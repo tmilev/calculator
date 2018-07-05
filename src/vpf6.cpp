@@ -2659,7 +2659,7 @@ std::string ObjectContainer::ToStringJavascriptForUserInputBoxes()
       out << ", ";
   }
   out << "];\n";
-  out << "calculatorInputBoxToSliderUpdaters = new Object;";
+  out << "calculatorInputBoxToSliderUpdaters = {};";
   for (int i = 0; i < this->theUserInputTextBoxesWithValues.size(); i ++)
   { InputBox& currentBox = this->theUserInputTextBoxesWithValues.theValues[i];
     out << "calculatorInputBoxToSliderUpdaters['"

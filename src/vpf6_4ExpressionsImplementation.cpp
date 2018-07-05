@@ -2606,7 +2606,7 @@ std::string Expression::ToStringAllSlidersInExpression() const
     this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex] = true;
     InputBox& theBox = theSliders.theValues[theIndex];
     std::string theSliderName = theBox.GetSliderName();
-    out << "<input id =\""
+    out << "<input name =\""
     << theSliderName
     << "\" type =\"range\"";
     double theReader = 0;
@@ -2626,7 +2626,7 @@ std::string Expression::ToStringAllSlidersInExpression() const
     << boxNames[i]
     << "','"
     << theSliderName
-    << "');\"/>";
+    << "');\"></input>";
   }
   return out.str();
 }

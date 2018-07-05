@@ -127,6 +127,11 @@ var MathQuillHasMatrixSupport = true;
 </div> <!--divSelectCourse-->
 
 <div id = "divCalculatorPage" class = "divMainPage">
+
+<table id = "tableCalculatorExamples" class = "tableCalculatorInputs">
+<tr><td>
+<table id = "tableCalculatorAndOutput" class = "tableCalculatorInputs">
+<tr><td>
 <table class = "tableCalculatorInputs"><tr>
   <td>
     <input type = "hidden" name = "request" id = "request" value = "compute">
@@ -153,33 +158,52 @@ var MathQuillHasMatrixSupport = true;
     </div>
   </td>
   <td>
-    <button onclick = "toggleCalculatorExamples(this)" class = "buttonToggleTopics">&#9656;</button> Examples
-    <span id = "spanProgressCalculatorExamples"></span>
-    <div id = "divCalculatorExamples">
-    </div><!--divCalculatorExamples-->
-  </td>
-  <td>
     <span id = "spanDebugCalculatorPage">
     </span>      
   </td>
+  <td>
+    <span id = "idAutocompletePanel">
+      <span id = "idAutocompleteHints">
+        Ctrl+space, ctrl+arrow = autocomplete, select
+      </span>
+      <br>
+      <div id = "idAutocompleteSpan" style = "display:block; overflow:auto;" height = "100px"></div>
+      <span id = "idAutocompleteDebug"></span>      
+    </span>  
+  </td>
   </tr>
-  </table>  
-  <span id = "idAutocompletePanel">
-    <span id = "idAutocompleteHints">
-      Ctrl+space, ctrl+arrow = autocomplete, select
+</table>
+</td></tr>
+<tr><td>
+<table>
+  <tr>
+    <td>
+    <button title = "Shift + Enter = shortcut from input text box. " name = "Go" onclick = "submitCalculatorComputation(); event.preventDefault();">
+    Go
+    </button>
+    <span>
+    <span id = "mainComputationStatus"></span>
     </span>
-    <br>
-    <div id = "idAutocompleteSpan" style = "display:block; overflow:auto;" height = "100px"></div>
-    <span id = "idAutocompleteDebug"></span>      
+    </td>
+  </tr>  
+  <tr>
+  <td>
+    <span id = "calculatorOutput"></span>
+  </td>
+  </tr>      
+</table>
+</td></tr>
+</table> <!--tableCalculatorAndOutput-->
+
+</td><td>
+  <span id = "spanCalculatorExamplesContainer">
+  <button onclick = "toggleCalculatorExamples(this)" class = "buttonToggleTopics">&#9656;</button> Examples
+  <span id = "spanProgressCalculatorExamples"></span>
+  <div id = "divCalculatorExamples">
+  </div><!--divCalculatorExamples-->
   </span>
-<br>
-  <button title = "Shift +Enter =shortcut from input text box. "
-  name = "Go" onclick = "submitCalculatorComputation(); event.preventDefault();">
-  Go
-  </button>
-  <span id = "mainComputationStatus">
-  </span>
-  <span id = "calculatorOutput"></span>
+</td></tr>
+</table><!--tableCalculatorExamples-->
 </div><!--divCalculatorPage-->
 <div id = "divAboutPage" class = "divMainPage">
   <h2> Project mission</h2>

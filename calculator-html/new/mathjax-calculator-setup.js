@@ -45,7 +45,7 @@ function showTex(originalTex, item, event) {
     item.parentNode.removeChild(item.nextSibling);
     return;
   }
-  flaSpan =document.createElement('span');
+  flaSpan = document.createElement('span');
   if (originalTex.startsWith("\\displaystyle ")) {
     originalTex = originalTex.slice(14);
   }
@@ -93,7 +93,7 @@ function configureMathJaxForCalculator() {
         var jax = HUB.getJaxFor(this);
         showTex(jax.originalText, this, event);
       } else { 
-        MathJax.Callback.Queue(["Require", MathJax.Ajax, "[MathJax]/extensions/MathMenu.js"], ["DblClick",this,{}]);
+        MathJax.Callback.Queue(["Require", MathJax.Ajax, "[MathJax]/extensions/MathMenu.js"], ["DblClick", this, {}]);
       }
       return EVENT.False(event);
     }
@@ -151,28 +151,36 @@ function configureMathJaxForCalculator() {
       //  Implements \FormInput[value][size][class]{name}
       //
       FormInput: function (name) {
-        var val = this.GetBrackets(name),
-            size = this.GetBrackets(name),
-            cls = this.GetBrackets(name),
-            id = this.GetArgument(name);
+        var val = this.GetBrackets(name);
+        var size = this.GetBrackets(name);
+        var cls = this.GetBrackets(name);
+        var inputName = this.GetArgument(name);
+        //if (window.mathjaxIdCounter === undefined) {
+        //  window.mathjaxIdCounter = 0;
+        //}
+        //window.mathjaxIdCounter ++;
+//        var id = `mathjax_id_${window.mathjaxIdCounter}_${inputName}`;
+//        console.log("DEBUG: mathjax id is: " + id);
         //alert("name: " + name + " size: "+ size + " cls: " + cls + " val: " + val + " id: "+ id);
-        if (size == null || size === "") {
+        if (size === null || size === "" || size === undefined) {
           size = "2";
         }
-        if (val == null) {
+        if (val === null || val === undefined || val === "") {
           val = "";
         }
-        cls = ("MathJax_Input " + (cls||"")).replace(/ +$/,"");
+        cls = ("MathJax_Input " + (cls || "")).replace(/ +$/,"");
         var input = HTML.Element("input", {
           type: "text", 
-          name: id, 
-          id: id, 
+          name: inputName, 
+//          id: id, 
           size: size, 
           className: cls, 
           value: val
         });
         input.setAttribute("xmlns","http://www.w3.org/1999/xhtml");
-        var mml = MML["annotation-xml"](MML.xml(input)).With({encoding:"application/xhtml+xml",isToken:true});
+        var mml = MML["annotation-xml"](MML.xml(input)).With({
+          encoding:"application/xhtml+xml", isToken:true
+        });
         this.Push(MML.semantics(mml));
       }
     });

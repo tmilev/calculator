@@ -170,9 +170,10 @@ void Calculator::initPredefinedInnerFunctions()
    "URLKeyValuePairsDecode");
   this->AddOperationInnerHandler
   ("LoadFileIntoString", CalculatorConversions::innerLoadFileIntoString, "",
-   "Loads a file into a string. The file must be given its relative file name displayed when browsing \
-   the web server. \
-   There are two exceptions. 1) The file can be located in a folder in the project base \
+   "Loads a file into a string. "
+   "The file must be given its relative file name displayed when browsing "
+   "the web server. "
+   "There are two exceptions. 1) The file can be located in a folder in the project base \
    that is otherwise not visible by the webserver **provided that** the folder is white-listed\
    via the FileOperations class within the C++ source. Example: folder DefaultProblemLocation \
    is white-listed. To access this file simply start your file name with the foldername. \
@@ -208,7 +209,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("MakeInputBox", CalculatorHtmlFunctions::innerUserInputBox, "",
    "Creates an user input text box. ",
-   "MakeInputBox(name =a, value =RandomInteger((-5,- 1), (1,5)));", true, false,
+   "MakeInputBox(name = a, value = RandomInteger((- 5, - 1), (1, 5)));", true, false,
    "CalculatorHtmlFunctions::innerUserInputBox",
    "MakeInputBox");
   this->AddOperationInnerHandler
@@ -388,32 +389,35 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("ConvertBase58ToHex", CalculatorFunctionsGeneral::innerConvertBase58ToHex, "",
    "Converts Base58 to hex. ",
-   "ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\");\
-   ",
+   "ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\");",
    true, false,
    "CalculatorFunctionsGeneral::innerConvertBase58ToHex",
    "ConvertBase58ToHex");
 
   this->AddOperationInnerHandler
   ("CharToBase64", CalculatorFunctionsGeneral::innerCharToBase64, "",
-   "Converts characters to bit stream and the bitstream to base64. The character to bit stream conversion is not fixed at the moment and may be \
-   system/compiler dependent. I believe that the character to bit stream conversion should be standard for the standard letters in the alphabet.\
-   Fancy UTF8 will probably be not read correctly from the CGI input, and furthermore will not be converted in a standard fashion to bit stream.\
-   The examples below are taken from Wikipedia. ",
-   "CharToBase64(\"pleasure.\");\
-    CharToBase64(\"leasure.\");\
-    CharToBase64(\"easure.\");\
-    CharToBase64(\"asure.\");\
-    CharToBase64(\"sure.\");\
-   ",
+   "Converts characters to bit stream and the bitstream to base64. "
+   "The character to bit stream conversion is not fixed at the moment "
+   "and may be system/compiler dependent. "
+   "I believe that the character to bit stream conversion should be standard for "
+   "the standard letters in the alphabet. "
+   "Fancy UTF8 will probably be not read correctly from the CGI input, "
+   "and furthermore will not be converted in a standard fashion to bit stream. "
+   "The examples below are taken from Wikipedia. ",
+   "CharToBase64(\"pleasure.\");\n"
+   "CharToBase64(\"leasure.\");\n"
+   "CharToBase64(\"easure.\");\n"
+   "CharToBase64(\"asure.\");\n"
+   "CharToBase64(\"sure.\");\n",
    true, false,
    "CalculatorFunctionsGeneral::innerCharToBase64",
    "CharToBase64");
   this->AddOperationInnerHandler
   ("Base64ToString", CalculatorFunctionsGeneral::innerBase64ToString, "",
    "Converts base64 to string",
-   "Base64ToString(\"k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9\");\
-   ",
+   "Base64ToString(\""
+   "k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9"
+   "\");",
    true, false,
    "CalculatorFunctionsGeneral::innerBase64ToString",
    "Base64ToString");

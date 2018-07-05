@@ -30,9 +30,8 @@ function getToggleButton(address, label) {
   result += `<button class = "buttonProgress accordionLikeIndividual" onclick = "doToggleContent(this);">`;
   result += `<span>${label}</span><span>&#9666;</span>`;
   result += "</button>";
-  result += `<br><span class = "spanProgressReport panelExpandable panelExpandableCollapsed">`;
-  result += address;
-  result += "</span>"
+  result += `<span class = "spanProgressReport panelExpandable panelExpandableCollapsed">${address}</span>`;
+  console.log("DEBUG: getting toggle button from: " + address);
   return result;
 }
 
@@ -51,7 +50,7 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   var content = "";
   var label = '<b style ="color:orange">Sent</b>';
   if (!isPost) {
-    content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${address}</a></span>`;
+    content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${address}</a>`;
   } else {
     content += address;
   }
@@ -96,9 +95,6 @@ function recordResult(resultText, resultSpan) {
  */
 function submitGET(inputObject) {
   var theAddress = inputObject.url;
-  if (theAddress === undefined || theAddress === null) {
-    theAddress = `${globalVars.serverInfo.imappServer}${inputObject.service}`;
-  }
   var progress = inputObject.progress;
   var result = inputObject.result;
   var callback = inputObject.callback;
@@ -120,8 +116,8 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   var spanOutput = document.getElementById(idOutput);
   if (spanOutput === null) {
     spanOutput = document.createElement('span');
-    document.body.appendChild(spanOutput);
     spanOutput.innerHTML = `<span style ='color:red'> ERROR: span with id ${idOutput} MISSING! </span>`;
+    document.body.appendChild(spanOutput);
   }
   var https = new XMLHttpRequest();
   https.open("POST", pathnames.calculatorAPI, true);
@@ -133,6 +129,7 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   timeOutCounter = 0;
 
   var postRequest = `POST ${pathnames.calculatorAPI}<br>message: ${inputParams}`;
+  console.log("DEBUG: the post request: " + postRequest);
   recordProgressStarted(idStatus, postRequest, true, (new Date()).getTime());
 
   https.onload = function() { 

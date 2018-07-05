@@ -24,7 +24,7 @@ function createSelectionNoFocus(field, start, end) {
     field.focus();
     field.setSelectionRange(start, end);
     calculatorMQfield.focus();
-  } else if (typeof field.selectionStart != 'undefined'){ 
+  } else if (typeof field.selectionStart != 'undefined') {
     field.selectionStart = start;
     field.selectionEnd = end;
     field.focus();
@@ -32,26 +32,33 @@ function createSelectionNoFocus(field, start, end) {
   }
 }
 
-function calculatorAddListenersToInputBoxes(){ 
+function updateCalculatorSliderEventHandler() {
+  event.preventDefault();
+  var sliderName = calculatorInputBoxToSliderUpdaters[this.name];
+  var theSliders = document.getElementsByName(sliderName);
+  for (var counterSlider = 0; counterSlider < theSliders.length; counterSlider ++) {
+    var currentSlider = theSliders[counterSlider];
+    currentSlider.value = this.value;
+  }
+  updateCalculatorSliderToInputBox(this.name, sliderName);
+}
+
+function calculatorAddListenersToInputBoxes() {
   //var theString=" updating: box names, slider names: ";
-  for (var i = 0; i < calculatorInputBoxNames.length; i ++){ 
+  for (var i = 0; i < calculatorInputBoxNames.length; i ++) {
     var theBoxes = document.getElementsByName(calculatorInputBoxNames[i]);
-    for (var j = 0; j < theBoxes.length; j ++){
-      theBoxes[j].addEventListener("input", function(){ 
-        var sliderName = calculatorInputBoxToSliderUpdaters[this.name];
-        document.getElementById(sliderName).value = this.value;
-        event.preventDefault();
-        updateCalculatorSliderToInputBox(this.name, sliderName);
-      });
+    for (var j = 0; j < theBoxes.length; j ++) {
+      theBoxes[j].addEventListener("input", updateCalculatorSliderEventHandler.bind(theBoxes[j]));
     }
   }
 }
 
 function updateCalculatorSliderToInputBox(boxName, sliderName) { 
   var theBoxes = document.getElementsByName(boxName);
-  var theSlider = document.getElementById(sliderName);
+  var theSliders = document.getElementsByName(sliderName);
+  var sliderValue = theSliders[0].value;
   for (var i = 0; i < theBoxes.length; i ++) {
-    theBoxes[i].value = theSlider.value;
+    theBoxes[i].value = sliderValue;
   }
   if (calculatorPlotUpdaters[sliderName] !== undefined) { 
     var theCanvas = calculatorCanvases[calculatorPlotUpdaters[sliderName]];

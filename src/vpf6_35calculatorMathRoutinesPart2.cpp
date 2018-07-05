@@ -1531,7 +1531,7 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
   std::stringstream out;
   InputBox theBox;
   if (input.IsOfType(&theBox))
-  { out << "parseFloat(document.getElementById('" << theBox.GetSliderName() << "').value)";
+  { out << "parseFloat(document.getElementsByName('" << theBox.GetSliderName() << "')[0].value)";
     return output.AssignValue(out.str(), theCommands);
   }
   out.precision(7);

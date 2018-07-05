@@ -471,6 +471,12 @@ span.titleContainer{
 span.spanProgressReport{
   word-wrap: break-word;
 }
+#spanCalculatorExamplesContainer {
+  overflow: auto;
+  display: inline-block;
+  vertical-align:top;
+  white-space:nowrap;
+}
 #idAutocompletePanel{
   overflow: none;
   display: inline-block;

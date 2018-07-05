@@ -13,7 +13,7 @@ function recordProgressDone(progress, timeFinished) {
 }
 
 function doToggleContent(button) {
-  var theSpan = button.nextSibling.nextSibling;
+  var theSpan = button.nextSibling;
   if (theSpan.classList.contains("panelExpandableCollapsed")) {
     theSpan.classList.remove("panelExpandableCollapsed");
     theSpan.classList.add("panelExpandableExpanded");
@@ -125,10 +125,11 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   if (idStatus === undefined) {
     idStatus = idOutput;
   }
-  console.log("DEBUG: id status: " + idStatus);
+  console.log("DEBUG: id status: " + idStatus + "\ninputParams:\n" + inputParams);
   timeOutCounter = 0;
 
-  var postRequest = `POST ${pathnames.calculatorAPI}<br>message: ${inputParams}`;
+  var postRequest = `POST ${pathnames.calculatorAPI}<br>message: ${shortenString(inputParams, 200)}`;
+//  postRequest = "asdfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   console.log("DEBUG: the post request: " + postRequest);
   recordProgressStarted(idStatus, postRequest, true, (new Date()).getTime());
 

@@ -154,6 +154,7 @@ function Page() {
   this.theTopics = {};
   this.theCourses = {}; 
   this.currentPage  = null;
+  this.calculatorInput = "";
   this.flagDebug = false;
   this.currentCourse = {
     courseHome: "",
@@ -194,14 +195,22 @@ Page.prototype.getHash = function () {
 }
 
 Page.prototype.loadSettingsFromURL = function() {    
+  return this.loadSettingsFromURLLikeString(window.location.hash.substr(1));
+}
+
+Page.prototype.loadSettingsFromURLLikeString = function(hashEncoded) {    
   try {
-    var hashEncoded = window.location.hash.substr(1);
     var hashDecoded = decodeURIComponent(hashEncoded);
     var hashParsed = JSON.parse(hashDecoded);
     console.log(`DEBUG: hashEncoded: ${hashEncoded}, decodes to: ${hashDecoded}, parses to: ${JSON.stringify(hashParsed)}`);
 
     if ("currentPage" in hashParsed) {
       this.currentPage = hashParsed["currentPage"];
+    }
+    if ("calculatorInput" in hashParsed) {
+      this.calculatorInput =  hashParsed.calculatorInput;
+      var decodedInput = decodeURIComponent(this.calculatorInput);
+      document.getElementById("mainInputID").value = decodedInput;
     }
   } catch (e) {
     console.log("Error loading settings from cookies: " + e);
@@ -295,13 +304,7 @@ Page.prototype.initializeCalculatorPage = function() {
   //console.log("Submit missing");
   if (document.getElementById('mainInputID').value !== "") {
     console.log("Debug: about to submit: " + document.getElementById('mainInputID').value);
-    submitStringAsMainInput(
-      document.getElementById('calculatorOutput'),
-      'calculatorOutput', 
-      'compute',
-      defaultOnLoadInjectScriptsAndProcessLaTeX,
-      'mainComputationStatus'
-    );
+    submitCalculatorComputation();
   }
 }
 
@@ -410,7 +413,7 @@ Page.prototype.selectPage = function(inputPage) {
   if (this.pages[this.currentPage].selectFunction !== null && this.pages[this.currentPage].selectFunction !== undefined) {
     this.pages[this.currentPage].selectFunction();
   }
-  location.href = `#${this.getHash()}`;
+  //location.href = `#${this.getHash()}`;
 }
 
 Page.prototype.getCurrentProblem = function() {

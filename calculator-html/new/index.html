@@ -110,17 +110,16 @@ var MathQuillHasMatrixSupport = true;
 </div><!--divProblemPage-->
 <div id = "divEditPage" class = "divMainPage">
   <div id = "divEditPageContainer">
-    <button class = "buttonSaveEdit" onclick = "storeEditedPage();">Save</button> 
-    <span id = "spanSubmitEditPageReport"></span><br>
-    <textarea id = "textareaTopicListEntry"></textarea>
-    <div id = "divEditorAce" name = "divEditorAce">
-
-    </div>
+  <button class = "buttonSaveEdit" onclick = "storeEditedPage();">Save</button> 
+  <span id = "spanSubmitEditPageReport"></span><br>
+  <textarea id = "textareaTopicListEntry"></textarea>
+  <div id = "divEditorAce" name = "divEditorAce">
+  </div>
   </div>
 </div>
 <div id = "divCurrentCourse" class = "divMainPage">
-    <div id = "divCurrentCourseEditPanel"></div>
-    <div id = "divCurrentCourseBody"></div>
+  <div id = "divCurrentCourseEditPanel"></div>
+  <div id = "divCurrentCourseBody"></div>
 </div> <!--divCurrentCourse-->
   
 <div id = "divSelectCourse" class = "divMainPage">
@@ -133,55 +132,56 @@ var MathQuillHasMatrixSupport = true;
 <table id = "tableCalculatorAndOutput" class = "tableCalculatorInputs">
 <tr><td>
 <table class = "tableCalculatorInputs"><tr>
-  <td>
-    <input type = "hidden" name = "request" id = "request" value = "compute">
-    <textarea class = "textareaCalculatorMain"
-    rows = "3" cols = "30" name = "mainInput" id = "mainInputID"
-    onkeypress = "submitCalculatorInputOnEnter();"
-    onkeyup    = "suggestWord(); calculatorPanel.mQHelpCalculator();"
-    onkeydown  = "suggestWord(); calculatorPanel.mQHelpCalculator(); arrowAction(event);"
-    onmouseup  = "suggestWord(); calculatorPanel.mQHelpCalculator();"
-    oninput    = "suggestWord(); calculatorPanel.mQHelpCalculator();"></textarea>
-  </td>
-  <td>
-    <span id = "mqPanelComments" style = "white-space:nowrap"> Equation assistant</span>
-    <br>
-    <span style = "vertical-align:top" id = "mainInputMQfield"></span>
-  </td>
-  <td>
-    <div class = "mqButtonPanel" style = "vertical-align:top" id = "mainInputMQfieldButtons" buttons = "algebra, logarithms, integrals, matrices"></div>
-  </td>
-  <td>
-    <a href = "https://github.com/tmilev/calculator" target = "_blank">Source code</a>
-
-    <div id = "divParserOutputDiv">
-    </div>
-  </td>
-  <td>
-    <span id = "spanDebugCalculatorPage">
-    </span>      
-  </td>
-  <td>
-    <span id = "idAutocompletePanel">
-      <span id = "idAutocompleteHints">
-        Ctrl+space, ctrl+arrow = autocomplete, select
-      </span>
-      <br>
-      <div id = "idAutocompleteSpan" style = "display:block; overflow:auto;" height = "100px"></div>
-      <span id = "idAutocompleteDebug"></span>      
-    </span>  
-  </td>
-  </tr>
+<td>
+  <input type = "hidden" name = "request" id = "request" value = "compute">
+  <textarea class = "textareaCalculatorMain"
+  rows = "3" cols = "30" name = "mainInput" id = "mainInputID"
+  onkeypress = "submitCalculatorInputOnEnter();"
+  onkeyup    = "suggestWord(); calculatorPanel.mQHelpCalculator();"
+  onkeydown  = "suggestWord(); calculatorPanel.mQHelpCalculator(); arrowAction(event);"
+  onmouseup  = "suggestWord(); calculatorPanel.mQHelpCalculator();"
+  oninput    = "suggestWord(); calculatorPanel.mQHelpCalculator();"></textarea>
+</td>
+<td>
+  <span id = "mqPanelComments" style = "white-space:nowrap"> Equation assistant</span>
+  <br>
+  <span style = "vertical-align:top" id = "mainInputMQfield"></span>
+</td>
+<td>
+  <div class = "mqButtonPanel" style = "vertical-align:top" id = "mainInputMQfieldButtons" buttons = "algebra, logarithms, integrals, matrices"></div>
+</td>
+<td>
+  <a href = "https://github.com/tmilev/calculator" target = "_blank">Source code</a>
+  <div id = "divParserOutputDiv">
+  </div>
+</td>
+<td>
+  <span id = "spanDebugCalculatorPage">
+  </span>      
+</td>
+<td>
+  <span id = "idAutocompletePanel">
+  <span id = "idAutocompleteHints">
+    Ctrl+space, ctrl+arrow = autocomplete, select
+  </span>
+  <br>
+  <div id = "idAutocompleteSpan" style = "display:block; overflow:auto;" height = "100px"></div>
+  <span id = "idAutocompleteDebug"></span>      
+  </span>  
+</td>
+</tr>
 </table>
 </td></tr>
 <tr><td>
 <table>
   <tr>
     <td>
-    <button title = "Shift + Enter = shortcut from input text box. " name = "Go" onclick = "submitCalculatorComputation(); event.preventDefault();">
+    <button class = "buttonPreview" title = "Shift + Enter = shortcut from input text box. " name = "Go" onclick = "submitCalculatorComputation(); event.preventDefault();">
     Go
     </button>
     <span id = "mainComputationStatus"></span>
+    <br>
+    <span id = "spanComputationLink"></span>
     </td>
   </tr>  
   <tr>

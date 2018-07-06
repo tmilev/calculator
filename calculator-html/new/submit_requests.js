@@ -129,7 +129,6 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   timeOutCounter = 0;
 
   var postRequest = `POST ${pathnames.calculatorAPI}<br>message: ${shortenString(inputParams, 200)}`;
-//  postRequest = "asdfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   console.log("DEBUG: the post request: " + postRequest);
   recordProgressStarted(idStatus, postRequest, true, (new Date()).getTime());
 
@@ -145,13 +144,18 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   ////////////////////////////////////////////
 }
 
-function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
+function getQueryStringSubmitStringAsMainInput(theString, requestType) {
   var inputParams = '';
   inputParams += 'request=' + requestType;
   inputParams += '&mainInput=' + encodeURIComponent(theString);
   if (thePage.flagDebug === true) {
     inputParams += "&debugFlag=true";
   }
+  return inputParams;
+}
+
+function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
+  var inputParams = getQueryStringSubmitStringAsMainInput(theString, requestType);
   submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);
 }
 
@@ -238,12 +242,21 @@ function submitCalculatorInputOnEnter() {
   event.preventDefault();
 }
 
-function submitCalculatorComputation() { 
+function submitCalculatorComputation() {
+  var result = "";
+  var theInput = encodeURIComponent(document.getElementById("mainInputID").value);
+  var theJSON = {
+    request: "calculatorOutput",
+    calculatorInput : theInput,
+    currentPage: thePage.pages.calculator.name
+  };
+  result += `<a href = '#${JSON.stringify(theJSON)}' onclick = "thePage.loadSettingsFromURLLikeString(this.href); submitCalculatorComputation();">Link to your input</a>`;
+  document.getElementById("spanComputationLink").innerHTML = result;
   submitStringAsMainInput(
-    document.getElementById('mainInputID').value,
-    'calculatorOutput', 
-    'compute', 
+    document.getElementById("mainInputID").value,
+    "calculatorOutput", 
+    "compute", 
     defaultOnLoadInjectScriptsAndProcessLaTeX,
-    'mainComputationStatus'
+    "mainComputationStatus"
   );
 }

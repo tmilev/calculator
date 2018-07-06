@@ -109,7 +109,7 @@ sectionSelection{
   bottom:0;
   right:0;
 }
-.submitButton{
+.buttonSubmit{
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
@@ -121,7 +121,7 @@ sectionSelection{
   color:red;
   width:60px;
 }
-.showSolutionButton{
+.buttonSolution{
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
@@ -133,10 +133,10 @@ sectionSelection{
   color:green;
   width:60px;
 }
-.submitButton:hover {
+.buttonSubmit:hover {
   background-color:#878787;
 }
-.previewButton {
+.buttonPreview {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
@@ -148,10 +148,10 @@ sectionSelection{
   color:green;
   width:60px;
 }
-.previewButton:hover {
+.buttonPreview:hover {
   background-color:#878787;
 }
-.showAnswerButton {
+.buttonAnswer {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
@@ -163,7 +163,7 @@ sectionSelection{
   color:green;
   width:60px;
 }
-.showAnswerButton:hover {
+.buttonAnswer:hover {
   background-color:#878787;
 }
 button.accordionLikeIndividual {

@@ -2377,14 +2377,13 @@ std::string Calculator::ToStringOutputAndSpecials()
     return "";
   std::stringstream out;
   std::string urledInput = HtmlRoutines::ConvertStringToURLString(this->inputString, false);
-  if (this->inputString != "")
-    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=calculator&mainInput="
-    << urledInput << "\">Link to your input (reloads page).</a><br>";
+  //if (this->inputString != "")
+  //  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+  //  << "?request=calculator&mainInput="
+  //  << urledInput << "\">Link to your input (reloads page).</a><br>";
   out <<  "<table style =\"vertical-align: top\"><tr><td style =\"vertical-align: top\">"
   << this->outputString << "</td>"
-  << "<td style =\"vertical-align: top\">"
-  ;
+  << "<td style =\"vertical-align: top\">";
 
   out << this->ToStringPerformance();
   if (this->outputCommentsString != "")
@@ -2392,8 +2391,7 @@ std::string Calculator::ToStringOutputAndSpecials()
   out << "</td></tr></table>";
   if (this->flagProduceLatexLink)
     out << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
-    << HtmlRoutines::GetLatexEmbeddableLinkFromCalculatorInput(urledInput, this->inputString)
-    ;
+    << HtmlRoutines::GetLatexEmbeddableLinkFromCalculatorInput(urledInput, this->inputString);
   if (this->parsingLog != "")
     out << "<b> As requested, here is a calculator parsing log</b><br>"
     << this->parsingLog;

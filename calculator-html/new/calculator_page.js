@@ -101,7 +101,7 @@ function exampleCalculatorClick(theLink) {
   }
 
 //console.log(theHandler);
-  var mainInput=document.getElementById("mainInputID");
+  var mainInput = document.getElementById("mainInputID");
   mainInput.value = theHandler.example;
   submitCalculatorComputation();
 }
@@ -123,9 +123,9 @@ function processOneFunctionAtom(handlers, isComposite) {
     }
     var encodedAtom = encodeURIComponent(handlers[counterHandlers].atom);
     currentId += `${encodedAtom}_${counterHandlers}_${handlers.length}`;
-    resultString += `<a href='#' class ='linkInfo' onclick="switchMenu('${currentId}')">info</a>`;
-    resultString += `<calculatorExampleInfo id ="${currentId}" class ="hiddenClass">${currentDescription}<br><b>Example:</b><br>${currentExample}</calculatorExampleInfo>`;
-    resultString += `<a href="#" class ="linkInfo" onclick="this.composite =${isComposite}; this.index =${counterHandlers}; this.atom='${encodedAtom}'; exampleCalculatorClick(this);"> Example</a>`;
+    resultString += `<a href = '#' class = 'linkInfo' onclick = "switchMenu('${currentId}')">info</a>`;
+    resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${currentDescription}<br><b>Example:</b><br>${currentExample}</calculatorExampleInfo>`;
+    resultString += `<a href = "#" class = "linkInfo" onclick = "this.composite =${isComposite}; this.index =${counterHandlers}; this.atom='${encodedAtom}'; exampleCalculatorClick(this);"> Example</a>`;
     //resultString += currentExample;
     //console.log(handlers[counterHandlers]);
   }

@@ -1494,11 +1494,11 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.idButtonInterpret = "buttonInterpret" + answerId;
   currentA.idButtonAnswer = "buttonAnswer" + answerId;
 
-  currentA.htmlButtonSubmit = "<button class =\"submitButton\" id =\"" + currentA.idButtonSubmit + "\"";
+  currentA.htmlButtonSubmit = "<button class =\"buttonSubmit\" id =\"" + currentA.idButtonSubmit + "\"";
   if (!this->flagUseJSON)
     currentA.htmlButtonSubmit += " onclick = \"submitAnswers('" + answerId + "', '" + currentA.idVerificationSpan + "')\"";
   currentA.htmlButtonSubmit +=  ">Submit</button>";
-  currentA.htmlButtonInterpret = (std::string)"<button class =\"previewButton\" ";
+  currentA.htmlButtonInterpret = (std::string)"<button class =\"buttonPreview\" ";
   currentA.htmlButtonInterpret += " id =\"" + currentA.idButtonInterpret + "\" ";
   if (!this->flagUseJSON)
     currentA.htmlButtonInterpret += "onclick=\"previewAnswersNoTimeOut('" + answerId + "', '" + currentA.idVerificationSpan + "')" + "\"";
@@ -1506,14 +1506,14 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   if (!this->flagIsForReal)
   { if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly != "")
     { currentA.htmlButtonAnswer = "<button id =\"" + currentA.idButtonAnswer +
-      "\" class =\"showAnswerButton\"";
+      "\" class =\"buttonAnswer\"";
       if (!this->flagUseJSON)
         currentA.htmlButtonAnswer += " onclick=\"giveUp('" + answerId + "', '" + currentA.idVerificationSpan + "')\"";
       currentA.htmlButtonAnswer += ">Answer</button>";
     } else
       currentA.htmlButtonAnswer = "No ``give-up'' answer available. ";
     if (currentA.flagSolutionFound)
-    { currentA.htmlButtonSolution = "<button class =\"showSolutionButton\"";
+    { currentA.htmlButtonSolution = "<button class =\"buttonSolution\"";
       if (!this->flagUseJSON)
         currentA.htmlButtonSolution += " onclick=\"showSolution('" + answerId +
         "','" + currentA.idSpanSolution + "')\"";

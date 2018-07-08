@@ -277,8 +277,8 @@ function afterLoadTopics(incomingTopics, result) {
 
 function writeEditCoursePagePanel() {
   var thePanel = "";
-  thePanel += getEditPanel(thePage.currentCourse.fileName);
-  thePanel += getEditPanel(thePage.currentCourse.topicList);
+  thePanel += getEditPanel(thePage.storage.currentCourse.courseHome.getValue());
+  thePanel += getEditPanel(thePage.storage.currentCourse.topicList.getValue());
   if (
     thePage.theTopics.topicBundleFile !== undefined && 
     thePage.theTopics.topicBundleFile !== null &&

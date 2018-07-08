@@ -1,8 +1,6 @@
+"use strict";
 function User() {
-  this.name = "";
-  this.googleToken = null;
   this.flagLoggedIn = false;
-  this.authenticationToken = "";
   this.googleProfile = null;
   this.role = "";
 }
@@ -22,6 +20,66 @@ User.prototype.hasProblemEditRights = function() {
 User.prototype.hideProfilePicture = function() {
   document.getElementById("divProfilePicture").classList.add("divInvisible");
   document.getElementById("divProfilePicture").classList.remove("divVisible");
+}
+
+function StorageVariable(inputs) {
+  this.value = "";
+  this.name = inputs.name;
+  this.nameURL = "";
+  this.nameCookie = "";
+  this.nameLocalStorage = "";
+  this.associatedDOMId = "";
+  this.type = "string";
+  this.secure = true;
+  var labelsToRead = ["nameURL", "nameCookie", "nameLocalStorage", "associatedDOMId", "type", "secure"];
+  for (var counterLabel = 0; counterLabel < labelsToRead.length; counterLabel ++) {
+    var currentLabel = labelsToRead[counterLabel];
+    var incoming = inputs[currentLabel];
+    if (incoming !== "" && incoming !== null && incoming !== undefined) {
+      this[currentLabel] = incoming;
+    }
+  }
+}
+
+StorageVariable.prototype.getValue = function() {
+  return this.value;
+}
+
+StorageVariable.prototype.loadMe = function() {
+  var incomingValue = "";
+  if (Storage !== undefined || localStorage !== undefined && this.nameLocalStorage !== "") {
+    incomingValue = localStorage.getItem(this.nameLocalStorage);
+    if (incomingValue !== "" && incomingValue !== null && incomingValue !== undefined) {
+      this.value = localStorage[this.nameLocalStorage];
+    }
+  }
+  if (this.nameCookie !== "") {
+    incomingValue = getCookie(this.nameCookie);
+    if (incomingValue !== "" && incomingValue !== null && incomingValue !== undefined) {
+      this.value = incomingValue;
+    }
+  }
+  console.log( `DEBUG: Loaded ${this.name}: ${this.value}`);
+}
+
+StorageVariable.prototype.storeMe = function() {
+  if (Storage !== undefined || localStorage !== undefined) {
+    if (this.nameLocalStorage !== "") {
+      localStorage[this.nameLocalStorage] = this.value
+      console.log(`DEBUG: stored ${this.name} as ${this.nameLocalStorage} with value ${this.value}`);
+    }
+  }
+  if (this.nameCookie !== "") {
+    setCookie(this.nameCookie, this.value, 150, this.secure);
+    console.log(`DEBUG: stored ${this.name} as ${this.nameCookie} with value ${this.value}`);
+  }
+
+
+}
+
+StorageVariable.prototype.setAndStore = function(newValue) {
+  this.value = newValue;
+  this.storeMe();
 }
 
 function Page() {
@@ -66,10 +124,6 @@ function Page() {
       selectFunction: selectEditPage,
       flagLoaded: false,
       editor: null,
-      storage: {
-        currentlyEditedPage: null,
-        AceEditorAutoCompletionWordList: []
-      }
     },
     calculator: {
       name: "calculator", //<-for autocomplete
@@ -104,9 +158,6 @@ function Page() {
       menuButtonId: "buttonSelectDatabase",
       container: null,
       selectFunction: updateDatabasePage,
-      storage: {
-        currentTable: null
-      }
     },
     server: {
       name: "server", //<-for autocomplete
@@ -130,7 +181,67 @@ function Page() {
       selectFunction: updateAccountsPage
     }
   }
-  addCookie("useJSON", true, 300, false);
+  this.storage = {
+    currentPage: new StorageVariable({
+      name: "currentPage", 
+      nameLocalStorage: "currentPage", //<- when given and non-empty, local storage will be used to store variable
+      nameCookie: "", //<- when given and non-empty, cookies will be used to store variable
+      nameURL: "currentPage" //<- when given and non-empty, url will be used to store variable      
+    }),
+    database: {
+      currentTable: new StorageVariable({
+        name: "currentTable", 
+        nameLocalStorage: "currentTable"
+      }), 
+    },
+    editor: {
+      currentlyEditedPage: new StorageVariable({
+        name: "currentlyEditedPage",
+        nameLocalStorage: "currentlyEditedPage"
+      })
+    },
+    currentCourse: {
+      courseHome: new StorageVariable({
+        name: "courseHome",
+        nameCookie: "courseHome",
+        nameURL: "courseHome"
+      }),
+      topicList: new StorageVariable({
+        name: "topicList",
+        nameCookie: "topicList",
+        nameURL: "topicList"
+      }),
+      fileName: new StorageVariable({
+        name: "fileName",
+        nameCookie: "fileName",
+        nameURL: "fileName"
+      })  
+    },
+    flagDebug: new StorageVariable({
+      name: "debugFlag", 
+      nameURL: "debugFlag", 
+      nameCookie: "debugFlag",
+      secure: false
+    }),
+    calculatorInput: new StorageVariable({name: "calculatorInput", associatedDOMId: "mainInputID"}),
+    user: {
+      googleToken: new StorageVariable({
+        name: "googleToken"
+      }),
+      name: new StorageVariable({
+        name: "user", 
+        nameCookie: "username", 
+        nameURL: "username"
+      }),
+      authenticationToken: new StorageVariable({
+        name: "authenticationToken",
+        nameCookie: "debugFlag",
+        nameURL: "authenticationToken"
+      })
+    }
+  }
+  
+  setCookie("useJSON", true, 300, false);
   //////////////////////////////////////
   //////////////////////////////////////
   //Common page initializations
@@ -153,21 +264,14 @@ function Page() {
   //////////////////////////////////////
   this.theTopics = {};
   this.theCourses = {}; 
-  this.currentPage  = null;
-  this.calculatorInput = "";
-  this.flagDebug = false;
-  this.currentCourse = {
-    courseHome: "",
-    topicList: "",
-    fileName: ""
-  };
   this.scriptsInjected = {};
   this.logoutRequestFromUrl = null;
   this.locationRequestFromUrl = null;
+  this.loadSettings(); 
+  this.hashHistory = []; 
+  this.problems = {};
   this.user = new User();
-  this.loadSettingsFromLocalStorage(); 
-  this.loadSettingsFromCookies(); //<-variables stored in cookies override local storage variables.
-  this.loadSettingsFromURL(); //<-variables stored in url override local storage and cookie variables.
+  this.aceEditorAutoCompletionWordList = [];
   //////////////////////////////////////
   //////////////////////////////////////
   //Page manipulation functions
@@ -178,101 +282,54 @@ function Page() {
   //Select page on first load
   //////////////////////////////////////
   //////////////////////////////////////
-  this.selectPage(this.currentPage);
+  this.selectPage(this.storage.currentPage.getValue());
   loginTry();
   this.setDebugSwitch();
   document.getElementById("divPage").style.display = "";
   document.getElementById("divPage").className = "divPage";
 }
 
-Page.prototype.correctSettings = function () {
-}
-
 Page.prototype.getHash = function () {
   var result = {};
-  result.currentPage = this.currentPage;
+  result.currentPage = this.storage.currentPage.getValue();
   return encodeURIComponent(JSON.stringify(result));
 }
 
-Page.prototype.loadSettingsFromURL = function() {    
-  return this.loadSettingsFromURLLikeString(window.location.hash.substr(1));
-}
-
-Page.prototype.loadSettingsFromURLLikeString = function(hashEncoded) {    
+Page.prototype.loadSettings = function() {
   try {
-    var hashDecoded = decodeURIComponent(hashEncoded);
-    var hashParsed = JSON.parse(hashDecoded);
-    console.log(`DEBUG: hashEncoded: ${hashEncoded}, decodes to: ${hashDecoded}, parses to: ${JSON.stringify(hashParsed)}`);
-
-    if ("currentPage" in hashParsed) {
-      this.currentPage = hashParsed["currentPage"];
-    }
-    if ("calculatorInput" in hashParsed) {
-      this.calculatorInput =  hashParsed.calculatorInput;
-      var decodedInput = decodeURIComponent(this.calculatorInput);
-      document.getElementById("mainInputID").value = decodedInput;
-    }
+    this.loadSettingsRecursively(this.storage);
   } catch (e) {
     console.log("Error loading settings from cookies: " + e);
   }
-  this.correctSettings();
-
 }
 
-Page.prototype.loadSettingsFromCookies = function() {
-  try {
-    for (label in this.currentCourse) {
-      this.currentCourse[label] = getCookie(label);
-      //console.log(label);
+Page.prototype.loadSettingsRecursively = function(currentStorage) {
+  if (currentStorage instanceof StorageVariable) {
+    currentStorage.loadMe();
+  } else if (typeof currentStorage === "object") {
+    for (var subLabel in currentStorage) {
+      this.loadSettingsRecursively(currentStorage[subLabel]);
     }
-    //console.log("DEBUG: Current course: " + JSON.stringify(this.currentCourse));
-    this.user.googleToken = getCookie("googleToken");
-    this.user.name = getCookie("username");
-    this.user.authenticationToken = getCookie("authenticationToken");
-    this.flagDebug = getCookie("debugFlag");
+  }  
+}
+
+Page.prototype.storeSettings = function() {
+  try {
+    this.storeSettingsRecursively(this.storage);
   } catch (e) {
     console.log("Error loading settings from cookies: " + e);
   }
-  this.correctSettings();
 }
 
-Page.prototype.storeSettingsToCookies = function() {
-  for (label in this.currentCourse) {
-    addCookie(label, this.currentCourse[label], 300);
+Page.prototype.storeSettingsRecursively = function(currentStorage) {
+  if (currentStorage instanceof StorageVariable) {
+    currentStorage.storeMe();
   }
-  //console.log("DEBUG: storing to cookies: " + JSON.stringify(this.currentCourse));
-  addCookie("googleToken", this.user.googleToken, 300, true); 
-  addCookie("username", this.user.name, 300, true);
-  addCookie("authenticationToken", this.user.authenticationToken, 300, true);
-  addCookie("debugFlag", this.flagDebug);
-}
-
-Page.prototype.loadSettingsFromLocalStorage = function() {    
-  if (Storage === undefined && localStorage === undefined) {
-    return;
-  }
-  try {
-    this.currentPage = localStorage.currentPage;
-    this.user.googleProfile = JSON.parse(localStorage.googleProfile); 
-    for (label in this.pages) {
-      this.pages[label].storage = JSON.parse(localStorage[label]);
+  if (typeof currentStorage === "object") {
+    for (var subLabel in currentStorage) {
+      this.storeSettingsRecursively(currentStorage[subLabel]);
     }
-  } catch (e) {
-    console.log("Error loading settings from local storage: " + e);
-  }
-}
-
-Page.prototype.storeSettingsToLocalStorage = function() {
-  if (Storage === undefined && localStorage === undefined) {
-    return;
-  }
-  localStorage.googleProfile = JSON.stringify(this.user.googleProfile);
-  for (label in this.pages) {
-    if (this.pages[label].storage === undefined) {
-      continue;
-    }
-    localStorage[label] = JSON.stringify(this.pages[label].storage);
-  }
+  }  
 }
 
 Page.prototype.showProfilePicture = function() {
@@ -309,19 +366,18 @@ Page.prototype.initializeCalculatorPage = function() {
 }
 
 Page.prototype.flipDebugSwitch = function () {
-  this.flagDebug = document.getElementById("sliderDebugFlag").checked;
+  this.storage.flagDebug.setAndStore(document.getElementById("sliderDebugFlag").checked);
   var debugSpan = document.getElementById("spanDebugFlagToggleReport");
-  if (this.flagDebug) {
+  if (this.storage.flagDebug) {
     debugSpan.innerHTML = "Debug on";
   } else {
     debugSpan.innerHTML = "Debug off";
   }
-  this.storeSettingsToCookies();
 }
 
 Page.prototype.setDebugSwitch = function () {
   //console.log ("DEBUG flag: " + this.flagDebug);
-  if (this.flagDebug === true || this.flagDebug === "true") {
+  if (this.storage.flagDebug === true || this.storage.flagDebug === "true") {
     document.getElementById("sliderDebugFlag").checked = true;
   } else {
     document.getElementById("sliderDebugFlag").checked = false;
@@ -386,38 +442,28 @@ Page.prototype.injectScript = function(scriptId, scriptContent) {
 }
 
 Page.prototype.selectPage = function(inputPage) {
-  if (inputPage === undefined || inputPage === null || typeof(inputPage) !== "string") {
-    if (typeof(this.currentPage) === "string") {
-      inputPage = this.currentPage;
-    } else {
-      inputPage = "calculator";
-    }
+  if (this.pages[inputPage] === undefined) {
+    inputPage = "calculator";
   }
-  this.currentPage = inputPage;
-  if (this.pages[this.currentPage] === undefined) {
-    this.currentPage = "calculator";
-  }
+  this.storage.currentPage.setAndStore(inputPage);
   for (var page in this.pages) {
     this.pages[page].container.style.display = "none";
     if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
       document.getElementById(this.pages[page].menuButtonId).classList.remove("buttonSelectPageSelected");
     }
   }
-  if (Storage !== undefined && localStorage !== undefined) {
-    localStorage.setItem("currentPage", this.currentPage); 
+  this.pages[inputPage].container.style.display = "";
+  if (this.pages[inputPage].menuButtonId !== null && this.pages[inputPage].menuButtonId !== undefined) {
+    document.getElementById(this.pages[inputPage].menuButtonId).classList.add("buttonSelectPageSelected");
   }
-  this.pages[this.currentPage].container.style.display = "";
-  if (this.pages[this.currentPage].menuButtonId !== null && this.pages[this.currentPage].menuButtonId !== undefined) {
-    document.getElementById(this.pages[this.currentPage].menuButtonId).classList.add("buttonSelectPageSelected");
-  }
-  if (this.pages[this.currentPage].selectFunction !== null && this.pages[this.currentPage].selectFunction !== undefined) {
-    this.pages[this.currentPage].selectFunction();
+  if (this.pages[inputPage].selectFunction !== null && this.pages[inputPage].selectFunction !== undefined) {
+    this.pages[inputPage].selectFunction();
   }
   //location.href = `#${this.getHash()}`;
 }
 
 Page.prototype.getCurrentProblem = function() {
-  return this.getProblem(this.currentCourse.fileName);
+  return this.getProblem(this.storage.currentCourse.fileName.getValue());
 }
 
 Page.prototype.cleanUpLoginSpan = function(componentToCleanUp) {
@@ -430,12 +476,12 @@ Page.prototype.cleanUpLoginSpan = function(componentToCleanUp) {
 }
 
 Page.prototype.getProblem = function(fileName) {
-  if (this.pages.problemPage.problems[fileName] === undefined) {
-    this.pages.problemPage.problems[fileName] = new Problem(fileName);
+  if (this.problems[fileName] === undefined) {
+    this.problems[fileName] = new Problem(fileName);
   }
-  return this.pages.problemPage.problems[fileName];
+  return this.problems[fileName];
 }
 
-function loadProfilePic(){
+function loadProfilePic() {
 
 }

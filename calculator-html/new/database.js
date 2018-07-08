@@ -2,7 +2,7 @@
 
 function updateDatabasePageCallback(incoming, output) {
   try {
-    var currentTable = thePage.pages.database.storage.currentTable;
+    var currentTable = thePage.storage.database.currentTable.getValue();
     var theParsed = JSON.parse(incoming);
     //console.log("DEBUG: incoming: " + JSON.stringify(theParsed));
     var theOutput = document.getElementById("divDatabaseOutput");
@@ -13,7 +13,7 @@ function updateDatabasePageCallback(incoming, output) {
         var currentCollection = theParsed.collections[counterCollection]; 
         theParsed.collections[counterCollection] = `
         <a href = "#" onclick =
-        "thePage.pages.database.storage.currentTable = '${currentCollection}'; updateDatabasePage();">${currentCollection}</a>`;
+        "thePage.storage.database.currentTable.setAndStore('${currentCollection}'); updateDatabasePage();">${currentCollection}</a>`;
       }
       theOutput.innerHTML = getHtmlFromArrayOfObjects(theParsed.collections);
     }
@@ -23,13 +23,13 @@ function updateDatabasePageCallback(incoming, output) {
 }
 
 function updateDatabasePageResetCurrentTable() {
-  thePage.pages.database.storage.currentTable = "";
+  thePage.storage.database.currentTable = "";
   updateDatabasePage();
 }
 
 function updateDatabasePage() {
-  thePage.storeSettingsToLocalStorage();
-  var theUrl = `${pathnames.calculatorAPI}?${pathnames.requestDatabase}&${pathnames.databaseTable}=${thePage.pages.database.storage.currentTable}`;
+  thePage.storeSettings();
+  var theUrl = `${pathnames.calculatorAPI}?${pathnames.requestDatabase}&${pathnames.databaseTable}=${thePage.storage.database.currentTable}`;
   submitGET({
     url: theUrl,
     progress: "spanProgressReportGeneral",

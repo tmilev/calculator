@@ -37,24 +37,23 @@ function logout() {
   if (thePage.user.role === "admin") {
     reloadPage("<b>Logging out admin: mandatory page reload. </b>", 3000);
   } else { 
-    document.getElementById("spanLoginStatus").innerHTML = `
-<b><a href='#' onclick='reloadPage("<b>User requested reload. </b>", 3000);'>Reload page</a> 
-for complete logout (when <span style='color:red'>using public computer</span>).</b>`;
+    var loginStatus = "";
+    loginStatus += `<b><a href='#' onclick='reloadPage("<b>User requested reload. </b>", 3000);'>Reload page</a>`;
+    loginStatus += `for complete logout (when <span style='color:red'>using public computer</span>).</b>`;
+    document.getElementById("spanLoginStatus").innerHTML = loginStatus;
   }
-  thePage.user.name = "";
+  thePage.storage.user.name.setAndStore("");
+  thePage.storage.user.authenticationToken.setAndStore("");
   thePage.user.role = "";
   thePage.user.flagLoggedIn = false;
   thePage.pages.problemPage.flagLoaded = false;
   document.getElementById("inputPassword").value = "";
   document.getElementById("divProblemPageContentContainer").innerHTML = "";
   document.getElementById("divCurrentCourse").innerHTML = "";
-  thePage.user.authenticationToken = "";
-  thePage.storeSettingsToCookies();
-  thePage.storeSettingsToLocalStorage();
   showLoginCalculatorButtons();
   toggleAccountPanels();
   toggleAdminPanels();
-  thePage.selectPage("login");
+  thePage.selectPage(thePage.pages.login.name);
 }
 
 function loginTry() {
@@ -101,15 +100,14 @@ function loginWithServerCallback(incomingString, result) {
     var parsedAuthentication = JSON.parse(incomingString);
     if (parsedAuthentication["status"] === "logged in") {
       success = true;
-      thePage.user.authenticationToken = parsedAuthentication.authenticationToken;
-      thePage.user.name = parsedAuthentication.username;
+      thePage.storage.user.authenticationToken.setAndStore(parsedAuthentication.authenticationToken);
+      thePage.storage.user.name.setAndStore(parsedAuthentication.username);
       thePage.user.role = parsedAuthentication.userRole;
       thePage.user.flagLoggedIn = true;
-      document.getElementById("spanUserIdInAccountsPage").innerHTML = thePage.user.name;
-      document.getElementById("inputUsername").value = thePage.user.name;
+      document.getElementById("spanUserIdInAccountsPage").innerHTML = thePage.storage.user.name.value;
+      document.getElementById("inputUsername").value = thePage.storage.user.name.value;
       toggleAccountPanels();
       toggleAdminPanels();
-      thePage.storeSettingsToCookies();
       hideLoginCalculatorButtons();
       showLogoutButton();
     } else if (parsedAuthentication["status"] === "not logged in"){
@@ -124,8 +122,8 @@ function loginWithServerCallback(incomingString, result) {
     if (loginErrorMessage!== undefined && loginErrorMessage !== "") {
       document.getElementById("spanLoginStatus").innerHTML = decodeURIComponent(loginErrorMessage);
     }
-    thePage.user.authenticationToken = "";
-    thePage.user.name = "";
+    thePage.storage.user.authenticationToken.setAndStore("");
+    thePage.storage.user.name.setAndStore("");
     thePage.user.role = "";
     thePage.user.flagLoggedIn = false;
     showLoginCalculatorButtons();
@@ -138,11 +136,9 @@ function loginWithServerCallback(incomingString, result) {
 function onGoogleSignIn(googleUser) { 
   var theToken = googleUser.getAuthResponse().id_token;
   thePage.user.googleToken = theToken;
-  thePage.user.name = "";
+  thePage.storage.user.name.setAndStore("");
   try {
     thePage.user.googleProfile = window.calculator.jwt.decode(theToken);
-    thePage.storeSettingsToCookies();
-    thePage.storeSettingsToLocalStorage();
     thePage.showProfilePicture();
     showLogoutButton();
     submitGET({
@@ -186,7 +182,7 @@ function showLoginCalculatorButtons() {
 function hideLoginCalculatorButtons() {
   document.getElementById("divLoginCalculatorPanel").classList.remove("divVisible");
   document.getElementById("divLoginCalculatorPanel").classList.add("divInvisible");
-  document.getElementById("divLoginPanelUsernameReport").innerHTML = thePage.user.name;
+  document.getElementById("divLoginPanelUsernameReport").innerHTML = thePage.storage.user.name.value;
   document.getElementById("divLoginPanelUsernameReport").classList.remove("divInvisible");
   document.getElementById("divLoginPanelUsernameReport").classList.add("divVisible");
 }
@@ -214,10 +210,8 @@ function hideLogoutButton() {
 }
 
 function logoutGoogle() {
-  thePage.user.googleToken = "";
+  thePage.storage.user.googleToken.setAndStore("");
   thePage.user.googleProfile = {};
-  thePage.storeSettingsToCookies();
-  thePage.storeSettingsToLocalStorage();
   if (typeof (gapi) !== "undefined") {
     gapi.auth2.getAuthInstance().disconnect();
   }

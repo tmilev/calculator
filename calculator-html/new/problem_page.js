@@ -1,16 +1,15 @@
 "use strict";
 
 function selectCurrentProblem(problem, exerciseType) {
-  thePage.currentCourse.fileName = problem;
+  thePage.storage.currentCourse.fileName.setAndStore(problem);
   var theProblem = thePage.getCurrentProblem();
   theProblem.flagForReal = false;
   if (exerciseType === "scoredQuizJSON") {
     theProblem.flagForReal = true;
   }
-  //thePage.currentCourse.request = exerciseType;
-  thePage.storeSettingsToCookies();
+  //thePage.storage.currentCourse.request = exerciseType;
   thePage.pages.problemPage.flagLoaded = false;
-  thePage.selectPage("problemPage");
+  thePage.selectPage(thePage.pages.problemPage.name);
 }
 
 function Problem (inputFileName) {
@@ -23,12 +22,10 @@ function Problem (inputFileName) {
   this.previousProblem = null;
   this.nextProblem = null;
   this.scriptIds = null;
-
-//  thePage.pages.problemPage.problems[this.fileName] = this;
 }
 
 Problem.prototype.getURLFileCourseTopics = function() {
-  return `fileName=${this.fileName}&currentCourse=${thePage.currentCourse.courseHome}&topicList=${thePage.currentCourse.topicList}&`;
+  return `fileName=${this.fileName}&currentCourse=${thePage.storage.currentCourse.courseHome}&topicList=${thePage.storage.currentCourse.topicList}&`;
 }
 
 Problem.prototype.getURLRequestFileCourseTopics = function(isScoredQuiz) {
@@ -116,7 +113,6 @@ function getEditPanel(fileName) {
   var result = "";
   result += `<span class = 'spanFileInfo'><button class = "buttonSaveEdit" onclick = "selectEditPage('${fileName}')">Edit</button>${fileName}</span>`;
   return result;
-
 }
 
 Problem.prototype.writeToHTML = function(outputElement) {
@@ -170,7 +166,7 @@ Problem.prototype.writeToHTML = function(outputElement) {
 }
 
 function updateProblemPageCallback(input, outputComponent) {
-  var theFileName = thePage.currentCourse.fileName;
+  var theFileName = thePage.storage.currentCourse.fileName.getValue();
   if (typeof outputComponent === "string" || outputComponent === undefined || outputComponent === null) {
     outputComponent = document.getElementById(outputComponent);
   }
@@ -203,7 +199,7 @@ function updateProblemPageCallback(input, outputComponent) {
 
   for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++) {
     currentProblem.answers[counterAnswers] = new InputPanelData({
-      fileName: thePage.currentCourse.fileName,
+      fileName: thePage.storage.currentCourse.fileName.getValue(),
       idMQSpan: answerVectors[counterAnswers].answerMQspanId,
       idPureLatex: answerVectors[counterAnswers].answerIdPureLatex,
       idButtonContainer: answerVectors[counterAnswers].preferredButtonContainer,
@@ -231,7 +227,7 @@ function updateProblemPage() {
   }
   thePage.pages.problemPage.flagLoaded = true;
   var theProblem = thePage.getCurrentProblem();
-  console.log("Current course: " + JSON.stringify(thePage.currentCourse));
+  console.log("Current course: " + JSON.stringify(thePage.storage.currentCourse));
   var theURL = `${pathnames.calculatorAPI}?${theProblem.getURLRequestFileCourseTopics()}`;
   submitGET({
     url: theURL,

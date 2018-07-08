@@ -188,17 +188,18 @@ button.accordionLikeIndividual.active, button.accordionLikeIndividual:hover {
 }
 .panelExpandable {
   transition: 2s all;
-  display: inline-block;
 }
 .panelExpandableCollapsed {
   transition: 2s all;
   max-height: 0;
+  height: 0;
   opacity: 0;
+  display: none;
 }
 .panelExpandableExpanded {
   transition: 2s all;
-  max-height: 500px;
   opacity: 1;
+  display: inline;
 }
 
 button.accordionLike {
@@ -854,7 +855,9 @@ span.problemLinkSelectedQuiz{
 a.linkProgressReport{
   word-wrap: break-word;
   overflow-wrap: break-word;
+  overflow: hidden;
   font-size: small;
+  max-width: 120px;
 }
 a.problemLinkQuiz{
   display: inline-block;

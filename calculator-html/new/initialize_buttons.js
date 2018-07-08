@@ -388,7 +388,7 @@ InputPanelData.prototype.showSolution = function() {
 
 InputPanelData.prototype.submitAnswer = function() {
   var theRequest = "";
-  var currentProblem = thePage.pages.problemPage.problems[this.fileName];
+  var currentProblem = thePage.getProblem(this.fileName);
   if (currentProblem.flagForReal) {
     theRequest = "submitAnswers";
   } else {
@@ -399,14 +399,14 @@ InputPanelData.prototype.submitAnswer = function() {
 }
 
 InputPanelData.prototype.submitGiveUp = function() {
-  var currentProblem = thePage.pages.problemPage.problems[this.fileName];
+  var currentProblem = thePage.getProblem(this.fileName);
   var theRequest = `problemGiveUp&randomSeed=${currentProblem.randomSeed}`; //"submitAnswersPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 
 InputPanelData.prototype.submitPreview = function() {
   var theRequest = "";
-  var currentProblem = thePage.pages.problemPage.problems[this.fileName];
+  var currentProblem = thePage.getProblem(this.fileName);
   if (currentProblem.flagForReal) {
     theRequest = "submitAnswersPreview";
   } else {

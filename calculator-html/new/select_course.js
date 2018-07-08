@@ -2,11 +2,9 @@
 
 function selectCourse(courseIndex) {
   var theCourse = thePage.theCourses[courseIndex];
-  thePage.currentCourse.courseHome = theCourse.courseHome;
-  thePage.currentCourse.topicList = theCourse.topicList;
-  thePage.currentCourse.fileName = "";
-  thePage.storeSettingsToCookies();
-  thePage.selectPage("currentCourse");
+  thePage.storage.currentCourse.courseHome.setAndStore(theCourse.courseHome);
+  thePage.storage.currentCourse.topicList.setAndStore(theCourse.topicList);
+  thePage.selectPage(thePage.pages.currentCourse.name);
 }
 
 function afterLoadSelectCoursePage(incomingPage, result) {

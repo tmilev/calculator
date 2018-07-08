@@ -1,15 +1,8 @@
 "use strict";
 
-function getEditPagePanel(filesToEdit) { 
-  var result = "";
-  result += "<editPagePanel>";
-  result += "</editPagePanel>";
-  return result;
-}
-
 var staticWordCompleter = {
   getCompletions: function(editor, session, pos, prefix, callback) {
-    callback(null, thePage.pages.editPage.storage.AceEditorAutoCompletionWordList.map(function(word) {
+    callback(null, thePage.aceEditorAutoCompletionWordList.map(function(word) {
       return {
         caption: word,
         value: word,
@@ -62,21 +55,21 @@ function selectEditPageCallback(input, outputComponent) {
 
 function selectEditPage(currentlyEditedPage) {
   if (currentlyEditedPage === undefined || currentlyEditedPage === null) { 
-    currentlyEditedPage = thePage.pages.editPage.storage.currentlyEditedPage;
+    currentlyEditedPage = thePage.storage.editPage.currentlyEditedPage;
   }
   if (currentlyEditedPage === undefined || currentlyEditedPage === null) { 
     currentlyEditedPage = "/coursesavailable/default.txt";
   }
-  thePage.pages.editPage.storage.currentlyEditedPage = currentlyEditedPage;
-  if (thePage.currentPage !== "editPage") {
-    thePage.selectPage("editPage");
+  thePage.storage.editor.currentlyEditedPage = currentlyEditedPage;
+  if (thePage.storage.currentPage !== thePage.pages.editPage.name) {
+    thePage.selectPage(thePage.pages.editPage.name);
     return;
   }
   var theTopicTextArea = document.getElementById("textareaTopicListEntry");
   theTopicTextArea.value  = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
   theTopicTextArea.cols = currentlyEditedPage.length + 15;
 
-  var theURL = `${pathnames.calculatorAPI}?${pathnames.requestEditPage}&fileName=${thePage.pages.editPage.storage.currentlyEditedPage}`;
+  var theURL = `${pathnames.calculatorAPI}?${pathnames.requestEditPage}&fileName=${thePage.storage.editor.currentlyEditedPage}`;
   submitGET({
     url: theURL,
     callback: selectEditPageCallback

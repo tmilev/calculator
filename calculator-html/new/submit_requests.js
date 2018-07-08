@@ -49,10 +49,13 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   var theHTML = "";
   var content = "";
   var label = '<b style ="color:orange">Sent</b>';
+  var addressSpreadOut = address.split("&").join(" &");
+  var addressSpreadOut = addressSpreadOut.split("=").join("= ");
+  var addressSpreadOut = addressSpreadOut.split("?").join("? ");
   if (!isPost) {
-    content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${address}</a>`;
+    content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${addressSpreadOut}</a>`;
   } else {
-    content += address;
+    content += addressSpreadOut;
   }
   theHTML += getToggleButton(content, label);
   progress.innerHTML = theHTML;

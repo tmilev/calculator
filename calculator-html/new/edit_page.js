@@ -55,21 +55,18 @@ function selectEditPageCallback(input, outputComponent) {
 
 function selectEditPage(currentlyEditedPage) {
   if (currentlyEditedPage === undefined || currentlyEditedPage === null) { 
-    currentlyEditedPage = thePage.storage.editPage.currentlyEditedPage;
-  }
-  if (currentlyEditedPage === undefined || currentlyEditedPage === null) { 
     currentlyEditedPage = "/coursesavailable/default.txt";
   }
-  thePage.storage.editor.currentlyEditedPage = currentlyEditedPage;
-  if (thePage.storage.currentPage !== thePage.pages.editPage.name) {
+  thePage.storage.editor.currentlyEditedPage.setAndStore(currentlyEditedPage);
+  if (thePage.storage.currentPage.getValue() !== thePage.pages.editPage.name) {
     thePage.selectPage(thePage.pages.editPage.name);
     return;
   }
   var theTopicTextArea = document.getElementById("textareaTopicListEntry");
-  theTopicTextArea.value  = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
+  theTopicTextArea.value = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
   theTopicTextArea.cols = currentlyEditedPage.length + 15;
 
-  var theURL = `${pathnames.calculatorAPI}?${pathnames.requestEditPage}&fileName=${thePage.storage.editor.currentlyEditedPage}`;
+  var theURL = `${pathnames.calculatorAPI}?${pathnames.requestEditPage}&fileName=${thePage.storage.editor.currentlyEditedPage.getValue()}`;
   submitGET({
     url: theURL,
     callback: selectEditPageCallback

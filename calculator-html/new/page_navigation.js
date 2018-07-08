@@ -45,7 +45,7 @@ StorageVariable.prototype.getValue = function() {
   return this.value;
 }
 
-StorageVariable.prototype.loadMe = function() {
+StorageVariable.prototype.loadMe = function(hashParsed) {
   var incomingValue = "";
   if (Storage !== undefined || localStorage !== undefined && this.nameLocalStorage !== "") {
     incomingValue = localStorage.getItem(this.nameLocalStorage);
@@ -59,22 +59,29 @@ StorageVariable.prototype.loadMe = function() {
       this.value = incomingValue;
     }
   }
-  console.log( `DEBUG: Loaded ${this.name}: ${this.value}`);
+  if (this.nameURL !== "") {
+    if (this.nameURL in hashParsed) {
+      this.value = decodeURIComponent(hashParsed[this.nameURL]);
+      if (this.associatedDOMId !== "") {
+        var theComponent = document.getElementById(this.associatedDOMId);
+        theComponent.value = this.value;
+      }
+    }
+  }
+  //console.log( `DEBUG: Loaded ${this.name}: ${this.value}`);
 }
 
 StorageVariable.prototype.storeMe = function() {
   if (Storage !== undefined || localStorage !== undefined) {
     if (this.nameLocalStorage !== "") {
       localStorage[this.nameLocalStorage] = this.value
-      console.log(`DEBUG: stored ${this.name} as ${this.nameLocalStorage} with value ${this.value}`);
+      //console.log(`DEBUG: stored ${this.name} as ${this.nameLocalStorage} with value ${this.value}`);
     }
   }
   if (this.nameCookie !== "") {
     setCookie(this.nameCookie, this.value, 150, this.secure);
-    console.log(`DEBUG: stored ${this.name} as ${this.nameCookie} with value ${this.value}`);
+    //console.log(`DEBUG: stored ${this.name} as ${this.nameCookie} with value ${this.value}`);
   }
-
-
 }
 
 StorageVariable.prototype.setAndStore = function(newValue) {
@@ -130,7 +137,7 @@ function Page() {
       id: "divCalculatorPage",
       menuButtonId: "buttonSelectCalculator",
       container: null,
-      selectFunction: null,
+      selectFunction: submitCalculatorComputation,
       scriptIds: []
     },
     signUp: {
@@ -223,7 +230,18 @@ function Page() {
       nameCookie: "debugFlag",
       secure: false
     }),
-    calculatorInput: new StorageVariable({name: "calculatorInput", associatedDOMId: "mainInputID"}),
+    calculator: {
+      input: new StorageVariable({
+        name: "calculatorInput", 
+        nameURL: "calculatorInput",
+        associatedDOMId: "mainInputID"
+      }),
+      request: new StorageVariable({
+        name: "calculatorRequest", 
+        nameURL: "calculatorRequest", 
+        nameLocalStorage: "calculatorRequest"
+      }),
+    },
     user: {
       googleToken: new StorageVariable({
         name: "googleToken"
@@ -262,16 +280,18 @@ function Page() {
   //Initialize global variables
   //////////////////////////////////////
   //////////////////////////////////////
+  this.calculatorInputLastSubmitted = "";
   this.theTopics = {};
   this.theCourses = {}; 
   this.scriptsInjected = {};
   this.logoutRequestFromUrl = null;
   this.locationRequestFromUrl = null;
-  this.loadSettings(); 
+  this.loadSettings(location.hash); 
   this.hashHistory = []; 
   this.problems = {};
   this.user = new User();
   this.aceEditorAutoCompletionWordList = [];
+  this.flagDoSubmitCalculatorComputation = true;
   //////////////////////////////////////
   //////////////////////////////////////
   //Page manipulation functions
@@ -289,26 +309,31 @@ function Page() {
   document.getElementById("divPage").className = "divPage";
 }
 
-Page.prototype.getHash = function () {
-  var result = {};
-  result.currentPage = this.storage.currentPage.getValue();
-  return encodeURIComponent(JSON.stringify(result));
-}
-
-Page.prototype.loadSettings = function() {
+Page.prototype.loadSettings = function(inputHash) {
   try {
-    this.loadSettingsRecursively(this.storage);
+    //console.log(`DEBUG: loading with hash: ${inputHash.slice(1)}`);
+    var inputHashParsed = {};
+    if (typeof inputHash === "string") {
+      var inputString = inputHash;
+      if (inputHash[0] === '#') {
+        inputString = inputHash.slice(1);
+      }
+      var decodedInputString = decodeURIComponent(inputString);
+      inputHashParsed = JSON.parse(decodedInputString);
+    }
+    console.log(`DEBUG: hash parsed to: ${JSON.stringify(inputHashParsed)}`);
+    this.loadSettingsRecursively(this.storage, inputHashParsed);
   } catch (e) {
     console.log("Error loading settings from cookies: " + e);
   }
 }
 
-Page.prototype.loadSettingsRecursively = function(currentStorage) {
+Page.prototype.loadSettingsRecursively = function(currentStorage, inputHashParsed) {
   if (currentStorage instanceof StorageVariable) {
-    currentStorage.loadMe();
+    currentStorage.loadMe(inputHashParsed);
   } else if (typeof currentStorage === "object") {
     for (var subLabel in currentStorage) {
-      this.loadSettingsRecursively(currentStorage[subLabel]);
+      this.loadSettingsRecursively(currentStorage[subLabel], inputHashParsed);
     }
   }  
 }
@@ -359,10 +384,10 @@ Page.prototype.initializeCalculatorPage = function() {
   initializeButtons();
   initializeCalculatorPage();
   //console.log("Submit missing");
-  if (document.getElementById('mainInputID').value !== "") {
-    console.log("Debug: about to submit: " + document.getElementById('mainInputID').value);
-    submitCalculatorComputation();
-  }
+  //if (document.getElementById('mainInputID').value !== "") {
+  //  //console.log("Debug: about to submit: " + document.getElementById('mainInputID').value);
+  //  submitCalculatorComputation();
+  //}
 }
 
 Page.prototype.flipDebugSwitch = function () {
@@ -412,7 +437,7 @@ function Script() {
 
 Page.prototype.removeOneScript = function(scriptId) {
   var theScript = document.getElementById(scriptId);
-  if (theScript === null){
+  if (theScript === null) {
     return;
   }
   var parent = theScript.parentNode;

@@ -227,7 +227,7 @@ function updateProblemPage() {
   }
   thePage.pages.problemPage.flagLoaded = true;
   var theProblem = thePage.getCurrentProblem();
-  console.log("Current course: " + JSON.stringify(thePage.storage.currentCourse));
+  //console.log("Current course: " + JSON.stringify(thePage.storage.currentCourse));
   var theURL = `${pathnames.calculatorAPI}?${theProblem.getURLRequestFileCourseTopics()}`;
   submitGET({
     url: theURL,

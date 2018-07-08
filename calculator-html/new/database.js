@@ -11,9 +11,11 @@ function updateDatabasePageCallback(incoming, output) {
     } else {
       for (var counterCollection = 0; counterCollection < theParsed.collections.length; counterCollection ++) {
         var currentCollection = theParsed.collections[counterCollection]; 
-        theParsed.collections[counterCollection] = `
-        <a href = "#" onclick =
-        "thePage.storage.database.currentTable.setAndStore('${currentCollection}'); updateDatabasePage();">${currentCollection}</a>`;
+        var linkHTML = "";
+        linkHTML += `<a href = "#" onclick = `;
+        linkHTML += `"thePage.storage.database.currentTable.setAndStore('${currentCollection}'); updateDatabasePage();"`;
+        linkHTML += `>${currentCollection}</a>`;
+        theParsed.collections[counterCollection] = linkHTML;
       }
       theOutput.innerHTML = getHtmlFromArrayOfObjects(theParsed.collections);
     }
@@ -23,13 +25,14 @@ function updateDatabasePageCallback(incoming, output) {
 }
 
 function updateDatabasePageResetCurrentTable() {
-  thePage.storage.database.currentTable = "";
+  thePage.storage.database.currentTable.setAndStore("");
   updateDatabasePage();
 }
 
 function updateDatabasePage() {
   thePage.storeSettings();
-  var theUrl = `${pathnames.calculatorAPI}?${pathnames.requestDatabase}&${pathnames.databaseTable}=${thePage.storage.database.currentTable}`;
+  var currentTable = thePage.storage.database.currentTable.getValue();
+  var theUrl = `${pathnames.calculatorAPI}?${pathnames.requestDatabase}&${pathnames.databaseTable}=${currentTable}`;
   submitGET({
     url: theUrl,
     progress: "spanProgressReportGeneral",

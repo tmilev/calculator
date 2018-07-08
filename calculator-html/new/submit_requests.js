@@ -31,7 +31,7 @@ function getToggleButton(address, label) {
   result += `<span>${label}</span><span>&#9666;</span>`;
   result += "</button>";
   result += `<span class = "spanProgressReport panelExpandable panelExpandableCollapsed">${address}</span>`;
-  console.log("DEBUG: getting toggle button from: " + address);
+  //console.log("DEBUG: getting toggle button from: " + address);
   return result;
 }
 
@@ -128,11 +128,11 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   if (idStatus === undefined) {
     idStatus = idOutput;
   }
-  console.log("DEBUG: id status: " + idStatus + "\ninputParams:\n" + inputParams);
+  //console.log("DEBUG: id status: " + idStatus + "\ninputParams:\n" + inputParams);
   timeOutCounter = 0;
 
   var postRequest = `POST ${pathnames.calculatorAPI}<br>message: ${shortenString(inputParams, 200)}`;
-  console.log("DEBUG: the post request: " + postRequest);
+  //console.log("DEBUG: the post request: " + postRequest);
   recordProgressStarted(idStatus, postRequest, true, (new Date()).getTime());
 
   https.onload = function() { 
@@ -245,15 +245,29 @@ function submitCalculatorInputOnEnter() {
   event.preventDefault();
 }
 
+function selectCalculatorPage() {
+  if (thePage.flagDoSubmitCalculatorComputation) {
+    submitCalculatorComputation();
+    thePage.flagDoSubmitCalculatorComputation = false;
+  }
+}
+
 function submitCalculatorComputation() {
   var result = "";
-  var theInput = encodeURIComponent(document.getElementById("mainInputID").value);
+  var calculatorInput = document.getElementById("mainInputID").value;
+  if (calculatorInput === thePage.calculatorInputLastSubmitted) {
+    return;
+  }
+  thePage.calculatorInputLastSubmitted = calculatorInput;
+  var calculatorInputEncoded = encodeURIComponent(calculatorInput);
   var theJSON = {
-    request: "calculatorOutput",
-    calculatorInput : theInput,
+    calculatorRequest: "calculatorOutput",
+    calculatorInput : calculatorInputEncoded,
     currentPage: thePage.pages.calculator.name
   };
-  result += `<a href = '#${JSON.stringify(theJSON)}' onclick = "thePage.loadSettingsFromURLLikeString(this.href); submitCalculatorComputation();">Link to your input</a>`;
+  result += `<a href = '#${encodeURIComponent(JSON.stringify(theJSON))}' onclick = `;
+  result += `"thePage.loadSettings(this.href.split('#')[1]); submitCalculatorComputation();"`;
+  result += `>Link to your input</a>`;
   document.getElementById("spanComputationLink").innerHTML = result;
   submitStringAsMainInput(
     document.getElementById("mainInputID").value,

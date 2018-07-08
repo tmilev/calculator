@@ -9,7 +9,7 @@ function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
 
 function deleteDatabaseItemCallback(input, output) {
   document.getElementById(this).remove();
-  console.log (`Debug: result: ${input}`);
+  //console.log (`Debug: result: ${input}`);
   //this.parentElement.innerHTML = "";
 }
 

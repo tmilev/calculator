@@ -93,14 +93,14 @@ function exampleCalculatorClick(theLink) {
   var theIndex = theLink.index;
   var isComposite = theLink.composite;
   var theHandler = null;
-//console.log(theLink);
-  if (isComposite){
+  //console.log(theLink);
+  if (isComposite) {
     theHandler = theCalculatorExamples[theAtom].composite[theIndex];
   } else {
     theHandler = theCalculatorExamples[theAtom].regular[theIndex];
   }
 
-//console.log(theHandler);
+  //console.log(theHandler);
   var mainInput = document.getElementById("mainInputID");
   mainInput.value = theHandler.example;
   submitCalculatorComputation();

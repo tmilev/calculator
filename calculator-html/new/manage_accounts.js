@@ -7,7 +7,7 @@ function getAccountsTable(inputAccounts) {
   for (var counterAccounts = 0; counterAccounts < inputAccounts.length; counterAccounts ++) {
     result += "<tr>";
     var currentUser = inputAccounts[counterAccounts];
-    console.log("Current user: " + JSON.stringify(currentUser));
+    //console.log("Current user: " + JSON.stringify(currentUser));
     result += `<td>${currentUser.username}</td>`;
     if (currentUser.email !== undefined) {
       result += `<td>${currentUser.email}</td>`;
@@ -44,7 +44,7 @@ function updateAccountsPageCallback(input, notUsed) {
   var outputComponentAdmin = document.getElementById("idOutputAdmins");
   var outputComponentStudents = document.getElementById("idOutputStudents");
   var parsedUserInfo = null;
-  console.log(input);
+  //console.log("DEBUG: input: " + input);
   try {
     parsedUserInfo = JSON.parse(input);
     var admins = parsedUserInfo["admins"];

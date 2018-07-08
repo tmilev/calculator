@@ -3127,15 +3127,15 @@ int WebWorker::ProcessChangePassword()
     return 0;
   }
   std::string newPassword =
-    HtmlRoutines::ConvertStringToURLString
-    (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("newPassword"), true), false);
+  HtmlRoutines::ConvertStringToURLString
+  (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("newPassword"), true), false);
   //<-Passwords are ONE-LAYER url-encoded
   //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
   //<-Incoming pluses must be re-coded as spaces (%20).
 
   std::string reenteredPassword =
-    HtmlRoutines::ConvertStringToURLString
-    (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("reenteredPassword"), true), false);
+  HtmlRoutines::ConvertStringToURLString
+  (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("reenteredPassword"), true), false);
   //<-Passwords are ONE-LAYER url-encoded
   //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
   //<-Incoming pluses must be re-coded as spaces (%20).

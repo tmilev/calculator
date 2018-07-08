@@ -24,7 +24,7 @@ function reloadPage(reason, time) {
     time = 0;
   }
   var timeRemaining = time / 1000;
-  document.getElementById("spanLoginStatus").innerHTML = reason + `[in ${timeRemaining} (s)]`; 
+  document.getElementById("spanLoginStatus").innerHTML = `${reason} [in ${timeRemaining} (s)]`; 
   if (time <= 0) {
     doReload();
   } else { 
@@ -35,10 +35,10 @@ function reloadPage(reason, time) {
 function logout() {
   logoutGoogle();
   if (thePage.user.role === "admin") {
-    reloadPage("<b>Logging out admin: mandatory page reload. </b>", 3000);
+    reloadPage("<b>Logging out admin: mandatory page reload. </b>", 0);
   } else { 
     var loginStatus = "";
-    loginStatus += `<b><a href='#' onclick='reloadPage("<b>User requested reload. </b>", 3000);'>Reload page</a>`;
+    loginStatus += `<b><a href='#' onclick='reloadPage("<b>User requested reload. </b>", 0);'>Reload page</a>`;
     loginStatus += `for complete logout (when <span style='color:red'>using public computer</span>).</b>`;
     document.getElementById("spanLoginStatus").innerHTML = loginStatus;
   }

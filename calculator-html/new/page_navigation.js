@@ -318,6 +318,9 @@ Page.prototype.loadSettings = function(inputHash) {
       if (inputHash[0] === '#') {
         inputString = inputHash.slice(1);
       }
+      if (inputString === "" || inputString === undefined || inputString === null) {
+        inputString = "{}";
+      }
       var decodedInputString = decodeURIComponent(inputString);
       inputHashParsed = JSON.parse(decodedInputString);
     }

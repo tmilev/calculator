@@ -174,12 +174,14 @@ function progressReport() {
   clearTimeout(this.timeoutID);
   var progReport = document.getElementById("idProgressReport");
   var requestStatus = document.getElementById("idProgressReportRequestStatus");
-  var progReportTimer = document.getElementById("idProgressReportTimer");
+  var progressReportTimer = document.getElementById("idProgressReportTimer");
   if (isPaused) {
     return;
   }
-  progReportTimer.innerHTML = "<hr>Refreshing every " + timeIncrementInTenthsOfSecond / 10 +
-  " second(s). Client time: ~" + Math.floor(timeOutCounter / 10) + " second(s)<br>";
+  var progressReportContent = "";
+  progressReportContent += `<hr>Refreshing every ${timeIncrementInTenthsOfSecond / 10}`;
+  progressReportContent += ` second(s). Client time: ~ ${Math.floor(timeOutCounter / 10)} second(s)<br>`;
+  progressReportTimer.innerHTML = progressReportContent;
   timeOutCounter += timeIncrementInTenthsOfSecond;
   var sURL  = `${pathnames.calculatorAPI}?request=indicator&mainInput=${currentWorkerNumber}`;
   var https = new XMLHttpRequest();
@@ -193,7 +195,7 @@ function progressReport() {
       return;
     }
     if (https.responseText !== "") { 
-      progReport.innerHTML = newReportString + "<hr>";
+      progReport.innerHTML = `${newReportString}<hr>`;
       requestStatus.innerHTML = '';
     } else {
       requestStatus.innerHTML = "<span style ='color:red'><b>Empty response</b></span>";

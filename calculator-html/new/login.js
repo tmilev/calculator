@@ -32,33 +32,41 @@ function reloadPage(reason, time) {
   }
 }
 
+var oldUserRole ;
 function logout() {
-  logoutGoogle();
-  if (thePage.user.role === "admin") {
-    reloadPage("<b>Logging out admin: mandatory page reload. </b>", 0);
-  } else { 
-    var loginStatus = "";
-    loginStatus += `<b><a href='#' onclick='reloadPage("<b>User requested reload. </b>", 0);'>Reload page</a>`;
-    loginStatus += `for complete logout (when <span style='color:red'>using public computer</span>).</b>`;
-    document.getElementById("spanLoginStatus").innerHTML = loginStatus;
-  }
+  oldUserRole = thePage.user.role;
   thePage.storage.user.name.setAndStore("");
   thePage.storage.user.authenticationToken.setAndStore("");
+  hideLogoutButton();
+  thePage.user.hideProfilePicture();
   thePage.user.role = "";
   thePage.user.flagLoggedIn = false;
   thePage.pages.problemPage.flagLoaded = false;
   document.getElementById("inputPassword").value = "";
   document.getElementById("divProblemPageContentContainer").innerHTML = "";
   document.getElementById("divCurrentCourse").innerHTML = "";
-  showLoginCalculatorButtons();
-  toggleAccountPanels();
-  toggleAdminPanels();
-  thePage.selectPage(thePage.pages.login.name);
+  logoutGoogle();
+  logoutPartTwo();
+}
+
+function logoutPartTwo() {
+  if (oldUserRole === "admin") {
+    reloadPage("<b>Logging out admin: mandatory page reload. </b>", 0);
+  } else { 
+    var loginStatus = "";
+    loginStatus += `<b><a href='#' onclick='reloadPage("<b>User requested reload. </b>", 0);'>Reload page</a>`;
+    loginStatus += `for complete logout (when <span style='color:red'>using public computer</span>).</b>`;
+    document.getElementById("spanLoginStatus").innerHTML = loginStatus;
+    showLoginCalculatorButtons();
+    toggleAccountPanels();
+    toggleAdminPanels();
+    thePage.selectPage(thePage.pages.login.name);  
+  }
 }
 
 function loginTry() {
   submitGET({
-    "url": `${pathnames.calculatorAPI}?request=userInfoJSON`,
+    url: `${pathnames.calculatorAPI}?request=userInfoJSON`,
     callback: loginWithServerCallback,
     progress: "spanProgressReportGeneral"
   });
@@ -68,7 +76,7 @@ function loginTry() {
 function toggleAccountPanels() {
   var accountPanels = document.getElementsByClassName("divAccountPanel");
   for (var counterPanels = 0; counterPanels < accountPanels.length; counterPanels ++) {
-    if (thePage.user.flagLoggedIn === true){
+    if (thePage.user.flagLoggedIn === true) {
       accountPanels[counterPanels].classList.remove("divInvisible");
       accountPanels[counterPanels].classList.add("divVisible");
     } else {
@@ -81,7 +89,7 @@ function toggleAccountPanels() {
 function toggleAdminPanels() {
   var adminPanels = document.getElementsByClassName("divAdminPanel");
   for (var counterPanels = 0; counterPanels < adminPanels.length; counterPanels ++) {
-    if (thePage.user.role === "admin"){
+    if (thePage.user.role === "admin") {
       adminPanels[counterPanels].classList.remove("divInvisible");
       adminPanels[counterPanels].classList.add("divVisible");
     } else {
@@ -156,9 +164,9 @@ function startGoogleLogin() {
   if (typeof (gapi) !== "undefined") {
     if (!thePage.pages.login.initialized) {
       gapi.signin2.render('divGoogleLoginButton', {
-        'scope': 'profile email',
-        'onsuccess': onGoogleSignIn,
-        'onfailure': null
+        scope: 'profile email',
+        onsuccess: onGoogleSignIn,
+        onfailure: null
       });
     }
     gapi.load('auth2', function() {
@@ -212,11 +220,9 @@ function hideLogoutButton() {
 function logoutGoogle() {
   thePage.storage.user.googleToken.setAndStore("");
   thePage.user.googleProfile = {};
-  if (typeof (gapi) !== "undefined") {
-    gapi.auth2.getAuthInstance().disconnect();
+  if (gapi !== undefined && gapi !== null) {
+    gapi.auth2.getAuthInstance().signOut();
   }
-  hideLogoutButton();
-  thePage.user.hideProfilePicture();
 }
 
 function getQueryVariable(variable) {

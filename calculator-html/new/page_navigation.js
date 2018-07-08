@@ -253,7 +253,7 @@ function Page() {
       }),
       authenticationToken: new StorageVariable({
         name: "authenticationToken",
-        nameCookie: "debugFlag",
+        nameCookie: "authenticationToken",
         nameURL: "authenticationToken"
       })
     }

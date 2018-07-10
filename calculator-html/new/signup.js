@@ -1,11 +1,10 @@
 "use strict";
 
-var recaptchaRenderedSignUp = false;
+var recaptchaIdForSignUp = null;
 
 function signUp() {
-  if (!recaptchaRenderedSignUp) {
-    grecaptcha.render("recaptchaSignUp", {'sitekey' : '6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql'});
-    recaptchaRenderedSignUp = true;
+  if (recaptchaIdForSignUp === null) {
+    recaptchaIdForSignUp = grecaptcha.render("recaptchaSignUp", {'sitekey' : '6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql'});
   }
   thePage.selectPage(thePage.pages.signUp.name);
 }
@@ -28,7 +27,7 @@ function callbackSignUp(input, output) {
     result += `<hr>${inputParsed.comments}`;
     output.innerHTML = result;
   } catch (e) {
-    output.innerHTML = `Result:${input}. Error: ${e}`;    
+    output.innerHTML = `Result:${input}. Error: ${e}. ${input}`;    
   }
 }
 
@@ -41,7 +40,7 @@ function submitSignUpInfo() {
   var desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForSignUp').value);
   var theURL = `${pathnames.calculatorAPI}?request=signUp&desiredUsername=${desiredUsernameEncoded}&`;
   theURL += `email=${desiredEmailEncoded}&`;
-  var theToken = grecaptcha.getResponse();
+  var theToken = grecaptcha.getResponse(recaptchaIdForSignUp);
   if (theToken === '' || theToken === null)  { 
     document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>Please don't forget to solve the captcha. </b></span>";
     return false;

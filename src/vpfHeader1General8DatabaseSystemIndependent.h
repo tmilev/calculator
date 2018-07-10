@@ -132,5 +132,10 @@ public:
   static std::string labelIdMongo;
 ///deleted info
   static std::string tableDeleted;
+///app info
+  static std::string labelCurrentPage;
+  static std::string labelPageSignUp;
+  static std::string labelPageAccount;
+  static std::string labelCalculatorRequest;
 };
 #endif

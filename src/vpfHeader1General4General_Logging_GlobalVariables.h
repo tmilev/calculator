@@ -179,6 +179,7 @@ public:
   // Example:
   // DisplayNameExecutable ="/cgi-bin/calculator";
   std::string DisplayNameExecutable;
+  std::string DisplayNameExecutableApp;
 
   std::string IPAdressCaller;
 

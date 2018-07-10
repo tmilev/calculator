@@ -136,6 +136,10 @@ std::string DatabaseStrings::objectSelectorMongo = "$oid";
 std::string DatabaseStrings::labelFields = "fields";
 std::string DatabaseStrings::labelTable = "table";
 std::string DatabaseStrings::labelIdMongo = "_id";
+std::string DatabaseStrings::labelCurrentPage = "currentPage";
+std::string DatabaseStrings::labelPageSignUp = "signUp";
+std::string DatabaseStrings::labelCalculatorRequest = "calculatorRequest";
+std::string DatabaseStrings::labelPageAccount = "account";
 
 void GlobalVariables::initModifiableDatabaseFields()
 { MacroRegisterFunctionWithName("GlobalVariables::initModifiableDatabaseFields");
@@ -668,7 +672,7 @@ bool UserCalculator::ComputeAndStoreActivationStats
   emailStatQuery[DatabaseStrings::labelUsernameAssociatedWithToken] = this->username;
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, commentsOnFailure))
     return false;
-  this->activationEmailSubject = "NO REPLY: Activation of your Math homework account. ";
+  this->activationEmailSubject = "NO REPLY: Activation of your math account. ";
   std::stringstream emailBody;
   emailBody << "Dear user,"
   << "\n\nto confirm your email change at our website "
@@ -1500,12 +1504,14 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
     out << calculatorBase;
   else
     out << theGlobalVariables.hopefullyPermanentWebAdress;
-  out << theGlobalVariables.DisplayNameExecutable
-  << "?request=activateAccount&username="
-  << HtmlRoutines::ConvertStringToURLString(inputUserNameUnsafe, false);
-  if (inputEmailUnsafe != "")
-    out << "&email=" << HtmlRoutines::ConvertStringToURLString(inputEmailUnsafe, false);
-  out << "&activationToken=" << HtmlRoutines::ConvertStringToURLString(theActivationToken, false);
+  JSData theJS;
+  theJS[DatabaseStrings::labelActivationToken] = HtmlRoutines::ConvertStringToURLString(theActivationToken, false);
+  theJS[DatabaseStrings::labelUsername] = HtmlRoutines::ConvertStringToURLString(inputUserNameUnsafe, false);
+  theJS[DatabaseStrings::labelCalculatorRequest] = "activateAccount";
+  theJS[DatabaseStrings::labelEmail] = HtmlRoutines::ConvertStringToURLString(inputEmailUnsafe, false);
+  theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageSignUp;
+  out << theGlobalVariables.DisplayNameExecutableApp
+  << "#" << HtmlRoutines::ConvertURLStringToNormal(theJS.ToString(false), false);
   return out.str();
 }
 

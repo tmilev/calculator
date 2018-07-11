@@ -1617,7 +1617,7 @@ std::string MonomialUniversalEnvelopingOrdered<coefficient>::ToString(bool useLa
   { tempS = MathRoutines::ElementToStringBrackets(this->Coefficient, PolyFormatLocal);
     if (tempS == "1")
       tempS = "";
-    if (tempS == "- 1")
+    if (tempS == "- 1" || tempS == "-1")
       tempS = "-";
   } else
     tempS = this->Coefficient.ToString(PolyFormatLocal);

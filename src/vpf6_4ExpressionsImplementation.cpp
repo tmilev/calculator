@@ -2761,7 +2761,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if (!doUseFrac)
     { std::string firstE = (*this)[1].ToString(theFormat);
       std::string secondE = (*this)[2].ToString(theFormat);
-      bool firstNeedsBrackets = !((*this)[1].IsListStartingWithAtom(this->owner->opTimes())|| (*this)[1].IsListStartingWithAtom(this->owner->opDivide()));
+      bool firstNeedsBrackets = !((*this)[1].IsListStartingWithAtom(this->owner->opTimes()) || (*this)[1].IsListStartingWithAtom(this->owner->opDivide()));
       bool secondNeedsBrackets = true;
       if ((*this)[2].IsOfType<Rational>())
         if ((*this)[2].GetValue<Rational>().IsInteger())
@@ -2829,7 +2829,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         if (secondE[0] == '-')
           secondNeedsBrackets = true;
       bool mustHaveTimes = false;
-      if (firstE == "- 1" )
+      if (firstE == "-1" || firstE == "- 1")
       { firstE = "-";
         firstNeedsBrackets = false;
       }
@@ -2863,7 +2863,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     std::string firstE = (*this)[1].ToString(theFormat);
     bool firstNeedsBrackets = (*this)[1].NeedsParenthesisForMultiplication();
     bool secondNeedsBrackets = (*this)[2].NeedsParenthesisForMultiplication();
-    if (firstE == "- 1" )
+    if (firstE == "- 1" || firstE == "-1")
     { firstE = "-";
       firstNeedsBrackets = false;
     }
@@ -3032,7 +3032,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     { needsParen = false;
       theCoeff = "";
     }
-//    if (theCoeff=="- 1")
+//    if (theCoeff=="- 1" || theCoeff == "-1")
 //    { theCoeff="-";
 //    }
     if (needsParen)
@@ -3720,7 +3720,7 @@ std::string Expression::ToUTF8String(FormatExpressions* theFormat) const
       bool firstNeedsBrackets = (*this)[1].NeedsParenthesisForMultiplication();
       bool secondNeedsBrackets = (*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(&((*this)[1]));
       bool mustHaveTimes = false;
-      if (firstE == "- 1")
+      if (firstE == "- 1" || firstE == "-1")
       { firstE = "-";
         firstNeedsBrackets = false;
       }

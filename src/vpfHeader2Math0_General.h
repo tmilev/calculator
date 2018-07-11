@@ -3036,9 +3036,7 @@ public:
         return;
     }
   }
-  void ClearDenominators
-  (RationalFunctionOld& outputWasMultipliedBy)
-  ;
+  void ClearDenominators(RationalFunctionOld& outputWasMultipliedBy);
   void operator+=(const Polynomial<Rational>& other)
   { RationalFunctionOld tempOther;
     tempOther = other;
@@ -4226,7 +4224,7 @@ std::string Vector<coefficient>::ToStringLetterFormat(const std::string& inputLe
         tempS = "(" + tempS + ")";
       if (tempS == "1")
         tempS = "";
-      if (tempS == "- 1")
+      if (tempS == "- 1" || tempS == "-1")
         tempS = "-";
       if (found)
       { if (tempS.size() > 0)
@@ -4539,7 +4537,7 @@ std::string MonomialCollection<templateMonomial, coefficient>::GetBlendCoeffAndM
     out << monString;
     return out.str();
   }
-  if (coeffStr == "- 1")
+  if (coeffStr == "- 1" || coeffStr == "-1")
   { out << "-" << monString;
     return out.str();
   }
@@ -4609,7 +4607,7 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
       { if (!useCustomTimes)
         { if (tempS1 == "1" && tempS2 != "1")
             tempS1 = "";
-          if (tempS1 == "- 1" && tempS2 != "1")
+          if ((tempS1 == "- 1" || tempS1 == "-1") && tempS2 != "1")
             tempS1 = "-";
           if (tempS2 != "1")
             tempS1 += tempS2;
@@ -6531,12 +6529,12 @@ std::string MonomialGeneralizedVerma<coefficient>::ToString(FormatExpressions* t
   std::string tempS;
   if (tempS == "1")
     tempS = "";
-  if (tempS == "- 1")
+  if (tempS == "- 1" || tempS == "-1")
     tempS = "-";
   tempS += this->theMonCoeffOne.ToString(theFormat);
   if (tempS == "1")
     tempS = "";
-  if (tempS == "- 1")
+  if (tempS == "- 1" || tempS == "-1")
     tempS = "-";
   bool needsCdot = (tempS != "1" && tempS != "-" && tempS != "");
   std::stringstream out;
@@ -6574,7 +6572,7 @@ std::ostream& operator<<(std::ostream& output, const MonomialCollection<template
     tempS2 = currentMon.ToString();
     if (tempS1 == "1" && tempS2 != "1")
       tempS1 = "";
-    if (tempS1 == "- 1" && tempS2 != "1")
+    if ((tempS1 == "- 1" || tempS1 == "-1") && tempS2 != "1")
       tempS1 = "-";
     if (tempS2 != "1")
       tempS1 += tempS2;

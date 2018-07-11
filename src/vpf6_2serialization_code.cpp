@@ -912,7 +912,7 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
       input.StartsWith(theCommands.opDivide(), 3))
   { Expression leftE, rightE;
     if (!CalculatorConversions::innerRationalFunction(theCommands, input[1], leftE) ||
-        !CalculatorConversions::innerRationalFunction(theCommands, input[2], rightE) )
+        !CalculatorConversions::innerRationalFunction(theCommands, input[2], rightE))
       return theCommands << "<hr> Failed to convert " << input[1].ToString() << " and " << input[2].ToString() << " to rational function. ";
     if (leftE.IsError() || rightE.IsError())
       return theCommands << "<hr> Conversion of " << input[1].ToString() << " and " << input[2].ToString() << "  returned error(s): "
@@ -939,7 +939,7 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
         return theCommands << "<hr>CalculatorConversions::innerRationalFunction: failed to convert " << input[1].ToString() << " to rational function. ";
       if (leftE.IsError())
         return theCommands << "<hr> Conversion of " << input[1].ToString() << "  returned error: " << leftE.ToString();
-      RationalFunctionOld theRF=leftE.GetValue<RationalFunctionOld>();
+      RationalFunctionOld theRF = leftE.GetValue<RationalFunctionOld>();
       theRF.RaiseToPower(theSmallPower);
       return output.AssignValueWithContext(theRF, leftE.GetContext(), theCommands);
     }

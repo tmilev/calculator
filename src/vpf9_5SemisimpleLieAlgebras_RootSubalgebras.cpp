@@ -1333,7 +1333,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2()
 
 bool rootSubalgebra::LinCombToString(const Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output)
 { int theDimension = this->GetAmbientWeyl().CartanSymmetric.NumRows;
-  if (coeff==1)
+  if (coeff == 1)
     return false;
   std::stringstream out;
   std::string tempS=alphaRoot.ToString();
@@ -1342,13 +1342,13 @@ bool rootSubalgebra::LinCombToString(const Vector<Rational>& alphaRoot, int coef
   for (int i = 0; i <theDimension; i ++)
   {  //if (linComb.coordinates[i].IsEqualToZero())
     //  return false;
-    tempS=linComb[i].ToString();
-    if (tempS!="0")
-    { if (tempS=="- 1")
-        tempS="-";
-      if (tempS=="1")
-        tempS="+";
-      if (!(tempS[0]=='+')&& !(tempS[0]=='-'))
+    tempS = linComb[i].ToString();
+    if (tempS != "0")
+    { if (tempS == "- 1" || tempS == "-1")
+        tempS = "-";
+      if (tempS == "1")
+        tempS = "+";
+      if (!(tempS[0] == '+')&& !(tempS[0] == '-'))
         tempS.insert(0, "+");
       out << tempS << "\\beta_" << i + 1;
     }
@@ -1361,7 +1361,7 @@ bool rootSubalgebra::LinCombToString(const Vector<Rational>& alphaRoot, int coef
 rootSubalgebra::rootSubalgebra()
 { this->flagDeallocated = false;
   this->ownEr = 0;
-  this->NumGmodKtableRowsAllowedLatex =35;
+  this->NumGmodKtableRowsAllowedLatex = 35;
   this->flagMakingProgressReport = true;
   this->flagComputeConeCondition = true;
   this->initForNilradicalGeneration();
@@ -1380,7 +1380,7 @@ void rootSubalgebra::initForNilradicalGeneration()
 { this->NumNilradicalsAllowed = 0;
   this->NumConeConditionFailures = 0;
   this->NumRelationsWithStronglyPerpendicularDecomposition = 0;
-  this->flagFirstRoundCounting= true;
+  this->flagFirstRoundCounting = true;
 }
 
 std::string rootSubalgebra::ToStringMultTable(bool useLaTeX, bool useHtml, rootSubalgebra& owner)
@@ -1406,7 +1406,7 @@ std::string rootSubalgebra::ToStringMultTable(bool useLaTeX, bool useHtml, rootS
       if (useHtml)
         out << "</th>";
       else
-      { if (i != this->theMultTable.size- 1)
+      { if (i != this->theMultTable.size - 1)
           out << "&";
       }
     }
@@ -1424,7 +1424,7 @@ std::string rootSubalgebra::ToStringMultTable(bool useLaTeX, bool useHtml, rootS
     if (useHtml)
       out << "</td>";
     for (int j = 0; j< this->theMultTable[i].size; j ++)
-    { if ((j == owner.CentralizerRoots.size- 1) && (i <= owner.CentralizerRoots.size- 1))
+    { if ((j == owner.CentralizerRoots.size - 1) && (i <= owner.CentralizerRoots.size - 1))
       { if (useLaTeX)
           out << "\\multicolumn{1}{c|}{";
         if (useHtml)
@@ -1433,12 +1433,12 @@ std::string rootSubalgebra::ToStringMultTable(bool useLaTeX, bool useHtml, rootS
       { if (useHtml)
           out << "<td>";
       }
-      for (int k= 0; k< this->theMultTable[i][j].size; k++)
+      for (int k = 0; k < this->theMultTable[i][j].size; k ++)
         out << this->theMultTable[i][j][k] << ", ";
-      if (useLaTeX )
-      { if ((j == owner.CentralizerRoots.size- 1) && (i <= owner.CentralizerRoots.size- 1))
+      if (useLaTeX)
+      { if ((j == owner.CentralizerRoots.size - 1) && (i <= owner.CentralizerRoots.size - 1))
           out << "}";
-        if (j != this->theMultTable[i].size- 1)
+        if (j != this->theMultTable[i].size - 1)
           out << " & ";
       }
       if (useHtml)
@@ -1448,7 +1448,7 @@ std::string rootSubalgebra::ToStringMultTable(bool useLaTeX, bool useHtml, rootS
       out << "</tr>";
     if (useLaTeX)
     { out << "\\\\";
-      if (i == owner.CentralizerRoots.size- 1)
+      if (i == owner.CentralizerRoots.size - 1)
         out << "\\cline{2-" << owner.CentralizerRoots.size + 1 << "}";
     }
   }
@@ -1507,16 +1507,16 @@ bool rootSubalgebra::LinCombToStringDistinguishedIndex(int distinguished, Vector
   for (int i = 0; i <theDimension; i ++)
   { //if (linComb.coordinates[i].IsEqualToZero())
     //  return false;
-    tempS=linComb.TheObjects[i].ToString();
-    if (tempS!="0")
-    { if (tempS=="- 1")
-        tempS="-";
-      if (tempS=="1")
-        tempS="+";
-      if (!(tempS[0]=='+') && !(tempS[0]=='-'))
+    tempS = linComb.TheObjects[i].ToString();
+    if (tempS != "0")
+    { if (tempS == "- 1" || tempS == "-1")
+        tempS = "-";
+      if (tempS == "1")
+        tempS = "+";
+      if (!(tempS[0] == '+') && !(tempS[0] == '-'))
         tempS.insert(0, "+");
       out << tempS;
-      if (i !=distinguished)
+      if (i != distinguished)
         out << "\\beta_" << i + 1;
       else
         out << "\\gamma";
@@ -3501,53 +3501,53 @@ void coneRelation::RelationOneSideToStringCoordForm(std::string& output, List<Ra
 { std::stringstream out;
   std::string tempS;
   for (int i = 0; i <theRoots.size; i ++)
-  { tempS= coeffs[i].ToString();
-    if (tempS=="1")
-      tempS="";
-    if (tempS=="- 1")
-      tempS="-";
-    if ((tempS=="0"))
-      crash << crash;
-    out<< tempS;
+  { tempS = coeffs[i].ToString();
+    if (tempS == "1")
+      tempS = "";
+    if (tempS == "- 1" || tempS == "-1")
+      tempS = "-";
+    if ((tempS == "0"))
+      crash << "Zero not allowed at this point of code. " << crash;
+    out << tempS;
     if (!EpsilonForm)
-      tempS= theRoots[i].ToString();
+      tempS = theRoots[i].ToString();
     else
-      tempS= theRoots[i].ToStringEpsilonFormat();
+      tempS = theRoots[i].ToStringEpsilonFormat();
     out << "(" << tempS << ")";
-    if (i != theRoots.size- 1)
+    if (i != theRoots.size - 1)
       out << " + ";
   }
    output = out.str();
 }
 
 void coneRelation::RelationOneSideToString(std::string& output, const std::string& letterType, List<Rational>& coeffs, List<List<int> >& kComponents, Vectors<Rational>& theRoots, bool useLatex, rootSubalgebra& owner)
-{ if (theRoots.size!= coeffs.size)
+{ if (theRoots.size != coeffs.size)
     crash << crash;
   std::stringstream out;
   std::string tempS;
   if (useLatex)
   { out << "\\begin{tabular}{";
-    for (int i = 0; i <theRoots.size; i ++)
+    for (int i = 0; i < theRoots.size; i ++)
       out << "c";
     out << "}";
   }
-  for (int i = 0; i <theRoots.size; i ++)
-  { tempS= coeffs[i].ToString();
-    if (tempS=="1")
-      tempS="";
-    if (tempS=="- 1")
-      tempS="-";
-    if ((tempS=="0"))
-      crash << crash;
+  for (int i = 0; i < theRoots.size; i ++)
+  { tempS = coeffs[i].ToString();
+    if (tempS == "1")
+      tempS = "";
+    if (tempS == "- 1" || tempS == "-1")
+      tempS = "-";
+    if ((tempS == "0"))
+      crash << "Zero not allowed here. " << crash;
     out << tempS;
     if (!useLatex)
-    { tempS= theRoots[i].ToString();
+    { tempS = theRoots[i].ToString();
       out << "(" << tempS << ")";
-      if (i != theRoots.size- 1)
+      if (i != theRoots.size - 1)
         out << " + ";
     } else
     { out << "$" << letterType << "_" << i + 1 << "$";
-      if (i != theRoots.size- 1)
+      if (i != theRoots.size - 1)
         out << "+ & ";
     }
   }
@@ -3557,25 +3557,25 @@ void coneRelation::RelationOneSideToString(std::string& output, const std::strin
   List<int> NumPrimesUniTypicComponent;
   TakenIndices.initFillInObject(owner.theDynkinDiagram.SimpleBasesConnectedComponents.size, - 1);
   NumPrimesUniTypicComponent.initFillInObject(owner.theDynkinDiagram.sameTypeComponents.size, - 1);
-  for (int i = 0; i <kComponents.size; i ++)
+  for (int i = 0; i < kComponents.size; i ++)
   { if (useLatex)
       out << "\\tiny{ ";
-    for (int j = 0; j<kComponents[i].size; j ++)
+    for (int j = 0; j < kComponents[i].size; j ++)
     { int index = kComponents[i][j];
       int indexUniComponent = owner.theDynkinDiagram.indexUniComponent[index];
       out << owner.theDynkinDiagram.SimpleComponentTypes[index].ToString();
-      if (TakenIndices[index]== - 1)
-      { NumPrimesUniTypicComponent[indexUniComponent]++;
-        TakenIndices[index]=NumPrimesUniTypicComponent[indexUniComponent];
+      if (TakenIndices[index] == - 1)
+      { NumPrimesUniTypicComponent[indexUniComponent] ++;
+        TakenIndices[index] = NumPrimesUniTypicComponent[indexUniComponent];
       }
-      for (int k= 0; k<TakenIndices[index]; k++)
+      for (int k = 0; k < TakenIndices[index]; k ++)
         out << "'";
-      if (j !=kComponents[i].size- 1)
+      if (j != kComponents[i].size - 1)
         out << "+";
     }
     if (useLatex)
     { out << " }";
-      if (i !=kComponents.size- 1)
+      if (i != kComponents.size - 1)
         out << " & ";
     }
   }
@@ -3587,7 +3587,7 @@ void coneRelation::RelationOneSideToString(std::string& output, const std::strin
 int coneRelation::ToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts)
 { std::string tempS;
   std::stringstream out;
-  if (this->AlphaCoeffs.size!= this->Alphas.size || this->BetaCoeffs.size!= this->Betas.size)
+  if (this->AlphaCoeffs.size != this->Alphas.size || this->BetaCoeffs.size != this->Betas.size)
     crash << crash;
   int LatexLineCounter = 0;
   this->ComputeConnectedComponents(this->Alphas, owners.theSubalgebras[this->IndexOwnerRootSubalgebra],  this->AlphaKComponents);

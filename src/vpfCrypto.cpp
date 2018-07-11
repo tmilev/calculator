@@ -838,7 +838,7 @@ void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& outpu
   }
   Crypto::initSha256();
   //stOutput << "DEBUG: start string length: " << inputString.size();
-  uint64_t messageLength= inputString.size() * 8;//*sizeof(char);
+  uint64_t messageLength = inputString.size() * 8;//*sizeof(char);
   std::string inputStringPreprocessed = inputString;
   inputStringPreprocessed.push_back(0x80);
   unsigned numbytesMod64 = inputStringPreprocessed.size() % 64;
@@ -875,7 +875,7 @@ void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& outpu
   uint32_t a = 0, b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0, maj = 0, temp1 = 0, temp2 = 0;
   uint32_t s0 = 0, s1 = 0, ch = 0;
   List<uint32_t>& kArray = Crypto::kArraySha2xx;
-  for (int chunkCounter = 0; chunkCounter<inputStringUint32.size; chunkCounter += 16)
+  for (int chunkCounter = 0; chunkCounter < inputStringUint32.size; chunkCounter += 16)
   { for (int j = 0; j < 16; j ++)
       currentChunk[j] = inputStringUint32[chunkCounter + j];
     for (int j = 16; j < 64; j ++)

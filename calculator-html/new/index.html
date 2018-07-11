@@ -255,10 +255,11 @@ var MathQuillHasMatrixSupport = true;
   <table>
   <tr><td>User:</td><td> <span id = "spanUserIdInAccountsPage"></span></td></tr>
   <tr>
-    <td>Old password:</td>
-    <td>
-      <input class = "textInputUsername" type = "password" id = "inputOldPasswordInAccount" name = "password" placeholder = "password" autocomplete = "on">
-    </td>
+  <td>Current password:</td>
+  <td>
+  <input class = "textInputUsername" type = "password" id = "inputOldPasswordInAccount" name = "password" placeholder = "password" autocomplete = "on">
+  <span id = "spanOldPasswordActivationLink"></span>
+  </td>
   </tr>
   <tr>
     <td>New password:</td>
@@ -275,6 +276,7 @@ var MathQuillHasMatrixSupport = true;
   </table>
   <button class = "buttonStandard" onclick = "submitChangePassRequest()">Change password</button>
   <table>
+  <tr><td>Current email:</td><td><span id = 'spanOldEmail'></span></td></tr>
   <tr>
     <td>New email:</td>
     <td>

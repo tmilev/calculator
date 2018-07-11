@@ -207,6 +207,10 @@ function Page() {
         nameLocalStorage: "currentlyEditedPage"
       })
     },
+    activationToken: new StorageVariable({
+      name: "activationToken",
+      nameURL: "activationToken"
+    }),
     currentCourse: {
       courseHome: new StorageVariable({
         name: "courseHome",
@@ -247,7 +251,7 @@ function Page() {
         name: "googleToken"
       }),
       name: new StorageVariable({
-        name: "user", 
+        name: "username", 
         nameCookie: "username", 
         nameURL: "username"
       }),
@@ -255,6 +259,10 @@ function Page() {
         name: "authenticationToken",
         nameCookie: "authenticationToken",
         nameURL: "authenticationToken"
+      }),
+      email: new StorageVariable({
+        name: "email",
+        nameURL: "email"
       })
     }
   }

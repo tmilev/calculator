@@ -5,7 +5,7 @@ function loginCalculator() {
   document.getElementById("inputPassword").value = "";
   var username = document.getElementById("inputUsername").value;
   submitGET({
-    "url": `${pathnames.calculatorAPI}?request=userInfoJSON&password=${password}&username=${username}`,
+    url: `${pathnames.calculatorAPI}?request=userInfoJSON&password=${password}&username=${username}`,
     callback: loginWithServerCallback,
     progress: "spanProgressReportGeneral"
   });

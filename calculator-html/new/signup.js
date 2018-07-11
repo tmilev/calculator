@@ -41,7 +41,7 @@ function submitSignUpInfo() {
   var theURL = `${pathnames.calculatorAPI}?request=signUp&desiredUsername=${desiredUsernameEncoded}&`;
   theURL += `email=${desiredEmailEncoded}&`;
   var theToken = grecaptcha.getResponse(recaptchaIdForSignUp);
-  if (theToken === '' || theToken === null)  { 
+  if (theToken === '' || theToken === null) { 
     document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>Please don't forget to solve the captcha. </b></span>";
     return false;
   }

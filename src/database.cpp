@@ -1509,9 +1509,9 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
   theJS[DatabaseStrings::labelUsername] = HtmlRoutines::ConvertStringToURLString(inputUserNameUnsafe, false);
   theJS[DatabaseStrings::labelCalculatorRequest] = "activateAccount";
   theJS[DatabaseStrings::labelEmail] = HtmlRoutines::ConvertStringToURLString(inputEmailUnsafe, false);
-  theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageSignUp;
+  theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageAccount;
   out << theGlobalVariables.DisplayNameExecutableApp
-  << "#" << HtmlRoutines::ConvertURLStringToNormal(theJS.ToString(false), false);
+  << "#" << HtmlRoutines::ConvertStringToURLString(theJS.ToString(false), false);
   return out.str();
 }
 

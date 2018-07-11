@@ -887,7 +887,8 @@ std::string WebWorker::GetSignUpRequestResult()
     << ") is available. </b></span>";
   }
   if (!theUser.StoreToDB(false, &errorStream))
-  { result["error"] = errorStream.str();
+  { errorStream << "Failed to store error stream. ";
+    result["error"] = errorStream.str();
     result["comments"] = generalCommentsStream.str();
     result["result"] = outputStream.str();
     return result.ToString(false);
@@ -895,6 +896,8 @@ std::string WebWorker::GetSignUpRequestResult()
   std::stringstream* adminOutputStream = 0;
   if (theGlobalVariables.UserDefaultHasAdminRights())
     adminOutputStream = &generalCommentsStream;
+  int fixThis;
+  adminOutputStream = &generalCommentsStream;
   this->DoSetEmail(theUser, &errorStream, &generalCommentsStream, adminOutputStream);
   result["error"] = errorStream.str();
   result["comments"] = generalCommentsStream.str();

@@ -23,7 +23,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   out << "The letter " << HtmlRoutines::GetMathSpanPure(hLetter) << " stands for elements of the Cartan subalgebra, <br>"
   << " the letter " << HtmlRoutines::GetMathSpanPure(gLetter) << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
   << " The generator " << HtmlRoutines::GetMathSpanPure(hLetter + "_i") << " is the element of the Cartan subalgebra dual to the <br>"
-  << "i^th simple root, that is, " << HtmlRoutines::GetMathSpanPure("[" + hLetter + "_i, g]=\\langle \\alpha_i , \\gamma\\rangle g")
+  << "i^th simple root, that is, " << HtmlRoutines::GetMathSpanPure("[" + hLetter + "_i, g] =\\langle \\alpha_i , \\gamma\\rangle g")
   << ", <br> where g is a Chevalley generator, " << HtmlRoutines::GetMathSpanPure("\\gamma") << " is its weight, and <br>"
   << HtmlRoutines::GetMathSpanPure("\\alpha_i") << " is the i^th simple root. ";
   std::stringstream theTableLateXStream, theHtmlStream;
@@ -36,7 +36,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   theTableLateXStream << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
   for (int i = 0; i < numRoots + theDimension; i ++)
   { tempElt1.MakeGenerator(i, *this);
-    tempS= tempElt1.ToString(theFormat);
+    tempS = tempElt1.ToString(theFormat);
     theHtmlStream << "<td>" << tempS << "</td>";
     theTableLateXStream << " & ";
     theTableLateXStream << tempS;
@@ -52,7 +52,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
     theTableLateXStream << tempRoot2.ToStringLetterFormat("\\varepsilon") << "&";
     theHtmlStream << "<td>" << tempRoot2.ToStringLetterFormat("e") << "</td>";
     tempElt1.MakeGenerator(i, *this);
-    tempS= tempElt1.ToString(theFormat);
+    tempS = tempElt1.ToString(theFormat);
     theTableLateXStream << tempS;
     theHtmlStream << "<td>" << tempS << "</td>";
     for (int j = 0; j < numRoots + theDimension; j ++)
@@ -403,9 +403,9 @@ bool SemisimpleLieAlgebra::TestForConsistency()
         temp += g312;
         if (!temp.IsEqualToZero())
         { crash << "This is a programming error. The computed structure constants are wrong: the Jacobi identity fails. More precisely, I get that "
-          << "<br>[" << g1.ToString(&theFormat) << ", " << g2.ToString(&theFormat) << "]=" << g12.ToString(&theFormat)
-          << "<br>[" << g2.ToString(&theFormat) << ", " << g3.ToString(&theFormat) << "]=" << g23.ToString(&theFormat)
-          << "<br>[" << g3.ToString(&theFormat) << ", " << g1.ToString(&theFormat) << "]=" << g31.ToString(&theFormat)
+          << "<br>[" << g1.ToString(&theFormat) << ", " << g2.ToString(&theFormat) << "] =" << g12.ToString(&theFormat)
+          << "<br>[" << g2.ToString(&theFormat) << ", " << g3.ToString(&theFormat) << "] =" << g23.ToString(&theFormat)
+          << "<br>[" << g3.ToString(&theFormat) << ", " << g1.ToString(&theFormat) << "] =" << g31.ToString(&theFormat)
           << "<br>g123= " << g123.ToString(&theFormat) << "<br>g231=" << g231.ToString(&theFormat) << "<br>g312=" << g312.ToString(&theFormat) << "<br>"
           << crash;
           return false;

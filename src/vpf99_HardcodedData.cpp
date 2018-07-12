@@ -1132,15 +1132,15 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     return false;
 
   SubgroupDataRootReflections readerSubgroup;
-  for (int i = 0; i <input.list.size; i ++)
+  for (int i = 0; i < input.list.size; i ++)
   { JSData& currentSGdata = input.list[i];
-    if (currentSGdata.list[0].list[0].string=="parabolic")
+    if (currentSGdata.list[0].list[0].string== "parabolic")
     { readerSubgroup.flagIsParabolic = true;
       readerSubgroup.flagIsExtendedParabolic = true;
-    } else if (currentSGdata.list[0].list[0].string=="pseudoParabolicNonParabolic")
+    } else if (currentSGdata.list[0].list[0].string== "pseudoParabolicNonParabolic")
     { readerSubgroup.flagIsExtendedParabolic = true;
       readerSubgroup.flagIsParabolic = false;
-    } else if (currentSGdata.list[0].list[0].string=="nonPseudoParabolic")
+    } else if (currentSGdata.list[0].list[0].string== "nonPseudoParabolic")
     { readerSubgroup.flagIsExtendedParabolic = false;
       readerSubgroup.flagIsParabolic = false;
     } else
@@ -1154,20 +1154,20 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     DynkinDiagramRootSubalgebra theSAdiagram;
     theSAdiagram.ComputeDiagramTypeModifyInput(readerSubgroup.generatingSimpleRoots, inputGroup);
     theSAdiagram.GetDynkinType(readerSubgroup.theDynkinType);
-    if (readerSubgroup.theDynkinType.ToString()!=sgString)
+    if (readerSubgroup.theDynkinType.ToString() !=sgString)
       crash << "Corrupt JSon data: hard-coded Dynkin type is: " << sgString << " but dynkin type is computed to be: "
       << readerSubgroup.theDynkinType.ToString() << crash;
-    if (currentSGdata.list[1].list.size!= inputGroup.theGroup.characterTable.size)
+    if (currentSGdata.list[1].list.size != inputGroup.theGroup.characterTable.size)
       crash << "Corrupt JSon or non-initialized Weyl group: tau signature has " << currentSGdata.list[1].list.size << " entries "
       << " but weyl group has " << inputGroup.theGroup.characterTable.size << " irreps. " << crash;
-    if (inputGroup.theGroup.characterTable.size<= 0 || inputGroup.theGroup.characterTable.size!= inputGroup.theGroup.ConjugacyClassCount())
+    if (inputGroup.theGroup.characterTable.size<= 0 || inputGroup.theGroup.characterTable.size != inputGroup.theGroup.ConjugacyClassCount())
       crash << "Bad input group" << crash;
-    if (inputGroup.theDynkinType.ToString()=="F^{1}_4")
-      if (inputGroup.theGroup.ConjugacyClassCount()!=25)
+    if (inputGroup.theDynkinType.ToString() == "F^{1}_4")
+      if (inputGroup.theGroup.ConjugacyClassCount() !=25)
         crash << "Bad f4. " << crash;
     readerSubgroup.tauSignature.SetSize(inputGroup.theGroup.characterTable.size);
     for (int j = 0; j<readerSubgroup.tauSignature.size; j ++)
-      readerSubgroup.tauSignature[j]= (int) currentSGdata.list[1].list[j].number;
+      readerSubgroup.tauSignature[j] = (int) currentSGdata.list[1].list[j].number;
     outputSubgroups.AddOnTop(readerSubgroup);
   }
   return true;
@@ -1404,7 +1404,7 @@ bool WeylGroupData::LoadConjugacyClassesHelper()
 { this->theGroup.sizePrivate = 0;
   for (int i = 0; i < this->theGroup.conjugacyClasseS.size; i ++)
     this->theGroup.sizePrivate += this->theGroup.conjugacyClasseS[i].size;
-  if (this->theGroup.sizePrivate!= this->theGroup.GetSizeByFormula(this->theGroup))
+  if (this->theGroup.sizePrivate != this->theGroup.GetSizeByFormula(this->theGroup))
     crash << "Corrupt hard-coded data: the size of the group does not work out according to formula. " << crash;
   this->theGroup.flagCCRepresentativesComputed = true;
   this->theGroup.flagCCsComputed = false;
@@ -1415,7 +1415,7 @@ bool WeylGroupData::LoadConjugacyClassesHelper()
 
 bool WeylGroupData::LoadSignSignatures(List<SubgroupDataRootReflections>& outputSubgroups)
 { //double startTime = theGlobalVariables->GetElapsedSeconds();
-  //if (this->theDynkinType.ToString()=="F^{1}_4")
+  //if (this->theDynkinType.ToString() == "F^{1}_4")
   //  return false;
   if (!this->LoadConjugacyClasses())
     return false;
@@ -1425,28 +1425,28 @@ bool WeylGroupData::LoadSignSignatures(List<SubgroupDataRootReflections>& output
     return false;
   //stOutput << "<hr>Loaded char table in " << theGlobalVariables->GetElapsedSeconds()-startTime << " seconds. ";
   //startTime = theGlobalVariables->GetElapsedSeconds();
-  if (this->theDynkinType.ToString()=="F^{1}_4")
+  if (this->theDynkinType.ToString() == "F^{1}_4")
     return LoadSignSignatureF1_4(*this, outputSubgroups);
-  if (this->theDynkinType.ToString()=="E^{1}_6")
+  if (this->theDynkinType.ToString() == "E^{1}_6")
     return LoadSignSignatureE1_6(*this, outputSubgroups);
-  if (this->theDynkinType.ToString()=="E^{1}_7")
+  if (this->theDynkinType.ToString() == "E^{1}_7")
     return LoadSignSignatureE1_7(*this, outputSubgroups);
-  if (this->theDynkinType.ToString()=="E^{1}_8")
+  if (this->theDynkinType.ToString() == "E^{1}_8")
     return LoadSignSignatureE1_8(*this, outputSubgroups);
 
   return false;
 }
 
 bool WeylGroupData::LoadConjugacyClasses()
-{ if (this->theDynkinType.ToString()=="G^{1}_2")
+{ if (this->theDynkinType.ToString() == "G^{1}_2")
     return LoadConjugacyClassesG1_2(*this);
-  if (this->theDynkinType.ToString()=="F^{1}_4")
+  if (this->theDynkinType.ToString() == "F^{1}_4")
     return LoadConjugacyClassesF1_4(*this);
-  if (this->theDynkinType.ToString()=="E^{1}_6")
+  if (this->theDynkinType.ToString() == "E^{1}_6")
     return LoadConjugacyClassesE1_6(*this);
-  if (this->theDynkinType.ToString()=="E^{1}_7")
+  if (this->theDynkinType.ToString() == "E^{1}_7")
     return LoadConjugacyClassesE1_7(*this);
-  if (this->theDynkinType.ToString()=="E^{1}_8")
+  if (this->theDynkinType.ToString() == "E^{1}_8")
     return LoadConjugacyClassesE1_8(*this);
 
   return false;
@@ -1454,15 +1454,15 @@ bool WeylGroupData::LoadConjugacyClasses()
 
 bool WeylGroupData::LoadCharTable()
 { bool result = false;
-  if (this->theDynkinType.ToString()=="G^{1}_2")
+  if (this->theDynkinType.ToString() == "G^{1}_2")
     result =LoadCharTableG1_2(*this);
-  if (this->theDynkinType.ToString()=="F^{1}_4")
+  if (this->theDynkinType.ToString() == "F^{1}_4")
     result =LoadCharTableF1_4(*this);
-  if (this->theDynkinType.ToString()=="E^{1}_6")
+  if (this->theDynkinType.ToString() == "E^{1}_6")
     result =LoadCharTableE1_6(*this);
-  if (this->theDynkinType.ToString()=="E^{1}_7")
+  if (this->theDynkinType.ToString() == "E^{1}_7")
     result =LoadCharTableE1_7(*this);
-  if (this->theDynkinType.ToString()=="E^{1}_8")
+  if (this->theDynkinType.ToString() == "E^{1}_8")
     result =LoadCharTableE1_8(*this);
   if (result)
     this->theGroup.CheckOrthogonalityCharTable();
@@ -1748,7 +1748,7 @@ bool WeylGroupData::LoadGAPRootSystem(HashedList<Vector<Rational> >& outputPosit
     result =LoadGAPRootSystemE1_6(outputPositiveRootSystem);
   if (!result)
     return result;
-  if (outputPositiveRootSystem.size!= this->RootsOfBorel.size)
+  if (outputPositiveRootSystem.size != this->RootsOfBorel.size)
     crash << "Wrong number of GAP roots!" << crash;
   for (int i = 0; i < this->RootsOfBorel.size; i ++)
     if (!outputPositiveRootSystem.Contains(this->RootsOfBorel[i]))

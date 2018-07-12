@@ -39,7 +39,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace
   WeylGroupData& theWeyl = this->GetOwner().theWeyl;
 //  std::stringstream tempStr;
 //  tempStr << thePair.Object2;
-//  if (tempStr.str()=="g_{1}^{1}g_{2}^{1}")
+//  if (tempStr.str() == "g_{1}^{1}g_{2}^{1}")
 //    stOutput << "<hr><hr>";
 //  stOutput << "<br>Computing (" << thePair.Object1 << ", " << thePair.Object2 << ")";
 //  if (this->cachedPairs.size< this->MaxNumCachedPairs)
@@ -75,8 +75,8 @@ Rational ModuleSSalgebra<coefficient>::hwTrace
     Accum.generatorsIndices.AddOnTop(oldRight.generatorsIndices[i]);
     Accum.Powers.AddOnTop(oldRight.Powers[i]);
   }
-//  if (indexInCache!= - 1)
-//    this->cachedTraces[indexInCache]=result;
+//  if (indexInCache != - 1)
+//    this->cachedTraces[indexInCache] =result;
 //  if (ProjectInformation::GetMainProjectInfo().CustomStackTrace.size<35)
   if (this->cachedPairs.size< this->MaxNumCachedPairs)
   { this->cachedPairs.AddOnTop(thePair);
@@ -90,7 +90,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace
 
 //  stOutput << "<br>Computed (" << thePair.Object1 << ", "
 //  << thePair.Object2 << ")=" << result.ToString();
-//  if (tempStr.str()=="g_{1}^{1}g_{2}^{1}")
+//  if (tempStr.str() == "g_{1}^{1}g_{2}^{1}")
 //    stOutput << "<hr><hr>";
 
   return result;
@@ -259,7 +259,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
   std::stringstream out;
   std::string tempS;
 //  stOutput << "Splitting parabolic selection: " << splittingParSel.ToString();
-  if (this->GetOwner()->GetRank()!=splittingParSel.MaxSize)
+  if (this->GetOwner()->GetRank() !=splittingParSel.MaxSize)
     crash << "This is a programming error: parabolic selection selects out of " << splittingParSel.MaxSize
     << " elements while the weyl group is of rank " << this->GetOwner()->GetRank() << ". " << crash;
   outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, splittingParSel, 1);
@@ -722,8 +722,8 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
             else
               out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << theMatrix.ToString();
           }
-      /*    for (int j = 0; j< this->actionsSimpleGens[i].size; j ++)
-            for (int k= 0; k< this->actionsSimpleGens[i][j].size; k++)
+      /*    for (int j = 0; j < this->actionsSimpleGens[i].size; j ++)
+            for (int k = 0; k< this->actionsSimpleGens[i][j].size; k++)
             { out << "<br>" << theSimpleGenerator.ToString(theGlobalVariables, tempFormat) << "\\cdot "
               << this->theGeneratingWordsGrouppedByWeight[j][k].ToString(false, false, tempFormat)
               << "\\cdot v=" << this->actionsSimpleGens[i][j][k].ToString(theGlobalVariables, tempFormat)
@@ -779,7 +779,7 @@ void ModuleSSalgebra<coefficient>::IntermediateStepForMakeFromHW
 //        << ", " << currentWordList[j].ToString() << ")=  Old: " << currentBF.elements[i][j].ToString()
 //        << "&nbsp    New: " << tempI.ToString();
         theReport.Report(tempStream.str());
-//        stOutput << "[" << currentWordList[i].ToString() << ", " << currentWordList[j].ToString() << "]=" <<currentBF.elements[i][j].ToString();
+//        stOutput << "[" << currentWordList[i].ToString() << ", " << currentWordList[j].ToString() << "] =" <<currentBF.elements[i][j].ToString();
         if (i != j)
           currentBF.elements[j][i] = currentBF.elements[i][j];
       }
@@ -914,8 +914,8 @@ void ModuleSSalgebra<coefficient>::ExpressAsLinearCombinationHomogenousElement
 
     inputHomogeneous.HWTAAbilinearForm(inputBasis[i], theScalarProducts[i], &subHiGoesToIthElement, theRingUnit, theRingZero, &tempStream);
 /*    stOutput << "<br>Computation details: " << tempStream.str();
-    if ( inputHomogeneous.ToString(false, false, theGlobalVariables.theDefaultFormat)=="x_{- 1}"
-        &&  theScalarProducts[i].ToString()=="0"
+    if ( inputHomogeneous.ToString(false, false, theGlobalVariables.theDefaultFormat) == "x_{- 1}"
+        &&  theScalarProducts[i].ToString() == "0"
         )
     { stOutput << "<b>Problem here!</b>";
       inputHomogeneous.HWTAAbilinearForm
@@ -1088,7 +1088,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
     output += buffer;
   }
   return true;
-  //for (int i = 0; i <theOwner.size; i ++)
+  //for (int i = 0; i < theOwner.size; i ++)
   //{ //stOutput << "<hr><hr>Module" << i + 1 << "<br>" << theOwner[i].ToString();
   //}
 }
@@ -1167,7 +1167,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg
       tempElt.AddMonomial(currentMon.theMons[j], theRingUnit);
 //      stOutput << "<hr> Acting by " << theGenerator.ToString() << " on " << tempElt.ToString() << "<br>";
       tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator);
-//      if (tempElt.size>0)
+//      if (tempElt.size >0)
 //        stOutput << "<br> result: " << tempElt.ToString() << ", the first coeff of tempElt is : " << tempElt.theCoeffs[0].ToString();
       for (int k = 0; k < tempElt.size(); k ++)
       { currentCoeff = this->theCoeffs[i];

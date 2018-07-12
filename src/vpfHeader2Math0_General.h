@@ -898,11 +898,11 @@ public:
   { return !((*this) == other);
   }
   bool operator==(const Matrix<coefficient>& other) const
-  { if (this->NumRows!= other.NumRows || this->NumCols!= other.NumCols)
+  { if (this->NumRows != other.NumRows || this->NumCols != other.NumCols)
       return false;
     for (int i = 0; i < this->NumRows; i ++)
-      for (int j = 0; j< this->NumCols; j ++)
-        if (!(this->elements[i][j]== other.elements[i][j]))
+      for (int j = 0; j < this->NumCols; j ++)
+        if (!(this->elements[i][j] == other.elements[i][j]))
           return false;
     return true;
   }
@@ -936,12 +936,12 @@ public:
   //returns true if the system has a solution, false otherwise
   bool RowEchelonFormToLinearSystemSolution(Selection& inputPivotPoints, Matrix<coefficient>& inputRightHandSide, Matrix<coefficient>& outputSolution);
   void operator+=(const Matrix<coefficient>& right)
-  { if (this->NumRows!=right.NumRows || this->NumCols!=right.NumCols)
+  { if (this->NumRows !=right.NumRows || this->NumCols !=right.NumCols)
       crash << "This is a programming error: attempting to add matrix with " << this->NumRows << " rows and " << this->NumCols
       << " columns to a matrix with " << right.NumRows << " rows and " << right.NumCols << " columns. " << crash;
     for (int i = 0; i < this->NumRows; i ++)
-      for (int j = 0; j< this->NumCols; j ++)
-        this->elements[i][j]+=(right.elements[i][j]);
+      for (int j = 0; j < this->NumCols; j ++)
+        this->elements[i][j] +=(right.elements[i][j]);
   }
   LargeIntUnsigned FindPositiveLCMCoefficientDenominators();
   void operator-=(const Matrix<coefficient>& right)
@@ -949,7 +949,7 @@ public:
       crash << "This is a programming error: attempting to subtract from matrix with " << this->NumRows << " rows and " << this->NumCols
       << " columns a matrix with " << right.NumRows << " rows and " << right.NumCols << " columns. " << crash;
     for (int i = 0; i < this->NumRows; i ++)
-      for (int j = 0; j< this->NumCols; j ++)
+      for (int j = 0; j < this->NumCols; j ++)
         (*this)(i, j) -= right(i, j);
   }
   void WriteToFile(std::fstream& output);
@@ -1956,7 +1956,7 @@ public:
 
   static std::string GetBlendCoeffAndMon(const templateMonomial& inputMon, coefficient& inputCoeff, bool addPlusToFront, FormatExpressions* theFormat = 0);
   void CheckNumCoeffsConsistency() const
-  { if (this->theCoeffs.size!= this->theMonomials.size)
+  { if (this->theCoeffs.size != this->theMonomials.size)
       crash << "This is a programming error: a monomial collection has " << this->theMonomials.size << " monomials but "
       << this->theCoeffs.size << " coefficients. " << crash;
   }
@@ -3236,7 +3236,7 @@ bool MonomialCollection<templateMonomial, coefficient>::ReadFromFile(std::fstrea
 
 template <class templateMonomial, class coefficient>
 bool MonomialCollection<templateMonomial, coefficient>::IsEqualToZero() const
-{ return this->size()== 0;
+{ return this->size() == 0;
 }
 
 template <class templateMonomial, class coefficient>
@@ -3423,7 +3423,7 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
   if (IvemadeARowSwitch != 0)
     *IvemadeARowSwitch = false;
 //  stOutput << "<br><b>starting list:</b> ";
-//  for (int i = 0; i <theList.size; i ++)
+//  for (int i = 0; i < theList.size; i ++)
 //    stOutput << //"<br>" << HtmlRoutines::GetMathSpanPure
 //    (theList[i].ToString(&tempFormat)) << ", ";
   int currentRowIndex = 0;
@@ -3480,7 +3480,7 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
     currentRowIndex ++;
   }
 //    stOutput << "<br><b>final list:</b> ";
-//  for (int i = 0; i <theList.size; i ++)
+//  for (int i = 0; i < theList.size; i ++)
 //    stOutput << //"<br>" << HtmlRoutines::GetMathSpanPure
 //    (theList[i].ToString(&tempFormat)) << ", ";
 }
@@ -6713,7 +6713,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe
 //  theGlobalVariables.MakeProgressReport("Monomial not basis of fd part. ", 2);
 //  theMod.GetOwner().OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
 //  stOutput << "<br>";
-//  for (int i = 0; i <theMod.GetOwner().UEGeneratorOrderIncludingCartanElts.size; i ++)
+//  for (int i = 0; i < theMod.GetOwner().UEGeneratorOrderIncludingCartanElts.size; i ++)
 //  { stOutput << "<br>generator index " << i << " has order " << theMod.GetOwner().UEGeneratorOrderIncludingCartanElts[i];
 //  }
   ElementUniversalEnveloping<coefficient> theUEelt;

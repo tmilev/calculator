@@ -293,7 +293,7 @@ public:
   }
   bool MakeAffineProjectionFromNormal(affineHyperplane<Rational>& output);
 /*  { int tempI= this->GetIndexFirstNonZeroCoordinate();
-    if (tempI== this->size- 1)
+    if (tempI == this->size- 1)
       return false;
     output.affinePoint.MakeZero(this->size- 1);
     output.normal.SetSize(this->size- 1);
@@ -301,7 +301,7 @@ public:
     output.affinePoint[tempI].Minus();
     output.affinePoint[tempI].DivideBy(this->TheObjects[tempI]);
     for (int i = 0; i < this->size- 1; i ++)
-      output.normal[i]= this->TheObjects[i];
+      output.normal[i] = this->TheObjects[i];
     return true;
   }*/
   int GetIndexFirstNonZeroCoordinate()
@@ -358,7 +358,7 @@ public:
   void operator=(const Vector<OtherType>& other)
   { this->SetSize(other.size);
     for (int i = 0; i <other.size; i ++)
-      this->TheObjects[i]= other.TheObjects[i];
+      this->TheObjects[i] = other.TheObjects[i];
   }*/
   void GetVectorsPerpendicularTo(Vectors<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero)
   { int Pivot = - 1;

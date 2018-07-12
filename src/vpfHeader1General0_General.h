@@ -1027,7 +1027,7 @@ public:
     if (n != this->size)
       if (this->TheObjects[n] == o)
         return n;
-    for (int i = n - 1; i > - 1; i--)
+    for (int i = n - 1; i > - 1; i --)
     { if (this->TheObjects[i] == o)
         return i;
       if (o > this->TheObjects[i])
@@ -1091,7 +1091,7 @@ public:
   }
   bool ReadFromFile(std::fstream& input, int UpperLimitForDebugPurposes = - 1);
   void WriteToFile(std::fstream& output, int UpperLimitForDebugPurposes = - 1) const;
-//  inline bool Contains(Object& o){return this->Contains(o)!= - 1; };
+//  inline bool Contains(Object& o){return this->Contains(o) != - 1; };
   int SizeWithoutObjects() const;
   inline Object* LastObject() const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void ReleaseMemory();

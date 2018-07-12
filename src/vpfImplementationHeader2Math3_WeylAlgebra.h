@@ -52,7 +52,7 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlg
   output.SetExpectedSize(theExpectedSize);
   for (int i = 0; i < numCycles; i ++)
   { coeffBuff = 1;
-    for (int k= 0; k<theDimensioN; k ++)
+    for (int k = 0; k<theDimensioN; k ++)
     { int multDrop = tempSel.Multiplicities[k];
       Rational theDOPower = left.differentialPart(k);
       Rational thePolPower = right.polynomialPart(k);

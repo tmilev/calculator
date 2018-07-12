@@ -596,13 +596,13 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
   Vector<Rational> tempRoot1, tempRoot2;
 //  Matrix<Rational> killingForm;
 //  killingForm.init(theDimension, theDimension);
-//  for (int i = 0; i <theDimension; i ++)
+//  for (int i = 0; i < theDimension; i ++)
 //  { tempRoot1.MakeEi(theDimension, i);
-//    for (int j = 0; j<theDimension; j ++)
-//    { killingForm.elements[i][j]= 0;
+//    for (int j = 0; j < theDimension; j ++)
+//    { killingForm.elements[i][j] = 0;
 //      tempRoot2.MakeEi(theDimension, j);
-//      for (int k= 0; k<theWeyl.RootSystem.size; k++)
-//        killingForm.elements[i][j]+= theWeyl.RootScalarCartanRoot(tempRoot1, theWeyl.RootSystem.TheObjects[k])* theWeyl.RootScalarCartanRoot(tempRoot2, theWeyl.RootSystem.TheObjects[k]);
+//      for (int k = 0; k<theWeyl.RootSystem.size; k++)
+//        killingForm.elements[i][j] += theWeyl.RootScalarCartanRoot(tempRoot1, theWeyl.RootSystem.TheObjects[k])* theWeyl.RootScalarCartanRoot(tempRoot2, theWeyl.RootSystem.TheObjects[k]);
 //    }
 //  }
 //  stOutput << killingForm.ToString(true, false);
@@ -643,7 +643,7 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
 //    Vector<Rational> & theRoot = theWeyl.RootSystem.TheObjects[i];
 //    int indexOfOpposite = theWeyl.RootSystem.GetIndex(-theRoot);
 //    Vector<Rational> & theOpposite = theWeyl.RootSystem.TheObjects[indexOfOpposite];
-//    for (int j = 0; j<theWeyl.RootSystem.size; j ++)
+//    for (int j = 0; j < theWeyl.RootSystem.size; j ++)
 //    { Vector<Rational> & current = theWeyl.RootSystem.TheObjects[j];
 //      if (current == theOpposite)
 //        tempRat +=2;
@@ -680,13 +680,13 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
 //  stOutput << "<br> check element minus casimir =" << checkElement.ToString(false, false, theGlobalVariables, tempPolyFormat);
   //this->DebugString= out.str();
 //  Vector<Rational> tempRoot;
-//  for (int i = 0; i <theDimension; i ++)
+//  for (int i = 0; i < theDimension; i ++)
 //  { tempRoot.MakeEi(theDimension, i);
 //    if (!length1Explored)
 //    { length1= theWeyl.RootScalarCartanRoot(tempRoot, tempRoot);
 //      length1Explored = true;
 //      coefficient1= 0;
-//      for (int j = 0; j<theWeyl.RootsOfBorel.size; j ++)
+//      for (int j = 0; j < theWeyl.RootsOfBorel.size; j ++)
 //      { coefficient1+= theWeyl.RootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.TheObjects[j])*theWeyl.RootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.TheObjects[j]);
 //        coef
 //      }
@@ -1234,7 +1234,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::MultiplyByNoSimplify(const
   int firstIndex = other.generatorsIndices[0];
   int i = 0;
 //  std::string tempS;
-//  tempS= other.ToString();
+//  tempS = other.ToString();
   if (this->generatorsIndices.size > 0)
     if (firstIndex == (*this->generatorsIndices.LastObject()))
     { //this->ComputeDebugString();
@@ -1412,7 +1412,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesR
   theRightPoweR -= 1;
   int powerDroP = 0;
 //  if (this->flagAnErrorHasOccurredTimeToPanic)
-//  if (this->ToString()=="2f_{5}f_{-5}f_{-4}" || this->ToString()=="2f_{11}f_{-4}")
+//  if (this->ToString() == "2f_{5}f_{-5}f_{-4}" || this->ToString() == "2f_{11}f_{-4}")
 //  { stOutput << "here we are!";
 //    this->flagAnErrorHasOccurredTimeToPanic = true;
 //  }
@@ -1490,7 +1490,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesL
   theLeftPower = this->Powers.TheObjects[theIndeX];
   theLeftPower -= 1;
   int powerDrop = 0;
- /* if (this->ToString()=="2f_{5}f_{-5}f_{-4}" || this->ToString()=="2f_{11}f_{-4}")
+ /* if (this->ToString() == "2f_{5}f_{-5}f_{-4}" || this->ToString() == "2f_{11}f_{-4}")
   { stOutput << "here we are!";
     this->flagAnErrorHasOccurredTimeToPanic = true;
   }*/

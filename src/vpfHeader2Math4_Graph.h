@@ -47,7 +47,7 @@ struct GraphEdge
   inline static bool IsMonEqualToZero()
   { return false;
   }
-  bool operator==(const GraphEdge& other) const
+  bool operator== (const GraphEdge& other) const
   { return this->vStart == other.vStart && this->vEnd == other.vEnd
     && this->label == other.label;
   }

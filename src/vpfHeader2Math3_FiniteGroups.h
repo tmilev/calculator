@@ -52,7 +52,7 @@ public:
   inline unsigned int HashFunction() const
   { return this->HashFunction(*this);
   }
-  void operator*=(const coefficient& inputCF)
+  void operator*= (const coefficient& inputCF)
   { this->data *= inputCF;
   }
   ClassFunction operator*(const coefficient& inputCF) const
@@ -60,15 +60,15 @@ public:
     result.data *= inputCF;
     return result;
   }
-  void operator+=(const ClassFunction& right)
+  void operator+= (const ClassFunction& right)
   { this->data += right.data;
   }
-  void operator-=(const ClassFunction& right)
+  void operator-= (const ClassFunction& right)
   { this->data -= right.data;
   }
-  void operator*=(const ClassFunction& right);
-  bool operator==(const ClassFunction& other) const;
-  bool operator!=(const ClassFunction& other) const
+  void operator*= (const ClassFunction& right);
+  bool operator== (const ClassFunction& other) const;
+  bool operator!= (const ClassFunction& other) const
   { return ! (*this == other);
   }
   bool operator>(const ClassFunction& right) const;
@@ -77,7 +77,7 @@ public:
       return false;
     return true;
   }
-  bool operator<=(const ClassFunction& right) const
+  bool operator<= (const ClassFunction& right) const
   { if (*this > right)
       return false;
     return true;
@@ -112,7 +112,7 @@ class SubgroupData;
 // //return true if there is an easy way to tell if they are not conjugate
 // //return false otherwise
 // void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& out) const;
-// bool operator==(const elementSomeGroup& right) const;
+// bool operator== (const elementSomeGroup& right) const;
 // bool operator>(const elementSomeGroup& right) const;
 // //group elements are not in general comparable, but do something consistent
 // //and reasonable for collating and printing purposes
@@ -371,7 +371,7 @@ struct simpleReflectionOrOuterAuto
   unsigned int HashFunction() const
   { return index + 100 * flagIsOuter;
   }
-  bool operator==(const simpleReflectionOrOuterAuto& other) const
+  bool operator== (const simpleReflectionOrOuterAuto& other) const
   { return this->flagIsOuter == other.flagIsOuter && this->index == other.index;
   }
   bool operator>(const simpleReflectionOrOuterAuto& right) const
@@ -394,7 +394,7 @@ public:
   bool flagDeallocated;
   ElementWeylGroup(const ElementWeylGroup& other)
   { this->flagDeallocated = false;
-    this->operator=(other);
+    this->operator= (other);
   }
   ElementWeylGroup(): owner(0), flagDeallocated(false)
   {
@@ -402,7 +402,7 @@ public:
   ~ElementWeylGroup()
   { this->flagDeallocated = true;
   }
-  void operator=(const ElementWeylGroup& other)
+  void operator= (const ElementWeylGroup& other)
   { this->owner = other.owner;
     this->generatorsLastAppliedFirst = other.generatorsLastAppliedFirst;
   }
@@ -464,7 +464,7 @@ public:
   static inline unsigned int HashFunction(const ElementWeylGroup<templateWeylGroup>& input)
   { return input.HashFunction();
   }
-  void operator*=(const ElementWeylGroup<WeylGroupData>& other);
+  void operator*= (const ElementWeylGroup<WeylGroupData>& other);
   ElementWeylGroup<WeylGroupData> operator*(const ElementWeylGroup<WeylGroupData>& other) const
   { ElementWeylGroup<WeylGroupData> result = *this;
     result *= other;
@@ -478,7 +478,7 @@ public:
   ElementWeylGroup<WeylGroupData> Inverse() const;
   bool HasDifferentConjugacyInvariantsFrom(const ElementWeylGroup<templateWeylGroup>& right) const;
   void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& output) const;
-  bool operator==(const ElementWeylGroup<WeylGroupData>& other) const
+  bool operator== (const ElementWeylGroup<WeylGroupData>& other) const
   { if (this->owner != other.owner)
       return false;
     return this->generatorsLastAppliedFirst == other.generatorsLastAppliedFirst;
@@ -545,7 +545,7 @@ class WeylGroupData
   bool LoadConjugacyClasses();
   bool LoadCharTable();
   WeylGroupData(const WeylGroupData& other);
-  void operator=(const WeylGroupData& other);
+  void operator= (const WeylGroupData& other);
   //<- once created, WeylGroupData can't be moved: a pointer to it is stored in FiniteGroup
 public:
   bool flagIrrepsAreComputed;
@@ -907,8 +907,8 @@ public:
   static void TransformToSimpleBasisGeneratorsArbitraryCoords(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem);
   void TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational>& theH);
   int operator()(int i, int j) const;
-  bool operator==(const WeylGroupData& other) const;
-  void operator+=(const WeylGroupData& other);
+  bool operator== (const WeylGroupData& other) const;
+  void operator+= (const WeylGroupData& other);
 };
 
 template <typename elementFirstGroup, typename elementSecondGroup>
@@ -991,7 +991,7 @@ class GroupRepresentation
     return true;
   }
   std::string DescribeAsDirectSum();
-  void operator*=(const GroupRepresentation<someGroup, coefficient>& other);
+  void operator*= (const GroupRepresentation<someGroup, coefficient>& other);
 
   JSData JSOut();
 
@@ -1001,10 +1001,10 @@ class GroupRepresentation
   friend std::ostream& operator<< (std::ostream& out, GroupRepresentation<someGroup, coefficient>& data)
   { return data.IntoStream(out);
   }
-  bool operator==(const GroupRepresentation<someGroup, coefficient>& right) const
+  bool operator== (const GroupRepresentation<someGroup, coefficient>& right) const
   { if (this->ownerGroup!=right.ownerGroup)
       return false;
-    if (this->generatorS!=right.generatorS)
+    if (this->generatorS !=right.generatorS)
       return false;
     return true;
     // if it ever becomes useful to compare element matrices...
@@ -1214,13 +1214,13 @@ public:
   GroupRepresentationCarriesAllMatrices<somegroup, coefficient> Reduced() const;
 
   coefficient GetNumberOfComponents();
-  void operator*=(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other);
+  void operator*= (const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other);
   GroupRepresentationCarriesAllMatrices<somegroup, coefficient> operator*(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other) const
   { GroupRepresentationCarriesAllMatrices<somegroup, coefficient> result =*this;
     result*= other;
     return result;
   }
-  bool operator==(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other) const
+  bool operator== (const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other) const
   { return this->ownerGroup == other.ownerGroup && this->theCharacteR== other.theCharacteR;
   }
   void SpreadVector(const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace);
@@ -1246,7 +1246,7 @@ template <class somegroup, class coefficient>
 class VirtualRepresentation : public MonomialCollection<ClassFunction<somegroup, coefficient>, Rational>
 {
 public:
-  void operator*=(const VirtualRepresentation<somegroup, coefficient>& other);
+  void operator*= (const VirtualRepresentation<somegroup, coefficient>& other);
   void AssignRep(const GroupRepresentationCarriesAllMatrices<somegroup, Rational>& other);
   void AssignRep(const GroupRepresentation<somegroup, Rational>& other);
   inline static unsigned int HashFunction(const VirtualRepresentation<somegroup, coefficient>& input)
@@ -1450,7 +1450,7 @@ bool SubgroupData<someGroup, elementSomeGroup>::VerifyNormal()
   stOutput << "Coset multiplication table\n" << csmt.ToStringPlainText() << '\n';
   for (int i = 0; i <cosets.size; i ++)
     for (int j = i; j<cosets.size; j ++)
-      for (int k= j; k<cosets.size; k++)
+      for (int k = j; k<cosets.size; k++)
         if (csmt(i,csmt(j,k)) != csmt(csmt(i, j),k))
           return false;
   return true;
@@ -1810,7 +1810,7 @@ ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coeff
 }
 
 template<class someFiniteGroup, typename coefficient>
-void ClassFunction<someFiniteGroup, coefficient>::operator*=(const ClassFunction<someFiniteGroup, coefficient>& right)
+void ClassFunction<someFiniteGroup, coefficient>::operator*= (const ClassFunction<someFiniteGroup, coefficient>& right)
 { if (this->G != right.G)
     crash << "Attempting to multiply class functions belonging to different groups.";
   for (int i = 0; i < this->data.size; i ++)
@@ -1845,7 +1845,7 @@ ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coeff
   /*l.G = this->G;
   l.data.SetSize(G->ConjugacyClassCount());
   for (int i = 0; i <G->ConjugacyClassCount(); i ++)
-    l.data[i]= this->data[i] + other[i];*/
+    l.data[i] = this->data[i] + other[i];*/
   return l;
 }
 
@@ -1921,13 +1921,13 @@ public:
   { this->data = other.data;
   }
 //  UDPolynomial<coefficient> operator+(const UDPolynomial<coefficient>& right) const;
-  void operator+=(const UDPolynomial<coefficient>& right);
+  void operator+= (const UDPolynomial<coefficient>& right);
 //  UDPolynomial<coefficient> operator-(const UDPolynomial<coefficient>& right) const;
-  void operator-=(const UDPolynomial<coefficient>& right);
+  void operator-= (const UDPolynomial<coefficient>& right);
   UDPolynomial<coefficient> operator*(const UDPolynomial<coefficient>& right) const;
 //  UDPolynomial<coefficient> operator*(const coefficient& right) const;
-  void operator*=(const coefficient& right);
-  void operator*=(const UDPolynomial<coefficient>& other)
+  void operator*= (const coefficient& right);
+  void operator*= (const UDPolynomial<coefficient>& other)
   { *this = (*this) * other;
   }
   UDPolynomial<coefficient> TimesXn(int n) const;
@@ -1936,8 +1936,8 @@ public:
   struct DivisionResult<UDPolynomial<coefficient> > DivideBy(const UDPolynomial<coefficient>& right) const;
   UDPolynomial<coefficient> operator/(const UDPolynomial<coefficient>& divisor) const;
   UDPolynomial<coefficient> operator%(const UDPolynomial<coefficient>& divisor) const;
-  void operator/=(const coefficient& right);
-  void operator/=(const UDPolynomial<coefficient>& right)
+  void operator/= (const coefficient& right);
+  void operator/= (const UDPolynomial<coefficient>& right)
   { *this = (*this / right);
   }
   coefficient operator()(const coefficient& x) const;
@@ -1949,7 +1949,7 @@ public:
 // static List<UDPolynomial<coefficient> > LagrangeInterpolants(List<coefficient> xs);
   coefficient& operator[](int i) const;
   bool operator<(const UDPolynomial<coefficient>& right) const;
-  bool operator==(int other) const;
+  bool operator== (int other) const;
   std::string ToString(FormatExpressions* theFormat = 0) const;
   void AssignMinPoly(const Matrix<coefficient>& input);
   void AssignCharPoly(const Matrix<coefficient>& input); // method due to Urbain Le Verrier
@@ -2014,7 +2014,7 @@ coefficient UDPolynomial<coefficient>::operator()(const coefficient &x) const
 }
 
 template <typename coefficient>
-void UDPolynomial<coefficient>::operator+=(const UDPolynomial<coefficient>& right)
+void UDPolynomial<coefficient>::operator+= (const UDPolynomial<coefficient>& right)
 {  int t = min(right.data.size, data.size);
    for (int i = 0; i < t; i ++)
       data[i] += right.data[i];
@@ -2031,7 +2031,7 @@ void UDPolynomial<coefficient>::operator+=(const UDPolynomial<coefficient>& righ
 }
 
 template <typename coefficient>
-void UDPolynomial<coefficient>::operator-=(const UDPolynomial<coefficient>& right)
+void UDPolynomial<coefficient>::operator-= (const UDPolynomial<coefficient>& right)
 {  // int t = min(right.data.size, data.size); // wtf lol
   int t = right.data.size;
   if (data.size < t)
@@ -2077,7 +2077,7 @@ UDPolynomial<coefficient> UDPolynomial<coefficient>::TimesXn(int n) const
 }
 
 template <typename coefficient>
-void UDPolynomial<coefficient>::operator*=(const coefficient& right)
+void UDPolynomial<coefficient>::operator*= (const coefficient& right)
 {  for (int i = 0; i < data.size; i ++)
       data[i] *= right;
 }

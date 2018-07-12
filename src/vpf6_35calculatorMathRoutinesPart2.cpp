@@ -2348,7 +2348,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder
     this->highlightMonsDivisors[indexCurrentDivisor]
     [this->allMonomials.GetIndex(this->theBasiS[indexCurrentDivisor][i])].
     AddOnTop(currentSlideNumber);
-  this->uncoverAllMonsSubtracands[remainderIndex]= currentSlideNumber;
+  this->uncoverAllMonsSubtracands[remainderIndex] = currentSlideNumber;
   this->longDivisionLog << "\\only<"
   << currentSlideNumber << ", "
   << currentSlideNumber + 1
@@ -2541,7 +2541,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
      &this->fcAnswerMonsRemainders[i], 0, &this->additionalHighlightRemainders[i],
      this->uncoverAllMonsRemainders[i], true)
     << "\\\\";
-    if (i <theSubtracands.size)
+    if (i < theSubtracands.size)
     { out << "\\uncover<" << this->uncoverAllMonsSubtracands[i] << "->{";
 //      if (!oneDivisor)
       out << "\\uncover<" << this->uncoverAllMonsSubtracands[i] + 2

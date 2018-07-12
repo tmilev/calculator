@@ -1361,7 +1361,7 @@ bool WeylGroupData::FreudenthalEval
     currentAccum /= BufferCoeff;
 
 //    stOutput << "<br>Coeff we divide by: " << (hwPlusRhoSquared-this->RootScalarCartanRoot
- //   (outputDominantWeightsSimpleCoords[k]+this->rho, outputDominantWeightsSimpleCoords[k]+this->rho))
+ //   (outputDominantWeightsSimpleCoords[k] + this->rho, outputDominantWeightsSimpleCoords[k] + this->rho))
   //  .ToString()
    // ;
     std::stringstream out;
@@ -1626,7 +1626,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunc
           this->classFunctionMatrices[cci] += this->theElementImageS[currentCC.indicesEltsInOwner[i]];
           if (theGlobalVariables.flagReportEverything)
           { std::stringstream reportstream;
-            reportstream << " Computing conjugacy class " << currentCC.indicesEltsInOwner[i]+ 1
+            reportstream << " Computing conjugacy class " << currentCC.indicesEltsInOwner[i] + 1
             << " (total num classes is " << numClasses << ").";
             theReport.Report(reportstream.str());
           }
@@ -1665,7 +1665,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ClassFunctio
       { //Matrix<coefficient> Mi;
         //Mi.MakeIdMatrix(this->generators[0].NumCols);
         this->classFunctionMatrices[cci] += this->GetMatrixElement(this->ownerGroup->conjugacyClasseS[cci].theElements[icci]);
-        //for (int gi =g.reflections.size- 1; ; gi--)
+        //for (int gi =g.reflections.size- 1; ; gi --)
         //{  if (gi < 0)
         //      break;
         //    Mi.MultiplyOnTheRight(gens[g.reflections[gi]]);
@@ -2014,7 +2014,7 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
     currentAccum *= 2;
    // stOutput << "<br>hwPlusRhoSquared: " << hwPlusRhoSquared.ToString();
     bufferCoeff = hwPlusRhoSquared;
-    bufferCoeff -= this->AmbientWeyl->RootScalarCartanRoot(outputDomWeightsSimpleCoordsLeviPart[k]+Rho, outputDomWeightsSimpleCoordsLeviPart[k]+Rho);
+    bufferCoeff -= this->AmbientWeyl->RootScalarCartanRoot(outputDomWeightsSimpleCoordsLeviPart[k] +Rho, outputDomWeightsSimpleCoordsLeviPart[k] +Rho);
     //bufferCoeff now holds the denominator participating in the Freudenthal formula.
     if (bufferCoeff.IsEqualToZero())
       crash << crash;
@@ -2416,7 +2416,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
     if (!tempB)
       crash << "<br>This is a mathematical or programming mistake: splittingOperatorMatrix should have small integral values, which it doesn't!" << crash;
     //stOutput << "<br>the eigenspaces were of dimensions: ";
-//    for (int i = 0; i <theSubRepsBasis.size; i ++)
+//    for (int i = 0; i < theSubRepsBasis.size; i ++)
 //      stOutput << theSubRepsBasis[i].size << " ";
     GroupRepresentationCarriesAllMatrices<somegroup, coefficient> newRep;
     if (theSubRepsBasis.size > 1)//we found splitting, so let us recursively decompose:

@@ -819,7 +819,7 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   << "fileName=" << urledProblem << "&";
   if (theGlobalVariables.UserStudentVieWOn())
   { refStreamNoRequest << "studentView=true&";
-    if (theGlobalVariables.GetWebInput("studentSection")!="")
+    if (theGlobalVariables.GetWebInput("studentSection") != "")
       refStreamNoRequest << "studentSection="
       << theGlobalVariables.GetWebInput("studentSection") << "&";
   }
@@ -1051,7 +1051,7 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   std::string tagClass = this->GetKeyValue("class");
   return
   tagClass == "calculatorExamProblem" || tagClass == "calculatorExamIntermediate" ||
-  tagClass == "calculatorAnswer" || tagClass =="calculatorManageClass" ||
+  tagClass == "calculatorAnswer" || tagClass == "calculatorManageClass" ||
   tagClass == "generateTopicTable" ||
   tagClass == "generateLectureMaterials" ||
   tagClass == "calculatorJavascript" ||
@@ -2429,7 +2429,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       continue;
     }
     if (thirdToLast.syntacticRole == "<openTag" && secondToLast.syntacticRole == "" && last.syntacticRole == "" &&
-        secondToLast != "=" && secondToLast != "\"" && last != "=" && last !="\"")
+        secondToLast != "=" && secondToLast != "\"" && last != "=" && last != "\"")
     { thirdToLast.tagKeysWithoutValue.AddOnTop(secondToLast.content);
       eltsStack[eltsStack.size - 2] = *eltsStack.LastObject();
       eltsStack.RemoveLastObject();
@@ -4638,7 +4638,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     problemSolved = false;
     returnEmptyStringIfNoDeadline = true;
   } else
-  { //std::string theRawSQLink= theGlobalVariables.DisplayNameExecutable +
+  { //std::string theRawSQLink = theGlobalVariables.DisplayNameExecutable +
     //"?request=scoredQuiz&fileName=" + this->problem;
     std::string theRawExerciseLink;
     theRawExerciseLink = theGlobalVariables.DisplayNameExecutable + "?request=exercise&fileName=" + this->problem;

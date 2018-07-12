@@ -18,10 +18,10 @@ public:
   //the Chevalley constants are listed in the same order as the root system of the Weyl group
   // i.e. if \alpha is the root at the i^th position in this->theWyl.RootSystem and \beta -
   //the root  at the j^th position, then
-  //the chevalley constant N_{\alpha\beta} given by [g^\alpha, g^\beta]=N_{\alpha\beta}g^{\alpha +\beta}
+  //the chevalley constant N_{\alpha\beta} given by [g^\alpha, g^\beta] =N_{\alpha\beta}g^{\alpha +\beta}
   //will be located at the ij^{th} entry in the below matrix.
   //Let $\alpha$ be a root . Then our choice of the elements of the Cartan subalgebra is such that
-  //1.   [g^{\alpha}, g^{-\alpha}]=h_\alpha * (2/ \langle\alpha,\alpha\rangle)
+  //1.   [g^{\alpha}, g^{-\alpha}] =h_\alpha * (2/ \langle\alpha,\alpha\rangle)
   //2.   [h_{\alpha},g^\beta] =\langle\alpha,\beta\rangle g^\beta
   //Reference: Samelson, Notes on Lie algebras, pages 46-51
   Matrix<Rational> ChevalleyConstants;

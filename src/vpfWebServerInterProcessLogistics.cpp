@@ -146,13 +146,13 @@ bool PauseProcess::PauseIfRequestedWithTimeOut(bool restartServerOnFail, bool do
   timeout.tv_usec = 0;
   if (this->CheckPauseIsRequested(restartServerOnFail, dontCrashOnFail, false))
     logBlock << logger::blue << this->currentProcessName << "Blocking on " << this->ToString() << logger::endL;
-  if (!(select(this->thePausePipe.pipeEnds[0]+ 1, &read_fds, &write_fds, &except_fds, &timeout) == 1))
+  if (!(select(this->thePausePipe.pipeEnds[0] + 1, &read_fds, &write_fds, &except_fds, &timeout) == 1))
   { logBlock << logger::green << this->currentProcessName << "Blocking on " << this->ToString() << logger::green
     << " timed out. " << logger::endL;
     return false;
   }
   this->thePausePipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
-  if (this->thePausePipe.lastRead.size>0)
+  if (this->thePausePipe.lastRead.size >0)
     this->thePausePipe.WriteIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
   return true;
 }
@@ -578,7 +578,7 @@ void logger::reset()
   this->flagStopWritingToFile = false;
   this->MaxLogSize = //10000
   50000000;
-  if (theGlobalVariables.flagRunningApache || this->theFileName =="")
+  if (theGlobalVariables.flagRunningApache || this->theFileName == "")
   { this->flagStopWritingToFile = true;
     return;
   }
@@ -748,7 +748,7 @@ logger& logger::operator << (const loggerSpecialSymbols& input)
       this->currentColor = logger::normalColor;
       if (this->flagStopWritingToFile)
         return *this;
-      this->buffer+= this->closeTagHtml() + "\n<br>\n";
+      this->buffer += this->closeTagHtml() + "\n<br>\n";
       theFile << this->getStamp() << this->buffer;
       this->buffer = "";
       theFile.flush();

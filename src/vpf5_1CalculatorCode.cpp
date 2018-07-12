@@ -82,13 +82,13 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
         crash << crash;
       tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
       tempRat.Invert();
-  //    if (BaseVariables.elements[LeavingVariableRow]==34)
+  //    if (BaseVariables.elements[LeavingVariableRow] ==34)
   //      tempMatA.ComputeDebugString();
       for (int i = 0; i < tempMatA.NumRows; i ++)
         if (!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1))
           crash << crash;
       tempMatA.RowTimesScalar(LeavingVariableRow, tempRat);
-      //if (BaseVariables.elements[LeavingVariableRow]==34)
+      //if (BaseVariables.elements[LeavingVariableRow] ==34)
       //  tempMatA.ComputeDebugString();
       tempTotalChange.Assign(MaxMovement);
       tempTotalChange.MultiplyBy(ChangeGradient);
@@ -104,7 +104,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
         else
           WeHaveNotEnteredACycle = false;
       }
-      //if (BaseVariables.elements[LeavingVariableRow]==34)
+      //if (BaseVariables.elements[LeavingVariableRow] ==34)
       //  tempMatA.ComputeDebugString();
       for (int i = 0; i < tempMatA.NumRows; i ++)
       { if (!tempMatA.elements[i][EnteringVariable].IsEqualToZero()&& i != LeavingVariableRow)
@@ -159,7 +159,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 //    if (i !=BaseVariables.CardinalitySelection- 1)
 //      out <<"+";
 //  }
-//  tempS= out.str();
+//  tempS = out.str();
   for (int i = NumTrueVariables; i < matX.size; i ++)
     if (matX[i].IsPositive())
       return false;
@@ -739,7 +739,7 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
   //If the code is uncommented, then ((1,2),(3,5))^t will not be transposed according to expectation.
   //If the commented code needs to be restored, please document why.
   //if (input.IsSequenceNElementS())
-  //  if (theMat.NumRows!=1)
+  //  if (theMat.NumRows !=1)
   //    return false;
   theMat.Transpose();
 //  stOutput << "DEBUG: got to here pt2, mat is: " << theMat.ToString();
@@ -937,7 +937,7 @@ void Plot::ComputeAxesAndBoundingBox()
     this->theUpperBoundAxes = MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
     this->lowBoundY = MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
     this->highBoundY = MathRoutines::Maximum(this->thePlots[k].yHigh, this->highBoundY);
-/*    for (int j = 0; j< this->thePlots[k].theLines.size; j ++)
+/*    for (int j = 0; j < this->thePlots[k].theLines.size; j ++)
     { List<Vector<double> > currentLine = this->thePlots[k].theLines[j];
       this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
       this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[1][0]);
@@ -973,7 +973,7 @@ void Plot::ComputeAxesAndBoundingBox3d()
     this->theUpperBoundAxes = MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
     this->lowBoundY = MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
     this->highBoundY = MathRoutines::Maximum(this->thePlots[k].yHigh, this->highBoundY);
-/*    for (int j = 0; j< this->thePlots[k].theLines.size; j ++)
+/*    for (int j = 0; j < this->thePlots[k].theLines.size; j ++)
     { List<Vector<double> > currentLine = this->thePlots[k].theLines[j];
       this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
       this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[1][0]);
@@ -1035,7 +1035,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++)
   { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
     out << "  calculatorPlotUpdaters['"
-    << currentBox.GetSliderName() << "']=" << "'" << this->canvasName << "'"
+    << currentBox.GetSliderName() << "'] =" << "'" << this->canvasName << "'"
     << ";\n";
   }
   List<std::string> the3dObjects;
@@ -1484,7 +1484,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.
     GetValueCreate(this->boxesThatUpdateMe[i]);
     outScript << " calculatorPlotUpdaters['"
-    << currentBox.GetSliderName() << "']="
+    << currentBox.GetSliderName() << "'] ="
     << "'" << this->canvasName << "'"
     << ";\n";
   }

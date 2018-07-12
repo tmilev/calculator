@@ -1027,7 +1027,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "function ctrlSPress(event){\n"
   << "   if (event.ctrlKey!= true)\n"
   << "     return;\n"
-  << "   if (event.keyCode!=83)\n"
+  << "   if (event.keyCode !=83)\n"
   << "     return;\n"
   << "   event.preventDefault();"
   << submitModPageJS.str() << "\n"
@@ -2235,7 +2235,7 @@ std::string HtmlInterpretation::GetScoresInCoursePage()
   UserScores theScores;
   if (!theScores.ComputeScoresAndStats(out))
     return out.str();
-//  for (int i = 0; i <theScores.theProblem.theTopicS.size(); i ++)
+//  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
 //  { TopicElement& currentElt = theScores.theProblem.theTopicS[i];
 //    currentElt.ComputeID();
 //    out << currentElt.id << ": "
@@ -2262,11 +2262,11 @@ std::string HtmlInterpretation::GetScoresInCoursePage()
   << theScores.theProblem.theTopicS.size() << ");\n";
   for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
   { TopicElement& currentElt = theScores.theProblem.theTopicS[i];
-    out << "studentScoresInHomePage[" << i << "]= new Object;\n";
+    out << "studentScoresInHomePage[" << i << "] = new Object;\n";
     if (currentElt.flagSubproblemHasNoWeight)
-      out << "studentScoresInHomePage[" << i << "].weightsOK= false;\n";
+      out << "studentScoresInHomePage[" << i << "].weightsOK = false;\n";
     else
-      out << "studentScoresInHomePage[" << i << "].weightsOK= true;\n";
+      out << "studentScoresInHomePage[" << i << "].weightsOK = true;\n";
     out << "studentScoresInHomePage[" << i << "].theId ="
     << "'"
     << currentElt.studentScoresSpanId

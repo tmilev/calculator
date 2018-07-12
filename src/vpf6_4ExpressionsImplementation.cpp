@@ -496,7 +496,7 @@ PlotObject
 { this->CheckInitialization();
   Plot plotContainer;
 //  stOutput << "DEBUG: Calling addplot";
-  plotContainer+= inputValue;
+  plotContainer += inputValue;
   return this->owner->theObjectContainer.thePlots
   .AddNoRepetitionOrReturnIndexFirst(plotContainer);
 }
@@ -1434,7 +1434,7 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output) const
   Expression theEWAE = this->ContextGetDifferentialOperatorVariables();
   output.weylAlgebraLetters.SetSize(theEWAE.children.size - 1);
   for (int i = 1; i < theEWAE.size(); i ++)
-    output.weylAlgebraLetters[i - 1]= theEWAE[i].ToString();
+    output.weylAlgebraLetters[i - 1] = theEWAE[i].ToString();
 }
 
 bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const
@@ -2058,7 +2058,7 @@ bool Expression::operator>(const Expression& other) const
   if (leftMon == rightMon)
   { bool result = leftCoeff > rightCoeff;
     //if (result)
-    //  stOutput << "DEBIG: leftMon ==rightMon";
+    //  stOutput << "DEBIG: leftMon == rightMon";
     //else
     //  stOutput << "DEBIG: false";
     return result;
@@ -3242,7 +3242,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->size() >= 2)
   { //stOutput << "I'm at the second place";
     out << (*this)[0].ToString(theFormat);
-    //if ((*this)[0].ToString(theFormat)=="+")
+    //if ((*this)[0].ToString(theFormat) =="+")
     //  stOutput << "What the fuck is going on: " << (*this)[0].ToStringFull();
     bool needParenthesis = true;
     if (this->size() == 2)

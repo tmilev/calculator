@@ -76,7 +76,7 @@ scalar PackedVector<scalar>::ScalarProduct(const PackedVector<scalar>& v, const 
 { PackedVector<scalar> Bv;
   Bv.MakeZero();
   for (int i = 0; i < this->size; i ++)
-    for (int j = 0; j< this->size; j ++)
+    for (int j = 0; j < this->size; j ++)
       Bv[i] += B[i][j]*v[j]
   scalar wBv = 0;
   for (int i = 0; i <B.NumRows; i ++)
@@ -877,7 +877,7 @@ void ComputeTauSignatures(weylgroup* G, List<List<bool> >& tauSignatures, bool p
   for (int i = 0; i <G->characterTable.size; i ++)
   { tauSignatures[i].SetSize(tss.size + 1);
     tauSignatures[i][0] = 1;
-    for (int j =1; j<tss.size + 1; j ++)
+    for (int j =1; j < tss.size + 1; j ++)
       tauSignatures[i][j] = tss[j- 1][i];
   }
 
@@ -1029,7 +1029,7 @@ void LoadAndPrintTauSignatures(char letter, int number)
 
       // data goes out here
       std::cout << "\\\\" << std::endl;
-      for (int i = 0; i <ts.size; i ++)
+      for (int i = 0; i < ts.size; i ++)
       { for (int j = numCycles; j<numCycles+numCycles- 1; j ++)
         { std::cout << '&';
           std::cout << ts[i][j] << '\t';

@@ -180,6 +180,12 @@ function Page() {
       container: null,
       selectFunction: updateAccountPage
     },
+    accountActivation: {
+      name: "accountActivation", //<-for autocomplete
+      id: "divAccountActivation",
+      container: null,
+      selectFunction: updateAccountActivationPage
+    },
     accounts: {
       name: "accounts", //<-for autocomplete
       id: "divAccounts",

@@ -214,7 +214,7 @@ bool LargeIntUnsigned::operator>(const LargeIntUnsigned& other) const
 
 bool LargeIntUnsigned::IsEven() const
 { //stOutput << "<br>DEBUG: remainder by 2 is " << ((*this) % 2).ToString()
-  //<< " and ((*this)%2)== 0 is " << (((*this) % 2) == 0);
+  //<< " and ((*this)%2) == 0 is " << (((*this) % 2) == 0);
   if (LargeIntUnsigned::CarryOverBound % 2 == 0)
   { //stOutput << "<br>DEBUG: (* this->theDigits.LastObject()) % 2: " << ((* this->theDigits.LastObject()) % 2);
     bool result = (this->theDigits[0] % 2) == 0;
@@ -430,7 +430,7 @@ void LargeIntUnsigned::ElementToStringLargeElementDecimal(std::string& output) c
 
 LargeIntUnsigned::LargeIntUnsigned()
 { this->theDigits.SetSize(1);
-  this->theDigits[0]= 0;
+  this->theDigits[0] = 0;
 }
 
 LargeIntUnsigned::LargeIntUnsigned(unsigned int x)
@@ -828,10 +828,10 @@ void LargeIntUnsigned::AssignFactorial(unsigned int x)
     tempInt.AssignShiftedUInt(thePrime, 0);
     MathRoutines::RaiseToPower(tempInt, thePowerOfThePrime, tempOne);
     *this *= tempInt;
-/*    if (theGlobalVariables!= 0)
+/*    if (theGlobalVariables != 0)
     { std::stringstream out;
       out << "processing prime " << thePrime << " (" << i + 1 << " out of " << primesBelowX.size << ").";
-      theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]= out.str();
+      theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0] = out.str();
       theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh= true;
       theGlobalVariables->MakeReport();
     }*/
@@ -1425,7 +1425,7 @@ void Rational::Simplify()
 /*
 void Rational::DrawElement(DrawElementInputOutput& theDrawData)
 { std::string tempS;
-  tempS= this->ToString();
+  tempS = this->ToString();
   theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer
   (theDrawData.TopLeftCornerX, theDrawData.TopLeftCornerY, tempS, 0, theGlobalVariables.theDrawingVariables.fontSizeNormal, theGlobalVariables.theDrawingVariables.TextStyleNormal);
   theDrawData.outputHeight =10;

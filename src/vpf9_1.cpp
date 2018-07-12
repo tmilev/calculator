@@ -536,7 +536,7 @@ void DynkinDiagramRootSubalgebra::SwapDynkinStrings(int i, int j)
 void DynkinDiagramRootSubalgebra::Sort()
 { //doing bubble sort
   for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++)
-    for (int j = i + 1; j< this->SimpleBasesConnectedComponents.size; j ++)
+    for (int j = i + 1; j < this->SimpleBasesConnectedComponents.size; j ++)
     { bool tempBool = false;
       if (this->SimpleBasesConnectedComponents[i].size < this->SimpleBasesConnectedComponents[j].size)
         tempBool = true;
@@ -621,7 +621,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
     if (diagramWithoutTripleNode.SimpleBasesConnectedComponents.size != 3)
       crash << "This is a programming error: Dynkin diagram has a triple node whose removal does not yield 3 connected components. " << crash;
     for (int i = 0; i < 3; i ++)
-      if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i][0].ScalarProduct(tripleNode, this->AmbientBilinearForm)== 0)
+      if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i][0].ScalarProduct(tripleNode, this->AmbientBilinearForm) == 0)
         diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].ReverseOrderElements();
     for (int i = 0; i < 3; i ++)
       for (int j = i + 1; j < 3; j ++)
@@ -1152,16 +1152,16 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex()
   crash << crash;
 /*
   for (int i = 0; i < this->thePfs.theChambersOld.size; i ++)
-    if (this->thePfs.theChambersOld.TheObjects[i]!= 0)
+    if (this->thePfs.theChambersOld.TheObjects[i] != 0)
     { QuasiPolynomial& currentQPNoSub= this->theQPsNonSubstituted.TheObjects[i];
       this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
       this->thePfs.GetVectorPartitionFunction(currentQPNoSub, this->thePfs.theChambersOld.TheObjects[i]->InternalPoint);
       out << "\nChamber " << i + 1 << " with internal point " << this->thePfs.theChambersOld.TheObjects[i]->InternalPoint.ToString() << " the quasipoly is: " << currentQPNoSub.ToString(false, false);
-      for (int k= 0; k< this->theLinearOperators.size; k++)
+      for (int k = 0; k< this->theLinearOperators.size; k++)
       { QuasiPolynomial& currentQPSub= this->theQPsSubstituted.TheObjects[i].TheObjects[k];
         std::stringstream tempStream;
         tempStream << "Processing chamber " << i + 1 << " linear operator " << k+ 1;
-        theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= tempStream.str();
+        theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0] = tempStream.str();
         theGlobalVariables.MakeReport();
         currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub);
         out << "; after substitution we get: " << currentQPSub.ToString(false, false);
@@ -1554,8 +1554,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   this->preferredBasiS[0] = - this->GmodKnegativeWeightS[1];
   this->preferredBasiS[1] = - this->GmodKnegativeWeightS[2];
   /////////////////////////////////////////
-  //this->preferredBasiS[0]="(1,0)";
-  //this->preferredBasiS[1]="(0,1)";
+  //this->preferredBasiS[0] ="(1,0)";
+  //this->preferredBasiS[1] ="(0,1)";
   ////////////////////////////////////////
   this->preferredBasisChangE.AssignVectorsToRows(this->preferredBasiS);
   this->preferredBasisChangE.Transpose();
@@ -1747,8 +1747,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   { tempRoot.MakeZero(input.theRange().GetRank() + input.theDomain().GetRank() + 1);
     for (int j = 0; j < input.theDomain().GetRank(); j ++)
       tempRoot.TheObjects[j] = this->PreimageWeylChamberSmallerAlgebra.Normals[i][j];
-  //  for (int j = 0; j<input.theRange.GetRank(); j ++)
-   //   tempRoot.TheObjects[j+ input.theDomain.GetRank()]= tempRoot2.TheObjects[j];
+  //  for (int j = 0; j < input.theRange.GetRank(); j ++)
+   //   tempRoot.TheObjects[j+ input.theDomain.GetRank()] = tempRoot2.TheObjects[j];
     this->PreimageWeylChamberSmallerAlgebra.Normals[i] = tempRoot;
   }
 
@@ -1812,7 +1812,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport()
  /* for (int i = 0; i < this->projectivezedChambersSplitByMultFreeWalls.size; i ++)
   { tempRoot = this->projectivezedChambersSplitByMultFreeWalls.TheObjects[i].GetInternalPoint();
     bool found = false;
-    for (int j = 0; j< this->projectivizedChamber.size; j ++)
+    for (int j = 0; j < this->projectivizedChamber.size; j ++)
       if (this->projectivizedChamber.TheObjects[j].IsInCone(tempRoot))
       { if (found)
           crash << crash;
@@ -1823,7 +1823,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport()
   { QuasiPolynomial& theMult = this->theMultiplicities.TheObjects[i];
     if (!theMult.IsEqualToZero())
     { int indexMultFreeChamber = - 1;
-      for (int j = 0; j< this->projectivezedChambersSplitByMultFreeWalls.size; j ++)
+      for (int j = 0; j < this->projectivezedChambersSplitByMultFreeWalls.size; j ++)
       { tempRoot = this->projectivezedChambersSplitByMultFreeWalls.TheObjects[j].GetInternalPoint();
         if (this->projectivizedChamber.TheObjects[i].IsInCone(tempRoot))
         { Rational tempRat;

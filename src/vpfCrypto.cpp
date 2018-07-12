@@ -260,7 +260,7 @@ bool Crypto::ConvertBase64ToBitStream
     if (numBitsInStack == 12)
     { output.AddOnTop(theStack / 16);
       numBitsInStack = 4;
-      theStack= theStack % 16;
+      theStack = theStack % 16;
     }
     if (numBitsInStack == 8)
     { output.AddOnTop(theStack);
@@ -852,7 +852,7 @@ void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& outpu
   Crypto::ConvertUint64toBigendianStringAppendResult(messageLength, inputStringPreprocessed);
 ////////////////////////
 //  std::stringstream tempSTream;
-//  for (unsigned i = 0; i <inputStringPreprocessed.size(); i ++)
+//  for (unsigned i = 0; i < inputStringPreprocessed.size(); i ++)
 //  {
 //    tempSTream << std::hex << inputStringPreprocessed[i];
 //  }
@@ -1083,7 +1083,7 @@ bool JSONWebToken::VerifyRSA256
     //List<int> intValues;
     //intValues.SetSize(payload.size());
     //for (unsigned i = 0; i < payload.size(); i ++)
-    //  intValues[i]=payload[i];
+    //  intValues[i] =payload[i];
     //*commentsGeneral << "<br>Payload, json: " << intValues.ToStringCommaDelimited();
   }
   List<uint32_t> outputSha, RSAresultInts;

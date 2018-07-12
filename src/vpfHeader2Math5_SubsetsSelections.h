@@ -20,7 +20,7 @@ public:
   void AddSelectionAppendNewIndex(int index);
   void RemoveLastSelection();
   void RemoveSelection(int index)
-  { this->selected[index]= false;
+  { this->selected[index] = false;
     this->ComputeIndicesFromSelection();
   }
   void MakeFullSelection(int inputMaxSize)
@@ -364,7 +364,7 @@ void Vectors<coefficient>::SelectionToMatrixAppend(Selection& theSelection, int 
 { for (int i = 0; i < theSelection.CardinalitySelection; i ++)
   { Vector<coefficient>& tempRoot = this->TheObjects[theSelection.elements[i]];
     for (int j = 0; j < OutputDimension; j ++)
-      output.elements[StartRowIndex + i][j]= tempRoot[j];
+      output.elements[StartRowIndex + i][j] = tempRoot[j];
   }
 }
 

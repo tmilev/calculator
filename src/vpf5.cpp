@@ -95,7 +95,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
   if (!highestWeightFundCoords.SumCoords().IsSmallInteger())
     return false;
   int theTopHeightSimpleCoords = (int) highestWeightSimpleCoords.SumCoords().GetDoubleValue() + 1;
-//  int theTopHeightFundCoords =(int) highestWeightFundCoords.SumCoords().GetDoubleValue();
+//  int theTopHeightFundCoords = (int) highestWeightFundCoords.SumCoords().GetDoubleValue();
   if (theTopHeightSimpleCoords < 0)
     theTopHeightSimpleCoords = 0;
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;
@@ -289,7 +289,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate()
     tempPath.ActByEalpha(nextInd);
     out << "<tr><td> e_" << nextInd + 1 << "(" << lastPath.ToString() << ") =</td>" << "<td>"
     << tempPath.ToString() << "</td>";
-/*    for (int j = 0; j< this->owner->GetDim(); j ++)
+/*    for (int j = 0; j < this->owner->GetDim(); j ++)
     { tempPath=lastPath;
       tempPath.ActByEalpha(j);
       out << "<td> e_" << j+ 1 << "("
@@ -453,7 +453,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
   readyForLatexComsumption << "\\hline \n<br> \\end{tabular}";
   out << "<br>Your ready for LaTeX consumption text follows.<br>";
   out << readyForLatexComsumption.str();
-//  if (outputEigenSpace!= 0)
+//  if (outputEigenSpace != 0)
 //  { stOutput << "<br> outputEigenSpace->size =" << outputEigenSpace->size << "; outputEigenVectors->size =" << outputEigenVectors->size;
 //  }
   theReport.Report("SplitFDpartOverFKLeviRedSubalg done!");
@@ -591,7 +591,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(Calculator& theCommands, co
           theG2B3Data.theFormat.CustomPlusSign = "\\oplus ";
           out << "<td rowspan =\"" << multiplicity << " \">" << tempChar.ToString(&theG2B3Data.theFormat) << "</td>";
           latexTable << "\\multirow{" << multiplicity  << "}{*}{$";
-//          if (k!= 0)
+//          if (k != 0)
 //            latexTable << "\\oplus ";
           latexTable << tempChar.ToString(&theG2B3Data.theFormat) << "$}";
           latexTable << "&\\multirow{" << multiplicity  << "}{*}{$";
@@ -1361,8 +1361,8 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
         return false;
       }
 /*      stOutput << "=+/- ";
-      for (int j = 0; j<thePrimeFactorsAtPoints[i].size; j ++)
-        for (int k= 0; k<thePrimeFactorsMults[i][j]; k++)
+      for (int j = 0; j < thePrimeFactorsAtPoints[i].size; j ++)
+        for (int k = 0; k<thePrimeFactorsMults[i][j]; k++)
           stOutput << thePrimeFactorsAtPoints[i][j] << "*";*/
     }
   }

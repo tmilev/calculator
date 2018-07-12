@@ -937,14 +937,14 @@ void Calculator::initPredefinedInnerFunctions()
    "CosineOfAngleSum", true);
   this->AddOperationInnerHandler
   ("\\sin", CalculatorFunctionsGeneral::innerConvertSinToExponent, "",
-   "Converts sine to exponent by sin(x)=(e^{i x}-e^{-ix})/(2i) ",
+   "Converts sine to exponent by sin(x)= (e^{i x}-e^{-ix})/(2i) ",
    "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\"); \\sin x; cos x",
    true, false,
    "CalculatorFunctionsGeneral::innerConvertTrigToExponent",
    "ExpressSinViaExponent", true);
   this->AddOperationInnerHandler
   ("\\cos", CalculatorFunctionsGeneral::innerConvertCosToExponent, "",
-   "Converts cosine to exponent by cos(x)=(e^{i x}+e^{-ix})/(2) ",
+   "Converts cosine to exponent by cos(x)= (e^{i x}+e^{-ix})/(2) ",
    "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\"); \\sin x; cos x",
    true, false,
    "CalculatorFunctionsGeneral::innerConvertTrigToExponent",
@@ -1475,13 +1475,13 @@ void Calculator::initPredefinedInnerFunctions()
    arguments must be differential operators. The output is a vector space \
    basis printout. Fails if the dimension of the vector space is larger than the upper bound.",
    "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); x_{{i}}=ElementWeylAlgebraPoly{}(\\partial_i, x_i); \
-    \ng_1=(-x_{5} \\partial_{5}^{2}-x_{4} \\partial_{4} \\partial_{5}  -x_{3} \\partial_{3} \\partial_{5} \
+    \ng_1= (-x_{5} \\partial_{5}^{2}-x_{4} \\partial_{4} \\partial_{5}  -x_{3} \\partial_{3} \\partial_{5} \
     \n-x_{2} \\partial_{2} \\partial_{5}  +x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\
     \ng_- 1=x_5;\
     \ng_2=x_{5} \\partial_{4} -x_{2} \\partial_{1} ;\
-    \ng_-2=(x_{4} \\partial_{5} -x_{1} \\partial_{2} );\
-    \ng_3=(2x_{4} \\partial_{3} -x_{3} \\partial_{2} );\
-    \ng_-3=(x_{3} \\partial_{4} -2x_{2} \\partial_{3} );\
+    \ng_-2= (x_{4} \\partial_{5} -x_{1} \\partial_{2} );\
+    \ng_3= (2x_{4} \\partial_{3} -x_{3} \\partial_{2} );\
+    \ng_-3= (x_{3} \\partial_{4} -2x_{2} \\partial_{3} );\
     \nGenerateVectorSpaceClosedWRTLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);\
     \nGenerateVectorSpaceClosedWRTLieBracket{}(50,g_1,g_2, g_-2, g_3, g_-3);\
     \nGenerateVectorSpaceClosedWRTLieBracket{}(50,g_1, g_- 1, g_2, g_-2, g_3); \
@@ -1565,7 +1565,7 @@ void Calculator::initPredefinedInnerFunctions()
    algorithm. The output is a string report of the operation. \
    The first cone is generated over Z_{&gt;} (``strict cone'')\
    the second cone is generated over Z_{&gt;= 0} (``non-strict cone'').",
-   "v_1=(1, 2, 3 ); v_2=(1, 3, 2); v_3=(3,1,1); v_4=(-2,2, 2);\
+   "v_1= (1, 2, 3 ); v_2= (1, 3, 2); v_3= (3,1,1); v_4= (-2,2, 2);\
    \n ConesIntersection{}((v_1,v_2 ), (v_3,v_4 ));\nConesIntersection{}((v_1,v_2 ), (v_3,-v_4 ));",
    true, false,
    "Calculator::innerConesIntersect",
@@ -2055,7 +2055,7 @@ void Calculator::initPredefinedInnerFunctions()
      The last argument gives the number of iterations of the method.\
      ",
      "NewtonsMethod(e^x-( 200 sin{} x  +x^7), 0, 10);\n\
-      NewtonsMethod(e^x =( 200 sin{} x  +x^7), 0, 10);",
+      NewtonsMethod(e^x = ( 200 sin{} x  +x^7), 0, 10);",
      true, false,
      "CalculatorFunctionsGeneral::innerNewtonsMethod",
      "NewtonsMethod")
@@ -2240,8 +2240,8 @@ void Calculator::initPredefinedInnerFunctions()
    CalculatorFunctionsGeneral::innerPlotSurface, "",
    " Plots a surface. \
    ",
-   "%HideLHS x =(R+v*cos(u/2))*cos(u);\
-    y =(R+v*cos(u/2))*sin(u);\
+   "%HideLHS x = (R+v*cos(u/2))*cos(u);\
+    y = (R+v*cos(u/2))*sin(u);\
     z=v*sin(u/2); \
     R=MakeInputBox (name =radiusBig, value =2, min =2, max =5) ;\
     r =MakeInputBox (name =radiusSmall, value = 0.6, min = 0.2, max =1, step = 0.2) ;\
@@ -2495,7 +2495,7 @@ void Calculator::initPredefinedInnerFunctions()
     \ntheFun =\\sqrt{x y}-(4 x^{2} y- 1);\
     \na =\\frac{-64 x^{3} y^{2}+ 16 x y+y}{32 x^{4} y-8 x^{2}- x};\
     \ntheDiff=d/dx(theFun);\
-    \nnum=(d/dx y = 0; theDiff)_2;\
+    \nnum= (d/dx y = 0; theDiff)_2;\
     \nden =CoefficientOf (d/dx y, theDiff);\
     \nb= -num/den;\
     \nCompareExpressionsNumerically(a,b, 0.001, x\\in(0,5),10, y\\in (0,5),10);\
@@ -2516,7 +2516,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("IsEven", CalculatorFunctionsGeneral::innerIsEven, "",
    "If the argument has no bound variables, returns 1 if \
     the argument is an even integer, 0 otherwise. ",
-   "i^{{n}}:if IsEven n =(- 1)^(n/2); i^100 ",
+   "i^{{n}}:if IsEven n = (- 1)^(n/2); i^100 ",
    true, false,
    "CalculatorFunctionsGeneral::innerIsEven",
    "IsEven");
@@ -3853,7 +3853,7 @@ void Calculator::initPredefinedStandardOperations()
     If the second child Y of X is a list starting with EndStatement(;), \
     then X is replaced with the second, third, ... children of Y. \
     If Y is not a list starting with EndStatement, X is replaced with Y.\
-   ", "c =(a =b);\na;\nc;\na;\nd =(e = f; g=h);\nd;\ne;\nMelt{}d;\ne;\ng;  ", true);
+   ", "c = (a =b);\na;\nc;\na;\nd = (e = f; g=h);\nd;\ne;\nMelt{}d;\ne;\ng;  ", true);
   this->AddOperationOuterHandler
   ("=", Calculator::outerCheckRule, "",
    "Checks whether the rule is of the form A=A, and substitutes the expression with an error if that \
@@ -3935,15 +3935,15 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("+", CalculatorFunctionsGeneral::outerCombineFractionsCommutative, "",
    "Combines fractions on condition that all participants commute. \
-   Equivalent to {{a}}/{{b}}+{{c}}/{{d}}=(a *d+c*b)/(d*b); \
+   Equivalent to {{a}}/{{b}}+{{c}}/{{d}}= (a *d+c*b)/(d*b); \
    Please note that this transformation is not correct if b and d do not commute. ",
    "a/b+c/d", true, false,
    "CalculatorFunctionsGeneral::outerCombineFractionsCommutative",
    "CommonDenominator");
   this->AddOperationOuterHandler
   ("+", this->outerCombineFractions, "",
-   "Combines fractions. Equivalent to {{a}}/{{b}}+{{c}}=(a +c*b)/b; ",
-   "f{}{{x}}=(2x +3)/(2x + 1);\ng{}{{y}}=(y-2)/(y+3);\ng{}f{}z;\nf{}g{}z", true, false,
+   "Combines fractions. Equivalent to {{a}}/{{b}}+{{c}}= (a +c*b)/b; ",
+   "f{}{{x}}= (2x +3)/(2x + 1);\ng{}{{y}}= (y-2)/(y+3);\ng{}f{}z;\nf{}g{}z", true, false,
    "Calculator::outerCombineFractions",
    "CommonDenominatorOneNonFraction");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -4102,10 +4102,10 @@ void Calculator::initPredefinedStandardOperations()
     this->opSequence(), this->opSequence(),
    "Adds two sequences (termwise), provided the sequences have the same number of entries. \
    In case the entries of the sequences are elements of a base field, corresponds to vector addition.",
-   "v_{1}=(1, 2, 3);\
-    \nv_{2}=(1, 3, 2);\
-    \nv_{3}=(3, 1, 1);\
-    \nv_{4}=(-2, 2, 2);\
+   "v_{1}= (1, 2, 3);\
+    \nv_{2}= (1, 3, 2);\
+    \nv_{3}= (3, 1, 1);\
+    \nv_{4}= (-2, 2, 2);\
     \n1/2v_{1}+ 1/2v_{2}+7/8v_{3}+ 13/16v_{4}"
    , true, false,
    "CalculatorFunctionsBinaryOps::innerAddSequenceToSequence", "AddSequences");
@@ -4532,8 +4532,8 @@ void Calculator::initPredefinedStandardOperations()
     (however please note a sequence does not necessarily consist \
     of elements of a field, so the latter \
     interpretation might not be applicable).",
-   "v_{1}=(1, 2, 3);\nv_{2}=(1, 3, 2);\nv_{3}=(3, 1, 1);\
-    \nv_{4}=(-2, 2, 2);\n1/2v_{1}+ 1/2v_{2}+7/8v_{3}+ 13/16v_{4}",
+   "v_{1}= (1, 2, 3);\nv_{2}= (1, 3, 2);\nv_{3}= (3, 1, 1);\
+    \nv_{4}= (-2, 2, 2);\n1/2v_{1}+ 1/2v_{2}+7/8v_{3}+ 13/16v_{4}",
     true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence",
    "ScalarTimesSequence");
@@ -4773,7 +4773,7 @@ void Calculator::initPredefinedStandardOperations()
    provided either the base or the exponent is a double, and provided that \
    the base is non-negative. ",
    "f{}{{x}}=x^3+p x +q; \
-   \nXcardano=( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
+   \nXcardano= ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
    \nq=DoubleValue{}1; \np =DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat",
@@ -4783,7 +4783,7 @@ void Calculator::initPredefinedStandardOperations()
     CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT, "",
    "Provided the exponent is t or T, calls the Transpose \
     function on the base.",
-   "X =(1,2)^t; X-Transpose{}(1,2); \\begin{pmatrix}1&2\\\\ 3& 5\\end{pmatrix}^t  ",
+   "X = (1,2)^t; X-Transpose{}(1,2); \\begin{pmatrix}1&2\\\\ 3& 5\\end{pmatrix}^t  ",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT",
    "TransposePowerNotation");
@@ -4852,7 +4852,7 @@ void Calculator::initPredefinedStandardOperations()
    this->opAlgNumber(), this->opRational(),
    "Raises algebraic number to small integer or half-integer power. ",
    "a =3/2; b= - 15/2; c =33/4;\
-    \nx =(-b+\\sqrt{}(b^2-4a c))/(2a);\
+    \nx = (-b+\\sqrt{}(b^2-4a c))/(2a);\
     \nB= c+a x^{2}+b x;", true, false,
     "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -4900,7 +4900,7 @@ void Calculator::initPredefinedStandardOperations()
    the exponent is rational with odd denominator, the exponent is evaluated to the corresponding\
    real negative root. ",
    "f{}{{x}}=x^3+p x +q; \
-   \nXcardano=( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
+   \nXcardano= ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
    \nq=DoubleValue{}1; \np =DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat",
@@ -4956,8 +4956,8 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationInnerHandler
   ("_", CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix, "",
    "Dereferences a sequence or a mtrix. The syntax is as illustrated by the example. ",
-   "X =(a,b,c); X_1; X_2; X_3; X_4; X_j; j =3; X_j; \
-    \nDenominations =(1, 5, 10, 25,50, 100,200, 500, 1000, 2000, 5000);\
+   "X = (a,b,c); X_1; X_2; X_3; X_4; X_j; j =3; X_j; \
+    \nDenominations = (1, 5, 10, 25,50, 100,200, 500, 1000, 2000, 5000);\
     \np(0, 0 )=1;\
     \np({{a}},{{x}}):if x<0= 0;\
     \np(0,{{x}})= 0;\
@@ -4986,7 +4986,7 @@ void Calculator::initPredefinedStandardOperations()
   ("\\otimes", CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix,
    "",
    "Tensor product of two matrices.",
-    "P=((0 , 2 ),(1 , 0)); Q=((0 , 3 ),(1 , 0)); \
+    "P= ((0 , 2 ),(1 , 0)); Q= ((0 , 3 ),(1 , 0)); \
     \nX =MakeMatrix{}P; Y =MakeMatrix{}Q; \
     \nZ=MakeMatrixTensorForm{}P; W=MakeMatrixTensorForm{}Q; \
     X\\otimes Y; Z\\otimes W", true, false,
@@ -5006,7 +5006,7 @@ void Calculator::initPredefinedStandardOperations()
    "TensorElementGeneralizedVermaModuleByElementGeneralizedVermaModule");
   this->AddOperationInnerHandler
   ("[]", CalculatorFunctionsBinaryOps::innerLieBracketDistribute, "",
-   "Implementation of the rules [{{a}}+{{b}},{{c}}]=[a,c]+[b,c] and  [{{c}},{{a}}+{{b}}]=[c,a]+[c,b]",
+   "Implementation of the rules [{{a}}+{{b}},{{c}}] =[a,c] +[b,c] and  [{{c}},{{a}}+{{b}}] =[c,a] +[c,b]",
    " ",
    true,false,
    "CalculatorFunctionsBinaryOps::innerLieBracketDistribute",
@@ -5059,7 +5059,7 @@ void Calculator::initPredefinedStandardOperations()
   ("\\otimes", CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor,
    this->opMatTensorRat(), this->opMatTensorRat(),
    "Same as tensor product of matrices but uses class MatrixTensor instead of class Matrix.",
-   "P=((0 , 2 ),(1 , 0)); Q=((0 , 3 ),(1 , 0)); \
+   "P= ((0 , 2 ),(1 , 0)); Q= ((0 , 3 ),(1 , 0)); \
    \nX =MakeMatrix{}P; Y =MakeMatrix{}Q; \
    \nZ=MakeMatrixTensorForm{}P; W=MakeMatrixTensorForm{}Q; \
    \nX\\otimes Y; Z\\otimes W", true);
@@ -5140,7 +5140,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationInnerHandler
   ("\\geq", CalculatorFunctionsGeneral::innerGreaterThanOrEqualTo, "",
    "Greater than or equal to operation. ",
-   "A=(2>=x); x =1; A",
+   "A= (2>=x); x =1; A",
    true, false,
    "Calculator::innerGreaterThanOrEqualTo",
    "greaterThanOrEqualTo");
@@ -5157,8 +5157,8 @@ void Calculator::initPredefinedStandardOperations()
    "If either the left or the right argument contains a bound variable does nothing. \
     Else evaluates to 1 if the left argument equals mathematically the right argument.",
    "%NumberColors\n  \
-   A=(a =3, b=4);\n\
-   B=(a =(sqrt(3))^2, b=4 );\n\
+   A= (a =3, b=4);\n\
+   B= (a = (sqrt(3))^2, b=4 );\n\
    A==B;\
    \nx ==y;\n\
    x ==1;\nIsEqualToX{} {{a}}=a ==x;\
@@ -5170,7 +5170,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationInnerHandler
   ("===", CalculatorFunctionsGeneral::innerEqualEqualEqual, "",
    "Returns 1 if both sides have identical expression trees, 0 otherwise. ",
-   "2+3 == 5; Freeze{}(2+3)==Freeze{}5; Freeze{}(2+3)===Freeze{}5",
+   "2+3 == 5; Freeze{}(2+3) ==Freeze{}5; Freeze{}(2+3) ===Freeze{}5",
    true, false,
    "CalculatorFunctionsGeneral::innerEqualEqualEqual",
    "IsEqualExpressionTree");
@@ -5211,7 +5211,7 @@ void Calculator::initPredefinedStandardOperations()
    "Returns a list with the last element removed, provided \
     the argument has no bound variables. If the expression \
     has bound variables does nothing.",
-   "X =(a,b,c); Y = (RemoveLast X)\\cup Sequence{}(last X)-X; ",
+   "X = (a,b,c); Y = (RemoveLast X)\\cup Sequence{}(last X)-X; ",
    true, false,
    "CalculatorFunctionsGeneral::innerRemoveLastElement",
    "RemoveLast");
@@ -5221,7 +5221,7 @@ void Calculator::initPredefinedStandardOperations()
    "Intersects lists. For the time being, the \
     output order is not specified (will be fixed in the future).",
    "(a,b,c)\\cap (c, d, e);\
-    \nx =(a,b,c)\\cap (c, d, e);\
+    \nx = (a,b,c)\\cap (c, d, e);\
     \na = 1;\
     \nd =1;\
     \n(a,b,c)\\cap (c, d, e); x",
@@ -5280,19 +5280,19 @@ void Calculator::initPredefinedOperationsComposite()
    "RationalFunctionSubstitution");
   this->AddOperationComposite
   ("+", CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument, "",
-   "Equivalent to (a +b){}x =(a{}x) +(b{}x) ",
+   "Equivalent to (a +b){}x = (a{}x) +(b{}x) ",
    "(a +b){}x;", true, true, false,
    "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument",
    "CompositeArithmeticOperationEvaluatedOnArgumentAddition");
   this->AddOperationComposite
   ("*", CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument, "",
-   "Equivalent to (a*b){}x =(a{}x)*(b{}x) ",
+   "Equivalent to (a*b){}x = (a{}x)*(b{}x) ",
    "(a*b){}x;", true, true, false,
    "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument",
    "CompositeArithmeticOperationEvaluatedOnArgumentMultiplication");
   this->AddOperationComposite
   ("/", CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument, "",
-   "Equivalent to (a/b){}x =(a{}x)/(b{}x) ",
+   "Equivalent to (a/b){}x = (a{}x)/(b{}x) ",
    "(a/b){}x;", true, true, false,
    "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument",
    "CompositeArithmeticOperationEvaluatedOnArgumentDivision");
@@ -5317,7 +5317,7 @@ void Calculator::initPredefinedOperationsComposite()
    "ConstTimesAnyAction");
   this->AddOperationComposite
   ("^", CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC, "",
-   "Provided that n is not equal to - 1 and f is not a sequence, use the rule ({{f}}^{{n}}){}{{x}}=(f{}x)^n.",
+   "Provided that n is not equal to - 1 and f is not a sequence, use the rule ({{f}}^{{n}}){}{{x}}= (f{}x)^n.",
    "\\tan^2 x; (f^-2) {}x ; (f^- 1){}x ",
    true, true, false, "CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC",
    "ApowerBevaluatedAtC");

@@ -23,7 +23,7 @@ bool Calculator::innerOperationBinary(Calculator& theCommands, const Expression&
 bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::outerExtractBaseMultiplication");
- // bool hereBeTrouble = input.ToString()=="e^{-2 x} -2";
+ // bool hereBeTrouble = input.ToString() == "e^{-2 x} -2";
 //  if (hereBeTrouble)
 //    stOutput << "<hr>Here be trouble";
   if (!input.StartsWith(theCommands.opTimes(), 3))
@@ -1282,7 +1282,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix
     return false;
   if (!theCommands.GetMatrixExpressions(input[2], rightMat, leftMat.NumCols))
     return false;
-  if (leftMat.NumCols!=rightMat.NumRows)
+  if (leftMat.NumCols !=rightMat.NumRows)
     return false;
   Matrix<Expression> outputMat;
   outputMat.init(leftMat.NumRows, rightMat.NumCols);

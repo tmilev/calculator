@@ -50,7 +50,7 @@ scalar PackedVector<scalar>::ScalarProduct(const PackedVector<scalar>& v, const 
 { PackedVector<scalar> Bv;
   Bv.MakeZero();
   for (int i = 0; i < this->size; i ++)
-    for (int j = 0; j< this->size; j ++)
+    for (int j = 0; j < this->size; j ++)
       Bv[i] += B[i][j]*v[j]
   scalar wBv = 0;
   for (int i = 0; i <B.NumRows; i ++)

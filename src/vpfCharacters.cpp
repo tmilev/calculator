@@ -300,7 +300,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
   List<Vector<coefficient> > Vb = this->basis;
   List<Vector<coefficient> > tempVectors;
   for (int i = 0; i < this->ownerGroup->characterTable.size; i ++)
-    if (this->theCharacteR.InnerProduct(this->ownerGroup->characterTable[i])!= 0)
+    if (this->theCharacteR.InnerProduct(this->ownerGroup->characterTable[i]) != 0)
     { stOutput << "contains irrep " << i << "\n";
       this->ClassFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
       splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
@@ -349,7 +349,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
   stOutput << "\n";
 */
   List<List<Vector<coefficient> > > es;
-  for (int cfi = this->ownerGroup->ConjugacyClassCount()- 1; cfi>= 0; cfi--)
+  for (int cfi = this->ownerGroup->ConjugacyClassCount()- 1; cfi>= 0; cfi --)
   { ClassFunction<somegroup, coefficient> cf;
     cf.MakeZero(*this->ownerGroup);
     cf[cfi] = 1;
@@ -422,7 +422,7 @@ struct DivisionResult<UDPolynomial<coefficient> > UDPolynomial<coefficient>::Div
     return out;
   int r = data.size - divisor.data.size + 1;
   out.quotient.data.SetSize(r);
-  for (int i =r- 1; i != - 1; i--)
+  for (int i =r- 1; i != - 1; i --)
   { if (out.remainder.data.size - divisor.data.size != i)
     { out.quotient[i] = 0;
       continue;
@@ -620,7 +620,7 @@ List<Vector<coefficient> > orthogonal_complement(const List<Vector<coefficient> 
   { for (int j = 0; j<d; j ++)
     { coefficient r = V[i][j];
       outm.elements[i][j] = r;
-      for (int k= 0; k<W.size; k++)
+      for (int k = 0; k<W.size; k++)
         outm.elements[i][j] -= VM.elements[k][i] * W[k][j];
     }
   }
@@ -686,7 +686,7 @@ List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M)
       zerov = true;
       for (int j = 0; j<M.NumCols; j ++)
       {  v[j] = M.elements[i][j];
-         if (zerov && M.elements[i][j]!= 0)
+         if (zerov && M.elements[i][j] != 0)
             zerov = false;
       }
       if (zerov)
@@ -733,7 +733,7 @@ Vector<coefficient> PutInBasis(const Vector<coefficient> &v, const List<Vector<c
    {  for (int j = 0; j<v.size; j ++)
          w[i] += B[i][j]*v[j];
       for (int j = 0; j<B.size; j ++)
-         for (int k= 0; k<v.size; k++)
+         for (int k = 0; k<v.size; k++)
             M.elements[i][j] += B[i][k] * B[j][k];
    }
    M.Invert();
@@ -807,7 +807,7 @@ Matrix<Rational> MatrixInBasis(const ClassFunction<FiniteGroup<ElementWeylGroup<
   for (int i1 = 0; i1<X.G->ConjugacyClassCount(); i1++)
     for (int i2= 0; i2<X.G->conjugacyClasseS[i1].size; i2++)
       for (int j = 0; j<X.G->GetSize(); j ++)
-        for (int k= 0; k<B.size; k++)
+        for (int k = 0; k<B.size; k++)
         { int l =X.G->theElements.GetIndex
           (X.G->conjugacyClasseS[i1].theElements[i2]*X.G->theElements[j]);
           rows[k][l] = X.data[i1]*B[k][j];
@@ -854,7 +854,7 @@ template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable()
 { MacroRegisterFunctionWithName("FiniteGroup::CheckOrthogonalityCharTable");
   for (int i = 0; i < this->characterTable.size; i ++)
-    for (int j = i; j< this->characterTable.size; j ++)
+    for (int j = i; j < this->characterTable.size; j ++)
     { ClassFunction<FiniteGroup, Rational>& leftChar = this->characterTable[i];
       ClassFunction<FiniteGroup, Rational>& rightChar = this->characterTable[j];
       Rational theScalarProd = this->GetHermitianProduct(leftChar.data, rightChar.data);
@@ -943,9 +943,9 @@ void SubgroupDataWeylGroup::ComputeTauSignature()
   { ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& XiG =
         this->theWeylData->theGroup.characterTable[i];
     //stOutput << "Restricting character: " << Xip.ToString() << "<br>";
-    for (int j = 0; j< this->theSubgroupData.theSubgroup->conjugacyClasseS.size; j ++)
+    for (int j = 0; j < this->theSubgroupData.theSubgroup->conjugacyClasseS.size; j ++)
       XiS[j] = XiG[this->theSubgroupData.ccRepresentativesPreimages[j]];
-    this->tauSignature[i]= this->theSubgroupData.theSubgroup->GetHermitianProduct(Xs,XiS);
+    this->tauSignature[i] = this->theSubgroupData.theSubgroup->GetHermitianProduct(Xs,XiS);
     stOutput << "<br>Hermitian product of " << Xs.ToString() << " and "
         << XiS.ToString() << " = " << this->tauSignature[i];
     if (!this->tauSignature[i].IsSmallInteger())
@@ -965,7 +965,7 @@ void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages()
     }
     this->theSubgroupData.ccRepresentativesPreimages.SetSize(this->theSubgroupData.theGroup->conjugacyClasseS.size);
     for (int i = 0; i < this->theSubgroupData.ccRepresentativesPreimages.size; i ++)
-      this->theSubgroupData.ccRepresentativesPreimages[i]= i;
+      this->theSubgroupData.ccRepresentativesPreimages[i] = i;
     this->theSubgroupData.theSubgroup->flagCCRepresentativesComputed = true;
   } else
   { if (this->theDynkinType.GetRank()<=6)
@@ -979,7 +979,7 @@ void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages()
 
 void SubgroupDataRootReflections::InitGenerators()
 { MacroRegisterFunctionWithName("SubgroupRootReflections::InitGenerators");
-  if (this->theDynkinType.GetRank()== 0)
+  if (this->theDynkinType.GetRank() == 0)
   { this->theSubgroupData.theSubgroup->generators.SetSize(1);
     this->theSubgroupData.theSubgroup->generators[0].MakeID(*this->theSubgroupData.theGroup);
     return;
@@ -990,8 +990,8 @@ void SubgroupDataRootReflections::InitGenerators()
   ElementWeylGroup<WeylGroupData> currentReflection;
   for (int i = 0; i <d; i ++)
   { currentReflection.MakeRootReflection(this->generatingSimpleRoots[i], *this->theWeylData);
-    this->theSubgroupData.generatorPreimages[i]= this->theSubgroupData.theGroup->theElements.GetIndex(currentReflection);
-    this->theSubgroupData.theSubgroup->generators[i]= currentReflection;
+    this->theSubgroupData.generatorPreimages[i] = this->theSubgroupData.theGroup->theElements.GetIndex(currentReflection);
+    this->theSubgroupData.theSubgroup->generators[i] = currentReflection;
   }
 }
 
@@ -1034,7 +1034,7 @@ void SubgroupDataRootReflections::MakeFromRoots
   this->ComputeDynkinType();
   DynkinType verificationType;
   theDiagram.GetDynkinType(verificationType);
-  if (this->theDynkinType!=verificationType)
+  if (this->theDynkinType !=verificationType)
     crash << "Two different comptuations of the Dynkin type a set of roots did not coincide. " << crash;
   this->InitGenerators();
 }
@@ -1052,9 +1052,9 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor
   if (this->generators.size == 0)
     crash << "generators not allowed to be 0. " << crash;
   do
-  { //if (left.ToString()=="s_{4}")
+  { //if (left.ToString() == "s_{4}")
     //  stOutput << "<br>" << theIterator.GetCurrentElement().ToString() << "=?=" << right.ToString();
-    if (theIterator.GetCurrentElement()==right)
+    if (theIterator.GetCurrentElement() == right)
       return true;
   } while (theIterator.IncrementReturnFalseIfPastLast());
   return false;
@@ -1071,7 +1071,7 @@ void WeylGroupData::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   ();
   List<Vectors<Rational> > theRootSAsBases;
   theRootSAsBases.SetExpectedSize(theRootSAs.theSubalgebras.size);
-  for (int i = theRootSAs.theSubalgebras.size- 1; i>= 0; i--)
+  for (int i = theRootSAs.theSubalgebras.size- 1; i>= 0; i --)
     theRootSAsBases.AddOnTop(theRootSAs.theSubalgebras[i].SimpleBasisK);
   this->GetSignSignatureRootSubgroups(outputSubgroups, theRootSAsBases);
 }

@@ -1,0 +1,12 @@
+"use strict";
+
+var idDOMElements = {
+  spanOldEmail: "spanOldEmail",
+  buttonChangeEmail: "buttonChangeEmail",
+  inputEmail: "inputEmail",
+  labelNewEmail: "labelNewEmail",
+  spanUserIdInActivateAccountPage: "spanUserIdInActivateAccountPage",
+  spanCurrentActivationEmail: "spanCurrentActivationEmail",
+  inputNewPasswordInActivationAccount: "inputNewPasswordInActivationAccount",
+  inputReenteredPasswordInActivationAccount: "inputReenteredPasswordInActivationAccount"
+}

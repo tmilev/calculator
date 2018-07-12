@@ -375,7 +375,7 @@ public:
   out << '[';
   for (int i = 0; i < this->representatives.size; i ++)
   { out << '[';
-    for (int j = 0; j< this->representatives[i].size; j ++)
+    for (int j = 0; j < this->representatives[i].size; j ++)
     { out << this->representatives[i][j];
       if (j != this->representatives[i].size- 1)
         out << ',';
@@ -401,7 +401,7 @@ public:
   out << '[';
   for (int i = 0; i < this->characters.size; i ++)
   { out << '[';
-    for (int j = 0; j< this->characters[i].size; j ++)
+    for (int j = 0; j < this->characters[i].size; j ++)
     { out << '"' << this->characters[i][j] << '"';
       if (j != this->characters[i].size- 1)
         out << ',';
@@ -431,7 +431,7 @@ template <>
 unsigned int Vector<int>::HashFunction() const
 { unsigned int result = 0;
   int theSize = MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
-  for (int i = 0; i <theSize; i ++)
+  for (int i = 0; i < theSize; i ++)
     result +=  (unsigned int) this->TheObjects[i] *  SomeRandomPrimes[i];
   return result;
 }
@@ -743,15 +743,15 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
   AllTauSignatures(&G,ts,true);
 
 
-  for (int i = 0; i <ts.size; i ++)
-    for (int j = 0; j<ts[i].size; j ++)
+  for (int i = 0; i < ts.size; i ++)
+    for (int j = 0; j < ts[i].size; j ++)
       data[i][j] = ts[i][j];
   /* this prints out everything for some reason
   for (int i = 0; i <G.conjugacyClasses.size; i ++)
   {stOutput << "conjugacy class " << i << "\n";
    for (int j = 0; j<G.conjugacyClasses[i].size; j ++)
    {ElementWeylGroup<WeylGroup> g = G.theElements[G.conjugacyClasses[i][j]];
-     for (int k= 0; k<g.size; k++)
+     for (int k = 0; k<g.size; k++)
       stOutput << g[k] << ' ';
      stOutput << "\n";
    }
@@ -768,7 +768,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
   { List<int> g;
     G.GetWord(G.conjugacyClasses[i][0],g);
     stOutput << "&\\rotatebox{90}{";
-    for (int k= 0; k<g.size; k++)
+    for (int k = 0; k<g.size; k++)
       stOutput << g[k] << ' ';
     stOutput << "}\t";
   }
@@ -805,7 +805,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
   }
 
   stOutput << "\\\\" << "\n";
-  for (int i = 0; i <ts.size; i ++)
+  for (int i = 0; i < ts.size; i ++)
   { for (int j = 0; j<numCycles; j ++)
     { stOutput << '&';
       stOutput << ts[i][j] << '\t';
@@ -847,7 +847,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
 
       // data goes out here
       stOutput << "\\\\" << "\n";
-      for (int i = 0; i <ts.size; i ++)
+      for (int i = 0; i < ts.size; i ++)
       { for (int j = numCycles; j<numCycles+numCycles- 1; j ++)
         { stOutput << '&';
           stOutput << ts[i][j] << '\t';
@@ -863,10 +863,10 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
   for (int j = 0; j<PSGs[i].ccCount; j ++)
   { CoxeterElement h = PSGs[i].GetCoxeterElement(PSGs[i].conjugacyClasses[j][0]);
     g.reflections.SetSize(h.reflections.size);
-    for (int k= 0; k<h.reflections.size; k++)
+    for (int k = 0; k<h.reflections.size; k++)
       g.reflections[k] = sel.elements[h.reflections[k]];
     int gi = this->GetIndexOfElement(g);
-    for (int k= 0; k< this->ccCount; k++)
+    for (int k = 0; k< this->ccCount; k++)
       for (int l = 0; l< this->conjugacyClasses[k].size; l ++)
         if (this->conjugacyClasses[k][l] == gi)
         { ccBackMaps[i][j] = k;
@@ -892,7 +892,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
    }
    List<Vector<coefficient> > Vb = basis;
    for (int i = 0; i <ct.size; i ++)
-   { if (character.IP(ct[i])!= 0)
+   { if (character.IP(ct[i]) != 0)
      { stOutput << "contains irrep " << i << "\n";
        Matrix<coefficient> M = ClassFunctionMatrix(ct[i]);
        Vb = intersection(Vb,DestructiveKernel(M));
@@ -1040,7 +1040,7 @@ class polynom1al
   // if only cxx had lisp macros...
   polynom1al<coefficient> operator+(const polynom1al &right) const
   { polynom1al<coefficient> out;
-    out.data.SetSize((right.data.size>this->data.size)?right.data.size:this->data.size);
+    out.data.SetSize((right.data.size >this->data.size)?right.data.size:this->data.size);
     int i = 0;
     for (; i < this->data.size && i <right.data.size; i ++)
       out.data[i] = this->data[i] + right.data[i];
@@ -1053,7 +1053,7 @@ class polynom1al
 
   polynom1al<coefficient> operator-(const polynom1al &right) const
   { polynom1al<coefficient> out;
-    out.data.SetSize((right.data.size>this->data.size)?right.data.size:this->data.size);
+    out.data.SetSize((right.data.size >this->data.size)?right.data.size:this->data.size);
     int i = 0;
     for (; i < this->data.size && i <right.data.size; i ++)
       out.data[i] = this->data[i] - right.data[i];
@@ -1075,7 +1075,7 @@ class polynom1al
   void operator*=(const polynom1al &right)
   { polynom1al<coefficient> tmp = *this;
     this->data.SetSize(tmp.data.size*right.data.size)
-    for (int i = 0; i <tmp.data.size; i ++)
+    for (int i = 0; i < tmp.data.size; i ++)
       for (int j = 0; j<right.data.size; j ++)
         this->data[i*j] = tmp.data[i]*right.data[j];
   }
@@ -1228,7 +1228,7 @@ List<Vector<coefficient> > orthogonal_complement(const List<Vector<coefficient> 
   { for (int j = 0; j<d; j ++)
     { coefficient r = V[i][j];
       outm.elements[i][j] = r;
-      for (int k= 0; k<W.size; k++)
+      for (int k = 0; k<W.size; k++)
         outm.elements[i][j] -= VM.elements[k][i] * W[k][j];
     }
   }
@@ -1324,7 +1324,7 @@ List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M)
     zerov = true;
     for (int j = 0; j<M.NumCols; j ++)
     { v[j] = M.elements[i][j];
-      if (zerov && M.elements[i][j]!= 0)
+      if (zerov && M.elements[i][j] != 0)
         zerov = false;
     }
     if (zerov)
@@ -1344,7 +1344,7 @@ Vector<coefficient> PutInBasis(const Vector<coefficient> &v, const List<Vector<c
   { for (int j = 0; j<v.size; j ++)
       w[i] += B[i][j]*v[j];
     for (int j = 0; j<B.size; j ++)
-      for (int k= 0; k<v.size; k++)
+      for (int k = 0; k<v.size; k++)
         M.elements[i][j] += B[i][k] * B[j][k];
   }
   M.Invert();
@@ -1367,7 +1367,7 @@ Vector<coefficient> ActOnGroupRing(const FiniteGroup<elementSomeGroup>& G, int g
   elementSomeGroup theProduct;
   for (int i = 0; i <G.theElements.size; i ++)
     if (v[i] != 0)
-      out[G.MultiplyElements(g,i)]=v[i];
+      out[G.MultiplyElements(g,i)] =v[i];
   return out;
 }
 
@@ -1447,7 +1447,7 @@ int popcnt(int i) // from the internet
 List<List<int> > powersetgrade(int G, const List<int>& l)
 { List<List<int> > out;
   for (int i = 0; i <1<<l.size; i ++)
-  { if (popcnt(i)== G)
+  { if (popcnt(i) == G)
     { List<int> outi;
       for (int j = 0; j<l.size; j ++)
       { if (i&(1<<j))
@@ -1496,7 +1496,7 @@ List<Element> charpoly(const Matrix<Element>& M)
       acc = -acc;
     p[M.NumRows-i] = acc;
   }
-  p[0] = ((M.NumRows%2)== 0)? - 1 : 1;
+  p[0] = ((M.NumRows%2) == 0)? - 1 : 1;
 
   return p;
 }
@@ -1578,7 +1578,7 @@ void matrix_acts_on_polynomial(const Matrix<Rational>& m,const Polynomial<Ration
       if (p.theMonomials[i](j) != 0)
       { Polynomial<Rational> qj;
         qj = qj.GetZero();
-        for (int k= 0; k<m.NumCols; k++)
+        for (int k = 0; k<m.NumCols; k++)
           qj.AddMonomial(vars[k],m.elements[k][j]);
         qj.RaiseToPower((p.theMonomials[i](j)).floorIfSmall());
         qi *= qj;
@@ -1596,14 +1596,14 @@ bool GetCoordsInBasisInputIsGaussianEliminated
 { MacroRegisterFunctionWithName("GetCoordsInBasiS");
   MonomialCollection<templateMonomial, coefficient>  summand, v= input;
   coefficient currentCoeff;
-  if (outputCoordinatesInBasis!= 0)
+  if (outputCoordinatesInBasis != 0)
     outputCoordinatesInBasis->MakeZero(inputReducedBasis.size);
-  for (int i = 0; i <inputReducedBasis.size; i ++)
+  for (int i = 0; i < inputReducedBasis.size; i ++)
   { currentCoeff=v.GetMonomialCoefficient(inputReducedBasis[i].GetMaxMonomial());
     if (!currentCoeff.IsEqualToZero())
     { summand = inputReducedBasis[i];
-      if (outputCoordinatesInBasis!= 0)
-        (*outputCoordinatesInBasis)[i]= currentCoeff;
+      if (outputCoordinatesInBasis != 0)
+        (*outputCoordinatesInBasis)[i] = currentCoeff;
       currentCoeff*= - 1;
       summand*= currentCoeff;
       v-=summand;
@@ -1620,14 +1620,14 @@ bool GetCoordsInBasisInputIsGaussianEliminated
 { MacroRegisterFunctionWithName("GetCoordsInBasiS");
   Polynomial<coefficient>  summand, v= input;
   coefficient currentCoeff;
-  if (outputCoordinatesInBasis!= 0)
+  if (outputCoordinatesInBasis != 0)
     outputCoordinatesInBasis->MakeZero(inputReducedBasis.size);
-  for (int i = 0; i <inputReducedBasis.size; i ++)
+  for (int i = 0; i < inputReducedBasis.size; i ++)
   { currentCoeff=v.GetMonomialCoefficient(inputReducedBasis[i].GetMaxMonomial());
     if (!currentCoeff.IsEqualToZero())
     { summand = inputReducedBasis[i];
-      if (outputCoordinatesInBasis!= 0)
-        (*outputCoordinatesInBasis)[i]= currentCoeff;
+      if (outputCoordinatesInBasis != 0)
+        (*outputCoordinatesInBasis)[i] = currentCoeff;
       currentCoeff*= - 1;
       summand*= currentCoeff;
       v-=summand;
@@ -1650,7 +1650,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
 
   List<Vector<Rational> > roots;
 
-  for (int k= 0; k<theRootSAs.theSubalgebras.size; k++)
+  for (int k = 0; k<theRootSAs.theSubalgebras.size; k++)
   { rootSubalgebra& currentRootSA= theRootSAs.theSubalgebras[k];
     roots = currentRootSA.PositiveRootsK;
     Polynomial<Rational> macdonaldPoly;
@@ -1782,7 +1782,7 @@ get_macdonald_representation(WeylGroupData& W, const List<Vector<Rational> >& ro
     for (int j = 0; j<monomials_used.size; j ++)
     { List<Vector<Rational> > monomial;
       monomial.SetSize(roots.size);
-      for (int k= 0; k<roots.size; k++)
+      for (int k = 0; k<roots.size; k++)
         monomial[k] = m*monomials[monomials_used[j]][k];
       Vector<Rational> evaluated;
       evaluated.SetSize(W.RootSystem.size);
@@ -1790,7 +1790,7 @@ get_macdonald_representation(WeylGroupData& W, const List<Vector<Rational> >& ro
       { Rational p = 1;
         for (int ej = 0; ej<monomial.size; ej ++)
         { Rational s = 0;
-          for (int ek= 0; ek<monomial[ej].size; ek++)
+          for (int ek = 0; ek<monomial[ej].size; ek++)
           { s += monomial[ej][ek] * W.RootSystem[ei][ek];
           }
           p *= s;
@@ -1927,7 +1927,7 @@ Vector<int> pointi_slow(int d, int i)
     while (true)
     { for (int j = 0; j<d; j ++)
       { if (point[j] < n)
-        { point[j]++;
+        { point[j] ++;
           points.AddOnTop(point);
           break;
         } else
@@ -1943,7 +1943,7 @@ Vector<int> pointi_slow(int d, int i)
     done_generating_points:
     //points.QuickSortAscending(&pointgt);
     std::sort(points.TheObjects, points.TheObjects+points.size, pointlt);
-    for (int k= 0; k<points.size; k++)
+    for (int k = 0; k<points.size; k++)
       stOutput << points[k] << "\n";
     stOutput << " " << points.size << " generated." << "\n";
     maxpoints = points.size;
@@ -2177,7 +2177,7 @@ int pointis(int d, int n)
 //    Rational is = 0;
 //    for (int j = 0; j<monomials[lens[i].num].size; j ++)
 //    { Rational js = 0;
-//      for (int k= 0; k<monomials[lens[i].num][j].size; k++)
+//      for (int k = 0; k<monomials[lens[i].num][j].size; k++)
 //        js += monomials[lens[i].num][j][k];
 //      stOutput << monomials[lens[i].num][j] << " [" << js << "], ";
 //      is += js;
@@ -2264,7 +2264,7 @@ int pointis(int d, int n)
 //    for (int j = 0; j<monomials_used.size; j ++)
 //    { List<Vector<Rational> > monomial;
 //      monomial.SetSize(roots.size);
-//      for (int k= 0; k<roots.size; k++)
+//      for (int k = 0; k<roots.size; k++)
 //        monomial[k] = m*monomials[monomials_used[j]][k];
 //      Vector<f65521> evaluated;
 //      evaluated.SetSize(number_of_images);
@@ -2272,7 +2272,7 @@ int pointis(int d, int n)
 //      { f65521 p = 1;
 //        for (int ej = 0; ej<monomial.size; ej ++)
 //        { f65521 s = 0;
-//          for (int ek= 0; ek<monomial[ej].size; ek++)
+//          for (int ek = 0; ek<monomial[ej].size; ek++)
 //          { s += monomial[ej][ek] * pointi(W.GetDim(),ei)[ek];
 //          }
 //          p *= s;
@@ -2359,7 +2359,7 @@ int pointis(int d, int n)
 //    for (int j = 0; j<monomials_used.size; j ++)
 //    { List<Vector<Rational> > monomial;
 //      monomial.SetSize(roots.size);
-//      for (int k= 0; k<roots.size; k++)
+//      for (int k = 0; k<roots.size; k++)
 //        monomial[k] = m*monomials[monomials_used[j]][k];
 //      Vector<Rational> evaluated;
 //      evaluated.SetSize(number_of_images);
@@ -2367,7 +2367,7 @@ int pointis(int d, int n)
 //      { Rational p = 1;
 //        for (int ej = 0; ej<monomial.size; ej ++)
 //        { Rational s = 0;
-//          for (int ek= 0; ek<monomial[ej].size; ek++)
+//          for (int ek = 0; ek<monomial[ej].size; ek++)
 //          { s += monomial[ej][ek] * pointi(W.GetDim(),ei)[ek];
 //          }
 //          p *= s;
@@ -2427,7 +2427,7 @@ int pointis(int d, int n)
 //  theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
 //  List<Vector<Rational> > roots;
 //
-//  for (int k= 0; k<theRootSAs.theSubalgebras.size; k++)
+//  for (int k = 0; k<theRootSAs.theSubalgebras.size; k++)
 //  { rootSubalgebra& currentRootSA= theRootSAs.theSubalgebras[k];
 //    roots = currentRootSA.PositiveRootsK;
 //    stOutput << "I am processing root subalgebra of type "
@@ -2447,13 +2447,13 @@ void lie_bracket_relations(Vector<Polynomial<Rational> >& out, int N)
   for (int i = 0; i <N; i ++)
     for (int j = 0; j<N; j ++)
     { brackets.elements[i][j].SetSize(N);
-      for (int k= 0; k<N; k++)
+      for (int k = 0; k<N; k++)
         brackets.elements[i][j][k].MakeMonomiaL(i*N*N+j*N+k,1);
     }
   stOutput << brackets << '\n';
   for (int i = 0; i <N; i ++)
-    for (int j = 0; j<i; j ++)
-    { for (int k= 0; k<j; k++)
+    for (int j = 0; j < i; j ++)
+    { for (int k = 0; k<j; k++)
       { stOutput << i << j << k;
         Vector<Polynomial<Rational> > w;
         w.MakeZero(N);
@@ -2476,7 +2476,7 @@ void lie_bracket_relations(Vector<Polynomial<Rational> >& out, int N)
     }
   stOutput << "done with Jacobi relations\n";
   for (int i = 0; i <N; i ++)
-    for (int j = 0; j<i; j ++)
+    for (int j = 0; j < i; j ++)
     { Vector<Polynomial<Rational> > v;
       v = brackets.elements[i][j];
       v += brackets.elements[j][i];
@@ -2741,7 +2741,7 @@ void TestInduction(int n =4, int m=3)
   stOutput << "5\n";
   stOutput << HD.theGroup->PrettyPrintCharacterTable();
   stOutput << HD.theSubgroup->PrettyPrintCharacterTable();
-  for (int i = 0; i <indreps.size; i ++)
+  for (int i = 0; i < indreps.size; i ++)
     stOutput << indreps[i].DescribeAsDirectSum() << '\n';
 }
 
@@ -2756,7 +2756,7 @@ void TestInduction(int n =4, int m=3)
   //    v.SetSize(3);
   //    v="(1/2,3,- 1/5)";
   //    v[1].AssignString("1/3");
-    //  v[2]=5;
+    //  v[2] =5;
       Vector<Rational> v;
       v = "(1/3,1,2)";
       stOutput << v << "\n";
@@ -3258,7 +3258,7 @@ void TestInduction(int n =4, int m=3)
         }
         stOutput << "finding next character" << "\n";
         if (ci != 0)
-        { ci--;
+        { ci --;
           cj ++;
           chars[ci].AddOnTop(chars[ci][cj- 1]*Xcs);
         } else

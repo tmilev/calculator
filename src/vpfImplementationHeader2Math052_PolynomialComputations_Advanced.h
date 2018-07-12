@@ -109,7 +109,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis
 //        (this->SoPolyBuf, &this->remainderDivision, theGlobalVariables, i);
         //if (!this->remainderDivision.IsEqualToZero())
         //  this->basisCandidates.AddOnTop(this->remainderDivision);
-        //if (this->basisCandidates.size>this->theBasiS.size)
+        //if (this->basisCandidates.size >this->theBasiS.size)
         //  if (this->AddPolysAndReduceBasis(theGlobalVariables))
         //    changed = true;
         this->basisCandidates.AddOnTop(this->SoPolyBuf);
@@ -697,7 +697,7 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
   MonomialP tempM;
   Polynomial<coefficient> tempP;
   coefficient theCF;
-//  if (theAlgebraicClosure!= 0)
+//  if (theAlgebraicClosure != 0)
 //  { stOutput << "running with non-zero algebraic closure";
 //  }
   for (int i = 0; i < inputSystem.size; i ++)
@@ -865,7 +865,7 @@ void GroebnerBasisComputation<coefficient>::PolySystemSolutionSimplificationPhas
   }
 
 //  stOutput << "<hr><hr>Recursion depth: " << this->RecursionCounterSerreLikeSystem << "<br>Solving the system\n<br>\n";
-//  for (int i = 0; i <inputSystem.size; i ++)
+//  for (int i = 0; i < inputSystem.size; i ++)
 //    stOutput << "<br>" << HtmlRoutines::GetMathSpanPure(inputSystem[i].ToString());
   bool changed = true;
   PolynomialSubstitution<coefficient> theSub;
@@ -908,7 +908,7 @@ void GroebnerBasisComputation<coefficient>::PolySystemSolutionSimplificationPhas
     //  stOutput << "<br>Failed to reduce system!";
     if (success)
     { //stOutput << "<hr>System groebner reduced successfully, output:";
-      //for (int i = 0; i <inputSystem.size; i ++)
+      //for (int i = 0; i < inputSystem.size; i ++)
         //stOutput << "<br>" << HtmlRoutines::GetMathSpanPure(inputSystem[i].ToString());
       if (this->IsContradictoryReducedSystem(inputSystem))
       { this->flagSystemProvenToHaveNoSolution = true;
@@ -1003,7 +1003,7 @@ void GroebnerBasisComputation<coefficient>::ProcessSolvedSubcaseIfSolvedOrProven
     this->flagSystemProvenToHaveNoSolution = potentiallySolvedCase.flagSystemProvenToHaveNoSolution;
     this->flagSystemProvenToHaveSolution = potentiallySolvedCase.flagSystemProvenToHaveSolution;
     this->flagSystemSolvedOverBaseField = potentiallySolvedCase.flagSystemSolvedOverBaseField;
-//    this->theImpliedSubS= impliedSubsCopy;
+//    this->theImpliedSubS = impliedSubsCopy;
 //    stOutput << "<br>this: system solution:  "
 //    << this->systemSolution.GetElement().ToStringCommaDelimited();
     this->BackSubstituteIntoPolySystem(this->theImpliedSubS);

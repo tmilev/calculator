@@ -435,7 +435,7 @@ void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
     return;
   }
   //this->crawlingResult << "%DEBUG: before error stream: opening: " << currentFileName << "\n";
-  if (this->errorStream.str()!="")
+  if (this->errorStream.str() != "")
     return;
   ///////////
   /// ALERT
@@ -761,7 +761,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
   std::string commandResult = theGlobalVariables.CallSystemWithOutput(currentSysCommand);
   if (commentsGeneral != 0)
     *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
-  if (this->targetVideoLatexPath!="")
+  if (this->targetVideoLatexPath!= "")
   { currentSysCommand = "mkdir -p " + this->targetVideoLatexPath;
     std::string commandResult = theGlobalVariables.CallSystemWithOutput(currentSysCommand);
     if (commentsGeneral != 0)

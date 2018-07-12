@@ -306,7 +306,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(Calculator& theCo
   std::string theConvertedBack = Crypto::ConvertStringToBase64(theBitStream);
   out << "Original string: " << input.GetValue<std::string>()
   << "<br>Converted to bitstream and back: " << theConvertedBack;
-  if (theConvertedBack!= input.GetValue<std::string>())
+  if (theConvertedBack != input.GetValue<std::string>())
     out << "<br><b>The input is not the same as the output!</b>";
   return output.AssignValue(out.str(), theCommands);
 }
@@ -2135,7 +2135,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative(Calculato
     << " - possible user typo?";
   const Expression& theDOvar = input[1], theArgument = input[2];
   //////////////////////
-  //Quotient rule (commutative): (a/b^n)'=(a'b-n a b')/b^{n + 1}
+  //Quotient rule (commutative): (a/b^n)'= (a'b-n a b')/b^{n + 1}
   if (!theArgument.StartsWith(theCommands.opDivide(), 3))
     return false;
   const Expression& numeratorE = theArgument[1];
@@ -2188,7 +2188,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBNONCommutative(Calcul
     << " - possible user typo?";
   const Expression& theDOvar = input[1], theArgument = input[2];
   //////////////////////
-  //Quotient rule (non-commutative): (a/b)'=(ab^{- 1})'=a' b - a b^{- 1} b' b^{- 1}
+  //Quotient rule (non-commutative): (a/b)'= (ab^{- 1})'=a' b - a b^{- 1} b' b^{- 1}
   if (!theArgument.StartsWith(theCommands.opDivide(), 3))
     return false;
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -2859,7 +2859,7 @@ bool CalculatorFunctionsGeneral::innerPolynomialRelations
     return output.MakeError
     ("Error: your upper limit of polynomial operations exceeds 1000000, which is too large.\
      You may use negative or zero number give no computation bound, but please don't. ", theCommands);
-//  int upperBoundComputations =(int) upperBound.GetDoubleValue();
+//  int upperBoundComputations = (int) upperBound.GetDoubleValue();
   output.reset(theCommands);
   for (int i = 1; i < input.size(); i ++)
     output.children.AddOnTop(input.children[i]);
@@ -3279,7 +3279,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(C
   remainingFunctionToIntegrate = oneE / quadraticPowerN;
   remainingIntegral.MakeIntegral(theCommands, integrationSetE, remainingFunctionToIntegrate, x);
 //  Expression xplusbdiv2a = x +b/(twoE*a);
-//  Expression D=(fourE*a*c-bSquared)/(fourE*aSquared);
+//  Expression D= (fourE*a*c-bSquared)/(fourE*aSquared);
   Expression C = B - (A * b) / (twoE * a);
   oneE.CheckInitializationRecursively();
   apowerN.CheckInitializationRecursively();
@@ -3652,11 +3652,11 @@ bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
       currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theTanE);
     } else
     { return false;
-      /*currentE=(oneE-theCosDoubleE)/twoE;
+      /*currentE= (oneE-theCosDoubleE)/twoE;
       powerE.AssignValue(powerSine/2, theCommands);
       currentIntegrandSinePart.MakeXOX
       (theCommands, theCommands.opThePower(),currentE, powerE);
-      currentE=(oneE+theCosDoubleE)/twoE;
+      currentE= (oneE+theCosDoubleE)/twoE;
       powerE.AssignValue(powerCosine/2, theCommands);
       currentIntegrandCosinePart.MakeXOX
       (theCommands, theCommands.opThePower(),currentE, powerE);
@@ -5101,7 +5101,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
       << std::fixed << xValues[i]  << ", "
       << std::fixed << fValuesUpper[i] << ")" << "(" << std::fixed << xValues[i] + theDeltaWithSign
       << ", " << std::fixed
-      << fValuesUpper[i] << ")(" << std::fixed << xValues[i]+theDeltaWithSign << ", "
+      << fValuesUpper[i] << ")(" << std::fixed << xValues[i] + theDeltaWithSign << ", "
       << std::fixed << fValuesLower[i] << ")"
       << "(" << std::fixed << xValues[i] << ", " << std::fixed << fValuesLower[i] << ")";
       outHtml << "(" << std::fixed << xValues[i] << ", " << std::fixed << fValuesLower[i] << ")("
@@ -7504,12 +7504,12 @@ public:
     }
 //    double& theGraphicsUnit = theDV.theBuffer.GraphicsUnit[0];
 //    theGraphicsUnit =100;
-//    theDV.DefaultHtmlHeight =(int)( (this->layerHeight* (this->LayerSizes.size- 1)*theGraphicsUnit + 100).GetDoubleValue());
-//    theDV.DefaultHtmlWidth=(int)( (this->widthMaxLayer*theGraphicsUnit +40).GetDoubleValue());
+//    theDV.DefaultHtmlHeight = (int)( (this->layerHeight* (this->LayerSizes.size- 1)*theGraphicsUnit + 100).GetDoubleValue());
+//    theDV.DefaultHtmlWidth= (int)( (this->widthMaxLayer*theGraphicsUnit +40).GetDoubleValue());
 //    theDV.theBuffer.centerX.SetSize(1);
 //    theDV.theBuffer.centerY.SetSize(1);
-//    theDV.theBuffer.centerX[0]= (this->widthMaxLayer/2).GetDoubleValue()*theGraphicsUnit;
-//    theDV.theBuffer.centerY[0]= 40;
+//    theDV.theBuffer.centerX[0] = (this->widthMaxLayer/2).GetDoubleValue()*theGraphicsUnit;
+//    theDV.theBuffer.centerY[0] = 40;
 //    stOutput << this->ToString();
   }
 };

@@ -1,6 +1,6 @@
 "use strict";
 
-function submitChangePassRequestCallback(result, outputComponent) {
+function submitAccountActivationRequestCallback(result, outputComponent) {
   outputComponent = document.getElementById("spanVerification").innerHTML = result;
   document.getElementById("inputPassword").value = document.getElementById("inputNewPasswordInAccount").value;
   document.getElementById("inputOldPasswordInAccount").value = "";
@@ -9,7 +9,7 @@ function submitChangePassRequestCallback(result, outputComponent) {
   loginCalculator();
 }
 
-function submitChangePassRequest() {
+function submitActivateAccountRequest() {
   var inputOldPassword = document.getElementById("inputOldPasswordInAccount");
   var inputNewPassword = document.getElementById("inputNewPasswordInAccount");
   var inputReenteredPassword = document.getElementById("inputReenteredPasswordInAccount");
@@ -28,9 +28,9 @@ function submitChangePassRequest() {
   });
 }
 
-function updateAccountPage() {
-  var usernameInput = document.getElementById("spanUserIdInAccountsPage");
-  var emailSpan = document.getElementById(idDOMElements.spanOldEmail);
+function updateAccountActivationPage() {
+  var emailSpan = document.getElementById(idDOMElements.spanCurrentActivationEmail);
+  var usernameInput = document.getElementById(idDOMElements.spanUserIdInActivateAccountPage);
   usernameInput.innerHTML = thePage.storage.user.name.getValue();
   emailSpan.innerHTML = thePage.storage.user.email.getValue();
 }

@@ -132,39 +132,39 @@ std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << "    theCalculatorForm.style.width  = theOldWidth;\n"
   << "    theCalculatorForm.style.height = theOldHeight;\n"
   << "  }\n"
-  << "  if (document.getElementById(\"debugFlag\")!= null)\n "
-  << "    if (getCookie(\"debugFlag\")!='')\n"
+  << "  if (document.getElementById(\"debugFlag\") != null)\n "
+  << "    if (getCookie(\"debugFlag\") !='')\n"
   << "      document.getElementById(\"debugFlag\").value =getCookie(\"debugFlag\");\n"
-  << "  if (getCookie(\"problemLinkStyle\")!='')\n"
-  << "  { if (setProblemLinkStyle!==undefined)\n"
+  << "  if (getCookie(\"problemLinkStyle\") !='')\n"
+  << "  { if (setProblemLinkStyle !==undefined)\n"
      "      setProblemLinkStyle(getCookie(\"problemLinkStyle\"));\n"
   << "  }\n"
-  << "  if (document.getElementById(\"studentView\")!= null)\n "
-  << "    if (getCookie(\"studentView\")!='')\n"
+  << "  if (document.getElementById(\"studentView\") != null)\n "
+  << "    if (getCookie(\"studentView\") !='')\n"
   << "      document.getElementById(\"studentView\").value =getCookie(\"studentView\");\n"
-  << "  if (document.getElementById(\"studentSection\")!= null)\n "
-  << "    if (getCookie(\"studentSection\")!='')\n"
+  << "  if (document.getElementById(\"studentSection\") != null)\n "
+  << "    if (getCookie(\"studentSection\") !='')\n"
   << "      document.getElementById(\"studentSection\").value =getCookie(\"studentSection\");\n"
-  << "  if (document.getElementById(\"request\")!= null)\n "
-  << "    if (getCookie(\"request\")!='')\n"
+  << "  if (document.getElementById(\"request\") != null)\n "
+  << "    if (getCookie(\"request\") !='')\n"
   << "    { var theReq=getCookie(\"request\");\n"
-  << "      if (theReq=='template' || theReq=='calculator' || theReq=='exercise' || "
-  << "         theReq=='scoredQuiz' || theReq=='exerciseNoLogin')\n"
+  << "      if (theReq== 'template' || theReq== 'calculator' || theReq== 'exercise' || "
+  << "         theReq== 'scoredQuiz' || theReq== 'exerciseNoLogin')\n"
   << "        document.getElementById(\"request\").value =getCookie(\"request\");\n"
   << "    }"
-  << "  if (document.getElementById(\"fileName\")!= null)\n "
-  << "    if (getCookie(\"fileName\")!='')\n"
+  << "  if (document.getElementById(\"fileName\") != null)\n "
+  << "    if (getCookie(\"fileName\") !='')\n"
   << "      document.getElementById(\"fileName\").value =getCookie(\"fileName\");\n"
-  << "  if (document.getElementById(\"courseHome\")!= null)\n "
-  << "    if (getCookie(\"courseHome\")!='')\n"
+  << "  if (document.getElementById(\"courseHome\") != null)\n "
+  << "    if (getCookie(\"courseHome\") !='')\n"
   << "      document.getElementById(\"courseHome\").value =getCookie(\"courseHome\");\n"
-  << "  if (document.getElementById(\"authenticationToken\")!= null)\n"
-  << "    if (getCookie(\"authenticationToken\")!='')\n"
+  << "  if (document.getElementById(\"authenticationToken\") != null)\n"
+  << "    if (getCookie(\"authenticationToken\") !='')\n"
   << "      document.getElementById(\"authenticationToken\").value =getCookie(\"authenticationToken\");\n ";
   out
-  << "  if (document.getElementById(\"username\")!= null)\n"
-  << "    if (document.getElementById(\"username\").value =='' || document.getElementById(\"username\").value == null)\n "
-  << "      if (getCookie(\"username\")!='')\n"
+  << "  if (document.getElementById(\"username\") != null)\n"
+  << "    if (document.getElementById(\"username\").value == '' || document.getElementById(\"username\").value == null)\n "
+  << "      if (getCookie(\"username\") !='')\n"
   << "        document.getElementById(\"username\").value =getCookie(\"username\");\n ";
   out << "}\n";
   out << " </script>\n";
@@ -190,7 +190,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "  if (isPaused)\n";
   out << "    return;\n";
   out << "  progReportTimer.innerHTML =\"<hr>Refreshing every \"+timeIncrementInTenthsOfSecond/10+\" second(s). Client time: ~\"+ Math.floor(timeOutCounter/10) +\" second(s)<br>\";\n";
-  out << "  timeOutCounter+= timeIncrementInTenthsOfSecond;\n";
+  out << "  timeOutCounter += timeIncrementInTenthsOfSecond;\n";
   out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable
   << "?request=indicator&mainInput=\"+currentWorkerNumber;\n";
   out << "  var https = new XMLHttpRequest();\n";
@@ -225,7 +225,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   << "?request=pause&mainInput=\"+currentWorkerNumber;\n";
   out << "  pauseRequest.open(\"GET\",pauseURL,true);\n";
   out << "  pauseRequest.onload = function() {\n";
-  out << "    if (pauseRequest.status!=200)\n";
+  out << "    if (pauseRequest.status !=200)\n";
   out << "      return;\n";
   out << "    requestStatus.innerHTML=pauseRequest.responseText;\n";
   out << "    if (pauseRequest.responseText ==\"paused\")\n";
@@ -1205,7 +1205,7 @@ std::string WebWorker::ToStringMessageFullUnsafe(bool useHTML) const
   //  return "Message cannot be viewed when using SSL";
   std::stringstream out;
   out << this->ToStringMessageUnsafe(useHTML);
-  if (this->theMessageHeaderStrings.size>0)
+  if (this->theMessageHeaderStrings.size >0)
   { out << "<hr>\nStrings extracted from message: ";
     for (int i = 0; i < this->theMessageHeaderStrings.size; i ++)
       out << "<br>" << this->theMessageHeaderStrings[i];
@@ -2500,7 +2500,7 @@ int WebWorker::ProcessFile()
   if (!this->flagKeepAlive)
     theHeader << this->GetHeaderConnectionClose() << "\r\n";
   //std::string theCookie = this->GetHeaderSetCookie();
-  //if (theCookie!="")
+  //if (theCookie != "")
   //  theHeader << theCookie << "\r\n";
   theHeader << "\r\n";
   this->QueueStringForSendingNoHeadeR(theHeader.str());
@@ -3895,7 +3895,7 @@ std::string WebWorker::GetSignUpPage()
   << "   return false;\n"
   << "  }\n"
   << "  var theToken =grecaptcha.getResponse();\n"
-  << "  if (theToken ==='' || theToken === null)"
+  << "  if (theToken === '' || theToken === null)"
   << "  { document.getElementById('signUpResult').innerHTML="
   << "\"<span style ='color:red'><b>Please don't forget to solve the captcha. </b></span>\";\n"
   << "    return false;\n"
@@ -4485,7 +4485,7 @@ void WebWorker::OutputShowIndicatorOnTimeout()
 
 std::string WebWorker::ToStringStatus() const
 { std::stringstream out;
-//  if (theWebServer.currentlyConnectedAddresses.GetCoefficientsSum()!= theWebServer.
+//  if (theWebServer.currentlyConnectedAddresses.GetCoefficientsSum() != theWebServer.
   out << "<br>Worker " << this->indexInParent + 1;
   if (this->flagInUse)
   { if (this->parent->activeWorker == this->indexInParent)
@@ -5295,7 +5295,7 @@ void WebServer::initPrepareSignals()
     crash << "Failed to register SIGFPE handler (fatal arithmetic error). Crashing to let you know. " << crash;
   ////////////////////
   //ignore interrupts
-  //if (sigemptyset(&SignalINT.sa_mask)== - 1)
+  //if (sigemptyset(&SignalINT.sa_mask) == - 1)
   //  crash << "Failed to initialize SignalINT mask. Crashing to let you know. " << crash;
   //SignalINT.sa_sigaction = 0;
   //SignalINT.sa_handler = &WebServer::Signal_SIGINT_handler;
@@ -5303,19 +5303,19 @@ void WebServer::initPrepareSignals()
   //  crash << "Failed to register null SIGINT handler. Crashing to let you know. " << crash;
   ////////////////////
   //reap children
-  //if (sigemptyset(&SignalChild.sa_mask)== - 1)
+  //if (sigemptyset(&SignalChild.sa_mask) == - 1)
   //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
-  //if (sigaddset(&SignalChild.sa_mask, SIGINT)== - 1)
+  //if (sigaddset(&SignalChild.sa_mask, SIGINT) == - 1)
   //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
   ////////////////////////////////
   //sigchld signal should automatically be blocked when calling the sigchld handler.
   //Nevertheless, let's explicitly add it:
-  //if (sigaddset(&SignalChild.sa_mask, SIGCHLD)== - 1)
+  //if (sigaddset(&SignalChild.sa_mask, SIGCHLD) == - 1)
   //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
   ////////////////////////////////
-  //if (sigaddset(&SignalChild.sa_mask, SIGFPE)== - 1)
+  //if (sigaddset(&SignalChild.sa_mask, SIGFPE) == - 1)
   //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
-  //if (sigaddset(&SignalChild.sa_mask, SIGSEGV)== - 1)
+  //if (sigaddset(&SignalChild.sa_mask, SIGSEGV) == - 1)
   //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
   SignalChild.sa_flags = SA_NOCLDWAIT;
   SignalChild.sa_handler =  NULL;
@@ -5439,7 +5439,7 @@ int WebServer::Run()
     bool found = false;
     for (int i = theListeningSockets.size - 1; i >= 0; i --)
       if (FD_ISSET(this->theListeningSockets[i], &FDListenSockets))
-      { //if (this->theListeningSockets[i]== this->listeningSocketHTTP)
+      { //if (this->theListeningSockets[i] == this->listeningSocketHTTP)
         newConnectedSocket = accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
         if (newConnectedSocket >= 0)
         { logServer << logger::green << "Connection candidate  "
@@ -6337,7 +6337,7 @@ int WebServer::mainApache()
   << "\n<hr>Server base: <br>\n" << theGlobalVariables.PhysicalPathProjectBase
   << "\n<hr>Calculator display name apache: <br>\n" << theGlobalVariables.DisplayNameCalculatorApache
   << "\n<hr>Cookies: <br>\n" << theWorker.cookiesApache;
-  for (int i = 0; i <theWorker.cookies.size; i ++)
+  for (int i = 0; i < theWorker.cookies.size; i ++)
     stOutput << "<br>\n" << theWorker.cookies[i] << "\n";
   stOutput << "\n<hr>query string:<br>\n" << theWorker.addressGetOrPost
   << "\n<hr>message body:<br>\n" << theWorker.messageBody
@@ -6504,7 +6504,7 @@ void WebWorker::QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool
 { MacroRegisterFunctionWithName("WebWorker::QueueBytesForSending");
   (void) MustSendAll;
   this->remainingBytesToSenD.AddListOnTop(bytesToSend);
-//  if (this->remainingBytesToSend.size>=1024*512 || MustSendAll)
+//  if (this->remainingBytesToSend.size >=1024*512 || MustSendAll)
 //    this->SendAllBytes();
 }
 

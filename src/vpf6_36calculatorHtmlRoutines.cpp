@@ -20,7 +20,7 @@ bool CalculatorHtmlFunctions::innerUserInputBox
     return output.AssignValue(theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(boxName), theCommands);
   InputBox newBox;
   newBox.name = boxName;
-  for (int i = 0; i <theArguments.theKeys.size; i ++)
+  for (int i = 0; i < theArguments.theKeys.size; i ++)
   { if (theArguments.theKeys[i] == "value")
       newBox.value = theArguments.theValues[i];
     if (theArguments.theKeys[i] == "min")

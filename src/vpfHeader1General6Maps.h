@@ -103,7 +103,7 @@ public:
   { return this->theKeys.GetIndex(input);
   }
   bool Contains(const key& input) const
-  { return this->GetIndex(input)!= - 1;
+  { return this->GetIndex(input) != - 1;
   }
   value& GetValueCreateIfNotPresent(const key& input)
   { int theIndex = this->theKeys.GetIndex(input);
@@ -116,7 +116,7 @@ public:
   }
   void SetValue(const value& inputValue, const key& inputKey)
   { if (this->Contains(inputKey))
-    { this->theValues[this->theKeys.GetIndex(inputKey)]= inputValue;
+    { this->theValues[this->theKeys.GetIndex(inputKey)] = inputValue;
       return;
     }
     this->theValues.AddOnTop(inputValue);

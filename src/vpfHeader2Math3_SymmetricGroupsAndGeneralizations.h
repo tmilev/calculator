@@ -127,8 +127,8 @@ class Partition
   static void TestAllSpechtModules(int n);
   // int might not be wide enough
   int Fulton61z() const;
-  bool operator==(const Partition& right) const;
-  bool operator!=(const Partition& right) const;
+  bool operator== (const Partition& right) const;
+  bool operator!= (const Partition& right) const;
   bool operator<(const Partition& right) const;
   bool operator>(const Partition& right) const;
 
@@ -186,7 +186,7 @@ public:
   unsigned int HashFunction() const;
   static  unsigned int HashFunction(const PermutationR2& in)
                                       { return in.HashFunction();};
-  bool operator==(const PermutationR2& right) const;
+  bool operator== (const PermutationR2& right) const;
   bool IsID() const;
   int BiggestOccurringNumber() const;
   int operator*(int i) const;
@@ -329,7 +329,7 @@ class SemidirectProductElement
   { out = conjugateOn^conjugateWith;
   }
 
-  bool operator==(const SemidirectProductElement<helt,kelt,oa> right) const
+  bool operator== (const SemidirectProductElement<helt,kelt,oa> right) const
   { return (this->h == right.h) && (this->k == right.k);
   }
 
@@ -482,7 +482,7 @@ class ElementZ2N
   {
   }
 
-  bool operator==(const ElementZ2N& right) const
+  bool operator== (const ElementZ2N& right) const
   { //stOutput << "ElementZ2N::operator==: " << this->ToString() << "?=" << right.ToString();
     int i = 0;
     for (; i < MathRoutines::Minimum(this->bits.size, right.bits.size); i ++)
@@ -640,7 +640,7 @@ class HyperoctahedralGroupData
   void SpechtModuleOfPartititons
   (const Partition& positive, const Partition& negative,
    GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> &out);
-  bool operator==(const HyperoctahedralGroupData& other) const
+  bool operator== (const HyperoctahedralGroupData& other) const
   { if (!this->flagIsEntireHyperoctahedralGroup || !other.flagIsEntireHyperoctahedralGroup)
       return false;
     return this->N == other.N;
@@ -693,7 +693,7 @@ std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroupData& data
   bool HasDifferentConjugacyInvariantsFrom(const ElementHyperoctahedralGroup& other) const;
   static bool AreConjugate(const ElementHyperoctahedralGroup& x, const ElementHyperoctahedralGroup& y);
   void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& out) const;
-  bool operator==(const ElementHyperoctahedralGroup& right) const;
+  bool operator== (const ElementHyperoctahedralGroup& right) const;
   bool operator>(const ElementHyperoctahedralGroup& right) const;
   unsigned int HashFunction() const;
   static  unsigned int HashFunction(const ElementHyperoctahedralGroup& in)
@@ -994,7 +994,7 @@ class GeneratorElementsSnxSnOnIndicesAndIndices: public GeneratorProductOfGenera
   void Initialize(List<List<int> > indiceses)
   { List<GeneratorPermutationR2sOnIndices> gens;
     gens.SetSize(indiceses.size);
-    for (int i = 0; i <indiceses.size; i ++)
+    for (int i = 0; i < indiceses.size; i ++)
     { gens[i].Initialize(indiceses[i]);
     }
     this->Initialize(gens);
@@ -1442,7 +1442,7 @@ void PermutationR2::ActOnList(List<Object>& in) const
 template <typename coefficient>
 void PermutationR2::ActOnTensor(ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>& out,
   const ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>& in) const
-{ for (int i = 0; i <in.theMonomials.size; i ++)
+{ for (int i = 0; i < in.theMonomials.size; i ++)
   { MonomialTensor<int,MathRoutines::IntUnsignIdentity> tmpout,tmpin;
     tmpin = in.theMonomials[i];
     this->ActOnMonomialTensor(tmpout,tmpin);
@@ -1512,7 +1512,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords()
 //  stOutput << "GOT to here in computation of cc sizes and rep words";
   GraphOLD conjugacygraph = GraphOLD(this->theElements.size, this->generators.size);
   for (int i = 0; i < this->theElements.size; i ++)
-    for (int j = 0; j< this->generators.size; j ++)
+    for (int j = 0; j < this->generators.size; j ++)
     { elementSomeGroup x = this->theElements[i] ^ this->generators[j];
       int xi = this->theElements.GetIndex(x);
       conjugacygraph.AddEdge(i, xi);
@@ -1570,7 +1570,7 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations()
     return;
   this->generatorCommutationRelations.init(this->generators.size, this->generators.size);
   for (int i = 0; i < this->generators.size; i ++)
-    for (int j = i; j< this->generators.size; j ++)
+    for (int j = i; j < this->generators.size; j ++)
     { elementSomeGroup g;
       if (i == j)
         g = this->generators[i];
@@ -1681,7 +1681,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPri
   int cols_per_elt = 0;
   for (int i = 0; i < this->irreps.size; i ++)
   { values[i].SetSize(this->irreps[i].theCharacteR.data.size);
-    for (int j = 0; j< this->irreps[i].theCharacteR.data.size; j ++)
+    for (int j = 0; j < this->irreps[i].theCharacteR.data.size; j ++)
     { values[i][j] = irreps[i].theCharacteR.data[j].ToString();
       int vijcols = values[i][j].length();
       if (vijcols > cols_per_elt)

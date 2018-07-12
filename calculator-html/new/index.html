@@ -12,6 +12,7 @@
 <script src = "https://apis.google.com/js/client:platform.js?onload =start" async defer></script>
 <script type = "text/javascript" src = "/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full"></script>
 <script type = "text/javascript" src = "/calculator-html/new/pathnames.js"></script>
+<script type = "text/javascript" src = "/calculator-html/new/ids_dom_elements.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/modifiable_database_fields.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/miscellaneous.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/json_to_html.js"></script>
@@ -34,6 +35,7 @@
 <script type = "text/javascript" src = "/calculator-html/new/database.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/server_status.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/account.js"></script>
+<script type = "text/javascript" src = "/calculator-html/new/account_activation.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/manage_accounts.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/edit_page.js"></script>
 <script type = "text/javascript">
@@ -258,7 +260,6 @@ var MathQuillHasMatrixSupport = true;
   <td>Current password:</td>
   <td>
   <input class = "textInputUsername" type = "password" id = "inputOldPasswordInAccount" name = "password" placeholder = "password" autocomplete = "on">
-  <span id = "spanOldPasswordActivationLink"></span>
   </td>
   </tr>
   <tr>
@@ -278,15 +279,36 @@ var MathQuillHasMatrixSupport = true;
   <table>
   <tr><td>Current email:</td><td><span id = 'spanOldEmail'></span></td></tr>
   <tr>
-    <td>New email:</td>
+    <td id = "labelNewEmail">New email:</td>
     <td>
       <input class = "textInputUsername" type = "text" id = "inputEmail" placeholder = "email" autocomplete = "on">
     </td>
   </tr>
   </table>
-  <button class = "buttonStandard" onclick = "submitChangePassRequest()">Change email</button> 
+  <button class = "buttonStandard" onclick = "submitChangePassRequest()" id = "buttonChangeEmail">Change email</button> 
   <br>
   <span id = "spanVerification"></span>
+</div>
+
+<div id = "divAccountActivation" class = "divMainPage">
+    <table>
+        <tr><td>User:</td><td> <span id = "spanUserIdInActivateAccountPage"></span></td></tr>
+        <tr><td>Current email:</td><td><span id = 'spanCurrentActivationEmail'></span></td></tr>
+        <tr>
+          <td>New password:</td>
+          <td>
+            <input class = "textInputUsername" type = "password" id = "inputNewPasswordInActivationAccount" name = "password" placeholder = "password" autocomplete = "on">
+          </td>
+        </tr>
+        <tr>
+          <td>Re-enter:</td>
+          <td>
+            <input class = "textInputUsername" type = "password" id = "inputReenteredPasswordInActivationAccount" name = "password" placeholder = "password" autocomplete = "on">
+          </td>
+        </tr>
+        </table>
+        <button class = "buttonStandard" onclick = "submitChangePassRequestActivation()">Change password</button>
+        <span id = "spanVerificationActivation"></span>
 </div>
 
 <div id = "divAccounts" class = "divMainPage">

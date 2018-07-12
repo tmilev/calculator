@@ -465,7 +465,7 @@ void WebCrawler::FetchWebPagePart2
     if (this->headerReceived[bodyStart] == '\n' ||
         this->headerReceived[bodyStart] == '\r')
     { numcrlfs ++;
-      //if (fullMessage[bodyStart]=='\n')
+      //if (fullMessage[bodyStart] == '\n')
       //  tempStream << "\\N";
       //else
       //  tempStream << "\\R";
@@ -506,7 +506,7 @@ void WebCrawler::FetchWebPagePart2
     return;
   }
   this->flagContinueWasNeeded = true;
-  //if (this->bodyReceivedWithHeader =="")
+  //if (this->bodyReceivedWithHeader == "")
   //{
   theContinueHeader << "HTTP/1.0 100 Continue\r\n\r\n";
   //theContinueHeader << "\r\n\r\n";
@@ -712,7 +712,7 @@ bool Crypto::VerifyJWTagainstKnownKeys
     << keyIDstring << "</b></span>. ";
   for (int i = 0; i < 2; i ++)
   { Crypto::LoadKnownCertificates(commentsOnFailure, commentsGeneral);
-    //if (commentsOnFailure!= 0)
+    //if (commentsOnFailure != 0)
     //  *commentsOnFailure << "DEBUG: got to after loading certificates.";
     for (int j = 0; j < Crypto::knownCertificates.size; j ++)
       if (keyIDstring == Crypto::knownCertificates[j].keyid)
@@ -733,7 +733,7 @@ bool Crypto::VerifyJWTagainstKnownKeys
     theCrawler.UpdatePublicKeys(commentsOnFailure, commentsGeneral);
   }
   //stOutput << "DEBUG:Got to here, part 2";
-  //if (commentsOnFailure!= 0)
+  //if (commentsOnFailure != 0)
   //  *commentsOnFailure << "<hr>DEBUG: got to here, PART 2.";
   if (theIndex == - 1)
   { if (commentsOnFailure != 0)
@@ -896,8 +896,8 @@ std::string WebWorker::GetSignUpRequestResult()
   std::stringstream* adminOutputStream = 0;
   if (theGlobalVariables.UserDefaultHasAdminRights())
     adminOutputStream = &generalCommentsStream;
-  int fixThis;
-  adminOutputStream = &generalCommentsStream;
+  //int fixThis;
+  //adminOutputStream = &generalCommentsStream;
   this->DoSetEmail(theUser, &errorStream, &generalCommentsStream, adminOutputStream);
   result["error"] = errorStream.str();
   result["comments"] = generalCommentsStream.str();

@@ -59,7 +59,7 @@ std::string GraphEdge::ToString(FormatExpressions* theFormat) const
 { (void) theFormat; //avoid unused parameter warning, portable.
   std::stringstream out;
   out << this->vStart + 1 << "->" << this->vEnd+ 1;
-  if (this->label!="")
+  if (this->label!= "")
     out << "(" << this->label << ")";
   return out.str();
 }
@@ -83,7 +83,7 @@ bool Graph::CheckConsistency() const
       << this->theEdges[i].ToString() << " is a bad." << crash;
   }
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++)
-    for (int j = 0; j< this->nodeGroupsForDisplay[i].size; j ++)
+    for (int j = 0; j < this->nodeGroupsForDisplay[i].size; j ++)
       if (this->nodeGroupsForDisplay[i][j] < 0 || this->nodeGroupsForDisplay[i][j] >= numNodes)
         crash << "Graph error in graph with " << this->numNodes << " nodes: display group " << i + 1 << " is corrupt: has "
         << " node of index " << this->nodeGroupsForDisplay[i][j] << crash;
@@ -159,7 +159,7 @@ void Graph::ComputeDisplayGroups()
   this->nodeGroupsForDisplay.SetExpectedSize(numGroups);
   this->nodeGroupsForDisplay.SetSize(0);
   for (int i = 0; i < this->connectedComponents.size; i ++)
-    for (int j = 0; j< this->connectedComponents[i].size; j ++)
+    for (int j = 0; j < this->connectedComponents[i].size; j ++)
       this->nodeGroupsForDisplay.AddOnTop(this->connectedComponents[i][j]);
   this->groupMaxSize = 0;
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++)
@@ -222,11 +222,11 @@ std::string Graph::ToStringNodesAndEdges(FormatExpressions* theFormat)
   out << "<br>DisplayGroups:";
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++)
   { out << "<br>Group " << i + 1 << ", nodes: ";
-    for (int j = 0; j< this->nodeGroupsForDisplay[i].size; j ++)
+    for (int j = 0; j < this->nodeGroupsForDisplay[i].size; j ++)
       out << this->nodeGroupsForDisplay[i][j] << ", ";
   }
   for (int i = 0; i < this->baseNode.size; i ++)
-    out << "<br>Node " << i + 1 << " has base node " << this->baseNode[i]+ 1;
+    out << "<br>Node " << i + 1 << " has base node " << this->baseNode[i] + 1;
   return out.str();
 }
 
@@ -272,7 +272,7 @@ std::string Graph::ToStringPsTricks(FormatExpressions* theFormat)
   << this->nodeGroupsForDisplay.size << ", " << (this->groupMaxSize + 1) / 2 << ")"
   << "\n<br>\\tiny\n<br>\n";
   for (int i = 0; i < this->edgesPerNodeNoMultiplicities.size; i ++)
-    for (int j = 0; j< this->edgesPerNodeNoMultiplicities[i].size; j ++)
+    for (int j = 0; j < this->edgesPerNodeNoMultiplicities[i].size; j ++)
       out << this->ToStringPsTricksEdge(i, this->edgesPerNodeNoMultiplicities[i][j], theFormat);
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++)
     for (int j = 0; j < this->nodeGroupsForDisplay[i].size; j ++)

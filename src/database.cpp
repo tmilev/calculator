@@ -140,6 +140,7 @@ std::string DatabaseStrings::labelCurrentPage = "currentPage";
 std::string DatabaseStrings::labelPageSignUp = "signUp";
 std::string DatabaseStrings::labelCalculatorRequest = "calculatorRequest";
 std::string DatabaseStrings::labelPageAccount = "account";
+std::string DatabaseStrings::labelPageActivateAccount = "activateAccount";
 
 void GlobalVariables::initModifiableDatabaseFields()
 { MacroRegisterFunctionWithName("GlobalVariables::initModifiableDatabaseFields");
@@ -219,7 +220,7 @@ bool ProblemData::CheckConsistency() const
   for (int i = 0; i < this->theAnswers.size(); i ++)
   { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].answerId) == "")
       crash << "This is not supposed to happen: empty answer id." << crash;
-//    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield)=="")
+//    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield) == "")
 //      crash << "This is not supposed to happen: empty idMQfield. The answer id is: "
 //      << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>All the answers are: "
 //      << this->ToString() << crash;
@@ -1313,7 +1314,7 @@ List<bool>& EmailRoutines::GetRecognizedEmailChars()
     theChars += "@";
     theChars += "!#$%&'*+-/=?.";
     for (unsigned i = 0; i < theChars.size(); i ++)
-      recognizedEmailCharacters[((unsigned char)theChars[i])]= true;
+      recognizedEmailCharacters[((unsigned char)theChars[i])] = true;
   }
   return EmailRoutines::recognizedEmailCharacters;
 }
@@ -1509,7 +1510,7 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
   theJS[DatabaseStrings::labelUsername] = HtmlRoutines::ConvertStringToURLString(inputUserNameUnsafe, false);
   theJS[DatabaseStrings::labelCalculatorRequest] = "activateAccount";
   theJS[DatabaseStrings::labelEmail] = HtmlRoutines::ConvertStringToURLString(inputEmailUnsafe, false);
-  theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageAccount;
+  theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageActivateAccount;
   out << theGlobalVariables.DisplayNameExecutableApp
   << "#" << HtmlRoutines::ConvertStringToURLString(theJS.ToString(false), false);
   return out.str();

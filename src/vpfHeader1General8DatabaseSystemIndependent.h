@@ -136,6 +136,7 @@ public:
   static std::string labelCurrentPage;
   static std::string labelPageSignUp;
   static std::string labelPageAccount;
+  static std::string labelPageActivateAccount;
   static std::string labelCalculatorRequest;
 };
 #endif

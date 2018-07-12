@@ -256,10 +256,10 @@ void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& sta
   }
 //  FormatExpressions tempFormat;
 //  tempFormat.polyAlphabeT.SetSize(4);
-//  tempFormat.polyAlphabeT[0]="x_1";
-//  tempFormat.polyAlphabeT[1]="x_2";
-//  tempFormat.polyAlphabeT[2]="\\partial_1";
-//  tempFormat.polyAlphabeT[3]="\\partial_2";
+//  tempFormat.polyAlphabeT[0] ="x_1";
+//  tempFormat.polyAlphabeT[1] ="x_2";
+//  tempFormat.polyAlphabeT[2] ="\\partial_1";
+//  tempFormat.polyAlphabeT[3] ="\\partial_2";
 
   Element tempE;
 //  stOutput << "<hr>[ " << standsOnTheLeft.ToString(&tempFormat);
@@ -320,7 +320,7 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(List<quasiDiffOp<coeffici
     theElts[i] = theEltsConverted[i];
 //  stOutput << "<hr>the elts at end: ";
 //  theElts = theEltsConverted;
-//  for (int i = 0; i <theElts.size; i ++)
+//  for (int i = 0; i < theElts.size; i ++)
 //    stOutput << "<br>" << theElts[i].ToString();
 }
 
@@ -553,7 +553,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
     }
   theQDOs.SetSize(theGeneratorsItry.size);
 /*  if (false)
-    if (theSSalgebra.GetRank()==3 && theSSalgebra.theWeyl.WeylLetter =='B')
+    if (theSSalgebra.GetRank() ==3 && theSSalgebra.theWeyl.WeylLetter == 'B')
     { theGenerator = theGeneratorsItry[0];
       theGenerator+= theGeneratorsItry[2];
       theGeneratorsItry.AddOnTop(theGenerator);
@@ -590,7 +590,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
       //stOutput << "<br>generic elt: " <<  genericElt.ToString();
 
       //stOutput << "<br>theWeylFormat: ";
-//      for (int k= 0; k<theWeylFormat.polyAlphabeT.size; k++)
+//      for (int k = 0; k<theWeylFormat.polyAlphabeT.size; k++)
 //        stOutput << theWeylFormat.polyAlphabeT[k] << ", ";
       theWeylFormat.polyAlphabeT.SetSize(numStartingVars + elementsNegativeNilrad.size);
       theWeylFormat.weylAlgebraLetters.SetSize(numStartingVars + elementsNegativeNilrad.size);
@@ -614,7 +614,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
         theWeylFormat.weylAlgebraLetters[k] = tempStream4.str();
       }
 //      stOutput << "<br>theUEformat: ";
-//      for (int k= 0; k<theUEformat.polyAlphabeT.size; k++)
+//      for (int k = 0; k<theUEformat.polyAlphabeT.size; k++)
 //        stOutput << theUEformat.polyAlphabeT[k] << ", ";
       out << "<tr><td>General monomial in U(n_-):</td><td>" << HtmlRoutines::GetMathMouseHover(genericElt.ToString(&theUEformat)) << "</td> </tr>";
       latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
@@ -712,7 +712,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
 //    theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, &theGlobalVariables);
 //    stOutput << "<br><b>Dimension generated Lie algebra: " << theQDOs.size << "</b>";
 //    stOutput << "<br>The qdos: ";
-//    for (int j = 0; j<theQDOs.size; j ++)
+//    for (int j = 0; j < theQDOs.size; j ++)
  //     stOutput << "<br>" << theQDOs[j].ToString();
   }
   latexReport << "\\end{longtable}";
@@ -900,7 +900,7 @@ bool Calculator::CheckConsistencyAfterInitializationExpressionStackEmpty()
 { this->theExpressionContainer.GrandMasterConsistencyCheck();
   this->EvaluatedExpressionsStack.GrandMasterConsistencyCheck();
   this->cachedExpressions.GrandMasterConsistencyCheck();
-  if (this->cachedExpressions.size != 0 || this->imagesCachedExpressions.size != 0 || this->EvaluatedExpressionsStack.size!= 0 || this->theExpressionContainer.size != 0)
+  if (this->cachedExpressions.size != 0 || this->imagesCachedExpressions.size != 0 || this->EvaluatedExpressionsStack.size != 0 || this->theExpressionContainer.size != 0)
     crash << "This is a programming error: cached expressions, images cached expressions, expression stack and expression container are supposed to be empty, but "
     << " instead they contain respectively " << this->cachedExpressions.size << ", " << this->imagesCachedExpressions.size << ", "
     << this->EvaluatedExpressionsStack.size << " and " << this->theExpressionContainer.size << " elements. " << crash;
@@ -1078,9 +1078,9 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   << HtmlRoutines::GetMathSpanPure(theWeyl.CoCartanSymmetric.ToStringLatex());
   out << "<br>The determinant of the symmetric Cartan matrix is: " << theWeyl.CartanSymmetric.GetDeterminant().ToString();
   /*  Rational theRatio;
-    for (int j = 0; j<theWeyl.GetDim(); j ++)
+    for (int j = 0; j < theWeyl.GetDim(); j ++)
     { theRatio= 0;
-      for (int i = 0; i <theWeyl.RootSystem.size; i ++)
+      for (int i = 0; i < theWeyl.RootSystem.size; i ++)
       { Rational tempRat = theWeyl.RootScalarCartanRoot(theWeyl.RootSystem[i], theWeyl.RootSystem[j]);
         theRatio+= tempRat*tempRat;
       }
@@ -1269,7 +1269,7 @@ bool Calculator::outerTensor(Calculator& theCommands, const Expression& input, E
     return true;
   if (theCommands.outerExtractBaseMultiplication(theCommands, input, output))
     return true;
-//  if (theExpression.children.size!=2)
+//  if (theExpression.children.size !=2)
 //    return false;
   //stOutput << "<br>After do associate: " << theExpression.ToString();
   return false;
@@ -1664,7 +1664,7 @@ bool Calculator::CollectSummands
     outputSum.AddMonomial(algSum, 1);
   }
 //  stOutput << "<hr> before mon sort, mon order: " << outputSum.theMonomials.ToString();
-//  if (outputSum.theMonomials[0]>outputSum.theMonomials[1])
+//  if (outputSum.theMonomials[0] >outputSum.theMonomials[1])
 //    stOutput << outputSum.theMonomials[0].ToString() << " > " << outputSum.theMonomials[1].ToString();
 //  else
 //    stOutput << outputSum.theMonomials[0].ToString() << " < " << outputSum.theMonomials[1].ToString();
@@ -1754,16 +1754,16 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
   //stOutput << "<br>Debug: collected summands: " << theSum.ToString();
   theSum.QuickSortDescending();
   //stOutput << "<br>Debug: sorted: " << theSum.ToString();
-  /*if (theSum.size()==3)
-  { if (theSum[0]>theSum[1])
+  /*if (theSum.size() ==3)
+  { if (theSum[0] >theSum[1])
       stOutput << "<br>" << theSum[0].ToString() << "&gt;" << theSum[1].ToString();
     else
       stOutput << "<br>" << theSum[1].ToString() << "&gt;" << theSum[0].ToString();
-    if (theSum[0]>theSum[2])
+    if (theSum[0] >theSum[2])
       stOutput << "<br>" << theSum[0].ToString() << "&gt;" << theSum[2].ToString();
     else
       stOutput << "<br>" << theSum[2].ToString() << "&gt;" << theSum[0].ToString();
-    if (theSum[1]>theSum[2])
+    if (theSum[1] >theSum[2])
       stOutput << "<br>" << theSum[1].ToString() << "&gt;" << theSum[2].ToString();
     else
       stOutput << "<br>" << theSum[2].ToString() << "&gt;" << theSum[1].ToString();
@@ -2620,7 +2620,7 @@ SemisimpleSubalgebras& ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPrese
     needToHookUpPointers = true;
   SemisimpleSubalgebras& currentSAs = this->theSSSubalgebraS.GetValueCreateNoInit(input);
   if (needToHookUpPointers)
-  { SemisimpleLieAlgebra& ownerSS= this->GetLieAlgebraCreateIfNotPresent(input);
+  { SemisimpleLieAlgebra& ownerSS = this->GetLieAlgebraCreateIfNotPresent(input);
     currentSAs.initHookUpPointers(ownerSS, &this->theAlgebraicClosure, &this->theSSLieAlgebras, &this->theSltwoSAs);
   }
   return currentSAs;
@@ -2661,7 +2661,7 @@ std::string ObjectContainer::ToStringJavascriptForUserInputBoxes()
   for (int i = 0; i < this->theUserInputTextBoxesWithValues.size(); i ++)
   { InputBox& currentBox = this->theUserInputTextBoxesWithValues.theValues[i];
     out << "calculatorInputBoxToSliderUpdaters['"
-    << currentBox.name << "']='"
+    << currentBox.name << "'] ='"
     << currentBox.GetSliderName() << "';\n";
   }
   out << "</script>";

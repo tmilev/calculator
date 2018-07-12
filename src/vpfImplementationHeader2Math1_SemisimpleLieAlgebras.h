@@ -67,7 +67,7 @@ void Weight<coefficient>::AccountSingleWeight
     return;
   Weight<Rational> tempMon;
   tempMon.owner = this->owner;
-  tempMon.weightFundamentalCoordS= theWeyl.GetFundamentalCoordinatesFromSimple(dominant);
+  tempMon.weightFundamentalCoordS = theWeyl.GetFundamentalCoordinatesFromSimple(dominant);
   coefficient coeffChange;
   coeffChange = theMult;
   coeffChange *= sign;
@@ -107,7 +107,7 @@ std::string Weight<coefficient>::TensorAndDecompose
   }
   HashedList<Vector<Rational> > currentOrbit;
   const int OrbitSizeHardLimit = 10000000;
-//  int theRank= theWeyl.GetDim();
+//  int theRank = theWeyl.GetDim();
   Vector<Rational> rightHWSimpleCoords = theWeyl.GetSimpleCoordinatesFromFundamental(rightHWFundCoords);
   Vectors<Rational> tempRoots;
   tempRoots.SetSize(1);
@@ -174,7 +174,7 @@ void charSSAlgMod<coefficient>::GetDual(charSSAlgMod<coefficient>& output) const
 template <class coefficient>
 void charSSAlgMod<coefficient>::MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner)
 { this->MakeZero();
-  if (inputWeightSimpleCoords.size!= inputOwner->GetRank())
+  if (inputWeightSimpleCoords.size != inputOwner->GetRank())
     crash << "This is a programming error: attempting to create a character from highest weight in simple coords "
     << inputWeightSimpleCoords.ToString() << "(" << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
     << " Lie algebra is of rank " << (inputOwner->GetRank()) << crash;
@@ -253,7 +253,7 @@ template <class coefficient>
 void SemisimpleLieAlgebra::GetCommonCentralizer
 (const List<ElementSemisimpleLieAlgebra<coefficient> >& inputElementsToCentralize, List<ElementSemisimpleLieAlgebra<coefficient> >& outputCentralizingElements)
 { Matrix<coefficient> tempAd, commonAd;
-  for (int i = 0; i <inputElementsToCentralize.size; i ++)
+  for (int i = 0; i < inputElementsToCentralize.size; i ++)
   { this->GetAd(tempAd, inputElementsToCentralize[i]);
     //tempAd.Transpose();
     commonAd.AppendMatrixToTheBottom(tempAd);

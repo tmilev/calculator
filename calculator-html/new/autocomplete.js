@@ -38,10 +38,10 @@ function initializeAutocomplete() {
   ignoreOninput = false;
   DebugCounter = 0;
   //theAutoCompleteHints.style.visibility ="hidden";
-  for (var i = 0; i <theAutocompleteDictionary.length; i ++) {
+  for (var i = 0; i < theAutocompleteDictionary.length; i ++) {
     theAutocompleteDictionaryLowerCase.push(theAutocompleteDictionary[i].toLowerCase());
   }
-  for (i = 0; i <theAutocompleteDictionary.length; i ++) {
+  for (i = 0; i < theAutocompleteDictionary.length; i ++) {
     theAutocompleteDictionaryByKey[theAutocompleteDictionary[i]] = 1;
   }
   return true;
@@ -134,7 +134,7 @@ function suggestWord() {
     clearAutocompleteTab();
     return;
   }  
-  for (var i = 0; i <theAutocompleteDictionary.length; i ++) { 
+  for (var i = 0; i < theAutocompleteDictionary.length; i ++) { 
     if (theLastWord == theAutocompleteDictionary[i]) { 
       clearAutocompleteTab();
       return;
@@ -165,7 +165,7 @@ function displaySuggestions() {
       indexInAutocomplete = 0;
     }
   }
-  for (var i = 0; i <theSuggestionsHighlighted.length; i ++) {
+  for (var i = 0; i < theSuggestionsHighlighted.length; i ++) {
     if (i === indexInAutocomplete) {
       theAutoComplete.innerHTML += "<span style ='background:silver'>" + theSuggestionsHighlighted[i] + "</span><br>";
     } else {  

@@ -53,7 +53,7 @@ void AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals()
   theSel.init(this->theQuadraticRadicals.size);
   do
   { std::stringstream out;
-    //for (int i = 0; i <theSel.CardinalitySelection; i ++)
+    //for (int i = 0; i < theSel.CardinalitySelection; i ++)
     //{ const LargeInt& theRad = this->theQuadraticRadicals[theSel.elements[i]];
     //  out << "\\sqrt{" << theRad.ToString() << "}";
     //}
@@ -212,7 +212,7 @@ void AlgebraicClosureRationals::ChooseGeneratingElement()
       this->theGeneratingElementPowersBasis.AddOnTop(currentVect);
       //stOutput << "<br>The basis: " << this->theGeneratingElementPowersBasis.ToString()
       //<< " has rank: " << this->theGeneratingElementPowersBasis.GetRankOfSpanOfElements();
-      if (this->theGeneratingElementPowersBasis.size>this->theGeneratingElementPowersBasis.GetRankOfSpanOfElements())
+      if (this->theGeneratingElementPowersBasis.size >this->theGeneratingElementPowersBasis.GetRankOfSpanOfElements())
       { this->theGeneratingElementPowersBasis.SetSize(this->theGeneratingElementPowersBasis.size - 1);
         break;
       }
@@ -526,7 +526,7 @@ void AlgebraicClosureRationals::reset()
 bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension
 (const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot)
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension");
-  if (thePoly.TotalDegree() != 2|| !this->flagIsQuadraticRadicalExtensionRationals)
+  if (thePoly.TotalDegree() != 2 || !this->flagIsQuadraticRadicalExtensionRationals)
     return false;
   Polynomial<AlgebraicNumber> algNumPoly;
   this->ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, algNumPoly);
@@ -1082,7 +1082,7 @@ bool AlgebraicNumber::IsRational(Rational* whichRational) const
 
     } else if (whichRational != 0)
       *whichRational = this->theElT.theCoeffs[i];
-//  if (this->basisIndex!= 0)
+//  if (this->basisIndex != 0)
 //    crash << "Rational algebraic number: must have basis index 0" << crash;
   //stOutput << "it is!";
   return true;

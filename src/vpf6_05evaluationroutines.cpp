@@ -173,7 +173,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
         if (output != input)
         { output.CheckConsistency();
           theCommands.DoLogEvaluationIfNeedBe(outerFun);
-//          if (input.Lispify()== output.Lispify())
+//          if (input.Lispify() == output.Lispify())
 //            crash << "Temporary check failed. " << crash;
 //          stOutput << "<hr>DEBUG: Subbing: input: " << input.ToString()
 //          << " by: " << output.ToString();
@@ -218,7 +218,7 @@ bool Calculator::ExpressionMatchesPattern
 //  static int ExpressionMatchesPatternDebugCounter = - 1;
   //ExpressionMatchesPatternDebugCounter ++;
 //  stOutput << " ExpressionMatchesPatternDebugCounter: " << ExpressionMatchesPatternDebugCounter;
-//  printLocalDebugInfo=(ExpressionMatchesPatternDebugCounter>- 1);
+//  printLocalDebugInfo= (ExpressionMatchesPatternDebugCounter>- 1);
   if (commentsGeneral!= 0)
   { *commentsGeneral << " <hr> current input: " << input.ToString() << "<br>current pattern: " << thePattern.ToString();
     *commentsGeneral << "<br> current matched expressions: " << matchedExpressions.ToStringHtml();
@@ -231,7 +231,7 @@ bool Calculator::ExpressionMatchesPattern
     this->evaluationErrors.AddOnTop(out.str());
     return false;
   }
-//  if (this->opDefine()== input.theOperation)
+//  if (this->opDefine() == input.theOperation)
 //    return false;
   int opVarB = this->opBind();
   if (thePattern.IsListStartingWithAtom(opVarB))
@@ -466,7 +466,7 @@ bool Calculator::EvaluateExpression
     theCommands.flagAbortComputationASAP = true;
     return output.MakeError(errorStream.str(), theCommands);
   }
-  //bool logEvaluationStepsRequested = theCommands.logEvaluationSteps.size>0;
+  //bool logEvaluationStepsRequested = theCommands.logEvaluationSteps.size >0;
   theCommands.EvaluatedExpressionsStack.AddOnTop(input);
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(theCommands, 3);
@@ -710,7 +710,7 @@ Expression* Calculator::PatternMatch
     theExpression.MakeError(out.str(), *this);
     return 0;
   }
-//  if (theExpression.ToString()=="f{}((a))=a +5")
+//  if (theExpression.ToString() == "f{}((a))=a +5")
 //  { stOutput << "!here";
 //  }
   thePattern.CheckInitialization();

@@ -168,7 +168,7 @@ std::string HtmlRoutines::GetLatexEmbeddableLinkFromCalculatorInput(const std::s
 { std::stringstream out;
   out << "\\href{" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?";
   for (unsigned i = 0; i < address.size(); i ++)
-  { //if (input[i]=='&')
+  { //if (input[i] == '&')
      // out << "\\&";
     //else
     if (address[i] == '%')
@@ -180,7 +180,7 @@ std::string HtmlRoutines::GetLatexEmbeddableLinkFromCalculatorInput(const std::s
   }
   out << "}{";
   for (unsigned i = 0; i < display.size(); i ++)
-  { //if (input[i]=='&')
+  { //if (input[i] == '&')
      // out << "\\&";
     //else
     if (display[i] == '%')
@@ -439,7 +439,7 @@ std::string HtmlRoutines::GetMathMouseHover(const std::string& input, int upperN
 //  idSpanStream << "mathFormula" << HtmlRoutines::GlobalMathSpanID;
 //  std::string containterString="container"+ idSpanStream.str();
 //  out << "<span id =\"" << containterString << "\">"  << "<span id =\"" << idSpanStream.str()
-//  out << "<span><span onmouseover =\"if (this.parentNode.className =='math') return; "
+//  out << "<span><span onmouseover =\"if (this.parentNode.className == 'math') return; "
 //  << "this.className ='math'; this.parentNode.className ='math';"
 //  << "window.alert('Calling jsmath.Process'); "
 //  << "jsMath.Process(this.parentNode);\" >"
@@ -529,9 +529,9 @@ bool HtmlRoutines::AccountOneInputCGIString
   if (fieldName == "")
     return true;
   (void) commentsOnFailure;
-//  if (fieldValue!="" && outputMap.Contains(fieldName))
-//    if (outputMap.GetValueCreateIfNotPresent(fieldName)!= fieldValue &&
-//        outputMap.GetValueCreateIfNotPresent(fieldName)!="")
+//  if (fieldValue != "" && outputMap.Contains(fieldName))
+//    if (outputMap.GetValueCreateIfNotPresent(fieldName) != fieldValue &&
+//        outputMap.GetValueCreateIfNotPresent(fieldName) != "")
 //    { commentsOnFailure << "More than one value specified for input field " << fieldName << ": "
 //      << fieldValue << " and " << outputMap.GetValueCreateIfNotPresent(fieldName) << ". ";
 //      return false;

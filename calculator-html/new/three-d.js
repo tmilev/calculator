@@ -320,7 +320,7 @@ function colorScale(inputRGB, theScale)
 { var result =[0,0,0];
   for (var i = 0; i < inputRGB.length; i ++)
   { result[i] =Math.round(inputRGB[i]*theScale);
-    if (result[i]<0)
+    if (result[i] < 0)
       result[i] = 0;
     if (result[i] >255)
       result[i] =255;
@@ -1622,7 +1622,7 @@ function Canvas(inputCanvas)
     var lowFloat = this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(base)[1]);
     var highFloat = this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(end)[1]);
     if (lowFloat>highFloat)
-    { var minusEdge =edgeVector.slice();
+    { var minusEdge = edgeVector.slice();
       vectorTimesScalar(minusEdge, - 1);
       this.accountEdgeInBufferStrip(end, minusEdge, patchIndex);
       return;

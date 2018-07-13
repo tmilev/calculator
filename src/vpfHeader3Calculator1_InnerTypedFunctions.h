@@ -164,7 +164,7 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
   }
   Expression theConverted, theComputed;
   if (input.IsListStartingWithAtom(theCommands.opTimes()) || input.IsListStartingWithAtom(theCommands.opPlus()))
-  { theComputed.reset(theCommands, input.children.size);
+  { theComputed.reset(theCommands, input.size());
     theComputed.AddChildOnTop(input[0]);
     for (int i = 1; i < input.size(); i ++)
     { if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
@@ -182,7 +182,7 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
     if (input[2].IsSmallInteger(&thePower))
     { if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
         return theCommands << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
-      Polynomial<coefficient> resultP= theConverted.GetValue<Polynomial<coefficient> >();
+      Polynomial<coefficient> resultP = theConverted.GetValue<Polynomial<coefficient> >();
       if (thePower < 0)
       { coefficient theConst;
         if (!resultP.IsConstant(&theConst))

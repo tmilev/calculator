@@ -36,7 +36,7 @@ bool CalculatorConversions::innerLoadWeylGroup(Calculator& theCommands, const Ex
   DynkinType theType;
   if (!CalculatorConversions::innerDynkinType(theCommands, input, theType))
     return false;
-  SemisimpleLieAlgebra& theSA= theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theType);
+  SemisimpleLieAlgebra& theSA = theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theType);
   return output.AssignValue(theSA.theWeyl, theCommands);
 }
 
@@ -243,12 +243,12 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(Calculator& theComma
   if (eltE.IsEqualToZero() || eltF.IsEqualToZero())
     return theCommands << "<hr>Failed to load sl(2) subalgebra: either e or f is equal to zero. e and f are: " << eltE.ToString()
     << ", " << eltF.ToString() << ". ";
-  if (eltE.GetOwner() !=eltF.GetOwner())
+  if (eltE.GetOwner() != eltF.GetOwner())
     return theCommands << "<hr>Failed to load sl(2): E and F element of sl(2) have different owners. More precisely, the owner of e is "
     << eltE.GetOwner()->ToString() << " and the owner of f is " << eltF.GetOwner()->ToString();
-  output.theE=eltE;
-  output.theF=eltF;
-  output.owner =eltE.GetOwner();
+  output.theE= eltE;
+  output.theF= eltF;
+  output.owner = eltE.GetOwner();
   DynkinType& theType = output.owner->theWeyl.theDynkinType;
   SemisimpleSubalgebras& ownerSubalgebras =
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(theType);

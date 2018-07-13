@@ -1897,7 +1897,7 @@ ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coeff
           if (X.Norm() == 0)
             return X;
           innerChanged = true;
-//          if (X[0]<0) // negative virtual character alert
+//          if (X[0] < 0) // negative virtual character alert
 //            for (int i = 0; i <X.data.size; i ++)
 //              X.data[i] = -X.data[i];
         }

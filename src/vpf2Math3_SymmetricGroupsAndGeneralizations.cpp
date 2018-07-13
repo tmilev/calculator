@@ -720,7 +720,7 @@ void PermutationR2::ActOnMonomialTensor(MonomialTensor<int,MathRoutines::IntUnsi
   { out.generatorsIndices.AddOnTop(expanded[xi]);
     xi ++;
     for (int j =1; ; j ++,xi ++)
-      if ((xi ==expanded.size) || (expanded[xi] != out.generatorsIndices[i]))
+      if ((xi == expanded.size) || (expanded[xi] != out.generatorsIndices[i]))
       { out.Powers.AddOnTop(j);
         break;
       }

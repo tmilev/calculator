@@ -3053,7 +3053,7 @@ void PartFraction::ReduceMonomialByMonomialModifyOneMonomial
 (PartFractions& Accum, SelectionWithDifferentMaxMultiplicities& thePowers, List<int>& thePowersSigned, MonomialP& input, LargeInt& inputCoeff)
 { (void) Accum; (void) thePowers; (void) thePowersSigned; (void) input; (void) inputCoeff;
 /*Polynomial<LargeInt>& theNumerator = theGlobalVariables.PolyLargeIntPartFracBuffer5.GetElement();
-  Polynomial<LargeInt>& tempP= theGlobalVariables.PolyLargeIntPartFracBuffer6.GetElement();
+  Polynomial<LargeInt>& tempP = theGlobalVariables.PolyLargeIntPartFracBuffer6.GetElement();
   theNumerator.MakeZero(Accum.AmbientDimension);
   theNumerator.AddMonomial(input, inputCoeff);
   if (thePowersSigned.size != thePowers.Multiplicities.size)
@@ -6740,13 +6740,13 @@ void KLpolys::ComputeRPolys()
 }
 
 bool KLpolys::IndexGEQIndex(int a, int b)
-{ /*ElementWeylGroup<WeylGroup>& eltA= (*this->TheWeylGroup)[a];
+{ /*ElementWeylGroup<WeylGroup>& eltA = (*this->TheWeylGroup)[a];
   ElementWeylGroup<WeylGroup>& eltB= (*this->TheWeylGroup)[b];
   int currentPointerInB= 0;
-  for (int currentPointerInA= 0; currentPointerInA<eltA.size && currentPointerInB<eltB.size; currentPointerInA++)
-    if (eltA[currentPointerInA] ==eltB[currentPointerInB])
+  for (int currentPointerInA = 0; currentPointerInA<eltA.size && currentPointerInB<eltB.size; currentPointerInA++)
+    if (eltA[currentPointerInA] == eltB[currentPointerInB])
       currentPointerInB++;
-  return currentPointerInB==eltB.size;*/
+  return currentPointerInB== eltB.size;*/
   Vector<Rational> tempV;
   tempV = (*this)[a];
   tempV -= (*this)[b];
@@ -9879,7 +9879,7 @@ bool PiecewiseQuasipolynomial::MakeVPF(Vectors<Rational>& theRoots, std::string&
   for (int i = 0; i < theFracs.theChambers.size; i ++)
   { indicator = theFracs.theChambers[i].GetInternalPoint();
     theFracs.GetVectorPartitionFunction(this->theQPs[i], indicator);
-    //QuasiPolynomial& currentQP= this->theQPs[i];
+    //QuasiPolynomial& currentQP = this->theQPs[i];
   }
   Lattice baseLattice;
   baseLattice.MakeFromRoots(theRoots);
@@ -9906,7 +9906,7 @@ bool Lattice::GetInternalPointInConeForSomeFundamentalDomain(Vector<Rational>& o
   if (maxCoord<0)
     maxCoord = -maxCoord;
   for (int i = 0; i <coordsInBasis.size; i ++)
-  { Rational tempRat =(coordsInBasis[i]<0)? -coordsInBasis[i] : coordsInBasis[i];
+  { Rational tempRat =(coordsInBasis[i] < 0)? -coordsInBasis[i] : coordsInBasis[i];
     if (tempRat>maxCoord)
       maxCoord = tempRat;
   }
@@ -10000,7 +10000,7 @@ std::string PiecewiseQuasipolynomial::ToString(bool useLatex, bool useHtml)
   FormatExpressions theFormat;
   for (int i = 0; i < this->theProjectivizedComplex.size; i ++)
   { const Cone& currentCone = this->theProjectivizedComplex[i];
-    QuasiPolynomial& currentQP= this->theQPs[i];
+    QuasiPolynomial& currentQP = this->theQPs[i];
     out << "Chamber number " << i + 1;
     if (useHtml)
       out << "<br>";
@@ -10582,7 +10582,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
             (directionSmallerDim, directionSmallerDimOnLattice, theShift, currentNormal, exitRepresentatives,
              exitWallsShifted, exitRougherLattice);
           exitNormalAffine = currentNormal;
-          exitNormalLatticeLevel =exitNormalAffine;
+          exitNormalLatticeLevel = exitNormalAffine;
           exitNormalLatticeLevel.SetSize(theDimProjectivized- 1);
           foundExitNormal = true;
         } else
@@ -10605,7 +10605,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
       crash << crash;
     for (int j = 0; j<exitRepresentatives.size; j ++)
     { tempCLS.theProjectivizedCone.Normals = theNewNormals;
-      exitNormalShiftedAffineProjected =exitNormalAffine.GetShiftToTheLeftOnePosition();
+      exitNormalShiftedAffineProjected = exitNormalAffine.GetShiftToTheLeftOnePosition();
       *exitNormalShiftedAffineProjected.LastObject()= -exitNormalLatticeLevel.ScalarEuclidean(exitRepresentatives[j]);
       stOutput << exitNormalShiftedAffineProjected.ToString() << ", ";
       if (foundEnteringNormal)
@@ -10616,7 +10616,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
       }
       Rational tempRat = theLPToMaximizeAffine[0];
       tempRoot = theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
-      tempRoot-=exitNormalShiftedAffineProjected*theLPToMaximizeAffine[0]/exitNormalAffine[0];
+      tempRoot-= exitNormalShiftedAffineProjected*theLPToMaximizeAffine[0]/exitNormalAffine[0];
       outputAppendLPToMaximizeAffine.AddOnTop(tempRoot);
       if (tempCLS.theProjectivizedCone.Normals.size<= 0)
         crash << crash;

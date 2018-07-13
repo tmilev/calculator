@@ -2206,7 +2206,7 @@ template<class coefficient>
 class Polynomial: public ElementMonomialAlgebra<MonomialP, coefficient>
 {
 public:
-  friend std::iostream& operator << <coefficient>(std::iostream& output, const Polynomial<coefficient>& input);
+  friend std::iostream& operator<< <coefficient>(std::iostream& output, const Polynomial<coefficient>& input);
   Polynomial(int x)
   { this->MakeConst(x, 0);
   }
@@ -2267,8 +2267,8 @@ public:
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output);
   void MakeMonomiaL(int LetterIndex, const Rational& Power, const coefficient& Coeff = 1, int ExpectedNumVars = 0)
   { if (LetterIndex < 0)
-    crash << "This is a programming error: the index"
-    << LetterIndex + 1 << " is  non-positive which is not allowed. " << crash;
+      crash << "This is a programming error: the index"
+      << LetterIndex + 1 << " is  non-positive which is not allowed. " << crash;
     int numVars = MathRoutines::Maximum(LetterIndex + 1, ExpectedNumVars);
     this->MakeZero();
     MonomialP tempM;

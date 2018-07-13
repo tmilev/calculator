@@ -1252,7 +1252,7 @@ bool KostkaNumber::initTableaux(std::stringstream* comments)
   this->sumPartition = 0;
   for (int i = 0; i < this->tuple.size; i ++)
   { this->sumTuple += this->tuple[i];
-    if (this->sumTuple>10000000 || this->tuple[i] >10000000 || this->tuple[i]<0)
+    if (this->sumTuple>10000000 || this->tuple[i] >10000000 || this->tuple[i] < 0)
     { if (comments != 0)
         *comments << "Failed to compute Kostka number: the tuple "
         << this->tuple << " is too large or negative. ";
@@ -1261,7 +1261,7 @@ bool KostkaNumber::initTableaux(std::stringstream* comments)
   }
   for (int i = 0; i < this->partition.size; i ++)
   { this->sumPartition += this->partition[i];
-    if (this->sumPartition>10000000 || this->partition[i] >10000000 || this->partition[i]<0)
+    if (this->sumPartition>10000000 || this->partition[i] >10000000 || this->partition[i] < 0)
     { if (comments != 0)
         *comments << "Failed to compute Kostka number: the partition: "
         << this->partition << " is too large or negative. ";
@@ -1476,10 +1476,10 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity
   HashedList<KostkaNumber> KNcache;
   KostkaNumber leftKN, rightKN;
   Partition tempP;
-  tempP=leftPartition;
+  tempP =leftPartition;
   tempP.Transpose();
   leftKN.partition = tempP.p;
-  tempP=rightPartition;
+  tempP =rightPartition;
   tempP.Transpose();
   rightKN.partition = tempP.p;
   theSelection.initFromInts(parabolicPartition.p);
@@ -1859,7 +1859,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   MonomialMacdonald theGenerator;
   HashedList<MonomialMacdonald> theOrbit;
   for (int i = 0; i < theRootSAs.theSubalgebras.size; i ++)
-  { rootSubalgebra& currentRootSA= theRootSAs.theSubalgebras[i];
+  { rootSubalgebra& currentRootSA = theRootSAs.theSubalgebras[i];
     theGenerator.MakeFromRootSubsystem(currentRootSA.PositiveRootsK, *thePointer);
     theGenerator.GenerateMyOrbit(theOrbit);
     out << "<hr>Root subsystem type " << currentRootSA.theDynkinDiagram.ToString();

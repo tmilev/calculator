@@ -473,6 +473,9 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSendEmailWithMailGun
   (Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool innerEllipticCurve
+  (Calculator& theCommands, const Expression& input, Expression& output);
 };
 
 #endif

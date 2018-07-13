@@ -723,7 +723,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("MakeExpression", CalculatorConversions::innerExpressionFromBuiltInType, "",
    "Creates expression from built-in polynomial. ",
    "MakeExpression(Polynomial{}((x-2y+z- 1)^2(x +y-z)));\
-    A=\\frac{64 x^{2} y x y+ 16 x y- y}{-32 x^{2} y x^{2}-8 x^{2}+x};\
+    A =\\frac{64 x^{2} y x y+ 16 x y- y}{-32 x^{2} y x^{2}-8 x^{2}+x};\
     B=MakeRationalFunction(A);\
     C=MakeExpression B;\
     D=MakeRationalFunction {}(\\frac{-2x^{3}y^{2}-\\frac{x y }{2}+\\frac{y }{32}}{x^{4}y +\\frac{x^{2}}{4}-\\frac{x }{32}}) ;\
@@ -808,7 +808,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("Polynomialize",
     CalculatorFunctionsGeneral::outerPolynomialize, "",
    "Polynomialize(a) is equivalent to MakeExpression(Polynomial(a)).",
-   "C= (c a + a b +b c + 1 )^3; A=Polynomialize(C);B=MakeExpression(Polynomial(C)); A-B",
+   "C= (c a + a b +b c + 1 )^3; A =Polynomialize(C);B=MakeExpression(Polynomial(C)); A-B",
    true, false,
    "CalculatorFunctionsGeneral::outerPolynomialize",
    "Polynomialize");
@@ -1131,7 +1131,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("ElementWeylAlgebraDO", Calculator::innerElementWeylAlgebra, "",
    "Creates element of a Weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \
    second argument - the dual polynomial expression. ",
-   "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1",
+   "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1",
    true, false,
    "Calculator::innerElementWeylAlgebra",
    "ElementWeylAlgebraDO");
@@ -1139,8 +1139,8 @@ void Calculator::initPredefinedInnerFunctions()
   ("ElementWeylAlgebraPoly", Calculator::innerPolynomialWithEWA, "",
    "Creates a monomial from the second argument whose differential \
     operator letter is the first argument. ",
-   "x_{{i}}=ElementWeylAlgebraPoly{}(\\partial_i, x_i); \
-    \n\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i);\
+   "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i); \
+    \n\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\
     \n\\partial_1 x_1",
     true, false,
    "Calculator::innerPolynomialWithEWA",
@@ -1178,8 +1178,8 @@ void Calculator::initPredefinedInnerFunctions()
   ("FourierTransformDO", CalculatorFunctionsGeneral::innerFourierTransformEWA, "",
    "Fourier-transforms an element of a Weyl algebra. Multiplies each monomial term of odd total degree by - 1 \
    (total degree = sum of degrees in the polynomial variables plus the degrees of the differential variables. ",
-   "x =ElementWeylAlgebraPoly{}(\\partial, x); \
-    \n\\partial =ElementWeylAlgebraDO{}(\\partial, x);\
+   "x = ElementWeylAlgebraPoly{}(\\partial, x); \
+    \n\\partial = ElementWeylAlgebraDO{}(\\partial, x);\
     \n  a =x^3+x\\partial; b=\\partial x +\\partial^3+\\partial;\
     \n[FourierTransformDO{}a,FourierTransformDO{}b]\
     -FourierTransformDO{}[a,b]",
@@ -1417,7 +1417,7 @@ void Calculator::initPredefinedInnerFunctions()
     CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup, "",
    "Checks if element is outer automorphism of a root system. First argument = type. \
    Second argument = matrix linear operator corresponding written in simple basis. ",
-   "A=MakeMatrix\
+   "A =MakeMatrix\
 ((1, 0, 0, 0, 0, - 1),\
 (0, 0, 0, 0, 1, -2),\
 (0, 0, 1, 0, 0, -2),\
@@ -1474,7 +1474,7 @@ void Calculator::initPredefinedInnerFunctions()
    The first argument of the input is an upper bound for the dimension of the vector space. The remaining \
    arguments must be differential operators. The output is a vector space \
    basis printout. Fails if the dimension of the vector space is larger than the upper bound.",
-   "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); x_{{i}}=ElementWeylAlgebraPoly{}(\\partial_i, x_i); \
+   "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i); \
     \ng_1= (-x_{5} \\partial_{5}^{2}-x_{4} \\partial_{4} \\partial_{5}  -x_{3} \\partial_{3} \\partial_{5} \
     \n-x_{2} \\partial_{2} \\partial_{5}  +x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\
     \ng_- 1=x_5;\
@@ -1525,7 +1525,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("MinPolyMatrix",
     CalculatorFunctionsGeneral::innerMinPolyMatrix, "",
    "Computes the minimal polynomial of a matrix, provided that the matrix is not too large.",
-   "A=MakeMatrix{}((0,1), (- 1,0)); p =MinPolyMatrix{}A",
+   "A =MakeMatrix{}((0,1), (- 1,0)); p =MinPolyMatrix{}A",
    true, false,
    "CalculatorFunctionsGeneral::innerMinPolyMatrix",
    "MinPolyMatrix")
@@ -1534,7 +1534,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("CharPoly", CalculatorFunctionsGeneral::innerCharPolyMatrix, "",
    "Computes the characteristic polynomial of a matrix (=det(A-q*Id)), \
     provided that the matrix is not too large.",
-   "A=\\begin{pmatrix}2 & 3& 5\\\\ 7& 11& 13\\\\ 17&19 &23\\end{pmatrix}; p =MinPolyMatrix{}A",
+   "A =\\begin{pmatrix}2 & 3& 5\\\\ 7& 11& 13\\\\ 17&19 &23\\end{pmatrix}; p =MinPolyMatrix{}A",
    true, false,
    "CalculatorFunctionsGeneral::innerCharPolyMatrix",
    "CharPoly")
@@ -1876,7 +1876,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("IsPrimeMillerRabin", CalculatorFunctionsGeneral::innerIsPrimeMillerRabin, "",
    "Checks if the number is prime by the Miller-Rabin test.",
-   "A=100!+ 1; IsPrimeMillerRabin(A); \
+   "A =100!+ 1; IsPrimeMillerRabin(A); \
     IsPrimeMillerRabin( 4256233);\
     IsPrimeMillerRabin(49979687);\
     IsPrimeMillerRabin( 4256233*49979687)",
@@ -2159,7 +2159,7 @@ void Calculator::initPredefinedInnerFunctions()
    "Attempts to splits a univariate rational function into partial fractions over the real algebraic numbers.\
    If successful, produces a sequence containing the partial fractions.\
    Else does nothing.",
-   "A=\\frac{x^3}{x^{3}-x^2+2x^2-2};\
+   "A =\\frac{x^3}{x^{3}-x^2+2x^2-2};\
     B=UnivariatePartialFractions(A);\
     A-\\sum(B)",
     true, false,
@@ -2447,7 +2447,7 @@ void Calculator::initPredefinedInnerFunctions()
    "<b>Calculus teaching function.</b> Same as plot2D but plots two \
    functions with bars locked between the two functions; \
    , used to illustrate approximations to definite integrals.",
-   "\nA=3/2- ((-3/4+ 1/4 (x))^{2});\nB= (1/4 (x))^{2}+2;\nPlot2DWithBars{}(A, B, 0, 5, 1)",
+   "\nA =3/2- ((-3/4+ 1/4 (x))^{2});\nB= (1/4 (x))^{2}+2;\nPlot2DWithBars{}(A, B, 0, 5, 1)",
    false, true,
    "CalculatorFunctionsGeneral::innerPlot2DWithBars",
    "Plot2DWithBars");
@@ -2499,7 +2499,7 @@ void Calculator::initPredefinedInnerFunctions()
     \nden =CoefficientOf (d/dx y, theDiff);\
     \nb= -num/den;\
     \nCompareExpressionsNumerically(a,b, 0.001, x\\in(0,5),10, y\\in (0,5),10);\
-    \nA=PointsImplicitly(theFun, (0,0),(4,4), (10,10), (400,400));\
+    \nA =PointsImplicitly(theFun, (0,0),(4,4), (10,10), (400,400));\
     \nCompareExpressionsNumericallyAtPoints(a,b, 0.01, (x,y)\\in A);\
    ",
    true, false,
@@ -3856,7 +3856,7 @@ void Calculator::initPredefinedStandardOperations()
    ", "c = (a =b);\na;\nc;\na;\nd = (e = f; g=h);\nd;\ne;\nMelt{}d;\ne;\ng;  ", true);
   this->AddOperationOuterHandler
   ("=", Calculator::outerCheckRule, "",
-   "Checks whether the rule is of the form A=A, and substitutes the expression with an error if that \
+   "Checks whether the rule is of the form A =A, and substitutes the expression with an error if that \
     is the case. This usually happens when a general rule is entered twice.\
     In the following example, we try to redefine the associative rule\
     of the calculator. This fails because the associative rule is already implemented:\
@@ -4019,22 +4019,22 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opRational(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element Weyl algebra. ",
-   " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opPoly(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element Weyl algebra. ",
-   " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i +\\partial_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i +\\partial_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opPoly(),
    "Adds a rational or polynomial to element Weyl algebra. ",
-   " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element Weyl algebra. ",
-   " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF, this->opRationalFunction(), this->opRationalFunction(),
@@ -4113,7 +4113,7 @@ void Calculator::initPredefinedStandardOperations()
   ("+", CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor,
    this->opMatTensorRat(), this->opMatTensorRat(),
    "Adds two matrices.",
-   " A=MakeMatrixTensorForm{}((5, 8), (3, 5)); 3A*A-A;",
+   " A =MakeMatrixTensorForm{}((5, 8), (3, 5)); 3A*A-A;",
    true, false,
    "CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor");
   this->AddOperationOuterHandler
@@ -4264,21 +4264,21 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opRational(), this->opElementWeylAlgebra(),
    "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
-   " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; 3\\partial_i", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; 3\\partial_i", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opPoly(), this->opElementWeylAlgebra(),
    "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
-   " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]", true,
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]", true,
    false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
    "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
-   " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\na =x_1x_2;\nb=\\partial_1\\partial_2; a b - b a -[a,b] ",
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\na =x_1x_2;\nb=\\partial_1\\partial_2; a b - b a -[a,b] ",
    true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opPoly(),
    "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
-   "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
+   "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
    true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly, this->opPoly(), this->opRational(),
@@ -4593,13 +4593,21 @@ void Calculator::initPredefinedStandardOperations()
     x =Polynomial{}x; x\\varepsilon_1",
     true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
-    this->AddOperationInnerHandler
+  this->AddOperationInnerHandler
   ("\\binom", CalculatorFunctionsBinaryOps::innerNChooseK, "",
    "Evaluates the binomial coefficient if possible.",
    "\\binom{8}{3} ",
    true, false,
    "CalculatorFunctionsBinaryOps::innerNChooseK",
    "Binom");
+  this->AddOperationInnerHandler
+  ("EllipticCurveNormalForm", CalculatorFunctionsGeneral::innerEllipticCurve, "",
+   "Makes an elliptic curve from a cubic in normal form, generator letter and base point.",
+   "EllipticCurveNormalForm(y^2 = x^3+x+7, g, x= 3 mod 101, y= 19 mod 101)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerEllipticCurve",
+   "EllipticCurveNormalForm");
+
   this->AddOperationOuterHandler
   ("mod", Calculator::innerZmodP, "",
    "Same as ModP but uses the mod notation.",
@@ -4831,7 +4839,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationHandler
   ("^", CalculatorFunctionsGeneral::innerPowerAnyToZero, "",
    "Replaces p^0 by 1 if p is non-zero, and by an error message if p is zero.",
-   "A=x^0; x = 0; A; B=x^0; 0^0; ",
+   "A =x^0; x = 0; A; B=x^0; 0^0; ",
    true, true, false, "CalculatorFunctionsGeneral::innerPowerAnyToZero",
    "PowerAnytoZero", false, "");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -4858,7 +4866,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger, this->opElementWeylAlgebra(), this->opRational(),
    "Raises element of Weyl algebra to integer power. ",
-   "\\partial =ElementWeylAlgebraDO{}(\\partial, x); \nx =ElementWeylAlgebraPoly{}(\\partial, x); \na =x\\partial; \na^10; \\partial x^{3/2}; \\partial^{3/2} x",
+   "\\partial = ElementWeylAlgebraDO{}(\\partial, x); \nx = ElementWeylAlgebraPoly{}(\\partial, x); \na =x\\partial; \na^10; \\partial x^{3/2}; \\partial^{3/2} x",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger");
 
@@ -4941,7 +4949,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationHandler
   ("^", CalculatorFunctionsGeneral::innerOperatorBounds, "",
    "Replaces \\int_a^b by (\\int, a, b) .",
-   "A=\\int_a^b; Lispify(A); PlotExpressionTree(A); ",
+   "A =\\int_a^b; Lispify(A); PlotExpressionTree(A); ",
    true, true, false,
    "CalculatorFunctionsGeneral::innerIntegralUpperBound",
    "OperatorBoundsSuperscript", false, "");
@@ -4978,7 +4986,7 @@ void Calculator::initPredefinedStandardOperations()
   ("_", CalculatorFunctionsGeneral::innerDereferenceSequenceStatements, "",
    "Dereferences a sequence of rules. \
     The syntax is as illustrated by the example. ",
-   "A=d/dx( \\sqrt(x +y)-4x^2y^2); (d/dx(y)= 0; A)_2;  ",
+   "A =d/dx( \\sqrt(x +y)-4x^2y^2); (d/dx(y)= 0; A)_2;  ",
    true, false,
    "CalculatorFunctionsGeneral::innerDereferenceSequenceStatements",
    "DereferenceSequenceStatements");
@@ -4986,7 +4994,7 @@ void Calculator::initPredefinedStandardOperations()
   ("\\otimes", CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix,
    "",
    "Tensor product of two matrices.",
-    "P= ((0 , 2 ),(1 , 0)); Q= ((0 , 3 ),(1 , 0)); \
+    "P = ((0 , 2 ),(1 , 0)); Q= ((0 , 3 ),(1 , 0)); \
     \nX =MakeMatrix{}P; Y =MakeMatrix{}Q; \
     \nZ=MakeMatrixTensorForm{}P; W=MakeMatrixTensorForm{}Q; \
     X\\otimes Y; Z\\otimes W", true, false,
@@ -5022,7 +5030,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationInnerHandler
   ("[]", CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA, "",
    "Lie bracket of elements of Weyl algebras =differential operators with polynomial coefficients. ",
-   "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; \n[\\partial_1, x_1]; ",
+   "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; \n[\\partial_1, x_1]; ",
    true, false,
    "CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA",
    "LieBracketWeylAlgebraElements");
@@ -5059,7 +5067,7 @@ void Calculator::initPredefinedStandardOperations()
   ("\\otimes", CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor,
    this->opMatTensorRat(), this->opMatTensorRat(),
    "Same as tensor product of matrices but uses class MatrixTensor instead of class Matrix.",
-   "P= ((0 , 2 ),(1 , 0)); Q= ((0 , 3 ),(1 , 0)); \
+   "P = ((0 , 2 ),(1 , 0)); Q= ((0 , 3 ),(1 , 0)); \
    \nX =MakeMatrix{}P; Y =MakeMatrix{}Q; \
    \nZ=MakeMatrixTensorForm{}P; W=MakeMatrixTensorForm{}Q; \
    \nX\\otimes Y; Z\\otimes W", true);
@@ -5140,7 +5148,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationInnerHandler
   ("\\geq", CalculatorFunctionsGeneral::innerGreaterThanOrEqualTo, "",
    "Greater than or equal to operation. ",
-   "A= (2>=x); x =1; A",
+   "A = (2>=x); x =1; A",
    true, false,
    "Calculator::innerGreaterThanOrEqualTo",
    "greaterThanOrEqualTo");
@@ -5157,9 +5165,9 @@ void Calculator::initPredefinedStandardOperations()
    "If either the left or the right argument contains a bound variable does nothing. \
     Else evaluates to 1 if the left argument equals mathematically the right argument.",
    "%NumberColors\n  \
-   A= (a =3, b=4);\n\
+   A = (a =3, b=4);\n\
    B= (a = (sqrt(3))^2, b=4 );\n\
-   A==B;\
+   A ==B;\
    \nx ==y;\n\
    x ==1;\nIsEqualToX{} {{a}}=a ==x;\
    \nIsEqualToX{}y;\nIsEqualToX{}x;\
@@ -5305,7 +5313,7 @@ void Calculator::initPredefinedOperationsComposite()
   this->AddOperationComposite
   ("ElementWeylAlgebra", CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly, "",
    "Differential operation acting on a polynomial. ",
-   "x =ElementWeylAlgebraPoly{}(\\partial, x);\\partial =ElementWeylAlgebraDO{}(\\partial, x);\
+   "x = ElementWeylAlgebraPoly{}(\\partial, x);\\partial = ElementWeylAlgebraDO{}(\\partial, x);\
    \n \\partial{}(x); \\partial^{2}{}(x^3+x^2); x{}(x^2)",
    true, true, false, "CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly",
    "EWAactOnPoly");

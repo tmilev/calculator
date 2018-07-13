@@ -66,6 +66,9 @@ public:
   void Reserve(int desiredSize)
   { this->AllocateElements(desiredSize);
   }
+  void Clear()
+  { this->SetSize(0);
+  }
   void SetSize(int newSize)
   { //std::cout << "Setting size to: " << newSize << std::endl;
     this->AllocateElements(newSize);

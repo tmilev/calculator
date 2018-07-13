@@ -506,7 +506,7 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
       case SSL_ERROR_SSL:
         logOpenSSL << logger::red << "A failure in the SSL library occurred. "
         << logger::endL;
-//        theError =ERR_get_error(3ssl);
+//        theError = ERR_get_error(3ssl);
 //        if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
 //          maxNumHandshakeTries =1;
         break;
@@ -641,7 +641,7 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup
       case SSL_ERROR_SSL:
         if (commentsOnFailure != 0)
           *commentsOnFailure << "A failure in the SSL library occurred. <br>";
-//        theError =ERR_get_error(3ssl);
+//        theError = ERR_get_error(3ssl);
 //        if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
 //          maxNumHandshakeTries =1;
         break;
@@ -1910,7 +1910,7 @@ bool WebWorker::ReceiveAllHttp()
     { if (errno == EAGAIN ||
           errno == EWOULDBLOCK ||
           errno == EINTR ||
-          errno == EIO || // errno==ENOBUFS ||
+          errno == EIO || // errno== ENOBUFS ||
           errno == ENOMEM)
         continue;
       this->error = "Error fetching message body: " + this->parent->ToStringLastErrorDescription();

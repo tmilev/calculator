@@ -106,7 +106,7 @@ void Calculator::reset()
   this->flagFirstErrorEncountered = false;
   this->flagMaxTransformationsErrorEncountered = false;
   this->flagMaxRecursionErrorEncountered = false;
-  this->flagAbortComputationASAP= false;
+  this->flagAbortComputationASAP = false;
   this->flagDisplayContext = false;
   this->EvaluatedExpressionsStack.Clear();
   this->theCruncherIds.Clear();
@@ -114,7 +114,7 @@ void Calculator::reset()
   this->syntaxErrors ="";
   this->evaluationErrors.SetSize(0);
   this->CurrentSyntacticStacK = &this->syntacticStacK;
-  this->CurrrentSyntacticSouP= &this->syntacticSouP;
+  this->CurrrentSyntacticSouP = &this->syntacticSouP;
   this->cachedExpressions.Clear();
   this->imagesCachedExpressions.SetSize(0);
   this->theProgramExpression.reset(*this);
@@ -1810,7 +1810,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
     errorLog << "Instead it simplifies to:<br> " << this->ToStringSyntacticStackHTMLTable(false);
   }
   if (outputErrors != 0)
-    *outputErrors =errorLog.str();
+    *outputErrors = errorLog.str();
   return success;
 }
 

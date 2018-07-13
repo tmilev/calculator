@@ -66,7 +66,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
       break;
     if (theFileTypes[i] != ".html")
       continue;
-    numInterpretations++;
+    numInterpretations ++;
     if (numInterpretations < firstTestToRun)
       continue;
     std::stringstream reportStream;
@@ -1674,11 +1674,69 @@ bool CalculatorFunctionsGeneral::innerNewtonsMethod(Calculator& theCommands, con
   theSub.SetKeyValue("startingPoint", input[2]);
   theSub.SetKeyValue("numIterations", input[3]);
 
-  return output.AssignStringParsed(
-  "(NewtonMap{}{{a}}= DoubleValue( (iteratedMap =x- f/ Differentiate{}(x, f); x ={{a}}; iteratedMap )_3); \
-   y_{0} = startingPoint;\
-   y_{{a}}=NewtonMap{}(y_{a- 1});\
-   y_{numIterations})_4"
+  return output.AssignStringParsed
+  ("(NewtonMap{}{{a}} = DoubleValue( (iteratedMap =x- f/ Differentiate{}(x, f); x ={{a}}; iteratedMap )_3); "
+   "y_{0} = startingPoint;"
+   "y_{{a}} = NewtonMap{}(y_{a- 1});"
+   "y_{numIterations})_4",
+   &theSub, theCommands);
+}
 
-  , &theSub, theCommands);
+
+bool CalculatorFunctionsGeneral::innerEllipticCurve(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEllipticCurve");
+  if (input.size() != 5)
+    return theCommands << "Elliptic curve expects 4 arguments (curve, generator letter, baseX and baseY) ";
+  const Expression& xDefE = input[3];
+  const Expression& yDefE = input[4];
+  //  HashedList<Expression> xEcandidates, yEcandidates;
+  //  if (!xDefE.GetFreeVariables(xEcandidates, false))
+  //    return theCommands << "Failed to get free variables from " << xDefE.ToString();
+  //  if (!yDefE.GetFreeVariables(yEcandidates, false))
+  //    return theCommands << "Failed to get free variables from " << yDefE.ToString();
+  //  if (xEcandidates.size != 1 || yEcandidates.size != 1)
+  //    return theCommands << "Couldn't get single free variable from " << xEcandidates.ToStringCommaDelimited()
+  //    << " and/or " << yEcandidates.ToStringCommaDelimited();
+  //  if (CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression())
+  if (!xDefE.StartsWith(theCommands.opDefine(), 3))
+    return theCommands << "Failed to extract variable form " << xDefE.ToString();
+  if (!yDefE.StartsWith(theCommands.opDefine(), 3))
+    return theCommands << "Failed to extract variable form " << yDefE.ToString();
+  ElementZmodP xBase, yBase;
+  if (!xDefE[2].IsOfType(&xBase))
+    return theCommands << "Could not extract element of z mod p from " << xDefE[2].ToString();
+  if (!yDefE[2].IsOfType(&yBase))
+    return theCommands << "Could not extract element of z mod p from " << yDefE[2].ToString();
+  if (xBase.theModulo != yBase.theModulo)
+    return theCommands << "The two base coordinates have different moduli. ";
+  Expression theCurve;
+  if (!CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression(theCommands, input[1], theCurve))
+    return theCommands << "Could not get arithmetic expression from: " << input[1].ToString()
+    << ". I was expecting a cubic equality.";
+  Expression thePolyE;
+  Polynomial<Rational> thePoly;
+  if (!CalculatorConversions::innerPolynomial<Rational>(theCommands, theCurve, thePolyE))
+    return theCommands << "Could not get polynomial from " << theCurve.ToString();
+  if (!thePolyE.IsOfType(&thePoly))
+    return theCommands << "Could not convert to polynomial: " << thePolyE.ToString();
+  Expression curveContext = thePolyE.GetContext();
+  if (curveContext.ContextGetNumContextVariables() != 2)
+    return theCommands << "Expected 2 context variables in " << theCurve.ToString() << ", got: "
+    << curveContext.ContextGetPolynomialVariables().ToString();
+  MonomialP leadingMon = thePoly.GetMaxMonomial(MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest);
+  int indexX = 0;
+  int indexY = 1;
+  if (leadingMon[indexX] == 3)
+    MathRoutines::swap(indexX, indexY);
+
+  Expression xE = xDefE[1];
+  Expression yE = yDefE[1];
+  if (curveContext.ContextGetContextVariable(indexX) != xE)
+     MathRoutines::swap(xE, yE);
+  if (curveContext.ContextGetContextVariable(indexY) != yE)
+    return theCommands << "Curve variable " << curveContext.ContextGetContextVariable(1).ToString()
+    << " not equal to " << yE.ToString();
+  theCommands << "Variables: x = " << xE.ToString() << ", y = " << yE.ToString()
+  << " polyE: " << thePolyE.ToString();
+  return false;
 }

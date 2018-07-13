@@ -1590,7 +1590,7 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
   }
   if (this->expressionType == this->typePoly)
   { Polynomial<Rational>  tempP;
-    tempP= this->Numerator.GetElement();
+    tempP = this->Numerator.GetElement();
     this->operator=(other);
     this->operator*=(tempP);
     return;

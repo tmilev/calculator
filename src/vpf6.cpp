@@ -680,12 +680,12 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
     { ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
       reportFourierTransformedCalculatorCommands << "<hr>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.ToString())
       << ", differential operators Fourier transformed - formatted for calculator input. <br><br>";
-      reportFourierTransformedCalculatorCommands << "x_{{i}}=ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
-      << "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
+      reportFourierTransformedCalculatorCommands << "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
+      << "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
       reportCalculatorCommands << "<hr>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.ToString())
       << ", differential operators - formatted for calculator input. <br><br>";
-      reportCalculatorCommands << "x_{{i}}=ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
-      << "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
+      reportCalculatorCommands << "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
+      << "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
 
       for (int j = 0; j < theGeneratorsItry.size; j ++)
       { theQDOs[j].GetEWAsetMatrixPartsToId(diffOpPart);
@@ -2718,6 +2718,7 @@ void ObjectContainer::reset()
   this->CurrentRandomSeed = time(NULL);
   this->theUserInputTextBoxesWithValues.Clear();
   this->graphicsScripts.Clear();
+  this->theEllipticCurves.SetSize(0);
    //Setting up a random seed.
   srand (this->CurrentRandomSeed);
 }

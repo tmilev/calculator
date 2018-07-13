@@ -1651,7 +1651,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
   List<Vector<Rational> > roots;
 
   for (int k = 0; k<theRootSAs.theSubalgebras.size; k++)
-  { rootSubalgebra& currentRootSA= theRootSAs.theSubalgebras[k];
+  { rootSubalgebra& currentRootSA = theRootSAs.theSubalgebras[k];
     roots = currentRootSA.PositiveRootsK;
     Polynomial<Rational> macdonaldPoly;
     make_macdonald_polynomial(W,roots,macdonaldPoly);
@@ -2428,7 +2428,7 @@ int pointis(int d, int n)
 //  List<Vector<Rational> > roots;
 //
 //  for (int k = 0; k<theRootSAs.theSubalgebras.size; k++)
-//  { rootSubalgebra& currentRootSA= theRootSAs.theSubalgebras[k];
+//  { rootSubalgebra& currentRootSA = theRootSAs.theSubalgebras[k];
 //    roots = currentRootSA.PositiveRootsK;
 //    stOutput << "I am processing root subalgebra of type "
 //              << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);

@@ -6787,7 +6787,7 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   { //stOutput << theCommands.javaScriptDisplayingIndicator;
 /*    if (theGlobalVariables.Fork())
       if (theGlobalVariables.ProcessIDforForking>0)//parent
-      { theCommands.flagAbortComputationASAP= true;
+      { theCommands.flagAbortComputationASAP = true;
         out << "<br>Computation of the root subalgebras is in progress. Below is a progress report. "
         << "Evaluation of all other commands has been stopped. " << theCommands.javaScriptDisplayingIndicator;
         stOutput << "parent is exiting...";

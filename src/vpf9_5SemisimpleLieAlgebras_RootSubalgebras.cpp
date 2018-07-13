@@ -2004,7 +2004,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew()
       for (int j = 0; j < this->SimpleBasisK.size; j ++)
         for (int k = 0; k< this->SimpleBasisK.size; k++)
           this->scalarProdMatrixOrdered(extensionRootPermutations[i][j], extensionRootPermutations[i][k])= this->scalarProdMatrixPermuted(j,k);
-      if (this->scalarProdMatrixOrdered ==extensionCartanSymmetrics[i])
+      if (this->scalarProdMatrixOrdered == extensionCartanSymmetrics[i])
       { goodPermutation = i;
         break;
       }
@@ -2650,7 +2650,7 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
   output.theSubalgebras.Reserve(this->theSubalgebras.size);
   for (int i = 0; i < this->theSubalgebras.size; i ++)
   { output.theSubalgebras.AddOnTop(this->theSubalgebras[SortingArray[i]]);
-    rootSubalgebra& currentSA=*output.theSubalgebras.LastObject();
+    rootSubalgebra& currentSA =*output.theSubalgebras.LastObject();
     List<int>& otherArray = this->theSubalgebras[SortingArray[i]].indicesSubalgebrasContainingK;
     currentSA.indicesSubalgebrasContainingK.Reserve(otherArray.size);
     currentSA.indicesSubalgebrasContainingK.SetSize(0);
@@ -2881,7 +2881,7 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
     if (this->flagPrintGAPinput && this->owner->theWeyl.LoadGAPRootSystem(GAPPosRootSystem))
     { out << " The roots needed to generate the root subsystems are listed below using the root indices in GAP. ";
       for (int i = 0; i < this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size; i ++)
-      { rootSubalgebra& currentSA= this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither[i];
+      { rootSubalgebra& currentSA = this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither[i];
         out << "<br>";
         out << "[";
         if (i < this->NumParabolic)
@@ -2907,7 +2907,7 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
     }
     out << "<hr>The roots needed to generate the root subsystems are listed below. ";
     for (int i = 0; i < this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size; i ++)
-    { rootSubalgebra& currentSA= this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither[i];
+    { rootSubalgebra& currentSA = this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither[i];
       out << "<br>";
       out << "[";
       if (i < this->NumParabolic)
@@ -2959,7 +2959,7 @@ std::string rootSubalgebras::ToStringDynkinTableFormat2LaTeX(FormatExpressions* 
   out << "\\begin{longtable}{cccccccc}" << endline;
   out << "$\\mathfrak g$ & $C(\\mathfrak g)$& $p$ & $q$&  $m$& $r$ & $c_r$ \\\\\\endhead" << endline;
   for (int i = 0; i < this->theSubalgebras.size; i ++)
-  { rootSubalgebra& currentSA= this->theSubalgebras[i];
+  { rootSubalgebra& currentSA = this->theSubalgebras[i];
     out << "$" << currentSA.theDynkinType.ToString(theFormat) << "$&" ;
     out << "$" << currentSA.theCentralizerDynkinType.ToString(theFormat) << "$&" ;
     out << "$" << (currentSA.theDynkinType.GetRootSystemSize()/2) << "$&" ;
@@ -3036,8 +3036,8 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomo
       out << "Included root " << k+ 1 << " out of " << bufferSAs[RecursionDepth- 1].Modules.size
       << " Total found SAs: " << this->theSubalgebras.size;
       theReport.Report(out.str());
-      int indexSA= this->IndexSubalgebra(bufferSAs[RecursionDepth]);
-      if (indexSA== - 1)
+      int indexSA = this->IndexSubalgebra(bufferSAs[RecursionDepth]);
+      if (indexSA == - 1)
       { bufferSAs[RecursionDepth].ComputeEssentialS();
         this->theSubalgebras[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(this->theSubalgebras.size);
         this->ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(bufferSAs, RecursionDepth+ 1);
@@ -3210,7 +3210,7 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
   }
   for (int i = 0; i < this->theSubalgebras.size- 1; i ++)
     if (this->storedNilradicals[i].size >0)
-    { rootSubalgebra& currentRootSA= this->theSubalgebras[i];
+    { rootSubalgebra& currentRootSA = this->theSubalgebras[i];
       tempRoots.size = 0;
       for (int j = 0; j<currentRootSA.PositiveRootsK.size; j ++)
       { tempRoots.AddOnTop(currentRootSA.PositiveRootsK[j]);

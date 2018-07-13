@@ -3550,7 +3550,7 @@ void SemisimpleSubalgebras::reset()
 bool CandidateSSSubalgebra::AttemptToSolveSystem()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
   this->CheckFullInitializatioN();
-  this->transformedSystem= this->theSystemToSolve;
+  this->transformedSystem = this->theSystemToSolve;
   ProgressReport theReport;
   std::stringstream reportstream;
   reportstream << "<hr>In order to realize type " << this->theWeylNonEmbedded->theDynkinType.ToString()
@@ -3565,10 +3565,10 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem()
   //stOutput << "<br>additions so far: " << Rational::total
   theComputation.thePolynomialOrder.theMonOrder =
   MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
-  for (int i =500; i <200000; i +=100000)
+  for (int i = 500; i < 200000; i += 100000)
   { theComputation.MaxNumGBComputations = i;
     theComputation.MaxNumSerreSystemComputationsPreferred = i;
-    theComputation.theAlgebraicClosurE= this->owner->ownerField;
+    theComputation.theAlgebraicClosurE = this->owner->ownerField;
     theComputation.SolveSerreLikeSystem(this->transformedSystem);
     if (theComputation.flagSystemProvenToHaveNoSolution || theComputation.flagSystemProvenToHaveSolution)
       break;
@@ -3619,7 +3619,7 @@ void CandidateSSSubalgebra::GetGenericCartanCentralizerLinearCombination(int ind
 { int offsetIndex = this->totalNumUnknownsNoCentralizer+ indexCartanCentralizerGen*this->GetAmbientWeyl().GetDim() ;
   List<ChevalleyGenerator> eltsCartan;
   eltsCartan.SetSize(this->GetAmbientWeyl().GetDim());
-  for (int i = 0; i <eltsCartan.size; i ++)
+  for (int i = 0; i < eltsCartan.size; i ++)
   { eltsCartan[i].theGeneratorIndex = this->GetAmbientSS().GetNumPosRoots() + i;
     eltsCartan[i].owner = &this->GetAmbientSS();
   }
@@ -3637,8 +3637,8 @@ void CandidateSSSubalgebra::GetGenericPosGenLinearCombination(int indexPosGens, 
 void CandidateSSSubalgebra::AddToSystem(const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish)
 { Polynomial<AlgebraicNumber> thePoly;
 //  stOutput << "<hr>I must vanish: " << elementThatMustVanish.ToString();
-  for (int i = 0; i <elementThatMustVanish.size(); i ++)
-  { thePoly =elementThatMustVanish.theCoeffs[i];
+  for (int i = 0; i < elementThatMustVanish.size(); i ++)
+  { thePoly = elementThatMustVanish.theCoeffs[i];
     thePoly.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
     this->theSystemToSolve.AddOnTopNoRepetition(thePoly);
   }
@@ -3685,7 +3685,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
       << " but co-Cartan of the computed candidate elements of the Cartan, " << this->theHsScaledToActByTwo.ToString()
       << " is different, namely, " << coCartanCandidate.ToString();
   }
-  for (int k = 0; k< this->GetAmbientWeyl().RootSystem.size; k++)
+  for (int k = 0; k < this->GetAmbientWeyl().RootSystem.size; k ++)
   { int counter = - 1;
     for (int i = 0; i < this->CartanSAsByComponentScaledToActByTwo.size; i ++)
       for (int j = 0; j < this->CartanSAsByComponentScaledToActByTwo[i].size; j ++)
@@ -3725,20 +3725,20 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
 
 //  stOutput << "<hr>Current candidate: " << this->ToStringCartanSA();
 //  stOutput << "<br>reducing: " << accumChar.ToString();
-  while (accumChar.size()>0)
-  { int currentIndex =accumChar.GetIndexExtremeWeightRelativeToWeyl(*this->theWeylNonEmbedded);
+  while (accumChar.size() > 0)
+  { int currentIndex = accumChar.GetIndexExtremeWeightRelativeToWeyl(*this->theWeylNonEmbedded);
     if (currentIndex == - 1)
       crash << "This is a programming error: while decomposing ambient Lie algebra over the candidate subalgebra, I got "
       << "that there is no extreme weight. This is impossible: something has gone very wrong. " << crash;
     //stOutput << "<br>Extreme weight: " << this->theWeylNonEmbedded->GetSimpleCoordinatesFromFundamental
     //(accumChar[currentIndex].weightFundamentalCoordS).ToString();
 
-    if (accumChar.theCoeffs[currentIndex]<0)
+    if (accumChar.theCoeffs[currentIndex] < 0)
     { //stOutput << "<br>accumChar has negative coeff!";
       return false;
     }
-    for (int i = 0; i <accumChar[currentIndex].weightFundamentalCoordS.size; i ++)
-      if (accumChar[currentIndex].weightFundamentalCoordS[i]<0)
+    for (int i = 0; i < accumChar[currentIndex].weightFundamentalCoordS.size; i ++)
+      if (accumChar[currentIndex].weightFundamentalCoordS[i] < 0)
       { //stOutput << "<br>accumChar[currentIndex].weightFundamentalCoords[i] is less than 0.";
         return false;
       }
@@ -3755,7 +3755,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
       << freudenthalChar.ToString() << ". The failure message was: " << tempS << ". This shouldn't happen. " << crash;
       return false;
     }
-    accumChar-= outputChar;
+    accumChar -= outputChar;
     //stOutput << "<br>remaining char:" << accumChar.ToString();
   }
   //stOutput << "<br>GOT to returning true!";
@@ -3770,7 +3770,7 @@ void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegular
   if (useHtml)
   { out << "<table><tr><td align =\"center\">Char.</td>";
     for (int i = 0; i < this->IndicesMinimalContainingRootSAs.size; i ++)
-    { rootSubalgebra& theSA= owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[i]];
+    { rootSubalgebra& theSA = owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[i]];
       out << "<td align =\"center\">Decomp. "
       << theSA.theDynkinDiagram.ToString() << "</td>";
     }
@@ -3778,7 +3778,7 @@ void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegular
   }
   out << "<tr><td align =\"center\"> " << this->hCharacteristic.ToString() << "</td>";
   for (int k = 0; k< this->IndicesMinimalContainingRootSAs.size; k++)
-  { rootSubalgebra& theSA= owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[k]];
+  { rootSubalgebra& theSA = owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[k]];
     tempS = theSA.theDynkinDiagram.ToString();
     if (useHtml)
       out << "<td align =\"center\">";
@@ -3853,7 +3853,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat) const
   latexFormat.flagUseLatex = true;
   for (int i = 0; i < this->IndicesContainingRootSAs.size; i ++)
   { out << "\nContaining regular semisimple subalgebra number " << i + 1 << ": ";
-    rootSubalgebra& currentSA= this->container->theRootSAs.theSubalgebras[this->IndicesContainingRootSAs[i]];
+    rootSubalgebra& currentSA = this->container->theRootSAs.theSubalgebras[this->IndicesContainingRootSAs[i]];
     if (useHtml)
     { out << "<a href=\"" << htmlPathServer << "../rootSubalgebra_" << this->IndicesContainingRootSAs[i] + 1 << ".html\">";
       tempS = currentSA.theDynkinDiagram.ToString();
@@ -3957,7 +3957,7 @@ bool slTwoSubalgebra::ModuleDecompositionLeftFitsIntoRight
 { MacroRegisterFunctionWithName("slTwoSubalgebra::ModuleDecompositionLeftFitsIntoRight");
   charSSAlgMod<Rational> moduleDifference = moduleDecompoRight-moduleDecompoLeft;
   for (int i = 0; i <moduleDifference.size(); i ++)
-    if (moduleDifference.theCoeffs[i]<0)
+    if (moduleDifference.theCoeffs[i] < 0)
       return false;
   return true;
 }
@@ -4164,7 +4164,7 @@ bool slTwoSubalgebra::AttemptToComputeCentralizer()
   for (int i = 0; i < this->IndicesMinimalContainingRootSAs.size; i ++)
   { rootSubalgebra& currentMinimalContainer =
     this->container->theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[i]];
-    Rational dimOfSSpartOfCentralizerOfRootSA=
+    Rational dimOfSSpartOfCentralizerOfRootSA =
     currentMinimalContainer.theCentralizerDynkinType.GetRankRational() +
     currentMinimalContainer.theCentralizerDynkinType.GetRootSystemSize();
 //    stOutput << "<hr>Current minimal container: " << currentMinimalContainer.theDynkinType.ToString()
@@ -4208,7 +4208,7 @@ void slTwoSubalgebra::ComputeModuleDecompositionOfMinimalContainingRegularSAs
   this->moduleDecompositionMinimalContainingRootSAs.SetSize(this->IndicesMinimalContainingRootSAs.size);
   List<int> buffer;
   for (int i = 0; i < this->IndicesMinimalContainingRootSAs.size; i ++)
-  { rootSubalgebra& theSA= owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[i]];
+  { rootSubalgebra& theSA = owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[i]];
     this->ComputeModuleDecomposition
     (theSA.PositiveRootsK, theSA.SimpleBasisK.size, this->moduleDecompositionMinimalContainingRootSAs[i],
      buffer);
@@ -4303,7 +4303,7 @@ void slTwoSubalgebra::ComputeModuleDecomposition
       { BufferHighestWeights[k]-= topMult;
         if (k !=IndexZeroWeight)
           BufferHighestWeights[IndexZeroWeight*2-k]-= topMult;
-        if (BufferHighestWeights[k]<0 || !(BufferHighestWeights[k] ==BufferHighestWeights[IndexZeroWeight*2-k]))
+        if (BufferHighestWeights[k] < 0 || !(BufferHighestWeights[k] ==BufferHighestWeights[IndexZeroWeight*2-k]))
         { crash.theCrashReport << " This is a programming error: an error check has failed. While trying to decompose with respect to  h-characteristic <br> "
           << this->hCharacteristic.ToString() << ". The positive root system of the containing root subalgebra is <br>" << positiveRootsContainingRegularSA.ToString()
           << ". <br>The preferred simple basis is <br>" << this->preferredAmbientSimpleBasis.ToString() << ". The coordinates relative to the preferred simple basis are<br>"
@@ -4427,14 +4427,14 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat)
     if (useHtml)
       out << "</td><td>";
     for (int j = 0; j < theSl2.IndicesMinimalContainingRootSAs.size; j ++)
-    { rootSubalgebra& currentSA= this->theRootSAs.theSubalgebras[theSl2.IndicesMinimalContainingRootSAs[j]];
+    { rootSubalgebra& currentSA = this->theRootSAs.theSubalgebras[theSl2.IndicesMinimalContainingRootSAs[j]];
       out << "<a href=\"" << displayPath << "rootSubalgebra_" << theSl2.IndicesMinimalContainingRootSAs[j] + 1 << ".html\">"
       << currentSA.theDynkinDiagram.ToString() << "</a>" << ";  ";
     }
     if (useHtml)
       out << "</td><td title =\"" << tooltipContainingRegular << "\">";
     for (int j = 0; j < theSl2.IndicesContainingRootSAs.size; j ++)
-    { rootSubalgebra& currentSA= this->theRootSAs.theSubalgebras[theSl2.IndicesContainingRootSAs[j]];
+    { rootSubalgebra& currentSA = this->theRootSAs.theSubalgebras[theSl2.IndicesContainingRootSAs[j]];
       out << "<a href=\"" <<  displayPath << "rootSubalgebra_" << theSl2.IndicesContainingRootSAs[j] + 1 << ".html\">"
       << currentSA.theDynkinDiagram.ToString() << "</a>" << ";  ";
     }
@@ -5981,7 +5981,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   theDifference = other.theWeylNonEmbedded->theDynkinType;
   theDifference-= this->theWeylNonEmbedded->theDynkinType;
   for (int i = 0; i < theDifference.size(); i ++)
-    if (theDifference.theCoeffs[i]<0)
+    if (theDifference.theCoeffs[i] < 0)
     { //if (doDebug)
       //  stOutput << " it's not because types don't match.";
       return false;
@@ -6080,7 +6080,7 @@ void SemisimpleSubalgebras::ComputePairingTablesAndFKFTtypes()
   //stOutput << "computing pairing tables";
   ProgressReport theReport;
   for (int i = 0; i < this->theSubalgebras.theValues.size; i ++)
-  { CandidateSSSubalgebra& currentSA= this->theSubalgebras[i];
+  { CandidateSSSubalgebra& currentSA = this->theSubalgebras[i];
     if (!currentSA.flagCentralizerIsWellChosen || !currentSA.flagSystemSolved)
       continue;
     if (!this->flagComputePairingTable)
@@ -6132,7 +6132,7 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
       continue;
     if (!this->theSubalgebras[i].ComputeAndVerifyFromGeneratorsAndHs())
       continue;
-    CandidateSSSubalgebra& currentSA= this->theSubalgebras[i];
+    CandidateSSSubalgebra& currentSA = this->theSubalgebras[i];
     std::stringstream reportStream2;
     reportStream2 << "Computing centralizer of subalgebra number " << i + 1
     << " out of " << this->theSubalgebras.theValues.size
@@ -6146,7 +6146,7 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
     for (int j = 0; j < this->theSubalgebras.theValues.size; j ++)
     { if (i == j)
         continue;
-      CandidateSSSubalgebra& otherSA= this->theSubalgebras[j];
+      CandidateSSSubalgebra& otherSA = this->theSubalgebras[j];
       if (currentSA.IsDirectSummandOf(otherSA))
       { currentSA.indicesDirectSummandSuperAlgebra.AddOnTop(j);
         if (currentSA.indexMaxSSContainer == - 1)

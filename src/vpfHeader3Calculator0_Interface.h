@@ -13,6 +13,7 @@
 #include "vpfHeader2Math15_UniversalEnveloping.h"
 #include "vpfHeader2Math6_ModulesSSLieAlgebras.h"
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
+#include "vpfHeader2Math11_EllipticCurves.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file, calculator declaration. ");
 
@@ -774,6 +775,8 @@ public:
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> > theWeylGroupVirtualReps;
   ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
   ListReferences<SltwoSubalgebras> theSltwoSAs;
+  ListReferences<EllipticCurveWeierstrassNormalForm<ElementZmodP> > theEllipticCurves;
+  HashedListReferences<ElementEllipticCurve<ElementZmodP> > EllipticCurveElementsZmodP;
   HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
   HashedListReferences<Polynomial<Rational> > thePolys;
   HashedListReferences<Polynomial<AlgebraicNumber> > thePolysOverANs;

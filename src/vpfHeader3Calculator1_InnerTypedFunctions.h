@@ -149,8 +149,10 @@ template <class coefficient>
 bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerPolynomial");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
-//  stOutput << "Extracting poly from: " << input.ToString();
-  if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
+  //stOutput << "DEBUG: Extracting poly from: " << input.ToString() << "<br>";
+  //if (input.size() > 0)
+  //  stOutput << "DEBUG: input starts with: " << input[0].ToString() << ", input size: " << input.size() << "\n<br>\n";
+  if (theCommands.RecursionDeptH > theCommands.MaxRecursionDeptH)
     return theCommands << "Max recursion depth of " << theCommands.MaxRecursionDeptH
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
   if (input.IsOfType<Polynomial<coefficient> >())
@@ -163,7 +165,8 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
     return true;
   }
   Expression theConverted, theComputed;
-  if (input.IsListStartingWithAtom(theCommands.opTimes()) || input.IsListStartingWithAtom(theCommands.opPlus()))
+  if (input.IsListStartingWithAtom(theCommands.opTimes()) ||
+      input.IsListStartingWithAtom(theCommands.opPlus()))
   { theComputed.reset(theCommands, input.size());
     theComputed.AddChildOnTop(input[0]);
     for (int i = 1; i < input.size(); i ++)
@@ -177,6 +180,20 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
       return CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(theCommands, theComputed, output);
     crash << "Error, this line of code should never be reached. " << crash;
   }
+  if (input.StartsWith(theCommands.opMinus(), 3))
+  { theComputed.reset(theCommands, input.size());
+    theComputed.AddChildOnTop(input[0]);
+    for (int i = 1; i < 3; i ++)
+    { Expression summand = input[i];
+      if (i == 2)
+        summand *= - 1;
+      if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, summand, theConverted))
+        return theCommands << "<hr>Failed to extract polynomial from " << summand.ToString();
+      theComputed.AddChildOnTop(theConverted);
+    }
+    return CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(theCommands, theComputed, output);
+  }
+
   int thePower = - 1;
   if (input.StartsWith(theCommands.opThePower(), 3))
     if (input[2].IsSmallInteger(&thePower))

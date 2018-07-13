@@ -4601,12 +4601,12 @@ void Calculator::initPredefinedStandardOperations()
    "CalculatorFunctionsBinaryOps::innerNChooseK",
    "Binom");
   this->AddOperationInnerHandler
-  ("EllipticCurveNormalForm", CalculatorFunctionsGeneral::innerEllipticCurve, "",
+  ("EllipticCurveNormalFormOvernZp", CalculatorFunctionsGeneral::innerEllipticCurveNormalFormOverZp, "",
    "Makes an elliptic curve from a cubic in normal form, generator letter and base point.",
    "EllipticCurveNormalForm(y^2 = x^3+x+7, g, x= 3 mod 101, y= 19 mod 101)",
    true, false,
    "CalculatorFunctionsGeneral::innerEllipticCurve",
-   "EllipticCurveNormalForm");
+   "EllipticCurveNormalFormOvernZp");
 
   this->AddOperationOuterHandler
   ("mod", Calculator::innerZmodP, "",

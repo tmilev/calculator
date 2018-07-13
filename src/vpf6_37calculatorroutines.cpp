@@ -1683,8 +1683,8 @@ bool CalculatorFunctionsGeneral::innerNewtonsMethod(Calculator& theCommands, con
 }
 
 
-bool CalculatorFunctionsGeneral::innerEllipticCurve(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEllipticCurve");
+bool CalculatorFunctionsGeneral::innerEllipticCurveNormalFormOverZp(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEllipticCurveNormalFormOverZp");
   if (input.size() != 5)
     return theCommands << "Elliptic curve expects 4 arguments (curve, generator letter, baseX and baseY) ";
   const Expression& xDefE = input[3];
@@ -1709,24 +1709,25 @@ bool CalculatorFunctionsGeneral::innerEllipticCurve(Calculator& theCommands, con
     return theCommands << "Could not extract element of z mod p from " << yDefE[2].ToString();
   if (xBase.theModulo != yBase.theModulo)
     return theCommands << "The two base coordinates have different moduli. ";
-  Expression theCurve;
-  if (!CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression(theCommands, input[1], theCurve))
+  Expression theCurveE;
+  if (!CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression(theCommands, input[1], theCurveE))
     return theCommands << "Could not get arithmetic expression from: " << input[1].ToString()
     << ". I was expecting a cubic equality.";
   Expression thePolyE;
   Polynomial<Rational> thePoly;
-  if (!CalculatorConversions::innerPolynomial<Rational>(theCommands, theCurve, thePolyE))
-    return theCommands << "Could not get polynomial from " << theCurve.ToString();
+  if (!CalculatorConversions::innerPolynomial<Rational>(theCommands, theCurveE, thePolyE))
+    return theCommands << "Could not get polynomial from " << theCurveE.ToString();
   if (!thePolyE.IsOfType(&thePoly))
     return theCommands << "Could not convert to polynomial: " << thePolyE.ToString();
   Expression curveContext = thePolyE.GetContext();
   if (curveContext.ContextGetNumContextVariables() != 2)
-    return theCommands << "Expected 2 context variables in " << theCurve.ToString() << ", got: "
+    return theCommands << "Expected 2 context variables in " << theCurveE.ToString() << ", got: "
     << curveContext.ContextGetPolynomialVariables().ToString();
   MonomialP leadingMon = thePoly.GetMaxMonomial(MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest);
+  theCommands << "DEBUG: leading mon: " << leadingMon.ToString();
   int indexX = 0;
   int indexY = 1;
-  if (leadingMon[indexX] == 3)
+  if (leadingMon[indexX] != 3)
     MathRoutines::swap(indexX, indexY);
 
   Expression xE = xDefE[1];
@@ -1736,7 +1737,21 @@ bool CalculatorFunctionsGeneral::innerEllipticCurve(Calculator& theCommands, con
   if (curveContext.ContextGetContextVariable(indexY) != yE)
     return theCommands << "Curve variable " << curveContext.ContextGetContextVariable(1).ToString()
     << " not equal to " << yE.ToString();
-  theCommands << "Variables: x = " << xE.ToString() << ", y = " << yE.ToString()
-  << " polyE: " << thePolyE.ToString();
+  theCommands << "Created elliptic curve " << thePolyE.ToString()
+  << " = 0. The variables are assumed to be: x = " << xE.ToString() << ", y = " << yE.ToString();
+  if (thePoly.size() > 4)
+    return theCommands << "Elliptic curve allowed to have max 4 terms, yours has: " << thePoly.size();
+  MonomialP xCubed, xLinear, ySquared;
+  xCubed.MakeEi(indexX, 3);
+  xLinear.MakeEi(indexX, 1);
+  ySquared.MakeEi(indexY, 2);
+  EllipticCurveWeierstrassNormalForm<ElementZmodP> theCurve;
+  Rational coefficientY = thePoly.GetMonomialCoefficient(ySquared);
+  Rational coefficientXcubed = - thePoly.GetMonomialCoefficient(xCubed);
+  if (coefficientY == 0)
+    return theCommands << "Did not find square term in your curve.";
+  if (coefficientXcubed == 0)
+    return theCommands << "Did not find cube term in your curve.";
+
   return false;
 }

@@ -474,7 +474,7 @@ public:
   static bool innerSendEmailWithMailGun
   (Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerEllipticCurve
+  static bool innerEllipticCurveNormalFormOverZp
   (Calculator& theCommands, const Expression& input, Expression& output);
 };
 

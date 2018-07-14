@@ -9,6 +9,7 @@
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfHeader3Calculator4HtmlFunctions.h"
 #include "vpfHeader5Crypto.h"
+#include "vpfImplementationHeader2Math11_EllipticCurves.h"
 #include <cmath>
 ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp(__FILE__, "Calculator expression implementation. ");
 
@@ -55,6 +56,18 @@ FormatExpressions::GetMonOrder<Expression>()
 }
 
 //Expression::GetTypeOperation specializations follow
+template < >
+int Expression::GetTypeOperation<ElementEllipticCurve<Rational> >() const
+{ this->CheckInitialization();
+  return this->owner->opEllipticCurveElementsRational();
+}
+
+template < >
+int Expression::GetTypeOperation<ElementEllipticCurve<ElementZmodP> >() const
+{ this->CheckInitialization();
+  return this->owner->opEllipticCurveElementsZmodP();
+}
+
 template < >
 int Expression::GetTypeOperation<RationalFunctionOld>() const
 { this->CheckInitialization();
@@ -257,6 +270,24 @@ ElementSemisimpleLieAlgebra<AlgebraicNumber>* whichElement
 
 //Expression::ConvertsToType specializations end.
 //Expression::AddObjectReturnIndex specializations follow
+template < >
+int Expression::AddObjectReturnIndex(const
+ElementEllipticCurve<Rational>
+& inputValue) const
+{ this->CheckInitialization();
+  return this->owner->theObjectContainer.EllipticCurveElementsRational
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+ElementEllipticCurve<ElementZmodP>
+& inputValue) const
+{ this->CheckInitialization();
+  return this->owner->theObjectContainer.EllipticCurveElementsZmodP
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
 template < >
 int Expression::AddObjectReturnIndex(const
 SemisimpleSubalgebras
@@ -545,6 +576,20 @@ Rational& Expression::GetValueNonConst() const
 { if (!this->IsOfType<Rational>())
     crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theRationals.GetElement(this->GetLastChild().theData);
+}
+
+template < >
+ElementEllipticCurve<Rational>& Expression::GetValueNonConst() const
+{ if (!this->IsOfType<ElementEllipticCurve<Rational> >())
+    crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
+  return this->owner->theObjectContainer.EllipticCurveElementsRational.GetElement(this->GetLastChild().theData);
+}
+
+template < >
+ElementEllipticCurve<ElementZmodP>& Expression::GetValueNonConst() const
+{ if (!this->IsOfType<ElementEllipticCurve<ElementZmodP> >())
+    crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
+  return this->owner->theObjectContainer.EllipticCurveElementsZmodP.GetElement(this->GetLastChild().theData);
 }
 
 template < >
@@ -2149,11 +2194,20 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     if (this->HasNonEmptyContext())
       out << ")";
     result = true;
+  } else if (this->IsOfType<ElementEllipticCurve<Rational> >())
+  { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    contextFormat.GetElement().flagUseFrac = true;
+    out << this->GetValue<ElementEllipticCurve<Rational> >().ToString(&contextFormat.GetElement());
+    result = true;
+  } else if (this->IsOfType<ElementEllipticCurve<ElementZmodP> >())
+  { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    contextFormat.GetElement().flagUseFrac = true;
+    out << this->GetValue<ElementEllipticCurve<ElementZmodP> >().ToString(&contextFormat.GetElement());
+    result = true;
   } else if (this->IsOfType<ElementZmodP>())
   { out << this->GetValue<ElementZmodP>().ToString();
     result = true;
-  }
-  else if (this->IsOfType<InputBox>())
+  } else if (this->IsOfType<InputBox>())
   { out << this->GetValue<InputBox>().GetUserInputBox();
     result = true;
   } else if (this->IsOfType<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >())
@@ -3287,7 +3341,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     outTrue << "</table>";
     return outTrue.str();
   }
-//  if (useLatex && recursionDepth== 0 && this->theOperation!= owner->opEndStatement())
+//  if (useLatex && recursionDepth== 0 && this->theOperation != owner->opEndStatement())
 //    return HtmlRoutines::GetHtmlMathSpanFromLatexFormula(out.str());
 //  if (this->format == this->formatTimesDenotedByStar)
 //    stOutput << "DEBUG: Formatted by star: " << out.str() << "<br>";

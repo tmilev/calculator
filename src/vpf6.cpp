@@ -1079,7 +1079,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   out << "<br>The determinant of the symmetric Cartan matrix is: " << theWeyl.CartanSymmetric.GetDeterminant().ToString();
   /*  Rational theRatio;
     for (int j = 0; j < theWeyl.GetDim(); j ++)
-    { theRatio= 0;
+    { theRatio = 0;
       for (int i = 0; i < theWeyl.RootSystem.size; i ++)
       { Rational tempRat = theWeyl.RootScalarCartanRoot(theWeyl.RootSystem[i], theWeyl.RootSystem[j]);
         theRatio+= tempRat*tempRat;
@@ -2718,7 +2718,8 @@ void ObjectContainer::reset()
   this->CurrentRandomSeed = time(NULL);
   this->theUserInputTextBoxesWithValues.Clear();
   this->graphicsScripts.Clear();
-  this->theEllipticCurves.SetSize(0);
+  this->EllipticCurveElementsZmodP.Clear();
+  this->EllipticCurveElementsRational.Clear();
    //Setting up a random seed.
   srand (this->CurrentRandomSeed);
 }

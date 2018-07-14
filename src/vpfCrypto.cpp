@@ -1083,7 +1083,7 @@ bool JSONWebToken::VerifyRSA256
     //List<int> intValues;
     //intValues.SetSize(payload.size());
     //for (unsigned i = 0; i < payload.size(); i ++)
-    //  intValues[i] =payload[i];
+    //  intValues[i] = payload[i];
     //*commentsGeneral << "<br>Payload, json: " << intValues.ToStringCommaDelimited();
   }
   List<uint32_t> outputSha, RSAresultInts;

@@ -554,7 +554,7 @@ void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroupData>& g, Per
 //  { out << '(';
 //    for (int j = 0; j<p.cycles[i].size; j ++)
 //    { out << p.cycles[i][j];
-//      if (j !=p.cycles[i].size- 1)
+//      if (j != p.cycles[i].size- 1)
 //        out << ' ';
 //    }
 //    out << ')';
@@ -1948,7 +1948,7 @@ Vector<int> pointi_slow(int d, int i)
     stOutput << " " << points.size << " generated." << "\n";
     maxpoints = points.size;
   }
-  if (i>=points.size)
+  if (i>= points.size)
     stOutput << "only " << points.size << " points in dimension " << d << " available so far (requested point " << i << ")" << "\n";
   return points[i];
 }
@@ -3443,7 +3443,7 @@ void TestInduction(int n =4, int m=3)
   //SemisimpleLieAlgebra theSSlieAlg;
   //theSSlieAlg.theWeyl.MakeArbitrarySimple(letter, number);
   //theSSlieAlg.ComputeChevalleyConstants(&theGlobalVariables);
-  //WeylGroup& W= theSSlieAlg.theWeyl;
+  //WeylGroup& W = theSSlieAlg.theWeyl;
   //W.ComputeConjugacyClassesThomasVersion();
 
   //get_macdonald_representations_of_weyl_group_v2(theSSlieAlg);

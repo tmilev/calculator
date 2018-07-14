@@ -687,7 +687,7 @@ public:
     inputOutput = buffer;
   }
   template <class otherType>
-  void ActOnVectorsColumn(Vectors<otherType>& inputOutput, const otherType& TheRingZero=(otherType) 0) const
+  void ActOnVectorsColumn(Vectors<otherType>& inputOutput, const otherType& TheRingZero =(otherType) 0) const
   { for (int i = 0; i < inputOutput.size; i ++)
       this->ActOnVectorColumn(inputOutput[i], TheRingZero);
   }
@@ -808,7 +808,7 @@ public:
     if (theCarbonCopy != 0)
       theCarbonCopy->SubtractRows(indexRowWeSubtractFrom, indexSubtracted, StartColIndex, scalar);
   }
-  void MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, Matrix<coefficient>& output, const coefficient& theRingZero= 0) const;
+  void MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, Matrix<coefficient>& output, const coefficient& theRingZero = 0) const;
   void MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, const coefficient& theRingZero = 0);
   void MultiplyOnTheRight(const Matrix<coefficient>& standsOnTheRight)
   { Matrix<coefficient> temp = *this;
@@ -824,7 +824,7 @@ public:
         output[i][j] = this->elements[i][j];
     }
   }
-  void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, Vector<coefficient>& output, const coefficient& theRingUnit =1, const coefficient& theRingZero= 0);
+  void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, Vector<coefficient>& output, const coefficient& theRingUnit =1, const coefficient& theRingZero = 0);
   //returns true if successful, false otherwise
 //  bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
 //    (Matrix<coefficient>& inputColumn, Matrix<coefficient>* outputTheGaussianTransformations Matrix<coefficient>& outputColumn);
@@ -837,8 +837,8 @@ public:
   }
   Matrix<coefficient> operator^(const Matrix<coefficient>& right) const;
   static void ConjugationAction(const Matrix<coefficient>& conjugateMe, const Matrix<coefficient>& conjugateBy, Matrix<coefficient>& out);
-  void MakeZero(const coefficient& theRingZero= 0);
-  void MakeID(const Matrix<coefficient>& prototype, const coefficient& theRingZero= 0, const coefficient& theRingOne =1);
+  void MakeZero(const coefficient& theRingZero = 0);
+  void MakeID(const Matrix<coefficient>& prototype, const coefficient& theRingZero = 0, const coefficient& theRingOne =1);
   //if m1 corresponds to a linear operator from V1 to V2 and
   // m2 to a linear operator from W1 to W2, then the result of the below function
   //corresponds to the linear operator from V1+W1 to V2+W2 (direct sum)
@@ -1527,8 +1527,6 @@ public:
   List<std::string> weylAlgebraLetters;
   List<std::string> vectorSpaceEiBasisNames;
   std::string GetPolyLetter(int index) const;
-  std::string GetChevalleyHletter(int index) const;
-  std::string GetChevalleyGletter(int index) const;
   char AmbientWeylLetter;
   Rational AmbientCartanSymmetricInverseScale;
   int ExtraLinesCounterLatex;

@@ -6800,9 +6800,9 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
 //    << "<br>Appologies for this technical (Apache server configuration) problem. <br>Alleviating it is around the bottom of a very long to-do list.</b>"
 //    << "<br> The computation is slow, up to around 10 minutes for E_8.<br>";
     SltwoSubalgebras theSl2s(*ownerSS);
-    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo= true;
+    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo = true;
 //    stOutput << "ChangeME";
-//    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo= false;
+//    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo = false;
     ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s);
     theSl2s.ToHTML(&theFormat);
   } else

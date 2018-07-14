@@ -1744,7 +1744,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::RaiseToPower(int thePower, 
   ElementUniversalEnvelopingOrdered<coefficient> buffer;
   buffer.operator=(*this);
   this->MakeConst(theRingUnit, *this->owner);
-  //stOutput << "<br>raising " <<buffer.ToString() << " to power " << thePower;
+  //stOutput << "<br>raising " << buffer.ToString() << " to power " << thePower;
   for (int i = 0; i < thePower; i ++)
     this->operator*=(buffer);
   //stOutput << "<br> and the result is " << this->ToString();

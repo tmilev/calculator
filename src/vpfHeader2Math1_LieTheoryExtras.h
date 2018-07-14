@@ -195,7 +195,7 @@ class ElementUniversalEnvelopingOrdered;
 template<class coefficient>
 class MonomialUniversalEnvelopingOrdered
 {
-  void SimplifyAccumulateInOutputNoOutputInit(ElementUniversalEnvelopingOrdered<coefficient>& output, GlobalVariables* theContext, const coefficient& theRingUnit =1, const coefficient& theRingZero= 0);
+  void SimplifyAccumulateInOutputNoOutputInit(ElementUniversalEnvelopingOrdered<coefficient>& output, GlobalVariables* theContext, const coefficient& theRingUnit =1, const coefficient& theRingZero = 0);
   MonomialUniversalEnvelopingOrdered(const MonomialUniversalEnvelopingOrdered& other);
 public:
   SemisimpleLieAlgebraOrdered* owner;

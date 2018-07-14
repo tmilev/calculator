@@ -742,7 +742,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllEle
   for (int j = 0; j<outerAutos.size; j ++)
   { out << "Outer automorphism " << j << ": "
     << outerAutos[j].ToString() << "<br>";
-    invertedOuterAuto= outerAutos[j];
+    invertedOuterAuto = outerAutos[j];
     invertedOuterAuto.Invert();
     for (int i = 0; i <groupNoOuterAutos.conjugacyClasseS.size; i ++)
     { conjugatedMat = outerAutos[j];
@@ -987,11 +987,11 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
         hasRepeatingFullSigs = true;
   for (int i = 0; i <pseudoSignSig.size && !hasRepeatingPseudoParabolicSigs; i ++)
     for (int j = i + 1; j<pseudoSignSig.size && !hasRepeatingPseudoParabolicSigs; j ++)
-      if (pseudoSignSig[i] ==pseudoSignSig[j])
+      if (pseudoSignSig[i] == pseudoSignSig[j])
         hasRepeatingPseudoParabolicSigs = true;
   for (int i = 0; i <parabolicSignSig.size && !hasRepeatingParSigs; i ++)
     for (int j = i + 1; j<parabolicSignSig.size && !hasRepeatingParSigs; j ++)
-      if (parabolicSignSig[i] ==parabolicSignSig[j])
+      if (parabolicSignSig[i] == parabolicSignSig[j])
         hasRepeatingParSigs = true;
   if (hasRepeatingParSigs)
     out << "<hr><b>There are repeating parabolic sign signatures. </b><hr>";
@@ -1341,8 +1341,8 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank)
     partitionsParabolics.AddListOnTop(partitionsRight);
     for (int j = 0; j<partitionsLeft.size; j ++)
       for (int k = 0; k<partitionsRight.size; k++)
-      { currentPartition.Object1=partitionsLeft[j];
-        currentPartition.Object2=partitionsRight[k];
+      { currentPartition.Object1= partitionsLeft[j];
+        currentPartition.Object2= partitionsRight[k];
         partitionPairs.AddOnTop(currentPartition);
       }
   }

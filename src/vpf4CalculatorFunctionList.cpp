@@ -164,7 +164,7 @@ void Calculator::initPredefinedInnerFunctions()
     CalculatorFunctionsGeneral::innerURLKeyValuePairsToNormalRecursive, "",
    "Converts an url-encoded string to a normal string. All % signs are interpreted recursively as\
    double, triple, ... url encoded strings and decoded accordingly.",
-   "URLKeyValuePairsDecode(\"Problems%2fFunctions%2dcomposing%2dfractional%2dlinear%2d1.html =weight%3d3%26deadlines%3d%26&Problems%2fLimits%2dbasic % 2dsubstitution%2d1.html =weight%3d3%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dinfinity%2dRF%2dequal%2ddeg%2d1.html =weight%3d2%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2dequal%2ddeg%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dpm%2dinfinity%2dRF%2dnum%2ddeg%2dsmaller%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html =weight%3d5%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d2.html =weight%3d6%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dpm%2dinfinity%2dquotient%2dradical%2deven%2dpower%2dbasic % 2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dquotient%2dradical%2dodd%2dpower%2dbasic % 2d1.html =weight%3d1%26deadlines%3d%26&Homework%2fPrecalculus%2dPrerequisites%2dUMB%2d1.html =deadlines%3d%26&\")",
+   "URLKeyValuePairsDecode(\"Problems%2fFunctions%2dcomposing%2dfractional%2dlinear%2d1.html =weight%3d3%26deadlines%3d%26&Problems%2fLimits%2dbasic % 2dsubstitution%2d1.html =weight%3d3%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dinfinity%2dRF%2dequal%2ddeg%2d1.html =weight%3d2%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2dequal%2ddeg%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dpm%2dinfinity%2dRF%2dnum%2ddeg%2dsmaller%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html =weight%3d5%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d2.html =weight%3d6%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dpm%2dinfinity%2dquotient%2dradical%2deven%2dpower%2dbasic % 2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dquotient%2dradical%2dodd%2dpower%2dbasic % 2d1.html =weight%3d1%26deadlines%3d%26&Homework%2fPrecalculus%2dPrerequisites%2dUMB%2d1.html = deadlines%3d%26&\")",
    true, false,
    "CalculatorConversions::innerUrlStringToNormalString",
    "URLKeyValuePairsDecode");
@@ -808,7 +808,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("Polynomialize",
     CalculatorFunctionsGeneral::outerPolynomialize, "",
    "Polynomialize(a) is equivalent to MakeExpression(Polynomial(a)).",
-   "C= (c a + a b +b c + 1 )^3; A =Polynomialize(C);B=MakeExpression(Polynomial(C)); A-B",
+   "C= (c a + a b +b c + 1 )^3; A = Polynomialize(C);B=MakeExpression(Polynomial(C)); A-B",
    true, false,
    "CalculatorFunctionsGeneral::outerPolynomialize",
    "Polynomialize");
@@ -1131,7 +1131,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("ElementWeylAlgebraDO", Calculator::innerElementWeylAlgebra, "",
    "Creates element of a Weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \
    second argument - the dual polynomial expression. ",
-   "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1",
+   "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}= Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1",
    true, false,
    "Calculator::innerElementWeylAlgebra",
    "ElementWeylAlgebraDO");
@@ -1407,7 +1407,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("MakeRho",
     CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight, "",
    "Makes the half-sum of the positive roots.",
-   "\n\\rho=MakeRho(B_3);\
+   "\n\\rho =MakeRho(B_3);\
    ",
    true, false,
    "CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight",
@@ -1532,7 +1532,7 @@ void Calculator::initPredefinedInnerFunctions()
    ;
   this->AddOperationInnerHandler
   ("CharPoly", CalculatorFunctionsGeneral::innerCharPolyMatrix, "",
-   "Computes the characteristic polynomial of a matrix (=det(A-q*Id)), \
+   "Computes the characteristic polynomial of a matrix (= det(A-q*Id)), \
     provided that the matrix is not too large.",
    "A =\\begin{pmatrix}2 & 3& 5\\\\ 7& 11& 13\\\\ 17&19 &23\\end{pmatrix}; p =MinPolyMatrix{}A",
    true, false,
@@ -1575,7 +1575,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("PrintRuleStack",
    CalculatorFunctionsGeneral::innerPrintRuleStack, "",
    "Prints the current rule stack",
-   "a =b; PrintRuleStack{}0; c =d; PrintRuleStack{}0; ",
+   "a =b; PrintRuleStack{}0; c = d; PrintRuleStack{}0; ",
    true, false,
    "CalculatorFunctionsGeneral::innerPrintRuleStack",
    "PrintRuleStack")
@@ -2248,7 +2248,7 @@ void Calculator::initPredefinedInnerFunctions()
     uSegments = MakeInputBox(name = uSegments, value = 22, min = 8, max =40) ;\
     vSegments = MakeInputBox(name = vSegments, value = 4, min = 2, max =10) ;\
     PlotSurface((x,y,z  ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=blue, color2= cyan, numSegments1=uSegments, numSegments2=vSegments) +\
-    PlotSurface(( x +2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=pink, numSegments1=uSegments, numSegments2=vSegments); ",
+    PlotSurface(( x +2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2= pink, numSegments1=uSegments, numSegments2=vSegments); ",
     true, false,
     "CalculatorFunctionsGeneral::innerPlotSurface",
    "PlotSurface")
@@ -2494,12 +2494,12 @@ void Calculator::initPredefinedInnerFunctions()
     (x,y)\\in ((0.5,0.5),(0.3,0.3)));\
     \ntheFun =\\sqrt{x y}-(4 x^{2} y- 1);\
     \na =\\frac{-64 x^{3} y^{2}+ 16 x y+y}{32 x^{4} y-8 x^{2}- x};\
-    \ntheDiff=d/dx(theFun);\
+    \ntheDiff= d/dx(theFun);\
     \nnum= (d/dx y = 0; theDiff)_2;\
     \nden =CoefficientOf (d/dx y, theDiff);\
     \nb= -num/den;\
     \nCompareExpressionsNumerically(a,b, 0.001, x\\in(0,5),10, y\\in (0,5),10);\
-    \nA =PointsImplicitly(theFun, (0,0),(4,4), (10,10), (400,400));\
+    \nA = PointsImplicitly(theFun, (0,0),(4,4), (10,10), (400,400));\
     \nCompareExpressionsNumericallyAtPoints(a,b, 0.01, (x,y)\\in A);\
    ",
    true, false,
@@ -2650,7 +2650,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("PrintNonNegativeVectorsLevel", Calculator::innerPrintZnEnumeration, "",
    "Prints all vectors of grade level d with n coordinates lying in Z_{>= 0}. Function meant for \
-   debugging purposes. First argument =dimension, second argument =grading level. ",
+   debugging purposes. First argument = dimension, second argument =grading level. ",
    "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ",
    true, false,
    "Calculator::innerPrintZnEnumeration",
@@ -4019,22 +4019,22 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opRational(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element Weyl algebra. ",
-   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}= Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opPoly(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element Weyl algebra. ",
-   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i +\\partial_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}= Polynomial{}x_i;\nx_i +\\partial_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opPoly(),
    "Adds a rational or polynomial to element Weyl algebra. ",
-   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}= Polynomial{}x_i;\nx_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element Weyl algebra. ",
-   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}= Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF, this->opRationalFunction(), this->opRationalFunction(),
@@ -4056,7 +4056,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddWeightToWeight, this->opWeightLieAlgPoly(), this->opWeightLieAlgPoly(),
    "Adds two weights. ",
-   "\\lambda =Polynomial{}\\lambda; \\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon); (1/2+\\lambda)\\varepsilon_1+ 1/2\\varepsilon_2+ 1/2\\varepsilon_3  "
+   "\\lambda = Polynomial{}\\lambda; \\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon); (1/2+\\lambda)\\varepsilon_1+ 1/2\\varepsilon_2+ 1/2\\varepsilon_3  "
    , true, false, "CalculatorFunctionsBinaryOps::innerAddWeightToWeight");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddUEToAny, this->opElementUEoverRF(), this->opElementUEoverRF(),
@@ -4264,21 +4264,21 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opRational(), this->opElementWeylAlgebra(),
    "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
-   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; 3\\partial_i", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}= Polynomial{}x_i; 3\\partial_i", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opPoly(), this->opElementWeylAlgebra(),
    "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
-   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]", true,
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}= Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]", true,
    false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
    "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
-   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\na =x_1x_2;\nb=\\partial_1\\partial_2; a b - b a -[a,b] ",
+   " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}= Polynomial{}x_i;\na =x_1x_2;\nb=\\partial_1\\partial_2; a b - b a -[a,b] ",
    true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opPoly(),
    "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
-   "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
+   "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}= Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
    true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly, this->opPoly(), this->opRational(),
@@ -4355,7 +4355,7 @@ void Calculator::initPredefinedStandardOperations()
   ("*", CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps,
    this->opWeylGroupVirtualRep(), this->opWeylGroupVirtualRep(),
    "Tensor and decompose two virtual Weyl group representations. ",
-   "W= WeylGroupNaturalRep{}(B_3); V=MakeVirtualWeylGroupRepresentation{}W;\
+   "W = WeylGroupNaturalRep{}(B_3); V=MakeVirtualWeylGroupRepresentation{}W;\
     W\\otimes W; V*V",
     true, true,
    "CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps",
@@ -4498,7 +4498,7 @@ void Calculator::initPredefinedStandardOperations()
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
    "X = G_2;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\nh_{{i}}= GetCartanGenerator{}(X, i);  \
-   \nz=Polynomial{}y;\
+   \nz= Polynomial{}y;\
    \nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\
    \n(2*z) v;\n",
    true, false,
@@ -4509,7 +4509,7 @@ void Calculator::initPredefinedStandardOperations()
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
    "X = G_2;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\nh_{{i}}= GetCartanGenerator{}(X, i);  \
-   \nz=Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\
+   \nz= Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\
    \n1/z v",
    true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor",
@@ -4520,7 +4520,7 @@ void Calculator::initPredefinedStandardOperations()
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
    "X = G_2;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\nh_{{i}}= GetCartanGenerator{}(X, i);  \
-   \nz=Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\
+   \nz= Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\
    \n h_1 v; \nh_2 v;\n g_1 g_{- 1} v ",
    true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor");
@@ -4564,7 +4564,7 @@ void Calculator::initPredefinedStandardOperations()
     this->opPoly(), this->opSequence(),
    "Carries out multiplication between a rational number on left \
    and sequence on the right.",
-   "x =Polynomial{}x; v=x*(1, 2, 3);",
+   "x = Polynomial{}x; v=x*(1, 2, 3);",
    true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -4572,7 +4572,7 @@ void Calculator::initPredefinedStandardOperations()
     this->opWeylGroupElement(), this->opWeightLieAlgPoly(),
    "Element of Weyl group action on a weight. ",
    "s_{{a}}=MakeElementWeylGroup(B_3, a); \\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon);   \
-   \nx =Polynomial{}x; \\mu= x\\varepsilon_1; s_1s_2s_3s_2s_1 \\mu",
+   \nx = Polynomial{}x; \\mu= x\\varepsilon_1; s_1s_2s_3s_2s_1 \\mu",
    true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -4581,7 +4581,7 @@ void Calculator::initPredefinedStandardOperations()
    "Carries out multiplication between a rational or polynomial\
     on left and a weight on the right.",
    "\\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon);\
-    x =Polynomial{}x; x\\varepsilon_1",
+    x = Polynomial{}x; x\\varepsilon_1",
     true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -4590,7 +4590,7 @@ void Calculator::initPredefinedStandardOperations()
    "Carries out multiplication between a rational or polynomial\
     on left and a weight on the right.",
    "\\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon);\
-    x =Polynomial{}x; x\\varepsilon_1",
+    x = Polynomial{}x; x\\varepsilon_1",
     true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
   this->AddOperationInnerHandler
@@ -4601,12 +4601,12 @@ void Calculator::initPredefinedStandardOperations()
    "CalculatorFunctionsBinaryOps::innerNChooseK",
    "Binom");
   this->AddOperationInnerHandler
-  ("EllipticCurveNormalFormOvernZp", CalculatorFunctionsGeneral::innerEllipticCurveNormalFormOverZp, "",
+  ("ElementEllipticCurveNormalForm", CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm, "",
    "Makes an elliptic curve from a cubic in normal form, generator letter and base point.",
-   "EllipticCurveNormalForm(y^2 = x^3+x+7, g, x= 3 mod 101, y= 19 mod 101)",
+   "ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 19 mod 101)",
    true, false,
-   "CalculatorFunctionsGeneral::innerEllipticCurve",
-   "EllipticCurveNormalFormOvernZp");
+   "CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm",
+   "ElementEllipticCurveNormalForm");
 
   this->AddOperationOuterHandler
   ("mod", Calculator::innerZmodP, "",
@@ -4723,14 +4723,14 @@ void Calculator::initPredefinedStandardOperations()
   ("/", CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble,
     this->opRational(), this->opDouble(),
    "Divides doubles. ",
-   "a = 0.5; b= 0.5; c =DoubleValue{}3.3; a/c; c/a; c/c",
+   "a = 0.5; b= 0.5; c = DoubleValue{}3.3; a/c; c/a; c/c",
    true, false,
    "CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble,
    this->opDouble(), this->opDouble(),
    "Divides doubles. ",
-   "a = 0.5; b= 0.5; c =DoubleValue{}3.3; a/c; c/a; c/c",
+   "a = 0.5; b= 0.5; c = DoubleValue{}3.3; a/c; c/a; c/c",
    true, false,
    "CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble",
    "DivideDoubleByDouble");
@@ -4738,7 +4738,7 @@ void Calculator::initPredefinedStandardOperations()
   ("/", CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly,
    this->opRational(), this->opPoly(),
    "Divides rational by polynomial (to get a rational function).",
-   "z=Polynomial{}(x^2+y^2);\n1/z",
+   "z= Polynomial{}(x^2+y^2);\n1/z",
    true, false,
    "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -4781,8 +4781,8 @@ void Calculator::initPredefinedStandardOperations()
    provided either the base or the exponent is a double, and provided that \
    the base is non-negative. ",
    "f{}{{x}}=x^3+p x +q; \
-   \nXcardano= ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
-   \nq=DoubleValue{}1; \np =DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
+   \nXcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
+   \nq= DoubleValue{}1; \np = DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat",
    "PowerDoubleToDouble");
@@ -4846,13 +4846,13 @@ void Calculator::initPredefinedStandardOperations()
   ("^", CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger,
     this->opPoly(), this->opRational(),
    "Raises poly to small integer power. ",
-   "x =Polynomial{}x; y =Polynomial{}y;(x +2y+x y+x^2+3y^2)^3",
+   "x = Polynomial{}x; y = Polynomial{}y;(x +2y+x y+x^2+3y^2)^3",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger, this->opPolyOverANs(), this->opRational(),
    "Raises poly over algebraic numbers to small integer power. ",
-   " x =Polynomial{}x; y =Polynomial{}y;(x +\\sqrt{2}y+x y+x^2+\\sqrt{3}y^2)^3",
+   " x = Polynomial{}x; y = Polynomial{}y;(x +\\sqrt{2}y+x y+x^2+\\sqrt{3}y^2)^3",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -4908,8 +4908,8 @@ void Calculator::initPredefinedStandardOperations()
    the exponent is rational with odd denominator, the exponent is evaluated to the corresponding\
    real negative root. ",
    "f{}{{x}}=x^3+p x +q; \
-   \nXcardano= ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
-   \nq=DoubleValue{}1; \np =DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
+   \nXcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
+   \nq= DoubleValue{}1; \np = DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat",
    "PowerFloatingToPower");
@@ -4969,7 +4969,7 @@ void Calculator::initPredefinedStandardOperations()
     \np(0, 0 )=1;\
     \np({{a}},{{x}}):if x<0= 0;\
     \np(0,{{x}})= 0;\
-    \np({{a}},{{x}} )=p(a- 1,x) + p(a, x-Denominations_a);\
+    \np({{a}},{{x}} )= p(a- 1,x) + p(a, x-Denominations_a);\
     \np(11,100)\
   ",
   true, false,
@@ -4986,7 +4986,7 @@ void Calculator::initPredefinedStandardOperations()
   ("_", CalculatorFunctionsGeneral::innerDereferenceSequenceStatements, "",
    "Dereferences a sequence of rules. \
     The syntax is as illustrated by the example. ",
-   "A =d/dx( \\sqrt(x +y)-4x^2y^2); (d/dx(y)= 0; A)_2;  ",
+   "A = d/dx( \\sqrt(x +y)-4x^2y^2); (d/dx(y)= 0; A)_2;  ",
    true, false,
    "CalculatorFunctionsGeneral::innerDereferenceSequenceStatements",
    "DereferenceSequenceStatements");
@@ -4996,7 +4996,7 @@ void Calculator::initPredefinedStandardOperations()
    "Tensor product of two matrices.",
     "P = ((0 , 2 ),(1 , 0)); Q= ((0 , 3 ),(1 , 0)); \
     \nX =MakeMatrix{}P; Y =MakeMatrix{}Q; \
-    \nZ=MakeMatrixTensorForm{}P; W=MakeMatrixTensorForm{}Q; \
+    \nZ=MakeMatrixTensorForm{}P; W =MakeMatrixTensorForm{}Q; \
     X\\otimes Y; Z\\otimes W", true, false,
     "CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix",
     "MatrixTensorMatrix");
@@ -5006,7 +5006,7 @@ void Calculator::initPredefinedStandardOperations()
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
    "X = G_2;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\nh_{{i}}= GetCartanGenerator{}(X, i);  \
-   \nz=Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\
+   \nz= Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\
    \ng_{- 1}(v\\otimes v);\
    \ng_{- 1}g_{- 1}(v\\otimes v)",
    true, false,
@@ -5029,8 +5029,8 @@ void Calculator::initPredefinedStandardOperations()
    "LieBracketConstants");
   this->AddOperationInnerHandler
   ("[]", CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA, "",
-   "Lie bracket of elements of Weyl algebras =differential operators with polynomial coefficients. ",
-   "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; \n[\\partial_1, x_1]; ",
+   "Lie bracket of elements of Weyl algebras = differential operators with polynomial coefficients. ",
+   "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}= Polynomial{}x_i; \n[\\partial_1, x_1]; ",
    true, false,
    "CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA",
    "LieBracketWeylAlgebraElements");
@@ -5069,7 +5069,7 @@ void Calculator::initPredefinedStandardOperations()
    "Same as tensor product of matrices but uses class MatrixTensor instead of class Matrix.",
    "P = ((0 , 2 ),(1 , 0)); Q= ((0 , 3 ),(1 , 0)); \
    \nX =MakeMatrix{}P; Y =MakeMatrix{}Q; \
-   \nZ=MakeMatrixTensorForm{}P; W=MakeMatrixTensorForm{}Q; \
+   \nZ=MakeMatrixTensorForm{}P; W =MakeMatrixTensorForm{}Q; \
    \nX\\otimes Y; Z\\otimes W", true);
   this->AddOperationOuterHandler
   ("\\otimes", Calculator::outerTensor, "",
@@ -5208,7 +5208,7 @@ void Calculator::initPredefinedStandardOperations()
    "p{}((), 0 )=1;\
     \np{}({{x}}, {{n}}):if n<0= 0;\
     \np{}((), {{n}})= 0;\
-    \np{}({{x}},{{n}})=p{}(x, n-Last x) +p{}(RemoveLast x, n);\
+    \np{}({{x}},{{n}})= p{}(x, n-Last x) +p{}(RemoveLast x, n);\
     \np{}((1,2, 5, 10, 25,100), 100);",
     true, false,
     "CalculatorFunctionsGeneral::innerLastElement",

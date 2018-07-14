@@ -67,7 +67,8 @@ SOURCES += \
     vpf6_37calculatorroutines.cpp \
     vpf6_38LaTeXRoutines.cpp \
     databasemongo.cpp \
-    database_mongo_calculator.cpp
+    database_mongo_calculator.cpp \
+    vpfEllipticCurves.cpp
 
 HEADERS += \
     webserver.h \
@@ -127,7 +128,8 @@ HEADERS += \
     vpfHeader3Calculator5_Database_Mongo.h \
     vpfHeader7DatabaseInterface_Mongodb.h \
     vpfImplementationHeader2Math0_General.h \
-    vpfHeader2Math11_EllipticCurves.h
+    vpfHeader2Math11_EllipticCurves.h \
+    vpfImplementationHeader2Math11_EllipticCurves.h
 
 DISTFILES += \
     ../calculator-html/new/app.js \

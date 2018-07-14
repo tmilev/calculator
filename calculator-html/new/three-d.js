@@ -228,7 +228,7 @@ function CurveThreeD(
       theSurface.lineTo(theCoords[0], theCoords[1]);
     var skippedValues = false;
     for (var i = 0; i < this.numSegments; i ++)
-    { var theRatio= i/(this.numSegments- 1);
+    { var theRatio = i/(this.numSegments- 1);
       theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio; //<- this way of
       //computing x introduces smaller numerical errors.
       //For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
@@ -250,7 +250,7 @@ function CurveThreeD(
       theSurface.lineTo(theCoords[0], theCoords[1]);
     }
   };
-  this.draw= function(theCanvas)
+  this.draw = function(theCanvas)
   { var theSurface = theCanvas.surface;
     theSurface.beginPath();
     this.drawNoFinish(theCanvas, true);
@@ -389,7 +389,7 @@ function PointsTwoD(inputLocation, inputColor)
   { for (var i = 0; i < this.location.length; i ++)
       accountBoundingBox(this.location[i], inputOutputBox);
   };
-  this.draw= function(theCanvas)
+  this.draw = function(theCanvas)
   { var theSurface = theCanvas.surface;
     for (var i = 0; i < this.location.length; i ++)
     { theSurface.beginPath();
@@ -427,7 +427,7 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
     var theY = this.coordinateFunctions[1](theT);
     accountBoundingBox([theX, theY], inputOutputBox);
     for (var i = 0; i < this.numSegments; i ++)
-    { var theRatio= i/(this.numSegments- 1);
+    { var theRatio = i/(this.numSegments- 1);
       theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
       theX = this.coordinateFunctions[0](theT);
       theY = this.coordinateFunctions[1](theT);
@@ -448,7 +448,7 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
     theSurface.lineWidth= this.lineWidth;
     var skippedValues = false;
     for (var i = 0; i < this.numSegments; i ++)
-    { var theRatio= i/(this.numSegments- 1);
+    { var theRatio = i/(this.numSegments- 1);
       theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio; //<- this way of
       //computing x introduces smaller numerical errors.
       //For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
@@ -474,7 +474,7 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
         theSurface.lineTo(theCoords[0], theCoords[1]);
     }
   };
-  this.draw= function(theCanvas)
+  this.draw = function(theCanvas)
   { var theSurface = theCanvas.surface;
     theSurface.beginPath();
     this.drawNoFinish(theCanvas, true);
@@ -512,7 +512,7 @@ function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth)
     if (this.isFilled)
       theSurface.fill();
   };
-  this.draw= function(theCanvas)
+  this.draw = function(theCanvas)
   { if (inputPath.length<1)
       return;
     var theSurface = theCanvas.surface;
@@ -523,7 +523,7 @@ function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth)
 }
 
 function drawCoordinateAxesTwoD()
-{ this.draw= function(theCanvas)
+{ this.draw = function(theCanvas)
   { var theSurface = theCanvas.surface;
     this.drawNoFinish(theCanvas, true);
   };
@@ -564,7 +564,7 @@ function drawCoordinateAxesTwoD()
 }
 
 function AxesGrid()
-{ this.draw= function(theCanvas)
+{ this.draw = function(theCanvas)
   { var theSurface = theCanvas.surface;
     this.drawNoFinish(theCanvas, true);
   };
@@ -588,14 +588,14 @@ function AxesGrid()
     var DeltaVertical =Math.max(1, Math.floor ((ceilTop-floorBottom)/ (theCanvas.height/distanceBetweenMarks)));
     var Delta = Math.max(DeltaHorizontal, DeltaVertical);
     theSurface.beginPath();
-    for (var i = floorLeft; i <= ceilRight; i +=Delta)
+    for (var i = floorLeft; i <= ceilRight; i += Delta)
     { var theCoords = theCanvas.coordsMathScreenToScreen([i, bottom]);
       theSurface.moveTo(theCoords[0], theCoords[1]);
       theCoords = theCanvas.coordsMathScreenToScreen([i, top]);
       theSurface.lineTo(theCoords[0], theCoords[1]);
       theSurface.stroke();
     }
-    for (i = floorBottom; i <= ceilTop; i +=Delta)
+    for (i = floorBottom; i <= ceilTop; i += Delta)
     { theCoords = theCanvas.coordsMathScreenToScreen([left, i]);
       theSurface.moveTo(theCoords[0], theCoords[1]);
       theCoords = theCanvas.coordsMathScreenToScreen([right, i]);
@@ -605,7 +605,7 @@ function AxesGrid()
     theSurface.strokeStyle = colorRGBToString([0, 0, 0]);
     theSurface.fillStyle = colorRGBToString([0, 0, 0] );
     var counter = 0;
-    for (var i = floorLeft; i <= ceilRight; i +=Delta)
+    for (var i = floorLeft; i <= ceilRight; i += Delta)
     { counter ++;
       //if (counter%2=== 0 && i !==1){
         theCoords = theCanvas.coordsMathScreenToScreen([i, 0]);
@@ -613,7 +613,7 @@ function AxesGrid()
       //}
     }
     counter = 0;
-    for (i = floorBottom; i <= ceilTop; i +=Delta)
+    for (i = floorBottom; i <= ceilTop; i += Delta)
     { counter ++;
       //if (counter%2=== 0 && i !==1){
         theCoords = theCanvas.coordsMathScreenToScreen([ 0,i]);
@@ -639,7 +639,7 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
     this.Delta = (inputRightPt-inputLeftPt)/inputNumSegments;
   this.accountBoundingBox = function(inputOutputBox)
   { for (var i = 0; i < this.numSegments; i ++)
-    { var theRatio= i/(this.numSegments- 1);
+    { var theRatio = i/(this.numSegments- 1);
       var theX = this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
       var theY = this.theFunction(theX);
       if (!isFinite(theY) )
@@ -671,7 +671,7 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
     theSurface.lineWidth= this.lineWidth;
     var skippedValues = false;
     for (var i = 0; i < this.numSegments; i ++)
-    { var theRatio= i/(this.numSegments- 1);
+    { var theRatio = i/(this.numSegments- 1);
       theX = realLeft *(1-theRatio) +  realRight*theRatio; //<- this way of
       //computing x this way introduces smaller numerical errors.
       //For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
@@ -696,7 +696,7 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
         theSurface.lineTo(theCoords[0], theCoords[1]);
     }
   };
-  this.draw= function(theCanvas)
+  this.draw = function(theCanvas)
   { var theSurface = theCanvas.surface;
     theSurface.beginPath();
     this.drawNoFinish(theCanvas,true);
@@ -719,7 +719,7 @@ function TextPlotTwoD(inputLocation, inputText, inputColor)
     var theCoords = theCanvas.coordsMathToScreen(this.location);
     theSurface.fillText(this.text, theCoords[0], theCoords[1]);
   };
-  this.draw= function(theCanvas)
+  this.draw = function(theCanvas)
   { var theSurface = theCanvas.surface;
     theSurface.beginPath();
     this.drawNoFinish(theCanvas);
@@ -745,7 +745,7 @@ function VectorFieldTwoD(
   { accountBoundingBox(this.lowLeft, inputOutputBox);
     accountBoundingBox(this.highRight, inputOutputBox);
   };
-  this.draw= function(theCanvas)
+  this.draw = function(theCanvas)
   { var theSurface = theCanvas.surface;
     theSurface.beginPath();
     theSurface.strokeStyle = colorRGBToString(this.color);
@@ -801,7 +801,7 @@ function SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth)
     theCoords = theCanvas.coordsMathToScreen(this.rightPt);
     theSurface.lineTo(theCoords[0], theCoords[1]);
   };
-  this.draw= function(theCanvas)
+  this.draw = function(theCanvas)
   { var theSurface = theCanvas.surface;
     theSurface.beginPath();
     theSurface.strokeStyle = colorRGBToString(this.color);
@@ -817,14 +817,14 @@ function PlotFillTwoD(inputCanvas, inputColor)
   this.accountBoundingBox = function(inputOutputBox)
   {
   };
-  this.draw= function(inputCanvas)
+  this.draw = function(inputCanvas)
   { var theSurface = inputCanvas.surface;
     var theObs = inputCanvas.theObjects;
     var tempCounter = inputCanvas.numDrawnObjects;
     theSurface.beginPath();
     var firstRun = true;
     for (tempCounter ++; tempCounter<theObs.length; tempCounter ++)
-    { var currentO= theObs[tempCounter];
+    { var currentO = theObs[tempCounter];
       if (currentO.type === "plotFillFinish")
         break;
       currentO.drawNoFinish(inputCanvas, firstRun);
@@ -833,7 +833,7 @@ function PlotFillTwoD(inputCanvas, inputColor)
     theSurface.fillStyle = colorRGBToString(this.color);
     theSurface.fill();
     for (inputCanvas.numDrawnObjects++; inputCanvas.numDrawnObjects<theObs.length; inputCanvas.numDrawnObjects++)
-    { currentO= theObs[inputCanvas.numDrawnObjects];
+    { currentO = theObs[inputCanvas.numDrawnObjects];
       if (currentO.type === "plotFillFinish")
         break;
       currentO.draw(inputCanvas);
@@ -867,9 +867,9 @@ function CanvasTwoD(inputCanvas)
   this.clickedPosition = [];
   this.positionDelta = [];
   this.spanMessages = undefined;
-  this.textMouseInfo= "";
-  this.textProjectionInfo= "";
-  this.textPatchInfo= "";
+  this.textMouseInfo = "";
+  this.textProjectionInfo = "";
+  this.textPatchInfo = "";
   this.textErrors = "";
   this.textPerformance = "";
   this.selectedElement = "";
@@ -944,7 +944,7 @@ function CanvasTwoD(inputCanvas)
   this.plotFillFinish= function ()
   { this.theObjects.push({type:"plotFillFinish"});
   };
-  this.computeViewWindow= function()
+  this.computeViewWindow = function()
   { this.boundingBoxMath=[[-0.1,-0.1],[0.1,0.1]];
     for (var i = 0; i < this.theObjects.length; i ++)
     { if (this.theObjects[i].accountBoundingBox ===undefined)
@@ -955,7 +955,7 @@ function CanvasTwoD(inputCanvas)
     vectorTimesScalar(this.boundingBoxMath[1], 1.05);
     this.setViewWindow(this.boundingBoxMath[0], this.boundingBoxMath[1]);
   };
-  this.setViewWindow= function(leftLowPt, rightUpPt)
+  this.setViewWindow = function(leftLowPt, rightUpPt)
   { this.viewWindowDefault =[leftLowPt,rightUpPt];
     var leftLowScreen = this.coordsMathToScreen(leftLowPt);
     var rightUpScreen = this.coordsMathToScreen(rightUpPt);
@@ -971,7 +971,7 @@ function CanvasTwoD(inputCanvas)
     this.centerX+= this.centerCanvasX-centerViewWindowScreen[0];
     this.centerY+= this.centerCanvasY-centerViewWindowScreen[1];
   };
-  this.redraw= function()
+  this.redraw = function()
   { this.textPerformance ="";
     this.redrawStart = new Date().getTime();
     var theSurface = this.surface;
@@ -990,7 +990,7 @@ function CanvasTwoD(inputCanvas)
     //  this.screenBasisOrthonormal.length=2;
     this.screenBasisOrthonormal[0] =[1,0];
     this.screenBasisOrthonormal[1] =[0,1];
-    this.textProjectionInfo="";
+    this.textProjectionInfo ="";
     this.textProjectionInfo+=
     "<br>e1: " + this.screenBasisOrthonormal[0] +
     "<br>e2: " + this.screenBasisOrthonormal[1];
@@ -1003,13 +1003,13 @@ function CanvasTwoD(inputCanvas)
     this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, false);
 //    this.canvasContainer.addEventListener("wheel", calculatorCanvasMouseWheel, true);
     this.theObjects =[];
-    this.spanMessages =document.getElementById(this.canvasId+"Messages");
-    this.spanCriticalErrors =document.getElementById(this.canvasId+"CriticalErrors");
-    this.spanControls =document.getElementById(this.canvasId+"Controls");
+    this.spanMessages = document.getElementById(this.canvasId+"Messages");
+    this.spanCriticalErrors = document.getElementById(this.canvasId+"CriticalErrors");
+    this.spanControls = document.getElementById(this.canvasId+"Controls");
     this.constructControls();
     this.computeBasis();
   };
-  this.resetView= function()
+  this.resetView = function()
   { this.setViewWindow(this.viewWindowDefault[0],this.viewWindowDefault[1]);
     this.redraw();
   };
@@ -1071,8 +1071,8 @@ function CanvasTwoD(inputCanvas)
   };
   this.panAfterCursor = function()
   { var difference =vectorMinusVector(this.mousePosition, this.clickedPosition);
-    this.centerX+=difference[0]*this.scale;
-    this.centerY-=difference[1]*this.scale;
+    this.centerX+= difference[0]*this.scale;
+    this.centerY-= difference[1]*this.scale;
     this.redraw();
   };
   this.pointsWithinClickTolerance = function (leftXY, rightXY)
@@ -1111,7 +1111,7 @@ function CanvasTwoD(inputCanvas)
     ;
   };
   this.logStatus = function()
-  { this.textMouseInfo="";
+  { this.textMouseInfo ="";
     this.textMouseInfo+=
     "time last redraw: " + this.redrawTime +" ms " +
     "(~" + (1000/this.redrawTime).toFixed(1) + " f.p.s.)"+
@@ -1169,9 +1169,9 @@ function Canvas(inputCanvas)
   this.rayComponent = [];
   this.positionDelta = [];
   this.spanMessages = undefined;
-  this.textMouseInfo= "";
-  this.textProjectionInfo= "";
-  this.textPatchInfo= "";
+  this.textMouseInfo = "";
+  this.textProjectionInfo = "";
+  this.textPatchInfo = "";
   this.textErrors = "";
   this.textPerformance = "";
   this.angleNormal = 0;
@@ -1196,7 +1196,7 @@ function Canvas(inputCanvas)
   this.drawCurve = function(theCurve)
   { var contourPoints = new Array(theCurve.numSegments+ 1);
     for (var i = 0; i < theCurve.numSegments+ 1; i ++)
-    { var theRatio= i/(theCurve.numSegments);
+    { var theRatio = i/(theCurve.numSegments);
       var currentParam= theCurve.leftPt*(1-theRatio) + theCurve.rightPt*theRatio;
       contourPoints[i] = theCurve.coordinateFunctions(currentParam);
     }
@@ -1277,7 +1277,7 @@ function Canvas(inputCanvas)
   { this.theIIIdObjects.thePatches.push(new Patch(base, edge1, edge2, color));
     var patchIndex = this.theIIIdObjects.thePatches.length- 1;
     var thePatch= this.theIIIdObjects.thePatches[patchIndex];
-    thePatch.index =patchIndex;
+    thePatch.index = patchIndex;
     var theContours = this.theIIIdObjects.theContours;
     thePatch.adjacentContours.push(this.drawLine(thePatch.base, thePatch.v1));
     thePatch.traversalOrder.push(1);
@@ -1375,7 +1375,7 @@ function Canvas(inputCanvas)
     }
     return true;
   };
-  this.paintMouseInfo= function()
+  this.paintMouseInfo = function()
   { if (this.selectedElement !== "default" || this.selectedElement ===undefined || this.selectedVector ===[] || this.selectedVector ===undefined)
       return;
     if (this.selectedVector.length=== 0 || this.selectedVector.length===undefined)
@@ -1472,7 +1472,7 @@ function Canvas(inputCanvas)
   { var theSurface = this.surface;
     var visibilityScalarProd =vectorScalarVector(this.screenNormal, thePatch.normal);
     var depthScalarProd =vectorScalarVector(this.screenNormal, thePatch.internalPoint);
-    var depthRatio= (depthScalarProd- this.boundingSegmentZ[0])/(this.boundingSegmentZ[1]-this.boundingSegmentZ[0]) -0.5;
+    var depthRatio = (depthScalarProd- this.boundingSegmentZ[0])/(this.boundingSegmentZ[1]-this.boundingSegmentZ[0]) -0.5;
     //depthRatio is a number between -0.5 and 0.5 measuring how deep is the patch
     //relative to the center of the picture
     var colorFactor =1+depthRatio*this.colorDepthFactor;
@@ -1554,21 +1554,21 @@ function Canvas(inputCanvas)
       theSurface.stroke();
   };
   this.getExtremePoint = function(indexToCompareBy, getLarger, pt1, pt2, pt3, pt4)
-  { var result =pt1[indexToCompareBy];
+  { var result = pt1[indexToCompareBy];
     if (getLarger ===1)
     { if (result<pt2[indexToCompareBy])
-        result =pt2[indexToCompareBy];
+        result = pt2[indexToCompareBy];
       if (result<pt3[indexToCompareBy])
-        result =pt3[indexToCompareBy];
+        result = pt3[indexToCompareBy];
       if (result<pt4[indexToCompareBy])
-        result =pt4[indexToCompareBy];
+        result = pt4[indexToCompareBy];
     } else
     { if (result>pt2[indexToCompareBy])
-        result =pt2[indexToCompareBy];
+        result = pt2[indexToCompareBy];
       if (result>pt3[indexToCompareBy])
-        result =pt3[indexToCompareBy];
+        result = pt3[indexToCompareBy];
       if (result>pt4[indexToCompareBy])
-        result =pt4[indexToCompareBy];
+        result = pt4[indexToCompareBy];
     }
     return result;
   };
@@ -1647,7 +1647,7 @@ function Canvas(inputCanvas)
     var pt4= this.coordsMathToMathScreen(thePatch.vEnd);
     var lowFloat = this.getExtremePoint(1, 0, pt1, pt2, pt3, pt4);
     var highFloat = this.getExtremePoint(1, 1, pt1, pt2, pt3, pt4);
-    var low= this.coordsMathScreenToBufferIndicesROWS(lowFloat);
+    var low = this.coordsMathScreenToBufferIndicesROWS(lowFloat);
     var high= this.coordsMathScreenToBufferIndicesROWS(highFloat);
     for (var i =low; i <=high; i ++)
     { this.zBufferIndexStrip[i][0] = - 1;
@@ -1817,11 +1817,11 @@ function Canvas(inputCanvas)
       }
     }
     this.numCyclicallyOverlappingPatchTieBreaks++;
-    this.thePatchOrder[this.numAccountedPatches] =deepestNonAccountedIndex;
+    this.thePatchOrder[this.numAccountedPatches] = deepestNonAccountedIndex;
     this.numAccountedPatches++;
     this.patchIsAccounted[deepestNonAccountedIndex] =1;
   };
-  this.redraw= function()
+  this.redraw = function()
   { this.textPerformance ="";
     this.redrawStart = new Date().getTime();
     var theContours = this.theIIIdObjects.theContours;
@@ -1941,7 +1941,7 @@ function Canvas(inputCanvas)
     vectorAddVectorTimesScalar(e2, e1, - vectorScalarVector(e1,e2));
     vectorNormalize(e2);
     this.screenNormal =vectorCrossVector(e1, e2);
-    this.textProjectionInfo="";
+    this.textProjectionInfo ="";
     this.textProjectionInfo+=
     "<br>screen normal: " + this.screenNormal;
     this.textProjectionInfo+=
@@ -1951,7 +1951,7 @@ function Canvas(inputCanvas)
     "<br>selected e2: "+ this.selectedScreenBasis[1]
     ;
   };
-  this.setBoundingBoxAsDefaultViewWindow= function()
+  this.setBoundingBoxAsDefaultViewWindow = function()
   { this.resetViewNoRedraw();
     this.computeBoundingBox();
     var leftLowScreen = this.coordsMathScreenToScreen(this.boundingBoxMathScreen[0]);
@@ -1984,11 +1984,11 @@ function Canvas(inputCanvas)
     this.scaleDefault = this.scale;
     this.lastCenterScreen = newViewWindowCenterMath.slice();
   };
-  this.resetView= function()
+  this.resetView = function()
   { this.resetViewNoRedraw();
     this.redraw();
   };
-  this.resetViewNoRedraw= function()
+  this.resetViewNoRedraw = function()
   { this.boundingBoxMathScreen = [[-0.01, -0.01], [0.01, 0.01]];
     this.boundingBoxMath= [[-0.01,-0.01,-0.01],[0.01,0.01,0.01]];
     this.boundingSegmentZ= [-0.01,0.01];
@@ -2009,9 +2009,9 @@ function Canvas(inputCanvas)
     this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
     this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
 //    this.canvasContainer.addEventListener("wheel", calculatorCanvasMouseWheel, true);
-    this.spanMessages =document.getElementById(this.canvasId+"Messages");
-    this.spanCriticalErrors =document.getElementById(this.canvasId+"CriticalErrors");
-    this.spanControls =document.getElementById(this.canvasId+"Controls");
+    this.spanMessages = document.getElementById(this.canvasId+"Messages");
+    this.spanCriticalErrors = document.getElementById(this.canvasId+"CriticalErrors");
+    this.spanControls = document.getElementById(this.canvasId+"Controls");
     this.theIIIdObjects.thePatches = [];
     this.theIIIdObjects.theContours = [];
     this.theIIIdObjects.thePoints = [];
@@ -2173,8 +2173,8 @@ function Canvas(inputCanvas)
   };
   this.panAfterCursor = function()
   { var difference =vectorMinusVector(this.mousePosition, this.clickedPosition);
-    this.centerX+=difference[0]*this.scale;
-    this.centerY-=difference[1]*this.scale;
+    this.centerX+= difference[0]*this.scale;
+    this.centerY-= difference[1]*this.scale;
     this.redraw();
   };
   this.pointsWithinClickTolerance = function (leftXY, rightXY)
@@ -2234,8 +2234,8 @@ function Canvas(inputCanvas)
     this.spanMessages.innerHTML= theHTML;
     ;
   };
-  this.logPatchInfo= function() { 
-    this.textPatchInfo="";
+  this.logPatchInfo = function() { 
+    this.textPatchInfo ="";
     this.textPatchInfo += "Z-depth: " + this.boundingSegmentZ + "<br>";
     var thePatches = this.theIIIdObjects.thePatches;
     for (var i = 0; i < thePatches.length; i ++) { 
@@ -2411,7 +2411,7 @@ function calculatorCanvasMouseWheel(theEvent)
     return;
   if (theEvent.preventDefault !==undefined)
     theEvent.preventDefault();
-  if (theEvent.stopPropagation!==undefined)
+  if (theEvent.stopPropagation !==undefined)
     theEvent.stopPropagation();
   var theWheelDelta = theEvent.detail ? theEvent.detail * - 1 : theEvent.wheelDelta / 40;
   var theCanvas = calculatorCanvases[theEvent.target.id];

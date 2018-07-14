@@ -30,10 +30,10 @@ function initializeAutocomplete() {
   theText = document.getElementById('mainInputID');
   theSuggestions = new Array;
   theSuggestionsHighlighted = new Array;
-  theAutoComplete =document.getElementById('idAutocompleteSpan');
-  theAutoCompleteHints =document.getElementById('idAutocompleteHints');
+  theAutoComplete = document.getElementById('idAutocompleteSpan');
+  theAutoCompleteHints = document.getElementById('idAutocompleteHints');
   indexInAutocomplete = - 1;
-  autocompleteDebugWindow=document.getElementById('idAutocompleteDebug');
+  autocompleteDebugWindow = document.getElementById('idAutocompleteDebug');
   theLastWord = new String;
   ignoreOninput = false;
   DebugCounter = 0;

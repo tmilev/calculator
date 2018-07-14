@@ -6,45 +6,26 @@
 
 static ProjectInformationInstance ProjectInfovpfHeader_HeaderEllipticCurves(__FILE__, "Header, elliptic curves. ");
 
-template <typename coefficient>
 class EllipticCurveWeierstrassNormalForm
 {
-
 public:
-  coefficient linearCoefficient;
-  coefficient constantTerm;
-  List<coefficient> generatorsX;
-  List<coefficient> generatorsY;
+  LargeInt linearCoefficient;
+  LargeInt constantTerm;
   void MakeSecp256k1();
-  static unsigned int HashFunction(const EllipticCurveWeierstrassNormalForm<coefficient>& input)
-  { return
-    input.linearCoefficient.HashFunction() * SomeRandomPrimes[0] +
-    input.constantTerm.HashFunction() * SomeRandomPrimes[1] +
-    input.generatorsX.HashFunction() * SomeRandomPrimes[2] +
-    input.generatorsY.HashFunction() * SomeRandomPrimes[3];
-  }
-  bool operator==(const EllipticCurveWeierstrassNormalForm& other)
-  { return this->linearCoefficient == other.linearCoefficient &&
-    this->constantTerm == other.constantTerm &&
-    this->generatorsX == other.generatorsX &&
-    this->generatorsY == other.generatorsY;
-  }
+  static unsigned int HashFunction(const EllipticCurveWeierstrassNormalForm& input);
+  bool operator==(const EllipticCurveWeierstrassNormalForm& other) const;
 };
 
 template <typename coefficient>
 class ElementEllipticCurve
 {
 public:
-  EllipticCurveWeierstrassNormalForm<coefficient>* owner;
+  EllipticCurveWeierstrassNormalForm owner;
   coefficient xCoordinate;
   coefficient yCoordinate;
-  bool isInfinity;
-  static unsigned int HashFunction(const ElementEllipticCurve<coefficient>& input)
-  { if (input.isInfinity)
-      return 0;
-    return input.xCoordinate.HashFunction() * SomeRandomPrimes[0] +
-    input.yCoordinate.HashFunction() * SomeRandomPrimes[1];
-  }
-
+  bool flagInfinity;
+  static unsigned int HashFunction(const ElementEllipticCurve<coefficient>& input);
+  bool operator==(const ElementEllipticCurve& other) const;
+  std::string ToString(FormatExpressions* theFormat = 0) const;
 };
 #endif

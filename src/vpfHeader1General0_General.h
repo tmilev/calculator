@@ -201,7 +201,7 @@ public:
     p = vP[1] % N;
     if (p < 0)
       p += N;
-    output =p;
+    output = p;
     return true;
   }
   static int lcm(int a, int b);

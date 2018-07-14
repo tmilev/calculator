@@ -721,7 +721,7 @@ class Vectors: public List<Vector<coefficient> >
   (const List<Vector<coefficient> >& input, List<Vector<coefficient> >& output, Selection& outputSelectedPivots);
   int GetRankOfSpanOfElements(Matrix<coefficient>* buffer = 0, Selection* bufferSelection = 0) const;
   static bool ConesIntersect
-  (List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone, Vector<Rational>* outputLinearCombo= 0, Vector<Rational>* outputSplittingNormal = 0);
+  (List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone, Vector<Rational>* outputLinearCombo = 0, Vector<Rational>* outputSplittingNormal = 0);
   static bool GetNormalSeparatingCones
   (List<Vector<coefficient> >& coneStrictlyPositiveCoeffs, List<Vector<coefficient> >& coneNonNegativeCoeffs, Vector<coefficient>& outputNormal);
   void average(Vector<coefficient>& output, int theDimension)
@@ -821,7 +821,7 @@ class Vectors: public List<Vector<coefficient> >
       return this->TheObjects[0].size;
     return - 1;
   }
-  void BeefUpWithEiToLinearlyIndependentBasis(int theDim, const coefficient& ringUnit =(coefficient) 1, const coefficient& ringZero=(coefficient) 0)
+  void BeefUpWithEiToLinearlyIndependentBasis(int theDim, const coefficient& ringUnit =(coefficient) 1, const coefficient& ringZero =(coefficient) 0)
   { Selection BufferSel;
     Matrix<coefficient> Buffer;
     if (this->size != 0 && theDim != this->GetDim())

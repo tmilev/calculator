@@ -13,7 +13,7 @@
 #include "vpfHeader2Math15_UniversalEnveloping.h"
 #include "vpfHeader2Math6_ModulesSSLieAlgebras.h"
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
-#include "vpfHeader2Math11_EllipticCurves.h"
+#include "vpfImplementationHeader2Math11_EllipticCurves.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file, calculator declaration. ");
 
@@ -775,8 +775,8 @@ public:
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> > theWeylGroupVirtualReps;
   ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
   ListReferences<SltwoSubalgebras> theSltwoSAs;
-  ListReferences<EllipticCurveWeierstrassNormalForm<ElementZmodP> > theEllipticCurves;
   HashedListReferences<ElementEllipticCurve<ElementZmodP> > EllipticCurveElementsZmodP;
+  HashedListReferences<ElementEllipticCurve<Rational> > EllipticCurveElementsRational;
   HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
   HashedListReferences<Polynomial<Rational> > thePolys;
   HashedListReferences<Polynomial<AlgebraicNumber> > thePolysOverANs;
@@ -1535,6 +1535,12 @@ public:
   int opPolyOverANs()
   { return this->theAtoms.GetIndexIMustContainTheObject("PolynomialOverANs");
   }
+  int opEllipticCurveElementsRational()
+  { return this->theAtoms.GetIndexIMustContainTheObject("EllipticCurveElementsRational");
+  }
+  int opEllipticCurveElementsZmodP()
+  { return this->theAtoms.GetIndexIMustContainTheObject("EllipticCurveElementsZmodP");
+  }
   int opRationalFunction()
   { return this->theAtoms.GetIndexIMustContainTheObject("RationalFunction");
   }
@@ -2040,8 +2046,7 @@ public:
    const std::string& opExample, bool isInner, bool visible, bool experimental,
    const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier,
    bool inputDisabledByDefault,
-   const std::string& parentOpThatBansHandler)
-   ;
+   const std::string& parentOpThatBansHandler);
   void AddOperationInnerHandler
   (const std::string& theOpName, Expression::FunctionAddress innerHandler, const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample, bool visible = true, bool experimental = false,

@@ -39,7 +39,7 @@ int HtmlRoutines::GlobalMathSpanID = 0;
 int HtmlRoutines::GlobalCanvasID = 0;
 int HtmlRoutines::GlobalGeneralPurposeID = 0;
 
-template < > bool Matrix<Rational>::flagComputingDebugInfo= true;
+template < > bool Matrix<Rational>::flagComputingDebugInfo = true;
 template < > bool Polynomial<Rational>::flagAnErrorHasOccuredTimeToPanic = true;
 
 template < > bool CompleX<double>::flagEqualityIsApproximate = true;
@@ -1996,7 +1996,7 @@ FormatExpressions::FormatExpressions()
 }
 
 std::string FormatExpressions::GetPolyLetter(int index) const
-{ if (index< this->polyAlphabeT.size)
+{ if (index < this->polyAlphabeT.size)
     return this->polyAlphabeT[index];
   std::stringstream out;
   out << this->polyDefaultLetter << "_{" << index + 1 << "}";
@@ -9048,7 +9048,7 @@ std::string HtmlRoutines::GetHtmlSpanHidableStartsHiddeN
   buttonLabel << "buttonHS" << HtmlRoutines::GlobalGeneralPurposeID;
   out << HtmlRoutines::GetHtmlButton(buttonLabel.str(), "switchMenu('" + spanLabel.str() + "');", labelExpandButton);
   out << "<span";
-  out << " id =\"" << spanLabel.str() << "\" style =\"display: none\">";
+  out << " id =\"" << spanLabel.str() << "\" class=\"hiddenClass\">";
   out << input << "</span>";
   return out.str();
 }
@@ -10488,7 +10488,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerate
     { preferredNormal = theNormals[i];
       break;
     }
-  Rational firstCoord =preferredNormal[0];
+  Rational firstCoord = preferredNormal[0];
   preferredNormal.ShiftToTheLeftOnePos();
   preferredNormal/= -firstCoord;
   ConeLatticeAndShift tempCLS;
@@ -10497,7 +10497,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerate
   for (int i = 0; i <newNormals.size; i ++)
   { firstCoordNewNormal = newNormals[i][0];
     newNormals[i].ShiftToTheLeftOnePos();
-    newNormals[i] +=preferredNormal*firstCoordNewNormal;
+    newNormals[i] += preferredNormal*firstCoordNewNormal;
   }
   //bool tempBool =
   tempCLS.theProjectivizedCone.CreateFromNormals(newNormals);
@@ -10507,7 +10507,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerate
   Vector<Rational> tempRoot;
   tempRoot = theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
   //Vector<Rational> tempRoot2;
-  //tempRoot2=preferredNormal;
+  //tempRoot2= preferredNormal;
   tempRoot +=(preferredNormal*theLPToMaximizeAffine[0]);
   if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone)
   { outputAppend.AddOnTop(tempCLS);
@@ -10666,7 +10666,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
 
 void ConeComplex::GetNewVerticesAppend
   (Cone& myDyingCone, const Vector<Rational>& killerNormal, HashedList<Vector<Rational> >& outputVertices)
-{ int theDimMinusTwo=killerNormal.size-2;
+{ int theDimMinusTwo =killerNormal.size-2;
   int theDim=killerNormal.size;
   int numCycles =MathRoutines::NChooseK(myDyingCone.Normals.size, theDimMinusTwo);
   Selection theSel;

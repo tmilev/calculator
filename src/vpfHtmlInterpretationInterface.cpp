@@ -1036,8 +1036,8 @@ std::string HtmlInterpretation::GetEditPageHTML()
   outBody
   << "<script src =\"/html-common/ace/src-min/ext-language_tools.js\"></script>";
   outBody << "<script type =\"text/javascript\"> \n"
-  //<< " document.getElementById('mainInput').value =decodeURIComponent(\""
-  << " document.getElementById('editor').textContent =decodeURIComponent(\""
+  //<< " document.getElementById('mainInput').value = decodeURIComponent(\""
+  << " document.getElementById('editor').textContent = decodeURIComponent(\""
   << HtmlRoutines::ConvertStringToURLString(theFile.inputHtml, false)
   << "\");\n"
   << "    ace.require(\"ace/ext/language_tools\");\n"

@@ -218,7 +218,7 @@ bool Calculator::ExpressionMatchesPattern
 //  static int ExpressionMatchesPatternDebugCounter = - 1;
   //ExpressionMatchesPatternDebugCounter ++;
 //  stOutput << " ExpressionMatchesPatternDebugCounter: " << ExpressionMatchesPatternDebugCounter;
-//  printLocalDebugInfo= (ExpressionMatchesPatternDebugCounter>- 1);
+//  printLocalDebugInfo = (ExpressionMatchesPatternDebugCounter>- 1);
   if (commentsGeneral!= 0)
   { *commentsGeneral << " <hr> current input: " << input.ToString() << "<br>current pattern: " << thePattern.ToString();
     *commentsGeneral << "<br> current matched expressions: " << matchedExpressions.ToStringHtml();

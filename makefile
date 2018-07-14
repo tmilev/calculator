@@ -115,6 +115,7 @@ examRoutines.cpp \
 vpfHtmlInterpretationInterface.cpp \
 vpfHtmlSnippets.cpp \
 test.cpp \
+vpfEllipticCurves.cpp \
 vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
 vpf4CalculatorFunctionList.cpp \
 vpf5_1CalculatorCode.cpp \

@@ -831,7 +831,7 @@ void GetTauSignaturesFromSubgroup(weylgroup& G, const List<int>& gens, List<bool
 
 
 template <typename weylgroup>
-void ComputeTauSignatures(weylgroup* G, List<List<bool> >& tauSignatures, bool pseudo= false)
+void ComputeTauSignatures(weylgroup* G, List<List<bool> >& tauSignatures, bool pseudo = false)
 { Selection sel;
   sel.init(G->CartanSymmetric.NumCols);
   int numCycles = MathRoutines::TwoToTheNth(sel.MaxSize);

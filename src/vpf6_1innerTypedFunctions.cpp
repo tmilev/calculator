@@ -1084,7 +1084,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
       return false;
   }
   for (int i = 0; i < denominatorPowers.size; i ++)
-  { currentContribution =denominatorFactors[i];
+  { currentContribution = denominatorFactors[i];
     if (!denominatorPowers[i].IsIntegerFittingInInt(&currentExpSmallInt))
       return false;
     currentContribution.RaiseToPower(currentExpSmallInt);

@@ -405,7 +405,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   if (CalculatorConversions::innerLoadKey(theCommands, input, "generators", generatorsE))
   { generatorsE.Sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
-    for (int i =1; i <generatorsE.children.size; i ++)
+    for (int i =1; i < generatorsE.children.size; i ++)
     { if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, generatorsE[i], curGenAlgebraic, *owner.owner))
         return theCommands << "<hr>Failed to load semisimple Lie algebra element from expression " << generatorsE[i].ToString() << ". ";
       if (i%2 ==1)
@@ -514,7 +514,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   reportStream << "Subalgebra loading done, total  " << theSAs.theSubalgebras.theValues.size << " subalgebras loaded. ";
   theReport.Report(reportStream.str());
   theSAs.ToStringExpressionString=CalculatorConversions::innerStringFromSemisimpleSubalgebras;
-//  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection!= 0)
+//  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != 0)
 //    theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
   if (!theSAs.LoadState(currentChainInt, numExploredTypes, numExploredHs, theCommands.Comments))
     return false;
@@ -659,16 +659,16 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
   Polynomial<AlgebraicNumber> polyForm;
   bool polyFormGood =CalculatorConversions::innerPolynomial<AlgebraicNumber>(theCommands, input, polyFormE);
   if (polyFormGood)
-    polyFormGood =polyFormE.IsOfType<Polynomial<AlgebraicNumber> >(&polyForm);
+    polyFormGood = polyFormE.IsOfType<Polynomial<AlgebraicNumber> >(&polyForm);
   if (!polyFormGood)
     return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
   ChevalleyGenerator theChevGen;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElt;
   theChevGen.owner = &owner;
   output.MakeZero();
-  Expression theContext =polyFormE.GetContext();
+  Expression theContext = polyFormE.GetContext();
   for (int j = 0; j<polyForm.size(); j ++)
-  { const MonomialP& currentMon =polyForm[j];
+  { const MonomialP& currentMon = polyForm[j];
     int theGenIndex = 0;
     if (!currentMon.IsOneLetterFirstDegree(&theGenIndex))
       return theCommands << "<hr>Failed to convert semisimple Lie algebra input to linear poly: " << input.ToString() << ".<hr>";
@@ -697,7 +697,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
         isGood = false;
       else
       { currentElt.MakeHgenerator(owner.theWeyl.RootSystem[theRootIndex], owner);
-        currentElt*=polyForm.theCoeffs[j];
+        currentElt*= polyForm.theCoeffs[j];
         output += currentElt;
       }
     } else
@@ -725,7 +725,7 @@ bool CalculatorConversions::innerElementUE(Calculator& theCommands, const Expres
   Polynomial<Rational> theP;
   if (polyE.IsError() || !polyE.IsOfType<Polynomial<Rational> >(&theP))
     return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial. Instead I got " << polyE.ToString() << ". <hr>";
-  Expression theContext =polyE.GetContext();
+  Expression theContext = polyE.GetContext();
   Expression outputPolyVars;
   outputPolyVars.reset(theCommands, 1);
   outputPolyVars.AddChildAtomOnTop(theCommands.opPolynomialVariables());
@@ -893,9 +893,9 @@ bool CalculatorConversions::innerExpressionFromRF
   Expression numE, denE;
   input.GetDenominator(denP);
   Polynomial<Rational> numRescaled = numP;
-  Polynomial<Rational> denRescaled =denP;
+  Polynomial<Rational> denRescaled = denP;
   Rational topMultiple =  numRescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-  Rational bottomMultiple =denRescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  Rational bottomMultiple = denRescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   Rational multipleTopBottom=bottomMultiple/topMultiple;
   numRescaled*=multipleTopBottom.GetNumerator();
   denRescaled*=multipleTopBottom.GetDenominator();

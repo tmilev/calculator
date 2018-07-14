@@ -972,7 +972,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
     *abortKmodule = false;
   if (CurrentRank == this->GetAmbientWeyl().CartanSymmetric.NumRows)
     return this->IsAnIsomorphism(Domain, Range, outputAutomorphisms, additionalDomain, additionalRange);
-  Vectors<Rational> domainRec =Domain;
+  Vectors<Rational> domainRec = Domain;
   Vectors<Rational> rangeRec =Range;
   rootSubalgebra leftSA;
   rootSubalgebra rightSA;
@@ -1067,7 +1067,7 @@ bool rootSubalgebra::IsAnIsomorphism(Vectors<Rational>& domain, Vectors<Rational
   //if (this->flagAnErrorHasOccuredTimeToPanic)
     //tempRoots.ComputeDebugString();
   Vector<Rational> tempRoot;
-  if (additionalDomain!= 0)
+  if (additionalDomain != 0)
     for (int i = 0; i <additionalDomain->size; i ++)
     { additionalDomain->TheObjects[i].GetCoordsInBasiS(tempRoots, tempRoot);
       if (!(tempRoot ==additionalRange->TheObjects[i]))
@@ -1371,9 +1371,9 @@ rootSubalgebra::rootSubalgebra()
 void rootSubalgebra::initNoOwnerReset()
 { this->indexInducingSubalgebra = - 1;
   this->numHeirsRejectedNotMaximallyDominant = 0;
-  this->numHeirsRejectedSameModuleDecompo= 0;
+  this->numHeirsRejectedSameModuleDecompo = 0;
   this->numHeirsRejectedBadAngleS = 0;
-  this->numHeirsRejectedNotMaxWRTouterAuto= 0;
+  this->numHeirsRejectedNotMaxWRTouterAuto = 0;
 }
 
 void rootSubalgebra::initForNilradicalGeneration()
@@ -1982,7 +1982,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew()
   this->CheckInitialization();
   ProgressReport theReport;
   std::stringstream reportStream;
-  this->SimpleBasisKScaledToActByTwo= this->SimpleBasisK;
+  this->SimpleBasisKScaledToActByTwo = this->SimpleBasisK;
 //  stOutput << "Simple basis k: " << this->SimpleBasisK.ToString();
   for (int i = 0; i < this->SimpleBasisK.size; i ++)
 //  { stOutput << "the scalar prod: " << this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]).ToString();
@@ -2118,7 +2118,7 @@ bool slTwoSubalgebra::AttemptExtendingHFtoHEFWRTSubalgebra
   rootsInPlay.size = 0;
   int theRelativeDimension = simpleBasisSA.size;
 //  int theDimension = this->theWeyl.CartanSymmetric.NumRows;
-  if (theRelativeDimension!= theZeroCharacteristics.MaxSize)
+  if (theRelativeDimension != theZeroCharacteristics.MaxSize)
     crash << crash;
   Vector<Rational> tempRoot, tempRoot2;
   //format. We are looking for an sl(2) for which e = a_0 g^\alpha_0+... a_kg^\alpha_k, and
@@ -2322,7 +2322,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       { theSlack++;
         rootsScalarProduct2HnonRaised.AddOnTop(this->PositiveRootsK[j]);
       }
-    int theDynkinEpsilon =diagramZeroCharRoots.NumRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
+    int theDynkinEpsilon = diagramZeroCharRoots.NumRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
     //if Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2) subalgebra.
     //otherwise, as far as I understand, it always is //
     //except for G_2 (go figure!).
@@ -2330,7 +2330,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
     //this is done in the below code.
 //    if (ereBeProbs)
 //      stOutput << "<br>Sel: " << selectionRootsWithZeroCharacteristic.ToString() << ", dynkin epsilon: " << theDynkinEpsilon;
-    if (theDynkinEpsilon!= 0)
+    if (theDynkinEpsilon != 0)
       continue;
     Vector<Rational> relativeCharacteristic, relativeSimpleCoords;
     relativeCharacteristic.MakeZero(theRelativeDimension);
@@ -2626,7 +2626,7 @@ void rootSubalgebras::ComputeLProhibitingRelations()
   for (; this->IndexCurrentSANilradicalsGeneration< this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration; this->IndexCurrentSANilradicalsGeneration ++)
   { this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration].flagComputeConeCondition = this->flagComputeConeCondition;
     this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(localController, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, this->flagUsingParabolicsInCentralizers, *this, this->IndexCurrentSANilradicalsGeneration);
-    if (this->IndexCurrentSANilradicalsGeneration!= this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration- 1)
+    if (this->IndexCurrentSANilradicalsGeneration != this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration- 1)
       this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration + 1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
   }
 }
@@ -2846,7 +2846,7 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
   , Semisimple Lie subalgebras of semisimple Lie algebras. k_{ss} is parametrized by a root subsytem of \\Delta(g). \
   C(k_{ss}) consists of root spaces with roots strongly orthogonal to \\Delta(k) and a part of the Cartan h";
   int col = 0;
-  int row= 0;
+  int row = 0;
   out << "g: " << this->theSubalgebras[0].theDynkinDiagram.ToString()
   << ". There are " << this->theSubalgebras.size << " table entries (= " << this->theSubalgebras.size-2
   << " larger than the Cartan subalgebra + the Cartan subalgebra + the full subalgebra).\n\n";
@@ -2868,7 +2868,7 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
       out << "<b>(Cartan subalgebra)</b>";
     out << "\n<br>\nType C(k_{ss})_{ss}: " << this->theSubalgebras[i].theCentralizerDiagram.ToString();
     if (row == this->NumLinesPerTableLatex)
-      row= 0;
+      row = 0;
     out << "</td>";
     if (col == this->NumColsPerTableLatex- 1 || i == this->theSubalgebras.size- 1)
       out << "</tr>";
@@ -3028,7 +3028,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomo
   bufferSAs[RecursionDepth].genK = bufferSAs[RecursionDepth- 1].genK;
   bufferSAs[RecursionDepth].ownEr = this;
   ProgressReport theReport;
-  for (int k = 0; k<bufferSAs[RecursionDepth- 1].Modules.size; k++)
+  for (int k = 0; k< bufferSAs[RecursionDepth- 1].Modules.size; k++)
     if (bufferSAs[RecursionDepth- 1].HighestWeightsPrimalSimple[k].IsPositive())
     { bufferSAs[RecursionDepth].genK.AddOnTop(bufferSAs[RecursionDepth- 1].HighestWeightsPrimalSimple[k]);
       bufferSAs[RecursionDepth].ComputeDynkinDiagramKandCentralizer();
@@ -3091,7 +3091,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
     //    if (tempI!= theRootSA.GetIndexKmoduleContainingRoot(tempRoot))crash << crash;
     //  }
     }
-    if (theGlobalVariables.IndicatorStringOutputFunction!= 0)
+    if (theGlobalVariables.IndicatorStringOutputFunction != 0)
     { std::stringstream out;
       out << "Computing action of element " << i + 1 << " out of " << theSubgroup.size;
       theReport.Report(out.str());
@@ -3144,7 +3144,7 @@ rootSubalgebras::rootSubalgebras()
   this->UpperLimitNumElementsWeyl = 0;
   this->owner = 0;
   this->flagPrintGAPinput = false;
-  this->flagPrintParabolicPseudoParabolicInfo= false;
+  this->flagPrintParabolicPseudoParabolicInfo = false;
   this->initForNilradicalGeneration();
   this->NumNonPseudoParabolic = 0;
   this->NumParabolic = 0;
@@ -3198,7 +3198,7 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
   if (simpleType == 'B')
     out << "$\\mathrm{so}(2n + 1)$ is realized as a matrix Lie algebra as $\\left\\{\\left(\\begin{array}{c|c|c}A&\\begin{array}{c}v_1\\\\ \\vdots \\\\ v_n\\end{array} &C= -C^T \\\\\\hline \\begin{array}{ccc}w_1 &\\dots&  w_n\\end{array} &0& \\begin{array}{ccc}-v_n &\\dots&  -v_1\\end{array} \\\\\\hline D= -D^T&\\begin{array}{c}-w_n\\\\ \\vdots \\\\ -w_1\\end{array} & -A^T\\end{array}\\right)\\right\\}$.\n\n";
   if (simpleType == 'C')
-    out << "$\\mathrm{sp}(2n)$ is realized as a matrix Lie algebra as $\\left\\{\\left(\\begin{array}{c|c}A& C \\\\\\hline D& -A^T\\end{array}\\right)| C=C^T, D=D^T\\right\\}.$";
+    out << "$\\mathrm{sp}(2n)$ is realized as a matrix Lie algebra as $\\left\\{\\left(\\begin{array}{c|c}A& C \\\\\\hline D& -A^T\\end{array}\\right)| C=C^T, D= D^T\\right\\}.$";
   out << " In this realization, the Cartan subalgebra $\\mathfrak{h}$ can be chosen to consist of the diagonal matrices of the above form.\n\n";
   if (!includeMatrixForm)
   { out << "\n\\begin{longtable}{r|l}\n\\multicolumn{2}{c}{";

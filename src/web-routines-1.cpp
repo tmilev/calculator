@@ -183,7 +183,7 @@ void WebCrawler::init()
   buffer.initFillInObject(50000, 0);
   if (!theWebServer.flagPort8155)
   { this->portOrService = "8080";
-//    this->addressToConnectTo="localhost";
+//    this->addressToConnectTo ="localhost";
     this->addressToConnectTo = "127.0.0.1";
   } else
   { this->portOrService = "8155";

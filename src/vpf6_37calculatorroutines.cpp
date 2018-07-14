@@ -8,7 +8,9 @@
 #include "vpfHeader8HtmlInterpretation.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
 #include "vpfHeader2Math9DrawingVariables.h"
+#include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 #include "vpfHeader5Crypto.h"
+#include "vpfImplementationHeader2Math11_EllipticCurves.h"
 //////////////////////////////////////
 #include "webserver.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
@@ -76,8 +78,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     << " out of "
     << totalToInterpret
     << "). Random seed: "
-    << randomSeedCurrent << "."
-    ;
+    << randomSeedCurrent << ".";
     theReport.Report(reportStream.str());
     CalculatorHTML theProblem;
     std::stringstream problemComments;
@@ -1683,12 +1684,12 @@ bool CalculatorFunctionsGeneral::innerNewtonsMethod(Calculator& theCommands, con
 }
 
 
-bool CalculatorFunctionsGeneral::innerEllipticCurveNormalFormOverZp(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEllipticCurveNormalFormOverZp");
-  if (input.size() != 5)
-    return theCommands << "Elliptic curve expects 4 arguments (curve, generator letter, baseX and baseY) ";
-  const Expression& xDefE = input[3];
-  const Expression& yDefE = input[4];
+bool CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm");
+  if (input.size() != 4)
+    return theCommands << "Elliptic curve expects 3 arguments (curve, generator letter, baseX and baseY) ";
+  const Expression& xDefE = input[2];
+  const Expression& yDefE = input[3];
   //  HashedList<Expression> xEcandidates, yEcandidates;
   //  if (!xDefE.GetFreeVariables(xEcandidates, false))
   //    return theCommands << "Failed to get free variables from " << xDefE.ToString();
@@ -1702,13 +1703,24 @@ bool CalculatorFunctionsGeneral::innerEllipticCurveNormalFormOverZp(Calculator& 
     return theCommands << "Failed to extract variable form " << xDefE.ToString();
   if (!yDefE.StartsWith(theCommands.opDefine(), 3))
     return theCommands << "Failed to extract variable form " << yDefE.ToString();
-  ElementZmodP xBase, yBase;
-  if (!xDefE[2].IsOfType(&xBase))
-    return theCommands << "Could not extract element of z mod p from " << xDefE[2].ToString();
-  if (!yDefE[2].IsOfType(&yBase))
-    return theCommands << "Could not extract element of z mod p from " << yDefE[2].ToString();
-  if (xBase.theModulo != yBase.theModulo)
-    return theCommands << "The two base coordinates have different moduli. ";
+  ElementEllipticCurve<ElementZmodP> eltZmodP;
+  ElementEllipticCurve<Rational> eltRational;
+  bool isRational = true;
+  bool isElementZmodP = true;
+  if (!xDefE[2].IsOfType(&eltRational.xCoordinate))
+    isRational = false;
+  if (!yDefE[2].IsOfType(&eltRational.yCoordinate))
+    isRational = false;
+  if (!xDefE[2].IsOfType(&eltZmodP.xCoordinate))
+    isElementZmodP = false;
+  if (!yDefE[2].IsOfType(&eltZmodP.yCoordinate))
+    isElementZmodP = false;
+  if (!isRational && !isElementZmodP)
+    return theCommands << "Could not extract rational or element of z mod p from "
+    << xDefE[2].ToString() << ", " << yDefE[2].ToString();
+  if (isElementZmodP)
+    if (eltZmodP.xCoordinate.theModulo != eltZmodP.yCoordinate.theModulo)
+      return theCommands << "The two base coordinates have different moduli. ";
   Expression theCurveE;
   if (!CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression(theCommands, input[1], theCurveE))
     return theCommands << "Could not get arithmetic expression from: " << input[1].ToString()
@@ -1745,13 +1757,35 @@ bool CalculatorFunctionsGeneral::innerEllipticCurveNormalFormOverZp(Calculator& 
   xCubed.MakeEi(indexX, 3);
   xLinear.MakeEi(indexX, 1);
   ySquared.MakeEi(indexY, 2);
-  EllipticCurveWeierstrassNormalForm<ElementZmodP> theCurve;
   Rational coefficientY = thePoly.GetMonomialCoefficient(ySquared);
   Rational coefficientXcubed = - thePoly.GetMonomialCoefficient(xCubed);
   if (coefficientY == 0)
     return theCommands << "Did not find square term in your curve.";
   if (coefficientXcubed == 0)
     return theCommands << "Did not find cube term in your curve.";
-
+  Rational coefficientXlinear = - thePoly.GetMonomialCoefficient(xLinear);
+  Rational constCoefficient = - thePoly.GetConstantTerm();
+  EllipticCurveWeierstrassNormalForm& curveConstants = isRational ? eltRational.owner : eltZmodP.owner;
+  if (!coefficientXlinear.IsInteger(&curveConstants.linearCoefficient) ||
+      !constCoefficient.IsInteger(&curveConstants.constantTerm))
+    return theCommands << "At the moment only integer elliptic curve coefficients are supported. Your coefficients were: "
+    << coefficientXlinear << ", " << constCoefficient << ". ";
+  int numNonZeroGoodCoeffs = 2;
+  if (coefficientXlinear != 0)
+    numNonZeroGoodCoeffs ++;
+  if (constCoefficient != 0)
+    numNonZeroGoodCoeffs ++;
+  if (numNonZeroGoodCoeffs != thePoly.size())
+    return theCommands << "It appears your curve: " << theCurveE.ToString()
+    << " is not of the form y^2 = x^3 + ax + b. ";
+  Expression theContext, thePolyVars;
+  theContext.MakeEmptyContext(theCommands);
+  thePolyVars.MakeXOX(theCommands, theCommands.opPolynomialVariables(), xE, yE);
+  thePolyVars.AddChildOnTop(input[2]);
+  theContext.AddChildOnTop(thePolyVars);
+  if (isRational)
+    return output.AssignValueWithContext(eltRational, theContext, theCommands);
+  if (isElementZmodP)
+    return output.AssignValueWithContext(eltZmodP, theContext, theCommands);
   return false;
 }

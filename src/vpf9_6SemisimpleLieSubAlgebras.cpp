@@ -1170,7 +1170,7 @@ void SemisimpleSubalgebras::GetHCandidates
   { if (theGlobalVariables.flagReportEverything)
     { std::stringstream reportStreamX;
       reportStreamX << "Trying to realize via orbit number " << j+ 1 << ".";
-      if (this->theSl2s[j].LengthHsquared!=desiredHScaledToActByTwoLengthSquared)
+      if (this->theSl2s[j].LengthHsquared!= desiredHScaledToActByTwoLengthSquared)
         reportStreamX << " The h element "  << this->theSl2s[j].theH.GetCartanPart().ToString() << " of length "
         << this->theOrbitHelementLengths[j].ToString() << " generating orbit number " << j+ 1 << " out of "
         << this->theSl2s.size << " does not have the required length of " << desiredHScaledToActByTwoLengthSquared.ToString();
@@ -1180,7 +1180,7 @@ void SemisimpleSubalgebras::GetHCandidates
       //stOutput << "<br>" << reportStreamX.str();
       theReport2.Report(reportStreamX.str());
     }
-    if (this->theSl2s[j].LengthHsquared!=desiredHScaledToActByTwoLengthSquared)
+    if (this->theSl2s[j].LengthHsquared!= desiredHScaledToActByTwoLengthSquared)
       continue;
     if (baseRank == 0)
     { outputHCandidatesScaledToActByTwo.AddOnTop(this->theSl2s[j].theH.GetCartanPart());
@@ -1292,7 +1292,7 @@ void DynkinType::GetDynkinIndicesSl2SubalgebrasSimpleType
       outputIndicesDefaultScale.AddOnTopNoRepetition(theSl2s[i].LengthHsquared/2);
     precomputedDynkinIndicesSl2subalgebrasSimpleTypes.AddOnTop(outputIndicesDefaultScale);
   }
-  List<Rational>& outputIndicesDefaultScale =precomputedDynkinIndicesSl2subalgebrasSimpleTypes
+  List<Rational>& outputIndicesDefaultScale = precomputedDynkinIndicesSl2subalgebrasSimpleTypes
   [dynkinSimpleTypesWithComputedSl2Subalgebras.GetIndex(theTypeDefaultScale)];
   outputDynkinIndices.SetExpectedSize(outputIndicesDefaultScale.size);
   outputDynkinIndices.Clear();
@@ -1321,14 +1321,14 @@ void DynkinType::GetDynkinIndicesSl2Subalgebras
   List<int> theMults;
   theMults.SetSize(theTypes.size);
   for (int i = 0; i < theMults.size; i ++)
-    theMults[i] =DynkinIndicesPerType[i].size- 1;
+    theMults[i] = DynkinIndicesPerType[i].size- 1;
   dynkinIndexSelector.initFromInts(theMults);
   outputDynkinIndices.Clear();
   while (dynkinIndexSelector.IncrementReturnFalseIfPastLast())
   { Rational currentIndex = 0;
     //  stOutput << "here be i";
     for (int i = 0; i <dynkinIndexSelector.Multiplicities.size; i ++)
-      currentIndex +=DynkinIndicesPerType[i][dynkinIndexSelector.Multiplicities[i]];
+      currentIndex += DynkinIndicesPerType[i][dynkinIndexSelector.Multiplicities[i]];
     outputDynkinIndices.AddOnTopNoRepetition(currentIndex);
   }
 }
@@ -1942,7 +1942,7 @@ bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(const Vector<Rational>& HNewAc
   //stOutput << "<br>Checking whether " << HNewActingByTwo.ToString() << " is a good new vector... " << this->theHsScaledToActByTwoInOrderOfCreation.size
   //<< " already created vectors to be respected... ";
   Rational theScalarProd;
-  int indexHneW=*theRootInjections.LastObject();
+  int indexHneW =*theRootInjections.LastObject();
   for  (int i = 0; i < this->GetAmbientWeyl().RootsOfBorel.size; i ++)
   { Vector<Rational>& currentPosRoot = this->GetAmbientWeyl().RootsOfBorel[i];
     bool canBeRaisingReflection = true;
@@ -2142,7 +2142,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
       { //stOutput << " <hr>... and the inducer is: " << theInducer.theWeylNonEmbedded->theDynkinType.ToString();
         //if (theInducer.theWeylNonEmbedded->theDynkinType.ToString() == "A^{1}_1")
         //  stOutput << "<br>Detailed inducer printout<br>" << theInducer.ToString();
-        int preimageIndex =DynkinType::GetIndexPreimageFromRootInjection(i, this->RootInjectionsFromInducer);
+        int preimageIndex = DynkinType::GetIndexPreimageFromRootInjection(i, this->RootInjectionsFromInducer);
         this->theUnknownNegGens[i] = theInducer.theNegGens[preimageIndex];//<-implicit type conversion from base field to polynomial here
         this->theUnknownPosGens[i] = theInducer.thePosGens[preimageIndex];//<-implicit type conversion from base field to polynomial here
         //stOutput << "<br>induced neg generator: " << theInducer.theNegGens[preimageIndex];
@@ -4177,7 +4177,7 @@ bool slTwoSubalgebra::AttemptToComputeCentralizer()
     currentMinimalContainer.theCentralizerDynkinType.GetRank();
 //    stOutput << "<br>this->dimCentralizerToralPart is: " << this->dimCentralizerToralPart.ToString();
 
-    Rational totalCentalizerCandidateDim=dimOfSSpartOfCentralizerOfRootSA+this->dimCentralizerToralPart;
+    Rational totalCentalizerCandidateDim= dimOfSSpartOfCentralizerOfRootSA+this->dimCentralizerToralPart;
 //    stOutput << "<br>totalCentalizerCandidateDim is: " << totalCentalizerCandidateDim.ToString()
 //    << "<br>this->dimensionCentralizer is: " << this->dimensionCentralizer;
 
@@ -4261,9 +4261,9 @@ void slTwoSubalgebra::ComputeModuleDecomposition
   positiveRootsContainingRegularSA.CheckConsistency();
   if (positiveRootsContainingRegularSA.size<= 0)
     crash << "This is a programming error: positiveRootsContainingRegularSA has less than one element. " << crash;
-  int IndexZeroWeight =positiveRootsContainingRegularSA.size*2;
+  int IndexZeroWeight = positiveRootsContainingRegularSA.size*2;
   outputModuleDimensions.initFillInObject(4*positiveRootsContainingRegularSA.size + 1, 0);
-  outputModuleDimensions[IndexZeroWeight] =dimensionContainingRegularSA;
+  outputModuleDimensions[IndexZeroWeight] = dimensionContainingRegularSA;
   List<int> BufferHighestWeights;
   Rational tempRat;
   Vectors<Rational> coordsInPreferredSimpleBasis;
@@ -4740,7 +4740,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompoLaTeX(FormatExpressions*
   << "Component &Module & elements & elt. weights& $h$-element $\\mathfrak k-sl(2)$-triple& $f$-element $\\mathfrak k-sl(2)$-triple\\\\";
   ElementSemisimpleLieAlgebra<AlgebraicNumber> tempLieBracket;
   for (int i = 0; i < this->Modules.size; i ++)
-  { int numRowsIsoCompo= this->Modules[i].size*this->Modules[i][0].size;
+  { int numRowsIsoCompo = this->Modules[i].size*this->Modules[i][0].size;
     if (numRowsIsoCompo>1)
       out << "\\multirow{" << numRowsIsoCompo << "}{*}";
     out << "{$W_{" << i + 1 << "} $}";
@@ -5448,7 +5448,7 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
         out << HtmlRoutines::GetMathMouseHover(toralPartStream.str());
       else
         out << HtmlRoutines::GetMathSpanPure(toralPartStream.str());
-      out << " (toral part, subscript =dimension)";
+      out << " (toral part, subscript = dimension)";
     }
     out << ". ";
   }

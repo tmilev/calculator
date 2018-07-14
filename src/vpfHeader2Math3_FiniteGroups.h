@@ -1140,7 +1140,7 @@ JSData GroupRepresentation<someGroup, coefficient>::JSOut()
     out["character"] = this->theCharacteR.data;
   else
     out["character"].type = JSData::JSnull;
-  for (int i = 0; i <generatorS.size; i ++)
+  for (int i = 0; i < generatorS.size; i ++)
     out["generators"][i] = generatorS[i];
   return out;
 }

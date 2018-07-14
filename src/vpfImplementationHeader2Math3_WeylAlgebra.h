@@ -271,7 +271,7 @@ void ElementWeylAlgebra<coefficient>::GetStandardOrderDiffOperatorCorrespondingT
   { outputDenominator *= newMult;
     newMult -= 1;
   }
-//  output/=den;
+//  output/= den;
 }
 
 template <class coefficient>

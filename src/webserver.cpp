@@ -76,7 +76,7 @@ std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << "<script type =\"text/javascript\"> \n"
   << HtmlRoutines::GetJavascriptCookieFunctionSNoTags()
   << "function storeSettings()\n"
-  << "{ theCalculatorForm=document.getElementById(\"mainInputID\");  \n"
+  << "{ theCalculatorForm= document.getElementById(\"mainInputID\");  \n"
   << "  //alert(theCalculatorForm.style.width);\n"
   << "  if (theCalculatorForm!= null){\n"
   << "    addCookie(\"widthCalculatorText\", theCalculatorForm.style.width, 100);  \n"
@@ -125,7 +125,7 @@ std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << "var setProblemLinkStyle;\n"
   << "function loadSettings(){\n"
   << "  storeSettingsProgress();\n"
-  << "  theCalculatorForm=document.getElementById(\"mainInputID\");  \n"
+  << "  theCalculatorForm= document.getElementById(\"mainInputID\");  \n"
   << "  if (theCalculatorForm!= null){\n"
   << "    theOldWidth=getCookie(\"widthCalculatorText\");\n"
   << "    theOldHeight =getCookie(\"heightCalculatorText\");\n"
@@ -236,7 +236,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "      document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Continue\";\n";
   out << "    else\n";
   out << "      document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Pause\";\n";
-  out << "    document.getElementById(\"idProgressReportRequestStatus\").innerHTML=pauseRequest.responseText;\n";
+  out << "    document.getElementById(\"idProgressReportRequestStatus\").innerHTML= pauseRequest.responseText;\n";
   out << "    if (!isPaused)\n";
   out << "      progressReport();\n";
   out << "   }\n";
@@ -1910,7 +1910,7 @@ bool WebWorker::ReceiveAllHttp()
     { if (errno == EAGAIN ||
           errno == EWOULDBLOCK ||
           errno == EINTR ||
-          errno == EIO || // errno== ENOBUFS ||
+          errno == EIO || // errno == ENOBUFS ||
           errno == ENOMEM)
         continue;
       this->error = "Error fetching message body: " + this->parent->ToStringLastErrorDescription();

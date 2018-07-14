@@ -220,6 +220,8 @@ void Calculator::init()
   this->AddOperationBuiltInType("ElementWeylAlgebra");
   this->AddOperationBuiltInType("weightLieAlg");
   this->AddOperationBuiltInType("weightLieAlgPoly");
+  this->AddOperationBuiltInType("EllipticCurveElementsRational");
+  this->AddOperationBuiltInType("EllipticCurveElementsZmodP");
 
   this->initOperationsInterpretedAsFunctionsMultiplicatively();
 

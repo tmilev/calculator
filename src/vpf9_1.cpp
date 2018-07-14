@@ -2077,7 +2077,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2()
   ProgressReport theReport;
 //  int dimSmallerAlgebra = this->theLinearOperators.TheObjects[0].NumRows;
 //  int dimLargerAlgebra = this->theLinearOperators.TheObjects[0].NumCols;
-//  int dimFinal =dimSmallerAlgebra +dimLargerAlgebra + 1;
+//  int dimFinal = dimSmallerAlgebra +dimLargerAlgebra + 1;
   projectivizedChamberFinal.init();
   for (int i = 0; i < this->smallerAlgebraChamber.size; i ++)
   { Cone& currentAffineCone = this->smallerAlgebraChamber.TheObjects[i];
@@ -2110,7 +2110,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2()
   theReport.Report(out.str());
 
   projectivizedChamberFinal.indexLowestNonRefinedChamber = 0;
-  this->projectivizedChambeR=projectivizedChamberFinal;
+  this->projectivizedChambeR= projectivizedChamberFinal;
   for (int k = 1; k < this->theLinearOperators.size; k ++)
     for (int i = 0; i < this->smallerAlgebraChamber.size; i ++)
       for (int j = 0; j < this->smallerAlgebraChamber[i].Normals.size; j ++)

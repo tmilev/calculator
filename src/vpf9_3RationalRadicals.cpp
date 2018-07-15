@@ -1151,6 +1151,147 @@ std::string ElementZmodP::ToString(FormatExpressions* theFormat) const
   return out.str();
 }
 
+ElementZmodP ElementZmodP::operator*(const Rational& other) const
+{ ElementZmodP otherElt;
+  otherElt.theModulo = this->theModulo;
+  otherElt.AssignRational(other);
+  ElementZmodP result = *this;
+  result *= otherElt;
+  return result;
+}
+
+unsigned int ElementZmodP::HashFunction() const
+{ if (this->theValue.IsEqualToZero())
+    return 0;
+  return this->theValue.HashFunction() * SomeRandomPrimes[0] + this->theModulo.HashFunction() * SomeRandomPrimes[1];
+}
+
+void ElementZmodP::CheckIamInitialized() const
+{ if (this->theModulo.IsEqualToZero())
+    crash << "This is a programming error: computing with non-initialized element the ring Z mod p (the number p has not been initialized!)." << crash;
+  if (this->flagDeallocated)
+    crash << "This is a programming error: use after free of element z mod p. " << crash;
+}
+
+void ElementZmodP::operator=(const LargeInt& other)
+{ this->CheckIamInitialized();
+  this->theValue = other.value;
+  this->theValue %= this->theModulo;
+  if (other.sign == - 1)
+  { ElementZmodP mOne;
+    mOne.MakeMOne(this->theModulo);
+    *this *= mOne;
+  }
+}
+
+void ElementZmodP::ScaleToIntegralMinHeightAndGetPoly
+(const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntUnsigned& newModulo)
+{ Polynomial<Rational> rescaled;
+  rescaled = input;
+  rescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  output.SetExpectedSize(input.size());
+  ElementZmodP theCF;
+  theCF.theModulo = newModulo;
+  output.MakeZero();
+  for (int i = 0; i < input.size(); i ++)
+  { theCF = input.theCoeffs[i];
+    output.AddMonomial(input[i], theCF);
+  }
+}
+
+void ElementZmodP::operator=(const ElementZmodP& other)
+{ this->theModulo = other.theModulo;
+  this->theValue = other.theValue;
+}
+
+void ElementZmodP::operator=(const LargeIntUnsigned& other)
+{ this->CheckIamInitialized();
+  this->theValue = other;
+  this->theValue %= this->theModulo;
+}
+
+void ElementZmodP::MakeOne(const LargeIntUnsigned& newModulo)
+{ this->theModulo = newModulo;
+  this->theValue = 1;
+}
+
+void ElementZmodP::MakeMOne(const LargeIntUnsigned& newModulo)
+{ this->theModulo = newModulo;
+  this->theValue = newModulo;
+  this->theValue --;
+}
+
+void ElementZmodP::CheckEqualModuli(const ElementZmodP& other)
+{ if (this->theModulo != other.theModulo)
+    crash << "This is a programming error: attempting to make an operation with two elemetns of Z mod P with different moduli, "
+    << this->theModulo.ToString() << " and " << other.theModulo.ToString() << ". " << crash;
+}
+
+ElementZmodP ElementZmodP::operator*(const ElementZmodP& other) const
+{ ElementZmodP result = *this;
+  result *= other;
+  return result;
+}
+
+ElementZmodP ElementZmodP::operator+(const Rational& other) const
+{ ElementZmodP result = *this;
+  result += other;
+  return result;
+}
+
+ElementZmodP ElementZmodP::operator-(const ElementZmodP& other) const
+{ ElementZmodP result = *this;
+  result -= other;
+  return result;
+}
+
+ElementZmodP ElementZmodP::operator/(const ElementZmodP& other) const
+{ ElementZmodP result = *this;
+  result /= other;
+  return result;
+}
+
+
+void ElementZmodP::operator*=(const LargeInt& other)
+{ this->theValue *= other.value;
+  if (other.IsNegative())
+  { this->theValue *= this->theModulo - 1;
+    this->theValue %= this->theModulo;
+  }
+}
+
+bool ElementZmodP::operator+=(const Rational& other)
+{ ElementZmodP otherElt;
+  otherElt.theModulo = this->theModulo;
+  if (!otherElt.AssignRational(other))
+    return false;
+  *this += otherElt;
+  return true;
+}
+
+void ElementZmodP::operator+=(const ElementZmodP& other)
+{ if (this == &other)
+  { ElementZmodP other = *this;
+    *this += other;
+    return;
+  }
+  this->CheckEqualModuli(other);
+  this->theValue += other.theValue;
+  this->theValue %= this->theModulo;
+}
+
+void ElementZmodP::operator-=(const ElementZmodP& other)
+{ if (this == &other)
+  { ElementZmodP other = *this;
+    *this += other;
+    return;
+  }
+  this->CheckEqualModuli(other);
+  ElementZmodP otherTimesMinusOne = other;
+  otherTimesMinusOne *= -1;
+  *this += otherTimesMinusOne;
+}
+
 bool ElementZmodP::AssignRational(const Rational& other)
 { this->CheckIamInitialized();
   *this = other.GetNumerator();

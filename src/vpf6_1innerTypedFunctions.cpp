@@ -396,6 +396,37 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(Calcula
   return output.AssignValueWithContext(theWeight, inputConverted[2].GetContext(), theCommands);
 }
 
+bool CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements");
+  if (!input.StartsWith(theCommands.opTimes(), 3))
+    return false;
+  //stOutput << "DEBUG: multiplying: " << input.ToString();
+  ElementEllipticCurve<Rational> left, right;
+  if (!input[1].IsOfType(&left) || !input[2].IsOfType(&right))
+    return false;
+  //stOutput << "DEBUG: multiplying: " << left.ToString() << " by " << right.ToString();
+  if (!(left *= right))
+    return false;
+  return output.AssignValueWithContext(left, input[1].GetContext(), theCommands);
+}
+
+bool CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElementsZmodP(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements");
+  if (!input.StartsWith(theCommands.opTimes(), 3))
+    return false;
+  //stOutput << "DEBUG: multiplying: " << input.ToString();
+  ElementEllipticCurve<ElementZmodP> left, right;
+  if (!input[1].IsOfType(&left) || !input[2].IsOfType(&right))
+    return false;
+  if (!left.flagInfinity && !right.flagInfinity)
+    if (left.xCoordinate.theModulo != right.xCoordinate.theModulo)
+      return theCommands << "Attempt to multiply elliptic curve elements over Z mod p for different moduli p. Possible bad user input?";
+  //stOutput << "DEBUG: multiplying: " << left.ToString() << " by " << right.ToString();
+  if (!(left *= right))
+    return false;
+  return output.AssignValueWithContext(left, input[1].GetContext(), theCommands);
+}
+
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor");
   //stOutput << HtmlRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -1858,4 +1889,52 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(Calculator& t
   unit.MakeOne(theElt.theModulo);
   MathRoutines::RaiseToPower(theElt, thePower, unit);
   return output.AssignValue(theElt, theCommands);
+}
+
+bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteger(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteger");
+  if (!input.StartsWith(theCommands.opThePower(), 3))
+    return false;
+  stOutput << "DEBUG: Got to here!";
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
+  ElementEllipticCurve<Rational> theElt;
+  if (!leftE.IsOfType(&theElt))
+    return false;
+  stOutput << "DEBUG: Got to here: raising " << theElt.ToString();
+  int thePower = 0;
+  if (!rightE.IsSmallInteger(& thePower))
+    return false;
+  if (thePower < 0)
+  { theElt.Invert();
+    thePower *= - 1;
+  }
+  ElementEllipticCurve<Rational> unit;
+  unit.MakeOne(theElt.owner);
+  MathRoutines::RaiseToPower(theElt, thePower, unit);
+  return output.AssignValueWithContext(theElt, input[1].GetContext(), theCommands);
+}
+
+bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger");
+  if (!input.StartsWith(theCommands.opThePower(), 3))
+    return false;
+  //stOutput << "DEBUG: Got to here!";
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
+  ElementEllipticCurve<ElementZmodP> theElt;
+  if (!leftE.IsOfType(&theElt))
+    return false;
+  //stOutput << "DEBUG: Got to here: raising " << theElt.ToString();
+  int thePower = 0;
+  if (!rightE.IsSmallInteger(& thePower))
+    return false;
+  if (thePower < 0)
+  { theElt.Invert();
+    thePower *= - 1;
+  }
+  ElementEllipticCurve<ElementZmodP> unit;
+  unit.MakeOne(theElt.owner);
+  MathRoutines::RaiseToPower(theElt, thePower, unit);
+  return output.AssignValueWithContext(theElt, input[1].GetContext(), theCommands);
 }

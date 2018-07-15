@@ -1705,6 +1705,8 @@ bool CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm(Calculator&
     return theCommands << "Failed to extract variable form " << yDefE.ToString();
   ElementEllipticCurve<ElementZmodP> eltZmodP;
   ElementEllipticCurve<Rational> eltRational;
+  eltZmodP.flagInfinity = false;
+  eltRational.flagInfinity = false;
   bool isRational = true;
   bool isElementZmodP = true;
   if (!xDefE[2].IsOfType(&eltRational.xCoordinate))

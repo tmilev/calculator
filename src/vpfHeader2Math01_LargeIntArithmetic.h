@@ -370,6 +370,9 @@ private:
     crash << "This line of code should not be running. " << crash;
     return input;
   }
+  friend Rational operator*(int left, const Rational& right)
+  { return (Rational) left * right;
+  }
   friend bool operator<(int left, const Rational& right)
   { return (Rational) left < right;
   }

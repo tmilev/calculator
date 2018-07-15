@@ -25,7 +25,11 @@ public:
   coefficient yCoordinate;
   bool flagInfinity;
   static unsigned int HashFunction(const ElementEllipticCurve<coefficient>& input);
+  void Invert();
+  void MakeOne(const EllipticCurveWeierstrassNormalForm& inputCurve);
   bool operator==(const ElementEllipticCurve& other) const;
+  bool operator*=(const ElementEllipticCurve& other);
   std::string ToString(FormatExpressions* theFormat = 0) const;
+  ElementEllipticCurve();
 };
 #endif

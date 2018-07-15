@@ -4346,13 +4346,13 @@ bool ElementZmodP::operator==(int other) const
   return *this == tempElt;
 }
 
-bool ElementZmodP ::operator==(const ElementZmodP& other) const
+bool ElementZmodP::operator==(const ElementZmodP& other) const
 { this->CheckIamInitialized();
   other.CheckIamInitialized();
   return this->theModulo == other.theModulo && this->theValue == other.theValue;
 }
 
-void ElementZmodP ::operator*=(const ElementZmodP& other)
+void ElementZmodP::operator*=(const ElementZmodP& other)
 { if (this == &other)
   { ElementZmodP other = *this;
     *this *= other;

@@ -4504,13 +4504,39 @@ void Calculator::initPredefinedStandardOperations()
    true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor");
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements,
+   this->opEllipticCurveElementsRational(),
+   this->opEllipticCurveElementsRational(),
+   "Multiplies two elements of elliptic curves.",
+   "g = ElementEllipticCurveNormalForm(y^2 = x^3 - x +1, x = 3, y = 5);\n"
+   "h = g^2;\n"
+   "h*g\n",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements",
+   "MultiplyEllipticCurveElements");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElementsZmodP,
+   this->opEllipticCurveElementsZmodP(),
+   this->opEllipticCurveElementsZmodP(),
+   "Multiplies two elements of elliptic curves.",
+   "g = ElementEllipticCurveNormalForm(y^2 = x^3 +x - 5, x = 3 mod 17, y = 5 mod 17);\n"
+   "h = g^2;\n"
+   "h*g\n",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements",
+   "MultiplyEllipticCurveElements");
+
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor, this->opRationalFunction(), this->opElementTensorGVM(),
-   "Handles multiplying rational function number by an element of tensor product of generalized Verma modules. \
-   Not fully tested and documented at the moment.  \
-   Will get more documented in the future. ",
-   "X = G_2;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\nh_{{i}}= GetCartanGenerator{}(X, i);  \
-   \nz= Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\
-   \n1/z v",
+   "Handles multiplying rational function number by an element of tensor product of generalized Verma modules. "
+   "Not fully tested and documented at the moment. "
+   "Will get more documented in the future. ",
+   "X = G_2;\n"
+   "g_{{i}} = GetChevalleyGenerator{}(X,i);\n"
+   "h_{{i}} = GetCartanGenerator{}(X, i);\n"
+   "z = Polynomial{}y;\n"
+   "v = HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
+   "1/z v",
    true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor",
    "MultiplyAnyByTensor");
@@ -4603,7 +4629,8 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationInnerHandler
   ("ElementEllipticCurveNormalForm", CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm, "",
    "Makes an elliptic curve from a cubic in normal form, generator letter and base point.",
-   "ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 19 mod 101)",
+   "ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 21 mod 101);"
+   "ElementEllipticCurveNormalForm(y^2 = x^3 - x + 1, x = 3, y = 5)",
    true, false,
    "CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm",
    "ElementEllipticCurveNormalForm");
@@ -4856,19 +4883,49 @@ void Calculator::initPredefinedStandardOperations()
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteger,
+   this->opEllipticCurveElementsRational(),
+   this->opRational(),
+   "Exponentiates an elliptic curve element by an integer. ",
+   "g = ElementEllipticCurveNormalForm(y^2 = x^3 - x +1, x = 3, y = 5);\n"
+   "g^2",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerPowerEllipticCuveElementByInteger",
+   "PowerEllipticCurveElementByInteger");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger,
+   this->opEllipticCurveElementsZmodP(),
+   this->opRational(),
+   "Exponentiates an elliptic curve element by an integer. ",
+   "g = ElementEllipticCurveNormalForm(y^2 = x^3 - x +1, x = 3, y = 5);\n"
+   "g^2",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerPowerEllipticCuveElementByInteger",
+   "PowerEllipticCurveElementByInteger");
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger,
    this->opAlgNumber(), this->opRational(),
    "Raises algebraic number to small integer or half-integer power. ",
-   "a =3/2; b= - 15/2; c =33/4;\
-    \nx = (-b+\\sqrt{}(b^2-4a c))/(2a);\
-    \nB= c+a x^{2}+b x;", true, false,
-    "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger");
+   "a = 3/2;\n"
+   "b = - 15/2;\n"
+   "c = 33/4;\n"
+   "x = (-b+\\sqrt{}(b^2-4a c))/(2a);\n"
+   "B= c+a x^{2}+b x;",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger",
+   "PowerAlgebraicNumberBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger, this->opElementWeylAlgebra(), this->opRational(),
    "Raises element of Weyl algebra to integer power. ",
-   "\\partial = ElementWeylAlgebraDO{}(\\partial, x); \nx = ElementWeylAlgebraPoly{}(\\partial, x); \na =x\\partial; \na^10; \\partial x^{3/2}; \\partial^{3/2} x",
+   "\\partial = ElementWeylAlgebraDO{}(\\partial, x);\n"
+   "x = ElementWeylAlgebraPoly{}(\\partial, x); \n"
+   "a =x\\partial; \n"
+   "a^10;\n"
+   "\\partial x^{3/2};\n"
+   "\\partial^{3/2} x",
    true, false,
-   "CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger");
+   "CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger",
+   "PowerElementWeylAlgebraBySmallInteger");
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF, this->opElementUEoverRF(), this->opRational(),

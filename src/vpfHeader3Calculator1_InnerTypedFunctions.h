@@ -62,6 +62,8 @@ public:
   static bool innerMultiplyCharSSLieAlgByCharSSLieAlg(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyAnyByUE(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyAnyByEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyEllipticCurveElements(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyEllipticCurveElementsZmodP(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrPolyByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyWeylGroupEltByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output);
 
@@ -94,6 +96,8 @@ public:
   static bool innerPowerSequenceOrMatrixByT(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPowerElementZmodPByInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerEllipticCurveRationalElementByInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerEllipticCurveZmodPElementByInteger(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerNChooseK(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetMinus(Calculator& theCommands, const Expression& input, Expression& output);

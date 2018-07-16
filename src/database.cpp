@@ -1412,10 +1412,17 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
+  stOutput << "DEBUG: before user wrapper authenticate";
   if (userWrapper.Authenticate(comments))
   { theUseR = userWrapper;
     return true;
   }
+  stOutput << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
+  << ". Entered activation token: " << userWrapper.enteredActivationToken
+  << "user request: " << theGlobalVariables.userCalculatorRequestType;
+  stOutput << "DEBUG: entered pass: " << userWrapper.enteredPassword
+  << "shaone-ing to: " << userWrapper.enteredShaonedSaltedPassword
+  << ". Actual pass sha: " << userWrapper.actualShaonedSaltedPassword;
   //*comments << "DEBUG: entered pass: " << userWrapper.enteredPassword
   //<< "shaone-ing to: " << userWrapper.enteredShaonedSaltedPassword
   //<< ". Actual pass sha: " << userWrapper.actualShaonedSaltedPassword;
@@ -1427,9 +1434,12 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
     << " with token " << userWrapper.enteredAuthenticationToken << " failed. </b>";
   }
   if (userWrapper.enteredActivationToken != "" && comments != 0)
-  { //*comments << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
-    //<< ". Entered activation token: " << userWrapper.enteredActivationToken
-    //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
+  { *comments << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
+    << ". Entered activation token: " << userWrapper.enteredActivationToken
+    << "user request: " << theGlobalVariables.userCalculatorRequestType;
+    stOutput << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
+    << ". Entered activation token: " << userWrapper.enteredActivationToken
+    << "user request: " << theGlobalVariables.userCalculatorRequestType;
   }
   if (theGlobalVariables.userCalculatorRequestType == "changePassword" ||
       theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||

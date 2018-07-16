@@ -290,25 +290,25 @@ var MathQuillHasMatrixSupport = true;
   <span id = "spanVerification"></span>
 </div>
 
-<div id = "divAccountActivation" class = "divMainPage">
-    <table>
-        <tr><td>User:</td><td> <span id = "spanUserIdInActivateAccountPage"></span></td></tr>
-        <tr><td>Current email:</td><td><span id = 'spanCurrentActivationEmail'></span></td></tr>
-        <tr>
-          <td>New password:</td>
-          <td>
-            <input class = "textInputUsername" type = "password" id = "inputNewPasswordInActivationAccount" name = "password" placeholder = "password" autocomplete = "on">
-          </td>
-        </tr>
-        <tr>
-          <td>Re-enter:</td>
-          <td>
-            <input class = "textInputUsername" type = "password" id = "inputReenteredPasswordInActivationAccount" name = "password" placeholder = "password" autocomplete = "on">
-          </td>
-        </tr>
-        </table>
-        <button class = "buttonStandard" onclick = "submitChangePassRequestActivation()">Change password</button>
-        <span id = "spanVerificationActivation"></span>
+<div id = "divActivateAccount" class = "divMainPage">
+  <table>
+  <tr><td>User:</td><td> <span id = "spanUserIdInActivateAccountPage"></span></td></tr>
+  <tr><td>Current email:</td><td><span id = "spanCurrentActivationEmail"></span></td></tr>
+  <tr>
+  <td>New password:</td>
+  <td>
+    <input class = "textInputUsername" type = "password" id = "inputNewPasswordInActivationAccount" name = "password" placeholder = "password" autocomplete = "on">
+  </td>
+  </tr>
+  <tr>
+  <td>Re-enter:</td>
+  <td>
+    <input class = "textInputUsername" type = "password" id = "inputReenteredPasswordInActivationAccount" name = "password" placeholder = "password" autocomplete = "on">
+  </td>
+  </tr>
+  </table>
+  <button class = "buttonStandard" onclick = "submitActivateAccountRequest()">Change password</button>
+  <span id = "spanVerificationActivation"></span>
 </div>
 
 <div id = "divAccounts" class = "divMainPage">

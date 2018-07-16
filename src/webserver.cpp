@@ -1504,6 +1504,8 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theUser.flagEnteredActivationToken = true;
     theGlobalVariables.flagLogInAttempted = true;
   }
+  stOutput << "DEBUG: Entered activation token: " << theUser.enteredActivationToken
+  << ", username: " << theUser.username;
   //stOutput << "DEBUG: logging-in: " << theUser.ToStringUnsecure();
   if (theUser.username != "")
     theUser.enteredGoogleToken = "";
@@ -1536,7 +1538,8 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     if (theUser.username == "")
       doAttemptGoogleTokenLogin = true;
   } else if (theUser.username == "")
-  { return !theUser.flagMustLogin;
+  { stOutput << "DEBUG: no username specified";
+    return !theUser.flagMustLogin;
   }
   /////////////////
   //doAttemptGoogleTokenLogin = false;
@@ -1546,16 +1549,18 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   if (changingPass)
     theUser.enteredAuthenticationToken = "";
   if (doAttemptGoogleTokenLogin)
-  { //argumentProcessingFailureComments << "DEBUG: Attempting google token login ...";
+  { stOutput << "DEBUG: Attempting google token login ...";
     //std::stringstream comments
     theGlobalVariables.flagLoggedIn =
     DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded
     (theUser, &argumentProcessingFailureComments, 0);
   } else if (theUser.enteredAuthenticationToken != "" || theUser.enteredPassword != "" ||
              theUser.enteredActivationToken != "")
+  { stOutput << "DEBUG: About to login via database";
+
     theGlobalVariables.flagLoggedIn = DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (theUser, &argumentProcessingFailureComments);
-
+  }
   theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("username",
    HtmlRoutines::ConvertStringToURLString(theUser.username, false)
    //<-User name must be stored in URL-encoded fashion, NO PLUSES.

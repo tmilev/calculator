@@ -180,9 +180,9 @@ function Page() {
       container: null,
       selectFunction: updateAccountPage
     },
-    accountActivation: {
-      name: "accountActivation", //<-for autocomplete
-      id: "divAccountActivation",
+    activateAccount: {
+      name: "activateAccount", //<-for autocomplete
+      id: "divActivateAccount",
       container: null,
       selectFunction: updateAccountActivationPage
     },
@@ -213,10 +213,6 @@ function Page() {
         nameLocalStorage: "currentlyEditedPage"
       })
     },
-    activationToken: new StorageVariable({
-      name: "activationToken",
-      nameURL: "activationToken"
-    }),
     currentCourse: {
       courseHome: new StorageVariable({
         name: "courseHome",
@@ -253,7 +249,11 @@ function Page() {
       }),
     },
     user: {
-      googleToken: new StorageVariable({
+      activationToken: new StorageVariable({
+        name: "activationToken",
+        nameURL: "activationToken"
+      }),
+        googleToken: new StorageVariable({
         name: "googleToken"
       }),
       name: new StorageVariable({
@@ -317,7 +317,9 @@ function Page() {
   //////////////////////////////////////
   //////////////////////////////////////
   this.selectPage(this.storage.currentPage.getValue());
-  loginTry();
+  if (this.storage.currentPage.getValue() != this.pages.activateAccount.name) {
+    loginTry();
+  }
   this.setDebugSwitch();
   document.getElementById("divPage").style.display = "";
   document.getElementById("divPage").className = "divPage";

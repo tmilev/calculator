@@ -7,6 +7,7 @@ var idDOMElements = {
   labelNewEmail: "labelNewEmail",
   spanUserIdInActivateAccountPage: "spanUserIdInActivateAccountPage",
   spanCurrentActivationEmail: "spanCurrentActivationEmail",
+  spanVerificationActivation: "spanVerificationActivation",
   inputNewPasswordInActivationAccount: "inputNewPasswordInActivationAccount",
   inputReenteredPasswordInActivationAccount: "inputReenteredPasswordInActivationAccount"
 }

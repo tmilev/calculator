@@ -530,6 +530,7 @@ void UserCalculator::ComputeShaonedSaltedPassword()
 { MacroRegisterFunctionWithName("UserCalculator::ComputeShaonedSaltedPassword");
   this->usernamePlusPassWord = this->username;
   this->usernamePlusPassWord += this->enteredPassword;
+  //stOutput << "DEBUG: usernamePlusPassword: " << this->usernamePlusPassWord;
   this->enteredShaonedSaltedPassword = Crypto::computeSha1outputBase64(this->usernamePlusPassWord);
   //<-careful copying those around. We want to avoid leaving
   //passwords in non-zeroed memory, even if properly freed (to the extent possible and practical).
@@ -1412,17 +1413,17 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
-  stOutput << "DEBUG: before user wrapper authenticate";
+  //stOutput << "DEBUG: before user wrapper authenticate";
   if (userWrapper.Authenticate(comments))
   { theUseR = userWrapper;
     return true;
   }
-  stOutput << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
-  << ". Entered activation token: " << userWrapper.enteredActivationToken
-  << "user request: " << theGlobalVariables.userCalculatorRequestType;
-  stOutput << "DEBUG: entered pass: " << userWrapper.enteredPassword
-  << "shaone-ing to: " << userWrapper.enteredShaonedSaltedPassword
-  << ". Actual pass sha: " << userWrapper.actualShaonedSaltedPassword;
+  //stOutput << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
+  //<< ". Entered activation token: " << userWrapper.enteredActivationToken
+  //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
+  //stOutput << "DEBUG: entered pass: " << userWrapper.enteredPassword
+  //<< "shaone-ing to: " << userWrapper.enteredShaonedSaltedPassword
+  //<< ". Actual pass sha: " << userWrapper.actualShaonedSaltedPassword;
   //*comments << "DEBUG: entered pass: " << userWrapper.enteredPassword
   //<< "shaone-ing to: " << userWrapper.enteredShaonedSaltedPassword
   //<< ". Actual pass sha: " << userWrapper.actualShaonedSaltedPassword;
@@ -1434,12 +1435,12 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
     << " with token " << userWrapper.enteredAuthenticationToken << " failed. </b>";
   }
   if (userWrapper.enteredActivationToken != "" && comments != 0)
-  { *comments << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
-    << ". Entered activation token: " << userWrapper.enteredActivationToken
-    << "user request: " << theGlobalVariables.userCalculatorRequestType;
-    stOutput << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
-    << ". Entered activation token: " << userWrapper.enteredActivationToken
-    << "user request: " << theGlobalVariables.userCalculatorRequestType;
+  { //*comments << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
+    //<< ". Entered activation token: " << userWrapper.enteredActivationToken
+    //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
+    //stOutput << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
+    //<< ". Entered activation token: " << userWrapper.enteredActivationToken
+    //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
   }
   if (theGlobalVariables.userCalculatorRequestType == "changePassword" ||
       theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||

@@ -127,7 +127,7 @@ std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << "  storeSettingsProgress();\n"
   << "  theCalculatorForm= document.getElementById(\"mainInputID\");  \n"
   << "  if (theCalculatorForm!= null){\n"
-  << "    theOldWidth=getCookie(\"widthCalculatorText\");\n"
+  << "    theOldWidth =getCookie(\"widthCalculatorText\");\n"
   << "    theOldHeight =getCookie(\"heightCalculatorText\");\n"
   << "    theCalculatorForm.style.width  = theOldWidth;\n"
   << "    theCalculatorForm.style.height = theOldHeight;\n"
@@ -1504,8 +1504,8 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theUser.flagEnteredActivationToken = true;
     theGlobalVariables.flagLogInAttempted = true;
   }
-  stOutput << "DEBUG: Entered activation token: " << theUser.enteredActivationToken
-  << ", username: " << theUser.username;
+  //stOutput << "DEBUG: Entered activation token: " << theUser.enteredActivationToken
+  //<< ", username: " << theUser.username;
   //stOutput << "DEBUG: logging-in: " << theUser.ToStringUnsecure();
   if (theUser.username != "")
     theUser.enteredGoogleToken = "";
@@ -1538,7 +1538,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     if (theUser.username == "")
       doAttemptGoogleTokenLogin = true;
   } else if (theUser.username == "")
-  { stOutput << "DEBUG: no username specified";
+  { //stOutput << "DEBUG: no username specified";
     return !theUser.flagMustLogin;
   }
   /////////////////
@@ -1549,15 +1549,14 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   if (changingPass)
     theUser.enteredAuthenticationToken = "";
   if (doAttemptGoogleTokenLogin)
-  { stOutput << "DEBUG: Attempting google token login ...";
+  { //stOutput << "DEBUG: Attempting google token login ...";
     //std::stringstream comments
     theGlobalVariables.flagLoggedIn =
     DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded
     (theUser, &argumentProcessingFailureComments, 0);
   } else if (theUser.enteredAuthenticationToken != "" || theUser.enteredPassword != "" ||
              theUser.enteredActivationToken != "")
-  { stOutput << "DEBUG: About to login via database";
-
+  { //stOutput << "DEBUG: About to login via database";
     theGlobalVariables.flagLoggedIn = DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (theUser, &argumentProcessingFailureComments);
   }
@@ -2073,7 +2072,7 @@ void WebWorker::SanitizeVirtualFileName()
     if (isOK)
       resultName.push_back(this->VirtualFileName[i]);
     if (this->VirtualFileName[i] == '/')
-      foundslash= true;
+      foundslash = true;
   }
   this->VirtualFileName = "";
   for (int i = resultName.size() - 1; i >= 0; i --)

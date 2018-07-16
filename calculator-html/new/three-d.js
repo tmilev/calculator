@@ -200,7 +200,7 @@ function CurveThreeD(
   this.rightPt = inputRightPt;
   this.color = colorToRGB(inputColor);
   this.numSegments = inputNumSegments;
-  this.lineWidth= inputLineWidth;
+  this.lineWidth = inputLineWidth;
   this.accountBoundingBox = function(inputOutputBox) { 
     var theT = this.leftPt;
     var theX = this.coordinateFunctions[0](theT);
@@ -263,7 +263,7 @@ function Surface(inputxyzFun, inputUVBox, inputPatchDimensions, inputColors, inp
   this.uvBox = inputUVBox;
   this.patchDimensions = inputPatchDimensions;
   this.colors = inputColors;
-  this.contourWidth= inputContourWidth;
+  this.contourWidth = inputContourWidth;
   this.colors.colorUV= colorToHex(this.colors.colorUV);
   this.colors.colorVU= colorToHex(this.colors.colorVU);
   this.deltaU= (inputUVBox[1][0]-inputUVBox[0][0])/this.patchDimensions[0];
@@ -303,7 +303,7 @@ function Contour(inputPoints, inputColor, inputLineWidth)
   this.color = colorToRGB(inputColor);
   this.adjacentPatches =[];
   this.index = - 1;
-  this.lineWidth= inputLineWidth;
+  this.lineWidth = inputLineWidth;
 }
 
 function colorRGBToHex(r, g, b)
@@ -329,7 +329,7 @@ function colorScale(inputRGB, theScale)
 }
 
 function colorToRGB(input)
-{ if (input.length===3 && !(typeof input === 'string'))
+{ if (input.length ===3 && !(typeof input === 'string'))
     return input;
   var hex = colorToHex(input);
   return [parseInt(hex.slice(1,3), 16), parseInt(hex.slice(3,5), 16), parseInt(hex.slice(5,7), 16)];
@@ -362,7 +362,7 @@ function colorToHex(color)
   "yellow":"#ffff00","yellowgreen":"#9acd32"};
   if (typeof colors[color.toLowerCase()] != 'undefined')
     return colors[color.toLowerCase()];
-  if (color.length===3)
+  if (color.length ===3)
     return colorRGBToHex(color[0], color[1], color[2]);
   return color;
 }
@@ -420,7 +420,7 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
   this.rightPt = inputRightPt;
   this.color = colorToRGB(inputColor);
   this.numSegments = inputNumSegments;
-  this.lineWidth= inputLineWidth;
+  this.lineWidth = inputLineWidth;
   this.accountBoundingBox = function(inputOutputBox)
   { var theT= this.leftPt;
     var theX = this.coordinateFunctions[0](theT);
@@ -434,7 +434,7 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
       accountBoundingBox([theX, theY], inputOutputBox);
     }
   };
-  this.drawNoFinish= function(theCanvas, startByMoving)
+  this.drawNoFinish = function(theCanvas, startByMoving)
   { var theSurface = theCanvas.surface;
     theSurface.strokeStyle = colorRGBToString(this.color);
     theSurface.fillStyle  = colorRGBToString(this.color);
@@ -445,7 +445,7 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
     var alreadyMoved = false;
     if (startByMoving)
       alreadyMoved = true;
-    theSurface.lineWidth= this.lineWidth;
+    theSurface.lineWidth = this.lineWidth;
     var skippedValues = false;
     for (var i = 0; i < this.numSegments; i ++)
     { var theRatio = i/(this.numSegments- 1);
@@ -483,17 +483,17 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
 }
 
 function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth)
-{ this.path= inputPath;
+{ this.path = inputPath;
   this.color = colorToRGB(inputColor);
   this.colorFill = colorToRGB(inputFillColor);
   this.isFilled = false;
   this.type ="path";
-  this.lineWidth= inputLineWidth;
+  this.lineWidth = inputLineWidth;
   this.accountBoundingBox = function(inputOutputBox)
   { for (var i = 0; i < this.path.length; i ++)
       accountBoundingBox(this.path[i], inputOutputBox);
   };
-  this.drawNoFinish= function(theCanvas, startByMoving)
+  this.drawNoFinish = function(theCanvas, startByMoving)
   { if (inputPath.length<1)
       return;
     var theSurface = theCanvas.surface;
@@ -502,7 +502,7 @@ function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth)
       theSurface.moveTo(theCoords[0], theCoords[1]);
     else
       theSurface.lineTo(theCoords[0], theCoords[1]);
-    theSurface.lineWidth= this.lineWidth;
+    theSurface.lineWidth = this.lineWidth;
     for (var i =1; i < this.path.length; i ++)
     { theCoords = theCanvas.coordsMathToScreen(this.path[i]);
       theSurface.lineTo(theCoords[0], theCoords[1]);
@@ -531,16 +531,16 @@ function drawCoordinateAxesTwoD()
   { accountBoundingBox([0,1], inputOutputBox);
     accountBoundingBox([1,0], inputOutputBox);
   };
-  this.drawNoFinish= function(theCanvas, startByMoving)
+  this.drawNoFinish = function(theCanvas, startByMoving)
   { var lowLeft = theCanvas.coordsScreenToMathScreen([0, theCanvas.height]);
     var topRight = theCanvas.coordsScreenToMathScreen([theCanvas.width, 0]);
     var theSurface = theCanvas.surface;
     theSurface.strokeStyle = colorRGBToString([0, 0, 0]);
     theSurface.fillStyle = colorRGBToString([0, 0, 0] );
-    theSurface.lineWidth=1;
-    var left =lowLeft[0];
+    theSurface.lineWidth =1;
+    var left = lowLeft[0];
     var right = topRight[0];
-    var bottom=lowLeft[1];
+    var bottom= lowLeft[1];
     var top = topRight[1];
     theSurface.beginPath();
     var theCoords = theCanvas.coordsMathScreenToScreen([0, bottom]);
@@ -568,16 +568,16 @@ function AxesGrid()
   { var theSurface = theCanvas.surface;
     this.drawNoFinish(theCanvas, true);
   };
-  this.drawNoFinish= function(theCanvas, startByMoving)
+  this.drawNoFinish = function(theCanvas, startByMoving)
   { var lowLeft = theCanvas.coordsScreenToMathScreen([0, theCanvas.height]);
     var topRight = theCanvas.coordsScreenToMathScreen([theCanvas.width, 0]);
     var theSurface = theCanvas.surface;
     theSurface.strokeStyle = colorRGBToString([160, 160, 160]);
     theSurface.fillStyle = colorRGBToString([160, 160, 160] );
-    theSurface.lineWidth= 0.1;
-    var left =lowLeft[0];
+    theSurface.lineWidth = 0.1;
+    var left = lowLeft[0];
     var right = topRight[0];
-    var bottom=lowLeft[1];
+    var bottom= lowLeft[1];
     var top = topRight[1];
     var floorLeft =Math.floor(left);
     var ceilRight =Math.ceil(right);
@@ -628,10 +628,10 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
   this.leftPt = inputLeftPt;
   this.rightPt = inputRightPt;
   this.color = colorToRGB(inputColor);
-  if (inputLineWidth===undefined)
-    this.lineWidth=1;
+  if (inputLineWidth ===undefined)
+    this.lineWidth =1;
   else
-    this.lineWidth= inputLineWidth;
+    this.lineWidth = inputLineWidth;
   //console.log(this.color);
   this.type ="plotFunction";
   this.numSegments = inputNumSegments;
@@ -649,7 +649,7 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
       accountBoundingBox([theX, theY], inputOutputBox);
     }
   };
-  this.drawNoFinish= function(theCanvas, startByMoving)
+  this.drawNoFinish = function(theCanvas, startByMoving)
   { var theSurface = theCanvas.surface;
     theSurface.strokeStyle = colorRGBToString(this.color);
     theSurface.fillStyle = colorRGBToString(this.color);
@@ -668,7 +668,7 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
     var alreadyMoved = false;
     if (startByMoving)
       alreadyMoved = true;
-    theSurface.lineWidth= this.lineWidth;
+    theSurface.lineWidth = this.lineWidth;
     var skippedValues = false;
     for (var i = 0; i < this.numSegments; i ++)
     { var theRatio = i/(this.numSegments- 1);
@@ -712,7 +712,7 @@ function TextPlotTwoD(inputLocation, inputText, inputColor)
   this.accountBoundingBox = function(inputOutputBox)
   { accountBoundingBox(this.location, inputOutputBox);
   };
-  this.drawNoFinish= function(theCanvas)
+  this.drawNoFinish = function(theCanvas)
   { var theSurface = theCanvas.surface;
     theSurface.strokeStyle = colorRGBToString(this.color);
     theSurface.fillStyle = colorRGBToString(this.color);
@@ -740,7 +740,7 @@ function VectorFieldTwoD(
   this.numSegmentsXY = inputNumSegmentsXY;
   this.desiredLengthDirectionVectors = inputDesiredLengthDirectionVectors;
   this.color = colorToRGB(inputColor);
-  this.lineWidth= inputLineWidth;
+  this.lineWidth = inputLineWidth;
   this.accountBoundingBox = function(inputOutputBox)
   { accountBoundingBox(this.lowLeft, inputOutputBox);
     accountBoundingBox(this.highRight, inputOutputBox);
@@ -750,7 +750,7 @@ function VectorFieldTwoD(
     theSurface.beginPath();
     theSurface.strokeStyle = colorRGBToString(this.color);
     theSurface.fillStyle = colorRGBToString(this.color);
-    theSurface.lineWidth= this.lineWidth;
+    theSurface.lineWidth = this.lineWidth;
     for (var i = 0; i < this.numSegmentsXY[0]; i ++)
     { var theRatioX = i/(this.numSegmentsXY[0]- 1);
       var theX = this.lowLeft[0] *(1-theRatioX) +
@@ -785,15 +785,15 @@ function SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth)
   this.rightPt = inputRightPt;
   this.color = colorToRGB(inputColor);
   this.type ="segment";
-  this.lineWidth= inputLineWidth;
+  this.lineWidth = inputLineWidth;
   this.accountBoundingBox = function(inputOutputBox)
   { accountBoundingBox(this.leftPt , inputOutputBox);
     accountBoundingBox(this.rightPt, inputOutputBox);
   };
-  this.drawNoFinish= function (theCanvas, startByMoving)
+  this.drawNoFinish = function (theCanvas, startByMoving)
   { var theSurface = theCanvas.surface;
     var theCoords = theCanvas.coordsMathToScreen(this.leftPt);
-    theSurface.lineWidth= this.lineWidth;
+    theSurface.lineWidth = this.lineWidth;
     if (startByMoving)
       theSurface.moveTo(theCoords[0], theCoords[1]);
     else
@@ -852,10 +852,10 @@ function CanvasTwoD(inputCanvas)
   this.spanCriticalErrors = null;
   this.spanControls = null;
   this.numDrawnObjects = 0;
-  this.boundingBoxMath= [[-0.1,-0.1],[0.1,0.1]];
+  this.boundingBoxMath = [[-0.1,-0.1],[0.1,0.1]];
   this.leftMostPlotPoint ="none";
   this.rightMostPlotPoint ="none";
-  this.width= inputCanvas.width;
+  this.width = inputCanvas.width;
   this.height = inputCanvas.height;
   this.centerCanvasX = inputCanvas.width/2;
   this.centerCanvasY = inputCanvas.height/2;
@@ -874,7 +874,7 @@ function CanvasTwoD(inputCanvas)
   this.textPerformance = "";
   this.selectedElement = "";
   this.redrawStart = 0;
-  this.redrawFinish= 0;
+  this.redrawFinish = 0;
   this.redrawTime = 0;
   this.defaultNumSegmentsPerContour = 10;
   this.flagShowPerformance = true;
@@ -907,12 +907,12 @@ function CanvasTwoD(inputCanvas)
       inputColor, inputLineWidth);
     this.theObjects.push(newLine);
   };
-  this.drawPath= function (inputPath, inputColor, inputLineWidth)
-  { var newPath= new PathTwoD(inputPath, inputColor, inputColor, inputLineWidth);
+  this.drawPath = function (inputPath, inputColor, inputLineWidth)
+  { var newPath = new PathTwoD(inputPath, inputColor, inputColor, inputLineWidth);
     this.theObjects.push(newPath);
   };
   this.drawPathFilled = function (inputPath, inputContourColor, inputFillColor)
-  { var newPath= new PathTwoD(inputPath, inputContourColor, inputFillColor);
+  { var newPath = new PathTwoD(inputPath, inputContourColor, inputFillColor);
     newPath.isFilled = true;
     this.theObjects.push(newPath);
   };
@@ -941,11 +941,11 @@ function CanvasTwoD(inputCanvas)
   this.plotFillStart = function (inputColor)
   { this.theObjects.push(new PlotFillTwoD(this, inputColor));
   };
-  this.plotFillFinish= function ()
+  this.plotFillFinish = function ()
   { this.theObjects.push({type:"plotFillFinish"});
   };
   this.computeViewWindow = function()
-  { this.boundingBoxMath=[[-0.1,-0.1],[0.1,0.1]];
+  { this.boundingBoxMath =[[-0.1,-0.1],[0.1,0.1]];
     for (var i = 0; i < this.theObjects.length; i ++)
     { if (this.theObjects[i].accountBoundingBox ===undefined)
         continue;
@@ -960,12 +960,12 @@ function CanvasTwoD(inputCanvas)
     var leftLowScreen = this.coordsMathToScreen(leftLowPt);
     var rightUpScreen = this.coordsMathToScreen(rightUpPt);
     var desiredHeight =Math.abs(rightUpScreen[1]-leftLowScreen[1]);
-    var desiredWidth=Math.abs(rightUpScreen[0]-leftLowScreen[0]);
+    var desiredWidth =Math.abs(rightUpScreen[0]-leftLowScreen[0]);
     var candidateScaleHeight = this.scale* this.height/desiredHeight;
-    var candidateScaleWidth= this.scale* this.width/desiredWidth;
+    var candidateScaleWidth = this.scale* this.width/desiredWidth;
     this.scale =Math.min(candidateScaleHeight, candidateScaleWidth);
     //console.log("new scale: "+ this.scale);
-    var centerViewWindowMath= vectorPlusVector(leftLowPt,rightUpPt);
+    var centerViewWindowMath = vectorPlusVector(leftLowPt,rightUpPt);
     vectorTimesScalar(centerViewWindowMath,0.5);
     var centerViewWindowScreen = this.coordsMathToScreen(centerViewWindowMath);
     this.centerX+= this.centerCanvasX-centerViewWindowScreen[0];
@@ -987,7 +987,7 @@ function CanvasTwoD(inputCanvas)
   };
   this.computeBasis = function ()
   { //if (this.screenBasisOrthonormal.length<2)
-    //  this.screenBasisOrthonormal.length=2;
+    //  this.screenBasisOrthonormal.length =2;
     this.screenBasisOrthonormal[0] =[1,0];
     this.screenBasisOrthonormal[1] =[0,1];
     this.textProjectionInfo ="";
@@ -1017,7 +1017,7 @@ function CanvasTwoD(inputCanvas)
   { var thisString="document.getElementById('"+this.canvasId+"')";
     this.spanControls.innerHTML="<button style =\"border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer\" onclick=\"calculatorGetCanvasTwoD("+thisString+ ").resetView();\">reset view</button> ";
   };
-  this.coordsMathScreenToMath= function(theCoords)
+  this.coordsMathScreenToMath = function(theCoords)
   { var output = this.screenBasisOrthonormal[0].slice();
     vectorTimesScalar(output, theCoords[0]);
     vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], theCoords[1]);
@@ -1066,7 +1066,7 @@ function CanvasTwoD(inputCanvas)
     this.mousePosition = this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
     if (this.selectedElement === "origin")
       this.panAfterCursor();
-    this.redrawFinish= new Date().getTime();
+    this.redrawFinish = new Date().getTime();
     this.redrawTime = this.redrawFinish-this.redrawStart;
   };
   this.panAfterCursor = function()
@@ -1152,10 +1152,10 @@ function Canvas(inputCanvas)
   this.bufferDeltaY = 0;
   this.colorDepthFactor = 0.4;
   this.boundingBoxMathScreen = [[-0.01, -0.01], [0.01, 0.01]];
-  this.boundingBoxMath= [[-0.01,-0.01,-0.01],[0.01,0.01,0.01]];
+  this.boundingBoxMath = [[-0.01,-0.01,-0.01],[0.01,0.01,0.01]];
   this.boundingSegmentZ= [-0.01,0.01];
   this.lastCenterScreen =[0,0];
-  this.width= inputCanvas.width;
+  this.width = inputCanvas.width;
   this.height = inputCanvas.height;
   this.defaultCenterX = this.width/2;
   this.defaultCenterY = this.height/2;
@@ -1185,7 +1185,7 @@ function Canvas(inputCanvas)
   this.selectedScreenNormal = [];
   this.selectedPolarAngleChange = 0;
   this.redrawStart = 0;
-  this.redrawFinish= 0;
+  this.redrawFinish = 0;
   this.redrawTime = 0;
   this.defaultNumSegmentsPerContour = 10;
   this.flagRoundContours = false;
@@ -1214,7 +1214,7 @@ function Canvas(inputCanvas)
     for (var i = 0; i <numUsegments; i ++)
     { //incomingPatches[i] = new Array(numVsegments);
       for (var j = 0; j<numVsegments; j ++)
-      { //var incomingPatch= incomingPatches[i][j];
+      { //var incomingPatch = incomingPatches[i][j];
         var currentU= theSurface.uvBox[0][0] + i*deltaU;
         var currentV= theSurface.uvBox[0][1] +j*deltaV;
         var base = theSurface.xyzFun(currentU, currentV);
@@ -1276,7 +1276,7 @@ function Canvas(inputCanvas)
   this.drawPatchStraight = function(base, edge1, edge2, color)
   { this.theIIIdObjects.thePatches.push(new Patch(base, edge1, edge2, color));
     var patchIndex = this.theIIIdObjects.thePatches.length- 1;
-    var thePatch= this.theIIIdObjects.thePatches[patchIndex];
+    var thePatch = this.theIIIdObjects.thePatches[patchIndex];
     thePatch.index = patchIndex;
     var theContours = this.theIIIdObjects.theContours;
     thePatch.adjacentContours.push(this.drawLine(thePatch.base, thePatch.v1));
@@ -1310,7 +1310,7 @@ function Canvas(inputCanvas)
     newContour.thePoints = new Array(numSegments);
     var incrementScalar =1/numSegments;
     vectorTimesScalar(incrementVector, incrementScalar);
-    var currentPoint =leftPt.slice();
+    var currentPoint = leftPt.slice();
     for (var i = 0; i <numSegments+ 1; i ++)
     { newContour.thePoints[i] = currentPoint;
       currentPoint =vectorPlusVector(currentPoint, incrementVector);
@@ -1332,7 +1332,7 @@ function Canvas(inputCanvas)
     for (var i = 0; i < theContour.thePoints.length; i ++)
       theContour.thePointsMathScreen[i] = this.coordsMathToMathScreen(theContour.thePoints[i]);
   };
-  this.pointRelativeToPatch= function(thePoint, thePatch)
+  this.pointRelativeToPatch = function(thePoint, thePatch)
   { if (vectorLength(thePatch.normalScreen1)<0.00001 ||
         vectorLength(thePatch.normalScreen2)<0.00001 ||
         vectorLength(thePatch.normal)<0.00001)
@@ -1359,10 +1359,10 @@ function Canvas(inputCanvas)
           }
     return 0;
   };
-  this.pointIsBehindPatch= function(thePoint, thePatch)
+  this.pointIsBehindPatch = function(thePoint, thePatch)
   { return this.pointRelativeToPatch(thePoint, thePatch) === - 1;
   };
-  this.pointIsInFrontOfPatch= function(thePoint, thePatch)
+  this.pointIsInFrontOfPatch = function(thePoint, thePatch)
   { return this.pointRelativeToPatch(thePoint, thePatch) ===1;
   };
   this.pointIsInForeGround = function(thePoint, containerPatches)
@@ -1378,14 +1378,14 @@ function Canvas(inputCanvas)
   this.paintMouseInfo = function()
   { if (this.selectedElement !== "default" || this.selectedElement ===undefined || this.selectedVector ===[] || this.selectedVector ===undefined)
       return;
-    if (this.selectedVector.length=== 0 || this.selectedVector.length===undefined)
+    if (this.selectedVector.length === 0 || this.selectedVector.length ===undefined)
       return;
 //    if (true)
 //      return;
     var currentPt;
     this.surface.beginPath();
     this.surface.setLineDash([4,4]);
-    this.surface.lineWidth=2;
+    this.surface.lineWidth =2;
     this.surface.strokeStyle ="green";
     currentPt = this.coordsMathToSelectedScreen(this.selectedVector);
     this.surface.moveTo(currentPt[0], currentPt[1]);
@@ -1394,7 +1394,7 @@ function Canvas(inputCanvas)
     this.surface.stroke();
     this.surface.beginPath();
     this.surface.setLineDash([]);
-    this.surface.lineWidth=2;
+    this.surface.lineWidth =2;
     this.surface.strokeStyle ="green";
     currentPt = this.coordsMathToScreen(this.selectedVector);
     this.surface.moveTo(currentPt[0], currentPt[1]);
@@ -1420,9 +1420,9 @@ function Canvas(inputCanvas)
 //    theSurface.setLineDash([]);
     theSurface.strokeStyle = colorRGBToString(theContour.color);
     if (theContour.lineWidth!==undefined)
-      theSurface.lineWidth= theContour.lineWidth;
+      theSurface.lineWidth = theContour.lineWidth;
     else
-      theSurface.lineWidth=1;
+      theSurface.lineWidth =1;
     theSurface.moveTo(currentPt[0], currentPt[1]);
     this.numContourPoints+= thePts.length;
     for (var i =1; i < thePts.length; i ++)
@@ -1468,7 +1468,7 @@ function Canvas(inputCanvas)
     }
     //console.log("line end\n");
   };
-  this.paintOnePatch= function(thePatch)
+  this.paintOnePatch = function(thePatch)
   { var theSurface = this.surface;
     var visibilityScalarProd =vectorScalarVector(this.screenNormal, thePatch.normal);
     var depthScalarProd =vectorScalarVector(this.screenNormal, thePatch.internalPoint);
@@ -1531,7 +1531,7 @@ function Canvas(inputCanvas)
     theSurface.strokeStyle = theText.color;
     var theCoords = this.coordsMathToScreen(theText.location);
     theSurface.font ="15pt sans-serif";
-    theSurface.lineWidth=1;
+    theSurface.lineWidth =1;
     if (isInForeGround)
     { theSurface.fillStyle = theText.color;
       theSurface.fillText(theText.text, theCoords[0], theCoords[1]);
@@ -1639,8 +1639,8 @@ function Canvas(inputCanvas)
       this.accountOnePointMathCoordsInBufferStrip(i- 1, currentPoint, patchIndex);
     }
   };
-  this.accountOnePatch= function(patchIndex)
-  { var thePatch= this.theIIIdObjects.thePatches[patchIndex];
+  this.accountOnePatch = function(patchIndex)
+  { var thePatch = this.theIIIdObjects.thePatches[patchIndex];
     var pt1= this.coordsMathToMathScreen(thePatch.base);
     var pt2= this.coordsMathToMathScreen(thePatch.v1);
     var pt3= this.coordsMathToMathScreen(thePatch.v2);
@@ -1648,8 +1648,8 @@ function Canvas(inputCanvas)
     var lowFloat = this.getExtremePoint(1, 0, pt1, pt2, pt3, pt4);
     var highFloat = this.getExtremePoint(1, 1, pt1, pt2, pt3, pt4);
     var low = this.coordsMathScreenToBufferIndicesROWS(lowFloat);
-    var high= this.coordsMathScreenToBufferIndicesROWS(highFloat);
-    for (var i =low; i <=high; i ++)
+    var high = this.coordsMathScreenToBufferIndicesROWS(highFloat);
+    for (var i = low; i <=high; i ++)
     { this.zBufferIndexStrip[i][0] = - 1;
       this.zBufferIndexStrip[i][1] = - 1;
     }
@@ -1657,7 +1657,7 @@ function Canvas(inputCanvas)
     this.accountEdgeInBufferStrip(thePatch.base, thePatch.edge2, patchIndex);
     this.accountEdgeInBufferStrip(thePatch.v1, thePatch.edge2,   patchIndex);
     this.accountEdgeInBufferStrip(thePatch.v2, thePatch.edge1,   patchIndex);
-    for (var i =low; i <=high; i ++)
+    for (var i = low; i <=high; i ++)
       for (var j = this.zBufferIndexStrip[i][0]; j<= this.zBufferIndexStrip[i][1]; j ++)
       { if (i === - 1 || j === - 1)
           continue;
@@ -1704,7 +1704,7 @@ function Canvas(inputCanvas)
   { var thePatches = this.theIIIdObjects.thePatches;
     for (var i = 0; i < this.zBuffer.length; i ++)
       for (var j = 0; j < this.zBuffer[i].length; j ++)
-        this.zBuffer[i][j].length= 0;
+        this.zBuffer[i][j].length = 0;
     this.computeBoundingBox();
     this.bufferDeltaX = (this.boundingBoxMathScreen[1][0]-this.boundingBoxMathScreen[0][0])/this.zBufferColCount;
     this.bufferDeltaY = (this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1])/this.zBufferRowCount;
@@ -1724,7 +1724,7 @@ function Canvas(inputCanvas)
       if (thePatch.patchesAboveMe.indexOf(currentBuffer[i])>= 0 ||
           thePatch.patchesBelowMe.indexOf(currentBuffer[i])>= 0)
         continue;
-      var otherPatch= thePatches[currentBuffer[i]];
+      var otherPatch = thePatches[currentBuffer[i]];
       var relativePosition = this.pointRelativeToPatch(thePoint, otherPatch);
       if (relativePosition === - 1)
       { otherPatch.patchesBelowMe.push(thePatch.index);
@@ -1735,7 +1735,7 @@ function Canvas(inputCanvas)
       }
     }
   };
-  this.computePatchPartialOrderOnePatch= function(thePatch)
+  this.computePatchPartialOrderOnePatch = function(thePatch)
   { var theContours = this.theIIIdObjects.theContours;
     for (var i = 0; i < thePatch.adjacentContours.length; i ++)
       for (var j = 0; j < theContours[thePatch.adjacentContours[i]].thePoints.length; j ++)
@@ -1763,7 +1763,7 @@ function Canvas(inputCanvas)
     }
     this.numAccountedPatches = 0;
     for (i = 0; i < thePatches.length; i ++)
-      if (thePatches[i].patchesBelowMe.length=== 0)
+      if (thePatches[i].patchesBelowMe.length === 0)
       { this.thePatchOrder[this.numAccountedPatches] = i;
         this.numAccountedPatches++;
         this.patchIsAccounted[i] =1;
@@ -1772,12 +1772,12 @@ function Canvas(inputCanvas)
     while (this.numAccountedPatches<thePatches.length)
     { var currentIndex = 0;
       while (currentIndex<this.numAccountedPatches)
-      { var currentPatch= thePatches[this.thePatchOrder[currentIndex]];
+      { var currentPatch = thePatches[this.thePatchOrder[currentIndex]];
         for (i = 0; i <currentPatch.patchesAboveMe.length; i ++)
         { var nextIndex = currentPatch.patchesAboveMe[i];
           if (this.patchIsAccounted[nextIndex] ===1)
             continue;
-          var nextPatch= thePatches[nextIndex];
+          var nextPatch = thePatches[nextIndex];
           var isGood =1;
           for (var j = 0; j<nextPatch.patchesBelowMe.length; j ++)
             if (this.patchIsAccounted[nextPatch.patchesBelowMe[j]] !==1)
@@ -1802,17 +1802,17 @@ function Canvas(inputCanvas)
     //has the highest (screen) depth.
     var thePatches = this.theIIIdObjects.thePatches;
     var deepestNonAccountedIndex = - 1;
-    var minDepth= 0;
+    var minDepth = 0;
     for (var i = 0; i < this.patchIsAccounted.length; i ++)
     { if (this.patchIsAccounted[i] ===1)
         continue;
       if (deepestNonAccountedIndex === - 1)
       { deepestNonAccountedIndex = i;
-        minDepth=vectorScalarVector(this.screenNormal, thePatches[i].internalPoint);
+        minDepth =vectorScalarVector(this.screenNormal, thePatches[i].internalPoint);
       }
-      var currentDepth=vectorScalarVector(this.screenNormal, thePatches[i].internalPoint);
+      var currentDepth =vectorScalarVector(this.screenNormal, thePatches[i].internalPoint);
       if (currentDepth<minDepth)
-      { minDepth= currentDepth;
+      { minDepth = currentDepth;
         deepestNonAccountedIndex = i;
       }
     }
@@ -1932,7 +1932,7 @@ function Canvas(inputCanvas)
   };
   this.computeBasis = function ()
   { //if (this.screenBasisOrthonormal.length<2)
-    //  this.screenBasisOrthonormal.length=2;
+    //  this.screenBasisOrthonormal.length =2;
     this.screenBasisOrthonormal[0] = this.screenBasisUser[0].slice();
     this.screenBasisOrthonormal[1] = this.screenBasisUser[1].slice();
     var e1= this.screenBasisOrthonormal[0];
@@ -1957,9 +1957,9 @@ function Canvas(inputCanvas)
     var leftLowScreen = this.coordsMathScreenToScreen(this.boundingBoxMathScreen[0]);
     var rightUpScreen = this.coordsMathScreenToScreen(this.boundingBoxMathScreen[1]);
     var desiredHeight =Math.abs(rightUpScreen[1]-leftLowScreen[1]) *1.05;
-    var desiredWidth=Math.abs(rightUpScreen[0]-leftLowScreen[0]) *1.05;
+    var desiredWidth =Math.abs(rightUpScreen[0]-leftLowScreen[0]) *1.05;
     var candidateScaleHeight = this.scale* this.height/desiredHeight;
-    var candidateScaleWidth= this.scale* this.width/desiredWidth;
+    var candidateScaleWidth = this.scale* this.width/desiredWidth;
     //console.log("leftLowScreen: "+ leftLowScreen +" rightUpScreen: "+rightUpScreen);
     //console.log(centerScreen);
     //console.log("desiredHeight: "+desiredHeight);
@@ -1968,7 +1968,7 @@ function Canvas(inputCanvas)
     //console.log("old scale: "+ this.scale);
     this.scale =Math.min(candidateScaleHeight, candidateScaleWidth);
     //console.log("new scale: "+ this.scale);
-    var newViewWindowCenterMath= vectorPlusVector(
+    var newViewWindowCenterMath = vectorPlusVector(
       this.boundingBoxMathScreen[0],this.boundingBoxMathScreen[1]);
     vectorTimesScalar(newViewWindowCenterMath,0.5);
     var newCenterViewWindowScreenRescaled =
@@ -1990,7 +1990,7 @@ function Canvas(inputCanvas)
   };
   this.resetViewNoRedraw = function()
   { this.boundingBoxMathScreen = [[-0.01, -0.01], [0.01, 0.01]];
-    this.boundingBoxMath= [[-0.01,-0.01,-0.01],[0.01,0.01,0.01]];
+    this.boundingBoxMath = [[-0.01,-0.01,-0.01],[0.01,0.01,0.01]];
     this.boundingSegmentZ= [-0.01,0.01];
     this.screenBasisUser = this.screenBasisUserDefault.slice();
     this.centerX = this.defaultCenterX;
@@ -2018,10 +2018,10 @@ function Canvas(inputCanvas)
     this.theIIIdObjects.theLabels = [];
     this.constructControls();
     this.computeBasis();
-    if (this.zBuffer.length=== 0)
+    if (this.zBuffer.length === 0)
       this.allocateZbuffer();
   };
-  this.coordsMathScreenToMath= function(theCoords)
+  this.coordsMathScreenToMath = function(theCoords)
   { var output = this.screenBasisOrthonormal[0].slice();
     vectorTimesScalar(output, theCoords[0]);
     vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], theCoords[1]);
@@ -2079,7 +2079,7 @@ function Canvas(inputCanvas)
   this.rotateAfterCursorDefaultGreatNormalCircle = function(doRotateRadially)
   //please use only with doRotateRadially = false
   //the option creates confusing user interface, needs to be fixed/reworked
-  { if (this.mousePosition.length== 0)
+  { if (this.mousePosition.length == 0)
       return;
     if (doRotateRadially)
     {/* this.selectedPolarAngleChange = -getAngleChangeMathScreen(newX, newY, oldX, oldY);
@@ -2123,7 +2123,7 @@ function Canvas(inputCanvas)
     this.redraw();
   };
   this.rotateAfterCursorDefaultCartesian = function()
-  { if (this.mousePosition.length=== 0)
+  { if (this.mousePosition.length === 0)
       return;
     this.positionDelta =[this.mousePosition[0]-this.clickedPosition[0], this.mousePosition[1]-this.clickedPosition[1]];
     var xyThreshhold =5;
@@ -2139,7 +2139,7 @@ function Canvas(inputCanvas)
     this.redraw();
   };
   this.rotateAfterCursorDefault = function()
-  { if (this.mousePosition.length=== 0)
+  { if (this.mousePosition.length === 0)
       return;
     this.rotateAfterCursorDefaultGreatNormalCircle(false);
   };
@@ -2168,7 +2168,7 @@ function Canvas(inputCanvas)
     if (this.selectedElement === "origin")
     { this.panAfterCursor();
     }
-    this.redrawFinish= new Date().getTime();
+    this.redrawFinish = new Date().getTime();
     this.redrawTime = this.redrawFinish-this.redrawStart;
   };
   this.panAfterCursor = function()

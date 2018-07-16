@@ -1123,7 +1123,7 @@ bool JSONWebToken::VerifyRSA256
   { std::string RSAresultTrimmedHex, theShaHex, RSAresultHex, RSAresultBase64;
     LargeIntUnsigned theShaUI;
     Crypto::ConvertListUintToLargeUInt(outputSha, theShaUI);
-    RSAresultBase64=Crypto::ConvertStringToBase64(RSAresultBitstream);
+    RSAresultBase64= Crypto::ConvertStringToBase64(RSAresultBitstream);
     Crypto::ConvertStringToHex(RSAresultBitstream, RSAresultHex);
     Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex);
     Crypto::ConvertLargeUnsignedIntToHex(theShaUI, theShaHex);

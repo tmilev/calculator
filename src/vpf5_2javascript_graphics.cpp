@@ -126,7 +126,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
 //  << "/* or border-collapse:collapse */\n}\n</style>\n";
   if (!this->flagPlotShowJavascriptOnly)
   { out << "<table> "
-    << "<tr><td> <canvas width=\"" << this->DefaultHtmlWidth << "\" height =\""
+    << "<tr><td> <canvas width =\"" << this->DefaultHtmlWidth << "\" height =\""
     << this->DefaultHtmlHeight << "\" style =\"border:solid 1px\" id =\"" << theCanvasId
     << "\" onmousedown =\"clickCanvasCone" << timesCalled
     << "(event.clientX, event.clientY);\" onmouseup =\"selectedBasisIndexCone" << timesCalled
@@ -520,7 +520,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         out << theSurfaceName << ".strokeStyle =\""
         << this->GetColorHtmlFromColorIndex(this->theBuffer.theDrawLineBetweenTwoRootsOperations[currentIndex].ColorIndex)
         << "\"; ";
-        out << theSurfaceName << ".lineWidth="
+        out << theSurfaceName << ".lineWidth ="
         << FloatingPoint::DoubleToString
         (this->theBuffer.theDrawLineBetweenTwoRootsOperations[currentIndex].lineWidth)
         << "; ";
@@ -542,7 +542,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         out << theSurfaceName << ".fillStyle =\""
         << this->GetColorHtmlFromColorIndex(this->theBuffer.theShapes[currentIndex].ColorFillIndex)
         << "\";\n";
-        out << theSurfaceName << ".lineWidth="
+        out << theSurfaceName << ".lineWidth ="
         << FloatingPoint::DoubleToString(this->theBuffer.theShapes[currentIndex].lineWidth)
         << ";\n ";
         out << theSurfaceName << ".moveTo("
@@ -723,7 +723,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "{ if (newX == 0 && newY == 0)\n"
   << "    return;\n"
   << "  var selectedRoot =" << basisCircles << "[selectedIndex];\n"
-  << "  var selectedRootLength=getScalarProduct" << timesCalled << "(selectedRoot,selectedRoot);\n"
+  << "  var selectedRootLength =getScalarProduct" << timesCalled << "(selectedRoot,selectedRoot);\n"
   << "  var projectionSelected =" << projBasisCircles << "[selectedIndex];\n"
   << "  var oldX = projectionSelected[0]/GraphicsUnitCone" << timesCalled << ";\n"
   << "  var oldY = -projectionSelected[1]/GraphicsUnitCone" << timesCalled << ";\n"
@@ -793,7 +793,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "    }\n"
   << "  if (needRedraw)\n"
   << "  { labelString+=\"</tr></table>\";"
-  << "    document.getElementById(\"canvas" << timesCalled << "Notes\").innerHTML=labelString;\n"
+  << "    document.getElementById(\"canvas" << timesCalled << "Notes\").innerHTML= labelString;\n"
   << "    " << theDrawFunctionName << "();\n"
   //<< "    jsMath.Process(document.getElementById(\"canvas" << timesCalled << "Notes\"));\n"
   << "  }\n"
@@ -947,7 +947,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   tempStream9 << "convXY" << timesCalled;
   std::string functionConvertToXYName = tempStream9.str();
 
-  out << "<canvas width=\"" << boss->DefaultHtmlWidth << "\" height =\"" << boss->DefaultHtmlHeight << "\" border =\"solid 1px\" id =\"" << theCanvasId
+  out << "<canvas width =\"" << boss->DefaultHtmlWidth << "\" height =\"" << boss->DefaultHtmlHeight << "\" border =\"solid 1px\" id =\"" << theCanvasId
   << "\" onmousedown =\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup =\"selectedBasisIndexCone" << timesCalled
   << "= - 1;\" onmousemove =\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
   << "onmousewheel =\"mouseHandleWheelCone" << timesCalled << "(event);\"" << "></canvas>";
@@ -1381,7 +1381,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << "{ if (newX == 0 && newY == 0)\n"
   << "    return;\n"
   << "  var selectedRoot =" << basisCircles << "[selectedIndex];\n"
-  << "  var selectedRootLength=getScalarProduct" << timesCalled << "(selectedRoot,selectedRoot);\n"
+  << "  var selectedRootLength =getScalarProduct" << timesCalled << "(selectedRoot,selectedRoot);\n"
   << "  var projectionSelected =" << projBasisCircles << "[selectedIndex];\n"
   << "  var oldX = projectionSelected[0]/GraphicsUnitCone" << timesCalled << ";\n"
   << "  var oldY = -projectionSelected[1]/GraphicsUnitCone" << timesCalled << ";\n"

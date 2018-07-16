@@ -98,7 +98,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF
   inputOutputH.SubstitutionCoefficients(theSolutionSub);
   inputOutputE.SubstitutionCoefficients(theSolutionSub);
   if (logStream != 0)
-    *logStream << "<br>H= " << inputOutputH.ToString() << "<br>E=" << inputOutputE.ToString() << "<br>F=" << inputOutputF.ToString();
+    *logStream << "<br>H = " << inputOutputH.ToString() << "<br>E=" << inputOutputE.ToString() << "<br>F=" << inputOutputF.ToString();
   return true;
 }
 
@@ -1401,7 +1401,7 @@ bool CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed()
   this->CheckFullInitializatioN();
   if (this->GetRank() !=1)
     return false;
-  Vector<Rational> theH= this->theHsScaledToActByTwo[0];
+  Vector<Rational> theH = this->theHsScaledToActByTwo[0];
   int indexSl2= - 1;
   bool mustBeTrue =  this->owner->theSl2s.ContainsSl2WithGivenH(theH, &indexSl2);
   if (!mustBeTrue)
@@ -1486,7 +1486,7 @@ bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
   if (typeIndex>= this->currentPossibleLargerDynkinTypes[stackIndex].size)
     return false;
   DynkinType& currentType = this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
-  Rational candidatePrincipalLength= currentType.GetPrincipalSlTwoCSInverseScale()*2;
+  Rational candidatePrincipalLength = currentType.GetPrincipalSlTwoCSInverseScale()*2;
 //  stOutput << "<br>Candidate principal length is: " << candidatePrincipalLength.ToString()
 //  << ". <br>Its h element lengths are: " << this->theOrbitHelementLengths.ToString();
   if (!this->theOrbitHelementLengths.Contains(candidatePrincipalLength))
@@ -2211,7 +2211,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
         Vector<Rational> posRoot1, posRoot2;
         posRoot1.MakeEi(this->theWeylNonEmbedded->GetDim(), i);
         posRoot2.MakeEi(this->theWeylNonEmbedded->GetDim(), j);
-        int alphaStringLength= - 1;
+        int alphaStringLength = - 1;
         if (!nonEmbeddedMe.GetMaxQForWhichBetaMinusQAlphaIsARoot(posRoot1, -posRoot2, alphaStringLength))
           crash << "This is a programming error: the alpha-string along " << posRoot1.ToString()
           << " through " << (-posRoot2).ToString()
@@ -3171,7 +3171,7 @@ std::string CandidateSSSubalgebra::ToStringNilradicalSelection(const List<int>& 
 bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications(List<int>& theSelection, std::stringstream* logStream)
 { if (this->FKNilradicalCandidates.size >100)
   { if (logStream!= 0)
-    { std::string tempS=logStream->str();
+    { std::string tempS= logStream->str();
       if (tempS.size()>2)
         if (tempS[tempS.size()- 1] !='.' || tempS[tempS.size()-2] !='.')
           *logStream << "<br>... number of nilradicals found exceeds 100, I will no longer log the computations ...";
@@ -3289,7 +3289,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnly()
 }
 
 bool CandidateSSSubalgebra::CompareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right)
-{ Vector<Rational> leftSSpart =left;
+{ Vector<Rational> leftSSpart = left;
   Vector<Rational> rightSSpart =right;
   leftSSpart.SetSize(this->theHs.size);
   rightSSpart.SetSize(this->theHs.size);
@@ -3297,7 +3297,7 @@ bool CandidateSSSubalgebra::CompareLeftGreaterThanRight(const Vector<Rational>& 
     return true;
   if (rightSSpart>leftSSpart)
     return false;
-  Vector<Rational> leftCpart =left;
+  Vector<Rational> leftCpart = left;
   Vector<Rational> rightCpart =right;
   leftCpart.ShiftToTheLeft(this->theHs.size);
   rightCpart.ShiftToTheLeft(this->theHs.size);
@@ -3824,14 +3824,14 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat) const
   out << "<a name =\"sl2index" << indexInContainer << "\">h-characteristic: " << this->hCharacteristic.ToString() << "</a>";
   out << "<br>Length of the weight dual to h: " << this->LengthHsquared;
   tempS = this->preferredAmbientSimpleBasis.ToString();
-  std::string physicalPath="";
+  std::string physicalPath ="";
   std::string htmlPathServer ="";
   //bool usePNG = false;
   bool useHtml = true;
   bool useLatex = false;
-  physicalPath= this->owner->VirtualNameSSAlgOutputFolder+ "sl2s/";
+  physicalPath = this->owner->VirtualNameSSAlgOutputFolder+ "sl2s/";
   htmlPathServer = this->owner->DisplayNameSSalgOutputFolder+ "sl2s/";
-  if (physicalPath== "" || htmlPathServer == "")
+  if (physicalPath == "" || htmlPathServer == "")
   { //usePNG = false;
     useHtml = false;
   }
@@ -3873,7 +3873,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat) const
     out << "\n<br>\n";
   std::stringstream tempStreamH, tempStreamE, tempStreamF, tempStreamHE, tempStreamHF, tempStreamEF;
   tempS = this->theH.ToString(theFormat);
-  tempStreamH << "\nh= " << tempS << "";
+  tempStreamH << "\nh = " << tempS << "";
   out << HtmlRoutines::GetMathMouseHover(tempStreamH.str()) << "\n<br>\n";
   tempStreamE << "\ne = " << this->theE.ToString(theFormat) << "\n<br>\n";
   out << HtmlRoutines::GetMathMouseHover(tempStreamE.str()) << "\n<br>\n";
@@ -4132,7 +4132,7 @@ bool SltwoSubalgebras::ContainsSl2WithGivenH(Vector<Rational>& theH, int* output
   this->CheckForCorrectInitializationCrashIfNot();
   tempH.MakeHgenerator(theH, *this->owner);
   for (int i = 0; i < this->size; i ++)
-    if (this->TheObjects[i].theH== tempH)
+    if (this->TheObjects[i].theH == tempH)
     { if (outputIndex != 0)
         *outputIndex = i;
       return true;
@@ -4343,8 +4343,8 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat)
   *with respect to another basis* (namely, with respect to an h-positive simple basis). I will fix this in the future (email me if you want that done sooner).";
   bool useHtml = theFormat == 0 ? true : theFormat->flagUseHTML;
   std::string physicalPath, displayPath;
-  physicalPath= this->owner->VirtualNameSSAlgOutputFolder;
-  displayPath= this->owner->DisplayNameSSalgOutputFolder;
+  physicalPath = this->owner->VirtualNameSSAlgOutputFolder;
+  displayPath = this->owner->DisplayNameSSalgOutputFolder;
   out << "Number of sl(2) subalgebras: " << this->size << ".\n";
   std::stringstream out2;
   out2 << "<br>Length longest root ambient algebra squared/4= "
@@ -4442,7 +4442,7 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat)
       out << "</td></tr>\n";
   }
   if (useHtml)
-    out << "</table><HR width=\"100%\">";
+    out << "</table><HR width =\"100%\">";
   out << out2.str() << "<hr>";
   return out.str();
 }
@@ -4459,7 +4459,7 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
       body << "<br>";
     body << tempS;
     if (useHtml)
-      body << "<HR width=\"100%\">";
+      body << "<HR width =\"100%\">";
   }
   if (useHtml)
     out << "<br>";

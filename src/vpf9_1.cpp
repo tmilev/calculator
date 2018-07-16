@@ -1437,7 +1437,7 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(Vector<Rational>& pa
   if (this->computationPhase > 8)
   { //theGlobalVariables.theIndicatorVariables.StatusString1= this->PrepareReport();
   }
-//  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh= true;
+//  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh = true;
 //  theGlobalVariables.MakeReport();
   if (this->UpperLimitChambersForDebugPurposes <= 0)
     if (this->computationPhase < 30)
@@ -1757,7 +1757,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
   this->log << "\nPreimage Weyl chamber larger algebra: " << this->PreimageWeylChamberLargerAlgebra.ToString(&theFormat) << "\n";
 
-  //theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh= true;
+  //theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh = true;
   //theGlobalVariables.theIndicatorVariables.StatusString1= this->log.str();
   //theGlobalVariables.MakeReport();
 }

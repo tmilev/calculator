@@ -1586,7 +1586,7 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
   (void) input;
   List<std::string> cppFilesNoExtension;
   for (int i = 0; i < theGlobalVariables.theSourceCodeFiles().size; i ++)
-  { std::string theFileNameWithPath= theGlobalVariables.theSourceCodeFiles()[i].FileName;
+  { std::string theFileNameWithPath = theGlobalVariables.theSourceCodeFiles()[i].FileName;
     if (theFileNameWithPath[theFileNameWithPath.size() - 1] == 'h')
       continue;
     theFileNameWithPath.resize(theFileNameWithPath.size() - 4);
@@ -5082,20 +5082,20 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
     { //bool includePsLine = false;
       bool useNegativePattern = (fValuesLower[i] > fValuesUpper[i]);
       if (k == 0 && useNegativePattern)
-      { outTex << "\\psline*[linecolor =\\fcColorNegativeAreaUnderGraph, linewidth= 0.1pt]";
-        outHtml << "<br>\\psline*[linecolor =\\fcColorNegativeAreaUnderGraph, linewidth= 0.1pt]";
+      { outTex << "\\psline*[linecolor =\\fcColorNegativeAreaUnderGraph, linewidth = 0.1pt]";
+        outHtml << "<br>\\psline*[linecolor =\\fcColorNegativeAreaUnderGraph, linewidth = 0.1pt]";
       }
       if (k == 0 && !useNegativePattern)
-      { outTex << "\\psline*[linecolor =\\fcColorAreaUnderGraph, linewidth= 0.1pt]";
-        outHtml << "<br>\\psline*[linecolor =\\fcColorAreaUnderGraph, linewidth= 0.1pt]";
+      { outTex << "\\psline*[linecolor =\\fcColorAreaUnderGraph, linewidth = 0.1pt]";
+        outHtml << "<br>\\psline*[linecolor =\\fcColorAreaUnderGraph, linewidth = 0.1pt]";
       }
       if (k > 0 && useNegativePattern)
-      { outTex << "\\psline[linecolor =brown, linewidth= 0.1pt]";
-        outHtml << "<br>\\psline[linecolor =brown, linewidth= 0.1pt]";
+      { outTex << "\\psline[linecolor =brown, linewidth = 0.1pt]";
+        outHtml << "<br>\\psline[linecolor =brown, linewidth = 0.1pt]";
       }
       if (k > 0 && !useNegativePattern)
-      { outTex << "\\psline[linecolor =blue, linewidth= 0.1pt]";
-        outHtml << "<br>\\psline[linecolor =blue, linewidth= 0.1pt]";
+      { outTex << "\\psline[linecolor =blue, linewidth = 0.1pt]";
+        outHtml << "<br>\\psline[linecolor =blue, linewidth = 0.1pt]";
       }
       outTex << "(" << std::fixed << xValues[i] << ", " << std::fixed << fValuesLower[i] << ")("
       << std::fixed << xValues[i]  << ", "
@@ -5627,7 +5627,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
     << fileHasse << ".tex\"> "
     << fileHasse << ".tex</a>";
     out << ", <iframe src =\"" << fileHasse
-    << ".png\" width=\"800\" height =\"600\">"
+    << ".png\" width =\"800\" height =\"600\">"
     << fileHasse << ".png</iframe>";
     out << "<hr> The coset graph of the Weyl group of the Levi part follows. "
     << "The cosets are right, i.e. a coset "
@@ -5636,7 +5636,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
     << fileCosetGraph
     << ".tex\"> " << fileCosetGraph << ".tex</a>";
     out << ", <iframe src =\"" << fileCosetGraph
-    << ".png\" width=\"800\" height =\"600\"> " << fileCosetGraph << ".png</iframe>";
+    << ".png\" width =\"800\" height =\"600\"> " << fileCosetGraph << ".png</iframe>";
     out <<"<b>The .png file might be bad if LaTeX crashed while trying to process it; "
     << "please check whether the .tex corresponds to the .png.</b>";
     out << "<hr>Additional printout follows.<br> ";
@@ -7505,7 +7505,7 @@ public:
 //    double& theGraphicsUnit = theDV.theBuffer.GraphicsUnit[0];
 //    theGraphicsUnit =100;
 //    theDV.DefaultHtmlHeight = (int)( (this->layerHeight* (this->LayerSizes.size- 1)*theGraphicsUnit + 100).GetDoubleValue());
-//    theDV.DefaultHtmlWidth= (int)( (this->widthMaxLayer*theGraphicsUnit +40).GetDoubleValue());
+//    theDV.DefaultHtmlWidth = (int)( (this->widthMaxLayer*theGraphicsUnit +40).GetDoubleValue());
 //    theDV.theBuffer.centerX.SetSize(1);
 //    theDV.theBuffer.centerY.SetSize(1);
 //    theDV.theBuffer.centerX[0] = (this->widthMaxLayer/2).GetDoubleValue()*theGraphicsUnit;

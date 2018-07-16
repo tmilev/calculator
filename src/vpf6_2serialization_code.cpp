@@ -513,7 +513,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   }
   reportStream << "Subalgebra loading done, total  " << theSAs.theSubalgebras.theValues.size << " subalgebras loaded. ";
   theReport.Report(reportStream.str());
-  theSAs.ToStringExpressionString=CalculatorConversions::innerStringFromSemisimpleSubalgebras;
+  theSAs.ToStringExpressionString= CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 //  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != 0)
 //    theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
   if (!theSAs.LoadState(currentChainInt, numExploredTypes, numExploredHs, theCommands.Comments))
@@ -657,7 +657,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
 { MacroRegisterFunctionWithName("CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers");
   Expression polyFormE;
   Polynomial<AlgebraicNumber> polyForm;
-  bool polyFormGood =CalculatorConversions::innerPolynomial<AlgebraicNumber>(theCommands, input, polyFormE);
+  bool polyFormGood = CalculatorConversions::innerPolynomial<AlgebraicNumber>(theCommands, input, polyFormE);
   if (polyFormGood)
     polyFormGood = polyFormE.IsOfType<Polynomial<AlgebraicNumber> >(&polyForm);
   if (!polyFormGood)

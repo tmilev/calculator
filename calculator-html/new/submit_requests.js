@@ -50,8 +50,16 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   var content = "";
   var label = '<b style ="color:orange">Sent</b>';
   var addressSpreadOut = address.split("&").join(" &");
-  var addressSpreadOut = addressSpreadOut.split("=").join("= ");
-  var addressSpreadOut = addressSpreadOut.split("?").join("? ");
+  addressSpreadOut = addressSpreadOut.split("=").join("= ");
+  addressSpreadOut = addressSpreadOut.split("?").join("? ");
+  addressPassSplit = addressSpreadOut.split("password=");
+  if (addressPassSplit.length > 1) {
+    var indexAmpersand = addressPassSplit[1].search("&");
+    addressPassSplit[1] = addressPassSplit[1].substr(indexAmpersand);
+    addressPassSplit[1] = "***" + addressPassSplit[1];
+    addressSpreadOut = addressPassSplit.join("password= ");
+    //console.log(`DEBUG: Address spread out masked to: ${addressSpreadOut}`);
+  }
   if (!isPost) {
     content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${addressSpreadOut}</a>`;
   } else {

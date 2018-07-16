@@ -37,8 +37,8 @@ void Calculator::reset()
 { this->MaxAlgTransformationsPerExpression =100;
   this->MaxRuleStacksCached =500;
   this->MaxCachedExpressionPerRuleStack=100000;
-  this->MaxRecursionDeptH=10000;
-  this->RecursionDeptH= 0;
+  this->MaxRecursionDeptH =10000;
+  this->RecursionDeptH = 0;
   this->NumErrors = 0;
   this->NumListsStart               = - 1;
   this->NumListResizesStart         = - 1;
@@ -68,7 +68,7 @@ void Calculator::reset()
   this->flagUseFracInRationalLaTeX = true;
   this->flagForkingProcessAllowed = true;
   this->flagNoApproximationS = false;
-  this->flagDefaultRulesWereTamperedWith= false;
+  this->flagDefaultRulesWereTamperedWith = false;
   this->flagUsePredefinedWordSplits = true;
   this->flagPlotNoControls = true;
   this->flagPlotShowJavascriptOnly = false;
@@ -1388,7 +1388,7 @@ bool Calculator::ReplacePowerEUnderScoreEbyLimits()
 bool Calculator::ReplaceIntIntBy10IntPlusInt()
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size- 1];
-  Rational tempRat =left.theData.GetValue<Rational>();
+  Rational tempRat = left.theData.GetValue<Rational>();
   if (this->registerPositionAfterDecimalPoint == 0)
   { tempRat*=10;
     tempRat +=right.theData.GetValue<Rational>();

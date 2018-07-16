@@ -5942,9 +5942,9 @@ public:
       return;
     }
     //The basis of the tensor product vector space MUST be in the SAME order as the one used by Matrix::AssignTensorProduct.
-    //int leftDomainDim=left.GetMinNumCols();
+    //int leftDomainDim= left.GetMinNumCols();
     int rightDomainDim = right.GetMinNumCols();
-    //int leftRangeDim=left.GetMinNumRows();
+    //int leftRangeDim= left.GetMinNumRows();
     int rightRangeDim = right.GetMinNumRows();
     MonomialMatrix tempM;
     this->MakeZero();

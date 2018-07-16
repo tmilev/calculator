@@ -435,11 +435,11 @@ public:
   //if the LatexOutFile is zero then the procedure defaults to the screen
   void drawLineBufferOld(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
   void drawLineBetweenTwoVectorsBufferRational
-  (const Vector<Rational>& r1, const Vector<Rational>& r2, int PenStyle, int PenColor, double lineWidth=1)
+  (const Vector<Rational>& r1, const Vector<Rational>& r2, int PenStyle, int PenColor, double lineWidth =1)
   { this->theBuffer.drawLineBetweenTwoVectorsBufferRational(r1, r2, PenStyle, PenColor, lineWidth);
   }
   void drawLineBetweenTwoVectorsBufferDouble
-  (const Vector<double>& r1, const Vector<double>& r2, uint32_t PenStyle, int PenColor, double lineWidth=1)
+  (const Vector<double>& r1, const Vector<double>& r2, uint32_t PenStyle, int PenColor, double lineWidth =1)
   { this->theBuffer.drawLineBetweenTwoVectorsBufferDouble(r1, r2, PenStyle, PenColor, lineWidth);
   }
   void drawTextAtVectorBufferRational(const Vector<Rational>& point, const std::string& inputText, int textColor, int theTextStyle);

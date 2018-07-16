@@ -832,7 +832,7 @@ void LargeIntUnsigned::AssignFactorial(unsigned int x)
     { std::stringstream out;
       out << "processing prime " << thePrime << " (" << i + 1 << " out of " << primesBelowX.size << ").";
       theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0] = out.str();
-      theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh= true;
+      theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh = true;
       theGlobalVariables->MakeReport();
     }*/
   }
@@ -1429,7 +1429,7 @@ void Rational::DrawElement(DrawElementInputOutput& theDrawData)
   theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer
   (theDrawData.TopLeftCornerX, theDrawData.TopLeftCornerY, tempS, 0, theGlobalVariables.theDrawingVariables.fontSizeNormal, theGlobalVariables.theDrawingVariables.TextStyleNormal);
   theDrawData.outputHeight =10;
-  theDrawData.outputWidth=10*tempS.size();
+  theDrawData.outputWidth =10*tempS.size();
 }*/
 
 void Rational::operator=(const Polynomial<Rational>& other)

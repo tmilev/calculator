@@ -41,7 +41,7 @@ private:
   //1.2. A list is an expression with 1 or more children whose theData entry equals
   //     0. The atom 0 *MUST* be equal to Calculator::opList().
   //1.3. An expression with 1 or more children is not allowed to have theData entry different
-  //     from 0=Calculator::opList(). The system is instructed to
+  //     from 0= Calculator::opList(). The system is instructed to
   //     crash and burn shall such a configuration be detected.
   //2. Basic building blocks
   //2.1. A frozen expression is a list whose first entry is an atom equal to Freeze.
@@ -54,7 +54,7 @@ private:
   //This is GUARANTEED, and you MAY assume it.
   //If you want to have a list of mathematical objects, use the Sequence
   //data structure. A sequence is a List whose first entry is an atom whose value
-  //is Sequence =Calculator::opSequence().
+  //is Sequence = Calculator::opSequence().
   //
   //-------------------------------------------------------
   //

@@ -1218,7 +1218,7 @@ std::string HtmlInterpretation::SubmitAnswers
   else
     *outputIsCorrect = (mustBeOne == 1);
   FormatExpressions theFormat;
-  out << "<table width=\"300\">";
+  out << "<table width =\"300\">";
   if (!(*outputIsCorrect))
   { out << "<tr><td><span style =\"color:red\"><b>Your answer appears to be incorrect. </b></span></td></tr>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
@@ -1957,11 +1957,11 @@ std::string HtmlInterpretation::ToStringAssignSection()
   std::string idExtraTextarea = "inputSections";
   std::string idOutput = "idOutputSections";
   out << "Assign section(s) to teacher(s)<br> ";
-  out << "<textarea width=\"500px\" ";
+  out << "<textarea width =\"500px\" ";
   out << "id =\"" << idAddressTextarea << "\"";
   out << "placeholder =\"email or user list, comma, space or ; separated\">";
   out << "</textarea>";
-  out << "<textarea width=\"500px\" ";
+  out << "<textarea width =\"500px\" ";
   out << "id =\"" << idExtraTextarea << "\"";
   out << " placeholder =\"list of sections\">";
   out << "</textarea>";
@@ -2409,15 +2409,15 @@ std::string HtmlInterpretation::ToStringUserDetails
   << "<li>If the password entries are not left blank and the number of passwords "
   << "does not match the number of added users, the operation will fail (no users will be added).</li> "
   << "</ul>\n";
-  out << "<textarea width=\"500px\" ";
+  out << "<textarea width =\"500px\" ";
   out << "id =\"" << idAddressTextarea << "\"";
   out << "placeholder =\"user list, comma, space or ; separated\">";
   out << "</textarea>";
-  out << "<textarea width=\"500px\" ";
+  out << "<textarea width =\"500px\" ";
   out << "id =\"" << idPasswordTextarea << "\"";
   out << " placeholder =\"default passwords\">";
   out << "</textarea>";
-  out << "<textarea width=\"500px\" ";
+  out << "<textarea width =\"500px\" ";
   out << "id =\"" << idExtraTextarea << "\"";
   out << " placeholder =\"section/class #\">";
   out << "</textarea>";

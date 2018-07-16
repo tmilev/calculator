@@ -290,7 +290,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate()
     out << "<tr><td> e_" << nextInd + 1 << "(" << lastPath.ToString() << ") =</td>" << "<td>"
     << tempPath.ToString() << "</td>";
 /*    for (int j = 0; j < this->owner->GetDim(); j ++)
-    { tempPath=lastPath;
+    { tempPath = lastPath;
       tempPath.ActByEalpha(j);
       out << "<td> e_" << j+ 1 << "("
       << lastPath.ToString() << ")=</td>" <<"<td>" << tempPath.ToString() << "</td>";
@@ -301,7 +301,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate()
   out << "<table><td>corresponding element of U(g)</td><td>is adapted</td><td>path</td><td>e operators with non-zero action.</td>";
   for (int i = 0; i < theGens.size; i ++)
   { //tempPath.MakeFromWeightInSimpleCoords(*theOrbit[i].Waypoints.LastObject(), *this->owner);
-    //tempPath=*theOrbit.LastObject();
+    //tempPath =*theOrbit.LastObject();
     tempPath = theOrbit[i];
     tempMon = theGens[i];
     tempMon.generatorsIndices.ReverseOrderElements();

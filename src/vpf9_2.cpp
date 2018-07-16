@@ -123,7 +123,7 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
     { std::stringstream out;
       out << "Generated: " << i + 1<<" elements";
       theGlobalVariables.theIndicatorVariables.StatusString1= out.str();
-      theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh= true;
+      theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh = true;
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }*/
   }
@@ -160,7 +160,7 @@ void DrawLineBetweenTwoRootsOperation::init
   }
   this->thePenStyle = PenStyle;
   this->ColorIndex = colorIndex;
-  this->lineWidth= inputLineWidth;
+  this->lineWidth = inputLineWidth;
 }
 
 void DrawLineBetweenTwoRootsOperation::init
@@ -176,7 +176,7 @@ void DrawLineBetweenTwoRootsOperation::init
   }
   this->thePenStyle = PenStyle;
   this->ColorIndex = colorIndex;
-  this->lineWidth= inputLineWidth;
+  this->lineWidth = inputLineWidth;
 }
 
 void DrawOperations::drawCircleAtVectorBufferRational
@@ -206,13 +206,13 @@ void DrawOperations::drawParallelogram
   theOp.ColorIndex = ColorIndex;
   theOp.ColorFillIndex = fillColorIndex;
   theOp.thePenStyle = thePenStyle;
-  theOp.lineWidth=lineWidth;
+  theOp.lineWidth = lineWidth;
   theOp.theCorners.SetSize(5);
-  theOp.theCorners[0] =lowerLeftCorner;
+  theOp.theCorners[0] = lowerLeftCorner;
   theOp.theCorners[1] = theOp.theCorners[0] + vector1;
   theOp.theCorners[2] = theOp.theCorners[1] +vector2;
   theOp.theCorners[3] = theOp.theCorners[2]-vector1;
-  theOp.theCorners[4] =lowerLeftCorner;
+  theOp.theCorners[4] = lowerLeftCorner;
 }
 
 void DrawOperations::drawFilledShape
@@ -222,10 +222,10 @@ void DrawOperations::drawFilledShape
   this->IndexNthDrawOperation.AddOnTop(this->theShapes.size);
   this->theShapes.AddObjectOnTopCreateNew();
   DrawFilledShapeOperation& theOp = *this->theShapes.LastObject();
-  theOp.ColorIndex =ColorIndex;
+  theOp.ColorIndex = ColorIndex;
   theOp.ColorFillIndex = fillColorIndex;
   theOp.thePenStyle = thePenStyle;
-  theOp.lineWidth=lineWidth;
+  theOp.lineWidth = lineWidth;
   theOp.theCorners = theCorners;
 }
 
@@ -372,7 +372,7 @@ void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& i
 }
 
 void DrawingVariables::drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle)
-{ theDrawData.outputHeight = 0; theDrawData.outputWidth= 0;
+{ theDrawData.outputHeight = 0; theDrawData.outputWidth = 0;
   if (input == "")
     return;
   for (unsigned int i = 0; i < input.size(); i ++)
@@ -1179,8 +1179,8 @@ bool RationalFunctionOld::checkConsistency() const
     { crash << "This is a programming error: a rational funtion is flagged as having a non-constant numerator, but the numerator is constant. " << crash;
       return false;
     }
-//      int commentMeOutWhenDoneDebugging= - 1;
-//      this->Numerator.GetElementConst().GrandMasterConsistencyCheck();
+    //int commentMeOutWhenDoneDebugging= - 1;
+    //this->Numerator.GetElementConst().GrandMasterConsistencyCheck();
   }
   if (this->expressionType == this->typeRationalFunction)
   { if (this->Numerator.IsZeroPointer() || this->Denominator.IsZeroPointer())
@@ -1328,7 +1328,7 @@ std::string RationalFunctionOld::ToString(FormatExpressions* theFormat) const
     out << "}";
   else
     out << ")";
-//  out << " Num vars: " << this->GetNumVars();
+  //out << " Num vars: " << this->GetNumVars();
   return out.str();
 }
 
@@ -1340,7 +1340,7 @@ void RationalFunctionOld::gcd(const Polynomial<Rational>& left, const Polynomial
   RationalFunctionOld::lcm(left, right, lcmBuf);
   prodBuf = left;
   prodBuf *= right;
-//  stOutput << "<hr>the product: " << buffer2.ToString() << " and the lcm: " << buffer1.ToString() << "<br>";
+  //stOutput << "<hr>the product: " << buffer2.ToString() << " and the lcm: " << buffer1.ToString() << "<br>";
   prodBuf.DivideBy(lcmBuf, output, remBuf);
   if (!remBuf.IsEqualToZero() || output.IsEqualToZero() )
     crash << "This is a programming error. <br>While computing the gcd of left =" << left.ToString() << " <br>and right ="
@@ -1348,7 +1348,7 @@ void RationalFunctionOld::gcd(const Polynomial<Rational>& left, const Polynomial
     << lcmBuf.ToString() << " <br>but at the same time right*left divided by lcm (left, right) equals <br>" << output.ToString()
     << "<br> with remainder " << remBuf.ToString() << ", which is imposible. <br>The Groebner basis follows. <br>" << crash;
   output.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-//  stOutput << "<br>and the result of gcd (product/lcm)= " << output.ToString() << "<hr>";
+  //stOutput << "<br>and the result of gcd (product/lcm)= " << output.ToString() << "<hr>";
 }
 
 void RationalFunctionOld::MakeOneLetterMoN(int theIndex, const Rational& theCoeff, int ExpectedNumVars)
@@ -1373,8 +1373,8 @@ void RationalFunctionOld::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
   this->Denominator.GetElement().SetNumVariablesSubDeletedVarsByOne(newNumVars);
   if (newNumVars<oldNumVars)
     this->Simplify();
-//    if (!this->checkConsistency())
-//      crash << crash;
+  //if (!this->checkConsistency())
+  //  crash << crash;
 }
 
 void RationalFunctionOld::operator=(const RationalFunctionOld& other)
@@ -1405,9 +1405,9 @@ void RationalFunctionOld::operator=(const RationalFunctionOld& other)
     default:
       break;
   }
-//    int commentmewhendone;
-//    other.checkConsistency();
-//    this->checkConsistency();
+  //int commentmewhendone;
+  //other.checkConsistency();
+  //this->checkConsistency();
 }
 
 void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output)
@@ -1429,10 +1429,10 @@ void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial
   theBasis.size = 0;
   theBasis.AddOnTop(leftTemp);
   theBasis.AddOnTop(rightTemp);
-//  stOutput << "<br>In the beginning: <br>";
-//  for (int i = 0; i < theBasis.size; i ++)
-//  { stOutput << theBasis[i].ToString() << "<br>\n";
-//  }
+  //stOutput << "<br>In the beginning: <br>";
+  //for (int i = 0; i < theBasis.size; i ++)
+  //{ stOutput << theBasis[i].ToString() << "<br>\n";
+  //}
   MemorySaving<GroebnerBasisComputation<Rational> > bufComp;
   GroebnerBasisComputation<Rational> theComp;
   theComp.thePolynomialOrder.theMonOrder =MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
@@ -1440,10 +1440,10 @@ void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial
   if (!theComp.TransformToReducedGroebnerBasis(theBasis))
     crash << "Transformation to reduced Groebner basis is not allowed to fail in this function. " << crash;
 
-//  stOutput << "<br><br> ... and the basis is: <br>";
-//  for (int i = 0; i < theBasis.size; i ++)
-//  { stOutput << theBasis[i].ToString() << "<hr>\n";
-//  }
+  //stOutput << "<br><br> ... and the basis is: <br>";
+  //for (int i = 0; i < theBasis.size; i ++)
+  //{ stOutput << theBasis[i].ToString() << "<hr>\n";
+  //}
   int maxMonNoTIndex = - 1;
   Rational MaxTotalDeg;
   for (int i = 0; i < theBasis.size; i ++)
@@ -1597,9 +1597,9 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
   }
   Polynomial<Rational> theGCD1, theGCD2, tempP1, tempP2;
   //this->ComputeDebugString();
-//  RationalFunctionOld tempde_Bugger;
-//  tempde_Bugger = other;
-//  tempde_Bugger.ComputeDebugString();
+  //  RationalFunctionOld tempde_Bugger;
+  //  tempde_Bugger = other;
+  //  tempde_Bugger.ComputeDebugString();
   ProgressReport theReport;
   if (theGlobalVariables.flagReportEverything)
   { std::stringstream out;
@@ -1637,7 +1637,7 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
 
 void RationalFunctionOld::operator+=(const RationalFunctionOld& other)
 { if (this == &other)
-  { *this *= (Rational)2;
+  { *this *= (Rational) 2;
     return;
   }
   if (!this->checkConsistency())
@@ -1773,7 +1773,7 @@ void SemisimpleLieAlgebraOrdered::GetLinearCombinationFrom(ElementSemisimpleLieA
     theCoeffs[this->theOwner->GetGeneratorFromRootIndex(theIndex)] = input.theCoeffs[i];
   }
   int numPosRoots = this->theOwner->GetNumPosRoots();
-  Vector<Rational> tempH= input.GetCartanPart();
+  Vector<Rational> tempH = input.GetCartanPart();
   for (int i = 0; i < this->theOwner->GetRank(); i ++)
     theCoeffs[numPosRoots + i] = tempH[i];
   this->ChevalleyGeneratorsInCurrentCoords.ActOnVectorColumn(theCoeffs);
@@ -1894,7 +1894,7 @@ bool RationalFunctionOld::gcdQuicK(const Polynomial<Rational>& left, const Polyn
       output.MakeOne(left.GetMinNumVars());
   } else
   { //std::string tempS1, tempS2, tempS3, tempS4;
-//    tempS1=left.ToString(theGlobalVariables.theDefaultPolyFormat);
+//    tempS1= left.ToString(theGlobalVariables.theDefaultPolyFormat);
 //    tempS2=right.ToString(theGlobalVariables.theDefaultPolyFormat);
     right.DivideBy(left, quotient, remainder);
 //    tempS3=quotient.ToString();
@@ -2194,11 +2194,11 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
     }
     currentOffset += this->thePartition[i];
   }
-  out << newLine << beginMath << "h=" << this->ElementMatrixToTensorString(this->theH, useHtml) << "="
+  out << newLine << beginMath << "h =" << this->ElementMatrixToTensorString(this->theH, useHtml) << "="
   << this->theH.ElementToStringWithBlocks(this->thePartition) << endMath;
   out << newLine << beginMath << "e =" << this->ElementMatrixToTensorString(this->theE, useHtml) << "="
   << this->theE.ElementToStringWithBlocks(this->thePartition) << endMath;
-  out << newLine << beginMath << "f=" << this->ElementMatrixToTensorString(this->theF, useHtml) << "="
+  out << newLine << beginMath << "f =" << this->ElementMatrixToTensorString(this->theF, useHtml) << "="
   << this->theF.ElementToStringWithBlocks(this->thePartition) << endMath;
   Matrix<Rational>  tempMat;
   tempMat.init(this->theDimension, this->theDimension);

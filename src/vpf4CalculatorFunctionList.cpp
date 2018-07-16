@@ -2496,7 +2496,7 @@ void Calculator::initPredefinedInnerFunctions()
     \na =\\frac{-64 x^{3} y^{2}+ 16 x y+y}{32 x^{4} y-8 x^{2}- x};\
     \ntheDiff= d/dx(theFun);\
     \nnum= (d/dx y = 0; theDiff)_2;\
-    \nden =CoefficientOf (d/dx y, theDiff);\
+    \nden = CoefficientOf (d/dx y, theDiff);\
     \nb= -num/den;\
     \nCompareExpressionsNumerically(a,b, 0.001, x\\in(0,5),10, y\\in (0,5),10);\
     \nA = PointsImplicitly(theFun, (0,0),(4,4), (10,10), (400,400));\
@@ -3313,7 +3313,7 @@ void Calculator::initPredefinedInnerFunctions()
    "Littelmann root operator e_i, where e_i is the Littelmann root operator with \
    respect to root of index i. If i is negative then the e_i root operator is defined to be \
    the f_\\alpha operator.",
-   "e_{{i}}=LROdefine_i; e_{- 1} e_{- 1} LSpath{}(G_2, (0,0), (2,1))",
+   "e_{{i}}= LROdefine_i; e_{- 1} e_{- 1} LSpath{}(G_2, (0,0), (2,1))",
    true, true,
    "Calculator::innerLittelmannOperator",
    "LROdefine");

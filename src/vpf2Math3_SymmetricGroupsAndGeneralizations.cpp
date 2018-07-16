@@ -876,7 +876,7 @@ void ElementHyperoctahedralGroup::ToggleBit(int i)
 }
 
 bool NeedRankAdjustment(const ElementHyperoctahedralGroup& left, const ElementHyperoctahedralGroup& right)
-{ int theRank=left.s.size;
+{ int theRank= left.s.size;
   if (theRank == 0)
     theRank = right.s.size;
   if (theRank == 0)
@@ -896,7 +896,7 @@ bool NeedRankAdjustment(const ElementHyperoctahedralGroup& left, const ElementHy
 
 
 void EnsureSameRank(ElementHyperoctahedralGroup& left, ElementHyperoctahedralGroup& right)
-{ int theRank=left.s.size;
+{ int theRank= left.s.size;
   if (theRank == 0)
     theRank = right.s.size;
   if (theRank == 0)
@@ -915,7 +915,7 @@ void ElementHyperoctahedralGroup::MakeFromMul(const ElementHyperoctahedralGroup&
   this->s.SetSize(thisssize);
   for (int i = 0; i <left.s.size; i ++)
     this->s[i] = left.s[i];
-  for (int i =left.s.size; i < thisssize; i ++)
+  for (int i = left.s.size; i < thisssize; i ++)
     this->s[i] = false;
   // see the documentation for ElementHyperoctahedralGroup if you
   // don't understand why the right wants to act on the left in this way

@@ -454,7 +454,7 @@ void rootSubalgebra::KmodTimesKmod(int index1, int index2, List<int>& oppositeKm
         oppositeKmods[index2] = index1;
         continue;
       }
-      Vector<Rational> weightSum=leftWeight +rightWeight;
+      Vector<Rational> weightSum= leftWeight +rightWeight;
       for (int k = 0; k< this->WeightsModulesPrimalSimple.size; k++)
         if (this->WeightsModulesPrimalSimple[k].GetIndex(weightSum) != - 1)
         { output.AddOnTopNoRepetition(k);
@@ -1004,7 +1004,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
     }
   int counter = 0;
   domainRec.AddOnTop(leftSA.HighestWeightsPrimalSimple[counter]);
-  while (domainRec.GetRankOfSpanOfElements() ==CurrentRank)
+  while (domainRec.GetRankOfSpanOfElements() == CurrentRank)
   { counter ++;
     if (leftSA.Modules.size<= counter)
       crash << crash;
@@ -1015,12 +1015,12 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
   for (int i = 0; i <leftSA.Modules.size; i ++)
     if (leftSA.Modules[i].size > leftSA.Modules[counter].size)
     { domainRec.LastObject()->operator=(leftSA.HighestWeightsPrimalSimple[i]);
-      if (domainRec.GetRankOfSpanOfElements() ==CurrentRank)
+      if (domainRec.GetRankOfSpanOfElements() == CurrentRank)
         domainRec.LastObject()->operator=(leftSA.HighestWeightsPrimalSimple[counter]);
       else
         counter = i;
     }
-  if (!(domainRec.GetRankOfSpanOfElements() ==CurrentRank+ 1))
+  if (!(domainRec.GetRankOfSpanOfElements() == CurrentRank+ 1))
     crash << crash;
   Vectors<Rational>& firstKmodLeft = leftSA.WeightsModulesPrimalSimple[counter];
   bool result = false;
@@ -2369,7 +2369,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
     //  << ", acting on: " << reflectedSimpleBasisK.ToString();
     //  stOutput << "<br>so the reflected simple basis becomes: " << reflectedSimpleBasisK.ToString();
     //}
-    theSl2.RootsWithScalar2WithH=rootsScalarProduct2HnonRaised;
+    theSl2.RootsWithScalar2WithH =rootsScalarProduct2HnonRaised;
     for (int k = 0; k<theSl2.RootsWithScalar2WithH.size; k++)
       this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
     for (int i = 0; i < theSl2.RootsWithScalar2WithH.size; i ++)
@@ -2852,7 +2852,7 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
   << " larger than the Cartan subalgebra + the Cartan subalgebra + the full subalgebra).\n\n";
   out << "<table border =\"1\">\n <colgroup>";
   for (int i = 0; i < this->NumColsPerTableLatex; i ++)
-    out << "<col width=\"180\">";
+    out << "<col width =\"180\">";
   out << "</colgroup>";
   for (int i = 0; i < this->theSubalgebras.size; i ++)
   { row = (i)/this->NumColsPerTableLatex;
@@ -3119,7 +3119,7 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical
   //std::string tempS;
   //theSubgroup.ToString(tempS);
   //theGlobalVariables.theIndicatorVariables.StatusString1= tempS;
-  //theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh= true;
+  //theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh = true;
   //theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
   outputSubgroup.ComputeSubGroupFromGeneratingReflections
   (&selectedRootsBasisCentralizer, &outputSubgroup.ExternalAutomorphisms, this->UpperLimitNumElementsWeyl, false);

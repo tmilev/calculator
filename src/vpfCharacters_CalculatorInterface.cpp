@@ -924,7 +924,7 @@ bool CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps(Calculator& t
     return false;
   if (!rightE.IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >())
     return false;
-  VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> outputRep =leftE.GetValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >();
+  VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> outputRep = leftE.GetValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >();
   outputRep*=rightE.GetValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >();
   return output.AssignValue(outputRep, theCommands);
 }
@@ -1460,7 +1460,7 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity
 (const Partition& parabolicPartition, const Partition& leftPartition,
  const Partition& rightPartition, std::stringstream* comments)
 { MacroRegisterFunctionWithName("KostkaNumber::ComputeTypeBParabolicSignMultiplicity");
-  int rank=leftPartition.n +rightPartition.n;
+  int rank= leftPartition.n +rightPartition.n;
   int BcomponentSize =rank-parabolicPartition.n;
   if (comments != 0)
     *comments << "<br>dim Hom_P(Sign P_{("
@@ -1476,7 +1476,7 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity
   HashedList<KostkaNumber> KNcache;
   KostkaNumber leftKN, rightKN;
   Partition tempP;
-  tempP =leftPartition;
+  tempP = leftPartition;
   tempP.Transpose();
   leftKN.partition = tempP.p;
   tempP =rightPartition;
@@ -1498,7 +1498,7 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity
     rightKN.tuple = complementSelection;
     rightKN.tuple.AddOnTop(BcomponentSize);
     rightKN.Compute(&KNcache, 0);
-    result +=leftKN.value*rightKN.value;
+    result += leftKN.value*rightKN.value;
   } while (theSelection.IncrementReturnFalseIfPastLast());
   if (comments != 0)
     *comments << result.ToString();

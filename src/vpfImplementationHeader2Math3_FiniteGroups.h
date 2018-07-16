@@ -1331,7 +1331,7 @@ bool WeylGroupData::FreudenthalEval
 //        double startLocal = theGlobalVariables.GetElapsedSeconds();
         this->RaiseToDominantWeight(currentDominantRepresentative);
 //        timeSpentRaisingWeights+= theGlobalVariables.GetElapsedSeconds()-startLocal;
-        //double beforeHash= theGlobalVariables.GetElapsedSeconds();
+        //double beforeHash = theGlobalVariables.GetElapsedSeconds();
         int theIndex = outputDominantWeightsSimpleCoords.GetIndex(currentDominantRepresentative);
         //totalTimeSpentOnHashIndexing+= theGlobalVariables.GetElapsedSeconds()-beforeHash;
         if (theIndex == - 1)

@@ -32,7 +32,7 @@ function reloadPage(reason, time) {
   }
 }
 
-var oldUserRole ;
+var oldUserRole;
 function logout() {
   oldUserRole = thePage.user.role;
   thePage.storage.user.name.setAndStore("");
@@ -45,7 +45,11 @@ function logout() {
   document.getElementById("inputPassword").value = "";
   document.getElementById("divProblemPageContentContainer").innerHTML = "";
   document.getElementById("divCurrentCourse").innerHTML = "";
-  logoutGoogle();
+  try {
+    logoutGoogle();
+  } catch (e) {
+    console.log(`Failed to log out with google. ${e}`);
+  }
   logoutPartTwo();
 }
 

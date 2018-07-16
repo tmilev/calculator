@@ -1903,7 +1903,7 @@ bool Expression::ContextGetPolySubFromSuperContextNoFailure(const Expression& la
 
 template <class coefficient>
 bool Expression::ContextGetPolySubFromSuperContext(const Expression& largerContext, PolynomialSubstitution<coefficient>& output) const
-{ Expression polyVarsElargerContext =largerContext.ContextGetPolynomialVariables();
+{ Expression polyVarsElargerContext = largerContext.ContextGetPolynomialVariables();
   Expression polyVarsEsmallContext = this->ContextGetPolynomialVariables();
   output.SetSize(polyVarsElargerContext.children.size - 1);
   int numVars = polyVarsElargerContext.children.size - 1;
@@ -3341,7 +3341,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     outTrue << "</table>";
     return outTrue.str();
   }
-//  if (useLatex && recursionDepth== 0 && this->theOperation != owner->opEndStatement())
+//  if (useLatex && recursionDepth == 0 && this->theOperation != owner->opEndStatement())
 //    return HtmlRoutines::GetHtmlMathSpanFromLatexFormula(out.str());
 //  if (this->format == this->formatTimesDenotedByStar)
 //    stOutput << "DEBUG: Formatted by star: " << out.str() << "<br>";

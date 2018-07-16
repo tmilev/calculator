@@ -1012,7 +1012,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   //stOutput << "DEBUG: width: " << this->DesiredHtmlWidthInPixels
   //<< " height: " << this->DesiredHtmlHeightInPixels;
   if (!owner.flagPlotShowJavascriptOnly)
-  { out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
+  { out << "<canvas width =\"" << this->DesiredHtmlWidthInPixels
     << "\" height =\"" << this->DesiredHtmlHeightInPixels << "\" "
     << "style =\"border:solid 1px\" id =\""
     << this->canvasName
@@ -1458,7 +1458,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     this->ComputeAxesAndBoundingBox();
     //out << this->ToStringDebug();
   if (!this->flagPlotShowJavascriptOnly)
-  { out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
+  { out << "<canvas width =\"" << this->DesiredHtmlWidthInPixels
     << "\" height =\"" << this->DesiredHtmlHeightInPixels << "\" "
     << "style =\"border:solid 1px\" id =\""
     << this->canvasName

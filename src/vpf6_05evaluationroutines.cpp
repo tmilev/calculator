@@ -694,7 +694,7 @@ bool Calculator::EvaluateExpression
   }
   //if (logEvaluationStepsRequested && counterNumTransformations>1)
   //{ logStream << "<br>";
-  //  *theCommands.logEvaluationSteps.LastObject()=logStream.str() +*theCommands.logEvaluationSteps.LastObject();
+  //  *theCommands.logEvaluationSteps.LastObject()= logStream.str() +*theCommands.logEvaluationSteps.LastObject();
   //}
   return true;
 }

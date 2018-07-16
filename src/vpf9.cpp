@@ -6313,7 +6313,7 @@ std::string SubgroupWeylGroupOLD::ElementToStringCosetGraph()
       oldLayerElementLength = this->RepresentativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.size;
     }
     Layers.LastObject()->AddOnTop(i);
-    GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
+    GraphWidth =MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
   }
 //  HashedList<Vector<Rational>> orbit;
 //  orbit.Reserve(this->RepresentativesQuotientAmbientOrder.size);
@@ -6996,7 +6996,7 @@ void LaTeXProcedures::drawline(double X1, double Y1, double X2, double Y2, uint3
     tempS = "lightgray";
   else
     LaTeXProcedures::GetStringFromColorIndex(ColorIndex, tempS, drawInput);
-  output << "\\psline[linewidth= 0.3pt, linecolor =" << tempS << "]("
+  output << "\\psline[linewidth = 0.3pt, linecolor =" << tempS << "]("
   << X1 - LaTeXProcedures::FigureCenterCoordSystemX << ", "
   << LaTeXProcedures::FigureCenterCoordSystemY - Y1 << ")" << "("
   << X2 - LaTeXProcedures::FigureCenterCoordSystemX << ", "
@@ -9820,7 +9820,7 @@ bool Cone::GetLatticePointsInCone
     if (shiftAllPointsBy!= 0)
       candidatePoint +=*shiftAllPointsBy;
     for (int j = 0; j<boundingBox.Multiplicities.size; j ++)
-      candidatePoint +=LatticeBasis[j]*
+      candidatePoint += LatticeBasis[j]*
       (boundingBox.Multiplicities[j]-upperBoundPointsInEachDim);
     if (lastCoordinateIsOne)
     { candidatePoint.SetSize(candidatePoint.size + 1);
@@ -10047,7 +10047,7 @@ void PiecewiseQuasipolynomial::DrawMe(DrawingVariables& theDrawingVars, int numL
       tempList.initFillInObject(latticePoints.size, chamberWallColor);
       if (RestrictingChamber!= 0)
         for (int k = 0; k<latticePoints.size; k++)
-        { tempRoot =latticePoints[k];
+        { tempRoot = latticePoints[k];
           tempRoot.MakeAffineUsingLastCoordinate();
           if (!RestrictingChamber->IsInCone(tempRoot))
             tempList[k] =ZeroColor;
@@ -10259,7 +10259,7 @@ void ConeComplex::TransformToWeylProjective()
   this->log << "the global cone normals: " << this->TheGlobalConeNormals.ToString();
   this->ToString(tempS);
   this->log << tempS;
-  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh= true;
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh = true;
   theGlobalVariables.theIndicatorVariables.StatusString1= this->log.str();
   theGlobalVariables.MakeReport();*/
 }
@@ -10637,7 +10637,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
         tempStream << "\n\n\n\n<br><br><hr>The bad normals: " << tempTempRoots.ToString();
         tempStream << "\n\n\n\n<br><br><hr>The bad normals after creation: " << tempCLS.theProjectivizedCone.Normals.ToString();
         theGlobalVariables.theIndicatorVariables.StatusString1= tempStream.str();
-        theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh= true;
+        theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh = true;
         theGlobalVariables.MakeReport();
         for (int i = 0; i <10000000; i ++)
           if (i%3== 0)

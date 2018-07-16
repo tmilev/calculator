@@ -1455,15 +1455,15 @@ bool WeylGroupData::LoadConjugacyClasses()
 bool WeylGroupData::LoadCharTable()
 { bool result = false;
   if (this->theDynkinType.ToString() == "G^{1}_2")
-    result =LoadCharTableG1_2(*this);
+    result = LoadCharTableG1_2(*this);
   if (this->theDynkinType.ToString() == "F^{1}_4")
-    result =LoadCharTableF1_4(*this);
+    result = LoadCharTableF1_4(*this);
   if (this->theDynkinType.ToString() == "E^{1}_6")
-    result =LoadCharTableE1_6(*this);
+    result = LoadCharTableE1_6(*this);
   if (this->theDynkinType.ToString() == "E^{1}_7")
-    result =LoadCharTableE1_7(*this);
+    result = LoadCharTableE1_7(*this);
   if (this->theDynkinType.ToString() == "E^{1}_8")
-    result =LoadCharTableE1_8(*this);
+    result = LoadCharTableE1_8(*this);
   if (result)
     this->theGroup.CheckOrthogonalityCharTable();
   return result;
@@ -1739,13 +1739,13 @@ bool LoadGAPRootSystemE1_8(HashedList<Vector<Rational> >& outputRootSystem)
 bool WeylGroupData::LoadGAPRootSystem(HashedList<Vector<Rational> >& outputPositiveRootSystem) const
 { bool result = false;
   if (this->theDynkinType.IsOfSimpleType('F', 4))
-    result =LoadGAPRootSystemF1_4(outputPositiveRootSystem);
+    result = LoadGAPRootSystemF1_4(outputPositiveRootSystem);
   if (this->theDynkinType.IsOfSimpleType('E', 8))
-    result =LoadGAPRootSystemE1_8(outputPositiveRootSystem);
+    result = LoadGAPRootSystemE1_8(outputPositiveRootSystem);
   if (this->theDynkinType.IsOfSimpleType('E', 7))
-    result =LoadGAPRootSystemE1_7(outputPositiveRootSystem);
+    result = LoadGAPRootSystemE1_7(outputPositiveRootSystem);
   if (this->theDynkinType.IsOfSimpleType('E', 6))
-    result =LoadGAPRootSystemE1_6(outputPositiveRootSystem);
+    result = LoadGAPRootSystemE1_6(outputPositiveRootSystem);
   if (!result)
     return result;
   if (outputPositiveRootSystem.size != this->RootsOfBorel.size)

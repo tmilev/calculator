@@ -660,8 +660,8 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById
       << tableName;
     return false;
   }
-  if (commentsOnFailure != 0)
-    *commentsOnFailure << "DEBUG: found item: " << foundItem.ToString(false);
+  //if (commentsOnFailure != 0)
+  //  *commentsOnFailure << "DEBUG: found item: " << foundItem.ToString(false);
   MongoQuery queryInsertIntoDeletedTable;
   JSData deletedEntry;
   deletedEntry["deleted"] = foundItem;
@@ -747,8 +747,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString");
 #ifdef MACRO_use_MongoDB
   if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(updateQuery, commentsOnFailure, true))
-  { return false;
-  }
+    return false;
   MongoQuery query;
   query.findQuery = findQuery;
   query.collectionName = collectionName;
@@ -773,10 +772,10 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON
 (const std::string& collectionName, const List<JSData>& findOrQueries, const JSData& updateQuery,
  std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON");
-  logWorker << "DEBUG: HEre I am!" << logger::endL;
+  //logWorker << "DEBUG: HEre I am!" << logger::endL;
   std::string queryString;
   if (!DatabaseRoutinesGlobalFunctionsMongo::GetOrFindQuery(findOrQueries, queryString, commentsOnFailure))
-  { logWorker << logger::blue << "DEBUG: GetOrFindQuery, comments: " << commentsOnFailure->str() << logger::endL;
+  { //logWorker << logger::blue << "DEBUG: GetOrFindQuery, comments: " << commentsOnFailure->str() << logger::endL;
     return false;
   }
   if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(updateQuery, commentsOnFailure, false))

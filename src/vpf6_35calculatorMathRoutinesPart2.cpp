@@ -1759,7 +1759,7 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
       if (input[i][2].size() != 3)
         continue;
       for (int j = 0; j < 2; j ++)
-      { bool isGood =CalculatorFunctionsGeneral::innerMakeJavascriptExpression
+      { bool isGood = CalculatorFunctionsGeneral::innerMakeJavascriptExpression
         (theCommands, input[i][2][j + 1], jsConverter);
         if (isGood)
           isGood = jsConverter.IsOfType<std::string>(&thePlot.theVarRangesJS[theIndex][j]);

@@ -3,6 +3,7 @@
 #ifndef vpfHeader11_ImplementationHeaderEllipticCurves
 #define vpfHeader11_ImplementationHeaderEllipticCurves
 #include "vpfHeader2Math11_EllipticCurves.h"
+#include "vpfHeader2Math2_AlgebraicNumbers.h"
 
 static ProjectInformationInstance ProjectInfovpfImplementationHeader_HeaderEllipticCurves(__FILE__, "Implementation header, elliptic curves. ");
 
@@ -105,5 +106,6 @@ std::string ElementEllipticCurve<coefficient>::ToString(FormatExpressions* theFo
     out << " Infinity. ";
   return out.str();
 }
+
 
 #endif

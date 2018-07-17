@@ -11,6 +11,9 @@ class EllipticCurveWeierstrassNormalForm
 public:
   LargeInt linearCoefficient;
   LargeInt constantTerm;
+  std::string name;
+  LargeIntUnsigned order;
+  LargeIntUnsigned modulo;
   void MakeSecp256k1();
   static unsigned int HashFunction(const EllipticCurveWeierstrassNormalForm& input);
   bool operator==(const EllipticCurveWeierstrassNormalForm& other) const;
@@ -26,6 +29,8 @@ public:
   bool flagInfinity;
   static unsigned int HashFunction(const ElementEllipticCurve<coefficient>& input);
   void Invert();
+  bool MakeGeneratorNISTCurve(const std::string& input, std::stringstream* commentsOnFailure);
+  void MakeGeneratorSecp256k1();
   void MakeOne(const EllipticCurveWeierstrassNormalForm& inputCurve);
   bool operator==(const ElementEllipticCurve& other) const;
   bool operator*=(const ElementEllipticCurve& other);

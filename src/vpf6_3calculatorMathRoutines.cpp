@@ -265,6 +265,36 @@ bool CalculatorFunctionsGeneral::innerBase64ToString(Calculator& theCommands, co
   return output.AssignValue(result, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator");
+  if (!input.IsOfType<std::string>())
+  { return theCommands
+    << "Function NISTEllipticCurveGenerator takes as input a string with an EC curve name. "
+    << "Available curve names: secp256k1";
+  }
+  ElementEllipticCurve<ElementZmodP> generator;
+  if (!generator.MakeGeneratorNISTCurve(input.GetValue<std::string>(), &theCommands.Comments))
+    return false;
+  Expression theContext;
+  List<std::string> theVars;
+  theVars.AddOnTop("x");
+  theVars.AddOnTop("y");
+  theContext.ContextMakeContextWithPolyVars(theCommands, theVars);
+  return output.AssignValueWithContext(generator, theContext, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58");
+  LargeInt theInt;
+  if (!input.IsInteger(&theInt))
+    return false;
+  if (theInt < 0)
+    return theCommands << "Conversion from negative integer to base58 not allowed.";
+  std::string result;
+  Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLast(theInt.value, result);
+  return output.AssignValue(result, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerConvertBase58ToHex(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertBase58ToHex");
   if (!input.IsOfType<std::string>())
@@ -272,7 +302,7 @@ bool CalculatorFunctionsGeneral::innerConvertBase58ToHex(Calculator& theCommands
   const std::string& inputString = input.GetValue<std::string>();
   std::string outputString;
   if (!Crypto::ConvertBase58ToHex(inputString, outputString))
-    theCommands << "Failed to convert " << inputString << " to hex. ";
+    return theCommands << "Failed to convert " << inputString << " to hex. ";
   return output.AssignValue(outputString, theCommands);
 }
 

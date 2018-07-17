@@ -45,7 +45,7 @@ function showTex(originalTex, item, event) {
     item.parentNode.removeChild(item.nextSibling);
     return;
   }
-  flaSpan = document.createElement('span');
+  var flaSpan = document.createElement('span');
   if (originalTex.startsWith("\\displaystyle ")) {
     originalTex = originalTex.slice(14);
   }

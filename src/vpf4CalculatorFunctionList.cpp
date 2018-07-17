@@ -387,6 +387,24 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test",
    "TestBase64");
   this->AddOperationInnerHandler
+  ("EllipticCurveGeneratorNIST", CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator, "",
+   "Makes generator of a NIST curve",
+   "g=EllipticCurveGeneratorNIST(\"secp256k1\");\n"
+   "g^3; g^115792089237316195423570985008687907852837564279074904382605163141518161494337",
+   true, false,
+   "CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58",
+   "ConvertIntegerToBase58");
+
+  this->AddOperationInnerHandler
+  ("ConvertIntegerToBase58", CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58, "",
+   "Converts an unsigned integer to base58. ",
+   "theInt = ConvertHexToInteger(ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\"));"
+   "ConvertIntegerToBase58(theInt)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58",
+   "ConvertIntegerToBase58");
+
+  this->AddOperationInnerHandler
   ("ConvertBase58ToHex", CalculatorFunctionsGeneral::innerConvertBase58ToHex, "",
    "Converts Base58 to hex. ",
    "ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\");",

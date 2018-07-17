@@ -409,6 +409,8 @@ private:
     tempE.MakeXOX(owner, theOp, left, right);
     this->SetChilD(childIndex, tempE);
   }
+  bool ContextMakeContextWithPolyVars(Calculator& owner, const List<std::string>& inputPolyVarNames);
+  bool ContextMakeContextWithPolyVars(Calculator& owner, const List<Expression>& inputPolyVarEs);
   bool ContextMakeContextWithOnePolyVar(Calculator& owner, const std::string& inputPolyVarName);
   bool ContextMakeContextWithOnePolyVar(Calculator& owner, const Expression& inputPolyVarE);
   bool MakeContextWithOnePolyVarOneDiffVar(Calculator& owner, const Expression& inputPolyVarE, const Expression& inputDiffVarE);

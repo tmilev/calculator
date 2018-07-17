@@ -4011,8 +4011,8 @@ bool WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified()
       stateNotModified = false;
     }
   if (this->addressComputed == "/" || this->addressComputed == "")
-  { this->addressComputed = theGlobalVariables.DisplayNameExecutable;
-    theGlobalVariables.userCalculatorRequestType = "selectCourse";
+  { this->addressComputed = WebAPI::app; //was: theGlobalVariables.DisplayNameExecutable;
+    //theGlobalVariables.userCalculatorRequestType = "selectCourse";
     stateNotModified = false;
   }
   return stateNotModified;
@@ -4184,6 +4184,7 @@ int WebWorker::ServeClient()
   if (this->addressComputed == theGlobalVariables.DisplayNameExecutable)
     theGlobalVariables.userCalculatorRequestType = theGlobalVariables.GetWebInput("request");
   //std::cout << "Address computed: " << this->addressComputed << std::endl;
+  this->CorrectRequestsBEFORELoginReturnFalseIfModified();
   if (theWebServer.addressStartsInterpretedAsCalculatorRequest.Contains(this->addressComputed))
   { theGlobalVariables.userCalculatorRequestType = this->addressComputed;
     std::string correctedRequest;
@@ -4193,7 +4194,6 @@ int WebWorker::ServeClient()
     }
     //std::cout << "Address request set to: " << theGlobalVariables.userCalculatorRequestType << std::endl;
   }
-  this->CorrectRequestsBEFORELoginReturnFalseIfModified();
   theUser.flagMustLogin = this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
   if (theUser.flagMustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
     return this->ProcessLoginNeededOverUnsecureConnection();

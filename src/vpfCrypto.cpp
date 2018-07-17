@@ -80,6 +80,72 @@ unsigned char Crypto::GetCharFrom6bit(uint32_t input)
   return - 1;
 }
 
+bool Crypto::GetCharFromBase58(uint32_t input, char& output)
+{ switch (input)
+  { case 0:  output = '0'; return true;
+    case 1:  output = '1'; return true;
+    case 2:  output = '2'; return true;
+    case 3:  output = '3'; return true;
+    case 4:  output = '4'; return true;
+    case 5:  output = '5'; return true;
+    case 6:  output = '6'; return true;
+    case 7:  output = '7'; return true;
+    case 8:  output = '8'; return true;
+    case 9:  output = '9'; return true;
+    case 10: output = 'A'; return true;
+    case 11: output = 'B'; return true;
+    case 12: output = 'C'; return true;
+    case 13: output = 'D'; return true;
+    case 14: output = 'E'; return true;
+    case 15: output = 'F'; return true;
+    case 16: output = 'G'; return true;
+    case 17: output = 'H'; return true;
+    case 18: output = 'J'; return true;
+    case 19: output = 'K'; return true;
+    case 20: output = 'M'; return true;
+    case 21: output = 'L'; return true;
+    case 22: output = 'P'; return true;
+    case 23: output = 'Q'; return true;
+    case 24: output = 'R'; return true;
+    case 25: output = 'S'; return true;
+    case 26: output = 'T'; return true;
+    case 27: output = 'U'; return true;
+    case 28: output = 'V'; return true;
+    case 29: output = 'W'; return true;
+    case 30: output = 'X'; return true;
+    case 31: output = 'Y'; return true;
+    case 32: output = 'Z'; return true;
+    case 33: output = 'a'; return true;
+    case 34: output = 'b'; return true;
+    case 35: output = 'c'; return true;
+    case 36: output = 'd'; return true;
+    case 37: output = 'e'; return true;
+    case 38: output = 'f'; return true;
+    case 39: output = 'g'; return true;
+    case 40: output = 'h'; return true;
+    case 41: output = 'i'; return true;
+    case 42: output = 'j'; return true;
+    case 43: output = 'k'; return true;
+    case 44: output = 'm'; return true;
+    case 45: output = 'n'; return true;
+    case 46: output = 'o'; return true;
+    case 47: output = 'p'; return true;
+    case 48: output = 'q'; return true;
+    case 49: output = 'r'; return true;
+    case 50: output = 's'; return true;
+    case 51: output = 't'; return true;
+    case 52: output = 'u'; return true;
+    case 53: output = 'v'; return true;
+    case 54: output = 'w'; return true;
+    case 55: output = 'x'; return true;
+    case 56: output = 'y'; return true;
+    case 57: output = 'z'; return true;
+    default: return false;
+  }
+  return false;
+}
+
+
 bool Crypto::GetBase58FromChar(unsigned char input, uint32_t& output)
 { switch (input)
   { case '0': output = 0;  return true;
@@ -767,7 +833,30 @@ void Crypto::ConvertBitStreamToLargeUnsignedInt(const List<unsigned char>& input
   }
 }
 
-bool Crypto::ConvertBase58ToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output)
+void Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLast
+(const LargeIntUnsigned& input, std::string& output)
+{ MacroRegisterFunctionWithName("Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLast");
+  output.clear();
+  LargeIntUnsigned copy = input;
+  while (copy > 0) {
+    LargeIntUnsigned nextDigitLIU = copy % 58;
+    copy /= 58;
+    int32_t nextDigitInt = nextDigitLIU.theDigits[0];
+    char next = '#';
+    Crypto::GetCharFromBase58(nextDigitInt, next);
+    output.push_back(next);
+  }
+}
+
+bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output)
+{ std::string reversed;
+  reversed.resize(input.size());
+  for (unsigned i = 0; i < input.size(); i ++)
+    reversed[reversed.size() - 1 - i] = input[i];
+  return Crypto::ConvertBase58SignificantDigitsLASTToLargeIntUnsigned(reversed, output);
+}
+
+bool Crypto::ConvertBase58SignificantDigitsLASTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output)
 { output = 0;
   bool result = true;
   for (unsigned i = 0; i < input.size(); i ++)
@@ -785,8 +874,8 @@ bool Crypto::ConvertBase58ToLargeIntUnsigned(const std::string& input, LargeIntU
 bool Crypto::ConvertBase58ToHex(const std::string& input, std::string& output)
 { MacroRegisterFunctionWithName("Crypto::ConvertBase58ToHex");
   LargeIntUnsigned outputLIU;
-  bool result = false;
-  if (! Crypto::ConvertBase58ToLargeIntUnsigned(input, outputLIU))
+  bool result = true;
+  if (!Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(input, outputLIU))
     result = false;
   if (!Crypto::ConvertLargeUnsignedIntToHex(outputLIU, output))
     return false;

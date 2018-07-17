@@ -3642,6 +3642,25 @@ bool Expression::MakeEmptyContext(Calculator& owner)
   return this->AddChildAtomOnTop(owner.opContexT());
 }
 
+bool Expression::ContextMakeContextWithPolyVars(Calculator& owner, const List<std::string>& inputPolyVarNames)
+{ MacroRegisterFunctionWithName("Expression::ContextMakeContextWithPolyVars");
+  List<Expression> thePolyVars;
+  thePolyVars.SetSize(inputPolyVarNames.size);
+  for (int i = 0; i < thePolyVars.size; i ++)
+    thePolyVars[i].MakeAtom(inputPolyVarNames[i], owner);
+  return this->ContextMakeContextWithPolyVars(owner, thePolyVars);
+}
+
+bool Expression::ContextMakeContextWithPolyVars(Calculator& owner, const List<Expression>& inputPolyVarEs)
+{ this->MakeEmptyContext(owner);
+  Expression thePolyVars;
+  thePolyVars.reset(owner, 2);
+  thePolyVars.AddChildAtomOnTop(owner.opPolynomialVariables());
+  for (int i = 0; i< inputPolyVarEs.size; i ++)
+    thePolyVars.AddChildOnTop(inputPolyVarEs[i]);
+  return this->AddChildOnTop(thePolyVars);
+}
+
 bool Expression::ContextMakeContextWithOnePolyVar(Calculator& owner, const Expression& inputPolyVarE)
 { this->MakeEmptyContext(owner);
   Expression thePolyVars;

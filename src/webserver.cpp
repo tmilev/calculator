@@ -5,6 +5,14 @@
 #include "vpfHeader7DatabaseInterface.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
 #include "vpfHeader8HtmlSnippets.h"
+#include "vpfWebAPI.h"
+
+std::string WebAPI::appNoCache = "appNoCache";
+std::string WebAPI::app = "app";
+std::string WebAPI::calculatorHTML = "/calculator-html";
+std::string WebAPI::calculatorOnePageJS = "/calculator-html/javascript_all_in_one.js";
+std::string WebAPI::calculatorOnePageJSWithHash = "/calculator-html/javascript_all_in_one.js";
+std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
 
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 WebServer theWebServer;
@@ -115,13 +123,13 @@ std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   out
   << "}\n";
   out
-//  << "function getCalculatorCGIsettings(){\n"
-//  << "  result =\"examStatus=\"+getCookie(\"examStatus\");\n"
-//  << "  result +=\"&username=\"+getCookie(\"username\");\n"
-//  << "  result +=\"&authenticationToken =\"+getCookie(\"authenticationToken\");\n"
-//  << "  result +=\"&fileName=\"+getCookie(\"fileName\");\n"
-//  << "  return result;\n"
-//  << "}\n"
+  //<< "function getCalculatorCGIsettings(){\n"
+  //<< "  result =\"examStatus=\"+getCookie(\"examStatus\");\n"
+  //<< "  result +=\"&username=\"+getCookie(\"username\");\n"
+  //<< "  result +=\"&authenticationToken =\"+getCookie(\"authenticationToken\");\n"
+  //<< "  result +=\"&fileName=\"+getCookie(\"fileName\");\n"
+  //<< "  return result;\n"
+  //<< "}\n"
   << "var setProblemLinkStyle;\n"
   << "function loadSettings(){\n"
   << "  storeSettingsProgress();\n"
@@ -211,9 +219,9 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   << "      requestStatus.innerHTML=\"<span style ='color:red'><b>Empty response</b></span>\";"
   << "  }\n"
   ////////////////////////////////////////////
-//  << "  requestStatus.innerHTML = \"<span style ='color:orange'><b>Request sent</b></span>\";\n"
+  //<< "  requestStatus.innerHTML = \"<span style ='color:orange'><b>Request sent</b></span>\";\n"
   << "  https.send(null);\n";
-//  out << "  if (oRequest.status ==200)\n";
+  //out << "  if (oRequest.status ==200)\n";
   out << "   this.timeoutID =window.setTimeout(\"progressReport()\",timeIncrementInTenthsOfSecond*100);\n";
   out << " }\n";
   out << "function SendTogglePauseRequest()\n";
@@ -242,8 +250,8 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "   }\n";
   out << "  pauseRequest.send(null);\n";
   out << "}\n";
-//  out << " progressReport();";
-//  out << " var newReportString=\"\";\n";
+  //out << " progressReport();";
+  //out << " var newReportString=\"\";\n";
   out << " </script>\n";
   out << " \n";
   out << " \n";
@@ -408,10 +416,10 @@ void SSLdata::initSSLserver()
     }
   } else
   { logServer << logger::green << "Found officially signed certificate... " << logger::endL;
-//    if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate2.c_str()) <= 0)
-//    { ERR_print_errors_fp(stderr);
-//      exit(3);
-//    }
+    //if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate2.c_str()) <= 0)
+    //{ ERR_print_errors_fp(stderr);
+    //  exit(3);
+    //}
     if (SSL_CTX_use_certificate_chain_file(this->contextServer, singedFileCertificate1Physical.c_str()) <= 0)
     { ERR_print_errors_fp(stderr);
       crash << "Failed to user certificate file." << crash;
@@ -426,9 +434,9 @@ void SSLdata::initSSLserver()
   { logServer << "Private key does not match the certificate public key.";
     crash << "Private key does not match the certificate public key." << crash;
   }
-////////Safari web browser: no further use of foul language necessary.
-//  SSL_CTX_set_options(theSSLdata.ctx, SSL_OP_SAFARI_ECDHE_ECDSA_BUG);
-////////
+  ////////Safari web browser: no further use of foul language necessary.
+  //  SSL_CTX_set_options(theSSLdata.ctx, SSL_OP_SAFARI_ECDHE_ECDSA_BUG);
+  ////////
 }
 #endif
 
@@ -448,16 +456,16 @@ void SSLdata::initSSLserver()
 void SSLdata::HandShakeIamServer(int inputSocketID)
 {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamServer");
-//  logWorker << "Got to here 1" << logger::endL;
+  //logWorker << "Got to here 1" << logger::endL;
   this->sslServeR = SSL_new(this->contextServer);
-//  logWorker << "Got to here 1.05" << logger::endL;
+  //logWorker << "Got to here 1.05" << logger::endL;
   if (this->sslServeR == 0)
   { logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
   }
   this->SetSocketAddToStackServer(inputSocketID);
   int maxNumHandshakeTries = 3;
-//  int theError = - 1;
+  //int theError = - 1;
   for (int i = 0; i < maxNumHandshakeTries; i ++)
   { //logWorker << logger::yellow << "DEBUG: ssl is server before call: " << SSL_is_server(this->sslServeR) << logger::endL;
     this->errorCode = SSL_accept(this->sslServeR);
@@ -494,10 +502,10 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
         << logger::endL;
         maxNumHandshakeTries = 1;
         break;
-  //    case SSL_ERROR_WANT_ASYNC:
-  //      logOpenSSL << logger::red << "Asynchronous engine is still processing data. "
-  //      << logger::endL;
-  //      break;
+      //case SSL_ERROR_WANT_ASYNC:
+      //  logOpenSSL << logger::red << "Asynchronous engine is still processing data. "
+      //  << logger::endL;
+      //  break;
       case SSL_ERROR_SYSCALL:
         logOpenSSL << logger::red << "Error: some I/O error occurred. "
         << logger::endL;
@@ -506,9 +514,9 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
       case SSL_ERROR_SSL:
         logOpenSSL << logger::red << "A failure in the SSL library occurred. "
         << logger::endL;
-//        theError = ERR_get_error(3ssl);
-//        if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
-//          maxNumHandshakeTries =1;
+      //theError = ERR_get_error(3ssl);
+      //if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
+      //  maxNumHandshakeTries =1;
         break;
       default:
         logOpenSSL << logger::red << "Unknown error. " << logger::endL;
@@ -628,10 +636,10 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup
           << "repeat needed (not implemented).  <br>";
         maxNumHandshakeTries = 1;
         break;
-  //    case SSL_ERROR_WANT_ASYNC:
-  //      logOpenSSL << logger::red << "Asynchronous engine is still processing data. <br>"
-  //      << logger::endL;
-  //      break;
+      //case SSL_ERROR_WANT_ASYNC:
+      //  logOpenSSL << logger::red << "Asynchronous engine is still processing data. <br>"
+      //  << logger::endL;
+      //  break;
       case SSL_ERROR_SYSCALL:
         if (commentsOnFailure != 0)
           *commentsOnFailure << logger::red << "Error: some I/O error occurred. <br>"
@@ -641,9 +649,9 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup
       case SSL_ERROR_SSL:
         if (commentsOnFailure != 0)
           *commentsOnFailure << "A failure in the SSL library occurred. <br>";
-//        theError = ERR_get_error(3ssl);
-//        if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
-//          maxNumHandshakeTries =1;
+        //theError = ERR_get_error(3ssl);
+        //if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
+        //  maxNumHandshakeTries =1;
         break;
       default:
         if (commentsOnFailure != 0)
@@ -668,7 +676,7 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup
     return false;
   }
   //CHK_SSL(err);
-//  logWorker << "Got to here 2" << logger::endL;
+  //logWorker << "Got to here 2" << logger::endL;
   /* Get the cipher - opt */
   /* Get client's certificate (note: beware of dynamic allocation) - opt */
   if (false)
@@ -893,8 +901,8 @@ bool WebWorker::ReceiveAllHttpSSL()
   this->requestTypE = this->requestUnknown;
   unsigned const int bufferSize = 60000;
   char buffer[bufferSize];
-//  std::cout << "Got thus far 9" << std::endl;
-//  std::cout.flush();
+  //std::cout << "Got thus far 9" << std::endl;
+  //std::cout.flush();
   if (this->connectedSocketID == - 1)
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   struct timeval tv; //<- code involving tv taken from stackexchange
@@ -941,8 +949,8 @@ bool WebWorker::ReceiveAllHttpSSL()
   if (this->messageBody.size() == (unsigned) this->ContentLength)
     return true;
   this->messageBody.clear(); //<- needed else the length error check will pop.
-//  logWorker << "Content-length parsed to be: " << this->ContentLength
-//  << "However the size of mainArgumentRAW is: " << this->mainArgumentRAW.size();
+  //logWorker << "Content-length parsed to be: " << this->ContentLength
+  //<< "However the size of mainArgumentRAW is: " << this->mainArgumentRAW.size();
   if (this->ContentLength > 10000000)
   { this->CheckConsistency();
     error = "Content-length parsed to be more than 10 million bytes, aborting.";
@@ -962,7 +970,7 @@ bool WebWorker::ReceiveAllHttpSSL()
       this->displayUserInput = this->error;
       return false;
     }
-//    logIO << logger::blue << "about to read ..." << logger::endL;
+    //logIO << logger::blue << "about to read ..." << logger::endL;
     numBytesInBuffer = this->parent->theSSLdata.SSLread
     (this->parent->theSSLdata.sslServeR, &buffer, bufferSize - 1, &comments, 0, true);
     if (numBytesInBuffer == 0)
@@ -1089,23 +1097,23 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
   if (!theGlobalVariables.flagRunningBuiltInWebServer)
     return;
   theWebServer.CheckConsistency();
-//  logWorker << logger::endL << logger::red << "SetStatus: outputFunction: "
-//  << (int) stOutput.theOutputFunction << logger::endL;
+  //logWorker << logger::endL << logger::red << "SetStatus: outputFunction: "
+  //<< (int) stOutput.theOutputFunction << logger::endL;
   MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerStaticFiasco;
-//    std::cout << "Got thus far ProgressReportWebServer::SetStatus 2" << std::endl;
+  //std::cout << "Got thus far ProgressReportWebServer::SetStatus 2" << std::endl;
   safetyFirst.LockMe();
-//    std::cout << "Got thus far ProgressReportWebServer::SetStatus 3" << std::endl;
+  //std::cout << "Got thus far ProgressReportWebServer::SetStatus 3" << std::endl;
   if (this->indexProgressReport >= theWebServer.theProgressReports.size)
     theWebServer.theProgressReports.SetSize(this->indexProgressReport + 1);
   theWebServer.theProgressReports[this->indexProgressReport] = inputStatus;
-//    std::cout << "SetStatus: passed mutex section" << std::endl;
+  //std::cout << "SetStatus: passed mutex section" << std::endl;
   std::stringstream toBePiped;
   for (int i = 0; i < theWebServer.theProgressReports.size; i ++)
     if (theWebServer.theProgressReports[i] != "")
       toBePiped << "<br>" << theWebServer.theProgressReports[i];
   safetyFirst.UnlockMe();
-  // logWorker << logger::endL << logger::red << "SetStatus before the issue: outputFunction: "
-  // << (int) stOutput.theOutputFunction << logger::endL;
+  //logWorker << logger::endL << logger::red << "SetStatus before the issue: outputFunction: "
+  //<< (int) stOutput.theOutputFunction << logger::endL;
   if (!theGlobalVariables.flagRunningBuiltInWebServer)
     return;
   theWebServer.GetActiveWorker().pipeWorkerToWorkerStatus.WriteAfterEmptying(toBePiped.str(), false, false);
@@ -1286,8 +1294,8 @@ void WebWorker::resetMessageComponentsExceptRawMessage()
 static std::stringstream standardOutputStreamAfterTimeout;
 void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 { standardOutputStreamAfterTimeout << input;
-//  logWorker << logger::endL << logger::green << " Standard output: " << standardOutputStreamAfterTimeout.str()
-//  << logger::endL;
+  //logWorker << logger::endL << logger::green << " Standard output: " << standardOutputStreamAfterTimeout.str()
+  //<< logger::endL;
 }
 
 std::string WebWorker::GetNavigationPage()
@@ -1421,7 +1429,7 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
 bool WebWorker::ExtractArgumentsFromMessage
 (const std::string& input, std::stringstream& argumentProcessingFailureComments, int recursionDepth)
 { MacroRegisterFunctionWithName("WebWorker::ExtractArgumentsFromMessage");
-//  stOutput << "DEBUG: here I am.";
+  //stOutput << "DEBUG: here I am.";
   if (recursionDepth > 1)
   { argumentProcessingFailureComments << "Error: input string encoded too many times";
     return false;
@@ -1775,7 +1783,7 @@ void WebWorker::ParseMessageHead()
       }
     }
   theGlobalVariables.hostWithPort = this->hostWithPort;
-//  std::cout << "Got thus far 14" << std::endl;
+  //std::cout << "Got thus far 14" << std::endl;
 }
 
 void WebWorker::AttemptUnknownRequestErrorCorrection()
@@ -1820,7 +1828,7 @@ bool WebWorker::ReceiveAllHttp()
   char buffer[bufferSize];
   if (this->connectedSocketID == - 1)
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
-//  std::cout << "Got thus far 10" << std::endl;
+  //std::cout << "Got thus far 10" << std::endl;
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
@@ -1957,7 +1965,7 @@ void WebWorker::ReportDisplayUserInput()
     this->displayUserInput.resize(3000);
   this->pipeWorkerToWorkerUserInput.WriteAfterEmptying
   (this->displayUserInput,false, false);
-//  logWorker << logger::blue << "Piping " << this->displayUserInput << " to the server. " << logger::endL;
+  //logWorker << logger::blue << "Piping " << this->displayUserInput << " to the server. " << logger::endL;
 }
 
 void WebWorker::ExtractHostInfo()
@@ -2051,9 +2059,12 @@ void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const st
     this->remainingHeaderToSend.AddOnTop(finalHeader[i]);
 }
 
-void WebWorker::SetHeaderOKNoContentLength()
+void WebWorker::SetHeaderOKNoContentLength(const std::string& extraHeader)
 { MacroRegisterFunctionWithName("WebWorker::SetHeaderOKNoContentLength");
-  this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: text/html; charset =utf-8\r\nAccess-Control-Allow-Origin: *");
+  std::string header = "Content-Type: text/html; charset=utf-8\r\nAccess-Control-Allow-Origin: *";
+  if (extraHeader != "")
+    header += "\r\n" + extraHeader;
+  this->SetHeadeR("HTTP/1.0 200 OK", header);
   this->flagDoAddContentLength = true;
 }
 
@@ -2081,28 +2092,28 @@ void WebWorker::SanitizeVirtualFileName()
 
 int WebWorker::ProcessCalculatorExamples()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorExamples");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << theParser->ToStringFunctionHandlers();
   return 0;
 }
 
 int WebWorker::ProcessCalculatorExamplesJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorExamplesJSON");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << theParser->ToStringFunctionHandlersJSON();
   return 0;
 }
 
 int WebWorker::ProcessServerStatusPublic()
 { MacroRegisterFunctionWithName("WebWorker::ProcessServerStatusPublic");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << theWebServer.ToStringStatusPublic();
   return 0;
 }
 
 int WebWorker::ProcessToggleMonitoring()
 { MacroRegisterFunctionWithName("WebWorker::ToggleMonitoring");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << "<html><head> ";
   stOutput << HtmlRoutines::GetCSSLinkCalculator();
   stOutput << "</head>";
@@ -2126,7 +2137,7 @@ int WebWorker::ProcessToggleMonitoring()
 
 int WebWorker::ProcessServerStatus()
 { MacroRegisterFunctionWithName("WebWorker::ProcessServerStatus");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   std::stringstream out;
   out << "<html>"
   << "<head>"
@@ -2151,7 +2162,7 @@ int WebWorker::ProcessServerStatus()
 
 int WebWorker::ProcessServerStatusJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessServerStatusJSON");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   std::stringstream out;
   if (theGlobalVariables.UserDefaultHasAdminRights())
     out << " <table><tr><td style =\"vertical-align:top\">"
@@ -2168,7 +2179,7 @@ int WebWorker::ProcessServerStatusJSON()
 
 int WebWorker::ProcessPauseWorker()
 { MacroRegisterFunctionWithName("WebWorker::ProcessPauseWorker");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   std::string theMainInput = theGlobalVariables.GetWebInput("mainInput");
   if (theMainInput == "")
   { stOutput << "<b>To pause a worker please provide the worker number in the mainInput field.</b>";
@@ -2205,7 +2216,7 @@ int WebWorker::ProcessPauseWorker()
 
 int WebWorker::ProcessMonitor()
 { MacroRegisterFunctionWithName("WebWorker::ProcessMonitor");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   logWorker << "Processing get monitor." << logger::endL;
   std::string theMainInput = theGlobalVariables.GetWebInput("mainInput");
   if (theMainInput == "")
@@ -2234,7 +2245,7 @@ int WebWorker::ProcessMonitor()
 
 int WebWorker::ProcessComputationIndicator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicator");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   logWorker << "Processing get request indicator." << logger::endL;
   std::string theMainInput = theGlobalVariables.GetWebInput("mainInput");
   if (theMainInput == "")
@@ -2360,7 +2371,7 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
 
 int WebWorker::ProcessFolder()
 { MacroRegisterFunctionWithName("WebWorker::ProcessFolder");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   std::stringstream out;
   out << "<html><body>";
 //  out << this->ToString();
@@ -2447,7 +2458,7 @@ int WebWorker::ProcessFile()
   bool isBinary = this->IsFileExtensionOfBinaryFile(fileExtension);
   std::fstream theFile;
   if (!FileOperations::OpenFileUnsecure(theFile, this->RelativePhysicalFileNamE, false, false, !isBinary))
-  { this->SetHeaderOKNoContentLength();
+  { this->SetHeaderOKNoContentLength("");
     stOutput << "<html><body><b>Error: file appears to exist but I could not open it.</b> ";
     if (this->flagFileNameSanitized)
     { stOutput << "<hr>You requested virtual file: " << this->VirtualFileName
@@ -2476,7 +2487,7 @@ int WebWorker::ProcessFile()
   << "Access-Control-Allow-Origin: *\r\n";
   for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++)
     if (MathRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i]))
-    { theHeader << "Cache-Control: max-age =129600000, public\r\n";
+    { theHeader << WebAPI::HeaderCacheControl << "\r\n";
       withCacheHeader = true;
       break;
     }
@@ -2492,7 +2503,7 @@ int WebWorker::ProcessFile()
   { debugBytesStream << "#" << this->GetMIMEtypeFromFileExtension(fileExtension);
   }
   if (theGlobalVariables.flagRunningApache)
-  { this->SetHeaderOKNoContentLength();
+  { this->SetHeaderOKNoContentLength("");
     stOutput << "<html><body>"
     << "<a href=\"" << this->VirtualFileName << "\">" << this->VirtualFileName << "</a>"
     << "</body></html>";
@@ -2823,8 +2834,8 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   << "<td>"
   << "<input class =\"textInputUsername\" type =\"password\" id =\"password\" name =\"password\" placeholder =\"password\" autocomplete =\"on\">"
   << "</td></tr>";
-//  out << "<tr><td></td><td>";
-//  out << "</td></tr>";
+  //out << "<tr><td></td><td>";
+  //out << "</td></tr>";
   out << "</table>";
   out << this->GetHtmlHiddenInputs(false, false);
   out << "<input type =\"hidden\" name =\"request\" id =\"request\"";
@@ -2870,7 +2881,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   << "{ document.getElementById(\"googleToken\").value =googleUser.getAuthResponse().id_token;\n"
   << "  addCookie(\"googleToken\", googleUser.getAuthResponse().id_token, 5, true);\n"
   << "  document.getElementById(\"doSignInWithGoogleToken\").style.opacity =\"1\";\n"
-//  << "  document.getElementById(\"doSignInWithGoogleToken\").style.visibility =\"visible\";\n"
+  //<< "  document.getElementById(\"doSignInWithGoogleToken\").style.visibility =\"visible\";\n"
   << "}\n"
   << "</script>\n";
 
@@ -2969,9 +2980,8 @@ std::string WebWorker::GetChangePasswordPage()
     out << "</body></html>";
     return out.str();
   }
-//    << "  window.location ='calculator?username='+GlobalUser+'&authenticationToken ='+GlobalAuthenticationToken;";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
-//  out << "<form name =\"login\" id =\"login\" action =\"calculator\" method =\"GET\" accept-charset =\"utf-8\">";
+  //out << "<form name =\"login\" id =\"login\" action =\"calculator\" method =\"GET\" accept-charset =\"utf-8\">";
   out
   <<  "User: " << theGlobalVariables.userDefault.username
   << "<input type =\"hidden\" id =\"username\" placeholder =\"username\" "
@@ -3031,9 +3041,7 @@ std::string WebWorker::GetChangePasswordPage()
   << "</table>";
   if (doShowPasswordChangeField)
   { out << "<button  onclick=\"submitChangePassRequest('passwordChangeResult') \"> Submit</button>\n"
-    << "<span id =\"passwordChangeResult\"> </span>\n"
-//  << "</form>"
-    ;
+    << "<span id =\"passwordChangeResult\"> </span>\n";
     out << "<hr>"
     << "Email: " << theGlobalVariables.userDefault.email
     << "<br>\n"
@@ -3115,10 +3123,10 @@ int WebWorker::SetEmail(const std::string& input)
 int WebWorker::ProcessChangePassword()
 { MacroRegisterFunctionWithName("WebWorker::ProcessChangePassword");
   //stOutput << " ere i am";
-//  if (theGlobalVariables.UserDebugFlagOn())
-//  theGlobalVariables.SetWebInpuT("debugFlag", "true");
-//  stOutput << "DEBUG: " << this->ToStringCalculatorArgumentsHumanReadable();
-  this->SetHeaderOKNoContentLength();
+  //if (theGlobalVariables.UserDebugFlagOn())
+  //theGlobalVariables.SetWebInpuT("debugFlag", "true");
+  //stOutput << "DEBUG: " << this->ToStringCalculatorArgumentsHumanReadable();
+  this->SetHeaderOKNoContentLength("");
 #ifdef MACRO_use_MongoDB
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theUser.enteredAuthenticationToken = "";
@@ -3194,7 +3202,7 @@ int WebWorker::ProcessChangePassword()
 
 int WebWorker::ProcessCompute()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCompute");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
 //  theParser.initComputationStats();
   theParser->inputString = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection = WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone;
@@ -3225,7 +3233,7 @@ int WebWorker::ProcessCompute()
 
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   theParser->inputString = HtmlRoutines::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("mainInput"), false);
   theParser->flagShowCalculatorExamples = (theGlobalVariables.GetWebInput("showExamples") == "true");
@@ -3240,7 +3248,7 @@ int WebWorker::ProcessCalculator()
   stOutput << HtmlRoutines::GetJavascriptAutocompleteLink();
   stOutput << HtmlRoutines::GetJavascriptInitializeButtonsLink();
   stOutput << HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull();
-//  stOutput << HtmlRoutines::GetJavascriptMathQuillDefault();
+  //stOutput << HtmlRoutines::GetJavascriptMathQuillDefault();
   stOutput << HtmlRoutines::GetMathQuillStyleSheetLink();
 
   stOutput << this->GetJavaScriptIndicatorBuiltInServer();
@@ -3353,7 +3361,7 @@ int WebWorker::ProcessCalculator()
   out << this->closeIndentTag("</table><!--table with input, autocomplete space and output-->");
   out << this->closeIndentTag("</td>");
 
-//  bool displayClientMessage = theWebServer.flagUsingBuiltInServer && theWebServer.activeWorker!= - 1;
+  //bool displayClientMessage = theWebServer.flagUsingBuiltInServer && theWebServer.activeWorker!= - 1;
   //displayClientMessage = false;
   out << "<td valign =\"top\">";
   theGlobalVariables.theSourceCodeFiles().QuickSortAscending();
@@ -3379,14 +3387,14 @@ int WebWorker::ProcessCalculator()
 
 int WebWorker::ProcessChangePasswordPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessChangePasswordPage");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << this->GetChangePasswordPage();
   return 0;
 }
 
 int WebWorker::ProcessForgotLoginPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessForgotLoginPage");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
   { DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
     theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
@@ -3397,7 +3405,7 @@ int WebWorker::ProcessForgotLoginPage()
 
 int WebWorker::ProcessSignUpPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSignUpPage");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
   theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
   stOutput << this->GetSignUpPage();
@@ -3406,7 +3414,7 @@ int WebWorker::ProcessSignUpPage()
 
 int WebWorker::ProcessLogout()
 { MacroRegisterFunctionWithName("WebWorker::ProcessLogout");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
   theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
   stOutput << this->GetLoginPage();
@@ -3415,28 +3423,38 @@ int WebWorker::ProcessLogout()
 
 int WebWorker::ProcessSelectCourse()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSelectCourse");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetSelectCourse();
   return 0;
 }
 
 int WebWorker::ProcessSelectCourseJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSelectCourseJSON");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetSelectCourseJSON();
   return 0;
 }
 
 int WebWorker::ProcessTopicListJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessTopicListJSON");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetTopicTableJSON();
+  return 0;
+}
+
+int WebWorker::ProcessCalculatorOnePageJS(bool appendBuildHash)
+{ MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorOnePageJS");
+  if (appendBuildHash)
+    this->SetHeaderOKNoContentLength(WebAPI::HeaderCacheControl);
+  else
+    this->SetHeaderOKNoContentLength("");
+  stOutput << HtmlInterpretation::GetOnePageJS(appendBuildHash);
   return 0;
 }
 
 int WebWorker::ProcessApp(bool appendBuildHash)
 { MacroRegisterFunctionWithName("WebWorker::ProcessApp");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
   stOutput << HtmlInterpretation::GetApp(appendBuildHash);
   return 0;
@@ -3444,14 +3462,14 @@ int WebWorker::ProcessApp(bool appendBuildHash)
 
 int WebWorker::ProcessAbout()
 { MacroRegisterFunctionWithName("WebWorker::ProcessAbout");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetAboutPage();
   return 0;
 }
 
 int WebWorker::ProcessTemplate()
 { MacroRegisterFunctionWithName("WebWorker::ProcessTemplate");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetPageFromTemplate();
   //if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
   //  stOutput << "<!--" << this->ToStringMessageFullUnsafe() << "-->";
@@ -3460,7 +3478,7 @@ int WebWorker::ProcessTemplate()
 
 int WebWorker::ProcessUserInfoJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessUserInfoJSON");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetJSONUserInfo();
   //if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
   //  stOutput << "<!--" << this->ToStringMessageFullUnsafe() << "-->";
@@ -3469,7 +3487,7 @@ int WebWorker::ProcessUserInfoJSON()
 
 int WebWorker::ProcessTemplateJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessTemplateJSON");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetJSONFromTemplate();
   //if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
   //  stOutput << "<!--" << this->ToStringMessageFullUnsafe() << "-->";
@@ -3478,14 +3496,14 @@ int WebWorker::ProcessTemplateJSON()
 
 int WebWorker::ProcessExamPageJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessExamPageJSON");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetExamPageJSON();
   return 0;
 }
 
 int WebWorker::ProcessExamPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessExamPage");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetExamPage();
   return 0;
 }
@@ -3497,133 +3515,133 @@ int WebWorker::ProcessExamPageInterpreter()
 
 int WebWorker::ProcessNavigation()
 { MacroRegisterFunctionWithName("WebWorker::ProcessNavigation");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << this->GetNavigationPage();
   return 0;
 }
 
 int WebWorker::ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication)
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetAuthenticationToken");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << this->GetAuthenticationToken(reasonForNoAuthentication);
   return 0;
 }
 
 int WebWorker::ProcessLoginPage(const std::string& reasonForLogin)
 { MacroRegisterFunctionWithName("WebWorker::ProcessLoginPage");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << this->GetLoginPage(reasonForLogin);
   return 0;
 }
 
 int WebWorker::ProcessSetProblemDatabaseInfo()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSetProblemDatabaseInfo");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetSetProblemDatabaseInfoHtml();
   return 0;
 }
 
 int WebWorker::ProcessAddUserEmails()
 { MacroRegisterFunctionWithName("WebWorker::ProcessAddUserEmails");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << this->GetAddUserEmails();
   return 0;
 }
 
 int WebWorker::ProcessModifyPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessModifyPage");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::ModifyProblemReport();
   return 0;
 }
 
 int WebWorker::ProcessAssignTeacherToSection()
 { MacroRegisterFunctionWithName("WebWorker::ProcessAssignTeacherToSection");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::AddTeachersSections();
   return 0;
 }
 
 int WebWorker::ProcessScores()
 { MacroRegisterFunctionWithName("WebWorker::ProcessScores");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetScoresPage();
   return 0;
 }
 
 int WebWorker::ProcessScoresInCoursePage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessScoresInCoursePage");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetScoresInCoursePage();
   return 0;
 }
 
 int WebWorker::ProcessAccounts()
 { MacroRegisterFunctionWithName("WebWorker::ProcessAccounts");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetAccountsPage(this->hostWithPort);
   return 0;
 }
 
 int WebWorker::ProcessAccountsJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessAccountsJSON");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetAccountsPageJSON(this->hostWithPort);
   return 0;
 }
 
 int WebWorker::ProcessDatabaseJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseJSON");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << this->GetDatabaseJSON();
   return 0;
 }
 
 int WebWorker::ProcessDatabase()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabase");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << this->GetDatabasePage();
   return 0;
 }
 
 int WebWorker::ProcessDatabaseDeleteEntry()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseDeleteEntry");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << this->GetDatabaseDeleteOneItem();
   return 0;
 }
 
 int WebWorker::ProcessDatabaseModifyEntry()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseModifyEntry");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << "Not implemented yet";
   return 0;
 }
 
 int WebWorker::ProcessDatabaseOneEntry()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseOneEntry");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << "Not implemented yet";
   return 0;
 }
 
 int WebWorker::ProcessBrowseProblems()
 { MacroRegisterFunctionWithName("WebWorker::ProcessBrowseProblems");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetBrowseProblems();
   return 0;
 }
 
 int WebWorker::ProcessEditPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessEditPage");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << this->GetEditPageHTML();
   return 0;
 }
 
 int WebWorker::ProcessEditPageJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessEditPageJSON");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetEditPageJSON();
   return 0;
 }
@@ -3631,7 +3649,7 @@ int WebWorker::ProcessEditPageJSON()
 #include "vpfHeader2Math10_LaTeXRoutines.h"
 int WebWorker::ProcessSlidesOrHomeworkFromSource()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSlidesOrHomeworkFromSource");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   LaTeXcrawler theCrawler;
   for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++)
   { std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
@@ -3688,7 +3706,7 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource()
 
 int WebWorker::ProcessSlidesSource()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSlidesSource");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   LaTeXcrawler theCrawler;
   for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++)
   { std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
@@ -3740,35 +3758,35 @@ int WebWorker::ProcessSlidesSource()
 
 int WebWorker::ProcessClonePage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessClonePage");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << this->GetClonePageResult();
   return 0;
 }
 
 int WebWorker::ProcessProblemGiveUp()
 { MacroRegisterFunctionWithName("WebWorker::ProcessProblemGiveUp");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetAnswerOnGiveUp();
   return 0;
 }
 
 int WebWorker::ProcessProblemSolution()
 { MacroRegisterFunctionWithName("WebWorker::ProcessProblemSolution");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetProblemSolution();
   return 0;
 }
 
 int WebWorker::ProcessSubmitAnswersPreview()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSubmitAnswersPreview");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::submitAnswersPreview();
   return 0;
 }
 
 std::string WebWorker::GetClonePageResult()
 { MacroRegisterFunctionWithName("WebWorker::GetClonePageResult");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   return HtmlInterpretation::ClonePageResult();
 }
 
@@ -3805,19 +3823,19 @@ std::string HtmlInterpretation::ModifyProblemReport()
 
 std::string WebWorker::GetEditPageHTML()
 { MacroRegisterFunctionWithName("WebWorker::GetEditPageHTML");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   return HtmlInterpretation::GetEditPageHTML();
 }
 
 std::string WebWorker::GetExamPageInterpreter()
 { MacroRegisterFunctionWithName("WebWorker::GetExamPageInterpreter");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   return HtmlInterpretation::GetExamPageInterpreter();
 }
 
 int WebWorker::ProcessSubmitAnswers()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSubmitAnswers");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::SubmitAnswers();
   return 0;
 }
@@ -3887,7 +3905,7 @@ std::string WebWorker::GetSignUpPage()
   << "}\n";
   out << "function submitSignUpInfo()\n";
   out << "{";
-//  << " document.getElementById('desiredAccount')"
+  //<< " document.getElementById('desiredAccount')"
   //out << "  var grecaptcha;\n";
   out
   << "  var theInput =\"request=signUp&\";\n"
@@ -3923,22 +3941,22 @@ std::string WebWorker::GetSignUpPage()
   << "<td> Email:</td>"
   << "<td> <input type =\"text\" id =\"email\" name =\"email\" placeholder =\"email\">\n</td>\n"
   << "</tr>"
-//  << "<tr>"
-//  << "<td>"
-//  << "Password:"
-//  << "</td>\n"
-//  << "<td>"
-//  << "<input type =\"password\" id =\"desiredPassword\" name =\"desiredPassword\" placeholder =\"password\">\n"
-//  << "</td>\n"
-//  << "</tr>"
-//  << "<tr>"
-//  << "<td>"
-//  <<  "Repeat password:\n"
-//  << "\n</td>"
-//  << "<td>\n"
-//  << "<input type =\"password\" id =\"reenteredPassword\" name =\"reenteredPassword\" placeholder =\"re-enter password\">\n<br>\n"
-//  << "</td>\n"
-//  << "</tr>"
+  //<< "<tr>"
+  //<< "<td>"
+  //<< "Password:"
+  //<< "</td>\n"
+  //<< "<td>"
+  //<< "<input type =\"password\" id =\"desiredPassword\" name =\"desiredPassword\" placeholder =\"password\">\n"
+  //<< "</td>\n"
+  //<< "</tr>"
+  //<< "<tr>"
+  //<< "<td>"
+  //<<  "Repeat password:\n"
+  //<< "\n</td>"
+  //<< "<td>\n"
+  //<< "<input type =\"password\" id =\"reenteredPassword\" name =\"reenteredPassword\" placeholder =\"re-enter password\">\n<br>\n"
+  //<< "</td>\n"
+  //<< "</tr>"
   << "</table>";
   out << HtmlInterpretation::GetCaptchaDiv();
   out << "</form>";
@@ -3974,8 +3992,8 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
   out << "\"";
   out << ">\n";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
-//  out << "DEBUG: " << this->ToStringMessageFullUnsafe();
-//  out << WebWorker::ToStringCalculatorArgumentsHumanReadable();
+  //out << "DEBUG: " << this->ToStringMessageFullUnsafe();
+  //out << WebWorker::ToStringCalculatorArgumentsHumanReadable();
   out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</calculatorNavigation>\n";
   out << WebWorker::GetLoginHTMLinternal(reasonForLogin) << "</body></html>";
@@ -4119,14 +4137,14 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection()
     stOutput << "<html><body>Address available through secure (SSL) connection only. "
     << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
   } else
-  { this->SetHeaderOKNoContentLength();
+  { this->SetHeaderOKNoContentLength("");
     stOutput << "<html><body>Address available through secure (SSL) connection only. <br>"
     << "<b style ='color:red'>In the web address, please change http to https. </b><br>"
     << "Unfortunately, I can't redirect you automatically as your browser did not tell me "
     << "under what domain name it sees me, and the server responds to multiple domain names. ";
 
   }
-//  stOutput << "<br>" << redirectStream.str();
+  //stOutput << "<br>" << redirectStream.str();
   if (theGlobalVariables.flagRunningApache)
     stOutput << "To avoid seeing this message, <b><span \"style = color:red\">please use the secure version:</span></b> "
     << "<a href=\"https://" << this->hostNoPort << "\">https://" << this->hostNoPort
@@ -4367,10 +4385,14 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType == "topicListJSON" ||
            theGlobalVariables.userCalculatorRequestType == "topicListJSONNoLogin")
     return this->ProcessTopicListJSON();
-  else if (theGlobalVariables.userCalculatorRequestType == "app")
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::app)
     return this->ProcessApp(true);
-  else if (theGlobalVariables.userCalculatorRequestType == "appNoCache")
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::appNoCache)
     return this->ProcessApp(false);
+  else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorOnePageJS)
+    return this->ProcessCalculatorOnePageJS(false);
+  else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorOnePageJSWithHash)
+    return this->ProcessCalculatorOnePageJS(true);
   return this->ProcessFolderOrFile();
 }
 
@@ -4427,10 +4449,10 @@ void WebWorker::Release()
 void WebWorker::OutputShowIndicatorOnTimeout()
 { MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
   MutexLockGuard theLock(this->PauseIndicatorPipeInUse.mutexForProcessBlocking.GetElement());
-//  this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
+  //this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
   theGlobalVariables.flagOutputTimedOut = true;
   theGlobalVariables.flagTimedOutComputationIsDone = false;
-  //  ProgressReportWebServer theReport("WebServer::OutputShowIndicatorOnTimeout");
+  //ProgressReportWebServer theReport("WebServer::OutputShowIndicatorOnTimeout");
   logWorker << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
   if (theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed)
   { stOutput << "Your computation is taking more than " << theGlobalVariables.MaxComputationTimeBeforeWeTakeAction
@@ -4447,7 +4469,7 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   stOutput << "A progress indicator, as reported by your current computation, is displayed below. "
   << "When done, your computation result will be displayed below. ";
   stOutput << " <!>\n";
-//  out << "\n<br>\n<button onclick=\"progressReport()\">Manual report</button>";
+  //out << "\n<br>\n<button onclick=\"progressReport()\">Manual report</button>";
   if (this->indexInParent < 0)
     crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
   stOutput << "\n<script language =\"javascript\">\n"
@@ -4455,8 +4477,7 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   << "isPaused = false;\n "
   << "currentWorkerNumber =" << this->indexInParent + 1 << ";\n "
   << "progressReport();\n"
-  << "</script>"
-  ;
+  << "</script>";
   stOutput << "\n<br>\n<button id =\"idButtonSendTogglePauseRequest\" onclick=\"SendTogglePauseRequest()\">Pause</button>";
   stOutput << "\n<span id =\"idProgressReportRequestStatus\"></span>";
   stOutput << "<span id =\"idProgressReportTimer\"></span>\n";
@@ -4470,10 +4491,10 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   //this->parent->Release(this->pipeServerToWorkerControls[1]);
   //this->parent->Release(this->pipeWorkerToServerControls[0]);
   //this->parent->Release(this->pipeWorkerToServerControls[1]);
-//  this->parent->Release(this->pipeServerToWorkerIndicator[0]);
-//  this->parent->Release(this->pipeServerToWorkerIndicator[1]);
-//  this->parent->Release(this->pipeWorkerToServerIndicator[0]);
-//  this->parent->Release(this->pipeWorkerToServerIndicator[1]);
+  //this->parent->Release(this->pipeServerToWorkerIndicator[0]);
+  //this->parent->Release(this->pipeServerToWorkerIndicator[1]);
+  //this->parent->Release(this->pipeWorkerToServerIndicator[0]);
+  //this->parent->Release(this->pipeWorkerToServerIndicator[1]);
   this->parent->Release(this->connectedSocketID);
   //set flags properly:
   //we need to rewire the standard output and the crashing mechanism:
@@ -4483,13 +4504,13 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   //theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: continuing computation.");
   this->PauseIndicatorPipeInUse.mutexForProcessBlocking.GetElement().UnlockMe();
   //theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: exiting function.");
-//  this->SignalIamDoneReleaseEverything();
-//  logWorker << consoleGreen("Indicator: released everything and signalled end.") << logger::endL;
+  //this->SignalIamDoneReleaseEverything();
+  //logWorker << consoleGreen("Indicator: released everything and signalled end.") << logger::endL;
 }
 
 std::string WebWorker::ToStringStatus() const
 { std::stringstream out;
-//  if (theWebServer.currentlyConnectedAddresses.GetCoefficientsSum() != theWebServer.
+  //if (theWebServer.currentlyConnectedAddresses.GetCoefficientsSum() != theWebServer.
   out << "<br>Worker " << this->indexInParent + 1;
   if (this->flagInUse)
   { if (this->parent->activeWorker == this->indexInParent)
@@ -4526,8 +4547,7 @@ std::string WebWorker::ToStringStatus() const
   << ", " << this->pipeWorkerToWorkerStatus.ToString()
   << ", " << this->PauseWorker.ToString()
   << ", " << this->PauseComputationReportReceived.ToString()
-  << ", " << this->PauseIndicatorPipeInUse.ToString()
-  ;
+  << ", " << this->PauseIndicatorPipeInUse.ToString();
   out << ", user address: " << this->userAddress << ".";
   return out.str();
 }
@@ -4577,11 +4597,11 @@ WebServer::~WebServer()
 
 void WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone()
 { //logWorker << logger::red << ("Got THUS far") << logger::endL;
-//  logWorker << "here am i";
+  //logWorker << "here am i";
   MacroRegisterFunctionWithName("WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone");
   theWebServer.GetActiveWorker().OutputShowIndicatorOnTimeout();
-//  stOutput << "What the hell";
-//  stOutput.Flush();
+  //stOutput << "What the hell";
+  //stOutput.Flush();
 }
 
 void WebServer::FlushActiveWorker()
@@ -4840,7 +4860,7 @@ std::string WebServer::ToStringStatusPublicNoTop()
   << this->GetActiveWorker().timeOfLastPingServerSideOnly
   << " seconds = "
   << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
-  (this->GetActiveWorker().timeOfLastPingServerSideOnly, false, false)
+     (this->GetActiveWorker().timeOfLastPingServerSideOnly, false, false)
   << " web server uptime. ";
   int approxNumPings =
   this->GetActiveWorker().timeOfLastPingServerSideOnly/this->WebServerPingIntervalInSeconds;
@@ -4852,8 +4872,7 @@ std::string WebServer::ToStringStatusPublicNoTop()
   out << "~" << numConnectionsSoFarApprox << " actual connections + ~"
   << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total)"
   << " served since last restart. "
-  << "This counts one connection per problem answer preview, page visit, progress report ping, etc. "
-  ;
+  << "This counts one connection per problem answer preview, page visit, progress report ping, etc. ";
   int numInUse = 0;
   for (int i = 0; i < this->theWorkers.size; i ++)
     if (this->theWorkers[i].flagInUse)
@@ -5909,62 +5928,8 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   theGlobalVariables.flagRunningCommandLine = true;
 }
 
-void WebServer::InitializeGlobalVariables()
-{ theGlobalVariables.MaxComputationTimeBeforeWeTakeAction = 0;
-  theGlobalVariables.flagReportEverything = true;
-  ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
-  this->requestStartsNotNeedingLogin.AddOnTop("about");
-  this->requestStartsNotNeedingLogin.AddOnTop("signUp");
-  this->requestStartsNotNeedingLogin.AddOnTop("signUpPage");
-  this->requestStartsNotNeedingLogin.AddOnTop("forgotLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("forgotLoginPage");
-  this->requestStartsNotNeedingLogin.AddOnTop("compute");
-  this->requestStartsNotNeedingLogin.AddOnTop("calculator");
-  this->requestStartsNotNeedingLogin.AddOnTop("calculatorExamples");
-  this->requestStartsNotNeedingLogin.AddOnTop("exerciseNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("exerciseJSON");
-  this->requestStartsNotNeedingLogin.AddOnTop("templateNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("templateJSONNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("topicListJSONNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("submitExerciseNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("submitExercisePreviewNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("problemSolutionNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("selectCourse");
-  this->requestStartsNotNeedingLogin.AddOnTop("slidesFromSource");
-  this->requestStartsNotNeedingLogin.AddOnTop("homeworkFromSource");
-  this->requestStartsNotNeedingLogin.AddOnTop("slidesSource");
-  this->requestStartsNotNeedingLogin.AddOnTop("homeworkSource");
-  this->requestStartsNotNeedingLogin.AddOnTop("app");
-  this->requestStartsNotNeedingLogin.AddOnTop("appNoCache");
-  this->requestStartsNotNeedingLogin.AddOnTop("userInfoJSON");
-
-  this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
-  this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");
-  this->addressStartsNotNeedingLogin.AddOnTop("/html-common/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/calculator-html/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/css/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/javascriptlibs/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/MathJax-2.7-latest/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/login");
-  this->addressStartsNotNeedingLogin.AddOnTop("/app");
-  this->addressStartsNotNeedingLogin.AddOnTop("/appNoCache");
-
-  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/app");
-  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("app");
-  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/appNoCache");
-  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("appNoCache");
-  //NO! Adding "logout", for example: this->addressStartsNotNeedingLogin.AddOnTop("logout");
-  //is FORBIDDEN! Logging someone out definitely requires authentication (imagine someone
-  //asking for logouts on your account once every second: this would be fatal as proper logout resets
-  //the authentication tokens.
-
-  MapLisT<std::string, std::string, MathRoutines::hashString>&
-  folderSubstitutionsNonSensitive = FileOperations::FolderVirtualLinksNonSensitive();
-  MapLisT<std::string, std::string, MathRoutines::hashString>&
-  folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
-  FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
-  folderSubstitutionsNonSensitive.Clear();
+void WebServer::InitializeGlobalVariablesHashes()
+{
   StateMaintainerCurrentFolder preserveCurrentFolder;
 
   std::string theDir = FileOperations::GetCurrentFolder();
@@ -5992,8 +5957,71 @@ void WebServer::InitializeGlobalVariables()
   theGlobalVariables.ChDir(theDir);
 
   FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
-  ("/calculator-html");
+  (WebAPI::calculatorHTML);
+  WebAPI::calculatorOnePageJSWithHash = FileOperations::GetVirtualNameWithHash(WebAPI::calculatorOnePageJS);
+}
 
+void WebServer::InitializeGlobalVariables()
+{ theGlobalVariables.MaxComputationTimeBeforeWeTakeAction = 0;
+  theGlobalVariables.flagReportEverything = true;
+  ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
+  this->InitializeGlobalVariablesHashes();
+  this->requestStartsNotNeedingLogin.AddOnTop("about");
+  this->requestStartsNotNeedingLogin.AddOnTop("signUp");
+  this->requestStartsNotNeedingLogin.AddOnTop("signUpPage");
+  this->requestStartsNotNeedingLogin.AddOnTop("forgotLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("forgotLoginPage");
+  this->requestStartsNotNeedingLogin.AddOnTop("compute");
+  this->requestStartsNotNeedingLogin.AddOnTop("calculator");
+  this->requestStartsNotNeedingLogin.AddOnTop("calculatorExamples");
+  this->requestStartsNotNeedingLogin.AddOnTop("exerciseNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("exerciseJSON");
+  this->requestStartsNotNeedingLogin.AddOnTop("templateNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("templateJSONNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("topicListJSONNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("submitExerciseNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("submitExercisePreviewNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("problemSolutionNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("selectCourse");
+  this->requestStartsNotNeedingLogin.AddOnTop("slidesFromSource");
+  this->requestStartsNotNeedingLogin.AddOnTop("homeworkFromSource");
+  this->requestStartsNotNeedingLogin.AddOnTop("slidesSource");
+  this->requestStartsNotNeedingLogin.AddOnTop("homeworkSource");
+  this->requestStartsNotNeedingLogin.AddOnTop(WebAPI::app);
+  this->requestStartsNotNeedingLogin.AddOnTop(WebAPI::appNoCache);
+  this->requestStartsNotNeedingLogin.AddOnTop("userInfoJSON");
+
+  this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
+  this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");
+  this->addressStartsNotNeedingLogin.AddOnTop("/html-common/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/calculator-html/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/css/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/javascriptlibs/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/MathJax-2.7-latest/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/login");
+  this->addressStartsNotNeedingLogin.AddOnTop("/" + WebAPI::app);
+  this->addressStartsNotNeedingLogin.AddOnTop("/" + WebAPI::appNoCache);
+  this->addressStartsNotNeedingLogin.AddOnTop(WebAPI::calculatorOnePageJS);
+
+
+  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/" + WebAPI::app);
+  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::app);
+  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/" + WebAPI::appNoCache);
+  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::appNoCache);
+  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::calculatorOnePageJS);
+  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::calculatorOnePageJSWithHash);
+  //NO! Adding "logout", for example: this->addressStartsNotNeedingLogin.AddOnTop("logout");
+  //is FORBIDDEN! Logging someone out definitely requires authentication (imagine someone
+  //asking for logouts on your account once every second: this would be fatal as proper logout resets
+  //the authentication tokens.
+
+  MapLisT<std::string, std::string, MathRoutines::hashString>&
+  folderSubstitutionsNonSensitive = FileOperations::FolderVirtualLinksNonSensitive();
+  MapLisT<std::string, std::string, MathRoutines::hashString>&
+  folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
+  FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
+  folderSubstitutionsNonSensitive.Clear();
   this->addressStartsNotNeedingLogin.AddListOnTop
   (FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash());
 

@@ -15,8 +15,9 @@ public:
   std::string htmlJSbuild;
   List<std::string> currentWords;
   //List<bool> charIsSplitting;
+  List<std::string> jsFiles;
 
-  void BuildHtmlJSpage();
+  void BuildHtmlJSpage(bool appendBuildHash);
   static std::string GetHtmlTagWithManifest();
   static std::string ModifyProblemReport();
   static std::string ClonePageResult();
@@ -46,6 +47,7 @@ public:
   static std::string GetScoresPage();
   static std::string GetAboutPage();
   static std::string GetApp(bool appendBuildHash);
+  static std::string GetOnePageJS(bool appendBuildHash);
   static std::string GetScoresInCoursePage();
   static std::string GetNavigationPanelWithGenerationTime();
   static std::string submitAnswersPreview();

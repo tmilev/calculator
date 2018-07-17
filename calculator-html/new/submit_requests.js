@@ -52,7 +52,7 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   var addressSpreadOut = address.split("&").join(" &");
   addressSpreadOut = addressSpreadOut.split("=").join("= ");
   addressSpreadOut = addressSpreadOut.split("?").join("? ");
-  addressPassSplit = addressSpreadOut.split("password=");
+  var addressPassSplit = addressSpreadOut.split("password=");
   if (addressPassSplit.length > 1) {
     var indexAmpersand = addressPassSplit[1].search("&");
     addressPassSplit[1] = addressPassSplit[1].substr(indexAmpersand);

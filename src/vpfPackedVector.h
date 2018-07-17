@@ -405,7 +405,7 @@ void AnotherWeylGroup<scalar, vector>::ComputeAllElements()
   }
   this->size = this->rhoOrbit.size;
   std::cout << this->size << std::endl;
-//  std::cout << rhoOrbit << std::endl;
+  //std::cout << rhoOrbit << std::endl;
 }
 
 template <typename scalar, typename vector>
@@ -648,7 +648,7 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
     }
     got_chars:
     */
-//  std::cout << chars << std::endl;
+  //std::cout << chars << std::endl;
   for (int i = 0; i < chars.size; i ++)
   { Rational x = G.GetHermitianProduct(chars[i], chars[i]);
     int x2 = x.GetDenominator().GetUnsignedIntValueTruncated();

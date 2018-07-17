@@ -271,7 +271,7 @@ void ElementWeylAlgebra<coefficient>::GetStandardOrderDiffOperatorCorrespondingT
   { outputDenominator *= newMult;
     newMult -= 1;
   }
-//  output/= den;
+  //output/= den;
 }
 
 template <class coefficient>
@@ -282,7 +282,7 @@ bool ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<
   ElementWeylAlgebra output;
   output.MakeZero();
   coefficient theNewCoeff;
-//  stOutput << "<hr>Substituting " << SubPolyPart.ToString() << " into " << this->ToString();
+  //stOutput << "<hr>Substituting " << SubPolyPart.ToString() << " into " << this->ToString();
   for (int i = 0; i < this->size(); i ++)
   { const MonomialWeylAlgebra& currentMon = (*this)[i];
     //stOutput << "<hr>Substituting " << SubPolyPart.ToString() << " into " << currentMon.polynomialPart.ToString();
@@ -323,17 +323,17 @@ void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coeffi
   { const MonomialWeylAlgebra& currentMon = (*this)[i];
     if (!(currentMon.polynomialPart.TotalDegree() + currentMon.differentialPart.TotalDegree()).IsInteger(&totalDeg))
       crash << "This is a programming error: calling Fourier transoform on differential operator with non-integral exponents. " << crash;
-//    stOutput << "<br>totalDeg: " << totalDeg.ToString() << ", is even =" << totalDeg.IsEven();
+    //stOutput << "<br>totalDeg: " << totalDeg.ToString() << ", is even =" << totalDeg.IsEven();
     theMon.differentialPart = currentMon.polynomialPart;
     theMon.polynomialPart = currentMon.differentialPart;
     theCoeff = this->theCoeffs[i];
     if (totalDeg.IsEven())
       theCoeff *= - 1;
-//    totalDeg%=4;
-//    if (totalDeg==2 || totalDeg==3)
-//      theCoeff*= - 1;
+    //totalDeg%=4;
+    //if (totalDeg==2 || totalDeg==3)
+    //  theCoeff*= - 1;
     //if (totalDeg==1 || totalDeg==3)
-      //theCoeff*=ImaginaryUnit;
+    //  theCoeff*=ImaginaryUnit;
     output.AddMonomial(theMon, theCoeff);
   }
 }

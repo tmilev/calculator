@@ -71,7 +71,7 @@ public:
     this->peer_certificate = 0;
     this->theSSLMethod = 0;
     this->contextServer = 0;
-//    this->contextClient = 0;
+    //this->contextClient = 0;
     this->flagSSLHandshakeSuccessful = false;
   }
   ~SSLdata();
@@ -190,6 +190,7 @@ public:
   int ProcessScores();
   int ProcessAbout();
   int ProcessApp(bool appendBuildHash);
+  int ProcessCalculatorOnePageJS(bool appendBuildHash);
   int ProcessTopicListJSON();
   int ProcessScoresInCoursePage();
   int ProcessAssignTeacherToSection();
@@ -283,7 +284,7 @@ public:
   static std::string GetJavaScriptIndicatorFromHD();
   static std::string GetJavascriptSubmitLoginInfo();
   std::string GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken);
-  void SetHeaderOKNoContentLength();
+  void SetHeaderOKNoContentLength(const std::string& extraHeader);
   void SetHeadeR(const std::string& httpResponseNoTermination, const std::string& remainingHeaderNoTermination);
   std::string GetHeaderConnectionClose();
   std::string GetHeaderConnectionKeepAlive();
@@ -336,7 +337,7 @@ public:
   std::string httpPort;
   std::string httpSSLPort;
   List<int> theListeningSockets;
-//  List<int> theListeningSocketsReadyToAccept;
+  //List<int> theListeningSocketsReadyToAccept;
   ListReferences<WebWorker> theWorkers;
 
   List<std::string> requestStartsNotNeedingLogin;
@@ -360,6 +361,7 @@ public:
   static void CheckSVNSetup();
   static void AnalyzeMainArguments(int argC, char **argv);
   void InitializeGlobalVariables();
+  void InitializeGlobalVariablesHashes();
   bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);
   void ReleaseWorkerSideResources();
   void ReleaseActiveWorker();

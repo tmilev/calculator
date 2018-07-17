@@ -6,7 +6,6 @@
 #include "vpfHeader2Math7_PackedVector.h"
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderPackedVector(__FILE__, "Implementation header, packed vector. ");
 
-
 template <typename scalar>
 const int PackedVector<scalar>::size;
 

@@ -5,6 +5,7 @@
 #include "vpfHeader8HtmlInterpretationInterface.h"
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
 #include <iomanip>
+#include "vpfWebAPI.h"
 
 ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation
 (__FILE__, "Routines for calculus teaching: calculator exam mode.");
@@ -454,24 +455,68 @@ std::string HtmlInterpretation::GetAboutPage()
   return out.str();
 }
 
-void HtmlInterpretation::BuildHtmlJSpage()
+void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash)
 { MacroRegisterFunctionWithName("HtmlInterpretation::BuildHtmlJSpage");
-  std::stringstream out;
+  std::stringstream outFirstPart, outSecondPart;
   std::stringstream theReader(this->htmlRaw);
   theReader.seekg(0);
-  std::string theCalculatorHtmlFolder = "/calculator-html";
+  List<std::string> splitterStrings;
+  std::string virtualFolder = appendBuildHash ?
+  FileOperations::GetVirtualNameWithHash(WebAPI::calculatorHTML) :
+  WebAPI::calculatorHTML;
+
   for (std::string currentLine; std::getline(theReader, currentLine, '\n');)
-  { int startChar = currentLine.find(theCalculatorHtmlFolder);
+  { int startChar = currentLine.find(WebAPI::calculatorHTML);
     if (startChar == - 1)
-    { out << currentLine << "\n";
+    { if (this->jsFiles.size > 0)
+        outSecondPart << currentLine << "\n";
+      else
+        outFirstPart << currentLine << "\n";
       continue;
     }
     std::string firstPart, secondAndThirdPart, thirdPart, notUsed;
     MathRoutines::SplitStringInTwo(currentLine, startChar, firstPart, secondAndThirdPart);
-    MathRoutines::SplitStringInTwo(secondAndThirdPart, theCalculatorHtmlFolder.size(), notUsed, thirdPart);
-    out << firstPart << FileOperations::GetVirtualNameWithHash(theCalculatorHtmlFolder) << thirdPart << "\n";
+    MathRoutines::SplitStringInTwo(secondAndThirdPart, WebAPI::calculatorHTML.size(), notUsed, thirdPart);
+    if (currentLine.find("<script") == std::string::npos)
+    { std::stringstream lineStream;
+      lineStream << firstPart << virtualFolder << thirdPart << "\n";
+      if (this->jsFiles.size > 0)
+        outSecondPart << lineStream.str();
+      else
+        outFirstPart << lineStream.str();
+    } else
+    { MathRoutines::StringSplitExcludeDelimiter(secondAndThirdPart, '"', splitterStrings);
+      this->jsFiles.AddOnTop(splitterStrings[0]);
+    }
   }
-  this->htmlJSbuild = out.str();
+  std::string virtualOnePageJS = appendBuildHash ?
+  FileOperations::GetVirtualNameWithHash(WebAPI::calculatorOnePageJS) :
+  WebAPI::calculatorOnePageJS;
+  outFirstPart << "<script src=\"" << virtualOnePageJS << "\"></script>\n"
+  << outSecondPart.str();
+  this->htmlJSbuild = outFirstPart.str();
+}
+
+std::string HtmlInterpretation::GetOnePageJS(bool appendBuildHash)
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetOnePageJS");
+  HtmlInterpretation theInterpretation;
+  std::stringstream out;
+  std::stringstream errorStream;
+  if (!FileOperations::LoadFileToStringVirtual
+       ("/calculator-html/new/index.html", theInterpretation.htmlRaw, false, false, &errorStream))
+  { out << "<html><body><b>Failed to load the application file. "
+    << "Further comments follow. " << errorStream.str() << "</body></html>";
+    return out.str();
+  }
+  theInterpretation.BuildHtmlJSpage(appendBuildHash);
+  for (int i = 0; i < theInterpretation.jsFiles.size; i ++)
+  { std::string theFile;
+    if (!FileOperations::LoadFileToStringVirtual
+         (theInterpretation.jsFiles[i], theFile, false, false, &errorStream))
+      return errorStream.str();
+    out << theFile << "\n";
+  }
+  return out.str();
 }
 
 std::string HtmlInterpretation::GetApp(bool appendBuildHash)
@@ -480,16 +525,13 @@ std::string HtmlInterpretation::GetApp(bool appendBuildHash)
   std::stringstream out;
   std::stringstream errorStream;
   if (!FileOperations::LoadFileToStringVirtual
-      ("/calculator-html/new/index.html", theInterpretation.htmlRaw, false, false, &errorStream))
+       ("/calculator-html/new/index.html", theInterpretation.htmlRaw, false, false, &errorStream))
   { out << "<html><body><b>Failed to load the application file. "
     << "Further comments follow. " << errorStream.str() << "</body></html>";
     return out.str();
   }
-  if (appendBuildHash)
-  { theInterpretation.BuildHtmlJSpage();
-    return theInterpretation.htmlJSbuild;
-  }
-  return theInterpretation.htmlRaw;
+  theInterpretation.BuildHtmlJSpage(appendBuildHash);
+  return theInterpretation.htmlJSbuild;
 }
 
 class Course
@@ -578,7 +620,7 @@ std::string HtmlInterpretation::GetSelectCourseJSON()
   FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly
   (coursesAvailableList, temp, &commentsOnFailure);
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly
-      ("/coursesavailable/default.txt", theTopicFile, &commentsOnFailure))
+       ("/coursesavailable/default.txt", theTopicFile, &commentsOnFailure))
   { comments << "Failed to fetch available courses from /coursesavailable/default.txt. "
     << commentsOnFailure.str();
     output["error"] = comments.str();

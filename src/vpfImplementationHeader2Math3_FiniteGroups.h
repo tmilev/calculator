@@ -834,7 +834,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives
   this->CheckConsistency();
   if (this->GetSizeByFormula != 0)
   { LargeInt theSize = this->GetSizeByFormula(*this);
-    // extended digit separators only appear in cxx14
+    //extended digit separators only appear in cxx14
     if (theSize > 100000000)
       if (this->flagCanComputeCCsWithOrbitIterator)
       { this->ComputeCCSizesAndRepresentativesWithOrbitIterator();

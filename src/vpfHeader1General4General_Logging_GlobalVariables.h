@@ -239,13 +239,13 @@ public:
   bool UserGuestMode();
   bool UserDebugFlagOn();
   bool UserStudentVieWOn();
-//  void operator=(const GlobalVariables& other)
-//  { this->IndicatorStringOutputFunction = other.IndicatorStringOutputFunction;
-//    this->theDrawingVariables = other.theDrawingVariables;
-//  }
-//  inline void DrawBufferNoIniT()
-//  { this->theDrawingVariables.drawBufferNoIniT();
-//  }
+  //void operator=(const GlobalVariables& other)
+  //{ this->IndicatorStringOutputFunction = other.IndicatorStringOutputFunction;
+  //  this->theDrawingVariables = other.theDrawingVariables;
+  //}
+  //inline void DrawBufferNoIniT()
+  //{ this->theDrawingVariables.drawBufferNoIniT();
+  //}
   void CallSystemNoOutput(const std::string& systemCommand, bool ignoreNonZeroReturn);
   std::string CallSystemWithOutput(const std::string& systemCommand);
   void ChDir(const std::string& systemCommand);

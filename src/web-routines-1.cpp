@@ -910,7 +910,7 @@ std::string WebWorker::GetSignUpRequestResult()
 
 int WebWorker::ProcessSignUP()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSignUP");
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
   stOutput << this->GetSignUpRequestResult();
   return 0;
 }
@@ -918,7 +918,7 @@ int WebWorker::ProcessSignUP()
 int WebWorker::ProcessForgotLogin()
 { MacroRegisterFunctionWithName("WebWorker::ProcessForgotLogin");
   //double startTime =theGlobalVariables.GetElapsedSeconds();
-  this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength("");
 #ifdef MACRO_use_MongoDB
   std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights())

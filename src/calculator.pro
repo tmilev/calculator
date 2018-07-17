@@ -129,7 +129,8 @@ HEADERS += \
     vpfHeader7DatabaseInterface_Mongodb.h \
     vpfImplementationHeader2Math0_General.h \
     vpfHeader2Math11_EllipticCurves.h \
-    vpfImplementationHeader2Math11_EllipticCurves.h
+    vpfImplementationHeader2Math11_EllipticCurves.h \
+    vpfWebAPI.h
 
 DISTFILES += \
     ../calculator-html/new/app.js \

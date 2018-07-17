@@ -9,6 +9,7 @@
 #include <assert.h>
 #include "vpfHeader3Calculator0_Interface.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
+#include "vpfWebAPI.h"
 
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
 
@@ -264,7 +265,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->DisplayNameExtraOutputWithPath = this->DisplayPathOutputFolder + this->DisplayNameExtraOutputNoPath;
 
   this->DisplayNameExecutable = "/cgi-bin/" + this->PhysicalNameExecutableNoPath;
-  this->DisplayNameExecutableApp = "/appNoCache";
+  this->DisplayNameExecutableApp = "/" + WebAPI::appNoCache;
   this->initOutputReportAndCrashFileNames("", "");
 }
 

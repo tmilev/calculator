@@ -7,9 +7,13 @@
 <script src ="/html-common/ace/src-min/ext-language_tools.js"></script>
 <!--script src = "/html-common/mathquill.min.js"></script-->
 <script src = "/html-common/mathquill.min.js"></script>
-<!--script src ="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+<script type = "text/javascript">
+  var globalMQ = MathQuill.getInterface(2);
+  var MathQuillHasMatrixSupport = true;
+  </script>
+  <!--script src ="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
 </script-->
-<script src = "https://apis.google.com/js/client:platform.js?onload =start" async defer></script>
+<script src = "https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
 <script type = "text/javascript" src = "/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full"></script>
 <script type = "text/javascript" src = "/calculator-html/new/pathnames.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/ids_dom_elements.js"></script>
@@ -38,13 +42,9 @@
 <script type = "text/javascript" src = "/calculator-html/new/account_activation.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/manage_accounts.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/edit_page.js"></script>
-<script type = "text/javascript">
-var globalMQ = MathQuill.getInterface(2);
-var MathQuillHasMatrixSupport = true;
-</script>
 <script type = "text/javascript" src = "/calculator-html/new/calculator_page.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/app.js"></script>
-<script type = "text/javascript" src = "/calculator-html/new/external/build/output.js"></script>
+<!--script type = "text/javascript" src = "/calculator-html/new/external/build/output.js"></script-->
 
 <script src ='https://www.google.com/recaptcha/api.js'></script>
 

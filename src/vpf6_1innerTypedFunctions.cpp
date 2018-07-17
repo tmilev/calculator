@@ -1895,13 +1895,13 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteg
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteger");
   if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
-  stOutput << "DEBUG: Got to here!";
+  //stOutput << "DEBUG: Got to here!";
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
   ElementEllipticCurve<Rational> theElt;
   if (!leftE.IsOfType(&theElt))
     return false;
-  stOutput << "DEBUG: Got to here: raising " << theElt.ToString();
+  //stOutput << "DEBUG: Got to here: raising " << theElt.ToString();
   int thePower = 0;
   if (!rightE.IsSmallInteger(& thePower))
     return false;

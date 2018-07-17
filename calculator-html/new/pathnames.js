@@ -6,9 +6,4 @@ var pathnames = {
   requestDatabase: "request=databaseJSON",
   requestEditPage: "request=editPageJSON", 
   databaseTable: "currentDatabaseTable"
-
-};
-
-var ids = {
-  
 };

@@ -90,14 +90,19 @@ function addEmailsOrUsers(
   });
 }
 
-function getTeachersStudentsCallback() { 
+function getTeachersStudentsCallback(input, output) {
+  document.getElementById(output).innerHTML = input; 
 }
 
 function getTeachersStudents() { 
-  var theURL = `${pathnames.calculatorAPI}?request=accountsJSON&`;
+  var theURL = `${pathnames.calculatorAPI}?request=setTeacher&`;
   var inputSections = document.getElementById('inputSections').value;
   var inputTeachers = document.getElementById('inputSetTeacher').value;
-  theURL += `teachers=${encodeURIComponent(inputTeachers)}&sections=${encodeURIComponent(inputSections)}&`;
+  var teachersAndSections = {
+    teachers: encodeURIComponent(inputTeachers),
+    students: encodeURIComponent(inputSections)
+  }
+  theURL += `teachersAndSections=${encodeURIComponent(JSON.stringify(teachersAndSections))}&`;
   submitGET({
     url: theURL,
     progress: "spanProgressReportGeneral",

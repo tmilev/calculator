@@ -4311,12 +4311,12 @@ int WebWorker::ServeClient()
             theGlobalVariables.userCalculatorRequestType == "addUsers") &&
             theGlobalVariables.flagLoggedIn)
     return this->ProcessAddUserEmails();
-  else if (theGlobalVariables.userCalculatorRequestType == "setTeacher"
-           && theGlobalVariables.flagLoggedIn)
+  else if (theGlobalVariables.userCalculatorRequestType == "setTeacher" &&
+           theGlobalVariables.flagLoggedIn)
     return this->ProcessAssignTeacherToSection();
   else if ((theGlobalVariables.userCalculatorRequestType == "submitAnswers" ||
-            theGlobalVariables.userCalculatorRequestType == "submitExercise")
-            && theGlobalVariables.flagLoggedIn)
+            theGlobalVariables.userCalculatorRequestType == "submitExercise") &&
+           theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitAnswers();
   else if (theGlobalVariables.userCalculatorRequestType == "scores" && theGlobalVariables.flagLoggedIn)
     return this->ProcessScores();

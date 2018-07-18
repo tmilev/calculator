@@ -1406,16 +1406,25 @@ std::string HtmlInterpretation::AddTeachersSections()
   { out << "<b>Only admins may assign sections to teachers.</b>";
     return out.str();
   }
-  std::string mainInput=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
-  MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
-  if (!HtmlRoutines::ChopCGIString(mainInput, theMap, out))
-  { out << "<b>Failed to extract input from: " << mainInput << ".</b>";
+  std::string input = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("teachersAndSections"), false);
+  JSData inputParsed;
+  if (!inputParsed.readstring(input, false, &out))
+  { out << "<b style='color:red'>Failed to interpret your input. </b>";
     return out.str();
   }
+  if (inputParsed["teachers"].type != JSData::JSstring)
+  { out << "<b style='color:red'>Failed to extract key 'teachers' from your input. </b>";
+    return out.str();
+  }
+  if (inputParsed["students"].type != JSData::JSstring)
+  { out << "<b style='color:red'>Failed to find key 'students' in your input. </b>";
+    return out.str();
+  }
+
   std::string desiredUsers =
-  HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate("teachers"), false);
+  HtmlRoutines::ConvertURLStringToNormal(inputParsed["teachers"].string, false);
   std::string desiredSectionsOneString =
-  HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate("sections"), false);
+  HtmlRoutines::ConvertURLStringToNormal(inputParsed["students"].string, false);
   List<std::string> desiredSectionsList;
 
 #ifdef MACRO_use_MongoDB
@@ -1451,7 +1460,7 @@ std::string HtmlInterpretation::AddTeachersSections()
     currentTeacher.sectionsTaught = desiredSectionsList;
     JSData findQuery, setQuery;
     findQuery[DatabaseStrings::labelUsername] = currentTeacher.username;
-    setQuery = currentTeacher.ToJSON();
+    setQuery[DatabaseStrings::labelSectionsTaught] = desiredSectionsList;
     if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findQuery, setQuery, &out))
       out << "<span style =\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
     else

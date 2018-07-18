@@ -12,7 +12,7 @@ function selectCurrentProblem(problem, exerciseType) {
   thePage.selectPage(thePage.pages.problemPage.name);
 }
 
-function Problem (inputFileName) {
+function Problem(inputFileName) {
   this.fileName = inputFileName;
   this.randomSeed = null;
   this.answers = [];

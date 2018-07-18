@@ -94,7 +94,7 @@ function getTableHorizontallyLaidFromJSON(input, currentLabels, selector) {
   var inputType = typeof input; 
   if (inputType === "string" || inputType === "number" || inputType === "boolean") {
     if (shouldBeAbbreviated(currentLabels, selector)) {
-      label = shortenString(input, 4);
+      var label = shortenString(input, 4);
       input = getToggleButton(input, label);
     }
     if (isDeleteable(currentLabels, selector)) {

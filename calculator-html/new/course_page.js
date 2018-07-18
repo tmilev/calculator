@@ -88,6 +88,13 @@ function modifyWeight(id) {
   });
 }
 
+function toStringDeadline(problemData) {
+  if (!thePage.user.hasAdminRights()) {
+    return "";
+  }
+  return "not implemented";
+}
+
 function toStringProblemWeightCell(problemData) {
   var result = "";
   if (problemData.problem === "") {
@@ -152,7 +159,7 @@ function getHTMLProblems(theProblemContainer) {
     }
     result += "</td>";
     result += toStringProblemWeightCell(currentProblemData);
-    result += "<td></td>";
+    result += `<td>${toStringDeadline(currentProblemData)}</td>`;
     result += "</tr>";
   }
   result += "</table>";

@@ -436,9 +436,34 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
 #endif
 }
 
-bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery
+bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery
+(const JSData& updateQuery, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery");
+  //stOutput << "DEBUG: computing isvalid update query with query = " << updateQuery.ToString(false) << "<br>";
+  if (updateQuery.type != updateQuery.JSstring &&
+      updateQuery.type != updateQuery.JSObject &&
+      updateQuery.type != updateQuery.JSarray)
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "JSData: "
+      << HtmlRoutines::ConvertStringToHtmlString(updateQuery.ToString(false), false)
+      << " expected to be a string, array or an object. ";
+    return false;
+  }
+  if (updateQuery.type == updateQuery.JSObject)
+    for (int i = 0; i < updateQuery.objects.size(); i ++)
+      if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery(updateQuery.objects.theValues[i], commentsOnFailure))
+        return false;
+  if (updateQuery.type == updateQuery.JSarray)
+    for (int i = 0; i < updateQuery.list.size; i ++)
+      if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery
+           (updateQuery.list[i], commentsOnFailure))
+        return false;
+  return true;
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoFindQuery
 (const JSData& findQuery, std::stringstream* commentsOnFailure, bool mustBeObject)
-{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery");
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoFindQuery");
   //logWorker << logger::red << "DEBUG: findQuery in isvalid json: " << findQuery.ToString(false) << logger::endL;
   if (mustBeObject)
   { if (findQuery.type != findQuery.JSObject)
@@ -461,7 +486,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery
     }
   }
   for (int i = 0; i < findQuery.objects.size(); i ++)
-    if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(findQuery.objects.theValues[i], commentsOnFailure, false))
+    if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoFindQuery(findQuery.objects.theValues[i], commentsOnFailure, false))
       return false;
   return true;
 }
@@ -480,7 +505,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::GetOrFindQuery
 (const List<JSData>& input, std::string& output, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::GetOrFindQuery");
   for (int i = 0; i < input.size; i ++)
-    if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(input[i], commentsOnFailure, true))
+    if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoFindQuery(input[i], commentsOnFailure, true))
       return false;
   std::stringstream queryStream;
   queryStream << "{\"$or\": [";
@@ -552,7 +577,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
 (const std::string& collectionName, const JSData& findQuery,
  JSData& output, std::stringstream* commentsOnFailure, bool doEncodeFindFields)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON");
-  if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(findQuery, commentsOnFailure, true))
+  if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoFindQuery(findQuery, commentsOnFailure, true))
     return false;
   //logWorker << logger::red << "DEbug: find one from json with: " << findQuery.ToString(doEncodeFindFields) << logger::endL;
   return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString(collectionName, findQuery.ToString(doEncodeFindFields), output, commentsOnFailure);
@@ -746,7 +771,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
  std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString");
 #ifdef MACRO_use_MongoDB
-  if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(updateQuery, commentsOnFailure, true))
+  if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery(updateQuery, commentsOnFailure))
     return false;
   MongoQuery query;
   query.findQuery = findQuery;
@@ -778,7 +803,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON
   { //logWorker << logger::blue << "DEBUG: GetOrFindQuery, comments: " << commentsOnFailure->str() << logger::endL;
     return false;
   }
-  if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(updateQuery, commentsOnFailure, false))
+  if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery(updateQuery, commentsOnFailure))
   { logWorker << logger::green << "Not valid json mongo query, comments: " << commentsOnFailure->str() << logger::endL;
     return false;
   }

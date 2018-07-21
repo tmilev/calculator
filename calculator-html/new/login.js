@@ -41,6 +41,7 @@ function logout() {
   thePage.user.hideProfilePicture();
   thePage.user.role = "";
   thePage.user.flagLoggedIn = false;
+  thePage.user.sectionsTaught = [];
   thePage.pages.problemPage.flagLoaded = false;
   document.getElementById("inputPassword").value = "";
   document.getElementById("divProblemPageContentContainer").innerHTML = "";
@@ -116,6 +117,8 @@ function loginWithServerCallback(incomingString, result) {
       thePage.storage.user.name.setAndStore(parsedAuthentication.username);
       thePage.user.role = parsedAuthentication.userRole;
       thePage.user.flagLoggedIn = true;
+      thePage.user.sectionsTaught = parsedAuthentication.sectionsTaught;
+      console.log("DEBUG: parsed authentication sections taught: " + JSON.stringify(parsedAuthentication.sectionsTaught));
       document.getElementById("spanUserIdInAccountsPage").innerHTML = thePage.storage.user.name.value;
       document.getElementById("inputUsername").value = thePage.storage.user.name.value;
       toggleAccountPanels();

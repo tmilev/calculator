@@ -1,55 +1,139 @@
 "use strict";
+var theChapters = {};
+var theProblemMetaDataCollection = {};
 
-function ProblemWeight(inputIdURLed, inputWeight) {
-  this.idURLed = inputIdURLed;
-  this.idButton = `modifyPoints${this.idURLed}`;
-  this.idTextarea = `points${this.idURLed}`;
-  this.idModifyReport = `report${this.idURLed}`;
-  this.weight = inputWeight;
+function ProblemMetaData(problemData) {
+  this.type = problemData.type;
+  this.idURLed = encodeURIComponent(problemData.id);
+  this.problem = problemData.problem;
+  this.title = problemData.title;
+  this.problemNumberString = problemData.problemNumberString;
+  //console.log("DEBUG: creating problemMetaData with id: " + this.idURLed);
+  this.idButtonPoints = `modifyPoints${this.idURLed}`;
+  this.idTextareaPoints = `points${this.idURLed}`;
+  this.idModifyReportPoints = `report${this.idURLed}`;
+  this.type = problemData.type;
+  this.correctlyAnswered = problemData.correctlyAnswered;
+  this.totalQuestions = problemData.totalQuestions;
+
+  this.weight = problemData.weight;
+  theProblemMetaDataCollection[this.idURLed] = this;
+  if (this.type === "chapter") {
+    theChapters[this.idURLed] = this;
+  }
+  this.childrenIds = [];
+  if (problemData.children === undefined) {
+    return;
+  }
+  for (var counterChildren = 0; counterChildren < problemData.children.length; counterChildren ++) {
+    var currentChild = new ProblemMetaData(problemData.children[counterChildren]);
+    this.childrenIds.push(currentChild.idURLed);
+  }
 }
 
-ProblemWeight.prototype.toHTML = function() { 
+ProblemMetaData.prototype.toStringDeadline = function() {
+  if (!thePage.user.hasAdminRights()) {
+    return "";
+  }
+  if (this.type !== "problem") {
+    return "";
+  }
+  var result = "";
+  result += "<table>";
+  result += "<tr><th>Grp.</th><th>Deadline</th></tr>";
+  for (var counterGroup = 0; counterGroup < thePage.user.sectionsTaught.length; counterGroup ++) {
+    result += `<tr><td>${thePage.user.sectionsTaught[counterGroup]}</td><td></td></tr>`;
+  } 
+  result += "</table>";
+  console.log("Problem data problem: " + JSON.stringify(this.problem));
+  console.log("Problem data title: " + JSON.stringify(this.title));
+  result += `<button onclick="modifyDeadlines('${encodeURIComponent(this.problem)}')">Set</button>`;
+  return result;
+}
+
+ProblemMetaData.prototype.toHTMLWeights = function() { 
   //console.log("DEBUG: problem:  " + this.idURLed);
   var result = "";
   result += "<span class = 'panelProblemWeights' style = 'opacity: 1; max-height: 200px;'>";
-  result += `Pts: <textarea class = 'textareaStudentPoints' rows = '1' cols = '2' id = '${this.idTextarea}'>`;
+  result += `Pts: <textarea class = 'textareaStudentPoints' rows = '1' cols = '2' id = '${this.idTextareaPoints}'>`;
   if (this.weight !== undefined && this.weight !== null) {
     result += this.weight;
   }
   result += "</textarea>";
-  result += `<button id = '${this.idButton}' onclick = "modifyWeight('${this.idURLed}')" >Modify</button><br>`;
-  result += `<span id = '${this.idModifyReport}'></span>`;
+  result += `<button id = '${this.idButtonPoints}' onclick = "modifyWeight('${this.idURLed}')" >Modify</button><br>`;
+  result += `<span id = '${this.idModifyReportPoints}'></span>`;
   result += "</span>";
   return result;
 }
 
-function toStringProblemWeight(problemData) {
+ProblemMetaData.prototype.callbackModifyWeight = function(input, output) {
+  //console.log("DEBUG: got to mod weight callback. This id: " + this.idURLed);
+  document.getElementById(this.idModifyReportPoints).innerHTML = input;
+}
+
+ProblemMetaData.prototype.modifyWeight = function() {
+  var problemWeightTextareaId = `points${this.idURLed}`;
+  var incomingPoints = document.getElementById(problemWeightTextareaId).value;
+  var modifyObject = {};
+  console.log("DEBUG: id: " + this.idURLed);
+  var idDecoded = decodeURIComponent(this.idURLed);
+  //var problemModifyWeightReport = `report${id}`;
+  modifyObject[idDecoded] = {
+    weight: incomingPoints
+  };
+  //console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
+  var theURL = `${pathnames.calculatorAPI}?request=setProblemData&mainInput=${encodeURIComponent(JSON.stringify(modifyObject))}`;
+  submitGET({
+    url: theURL,
+    progress: "spanProgressReportGeneral",
+    callback: this.callbackModifyWeight.bind(this)
+  });
+}
+
+function modifyWeight(id) {
+  var theProblemWeight = theProblemMetaDataCollection[id];
+  theProblemWeight.modifyWeight();
+}
+
+ProblemMetaData.prototype.toStringProblemWeightCell = function() {
+  var result = "";
+  if (this.type !== "problem") {
+    return "<td></td>";
+  }
+  //console.log("DEBUG: problemData.problem:  " + problemData.problem);
+  var pointsString = `<button class = 'accordionLike' onclick = 'toggleProblemWeights()'>${this.toStringProblemWeight()}</button>`;
+  var problemWeightString = this.toHTMLWeights();
+  result += `<td>${pointsString}<br> ${problemWeightString}</td>`;
+  return result;
+}
+
+ProblemMetaData.prototype.toStringProblemWeight = function() {
   var result = "";
   var color = "brown";
-  if (problemData.correctlyAnswered !== undefined && problemData.correctlyAnswered !== NaN) {
+  if (this.correctlyAnswered !== undefined && this.correctlyAnswered !== NaN) {
     if (
-      problemData.correctlyAnswered >= problemData.totalQuestions && 
-      problemData.totalQuestions !== undefined &&
-      problemData.totalQuestions !== 0
+      this.correctlyAnswered >= this.totalQuestions && 
+      this.totalQuestions !== undefined &&
+      this.totalQuestions !== 0
     ) {
       color = "green";
     } 
-    var numCorrectlyAnswered = problemData.correctlyAnswered;
-    var totalQuestions = problemData.totalQuestions;
+    var numCorrectlyAnswered = this.correctlyAnswered;
+    var totalQuestions = this.totalQuestions;
     if (totalQuestions === 0) {
       totalQuestions = "?";
     }
     result += `${numCorrectlyAnswered} out of ${totalQuestions}`;
-    //console.log(`DEBUG: Problem weight: ` + JSON.stringify(problemData.weight));
-    //console.log(`DEBUG: correctly answered: ` + problemData.correctlyAnswered);
-    //console.log(`DEBUG: total: ` + problemData.totalQuestions);
-    if (problemData.weight !== undefined && problemData.totalQuestions !== 0) {
-      var problemWeightConverted = parseInt(problemData.weight);
-      //console.log("DEBUG: prob weight converted: " + problemWeightConverted + " correctly answered: " + problemData.correctlyAnswered)
-      var points = ((0.0 + problemData.correctlyAnswered * problemWeightConverted) / problemData.totalQuestions);
+    //console.log(`DEBUG: Problem weight: ` + JSON.stringify(this.weight));
+    //console.log(`DEBUG: correctly answered: ` + this.correctlyAnswered);
+    //console.log(`DEBUG: total: ` + this.totalQuestions);
+    if (this.weight !== undefined && this.totalQuestions !== 0) {
+      var problemWeightConverted = parseInt(this.weight);
+      //console.log("DEBUG: prob weight converted: " + problemWeightConverted + " correctly answered: " + this.correctlyAnswered)
+      var points = ((0.0 + this.correctlyAnswered * problemWeightConverted) / this.totalQuestions);
       points = Number(points.toFixed(2));
       result += ` = ${points} pts`;
-      if (problemData.correctlyAnswered < problemData.totalQuestions) {
+      if (this.correctlyAnswered < this.totalQuestions) {
         color = "red";
       } 
     } else {
@@ -59,52 +143,8 @@ function toStringProblemWeight(problemData) {
   return `<b style = "color:${color}">${result}</b>`;
 }
 
-ProblemWeight.prototype.callbackModifyWeight = function(input, output) {
-  //console.log("DEBUG: got to mod weight callback. This id: " + this.idURLed);
-  document.getElementById(this.idModifyReport).innerHTML = input;
-}
-var theProblemWeightCollection = {};
-
-function modifyWeight(id) {
-  if (!(id in theProblemWeightCollection)) {
-    theProblemWeightCollection[id] = new ProblemWeight(id);
-  }
-  var theProblemWeight = theProblemWeightCollection[id];
-  var problemWeightTextareaId = `points${id}`;
-  var incomingPoints = document.getElementById(problemWeightTextareaId).value;
-  var modifyObject = {};
-  //console.log("DEBUG: id: " + id);
-  var idDecoded = decodeURIComponent(id);
-  var problemModifyWeightReport = `report${id}`;
-  modifyObject[idDecoded] = {
-    weight: incomingPoints
-  };
-  //console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
-  var theURL = `${pathnames.calculatorAPI}?request=setProblemData&mainInput=${encodeURIComponent(JSON.stringify(modifyObject))}`;
-  submitGET({
-    url: theURL,
-    progress: "spanProgressReportGeneral",
-    callback: theProblemWeight.callbackModifyWeight.bind(theProblemWeight)
-  });
-}
-
-function toStringDeadline(problemData) {
-  if (!thePage.user.hasAdminRights()) {
-    return "";
-  }
-  return "not implemented";
-}
-
-function toStringProblemWeightCell(problemData) {
-  var result = "";
-  if (problemData.problem === "") {
-    return "<td></td>";
-  }
-  //console.log("DEBUG: problemData.problem:  " + problemData.problem);
-  var pointsString = `<button class = 'accordionLike' onclick = 'toggleProblemWeights()'> ${toStringProblemWeight(problemData)}</button>`;
-  var theProblemWeight = new ProblemWeight(encodeURIComponent(problemData.problem));
-  result += `<td>${pointsString}<br> ${theProblemWeight.toHTML()}</td>`;
-  return result;
+function modifyDeadlines(incomingId) {
+  console.log("Incoming id: " + incomingId);
 }
 
 function convertStringToLaTeXFileName(input) {
@@ -119,13 +159,13 @@ function convertStringToLaTeXFileName(input) {
 }
 
 var previousProblem = null;
-function getHTMLProblems(theProblemContainer) {
+ProblemMetaData.prototype.getHTMLProblems = function () {
   var result = "";
   result += "<div class = \"bodySubsection\">";
   result += "<table class = \"topicList\"><colgroup><col><col><col><col><col></colgroup>";
-  for (var counterSubSection = 0; counterSubSection < theProblemContainer["children"].length; counterSubSection ++) {
-    var currentProblemData = theProblemContainer["children"][counterSubSection];
-    //console.log("DEBUG: current problem data: " + JSON.stringify(currentProblemData.title));
+  for (var counterSubSection = 0; counterSubSection < this.childrenIds.length; counterSubSection ++) {
+    var currentProblemData = theProblemMetaDataCollection[this.childrenIds[counterSubSection]];
+    console.log("DEBUG: current problem data deadline: " + JSON.stringify(currentProblemData.deadline));
     if (currentProblemData.problem !== "") {
       var currentProblem = thePage.getProblem(currentProblemData.problem);
       currentProblem.previousProblem = previousProblem;
@@ -158,8 +198,9 @@ function getHTMLProblems(theProblemContainer) {
       result += `onclick = "selectCurrentProblem('${currentProblemData.problem}', 'exerciseJSON');">Practice</a>`;
     }
     result += "</td>";
-    result += toStringProblemWeightCell(currentProblemData);
-    result += `<td>${toStringDeadline(currentProblemData)}</td>`;
+
+    result += currentProblemData.toStringProblemWeightCell(currentProblemData);
+    result += `<td>${currentProblemData.toStringDeadline(currentProblemData)}</td>`;
     result += "</tr>";
   }
   result += "</table>";
@@ -195,18 +236,18 @@ function toggleProblemWeights() {
   problemWeightsVisible = !problemWeightsVisible;
 }
 
-function getHTMLSubSection(theSubSection) {
-  //console.log("DEBUG: current subsection: " + JSON.stringify(theSubSection.title) + "; type: " + JSON.stringify(theSubSection.type));
+ProblemMetaData.prototype.getHTMLSubSection = function() {
+  //console.log("DEBUG: current subsection: " + JSON.stringify(this.title) + "; type: " + JSON.stringify(this.type));
   var result = "";
-  result += `<div class = \"headSubsection\">${theSubSection.problemNumberString} ${theSubSection.title}</div>`;
-  result += getHTMLProblems(theSubSection)
+  result += `<div class = \"headSubsection\">${this.problemNumberString} ${this.title}</div>`;
+  result += this.getHTMLProblems();
   return result;  
 }
 
-function isProblemContainer(section) {
-  if (section["children"].length !== undefined) {
-    if (section["children"].length > 0) {
-      if (section["children"][0].type === "problem") {
+ProblemMetaData.prototype.isProblemContainer = function() {
+  if (this.childrenIds.length !== undefined) {
+    if (this.childrenIds.length > 0) {
+      if (this.childrenIds[0].type === "problem") {
         return true;
       }
     }
@@ -214,48 +255,47 @@ function isProblemContainer(section) {
   return false;
 }
 
-function getHTMLSection(theSection) {
+ProblemMetaData.prototype.getHTMLSection = function() {
   var result = "";
-  //console.log("DEBUG: current section: " + JSON.stringify(theSection.title) + "; type: " + JSON.stringify(theSection.type));
-  if (theSection.type === "section") {
-    result += `<div class =\"headSection\">${theSection.problemNumberString} ${theSection.title}</div>`;    
+  //console.log("DEBUG: current section: " + JSON.stringify(this.title) + "; type: " + JSON.stringify(this.type));
+  if (this.type === "section") {
+    result += `<div class =\"headSection\">${this.problemNumberString} ${this.title} ${this.toStringDeadline()}</div>`;    
   }
   result += "<div class =\"bodySection\">";
-  if (isProblemContainer(theSection)) {
-    result += getHTMLProblems(theSection);
-  } else if (theSection.type === "section") {
-    for (var counterSection = 0; counterSection < theSection["children"].length; counterSection ++) {
-      var currentSubSection = theSection["children"][counterSection];
-      result += getHTMLSubSection(currentSubSection);
+  if (this.isProblemContainer()) {
+    result += this.getHTMLProblems();
+  } else if (this.type === "section") {
+    for (var counterSection = 0; counterSection < this.childrenIds.length; counterSection ++) {
+      var currentSubSection = theProblemMetaDataCollection[this.childrenIds[counterSection]];
+      result += currentSubSection.getHTMLSubSection();
     }
   } else {
-    result += getHTMLSubSection(theSection);
+    result += this.getHTMLSubSection();
   }
   result += "</div>";
   return result;  
 }
 
-function getHTMLChapter(theChapter) {
+ProblemMetaData.prototype.toHTMLChapter =  function() {
   var result = "";
-  result += `<div class =\"headChapter\">${theChapter.problemNumberString} ${theChapter.title}</div>`;
+  result += `<div class =\"headChapter\">${this.problemNumberString} ${this.title}</div>`;
   result += "<div class =\"bodyChapter\">";
-  if (isProblemContainer(theChapter)) {
-    result += getHTMLProblems(theChapter);
+  if (this.isProblemContainer()) {
+    result += this.getHTMLProblems();
   } else {
-    for (var counterSection = 0; counterSection < theChapter["children"].length; counterSection ++) {
-      var currentSection = theChapter["children"][counterSection];
-      result += getHTMLSection(currentSection);
+    for (var counterSection = 0; counterSection < this.childrenIds.length; counterSection ++) {
+      var currentSection = theProblemMetaDataCollection[this.childrenIds[counterSection]];
+      result += currentSection.getHTMLSection();
     }
   }
   result += "</div>";
   return result;
 }
 
-function getHTMLfromTopics(theTopics) {
+function getHTMLfromTopics() {
   var result = "";
-  for (var counterChapter = 0; counterChapter < theTopics["children"].length; counterChapter ++) {
-    var currentChapter = theTopics["children"][counterChapter];
-    result += getHTMLChapter(currentChapter);
+  for (var label in theChapters) {
+    result += theChapters[label].toHTMLChapter();
   }
   return result;
 }
@@ -268,13 +308,18 @@ function afterLoadTopics(incomingTopics, result) {
   }
   previousProblem = null;
   var stringHTMLContent = "";
-  try {
+  console.log ("DEBUG: temporarily disabled error catching ");
+  //try {
     thePage.theTopics = JSON.parse(incomingTopics);
-    stringHTMLContent += getHTMLfromTopics(thePage.theTopics);
+    for (var counterChapter = 0; counterChapter < thePage.theTopics["children"].length; counterChapter ++) {
+      var currentChapter = thePage.theTopics["children"][counterChapter];
+      new ProblemMetaData(currentChapter);
+    }
+    stringHTMLContent += getHTMLfromTopics();
     writeEditCoursePagePanel();
-  } catch (e) {
-    stringHTMLContent = "<b style ='color:red'>Data error</b>. " + e;
-  }
+  //} catch (e) {
+  //  stringHTMLContent = "<b style ='color:red'>Data error</b>. " + e;
+  //}
   //stringHTMLContent += "<hr>DEBUG: incoming topics JSON: " + incomingTopics;
   topicsElements[0].innerHTML = stringHTMLContent;
   initializeProblemWeights();

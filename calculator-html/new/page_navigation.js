@@ -3,6 +3,7 @@ function User() {
   this.flagLoggedIn = false;
   this.googleProfile = null;
   this.role = "";
+  this.sectionsTaught = [];
 }
 
 User.prototype.isLoggedIn = function() {

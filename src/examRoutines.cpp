@@ -306,7 +306,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabaseJSON
 { MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
   //stOutput << "DEBUG: Here I am, merging in data: " << incomingProblemInfo;
   JSData theProblemJSON;
-  if (! theProblemJSON.readstring(incomingProblemInfo, false, &commentsOnFailure))
+  if (!theProblemJSON.readstring(incomingProblemInfo, false, &commentsOnFailure))
     return false;
   MapLisT<std::string, ProblemData, MathRoutines::hashString> incomingProblems;
   if (!this->LoadProblemInfoFromJSONAppend(theProblemJSON, incomingProblems, commentsOnFailure))
@@ -4690,6 +4690,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
 { MacroRegisterFunctionWithName("TopicElement::ToJSON");
   JSData output;
   output["title"] = this->title;
+  output["id"] = this->id;
   switch (this->type)
   { case TopicElement::tChapter:
       output["type"] = (std::string) "chapter";
@@ -4729,6 +4730,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
   output["videoHandwritten"] = this->videoHandwritten;
   output["slidesProjector"] = this->slidesProjector;
   output["slidesPrintable"] = this->slidesPrintable;
+  output["deadline"] = this->deadlinesPerSectioN;
   if (theGlobalVariables.UserDefaultHasProblemComposingRights())
     output["linkSlidesLaTeX"] = this->linkSlidesTex;
   output["handwrittenSolution"]  = this->handwrittenSolution;

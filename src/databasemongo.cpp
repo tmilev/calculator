@@ -229,8 +229,8 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert)
   if (!databaseMongo.initialize(commentsOnFailure))
     return false;
   MongoCollection theCollection(this->collectionName);
-  //logWorker << "DEBUG: Update: " << this->findQuery << " to: "
-  //<< this->updateQuery << " inside: " << this->collectionName << logger::endL;
+  logWorker << "DEBUG: Update: " << this->findQuery << " to: "
+  << this->updateQuery << " inside: " << this->collectionName << logger::endL;
   if (this->query != 0)
     crash << "At this point of code, query is supposed to be 0. " << crash;
   this->query = bson_new_from_json
@@ -768,6 +768,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure
 
 bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
 (const std::string& collectionName, const std::string& findQuery, const JSData& updateQuery,
+ List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
  std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString");
 #ifdef MACRO_use_MongoDB
@@ -778,10 +779,24 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
   query.collectionName = collectionName;
   std::stringstream updateQueryStream;
   //logWorker << logger::blue << "DEBUG: GOT to here: " << logger::endL;
-  updateQueryStream << "{\"$set\": " << updateQuery.ToString(true) << "}";
+  if (fieldsToSetIfNullUseFirstFieldIfUpdateQuery == 0)
+    updateQueryStream << "{\"$set\": " << updateQuery.ToString(true) << "}";
+  else
+  { updateQueryStream << "{\"$set\":{";
+    updateQueryStream << "\"";
+    for (int i = 0; i < fieldsToSetIfNullUseFirstFieldIfUpdateQuery->size; i ++)
+    { updateQueryStream << HtmlRoutines::ConvertStringToURLStringIncludingDots
+      ((*fieldsToSetIfNullUseFirstFieldIfUpdateQuery)[i], false);
+      if (i != fieldsToSetIfNullUseFirstFieldIfUpdateQuery->size - 1)
+        updateQueryStream << ".";
+    }
+    updateQueryStream << "\":";
+    updateQueryStream << updateQuery.ToString(true);
+    updateQueryStream << "}}";
+  }
   query.updateQuery = updateQueryStream.str();
-  //logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
-  //logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
+  logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
+  logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
   return query.UpdateOneWithOptions(commentsOnFailure);
 #else
   (void) collectionName;
@@ -807,14 +822,28 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON
   { logWorker << logger::green << "Not valid json mongo query, comments: " << commentsOnFailure->str() << logger::endL;
     return false;
   }
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString(collectionName, queryString, updateQuery, commentsOnFailure);
+  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
+  (collectionName, queryString, updateQuery, 0, commentsOnFailure);
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSONSpecifyField
+(const std::string& collectionName, const JSData& findQuery, const JSData& updateQuery,
+ std::string fieldToSet, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSONSpecifyField");
+  List<std::string> fields;
+  fields.AddOnTop(fieldToSet);
+  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+  (collectionName, findQuery, updateQuery, &fields, commentsOnFailure);
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
 (const std::string& collectionName, const JSData& findQuery, const JSData& updateQuery,
+ List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
  std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON");
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString(collectionName, findQuery.ToString(true), updateQuery, commentsOnFailure);
+  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
+  (collectionName, findQuery.ToString(true), updateQuery,
+   fieldsToSetIfNullUseFirstFieldIfUpdateQuery, commentsOnFailure);
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(UserCalculatorData& output)

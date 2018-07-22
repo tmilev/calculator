@@ -12,6 +12,7 @@ std::string WebAPI::app = "app";
 std::string WebAPI::calculatorHTML = "/calculator-html";
 std::string WebAPI::calculatorOnePageJS = "/calculator-html/javascript_all_in_one.js";
 std::string WebAPI::calculatorOnePageJSWithHash = "/calculator-html/javascript_all_in_one.js";
+std::string WebAPI::calculatorSetProblemData = "setProblemData";
 std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
 
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
@@ -277,6 +278,7 @@ void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString)
 //then get the CSR.csr file to a signing authority,
 //from where you get the signedFileCertificate1 and signedFileCertificate3
 const std::string fileCertificate = "certificates/cert.pem";
+const std::string fileCertificateConfiguration = "certificates/certificate_configuration.cnf";
 const std::string fileKey = "certificates/key.pem";
 const std::string signedFileCertificate1 = "certificates/calculator-algebra.crt";
 const std::string signedFileCertificate3 = "certificates/godaddy-signature.crt";
@@ -353,11 +355,17 @@ bool SSLdata::initSSLkeyFiles()
   { logWorker << logger::red << "SSL is available but CERTIFICATE files are missing." << logger::endL;
     logWorker << logger::green << "Let me try to create those files for you." << logger::endL;
     std::stringstream theCommand;
-    std::string certificatePhysicalName,keyPhysicalName;
+    std::string certificatePhysicalName, keyPhysicalName, certificateConfiguration;
     FileOperations::GetPhysicalFileNameFromVirtual(fileCertificate, certificatePhysicalName, true, true, 0);
     FileOperations::GetPhysicalFileNameFromVirtual(fileKey, keyPhysicalName, true, true, 0);
+    FileOperations::GetPhysicalFileNameFromVirtual(fileCertificateConfiguration, certificateConfiguration, true, true, 0);
     theCommand <<  "openssl req -x509 -newkey rsa:2048 -nodes -keyout " << keyPhysicalName
-    << " -out " << certificatePhysicalName << " -days 3001";
+    << " -out " << certificatePhysicalName
+    << " -days 3001 ";
+    if (theGlobalVariables.configuration["openSSLSubject"].type != JSData::JSUndefined &&
+        theGlobalVariables.configuration["openSSLSubject"].type == JSData::JSstring)
+      theCommand
+      << "-subj " << theGlobalVariables.configuration["openSSLSubject"].string;
     theGlobalVariables.CallSystemNoOutput(theCommand.str(), false);
   }
   if (!FileOperations::FileExistsVirtual(fileCertificate, true, true) ||
@@ -2936,13 +2944,15 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     return out.str();
   }
   emailInfo[DatabaseStrings::labelActivationToken] = "";
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableEmailInfo, findEmail, emailInfo, &out))
+  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+       (DatabaseStrings::tableEmailInfo, findEmail, emailInfo, 0, &out))
   { out << "\n<span style =\"color:red\"><b>Could not reset the activation token (database is down?). </b></span>";
     return out.str();
   }
   userInfo[DatabaseStrings::labelEmail] = claimedEmail;
   findUser[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, userInfo, &out))
+  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+       (DatabaseStrings::tableUsers, findUser, userInfo, 0, &out))
   { out << "\n<span style =\"color:red\"><b>Could not store your email (database is down?). </b></span>";
     return out.str();
   }
@@ -3007,7 +3017,8 @@ std::string WebWorker::GetChangePasswordPage()
       << "- probably by an admin/instructor. ";
       findUser[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
       updateUser[DatabaseStrings::labelActivationToken] = "activated";
-      if (! DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, updateUser, &out))
+      if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+           (DatabaseStrings::tableUsers, findUser, updateUser, 0, &out))
         out << " <span style =\"color:red\"><b>Failed to activate your account. </b></span>";
       else
         out << " <span style =\"color:green\"><b>Your account is now marked as activated.</b></span>";
@@ -3178,7 +3189,7 @@ int WebWorker::ProcessChangePassword()
   findQuery[DatabaseStrings::labelUsername] = theUser.username;
   setQuery[DatabaseStrings::labelActivationToken] = "activated";
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-       (DatabaseStrings::tableUsers, findQuery, setQuery, &commentsOnFailure))
+       (DatabaseStrings::tableUsers, findQuery, setQuery, 0, &commentsOnFailure))
     stOutput << "<span style =\"color:red\"><b>Failed to set activationToken: "
     << commentsOnFailure.str() << "</b></span>";
 
@@ -4288,7 +4299,7 @@ int WebWorker::ServeClient()
   //this->parent->ReleaseNonActiveWorkers();
   //Reason: the architecture changed, now multiple requests
   //can be piped through one worker.
-  else if (theGlobalVariables.userCalculatorRequestType == "setProblemData")
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorSetProblemData)
     return this->ProcessSetProblemDatabaseInfo();
   else if (theGlobalVariables.userCalculatorRequestType == "changePassword")
     return this->ProcessChangePassword();

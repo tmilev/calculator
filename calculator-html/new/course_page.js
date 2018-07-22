@@ -6,15 +6,19 @@ function ProblemMetaData(problemData) {
   this.type = problemData.type;
   this.idURLed = encodeURIComponent(problemData.id);
   this.problem = problemData.problem;
+  this.fileName = problemData.fileName;
+  console.log(`DEBUG: filename: ${this.fileName}`);
   this.title = problemData.title;
   this.problemNumberString = problemData.problemNumberString;
   //console.log("DEBUG: creating problemMetaData with id: " + this.idURLed);
   this.idButtonPoints = `modifyPoints${this.idURLed}`;
   this.idTextareaPoints = `points${this.idURLed}`;
+  this.idModifyReportDeadline = `deadlines${this.idURLed}`;
   this.idModifyReportPoints = `report${this.idURLed}`;
   this.type = problemData.type;
   this.correctlyAnswered = problemData.correctlyAnswered;
   this.totalQuestions = problemData.totalQuestions;
+  this.deadlines = problemData.deadlines;
 
   this.weight = problemData.weight;
   theProblemMetaDataCollection[this.idURLed] = this;
@@ -42,12 +46,18 @@ ProblemMetaData.prototype.toStringDeadline = function() {
   result += "<table>";
   result += "<tr><th>Grp.</th><th>Deadline</th></tr>";
   for (var counterGroup = 0; counterGroup < thePage.user.sectionsTaught.length; counterGroup ++) {
-    result += `<tr><td>${thePage.user.sectionsTaught[counterGroup]}</td><td></td></tr>`;
+    result += `<tr><td>${thePage.user.sectionsTaught[counterGroup]}</td>`;
+    result += `<td><input class = "datePicker" name = "${this.idURLed}" `;
+    if (this.deadlines[counterGroup] !== "" && this.deadlines[counterGroup] !== undefined) {
+      result += `value = "${this.deadlines[counterGroup]}"`;
+    }
+    result += `></input></td></tr>`;
   } 
   result += "</table>";
   console.log("Problem data problem: " + JSON.stringify(this.problem));
   console.log("Problem data title: " + JSON.stringify(this.title));
-  result += `<button onclick="modifyDeadlines('${encodeURIComponent(this.problem)}')">Set</button>`;
+  result += `<button onclick = "modifyDeadlines('${this.idURLed}')">Set</button>`;
+  result += `<span id = '${this.idModifyReportDeadline}'></span>`;
   return result;
 }
 
@@ -60,7 +70,7 @@ ProblemMetaData.prototype.toHTMLWeights = function() {
     result += this.weight;
   }
   result += "</textarea>";
-  result += `<button id = '${this.idButtonPoints}' onclick = "modifyWeight('${this.idURLed}')" >Modify</button><br>`;
+  result += `<button id = '${this.idButtonPoints}' onclick = "modifyWeight('${this.idURLed}')">Modify</button><br>`;
   result += `<span id = '${this.idModifyReportPoints}'></span>`;
   result += "</span>";
   return result;
@@ -143,8 +153,32 @@ ProblemMetaData.prototype.toStringProblemWeight = function() {
   return `<b style = "color:${color}">${result}</b>`;
 }
 
+function callbackModifyDeadlines(incomingId, input, output) {
+  console.log(`DEBUG: ${incomingId}, input: ${input}`);
+  document.getElementById(`deadlines${incomingId}`).innerHTML = input;
+}
+
 function modifyDeadlines(incomingId) {
-  console.log("Incoming id: " + incomingId);
+  var theDates = document.getElementsByName(incomingId);
+  var jsonToSubmit = {};
+  var idDecoded = decodeURIComponent(incomingId);
+  jsonToSubmit[idDecoded] = {
+    deadlines: {}
+  };
+
+  for (var counterDates = 0; counterDates < theDates.length; counterDates ++) {
+    jsonToSubmit[idDecoded].deadlines[thePage.user.sectionsTaught[counterDates]] = theDates[counterDates].value;
+  }
+  console.log("DEBUG: id: " + incomingId);
+  //console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
+  var theURL = "";
+  theURL += `${pathnames.calculatorAPI}?request=setProblemData&`;
+  theURL += `mainInput=${encodeURIComponent(JSON.stringify(jsonToSubmit))}`;
+  submitGET({
+    url: theURL,
+    progress: "spanProgressReportGeneral",
+    callback: callbackModifyDeadlines.bind(null, incomingId)
+  });
 }
 
 function convertStringToLaTeXFileName(input) {
@@ -300,6 +334,14 @@ function getHTMLfromTopics() {
   return result;
 }
 
+function initializeDatePickers() {
+  var thePickers = document.getElementsByClassName("datePicker");
+  for (var counterPicker = 0; counterPicker < thePickers.length; counterPicker ++ ) {
+    $(thePickers[counterPicker]).datepicker();
+
+  }
+}
+
 function afterLoadTopics(incomingTopics, result) {
   //console.log("DEBUG: topic list cookie @ afterLoadTopics: " + getCookie("topicList"));
   var topicsElements = document.getElementsByTagName("topicList");
@@ -323,6 +365,7 @@ function afterLoadTopics(incomingTopics, result) {
   //stringHTMLContent += "<hr>DEBUG: incoming topics JSON: " + incomingTopics;
   topicsElements[0].innerHTML = stringHTMLContent;
   initializeProblemWeights();
+  initializeDatePickers();
   previousProblem = null;
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, topicsElements[0]]);
 }
@@ -344,7 +387,6 @@ function writeEditCoursePagePanel() {
 }
 
 function afterLoadCoursePage(incomingPage, result) {
-  var incomingPageWithPanel = "";
   document.getElementById("divCurrentCourseBody").innerHTML = incomingPage;
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentCourse")]);
   //MathJax.Hub.Process();

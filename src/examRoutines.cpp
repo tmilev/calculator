@@ -75,8 +75,9 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend
     JSData& currentProblem = inputJSON.objects.theValues[i];
     if (currentProbName == "")
       continue;
-    //stOutput << "<br>DEBUG: current problem json: " << currentProblem.ToString(false)
-    //<< ";<br> currentProbName: " << currentProbName;
+    if (theGlobalVariables.UserDebugFlagOn())
+      stOutput << "<br>DEBUG: current problem json: " << currentProblem.ToString(false)
+      << ";<br> currentProbName: " << currentProbName << "\n\n\n";
     if (!outputProblemInfo.Contains(currentProbName))
       outputProblemInfo.GetValueCreate(currentProbName) = emptyData;
     ProblemData& currentProblemValue = outputProblemInfo.GetValueCreate(currentProbName);
@@ -97,17 +98,18 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend
     else if (currentWeight.type == JSData::JSstring)
       currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
       (currentCourse, currentWeight.string);
-    else
+    else if (currentWeight.type != JSData::JSUndefined)
     { commentsOnFailure << "Could extract neither weight nor weights-per course from "
-      << currentWeight.ToString(false) << ". ";
+      << currentWeight.ToString(false) << ". Your input was: " << inputJSON.ToString(false);
       return false;
     }
     if (currentDeadlines.type != JSData::JSUndefined)
     { for (int j = 0; j < currentDeadlines.objects.size(); j ++)
         currentProblemValue.adminData.deadlinesPerSection.SetKeyValue
         (currentDeadlines.objects.theKeys[j], currentDeadlines.objects.theValues[j].string);
+      //stOutput << "<br>DEBUG: Current deadlines: " << currentDeadlines.ToString(false)
+      //<< "<br> Total input: " << inputJSON.ToString(false) << "<hr>";
     }
-    //stOutput << "<br>DEBUG: Current prob: " << currentProblemValue.ToString() << "<hr>";
   }
   return true;
 }
@@ -175,6 +177,8 @@ JSData CalculatorHTML::ToJSONDeadlines
 (MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToJSONDeadlines");
   JSData output;
+  output.type = output.JSObject;
+
   for (int i = 0; i < inputProblemInfo.size(); i ++)
   { ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
     if (currentProblem.deadlinesPerSection.size() == 0)
@@ -186,12 +190,12 @@ JSData CalculatorHTML::ToJSONDeadlines
       if (currentDeadline == "")
         continue;
       std::string currentSection = MathRoutines::StringTrimWhiteSpace(currentProblem.deadlinesPerSection.theKeys[j]);
-      currentProblemJSON[currentSection] = currentDeadline;
+      currentProblemJSON[DatabaseStrings::labelDeadlines][currentSection] = currentDeadline;
     }
-    JSData currentDeadline;
-    currentDeadline[DatabaseStrings::labelDeadlines] = currentProblemJSON;
-    output[currentProblemName] = currentDeadline;
+    output[currentProblemName] = currentProblemJSON;
   }
+  if (theGlobalVariables.UserDebugFlagOn())
+    stOutput << "DEBUG: deadline Output: " << output.ToString(false);
   return output;
 }
 
@@ -219,43 +223,58 @@ JSData CalculatorHTML::ToJSONProblemWeights
   return output;
 }
 
-void CalculatorHTML::StoreDeadlineInfoIntoJSON
-(JSData& outputData, MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::StoreDeadlineInfo");
-  outputData.reset();
-  for (int i = 0; i < inputProblemInfo.size(); i ++)
-  { ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
-    if (currentProblem.deadlinesPerSection.size() == 0)
-      continue;
-    std::string currentProbName = inputProblemInfo.theKeys[i];
-    JSData deadlines;
-    for (int j = 0; j < currentProblem.deadlinesPerSection.size(); j ++)
-    { std::string currentDeadline = MathRoutines::StringTrimWhiteSpace(currentProblem.deadlinesPerSection.theValues[j]);
-      if (currentDeadline == "")
-        continue;
-      std::string currentSection = MathRoutines::StringTrimWhiteSpace(currentProblem.deadlinesPerSection.theKeys[j]);
-      deadlines[currentSection] = currentDeadline;
-    }
-    outputData[currentProbName] = deadlines;
-  }
-}
-
-bool DatabaseRoutineS::StoreProblemDatabaseInfo
-(const UserCalculatorData& theUser, std::stringstream& commentsOnFailure)
+bool DatabaseRoutineS::StoreProblemInfoToDatabase
+(const UserCalculatorData& theUser, bool overwrite, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
-  JSData findQueryWeights, setQueryWeights, findQueryDeadlines;
+  JSData findQueryWeights, findQueryDeadlines;
   findQueryWeights[DatabaseStrings::labelProblemWeightsSchema] = theUser.problemWeightSchema;
   findQueryDeadlines[DatabaseStrings::labelDeadlinesSchema] = theUser.deadlineSchema;
+  stOutput << "<br>DEBUG: deadline find query: " << findQueryWeights.ToString(false) << "<br>";
   if (theUser.problemWeights.type != JSData::JSUndefined)
-    setQueryWeights[DatabaseStrings::labelProblemWeights] = theUser.problemWeights;
-  if (theUser.problemWeights.type != JSData::JSUndefined)
-    if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-         (DatabaseStrings::tableProblemWeights, findQueryWeights, setQueryWeights, &commentsOnFailure))
-      return false;
+  { if (overwrite)
+    { JSData setQueryWeights;
+      setQueryWeights[DatabaseStrings::labelProblemWeights] = theUser.problemWeights;
+      if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+           (DatabaseStrings::tableProblemWeights, findQueryWeights, setQueryWeights, 0, &commentsOnFailure))
+        return false;
+    } else
+    { List<std::string> adjustLabels;
+      adjustLabels.SetSize(2);
+      adjustLabels[0] = DatabaseStrings::labelProblemWeights;
+      for (int i = 0; i < theUser.problemWeights.objects.size(); i ++)
+      { adjustLabels[1] = theUser.problemWeights.objects.theKeys[i];
+        if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+             (DatabaseStrings::tableProblemWeights,
+              findQueryWeights, theUser.problemWeights.objects.theValues[i],
+              &adjustLabels, &commentsOnFailure))
+          return false;
+      }
+    }
+  }
+  stOutput << "<br>DEBUG: deadline find query: " << findQueryDeadlines.ToString(false);
+  stOutput << "<br>DEBUG: deadline update query: " << theUser.deadlines.ToString(false);
+
   if (theUser.deadlines.type != JSData::JSUndefined)
-    if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-         (DatabaseStrings::tableDeadlines, findQueryDeadlines, theUser.deadlines, &commentsOnFailure))
-      return false;
+  { if (overwrite)
+    { JSData setQueryDeadlines;
+      setQueryDeadlines[DatabaseStrings::labelDeadlines] = theUser.deadlines;
+      if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+           (DatabaseStrings::tableProblemWeights, findQueryDeadlines, setQueryDeadlines, 0, &commentsOnFailure))
+        return false;
+    } else
+    { List<std::string> adjustLabels;
+      adjustLabels.SetSize(2);
+      adjustLabels[0] = DatabaseStrings::labelDeadlines;
+      for (int i = 0; i < theUser.deadlines.objects.size(); i ++)
+      { adjustLabels[1] = theUser.deadlines.objects.theKeys[i];
+        if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+             (DatabaseStrings::tableDeadlines,
+              findQueryDeadlines, theUser.deadlines.objects.theValues[i],
+              &adjustLabels, &commentsOnFailure))
+          return false;
+      }
+    }
+  }
   return true;
 }
 
@@ -313,28 +332,11 @@ bool CalculatorHTML::MergeProblemInfoInDatabaseJSON
   { commentsOnFailure << "Failed to parse your request";
     return false;
   }
-  bool result = true;
-  //stOutput << "<hr><hr>Debug: incoming problems: " << incomingProblems.ToStringHtml();
-  for (int i = 0; i < incomingProblems.size(); i ++)
-    if (!this->MergeOneProblemAdminData(incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
-      result = false;
-  //this->StoreDeadlineInfoIntoJSON(theProblemJSON, this->currentUseR.theProblemData);
-  //stOutput << "<hr>Debug: about to store WEIGHT with row id: "
-  //<< this->currentUseR.problemInfoRowId.value << "<hr>";
-  //stOutput << "<hr>About to transform to database string: "
-  //<< this->currentUseR.theProblemData.ToStringHtml()
-  //<< "<hr>";
-  theGlobalVariables.userDefault.problemWeights = this->ToJSONProblemWeights(this->currentUseR.theProblemData);
-  theGlobalVariables.userDefault.deadlines = this->ToJSONDeadlines(this->currentUseR.theProblemData);
-  //theGlobalVariables.userDefault = this->currentUseR;
-  //stOutput << "<hr>Resulting string: "
-  //<< theGlobalVariables.userDefault.problemInfoString.value
-  //<< "<hr>";
-  //commentsOnFailure << "About to store: " << theGlobalVariables.userDefault.problemWeightString;
-  //return false;
-  if (!DatabaseRoutineS::StoreProblemDatabaseInfo(theGlobalVariables.userDefault, commentsOnFailure))
+  theGlobalVariables.userDefault.problemWeights = this->ToJSONProblemWeights(incomingProblems);
+  theGlobalVariables.userDefault.deadlines = this->ToJSONDeadlines(incomingProblems);
+  if (!DatabaseRoutineS::StoreProblemInfoToDatabase(theGlobalVariables.userDefault, false, commentsOnFailure))
     return false;
-  return result;
+  return true;
 }
 
 /*bool CalculatorHTML::MergeProblemInfoInDatabase
@@ -398,12 +400,12 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
     }
   }
   if (!this->LoadProblemInfoFromJSONAppend
-      (this->currentUseR.problemWeights, this->currentUseR.theProblemData, comments))
+       (this->currentUseR.problemWeights, this->currentUseR.theProblemData, comments))
   { comments << "Failed to load problem weights. ";
     return false;
   }
   if (!this->LoadProblemInfoFromJSONAppend
-      (this->currentUseR.deadlines, this->currentUseR.theProblemData, comments))
+       (this->currentUseR.deadlines, this->currentUseR.theProblemData, comments))
   { comments << "Failed to load problem deadlines. ";
     return false;
   }
@@ -4730,7 +4732,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
   output["videoHandwritten"] = this->videoHandwritten;
   output["slidesProjector"] = this->slidesProjector;
   output["slidesPrintable"] = this->slidesPrintable;
-  output["deadline"] = this->deadlinesPerSectioN;
+  output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSectioN;
   if (theGlobalVariables.UserDefaultHasProblemComposingRights())
     output["linkSlidesLaTeX"] = this->linkSlidesTex;
   output["handwrittenSolution"]  = this->handwrittenSolution;

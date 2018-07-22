@@ -1157,6 +1157,10 @@ span.currentCourseIndicator{
   transition: 0.6s;
 }
 
+.datePicker{
+
+}
+
 .textInputUsername{
 font-size: 0.9em;
 font-weight: bold;

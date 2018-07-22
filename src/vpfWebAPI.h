@@ -11,6 +11,7 @@ public:
   static std::string appNoCache;
   static std::string app;
 
+  static std::string calculatorSetProblemData;
   static std::string calculatorHTML;
   static std::string calculatorOnePageJS;
   static std::string calculatorOnePageJSWithHash;

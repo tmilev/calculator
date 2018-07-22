@@ -54,12 +54,17 @@ public:
   (const JSData& findQuery, std::stringstream* commentsOnFailure = 0, bool mustBeObject = true);
   static bool UpdateOneFromJSON
   (const std::string& collectionName, const JSData& findQuery, const JSData& updateQuery,
+   List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
    std::stringstream* commentsOnFailure = 0);
+  static bool UpdateOneFromJSONSpecifyField
+  (const std::string& collectionName, const JSData& findQuery, const JSData& updateQuery,
+   std::string fieldToSet, std::stringstream* commentsOnFailure = 0);
   static bool UpdateOneFromSomeJSON
   (const std::string& collectionName, const List<JSData>& findOrQueries, const JSData& updateQuery,
    std::stringstream* commentsOnFailure = 0);
   static bool UpdateOneFromQueryString
   (const std::string& collectionName, const std::string& findQuery, const JSData& updateQuery,
+   List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
    std::stringstream* commentsOnFailure = 0);
   static bool FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure);
   static bool FetchTable

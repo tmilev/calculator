@@ -127,12 +127,12 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
     return out.str();
   }
   if (!theProblem.LoadProblemInfoFromJSONAppend
-      (theProblem.currentUseR.problemWeights, theProblem.currentUseR.theProblemData, out))
+       (theProblem.currentUseR.problemWeights, theProblem.currentUseR.theProblemData, out))
   { out << "Failed to interpret the problem weight string. ";
     return out.str();
   }
   if (!theProblem.LoadProblemInfoFromJSONAppend
-      (theProblem.currentUseR.deadlines, theProblem.currentUseR.theProblemData, out))
+       (theProblem.currentUseR.deadlines, theProblem.currentUseR.theProblemData, out))
   { out << "Failed to interpret the deadline string. ";
     return out.str();
   }
@@ -1462,7 +1462,8 @@ std::string HtmlInterpretation::AddTeachersSections()
     JSData findQuery, setQuery;
     findQuery[DatabaseStrings::labelUsername] = currentTeacher.username;
     setQuery[DatabaseStrings::labelSectionsTaught] = desiredSectionsList;
-    if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findQuery, setQuery, &out))
+    if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+         (DatabaseStrings::tableUsers, findQuery, setQuery, 0, &out))
       out << "<span style =\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
     else
       out << "<span style =\"color:green\">Assigned " << theTeachers[i] << " to section(s): "
@@ -2093,7 +2094,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   stringConverter << this->knownNumberOfAnswersFromHD;
   newDBentry[DatabaseStrings::labelProblemTotalQuestions] = stringConverter.str();
   DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-  (DatabaseStrings::tableProblemInformation, findDBentry, newDBentry, &commentsOnFailure);
+  (DatabaseStrings::tableProblemInformation, findDBentry, newDBentry, 0, &commentsOnFailure);
   return this->knownNumberOfAnswersFromHD;
 }
 

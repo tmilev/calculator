@@ -370,7 +370,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
   //stOutput << "DEBUG: deadlineInfo: " << this->deadlines.ToString(false);
   //stOutput << "DEBUG: problem info row id: " << this->problemInfoRowId.value;
   if (this->problemWeightSchema != "")
-  { JSData findProblemWeightsQuery, findProblemInfoQuery, outProblemWeightsQuery;
+  { JSData findProblemWeightsQuery, outProblemWeightsQuery;
     //stOutput << "DEBUG: Problem weight schema: " << this->problemWeightSchema;
     findProblemWeightsQuery[DatabaseStrings::labelProblemWeightsSchema] = this->problemWeightSchema;
     if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
@@ -549,7 +549,8 @@ bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailu
   findUser[DatabaseStrings::labelUsername] = this->username;
   setUser[DatabaseStrings::labelAuthenticationToken] = this->actualAuthenticationToken;
   setUser[DatabaseStrings::labelTimeOfAuthenticationTokenCreation] = now.theTimeStringNonReadable;
-  DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, setUser, commentsOnFailure);
+  DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+  (DatabaseStrings::tableUsers, findUser, setUser, 0, commentsOnFailure);
   this->flagNewAuthenticationTokenComputedUserNeedsIt = true;
   return true;
 }
@@ -565,7 +566,8 @@ bool UserCalculator::SetPassword(std::stringstream* commentsOnFailure)
   JSData findUser, setUser;
   findUser[DatabaseStrings::labelUsername] = this->username;
   setUser[DatabaseStrings::labelPassword] = this->enteredShaonedSaltedPassword;
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, setUser, commentsOnFailure);
+  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+  (DatabaseStrings::tableUsers, findUser, setUser, 0, commentsOnFailure);
 }
 
 bool UserCalculator::IsAcceptableCharDatabaseInpuT(char theChar)
@@ -663,7 +665,7 @@ bool UserCalculator::ComputeAndStoreActivationStats
     return false;
   }
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-       (DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, commentsOnFailure))
+       (DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, 0, commentsOnFailure))
   { if (commentsOnFailure != 0)
       *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
     return false;
@@ -672,7 +674,7 @@ bool UserCalculator::ComputeAndStoreActivationStats
   emailStatQuery[DatabaseStrings::labelNumActivationEmails] = numActivationsThisEmail.ToString();
   emailStatQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
   emailStatQuery[DatabaseStrings::labelUsernameAssociatedWithToken] = this->username;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, commentsOnFailure))
+  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, 0, commentsOnFailure))
     return false;
   this->activationEmailSubject = "NO REPLY: Activation of your math account. ";
   std::stringstream emailBody;
@@ -705,7 +707,8 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
   JSData findUserQuery, setUserQuery;
   findUserQuery[DatabaseStrings::labelUsername] = this->username;
   setUserQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUserQuery, setUserQuery, commentsOnFailure))
+  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+       (DatabaseStrings::tableUsers, findUserQuery, setUserQuery, 0, commentsOnFailure))
   { if (commentsOnFailure != 0)
       *commentsOnFailure << "Setting activation token failed.";
     this->actualActivationToken = "";
@@ -952,7 +955,7 @@ List<JSData> UserCalculatorData::GetFindMeFromUserNameQuery()
 
 #ifdef MACRO_use_MongoDB
 bool UserCalculator::StoreProblemDataToDatabasE(std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabase");
+{ MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabasE");
   std::stringstream problemDataStream;
   for (int i = 0; i < this->theProblemData.size(); i ++)
     problemDataStream << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false) << "="
@@ -967,7 +970,7 @@ bool UserCalculator::StoreProblemDataToDatabasE(std::stringstream& commentsOnFai
 }
 
 bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabase");
+{ MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabaseJSON");
   JSData problemData;
   for (int i = 0; i < this->theProblemData.size(); i ++)
   { JSData nextProblem = this->theProblemData.theValues[i].StoreJSON();
@@ -1502,7 +1505,8 @@ bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOn
   JSData setUser = this->ToJSON();
   //*commentsOnFailure << " DEBUG: About to Store: " << setUser.ToString();
 
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, setUser, commentsOnFailure);
+  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+  (DatabaseStrings::tableUsers, findUser, setUser, 0, commentsOnFailure);
 }
 
 std::string UserCalculator::GetActivationAddressFromActivationToken

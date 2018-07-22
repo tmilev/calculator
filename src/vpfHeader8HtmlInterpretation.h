@@ -252,9 +252,9 @@ public:
   //  (const std::string& inputJSONString,
   //   MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputDeadlineInfo,
   //   std::stringstream& commentsOnFailure);
-  void StoreDeadlineInfoIntoJSON
-  (JSData& outputData,
-   MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
+  //void StoreDeadlineInfoIntoJSON
+  //(JSData& outputData,
+  // MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
   JSData ToJSONProblemWeights
   (MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
   JSData ToJSONDeadlines

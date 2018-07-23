@@ -457,6 +457,16 @@ span.panelProblemWeights{
   transition: 2s linear;
   opacity: 0;
 }
+span.panelDeadlines{
+  display: block;
+  max-height: 0;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  overflow: hidden;
+  transition: 1s linear;
+  opacity: 0;
+}
+
 span.studentScoresWrapper{
   width: 420px;
   font-size: medium;

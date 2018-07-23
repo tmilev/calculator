@@ -1,7 +1,7 @@
 "use strict";
 
-function selectCurrentProblem(problem, exerciseType) {
-  thePage.storage.currentCourse.fileName.setAndStore(problem);
+function selectCurrentProblem(problemIdURLed, exerciseType) {
+  thePage.storage.currentCourse.fileName.setAndStore(decodeURIComponent(problemIdURLed));
   var theProblem = thePage.getCurrentProblem();
   theProblem.flagForReal = false;
   if (exerciseType === "scoredQuizJSON") {
@@ -12,20 +12,70 @@ function selectCurrentProblem(problem, exerciseType) {
   thePage.selectPage(thePage.pages.problemPage.name);
 }
 
-function Problem(inputFileName) {
-  this.fileName = inputFileName;
+function Problem(problemData) {
+  this.idURLed = encodeURIComponent(problemData.id);
   this.randomSeed = null;
   this.answers = [];
-  this.title = "";
   this.problemLabel = "";
   this.flagForReal = true;
-  this.previousProblem = null;
-  this.nextProblem = null;
+  this.previousProblemId = null;
+  this.nextProblemId = null;
   this.scriptIds = null;
+  this.type = problemData.type;
+  this.problem = problemData.problem;
+  if (this.problem === null || this.problem === undefined) {
+    this.problem = "";
+  }
+  this.title = problemData.title;
+  this.problemNumberString = problemData.problemNumberString;
+  //console.log("DEBUG: creating problemMetaData with id: " + this.idURLed);
+  this.idButtonPoints = `modifyPoints${this.idURLed}`;
+  this.idTextareaPoints = `points${this.idURLed}`;
+  this.idModifyReportDeadline = `deadlines${this.idURLed}`;
+  this.idDeadlinePanel = `deadlinesPanel${this.idURLed}`;
+  this.idModifyReportPoints = `report${this.idURLed}`;
+  this.correctlyAnswered = problemData.correctlyAnswered;
+  this.totalQuestions = problemData.totalQuestions;
+  this.deadlines = problemData.deadlines;
+  this.weight = problemData.weight;
+
+  if (this.problem !== "") {
+    this.previousProblemId = thePage.previousProblemId;
+    if (
+      this.previousProblemId !== null && 
+      this.previousProblemId !== undefined && 
+      this.previousProblemId !== ""
+    ) {
+      thePage.problems[this.previousProblemId].nextProblemId = this.idURLed;
+    }
+    thePage.previousProblemId = this.idURLed;
+  }
+  this.problemNumberString = problemData.problemNumberString;
+  this.video = problemData.video;
+  this.slidesProjector = problemData.slidesProjector;
+  this.slidesPrintable = problemData.slidesPrintable;
+  this.linkSlidesLaTeX = problemData.linkSlidesLaTeX;
+
+  thePage.problems[this.idURLed] = this;
+  if (this.type === "chapter") {
+    thePage.theChapterIds[this.idURLed] = true;
+  }
+  this.childrenIds = [];
+  if (problemData.children === undefined) {
+    return;
+  }
+  for (var counterChildren = 0; counterChildren < problemData.children.length; counterChildren ++) {
+    var currentChild = new Problem(problemData.children[counterChildren]);
+    this.childrenIds.push(currentChild.idURLed);
+  }
 }
 
 Problem.prototype.getURLFileCourseTopics = function() {
-  return `fileName=${this.fileName}&currentCourse=${thePage.storage.currentCourse.courseHome}&topicList=${thePage.storage.currentCourse.topicList}&`;
+  var result = "";
+  result += `fileName=${this.problem}&`;
+  result += `currentCourse=${thePage.storage.currentCourse.courseHome.getValue()}&`;
+  result += `topicList=${thePage.storage.currentCourse.topicList.getValue()}&`;
+  return result;
 }
 
 Problem.prototype.getURLRequestFileCourseTopics = function(isScoredQuiz) {
@@ -71,24 +121,27 @@ Problem.prototype.getProblemNavigation = function() {
     defaultRequest = 'scoredQuizJSON';
     linkType = "problemLinkQuiz"
   }
-  if (this.previousProblem !== null && this.previousProblem !== "") {
-    result += `<a class='${linkType}' href='#${thePage.getProblem(this.previousProblem).getURLRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.previousProblem}' ,'${defaultRequest}')">&#8592;</a>`;
+  if (this.previousProblemId !== null && this.previousProblemId !== "") {
+    var previousURL = thePage.problems[this.previousProblemId].getURLRequestFileCourseTopics();
+    result += `<a class='${linkType}' href='#${previousURL}'`;
+    result += `onclick = "selectCurrentProblem('${this.previousProblemId}', '${defaultRequest}')">&#8592;</a>`;
   }
 
   if (this.flagForReal && thePage.user.flagLoggedIn) {
-    result += `<a class='problemLinkPractice' href='${this.getURL()}' onclick = "selectCurrentProblem('${this.fileName}' ,'exerciseJSON')">Practice</a>`;
+    result += `<a class='problemLinkPractice' href='${this.getURL()}' onclick = "selectCurrentProblem('${this.idURLed}' ,'exerciseJSON')">Practice</a>`;
   } else {
     result += "<span class = 'problemLinkSelectedPractice' style='color:green'>Practice</span>";
   }
   if (!this.flagForReal && thePage.user.flagLoggedIn) { 
-    result += `<a class='problemLinkQuiz' href='${this.getURL()}' onclick = "selectCurrentProblem('${this.fileName}' ,'scoredQuizJSON')">Quiz</a>`;
+    result += `<a class='problemLinkQuiz' href='${this.getURL()}' onclick = "selectCurrentProblem('${this.idURLed}' ,'scoredQuizJSON')">Quiz</a>`;
   } else {
     if (this.flagForReal) {
       result += "<span class = 'problemLinkSelectedQuiz' style='color:brown'>Quiz</span>";
     }
   }
-  if (this.nextProblem !== null && this.nextProblem !== "") {
-    result+= `<a class='${linkType}' href='#${thePage.getProblem(this.nextProblem).getURLRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.nextProblem}' ,'${defaultRequest}')">&#8594;</a>`;
+  if (this.nextProblemId !== null && this.nextProblemId !== "") {
+    var nextURL = thePage.problems[this.nextProblemId].getURLRequestFileCourseTopics();
+    result+= `<a class='${linkType}' href='#${nextURL}' onclick = "selectCurrentProblem('${this.nextProblemId}' ,'${defaultRequest}')">&#8594;</a>`;
   }
   if (this.flagForReal !== true && this.flagForReal !== "true") {
     result += `<b style = 'color:green'>Scores not recorded. </b>`;
@@ -100,7 +153,7 @@ Problem.prototype.getProblemNavigation = function() {
 }
 
 Problem.prototype.getEditPanel = function() {
-  return getEditPanel(this.fileName);
+  return getEditPanel(decodeURIComponent(this.idURLed));
 }
 
 function getEditPanel(fileName) {
@@ -166,14 +219,13 @@ Problem.prototype.writeToHTML = function(outputElement) {
 }
 
 function updateProblemPageCallback(input, outputComponent) {
-  var theFileName = thePage.storage.currentCourse.fileName.getValue();
   if (typeof outputComponent === "string" || outputComponent === undefined || outputComponent === null) {
     outputComponent = document.getElementById(outputComponent);
   }
   if (outputComponent === null || outputComponent === undefined) {
     outputComponent = document.getElementById("divProblemPageContentContainer");
   }
-  var currentProblem = thePage.getProblem(theFileName);
+  var currentProblem = thePage.getCurrentProblem();
   var theProblem = null;
   try {
     theProblem = JSON.parse(input);
@@ -192,14 +244,13 @@ function updateProblemPageCallback(input, outputComponent) {
     currentProblem.writeToHTML("divProblemPageContentContainer");
     return;    
   }
-  currentProblem.title = theProblem.title;
   currentProblem.problemLabel = theProblem["problemLabel"];
   currentProblem.flagForReal = theProblem["forReal"];
   currentProblem.randomSeed = theProblem.randomSeed;
 
   for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++) {
     currentProblem.answers[counterAnswers] = new InputPanelData({
-      fileName: thePage.storage.currentCourse.fileName.getValue(),
+      problemId: currentProblem.idURLed,
       idMQSpan: answerVectors[counterAnswers].answerMQspanId,
       idPureLatex: answerVectors[counterAnswers].answerIdPureLatex,
       idButtonContainer: answerVectors[counterAnswers].preferredButtonContainer,

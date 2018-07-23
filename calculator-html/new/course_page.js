@@ -1,48 +1,15 @@
 "use strict";
-var theChapters = {};
-var theProblemMetaDataCollection = {};
 
-function ProblemMetaData(problemData) {
-  this.type = problemData.type;
-  this.idURLed = encodeURIComponent(problemData.id);
-  this.problem = problemData.problem;
-  this.fileName = problemData.fileName;
-  console.log(`DEBUG: filename: ${this.fileName}`);
-  this.title = problemData.title;
-  this.problemNumberString = problemData.problemNumberString;
-  //console.log("DEBUG: creating problemMetaData with id: " + this.idURLed);
-  this.idButtonPoints = `modifyPoints${this.idURLed}`;
-  this.idTextareaPoints = `points${this.idURLed}`;
-  this.idModifyReportDeadline = `deadlines${this.idURLed}`;
-  this.idModifyReportPoints = `report${this.idURLed}`;
-  this.type = problemData.type;
-  this.correctlyAnswered = problemData.correctlyAnswered;
-  this.totalQuestions = problemData.totalQuestions;
-  this.deadlines = problemData.deadlines;
-
-  this.weight = problemData.weight;
-  theProblemMetaDataCollection[this.idURLed] = this;
-  if (this.type === "chapter") {
-    theChapters[this.idURLed] = this;
-  }
-  this.childrenIds = [];
-  if (problemData.children === undefined) {
-    return;
-  }
-  for (var counterChildren = 0; counterChildren < problemData.children.length; counterChildren ++) {
-    var currentChild = new ProblemMetaData(problemData.children[counterChildren]);
-    this.childrenIds.push(currentChild.idURLed);
-  }
-}
-
-ProblemMetaData.prototype.toStringDeadline = function() {
+Problem.prototype.toStringDeadline = function() {
   if (!thePage.user.hasAdminRights()) {
     return "";
   }
-  if (this.type !== "problem") {
+  if (this.type === "problem" && this.problem === "") {
     return "";
   }
   var result = "";
+  result += `<button class = "accordionLike" onclick = "toggleDeadline('${this.idDeadlinePanel}')">Deadline</button>`;
+  result += `<span class = "panelDeadlines" id = "${this.idDeadlinePanel}">`;
   result += "<table>";
   result += "<tr><th>Grp.</th><th>Deadline</th></tr>";
   for (var counterGroup = 0; counterGroup < thePage.user.sectionsTaught.length; counterGroup ++) {
@@ -58,10 +25,11 @@ ProblemMetaData.prototype.toStringDeadline = function() {
   console.log("Problem data title: " + JSON.stringify(this.title));
   result += `<button onclick = "modifyDeadlines('${this.idURLed}')">Set</button>`;
   result += `<span id = '${this.idModifyReportDeadline}'></span>`;
+  result += `</span>`;
   return result;
 }
 
-ProblemMetaData.prototype.toHTMLWeights = function() { 
+Problem.prototype.toHTMLWeights = function() { 
   //console.log("DEBUG: problem:  " + this.idURLed);
   var result = "";
   result += "<span class = 'panelProblemWeights' style = 'opacity: 1; max-height: 200px;'>";
@@ -76,12 +44,12 @@ ProblemMetaData.prototype.toHTMLWeights = function() {
   return result;
 }
 
-ProblemMetaData.prototype.callbackModifyWeight = function(input, output) {
+Problem.prototype.callbackModifyWeight = function(input, output) {
   //console.log("DEBUG: got to mod weight callback. This id: " + this.idURLed);
   document.getElementById(this.idModifyReportPoints).innerHTML = input;
 }
 
-ProblemMetaData.prototype.modifyWeight = function() {
+Problem.prototype.modifyWeight = function() {
   var problemWeightTextareaId = `points${this.idURLed}`;
   var incomingPoints = document.getElementById(problemWeightTextareaId).value;
   var modifyObject = {};
@@ -105,7 +73,7 @@ function modifyWeight(id) {
   theProblemWeight.modifyWeight();
 }
 
-ProblemMetaData.prototype.toStringProblemWeightCell = function() {
+Problem.prototype.toStringProblemWeightCell = function() {
   var result = "";
   if (this.type !== "problem") {
     return "<td></td>";
@@ -117,7 +85,7 @@ ProblemMetaData.prototype.toStringProblemWeightCell = function() {
   return result;
 }
 
-ProblemMetaData.prototype.toStringProblemWeight = function() {
+Problem.prototype.toStringProblemWeight = function() {
   var result = "";
   var color = "brown";
   if (this.correctlyAnswered !== undefined && this.correctlyAnswered !== NaN) {
@@ -192,50 +160,44 @@ function convertStringToLaTeXFileName(input) {
   return result;
 }
 
-var previousProblem = null;
-ProblemMetaData.prototype.getHTMLProblems = function () {
+Problem.prototype.getHTMLOneProblemTr = function () {
+  var result = "";
+  result += "<tr>";
+  result += `<td>${this.problemNumberString} ${this.title}</td>`;
+  result += "<td>";
+  result += `<a class ='videoLink' href='${this.video}' target = '_blank'>Video</a>`;
+  result += `<a class ='slidesLink' href='${this.slidesProjector}' target = '_blank'>Printable slides</a>`;
+  result += `<a class ='slidesLink' href='${this.slidesPrintable}' target = '_blank'>Slides</a>`;
+  if (this.linkSlidesLaTeX !== "" && this.linkSlidesLaTeX !== undefined) {
+    result += `<a class ='slidesLink' href='${this.linkSlidesLaTeX}' target = '_blank' `;
+    result += `download ='${convertStringToLaTeXFileName(this.title)}.tex'>.tex</a>`;
+  }
+  result += "</td>";
+  result += "<td>";
+  if (this.problem !== "") {
+    if (thePage.user.flagLoggedIn) {
+      result += `<a class = "problemLinkQuiz" href = "${this.getURL(true)}" `; 
+      result += `onclick = "selectCurrentProblem('${this.idURLed}', 'scoredQuizJSON');">Quiz</a>`;
+    }
+    result += `<a class = "problemLinkPractice" href = "${this.getURL(false)}" `;
+    result += `onclick = "selectCurrentProblem('${this.idURLed}', 'exerciseJSON');">Practice</a>`;
+  }
+  result += "</td>";
+
+  result += this.toStringProblemWeightCell();
+  result += `<td>${this.toStringDeadline()}</td>`;
+  result += "</tr>";
+  return result;
+}
+
+Problem.prototype.getHTMLProblems = function () {
   var result = "";
   result += "<div class = \"bodySubsection\">";
   result += "<table class = \"topicList\"><colgroup><col><col><col><col><col></colgroup>";
   for (var counterSubSection = 0; counterSubSection < this.childrenIds.length; counterSubSection ++) {
-    var currentProblemData = theProblemMetaDataCollection[this.childrenIds[counterSubSection]];
-    console.log("DEBUG: current problem data deadline: " + JSON.stringify(currentProblemData.deadline));
-    if (currentProblemData.problem !== "") {
-      var currentProblem = thePage.getProblem(currentProblemData.problem);
-      currentProblem.previousProblem = previousProblem;
-      if (
-        currentProblem.previousProblem !== null && 
-        currentProblem.previousProblem !== undefined && 
-        currentProblem.previousProblem !== ""
-      ) {
-        thePage.getProblem(currentProblem.previousProblem).nextProblem = currentProblem.fileName;
-      }
-      previousProblem = currentProblem.fileName;
-    }
-    result += "<tr>";
-    result += `<td>${currentProblemData.problemNumberString} ${currentProblemData.title}</td>`;
-    result += "<td>";
-    result += `<a class ='videoLink' href='${currentProblemData.video}' target = '_blank'>Video</a>`;
-    result += `<a class ='slidesLink' href='${currentProblemData.slidesProjector}' target = '_blank'>Printable slides</a>`;
-    result += `<a class ='slidesLink' href='${currentProblemData.slidesPrintable}' target = '_blank'>Slides</a>`;
-    if (currentProblemData.linkSlidesLaTeX !== "" && currentProblemData.linkSlidesLaTeX !== undefined) {
-      result += `<a class ='slidesLink' href='${currentProblemData.linkSlidesLaTeX}' target = '_blank' download ='${convertStringToLaTeXFileName(currentProblemData.title)}.tex'>.tex</a>`;
-    }
-    result += "</td>";
-    result += "<td>";
-    if (currentProblemData.problem !== "") {
-      if (thePage.user.flagLoggedIn) {
-        result += `<a class = "problemLinkQuiz" href = "${currentProblem.getURL(true)}" `; 
-        result += `onclick = "selectCurrentProblem('${currentProblemData.problem}', 'scoredQuizJSON');">Quiz</a>`;
-      }
-      result += `<a class = "problemLinkPractice" href = "${currentProblem.getURL(false)}" `;
-      result += `onclick = "selectCurrentProblem('${currentProblemData.problem}', 'exerciseJSON');">Practice</a>`;
-    }
-    result += "</td>";
-
-    result += currentProblemData.toStringProblemWeightCell(currentProblemData);
-    result += `<td>${currentProblemData.toStringDeadline(currentProblemData)}</td>`;
-    result += "</tr>";
+    var currentProblem = thePage.problems[this.childrenIds[counterSubSection]];
+    console.log("DEBUG: current problem data deadline: " + JSON.stringify(currentProblem.deadline));
+    result += currentProblem.getHTMLOneProblemTr();
   }
   result += "</table>";
   result += "</div>";
@@ -244,11 +206,27 @@ ProblemMetaData.prototype.getHTMLProblems = function () {
 
 var problemWeightsVisible = false;
 
-function initializeProblemWeights() {
+function initializeProblemWeightsAndDeadlines() {
   var theWeights = document.getElementsByClassName('panelProblemWeights');
   for (var i = 0; i < theWeights.length; i ++) { 
     //theScores[i].style.transition ='opacity 1s linear';
     theWeights[i].style.maxHeight = '0px';
+  }
+  var theDeadlines = document.getElementsByClassName('panelDeadlines');
+  for (var i = 0; i < theDeadlines.length; i ++) { 
+    //theScores[i].style.transition ='opacity 1s linear';
+    theDeadlines[i].style.maxHeight = '0px';
+  }
+}
+
+function toggleDeadline(deadlineId) { 
+  var thePanel = document.getElementById(deadlineId);
+  if (thePanel.style.maxHeight === '200px') {
+    thePanel.style.opacity = '0';
+    thePanel.style.maxHeight = '0';
+  } else {
+    thePanel.style.opacity = '1';
+    thePanel.style.maxHeight = '200px';
   }
 }
 
@@ -270,7 +248,7 @@ function toggleProblemWeights() {
   problemWeightsVisible = !problemWeightsVisible;
 }
 
-ProblemMetaData.prototype.getHTMLSubSection = function() {
+Problem.prototype.getHTMLSubSection = function() {
   //console.log("DEBUG: current subsection: " + JSON.stringify(this.title) + "; type: " + JSON.stringify(this.type));
   var result = "";
   result += `<div class = \"headSubsection\">${this.problemNumberString} ${this.title}</div>`;
@@ -278,7 +256,7 @@ ProblemMetaData.prototype.getHTMLSubSection = function() {
   return result;  
 }
 
-ProblemMetaData.prototype.isProblemContainer = function() {
+Problem.prototype.isProblemContainer = function() {
   if (this.childrenIds.length !== undefined) {
     if (this.childrenIds.length > 0) {
       if (this.childrenIds[0].type === "problem") {
@@ -289,7 +267,7 @@ ProblemMetaData.prototype.isProblemContainer = function() {
   return false;
 }
 
-ProblemMetaData.prototype.getHTMLSection = function() {
+Problem.prototype.getHTMLSection = function() {
   var result = "";
   //console.log("DEBUG: current section: " + JSON.stringify(this.title) + "; type: " + JSON.stringify(this.type));
   if (this.type === "section") {
@@ -300,7 +278,7 @@ ProblemMetaData.prototype.getHTMLSection = function() {
     result += this.getHTMLProblems();
   } else if (this.type === "section") {
     for (var counterSection = 0; counterSection < this.childrenIds.length; counterSection ++) {
-      var currentSubSection = theProblemMetaDataCollection[this.childrenIds[counterSection]];
+      var currentSubSection = thePage.problems[this.childrenIds[counterSection]];
       result += currentSubSection.getHTMLSubSection();
     }
   } else {
@@ -310,7 +288,7 @@ ProblemMetaData.prototype.getHTMLSection = function() {
   return result;  
 }
 
-ProblemMetaData.prototype.toHTMLChapter =  function() {
+Problem.prototype.toHTMLChapter =  function() {
   var result = "";
   result += `<div class =\"headChapter\">${this.problemNumberString} ${this.title}</div>`;
   result += "<div class =\"bodyChapter\">";
@@ -318,7 +296,7 @@ ProblemMetaData.prototype.toHTMLChapter =  function() {
     result += this.getHTMLProblems();
   } else {
     for (var counterSection = 0; counterSection < this.childrenIds.length; counterSection ++) {
-      var currentSection = theProblemMetaDataCollection[this.childrenIds[counterSection]];
+      var currentSection = thePage.problems[this.childrenIds[counterSection]];
       result += currentSection.getHTMLSection();
     }
   }
@@ -328,8 +306,8 @@ ProblemMetaData.prototype.toHTMLChapter =  function() {
 
 function getHTMLfromTopics() {
   var result = "";
-  for (var label in theChapters) {
-    result += theChapters[label].toHTMLChapter();
+  for (var label in thePage.theChapterIds) {
+    result += thePage.problems[label].toHTMLChapter();
   }
   return result;
 }
@@ -348,14 +326,14 @@ function afterLoadTopics(incomingTopics, result) {
   if (topicsElements.length === 0) {
     return;
   }
-  previousProblem = null;
+  thePage.previousProblemId = null;
   var stringHTMLContent = "";
   console.log ("DEBUG: temporarily disabled error catching ");
   //try {
     thePage.theTopics = JSON.parse(incomingTopics);
     for (var counterChapter = 0; counterChapter < thePage.theTopics["children"].length; counterChapter ++) {
       var currentChapter = thePage.theTopics["children"][counterChapter];
-      new ProblemMetaData(currentChapter);
+      new Problem(currentChapter);
     }
     stringHTMLContent += getHTMLfromTopics();
     writeEditCoursePagePanel();
@@ -364,9 +342,9 @@ function afterLoadTopics(incomingTopics, result) {
   //}
   //stringHTMLContent += "<hr>DEBUG: incoming topics JSON: " + incomingTopics;
   topicsElements[0].innerHTML = stringHTMLContent;
-  initializeProblemWeights();
+  initializeProblemWeightsAndDeadlines();
   initializeDatePickers();
-  previousProblem = null;
+  thePage.previousProblemId = null;
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, topicsElements[0]]);
 }
 

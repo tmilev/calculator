@@ -121,7 +121,6 @@ function Page() {
       menuButtonId: "buttonProblemPage",
       container: null,
       selectFunction: updateProblemPage,
-      problems: {},
       flagLoaded: false
     },
     editPage : {
@@ -303,7 +302,9 @@ function Page() {
   this.locationRequestFromUrl = null;
   this.loadSettings(location.hash); 
   this.hashHistory = []; 
+  this.previousProblemId = null;
   this.problems = {};
+  this.theChapterIds = {};
   this.user = new User();
   this.aceEditorAutoCompletionWordList = [];
   this.flagDoSubmitCalculatorComputation = true;
@@ -508,7 +509,9 @@ Page.prototype.selectPage = function(inputPage) {
 }
 
 Page.prototype.getCurrentProblem = function() {
-  return this.getProblem(this.storage.currentCourse.fileName.getValue());
+  var label = this.storage.currentCourse.fileName.getValue();
+  label = encodeURIComponent(label);
+  return this.problems[label];
 }
 
 Page.prototype.cleanUpLoginSpan = function(componentToCleanUp) {
@@ -518,13 +521,6 @@ Page.prototype.cleanUpLoginSpan = function(componentToCleanUp) {
       loginInfo.innerHTML = "<b>...</b>";
     }
   }
-}
-
-Page.prototype.getProblem = function(fileName) {
-  if (this.problems[fileName] === undefined) {
-    this.problems[fileName] = new Problem(fileName);
-  }
-  return this.problems[fileName];
 }
 
 function loadProfilePic() {

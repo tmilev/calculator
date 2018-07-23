@@ -66,7 +66,8 @@ function selectEditPage(currentlyEditedPage) {
   theTopicTextArea.value = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
   theTopicTextArea.cols = currentlyEditedPage.length + 15;
 
-  var theURL = `${pathnames.calculatorAPI}?${pathnames.requestEditPage}&fileName=${thePage.storage.editor.currentlyEditedPage.getValue()}`;
+  var theURL = `${pathnames.calculatorAPI}?${pathnames.requestEditPage}&`;
+  theURL += `fileName=${thePage.storage.editor.currentlyEditedPage.getValue()}`;
   submitGET({
     url: theURL,
     callback: selectEditPageCallback

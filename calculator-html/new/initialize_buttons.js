@@ -85,7 +85,7 @@ function MathQuillCommandButton(inputCommand, inputLabel, inputAdditionalStyle, 
 }
 
 MathQuillCommandButton.prototype.getButtonId = function (inputPanel) {
-  return `${encodeURIComponent(inputPanel.fileName)}_${encodeURIComponent(inputPanel.idButtonContainer)}_${encodeURIComponent(this.id)}`;
+  return `${encodeURIComponent(inputPanel.problemId)}_${encodeURIComponent(inputPanel.idButtonContainer)}_${encodeURIComponent(this.id)}`;
 }
 
 MathQuillCommandButton.prototype.getButton = function (inputPanel) {
@@ -290,7 +290,7 @@ function initializeCalculatorPage() {
   calculatorPanel = new InputPanelData({
     idMQSpan: "mainInputMQfield",
     idMQcomments: "mqPanelComments",
-    fileName: "",
+    problemId: "",
     idPureLatex: "mainInputID",
     idButtonContainer: 'mainInputMQfieldButtons',
     flagCalculatorPanel: true
@@ -303,7 +303,7 @@ function InputPanelData(input) {
   //to serve autocomplete:
   this.idMQSpan = input.idMQSpan;
   this.idMQcomments = input.idMQcomments;
-  this.fileName = input.fileName;
+  this.problemId = input.problemId;
 
   this.idPureLatex = input.idPureLatex;
   this.idButtonContainer = input.idButtonContainer;
@@ -388,7 +388,7 @@ InputPanelData.prototype.showSolution = function() {
 
 InputPanelData.prototype.submitAnswer = function() {
   var theRequest = "";
-  var currentProblem = thePage.getProblem(this.fileName);
+  var currentProblem = thePage.problems[this.problemId];
   if (currentProblem.flagForReal) {
     theRequest = "submitAnswers";
   } else {
@@ -399,14 +399,14 @@ InputPanelData.prototype.submitAnswer = function() {
 }
 
 InputPanelData.prototype.submitGiveUp = function() {
-  var currentProblem = thePage.getProblem(this.fileName);
+  var currentProblem = thePage.problems[this.problemId];
   var theRequest = `problemGiveUp&randomSeed=${currentProblem.randomSeed}`; //"submitAnswersPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 
 InputPanelData.prototype.submitPreview = function() {
   var theRequest = "";
-  var currentProblem = thePage.getProblem(this.fileName);
+  var currentProblem = thePage.problems[this.problemId];
   if (currentProblem.flagForReal) {
     theRequest = "submitAnswersPreview";
   } else {

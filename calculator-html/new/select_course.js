@@ -20,7 +20,8 @@ function afterLoadSelectCoursePage(incomingPage, result) {
     resultString += "<div style='text-align:center; width:100%'>";
     for (var counterCourses = 0; counterCourses < thePage.theCourses.length; counterCourses ++) {
       var currentCourse = thePage.theCourses[counterCourses];
-      resultString += `<a href="#" onclick="selectCourse(${counterCourses})" class = "courseLink">${currentCourse.title}</a>`;
+      resultString += `<a href="#" onclick="selectCourse(${counterCourses})" class = "courseLink">`;
+      resultString += `${currentCourse.title}</a>`;
       if (counterCourses != thePage.theCourses.length - 1) {
         resultString += "<br>";
       }

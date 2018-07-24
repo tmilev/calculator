@@ -15,6 +15,10 @@ std::string WebAPI::calculatorOnePageJSWithHash = "/calculator-html/javascript_a
 std::string WebAPI::calculatorSetProblemData = "setProblemData";
 std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
 
+std::string WebAPI::problemContent = "problemContent";
+std::string WebAPI::problemFileName = "fileName";
+std::string WebAPI::problemId = "id";
+
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 WebServer theWebServer;
 

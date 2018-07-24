@@ -881,12 +881,14 @@ std::string HtmlInterpretation::GetExamPageJSON()
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
 
   JSData output;
-  output["problem"] = HtmlRoutines::ConvertStringToURLString(out.str(), false);
+  output[WebAPI::problemContent] = HtmlRoutines::ConvertStringToURLString(out.str(), false);
   if (theFile.flagLoadedSuccessfully)
   { output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
     output["deadline"] = theFile.outputDeadlineString;
     output["problemLabel"] = theFile.outputProblemLabel;
     output["title"] = theFile.outputProblemTitle;
+    output[WebAPI::problemFileName] = theFile.fileName;
+    output[WebAPI::problemId] = theFile.fileName;
     JSData theScripts(JSData::JSarray);
     theScripts.list.SetSize(theFile.theScripts.size());
     for (int i = 0; i < theFile.theScripts.size(); i ++)
@@ -2356,7 +2358,7 @@ std::string HtmlInterpretation::ToStringUserScores()
   << "<th rowspan =\"3\">Section</th><th rowspan =\"3\"> Total score</th>";
   for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
   { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
-    if (currentElt.problem != "" || currentElt.type != currentElt.tChapter)
+    if (currentElt.problemFileName != "" || currentElt.type != currentElt.tChapter)
       continue;
     int numCols = currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
     out << "<td colspan =\"" << numCols << "\"";
@@ -2369,7 +2371,7 @@ std::string HtmlInterpretation::ToStringUserScores()
   out << "<tr>";
   for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
   { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
-    if (currentElt.problem != "" || currentElt.type != currentElt.tSection)
+    if (currentElt.problemFileName != "" || currentElt.type != currentElt.tSection)
       continue;
     int numCols = currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
     out << "<td colspan =\"" << numCols << "\"";
@@ -2382,7 +2384,7 @@ std::string HtmlInterpretation::ToStringUserScores()
   out << "<tr>";
   for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
   { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
-    if (currentElt.problem == "" && currentElt.type != currentElt.tProblem &&
+    if (currentElt.problemFileName == "" && currentElt.type != currentElt.tProblem &&
         currentElt.type != currentElt.tSubSection && currentElt.type != currentElt.tTexHeader)
     { if ((currentElt.flagContainsProblemsNotInSubsection &&
            currentElt.totalSubSectionsUnderMeIncludingEmptySubsections > 1)
@@ -2390,7 +2392,7 @@ std::string HtmlInterpretation::ToStringUserScores()
         out << "<td></td>";
       continue;
     }
-    if (currentElt.problem != "" || currentElt.type != currentElt.tSubSection)
+    if (currentElt.problemFileName != "" || currentElt.type != currentElt.tSubSection)
       continue;
     out << "<td>" << currentElt.title << "</td>";
   }
@@ -2408,7 +2410,7 @@ std::string HtmlInterpretation::ToStringUserScores()
 #endif
   for (int j = 0; j < theScores.theProblem.theTopicS.size(); j ++)
   { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[j];
-    if (currentElt.problem != "")
+    if (currentElt.problemFileName != "")
       continue;
     if (currentElt.type != currentElt.tSubSection &&
         !currentElt.flagContainsProblemsNotInSubsection)
@@ -2422,7 +2424,7 @@ std::string HtmlInterpretation::ToStringUserScores()
     << "<td>" << theScores.userScores[i].GetDoubleValue() << "</td>";
     for (int j = 0; j < theScores.theProblem.theTopicS.size(); j ++)
     { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[j];
-      if (currentElt.problem != "")
+      if (currentElt.problemFileName != "")
         continue;
       if (currentElt.type != currentElt.tSubSection && !currentElt.flagContainsProblemsNotInSubsection)
         continue;

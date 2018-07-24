@@ -125,7 +125,7 @@ function loginWithServerCallback(incomingString, result) {
       toggleAdminPanels();
       hideLoginCalculatorButtons();
       showLogoutButton();
-    } else if (parsedAuthentication["status"] === "not logged in"){
+    } else if (parsedAuthentication["status"] === "not logged in") {
       if (parsedAuthentication["error"] !== undefined) {
         loginErrorMessage = parsedAuthentication["error"];
       }

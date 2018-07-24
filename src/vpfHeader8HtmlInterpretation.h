@@ -48,7 +48,7 @@ public:
   List<std::string> sourceHomework;
   List<bool> sourceHomeworkIsSolution;
   std::string slidesPrintable;
-  std::string problem;
+  std::string problemFileName;
   std::string error;
   std::string displayTitle;
   std::string displayVideoLink;

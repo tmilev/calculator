@@ -15,26 +15,26 @@ var startingCharacterSectionUnderMathQuillEdit = '';
 var panelDataRegistry = {};
 var calculatorPanel = null;
 
-function processMathQuillLatex(theText){ 
-  for (var i = 0; i < theText.length; i ++){
-    if (i + 1 < theText.length){ 
-      if ((theText[i] === '_' || theText[i] === '^') && theText[i + 1] !== '{'){
+function processMathQuillLatex(theText) { 
+  for (var i = 0; i < theText.length; i ++) {
+    if (i + 1 < theText.length) { 
+      if ((theText[i] === '_' || theText[i] === '^') && theText[i + 1] !== '{') {
         theText = theText.slice(0, i + 1) + '{' + theText[i + 1] + '}' + theText.slice(i + 2);
       }
-      if (theText[i] === '\\' && theText[i + 1] === '\\'){
+      if (theText[i] === '\\' && theText[i + 1] === '\\') {
         theText = theText.slice(0, i + 2) + ' ' + theText.slice(i + 2);
       }
     }
   }
-  if (charsToSplit !== undefined){
-    for (var i = 0; i < theText.length - 1; i ++){ 
-      for (var j = 0; j < charsToSplit.length; j ++){
+  if (charsToSplit !== undefined) {
+    for (var i = 0; i < theText.length - 1; i ++) { 
+      for (var j = 0; j < charsToSplit.length; j ++) {
         if (theText[i] === charsToSplit[j] && theText[i + 1] !== ' ' && 
             theText[i + 1] !== '\\' && theText[i + 1] !== '+' && 
             theText[i + 1] !== '*' && theText[i + 1] !== '/' && 
-            theText[i + 1] !== '-' && theText[i + 1] !== '='){ 
-          if (theText[i] === 'x'){
-            if (theText.slice(i - 5, i + 1) === 'matrix'){
+            theText[i + 1] !== '-' && theText[i + 1] !== '=') { 
+          if (theText[i] === 'x') {
+            if (theText.slice(i - 5, i + 1) === 'matrix') {
               continue;
             }
           }
@@ -52,33 +52,33 @@ function sleep(ms) {
 
 var MathQuillCommandButtonCollection = {};
 
-function MathQuillCommandButton(inputCommand, inputLabel, inputAdditionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection){
+function MathQuillCommandButton(inputCommand, inputLabel, inputAdditionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection) {
   this.theCommand = inputCommand;
   this.theLabel = inputLabel;
   this.isComposite = false;
   this.extraDirection = inputExtraDirection;
   this.additionalStyle = inputAdditionalStyle;
-  if (typeof(inputCommand) !== "string"){
+  if (typeof(inputCommand) !== "string") {
     this.isComposite = true;
   }
   this.id = "";
-  if (!this.isComposite){
+  if (!this.isComposite) {
     this.id = this.theCommand;
   } else { 
     this.id = "";
-    for (var i = 0; i < inputCommand.length; i ++){
+    for (var i = 0; i < inputCommand.length; i ++) {
       this.id += inputCommand[i];
     }
   }
-  if (doWriteInsteadOfCmdInput !== undefined){
+  if (doWriteInsteadOfCmdInput !== undefined) {
     this.doWriteInsteadOfCmd = doWriteInsteadOfCmdInput;
   } else {
     this.doWriteInsteadOfCmd = false;
   }
   this.idEscaped = "";
-  for (var i = 0; i < this.id.length; i ++){ 
+  for (var i = 0; i < this.id.length; i ++) { 
     this.idEscaped += this.id[i];
-    if (this.id[i] === '\\'){
+    if (this.id[i] === '\\') {
       this.idEscaped += "\\";
     }
   }
@@ -133,7 +133,7 @@ MathQuillCommandButton.prototype.clickFunction = function (inputPanel) {
   event.preventDefault();
 }
 
-function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection){ 
+function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection) { 
   var commandObject = new MathQuillCommandButton(
     inputCommand, inputLabel, additionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection
   );
@@ -432,12 +432,12 @@ InputPanelData.prototype.editMQFunction = function() { // useful event handlers
   if (this.ignoreNextMathQuillUpdateEvent) {
     return;
   }
-  if (this.flagAnswerPanel){
+  if (this.flagAnswerPanel) {
     document.getElementById(this.idPureLatex).value = processMathQuillLatex(this.mqObject.latex()); // simple API
     this.submitPreviewWithTimeOut();
     return;
   }
-  if (this.flagCalculatorPanel){
+  if (this.flagCalculatorPanel) {
     if (!this.flagCalculatorMQStringIsOK) {
       return;
     }
@@ -643,7 +643,7 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
     addCommand("(");
     addCommand(")");
   }
-  if (buttonArray.indexOf("trig") > - 1 || includeAll){ 
+  if (buttonArray.indexOf("trig") > - 1 || includeAll) { 
     addCommand("sin");
     addCommand("cos");
     addCommand("tan");
@@ -659,7 +659,7 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
       buttonArray.indexOf("inversetrigonometry") > - 1 ||
       buttonArray.indexOf("inverse_trigonometry") > - 1 ||
       buttonArray.indexOf("inverse-trigonometry") > - 1 ||
-      includeAll){ 
+      includeAll) { 
     addCommand("arcsin");
     addCommand("arccos");
     addCommand("arctan");
@@ -668,23 +668,23 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
       buttonArray.indexOf("comma") > - 1 ||
       buttonArray.indexOf("commas") > - 1 ||
       buttonArray.indexOf("intervals") > - 1 ||
-      includeAll){
+      includeAll) {
     addCommand(",");
   }
   if (buttonArray.indexOf("brackets") > - 1 ||
-      buttonArray.indexOf("intervals") > - 1 || includeAll){ 
+      buttonArray.indexOf("intervals") > - 1 || includeAll) { 
     addCommand("[");
     addCommand("]");
   }
-  if (buttonArray.indexOf("complex") > - 1 || buttonArray.indexOf("imaginary") > - 1 || includeAll){ 
+  if (buttonArray.indexOf("complex") > - 1 || buttonArray.indexOf("imaginary") > - 1 || includeAll) { 
     addCommand("i");
   }
-  if (buttonArray.indexOf("variables") > - 1 || includeAll){ 
+  if (buttonArray.indexOf("variables") > - 1 || includeAll) { 
     addCommand("x");
     addCommand("y");
     addCommand("=");
   }
-  if (buttonArray.indexOf("logarithms") > - 1 || noOptions || includeAll){ 
+  if (buttonArray.indexOf("logarithms") > - 1 || noOptions || includeAll) { 
     addCommand("log_");
     addCommand("_");
     addCommand("ln");
@@ -696,39 +696,39 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
       buttonArray.indexOf("intervals") > - 1 ||
       buttonArray.indexOf("limits") > - 1 ||
       buttonArray.indexOf("limit") > - 1 ||
-      includeAll || noOptions){
+      includeAll || noOptions) {
     addCommand("infty");
   }
   if (buttonArray.indexOf("limits") > - 1 ||
       buttonArray.indexOf("limit") > - 1 ||
-      includeAll){
+      includeAll) {
     addCommand(" DNE ");
   }
   if (buttonArray.indexOf("sum") > - 1 ||
-      buttonArray.indexOf("series") > - 1 || noOptions || includeAll){ 
+      buttonArray.indexOf("series") > - 1 || noOptions || includeAll) { 
     addCommand("binom");
     addCommand("!");
     addCommand("sum");
   }
-  if (noOptions || includeAll){ 
+  if (noOptions || includeAll) { 
     addCommand("circ");
   }
   if (buttonArray.indexOf("interval") > - 1 || buttonArray.indexOf("intervals") > - 1 ||
-      buttonArray.indexOf("or") > - 1 || noOptions || includeAll){
+      buttonArray.indexOf("or") > - 1 || noOptions || includeAll) {
     addCommand(" or ");
   }
-  if (buttonArray.indexOf("interval") > - 1 || buttonArray.indexOf("intervals") > - 1 || noOptions || includeAll){ 
+  if (buttonArray.indexOf("interval") > - 1 || buttonArray.indexOf("intervals") > - 1 || noOptions || includeAll) { 
     addCommand("cup");
     addCommand("in");
     addCommand("emptyset");
   }
-  if (buttonArray.indexOf("matrix") > - 1 || buttonArray.indexOf("matrices") > - 1 || (includeAll && MathQuillHasMatrixSupport)){ 
+  if (buttonArray.indexOf("matrix") > - 1 || buttonArray.indexOf("matrices") > - 1 || (includeAll && MathQuillHasMatrixSupport)) { 
     addCommand("\\begin{pmatrix} \\\\ \\end{pmatrix}");
     addCommand("\\begin{pmatrix} \\\\ \\\\ \\end{pmatrix}");
     addCommand("\\begin{pmatrix} & \\\\ & \\end{pmatrix}");
     addCommand("\\begin{pmatrix} & & \\\\ & & \\\\ & & \\end{pmatrix}");
   }
-  if (buttonArray.indexOf("angle") > - 1 || buttonArray.indexOf("angles") > - 1 || noOptions || includeAll){ 
+  if (buttonArray.indexOf("angle") > - 1 || buttonArray.indexOf("angles") > - 1 || noOptions || includeAll) { 
     addCommand("pi");
     addCommand("^circ");
     addCommand("alpha");
@@ -741,25 +741,25 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
       buttonArray.indexOf("NewtonMethod") > - 1 ||
       buttonArray.indexOf("newtonmethod") > - 1 ||
       buttonArray.indexOf("newton") > - 1 ||
-      includeAll){ 
+      includeAll) { 
     addCommand("NewtonsMethod (,,)");
   }
   var theContent = "<table>";
   var numButtonsPerLine = 4;
-  for (var j = 0; j < buttonBindings.length; j ++){ 
-    if (j % numButtonsPerLine === 0){ 
-      if (j !== 0){
+  for (var j = 0; j < buttonBindings.length; j ++) { 
+    if (j % numButtonsPerLine === 0) { 
+      if (j !== 0) {
         theContent += "</tr>";
       }
       theContent += "<tr>";
     }
     theContent += "<td>" + buttonBindings[j].getButton(this) + "</td>";
   }
-  if (buttonBindings.length > 0){
+  if (buttonBindings.length > 0) {
     theContent += "</tr>";
   }
   theContent += "</table>";
-  if (!forceShowAll && !includeAll){
+  if (!forceShowAll && !includeAll) {
     theContent += `<small><a href=\"#\" onclick=\"panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(true);\">Show all</a></small>`;
   } else {
     theContent += `<small><a href=\"#\" onclick=\"panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(false);\">Show relevant</a></small>`;
@@ -769,16 +769,16 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
   currentButtonPanel.style.maxHeight = "";
   currentButtonPanel.style.height = "";
   currentButtonPanel.innerHTML = theContent;
-  for (var j = 0; j< buttonBindings.length; j ++){
+  for (var j = 0; j< buttonBindings.length; j ++) {
     document.getElementById(buttonBindings[j].getButtonId(this)).addEventListener(
       'click', buttonBindings[j].clickFunction.bind(buttonBindings[j], this)
     );
   }
-  if (oldHeight !== 0 && oldHeight !== "0px"){ 
+  if (oldHeight !== 0 && oldHeight !== "0px") { 
     var newHeight = window.getComputedStyle(currentButtonPanel).height;
     currentButtonPanel.style.maxHeight = oldHeight ;
     currentButtonPanel.style.height = oldHeight ;
-    setTimeout(function(){ 
+    setTimeout(function() { 
       modifyHeightForTimeout(currentButtonPanel, newHeight)
     }, 0);
   }

@@ -39,7 +39,7 @@ function calculatorError(x) {
   }
 }
 
-function vectorScalarVector(s, t){ 
+function vectorScalarVector(s, t) { 
   var result = 0;
   if (s.length !== t.length) {
     calculatorError("Scalar product of vectors of different length: " + s + " and " + t + ".");
@@ -214,7 +214,7 @@ function CurveThreeD(
       accountBoundingBox([theX, theY], inputOutputBox);
     }
   };
-  this.drawNoFinish = function(theCanvas, startByMoving){ 
+  this.drawNoFinish = function(theCanvas, startByMoving) { 
     var theSurface = theCanvas.surface;
     theSurface.strokeStyle = colorRGBToString(this.color);
     theSurface.fillStyle = colorRGBToString(this.color);

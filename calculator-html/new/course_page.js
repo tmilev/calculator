@@ -4,7 +4,7 @@ Problem.prototype.toStringDeadline = function() {
   if (!thePage.user.hasAdminRights()) {
     return "";
   }
-  if (this.type === "problem" && this.problem === "") {
+  if (this.type === "problem" && this.fileName === "") {
     return "";
   }
   var result = "";
@@ -21,7 +21,7 @@ Problem.prototype.toStringDeadline = function() {
     result += `></input></td></tr>`;
   } 
   result += "</table>";
-  console.log("Problem data problem: " + JSON.stringify(this.problem));
+  console.log("Problem data problem: " + JSON.stringify(this.fileName));
   console.log("Problem data title: " + JSON.stringify(this.title));
   result += `<button onclick = "modifyDeadlines('${this.idURLed}')">Set</button>`;
   result += `<span id = '${this.idModifyReportDeadline}'></span>`;
@@ -53,7 +53,7 @@ Problem.prototype.modifyWeight = function() {
   var problemWeightTextareaId = `points${this.idURLed}`;
   var incomingPoints = document.getElementById(problemWeightTextareaId).value;
   var modifyObject = {};
-  console.log("DEBUG: id: " + this.idURLed);
+  //console.log("DEBUG: id: " + this.idURLed);
   var idDecoded = decodeURIComponent(this.idURLed);
   //var problemModifyWeightReport = `report${id}`;
   modifyObject[idDecoded] = {
@@ -69,13 +69,13 @@ Problem.prototype.modifyWeight = function() {
 }
 
 function modifyWeight(id) {
-  var theProblemWeight = theProblemMetaDataCollection[id];
+  var theProblemWeight = thePage.problems[id];
   theProblemWeight.modifyWeight();
 }
 
 Problem.prototype.toStringProblemWeightCell = function() {
   var result = "";
-  if (this.type !== "problem") {
+  if (this.type !== "problem" || this.fileName === "") {
     return "<td></td>";
   }
   //console.log("DEBUG: problemData.problem:  " + problemData.problem);
@@ -122,7 +122,7 @@ Problem.prototype.toStringProblemWeight = function() {
 }
 
 function callbackModifyDeadlines(incomingId, input, output) {
-  console.log(`DEBUG: ${incomingId}, input: ${input}`);
+  //console.log(`DEBUG: ${incomingId}, input: ${input}`);
   document.getElementById(`deadlines${incomingId}`).innerHTML = input;
 }
 
@@ -137,7 +137,7 @@ function modifyDeadlines(incomingId) {
   for (var counterDates = 0; counterDates < theDates.length; counterDates ++) {
     jsonToSubmit[idDecoded].deadlines[thePage.user.sectionsTaught[counterDates]] = theDates[counterDates].value;
   }
-  console.log("DEBUG: id: " + incomingId);
+  //console.log("DEBUG: id: " + incomingId);
   //console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
   var theURL = "";
   theURL += `${pathnames.calculatorAPI}?request=setProblemData&`;
@@ -174,12 +174,12 @@ Problem.prototype.getHTMLOneProblemTr = function () {
   }
   result += "</td>";
   result += "<td>";
-  if (this.problem !== "") {
+  if (this.fileName !== "") {
     if (thePage.user.flagLoggedIn) {
-      result += `<a class = "problemLinkQuiz" href = "${this.getURL(true)}" `; 
+      result += `<a class = "problemLinkQuiz" href = "#${this.getAppAnchorRequestFileCourseTopics(true)}" `; 
       result += `onclick = "selectCurrentProblem('${this.idURLed}', 'scoredQuizJSON');">Quiz</a>`;
     }
-    result += `<a class = "problemLinkPractice" href = "${this.getURL(false)}" `;
+    result += `<a class = "problemLinkPractice" href = "#${this.getAppAnchorRequestFileCourseTopics(false)}" `;
     result += `onclick = "selectCurrentProblem('${this.idURLed}', 'exerciseJSON');">Practice</a>`;
   }
   result += "</td>";
@@ -328,7 +328,7 @@ function afterLoadTopics(incomingTopics, result) {
   }
   thePage.previousProblemId = null;
   var stringHTMLContent = "";
-  console.log ("DEBUG: temporarily disabled error catching ");
+  //console.log ("DEBUG: temporarily disabled error catching ");
   //try {
     thePage.theTopics = JSON.parse(incomingTopics);
     for (var counterChapter = 0; counterChapter < thePage.theTopics["children"].length; counterChapter ++) {

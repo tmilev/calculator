@@ -20,7 +20,7 @@ function createSelectionNoFocus(field, start, end) {
     selRange.select();
     field.focus();
     calculatorMQfield.focus();
-  } else if (field.setSelectionRange){ 
+  } else if (field.setSelectionRange) { 
     field.focus();
     field.setSelectionRange(start, end);
     calculatorMQfield.focus();

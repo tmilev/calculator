@@ -10,6 +10,7 @@
 #include "vpfHeader2Math10_LaTeXRoutines.h"
 #include <iomanip>
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
+#include "vpfWebAPI.h"
 
 ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutinesCustomCode
 (__FILE__, "Routines for calculus teaching: calculator exam mode. Shared code. ");
@@ -194,8 +195,8 @@ JSData CalculatorHTML::ToJSONDeadlines
     }
     output[currentProblemName] = currentProblemJSON;
   }
-  if (theGlobalVariables.UserDebugFlagOn())
-    stOutput << "DEBUG: deadline Output: " << output.ToString(false);
+  //if (theGlobalVariables.UserDebugFlagOn())
+  //  stOutput << "DEBUG: deadline Output: " << output.ToString(false);
   return output;
 }
 
@@ -229,7 +230,7 @@ bool DatabaseRoutineS::StoreProblemInfoToDatabase
   JSData findQueryWeights, findQueryDeadlines;
   findQueryWeights[DatabaseStrings::labelProblemWeightsSchema] = theUser.problemWeightSchema;
   findQueryDeadlines[DatabaseStrings::labelDeadlinesSchema] = theUser.deadlineSchema;
-  stOutput << "<br>DEBUG: deadline find query: " << findQueryWeights.ToString(false) << "<br>";
+  //stOutput << "<br>DEBUG: deadline find query: " << findQueryWeights.ToString(false) << "<br>";
   if (theUser.problemWeights.type != JSData::JSUndefined)
   { if (overwrite)
     { JSData setQueryWeights;
@@ -251,8 +252,8 @@ bool DatabaseRoutineS::StoreProblemInfoToDatabase
       }
     }
   }
-  stOutput << "<br>DEBUG: deadline find query: " << findQueryDeadlines.ToString(false);
-  stOutput << "<br>DEBUG: deadline update query: " << theUser.deadlines.ToString(false);
+  //stOutput << "<br>DEBUG: deadline find query: " << findQueryDeadlines.ToString(false);
+  //stOutput << "<br>DEBUG: deadline update query: " << theUser.deadlines.ToString(false);
 
   if (theUser.deadlines.type != JSData::JSUndefined)
   { if (overwrite)
@@ -3531,8 +3532,8 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
 
 void TopicElement::ComputeID()
 { MacroRegisterFunctionWithName("TopicElement::ComputeID");
-  if (this->problem != "")
-  { this->id = this->problem;
+  if (this->problemFileName != "")
+  { this->id = this->problemFileName;
     this->type = this->tProblem;
   } else
   { std::stringstream out;
@@ -3619,7 +3620,7 @@ void TopicElement::reset(int parentSize, MapLisT<std::string, TopicElement, Math
   this->sourceSlides.SetSize(0);
   this->sourceHomework.SetSize(0);
   this->sourceHomeworkIsSolution.SetSize(0);
-  this->problem = "";
+  this->problemFileName = "";
   this->error = "";
   if (parentSize != - 1)
   { this->parentTopics.SetSize(MathRoutines::Minimum(parentSize, this->parentTopics.size));
@@ -3808,8 +3809,8 @@ void TopicElement::GetTopicList
     else if (MathRoutines::StringBeginsWith(currentLine, "HandwrittenSolutions:", &currentArgument))
       currentElt.handwrittenSolution = MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "Problem:", &currentArgument))
-    { currentElt.problem = MathRoutines::StringTrimWhiteSpace(currentArgument);
-      currentElt.id = currentElt.problem;
+    { currentElt.problemFileName = MathRoutines::StringTrimWhiteSpace(currentArgument);
+      currentElt.id = currentElt.problemFileName;
       found = true;
     } else
     { std::stringstream errorStream;
@@ -3878,11 +3879,11 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
   this->CheckConsistencyTopics();
   this->problemNamesNoTopics.Clear();
   for (int i = 0; i < this->theTopicS.size(); i ++)
-    if (this->theTopicS[i].problem != "")
-      this->problemNamesNoTopics.AddOnTop(this->theTopicS[i].problem);
+    if (this->theTopicS[i].problemFileName != "")
+      this->problemNamesNoTopics.AddOnTop(this->theTopicS[i].problemFileName);
   for (int i = this->theTopicS.size() - 1; i >= 0; i --)
   { TopicElement& currentElt = this->theTopicS.theValues[i];
-    if (currentElt.problem != "")
+    if (currentElt.problemFileName != "")
       continue;
     if (currentElt.type == currentElt.tSubSection)
     { currentElt.totalSubSectionsUnderME = 0;
@@ -3897,7 +3898,7 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
       if (currentChild.type == currentChild.tSubSection)
       { currentElt.totalSubSectionsUnderME ++;
         currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
-      } else if (currentChild.problem != "")
+      } else if (currentChild.problemFileName != "")
         currentElt.flagContainsProblemsNotInSubsection = true;
       else
       { currentElt.totalSubSectionsUnderME += currentChild.totalSubSectionsUnderME;
@@ -4135,7 +4136,7 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
     out << this->displayProblemLink;
     out << "  </td>\n";
     out << "  <td>";
-    if (this->problem == "")
+    if (this->problemFileName == "")
       out << "-";
     else
       out << this->displayScore;
@@ -4630,7 +4631,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   }
   bool problemSolved = false;
   bool returnEmptyStringIfNoDeadline = false;
-  if (this->problem == "")
+  if (this->problemFileName == "")
   { if (this->type == this->tProblem)
       this->displayProblemLink = "(theory)";
     else
@@ -4643,12 +4644,12 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   { //std::string theRawSQLink = theGlobalVariables.DisplayNameExecutable +
     //"?request=scoredQuiz&fileName=" + this->problem;
     std::string theRawExerciseLink;
-    theRawExerciseLink = theGlobalVariables.DisplayNameExecutable + "?request=exercise&fileName=" + this->problem;
-    this->displayProblemLink = owner.ToStringLinkFromFileName(this->problem);
-    this->displayScore = owner.ToStringProblemScoreShort(this->problem, problemSolved);
-    this->displayModifyWeight = owner.ToStringProblemWeightButton(this->problem);
+    theRawExerciseLink = theGlobalVariables.DisplayNameExecutable + "?request=exercise&fileName=" + this->problemFileName;
+    this->displayProblemLink = owner.ToStringLinkFromFileName(this->problemFileName);
+    this->displayScore = owner.ToStringProblemScoreShort(this->problemFileName, problemSolved);
+    this->displayModifyWeight = owner.ToStringProblemWeightButton(this->problemFileName);
   }
-  if (this->problem == "" && this->type == this->tProblem)
+  if (this->problemFileName == "" && this->type == this->tProblem)
     this->displayDeadlinE = "";
   else
     this->displayDeadlinE = owner.ToStringDeadline
@@ -4678,7 +4679,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   << this->displayVideoLink << this->displayVideoHandwrittenLink << this->displaySlidesLink
   << this->displaySlidesPrintableLink << this->displayHandwrittenSolution;
   this->displayResourcesLinks = displayResourcesLinksStream.str();
-  if (this->problem != "")
+  if (this->problemFileName != "")
     owner.NumProblemsFound ++;
   if (this->video != "")
     owner.NumVideosWithSlidesFound ++;
@@ -4692,7 +4693,6 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
 { MacroRegisterFunctionWithName("TopicElement::ToJSON");
   JSData output;
   output["title"] = this->title;
-  output["id"] = this->id;
   switch (this->type)
   { case TopicElement::tChapter:
       output["type"] = (std::string) "chapter";
@@ -4737,10 +4737,11 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
     output["linkSlidesLaTeX"] = this->linkSlidesTex;
   output["handwrittenSolution"]  = this->handwrittenSolution;
 
-  output["problem"] = this->problem;
+  output[WebAPI::problemFileName] = this->problemFileName;
+  output[WebAPI::problemId] = this->id;
 #ifdef MACRO_use_MongoDB
-  if (owner.currentUseR.theProblemData.Contains(this->problem))
-  { ProblemData& currentData = owner.currentUseR.theProblemData.GetValueCreate(this->problem);
+  if (owner.currentUseR.theProblemData.Contains(this->problemFileName))
+  { ProblemData& currentData = owner.currentUseR.theProblemData.GetValueCreate(this->problemFileName);
     output["correctlyAnswered"] = currentData.numCorrectlyAnswered;
     output["totalQuestions"] = currentData.theAnswers.size();
     Rational currentWeight;

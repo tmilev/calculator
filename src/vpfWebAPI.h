@@ -16,6 +16,9 @@ public:
   static std::string calculatorOnePageJS;
   static std::string calculatorOnePageJSWithHash;
   static std::string HeaderCacheControl;
+  static std::string problemContent;
+  static std::string problemFileName;
+  static std::string problemId;
 };
 
 #endif

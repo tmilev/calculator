@@ -7,7 +7,7 @@ function modifyHeightForTimeout(currentButtonPanel, newHeight) {
 
 function toggleHeight(currentButton, currentPanelID) { 
   var currentPanel = document.getElementById(currentPanelID);
-  if (currentPanel === null){
+  if (currentPanel === null) {
     return;
   }
   currentPanel.buttonThatModifiesMe = currentButton;
@@ -17,7 +17,7 @@ function toggleHeight(currentButton, currentPanelID) {
     currentPanel.style.height = currentPanel.startingMaxHeight;
   }
   var currentContainer = currentPanel;
-  while (true){ 
+  while (true) { 
     currentContainer = currentContainer.parentNode;
     //console.log("processing "+ currentContainer.tagName +"."+ currentContainer.className);
     if (!currentContainer.className.startsWith("body")) {

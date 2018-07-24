@@ -1,7 +1,9 @@
 "use strict";
 
 function selectCurrentProblem(problemIdURLed, exerciseType) {
+  thePage.storage.currentCourse.currentProblemId.setAndStore(problemIdURLed);
   thePage.storage.currentCourse.fileName.setAndStore(decodeURIComponent(problemIdURLed));
+  thePage.storage.currentCourse.exerciseType.setAndStore(exerciseType);
   var theProblem = thePage.getCurrentProblem();
   theProblem.flagForReal = false;
   if (exerciseType === "scoredQuizJSON") {
@@ -14,6 +16,7 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
 
 function Problem(problemData) {
   this.idURLed = encodeURIComponent(problemData.id);
+  console.log("DEBUG: idurled: " + this.idURLed);
   this.randomSeed = null;
   this.answers = [];
   this.problemLabel = "";
@@ -22,9 +25,9 @@ function Problem(problemData) {
   this.nextProblemId = null;
   this.scriptIds = null;
   this.type = problemData.type;
-  this.problem = problemData.problem;
-  if (this.problem === null || this.problem === undefined) {
-    this.problem = "";
+  this.fileName = problemData.fileName;
+  if (this.fileName === null || this.fileName === undefined) {
+    this.fileName = "";
   }
   this.title = problemData.title;
   this.problemNumberString = problemData.problemNumberString;
@@ -39,7 +42,7 @@ function Problem(problemData) {
   this.deadlines = problemData.deadlines;
   this.weight = problemData.weight;
 
-  if (this.problem !== "") {
+  if (this.fileName !== "") {
     this.previousProblemId = thePage.previousProblemId;
     if (
       this.previousProblemId !== null && 
@@ -70,16 +73,47 @@ function Problem(problemData) {
   }
 }
 
-Problem.prototype.getURLFileCourseTopics = function() {
+function getCalculatorURLRequestFileCourseTopicsFromStorage() {
+  var currentCourse = thePage.storage.currentCourse; 
+  var exerciseType = currentCourse.exerciseType.getValue();
+  var fileName = currentCourse.fileName.getValue();
+  var topicList = currentCourse.topicList.getValue();
+  var courseHome = currentCourse.courseHome.getValue();
   var result = "";
-  result += `fileName=${this.problem}&`;
-  result += `currentCourse=${thePage.storage.currentCourse.courseHome.getValue()}&`;
+  result += `${pathnames.calculatorAPI}?`;
+  result += `request=${exerciseType}&fileName=${fileName}&`;
+  result += `topicList=${topicList}&courseHome=${courseHome}`;
+  return result;
+}
+
+Problem.prototype.getAppAnchorRequestFileCourseTopics = function(isScoredQuiz) {
+  var theExerciseType = "exerciseJSON";
+  if (isScoredQuiz) {
+    theExerciseType = "scoredQuizJSON";
+  }
+
+  var requestJSON = {
+    currentPage: thePage.pages.problemPage.name,
+    exerciseType: theExerciseType,
+    fileName: this.fileName,
+    courseHome: thePage.storage.currentCourse.courseHome.getValue(),
+    topicList: thePage.storage.currentCourse.topicList.getValue()
+  };
+  return encodeURIComponent(JSON.stringify(requestJSON));
+}
+
+
+Problem.prototype.getCalculatorURLFileCourseTopics = function() {
+  var result = "";
+  result += `fileName=${this.fileName}&`;
+  result += `courseHome=${thePage.storage.currentCourse.courseHome.getValue()}&`;
   result += `topicList=${thePage.storage.currentCourse.topicList.getValue()}&`;
   return result;
 }
 
-Problem.prototype.getURLRequestFileCourseTopics = function(isScoredQuiz) {
+Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQuiz) {
   var result = "";
+  console.log("DEBUG: " + JSON.stringify(thePage.storage.currentCourse));
   if (isScoredQuiz === undefined) {
     isScoredQuiz = this.flagForReal;
   }
@@ -89,7 +123,7 @@ Problem.prototype.getURLRequestFileCourseTopics = function(isScoredQuiz) {
   } else {
     result += "exerciseJSON";
   }
-  result += `&${this.getURLFileCourseTopics()}`;
+  result += `&${this.getCalculatorURLFileCourseTopics()}`;
   return result;
 }
 
@@ -103,12 +137,6 @@ Problem.prototype.getURLRandomSeedRequestFileCourseTopics = function(isScoredQui
   ) {
     result += `randomSeed=${this.randomSeed}&`;
   }
-  return result;
-}
-
-Problem.prototype.getURL = function(isScoredQuiz) {
-  var result = "";
-  result += `#problemPage?${this.getURLRequestFileCourseTopics(isScoredQuiz)}`; 
   return result;
 }
 
@@ -128,19 +156,19 @@ Problem.prototype.getProblemNavigation = function() {
   }
 
   if (this.flagForReal && thePage.user.flagLoggedIn) {
-    result += `<a class='problemLinkPractice' href='${this.getURL()}' onclick = "selectCurrentProblem('${this.idURLed}' ,'exerciseJSON')">Practice</a>`;
+    result += `<a class='problemLinkPractice' href='#${this.getAppAnchorRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.idURLed}' ,'exerciseJSON')">Practice</a>`;
   } else {
     result += "<span class = 'problemLinkSelectedPractice' style='color:green'>Practice</span>";
   }
   if (!this.flagForReal && thePage.user.flagLoggedIn) { 
-    result += `<a class='problemLinkQuiz' href='${this.getURL()}' onclick = "selectCurrentProblem('${this.idURLed}' ,'scoredQuizJSON')">Quiz</a>`;
+    result += `<a class='problemLinkQuiz' href='#${this.getAppAnchorRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.idURLed}' ,'scoredQuizJSON')">Quiz</a>`;
   } else {
     if (this.flagForReal) {
       result += "<span class = 'problemLinkSelectedQuiz' style='color:brown'>Quiz</span>";
     }
   }
   if (this.nextProblemId !== null && this.nextProblemId !== "") {
-    var nextURL = thePage.problems[this.nextProblemId].getURLRequestFileCourseTopics();
+    var nextURL = thePage.problems[this.nextProblemId].getAppAnchorRequestFileCourseTopics();
     result+= `<a class='${linkType}' href='#${nextURL}' onclick = "selectCurrentProblem('${this.nextProblemId}' ,'${defaultRequest}')">&#8594;</a>`;
   }
   if (this.flagForReal !== true && this.flagForReal !== "true") {
@@ -225,7 +253,6 @@ function updateProblemPageCallback(input, outputComponent) {
   if (outputComponent === null || outputComponent === undefined) {
     outputComponent = document.getElementById("divProblemPageContentContainer");
   }
-  var currentProblem = thePage.getCurrentProblem();
   var theProblem = null;
   try {
     theProblem = JSON.parse(input);
@@ -234,9 +261,14 @@ function updateProblemPageCallback(input, outputComponent) {
     thePage.cleanUpLoginSpan(outputComponent);
     return;
   }
-  currentProblem.decodedProblem = decodeURIComponent(theProblem["problem"]);
+  var currentProblem = thePage.getCurrentProblem();
+  if (currentProblem === null || currentProblem === undefined) {
+    thePage.problems[thePage.storage.currentCourse.currentProblemId.getValue()] = new Problem(theProblem);
+    currentProblem = thePage.getCurrentProblem();
+  }
+  currentProblem.decodedProblem = decodeURIComponent(theProblem["problemContent"]);
   //var theScripts = currentProblem.scripts.split ("</script>");
-  //for (var counterScripts = 0; counterScripts < theScripts.length; counterScripts++){
+  //for (var counterScripts = 0; counterScripts < theScripts.length; counterScripts++) {
   //  console.log(`Scripts: ${theScripts[counterScripts]}`);
   //}
   var answerVectors = theProblem["answers"];
@@ -278,8 +310,13 @@ function updateProblemPage() {
   }
   thePage.pages.problemPage.flagLoaded = true;
   var theProblem = thePage.getCurrentProblem();
+  var theURL;
+  if (theProblem !== undefined && theProblem !== null) {
+    theURL = `${pathnames.calculatorAPI}?${theProblem.getCalculatorURLRequestFileCourseTopics()}`;
+  } else {
+    theURL = getCalculatorURLRequestFileCourseTopicsFromStorage();
+  }
   //console.log("Current course: " + JSON.stringify(thePage.storage.currentCourse));
-  var theURL = `${pathnames.calculatorAPI}?${theProblem.getURLRequestFileCourseTopics()}`;
   submitGET({
     url: theURL,
     callback: updateProblemPageCallback,

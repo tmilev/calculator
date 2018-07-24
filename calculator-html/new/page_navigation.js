@@ -228,7 +228,17 @@ function Page() {
         name: "fileName",
         nameCookie: "fileName",
         nameURL: "fileName"
-      })  
+      }),
+      currentProblemId: new StorageVariable({
+        name: "currentProblemId",
+        nameLocalStorage: "currentProblemId",
+        nameURL: "currentProblemId"
+      }),
+      exerciseType: new StorageVariable({
+        name: "exerciseType",
+        nameLocalStorage: "exerciseType",
+        nameURL: "exerciseType"
+      })
     },
     flagDebug: new StorageVariable({
       name: "debugFlag", 
@@ -345,7 +355,7 @@ Page.prototype.loadSettings = function(inputHash) {
     console.log(`DEBUG: hash parsed to: ${JSON.stringify(inputHashParsed)}`);
     this.loadSettingsRecursively(this.storage, inputHashParsed);
   } catch (e) {
-    console.log("Error loading settings from cookies: " + e);
+    console.log(`Error loading settings: ` + e + ` Input hash: ${inputHash}`);
   }
 }
 
@@ -509,8 +519,7 @@ Page.prototype.selectPage = function(inputPage) {
 }
 
 Page.prototype.getCurrentProblem = function() {
-  var label = this.storage.currentCourse.fileName.getValue();
-  label = encodeURIComponent(label);
+  var label = this.storage.currentCourse.currentProblemId.getValue();
   return this.problems[label];
 }
 

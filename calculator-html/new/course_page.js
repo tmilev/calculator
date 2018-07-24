@@ -391,6 +391,10 @@ function selectCurrentCoursePage() {
   if (thePage.user.flagLoggedIn) {
     topicRequest = "templateJSON";
   }
+  var urlObject = { 
+    currentPage: thePage.storage.currentPage.getValue()
+  };
+  location.href = `${pathnames.app}#${encodeURIComponent(JSON.stringify(urlObject))}`;
   submitGET({
     url: `${pathnames.calculatorAPI}?request=${topicRequest}`,
     callback: afterLoadCoursePage,

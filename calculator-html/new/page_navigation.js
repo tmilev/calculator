@@ -99,21 +99,24 @@ function Page() {
       menuButtonId: "buttonLoginPage",
       container: null,
       selectFunction: null,
-      initialized: false
+      initialized: false,
+      flagModifyURL: false
     },
     selectCourse : {
       name: "selectCourse", //<-for autocomplete
       id: "divSelectCourse",
       menuButtonId: "buttonSelectCourse",
       container: null,
-      selectFunction: selectSelectCoursePage
+      selectFunction: selectSelectCoursePage,
+      flagModifyURL: true
     },
     currentCourse : {
       name: "currentCourse", //<-for autocomplete
       id: "divCurrentCourse",
       menuButtonId: "buttonCurrentCourse",
       container: null,
-      selectFunction: selectCurrentCoursePage
+      selectFunction: selectCurrentCoursePage,
+      flagModifyURL: true
     },
     problemPage : {
       name: "problemPage", //<-for autocomplete
@@ -121,7 +124,8 @@ function Page() {
       menuButtonId: "buttonProblemPage",
       container: null,
       selectFunction: updateProblemPage,
-      flagLoaded: false
+      flagLoaded: false,
+      flagModifyURL: false
     },
     editPage : {
       name: "editPage", //<-for autocomplete
@@ -131,6 +135,7 @@ function Page() {
       selectFunction: selectEditPage,
       flagLoaded: false,
       editor: null,
+      flagModifyURL: false
     },
     calculator: {
       name: "calculator", //<-for autocomplete
@@ -138,26 +143,30 @@ function Page() {
       menuButtonId: "buttonSelectCalculator",
       container: null,
       selectFunction: submitCalculatorComputation,
-      scriptIds: []
+      scriptIds: [],
+      flagModifyURL: false
     },
     signUp: {
       name: "signUp", //<-for autocomplete
       id: "divSignUpPage",
       container: null,
-      selectFunction: null
+      selectFunction: null,
+      flagModifyURL: false
     },
     forgotLogin: {
       name: "forgotLogin",
       id: "divForgotLogin",
       container: null,
-      selectFunction: null      
+      selectFunction: null   ,
+      flagModifyURL: false   
     },
     about: {
       name: "about", //<-for autocomplete
       id: "divAboutPage",
       menuButtonId: "buttonAboutPage",
       container: null,
-      selectFunction: null
+      selectFunction: null,
+      flagModifyURL: true
     },
     database: {
       name: "database", //<-for autocomplete
@@ -165,33 +174,38 @@ function Page() {
       menuButtonId: "buttonSelectDatabase",
       container: null,
       selectFunction: updateDatabasePage,
+      flagModifyURL: false
     },
     server: {
       name: "server", //<-for autocomplete
       id: "divServer",
       menuButtonId: "buttonSelectServer",
       container: null,
-      selectFunction: updateServerStatus
+      selectFunction: updateServerStatus,
+      flagModifyURL: true
     },
     account: {
       name: "account", //<-for autocomplete
       id: "divAccount",
       menuButtonId: "buttonSelectAccount",
       container: null,
-      selectFunction: updateAccountPage
+      selectFunction: updateAccountPage,
+      flagModifyURL: false
     },
     activateAccount: {
       name: "activateAccount", //<-for autocomplete
       id: "divActivateAccount",
       container: null,
-      selectFunction: updateAccountActivationPage
+      selectFunction: updateAccountActivationPage,
+      flagModifyURL: true
     },
     accounts: {
       name: "accounts", //<-for autocomplete
       id: "divAccounts",
       menuButtonId: "buttonSelectAccounts",
       container: null,
-      selectFunction: updateAccountsPage
+      selectFunction: updateAccountsPage,
+      flagModifyURL: true
     }
   }
   this.storage = {
@@ -511,6 +525,12 @@ Page.prototype.selectPage = function(inputPage) {
   this.pages[inputPage].container.style.display = "";
   if (this.pages[inputPage].menuButtonId !== null && this.pages[inputPage].menuButtonId !== undefined) {
     document.getElementById(this.pages[inputPage].menuButtonId).classList.add("buttonSelectPageSelected");
+  }
+  if (this.pages[inputPage].flagModifyURL === true) {
+    var urlObject = { 
+      currentPage: thePage.storage.currentPage.getValue()
+    };
+    location.href = `${pathnames.app}#${encodeURIComponent(JSON.stringify(urlObject))}`;
   }
   if (this.pages[inputPage].selectFunction !== null && this.pages[inputPage].selectFunction !== undefined) {
     this.pages[inputPage].selectFunction();

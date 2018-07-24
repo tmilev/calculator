@@ -64,7 +64,6 @@ function callbackAddEmailsOrUsers(input, outputComponent) {
   outputComponent.innerHTML = decodeURIComponent(input);
 }
 
-
 function addEmailsOrUsers(
   idEmailList, problemCollectionName, 
   idOutput, userRole, idUserGroup, 
@@ -111,6 +110,7 @@ function getTeachersStudents() {
   });
 
 }
+
 function updateAccountsPage() {
   var theURL = `${pathnames.calculatorAPI}?request=accountsJSON`;
 

@@ -1,7 +1,7 @@
 "use strict";
 
 Problem.prototype.toStringDeadline = function() {
-  if (!thePage.user.hasAdminRights()) {
+  if (!thePage.user.hasAdminRights() || thePage.studentView()) {
     return "";
   }
   if (this.type === "problem" && this.fileName === "") {
@@ -259,7 +259,7 @@ Problem.prototype.getHTMLSubSection = function() {
 Problem.prototype.isProblemContainer = function() {
   if (this.childrenIds.length !== undefined) {
     if (this.childrenIds.length > 0) {
-      if (this.childrenIds[0].type === "problem") {
+      if (thePage.problems[this.childrenIds[0]].type === "problem") {
         return true;
       }
     }

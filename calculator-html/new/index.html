@@ -290,7 +290,9 @@
   </table>
   <button class = "buttonStandard" onclick = "submitChangePassRequest()" id = "buttonChangeEmail">Change email</button> 
   <br>
-  <span id = "spanVerification"></span>
+  <span id = "spanVerification"></span> 
+  <hr>
+  <span id = "spanUserExtraInfo"></span>
 </div>
 
 <div id = "divActivateAccount" class = "divMainPage">
@@ -392,6 +394,11 @@
 <div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectDatabase">Database</button></div>
 <div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectServer">Server</button></div>
 <div> 
+  <label class = "switch">
+    <input id = "sliderStudentView" type = "checkbox" onchange = "thePage.flipStudentView();">
+    <span class = "slider round"></span>
+  </label><span id = "spanStudentViewToggleReport">-</span>
+  <br>
   <label class = "switch">
     <input id = "sliderDebugFlag" type = "checkbox" onchange = "thePage.flipDebugSwitch();">
     <span class = "slider round"></span>

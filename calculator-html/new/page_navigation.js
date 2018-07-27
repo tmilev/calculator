@@ -4,6 +4,8 @@ function User() {
   this.googleProfile = null;
   this.role = "";
   this.sectionsTaught = [];
+  this.instructor = "";
+  this.sectionInDB = "";
 }
 
 User.prototype.isLoggedIn = function() {
@@ -21,6 +23,19 @@ User.prototype.hasProblemEditRights = function() {
 User.prototype.hideProfilePicture = function() {
   document.getElementById("divProfilePicture").classList.add("divInvisible");
   document.getElementById("divProfilePicture").classList.remove("divVisible");
+}
+
+User.prototype.makeFromUserInfo = function(inputData) {
+  thePage.storage.user.authenticationToken.setAndStore(inputData.authenticationToken);
+  thePage.storage.user.name.setAndStore(inputData.username);
+  this.role = inputData.userRole;
+  this.flagLoggedIn = true;
+  this.sectionsTaught = inputData.sectionsTaught;
+  this.instructor = inputData.instructor;
+  this.sectionInDB = inputData.studentSection;
+  document.getElementById(idDOMElements.spanUserIdInAccountsPage).innerHTML = thePage.storage.user.name.value;
+  document.getElementById(idDOMElements.inputUsername).value = thePage.storage.user.name.value;
+
 }
 
 function StorageVariable(inputs) {
@@ -260,6 +275,12 @@ function Page() {
       nameCookie: "debugFlag",
       secure: false
     }),
+    flagStudentView: new StorageVariable({
+      name: "studentView", 
+      nameURL: "studentView", 
+      nameCookie: "studentView",
+      secure: true
+    }),
     calculator: {
       input: new StorageVariable({
         name: "calculatorInput", 
@@ -346,7 +367,7 @@ function Page() {
   if (this.storage.currentPage.getValue() != this.pages.activateAccount.name) {
     loginTry();
   }
-  this.setDebugSwitch();
+  this.setSwitches();
   document.getElementById("divPage").style.display = "";
   document.getElementById("divPage").className = "divPage";
 }
@@ -435,24 +456,53 @@ Page.prototype.initializeCalculatorPage = function() {
   //}
 }
 
+Page.prototype.flipStudentView = function () {
+  var oldValue = this.storage.flagStudentView.getValue();
+  this.storage.flagStudentView.setAndStore(document.getElementById(idDOMElements.sliderStudentView).checked);    
+  var spanView = document.getElementById(idDOMElements.spanStudentViewFlagToggleReport);
+  if (this.storage.flagStudentView.getValue()) {
+    spanView.innerHTML = "Student view";
+  } else {
+    spanView.innerHTML = "Admin view";
+  }
+  if (oldValue !== this.storage.flagStudentView.getValue()) {
+    thePage.pages.problemPage.flagLoaded = false;
+    toggleAdminPanels();
+    this.selectPage(this.storage.currentPage.getValue());
+  }
+}
+
 Page.prototype.flipDebugSwitch = function () {
-  this.storage.flagDebug.setAndStore(document.getElementById("sliderDebugFlag").checked);
-  var debugSpan = document.getElementById("spanDebugFlagToggleReport");
-  if (this.storage.flagDebug) {
+  this.storage.flagDebug.setAndStore(document.getElementById(idDOMElements.sliderDebugFlag).checked);
+  var debugSpan = document.getElementById(idDOMElements.spanDebugFlagToggleReport);
+  if (this.storage.flagDebug.getValue()) {
     debugSpan.innerHTML = "Debug on";
   } else {
     debugSpan.innerHTML = "Debug off";
   }
 }
 
-Page.prototype.setDebugSwitch = function () {
+Page.prototype.setSwitches = function () {
   //console.log ("DEBUG flag: " + this.flagDebug);
-  if (this.storage.flagDebug === true || this.storage.flagDebug === "true") {
-    document.getElementById("sliderDebugFlag").checked = true;
+  if (this.storage.flagDebug.getValue() === true || this.storage.flagDebug.getValue() === "true") {
+    document.getElementById(idDOMElements.sliderDebugFlag).checked = true;
   } else {
-    document.getElementById("sliderDebugFlag").checked = false;
+    document.getElementById(idDOMElements.sliderDebugFlag).checked = false;
+  }
+  if (this.storage.flagStudentView.getValue() === true || this.storage.flagStudentView.getValue() === "true") {
+    document.getElementById(idDOMElements.sliderStudentView).checked = true;
+  } else {
+    document.getElementById(idDOMElements.sliderStudentView).checked = false;
   }
   this.flipDebugSwitch();
+  this.flipStudentView();
+}
+
+Page.prototype.studentView = function () {
+  if (this.storage.flagStudentView.getValue() === true) {
+    return true;
+  }
+  return false;
 }
 
 function defaultOnLoadInjectScriptsAndProcessLaTeX(idElement) { 

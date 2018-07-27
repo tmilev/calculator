@@ -33,4 +33,15 @@ function updateAccountPage() {
   var emailSpan = document.getElementById(idDOMElements.spanOldEmail);
   usernameInput.innerHTML = thePage.storage.user.name.getValue();
   emailSpan.innerHTML = thePage.storage.user.email.getValue();
+  var spanExtraInfo = document.getElementById(idDOMElements.spanUserExtraInfo);
+  var extraInfo = "";
+  extraInfo += "<table>";
+  extraInfo += `<tr><td>Role: </td><td>${thePage.user.role}</td><tr>`;
+  if (thePage.user.sectionsTaught.length > 0 && !thePage.studentView()) {
+    extraInfo += `<tr><td>Sections taught: </td><td>${thePage.user.sectionsTaught.join(", ")}</td><tr>`;
+  }
+  extraInfo += `<tr><td>Instructor: </td><td>${thePage.user.instructor}</td><tr>`;
+  extraInfo += `<tr><td>Section in database: </td><td>${thePage.user.sectionInDB}</td><tr>`;
+  extraInfo += "</table>";
+  spanExtraInfo.innerHTML = extraInfo;
 }

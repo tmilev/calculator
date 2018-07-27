@@ -76,9 +76,9 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend
     JSData& currentProblem = inputJSON.objects.theValues[i];
     if (currentProbName == "")
       continue;
-    if (theGlobalVariables.UserDebugFlagOn())
-      stOutput << "<br>DEBUG: current problem json: " << currentProblem.ToString(false)
-      << ";<br> currentProbName: " << currentProbName << "\n\n\n";
+    //if (theGlobalVariables.UserDebugFlagOn())
+    //  stOutput << "<br>DEBUG: current problem json: " << currentProblem.ToString(false)
+    //  << ";<br> currentProbName: " << currentProbName << "\n\n\n";
     if (!outputProblemInfo.Contains(currentProbName))
       outputProblemInfo.GetValueCreate(currentProbName) = emptyData;
     ProblemData& currentProblemValue = outputProblemInfo.GetValueCreate(currentProbName);

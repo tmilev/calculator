@@ -185,13 +185,14 @@ Problem.prototype.getEditPanel = function() {
 }
 
 function getEditPanel(fileName) {
-  if (!thePage.user.hasProblemEditRights()) {
+  if (!thePage.user.hasProblemEditRights() || thePage.studentView()) {
     return "";
   }
   if (fileName === "" || fileName === undefined || fileName === null) {
     return "";
   }
   var result = "";
+  console.log(`DEBUG: Edit page panel called with input: ${fileName}`); 
   result += `<span class = 'spanFileInfo'><button class = "buttonSaveEdit" onclick = "selectEditPage('${fileName}')">Edit</button>${fileName}</span>`;
   return result;
 }

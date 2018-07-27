@@ -94,7 +94,7 @@ function toggleAccountPanels() {
 function toggleAdminPanels() {
   var adminPanels = document.getElementsByClassName("divAdminPanel");
   for (var counterPanels = 0; counterPanels < adminPanels.length; counterPanels ++) {
-    if (thePage.user.role === "admin") {
+    if (thePage.user.role === "admin" && !thePage.studentView()) {
       adminPanels[counterPanels].classList.remove("divInvisible");
       adminPanels[counterPanels].classList.add("divVisible");
     } else {
@@ -113,14 +113,7 @@ function loginWithServerCallback(incomingString, result) {
     var parsedAuthentication = JSON.parse(incomingString);
     if (parsedAuthentication["status"] === "logged in") {
       success = true;
-      thePage.storage.user.authenticationToken.setAndStore(parsedAuthentication.authenticationToken);
-      thePage.storage.user.name.setAndStore(parsedAuthentication.username);
-      thePage.user.role = parsedAuthentication.userRole;
-      thePage.user.flagLoggedIn = true;
-      thePage.user.sectionsTaught = parsedAuthentication.sectionsTaught;
-      console.log("DEBUG: parsed authentication sections taught: " + JSON.stringify(parsedAuthentication.sectionsTaught));
-      document.getElementById("spanUserIdInAccountsPage").innerHTML = thePage.storage.user.name.value;
-      document.getElementById("inputUsername").value = thePage.storage.user.name.value;
+      thePage.user.makeFromUserInfo(parsedAuthentication);
       toggleAccountPanels();
       toggleAdminPanels();
       hideLoginCalculatorButtons();

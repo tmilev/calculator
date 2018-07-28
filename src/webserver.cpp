@@ -19,6 +19,8 @@ std::string WebAPI::problemContent = "problemContent";
 std::string WebAPI::problemFileName = "fileName";
 std::string WebAPI::problemId = "id";
 
+std::string WebAPI::calculatorUserInfoJSON = "userInfoJSON";
+
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 WebServer theWebServer;
 
@@ -3633,13 +3635,6 @@ int WebWorker::ProcessDatabaseModifyEntry()
   return 0;
 }
 
-int WebWorker::ProcessDatabaseOneEntry()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseOneEntry");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << "Not implemented yet";
-  return 0;
-}
-
 int WebWorker::ProcessBrowseProblems()
 { MacroRegisterFunctionWithName("WebWorker::ProcessBrowseProblems");
   this->SetHeaderOKNoContentLength("");
@@ -4244,7 +4239,8 @@ int WebWorker::ServeClient()
     return this->ProcessLoginPage(argumentProcessingFailureComments.str());
   }
   //logWorker << "DEBUG: argumentProcessingFailureComments: " <<  argumentProcessingFailureComments.str() << logger::endL;
-  if (argumentProcessingFailureComments.str() != "" &&  (theUser.flagMustLogin || theGlobalVariables.userCalculatorRequestType == "userInfoJSON"))
+  if (argumentProcessingFailureComments.str() != "" &&
+      (theUser.flagMustLogin || theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorUserInfoJSON))
   { theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
     //logWorker << "DEBUG: set global error" << logger::endL;
   }
@@ -4268,9 +4264,6 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.flagLoggedIn &&
            theGlobalVariables.userCalculatorRequestType == "databaseDeleteOneEntry")
     return this->ProcessDatabaseDeleteEntry();
-  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-           theGlobalVariables.userCalculatorRequestType == "databaseOneEntry")
-    return this->ProcessDatabaseOneEntry();
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
            theGlobalVariables.userCalculatorRequestType == "databaseModifyEntry")
     return this->ProcessDatabaseModifyEntry();
@@ -4371,7 +4364,7 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType == "templateJSON" ||
            theGlobalVariables.userCalculatorRequestType == "templateJSONNoLogin")
     return this->ProcessTemplateJSON();
-  else if (theGlobalVariables.userCalculatorRequestType == "userInfoJSON")
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorUserInfoJSON)
     return this->ProcessUserInfoJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "editPage")
     return this->ProcessEditPage();
@@ -6005,7 +5998,7 @@ void WebServer::InitializeGlobalVariables()
   this->requestStartsNotNeedingLogin.AddOnTop("homeworkSource");
   this->requestStartsNotNeedingLogin.AddOnTop(WebAPI::app);
   this->requestStartsNotNeedingLogin.AddOnTop(WebAPI::appNoCache);
-  this->requestStartsNotNeedingLogin.AddOnTop("userInfoJSON");
+  this->requestStartsNotNeedingLogin.AddOnTop(WebAPI::calculatorUserInfoJSON);
 
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");

@@ -1,14 +1,20 @@
 "use strict";
 
 Problem.prototype.toStringDeadline = function() {
-  if (!thePage.user.hasAdminRights() || thePage.studentView()) {
-    return "";
+  console.log("DEBUG: " + JSON.stringify(this));
+//  this.deadlines[];
+}
+
+Problem.prototype.toStringDeadlinePanel = function() {
+  if (!thePage.user.hasInstructorRights() || thePage.studentView()) {
+    return this.toStringDeadline();
   }
   if (this.type === "problem" && this.fileName === "") {
     return "";
   }
   var result = "";
-  result += `<button class = "accordionLike" onclick = "toggleDeadline('${this.idDeadlinePanel}')">Deadline</button>`;
+  result += `<button class = "accordionLike" `
+  result += `onclick = "toggleDeadline('${this.idDeadlinePanel}')">${this.toStringDeadline()}</button>`;
   result += `<span class = "panelDeadlines" id = "${this.idDeadlinePanel}">`;
   result += "<table>";
   result += "<tr><th>Grp.</th><th>Deadline</th></tr>";
@@ -79,6 +85,9 @@ Problem.prototype.toStringProblemWeightCell = function() {
     return "<td></td>";
   }
   //console.log("DEBUG: problemData.problem:  " + problemData.problem);
+  if (!thePage.user.hasInstructorRights()) {
+    return `<td>${this.toStringProblemWeight()}</td>`;
+  }
   var pointsString = `<button class = 'accordionLike' onclick = 'toggleProblemWeights()'>${this.toStringProblemWeight()}</button>`;
   var problemWeightString = this.toHTMLWeights();
   result += `<td>${pointsString}<br> ${problemWeightString}</td>`;
@@ -185,7 +194,7 @@ Problem.prototype.getHTMLOneProblemTr = function () {
   result += "</td>";
 
   result += this.toStringProblemWeightCell();
-  result += `<td>${this.toStringDeadline()}</td>`;
+  result += `<td>${this.toStringDeadlinePanel()}</td>`;
   result += "</tr>";
   return result;
 }
@@ -271,7 +280,7 @@ Problem.prototype.getHTMLSection = function() {
   var result = "";
   //console.log("DEBUG: current section: " + JSON.stringify(this.title) + "; type: " + JSON.stringify(this.type));
   if (this.type === "section") {
-    result += `<div class =\"headSection\">${this.problemNumberString} ${this.title} ${this.toStringDeadline()}</div>`;    
+    result += `<div class =\"headSection\">${this.problemNumberString} ${this.title} ${this.toStringDeadlinePanel()}</div>`;    
   }
   result += "<div class =\"bodySection\">";
   if (this.isProblemContainer()) {

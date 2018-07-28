@@ -17,5 +17,6 @@ var idDOMElements = {
   sliderStudentView: "sliderStudentView",
   spanDebugFlagToggleReport: "spanDebugFlagToggleReport",
   spanStudentViewFlagToggleReport: "spanStudentViewToggleReport",
-  spanUserExtraInfo: "spanUserExtraInfo"
+  spanUserExtraInfo: "spanUserExtraInfo",
+  spanStudentViewPanel: "spanStudentViewPanel"
 }

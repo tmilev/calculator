@@ -16,7 +16,7 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
 
 function Problem(problemData) {
   this.idURLed = encodeURIComponent(problemData.id);
-  console.log("DEBUG: idurled: " + this.idURLed);
+  //console.log("DEBUG: idurled: " + this.idURLed);
   this.randomSeed = null;
   this.answers = [];
   this.problemLabel = "";

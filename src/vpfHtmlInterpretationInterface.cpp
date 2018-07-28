@@ -799,6 +799,7 @@ std::string HtmlInterpretation::GetJSONUserInfo()
   output[DatabaseStrings::labelSection] = theGlobalVariables.userDefault.sectionInDB;
   output[DatabaseStrings::labelCurrentCourses] = theGlobalVariables.userDefault.courseInDB;
   output[DatabaseStrings::labelSectionsTaught] = theGlobalVariables.userDefault.sectionsTaught;
+  output[DatabaseStrings::labelDeadlinesSchema] = theGlobalVariables.userDefault.deadlineSchema;
   return output.ToString(false);
 }
 

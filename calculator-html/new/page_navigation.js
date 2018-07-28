@@ -6,6 +6,7 @@ function User() {
   this.sectionsTaught = [];
   this.instructor = "";
   this.sectionInDB = "";
+  this.deadlineSchema = "";
 }
 
 User.prototype.isLoggedIn = function() {
@@ -13,11 +14,15 @@ User.prototype.isLoggedIn = function() {
 }
 
 User.prototype.hasAdminRights = function() {
-  return this.role === "admin" && this.flagLoggedIn === true;  
+  return this.role === "admin" && this.isLoggedIn();
 }
 
 User.prototype.hasProblemEditRights = function() {
-  return this.role === "admin" && this.isLoggedIn();  
+  return this.role === "admin" && this.isLoggedIn();
+}
+
+User.prototype.hasInstructorRights = function() {
+  return this.role === "admin" && this.isLoggedIn();
 }
 
 User.prototype.hideProfilePicture = function() {
@@ -33,6 +38,7 @@ User.prototype.makeFromUserInfo = function(inputData) {
   this.sectionsTaught = inputData.sectionsTaught;
   this.instructor = inputData.instructor;
   this.sectionInDB = inputData.studentSection;
+  this.deadlineSchema = inputData.deadlineSchema;
   document.getElementById(idDOMElements.spanUserIdInAccountsPage).innerHTML = thePage.storage.user.name.value;
   document.getElementById(idDOMElements.inputUsername).value = thePage.storage.user.name.value;
 

@@ -184,7 +184,6 @@ public:
   int ProcessDatabaseJSON();
   int ProcessDatabaseDeleteEntry();
   int ProcessDatabaseModifyEntry();
-  int ProcessDatabaseOneEntry();
   int ProcessAccounts();
   int ProcessAccountsJSON();
   int ProcessScores();

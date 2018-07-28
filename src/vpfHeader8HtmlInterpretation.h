@@ -234,6 +234,7 @@ public:
   std::string CleanUpCommandString(const std::string& inputCommand);
   void InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inputOutput);
   void InterpretIfAnswer(SyntacticElementHTML& inputOutput);
+  std::string GetDeadlineNoInheritance(const std::string& id);
   std::string GetDeadline
   (const std::string& problemName, const std::string& sectionNumber, bool& outputIsInherited);
   bool MergeOneProblemAdminData

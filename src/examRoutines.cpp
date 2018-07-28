@@ -340,40 +340,6 @@ bool CalculatorHTML::MergeProblemInfoInDatabaseJSON
   return true;
 }
 
-/*bool CalculatorHTML::MergeProblemInfoInDatabase
-(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
-  //stOutput << "DEBUG: Here I am, merging in data: " << incomingProblemInfo;
-  MapLisT<std::string, ProblemData, MathRoutines::hashString> incomingProblems;
-  if (!this->LoadProblemInfoFromURLedInputAppend(incomingProblemInfo, incomingProblems, commentsOnFailure))
-  { commentsOnFailure << "Failed to parse your request";
-    return false;
-  }
-  bool result = true;
-  //stOutput << "<hr><hr>Debug: incoming problems: " << incomingProblems.ToStringHtml();
-  for (int i = 0; i < incomingProblems.size(); i ++)
-    if (!this->MergeOneProblemAdminData(incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
-      result = false;
-  JSData theProblemJSON;
-  theProblemJSON.readstring(incomingProblemInfo, false, &commentsOnFailure);
-  this->StoreDeadlineInfo(theProblemJSON, this->currentUseR.theProblemData);
-  //stOutput << "<hr>Debug: about to store WEIGHT with row id: "
-  //<< this->currentUseR.problemInfoRowId.value << "<hr>";
-  //stOutput << "<hr>About to transform to database string: "
-  //<< this->currentUseR.theProblemData.ToStringHtml()
-  //<< "<hr>";
-  theGlobalVariables.userDefault.problemWeights = this->ToJSONProblemWeights(this->currentUseR.theProblemData);
-  theGlobalVariables.userDefault.deadlines = this->ToJSONDeadlines(this->currentUseR.theProblemData);
-  //theGlobalVariables.userDefault = this->currentUseR;
-  //stOutput << "<hr>Resulting string: "
-  //<< theGlobalVariables.userDefault.problemInfoString.value
-  //<< "<hr>";
-  //commentsOnFailure << "About to store: " << theGlobalVariables.userDefault.problemWeightString;
-  //return false;
-  if (!DatabaseRoutineS::StoreProblemDatabaseInfo(theGlobalVariables.userDefault, commentsOnFailure))
-    return false;
-  return result;
-}*/
 #endif // MACRO_use_MongoDB
 
 bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
@@ -1680,6 +1646,17 @@ std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
 }
 
 #include "vpfHeader5Crypto.h"
+
+std::string CalculatorHTML::GetDeadlineNoInheritance(const std::string& id)
+{ MacroRegisterFunctionWithName("CalculatorHTML::GetDeadlineNoInheritance");
+  if (!this->currentUseR.theProblemData.Contains(id))
+    return "";
+  ProblemDataAdministrative& currentProb =
+  this->currentUseR.theProblemData.GetValueCreateNoInit((id)).adminData;
+  if (!currentProb.deadlinesPerSection.Contains(this->currentUseR.sectionComputed))
+    return "";
+  return currentProb.deadlinesPerSection.GetValueCreate(this->currentUseR.sectionComputed);
+}
 
 std::string CalculatorHTML::GetDeadline
 (const std::string& problemName, const std::string& sectionNumber, bool& outputIsInherited)
@@ -3959,6 +3936,7 @@ std::string CalculatorHTML::ToStringTopicListJSON()
   if (!this->LoadAndParseTopicList(out))
     return "\"" + out.str() + "\"";
   JSData output, topicBundles;
+//  output["DEBUGdatabaseTopicList"] =
   topicBundles.type = JSData::JSarray;
   for (int i = 0; i < this->loadedTopicBundles.size; i ++)
     topicBundles[i] = this->loadedTopicBundles[i];
@@ -4732,7 +4710,12 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
   output["videoHandwritten"] = this->videoHandwritten;
   output["slidesProjector"] = this->slidesProjector;
   output["slidesPrintable"] = this->slidesPrintable;
-  output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSectioN;
+  if (theGlobalVariables.UserDefaultHasProblemComposingRights())
+    output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSectioN;
+  else
+  { std::string theDeadline = owner.GetDeadlineNoInheritance(this->id);
+    output[DatabaseStrings::labelDeadlines] = theDeadline;
+  }
   if (theGlobalVariables.UserDefaultHasProblemComposingRights())
     output["linkSlidesLaTeX"] = this->linkSlidesTex;
   output["handwrittenSolution"]  = this->handwrittenSolution;

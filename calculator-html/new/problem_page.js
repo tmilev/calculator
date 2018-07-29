@@ -39,9 +39,16 @@ function Problem(problemData) {
   this.idModifyReportPoints = `report${this.idURLed}`;
   this.correctlyAnswered = problemData.correctlyAnswered;
   this.totalQuestions = problemData.totalQuestions;
-  this.deadlines = problemData.deadlines;
+  this.deadlines = [];
+  this.deadlineString = null;
+  this.deadline = null;
   this.weight = problemData.weight;
-
+  if (problemData.deadlines !== undefined) {
+    this.deadlines = problemData.deadlines;
+  } 
+  if (problemData.deadline !== undefined) {
+    this.deadlineString = problemData.deadline;
+  }
   if (this.fileName !== "") {
     this.previousProblemId = thePage.previousProblemId;
     if (
@@ -91,7 +98,6 @@ Problem.prototype.getAppAnchorRequestFileCourseTopics = function(isScoredQuiz) {
   if (isScoredQuiz) {
     theExerciseType = "scoredQuizJSON";
   }
-
   var requestJSON = {
     currentPage: thePage.pages.problemPage.name,
     exerciseType: theExerciseType,
@@ -113,7 +119,7 @@ Problem.prototype.getCalculatorURLFileCourseTopics = function() {
 
 Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQuiz) {
   var result = "";
-  console.log("DEBUG: " + JSON.stringify(thePage.storage.currentCourse));
+  //console.log("DEBUG: " + JSON.stringify(thePage.storage.currentCourse));
   if (isScoredQuiz === undefined) {
     isScoredQuiz = this.flagForReal;
   }

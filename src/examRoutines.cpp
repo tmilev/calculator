@@ -4714,7 +4714,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
     output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSectioN;
   else
   { std::string theDeadline = owner.GetDeadlineNoInheritance(this->id);
-    output[DatabaseStrings::labelDeadlines] = theDeadline;
+    output[WebAPI::problemSingleDeadline] = theDeadline;
   }
   if (theGlobalVariables.UserDefaultHasProblemComposingRights())
     output["linkSlidesLaTeX"] = this->linkSlidesTex;

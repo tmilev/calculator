@@ -20,6 +20,7 @@ std::string WebAPI::problemFileName = "fileName";
 std::string WebAPI::problemId = "id";
 
 std::string WebAPI::calculatorUserInfoJSON = "userInfoJSON";
+std::string WebAPI::problemSingleDeadline = "deadline";
 
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 WebServer theWebServer;

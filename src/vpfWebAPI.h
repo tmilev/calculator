@@ -21,6 +21,7 @@ public:
   static std::string problemContent;
   static std::string problemFileName;
   static std::string problemId;
+  static std::string problemSingleDeadline;
 };
 
 #endif

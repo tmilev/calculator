@@ -2,6 +2,32 @@
 
 Problem.prototype.toStringDeadline = function() {
   console.log("DEBUG: " + JSON.stringify(this));
+  if (thePage.user.hasInstructorRights()) {
+    return "Deadlines";
+  }
+  if (this.deadlineString === "" || this.deadlineString === null || this.deadlineString === undefined) {
+    return "";
+  }
+  this.deadline = new Date(this.deadlineString);
+  var remainingInHours = (this.deadline - (new Date())) / 1000 / 60 / 60;
+  remainingInHours += 24;
+  var resultString = "";
+  if (this.isSolvedForSure()) {
+    resultString += `<b style = 'color:green'>${this.deadline.toLocaleDateString()}</b>`;
+    return resultString;
+  }
+  if (remainingInHours < 48 && remainingInHours >= 0) {
+    resultString += `<b style = 'color:red'>${this.deadline.toLocaleDateString()}`;
+    resultString += `, ~${remainingInHours.toFixed(1)} hrs left</b>`;
+    return resultString;
+  }
+  if (remainingInHours < 0) {
+    resultString += `<b style = 'color:red'>${this.deadline.toLocaleDateString()}</b>`;
+    resultString += ` <b>[passed]</b>`;
+    return resultString;
+  }
+  resultString += `<b style>${this.deadline.toLocaleDateString()}</b>`
+  return resultString;
 //  this.deadlines[];
 }
 
@@ -94,17 +120,27 @@ Problem.prototype.toStringProblemWeightCell = function() {
   return result;
 }
 
+Problem.prototype.isSolvedForSure = function () {
+  if (this.correctlyAnswered === undefined || this.correctlyAnswered === NaN) {
+    return false;
+  }
+  if (
+    this.correctlyAnswered >= this.totalQuestions && 
+    this.totalQuestions !== undefined &&
+    this.totalQuestions !== 0
+  ) {
+    return true;
+  } 
+  return false;
+}
+
 Problem.prototype.toStringProblemWeight = function() {
   var result = "";
   var color = "brown";
   if (this.correctlyAnswered !== undefined && this.correctlyAnswered !== NaN) {
-    if (
-      this.correctlyAnswered >= this.totalQuestions && 
-      this.totalQuestions !== undefined &&
-      this.totalQuestions !== 0
-    ) {
+    if (this.isSolvedForSure()) {
       color = "green";
-    } 
+    }
     var numCorrectlyAnswered = this.correctlyAnswered;
     var totalQuestions = this.totalQuestions;
     if (totalQuestions === 0) {

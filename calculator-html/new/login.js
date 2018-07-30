@@ -45,7 +45,7 @@ function logout() {
   thePage.pages.problemPage.flagLoaded = false;
   document.getElementById("inputPassword").value = "";
   document.getElementById("divProblemPageContentContainer").innerHTML = "";
-  document.getElementById("divCurrentCourse").innerHTML = "";
+  document.getElementById(idDOMElements.divCurrentCourseBody).innerHTML = "";
   try {
     logoutGoogle();
   } catch (e) {

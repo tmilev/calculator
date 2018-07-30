@@ -410,7 +410,7 @@ function writeEditCoursePagePanel() {
 }
 
 function afterLoadCoursePage(incomingPage, result) {
-  document.getElementById("divCurrentCourseBody").innerHTML = incomingPage;
+  document.getElementById(idDOMElements.divCurrentCourseBody).innerHTML = incomingPage;
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentCourse")]);
   //MathJax.Hub.Process();
   var theTopics = document.getElementsByTagName("topicList");

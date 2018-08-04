@@ -14,7 +14,6 @@ function submitActivateAccountRequest() {
   var inputNewPassword = document.getElementById(idDOMElements.inputNewPasswordInActivationAccount).value;
   var inputNewPasswordReentered = document.getElementById(idDOMElements.inputReenteredPasswordInActivationAccount).value;
   var activationToken = thePage.storage.user.activationToken.getValue();
-  console.log("DEBUG: user.name: " + thePage.storage.user.name.getValue());
   var userName = thePage.storage.user.name.getValue();
   var theURL = "";
   theURL += `${pathnames.calculatorAPI}?request=changePassword&`;
@@ -34,6 +33,5 @@ function updateAccountActivationPage() {
   var emailSpan = document.getElementById(idDOMElements.spanCurrentActivationEmail);
   var usernameInput = document.getElementById(idDOMElements.spanUserIdInActivateAccountPage);
   usernameInput.innerHTML = thePage.storage.user.name.getValue();
-  console.log( "DEBUG: user.name: " + thePage.storage.user.name.getValue());
   emailSpan.innerHTML = thePage.storage.user.email.getValue();
 }

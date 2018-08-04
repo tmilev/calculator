@@ -16,7 +16,6 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
 
 function Problem(problemData) {
   this.idURLed = encodeURIComponent(problemData.id);
-  //console.log("DEBUG: idurled: " + this.idURLed);
   this.randomSeed = null;
   this.answers = [];
   this.problemLabel = "";
@@ -31,7 +30,6 @@ function Problem(problemData) {
   }
   this.title = problemData.title;
   this.problemNumberString = problemData.problemNumberString;
-  //console.log("DEBUG: creating problemMetaData with id: " + this.idURLed);
   this.idButtonPoints = `modifyPoints${this.idURLed}`;
   this.idTextareaPoints = `points${this.idURLed}`;
   this.idModifyReportDeadline = `deadlines${this.idURLed}`;
@@ -119,7 +117,6 @@ Problem.prototype.getCalculatorURLFileCourseTopics = function() {
 
 Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQuiz) {
   var result = "";
-  //console.log("DEBUG: " + JSON.stringify(thePage.storage.currentCourse));
   if (isScoredQuiz === undefined) {
     isScoredQuiz = this.flagForReal;
   }
@@ -198,7 +195,6 @@ function getEditPanel(fileName) {
     return "";
   }
   var result = "";
-  console.log(`DEBUG: Edit page panel called with input: ${fileName}`); 
   result += `<span class = 'spanFileInfo'><button class = "buttonSaveEdit" onclick = "selectEditPage('${fileName}')">Edit</button>${fileName}</span>`;
   return result;
 }

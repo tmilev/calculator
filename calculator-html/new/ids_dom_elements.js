@@ -19,5 +19,6 @@ var idDOMElements = {
   spanStudentViewFlagToggleReport: "spanStudentViewToggleReport",
   spanUserExtraInfo: "spanUserExtraInfo",
   spanStudentViewPanel: "spanStudentViewPanel",
-  divCurrentCourseBody: "divCurrentCourseBody"
+  spanStudentViewSectionSelectPanel: "spanStudentViewSectionSelectPanel",
+  divCurrentCourseBody: "divCurrentCourseBody",
 }

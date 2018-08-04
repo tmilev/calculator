@@ -102,10 +102,17 @@ function toggleAdminPanels() {
       adminPanels[counterPanels].classList.add("divInvisible");
     }
   }
+  var studentViewPanel = document.getElementById(idDOMElements.spanStudentViewPanel);
+  if (thePage.user.role === "admin") {
+    studentViewPanel.classList.remove("divInvisible")
+    studentViewPanel.classList.add("divVisible");
+  } else {
+    studentViewPanel.classList.remove("divVisible");
+    studentViewPanel.classList.add("divInvisible");
+  }
 }
 
 function loginWithServerCallback(incomingString, result) {
-  //console.log("DEBUG: loginwithservercallback: " + incomingString);
   document.getElementById("spanLoginStatus").innerHTML = "";
   var success = false;
   var loginErrorMessage = "";
@@ -118,6 +125,7 @@ function loginWithServerCallback(incomingString, result) {
       toggleAdminPanels();
       hideLoginCalculatorButtons();
       showLogoutButton();
+      thePage.setSwitches();
     } else if (parsedAuthentication["status"] === "not logged in") {
       if (parsedAuthentication["error"] !== undefined) {
         loginErrorMessage = parsedAuthentication["error"];

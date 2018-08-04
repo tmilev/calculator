@@ -9,7 +9,6 @@ function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
 
 function deleteDatabaseItemCallback(input, output) {
   document.getElementById(this).remove();
-  //console.log (`Debug: result: ${input}`);
   //this.parentElement.innerHTML = "";
 }
 
@@ -20,7 +19,6 @@ function deleteDatabaseItem(containerLabel, labels, selector) {
     fields: labels
   }
   var theURL = `${pathnames.calculatorAPI}?request=databaseDeleteOneEntry&item=${escape(JSON.stringify(finalSelector))}`;
-  //console.log("DEBUG: final selector: " + JSON.stringify(finalSelector));
   submitGET({
     url: theURL,
     callback: deleteDatabaseItemCallback.bind(containerLabel),
@@ -42,7 +40,6 @@ function matchesPattern(currentLabels, selector, pattern) {
   if (currentLabels.length !== pattern.length - 1) {
     return false;
   }
-  //console.log(`DEBUG: Does ${currentLabels.join(", ")} match ${pattern.join(", ")}`);
   if (pattern.length < 1) {
     return false;
   }

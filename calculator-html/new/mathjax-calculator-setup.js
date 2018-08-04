@@ -160,7 +160,6 @@ function configureMathJaxForCalculator() {
         //}
         //window.mathjaxIdCounter ++;
 //        var id = `mathjax_id_${window.mathjaxIdCounter}_${inputName}`;
-//        console.log("DEBUG: mathjax id is: " + id);
         //alert("name: " + name + " size: "+ size + " cls: " + cls + " val: " + val + " id: "+ id);
         if (size === null || size === "" || size === undefined) {
           size = "2";

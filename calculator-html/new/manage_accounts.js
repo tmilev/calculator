@@ -44,7 +44,6 @@ function updateAccountsPageCallback(input, notUsed) {
   var outputComponentAdmin = document.getElementById("idOutputAdmins");
   var outputComponentStudents = document.getElementById("idOutputStudents");
   var parsedUserInfo = null;
-  //console.log("DEBUG: input: " + input);
   try {
     parsedUserInfo = JSON.parse(input);
     var admins = parsedUserInfo["admins"];

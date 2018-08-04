@@ -1,8 +1,7 @@
 "use strict";
 
 Problem.prototype.toStringDeadline = function() {
-  console.log("DEBUG: " + JSON.stringify(this));
-  if (thePage.user.hasInstructorRights()) {
+  if (thePage.user.hasInstructorRights() && !thePage.studentView()) {
     return "Deadlines";
   }
   if (this.deadlineString === "" || this.deadlineString === null || this.deadlineString === undefined) {
@@ -62,7 +61,6 @@ Problem.prototype.toStringDeadlinePanel = function() {
 }
 
 Problem.prototype.toHTMLWeights = function() { 
-  //console.log("DEBUG: problem:  " + this.idURLed);
   var result = "";
   result += "<span class = 'panelProblemWeights' style = 'opacity: 1; max-height: 200px;'>";
   result += `Pts: <textarea class = 'textareaStudentPoints' rows = '1' cols = '2' id = '${this.idTextareaPoints}'>`;
@@ -77,7 +75,6 @@ Problem.prototype.toHTMLWeights = function() {
 }
 
 Problem.prototype.callbackModifyWeight = function(input, output) {
-  //console.log("DEBUG: got to mod weight callback. This id: " + this.idURLed);
   document.getElementById(this.idModifyReportPoints).innerHTML = input;
 }
 
@@ -85,13 +82,11 @@ Problem.prototype.modifyWeight = function() {
   var problemWeightTextareaId = `points${this.idURLed}`;
   var incomingPoints = document.getElementById(problemWeightTextareaId).value;
   var modifyObject = {};
-  //console.log("DEBUG: id: " + this.idURLed);
   var idDecoded = decodeURIComponent(this.idURLed);
   //var problemModifyWeightReport = `report${id}`;
   modifyObject[idDecoded] = {
     weight: incomingPoints
   };
-  //console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
   var theURL = `${pathnames.calculatorAPI}?request=setProblemData&mainInput=${encodeURIComponent(JSON.stringify(modifyObject))}`;
   submitGET({
     url: theURL,
@@ -110,7 +105,6 @@ Problem.prototype.toStringProblemWeightCell = function() {
   if (this.type !== "problem" || this.fileName === "") {
     return "<td></td>";
   }
-  //console.log("DEBUG: problemData.problem:  " + problemData.problem);
   if (!thePage.user.hasInstructorRights()) {
     return `<td>${this.toStringProblemWeight()}</td>`;
   }
@@ -147,12 +141,8 @@ Problem.prototype.toStringProblemWeight = function() {
       totalQuestions = "?";
     }
     result += `${numCorrectlyAnswered} out of ${totalQuestions}`;
-    //console.log(`DEBUG: Problem weight: ` + JSON.stringify(this.weight));
-    //console.log(`DEBUG: correctly answered: ` + this.correctlyAnswered);
-    //console.log(`DEBUG: total: ` + this.totalQuestions);
     if (this.weight !== undefined && this.totalQuestions !== 0) {
       var problemWeightConverted = parseInt(this.weight);
-      //console.log("DEBUG: prob weight converted: " + problemWeightConverted + " correctly answered: " + this.correctlyAnswered)
       var points = ((0.0 + this.correctlyAnswered * problemWeightConverted) / this.totalQuestions);
       points = Number(points.toFixed(2));
       result += ` = ${points} pts`;
@@ -167,7 +157,6 @@ Problem.prototype.toStringProblemWeight = function() {
 }
 
 function callbackModifyDeadlines(incomingId, input, output) {
-  //console.log(`DEBUG: ${incomingId}, input: ${input}`);
   document.getElementById(`deadlines${incomingId}`).innerHTML = input;
 }
 
@@ -182,8 +171,6 @@ function modifyDeadlines(incomingId) {
   for (var counterDates = 0; counterDates < theDates.length; counterDates ++) {
     jsonToSubmit[idDecoded].deadlines[thePage.user.sectionsTaught[counterDates]] = theDates[counterDates].value;
   }
-  //console.log("DEBUG: id: " + incomingId);
-  //console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
   var theURL = "";
   theURL += `${pathnames.calculatorAPI}?request=setProblemData&`;
   theURL += `mainInput=${encodeURIComponent(JSON.stringify(jsonToSubmit))}`;
@@ -241,7 +228,6 @@ Problem.prototype.getHTMLProblems = function () {
   result += "<table class = \"topicList\"><colgroup><col><col><col><col><col></colgroup>";
   for (var counterSubSection = 0; counterSubSection < this.childrenIds.length; counterSubSection ++) {
     var currentProblem = thePage.problems[this.childrenIds[counterSubSection]];
-    console.log("DEBUG: current problem data deadline: " + JSON.stringify(currentProblem.deadline));
     result += currentProblem.getHTMLOneProblemTr();
   }
   result += "</table>";
@@ -294,7 +280,6 @@ function toggleProblemWeights() {
 }
 
 Problem.prototype.getHTMLSubSection = function() {
-  //console.log("DEBUG: current subsection: " + JSON.stringify(this.title) + "; type: " + JSON.stringify(this.type));
   var result = "";
   result += `<div class = \"headSubsection\">${this.problemNumberString} ${this.title}</div>`;
   result += this.getHTMLProblems();
@@ -314,7 +299,6 @@ Problem.prototype.isProblemContainer = function() {
 
 Problem.prototype.getHTMLSection = function() {
   var result = "";
-  //console.log("DEBUG: current section: " + JSON.stringify(this.title) + "; type: " + JSON.stringify(this.type));
   if (this.type === "section") {
     result += `<div class =\"headSection\">${this.problemNumberString} ${this.title} ${this.toStringDeadlinePanel()}</div>`;    
   }
@@ -366,14 +350,12 @@ function initializeDatePickers() {
 }
 
 function afterLoadTopics(incomingTopics, result) {
-  //console.log("DEBUG: topic list cookie @ afterLoadTopics: " + getCookie("topicList"));
   var topicsElements = document.getElementsByTagName("topicList");
   if (topicsElements.length === 0) {
     return;
   }
   thePage.previousProblemId = null;
   var stringHTMLContent = "";
-  //console.log ("DEBUG: temporarily disabled error catching ");
   //try {
     thePage.theTopics = JSON.parse(incomingTopics);
     for (var counterChapter = 0; counterChapter < thePage.theTopics["children"].length; counterChapter ++) {
@@ -385,7 +367,6 @@ function afterLoadTopics(incomingTopics, result) {
   //} catch (e) {
   //  stringHTMLContent = "<b style ='color:red'>Data error</b>. " + e;
   //}
-  //stringHTMLContent += "<hr>DEBUG: incoming topics JSON: " + incomingTopics;
   topicsElements[0].innerHTML = stringHTMLContent;
   initializeProblemWeightsAndDeadlines();
   initializeDatePickers();
@@ -422,7 +403,6 @@ function afterLoadCoursePage(incomingPage, result) {
   if (theTopics.length  === 0) {
     return;
   }
-  //console.log("DEBUG: topic list cookie @ afterLoadCoursePage: " + getCookie("topicList"));
   submitGET({
     url: `${pathnames.calculatorAPI}?request=${topicList}`,
     callback: afterLoadTopics,
@@ -431,7 +411,6 @@ function afterLoadCoursePage(incomingPage, result) {
 }
 
 function selectCurrentCoursePage() {
-  //console.log("DEBUG: topic list cookie @ selectCurrentCoursePage: " + getCookie("topicList"));
   var topicRequest = "templateJSONNoLogin";
   if (thePage.user.flagLoggedIn) {
     topicRequest = "templateJSON";

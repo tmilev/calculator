@@ -394,12 +394,6 @@
 <div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectDatabase">Database</button></div>
 <div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectServer">Server</button></div>
 <div> 
-  <div id = "spanStudentViewPanel" class = "divAdminPanel">
-  <label class = "switch">
-    <input id = "sliderStudentView" type = "checkbox" onchange = "thePage.flipStudentView();">
-    <span class = "slider round"></span>
-  </label><span id = "spanStudentViewToggleReport">-</span>
-  </div>
   <div><!--div containing debug flag-->
   <label class = "switch">
     <input id = "sliderDebugFlag" type = "checkbox" onchange = "thePage.flipDebugSwitch();">
@@ -408,8 +402,20 @@
   </div><!--div containing debug flag-->
 </div>
 <div id = "spanProgressReportGeneral"></div>
+<div id = "spanStudentViewPanel">
+<div>
+  <label class = "switch">
+  <input id = "sliderStudentView" type = "checkbox" onchange = "thePage.flipStudentView();">
+  <span class = "slider round"></span>
+</label><span id = "spanStudentViewToggleReport">-</span>
+</div>
+<div>
+<span id = "spanStudentViewSectionSelectPanel">  
+</span>
+</div>
+</div>
 </div> <!--divTheMainMenuPanel-->
-
+  
 </div><!--divMainPage-->
 
 </body>

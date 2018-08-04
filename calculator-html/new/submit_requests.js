@@ -31,7 +31,6 @@ function getToggleButton(address, label) {
   result += `<span>${label}</span><span>&#9666;</span>`;
   result += "</button>";
   result += `<span class = "spanProgressReport panelExpandable panelExpandableCollapsed">${address}</span>`;
-  //console.log("DEBUG: getting toggle button from: " + address);
   return result;
 }
 
@@ -58,7 +57,6 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
     addressPassSplit[1] = addressPassSplit[1].substr(indexAmpersand);
     addressPassSplit[1] = "***" + addressPassSplit[1];
     addressSpreadOut = addressPassSplit.join("password= ");
-    //console.log(`DEBUG: Address spread out masked to: ${addressSpreadOut}`);
   }
   if (!isPost) {
     content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${addressSpreadOut}</a>`;
@@ -136,11 +134,9 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   if (idStatus === undefined) {
     idStatus = idOutput;
   }
-  //console.log("DEBUG: id status: " + idStatus + "\ninputParams:\n" + inputParams);
   timeOutCounter = 0;
 
   var postRequest = `POST ${pathnames.calculatorAPI}<br>message: ${shortenString(inputParams, 200)}`;
-  //console.log("DEBUG: the post request: " + postRequest);
   recordProgressStarted(idStatus, postRequest, true, (new Date()).getTime());
 
   https.onload = function() { 

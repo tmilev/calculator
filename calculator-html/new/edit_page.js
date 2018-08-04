@@ -54,7 +54,6 @@ function selectEditPageCallback(input, outputComponent) {
 }
 
 function selectEditPage(currentlyEditedPage) {
-  console.log(`DEBUG: Currently edited page: ${currentlyEditedPage}`);
   if (currentlyEditedPage === undefined || currentlyEditedPage === null) { 
     currentlyEditedPage = thePage.storage.editor.currentlyEditedPage.getValue();
   }

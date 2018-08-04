@@ -90,19 +90,16 @@ StorageVariable.prototype.loadMe = function(hashParsed) {
       }
     }
   }
-  //console.log( `DEBUG: Loaded ${this.name}: ${this.value}`);
 }
 
 StorageVariable.prototype.storeMe = function() {
   if (Storage !== undefined || localStorage !== undefined) {
     if (this.nameLocalStorage !== "") {
       localStorage[this.nameLocalStorage] = this.value
-      //console.log(`DEBUG: stored ${this.name} as ${this.nameLocalStorage} with value ${this.value}`);
     }
   }
   if (this.nameCookie !== "") {
     setCookie(this.nameCookie, this.value, 150, this.secure);
-    //console.log(`DEBUG: stored ${this.name} as ${this.nameCookie} with value ${this.value}`);
   }
 }
 
@@ -380,7 +377,6 @@ function Page() {
 
 Page.prototype.loadSettings = function(inputHash) {
   try {
-    //console.log(`DEBUG: loading with hash: ${inputHash.slice(1)}`);
     var inputHashParsed = {};
     if (typeof inputHash === "string") {
       var inputString = inputHash;
@@ -393,7 +389,6 @@ Page.prototype.loadSettings = function(inputHash) {
       var decodedInputString = decodeURIComponent(inputString);
       inputHashParsed = JSON.parse(decodedInputString);
     }
-    console.log(`DEBUG: hash parsed to: ${JSON.stringify(inputHashParsed)}`);
     this.loadSettingsRecursively(this.storage, inputHashParsed);
   } catch (e) {
     console.log(`Error loading settings: ` + e + ` Input hash: ${inputHash}`);
@@ -455,22 +450,26 @@ Page.prototype.showProfilePicture = function() {
 Page.prototype.initializeCalculatorPage = function() {
   initializeButtons();
   initializeCalculatorPage();
-  //console.log("Submit missing");
-  //if (document.getElementById('mainInputID').value !== "") {
-  //  //console.log("Debug: about to submit: " + document.getElementById('mainInputID').value);
-  //  submitCalculatorComputation();
-  //}
 }
 
 Page.prototype.flipStudentView = function () {
   var oldValue = this.storage.flagStudentView.getValue();
   this.storage.flagStudentView.setAndStore(document.getElementById(idDOMElements.sliderStudentView).checked);    
   var spanView = document.getElementById(idDOMElements.spanStudentViewFlagToggleReport);
+  var radioHTML = "";
   if (this.storage.flagStudentView.getValue()) {
     spanView.innerHTML = "Student view";
+    for (var counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections ++) {
+      radioHTML += `<br><label class = "containerRadioButton">`;
+      radioHTML += `<input id = "radioBoxSetTestnet" type = "radio" name = "net" onchange = "">`;
+      radioHTML += `<span class = "radioMark"></span>`;
+      radioHTML += this.user.sectionsTaught[counterSections];
+      radioHTML += `</label>`
+    }
   } else {
     spanView.innerHTML = "Admin view";
   }
+  document.getElementById(idDOMElements.spanStudentViewSectionSelectPanel).innerHTML = radioHTML;
   if (oldValue !== this.storage.flagStudentView.getValue()) {
     thePage.pages.problemPage.flagLoaded = false;
     toggleAdminPanels();

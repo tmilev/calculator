@@ -4,6 +4,9 @@ Problem.prototype.toStringDeadline = function() {
   if (thePage.user.hasInstructorRights() && !thePage.studentView()) {
     return "Deadlines";
   }
+  if (thePage.user.hasInstructorRights() && thePage.studentView()) {
+    this.deadlineString = this.deadlines[thePage.storage.currentSectionComputed.getValue()];
+  }
   if (this.deadlineString === "" || this.deadlineString === null || this.deadlineString === undefined) {
     return "";
   }
@@ -345,7 +348,6 @@ function initializeDatePickers() {
   var thePickers = document.getElementsByClassName("datePicker");
   for (var counterPicker = 0; counterPicker < thePickers.length; counterPicker ++ ) {
     $(thePickers[counterPicker]).datepicker();
-
   }
 }
 

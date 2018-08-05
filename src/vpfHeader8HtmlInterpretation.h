@@ -262,6 +262,8 @@ public:
   (MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
   std::string ToStringDeadline
   (const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection);
+  void ComputeDeadlinesAllSections(TopicElement& inputOutput);
+  void ComputeDeadlinesAllSectionsNoInheritance(TopicElement& inputOutput);
   void ComputeDeadlineModifyButton
   (TopicElement& inputOutput, bool problemAlreadySolved, bool isProblemGroup);
   std::string ToStringTopicListJSON();

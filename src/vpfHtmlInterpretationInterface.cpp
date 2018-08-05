@@ -770,6 +770,11 @@ std::string HtmlInterpretation::GetTopicTableJSON()
   CalculatorHTML thePage;
   std::stringstream comments;
   thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
+  thePage.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
+  if (!thePage.LoadAndParseTopicList(out))
+  { out << "Failed to load and parse topic list.";
+    return out.str();
+  }
   if (!thePage.LoadMe(true, comments, theGlobalVariables.GetWebInput("randomSeed")))
   { out << "\"Failed to load file: "
     << theGlobalVariables.GetWebInput("courseHome") << ""
@@ -777,6 +782,10 @@ std::string HtmlInterpretation::GetTopicTableJSON()
     out << "\"";
     return out.str();
   }
+  //stOutput << "DEBUG: after thePAge.loadme: \n<br>\n"
+  //<< thePage.theProblemData.adminData.ToString()
+  //<< "\n<br>\n";
+
   thePage.ComputeTopicListAndPointsEarned(comments);
   out << thePage.ToStringTopicListJSON();
   return out.str();

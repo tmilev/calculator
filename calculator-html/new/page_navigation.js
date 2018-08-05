@@ -7,6 +7,7 @@ function User() {
   this.instructor = "";
   this.sectionInDB = "";
   this.deadlineSchema = "";
+  this.sectionComputed = "";
 }
 
 User.prototype.isLoggedIn = function() {
@@ -38,6 +39,7 @@ User.prototype.makeFromUserInfo = function(inputData) {
   this.sectionsTaught = inputData.sectionsTaught;
   this.instructor = inputData.instructor;
   this.sectionInDB = inputData.studentSection;
+  this.sectionComputed = inputData.studentSection;
   this.deadlineSchema = inputData.deadlineSchema;
   document.getElementById(idDOMElements.spanUserIdInAccountsPage).innerHTML = thePage.storage.user.name.value;
   document.getElementById(idDOMElements.inputUsername).value = thePage.storage.user.name.value;
@@ -245,6 +247,10 @@ function Page() {
         nameLocalStorage: "currentlyEditedPage"
       })
     },
+    currentSectionComputed: new StorageVariable({
+      name: "currentSectionComputed",
+      nameLocalStorage: "currentSectionComputed"
+    }),
     currentCourse: {
       courseHome: new StorageVariable({
         name: "courseHome",
@@ -452,6 +458,12 @@ Page.prototype.initializeCalculatorPage = function() {
   initializeCalculatorPage();
 }
 
+function sectionSelect(sectionNumber) {
+  console.log(`DEBUG: section select: ${sectionNumber}`);
+  thePage.storage.currentSectionComputed.setAndStore(sectionNumber);
+  thePage.user.sectionComputed = thePage.user.sectionsTaught[sectionNumber];
+}
+
 Page.prototype.flipStudentView = function () {
   var oldValue = this.storage.flagStudentView.getValue();
   this.storage.flagStudentView.setAndStore(document.getElementById(idDOMElements.sliderStudentView).checked);    
@@ -461,7 +473,11 @@ Page.prototype.flipStudentView = function () {
     spanView.innerHTML = "Student view";
     for (var counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections ++) {
       radioHTML += `<br><label class = "containerRadioButton">`;
-      radioHTML += `<input id = "radioBoxSetTestnet" type = "radio" name = "net" onchange = "">`;
+      radioHTML += `<input type = "radio" name = "radioSection" onchange = "sectionSelect(${counterSections});" `; 
+      if (counterSections === thePage.storage.currentSectionComputed.getValue()) {
+        radioHTML += "checked = 'true'";
+      }
+      radioHTML += `>`;
       radioHTML += `<span class = "radioMark"></span>`;
       radioHTML += this.user.sectionsTaught[counterSections];
       radioHTML += `</label>`
@@ -470,6 +486,7 @@ Page.prototype.flipStudentView = function () {
     spanView.innerHTML = "Admin view";
   }
   document.getElementById(idDOMElements.spanStudentViewSectionSelectPanel).innerHTML = radioHTML;
+
   if (oldValue !== this.storage.flagStudentView.getValue()) {
     thePage.pages.problemPage.flagLoaded = false;
     toggleAdminPanels();

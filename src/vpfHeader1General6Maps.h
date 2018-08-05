@@ -75,7 +75,7 @@ public:
   { std::stringstream out;
     out << "{";
     for (int i = 0; i < this->size(); i ++)
-    { out << this->theKeys[i] << ": " << this->theValues[i];
+    { out << "\"" << this->theKeys[i] << "\":\"" << this->theValues[i] << "\"";
       if (i != this->size() - 1)
         out << ", ";
     }

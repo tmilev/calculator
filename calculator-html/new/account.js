@@ -42,6 +42,7 @@ function updateAccountPage() {
   }
   extraInfo += `<tr><td>Instructor: </td><td>${thePage.user.instructor}</td><tr>`;
   extraInfo += `<tr><td>Section in database: </td><td>${thePage.user.sectionInDB}</td><tr>`;
+  extraInfo += `<tr><td>Section computed: </td><td>${thePage.user.sectionComputed}</td></tr>`;
   extraInfo += `<tr><td>Deadline schema: </td><td>${thePage.user.deadlineSchema}</td><tr>`;
   extraInfo += "</table>";
   spanExtraInfo.innerHTML = extraInfo;

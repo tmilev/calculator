@@ -66,8 +66,8 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend
   (void) commentsOnFailure;
   if (inputJSON.type == inputJSON.JSUndefined)
     return true;
-  //stOutput //<< crash.GetStackTraceShort()
-  //<< "<br>DEBUG: Read json: " << inputJS.ToString(false);
+  //stOutput << crash.GetStackTraceShort()
+  //<< "<br>DEBUG: Read json: " << inputJSON.ToString(false);
   outputProblemInfo.SetExpectedSize(inputJSON.objects.size());
   ProblemData emptyData;
   std::string currentCourse = theGlobalVariables.userDefault.courseComputed;
@@ -347,6 +347,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 #ifdef MACRO_use_MongoDB
   this->currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   //this->theProblemData.CheckConsistency();
+  //stOutput << "<hr>DEBug: got to before PrepareSectionList.<hr>";
   if (!this->PrepareSectionList(comments))
     return false;
   //this->theProblemData.CheckConsistency();
@@ -376,12 +377,14 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   { comments << "Failed to load problem deadlines. ";
     return false;
   }
+
   if (this->currentUseR.theProblemData.Contains(this->fileName))
   { this->theProblemData = this->currentUseR.theProblemData.GetValueCreate(this->fileName);
     //stOutput << "<hr>Debug: found problem data! " << this->theProblemData.ToString() << "<hr>";
   } //else
     //stOutput << "<hr>Did not find problem data for filename: " << this->fileName << ". USer details: " << this->currentUseR.ToString() << "<hr>";
   theGlobalVariables.userDefault = this->currentUseR;
+  //stOutput << "<hr>DEBUG: About to return true from LoadDatabaseInfo";
   return true;
 #else
   comments << "Database not available. ";
@@ -410,7 +413,12 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, co
   //this->theProblemData.CheckConsistency();
   //stOutput << "Debug: got to here pt3";
   if (doLoadDatabase)
-    this->LoadDatabaseInfo(comments);
+  { this->LoadDatabaseInfo(comments);
+   // stOutput << "DEBUG: the topics: " << this->theTopicS.ToStringHtml();
+    for (int i = 0; i < this->theTopicS.size(); i ++)
+      this->ComputeDeadlinesAllSectionsNoInheritance(this->theTopicS[i]);
+  }
+
 #endif // MACRO_use_MongoDB
   //stOutput << "<hr>DEBUG: Loaded successfully, checking: <hr>";
   this->theProblemData.CheckConsistency();
@@ -1801,11 +1809,38 @@ std::string CalculatorHTML::ToStringDeadline
   return "";
 }
 
+void CalculatorHTML::ComputeDeadlinesAllSections(TopicElement& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ComputeDeadlinesAllSections");
+  inputOutput.deadlinesPerSectioN.initFillInObject
+  (this->databaseStudentSections.size, "");
+  for (int i = 0; i < this->databaseStudentSections.size; i ++)
+  { inputOutput.deadlinesPerSectioN[i] = this->GetDeadline
+    (inputOutput.id, this->databaseStudentSections[i],
+     inputOutput.deadlinesAreInherited[i]);
+    if (inputOutput.deadlinesAreInherited[i])
+      inputOutput.deadlinesPerSectioN[i] = "";
+  }
+}
+
+void CalculatorHTML::ComputeDeadlinesAllSectionsNoInheritance(TopicElement& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ComputeDeadlinesAllSectionsNoInheritance");
+  inputOutput.deadlinesPerSectioN.initFillInObject(this->databaseStudentSections.size, "");
+  //stOutput << "<hr>DEBUG: deadlinespersection: "
+  //<< this->databaseStudentSections.ToStringCommaDelimited() << "<hr>";
+  for (int i = 0; i < this->databaseStudentSections.size; i ++)
+  { ProblemDataAdministrative& currentProb =
+    this->currentUseR.theProblemData.GetValueCreateNoInit(inputOutput.id).adminData;
+    inputOutput.deadlinesPerSectioN[i] =
+    currentProb.deadlinesPerSection.GetValueCreate(this->databaseStudentSections[i]);
+  }
+}
+
 void CalculatorHTML::ComputeDeadlineModifyButton
 (TopicElement& inputOutput, bool problemAlreadySolved, bool isProblemGroup)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringDeadlineModifyButton");
   if (!theGlobalVariables.UserDefaultHasProblemComposingRights())
     return;
+  this->ComputeDeadlinesAllSections(inputOutput);
 //    this->id, this->displayDeadline
   (void) problemAlreadySolved;
   std::stringstream out;
@@ -1820,8 +1855,6 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   deadlineStream << "<tr><th>Grp.</th><th>Deadline</th></tr>";
   inputOutput.idsDeadlines.SetSize(this->databaseStudentSections.size);
   inputOutput.deadlinesPerSectionFormatted.initFillInObject
-  (this->databaseStudentSections.size, "");
-  inputOutput.deadlinesPerSectioN.initFillInObject
   (this->databaseStudentSections.size, "");
   inputOutput.deadlinesAreInherited.initFillInObject
   (this->databaseStudentSections.size, false);
@@ -1841,11 +1874,6 @@ void CalculatorHTML::ComputeDeadlineModifyButton
 //    this->GetDeadline(inputFileName, sectionNumber, deadlineInherited);
     deadlineStream << "<tr>";
     deadlineStream << "<td>" << this->databaseStudentSections[i] << "</td>";
-    inputOutput.deadlinesPerSectioN[i] = this->GetDeadline
-    (inputOutput.id, this->databaseStudentSections[i],
-     inputOutput.deadlinesAreInherited[i]);
-    if (inputOutput.deadlinesAreInherited[i])
-      inputOutput.deadlinesPerSectioN[i] = "";
     inputOutput.deadlinesPerSectionFormatted[i] =
     this->ToStringOnEDeadlineFormatted
     (inputOutput.id, this->databaseStudentSections[i],
@@ -3851,7 +3879,9 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
       return false;
     }
   if (this->topicListContent == "")
+  { comments  << "Topic list empty. Topic list file name: " << this->topicListFileName << ". ";
     return false;
+  }
   TopicElement::GetTopicList(this->topicListContent, this->theTopicS, *this);
   this->CheckConsistencyTopics();
   this->problemNamesNoTopics.Clear();
@@ -4246,7 +4276,7 @@ void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput
 }
 
 bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretTopicList");
+{ MacroRegisterFunctionWithName("CalculatorHTML::ComputeTopicListAndPointsEarned");
   if (!this->LoadAndParseTopicList(commentsOnFailure))
     return false;
   if (!this->LoadDatabaseInfo(commentsOnFailure))
@@ -4710,9 +4740,9 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
   output["videoHandwritten"] = this->videoHandwritten;
   output["slidesProjector"] = this->slidesProjector;
   output["slidesPrintable"] = this->slidesPrintable;
-  if (theGlobalVariables.UserDefaultHasProblemComposingRights())
-    output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSectioN;
-  else
+  output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSectioN;
+  //stOutput << "DEBUG: deadlinesPerSection: " << this->deadlinesPerSectioN.ToStringCommaDelimited();
+  if (!theGlobalVariables.UserDefaultHasProblemComposingRights())
   { std::string theDeadline = owner.GetDeadlineNoInheritance(this->id);
     output[WebAPI::problemSingleDeadline] = theDeadline;
   }

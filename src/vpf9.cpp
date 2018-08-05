@@ -665,7 +665,12 @@ bool FileOperations::GetFolderFileNamesUnsecure
 bool FileOperations::LoadFileToStringVirtualCustomizedReadOnly
 (const std::string& theFileName, std::string& output,
  std::stringstream* commentsOnFailure)
-{ std::string computedFileName;
+{ if (theFileName == "")
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "Empty file name not allowed. ";
+    return false;
+  }
+  std::string computedFileName;
   if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(theFileName, computedFileName, commentsOnFailure))
     return false;
   return FileOperations::LoadFileToStringUnsecure(computedFileName, output, commentsOnFailure);

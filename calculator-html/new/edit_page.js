@@ -26,7 +26,16 @@ function ctrlSPressAceEditorHandler(event) {
 
 function storeEditedPage() {
   var editor = thePage.pages.editPage.editor;
-  submitStringAsMainInput(editor.getValue(), 'spanSubmitEditPageReport', 'modifyPage', null, 'spanSubmitEditPageReport');
+  var theURL = "";
+  theURL += `${pathnames.calculatorAPI}?`;
+  theURL += getQueryStringSubmitStringAsMainInput(editor.getValue(), pathnames.requestModifyPage);
+  theURL += `${pathnames.fileName}=${thePage.storage.editor.currentlyEditedPage.getValue()}&`;
+  theURL += `${pathnames.mainInput}=${encodeURIComponent(editor.getValue())}`;
+  console.log("DEBUG: about to submit: " + theURL); 
+  submitGET({
+    url: theURL,
+    result: "spanSubmitEditPageReport"
+  });
 }
 
 function selectEditPageCallback(input, outputComponent) {
@@ -69,7 +78,7 @@ function selectEditPage(currentlyEditedPage) {
   theTopicTextArea.value = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
   theTopicTextArea.cols = currentlyEditedPage.length + 15;
 
-  var theURL = `${pathnames.calculatorAPI}?${pathnames.requestEditPage}&`;
+  var theURL = `${pathnames.calculatorAPI}?${pathnames.request}=${pathnames.requestEditPage}&`;
   theURL += `fileName=${thePage.storage.editor.currentlyEditedPage.getValue()}`;
   submitGET({
     url: theURL,

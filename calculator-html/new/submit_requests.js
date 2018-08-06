@@ -74,7 +74,7 @@ function recordResult(resultText, resultSpan) {
   if (typeof resultSpan === "string") {
     resultSpan = document.getElementById(resultSpan);
   }
-  resultSpan.innerHTML = escape(resultText);
+  resultSpan.innerHTML = resultText;
 }
 
 /**
@@ -153,10 +153,10 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
 
 function getQueryStringSubmitStringAsMainInput(theString, requestType) {
   var inputParams = '';
-  inputParams += 'request=' + requestType;
-  inputParams += '&mainInput=' + encodeURIComponent(theString);
+  inputParams += `${pathnames.request}=${requestType}&`;
+  inputParams += `${pathnames.mainInput}=${encodeURIComponent(theString)}&`;
   if (thePage.flagDebug === true) {
-    inputParams += "&debugFlag=true";
+    inputParams += "debugFlag=true&";
   }
   return inputParams;
 }

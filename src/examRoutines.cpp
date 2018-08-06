@@ -1811,12 +1811,11 @@ std::string CalculatorHTML::ToStringDeadline
 
 void CalculatorHTML::ComputeDeadlinesAllSections(TopicElement& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::ComputeDeadlinesAllSections");
-  inputOutput.deadlinesPerSectioN.initFillInObject
-  (this->databaseStudentSections.size, "");
+  inputOutput.deadlinesPerSectioN.initFillInObject(this->databaseStudentSections.size, "");
+  inputOutput.deadlinesAreInherited.initFillInObject(this->databaseStudentSections.size, false);
   for (int i = 0; i < this->databaseStudentSections.size; i ++)
   { inputOutput.deadlinesPerSectioN[i] = this->GetDeadline
-    (inputOutput.id, this->databaseStudentSections[i],
-     inputOutput.deadlinesAreInherited[i]);
+    (inputOutput.id, this->databaseStudentSections[i], inputOutput.deadlinesAreInherited[i]);
     if (inputOutput.deadlinesAreInherited[i])
       inputOutput.deadlinesPerSectioN[i] = "";
   }
@@ -1856,8 +1855,6 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   inputOutput.idsDeadlines.SetSize(this->databaseStudentSections.size);
   inputOutput.deadlinesPerSectionFormatted.initFillInObject
   (this->databaseStudentSections.size, "");
-  inputOutput.deadlinesAreInherited.initFillInObject
-  (this->databaseStudentSections.size, false);
   for (int i = 0; i < this->databaseStudentSections.size; i ++)
   { std::string& currentDeadlineId = inputOutput.idsDeadlines[i];
     if (this->databaseStudentSections[i] == "")

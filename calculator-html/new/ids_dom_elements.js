@@ -1,5 +1,9 @@
 "use strict";
 
+var stringResources = {
+  prefixDeadlineContainer : "deadlinesContainer"
+};
+
 var idDOMElements = {
   spanOldEmail: "spanOldEmail",
   buttonChangeEmail: "buttonChangeEmail",
@@ -21,4 +25,6 @@ var idDOMElements = {
   spanStudentViewPanel: "spanStudentViewPanel",
   spanStudentViewSectionSelectPanel: "spanStudentViewSectionSelectPanel",
   divCurrentCourseBody: "divCurrentCourseBody",
-}
+  classSpanDeadlineContainer: "spanDeadlineContainer",
+
+};

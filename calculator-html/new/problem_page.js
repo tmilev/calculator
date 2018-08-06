@@ -34,6 +34,7 @@ function Problem(problemData) {
   this.idTextareaPoints = `points${this.idURLed}`;
   this.idModifyReportDeadline = `deadlines${this.idURLed}`;
   this.idDeadlinePanel = `deadlinesPanel${this.idURLed}`;
+  this.idDeadlineContainer = `${stringResources.prefixDeadlineContainer}${this.idURLed}`;
   this.idModifyReportPoints = `report${this.idURLed}`;
   this.correctlyAnswered = problemData.correctlyAnswered;
   this.totalQuestions = problemData.totalQuestions;
@@ -105,7 +106,6 @@ Problem.prototype.getAppAnchorRequestFileCourseTopics = function(isScoredQuiz) {
   };
   return encodeURIComponent(JSON.stringify(requestJSON));
 }
-
 
 Problem.prototype.getCalculatorURLFileCourseTopics = function() {
   var result = "";

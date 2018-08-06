@@ -462,6 +462,18 @@ function sectionSelect(sectionNumber) {
   console.log(`DEBUG: section select: ${sectionNumber}`);
   thePage.storage.currentSectionComputed.setAndStore(sectionNumber);
   thePage.user.sectionComputed = thePage.user.sectionsTaught[sectionNumber];
+  var deadlineSpans = document.getElementsByClassName(idDOMElements.classSpanDeadlineContainer);
+  for (var counterDeadlines = 0; counterDeadlines < deadlineSpans.length; counterDeadlines ++) {
+    var currentDeadlineSpan = deadlineSpans[counterDeadlines];
+    var currentDeadlineId = currentDeadlineSpan.id.substr(stringResources.prefixDeadlineContainer.length);
+    var currentProblem = thePage.problems[currentDeadlineId];
+    if (currentProblem === undefined) {
+      continue;
+    }
+    currentDeadlineSpan.innerHTML = currentProblem.toStringDeadlinePanel();
+    //console.log(`DEBUG: current id: ${currentDeadlineId}`);
+    //console.log(`DEBUG: counter deadlines ${currentProblem.idURLed}`);
+  }
 }
 
 Page.prototype.flipStudentView = function () {

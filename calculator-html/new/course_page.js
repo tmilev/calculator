@@ -5,7 +5,8 @@ Problem.prototype.toStringDeadline = function() {
     return "Deadlines";
   }
   if (thePage.user.hasInstructorRights() && thePage.studentView()) {
-    this.deadlineString = this.deadlines[thePage.storage.currentSectionComputed.getValue()];
+    var sectionIndex = thePage.storage.currentSectionComputed.getValue();
+    this.deadlineString = this.deadlines[sectionIndex];
   }
   if (this.deadlineString === "" || this.deadlineString === null || this.deadlineString === undefined) {
     return "";
@@ -31,6 +32,12 @@ Problem.prototype.toStringDeadline = function() {
   resultString += `<b style>${this.deadline.toLocaleDateString()}</b>`
   return resultString;
 //  this.deadlines[];
+}
+
+Problem.prototype.toStringDeadlineContainer = function() {
+  var result = "";
+  result += `<span id = '${this.idDeadlineContainer}' class = '${idDOMElements.classSpanDeadlineContainer}'>${this.toStringDeadline()}</span>`;
+  return result;
 }
 
 Problem.prototype.toStringDeadlinePanel = function() {
@@ -220,7 +227,7 @@ Problem.prototype.getHTMLOneProblemTr = function () {
   result += "</td>";
 
   result += this.toStringProblemWeightCell();
-  result += `<td>${this.toStringDeadlinePanel()}</td>`;
+  result += `<td>${this.toStringDeadlineContainer()}</td>`;
   result += "</tr>";
   return result;
 }
@@ -303,7 +310,7 @@ Problem.prototype.isProblemContainer = function() {
 Problem.prototype.getHTMLSection = function() {
   var result = "";
   if (this.type === "section") {
-    result += `<div class =\"headSection\">${this.problemNumberString} ${this.title} ${this.toStringDeadlinePanel()}</div>`;    
+    result += `<div class =\"headSection\">${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}</div>`;    
   }
   result += "<div class =\"bodySection\">";
   if (this.isProblemContainer()) {

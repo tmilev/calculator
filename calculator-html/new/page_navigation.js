@@ -486,7 +486,8 @@ Page.prototype.flipStudentView = function () {
     for (var counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections ++) {
       radioHTML += `<br><label class = "containerRadioButton">`;
       radioHTML += `<input type = "radio" name = "radioSection" onchange = "sectionSelect(${counterSections});" `; 
-      if (counterSections === thePage.storage.currentSectionComputed.getValue()) {
+      var counterFromStorage = parseInt(thePage.storage.currentSectionComputed.getValue());
+      if (counterSections === counterFromStorage) {
         radioHTML += "checked = 'true'";
       }
       radioHTML += `>`;

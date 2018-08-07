@@ -9,5 +9,6 @@ var pathnames = {
   requestDatabase: "databaseJSON",
   requestEditPage: "editPageJSON", 
   requestModifyPage: "modifyPage",
-  databaseTable: "currentDatabaseTable"
+  databaseTable: "currentDatabaseTable",
+  setProblemData: "setProblemData"
 };

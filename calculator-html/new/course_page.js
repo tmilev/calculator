@@ -36,7 +36,7 @@ Problem.prototype.toStringDeadline = function() {
 
 Problem.prototype.toStringDeadlineContainer = function() {
   var result = "";
-  result += `<span id = '${this.idDeadlineContainer}' class = '${idDOMElements.classSpanDeadlineContainer}'>${this.toStringDeadline()}</span>`;
+  result += `<span id = '${this.idDeadlineContainer}' class = '${idDOMElements.classSpanDeadlineContainer}'>${this.toStringDeadlinePanel()}</span>`;
   return result;
 }
 
@@ -49,7 +49,8 @@ Problem.prototype.toStringDeadlinePanel = function() {
   }
   var result = "";
   result += `<button class = "accordionLike" `
-  result += `onclick = "toggleDeadline('${this.idDeadlinePanel}')">${this.toStringDeadline()}</button>`;
+  result += `onclick = "toggleDeadline('${this.idDeadlinePanel}', '${this.idURLed}', this);">`
+  result += `${this.toStringDeadline()} &#9666;</button>`;
   result += `<span class = "panelDeadlines" id = "${this.idDeadlinePanel}">`;
   result += "<table>";
   result += "<tr><th>Grp.</th><th>Deadline</th></tr>";
@@ -62,8 +63,8 @@ Problem.prototype.toStringDeadlinePanel = function() {
     result += `></input></td></tr>`;
   } 
   result += "</table>";
-  console.log("Problem data problem: " + JSON.stringify(this.fileName));
-  console.log("Problem data title: " + JSON.stringify(this.title));
+  //console.log("Problem data problem: " + JSON.stringify(this.fileName));
+  //console.log("Problem data title: " + JSON.stringify(this.title));
   result += `<button onclick = "modifyDeadlines('${this.idURLed}')">Set</button>`;
   result += `<span id = '${this.idModifyReportDeadline}'></span>`;
   result += `</span>`;
@@ -97,7 +98,9 @@ Problem.prototype.modifyWeight = function() {
   modifyObject[idDecoded] = {
     weight: incomingPoints
   };
-  var theURL = `${pathnames.calculatorAPI}?request=setProblemData&mainInput=${encodeURIComponent(JSON.stringify(modifyObject))}`;
+  var theURL = ""; 
+  theURL += `${pathnames.calculatorAPI}?${pathnames.request}=${pathnames.setProblemData}&`;
+  theURL += `${pathnames.mainInput}=${encodeURIComponent(JSON.stringify(modifyObject))}`;
   submitGET({
     url: theURL,
     progress: "spanProgressReportGeneral",
@@ -118,7 +121,9 @@ Problem.prototype.toStringProblemWeightCell = function() {
   if (!thePage.user.hasInstructorRights()) {
     return `<td>${this.toStringProblemWeight()}</td>`;
   }
-  var pointsString = `<button class = 'accordionLike' onclick = 'toggleProblemWeights()'>${this.toStringProblemWeight()}</button>`;
+  var pointsString = ""; 
+  pointsString += `<button class = 'accordionLikeProblemWeight' onclick = "toggleProblemWeights()" `;
+  pointsString += `name = "${this.idURLed}">${this.toStringProblemWeight()} &#9666;</button>`;
   var problemWeightString = this.toHTMLWeights();
   result += `<td>${pointsString}<br> ${problemWeightString}</td>`;
   return result;
@@ -260,30 +265,38 @@ function initializeProblemWeightsAndDeadlines() {
   }
 }
 
-function toggleDeadline(deadlineId) { 
+function toggleDeadline(deadlineId, panelId, button) { 
   var thePanel = document.getElementById(deadlineId);
+  var theProblem = thePage.problems[panelId];
   if (thePanel.style.maxHeight === '200px') {
     thePanel.style.opacity = '0';
     thePanel.style.maxHeight = '0';
+    button.innerHTML = `${theProblem.toStringDeadline()} &#9666;`;
   } else {
     thePanel.style.opacity = '1';
     thePanel.style.maxHeight = '200px';
+    button.innerHTML = `${theProblem.toStringDeadline()} &#9660;`;
   }
 }
 
 function toggleProblemWeights() { 
   var theWeights = document.getElementsByClassName('panelProblemWeights');
-  if (!problemWeightsVisible) { 
-    for (var i = 0; i < theWeights.length; i ++) { 
-      //theScores[i].style.transition ='opacity 1s linear';
+  var theButtons = document.getElementsByClassName('accordionLikeProblemWeight');
+  for (var i = 0; i < theWeights.length; i ++) { 
+    if (!problemWeightsVisible) { 
       theWeights[i].style.opacity = '1';
       theWeights[i].style.maxHeight = '200px';
-    }
-  } else { 
-    for (i = 0; i < theWeights.length; i ++) { 
-      //theScores[i].style.transition ='opacity 1s linear';
+    } else { 
       theWeights[i].style.opacity = '0';
       theWeights[i].style.maxHeight = '0';
+    }
+  }
+  for (var i = 0; i < theButtons.length; i ++) {
+    var currentProblem = thePage.problems[theButtons[i].name];
+    if (!problemWeightsVisible) { 
+      theButtons[i].innerHTML = `${currentProblem.toStringProblemWeight()} &#9660;`;
+    } else {
+      theButtons[i].innerHTML = `${currentProblem.toStringProblemWeight()} &#9666;`;
     }
   }
   problemWeightsVisible = !problemWeightsVisible;

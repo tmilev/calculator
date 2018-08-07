@@ -120,7 +120,7 @@ Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQui
   if (isScoredQuiz === undefined) {
     isScoredQuiz = this.flagForReal;
   }
-  result += "request=";
+  result += `${pathnames.request}=`;
   if (isScoredQuiz) {
     result += "scoredQuizJSON";
   } else {
@@ -154,17 +154,17 @@ Problem.prototype.getProblemNavigation = function() {
   }
   if (this.previousProblemId !== null && this.previousProblemId !== "") {
     var previousURL = thePage.problems[this.previousProblemId].getURLRequestFileCourseTopics();
-    result += `<a class='${linkType}' href='#${previousURL}'`;
+    result += `<a class = '${linkType}' href = '#${previousURL}'`;
     result += `onclick = "selectCurrentProblem('${this.previousProblemId}', '${defaultRequest}')">&#8592;</a>`;
   }
 
   if (this.flagForReal && thePage.user.flagLoggedIn) {
-    result += `<a class='problemLinkPractice' href='#${this.getAppAnchorRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.idURLed}' ,'exerciseJSON')">Practice</a>`;
+    result += `<a class = 'problemLinkPractice' href = '#${this.getAppAnchorRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.idURLed}' ,'exerciseJSON')">Practice</a>`;
   } else {
     result += "<span class = 'problemLinkSelectedPractice' style='color:green'>Practice</span>";
   }
   if (!this.flagForReal && thePage.user.flagLoggedIn) { 
-    result += `<a class='problemLinkQuiz' href='#${this.getAppAnchorRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.idURLed}' ,'scoredQuizJSON')">Quiz</a>`;
+    result += `<a class = 'problemLinkQuiz' href = '#${this.getAppAnchorRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.idURLed}' ,'scoredQuizJSON')">Quiz</a>`;
   } else {
     if (this.flagForReal) {
       result += "<span class = 'problemLinkSelectedQuiz' style='color:brown'>Quiz</span>";
@@ -172,7 +172,7 @@ Problem.prototype.getProblemNavigation = function() {
   }
   if (this.nextProblemId !== null && this.nextProblemId !== "") {
     var nextURL = thePage.problems[this.nextProblemId].getAppAnchorRequestFileCourseTopics();
-    result+= `<a class='${linkType}' href='#${nextURL}' onclick = "selectCurrentProblem('${this.nextProblemId}' ,'${defaultRequest}')">&#8594;</a>`;
+    result += `<a class = '${linkType}' href = '#${nextURL}' onclick = "selectCurrentProblem('${this.nextProblemId}', '${defaultRequest}')">&#8594;</a>`;
   }
   if (this.flagForReal !== true && this.flagForReal !== "true") {
     result += `<b style = 'color:green'>Scores not recorded. </b>`;
@@ -195,7 +195,11 @@ function getEditPanel(fileName) {
     return "";
   }
   var result = "";
-  result += `<span class = 'spanFileInfo'><button class = "buttonSaveEdit" onclick = "selectEditPage('${fileName}')">Edit</button>${fileName}</span>`;
+  result += `<span class = 'spanFileInfo'>`;
+  result += `<button class = "buttonSaveEdit" onclick = "selectEditPage('${fileName}')">Edit</button>${fileName}&nbsp;`;
+//  result += `<button class = "accordionLike" onclick = "selectEditPage('${fileName}')">Clone&#9666;</button>`;
+  result += ``;
+  result += `</span>`;
   return result;
 }
 
@@ -246,7 +250,6 @@ Problem.prototype.writeToHTML = function(outputElement) {
 
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divProblemPageContentContainer")]);
   initializeAccordionButtons();
-
 }
 
 function updateProblemPageCallback(input, outputComponent) {

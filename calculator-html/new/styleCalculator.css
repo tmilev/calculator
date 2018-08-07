@@ -202,6 +202,28 @@ button.accordionLikeIndividual.active, button.accordionLikeIndividual:hover {
   display: inline;
 }
 
+button.accordionLikeProblemWeight {
+  display: inline;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #efefef;
+  padding: 2px;
+  color: #444;
+  cursor: pointer;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s;
+}
+button.accordionLikeProblemWeight.active, button.accordionLikeProblemWeight:hover {
+  background-color: #ddd;
+}
+
+
 button.accordionLike {
   display: inline;
   -moz-border-radius: 3px;

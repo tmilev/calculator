@@ -19,9 +19,8 @@ function ctrlSPressAceEditorHandler(event) {
   if (event.keyCode !== 83) {
     return;
   }
-  console.log("not implemented yet");
   event.preventDefault();
-  submitStringAsMainInput(editor.getValue(), 'spanSubmitEditPageReport', 'modifyPage', null, 'spanSubmitEditPageReport');
+  storeEditedPage();
 }
 
 function storeEditedPage() {

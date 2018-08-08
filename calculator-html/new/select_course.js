@@ -13,9 +13,9 @@ function afterLoadSelectCoursePage(incomingPage, result) {
     thePage.theCourses = JSON.parse(incomingPage)["courses"];
     //resultString += JSON.stringify(thePage.theCourses);
     if (thePage.user.hasProblemEditRights()) {
-      resultString += "<problemInfoBar>";
+      resultString += "<div class ='problemInfoBar'>";
       resultString += getEditPanel("/coursesavailable/default.txt");
-      resultString += "</problemInfoBar>";
+      resultString += "</div>";
     }
     resultString += "<div style='text-align:center; width:100%'>";
     for (var counterCourses = 0; counterCourses < thePage.theCourses.length; counterCourses ++) {

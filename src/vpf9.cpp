@@ -672,7 +672,10 @@ bool FileOperations::LoadFileToStringVirtualCustomizedReadOnly
   }
   std::string computedFileName;
   if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(theFileName, computedFileName, commentsOnFailure))
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "Failed to extract physical file name from the virtual file name: " << theFileName;
     return false;
+  }
   return FileOperations::LoadFileToStringUnsecure(computedFileName, output, commentsOnFailure);
 }
 

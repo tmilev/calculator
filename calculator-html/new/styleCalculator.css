@@ -34,8 +34,8 @@ td.problemContainerCell{
 /*height: 500px;*/
 }
 
-problemInfoBar{
-  display: block;
+.problemInfoBar{
+  /*display: block;*/
   background-color: #fafafa;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -43,36 +43,33 @@ problemInfoBar{
   width: 100%;
   margin-bottom: 10px;
 }
-problemTitle {
-  text-align: center;
+span.spanFileInfo {
   display: inline-block;
-  margin-right: 4px;
-  margin-bottom: 4px;
-  padding-right: 4px;
-  padding-bottom: 4px;
+  border-radius: 3px;
+  margin:  3px;
+  padding: 3px;
+  text-align: left;
+  white-space: nowrap;
+  background-color: #f8f8f8;
+}
+span.problemTitle {
+  display: inline-block;
+  border-radius: 3px;
+  margin:  3px;
+  padding: 3px;
+  text-align: center;
   white-space: nowrap;
 }
-problemNavigation {
-  text-align: center;
+span.problemNavigation {
   display: inline-block;
-  margin-right: 4px;
-  padding-right: 4px;
+  border-radius: 3px;
+  margin:  3px;
+  padding: 3px;
+  text-align: center;
   white-space: nowrap;
 /*  border: 1px solid black;*/
 }
-problemNavigation:after{
-clear:both;
-}
-editPagePanel{
-  text-align: center;
-  display: block;
-  width: 100%;
-  background-color:#fafafa;
-  white-space: nowrap;
-  margin: 0;
-  padding-top: 2px;
-  padding-bottom: 2px;
-}
+
 textarea.textareaCalculatorMain{
   white-space:normal;
   resize: auto;
@@ -294,11 +291,11 @@ button.buttonSaveEdit{
   -webkit-border-radius: 3px;
   border-radius: 4px;
   display: inline;
-  background-color: PaleGreen;
+  background-color: #caff99;
   color: #444;
   cursor: pointer;
   border: none;
-  text-align: left;
+  text-align: center;
   outline: none;
   font-size: medium;
   transition: 0.6s; 
@@ -311,17 +308,17 @@ button.buttonClone{
   padding: 3px;
   border-radius: 3px;
   display: inline;
-  background-color: PaleGreen;
+  background-color: #caff99;
   color: #444;
   cursor: pointer;
   border: none;
-  text-align: left;
+  text-align: center;
   outline: none;
   font-size: medium;
   transition: 0.6s; 
 }
 button.buttonClone:hover{
-  background-color: green;
+  background-color: lightgreen;
 }
 button.buttonProgress{
   box-shadow: none;
@@ -1215,15 +1212,6 @@ font-weight: bold;
 #divEditorAce { 
   height: 85%;
   font-size: 100%;
-}
-
-span.spanFileInfo {
-  display: inline-block;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
-  margin:  3px;
-  padding: 3px;
-  background-color: #eaeaea;
 }
 
 /* The switch - the box around the slider */

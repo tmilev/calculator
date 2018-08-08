@@ -384,16 +384,16 @@ std::string HtmlInterpretation::ClonePageResult()
   std::string fileNameToBeCloned = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
   std::stringstream out;
   std::string startingFileString;
-  if (!FileOperations::LoadFileToStringVirtual(fileNameToBeCloned, startingFileString, false, false, &out))
+  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileNameToBeCloned, startingFileString, &out))
   { out << "Could not find file: " << fileNameToBeCloned;
     return out.str();
   }
   std::fstream theFile;
-  if (FileOperations::FileExistsVirtual(fileNameResulT))
+  if (FileOperations::FileExistsVirtualCustomizedReadOnly(fileNameResulT, &out))
   { out << "<b>File: " << fileNameResulT << " already exists. </b>";
     return out.str();
   }
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, fileNameResulT, false, false, false))
+  if (!FileOperations::OpenFileVirtualCustomizedWriteOnly(theFile, fileNameResulT, false, false, false, &out))
   { out << "<b><span style =\"color:red\">Failed to open output file: " << fileNameResulT << ". </span></b>";
     return out.str();
   }

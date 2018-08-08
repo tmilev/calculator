@@ -48,8 +48,8 @@ Problem.prototype.toStringDeadlinePanel = function() {
     return "";
   }
   var result = "";
-  result += `<button class = "accordionLike" `
-  result += `onclick = "toggleDeadline('${this.idDeadlinePanel}', '${this.idURLed}', this);">`
+  result += `<button class = "accordionLike" `;
+  result += `onclick = "toggleDeadline('${this.idDeadlinePanel}', '${this.idURLed}', this);">`;
   result += `${this.toStringDeadline()} &#9666;</button>`;
   result += `<span class = "panelDeadlines" id = "${this.idDeadlinePanel}">`;
   result += "<table>";
@@ -118,7 +118,7 @@ Problem.prototype.toStringProblemWeightCell = function() {
   if (this.type !== "problem" || this.fileName === "") {
     return "<td></td>";
   }
-  if (!thePage.user.hasInstructorRights()) {
+  if (!thePage.user.hasInstructorRights() || thePage.studentView()) {
     return `<td>${this.toStringProblemWeight()}</td>`;
   }
   var pointsString = ""; 

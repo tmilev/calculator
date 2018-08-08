@@ -131,7 +131,7 @@ Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQui
 }
 
 Problem.prototype.getURLRandomSeedRequestFileCourseTopics = function(isScoredQuiz) {
-  var result = this.getURLRequestFileCourseTopics(isScoredQuiz);
+  var result = this.getAppAnchorRequestFileCourseTopics(isScoredQuiz);
   if (
     !this.flagForReal && 
     this.randomSeed !== undefined && 
@@ -145,7 +145,7 @@ Problem.prototype.getURLRandomSeedRequestFileCourseTopics = function(isScoredQui
 
 Problem.prototype.getProblemNavigation = function() {
   var result = "";
-  result += "<problemNavigation>";
+  result += "<span class='problemNavigation'>";
   var linkType = "problemLinkPractice";
   var defaultRequest = 'exerciseJSON';
   if (this.flagForReal && thePage.user.flagLoggedIn) {
@@ -153,8 +153,8 @@ Problem.prototype.getProblemNavigation = function() {
     linkType = "problemLinkQuiz"
   }
   if (this.previousProblemId !== null && this.previousProblemId !== "") {
-    var previousURL = thePage.problems[this.previousProblemId].getURLRequestFileCourseTopics();
-    result += `<a class = '${linkType}' href = '#${previousURL}'`;
+    var previousURL = thePage.problems[this.previousProblemId].getAppAnchorRequestFileCourseTopics();
+    result += `<a class = '${linkType}' href = '#${previousURL}' `;
     result += `onclick = "selectCurrentProblem('${this.previousProblemId}', '${defaultRequest}')">&#8592;</a>`;
   }
 
@@ -179,7 +179,7 @@ Problem.prototype.getProblemNavigation = function() {
   } else {
     result += `<b style = 'color:brown'>Scores are recorded. </b>`;
   }
-  result += "</problemNavigation>";
+  result += "</span>";
   return result;
 }
 
@@ -187,20 +187,18 @@ Problem.prototype.getEditPanel = function() {
   return getEditPanel(decodeURIComponent(this.idURLed));
 }
 
-function getEditPanel(fileName) {
-  if (!thePage.user.hasProblemEditRights() || thePage.studentView()) {
-    return "";
+function toggleClonePanel(button) {
+  var thePanel = button.nextElementSibling; 
+  if (thePanel.style.maxHeight === '200px') {
+    thePanel.style.opacity = '0';
+    thePanel.style.maxHeight = '0';
+    button.innerHTML = `Clone panel &#9666;`;
+  } else {
+    thePanel.style.opacity = '1';
+    thePanel.style.maxHeight = '200px';
+    button.innerHTML = `Clone panel &#9660;`;
   }
-  if (fileName === "" || fileName === undefined || fileName === null) {
-    return "";
-  }
-  var result = "";
-  result += `<span class = 'spanFileInfo'>`;
-  result += `<button class = "buttonSaveEdit" onclick = "selectEditPage('${fileName}')">Edit</button>${fileName}&nbsp;`;
-//  result += `<button class = "accordionLike" onclick = "selectEditPage('${fileName}')">Clone&#9666;</button>`;
-  result += ``;
-  result += `</span>`;
-  return result;
+
 }
 
 Problem.prototype.writeToHTML = function(outputElement) {
@@ -208,12 +206,12 @@ Problem.prototype.writeToHTML = function(outputElement) {
     outputElement = document.getElementById(outputElement);
   }
   var topPart = "";
-  topPart += "<problemInfoBar>";
+  topPart += "<div class = 'problemInfoBar'>";
   topPart += this.getProblemNavigation();
-  topPart += `<problemTitle>${this.problemLabel} ${this.title}</problemTitle>`;
+  topPart += `<span class = "problemTitle">${this.problemLabel} ${this.title}</span>`;
   //topPart += "<br>"
   topPart += this.getEditPanel();
-  topPart += "</problemInfoBar>";
+  topPart += "</div>";
   topPart += "<br>";
   outputElement.innerHTML = topPart + this.decodedProblem;
   for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++) {
@@ -304,7 +302,7 @@ function updateProblemPageCallback(input, outputComponent) {
 
   currentProblem.scriptIds = [];
   for (var scriptLabel in theProblem.scripts) {
-    var newLabel = encodeURIComponent(theFileName + scriptLabel);
+    var newLabel = encodeURIComponent(currentProblem.idURLed + scriptLabel);
     currentProblem.scriptIds.push(newLabel); 
     thePage.injectScript(newLabel, decodeURIComponent(theProblem.scripts[scriptLabel]));
   }

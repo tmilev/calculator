@@ -158,7 +158,7 @@ public:
   int ProcessSetProblemDatabaseInfo();
   int ProcessSlidesOrHomeworkFromSource();
   int ProcessSlidesSource();
-  int ProcessClonePage();
+  int ProcessClonePage(bool useJSON);
   int ProcessModifyPage();
   int ProcessAddUserEmails();
   int ProcessServerStatus();
@@ -263,7 +263,7 @@ public:
   std::string GetJavaScriptIndicatorBuiltInServer();
   std::string GetChangePasswordPage();
   std::string GetChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField);
-  std::string GetClonePageResult();
+  std::string GetClonePageResult(bool useJSON);
   std::string GetModifyProblemReport();
   std::string GetLoginPage(const std::string& reasonForLogin = "");
   std::string GetForgotLoginPage();

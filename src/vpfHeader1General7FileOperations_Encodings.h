@@ -87,6 +87,9 @@ public:
   static bool OpenFileVirtualCustomizedWriteOnly
   (std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode,
    bool truncate, bool openAsBinary, std::stringstream* commentsOnFailure);
+  static bool OpenFileVirtualCustomizedWriteOnlyCreateIfNeeded
+  (std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode,
+   bool truncate, bool openAsBinary, std::stringstream* commentsOnFailure);
   static bool OpenFileVirtualReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary, bool accessSensitiveFolders = false);
 };
 

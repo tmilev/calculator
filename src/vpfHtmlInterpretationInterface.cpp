@@ -375,7 +375,7 @@ std::string HtmlInterpretation::submitAnswersPreview()
   return out.str();
 }
 
-std::string HtmlInterpretation::ClonePageResult()
+std::string HtmlInterpretation::ClonePageResult(bool useJSON)
 { MacroRegisterFunctionWithName("HtmlInterpretation::ClonePageResult");
   if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights() ||
       !theGlobalVariables.flagUsingSSLinCurrentConnection)
@@ -393,7 +393,8 @@ std::string HtmlInterpretation::ClonePageResult()
   { out << "<b>File: " << fileNameResulT << " already exists. </b>";
     return out.str();
   }
-  if (!FileOperations::OpenFileVirtualCustomizedWriteOnly(theFile, fileNameResulT, false, false, false, &out))
+  if (!FileOperations::OpenFileVirtualCustomizedWriteOnlyCreateIfNeeded
+       (theFile, fileNameResulT, false, false, false, &out))
   { out << "<b><span style =\"color:red\">Failed to open output file: " << fileNameResulT << ". </span></b>";
     return out.str();
   }
@@ -402,7 +403,7 @@ std::string HtmlInterpretation::ClonePageResult()
   std::stringstream svnAddCommand;
   std::string fileNameNonVirtual;
   std::stringstream commandResult;
-  if (FileOperations::GetPhysicalFileNameFromVirtual(fileNameResulT, fileNameNonVirtual, false, false, &commandResult))
+  if (FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(fileNameResulT, fileNameNonVirtual, &commandResult))
   { if (FileOperations::IsFileNameSafeForSystemCommands(fileNameNonVirtual, &commandResult))
     { svnAddCommand << "svn add " << fileNameNonVirtual;
       commandResult << "<b>Command:</b> " << svnAddCommand.str() << "<br>";
@@ -411,10 +412,12 @@ std::string HtmlInterpretation::ClonePageResult()
     }
   } else
     commandResult << "SVN: Could not get physical file name from virtual. ";
-  CalculatorHTML linkInterpreter;
-  out << "<br>" << linkInterpreter.ToStringLinkFromFileName(fileNameResulT);
-  out << "<br><b><span style =\"color:green\">Written content to file: "
-  << fileNameResulT << ". </span></b>" << "<br> " << commandResult.str();
+  if (!useJSON)
+  { CalculatorHTML linkInterpreter;
+    out << "<br>" << linkInterpreter.ToStringLinkFromFileName(fileNameResulT);
+    out << "<br><b><span style =\"color:green\">Written content to file: "
+    << fileNameResulT << ". </span></b>" << "<br> " << commandResult.str();
+  }
   return out.str();
 }
 

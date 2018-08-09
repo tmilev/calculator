@@ -413,7 +413,14 @@ function writeEditCoursePagePanel() {
 }
 
 function afterLoadCoursePage(incomingPage, result) {
-  document.getElementById(idDOMElements.divCurrentCourseBody).innerHTML = incomingPage;
+  var theCourseDiv = document.getElementById(idDOMElements.divCurrentCourseBody); 
+  theCourseDiv.innerHTML = incomingPage;
+  var titleElements = theCourseDiv.getElementsByTagName('title');
+  if (titleElements !== null && titleElements !== undefined) {
+    if (titleElements.length > 0) {
+      document.getElementsByTagName('title')[0].text = titleElements[0].text;
+    }
+  }
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentCourse")]);
   //MathJax.Hub.Process();
   var theTopics = document.getElementsByTagName("topicList");

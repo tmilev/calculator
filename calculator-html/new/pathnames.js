@@ -9,7 +9,7 @@ var pathnames = {
   requestDatabase: "databaseJSON",
   requestEditPage: "editPageJSON", 
   requestModifyPage: "modifyPage",
-  requestClonePage: "clonePage",
+  requestClonePage: "clonePageJSON",
   databaseTable: "currentDatabaseTable",
   setProblemData: "setProblemData"
 };

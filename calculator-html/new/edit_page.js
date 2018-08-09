@@ -54,7 +54,7 @@ function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
   theURL += `${pathnames.calculatorAPI}?`;
   theURL += getQueryStringSubmitStringAsMainInput(newFileName, pathnames.requestClonePage);
   theURL += `${pathnames.fileName}=${fileName}&`;
-  console.log("DEBUG: about to submit: " + theURL); 
+  //console.log("DEBUG: about to submit: " + theURL); 
   submitGET({
     url: theURL,
     result: idSpanClonePageReport
@@ -68,7 +68,7 @@ function storeEditedPage() {
   theURL += `${pathnames.calculatorAPI}?`;
   theURL += getQueryStringSubmitStringAsMainInput(editor.getValue(), pathnames.requestModifyPage);
   theURL += `${pathnames.fileName}=${thePage.storage.editor.currentlyEditedPage.getValue()}&`;
-  console.log("DEBUG: about to submit: " + theURL); 
+  //console.log("DEBUG: about to submit: " + theURL); 
   submitGET({
     url: theURL,
     result: "spanSubmitEditPageReport"

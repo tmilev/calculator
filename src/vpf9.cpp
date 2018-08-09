@@ -821,6 +821,16 @@ bool FileOperations::OpenFileVirtualCustomizedWriteOnly
   return FileOperations::OpenFileUnsecure(theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
 }
 
+bool FileOperations::OpenFileVirtualCustomizedWriteOnlyCreateIfNeeded
+(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode,
+ bool truncate, bool openAsBinary, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("FileOperations::OpenFileVirtualCustomizedWriteOnly");
+  std::string computedFileName;
+  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(theFileName, computedFileName, commentsOnFailure))
+    return false;
+  return FileOperations::OpenFileCreateIfNotPresentUnsecure(theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
+}
+
 bool FileOperations::OpenFileVirtualCustomizedReadOnly
 (std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate,
  bool openAsBinary, std::stringstream* commentsOnFailure)

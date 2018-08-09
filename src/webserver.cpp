@@ -3767,10 +3767,10 @@ int WebWorker::ProcessSlidesSource()
 }
 
 
-int WebWorker::ProcessClonePage()
+int WebWorker::ProcessClonePage(bool useJSON)
 { MacroRegisterFunctionWithName("WebWorker::ProcessClonePage");
   this->SetHeaderOKNoContentLength("");
-  stOutput << this->GetClonePageResult();
+  stOutput << this->GetClonePageResult(useJSON);
   return 0;
 }
 
@@ -3795,10 +3795,10 @@ int WebWorker::ProcessSubmitAnswersPreview()
   return 0;
 }
 
-std::string WebWorker::GetClonePageResult()
+std::string WebWorker::GetClonePageResult(bool useJSON)
 { MacroRegisterFunctionWithName("WebWorker::GetClonePageResult");
   this->SetHeaderOKNoContentLength("");
-  return HtmlInterpretation::ClonePageResult();
+  return HtmlInterpretation::ClonePageResult(useJSON);
 }
 
 std::string WebWorker::GetAddUserEmails()
@@ -4380,7 +4380,9 @@ int WebWorker::ServeClient()
            theGlobalVariables.userCalculatorRequestType == "homeworkSource")
     return this->ProcessSlidesSource();
   else if (theGlobalVariables.userCalculatorRequestType == "clonePage")
-    return this->ProcessClonePage();
+    return this->ProcessClonePage(false);
+  else if (theGlobalVariables.userCalculatorRequestType == "clonePageJSON")
+    return this->ProcessClonePage(true);
   else if (theGlobalVariables.userCalculatorRequestType == "calculator")
     return this->ProcessCalculator();
   else if (theGlobalVariables.userCalculatorRequestType == "compute")

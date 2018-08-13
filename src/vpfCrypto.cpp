@@ -82,28 +82,28 @@ unsigned char Crypto::GetCharFrom6bit(uint32_t input)
 
 bool Crypto::GetCharFromBase58(uint32_t input, char& output)
 { switch (input)
-  { case 0:  output = '0'; return true;
-    case 1:  output = '1'; return true;
-    case 2:  output = '2'; return true;
-    case 3:  output = '3'; return true;
-    case 4:  output = '4'; return true;
-    case 5:  output = '5'; return true;
-    case 6:  output = '6'; return true;
-    case 7:  output = '7'; return true;
-    case 8:  output = '8'; return true;
-    case 9:  output = '9'; return true;
-    case 10: output = 'A'; return true;
-    case 11: output = 'B'; return true;
-    case 12: output = 'C'; return true;
-    case 13: output = 'D'; return true;
-    case 14: output = 'E'; return true;
-    case 15: output = 'F'; return true;
-    case 16: output = 'G'; return true;
-    case 17: output = 'H'; return true;
-    case 18: output = 'J'; return true;
-    case 19: output = 'K'; return true;
+  { case 0:  output = '1'; return true;
+    case 1:  output = '2'; return true;
+    case 2:  output = '3'; return true;
+    case 3:  output = '4'; return true;
+    case 4:  output = '5'; return true;
+    case 5:  output = '6'; return true;
+    case 6:  output = '7'; return true;
+    case 7:  output = '8'; return true;
+    case 8:  output = '9'; return true;
+    case 9:  output = 'A'; return true;
+    case 10: output = 'B'; return true;
+    case 11: output = 'C'; return true;
+    case 12: output = 'D'; return true;
+    case 13: output = 'E'; return true;
+    case 14: output = 'F'; return true;
+    case 15: output = 'G'; return true;
+    case 16: output = 'H'; return true;
+    case 17: output = 'J'; return true;
+    case 18: output = 'K'; return true;
+    case 19: output = 'L'; return true;
     case 20: output = 'M'; return true;
-    case 21: output = 'L'; return true;
+    case 21: output = 'N'; return true;
     case 22: output = 'P'; return true;
     case 23: output = 'Q'; return true;
     case 24: output = 'R'; return true;
@@ -148,28 +148,28 @@ bool Crypto::GetCharFromBase58(uint32_t input, char& output)
 
 bool Crypto::GetBase58FromChar(unsigned char input, uint32_t& output)
 { switch (input)
-  { case '0': output = 0;  return true;
-    case '1': output = 1;  return true;
-    case '2': output = 2;  return true;
-    case '3': output = 3;  return true;
-    case '4': output = 4;  return true;
-    case '5': output = 5;  return true;
-    case '6': output = 6;  return true;
-    case '7': output = 7;  return true;
-    case '8': output = 8;  return true;
-    case '9': output = 9;  return true;
-    case 'A': output = 10; return true;
-    case 'B': output = 11; return true;
-    case 'C': output = 12; return true;
-    case 'D': output = 13; return true;
-    case 'E': output = 14; return true;
-    case 'F': output = 15; return true;
-    case 'G': output = 16; return true;
-    case 'H': output = 17; return true;
-    case 'J': output = 18; return true;
-    case 'K': output = 19; return true;
+  { case '1': output = 0;  return true;
+    case '2': output = 1;  return true;
+    case '3': output = 2;  return true;
+    case '4': output = 3;  return true;
+    case '5': output = 4;  return true;
+    case '6': output = 5;  return true;
+    case '7': output = 6;  return true;
+    case '8': output = 7;  return true;
+    case '9': output = 8;  return true;
+    case 'A': output = 9;  return true;
+    case 'B': output = 10; return true;
+    case 'C': output = 11; return true;
+    case 'D': output = 12; return true;
+    case 'E': output = 13; return true;
+    case 'F': output = 14; return true;
+    case 'G': output = 15; return true;
+    case 'H': output = 16; return true;
+    case 'J': output = 17; return true;
+    case 'K': output = 18; return true;
+    case 'L': output = 19; return true;
     case 'M': output = 20; return true;
-    case 'L': output = 21; return true;
+    case 'N': output = 21; return true;
     case 'P': output = 22; return true;
     case 'Q': output = 23; return true;
     case 'R': output = 24; return true;
@@ -773,15 +773,15 @@ void Crypto::initSha256()
   Crypto::kArraySha2xx[63] = 0xc67178f2;
 }
 
-bool Crypto::ConvertLargeUnsignedIntToHex
+bool Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst
 (const LargeIntUnsigned& input, std::string& output)
 { std::string outputString;
-  Crypto::ConvertLargeUnsignedIntToString(input, outputString);
+  Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(input, outputString);
   Crypto::ConvertStringToHex(outputString, output);
   return true;
 }
 
-bool Crypto::ConvertLargeUnsignedIntToString(const LargeIntUnsigned& input, std::string& output)
+bool Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(const LargeIntUnsigned& input, std::string& output)
 { List<char> result;
   LargeIntUnsigned digit, inputCopy = input;
   while (inputCopy > 0)
@@ -797,10 +797,10 @@ bool Crypto::ConvertLargeUnsignedIntToString(const LargeIntUnsigned& input, std:
   return true;
 }
 
-bool Crypto::ConvertLargeUnsignedIntToBase64
+bool Crypto::ConvertLargeUnsignedIntToBase64SignificantDigitsFirst
 (const LargeIntUnsigned& input, std::string& outputBase64)
 { std::string theString;
-  Crypto::ConvertLargeUnsignedIntToString(input, theString);
+  Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(input, theString);
   outputBase64 = Crypto::ConvertStringToBase64(theString);
   return true;
 }
@@ -848,36 +848,39 @@ void Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLast
   }
 }
 
-bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output)
+bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output, std::stringstream* commentsOnFailure)
 { std::string reversed;
   reversed.resize(input.size());
   for (unsigned i = 0; i < input.size(); i ++)
     reversed[reversed.size() - 1 - i] = input[i];
-  return Crypto::ConvertBase58SignificantDigitsLASTToLargeIntUnsigned(reversed, output);
+  return Crypto::ConvertBase58SignificantDigitsLASTToLargeIntUnsigned(reversed, output, commentsOnFailure);
 }
 
-bool Crypto::ConvertBase58SignificantDigitsLASTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output)
+bool Crypto::ConvertBase58SignificantDigitsLASTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output, std::stringstream* commentsOnFailure)
 { output = 0;
   bool result = true;
   for (unsigned i = 0; i < input.size(); i ++)
   { output *= 58;
     uint32_t currentChar;
     if (!Crypto::GetBase58FromChar(input[i], currentChar))
-    { result = false;
-      currentChar = 0;
+    { currentChar = 0;
+      if (result)
+        if (commentsOnFailure != 0)
+          *commentsOnFailure << "Failed to extract base 58 digit from: " << input[i] << " (position " << i << "). ";
+      result = false;
     }
     output += currentChar;
   }
   return result;
 }
 
-bool Crypto::ConvertBase58ToHex(const std::string& input, std::string& output)
-{ MacroRegisterFunctionWithName("Crypto::ConvertBase58ToHex");
+bool Crypto::ConvertBase58ToHexSignificantDigitsFirst(const std::string& input, std::string& output, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("Crypto::ConvertBase58ToHexSignificantDigitsFirst");
   LargeIntUnsigned outputLIU;
   bool result = true;
-  if (!Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(input, outputLIU))
+  if (!Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(input, outputLIU, commentsOnFailure))
     result = false;
-  if (!Crypto::ConvertLargeUnsignedIntToHex(outputLIU, output))
+  if (!Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(outputLIU, output))
     return false;
   return result;
 }
@@ -1199,7 +1202,7 @@ bool JSONWebToken::VerifyRSA256
     *commentsGeneral << "<br>RSA encryption took: "
     << theGlobalVariables.GetElapsedSeconds() - timeStart << " second(s).<br>";
   std::string RSAresultBitstream, RSAresultLast32bytes;
-  Crypto::ConvertLargeUnsignedIntToString(RSAresult, RSAresultBitstream);
+  Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(RSAresult, RSAresultBitstream);
   if (RSAresultBitstream.size() > 32)
     RSAresultLast32bytes = RSAresultBitstream.substr(RSAresultBitstream.size() - 32, 32);
   Crypto::ConvertStringToListUInt32BigendianZeroPad(RSAresultLast32bytes, RSAresultInts);
@@ -1215,7 +1218,7 @@ bool JSONWebToken::VerifyRSA256
     RSAresultBase64= Crypto::ConvertStringToBase64(RSAresultBitstream);
     Crypto::ConvertStringToHex(RSAresultBitstream, RSAresultHex);
     Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex);
-    Crypto::ConvertLargeUnsignedIntToHex(theShaUI, theShaHex);
+    Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theShaUI, theShaHex);
     if (!result && commentsOnFailure != 0)
       *commentsOnFailure << "<br><b><span style =\"color:red\">Token invalid: the SHA does not match the RSA result. </span></b>";
     else if (commentsGeneral != 0)

@@ -301,7 +301,7 @@ bool CalculatorFunctionsGeneral::innerConvertBase58ToHex(Calculator& theCommands
     return false;
   const std::string& inputString = input.GetValue<std::string>();
   std::string outputString;
-  if (!Crypto::ConvertBase58ToHex(inputString, outputString))
+  if (!Crypto::ConvertBase58ToHexSignificantDigitsFirst(inputString, outputString, &theCommands.Comments))
     return theCommands << "Failed to convert " << inputString << " to hex. ";
   return output.AssignValue(outputString, theCommands);
 }

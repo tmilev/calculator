@@ -46,9 +46,9 @@ public:
 
   static void ConvertStringToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output);
   static void ConvertLargeIntUnsignedToBase58SignificantDigitsLast(const LargeIntUnsigned& input, std::string& output);
-  static bool ConvertBase58SignificantDigitsLASTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output);
-  static bool ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output);
-  static bool ConvertBase58ToHex(const std::string& input, std::string& output);
+  static bool ConvertBase58SignificantDigitsLASTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output, std::stringstream *commentsOnFailure);
+  static bool ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output, std::stringstream *commentsOnFailure);
+  static bool ConvertBase58ToHexSignificantDigitsFirst(const std::string& input, std::string& output, std::stringstream* commentsOnFailure);
   static bool ConvertHexToString(const std::string& input, std::string& output);
   static bool ConvertHexToInteger(const std::string& input, LargeInt& output);
   static bool ConvertStringToHex(const std::string& input, std::string& output);
@@ -79,11 +79,13 @@ public:
   (const List<unsigned char>& input, LargeIntUnsigned& output);
   static bool ConvertBase64ToLargeUnsignedInt
   (const std::string& inputBase64, LargeIntUnsigned& output, std::stringstream* commentsOnFailure);
-  static bool ConvertLargeUnsignedIntToBase64
+  static bool ConvertLargeUnsignedIntToBase64SignificantDigitsFirst
   (const LargeIntUnsigned& input, std::string& outputBase64);
-  static bool ConvertLargeUnsignedIntToHex
+  static bool ConvertLargeUnsignedIntToHexSignificantDigitsFirst
   (const LargeIntUnsigned& input, std::string& outputHex);
-  static bool ConvertLargeUnsignedIntToString
+  static bool ConvertLargeUnsignedIntToStringSignificantDigitsLast
+  (const LargeIntUnsigned& input, std::string& output);
+  static bool ConvertLargeUnsignedIntToStringSignificantDigitsFirst
   (const LargeIntUnsigned& input, std::string& output);
   static std::string computeSha1outputBase64(const std::string& inputString);
   static bool VerifyJWTagainstKnownKeys

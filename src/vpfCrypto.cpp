@@ -833,9 +833,9 @@ void Crypto::ConvertBitStreamToLargeUnsignedInt(const List<unsigned char>& input
   }
 }
 
-void Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLast
+void Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLAST
 (const LargeIntUnsigned& input, std::string& output)
-{ MacroRegisterFunctionWithName("Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLast");
+{ MacroRegisterFunctionWithName("Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLAST");
   output.clear();
   LargeIntUnsigned copy = input;
   while (copy > 0) {
@@ -848,15 +848,16 @@ void Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLast
   }
 }
 
-bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output, std::stringstream* commentsOnFailure)
-{ std::string reversed;
-  reversed.resize(input.size());
-  for (unsigned i = 0; i < input.size(); i ++)
-    reversed[reversed.size() - 1 - i] = input[i];
-  return Crypto::ConvertBase58SignificantDigitsLASTToLargeIntUnsigned(reversed, output, commentsOnFailure);
+void Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST
+(const LargeIntUnsigned& input, std::string& output)
+{ std::string outputReversed;
+  Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLAST(input, outputReversed);
+  output.resize(outputReversed.size());
+  for (unsigned i = 0; i < outputReversed.size(); i ++)
+    output[i] = outputReversed[outputReversed.size() - 1 - i];
 }
 
-bool Crypto::ConvertBase58SignificantDigitsLASTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output, std::stringstream* commentsOnFailure)
+bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output, std::stringstream* commentsOnFailure)
 { output = 0;
   bool result = true;
   for (unsigned i = 0; i < input.size(); i ++)
@@ -1215,7 +1216,7 @@ bool JSONWebToken::VerifyRSA256
   { std::string RSAresultTrimmedHex, theShaHex, RSAresultHex, RSAresultBase64;
     LargeIntUnsigned theShaUI;
     Crypto::ConvertListUintToLargeUInt(outputSha, theShaUI);
-    RSAresultBase64= Crypto::ConvertStringToBase64(RSAresultBitstream);
+    RSAresultBase64 = Crypto::ConvertStringToBase64(RSAresultBitstream);
     Crypto::ConvertStringToHex(RSAresultBitstream, RSAresultHex);
     Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex);
     Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theShaUI, theShaHex);

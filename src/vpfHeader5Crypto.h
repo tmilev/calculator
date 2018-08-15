@@ -45,9 +45,9 @@ public:
    std::stringstream* commentsGeneral = 0);
 
   static void ConvertStringToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output);
-  static void ConvertLargeIntUnsignedToBase58SignificantDigitsLast(const LargeIntUnsigned& input, std::string& output);
-  static bool ConvertBase58SignificantDigitsLASTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output, std::stringstream *commentsOnFailure);
-  static bool ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output, std::stringstream *commentsOnFailure);
+  static void ConvertLargeIntUnsignedToBase58SignificantDigitsLAST(const LargeIntUnsigned& input, std::string& output);
+  static void ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(const LargeIntUnsigned& input, std::string& output);
+  static bool ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& inputSignificantDigitsFirst, LargeIntUnsigned& output, std::stringstream *commentsOnFailure);
   static bool ConvertBase58ToHexSignificantDigitsFirst(const std::string& input, std::string& output, std::stringstream* commentsOnFailure);
   static bool ConvertHexToString(const std::string& input, std::string& output);
   static bool ConvertHexToInteger(const std::string& input, LargeInt& output);

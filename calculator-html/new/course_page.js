@@ -304,7 +304,7 @@ function toggleProblemWeights() {
 
 Problem.prototype.getHTMLSubSection = function() {
   var result = "";
-  result += `<div class = \"headSubsection\">${this.problemNumberString} ${this.title}</div>`;
+  result += `<div class = \"headSubsection\">${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}</div>`;
   result += this.getHTMLProblems();
   return result;  
 }
@@ -342,7 +342,7 @@ Problem.prototype.getHTMLSection = function() {
 
 Problem.prototype.toHTMLChapter =  function() {
   var result = "";
-  result += `<div class =\"headChapter\">${this.problemNumberString} ${this.title}</div>`;
+  result += `<div class =\"headChapter\">${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}</div>`;
   result += "<div class =\"bodyChapter\">";
   if (this.isProblemContainer()) {
     result += this.getHTMLProblems();
@@ -379,6 +379,7 @@ function afterLoadTopics(incomingTopics, result) {
   thePage.previousProblemId = null;
   var stringHTMLContent = "";
   //try {
+    thePage.resetProblems();
     thePage.theTopics = JSON.parse(incomingTopics);
     for (var counterChapter = 0; counterChapter < thePage.theTopics["children"].length; counterChapter ++) {
       var currentChapter = thePage.theTopics["children"][counterChapter];

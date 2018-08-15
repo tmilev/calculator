@@ -381,6 +381,11 @@ function Page() {
   document.getElementById("divPage").className = "divPage";
 }
 
+Page.prototype.resetProblems = function() {
+  this.problems = {};
+  this.theChapterIds = {};
+}
+
 Page.prototype.loadSettings = function(inputHash) {
   try {
     var inputHashParsed = {};

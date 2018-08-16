@@ -291,7 +291,7 @@ bool CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58(Calculator&
   if (theInt < 0)
     return theCommands << "Conversion from negative integer to base58 not allowed.";
   std::string result;
-  Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLast(theInt.value, result);
+  Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(theInt.value, result);
   return output.AssignValue(result, theCommands);
 }
 

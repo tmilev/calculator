@@ -383,7 +383,7 @@ function afterLoadTopics(incomingTopics, result) {
     thePage.theTopics = JSON.parse(incomingTopics);
     for (var counterChapter = 0; counterChapter < thePage.theTopics["children"].length; counterChapter ++) {
       var currentChapter = thePage.theTopics["children"][counterChapter];
-      new Problem(currentChapter);
+      new Problem(currentChapter, null);
     }
     stringHTMLContent += getHTMLfromTopics();
     writeEditCoursePagePanel();

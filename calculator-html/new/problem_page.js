@@ -14,8 +14,12 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
   thePage.selectPage(thePage.pages.problemPage.name);
 }
 
-function Problem(problemData) {
+function Problem(problemData, inputParentIdURLed) {
   this.idURLed = encodeURIComponent(problemData.id);
+  if (inputParentIdURLed === undefined) {
+    console.log("DEBUG: bad parent id");
+  }
+  this.parentIdURLed = inputParentIdURLed;
   this.randomSeed = null;
   this.answers = [];
   this.problemLabel = "";
@@ -74,7 +78,7 @@ function Problem(problemData) {
     return;
   }
   for (var counterChildren = 0; counterChildren < problemData.children.length; counterChildren ++) {
-    var currentChild = new Problem(problemData.children[counterChildren]);
+    var currentChild = new Problem(problemData.children[counterChildren], this.idURLed);
     this.childrenIds.push(currentChild.idURLed);
   }
 }
@@ -267,7 +271,7 @@ function updateProblemPageCallback(input, outputComponent) {
   }
   var currentProblem = thePage.getCurrentProblem();
   if (currentProblem === null || currentProblem === undefined) {
-    thePage.problems[thePage.storage.currentCourse.currentProblemId.getValue()] = new Problem(theProblem);
+    thePage.problems[thePage.storage.currentCourse.currentProblemId.getValue()] = new Problem(theProblem, null);
     currentProblem = thePage.getCurrentProblem();
   }
   currentProblem.decodedProblem = decodeURIComponent(theProblem["problemContent"]);

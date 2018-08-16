@@ -9,6 +9,16 @@ Problem.prototype.toStringDeadline = function() {
     this.deadlineString = this.deadlines[sectionIndex];
   }
   if (this.deadlineString === "" || this.deadlineString === null || this.deadlineString === undefined) {
+    if (this.parentIdURLed !== null && this.parentIdURLed !== undefined && this.parentIdURLed !== "") {
+      var parentProblem = thePage.problems[this.parentIdURLed];
+      var inheritedResult = parentProblem.toStringDeadline();
+      if (inheritedResult !== "") {
+        if (!inheritedResult.endsWith("[inherited]")) {
+          inheritedResult += " [inherited]";
+        }
+      }
+      return inheritedResult;
+    }
     return "";
   }
   this.deadline = new Date(this.deadlineString);

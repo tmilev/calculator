@@ -201,7 +201,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy
   output.reset(this->G);
   int Vd = this->basis[0].size;
   int Wd = other.basis[0].size;
-  int Ud = Vd*Wd;
+  int Ud = Vd * Wd;
   for (int vi = 0; vi < this->basis.size; vi ++)
     for (int wi = 0; wi < other.basis.size; wi ++)
     { Vector<coefficient> u;
@@ -264,17 +264,17 @@ VectorSpace<coefficient> GroupRepresentationCarriesAllMatrices<somegroup, coeffi
   int d = this->generators[0].NumCols;
   for (int geni = 0; geni < this->generators.size; geni ++)
   { List<Vector<coefficient> > ess = eigenspaces(this->generators[geni]);
-    for (int essi = 0; essi <ess.size; essi ++)
-      for (int esi = 0; esi <ess[essi].size; esi ++)
+    for (int essi = 0; essi < ess.size; essi ++)
+      for (int esi = 0; esi < ess[essi].size; esi ++)
       { // the best laid coding practices of mice and men oft go astray
         if (!V.AddVectorToBasis(ess[essi][esi]))
           return V;
       }
   }
   // This should not be possible
-  for (int i = 0; i <d; i ++)
+  for (int i = 0; i < d; i ++)
   { Vector<coefficient> v;
-    v.MakeEi(d,i);
+    v.MakeEi(d, i);
     if (!V.AddVectorToBasis(v))
       return V;
   }
@@ -349,7 +349,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
   stOutput << "\n";
 */
   List<List<Vector<coefficient> > > es;
-  for (int cfi = this->ownerGroup->ConjugacyClassCount()- 1; cfi>= 0; cfi --)
+  for (int cfi = this->ownerGroup->ConjugacyClassCount() - 1; cfi >= 0; cfi --)
   { ClassFunction<somegroup, coefficient> cf;
     cf.MakeZero(*this->ownerGroup);
     cf[cfi] = 1;
@@ -359,14 +359,14 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
     es = eigenspaces(A);
     if (es.size > 1)
     { stOutput << "eigenspaces were ";
-      for (int i = 0; i <es.size; i ++)
+      for (int i = 0; i < es.size; i ++)
         stOutput << es[i].size << " ";
       stOutput << "\n";
       break;
     }
   }
 
-  for (int i = 0; i <es.size; i ++)
+  for (int i = 0; i < es.size; i ++)
   { GroupRepresentationCarriesAllMatrices<somegroup, coefficient> outeme;
     outeme.ownerGroup = this->ownerGroup;
     outeme.generatorS = this->generatorS;
@@ -381,10 +381,10 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
 // by masking. dividing by 3 a few times earlier and only checking
 // 1 and 5 mod 6 would require more complicated iteration that +=2
 void factor_integer_l(int n, List<int> f)
-{ for (int i =2; i <FloatingPoint::sqrt(n); i +=2)
-    if (n%i == 0)
+{ for (int i = 2; i < FloatingPoint::sqrt(n); i += 2)
+    if (n % i == 0)
     { f.AddOnTop(i);
-      factor_integer_l(n/i,f);
+      factor_integer_l(n / i,f);
       return;
     }
 }
@@ -394,22 +394,22 @@ List<int> factor_integer(int n)
 { List<int> f;
   if (n == 0)
     return f;
-  if (n<0)
-    n = -n;
-  if (n ==1)
+  if (n < 0)
+    n = - n;
+  if (n == 1)
     return f;
-  while ((n&1) == 0)
+  while ((n & 1) == 0)
   { f.AddOnTop(2);
-    n = n>>1;
+    n = n >> 1;
   }
-  factor_integer_l(n,f);
+  factor_integer_l(n, f);
   return f;
 }
 
 int ithfactor(int i, List<int> f)
 { int acc = 1;
-  for (int j = 0; j<f.size; j ++)
-    if (i&i <<j)
+  for (int j = 0; j < f.size; j ++)
+    if (i & i << j)
       acc = acc * f[j];
   return acc;
 }
@@ -422,13 +422,13 @@ struct DivisionResult<UDPolynomial<coefficient> > UDPolynomial<coefficient>::Div
     return out;
   int r = data.size - divisor.data.size + 1;
   out.quotient.data.SetSize(r);
-  for (int i =r- 1; i != - 1; i --)
+  for (int i = r- 1; i != - 1; i --)
   { if (out.remainder.data.size - divisor.data.size != i)
     { out.quotient[i] = 0;
       continue;
     }
     UDPolynomial<coefficient> p = divisor.TimesXn(i);
-    out.quotient[i] = out.remainder.data[out.remainder.data.size- 1]/divisor.data[divisor.data.size- 1];
+    out.quotient[i] = out.remainder.data[out.remainder.data.size - 1] / divisor.data[divisor.data.size - 1];
     p *= out.quotient[i];
     out.remainder -= p;
   }
@@ -465,8 +465,8 @@ template <typename coefficient>
 //template <typename integral>
 void UDPolynomial<coefficient>::ClearDenominators()
 { int acc = 1;
-  for (int i = 0; i <data.size; i ++)
-    acc = lcm(acc,data[i].GetDenominator());
+  for (int i = 0; i < data.size; i ++)
+    acc = lcm(acc, data[i].GetDenominator());
   *this *= acc;
 }
 
@@ -474,8 +474,8 @@ template <typename coefficient>
 void UDPolynomial<coefficient>::FormalDerivative()
 { if (data.size < 2)
     data.size = 0;
-  for (int i =1; i <data.size; i ++)
-    data[i- 1] = i*data[i];
+  for (int i = 1; i < data.size; i ++)
+    data[i - 1] = i * data[i];
   data.size--;
 }
 
@@ -487,7 +487,7 @@ bool UDPolynomial<coefficient>::operator<(const UDPolynomial<coefficient>& right
     return false;
   if (data.size == 0)
     return false;
-  return data[data.size- 1] < right.data[data.size- 1];
+  return data[data.size - 1] < right.data[data.size - 1];
 }
 
 template <typename coefficient>
@@ -495,13 +495,13 @@ void UDPolynomial<coefficient>::SquareFree()
 { stOutput << *this << "\n";
   UDPolynomial<coefficient> p = FormalDerivative();
   stOutput << p << "\n";
-  UDPolynomial<coefficient> q = gcd(*this,p);
+  UDPolynomial<coefficient> q = gcd(*this, p);
   if (q.data.size > 1)
-    data = (*this/q).data;
+    data = (*this / q).data;
 }
 
 template <typename coefficient>
-bool space_contains(const List<Vector<coefficient> > &V, Vector<coefficient> v)
+bool space_contains(const List<Vector<coefficient> >& V, Vector<coefficient> v)
 { if (v.IsEqualToZero())
   { if (V.size == 0)
       return false;
@@ -511,7 +511,7 @@ bool space_contains(const List<Vector<coefficient> > &V, Vector<coefficient> v)
   while (true)
   { int vi = v.GetIndexFirstNonZeroCoordinate();
     while (true)
-    { if (i ==V.size)
+    { if (i == V.size)
         return false;
       int vii = V[i].GetIndexFirstNonZeroCoordinate();
       if (vii > vi)
@@ -520,14 +520,14 @@ bool space_contains(const List<Vector<coefficient> > &V, Vector<coefficient> v)
         break;
       i ++;
     }
-    v -= V[i] * v[vi]/V[i][vi];
+    v -= V[i] * v[vi] / V[i][vi];
     if (v.IsEqualToZero())
       return true;
   }
 }
 
 template<typename coefficient>
-void getunion(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W, List<Vector<coefficient> >& output)
+void getunion(const List<Vector<coefficient> >& V, const List<Vector<coefficient> >& W, List<Vector<coefficient> >& output)
 { if (&output == &V || &output == &W)
   { List<Vector<coefficient> > newOutput;
     getunion(V, W, newOutput);
@@ -535,24 +535,24 @@ void getunion(const List<Vector<coefficient> > &V, const List<Vector<coefficient
     return;
   }
   if (V.size == 0)
-  { output =W;
+  { output = W;
     return;
   }
   int d = V[0].size;
   Matrix<coefficient> M;
-  M.init(V.size +W.size,d);
-  for (int i = 0; i <V.size; i ++)
-    for (int j = 0; j<d; j ++)
+  M.init(V.size + W.size,d);
+  for (int i = 0; i < V.size; i ++)
+    for (int j = 0; j < d; j ++)
       M.elements[i][j] = V[i][j];
-  for (int i = 0; i <W.size; i ++)
-    for (int j = 0; j<d; j ++)
+  for (int i = 0; i < W.size; i ++)
+    for (int j = 0; j < d; j ++)
       M.elements[V.size + i][j] = W[i][j];
   M.GaussianEliminationByRows(M);
   output.SetSize(0);
   Vector<coefficient> v;
-  for (int i = 0; i <M.NumRows; i ++)
+  for (int i = 0; i < M.NumRows; i ++)
   { v.SetSize(d);
-    for (int j = 0; j<d; j ++)
+    for (int j = 0; j < d; j ++)
       v[j] = M.elements[i][j];
     if (v.IsEqualToZero())
       break;
@@ -570,57 +570,57 @@ void intersection(const List<Vector<coefficient> > &V, const List<Vector<coeffic
 
   Matrix<coefficient> MV;
   MV.init(V.size, d);
-  for (int i = 0; i <V.size; i ++)
-    for (int j = 0; j<d; j ++)
+  for (int i = 0; i < V.size; i ++)
+    for (int j = 0; j < d; j ++)
       MV.elements[i][j] = V[i][j];
   List<Vector<coefficient> > Vperp;
   MV.GetZeroEigenSpaceModifyMe(Vperp);
 
   Matrix<coefficient> MW;
   MW.init(W.size, d);
-  for (int i = 0; i <W.size; i ++)
-    for (int j = 0; j<d; j ++)
+  for (int i = 0; i < W.size; i ++)
+    for (int j = 0; j < d; j ++)
       MW.elements[i][j] = W[i][j];
   List<Vector<coefficient> > Wperp;
   MW.GetZeroEigenSpaceModifyMe(Wperp);
 
   Matrix<coefficient> M;
-  M.init(Vperp.size +Wperp.size,d);
+  M.init(Vperp.size + Wperp.size,d);
   int i = 0;
-  for (; i <Vperp.size; i ++)
-    for (int j = 0; j<d; j ++)
+  for (; i < Vperp.size; i ++)
+    for (int j = 0; j < d; j ++)
       M.elements[i][j] = Vperp[i][j];
-  for (; i <Vperp.size +Wperp.size; i ++)
-    for (int j = 0; j<d; j ++)
-      M.elements[i][j] = Wperp[i-Vperp.size][j];
+  for (; i < Vperp.size + Wperp.size; i ++)
+    for (int j = 0; j < d; j ++)
+      M.elements[i][j] = Wperp[i - Vperp.size][j];
   M.GetZeroEigenSpaceModifyMe(output);
 }
 
 template <typename coefficient>
 List<Vector<coefficient> > orthogonal_complement(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &WW)
-{ List<Vector<coefficient> > W = intersection(V,WW);
+{ List<Vector<coefficient> > W = intersection(V, WW);
   if (W.size == 0)
     return V;
   int d = W[0].size;
   Matrix<coefficient> GM;
   GM.init(W.size, W.size);
-  for (int i = 0; i <W.size; i ++)
-    for (int j = 0; j<W.size; j ++)
+  for (int i = 0; i < W.size; i ++)
+    for (int j = 0; j < W.size; j ++)
       GM.elements[i][j] = W[i].ScalarEuclidean(W[j]);
   GM.Invert();
   Matrix<coefficient> VM;
   VM.init(W.size,V.size);
-  for (int i = 0; i <W.size; i ++)
-    for (int j = 0; j<V.size; j ++)
+  for (int i = 0; i < W.size; i ++)
+    for (int j = 0; j < V.size; j ++)
       VM.elements[i][j] = W[i].ScalarEuclidean(V[j]);
   VM.MultiplyOnTheLeft(GM);
   Matrix<coefficient> outm;
   outm.init(V.size, d);
-  for (int i = 0; i <V.size; i ++)
-  { for (int j = 0; j<d; j ++)
+  for (int i = 0; i < V.size; i ++)
+  { for (int j = 0; j < d; j ++)
     { coefficient r = V[i][j];
       outm.elements[i][j] = r;
-      for (int k = 0; k<W.size; k++)
+      for (int k = 0; k < W.size; k ++)
         outm.elements[i][j] -= VM.elements[k][i] * W[k][j];
     }
   }
@@ -628,10 +628,10 @@ List<Vector<coefficient> > orthogonal_complement(const List<Vector<coefficient> 
   Selection s;
   outm.GaussianEliminationByRows(outm,tmp,s);
   List<Vector<coefficient> > out;
-  for (int i = 0; i <outm.NumRows; i ++)
+  for (int i = 0; i < outm.NumRows; i ++)
   { Vector<coefficient> v;
     v.SetSize(d);
-    for (int j = 0; j<d; j ++)
+    for (int j = 0; j < d; j ++)
       v[j] = outm.elements[i][j];
     if (v.IsEqualToZero())
       return out;
@@ -645,9 +645,9 @@ template <typename coefficient>
 bool pdiv(List<coefficient> &p, int a)
 { List<coefficient> q;
   coefficient lastround = p[0];
-  for (int i =1; i <p.size; i ++)
+  for (int i = 1; i < p.size; i ++)
   { q.AddOnTop(lastround);
-    lastround = p[i] - lastround*a;
+    lastround = p[i] - lastround * a;
   }
   if (lastround == 0)
   { p = q;
@@ -659,10 +659,10 @@ bool pdiv(List<coefficient> &p, int a)
 template <typename coefficient>
 List<int> factorpoly(List<coefficient> p, int maxfac)
 { List<int> factors;
-  for (int i1= 0; i1<maxfac; i1++)
-    for (int i2=1; i2>= - 1; i2-=2)
-    { int i = i1*i2;
-      while (pdiv(p,i))
+  for (int i1 = 0; i1 < maxfac; i1 ++)
+    for (int i2 = 1; i2 >= - 1; i2 -= 2)
+    { int i = i1 * i2;
+      while (pdiv(p, i))
       { if (!factors.Contains(i))
           factors.AddOnTop(i);
         if (p.size == 1)
@@ -677,14 +677,14 @@ List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M)
 {  M.Transpose();
    Matrix<coefficient> dummy1;
    Selection dummy2;
-   M.GaussianEliminationByRows(M,dummy1,dummy2);
+   M.GaussianEliminationByRows(M, dummy1, dummy2);
    List<Vector<coefficient> > out;
    bool zerov;
-   for (int i = 0; i <M.NumRows; i ++)
+   for (int i = 0; i < M.NumRows; i ++)
    {  Vector<coefficient> v;
       v.MakeZero(M.NumCols); // initializing is not necessary
       zerov = true;
-      for (int j = 0; j<M.NumCols; j ++)
+      for (int j = 0; j < M.NumCols; j ++)
       {  v[j] = M.elements[i][j];
          if (zerov && M.elements[i][j] != 0)
             zerov = false;
@@ -696,7 +696,7 @@ List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M)
 }
 
 // guess at integers
-List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf= 0)
+List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkDivisorsOf = 0)
 { (void) checkDivisorsOf;//avoid unused parameter warning, portable.
   int n = M.NumCols;
   List<List<Vector<Rational> > > spaces;
@@ -706,8 +706,8 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkD
 //     continue;
   UDPolynomial<Rational> p;
   p.AssignMinPoly(M);
-  for (int ii = 0; ii <2*n +2; ii ++) // lol, this did end up working though
-  { int i = ((ii + 1)/2) * (2*(ii%2)- 1); // 0,1,- 1,2,-2,3,-3,...
+  for (int ii = 0; ii < 2 * n + 2; ii ++) // lol, this did end up working though
+  { int i = ((ii + 1) / 2) * (2 * (ii % 2)- 1); // 0,1,- 1,2,-2,3,-3,...
 //    stOutput << "checking " << i << " found " << found << "\n";
     Rational r = i;
     if (p(r) == 0)
@@ -724,23 +724,23 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkD
 }
 
 template <typename coefficient>
-Vector<coefficient> PutInBasis(const Vector<coefficient> &v, const List<Vector<coefficient> > &B)
+Vector<coefficient> PutInBasis(const Vector<coefficient>& v, const List<Vector<coefficient> >& B)
 {  Vector<coefficient> w;
    w.MakeZero(B.size);
    Matrix<coefficient> M;
    M.MakeZeroMatrix(B.size);
-   for (int i = 0; i <B.size; i ++)
-   {  for (int j = 0; j<v.size; j ++)
-         w[i] += B[i][j]*v[j];
-      for (int j = 0; j<B.size; j ++)
-         for (int k = 0; k<v.size; k++)
+   for (int i = 0; i < B.size; i ++)
+   {  for (int j = 0; j < v.size; j ++)
+         w[i] += B[i][j] * v[j];
+      for (int j = 0; j < B.size; j ++)
+         for (int k = 0; k < v.size; k ++)
             M.elements[i][j] += B[i][k] * B[j][k];
    }
    M.Invert();
-   Vector<coefficient> v2 = M*w;
+   Vector<coefficient> v2 = M * w;
    Vector<coefficient> v3;
    v3.MakeZero(v.size);
-   for (int i = 0; i <B.size; i ++)
+   for (int i = 0; i < B.size; i ++)
       v3 += B[i] * v2[i];
    if (!(v3 == v))
    {  Vector<coefficient> out;
@@ -753,7 +753,7 @@ template <typename coefficient>
 ElementWeylGroupRing<coefficient> ActOnGroupRing(ElementWeylGroup<WeylGroupData>& theElement, const ElementWeylGroupRing<coefficient>& v)
 { ElementWeylGroupRing<coefficient> out;
   out.MakeZero();
-  for (int i = 0; i <v.size(); i ++)
+  for (int i = 0; i < v.size(); i ++)
     out.AddMonomial(v.theCoeffs[i], theElement*v[i]);
   return out;
 }
@@ -766,18 +766,18 @@ bool is_isotypic_component(WeylGroupData& G, const List<Vector<coefficient> >& V
     return false;
   // initial test: dimension of V is a square
   int n = sqrt(V.size);
-  if (n*n != V.size)
+  if (n * n != V.size)
     return false;
   // more expensive test: character of V has unit Norm
   ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, coefficient> X;
   X.G = &G.theGroup;
   X.data.SetSize(G.theGroup.ConjugacyClassCount());
-  for (int i = 0; i <G.theGroup.ConjugacyClassCount(); i ++)
+  for (int i = 0; i < G.theGroup.ConjugacyClassCount(); i ++)
   { ElementWeylGroup<WeylGroupData>& g = G.theGroup.conjugacyClasseS[i].representative;
     coefficient tr = 0;
-    for (int j = 0; j<V.size; j ++)
+    for (int j = 0; j < V.size; j ++)
     { Vector<coefficient> v = ActOnGroupRing(g,V[j]);
-      v = PutInBasis(v,V);
+      v = PutInBasis(v, V);
       tr += v[j];
     }
     X.data[i] = tr;
@@ -799,24 +799,24 @@ bool is_isotypic_component(WeylGroupData& G, const List<Vector<coefficient> >& V
 
 Matrix<Rational> MatrixInBasis(const ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& X, const List<Vector<Rational> >& B)
 { List<Vector<Rational> > rows;
-  for (int i = 0; i <B.size; i ++)
+  for (int i = 0; i < B.size; i ++)
   { Vector<Rational> v;
     v.MakeZero(B[0].size);
     rows.AddOnTop(v);
   }
-  for (int i1 = 0; i1<X.G->ConjugacyClassCount(); i1++)
-    for (int i2= 0; i2<X.G->conjugacyClasseS[i1].size; i2++)
-      for (int j = 0; j<X.G->GetSize(); j ++)
-        for (int k = 0; k<B.size; k++)
-        { int l =X.G->theElements.GetIndex
-          (X.G->conjugacyClasseS[i1].theElements[i2]*X.G->theElements[j]);
-          rows[k][l] = X.data[i1]*B[k][j];
+  for (int i1 = 0; i1 < X.G->ConjugacyClassCount(); i1 ++)
+    for (int i2 = 0; i2 < X.G->conjugacyClasseS[i1].size; i2 ++)
+      for (int j = 0; j < X.G->GetSize(); j ++)
+        for (int k = 0; k < B.size; k ++)
+        { int l = X.G->theElements.GetIndex
+          (X.G->conjugacyClasseS[i1].theElements[i2] * X.G->theElements[j]);
+          rows[k][l] = X.data[i1] * B[k][j];
         }
   Matrix<Rational> M;
   M.init(rows.size, rows.size);
-  for (int i = 0; i <rows.size; i ++)
-  { Vector<Rational> v = PutInBasis(rows[i],B);
-    for (int j = 0; j<rows.size; j ++)
+  for (int i = 0; i < rows.size; i ++)
+  { Vector<Rational> v = PutInBasis(rows[i], B);
+    for (int j = 0; j < rows.size; j ++)
       M.elements[i][j] = v[j];
   }
   return M;
@@ -824,9 +824,9 @@ Matrix<Rational> MatrixInBasis(const ClassFunction<FiniteGroup<ElementWeylGroup<
 
 ElementMonomialAlgebra<ElementWeylGroup<WeylGroupData>, Rational> FromClassFunction(const ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& X)
 { ElementMonomialAlgebra<ElementWeylGroup<WeylGroupData>, Rational> out;
-  for (int i = 0; i <X.G->ConjugacyClassCount(); i ++)
-    for (int j = 0; j<X.G->conjugacyClasseS[i].size; j ++)
-      out.AddMonomial(X.G->conjugacyClasseS[i].theElements[j],X.data[i]);
+  for (int i = 0; i < X.G->ConjugacyClassCount(); i ++)
+    for (int j = 0; j < X.G->conjugacyClasseS[i].size; j ++)
+      out.AddMonomial(X.G->conjugacyClasseS[i].theElements[j], X.data[i]);
   return out;
 }
 
@@ -834,11 +834,11 @@ template <typename coefficient>
 Matrix<coefficient> GetMatrix(const ClassFunction<WeylGroupData::WeylGroupBase, coefficient>& X)
 { Matrix<coefficient> M;
   M.MakeZeroMatrix(X.G->N);
-  for (int i1= 0; i1<X.G->ccCount; i1++)
-    for (int i2= 0; i2<X.G->ccSizes[i1]; i2++)
-    { int i =X.G->conjugacyClasses[i1][i2];
-      for (int j = 0; j<X.G->N; j ++)
-        M(X.G->MultiplyElements(i, j),j) = X.data[i1];
+  for (int i1 = 0; i1 < X.G->ccCount; i1 ++)
+    for (int i2 = 0; i2 < X.G->ccSizes[i1]; i2 ++)
+    { int i = X.G->conjugacyClasses[i1][i2];
+      for (int j = 0; j < X.G->N; j ++)
+        M(X.G->MultiplyElements(i, j), j) = X.data[i1];
     }
   return M;
 }
@@ -925,14 +925,14 @@ void SubgroupDataWeylGroup::ComputeTauSignature()
   this->theSubgroupData.ComputeCCRepresentativesPreimages();
   //if (theGlobalVariables.printOutThisKindaThing)
   //{
-  stOutput << "here is the character table of the group, the representatives and sizes for "
-           << "conjugacy classes of the group and the subgroup, and for your convenience, "
-           << "a mapping from subgroup conjugacy classes to their preimages in the group. ";
-  stOutput << this->theSubgroupData.theGroup->PrettyPrintCharacterTable();
-  stOutput << Xs << " <- subgroup sign character\n";
-  stOutput << this->theSubgroupData.theGroup->PrettyPrintCCRepsSizes();
-  stOutput << this->theSubgroupData.theSubgroup->PrettyPrintCCRepsSizes();
-  stOutput << this->theSubgroupData.ccRepresentativesPreimages.ToStringCommaDelimited() << '\n';
+  //stOutput << "here is the character table of the group, the representatives and sizes for "
+  //         << "conjugacy classes of the group and the subgroup, and for your convenience, "
+  //         << "a mapping from subgroup conjugacy classes to their preimages in the group. ";
+  //stOutput << this->theSubgroupData.theGroup->PrettyPrintCharacterTable();
+  //stOutput << Xs << " <- subgroup sign character\n";
+  //stOutput << this->theSubgroupData.theGroup->PrettyPrintCCRepsSizes();
+  //stOutput << this->theSubgroupData.theSubgroup->PrettyPrintCCRepsSizes();
+  //stOutput << this->theSubgroupData.ccRepresentativesPreimages.ToStringCommaDelimited() << '\n';
  //}
 
   this->tauSignature.SetSize(this->theSubgroupData.theGroup->ConjugacyClassCount());
@@ -945,9 +945,9 @@ void SubgroupDataWeylGroup::ComputeTauSignature()
     //stOutput << "Restricting character: " << Xip.ToString() << "<br>";
     for (int j = 0; j < this->theSubgroupData.theSubgroup->conjugacyClasseS.size; j ++)
       XiS[j] = XiG[this->theSubgroupData.ccRepresentativesPreimages[j]];
-    this->tauSignature[i] = this->theSubgroupData.theSubgroup->GetHermitianProduct(Xs,XiS);
-    stOutput << "<br>Hermitian product of " << Xs.ToString() << " and "
-        << XiS.ToString() << " = " << this->tauSignature[i];
+    this->tauSignature[i] = this->theSubgroupData.theSubgroup->GetHermitianProduct(Xs, XiS);
+    //stOutput << "<br>Hermitian product of " << Xs.ToString() << " and "
+    //<< XiS.ToString() << " = " << this->tauSignature[i];
     if (!this->tauSignature[i].IsSmallInteger())
       crash << " Tau signature is not integral, impossible! " << crash ;
   }
@@ -968,7 +968,7 @@ void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages()
       this->theSubgroupData.ccRepresentativesPreimages[i] = i;
     this->theSubgroupData.theSubgroup->flagCCRepresentativesComputed = true;
   } else
-  { if (this->theDynkinType.GetRank()<=6)
+  { if (this->theDynkinType.GetRank() <= 6)
       this->theSubgroupData.theSubgroup->ComputeCCfromAllElements();
     else
       this->theSubgroupData.theSubgroup->ComputeCCSizesAndRepresentatives();
@@ -988,7 +988,7 @@ void SubgroupDataRootReflections::InitGenerators()
   this->theSubgroupData.generatorPreimages.SetSize(d);
   this->theSubgroupData.theSubgroup->generators.SetSize(d);
   ElementWeylGroup<WeylGroupData> currentReflection;
-  for (int i = 0; i <d; i ++)
+  for (int i = 0; i < d; i ++)
   { currentReflection.MakeRootReflection(this->generatingSimpleRoots[i], *this->theWeylData);
     this->theSubgroupData.generatorPreimages[i] = this->theSubgroupData.theGroup->theElements.GetIndex(currentReflection);
     this->theSubgroupData.theSubgroup->generators[i] = currentReflection;
@@ -1007,11 +1007,11 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
   EiBasis.MakeEiBasis(G.GetDim());
   EiBasis.SubSelection(inputGeneratingSimpleRoots, this->generatingSimpleRoots);
   int d = inputGeneratingSimpleRoots.CardinalitySelection;
-  this->SubCartanSymmetric.init(d,d);
-  for (int ii = 0; ii <d; ii ++)
-    for (int jj = 0; jj<d; jj ++)
+  this->SubCartanSymmetric.init(d, d);
+  for (int ii = 0; ii < d; ii ++)
+    for (int jj = 0; jj < d; jj ++)
       this->SubCartanSymmetric(ii, jj) =
-      G.RootScalarCartanRoot(this->generatingSimpleRoots[ii],this->generatingSimpleRoots[jj]);
+      G.RootScalarCartanRoot(this->generatingSimpleRoots[ii], this->generatingSimpleRoots[jj]);
   this->ComputeDynkinType();
   this->InitGenerators();
 }
@@ -1026,15 +1026,15 @@ void SubgroupDataRootReflections::MakeFromRoots
   theDiagram.ComputeDiagramTypeModifyInput
   (this->generatingSimpleRoots, G);
   int d = this->generatingSimpleRoots.size;
-  this->SubCartanSymmetric.init(d,d);
-  for (int ii = 0; ii <d; ii ++)
-    for (int jj = 0; jj<d; jj ++)
+  this->SubCartanSymmetric.init(d, d);
+  for (int ii = 0; ii < d; ii ++)
+    for (int jj = 0; jj < d; jj ++)
       this->SubCartanSymmetric(ii, jj) = G.RootScalarCartanRoot
-      (this->generatingSimpleRoots[ii],generatingSimpleRoots[jj]);
+      (this->generatingSimpleRoots[ii], generatingSimpleRoots[jj]);
   this->ComputeDynkinType();
   DynkinType verificationType;
   theDiagram.GetDynkinType(verificationType);
-  if (this->theDynkinType !=verificationType)
+  if (this->theDynkinType != verificationType)
     crash << "Two different comptuations of the Dynkin type a set of roots did not coincide. " << crash;
   this->InitGenerators();
 }
@@ -1071,7 +1071,7 @@ void WeylGroupData::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   ();
   List<Vectors<Rational> > theRootSAsBases;
   theRootSAsBases.SetExpectedSize(theRootSAs.theSubalgebras.size);
-  for (int i = theRootSAs.theSubalgebras.size- 1; i>= 0; i --)
+  for (int i = theRootSAs.theSubalgebras.size - 1; i >= 0; i --)
     theRootSAsBases.AddOnTop(theRootSAs.theSubalgebras[i].SimpleBasisK);
   this->GetSignSignatureRootSubgroups(outputSubgroups, theRootSAsBases);
 }
@@ -1085,12 +1085,12 @@ void WeylGroupData::GetSignSignatureParabolics(List<SubgroupDataRootReflections>
   this->GetSignCharacter(signRep.data);
   Selection sel;
   sel.init(this->GetDim());
-  int numCycles =MathRoutines::TwoToTheNth(sel.MaxSize);
+  int numCycles = MathRoutines::TwoToTheNth(sel.MaxSize);
   outputSubgroups.SetSize(numCycles);
   ElementWeylGroup<WeylGroupData> g;
   g.owner = this;
 //  stOutput << "<hr>Meself is: " << this->ToString();
-  for (int i = 0; i <outputSubgroups.size; i ++, sel.incrementSelection())
+  for (int i = 0; i < outputSubgroups.size; i ++, sel.incrementSelection())
   { SubgroupDataRootReflections& currentParabolic = outputSubgroups[i];
     currentParabolic.MakeParabolicSubgroup(*this, sel);
     currentParabolic.ComputeCCSizesRepresentativesPreimages();
@@ -1100,7 +1100,7 @@ void WeylGroupData::GetSignSignatureParabolics(List<SubgroupDataRootReflections>
     //stOutput << "<hr>before compute initial irreps";
   }
   this->theGroup.CheckConjugacyClassRepsMatchCCsizes();
-  for (int j = 0; j<outputSubgroups.size; j ++)
+  for (int j = 0; j < outputSubgroups.size; j ++)
   { outputSubgroups[j].ComputeTauSignature();
   }
 }
@@ -1129,10 +1129,10 @@ void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
       outputSubgroups.AddOnTop(theSG);
     }
   } while (parSelrootsAreInLevi.IncrementReturnFalseIfPastLast());
-  for (int i = 0; i <outputSubgroups.size; i ++)
+  for (int i = 0; i < outputSubgroups.size; i ++)
     outputSubgroups[i].ComputeCCSizesRepresentativesPreimages();
   this->theGroup.CheckConjugacyClassRepsMatchCCsizes();
-  for (int j = 0; j<outputSubgroups.size; j ++)
+  for (int j = 0; j < outputSubgroups.size; j ++)
     outputSubgroups[j].ComputeTauSignature();
 }
 
@@ -1148,7 +1148,7 @@ void WeylGroupData::GetSignSignatureRootSubgroups
   ElementWeylGroup<WeylGroupData> g;
   g.owner = this;
 //  stOutput << "<hr>Meself is: " << this->ToString();
-  for (int i = 0; i <outputSubgroups.size; i ++)
+  for (int i = 0; i < outputSubgroups.size; i ++)
   { SubgroupDataRootReflections& currentParabolic = outputSubgroups[i];
     currentParabolic.MakeFromRoots(*this, rootsGeneratingReflections[i]);
     currentParabolic.ComputeCCSizesRepresentativesPreimages();
@@ -1159,7 +1159,7 @@ void WeylGroupData::GetSignSignatureRootSubgroups
   }
   this->theGroup.CheckConjugacyClassRepsMatchCCsizes();
   this->theGroup.CheckOrthogonalityCharTable();
-  for (int j = 0; j<outputSubgroups.size; j ++)
+  for (int j = 0; j < outputSubgroups.size; j ++)
   { outputSubgroups[j].ComputeTauSignature();
   }
 }

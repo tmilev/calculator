@@ -4846,15 +4846,15 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
 }
 
 bool DynkinSimpleType::operator>(const DynkinSimpleType& other) const
-{ if (this->theRank>other.theRank)
+{ if (this->theRank > other.theRank)
     return true;
-  if (this->theRank<other.theRank)
+  if (this->theRank < other.theRank)
     return false;
-  if (this->CartanSymmetricInverseScale>other.CartanSymmetricInverseScale)
+  if (this->CartanSymmetricInverseScale > other.CartanSymmetricInverseScale)
     return true;
-  if (this->CartanSymmetricInverseScale<other.CartanSymmetricInverseScale)
+  if (this->CartanSymmetricInverseScale < other.CartanSymmetricInverseScale)
     return false;
-  if ((this->theLetter == 'B' ||this->theLetter == 'C') && other.theLetter == 'D')
+  if ((this->theLetter == 'B' || this->theLetter == 'C') && other.theLetter == 'D')
     return true;
   if (this->theLetter == 'D' && (other.theLetter == 'B' ||other.theLetter == 'C'))
     return false;

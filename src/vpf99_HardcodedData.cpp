@@ -1134,36 +1134,38 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
   SubgroupDataRootReflections readerSubgroup;
   for (int i = 0; i < input.list.size; i ++)
   { JSData& currentSGdata = input.list[i];
-    if (currentSGdata.list[0].list[0].string== "parabolic")
+    if (currentSGdata.list[0].list[0].string == "parabolic")
     { readerSubgroup.flagIsParabolic = true;
       readerSubgroup.flagIsExtendedParabolic = true;
-    } else if (currentSGdata.list[0].list[0].string== "pseudoParabolicNonParabolic")
+    } else if (currentSGdata.list[0].list[0].string == "pseudoParabolicNonParabolic")
     { readerSubgroup.flagIsExtendedParabolic = true;
       readerSubgroup.flagIsParabolic = false;
-    } else if (currentSGdata.list[0].list[0].string== "nonPseudoParabolic")
+    } else if (currentSGdata.list[0].list[0].string == "nonPseudoParabolic")
     { readerSubgroup.flagIsExtendedParabolic = false;
       readerSubgroup.flagIsParabolic = false;
     } else
       crash << "Corrupt JSon data, entry number " << i + 1 << ": the group labels are: "
       << currentSGdata.list[0].ToString(false) << crash;
-    std::string sgString= currentSGdata.list[0].list[1].string;
+    std::string sgString = currentSGdata.list[0].list[1].string;
     readerSubgroup.generatingSimpleRoots.SetSize(0);
-    for (int j = 0; j< currentSGdata.list[0].list[2].list.size; j ++)
+    for (int j = 0; j < currentSGdata.list[0].list[2].list.size; j ++)
       readerSubgroup.generatingSimpleRoots.AddOnTop
-      (gapRootSystem[- 1+(int) currentSGdata.list[0].list[2].list[j].number]);
+      (gapRootSystem[- 1 + (int) currentSGdata.list[0].list[2].list[j].number]);
     DynkinDiagramRootSubalgebra theSAdiagram;
     theSAdiagram.ComputeDiagramTypeModifyInput(readerSubgroup.generatingSimpleRoots, inputGroup);
     theSAdiagram.GetDynkinType(readerSubgroup.theDynkinType);
-    if (readerSubgroup.theDynkinType.ToString() !=sgString)
+    if (readerSubgroup.theDynkinType.ToString() != sgString)
       crash << "Corrupt JSon data: hard-coded Dynkin type is: " << sgString << " but dynkin type is computed to be: "
       << readerSubgroup.theDynkinType.ToString() << crash;
     if (currentSGdata.list[1].list.size != inputGroup.theGroup.characterTable.size)
-      crash << "Corrupt JSon or non-initialized Weyl group: tau signature has " << currentSGdata.list[1].list.size << " entries "
+      crash << "Corrupt JSon or non-initialized Weyl group: tau signature has " << currentSGdata.list[1].list.size
+      << " entries "
       << " but weyl group has " << inputGroup.theGroup.characterTable.size << " irreps. " << crash;
-    if (inputGroup.theGroup.characterTable.size<= 0 || inputGroup.theGroup.characterTable.size != inputGroup.theGroup.ConjugacyClassCount())
+    if (inputGroup.theGroup.characterTable.size <= 0 ||
+        inputGroup.theGroup.characterTable.size != inputGroup.theGroup.ConjugacyClassCount())
       crash << "Bad input group" << crash;
     if (inputGroup.theDynkinType.ToString() == "F^{1}_4")
-      if (inputGroup.theGroup.ConjugacyClassCount() !=25)
+      if (inputGroup.theGroup.ConjugacyClassCount() != 25)
         crash << "Bad f4. " << crash;
     readerSubgroup.tauSignature.SetSize(inputGroup.theGroup.characterTable.size);
     for (int j = 0; j<readerSubgroup.tauSignature.size; j ++)
@@ -1176,7 +1178,7 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
 bool LoadSignSignatureF1_4(WeylGroupData& inputGroup, List<SubgroupDataRootReflections>& outputSubgroups)
 { JSData theJSreader;
   //double startTime = theGlobalVariables->GetElapsedSeconds();
-  theJSreader.readstring("[ [ [ \"parabolic\", \"0\", [ ] ], [ 1, 1, 1, 1, 2, 2, 2, 2, 4, 9, 9, 9, 9, 6, 6, 12, 4, 4, 4, 4, 8, 8, 8, 8, 16 ] ], [ [ \"parabolic\", \"A^{1}_1\", [ 24 ] ], [ 0, 0, 1, 1, 0, 2, 1, 1, 2, 3, 3, 6, 6, 3, 3, 6, 1, 1, 3, 3, 2, 6, 4, 4, 8 ] ], [ [ \"parabolic\", \"A^{2}_1\", [ 21 ] ], [ 0, 1, 0, 1, 1, 1, 0, 2, 2, 3, 6, 3, 6, 3, 3, 6, 1, 3, 1, 3, 4, 4, 2, 6, 8 ] ], [ [ \"parabolic\", \"A^{1}_2\", [ 24, 1 ] ], [ 0, 0, 1, 1, 0, 2, 0, 0, 0, 0, 0, 3, 3, 1, 1, 2, 0, 0, 2, 2, 0, 4, 1, 1, 2 ] ], [ [ \"parabolic\", \"B^{1}_2\", [ 24, 8 ] ], [ 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 3, 0, 1, 1, 0, 0, 0, 2, 0, 2, 0, 2, 2 ] ], [ [ \"parabolic\", \"A^{2}_1+A^{1}_1\", [ 21, 14 ] ], [ 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 2, 2, 4, 2, 1, 3, 0, 1, 1, 2, 1, 3, 1, 3, 4 ] ], [ [ \"parabolic\", \"A^{2}_2\", [ 21, 4 ] ], [ 0, 1, 0, 1, 0, 0, 0, 2, 0, 0, 3, 0, 3, 1, 1, 2, 0, 2, 0, 2, 1, 1, 0, 4, 2 ] ], [ [ \"parabolic\", \"B^{1}_3\", [ 24, 1, 6 ] ], [ 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0 ] ], [ [ \"parabolic\", \"A^{2}_1+A^{1}_2\", [ 21, 14, 2 ] ], [ 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 2, 1, 0, 1, 0, 0, 1, 1, 0, 2, 0, 1, 1 ] ], [ [ \"parabolic\", \"A^{2}_2+A^{1}_1\", [ 21, 4, 5 ] ], [ 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 2, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 2, 1 ] ], [ [ \"parabolic\", \"C^{2}_3\", [ 21, 4, 9 ] ], [ 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0 ] ], [ [ \"parabolic\", \"F^{1}_4\", [ 24, 1, 6, 4 ] ], [ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ], [ [ \"pseudoParabolicNonParabolic\", \"2A^{1}_1\", [ 24, 16 ] ], [ 0, 0, 1, 1, 0, 2, 1, 1, 2, 1, 1, 4, 4, 1, 1, 2, 0, 0, 2, 2, 0, 4, 2, 2, 4 ] ], [ [ \"pseudoParabolicNonParabolic\", \"B^{1}_2+A^{1}_1\", [ 24, 8, 9 ] ], [ 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1 ] ], [ [ \"pseudoParabolicNonParabolic\", \"A^{1}_3\", [ 24, 1, 2 ] ], [ 0, 0, 1, 1, 0, 2, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 2, 0, 0, 0 ] ], [ [ \"pseudoParabolicNonParabolic\", \"A^{2}_1+2A^{1}_1\", [ 21, 14, 1 ] ], [ 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 3, 1, 0, 1, 0, 0, 1, 1, 0, 2, 1, 1, 2 ] ], [ [ \"pseudoParabolicNonParabolic\", \"B^{1}_4\", [ 24, 1, 2, 3 ] ], [ 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ], [ [ \"pseudoParabolicNonParabolic\", \"A^{2}_1+A^{1}_3\", [ 21, 14, 2, 1 ] ] , [ 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0 ] ], [ [ \"pseudoParabolicNonParabolic\", \"A^{2}_2+A^{1}_2\", [ 21, 4, 5, 2 ] ], [ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0 ] ], [ [ \"pseudoParabolicNonParabolic\", \"C^{2}_3+A^{1}_1\", [ 21, 4, 9, 2 ] ], [ 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ], [ [ \"nonPseudoParabolic\", \"3A^{1}_1\", [ 24, 16, 9 ] ], [ 0, 0, 1, 1, 0, 2, 1, 1, 2, 0, 0, 3, 3, 0, 0, 0, 0, 0, 1, 1, 0, 2, 1, 1, 2 ] ], [ [ \"nonPseudoParabolic\", \"4A^{1}_1\", [ 24, 16, 9, 2 ] ], [ 0, 0, 1, 1, 0, 2, 1, 1, 2, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ], [ [ \"nonPseudoParabolic\", \"B^{1}_2+2A^{1}_1\", [ 24, 8, 9, 2 ] ], [ 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ], [ [ \"nonPseudoParabolic\", \"D^{1}_4\", [ 24, 1, 2, 9 ] ], [ 0, 0, 1, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ] ]", false);
+  theJSreader.readstring("[ [ [ \"parabolic\", \"0\", [ ] ], [ 1, 1, 1, 1, 2, 2, 2, 2, 4, 9, 9, 9, 9, 6, 6, 12, 4, 4, 4, 4, 8, 8, 8, 8, 16 ] ], [ [ \"parabolic\", \"A^{1}_1\", [ 24 ] ], [ 0, 0, 1, 1, 0, 2, 1, 1, 2, 3, 3, 6, 6, 3, 3, 6, 1, 1, 3, 3, 2, 6, 4, 4, 8 ] ], [ [ \"parabolic\", \"A^{2}_1\", [ 21 ] ], [ 0, 1, 0, 1, 1, 1, 0, 2, 2, 3, 6, 3, 6, 3, 3, 6, 1, 3, 1, 3, 4, 4, 2, 6, 8 ] ], [ [ \"parabolic\", \"A^{1}_2\", [ 24, 1 ] ], [ 0, 0, 1, 1, 0, 2, 0, 0, 0, 0, 0, 3, 3, 1, 1, 2, 0, 0, 2, 2, 0, 4, 1, 1, 2 ] ], [ [ \"parabolic\", \"B^{1}_2\", [ 24, 8 ] ], [ 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 3, 0, 1, 1, 0, 0, 0, 2, 0, 2, 0, 2, 2 ] ], [ [ \"parabolic\", \"A^{2}_1+A^{1}_1\", [ 21, 14 ] ], [ 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 2, 2, 4, 2, 1, 3, 0, 1, 1, 2, 1, 3, 1, 3, 4 ] ], [ [ \"parabolic\", \"A^{2}_2\", [ 21, 4 ] ], [ 0, 1, 0, 1, 0, 0, 0, 2, 0, 0, 3, 0, 3, 1, 1, 2, 0, 2, 0, 2, 1, 1, 0, 4, 2 ] ], [ [ \"parabolic\", \"B^{1}_3\", [ 24, 1, 6 ] ], [ 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0 ] ], [ [ \"parabolic\", \"A^{1}_2+A^{2}_1\", [ 21, 14, 2 ] ], [ 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 2, 1, 0, 1, 0, 0, 1, 1, 0, 2, 0, 1, 1 ] ], [ [ \"parabolic\", \"A^{2}_2+A^{1}_1\", [ 21, 4, 5 ] ], [ 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 2, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 2, 1 ] ], [ [ \"parabolic\", \"C^{1}_3\", [ 21, 4, 9 ] ], [ 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0 ] ], [ [ \"parabolic\", \"F^{1}_4\", [ 24, 1, 6, 4 ] ], [ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ], [ [ \"pseudoParabolicNonParabolic\", \"2A^{1}_1\", [ 24, 16 ] ], [ 0, 0, 1, 1, 0, 2, 1, 1, 2, 1, 1, 4, 4, 1, 1, 2, 0, 0, 2, 2, 0, 4, 2, 2, 4 ] ], [ [ \"pseudoParabolicNonParabolic\", \"B^{1}_2+A^{1}_1\", [ 24, 8, 9 ] ], [ 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1 ] ], [ [ \"pseudoParabolicNonParabolic\", \"A^{1}_3\", [ 24, 1, 2 ] ], [ 0, 0, 1, 1, 0, 2, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 2, 0, 0, 0 ] ], [ [ \"pseudoParabolicNonParabolic\", \"A^{2}_1+2A^{1}_1\", [ 21, 14, 1 ] ], [ 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 3, 1, 0, 1, 0, 0, 1, 1, 0, 2, 1, 1, 2 ] ], [ [ \"pseudoParabolicNonParabolic\", \"B^{1}_4\", [ 24, 1, 2, 3 ] ], [ 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ], [ [ \"pseudoParabolicNonParabolic\", \"A^{1}_3+A^{2}_1\", [ 21, 14, 2, 1 ] ] , [ 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0 ] ], [ [ \"pseudoParabolicNonParabolic\", \"A^{2}_2+A^{1}_2\", [ 21, 4, 5, 2 ] ], [ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0 ] ], [ [ \"pseudoParabolicNonParabolic\", \"C^{1}_3+A^{1}_1\", [ 21, 4, 9, 2 ] ], [ 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ], [ [ \"nonPseudoParabolic\", \"3A^{1}_1\", [ 24, 16, 9 ] ], [ 0, 0, 1, 1, 0, 2, 1, 1, 2, 0, 0, 3, 3, 0, 0, 0, 0, 0, 1, 1, 0, 2, 1, 1, 2 ] ], [ [ \"nonPseudoParabolic\", \"4A^{1}_1\", [ 24, 16, 9, 2 ] ], [ 0, 0, 1, 1, 0, 2, 1, 1, 2, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ], [ [ \"nonPseudoParabolic\", \"B^{1}_2+2A^{1}_1\", [ 24, 8, 9, 2 ] ], [ 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ], [ [ \"nonPseudoParabolic\", \"D^{1}_4\", [ 24, 1, 2, 9 ] ], [ 0, 0, 1, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ] ]", false);
   //stOutput << "<hr>read json in " << theGlobalVariables->GetElapsedSeconds()-startTime << " seconds. ";
   return LoadOutputSubgroupsFromJSData(theJSreader, inputGroup, outputSubgroups);
 }
@@ -1312,31 +1314,31 @@ bool LoadConjugacyClassesE1_6(WeylGroupData& output)
   output.ccCarterLabels.AddOnTop("A_4+A_1"  );
   output.ccCarterLabels.AddOnTop("D_5(a_1)" );
 
-  output.theGroup.conjugacyClasseS[0  ].size =1   ;
-  output.theGroup.conjugacyClasseS[1  ].size =45  ;
-  output.theGroup.conjugacyClasseS[2  ].size =270 ;
-  output.theGroup.conjugacyClasseS[3  ].size =80  ;
-  output.theGroup.conjugacyClasseS[4  ].size =240 ;
-  output.theGroup.conjugacyClasseS[5  ].size =480 ;
-  output.theGroup.conjugacyClasseS[6  ].size =540 ;
-  output.theGroup.conjugacyClasseS[7  ].size =3240;
-  output.theGroup.conjugacyClasseS[8  ].size =5184;
-  output.theGroup.conjugacyClasseS[9  ].size =720 ;
-  output.theGroup.conjugacyClasseS[10 ].size =1440;
-  output.theGroup.conjugacyClasseS[11 ].size =1440;
-  output.theGroup.conjugacyClasseS[12 ].size =2160;
-  output.theGroup.conjugacyClasseS[13 ].size =5760;
-  output.theGroup.conjugacyClasseS[14 ].size =4320;
-  output.theGroup.conjugacyClasseS[15 ].size =36  ;
-  output.theGroup.conjugacyClasseS[16 ].size =540 ;
-  output.theGroup.conjugacyClasseS[17 ].size =540 ;
-  output.theGroup.conjugacyClasseS[18 ].size =1620;
-  output.theGroup.conjugacyClasseS[19 ].size =1440;
-  output.theGroup.conjugacyClasseS[20 ].size =1440;
-  output.theGroup.conjugacyClasseS[21 ].size =4320;
-  output.theGroup.conjugacyClasseS[22 ].size =6480;
-  output.theGroup.conjugacyClasseS[23 ].size =5184;
-  output.theGroup.conjugacyClasseS[24 ].size =4320;
+  output.theGroup.conjugacyClasseS[0  ].size = 1   ;
+  output.theGroup.conjugacyClasseS[1  ].size = 45  ;
+  output.theGroup.conjugacyClasseS[2  ].size = 270 ;
+  output.theGroup.conjugacyClasseS[3  ].size = 80  ;
+  output.theGroup.conjugacyClasseS[4  ].size = 240 ;
+  output.theGroup.conjugacyClasseS[5  ].size = 480 ;
+  output.theGroup.conjugacyClasseS[6  ].size = 540 ;
+  output.theGroup.conjugacyClasseS[7  ].size = 3240;
+  output.theGroup.conjugacyClasseS[8  ].size = 5184;
+  output.theGroup.conjugacyClasseS[9  ].size = 720 ;
+  output.theGroup.conjugacyClasseS[10 ].size = 1440;
+  output.theGroup.conjugacyClasseS[11 ].size = 1440;
+  output.theGroup.conjugacyClasseS[12 ].size = 2160;
+  output.theGroup.conjugacyClasseS[13 ].size = 5760;
+  output.theGroup.conjugacyClasseS[14 ].size = 4320;
+  output.theGroup.conjugacyClasseS[15 ].size = 36  ;
+  output.theGroup.conjugacyClasseS[16 ].size = 540 ;
+  output.theGroup.conjugacyClasseS[17 ].size = 540 ;
+  output.theGroup.conjugacyClasseS[18 ].size = 1620;
+  output.theGroup.conjugacyClasseS[19 ].size = 1440;
+  output.theGroup.conjugacyClasseS[20 ].size = 1440;
+  output.theGroup.conjugacyClasseS[21 ].size = 4320;
+  output.theGroup.conjugacyClasseS[22 ].size = 6480;
+  output.theGroup.conjugacyClasseS[23 ].size = 5184;
+  output.theGroup.conjugacyClasseS[24 ].size = 4320;
   output.LoadConjugacyClassesHelper();
   return true;
 }

@@ -504,14 +504,15 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output)
       { result = false;
         break;
       }
+      char currentChar = input[i + j];
       unsigned char theDigit = 255;
       //stOutput << "DEBUG: Digit from: " << input[i];
-      if (input[i + j] >= 'A' && input[i + j] <= 'F')
-        theDigit = 10 + input[i + j] - 'A';
-      if (input[i + j] >= 'a' && input[i + j] <= 'f')
-        theDigit = 10 + input[i] - 'a';
-      if (input[i + j] >= '0' && input[i + j] <= '9')
-        theDigit = input[i + j] - '0';
+      if (currentChar >= 'A' && currentChar <= 'F')
+        theDigit = 10 + currentChar - 'A';
+      if (currentChar >= 'a' && currentChar <= 'f')
+        theDigit = 10 + currentChar - 'a';
+      if (currentChar >= '0' && currentChar <= '9')
+        theDigit = currentChar - '0';
       //stOutput << "DEBUG: got digit: " << theDigit;
       if (theDigit != 255)
       { nextByte *= 16;

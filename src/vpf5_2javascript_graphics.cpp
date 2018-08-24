@@ -468,7 +468,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     out << "];\n";
   }
   for (int i = 0; i < this->theBuffer.theDrawTextAtVectorOperations.size; i ++)
-  { Vector<double>& current1= theBuffer.theDrawTextAtVectorOperations[i].theVector;
+  { Vector<double>& current1 = theBuffer.theDrawTextAtVectorOperations[i].theVector;
     out << txtArrayName << "[" << i << "] =[";
     for (int j = 0; j < theDimension; j ++)
     { out << current1[j];
@@ -1262,9 +1262,9 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
 //  << "});\n"
   << "  ComputeProjections" << timesCalled << "();\n"
   << theDrawFunctionName << "();\n";
-  if (this->theBuffer.BasisProjectionPlane.size >2)
+  if (this->theBuffer.BasisProjectionPlane.size > 2)
     out << "window.setTimeout(\"changeProjectionPlaneOnTimer" << timesCalled << "()\",100);\n";
-  if (this->theFrames.size >1)
+  if (this->theFrames.size > 1)
     out <<"window.setTimeout(\"incrementGlobalFrameCounter" << timesCalled << "()\"," << frameDelay << ");\n";
   out << " }\n";
   out << "var selectedBasisIndexCone" << timesCalled << "= - 1;\n"

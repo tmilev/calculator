@@ -1,0 +1,10 @@
+<html>
+<script type="text/javascript" src="three-d.js">
+</script>
+<body onload="testPicture('theCanvas');">
+<canvas width="600" height="400" style="border:solid 1px" id="theCanvas" onmousedown="calculatorCanvasClick(this, event);" onmouseup="calculatorCanvasMouseUp(this);" onmousemove="calculatorCanvasMouseMoveRedraw(this, event.clientX, event.clientY);" onmousewheel="calculatorCanvasMouseWheel(this, event);">Your browser does not support the HTML5 canvas tag.</canvas><br>
+<span id="theCanvasControls"></span><br>
+<span id="theCanvasMessages"></span>
+
+</body>
+</html>

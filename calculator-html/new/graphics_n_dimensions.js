@@ -47,6 +47,10 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
 
   var theDiv = document.getElementById(this.idCanvas);
   theDiv.addEventListener("DOMMouseScroll", this.mouseHandleWheel.bind(this));
+  this.frameCount = 0;
+  this.numFramesUserPlane = 20;
+  this.screenGoal = [];
+  this.screenStart = [];
 }
 
 GraphicsNDimensions.prototype.drawAll = function () {
@@ -206,22 +210,17 @@ GraphicsNDimensions.prototype.init = function() {
     this.theBilinearForm[counterDimension] = Array.fill(0, 0, this.dimension);
   }
   this.modifyBasisToOrthonormalNoShiftSecond();
+}
 
-  out << "function changeProjectionPlaneUser" << timesCalled << "(){\n"
-  << "  frameCount" << timesCalled << "++;\n"
-  << "  if (frameCount" << timesCalled << "> " << numFramesUserPlane << ")\n"
-  << "    return;\n"
-  << "  for (i = 0; i <" << theDimension << "; i ++)\n"
-  << "  { "
-  << "VectorE1Cone" << timesCalled << "[i] =VectorE1ConeGoal" << timesCalled << "[i]*"
-  << "(frameCount" << timesCalled << "/" << numFramesUserPlane << ")"
-  << "+ VectorE1ConeStart" << timesCalled << "[i]*"
-  << "(1-frameCount" << timesCalled << "/" << numFramesUserPlane << ");\n"
-  << "    VectorE2Cone" << timesCalled << "[i] =VectorE2ConeGoal" << timesCalled << "[i]*"
-  << "(frameCount" << timesCalled << "/" << numFramesUserPlane << ")"
-  << "+ VectorE2ConeStart" << timesCalled << "[i]*"
-  << "(1-frameCount" << timesCalled << "/" << numFramesUserPlane << ");\n"
-  << "  }\n"
+GraphicsNDimensions.prototype.changeProjectionPlaneUser = function() {
+  this.frameCount ++;
+  if (this.frameCount) {
+    return;
+  }
+  for (var i = 0; i < this.dimension; i ++) {
+    this.screenBasis[0][i] = this.screenGoal[0][i] * (this.frameCount / this.numFramesUserPlane) + this.screenStart[0][i] * (1 - this.frameCount / this.numFramesUserPlane);
+    this.screenBasis[1][i] = this.screenGoal[1][i] * (this.frameCount / this.numFramesUserPlane) + this.screenStart[1][i] * (1 - this.frameCount / this.numFramesUserPlane);
+  }
   << "  MakeVectorE1AndE2orthonormal" << timesCalled << "();\n"
   << "  ComputeProjections" << timesCalled << "();\n"
   << "  " << theDrawFunctionName << "();\n"

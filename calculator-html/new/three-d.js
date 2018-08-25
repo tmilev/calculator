@@ -1200,906 +1200,973 @@ function Canvas(inputCanvas)
   this.defaultNumSegmentsPerContour = 10;
   this.flagRoundContours = false;
   this.flagRoundPatches = true;
-  this.drawText = function(theText)
-  { this.theIIIdObjects.theLabels.push(theText);
-  };
-  this.drawCurve = function(theCurve)
-  { var contourPoints = new Array(theCurve.numSegments+ 1);
-    for (var i = 0; i < theCurve.numSegments+ 1; i ++)
-    { var theRatio = i/(theCurve.numSegments);
-      var currentParam= theCurve.leftPt*(1-theRatio) + theCurve.rightPt*theRatio;
-      contourPoints[i] = theCurve.coordinateFunctions(currentParam);
-    }
-    this.theIIIdObjects.theContours.push(new Contour(contourPoints, theCurve.color, theCurve.lineWidth));
-  };
-  this.drawPatchStraight = function(base, edge1, edge2, color)
-  { this.theIIIdObjects.thePatches.push(new Patch(base, edge1, edge2, color));
-    var patchIndex = this.theIIIdObjects.thePatches.length- 1;
-    var thePatch = this.theIIIdObjects.thePatches[patchIndex];
-    thePatch.index = patchIndex;
-    var theContours = this.theIIIdObjects.theContours;
-    thePatch.adjacentContours.push(this.drawLine(thePatch.base, thePatch.v1));
-    thePatch.traversalOrder.push(1);
+}
 
-    theContours[theContours.length- 1].adjacentPatches.push(patchIndex);
-    thePatch.adjacentContours.push(this.drawLine(thePatch.v1, thePatch.vEnd));
-    thePatch.traversalOrder.push(1);
+Canvas.prototype.drawText = function(theText) { 
+  this.theIIIdObjects.theLabels.push(theText);
+}
 
-    theContours[theContours.length- 1].adjacentPatches.push(patchIndex);
-    thePatch.adjacentContours.push(this.drawLine(thePatch.vEnd, thePatch.v2));
-    thePatch.traversalOrder.push(1);
+Canvas.prototype.drawCurve = function(theCurve) { 
+  var contourPoints = new Array(theCurve.numSegments+ 1);
+  for (var i = 0; i < theCurve.numSegments+ 1; i ++)
+  { var theRatio = i/(theCurve.numSegments);
+    var currentParam= theCurve.leftPt*(1-theRatio) + theCurve.rightPt*theRatio;
+    contourPoints[i] = theCurve.coordinateFunctions(currentParam);
+  }
+  this.theIIIdObjects.theContours.push(new Contour(contourPoints, theCurve.color, theCurve.lineWidth));
+}
 
-    theContours[theContours.length- 1].adjacentPatches.push(patchIndex);
-    thePatch.adjacentContours.push(this.drawLine(thePatch.v2, thePatch.base));
-    thePatch.traversalOrder.push(1);
+Canvas.prototype.drawPatchStraight = function(base, edge1, edge2, color)
+{ this.theIIIdObjects.thePatches.push(new Patch(base, edge1, edge2, color));
+  var patchIndex = this.theIIIdObjects.thePatches.length- 1;
+  var thePatch = this.theIIIdObjects.thePatches[patchIndex];
+  thePatch.index = patchIndex;
+  var theContours = this.theIIIdObjects.theContours;
+  thePatch.adjacentContours.push(this.drawLine(thePatch.base, thePatch.v1));
+  thePatch.traversalOrder.push(1);
 
-    theContours[theContours.length- 1].adjacentPatches.push(patchIndex);
-  };
-  this.drawPoints = function (inputPoints, inputColor)
-  { for (var i = 0; i < inputPoints.length; i ++)
-        this.theIIIdObjects.thePoints.push(new Point(inputPoints[i], inputColor));
-  };
-  this.drawLine = function (leftPt, rightPt, inputColor, inputLineWidth)
-  { var newContour = new Contour([], inputColor, inputLineWidth);
-    var numSegments = this.defaultNumSegmentsPerContour;
-    newContour.index = this.theIIIdObjects.theContours.length;
-    var incrementVector =vectorMinusVector(rightPt, leftPt);
-    if (vectorLength(incrementVector)*10>numSegments)
-      numSegments =Math.ceil(vectorLength(incrementVector)*10);
-    newContour.thePoints = new Array(numSegments);
-    var incrementScalar =1/numSegments;
-    vectorTimesScalar(incrementVector, incrementScalar);
-    var currentPoint = leftPt.slice();
-    for (var i = 0; i <numSegments+ 1; i ++)
-    { newContour.thePoints[i] = currentPoint;
-      currentPoint =vectorPlusVector(currentPoint, incrementVector);
-    }
-    this.theIIIdObjects.theContours.push(newContour);
-    return this.theIIIdObjects.theContours.length- 1;
-  };
-  this.computePatch = function(thePatch)
-  { thePatch.normalScreen1= vectorCrossVector(this.screenNormal, thePatch.edge1);
-    thePatch.normalScreen2= vectorCrossVector(this.screenNormal, thePatch.edge2);
-    thePatch.normal = vectorCrossVector(thePatch.edge1, thePatch.edge2);
-    thePatch.internalPoint = thePatch.base.slice();
-    vectorAddVectorTimesScalar(thePatch.internalPoint, thePatch.edge1, 0.5);
-    vectorAddVectorTimesScalar(thePatch.internalPoint, thePatch.edge2, 0.5);
-  };
-  this.computeContour = function(theContour)
-  { if (theContour.thePointsMathScreen.length!== theContour.thePoints.length)
-      theContour.thePointsMathScreen = new Array(theContour.thePoints.length);
-    for (var i = 0; i < theContour.thePoints.length; i ++)
-      theContour.thePointsMathScreen[i] = this.coordsMathToMathScreen(theContour.thePoints[i]);
-  };
-  this.pointRelativeToPatch = function(thePoint, thePatch)
-  { if (vectorLength(thePatch.normalScreen1)<0.00001 ||
-        vectorLength(thePatch.normalScreen2)<0.00001 ||
-        vectorLength(thePatch.normal)<0.00001)
-      return 0;
+  theContours[theContours.length- 1].adjacentPatches.push(patchIndex);
+  thePatch.adjacentContours.push(this.drawLine(thePatch.v1, thePatch.vEnd));
+  thePatch.traversalOrder.push(1);
 
-    if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen1) *
-        vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen1)
-        >0)
-      if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen1) *
-          vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen1)
-          >0)
-        if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen2) *
-            vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen2)
-            >0)
-          if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen2) *
-              vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen2)
-              >0)
-          { if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normal) *
-                vectorScalarVector(this.screenNormal, thePatch.normal)<= 0)
-              return - 1;
-            if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normal) *
-                vectorScalarVector(this.screenNormal, thePatch.normal)>= 0)
-              return 1;
-          }
+  theContours[theContours.length- 1].adjacentPatches.push(patchIndex);
+  thePatch.adjacentContours.push(this.drawLine(thePatch.vEnd, thePatch.v2));
+  thePatch.traversalOrder.push(1);
+
+  theContours[theContours.length- 1].adjacentPatches.push(patchIndex);
+  thePatch.adjacentContours.push(this.drawLine(thePatch.v2, thePatch.base));
+  thePatch.traversalOrder.push(1);
+
+  theContours[theContours.length- 1].adjacentPatches.push(patchIndex);
+}
+
+Canvas.prototype.drawPoints = function (inputPoints, inputColor) { 
+  for (var i = 0; i < inputPoints.length; i ++) {
+    this.theIIIdObjects.thePoints.push(new Point(inputPoints[i], inputColor));
+  }
+}
+
+Canvas.prototype.drawLine = function (leftPt, rightPt, inputColor, inputLineWidth)
+{ var newContour = new Contour([], inputColor, inputLineWidth);
+  var numSegments = this.defaultNumSegmentsPerContour;
+  newContour.index = this.theIIIdObjects.theContours.length;
+  var incrementVector =vectorMinusVector(rightPt, leftPt);
+  if (vectorLength(incrementVector)*10>numSegments)
+    numSegments =Math.ceil(vectorLength(incrementVector)*10);
+  newContour.thePoints = new Array(numSegments);
+  var incrementScalar =1/numSegments;
+  vectorTimesScalar(incrementVector, incrementScalar);
+  var currentPoint = leftPt.slice();
+  for (var i = 0; i <numSegments+ 1; i ++)
+  { newContour.thePoints[i] = currentPoint;
+    currentPoint =vectorPlusVector(currentPoint, incrementVector);
+  }
+  this.theIIIdObjects.theContours.push(newContour);
+  return this.theIIIdObjects.theContours.length- 1;
+}
+
+Canvas.prototype.computePatch = function(thePatch)
+{ thePatch.normalScreen1= vectorCrossVector(this.screenNormal, thePatch.edge1);
+  thePatch.normalScreen2= vectorCrossVector(this.screenNormal, thePatch.edge2);
+  thePatch.normal = vectorCrossVector(thePatch.edge1, thePatch.edge2);
+  thePatch.internalPoint = thePatch.base.slice();
+  vectorAddVectorTimesScalar(thePatch.internalPoint, thePatch.edge1, 0.5);
+  vectorAddVectorTimesScalar(thePatch.internalPoint, thePatch.edge2, 0.5);
+}
+
+Canvas.prototype.computeContour = function(theContour)
+{ if (theContour.thePointsMathScreen.length!== theContour.thePoints.length)
+    theContour.thePointsMathScreen = new Array(theContour.thePoints.length);
+  for (var i = 0; i < theContour.thePoints.length; i ++)
+    theContour.thePointsMathScreen[i] = this.coordsMathToMathScreen(theContour.thePoints[i]);
+}
+
+Canvas.prototype.pointRelativeToPatch = function(thePoint, thePatch)
+{ if (vectorLength(thePatch.normalScreen1)<0.00001 ||
+      vectorLength(thePatch.normalScreen2)<0.00001 ||
+      vectorLength(thePatch.normal)<0.00001)
     return 0;
-  };
-  this.pointIsBehindPatch = function(thePoint, thePatch)
-  { return this.pointRelativeToPatch(thePoint, thePatch) === - 1;
-  };
-  this.pointIsInFrontOfPatch = function(thePoint, thePatch)
-  { return this.pointRelativeToPatch(thePoint, thePatch) ===1;
-  };
-  this.pointIsInForeGround = function(thePoint, containerPatches)
-  { var thePatches = this.theIIIdObjects.thePatches;
-    for (var i = 0; i < thePatches.length; i ++)
-    { if (containerPatches.indexOf(i) !== - 1)
-        continue;
-      if (this.pointIsBehindPatch(thePoint, thePatches[i]))
-        return false;
-    }
-    return true;
-  };
-  this.paintMouseInfo = function()
-  { if (this.selectedElement !== "default" || this.selectedElement ===undefined || this.selectedVector ===[] || this.selectedVector ===undefined)
-      return;
-    if (this.selectedVector.length === 0 || this.selectedVector.length ===undefined)
-      return;
+
+  if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen1) *
+      vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen1)
+      >0)
+    if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen1) *
+        vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen1)
+        >0)
+      if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen2) *
+          vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen2)
+          >0)
+        if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen2) *
+            vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen2)
+            >0)
+        { if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normal) *
+              vectorScalarVector(this.screenNormal, thePatch.normal)<= 0)
+            return - 1;
+          if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normal) *
+              vectorScalarVector(this.screenNormal, thePatch.normal)>= 0)
+            return 1;
+        }
+  return 0;
+}
+
+Canvas.prototype.pointIsBehindPatch = function(thePoint, thePatch)
+{ return this.pointRelativeToPatch(thePoint, thePatch) === - 1;
+}
+
+Canvas.prototype.pointIsInFrontOfPatch = function(thePoint, thePatch)
+{ return this.pointRelativeToPatch(thePoint, thePatch) ===1;
+}
+
+Canvas.prototype.pointIsInForeGround = function(thePoint, containerPatches)
+{ var thePatches = this.theIIIdObjects.thePatches;
+  for (var i = 0; i < thePatches.length; i ++)
+  { if (containerPatches.indexOf(i) !== - 1)
+      continue;
+    if (this.pointIsBehindPatch(thePoint, thePatches[i]))
+      return false;
+  }
+  return true;
+}
+
+Canvas.prototype.paintMouseInfo = function()
+{ if (this.selectedElement !== "default" || this.selectedElement ===undefined || this.selectedVector ===[] || this.selectedVector ===undefined)
+    return;
+  if (this.selectedVector.length === 0 || this.selectedVector.length ===undefined)
+    return;
 //    if (true)
 //      return;
-    var currentPt;
-    this.surface.beginPath();
-    this.surface.setLineDash([4,4]);
-    this.surface.lineWidth =2;
-    this.surface.strokeStyle ="green";
-    currentPt = this.coordsMathToSelectedScreen(this.selectedVector);
-    this.surface.moveTo(currentPt[0], currentPt[1]);
-    currentPt = this.coordsMathToSelectedScreen([0,0,0]);
-    this.surface.lineTo(currentPt[0], currentPt[1]);
-    this.surface.stroke();
-    this.surface.beginPath();
-    this.surface.setLineDash([]);
-    this.surface.lineWidth =2;
-    this.surface.strokeStyle ="green";
-    currentPt = this.coordsMathToScreen(this.selectedVector);
-    this.surface.moveTo(currentPt[0], currentPt[1]);
-    currentPt = this.coordsMathToScreen([0,0,0]);
-    this.surface.lineTo(currentPt[0], currentPt[1]);
-    this.surface.stroke();
-  };
-  this.paintOneContour = function(theContour)
-  { if (theContour.thePoints.length<2)
-      return;
-    var theSurface = this.surface;
-    var thePts = theContour.thePoints;
-    //console.log("line start\n");
-    var currentPt = this.coordsMathToScreen(thePts[0]);
-    if (this.flagRoundContours)
-      vectorRound(currentPt);
-    var oldIsInForeGround = this.pointIsInForeGround(theContour.thePoints[0], theContour.adjacentPatches);
-    var newIsInForeground = true;
-    var dashIsOn = false;
-    theSurface.beginPath();
-    theSurface.setLineDash([]);
-    this.numContourPaths++;
-//    theSurface.setLineDash([]);
-    theSurface.strokeStyle = colorRGBToString(theContour.color);
-    if (theContour.lineWidth!==undefined)
-      theSurface.lineWidth = theContour.lineWidth;
-    else
-      theSurface.lineWidth =1;
-    theSurface.moveTo(currentPt[0], currentPt[1]);
-    this.numContourPoints+= thePts.length;
-    for (var i =1; i < thePts.length; i ++)
-    { newIsInForeground = this.pointIsInForeGround(theContour.thePoints[i],theContour.adjacentPatches);
-      if (!newIsInForeground && !oldIsInForeGround && !dashIsOn)
-      { if (i>1)
-        { theSurface.stroke();
-          theSurface.setLineDash([4,4]);
-          theSurface.beginPath();
-          this.numContourPaths++;
-//          theSurface.setLineDash([4,4]);
-          theSurface.moveTo(currentPt[0], currentPt[1]);
-        }
-        theSurface.setLineDash([4,4]);
-        //console.log("set dash\n");
-        dashIsOn = true;
+  var currentPt;
+  this.surface.beginPath();
+  this.surface.setLineDash([4,4]);
+  this.surface.lineWidth =2;
+  this.surface.strokeStyle ="green";
+  currentPt = this.coordsMathToSelectedScreen(this.selectedVector);
+  this.surface.moveTo(currentPt[0], currentPt[1]);
+  currentPt = this.coordsMathToSelectedScreen([0,0,0]);
+  this.surface.lineTo(currentPt[0], currentPt[1]);
+  this.surface.stroke();
+  this.surface.beginPath();
+  this.surface.setLineDash([]);
+  this.surface.lineWidth =2;
+  this.surface.strokeStyle ="green";
+  currentPt = this.coordsMathToScreen(this.selectedVector);
+  this.surface.moveTo(currentPt[0], currentPt[1]);
+  currentPt = this.coordsMathToScreen([0,0,0]);
+  this.surface.lineTo(currentPt[0], currentPt[1]);
+  this.surface.stroke();
+}
 
-      } else if (dashIsOn && newIsInForeground)
+Canvas.prototype.paintOneContour = function(theContour)
+{ if (theContour.thePoints.length<2)
+    return;
+  var theSurface = this.surface;
+  var thePts = theContour.thePoints;
+  //console.log("line start\n");
+  var currentPt = this.coordsMathToScreen(thePts[0]);
+  if (this.flagRoundContours)
+    vectorRound(currentPt);
+  var oldIsInForeGround = this.pointIsInForeGround(theContour.thePoints[0], theContour.adjacentPatches);
+  var newIsInForeground = true;
+  var dashIsOn = false;
+  theSurface.beginPath();
+  theSurface.setLineDash([]);
+  this.numContourPaths++;
+//    theSurface.setLineDash([]);
+  theSurface.strokeStyle = colorRGBToString(theContour.color);
+  if (theContour.lineWidth!==undefined)
+    theSurface.lineWidth = theContour.lineWidth;
+  else
+    theSurface.lineWidth =1;
+  theSurface.moveTo(currentPt[0], currentPt[1]);
+  this.numContourPoints+= thePts.length;
+  for (var i =1; i < thePts.length; i ++)
+  { newIsInForeground = this.pointIsInForeGround(theContour.thePoints[i],theContour.adjacentPatches);
+    if (!newIsInForeground && !oldIsInForeGround && !dashIsOn)
+    { if (i>1)
       { theSurface.stroke();
-        theSurface.setLineDash([]);
+        theSurface.setLineDash([4,4]);
         theSurface.beginPath();
         this.numContourPaths++;
-//        theSurface.setLineDash([]);
-        //console.log("removed dash\n");
+//          theSurface.setLineDash([4,4]);
         theSurface.moveTo(currentPt[0], currentPt[1]);
-        dashIsOn = false;
       }
-      currentPt = this.coordsMathToScreen(thePts[i]);
-      if (this.flagRoundContours)
-        vectorRound(currentPt);
-      theSurface.lineTo(currentPt[0], currentPt[1]);
-      oldIsInForeGround = newIsInForeground;
+      theSurface.setLineDash([4,4]);
+      //console.log("set dash\n");
+      dashIsOn = true;
+
+    } else if (dashIsOn && newIsInForeground)
+    { theSurface.stroke();
+      theSurface.setLineDash([]);
+      theSurface.beginPath();
+      this.numContourPaths++;
+//        theSurface.setLineDash([]);
+      //console.log("removed dash\n");
+      theSurface.moveTo(currentPt[0], currentPt[1]);
+      dashIsOn = false;
     }
-    theSurface.stroke();
-    /////////////////
-    if (0)
-    { currentPt = this.coordsMathToScreen(thePts[4]);
-      if (this.flagRoundContours)
-        vectorRound(currentPt);
-      theSurface.font ="9pt sans-serif";
-      theSurface.fillStyle ="black";
-      theSurface.fillText(theContour.index, currentPt[0], currentPt[1]);
-    }
-    //console.log("line end\n");
-  };
-  this.paintOnePatch = function(thePatch)
-  { var theSurface = this.surface;
-    var visibilityScalarProd =vectorScalarVector(this.screenNormal, thePatch.normal);
-    var depthScalarProd =vectorScalarVector(this.screenNormal, thePatch.internalPoint);
-    var depthRatio = (depthScalarProd- this.boundingSegmentZ[0])/(this.boundingSegmentZ[1]-this.boundingSegmentZ[0]) -0.5;
-    //depthRatio is a number between -0.5 and 0.5 measuring how deep is the patch
-    //relative to the center of the picture
-    var colorFactor =1+depthRatio*this.colorDepthFactor;
-    if (visibilityScalarProd>= 0)
-      theSurface.fillStyle = colorRGBToString(colorScale(thePatch.colorUV, colorFactor));
-    else
-      theSurface.fillStyle = colorRGBToString(colorScale(thePatch.colorVU, colorFactor));
-    theSurface.beginPath();
-/*    if (0)
-    { var
-      theCoords = this.coordsMathToScreen(thePatch.base);
-      theSurface.moveTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
-      theCoords = this.coordsMathToScreen(thePatch.v1);
-      theSurface.lineTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
-      theCoords = this.coordsMathToScreen(thePatch.vEnd);
-      theSurface.lineTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
-      theCoords = this.coordsMathToScreen(thePatch.v2);
-      theSurface.lineTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
-      theCoords = this.coordsMathToScreen(thePatch.base);
-      theSurface.lineTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
-      theSurface.fill();
-      return;
-    }*/
-    var first = true;
-    for (var i = 0; i < thePatch.adjacentContours.length; i ++)
-    { var currentContour = this.theIIIdObjects.theContours[thePatch.adjacentContours[i]];
-      for (var j = 0; j<currentContour.thePoints.length; j ++)
-      { var theIndex = (thePatch.traversalOrder[i] === - 1) ? j : currentContour.thePoints.length-j- 1;
-        var theCoords = this.coordsMathToScreen(currentContour.thePoints[theIndex]);
-        if (this.flagRoundPatches)
-          vectorRound(theCoords);
-        if (first)
-          theSurface.moveTo(theCoords[0], theCoords[1]);
-        else
-          theSurface.lineTo(theCoords[0], theCoords[1]);
-        first = false;
-      }
-    }
-    theSurface.closePath();
-//    theSurface.clip();
-    theSurface.fill();
-    if (0)
-    { theCoords = this.coordsMathToScreen(thePatch.internalPoint);
-      theSurface.fillStyle ="black";
-      theSurface.font ="20pt sans-serif";
-      theSurface.fillStyle ="cyan";
-      //if (thePatch.index ===90)
-      theSurface.fillText(thePatch.index, theCoords[0], theCoords[1]);
-    }
-//    theSurface.stroke();
-  };
-  this.paintText = function(theText)
-  { var theSurface = this.surface;
-    var isInForeGround = this.pointIsInForeGround(theText.location, []);
-    theSurface.beginPath();
-    theSurface.strokeStyle = theText.color;
-    var theCoords = this.coordsMathToScreen(theText.location);
-    theSurface.font ="15pt sans-serif";
-    theSurface.lineWidth =1;
-    if (isInForeGround)
-    { theSurface.fillStyle = theText.color;
-      theSurface.fillText(theText.text, theCoords[0], theCoords[1]);
-    } else
-    { theSurface.strokeStyle = theText.color;
-      theSurface.strokeText(theText.text, theCoords[0], theCoords[1]);
-    }
-  };
-  this.paintOnePoint = function(thePoint)
-  { var theSurface = this.surface;
-    var isInForeGround = this.pointIsInForeGround(thePoint.location, []);
-    theSurface.beginPath();
-    theSurface.strokeStyle = colorRGBToString(thePoint.color);
-    theSurface.fillStyle = colorRGBToString( thePoint.color );
-    var theCoords = this.coordsMathToScreen(thePoint.location);
-    theSurface.arc(theCoords[0], theCoords[1],3, 0, Math.PI*2);
-    if (isInForeGround)
-      theSurface.fill();
-    else
-      theSurface.stroke();
-  };
-  this.getExtremePoint = function(indexToCompareBy, getLarger, pt1, pt2, pt3, pt4)
-  { var result = pt1[indexToCompareBy];
-    if (getLarger ===1)
-    { if (result<pt2[indexToCompareBy])
-        result = pt2[indexToCompareBy];
-      if (result<pt3[indexToCompareBy])
-        result = pt3[indexToCompareBy];
-      if (result<pt4[indexToCompareBy])
-        result = pt4[indexToCompareBy];
-    } else
-    { if (result>pt2[indexToCompareBy])
-        result = pt2[indexToCompareBy];
-      if (result>pt3[indexToCompareBy])
-        result = pt3[indexToCompareBy];
-      if (result>pt4[indexToCompareBy])
-        result = pt4[indexToCompareBy];
-    }
-    return result;
-  };
-  this.coordsMathScreenToBufferIndicesROWSFloat = function (input)
-  { return (this.zBufferRowCount)*(input-this.boundingBoxMathScreen[0][1])/(this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1]);
-  };
-  this.coordsMathScreenToBufferIndicesROWS = function (input)
-  { var result = Math.floor(this.coordsMathScreenToBufferIndicesROWSFloat(input));
-    if (result>= this.zBufferRowCount)
-      result--;
-    return result;
-  };
-  this.coordsMathScreenToBufferIndicesCOLSFloat = function (input) { 
-    return (this.zBufferColCount) * (input-this.boundingBoxMathScreen[0][0]) / (this.boundingBoxMathScreen[1][0] - this.boundingBoxMathScreen[0][0]);
-  };
-  this.coordsMathScreenToBufferIndicesCOLS = function (input) { 
-    var result = Math.floor(this.coordsMathScreenToBufferIndicesCOLSFloat(input));
-    if (result >= this.zBufferColCount) {
-      result --;
-    }
-    return result;
-  };
-  this.coordsMathScreenToBufferIndices = function (input) { 
-    var row = this.coordsMathScreenToBufferIndicesROWS(input[1]);
-    var col = this.coordsMathScreenToBufferIndicesCOLS(input[0]);
-    if (row < 0 || row >= this.zBufferRowCount || col < 0 || col >= this.zBufferColCount) {
-      console.log("point with math-screen coords: " + input + " is out of the bounding box");
-    }
-    return [row,col];
-  };
-  this.accountOnePointMathCoordsInBufferStrip = function(row, thePoint, patchIndex) { 
-    if (row < 0 || row >= this.zBufferIndexStrip.length) {
-      return;
-    }
-    var bufferCoords = this.coordsMathScreenToBufferIndices(this.coordsMathToMathScreen(thePoint));
-    //If there were no rounding errors, row would be equal
-    //to bufferCoords[0]. However since there will be rounding errors,
-    //the row is passed instead as an argument.
-    if (this.zBufferIndexStrip[row][0] === - 1)
-    { this.zBufferIndexStrip[row][0] =bufferCoords[1];
-      this.zBufferIndexStrip[row][1] =bufferCoords[1];
-      return;
-    }
-    if (bufferCoords[1]< this.zBufferIndexStrip[row][0])
-      this.zBufferIndexStrip[row][0] =bufferCoords[1];
-    if (bufferCoords[1] >this.zBufferIndexStrip[row][1])
-      this.zBufferIndexStrip[row][1] =bufferCoords[1];
-  };
-  this.accountEdgeInBufferStrip = function(base, edgeVector, patchIndex)
-  { var end =vectorPlusVector(base, edgeVector);
-    var lowFloat = this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(base)[1]);
-    var highFloat = this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(end)[1]);
-    if (lowFloat>highFloat)
-    { var minusEdge = edgeVector.slice();
-      vectorTimesScalar(minusEdge, - 1);
-      this.accountEdgeInBufferStrip(end, minusEdge, patchIndex);
-      return;
-    }
-    this.accountOnePointMathCoordsInBufferStrip(Math.floor(lowFloat), base, patchIndex);
-    this.accountOnePointMathCoordsInBufferStrip(Math.floor(highFloat), end, patchIndex);
-    if (lowFloat ===highFloat)
-      return;
-    var currentPoint;
-    for (var i =Math.ceil(lowFloat); i <highFloat; i ++)
-    { currentPoint =base.slice();
-      vectorAddVectorTimesScalar(currentPoint, edgeVector, (i-lowFloat)/(highFloat-lowFloat));
-      this.accountOnePointMathCoordsInBufferStrip(i, currentPoint, patchIndex);
-      this.accountOnePointMathCoordsInBufferStrip(i- 1, currentPoint, patchIndex);
-    }
-  };
-  this.accountOnePatch = function(patchIndex)
-  { var thePatch = this.theIIIdObjects.thePatches[patchIndex];
-    var pt1= this.coordsMathToMathScreen(thePatch.base);
-    var pt2= this.coordsMathToMathScreen(thePatch.v1);
-    var pt3= this.coordsMathToMathScreen(thePatch.v2);
-    var pt4= this.coordsMathToMathScreen(thePatch.vEnd);
-    var lowFloat = this.getExtremePoint(1, 0, pt1, pt2, pt3, pt4);
-    var highFloat = this.getExtremePoint(1, 1, pt1, pt2, pt3, pt4);
-    var low = this.coordsMathScreenToBufferIndicesROWS(lowFloat);
-    var high = this.coordsMathScreenToBufferIndicesROWS(highFloat);
-    for (var i = low; i <=high; i ++)
-    { this.zBufferIndexStrip[i][0] = - 1;
-      this.zBufferIndexStrip[i][1] = - 1;
-    }
-    this.accountEdgeInBufferStrip(thePatch.base, thePatch.edge1, patchIndex);
-    this.accountEdgeInBufferStrip(thePatch.base, thePatch.edge2, patchIndex);
-    this.accountEdgeInBufferStrip(thePatch.v1, thePatch.edge2,   patchIndex);
-    this.accountEdgeInBufferStrip(thePatch.v2, thePatch.edge1,   patchIndex);
-    for (var i = low; i <=high; i ++)
-      for (var j = this.zBufferIndexStrip[i][0]; j<= this.zBufferIndexStrip[i][1]; j ++)
-      { if (i === - 1 || j === - 1)
-          continue;
-        this.zBuffer[i][j].push(patchIndex);
-      }
-  };
-  this.computeBoundingBoxAccountPoint = function(input)
-  { var theV= this.coordsMathToMathScreen(input);
-    for (var i = 0; i <2; i ++)
-      if (theV[i]<this.boundingBoxMathScreen[0][i])
-        this.boundingBoxMathScreen[0][i] = theV[i];
-    for (i = 0; i <2; i ++)
-      if (theV[i] >this.boundingBoxMathScreen[1][i])
-        this.boundingBoxMathScreen[1][i] = theV[i];
-    for (i = 0; i <3; i ++)
-      if (input[i]<this.boundingBoxMath[0][i])
-        this.boundingBoxMath[0][i] = input[i];
-    for (i = 0; i <3; i ++)
-      if (input[i] >this.boundingBoxMath[1][i])
-        this.boundingBoxMath[1][i] = input[i];
-    var theScalarProd =vectorScalarVector(this.screenNormal, input);
-    if (theScalarProd<this.boundingSegmentZ[0])
-      this.boundingSegmentZ[0] = theScalarProd;
-    if (theScalarProd>this.boundingSegmentZ[1])
-        this.boundingSegmentZ[1] = theScalarProd;
-  };
-  this.computeBoundingBox = function()
-  { var thePatches = this.theIIIdObjects.thePatches;
-    var theContours = this.theIIIdObjects.theContours;
-    var thePoints = this.theIIIdObjects.thePoints;
-    for (var i = 0; i < thePatches.length; i ++)
-    { this.computeBoundingBoxAccountPoint(thePatches[i].base);
-      this.computeBoundingBoxAccountPoint(thePatches[i].v1);
-      this.computeBoundingBoxAccountPoint(thePatches[i].v2);
-      this.computeBoundingBoxAccountPoint(thePatches[i].vEnd);
-    }
-    for (i = 0; i < theContours.length; i ++)
-      for (var j = 0; j < theContours[i].thePoints.length; j ++)
-        this.computeBoundingBoxAccountPoint(theContours[i].thePoints[j]);
-    for (i = 0; i < thePoints.length; i ++)
-      this.computeBoundingBoxAccountPoint(thePoints[i].location);
-  };
-  this.computeBuffers = function()
-  { var thePatches = this.theIIIdObjects.thePatches;
-    for (var i = 0; i < this.zBuffer.length; i ++)
-      for (var j = 0; j < this.zBuffer[i].length; j ++)
-        this.zBuffer[i][j].length = 0;
-    this.computeBoundingBox();
-    this.bufferDeltaX = (this.boundingBoxMathScreen[1][0]-this.boundingBoxMathScreen[0][0])/this.zBufferColCount;
-    this.bufferDeltaY = (this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1])/this.zBufferRowCount;
-    for (i = 0; i < thePatches.length; i ++)
-      this.accountOnePatch(i);
-    this.computePatchOrder();
-  };
-  this.computePatchOrderOneContourPoint = function(thePatch, theContour, ptIndex)
-  { var thePointMathScreen = theContour.thePointsMathScreen[ptIndex];
-    var thePoint = theContour.thePoints[ptIndex];
-    var theIndices = this.coordsMathScreenToBufferIndices(thePointMathScreen);
-    var currentBuffer = this.zBuffer[theIndices[0]][theIndices[1]];
-    var thePatches = this.theIIIdObjects.thePatches;
-    for (var i = 0; i <currentBuffer.length; i ++)
-    { if (thePatch.index === currentBuffer[i])
-        continue;
-      if (thePatch.patchesAboveMe.indexOf(currentBuffer[i])>= 0 ||
-          thePatch.patchesBelowMe.indexOf(currentBuffer[i])>= 0)
-        continue;
-      var otherPatch = thePatches[currentBuffer[i]];
-      var relativePosition = this.pointRelativeToPatch(thePoint, otherPatch);
-      if (relativePosition === - 1)
-      { otherPatch.patchesBelowMe.push(thePatch.index);
-        thePatch.patchesAboveMe.push(currentBuffer[i]);
-      } else if (relativePosition ===1)
-      { otherPatch.patchesAboveMe.push(thePatch.index);
-        thePatch.patchesBelowMe.push(currentBuffer[i]);
-      }
-    }
-  };
-  this.computePatchPartialOrderOnePatch = function(thePatch)
-  { var theContours = this.theIIIdObjects.theContours;
-    for (var i = 0; i < thePatch.adjacentContours.length; i ++)
-      for (var j = 0; j < theContours[thePatch.adjacentContours[i]].thePoints.length; j ++)
-        this.computePatchOrderOneContourPoint(thePatch, theContours[thePatch.adjacentContours[i]], j);
-  };
-  this.computePatchPartialOrder = function()
-  { var thePatches = this.theIIIdObjects.thePatches;
-    for (var i = 0; i < thePatches.length; i ++)
-    { thePatches[i].patchesBelowMe =[];
-      thePatches[i].patchesAboveMe =[];
-    }
-    for (var i = 0; i < thePatches.length; i ++)
-      this.computePatchPartialOrderOnePatch(thePatches[i]);
-  };
-  this.computePatchOrder = function()
-  { this.computePatchPartialOrder();
-    var thePatches = this.theIIIdObjects.thePatches;
-    if (this.thePatchOrder.length!== thePatches.length)
-    { this.thePatchOrder = new Array(thePatches.length);
-      this.patchIsAccounted = new Array(thePatches.length);
-    }
-    for (var i = 0; i < thePatches.length; i ++)
-    { this.thePatchOrder[i] = - 1;
-      this.patchIsAccounted[i] = 0;
-    }
-    this.numAccountedPatches = 0;
-    for (i = 0; i < thePatches.length; i ++)
-      if (thePatches[i].patchesBelowMe.length === 0)
-      { this.thePatchOrder[this.numAccountedPatches] = i;
-        this.numAccountedPatches++;
-        this.patchIsAccounted[i] =1;
-      }
-    this.numCyclicallyOverlappingPatchTieBreaks = 0;
-    while (this.numAccountedPatches<thePatches.length)
-    { var currentIndex = 0;
-      while (currentIndex<this.numAccountedPatches)
-      { var currentPatch = thePatches[this.thePatchOrder[currentIndex]];
-        for (i = 0; i <currentPatch.patchesAboveMe.length; i ++)
-        { var nextIndex = currentPatch.patchesAboveMe[i];
-          if (this.patchIsAccounted[nextIndex] ===1)
-            continue;
-          var nextPatch = thePatches[nextIndex];
-          var isGood =1;
-          for (var j = 0; j<nextPatch.patchesBelowMe.length; j ++)
-            if (this.patchIsAccounted[nextPatch.patchesBelowMe[j]] !==1)
-            { isGood = 0;
-              break;
-            }
-          if (isGood ===1)
-          { this.thePatchOrder[this.numAccountedPatches] = nextIndex;
-            this.numAccountedPatches++;
-            this.patchIsAccounted[nextIndex] =1;
-          }
-        }
-        currentIndex ++;
-      }
-      if (this.numAccountedPatches<thePatches.length)
-        this.patchOverlapTieBreak();
-    }
-  };
-  this.patchOverlapTieBreak = function()
-  { //if we have cyclically overlapping patches we break ties
-    //by selecting/painting first the patches whose internal point
-    //has the highest (screen) depth.
-    var thePatches = this.theIIIdObjects.thePatches;
-    var deepestNonAccountedIndex = - 1;
-    var minDepth = 0;
-    for (var i = 0; i < this.patchIsAccounted.length; i ++)
-    { if (this.patchIsAccounted[i] ===1)
-        continue;
-      if (deepestNonAccountedIndex === - 1)
-      { deepestNonAccountedIndex = i;
-        minDepth =vectorScalarVector(this.screenNormal, thePatches[i].internalPoint);
-      }
-      var currentDepth =vectorScalarVector(this.screenNormal, thePatches[i].internalPoint);
-      if (currentDepth<minDepth)
-      { minDepth = currentDepth;
-        deepestNonAccountedIndex = i;
-      }
-    }
-    this.numCyclicallyOverlappingPatchTieBreaks++;
-    this.thePatchOrder[this.numAccountedPatches] = deepestNonAccountedIndex;
-    this.numAccountedPatches++;
-    this.patchIsAccounted[deepestNonAccountedIndex] =1;
-  };
-  this.allocateZbuffer = function()
-  { if (this.zBufferRowCount<1)
-      this.zBufferRowCount =1;
-    if (this.zBufferColCount<1)
-      this.zBufferColCount =1;
-    if (this.zBuffer.length<this.zBufferRowCount)
-    { this.zBuffer = new Array(this.zBufferRowCount);
-      this.zBufferIndexStrip = new Array(this.zBufferRowCount);
-      for (var i = 0; i < this.zBufferRowCount; i ++)
-      { this.zBuffer[i] = new Array(this.zBufferColCount);
-        for (var j = 0; j < this.zBufferColCount; j ++)
-          this.zBuffer[i][j] =[];
-        this.zBufferIndexStrip[i] =[- 1,- 1];
-      }
-    }
-  };
-  this.getBufferBox = function(row, col)
-  { return [[this.boundingBoxMathScreen[0][0] + this.bufferDeltaX*col,
-             this.boundingBoxMathScreen[0][1] + this.bufferDeltaY*row],
-            [this.boundingBoxMathScreen[0][0] + this.bufferDeltaX*(col+ 1),
-             this.boundingBoxMathScreen[0][1] + this.bufferDeltaY*(row+ 1)]];
-  };
-  this.paintZbuffer = function()
-  { var theSurface = this.surface;
-    theSurface.strokeStyle ="gray";
+    currentPt = this.coordsMathToScreen(thePts[i]);
+    if (this.flagRoundContours)
+      vectorRound(currentPt);
+    theSurface.lineTo(currentPt[0], currentPt[1]);
+    oldIsInForeGround = newIsInForeground;
+  }
+  theSurface.stroke();
+  /////////////////
+  if (0)
+  { currentPt = this.coordsMathToScreen(thePts[4]);
+    if (this.flagRoundContours)
+      vectorRound(currentPt);
+    theSurface.font ="9pt sans-serif";
     theSurface.fillStyle ="black";
-    theSurface.setLineDash([]);
-    for (var i = 0; i < this.zBuffer.length; i ++)
-      for (var j = 0; j < this.zBuffer[i].length; j ++)
-      { var bufferBox = this.getBufferBox(i, j);
-        var bufferBoxLowLeft = this.coordsMathScreenToScreen(bufferBox[0]);
-        var bufferBoxTopRight = this.coordsMathScreenToScreen(bufferBox[1]);
-        theSurface.beginPath();
-        theSurface.moveTo(bufferBoxLowLeft[0],  bufferBoxLowLeft [1]);
-        theSurface.lineTo(bufferBoxTopRight[0], bufferBoxLowLeft [1]);
-        theSurface.lineTo(bufferBoxTopRight[0], bufferBoxTopRight[1]);
-        theSurface.lineTo(bufferBoxLowLeft[0],  bufferBoxTopRight[1]);
-        theSurface.lineTo(bufferBoxLowLeft[0],  bufferBoxLowLeft [1]);
-        theSurface.stroke();
-        if (this.zBuffer[i][j].length!== 0)
-          theSurface.fill();
+    theSurface.fillText(theContour.index, currentPt[0], currentPt[1]);
+  }
+  //console.log("line end\n");
+}
+
+Canvas.prototype.paintOnePatch = function(thePatch)
+{ var theSurface = this.surface;
+  var visibilityScalarProd =vectorScalarVector(this.screenNormal, thePatch.normal);
+  var depthScalarProd =vectorScalarVector(this.screenNormal, thePatch.internalPoint);
+  var depthRatio = (depthScalarProd- this.boundingSegmentZ[0])/(this.boundingSegmentZ[1]-this.boundingSegmentZ[0]) -0.5;
+  //depthRatio is a number between -0.5 and 0.5 measuring how deep is the patch
+  //relative to the center of the picture
+  var colorFactor =1+depthRatio*this.colorDepthFactor;
+  if (visibilityScalarProd>= 0)
+    theSurface.fillStyle = colorRGBToString(colorScale(thePatch.colorUV, colorFactor));
+  else
+    theSurface.fillStyle = colorRGBToString(colorScale(thePatch.colorVU, colorFactor));
+  theSurface.beginPath();
+/*    if (0)
+  { var
+    theCoords = this.coordsMathToScreen(thePatch.base);
+    theSurface.moveTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
+    theCoords = this.coordsMathToScreen(thePatch.v1);
+    theSurface.lineTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
+    theCoords = this.coordsMathToScreen(thePatch.vEnd);
+    theSurface.lineTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
+    theCoords = this.coordsMathToScreen(thePatch.v2);
+    theSurface.lineTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
+    theCoords = this.coordsMathToScreen(thePatch.base);
+    theSurface.lineTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
+    theSurface.fill();
+    return;
+  }*/
+  var first = true;
+  for (var i = 0; i < thePatch.adjacentContours.length; i ++)
+  { var currentContour = this.theIIIdObjects.theContours[thePatch.adjacentContours[i]];
+    for (var j = 0; j<currentContour.thePoints.length; j ++)
+    { var theIndex = (thePatch.traversalOrder[i] === - 1) ? j : currentContour.thePoints.length-j- 1;
+      var theCoords = this.coordsMathToScreen(currentContour.thePoints[theIndex]);
+      if (this.flagRoundPatches)
+        vectorRound(theCoords);
+      if (first)
+        theSurface.moveTo(theCoords[0], theCoords[1]);
+      else
+        theSurface.lineTo(theCoords[0], theCoords[1]);
+      first = false;
+    }
+  }
+  theSurface.closePath();
+//    theSurface.clip();
+  theSurface.fill();
+  if (0)
+  { theCoords = this.coordsMathToScreen(thePatch.internalPoint);
+    theSurface.fillStyle ="black";
+    theSurface.font ="20pt sans-serif";
+    theSurface.fillStyle ="cyan";
+    //if (thePatch.index ===90)
+    theSurface.fillText(thePatch.index, theCoords[0], theCoords[1]);
+  }
+//    theSurface.stroke();
+}
+
+Canvas.prototype.paintText = function(theText)
+{ var theSurface = this.surface;
+  var isInForeGround = this.pointIsInForeGround(theText.location, []);
+  theSurface.beginPath();
+  theSurface.strokeStyle = theText.color;
+  var theCoords = this.coordsMathToScreen(theText.location);
+  theSurface.font ="15pt sans-serif";
+  theSurface.lineWidth =1;
+  if (isInForeGround)
+  { theSurface.fillStyle = theText.color;
+    theSurface.fillText(theText.text, theCoords[0], theCoords[1]);
+  } else
+  { theSurface.strokeStyle = theText.color;
+    theSurface.strokeText(theText.text, theCoords[0], theCoords[1]);
+  }
+}
+
+Canvas.prototype.paintOnePoint = function(thePoint)
+{ var theSurface = this.surface;
+  var isInForeGround = this.pointIsInForeGround(thePoint.location, []);
+  theSurface.beginPath();
+  theSurface.strokeStyle = colorRGBToString(thePoint.color);
+  theSurface.fillStyle = colorRGBToString( thePoint.color );
+  var theCoords = this.coordsMathToScreen(thePoint.location);
+  theSurface.arc(theCoords[0], theCoords[1],3, 0, Math.PI*2);
+  if (isInForeGround)
+    theSurface.fill();
+  else
+    theSurface.stroke();
+}
+
+Canvas.prototype.getExtremePoint = function(indexToCompareBy, getLarger, pt1, pt2, pt3, pt4)
+{ var result = pt1[indexToCompareBy];
+  if (getLarger ===1)
+  { if (result<pt2[indexToCompareBy])
+      result = pt2[indexToCompareBy];
+    if (result<pt3[indexToCompareBy])
+      result = pt3[indexToCompareBy];
+    if (result<pt4[indexToCompareBy])
+      result = pt4[indexToCompareBy];
+  } else
+  { if (result>pt2[indexToCompareBy])
+      result = pt2[indexToCompareBy];
+    if (result>pt3[indexToCompareBy])
+      result = pt3[indexToCompareBy];
+    if (result>pt4[indexToCompareBy])
+      result = pt4[indexToCompareBy];
+  }
+  return result;
+}
+
+Canvas.prototype.coordsMathScreenToBufferIndicesROWSFloat = function (input)
+{ return (this.zBufferRowCount)*(input-this.boundingBoxMathScreen[0][1])/(this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1]);
+}
+
+Canvas.prototype.coordsMathScreenToBufferIndicesROWS = function (input)
+{ var result = Math.floor(this.coordsMathScreenToBufferIndicesROWSFloat(input));
+  if (result>= this.zBufferRowCount)
+    result--;
+  return result;
+}
+
+Canvas.prototype.coordsMathScreenToBufferIndicesCOLSFloat = function (input) { 
+  return (this.zBufferColCount) * (input-this.boundingBoxMathScreen[0][0]) / (this.boundingBoxMathScreen[1][0] - this.boundingBoxMathScreen[0][0]);
+}
+
+Canvas.prototype.coordsMathScreenToBufferIndicesCOLS = function (input) { 
+  var result = Math.floor(this.coordsMathScreenToBufferIndicesCOLSFloat(input));
+  if (result >= this.zBufferColCount) {
+    result --;
+  }
+  return result;
+}
+
+Canvas.prototype.coordsMathScreenToBufferIndices = function (input) { 
+  var row = this.coordsMathScreenToBufferIndicesROWS(input[1]);
+  var col = this.coordsMathScreenToBufferIndicesCOLS(input[0]);
+  if (row < 0 || row >= this.zBufferRowCount || col < 0 || col >= this.zBufferColCount) {
+    console.log("point with math-screen coords: " + input + " is out of the bounding box");
+  }
+  return [row,col];
+}
+
+Canvas.prototype.accountOnePointMathCoordsInBufferStrip = function(row, thePoint, patchIndex) { 
+  if (row < 0 || row >= this.zBufferIndexStrip.length) {
+    return;
+  }
+  var bufferCoords = this.coordsMathScreenToBufferIndices(this.coordsMathToMathScreen(thePoint));
+  //If there were no rounding errors, row would be equal
+  //to bufferCoords[0]. However since there will be rounding errors,
+  //the row is passed instead as an argument.
+  if (this.zBufferIndexStrip[row][0] === - 1)
+  { this.zBufferIndexStrip[row][0] =bufferCoords[1];
+    this.zBufferIndexStrip[row][1] =bufferCoords[1];
+    return;
+  }
+  if (bufferCoords[1]< this.zBufferIndexStrip[row][0])
+    this.zBufferIndexStrip[row][0] =bufferCoords[1];
+  if (bufferCoords[1] >this.zBufferIndexStrip[row][1])
+    this.zBufferIndexStrip[row][1] =bufferCoords[1];
+}
+
+Canvas.prototype.accountEdgeInBufferStrip = function(base, edgeVector, patchIndex)
+{ var end =vectorPlusVector(base, edgeVector);
+  var lowFloat = this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(base)[1]);
+  var highFloat = this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(end)[1]);
+  if (lowFloat>highFloat)
+  { var minusEdge = edgeVector.slice();
+    vectorTimesScalar(minusEdge, - 1);
+    this.accountEdgeInBufferStrip(end, minusEdge, patchIndex);
+    return;
+  }
+  this.accountOnePointMathCoordsInBufferStrip(Math.floor(lowFloat), base, patchIndex);
+  this.accountOnePointMathCoordsInBufferStrip(Math.floor(highFloat), end, patchIndex);
+  if (lowFloat ===highFloat)
+    return;
+  var currentPoint;
+  for (var i =Math.ceil(lowFloat); i <highFloat; i ++)
+  { currentPoint =base.slice();
+    vectorAddVectorTimesScalar(currentPoint, edgeVector, (i-lowFloat)/(highFloat-lowFloat));
+    this.accountOnePointMathCoordsInBufferStrip(i, currentPoint, patchIndex);
+    this.accountOnePointMathCoordsInBufferStrip(i- 1, currentPoint, patchIndex);
+  }
+}
+
+Canvas.prototype.accountOnePatch = function(patchIndex)
+{ var thePatch = this.theIIIdObjects.thePatches[patchIndex];
+  var pt1= this.coordsMathToMathScreen(thePatch.base);
+  var pt2= this.coordsMathToMathScreen(thePatch.v1);
+  var pt3= this.coordsMathToMathScreen(thePatch.v2);
+  var pt4= this.coordsMathToMathScreen(thePatch.vEnd);
+  var lowFloat = this.getExtremePoint(1, 0, pt1, pt2, pt3, pt4);
+  var highFloat = this.getExtremePoint(1, 1, pt1, pt2, pt3, pt4);
+  var low = this.coordsMathScreenToBufferIndicesROWS(lowFloat);
+  var high = this.coordsMathScreenToBufferIndicesROWS(highFloat);
+  for (var i = low; i <=high; i ++)
+  { this.zBufferIndexStrip[i][0] = - 1;
+    this.zBufferIndexStrip[i][1] = - 1;
+  }
+  this.accountEdgeInBufferStrip(thePatch.base, thePatch.edge1, patchIndex);
+  this.accountEdgeInBufferStrip(thePatch.base, thePatch.edge2, patchIndex);
+  this.accountEdgeInBufferStrip(thePatch.v1, thePatch.edge2,   patchIndex);
+  this.accountEdgeInBufferStrip(thePatch.v2, thePatch.edge1,   patchIndex);
+  for (var i = low; i <=high; i ++)
+    for (var j = this.zBufferIndexStrip[i][0]; j<= this.zBufferIndexStrip[i][1]; j ++)
+    { if (i === - 1 || j === - 1)
+        continue;
+      this.zBuffer[i][j].push(patchIndex);
+    }
+}
+
+Canvas.prototype.computeBoundingBoxAccountPoint = function(input)
+{ var theV= this.coordsMathToMathScreen(input);
+  for (var i = 0; i <2; i ++)
+    if (theV[i]<this.boundingBoxMathScreen[0][i])
+      this.boundingBoxMathScreen[0][i] = theV[i];
+  for (i = 0; i <2; i ++)
+    if (theV[i] >this.boundingBoxMathScreen[1][i])
+      this.boundingBoxMathScreen[1][i] = theV[i];
+  for (i = 0; i <3; i ++)
+    if (input[i]<this.boundingBoxMath[0][i])
+      this.boundingBoxMath[0][i] = input[i];
+  for (i = 0; i <3; i ++)
+    if (input[i] >this.boundingBoxMath[1][i])
+      this.boundingBoxMath[1][i] = input[i];
+  var theScalarProd =vectorScalarVector(this.screenNormal, input);
+  if (theScalarProd<this.boundingSegmentZ[0])
+    this.boundingSegmentZ[0] = theScalarProd;
+  if (theScalarProd>this.boundingSegmentZ[1])
+      this.boundingSegmentZ[1] = theScalarProd;
+}
+
+Canvas.prototype.computeBoundingBox = function()
+{ var thePatches = this.theIIIdObjects.thePatches;
+  var theContours = this.theIIIdObjects.theContours;
+  var thePoints = this.theIIIdObjects.thePoints;
+  for (var i = 0; i < thePatches.length; i ++)
+  { this.computeBoundingBoxAccountPoint(thePatches[i].base);
+    this.computeBoundingBoxAccountPoint(thePatches[i].v1);
+    this.computeBoundingBoxAccountPoint(thePatches[i].v2);
+    this.computeBoundingBoxAccountPoint(thePatches[i].vEnd);
+  }
+  for (i = 0; i < theContours.length; i ++)
+    for (var j = 0; j < theContours[i].thePoints.length; j ++)
+      this.computeBoundingBoxAccountPoint(theContours[i].thePoints[j]);
+  for (i = 0; i < thePoints.length; i ++)
+    this.computeBoundingBoxAccountPoint(thePoints[i].location);
+}
+
+Canvas.prototype.computeBuffers = function()
+{ var thePatches = this.theIIIdObjects.thePatches;
+  for (var i = 0; i < this.zBuffer.length; i ++)
+    for (var j = 0; j < this.zBuffer[i].length; j ++)
+      this.zBuffer[i][j].length = 0;
+  this.computeBoundingBox();
+  this.bufferDeltaX = (this.boundingBoxMathScreen[1][0]-this.boundingBoxMathScreen[0][0])/this.zBufferColCount;
+  this.bufferDeltaY = (this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1])/this.zBufferRowCount;
+  for (i = 0; i < thePatches.length; i ++)
+    this.accountOnePatch(i);
+  this.computePatchOrder();
+}
+
+Canvas.prototype.computePatchOrderOneContourPoint = function(thePatch, theContour, ptIndex)
+{ var thePointMathScreen = theContour.thePointsMathScreen[ptIndex];
+  var thePoint = theContour.thePoints[ptIndex];
+  var theIndices = this.coordsMathScreenToBufferIndices(thePointMathScreen);
+  var currentBuffer = this.zBuffer[theIndices[0]][theIndices[1]];
+  var thePatches = this.theIIIdObjects.thePatches;
+  for (var i = 0; i <currentBuffer.length; i ++)
+  { if (thePatch.index === currentBuffer[i])
+      continue;
+    if (thePatch.patchesAboveMe.indexOf(currentBuffer[i])>= 0 ||
+        thePatch.patchesBelowMe.indexOf(currentBuffer[i])>= 0)
+      continue;
+    var otherPatch = thePatches[currentBuffer[i]];
+    var relativePosition = this.pointRelativeToPatch(thePoint, otherPatch);
+    if (relativePosition === - 1)
+    { otherPatch.patchesBelowMe.push(thePatch.index);
+      thePatch.patchesAboveMe.push(currentBuffer[i]);
+    } else if (relativePosition ===1)
+    { otherPatch.patchesAboveMe.push(thePatch.index);
+      thePatch.patchesBelowMe.push(currentBuffer[i]);
+    }
+  }
+}
+
+Canvas.prototype.computePatchPartialOrderOnePatch = function(thePatch)
+{ var theContours = this.theIIIdObjects.theContours;
+  for (var i = 0; i < thePatch.adjacentContours.length; i ++)
+    for (var j = 0; j < theContours[thePatch.adjacentContours[i]].thePoints.length; j ++)
+      this.computePatchOrderOneContourPoint(thePatch, theContours[thePatch.adjacentContours[i]], j);
+}
+
+Canvas.prototype.computePatchPartialOrder = function()
+{ var thePatches = this.theIIIdObjects.thePatches;
+  for (var i = 0; i < thePatches.length; i ++)
+  { thePatches[i].patchesBelowMe =[];
+    thePatches[i].patchesAboveMe =[];
+  }
+  for (var i = 0; i < thePatches.length; i ++)
+    this.computePatchPartialOrderOnePatch(thePatches[i]);
+};
+
+Canvas.prototype.computePatchOrder = function()
+{ this.computePatchPartialOrder();
+  var thePatches = this.theIIIdObjects.thePatches;
+  if (this.thePatchOrder.length!== thePatches.length)
+  { this.thePatchOrder = new Array(thePatches.length);
+    this.patchIsAccounted = new Array(thePatches.length);
+  }
+  for (var i = 0; i < thePatches.length; i ++)
+  { this.thePatchOrder[i] = - 1;
+    this.patchIsAccounted[i] = 0;
+  }
+  this.numAccountedPatches = 0;
+  for (i = 0; i < thePatches.length; i ++)
+    if (thePatches[i].patchesBelowMe.length === 0)
+    { this.thePatchOrder[this.numAccountedPatches] = i;
+      this.numAccountedPatches++;
+      this.patchIsAccounted[i] =1;
+    }
+  this.numCyclicallyOverlappingPatchTieBreaks = 0;
+  while (this.numAccountedPatches<thePatches.length)
+  { var currentIndex = 0;
+    while (currentIndex<this.numAccountedPatches)
+    { var currentPatch = thePatches[this.thePatchOrder[currentIndex]];
+      for (i = 0; i <currentPatch.patchesAboveMe.length; i ++)
+      { var nextIndex = currentPatch.patchesAboveMe[i];
+        if (this.patchIsAccounted[nextIndex] ===1)
+          continue;
+        var nextPatch = thePatches[nextIndex];
+        var isGood =1;
+        for (var j = 0; j<nextPatch.patchesBelowMe.length; j ++)
+          if (this.patchIsAccounted[nextPatch.patchesBelowMe[j]] !==1)
+          { isGood = 0;
+            break;
+          }
+        if (isGood ===1)
+        { this.thePatchOrder[this.numAccountedPatches] = nextIndex;
+          this.numAccountedPatches++;
+          this.patchIsAccounted[nextIndex] =1;
+        }
       }
-  };
-  this.computeBasisFromNormal = function(inputNormal)
-  { if (inputNormal[0] !== 0)
-    { this.screenBasisUser[0] =[-inputNormal[1], inputNormal[0], 0];
-      this.screenBasisUser[1] =[-inputNormal[2], 0, inputNormal[0]];
-    } else if (inputNormal[1] !== 0)
-    { this.screenBasisUser[0] =[1, 0, 0];
-      this.screenBasisUser[1] =[0, inputNormal[2], -inputNormal[1]];
-    } else
-    { this.screenBasisUser[0] =[1, 0, 0];
-      this.screenBasisUser[1] =[0, 1, 0];
+      currentIndex ++;
     }
-  };
-  this.computeBasis = function ()
-  { //if (this.screenBasisOrthonormal.length<2)
-    //  this.screenBasisOrthonormal.length =2;
-    this.screenBasisOrthonormal[0] = this.screenBasisUser[0].slice();
-    this.screenBasisOrthonormal[1] = this.screenBasisUser[1].slice();
-    var e1= this.screenBasisOrthonormal[0];
-    var e2= this.screenBasisOrthonormal[1];
-    vectorNormalize(e1);
-    vectorAddVectorTimesScalar(e2, e1, - vectorScalarVector(e1,e2));
-    vectorNormalize(e2);
-    this.screenNormal =vectorCrossVector(e1, e2);
-    this.textProjectionInfo ="";
-    this.textProjectionInfo+=
-    "<br>screen normal: " + this.screenNormal;
-    this.textProjectionInfo+=
-    "<br>e1: " + this.screenBasisOrthonormal[0] +
-    "<br>e2: " + this.screenBasisOrthonormal[1] +
-    "<br>selected e1: " + this.selectedScreenBasis[0] +
-    "<br>selected e2: "+ this.selectedScreenBasis[1]
-    ;
-  };
-  this.setBoundingBoxAsDefaultViewWindow = function()
-  { this.resetViewNoRedraw();
-    this.computeBoundingBox();
-    var leftLowScreen = this.coordsMathScreenToScreen(this.boundingBoxMathScreen[0]);
-    var rightUpScreen = this.coordsMathScreenToScreen(this.boundingBoxMathScreen[1]);
-    var desiredHeight =Math.abs(rightUpScreen[1]-leftLowScreen[1]) *1.05;
-    var desiredWidth =Math.abs(rightUpScreen[0]-leftLowScreen[0]) *1.05;
-    var candidateScaleHeight = this.scale* this.height/desiredHeight;
-    var candidateScaleWidth = this.scale* this.width/desiredWidth;
-    //console.log("leftLowScreen: "+ leftLowScreen +" rightUpScreen: "+rightUpScreen);
-    //console.log(centerScreen);
-    //console.log("desiredHeight: "+desiredHeight);
-    //console.log("candidateScaleHeight: "+candidateScaleHeight);
-    //console.log("candidateScaleWidth: "+candidateScaleWidth);
-    //console.log("old scale: "+ this.scale);
-    this.scale =Math.min(candidateScaleHeight, candidateScaleWidth);
-    //console.log("new scale: "+ this.scale);
-    var newViewWindowCenterMath = vectorPlusVector(
-      this.boundingBoxMathScreen[0],this.boundingBoxMathScreen[1]);
-    vectorTimesScalar(newViewWindowCenterMath,0.5);
-    var newCenterViewWindowScreenRescaled =
-    this.coordsMathScreenToScreen(newViewWindowCenterMath);
-    var oldCenterViewWindowMathScreenRescaled =
-    this.coordsMathScreenToScreen(this.lastCenterScreen);
-    this.centerX = this.centerX+oldCenterViewWindowMathScreenRescaled[0]-
-    newCenterViewWindowScreenRescaled[0];
-    this.centerY = this.centerY+oldCenterViewWindowMathScreenRescaled[1]-
-    newCenterViewWindowScreenRescaled[1];
-    this.defaultCenterX = this.centerX;
-    this.defaultCenterY = this.centerY;
-    this.scaleDefault = this.scale;
-    this.lastCenterScreen = newViewWindowCenterMath.slice();
-  };
-  this.resetView = function()
-  { this.resetViewNoRedraw();
-    this.redraw();
-  };
-  this.resetViewNoRedraw = function()
-  { this.boundingBoxMathScreen = [[-0.01, -0.01], [0.01, 0.01]];
-    this.boundingBoxMath = [[-0.01,-0.01,-0.01],[0.01,0.01,0.01]];
-    this.boundingSegmentZ= [-0.01,0.01];
-    this.screenBasisUser = this.screenBasisUserDefault.slice();
-    this.centerX = this.defaultCenterX;
-    this.centerY = this.defaultCenterY;
-    this.scale = this.scaleDefault;
-    this.computeBasis();
-  };
-  this.constructControls = function()
-  { var thisString="document.getElementById('"+this.canvasId+"')";
-    this.spanControls.innerHTML="<button style =\"border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer\" onclick=\"calculatorGetCanvas("+thisString+ ").resetView();\">reset view</button><small> shift +drag to rotate</small>";
-  };
-  this.init = function(inputCanvasId)
-  { this.canvasId = inputCanvasId;
-    this.canvasContainer = document.getElementById(inputCanvasId);
-    this.surface = this.canvasContainer.getContext("2d");
-    this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
-    this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
-//    this.canvasContainer.addEventListener("wheel", calculatorCanvasMouseWheel, true);
-    this.spanMessages = document.getElementById(this.canvasId+"Messages");
-    this.spanCriticalErrors = document.getElementById(this.canvasId+"CriticalErrors");
-    this.spanControls = document.getElementById(this.canvasId+"Controls");
-    this.theIIIdObjects.thePatches = [];
-    this.theIIIdObjects.theContours = [];
-    this.theIIIdObjects.thePoints = [];
-    this.theIIIdObjects.theLabels = [];
-    this.constructControls();
-    this.computeBasis();
-    if (this.zBuffer.length === 0)
-      this.allocateZbuffer();
-  };
-  this.coordsMathScreenToMath = function(theCoords)
-  { var output = this.screenBasisOrthonormal[0].slice();
-    vectorTimesScalar(output, theCoords[0]);
-    vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], theCoords[1]);
-    return output;
-  };
-  this.coordsMathToMathScreen = function(vector)
-  { return [vectorScalarVector(vector, this.screenBasisOrthonormal[0]),
-            vectorScalarVector(vector, this.screenBasisOrthonormal[1])];
-  };
-  this.projectToMathScreen = function(vector)
-  { var output = this.screenBasisOrthonormal[0].slice();
-    vectorTimesScalar(output, vectorScalarVector(vector, this.screenBasisOrthonormal[0]));
-    vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], vectorScalarVector(vector, this.screenBasisOrthonormal[1]));
-    return output;
-  };
-  this.projectToSelectedMathScreen = function(vector)
-  { var output = this.selectedScreenBasis[0].slice();
-    vectorTimesScalar(output, vectorScalarVector(vector, this.selectedScreenBasis[0]));
-    vectorAddVectorTimesScalar(output, this.selectedScreenBasis[1], vectorScalarVector(vector, this.selectedScreenBasis[1]));
-    return output;
-  };
-  this.coordsMathToScreen = function(vector)
-  { return [this.scale*vectorScalarVector(vector, this.screenBasisOrthonormal[0]) +this.centerX,
-       (- 1)*this.scale*vectorScalarVector(vector, this.screenBasisOrthonormal[1]) +this.centerY];
-  };
-  this.coordsMathToSelectedScreen = function(vector)
-  { return [this.scale*vectorScalarVector(vector, this.selectedScreenBasis[0]) +this.centerX,
-       (- 1)*this.scale*vectorScalarVector(vector, this.selectedScreenBasis[1]) +this.centerY];
-  };
-  this.coordsScreenToMathScreen = function(screenPos)
-  { return [ (screenPos[0]-this.centerX)/this.scale, (this.centerY-screenPos[1])/this.scale];
-  };
-  this.coordsScreenAbsoluteToScreen = function (cx, cy)
-  { return getPosXPosYObject(this.canvasContainer, cx, cy);
-  };
-  this.coordsScreenAbsoluteToMathScreen = function(screenX, screenY)
-  { return this.coordsScreenToMathScreen(this.coordsScreenAbsoluteToScreen(screenX, screenY));
-  };
-  this.coordsMathScreenToScreen = function(theCoords)
-  { return [this.scale*theCoords[0] + this.centerX, this.centerY-this.scale*theCoords[1]];
-  };
-  this.rotateOutOfPlane = function (input, orthoBasis1, orthoBasis2, theAngle)
-  { var vComponent = input.slice();
-    var scal1= vectorScalarVector(orthoBasis1, input);
-    var scal2= vectorScalarVector(orthoBasis2, input);
-    var projection = orthoBasis1.slice();
-    vectorTimesScalar(projection, scal1);
-    vectorAddVectorTimesScalar(projection, orthoBasis2, scal2);
-    vectorAddVectorTimesScalar(vComponent, projection, - 1);
-    projection = orthoBasis1.slice();
-    vectorTimesScalar(projection, Math.cos(theAngle)*scal1-Math.sin(theAngle)*scal2);
-    vectorAddVectorTimesScalar(projection, orthoBasis2, Math.sin(theAngle)*scal1+Math.sin(theAngle)*scal2);
-    return vectorPlusVector(vComponent, projection);
-  };
-  this.rotateAfterCursorDefaultGreatNormalCircle = function(doRotateRadially)
-  //please use only with doRotateRadially = false
-  //the option creates confusing user interface, needs to be fixed/reworked
-  { if (this.mousePosition.length == 0)
-      return;
-    if (doRotateRadially)
-    {/* this.selectedPolarAngleChange = -getAngleChangeMathScreen(newX, newY, oldX, oldY);
-      vectorTimesScalar(newE1, Math.cos(this.selectedPolarAngleChange));
-      vectorAddVectorTimesScalar(newE1, oldE2, Math.sin(this.selectedPolarAngleChange));
-      vectorTimesScalar(newE2, Math.cos(this.selectedPolarAngleChange));
-      vectorAddVectorTimesScalar(newE2, oldE1, -Math.sin(this.selectedPolarAngleChange));
-      this.screenBasisOrthonormal[0] = newE1;
-      this.screenBasisOrthonormal[1] = newE2;*/
+    if (this.numAccountedPatches<thePatches.length)
+      this.patchOverlapTieBreak();
+  }
+};
+
+Canvas.prototype.patchOverlapTieBreak = function()
+{ //if we have cyclically overlapping patches we break ties
+  //by selecting/painting first the patches whose internal point
+  //has the highest (screen) depth.
+  var thePatches = this.theIIIdObjects.thePatches;
+  var deepestNonAccountedIndex = - 1;
+  var minDepth = 0;
+  for (var i = 0; i < this.patchIsAccounted.length; i ++)
+  { if (this.patchIsAccounted[i] ===1)
+      continue;
+    if (deepestNonAccountedIndex === - 1)
+    { deepestNonAccountedIndex = i;
+      minDepth =vectorScalarVector(this.screenNormal, thePatches[i].internalPoint);
     }
-    var oldX = this.clickedPosition[0];
-    var oldY = this.clickedPosition[1];
-    var newX = this.mousePosition[0];
-    var newY = this.mousePosition[1];
-    this.positionDelta =[newX-oldX, newY-oldY];
-    this.unitRay = this.clickedPosition.slice();
-    vectorNormalize(this.unitRay);
-    this.rayComponent = this.unitRay.slice();
-    vectorTimesScalar(this.rayComponent, vectorScalarVector(this.mousePosition, this.unitRay));
-    var osculatingOldX =vectorLength(this.clickedPosition);
-    var osculatingOldCos = osculatingOldX/vectorLength(this.selectedVector);
+    var currentDepth =vectorScalarVector(this.screenNormal, thePatches[i].internalPoint);
+    if (currentDepth<minDepth)
+    { minDepth = currentDepth;
+      deepestNonAccountedIndex = i;
+    }
+  }
+  this.numCyclicallyOverlappingPatchTieBreaks++;
+  this.thePatchOrder[this.numAccountedPatches] = deepestNonAccountedIndex;
+  this.numAccountedPatches++;
+  this.patchIsAccounted[deepestNonAccountedIndex] =1;
+}
+
+Canvas.prototype.allocateZbuffer = function()
+{ if (this.zBufferRowCount<1)
+    this.zBufferRowCount =1;
+  if (this.zBufferColCount<1)
+    this.zBufferColCount =1;
+  if (this.zBuffer.length<this.zBufferRowCount)
+  { this.zBuffer = new Array(this.zBufferRowCount);
+    this.zBufferIndexStrip = new Array(this.zBufferRowCount);
+    for (var i = 0; i < this.zBufferRowCount; i ++)
+    { this.zBuffer[i] = new Array(this.zBufferColCount);
+      for (var j = 0; j < this.zBufferColCount; j ++)
+        this.zBuffer[i][j] =[];
+      this.zBufferIndexStrip[i] =[- 1,- 1];
+    }
+  }
+};
+Canvas.prototype.getBufferBox = function(row, col)
+{ return [[this.boundingBoxMathScreen[0][0] + this.bufferDeltaX*col,
+           this.boundingBoxMathScreen[0][1] + this.bufferDeltaY*row],
+          [this.boundingBoxMathScreen[0][0] + this.bufferDeltaX*(col+ 1),
+           this.boundingBoxMathScreen[0][1] + this.bufferDeltaY*(row+ 1)]];
+};
+Canvas.prototype.paintZbuffer = function()
+{ var theSurface = this.surface;
+  theSurface.strokeStyle ="gray";
+  theSurface.fillStyle ="black";
+  theSurface.setLineDash([]);
+  for (var i = 0; i < this.zBuffer.length; i ++)
+    for (var j = 0; j < this.zBuffer[i].length; j ++)
+    { var bufferBox = this.getBufferBox(i, j);
+      var bufferBoxLowLeft = this.coordsMathScreenToScreen(bufferBox[0]);
+      var bufferBoxTopRight = this.coordsMathScreenToScreen(bufferBox[1]);
+      theSurface.beginPath();
+      theSurface.moveTo(bufferBoxLowLeft[0],  bufferBoxLowLeft [1]);
+      theSurface.lineTo(bufferBoxTopRight[0], bufferBoxLowLeft [1]);
+      theSurface.lineTo(bufferBoxTopRight[0], bufferBoxTopRight[1]);
+      theSurface.lineTo(bufferBoxLowLeft[0],  bufferBoxTopRight[1]);
+      theSurface.lineTo(bufferBoxLowLeft[0],  bufferBoxLowLeft [1]);
+      theSurface.stroke();
+      if (this.zBuffer[i][j].length!== 0)
+        theSurface.fill();
+    }
+}
+
+Canvas.prototype.computeBasisFromNormal = function(inputNormal)
+{ if (inputNormal[0] !== 0)
+  { this.screenBasisUser[0] =[-inputNormal[1], inputNormal[0], 0];
+    this.screenBasisUser[1] =[-inputNormal[2], 0, inputNormal[0]];
+  } else if (inputNormal[1] !== 0)
+  { this.screenBasisUser[0] =[1, 0, 0];
+    this.screenBasisUser[1] =[0, inputNormal[2], -inputNormal[1]];
+  } else
+  { this.screenBasisUser[0] =[1, 0, 0];
+    this.screenBasisUser[1] =[0, 1, 0];
+  }
+}
+
+Canvas.prototype.computeBasis = function ()
+{ //if (this.screenBasisOrthonormal.length<2)
+  //  this.screenBasisOrthonormal.length =2;
+  this.screenBasisOrthonormal[0] = this.screenBasisUser[0].slice();
+  this.screenBasisOrthonormal[1] = this.screenBasisUser[1].slice();
+  var e1= this.screenBasisOrthonormal[0];
+  var e2= this.screenBasisOrthonormal[1];
+  vectorNormalize(e1);
+  vectorAddVectorTimesScalar(e2, e1, - vectorScalarVector(e1,e2));
+  vectorNormalize(e2);
+  this.screenNormal =vectorCrossVector(e1, e2);
+  this.textProjectionInfo ="";
+  this.textProjectionInfo+=
+  "<br>screen normal: " + this.screenNormal;
+  this.textProjectionInfo+=
+  "<br>e1: " + this.screenBasisOrthonormal[0] +
+  "<br>e2: " + this.screenBasisOrthonormal[1] +
+  "<br>selected e1: " + this.selectedScreenBasis[0] +
+  "<br>selected e2: "+ this.selectedScreenBasis[1]
+  ;
+}
+
+Canvas.prototype.setBoundingBoxAsDefaultViewWindow = function()
+{ this.resetViewNoRedraw();
+  this.computeBoundingBox();
+  var leftLowScreen = this.coordsMathScreenToScreen(this.boundingBoxMathScreen[0]);
+  var rightUpScreen = this.coordsMathScreenToScreen(this.boundingBoxMathScreen[1]);
+  var desiredHeight =Math.abs(rightUpScreen[1]-leftLowScreen[1]) *1.05;
+  var desiredWidth =Math.abs(rightUpScreen[0]-leftLowScreen[0]) *1.05;
+  var candidateScaleHeight = this.scale* this.height/desiredHeight;
+  var candidateScaleWidth = this.scale* this.width/desiredWidth;
+  //console.log("leftLowScreen: "+ leftLowScreen +" rightUpScreen: "+rightUpScreen);
+  //console.log(centerScreen);
+  //console.log("desiredHeight: "+desiredHeight);
+  //console.log("candidateScaleHeight: "+candidateScaleHeight);
+  //console.log("candidateScaleWidth: "+candidateScaleWidth);
+  //console.log("old scale: "+ this.scale);
+  this.scale =Math.min(candidateScaleHeight, candidateScaleWidth);
+  //console.log("new scale: "+ this.scale);
+  var newViewWindowCenterMath = vectorPlusVector(
+    this.boundingBoxMathScreen[0],this.boundingBoxMathScreen[1]);
+  vectorTimesScalar(newViewWindowCenterMath,0.5);
+  var newCenterViewWindowScreenRescaled =
+  this.coordsMathScreenToScreen(newViewWindowCenterMath);
+  var oldCenterViewWindowMathScreenRescaled =
+  this.coordsMathScreenToScreen(this.lastCenterScreen);
+  this.centerX = this.centerX+oldCenterViewWindowMathScreenRescaled[0]-
+  newCenterViewWindowScreenRescaled[0];
+  this.centerY = this.centerY+oldCenterViewWindowMathScreenRescaled[1]-
+  newCenterViewWindowScreenRescaled[1];
+  this.defaultCenterX = this.centerX;
+  this.defaultCenterY = this.centerY;
+  this.scaleDefault = this.scale;
+  this.lastCenterScreen = newViewWindowCenterMath.slice();
+}
+
+Canvas.prototype.resetView = function()
+{ this.resetViewNoRedraw();
+  this.redraw();
+}
+
+Canvas.prototype.resetViewNoRedraw = function()
+{ this.boundingBoxMathScreen = [[-0.01, -0.01], [0.01, 0.01]];
+  this.boundingBoxMath = [[-0.01,-0.01,-0.01],[0.01,0.01,0.01]];
+  this.boundingSegmentZ= [-0.01,0.01];
+  this.screenBasisUser = this.screenBasisUserDefault.slice();
+  this.centerX = this.defaultCenterX;
+  this.centerY = this.defaultCenterY;
+  this.scale = this.scaleDefault;
+  this.computeBasis();
+}
+
+Canvas.prototype.constructControls = function()
+{ var thisString="document.getElementById('"+this.canvasId+"')";
+  this.spanControls.innerHTML="<button style =\"border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer\" onclick=\"calculatorGetCanvas("+thisString+ ").resetView();\">reset view</button><small> shift +drag to rotate</small>";
+}
+
+Canvas.prototype.init = function(inputCanvasId)
+{ this.canvasId = inputCanvasId;
+  this.canvasContainer = document.getElementById(inputCanvasId);
+  this.surface = this.canvasContainer.getContext("2d");
+  this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
+  this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
+  this.spanMessages = document.getElementById(this.canvasId+"Messages");
+  this.spanCriticalErrors = document.getElementById(this.canvasId+"CriticalErrors");
+  this.spanControls = document.getElementById(this.canvasId+"Controls");
+  this.theIIIdObjects.thePatches = [];
+  this.theIIIdObjects.theContours = [];
+  this.theIIIdObjects.thePoints = [];
+  this.theIIIdObjects.theLabels = [];
+  this.constructControls();
+  this.computeBasis();
+  if (this.zBuffer.length === 0)
+    this.allocateZbuffer();
+}
+
+Canvas.prototype.coordsMathScreenToMath = function(theCoords)
+{ var output = this.screenBasisOrthonormal[0].slice();
+  vectorTimesScalar(output, theCoords[0]);
+  vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], theCoords[1]);
+  return output;
+}
+
+Canvas.prototype.coordsMathToMathScreen = function(vector) { 
+  return [
+    vectorScalarVector(vector, this.screenBasisOrthonormal[0]),
+    vectorScalarVector(vector, this.screenBasisOrthonormal[1])
+  ];
+}
+
+Canvas.prototype.projectToMathScreen = function(vector) { 
+  var output = this.screenBasisOrthonormal[0].slice();
+  vectorTimesScalar(output, vectorScalarVector(vector, this.screenBasisOrthonormal[0]));
+  vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], vectorScalarVector(vector, this.screenBasisOrthonormal[1]));
+  return output;
+}
+
+Canvas.prototype.projectToSelectedMathScreen = function(vector) { 
+  var output = this.selectedScreenBasis[0].slice();
+  vectorTimesScalar(output, vectorScalarVector(vector, this.selectedScreenBasis[0]));
+  vectorAddVectorTimesScalar(output, this.selectedScreenBasis[1], vectorScalarVector(vector, this.selectedScreenBasis[1]));
+  return output;
+}
+
+Canvas.prototype.coordsMathToScreen = function(vector) { 
+  return [
+    this.scale * vectorScalarVector(vector, this.screenBasisOrthonormal[0]) + this.centerX,
+    (- 1) * this.scale * vectorScalarVector(vector, this.screenBasisOrthonormal[1]) + this.centerY
+  ];
+}
+
+Canvas.prototype.coordsMathToSelectedScreen = function(vector) { 
+  return [
+    this.scale*vectorScalarVector(vector, this.selectedScreenBasis[0]) + this.centerX,
+    (- 1) * this.scale * vectorScalarVector(vector, this.selectedScreenBasis[1]) + this.centerY
+  ];
+}
+Canvas.prototype.coordsScreenToMathScreen = function(screenPos) { 
+  return [(screenPos[0] - this.centerX) / this.scale, (this.centerY - screenPos[1]) / this.scale];
+}
+
+Canvas.prototype.coordsScreenAbsoluteToScreen = function (cx, cy) { 
+  return getPosXPosYObject(this.canvasContainer, cx, cy);
+}
+
+Canvas.prototype.coordsScreenAbsoluteToMathScreen = function(screenX, screenY) { 
+  return this.coordsScreenToMathScreen(this.coordsScreenAbsoluteToScreen(screenX, screenY));
+}
+
+Canvas.prototype.coordsMathScreenToScreen = function(theCoords) { 
+  return [this.scale*theCoords[0] + this.centerX, this.centerY-this.scale*theCoords[1]];
+}
+
+Canvas.prototype.rotateOutOfPlane = function (input, orthoBasis1, orthoBasis2, theAngle)
+{ var vComponent = input.slice();
+  var scal1= vectorScalarVector(orthoBasis1, input);
+  var scal2= vectorScalarVector(orthoBasis2, input);
+  var projection = orthoBasis1.slice();
+  vectorTimesScalar(projection, scal1);
+  vectorAddVectorTimesScalar(projection, orthoBasis2, scal2);
+  vectorAddVectorTimesScalar(vComponent, projection, - 1);
+  projection = orthoBasis1.slice();
+  vectorTimesScalar(projection, Math.cos(theAngle)*scal1-Math.sin(theAngle)*scal2);
+  vectorAddVectorTimesScalar(projection, orthoBasis2, Math.sin(theAngle)*scal1+Math.sin(theAngle)*scal2);
+  return vectorPlusVector(vComponent, projection);
+}
+
+//please use only with doRotateRadially = false
+//the option creates confusing user interface, needs to be fixed/reworked
+Canvas.prototype.rotateAfterCursorDefaultGreatNormalCircle = function(doRotateRadially)
+{ if (this.mousePosition.length == 0)
+    return;
+  if (doRotateRadially)
+  {/* this.selectedPolarAngleChange = -getAngleChangeMathScreen(newX, newY, oldX, oldY);
+    vectorTimesScalar(newE1, Math.cos(this.selectedPolarAngleChange));
+    vectorAddVectorTimesScalar(newE1, oldE2, Math.sin(this.selectedPolarAngleChange));
+    vectorTimesScalar(newE2, Math.cos(this.selectedPolarAngleChange));
+    vectorAddVectorTimesScalar(newE2, oldE1, -Math.sin(this.selectedPolarAngleChange));
+    this.screenBasisOrthonormal[0] = newE1;
+    this.screenBasisOrthonormal[1] = newE2;*/
+  }
+  var oldX = this.clickedPosition[0];
+  var oldY = this.clickedPosition[1];
+  var newX = this.mousePosition[0];
+  var newY = this.mousePosition[1];
+  this.positionDelta =[newX-oldX, newY-oldY];
+  this.unitRay = this.clickedPosition.slice();
+  vectorNormalize(this.unitRay);
+  this.rayComponent = this.unitRay.slice();
+  vectorTimesScalar(this.rayComponent, vectorScalarVector(this.mousePosition, this.unitRay));
+  var osculatingOldX =vectorLength(this.clickedPosition);
+  var osculatingOldCos = osculatingOldX/vectorLength(this.selectedVector);
 //    var osculatingOldSin =1-osculatingOldCos*osculatingOldCos;
-    var osculatingNewX =vectorScalarVector(this.mousePosition, this.unitRay)
-    //vectorLength(this.mousePosition)
-    ;
-    var osculatingNewCos = osculatingNewX/vectorLength(this.selectedVector);
+  var osculatingNewX =vectorScalarVector(this.mousePosition, this.unitRay)
+  //vectorLength(this.mousePosition)
+  ;
+  var osculatingNewCos = osculatingNewX/vectorLength(this.selectedVector);
 //    var osculatingNewSin =1-osculatingNewCos*osculatingNewCos;
 //    var osculatingOldY =vectorScalarVector(this.selectedVector, selectedOrthogonal);
-    this.newAngleNormal =Math.acos(osculatingNewCos);
-    this.oldAngleNormal =Math.acos(osculatingOldCos);
-    this.angleNormal = this.oldAngleNormal-this.newAngleNormal;
-    if (isNaN(this.angleNormal))
-      return;
-    var newE1 = this.selectedScreenBasis[0].slice();
-    var newE2 = this.selectedScreenBasis[1].slice();
-    newE1= this.rotateOutOfPlane(newE1, this.selectedScreenProjectionNormalized, this.selectedScreenNormal, this.angleNormal);
-    newE2= this.rotateOutOfPlane(newE2, this.selectedScreenProjectionNormalized, this.selectedScreenNormal, this.angleNormal);
-    this.screenBasisUser[0] = newE1.slice();
-    this.screenBasisUser[1] = newE2.slice();
-    this.computeBasis();
-    this.redraw();
-  };
-  this.rotateAfterCursorDefaultCartesian = function()
-  { if (this.mousePosition.length === 0)
-      return;
-    this.positionDelta =[this.mousePosition[0]-this.clickedPosition[0], this.mousePosition[1]-this.clickedPosition[1]];
-    var xyThreshhold =5;
-    if (this.positionDelta[0] >xyThreshhold)
-      this.positionDelta[0] =xyThreshhold;
-    if (this.positionDelta[1] >xyThreshhold)
-      this.positionDelta[1] =xyThreshhold;
-    if (this.positionDelta[0]<-xyThreshhold)
-      this.positionDelta[0] = -xyThreshhold;
-    if (this.positionDelta[1]<-xyThreshhold)
-      this.positionDelta[1] = -xyThreshhold;
-    this.computeBasis();
-    this.redraw();
-  };
-  this.rotateAfterCursorDefault = function()
-  { if (this.mousePosition.length === 0)
-      return;
-    this.rotateAfterCursorDefaultGreatNormalCircle(false);
-  };
-  this.mouseWheel = function(wheelDelta, screenX, screenY)
-  { var screenPos = this.coordsScreenAbsoluteToScreen(screenX, screenY);
-    var mathScreenPos = this.coordsScreenToMathScreen(screenPos);
-    this.scale +=wheelDelta;
-    if (this.scale<= 0)
-      this.scale =1;
-    var intermediateScreenPos = this.coordsMathScreenToScreen(mathScreenPos);
-    //console.log("start screen: "+[screenX, screenY]);
-    //console.log("intermed. screen: "+ intermediateScreenPos);
-    this.centerX = this.centerX+screenPos[0]-intermediateScreenPos[0];
-    this.centerY = this.centerY+screenPos[1]-intermediateScreenPos[1];
+  this.newAngleNormal =Math.acos(osculatingNewCos);
+  this.oldAngleNormal =Math.acos(osculatingOldCos);
+  this.angleNormal = this.oldAngleNormal-this.newAngleNormal;
+  if (isNaN(this.angleNormal))
+    return;
+  var newE1 = this.selectedScreenBasis[0].slice();
+  var newE2 = this.selectedScreenBasis[1].slice();
+  newE1= this.rotateOutOfPlane(newE1, this.selectedScreenProjectionNormalized, this.selectedScreenNormal, this.angleNormal);
+  newE2= this.rotateOutOfPlane(newE2, this.selectedScreenProjectionNormalized, this.selectedScreenNormal, this.angleNormal);
+  this.screenBasisUser[0] = newE1.slice();
+  this.screenBasisUser[1] = newE2.slice();
+  this.computeBasis();
+  this.redraw();
+}
 
-    this.redraw();
+Canvas.prototype.rotateAfterCursorDefaultCartesian = function()
+{ if (this.mousePosition.length === 0)
+    return;
+  this.positionDelta =[this.mousePosition[0]-this.clickedPosition[0], this.mousePosition[1]-this.clickedPosition[1]];
+  var xyThreshhold =5;
+  if (this.positionDelta[0] >xyThreshhold)
+    this.positionDelta[0] =xyThreshhold;
+  if (this.positionDelta[1] >xyThreshhold)
+    this.positionDelta[1] =xyThreshhold;
+  if (this.positionDelta[0]<-xyThreshhold)
+    this.positionDelta[0] = -xyThreshhold;
+  if (this.positionDelta[1]<-xyThreshhold)
+    this.positionDelta[1] = -xyThreshhold;
+  this.computeBasis();
+  this.redraw();
+}
 
-  };
-  this.mouseMove = function(screenX, screenY)
-  { if (this.selectedElement == "")
-      return;
-    this.mousePosition = this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
-    if (this.selectedElement === "default")
-    { this.rotateAfterCursorDefault();
-    }
-    if (this.selectedElement === "origin")
-    { this.panAfterCursor();
-    }
-    this.redrawFinish = new Date().getTime();
-    this.redrawTime = this.redrawFinish-this.redrawStart;
-  };
-  this.panAfterCursor = function()
-  { var difference =vectorMinusVector(this.mousePosition, this.clickedPosition);
-    this.centerX+= difference[0]*this.scale;
-    this.centerY-= difference[1]*this.scale;
-    this.redraw();
-  };
-  this.pointsWithinClickTolerance = function (leftXY, rightXY)
-  { var squaredDistance = ((leftXY[0]-rightXY[0])*(leftXY[0]-rightXY[0]) +
-          (leftXY[1]-rightXY[1])*(leftXY[1]-rightXY[1]))*this.scale;
-    return squaredDistance<7;
-  };
-  this.canvasClick = function (screenX, screenY)
-  { this.clickedPosition = this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
-    this.mousePosition =[];
-    var mustSelectOrigin = true;
-    if (window.event.shiftKey)
-      mustSelectOrigin = false;
-    if (this.pointsWithinClickTolerance(this.clickedPosition,[0,0])
-        || mustSelectOrigin)
-      this.selectedElement ="origin";
-    else
-    { this.selectedElement ="default";
-      this.computeSelectedVector();
-    }
-    this.logStatus();
-  };
-  this.selectEmpty = function()
-  { this.selectedElement ="";
-    this.selectedScreenBasis =[];
-    this.selectedVector =[];
-    this.selectedPolarAngleChange = 0;
-    this.angleNormal = 0;
-  };
-  this.computeSelectedVector = function()
-  { this.selectedScreenProjectionNormalized = this.coordsMathScreenToMath(this.clickedPosition);
-    this.selectedVector = this.selectedScreenProjectionNormalized.slice();
-    vectorNormalize(this.selectedScreenProjectionNormalized);
-    this.selectedScreenNormal = this.screenNormal;
+Canvas.prototype.rotateAfterCursorDefault = function()
+{ if (this.mousePosition.length === 0)
+    return;
+  this.rotateAfterCursorDefaultGreatNormalCircle(false);
+}
+
+Canvas.prototype.mouseWheel = function(wheelDelta, screenX, screenY)
+{ var screenPos = this.coordsScreenAbsoluteToScreen(screenX, screenY);
+  var mathScreenPos = this.coordsScreenToMathScreen(screenPos);
+  this.scale +=wheelDelta;
+  if (this.scale<= 0)
+    this.scale =1;
+  var intermediateScreenPos = this.coordsMathScreenToScreen(mathScreenPos);
+  //console.log("start screen: "+[screenX, screenY]);
+  //console.log("intermed. screen: "+ intermediateScreenPos);
+  this.centerX = this.centerX+screenPos[0]-intermediateScreenPos[0];
+  this.centerY = this.centerY+screenPos[1]-intermediateScreenPos[1];
+
+  this.redraw();
+
+}
+
+Canvas.prototype.mouseMove = function(screenX, screenY)
+{ if (this.selectedElement == "")
+    return;
+  this.mousePosition = this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
+  if (this.selectedElement === "default")
+  { this.rotateAfterCursorDefault();
+  }
+  if (this.selectedElement === "origin")
+  { this.panAfterCursor();
+  }
+  this.redrawFinish = new Date().getTime();
+  this.redrawTime = this.redrawFinish-this.redrawStart;
+}
+
+Canvas.prototype.panAfterCursor = function()
+{ var difference =vectorMinusVector(this.mousePosition, this.clickedPosition);
+  this.centerX+= difference[0]*this.scale;
+  this.centerY-= difference[1]*this.scale;
+  this.redraw();
+}
+
+Canvas.prototype.pointsWithinClickTolerance = function (leftXY, rightXY)
+{ var squaredDistance = ((leftXY[0]-rightXY[0])*(leftXY[0]-rightXY[0]) +
+        (leftXY[1]-rightXY[1])*(leftXY[1]-rightXY[1]))*this.scale;
+  return squaredDistance<7;
+}
+
+Canvas.prototype.canvasClick = function (screenX, screenY)
+{ this.clickedPosition = this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
+  this.mousePosition =[];
+  var mustSelectOrigin = true;
+  if (window.event.shiftKey)
+    mustSelectOrigin = false;
+  if (this.pointsWithinClickTolerance(this.clickedPosition,[0,0])
+      || mustSelectOrigin)
+    this.selectedElement ="origin";
+  else
+  { this.selectedElement ="default";
+    this.computeSelectedVector();
+  }
+  this.logStatus();
+}
+
+Canvas.prototype.selectEmpty = function()
+{ this.selectedElement ="";
+  this.selectedScreenBasis =[];
+  this.selectedVector =[];
+  this.selectedPolarAngleChange = 0;
+  this.angleNormal = 0;
+}
+
+Canvas.prototype.computeSelectedVector = function()
+{ this.selectedScreenProjectionNormalized = this.coordsMathScreenToMath(this.clickedPosition);
+  this.selectedVector = this.selectedScreenProjectionNormalized.slice();
+  vectorNormalize(this.selectedScreenProjectionNormalized);
+  this.selectedScreenNormal = this.screenNormal;
 //    vectorAddVectorTimesScalar(this.selectedVector, this.screenNormal, 0.1);
-    var lengthSelectedVector = vectorScalarVector(this.selectedVector, this.selectedVector);
-    if (lengthSelectedVector<0.5)
-      vectorTimesScalar(this.selectedVector, 1/Math.sqrt(lengthSelectedVector));
-    this.selectedScreenBasis =[this.screenBasisOrthonormal[0].slice(), this.screenBasisOrthonormal[1].slice()];
-  };
+  var lengthSelectedVector = vectorScalarVector(this.selectedVector, this.selectedVector);
+  if (lengthSelectedVector<0.5)
+    vectorTimesScalar(this.selectedVector, 1/Math.sqrt(lengthSelectedVector));
+  this.selectedScreenBasis =[this.screenBasisOrthonormal[0].slice(), this.screenBasisOrthonormal[1].slice()];
 }
 
 Canvas.prototype.showMessages = function()

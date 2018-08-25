@@ -102,11 +102,11 @@ const std::string HtmlRoutines::GetJavascriptTopicListLink()
 }
 
 const std::string& HtmlRoutines::GetJavascriptCanvasGraphicSWithTags()
-{ return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/three-d.js");
+{ return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/new/three-d.js");
 }
 
 const std::string HtmlRoutines::GetJavascriptCanvasGraphicsLink()
-{ return HtmlRoutines::GetJavascriptLink("/calculator-html/three-d.js");
+{ return HtmlRoutines::GetJavascriptLink("/calculator-html/new/three-d.js");
 }
 
 const std::string& HtmlRoutines::GetJavascriptDatabaseRoutineSWithTags()

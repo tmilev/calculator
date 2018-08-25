@@ -48,9 +48,12 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   var theDiv = document.getElementById(this.idCanvas);
   theDiv.addEventListener("DOMMouseScroll", this.mouseHandleWheel.bind(this));
   this.frameCount = 0;
-  this.numFramesUserPlane = 20;
+  this.numberOfFrames = 20;
   this.screenGoal = [];
   this.screenStart = [];
+  this.canvas = null;
+  this.widthHtml = 0;
+  this.heightHtml = 0;
 }
 
 GraphicsNDimensions.prototype.drawAll = function () {
@@ -214,178 +217,45 @@ GraphicsNDimensions.prototype.init = function() {
 
 GraphicsNDimensions.prototype.changeProjectionPlaneUser = function() {
   this.frameCount ++;
-  if (this.frameCount) {
+  if (this.frameCount >= this.numberOfFrames) {
     return;
   }
   for (var i = 0; i < this.dimension; i ++) {
     this.screenBasis[0][i] = this.screenGoal[0][i] * (this.frameCount / this.numFramesUserPlane) + this.screenStart[0][i] * (1 - this.frameCount / this.numFramesUserPlane);
     this.screenBasis[1][i] = this.screenGoal[1][i] * (this.frameCount / this.numFramesUserPlane) + this.screenStart[1][i] * (1 - this.frameCount / this.numFramesUserPlane);
   }
-  << "  MakeVectorE1AndE2orthonormal" << timesCalled << "();\n"
-  << "  ComputeProjections" << timesCalled << "();\n"
-  << "  " << theDrawFunctionName << "();\n"
-  << "  window.setTimeout(\"changeProjectionPlaneUser" << timesCalled << "()\",100);\n"
-  << "}";
-//  stOutput << "<hr>DEBUG: got to here pt 4";
-  if (this->theBuffer.BasisProjectionPlane.size > 2)
-  { out << "BasisProjectionPlane" << timesCalled << "= new Array(" << this->theBuffer.BasisProjectionPlane.size << ");\n";
-    for (int j = 0; j < this->theBuffer.BasisProjectionPlane.size; j ++)
-    { out << "BasisProjectionPlane" << timesCalled << "[" << j << "] = new Array(2);\n";
-      for (int k = 0; k < 2; k ++)
-      { out << "BasisProjectionPlane" << timesCalled << "[" << j << "][" << k << "] = new Array(" << theDimension << ");\n";
-        for (int l = 0; l < theDimension; l ++)
-          out << "BasisProjectionPlane" << timesCalled << "[" << j << "][" << k << "][" << l << "] ="
-          << this->theBuffer.BasisProjectionPlane[j][k][l] << ";\t";
-        out << "\n";
-      }
-      out << "\n";
-    }
-    out << "function changeProjectionPlaneOnTimer" << timesCalled << "(){\n"
-    << "if (frameCountGoesUp" << timesCalled << ")\n"
-    << "  frameCount" << timesCalled << "++;\n"
-    << "else\n"
-    << "  frameCount" << timesCalled << "--;\n"
-    << "if (frameCount" << timesCalled << "==" << this->theBuffer.BasisProjectionPlane.size - 1 << " || "
-    << "frameCount" << timesCalled << "== 0)\n"
-    << "{ \n"
-    << "  frameCountGoesUp" << timesCalled << "=! frameCountGoesUp" << timesCalled << ";\n"
-    << "}\n"
-    << "if (frameCount" << timesCalled << ">= " << this->theBuffer.BasisProjectionPlane.size << ")\n"
-    << "  return;"
-    << "for (i = 0; i <" << theDimension << "; i ++)\n"
-    << "{ VectorE1Cone" << timesCalled << "[i] =BasisProjectionPlane" << timesCalled
-    << "[frameCount" << timesCalled << "][0][i];\n"
-    << "  VectorE2Cone" << timesCalled << "[i] =BasisProjectionPlane" << timesCalled
-    << "[frameCount" << timesCalled << "][1][i];\n"
-    << "\n}\n";
-    out << theDrawFunctionName << "();\n";
-    out << "window.setTimeout(\"changeProjectionPlaneOnTimer" << timesCalled << "()\", 100);\n" << "}\n";
-  }
-//  stOutput << "<hr>DEBUG: got to here pt 5";
+  this.makeScreenBasisOrthonormal();
+  this.computeAllScreenCoordinates();
+  this.drawAll();
+  setTimeout(this.changeProjectionPlaneUser.bind(this), 100);
+}
 
-  out << CreateStaticJavaScriptVectorsArrayWithProjection
-  (this->theBuffer.labeledVectors, labeledVectorsVarName, "proj" + labeledVectorsVarName);
-  out << CreateStaticJavaScriptTextArray
-  (this->theBuffer.labelsOfLabeledVectors, "labels" + labeledVectorsVarName);
-  out << CreateJavaScriptListVectors(this->theBuffer.toBeHighlightedWhenLabeledVectorHovered, "highlight" + labeledVectorsVarName);
-//  stOutput << "<hr>DEBUG: got to here pt 6";
-  out << "var selectedLabels" << timesCalled << "= new Array(" << this->theBuffer.labeledVectors.size << ");\n";
-  out << "var " << projName << "= new Array(" << theDimension << ");\n";
-  out << "var " << eiBasis << "= new Array(" << theDimension << ");\n";
-  for (int i = 0; i < theDimension; i ++)
-    out << projName << "[" << i << "] = new Array(2);\n";
-  out << "var " << basisCircles << "= new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
-  out << "var " << projBasisCircles << "= new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
-//  stOutput << "<hr>DEBUG: got to here pt 6.5";
-  for (int i = 0; i < this->theBuffer.BasisToDrawCirclesAt.size; i ++)
-  { out << basisCircles << "[" << i << "] =[";
-    for (int j = 0; j < theDimension; j ++)
-    { out << this->theBuffer.BasisToDrawCirclesAt[i][j];
-      if (j != theDimension - 1)
-        out << ",";
-     }
-    out <<  "];\n";
-  }
-//  stOutput << "<hr>DEBUG: got to here pt 7";
-  for (int i = 0; i < theDimension; i ++)
-  { ////////////////////
-    out << eiBasis << "[" << i << "] =[";
-    for (int j = 0; j < theDimension; j ++)
-    { out << ((i == j) ? 1 : 0);
-      if (j != theDimension - 1)
-        out << ",";
-     }
-    out <<  "];\n";
-    //////////////////
-    out << projBasisCircles << "[" << i << "] = new Array(2);\n";
-  }
-  out << "var " << Points2ArrayName << "= new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n";
-  out << "var " << circArrayName << "= new Array(" << this->theBuffer.theDrawCircleAtVectorOperations.size << ");\n";
-  out << "var " << txtArrayName << "= new Array(" << this->theBuffer.theDrawTextAtVectorOperations.size << ");\n";
-  out << "var " << filledShapes << "= new Array(" << this->theBuffer.theShapes.size << ");\n";
-  for (int i = 0; i < this->theBuffer.theShapes.size; i ++)
-  { out << filledShapes << "[" << i << "] =[";
-    DrawFilledShapeOperation& currentShape = this->theBuffer.theShapes[i];
-    for (int j = 0; j < currentShape.theCorners.size; j ++)
-    { out << currentShape.theCorners[j].ToStringSquareBracketsBasicType();
-      if (j != currentShape.theCorners.size - 1)
-        out << ", ";
+GraphicsNDimensions.prototype.drawAll = function () {
+  for (var i = 0; i < this.labeledVectors.size; i ++) {
+    if (!this.selectedLabels[i]) {
+      continue;
     }
-    out << "];\n";
+    for (var j = 0; j < this.highlight[i].length; j ++) { 
+      this.canvas.strokeStyle = "#555555";
+      this.canvas.beginPath();
+      this.canvas.arc(
+        this.convertToXYName(this.highlight[i][j])[0], 
+        this.convertToXYName(this.highlight[i][j])[1], 
+        7, 0, 2*Math.PI
+      );
+    this.canvas.stroke();
   }
-  out << "var " << Points1ArrayName << "=[ ";
-  for (int i = 0; i < this->theBuffer.theDrawLineBetweenTwoRootsOperations.size; i ++)
-  { Vector<double>& current1 = theBuffer.theDrawLineBetweenTwoRootsOperations[i].v1;
-    out << current1.ToStringSquareBracketsBasicType();
-    if (i < this->theBuffer.theDrawLineBetweenTwoRootsOperations.size - 1)
-      out << ", ";
+}
+
+GraphicsNDimensions.prototype.drawAll = function(){
+  if (this.canvas == null || this.canvas == undefined) {
+    this.init();
   }
-  out << "];\n";
-  out << "var " << Points2ArrayName << "=[";
-  for (int i = 0; i < this->theBuffer.theDrawLineBetweenTwoRootsOperations.size; i ++)
-  { Vector<double>& current2 = theBuffer.theDrawLineBetweenTwoRootsOperations[i].v2;
-    out << current2.ToStringSquareBracketsBasicType();
-    if (i < this->theBuffer.theDrawLineBetweenTwoRootsOperations.size - 1)
-      out << ", ";
-  }
-  out << "];\n";
-  for (int i = 0; i < this->theBuffer.theDrawCircleAtVectorOperations.size; i ++)
-  { Vector<double>& current1 = theBuffer.theDrawCircleAtVectorOperations[i].theVector;
-    out << circArrayName << "[" << i << "] =[";
-    for (int j = 0; j < theDimension; j ++)
-    { out << current1[j];
-      if (j != theDimension - 1)
-        out << ",";
-    }
-    out << "];\n";
-  }
-  for (int i = 0; i < this->theBuffer.theDrawTextAtVectorOperations.size; i ++)
-  { Vector<double>& current1= theBuffer.theDrawTextAtVectorOperations[i].theVector;
-    out << txtArrayName << "[" << i << "] =[";
-    for (int j = 0; j < theDimension; j ++)
-    { out << current1[j];
-      if (j != theDimension - 1)
-        out << ",";
-    }
-    out << "];\n";
-  }
-  //stOutput << "<hr>DEBUG: got to here pt 8";
-  out << "var " << shiftX << "=" << this->theBuffer.centerX[0] << ";\n";
-  out << "var " << shiftY << "=" << this->theBuffer.centerY[0] << ";\n";
-  out << "var GraphicsUnitCone" << timesCalled << "=" << this->theBuffer.GraphicsUnit[0] << ";\n";
-  out << "function " << functionConvertToXYName << "(vector){\n"
-  << "  resultX =" << shiftX << ";\n"
-  << "  resultY =" << shiftY << ";\n"
-  << "  for (i = 0; i <" << theDimension << "; i ++){\n"
-  << "    resultX+=vector[i]*" << projName << "[i][0];\n"
-  << "    resultY+=vector[i]*" << projName << "[i][1];\n"
-  << "  }\n"
-  << "  result =[resultX, resultY];\n"
-  << "  return result;\n"
-  << "}\n";
-  out << "var " << theSurfaceName << "= 0;\n";
-  out << "function drawHighlights" << timesCalled << "() {\n"
-  << "for (var i = 0; i <" << this->theBuffer.labeledVectors.size << "; i ++)\n"
-  << "  if (selectedLabels" << timesCalled << "[i])\n"
-  << "    for (var j = 0; j<highlight" << labeledVectorsVarName << "[i].length; j ++)\n"
-  << "    { " << theSurfaceName << ".strokeStyle =\"#555555\";\n "
-  << "      " << theSurfaceName << ".beginPath();\n "
-  << "      " << theSurfaceName << ".arc("
-  << functionConvertToXYName << "(highlight" << labeledVectorsVarName << "[i][j])[0],"
-  << functionConvertToXYName << "(highlight" << labeledVectorsVarName << "[i][j])[1], 7"
-  << ", 0, 2*Math.PI);\n "
-  << "      " << theSurfaceName << ".stroke();\n"
-  << "    }\n"
-  << "}\n";
-  out << "function " << theDrawFunctionName << "(){\n"
-  << "  if (" << theSurfaceName << "== 0)\n"
-  << "    " << theInitFunctionName << "();\n"
-  << "ComputeProjections" << timesCalled << "();\n";
-  out << theSurfaceName << ".fillStyle =\"#FFFFFF\";\n";
-  out << theSurfaceName << ".fillRect(0,0," << this->DefaultHtmlWidth  << " ," << this->DefaultHtmlHeight << ");\n";
-  //stOutput << "<hr>DEBUG: got to here pt 9";
-  for (int i = 0; i < this->theBuffer.IndexNthDrawOperation.size; i ++)
-  { int currentIndex = this->theBuffer.IndexNthDrawOperation[i];
+  this.computeAllScreenCoordinates();
+  this.canvas.fillStyle = "#FFFFFF";
+  this.canvas.fillRect(0, 0, this.widthHtml, this.heightHtml);
+  for (var counterOperation = 0; counterOperation < this.drawOperations.length; counterOperation ++) { 
+    int currentIndex = this->theBuffer.IndexNthDrawOperation[i];
     switch (theBuffer.TypeNthDrawOperation[i])
     { case DrawOperations::typeDrawLineBetweenTwoVectors:
         out << theSurfaceName << ".beginPath();\n ";
@@ -558,6 +428,10 @@ GraphicsNDimensions.prototype.makeScreenBasisOrthonormal = function() {
   );
   this.scaleToUnitLength(this.screenBasis[0]);
   this.scaleToUnitLength(this.screenBasis[1]);
+}
+
+GraphicsNDimensions.prototype.computeAllScreenCoordinates = function() {
+  console.log("not implemented");
 }
 
 GraphicsNDimensions.prototype.computeScreenCoordinates = function(input, output) {

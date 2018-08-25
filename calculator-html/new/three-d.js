@@ -335,56 +335,58 @@ function colorToRGB(input)
   return [parseInt(hex.slice(1,3), 16), parseInt(hex.slice(3,5), 16), parseInt(hex.slice(5,7), 16)];
 }
 
-function colorToHex(color)
-{ var colors = {"aliceblue":"#f0f8ff","antiquewhite":"#faebd7","aqua":"#00ffff","aquamarine":"#7fffd4","azure":"#f0ffff",
-  "beige":"#f5f5dc","bisque":"#ffe4c4","black":"#000000","blanchedalmond":"#ffebcd","blue":"#0000ff","blueviolet":"#8a2be2","brown":"#a52a2a","burlywood":"#deb887",
-  "cadetblue":"#5f9ea0","chartreuse":"#7fff00","chocolate":"#d2691e","coral":"#ff7f50","cornflowerblue":"#6495ed","cornsilk":"#fff8dc","crimson":"#dc143c","cyan":"#00ffff",
-  "darkblue":"#00008b","darkcyan":"#008b8b","darkgoldenrod":"#b8860b","darkgray":"#a9a9a9","darkgreen":"#006400","darkkhaki":"#bdb76b","darkmagenta":"#8b008b","darkolivegreen":"#556b2f",
-  "darkorange":"#ff8c00","darkorchid":"#9932cc","darkred":"#8b0000","darksalmon":"#e9967a","darkseagreen":"#8fbc8f","darkslateblue":"#483d8b","darkslategray":"#2f4f4f","darkturquoise":"#00ced1",
-  "darkviolet":"#9400d3","deeppink":"#ff1493","deepskyblue":"#00bfff","dimgray":"#696969","dodgerblue":"#1e90ff",
-  "firebrick":"#b22222","floralwhite":"#fffaf0","forestgreen":"#228b22","fuchsia":"#ff00ff",
-  "gainsboro":"#dcdcdc","ghostwhite":"#f8f8ff","gold":"#ffd700","goldenrod":"#daa520","gray":"#808080","green":"#008000","greenyellow":"#adff2f",
-  "honeydew":"#f0fff0","hotpink":"#ff69b4",
-  "indianred ":"#cd5c5c","indigo":"#4b0082","ivory":"#fffff0","khaki":"#f0e68c",
-  "lavender":"#e6e6fa","lavenderblush":"#fff0f5","lawngreen":"#7cfc00","lemonchiffon":"#fffacd","lightblue":"#add8e6","lightcoral":"#f08080","lightcyan":"#e0ffff","lightgoldenrodyellow":"#fafad2",
-  "lightgrey":"#d3d3d3","lightgreen":"#90ee90","lightpink":"#ffb6c1","lightsalmon":"#ffa07a","lightseagreen":"#20b2aa","lightskyblue":"#87cefa","lightslategray":"#778899","lightsteelblue":"#b0c4de",
-  "lightyellow":"#ffffe0","lime":"#00ff00","limegreen":"#32cd32","linen":"#faf0e6",
-  "magenta":"#ff00ff","maroon":"#800000","mediumaquamarine":"#66cdaa","mediumblue":"#0000cd","mediumorchid":"#ba55d3","mediumpurple":"#9370d8","mediumseagreen":"#3cb371","mediumslateblue":"#7b68ee",
-  "mediumspringgreen":"#00fa9a","mediumturquoise":"#48d1cc","mediumvioletred":"#c71585","midnightblue":"#191970","mintcream":"#f5fffa","mistyrose":"#ffe4e1","moccasin":"#ffe4b5",
-  "navajowhite":"#ffdead","navy":"#000080",
-  "oldlace":"#fdf5e6","olive":"#808000","olivedrab":"#6b8e23","orange":"#ffa500","orangered":"#ff4500","orchid":"#da70d6",
-  "palegoldenrod":"#eee8aa","palegreen":"#98fb98","paleturquoise":"#afeeee","palevioletred":"#d87093","papayawhip":"#ffefd5","peachpuff":"#ffdab9","peru":"#cd853f","pink":"#ffc0cb","plum":"#dda0dd","powderblue":"#b0e0e6","purple":"#800080",
-  "red":"#ff0000","rosybrown":"#bc8f8f","royalblue":"#4169e1",
-  "saddlebrown":"#8b4513","salmon":"#fa8072","sandybrown":"#f4a460","seagreen":"#2e8b57","seashell":"#fff5ee","sienna":"#a0522d","silver":"#c0c0c0","skyblue":"#87ceeb","slateblue":"#6a5acd","slategray":"#708090","snow":"#fffafa","springgreen":"#00ff7f","steelblue":"#4682b4",
-  "tan":"#d2b48c","teal":"#008080","thistle":"#d8bfd8","tomato":"#ff6347","turquoise":"#40e0d0",
-  "violet":"#ee82ee",
-  "wheat":"#f5deb3","white":"#ffffff","whitesmoke":"#f5f5f5",
-  "yellow":"#ffff00","yellowgreen":"#9acd32"};
-  if (typeof colors[color.toLowerCase()] != 'undefined')
+function colorToHex(color) { 
+  var colors = {
+    "aliceblue":"#f0f8ff","antiquewhite":"#faebd7","aqua":"#00ffff","aquamarine":"#7fffd4","azure":"#f0ffff",
+    "beige":"#f5f5dc","bisque":"#ffe4c4","black":"#000000","blanchedalmond":"#ffebcd","blue":"#0000ff","blueviolet":"#8a2be2","brown":"#a52a2a","burlywood":"#deb887",
+    "cadetblue":"#5f9ea0","chartreuse":"#7fff00","chocolate":"#d2691e","coral":"#ff7f50","cornflowerblue":"#6495ed","cornsilk":"#fff8dc","crimson":"#dc143c","cyan":"#00ffff",
+    "darkblue":"#00008b","darkcyan":"#008b8b","darkgoldenrod":"#b8860b","darkgray":"#a9a9a9","darkgreen":"#006400","darkkhaki":"#bdb76b","darkmagenta":"#8b008b","darkolivegreen":"#556b2f",
+    "darkorange":"#ff8c00","darkorchid":"#9932cc","darkred":"#8b0000","darksalmon":"#e9967a","darkseagreen":"#8fbc8f","darkslateblue":"#483d8b","darkslategray":"#2f4f4f","darkturquoise":"#00ced1",
+    "darkviolet":"#9400d3","deeppink":"#ff1493","deepskyblue":"#00bfff","dimgray":"#696969","dodgerblue":"#1e90ff",
+    "firebrick":"#b22222","floralwhite":"#fffaf0","forestgreen":"#228b22","fuchsia":"#ff00ff",
+    "gainsboro":"#dcdcdc","ghostwhite":"#f8f8ff","gold":"#ffd700","goldenrod":"#daa520","gray":"#808080","green":"#008000","greenyellow":"#adff2f",
+    "honeydew":"#f0fff0","hotpink":"#ff69b4",
+    "indianred ":"#cd5c5c","indigo":"#4b0082","ivory":"#fffff0","khaki":"#f0e68c",
+    "lavender":"#e6e6fa","lavenderblush":"#fff0f5","lawngreen":"#7cfc00","lemonchiffon":"#fffacd","lightblue":"#add8e6","lightcoral":"#f08080","lightcyan":"#e0ffff","lightgoldenrodyellow":"#fafad2",
+    "lightgrey":"#d3d3d3","lightgreen":"#90ee90","lightpink":"#ffb6c1","lightsalmon":"#ffa07a","lightseagreen":"#20b2aa","lightskyblue":"#87cefa","lightslategray":"#778899","lightsteelblue":"#b0c4de",
+    "lightyellow":"#ffffe0","lime":"#00ff00","limegreen":"#32cd32","linen":"#faf0e6",
+    "magenta":"#ff00ff","maroon":"#800000","mediumaquamarine":"#66cdaa","mediumblue":"#0000cd","mediumorchid":"#ba55d3","mediumpurple":"#9370d8","mediumseagreen":"#3cb371","mediumslateblue":"#7b68ee",
+    "mediumspringgreen":"#00fa9a","mediumturquoise":"#48d1cc","mediumvioletred":"#c71585","midnightblue":"#191970","mintcream":"#f5fffa","mistyrose":"#ffe4e1","moccasin":"#ffe4b5",
+    "navajowhite":"#ffdead","navy":"#000080",
+    "oldlace":"#fdf5e6","olive":"#808000","olivedrab":"#6b8e23","orange":"#ffa500","orangered":"#ff4500","orchid":"#da70d6",
+    "palegoldenrod":"#eee8aa","palegreen":"#98fb98","paleturquoise":"#afeeee","palevioletred":"#d87093","papayawhip":"#ffefd5","peachpuff":"#ffdab9","peru":"#cd853f","pink":"#ffc0cb","plum":"#dda0dd","powderblue":"#b0e0e6","purple":"#800080",
+    "red":"#ff0000","rosybrown":"#bc8f8f","royalblue":"#4169e1",
+    "saddlebrown":"#8b4513","salmon":"#fa8072","sandybrown":"#f4a460","seagreen":"#2e8b57","seashell":"#fff5ee","sienna":"#a0522d","silver":"#c0c0c0","skyblue":"#87ceeb","slateblue":"#6a5acd","slategray":"#708090","snow":"#fffafa","springgreen":"#00ff7f","steelblue":"#4682b4",
+    "tan":"#d2b48c","teal":"#008080","thistle":"#d8bfd8","tomato":"#ff6347","turquoise":"#40e0d0",
+    "violet":"#ee82ee",
+    "wheat":"#f5deb3","white":"#ffffff","whitesmoke":"#f5f5f5",
+    "yellow":"#ffff00","yellowgreen":"#9acd32"
+  };
+  if (typeof colors[color.toLowerCase()] != 'undefined') {
     return colors[color.toLowerCase()];
-  if (color.length ===3)
+  }
+  if (color.length === 3) {
     return colorRGBToHex(color[0], color[1], color[2]);
+  }
   return color;
 }
 
-function calculatorDeleteCanvas(inputCanvas)
-{ if (calculatorCanvases[inputCanvas.id] !==undefined &&
-     calculatorCanvases[inputCanvas.id] !== null)
-  { delete calculatorCanvases[inputCanvas.id];
+function calculatorDeleteCanvas(inputCanvas) { 
+  if (calculatorCanvases[inputCanvas.id] !==undefined && calculatorCanvases[inputCanvas.id] !== null) { 
+    delete calculatorCanvases[inputCanvas.id];
   }
 }
 
-function calculatorResetCanvas(inputCanvas)
-{ if (calculatorCanvases[inputCanvas.id] !==undefined &&
-     calculatorCanvases[inputCanvas.id] !== null)
-  { calculatorCanvases[inputCanvas.id].init(inputCanvas.id);
+function calculatorResetCanvas(inputCanvas) { 
+  if (calculatorCanvases[inputCanvas.id] !==undefined && calculatorCanvases[inputCanvas.id] !== null) { 
+    calculatorCanvases[inputCanvas.id].init(inputCanvas.id);
   }
 }
 
 function PointsTwoD(inputLocation, inputColor)
 { this.location = inputLocation.slice();
   this.color = colorToRGB(inputColor);
-  this.type ="points";
+  this.type = "points";
   this.accountBoundingBox = function(inputOutputBox)
   { for (var i = 0; i < this.location.length; i ++)
       accountBoundingBox(this.location[i], inputOutputBox);
@@ -413,73 +415,81 @@ function accountBoundingBox(inputPoint, outputBox)
   }
 }
 
-function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
-                   inputNumSegments, inputColor, inputLineWidth)
-{ this.coordinateFunctions = inputCoordinateFunctions;
+function CurveTwoD(
+  inputCoordinateFunctions, inputLeftPt, inputRightPt,
+  inputNumSegments, inputColor, inputLineWidth
+) { 
+  this.coordinateFunctions = inputCoordinateFunctions;
   this.leftPt = inputLeftPt;
   this.rightPt = inputRightPt;
   this.color = colorToRGB(inputColor);
   this.numSegments = inputNumSegments;
   this.lineWidth = inputLineWidth;
-  this.accountBoundingBox = function(inputOutputBox)
-  { var theT= this.leftPt;
-    var theX = this.coordinateFunctions[0](theT);
-    var theY = this.coordinateFunctions[1](theT);
+}
+
+CurveTwoD.prototype.accountBoundingBox = function(inputOutputBox) { 
+  var theT= this.leftPt;
+  var theX = this.coordinateFunctions[0](theT);
+  var theY = this.coordinateFunctions[1](theT);
+  accountBoundingBox([theX, theY], inputOutputBox);
+  for (var i = 0; i < this.numSegments; i ++) { 
+    var theRatio = i/(this.numSegments- 1);
+    theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
+    theX = this.coordinateFunctions[0](theT);
+    theY = this.coordinateFunctions[1](theT);
     accountBoundingBox([theX, theY], inputOutputBox);
-    for (var i = 0; i < this.numSegments; i ++)
-    { var theRatio = i/(this.numSegments- 1);
-      theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
-      theX = this.coordinateFunctions[0](theT);
-      theY = this.coordinateFunctions[1](theT);
-      accountBoundingBox([theX, theY], inputOutputBox);
+  }
+}
+
+CurveTwoD.prototype.draw = function(theCanvas) { 
+  var theSurface = theCanvas.surface;
+  theSurface.beginPath();
+  this.drawNoFinish(theCanvas, true);
+  theSurface.stroke();
+}
+
+CurveTwoD.prototype.drawNoFinish = function(theCanvas, startByMoving) { 
+  var theSurface = theCanvas.surface;
+  theSurface.strokeStyle = colorRGBToString(this.color);
+  theSurface.fillStyle = colorRGBToString(this.color);
+  var theT= this.leftPt;
+  var theX = this.coordinateFunctions[0](theT);
+  var theY = this.coordinateFunctions[1](theT);
+  var theCoords = theCanvas.coordsMathToScreen([theX, theY]);
+  var alreadyMoved = false;
+  if (startByMoving) {
+    alreadyMoved = true;
+  }
+  theSurface.lineWidth = this.lineWidth;
+  var skippedValues = false;
+  for (var i = 0; i < this.numSegments; i ++) { 
+    var theRatio = i / (this.numSegments - 1);
+    theT = this.leftPt * (1 - theRatio) + this.rightPt * theRatio; //<- this way of
+    //computing x introduces smaller numerical errors.
+    //For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
+    //If not careful with rounding errors,
+    //you may end up evaluating sqrt(1-x^2) for x =1.00000000000004
+    //resulting in serious visual glitches.
+    //Note: the remarks above were discovered the painful way (trial and error).
+    theX = this.coordinateFunctions[0](theT);
+    theY = this.coordinateFunctions[1](theT);
+    if (!isFinite(theY) || !isFinite(theX)) {
+      console.log(`Failed to evaluate: ${this.theFunction} at x = ${theX}`);
     }
-  };
-  this.drawNoFinish = function(theCanvas, startByMoving)
-  { var theSurface = theCanvas.surface;
-    theSurface.strokeStyle = colorRGBToString(this.color);
-    theSurface.fillStyle  = colorRGBToString(this.color);
-    var theT= this.leftPt;
-    var theX = this.coordinateFunctions[0](theT);
-    var theY = this.coordinateFunctions[1](theT);
-    var theCoords = theCanvas.coordsMathToScreen([theX, theY]);
-    var alreadyMoved = false;
-    if (startByMoving)
-      alreadyMoved = true;
-    theSurface.lineWidth = this.lineWidth;
-    var skippedValues = false;
-    for (var i = 0; i < this.numSegments; i ++)
-    { var theRatio = i/(this.numSegments- 1);
-      theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio; //<- this way of
-      //computing x introduces smaller numerical errors.
-      //For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
-      //If not careful with rounding errors,
-      //you may end up evaluating sqrt(1-x^2) for x =1.00000000000004
-      //resulting in serious visual glitches.
-      //Note: the remarks above were discovered the painful way (trial and error).
-      theX = this.coordinateFunctions[0](theT);
-      theY = this.coordinateFunctions[1](theT);
-      if (!isFinite(theY) || !isFinite(theX))
-        console.log('Failed to evaluate: ' + this.theFunction + ' at x = ' + theX);
-      if (Math.abs(theY)>100000 || Math.abs(theX)>100000)
-      { if (!skippedValues)
-          console.log('Curve point: ' + [theX, theY] + " is too large, skipping. Further errors suppressed.");
-        skippedValues = true;
-        continue;
+    if (Math.abs(theY) > 100000 || Math.abs(theX) > 100000) { 
+      if (!skippedValues) {
+        console.log(`Curve point: [${theX}, ${theY}] is too large, skipping. Further errors suppressed.`);
       }
-      theCoords = theCanvas.coordsMathToScreen([theX, theY]);
-      if (!alreadyMoved)
-      { alreadyMoved = true;
-        theSurface.moveTo(theCoords[0], theCoords[1]);
-      } else
-        theSurface.lineTo(theCoords[0], theCoords[1]);
+      skippedValues = true;
+      continue;
     }
-  };
-  this.draw = function(theCanvas)
-  { var theSurface = theCanvas.surface;
-    theSurface.beginPath();
-    this.drawNoFinish(theCanvas, true);
-    theSurface.stroke();
-  };
+    theCoords = theCanvas.coordsMathToScreen([theX, theY]);
+    if (!alreadyMoved)
+    { alreadyMoved = true;
+      theSurface.moveTo(theCoords[0], theCoords[1]);
+    } else
+      theSurface.lineTo(theCoords[0], theCoords[1]);
+  }
 }
 
 function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth)
@@ -487,7 +497,7 @@ function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth)
   this.color = colorToRGB(inputColor);
   this.colorFill = colorToRGB(inputFillColor);
   this.isFilled = false;
-  this.type ="path";
+  this.type = "path";
   this.lineWidth = inputLineWidth;
   this.accountBoundingBox = function(inputOutputBox)
   { for (var i = 0; i < this.path.length; i ++)
@@ -1202,77 +1212,6 @@ function Canvas(inputCanvas)
     }
     this.theIIIdObjects.theContours.push(new Contour(contourPoints, theCurve.color, theCurve.lineWidth));
   };
-  this.drawSurface = function(theSurface)
-  { var numUsegments = theSurface.patchDimensions[0];
-    var numVsegments = theSurface.patchDimensions[1];
-    var thePatches = this.theIIIdObjects.thePatches;
-    var theContours = this.theIIIdObjects.theContours;
-    //var incomingPatches = new Array(numUsegments);
-    var deltaU= theSurface.deltaU;
-    var deltaV= theSurface.deltaV;
-    var firstPatchIndex = thePatches.length;
-    for (var i = 0; i <numUsegments; i ++)
-    { //incomingPatches[i] = new Array(numVsegments);
-      for (var j = 0; j<numVsegments; j ++)
-      { //var incomingPatch = incomingPatches[i][j];
-        var currentU= theSurface.uvBox[0][0] + i*deltaU;
-        var currentV= theSurface.uvBox[0][1] +j*deltaV;
-        var base = theSurface.xyzFun(currentU, currentV);
-        var v1= theSurface.xyzFun(currentU+deltaU, currentV);
-        var v2= theSurface.xyzFun(currentU, currentV+deltaV);
-        var edge1=vectorMinusVector(v1, base);
-        var edge2=vectorMinusVector(v2, base);
-        var incomingPatch = new Patch(base, edge1, edge2, theSurface.colors.colorUV, theSurface.colors.colorVU);
-        incomingPatch.adjacentContours = new Array(4);
-        incomingPatch.traversalOrder = [1,1,1,1];
-        incomingPatch.index = thePatches.length;
-        incomingPatch.internalPoint = theSurface.xyzFun(currentU+deltaU/2, currentV+deltaV/2);
-        thePatches.push(incomingPatch);
-      }
-    }
-    var numSegmentsPerContour = this.defaultNumSegmentsPerContour;
-    var contourPoints = new Array(numSegmentsPerContour+ 1);
-    for (i = 0; i <numUsegments+ 1; i ++)
-      for (j = 0; j<numVsegments; j ++)
-      { currentU= theSurface.uvBox[0][0] + i*deltaU;
-        for (var k = 0; k<numSegmentsPerContour+ 1; k++)
-        { currentV= theSurface.uvBox[0][1] +(j+k/numSegmentsPerContour)*deltaV;
-          contourPoints[k] = theSurface.xyzFun(currentU,currentV);
-        }
-        var incomingContour = new Contour(contourPoints, theSurface.colors.colorContour, theSurface.contourWidth);
-        incomingContour.index = theContours.length;
-        if (i>0)
-        { incomingContour.adjacentPatches.push(firstPatchIndex + numVsegments*(i- 1) +j);
-          thePatches[firstPatchIndex + numVsegments*(i- 1) +j].adjacentContours[2] = (theContours.length);
-          thePatches[firstPatchIndex + numVsegments*(i- 1) +j].traversalOrder[2] = - 1;
-        }
-        if (i <numUsegments)
-        { incomingContour.adjacentPatches.push(firstPatchIndex + numVsegments*i +j);
-          thePatches[firstPatchIndex + numVsegments*i +j].adjacentContours[0] = (theContours.length);
-        }
-        theContours.push(incomingContour);
-      }
-    for (i = 0; i <numUsegments; i ++)
-      for (j = 0; j<numVsegments+ 1; j ++)
-      { currentV= theSurface.uvBox[0][1] +j*deltaV;
-        for (k = 0; k<numSegmentsPerContour+ 1; k++)
-        { currentU= theSurface.uvBox[0][0] +(i +k/numSegmentsPerContour)*deltaU;
-          contourPoints[k] = theSurface.xyzFun(currentU,currentV);
-        }
-        incomingContour = new Contour(contourPoints, theSurface.colors.colorContour, theSurface.contourWidth);
-        incomingContour.index = theContours.length;
-        if (j>0)
-        { incomingContour.adjacentPatches.push(firstPatchIndex + numVsegments*i +j- 1);
-          thePatches[firstPatchIndex + numVsegments*i +j- 1].adjacentContours[1] = (theContours.length);
-        }
-        if (j<numVsegments)
-        { incomingContour.adjacentPatches.push(firstPatchIndex + numVsegments*i +j);
-          thePatches[firstPatchIndex + numVsegments*i +j].adjacentContours[3] = (theContours.length);
-          thePatches[firstPatchIndex + numVsegments*i +j].traversalOrder[3] = - 1;
-        }
-        theContours.push(incomingContour);
-      }
-  };
   this.drawPatchStraight = function(base, edge1, edge2, color)
   { this.theIIIdObjects.thePatches.push(new Patch(base, edge1, edge2, color));
     var patchIndex = this.theIIIdObjects.thePatches.length- 1;
@@ -1821,60 +1760,6 @@ function Canvas(inputCanvas)
     this.numAccountedPatches++;
     this.patchIsAccounted[deepestNonAccountedIndex] =1;
   };
-  this.redraw = function()
-  { this.textPerformance ="";
-    this.redrawStart = new Date().getTime();
-    var theContours = this.theIIIdObjects.theContours;
-    var thePatches = this.theIIIdObjects.thePatches;
-    var thePoints = this.theIIIdObjects.thePoints;
-    var theLabels = this.theIIIdObjects.theLabels;
-    var theSurface = this.surface;
-    theSurface.clearRect(0, 0, this.width, this.height);
-    for (var i = 0; i < thePatches.length; i ++)
-      this.computePatch(thePatches[i]);
-    var computePatchesTime = new Date().getTime();
-    for (i = 0; i < theContours.length; i ++)
-      this.computeContour(theContours[i]);
-    var computeContoursTime = new Date().getTime();
-    this.computeBuffers();
-    var computeBuffersTime = new Date().getTime();
-    //this.paintZbuffer();
-    var paintBuffersTime = new Date().getTime();
-    var numPainted = 0;
-    for (i = 0; i < this.thePatchOrder.length; i ++)
-      if (this.thePatchOrder[i] !== - 1)
-      { this.paintOnePatch(thePatches[this.thePatchOrder[i]]);
-        numPainted++;
-      }
-    for (i = 0; i < this.patchIsAccounted.length; i ++)
-      if (this.patchIsAccounted[i] === 0)
-      { this.paintOnePatch(thePatches[i]);
-        numPainted++;
-      }
-    var paintPatchTime = new Date().getTime();
-    this.numContourPoints = 0;
-    this.numContourPaths = 0;
-    for (i = 0; i < theContours.length; i ++)
-      this.paintOneContour(theContours[i]);
-    var paintContourTime = new Date().getTime();
-    for (i = 0; i < thePoints.length; i ++)
-      this.paintOnePoint(thePoints[i]);
-    for (i = 0; i < theLabels.length; i ++)
-      this.paintText(theLabels[i]);
-    this.paintMouseInfo();
-    var redrawTime = new Date().getTime();
-    this.textPerformance =
-    "Redraw time (ms): " + (redrawTime-this.redrawStart) + "=<br>" +
-    (computePatchesTime-this.redrawStart) + " (compute patches) + " +
-    (computeContoursTime-computePatchesTime) + " (compute contours) + " +
-    (computeBuffersTime-computeContoursTime) + " (compute buffers) + " +
-    (paintBuffersTime-computeBuffersTime) + "<br>(paint buffers) + " +
-    (paintPatchTime-paintBuffersTime) + "<br> (paint " + numPainted + " patche(s)) + <br>" +
-    (paintContourTime-paintPatchTime) + " (paint " + theContours.length + " contour(s) with "+
-    this.numContourPoints +" points in "+ this.numContourPaths  + " sub-paths) + " +
-    (redrawTime-paintContourTime) + " (paint all else). ";
-    this.showMessages();
-  };
   this.allocateZbuffer = function()
   { if (this.zBufferRowCount<1)
       this.zBufferRowCount =1;
@@ -2215,99 +2100,229 @@ function Canvas(inputCanvas)
       vectorTimesScalar(this.selectedVector, 1/Math.sqrt(lengthSelectedVector));
     this.selectedScreenBasis =[this.screenBasisOrthonormal[0].slice(), this.screenBasisOrthonormal[1].slice()];
   };
+}
 
-  this.showMessages = function()
-  { if (!this.flagShowPerformance)
-      return;
-    if (this.spanMessages === null || this.spanMessages ===undefined)
-      return;
-    var theHTML="";
-    if (this.textPerformance !== "")
-      theHTML+= this.textPerformance + "<hr>";
-    if (this.textErrors !== "")
-      theHTML+="<span style =\"red\"><b>" +this.textErrors+ "</b></span><hr>";
-    theHTML+=
-    "<span>" +this.textMouseInfo+ "</span><hr>"+
-    "<span>" +this.textProjectionInfo+ "</span>";
-    if (this.textPatchInfo!= "")
-      theHTML+="<hr><span>" +this.textPatchInfo+ "</span>";
-    this.spanMessages.innerHTML= theHTML;
-    ;
-  };
-  this.logPatchInfo = function() { 
-    this.textPatchInfo ="";
-    this.textPatchInfo += "Z-depth: " + this.boundingSegmentZ + "<br>";
-    var thePatches = this.theIIIdObjects.thePatches;
-    for (var i = 0; i < thePatches.length; i ++) { 
-      var currentPatch = thePatches[i];
-      for (var j = 0; j < currentPatch.patchesAboveMe.length; j ++) { 
-        this.textPatchInfo += currentPatch.patchesAboveMe[j];
-        if (j !== currentPatch.patchesAboveMe.length- 1) {
-          this.textPatchInfo += ", ";
-        } else {
-          this.textPatchInfo += "->";
-        }
+Canvas.prototype.showMessages = function()
+{ if (!this.flagShowPerformance)
+    return;
+  if (this.spanMessages === null || this.spanMessages ===undefined)
+    return;
+  var theHTML="";
+  if (this.textPerformance !== "")
+    theHTML+= this.textPerformance + "<hr>";
+  if (this.textErrors !== "")
+    theHTML+="<span style =\"red\"><b>" +this.textErrors+ "</b></span><hr>";
+  theHTML+=
+  "<span>" +this.textMouseInfo+ "</span><hr>"+
+  "<span>" +this.textProjectionInfo+ "</span>";
+  if (this.textPatchInfo!= "")
+    theHTML+="<hr><span>" +this.textPatchInfo+ "</span>";
+  this.spanMessages.innerHTML= theHTML;
+}
+
+Canvas.prototype.logPatchInfo = function() { 
+  this.textPatchInfo ="";
+  this.textPatchInfo += "Z-depth: " + this.boundingSegmentZ + "<br>";
+  var thePatches = this.theIIIdObjects.thePatches;
+  for (var i = 0; i < thePatches.length; i ++) { 
+    var currentPatch = thePatches[i];
+    for (var j = 0; j < currentPatch.patchesAboveMe.length; j ++) { 
+      this.textPatchInfo += currentPatch.patchesAboveMe[j];
+      if (j !== currentPatch.patchesAboveMe.length- 1) {
+        this.textPatchInfo += ", ";
+      } else {
+        this.textPatchInfo += "->";
       }
-      this.textPatchInfo+="<b>"+ i + "</b>";
-      if (currentPatch.patchesBelowMe.length > 0)
-        this.textPatchInfo+="->";
-      for (j = 0; j<currentPatch.patchesBelowMe.length; j ++)
-      { this.textPatchInfo += currentPatch.patchesBelowMe[j];
-        if (j !== currentPatch.patchesBelowMe.length)
+    }
+    this.textPatchInfo+="<b>"+ i + "</b>";
+    if (currentPatch.patchesBelowMe.length > 0)
+      this.textPatchInfo+="->";
+    for (j = 0; j<currentPatch.patchesBelowMe.length; j ++)
+    { this.textPatchInfo += currentPatch.patchesBelowMe[j];
+      if (j !== currentPatch.patchesBelowMe.length)
+        this.textPatchInfo+=", ";
+    }
+    this.textPatchInfo += "; contours: ";
+    for (j = 0; j< currentPatch.adjacentContours.length; j ++) { 
+      this.textPatchInfo+= currentPatch.adjacentContours[j];
+      if (j !== currentPatch.adjacentContours.length - 1)
+        this.textPatchInfo+=", ";
+    }
+    if (i != thePatches.length - 1) {
+      this.textPatchInfo += "<br>";
+    }
+  }
+  this.textPatchInfo+="<style>#patchInfo{ border: 1px solid black;}</style>";
+  this.textPatchInfo+="<table id =\"patchInfo\">";
+  for (i = this.zBuffer.length- 1; i>= 0; i --)
+  { this.textPatchInfo+="<tr id =\"patchInfo\">";
+    for (j = 0; j < this.zBuffer[i].length; j ++)
+    { this.textPatchInfo+="<td id =\"patchInfo\">";
+      for (var k = 0; k<this.zBuffer[i][j].length; k++)
+      { this.textPatchInfo+= this.zBuffer[i][j][k];
+        if (k !== this.zBuffer[i][j].length- 1)
           this.textPatchInfo+=", ";
       }
-      this.textPatchInfo += "; contours: ";
-      for (j = 0; j< currentPatch.adjacentContours.length; j ++) { 
-        this.textPatchInfo+= currentPatch.adjacentContours[j];
-        if (j !== currentPatch.adjacentContours.length - 1)
-          this.textPatchInfo+=", ";
-      }
-      if (i != thePatches.length - 1) {
-        this.textPatchInfo += "<br>";
-      }
+      this.textPatchInfo+="</td>";
     }
-    this.textPatchInfo+="<style>#patchInfo{ border: 1px solid black;}</style>";
-    this.textPatchInfo+="<table id =\"patchInfo\">";
-    for (i = this.zBuffer.length- 1; i>= 0; i --)
-    { this.textPatchInfo+="<tr id =\"patchInfo\">";
-      for (j = 0; j < this.zBuffer[i].length; j ++)
-      { this.textPatchInfo+="<td id =\"patchInfo\">";
-        for (var k = 0; k<this.zBuffer[i][j].length; k++)
-        { this.textPatchInfo+= this.zBuffer[i][j][k];
-          if (k !== this.zBuffer[i][j].length- 1)
-            this.textPatchInfo+=", ";
-        }
-        this.textPatchInfo+="</td>";
-      }
-      this.textPatchInfo+="</tr>";
-    }
-    this.textPatchInfo+="</table>";
-  };
-  this.logStatus = function() { 
-    this.textMouseInfo = "";
+    this.textPatchInfo+="</tr>";
+  }
+  this.textPatchInfo+="</table>";
+}
+
+Canvas.prototype.logStatus = function() { 
+  this.textMouseInfo = "";
+  var thePatches = this.theIIIdObjects.thePatches;
+  if (this.numAccountedPatches<thePatches.length) {
+    this.textMouseInfo += "<span style ='color:red'><b>Error: only " + this.numAccountedPatches + " out of " +
+    this.theIIIdObjects.thePatches.length + " patches accounted. "+ "</b></span><br>";
+  }
+  this.textMouseInfo += `time last redraw: ${this.redrawTime} ms `; 
+  this.textMouseInfo += `(~${(1000/this.redrawTime).toFixed(1)} f.p.s.)`;
+  this.testMouseInfo += "<br>selected element: " + this.selectedElement +
+  "<br>mouse coordinates: " + this.mousePosition +
+  "<br>clicked coordinates: " + this.clickedPosition +
+  "<br>delta of position: " + this.positionDelta +
+  "<br>ray component of mouse: " + this.rayComponent +
+  "<br>selected vector: " + this.selectedVector +
+  "<br>normal angle change: "+ this.angleNormal.toFixed(3)
+  + " (" + (this.angleNormal*180/Math.PI).toFixed(1) + " deg)"
+  + " = " +
+  this.oldAngleNormal.toFixed(3) + " (" + (this.oldAngleNormal*180/Math.PI).toFixed(1) + " deg)"
+  + "-" +
+  this.newAngleNormal.toFixed(3) + " (" + (this.newAngleNormal*180/Math.PI).toFixed(1) + " deg)";
+  if (1)
+    this.logPatchInfo();
+  this.showMessages();
+}
+
+Canvas.prototype.redraw = function() { 
+  this.textPerformance ="";
+    this.redrawStart = new Date().getTime();
+    var theContours = this.theIIIdObjects.theContours;
     var thePatches = this.theIIIdObjects.thePatches;
-    if (this.numAccountedPatches<thePatches.length) {
-      this.textMouseInfo += "<span style ='color:red'><b>Error: only " + this.numAccountedPatches + " out of " +
-      this.theIIIdObjects.thePatches.length + " patches accounted. "+ "</b></span><br>";
-    }
-    this.textMouseInfo += `time last redraw: ${this.redrawTime} ms `; 
-    this.textMouseInfo += `(~${(1000/this.redrawTime).toFixed(1)} f.p.s.)`;
-    this.testMouseInfo += "<br>selected element: " + this.selectedElement +
-    "<br>mouse coordinates: " + this.mousePosition +
-    "<br>clicked coordinates: " + this.clickedPosition +
-    "<br>delta of position: " + this.positionDelta +
-    "<br>ray component of mouse: " + this.rayComponent +
-    "<br>selected vector: " + this.selectedVector +
-    "<br>normal angle change: "+ this.angleNormal.toFixed(3)
-    + " (" + (this.angleNormal*180/Math.PI).toFixed(1) + " deg)"
-    + " = " +
-    this.oldAngleNormal.toFixed(3) + " (" + (this.oldAngleNormal*180/Math.PI).toFixed(1) + " deg)"
-    + "-" +
-    this.newAngleNormal.toFixed(3) + " (" + (this.newAngleNormal*180/Math.PI).toFixed(1) + " deg)";
-    if (1)
-      this.logPatchInfo();
+    var thePoints = this.theIIIdObjects.thePoints;
+    var theLabels = this.theIIIdObjects.theLabels;
+    var theSurface = this.surface;
+    theSurface.clearRect(0, 0, this.width, this.height);
+    for (var i = 0; i < thePatches.length; i ++)
+      this.computePatch(thePatches[i]);
+    var computePatchesTime = new Date().getTime();
+    for (i = 0; i < theContours.length; i ++)
+      this.computeContour(theContours[i]);
+    var computeContoursTime = new Date().getTime();
+    this.computeBuffers();
+    var computeBuffersTime = new Date().getTime();
+    //this.paintZbuffer();
+    var paintBuffersTime = new Date().getTime();
+    var numPainted = 0;
+    for (i = 0; i < this.thePatchOrder.length; i ++)
+      if (this.thePatchOrder[i] !== - 1)
+      { this.paintOnePatch(thePatches[this.thePatchOrder[i]]);
+        numPainted++;
+      }
+    for (i = 0; i < this.patchIsAccounted.length; i ++)
+      if (this.patchIsAccounted[i] === 0)
+      { this.paintOnePatch(thePatches[i]);
+        numPainted++;
+      }
+    var paintPatchTime = new Date().getTime();
+    this.numContourPoints = 0;
+    this.numContourPaths = 0;
+    for (i = 0; i < theContours.length; i ++)
+      this.paintOneContour(theContours[i]);
+    var paintContourTime = new Date().getTime();
+    for (i = 0; i < thePoints.length; i ++)
+      this.paintOnePoint(thePoints[i]);
+    for (i = 0; i < theLabels.length; i ++)
+      this.paintText(theLabels[i]);
+    this.paintMouseInfo();
+    var redrawTime = new Date().getTime();
+    this.textPerformance =
+    "Redraw time (ms): " + (redrawTime-this.redrawStart) + "=<br>" +
+    (computePatchesTime-this.redrawStart) + " (compute patches) + " +
+    (computeContoursTime-computePatchesTime) + " (compute contours) + " +
+    (computeBuffersTime-computeContoursTime) + " (compute buffers) + " +
+    (paintBuffersTime-computeBuffersTime) + "<br>(paint buffers) + " +
+    (paintPatchTime-paintBuffersTime) + "<br> (paint " + numPainted + " patche(s)) + <br>" +
+    (paintContourTime-paintPatchTime) + " (paint " + theContours.length + " contour(s) with "+
+    this.numContourPoints +" points in "+ this.numContourPaths  + " sub-paths) + " +
+    (redrawTime-paintContourTime) + " (paint all else). ";
     this.showMessages();
-  };
+}
+
+Canvas.prototype.drawSurface = function(theSurface) { 
+  var numUsegments = theSurface.patchDimensions[0];
+  var numVsegments = theSurface.patchDimensions[1];
+  var thePatches = this.theIIIdObjects.thePatches;
+  var theContours = this.theIIIdObjects.theContours;
+  //var incomingPatches = new Array(numUsegments);
+  var deltaU = theSurface.deltaU;
+  var deltaV = theSurface.deltaV;
+  var firstPatchIndex = thePatches.length;
+  for (var i = 0; i < numUsegments; i ++) { 
+    //incomingPatches[i] = new Array(numVsegments);
+    for (var j = 0; j<numVsegments; j ++) { 
+      //var incomingPatch = incomingPatches[i][j];
+      var currentU = theSurface.uvBox[0][0] + i * deltaU;
+      var currentV = theSurface.uvBox[0][1] + j * deltaV;
+      var base = theSurface.xyzFun(currentU, currentV);
+      var v1= theSurface.xyzFun(currentU + deltaU, currentV);
+      var v2= theSurface.xyzFun(currentU, currentV + deltaV);
+      var edge1=vectorMinusVector(v1, base);
+      var edge2=vectorMinusVector(v2, base);
+      var incomingPatch = new Patch(base, edge1, edge2, theSurface.colors.colorUV, theSurface.colors.colorVU);
+      incomingPatch.adjacentContours = new Array(4);
+      incomingPatch.traversalOrder = [1, 1, 1, 1];
+      incomingPatch.index = thePatches.length;
+      incomingPatch.internalPoint = theSurface.xyzFun(currentU + deltaU / 2, currentV + deltaV / 2);
+      thePatches.push(incomingPatch);
+    }
+  }
+  var numSegmentsPerContour = this.defaultNumSegmentsPerContour;
+  var contourPoints = new Array(numSegmentsPerContour + 1);
+  for (i = 0; i < numUsegments + 1; i ++) {
+    for (j = 0; j < numVsegments; j ++) { 
+      currentU = theSurface.uvBox[0][0] + i * deltaU;
+      for (var k = 0; k < numSegmentsPerContour + 1; k ++) { 
+        currentV = theSurface.uvBox[0][1] +(j + k / numSegmentsPerContour) * deltaV;
+        contourPoints[k] = theSurface.xyzFun(currentU,currentV);
+      }
+      var incomingContour = new Contour(contourPoints, theSurface.colors.colorContour, theSurface.contourWidth);
+      incomingContour.index = theContours.length;
+      if (i > 0) { 
+        incomingContour.adjacentPatches.push(firstPatchIndex + numVsegments * (i - 1) + j);
+        thePatches[firstPatchIndex + numVsegments * (i - 1) + j].adjacentContours[2] = theContours.length;
+        thePatches[firstPatchIndex + numVsegments * (i - 1) + j].traversalOrder[2] = - 1;
+      }
+      if (i < numUsegments) { 
+        incomingContour.adjacentPatches.push(firstPatchIndex + numVsegments * i +j);
+        thePatches[firstPatchIndex + numVsegments * i +j].adjacentContours[0] = theContours.length;
+      }
+      theContours.push(incomingContour);
+    }
+  }
+  for (i = 0; i < numUsegments; i ++) {
+    for (j = 0; j < numVsegments + 1; j ++) { 
+      currentV = theSurface.uvBox[0][1] + j * deltaV;
+      for (k = 0; k < numSegmentsPerContour + 1; k ++) { 
+        currentU = theSurface.uvBox[0][0] +(i + k / numSegmentsPerContour) * deltaU;
+        contourPoints[k] = theSurface.xyzFun(currentU, currentV);
+      }
+      incomingContour = new Contour(contourPoints, theSurface.colors.colorContour, theSurface.contourWidth);
+      incomingContour.index = theContours.length;
+      if (j > 0) { 
+        incomingContour.adjacentPatches.push(firstPatchIndex + numVsegments * i + j - 1);
+        thePatches[firstPatchIndex + numVsegments * i + j - 1].adjacentContours[1] = theContours.length;
+      }
+      if (j < numVsegments) { 
+        incomingContour.adjacentPatches.push(firstPatchIndex + numVsegments * i +j);
+        thePatches[firstPatchIndex + numVsegments * i + j].adjacentContours[3] = theContours.length;
+        thePatches[firstPatchIndex + numVsegments * i + j].traversalOrder[3] = - 1;
+      }
+      theContours.push(incomingContour);
+    }
+  }
 }
 
 function calculatorGetCanvas(inputCanvas)

@@ -65,7 +65,11 @@ function vectorPlusVector(left, right) {
 }
 
 function vectorCrossVector(left, right) { 
-  return [left[1] * right[2] - left[2] * right[1], -left[0] * right[2] + left[2] * right[0], left[0] * right[1] - left[1] * right[0] ];
+  return [
+    left[1] * right[2] - left[2] * right[1], 
+    -left[0] * right[2] + left[2] * right[0], 
+    left[0] * right[1] - left[1] * right[0] 
+  ];
 }
 
 function vectorMinusVector(left, right) { 
@@ -201,61 +205,64 @@ function CurveThreeD(
   this.color = colorToRGB(inputColor);
   this.numSegments = inputNumSegments;
   this.lineWidth = inputLineWidth;
-  this.accountBoundingBox = function(inputOutputBox) { 
-    var theT = this.leftPt;
-    var theX = this.coordinateFunctions[0](theT);
-    var theY = this.coordinateFunctions[1](theT);
+}
+
+CurveThreeD.prototype.accountBoundingBox = function(inputOutputBox) { 
+  var theT = this.leftPt;
+  var theX = this.coordinateFunctions[0](theT);
+  var theY = this.coordinateFunctions[1](theT);
+  accountBoundingBox([theX, theY], inputOutputBox);
+  for (var i = 0; i < this.numSegments; i ++) { 
+    var theRatio = i / (this.numSegments - 1);
+    theT = this.leftPt * (1 - theRatio) +  this.rightPt * theRatio;
+    theX = this.coordinateFunctions[0](theT);
+    theY = this.coordinateFunctions[1](theT);
     accountBoundingBox([theX, theY], inputOutputBox);
-    for (var i = 0; i < this.numSegments; i ++) { 
-      var theRatio = i / (this.numSegments - 1);
-      theT = this.leftPt * (1 - theRatio) +  this.rightPt * theRatio;
-      theX = this.coordinateFunctions[0](theT);
-      theY = this.coordinateFunctions[1](theT);
-      accountBoundingBox([theX, theY], inputOutputBox);
+  }
+}
+
+CurveThreeD.prototype.drawNoFinish = function(theCanvas, startByMoving) { 
+  var theSurface = theCanvas.surface;
+  theSurface.strokeStyle = colorRGBToString(this.color);
+  theSurface.fillStyle = colorRGBToString(this.color);
+  var theT= this.leftPt;
+  var theX = this.coordinateFunctions[0](theT);
+  var theY = this.coordinateFunctions[1](theT);
+  var theCoords = theCanvas.coordsMathToScreen([theX, theY]);
+  if (startByMoving)
+    theSurface.moveTo(theCoords[0], theCoords[1]);
+  else
+    theSurface.lineTo(theCoords[0], theCoords[1]);
+  var skippedValues = false;
+  for (var i = 0; i < this.numSegments; i ++)
+  { var theRatio = i/(this.numSegments- 1);
+    theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio; //<- this way of
+    //computing x introduces smaller numerical errors.
+    //For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
+    //If not careful with rounding errors,
+    //you may end up evaluating sqrt(1-x^2) for x =1.00000000000004
+    //resulting in serious visual glitches.
+    //Note: the remarks above were discovered the painful way (trial and error).
+    theX = this.coordinateFunctions[0](theT);
+    theY = this.coordinateFunctions[1](theT);
+    if (!isFinite(theY) || !isFinite(theX))
+      console.log('Failed to evaluate: ' + this.theFunction + ' at x = ' + theX);
+    if (Math.abs(theY)>100000 || Math.abs(theX)>100000)
+    { if (!skippedValues)
+        console.log('Curve point: ' + [theX, theY] + " is too large, skipping. Further errors suppressed.");
+      skippedValues = true;
+      continue;
     }
-  };
-  this.drawNoFinish = function(theCanvas, startByMoving) { 
-    var theSurface = theCanvas.surface;
-    theSurface.strokeStyle = colorRGBToString(this.color);
-    theSurface.fillStyle = colorRGBToString(this.color);
-    var theT= this.leftPt;
-    var theX = this.coordinateFunctions[0](theT);
-    var theY = this.coordinateFunctions[1](theT);
-    var theCoords = theCanvas.coordsMathToScreen([theX, theY]);
-    if (startByMoving)
-      theSurface.moveTo(theCoords[0], theCoords[1]);
-    else
-      theSurface.lineTo(theCoords[0], theCoords[1]);
-    var skippedValues = false;
-    for (var i = 0; i < this.numSegments; i ++)
-    { var theRatio = i/(this.numSegments- 1);
-      theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio; //<- this way of
-      //computing x introduces smaller numerical errors.
-      //For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
-      //If not careful with rounding errors,
-      //you may end up evaluating sqrt(1-x^2) for x =1.00000000000004
-      //resulting in serious visual glitches.
-      //Note: the remarks above were discovered the painful way (trial and error).
-      theX = this.coordinateFunctions[0](theT);
-      theY = this.coordinateFunctions[1](theT);
-      if (!isFinite(theY) || !isFinite(theX))
-        console.log('Failed to evaluate: ' + this.theFunction + ' at x = ' + theX);
-      if (Math.abs(theY)>100000 || Math.abs(theX)>100000)
-      { if (!skippedValues)
-          console.log('Curve point: ' + [theX, theY] + " is too large, skipping. Further errors suppressed.");
-        skippedValues = true;
-        continue;
-      }
-      theCoords = theCanvas.coordsMathToScreen([theX, theY]);
-      theSurface.lineTo(theCoords[0], theCoords[1]);
-    }
-  };
-  this.draw = function(theCanvas)
-  { var theSurface = theCanvas.surface;
-    theSurface.beginPath();
-    this.drawNoFinish(theCanvas, true);
-    theSurface.stroke();
-  };
+    theCoords = theCanvas.coordsMathToScreen([theX, theY]);
+    theSurface.lineTo(theCoords[0], theCoords[1]);
+  }
+}
+
+CurveThreeD.prototype.draw = function(theCanvas)
+{ var theSurface = theCanvas.surface;
+  theSurface.beginPath();
+  this.drawNoFinish(theCanvas, true);
+  theSurface.stroke();
 }
 
 function Surface(inputxyzFun, inputUVBox, inputPatchDimensions, inputColors, inputContourWidth)
@@ -387,21 +394,24 @@ function PointsTwoD(inputLocation, inputColor)
 { this.location = inputLocation.slice();
   this.color = colorToRGB(inputColor);
   this.type = "points";
-  this.accountBoundingBox = function(inputOutputBox)
-  { for (var i = 0; i < this.location.length; i ++)
-      accountBoundingBox(this.location[i], inputOutputBox);
-  };
-  this.draw = function(theCanvas)
-  { var theSurface = theCanvas.surface;
-    for (var i = 0; i < this.location.length; i ++)
-    { theSurface.beginPath();
-      theSurface.strokeStyle = colorRGBToString(this.color);
-      theSurface.fillStyle = colorRGBToString(this.color );
-      var theCoords = theCanvas.coordsMathToScreen(this.location[i]);
-      theSurface.arc(theCoords[0], theCoords[1],3, 0, Math.PI*2);
-      theSurface.fill();
-    }
-  };
+
+}
+
+PointsTwoD.prototype.accountBoundingBox = function(inputOutputBox)
+{ for (var i = 0; i < this.location.length; i ++)
+    accountBoundingBox(this.location[i], inputOutputBox);
+}
+
+PointsTwoD.prototype.draw = function(theCanvas)
+{ var theSurface = theCanvas.surface;
+  for (var i = 0; i < this.location.length; i ++)
+  { theSurface.beginPath();
+    theSurface.strokeStyle = colorRGBToString(this.color);
+    theSurface.fillStyle = colorRGBToString(this.color );
+    var theCoords = theCanvas.coordsMathToScreen(this.location[i]);
+    theSurface.arc(theCoords[0], theCoords[1],3, 0, Math.PI*2);
+    theSurface.fill();
+  }
 }
 
 function accountBoundingBox(inputPoint, outputBox)
@@ -499,139 +509,150 @@ function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth)
   this.isFilled = false;
   this.type = "path";
   this.lineWidth = inputLineWidth;
-  this.accountBoundingBox = function(inputOutputBox)
-  { for (var i = 0; i < this.path.length; i ++)
-      accountBoundingBox(this.path[i], inputOutputBox);
-  };
-  this.drawNoFinish = function(theCanvas, startByMoving)
-  { if (inputPath.length<1)
-      return;
-    var theSurface = theCanvas.surface;
-    var theCoords = theCanvas.coordsMathToScreen(this.path[0]);
-    if (startByMoving)
-      theSurface.moveTo(theCoords[0], theCoords[1]);
-    else
-      theSurface.lineTo(theCoords[0], theCoords[1]);
-    theSurface.lineWidth = this.lineWidth;
-    for (var i =1; i < this.path.length; i ++)
-    { theCoords = theCanvas.coordsMathToScreen(this.path[i]);
-      theSurface.lineTo(theCoords[0], theCoords[1]);
-    }
-    theSurface.strokeStyle = colorRGBToString(this.color);
-    theSurface.fillStyle = colorRGBToString(this.colorFill);
-    if (this.isFilled)
-      theSurface.fill();
-  };
-  this.draw = function(theCanvas)
-  { if (inputPath.length<1)
-      return;
-    var theSurface = theCanvas.surface;
-    theSurface.beginPath();
-    this.drawNoFinish(theCanvas, true);
-    theSurface.stroke();
-  };
+}
+
+PathTwoD.prototype.accountBoundingBox = function(inputOutputBox)
+{ for (var i = 0; i < this.path.length; i ++)
+    accountBoundingBox(this.path[i], inputOutputBox);
+}
+
+PathTwoD.prototype.drawNoFinish = function(theCanvas, startByMoving)
+{ if (inputPath.length<1)
+    return;
+  var theSurface = theCanvas.surface;
+  var theCoords = theCanvas.coordsMathToScreen(this.path[0]);
+  if (startByMoving)
+    theSurface.moveTo(theCoords[0], theCoords[1]);
+  else
+    theSurface.lineTo(theCoords[0], theCoords[1]);
+  theSurface.lineWidth = this.lineWidth;
+  for (var i =1; i < this.path.length; i ++)
+  { theCoords = theCanvas.coordsMathToScreen(this.path[i]);
+    theSurface.lineTo(theCoords[0], theCoords[1]);
+  }
+  theSurface.strokeStyle = colorRGBToString(this.color);
+  theSurface.fillStyle = colorRGBToString(this.colorFill);
+  if (this.isFilled)
+    theSurface.fill();
+}
+
+PathTwoD.prototype.draw = function(theCanvas)
+{ if (inputPath.length<1)
+    return;
+  var theSurface = theCanvas.surface;
+  theSurface.beginPath();
+  this.drawNoFinish(theCanvas, true);
+  theSurface.stroke();
 }
 
 function drawCoordinateAxesTwoD()
-{ this.draw = function(theCanvas)
-  { var theSurface = theCanvas.surface;
-    this.drawNoFinish(theCanvas, true);
-  };
-  this.accountBoundingBox = function(inputOutputBox)
-  { accountBoundingBox([0,1], inputOutputBox);
-    accountBoundingBox([1,0], inputOutputBox);
-  };
-  this.drawNoFinish = function(theCanvas, startByMoving)
-  { var lowLeft = theCanvas.coordsScreenToMathScreen([0, theCanvas.height]);
-    var topRight = theCanvas.coordsScreenToMathScreen([theCanvas.width, 0]);
-    var theSurface = theCanvas.surface;
-    theSurface.strokeStyle = colorRGBToString([0, 0, 0]);
-    theSurface.fillStyle = colorRGBToString([0, 0, 0] );
-    theSurface.lineWidth =1;
-    var left = lowLeft[0];
-    var right = topRight[0];
-    var bottom= lowLeft[1];
-    var top = topRight[1];
-    theSurface.beginPath();
-    var theCoords = theCanvas.coordsMathScreenToScreen([0, bottom]);
-    theSurface.moveTo(theCoords[0], theCoords[1]);
-    theCoords = theCanvas.coordsMathScreenToScreen([0, top]);
-    theSurface.lineTo(theCoords[0], theCoords[1]);
-    theSurface.stroke();
-    theCoords = theCanvas.coordsMathScreenToScreen([left, 0]);
-    theSurface.moveTo(theCoords[0], theCoords[1]);
-    theCoords = theCanvas.coordsMathScreenToScreen([right, 0]);
-    theSurface.lineTo(theCoords[0], theCoords[1]);
-    theSurface.stroke();
-    theCoords = theCanvas.coordsMathScreenToScreen([1, -0.1]);
-    theSurface.moveTo(theCoords[0], theCoords[1]);
-    theCoords = theCanvas.coordsMathScreenToScreen([1, 0.1]);
-    theSurface.lineTo(theCoords[0], theCoords[1]);
-    theSurface.stroke();
-    theCoords = theCanvas.coordsMathScreenToScreen([1, 0]);
-    theSurface.fillText("1", theCoords[0], theCoords[1] + 10);
-  };
+{ 
+}
+
+drawCoordinateAxesTwoD.prototype.draw = function(theCanvas)
+{ var theSurface = theCanvas.surface;
+  this.drawNoFinish(theCanvas, true);
+}
+
+drawCoordinateAxesTwoD.prototype.accountBoundingBox = function(inputOutputBox)
+{ accountBoundingBox([0,1], inputOutputBox);
+  accountBoundingBox([1,0], inputOutputBox);
+}
+
+drawCoordinateAxesTwoD.prototype.drawNoFinish = function(theCanvas, startByMoving) { 
+  var lowLeft = theCanvas.coordsScreenToMathScreen([0, theCanvas.height]);
+  var topRight = theCanvas.coordsScreenToMathScreen([theCanvas.width, 0]);
+  var theSurface = theCanvas.surface;
+  theSurface.strokeStyle = colorRGBToString([0, 0, 0]);
+  theSurface.fillStyle = colorRGBToString([0, 0, 0] );
+  theSurface.lineWidth =1;
+  var left = lowLeft[0];
+  var right = topRight[0];
+  var bottom= lowLeft[1];
+  var top = topRight[1];
+  theSurface.beginPath();
+  var theCoords = theCanvas.coordsMathScreenToScreen([0, bottom]);
+  theSurface.moveTo(theCoords[0], theCoords[1]);
+  theCoords = theCanvas.coordsMathScreenToScreen([0, top]);
+  theSurface.lineTo(theCoords[0], theCoords[1]);
+  theSurface.stroke();
+  theCoords = theCanvas.coordsMathScreenToScreen([left, 0]);
+  theSurface.moveTo(theCoords[0], theCoords[1]);
+  theCoords = theCanvas.coordsMathScreenToScreen([right, 0]);
+  theSurface.lineTo(theCoords[0], theCoords[1]);
+  theSurface.stroke();
+  theCoords = theCanvas.coordsMathScreenToScreen([1, -0.1]);
+  theSurface.moveTo(theCoords[0], theCoords[1]);
+  theCoords = theCanvas.coordsMathScreenToScreen([1, 0.1]);
+  theSurface.lineTo(theCoords[0], theCoords[1]);
+  theSurface.stroke();
+  theCoords = theCanvas.coordsMathScreenToScreen([1, 0]);
+  theSurface.fillText("1", theCoords[0], theCoords[1] + 10);
 }
 
 function AxesGrid()
-{ this.draw = function(theCanvas)
+{ 
+}
+
+AxesGrid.prototype.draw = function(theCanvas)
   { var theSurface = theCanvas.surface;
     this.drawNoFinish(theCanvas, true);
-  };
-  this.drawNoFinish = function(theCanvas, startByMoving)
-  { var lowLeft = theCanvas.coordsScreenToMathScreen([0, theCanvas.height]);
-    var topRight = theCanvas.coordsScreenToMathScreen([theCanvas.width, 0]);
-    var theSurface = theCanvas.surface;
-    theSurface.strokeStyle = colorRGBToString([160, 160, 160]);
-    theSurface.fillStyle = colorRGBToString([160, 160, 160] );
-    theSurface.lineWidth = 0.1;
-    var left = lowLeft[0];
-    var right = topRight[0];
-    var bottom= lowLeft[1];
-    var top = topRight[1];
-    var floorLeft =Math.floor(left);
-    var ceilRight =Math.ceil(right);
-    var floorBottom=Math.floor(bottom);
-    var ceilTop =Math.ceil(top);
-    var distanceBetweenMarks =30;
-    var DeltaHorizontal =Math.max(1, Math.floor ((ceilRight-floorLeft)/ (theCanvas.width/distanceBetweenMarks)));
-    var DeltaVertical =Math.max(1, Math.floor ((ceilTop-floorBottom)/ (theCanvas.height/distanceBetweenMarks)));
-    var Delta = Math.max(DeltaHorizontal, DeltaVertical);
-    theSurface.beginPath();
-    for (var i = floorLeft; i <= ceilRight; i += Delta)
-    { var theCoords = theCanvas.coordsMathScreenToScreen([i, bottom]);
-      theSurface.moveTo(theCoords[0], theCoords[1]);
-      theCoords = theCanvas.coordsMathScreenToScreen([i, top]);
-      theSurface.lineTo(theCoords[0], theCoords[1]);
-      theSurface.stroke();
-    }
-    for (i = floorBottom; i <= ceilTop; i += Delta)
-    { theCoords = theCanvas.coordsMathScreenToScreen([left, i]);
-      theSurface.moveTo(theCoords[0], theCoords[1]);
-      theCoords = theCanvas.coordsMathScreenToScreen([right, i]);
-      theSurface.lineTo(theCoords[0], theCoords[1]);
-      theSurface.stroke();
-    }
-    theSurface.strokeStyle = colorRGBToString([0, 0, 0]);
-    theSurface.fillStyle = colorRGBToString([0, 0, 0] );
-    var counter = 0;
-    for (var i = floorLeft; i <= ceilRight; i += Delta)
-    { counter ++;
-      //if (counter%2=== 0 && i !==1){
-        theCoords = theCanvas.coordsMathScreenToScreen([i, 0]);
-        theSurface.fillText(i, theCoords[0], theCoords[1] + 10);
-      //}
-    }
-    counter = 0;
-    for (i = floorBottom; i <= ceilTop; i += Delta)
-    { counter ++;
-      //if (counter%2=== 0 && i !==1){
-        theCoords = theCanvas.coordsMathScreenToScreen([ 0,i]);
-        theSurface.fillText(i, theCoords[0]- 10, theCoords[1]);
-      //}
-    }
-  };
-}
+  }
+
+AxesGrid.prototype.drawNoFinish = function(theCanvas, startByMoving)
+{ var lowLeft = theCanvas.coordsScreenToMathScreen([0, theCanvas.height]);
+  var topRight = theCanvas.coordsScreenToMathScreen([theCanvas.width, 0]);
+  var theSurface = theCanvas.surface;
+  theSurface.strokeStyle = colorRGBToString([160, 160, 160]);
+  theSurface.fillStyle = colorRGBToString([160, 160, 160] );
+  theSurface.lineWidth = 0.1;
+  var left = lowLeft[0];
+  var right = topRight[0];
+  var bottom= lowLeft[1];
+  var top = topRight[1];
+  var floorLeft =Math.floor(left);
+  var ceilRight =Math.ceil(right);
+  var floorBottom=Math.floor(bottom);
+  var ceilTop =Math.ceil(top);
+  var distanceBetweenMarks =30;
+  var DeltaHorizontal =Math.max(1, Math.floor ((ceilRight-floorLeft)/ (theCanvas.width/distanceBetweenMarks)));
+  var DeltaVertical =Math.max(1, Math.floor ((ceilTop-floorBottom)/ (theCanvas.height/distanceBetweenMarks)));
+  var Delta = Math.max(DeltaHorizontal, DeltaVertical);
+  theSurface.beginPath();
+  for (var i = floorLeft; i <= ceilRight; i += Delta)
+  { var theCoords = theCanvas.coordsMathScreenToScreen([i, bottom]);
+    theSurface.moveTo(theCoords[0], theCoords[1]);
+    theCoords = theCanvas.coordsMathScreenToScreen([i, top]);
+    theSurface.lineTo(theCoords[0], theCoords[1]);
+    theSurface.stroke();
+  }
+  for (i = floorBottom; i <= ceilTop; i += Delta)
+  { theCoords = theCanvas.coordsMathScreenToScreen([left, i]);
+    theSurface.moveTo(theCoords[0], theCoords[1]);
+    theCoords = theCanvas.coordsMathScreenToScreen([right, i]);
+    theSurface.lineTo(theCoords[0], theCoords[1]);
+    theSurface.stroke();
+  }
+  theSurface.strokeStyle = colorRGBToString([0, 0, 0]);
+  theSurface.fillStyle = colorRGBToString([0, 0, 0] );
+  var counter = 0;
+  for (var i = floorLeft; i <= ceilRight; i += Delta)
+  { counter ++;
+    //if (counter%2=== 0 && i !==1){
+      theCoords = theCanvas.coordsMathScreenToScreen([i, 0]);
+      theSurface.fillText(i, theCoords[0], theCoords[1] + 10);
+    //}
+  }
+  counter = 0;
+  for (i = floorBottom; i <= ceilTop; i += Delta)
+  { counter ++;
+    //if (counter%2=== 0 && i !==1){
+      theCoords = theCanvas.coordsMathScreenToScreen([ 0,i]);
+      theSurface.fillText(i, theCoords[0]- 10, theCoords[1]);
+    //}
+  }
+};
+
 
 function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth)
 { this.theFunction = inputTheFn;
@@ -647,71 +668,74 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
   this.numSegments = inputNumSegments;
   if (inputRightPt !== "infinity" && inputLeftPt !== "minusInfinity")
     this.Delta = (inputRightPt-inputLeftPt)/inputNumSegments;
-  this.accountBoundingBox = function(inputOutputBox)
-  { for (var i = 0; i < this.numSegments; i ++)
-    { var theRatio = i/(this.numSegments- 1);
-      var theX = this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
-      var theY = this.theFunction(theX);
-      if (!isFinite(theY) )
-        continue;
-      if (Math.abs(theY)>100000)
-        continue;
-      accountBoundingBox([theX, theY], inputOutputBox);
-    }
-  };
-  this.drawNoFinish = function(theCanvas, startByMoving)
-  { var theSurface = theCanvas.surface;
-    theSurface.strokeStyle = colorRGBToString(this.color);
-    theSurface.fillStyle = colorRGBToString(this.color);
-    var realLeft = this.leftPt;
-    var realRight = this.rightPt;
-    if (realLeft === "minusInfinity")
-      realLeft = theCanvas.leftMostPlotPoint;
-    if (this.rightPt === "infinity" || this.leftPt === "minusInfinity")
-    { if (realRight === "infinity")
-        realRight = theCanvas.rightMostPlotPoint;
-      this.Delta = (realRight-realLeft)/this.numSegments;
-    }
-    var theX =realLeft;
+}
+
+PlotTwoD.prototype.accountBoundingBox = function(inputOutputBox)
+{ for (var i = 0; i < this.numSegments; i ++)
+  { var theRatio = i/(this.numSegments- 1);
+    var theX = this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
     var theY = this.theFunction(theX);
-    var theCoords = theCanvas.coordsMathToScreen([theX, theY]);
-    var alreadyMoved = false;
-    if (startByMoving)
-      alreadyMoved = true;
-    theSurface.lineWidth = this.lineWidth;
-    var skippedValues = false;
-    for (var i = 0; i < this.numSegments; i ++)
-    { var theRatio = i/(this.numSegments- 1);
-      theX = realLeft *(1-theRatio) +  realRight*theRatio; //<- this way of
-      //computing x this way introduces smaller numerical errors.
-      //For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
-      //If not careful with rounding errors,
-      //you may end up evaluating sqrt(1-x^2) for x =1.00000000000004
-      //resulting in serious visual glitches.
-      //Note: the remarks above were discovered the painful way (trial and error).
-      theY = this.theFunction(theX);
-      if (!isFinite(theY) )
-        console.log('Failed to evaluate: ' + this.theFunction + ' at x = ' + theX);
-      if (Math.abs(theY)>10000)
-      { if (!skippedValues)
-          console.log('Function result: ' + theY + " is too large, skipping. Further errors suppressed.");
-        skippedValues = true;
-        continue;
-      }
-      theCoords = theCanvas.coordsMathToScreen([theX, theY]);
-      if (!alreadyMoved)
-      { alreadyMoved = true;
-        theSurface.moveTo(theCoords[0], theCoords[1]);
-      } else
-        theSurface.lineTo(theCoords[0], theCoords[1]);
+    if (!isFinite(theY) )
+      continue;
+    if (Math.abs(theY)>100000)
+      continue;
+    accountBoundingBox([theX, theY], inputOutputBox);
+  }
+}
+
+PlotTwoD.prototype.drawNoFinish = function(theCanvas, startByMoving)
+{ var theSurface = theCanvas.surface;
+  theSurface.strokeStyle = colorRGBToString(this.color);
+  theSurface.fillStyle = colorRGBToString(this.color);
+  var realLeft = this.leftPt;
+  var realRight = this.rightPt;
+  if (realLeft === "minusInfinity")
+    realLeft = theCanvas.leftMostPlotPoint;
+  if (this.rightPt === "infinity" || this.leftPt === "minusInfinity")
+  { if (realRight === "infinity")
+      realRight = theCanvas.rightMostPlotPoint;
+    this.Delta = (realRight-realLeft)/this.numSegments;
+  }
+  var theX =realLeft;
+  var theY = this.theFunction(theX);
+  var theCoords = theCanvas.coordsMathToScreen([theX, theY]);
+  var alreadyMoved = false;
+  if (startByMoving)
+    alreadyMoved = true;
+  theSurface.lineWidth = this.lineWidth;
+  var skippedValues = false;
+  for (var i = 0; i < this.numSegments; i ++)
+  { var theRatio = i/(this.numSegments- 1);
+    theX = realLeft *(1-theRatio) +  realRight*theRatio; //<- this way of
+    //computing x this way introduces smaller numerical errors.
+    //For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
+    //If not careful with rounding errors,
+    //you may end up evaluating sqrt(1-x^2) for x =1.00000000000004
+    //resulting in serious visual glitches.
+    //Note: the remarks above were discovered the painful way (trial and error).
+    theY = this.theFunction(theX);
+    if (!isFinite(theY) )
+      console.log('Failed to evaluate: ' + this.theFunction + ' at x = ' + theX);
+    if (Math.abs(theY)>10000)
+    { if (!skippedValues)
+        console.log('Function result: ' + theY + " is too large, skipping. Further errors suppressed.");
+      skippedValues = true;
+      continue;
     }
-  };
-  this.draw = function(theCanvas)
-  { var theSurface = theCanvas.surface;
-    theSurface.beginPath();
-    this.drawNoFinish(theCanvas,true);
-    theSurface.stroke();
-  };
+    theCoords = theCanvas.coordsMathToScreen([theX, theY]);
+    if (!alreadyMoved)
+    { alreadyMoved = true;
+      theSurface.moveTo(theCoords[0], theCoords[1]);
+    } else
+      theSurface.lineTo(theCoords[0], theCoords[1]);
+  }
+}
+
+PlotTwoD.prototype.draw = function(theCanvas)
+{ var theSurface = theCanvas.surface;
+  theSurface.beginPath();
+  this.drawNoFinish(theCanvas,true);
+  theSurface.stroke();
 }
 
 function TextPlotTwoD(inputLocation, inputText, inputColor)
@@ -719,22 +743,25 @@ function TextPlotTwoD(inputLocation, inputText, inputColor)
   this.text = inputText;
   this.color = colorToRGB(inputColor);
   this.type ="plotText";
-  this.accountBoundingBox = function(inputOutputBox)
-  { accountBoundingBox(this.location, inputOutputBox);
-  };
-  this.drawNoFinish = function(theCanvas)
-  { var theSurface = theCanvas.surface;
-    theSurface.strokeStyle = colorRGBToString(this.color);
-    theSurface.fillStyle = colorRGBToString(this.color);
-    var theCoords = theCanvas.coordsMathToScreen(this.location);
-    theSurface.fillText(this.text, theCoords[0], theCoords[1]);
-  };
-  this.draw = function(theCanvas)
-  { var theSurface = theCanvas.surface;
-    theSurface.beginPath();
-    this.drawNoFinish(theCanvas);
-    theSurface.stroke();
-  };
+}
+
+TextPlotTwoD.prototype.accountBoundingBox = function(inputOutputBox)
+{ accountBoundingBox(this.location, inputOutputBox);
+}
+
+TextPlotTwoD.prototype.drawNoFinish = function(theCanvas)
+{ var theSurface = theCanvas.surface;
+  theSurface.strokeStyle = colorRGBToString(this.color);
+  theSurface.fillStyle = colorRGBToString(this.color);
+  var theCoords = theCanvas.coordsMathToScreen(this.location);
+  theSurface.fillText(this.text, theCoords[0], theCoords[1]);
+}
+
+TextPlotTwoD.prototype.draw = function(theCanvas)
+{ var theSurface = theCanvas.surface;
+  theSurface.beginPath();
+  this.drawNoFinish(theCanvas);
+  theSurface.stroke();
 }
 
 function VectorFieldTwoD(
@@ -742,8 +769,9 @@ function VectorFieldTwoD(
   inputLowLeft, inputHighRight,
   inputNumSegmentsXY,
   inputDesiredLengthDirectionVectors,
-  inputColor, inputLineWidth)
-{ this.theField = inputField;
+  inputColor, inputLineWidth
+) { 
+  this.theField = inputField;
   this.isDirectionField = inputIsDirectionField;
   this.lowLeft = inputLowLeft;
   this.highRight = inputHighRight;
@@ -751,43 +779,45 @@ function VectorFieldTwoD(
   this.desiredLengthDirectionVectors = inputDesiredLengthDirectionVectors;
   this.color = colorToRGB(inputColor);
   this.lineWidth = inputLineWidth;
-  this.accountBoundingBox = function(inputOutputBox)
-  { accountBoundingBox(this.lowLeft, inputOutputBox);
-    accountBoundingBox(this.highRight, inputOutputBox);
-  };
-  this.draw = function(theCanvas)
-  { var theSurface = theCanvas.surface;
-    theSurface.beginPath();
-    theSurface.strokeStyle = colorRGBToString(this.color);
-    theSurface.fillStyle = colorRGBToString(this.color);
-    theSurface.lineWidth = this.lineWidth;
-    for (var i = 0; i < this.numSegmentsXY[0]; i ++)
-    { var theRatioX = i/(this.numSegmentsXY[0]- 1);
-      var theX = this.lowLeft[0] *(1-theRatioX) +
-        this.highRight[0]*theRatioX;
-      for (var j = 0; j < this.numSegmentsXY[1]; j ++)
-      { var theRatioY = j/(this.numSegmentsXY[1]- 1);
-        var theY = this.lowLeft[1] *(1-theRatioY) +
-          this.highRight[1]*theRatioY;
-        var theV= this.theField(theX, theY);
-        if (this.isDirectionField)
-          if (vectorLength(theV) !== 0)
-            vectorTimesScalar(theV,this.desiredLengthDirectionVectors* 1/vectorLength(theV));
-        var headMath = [theX+theV[0]/2, theY+theV[1]/2 ];
-        var tailMath = [theX-theV[0]/2, theY-theV[1]/2 ];
-        var headScreen = theCanvas.coordsMathToScreen(headMath);
-        var tailScreen = theCanvas.coordsMathToScreen(tailMath);
-        var baseScreen = theCanvas.coordsMathToScreen([theX, theY]);
-        theSurface.moveTo(tailScreen[0], tailScreen[1]);
-        theSurface.lineTo(headScreen[0], headScreen[1]);
-        theSurface.stroke();
-        //theSurface.moveTo(baseScreen[0], baseScreen[1]);
-        //theSurface.arc(baseScreen[0], baseScreen[1],0.5, 0, Math.PI*2);
-        //theSurface.fill();
-      }
-    }
+}
 
-  };
+VectorFieldTwoD.prototype.accountBoundingBox = function(inputOutputBox)
+{ accountBoundingBox(this.lowLeft, inputOutputBox);
+  accountBoundingBox(this.highRight, inputOutputBox);
+}
+
+VectorFieldTwoD.prototype.draw = function(theCanvas)
+{ var theSurface = theCanvas.surface;
+  theSurface.beginPath();
+  theSurface.strokeStyle = colorRGBToString(this.color);
+  theSurface.fillStyle = colorRGBToString(this.color);
+  theSurface.lineWidth = this.lineWidth;
+  for (var i = 0; i < this.numSegmentsXY[0]; i ++)
+  { var theRatioX = i/(this.numSegmentsXY[0]- 1);
+    var theX = this.lowLeft[0] *(1-theRatioX) +
+      this.highRight[0]*theRatioX;
+    for (var j = 0; j < this.numSegmentsXY[1]; j ++)
+    { var theRatioY = j/(this.numSegmentsXY[1]- 1);
+      var theY = this.lowLeft[1] *(1-theRatioY) +
+        this.highRight[1]*theRatioY;
+      var theV= this.theField(theX, theY);
+      if (this.isDirectionField)
+        if (vectorLength(theV) !== 0)
+          vectorTimesScalar(theV,this.desiredLengthDirectionVectors* 1/vectorLength(theV));
+      var headMath = [theX+theV[0]/2, theY+theV[1]/2 ];
+      var tailMath = [theX-theV[0]/2, theY-theV[1]/2 ];
+      var headScreen = theCanvas.coordsMathToScreen(headMath);
+      var tailScreen = theCanvas.coordsMathToScreen(tailMath);
+      var baseScreen = theCanvas.coordsMathToScreen([theX, theY]);
+      theSurface.moveTo(tailScreen[0], tailScreen[1]);
+      theSurface.lineTo(headScreen[0], headScreen[1]);
+      theSurface.stroke();
+      //theSurface.moveTo(baseScreen[0], baseScreen[1]);
+      //theSurface.arc(baseScreen[0], baseScreen[1],0.5, 0, Math.PI*2);
+      //theSurface.fill();
+    }
+  }
+
 }
 
 function SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth)
@@ -796,29 +826,32 @@ function SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth)
   this.color = colorToRGB(inputColor);
   this.type ="segment";
   this.lineWidth = inputLineWidth;
-  this.accountBoundingBox = function(inputOutputBox)
-  { accountBoundingBox(this.leftPt , inputOutputBox);
-    accountBoundingBox(this.rightPt, inputOutputBox);
-  };
-  this.drawNoFinish = function (theCanvas, startByMoving)
-  { var theSurface = theCanvas.surface;
-    var theCoords = theCanvas.coordsMathToScreen(this.leftPt);
-    theSurface.lineWidth = this.lineWidth;
-    if (startByMoving)
-      theSurface.moveTo(theCoords[0], theCoords[1]);
-    else
-      theSurface.lineTo(theCoords[0], theCoords[1]);
-    theCoords = theCanvas.coordsMathToScreen(this.rightPt);
+}
+
+SegmentTwoD.prototype.accountBoundingBox = function(inputOutputBox) { 
+  accountBoundingBox(this.leftPt , inputOutputBox);
+  accountBoundingBox(this.rightPt, inputOutputBox);
+}
+
+SegmentTwoD.prototype.drawNoFinish = function (theCanvas, startByMoving)
+{ var theSurface = theCanvas.surface;
+  var theCoords = theCanvas.coordsMathToScreen(this.leftPt);
+  theSurface.lineWidth = this.lineWidth;
+  if (startByMoving)
+    theSurface.moveTo(theCoords[0], theCoords[1]);
+  else
     theSurface.lineTo(theCoords[0], theCoords[1]);
-  };
-  this.draw = function(theCanvas)
-  { var theSurface = theCanvas.surface;
-    theSurface.beginPath();
-    theSurface.strokeStyle = colorRGBToString(this.color);
-    theSurface.fillStyle = colorRGBToString(this.color);
-    this.drawNoFinish(theCanvas, true);
-    theSurface.stroke();
-  };
+  theCoords = theCanvas.coordsMathToScreen(this.rightPt);
+  theSurface.lineTo(theCoords[0], theCoords[1]);
+}
+
+SegmentTwoD.prototype.draw = function(theCanvas)
+{ var theSurface = theCanvas.surface;
+  theSurface.beginPath();
+  theSurface.strokeStyle = colorRGBToString(this.color);
+  theSurface.fillStyle = colorRGBToString(this.color);
+  this.drawNoFinish(theCanvas, true);
+  theSurface.stroke();
 }
 
 function PlotFillTwoD(inputCanvas, inputColor)
@@ -890,246 +923,277 @@ function CanvasTwoD(inputCanvas)
   this.flagShowPerformance = true;
   this.flagShowAxesTicks = false;
   this.flagShowGrid = false;
-  this.drawPoints = function (inputPoints, inputColor)
-  { this.theObjects.push(new PointsTwoD(inputPoints, inputColor));
-  };
-  this.drawLine = function (inputLeftPt, inputRightPt, inputColor, inputLineWidth)
-  { var newLine = new SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth);
-    this.theObjects.push(newLine);
-  };
-  this.drawGrid = function ()
-  { this.flagShowAxesTicks = true;
-    this.flagShowGrid = true;
-    this.theObjects.push(new AxesGrid());
-  };
-  this.drawCoordinateAxes = function ()
-  { this.theObjects.push(new drawCoordinateAxesTwoD());
-  };
-  this.drawVectorField = function (
-    inputField, inputIsDirectionField, inputLowLeft,
-    inputHighRight, inputNumSegmentsXY,
+}
+
+CanvasTwoD.prototype.drawPoints = function (inputPoints, inputColor)
+{ this.theObjects.push(new PointsTwoD(inputPoints, inputColor));
+};
+
+CanvasTwoD.prototype.drawLine = function (inputLeftPt, inputRightPt, inputColor, inputLineWidth)
+{ var newLine = new SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth);
+  this.theObjects.push(newLine);
+};
+
+CanvasTwoD.prototype.drawGrid = function ()
+{ this.flagShowAxesTicks = true;
+  this.flagShowGrid = true;
+  this.theObjects.push(new AxesGrid());
+};
+
+CanvasTwoD.prototype.drawCoordinateAxes = function ()
+{ this.theObjects.push(new drawCoordinateAxesTwoD());
+};
+
+CanvasTwoD.prototype.drawVectorField = function (
+  inputField, inputIsDirectionField, inputLowLeft,
+  inputHighRight, inputNumSegmentsXY,
+  inputDesiredLengthDirectionVectors,
+  inputColor, inputLineWidth)
+{ var newLine = new VectorFieldTwoD(
+    inputField, inputIsDirectionField, inputLowLeft, inputHighRight,
+    inputNumSegmentsXY,
     inputDesiredLengthDirectionVectors,
-    inputColor, inputLineWidth)
-  { var newLine = new VectorFieldTwoD(
-      inputField, inputIsDirectionField, inputLowLeft, inputHighRight,
-      inputNumSegmentsXY,
-      inputDesiredLengthDirectionVectors,
-      inputColor, inputLineWidth);
-    this.theObjects.push(newLine);
-  };
-  this.drawPath = function (inputPath, inputColor, inputLineWidth)
-  { var newPath = new PathTwoD(inputPath, inputColor, inputColor, inputLineWidth);
-    this.theObjects.push(newPath);
-  };
-  this.drawPathFilled = function (inputPath, inputContourColor, inputFillColor)
-  { var newPath = new PathTwoD(inputPath, inputContourColor, inputFillColor);
-    newPath.isFilled = true;
-    this.theObjects.push(newPath);
-  };
-  this.drawFunction = function (inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth)
-  { var newPlot = new PlotTwoD(inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth);
-    if (inputLeftPt !== "minusInfinity" && inputRightPt !== "infinity")
-    { if (this.leftMostPlotPoint === "none")
-        this.leftMostPlotPoint = inputLeftPt;
-      else
-        this.leftMostPlotPoint =Math.min(inputLeftPt, this.leftMostPlotPoint);
-      if (this.rightMostPlotPoint === "none")
-        this.rightMostPlotPoint = inputRightPt;
-      else
-        this.rightMostPlotPoint =Math.max(inputRightPt, this.rightMostPlotPoint);
-    }
-    this.theObjects.push(newPlot);
-  };
-  this.drawCurve = function (inputCoordinateFuns, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth)
-  { var newPlot = new CurveTwoD(inputCoordinateFuns, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth);
-    this.theObjects.push(newPlot);
-  };
-  this.drawText = function (inputLocation, inputText, inputColor)
-  { var newPlot = new TextPlotTwoD(inputLocation, inputText, inputColor);
-    this.theObjects.push(newPlot);
-  };
-  this.plotFillStart = function (inputColor)
-  { this.theObjects.push(new PlotFillTwoD(this, inputColor));
-  };
-  this.plotFillFinish = function ()
-  { this.theObjects.push({type:"plotFillFinish"});
-  };
-  this.computeViewWindow = function()
-  { this.boundingBoxMath =[[-0.1,-0.1],[0.1,0.1]];
-    for (var i = 0; i < this.theObjects.length; i ++)
-    { if (this.theObjects[i].accountBoundingBox ===undefined)
-        continue;
-      this.theObjects[i].accountBoundingBox(this.boundingBoxMath);
-    }
-    vectorTimesScalar(this.boundingBoxMath[0], 1.05);
-    vectorTimesScalar(this.boundingBoxMath[1], 1.05);
-    this.setViewWindow(this.boundingBoxMath[0], this.boundingBoxMath[1]);
-  };
-  this.setViewWindow = function(leftLowPt, rightUpPt)
-  { this.viewWindowDefault =[leftLowPt,rightUpPt];
-    var leftLowScreen = this.coordsMathToScreen(leftLowPt);
-    var rightUpScreen = this.coordsMathToScreen(rightUpPt);
-    var desiredHeight =Math.abs(rightUpScreen[1]-leftLowScreen[1]);
-    var desiredWidth =Math.abs(rightUpScreen[0]-leftLowScreen[0]);
-    var candidateScaleHeight = this.scale* this.height/desiredHeight;
-    var candidateScaleWidth = this.scale* this.width/desiredWidth;
-    this.scale =Math.min(candidateScaleHeight, candidateScaleWidth);
-    //console.log("new scale: "+ this.scale);
-    var centerViewWindowMath = vectorPlusVector(leftLowPt,rightUpPt);
-    vectorTimesScalar(centerViewWindowMath,0.5);
-    var centerViewWindowScreen = this.coordsMathToScreen(centerViewWindowMath);
-    this.centerX+= this.centerCanvasX-centerViewWindowScreen[0];
-    this.centerY+= this.centerCanvasY-centerViewWindowScreen[1];
-  };
-  this.redraw = function()
-  { this.textPerformance ="";
-    this.redrawStart = new Date().getTime();
-    var theSurface = this.surface;
-    theSurface.clearRect(0, 0, this.width, this.height);
-    for (this.numDrawnObjects = 0; this.numDrawnObjects<this.theObjects.length; this.numDrawnObjects++)
-      this.theObjects[this.numDrawnObjects].draw(this);
-    var redrawTime = new Date().getTime();
-    if (this.flagShowPerformance)
-    { this.textPerformance =
-      "Redraw time (ms): " + (redrawTime-this.redrawStart);
-      this.showMessages();
-    }
-  };
-  this.computeBasis = function ()
-  { //if (this.screenBasisOrthonormal.length<2)
-    //  this.screenBasisOrthonormal.length =2;
-    this.screenBasisOrthonormal[0] =[1,0];
-    this.screenBasisOrthonormal[1] =[0,1];
-    this.textProjectionInfo ="";
-    this.textProjectionInfo+=
-    "<br>e1: " + this.screenBasisOrthonormal[0] +
-    "<br>e2: " + this.screenBasisOrthonormal[1];
-  };
-  this.init = function(inputCanvasId)
-  { this.canvasId = inputCanvasId;
-    this.canvasContainer = document.getElementById(inputCanvasId);
-    this.surface = this.canvasContainer.getContext("2d");
-    this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, false);
-    this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, false);
-//    this.canvasContainer.addEventListener("wheel", calculatorCanvasMouseWheel, true);
-    this.theObjects =[];
-    this.spanMessages = document.getElementById(this.canvasId+"Messages");
-    this.spanCriticalErrors = document.getElementById(this.canvasId+"CriticalErrors");
-    this.spanControls = document.getElementById(this.canvasId+"Controls");
-    this.constructControls();
-    this.computeBasis();
-  };
-  this.resetView = function()
-  { this.setViewWindow(this.viewWindowDefault[0],this.viewWindowDefault[1]);
-    this.redraw();
-  };
-  this.constructControls = function()
-  { var thisString="document.getElementById('"+this.canvasId+"')";
-    this.spanControls.innerHTML="<button style =\"border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer\" onclick=\"calculatorGetCanvasTwoD("+thisString+ ").resetView();\">reset view</button> ";
-  };
-  this.coordsMathScreenToMath = function(theCoords)
-  { var output = this.screenBasisOrthonormal[0].slice();
-    vectorTimesScalar(output, theCoords[0]);
-    vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], theCoords[1]);
-    return output;
-  };
-  this.coordsMathToMathScreen = function(vector)
-  { return [vectorScalarVector(vector, this.screenBasisOrthonormal[0]),
-            vectorScalarVector(vector, this.screenBasisOrthonormal[1])];
-  };
-  this.coordsMathToScreen = function(vector)
-  { return [this.scale*vectorScalarVector(vector, this.screenBasisOrthonormal[0]) +this.centerX,
-       (- 1)*this.scale*vectorScalarVector(vector, this.screenBasisOrthonormal[1]) +this.centerY];
-  };
-  this.coordsScreenAbsoluteToScreen = function(screenX, screenY)
-  { return getPosXPosYObject(this.canvasContainer, screenX, screenY);
-  };
-  this.coordsScreenToMathScreen = function(screenPos)
-  { return [ (screenPos[0]-this.centerX)/this.scale, (this.centerY-screenPos[1])/this.scale];
-  };
-  this.coordsScreenAbsoluteToMathScreen = function(screenX, screenY)
-  { return this.coordsScreenToMathScreen(this.coordsScreenAbsoluteToScreen(screenX, screenY));
-  };
-  this.coordsMathScreenToScreen = function(theCoords)
-  { return [this.scale*theCoords[0] + this.centerX, this.centerY-this.scale*theCoords[1]];
-  };
-  this.mouseWheel = function(wheelDelta, screenX, screenY)
-  { var screenPos = this.coordsScreenAbsoluteToScreen(screenX, screenY);
-    var mathScreenPos = this.coordsScreenToMathScreen(screenPos);
-    if (wheelDelta/this.scale>0.1)
-      wheelDelta = this.scale*0.1;
-    if (wheelDelta/this.scale<-0.1)
-      wheelDelta = -this.scale*0.1;
-    this.scale +=wheelDelta;
-    if (this.scale<= 0)
-      this.scale =1;
-    var intermediateScreenPos = this.coordsMathScreenToScreen(mathScreenPos);
-    //console.log("start screen: "+[screenX, screenY]);
-    //console.log("intermed. screen: "+ intermediateScreenPos);
-    this.centerX = this.centerX+screenPos[0]-intermediateScreenPos[0];
-    this.centerY = this.centerY+screenPos[1]-intermediateScreenPos[1];
-    this.redraw();
-  };
-  this.mouseMove = function(screenX, screenY)
-  { if (this.selectedElement === "")
-      return;
-    this.mousePosition = this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
-    if (this.selectedElement === "origin")
-      this.panAfterCursor();
-    this.redrawFinish = new Date().getTime();
-    this.redrawTime = this.redrawFinish-this.redrawStart;
-  };
-  this.panAfterCursor = function()
-  { var difference =vectorMinusVector(this.mousePosition, this.clickedPosition);
-    this.centerX+= difference[0]*this.scale;
-    this.centerY-= difference[1]*this.scale;
-    this.redraw();
-  };
-  this.pointsWithinClickTolerance = function (leftXY, rightXY)
-  { var squaredDistance =
-    ((leftXY[0]-rightXY[0])*(leftXY[0]-rightXY[0]) +
-     (leftXY[1]-rightXY[1])*(leftXY[1]-rightXY[1]))*this.scale;
-    return squaredDistance<1000;
-  };
-  this.canvasClick = function (screenX, screenY)
-  { this.clickedPosition = this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
-    this.mousePosition =[];
-    //if (this.pointsWithinClickTolerance(this.clickedPosition,[0,0]))
-    this.selectedElement ="origin";
-    //else
-    //  this.selectedElement ="";
-    if (this.flagShowPerformance)
-      this.logStatus();
-  };
-  this.selectEmpty = function()
-  { this.selectedElement ="";
-  };
-  this.showMessages = function()
-  { if (this.spanMessages === null || this.spanMessages ===undefined)
-      return;
-    var theHTML="";
-    if (this.textPerformance != "")
-      theHTML+= this.textPerformance + "<hr>";
-    if (this.textErrors !== "")
-      theHTML+="<span style =\"red\"><b>" +this.textErrors+ "</b></span><hr>";
-    theHTML+=
-    "<span>" +this.textMouseInfo+ "</span><hr>"+
-    "<span>" +this.textProjectionInfo+ "</span>";
-    if (this.textPatchInfo!== "")
-      theHTML+="<hr><span>" +this.textPatchInfo+ "</span>";
-    this.spanMessages.innerHTML= theHTML;
-    ;
-  };
-  this.logStatus = function()
-  { this.textMouseInfo ="";
-    this.textMouseInfo+=
-    "time last redraw: " + this.redrawTime +" ms " +
-    "(~" + (1000/this.redrawTime).toFixed(1) + " f.p.s.)"+
-    "<br>mouse coordinates: " + this.mousePosition +
-    "<br>clicked coordinates: " + this.clickedPosition +
-    "<br>delta of position: " + this.positionDelta ;
+    inputColor, inputLineWidth);
+  this.theObjects.push(newLine);
+};
+
+CanvasTwoD.prototype.drawPath = function (inputPath, inputColor, inputLineWidth)
+{ var newPath = new PathTwoD(inputPath, inputColor, inputColor, inputLineWidth);
+  this.theObjects.push(newPath);
+}
+
+CanvasTwoD.prototype.drawPathFilled = function (inputPath, inputContourColor, inputFillColor)
+{ var newPath = new PathTwoD(inputPath, inputContourColor, inputFillColor);
+  newPath.isFilled = true;
+  this.theObjects.push(newPath);
+};
+
+CanvasTwoD.prototype.drawFunction = function (inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth)
+{ var newPlot = new PlotTwoD(inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth);
+  if (inputLeftPt !== "minusInfinity" && inputRightPt !== "infinity")
+  { if (this.leftMostPlotPoint === "none")
+      this.leftMostPlotPoint = inputLeftPt;
+    else
+      this.leftMostPlotPoint =Math.min(inputLeftPt, this.leftMostPlotPoint);
+    if (this.rightMostPlotPoint === "none")
+      this.rightMostPlotPoint = inputRightPt;
+    else
+      this.rightMostPlotPoint =Math.max(inputRightPt, this.rightMostPlotPoint);
+  }
+  this.theObjects.push(newPlot);
+}
+
+CanvasTwoD.prototype.drawCurve = function (inputCoordinateFuns, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth)
+{ var newPlot = new CurveTwoD(inputCoordinateFuns, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth);
+  this.theObjects.push(newPlot);
+}
+
+CanvasTwoD.prototype.drawText = function (inputLocation, inputText, inputColor)
+{ var newPlot = new TextPlotTwoD(inputLocation, inputText, inputColor);
+  this.theObjects.push(newPlot);
+};
+
+CanvasTwoD.prototype.plotFillStart = function (inputColor)
+{ this.theObjects.push(new PlotFillTwoD(this, inputColor));
+};
+
+CanvasTwoD.prototype.plotFillFinish = function ()
+{ this.theObjects.push({type:"plotFillFinish"});
+}
+
+CanvasTwoD.prototype.computeViewWindow = function()
+{ this.boundingBoxMath =[[-0.1,-0.1],[0.1,0.1]];
+  for (var i = 0; i < this.theObjects.length; i ++)
+  { if (this.theObjects[i].accountBoundingBox ===undefined)
+      continue;
+    this.theObjects[i].accountBoundingBox(this.boundingBoxMath);
+  }
+  vectorTimesScalar(this.boundingBoxMath[0], 1.05);
+  vectorTimesScalar(this.boundingBoxMath[1], 1.05);
+  this.setViewWindow(this.boundingBoxMath[0], this.boundingBoxMath[1]);
+};
+
+CanvasTwoD.prototype.setViewWindow = function(leftLowPt, rightUpPt)
+{ this.viewWindowDefault =[leftLowPt,rightUpPt];
+  var leftLowScreen = this.coordsMathToScreen(leftLowPt);
+  var rightUpScreen = this.coordsMathToScreen(rightUpPt);
+  var desiredHeight =Math.abs(rightUpScreen[1]-leftLowScreen[1]);
+  var desiredWidth =Math.abs(rightUpScreen[0]-leftLowScreen[0]);
+  var candidateScaleHeight = this.scale* this.height/desiredHeight;
+  var candidateScaleWidth = this.scale* this.width/desiredWidth;
+  this.scale =Math.min(candidateScaleHeight, candidateScaleWidth);
+  //console.log("new scale: "+ this.scale);
+  var centerViewWindowMath = vectorPlusVector(leftLowPt,rightUpPt);
+  vectorTimesScalar(centerViewWindowMath,0.5);
+  var centerViewWindowScreen = this.coordsMathToScreen(centerViewWindowMath);
+  this.centerX+= this.centerCanvasX-centerViewWindowScreen[0];
+  this.centerY+= this.centerCanvasY-centerViewWindowScreen[1];
+}
+
+CanvasTwoD.prototype.redraw = function()
+{ this.textPerformance ="";
+  this.redrawStart = new Date().getTime();
+  var theSurface = this.surface;
+  theSurface.clearRect(0, 0, this.width, this.height);
+  for (this.numDrawnObjects = 0; this.numDrawnObjects<this.theObjects.length; this.numDrawnObjects++)
+    this.theObjects[this.numDrawnObjects].draw(this);
+  var redrawTime = new Date().getTime();
+  if (this.flagShowPerformance)
+  { this.textPerformance =
+    "Redraw time (ms): " + (redrawTime-this.redrawStart);
     this.showMessages();
-  };
+  }
+}
+
+CanvasTwoD.prototype.computeBasis = function ()
+{ //if (this.screenBasisOrthonormal.length<2)
+  //  this.screenBasisOrthonormal.length =2;
+  this.screenBasisOrthonormal[0] =[1,0];
+  this.screenBasisOrthonormal[1] =[0,1];
+  this.textProjectionInfo ="";
+  this.textProjectionInfo+=
+  "<br>e1: " + this.screenBasisOrthonormal[0] +
+  "<br>e2: " + this.screenBasisOrthonormal[1];
+}
+
+CanvasTwoD.prototype.init = function(inputCanvasId)
+{ this.canvasId = inputCanvasId;
+  this.canvasContainer = document.getElementById(inputCanvasId);
+  this.surface = this.canvasContainer.getContext("2d");
+  this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, false);
+  this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, false);
+//    this.canvasContainer.addEventListener("wheel", calculatorCanvasMouseWheel, true);
+  this.theObjects =[];
+  this.spanMessages = document.getElementById(this.canvasId+"Messages");
+  this.spanCriticalErrors = document.getElementById(this.canvasId+"CriticalErrors");
+  this.spanControls = document.getElementById(this.canvasId+"Controls");
+  this.constructControls();
+  this.computeBasis();
+};
+CanvasTwoD.prototype.resetView = function()
+{ this.setViewWindow(this.viewWindowDefault[0],this.viewWindowDefault[1]);
+  this.redraw();
+};
+CanvasTwoD.prototype.constructControls = function()
+{ var thisString="document.getElementById('"+this.canvasId+"')";
+  this.spanControls.innerHTML="<button style =\"border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer\" onclick=\"calculatorGetCanvasTwoD("+thisString+ ").resetView();\">reset view</button> ";
+};
+
+CanvasTwoD.prototype.coordsMathScreenToMath = function(theCoords)
+{ var output = this.screenBasisOrthonormal[0].slice();
+  vectorTimesScalar(output, theCoords[0]);
+  vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], theCoords[1]);
+  return output;
+}
+
+CanvasTwoD.prototype.coordsMathToMathScreen = function(vector)
+{ return [vectorScalarVector(vector, this.screenBasisOrthonormal[0]),
+          vectorScalarVector(vector, this.screenBasisOrthonormal[1])];
+}
+
+CanvasTwoD.prototype.coordsMathToScreen = function(vector)
+{ return [this.scale*vectorScalarVector(vector, this.screenBasisOrthonormal[0]) +this.centerX,
+     (- 1)*this.scale*vectorScalarVector(vector, this.screenBasisOrthonormal[1]) +this.centerY];
+}
+
+CanvasTwoD.prototype.coordsScreenAbsoluteToScreen = function(screenX, screenY)
+{ return getPosXPosYObject(this.canvasContainer, screenX, screenY);
+}
+
+CanvasTwoD.prototype.coordsScreenToMathScreen = function(screenPos)
+{ return [ (screenPos[0]-this.centerX)/this.scale, (this.centerY-screenPos[1])/this.scale];
+}
+
+CanvasTwoD.prototype.coordsScreenAbsoluteToMathScreen = function(screenX, screenY)
+{ return this.coordsScreenToMathScreen(this.coordsScreenAbsoluteToScreen(screenX, screenY));
+}
+
+CanvasTwoD.prototype.coordsMathScreenToScreen = function(theCoords)
+{ return [this.scale*theCoords[0] + this.centerX, this.centerY-this.scale*theCoords[1]];
+}
+
+CanvasTwoD.prototype.mouseWheel = function(wheelDelta, screenX, screenY)
+{ var screenPos = this.coordsScreenAbsoluteToScreen(screenX, screenY);
+  var mathScreenPos = this.coordsScreenToMathScreen(screenPos);
+  if (wheelDelta/this.scale>0.1)
+    wheelDelta = this.scale*0.1;
+  if (wheelDelta/this.scale<-0.1)
+    wheelDelta = -this.scale*0.1;
+  this.scale +=wheelDelta;
+  if (this.scale<= 0)
+    this.scale =1;
+  var intermediateScreenPos = this.coordsMathScreenToScreen(mathScreenPos);
+  //console.log("start screen: "+[screenX, screenY]);
+  //console.log("intermed. screen: "+ intermediateScreenPos);
+  this.centerX = this.centerX+screenPos[0]-intermediateScreenPos[0];
+  this.centerY = this.centerY+screenPos[1]-intermediateScreenPos[1];
+  this.redraw();
+}
+
+CanvasTwoD.prototype.mouseMove = function(screenX, screenY)
+{ if (this.selectedElement === "")
+    return;
+  this.mousePosition = this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
+  if (this.selectedElement === "origin")
+    this.panAfterCursor();
+  this.redrawFinish = new Date().getTime();
+  this.redrawTime = this.redrawFinish-this.redrawStart;
+}
+
+CanvasTwoD.prototype.panAfterCursor = function()
+{ var difference =vectorMinusVector(this.mousePosition, this.clickedPosition);
+  this.centerX+= difference[0]*this.scale;
+  this.centerY-= difference[1]*this.scale;
+  this.redraw();
+}
+
+CanvasTwoD.prototype.pointsWithinClickTolerance = function (leftXY, rightXY)
+{ var squaredDistance =
+  ((leftXY[0]-rightXY[0])*(leftXY[0]-rightXY[0]) +
+   (leftXY[1]-rightXY[1])*(leftXY[1]-rightXY[1]))*this.scale;
+  return squaredDistance<1000;
+}
+
+CanvasTwoD.prototype.canvasClick = function (screenX, screenY)
+{ this.clickedPosition = this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
+  this.mousePosition =[];
+  //if (this.pointsWithinClickTolerance(this.clickedPosition,[0,0]))
+  this.selectedElement ="origin";
+  //else
+  //  this.selectedElement ="";
+  if (this.flagShowPerformance)
+    this.logStatus();
+}
+
+CanvasTwoD.prototype.selectEmpty = function()
+{ this.selectedElement ="";
+}
+
+CanvasTwoD.prototype.showMessages = function()
+{ if (this.spanMessages === null || this.spanMessages ===undefined)
+    return;
+  var theHTML="";
+  if (this.textPerformance != "")
+    theHTML+= this.textPerformance + "<hr>";
+  if (this.textErrors !== "")
+    theHTML+="<span style =\"red\"><b>" +this.textErrors+ "</b></span><hr>";
+  theHTML+=
+  "<span>" +this.textMouseInfo+ "</span><hr>"+
+  "<span>" +this.textProjectionInfo+ "</span>";
+  if (this.textPatchInfo!== "")
+    theHTML+="<hr><span>" +this.textPatchInfo+ "</span>";
+  this.spanMessages.innerHTML= theHTML;
+}
+
+CanvasTwoD.prototype.logStatus = function()
+{ this.textMouseInfo ="";
+  this.textMouseInfo+=
+  "time last redraw: " + this.redrawTime +" ms " +
+  "(~" + (1000/this.redrawTime).toFixed(1) + " f.p.s.)"+
+  "<br>mouse coordinates: " + this.mousePosition +
+  "<br>clicked coordinates: " + this.clickedPosition +
+  "<br>delta of position: " + this.positionDelta ;
+  this.showMessages();
 }
 
 function Canvas(inputCanvas)

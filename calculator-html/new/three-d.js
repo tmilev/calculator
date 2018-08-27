@@ -494,11 +494,12 @@ CurveTwoD.prototype.drawNoFinish = function(theCanvas, startByMoving) {
       continue;
     }
     theCoords = theCanvas.coordsMathToScreen([theX, theY]);
-    if (!alreadyMoved)
-    { alreadyMoved = true;
+    if (!alreadyMoved) { 
+      alreadyMoved = true;
       theSurface.moveTo(theCoords[0], theCoords[1]);
-    } else
+    } else {
       theSurface.lineTo(theCoords[0], theCoords[1]);
+    }
   }
 }
 
@@ -511,34 +512,38 @@ function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth)
   this.lineWidth = inputLineWidth;
 }
 
-PathTwoD.prototype.accountBoundingBox = function(inputOutputBox)
-{ for (var i = 0; i < this.path.length; i ++)
+PathTwoD.prototype.accountBoundingBox = function(inputOutputBox) { 
+  for (var i = 0; i < this.path.length; i ++) {
     accountBoundingBox(this.path[i], inputOutputBox);
+  }
 }
 
-PathTwoD.prototype.drawNoFinish = function(theCanvas, startByMoving)
-{ if (inputPath.length<1)
+PathTwoD.prototype.drawNoFinish = function(theCanvas, startByMoving) { 
+  if (this.path.length < 1)
     return;
   var theSurface = theCanvas.surface;
   var theCoords = theCanvas.coordsMathToScreen(this.path[0]);
-  if (startByMoving)
+  if (startByMoving) {
     theSurface.moveTo(theCoords[0], theCoords[1]);
-  else
+  } else {
     theSurface.lineTo(theCoords[0], theCoords[1]);
+  }
   theSurface.lineWidth = this.lineWidth;
-  for (var i =1; i < this.path.length; i ++)
-  { theCoords = theCanvas.coordsMathToScreen(this.path[i]);
+  for (var i =1; i < this.path.length; i ++) { 
+    theCoords = theCanvas.coordsMathToScreen(this.path[i]);
     theSurface.lineTo(theCoords[0], theCoords[1]);
   }
   theSurface.strokeStyle = colorRGBToString(this.color);
   theSurface.fillStyle = colorRGBToString(this.colorFill);
-  if (this.isFilled)
+  if (this.isFilled) {
     theSurface.fill();
+  }
 }
 
-PathTwoD.prototype.draw = function(theCanvas)
-{ if (inputPath.length<1)
+PathTwoD.prototype.draw = function(theCanvas) { 
+  if (this.path.length < 1) {
     return;
+  }
   var theSurface = theCanvas.surface;
   theSurface.beginPath();
   this.drawNoFinish(theCanvas, true);

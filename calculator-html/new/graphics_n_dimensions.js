@@ -23,6 +23,8 @@
 //TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+var collectionGraphicsNDimension = {};
+
 function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.vectors = [];
   this.vectorProjections = [];
@@ -54,6 +56,9 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.canvas = null;
   this.widthHtml = 0;
   this.heightHtml = 0;
+  collectionGraphicsNDimension[this.idCanvas] = this;
+  this.clickTolerance = 5;
+
 }
 
 GraphicsNDimensions.prototype.drawAll = function () {
@@ -167,6 +172,17 @@ GraphicsNDimensions.prototype.snapShotLaTeX = function() {
 function setBilinearForm(idCanvas, row, column) {
 
 }
+
+GraphicsNDimensions.prototype.drawLine = function(left, right, color) {
+  this.drawOperations = new DrawSegmentBetweenTwoVectors(
+    this.idCanvas, {
+      left: left,
+      right: right,
+      lineWidth: 1,
+      lineColor = color    
+    }
+  );
+}
   
 GraphicsNDimensions.prototype.getBilinearFormInput = function () {
   var result = "";
@@ -204,17 +220,6 @@ GraphicsNDimensions.prototype.modifyBasisToOrthonormalNoShiftSecond = function()
 
 } 
 
-GraphicsNDimensions.prototype.init = function() {
-  if (this.ProjectionsEiVectors.length != this.dimension || this.theBilinearForm.length != this.dimension) {
-    this.theBuffer.MakeMeAStandardBasis(theDimension);
-  }
-  this.theBilinearForm = new Array(this.dimension);
-  for (var counterDimension = 0; counterDimension < this.dimension; counterDimension ++) { 
-    this.theBilinearForm[counterDimension] = Array.fill(0, 0, this.dimension);
-  }
-  this.modifyBasisToOrthonormalNoShiftSecond();
-}
-
 GraphicsNDimensions.prototype.changeProjectionPlaneUser = function() {
   this.frameCount ++;
   if (this.frameCount >= this.numberOfFrames) {
@@ -241,13 +246,98 @@ GraphicsNDimensions.prototype.drawAll = function () {
       this.canvas.arc(
         this.convertToXYName(this.highlight[i][j])[0], 
         this.convertToXYName(this.highlight[i][j])[1], 
-        7, 0, 2*Math.PI
+        7, 0, 2 * Math.PI
       );
-    this.canvas.stroke();
+      this.canvas.stroke();
+    }
   }
 }
 
-GraphicsNDimensions.prototype.drawAll = function(){
+function DrawSegmentBetweenTwoVectors(inputOwnerId, inputData) {
+  this.ownerId = inputOwnerId;
+  this.left = inputData.left;
+  this.right = inputData.right;
+  this.lineWidth = inputData.lineWidth;
+  this.lineColor = inputData.lineColor;
+}
+
+DrawSegmentBetweenTwoVectors.prototype.drawNoFinish = function() {
+  var owner = collectionGraphicsNDimension[this.ownerId];
+  var canvas = owner.canvas;
+  canvas.beginPath();
+  canvas.strokeStyle = this.colorLine;
+  canvas.lineWidth = this.lineWidth;
+  var screenCoordinatesLeft = owner.computeScreenCoordinates(this.left);
+  var screenCoordinatesRight = owner.computeScreenCoordinates(this.right);
+  canvas.moveTo(screenCoordinatesLeft[0], screenCoordinatesLeft[1]);
+  canvas.lineTo(screenCoordinatesRight[0], screenCoordinatesRight[1]);
+}
+
+function DrawFilledShape(inputOwnerId, inputData) {
+  this.points = inputData.points;
+  this.ownerId = inputOwnerId;
+  this.colorFill = inputData.colorFill;
+  this.lineWidth = inputData.lineWidth;
+}
+
+DrawFilledShape.prototype.drawNoFinish = function () {
+  var owner = collectionGraphicsNDimension[this.ownerId];
+  var canvas = owner.canvas;
+  canvas.beginPath();
+  canvas.fillStyle = this.colorFill;
+  canvas.lineWidth = this.lineWidth;
+  var currentPoint = [];
+  owner.computeScreenCoordinates(this.points[0], currentPoint);
+  canvas.moveTo(currentPoint[0], currentPoint[1]);
+  for (var counterPoint = 1; counterPoint < this.points.length; counterPoint ++) {
+    owner.computeAllScreenCoordinates(this.points[counterPoint], currentPoint);
+    canvas.lineTo(currentPoint[0], currentPoint[1]);
+  }
+  canvas.closePath();
+  canvas.fill();
+  //canvas.stroke();
+}
+
+function DrawCircleAtVector(inputOwnerId, inputData) {
+  this.ownerId = inputOwnerId;
+  this.location = inputData.location;
+  this.locationScreenCoordinates = [];
+  this.colorFill = inputData.colorFill;
+  this.radius = inputData.radius;
+}
+
+DrawCircleAtVector.prototype.drawNoFinish = function() {
+  var owner = collectionGraphicsNDimension[this.ownerId];
+  var canvas = owner.canvas;
+  canvas.strokeStyle = this.colorFill;
+  this.computeScreenCoordinates(this.location, this.locationScreenCoordinates);
+  canvas.beginPath();
+  canvas.arc( 
+    this.locationScreenCoordinates[0], 
+    this.locationScreenCoordinates[1],
+    this.radius,
+    0, 2 * Math.PI
+  );
+  //canvas.stroke();
+}
+
+function DrawTextAtVector(inputOwnerId, inputData) {
+  this.ownerId = inputOwnerId;
+  this.text = inputData.text;
+  this.location = inputData.location;
+  this.locationScreen = [];
+  this.colorFill = inputData.colorFill;
+}
+
+DrawTextAtVector.prototype.drawNoFinish = function() {
+  var owner = collectionGraphicsNDimension[this.ownerId];
+  var canvas = owner.canvas;
+  canvas.strokeStyle = this.colorFill;
+  this.locationScreen = owner.computeScreenCoordinates(this.location, this.locationScreen);
+  canvas.strokeText(this.text, this.locationScreen[0], this.locationScreen[1]);
+}
+
+GraphicsNDimensions.prototype.drawAll = function() {
   if (this.canvas == null || this.canvas == undefined) {
     this.init();
   }
@@ -255,107 +345,38 @@ GraphicsNDimensions.prototype.drawAll = function(){
   this.canvas.fillStyle = "#FFFFFF";
   this.canvas.fillRect(0, 0, this.widthHtml, this.heightHtml);
   for (var counterOperation = 0; counterOperation < this.drawOperations.length; counterOperation ++) { 
-    int currentIndex = this->theBuffer.IndexNthDrawOperation[i];
-    switch (theBuffer.TypeNthDrawOperation[i])
-    { case DrawOperations::typeDrawLineBetweenTwoVectors:
-        out << theSurfaceName << ".beginPath();\n ";
-        out << theSurfaceName << ".strokeStyle =\""
-        << this->GetColorHtmlFromColorIndex(this->theBuffer.theDrawLineBetweenTwoRootsOperations[currentIndex].ColorIndex)
-        << "\"; ";
-        out << theSurfaceName << ".lineWidth ="
-        << FloatingPoint::DoubleToString
-        (this->theBuffer.theDrawLineBetweenTwoRootsOperations[currentIndex].lineWidth)
-        << "; ";
-        out << theSurfaceName << ".moveTo("
-        << functionConvertToXYName << "( " << Points1ArrayName << "[" << currentIndex << "])[0],"
-        << functionConvertToXYName << "( " << Points1ArrayName << "["
-        << currentIndex << "])[1]); ";
-        out << theSurfaceName << ".lineTo("
-        << functionConvertToXYName << "( " << Points2ArrayName << "["
-        << currentIndex << "])[0],"
-        << " " << functionConvertToXYName << "( " << Points2ArrayName << "["
-        << currentIndex << "])[1]); ";
-        out << theSurfaceName << ".stroke();\n";
-        break;
-      case DrawOperations::typeFilledShape:
-        if (theDimension != 2)
-          break;
-        out << theSurfaceName << ".beginPath();\n ";
-        out << theSurfaceName << ".fillStyle =\""
-        << this->GetColorHtmlFromColorIndex(this->theBuffer.theShapes[currentIndex].ColorFillIndex)
-        << "\";\n";
-        out << theSurfaceName << ".lineWidth ="
-        << FloatingPoint::DoubleToString(this->theBuffer.theShapes[currentIndex].lineWidth)
-        << ";\n ";
-        out << theSurfaceName << ".moveTo("
-        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[0],"
-        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[1]);\n ";
-        out << "for (var i =1; i < " << filledShapes << "[" << currentIndex << "].length; i ++)\n";
-        out << "  " << theSurfaceName << ".lineTo("
-        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][i])[0],"
-        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][i])[1]);\n ";
-//        out << theSurfaceName << ".lineTo("
-//        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[0],"
-//        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[1]);\n ";
-        out << theSurfaceName << ".closePath();\n";
-        out << theSurfaceName << ".fill();\n";
-        out << theSurfaceName << ".strokeStyle =\""
-        << this->GetColorHtmlFromColorIndex(this->theBuffer.theShapes[currentIndex].ColorIndex)
-        << "\";\n";
-        out << theSurfaceName << ".stroke();\n";
-        break;
-      case DrawOperations::typeDrawCircleAtVector:
-        out << theSurfaceName << ".strokeStyle =\""
-        << this->GetColorHtmlFromColorIndex(this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].ColorIndex)
-        << "\"; ";
-        out << theSurfaceName << ".beginPath(); ";
-        out << theSurfaceName << ".arc("
-        << functionConvertToXYName << "( " << circArrayName << "["
-        << currentIndex << "])[0],"
-        << functionConvertToXYName << "( " << circArrayName << "["
-        << currentIndex << "])[1],"
-        <<  this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].radius << ", 0, 2*Math.PI); ";
-        out << theSurfaceName << ".stroke();\n";
-        break;
-      case DrawOperations::typeDrawTextAtVector:
-        out << theSurfaceName << ".strokeStyle =\""
-        << this->GetColorHtmlFromColorIndex(this->theBuffer.theDrawTextAtVectorOperations[currentIndex].ColorIndex)
-        << "\"; ";
-        out << theSurfaceName << ".strokeText(\"" << this->theBuffer.theDrawTextAtVectorOperations[currentIndex].theText << "\", "
-        << functionConvertToXYName << "( " << txtArrayName << "[" << currentIndex<< "])[0],"
-        << functionConvertToXYName << "( " << txtArrayName << "[" << currentIndex << "])[1]);\n";
-      default: break;
-    }
+    this.drawOperations[counterOperation].drawNoFinish();
   }
-//    stOutput << " got to here pt 10C";
+}
 
-  out << "drawHighlights" << timesCalled << "();\n";
-  out << "}\n";
-  out << "function " << theInitFunctionName << "(){\n"
-  << theSurfaceName << " = document.getElementById(\"" << theCanvasId << "\").getContext(\"2d\");\n"
-  << theDrawFunctionName << "();\n";
-  if (this->theBuffer.BasisProjectionPlane.size > 2)
-    out << "window.setTimeout(\"changeProjectionPlaneOnTimer" << timesCalled << "()\",100);\n";
-  out << " }\n";
-  out << "var selectedBasisIndexCone" << timesCalled << "= - 1;\n";
-  out << "var xShiftPointer" << timesCalled << "= 0;\n";
-  out << "var yShiftPointer" << timesCalled << "= 0;\n";
-  out << "var clickTolerance =5;\n"
-  << "function ptsWithinClickToleranceCone" << timesCalled << "(x1, y1, x2, y2)\n"
-  << "{ if (x1-x2>clickTolerance || x2-x1>clickTolerance || y1-y2>clickTolerance || y2-y1>clickTolerance )\n    return false;\n  return true;\n}";
+GraphicsNDimensions.prototype.init = function () {
 
-  out << "function MultiplyVector" << timesCalled << "(output, coeff)"
-  << "{ for (var i = 0; i <output.length; i ++)\n"
-  << "  output[i]*= coeff;\n"
-  << "}\n"
-  << "function AddVectorTimes" << timesCalled << "(output, inputVector, coeff)\n"
-  << "{ for (var i = 0; i <output.length; i ++)\n"
-  << "  output[i] += inputVector[i]*coeff;\n"
-  << "}\n"
-  << "function ScaleToUnitLength" << timesCalled << "(vector)\n"
-  << "{ MultiplyVector" << timesCalled << "(vector, 1/Math.sqrt(getScalarProduct" << timesCalled << "(vector,vector)));\n"
-  << "}\n";
-}  
+  if (this.ProjectionsEiVectors.length != this.dimension || this.theBilinearForm.length != this.dimension) {
+    this.theBuffer.MakeMeAStandardBasis(theDimension);
+  }
+  this.theBilinearForm = new Array(this.dimension);
+  for (var counterDimension = 0; counterDimension < this.dimension; counterDimension ++) { 
+    this.theBilinearForm[counterDimension] = Array.fill(0, 0, this.dimension);
+  }
+  this.modifyBasisToOrthonormalNoShiftSecond();
+  this.canvas = document.getElementById(this.idCanvas).getContext("2d");
+  this.drawAll();
+}
+
+GraphicsNDimensions.prototype.pointsAreWithinClickTolerance = function(x1, y1, x2, y2) {
+  if (
+    Math.abs(x1 - x2) > clickTolerance ||
+    Math.abs(y1 - y2) > this.clickTolerance
+  ) {
+    return false;
+  } 
+  return true;
+}
+
+GraphicsNDimensions.prototype.scaleToUnitLength = function(output) {
+  var scale =  1 / Math.sqrt(this.scalarProduct(output, output));
+  multiplyVectorByScalar(output, scale)
+}
 
 GraphicsNDimensions.prototype.scalarProduct = function(left, right) {
 
@@ -373,7 +394,9 @@ function addVectorTimesScalar(vector, other, scalar) {
   }
 }
 
-GraphicsNDimensions.prototype.rotateOutOfPlane = function(input, orthoBasis1, orthoBasis2, oldTanSquared, newTanSquared, newX, newY, oldX, oldY) {
+GraphicsNDimensions.prototype.rotateOutOfPlane = function(
+  input, orthoBasis1, orthoBasis2, oldTanSquared, newTanSquared, newX, newY, oldX, oldY
+) {
   var projection = orthoBasis1.slice();
   var vComponent = input.slice();
   var scalarProduct1 = this.scalarProduct(orthoBasis1, input);
@@ -415,10 +438,6 @@ GraphicsNDimensions.prototype.scalarProduct = function(root1, root2) {
   return result;
 }
 
-GraphicsNDimensions.prototype.scaleToUnitLength = function(output) {
-
-} 
-
 GraphicsNDimensions.prototype.makeScreenBasisOrthonormal = function() {
   addVectorTimesScalar(
     this.screenBasis[1], 
@@ -448,6 +467,7 @@ GraphicsNDimensions.prototype.ComputeProjectionsSpecialVectors = function() {
   } 
   for (var i = 0; i < this.labeledVectors.length; i ++) {
     this.computeScreenCoordinates(this.labeledVectors[i], this.projectionsLabeledVectors[i]);
+  }
 }
 
 function getAngleFromXandY(x, y) { 
@@ -577,7 +597,7 @@ GraphicsNDimensions.prototype.getPosXPosY = function(cx,cy) {
   return [posx, posy];
 }
 
-GraphicsNDimensions.prototype.clickCanvasCone = function(cx,cy){
+GraphicsNDimensions.prototype.clickCanvasCone = function(cx,cy) {
   var positionScreen = this.getPosXPosY(cx, cy);
   var posx = positionScreen[0];
   var posy = positionScreen[1];
@@ -600,6 +620,7 @@ GraphicsNDimensions.prototype.clickCanvasCone = function(cx,cy){
     }
   }
 }
+
 GraphicsNDimensions.prototype.mouseMoveRedraw = function(cx, cy) {
     var posx = this.getPosXPosY(cx, cy)[0];
     var posy =  - this.getPosXPosY(cx,cy)[1];
@@ -643,14 +664,65 @@ GraphicsNDimensions.prototype.mouseHandleWheel = function(theEvent) {
   return out.str();
 }
 
-function testG2(idCanvas, idSpanInformation) {
-  
-}
-
 function testA3(idCanvas, idSpanInformation) {
-
-}
-
-function testA4(idCanvas, idSpanInformation) {
-  
+  var theA3 = new GraphicsNDimensions(idCanvas, idSpanInformation);
+  var theBilinearForm = [
+    [ 2, -1,  0],
+    [-1,  2, -1],
+    [ 0, -1,  2]
+  ];
+  var screenBasis = [
+    [0.707107, 0.707107, 0],
+    [0, 0.707107, 0.707107]
+  ];
+  var labeledVectors = [
+    [-1,-1,-1],
+    [ 0,-1,-1],
+    [-1,-1, 0],
+    [ 0, 0,-1],
+    [ 0,-1, 0],
+    [-1, 0, 0],
+    [ 1, 0, 0],
+    [ 0, 1, 0],
+    [ 0, 0, 1],
+    [ 1, 1, 0],
+    [ 0, 1, 1],
+    [ 1, 1, 1],
+  ];
+  var segments =    [
+    [[0 , - 1, - 1], [ 1,  0,  0]],
+    [[0 , - 1, - 1], [-1, -1, -1]],
+    [[0 , - 1, - 1], [ 0,  0, -1]],
+    [[0 , - 1, - 1], [ 0, -1,  0]],
+    [[-1,  -1,   0], [-1,  0,  0]],
+    [[-1,  -1,   0], [ 0,  0,  1]],
+    [[-1,  -1,   0], [-1, -1, -1]],
+    [[-1,  -1,   0], [ 0, -1,  0]],
+    [[1 ,   1,   0], [ 1,  0,  0]],
+    [[1 ,   1,   0], [ 0,  0, -1]],
+    [[1 ,   1,   0], [ 1,  1,  1]],
+    [[1 ,   1,   0], [ 0,  1,  0]],
+    [[0 ,   1,   1], [-1,  0,  0]],
+    [[0 ,   1,   1], [ 0,  0,  1]],
+    [[0 ,   1,   1], [ 1,  1,  1]],
+    [[0 ,   1,   1], [ 0,  1,  0]],
+    [[-1,   0,   0], [-1, -1, -1]],
+    [[-1,   0,   0], [ 0,  1,  0]],
+    [[1 ,   0,   0], [ 1,  1,  1]],
+    [[1 ,   0,   0], [ 0, -1,  0]],
+    [[0 ,   0,   1], [ 1,  1,  1]],
+    [[0 ,   0,   1], [ 0, -1,  0]],
+    [[-1,  -1,  -1], [ 0,  0, -1]],
+    [[0 ,   0,  -1], [ 0,  1,  0]]
+  ];
+  var labeledVectorsText = [];
+  for (var counterLabel = 0; counterLabel < labeledVectors.length; counterLabel ++) {
+    theA3.drawLine([0, 0, 0], labeledVectors[counterLabel], "green");
+    //theA3.drawText(labeledVectors[counterLabel], `[${labeledVectors.join(', ')}]`);
+    //theA3.drawCircle(labeledVectors[counterLabel], "red");
+  }
+  for (var counterSegment = 0; counterSegment < segments.length; counterSegment ++) {
+    theA3.drawLine(segments[counterSegment][0], segments[counterSegment][1]);
+  }
+  theA3.graphicsUnit = 150;
 }

@@ -85,6 +85,9 @@ GraphicsNDimensions.prototype.writeInfo = function() {
   result += "<br>The projection plane (drawn on the screen) is spanned by the following two vectors <br>\n";
   result += `(${this.screenBasis[0].join(", ")})<br>`;
   result += `(${this.screenBasis[1].join(", ")})<br>`;
+  for (var i = 0; i < this.basisCircles.length; i ++) {
+    result += `${i}: (${this.basisCircles[i].join(", ")}): (${this.projectionsBasisCircles[i].join(", ")})<br>`;
+  }
   document.getElementById(this.idPlaneInfo).innerHTML = result;
 }
 
@@ -180,7 +183,34 @@ function setBilinearForm(idCanvas, row, column) {
 
 }
 
+GraphicsNDimensions.prototype.drawStandardEiBasis = function(color) {
+  for (var i = 0; i < this.dimension; i ++) {
+    var eiVector = new Array(this.dimension);
+    eiVector.fill(0);
+    eiVector[i] = 1;
+    this.drawCircle(eiVector, color, 3);
+  }
+}
+
+GraphicsNDimensions.prototype.drawCircle = function(position, color, radius) {
+  if (radius === undefined) {
+    radius = 3;
+  }
+  if (color === undefined) {
+    color = "black";
+  }
+  this.drawOperations.push(new DrawCircleAtVector(
+    this.idCanvas, {
+      location: position,
+      colorFill: color,
+      radius: radius
+  }));
+}
+
 GraphicsNDimensions.prototype.drawLine = function(left, right, color) {
+  if (color === undefined) {
+    color = "black";
+  }
   this.drawOperations.push(new DrawSegmentBetweenTwoVectors(
     this.idCanvas, {
       left: left,
@@ -243,8 +273,8 @@ GraphicsNDimensions.prototype.changeProjectionPlaneUser = function() {
 
 function DrawSegmentBetweenTwoVectors(inputOwnerId, inputData) {
   this.ownerId = inputOwnerId;
-  this.left = inputData.left;
-  this.right = inputData.right;
+  this.left = inputData.left.slice();
+  this.right = inputData.right.slice();
   this.lineWidth = inputData.lineWidth;
   this.lineColor = inputData.lineColor;
 }
@@ -291,7 +321,7 @@ DrawFilledShape.prototype.drawNoFinish = function () {
 
 function DrawCircleAtVector(inputOwnerId, inputData) {
   this.ownerId = inputOwnerId;
-  this.location = inputData.location;
+  this.location = inputData.location.slice();
   this.locationScreenCoordinates = [];
   this.colorFill = inputData.colorFill;
   this.radius = inputData.radius;
@@ -301,7 +331,8 @@ DrawCircleAtVector.prototype.drawNoFinish = function() {
   var owner = collectionGraphicsNDimension[this.ownerId];
   var canvas = owner.canvas;
   canvas.strokeStyle = this.colorFill;
-  this.computeScreenCoordinates(this.location, this.locationScreenCoordinates);
+  canvas.fillStyle = this.colorFill;
+  owner.computeScreenCoordinates(this.location, this.locationScreenCoordinates);
   canvas.beginPath();
   canvas.arc( 
     this.locationScreenCoordinates[0], 
@@ -309,7 +340,7 @@ DrawCircleAtVector.prototype.drawNoFinish = function() {
     this.radius,
     0, 2 * Math.PI
   );
-  //canvas.stroke();
+  canvas.fill();
 }
 
 function DrawTextAtVector(inputOwnerId, inputData) {
@@ -328,17 +359,6 @@ DrawTextAtVector.prototype.drawNoFinish = function() {
   canvas.strokeText(this.text, this.locationScreen[0], this.locationScreen[1]);
 }
 
-GraphicsNDimensions.prototype.computeProjectionsEiBasis = function () {
-  if (this.projectionsEiVectors.length != this.dimension) {
-    this.projectionsEiVectors[i] = new Array(this.dimension);
-    for (var i = 0; i < this.dimension; i ++) {
-      this.projectionsEiVectors[i] = new Array(this.dimension);
-    }
-  }
-  for (var i = 0; i < this.eiBasis.length; i ++) {
-    this.computeScreenCoordinates(this.eiBasis[i], this.projectionsEiVectors[i]);
-  }
-}
 
 GraphicsNDimensions.prototype.drawAll = function() {
   if (this.frameStarted) {
@@ -349,6 +369,7 @@ GraphicsNDimensions.prototype.drawAll = function() {
     this.init();
   }
   this.computeProjectionsEiBasis();
+  this.ComputeProjectionsSpecialVectors();
   this.canvas.clearRect(0, 0, this.widthHtml, this.heightHtml);
   //this.canvas.fillStyle = "#FFFFFF";
   //this.canvas.fillRect(0, 0, this.widthHtml, this.heightHtml);
@@ -364,7 +385,8 @@ GraphicsNDimensions.prototype.drawAll = function() {
 GraphicsNDimensions.prototype.makeStandardBilinearForm = function () {
   this.theBilinearForm = new Array(this.dimension);
   for (var i = 0; i < this.theBilinearForm.length; i ++) {
-    this.theBilinearForm[i] = Array.fill(0, 0, this.dimension);
+    this.theBilinearForm[i] = newArray(this.dimension);
+    this.theBilinearForm[i].fill(0, 0, this.dimension);
     this.theBilinearForm[i][i] = 1;
   }
 }
@@ -372,8 +394,21 @@ GraphicsNDimensions.prototype.makeStandardBilinearForm = function () {
 GraphicsNDimensions.prototype.makeEiBasis = function () {
   this.eiBasis = new Array(this.dimension);
   for (var i = 0; i < this.eiBasis.length; i ++) {
-    this.eiBasis[i] = Array.prototype.fill(0, 0, this.dimension);
+    this.eiBasis[i] = new Array(this.dimension);
+    this.eiBasis[i].fill(0, 0, this.dimension);
     this.eiBasis[i][i] = 1;
+  }
+}
+
+GraphicsNDimensions.prototype.makeBasisCircles = function () {
+  this.basisCircles = new Array(this.dimension);
+  this.projectionsBasisCircles = new Array(this.dimension);
+  for (var i = 0; i < this.basisCircles.length; i ++) {
+    this.basisCircles[i] = new Array(this.dimension);
+    this.basisCircles[i].fill(0, 0, this.dimension);
+    this.basisCircles[i][i] = 1;
+    this.projectionsBasisCircles[i] = new Array(2);
+    this.projectionsBasisCircles[i].fill(0, 0, 2);
   }
 }
 
@@ -381,6 +416,9 @@ GraphicsNDimensions.prototype.init = function () {
   this.initInfo();
   if (this.theBilinearForm.length != this.dimension) {
     this.makeStandardBilinearForm(this.dimension);
+  }
+  if (this.basisCircles.length === 0) {
+    this.makeBasisCircles();
   }
   this.makeEiBasis();
   this.modifyBasisToOrthonormalNoShiftSecond();
@@ -390,7 +428,7 @@ GraphicsNDimensions.prototype.init = function () {
 
 GraphicsNDimensions.prototype.pointsAreWithinClickTolerance = function(x1, y1, x2, y2) {
   if (
-    Math.abs(x1 - x2) > clickTolerance ||
+    Math.abs(x1 - x2) > this.clickTolerance ||
     Math.abs(y1 - y2) > this.clickTolerance
   ) {
     return false;
@@ -427,7 +465,7 @@ GraphicsNDimensions.prototype.rotateOutOfPlane = function(
   var scalarProduct1 = this.scalarProduct(orthoBasis1, input);
   var scalarProduct2 = this.scalarProduct(orthoBasis2, input);
   multiplyVectorByScalar(projection, scalarProduct1);
-  addVectorTimesScalar(projection, orthoBasis2, scal2);
+  addVectorTimesScalar(projection, orthoBasis2, scalarProduct2);
   addVectorTimesScalar(vComponent, projection, - 1);
   var oldAngle = Math.atan(Math.sqrt(oldTanSquared));
   var newAngle = Math.atan(Math.sqrt(newTanSquared));
@@ -479,10 +517,19 @@ GraphicsNDimensions.prototype.computeScreenCoordinates = function(input, output)
   output[1] = this.shiftScreenCoordinates[1] + this.graphicsUnit * this.scalarProduct(this.screenBasis[1], input);
 }
 
-GraphicsNDimensions.prototype.ComputeProjectionsSpecialVectors = function() {
-  for (var i = 0; i < this.dimension; i ++) {
+GraphicsNDimensions.prototype.computeProjectionsEiBasis = function () {
+  if (this.projectionsEiVectors.length != this.dimension) {
+    this.projectionsEiVectors[i] = new Array(this.dimension);
+    for (var i = 0; i < this.dimension; i ++) {
+      this.projectionsEiVectors[i] = new Array(this.dimension);
+    }
+  }
+  for (var i = 0; i < this.eiBasis.length; i ++) {
     this.computeScreenCoordinates(this.eiBasis[i], this.projectionsEiVectors[i]);
   }
+}
+
+GraphicsNDimensions.prototype.ComputeProjectionsSpecialVectors = function() {
   for (var i = 0; i < this.basisCircles.length; i ++) {
     this.computeScreenCoordinates(this.basisCircles[i], this.projectionsBasisCircles[i]);
   } 
@@ -505,11 +552,13 @@ function getAngleChange(newX, newY, oldX, oldY) {
     } else {
       result += Math.PI;
     }
-    return result;
   }
+  return result;
 }
 
-GraphicsNDimensions.prototype.changeBasis = function(selectedIndex, newX, newY) {
+GraphicsNDimensions.prototype.changeBasis = function(selectedIndex) {
+  var newX = this.mousePositionScreen[0];
+  var newY = this.mousePositionScreen[1];
   if (newX == 0 && newY == 0) {
     return;
   }
@@ -560,6 +609,7 @@ GraphicsNDimensions.prototype.changeBasis = function(selectedIndex, newX, newY) 
     multiplyVectorByScalar(vProjection, - newX);
     addVectorTimesScalar(vProjection, this.screenBasis[1], newY);
   }
+  return;
   this.scaleToUnitLength(vProjection);
   this.scaleToUnitLength(vOrthogonal);
   this.screenBasis[0] = this.rotateOutOfPlane(
@@ -574,7 +624,6 @@ GraphicsNDimensions.prototype.changeBasis = function(selectedIndex, newX, newY) 
     newX, newY, oldX, oldY 
   );
   this.makeScreenBasisOrthonormal();
-  this.ComputeProjections();    
 }
 
 GraphicsNDimensions.prototype.processMousePosition = function(x, y) {
@@ -671,7 +720,7 @@ GraphicsNDimensions.prototype.mouseMoveRedraw = function(event) {
     this.shiftScreenCoordinates[0] = this.shiftScreenCoordinatesClicked[0] + deltaX;
     this.shiftScreenCoordinates[1] = this.shiftScreenCoordinatesClicked[1] + deltaY;
   } else { 
-    this.changeBasis(selectedBasisIndex, posx, posy);
+    this.changeBasis(this.selectedBasisIndex);
     var doRedraw = true;
   }
   if (doRedraw) {
@@ -750,6 +799,7 @@ function testA3(idCanvas, idSpanInformation) {
     [[-1,  -1,  -1], [ 0,  0, -1]],
     [[0 ,   0,  -1], [ 0,  1,  0]]
   ];
+  theA3.drawStandardEiBasis("red");
   for (var counterLabel = 0; counterLabel < labeledVectors.length; counterLabel ++) {
     theA3.drawLine([0, 0, 0], labeledVectors[counterLabel], "green");
     //theA3.drawText(labeledVectors[counterLabel], `[${labeledVectors.join(', ')}]`);

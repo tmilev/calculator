@@ -470,7 +470,7 @@ bool CalculatorFunctionsGeneral::innerHexToInteger(Calculator& theCommands, cons
   std::string inputString;
   if (!input.IsOfType(&inputString))
     return false;
-  LargeInt result;
+  LargeIntUnsigned result;
   if (!Crypto::ConvertHexToInteger(inputString, result))
     return theCommands << "Failed to interpret " << inputString
     << " as a hex string ";

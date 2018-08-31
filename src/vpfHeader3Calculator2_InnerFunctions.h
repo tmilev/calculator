@@ -55,7 +55,9 @@ public:
   static bool innerBase64ToString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConvertStringToHex(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAppendDoubleSha256Check(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConvertBase58ToHex(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerConvertHexToBase58(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConvertIntegerUnsignedToBase58(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNISTEllipticCurveGenerator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLoadKnownCertificates(Calculator& theCommands, const Expression& input, Expression& output);

@@ -36,6 +36,7 @@ public:
   static void ConvertStringToListUInt32BigendianZeroPad
   (const std::string& input, List<uint32_t>& output);
   static void ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output);
+  static void ConvertUint32ToString(const List<uint32_t>& input, std::string& output);
   static bool ConvertBase64ToBitStream
   (const std::string& input, List<unsigned char>& output,
    std::stringstream* commentsOnFailure = 0,
@@ -50,8 +51,9 @@ public:
   static bool ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& inputSignificantDigitsFirst, LargeIntUnsigned& output, std::stringstream *commentsOnFailure);
   static bool ConvertBase58ToHexSignificantDigitsFirst(const std::string& input, std::string& output, std::stringstream* commentsOnFailure);
   static bool ConvertHexToString(const std::string& input, std::string& output);
-  static bool ConvertHexToInteger(const std::string& input, LargeInt& output);
+  static bool ConvertHexToInteger(const std::string& input, LargeIntUnsigned &output);
   static bool ConvertStringToHex(const std::string& input, std::string& output);
+  static void AppendDoubleSha256Check(const std::string& input, std::string& output);
   static std::string ConvertStringToHex(const std::string& input);
   static bool GetBase58FromChar(unsigned char input, uint32_t& output);
   static bool GetCharFromBase58(uint32_t input, char& output);
@@ -73,6 +75,7 @@ public:
   static void computeSha224(const std::string& inputString, List<uint32_t>& output);
   static void computeSha2xx(const std::string& inputString, List<uint32_t>& output, bool is224);
   static void computeSha256(const std::string& inputString, List<uint32_t>& output);
+  static void computeSha256(const std::string& inputString, std::string& output);
   static void ConvertListUintToLargeUInt(List<uint32_t>& input, LargeIntUnsigned& output);
   static LargeIntUnsigned RSAencrypt(const LargeIntUnsigned& theModulus, const LargeInt& theExponent, const LargeInt& theMessage);
   static void ConvertBitStreamToLargeUnsignedInt

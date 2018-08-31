@@ -493,6 +493,17 @@ void Crypto::ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<uns
   }
 }
 
+void Crypto::ConvertUint32ToString(const List<uint32_t>& input, std::string& output)
+{ MacroRegisterFunctionWithName("Crypto::ConvertUint32ToString");
+  output.resize(input.size * 4);
+  for (int i = 0; i < input.size; i ++)
+  { output[i * 4 + 0] = (char) (input[i] / 16777216);
+    output[i * 4 + 1] = (char) ((input[i] / 65536) % 256);
+    output[i * 4 + 2] = (char) ((input[i] / 256) % 256);
+    output[i * 4 + 3] = (char) (input[i] % 256);
+  }
+}
+
 bool Crypto::ConvertHexToString(const std::string& input, std::string& output)
 { output.reserve(input.size() / 2);
   output.clear();
@@ -526,7 +537,7 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output)
   return result;
 }
 
-bool Crypto::ConvertHexToInteger(const std::string& input, LargeInt& output)
+bool Crypto::ConvertHexToInteger(const std::string& input, LargeIntUnsigned& output)
 { output.MakeZero();
   for (unsigned i = 0; i < input.size(); i ++)
   { int theDigit = - 1;
@@ -551,6 +562,16 @@ std::string Crypto::ConvertStringToHex(const std::string& input)
 { std::string result;
   Crypto::ConvertStringToHex(input, result);
   return result;
+}
+
+void Crypto::AppendDoubleSha256Check(const std::string& input, std::string& output)
+{ std::string theSha256, doubleSha256;
+  Crypto::computeSha256(input, theSha256);
+  Crypto::computeSha256(theSha256, doubleSha256);
+  output.reserve(input.size() + 4);
+  output = input;
+  for (int i = 0; i < 4; i ++)
+    output.push_back(doubleSha256[i]);
 }
 
 bool Crypto::ConvertStringToHex(const std::string& input, std::string& output)
@@ -899,6 +920,13 @@ void Crypto::ConvertStringToLargeIntUnsigned
 void Crypto::computeSha224(const std::string& inputString, List<uint32_t>& output)
 { MacroRegisterFunctionWithName("Crypto::computeSha224");
   return Crypto::computeSha2xx(inputString, output, true);
+}
+
+void Crypto::computeSha256(const std::string& inputString, std::string& output)
+{
+  List<uint32_t> theSha256Uint;
+  Crypto::computeSha256(inputString, theSha256Uint);
+  Crypto::ConvertUint32ToString(theSha256Uint, output);
 }
 
 void Crypto::computeSha256(const std::string& inputString, List<uint32_t>& output)

@@ -39,13 +39,17 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.labeledVectors = [];
   this.projectionsLabeledVectors = [];
   this.projectionScreenBasis = [];
+  this.projectionSelectedAtSelection = [];
   this.screenBasis = [];
+  this.screenBasisAtSelection = [];
   this.canvasContainer = document.getElementById(this.idCanvas);
   this.dimension = 0;
   this.theBilinearForm = [];
   this.graphicsUnit = 0;
   this.selectedBasisIndex = - 1;
   this.flagAllowMovingCoordinateSystemFromArbitraryClick = true;
+
+  this.angleScreenChange = 0;
 
   this.canvasContainer.addEventListener("DOMMouseScroll", this.mouseHandleWheel.bind(this));
   this.canvasContainer.addEventListener("wheel", this.mouseHandleWheel.bind(this));
@@ -81,12 +85,19 @@ GraphicsNDimensions.prototype.writeInfo = function() {
   var result = "";
   result += `<br>Mouse position: (${this.mousePositionScreen.join(", ")})`;
   result += `<br>Selected index: ${this.selectedBasisIndex}`;
-  result += `<br>Coordinate center in screen coordinates: (${this.shiftScreenCoordinates.join(", ")})`;
-  result += "<br>The projection plane (drawn on the screen) is spanned by the following two vectors <br>\n";
-  result += `(${this.screenBasis[0].join(", ")})<br>`;
-  result += `(${this.screenBasis[1].join(", ")})<br>`;
+  if (this.selectedBasisIndex >= 0) {
+    result += `: (${this.basisCircles[this.selectedBasisIndex].join(", ")})`;
+    result += `<br>Screen basis at selection:`;
+    result += `<br>(${this.screenBasisAtSelection[0].join(", ")})`;
+    result += `<br>(${this.screenBasisAtSelection[1].join(", ")})`;
+    result += `<br>Angle change relative to selection: ${this.angleScreenChange.toFixed(2)}`;
+  }
+  result += `<br>Coordinate center in screen coordinates: <br>(${this.shiftScreenCoordinates.join(", ")})`;
+  result += "<br>The projection plane (drawn on the screen) is spanned by the following two vectors.\n";
+  result += `<br>(${this.screenBasis[0].join(", ")})`;
+  result += `<br>(${this.screenBasis[1].join(", ")})`;
   for (var i = 0; i < this.basisCircles.length; i ++) {
-    result += `${i}: (${this.basisCircles[i].join(", ")}): (${this.projectionsBasisCircles[i].join(", ")})<br>`;
+    result += `<br>${i}: (${this.basisCircles[i].join(", ")}): (${this.projectionsBasisCircles[i].join(", ")})`;
   }
   document.getElementById(this.idPlaneInfo).innerHTML = result;
 }
@@ -542,57 +553,60 @@ function getAngleFromXandY(x, y) {
   return Math.atan2(y, x);
 }
 
-function getAngleChange(newX, newY, oldX, oldY) { 
+function getAngleScreenChange(newX, newY, oldX, oldY) { 
   var result = getAngleFromXandY(newX, newY) - getAngleFromXandY(oldX, oldY);
-  var topBound = Math.PI / 2;
-  var bottomBound = - Math.PI / 2;
-  while (result > topBound || result < bottomBound) {
+  var topBound = Math.PI;
+  var bottomBound = - Math.PI;
+  while (result > topBound || result <= bottomBound) {
     if (result > topBound) {
-      result -= Math.PI;
+      result -= 2 * Math.PI;
     } else {
-      result += Math.PI;
+      result += 2 * Math.PI;
     }
   }
   return result;
 }
 
 GraphicsNDimensions.prototype.changeBasis = function(selectedIndex) {
-  var newX = this.mousePositionScreen[0];
-  var newY = this.mousePositionScreen[1];
+  var newX = this.mousePositionScreen[0] - this.shiftScreenCoordinates[0];
+  var newY = this.mousePositionScreen[1] - this.shiftScreenCoordinates[1];
   if (newX == 0 && newY == 0) {
     return;
   }
   var selectedRoot = this.basisCircles[selectedIndex];
-  var selectedRootLength = this.scalarProduct(selectedRoot, selectedRoot);
-  var projectionSelected = this.projectionsBasisCircles[selectedIndex];
-  var oldX = projectionSelected[0] / this.graphicsUnit;
-  var oldY = - projectionSelected[1] / this.graphicsUnit;
-  newX /= this.graphicsUnit;
-  newY /= this.graphicsUnit;
+  var oldX = this.projectionSelectedAtSelection[0] - this.shiftScreenCoordinates[0];
+  var oldY = this.projectionSelectedAtSelection[1] - this.shiftScreenCoordinates[1];
   var epsilon = 0.000000015;
-  if (newX * newX + newY * newY > 0.003) { 
-    var angleChange = - getAngleChange(newX, newY, oldX, oldY);
-    var newVectorE1 = this.screenBasis[0].slice();
-    var newVectorE2 = this.screenBasis[1].slice();
-    multiplyVectorByScalar(newVectorE1, Math.cos(angleChange));
-    addVectorTimesScalar(newVectorE1, this.screenBasis[1], Math.sin(angleChange));
-    multiplyVectorByScalar(newVectorE2, Math.cos(angleChange));
-    addVectorTimesScalar(newVectorE2, this.screenBasis[0], - Math.sin(angleChange));
+  if (newX * newX + newY * newY > 3) { 
+    this.angleScreenChange = - getAngleScreenChange(newX, newY, oldX, oldY);
+    if (this.angleScreenChange > Math.PI / 2 || this.angleScreenChange < - Math.PI/2) {
+      return;
+    } 
+    var newVectorE1 = this.screenBasisAtSelection[0].slice();
+    var newVectorE2 = this.screenBasisAtSelection[1].slice();
+    multiplyVectorByScalar(newVectorE1, Math.cos(this.angleScreenChange));
+    addVectorTimesScalar(newVectorE1, this.screenBasisAtSelection[1], Math.sin(this.angleScreenChange));
+    multiplyVectorByScalar(newVectorE2, Math.cos(this.angleScreenChange));
+    addVectorTimesScalar(newVectorE2, this.screenBasisAtSelection[0], - Math.sin(this.angleScreenChange));
     this.screenBasis[0] = newVectorE1;
     this.screenBasis[1] = newVectorE2;
   }
-  if (newX * newX + newY * newY < 0.0001) {
+
+  if (this.dimension <= 2) {
     return;
-  } 
-  var vectorTimesE1 = this.scalarProduct(selectedRoot, this.screenBasis[0]);
-  var vectorTimesE2 = this.scalarProduct(selectedRoot, this.screenBasis[1]);
+  }
+  var vectorTimesE1 = this.scalarProduct(selectedRoot, this.screenBasisAtSelection[0]);
+  var vectorTimesE2 = this.scalarProduct(selectedRoot, this.screenBasisAtSelection[1]);
   var vOrthogonal = selectedRoot.slice();
-  var vProjection = this.screenBasis[0].slice();
+  var vProjection = this.screenBasisAtSelection[0].slice();
   multiplyVectorByScalar(vProjection, vectorTimesE1);
-  addVectorTimesScalar(vProjection, this.screenBasis[1], vectorTimesE2);
+  addVectorTimesScalar(vProjection, this.screenBasisAtSelection[1], vectorTimesE2);
   addVectorTimesScalar(vOrthogonal, vProjection, - 1);
-  var oldRatioProjectionOverHeightSquared = (oldX * oldX + oldY * oldY) / (selectedRootLength - oldX * oldX - oldY * oldY);
-  var newRatioProjectionOverHeightSquared = (newX * newX + newY * newY) / (selectedRootLength - newX * newX - newY * newY);
+
+  oldX /= this.graphicsUnit;
+  oldY /= this.graphicsUnit;
+  newX /= this.graphicsUnit;
+  newY /= this.graphicsUnit;
   var vOrthogonalSquareLength = this.scalarProduct(vOrthogonal, vOrthogonal);
   //<- should be positive (the bilinear form is expected to be positive definite)
   if (this.dimension > 2) {
@@ -604,23 +618,22 @@ GraphicsNDimensions.prototype.changeBasis = function(selectedIndex) {
   if (Math.abs(vOrthogonalSquareLength) < epsilon) {
     return;
   }
-  if (oldRatioProjectionOverHeightSquared == 0) {
-    vProjection = this.screenBasis[0].slice();
+  if (oldRatioProjectionSquaredOverHeightSquared == 0) {
+    vProjection = this.screenBasisAtSelection[0].slice();
     multiplyVectorByScalar(vProjection, - newX);
-    addVectorTimesScalar(vProjection, this.screenBasis[1], newY);
+    addVectorTimesScalar(vProjection, this.screenBasisAtSelection[1], newY);
   }
-  return;
   this.scaleToUnitLength(vProjection);
   this.scaleToUnitLength(vOrthogonal);
   this.screenBasis[0] = this.rotateOutOfPlane(
     this.screenBasis[0], vProjection, vOrthogonal,
-    oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared,
+    oldRatioProjectionSquaredOverHeightSquared, newRatioProjectionSquaredOverHeightSquared,
     newX, newY, oldX, oldY
   );
   this.screenBasis[1] = this.rotateOutOfPlane(
     this.screenBasis[1], 
     vProjection, vOrthogonal, 
-    oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared, 
+    oldRatioProjectionSquaredOverHeightSquared, newRatioProjectionSquaredOverHeightSquared, 
     newX, newY, oldX, oldY 
   );
   this.makeScreenBasisOrthonormal();
@@ -674,6 +687,18 @@ GraphicsNDimensions.prototype.releaseMouse = function(event) {
   this.selectedBasisIndex = - 1;
 }
 
+GraphicsNDimensions.prototype.selectIndex = function (index) {
+  this.selectedBasisIndex = index;
+  this.projectionSelectedAtSelection[0] = this.projectionsBasisCircles[index][0];
+  this.projectionSelectedAtSelection[1] = this.projectionsBasisCircles[index][1];
+  if (this.screenBasisAtSelection.length === 0) {
+    this.screenBasisAtSelection = new Array(2);
+  }
+  this.screenBasisAtSelection[0] = this.screenBasis[0].slice();
+  this.screenBasisAtSelection[1] = this.screenBasis[1].slice();
+}
+
+
 GraphicsNDimensions.prototype.clickCanvas = function(event) {
   this.computePosXPosY(event);
   this.mousePositionScreenClicked[0] = this.mousePositionScreen[0];
@@ -695,7 +720,7 @@ GraphicsNDimensions.prototype.clickCanvas = function(event) {
       this.mousePositionScreenClicked[0], this.mousePositionScreenClicked[1], 
       this.projectionsBasisCircles[i][0], this.projectionsBasisCircles[i][1]
     )) {
-      this.selectedBasisIndex = i;
+      this.selectIndex(i);
     }
   }
 }

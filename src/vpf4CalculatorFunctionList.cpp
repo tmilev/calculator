@@ -413,6 +413,25 @@ void Calculator::initPredefinedInnerFunctions()
    "ConvertBase58ToHex");
 
   this->AddOperationInnerHandler
+  ("AppendDoubleSha256Check", CalculatorFunctionsGeneral::innerAppendDoubleSha256Check, "",
+   "Appends a sha 256 checksum to a string. More precisely, appends the first 4 bytes "
+   "of sha256 of the string to the string. ",
+   "A= \"80aad3f1f5de25ff67a4fd3d7808d58510e00ec08a55c10ad5751facf35411509701\";\n"
+   "B= ConvertHexToString(A);\n"
+   "C= AppendDoubleSha256Check(B);\n"
+   "D= ConvertStringToHex(C)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerAppendDoubleSha256Check",
+   "AppendDoubleSha256Check");
+
+  this->AddOperationInnerHandler
+  ("ConvertHexToBase58", CalculatorFunctionsGeneral::innerConvertHexToBase58, "",
+   "Converts hex to base58. ",
+   "ConvertHexToBase58(\"03aaf2d5530b1a5cbf80c248ca44635ac265f4104ffc5b76ef48f361c03b7f536f\");",
+   true, false,
+   "CalculatorFunctionsGeneral::innerConvertHexToBase58",
+   "ConvertHexToBase58");
+  this->AddOperationInnerHandler
   ("CharToBase64", CalculatorFunctionsGeneral::innerCharToBase64, "",
    "Converts characters to bit stream and the bitstream to base64. "
    "The character to bit stream conversion is not fixed at the moment "

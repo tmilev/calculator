@@ -295,6 +295,16 @@ bool CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58(Calculator&
   return output.AssignValue(result, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerAppendDoubleSha256Check(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAppendSha256Check");
+  std::string inputString;
+  if (!input.IsOfType(&inputString))
+    return false;
+  std::string outputString;
+  Crypto::AppendDoubleSha256Check(inputString, outputString);
+  return output.AssignValue(outputString, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerConvertBase58ToHex(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertBase58ToHex");
   if (!input.IsOfType<std::string>())
@@ -303,6 +313,19 @@ bool CalculatorFunctionsGeneral::innerConvertBase58ToHex(Calculator& theCommands
   std::string outputString;
   if (!Crypto::ConvertBase58ToHexSignificantDigitsFirst(inputString, outputString, &theCommands.Comments))
     return theCommands << "Failed to convert " << inputString << " to hex. ";
+  return output.AssignValue(outputString, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerConvertHexToBase58(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertBase58ToHex");
+  if (!input.IsOfType<std::string>())
+    return false;
+  const std::string& inputString = input.GetValue<std::string>();
+  LargeIntUnsigned outputInteger;
+  std::string outputString;
+  if (!Crypto::ConvertHexToInteger(inputString, outputInteger))
+    return theCommands << "Failed to convert " << inputString << " from hex to integer. ";
+  Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(outputInteger, outputString);
   return output.AssignValue(outputString, theCommands);
 }
 

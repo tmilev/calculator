@@ -49,7 +49,12 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.selectedBasisIndex = - 1;
   this.flagAllowMovingCoordinateSystemFromArbitraryClick = true;
 
+  this.vOrthogonalSelected = [];
+  this.vProjectionNormalizedSelected = []; 
+  this.vProjectionNormalizedSelectedRotated = [];
+
   this.angleScreenChange = 0;
+  this.angleCuttingChange = 0;
 
   this.canvasContainer.addEventListener("DOMMouseScroll", this.mouseHandleWheel.bind(this));
   this.canvasContainer.addEventListener("wheel", this.mouseHandleWheel.bind(this));
@@ -81,16 +86,33 @@ GraphicsNDimensions.prototype.initVectors = function(inputVectors) {
   }
 }
 
+function toStringVector(vector) {
+  var result = "";
+  result += "(";
+  for (var i = 0; i < vector.length; i ++) {
+    result += vector[i].toFixed(2);
+    if (i !== vector.length - 1) {
+      result += ", ";
+    } 
+  }
+  result += ")";
+  return result;
+}
+
 GraphicsNDimensions.prototype.writeInfo = function() {
   var result = "";
   result += `<br>Mouse position: (${this.mousePositionScreen.join(", ")})`;
   result += `<br>Selected index: ${this.selectedBasisIndex}`;
   if (this.selectedBasisIndex >= 0) {
-    result += `: (${this.basisCircles[this.selectedBasisIndex].join(", ")})`;
+    result += `: ${toStringVector(this.basisCircles[this.selectedBasisIndex])}`;
     result += `<br>Screen basis at selection:`;
-    result += `<br>(${this.screenBasisAtSelection[0].join(", ")})`;
-    result += `<br>(${this.screenBasisAtSelection[1].join(", ")})`;
-    result += `<br>Angle change relative to selection: ${this.angleScreenChange.toFixed(2)}`;
+    result += `<br>${toStringVector(this.screenBasisAtSelection[0])}`;
+    result += `<br>${toStringVector(this.screenBasisAtSelection[1])}`;
+    result += `<br>Angle change screen: ${this.angleScreenChange.toFixed(2)}`;
+    result += `<br>Angle change cutting: ${this.angleCuttingChange.toFixed(2)}`;
+    result += `<br>Projection selected: ${toStringVector(this.vProjectionNormalizedSelected)}`;
+    result += `<br>Rotated projection selected: ${toStringVector(this.vProjectionNormalizedSelectedRotated)}`;
+    result += `<br>Orthogonal component selected: ${toStringVector(this.vOrthogonalSelected)}`;
   }
   result += `<br>Coordinate center in screen coordinates: <br>(${this.shiftScreenCoordinates.join(", ")})`;
   result += "<br>The projection plane (drawn on the screen) is spanned by the following two vectors.\n";
@@ -227,7 +249,7 @@ GraphicsNDimensions.prototype.drawLine = function(left, right, color) {
       left: left,
       right: right,
       lineWidth: 1,
-      lineColor: color    
+      colorLine: color    
     }
   ));
 }
@@ -287,7 +309,7 @@ function DrawSegmentBetweenTwoVectors(inputOwnerId, inputData) {
   this.left = inputData.left.slice();
   this.right = inputData.right.slice();
   this.lineWidth = inputData.lineWidth;
-  this.lineColor = inputData.lineColor;
+  this.colorLine = inputData.colorLine;
 }
 
 DrawSegmentBetweenTwoVectors.prototype.drawNoFinish = function() {
@@ -369,7 +391,6 @@ DrawTextAtVector.prototype.drawNoFinish = function() {
   this.locationScreen = owner.computeScreenCoordinates(this.location, this.locationScreen);
   canvas.strokeText(this.text, this.locationScreen[0], this.locationScreen[1]);
 }
-
 
 GraphicsNDimensions.prototype.drawAll = function() {
   if (this.frameStarted) {
@@ -469,44 +490,28 @@ function addVectorTimesScalar(vector, other, scalar) {
 }
 
 GraphicsNDimensions.prototype.rotateOutOfPlane = function(
-  input, orthoBasis1, orthoBasis2, oldTanSquared, newTanSquared, newX, newY, oldX, oldY
+  input, orthoBasis1, orthoBasis2
 ) {
-  var projection = orthoBasis1.slice();
-  var vComponent = input.slice();
   var scalarProduct1 = this.scalarProduct(orthoBasis1, input);
   var scalarProduct2 = this.scalarProduct(orthoBasis2, input);
-  multiplyVectorByScalar(projection, scalarProduct1);
-  addVectorTimesScalar(projection, orthoBasis2, scalarProduct2);
-  addVectorTimesScalar(vComponent, projection, - 1);
-  var oldAngle = Math.atan(Math.sqrt(oldTanSquared));
-  var newAngle = Math.atan(Math.sqrt(newTanSquared));
-  if (isNaN(oldAngle) || isNaN(newAngle)) {
-    return input;
-  }
-  var angleChange = - oldAngle + newAngle;
-  if (newX * oldX < 0 && newY * oldY < 0) {
-    angleChange *= - 1;
-  }
-  projection = orthoBasis1.slice();
+  var result = orthoBasis1.slice();
   multiplyVectorByScalar(
-    projection, 
-    Math.cos(angleChange) * scalarProduct1 - Math.sin(angleChange) * scalarProduct2
+    result, 
+    Math.cos(this.angleCuttingChange) * scalarProduct1 - Math.sin(this.angleCuttingChange) * scalarProduct2
   );
   addVectorTimesScalar(
-    projection, 
+    result, 
     orthoBasis2, 
-    Math.sin(angleChange) * scalarProduct1 + Math.sin(angleChange) * scalarProduct2
+    Math.sin(this.angleCuttingChange) * scalarProduct1 + Math.sin(this.angleCuttingChange) * scalarProduct2
   );
-  var result = vComponent;
-  addVectorTimesScalar(result, projection, 1);
   return result;
 }
 
-GraphicsNDimensions.prototype.scalarProduct = function(root1, root2) { 
+GraphicsNDimensions.prototype.scalarProduct = function(vector1, vector2) { 
   var result = 0;
   for (var i = 0; i < this.dimension; i ++) {
     for (var j = 0; j < this.dimension; j ++) {
-      result += root1[i] * root2[j] * this.theBilinearForm[i][j];
+      result += vector1[i] * vector2[j] * this.theBilinearForm[i][j];
     } 
   }
   return result;
@@ -567,74 +572,105 @@ function getAngleScreenChange(newX, newY, oldX, oldY) {
   return result;
 }
 
-GraphicsNDimensions.prototype.changeBasis = function(selectedIndex) {
+GraphicsNDimensions.prototype.rotateInPlane = function(
+  inputOutput, orthonormalBasis1, orthonormalBasis2, angle
+) {
+  var result = inputOutput.slice();
+  var scalarProductWithBasis1 = this.scalarProduct(result, orthonormalBasis1);
+  var scalarProductWithBasis2 = this.scalarProduct(result, orthonormalBasis2);
+  addVectorTimesScalar(result, orthonormalBasis1, - scalarProductWithBasis1);
+  addVectorTimesScalar(result, orthonormalBasis2, - scalarProductWithBasis2);
+  addVectorTimesScalar(
+    result, 
+    orthonormalBasis1, 
+    scalarProductWithBasis1 * Math.cos(angle) - 
+    scalarProductWithBasis2 * Math.sin(angle)
+  );
+  addVectorTimesScalar(
+    result, 
+    orthonormalBasis2, 
+    scalarProductWithBasis1 * Math.sin(angle) + 
+    scalarProductWithBasis2 * Math.cos(angle)
+  );
+  for (var i = 0; i < inputOutput.length; i ++) {
+    inputOutput[i] = result[i];
+  }
+}
+
+GraphicsNDimensions.prototype.changeBasis = function() {
   var newX = this.mousePositionScreen[0] - this.shiftScreenCoordinates[0];
   var newY = this.mousePositionScreen[1] - this.shiftScreenCoordinates[1];
   if (newX == 0 && newY == 0) {
     return;
   }
-  var selectedRoot = this.basisCircles[selectedIndex];
   var oldX = this.projectionSelectedAtSelection[0] - this.shiftScreenCoordinates[0];
   var oldY = this.projectionSelectedAtSelection[1] - this.shiftScreenCoordinates[1];
-  var epsilon = 0.000000015;
-  if (newX * newX + newY * newY > 3) { 
+  newX /= this.graphicsUnit;
+  newY /= this.graphicsUnit;
+  oldX /= this.graphicsUnit; 
+  oldY /= this.graphicsUnit;
+  this.vProjectionNormalizedSelectedRotated = this.vProjectionNormalizedSelected.slice();
+  this.screenBasis[0] = this.screenBasisAtSelection[0].slice();
+  this.screenBasis[1] = this.screenBasisAtSelection[1].slice();
+  if (newX * newX + newY * newY > 0.03) { 
     this.angleScreenChange = - getAngleScreenChange(newX, newY, oldX, oldY);
-    if (this.angleScreenChange > Math.PI / 2 || this.angleScreenChange < - Math.PI/2) {
+    if (this.angleScreenChange > Math.PI / 2 || this.angleScreenChange < - Math.PI / 2) {
       return;
-    } 
-    var newVectorE1 = this.screenBasisAtSelection[0].slice();
-    var newVectorE2 = this.screenBasisAtSelection[1].slice();
-    multiplyVectorByScalar(newVectorE1, Math.cos(this.angleScreenChange));
-    addVectorTimesScalar(newVectorE1, this.screenBasisAtSelection[1], Math.sin(this.angleScreenChange));
-    multiplyVectorByScalar(newVectorE2, Math.cos(this.angleScreenChange));
-    addVectorTimesScalar(newVectorE2, this.screenBasisAtSelection[0], - Math.sin(this.angleScreenChange));
-    this.screenBasis[0] = newVectorE1;
-    this.screenBasis[1] = newVectorE2;
+    }
+    this.rotateInPlane(
+      this.screenBasis[0], 
+      this.screenBasisAtSelection[0], this.screenBasisAtSelection[1], 
+      this.angleScreenChange
+    );
+    this.rotateInPlane(
+      this.screenBasis[1],
+      this.screenBasisAtSelection[0], this.screenBasisAtSelection[1], 
+      this.angleScreenChange    
+    );
+    this.rotateInPlane(
+      this.vProjectionNormalizedSelectedRotated,
+      this.screenBasisAtSelection[0], this.screenBasisAtSelection[1], 
+      this.angleScreenChange    
+    );
   }
-
   if (this.dimension <= 2) {
     return;
   }
-  var vectorTimesE1 = this.scalarProduct(selectedRoot, this.screenBasisAtSelection[0]);
-  var vectorTimesE2 = this.scalarProduct(selectedRoot, this.screenBasisAtSelection[1]);
-  var vOrthogonal = selectedRoot.slice();
-  var vProjection = this.screenBasisAtSelection[0].slice();
-  multiplyVectorByScalar(vProjection, vectorTimesE1);
-  addVectorTimesScalar(vProjection, this.screenBasisAtSelection[1], vectorTimesE2);
-  addVectorTimesScalar(vOrthogonal, vProjection, - 1);
+  var selectedVector = this.basisCircles[this.selectedBasisIndex];
+  var xCuttingOld = this.scalarProduct(selectedVector, this.vProjectionNormalizedSelected);
+  var yCuttingOld = this.scalarProduct(selectedVector, this.vOrthogonalSelected);
+  var hypothenuseSquared = xCuttingOld * xCuttingOld + yCuttingOld * yCuttingOld;
 
-  oldX /= this.graphicsUnit;
-  oldY /= this.graphicsUnit;
-  newX /= this.graphicsUnit;
-  newY /= this.graphicsUnit;
-  var vOrthogonalSquareLength = this.scalarProduct(vOrthogonal, vOrthogonal);
-  //<- should be positive (the bilinear form is expected to be positive definite)
-  if (this.dimension > 2) {
-    if (Math.abs(vOrthogonalSquareLength) > epsilon) {
-      vOrthogonal = this.eiBasis[2];
+  var xCuttingNew = Math.sqrt(newX * newX + newY * newY);
+  if (xCuttingNew * xCuttingNew > hypothenuseSquared) {
+    xCuttingNew = Math.sqrt(hypothenuseSquared) - 0.01;
+  }
+  var yCuttingNew = Math.sqrt(hypothenuseSquared - xCuttingNew * xCuttingNew);  
+  //if (newX * oldX + newY * oldY < 0) {
+  //  xCuttingNew *= - 1;
+  //}
+  this.angleCuttingChange = - Math.atan2(yCuttingNew, xCuttingNew) + Math.atan2(yCuttingOld, xCuttingOld);
+  for (var i = 0; i < 5; i ++) {
+    if (this.angleCuttingChange <= - Math.PI) {
+      this.angleCuttingChange += 2 * Math.PI;
     }
-    vOrthogonalSquareLength = this.scalarProduct(vOrthogonal, vOrthogonal);
+    if (this.angleCuttingChange > Math.PI) {
+      this.angleCuttingChange -= 2 * Math.PI;
+    }
+    if (this.angleCuttingChange >= 0 && this.angleCuttingChange <= Math.PI) {
+      break;
+    }
   }
-  if (Math.abs(vOrthogonalSquareLength) < epsilon) {
-    return;
-  }
-  if (oldRatioProjectionSquaredOverHeightSquared == 0) {
-    vProjection = this.screenBasisAtSelection[0].slice();
-    multiplyVectorByScalar(vProjection, - newX);
-    addVectorTimesScalar(vProjection, this.screenBasisAtSelection[1], newY);
-  }
-  this.scaleToUnitLength(vProjection);
-  this.scaleToUnitLength(vOrthogonal);
-  this.screenBasis[0] = this.rotateOutOfPlane(
-    this.screenBasis[0], vProjection, vOrthogonal,
-    oldRatioProjectionSquaredOverHeightSquared, newRatioProjectionSquaredOverHeightSquared,
-    newX, newY, oldX, oldY
+
+  this.rotateInPlane(
+    this.screenBasis[0], 
+    this.vProjectionNormalizedSelectedRotated, this.vOrthogonalSelected,
+    this.angleCuttingChange
   );
-  this.screenBasis[1] = this.rotateOutOfPlane(
+  this.rotateInPlane(
     this.screenBasis[1], 
-    vProjection, vOrthogonal, 
-    oldRatioProjectionSquaredOverHeightSquared, newRatioProjectionSquaredOverHeightSquared, 
-    newX, newY, oldX, oldY 
+    this.vProjectionNormalizedSelectedRotated, this.vOrthogonalSelected,
+    this.angleCuttingChange
   );
   this.makeScreenBasisOrthonormal();
 }
@@ -696,8 +732,34 @@ GraphicsNDimensions.prototype.selectIndex = function (index) {
   }
   this.screenBasisAtSelection[0] = this.screenBasis[0].slice();
   this.screenBasisAtSelection[1] = this.screenBasis[1].slice();
-}
 
+  var epsilon = 0.0000001;
+  for (var round = 0; round < this.dimension + 1; round ++) {
+    var selectedVector = this.basisCircles[this.selectedBasisIndex].slice();
+    if (round > 0) {
+      selectedVector[(round + 1) % this.dimension] += 0.01;
+    }
+    var vectorTimesE1 = this.scalarProduct(selectedVector, this.screenBasisAtSelection[0]);
+    var vectorTimesE2 = this.scalarProduct(selectedVector, this.screenBasisAtSelection[1]);
+    this.vProjectionNormalizedSelected = this.screenBasisAtSelection[0].slice();
+    multiplyVectorByScalar(this.vProjectionNormalizedSelected, vectorTimesE1);
+    addVectorTimesScalar(this.vProjectionNormalizedSelected, this.screenBasisAtSelection[1], vectorTimesE2);
+    this.vOrthogonalSelected = selectedVector.slice();
+    addVectorTimesScalar(this.vOrthogonalSelected, this.vProjectionNormalizedSelected, - 1);
+    var vOrthogonalSquareLength = this.scalarProduct(this.vOrthogonalSelected, this.vOrthogonalSelected);
+    var vProjectionSquareLength = this.scalarProduct(this.vProjectionNormalizedSelected, this.vProjectionNormalizedSelected);
+    if (vOrthogonalSquareLength > epsilon && vProjectionSquareLength > epsilon) {
+      break;
+    }
+    if (this.dimension <= 2 && vProjectionSquareLength > epsilon) {
+      break;
+    }
+  }
+  this.scaleToUnitLength(this.vProjectionNormalizedSelected);
+  if (this.dimension > 2) {
+    this.scaleToUnitLength(this.vOrthogonalSelected);
+  }
+}
 
 GraphicsNDimensions.prototype.clickCanvas = function(event) {
   this.computePosXPosY(event);
@@ -745,7 +807,7 @@ GraphicsNDimensions.prototype.mouseMoveRedraw = function(event) {
     this.shiftScreenCoordinates[0] = this.shiftScreenCoordinatesClicked[0] + deltaX;
     this.shiftScreenCoordinates[1] = this.shiftScreenCoordinatesClicked[1] + deltaY;
   } else { 
-    this.changeBasis(this.selectedBasisIndex);
+    this.changeBasis();
     var doRedraw = true;
   }
   if (doRedraw) {

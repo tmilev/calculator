@@ -51,7 +51,6 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
 
   this.vOrthogonalSelected = [];
   this.vProjectionNormalizedSelected = []; 
-  this.vProjectionNormalizedSelectedRotated = [];
 
   this.angleScreenChange = 0;
   this.angleCuttingChange = 0;
@@ -111,7 +110,6 @@ GraphicsNDimensions.prototype.writeInfo = function() {
     result += `<br>Angle change screen: ${this.angleScreenChange.toFixed(2)}`;
     result += `<br>Angle change cutting: ${this.angleCuttingChange.toFixed(2)}`;
     result += `<br>Projection selected: ${toStringVector(this.vProjectionNormalizedSelected)}`;
-    result += `<br>Rotated projection selected: ${toStringVector(this.vProjectionNormalizedSelectedRotated)}`;
     result += `<br>Orthogonal component selected: ${toStringVector(this.vOrthogonalSelected)}`;
   }
   result += `<br>Coordinate center in screen coordinates: <br>(${this.shiftScreenCoordinates.join(", ")})`;
@@ -489,24 +487,6 @@ function addVectorTimesScalar(vector, other, scalar) {
   }
 }
 
-GraphicsNDimensions.prototype.rotateOutOfPlane = function(
-  input, orthoBasis1, orthoBasis2
-) {
-  var scalarProduct1 = this.scalarProduct(orthoBasis1, input);
-  var scalarProduct2 = this.scalarProduct(orthoBasis2, input);
-  var result = orthoBasis1.slice();
-  multiplyVectorByScalar(
-    result, 
-    Math.cos(this.angleCuttingChange) * scalarProduct1 - Math.sin(this.angleCuttingChange) * scalarProduct2
-  );
-  addVectorTimesScalar(
-    result, 
-    orthoBasis2, 
-    Math.sin(this.angleCuttingChange) * scalarProduct1 + Math.sin(this.angleCuttingChange) * scalarProduct2
-  );
-  return result;
-}
-
 GraphicsNDimensions.prototype.scalarProduct = function(vector1, vector2) { 
   var result = 0;
   for (var i = 0; i < this.dimension; i ++) {
@@ -609,30 +589,25 @@ GraphicsNDimensions.prototype.changeBasis = function() {
   newY /= this.graphicsUnit;
   oldX /= this.graphicsUnit; 
   oldY /= this.graphicsUnit;
-  this.vProjectionNormalizedSelectedRotated = this.vProjectionNormalizedSelected.slice();
+  if (newX * newX + newY * newY <= 0.03) {
+    return;
+  }
+  this.angleScreenChange = - getAngleScreenChange(newX, newY, oldX, oldY);
+  if (this.angleScreenChange > Math.PI / 2 || this.angleScreenChange < - Math.PI / 2) {
+    return;
+  }
   this.screenBasis[0] = this.screenBasisAtSelection[0].slice();
   this.screenBasis[1] = this.screenBasisAtSelection[1].slice();
-  if (newX * newX + newY * newY > 0.03) { 
-    this.angleScreenChange = - getAngleScreenChange(newX, newY, oldX, oldY);
-    if (this.angleScreenChange > Math.PI / 2 || this.angleScreenChange < - Math.PI / 2) {
-      return;
-    }
-    this.rotateInPlane(
-      this.screenBasis[0], 
-      this.screenBasisAtSelection[0], this.screenBasisAtSelection[1], 
-      this.angleScreenChange
-    );
-    this.rotateInPlane(
-      this.screenBasis[1],
-      this.screenBasisAtSelection[0], this.screenBasisAtSelection[1], 
-      this.angleScreenChange    
-    );
-    this.rotateInPlane(
-      this.vProjectionNormalizedSelectedRotated,
-      this.screenBasisAtSelection[0], this.screenBasisAtSelection[1], 
-      this.angleScreenChange    
-    );
-  }
+  this.rotateInPlane(
+    this.screenBasis[0], 
+    this.screenBasisAtSelection[0], this.screenBasisAtSelection[1], 
+    this.angleScreenChange
+  );
+  this.rotateInPlane(
+    this.screenBasis[1],
+    this.screenBasisAtSelection[0], this.screenBasisAtSelection[1], 
+    this.angleScreenChange    
+  );
   if (this.dimension <= 2) {
     return;
   }
@@ -664,12 +639,12 @@ GraphicsNDimensions.prototype.changeBasis = function() {
 
   this.rotateInPlane(
     this.screenBasis[0], 
-    this.vProjectionNormalizedSelectedRotated, this.vOrthogonalSelected,
+    this.vProjectionNormalizedSelected, this.vOrthogonalSelected,
     this.angleCuttingChange
   );
   this.rotateInPlane(
     this.screenBasis[1], 
-    this.vProjectionNormalizedSelectedRotated, this.vOrthogonalSelected,
+    this.vProjectionNormalizedSelected, this.vOrthogonalSelected,
     this.angleCuttingChange
   );
   this.makeScreenBasisOrthonormal();
@@ -893,7 +868,7 @@ function testA3(idCanvas, idSpanInformation) {
     //theA3.drawCircle(labeledVectors[counterLabel], "red");
   }
   for (var counterSegment = 0; counterSegment < segments.length; counterSegment ++) {
-    theA3.drawLine(segments[counterSegment][0], segments[counterSegment][1]);
+    theA3.drawLine(segments[counterSegment][0], segments[counterSegment][1], "blue");
   }
   theA3.graphicsUnit = 150;
   theA3.drawAll();

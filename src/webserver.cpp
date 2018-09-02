@@ -5760,6 +5760,11 @@ void WebServer::CheckSystemInstallationMongoDB()
 
 void WebServer::CheckMongoDBSetup()
 { MacroRegisterFunctionWithName("WebServer::CheckMongoDBSetup");
+#ifdef MACRO_use_MongoDB
+  logServer << logger::green << "Compiled with mongo DB support. " << logger::endL;
+#else
+  logServer << logger::red << "Compiled without mongo DB support. " << logger::endL;
+#endif
   if (theGlobalVariables.configuration["mongoDBSetup"].type != JSData::JSUndefined)
   { return;
   }

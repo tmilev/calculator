@@ -837,15 +837,15 @@ bool WebCrawler::VerifyRecaptcha
 std::string WebWorker::GetSignUpRequestResult()
 { MacroRegisterFunctionWithName("WebWorker::GetSignUpRequestResult");
   //double startTime =theGlobalVariables.GetElapsedSeconds();
+  JSData result;
+  std::stringstream errorStream;
 #ifdef MACRO_use_MongoDB
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
   UserCalculator theUser;
   theUser.username = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
   theUser.email = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
-  JSData result;
   std::stringstream generalCommentsStream;
   std::stringstream outputStream;
-  std::stringstream errorStream;
   generalCommentsStream
   << "<b>Please excuse our verbose messages, they are used "
   << "for debugging and will soon be turned off.</b>"

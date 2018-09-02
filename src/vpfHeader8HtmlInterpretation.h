@@ -139,9 +139,7 @@ public:
   List<double> timePerAttempt;
   List<List<double> > timeIntermediatePerAttempt;
   List<List<std::string> > timeIntermediateComments;
-#ifdef MACRO_use_MongoDB
   UserCalculator currentUseR;
-#endif
   static std::string stringScoredQuizzes;
   static std::string stringPracticE;
   static std::string stringProblemLink;

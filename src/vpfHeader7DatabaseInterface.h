@@ -193,8 +193,6 @@ public:
   std::string ToStringAvailableAnswerIds();
 };
 
-#ifdef MACRO_use_MongoDB
-
 class EmailRoutines
 {
 public:
@@ -293,5 +291,4 @@ public:
    std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers);
 };
 
-#endif // MACRO_use_MongoDB
 #endif // vpfHeader7_databaseMySQL_already_included

@@ -1657,6 +1657,7 @@ std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
 
 std::string CalculatorHTML::GetDeadlineNoInheritance(const std::string& id)
 { MacroRegisterFunctionWithName("CalculatorHTML::GetDeadlineNoInheritance");
+#ifdef MACRO_use_MongoDB
   if (!this->currentUseR.theProblemData.Contains(id))
     return "";
   ProblemDataAdministrative& currentProb =
@@ -1664,6 +1665,9 @@ std::string CalculatorHTML::GetDeadlineNoInheritance(const std::string& id)
   if (!currentProb.deadlinesPerSection.Contains(this->currentUseR.sectionComputed))
     return "";
   return currentProb.deadlinesPerSection.GetValueCreate(this->currentUseR.sectionComputed);
+#else
+  return "Database not present. ";
+#endif
 }
 
 std::string CalculatorHTML::GetDeadline

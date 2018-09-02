@@ -267,6 +267,22 @@ std::string ProblemData::ToString() const
   return out.str();
 }
 
+UserCalculator::UserCalculator()
+{ this->flagNewAuthenticationTokenComputedUserNeedsIt = false;
+  this->approximateHoursSinceLastTokenWasIssued = 2;
+}
+
+UserCalculator::~UserCalculator()
+{ for (unsigned i = 0; i < this->enteredPassword.size(); i ++)
+    this->enteredPassword[i] = ' ';
+  for (unsigned i = 0; i < this->usernamePlusPassWord.size(); i ++)
+    this->usernamePlusPassWord[i] = ' ';
+  for (unsigned i = 0; i < this->enteredShaonedSaltedPassword.size(); i ++)
+    this->enteredShaonedSaltedPassword[i] = ' ';
+  for (unsigned i = 0; i < this->actualShaonedSaltedPassword.size(); i ++)
+    this->actualShaonedSaltedPassword[i] = ' ';
+}
+
 #ifdef MACRO_use_MongoDB
 
 std::string UserCalculator::ToStringSelectedColumns()
@@ -306,22 +322,6 @@ std::string UserCalculator::ToString()
   out << "<br>Deadline info: "
   << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(this->deadlines.ToString(false));
   return out.str();
-}
-
-UserCalculator::UserCalculator()
-{ this->flagNewAuthenticationTokenComputedUserNeedsIt = false;
-  this->approximateHoursSinceLastTokenWasIssued = 2;
-}
-
-UserCalculator::~UserCalculator()
-{ for (unsigned i = 0; i < this->enteredPassword.size(); i ++)
-    this->enteredPassword[i] = ' ';
-  for (unsigned i = 0; i < this->usernamePlusPassWord.size(); i ++)
-    this->usernamePlusPassWord[i] = ' ';
-  for (unsigned i = 0; i < this->enteredShaonedSaltedPassword.size(); i ++)
-    this->enteredShaonedSaltedPassword[i] = ' ';
-  for (unsigned i = 0; i < this->actualShaonedSaltedPassword.size(); i ++)
-    this->actualShaonedSaltedPassword[i] = ' ';
 }
 
 bool UserCalculator::FetchOneColumn

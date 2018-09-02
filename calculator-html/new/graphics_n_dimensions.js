@@ -30,6 +30,7 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.vectorProjections = [];
   this.drawOperations = [];
   this.idCanvas = inputIdCanvas;
+  this.idsBasis = [];
   this.idInfo = inputIdInfo;
   this.idPlaneInfo = `${inputIdInfo}projectionPlane`;
   this.basisCircles = [];
@@ -60,10 +61,12 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.canvasContainer.addEventListener("mousedown", this.clickCanvas.bind(this));
   this.canvasContainer.addEventListener("mouseup", this.releaseMouse.bind(this));
   this.canvasContainer.addEventListener("mousemove", this.mouseMoveRedraw.bind(this));
-  this.frameCount = 0;
-  this.numberOfFrames = 20;
-  this.screenGoal = [];
-  this.screenStart = [];
+  this.animationBasisChange = {
+    frameCount: 0,
+    numberOfFrames: 20,
+    screenGoal: [],
+    screenStart: [],
+  };
   this.canvas = null;
   this.widthHtml = this.canvasContainer.width;
   this.heightHtml = this.canvasContainer.height;
@@ -83,6 +86,10 @@ GraphicsNDimensions.prototype.initVectors = function(inputVectors) {
   for (var counterVector = 0; counterVector < this.vectors.length; counterVector ++) {
     this.vectorProjections.push([0, 0]);
   }
+}
+
+function startProjectionPlaneUser(canvasId) {
+  collectionGraphicsNDimension[canvasId].startProjectionPlaneUser();
 }
 
 function toStringVector(vector) {
@@ -124,16 +131,18 @@ GraphicsNDimensions.prototype.writeInfo = function() {
 
 GraphicsNDimensions.prototype.initInfo = function () {
   var result = "";
-  for (var i = 0; i < 2; i ++) { 
+  for (var i = 0; i < 2; i ++) {
+    this.idsBasis[i] = []; 
     for (var j = 0; j < this.dimension; j ++) { 
-      result += `<textarea rows = "1" cols = "2" id = "${this.idCanvas}textEbasis_${i}_${j}"></textarea>`;
+      this.idsBasis[i][j] = `${this.idCanvas}textEbasis_${i}_${j}`;
+      result += `<textarea rows = "1" cols = "2" id = "${this.idsBasis[i][j]}"></textarea>`;
       result += "</textarea>\n";
     }
     result += "<br>";
   }
-  result += `<button onclick = "startProjectionPlaneUser('${this.idCanvas}')>`;
+  result += `<button onclick = "startProjectionPlaneUser('${this.idCanvas}')">`;
   result += `Change to basis</button><br>`;
-  result += `<button onclick = "snapShotLaTeX('${this.idCanvas}')>LaTeX snapshot</button>`;
+  //result += `<button onclick = "snapShotLaTeX('${this.idCanvas}')>LaTeX snapshot</button>`;
   result += `<span id = "${this.idCanvas}snapShotLateXspan"> </span>\n`;
   result += `<span id = '${this.idPlaneInfo}'></span><br>`;
   document.getElementById(this.idInfo).innerHTML = result;
@@ -284,22 +293,36 @@ GraphicsNDimensions.prototype.getBilinearFormInput = function () {
   textComponent.innerHTML = result;
 }
 
-GraphicsNDimensions.prototype.modifyBasisToOrthonormalNoShiftSecond = function() {
+GraphicsNDimensions.prototype.startProjectionPlaneUser = function () {
+  this.animationBasisChange.frameCount = 0;
+  this.animationBasisChange.screenStart[0] = this.screenBasis[0].slice();
+  this.animationBasisChange.screenStart[1] = this.screenBasis[1].slice();
+  for (var i = 0; i < 2; i ++) {
+    this.animationBasisChange.screenGoal[i] = [];
+    for (var counterDimension = 0; counterDimension < this.dimension; counterDimension ++) {
+      var coordinate = document.getElementById(this.idsBasis[i][counterDimension]).value;
+      this.animationBasisChange.screenGoal[i][counterDimension] = Number(coordinate);
+    }
+  }
+  this.animateChangeProjectionPlaneUser();
+}
 
-} 
-
-GraphicsNDimensions.prototype.changeProjectionPlaneUser = function() {
-  this.frameCount ++;
-  if (this.frameCount >= this.numberOfFrames) {
+GraphicsNDimensions.prototype.animateChangeProjectionPlaneUser = function() {
+  this.animationBasisChange.frameCount ++;
+  var frameCount = this.animationBasisChange.frameCount;
+  var maxFrameCount = this.animationBasisChange.numberOfFrames;
+  if (frameCount > maxFrameCount) {
     return;
   }
+  var screenStart = this.animationBasisChange.screenStart;
+  var screenGoal = this.animationBasisChange.screenGoal;
   for (var i = 0; i < this.dimension; i ++) {
-    this.screenBasis[0][i] = this.screenGoal[0][i] * (this.frameCount / this.numFramesUserPlane) + this.screenStart[0][i] * (1 - this.frameCount / this.numFramesUserPlane);
-    this.screenBasis[1][i] = this.screenGoal[1][i] * (this.frameCount / this.numFramesUserPlane) + this.screenStart[1][i] * (1 - this.frameCount / this.numFramesUserPlane);
+    this.screenBasis[0][i] = screenGoal[0][i] * (frameCount / maxFrameCount) + screenStart[0][i] * (1 - frameCount / maxFrameCount);
+    this.screenBasis[1][i] = screenGoal[1][i] * (frameCount / maxFrameCount) + screenStart[1][i] * (1 - frameCount / maxFrameCount);
   }
   this.makeScreenBasisOrthonormal();
   this.drawAll();
-  setTimeout(this.changeProjectionPlaneUser.bind(this), 100);
+  setTimeout(this.animateChangeProjectionPlaneUser.bind(this), 100);
 }
 
 function DrawSegmentBetweenTwoVectors(inputOwnerId, inputData) {
@@ -451,7 +474,6 @@ GraphicsNDimensions.prototype.init = function () {
     this.makeBasisCircles();
   }
   this.makeEiBasis();
-  this.modifyBasisToOrthonormalNoShiftSecond();
   var theDiv = document.getElementById(this.idCanvas);
   this.canvas = theDiv.getContext("2d");
 }
@@ -872,4 +894,66 @@ function testA3(idCanvas, idSpanInformation) {
   }
   theA3.graphicsUnit = 150;
   theA3.drawAll();
+}
+
+function testA4(idCanvas, idSpanInformation) {
+  var theA4 = new GraphicsNDimensions(idCanvas, idSpanInformation);
+  theA4.dimension = 4;
+  theA4.theBilinearForm = [
+    [ 2, -1,  0,  0],
+    [-1,  2, -1,  0],
+    [0,  -1,  2, -1],
+    [0,   0, -1,  2]
+  ];
+  theA4.screenBasis = [
+    [-0.195, 0.316, 0.828, 0.632],
+    [ 0.602, 0.973, 0.602, 0]
+  ];
+  var labeledVectors = [
+    [ 1, 0, 0, 0],
+    [ 0, 1, 0, 0],
+    [ 0, 0, 1, 0],
+    [ 0, 0, 0, 1],
+    [ 1, 1, 0, 0],
+    [ 0, 1, 1, 0],
+    [ 0, 0, 1, 1],
+    [ 1, 1, 1, 0],
+    [ 0, 1, 1, 1],
+    [ 1, 1, 1, 1],
+  ];
+  var numberOfPositiveVectors = labeledVectors.length;
+  for (var counter = 0; counter < numberOfPositiveVectors; counter ++) {
+    var theVector = labeledVectors[counter].slice();
+    multiplyVectorByScalar(theVector, - 1);
+    labeledVectors.push(theVector);
+  }
+  var segments = [];
+  for (var counter = 0; counter < labeledVectors.length; counter ++) {
+    var minDistance = 10;
+    for (var secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter ++) {
+      var newDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]); 
+      if (newDistance < minDistance && newDistance > 0) {
+        minDistance = newDistance;
+      }
+    }
+    for (var secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter ++) {
+      var theDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]); 
+      if (theDistance != minDistance) {
+        continue;
+      }
+      segments.push([labeledVectors[counter].slice(), labeledVectors[secondCounter].slice()]);
+    }
+  }
+
+  theA4.drawStandardEiBasis("red");
+  for (var counterLabel = 0; counterLabel < labeledVectors.length; counterLabel ++) {
+    theA4.drawLine([0, 0, 0, 0], labeledVectors[counterLabel], "green");
+    //theA3.drawText(labeledVectors[counterLabel], `[${labeledVectors.join(', ')}]`);
+    //theA3.drawCircle(labeledVectors[counterLabel], "red");
+  }
+  for (var counterSegment = 0; counterSegment < segments.length; counterSegment ++) {
+    theA4.drawLine(segments[counterSegment][0], segments[counterSegment][1], "blue");
+  }
+  theA4.graphicsUnit = 150;
+  theA4.drawAll();
 }

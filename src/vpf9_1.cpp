@@ -1222,7 +1222,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   Vector<Rational> highestWeightLargerAlgSimpleCoords;
   highestWeightLargerAlgSimpleCoords = LargerWeyl.GetSimpleCoordinatesFromFundamental(highestWeightLargerAlgebraFundamentalCoords);
   Matrix<Rational> tempMat;
-  Vector<Rational> tempRoot, ZeroRoot;
+  Vector<Rational> tempRoot;
   DrawingVariables drawOps;
   int theSmallDim = SmallerWeyl.CartanSymmetric.NumRows;
 //  drawOps.theBuffer.initDimensions(theSmallDim, 1);
@@ -1230,15 +1230,15 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   theDraggableBasis.MakeEiBasis(theSmallDim);
   WeylGroupData tmpWeyl;
   tmpWeyl.MakeArbitrarySimple('A', 2);
-  drawOps.theBuffer.initDimensions(tmpWeyl.CartanSymmetric, theDraggableBasis, theDraggableBasis, 1);
+  drawOps.theBuffer.initDimensions(tmpWeyl.CartanSymmetric, theDraggableBasis, theDraggableBasis);
   FormatExpressions theFormat;
-  drawOps.theBuffer.BasisProjectionPlane[0][0][0] = 1;
-  drawOps.theBuffer.BasisProjectionPlane[0][0][1] = 0;
-  drawOps.theBuffer.BasisProjectionPlane[0][1][0] = 1;
-  drawOps.theBuffer.BasisProjectionPlane[0][1][1] = 1;
+  drawOps.theBuffer.BasisProjectionPlane[0][0] = 1;
+  drawOps.theBuffer.BasisProjectionPlane[0][1] = 0;
+  drawOps.theBuffer.BasisProjectionPlane[1][0] = 1;
+  drawOps.theBuffer.BasisProjectionPlane[1][1] = 1;
   drawOps.theBuffer.ModifyToOrthonormalNoShiftSecond
-  (drawOps.theBuffer.BasisProjectionPlane[0][1], drawOps.theBuffer.BasisProjectionPlane[0][0]);
-  drawOps.theBuffer.GraphicsUnit[0] = 50;
+  (drawOps.theBuffer.BasisProjectionPlane[1], drawOps.theBuffer.BasisProjectionPlane[0]);
+  drawOps.theBuffer.GraphicsUnit = 50;
   PiecewiseQuasipolynomial theStartingPoly, theSubbedPoly, Accum;
   //stOutput << "<hr>" << this->GmodKNegWeightsBasisChanged.ToString() << "<hr>";
   std::string tempS;
@@ -1318,7 +1318,6 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     */
   }
 //  stOutput << "<hr>so far so good!";
-  drawOps.theBuffer.theDrawCircleAtVectorOperations.Reserve(2500);
   Accum.DrawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
 //  smallWeylChamber.DrawMeProjective(0, false, drawOps, theFormat);
 //  out << tempVars.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);

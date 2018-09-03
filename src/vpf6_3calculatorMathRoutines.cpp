@@ -7555,15 +7555,6 @@ public:
         this->thePlot += thePoint;
       }
     }
-//    double& theGraphicsUnit = theDV.theBuffer.GraphicsUnit[0];
-//    theGraphicsUnit =100;
-//    theDV.DefaultHtmlHeight = (int)( (this->layerHeight* (this->LayerSizes.size- 1)*theGraphicsUnit + 100).GetDoubleValue());
-//    theDV.DefaultHtmlWidth = (int)( (this->widthMaxLayer*theGraphicsUnit +40).GetDoubleValue());
-//    theDV.theBuffer.centerX.SetSize(1);
-//    theDV.theBuffer.centerY.SetSize(1);
-//    theDV.theBuffer.centerX[0] = (this->widthMaxLayer/2).GetDoubleValue()*theGraphicsUnit;
-//    theDV.theBuffer.centerY[0] = 40;
-//    stOutput << this->ToString();
   }
 };
 

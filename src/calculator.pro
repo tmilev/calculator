@@ -147,4 +147,21 @@ DISTFILES += \
     ../calculator-html/new/three-d.js \
     ../calculator-html/new/submit_requests.js \
     ../calculator-html/new/autocomplete_keywords.js \
-    ../calculator-html/new/course_page.js
+    ../calculator-html/new/course_page.js \
+    ../calculator-html/new/account_activation.js \
+    ../calculator-html/new/account.js \
+    ../calculator-html/new/database.js \
+    ../calculator-html/new/edit_page.js \
+    ../calculator-html/new/forgot_password.js \
+    ../calculator-html/new/graphics_n_dimensions.js \
+    ../calculator-html/new/ids_dom_elements.js \
+    ../calculator-html/new/json_to_html.js \
+    ../calculator-html/new/login.js \
+    ../calculator-html/new/manage_accounts.js \
+    ../calculator-html/new/miscellaneous.js \
+    ../calculator-html/new/modifiable_database_fields.js \
+    ../calculator-html/new/pathnames.js \
+    ../calculator-html/new/problem_page.js \
+    ../calculator-html/new/select_course.js \
+    ../calculator-html/new/server_status.js \
+    ../calculator-html/new/signup.js

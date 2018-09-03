@@ -51,7 +51,7 @@ function updateAccountsPageCallback(input, notUsed) {
     outputComponentAdmin.innerHTML = getAccountsTable(admins);
     outputComponentStudents.innerHTML = getAccountsTable(students);
   } catch (e) {
-    outputComponent.innerHTML = e;
+    outputComponentStudents.innerHTML = e;
     console.log(e);
   }
 }

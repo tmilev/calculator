@@ -128,7 +128,7 @@ std::ostream& operator<<(std::ostream& out, const JSData& data);
 template <typename coefficient>
 void JSData::operator=(const Vector<coefficient>& other)
 { for (int i = 0; i < other.size; i ++)
-    (*this)[i] = other.TheObjects[i];
+    (*this)[i] = other[i];
 }
 
 template <typename coefficient>

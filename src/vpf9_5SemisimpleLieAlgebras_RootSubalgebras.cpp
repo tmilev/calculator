@@ -71,7 +71,7 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   Vectors<CompleX<double> > theEigenSpace;
   theEigenSpace.operator=(theEigenSpaceList);
   DrawOperations tempDO;
-  tempDO.initDimensions(theDimension, 1);
+  tempDO.initDimensions(theDimension);
   for (int i = 0; i < theDimension; i ++)
     for (int j = 0; j < theDimension; j ++)
       tempDO.theBilinearForm.elements[i][j] =

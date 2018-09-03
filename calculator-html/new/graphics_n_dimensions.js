@@ -68,9 +68,9 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
     screenStart: [],
   };
   this.canvas = null;
-  this.widthHtml = this.canvasContainer.width;
-  this.heightHtml = this.canvasContainer.height;
-  this.shiftScreenCoordinates = [this.widthHtml / 2, this.heightHtml / 2];
+  this.widthHTML = this.canvasContainer.width;
+  this.heightHTML = this.canvasContainer.height;
+  this.shiftScreenCoordinates = [this.widthHTML / 2, this.heightHTML / 2];
   this.mousePositionScreen = [0, 0];
   this.mousePositionScreenClicked = [0, 0];
   this.shiftScreenCoordinatesClicked = [0, 0];
@@ -256,11 +256,24 @@ GraphicsNDimensions.prototype.drawLine = function(left, right, color) {
       left: left,
       right: right,
       lineWidth: 1,
-      colorLine: color    
+      colorLine: color
     }
   ));
 }
-  
+
+GraphicsNDimensions.prototype.drawText = function(location, text, color) {
+  if (color === undefined) {
+    color = "black";
+  }
+  this.drawOperations.push(new DrawTextAtVector(
+    this.idCanvas, {
+      location: location,
+      text: text,
+      colorFill: color
+    }
+  ));
+}
+
 GraphicsNDimensions.prototype.getBilinearFormInput = function () {
   var result = "";
   result += "The bilinear form of the vector space follows. The ij^th element ";
@@ -409,7 +422,7 @@ DrawTextAtVector.prototype.drawNoFinish = function() {
   var owner = collectionGraphicsNDimension[this.ownerId];
   var canvas = owner.canvas;
   canvas.strokeStyle = this.colorFill;
-  this.locationScreen = owner.computeScreenCoordinates(this.location, this.locationScreen);
+  owner.computeScreenCoordinates(this.location, this.locationScreen);
   canvas.strokeText(this.text, this.locationScreen[0], this.locationScreen[1]);
 }
 
@@ -423,7 +436,7 @@ GraphicsNDimensions.prototype.drawAll = function() {
   }
   this.computeProjectionsEiBasis();
   this.ComputeProjectionsSpecialVectors();
-  this.canvas.clearRect(0, 0, this.widthHtml, this.heightHtml);
+  this.canvas.clearRect(0, 0, this.widthHTML, this.heightHTML);
   //this.canvas.fillStyle = "#FFFFFF";
   //this.canvas.fillRect(0, 0, this.widthHtml, this.heightHtml);
   //this.canvas.stroke();
@@ -472,9 +485,18 @@ GraphicsNDimensions.prototype.init = function () {
   }
   if (this.basisCircles.length === 0) {
     this.makeBasisCircles();
+  } else {
+    this.projectionsBasisCircles = new Array(this.basisCircles.length);
+    for (var i = 0; i < this.basisCircles.length; i ++) {
+      this.projectionsBasisCircles[i] = new Array(2);
+      this.projectionsBasisCircles[i].fill(0, 0, 2);
+    }
   }
+
   this.makeEiBasis();
   var theDiv = document.getElementById(this.idCanvas);
+  theDiv.width = this.widthHTML;
+  theDiv.height = this.heightHTML;
   this.canvas = theDiv.getContext("2d");
 }
 
@@ -549,6 +571,9 @@ GraphicsNDimensions.prototype.computeProjectionsEiBasis = function () {
 
 GraphicsNDimensions.prototype.ComputeProjectionsSpecialVectors = function() {
   for (var i = 0; i < this.basisCircles.length; i ++) {
+    if (this.projectionsBasisCircles[i] === null || this.projectionsBasisCircles[i] === undefined) {
+        this.projectionsBasisCircles[i] = [];
+    }
     this.computeScreenCoordinates(this.basisCircles[i], this.projectionsBasisCircles[i]);
   } 
   for (var i = 0; i < this.labeledVectors.length; i ++) {
@@ -703,17 +728,21 @@ GraphicsNDimensions.prototype.computePosXPosY = function(event) {
   this.mousePositionScreen[0] = event.clientX;
   this.mousePositionScreen[1] = event.clientY;
   var thePointer = this.canvasContainer;
-  while (thePointer) {
-    this.mousePositionScreen[0] -= thePointer.offsetLeft; 
-    if (typeof thePointer.scrollLeft === "number") {
-      this.mousePositionScreen[0] += thePointer.scrollLeft;
-    }
-    this.mousePositionScreen[1] -= thePointer.offsetTop;
-    if (typeof thePointer.scrollTop === "number") {
-      this.mousePositionScreen[1] += thePointer.scrollTop;
-    }
-    thePointer = thePointer.offsetParent;
-  }
+  var rect = this.canvasContainer.getBoundingClientRect();
+  this.mousePositionScreen[0] -= rect.left;
+  this.mousePositionScreen[1] -= rect.top;
+//  while (thePointer) {
+//    this.mousePositionScreen[0] -= thePointer.offsetLeft;
+//    if (typeof thePointer.scrollLeft === "number") {
+//      this.mousePositionScreen[0] += thePointer.scrollLeft;
+//    }
+//    this.mousePositionScreen[1] -= thePointer.offsetTop;
+//    if (typeof thePointer.scrollTop === "number") {
+//      this.mousePositionScreen[1] += thePointer.scrollTop;
+//    }
+//    //thePointer = thePointer.offsetParent;
+//    thePointer = thePointer.parentElement;
+//  }
 }
 
 GraphicsNDimensions.prototype.releaseMouse = function(event) {
@@ -894,6 +923,43 @@ function testA3(idCanvas, idSpanInformation) {
   }
   theA3.graphicsUnit = 150;
   theA3.drawAll();
+}
+
+GraphicsNDimensions.prototype.initFromObject = function(input) {
+  this.dimension = input.dimension;
+  this.theBilinearForm = input.bilinearForm;
+  this.screenBasis = input.screenBasis;
+  this.basisCircles = input.draggablePoints;
+  for (var i = 0; i < input.drawObjects.length; i ++) {
+    var currentOperation = input.drawObjects[i];
+    if (currentOperation.operation === "circleAtVector") {
+      this.drawCircle(currentOperation.location, currentOperation.color, currentOperation.radius);
+    } else if (currentOperation.operation === "segment") {
+      this.drawLine(currentOperation.points[0], currentOperation.points[1], currentOperation.color);
+    }
+  }
+  this.graphicsUnit = input.graphicsUnit;
+  if (this.graphicsUnit === undefined || this.graphicsUnit === null) {
+    this.graphicsUnit = 150;
+  }
+  if (input.widthHTML !== undefined && input.widthHTML !== null) {
+    this.widthHTML = input.widthHTML;
+  }
+  if (input.heightHTML !== undefined && input.heightHTML !== null) {
+    this.heightHTML = input.heightHTML;
+  }
+  this.drawAll();
+}
+
+function CreateGraphicsFromObject(input) {
+  if (input.idCanvas === undefined || input.idCanvas === null) {
+    throw("idCanvas missing.");
+  }
+  if (input.idSpanInformation === undefined || input.idSpanInformation === null) {
+    throw("idSpanInformation missing.");
+  }
+  var theObject = new GraphicsNDimensions(input.idCanvas, input.idSpanInformation);
+  theObject.initFromObject(input);
 }
 
 function testA4(idCanvas, idSpanInformation) {

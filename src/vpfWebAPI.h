@@ -12,6 +12,7 @@ public:
   static std::string app;
 
   static std::string calculatorSetProblemData;
+  static std::string calculatorChangePassword;
   static std::string calculatorHTML;
   static std::string calculatorOnePageJS;
   static std::string calculatorOnePageJSWithHash;

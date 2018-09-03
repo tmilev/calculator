@@ -234,6 +234,8 @@ std::string HtmlRoutines::GetSliderSpanStartsHidden(const std::string& content, 
 
 std::string LittelmannPath::GenerateOrbitAndAnimate()
 { std::stringstream out;
+  out << "not implemented yet";
+/*
   List<LittelmannPath> theOrbit;
   List<List<int> > theGens;
   if (!this->GenerateOrbit(theOrbit, theGens, 1000, 0))
@@ -289,12 +291,12 @@ std::string LittelmannPath::GenerateOrbitAndAnimate()
     tempPath.ActByEalpha(nextInd);
     out << "<tr><td> e_" << nextInd + 1 << "(" << lastPath.ToString() << ") =</td>" << "<td>"
     << tempPath.ToString() << "</td>";
-/*    for (int j = 0; j < this->owner->GetDim(); j ++)
+    for (int j = 0; j < this->owner->GetDim(); j ++)
     { tempPath = lastPath;
       tempPath.ActByEalpha(j);
       out << "<td> e_" << j+ 1 << "("
       << lastPath.ToString() << ")=</td>" <<"<td>" << tempPath.ToString() << "</td>";
-    }*/
+    }
     out << "</tr>";
   }
   out << "</table>";
@@ -321,7 +323,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate()
     }
     out << "</td></tr>";
   }
-  out << "</table>";
+  out << "</table>";*/
   return out.str();
 }
 

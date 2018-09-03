@@ -114,8 +114,8 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
         tempEW.generatorsLastAppliedFirst.RemoveLastObject();
       }
     }
-    if (UpperLimitNumElements>0)
-      if (this->size>=UpperLimitNumElements)
+    if (UpperLimitNumElements > 0)
+      if (this->size >= UpperLimitNumElements)
       { this->truncated = true;
         return false;
       }
@@ -130,117 +130,111 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
   return true;
 }
 
+std::string DrawOperations::typeCircleAtVector = "circleAtVector";
+std::string DrawOperations::typeSegment = "segment";
+std::string DrawOperations::typeSegment2DFixed = "segment2DFixed";
+std::string DrawOperations::typeTextAtVector = "text";
+std::string DrawOperations::typeText2DFixed = "text2DFixed";
+std::string DrawOperations::typeFilledShape = "filledShape";
+
+std::string DrawOperations::fieldOperation = "operation";
+std::string DrawOperations::fieldPoints = "points";
+std::string DrawOperations::fieldLocation = "location";
+std::string DrawOperations::fieldRadius = "radius";
+std::string DrawOperations::fieldPenStyle = "penStyle";
+std::string DrawOperations::fieldText = "text";
+std::string DrawOperations::fieldLineWidth = "lineWidth";
+
+void DrawOperations::drawCircleAtVectorBufferRational
+(const Vector<Rational>& input, double radius, uint32_t thePenStyle, int theColor)
+{ (void) thePenStyle;
+  (void) theColor;
+  JSData theOperation;
+  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeCircleAtVector;
+  theOperation[DrawOperations::fieldLocation] = input;
+  theOperation[DrawOperations::fieldRadius] = radius;
+  //theOperation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
+  this->theOperations.AddOnTop(theOperation);
+}
+
+void DrawOperations::drawCircleAtVectorBufferDouble
+(const Vector<double>& input, double radius, uint32_t thePenStyle, int theColor)
+{ (void) thePenStyle;
+  (void) theColor;
+
+  JSData theOperation;
+  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeCircleAtVector;
+  theOperation[DrawOperations::fieldLocation] = input;
+  theOperation[DrawOperations::fieldRadius] = radius;
+  //theOperation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
+  this->theOperations.AddOnTop(theOperation);
+}
+
 void DrawOperations::drawLineBetweenTwoVectorsBufferRational
 (const Vector<Rational>& vector1, const Vector<Rational>& vector2, uint32_t thePenStyle, int ColorIndex, double lineWidth)
-{ this->TypeNthDrawOperation.AddOnTop(this->typeDrawLineBetweenTwoVectors);
-  this->IndexNthDrawOperation.AddOnTop(this->theDrawLineBetweenTwoRootsOperations.size);
-  this->theDrawLineBetweenTwoRootsOperations.AddObjectOnTopCreateNew();
-  this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex, lineWidth);
+{ (void) thePenStyle;
+  (void) ColorIndex;
+  JSData theOperation;
+  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment;
+  theOperation[DrawOperations::fieldPoints] = JSData::JSarray;
+  theOperation[DrawOperations::fieldPoints][0] = vector1;
+  theOperation[DrawOperations::fieldPoints][1] = vector2;
+  if (lineWidth != 1)
+    theOperation[DrawOperations::fieldLineWidth] = lineWidth;
+  this->theOperations.AddOnTop(theOperation);
 }
 
 void DrawOperations::drawLineBetweenTwoVectorsBufferDouble
 (const Vector<double>& vector1, const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex,
  double lineWidth)
-{ this->TypeNthDrawOperation.AddOnTop(this->typeDrawLineBetweenTwoVectors);
-  this->IndexNthDrawOperation.AddOnTop(this->theDrawLineBetweenTwoRootsOperations.size);
-  this->theDrawLineBetweenTwoRootsOperations.AddObjectOnTopCreateNew();
-  this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex, lineWidth);
-}
-
-void DrawLineBetweenTwoRootsOperation::init
-(const Vector<Rational>& input1, const Vector<Rational>& input2, uint32_t PenStyle, int colorIndex, double inputLineWidth)
-{ if (input1.size != input2.size)
-    crash << crash;
-  int theDimension = input1.size;
-  this->v1.SetSize(theDimension);
-  this->v2.SetSize(theDimension);
-  for (int i = 0; i < theDimension; i ++)
-  { this->v1[i] = input1[i].GetDoubleValue();
-    this->v2[i] = input2[i].GetDoubleValue();
-  }
-  this->thePenStyle = PenStyle;
-  this->ColorIndex = colorIndex;
-  this->lineWidth = inputLineWidth;
-}
-
-void DrawLineBetweenTwoRootsOperation::init
-(const Vector<double>& input1, const Vector<double>& input2, uint32_t PenStyle, int colorIndex, double inputLineWidth)
-{ if (input1.size != input2.size)
-    crash << crash;
-  int theDimension = input1.size;
-  this->v1.SetSize(theDimension);
-  this->v2.SetSize(theDimension);
-  for (int i = 0; i < theDimension; i ++)
-  { this->v1[i] = input1[i];
-    this->v2[i] = input2[i];
-  }
-  this->thePenStyle = PenStyle;
-  this->ColorIndex = colorIndex;
-  this->lineWidth = inputLineWidth;
-}
-
-void DrawOperations::drawCircleAtVectorBufferRational
-(const Vector<Rational>& input, double radius, uint32_t thePenStyle, int theColor)
-{ this->TypeNthDrawOperation.AddOnTop(this->typeDrawCircleAtVector);
-  this->IndexNthDrawOperation.AddOnTop(this->theDrawCircleAtVectorOperations.size);
-  this->theDrawCircleAtVectorOperations.AddObjectOnTopCreateNew();
-  this->theDrawCircleAtVectorOperations.LastObject()->initFromVectorRational(input, radius, thePenStyle, theColor);
-}
-
-void DrawOperations::drawCircleAtVectorBufferDouble
-(const Vector<double>& input, double radius, uint32_t thePenStyle, int theColor)
-{ this->TypeNthDrawOperation.AddOnTop(this->typeDrawCircleAtVector);
-  this->IndexNthDrawOperation.AddOnTop(this->theDrawCircleAtVectorOperations.size);
-  this->theDrawCircleAtVectorOperations.AddObjectOnTopCreateNew();
-  this->theDrawCircleAtVectorOperations.LastObject()->initFromVectorDouble(input, radius, thePenStyle, theColor);
-}
-
-void DrawOperations::drawParallelogram
-(const Vector<double>& lowerLeftCorner, const Vector<double>& vector1,
- const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex, int fillColorIndex,
- double lineWidth)
-{ this->TypeNthDrawOperation.AddOnTop(this->typeFilledShape);
-  this->IndexNthDrawOperation.AddOnTop(this->theShapes.size);
-  this->theShapes.AddObjectOnTopCreateNew();
-  DrawFilledShapeOperation& theOp = *this->theShapes.LastObject();
-  theOp.ColorIndex = ColorIndex;
-  theOp.ColorFillIndex = fillColorIndex;
-  theOp.thePenStyle = thePenStyle;
-  theOp.lineWidth = lineWidth;
-  theOp.theCorners.SetSize(5);
-  theOp.theCorners[0] = lowerLeftCorner;
-  theOp.theCorners[1] = theOp.theCorners[0] + vector1;
-  theOp.theCorners[2] = theOp.theCorners[1] +vector2;
-  theOp.theCorners[3] = theOp.theCorners[2]-vector1;
-  theOp.theCorners[4] = lowerLeftCorner;
+{ (void) thePenStyle;
+  (void) ColorIndex;
+  JSData theOperation;
+  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment;
+  theOperation[DrawOperations::fieldPoints] = JSData::JSarray;
+  theOperation[DrawOperations::fieldPoints][0] = vector1;
+  theOperation[DrawOperations::fieldPoints][1] = vector2;
+  if (lineWidth != 1)
+    theOperation[DrawOperations::fieldLineWidth] = lineWidth;
+  this->theOperations.AddOnTop(theOperation);
 }
 
 void DrawOperations::drawFilledShape
 (const List<Vector<double> >& theCorners, uint32_t thePenStyle, int ColorIndex, int fillColorIndex,
  double lineWidth)
-{ this->TypeNthDrawOperation.AddOnTop(this->typeFilledShape);
-  this->IndexNthDrawOperation.AddOnTop(this->theShapes.size);
-  this->theShapes.AddObjectOnTopCreateNew();
-  DrawFilledShapeOperation& theOp = *this->theShapes.LastObject();
-  theOp.ColorIndex = ColorIndex;
-  theOp.ColorFillIndex = fillColorIndex;
-  theOp.thePenStyle = thePenStyle;
-  theOp.lineWidth = lineWidth;
-  theOp.theCorners = theCorners;
+{ (void) thePenStyle;
+  (void) ColorIndex;
+  (void) fillColorIndex;
+  JSData theOperation;
+  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeFilledShape;
+  theOperation[DrawOperations::fieldPoints] = JSData::JSarray;
+  for (int i = 0; i < theCorners.size; i ++)
+    theOperation[DrawOperations::fieldPoints][i] = theCorners[i];
+  if (lineWidth != 1)
+    theOperation[DrawOperations::fieldLineWidth] = lineWidth;
+  this->theOperations.AddOnTop(theOperation);
 }
 
 void DrawOperations::drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
-{ this->TypeNthDrawOperation.AddOnTop(this->typeDrawTextAtVector);
-  this->IndexNthDrawOperation.AddOnTop(this->theDrawTextAtVectorOperations.size);
-  this->theDrawTextAtVectorOperations.AddObjectOnTopCreateNew();
-  this->theDrawTextAtVectorOperations.LastObject()->init(input, inputText, ColorIndex, theFontSize, theTextStyle);
+{ (void) ColorIndex;
+  (void) theFontSize;
+  (void) theTextStyle;
+  JSData theOperation;
+  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
+  theOperation[DrawOperations::fieldLocation] = input;
+  theOperation[DrawOperations::fieldText] = inputText;
+  this->theOperations.AddOnTop(theOperation);
 }
 
 void DrawOperations::drawTextAtVectorBufferDouble(const Vector<double>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
-{ this->TypeNthDrawOperation.AddOnTop(this->typeDrawTextAtVector);
-  this->IndexNthDrawOperation.AddOnTop(this->theDrawTextAtVectorOperations.size);
-  this->theDrawTextAtVectorOperations.AddObjectOnTopCreateNew();
-  this->theDrawTextAtVectorOperations.LastObject()->init(input, inputText, ColorIndex, theFontSize, theTextStyle);
+{ (void) ColorIndex;
+  (void) theFontSize;
+  (void) theTextStyle;
+  JSData theOperation;
+  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
+  theOperation[DrawOperations::fieldLocation] = input;
+  theOperation[DrawOperations::fieldText] = inputText;
+  this->theOperations.AddOnTop(theOperation);
 }
 
 void DrawingVariables::drawLineDirectly
@@ -250,81 +244,30 @@ void DrawingVariables::drawLineDirectly
 
 void DrawOperations::drawLineBuffer
 (double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth)
-{ this->TypeNthDrawOperation.AddOnTop(this->typeDrawLine);
-  this->IndexNthDrawOperation.AddOnTop(this->theDrawLineOperations.size);
-  this->theDrawLineOperations.AddObjectOnTopCreateNew();
-  this->theDrawLineOperations.LastObject()->init(X1, Y1, X2, Y2, thePenStyle, ColorIndex, lineWidth);
+{ (void) thePenStyle;
+  (void) ColorIndex;
+  (void) lineWidth;
+  JSData theOperation;
+  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
+  theOperation[DrawOperations::fieldPoints].type = JSData::JSarray;
+  theOperation[DrawOperations::fieldPoints][0][0] = X1;
+  theOperation[DrawOperations::fieldPoints][0][1] = Y1;
+  theOperation[DrawOperations::fieldPoints][1][0] = X2;
+  theOperation[DrawOperations::fieldPoints][1][1] = Y2;
+  this->theOperations.AddOnTop(theOperation);
 }
 
 void DrawOperations::drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
-{ this->TypeNthDrawOperation.AddOnTop(this->typeDrawText);
-  this->IndexNthDrawOperation.AddOnTop(this->theDrawTextOperations.size);
-  this->theDrawTextOperations.AddObjectOnTopCreateNew();
-  this->theDrawTextOperations.LastObject()->init(X1, Y1, inputText, ColorIndex, theFontSize, theTextStyle);
-}
-
-void DrawingVariables::drawBufferNoIniT(DrawOperations& theOps)
-{ MacroRegisterFunctionWithName("DrawingVariables::drawBufferNoIniT");
-  //this->LockedWhileDrawing.LockMe();
-  theOps.EnsureProperInitialization();
-  theOps.ComputeProjectionsEiVectors();
-  theOps.ComputeXYsFromProjectionsEisAndGraphicsUnit();
-  int currentPenStyle, currentTextStyle;
-  if (this->theDrawClearScreenFunction != 0)
-    this->theDrawClearScreenFunction();
-  int numOps = theOps.IndexNthDrawOperation.size;
-  //the bad debugline is here:
-  //numOps =(numOps>10)? 10: numOps;
-  for (int i = 0; i <numOps; i ++)
-    switch (theOps.TypeNthDrawOperation[i])
-    { case DrawOperations::typeDrawText:
-        if (this->theDrawTextFunction != 0)
-        { DrawTextOperation& theDrawTextOp = theOps.theDrawTextOperations[theOps.IndexNthDrawOperation[i]];
-          currentTextStyle = this->GetActualTextStyleFromFlagsAnd(theDrawTextOp.TextStyle);
-          if (currentTextStyle == this->TextStyleInvisible)
-            break;
-          this->theDrawTextFunction(theDrawTextOp.X1, theDrawTextOp.Y1, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex, theDrawTextOp.fontSize);
-        }
-        break;
-      case DrawOperations::typeDrawLine:
-        if (this->theDrawLineFunction != 0)
-        { DrawLineOperation& theDrawLineOp = theOps.theDrawLineOperations[theOps.IndexNthDrawOperation[i]];
-          currentPenStyle = this->GetActualPenStyleFromFlagsAnd(theDrawLineOp.thePenStyle);
-          if (currentPenStyle == this->PenStyleInvisible)
-            break;
-          this->theDrawLineFunction(theDrawLineOp.X1, theDrawLineOp.Y1, theDrawLineOp.X2, theDrawLineOp.Y2, currentPenStyle, theDrawLineOp.ColorIndex);
-        }
-        break;
-      case DrawOperations::typeDrawLineBetweenTwoVectors:
-        if (this->theDrawLineFunction != 0)
-        { DrawLineBetweenTwoRootsOperation& theDrawLineBnTwoOp = theOps.theDrawLineBetweenTwoRootsOperations[theOps.IndexNthDrawOperation.TheObjects[i]];
-          currentPenStyle = this->GetActualPenStyleFromFlagsAnd(theDrawLineBnTwoOp.thePenStyle);
-          if (currentPenStyle == this->PenStyleInvisible)
-            break;
-          this->theDrawLineFunction(theDrawLineBnTwoOp.precomputedX1, theDrawLineBnTwoOp.precomputedY1, theDrawLineBnTwoOp.precomputedX2, theDrawLineBnTwoOp.precomputedY2, currentPenStyle, theDrawLineBnTwoOp.ColorIndex);
-        }
-        break;
-      case DrawOperations::typeDrawTextAtVector:
-        if (this->theDrawTextFunction != 0)
-        { DrawTextAtVectorOperation& theDrawTextOp = theOps.theDrawTextAtVectorOperations[theOps.IndexNthDrawOperation.TheObjects[i]];
-          currentTextStyle = this->GetActualTextStyleFromFlagsAnd(theDrawTextOp.TextStyle);
-          if (currentTextStyle == this->TextStyleInvisible)
-            break;
-          this->theDrawTextFunction(theDrawTextOp.precomputedX, theDrawTextOp.precomputedY, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex, theDrawTextOp.fontSize);
-        }
-        break;
-      case DrawOperations::typeDrawCircleAtVector:
-        if (this->theDrawCircleFunction != 0)
-        { DrawCircleAtVectorOperation& theDrawCircleOp = theOps.theDrawCircleAtVectorOperations.TheObjects[theOps.IndexNthDrawOperation.TheObjects[i]];
-          currentPenStyle = this->GetActualPenStyleFromFlagsAnd(theDrawCircleOp.thePenStyle);
-          if (currentPenStyle == this->PenStyleInvisible)
-            break;
-          this->theDrawCircleFunction(theDrawCircleOp.precomputedX, theDrawCircleOp.precomputedY, theDrawCircleOp.radius, theDrawCircleOp.thePenStyle, theDrawCircleOp.ColorIndex);
-        }
-        break;
-      default: break;
-    }
-//  this->LockedWhileDrawing.UnlockMe();
+{ (void) theFontSize;
+  (void) ColorIndex;
+  (void) theTextStyle;
+  JSData theOperation;
+  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
+  theOperation[DrawOperations::fieldLocation].type = JSData::JSarray;
+  theOperation[DrawOperations::fieldLocation][0] = X1;
+  theOperation[DrawOperations::fieldLocation][1] = Y1;
+  theOperation[DrawOperations::fieldText] = inputText;
+  this->theOperations.AddOnTop(theOperation);
 }
 
 int DrawingVariables::GetActualPenStyleFromFlagsAnd(int inputPenStyle)
@@ -442,9 +385,9 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
   { domainRoot.MakeEi(theDimension, i);
     mapOnRootSpaces.ActOnVectorColumn(domainRoot, rangeRoot);
     tempElt.MakeHgenerator(domainRoot, *this);
-    Domain[numRoots+ i] = tempElt;
+    Domain[numRoots + i] = tempElt;
     tempElt.MakeHgenerator(rangeRoot, *this);
-    Range[numRoots+ i] = tempElt;
+    Range[numRoots + i] = tempElt;
     for (int i = 0; i < 2; i ++, domainRoot.Minus(), rangeRoot.Minus())
     { int theIndex = this->theWeyl.RootSystem.GetIndex(rangeRoot);
       tempElt.MakeGGenerator(rangeRoot, *this);
@@ -484,12 +427,12 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
   vectorsLeft.SetSize(Range.size);
   vectorsRight.SetSize(Range.size);
   if (!useNegativeRootsFirst)
-    for (int i = 0; i <Range.size; i ++)
+    for (int i = 0; i < Range.size; i ++)
     { Range[i].ElementToVectorNegativeRootSpacesFirst(vectorsRight[i]);
       Domain[i].ElementToVectorNegativeRootSpacesFirst(vectorsLeft[i]);
     }
   else
-    for (int i = 0; i <Range.size; i ++)
+    for (int i = 0; i < Range.size; i ++)
     { Range[i].ElementToVectorNegativeRootSpacesFirst(vectorsRight[i]);
       Domain[i].ElementToVectorNegativeRootSpacesFirst(vectorsLeft[i]);
     }

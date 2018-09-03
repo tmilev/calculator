@@ -13,6 +13,7 @@ std::string WebAPI::calculatorHTML = "/calculator-html";
 std::string WebAPI::calculatorOnePageJS = "/calculator-html/javascript_all_in_one.js";
 std::string WebAPI::calculatorOnePageJSWithHash = "/calculator-html/javascript_all_in_one.js";
 std::string WebAPI::calculatorSetProblemData = "setProblemData";
+std::string WebAPI::calculatorChangePassword = "changePassword";
 std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
 
 std::string WebAPI::problemContent = "problemContent";
@@ -81,7 +82,7 @@ std::string WebWorker::closeIndentTag(const std::string& theTag)
 
 bool WebWorker::IsAllowedAsRequestCookie(const std::string& input)
 { return input != "login" && input != "logout"
-  && input != "changePassword"
+  && input != WebAPI::calculatorChangePassword
   && input != "changePasswordPage"
   && input != "activateAccount";
 }
@@ -1567,7 +1568,8 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   /////////////////
   //doAttemptGoogleTokenLogin = false;
   ////////////////////////////
-  bool changingPass = theGlobalVariables.userCalculatorRequestType == "changePassword" ||
+  bool changingPass =
+  theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorChangePassword ||
   theGlobalVariables.userCalculatorRequestType == "activateAccount";
   if (changingPass)
     theUser.enteredAuthenticationToken = "";
@@ -3188,7 +3190,7 @@ int WebWorker::ProcessChangePassword()
   std::stringstream commentsOnFailure;
   std::string newAuthenticationToken;
   if (!DatabaseRoutinesGlobalFunctions::SetPassword
-      (theUser.username, newPassword, newAuthenticationToken, commentsOnFailure))
+       (theUser.username, newPassword, newAuthenticationToken, commentsOnFailure))
   { stOutput << "<span style =\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
     return 0;
   }
@@ -4299,7 +4301,7 @@ int WebWorker::ServeClient()
   //can be piped through one worker.
   else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorSetProblemData)
     return this->ProcessSetProblemDatabaseInfo();
-  else if (theGlobalVariables.userCalculatorRequestType == "changePassword")
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorChangePassword)
     return this->ProcessChangePassword();
   else if (theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
            theGlobalVariables.userCalculatorRequestType == "activateAccount")

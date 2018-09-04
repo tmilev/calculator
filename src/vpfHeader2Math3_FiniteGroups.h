@@ -1708,7 +1708,7 @@ public:
   (Vector<coefficient>& highestWeightSimpleCoords, HashedList<Vector<coefficient> >& outputWeightsSimpleCoords,
    int upperBoundDominantWeights, std::string& outputDetails);
   bool DrawContour
-  (const Vector<Rational>& highestWeightSimpleCoord, DrawingVariables& theDV, int theColor,
+  (const Vector<Rational>& highestWeightSimpleCoord, DrawingVariables& theDV, const std::string& color,
    int UpperBoundVertices);
 //The dirty C++ language forces that the body of this function appear after the definitions of IsDominantWRTgenerator.
 //Apparently the algorithm of making an oriented acyclic graph totally ordered is a too difficult task for the designers of c++

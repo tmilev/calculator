@@ -1285,7 +1285,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   for (int i = 0; i < this->theLinearOperators.size; i ++)
   { this->theLinearOperators[i].ActOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]);
     translationsProjectedFinal[i] += this->theTranslationsProjectedBasisChanged[i];
-    drawOps.drawCircleAtVectorBufferRational(- translationsProjectedFinal[i], 3, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(250, 0, 0));
+    drawOps.drawCircleAtVectorBufferRational(- translationsProjectedFinal[i], "red", 3);
   }
   out << "<br>the translations projected final: " << translationsProjectedFinal.ToString();
   Accum.MakeZero(theStartingPoly.NumVariables);
@@ -1293,51 +1293,11 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   { theSubbedPoly = theStartingPoly;
     theSubbedPoly *= this->theCoeffs[i];
     theSubbedPoly.TranslateArgument(translationsProjectedFinal[i]);
-    //theSubbedPoly.DrawMe(tempVars);
-   /* if (i ==2)
-    { DrawingVariables tempDV, tempDV2;
-      tempDV.NumHtmlGraphics =100;
-      tempDV2.NumHtmlGraphics =109;
-      stOutput << "<hr><hr>first point of failure: <hr>accum: ";
-      Accum.DrawMe(tempDV);
-      tempDV.drawCoordSystemBuffer(tempDV, 2, 0);
-      stOutput << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
-      stOutput << "<hr>subbed poly: ";
-      theSubbedPoly.DrawMe(tempDV2);
-      tempDV.drawCoordSystemBuffer(tempDV2, 2, 0);
-      stOutput << tempDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
-    }*/
     Accum += theSubbedPoly;
-/*    if (i ==2)
-    { DrawingVariables tempDrawOps;
-      tempDrawOps.NumHtmlGraphics =500;
-      stOutput << "<hr><hr> <b>Index: " << i + 1 << " out of " << this->theLinearOperators.size << "</b> <hr>";
-      Accum.DrawMe(tempDrawOps);
-      stOutput << tempDrawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
-    }
-    */
   }
-//  stOutput << "<hr>so far so good!";
   Accum.DrawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
-//  smallWeylChamber.DrawMeProjective(0, false, drawOps, theFormat);
-//  out << tempVars.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   out << drawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   out << Accum.ToString(false, true);
-/*  out << refinedProjectivized.ToString(false, true);*/
-/*
-  for (int i = 0; i < this->theLinearOperators.size; i ++)
-  { this->theLinearOperators[i].ActOnVectorColumn(highestWeightLargerAlg, tempRoot);
-    tempRoot.Minus();
-    tempRoot-= this->theTranslationsProjecteD[i];
-    drawOps.
-    drawCircleAtVectorBuffer(tempRoot, 2, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0,0,100));
-    drawOps.drawLineBetweenTwoVectorsBuffer(tempRoot, ZeroRoot, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(240, 240, 240));
-    tempComplex.DrawMeProjective(&tempRoot, false, drawOps, tempFormat);
-    out << tempRoot.ToString();
-  }
-  drawOps.drawCoordSystemBuffer(drawOps, 3, 0);
-  out << drawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);*/
-
   return out.str();
 }
 

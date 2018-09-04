@@ -385,10 +385,10 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
     << " simple reflections of one another, with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i = 0; i < output.size(); i ++)
     { tempRoot = theWeyL.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
-      outputWeylSub.DrawContour(tempRoot, theDV, HtmlRoutines::RedGreenBlue(200, 200, 0), 1000);
+      outputWeylSub.DrawContour(tempRoot, theDV, "#a0a000", 1000);
       std::stringstream tempStream;
       tempStream << output.theCoeffs[i].ToString();
-      theDV.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal);
+      theDV.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
     }
     out << "<hr>" << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyL.GetDim());
     *Report = out.str();
@@ -425,7 +425,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
   if (Report != 0)
     out << *Report;
   Selection splittingParSelectedInLevi;
-  splittingParSelectedInLevi =splittingParSel;
+  splittingParSelectedInLevi = splittingParSel;
   splittingParSelectedInLevi.InvertSelection();
   if (!splittingParSelectedInLevi.IsSubset(this->parabolicSelectionSelectedAreElementsLevi))
   { out << "The parabolic subalgebra you selected is not a subalgebra of the ambient parabolic subalgebra."

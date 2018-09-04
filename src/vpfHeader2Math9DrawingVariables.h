@@ -13,12 +13,9 @@ private:
   void changeBasisPReserveAngles(double newX, double newY);
 public:
   List<JSData> theOperations;
-  List<Vectors<double> > toBeHighlightedWhenLabeledVectorHovered;
-  Vectors<double> labeledVectors;
-  List<std::string> labelsOfLabeledVectors;
   List<List<double> > ProjectionsEiVectors;
   Vectors<double> BasisProjectionPlane;
-  static const int GraphicsUnitDefault = 75;
+  static const int GraphicsUnitDefault = 100;
   int SelectedCircleMinus2noneMinus1Center; //-2= none, - 1= center of coordinate system, nonnegative integers = selectedindex
   Vectors<double> BasisToDrawCirclesAt;
   Matrix<double> theBilinearForm;
@@ -116,23 +113,21 @@ public:
   //  this->draw();
   }
   void click(double x, double y);
+  void drawHighlightGroup(Vectors<double>& highlightGroup, List<std::string>& labels, const std::string& color, int radius);
   void drawLineBuffer
-  (double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex,
-   double lineWidth);
+  (double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth);
   void drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
   void drawLineBetweenTwoVectorsBufferRational
-  (const Vector<Rational>& vector1, const Vector<Rational>& vector2, uint32_t thePenStyle, int ColorIndex,
-   double lineWidth);
+  (const Vector<Rational>& vector1, const Vector<Rational>& vector2, const std::string& color, double lineWidth = 1);
   void drawFilledShape
-  (const List<Vector<double> >& theCorners, uint32_t thePenStyle, int ColorIndex, int fillColorIndex,
-   double lineWidth);
+  (const List<Vector<double> >& theCorners, uint32_t thePenStyle, int ColorIndex, int fillColorIndex, double lineWidth);
   void drawLineBetweenTwoVectorsBufferDouble
-  (const Vector<double>& vector1, const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex,
-   double lineWidth);
-  void drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
+  (const Vector<double>& vector1, const Vector<double>& vector2, const std::string& color,
+   double lineWidth = 1);
+  void drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, const std::string& color, int fontSize);
   void drawTextAtVectorBufferDouble(const Vector<double>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
-  void drawCircleAtVectorBufferRational(const Vector<Rational>& input, double radius, uint32_t thePenStyle, int theColor);
-  void drawCircleAtVectorBufferDouble(const Vector<double>& input, double radius, uint32_t thePenStyle, int theColor);
+  void drawCircleAtVectorBufferRational(const Vector<Rational>& input, const std::string& color, double radius);
+  void drawCircleAtVectorBufferDouble(const Vector<double>& input, const std::string& color, double radius);
   double getAngleFromXandY(double x, double y);
   void ScaleToUnitLength(Vector<double>& theRoot)
   { double theLength = this->theBilinearForm.ScalarProduct(theRoot, theRoot);
@@ -154,6 +149,7 @@ public:
   void init();
   static std::string typeSegment;
   static std::string typeSegment2DFixed;
+  static std::string typeHighlightGroup;
   static std::string typeText;
   static std::string typeText2DFixed;
   static std::string typeTextAtVector;
@@ -166,9 +162,11 @@ public:
   static std::string fieldPenStyle;
   static std::string fieldLocation;
   static std::string fieldRadius;
+  static std::string fieldColor;
   static std::string fieldOperation;
   static std::string fieldLineWidth;
   static std::string fieldText;
+  static std::string fieldLabels;
 };
 
 class DrawingVariables
@@ -242,27 +240,25 @@ public:
   void drawCoordSystemDirectlly(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
   void drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension);
   void drawLineDirectly
-  (double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex,
-   double lineWidth);
+  (double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth);
   void drawLineBuffer
-  (double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex,
-   double lineWidth);
+  (double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth);
   void drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile);
   void drawTextBuffer(double X1, double Y1, const std::string& inputText, int color);
   //if the LatexOutFile is zero then the procedure defaults to the screen
   void drawLineBufferOld(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
   void drawLineBetweenTwoVectorsBufferRational
-  (const Vector<Rational>& r1, const Vector<Rational>& r2, int PenStyle, int PenColor, double lineWidth = 1)
-  { this->theBuffer.drawLineBetweenTwoVectorsBufferRational(r1, r2, PenStyle, PenColor, lineWidth);
+  (const Vector<Rational>& r1, const Vector<Rational>& r2, const std::string& color, double lineWidth = 1)
+  { this->theBuffer.drawLineBetweenTwoVectorsBufferRational(r1, r2, color, lineWidth);
   }
   void drawLineBetweenTwoVectorsBufferDouble
-  (const Vector<double>& r1, const Vector<double>& r2, uint32_t PenStyle, int PenColor, double lineWidth = 1)
-  { this->theBuffer.drawLineBetweenTwoVectorsBufferDouble(r1, r2, PenStyle, PenColor, lineWidth);
+  (const Vector<double>& r1, const Vector<double>& r2, const std::string& color, double lineWidth = 1)
+  { this->theBuffer.drawLineBetweenTwoVectorsBufferDouble(r1, r2, color, lineWidth);
   }
-  void drawTextAtVectorBufferRational(const Vector<Rational>& point, const std::string& inputText, int textColor, int theTextStyle);
+  void drawTextAtVectorBufferRational(const Vector<Rational>& point, const std::string& inputText, const std::string& color);
   void drawTextAtVectorBufferDouble(const Vector<double>& point, const std::string& inputText, int textColor, int theTextStyle);
-  void drawCircleAtVectorBufferRational(const Vector<Rational>& point, double radius, uint32_t thePenStyle, int theColor);
-  void drawCircleAtVectorBufferDouble(const Vector<double>& point, double radius, uint32_t thePenStyle, int theColor);
+  void drawCircleAtVectorBufferRational(const Vector<Rational>& point, const std::string& color, double radius);
+  void drawCircleAtVectorBufferDouble(const Vector<double>& point, const std::string& color, double radius);
   void operator=(const DrawingVariables& other)
   { this->theDrawLineFunction = other.theDrawLineFunction;
     this->theDrawTextFunction = other.theDrawTextFunction;

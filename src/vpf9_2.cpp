@@ -136,64 +136,54 @@ std::string DrawOperations::typeSegment2DFixed = "segment2DFixed";
 std::string DrawOperations::typeTextAtVector = "text";
 std::string DrawOperations::typeText2DFixed = "text2DFixed";
 std::string DrawOperations::typeFilledShape = "filledShape";
+std::string DrawOperations::typeHighlightGroup = "highlightGroup";
 
+std::string DrawOperations::fieldColor = "color";
 std::string DrawOperations::fieldOperation = "operation";
 std::string DrawOperations::fieldPoints = "points";
 std::string DrawOperations::fieldLocation = "location";
 std::string DrawOperations::fieldRadius = "radius";
 std::string DrawOperations::fieldPenStyle = "penStyle";
 std::string DrawOperations::fieldText = "text";
+std::string DrawOperations::fieldLabels = "labels";
 std::string DrawOperations::fieldLineWidth = "lineWidth";
 
 void DrawOperations::drawCircleAtVectorBufferRational
-(const Vector<Rational>& input, double radius, uint32_t thePenStyle, int theColor)
-{ (void) thePenStyle;
-  (void) theColor;
-  JSData theOperation;
+(const Vector<Rational>& input, const std::string& color, double radius)
+{ JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeCircleAtVector;
   theOperation[DrawOperations::fieldLocation] = input;
   theOperation[DrawOperations::fieldRadius] = radius;
+  theOperation[DrawOperations::fieldColor] = color;
   //theOperation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
   this->theOperations.AddOnTop(theOperation);
 }
 
 void DrawOperations::drawCircleAtVectorBufferDouble
-(const Vector<double>& input, double radius, uint32_t thePenStyle, int theColor)
-{ (void) thePenStyle;
-  (void) theColor;
-
-  JSData theOperation;
+(const Vector<double>& input, const std::string& color, double radius)
+{ JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeCircleAtVector;
   theOperation[DrawOperations::fieldLocation] = input;
   theOperation[DrawOperations::fieldRadius] = radius;
+  theOperation[DrawOperations::fieldColor] = color;
   //theOperation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
   this->theOperations.AddOnTop(theOperation);
 }
 
 void DrawOperations::drawLineBetweenTwoVectorsBufferRational
-(const Vector<Rational>& vector1, const Vector<Rational>& vector2, uint32_t thePenStyle, int ColorIndex, double lineWidth)
-{ (void) thePenStyle;
-  (void) ColorIndex;
-  JSData theOperation;
-  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment;
-  theOperation[DrawOperations::fieldPoints] = JSData::JSarray;
-  theOperation[DrawOperations::fieldPoints][0] = vector1;
-  theOperation[DrawOperations::fieldPoints][1] = vector2;
-  if (lineWidth != 1)
-    theOperation[DrawOperations::fieldLineWidth] = lineWidth;
-  this->theOperations.AddOnTop(theOperation);
+(const Vector<Rational>& vector1, const Vector<Rational>& vector2, const std::string& color, double lineWidth)
+{ this->drawLineBetweenTwoVectorsBufferDouble(vector1.GetVectorDouble(), vector2.GetVectorDouble(), color, lineWidth);
 }
 
 void DrawOperations::drawLineBetweenTwoVectorsBufferDouble
-(const Vector<double>& vector1, const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex,
- double lineWidth)
-{ (void) thePenStyle;
-  (void) ColorIndex;
-  JSData theOperation;
+(const Vector<double>& vector1, const Vector<double>& vector2, const std::string& color, double lineWidth)
+{ JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment;
   theOperation[DrawOperations::fieldPoints] = JSData::JSarray;
   theOperation[DrawOperations::fieldPoints][0] = vector1;
   theOperation[DrawOperations::fieldPoints][1] = vector2;
+  if (color != "")
+    theOperation[DrawOperations::fieldColor] = color;
   if (lineWidth != 1)
     theOperation[DrawOperations::fieldLineWidth] = lineWidth;
   this->theOperations.AddOnTop(theOperation);
@@ -215,10 +205,9 @@ void DrawOperations::drawFilledShape
   this->theOperations.AddOnTop(theOperation);
 }
 
-void DrawOperations::drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
-{ (void) ColorIndex;
-  (void) theFontSize;
-  (void) theTextStyle;
+void DrawOperations::drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, const std::string& color, int fontSize)
+{ (void) color;
+  (void) fontSize;
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
   theOperation[DrawOperations::fieldLocation] = input;
@@ -240,6 +229,17 @@ void DrawOperations::drawTextAtVectorBufferDouble(const Vector<double>& input, c
 void DrawingVariables::drawLineDirectly
 (double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth)
 { this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex, lineWidth);
+}
+
+void DrawOperations::drawHighlightGroup
+(Vectors<double>& highlightGroup, List<std::string>& labels, const std::string& color, int radius)
+{ JSData theOperation;
+  theOperation[DrawOperations::fieldOperation] = DrawOperations::typeHighlightGroup;
+  theOperation[DrawOperations::fieldPoints] = highlightGroup;
+  theOperation[DrawOperations::fieldLabels] = labels;
+  theOperation[DrawOperations::fieldColor] = color;
+  theOperation[DrawOperations::fieldRadius] = radius;
+  this->theOperations.AddOnTop(theOperation);
 }
 
 void DrawOperations::drawLineBuffer
@@ -755,8 +755,8 @@ void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmall
 //  tempMat.ComputeDebugString(true, false);
 //  stOutput << tempMat.DebugString << "<br>";
   for (int i = 0; i < theRootSystem.size; i ++)
-  { for (int j = 0; j< rankSA; j ++)
-    { ElementSemisimpleLieAlgebra<Rational>& currentH = this->imagesAllChevalleyGenerators[j+numPosRootsDomain];
+  { for (int j = 0; j < rankSA; j ++)
+    { ElementSemisimpleLieAlgebra<Rational>& currentH = this->imagesAllChevalleyGenerators[j + numPosRootsDomain];
       theScalarProducts[j] = this->theRange().theWeyl.RootScalarCartanRoot(currentH.GetCartanPart(), theRootSystem[i]);
     }
     tempMat.ActOnVectorColumn(theScalarProducts, output[i]);
@@ -883,7 +883,7 @@ void SemisimpleLieAlgebra::OrderSSalgebraForHWbfComputation()
 
 void SemisimpleLieAlgebra::OrderStandardAscending()
 { int numGens = this->GetNumGenerators();
-  for (int i = 0; i <numGens; i ++)
+  for (int i = 0; i < numGens; i ++)
     this->UEGeneratorOrderIncludingCartanElts[i] = i;
 }
 
@@ -1008,7 +1008,7 @@ void VectorPartition::BeefUpPartition()
 bool VectorPartition::NudgePartition()
 { MacroRegisterFunctionWithName("VectorPartition::NudgePartition");
   int indexFirstNonZero = - 1;
-  for (int i = this->currentPartition.size- 1; i >= 0; i --)
+  for (int i = this->currentPartition.size - 1; i >= 0; i --)
     if (this->currentPartition[i] != 0)
     { indexFirstNonZero = i;
       break;

@@ -408,10 +408,10 @@ bool charSSAlgMod<coefficient>::DrawMe
     }
     for (int j = 0; j < finalWeights.size; j ++)
     { convertor = finalWeights[j].GetVectorRational();
-      theDrawingVars.drawCircleAtVectorBufferRational(convertor, 3, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0, 0, 0));
+      theDrawingVars.drawCircleAtVectorBufferRational(convertor, "black", 3);
       if (useMults)
         theDrawingVars.drawTextAtVectorBufferRational
-        (convertor, CharCartan.theCoeffs[i].ToString(), HtmlRoutines::RedGreenBlue(0, 0, 0), theDrawingVars.PenStyleNormal);
+        (convertor, CharCartan.theCoeffs[i].ToString(), "black");
     }
   }
   out << "<br>Number of computed weights: " << totalNumWeights << ". ";
@@ -434,8 +434,8 @@ void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(WeylGroupData& actu
   for (int j = 0; j < this->size(); j ++)
   { actualWeight = actualAmbientWeyl.GetSimpleCoordinatesFromFundamental((*this)[j].weightFundamentalCoordS);
     actualWeightRationalPart = actualWeight.GetVectorRational(); // <-type conversion here!
-    theDrawingVars.drawCircleAtVectorBufferRational(actualWeightRationalPart, 5, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0, 0, 0));
-    theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->theCoeffs[j].ToString(), HtmlRoutines::RedGreenBlue(0, 0, 0), theDrawingVars.PenStyleNormal);
+    theDrawingVars.drawCircleAtVectorBufferRational(actualWeightRationalPart, "black", 5);
+    theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->theCoeffs[j].ToString(), "black");
   }
 }
 
@@ -638,29 +638,14 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
  //     (tempRoot, theDV1, HtmlRoutines::RedGreenBlue(200, 200, 0), 1000);
       std::stringstream tempStream;
       tempStream << output.theCoeffs[i].ToString();
-      theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal);
+      theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
       for (int j = 1; j < WeylFDSmall.AmbientWeyl->theGroup.theElements.size; j ++)
       { tempRoot2 = tempRoot;
         WeylFDSmall.AmbientWeyl->ActOnRhoModified(j, tempRoot2);
-        theDV1.drawCircleAtVectorBufferRational(tempRoot2, 5, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(200,0,0));
+        theDV1.drawCircleAtVectorBufferRational(tempRoot2, "#a00000", 5);
       }
     }
     out << "<hr>" << theDV1.GetHtmlFromDrawOperationsCreateDivWithUniqueName(WeylFDSmall.AmbientWeyl->GetDim());
-/*    DrawingVariables theDV2;
-    std::string tempS;
-    this->DrawMeNoMults(tempS, theDV2, 10000);
-    Vector<Rational> tempRoot;
-    out << "<hr>In the following weight visualization, a yellow line is drawn if the corresponding weights are "
-    << " simple reflections of one another, with respect to a simple Vector<Rational> of the Levi part of the parabolic subalgebra. ";
-    for (int i = 0; i <output.size; i ++)
-    { tempRoot = theWeyl.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoords).GetVectorRational();
-      outputSubGroup.DrawContour
-      (tempRoot, theDV2, HtmlRoutines::RedGreenBlue(200, 200, 0), 1000);
-      std::stringstream tempStream;
-      tempStream << output.theCoeffs[i].ToString();
-      theDV2.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
-    }
-    out << "<hr>" << theDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());*/
     *Report = out.str();
   }
 //  stOutput << "<br>time at finish: " << theGlobalVariables.GetElapsedSeconds();

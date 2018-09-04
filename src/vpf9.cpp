@@ -1221,15 +1221,15 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
   Vector<Rational> tempRoot;
   Vector<Rational> zeroRoot;
   zeroRoot.MakeZero(theDimension);
+  std::string colorText ="#64c064";
   for (int i = 0; i < theDimension; i ++)
   { tempRoot.MakeEi(theDimension, i);
     std::string tempS;
     tempS = tempRoot.ToString();
     TDV.drawLineBetweenTwoVectorsBufferRational
-    (zeroRoot, tempRoot, TDV.PenStyleNormal, HtmlRoutines::RedGreenBlue(210, 210, 210), 1);
-    TDV.drawTextAtVectorBufferRational
-    (tempRoot, tempS, HtmlRoutines::RedGreenBlue(100, 200, 100), TDV.TextStyleNormal);
-    TDV.drawCircleAtVectorBufferRational(tempRoot, 2, TDV.PenStyleNormal, HtmlRoutines::RedGreenBlue(100, 200, 100) );
+    (zeroRoot, tempRoot, "gray", 1);
+    TDV.drawTextAtVectorBufferRational(tempRoot, tempS, "#94c894");
+    TDV.drawCircleAtVectorBufferRational(tempRoot, colorText, 2);
   }
   TDV.theBuffer.BasisToDrawCirclesAt.MakeEiBasis(theDimension);
 }
@@ -1242,8 +1242,8 @@ void DrawingVariables::drawLineBufferOld
 }
 
 void DrawingVariables::drawTextAtVectorBufferRational
-(const Vector<Rational>& point, const std::string& inputText, int textColor, int theTextStyle)
-{ this->theBuffer.drawTextAtVectorBufferRational(point, inputText, textColor, this->fontSizeNormal, theTextStyle);
+(const Vector<Rational>& point, const std::string& inputText, const std::string& color)
+{ this->theBuffer.drawTextAtVectorBufferRational(point, inputText, color, 10);
 }
 
 void DrawingVariables::drawTextAtVectorBufferDouble(const Vector<double>& point, const std::string& inputText, int textColor, int theTextStyle)
@@ -1251,13 +1251,13 @@ void DrawingVariables::drawTextAtVectorBufferDouble(const Vector<double>& point,
 }
 
 void DrawingVariables::drawCircleAtVectorBufferRational
-(const Vector<Rational>& point, double radius, uint32_t thePenStyle, int theColor)
-{ this->theBuffer.drawCircleAtVectorBufferRational(point, radius, thePenStyle, theColor);
+(const Vector<Rational>& point, const std::string& color, double radius)
+{ this->theBuffer.drawCircleAtVectorBufferRational(point, color, radius);
 }
 
 void DrawingVariables::drawCircleAtVectorBufferDouble
-(const Vector<double>& point, double radius, uint32_t thePenStyle, int theColor)
-{ this->theBuffer.drawCircleAtVectorBufferDouble(point, radius, thePenStyle, theColor);
+(const Vector<double>& point, const std::string& color, double radius)
+{ this->theBuffer.drawCircleAtVectorBufferDouble(point, color, radius);
 }
 
 void DrawingVariables::drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)
@@ -1294,7 +1294,7 @@ void DrawingVariables::ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
 }
 
 bool WeylGroupData::IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vector<Rational>& other)
-{ return !this->RootSystem.Contains (input +other) && ! this->RootSystem.Contains(input-other);
+{ return !this->RootSystem.Contains(input + other) && !this->RootSystem.Contains(input - other);
 }
 
 bool WeylGroupData::HasStronglyPerpendicularDecompositionWRT
@@ -1539,7 +1539,7 @@ void MathRoutines::NChooseK(int n, int k, LargeInt& result)
 }
 
 double MathRoutines::ReducePrecision(double x)
-{ if (x < 0.00001 && x > -0.00001)
+{ if (x < 0.00001 && x > - 0.00001)
     return 0;
   return x;
 }
@@ -5894,13 +5894,13 @@ void WeylGroupData::DrawRootSystem
     output.init();
   int theDimension = this->GetDim();
   if (theDimension == 1)
-  { int color = HtmlRoutines::RedGreenBlue(0, 255, 0);
-    Vector<Rational> tempRoot, tempZero;
+  { Vector<Rational> tempRoot, tempZero;
     tempZero.MakeZero(2);
     tempRoot.MakeEi(2, 0);
+    std::string currentColor = "#ff00ff";
     for (int i = 0; i < 2; i ++)
-    { output.drawLineBetweenTwoVectorsBufferRational(tempZero, tempRoot, DrawingVariables::PenStyleNormal, color, 1);
-      output.drawCircleAtVectorBufferRational(tempRoot, 2, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(255,0,255));
+    { output.drawLineBetweenTwoVectorsBufferRational(tempZero, tempRoot, "green", 1);
+      output.drawCircleAtVectorBufferRational(tempRoot, currentColor, 2);
       tempRoot.Minus();
     }
     return;
@@ -5956,9 +5956,9 @@ void WeylGroupData::DrawRootSystem
 //  stOutput << "<hr>the min length is: " << minLength.ToString();
   Rational tempRat;
   if (bluePoint != 0)
-  { output.drawCircleAtVectorBufferRational(*bluePoint, 5, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0, 0, 255));
-    output.drawCircleAtVectorBufferRational(*bluePoint, 4, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0, 0, 255));
-    output.drawCircleAtVectorBufferRational(*bluePoint, 3, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0, 0, 255));
+  { output.drawCircleAtVectorBufferRational(*bluePoint, "blue", 5);
+    output.drawCircleAtVectorBufferRational(*bluePoint, "blue", 4);
+    output.drawCircleAtVectorBufferRational(*bluePoint, "blue", 3);
   }
   if (drawWeylChamber)
   { Cone theWeylChamber;
@@ -5969,15 +5969,14 @@ void WeylGroupData::DrawRootSystem
   output.centerX = 300;
   output.centerY = 300;
   for (int i = 0; i < RootSystemSorted.size; i ++)
-  { int color = HtmlRoutines::RedGreenBlue(0, 255, 0);
-    output.drawLineBetweenTwoVectorsBufferRational(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color, 1);
-    output.drawCircleAtVectorBufferRational(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(255, 0, 255));
+  { output.drawLineBetweenTwoVectorsBufferRational(ZeroRoot, RootSystemSorted[i], "green", 1);
+    output.drawCircleAtVectorBufferRational(RootSystemSorted[i], "#ff00ff", 2);
     for (int j = i + 1; j < RootSystemSorted.size; j ++)
     { differenceRoot = RootSystemSorted[i] - RootSystemSorted[j];
       tempRat = this->RootScalarCartanRoot(differenceRoot, differenceRoot);
       if (minLength == tempRat)
         output.drawLineBetweenTwoVectorsBufferRational
-        (RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0, 0, 255), 1);
+        (RootSystemSorted[i], RootSystemSorted[j], "blue", 1);
     }
   }
   Vector<Rational> tempRootRat;
@@ -5986,21 +5985,24 @@ void WeylGroupData::DrawRootSystem
   this->GetEpsilonCoords(epsNotationSimpleBasis, epsNotationSimpleBasis);
   for (int i = 0; i < theDimension; i ++)
   { tempRootRat.MakeEi(theDimension, i);
-    output.drawCircleAtVectorBufferRational(tempRootRat, 1, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(255, 0, 0));
-    output.drawCircleAtVectorBufferRational(tempRootRat, 3, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(255, 0, 0));
-    output.drawCircleAtVectorBufferRational(tempRootRat, 4, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(255, 0, 0));
+    output.drawCircleAtVectorBufferRational(tempRootRat, "red", 1);
+    output.drawCircleAtVectorBufferRational(tempRootRat, "red", 3);
+    output.drawCircleAtVectorBufferRational(tempRootRat, "red", 4);
     if (LabelDynkinDiagramVertices)
     { Vector<Rational>& current = epsNotationSimpleBasis[i];
-      output.drawTextAtVectorBufferRational(tempRootRat, current.ToStringLetterFormat("e"), 0, 10, DrawingVariables::TextStyleNormal);
+      output.drawTextAtVectorBufferRational(tempRootRat, current.ToStringLetterFormat("e"), "black", 10);
     }
   }
-  for (int i = 0; i < this->RootSystem.size; i ++)
-  { output.labeledVectors.AddOnTop(this->RootSystem[i].GetVectorDouble());
-    output.labelsOfLabeledVectors.AddOnTop(this->RootSystem[i].ToString());
-    output.toBeHighlightedWhenLabeledVectorHovered.SetSize(output.toBeHighlightedWhenLabeledVectorHovered.size + 1);
-    output.toBeHighlightedWhenLabeledVectorHovered.LastObject()->SetSize(0);
-    output.toBeHighlightedWhenLabeledVectorHovered.LastObject()->AddOnTop(this->RootSystem[i].GetVectorDouble());
-    output.toBeHighlightedWhenLabeledVectorHovered.LastObject()->AddOnTop((-this->RootSystem[i]).GetVectorDouble());
+  Vectors<double> highlightGroup;
+  List<std::string> highlightLabels;
+  highlightGroup.SetSize(2);
+  highlightLabels.SetSize(2);
+  for (int i = 0; i < this->RootsOfBorel.size; i ++)
+  { highlightGroup[0] = this->RootsOfBorel[i].GetVectorDouble();
+    highlightGroup[1] = - this->RootsOfBorel[i].GetVectorDouble();
+    highlightLabels[0] = this->RootsOfBorel[i].ToString();
+    highlightLabels[1] = (- this->RootsOfBorel[i]).ToString();
+    output.drawHighlightGroup(highlightGroup, highlightLabels, "gray", 5);
   }
   std::stringstream tempStream;
   tempStream << this->theDynkinType.GetWeylGroupName();
@@ -6374,7 +6376,7 @@ void SubgroupWeylGroupOLD::FindQuotientRepresentatives(int UpperLimit)
 }
 
 bool SubgroupWeylGroupOLD::DrawContour
-(const Vector<Rational>& highestWeightSimpleCoord, DrawingVariables& theDV, int theColor, int UpperBoundVertices)
+(const Vector<Rational>& highestWeightSimpleCoord, DrawingVariables& theDV, const std::string& color, int UpperBoundVertices)
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::DrawContour");
   HashedList<Vector<Rational> > theOrbit;
   theOrbit.AddOnTop(highestWeightSimpleCoord);
@@ -6385,8 +6387,7 @@ bool SubgroupWeylGroupOLD::DrawContour
     { tempRoot = theOrbit[i];
       theWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], tempRoot, false, tempRoot);
       if (theOrbit.AddOnTopNoRepetition(tempRoot))
-        theDV.drawLineBetweenTwoVectorsBufferRational
-        (theOrbit[i], tempRoot, DrawingVariables::PenStyleNormal, theColor, 1);
+        theDV.drawLineBetweenTwoVectorsBufferRational(theOrbit[i], tempRoot, color, 1);
       if (theOrbit.size > UpperBoundVertices)
         return false;
     }
@@ -8880,9 +8881,7 @@ bool ConeComplex::DrawMeLastCoordAffine
     tempStream << i + 1;
     Vector<Rational> tempRoot = this->TheObjects[i].GetInternalPoint();
     tempRoot.MakeAffineUsingLastCoordinate();
-    theDrawingVariables.drawTextAtVectorBufferRational
-    (tempRoot, tempStream.str(), HtmlRoutines::RedGreenBlue(0, 0, 0), theDrawingVariables.PenStyleNormal);
-    //stOutput <<"<hr> drawing number " << i + 1 << ": " << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()- 1);
+    theDrawingVariables.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
   }
   return result;
 }
@@ -8918,7 +8917,7 @@ bool ConeComplex::DrawMeProjective
 }
 
 bool Cone::DrawMeLastCoordAffine
-(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat, int ChamberWallColor) const
+(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat, const std::string& ChamberWallColor) const
 { (void) theFormat; //avoid unused parameter warning, portable.
   Vector<Rational> ZeroRoot;
   ZeroRoot.MakeZero(this->GetDim() - 1);
@@ -8962,7 +8961,7 @@ bool Cone::DrawMeLastCoordAffine
                 (iScaledVertex, jScaledVertex, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(200,200,200));
               }*/
               theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-              (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, ChamberWallColor, 1);
+              (VerticesScaled[i], VerticesScaled[j], ChamberWallColor, 1);
             }
   return foundBadVertex;
 }
@@ -9006,18 +9005,19 @@ bool Cone::DrawMeProjective
       crash << crash;
     VerticesScaled[i] /= sumAbsValuesCoords;
   }
+
   Vector<Rational> tempRoot;
   if (initTheDrawVars)
   { theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
     for (int i = 0; i < this->GetDim(); i ++)
     { tempRoot.MakeEi(this->GetDim(), i);
       theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-      (ZeroRoot + coordCenter, tempRoot + coordCenter, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(205, 205, 205), 1);
+      (ZeroRoot + coordCenter, tempRoot + coordCenter, "gray", 1);
     }
   }
   for (int i = 0; i < this->Vertices.size; i ++)
     theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-    (ZeroRoot + coordCenter, VerticesScaled[i] * 10000 + coordCenter, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(180, 180, 180), 1);
+    (ZeroRoot + coordCenter, VerticesScaled[i] * 10000 + coordCenter, "gray", 1);
   for (int k = 0; k < this->Normals.size; k ++)
     for (int i = 0; i < this->Vertices.size; i ++)
       if (this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
@@ -9025,7 +9025,7 @@ bool Cone::DrawMeProjective
           if (this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
             if (this->IsAnHonest1DEdgeAffine(i, j))
               theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-              (VerticesScaled[i] +coordCenter, VerticesScaled[j] + coordCenter, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(0, 0, 0), 1);
+              (VerticesScaled[i] +coordCenter, VerticesScaled[j] + coordCenter, "black", 1);
   return true;
 }
 
@@ -9138,8 +9138,6 @@ void DrawOperations::init()
   this->centerX = 300;
   this->centerY = 300;
   this->GraphicsUnit = DrawOperations::GraphicsUnitDefault;
-  this->labeledVectors.SetSize(0);
-  this->labelsOfLabeledVectors.SetSize(0);
   this->ClickToleranceX = 5;
   this->ClickToleranceY = 5;
   this->SelectedCircleMinus2noneMinus1Center = - 2;
@@ -9782,13 +9780,13 @@ void PiecewiseQuasipolynomial::DrawMe(DrawingVariables& theDrawingVars, int numL
 { FormatExpressions theFormat;
   Vectors<Rational> latticePoints;
   HashedList<Vector<Rational> > theLatticePointsFinal;
-  List<int> theLatticePointColors;
-  List<int> tempList;
+  List<std::string> theLatticePointColors;
+  List<std::string> tempList;
   if (numLatticePointsPerDim < 0)
     numLatticePointsPerDim = 0;
-  int ZeroColor = HtmlRoutines::RedGreenBlue(200, 200, 200);
+  const std::string ZeroColor = "gray";
   for (int i = 0; i < this->theProjectivizedComplex.size; i ++)
-  { int chamberWallColor = 0;
+  { std::string chamberWallColor = "black";
     bool isZeroChamber = this->theQPs[i].IsEqualToZero();
     if (isZeroChamber)
       chamberWallColor = ZeroColor;
@@ -9817,12 +9815,10 @@ void PiecewiseQuasipolynomial::DrawMe(DrawingVariables& theDrawingVars, int numL
     }
   }
   for (int i = 0; i < theLatticePointsFinal.size; i ++)
-  { theDrawingVars.drawCircleAtVectorBufferRational
-    (theLatticePointsFinal[i], 2, theDrawingVars.PenStyleNormal, theLatticePointColors[i]);
+  { theDrawingVars.drawCircleAtVectorBufferRational(theLatticePointsFinal[i], theLatticePointColors[i], 2);
     theDrawingVars.drawTextAtVectorBufferRational
     (theLatticePointsFinal[i], this->EvaluateInputProjectivized(theLatticePointsFinal[i]).ToString(),
-     theLatticePointColors[i],
-    DrawingVariables::PenStyleNormal);
+     theLatticePointColors[i]);
   }
 }
 
@@ -9880,12 +9876,11 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Ratio
           //this->DrawMe(tempDV);
           this->theProjectivizedComplex.DrawMeLastCoordAffine(true, tempDV, tempFormat);
           tempDV.NumHtmlGraphics = 5;
-          tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, 5, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0,0,0));
-          tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, 10, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0,0,0));
-          tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, 4, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(255,0,0));
+          tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 5);
+          tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 10);
+          tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "red", 4);
           stOutput << "<br> <script src =\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\" type =\"text/javascript\"></script>\n";
-          stOutput << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->theProjectivizedComplex.GetDim()- 1);
-
+          stOutput << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->theProjectivizedComplex.GetDim() - 1);
         }
         firstFail = false;
       }

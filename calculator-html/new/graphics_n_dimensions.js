@@ -33,11 +33,12 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.idsBasis = [];
   this.idInfo = inputIdInfo;
   this.idPlaneInfo = `${inputIdInfo}projectionPlane`;
+  this.idHighlightInfo = `${this.idCanvas}HighlightInfo`;
   this.basisCircles = [];
   this.projectionsBasisCircles = [];
   this.eiBasis = [];
   this.projectionsEiVectors = [];
-  this.labeledVectors = [];
+  this.indicesHighlightOperations = [];
   this.projectionsLabeledVectors = [];
   this.projectionScreenBasis = [];
   this.projectionSelectedAtSelection = [];
@@ -48,6 +49,8 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.theBilinearForm = [];
   this.graphicsUnit = 0;
   this.selectedBasisIndex = - 1;
+  this.selectedHighlightIndex = - 1;
+  this.selectedIndexWithinGroup = -1;
   this.flagAllowMovingCoordinateSystemFromArbitraryClick = true;
 
   this.vOrthogonalSelected = [];
@@ -121,16 +124,17 @@ GraphicsNDimensions.prototype.writeInfo = function() {
   }
   result += `<br>Coordinate center in screen coordinates: <br>(${this.shiftScreenCoordinates.join(", ")})`;
   result += "<br>The projection plane (drawn on the screen) is spanned by the following two vectors.\n";
-  result += `<br>(${this.screenBasis[0].join(", ")})`;
-  result += `<br>(${this.screenBasis[1].join(", ")})`;
+  result += `<br>(${toStringVector(this.screenBasis[0])})`;
+  result += `<br>(${toStringVector(this.screenBasis[1])})`;
   for (var i = 0; i < this.basisCircles.length; i ++) {
-    result += `<br>${i}: (${this.basisCircles[i].join(", ")}): (${this.projectionsBasisCircles[i].join(", ")})`;
+    result += `<br>${i}: (${toStringVector(this.basisCircles[i])}): (${toStringVector(this.projectionsBasisCircles[i])})`;
   }
   document.getElementById(this.idPlaneInfo).innerHTML = result;
 }
 
 GraphicsNDimensions.prototype.initInfo = function () {
   var result = "";
+  result += `<span id = "${this.idCanvasHighlights}"> </span>\n`;
   for (var i = 0; i < 2; i ++) {
     this.idsBasis[i] = []; 
     for (var j = 0; j < this.dimension; j ++) { 
@@ -156,61 +160,8 @@ GraphicsNDimensions.prototype.snapShotLaTeX = function() {
   result += `\\psset{xunit = 0.01cm, yunit = 0.01cm} <br>\n\\begin{pspicture}(0,0)(1,1)\n`;
   ComputeProjections();
   for (var counterDrawOperation = 0; counterDrawOperation < this.drawOperations.length; counterDrawOperation ++) { 
-    result += this.drawOperations[counterDrawOperation].getLaTeXOperation(); 
-  //  case DrawOperations::typeDrawLineBetweenTwoVectors:
-  //  out << "theText.innerHTML+=\""
-  //  << this->GetColorPsTricksFromColorIndex(this->theBuffer.theDrawLineBetweenTwoRootsOperations[currentIndex].ColorIndex)
-  //  << "<br>\";\n";
-  //  out << "theText.innerHTML+=\"\\\\psline[linecolor = currentColor](\"+ "
-  //  << functionConvertToXYName << "( " << Points1ArrayName << "[" << currentIndex<< "])[0]"
-  //  << "+\",\"+"
-  //  << functionConvertToXYName << "( " << Points1ArrayName << "["
-  //  << currentIndex << "])[1]*- 1 +\")\";\n ";
-  //  out << "theText.innerHTML+=\"(\"+"
-  //  << functionConvertToXYName << "( " << Points2ArrayName << "["
-  //  << currentIndex << "])[0] +\",\"+"
-  //  << " " << functionConvertToXYName << "( " << Points2ArrayName << "["
-  //  << currentIndex << "])[1]*- 1+\")<br>\"; \n";
-  //  break;
-  //case DrawOperations::typeDrawCircleAtVector:
-  //  out << "theText.innerHTML+=\""
-  //  << this->GetColorPsTricksFromColorIndex(this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].ColorIndex)
-  //  << "<br>\";\n";
-  //  out << "theText.innerHTML+=\"\\\\pscircle[linecolor = currentColor](\"+ "
-  //  << functionConvertToXYName << "( " << circArrayName << "["
-  //  << currentIndex << "])[0]" << "+\",\"+"
-  //  << functionConvertToXYName << "( " << circArrayName << "["
-  //  << currentIndex << "])[1]*- 1" << "+ \"){\"+"
-  //  << (((double)this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].radius) / 40) << "+\"}<br>\";\n";
-  //  break;
-  //case DrawOperations::typeFilledShape:
-/*//        out << "theText.innerHTML+=\""
-  //  << this->GetColorPsTricksFromColorIndex
-  //  (this->theBuffer.theParallelograms[currentIndex].ColorIndex)
-  //  << "<br>\";\n";
-  //  out << "theText.innerHTML+=\"\\\\pscustom[linecolor = currentColor](\"+ "
-  //  << functionConvertToXYName << "( " << circArrayName << "["
-  //  << currentIndex << "])[0]" << "+\",\"+"
-  //  << functionConvertToXYName << "( " << circArrayName << "["
-  //  << currentIndex << "])[1]*- 1" << "+ \"){\"+"
-  //  << (((double)this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].radius)/40) << "+\"}<br>\";\n";*/
-  //  nonImplementedFound = true;
-  //  break;
-  //case DrawOperations::typeDrawTextAtVector:
-  //  out << "theText.innerHTML+=\""
-  //  << this->GetColorPsTricksFromColorIndex(this->theBuffer.theDrawTextAtVectorOperations[currentIndex].ColorIndex)
-  //  << "<br>\";\n";
-  //  out << "theText.innerHTML+=\"\\\\rput[b](\"+ "
-  //  << functionConvertToXYName << "( " << txtArrayName << "["
-  //  << currentIndex << "])[0]" << "+\",\"+"
-  //  << functionConvertToXYName << "( " << txtArrayName << "["
-  //  << currentIndex << "])[1]*- 1" << "+ \"){\\\\color{currentColor}"
-  //  << this->theBuffer.theDrawTextAtVectorOperations[currentIndex].theText << "}<br>\";\n";
-  //  break;
-  //default: break;
+    result += this.drawOperations[counterDrawOperation].getLaTeXOperation();
   }
-//  stOutput << "<hr>DEBUG: got to here pt 2";
-  //  out << theSurfaceName << ".stroke();\n";
   result += "\\end{pspicture}<br>";
   if (nonImplementedFound) {
     result += `Not all elements in the html picture were drawn in LaTex. To do: fix this.`;
@@ -259,6 +210,25 @@ GraphicsNDimensions.prototype.drawLine = function(left, right, color) {
       colorLine: color
     }
   ));
+}
+
+GraphicsNDimensions.prototype.drawHighlightGroup = function(points, labels, color, radius) {
+  if (color === undefined) {
+    color = "black";
+  }
+  if (radius === undefined) {
+    radius = 3;
+  }
+  this.drawOperations.push(new DrawHighlights(
+    this.idCanvas, {
+      vectors: points,
+      indexInOperations: this.drawOperations.length,
+      labels: labels,
+      color: color,
+      radius: radius
+    }
+  ));
+
 }
 
 GraphicsNDimensions.prototype.drawText = function(location, text, color) {
@@ -336,6 +306,52 @@ GraphicsNDimensions.prototype.animateChangeProjectionPlaneUser = function() {
   this.makeScreenBasisOrthonormal();
   this.drawAll();
   setTimeout(this.animateChangeProjectionPlaneUser.bind(this), 100);
+}
+
+function DrawHighlights(inputOwnerId, inputData) {
+  this.ownerId = inputOwnerId;
+  this.indexInOperations = inputData.indexInOperations;
+  var owner = collectionGraphicsNDimension[this.ownerId];
+  owner.indicesHighlightOperations.push(this.indexInOperations);
+  this.vectors = inputData.vectors;
+  this.vectorProjections = [];
+  this.color = inputData.color;
+  this.labels = inputData.labels;
+  this.radius = inputData.radius;
+}
+
+
+DrawHighlights.prototype.computeProjections = function () {
+  var owner = collectionGraphicsNDimension[this.ownerId];
+  if (this.vectorProjections.length !== this.vectors.length) {
+    this.vectorProjecions = new Array (this.vectors.length);
+  }
+  for (var i = 0; i < this.vectors.length; i ++) {
+    if (this.vectorProjections[i] === undefined || this.vectorProjections[i] === null) {
+      this.vectorProjections[i] = [];
+    }
+    owner.computeScreenCoordinates(this.vectors[i], this.vectorProjections[i]);
+  }
+}
+
+DrawHighlights.prototype.drawNoFinish = function () {
+  var owner = collectionGraphicsNDimension[this.ownerId];
+  if (this.indexInOperations != owner.selectedHighlightIndex) {
+    return;
+  }
+  this.computeProjections();
+  var canvas = owner.canvas;
+  canvas.strokeStyle = this.color;
+  for (var i = 0; i < this.vectors.length; i ++) {
+    canvas.beginPath();
+    canvas.arc(
+      this.vectorProjections[i][0],
+      this.vectorProjections[i][1],
+      this.radius,
+      0, 2 * Math.PI
+    );
+    canvas.stroke();
+  }
 }
 
 function DrawSegmentBetweenTwoVectors(inputOwnerId, inputData) {
@@ -445,7 +461,6 @@ GraphicsNDimensions.prototype.drawAll = function() {
     this.drawOperations[counterOperation].drawNoFinish();
   }
   this.frameStarted = false;
-  //this.canvas.stroke();
 }
 
 GraphicsNDimensions.prototype.makeStandardBilinearForm = function () {
@@ -575,9 +590,6 @@ GraphicsNDimensions.prototype.ComputeProjectionsSpecialVectors = function() {
         this.projectionsBasisCircles[i] = [];
     }
     this.computeScreenCoordinates(this.basisCircles[i], this.projectionsBasisCircles[i]);
-  } 
-  for (var i = 0; i < this.labeledVectors.length; i ++) {
-    this.computeScreenCoordinates(this.labeledVectors[i], this.projectionsLabeledVectors[i]);
   }
 }
 
@@ -697,33 +709,6 @@ GraphicsNDimensions.prototype.changeBasis = function() {
   this.makeScreenBasisOrthonormal();
 }
 
-GraphicsNDimensions.prototype.processMousePosition = function(x, y) {
-  var labelString = "<table><tr>";
-  var needRedraw = false;
-  for (var i = 0; i < this.labeledVectors.sin; i ++) {
-    var isNear = this.pointsAreWithinClickToleranceCone(
-      x, y, this.projectionsLabeledVectors[i][0], this.projectionsLabeledVectors[1]
-    );
-    if (isNear) {
-      labelString += `<td>${this.labels[i]}</td>`;
-      if (!this.selectedLabels[i]) {
-        needRedraw = true;
-        this.selectedLabels[i] = true;
-      } else if (this.selectedLabels[i]) {
-        needRedraw = true;
-        this.selectedLabels[i] = false;
-      }
-    }
-  }
-  if (needRedraw) {
-    labelString += "</tr></table>";
-    var notes = document.getElementById(this.idNotes);
-    this.drawAll();
-    notes.innerHTML = labelString;
-    jsMath.Process(notes);
-  }
-}
-
 GraphicsNDimensions.prototype.computePosXPosY = function(event) {
   this.mousePositionScreen[0] = event.clientX;
   this.mousePositionScreen[1] = event.clientY;
@@ -813,15 +798,40 @@ GraphicsNDimensions.prototype.clickCanvas = function(event) {
   }
 }
 
+GraphicsNDimensions.prototype.computeHighlightedIndex = function() {
+  var oldSelected = this.selectedHighlightIndex;
+  this.selectedHighlightIndex = - 1;
+  this.selectedIndexWithinGroup = - 1;
+  for (var i = 0; i < this.indicesHighlightOperations.length; i ++) {
+    var currentIndex = this.indicesHighlightOperations[i];
+    var currentHighlight = this.drawOperations[currentIndex];
+    currentHighlight.computeProjections();
+    var currentVectors = currentHighlight.vectorProjections;
+    for (var j = 0; j < currentVectors.length; j ++) {
+      if (this.pointsAreWithinClickTolerance(
+        this.mousePositionScreen[0], this.mousePositionScreen[1], currentVectors[j][0], currentVectors[j][1]
+      )) {
+        this.selectedHighlightIndex = currentIndex;
+        this.selectedIndexWithinGroup = j;
+        break;
+      }
+      if (this.selectedHighlightIndex != -1) {
+        break;
+      }
+    }
+  }
+  return oldSelected !== this.selectedHighlightIndex;
+}
+
 GraphicsNDimensions.prototype.mouseMoveRedraw = function(event) {
   this.computePosXPosY(event);
   this.writeInfo();
   //this.processMousePosition(posx, - posy);
-  if (this.selectedBasisIndex == - 1) {
+  var doRedraw = this.computeHighlightedIndex();
+  if (this.selectedBasisIndex == - 1 && !doRedraw) {
     return;
   }
-  var doRedraw = false;
-  if (this.selectedBasisIndex == - 2){
+  if (this.selectedBasisIndex == - 2) {
     if (
       this.shiftScreenCoordinates[0] !== this.mousePositionScreen[0] ||
       this.shiftScreenCoordinates[1] !== this.mousePositionScreen[1]
@@ -832,7 +842,7 @@ GraphicsNDimensions.prototype.mouseMoveRedraw = function(event) {
     var deltaY = this.mousePositionScreen[1] - this.mousePositionScreenClicked[1];
     this.shiftScreenCoordinates[0] = this.shiftScreenCoordinatesClicked[0] + deltaX;
     this.shiftScreenCoordinates[1] = this.shiftScreenCoordinatesClicked[1] + deltaY;
-  } else { 
+  } else if (this.selectedBasisIndex >= 0) {
     this.changeBasis();
     var doRedraw = true;
   }
@@ -936,6 +946,11 @@ GraphicsNDimensions.prototype.initFromObject = function(input) {
       this.drawCircle(currentOperation.location, currentOperation.color, currentOperation.radius);
     } else if (currentOperation.operation === "segment") {
       this.drawLine(currentOperation.points[0], currentOperation.points[1], currentOperation.color);
+    } else if (currentOperation.operation === "highlightGroup") {
+      this.drawHighlightGroup(
+        currentOperation.points, currentOperation.labels,
+        currentOperation.color, currentOperation.radius
+      );
     }
   }
   this.graphicsUnit = input.graphicsUnit;

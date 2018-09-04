@@ -4986,7 +4986,7 @@ public:
     Vector<Rational>& vertex2 = this->Vertices[vertexIndex2];
     return this->IsAnHonest1DEdgeAffine(vertex1, vertex2);
   }
-  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat, int ChamberWallColor = 0) const;
+  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat, const std::string& ChamberWallColor = 0) const;
   bool DrawMeProjective(Vector<Rational>* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) const;
   bool IsInCone(const Vector<Rational>& point) const;
   bool IsInCone(const Vectors<Rational>& vertices) const
@@ -5264,12 +5264,16 @@ public:
   void ComputeSupport(List<Vectors<Rational> >& output);
   void ComputeOneCheckSum(Rational& output);
   void AccountPartFractionInternals(int sign, int index, Vector<Rational>* Indicator);
-  void PopIndexHashChooseSwapByLowestNonProcessedAndAccount(int index, Vector<Rational> * Indicator);
+  void PopIndexHashChooseSwapByLowestNonProcessedAndAccount(int index, Vector<Rational>* Indicator);
   void PopIndexSwapLastHashAndAccount(int index, Vector<Rational>* Indicator);
   void PrepareIndicatorVariables();
   void initFromOtherPartFractions(PartFractions& input);
   void IncreaseHighestIndex(int increment);
-  std::string ToString(FormatExpressions& theFormat){std::string tempS; this->ToString(tempS, theFormat);  return tempS;}
+  std::string ToString(FormatExpressions& theFormat)
+  { std::string tempS;
+    this->ToString(tempS, theFormat);
+    return tempS;
+  }
   void ToString(std::string& output, FormatExpressions& theFormat);
   int ToString(std::string& output, bool LatexFormat, FormatExpressions& theFormat);
   int ElementToStringBasisChange
@@ -5277,7 +5281,7 @@ public:
   int ElementToStringOutputToFile(std::fstream& output, bool LatexFormat);
   int ElementToStringBasisChangeOutputToFile(std::fstream& output, bool LatexFormat);
   bool GetVectorPartitionFunction
-  (QuasiPolynomial& output, Vector<Rational> & newIndicator);
+  (QuasiPolynomial& output, Vector<Rational>& newIndicator);
   bool VerifyFileComputedContributions();
   void WriteToFileComputedContributions(std::fstream& output);
   int ReadFromFileComputedContributions(std::fstream& input);

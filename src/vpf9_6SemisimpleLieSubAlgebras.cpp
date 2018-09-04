@@ -4612,8 +4612,8 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
     if (!theFormat->flagIncludeMutableInformation)
       return "<br>Weight diagram not drawn to avoid javascript problems (use command PrintSemisimpleSubalgebras if you want to see the weight diagram). ";
   int thePrimalRank = - 1;
-  (this->centralizerRank+this->theHs.size).IsSmallInteger(&thePrimalRank);
-  if (thePrimalRank<2)
+  (this->centralizerRank + this->theHs.size).IsSmallInteger(&thePrimalRank);
+  if (thePrimalRank < 2)
     return "";
   std::stringstream out;
   if (thePrimalRank != this->BilinearFormFundPrimal.NumCols)
@@ -4651,66 +4651,65 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
     for (int j = 0; j < this->Modules[i].size; j ++)
       for (int k = 0; k< this->Modules[i][j].size; k++)
       { if (j == 0)
-        { int color = HtmlRoutines::RedGreenBlue(150,150,0);
+        { std::string color = "#959500";
           if (this->primalSubalgebraModules.Contains(i))
-          { color =HtmlRoutines::RedGreenBlue(0,250,0);
-            theDV.drawLineBetweenTwoVectorsBufferRational
-            (zeroVector, this->WeightsModulesPrimal[i][k], theDV.PenStyleNormal, color);
+          { theDV.drawLineBetweenTwoVectorsBufferRational
+            (zeroVector, this->WeightsModulesPrimal[i][k], "green");
           }
-          theDV.drawCircleAtVectorBufferRational(this->WeightsModulesPrimal[i][k], 2, theDV.PenStyleNormal, color);
+          theDV.drawCircleAtVectorBufferRational(this->WeightsModulesPrimal[i][k], color, 2);
           if (this->IsExtremeWeight(i, k))
             cornerWeights.AddOnTop(this->WeightsModulesPrimal[i][k]);
         }
-        if (k == this->Modules[i][j].size- 1 && BasisToDrawCirclesAt.size<thePrimalRank)
+        if (k == this->Modules[i][j].size - 1 && BasisToDrawCirclesAt.size < thePrimalRank)
         { BasisToDrawCirclesAt.AddOnTop(this->WeightsModulesPrimal[i][k]);
-          if (BasisToDrawCirclesAt.GetRankOfSpanOfElements() !=BasisToDrawCirclesAt.size)
+          if (BasisToDrawCirclesAt.GetRankOfSpanOfElements() != BasisToDrawCirclesAt.size)
             BasisToDrawCirclesAt.RemoveLastObject();
         }
       }
-    int color =HtmlRoutines::RedGreenBlue(250, 250,0);
+    std::string color = "#f0f000";
     if (this->primalSubalgebraModules.Contains(i))
-      color =HtmlRoutines::RedGreenBlue(0, 0, 250);
+      color = "blue";
     for (int j = 0; j<cornerWeights.size; j ++)
     { Rational minDist = 0;
-      for (int k = 0; k<cornerWeights.size; k++)
-      { Rational tempRat =Vector<Rational>::ScalarProduct
-        ((cornerWeights[k]-cornerWeights[j]), (cornerWeights[k]-cornerWeights[j]),
+      for (int k = 0; k < cornerWeights.size; k ++)
+      { Rational tempRat = Vector<Rational>::ScalarProduct
+        (cornerWeights[k] - cornerWeights[j], cornerWeights[k] - cornerWeights[j],
          this->BilinearFormFundPrimal);
         if (minDist == 0)
           minDist = tempRat;
         else if (tempRat != 0)
-          minDist =MathRoutines::Minimum(tempRat, minDist);
+          minDist = MathRoutines::Minimum(tempRat, minDist);
       }
-      for (int k = j+ 1; k<cornerWeights.size; k++)
-        if (minDist ==Vector<Rational>::ScalarProduct((cornerWeights[k]-cornerWeights[j]), (cornerWeights[k]-cornerWeights[j]), this->BilinearFormFundPrimal))
-          theDV.drawLineBetweenTwoVectorsBufferRational(cornerWeights[k], cornerWeights[j], theDV.PenStyleNormal, color);
+      for (int k = j + 1; k < cornerWeights.size; k ++)
+        if (minDist == Vector<Rational>::ScalarProduct(cornerWeights[k] - cornerWeights[j], cornerWeights[k] - cornerWeights[j], this->BilinearFormFundPrimal))
+          theDV.drawLineBetweenTwoVectorsBufferRational(cornerWeights[k], cornerWeights[j], color, 1);
     }
   }
-  theDV.theBuffer.labeledVectors.SetSize(0);
-  theDV.theBuffer.labelsOfLabeledVectors.SetSize(0);
-  theDV.theBuffer.toBeHighlightedWhenLabeledVectorHovered.SetSize(0);
   HashedList<Vector<Rational> > currentWeights;
+
+  Vectors<double> highlightGroup;
+  List<std::string> highlightLabels;
   for (int i = 0; i < this->Modules.size; i ++)
   { currentWeights.Clear();
     currentWeights.AddOnTopNoRepetition(this->WeightsModulesPrimal[i]);
     Vectors<double> currentWeightsDouble;
     currentWeightsDouble.SetSize(currentWeights.size);
-    for (int j = 0; j<currentWeightsDouble.size; j ++)
+    for (int j = 0; j < currentWeightsDouble.size; j ++)
       currentWeightsDouble[j] = currentWeights[j].GetVectorDouble();
-    for (int j = 0; j<currentWeights.size; j ++)
-    { theDV.theBuffer.labeledVectors.AddOnTop(currentWeights[j].GetVectorDouble());
-      theDV.theBuffer.toBeHighlightedWhenLabeledVectorHovered.AddOnTop(currentWeightsDouble);
-      theDV.theBuffer.labelsOfLabeledVectors.AddOnTop(this->ToStringDrawWeightsHelper(i, currentWeights[j]));
+    highlightGroup.SetSize(currentWeights.size);
+    highlightLabels.SetSize(currentWeights.size);
+    for (int j = 0; j < currentWeights.size; j ++)
+    { highlightGroup[j] = currentWeights[j].GetVectorDouble();
+      highlightLabels[j] = currentWeights[j].ToString();
     }
+    theDV.theBuffer.drawHighlightGroup(highlightGroup, highlightLabels, "black", 5);
   }
   theDV.theBuffer.BasisToDrawCirclesAt.SetSize(BasisToDrawCirclesAt.size);
   for (int i = 0; i < theDV.theBuffer.BasisToDrawCirclesAt.size; i ++)
   { theDV.theBuffer.BasisToDrawCirclesAt[i].SetSize(thePrimalRank);
     for (int j = 0; j < thePrimalRank; j ++)
-      theDV.theBuffer.BasisToDrawCirclesAt[i][j] =BasisToDrawCirclesAt[i][j].GetDoubleValue();
-    theDV.drawCircleAtVectorBufferRational(BasisToDrawCirclesAt[i], 4, theDV.PenStyleNormal, HtmlRoutines::RedGreenBlue(250, 0,0));
-    //theDV.drawTextAtVectorBuffer
-    //(BasisToDrawCirclesAt[i], BasisToDrawCirclesAt[i].ToString(), HtmlRoutines::RedGreenBlue(0, 0,0), theDV.TextStyleNormal, 0);
+      theDV.theBuffer.BasisToDrawCirclesAt[i][j] = BasisToDrawCirclesAt[i][j].GetDoubleValue();
+    theDV.drawCircleAtVectorBufferRational(BasisToDrawCirclesAt[i], "red", 4);
   }
   out << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(thePrimalRank);
   return out.str();
@@ -4739,8 +4738,8 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompoLaTeX(FormatExpressions*
   << "Component &Module & elements & elt. weights& $h$-element $\\mathfrak k-sl(2)$-triple& $f$-element $\\mathfrak k-sl(2)$-triple\\\\";
   ElementSemisimpleLieAlgebra<AlgebraicNumber> tempLieBracket;
   for (int i = 0; i < this->Modules.size; i ++)
-  { int numRowsIsoCompo = this->Modules[i].size*this->Modules[i][0].size;
-    if (numRowsIsoCompo>1)
+  { int numRowsIsoCompo = this->Modules[i].size * this->Modules[i][0].size;
+    if (numRowsIsoCompo > 1)
       out << "\\multirow{" << numRowsIsoCompo << "}{*}";
     out << "{$W_{" << i + 1 << "} $}";
     out << "&";

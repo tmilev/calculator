@@ -19,6 +19,7 @@ public:
   int SelectedCircleMinus2noneMinus1Center; //-2= none, - 1= center of coordinate system, nonnegative integers = selectedindex
   Vectors<double> BasisToDrawCirclesAt;
   Matrix<double> theBilinearForm;
+  MapLisT<std::string, List<int>, MathRoutines::hashString> frames;
   double ClickToleranceX;
   double ClickToleranceY;
   double centerX;
@@ -124,6 +125,9 @@ public:
   void drawLineBetweenTwoVectorsBufferDouble
   (const Vector<double>& vector1, const Vector<double>& vector2, const std::string& color,
    double lineWidth = 1);
+  void drawSegmentToFrame
+  (const std::string& frameId, const Vector<Rational>& r1,
+   const Vector<Rational>& r2,  const std::string& color, double lineWidth = 1);
   void drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, const std::string& color, int fontSize);
   void drawTextAtVectorBufferDouble(const Vector<double>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
   void drawCircleAtVectorBufferRational(const Vector<Rational>& input, const std::string& color, double radius);
@@ -250,6 +254,13 @@ public:
   void drawLineBetweenTwoVectorsBufferRational
   (const Vector<Rational>& r1, const Vector<Rational>& r2, const std::string& color, double lineWidth = 1)
   { this->theBuffer.drawLineBetweenTwoVectorsBufferRational(r1, r2, color, lineWidth);
+  }
+  void drawCircleAtVectorFrame
+  (const std::string& frameId, const Vector<Rational>& point, const std::string& color, double radius);
+  void drawSegmentToFrame
+  (const std::string& frameId, const Vector<Rational>& r1,
+   const Vector<Rational>& r2,  const std::string& color, double lineWidth = 1)
+  { this->theBuffer.drawSegmentToFrame(frameId, r1, r2, color, lineWidth);
   }
   void drawLineBetweenTwoVectorsBufferDouble
   (const Vector<double>& r1, const Vector<double>& r2, const std::string& color, double lineWidth = 1)

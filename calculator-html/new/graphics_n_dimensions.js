@@ -81,6 +81,7 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   collectionGraphicsNDimension[this.idCanvas] = this;
   this.clickTolerance = 5;
   this.frameStarted = false;
+  this.textShift = [-3, -4];
 }
 
 GraphicsNDimensions.prototype.initVectors = function(inputVectors) {
@@ -122,12 +123,12 @@ GraphicsNDimensions.prototype.writeInfo = function() {
     result += `<br>Projection selected: ${toStringVector(this.vProjectionNormalizedSelected)}`;
     result += `<br>Orthogonal component selected: ${toStringVector(this.vOrthogonalSelected)}`;
   }
-  result += `<br>Coordinate center in screen coordinates: <br>(${this.shiftScreenCoordinates.join(", ")})`;
+  result += `<br>Coordinate center in screen coordinates: <br>${toStringVector(this.shiftScreenCoordinates)}`;
   result += "<br>The projection plane (drawn on the screen) is spanned by the following two vectors.\n";
-  result += `<br>(${toStringVector(this.screenBasis[0])})`;
-  result += `<br>(${toStringVector(this.screenBasis[1])})`;
+  result += `<br>${toStringVector(this.screenBasis[0])}`;
+  result += `<br>${toStringVector(this.screenBasis[1])}`;
   for (var i = 0; i < this.basisCircles.length; i ++) {
-    result += `<br>${i}: (${toStringVector(this.basisCircles[i])}): (${toStringVector(this.projectionsBasisCircles[i])})`;
+    result += `<br>${i}: ${toStringVector(this.basisCircles[i])}: ${toStringVector(this.projectionsBasisCircles[i])}`;
   }
   document.getElementById(this.idPlaneInfo).innerHTML = result;
 }
@@ -439,7 +440,7 @@ DrawTextAtVector.prototype.drawNoFinish = function() {
   var canvas = owner.canvas;
   canvas.strokeStyle = this.colorFill;
   owner.computeScreenCoordinates(this.location, this.locationScreen);
-  canvas.strokeText(this.text, this.locationScreen[0], this.locationScreen[1]);
+  canvas.strokeText(this.text, this.locationScreen[0] + owner.textShift[0], this.locationScreen[1] + owner.textShift[1]);
 }
 
 GraphicsNDimensions.prototype.drawAll = function() {
@@ -863,6 +864,9 @@ GraphicsNDimensions.prototype.mouseHandleWheel = function(event) {
   var oldXDeltaScaled = oldXDelta / this.graphicsUnit;
   var oldYDeltaScaled = oldYDelta / this.graphicsUnit;
   this.graphicsUnit += theWheelDelta;
+  if (this.graphicsUnit < 3) {
+    this.graphicsUnit = 3;
+  }
   var newXDelta = oldXDeltaScaled * this.graphicsUnit;
   var newYDelta = oldYDeltaScaled * this.graphicsUnit;
   this.shiftScreenCoordinates[0] += oldXDelta - newXDelta;
@@ -923,6 +927,7 @@ function testA3(idCanvas, idSpanInformation) {
     [[0 ,   0,  -1], [ 0,  1,  0]]
   ];
   theA3.drawStandardEiBasis("red");
+  theA3.drawText([1,0,0], "(1,0,0)");
   for (var counterLabel = 0; counterLabel < labeledVectors.length; counterLabel ++) {
     theA3.drawLine([0, 0, 0], labeledVectors[counterLabel], "green");
     //theA3.drawText(labeledVectors[counterLabel], `[${labeledVectors.join(', ')}]`);
@@ -951,6 +956,8 @@ GraphicsNDimensions.prototype.initFromObject = function(input) {
         currentOperation.points, currentOperation.labels,
         currentOperation.color, currentOperation.radius
       );
+    } else if (currentOperation.operation === "text") {
+      this.drawText(currentOperation.location, currentOperation.text, currentOperation.color);
     }
   }
   this.graphicsUnit = input.graphicsUnit;

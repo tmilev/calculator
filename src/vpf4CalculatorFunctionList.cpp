@@ -3006,11 +3006,10 @@ void Calculator::initPredefinedInnerFunctions()
    "WeylDimFormula");
   this->AddOperationInnerHandler
   ("AnimateLittelmannPaths", Calculator::innerAnimateLittelmannPaths, "",
-   "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. \
-   Presented first on the seminar in Charles University Prague. \
-   The first argument gives the type of the semisimple Lie algebra, \
-   the second gives the highest weight. \
-   ",
+   "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. "
+   "Presented first on the seminar in Charles University Prague. "
+   "The first argument gives the type of the semisimple Lie algebra, "
+   "the second gives the highest weight. ",
    "AnimateLittelmannPaths{}(G_2, (2,0));",
    true, false,
    "Calculator::innerAnimateLittelmannPaths",

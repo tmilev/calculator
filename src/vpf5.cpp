@@ -158,7 +158,8 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
 }
 
 bool Calculator::innerAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output)
-{ RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+{ MacroRegisterFunctionWithName("Calculator::innerAnimateLittelmannPaths");
+  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
     return output.MakeError("This function takes 2 arguments", theCommands);
   SemisimpleLieAlgebra* theSSowner = 0;
@@ -234,39 +235,33 @@ std::string HtmlRoutines::GetSliderSpanStartsHidden(const std::string& content, 
 
 std::string LittelmannPath::GenerateOrbitAndAnimate()
 { std::stringstream out;
-  out << "not implemented yet";
-/*
   List<LittelmannPath> theOrbit;
   List<List<int> > theGens;
   if (!this->GenerateOrbit(theOrbit, theGens, 1000, 0))
     out  << "<b>Not all paths were genenerated, only the first " << theOrbit.size << "</b>";
-  AnimationBuffer theBuffer;
-//  int theDim= this->owner->GetDim();
+  //  int theDim= this->owner->GetDim();
   Vectors<double> coxPlane;
   coxPlane.SetSize(2);
   this->owner->GetCoxeterPlane(coxPlane[0], coxPlane[1]);
-  DrawingVariables tempDV, tempDV2;
-  this->owner->DrawRootSystem(tempDV, true, true);
-  this->owner->DrawRootSystem(tempDV2, true, true);
-  theBuffer.theBuffer = tempDV.theBuffer;
-  theBuffer.theFrames.SetSize(theOrbit.size);
+  DrawingVariables currentOps;
+  this->owner->DrawRootSystem(currentOps, true, true);
+  int numberOfFrames = theOrbit.size;
   for (int i = 0; i < theOrbit.size; i ++)
-  { DrawingVariables& currentOps = theBuffer.theFrames[i];
-    LittelmannPath& currentPath = theOrbit[i];
-    currentOps.theBuffer = tempDV.theBuffer;
+  { LittelmannPath& currentPath = theOrbit[i];
     for (int j = 0; j < currentPath.Waypoints.size; j ++)
     { if (j != currentPath.Waypoints.size - 1)
-      { currentOps.drawLineBetweenTwoVectorsBufferRational(currentPath.Waypoints[j], currentPath.Waypoints[j + 1], DrawingVariables::PenStyleNormal, 0, 1);
-        tempDV2.theBuffer.drawLineBetweenTwoVectorsBufferRational(currentPath.Waypoints[j], currentPath.Waypoints[j + 1], DrawingVariables::PenStyleNormal, 0, 1);
+      { currentOps.drawSegmentToFrame
+        (this->owner->theDynkinType.ToString(), currentPath.Waypoints[j],
+         currentPath.Waypoints[j + 1], "black", 1);
       }
-      currentOps.drawCircleAtVectorBufferRational(currentPath.Waypoints[j], 2, DrawingVariables::PenStyleNormal, 0);
-      tempDV2.theBuffer.drawCircleAtVectorBufferRational(currentPath.Waypoints[j], 4, DrawingVariables::PenStyleNormal, 0);
+      currentOps.drawCircleAtVectorFrame
+      (this->owner->theDynkinType.ToString(), currentPath.Waypoints[j], "purple", 3);
     }
   }
   out << "<br>Animation of the Littelmann paths follows. ";
-  out << theBuffer.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
+   out << currentOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
   out << "<br>Here are all Littelmann paths drawn simultaneously. ";
-  out << tempDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
+  out << currentOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
   out << "Littelmann paths in simple coordinates given in the order in which they are generated ("
   << theOrbit.size << " total):<br>";
   out << "<table>";
@@ -323,7 +318,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate()
     }
     out << "</td></tr>";
   }
-  out << "</table>";*/
+  out << "</table>";
   return out.str();
 }
 

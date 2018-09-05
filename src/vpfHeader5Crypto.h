@@ -22,6 +22,10 @@ class Crypto
 {
   //To do: make sure all crypto functions zero their buffers.
 public:
+
+  static const int RIPEMD160LengthInBytes = 20;
+  static bool flagRIPEMDBigEndian;
+
   static List<Certificate> knownCertificates;
   static List<uint32_t> kArraySha2xx;
   static bool LoadKnownCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
@@ -93,6 +97,7 @@ public:
   static std::string computeSha1outputBase64(const std::string& inputString);
   static bool VerifyJWTagainstKnownKeys
   (const std::string& inputToken, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  static void computeRIPEMD160(const std::string& input, List<unsigned char>& output);
 };
 
 class JSONWebToken

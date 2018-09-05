@@ -66,10 +66,11 @@ public:
   static bool innerRSAencrypt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha224OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha256OfString(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerRIPEMD160OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha256OfStringVerbose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha1OfString(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerShaX
-  (Calculator& theCommands, const Expression& input, Expression& output, const std::string& shaId, bool verbose);
+  static bool innerHashString
+  (Calculator& theCommands, const Expression& input, Expression& output, const std::string& hashId, bool verbose);
   static bool innerTestJSON(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBase64ToHex(Calculator& theCommands, const Expression& input, Expression& output );
   static bool innerIntegerToHex(Calculator& theCommands, const Expression& input, Expression& output);

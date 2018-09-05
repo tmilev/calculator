@@ -196,30 +196,36 @@ bool CalculatorFunctionsGeneral::innerLoadKnownCertificates(Calculator& theComma
 bool CalculatorFunctionsGeneral::innerSha1OfString
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha1OfString");
-  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA1", false);
+  return CalculatorFunctionsGeneral::innerHashString(theCommands, input, output, "SHA1", false);
 }
 
 bool CalculatorFunctionsGeneral::innerSha256OfString
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha256OfString");
-  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA256", false);
+  return CalculatorFunctionsGeneral::innerHashString(theCommands, input, output, "SHA256", false);
 }
 
 bool CalculatorFunctionsGeneral::innerSha256OfStringVerbose
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha256OfString");
-  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA256", true);
+  return CalculatorFunctionsGeneral::innerHashString(theCommands, input, output, "SHA256", true);
 }
 
 bool CalculatorFunctionsGeneral::innerSha224OfString
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha224OfString");
-  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA224", false);
+  return CalculatorFunctionsGeneral::innerHashString(theCommands, input, output, "SHA224", false);
 }
 
-bool CalculatorFunctionsGeneral::innerShaX
-(Calculator& theCommands, const Expression& input, Expression& output, const std::string& shaId, bool verbose)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerShaX");
+bool CalculatorFunctionsGeneral::innerRIPEMD160OfString
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha224OfString");
+  return CalculatorFunctionsGeneral::innerHashString(theCommands, input, output, "RIPEMD160", false);
+}
+
+bool CalculatorFunctionsGeneral::innerHashString
+(Calculator& theCommands, const Expression& input, Expression& output, const std::string& hashId, bool verbose)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerHashString");
   if (!input.IsOfType<std::string>())
     return false;
   List<unsigned char> theBitStream;
@@ -232,26 +238,29 @@ bool CalculatorFunctionsGeneral::innerShaX
   { out << "<br>Input: " << inputString;
     out << "<br>Base64 conversion: " << Crypto::ConvertStringToBase64(theBitStream);
   }
+  List<unsigned char> hashUChar;
   List<uint32_t> theSha1Uint;
-  List<unsigned char> theSha1Uchar;
-  std::string theSha1base64string;
-  if (shaId == "SHA1")
-    Crypto::computeSha1(inputString, theSha1Uint);
-  else if (shaId == "SHA256")
-    Crypto::computeSha256(inputString, theSha1Uint);
-  else if (shaId == "SHA224")
-    Crypto::computeSha224(inputString, theSha1Uint);
-  Crypto::ConvertUint32ToUcharBigendian(theSha1Uint, theSha1Uchar);
-  theSha1base64string = Crypto::ConvertStringToBase64(theSha1Uchar);
+  if (hashId == "SHA1" || hashId == "SHA256" || hashId == "SHA224")
+  { if (hashId == "SHA1")
+      Crypto::computeSha1(inputString, theSha1Uint);
+    else if (hashId == "SHA256")
+      Crypto::computeSha256(inputString, theSha1Uint);
+    else if (hashId == "SHA224")
+      Crypto::computeSha224(inputString, theSha1Uint);
+    Crypto::ConvertUint32ToUcharBigendian(theSha1Uint, hashUChar);
+  } else if (hashId == "RIPEMD160")
+    Crypto::computeRIPEMD160(inputString, hashUChar);
   if (verbose)
-  { out << "<br>" << shaId << " in base64: " << theSha1base64string;
-    out << "<br>" << shaId << " hex: ";
+  { std::string theSha1base64string;
+    theSha1base64string = Crypto::ConvertStringToBase64(hashUChar);
+    out << "<br>" << hashId << " in base64: " << theSha1base64string;
+    out << "<br>" << hashId << " hex: ";
     for (int i = 0; i < theSha1Uint.size; i ++)
       out << std::hex << theSha1Uint[i];
     out << "<br>bitstream: ";
   }
-  for (int i = 0; i < theSha1Uchar.size; i ++)
-    out << theSha1Uchar[i];
+  for (int i = 0; i < hashUChar.size; i ++)
+    out << hashUChar[i];
   return output.AssignValue(out.str(), theCommands);
 }
 

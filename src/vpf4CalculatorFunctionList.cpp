@@ -527,6 +527,16 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorFunctionsGeneral::innerRSAencrypt",
    "RSAencrypt");
   this->AddOperationInnerHandler
+  ("RIPEMD160", CalculatorFunctionsGeneral::innerRIPEMD160OfString, "",
+   "RIPEMD160 hash function. See wikipedia page. ",
+   "ConvertStringToHex RIPEMD160(\"The quick brown fox jumps over the lazy dog\");\n"
+   "\"37f332f68db77bd9d7edd4969571ad671cf9dd3b\";\n"
+   "ConvertStringToHex RIPEMD160(\"The quick brown fox jumps over the lazy cog\");\n"
+   "\"132072df690933835eb8b6ad0b77e7b6f14acad7\";\n",
+   true, false,
+   "CalculatorFunctionsGeneral::innerSha256OfString",
+   "Sha256");
+  this->AddOperationInnerHandler
   ("Sha256", CalculatorFunctionsGeneral::innerSha256OfString, "",
    "Converts characters to a sequence of bits and computes the sha256 hash value of those bits. \
    Reference: Wikipedia. ",

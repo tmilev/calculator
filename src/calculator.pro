@@ -68,7 +68,8 @@ SOURCES += \
     vpf6_38LaTeXRoutines.cpp \
     databasemongo.cpp \
     database_mongo_calculator.cpp \
-    vpfEllipticCurves.cpp
+    vpfEllipticCurves.cpp \
+    vpfCrypto_ripemd.cpp
 
 HEADERS += \
     webserver.h \

@@ -69,7 +69,8 @@ SOURCES += \
     databasemongo.cpp \
     database_mongo_calculator.cpp \
     vpfEllipticCurves.cpp \
-    vpfCrypto_ripemd.cpp
+    vpfCrypto_ripemd.cpp \
+    vpfCrypto_sha3.cpp
 
 HEADERS += \
     webserver.h \

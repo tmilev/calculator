@@ -67,6 +67,8 @@ public:
   static bool innerSha224OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha256OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRIPEMD160OfString(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSha3_256OfString(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerKeccak256OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha256OfStringVerbose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha1OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerHashString

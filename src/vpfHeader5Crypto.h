@@ -98,6 +98,8 @@ public:
   static bool VerifyJWTagainstKnownKeys
   (const std::string& inputToken, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   static void computeRIPEMD160(const std::string& input, List<unsigned char>& output);
+  static void computeSha3_256(const std::string& input, List<unsigned char>& output);
+  static void computeKeccak3_256(const std::string& input, List<unsigned char>& output);
 };
 
 class JSONWebToken

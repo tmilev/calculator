@@ -219,8 +219,20 @@ bool CalculatorFunctionsGeneral::innerSha224OfString
 
 bool CalculatorFunctionsGeneral::innerRIPEMD160OfString
 (Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha224OfString");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRIPEMD160OfString");
   return CalculatorFunctionsGeneral::innerHashString(theCommands, input, output, "RIPEMD160", false);
+}
+
+bool CalculatorFunctionsGeneral::innerSha3_256OfString
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha3_256OfString");
+  return CalculatorFunctionsGeneral::innerHashString(theCommands, input, output, "SHA3_256", false);
+}
+
+bool CalculatorFunctionsGeneral::innerKeccak256OfString
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerKeccak256OfString");
+  return CalculatorFunctionsGeneral::innerHashString(theCommands, input, output, "KECCAK256", false);
 }
 
 bool CalculatorFunctionsGeneral::innerHashString
@@ -250,6 +262,10 @@ bool CalculatorFunctionsGeneral::innerHashString
     Crypto::ConvertUint32ToUcharBigendian(theSha1Uint, hashUChar);
   } else if (hashId == "RIPEMD160")
     Crypto::computeRIPEMD160(inputString, hashUChar);
+  else if (hashId == "SHA3_256")
+    Crypto::computeSha3_256(inputString, hashUChar);
+  else if (hashId == "KECCAK256")
+    Crypto::computeKeccak3_256(inputString, hashUChar);
   if (verbose)
   { std::string theSha1base64string;
     theSha1base64string = Crypto::ConvertStringToBase64(hashUChar);

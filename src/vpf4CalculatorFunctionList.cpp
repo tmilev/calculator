@@ -527,15 +527,44 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorFunctionsGeneral::innerRSAencrypt",
    "RSAencrypt");
   this->AddOperationInnerHandler
-  ("RIPEMD160", CalculatorFunctionsGeneral::innerRIPEMD160OfString, "",
-   "RIPEMD160 hash function. See wikipedia page. ",
+  ("Ripemd160", CalculatorFunctionsGeneral::innerRIPEMD160OfString, "",
+   "Ripemd160 hash function. See wikipedia page. ",
    "ConvertStringToHex RIPEMD160(\"The quick brown fox jumps over the lazy dog\");\n"
    "\"37f332f68db77bd9d7edd4969571ad671cf9dd3b\";\n"
    "ConvertStringToHex RIPEMD160(\"The quick brown fox jumps over the lazy cog\");\n"
    "\"132072df690933835eb8b6ad0b77e7b6f14acad7\";\n",
    true, false,
-   "CalculatorFunctionsGeneral::innerSha256OfString",
-   "Sha256");
+   "CalculatorFunctionsGeneral::innerRIPEMD160OfString",
+   "Ripemd160");
+  this->AddOperationInnerHandler
+  ("ShaThree256", CalculatorFunctionsGeneral::innerSha3_256OfString, "",
+   "SHA3 of input string, 256 bit version. See the wikipedia page on SHA3. ",
+   "ConvertStringToHex ShaThree256(\"abc\");\n"
+   "\"3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532\";\n"
+   "ConvertStringToHex ShaThree256(\"\");\n"
+   "\"a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a\";\n"
+   "ConvertStringToHex ShaThree256(\"testing\");\n"
+   "\"7f5979fb78f082e8b1c676635db8795c4ac6faba03525fb708cb5fd68fd40c5e\";\n"
+   "ConvertStringToHex Keccak256(\"testing\");\n"
+   "\"5f16f4c7f149ac4f9510d9cf8cf384038ad348b3bcdc01915f95de12df9d1b02\";\n",
+   true, false,
+   "CalculatorFunctionsGeneral::innerSha3_256OfString",
+   "ShaThree256");
+  this->AddOperationInnerHandler
+  ("Keccak256", CalculatorFunctionsGeneral::innerKeccak256OfString, "",
+   "Keccak256 of input string, 256 bit version. This is ``non-stardard sha3'' "
+   "and is different from the sha3. See the wikipedia page on SHA3/Keccak. ",
+   "ConvertStringToHex ShaThree256(\"abc\");\n"
+   "\"3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532\";\n"
+   "ConvertStringToHex ShaThree256(\"\");\n"
+   "\"a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a\";\n"
+   "ConvertStringToHex ShaThree256(\"testing\");\n"
+   "\"7f5979fb78f082e8b1c676635db8795c4ac6faba03525fb708cb5fd68fd40c5e\";\n"
+   "ConvertStringToHex Keccak256(\"testing\");\n"
+   "\"5f16f4c7f149ac4f9510d9cf8cf384038ad348b3bcdc01915f95de12df9d1b02\";\n",
+   true, false,
+   "CalculatorFunctionsGeneral::innerKeccak256OfString",
+   "Keccak256");
   this->AddOperationInnerHandler
   ("Sha256", CalculatorFunctionsGeneral::innerSha256OfString, "",
    "Converts characters to a sequence of bits and computes the sha256 hash value of those bits. \

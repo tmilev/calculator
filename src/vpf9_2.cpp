@@ -131,6 +131,7 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
 }
 
 std::string DrawOperations::typeCircleAtVector = "circleAtVector";
+std::string DrawOperations::typePath = "path";
 std::string DrawOperations::typeSegment = "segment";
 std::string DrawOperations::typeSegment2DFixed = "segment2DFixed";
 std::string DrawOperations::typeTextAtVector = "text";
@@ -147,14 +148,20 @@ std::string DrawOperations::fieldPenStyle = "penStyle";
 std::string DrawOperations::fieldText = "text";
 std::string DrawOperations::fieldLabels = "labels";
 std::string DrawOperations::fieldLineWidth = "lineWidth";
+std::string DrawOperations::fieldFrameId = "frameId";
+std::string DrawOperations::fieldFrameIndex = "frameIndex";
 
 void DrawOperations::drawCircleAtVectorBufferRational
-(const Vector<Rational>& input, const std::string& color, double radius)
+(const Vector<Rational>& input, const std::string& color, double radius, const std::string& frameId, int frameIndex)
 { JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeCircleAtVector;
   theOperation[DrawOperations::fieldLocation] = input;
   theOperation[DrawOperations::fieldRadius] = radius;
   theOperation[DrawOperations::fieldColor] = color;
+  if (frameId != "")
+  { theOperation[DrawOperations::fieldFrameId] = frameId;
+    theOperation[DrawOperations::fieldFrameIndex] = frameIndex;
+  }
   //theOperation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
   this->theOperations.AddOnTop(theOperation);
 }
@@ -173,6 +180,20 @@ void DrawOperations::drawCircleAtVectorBufferDouble
 void DrawOperations::drawLineBetweenTwoVectorsBufferRational
 (const Vector<Rational>& vector1, const Vector<Rational>& vector2, const std::string& color, double lineWidth)
 { this->drawLineBetweenTwoVectorsBufferDouble(vector1.GetVectorDouble(), vector2.GetVectorDouble(), color, lineWidth);
+}
+
+void DrawOperations::drawPath
+(const Vectors<Rational>& theVectors, const std::string& color, double lineWidth, const std::string& frameId, int frameIndex)
+{ JSData theOperation;
+  theOperation[DrawOperations::fieldOperation] = DrawOperations::typePath;
+  theOperation[DrawOperations::fieldPoints] = theVectors;
+  theOperation[DrawOperations::fieldFrameId] = frameId;
+  theOperation[DrawOperations::fieldFrameIndex] = frameIndex;
+  if (color != "")
+    theOperation[DrawOperations::fieldColor] = color;
+  if (lineWidth != 1)
+    theOperation[DrawOperations::fieldLineWidth] = lineWidth;
+  this->theOperations.AddOnTop(theOperation);
 }
 
 void DrawOperations::drawLineBetweenTwoVectorsBufferDouble

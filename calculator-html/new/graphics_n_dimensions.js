@@ -69,6 +69,13 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
     numberOfFrames: 20,
     screenGoal: [],
     screenStart: [],
+    frameStarted: false
+  };
+  this.animation = {
+    currentFrameIndex: - 1,
+    numberOfFrames: - 1,
+    timeoutHandle: null,
+    frameLength: 300
   };
   this.canvas = null;
   this.widthHTML = this.canvasContainer.width;
@@ -80,8 +87,7 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   
   collectionGraphicsNDimension[this.idCanvas] = this;
   this.clickTolerance = 5;
-  this.frameStarted = false;
-  this.textShift = [-3, -4];
+  this.textShift = [- 3, - 4];
 }
 
 GraphicsNDimensions.prototype.initVectors = function(inputVectors) {
@@ -111,7 +117,7 @@ function toStringVector(vector) {
 
 GraphicsNDimensions.prototype.writeInfo = function() {
   var result = "";
-  result += `<br>Mouse position: (${this.mousePositionScreen.join(", ")})`;
+  result += `<br>Mouse position: ${toStringVector(this.mousePositionScreen)}`;
   result += `<br>Selected index: ${this.selectedBasisIndex}`;
   if (this.selectedBasisIndex >= 0) {
     result += `: ${toStringVector(this.basisCircles[this.selectedBasisIndex])}`;
@@ -184,7 +190,7 @@ GraphicsNDimensions.prototype.drawStandardEiBasis = function(color) {
   }
 }
 
-GraphicsNDimensions.prototype.drawCircle = function(position, color, radius) {
+GraphicsNDimensions.prototype.drawCircle = function(position, color, radius, frameId, frameIndex) {
   if (radius === undefined) {
     radius = 3;
   }
@@ -195,7 +201,9 @@ GraphicsNDimensions.prototype.drawCircle = function(position, color, radius) {
     this.idCanvas, {
       location: position,
       colorFill: color,
-      radius: radius
+      radius: radius, 
+      frameId: frameId,
+      frameIndex: frameIndex
   }));
 }
 
@@ -209,6 +217,21 @@ GraphicsNDimensions.prototype.drawLine = function(left, right, color) {
       right: right,
       lineWidth: 1,
       colorLine: color
+    }
+  ));
+}
+
+GraphicsNDimensions.prototype.drawPath = function(points, color, lineWidth, frameId, frameIndex) {
+  if (color === undefined) {
+    color = "black";
+  }
+  this.drawOperations.push(new DrawPath(
+    this.idCanvas, {
+      points: points,
+      lineWidth: lineWidth,
+      colorLine: color,
+      frameId: frameId,
+      frameIndex: frameIndex
     }
   ));
 }
@@ -229,7 +252,6 @@ GraphicsNDimensions.prototype.drawHighlightGroup = function(points, labels, colo
       radius: radius
     }
   ));
-
 }
 
 GraphicsNDimensions.prototype.drawText = function(location, text, color) {
@@ -291,6 +313,15 @@ GraphicsNDimensions.prototype.startProjectionPlaneUser = function () {
   this.animateChangeProjectionPlaneUser();
 }
 
+GraphicsNDimensions.prototype.registerFrameIndex = function(frameIndex) {
+  if (typeof frameIndex !== "number") {
+    return;
+  }
+  if (this.animation.numberOfFrames < frameIndex) {
+    this.animation.numberOfFrames = frameIndex;
+  }
+}
+
 GraphicsNDimensions.prototype.animateChangeProjectionPlaneUser = function() {
   this.animationBasisChange.frameCount ++;
   var frameCount = this.animationBasisChange.frameCount;
@@ -320,7 +351,6 @@ function DrawHighlights(inputOwnerId, inputData) {
   this.labels = inputData.labels;
   this.radius = inputData.radius;
 }
-
 
 DrawHighlights.prototype.computeProjections = function () {
   var owner = collectionGraphicsNDimension[this.ownerId];
@@ -353,6 +383,34 @@ DrawHighlights.prototype.drawNoFinish = function () {
     );
     canvas.stroke();
   }
+}
+
+function DrawPath(inputOwnerId, inputData) {
+  this.ownerId = inputOwnerId;
+  this.points = inputData.points;
+  this.lineWidth = inputData.lineWidth;
+  this.colorLine = inputData.colorLine;
+  if (inputData.frameId !== "" && inputData.frameId !== null && inputData.frameId !== undefined) {
+    this.frameId = inputData.frameId;
+    this.frameIndex = inputData.frameIndex;
+    collectionGraphicsNDimension[this.ownerId].registerFrameIndex(this.frameIndex);
+  }
+}
+
+DrawPath.prototype.drawNoFinish = function() {
+  var owner = collectionGraphicsNDimension[this.ownerId];
+  var canvas = owner.canvas;
+  canvas.beginPath();
+  canvas.strokeStyle = this.colorLine;
+  canvas.lineWidth = this.lineWidth;
+  var vector = [];
+  owner.computeScreenCoordinates(this.points[0], vector);
+  canvas.moveTo(vector[0], vector[1]);
+  for (var counterPoints = 1; counterPoints < this.points.length; counterPoints ++) {
+    owner.computeScreenCoordinates(this.points[counterPoints], vector);
+    canvas.lineTo(vector[0], vector[1]);    
+  }
+  canvas.stroke();
 }
 
 function DrawSegmentBetweenTwoVectors(inputOwnerId, inputData) {
@@ -409,6 +467,11 @@ function DrawCircleAtVector(inputOwnerId, inputData) {
   this.locationScreenCoordinates = [];
   this.colorFill = inputData.colorFill;
   this.radius = inputData.radius;
+  if (inputData.frameId !== undefined && inputData.frameId !== null) {
+    this.frameId = inputData.frameId;
+    this.frameIndex = inputData.frameIndex;
+    collectionGraphicsNDimension[this.ownerId].registerFrameIndex(this.frameIndex);
+  }
 }
 
 DrawCircleAtVector.prototype.drawNoFinish = function() {
@@ -444,10 +507,10 @@ DrawTextAtVector.prototype.drawNoFinish = function() {
 }
 
 GraphicsNDimensions.prototype.drawAll = function() {
-  if (this.frameStarted) {
+  if (this.animationBasisChange.frameStarted) {
     return;
   }
-  this.frameStarted = true;
+  this.animationBasisChange.frameStarted = true;
   if (this.canvas == null || this.canvas == undefined) {
     this.init();
   }
@@ -458,10 +521,16 @@ GraphicsNDimensions.prototype.drawAll = function() {
   //this.canvas.fillRect(0, 0, this.widthHtml, this.heightHtml);
   //this.canvas.stroke();
   this.writeInfo();
-  for (var counterOperation = 0; counterOperation < this.drawOperations.length; counterOperation ++) { 
-    this.drawOperations[counterOperation].drawNoFinish();
+  for (var counterOperation = 0; counterOperation < this.drawOperations.length; counterOperation ++) {
+    var currentOperation = this.drawOperations[counterOperation];
+    if (currentOperation.frameId !== undefined && currentOperation.frameId !== null) {
+      if (currentOperation.frameIndex !== this.animation.currentFrameIndex) {
+        continue;
+      }
+    }
+    currentOperation.drawNoFinish();
   }
-  this.frameStarted = false;
+  this.animationBasisChange.frameStarted = false;
 }
 
 GraphicsNDimensions.prototype.makeStandardBilinearForm = function () {
@@ -927,7 +996,7 @@ function testA3(idCanvas, idSpanInformation) {
     [[0 ,   0,  -1], [ 0,  1,  0]]
   ];
   theA3.drawStandardEiBasis("red");
-  theA3.drawText([1,0,0], "(1,0,0)");
+  theA3.drawText([1,0,0], "(1, 0, 0)");
   for (var counterLabel = 0; counterLabel < labeledVectors.length; counterLabel ++) {
     theA3.drawLine([0, 0, 0], labeledVectors[counterLabel], "green");
     //theA3.drawText(labeledVectors[counterLabel], `[${labeledVectors.join(', ')}]`);
@@ -945,10 +1014,19 @@ GraphicsNDimensions.prototype.initFromObject = function(input) {
   this.theBilinearForm = input.bilinearForm;
   this.screenBasis = input.screenBasis;
   this.basisCircles = input.draggablePoints;
+  if (input.frameLength !== undefined && input.frameLength !== null) {
+    this.animation.frameLength = input.frameLength;
+  }
   for (var i = 0; i < input.drawObjects.length; i ++) {
     var currentOperation = input.drawObjects[i];
     if (currentOperation.operation === "circleAtVector") {
-      this.drawCircle(currentOperation.location, currentOperation.color, currentOperation.radius);
+      this.drawCircle(
+        currentOperation.location, 
+        currentOperation.color, 
+        currentOperation.radius, 
+        currentOperation.frameId, 
+        currentOperation.frameIndex
+      );
     } else if (currentOperation.operation === "segment") {
       this.drawLine(currentOperation.points[0], currentOperation.points[1], currentOperation.color);
     } else if (currentOperation.operation === "highlightGroup") {
@@ -958,6 +1036,14 @@ GraphicsNDimensions.prototype.initFromObject = function(input) {
       );
     } else if (currentOperation.operation === "text") {
       this.drawText(currentOperation.location, currentOperation.text, currentOperation.color);
+    } else if (currentOperation.operation === "path") {
+      this.drawPath(
+        currentOperation.points, 
+        currentOperation.color, 
+        currentOperation.lineWidth, 
+        currentOperation.frameId, 
+        currentOperation.frameIndex
+      );
     }
   }
   this.graphicsUnit = input.graphicsUnit;
@@ -970,7 +1056,21 @@ GraphicsNDimensions.prototype.initFromObject = function(input) {
   if (input.heightHTML !== undefined && input.heightHTML !== null) {
     this.heightHTML = input.heightHTML;
   }
+  if (this.animation.numberOfFrames > 0) {
+    this.animation.timeoutHandle = setTimeout(this.animate.bind(this), 0);
+  } else {
+    this.drawAll();
+  }
+}
+
+GraphicsNDimensions.prototype.animate = function () {
+  clearTimeout(this.animation.timeoutHandle);
+  this.animation.currentFrameIndex ++;
+  if (this.animation.currentFrameIndex < 0 || this.animation.currentFrameIndex > this.animation.numberOfFrames) {
+    this.animation.currentFrameIndex = 0;
+  }
   this.drawAll();
+  this.animation.timeoutHandle = setTimeout(this.animate.bind(this), this.animation.frameLength);
 }
 
 function CreateGraphicsFromObject(input) {

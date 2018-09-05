@@ -25,6 +25,7 @@ public:
   double centerX;
   double centerY;
   double GraphicsUnit;
+  int frameLengthInMilliseconds;
   bool flagRotatingPreservingAngles;
   bool flagAnimatingMovingCoordSystem;
   bool flagIsPausedWhileAnimating;
@@ -123,14 +124,12 @@ public:
   void drawFilledShape
   (const List<Vector<double> >& theCorners, uint32_t thePenStyle, int ColorIndex, int fillColorIndex, double lineWidth);
   void drawLineBetweenTwoVectorsBufferDouble
-  (const Vector<double>& vector1, const Vector<double>& vector2, const std::string& color,
-   double lineWidth = 1);
-  void drawSegmentToFrame
-  (const std::string& frameId, const Vector<Rational>& r1,
-   const Vector<Rational>& r2,  const std::string& color, double lineWidth = 1);
+  (const Vector<double>& vector1, const Vector<double>& vector2, const std::string& color, double lineWidth = 1);
+  void drawPath
+  (const Vectors<Rational>& theVectors, const std::string& color, double lineWidth, const std::string& frameId, int frameIndex);
   void drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, const std::string& color, int fontSize);
   void drawTextAtVectorBufferDouble(const Vector<double>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
-  void drawCircleAtVectorBufferRational(const Vector<Rational>& input, const std::string& color, double radius);
+  void drawCircleAtVectorBufferRational(const Vector<Rational>& input, const std::string& color, double radius, const std::string& frameId = "", int frameIndex = - 1);
   void drawCircleAtVectorBufferDouble(const Vector<double>& input, const std::string& color, double radius);
   double getAngleFromXandY(double x, double y);
   void ScaleToUnitLength(Vector<double>& theRoot)
@@ -152,6 +151,7 @@ public:
   }
   void init();
   static std::string typeSegment;
+  static std::string typePath;
   static std::string typeSegment2DFixed;
   static std::string typeHighlightGroup;
   static std::string typeText;
@@ -169,6 +169,8 @@ public:
   static std::string fieldColor;
   static std::string fieldOperation;
   static std::string fieldLineWidth;
+  static std::string fieldFrameId;
+  static std::string fieldFrameIndex;
   static std::string fieldText;
   static std::string fieldLabels;
 };
@@ -255,12 +257,13 @@ public:
   (const Vector<Rational>& r1, const Vector<Rational>& r2, const std::string& color, double lineWidth = 1)
   { this->theBuffer.drawLineBetweenTwoVectorsBufferRational(r1, r2, color, lineWidth);
   }
-  void drawCircleAtVectorFrame
-  (const std::string& frameId, const Vector<Rational>& point, const std::string& color, double radius);
-  void drawSegmentToFrame
-  (const std::string& frameId, const Vector<Rational>& r1,
-   const Vector<Rational>& r2,  const std::string& color, double lineWidth = 1)
-  { this->theBuffer.drawSegmentToFrame(frameId, r1, r2, color, lineWidth);
+  void drawCircleAtVector
+  (const Vector<Rational>& point, const std::string& color, double radius, const std::string& frameId = "", int frameIndex = -1)
+  { this->theBuffer.drawCircleAtVectorBufferRational(point, color, radius, frameId, frameIndex);
+  }
+  void drawPath
+  (const Vectors<Rational>& theVectors,  const std::string& color, double lineWidth, const std::string& frameId = "", int frameIndex = - 1)
+  { this->theBuffer.drawPath(theVectors, color, lineWidth, frameId, frameIndex);
   }
   void drawLineBetweenTwoVectorsBufferDouble
   (const Vector<double>& r1, const Vector<double>& r2, const std::string& color, double lineWidth = 1)
@@ -268,7 +271,7 @@ public:
   }
   void drawTextAtVectorBufferRational(const Vector<Rational>& point, const std::string& inputText, const std::string& color);
   void drawTextAtVectorBufferDouble(const Vector<double>& point, const std::string& inputText, int textColor, int theTextStyle);
-  void drawCircleAtVectorBufferRational(const Vector<Rational>& point, const std::string& color, double radius);
+  void drawCircleAtVectorBufferRational(const Vector<Rational>& point, const std::string& color, double radius, const std::string& frameId = "", int frameIndex = -1);
   void drawCircleAtVectorBufferDouble(const Vector<double>& point, const std::string& color, double radius);
   void operator=(const DrawingVariables& other)
   { this->theDrawLineFunction = other.theDrawLineFunction;

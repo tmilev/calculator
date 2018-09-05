@@ -164,7 +164,7 @@ bool Calculator::innerAnimateLittelmannPaths(Calculator& theCommands, const Expr
     return output.MakeError("This function takes 2 arguments", theCommands);
   SemisimpleLieAlgebra* theSSowner = 0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (CalculatorConversions::innerSSLieAlgebra, input[1], theSSowner))
+       (CalculatorConversions::innerSSLieAlgebra, input[1], theSSowner))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   Vector<Rational> theWeight;
   Expression tempContext(theCommands);
@@ -243,25 +243,23 @@ std::string LittelmannPath::GenerateOrbitAndAnimate()
   Vectors<double> coxPlane;
   coxPlane.SetSize(2);
   this->owner->GetCoxeterPlane(coxPlane[0], coxPlane[1]);
-  DrawingVariables currentOps;
-  this->owner->DrawRootSystem(currentOps, true, true);
-  int numberOfFrames = theOrbit.size;
+  DrawingVariables animated, collapsed;
+  this->owner->DrawRootSystem(animated, true, true);
+  this->owner->DrawRootSystem(collapsed, true, true);
   for (int i = 0; i < theOrbit.size; i ++)
   { LittelmannPath& currentPath = theOrbit[i];
+    animated.drawPath(currentPath.Waypoints, "black", 1, this->owner->theDynkinType.ToString(), i);
+    collapsed.drawPath(currentPath.Waypoints, "black", 1);
     for (int j = 0; j < currentPath.Waypoints.size; j ++)
-    { if (j != currentPath.Waypoints.size - 1)
-      { currentOps.drawSegmentToFrame
-        (this->owner->theDynkinType.ToString(), currentPath.Waypoints[j],
-         currentPath.Waypoints[j + 1], "black", 1);
-      }
-      currentOps.drawCircleAtVectorFrame
-      (this->owner->theDynkinType.ToString(), currentPath.Waypoints[j], "purple", 3);
+    { animated.drawCircleAtVector
+      (currentPath.Waypoints[j], "purple", 3, this->owner->theDynkinType.ToString(), i);
+      collapsed.drawCircleAtVector(currentPath.Waypoints[j], "purple", 3);
     }
   }
   out << "<br>Animation of the Littelmann paths follows. ";
-   out << currentOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
+   out << animated.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
   out << "<br>Here are all Littelmann paths drawn simultaneously. ";
-  out << currentOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
+  out << collapsed.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
   out << "Littelmann paths in simple coordinates given in the order in which they are generated ("
   << theOrbit.size << " total):<br>";
   out << "<table>";
@@ -289,7 +287,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate()
     for (int j = 0; j < this->owner->GetDim(); j ++)
     { tempPath = lastPath;
       tempPath.ActByEalpha(j);
-      out << "<td> e_" << j+ 1 << "("
+      out << "<td> e_" << j + 1 << "("
       << lastPath.ToString() << ")=</td>" <<"<td>" << tempPath.ToString() << "</td>";
     }
     out << "</tr>";
@@ -378,15 +376,15 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
       tempMat *= currentElt.theCoeffs[j];
       currentOp += tempMat;
     }
-      std::stringstream tempStream3;
-      double timeAtStart1 = theGlobalVariables.GetElapsedSeconds();
-      tempStream3 << "Computing eigenspace corresponding to " << currentElt.ToString() << "...";
-      theReport.Report(tempStream3.str());
+    std::stringstream tempStream3;
+    double timeAtStart1 = theGlobalVariables.GetElapsedSeconds();
+    tempStream3 << "Computing eigenspace corresponding to " << currentElt.ToString() << "...";
+    theReport.Report(tempStream3.str());
     Matrix<coefficient> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->GetDim());
     currentOpMat.GetZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
-      tempStream3 << " done in " << theGlobalVariables.GetElapsedSeconds() - timeAtStart1 << " seconds. ";
-      theReport.Report(tempStream3.str());
+    tempStream3 << " done in " << theGlobalVariables.GetElapsedSeconds() - timeAtStart1 << " seconds. ";
+    theReport.Report(tempStream3.str());
     if (i == 0)
       theFinalEigenSpace = eigenSpacesPerSimpleGenerator[i];
     else
@@ -660,9 +658,9 @@ bool Calculator::innerPrintB3G2branchingIntermediate(Calculator& theCommands, co
   latexTable2 << "\\end{longtable}";
   out << "<br>" << timeReport.str() << "<br><br><br><b>Ready for LaTeX consumption:</b><br  >";
   out << latexTable2.str();
-  out <<"<br><br><br>";
+  out << "<br><br><br>";
   out << latexTable.str();
-  out <<"<br>";
+  out << "<br>";
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -943,7 +941,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
       }
     theG2B3Data.additionalMultipliers[k] = currentTensorEltEigen.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
     currentTensorEltEigen.ExtractElementUE(currentUEelt, *theMod.owner);
-    currentUEelt.HWTAAbilinearForm(currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, 1,0,0);
+    currentUEelt.HWTAAbilinearForm(currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, 1, 0, 0);
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -1208,7 +1206,7 @@ bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expressi
     return false;
   int theIndex = 0;
   if (!input.IsSmallInteger(&theIndex))
-    return output.MakeError("The argument of the Littelmann root operator is expected to be a small integer, instead you gave me"+ input.ToString(), theCommands);
+    return output.MakeError("The argument of the Littelmann root operator is expected to be a small integer, instead you gave me" + input.ToString(), theCommands);
   if (theIndex == 0)
     return output.MakeError("The index of the Littelmann root operator is expected to be non-zero", theCommands);
   return output.AssignValue(theIndex, theCommands);

@@ -115,6 +115,7 @@ std::string DrawingVariables::GetHtmlDiv(int theDimension)
   theData["draggablePoints"] = this->theBuffer.BasisToDrawCirclesAt;
   theData["bilinearForm"] = this->theBuffer.theBilinearForm;
   theData["graphicsUnit"] = this->theBuffer.GraphicsUnit;
+  theData["frameLength"] = this->theBuffer.frameLengthInMilliseconds;
   std::string drawObjects = "drawObjects";
   theData[drawObjects].type = JSData::JSarray;
   theData[drawObjects].list = this->theBuffer.theOperations;

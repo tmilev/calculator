@@ -163,7 +163,7 @@ void ProgressReport::Report(const std::string& theReport)
   }
   if (this->threadIndex == - 1)
     return;
-  if (theGlobalVariables.ProgressReportStringS[this->threadIndex].size >this->currentLevel)
+  if (theGlobalVariables.ProgressReportStringS[this->threadIndex].size > this->currentLevel)
   { theGlobalVariables.ProgressReportStringS[this->threadIndex][this->currentLevel] = theReport;
     theGlobalVariables.MakeReport();
   }
@@ -1251,8 +1251,8 @@ void DrawingVariables::drawTextAtVectorBufferDouble(const Vector<double>& point,
 }
 
 void DrawingVariables::drawCircleAtVectorBufferRational
-(const Vector<Rational>& point, const std::string& color, double radius)
-{ this->theBuffer.drawCircleAtVectorBufferRational(point, color, radius);
+(const Vector<Rational>& point, const std::string& color, double radius, const std::string& frameId, int frameIndex)
+{ this->theBuffer.drawCircleAtVectorBufferRational(point, color, radius, frameId, frameIndex);
 }
 
 void DrawingVariables::drawCircleAtVectorBufferDouble
@@ -6509,7 +6509,7 @@ void KLpolys::FindNextToExplore()
 
 bool KLpolys::IsMaxNonEplored(int index)
 { for (int i = this->LowestNonExplored; i < this->size; i ++)
-    if (!this->Explored[i]&& i != index)
+    if (!this->Explored[i] && i != index)
     { Vector<Rational> tempRoot;
       tempRoot = (*this)[i];
       tempRoot -= (*this)[index];
@@ -9025,7 +9025,7 @@ bool Cone::DrawMeProjective
           if (this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
             if (this->IsAnHonest1DEdgeAffine(i, j))
               theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-              (VerticesScaled[i] +coordCenter, VerticesScaled[j] + coordCenter, "black", 1);
+              (VerticesScaled[i] + coordCenter, VerticesScaled[j] + coordCenter, "black", 1);
   return true;
 }
 
@@ -9090,6 +9090,7 @@ void DrawOperations::initDimensions(int theDim)
   this->centerX = 300;
   this->centerY = 300;
   this->GraphicsUnit = DrawOperations::GraphicsUnitDefault;
+  this->frameLengthInMilliseconds = 500;
 }
 
 int DrawOperations::GetDimFirstDimensionDependentOperation()
@@ -9662,10 +9663,10 @@ bool Lattice::GetInternalPointInConeForSomeFundamentalDomain(Vector<Rational>& o
     return false;
   Rational maxCoord = coordsInBasis[0];
   if (maxCoord < 0)
-    maxCoord = -maxCoord;
-  for (int i = 0; i <coordsInBasis.size; i ++)
-  { Rational tempRat = (coordsInBasis[i] < 0) ? -coordsInBasis[i] : coordsInBasis[i];
-    if (tempRat>maxCoord)
+    maxCoord = - maxCoord;
+  for (int i = 0; i < coordsInBasis.size; i ++)
+  { Rational tempRat = (coordsInBasis[i] < 0) ? - coordsInBasis[i] : coordsInBasis[i];
+    if (tempRat > maxCoord)
       maxCoord = tempRat;
   }
   maxCoord+=1;
@@ -9674,7 +9675,7 @@ bool Lattice::GetInternalPointInConeForSomeFundamentalDomain(Vector<Rational>& o
 }
 
 void Cone::TranslateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector)
-{ if (theTranslationVector.size != this->GetDim()- 1)
+{ if (theTranslationVector.size != this->GetDim() - 1)
     crash << crash;
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->Normals.size; i ++)
@@ -9684,7 +9685,7 @@ void Cone::TranslateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslat
   }
   tempRoot = theTranslationVector;
   tempRoot.SetSize(theTranslationVector.size + 1);
-  *tempRoot.LastObject()= 0;
+  *tempRoot.LastObject() = 0;
   for (int i = 0; i < this->Vertices.size; i ++)
     if (!this->Vertices[i].LastObject()->IsEqualToZero())
     { Rational tempRat = *this->Vertices[i].LastObject();
@@ -10498,7 +10499,7 @@ bool ConeComplex::SplitChamber
       newMinusCone.Normals.AddOnTop(myDyingCone.Normals[i]);
   }
   newPlusCone.Normals.AddOnTop(killerNormal);
-  newMinusCone.Normals.AddOnTop(-killerNormal);
+  newMinusCone.Normals.AddOnTop(- killerNormal);
   newPlusCone.Vertices.AddListOnTop(ZeroVertices);
   newMinusCone.Vertices.AddListOnTop(ZeroVertices);
 /*  Cone tempCone;

@@ -87,37 +87,35 @@ Sha3::Sha3()
 { this->flagUseKeccak = false;
 }
 
-//
 // Define SHA3_USE_KECCAK to run "pure" Keccak, as opposed to SHA3.
 // The tests that this macro enables use the input and output from [Keccak]
 // (see the reference below). The used test vectors aren't correct for SHA3,
 // however, they are helpful to verify the implementation.
 // SHA3_USE_KECCAK only changes one line of code in Finalize.
-//
 
 static const uint64_t keccakf_rndc[24] = {
-    0x0000000000000001UL, 0x0000000000008082UL,
-    0x800000000000808aUL, 0x8000000080008000UL,
-    0x000000000000808bUL, 0x0000000080000001UL,
-    0x8000000080008081UL, 0x8000000000008009UL,
-    0x000000000000008aUL, 0x0000000000000088UL,
-    0x0000000080008009UL, 0x000000008000000aUL,
-    0x000000008000808bUL, 0x800000000000008bUL,
-    0x8000000000008089UL, 0x8000000000008003UL,
-    0x8000000000008002UL, 0x8000000000000080UL,
-    0x000000000000800aUL, 0x800000008000000aUL,
-    0x8000000080008081UL, 0x8000000000008080UL,
-    0x0000000080000001UL, 0x8000000080008008UL
+  0x0000000000000001UL, 0x0000000000008082UL,
+  0x800000000000808aUL, 0x8000000080008000UL,
+  0x000000000000808bUL, 0x0000000080000001UL,
+  0x8000000080008081UL, 0x8000000000008009UL,
+  0x000000000000008aUL, 0x0000000000000088UL,
+  0x0000000080008009UL, 0x000000008000000aUL,
+  0x000000008000808bUL, 0x800000000000008bUL,
+  0x8000000000008089UL, 0x8000000000008003UL,
+  0x8000000000008002UL, 0x8000000000000080UL,
+  0x000000000000800aUL, 0x800000008000000aUL,
+  0x8000000080008081UL, 0x8000000000008080UL,
+  0x0000000080000001UL, 0x8000000080008008UL
 };
 
-static const unsigned keccakf_rotc[24] = {
-    1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62,
-    18, 39, 61, 20, 44
+static const unsigned keccakf_rotc[24] =
+{ 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62,
+  18, 39, 61, 20, 44
 };
 
-static const unsigned keccakf_piln[24] = {
-    10, 7, 11, 17, 18, 3, 5, 16, 8, 21, 24, 4, 15, 23, 19, 13, 12, 2, 20,
-    14, 22, 9, 6, 1
+static const unsigned keccakf_piln[24] =
+{ 10, 7, 11, 17, 18, 3, 5, 16, 8, 21, 24, 4, 15, 23, 19, 13, 12, 2, 20,
+  14, 22, 9, 6, 1
 };
 
 /* generally called after SHA3_KECCAK_SPONGE_WORDS-ctx->capacityWords words
@@ -296,8 +294,7 @@ void Sha3::init()
 }
 
 void Sha3::update(const std::string& input)
-{
-    this->update(input.c_str(), input.size());
+{ this->update(input.c_str(), input.size());
 }
 
 void Sha3::update(List<unsigned char>& input)

@@ -34,6 +34,18 @@ function getToggleButton(address, label) {
   return result;
 }
 
+function convertStringToHtml(input) {
+  var result = "";
+  for (var counter = 0; counter < input.length; counter ++) {
+    if (input[counter] === '&') {
+      result += '&amp;';
+      continue;
+    }
+    result += input[counter];
+  }
+  return result;
+}
+
 function recordProgressStarted(progress, address, isPost, timeStarted) {
   if (progress === null || progress === undefined) {
     return;
@@ -59,7 +71,7 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
     addressSpreadOut = addressPassSplit.join("password= ");
   }
   if (!isPost) {
-    content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${addressSpreadOut}</a>`;
+    content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${convertStringToHtml(addressSpreadOut)}</a>`;
   } else {
     content += addressSpreadOut;
   }

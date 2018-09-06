@@ -267,6 +267,11 @@ function Page() {
         nameCookie: "fileName",
         nameURL: "fileName"
       }),
+      problemFileName: new StorageVariable({
+        name: "problemFileName",
+        nameCookie: "problemFileName",
+        nameURL: "problemFileName"
+      }),
       currentProblemId: new StorageVariable({
         name: "currentProblemId",
         nameLocalStorage: "currentProblemId",

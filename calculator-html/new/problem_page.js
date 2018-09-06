@@ -86,6 +86,10 @@ function Problem(problemData, inputParentIdURLed) {
 function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   var currentCourse = thePage.storage.currentCourse; 
   var exerciseType = currentCourse.exerciseType.getValue();
+  if (exerciseType === "" || exerciseType === null || exerciseType === undefined) {
+    exerciseType = "exerciseJSON";
+    currentCourse.exerciseType.setAndStore(exerciseType);
+  }
   var fileName = currentCourse.fileName.getValue();
   var topicList = currentCourse.topicList.getValue();
   var courseHome = currentCourse.courseHome.getValue();

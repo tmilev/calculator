@@ -81,10 +81,9 @@ std::string WebWorker::closeIndentTag(const std::string& theTag)
 }
 
 bool WebWorker::IsAllowedAsRequestCookie(const std::string& input)
-{ return input != "login" && input != "logout"
-  && input != WebAPI::calculatorChangePassword
-  && input != "changePasswordPage"
-  && input != "activateAccount";
+{ return
+  input != "login" && input != "logout" && input != WebAPI::calculatorChangePassword &&
+  input != "changePasswordPage" && input != "activateAccount";
 }
 
 std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
@@ -633,7 +632,7 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup
         break;
       case SSL_ERROR_ZERO_RETURN:
         if (commentsOnFailure != 0)
-          *commentsOnFailure <<"The TLS/SSL connection has been closed (possibly cleanly).  <br>";
+          *commentsOnFailure << "The TLS/SSL connection has been closed (possibly cleanly).  <br>";
         maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_WANT_READ:
@@ -838,7 +837,7 @@ void SSLdata::ClearErrorQueue
       return;
     }
     numErrors ++;
-    //if (i>0)
+    //if (i > 0)
     //{ if (commentsOnError!= 0)
     //  { *commentsOnError << i + 1 << " ssl errors so far. ";
     //  }
@@ -1229,7 +1228,7 @@ std::string WebWorker::ToStringMessageFullUnsafe(bool useHTML) const
   //  return "Message cannot be viewed when using SSL";
   std::stringstream out;
   out << this->ToStringMessageUnsafe(useHTML);
-  if (this->theMessageHeaderStrings.size >0)
+  if (this->theMessageHeaderStrings.size > 0)
   { out << "<hr>\nStrings extracted from message: ";
     for (int i = 0; i < this->theMessageHeaderStrings.size; i ++)
       out << "<br>" << this->theMessageHeaderStrings[i];
@@ -1568,6 +1567,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   /////////////////
   //doAttemptGoogleTokenLogin = false;
   ////////////////////////////
+  //stOutput << "DEBUG: Password: " << theUser.enteredPassword;
   bool changingPass =
   theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorChangePassword ||
   theGlobalVariables.userCalculatorRequestType == "activateAccount";
@@ -1610,8 +1610,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   { if (theUser.flagEnteredPassword || theUser.flagEnteredActivationToken)
       shouldDisplayMessage = true;
     if (theUser.flagEnteredAuthenticationToken)
-      if (theUser.enteredActivationToken != "0" &&
-          theUser.enteredActivationToken != "")
+      if (theUser.enteredActivationToken != "0" && theUser.enteredActivationToken != "")
         shouldDisplayMessage = true;
   }
   theUser.clearPasswordFromMemory();
@@ -3815,7 +3814,7 @@ std::string HtmlInterpretation::ModifyProblemReport()
     shouldProceed = theGlobalVariables.flagUsingSSLinCurrentConnection;
   if (!shouldProceed)
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
-  std::string mainInput=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
+  std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   std::string fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
   std::stringstream out;
   if (!FileOperations::FileExistsVirtualCustomizedReadOnly(fileName, &out))

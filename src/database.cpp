@@ -5,6 +5,7 @@
 #include "webserver.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
+#include "vpfWebAPI.h"
 
 ProjectInformationInstance ProjectInfoVpfDatabasecpp(__FILE__, "Database-related code. ");
 
@@ -1447,7 +1448,8 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
   }
   if (theGlobalVariables.userCalculatorRequestType == "changePassword" ||
       theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
-      theGlobalVariables.userCalculatorRequestType == "activateAccount" )
+      theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccount ||
+      theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccountJSON)
     if (userWrapper.enteredActivationToken != "")
     { if (userWrapper.actualActivationToken != "activated" &&
           userWrapper.actualActivationToken != "" &&
@@ -1523,7 +1525,7 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
   JSData theJS;
   theJS[DatabaseStrings::labelActivationToken] = HtmlRoutines::ConvertStringToURLString(theActivationToken, false);
   theJS[DatabaseStrings::labelUsername] = HtmlRoutines::ConvertStringToURLString(inputUserNameUnsafe, false);
-  theJS[DatabaseStrings::labelCalculatorRequest] = "activateAccount";
+  theJS[DatabaseStrings::labelCalculatorRequest] = WebAPI::calculatorActivateAccountJSON;
   theJS[DatabaseStrings::labelEmail] = HtmlRoutines::ConvertStringToURLString(inputEmailUnsafe, false);
   theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageActivateAccount;
   out << theGlobalVariables.DisplayNameExecutableApp

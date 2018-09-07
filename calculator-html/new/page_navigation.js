@@ -333,21 +333,7 @@ function Page() {
   }
   
   setCookie("useJSON", true, 300, false);
-  //////////////////////////////////////
-  //////////////////////////////////////
-  //Common page initializations
-  //////////////////////////////////////
-  //////////////////////////////////////
-  for (var page in this.pages) {
-    this.pages[page].container = document.getElementById(this.pages[page].id);
-    if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
-      var currentButton = document.getElementById(this.pages[page].menuButtonId);
-      currentButton.pageToSelect = page;
-      currentButton.addEventListener("click", function() {
-        thePage.selectPage(this.pageToSelect);
-      });
-    }
-  }
+  this.initMenuBar();
   //////////////////////////////////////
   //////////////////////////////////////
   //Initialize global variables
@@ -384,6 +370,19 @@ function Page() {
   this.setSwitches();
   document.getElementById("divPage").style.display = "";
   document.getElementById("divPage").className = "divPage";
+}
+
+Page.prototype.initMenuBar = function() {
+  for (var page in this.pages) {
+    this.pages[page].container = document.getElementById(this.pages[page].id);
+    if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
+      var currentButton = document.getElementById(this.pages[page].menuButtonId);
+      currentButton.pageToSelect = page;
+      currentButton.addEventListener("click", function() {
+        thePage.selectPage(this.pageToSelect);
+      });
+    }
+  }
 }
 
 Page.prototype.resetProblems = function() {

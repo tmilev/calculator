@@ -14,6 +14,8 @@ std::string WebAPI::calculatorOnePageJS = "/calculator-html/javascript_all_in_on
 std::string WebAPI::calculatorOnePageJSWithHash = "/calculator-html/javascript_all_in_one.js";
 std::string WebAPI::calculatorSetProblemData = "setProblemData";
 std::string WebAPI::calculatorChangePassword = "changePassword";
+std::string WebAPI::calculatorActivateAccount = "activateAccount";
+std::string WebAPI::calculatorActivateAccountJSON = "activateAccountJSON";
 std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
 
 std::string WebAPI::problemContent = "problemContent";
@@ -83,7 +85,8 @@ std::string WebWorker::closeIndentTag(const std::string& theTag)
 bool WebWorker::IsAllowedAsRequestCookie(const std::string& input)
 { return
   input != "login" && input != "logout" && input != WebAPI::calculatorChangePassword &&
-  input != "changePasswordPage" && input != "activateAccount";
+  input != "changePasswordPage" && input != WebAPI::calculatorActivateAccount &&
+  input != WebAPI::calculatorActivateAccountJSON;
 }
 
 std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
@@ -1570,7 +1573,8 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   //stOutput << "DEBUG: Password: " << theUser.enteredPassword;
   bool changingPass =
   theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorChangePassword ||
-  theGlobalVariables.userCalculatorRequestType == "activateAccount";
+  theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccount ||
+  theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccountJSON;
   if (changingPass)
     theUser.enteredAuthenticationToken = "";
   if (doAttemptGoogleTokenLogin)
@@ -2922,16 +2926,14 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   std::string claimedEmail =
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
   out << "<input type =\"hidden\" id =\"activationToken\" value =\""
-  << claimedActivationToken
-  << "\">";
+  << claimedActivationToken << "\">";
   if (claimedActivationToken == "" || claimedEmail == "")
   { out << "Activation token or email is empty";
     return out.str();
   }
   std::string actualEmailActivationToken, usernameAssociatedWithToken;
   if (theGlobalVariables.userDefault.email == claimedEmail)
-  { out << "\n<b><span style =\"color:green\">Email "
-    << claimedEmail << " already updated. </span></b>";
+  { out << "\n<b><span style =\"color:green\">Email " << claimedEmail << " already updated. </span></b>";
     return out.str();
   }
   JSData findEmail, emailInfo, findUser, userInfo;
@@ -3013,7 +3015,7 @@ std::string WebWorker::GetChangePasswordPage()
     << "<b><span style =\"color:orange\">"
     << "To fully activate your account, "
     << "please choose a password.</span></b></td></tr>";
-  if (theGlobalVariables.userCalculatorRequestType == "activateAccount")
+  if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccount)
     out << "<tr><td colspan =\"2\">" << WebWorker::GetChangePasswordPagePartOne(doShowPasswordChangeField) << "</td></tr>";
   else
   { if (theGlobalVariables.userDefault.actualActivationToken != "" &&
@@ -3401,6 +3403,14 @@ int WebWorker::ProcessCalculator()
   stOutput << HtmlInterpretation::GetNavigationPanelWithGenerationTime()
   << out.str();
 
+  return 0;
+}
+
+int WebWorker::ProcessActivateAccount()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessActivateAccount");
+  this->SetHeaderOKNoContentLength("");
+  bool doShowDetails = true;
+  stOutput << WebWorker::GetChangePasswordPagePartOne(doShowDetails);
   return 0;
 }
 
@@ -4036,7 +4046,8 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
   if (!theUser.flagEnteredPassword)
     return false;
   if (theGlobalVariables.userCalculatorRequestType == "changePassword" ||
-      theGlobalVariables.userCalculatorRequestType == "activateAccount")
+      theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccount ||
+      theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccountJSON)
     return false;
   std::stringstream redirectedAddress;
   if (this->addressComputed == theGlobalVariables.DisplayNameExecutable)
@@ -4303,8 +4314,10 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorChangePassword)
     return this->ProcessChangePassword();
   else if (theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
-           theGlobalVariables.userCalculatorRequestType == "activateAccount")
+           theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccount)
     return this->ProcessChangePasswordPage();
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccountJSON)
+    return this->ProcessActivateAccount();
   else if (theGlobalVariables.userCalculatorRequestType == "signUp")
     return this->ProcessSignUP();
   else if (theGlobalVariables.userCalculatorRequestType == "signUpPage")

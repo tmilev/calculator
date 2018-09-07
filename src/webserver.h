@@ -186,6 +186,7 @@ public:
   int ProcessDatabaseModifyEntry();
   int ProcessAccounts();
   int ProcessAccountsJSON();
+  int ProcessActivateAccount();
   int ProcessScores();
   int ProcessAbout();
   int ProcessApp(bool appendBuildHash);
@@ -261,6 +262,7 @@ public:
   void SendAllBytesHttpSSL();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   std::string GetJavaScriptIndicatorBuiltInServer();
+
   std::string GetChangePasswordPage();
   std::string GetChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField);
   std::string GetClonePageResult(bool useJSON);

@@ -1178,12 +1178,12 @@ bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& output
       if (positionInCloseTag >= lengthCloseTag)
       { positionInCloseTag = 0;
         charReader = "";
-        numTags--;
+        numTags --;
 //        stOutput << "<br>numTags: " << numTags;
         if (numTags < 0)
           return false;
         if (numTags == 0)
-        { this->positionInString++;
+        { this->positionInString ++;
           tagWasClosed = true;
           break;
         }
@@ -2460,7 +2460,7 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA
         else
           tempI = multiplicityChange;
         MathRoutines::NChooseK(tempN, tempI, tempInt);
-        ComputationalBufferCoefficient *= (tempInt);
+        ComputationalBufferCoefficient *= tempInt;
         tempN -= tempI;
       }
       tempFrac[GainingMultiplicityIndex].AddMultiplicity(TheBigBadIndexingSet.TotalMultiplicity() + oldMaxMultiplicity + 1, ElongationGainingMultiplicityIndex);
@@ -2511,7 +2511,7 @@ void PartFraction::ApplySzenesVergneFormulA
     ParallelComputing::SafePointDontCallMeFromDestructors();
     CoefficientBuffer.MultiplyBy(tempM, 1);
     this->GetNElongationPoly(startingVectors, theSelectedIndices[i], LargestElongation, theElongations[i], tempP, theDim);
-    CoefficientBuffer *= (tempP);
+    CoefficientBuffer *= tempP;
     tempFrac.ComputeIndicesNonZeroMults();
     output.AddMonomial(tempFrac, CoefficientBuffer);
   }
@@ -3004,7 +3004,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
       for (int i = 0; i <matLinComb.NumRows; i ++)
       { thePowers.MaxMultiplicities[i] = 0;
         if (matLinComb.elements[i][0].IsGreaterThanOrEqualTo(1) || matLinComb.elements[i][0].IsNegative())
-        { int tempI=matLinComb.elements[i][0].floorIfSmall();
+        { int tempI = matLinComb.elements[i][0].floorIfSmall();
           thePowersSigned[i] = tempI;
           if (tempI<0)
             thePowers.MaxMultiplicities[i] = this->TheObjects[this->IndicesNonZeroMults[i]].GetMultiplicityLargestElongation();
@@ -3294,10 +3294,10 @@ void PartFractions::MakeProgressReportSplittingMainPart()
 }
 
 void PartFractions::MakeProgressVPFcomputation()
-{ this->NumProcessedForVPFfractions++;
+{ this->NumProcessedForVPFfractions ++;
   if (theGlobalVariables.IndicatorStringOutputFunction == 0)
     return;
-  std::stringstream out2, out3;
+  std::stringstream out2;
   ProgressReport theReport;
   out2 << "Processed " << this->NumProcessedForVPFfractions << " out of "
   << this->NumberRelevantReducedFractions << " relevant fractions";
@@ -3417,7 +3417,7 @@ bool PartFractions::VerifyFileComputedContributions()
   std::filebuf* pbuf = PartFraction::TheBigDump.rdbuf();
   int tempSize = pbuf->pubseekoff(0, std::fstream::end);
   PartFraction::TheBigDump.seekp(tempSize);
-  return(tempSize>= tempI);
+  return(tempSize >= tempI);
 }
 
 void PartFractions::ComputeDebugString()

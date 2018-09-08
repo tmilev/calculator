@@ -2927,8 +2927,12 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
   out << "<input type =\"hidden\" id =\"activationToken\" value =\""
   << claimedActivationToken << "\">";
-  if (claimedActivationToken == "" || claimedEmail == "")
-  { out << "Activation token or email is empty";
+  if (claimedActivationToken == "")
+  { out << "Activation token is empty. ";
+    return out.str();
+  }
+  if (claimedEmail == "")
+  { out << "Activation email is empty. ";
     return out.str();
   }
   std::string actualEmailActivationToken, usernameAssociatedWithToken;
@@ -2939,7 +2943,8 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   JSData findEmail, emailInfo, findUser, userInfo;
   findEmail[DatabaseStrings::labelEmail] = claimedEmail;
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableEmailInfo, findEmail, emailInfo, &out, true))
-  { out << "\n<span style =\"color:red\"><b>Failed to fetch email activation token. </b></span>";
+  { out << "\n<span style =\"color:red\"><b>Failed to fetch email activation token for email: "
+    << claimedEmail << " </b></span>";
     return out.str();
   }
   usernameAssociatedWithToken = emailInfo[DatabaseStrings::labelUsernameAssociatedWithToken].string;

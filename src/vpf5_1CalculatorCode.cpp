@@ -143,7 +143,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 //  std::string tempS;
 //  std::stringstream out;
 //  for (int i = 0; i <BaseVariables.CardinalitySelection; i ++)
-//  { int tempI=BaseVariables.elements[i];
+//  { int tempI = BaseVariables.elements[i];
 //    matX.elements[tempI][0].ToString(tempS);
 //    out << tempS <<"(";
 //    if (tempI<matA.NumCols)

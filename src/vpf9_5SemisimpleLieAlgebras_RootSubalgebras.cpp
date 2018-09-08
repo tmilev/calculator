@@ -691,13 +691,13 @@ bool rootSubalgebra::CheckForSmallRelations(coneRelation& theRel, Vectors<Ration
     if (!this->NilradicalKmods.selected[i])
       for (int j = i + 1; j < this->Modules.size; j ++)
         if (!this->NilradicalKmods.selected[j])
-        { weightSum=(this->HighestWeightsPrimalSimple[i]);
-          weightSum +=(this->HighestWeightsPrimalSimple[j]);
+        { weightSum = this->HighestWeightsPrimalSimple[i];
+          weightSum += this->HighestWeightsPrimalSimple[j];
           if (!weightSum.IsEqualToZero())
           { theRel.BetaCoeffs.SetSize(0);
             theRel.Betas.SetSize(0);
-            tempI= nilradicalRoots.GetIndex(weightSum);
-            if (tempI!= - 1)
+            tempI = nilradicalRoots.GetIndex(weightSum);
+            if (tempI != - 1)
             { tempBool = true;
               theRel.BetaCoeffs.SetSize(1);
               theRel.Betas.SetSize(1);
@@ -728,15 +728,15 @@ void rootSubalgebra::MatrixToRelation( coneRelation& output, Matrix<Rational> & 
   output.BetaCoeffs.size = 0;  output.Betas.size = 0;
   Vector<Rational> tempRoot; tempRoot.SetSize(theDimension);
   matX.ScaleToIntegralForMinRationalHeightNoSignChange();
-  if (matA.NumCols !=matX.NumRows)
+  if (matA.NumCols != matX.NumRows)
     crash << crash;
-  for (int i = 0; i <matA.NumCols; i ++)
+  for (int i = 0; i < matA.NumCols; i ++)
     if (!matX.elements[i][0].IsEqualToZero())
     { for (int j = 0; j < theDimension; j ++)
         tempRoot.TheObjects[j].Assign(matA.elements[j][i]);
-      if (!(matX.elements[i][0].DenShort ==1))
+      if (!(matX.elements[i][0].DenShort == 1))
         crash << crash;
-      if (i <NilradicalRoots.size)
+      if (i < NilradicalRoots.size)
       { output.Betas.AddOnTop(tempRoot);
         output.BetaCoeffs.AddOnTop(matX.elements[i][0]);
       } else
@@ -783,7 +783,7 @@ void rootSubalgebra::ExtractRelations
           theRel.Betas.size = 0;
           theRel.BetaCoeffs.size = 0;
           for (int j = 0; j < tempSel.CardinalitySelection; j ++)
-            theRel.Alphas[j] =(Ksingular[tempSel.elements[j]]);
+            theRel.Alphas[j] = Ksingular[tempSel.elements[j]];
           if (theRel.IsStrictlyWeaklyProhibiting(*this, NilradicalRoots, owner, indexInOwner))
             break;
         }

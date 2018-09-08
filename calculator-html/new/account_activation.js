@@ -34,8 +34,10 @@ function submitDoActivateAccount() {
   thePage.storage.user.activationToken.setAndStore("");
   var userName = thePage.storage.user.name.getValue();
   var theURL = "";
+  var email = thePage.storage.user.email.getValue();
   theURL += `${pathnames.calculatorAPI}?request=activateAccountJSON&`;
   theURL += `activationToken=${encodeURIComponent(activationToken)}&`;
+  theURL += `email=${encodeURIComponent(email)}&`;
   theURL += `newPassword=${encodeURIComponent(inputNewPassword)}&`;
   theURL += `reenteredPassword=${encodeURIComponent(inputNewPasswordReentered)}&`;
   theURL += `username=${encodeURIComponent(userName)}&`;

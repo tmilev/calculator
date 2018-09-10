@@ -583,7 +583,7 @@ static void XorWithIv(uint8_t* buf, uint8_t* Iv)
   }
 }
 
-void AES_CBC_encrypt_buffer(struct AES_ctx *ctx,uint8_t* buf, uint32_t length)
+void AES_CBC_encrypt_buffer(struct AES_ctx *ctx, uint8_t* buf, uint32_t length)
 {
   uintptr_t i;
   uint8_t *Iv = ctx->Iv;
@@ -685,11 +685,12 @@ bool Crypto::encryptAES_CBC_256
       newInput.push_back((char) numberOfBytesToPad);
     return Crypto::encryptAES_CBC_256(inputKey, newInput, output, commentsOnFailure);
   }
-  return false;
-  //AES_ctx context;
-  //uint8_t localInitializationVector[]
-  //AES_init_ctx_iv(&context,(uint8_t *) inputKey.c_str(), localInitializationVector);
-  //AES_CBC_encrypt_buffer(
-  //for (unsigned i = 0; i < inputPlainText.size(); i ++)
-  //  output[i] = inputPlainText[i];
+  AES_ctx context;
+  uint8_t localInitializationVector[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+  AES_init_ctx_iv(&context, (uint8_t *) inputKey.c_str(), localInitializationVector);
+  output.SetSize(inputPlainText.size());
+  for (unsigned i = 0; i < inputPlainText.size(); i ++)
+    output[i] = inputPlainText[i];
+  AES_CBC_encrypt_buffer(&context, (uint8_t *) output.TheObjects, output.size);
+  return true;
 }

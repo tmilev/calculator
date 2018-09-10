@@ -59,7 +59,7 @@ std::string GraphEdge::ToString(FormatExpressions* theFormat) const
 { (void) theFormat; //avoid unused parameter warning, portable.
   std::stringstream out;
   out << this->vStart + 1 << "->" << this->vEnd+ 1;
-  if (this->label!= "")
+  if (this->label != "")
     out << "(" << this->label << ")";
   return out.str();
 }

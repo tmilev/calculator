@@ -2285,7 +2285,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } /*else if (this->IsMatrixGivenType<Rational>())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseLatex = true;
-    contextFormat.GetElement().flagUseHTML= false;
+    contextFormat.GetElement().flagUseHTML = false;
     Matrix<Rational> theMat;
     this->IsMatrixGivenType(0, 0, &theMat);
     out << theMat.ToString(&contextFormat.GetElement());
@@ -2299,7 +2299,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsMatrixGivenType<AlgebraicNumber>())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseLatex = true;
-    contextFormat.GetElement().flagUseHTML= false;
+    contextFormat.GetElement().flagUseHTML = false;
     Matrix<AlgebraicNumber> theMat;
     this->IsMatrixGivenType(0, 0, &theMat);
     out << theMat.ToString(&contextFormat.GetElement());

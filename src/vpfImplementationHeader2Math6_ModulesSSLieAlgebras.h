@@ -443,7 +443,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
   Vectors<coefficient> tempSpace1, tempSpace2;
   MemorySaving<Vectors<coefficient> > tempEigenVects;
   Vectors<coefficient>& theFinalEigenSpace = (outputEigenSpace == 0) ? tempEigenVects.GetElement() : *outputEigenSpace;
-  //WeylGroup& theWeyL= this->theAlgebra.theWeyl;
+  //WeylGroup& theWeyL = this->theAlgebra.theWeyl;
   theFinalEigenSpace.MakeEiBasis(this->GetDim());
   for (int i = 0; i < splittingParSelectedInLevi.CardinalitySelection; i ++)
   { int theGenIndex = splittingParSelectedInLevi.elements[i] + this->GetOwner().GetRank() + this->GetOwner().GetNumPosRoots();

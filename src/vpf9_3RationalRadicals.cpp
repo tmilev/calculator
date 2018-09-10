@@ -833,7 +833,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
   MatrixTensor<Rational> leftMat, rightMat;
 //  FormatExpressions tempformat;
 //  tempformat.flagUseLatex = true;
-//  tempformat.flagUseHTML= false;
+//  tempformat.flagUseHTML = false;
   this->owner->GetMultiplicationBy(*this, leftMat);
   this->owner->GetMultiplicationBy(other, rightMat);
   leftMat.CheckConsistencyGrandMaster();

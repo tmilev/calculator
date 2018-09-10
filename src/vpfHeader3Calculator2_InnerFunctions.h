@@ -6,6 +6,14 @@
 
 static ProjectInformationInstance ProjectInfoVpf6_2Header(__FILE__, "Header, calculator built-in functions. ");
 
+
+class CalculatorFunctionsCrypto
+{
+public:
+  static bool innerAES_CBC_256_Encode(Calculator& theCommands, const Expression& input, Expression& output);
+
+};
+
 class CalculatorFunctionsGeneral
 {
 public:
@@ -56,6 +64,7 @@ public:
   static bool innerConvertStringToHex(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAppendDoubleSha256Check(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerConvertBase58ToHex(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConvertHexToBase58(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConvertIntegerUnsignedToBase58(Calculator& theCommands, const Expression& input, Expression& output);

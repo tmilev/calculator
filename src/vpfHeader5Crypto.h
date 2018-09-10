@@ -100,6 +100,12 @@ public:
   static void computeRIPEMD160(const std::string& input, List<unsigned char>& output);
   static void computeSha3_256(const std::string& input, List<unsigned char>& output);
   static void computeKeccak3_256(const std::string& input, List<unsigned char>& output);
+  static bool encryptAES_CBC_256
+  (const std::string& inputKey, const std::string& inputPlainText, List<unsigned char>& output, std::stringstream *commentsOnFailure);
+  static bool encryptAES_CBC_256
+  (const std::string& inputKey, const std::string& inputPlainText, std::string& output, std::stringstream *commentsOnFailure);
+  static void decodeAES_CBC_256
+  (const std::string& inputCipherText, const std::string& inputKey, List<unsigned char>& output);
 };
 
 class JSONWebToken

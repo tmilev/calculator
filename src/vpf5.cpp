@@ -361,7 +361,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
   MemorySaving<Vectors<coefficient> > tempEigenVects;
   Vectors<coefficient>& theFinalEigenSpace = (outputEigenSpace == 0) ? tempEigenVects.GetElement() : *outputEigenSpace;
   theFinalEigenSpace.SetSize(0);
-//  WeylGroup& theWeyL= this->theAlgebra.theWeyl;
+//  WeylGroup& theWeyL = this->theAlgebra.theWeyl;
   if (InvertedLeviInSmall.CardinalitySelection == 0)
     theFinalEigenSpace.MakeEiBasis(this->GetDim());
   for (int i = 0; i < InvertedLeviInSmall.CardinalitySelection; i ++)

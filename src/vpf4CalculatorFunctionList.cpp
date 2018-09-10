@@ -411,6 +411,17 @@ void Calculator::initPredefinedInnerFunctions()
    true, false,
    "CalculatorFunctionsGeneral::innerConvertBase58ToHex",
    "ConvertBase58ToHex");
+  this->AddOperationInnerHandler
+  ("AESCBCEncode", CalculatorFunctionsCrypto::innerAES_CBC_256_Encode, "",
+   "Encodes using aes 256 bit in cbc (cipher block chain) mode. "
+   "First argument = plain text. Second argument = key. Reference: NIST SP 800-38A.",
+   "text = ConvertHexToString \"6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710\";\n"
+   "key = ConvertHexToString \"603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4\";\n"
+   "ConvertStringToHex AESCBCEncode(key, text);\n"
+   "\"f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n",
+   true, false,
+   "CalculatorFunctionsCrypto::innerAES_CBC_256_Encode",
+   "AESCBCEncode");
 
   this->AddOperationInnerHandler
   ("AppendDoubleSha256Check", CalculatorFunctionsGeneral::innerAppendDoubleSha256Check, "",

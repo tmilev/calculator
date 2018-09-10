@@ -547,7 +547,7 @@ std::string CalculatorConversions::innerStringFromSemisimpleSubalgebras(Semisimp
   Expression tempE;
   FormatExpressions theFormat;
   CalculatorConversions::innerStoreSemisimpleSubalgebras(tempCalculator, input, tempE);
-  theFormat.flagUseHTML= true;
+  theFormat.flagUseHTML = true;
   return tempE.ToString(&theFormat);
 }
 

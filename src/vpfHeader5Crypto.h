@@ -104,8 +104,12 @@ public:
   (const std::string& inputKey, const std::string& inputPlainText, List<unsigned char>& output, std::stringstream *commentsOnFailure);
   static bool encryptAES_CBC_256
   (const std::string& inputKey, const std::string& inputPlainText, std::string& output, std::stringstream *commentsOnFailure);
-  static void decryptAES_CBC_256
-  (const std::string& inputCipherText, const std::string& inputKey, List<unsigned char>& output);
+  static bool decryptAES_CBC_256
+  (const std::string& inputKey, const std::string& inputCipherText, List<unsigned char>& output,
+   std::stringstream* commentsOnFailure);
+  static bool decryptAES_CBC_256
+  (const std::string& inputKey, const std::string& inputCipherText, std::string& output,
+   std::stringstream* commentsOnFailure);
 };
 
 class JSONWebToken

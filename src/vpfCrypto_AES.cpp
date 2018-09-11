@@ -599,7 +599,7 @@ void AES_CBC_encrypt_buffer(struct AES_ctx *ctx, uint8_t* buf, uint32_t length)
   memcpy(ctx->Iv, Iv, AES_BLOCKLEN);
 }
 
-void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf,  uint32_t length)
+void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length)
 {
   uintptr_t i;
   uint8_t storeNextIv[AES_BLOCKLEN];
@@ -656,6 +656,45 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length)
 
 #endif // #if defined(CTR) && (CTR == 1)
 
+
+bool Crypto::decryptAES_CBC_256
+(const std::string& inputKey, const std::string& inputCipherText, List<unsigned char>& output,
+ std::stringstream* commentsOnFailure)
+{ output.SetSize(inputCipherText.size());
+  if (inputKey.size() != 32)
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "Input key: " << inputKey << " is of length: "
+      << inputKey.size() << " (expected: 32). ";
+    return false;
+  }
+  int remainderMod16 = inputCipherText.size() % 16;
+  if (remainderMod16 > 0)
+  { int numberOfBytesToPad = 16 - remainderMod16;
+    std::string newInput;
+    newInput.reserve(inputCipherText.size() + numberOfBytesToPad);
+    newInput = inputCipherText;
+    for (int i = 0; i < numberOfBytesToPad; i ++)
+      newInput.push_back(0);
+    return Crypto::decryptAES_CBC_256(inputKey, inputCipherText, output, commentsOnFailure);
+  }
+
+  AES_ctx context;
+  AES_init_ctx(&context, (uint8_t*) inputKey.c_str());
+  for (unsigned i = 0; i < inputCipherText.size(); i ++)
+    output[i] = inputCipherText[i];
+  AES_CBC_decrypt_buffer(&context, (uint8_t*) output.TheObjects, output.size);
+  return true;
+}
+
+bool Crypto::decryptAES_CBC_256
+(const std::string& inputKey, const std::string& inputCipherText, std::string& output,
+ std::stringstream* commentsOnFailure)
+{ List<unsigned char> outputList;
+  if (!Crypto::decryptAES_CBC_256(inputKey, inputCipherText, outputList, commentsOnFailure))
+    return false;
+  output.assign((char *) outputList.TheObjects, outputList.size);
+  return true;
+}
 
 bool Crypto::encryptAES_CBC_256
 (const std::string& inputKey, const std::string& inputPlainText, std::string& output, std::stringstream* commentsOnFailure)

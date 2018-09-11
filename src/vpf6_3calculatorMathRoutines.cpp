@@ -334,6 +334,17 @@ bool CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt(Calculator& theCommands
 { MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt");
   if (input.size() != 3)
     return theCommands << "AES decrypt function expects two arguments: key and plain text. ";
+  std::string text, key;
+  if (!input[1].IsOfType<std::string>(&key))
+    return false;
+  if (!input[2].IsOfType<std::string>(&text))
+    return false;
+  std::string cipherText;
+  std::stringstream comments;
+  bool result = Crypto::decryptAES_CBC_256(key, text, cipherText, &comments);
+  if (!result)
+    return theCommands << comments.str();
+  return output.AssignValue(cipherText, theCommands);
 
 }
 

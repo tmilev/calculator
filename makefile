@@ -151,6 +151,7 @@ vpfCharacters.cpp \
 vpfCrypto.cpp \
 vpfCrypto_sha3.cpp \
 vpfCrypto_ripemd.cpp \
+vpfCrypto_AES.cpp \
 vpfFiniteFields.cpp \
 vpfGraph.cpp \
 vpfJson.cpp \

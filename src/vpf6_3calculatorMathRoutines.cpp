@@ -348,7 +348,7 @@ bool CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt(Calculator& theCommands
     return false;
   std::string cipherText;
   std::stringstream comments;
-  bool result = Crypto::encryptAES_CBC_256(text, key, cipherText, &comments);
+  bool result = Crypto::encryptAES_CBC_256(key, text, cipherText, &comments);
   if (!result)
     return theCommands << comments.str();
   return output.AssignValue(cipherText, theCommands);

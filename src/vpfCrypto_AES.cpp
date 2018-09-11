@@ -1,97 +1,3 @@
-#include "vpfHeader5Crypto.h"
-
-ProjectInformationInstance projectInfoCrypto_AES_implementation(__FILE__, "AES implementation.");
-
-#ifndef _AES_H_
-#define _AES_H_
-
-#include <stdint.h>
-
-// #define the macros below to 1/0 to enable/disable the mode of operation.
-//
-// CBC enables AES encryption in CBC-mode of operation.
-// CTR enables encryption in counter-mode.
-// ECB enables the basic ECB 16-byte block algorithm. All can be enabled simultaneously.
-
-// The #ifndef-guard allows it to be configured before #include'ing or at compile time.
-#ifndef CBC
-  #define CBC 1
-#endif
-
-#ifndef ECB
-  #define ECB 1
-#endif
-
-#ifndef CTR
-  #define CTR 1
-#endif
-
-
-//#define AES128 1
-//#define AES192 1
-#define AES256 1
-
-#define AES_BLOCKLEN 16 //Block length in bytes AES is 128b block only
-
-#if defined(AES256) && (AES256 == 1)
-    #define AES_KEYLEN 32
-    #define AES_keyExpSize 240
-#elif defined(AES192) && (AES192 == 1)
-    #define AES_KEYLEN 24
-    #define AES_keyExpSize 208
-#else
-    #define AES_KEYLEN 16   // Key length in bytes
-    #define AES_keyExpSize 176
-#endif
-
-struct AES_ctx
-{
-  uint8_t RoundKey[AES_keyExpSize];
-#if (defined(CBC) && (CBC == 1)) || (defined(CTR) && (CTR == 1))
-  uint8_t Iv[AES_BLOCKLEN];
-#endif
-};
-
-void AES_init_ctx(struct AES_ctx* ctx, const uint8_t* key);
-#if (defined(CBC) && (CBC == 1)) || (defined(CTR) && (CTR == 1))
-void AES_init_ctx_iv(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv);
-void AES_ctx_set_iv(struct AES_ctx* ctx, const uint8_t* iv);
-#endif
-
-#if defined(ECB) && (ECB == 1)
-// buffer size is exactly AES_BLOCKLEN bytes;
-// you need only AES_init_ctx as IV is not used in ECB
-// NB: ECB is considered insecure for most uses
-void AES_ECB_encrypt(struct AES_ctx* ctx, uint8_t* buf);
-void AES_ECB_decrypt(struct AES_ctx* ctx, uint8_t* buf);
-
-#endif // #if defined(ECB) && (ECB == !)
-
-
-#if defined(CBC) && (CBC == 1)
-// buffer size MUST be mutile of AES_BLOCKLEN;
-// Suggest https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
-// NOTES: you need to set IV in ctx via AES_init_ctx_iv() or AES_ctx_set_iv()
-//        no IV should ever be reused with the same key
-void AES_CBC_encrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
-void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
-
-#endif // #if defined(CBC) && (CBC == 1)
-
-
-#if defined(CTR) && (CTR == 1)
-
-// Same function for encrypting as for decrypting.
-// IV is incremented for every block, and used after encryption as XOR-compliment for output
-// Suggesting https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
-// NOTES: you need to set IV in ctx with AES_init_ctx_iv() or AES_ctx_set_iv()
-//        no IV should ever be reused with the same key
-void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length);
-
-#endif // #if defined(CTR) && (CTR == 1)
-
-
-#endif //_AES_H_
 /*
 
 This is an implementation of the AES algorithm, specifically ECB, CTR and CBC mode.
@@ -124,49 +30,128 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
         For AES192/256 the key size is proportionally larger.
 
 */
+#include "vpfHeader5Crypto.h"
 
+ProjectInformationInstance projectInfoCrypto_AES_implementation(__FILE__, "AES implementation.");
 
+class AESContext
+{
+public:
+  static const int blockLength = 16;
+  static const int maxKeyExpSize = 240;
 
-/*****************************************************************************/
-/* Defines:                                                                  */
-/*****************************************************************************/
-// The number of columns comprising a state in AES. This is a constant in AES. Value=4
-#define Nb 4
+  static const uint8_t sbox[256];
+  static const uint8_t rsbox[256];
 
-#if defined(AES256) && (AES256 == 1)
-    #define Nk 8
-    #define Nr 14
-#elif defined(AES192) && (AES192 == 1)
-    #define Nk 6
-    #define Nr 12
-#else
-    #define Nk 4        // The number of 32 bit words in a key.
-    #define Nr 10       // The number of rounds in AES Cipher.
-#endif
+  // CBC enables AES encryption in CBC-mode of operation.
+  // CTR enables encryption in counter-mode.
+  // ECB enables the basic ECB 16-byte block algorithm. All can be enabled simultaneously.
+  bool flagUseCBC;
+  bool flagUseECB;
+  bool flagUseCTR;
+  int numBits; // NumBits can be 256, 192 or 128.
+  int keyExpSize;
+  int keyLength;
+  uint8_t RoundKey[maxKeyExpSize];
+  uint8_t initializationVector[blockLength];
 
-// jcallan@github points out that declaring Multiply as a function
-// reduces code size considerably with the Keil ARM compiler.
-// See this link for more information: https://github.com/kokke/tiny-AES-C/pull/3
-#ifndef MULTIPLY_AS_A_FUNCTION
-  #define MULTIPLY_AS_A_FUNCTION 0
-#endif
+  // The number of columns comprising a state in AES. This is a constant in AES. Value=4
+  const static unsigned Nb = 4;
+  unsigned Nk; // The number of 32 bit words in a key.
+  unsigned Nr; // The number of rounds in AES Cipher.
 
+  /*****************************************************************************/
+  /* Private variables:                                                        */
+  /*****************************************************************************/
+  // state - array holding the intermediate results during decryption.
+  typedef uint8_t state_t[4][4];
 
+  AESContext();
+  void SetNumBits(int inputNumBits);
+  // buffer size MUST be multiple of blockLength;
+  // Suggest https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
+  // NOTES: you need to set IV in ctx via AES_init_ctx_iv() or AES_ctx_set_iv()
+  //        no IV should ever be reused with the same key
 
+  void AES_init_ctx(const uint8_t* key);
+  void AES_init_ctx_iv(const uint8_t* key, const uint8_t* iv);
+  void AES_ctx_set_iv(const uint8_t* iv);
+  void AES_ECB_encrypt(uint8_t* buf);
+  void AES_ECB_decrypt(uint8_t* buf);
+  void AES_CBC_encrypt_buffer(uint8_t* buf, uint32_t length);
+  void AES_CBC_decrypt_buffer(uint8_t* buf, uint32_t length);
 
-/*****************************************************************************/
-/* Private variables:                                                        */
-/*****************************************************************************/
-// state - array holding the intermediate results during decryption.
-typedef uint8_t state_t[4][4];
+  // Same function for encrypting as for decrypting.
+  // IV is incremented for every block, and used after encryption as XOR-compliment for output
+  // Suggesting https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
+  // NOTES: you need to set IV in ctx with AES_init_ctx_iv() or AES_ctx_set_iv()
+  //        no IV should ever be reused with the same key
+  void AES_CTR_xcrypt_buffer(uint8_t* buf, uint32_t length);
+  static inline uint8_t xtime(uint8_t x)
+  { return ((x << 1) ^ (((x >> 7) & 1) * 0x1b));
+  }
+  // Multiply is used to multiply numbers in the field GF(2^8)
+  // Note: The last call to xtime() is unneeded, but often ends up generating a smaller binary
+  //       The compiler seems to be able to vectorize the operation better this way.
+  //       See https://github.com/kokke/tiny-AES-c/pull/34
+  static inline uint8_t Multiply(uint8_t x, uint8_t y)
+  { return
+    (((y & 1) * x) ^
+    ((y>>1 & 1) * xtime(x)) ^
+    ((y>>2 & 1) * xtime(xtime(x))) ^
+    ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^
+    ((y>>4 & 1) * xtime(xtime(xtime(xtime(x)))))); /* this last call to xtime() can be omitted */
+  }
+  static void MixColumns(state_t* state);
+  void AddRoundKey(uint8_t round, state_t* state,uint8_t* RoundKey);
+  static void SubBytes(state_t* state);
+  static void ShiftRows(state_t* state);
+  static void InvMixColumns(state_t* state);
+  static void InvSubBytes(state_t* state);
+  static void InvShiftRows(state_t* state);
+  void Cipher(state_t* state, uint8_t* RoundKey);
+  void InvCipher(state_t* state,uint8_t* RoundKey);
+  void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key);
+};
 
+void AESContext::SetNumBits(int inputNumBits)
+{ this->numBits = inputNumBits;
+  if (this->numBits != 256 && this->numBits != 192 && this->numBits != 128)
+    crash << "Bad number of bits: " << inputNumBits << " for AES cipher. Allowed inputs: 256, 192, 128. " << crash;
+  if (this->numBits == 256)
+  { this->keyExpSize = 240;
+    this->keyLength = 32;
+    this->Nk = 8; // The number of 32 bit words in a key.
+    this->Nr = 14;// The number of rounds in AES Cipher.
+  }
+  if (this->numBits == 192)
+  { this->keyExpSize = 208;
+    this->keyLength = 24;
+    this->Nk = 6;
+    this->Nr = 12;
+  }
+  if (this->numBits == 128)
+  { this->keyExpSize = 176;
+    this->keyLength = 16;
+    this->Nk = 4;
+    this->Nr = 10;
+  }
+}
 
+AESContext::AESContext()
+{ this->flagUseCBC = true;
+  this->flagUseCTR = false;
+  this->flagUseECB = false;
+  for (int i = 0; i < 16; i ++)
+    this->initializationVector[i] = i;
+  this->SetNumBits(256);
+}
 
 // The lookup-tables are marked const so they can be placed in read-only storage instead of RAM
 // The numbers below can be computed dynamically trading ROM for RAM -
 // This can be useful in (embedded) bootloader applications, where ROM is often limited.
-static const uint8_t sbox[256] = {
-  //0     1    2      3     4    5     6     7      8    9     A      B    C     D     E     F
+const uint8_t AESContext::sbox[256] =
+{ //0     1    2      3     4    5     6     7      8    9     A      B    C     D     E     F
   0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
   0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
   0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15,
@@ -184,8 +169,8 @@ static const uint8_t sbox[256] = {
   0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
   0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16 };
 
-static const uint8_t rsbox[256] = {
-  0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
+const uint8_t AESContext::rsbox[256] =
+{ 0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
   0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
   0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e,
   0x08, 0x2e, 0xa1, 0x66, 0x28, 0xd9, 0x24, 0xb2, 0x76, 0x5b, 0xa2, 0x49, 0x6d, 0x8b, 0xd1, 0x25,
@@ -204,8 +189,7 @@ static const uint8_t rsbox[256] = {
 
 // The round constant word array, Rcon[i], contains the values given by
 // x to the power (i-1) being powers of x (x is denoted as {02}) in the field GF(2^8)
-static const uint8_t Rcon[11] = {
-  0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
+static const uint8_t Rcon[11] = { 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
 
 /*
  * Jordan Goulder points out in PR #12 (https://github.com/kokke/tiny-AES-C/pull/12),
@@ -217,92 +201,61 @@ static const uint8_t Rcon[11] = {
  *  up to rcon[8] for AES-192, up to rcon[7] for AES-256. rcon[0] is not used in AES algorithm."
  */
 
-
-/*****************************************************************************/
-/* Private functions:                                                        */
-/*****************************************************************************/
-/*
 static uint8_t getSBoxValue(uint8_t num)
-{
-  return sbox[num];
+{ return AESContext::sbox[num];
 }
-*/
-#define getSBoxValue(num) (sbox[(num)])
-/*
+
 static uint8_t getSBoxInvert(uint8_t num)
-{
-  return rsbox[num];
+{ return AESContext::rsbox[num];
 }
-*/
-#define getSBoxInvert(num) (rsbox[(num)])
 
 // This function produces Nb(Nr+1) round keys. The round keys are used in each round to decrypt the states.
-static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
-{
-  unsigned i, j, k;
+void AESContext::KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
+{ unsigned i, j, k;
   uint8_t tempa[4]; // Used for the column/row operations
 
   // The first round key is the key itself.
   for (i = 0; i < Nk; ++i)
-  {
-    RoundKey[(i * 4) + 0] = Key[(i * 4) + 0];
+  { RoundKey[(i * 4) + 0] = Key[(i * 4) + 0];
     RoundKey[(i * 4) + 1] = Key[(i * 4) + 1];
     RoundKey[(i * 4) + 2] = Key[(i * 4) + 2];
     RoundKey[(i * 4) + 3] = Key[(i * 4) + 3];
   }
 
   // All other round keys are found from the previous round keys.
-  for (i = Nk; i < Nb * (Nr + 1); ++i)
-  {
-    {
-      k = (i - 1) * 4;
-      tempa[0]=RoundKey[k + 0];
-      tempa[1]=RoundKey[k + 1];
-      tempa[2]=RoundKey[k + 2];
-      tempa[3]=RoundKey[k + 3];
-
-    }
-
+  for (i = Nk; i < Nb * (Nr + 1); ++ i)
+  { k = (i - 1) * 4;
+    tempa[0] = RoundKey[k + 0];
+    tempa[1] = RoundKey[k + 1];
+    tempa[2] = RoundKey[k + 2];
+    tempa[3] = RoundKey[k + 3];
     if (i % Nk == 0)
-    {
-      // This function shifts the 4 bytes in a word to the left once.
-      // [a0,a1,a2,a3] becomes [a1,a2,a3,a0]
-
+    { // This function shifts the 4 bytes in a word to the left once.
+      // [a0, a1, a2, a3] becomes [a1, a2, a3, a0]
       // Function RotWord()
-      {
-        k = tempa[0];
-        tempa[0] = tempa[1];
-        tempa[1] = tempa[2];
-        tempa[2] = tempa[3];
-        tempa[3] = k;
-      }
-
+      k = tempa[0];
+      tempa[0] = tempa[1];
+      tempa[1] = tempa[2];
+      tempa[2] = tempa[3];
+      tempa[3] = k;
       // SubWord() is a function that takes a four-byte input word and
       // applies the S-box to each of the four bytes to produce an output word.
-
       // Function Subword()
-      {
-        tempa[0] = getSBoxValue(tempa[0]);
+      tempa[0] = getSBoxValue(tempa[0]);
+      tempa[1] = getSBoxValue(tempa[1]);
+      tempa[2] = getSBoxValue(tempa[2]);
+      tempa[3] = getSBoxValue(tempa[3]);
+      tempa[0] = tempa[0] ^ Rcon[i / Nk];
+    }
+    if (this->numBits == 256)
+      if (i % Nk == 4)
+      { tempa[0] = getSBoxValue(tempa[0]);
         tempa[1] = getSBoxValue(tempa[1]);
         tempa[2] = getSBoxValue(tempa[2]);
         tempa[3] = getSBoxValue(tempa[3]);
       }
-
-      tempa[0] = tempa[0] ^ Rcon[i/Nk];
-    }
-#if defined(AES256) && (AES256 == 1)
-    if (i % Nk == 4)
-    {
-      // Function Subword()
-      {
-        tempa[0] = getSBoxValue(tempa[0]);
-        tempa[1] = getSBoxValue(tempa[1]);
-        tempa[2] = getSBoxValue(tempa[2]);
-        tempa[3] = getSBoxValue(tempa[3]);
-      }
-    }
-#endif
-    j = i * 4; k=(i - Nk) * 4;
+    j = i * 4;
+    k = (i - Nk) * 4;
     RoundKey[j + 0] = RoundKey[k + 0] ^ tempa[0];
     RoundKey[j + 1] = RoundKey[k + 1] ^ tempa[1];
     RoundKey[j + 2] = RoundKey[k + 2] ^ tempa[2];
@@ -310,73 +263,55 @@ static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
   }
 }
 
-void AES_init_ctx(struct AES_ctx* ctx, const uint8_t* key)
-{
-  KeyExpansion(ctx->RoundKey, key);
+void AESContext::AES_init_ctx(const uint8_t* key)
+{ KeyExpansion(this->RoundKey, key);
 }
-#if (defined(CBC) && (CBC == 1)) || (defined(CTR) && (CTR == 1))
-void AES_init_ctx_iv(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv)
-{
-  KeyExpansion(ctx->RoundKey, key);
-  memcpy (ctx->Iv, iv, AES_BLOCKLEN);
+
+void AESContext::AES_init_ctx_iv(const uint8_t* key, const uint8_t* iv)
+{ KeyExpansion(this->RoundKey, key);
+  memcpy(this->initializationVector, iv, this->blockLength);
 }
-void AES_ctx_set_iv(struct AES_ctx* ctx, const uint8_t* iv)
-{
-  memcpy (ctx->Iv, iv, AES_BLOCKLEN);
+
+void AESContext::AES_ctx_set_iv(const uint8_t* iv)
+{ memcpy(this->initializationVector, iv, this->blockLength);
 }
-#endif
 
 // This function adds the round key to state.
 // The round key is added to the state by an XOR function.
-static void AddRoundKey(uint8_t round,state_t* state,uint8_t* RoundKey)
-{
-  uint8_t i,j;
-  for (i = 0; i < 4; ++i)
-  {
-    for (j = 0; j < 4; ++j)
-    {
+void AESContext::AddRoundKey(uint8_t round, state_t* state, uint8_t* RoundKey)
+{ uint8_t i, j;
+  for (i = 0; i < 4; ++ i)
+    for (j = 0; j < 4; ++ j)
       (*state)[i][j] ^= RoundKey[(round * Nb * 4) + (i * Nb) + j];
-    }
-  }
 }
 
 // The SubBytes Function Substitutes the values in the
 // state matrix with values in an S-box.
-static void SubBytes(state_t* state)
-{
-  uint8_t i, j;
-  for (i = 0; i < 4; ++i)
-  {
-    for (j = 0; j < 4; ++j)
-    {
+void AESContext::SubBytes(state_t* state)
+{ uint8_t i, j;
+  for (i = 0; i < 4; ++ i)
+    for (j = 0; j < 4; ++ j)
       (*state)[j][i] = getSBoxValue((*state)[j][i]);
-    }
-  }
 }
 
 // The ShiftRows() function shifts the rows in the state to the left.
 // Each row is shifted with different offset.
 // Offset = Row number. So the first row is not shifted.
-static void ShiftRows(state_t* state)
-{
-  uint8_t temp;
-
+void AESContext::ShiftRows(state_t* state)
+{ uint8_t temp;
   // Rotate first row 1 columns to left
   temp           = (*state)[0][1];
   (*state)[0][1] = (*state)[1][1];
   (*state)[1][1] = (*state)[2][1];
   (*state)[2][1] = (*state)[3][1];
   (*state)[3][1] = temp;
-
   // Rotate second row 2 columns to left
   temp           = (*state)[0][2];
   (*state)[0][2] = (*state)[2][2];
   (*state)[2][2] = temp;
-
   temp           = (*state)[1][2];
   (*state)[1][2] = (*state)[3][2];
   (*state)[3][2] = temp;
-
   // Rotate third row 3 columns to left
   temp           = (*state)[0][3];
   (*state)[0][3] = (*state)[3][3];
@@ -385,64 +320,31 @@ static void ShiftRows(state_t* state)
   (*state)[1][3] = temp;
 }
 
-static uint8_t xtime(uint8_t x)
-{
-  return ((x<<1) ^ (((x>>7) & 1) * 0x1b));
-}
-
 // MixColumns function mixes the columns of the state matrix
-static void MixColumns(state_t* state)
-{
-  uint8_t i;
+void AESContext::MixColumns(state_t* state)
+{ uint8_t i;
   uint8_t Tmp, Tm, t;
   for (i = 0; i < 4; ++i)
-  {
-    t   = (*state)[i][0];
+  { t   = (*state)[i][0];
     Tmp = (*state)[i][0] ^ (*state)[i][1] ^ (*state)[i][2] ^ (*state)[i][3] ;
-    Tm  = (*state)[i][0] ^ (*state)[i][1] ; Tm = xtime(Tm);  (*state)[i][0] ^= Tm ^ Tmp ;
-    Tm  = (*state)[i][1] ^ (*state)[i][2] ; Tm = xtime(Tm);  (*state)[i][1] ^= Tm ^ Tmp ;
-    Tm  = (*state)[i][2] ^ (*state)[i][3] ; Tm = xtime(Tm);  (*state)[i][2] ^= Tm ^ Tmp ;
-    Tm  = (*state)[i][3] ^ t ;              Tm = xtime(Tm);  (*state)[i][3] ^= Tm ^ Tmp ;
+    Tm  = (*state)[i][0] ^ (*state)[i][1]; Tm = AESContext::xtime(Tm);  (*state)[i][0] ^= Tm ^ Tmp;
+    Tm  = (*state)[i][1] ^ (*state)[i][2]; Tm = AESContext::xtime(Tm);  (*state)[i][1] ^= Tm ^ Tmp;
+    Tm  = (*state)[i][2] ^ (*state)[i][3]; Tm = AESContext::xtime(Tm);  (*state)[i][2] ^= Tm ^ Tmp;
+    Tm  = (*state)[i][3] ^ t ;             Tm = AESContext::xtime(Tm);  (*state)[i][3] ^= Tm ^ Tmp;
   }
 }
-
-// Multiply is used to multiply numbers in the field GF(2^8)
-// Note: The last call to xtime() is unneeded, but often ends up generating a smaller binary
-//       The compiler seems to be able to vectorize the operation better this way.
-//       See https://github.com/kokke/tiny-AES-c/pull/34
-#if MULTIPLY_AS_A_FUNCTION
-static uint8_t Multiply(uint8_t x, uint8_t y)
-{
-  return (((y & 1) * x) ^
-       ((y>>1 & 1) * xtime(x)) ^
-       ((y>>2 & 1) * xtime(xtime(x))) ^
-       ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^
-       ((y>>4 & 1) * xtime(xtime(xtime(xtime(x)))))); /* this last call to xtime() can be omitted */
-  }
-#else
-#define Multiply(x, y)                                \
-      (  ((y & 1) * x) ^                              \
-      ((y>>1 & 1) * xtime(x)) ^                       \
-      ((y>>2 & 1) * xtime(xtime(x))) ^                \
-      ((y>>3 & 1) * xtime(xtime(xtime(x)))) ^         \
-      ((y>>4 & 1) * xtime(xtime(xtime(xtime(x))))))   \
-
-#endif
 
 // MixColumns function mixes the columns of the state matrix.
 // The method used to multiply may be difficult to understand for the inexperienced.
 // Please use the references to gain more information.
-static void InvMixColumns(state_t* state)
-{
-  int i;
+void AESContext::InvMixColumns(state_t* state)
+{ int i;
   uint8_t a, b, c, d;
   for (i = 0; i < 4; ++i)
-  {
-    a = (*state)[i][0];
+  { a = (*state)[i][0];
     b = (*state)[i][1];
     c = (*state)[i][2];
     d = (*state)[i][3];
-
     (*state)[i][0] = Multiply(a, 0x0e) ^ Multiply(b, 0x0b) ^ Multiply(c, 0x0d) ^ Multiply(d, 0x09);
     (*state)[i][1] = Multiply(a, 0x09) ^ Multiply(b, 0x0e) ^ Multiply(c, 0x0b) ^ Multiply(d, 0x0d);
     (*state)[i][2] = Multiply(a, 0x0d) ^ Multiply(b, 0x09) ^ Multiply(c, 0x0e) ^ Multiply(d, 0x0b);
@@ -453,38 +355,28 @@ static void InvMixColumns(state_t* state)
 
 // The SubBytes Function Substitutes the values in the
 // state matrix with values in an S-box.
-static void InvSubBytes(state_t* state)
-{
-  uint8_t i, j;
-  for (i = 0; i < 4; ++i)
-  {
-    for (j = 0; j < 4; ++j)
-    {
+void AESContext::InvSubBytes(state_t* state)
+{ uint8_t i, j;
+  for (i = 0; i < 4; ++ i)
+    for (j = 0; j < 4; ++ j)
       (*state)[j][i] = getSBoxInvert((*state)[j][i]);
-    }
-  }
 }
 
-static void InvShiftRows(state_t* state)
-{
-  uint8_t temp;
-
+void AESContext::InvShiftRows(state_t* state)
+{ uint8_t temp;
   // Rotate first row 1 columns to right
   temp = (*state)[3][1];
   (*state)[3][1] = (*state)[2][1];
   (*state)[2][1] = (*state)[1][1];
   (*state)[1][1] = (*state)[0][1];
   (*state)[0][1] = temp;
-
   // Rotate second row 2 columns to right
   temp = (*state)[0][2];
   (*state)[0][2] = (*state)[2][2];
   (*state)[2][2] = temp;
-
   temp = (*state)[1][2];
   (*state)[1][2] = (*state)[3][2];
   (*state)[3][2] = temp;
-
   // Rotate third row 3 columns to right
   temp = (*state)[0][3];
   (*state)[0][3] = (*state)[1][3];
@@ -493,51 +385,40 @@ static void InvShiftRows(state_t* state)
   (*state)[3][3] = temp;
 }
 
-
 // Cipher is the main function that encrypts the PlainText.
-static void Cipher(state_t* state, uint8_t* RoundKey)
-{
-  uint8_t round = 0;
-
+void AESContext::Cipher(state_t* state, uint8_t* RoundKey)
+{ uint8_t round = 0;
   // Add the First round key to the state before starting the rounds.
   AddRoundKey(0, state, RoundKey);
-
   // There will be Nr rounds.
   // The first Nr-1 rounds are identical.
   // These Nr-1 rounds are executed in the loop below.
-  for (round = 1; round < Nr; ++round)
-  {
-    SubBytes(state);
+  for (round = 1; round < this->Nr; ++ round)
+  { SubBytes(state);
     ShiftRows(state);
     MixColumns(state);
     AddRoundKey(round, state, RoundKey);
   }
-
   // The last round is given below.
   // The MixColumns function is not here in the last round.
   SubBytes(state);
   ShiftRows(state);
-  AddRoundKey(Nr, state, RoundKey);
+  AddRoundKey(this->Nr, state, RoundKey);
 }
 
-static void InvCipher(state_t* state,uint8_t* RoundKey)
-{
-  uint8_t round = 0;
-
+void AESContext::InvCipher(state_t* state, uint8_t* RoundKey)
+{ uint8_t round = 0;
   // Add the First round key to the state before starting the rounds.
   AddRoundKey(Nr, state, RoundKey);
-
   // There will be Nr rounds.
   // The first Nr-1 rounds are identical.
   // These Nr-1 rounds are executed in the loop below.
-  for (round = (Nr - 1); round > 0; --round)
-  {
-    InvShiftRows(state);
+  for (round = (Nr - 1); round > 0; -- round)
+  { InvShiftRows(state);
     InvSubBytes(state);
     AddRoundKey(round, state, RoundKey);
     InvMixColumns(state);
   }
-
   // The last round is given below.
   // The MixColumns function is not here in the last round.
   InvShiftRows(state);
@@ -545,117 +426,72 @@ static void InvCipher(state_t* state,uint8_t* RoundKey)
   AddRoundKey(0, state, RoundKey);
 }
 
-
-/*****************************************************************************/
-/* Public functions:                                                         */
-/*****************************************************************************/
-#if defined(ECB) && (ECB == 1)
-
-
-void AES_ECB_encrypt(struct AES_ctx *ctx, uint8_t* buf)
-{
-  // The next function call encrypts the PlainText with the Key using AES algorithm.
-  Cipher((state_t*)buf, ctx->RoundKey);
+void AESContext::AES_ECB_encrypt(uint8_t* buf)
+{ // The next function call encrypts the PlainText with the Key using AES algorithm.
+  Cipher((state_t*) buf, this->RoundKey);
 }
 
-void AES_ECB_decrypt(struct AES_ctx* ctx, uint8_t* buf)
-{
-  // The next function call decrypts the PlainText with the Key using AES algorithm.
-  InvCipher((state_t*)buf, ctx->RoundKey);
+void AESContext::AES_ECB_decrypt(uint8_t* buf)
+{ // The next function call decrypts the PlainText with the Key using AES algorithm.
+  InvCipher((state_t*) buf, this->RoundKey);
 }
-
-
-#endif // #if defined(ECB) && (ECB == 1)
-
-
-
-
-
-#if defined(CBC) && (CBC == 1)
-
 
 static void XorWithIv(uint8_t* buf, uint8_t* Iv)
-{
-  uint8_t i;
-  for (i = 0; i < AES_BLOCKLEN; ++i) // The block in AES is always 128bit no matter the key size
-  {
+{ uint8_t i;
+  for (i = 0; i < AESContext::blockLength; ++ i) // The block in AES is always 128bit no matter the key size
     buf[i] ^= Iv[i];
-  }
 }
 
-void AES_CBC_encrypt_buffer(struct AES_ctx *ctx, uint8_t* buf, uint32_t length)
-{
-  uintptr_t i;
-  uint8_t *Iv = ctx->Iv;
-  for (i = 0; i < length; i += AES_BLOCKLEN)
-  {
-    XorWithIv(buf, Iv);
-    Cipher((state_t*)buf, ctx->RoundKey);
+void AESContext::AES_CBC_encrypt_buffer(uint8_t* buf, uint32_t length)
+{ uintptr_t i;
+  uint8_t *Iv = this->initializationVector;
+  for (i = 0; i < length; i += AESContext::blockLength)
+  { XorWithIv(buf, Iv);
+    Cipher((state_t*) buf, this->RoundKey);
     Iv = buf;
-    buf += AES_BLOCKLEN;
+    buf += AESContext::blockLength;
     //printf("Step %d - %d", i/16, i);
   }
   /* store Iv in ctx for next call */
-  memcpy(ctx->Iv, Iv, AES_BLOCKLEN);
+  memcpy(this->initializationVector, Iv, AESContext::blockLength);
 }
 
-void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length)
-{
-  uintptr_t i;
-  uint8_t storeNextIv[AES_BLOCKLEN];
-  for (i = 0; i < length; i += AES_BLOCKLEN)
-  {
-    memcpy(storeNextIv, buf, AES_BLOCKLEN);
-    InvCipher((state_t*)buf, ctx->RoundKey);
-    XorWithIv(buf, ctx->Iv);
-    memcpy(ctx->Iv, storeNextIv, AES_BLOCKLEN);
-    buf += AES_BLOCKLEN;
+void AESContext::AES_CBC_decrypt_buffer(uint8_t* buf, uint32_t length)
+{ uintptr_t i;
+  uint8_t storeNextIv[this->blockLength];
+  for (i = 0; i < length; i += this->blockLength)
+  { memcpy(storeNextIv, buf, this->blockLength);
+    InvCipher((state_t*)buf, this->RoundKey);
+    XorWithIv(buf, this->initializationVector);
+    memcpy(this->initializationVector, storeNextIv, this->blockLength);
+    buf += this->blockLength;
   }
-
 }
-
-#endif // #if defined(CBC) && (CBC == 1)
-
-
-
-#if defined(CTR) && (CTR == 1)
 
 /* Symmetrical operation: same function for encrypting as for decrypting. Note any IV/nonce should never be reused with the same key */
-void AES_CTR_xcrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, uint32_t length)
-{
-  uint8_t buffer[AES_BLOCKLEN];
-
+void AESContext::AES_CTR_xcrypt_buffer(uint8_t* buf, uint32_t length)
+{ uint8_t buffer[this->blockLength];
   unsigned i;
   int bi;
-  for (i = 0, bi = AES_BLOCKLEN; i < length; ++i, ++bi)
-  {
-    if (bi == AES_BLOCKLEN) /* we need to regen xor compliment in buffer */
-    {
-
-      memcpy(buffer, ctx->Iv, AES_BLOCKLEN);
-      Cipher((state_t*)buffer,ctx->RoundKey);
-
+  for (i = 0, bi = this->blockLength; i < length; ++ i, ++ bi)
+  { if (bi == this->blockLength) /* we need to regen xor compliment in buffer */
+    { memcpy(buffer, this->initializationVector, this->blockLength);
+      Cipher((state_t*) buffer, this->RoundKey);
       /* Increment Iv and handle overflow */
-      for (bi = (AES_BLOCKLEN - 1); bi >= 0; --bi)
-      {
-  /* inc will owerflow */
-        if (ctx->Iv[bi] == 255)
-  {
-          ctx->Iv[bi] = 0;
+      for (bi = (this->blockLength - 1); bi >= 0; -- bi)
+      { /* inc will owerflow */
+        if (this->initializationVector[bi] == 255)
+        { this->initializationVector[bi] = 0;
           continue;
         }
-        ctx->Iv[bi] += 1;
+        this->initializationVector[bi] += 1;
         break;
       }
       bi = 0;
     }
-
-    buf[i] = (buf[i] ^ buffer[bi]);
+    buf[i] = buf[i] ^ buffer[bi];
   }
 }
-
-#endif // #if defined(CTR) && (CTR == 1)
-
 
 bool Crypto::decryptAES_CBC_256
 (const std::string& inputKey, const std::string& inputCipherText, List<unsigned char>& output,
@@ -678,12 +514,11 @@ bool Crypto::decryptAES_CBC_256
     return Crypto::decryptAES_CBC_256(inputKey, inputCipherText, output, commentsOnFailure);
   }
 
-  AES_ctx context;
-  uint8_t localInitializationVector[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-  AES_init_ctx_iv(&context, (uint8_t*) inputKey.c_str(), localInitializationVector);
+  AESContext context;
+  context.AES_init_ctx((uint8_t*) inputKey.c_str());
   for (unsigned i = 0; i < inputCipherText.size(); i ++)
     output[i] = inputCipherText[i];
-  AES_CBC_decrypt_buffer(&context, (uint8_t*) output.TheObjects, output.size);
+  context.AES_CBC_decrypt_buffer((uint8_t*) output.TheObjects, output.size);
   return true;
 }
 
@@ -725,12 +560,11 @@ bool Crypto::encryptAES_CBC_256
       newInput.push_back((char) numberOfBytesToPad);
     return Crypto::encryptAES_CBC_256(inputKey, newInput, output, commentsOnFailure);
   }
-  AES_ctx context;
-  uint8_t localInitializationVector[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-  AES_init_ctx_iv(&context, (uint8_t *) inputKey.c_str(), localInitializationVector);
+  AESContext context;
+  context.AES_init_ctx((uint8_t *) inputKey.c_str());
   output.SetSize(inputPlainText.size());
   for (unsigned i = 0; i < inputPlainText.size(); i ++)
     output[i] = inputPlainText[i];
-  AES_CBC_encrypt_buffer(&context, (uint8_t *) output.TheObjects, output.size);
+  context.AES_CBC_encrypt_buffer((uint8_t *) output.TheObjects, output.size);
   return true;
 }

@@ -192,12 +192,11 @@ static inline void byteswap32(uint32_t *v)
 
 static inline void byteswap_digest(uint32_t *p)
 { unsigned int i;
-
-  for (i = 0; i < 4; i++) {
-      byteswap32(p++);
-      byteswap32(p++);
-      byteswap32(p++);
-      byteswap32(p++);
+  for (i = 0; i < 4; i++)
+  { byteswap32(p++);
+    byteswap32(p++);
+    byteswap32(p++);
+    byteswap32(p++);
   }
 }
 
@@ -299,8 +298,8 @@ void ripemd160_process(ripemd160_state *self, const unsigned char *p, unsigned l
   /* We never leave a full buffer */
   if (self->bufpos >= 64)
     crash << "Internal error in RIPEMD160 computation. " << crash;
-  while (length > 0) {
-    /* Figure out how many bytes we need to fill the internal buffer. */
+  while (length > 0)
+  { /* Figure out how many bytes we need to fill the internal buffer. */
     bytes_needed = 64 - self->bufpos;
     if ((unsigned long) length >= bytes_needed) {
       /* We have enough bytes, so copy them into the internal buffer and run

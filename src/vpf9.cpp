@@ -790,7 +790,7 @@ bool FileOperations::FileExistsVirtual
 (const std::string& theFileName, bool accessSensitiveFolders, bool accessULTRASensitiveFolders, std::stringstream* commentsOnFailure)
 { std::string computedFileName;
   if (!FileOperations::GetPhysicalFileNameFromVirtual
-      (theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, commentsOnFailure))
+       (theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, commentsOnFailure))
     return false;
   return FileOperations::FileExistsUnsecure(computedFileName);
 }

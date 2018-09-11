@@ -384,12 +384,13 @@ std::string HtmlInterpretation::ClonePageResult(bool useJSON)
   std::string fileNameToBeCloned = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
   std::stringstream out;
   std::string startingFileString;
+  //out << "DEBUG: here be i.";
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileNameToBeCloned, startingFileString, &out))
   { out << "Could not find file: " << fileNameToBeCloned;
     return out.str();
   }
   std::fstream theFile;
-  if (FileOperations::FileExistsVirtualCustomizedReadOnly(fileNameResulT, &out))
+  if (FileOperations::FileExistsVirtualCustomizedReadOnly(fileNameResulT, 0))
   { out << "<b>File: " << fileNameResulT << " already exists. </b>";
     return out.str();
   }
@@ -398,6 +399,7 @@ std::string HtmlInterpretation::ClonePageResult(bool useJSON)
   { out << "<b><span style =\"color:red\">Failed to open output file: " << fileNameResulT << ". </span></b>";
     return out.str();
   }
+  //out << "DEBUG: here be i part2. So far output: " << out.str();
   theFile << startingFileString;
   theFile.close();
   std::stringstream svnAddCommand;
@@ -417,7 +419,8 @@ std::string HtmlInterpretation::ClonePageResult(bool useJSON)
     out << "<br>" << linkInterpreter.ToStringLinkFromFileName(fileNameResulT);
     out << "<br><b><span style =\"color:green\">Written content to file: "
     << fileNameResulT << ". </span></b>" << "<br> " << commandResult.str();
-  }
+  } else
+    out << "<br>Written content to file: " << fileNameResulT << "<br>" << commandResult.str();
   return out.str();
 }
 

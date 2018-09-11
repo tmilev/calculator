@@ -679,7 +679,8 @@ bool Crypto::decryptAES_CBC_256
   }
 
   AES_ctx context;
-  AES_init_ctx(&context, (uint8_t*) inputKey.c_str());
+  uint8_t localInitializationVector[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+  AES_init_ctx_iv(&context, (uint8_t*) inputKey.c_str(), localInitializationVector);
   for (unsigned i = 0; i < inputCipherText.size(); i ++)
     output[i] = inputCipherText[i];
   AES_CBC_decrypt_buffer(&context, (uint8_t*) output.TheObjects, output.size);

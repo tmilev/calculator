@@ -10,8 +10,8 @@ static ProjectInformationInstance ProjectInfoVpf6_2Header(__FILE__, "Header, cal
 class CalculatorFunctionsCrypto
 {
 public:
-  static bool innerAES_CBC_256_Encode(Calculator& theCommands, const Expression& input, Expression& output);
-
+  static bool innerAES_CBC_256_Encrypt(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAES_CBC_256_Decrypt(Calculator& theCommands, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctionsGeneral

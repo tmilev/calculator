@@ -330,8 +330,15 @@ bool CalculatorFunctionsGeneral::innerAppendDoubleSha256Check(Calculator& theCom
   return output.AssignValue(outputString, theCommands);
 }
 
-bool CalculatorFunctionsCrypto::innerAES_CBC_256_Encode(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::innerAES_CBC_256_Encode");
+bool CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt");
+  if (input.size() != 3)
+    return theCommands << "AES decrypt function expects two arguments: key and plain text. ";
+
+}
+
+bool CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt");
   if (input.size() != 3)
     return theCommands << "AES function expects two arguments: key and plain text.";
   std::string text, key;

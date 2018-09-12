@@ -121,7 +121,7 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
       }
 /*    if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault() != 0)
     { std::stringstream out;
-      out << "Generated: " << i + 1<<" elements";
+      out << "Generated: " << i + 1<< " elements";
       theGlobalVariables.theIndicatorVariables.StatusString1= out.str();
       theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh = true;
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -571,8 +571,8 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
       tempDomain[index].AddMonomial(tempGen, 1);
       tempRange[index] = this->imagesSimpleChevalleyGenerators[i +j*theDomainDimension];
       NonExplored.RemoveSelection(index);
-//      stOutput <<"<br>" << tempDomain.TheObjects[index].ElementToStringNegativeRootSpacesFirst(false, true, this->theDomain);
-//      stOutput <<"->" << tempRange.TheObjects[index].ElementToStringNegativeRootSpacesFirst(false, true, this->theRange);
+//      stOutput << "<br>" << tempDomain.TheObjects[index].ElementToStringNegativeRootSpacesFirst(false, true, this->theDomain);
+//      stOutput << "->" << tempRange.TheObjects[index].ElementToStringNegativeRootSpacesFirst(false, true, this->theRange);
     }
   }
 //  stOutput << this->ToString(theGlobalVariables) << "<br>";
@@ -2037,7 +2037,7 @@ std::string slTwoInSlN::ElementMatrixToTensorString(const Matrix<Rational> & inp
         this->GetIsPlusKIndexingFrom(j, sJ, kJ);
         out << "v_{i_{" << sI << "}";
         if (kI != 0)
-          out <<"+" << kI;
+          out << "+" << kI;
         out << "}\\otimes v^*_{i_{" << sJ << "}";
         if (kJ != 0)
           out  << "+" << kJ;

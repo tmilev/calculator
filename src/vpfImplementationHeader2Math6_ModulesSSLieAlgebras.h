@@ -136,7 +136,7 @@ void ModuleSSalgebra<coefficient>::Substitution(const PolynomialSubstitution<Rat
       for (int k = 0; k < this->actionsGeneratorS[i][j].size; k ++)
         this->actionsGeneratorS[i][j][k].Substitution(theSub);
   List<MonomialUniversalEnveloping<coefficient> > oldGeneratingWordsNonReduced;
-  oldGeneratingWordsNonReduced =(this->theGeneratingWordsNonReduced);
+  oldGeneratingWordsNonReduced = this->theGeneratingWordsNonReduced;
   this->theGeneratingWordsNonReduced.Clear();
   for (int i = 0; i < oldGeneratingWordsNonReduced.size; i ++)
   { oldGeneratingWordsNonReduced[i].Substitution(theSub);
@@ -240,7 +240,7 @@ void ModuleSSalgebra<coefficient>::GetMatrixHomogenousElt
         if (indexRow == - 1)
           crash << crash;
         output.AddMonomial(MonomialMatrix(indexRow, indexColumn), imageCurrentMon.theCoeffs[l]);
-        //stOutput <<"<br> Index row: " << indexRow << "; index column: " << indexColumn;
+        //stOutput << "<br> Index row: " << indexRow << "; index column: " << indexColumn;
       }
     }
   if (!this->flagIsInitialized)
@@ -259,7 +259,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
   std::stringstream out;
   std::string tempS;
   //stOutput << "Splitting parabolic selection: " << splittingParSel.ToString();
-  if (this->GetOwner()->GetRank() !=splittingParSel.MaxSize)
+  if (this->GetOwner()->GetRank() != splittingParSel.MaxSize)
     crash << "This is a programming error: parabolic selection selects out of " << splittingParSel.MaxSize
     << " elements while the weyl group is of rank " << this->GetOwner()->GetRank() << ". " << crash;
   outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, splittingParSel, 1);
@@ -289,7 +289,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
   out << "Starting character: " << this->ToString();
   tempMon.owner = this->GetOwner();
   for (int i = 0; i < this->size(); i ++)
-  { const Weight<coefficient>& currentMon =(*this)[i];
+  { const Weight<coefficient>& currentMon = (*this)[i];
     if (!theFDWeyl.FreudenthalEvalIrrepIsWRTLeviPart(currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000))
     { if (Report != 0)
         *Report = tempS;
@@ -324,7 +324,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
     //<< theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoords).ToString()
     //<< " is: ";
     //for (int l = 0; l<orbitDom.size; l ++)
-    //  stOutput <<"<br>" << orbitDom[l].ToString();
+    //  stOutput << "<br>" << orbitDom[l].ToString();
     //stOutput << "<hr>of them dominant are: <br>";
     for (int k = 0; k < orbitDom.size; k ++)
       if (outputWeylSub.IsDominantWeight(orbitDom[k]))
@@ -1133,7 +1133,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
       return false;
     int theIndex = theUE.generatorsIndices[i];
     for (int j = 0; j < thePower; j ++)
-    { //stOutput <<"<hr>Acting by generator index " << theIndex << " on " << output.ToString();
+    { //stOutput << "<hr>Acting by generator index " << theIndex << " on " << output.ToString();
       output.MultiplyByElementLieAlg(buffer, ownerAlgebra, theIndex, theRingUnit);
       //buffer.checkConsistency();
       output = buffer;

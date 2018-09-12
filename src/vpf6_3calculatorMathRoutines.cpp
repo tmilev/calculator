@@ -2232,7 +2232,7 @@ bool CalculatorFunctionsGeneral::innerPowerAnyToZero(Calculator& theCommands, co
   if (input[1].StartsWith(theCommands.opIntegral()))
     if (input[1].size() != 3) //<- an expression of the form \int_a^b (without f*dx).
       return false;
-//  stOutput << "input[1]: "<< input[1].ToString() << ", input[2]: " << input[2].ToString();
+//  stOutput << "input[1]: " << input[1].ToString() << ", input[2]: " << input[2].ToString();
   if (input[1].IsEqualToZero())
     return output.MakeError("Error: expression of the form 0^0 is illegal.", theCommands, true);
   return output.AssignValue<Rational>(1, theCommands);
@@ -5649,7 +5649,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverL
     return output.MakeError("Failed to extract parabolic selection from the fourth argument", theCommands);
   theCommands << "Your input weight in fundamental coordinates: " << theWeightFundCoords.ToString();
   theCommands << "<br>Your input weight in simple coordinates: " << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ToString()
-  << "<br>Your inducing parabolic subalgebra: " << inducingParSel.ToString() << "." <<"<br>The parabolic subalgebra I should split over: " << splittingParSel.ToString() << ".";
+  << "<br>Your inducing parabolic subalgebra: " << inducingParSel.ToString() << "." << "<br>The parabolic subalgebra I should split over: " << splittingParSel.ToString() << ".";
   ModuleSSalgebra<RationalFunctionOld> theMod;
   Selection selInducing = inducingParSel;
   Selection selSplittingParSel = splittingParSel;
@@ -5750,7 +5750,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
     << ".tex\"> " << fileCosetGraph << ".tex</a>";
     out << ", <iframe src =\"" << fileCosetGraph
     << ".png\" width =\"800\" height =\"600\"> " << fileCosetGraph << ".png</iframe>";
-    out <<"<b>The .png file might be bad if LaTeX crashed while trying to process it; "
+    out << "<b>The .png file might be bad if LaTeX crashed while trying to process it; "
     << "please check whether the .tex corresponds to the .png.</b>";
     out << "<hr>Additional printout follows.<br> ";
     out << "<br>Representatives of the coset follow. Below them you can find "
@@ -6232,7 +6232,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
     out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi") << "</td><td>"
     << currentChar.ToString(&tempFormat) << "</td></tr>";
     latexReport1 << " $" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi", &tempFormat) << "$"
-    << "&$p_{" << i + 1 <<"}=$ $" << currentChar.ToString(&tempFormat) << "$\\\\<br>";
+    << "&$p_{" << i + 1 << "}=$ $" << currentChar.ToString(&tempFormat) << "$\\\\<br>";
   }
   out << "</table>";
   latexReport1 << "\\end{longtable}<br>";
@@ -6485,7 +6485,7 @@ bool Calculator::innerSplitFDpartB3overG2old(Calculator& theCommands, const Expr
     out << "<td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theChars[i].ToString()) << "</td>";
     out << "</tr>";
   }
-  readyForLatexConsumptionTable1 <<"\\hline \n";
+  readyForLatexConsumptionTable1 << "\\hline \n";
   out << "</table>";
   out << "<br>Ready for LaTeX consumption: ";
   out << "<br><br>" << readyForLatexConsumptionTable1.str() << "<br><br>";

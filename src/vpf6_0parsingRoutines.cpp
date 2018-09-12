@@ -824,7 +824,7 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
     { inQuotes =!inQuotes;
       shouldSplit = true;
     }
-    //stOutput << "<br>in quotes: "<< inQuotes << " current: " << current << " shouldsplit: " << shouldSplit;
+    //stOutput << "<br>in quotes: " << inQuotes << " current: " << current << " shouldsplit: " << shouldSplit;
     if (!shouldSplit)
     { escapingAllowed = true;
       continue;
@@ -1758,7 +1758,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
   this->registerPositionAfterDecimalPoint = 0;
   for (int i = 0; i < this->numEmptyTokensStart; i ++)
     (*this->CurrentSyntacticStacK)[i] = this->GetEmptySyntacticElement();
-  this->parsingLog ="";
+  this->parsingLog = "";
   this->NonBoundVariablesInContext.Clear();
   this->BoundVariablesInContext.Clear();
   const int maxNumTimesOneRuleCanBeCalled = 1000;

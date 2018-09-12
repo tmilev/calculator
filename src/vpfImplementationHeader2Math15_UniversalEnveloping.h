@@ -109,7 +109,7 @@ void ElementUniversalEnveloping<coefficient>::ModOutVermaRelations
     acquiredCoeff *= this->theCoeffs[i];
 //    stOutput << "<hr><hr>Adding " << tempMon.ToString() << " times " << acquiredCoeff.ToString() << " to " << output.ToString();
     output.AddMonomial(tempMon, acquiredCoeff);
-//    stOutput <<"<br> to obtain " << output.ToString();
+//    stOutput << "<br> to obtain " << output.ToString();
   }
   this->operator=(output);
 }
@@ -290,7 +290,7 @@ void MonomialUniversalEnveloping<coefficient>::CommuteAnBtoBAnPlusLowerOrder
     acquiredCoefficienT *= theLeftPoweR;
     acquiredCoefficienT /= powerDroP;
     theLeftPoweR -= 1;
-//    stOutput <<"<hr>(ad_a)(" << adAToTheIthOfB.ToString(0) << ") =";
+//    stOutput << "<hr>(ad_a)(" << adAToTheIthOfB.ToString(0) << ") =";
 //    int commentwhendone;
 //    aElt.checkConsistency();
 //    adAToTheIthOfB.checkConsistency();

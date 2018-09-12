@@ -69,7 +69,7 @@ public:
   //  Rational numAnsweredInAllChildren;
   //  Rational maxCorrectAnswersInAllChildren;
   void ComputeID();
-  void reset(int parentSize, MapLisT<std::string, TopicElement, MathRoutines::hashString> *containerElements);
+  void reset(int parentSize, MapLisT<std::string, TopicElement, MathRoutines::hashString>* containerElements);
   friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt)
   { output << theElt.ToString();
     return output;

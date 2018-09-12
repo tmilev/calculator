@@ -144,7 +144,7 @@ public:
   }
   int GetDisplayIndexFromGenerator(int theIndex) const
   { //stOutput << "<br>num pos roots: " <<  this->GetNumPosRoots();
-   // stOutput << " rank: "<< this->GetRank();
+   // stOutput << " rank: " << this->GetRank();
     if (theIndex < this->GetNumPosRoots())
       return theIndex - this->GetNumPosRoots();
     if (theIndex >= this->GetNumPosRoots() + this->GetRank())

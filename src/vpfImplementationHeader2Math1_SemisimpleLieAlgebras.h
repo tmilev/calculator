@@ -538,7 +538,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
 //    << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoords).ToString()
 //    << " is: ";
 //    for (int l = 0; l<orbitDom.size; l ++)
-//      stOutput <<"<br>" << orbitDom[l].ToString();
+//      stOutput << "<br>" << orbitDom[l].ToString();
 //    stOutput << "<hr>of them dominant are: <br>";
     tempMon.owner = this->GetOwner();
     for (int k = 0; k < orbitDom.size; k ++)

@@ -11,7 +11,7 @@ bool CalculatorConversions::innerExpressionFromChevalleyGenerator(Calculator& th
   input.CheckInitialization();
   output.reset(theCommands, 2);
   Expression generatorLetterE, generatorIndexE;
-  if (input.theGeneratorIndex>= input.owner->GetNumPosRoots() && input.theGeneratorIndex< input.owner->GetNumPosRoots() + input.owner->GetRank())
+  if (input.theGeneratorIndex >= input.owner->GetNumPosRoots() && input.theGeneratorIndex < input.owner->GetNumPosRoots() + input.owner->GetRank())
     generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("h"), theCommands);
   else
     generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("g"), theCommands);
@@ -43,22 +43,22 @@ bool CalculatorConversions::innerLoadWeylGroup(Calculator& theCommands, const Ex
 bool CalculatorConversions::innerDynkinSimpleType(Calculator& theCommands, const Expression& input, DynkinSimpleType& outputMon)
 { MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::DeSerializeMon_DynkinSimpleType");
   Expression rankE, typeLetterE, scaleE;
-  if (input.StartsWith(theCommands.opUnderscore(),3))
-  { rankE= input[2];
-    typeLetterE= input[1];
+  if (input.StartsWith(theCommands.opUnderscore(), 3))
+  { rankE = input[2];
+    typeLetterE = input[1];
     if (typeLetterE.StartsWith(theCommands.opThePower(),3))
-    { scaleE= typeLetterE[2];
-      typeLetterE= typeLetterE[1];
+    { scaleE = typeLetterE[2];
+      typeLetterE = typeLetterE[1];
     } else
       scaleE.AssignValue(1, theCommands);
-  } else if (input.StartsWith(theCommands.opThePower(),3))
-  { scaleE= input[2];
+  } else if (input.StartsWith(theCommands.opThePower(), 3))
+  { scaleE = input[2];
     if (!input[1].StartsWith(theCommands.opUnderscore(), 3))
       return theCommands << "<hr>Failed to extract rank, type from "
       << input[1].ToString()
       << ". The expression does not have two children.";
-    rankE= input[1][2];
-    typeLetterE= input[1][1];
+    rankE = input[1][2];
+    typeLetterE = input[1][1];
   } else
     return theCommands << "<hr>Failed to extract rank, type, "
     << "first co-root length from: " << input.ToString() << ". ";
@@ -67,32 +67,39 @@ bool CalculatorConversions::innerDynkinSimpleType(Calculator& theCommands, const
     return theCommands << "<hr>Failed to extract first co-root length: "
     << "expression " << scaleE.ToString()
     << " is not a rational number.";
-  if (theScale<= 0)
+  if (theScale <= 0)
     return theCommands << "<hr>Couldn't extract first co-root length: " << theScale.ToString() << " is non-positive.";
   std::string theTypeName;
   if (!typeLetterE.IsAtom(&theTypeName))
     return theCommands << "I couldn't extract a type letter from " << typeLetterE.ToString();
-  if (theTypeName.size() !=1)
+  if (theTypeName.size() != 1)
     return theCommands << "<hr>Error while extracting Dynkin simple type: The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G."
     << "Instead, it is " << theTypeName + ". Error encountered while processing " << input.ToString();
   char theWeylLetter = theTypeName[0];
-  if (theWeylLetter == 'a') theWeylLetter ='A';
-  if (theWeylLetter == 'b') theWeylLetter ='B';
-  if (theWeylLetter == 'c') theWeylLetter ='C';
-  if (theWeylLetter == 'd') theWeylLetter ='D';
-  if (theWeylLetter == 'e') theWeylLetter ='E';
-  if (theWeylLetter == 'f') theWeylLetter ='F';
-  if (theWeylLetter == 'g') theWeylLetter ='G';
+  if (theWeylLetter == 'a')
+    theWeylLetter ='A';
+  if (theWeylLetter == 'b')
+    theWeylLetter ='B';
+  if (theWeylLetter == 'c')
+    theWeylLetter ='C';
+  if (theWeylLetter == 'd')
+    theWeylLetter ='D';
+  if (theWeylLetter == 'e')
+    theWeylLetter ='E';
+  if (theWeylLetter == 'f')
+    theWeylLetter ='F';
+  if (theWeylLetter == 'g')
+    theWeylLetter ='G';
   if (!(theWeylLetter == 'A' || theWeylLetter == 'B' || theWeylLetter == 'C' || theWeylLetter == 'D' || theWeylLetter == 'E' || theWeylLetter == 'F' || theWeylLetter == 'G'))
     return theCommands << "The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G; error while processing " << input.ToString();
   int theRank;
   if (!rankE.IsSmallInteger(&theRank))
     return theCommands << "I wasn't able to extract rank from " << input.ToString();
-  if (theRank<1 || theRank>20)
+  if (theRank < 1 || theRank > 20)
     return theCommands << "<hr>The rank of a simple Lie algebra must be between 1 and 20; error while processing " << input.ToString();
-  if (theWeylLetter == 'E' &&(theRank>8 || theRank<3))
+  if (theWeylLetter == 'E' &&(theRank > 8 || theRank < 3))
     return theCommands << "<hr>Type E must have rank 6,7 or 8 ";
-  if (theWeylLetter == 'D' &&(theRank<3))
+  if (theWeylLetter == 'D' &&(theRank < 3))
     return theCommands << "<hr>Type D is expected to have rank 4 or more, your input was of rank " << theRank << ". ";
   outputMon.MakeArbitrary(theWeylLetter, theRank, theScale);
   return true;
@@ -112,7 +119,7 @@ bool CalculatorConversions::innerDynkinType(Calculator& theCommands, const Expre
     int theMultiplicity = - 1;
     if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
       theMultiplicity = - 1;
-    if (theMultiplicity<0)
+    if (theMultiplicity < 0)
       return theCommands << "<hr>Failed to convert the coefficient " << theType.theCoeffs[i] << " of " << theType[i].ToString()
       << " to a small positive integer. ";
     output.AddMonomial(simpleComponent, theMultiplicity);
@@ -228,13 +235,13 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(Calculator& theComma
 { MacroRegisterFunctionWithName("CalculatorConversions::innerLoadFromObject slTwoSubalgebra");
   if (!input.IsListNElements(4))
     return theCommands << "<hr>input of innerLoadFromObject has " << input.children.size << " children, 4 expected. ";
-  const Expression& theOwnerE= input[1];
+  const Expression& theOwnerE = input[1];
   Expression tempE;
   if (!CalculatorConversions::innerSSLieAlgebra(theCommands, theOwnerE, tempE, output.owner))
     return theCommands << "<hr>Failed to extract semisimple Lie algebra from " << theOwnerE.ToString()
     << " while extracting its sl(2) subalgebra.";
-  const Expression& theF= input[2];
-  const Expression& theE= input[3];
+  const Expression& theF = input[2];
+  const Expression& theE = input[3];
   ElementSemisimpleLieAlgebra<Rational> eltF, eltE;
   if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, theF, eltF, *output.owner))
     return theCommands << "<hr>Failed to extract f element while loading sl(2) subalgebra<hr>";
@@ -246,7 +253,7 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(Calculator& theComma
   if (eltE.GetOwner() != eltF.GetOwner())
     return theCommands << "<hr>Failed to load sl(2): E and F element of sl(2) have different owners. More precisely, the owner of e is "
     << eltE.GetOwner()->ToString() << " and the owner of f is " << eltF.GetOwner()->ToString();
-  output.theE= eltE;
+  output.theE = eltE;
   output.theF= eltF;
   output.owner = eltE.GetOwner();
   DynkinType& theType = output.owner->theWeyl.theDynkinType;
@@ -272,7 +279,7 @@ bool CalculatorConversions::innerAlgebraicNumber(Calculator& theCommands, const 
   }
   if (input.IsOfType<Rational>())
   { AlgebraicNumber theNum;
-    theNum= input.GetValue<Rational>();
+    theNum = input.GetValue<Rational>();
     return output.AssignValue(theNum, theCommands);
   }
   return false;
@@ -288,7 +295,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementList
     return false;
   output.Clear();
   std::string keyName;
-  for (int i = 0; i <outputExpressionFormat.theKeys.size; i ++)
+  for (int i = 0; i < outputExpressionFormat.theKeys.size; i ++)
   { if (!outputExpressionFormat.theKeys[i].IsOfType<std::string>(&keyName))
       keyName = outputExpressionFormat.theKeys[i].ToString();
     output.SetKeyValue(keyName, outputExpressionFormat[i]);
@@ -305,7 +312,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementList
   { output.SetKeyValue(input[1], input[2]);
     return true;
   }
-  for (int i =1; i < input.size(); i ++)
+  for (int i = 1; i < input.size(); i ++)
     if (input[i].StartsWith(theCommands.opDefine(), 3))
       output.SetKeyValue(input[i][1], input[i][2]);
     else if (!allowFailure)
@@ -395,7 +402,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
     { componentCounter ++;
       Vectors<Rational>& currentComponent = outputSubalgebra.CartanSAsByComponentScaledToActByTwo[componentCounter];
       currentComponent.SetSize(theRanks[i]);
-      for (int k = 0; k<theRanks[i]; k++)
+      for (int k = 0; k < theRanks[i]; k ++)
       { counter ++;
         theHs.GetVectorFromRow(counter, currentComponent[k]);
       }
@@ -405,10 +412,10 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   if (CalculatorConversions::innerLoadKey(theCommands, input, "generators", generatorsE))
   { generatorsE.Sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
-    for (int i =1; i < generatorsE.children.size; i ++)
+    for (int i = 1; i < generatorsE.children.size; i ++)
     { if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, generatorsE[i], curGenAlgebraic, *owner.owner))
         return theCommands << "<hr>Failed to load semisimple Lie algebra element from expression " << generatorsE[i].ToString() << ". ";
-      if (i%2 ==1)
+      if (i%2 == 1)
         outputSubalgebra.theNegGens.AddOnTop(curGenAlgebraic);
       else
         outputSubalgebra.thePosGens.AddOnTop(curGenAlgebraic);
@@ -487,10 +494,10 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   theSAs.flagComputePairingTable = false;
   theSAs.flagComputeNilradicals = false;
   theSAs.timeComputationStartInSeconds = theGlobalVariables.GetElapsedSeconds();
-  reportStream << " done. <br>Total subalgebras: " << theSAsE.children.size- 1 << ". ";
+  reportStream << " done. <br>Total subalgebras: " << theSAsE.children.size - 1 << ". ";
   theReport.Report(reportStream.str());
 
-  for (int i =1; i < theSAsE.children.size; i ++)
+  for (int i = 1; i < theSAsE.children.size; i ++)
   { std::stringstream reportStream2;
     reportStream2 << reportStream.str() << "Subalgebra " << i << " is being loaded from expression "
     << theSAsE[i].ToString() << ".";
@@ -509,7 +516,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
       continue;
     }
     theSAs.theSubalgebras.SetKeyValue(currentCandidate.theHs, currentCandidate);
-    theSAs.theSubalgebras.theValues.LastObject().indexInOwner = theSAs.theSubalgebras.theValues.size- 1;
+    theSAs.theSubalgebras.theValues.LastObject().indexInOwner = theSAs.theSubalgebras.theValues.size - 1;
   }
   reportStream << "Subalgebra loading done, total  " << theSAs.theSubalgebras.theValues.size << " subalgebras loaded. ";
   theReport.Report(reportStream.str());
@@ -521,7 +528,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
 //  reportStream << "<br> Computation state loaded: <br>" << theSAs.ToStringState();
 //  theReport.Report(reportStream.str());
   theSAs.flagAttemptToAdjustCentralizers = false;
-  if (! theSAs.FindTheSSSubalgebrasContinue())
+  if (!theSAs.FindTheSSSubalgebrasContinue())
   { std::stringstream out;
     out << "<br>Failed to realize all subalgebras, computation aborted. The failure report follows. "
     << theSAs.comments << "<br>The progress report for the entire computation follows.<br>"
@@ -564,7 +571,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(Calculator& theComma
   Expression currentChainE, numericalConvertorE(theCommands);
   currentChainE.MakeSequence(theCommands);
   for (int i = 0; i < input.currentSubalgebraChain.size; i ++)
-  { numericalConvertorE= input.currentSubalgebraChain[i].indexInOwner;
+  { numericalConvertorE = input.currentSubalgebraChain[i].indexInOwner;
     currentChainE.AddChildOnTop(numericalConvertorE);
   }
   theKeys.AddOnTop("CurrentChain");
@@ -572,7 +579,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(Calculator& theComma
   Expression numTypesExploredE;
   numTypesExploredE.MakeSequence(theCommands);
   for (int i = 0; i < input.currentNumLargerTypesExplored.size; i ++)
-  { numericalConvertorE= input.currentNumLargerTypesExplored[i];
+  { numericalConvertorE = input.currentNumLargerTypesExplored[i];
     numTypesExploredE.AddChildOnTop(numericalConvertorE);
   }
   theKeys.AddOnTop("NumExploredTypes");
@@ -580,7 +587,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(Calculator& theComma
   Expression numHsExploredE;
   numHsExploredE.MakeSequence(theCommands);
   for (int i = 0; i < input.currentNumHcandidatesExplored.size; i ++)
-  { numericalConvertorE= input.currentNumHcandidatesExplored[i];
+  { numericalConvertorE = input.currentNumHcandidatesExplored[i];
     numHsExploredE.AddChildOnTop(numericalConvertorE);
   }
   theKeys.AddOnTop("NumExploredHs");
@@ -642,7 +649,7 @@ bool CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs
     return theCommands << "<hr> Failed to obtain semisimple Lie algebra element from "
     << input.ToString() << ". ";
 
-  for (int i = 0; i <outputAlgebraic.theCoeffs.size; i ++)
+  for (int i = 0; i < outputAlgebraic.theCoeffs.size; i ++)
     if (!outputAlgebraic.theCoeffs[i].IsRational())
       return theCommands << "<hr>From input: " << input.ToString() << ", I managed to extract element: "
       << outputAlgebraic.ToString() << " but that appears to not have rational coefficients.";
@@ -667,12 +674,12 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
   theChevGen.owner = &owner;
   output.MakeZero();
   Expression theContext = polyFormE.GetContext();
-  for (int j = 0; j<polyForm.size(); j ++)
+  for (int j = 0; j < polyForm.size(); j ++)
   { const MonomialP& currentMon = polyForm[j];
     int theGenIndex = 0;
     if (!currentMon.IsOneLetterFirstDegree(&theGenIndex))
       return theCommands << "<hr>Failed to convert semisimple Lie algebra input to linear poly: " << input.ToString() << ".<hr>";
-    Expression singleChevGenE= theContext.ContextGetContextVariable(theGenIndex);
+    Expression singleChevGenE = theContext.ContextGetContextVariable(theGenIndex);
     if (!singleChevGenE.StartsWith(theCommands.opUnderscore(), 3))
       return theCommands << "<hr>Failed to convert: "
       << singleChevGenE.ToString()
@@ -733,14 +740,14 @@ bool CalculatorConversions::innerElementUE(Calculator& theCommands, const Expres
   { const MonomialP& currentMon = theP[j];
     currentSummand.MakeConst(theP.theCoeffs[j], owner);
     currentMultiplicandRFpartMon.MakeOne();
-    for (int i = 0; i <currentMon.GetMinNumVars(); i ++)
+    for (int i = 0; i < currentMon.GetMinNumVars(); i ++)
     { int thePower = - 1;
       if (!currentMon(i).IsSmallInteger(&thePower))
         return theCommands << "<hr>Failed to convert one of the exponents appearing in " << input.ToString()
         << " to  a small integer polynomial.<hr>";
       if (thePower == 0)
         continue;
-      Expression singleChevGenE= theContext.ContextGetContextVariable(i);
+      Expression singleChevGenE = theContext.ContextGetContextVariable(i);
       if (!singleChevGenE.IsListNElements(2))
         return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
       std::string theLetter;
@@ -748,18 +755,18 @@ bool CalculatorConversions::innerElementUE(Calculator& theCommands, const Expres
         return theCommands << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
         << owner.GetLieAlgebraName();
       bool isGood = true;
-      bool isHonestElementUE= true;
+      bool isHonestElementUE = true;
       if (theLetter == "g")
       { theChevGen.theGeneratorIndex = owner.GetGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
-        if (theChevGen.theGeneratorIndex<0 || theChevGen.theGeneratorIndex>= owner.GetNumGenerators())
+        if (theChevGen.theGeneratorIndex < 0 || theChevGen.theGeneratorIndex >= owner.GetNumGenerators())
           isGood = false;
       } else if (theLetter == "h")
-      { if (theChevGen.theGeneratorIndex <1 || theChevGen.theGeneratorIndex>owner.GetRank())
+      { if (theChevGen.theGeneratorIndex < 1 || theChevGen.theGeneratorIndex>owner.GetRank())
           isGood = false;
         else
-          theChevGen.theGeneratorIndex = theChevGen.theGeneratorIndex +owner.GetNumPosRoots()- 1;
+          theChevGen.theGeneratorIndex = theChevGen.theGeneratorIndex +owner.GetNumPosRoots() - 1;
       } else
-        isHonestElementUE= false;
+        isHonestElementUE = false;
       if (!isGood)
         return theCommands << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
         << owner.GetLieAlgebraName();
@@ -771,17 +778,17 @@ bool CalculatorConversions::innerElementUE(Calculator& theCommands, const Expres
       { int varIndex = outputPolyVars.GetIndexChild(singleChevGenE);
         if (varIndex == - 1)
         { outputPolyVars.AddChildOnTop(singleChevGenE);
-          varIndex = outputPolyVars.children.size- 1;
+          varIndex = outputPolyVars.children.size - 1;
         } else
-          varIndex--;
+          varIndex --;
         currentMultiplicandRFpartMon[varIndex] = thePower;
       }
     }
     currentPMultiplicand.MakeZero();
     currentPMultiplicand.AddMonomial(currentMultiplicandRFpartMon, 1);
     currentMultiplicandRFpart = currentPMultiplicand;
-    currentSummand*= currentMultiplicandRFpart;
-    outputUE+= currentSummand;
+    currentSummand *= currentMultiplicandRFpart;
+    outputUE += currentSummand;
   }
 //  stOutput << "<hr>outputUE: " << outputUE.ToString();
   Expression outputContext;
@@ -829,7 +836,7 @@ bool CalculatorConversions::innerExpressionFromPoly
           currentBase.AddChildValueOnTop((Rational) j);
         }
         if (input[i](j) ==1)
-          currentMultTermE= currentBase;
+          currentMultTermE = currentBase;
         else
         { currentPower.AssignValue(input[i](j), theCommands);
           currentMultTermE.MakeXOX(theCommands, theCommands.opThePower(), currentBase, currentPower);

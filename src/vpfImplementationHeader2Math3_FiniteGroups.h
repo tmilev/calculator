@@ -611,7 +611,7 @@ std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpres
   FormatExpressions charPolyFormat;
   charPolyFormat.polyAlphabeT.SetSize(1);
   charPolyFormat.polyAlphabeT[0] = "q";
-  //  out <<"Number of Vectors<Rational>: "<< this->RootSystem.size<<"\n
+  //  out << "Number of Vectors<Rational>: " << this->RootSystem.size<< "\n
   if (this->ConjugacyClassCount() > 0)
   { out << "<br>" << this->ConjugacyClassCount() << " conjugacy classes total.\n";
     for (int i = 0; i < this->conjugacyClasseS.size; i ++)
@@ -2320,7 +2320,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   coefficient SumOfNumComponentsSquared = this->GetNumberOfComponents();
   if (SumOfNumComponentsSquared == 0)
     crash << "This is a programming error: a module has character " << this->theCharacteR.ToString()
-    << " of zero length, which is impossible. "<< "Here is a printout of the module. "
+    << " of zero length, which is impossible. " << "Here is a printout of the module. "
     << this->ToString() << crash;
   if (SumOfNumComponentsSquared == 1)
   { int i = this->ownerGroup->characterTable.BSGetIndex(this->theCharacteR);

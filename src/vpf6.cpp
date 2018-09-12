@@ -1062,7 +1062,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
       { tempElt1.MakeGenerator(i, theSSalgebra);
         tempRoot = theSSalgebra.GetWeightOfGenerator(i);
         theWeyl.GetEpsilonCoords(tempRoot, tempRoot2);
-        out << "$" << tempElt1.ToString(&theFormat) << "$&$"<< tempRoot.ToString() << "$";
+        out << "$" << tempElt1.ToString(&theFormat) << "$&$" << tempRoot.ToString() << "$";
         out << "&$" << tempRoot2.ToStringLetterFormat("\\varepsilon") << "$";
         out << "\\\\\n";
       }

@@ -235,7 +235,7 @@ void LittelmannPath::Simplify()
   int leftIndex = 0;
   int rightIndex = 2;
 //  std::stringstream tempStream;
-//  tempStream <<"<br>" << this->ToString();
+//  tempStream << "<br>" << this->ToString();
   while (rightIndex < this->Waypoints.size)
   { Vector<Rational>& left = this->Waypoints[leftIndex];
     Vector<Rational>& middle = this->Waypoints[rightIndex - 1];

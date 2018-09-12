@@ -36,7 +36,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedBasis
     theReport1.Report(reportStream.str());
   }
   int oldMaxNumGBCompos = this->MaxNumGBComputations;
-  this->MaxNumGBComputations =upperLimitPolyComputations;
+  this->MaxNumGBComputations = upperLimitPolyComputations;
   this->AddPolysAndReduceBasis();
   this->MaxNumGBComputations = oldMaxNumGBCompos;
   if (upperLimitPolyComputations > 0)
@@ -250,7 +250,7 @@ void GroebnerBasisComputation<coefficient>::MakeMinimalBasis()
         //
 /*  stOutput << "<br><br> final leading monomials are: ";
   for (int i = 0; i <LeadingCoeffs.size; i ++)
-    stOutput <<"<br>" << LeadingCoeffs[i].ToString() << " of " << theBasis[i].ToString();
+    stOutput << "<br>" << LeadingCoeffs[i].ToString() << " of " << theBasis[i].ToString();
 */
 }
 
@@ -523,7 +523,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
             << "<br>This may or may not be a programming error. While handling computation excess limit, "
             << " I got that NumberOfComputations is much larger than MaxNumGBComputations. "
             << " I have no explanation for this issue right now, so I am crashing to let you know "
-            << " something is fishy. "<< crash;
+            << " something is fishy. " << crash;
         }*/
         this->NumberGBComputations++;
         //stOutput << " to get " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);

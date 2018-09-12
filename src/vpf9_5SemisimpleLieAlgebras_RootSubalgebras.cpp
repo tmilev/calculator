@@ -1126,7 +1126,7 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat)
   out << "<br>Number of outer autos with trivial action on orthogonal complement: "
   << this->outerSAautos.theElements.size << ". ";
   out << "<br>\nC(k_{ss})_{ss}: " << this->theCentralizerDiagram.ToString();
-  out << "<br>\n simple basis centralizer: "<< this->SimpleBasisCentralizerRoots.ToString();
+  out << "<br>\n simple basis centralizer: " << this->SimpleBasisCentralizerRoots.ToString();
   out << "<hr>\n Number of k-submodules of g: " << this->Modules.size;
   out << "<br>Module decomposition, fundamental coords over k: ";
   out << HtmlRoutines::GetMathSpanPure(this->ModuleDecompoHighestWeights.ToString());
@@ -2347,7 +2347,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
         crash << "Programming error: characteristicH is: " << characteristicH.ToString()
         << "; rootsWithScalarProduct2NonRaised: "
         << rootsScalarProduct2HnonRaised.ToString()
-        << "; the scalar product with vector "<< rootsScalarProduct2HnonRaised[k].ToString() << " is:  "
+        << "; the scalar product with vector " << rootsScalarProduct2HnonRaised[k].ToString() << " is:  "
         << this->GetAmbientWeyl().RootScalarCartanRoot
         (characteristicH, rootsScalarProduct2HnonRaised[k]).ToString()
         << " which is supposed to equal 2. " << crash;
@@ -3393,7 +3393,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
     out << "\\begin{tabular}{cc} \\begin{tabular}{l}";
   out << "$\\Delta(\\mathfrak{n})=$";
   if (includeMatrixForm)
-    out <<"\\\\";
+    out << "\\\\";
   int numNilradicalRootSpaces = 0;
   for (int i = 0; i < epsCoords.size; i ++)
   { Vector<Rational>& currentRoot = epsCoords[i];
@@ -3923,8 +3923,8 @@ void coneRelations::ToString
         << owners.theSubalgebras[oldIndex].theDynkinDiagram.ToString()
         << "}\\\\\n\\hline\\hline";
       //if (useHtml)
-      //{ out << "<table>" << "<tr>"<< owners.TheObjects[oldIndex].theDynkinDiagram.DebugString
-       //     <<"</tr>";
+      //{ out << "<table>" << "<tr>" << owners.TheObjects[oldIndex].theDynkinDiagram.DebugString
+       //     << "</tr>";
       //}
     }
     lineCounter += this->TheObjects[i].ToString(tempS, owners, useLatex, true, true);
@@ -3946,7 +3946,7 @@ void coneRelations::ToString
     //  out <<tempS;
     //  this->TheObjects[i].RelationOneSideToStringCoordForm
     //    (tempS, this->TheObjects[i].BetaCoeffs, this->TheObjects[i].Betas, false);
-    //  out <<"="<<tempS<<"}\\\\\n";
+    //  out << "=" <<tempS<< "}\\\\\n";
       out << "}\\\\\\hline\n";
     }
     if (lineCounter>this->NumAllowedLatexLines)

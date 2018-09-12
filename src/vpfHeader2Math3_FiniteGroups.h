@@ -678,7 +678,7 @@ public:
     return result;
   }
   template <class coefficient>
-  coefficient WeylDimFormulaSimpleCoords(Vector<coefficient>& theWeightInSimpleCoords, const coefficient& theRingUnit =1);
+  coefficient WeylDimFormulaSimpleCoords(Vector<coefficient>& theWeightInSimpleCoords, const coefficient& theRingUnit = 1);
   template <class coefficient>
   coefficient WeylDimFormulaFundamentalCoords(Vector<coefficient>& weightFundCoords);
   template <class coefficient>
@@ -1071,7 +1071,7 @@ void GroupRepresentation<someGroup, coefficient>::ComputeCharacter() const
     List<int> ccirWord;
     //    this->GetMatrixOfElement(this->ownerGroup->conjugacyClasseS[cci].representative);
     this->ownerGroup->GetWord(this->ownerGroup->conjugacyClasseS[cci].representative, ccirWord);
-    for (int i = 0; i <ccirWord.size; i ++)
+    for (int i = 0; i < ccirWord.size; i ++)
       M *= this->generatorS[ccirWord[i]];
     this->theCharacteR.data[cci] = M.GetTrace();
   }
@@ -1092,10 +1092,10 @@ bool GroupRepresentation<someGroup, coefficient>::operator>(const GroupRepresent
 }
 
 template <typename someGroup, typename coefficient>
-void GroupRepresentation<someGroup, coefficient>::MakeTensorRepresentation(GroupRepresentation<someGroup, coefficient> &right, GroupRepresentation<someGroup, coefficient> &left)
+void GroupRepresentation<someGroup, coefficient>::MakeTensorRepresentation(GroupRepresentation<someGroup, coefficient>& right, GroupRepresentation<someGroup, coefficient>& left)
 { ownerGroup = right.ownerGroup;
   generatorS.SetSize(right.generatorS.size);
-  for (int i = 0; i <right.generatorS.size; i ++)
+  for (int i = 0; i < right.generatorS.size; i ++)
     generatorS[i].AssignTensorProduct(right.generatorS[i], left.generatorS[i]);
 }
 
@@ -1216,7 +1216,7 @@ public:
   coefficient GetNumberOfComponents();
   void operator*= (const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other);
   GroupRepresentationCarriesAllMatrices<somegroup, coefficient> operator*(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other) const
-  { GroupRepresentationCarriesAllMatrices<somegroup, coefficient> result =*this;
+  { GroupRepresentationCarriesAllMatrices<somegroup, coefficient> result = *this;
     result*= other;
     return result;
   }
@@ -1444,14 +1444,14 @@ template <typename someGroup, typename elementSomeGroup>
 bool SubgroupData<someGroup, elementSomeGroup>::VerifyNormal()
 { Matrix<int> csmt;
   csmt.init(cosets.size, cosets.size);
-  for (int i = 0; i <cosets.size; i ++)
-    for (int j = 0; j<cosets.size; j ++)
+  for (int i = 0; i < cosets.size; i ++)
+    for (int j = 0; j < cosets.size; j ++)
       csmt(i, j) = QIDMul(i, j);
   stOutput << "Coset multiplication table\n" << csmt.ToStringPlainText() << '\n';
-  for (int i = 0; i <cosets.size; i ++)
-    for (int j = i; j<cosets.size; j ++)
-      for (int k = j; k<cosets.size; k++)
-        if (csmt(i,csmt(j,k)) != csmt(csmt(i, j),k))
+  for (int i = 0; i < cosets.size; i ++)
+    for (int j = i; j < cosets.size; j ++)
+      for (int k = j; k < cosets.size; k++)
+        if (csmt(i, csmt(j,k)) != csmt(csmt(i, j), k))
           return false;
   return true;
 }
@@ -1509,7 +1509,7 @@ void SubgroupData<someGroup, elementSomeGroup>::QuotientGroupPermutationRepresen
     for (int ci = 0; ci <out.generatorS[i].NumCols; ci ++)
     { elementSomeGroup g =  this->theGroup->generators[i] * this->cosets[ci].representative;
       int j = this->GetCosetId(g);
-      out.generatorS[i](j,ci) = 1;
+      out.generatorS[i](j, ci) = 1;
     }
     stOutput << "Element " << this->theGroup->generators[i] << " of coset " << this->GetCosetId(this->theGroup->generators[i]);
     stOutput << " permutes the other cosets as\n" << out.generatorS[i].ToStringPlainText() << '\n';
@@ -1938,7 +1938,7 @@ public:
   UDPolynomial<coefficient> operator%(const UDPolynomial<coefficient>& divisor) const;
   void operator/= (const coefficient& right);
   void operator/= (const UDPolynomial<coefficient>& right)
-  { *this = (*this / right);
+  { *this = *this / right;
   }
   coefficient operator()(const coefficient& x) const;
   void ClearDenominators();
@@ -1989,12 +1989,12 @@ void UDPolynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input)
   Matrix<coefficient> acc;
   acc = input;
   for (int i = 1; i < n; i ++)
-  { this->data[i] = -acc.GetTrace() / i;
+  { this->data[i] = - acc.GetTrace() / i;
     for (int j = 0; j < n; j ++)
       acc.elements[j][j] += this->data[i];
     acc.MultiplyOnTheLeft(input);
   }
-  this->data[n] = -acc.GetTrace() / n;
+  this->data[n] = - acc.GetTrace() / n;
 }
 
 template <typename coefficient>
@@ -2006,7 +2006,7 @@ template <typename coefficient>
 coefficient UDPolynomial<coefficient>::operator()(const coefficient &x) const
 {  coefficient acc = 0;
    coefficient y = 1;
-   for (int i = 0; i <data.size; i ++)
+   for (int i = 0; i < data.size; i ++)
    {  acc += y * data[i];
       y *= x;
    }
@@ -2026,8 +2026,8 @@ void UDPolynomial<coefficient>::operator+= (const UDPolynomial<coefficient>& rig
          data[i] = right.data[i];
    }
    else
-      while ((data.size != 0) and (data[data.size- 1] != 0))
-         data.size--;
+      while ((data.size != 0) and (data[data.size - 1] != 0))
+         data.size --;
 }
 
 template <typename coefficient>
@@ -2044,11 +2044,11 @@ void UDPolynomial<coefficient>::operator-= (const UDPolynomial<coefficient>& rig
   {  int n = data.size;
      data.SetSize(right.data.size);
      for (int i = n; i < right.data.size; i ++)
-       data[i] = -right.data[i];
+       data[i] = - right.data[i];
   }
   else
     while ((data.size != 0) and (data[data.size - 1] == 0))
-      data.size--;
+      data.size --;
 }
 
 template <typename coefficient>

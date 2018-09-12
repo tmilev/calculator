@@ -58,7 +58,7 @@ void Basis<coefficient>::AddVector(const Vector<coefficient>& v)
     basis.NumRows = 0;
   }
   if (basis.NumRows == basis.NumCols)
-  { crash.theCrashReport << "Programming error: attempting to add the "<< basis.NumRows << " vector to a Basis of degree " << basis.NumCols;
+  { crash.theCrashReport << "Programming error: attempting to add the " << basis.NumRows << " vector to a Basis of degree " << basis.NumCols;
     crash << crash;
   }
   haveGramMatrix = false;
@@ -139,7 +139,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
     if (jj == v.size)
       return false;
     int j = i;
-    for (;(j < fastbasis.NumCols) && (fastbasis.elements[i][j] == 0); j ++);
+    for (; (j < fastbasis.NumCols) && (fastbasis.elements[i][j] == 0); j ++);
     if (jj < j)
     { if (fastbasis.ActualNumRows >= fastbasis.NumRows + 1)
         fastbasis.NumRows ++;
@@ -161,7 +161,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
       continue;
     coefficient x = - v[jj] / fastbasis.elements[i][j];
     for (int jjj = jj; jjj < v.size; jjj ++)
-      v[jjj] += x*fastbasis.elements[i][jjj];
+      v[jjj] += x * fastbasis.elements[i][jjj];
   }
   if (v.IsEqualToZero())
     return false;
@@ -169,9 +169,9 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
   if (fastbasis.ActualNumRows >= fastbasis.NumRows + 1)
     fastbasis.NumRows ++;
   else
-    fastbasis.Resize(fastbasis.NumRows + 1,fastbasis.NumCols,true);
+    fastbasis.Resize(fastbasis.NumRows + 1, fastbasis.NumCols, true);
   for (int j = 0; j < fastbasis.NumCols; j ++)
-    fastbasis.elements[fastbasis.NumRows- 1][j] = v[j];
+    fastbasis.elements[fastbasis.NumRows - 1][j] = v[j];
   rank ++;
 //  stOutput << "tacked on the end" << "\n";
 //  stOutput << fastbasis.ToString(&consoleFormat) << "\n";

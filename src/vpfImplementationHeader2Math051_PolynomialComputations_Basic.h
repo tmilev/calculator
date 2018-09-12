@@ -84,7 +84,7 @@ void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polyn
     int sign = 1;
     for (int j = 0; j < permutationIndices.size; j ++)
       for (int k = j + 1; k < permutationIndices.size; k ++)
-        if (permutationIndices[k]<permutationIndices[j])
+        if (permutationIndices[k] < permutationIndices[j])
           sign *= - 1;
     //stOutput << "<hr>" << permutationIndices << " sign: " << sign;
     theMonomial *= sign;

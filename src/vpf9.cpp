@@ -1151,7 +1151,7 @@ bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& output
   int positionInCloseTag = 0;
   int numTags = 0;
   //stOutput << "open tag with symbols: " << theOpenTagWithSymbols << ", close tag: " << theCloseTagWithSymbols;
-//  stOutput << "lengths are :" << lengthOpenTag << " and "<< lengthCloseTag;
+//  stOutput << "lengths are :" << lengthOpenTag << " and " << lengthCloseTag;
   std::stringstream out;
   if (this->positionInString < 0)
     this->positionInString = 0;
@@ -3276,7 +3276,7 @@ void PartFractions::MakeProgressReportSplittingMainPart()
   out1 << this->NumberRelevantReducedFractions << " relevant reduced + " << this->NumberIrrelevantFractions << " disjoint = " << this->NumTotalReduced;
   if (this->NumRelevantNonReducedFractions != 0)
     out1 << " + " << this->NumRelevantNonReducedFractions << " relevant unreduced ";
-  out1 << " out of "<< this->size() << " total fractions";
+  out1 << " out of " << this->size() << " total fractions";
   ProgressReport theReport1;
   ProgressReport theReport2;
   ProgressReport theReport3;
@@ -3301,7 +3301,7 @@ void PartFractions::MakeProgressVPFcomputation()
   ProgressReport theReport;
   out2 << "Processed " << this->NumProcessedForVPFfractions << " out of "
   << this->NumberRelevantReducedFractions << " relevant fractions";
-//  out3  << "Processed " <<" out of " << this->NumMonomialsInNumeratorsRelevantFractions
+//  out3  << "Processed " << " out of " << this->NumMonomialsInNumeratorsRelevantFractions
 //        << " relevant fractions";
   theReport.Report(out2.str());
 }
@@ -5489,7 +5489,7 @@ std::string WeylGroupData::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("WeylGroup::ToString");
   std::stringstream out;
   out << "<br>Size: " << this->theGroup.theElements.size << "\n";
-  out << "Number of Vectors: "<< this->RootSystem.size << "\n";
+  out << "Number of Vectors: " << this->RootSystem.size << "\n";
   out << "<br>Half-sum positive roots:" << this->rho.ToString() << "\n";
   out << this->ToStringRootsAndRootReflections();
   out << "<br>Symmetric cartan: " << this->CartanSymmetric.ToString();
@@ -8047,7 +8047,7 @@ bool Lattice::SubstitutionHomogeneous
 { int targetDim = theSub.NumCols;
   if (theSub.NumRows != this->GetDim())
     return false;
-  //stOutput <<"<br> the sub: " << theSub.ToString(true, false) << "<br>";
+  //stOutput << "<br> the sub: " << theSub.ToString(true, false) << "<br>";
   int startingDim = this->GetDim();
   Matrix<Rational> theMat, oldBasisTransformed, matRelationBetweenStartingVariables;
   theMat = theSub;
@@ -8846,7 +8846,7 @@ std::string ConeComplex::DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawin
   out << this->ToString(true);
 /*  for (int i = 0; i < this->size; i ++)
   { theDrawingVariables.theBuffer.init();
-    out <<"<hr>" << this->TheObjects[i].DrawMeToHtmlLastCoordAffine(theDrawingVariables, theFormat);
+    out << "<hr>" << this->TheObjects[i].DrawMeToHtmlLastCoordAffine(theDrawingVariables, theFormat);
   }*/
   return out.str();
 }
@@ -8862,7 +8862,7 @@ std::string ConeComplex::DrawMeToHtmlProjective
   out << this->ToString(true);
 /*  for (int i = 0; i < this->size; i ++)
   { theDrawingVariables.theBuffer.init();
-    out <<"<hr>" << this->TheObjects[i].DrawMeToHtmlLastCoordAffine(theDrawingVariables, theFormat);
+    out << "<hr>" << this->TheObjects[i].DrawMeToHtmlLastCoordAffine(theDrawingVariables, theFormat);
   }*/
   return out.str();
 }
@@ -8911,7 +8911,7 @@ bool ConeComplex::DrawMeProjective
   for (int i = 0; i < this->size; i ++)
   { //theDrawingVariables.theBuffer.init();
     result = ((*this)[i].DrawMeProjective(coordCenterTranslation, false, theDrawingVariables, theFormat) && result);
-    //stOutput <<"<hr> drawing number " << i + 1 << ": " << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()- 1);
+    //stOutput << "<hr> drawing number " << i + 1 << ": " << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()- 1);
   }
   return result;
 }
@@ -9449,7 +9449,7 @@ bool RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
 //      if (!this->checkConsistency())crash << crash;
       return true;
     case RationalFunctionOld::typePoly:
-//      stOutput <<"<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
+//      stOutput << "<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
 //      << " to get ";
       if (!this->Numerator.GetElement().Substitution(theSub))
         return false;

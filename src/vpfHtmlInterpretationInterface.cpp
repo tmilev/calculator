@@ -756,7 +756,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   out << "<body" //<< ">"
   << " onload =\"loadSettings();";
   out << " initializeButtonsCommon(); ";
-  out <<"\"><!-- tag added automatically; user-specified body tag ignored-->\n";
+  out << "\"><!-- tag added automatically; user-specified body tag ignored-->\n";
   if (thePage.flagDoPrependCalculatorNavigationBar)
   { out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in " << theGlobalVariables.GetElapsedSeconds()

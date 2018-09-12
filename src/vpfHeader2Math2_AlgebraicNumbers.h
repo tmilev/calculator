@@ -233,7 +233,7 @@ public:
   }
   ElementZmodP(const ElementZmodP& other)
   { this->flagDeallocated = false;
-    this->operator= (other);
+    *this = other;
   }
   ~ElementZmodP()
   { this->flagDeallocated = true;

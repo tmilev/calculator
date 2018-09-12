@@ -6,7 +6,7 @@ GraphOLD::GraphOLD(int max_vertices, int max_edges)
 { this->vertices = max_vertices;
   this->edges = 0;
   this->max_edges = max_edges;
-  this->data = List<int>(max_vertices * max_edges,- 1);
+  this->data = List<int>(max_vertices * max_edges, - 1);
 }
 
 void GraphOLD::AddEdge(int v1, int v2)
@@ -51,14 +51,14 @@ void GraphOLD::TreeRecurseCopyDelete(List<int> &l, int v, int m)
       if (!l.Contains(w))
         l.AddOnTop(w);
       this->data[v * m + i] = - 1;
-      this->TreeRecurseCopyDelete(l,w,m);
+      this->TreeRecurseCopyDelete(l, w, m);
     }
 }
 
 std::string GraphEdge::ToString(FormatExpressions* theFormat) const
 { (void) theFormat; //avoid unused parameter warning, portable.
   std::stringstream out;
-  out << this->vStart + 1 << "->" << this->vEnd+ 1;
+  out << this->vStart + 1 << "->" << this->vEnd + 1;
   if (this->label != "")
     out << "(" << this->label << ")";
   return out.str();

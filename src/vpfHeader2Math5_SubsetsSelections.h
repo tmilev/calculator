@@ -59,7 +59,9 @@ public:
   }
   int SelectionToIndex();
   void ExpandMaxSize();
-  int GetNumCombinationsFixedCardinality(int theCardinality){return MathRoutines::NChooseK(this->MaxSize, theCardinality);}
+  int GetNumCombinationsFixedCardinality(int theCardinality)
+  { return MathRoutines::NChooseK(this->MaxSize, theCardinality);
+  }
   void ShrinkMaxSize();
   void MakeSubSelection(Selection& theSelection, Selection& theSubSelection);
   void initSelectionFixedCardinality(int card);
@@ -422,7 +424,7 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot
   int theDimension = this->TheObjects[0].size;
   output.SetSize(theDimension);
   Matrix<coefficient> matOutputEmpty;
-  Selection& NonPivotPoints =bufferSel;
+  Selection& NonPivotPoints = bufferSel;
   bufferMatrix.init((int) theSelection.CardinalitySelection + 1, (int) theDimension);
   matOutputEmpty.init(- 1, - 1);
   for (int j = 0; j < theDimension; j ++)

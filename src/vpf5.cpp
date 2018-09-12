@@ -288,7 +288,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate()
     { tempPath = lastPath;
       tempPath.ActByEalpha(j);
       out << "<td> e_" << j + 1 << "("
-      << lastPath.ToString() << ")=</td>" <<"<td>" << tempPath.ToString() << "</td>";
+      << lastPath.ToString() << ")=</td>" << "<td>" << tempPath.ToString() << "</td>";
     }
     out << "</tr>";
   }
@@ -1118,7 +1118,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
     { std::stringstream reportStream;
       Vector<Rational>& currentHW = theHws[j];
       out << "<tr><td> " << currentHW.ToString() << "</td><td>" << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << "</td>";
-      reportStream << "Processing " << currentAlg.GetLieAlgebraName() << ", index  "<< i + 1 << " out of " << theRanks.size << ",  highest weight "
+      reportStream << "Processing " << currentAlg.GetLieAlgebraName() << ", index  " << i + 1 << " out of " << theRanks.size << ",  highest weight "
       << currentHW.ToString() << ", dim: " << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << ", index " << j + 1 << " out of " << theHws.size;
       theReport.Report(reportStream.str());
       latexReport << "$" << currentHW.ToStringLetterFormat("\\omega") << "$ &" << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << "&";

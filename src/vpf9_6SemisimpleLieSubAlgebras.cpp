@@ -3887,9 +3887,9 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat) const
   tempStreamHF << "\n[h, f] = " << this->bufferHbracketF.ToString(theFormat) << "";
   out << HtmlRoutines::GetMathMouseHover(tempStreamHF.str()) << "\n<br>\n";*/
   //this->theSystemMatrixForm.ToString(tempS);
-  //out <<"\nSystem matrix form we try to solve:\n"<< tempS;
+  //out << "\nSystem matrix form we try to solve:\n" << tempS;
   //this->theSystemColumnVector.ToString(tempS);
-  //out <<"\nColumn vector of the system:\n"<<tempS;
+  //out << "\nColumn vector of the system:\n" <<tempS;
   std::stringstream latexStreamActual;
   latexStreamActual << "\\begin{array}{l}";
   for (int i = 0; i < this->theSystemToBeSolved.size; i ++)
@@ -4452,7 +4452,7 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
   bool useHtml = theFormat == 0 ? true : theFormat->flagUseHTML;
   for (int i = 0; i < this->size; i ++)
   { tempS = (*this)[i].ToString(theFormat);
-  //  body<< "Index "<< i <<": ";
+  //  body<< "Index " << i << ": ";
     if (useHtml)
       body << "<br>";
     body << tempS;
@@ -4819,7 +4819,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   for (int i = 0; i < this->HighestWeightsPrimal.size; i ++)
     out << "<td>" << "W_{" << i + 1 << "}" << "</td>";
   out << "</tr>";
-  out <<"<tr><td>Module elements (weight vectors). <span style =\"color:#0000FF\">In blue - corresp. F element</span>. "
+  out << "<tr><td>Module elements (weight vectors). <span style =\"color:#0000FF\">In blue - corresp. F element</span>. "
   << "<span style =\"color:#FF0000\">In red -corresp. H element</span>. </td>";
   ElementSemisimpleLieAlgebra<AlgebraicNumber> tempLieBracket;
   for (int i = 0; i < this->Modules.size; i ++)

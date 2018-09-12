@@ -906,7 +906,7 @@ bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasi
 //  stOutput << "<br>input for GetLinearDependence: " << bufferVectors.ToString();
   if (!bufferVectors.GetLinearDependence(bufferMat))
     return false;
-  //stOutput << "<br>output for GetLinearDependence: "<< bufferMat.ToString();
+  //stOutput << "<br>output for GetLinearDependence: " << bufferMat.ToString();
 //  tempRoots.ComputeDebugString();
 //  tempMat.ComputeDebugString();
   coefficient tempCF = bufferMat(bufferMat.NumRows - 1, 0);

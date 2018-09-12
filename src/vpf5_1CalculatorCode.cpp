@@ -145,19 +145,19 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 //  for (int i = 0; i <BaseVariables.CardinalitySelection; i ++)
 //  { int tempI = BaseVariables.elements[i];
 //    matX.elements[tempI][0].ToString(tempS);
-//    out << tempS <<"(";
+//    out << tempS << "(";
 //    if (tempI<matA.NumCols)
 //    {  for (int j = 0; j<matA.NumRows; j ++)
 //      { matA.elements[j][tempI].ToString(tempS);
 //        out << tempS;
 //        if (j !=matA.NumRows- 1)
-//          out <<", ";
+//          out << ", ";
 //      }
 //    } else
-//      out<<"dummy column " << i <<" ";
-//    out <<")";
+//      out<< "dummy column " << i << " ";
+//    out << ")";
 //    if (i !=BaseVariables.CardinalitySelection- 1)
-//      out <<"+";
+//      out << "+";
 //  }
 //  tempS = out.str();
   for (int i = NumTrueVariables; i < matX.size; i ++)

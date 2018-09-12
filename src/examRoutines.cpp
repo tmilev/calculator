@@ -3310,7 +3310,7 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
     << spanCloningAttemptResultID
     << "'"
     << ");"
-    << "\" >Clone</button> <span id =\"" << spanCloningAttemptResultID <<"\"></span>";
+    << "\" >Clone</button> <span id =\"" << spanCloningAttemptResultID << "\"></span>";
   return out.str();
 }
 
@@ -3420,7 +3420,7 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
           out << theProbData.totalNumSubmissions << " submission(s), problem not correctly answered yet. ";
       } else if (theProbData.theAnswers.size() > 1)
         out << theProbData.totalNumSubmissions << " submission(s), " << theProbData.numCorrectlyAnswered
-        << " out of "<< theProbData.theAnswers.size() << " subproblems correctly answered. ";
+        << " out of " << theProbData.theAnswers.size() << " subproblems correctly answered. ";
     } else if (theProbData.totalNumSubmissions != 0)
     { if (theProbData.numCorrectlyAnswered < theProbData.theAnswers.size())
       { out << "<span style =\"color:red\"><b> "

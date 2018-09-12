@@ -413,8 +413,7 @@ public:
   (bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output) const;
   void ComputeModuleDecomposition
   (Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA,
-   charSSAlgMod<Rational>& outputHWs, List<int>& outputModuleDimensions)
-   ;
+   charSSAlgMod<Rational>& outputHWs, List<int>& outputModuleDimensions);
   void ComputeModuleDecompositionAmbientLieAlgebra();
   bool AttemptToComputeCentralizer();
   bool AttemptExtendingHFtoHEFWRTSubalgebra

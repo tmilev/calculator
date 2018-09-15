@@ -30,9 +30,9 @@ After=network.target
 User=todor
 # Note RHEL/Fedora uses 'nobody', Debian/Ubuntu uses 'nogroup'
 Group=todor  
-ExecStart=/home/todor/math/ace/calculator/bin/calculator server nokill 35
+ExecStart=/home/todor/math/courses/calculator/bin/calculator server nokill 35
 Restart=always
-WorkingDirectory=/home/todor/math/ace/calculator/bin
+WorkingDirectory=/home/todor/math/courses/calculator/bin
 
 [Install]
 WantedBy=multi-user.target

@@ -942,7 +942,7 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
       resultMat.elements[i][j].AddChildOnTop(leftIE);
       resultMat.elements[i][j].AddChildOnTop(rightIE);
     }
-  return output.AssignMatrixExpressions(resultMat, theCommands, true);
+  return output.AssignMatrixExpressions(resultMat, theCommands, true, true);
 }
 
 bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1739,7 +1739,7 @@ bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
 bool Expression::MakeIdMatrixExpressions(int theDim, Calculator& inputBoss)
 { Matrix<Expression> theMat;
   theMat.MakeIdMatrix(theDim, inputBoss.EOne(), inputBoss.EZero());
-  return this->AssignMatrixExpressions(theMat, inputBoss, false);
+  return this->AssignMatrixExpressions(theMat, inputBoss, false, true);
 }
 
 bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Expression& output)
@@ -2132,8 +2132,7 @@ void Calculator::AddOperationHandler
  const std::string& inputAdditionalIdentifier,
  const std::string& inputCalculatorIdentifier,
  bool inputDisabledByDefault,
- const std::string& parentOpThatBansHandler
- )
+ const std::string& parentOpThatBansHandler)
 { int indexOp = this->theAtoms.GetIndex(theOpName);
   int indexParentOpThatBansHandler = - 1;
   if (parentOpThatBansHandler != "")
@@ -2163,10 +2162,10 @@ void Calculator::AddOperationHandler
 }
 
 void Calculator::AddOperationComposite
-  (const std::string& theOpName, Expression::FunctionAddress handler,
-   const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
-   const std::string& opExample, bool isInner, bool visible, bool experimental,
-   const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier)
+(const std::string& theOpName, Expression::FunctionAddress handler,
+ const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
+ const std::string& opExample, bool isInner, bool visible, bool experimental,
+ const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier)
 { MacroRegisterFunctionWithName("Calculator::AddOperationComposite");
   int theIndex = this->operationsComposite.GetIndex(theOpName);
   if (opArgumentListIgnoredForTheTimeBeing != "")
@@ -2280,16 +2279,17 @@ JSData Function::ToJSON() const
   else
     result["visible"] = "false";
   //stOutput << "<br>tojson pt 1.5";
-  result["atom"] = this->owner->theAtoms[this->indexOperation];
   //stOutput << "<br>tojson pt 2";
   if (this->flagIsCompositeHandler)
   { result["composite"] = "true";
     result["number"] = this->indexAmongOperationHandlers + 1;
     result["total"] = this->owner->operationsCompositeHandlers[this->indexOperation].size;
+    result["atom"] = this->owner->operationsComposite[this->indexOperation];
   } else
   { result["composite"] = "false";
     result["number"] = this->indexAmongOperationHandlers + 1;
     result["total"] = this->owner->FunctionHandlers[this->indexOperation].size;
+    result["atom"] = this->owner->theAtoms[this->indexOperation];
   }
   //stOutput << "<br>tojson pt 3";
   if (this->flagIsExperimental)

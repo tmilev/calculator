@@ -1526,31 +1526,6 @@ bool CalculatorFunctionsGeneral::innerExpressionToUTF8String
   return output.AssignValue(input.ToUTF8String(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerMatrixComputeTypeComposite(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMatrixComputeTypeComposite");
-  if (input.size() < 1)
-    return false;
-  if (!input[0].StartsWith(theCommands.opMatriX(), 1))
-    return false;
-  //stOutput << "DEBUG: Here be i";
-  Matrix<Expression> theMat;
-  if (!theCommands.GetMatrixExpressions(input, theMat))
-    return false;
-  Expression conversionAttempt;
-  conversionAttempt.AssignMatrixExpressions(theMat, theCommands, true);
-  if (!conversionAttempt.IsMatrix())
-  { output = conversionAttempt;
-    return true;
-  }
-  if (conversionAttempt.size() >= 1)
-    if (conversionAttempt[0].StartsWith(theCommands.opMatriX()))
-      if (conversionAttempt[0].size() > 1)
-      { output = conversionAttempt;
-        return true;
-      }
-  return false;
-}
-
 bool CalculatorFunctionsGeneral::innerIsProductTermsUpToPower(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsProductTermsUpToPower");
   if (input.size() < 3)

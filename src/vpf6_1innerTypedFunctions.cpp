@@ -1012,7 +1012,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger(Calcul
   Matrix<Expression> idMatE;
   idMatE.MakeIdMatrix(theMat.NumRows, theCommands.EOne(), theCommands.EZero());
   MathRoutines::RaiseToPower(theMat, thePower, idMatE);
-  return output.AssignMatrixExpressions(theMat, theCommands, true);
+  return output.AssignMatrixExpressions(theMat, theCommands, true, true);
 }
 
 bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors
@@ -1256,7 +1256,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix(Calculator& th
   for (int i = 0; i < theMat.NumRows; i ++)
     for (int j = 0; j < theMat.NumCols; j ++)
       theMat(i, j) = theScalarE * theMat(i, j);
-  return output.AssignMatrixExpressions(theMat, theCommands, false);
+  return output.AssignMatrixExpressions(theMat, theCommands, false, true);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1328,7 +1328,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix
           leftSummand.MakeProducT(theCommands, leftMat(i, k), rightMat(k, j));
           outputMat(i, j).MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
         }
-  return output.AssignMatrixExpressions(outputMat, theCommands, true);
+  return output.AssignMatrixExpressions(outputMat, theCommands, true, true);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix
@@ -1372,7 +1372,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix(Calculator& theComm
   if (!theCommands.GetMatrixExpressions(input[2], rightMatE))
     return false;
   resultMatE.AssignTensorProduct(leftMatE, rightMatE);
-  return output.AssignMatrixExpressions(resultMatE, theCommands, true);
+  return output.AssignMatrixExpressions(resultMatE, theCommands, true, true);
 }
 
 bool CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1680,7 +1680,7 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix
   for (int i = 0; i < leftMat.NumRows; i ++)
     for (int j = 0; j < leftMat.NumCols; j ++)
       leftMat(i, j) += rightMat(i, j);
-  return output.AssignMatrixExpressions(leftMat, theCommands, false);
+  return output.AssignMatrixExpressions(leftMat, theCommands, false, true);
 }
 
 bool CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix
@@ -1697,7 +1697,7 @@ bool CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix
       !theCommands.GetMatrixExpressions(rightE, rightMat))
     return false;
   leftMat.DirectSumWith(rightMat,theCommands.EZero());
-  return output.AssignMatrixExpressions(leftMat, theCommands, false);
+  return output.AssignMatrixExpressions(leftMat, theCommands, false, true);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(Calculator& theCommands, const Expression& input, Expression& output)

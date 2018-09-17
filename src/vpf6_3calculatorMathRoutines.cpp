@@ -4241,7 +4241,7 @@ bool Expression::MakeMatrix(Calculator& owner, Matrix<Expression>* inputMat)
     this->AddChildOnTop(theMatID);
     return true;
   }
-  return this->AssignMatrixExpressions(*inputMat, owner, true);
+  return this->AssignMatrixExpressions(*inputMat, owner, true, true);
 }
 
 bool Expression::MakeSequence(Calculator& owner, List<Expression>* inputSequence)

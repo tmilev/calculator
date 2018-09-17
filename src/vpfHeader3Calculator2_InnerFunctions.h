@@ -193,7 +193,6 @@ public:
   static bool innerCompositeEWAactOnPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeConstTimesAnyActOn(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeApowerBevaluatedAtC(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMatrixComputeTypeComposite(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConstantFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRationalFunctionSubstitution(Calculator& theCommands, const Expression& input, Expression& output);
 

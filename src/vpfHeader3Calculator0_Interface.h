@@ -170,7 +170,7 @@ private:
   bool SetChilD(int childIndexInMe, const Expression& inputChild);
   bool AssignMatrixExpressions
   (const Matrix<Expression>& input, Calculator& owner,
-   bool reduceOneRowToSequenceAndOneByOneToNonMatrix);
+   bool reduceOneRowToSequenceAndOneByOneToNonMatrix, bool dontReduceTypes);
   template<class coefficient>
   bool AssignMatrix
   (const Matrix<coefficient>& input, Calculator& owner,
@@ -2129,6 +2129,7 @@ public:
   static bool innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerElementUE
   (Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& inputOwner);
+  static bool outerMatrixExpressionsToMatrixOfType(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMakeMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixDouble(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2425,7 +2426,7 @@ bool Expression::AssignMatrix
         currentElt.AssignValueWithContext(input(i, j), *inputContext, owner);
       theMatEs(i, j) = currentElt;
     }
-  return this->AssignMatrixExpressions(theMatEs, owner, reduceOneRowToSequenceAndOneByOneToNonMatrix);
+  return this->AssignMatrixExpressions(theMatEs, owner, reduceOneRowToSequenceAndOneByOneToNonMatrix, false);
 }
 
 template <typename theType>

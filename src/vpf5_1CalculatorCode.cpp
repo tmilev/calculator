@@ -743,7 +743,7 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
   //    return false;
   theMat.Transpose();
 //  stOutput << "DEBUG: got to here pt2, mat is: " << theMat.ToString();
-  return output.AssignMatrixExpressions(theMat, theCommands, true);
+  return output.AssignMatrixExpressions(theMat, theCommands, true, true);
 }
 
 void Plot::operator+=(const Plot& other)

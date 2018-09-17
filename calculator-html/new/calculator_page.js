@@ -113,7 +113,8 @@ function processOneFunctionAtom(handlers, isComposite) {
     var currentDescription = handlers[counterHandlers].description;
     var currentExample = handlers[counterHandlers].example;
     resultString += `<calculatorAtom>${handlers[counterHandlers].atom}</calculatorAtom>`;
-    resultString += "<calculatorCompositeAtom>(composite)</calculatorCompositeAtom>";
+    if (handlers[counterHandlers].composite === "true")
+        resultString += "<calculatorCompositeAtom>(composite)</calculatorCompositeAtom>";
     resultString += ` (${counterHandlers + 1} out of ${handlers.length})`;
     var currentId = "example_";
     if (isComposite) {
@@ -142,8 +143,9 @@ function processExamples(inputJSONtext) {
     var numHandlers = 0;
     for (var counterAtoms = 0; counterAtoms < atomsSorted.length; counterAtoms ++) {
       var atom = atomsSorted[counterAtoms];
-      examplesString += processOneFunctionAtom(theCalculatorExamples[atom].regular, false);
-      examplesString += processOneFunctionAtom(theCalculatorExamples[atom].composite, false);
+      var currentExamples = theCalculatorExamples[atom];
+      examplesString += processOneFunctionAtom(currentExamples.regular, false);
+      examplesString += processOneFunctionAtom(currentExamples.composite, true);
       numHandlers += theCalculatorExamples[atom].regular.length + theCalculatorExamples[atom].composite.length;
     }
     var resultString = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;

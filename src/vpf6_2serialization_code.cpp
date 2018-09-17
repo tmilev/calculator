@@ -1010,6 +1010,34 @@ bool CalculatorConversions::innerMatrixRationalTensorForm(Calculator& theCommand
   return output.AssignValue(outputMatTensor, theCommands);
 }
 
+bool CalculatorConversions::outerMatrixExpressionsToMatrixOfType(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorConversions::outerMatrixExpressionsToMatrixOfType");
+  if (!input.IsMatrix())
+      return false;
+  if (input.size() < 1)
+      return false;
+  if (input[0].size() != 1)
+      return false;
+  if (input[0][0].theData != theCommands.opMatriX())
+      return false;
+  Matrix<Expression> theMatrix;
+  if (!theCommands.GetMatrixExpressionsFromArguments(input, theMatrix))
+      return false;
+  Expression conversionAttempt;
+  conversionAttempt.AssignMatrixExpressions(theMatrix, theCommands, true, false);
+  if (!conversionAttempt.IsMatrix())
+  { output = conversionAttempt;
+    return true;
+  }
+  if (conversionAttempt.size() >= 1)
+    if (conversionAttempt[0].StartsWith(theCommands.opMatriX()))
+      if (conversionAttempt[0].size() > 1)
+      { output = conversionAttempt;
+        return true;
+      }
+  return false;
+}
+
 bool CalculatorConversions::innerMakeMatrix(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerMakeMatrix");
   if (CalculatorConversions::innerMatrixRational(theCommands, input, output))
@@ -1020,7 +1048,7 @@ bool CalculatorConversions::innerMakeMatrix(Calculator& theCommands, const Expre
     return true;
   Matrix<Expression> outMat;
   if (theCommands.GetMatrixExpressionsFromArguments(input, outMat))
-    return output.AssignMatrixExpressions(outMat, theCommands, true);
+    return output.AssignMatrixExpressions(outMat, theCommands, true, true);
   return false;
 }
 

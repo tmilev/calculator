@@ -1526,7 +1526,7 @@ bool Calculator::innerPrintZnEnumeration(Calculator& theCommands, const Expressi
 
 bool Expression::AssignMatrixExpressions
 (const Matrix<Expression>& input, Calculator& owner,
- bool reduceOneRowToSequenceAndOneByOneToNonMatrix)
+ bool reduceOneRowToSequenceAndOneByOneToNonMatrix, bool dontReduceTypes)
 { MacroRegisterFunctionWithName("Expression::AssignMatrixExpressions");
   if (reduceOneRowToSequenceAndOneByOneToNonMatrix && input.NumRows == 1)
   { if (input.NumCols == 1)
@@ -1638,7 +1638,7 @@ bool Expression::AssignMatrixExpressions
     default:
       break;
   }
-  if (outType != typeUnknown && outType != typeExpression)
+  if (outType != typeUnknown && outType != typeExpression && !dontReduceTypes)
     this->SetChilD(0, theMatType);
   return true;
 }

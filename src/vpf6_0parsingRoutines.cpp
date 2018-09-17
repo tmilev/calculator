@@ -1064,12 +1064,13 @@ bool Calculator::ReplaceMatrixXByE()
     for (int i = 0; i < numRows; i ++)
       for (int j = 0; j < numCols; j ++)
       { if (j + 1 >= theMatElt.dataList[i].size())
-        { theMat.elements[i][j].AssignValue(0,*this);
+        { theMat.elements[i][j].AssignValue(0, *this);
           continue;
         }
         theMat.elements[i][j] = theMatElt.dataList[i][j + 1];
       }
-    theMatElt.theData.AssignMatrixExpressions(theMat, *this, true);
+    //stOutput << "DEBUG GOT TO HERE!";
+    theMatElt.theData.AssignMatrixExpressions(theMat, *this, true, true);
   } else
     theMatElt.theData.MakeMatrix(*this);
   theMatElt.dataList.SetSize(0);

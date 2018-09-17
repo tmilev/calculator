@@ -1251,7 +1251,7 @@ void Calculator::initPredefinedInnerFunctions()
    "MakeRationalFunction{}(x_1+MakeRationalFunction{}x_1+x_2)",
    true, false, "CalculatorConversions::innerRationalFunction");
   this->AddOperationInnerHandler
-  ("MakeMatrix", CalculatorConversions::innerMakeMatrix,"",
+  ("MakeMatrix", CalculatorConversions::innerMakeMatrix, "",
    "Creates an internal c++ matrix structure from double list of rationals. ",
    "s_1=MakeMatrix{}((- 1,- 1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1));\n"
    "s_2=MakeMatrix{}((1,0,0,0), (- 1,- 1,- 1,0), (0,0,1,0), (0,0,0,1));\n"
@@ -5516,11 +5516,22 @@ void Calculator::initPredefinedOperationsComposite()
    "CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation",
    "SumAsOperator");
   this->AddOperationComposite
-  ("Matrix", CalculatorFunctionsGeneral::innerMatrixComputeTypeComposite, "",
-   "If A is a non-typed matrix of expressions that can be converted to a typed matrix, carries out the type specialization. ",
-   " \\begin{pmatrix}- 1&2\\\\5&3\\end{pmatrix}", true, true, false,
-   "CalculatorFunctionsGeneral::innerMatrixComputeTypeComposite",
-   "MatrixComputeType");
+  ("Matrix", CalculatorConversions::outerMatrixExpressionsToMatrixOfType, "",
+    "If A is a non-typed matrix of expressions that can be converted to a typed matrix, carries out the type specialization. ",
+    "%LogEvaluation\n"
+    "A= \\begin{pmatrix}\n"
+    "1 & 2\\\\\n"
+    "3 & 4\n"
+    "\\end{pmatrix};\n"
+    "B=\\begin{pmatrix}\n"
+    "a & 2\\\\\n"
+    "3 & 4\n"
+    "\\end{pmatrix};\n"
+    "PlotExpressionTree A;\n"
+    "PlotExpressionTree B",
+    true, true, false,
+    "CalculatorConversions::outerMatrixExpressionsToMatrixOfType",
+    "MatrixTypeDeduction");
   this->AddOperationComposite
   ("Rational", CalculatorFunctionsGeneral::innerConstantFunction, "",
    "If x is a constant, replaces x{}({{anything}})=x; ",

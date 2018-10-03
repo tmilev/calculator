@@ -316,7 +316,7 @@ bool CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58(Calculator&
   if (theInt < 0)
     return theCommands << "Conversion from negative integer to base58 not allowed.";
   std::string result;
-  Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(theInt.value, result);
+  Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(theInt.value, result, 0);
   return output.AssignValue(result, theCommands);
 }
 
@@ -383,9 +383,10 @@ bool CalculatorFunctionsGeneral::innerConvertHexToBase58(Calculator& theCommands
   const std::string& inputString = input.GetValue<std::string>();
   LargeIntUnsigned outputInteger;
   std::string outputString;
-  if (!Crypto::ConvertHexToInteger(inputString, outputInteger))
+  int numLeadingZeroBytes = 0;
+  if (!Crypto::ConvertHexToInteger(inputString, outputInteger, numLeadingZeroBytes))
     return theCommands << "Failed to convert " << inputString << " from hex to integer. ";
-  Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(outputInteger, outputString);
+  Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(outputInteger, outputString, numLeadingZeroBytes);
   return output.AssignValue(outputString, theCommands);
 }
 

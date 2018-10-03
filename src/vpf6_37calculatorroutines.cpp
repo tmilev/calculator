@@ -471,7 +471,8 @@ bool CalculatorFunctionsGeneral::innerHexToInteger(Calculator& theCommands, cons
   if (!input.IsOfType(&inputString))
     return false;
   LargeIntUnsigned result;
-  if (!Crypto::ConvertHexToInteger(inputString, result))
+  int notUsedNumberOfLeadingZeroes = 0;
+  if (!Crypto::ConvertHexToInteger(inputString, result, notUsedNumberOfLeadingZeroes))
     return theCommands << "Failed to interpret " << inputString
     << " as a hex string ";
   Rational resultRat = result;

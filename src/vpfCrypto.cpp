@@ -537,8 +537,10 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output)
   return result;
 }
 
-bool Crypto::ConvertHexToInteger(const std::string& input, LargeIntUnsigned& output)
+bool Crypto::ConvertHexToInteger(const std::string& input, LargeIntUnsigned& output, int& outputNumLeadingZeroPairs)
 { output.MakeZero();
+  bool foundNonZero = false;
+  outputNumLeadingZeroPairs = 0;
   for (unsigned i = 0; i < input.size(); i ++)
   { int theDigit = - 1;
     //stOutput << "DEBUG: Digit from: " << input[i];
@@ -548,12 +550,21 @@ bool Crypto::ConvertHexToInteger(const std::string& input, LargeIntUnsigned& out
       theDigit = 10 + input[i] - 'a';
     if (input[i] >= '0' && input[i] <= '9')
       theDigit = input[i] - '0';
+    if (theDigit > 0) {
+        foundNonZero = true;
+    }
     //stOutput << "DEBUG: got digit: " << theDigit;
     if (theDigit != - 1)
     { output *= 16;
       output += theDigit;
     }
+    if (!foundNonZero)
+      outputNumLeadingZeroPairs ++;
   }
+  if (outputNumLeadingZeroPairs % 2 != 0) {
+      outputNumLeadingZeroPairs --;
+  }
+  outputNumLeadingZeroPairs /= 2;
   //stOutput << "result: " << output.ToString();
   return true;
 }
@@ -871,12 +882,16 @@ void Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLAST
 }
 
 void Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST
-(const LargeIntUnsigned& input, std::string& output)
+(const LargeIntUnsigned& input, std::string& output, int numberOfOnesToPrepend)
 { std::string outputReversed;
   Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLAST(input, outputReversed);
-  output.resize(outputReversed.size());
+  output.clear();
+  output.reserve(outputReversed.size() + numberOfOnesToPrepend);
+  for (int i = 0; i < numberOfOnesToPrepend; i ++) {
+    output.push_back('1');
+  }
   for (unsigned i = 0; i < outputReversed.size(); i ++)
-    output[i] = outputReversed[outputReversed.size() - 1 - i];
+    output.push_back(outputReversed[outputReversed.size() - 1 - i]);
 }
 
 bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output, std::stringstream* commentsOnFailure)

@@ -6103,10 +6103,10 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("/html/", "../public_html/");//<-coming from webserver
 
   folderSubstitutionsNonSensitive.SetKeyValue("/calculator-html/", "./calculator-html/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "./html-common/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/font/", "./html-common/fonts/");
   folderSubstitutionsNonSensitive.SetKeyValue("/font/", "./html-common/fonts/");
   folderSubstitutionsNonSensitive.SetKeyValue("/fonts/", "./html-common/fonts/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/font/", "./html-common/fonts/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "./html-common/");//<-coming from webserver
 
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");//<-internal use
   //referred to by site:

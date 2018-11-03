@@ -6104,6 +6104,7 @@ void WebServer::InitializeGlobalVariables()
 
   folderSubstitutionsNonSensitive.SetKeyValue("/calculator-html/", "./calculator-html/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "./html-common/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/font/", "./html-common/fonts/");
   folderSubstitutionsNonSensitive.SetKeyValue("/font/", "./html-common/fonts/");
   folderSubstitutionsNonSensitive.SetKeyValue("/fonts/", "./html-common/fonts/");
 

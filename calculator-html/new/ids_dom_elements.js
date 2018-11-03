@@ -26,6 +26,6 @@ var idDOMElements = {
   spanStudentViewSectionSelectPanel: "spanStudentViewSectionSelectPanel",
   divCurrentCourseBody: "divCurrentCourseBody",
   classSpanDeadlineContainer: "spanDeadlineContainer",
-  calculatorBuildVersion: "divCalculatorBuildVersion"
+  calculatorBuildVersion: "anchorCalculatorBuildVersion"
 
 };

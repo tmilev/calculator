@@ -28,3 +28,6 @@ node_modules
 external-source
 
 configuration
+
+calculator-html/new/autocomplete_keywords.js
+calculator-html/new/server_information.js

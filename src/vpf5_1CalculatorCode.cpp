@@ -348,8 +348,7 @@ std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType
     << "<a href=\"" <<  GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder
     << theType.ToString() << "/" << theTitlePageFileNameNoPathFastLoad << "\">"
     << theType[0].theLetter << theType[0].theRank << " semisipmles subalgebras, fast load</a></td>\n ";
-  }
-  else
+  } else
     out << "<td>Not available</td>\n";
   out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
   << "?request=calculator&mainInput=printSlTwoSubalgebras%7B%7D%28"
@@ -480,8 +479,7 @@ bool Calculator::innerPrintSSsubalgebras
   //  << "seconds...  </b>"
   //<< "<meta http-equiv=\"refresh\" content =\"5; url ="
   //<< displayFolder << theTitlePageFileNameNoPath
-  //<< "\">"
-  ;
+  //<< "\">";
   if (!FileOperations::FileExistsVirtual(theSSsubalgebras.VirtualNameMainFile1) || doForceRecompute)
   { if (!isAlreadySubalgebrasObject)
       theSSsubalgebras.timeComputationStartInSeconds = theGlobalVariables.GetElapsedSeconds();

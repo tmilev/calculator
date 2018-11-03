@@ -2329,12 +2329,20 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     }
     //stOutput << "<br>DEBUG: " << this->ToStringParsingStack(eltsStack);
     reduced = true;
-    SyntacticElementHTML& last         = eltsStack[eltsStack.size - 1];
-    SyntacticElementHTML& secondToLast = eltsStack[eltsStack.size - 2];
-    SyntacticElementHTML& thirdToLast  = eltsStack[eltsStack.size - 3];
-    SyntacticElementHTML& fourthToLast = eltsStack[eltsStack.size - 4];
-    SyntacticElementHTML& fifthToLast  = eltsStack[eltsStack.size - 5];
-    SyntacticElementHTML& sixthToLast  = eltsStack[eltsStack.size - 6];
+    int sizeMinus1 = eltsStack.size - 1;
+    //<- needed to avoid compiler warning:
+    //"warning: assuming signed overflow does not occur when assuming that (X + c) < X is always ..."
+    int sizeMinus2 = eltsStack.size - 2;
+    int sizeMinus3 = eltsStack.size - 3;
+    int sizeMinus4 = eltsStack.size - 4;
+    int sizeMinus5 = eltsStack.size - 5;
+    int sizeMinus6 = eltsStack.size - 6;
+    SyntacticElementHTML& last         = eltsStack[sizeMinus1]; //<- needed to avoid compiler warning
+    SyntacticElementHTML& secondToLast = eltsStack[sizeMinus2];
+    SyntacticElementHTML& thirdToLast  = eltsStack[sizeMinus3];
+    SyntacticElementHTML& fourthToLast = eltsStack[sizeMinus4];
+    SyntacticElementHTML& fifthToLast  = eltsStack[sizeMinus5];
+    SyntacticElementHTML& sixthToLast  = eltsStack[sizeMinus6];
     //SyntacticElementHTML& seventhToLast = eltsStack[eltsStack.size-7];
     if ((secondToLast.syntacticRole == "<openTagCalc>" ||
          secondToLast.syntacticRole == "<calculatorSolution>") &&

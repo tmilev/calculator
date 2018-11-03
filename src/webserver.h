@@ -63,17 +63,7 @@ public:
   int SSLwrite
   (SSL* theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
    std::stringstream *commentsGeneral, bool includeNoErrorInComments);
-  SSLdata()
-  { this->errorCode = - 1;
-    this->sslClient = 0;
-    this->sslServeR = 0;
-    this->my_certificate = 0;
-    this->peer_certificate = 0;
-    this->theSSLMethod = 0;
-    this->contextServer = 0;
-    //this->contextClient = 0;
-    this->flagSSLHandshakeSuccessful = false;
-  }
+  SSLdata();
   ~SSLdata();
   void FreeSSL();
   void FreeContext();
@@ -373,6 +363,7 @@ public:
   bool EmergencyRemoval_LastCreatedWorker();
   bool CheckConsistency();
   int Run();
+  void WriteVersionJSFile();
   WebWorker& GetActiveWorker();
   static void WorkerTimerPing(double pingTime);
   static void Release(int& theDescriptor);

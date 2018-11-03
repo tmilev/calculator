@@ -426,7 +426,7 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
   << "\n<br>\n8) Type the following command. Make sure to include the dot.  <br>./calculator server"
   << "\n<br>\n9) The calculator will display a message saying on which port it got bound. "
   << "The default ports should be 8155 and 8166 for http and https. "
-  << "Type the address:  <br>localhost:8155/cgi-bin/calculator<br>"
+  << "Type the address:  <br>localhost:8155<br>"
   << " in your web browser to get to the calculator. "
   << "If the calculator didn't succeed in binding to port 8155"
   << " (say, the port is already taken) it will try to bind next to ports 8080, 8081 and 8082. "

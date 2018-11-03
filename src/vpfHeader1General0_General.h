@@ -1144,7 +1144,7 @@ public:
   }
   Object& operator[](int i) const
   { this->CheckConsistency();
-    if (((int) i >= (int) this->size) || ((int) i < 0))
+    if ( (i >= this->size) || i < 0)
       crash << "Programming error: attempting to access the entry of index " << i << " in an array of " << this->size << " elements. " << crash;
     return this->TheObjects[i];
   }

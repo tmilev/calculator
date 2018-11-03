@@ -334,6 +334,7 @@ function Page() {
   
   setCookie("useJSON", true, 300, false);
   this.initMenuBar();
+  this.initBuildVersion();
   //////////////////////////////////////
   //////////////////////////////////////
   //Initialize global variables
@@ -370,6 +371,10 @@ function Page() {
   this.setSwitches();
   document.getElementById("divPage").style.display = "";
   document.getElementById("divPage").className = "divPage";
+}
+
+Page.prototype.initBuildVersion = function() {
+  document.getElementById(idDOMElements.calculatorBuildVersion).innerHTML = `Build version ${serverInformation.version}`;
 }
 
 Page.prototype.initMenuBar = function() {

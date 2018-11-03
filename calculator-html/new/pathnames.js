@@ -2,7 +2,9 @@
 
 var pathnames = {
   calculatorAPI: "/cgi-bin/calculator",
-  app: "/appNoCache",
+  appNoCache: "/appNoCache",
+  appWithCache: "/app",
+  app: "/app",
   request: "request",
   mainInput: "mainInput",
   fileName: "fileName",

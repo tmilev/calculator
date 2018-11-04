@@ -517,7 +517,7 @@ bool UserCalculator::Iexist(std::stringstream* comments)
 
 void UserCalculator::ComputeHashedSaltedPassword()
 { MacroRegisterFunctionWithName("UserCalculator::ComputeShaonedSaltedPassword");
-  this->usernamePlusPassWord.reserve(this->username.size() + this->enteredPassword.size());
+  this->usernamePlusPassWord.resize(this->username.size() + this->enteredPassword.size());
   //<-careful copying those around. We want to avoid leaving
   //passwords in non-zeroed memory, even if properly freed (to the extent possible and practical).
   for (unsigned i = 0; i < this->username.size(); i ++)
@@ -1463,8 +1463,8 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
   if (userWrapper.username == "admin" && userWrapper.enteredPassword != "")
     if (!userWrapper.Iexist(0))
     { if (comments != 0)
-        *comments << "First login of user admin: setting admin pass. ";
-      logWorker << logger::yellow << "First login of user admin: setting admin pass. " << logger::endL;
+        *comments << "First login of user admin: setting admin pass to: " << userWrapper.enteredPassword;
+      logWorker << logger::yellow << "First login of user admin: setting admin pass to: " << userWrapper.enteredPassword << logger::endL;
       //*comments << "DEBUG: user before storing: " << userWrapper.ToJSON().ToString();
       userWrapper.actualActivationToken = "activated";
       userWrapper.userRole = "admin";

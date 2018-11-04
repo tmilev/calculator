@@ -60,7 +60,7 @@ function logoutPartTwo() {
   } else { 
     var loginStatus = "";
     loginStatus += `<b><a href='#' onclick='reloadPage("<b>User requested reload. </b>", 0);'>Reload page</a>`;
-    loginStatus += `for complete logout (when <span style='color:red'>using public computer</span>).</b>`;
+    loginStatus += ` for complete logout (when <span style='color:red'>using public computer</span>).</b>`;
     document.getElementById("spanLoginStatus").innerHTML = loginStatus;
     showLoginCalculatorButtons();
     toggleAccountPanels();
@@ -157,8 +157,11 @@ function onGoogleSignIn(googleUser) {
     thePage.user.googleProfile = window.calculator.jwt.decode(theToken);
     thePage.showProfilePicture();
     showLogoutButton();
+    var theURL = "";
+    theURL += `${pathnames.calculatorAPI}?request=userInfoJSON&`;
+    theURL += `googleToken=${theToken}&`;
     submitGET({
-      url: `${pathnames.calculatorAPI}?request=userInfoJSON`,
+      url: theURL,
       callback: loginWithServerCallback,
       progress: "spanProgressReportGeneral"
     });

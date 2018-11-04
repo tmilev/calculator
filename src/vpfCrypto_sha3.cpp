@@ -180,7 +180,6 @@ sha3_Init512(void *priv)
 
 void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len)
 { Sha3 *ctx = (Sha3 *) priv;
-  stOutput << "DEBUG: flag use keccak: " << ctx->flagUseKeccak;
   /* 0...7 -- how much is needed to have a word */
   unsigned old_tail = (8 - ctx->byteIndex) & 7;
   size_t words;

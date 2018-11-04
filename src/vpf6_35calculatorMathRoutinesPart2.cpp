@@ -1489,7 +1489,7 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
 }
 
 std::string InputBox::GetSliderName() const
-{ return this->name + Crypto::computeSha1outputBase64(this->name);
+{ return this->name + Crypto::computeSha3_256OutputBase64URL(this->name);
 }
 
 std::string InputBox::GetUserInputBox() const

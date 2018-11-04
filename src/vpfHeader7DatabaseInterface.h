@@ -256,7 +256,7 @@ public:
   static bool IsAcceptableDatabaseInpuT(const std::string& input, std::stringstream* comments);
   static bool IsAcceptableCharDatabaseInpuT(char theChar);
   bool ComputeAndStoreActivationToken(std::stringstream* commentsOnFailure);
-  void ComputeShaonedSaltedPassword();
+  void ComputeHashedSaltedPassword();
   bool GetActivationAbsoluteAddress
   (std::string& output, std::stringstream& comments);
   bool GetActivationAddress

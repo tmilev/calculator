@@ -1849,9 +1849,9 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   std::stringstream out;
   std::stringstream deadlineStream;
   inputOutput.idDeadlineTable = "deadlineTable" +
-  Crypto::computeSha1outputBase64(inputOutput.id);
+  Crypto::computeSha3_256OutputBase64URL(inputOutput.id);
   inputOutput.idDeadlineButton = "deadlineButton" +
-  Crypto::computeSha1outputBase64(inputOutput.id);
+  Crypto::computeSha3_256OutputBase64URL(inputOutput.id);
   deadlineStream << "<table class =\"deadlineTable\" id =\""
   << inputOutput.idDeadlineTable
   << "\">";
@@ -1863,7 +1863,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   { std::string& currentDeadlineId = inputOutput.idsDeadlines[i];
     if (this->databaseStudentSections[i] == "")
       continue;
-    currentDeadlineId = "deadline" + Crypto::ConvertStringToBase64
+    currentDeadlineId = "deadline" + Crypto::ConvertStringToBase64URL
     (this->databaseStudentSections[i] + inputOutput.id);
     if (currentDeadlineId[currentDeadlineId.size() - 1] == '=')
       currentDeadlineId.resize(currentDeadlineId.size() - 1);
@@ -1890,7 +1890,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   }
   deadlineStream << "<tr><td>\n";
   inputOutput.idDeadlineReport = "deadlineReport" +
-  Crypto::computeSha1outputBase64(inputOutput.id);
+  Crypto::computeSha3_256OutputBase64URL(inputOutput.id);
 
   if (inputOutput.idDeadlineReport[inputOutput.idDeadlineReport.size() - 1] == '=')
     inputOutput.idDeadlineReport.resize(inputOutput.idDeadlineReport.size() - 1);
@@ -3564,8 +3564,8 @@ void TopicElement::ComputeID()
       out << "[TitledItem]";
     this->id = out.str();
   }
-  this->idBase64 = Crypto::computeSha1outputBase64(this->id);
-  this->studentScoresSpanId = "topic" + Crypto::computeSha1outputBase64(this->id);
+  this->idBase64 = Crypto::computeSha3_256OutputBase64URL(this->id);
+  this->studentScoresSpanId = "topic" + Crypto::computeSha3_256OutputBase64URL(this->id);
 }
 
 void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)

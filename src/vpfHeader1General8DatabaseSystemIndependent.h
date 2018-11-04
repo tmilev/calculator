@@ -22,9 +22,13 @@ class UserCalculatorData
   std::string problemDataStrinG;
   JSData problemDataJSON;
 
+  // Plain text password. Keep in memory as little as possible.
+  // Zero bytes as soon as enteredHashedSaltedPassword is computed.
   std::string enteredPassword;
-  std::string actualShaonedSaltedPassword;
-  std::string enteredShaonedSaltedPassword;
+  //At the moment, this is obtained via:
+  //Base64url(Sha3(concatenate(user,password))).
+  std::string actualHashedSaltedPassword;
+  std::string enteredHashedSaltedPassword;
   std::string enteredGoogleToken;
   std::string userRole;
   std::string timeOfAuthenticationTokenCreation;

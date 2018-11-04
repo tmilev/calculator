@@ -464,15 +464,15 @@ void UserCalculatorData::reset()
 
 void UserCalculatorData::clearPasswordFromMemory()
 { MacroRegisterFunctionWithName("UserCalculatorData::resetPassword");
-  for (unsigned i = 0; i < this->actualShaonedSaltedPassword.size(); i ++)
-    this->actualShaonedSaltedPassword[i] = ' ';
-  this->actualShaonedSaltedPassword = "";
+  for (unsigned i = 0; i < this->actualHashedSaltedPassword.size(); i ++)
+    this->actualHashedSaltedPassword[i] = ' ';
+  this->actualHashedSaltedPassword = "";
   for (unsigned i = 0; i < this->enteredPassword.size(); i ++)
     this->enteredPassword[i] = ' ';
   this->enteredPassword = "";
-  for (unsigned i = 0; i < this->enteredShaonedSaltedPassword.size(); i ++)
-    this->enteredShaonedSaltedPassword[i] = ' ';
-  this->enteredShaonedSaltedPassword = "";
+  for (unsigned i = 0; i < this->enteredHashedSaltedPassword.size(); i ++)
+    this->enteredHashedSaltedPassword[i] = ' ';
+  this->enteredHashedSaltedPassword = "";
   for (unsigned i = 0; i < this->actualActivationToken.size(); i ++)
     this->actualActivationToken[i] = ' ';
   this->actualActivationToken = "";

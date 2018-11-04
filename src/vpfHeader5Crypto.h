@@ -32,8 +32,9 @@ public:
   static bool LoadOneKnownCertificate
   (const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
 
-  static std::string ConvertStringToBase64(const List<unsigned char>& input);
-  static std::string ConvertStringToBase64(const std::string& input);
+  static std::string ConvertStringToBase64(const List<unsigned char>& input, bool useBase64URL);
+  static std::string ConvertStringToBase64Standard(const std::string& input);
+  static std::string ConvertStringToBase64URL(const std::string& input);
   static uint32_t GetUInt32FromCharBigendian(const List<unsigned char>& input);
   static void ConvertStringToListUInt32BigendianZeroPad
   (const List<unsigned char>& input, List<uint32_t>& output);
@@ -62,7 +63,7 @@ public:
   static bool GetBase58FromChar(unsigned char input, uint32_t& output);
   static bool GetCharFromBase58(uint32_t input, char& output);
   static bool Get6bitFromChar(unsigned char input, uint32_t& output);
-  static unsigned char GetCharFrom6bit(uint32_t input);
+  static unsigned char GetCharFrom6bit(uint32_t input, bool useBase64URL);
   static void ConvertBitStreamToString(const List<unsigned char>& input, std::string& output);
   static void ConvertStringToListBytes(const std::string& input, List<unsigned char>& output);
   static void ConvertStringToListBytesSigned(const std::string& input, List<char>& output);
@@ -94,10 +95,10 @@ public:
   (const LargeIntUnsigned& input, std::string& output);
   static bool ConvertLargeUnsignedIntToStringSignificantDigitsFirst
   (const LargeIntUnsigned& input, std::string& output);
-  static std::string computeSha1outputBase64(const std::string& inputString);
   static bool VerifyJWTagainstKnownKeys
   (const std::string& inputToken, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   static void computeRIPEMD160(const std::string& input, List<unsigned char>& output);
+  static std::string computeSha3_256OutputBase64URL(const std::string& input);
   static void computeSha3_256(const std::string& input, List<unsigned char>& output);
   static void computeKeccak3_256(const std::string& input, List<unsigned char>& output);
   static bool encryptAES_CBC_256

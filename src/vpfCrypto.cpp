@@ -6,7 +6,7 @@
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
 ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA- 1 and base64 implementation.");
 
-unsigned char Crypto::GetCharFrom6bit(uint32_t input)
+unsigned char Crypto::GetCharFrom6bit(uint32_t input, bool useBase64URL)
 { switch (input)
   { case 0: return  'A';
     case 1: return  'B';
@@ -70,10 +70,16 @@ unsigned char Crypto::GetCharFrom6bit(uint32_t input)
     case 59: return '7';
     case 60: return '8';
     case 61: return '9';
-    case 62: return '-';//RFC 7515 mandates these values.
-    case 63: return '_';//RFC 7515 mandates these values.
-//    case 62: return '+';//original base64, deprecated.
-//    case 63: return '/';//original base64, deprecated.
+    case 62:
+      if (useBase64URL)
+        return '-'; //RFC 4648, base64url.
+      else
+        return '+'; //RFC 4648.
+    case 63:
+      if (useBase64URL)
+        return '_'; //RFC 4648.
+      else
+        return '/'; // RFC 4648, base64url.
     default: crash << "Requesting character from a purported 6 bit integer, which in fact has more significant bits. " << crash;
       break;
   }
@@ -276,10 +282,10 @@ bool Crypto::Get6bitFromChar(unsigned char input, uint32_t& output)
     case '7': output = 59; return true;
     case '8': output = 60; return true;
     case '9': output = 61; return true;
-    case '-': output = 62; return true;//RFC 7515 mandates these values.
-    case '_': output = 63; return true;//RFC 7515 mandates these values.
-    case '+': output = 62; return true;//Orinal base64, RFC 1421, deprecated (wikipedia).
-    case '/': output = 63; return true;//Orinal base64, RFC 1421, deprecated (wikipedia).
+    case '-': output = 62; return true;//RFC 4648 base64url.
+    case '_': output = 63; return true;//RFC 4648 base64url.
+    case '+': output = 62; return true;//RFC 4648: "standard" base64.
+    case '/': output = 63; return true;//RFC 4648: "standard" base64.
     //Note: there is no collision between the original base64 and RFC 7515,
     //both can be supported for input.
     case '=': return false;
@@ -370,15 +376,6 @@ void Crypto::ConvertStringToListBytesSigned(const std::string& input, List<char>
     output[i] = input[i];
 }
 
-std::string Crypto::computeSha1outputBase64(const std::string& inputString)
-{ MacroRegisterFunctionWithName("Crypto::computeSha1outputBase64");
-  List<uint32_t> theSha1Uint;
-  List<unsigned char> theSha1Uchar;
-  Crypto::computeSha1(inputString, theSha1Uint);
-  Crypto::ConvertUint32ToUcharBigendian(theSha1Uint, theSha1Uchar);
-  return Crypto::ConvertStringToBase64(theSha1Uchar);
-}
-
 List<int> Crypto::ConvertStringToListInt(const std::string& input)
 { List<int> result;
   result.SetSize(input.size());
@@ -387,15 +384,23 @@ List<int> Crypto::ConvertStringToListInt(const std::string& input)
   return result;
 }
 
-std::string Crypto::ConvertStringToBase64(const std::string& input)
+std::string Crypto::ConvertStringToBase64Standard(const std::string& input)
 { List<unsigned char> inputChar;
   inputChar.SetSize(input.size());
   for (unsigned i = 0; i < input.size(); i ++)
     inputChar[i] = input[i];
-  return Crypto::ConvertStringToBase64(inputChar);
+  return Crypto::ConvertStringToBase64(inputChar, false);
 }
 
-std::string Crypto::ConvertStringToBase64(const List<unsigned char>& input)
+std::string Crypto::ConvertStringToBase64URL(const std::string& input)
+{ List<unsigned char> inputChar;
+  inputChar.SetSize(input.size());
+  for (unsigned i = 0; i < input.size(); i ++)
+    inputChar[i] = input[i];
+  return Crypto::ConvertStringToBase64(inputChar, true);
+}
+
+std::string Crypto::ConvertStringToBase64(const List<unsigned char>& input, bool useBase64URL)
 { MacroRegisterFunctionWithName("Crypto::ConvertStringToBase64");
   uint32_t theStack = 0;
   int numBitsInTheStack = 0;
@@ -406,29 +411,29 @@ std::string Crypto::ConvertStringToBase64(const List<unsigned char>& input)
     theStack += input[i];
     numBitsInTheStack += 8;
     if (numBitsInTheStack == 8)
-    { result.push_back(Crypto::GetCharFrom6bit(theStack / 4));
+    { result.push_back(Crypto::GetCharFrom6bit(theStack / 4, useBase64URL));
       numBitsInTheStack = 2;
       theStack %= 4;
     }
     if (numBitsInTheStack == 10)
-    { result.push_back(Crypto::GetCharFrom6bit(theStack / 16));
+    { result.push_back(Crypto::GetCharFrom6bit(theStack / 16, useBase64URL));
       numBitsInTheStack = 4;
       theStack %= 16;
     }
     if (numBitsInTheStack == 12)
-    { result.push_back(Crypto::GetCharFrom6bit(theStack / 64));
-      result.push_back(Crypto::GetCharFrom6bit(theStack % 64));
+    { result.push_back(Crypto::GetCharFrom6bit(theStack / 64, useBase64URL));
+      result.push_back(Crypto::GetCharFrom6bit(theStack % 64, useBase64URL));
       numBitsInTheStack = 0;
       theStack = 0;
     }
   }
   if (numBitsInTheStack == 2)
-  { result.push_back(Crypto::GetCharFrom6bit(theStack * 16));
+  { result.push_back(Crypto::GetCharFrom6bit(theStack * 16, useBase64URL));
     result.push_back('=');
     result.push_back('=');
   }
   if (numBitsInTheStack == 4)
-  { result.push_back(Crypto::GetCharFrom6bit(theStack * 4));
+  { result.push_back(Crypto::GetCharFrom6bit(theStack * 4, useBase64URL));
     result.push_back('=');
   }
   return result;
@@ -834,7 +839,7 @@ bool Crypto::ConvertLargeUnsignedIntToBase64SignificantDigitsFirst
 (const LargeIntUnsigned& input, std::string& outputBase64)
 { std::string theString;
   Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(input, theString);
-  outputBase64 = Crypto::ConvertStringToBase64(theString);
+  outputBase64 = Crypto::ConvertStringToBase64(theString, false);
   return true;
 }
 
@@ -1260,7 +1265,7 @@ bool JSONWebToken::VerifyRSA256
   { std::string RSAresultTrimmedHex, theShaHex, RSAresultHex, RSAresultBase64;
     LargeIntUnsigned theShaUI;
     Crypto::ConvertListUintToLargeUInt(outputSha, theShaUI);
-    RSAresultBase64 = Crypto::ConvertStringToBase64(RSAresultBitstream);
+    RSAresultBase64 = Crypto::ConvertStringToBase64Standard(RSAresultBitstream);
     Crypto::ConvertStringToHex(RSAresultBitstream, RSAresultHex);
     Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex);
     Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theShaUI, theShaHex);

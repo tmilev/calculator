@@ -1296,7 +1296,7 @@ void WebWorker::resetConnection()
       theGlobalVariables.userDefault.enteredAuthenticationToken != "" ||
       theGlobalVariables.userDefault.enteredGoogleToken != "" ||
       theGlobalVariables.userDefault.enteredPassword != "" ||
-      theGlobalVariables.userDefault.enteredShaonedSaltedPassword != "")
+      theGlobalVariables.userDefault.enteredHashedSaltedPassword != "")
     crash << "User default not reset correctly. " << crash;
   theGlobalVariables.flagLoggedIn = false;
   theGlobalVariables.flagLogInAttempted = false;
@@ -2987,7 +2987,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   out << "\n<span style =\"color:green\"><b>Email successfully updated. </b></span>";
   if (theGlobalVariables.userDefault.actualActivationToken != "" &&
       theGlobalVariables.userDefault.actualActivationToken != "activated" &&
-      theGlobalVariables.userDefault.actualShaonedSaltedPassword != "")
+      theGlobalVariables.userDefault.actualHashedSaltedPassword != "")
   { out << "<br>It appears your password is already set. "
     << "<br>If you'd like to change it using your old password, "
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
@@ -3037,7 +3037,7 @@ std::string WebWorker::GetChangePasswordPage()
   else
   { if (theGlobalVariables.userDefault.actualActivationToken != "" &&
         theGlobalVariables.userDefault.actualActivationToken != "activated" &&
-        theGlobalVariables.userDefault.actualShaonedSaltedPassword != "" &&
+        theGlobalVariables.userDefault.actualHashedSaltedPassword != "" &&
         theGlobalVariables.userCalculatorRequestType == "changePasswordPage")
     { out << "<tr><td colspan =\"2\">";
       out << "You already have a password but your account was marked as not activated "

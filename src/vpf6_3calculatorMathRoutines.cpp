@@ -248,7 +248,8 @@ bool CalculatorFunctionsGeneral::innerHashString
   std::stringstream out;
   if (verbose)
   { out << "<br>Input: " << inputString;
-    out << "<br>Base64 conversion: " << Crypto::ConvertStringToBase64(theBitStream);
+    out << "<br>Base64 conversion: " << Crypto::ConvertStringToBase64(theBitStream, false);
+    out << "<br>Base64url conversion: " << Crypto::ConvertStringToBase64(theBitStream, true);
   }
   List<unsigned char> hashUChar;
   List<uint32_t> theSha1Uint;
@@ -267,9 +268,11 @@ bool CalculatorFunctionsGeneral::innerHashString
   else if (hashId == "KECCAK256")
     Crypto::computeKeccak3_256(inputString, hashUChar);
   if (verbose)
-  { std::string theSha1base64string;
-    theSha1base64string = Crypto::ConvertStringToBase64(hashUChar);
+  { std::string theSha1base64string, theSha1base64URLstring;
+    theSha1base64string = Crypto::ConvertStringToBase64(hashUChar, true);
+    theSha1base64URLstring = Crypto::ConvertStringToBase64(hashUChar, false);
     out << "<br>" << hashId << " in base64: " << theSha1base64string;
+    out << "<br>" << hashId << " in base64url: " << theSha1base64URLstring;
     out << "<br>" << hashId << " hex: ";
     for (int i = 0; i < theSha1Uint.size; i ++)
       out << std::hex << theSha1Uint[i];
@@ -406,7 +409,7 @@ bool CalculatorFunctionsGeneral::innerCharToBase64(Calculator& theCommands, cons
   theBitStream.SetSize(inputString.size());
   for (unsigned i = 0; i < inputString.size(); i ++)
     theBitStream[i] = inputString[i];
-  return output.AssignValue(Crypto::ConvertStringToBase64(theBitStream), theCommands);
+  return output.AssignValue(Crypto::ConvertStringToBase64(theBitStream, false), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(Calculator& theCommands, const Expression& input, Expression& output)
@@ -417,7 +420,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(Calculator& theCo
   if (!Crypto::ConvertBase64ToBitStream(input.GetValue<std::string>(), theBitStream, &theCommands.Comments))
     return false;
   std::stringstream out;
-  std::string theConvertedBack = Crypto::ConvertStringToBase64(theBitStream);
+  std::string theConvertedBack = Crypto::ConvertStringToBase64(theBitStream, false);
   out << "Original string: " << input.GetValue<std::string>()
   << "<br>Converted to bitstream and back: " << theConvertedBack;
   if (theConvertedBack != input.GetValue<std::string>())

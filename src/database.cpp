@@ -278,10 +278,10 @@ UserCalculator::~UserCalculator()
     this->enteredPassword[i] = ' ';
   for (unsigned i = 0; i < this->usernamePlusPassWord.size(); i ++)
     this->usernamePlusPassWord[i] = ' ';
-  for (unsigned i = 0; i < this->enteredShaonedSaltedPassword.size(); i ++)
-    this->enteredShaonedSaltedPassword[i] = ' ';
-  for (unsigned i = 0; i < this->actualShaonedSaltedPassword.size(); i ++)
-    this->actualShaonedSaltedPassword[i] = ' ';
+  for (unsigned i = 0; i < this->enteredHashedSaltedPassword.size(); i ++)
+    this->enteredHashedSaltedPassword[i] = ' ';
+  for (unsigned i = 0; i < this->actualHashedSaltedPassword.size(); i ++)
+    this->actualHashedSaltedPassword[i] = ' ';
 }
 
 #ifdef MACRO_use_MongoDB
@@ -394,7 +394,7 @@ bool UserCalculatorData::LoadFromJSON(JSData& input)
   this->timeOfAuthenticationTokenCreation = input[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ].string;
   this->problemDataStrinG                 = input[DatabaseStrings::labelProblemDatA                       ].string;
   this->problemDataJSON                   = input[DatabaseStrings::labelProblemDataJSON                   ]       ;
-  this->actualShaonedSaltedPassword       = input[DatabaseStrings::labelPassword                          ].string;
+  this->actualHashedSaltedPassword        = input[DatabaseStrings::labelPassword                          ].string;
   this->userRole                          = input[DatabaseStrings::labelUserRole                          ].string;
 
   this->instructorInDB                    = input[DatabaseStrings::labelInstructor                        ].string;
@@ -426,7 +426,7 @@ JSData UserCalculatorData::ToJSON()
     result[DatabaseStrings::labelProblemDataJSON].type = JSData::JSarray;
     result[DatabaseStrings::labelProblemDataJSON].list.SetSize(0);
   }
-  result[DatabaseStrings::labelPassword                          ] = this->actualShaonedSaltedPassword           ;
+  result[DatabaseStrings::labelPassword                          ] = this->actualHashedSaltedPassword            ;
   result[DatabaseStrings::labelUserRole                          ] = this->userRole                              ;
 
   result[DatabaseStrings::labelInstructor                        ] = this->instructorInDB                        ;
@@ -504,20 +504,8 @@ bool UserCalculator::Authenticate(std::stringstream* commentsOnFailure)
 bool UserCalculator::AuthenticateWithUserNameAndPass(std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   (void) commentsOnFailure;
-  this->ComputeShaonedSaltedPassword();
-  std::string actualPasswordRFC4648 = this->actualShaonedSaltedPassword;
-  //<-old versions of the database were using a deprecated base64 encoding
-  //<- below is a small compatibility layer.
-  for (unsigned i = 0; i < actualPasswordRFC4648.size(); i ++)
-  { if (actualPasswordRFC4648[i] == '/')
-      actualPasswordRFC4648[i] = '_';
-    if (actualPasswordRFC4648[i] == '+')
-      actualPasswordRFC4648[i] = '-';
-  }
-  //if (commentsOnFailure != 0)
-  //  *commentsOnFailure << "DEBUG: Comparing " << this->enteredShaonedSaltedPassword
-  //  << " with: " << actualPasswordRFC4648;
-  return this->enteredShaonedSaltedPassword == actualPasswordRFC4648;
+  this->ComputeHashedSaltedPassword();
+  return this->enteredHashedSaltedPassword == this->actualHashedSaltedPassword;
 }
 
 bool UserCalculator::Iexist(std::stringstream* comments)
@@ -527,15 +515,18 @@ bool UserCalculator::Iexist(std::stringstream* comments)
   (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), notUsed, comments);
 }
 
-void UserCalculator::ComputeShaonedSaltedPassword()
+void UserCalculator::ComputeHashedSaltedPassword()
 { MacroRegisterFunctionWithName("UserCalculator::ComputeShaonedSaltedPassword");
-  this->usernamePlusPassWord = this->username;
-  this->usernamePlusPassWord += this->enteredPassword;
-  //stOutput << "DEBUG: usernamePlusPassword: " << this->usernamePlusPassWord;
-  this->enteredShaonedSaltedPassword = Crypto::computeSha1outputBase64(this->usernamePlusPassWord);
+  this->usernamePlusPassWord.reserve(this->username.size() + this->enteredPassword.size());
   //<-careful copying those around. We want to avoid leaving
   //passwords in non-zeroed memory, even if properly freed (to the extent possible and practical).
-  //To do: zero all buffers after use.
+  for (unsigned i = 0; i < this->username.size(); i ++)
+    this->usernamePlusPassWord[i] = this->username[i];
+  unsigned offset = this->username.size();
+  for (unsigned i = 0; i < this->enteredPassword.size(); i ++)
+    this->usernamePlusPassWord[i + offset] = this->enteredPassword[i];
+  //stOutput << "DEBUG: usernamePlusPassword: " << this->usernamePlusPassWord;
+  this->enteredHashedSaltedPassword = Crypto::computeSha3_256OutputBase64URL(this->usernamePlusPassWord);
 }
 
 bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailure)
@@ -545,7 +536,7 @@ bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailu
   now.AssignLocalTime();
   std::stringstream out;
   out << now.theTimeStringNonReadable << rand();
-  this->actualAuthenticationToken = Crypto::computeSha1outputBase64(out.str());
+  this->actualAuthenticationToken = Crypto::computeSha3_256OutputBase64URL(out.str());
   JSData findUser, setUser;
   findUser[DatabaseStrings::labelUsername] = this->username;
   setUser[DatabaseStrings::labelAuthenticationToken] = this->actualAuthenticationToken;
@@ -563,10 +554,10 @@ bool UserCalculator::SetPassword(std::stringstream* commentsOnFailure)
       *commentsOnFailure << "Empty password not allowed. ";
     return false;
   }
-  this->ComputeShaonedSaltedPassword();
+  this->ComputeHashedSaltedPassword();
   JSData findUser, setUser;
   findUser[DatabaseStrings::labelUsername] = this->username;
-  setUser[DatabaseStrings::labelPassword] = this->enteredShaonedSaltedPassword;
+  setUser[DatabaseStrings::labelPassword] = this->enteredHashedSaltedPassword;
   return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
   (DatabaseStrings::tableUsers, findUser, setUser, 0, commentsOnFailure);
 }
@@ -703,8 +694,12 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
   //stOutput << "Resetting authentication token. ";
   now.AssignLocalTime();
   std::stringstream activationTokenStream;
+  // activation token randomness strength: rand() has some randomness in it
+  // and so does the timer, so the add up (actually, multiply).
+  // This is not a very strong protection for the time being, but as activation tokens are supposed to be
+  // one-time use this should present no practical danger.
   activationTokenStream << now.theTimeStringNonReadable << rand();
-  this->actualActivationToken = Crypto::computeSha1outputBase64(activationTokenStream.str());
+  this->actualActivationToken = Crypto::computeSha3_256OutputBase64URL(activationTokenStream.str());
   JSData findUserQuery, setUserQuery;
   findUserQuery[DatabaseStrings::labelUsername] = this->username;
   setUserQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
@@ -1052,7 +1047,7 @@ bool DatabaseRoutineS::AddUsersFromEmails
         result = false;
     }
     if (thePasswords.size == 0 || thePasswords.size != theEmails.size)
-    { if (currentUser.actualShaonedSaltedPassword == "" && currentUser.actualAuthenticationToken == "")
+    { if (currentUser.actualHashedSaltedPassword == "" && currentUser.actualAuthenticationToken == "")
         if (!currentUser.ComputeAndStoreActivationToken(&comments))
           result = false;
     } else
@@ -1353,7 +1348,7 @@ EmailRoutines::EmailRoutines()
 { this->fromEmail = "calculator.todor.milev@gmail.com";
   //this->ccEmail ="todor.milev@gmail.com";
   this->smtpWithPort = "smtp.gmail.com:587";
-  this->fromEmailAuth = Crypto::ConvertStringToBase64("A good day to use a computer algebra system");
+  this->fromEmailAuth = Crypto::ConvertStringToBase64URL("A good day to use a computer algebra system");
 }
 
 #endif //MACRO_use_MongoDB
@@ -1501,8 +1496,8 @@ bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOn
   findUser[DatabaseStrings::labelUsername] = this->username;
   if (this->enteredPassword != "" && doSetPassword)
   { //*commentsOnFailure << " DEBUG: Computing sha- 1 salted pass from: " << this->enteredPassword;
-    this->ComputeShaonedSaltedPassword();
-    this->actualShaonedSaltedPassword = this->enteredShaonedSaltedPassword;
+    this->ComputeHashedSaltedPassword();
+    this->actualHashedSaltedPassword = this->enteredHashedSaltedPassword;
   }
   JSData setUser = this->ToJSON();
   //*commentsOnFailure << " DEBUG: About to Store: " << setUser.ToString();

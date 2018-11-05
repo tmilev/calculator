@@ -1,4 +1,6 @@
 "use strict";
+const submitRequests = require('./submit_requests');
+
 var calculatorMQString;
 var calculatorMQStringIsOK = true;
 var ignoreNextMathQuillUpdateEvent = false;
@@ -160,7 +162,7 @@ function processExamples(inputJSONtext) {
 function toggleCalculatorExamples(theButton) {
   var theExamples = document.getElementById('divCalculatorExamples');
   if (theExamples.innerHTML.length < 300) {
-    submitGET({
+    submitRequests.submitGET({
       url: `${pathnames.calculatorAPI}?request=calculatorExamplesJSON`,
       callback: processExamples,
       progress: "spanProgressCalculatorExamples"

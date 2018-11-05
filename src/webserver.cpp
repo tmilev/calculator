@@ -5399,6 +5399,7 @@ void WebServer::WriteVersionJSFile()
   out << "var serverInformation = {\n  ";
   out << "  version:\"" << theGlobalVariables.buildVersionSimple << "\",\n";
   out << "};\n";
+  out << "module.exports = {\nserverInformation,\n};\n";
   std::fstream theFileStream;
   FileOperations::OpenFileCreateIfNotPresentVirtual
   (theFileStream, "/calculator-html/new/server_information.js", false, true, false, false);

@@ -1,4 +1,5 @@
 "use strict";
+const submitRequests = require('./submit_requests');
 
 function selectCourse(courseIndex) {
   var theCourse = thePage.theCourses[courseIndex];
@@ -33,10 +34,15 @@ function afterLoadSelectCoursePage(incomingPage, result) {
   }
 }
 
-function selectSelectCoursePage() {
-  submitGET({
+function selectCoursePage() {
+  submitRequests.submitGET({
     url: `${pathnames.calculatorAPI}?request=selectCourseJSON`,
     callback: afterLoadSelectCoursePage,
     progress: "spanProgressReportGeneral"
   });
+}
+
+module.exports = {
+  selectCoursePage,
+  selectCourse,
 }

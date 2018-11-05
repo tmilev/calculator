@@ -4,7 +4,7 @@ var stringResources = {
   prefixDeadlineContainer : "deadlinesContainer"
 };
 
-var idDOMElements = {
+var domElements = {
   spanOldEmail: "spanOldEmail",
   buttonChangeEmail: "buttonChangeEmail",
   inputUsername: "inputUsername",
@@ -29,3 +29,8 @@ var idDOMElements = {
   calculatorBuildVersion: "anchorCalculatorBuildVersion"
 
 };
+
+module.exports = {
+  domElements,
+  stringResources
+}

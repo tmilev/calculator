@@ -1,10 +1,11 @@
 "use strict";
+const submitRequests = require('./submit_requests');
 
 function loginCalculator() {
   var password = document.getElementById("inputPassword").value;
   document.getElementById("inputPassword").value = "";
   var username = document.getElementById("inputUsername").value;
-  submitGET({
+  submitRequests.submitGET({
     url: `${pathnames.calculatorAPI}?request=userInfoJSON&password=${password}&username=${username}`,
     callback: loginWithServerCallback,
     progress: "spanProgressReportGeneral"
@@ -45,7 +46,7 @@ function logout() {
   thePage.pages.problemPage.flagLoaded = false;
   document.getElementById("inputPassword").value = "";
   document.getElementById("divProblemPageContentContainer").innerHTML = "";
-  document.getElementById(idDOMElements.divCurrentCourseBody).innerHTML = "";
+  document.getElementById(ids.domElements.divCurrentCourseBody).innerHTML = "";
   try {
     logoutGoogle();
   } catch (e) {
@@ -70,7 +71,7 @@ function logoutPartTwo() {
 }
 
 function loginTry() {
-  submitGET({
+  submitRequests.submitGET({
     url: `${pathnames.calculatorAPI}?request=userInfoJSON`,
     callback: loginWithServerCallback,
     progress: "spanProgressReportGeneral"
@@ -102,7 +103,7 @@ function toggleAdminPanels() {
       adminPanels[counterPanels].classList.add("divInvisible");
     }
   }
-  var studentViewPanel = document.getElementById(idDOMElements.spanStudentViewPanel);
+  var studentViewPanel = document.getElementById(ids.domElements.spanStudentViewPanel);
   if (thePage.user.role === "admin") {
     studentViewPanel.classList.remove("divInvisible")
     studentViewPanel.classList.add("divVisible");
@@ -160,7 +161,7 @@ function onGoogleSignIn(googleUser) {
     var theURL = "";
     theURL += `${pathnames.calculatorAPI}?request=userInfoJSON&`;
     theURL += `googleToken=${theToken}&`;
-    submitGET({
+    submitRequests.submitGET({
       url: theURL,
       callback: loginWithServerCallback,
       progress: "spanProgressReportGeneral"
@@ -255,3 +256,9 @@ function init() {
     logout();
   }
 }
+
+module.exports = {
+  init, 
+  logoutGoogle,
+  loginTry,
+};

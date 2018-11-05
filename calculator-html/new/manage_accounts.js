@@ -1,5 +1,5 @@
 "use strict";
-
+const submitRequests = require('./submit_requests');
 
 function getAccountsTable(inputAccounts) {
   var result = "";
@@ -80,7 +80,7 @@ function addEmailsOrUsers(
   theURL += `studentSection=${encodeURIComponent(spanUserGroup.value)}&`;
   theURL += `passwordList=${encodeURIComponent(spanPasswords.value)}&`;
   theURL += `filterAccounts=&`;
-  submitGET({
+  submitRequests.submitGET({
     url: theURL,
     progress: "spanProgressReportGeneral",
     result: idOutput,
@@ -101,7 +101,7 @@ function getTeachersStudents() {
     students: encodeURIComponent(inputSections)
   }
   theURL += `teachersAndSections=${encodeURIComponent(JSON.stringify(teachersAndSections))}&`;
-  submitGET({
+  submitRequests.submitGET({
     url: theURL,
     progress: "spanProgressReportGeneral",
     result: "idOutputSections",
@@ -113,10 +113,14 @@ function getTeachersStudents() {
 function updateAccountsPage() {
   var theURL = `${pathnames.calculatorAPI}?request=accountsJSON`;
 
-  submitGET({
+  submitRequests.submitGET({
     url: theURL,
     callback: updateAccountsPageCallback,
     progress: "spanProgressReportGeneral"
   });
 
+}
+
+module.exports = {
+  updateAccountsPage
 }

@@ -1,4 +1,6 @@
 "use strict";
+const submitRequests = require('./submit_requests');
+
 var studentScoresInHomePage = [];
 //var lastFocus;
 var charsToSplit = ['x','y'];
@@ -374,7 +376,7 @@ InputPanelData.prototype.submitOrPreviewAnswers = function(requestType) {
   clearTimeout(this.timerForPreviewAnswers);
   var studentAnswer = document.getElementById(this.idPureLatex).value;
   var theURL = `${pathnames.calculatorAPI}?request=${requestType}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
-  submitGET({
+  submitRequests.submitGET({
     url: theURL,
     progress: "spanProgressReportGeneral",
     callback: this.submitOrPreviewAnswersCallback.bind(this),

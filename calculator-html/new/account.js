@@ -1,4 +1,6 @@
 "use strict";
+const ids = require('./ids_dom_elements');
+const submitRequests = require('./submit_requests');
 
 function submitChangePassRequestCallback(result, outputComponent) {
   outputComponent = document.getElementById("spanVerification").innerHTML = result;
@@ -21,7 +23,7 @@ function submitChangePassRequest() {
   theURL += `reenteredPassword=${encodeURIComponent(inputReenteredPassword.value)}&`;
   theURL += `email=${encodeURIComponent(inputEmail.value)}&`;
   theURL += "doReload=false&"
-  submitGET({
+  submitRequests.submitGET({
     url: theURL,
     callback: submitChangePassRequestCallback,
     progress: "spanProgressReportGeneral"
@@ -30,10 +32,10 @@ function submitChangePassRequest() {
 
 function updateAccountPage() {
   var usernameInput = document.getElementById("spanUserIdInAccountsPage");
-  var emailSpan = document.getElementById(idDOMElements.spanOldEmail);
+  var emailSpan = document.getElementById(ids.domElements.spanOldEmail);
   usernameInput.innerHTML = thePage.storage.user.name.getValue();
   emailSpan.innerHTML = thePage.storage.user.email.getValue();
-  var spanExtraInfo = document.getElementById(idDOMElements.spanUserExtraInfo);
+  var spanExtraInfo = document.getElementById(ids.domElements.spanUserExtraInfo);
   var extraInfo = "";
   extraInfo += "<table>";
   extraInfo += `<tr><td>Role: </td><td>${thePage.user.role}</td><tr>`;
@@ -46,4 +48,8 @@ function updateAccountPage() {
   extraInfo += `<tr><td>Deadline schema: </td><td>${thePage.user.deadlineSchema}</td><tr>`;
   extraInfo += "</table>";
   spanExtraInfo.innerHTML = extraInfo;
+}
+
+module.exports = {
+  updateAccountPage
 }

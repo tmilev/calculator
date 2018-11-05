@@ -29,7 +29,7 @@ function submitForgotPassword() {
     return false;
   }
   theURL += `recaptchaToken=${encodeURIComponent(theToken)}&`;
-  submitGET({
+  submitRequests.submitGET({
     url: theURL,
     callback: callbackForgotLogin,
     result: "forgotLoginResult",

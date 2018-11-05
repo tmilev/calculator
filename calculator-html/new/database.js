@@ -1,4 +1,5 @@
 "use strict";
+const submitRequests = require('./submit_requests');
 
 function updateDatabasePageCallback(incoming, output) {
   try {
@@ -32,9 +33,13 @@ function updateDatabasePage() {
   thePage.storeSettings();
   var currentTable = thePage.storage.database.currentTable.getValue();
   var theUrl = `${pathnames.calculatorAPI}?${pathnames.request}=${pathnames.requestDatabase}&${pathnames.databaseTable}=${currentTable}`;
-  submitGET({
+  submitRequests.submitGET({
     url: theUrl,
     progress: "spanProgressReportGeneral",
     callback: updateDatabasePageCallback
   });
+}
+
+module.exports = {
+  updateDatabasePage
 }

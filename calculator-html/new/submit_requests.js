@@ -1,4 +1,5 @@
 "use srict";
+const submitRequests = require('./submit_requests');
 
 function recordProgressDone(progress, timeFinished) {
   if (progress === null || progress === undefined) {
@@ -294,4 +295,8 @@ function submitCalculatorComputation() {
     defaultOnLoadInjectScriptsAndProcessLaTeX,
     "mainComputationStatus"
   );
+}
+
+module.exports = {
+  submitCalculatorComputation
 }

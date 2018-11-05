@@ -1,18 +1,20 @@
 "use strict";
+const ids = require('./ids_dom_elements');
+const submitRequests = require('./submit_requests');
 
 function submitAccountActivationRequestCallback(result, outputComponent) {
-  outputComponent = document.getElementById(idDOMElements.spanVerificationActivation).innerHTML = result;
-  document.getElementById(idDOMElements.inputPassword).value = document.getElementById(
-    idDOMElements.inputNewPasswordInActivationAccount
+  outputComponent = document.getElementById(ids.domElements.spanVerificationActivation).innerHTML = result;
+  document.getElementById(ids.domElements.inputPassword).value = document.getElementById(
+    ids.domElements.inputNewPasswordInActivationAccount
   ).value;
-  document.getElementById(idDOMElements.inputNewPasswordInActivationAccount).value = "";
-  document.getElementById(idDOMElements.inputReenteredPasswordInActivationAccount).value = "";
+  document.getElementById(ids.domElements.inputNewPasswordInActivationAccount).value = "";
+  document.getElementById(ids.domElements.inputReenteredPasswordInActivationAccount).value = "";
   //loginCalculator();
 }
 
 function submitActivateAccountRequest() {
-  var inputNewPassword = document.getElementById(idDOMElements.inputNewPasswordInActivationAccount).value;
-  var inputNewPasswordReentered = document.getElementById(idDOMElements.inputReenteredPasswordInActivationAccount).value;
+  var inputNewPassword = document.getElementById(ids.domElements.inputNewPasswordInActivationAccount).value;
+  var inputNewPasswordReentered = document.getElementById(ids.domElements.inputReenteredPasswordInActivationAccount).value;
   var userName = thePage.storage.user.name.getValue();
   var theURL = "";
   theURL += `${pathnames.calculatorAPI}?request=changePassword&`;
@@ -20,7 +22,7 @@ function submitActivateAccountRequest() {
   theURL += `reenteredPassword=${encodeURIComponent(inputNewPasswordReentered)}&`;
   theURL += `username=${encodeURIComponent(userName)}&`;
   theURL += `doReload=false&`;
-  submitGET({
+  submitRequests.submitGET({
     url: theURL,
     callback: submitAccountActivationRequestCallback,
     progress: "spanProgressReportGeneral"
@@ -28,8 +30,8 @@ function submitActivateAccountRequest() {
 }
 
 function submitDoActivateAccount() {
-  var inputNewPassword = document.getElementById(idDOMElements.inputNewPasswordInActivationAccount).value;
-  var inputNewPasswordReentered = document.getElementById(idDOMElements.inputReenteredPasswordInActivationAccount).value;
+  var inputNewPassword = document.getElementById(ids.domElements.inputNewPasswordInActivationAccount).value;
+  var inputNewPasswordReentered = document.getElementById(ids.domElements.inputReenteredPasswordInActivationAccount).value;
   var activationToken = thePage.storage.user.activationToken.getValue();
   thePage.storage.user.activationToken.setAndStore("");
   var userName = thePage.storage.user.name.getValue();
@@ -42,7 +44,7 @@ function submitDoActivateAccount() {
   theURL += `reenteredPassword=${encodeURIComponent(inputNewPasswordReentered)}&`;
   theURL += `username=${encodeURIComponent(userName)}&`;
   theURL += `doReload=false&`;
-  submitGET({
+  submitRequests.submitGET({
     url: theURL,
     callback: submitAccountActivationRequestCallback,
     progress: "spanProgressReportGeneral"
@@ -50,12 +52,16 @@ function submitDoActivateAccount() {
 }
 
 function updateAccountActivationPage() {
-  var emailSpan = document.getElementById(idDOMElements.spanCurrentActivationEmail);
-  var usernameInput = document.getElementById(idDOMElements.spanUserIdInActivateAccountPage);
+  var emailSpan = document.getElementById(ids.domElements.spanCurrentActivationEmail);
+  var usernameInput = document.getElementById(ids.domElements.spanUserIdInActivateAccountPage);
   usernameInput.innerHTML = thePage.storage.user.name.getValue();
   emailSpan.innerHTML = thePage.storage.user.email.getValue();
   var activationToken = thePage.storage.user.activationToken.getValue();
   if (activationToken !== null && activationToken !== undefined && activationToken !== "") {
     submitDoActivateAccount();
   }
+}
+
+module.exports = {
+  updateAccountActivationPage,
 }

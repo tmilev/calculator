@@ -1,4 +1,5 @@
 "use strict";
+const submitRequests = require('./submit_requests');
 
 var staticWordCompleter = {
   getCompletions: function(editor, session, pos, prefix, callback) {
@@ -55,7 +56,7 @@ function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
   theURL += getQueryStringSubmitStringAsMainInput(newFileName, pathnames.requestClonePage);
   theURL += `${pathnames.fileName}=${fileName}&`;
   //console.log("DEBUG: about to submit: " + theURL); 
-  submitGET({
+  submitRequests.submitGET({
     url: theURL,
     result: idSpanClonePageReport
   });
@@ -69,7 +70,7 @@ function storeEditedPage() {
   theURL += getQueryStringSubmitStringAsMainInput(editor.getValue(), pathnames.requestModifyPage);
   theURL += `${pathnames.fileName}=${thePage.storage.editor.currentlyEditedPage.getValue()}&`;
   //console.log("DEBUG: about to submit: " + theURL); 
-  submitGET({
+  submitRequests.submitGET({
     url: theURL,
     result: "spanSubmitEditPageReport"
   });
@@ -117,8 +118,12 @@ function selectEditPage(currentlyEditedPage) {
 
   var theURL = `${pathnames.calculatorAPI}?${pathnames.request}=${pathnames.requestEditPage}&`;
   theURL += `fileName=${thePage.storage.editor.currentlyEditedPage.getValue()}`;
-  submitGET({
+  submitRequests.submitGET({
     url: theURL,
     callback: selectEditPageCallback
   });
+}
+
+module.exports = {
+  selectEditPage
 }

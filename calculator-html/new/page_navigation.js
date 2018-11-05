@@ -1,4 +1,19 @@
 "use strict";
+const selectCourse = require('./select_course');
+const coursePage = require('./course_page'); 
+const problemPage = require('./problem_page');
+const edigPage = require('./edit_page');
+const submitRequests = require('./submit_requests');
+const database = require('./database');
+const serverStatus = require('./server_status');
+const accountPage = require('./account');
+const activateAccount = require('./account_activation');
+const accountManagement = require('./manage_accounts');
+const cookies = require('./cookies');
+const ids = require('./ids_dom_elements');
+const serverInformation = require('./server_information');
+const login = require('./login');
+
 function User() {
   this.flagLoggedIn = false;
   this.googleProfile = null;
@@ -41,8 +56,8 @@ User.prototype.makeFromUserInfo = function(inputData) {
   this.sectionInDB = inputData.studentSection;
   this.sectionComputed = inputData.studentSection;
   this.deadlineSchema = inputData.deadlineSchema;
-  document.getElementById(idDOMElements.spanUserIdInAccountsPage).innerHTML = thePage.storage.user.name.value;
-  document.getElementById(idDOMElements.inputUsername).value = thePage.storage.user.name.value;
+  document.getElementById(ids.domElements.spanUserIdInAccountsPage).innerHTML = thePage.storage.user.name.value;
+  document.getElementById(ids.domElements.inputUsername).value = thePage.storage.user.name.value;
 
 }
 
@@ -101,7 +116,7 @@ StorageVariable.prototype.storeMe = function() {
     }
   }
   if (this.nameCookie !== "") {
-    setCookie(this.nameCookie, this.value, 150, this.secure);
+    cookies.setCookie(this.nameCookie, this.value, 150, this.secure);
   }
 }
 
@@ -111,7 +126,6 @@ StorageVariable.prototype.setAndStore = function(newValue) {
 }
 
 function Page() {
-  thePage = this;
   this.pages = {
     login: {
       name: "login", //<-for autocomplete
@@ -127,7 +141,7 @@ function Page() {
       id: "divSelectCourse",
       menuButtonId: "buttonSelectCourse",
       container: null,
-      selectFunction: selectSelectCoursePage,
+      selectFunction: selectCourse.selectCoursePage,
       flagModifyURL: true
     },
     currentCourse : {
@@ -135,7 +149,7 @@ function Page() {
       id: "divCurrentCourse",
       menuButtonId: "buttonCurrentCourse",
       container: null,
-      selectFunction: selectCurrentCoursePage,
+      selectFunction: coursePage.selectCurrentCoursePage,
       flagModifyURL: true
     },
     problemPage : {
@@ -143,7 +157,7 @@ function Page() {
       id: "divProblemPage",
       menuButtonId: "buttonProblemPage",
       container: null,
-      selectFunction: updateProblemPage,
+      selectFunction: problemPage.updateProblemPage,
       flagLoaded: false,
       flagModifyURL: false
     },
@@ -152,7 +166,7 @@ function Page() {
       id: "divEditPage",
       menuButtonId: "buttonEditPage",
       container: null,
-      selectFunction: selectEditPage,
+      selectFunction: edigPage.selectEditPage,
       flagLoaded: false,
       editor: null,
       flagModifyURL: false
@@ -162,7 +176,7 @@ function Page() {
       id: "divCalculatorPage",
       menuButtonId: "buttonSelectCalculator",
       container: null,
-      selectFunction: submitCalculatorComputation,
+      selectFunction: submitRequests.submitCalculatorComputation,
       scriptIds: [],
       flagModifyURL: false
     },
@@ -177,7 +191,7 @@ function Page() {
       name: "forgotLogin",
       id: "divForgotLogin",
       container: null,
-      selectFunction: null   ,
+      selectFunction: null,
       flagModifyURL: false   
     },
     about: {
@@ -193,7 +207,7 @@ function Page() {
       id: "divDatabase",
       menuButtonId: "buttonSelectDatabase",
       container: null,
-      selectFunction: updateDatabasePage,
+      selectFunction: database.updateDatabasePage,
       flagModifyURL: false
     },
     server: {
@@ -201,7 +215,7 @@ function Page() {
       id: "divServer",
       menuButtonId: "buttonSelectServer",
       container: null,
-      selectFunction: updateServerStatus,
+      selectFunction: serverStatus.updateServerStatus,
       flagModifyURL: true
     },
     account: {
@@ -209,14 +223,14 @@ function Page() {
       id: "divAccount",
       menuButtonId: "buttonSelectAccount",
       container: null,
-      selectFunction: updateAccountPage,
+      selectFunction: accountPage.updateAccountPage,
       flagModifyURL: false
     },
     activateAccount: {
       name: "activateAccount", //<-for autocomplete
       id: "divActivateAccount",
       container: null,
-      selectFunction: updateAccountActivationPage,
+      selectFunction: activateAccount.updateAccountActivationPage,
       flagModifyURL: true
     },
     accounts: {
@@ -224,10 +238,10 @@ function Page() {
       id: "divAccounts",
       menuButtonId: "buttonSelectAccounts",
       container: null,
-      selectFunction: updateAccountsPage,
+      selectFunction: accountManagement.updateAccountsPage,
       flagModifyURL: true
     }
-  }
+  };
   this.storage = {
     currentPage: new StorageVariable({
       name: "currentPage", 
@@ -332,7 +346,7 @@ function Page() {
     }
   }
   
-  setCookie("useJSON", true, 300, false);
+  cookies.setCookie("useJSON", true, 300, false);
   this.initMenuBar();
   this.initBuildVersion();
   //////////////////////////////////////
@@ -366,7 +380,7 @@ function Page() {
   //////////////////////////////////////
   this.selectPage(this.storage.currentPage.getValue());
   if (this.storage.currentPage.getValue() != this.pages.activateAccount.name) {
-    loginTry();
+    login.loginTry();
   }
   this.setSwitches();
   document.getElementById("divPage").style.display = "";
@@ -374,7 +388,7 @@ function Page() {
 }
 
 Page.prototype.initBuildVersion = function() {
-  document.getElementById(idDOMElements.calculatorBuildVersion).innerHTML = `Build version ${serverInformation.version}`;
+  document.getElementById(ids.domElements.calculatorBuildVersion).innerHTML = `Build version ${serverInformation.version}`;
 }
 
 Page.prototype.initMenuBar = function() {
@@ -476,7 +490,7 @@ function sectionSelect(sectionNumber) {
   console.log(`DEBUG: section select: ${sectionNumber}`);
   thePage.storage.currentSectionComputed.setAndStore(sectionNumber);
   thePage.user.sectionComputed = thePage.user.sectionsTaught[sectionNumber];
-  var deadlineSpans = document.getElementsByClassName(idDOMElements.classSpanDeadlineContainer);
+  var deadlineSpans = document.getElementsByClassName(ids.domElements.classSpanDeadlineContainer);
   for (var counterDeadlines = 0; counterDeadlines < deadlineSpans.length; counterDeadlines ++) {
     var currentDeadlineSpan = deadlineSpans[counterDeadlines];
     var currentDeadlineId = currentDeadlineSpan.id.substr(stringResources.prefixDeadlineContainer.length);
@@ -492,8 +506,8 @@ function sectionSelect(sectionNumber) {
 
 Page.prototype.flipStudentView = function () {
   var oldValue = this.storage.flagStudentView.getValue();
-  this.storage.flagStudentView.setAndStore(document.getElementById(idDOMElements.sliderStudentView).checked);    
-  var spanView = document.getElementById(idDOMElements.spanStudentViewFlagToggleReport);
+  this.storage.flagStudentView.setAndStore(document.getElementById(ids.domElements.sliderStudentView).checked);    
+  var spanView = document.getElementById(ids.domElements.spanStudentViewFlagToggleReport);
   var radioHTML = "";
   if (this.storage.flagStudentView.getValue()) {
     spanView.innerHTML = "Student view";
@@ -512,7 +526,7 @@ Page.prototype.flipStudentView = function () {
   } else {
     spanView.innerHTML = "Admin view";
   }
-  document.getElementById(idDOMElements.spanStudentViewSectionSelectPanel).innerHTML = radioHTML;
+  document.getElementById(ids.domElements.spanStudentViewSectionSelectPanel).innerHTML = radioHTML;
 
   if (oldValue !== this.storage.flagStudentView.getValue()) {
     thePage.pages.problemPage.flagLoaded = false;
@@ -522,8 +536,8 @@ Page.prototype.flipStudentView = function () {
 }
 
 Page.prototype.flipDebugSwitch = function () {
-  this.storage.flagDebug.setAndStore(document.getElementById(idDOMElements.sliderDebugFlag).checked);
-  var debugSpan = document.getElementById(idDOMElements.spanDebugFlagToggleReport);
+  this.storage.flagDebug.setAndStore(document.getElementById(ids.domElements.sliderDebugFlag).checked);
+  var debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
   if (this.storage.flagDebug.getValue()) {
     debugSpan.innerHTML = "Debug on";
   } else {
@@ -534,14 +548,14 @@ Page.prototype.flipDebugSwitch = function () {
 Page.prototype.setSwitches = function () {
   //console.log ("DEBUG flag: " + this.flagDebug);
   if (this.storage.flagDebug.getValue() === true || this.storage.flagDebug.getValue() === "true") {
-    document.getElementById(idDOMElements.sliderDebugFlag).checked = true;
+    document.getElementById(ids.domElements.sliderDebugFlag).checked = true;
   } else {
-    document.getElementById(idDOMElements.sliderDebugFlag).checked = false;
+    document.getElementById(ids.domElements.sliderDebugFlag).checked = false;
   }
   if (this.storage.flagStudentView.getValue() === true || this.storage.flagStudentView.getValue() === "true") {
-    document.getElementById(idDOMElements.sliderStudentView).checked = true;
+    document.getElementById(ids.domElements.sliderStudentView).checked = true;
   } else {
-    document.getElementById(idDOMElements.sliderStudentView).checked = false;
+    document.getElementById(ids.domElements.sliderStudentView).checked = false;
   }
   this.flipDebugSwitch();
   this.flipStudentView();
@@ -653,4 +667,16 @@ Page.prototype.cleanUpLoginSpan = function(componentToCleanUp) {
 
 function loadProfilePic() {
 
+}
+
+/**
+ * @returns {Page} 
+ * */
+function mainPage () {
+  return window.calculator.mainPage;
+}
+
+module.exports = {
+  Page,
+  mainPage,
 }

@@ -1,8 +1,8 @@
 "use strict";
-var thePage = null;
+const mainPage = require('./page_navigation');
 
-function initializePage() {
-  thePage = new Page();
-  thePage.initializeCalculatorPage();
-  //console.log("\\");
-}
+window.calculator = {
+  mainPage: new mainPage.Page(),
+};
+
+window.calculator.mainPage.initializeCalculatorPage();

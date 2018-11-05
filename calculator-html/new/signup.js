@@ -1,4 +1,5 @@
 "use strict";
+const submitRequests = require('./submit_requests');
 
 var recaptchaIdForSignUp = null;
 
@@ -46,7 +47,7 @@ function submitSignUpInfo() {
     return false;
   }
   theURL += `recaptchaToken=${encodeURIComponent(theToken)}&`;
-  submitGET({
+  submitRequests.submitGET({
     url: theURL,
     callback: callbackSignUp,
     result: "signUpResultReport",

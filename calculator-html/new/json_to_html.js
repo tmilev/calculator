@@ -1,4 +1,5 @@
 "use srict";
+const submitRequests = require('./submit_requests');
 
 function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
   if (typeof theDomComponent === "string") {
@@ -19,7 +20,7 @@ function deleteDatabaseItem(containerLabel, labels, selector) {
     fields: labels
   }
   var theURL = `${pathnames.calculatorAPI}?request=databaseDeleteOneEntry&item=${escape(JSON.stringify(finalSelector))}`;
-  submitGET({
+  submitRequests.submitGET({
     url: theURL,
     callback: deleteDatabaseItemCallback.bind(containerLabel),
     progress: "spanProgressReportGeneral"

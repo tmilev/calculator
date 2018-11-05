@@ -51,12 +51,55 @@
 <script type = "text/javascript" src = "/calculator-html/new/app.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/external/build/output.js"></script>
 
+<script type = "text/javascript">
+"use strict";
+function Browserifier() {
+  this.allModules = {
+  };
+  this.sanitizedFileNameContents = {};
+}
+
+Browserifier.prototype.require = function (inputFileName) {
+  var currentSource = this.sanitizedFileNameContents[inputFileName];
+  if (! (inputFileName in this.allModules)) {
+    this.allModules[inputFileName] = {};
+  }
+  var currentModule = this.allModules[inputFileName];
+  if (!currentModule.flagLoaded) {
+    currentModule.flagLoaded = true;
+    currentSource(this.require.bind(this), currentModule);
+  }
+  return currentModule.exports;
+}
+
+Browserifier.prototype.browserify = function() {
+  console.log(`Debug: js content keys: ` + Object.keys(theJSContent));
+  var expectedStart = "/calculator" + "-html/new/"; 
+  //<- please keep strings separated; the cpp builder auto-replaces the string /calculator-html
+  for (var fileName in theJSContent) {
+    var newFileName = "";
+    if (!fileName.startsWith(expectedStart)) {
+      continue;
+    }
+    var fileEnd = fileName.slice(21);
+    newFileName = `./${fileEnd}`;
+    this.sanitizedFileNameContents[newFileName] = theJSContent[fileName];
+  }
+  this.require('./app');
+}
+
+function browserify() {
+  window.browserifier = new Browserifier();
+  window.browserifier.browserify();
+}
+</script>
+
 <script src ='https://www.google.com/recaptcha/api.js'></script>
 
 <meta name = "google-signin-client_id" content = "538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com">
 <title>Calculator</title>
 </head>
-<body onload = "initializePage();">
+<body onload = "browserify();">
 <div id = "divPage"> 
 
 <div id = "divLoginPage" class = "divMainPage">

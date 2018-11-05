@@ -474,7 +474,7 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash)
   for (std::string currentLine; std::getline(theReader, currentLine, '\n');)
   { int startChar = currentLine.find(WebAPI::calculatorHTML);
     if (startChar == - 1)
-    { if (this->jsFiles.size > 0)
+    { if (this->jsFileNames.size > 0)
         outSecondPart << currentLine << "\n";
       else
         outFirstPart << currentLine << "\n";
@@ -486,13 +486,13 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash)
     if (currentLine.find("<script") == std::string::npos)
     { std::stringstream lineStream;
       lineStream << firstPart << virtualFolder << thirdPart << "\n";
-      if (this->jsFiles.size > 0)
+      if (this->jsFileNames.size > 0)
         outSecondPart << lineStream.str();
       else
         outFirstPart << lineStream.str();
     } else
     { MathRoutines::StringSplitExcludeDelimiter(secondAndThirdPart, '"', splitterStrings);
-      this->jsFiles.AddOnTop(splitterStrings[0]);
+      this->jsFileNames.AddOnTop(splitterStrings[0]);
     }
   }
   std::string virtualOnePageJS = appendBuildHash ?
@@ -515,13 +515,29 @@ std::string HtmlInterpretation::GetOnePageJS(bool appendBuildHash)
     return out.str();
   }
   theInterpretation.BuildHtmlJSpage(appendBuildHash);
-  for (int i = 0; i < theInterpretation.jsFiles.size; i ++)
-  { std::string theFile;
-    if (!FileOperations::LoadFileToStringVirtual
-         (theInterpretation.jsFiles[i], theFile, false, false, &errorStream))
+  theInterpretation.jsFileContents.SetSize(theInterpretation.jsFileNames.size);
+  for (int i = 0; i < theInterpretation.jsFileNames.size; i ++)
+  { if (!FileOperations::LoadFileToStringVirtual
+         (theInterpretation.jsFileNames[i], theInterpretation.jsFileContents[i], false, false, &errorStream))
       return errorStream.str();
-    out << theFile << "\n";
   }
+  return theInterpretation.GetOnePageJSBrowserify();
+}
+
+std::string HtmlInterpretation::GetOnePageJSBrowserify()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetOnePageJSBrowserify");
+  std::stringstream out;
+  out << "var theJSContent = {\n";
+  for (int i = 0; i < this->jsFileContents.size; i ++)
+  { std::string fileNameNoJS;
+    if (!MathRoutines::StringEndsWith(this->jsFileNames[i], ".js", &fileNameNoJS))
+    { fileNameNoJS = this->jsFileNames[i];
+    }
+    out << "\"" << fileNameNoJS << "\" : function(require, module, exports){\n";
+    out << this->jsFileContents[i];
+    out << "\n},\n";
+  }
+  out << "};\n";
   return out.str();
 }
 

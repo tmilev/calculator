@@ -30,3 +30,8 @@ function setCookie(theName, theValue, expiryDays, secure) {
   }
   document.cookie = `${theName}=${cookieValue}; Path=/;`;
 }
+
+module.exports = {
+  setCookie,
+  getCookie
+}

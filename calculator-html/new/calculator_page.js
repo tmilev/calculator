@@ -1,6 +1,11 @@
 "use strict";
 const submitRequests = require('./submit_requests');
 
+
+function Calculator() {
+
+}
+
 var calculatorMQString;
 var calculatorMQStringIsOK = true;
 var ignoreNextMathQuillUpdateEvent = false;
@@ -159,11 +164,19 @@ function processExamples(inputJSONtext) {
   }
 }
 
+Calculator.prototype.submitCalculatorInputOnEnter = function () { 
+  if (event.keyCode !== 13 || !event.shiftKey) {
+    return;
+  }
+  submitCalculatorComputation();
+  event.preventDefault();
+}
+
 function toggleCalculatorExamples(theButton) {
   var theExamples = document.getElementById('divCalculatorExamples');
   if (theExamples.innerHTML.length < 300) {
     submitRequests.submitGET({
-      url: `${pathnames.calculatorAPI}?request=calculatorExamplesJSON`,
+      url: `${pathnames.urls.calculatorAPI}?request=calculatorExamplesJSON`,
       callback: processExamples,
       progress: "spanProgressCalculatorExamples"
     });
@@ -176,4 +189,10 @@ function toggleCalculatorExamples(theButton) {
       theButton.innerHTML = "&#9656;";
     }
   }
+}
+
+var calculator = new Calculator;
+
+module.exports = {
+  calculator
 }

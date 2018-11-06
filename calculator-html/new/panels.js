@@ -107,3 +107,7 @@ function toggleMenu() {
     document.getElementById("divProfilePicture").classList.remove("divProfilePictureContainerCollapsed");
   }
 }
+
+module.exports = {
+  modifyHeightForTimeout
+}

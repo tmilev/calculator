@@ -1,5 +1,6 @@
 "use strict";
 const submitRequests = require('./submit_requests');
+const panels = require('./panels');
 
 var studentScoresInHomePage = [];
 //var lastFocus;
@@ -375,7 +376,7 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outpu
 InputPanelData.prototype.submitOrPreviewAnswers = function(requestType) {
   clearTimeout(this.timerForPreviewAnswers);
   var studentAnswer = document.getElementById(this.idPureLatex).value;
-  var theURL = `${pathnames.calculatorAPI}?request=${requestType}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
+  var theURL = `${pathnames.urls.calculatorAPI}?request=${requestType}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
   submitRequests.submitGET({
     url: theURL,
     progress: "spanProgressReportGeneral",
@@ -781,9 +782,13 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
     currentButtonPanel.style.maxHeight = oldHeight ;
     currentButtonPanel.style.height = oldHeight ;
     setTimeout(function() { 
-      modifyHeightForTimeout(currentButtonPanel, newHeight)
+      panels.modifyHeightForTimeout(currentButtonPanel, newHeight)
     }, 0);
   }
   return false;
 }
 
+module.exports = {
+  initializeButtons,
+  initializeCalculatorPage,
+}

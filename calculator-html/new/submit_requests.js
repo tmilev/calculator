@@ -142,14 +142,14 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
     document.body.appendChild(spanOutput);
   }
   var https = new XMLHttpRequest();
-  https.open("POST", pathnames.calculatorAPI, true);
+  https.open("POST", pathnames.urls.calculatorAPI, true);
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   if (idStatus === undefined) {
     idStatus = idOutput;
   }
   timeOutCounter = 0;
 
-  var postRequest = `POST ${pathnames.calculatorAPI}<br>message: ${shortenString(inputParams, 200)}`;
+  var postRequest = `POST ${pathnames.urls.calculatorAPI}<br>message: ${shortenString(inputParams, 200)}`;
   recordProgressStarted(idStatus, postRequest, true, (new Date()).getTime());
 
   https.onload = function() { 
@@ -200,7 +200,7 @@ function progressReport() {
   progressReportContent += ` second(s). Client time: ~ ${Math.floor(timeOutCounter / 10)} second(s)<br>`;
   progressReportTimer.innerHTML = progressReportContent;
   timeOutCounter += timeIncrementInTenthsOfSecond;
-  var sURL  = `${pathnames.calculatorAPI}?request=indicator&mainInput=${currentWorkerNumber}`;
+  var sURL  = `${pathnames.urls.calculatorAPI}?request=indicator&mainInput=${currentWorkerNumber}`;
   var https = new XMLHttpRequest();
   https.open("GET", sURL, true);
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -230,7 +230,7 @@ function SendTogglePauseRequest() {
   }
   var requestStatus = document.getElementById("idProgressReportRequestStatus");
   var pauseRequest = new XMLHttpRequest();
-  var pauseURL = `${pathnames.calculatorAPI}?request=pause&mainInput=${currentWorkerNumber}`;
+  var pauseURL = `${pathnames.urls.calculatorAPI}?request=pause&mainInput=${currentWorkerNumber}`;
   pauseRequest.open("GET", pauseURL, true);
   pauseRequest.onload = function() {
     if (pauseRequest.status !== 200) {
@@ -256,23 +256,9 @@ function SendTogglePauseRequest() {
   pauseRequest.send(null);
 }
 
-function submitCalculatorInputOnEnter() { 
-  if (event.keyCode !== 13 || !event.shiftKey) {
-    return;
-  }
-  submitCalculatorComputation();
-  event.preventDefault();
-}
-
-function selectCalculatorPage() {
-  if (thePage.flagDoSubmitCalculatorComputation) {
-    submitCalculatorComputation();
-    thePage.flagDoSubmitCalculatorComputation = false;
-  }
-}
-
 function submitCalculatorComputation() {
   var result = "";
+  var thePage = window.calculator.mainPage;
   var calculatorInput = document.getElementById("mainInputID").value;
   if (calculatorInput === thePage.calculatorInputLastSubmitted) {
     return;
@@ -298,5 +284,6 @@ function submitCalculatorComputation() {
 }
 
 module.exports = {
-  submitCalculatorComputation
+  submitCalculatorComputation,
+  submitGET,
 }

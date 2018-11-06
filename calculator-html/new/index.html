@@ -108,13 +108,13 @@ function browserify() {
   <div class = "divCenteredItem divVisible" id = "divLoginCalculatorPanel">
     <b>Local account:</b><br><br>
     <input class = "textInputUsername" type = "text" id = "inputUsername" name = "username" placeholder = "username" required><br>
-    <input class = "textInputUsername" type = "password" id = "inputPassword" name = "password" placeholder = "password" onkeypress = "if (event.keyCode === 13) loginCalculator();" autocomplete = "on"><br>
-    <button class = "buttonSelectPage" onclick = "loginCalculator();">Login</button><br>
-    <button class = "buttonSignUp" onclick = "signUp();">Sign up</button><br>
-    <button class = "buttonSignUp" onclick = "forgotLoginPage();">Forgot login</button><br>
+    <input class = "textInputUsername" type = "password" id = "inputPassword" name = "password" placeholder = "password" onkeypress = "if (event.keyCode === 13) window.calculator.login.loginCalculator();" autocomplete = "on"><br>
+    <button class = "buttonSelectPage" onclick = "window.calculator.login.loginCalculator();">Login</button><br>
+    <button class = "buttonSignUp"     onclick = "window.calculator.login.signUp();">Sign up</button><br>
+    <button class = "buttonSignUp"     onclick = "window.calculator.login.forgotLoginPage();">Forgot login</button><br>
   </div> <!--divLoginCalculatorPanel-->
   <div class = "divCenteredItem">
-    <a href = "#" onclick = "logout();" class = "linkLogoutInactive linkStandardButtonLike" >Log out</a> 
+    <a href = "#" onclick = "window.calculator.login.logout();" class = "linkLogoutInactive linkStandardButtonLike" >Log out</a> 
   </div><!--divCenteredItem-->
   <div class = "divCenteredItem">
     <b>Google login:</b>
@@ -140,7 +140,7 @@ function browserify() {
     </tr>
   </table>
   <div id = "recaptchaSignUp"></div>
-  <button onclick = "submitSignUpInfo();">Sign up</button>
+  <button onclick = "window.calculator.signUp.submitSignUpInfo();">Sign up</button>
   <span id = "signUpResultReport"></span>
   <br>
   <span id = "signUpResult"></span>
@@ -187,7 +187,7 @@ function browserify() {
   <input type = "hidden" name = "request" id = "request" value = "compute">
   <textarea class = "textareaCalculatorMain"
   rows = "3" cols = "30" name = "mainInput" id = "mainInputID"
-  onkeypress = "submitCalculatorInputOnEnter();"
+  onkeypress = "window.calculator.calculator.submitCalculatorInputOnEnter();"
   onkeyup    = "suggestWord(); calculatorPanel.mQHelpCalculator();"
   onkeydown  = "suggestWord(); calculatorPanel.mQHelpCalculator(); arrowAction(event);"
   onmouseup  = "suggestWord(); calculatorPanel.mQHelpCalculator();"

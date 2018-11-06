@@ -1,12 +1,14 @@
 "use strict";
 const submitRequests = require('./submit_requests');
+const pathnames = require('./pathnames');
+const ids = require('./ids_dom_elements');
 
 function loginCalculator() {
   var password = document.getElementById("inputPassword").value;
   document.getElementById("inputPassword").value = "";
   var username = document.getElementById("inputUsername").value;
   submitRequests.submitGET({
-    url: `${pathnames.calculatorAPI}?request=userInfoJSON&password=${password}&username=${username}`,
+    url: `${pathnames.urls.calculatorAPI}?request=userInfoJSON&password=${password}&username=${username}`,
     callback: loginWithServerCallback,
     progress: "spanProgressReportGeneral"
   });
@@ -35,6 +37,7 @@ function reloadPage(reason, time) {
 
 var oldUserRole;
 function logout() {
+  var thePage = window.calculator.mainPage;
   oldUserRole = thePage.user.role;
   thePage.storage.user.name.setAndStore("");
   thePage.storage.user.authenticationToken.setAndStore("");
@@ -72,7 +75,7 @@ function logoutPartTwo() {
 
 function loginTry() {
   submitRequests.submitGET({
-    url: `${pathnames.calculatorAPI}?request=userInfoJSON`,
+    url: `${pathnames.urls.calculatorAPI}?request=userInfoJSON`,
     callback: loginWithServerCallback,
     progress: "spanProgressReportGeneral"
   });
@@ -80,6 +83,7 @@ function loginTry() {
 }
 
 function toggleAccountPanels() {
+  var thePage = window.calculator.mainPage;
   var accountPanels = document.getElementsByClassName("divAccountPanel");
   for (var counterPanels = 0; counterPanels < accountPanels.length; counterPanels ++) {
     if (thePage.user.flagLoggedIn === true) {
@@ -93,6 +97,7 @@ function toggleAccountPanels() {
 }
 
 function toggleAdminPanels() {
+  var thePage = window.calculator.mainPage;
   var adminPanels = document.getElementsByClassName("divAdminPanel");
   for (var counterPanels = 0; counterPanels < adminPanels.length; counterPanels ++) {
     if (thePage.user.role === "admin" && !thePage.studentView()) {
@@ -115,25 +120,22 @@ function toggleAdminPanels() {
 
 function loginWithServerCallback(incomingString, result) {
   document.getElementById("spanLoginStatus").innerHTML = "";
+  var thePage = window.calculator.mainPage;
   var success = false;
   var loginErrorMessage = "";
-  try {
-    var parsedAuthentication = JSON.parse(incomingString);
-    if (parsedAuthentication["status"] === "logged in") {
-      success = true;
-      thePage.user.makeFromUserInfo(parsedAuthentication);
-      toggleAccountPanels();
-      toggleAdminPanels();
-      hideLoginCalculatorButtons();
-      showLogoutButton();
-      thePage.setSwitches();
-    } else if (parsedAuthentication["status"] === "not logged in") {
-      if (parsedAuthentication["error"] !== undefined) {
-        loginErrorMessage = parsedAuthentication["error"];
-      }
+  var parsedAuthentication = JSON.parse(incomingString);
+  if (parsedAuthentication["status"] === "logged in") {
+    success = true;
+    thePage.user.makeFromUserInfo(parsedAuthentication);
+    toggleAccountPanels();
+    toggleAdminPanels();
+    hideLoginCalculatorButtons();
+    showLogoutButton();
+    thePage.setSwitches();
+  } else if (parsedAuthentication["status"] === "not logged in") {
+    if (parsedAuthentication["error"] !== undefined) {
+      loginErrorMessage = parsedAuthentication["error"];
     }
-  } catch (e) {
-    console.log(`Bad authentication ${e}. Incoming login: ${incomingString}.`);
   }
   if (!success) {
     if (loginErrorMessage!== undefined && loginErrorMessage !== "") {
@@ -159,7 +161,7 @@ function onGoogleSignIn(googleUser) {
     thePage.showProfilePicture();
     showLogoutButton();
     var theURL = "";
-    theURL += `${pathnames.calculatorAPI}?request=userInfoJSON&`;
+    theURL += `${pathnames.urls.calculatorAPI}?request=userInfoJSON&`;
     theURL += `googleToken=${theToken}&`;
     submitRequests.submitGET({
       url: theURL,
@@ -173,6 +175,7 @@ function onGoogleSignIn(googleUser) {
 
 function startGoogleLogin() {
   //console.log("Got to here");
+  var thePage = window.calculator.mainPage;
   if (typeof (gapi) !== "undefined") {
     if (!thePage.pages.login.initialized) {
       gapi.signin2.render('divGoogleLoginButton', {
@@ -200,6 +203,7 @@ function showLoginCalculatorButtons() {
 }
 
 function hideLoginCalculatorButtons() {
+  var thePage = window.calculator.mainPage;
   document.getElementById("divLoginCalculatorPanel").classList.remove("divVisible");
   document.getElementById("divLoginCalculatorPanel").classList.add("divInvisible");
   document.getElementById("divLoginPanelUsernameReport").innerHTML = thePage.storage.user.name.value;
@@ -261,4 +265,6 @@ module.exports = {
   init, 
   logoutGoogle,
   loginTry,
+  toggleAdminPanels,
+  loginCalculator,
 };

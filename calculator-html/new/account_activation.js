@@ -1,6 +1,7 @@
 "use strict";
 const ids = require('./ids_dom_elements');
 const submitRequests = require('./submit_requests');
+const pathnames = require('./pathnames');
 
 function submitAccountActivationRequestCallback(result, outputComponent) {
   outputComponent = document.getElementById(ids.domElements.spanVerificationActivation).innerHTML = result;
@@ -17,7 +18,7 @@ function submitActivateAccountRequest() {
   var inputNewPasswordReentered = document.getElementById(ids.domElements.inputReenteredPasswordInActivationAccount).value;
   var userName = thePage.storage.user.name.getValue();
   var theURL = "";
-  theURL += `${pathnames.calculatorAPI}?request=changePassword&`;
+  theURL += `${pathnames.urls.calculatorAPI}?request=changePassword&`;
   theURL += `newPassword=${encodeURIComponent(inputNewPassword)}&`;
   theURL += `reenteredPassword=${encodeURIComponent(inputNewPasswordReentered)}&`;
   theURL += `username=${encodeURIComponent(userName)}&`;
@@ -37,7 +38,7 @@ function submitDoActivateAccount() {
   var userName = thePage.storage.user.name.getValue();
   var theURL = "";
   var email = thePage.storage.user.email.getValue();
-  theURL += `${pathnames.calculatorAPI}?request=activateAccountJSON&`;
+  theURL += `${pathnames.urls.calculatorAPI}?request=activateAccountJSON&`;
   theURL += `activationToken=${encodeURIComponent(activationToken)}&`;
   theURL += `email=${encodeURIComponent(email)}&`;
   theURL += `newPassword=${encodeURIComponent(inputNewPassword)}&`;

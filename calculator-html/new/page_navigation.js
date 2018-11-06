@@ -13,6 +13,7 @@ const cookies = require('./cookies');
 const ids = require('./ids_dom_elements');
 const serverInformation = require('./server_information');
 const login = require('./login');
+const initializeButtons = require('./initialize_buttons');
 
 function User() {
   this.flagLoggedIn = false;
@@ -47,6 +48,7 @@ User.prototype.hideProfilePicture = function() {
 }
 
 User.prototype.makeFromUserInfo = function(inputData) {
+  var thePage = window.calculator.mainPage;
   thePage.storage.user.authenticationToken.setAndStore(inputData.authenticationToken);
   thePage.storage.user.name.setAndStore(inputData.username);
   this.role = inputData.userRole;
@@ -93,7 +95,7 @@ StorageVariable.prototype.loadMe = function(hashParsed) {
     }
   }
   if (this.nameCookie !== "") {
-    incomingValue = getCookie(this.nameCookie);
+    incomingValue = cookies.getCookie(this.nameCookie);
     if (incomingValue !== "" && incomingValue !== null && incomingValue !== undefined) {
       this.value = incomingValue;
     }
@@ -126,6 +128,7 @@ StorageVariable.prototype.setAndStore = function(newValue) {
 }
 
 function Page() {
+  window.calculator.mainPage = this;
   this.pages = {
     login: {
       name: "login", //<-for autocomplete
@@ -397,9 +400,7 @@ Page.prototype.initMenuBar = function() {
     if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
       var currentButton = document.getElementById(this.pages[page].menuButtonId);
       currentButton.pageToSelect = page;
-      currentButton.addEventListener("click", function() {
-        thePage.selectPage(this.pageToSelect);
-      });
+      currentButton.addEventListener("click", this.selectPage.bind(this, page));
     }
   }
 }
@@ -410,23 +411,19 @@ Page.prototype.resetProblems = function() {
 }
 
 Page.prototype.loadSettings = function(inputHash) {
-  try {
-    var inputHashParsed = {};
-    if (typeof inputHash === "string") {
-      var inputString = inputHash;
-      if (inputHash[0] === '#') {
-        inputString = inputHash.slice(1);
-      }
-      if (inputString === "" || inputString === undefined || inputString === null) {
-        inputString = "{}";
-      }
-      var decodedInputString = decodeURIComponent(inputString);
-      inputHashParsed = JSON.parse(decodedInputString);
+  var inputHashParsed = {};
+  if (typeof inputHash === "string") {
+    var inputString = inputHash;
+    if (inputHash[0] === '#') {
+      inputString = inputHash.slice(1);
     }
-    this.loadSettingsRecursively(this.storage, inputHashParsed);
-  } catch (e) {
-    console.log(`Error loading settings: ` + e + ` Input hash: ${inputHash}`);
+    if (inputString === "" || inputString === undefined || inputString === null) {
+      inputString = "{}";
+    }
+    var decodedInputString = decodeURIComponent(inputString);
+    inputHashParsed = JSON.parse(decodedInputString);
   }
+  this.loadSettingsRecursively(this.storage, inputHashParsed);
 }
 
 Page.prototype.loadSettingsRecursively = function(currentStorage, inputHashParsed) {
@@ -482,8 +479,8 @@ Page.prototype.showProfilePicture = function() {
 }
 
 Page.prototype.initializeCalculatorPage = function() {
-  initializeButtons();
-  initializeCalculatorPage();
+  initializeButtons.initializeButtons();
+  initializeButtons.initializeCalculatorPage();
 }
 
 function sectionSelect(sectionNumber) {
@@ -529,8 +526,8 @@ Page.prototype.flipStudentView = function () {
   document.getElementById(ids.domElements.spanStudentViewSectionSelectPanel).innerHTML = radioHTML;
 
   if (oldValue !== this.storage.flagStudentView.getValue()) {
-    thePage.pages.problemPage.flagLoaded = false;
-    toggleAdminPanels();
+    this.pages.problemPage.flagLoaded = false;
+    login.toggleAdminPanels();
     this.selectPage(this.storage.currentPage.getValue());
   }
 }

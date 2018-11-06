@@ -32,7 +32,7 @@ function updateDatabasePageResetCurrentTable() {
 function updateDatabasePage() {
   thePage.storeSettings();
   var currentTable = thePage.storage.database.currentTable.getValue();
-  var theUrl = `${pathnames.calculatorAPI}?${pathnames.request}=${pathnames.requestDatabase}&${pathnames.databaseTable}=${currentTable}`;
+  var theUrl = `${pathnames.urls.calculatorAPI}?${pathnames.request}=${pathnames.requestDatabase}&${pathnames.databaseTable}=${currentTable}`;
   submitRequests.submitGET({
     url: theUrl,
     progress: "spanProgressReportGeneral",

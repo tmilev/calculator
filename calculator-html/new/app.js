@@ -1,8 +1,19 @@
 "use strict";
 const mainPage = require('./page_navigation');
 
+//declare globals:
 window.calculator = {
-  mainPage: new mainPage.Page(),
+  mainPage: null,
+  login: null,
+  signUp: null,
+  calculator: null,
 };
 
+//load globals:
+window.calculator.mainPage = new mainPage.Page();
+window.calculator.login = require('./login');
+window.calculator.signUp = require('./signup');
+window.calculator.calculator = require('./calculator_page').calculator;
+
+//initialize everything not initilized while loading:
 window.calculator.mainPage.initializeCalculatorPage();

@@ -17,7 +17,7 @@ function modifyDeadlines(incomingId) {
     jsonToSubmit[idDecoded].deadlines[thePage.user.sectionsTaught[counterDates]] = theDates[counterDates].value;
   }
   var theURL = "";
-  theURL += `${pathnames.calculatorAPI}?request=setProblemData&`;
+  theURL += `${pathnames.urls.calculatorAPI}?request=setProblemData&`;
   theURL += `mainInput=${encodeURIComponent(JSON.stringify(jsonToSubmit))}`;
   submitRequests.submitGET({
     url: theURL,
@@ -128,7 +128,7 @@ function afterLoadCoursePage(incomingPage, result) {
     return;
   }
   submitRequests.submitGET({
-    url: `${pathnames.calculatorAPI}?request=${topicList}`,
+    url: `${pathnames.urls.calculatorAPI}?request=${topicList}`,
     callback: afterLoadTopics,
     progress: "spanProgressReportGeneral"
   });
@@ -144,7 +144,7 @@ function selectCurrentCoursePage() {
   };
   location.href = `${pathnames.app}#${encodeURIComponent(JSON.stringify(urlObject))}`;
   submitRequests.submitGET({
-    url: `${pathnames.calculatorAPI}?request=${topicRequest}`,
+    url: `${pathnames.urls.calculatorAPI}?request=${topicRequest}`,
     callback: afterLoadCoursePage,
     progress: "spanProgressReportGeneral"
   });

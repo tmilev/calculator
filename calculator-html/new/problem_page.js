@@ -2,6 +2,7 @@
 const submitRequests = require('./submit_requests');
 
 function selectCurrentProblem(problemIdURLed, exerciseType) {
+  var thePage = window.calculator.mainPage;
   thePage.storage.currentCourse.currentProblemId.setAndStore(problemIdURLed);
   thePage.storage.currentCourse.fileName.setAndStore(decodeURIComponent(problemIdURLed));
   thePage.storage.currentCourse.exerciseType.setAndStore(exerciseType);
@@ -95,7 +96,7 @@ function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   var topicList = currentCourse.topicList.getValue();
   var courseHome = currentCourse.courseHome.getValue();
   var result = "";
-  result += `${pathnames.calculatorAPI}?`;
+  result += `${pathnames.urls.calculatorAPI}?`;
   result += `request=${exerciseType}&fileName=${fileName}&`;
   result += `topicList=${topicList}&courseHome=${courseHome}`;
   return result;
@@ -368,7 +369,7 @@ Problem.prototype.modifyWeight = function() {
     weight: incomingPoints
   };
   var theURL = ""; 
-  theURL += `${pathnames.calculatorAPI}?${pathnames.request}=${pathnames.setProblemData}&`;
+  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.request}=${pathnames.setProblemData}&`;
   theURL += `${pathnames.mainInput}=${encodeURIComponent(JSON.stringify(modifyObject))}`;
   submitRequests.submitGET({
     url: theURL,
@@ -637,6 +638,7 @@ function updateProblemPageCallback(input, outputComponent) {
 }
 
 function updateProblemPage() {
+  var thePage = window.calculator.mainPage;
   if (thePage.pages.problemPage.flagLoaded) {
     return;
   }
@@ -644,7 +646,7 @@ function updateProblemPage() {
   var theProblem = thePage.getCurrentProblem();
   var theURL;
   if (theProblem !== undefined && theProblem !== null) {
-    theURL = `${pathnames.calculatorAPI}?${theProblem.getCalculatorURLRequestFileCourseTopics()}`;
+    theURL = `${pathnames.urls.calculatorAPI}?${theProblem.getCalculatorURLRequestFileCourseTopics()}`;
   } else {
     theURL = getCalculatorURLRequestFileCourseTopicsFromStorage();
   }

@@ -17,7 +17,7 @@ function submitChangePassRequest() {
   var inputReenteredPassword = document.getElementById("inputReenteredPasswordInAccount");
   var inputEmail = document.getElementById("inputEmail");
   var theURL = "";
-  theURL += `${pathnames.calculatorAPI}?request=changePassword&`;
+  theURL += `${pathnames.urls.calculatorAPI}?request=changePassword&`;
   theURL += `password=${encodeURIComponent(inputOldPassword.value)}&`;
   theURL += `newPassword=${encodeURIComponent(inputNewPassword.value)}&`;
   theURL += `reenteredPassword=${encodeURIComponent(inputReenteredPassword.value)}&`;

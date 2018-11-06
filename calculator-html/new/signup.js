@@ -3,14 +3,18 @@ const submitRequests = require('./submit_requests');
 
 var recaptchaIdForSignUp = null;
 
-function signUp() {
+function SignUp() {
+
+}
+
+SignUp.prototype.signUp = function() {
   if (recaptchaIdForSignUp === null) {
     recaptchaIdForSignUp = grecaptcha.render("recaptchaSignUp", {'sitekey' : '6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql'});
   }
   thePage.selectPage(thePage.pages.signUp.name);
 }
 
-function resetRecaptchaOnLoad() { 
+SignUp.prototype.resetRecaptchaOnLoad = function() { 
   grecaptcha.reset();
 }
 
@@ -32,14 +36,14 @@ function callbackSignUp(input, output) {
   }
 }
 
-function submitSignUpInfo() {  
+SignUp.prototype.submitSignUpInfo = function () {  
   if (grecaptcha === undefined || grecaptcha === null) { 
     document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>";
     return false;
   }
   var desiredUsernameEncoded = encodeURIComponent(document.getElementById('desiredUsername').value);
   var desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForSignUp').value);
-  var theURL = `${pathnames.calculatorAPI}?request=signUp&desiredUsername=${desiredUsernameEncoded}&`;
+  var theURL = `${pathnames.urls.calculatorAPI}?request=signUp&desiredUsername=${desiredUsernameEncoded}&`;
   theURL += `email=${desiredEmailEncoded}&`;
   var theToken = grecaptcha.getResponse(recaptchaIdForSignUp);
   if (theToken === '' || theToken === null) { 
@@ -53,4 +57,10 @@ function submitSignUpInfo() {
     result: "signUpResultReport",
     progress: "spanProgressReportGeneral"
   });
+}
+
+var signUp = new SignUp();
+
+module.exports = {
+  signUp,
 }

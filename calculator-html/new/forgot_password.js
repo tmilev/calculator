@@ -22,7 +22,7 @@ function submitForgotPassword() {
   }
   var desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForForgotLogin').value);
   var theURL = "";
-  theURL += `${pathnames.calculatorAPI}?request=forgotLogin&email=${desiredEmailEncoded}&`;
+  theURL += `${pathnames.urls.calculatorAPI}?request=forgotLogin&email=${desiredEmailEncoded}&`;
   var theToken = grecaptcha.getResponse(recaptchaIdForForgotLogin);
   if (theToken === '' || theToken === null)  { 
     document.getElementById('forgotLoginResult').innerHTML = "<span style ='color:red'><b>Please don't forget to solve the captcha. </b></span>";

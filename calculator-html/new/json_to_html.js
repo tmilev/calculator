@@ -19,7 +19,7 @@ function deleteDatabaseItem(containerLabel, labels, selector) {
     object: selector.object,
     fields: labels
   }
-  var theURL = `${pathnames.calculatorAPI}?request=databaseDeleteOneEntry&item=${escape(JSON.stringify(finalSelector))}`;
+  var theURL = `${pathnames.urls.calculatorAPI}?request=databaseDeleteOneEntry&item=${escape(JSON.stringify(finalSelector))}`;
   submitRequests.submitGET({
     url: theURL,
     callback: deleteDatabaseItemCallback.bind(containerLabel),

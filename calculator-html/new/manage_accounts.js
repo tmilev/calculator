@@ -73,7 +73,7 @@ function addEmailsOrUsers(
   var spanUserGroup = document.getElementById(idUserGroup);
   var spanPasswords = document.getElementById(idPasswords);
   var theURL = "";
-  theURL += `${pathnames.calculatorAPI}?`;
+  theURL += `${pathnames.urls.calculatorAPI}?`;
   theURL += `request=${requestType}&`;
   theURL += `userRole=${userRole}&`;
   theURL += `userList=${encodeURIComponent(spanEmailList.value)}&`;
@@ -93,7 +93,7 @@ function getTeachersStudentsCallback(input, output) {
 }
 
 function getTeachersStudents() { 
-  var theURL = `${pathnames.calculatorAPI}?request=setTeacher&`;
+  var theURL = `${pathnames.urls.calculatorAPI}?request=setTeacher&`;
   var inputSections = document.getElementById('inputSections').value;
   var inputTeachers = document.getElementById('inputSetTeacher').value;
   var teachersAndSections = {
@@ -111,7 +111,7 @@ function getTeachersStudents() {
 }
 
 function updateAccountsPage() {
-  var theURL = `${pathnames.calculatorAPI}?request=accountsJSON`;
+  var theURL = `${pathnames.urls.calculatorAPI}?request=accountsJSON`;
 
   submitRequests.submitGET({
     url: theURL,

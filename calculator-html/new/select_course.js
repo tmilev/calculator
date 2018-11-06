@@ -36,7 +36,7 @@ function afterLoadSelectCoursePage(incomingPage, result) {
 
 function selectCoursePage() {
   submitRequests.submitGET({
-    url: `${pathnames.calculatorAPI}?request=selectCourseJSON`,
+    url: `${pathnames.urls.calculatorAPI}?request=selectCourseJSON`,
     callback: afterLoadSelectCoursePage,
     progress: "spanProgressReportGeneral"
   });

@@ -14,6 +14,7 @@ const ids = require('./ids_dom_elements');
 const serverInformation = require('./server_information');
 const login = require('./login');
 const initializeButtons = require('./initialize_buttons');
+const pathnames = require('./pathnames');
 
 function User() {
   this.flagLoggedIn = false;
@@ -638,9 +639,9 @@ Page.prototype.selectPage = function(inputPage) {
   }
   if (this.pages[inputPage].flagModifyURL === true) {
     var urlObject = { 
-      currentPage: thePage.storage.currentPage.getValue()
+      currentPage: this.storage.currentPage.getValue()
     };
-    location.href = `${pathnames.app}#${encodeURIComponent(JSON.stringify(urlObject))}`;
+    location.href = `${pathnames.urls.app}#${encodeURIComponent(JSON.stringify(urlObject))}`;
   }
   if (this.pages[inputPage].selectFunction !== null && this.pages[inputPage].selectFunction !== undefined) {
     this.pages[inputPage].selectFunction();

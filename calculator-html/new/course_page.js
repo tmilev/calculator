@@ -1,5 +1,6 @@
 "use strict";
 const submitRequests = require('./submit_requests');
+const pathnames = require('./pathnames');
 
 function callbackModifyDeadlines(incomingId, input, output) {
   document.getElementById(`deadlines${incomingId}`).innerHTML = input;
@@ -93,6 +94,7 @@ function toggleProblemWeights() {
 
 function writeEditCoursePagePanel() {
   var thePanel = "";
+  var thePage = window.storage.mainPage;
   thePanel += getEditPanel(thePage.storage.currentCourse.courseHome.getValue());
   thePanel += getEditPanel(thePage.storage.currentCourse.topicList.getValue());
   if (
@@ -142,7 +144,7 @@ function selectCurrentCoursePage() {
   var urlObject = { 
     currentPage: thePage.storage.currentPage.getValue()
   };
-  location.href = `${pathnames.app}#${encodeURIComponent(JSON.stringify(urlObject))}`;
+  location.href = `${pathnames.urls.app}#${encodeURIComponent(JSON.stringify(urlObject))}`;
   submitRequests.submitGET({
     url: `${pathnames.urls.calculatorAPI}?request=${topicRequest}`,
     callback: afterLoadCoursePage,

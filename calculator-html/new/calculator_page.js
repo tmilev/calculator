@@ -1,8 +1,13 @@
 "use strict";
 const submitRequests = require('./submit_requests');
-
+const pathnames = require('./pathnames');
 
 function Calculator() {
+
+  this.inputBoxNames = [];
+  this.inputBoxToSliderUpdaters = {};
+  this.canvases = null;
+  this.examples = null;
 
 }
 
@@ -10,10 +15,7 @@ var calculatorMQString;
 var calculatorMQStringIsOK = true;
 var ignoreNextMathQuillUpdateEvent = false;
 var calculatorPlotUpdaters = {};
-var calculatorInputBoxToSliderUpdaters = {};
-var calculatorInputBoxNames = [];
 var startingCharacterSectionUnderMathQuillEdit;
-var calculatorCanvases;
 
 function createSelectionNoFocus(field, start, end) { 
   if (field.createTextRange) { 
@@ -36,9 +38,9 @@ function createSelectionNoFocus(field, start, end) {
   }
 }
 
-function updateCalculatorSliderEventHandler() {
+Calculator.prototype.updateCalculatorSliderEventHandler = function () {
   event.preventDefault();
-  var sliderName = calculatorInputBoxToSliderUpdaters[this.name];
+  var sliderName = this.inputBoxToSliderUpdaters[this.name];
   var theSliders = document.getElementsByName(sliderName);
   for (var counterSlider = 0; counterSlider < theSliders.length; counterSlider ++) {
     var currentSlider = theSliders[counterSlider];
@@ -47,10 +49,10 @@ function updateCalculatorSliderEventHandler() {
   updateCalculatorSliderToInputBox(this.name, sliderName);
 }
 
-function calculatorAddListenersToInputBoxes() {
+Calculator.prototype.addListenersToInputBoxes = function() {
   //var theString=" updating: box names, slider names: ";
-  for (var i = 0; i < calculatorInputBoxNames.length; i ++) {
-    var theBoxes = document.getElementsByName(calculatorInputBoxNames[i]);
+  for (var i = 0; i < this.calculatorInputBoxNames.length; i ++) {
+    var theBoxes = document.getElementsByName(this.calculatorInputBoxNames[i]);
     for (var j = 0; j < theBoxes.length; j ++) {
       theBoxes[j].addEventListener("input", updateCalculatorSliderEventHandler.bind(theBoxes[j]));
     }
@@ -92,22 +94,22 @@ function createSelection(field, start, end) {
   }
 }
 
-function exampleCalculatorClick(theLink) {
+Calculator.prototype.exampleClick = function(theLink) {
   var theAtom = decodeURIComponent(theLink.atom);
   var theIndex = theLink.index;
   var isComposite = theLink.composite;
   var theHandler = null;
   //console.log(theLink);
   if (isComposite) {
-    theHandler = theCalculatorExamples[theAtom].composite[theIndex];
+    theHandler = this.examples[theAtom].composite[theIndex];
   } else {
-    theHandler = theCalculatorExamples[theAtom].regular[theIndex];
+    theHandler = this.examples[theAtom].regular[theIndex];
   }
 
   //console.log(theHandler);
   var mainInput = document.getElementById("mainInputID");
   mainInput.value = theHandler.example;
-  submitCalculatorComputation();
+  submitRequests.submitCalculatorComputation();
 }
 
 function processOneFunctionAtom(handlers, isComposite) {
@@ -130,27 +132,25 @@ function processOneFunctionAtom(handlers, isComposite) {
     currentId += `${encodedAtom}_${counterHandlers}_${handlers.length}`;
     resultString += `<a href = '#' class = 'linkInfo' onclick = "switchMenu('${currentId}')">info</a>`;
     resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${currentDescription}<br><b>Example:</b><br>${currentExample}</calculatorExampleInfo>`;
-    resultString += `<a href = "#" class = "linkInfo" onclick = "this.composite =${isComposite}; this.index =${counterHandlers}; this.atom='${encodedAtom}'; exampleCalculatorClick(this);"> Example</a>`;
+    resultString += `<a href = "#" class = "linkInfo" onclick = "this.composite =${isComposite}; this.index =${counterHandlers}; this.atom='${encodedAtom}'; window.calculator.calculator.exampleClick(this);"> Example</a>`;
     //resultString += currentExample;
     //console.log(handlers[counterHandlers]);
   }
   return resultString;
 }
 
-var theCalculatorExamples;
-
-function processExamples(inputJSONtext) {
+Calculator.prototype.processExamples = function(inputJSONtext) {
   try {
-    theCalculatorExamples = JSON.parse(inputJSONtext);
+    this.examples = JSON.parse(inputJSONtext);
     var examplesString = "";
-    var atomsSorted = Object.keys(theCalculatorExamples).slice().sort();
+    var atomsSorted = Object.keys(this.examples).slice().sort();
     var numHandlers = 0;
     for (var counterAtoms = 0; counterAtoms < atomsSorted.length; counterAtoms ++) {
       var atom = atomsSorted[counterAtoms];
-      var currentExamples = theCalculatorExamples[atom];
+      var currentExamples = this.examples[atom];
       examplesString += processOneFunctionAtom(currentExamples.regular, false);
       examplesString += processOneFunctionAtom(currentExamples.composite, true);
-      numHandlers += theCalculatorExamples[atom].regular.length + theCalculatorExamples[atom].composite.length;
+      numHandlers += this.examples[atom].regular.length + this.examples[atom].composite.length;
     }
     var resultString = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
     resultString += examplesString;
@@ -165,16 +165,16 @@ Calculator.prototype.submitCalculatorInputOnEnter = function () {
   if (event.keyCode !== 13 || !event.shiftKey) {
     return;
   }
-  submitCalculatorComputation();
+  submitRequests.submitCalculatorComputation();
   event.preventDefault();
 }
 
-function toggleCalculatorExamples(theButton) {
+Calculator.prototype.toggleExamples = function(theButton) {
   var theExamples = document.getElementById('divCalculatorExamples');
   if (theExamples.innerHTML.length < 300) {
     submitRequests.submitGET({
       url: `${pathnames.urls.calculatorAPI}?request=calculatorExamplesJSON`,
-      callback: processExamples,
+      callback: this.processExamples.bind(this),
       progress: "spanProgressCalculatorExamples"
     });
     theButton.innerHTML = "&#9660;";
@@ -188,7 +188,7 @@ function toggleCalculatorExamples(theButton) {
   }
 }
 
-var calculator = new Calculator;
+var calculator = new Calculator();
 
 module.exports = {
   calculator

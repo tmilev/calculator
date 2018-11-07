@@ -1,5 +1,6 @@
 "use strict";
 const submitRequests = require('./submit_requests');
+const pathnames = require('./pathnames');
 
 function updateServerStatusCallback(input, span) {
   document.getElementById("idServerStatus").innerHTML = input;

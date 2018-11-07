@@ -15,6 +15,7 @@ const serverInformation = require('./server_information');
 const login = require('./login');
 const initializeButtons = require('./initialize_buttons');
 const pathnames = require('./pathnames');
+const calculatorPage = require('./calculator_page');
 
 function User() {
   this.flagLoggedIn = false;
@@ -566,22 +567,23 @@ Page.prototype.studentView = function () {
   return false;
 }
 
-function defaultOnLoadInjectScriptsAndProcessLaTeX(idElement) { 
+Page.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(idElement) { 
   var spanVerification = document.getElementById(idElement);
   var incomingScripts = spanVerification.getElementsByTagName('script');
-  var oldScripts = thePage.pages.calculator.scriptIds;
-  thePage.removeScripts(oldScripts);
-  calculatorInputBoxNames = [];
-  calculatorInputBoxToSliderUpdaters = {};
-  calculatorCanvases = {};
-  thePage.pages.calculator.sciptIds = [];
+  var oldScripts = this.pages.calculator.scriptIds;
+  this.removeScripts(oldScripts);
+  var calculator = calculatorPage.calculator;
+  calculator.inputBoxNames = [];
+  calculator.inputBoxToSliderUpdaters = {};
+  calculator.canvases = {};
+  this.pages.calculator.sciptIds = [];
   for (var i = 0; i < incomingScripts.length; i ++) { 
     var newId = `calculatorMainPageId_${i}`;
-    thePage.pages.calculator.sciptIds.push(newId);
-    thePage.injectScript(newId, incomingScripts[i].innerHTML);
+    this.pages.calculator.sciptIds.push(newId);
+    this.injectScript(newId, incomingScripts[i].innerHTML);
   }
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById(idElement)]);
-  MathJax.Hub.Queue([calculatorAddListenersToInputBoxes]);
+  MathJax.Hub.Queue([calculator.addListenersToInputBoxes]);
 //  alert(theString);
 }
 

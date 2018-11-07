@@ -222,7 +222,7 @@ function browserify() {
 <table>
   <tr>
     <td>
-    <button class = "buttonPreview" title = "Shift + Enter = shortcut from input text box. " name = "Go" onclick = "submitCalculatorComputation(); event.preventDefault();">
+    <button class = "buttonPreview" title = "Shift + Enter = shortcut from input text box. " name = "Go" onclick = "window.calculator.submitRequests.submitCalculatorComputation(); event.preventDefault();">
     Go
     </button>
     <span id = "mainComputationStatus"></span>
@@ -241,7 +241,7 @@ function browserify() {
 
 </td><td>
   <span id = "spanCalculatorExamplesContainer">
-  <button onclick = "toggleCalculatorExamples(this)" class = "buttonToggleTopics">&#9656;</button> Examples
+  <button onclick = "window.calculator.calculator.toggleExamples(this)" class = "buttonToggleTopics">&#9656;</button> Examples
   <span id = "spanProgressCalculatorExamples"></span>
   <div id = "divCalculatorExamples">
   </div><!--divCalculatorExamples-->

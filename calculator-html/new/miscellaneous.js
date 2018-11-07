@@ -6,3 +6,7 @@ function shortenString(input, charsOnEachSide) {
   }
   return input.slice(0, charsOnEachSide) + "..." + input.slice(input.length - charsOnEachSide, input.length);
 }
+
+module.exports = {
+  shortenString,
+}

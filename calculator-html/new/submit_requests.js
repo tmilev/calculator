@@ -1,5 +1,6 @@
 "use srict";
-const submitRequests = require('./submit_requests');
+const pathnames = require('./pathnames');
+const miscellaneous = require('./miscellaneous');
 
 function recordProgressDone(progress, timeFinished) {
   if (progress === null || progress === undefined) {
@@ -149,7 +150,7 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   }
   timeOutCounter = 0;
 
-  var postRequest = `POST ${pathnames.urls.calculatorAPI}<br>message: ${shortenString(inputParams, 200)}`;
+  var postRequest = `POST ${pathnames.urls.calculatorAPI}<br>message: ${miscellaneous.shortenString(inputParams, 200)}`;
   recordProgressStarted(idStatus, postRequest, true, (new Date()).getTime());
 
   https.onload = function() { 
@@ -166,10 +167,11 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
 
 function getQueryStringSubmitStringAsMainInput(theString, requestType) {
   var inputParams = '';
-  inputParams += `${pathnames.request}=${requestType}&`;
-  inputParams += `${pathnames.mainInput}=${encodeURIComponent(theString)}&`;
+  var thePage = window.calculator.mainPage;
+  inputParams += `${pathnames.urlFields.request}=${requestType}&`;
+  inputParams += `${pathnames.urlFields.mainInput}=${encodeURIComponent(theString)}&`;
   if (thePage.flagDebug === true) {
-    inputParams += "debugFlag=true&";
+    inputParams += `${pathnames.urlFields.debugFlag}=true&`;
   }
   return inputParams;
 }
@@ -256,6 +258,12 @@ function SendTogglePauseRequest() {
   pauseRequest.send(null);
 }
 
+var submissionCalculatorCounter = 0;
+function calculatorLinkClickHandler() {
+  window.calculator.mainPage.loadSettings(this.href.split('#')[1]); 
+  submitCalculatorComputation();
+}
+
 function submitCalculatorComputation() {
   var result = "";
   var thePage = window.calculator.mainPage;
@@ -270,15 +278,16 @@ function submitCalculatorComputation() {
     calculatorInput : calculatorInputEncoded,
     currentPage: thePage.pages.calculator.name
   };
-  result += `<a href = '#${encodeURIComponent(JSON.stringify(theJSON))}' onclick = `;
-  result += `"thePage.loadSettings(this.href.split('#')[1]); submitCalculatorComputation();"`;
-  result += `>Link to your input</a>`;
+  var theId = `submitCalculatorLink${submissionCalculatorCounter}`;
+  result += `<a href = '#${encodeURIComponent(JSON.stringify(theJSON))}' id = "${theId}">Link to your input</a>`;
   document.getElementById("spanComputationLink").innerHTML = result;
+  theAnchor = document.getElementById(theId); 
+  theAnchor.addEventListener('click', calculatorLinkClickHandler.bind(theAnchor));
   submitStringAsMainInput(
     document.getElementById("mainInputID").value,
     "calculatorOutput", 
     "compute", 
-    defaultOnLoadInjectScriptsAndProcessLaTeX,
+    thePage.defaultOnLoadInjectScriptsAndProcessLaTeX.bind(thePage),
     "mainComputationStatus"
   );
 }

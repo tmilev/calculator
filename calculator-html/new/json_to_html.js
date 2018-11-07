@@ -1,5 +1,6 @@
 "use srict";
 const submitRequests = require('./submit_requests');
+const miscellaneous = require('./miscellaneous');
 
 function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
   if (typeof theDomComponent === "string") {
@@ -92,7 +93,7 @@ function getTableHorizontallyLaidFromJSON(input, currentLabels, selector) {
   var inputType = typeof input; 
   if (inputType === "string" || inputType === "number" || inputType === "boolean") {
     if (shouldBeAbbreviated(currentLabels, selector)) {
-      var label = shortenString(input, 4);
+      var label = miscellaneous.shortenString(input, 4);
       input = getToggleButton(input, label);
     }
     if (isDeleteable(currentLabels, selector)) {

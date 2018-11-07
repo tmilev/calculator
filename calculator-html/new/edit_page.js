@@ -41,7 +41,7 @@ function getEditPanel(fileName) {
   var idCloneInput = encodeURIComponent(`cloneButton${fileName}`);
   var idSpanClonePageReport = encodeURIComponent(`cloneButtonReport${fileName}`);
   result += `<button class = 'buttonClone' style = 'width:50px' onclick = `;
-  result += `"handleClone('${fileName}', '${idCloneInput}', '${idSpanClonePageReport}')">Clone</button>`;
+  result += `"window.calculator.editPage.handleClone('${fileName}', '${idCloneInput}', '${idSpanClonePageReport}')">Clone</button>`;
   result += `<input type = "text" value = '${fileName}' style = 'width:80%' id = '${idCloneInput}'></input><br>`
   result += `<div id = "${idSpanClonePageReport}" style = 'width:80%'></div>`;
   result += "</span>";
@@ -55,7 +55,7 @@ function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
   console.log(`DEBUG: handle clone with input: ${fileName}, new file name: ${newFileName}`); 
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
-  theURL += getQueryStringSubmitStringAsMainInput(newFileName, pathnames.requestClonePage);
+  theURL += submitRequests.getQueryStringSubmitStringAsMainInput(newFileName, pathnames.requestClonePage);
   theURL += `${pathnames.fileName}=${fileName}&`;
   //console.log("DEBUG: about to submit: " + theURL); 
   submitRequests.submitGET({
@@ -70,7 +70,7 @@ function storeEditedPage() {
   var editor = thePage.pages.editPage.editor;
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
-  theURL += getQueryStringSubmitStringAsMainInput(editor.getValue(), pathnames.requestModifyPage);
+  theURL += submitRequests.getQueryStringSubmitStringAsMainInput(editor.getValue(), pathnames.requestModifyPage);
   theURL += `${pathnames.fileName}=${thePage.storage.editor.currentlyEditedPage.getValue()}&`;
   //console.log("DEBUG: about to submit: " + theURL); 
   submitRequests.submitGET({
@@ -132,4 +132,5 @@ function selectEditPage(currentlyEditedPage) {
 module.exports = {
   selectEditPage, 
   getEditPanel,
+  handleClone
 }

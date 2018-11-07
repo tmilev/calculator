@@ -5,10 +5,10 @@ var urls = {
   appNoCache: "/appNoCache",
   appWithCache: "/app",
   app: "/appNoCache",
-  request: "request",
 };
 
 var urlFields = {
+  request: "request",
   mainInput: "mainInput",
   fileName: "fileName",
   requestDatabase: "databaseJSON",
@@ -17,6 +17,7 @@ var urlFields = {
   requestClonePage: "clonePageJSON",
   databaseTable: "currentDatabaseTable",
   setProblemData: "setProblemData",
+  debugFlag: "debugFlag",
 }
 
 module.exports = {

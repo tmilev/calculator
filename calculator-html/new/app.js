@@ -12,6 +12,8 @@ window.calculator = {
   selectCourse: null,
   coursePage: null,
   problemPage: null,
+  submitRequests: null,
+  editPage: null,
 };
 
 //load globals:
@@ -24,6 +26,8 @@ window.calculator.initializeButtons = require('./initialize_buttons');
 window.calculator.selectCourse = require('./select_course');
 window.calculator.coursePage = require('./course_page');
 window.calculator.problemPage = require('./problem_page');
+window.calculator.submitRequests = require('./submit_requests');
+window.calculator.editPage = require('./edit_page');
 
 
 //initialize everything not initilized while loading:

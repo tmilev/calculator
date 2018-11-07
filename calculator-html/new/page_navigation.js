@@ -491,7 +491,7 @@ function sectionSelect(sectionNumber) {
   var deadlineSpans = document.getElementsByClassName(ids.domElements.classSpanDeadlineContainer);
   for (var counterDeadlines = 0; counterDeadlines < deadlineSpans.length; counterDeadlines ++) {
     var currentDeadlineSpan = deadlineSpans[counterDeadlines];
-    var currentDeadlineId = currentDeadlineSpan.id.substr(stringResources.prefixDeadlineContainer.length);
+    var currentDeadlineId = currentDeadlineSpan.id.substr(ids.stringResources.prefixDeadlineContainer.length);
     var currentProblem = thePage.problems[currentDeadlineId];
     if (currentProblem === undefined) {
       continue;

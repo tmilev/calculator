@@ -7,6 +7,11 @@ window.calculator = {
   login: null,
   signUp: null,
   calculator: null,
+  autocomplete: null,
+  initializeButtons: null,
+  selectCourse: null,
+  coursePage: null,
+  problemPage: null,
 };
 
 //load globals:
@@ -14,6 +19,12 @@ window.calculator.mainPage = new mainPage.Page();
 window.calculator.login = require('./login');
 window.calculator.signUp = require('./signup');
 window.calculator.calculator = require('./calculator_page').calculator;
+window.calculator.autocomplete = require('./autocomplete');
+window.calculator.initializeButtons = require('./initialize_buttons');
+window.calculator.selectCourse = require('./select_course');
+window.calculator.coursePage = require('./course_page');
+window.calculator.problemPage = require('./problem_page');
+
 
 //initialize everything not initilized while loading:
 window.calculator.mainPage.initializeCalculatorPage();

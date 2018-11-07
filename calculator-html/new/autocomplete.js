@@ -1,4 +1,6 @@
 "use strict";
+var theAutocompleteDictionary = require('./autocomplete_keywords').theAutocompleteDictionary;
+
 var minLengthAutocompleteTrigger = 2;
 var DebugCounter = 0;
 var AutocompleteIsInitialized = false;
@@ -234,4 +236,9 @@ function setCursorPosition(caretPos) {
       theText.focus();
     }
   }
+}
+
+module.exports = {
+  suggestWord,
+  arrowAction,
 }

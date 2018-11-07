@@ -1,8 +1,10 @@
 "use strict";
 const submitRequests = require('./submit_requests');
 const pathnames = require('./pathnames');
+const editPage = require('./edit_page');
 
 function selectCourse(courseIndex) {
+  var thePage = window.calculator.mainPage;
   var theCourse = thePage.theCourses[courseIndex];
   thePage.storage.currentCourse.courseHome.setAndStore(theCourse.courseHome);
   thePage.storage.currentCourse.topicList.setAndStore(theCourse.topicList);
@@ -16,13 +18,13 @@ function afterLoadSelectCoursePage(incomingPage, result) {
   //resultString += JSON.stringify(thePage.theCourses);
   if (thePage.user.hasProblemEditRights()) {
     resultString += "<div class ='problemInfoBar'>";
-    resultString += getEditPanel("/coursesavailable/default.txt");
+    resultString += editPage.getEditPanel("/coursesavailable/default.txt");
     resultString += "</div>";
   }
   resultString += "<div style='text-align:center; width:100%'>";
   for (var counterCourses = 0; counterCourses < thePage.theCourses.length; counterCourses ++) {
     var currentCourse = thePage.theCourses[counterCourses];
-    resultString += `<a href="#" onclick="selectCourse(${counterCourses})" class = "courseLink">`;
+    resultString += `<a href="#" onclick="window.calculator.selectCourse.selectCourse(${counterCourses})" class = "courseLink">`;
     resultString += `${currentCourse.title}</a>`;
     if (counterCourses != thePage.theCourses.length - 1) {
       resultString += "<br>";

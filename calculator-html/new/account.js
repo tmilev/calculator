@@ -31,6 +31,7 @@ function submitChangePassRequest() {
 }
 
 function updateAccountPage() {
+  var thePage = window.calculator.mainPage;
   var usernameInput = document.getElementById("spanUserIdInAccountsPage");
   var emailSpan = document.getElementById(ids.domElements.spanOldEmail);
   usernameInput.innerHTML = thePage.storage.user.name.getValue();

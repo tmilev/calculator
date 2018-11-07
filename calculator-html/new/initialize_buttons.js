@@ -2,6 +2,11 @@
 const submitRequests = require('./submit_requests');
 const panels = require('./panels');
 
+var calculatorLeftPosition = 0;
+var calculatorRightPosition = 0;
+
+var keyWordsKnownToMathQuill = ['sqrt', 'frac', 'cdot', 'left', 'right', 'infty', 'otimes', 'times', 'oplus', 'pmatrix','int', 'begin', 'end'];
+
 var studentScoresInHomePage = [];
 //var lastFocus;
 var charsToSplit = ['x','y'];
@@ -16,7 +21,6 @@ var calculatorSeparatorRightDelimiters = {
 };
 var startingCharacterSectionUnderMathQuillEdit = '';
 var panelDataRegistry = {};
-var calculatorPanel = null;
 
 function processMathQuillLatex(theText) { 
   for (var i = 0; i < theText.length; i ++) {
@@ -287,18 +291,6 @@ function toggleHeightForTimeout(currentPanel) {
 }
 
 function initializeCalculatorPage() { 
-  if (calculatorPanel !== null) {
-    return;
-  }
-  calculatorPanel = new InputPanelData({
-    idMQSpan: "mainInputMQfield",
-    idMQcomments: "mqPanelComments",
-    problemId: "",
-    idPureLatex: "mainInputID",
-    idButtonContainer: 'mainInputMQfieldButtons',
-    flagCalculatorPanel: true
-
-  });
   calculatorPanel.initialize();
 }
 
@@ -408,6 +400,7 @@ InputPanelData.prototype.submitGiveUp = function() {
 }
 
 InputPanelData.prototype.submitPreview = function() {
+  var thePage = window.calculator.mainPage;
   var theRequest = "";
   var currentProblem = thePage.problems[this.problemId];
   if (currentProblem.flagForReal) {
@@ -788,7 +781,19 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
   return false;
 }
 
+var calculatorPanel =  new InputPanelData({
+  idMQSpan: "mainInputMQfield",
+  idMQcomments: "mqPanelComments",
+  problemId: "",
+  idPureLatex: "mainInputID",
+  idButtonContainer: 'mainInputMQfieldButtons',
+  flagCalculatorPanel: true,
+});
+
 module.exports = {
+  initializeAccordionButtons,
   initializeButtons,
   initializeCalculatorPage,
+  calculatorPanel,
+  InputPanelData,
 }

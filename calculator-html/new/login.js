@@ -264,6 +264,7 @@ function init() {
 module.exports = {
   init, 
   logoutGoogle,
+  logout,
   loginTry,
   toggleAdminPanels,
   loginCalculator,

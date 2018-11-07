@@ -1,12 +1,16 @@
 "use strict";
 const submitRequests = require('./submit_requests');
 const pathnames = require('./pathnames');
+const ids = require('./ids_dom_elements');
+const editPage = require('./edit_page');
+const problemPage = require('./problem_page');
 
 function callbackModifyDeadlines(incomingId, input, output) {
   document.getElementById(`deadlines${incomingId}`).innerHTML = input;
 }
 
 function modifyDeadlines(incomingId) {
+  var thePage = window.calculator.mainPage;
   var theDates = document.getElementsByName(incomingId);
   var jsonToSubmit = {};
   var idDecoded = decodeURIComponent(incomingId);
@@ -27,35 +31,10 @@ function modifyDeadlines(incomingId) {
   });
 }
 
-function convertStringToLaTeXFileName(input) {
-  var result = encodeURIComponent(input.split(" ").join("-")).split("%").join("-");
-  if (result.length === 0) {
-    return "undefined";
-  }
-  if (result[0] === "-") {
-    result = "L" + result;
-  }
-  return result;
-}
-
-
-
 var problemWeightsVisible = false;
 
-function initializeProblemWeightsAndDeadlines() {
-  var theWeights = document.getElementsByClassName('panelProblemWeights');
-  for (var i = 0; i < theWeights.length; i ++) { 
-    //theScores[i].style.transition ='opacity 1s linear';
-    theWeights[i].style.maxHeight = '0px';
-  }
-  var theDeadlines = document.getElementsByClassName('panelDeadlines');
-  for (var i = 0; i < theDeadlines.length; i ++) { 
-    //theScores[i].style.transition ='opacity 1s linear';
-    theDeadlines[i].style.maxHeight = '0px';
-  }
-}
-
-function toggleDeadline(deadlineId, panelId, button) { 
+function toggleDeadline(deadlineId, panelId, button) {
+  var thePage = window.calculator.mainPage;
   var thePanel = document.getElementById(deadlineId);
   var theProblem = thePage.problems[panelId];
   if (thePanel.style.maxHeight === '200px') {
@@ -70,6 +49,7 @@ function toggleDeadline(deadlineId, panelId, button) {
 }
 
 function toggleProblemWeights() { 
+  var thePage = window.calculator.mainPage;
   var theWeights = document.getElementsByClassName('panelProblemWeights');
   var theButtons = document.getElementsByClassName('accordionLikeProblemWeight');
   for (var i = 0; i < theWeights.length; i ++) { 
@@ -92,24 +72,8 @@ function toggleProblemWeights() {
   problemWeightsVisible = !problemWeightsVisible;
 }
 
-function writeEditCoursePagePanel() {
-  var thePanel = "";
-  var thePage = window.storage.mainPage;
-  thePanel += getEditPanel(thePage.storage.currentCourse.courseHome.getValue());
-  thePanel += getEditPanel(thePage.storage.currentCourse.topicList.getValue());
-  if (
-    thePage.theTopics.topicBundleFile !== undefined && 
-    thePage.theTopics.topicBundleFile !== null &&
-    thePage.theTopics.topicBundleFile !== ""
-  ) {
-    for (var counterTopicBundle = 0; counterTopicBundle < thePage.theTopics.topicBundleFile.length; counterTopicBundle ++) {
-      thePanel += getEditPanel(thePage.theTopics.topicBundleFile[counterTopicBundle]);
-    }
-  }
-  document.getElementById("divCurrentCourseEditPanel").innerHTML = thePanel;
-}
-
 function afterLoadCoursePage(incomingPage, result) {
+  var thePage = window.calculator.mainPage;
   var theCourseDiv = document.getElementById(ids.domElements.divCurrentCourseBody); 
   theCourseDiv.innerHTML = incomingPage;
   var titleElements = theCourseDiv.getElementsByTagName('title');
@@ -125,18 +89,19 @@ function afterLoadCoursePage(incomingPage, result) {
   if (thePage.user.flagLoggedIn) {
     topicList = "topicListJSON";
   }
-  writeEditCoursePagePanel();
+  problemPage.writeEditCoursePagePanel();
   if (theTopics.length  === 0) {
     return;
   }
   submitRequests.submitGET({
     url: `${pathnames.urls.calculatorAPI}?request=${topicList}`,
-    callback: afterLoadTopics,
+    callback: problemPage.afterLoadTopics,
     progress: "spanProgressReportGeneral"
   });
 }
 
 function selectCurrentCoursePage() {
+  var thePage = window.calculator.mainPage;
   var topicRequest = "templateJSONNoLogin";
   if (thePage.user.flagLoggedIn) {
     topicRequest = "templateJSON";
@@ -153,5 +118,7 @@ function selectCurrentCoursePage() {
 }
 
 module.exports =  {
-  selectCurrentCoursePage
+  selectCurrentCoursePage,
+  toggleDeadline,
+  toggleProblemWeights,
 }

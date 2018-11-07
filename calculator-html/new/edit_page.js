@@ -3,6 +3,7 @@ const submitRequests = require('./submit_requests');
 
 var staticWordCompleter = {
   getCompletions: function(editor, session, pos, prefix, callback) {
+    var thePage = window.calculator.mainPage;
     callback(null, thePage.aceEditorAutoCompletionWordList.map(function(word) {
       return {
         caption: word,
@@ -25,6 +26,7 @@ function ctrlSPressAceEditorHandler(event) {
 }
 
 function getEditPanel(fileName) {
+  var thePage = window.calculator.mainPage;
   if (!thePage.user.hasProblemEditRights() || thePage.studentView()) {
     return "";
   }
@@ -64,6 +66,7 @@ function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
 }
 
 function storeEditedPage() {
+  var thePage = window.calculator.mainPage;
   var editor = thePage.pages.editPage.editor;
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
@@ -77,6 +80,7 @@ function storeEditedPage() {
 }
 
 function selectEditPageCallback(input, outputComponent) {
+  var thePage = window.calculator.mainPage;
   try {
     var parsedInput = JSON.parse(input);
     //document.getElementById('divEditorAce').textContent = decodeURIComponent(parsedInput.content);
@@ -101,6 +105,7 @@ function selectEditPageCallback(input, outputComponent) {
 }
 
 function selectEditPage(currentlyEditedPage) {
+  var thePage = window.calculator.mainPage;
   if (currentlyEditedPage === undefined || currentlyEditedPage === null) { 
     currentlyEditedPage = thePage.storage.editor.currentlyEditedPage.getValue();
   }
@@ -125,5 +130,6 @@ function selectEditPage(currentlyEditedPage) {
 }
 
 module.exports = {
-  selectEditPage
+  selectEditPage, 
+  getEditPanel,
 }

@@ -188,10 +188,10 @@ function browserify() {
   <textarea class = "textareaCalculatorMain"
   rows = "3" cols = "30" name = "mainInput" id = "mainInputID"
   onkeypress = "window.calculator.calculator.submitCalculatorInputOnEnter();"
-  onkeyup    = "suggestWord(); calculatorPanel.mQHelpCalculator();"
-  onkeydown  = "suggestWord(); calculatorPanel.mQHelpCalculator(); arrowAction(event);"
-  onmouseup  = "suggestWord(); calculatorPanel.mQHelpCalculator();"
-  oninput    = "suggestWord(); calculatorPanel.mQHelpCalculator();"></textarea>
+  onkeyup    = "window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"
+  onkeydown  = "window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator(); window.calculator.autocomplete.arrowAction(event);"
+  onmouseup  = "window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"
+  oninput    = "window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"></textarea>
 </td>
 <td>
   <span id = "mqPanelComments" style = "white-space:nowrap"> Equation assistant</span>
@@ -423,7 +423,7 @@ function browserify() {
   </button>
   <div id = "divProfilePicture" class = "divProfilePictureContainerExpanded divInvisible"></div>
   <div id = "divLoginPanelUsernameReport" class = "divInvisible divSmall" style = "margin: 4px"></div>
-  <a href = "#" onclick = "logout();" class = "linkLogoutInactive linkStandardButtonLike">Log out</a> 
+  <a href = "#" onclick = "window.calculator.login.logout();" class = "linkLogoutInactive linkStandardButtonLike">Log out</a> 
 </div>
 <div><button class = "buttonSelectPage" id = "buttonLoginPage">Login</button></div>
 <div><button class = "buttonSelectPage" id = "buttonProblemPage">Current problem</button></div>

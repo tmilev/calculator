@@ -4,7 +4,7 @@ var urls = {
   calculatorAPI: "/cgi-bin/calculator",
   appNoCache: "/appNoCache",
   appWithCache: "/app",
-  app: "/app",
+  app: "/appNoCache",
   request: "request",
 };
 

@@ -9,14 +9,11 @@ function Calculator() {
 var calculatorMQString;
 var calculatorMQStringIsOK = true;
 var ignoreNextMathQuillUpdateEvent = false;
-var calculatorLeftPosition = 0;
-var calculatorRightPosition = 0;
 var calculatorPlotUpdaters = {};
 var calculatorInputBoxToSliderUpdaters = {};
 var calculatorInputBoxNames = [];
 var startingCharacterSectionUnderMathQuillEdit;
 var calculatorCanvases;
-var keyWordsKnownToMathQuill = ['sqrt', 'frac', 'cdot', 'left', 'right', 'infty', 'otimes', 'times', 'oplus', 'pmatrix','int', 'begin', 'end'];
 
 function createSelectionNoFocus(field, start, end) { 
   if (field.createTextRange) { 

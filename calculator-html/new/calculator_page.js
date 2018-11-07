@@ -59,7 +59,7 @@ Calculator.prototype.addListenersToInputBoxes = function() {
   }
 }
 
-function updateCalculatorSliderToInputBox(boxName, sliderName) { 
+Calculator.prototype.updateCalculatorSliderToInputBox =  function(boxName, sliderName) { 
   var theBoxes = document.getElementsByName(boxName);
   var theSliders = document.getElementsByName(sliderName);
   var sliderValue = theSliders[0].value;
@@ -67,7 +67,7 @@ function updateCalculatorSliderToInputBox(boxName, sliderName) {
     theBoxes[i].value = sliderValue;
   }
   if (calculatorPlotUpdaters[sliderName] !== undefined) { 
-    var theCanvas = calculatorCanvases[calculatorPlotUpdaters[sliderName]];
+    var theCanvas = this.canvases[calculatorPlotUpdaters[sliderName]];
     if (theCanvas !== undefined) { 
       if (theCanvas.canvasResetFunction !== null) {
         theCanvas.canvasResetFunction();

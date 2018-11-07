@@ -23,9 +23,22 @@
 //TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var calculatorCanvases = new Object;
-var firstCriticalRunTimeError = "";
-var firstCanvas = undefined;
+var module;
+var require;
+if (require === undefined) {
+  require = function(){};
+}
+
+if (module === undefined) {
+  module = {};
+}
+
+function Drawing() {
+  this.canvases = {};
+  this.firstCriticalRunTimeError = "";
+  this.firstCanvas = null;
+  this.numberOfControlsConstructed = 0;
+}
 
 function calculatorError(x) { 
   console.log(x);
@@ -33,7 +46,7 @@ function calculatorError(x) {
     return;  
   }
   firstCriticalRunTimeError = x;
-  if (firstCriticalRunTimeError !== "" && firstCanvas !== undefined) { 
+  if (firstCriticalRunTimeError !== "" && firstCanvas !== undefined && firstCanvas !== null) { 
     firstCanvas.textErrors = firstCriticalRunTimeError + " All further error messages are suppressed.";
     firstCanvas.showMessages();
   }
@@ -378,15 +391,15 @@ function colorToHex(color) {
   return color;
 }
 
-function calculatorDeleteCanvas(inputCanvas) { 
-  if (calculatorCanvases[inputCanvas.id] !==undefined && calculatorCanvases[inputCanvas.id] !== null) { 
-    delete calculatorCanvases[inputCanvas.id];
+Drawing.prototype.deleteCanvas = function(inputCanvas) { 
+  if (this.canvases[inputCanvas.id] !== undefined && this.canvases[inputCanvas.id] !== null) { 
+    delete this.canvases[inputCanvas.id];
   }
 }
 
-function calculatorResetCanvas(inputCanvas) { 
-  if (calculatorCanvases[inputCanvas.id] !==undefined && calculatorCanvases[inputCanvas.id] !== null) { 
-    calculatorCanvases[inputCanvas.id].init(inputCanvas.id);
+Drawing.prototype.resetCanvas = function (inputCanvas) { 
+  if (this.canvases[inputCanvas.id] !== undefined && this.canvases[inputCanvas.id] !== null) { 
+    this.canvases[inputCanvas.id].init(inputCanvas.id);
   }
 }
 
@@ -1064,24 +1077,28 @@ CanvasTwoD.prototype.init = function(inputCanvasId)
 { this.canvasId = inputCanvasId;
   this.canvasContainer = document.getElementById(inputCanvasId);
   this.surface = this.canvasContainer.getContext("2d");
-  this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, false);
-  this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, false);
-//    this.canvasContainer.addEventListener("wheel", calculatorCanvasMouseWheel, true);
+  this.canvasContainer.addEventListener("DOMMouseScroll", drawing.mouseWheel.bind(drawing), false);
+  this.canvasContainer.addEventListener("mousewheel", drawing.mouseWheel.bind(drawing), false);
+//    this.canvasContainer.addEventListener("wheel", drawing.mouseWheel.bind(drawing), true);
   this.theObjects =[];
   this.spanMessages = document.getElementById(this.canvasId+"Messages");
   this.spanCriticalErrors = document.getElementById(this.canvasId+"CriticalErrors");
   this.spanControls = document.getElementById(this.canvasId+"Controls");
   this.constructControls();
   this.computeBasis();
-};
-CanvasTwoD.prototype.resetView = function()
-{ this.setViewWindow(this.viewWindowDefault[0],this.viewWindowDefault[1]);
+}
+
+CanvasTwoD.prototype.resetView = function() { 
+  this.setViewWindow(this.viewWindowDefault[0], this.viewWindowDefault[1]);
   this.redraw();
-};
-CanvasTwoD.prototype.constructControls = function()
-{ var thisString="document.getElementById('"+this.canvasId+"')";
-  this.spanControls.innerHTML="<button style =\"border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer\" onclick=\"calculatorGetCanvasTwoD("+thisString+ ").resetView();\">reset view</button> ";
-};
+}
+
+CanvasTwoD.prototype.constructControls = function() { 
+  drawing.numberOfControlsConstructed ++;
+  var controlButtonId = `buttonControlCanvas${drawing.numberOfControlsConstructed}`;
+  this.spanControls.innerHTML = `<button id = "${controlButtonId}" style = "border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer" >reset view</button> `;
+  document.getElementById(controlButtonId).addEventListener('click', this.resetView.bind(this));
+}
 
 CanvasTwoD.prototype.coordsMathScreenToMath = function(theCoords)
 { var output = this.screenBasisOrthonormal[0].slice();
@@ -2044,8 +2061,8 @@ Canvas.prototype.init = function(inputCanvasId) {
   this.canvasId = inputCanvasId;
   this.canvasContainer = document.getElementById(inputCanvasId);
   this.surface = this.canvasContainer.getContext("2d");
-  this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
-  this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
+  this.canvasContainer.addEventListener("DOMMouseScroll", drawing.mouseWheel.bind(drawing), true);
+  this.canvasContainer.addEventListener("mousewheel", drawing.mouseWheel.bind(drawing), true);
   this.spanMessages = document.getElementById(this.canvasId + "Messages");
   this.spanCriticalErrors = document.getElementById(this.canvasId + "CriticalErrors");
   this.spanControls = document.getElementById(this.canvasId + "Controls");
@@ -2518,27 +2535,28 @@ Canvas.prototype.drawSurface = function(theSurface) {
   }
 }
 
-function calculatorGetCanvas(inputCanvas) { 
-  if (calculatorCanvases[inputCanvas.id] === undefined)
-  { calculatorCanvases[inputCanvas.id] = new Canvas(inputCanvas);
-    if (firstCanvas == null)
-      firstCanvas = calculatorCanvases[inputCanvas.id];
-  }
-  return calculatorCanvases[inputCanvas.id];
-}
-
-function calculatorGetCanvasTwoD(inputCanvas) { 
-  if (calculatorCanvases[inputCanvas.id] === undefined) { 
-    calculatorCanvases[inputCanvas.id] = new CanvasTwoD(inputCanvas);
-    if (firstCanvas == null) {
-      firstCanvas = calculatorCanvases[inputCanvas.id];
+Drawing.prototype.getCanvas = function(inputCanvas) { 
+  if (this.canvases[inputCanvas.id] === undefined) { 
+    this.canvases[inputCanvas.id] = new Canvas(inputCanvas);
+    if (this.firstCanvas == null) {
+      this.firstCanvas = this.canvases[inputCanvas.id];
     }
   }
-  return calculatorCanvases[inputCanvas.id];
+  return this.canvases[inputCanvas.id];
 }
 
-function testPicture(inputCanvas) { 
-  var theCanvas = calculatorGetCanvas(document.getElementById(inputCanvas));
+Drawing.prototype.getCanvasTwoD = function(inputCanvas) { 
+  if (this.canvases[inputCanvas.id] === undefined) { 
+    this.canvases[inputCanvas.id] = new CanvasTwoD(inputCanvas);
+    if (this.firstCanvas == null) {
+      this.firstCanvas = this.canvases[inputCanvas.id];
+    }
+  }
+  return this.canvases[inputCanvas.id];
+}
+
+Drawing.prototype.testPicture =  function(inputCanvas) { 
+  var theCanvas = this.getCanvas(document.getElementById(inputCanvas));
   theCanvas.screenBasisUserDefault = [[0.59, 0.78, 0.18], [0.46, - 0.15, - 0.87]];
   theCanvas.screenBasisUser = theCanvas.screenBasisUserDefault.slice();
   theCanvas.init(inputCanvas, false);
@@ -2564,8 +2582,8 @@ function testPicture(inputCanvas) {
   theCanvas.redraw();
 }
 
-function testPictureTwoD(inputCanvas1, inputCanvas2, inputCanvas3)
-{ var theCanvas = calculatorGetCanvasTwoD(document.getElementById(inputCanvas1));
+Drawing.prototype.testPictureTwoD = function(inputCanvas1, inputCanvas2, inputCanvas3) { 
+  var theCanvas = this.getCanvasTwoD(document.getElementById(inputCanvas1));
   theCanvas.init(inputCanvas1);
   theCanvas.drawLine([- 10,0],[19,0], 'green');
   theCanvas.drawLine([0,- 1],[0,1], 'purple');
@@ -2582,7 +2600,7 @@ function testPictureTwoD(inputCanvas1, inputCanvas2, inputCanvas3)
   theCanvas.plotFillFinish();
   theCanvas.drawVectorField(testVectorField2d, true, [-6,-6], [6,6], [20, 20], 0.5, "red",2);
   theCanvas.redraw();
-  var theCanvas2= calculatorGetCanvasTwoD(document.getElementById(inputCanvas2));
+  var theCanvas2 = this.getCanvasTwoD(document.getElementById(inputCanvas2));
   theCanvas2.init(inputCanvas2);
   theCanvas2.drawLine([- 10,- 1],[10,1], 'green');
   theCanvas2.drawLine([0,- 19],[0,1], 'purple');
@@ -2597,7 +2615,7 @@ function testPictureTwoD(inputCanvas1, inputCanvas2, inputCanvas3)
   theCanvas2.setViewWindow([- 1,- 19],[1,5]);
   theCanvas2.drawVectorField(testVectorField2d, false, [-6,-6], [6,6], [20, 20], 0.5, "red",2);
   theCanvas2.redraw();
-  var theCanvas3= calculatorGetCanvasTwoD(document.getElementById(inputCanvas3));
+  var theCanvas3 = this.getCanvasTwoD(document.getElementById(inputCanvas3));
   theCanvas3.init(inputCanvas3);
   theCanvas3.drawFunction(testFunctionPlot, - 10,10, 100, 'red', 2);
   theCanvas3.drawGrid();
@@ -2607,35 +2625,45 @@ function testPictureTwoD(inputCanvas1, inputCanvas2, inputCanvas3)
   theCanvas3.redraw();
 }
 
-function calculatorCanvasMouseMoveRedraw(inputCanvas, x, y)
-{ var theCanvas = calculatorGetCanvas(inputCanvas);
-  if (theCanvas !== null && theCanvas !==undefined)
-    theCanvas.mouseMove(x,y);
+Drawing.prototype.mouseMoveRedraw = function(inputCanvas, x, y) { 
+  var theCanvas = this.getCanvas(inputCanvas);
+  if (theCanvas !== null && theCanvas !== undefined) {
+    theCanvas.mouseMove(x, y);
+  }
 }
 
-function calculatorCanvasMouseWheel(theEvent)
-{ if (theEvent ===undefined)
+Drawing.prototype.mouseWheel = function(theEvent) { 
+  if (theEvent === undefined) {
     theEvent = window.event;
-  if (theEvent.target ===undefined)
+  }
+  if (theEvent.target === undefined) {
     return;
-  if (theEvent.preventDefault !==undefined)
+  }
+  if (theEvent.preventDefault !== undefined) {
     theEvent.preventDefault();
-  if (theEvent.stopPropagation !==undefined)
+  }
+  if (theEvent.stopPropagation !== undefined) {
     theEvent.stopPropagation();
+  }
   var theWheelDelta = theEvent.detail ? theEvent.detail * - 1 : theEvent.wheelDelta / 40;
-  var theCanvas = calculatorCanvases[theEvent.target.id];
+  var theCanvas = this.canvases[theEvent.target.id];
   if (theCanvas ===undefined || theCanvas === null)
     return;
   var theIncrement = 0.6;
   theCanvas.mouseWheel(theWheelDelta *theIncrement, theEvent.clientX, theEvent.clientY);
 }
 
-function calculatorCanvasMouseUp(inputCanvas)
-{ var theCanvas = calculatorGetCanvas(inputCanvas);
+Drawing.prototype.mouseUp = function(inputCanvas) { 
+  var theCanvas = this.getCanvas(inputCanvas);
   theCanvas.selectEmpty();
   theCanvas.redraw();
 }
 
-function calculatorCanvasClick(theCanvasContainer, theEvent)
-{ calculatorCanvases[theCanvasContainer.id].canvasClick(theEvent.clientX, theEvent.clientY);
+Drawing.prototype.canvasClick = function(theCanvasContainer, theEvent) { 
+  this.canvases[theCanvasContainer.id].canvasClick(theEvent.clientX, theEvent.clientY);
+}
+
+var drawing = new Drawing();
+module.exports = {
+  drawing
 }

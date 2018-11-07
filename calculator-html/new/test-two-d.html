@@ -1,17 +1,30 @@
 <html>
-<script type="text/javascript" src="three-d.js">
+<script type="text/javascript" src = "three-d.js">
 </script>
-<body onload="testPictureTwoD('cOne', 'cTwo', 'cThree');">
-<canvas width="600" height="400" style="border:solid 1px" id="cOne" onmousedown="calculatorCanvasClick(this, event);" onmouseup="calculatorCanvasMouseUp(this);" onmousemove="calculatorCanvasMouseMoveRedraw(this, event.clientX, event.clientY);" onmousewheel="calculatorCanvasMouseWheel(this, event);">Your browser does not support the HTML5 canvas tag.</canvas><br>
-<span id="cOneControls"></span>
-<span id="cOneMessages"></span>
+
+<body onload = "drawing.testPictureTwoD('cOne', 'cTwo', 'cThree');">
+<canvas width = "600" height = "400" style = "border:solid 1px" id = "cOne" 
+onmousedown = "drawing.canvasClick(this, event);" 
+onmouseup = "drawing.mouseUp(this);" 
+onmousemove = "drawing.mouseMoveRedraw(this, event.clientX, event.clientY);" 
+onmousewheel = "drawing.mouseWheel(this, event);">Your browser does not support the HTML5 canvas tag.</canvas><br>
+<span id = "cOneControls"></span>
+<span id = "cOneMessages"></span>
 <br>
-<canvas width="600" height="400" style="border:solid 1px" id="cTwo" onmousedown="calculatorCanvasClick(this, event);" onmouseup="calculatorCanvasMouseUp(this);" onmousemove="calculatorCanvasMouseMoveRedraw(this, event.clientX, event.clientY);" onmousewheel="calculatorCanvasMouseWheel(this, event);">Your browser does not support the HTML5 canvas tag.</canvas><br>
-<span id="cTwoControls"></span>
-<span id="cTwoMessages"></span>
+<canvas width = "600" height = "400" style = "border:solid 1px" id = "cTwo" 
+onmousedown = "drawing.canvasClick(this, event);" 
+onmouseup = "drawing.mouseUp(this);" 
+onmousemove = "drawing.mouseMoveRedraw(this, event.clientX, event.clientY);" 
+onmousewheel = "drawing.mouseWheel(this, event);">Your browser does not support the HTML5 canvas tag.</canvas><br>
+<span id = "cTwoControls"></span>
+<span id = "cTwoMessages"></span>
 <br>
-<canvas width="400" height="400" style="border:solid 1px" id="cThree" onmousedown="calculatorCanvasClick(this, event);" onmouseup="calculatorCanvasMouseUp(this);" onmousemove="calculatorCanvasMouseMoveRedraw(this, event.clientX, event.clientY);" onmousewheel="calculatorCanvasMouseWheel(this, event);">Your browser does not support the HTML5 canvas tag.</canvas><br>
-<span id="cThreeControls"></span>
-<span id="cThreeMessages"></span>
+<canvas width = "400" height = "400" style = "border:solid 1px" id = "cThree" 
+onmousedown = "drawing.canvasClick(this, event);" 
+onmouseup = "drawing.mouseUp(this);" 
+onmousemove = "drawing.mouseMoveRedraw(this, event.clientX, event.clientY);" 
+onmousewheel = "drawing.mouseWheel(this, event);">Your browser does not support the HTML5 canvas tag.</canvas><br>
+<span id = "cThreeControls"></span>
+<span id = "cThreeMessages"></span>
 </body>
 </html>

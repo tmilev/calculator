@@ -14,6 +14,7 @@ window.calculator = {
   problemPage: null,
   submitRequests: null,
   editPage: null,
+  drawing: null,
 };
 
 //load globals:
@@ -28,7 +29,7 @@ window.calculator.coursePage = require('./course_page');
 window.calculator.problemPage = require('./problem_page');
 window.calculator.submitRequests = require('./submit_requests');
 window.calculator.editPage = require('./edit_page');
-
+window.calculator.drawing = require('./three-d').drawing;
 
 //initialize everything not initilized while loading:
 window.calculator.mainPage.initializeCalculatorPage();

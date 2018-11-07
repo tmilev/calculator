@@ -1028,8 +1028,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   }
   out << "<script language =\"javascript\">\n";
   std::string canvasFunctionName = "functionMake" + this->canvasName;
-  out << "function " << canvasFunctionName << "()\n"
-  << "{ ";
+  out << "function " << canvasFunctionName << "(){\n";
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++)
   { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
     out << "  calculatorPlotUpdaters['"
@@ -1048,9 +1047,10 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     { out << currentO.GetJavascriptCurveImmersionIn3d(the3dObjects[i], this->canvasName, funCounter) << "\n ";
     }
   }
-  out << "calculatorResetCanvas(document.getElementById('"
+  out << "var theDrawer = window.calculator.drawing";
+  out << "theDrawer.resetCanvas(document.getElementById('"
   << this->canvasName << "'));\n";
-  out << "var theCanvas = calculatorGetCanvas(document.getElementById('"
+  out << "var theCanvas = theDrawer.getCanvas(document.getElementById('"
   << this->canvasName
   << "'));\n"
   << "theCanvas.init('" << this->canvasName << "');\n";
@@ -1205,9 +1205,9 @@ std::string PlotObject::GetJavascriptSurfaceImmersion
     << ", " << this->coordinateFunctionsJS[2] << "];\n";
     out << "}\n";
   } else
-  out << "//this->theCoordinateFunctionsJS has "
-  << this->coordinateFunctionsJS.size
-  << " elements instead of 3 (expected).\n";
+    out << "//this->theCoordinateFunctionsJS has "
+    << this->coordinateFunctionsJS.size
+    << " elements instead of 3 (expected).\n";
   if (this->theVarRangesJS.size != 2)
     out << "//this->theVarRangesJS has " << this->theVarRangesJS.size << " elements instead of 2 (expected).";
   else if (this->theVarRangesJS[0].size != 2 || this->theVarRangesJS[1].size != 2)
@@ -1461,12 +1461,12 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     << "style =\"border:solid 1px\" id =\""
     << this->canvasName
     << "\" "
-    << "onmousedown =\"calculatorCanvasClick(this, event);\" "
-    << "onmouseup =\"calculatorCanvasMouseUp(this);\" "
-    << "onmousemove =\"calculatorCanvasMouseMoveRedraw"
+    << "onmousedown =\"window.calculator.drawing.canvasClick(this, event);\" "
+    << "onmouseup =\"window.calculator.drawing.canvasMouseUp(this);\" "
+    << "onmousemove =\"window.calculator.drawing.canvasMouseMoveRedraw"
     << "(this, event.clientX, event.clientY);\""
-    << " onmousewheel =\"calculatorCanvasMouseWheel(event);\""
-    << " onDOMMouseScroll =\"calculatorCanvasMouseWheel(event);\""
+    << " onmousewheel =\"window.calculator.drawing.canvasMouseWheel(event);\""
+    << " onDOMMouseScroll =\"window.calculator.drawing.canvasMouseWheel(event);\""
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
     << "<span id =\"" << this->canvasName << "Controls\"></span>";
@@ -1503,9 +1503,13 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     if (currentPlot.thePlotType == "points")
       currentPlot.GetJavascriptPoints(theFnPlots[i], this->canvasName, funCounter);
   }
-  outScript << "calculatorResetCanvas(document.getElementById('"
+  //outScript << "console.log('window:' + window);";
+  //outScript << "console.log('calculator' + window.calculator);";
+  //outScript << "console.log('drawing' + window.calculator.drawing);";
+  outScript << "var drawing = window.calculator.drawing;\n";
+  outScript << "drawing.resetCanvas(document.getElementById('"
   << this->canvasName << "'));\n";
-  outScript << "var theCanvas = calculatorGetCanvasTwoD(document.getElementById('"
+  outScript << "var theCanvas = drawing.getCanvasTwoD(document.getElementById('"
   << this->canvasName
   << "'));\n"
   << "theCanvas.init('" << this->canvasName << "');\n";
@@ -1599,9 +1603,9 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   outScript
   << "theCanvas.redraw();\n"
   << "}\n"
-  << "calculatorGetCanvasTwoD(document.getElementById('"
+  << "window.calculator.drawing.getCanvasTwoD(document.getElementById('"
   << this->canvasName
-  << "')).canvasResetFunction =" << canvasFunctionName << ";\n"
+  << "')).canvasResetFunction = " << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n";
   owner.theObjectContainer.graphicsScripts.SetKeyValue(this->canvasName, outScript.str());
   out << "<script language =\"javascript\">\n" << outScript.str() << "</script>";

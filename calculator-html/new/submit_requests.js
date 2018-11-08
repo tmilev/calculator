@@ -11,7 +11,7 @@ function recordProgressDone(progress, timeFinished) {
   }
   var theButton = progress.childNodes[0];
   var timeTotal = timeFinished - progress.getAttribute("timeStarted");
-  theButton.childNodes[0].innerHTML = `<b style ='color:green'>Received</b> ${timeTotal} ms`;
+  theButton.innerHTML = `<b style ='color:green'>Received</b> ${timeTotal} ms`;
 }
 
 function doToggleContent(button) {
@@ -29,7 +29,7 @@ function doToggleContent(button) {
 
 function getToggleButton(address, label) {
   var result = "";
-  result += `<button class = "buttonProgress accordionLikeIndividual" onclick = "doToggleContent(this);">`;
+  result += `<button class = "buttonProgress accordionLikeIndividual" onclick = "window.calculator.submitRequests.doToggleContent(this);">`;
   result += `<span>${label}</span><span>&#9666;</span>`;
   result += "</button>";
   result += `<span class = "spanProgressReport panelExpandable panelExpandableCollapsed">${address}</span>`;
@@ -295,4 +295,5 @@ function submitCalculatorComputation() {
 module.exports = {
   submitCalculatorComputation,
   submitGET,
+  doToggleContent,
 }

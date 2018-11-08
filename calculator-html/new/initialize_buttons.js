@@ -1,6 +1,8 @@
 "use strict";
 const submitRequests = require('./submit_requests');
 const panels = require('./panels');
+const pathnames = require('./pathnames');
+const ids = require('./ids_dom_elements');
 
 var calculatorLeftPosition = 0;
 var calculatorRightPosition = 0;
@@ -36,10 +38,12 @@ function processMathQuillLatex(theText) {
   if (charsToSplit !== undefined) {
     for (var i = 0; i < theText.length - 1; i ++) { 
       for (var j = 0; j < charsToSplit.length; j ++) {
-        if (theText[i] === charsToSplit[j] && theText[i + 1] !== ' ' && 
-            theText[i + 1] !== '\\' && theText[i + 1] !== '+' && 
-            theText[i + 1] !== '*' && theText[i + 1] !== '/' && 
-            theText[i + 1] !== '-' && theText[i + 1] !== '=') { 
+        if (
+          theText[i] === charsToSplit[j] && theText[i + 1] !== ' ' && 
+          theText[i + 1] !== '\\' && theText[i + 1] !== '+' && 
+          theText[i + 1] !== '*' && theText[i + 1] !== '/' && 
+          theText[i + 1] !== '-' && theText[i + 1] !== '='
+        ) { 
           if (theText[i] === 'x') {
             if (theText.slice(i - 5, i + 1) === 'matrix') {
               continue;
@@ -306,6 +310,7 @@ function InputPanelData(input) {
   this.idButtonInterpret = input.idButtonInterpret;
   this.idButtonAnswer = input.idButtonAnswer;
   this.idVerificationSpan = input.idVerificationSpan;
+  this.idButtonSolution = input.idButtonSolution;
   //just in case we forget some entry above:
   Object.assign(this, input);
   panelDataRegistry[this.idButtonContainer] = this;
@@ -344,10 +349,11 @@ InputPanelData.prototype.mQHelpCalculator = function() {
 }
 
 InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outputComponent) {
-  if (typeof outputComponent == "string") {
+  if (typeof outputComponent === "string") {
     outputComponent = document.getElementById(outputComponent);
   }
   outputComponent.innerHTML = input;
+  var spanVerification = document.getElementById(this.idVerificationSpan);
   var scripts = spanVerification.getElementsByTagName('script');
   var theHead = document.getElementsByTagName('head')[0];
   for (var i = 0; i < this.numInsertedJavascriptChildren; i ++) {
@@ -365,37 +371,63 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outpu
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, outputComponent]);
 }
 
-InputPanelData.prototype.submitOrPreviewAnswers = function(requestType) {
+InputPanelData.prototype.submitOrPreviewAnswers = function(requestQuery) {
   clearTimeout(this.timerForPreviewAnswers);
   var studentAnswer = document.getElementById(this.idPureLatex).value;
-  var theURL = `${pathnames.urls.calculatorAPI}?request=${requestType}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
+  var theURL = `${pathnames.urls.calculatorAPI}?${requestQuery}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
   submitRequests.submitGET({
     url: theURL,
-    progress: "spanProgressReportGeneral",
+    progress: ids.domElements.spanProgressReportGeneral,
     callback: this.submitOrPreviewAnswersCallback.bind(this),
     result: this.idVerificationSpan
   });
 }
 
 InputPanelData.prototype.showSolution = function() {
-  clearTimeout(this.timerForPreviewAnswers);
+  var theRequest = "";
+  var thePage = window.calculator.mainPage;
+  var currentProblem = thePage.problems[this.problemId];
+  if (!currentProblem.flagForReal) {
+    if (thePage.user.flagLoggedIn) {
+      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolution}&`;
+    } else {
+      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolutionNoLogin}&`;
+    }
+    theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
+  } 
+   //"submitAnswersPreview"
+  this.submitOrPreviewAnswers(theRequest);
 }
 
-InputPanelData.prototype.submitAnswer = function() {
+InputPanelData.prototype.submitAnswers = function() {
   var theRequest = "";
+  var thePage = window.calculator.mainPage;
   var currentProblem = thePage.problems[this.problemId];
-  if (currentProblem.flagForReal) {
-    theRequest = "submitAnswers";
+  if (thePage.user.flagLoggedIn) {
+    if (currentProblem.flagForReal) {
+      theRequest = `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswers}`;
+    } else {
+      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercise}&`
+      theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
+    }
   } else {
-    theRequest = `submitExercise&randomSeed=${currentProblem.randomSeed}`;
+    theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExerciseNoLogin}&`
+    theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;  
   }
    //"submitAnswersPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 
 InputPanelData.prototype.submitGiveUp = function() {
+  var thePage = window.calculator.mainPage;
   var currentProblem = thePage.problems[this.problemId];
-  var theRequest = `problemGiveUp&randomSeed=${currentProblem.randomSeed}`; //"submitAnswersPreview"
+  var theRequest = "";
+  if (thePage.user.flagLoggedIn) {
+    theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUp}&`;
+  } else {
+    theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUpNoLogin}&`;
+  }
+  theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`; //"submitAnswersPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 
@@ -403,10 +435,14 @@ InputPanelData.prototype.submitPreview = function() {
   var thePage = window.calculator.mainPage;
   var theRequest = "";
   var currentProblem = thePage.problems[this.problemId];
-  if (currentProblem.flagForReal) {
-    theRequest = "submitAnswersPreview";
+  if (thePage.user.flagLoggedIn) {
+    if (currentProblem.flagForReal) {
+      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswersPreview}&`;
+    } else {
+      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreview}&`;
+    }
   } else {
-    theRequest = "submitExercisePreview";
+    theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreviewNoLogin}&`;
   }
   this.submitOrPreviewAnswers(theRequest);
 }
@@ -756,9 +792,9 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
   }
   theContent += "</table>";
   if (!forceShowAll && !includeAll) {
-    theContent += `<small><a href=\"#\" onclick=\"panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(true);\">Show all</a></small>`;
+    theContent += `<small><a href=\"#\" onclick=\"window.calculator.initializeButtons.panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(true);\">Show all</a></small>`;
   } else {
-    theContent += `<small><a href=\"#\" onclick=\"panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(false);\">Show relevant</a></small>`;
+    theContent += `<small><a href=\"#\" onclick=\"window.calculator.initializeButtons.panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(false);\">Show relevant</a></small>`;
   }
   var oldHeight = window.getComputedStyle(currentButtonPanel).height;
   //console.log("oldHeight: " + oldHeight);
@@ -791,6 +827,7 @@ var calculatorPanel =  new InputPanelData({
 });
 
 module.exports = {
+  panelDataRegistry,
   initializeAccordionButtons,
   initializeButtons,
   initializeCalculatorPage,

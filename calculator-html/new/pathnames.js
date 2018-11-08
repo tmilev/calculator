@@ -18,6 +18,19 @@ var urlFields = {
   databaseTable: "currentDatabaseTable",
   setProblemData: "setProblemData",
   debugFlag: "debugFlag",
+  scoredQuizJSON: "scoredQuizJSON",
+  exerciseJSON: "exerciseJSON",
+  problemGiveUp: "problemGiveUp",
+  problemGiveUpNoLogin: "problemGiveUpNoLogin",
+  randomSeed: "randomSeed",
+  problemSolution: "problemSolution",
+  problemSolutionNoLogin: "problemSolutionNoLogin",
+  submitAnswers: "submitAnswers",
+  submitExercise: "submitExercise",
+  submitExerciseNoLogin: "submitExerciseNoLogin",
+  submitAnswersPreview: "submitAnswersPreview",
+  submitExercisePreviewNoLogin: "submitExercisePreviewNoLogin",
+  submitExercisePreview: "submitExercisePreview",  
 }
 
 module.exports = {

@@ -1,5 +1,6 @@
 "use strict";
 const submitRequests = require('./submit_requests');
+const ids = require('./ids_dom_elements');
 
 var recaptchaIdForSignUp = null;
 
@@ -55,7 +56,7 @@ SignUp.prototype.submitSignUpInfo = function () {
     url: theURL,
     callback: callbackSignUp,
     result: "signUpResultReport",
-    progress: "spanProgressReportGeneral"
+    progress: ids.domElements.spanProgressReportGeneral
   });
 }
 

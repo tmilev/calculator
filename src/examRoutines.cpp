@@ -1470,12 +1470,13 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.idButtonSubmit = "buttonSubmit" + answerId;
   currentA.idButtonInterpret = "buttonInterpret" + answerId;
   currentA.idButtonAnswer = "buttonAnswer" + answerId;
+  currentA.idButtonSolution = "buttonSolution" + answerId;
 
   currentA.htmlButtonSubmit = "<button class =\"buttonSubmit\" id =\"" + currentA.idButtonSubmit + "\"";
   if (!this->flagUseJSON)
     currentA.htmlButtonSubmit += " onclick = \"submitAnswers('" + answerId + "', '" + currentA.idVerificationSpan + "')\"";
   currentA.htmlButtonSubmit +=  ">Submit</button>";
-  currentA.htmlButtonInterpret = (std::string)"<button class =\"buttonPreview\" ";
+  currentA.htmlButtonInterpret = (std::string) "<button class =\"buttonPreview\" ";
   currentA.htmlButtonInterpret += " id =\"" + currentA.idButtonInterpret + "\" ";
   if (!this->flagUseJSON)
     currentA.htmlButtonInterpret += "onclick=\"previewAnswersNoTimeOut('" + answerId + "', '" + currentA.idVerificationSpan + "')" + "\"";
@@ -1490,7 +1491,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
     } else
       currentA.htmlButtonAnswer = "No ``give-up'' answer available. ";
     if (currentA.flagSolutionFound)
-    { currentA.htmlButtonSolution = "<button class =\"buttonSolution\"";
+    { currentA.htmlButtonSolution = "<button id =\"" + currentA.idButtonSolution + "\" class =\"buttonSolution\"";
       if (!this->flagUseJSON)
         currentA.htmlButtonSolution += " onclick=\"showSolution('" + answerId +
         "','" + currentA.idSpanSolution + "')\"";

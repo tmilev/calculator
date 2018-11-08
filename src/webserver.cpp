@@ -3809,6 +3809,13 @@ int WebWorker::ProcessProblemGiveUp()
   return 0;
 }
 
+int WebWorker::ProcessProblemGiveUpJSON()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessProblemGiveUpJSON");
+  this->SetHeaderOKNoContentLength("");
+  stOutput << HtmlInterpretation::GetAnswerOnGiveUp();
+  return 0;
+}
+
 int WebWorker::ProcessProblemSolution()
 { MacroRegisterFunctionWithName("WebWorker::ProcessProblemSolution");
   this->SetHeaderOKNoContentLength("");
@@ -4362,12 +4369,16 @@ int WebWorker::ServeClient()
             theGlobalVariables.flagLoggedIn) ||
             theGlobalVariables.userCalculatorRequestType == "problemGiveUpNoLogin")
     return this->ProcessProblemGiveUp();
+  else if ((theGlobalVariables.userCalculatorRequestType == "problemGiveUpJSON" &&
+            theGlobalVariables.flagLoggedIn) ||
+            theGlobalVariables.userCalculatorRequestType == "problemGiveUpNoLoginJSON")
+    return this->ProcessProblemGiveUpJSON();
   else if ((theGlobalVariables.userCalculatorRequestType == "problemSolution" &&
             theGlobalVariables.flagLoggedIn) ||
             theGlobalVariables.userCalculatorRequestType == "problemSolutionNoLogin")
     return this->ProcessProblemSolution();
   else if ((theGlobalVariables.userCalculatorRequestType == "submitAnswersPreview" ||
-            theGlobalVariables.userCalculatorRequestType == "submitExercisePreview" ) &&
+            theGlobalVariables.userCalculatorRequestType == "submitExercisePreview") &&
            theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitAnswersPreview();
   else if (theGlobalVariables.userCalculatorRequestType == "submitExercisePreviewNoLogin" &&

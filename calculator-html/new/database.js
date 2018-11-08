@@ -1,5 +1,6 @@
 "use strict";
 const submitRequests = require('./submit_requests');
+const ids = require('./ids_dom_elements');
 
 function updateDatabasePageCallback(incoming, output) {
   try {
@@ -35,7 +36,7 @@ function updateDatabasePage() {
   var theUrl = `${pathnames.urls.calculatorAPI}?${pathnames.request}=${pathnames.requestDatabase}&${pathnames.databaseTable}=${currentTable}`;
   submitRequests.submitGET({
     url: theUrl,
-    progress: "spanProgressReportGeneral",
+    progress: ids.domElements.spanProgressReportGeneral,
     callback: updateDatabasePageCallback
   });
 }

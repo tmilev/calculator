@@ -26,7 +26,7 @@ function submitActivateAccountRequest() {
   submitRequests.submitGET({
     url: theURL,
     callback: submitAccountActivationRequestCallback,
-    progress: "spanProgressReportGeneral"
+    progress: ids.domElements.spanProgressReportGeneral
   });
 }
 
@@ -48,7 +48,7 @@ function submitDoActivateAccount() {
   submitRequests.submitGET({
     url: theURL,
     callback: submitAccountActivationRequestCallback,
-    progress: "spanProgressReportGeneral"
+    progress: ids.domElements.spanProgressReportGeneral,
   });
 }
 

@@ -1,4 +1,5 @@
 "use strict";
+const ids = require('./ids_dom_elements');
 
 function callbackForgotLogin(input, output) {
   if (typeof output === "string") {
@@ -33,6 +34,6 @@ function submitForgotPassword() {
     url: theURL,
     callback: callbackForgotLogin,
     result: "forgotLoginResult",
-    progress: "spanProgressReportGeneral"
+    progress: ids.domElements.spanProgressReportGeneral
   });
 }

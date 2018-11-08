@@ -73,7 +73,7 @@ Browserifier.prototype.require = function (inputFileName) {
 }
 
 Browserifier.prototype.browserify = function() {
-  console.log(`Debug: js content keys: ` + Object.keys(theJSContent));
+  //console.log(`Debug: js content keys: ` + Object.keys(theJSContent));
   var expectedStart = "/calculator" + "-html/new/"; 
   //<- please keep strings separated; the cpp builder auto-replaces the string /calculator-html
   for (var fileName in theJSContent) {

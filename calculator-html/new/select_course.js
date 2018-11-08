@@ -2,6 +2,7 @@
 const submitRequests = require('./submit_requests');
 const pathnames = require('./pathnames');
 const editPage = require('./edit_page');
+const ids = require('./ids_dom_elements');
 
 function selectCourse(courseIndex) {
   var thePage = window.calculator.mainPage;
@@ -38,7 +39,7 @@ function selectCoursePage() {
   submitRequests.submitGET({
     url: `${pathnames.urls.calculatorAPI}?request=selectCourseJSON`,
     callback: afterLoadSelectCoursePage,
-    progress: "spanProgressReportGeneral"
+    progress: ids.domElements.spanProgressReportGeneral
   });
 }
 

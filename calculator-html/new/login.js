@@ -10,7 +10,7 @@ function loginCalculator() {
   submitRequests.submitGET({
     url: `${pathnames.urls.calculatorAPI}?request=userInfoJSON&password=${password}&username=${username}`,
     callback: loginWithServerCallback,
-    progress: "spanProgressReportGeneral"
+    progress: ids.domElements.spanProgressReportGeneral
   });
 }
 
@@ -77,7 +77,7 @@ function loginTry() {
   submitRequests.submitGET({
     url: `${pathnames.urls.calculatorAPI}?request=userInfoJSON`,
     callback: loginWithServerCallback,
-    progress: "spanProgressReportGeneral"
+    progress: ids.domElements.spanProgressReportGeneral
   });
   startGoogleLogin();
 }
@@ -166,7 +166,7 @@ function onGoogleSignIn(googleUser) {
     submitRequests.submitGET({
       url: theURL,
       callback: loginWithServerCallback,
-      progress: "spanProgressReportGeneral"
+      progress: ids.domElements.spanProgressReportGeneral
     });
   } catch (e) {
     console.log("Error decoding google token: " + e);

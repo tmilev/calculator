@@ -26,7 +26,7 @@ function modifyDeadlines(incomingId) {
   theURL += `mainInput=${encodeURIComponent(JSON.stringify(jsonToSubmit))}`;
   submitRequests.submitGET({
     url: theURL,
-    progress: "spanProgressReportGeneral",
+    progress: ids.domElements.spanProgressReportGeneral,
     callback: callbackModifyDeadlines.bind(null, incomingId)
   });
 }
@@ -96,7 +96,7 @@ function afterLoadCoursePage(incomingPage, result) {
   submitRequests.submitGET({
     url: `${pathnames.urls.calculatorAPI}?request=${topicList}`,
     callback: problemPage.afterLoadTopics,
-    progress: "spanProgressReportGeneral"
+    progress: ids.domElements.spanProgressReportGeneral
   });
 }
 
@@ -113,7 +113,7 @@ function selectCurrentCoursePage() {
   submitRequests.submitGET({
     url: `${pathnames.urls.calculatorAPI}?request=${topicRequest}`,
     callback: afterLoadCoursePage,
-    progress: "spanProgressReportGeneral"
+    progress: ids.domElements.spanProgressReportGeneral
   });
 }
 

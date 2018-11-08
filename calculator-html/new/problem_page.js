@@ -12,7 +12,7 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
   thePage.storage.currentCourse.exerciseType.setAndStore(exerciseType);
   var theProblem = thePage.getCurrentProblem();
   theProblem.flagForReal = false;
-  if (exerciseType === "scoredQuizJSON") {
+  if (exerciseType === pathnames.urlFields.scoredQuizJSON) {
     theProblem.flagForReal = true;
   }
   //thePage.storage.currentCourse.request = exerciseType;
@@ -23,9 +23,9 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
 function Problem(problemData, inputParentIdURLed) {
   var thePage = window.calculator.mainPage;
   this.idURLed = encodeURIComponent(problemData.id);
-  if (inputParentIdURLed === undefined) {
-    console.log("DEBUG: bad parent id");
-  }
+  //if (inputParentIdURLed === undefined) {
+  //  console.log("DEBUG: bad parent id");
+  //}
   this.parentIdURLed = inputParentIdURLed;
   this.randomSeed = null;
   this.answers = [];
@@ -95,7 +95,7 @@ function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   var currentCourse = thePage.storage.currentCourse; 
   var exerciseType = currentCourse.exerciseType.getValue();
   if (exerciseType === "" || exerciseType === null || exerciseType === undefined) {
-    exerciseType = "exerciseJSON";
+    exerciseType = pathnames.urlFields.exerciseJSON;
     currentCourse.exerciseType.setAndStore(exerciseType);
   }
   var fileName = currentCourse.fileName.getValue();
@@ -110,9 +110,9 @@ function getCalculatorURLRequestFileCourseTopicsFromStorage() {
 
 Problem.prototype.getAppAnchorRequestFileCourseTopics = function(isScoredQuiz) {
   var thePage = window.calculator.mainPage;
-  var theExerciseType = "exerciseJSON";
+  var theExerciseType = pathnames.urlFields.exerciseJSON;
   if (isScoredQuiz) {
-    theExerciseType = "scoredQuizJSON";
+    theExerciseType = pathnames.urlFields.scoredQuizJSON;
   }
   var requestJSON = {
     currentPage: thePage.pages.problemPage.name,
@@ -138,11 +138,11 @@ Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQui
   if (isScoredQuiz === undefined) {
     isScoredQuiz = this.flagForReal;
   }
-  result += `${pathnames.request}=`;
+  result += `${pathnames.urlFields.request}=`;
   if (isScoredQuiz) {
-    result += "scoredQuizJSON";
+    result += pathnames.urlFields.scoredQuizJSON;
   } else {
-    result += "exerciseJSON";
+    result += pathnames.urlFields.exerciseJSON;
   }
   result += `&${this.getCalculatorURLFileCourseTopics()}`;
   return result;
@@ -166,9 +166,9 @@ Problem.prototype.getProblemNavigation = function() {
   var result = "";
   result += "<span class='problemNavigation'>";
   var linkType = "problemLinkPractice";
-  var defaultRequest = 'exerciseJSON';
+  var defaultRequest = pathnames.urlFields.exerciseJSON;
   if (this.flagForReal && thePage.user.flagLoggedIn) {
-    defaultRequest = 'scoredQuizJSON';
+    defaultRequest = pathnames.urlFields.scoredQuizJSON;
     linkType = "problemLinkQuiz"
   }
   if (this.previousProblemId !== null && this.previousProblemId !== "") {
@@ -249,11 +249,20 @@ Problem.prototype.writeToHTML = function(outputElement) {
       'click', currentAnswerPanel.submitPreview.bind(currentAnswerPanel)
     );
     document.getElementById(currentAnswerPanel.idButtonSubmit).addEventListener(
-      'click', currentAnswerPanel.submitAnswer.bind(currentAnswerPanel)
+      'click', currentAnswerPanel.submitAnswers.bind(currentAnswerPanel)
     );
     if (!this.flagForReal) {
       document.getElementById(currentAnswerPanel.idButtonAnswer).addEventListener(
         'click', currentAnswerPanel.submitGiveUp.bind(currentAnswerPanel)
+      );
+    }
+    if (
+      currentAnswerPanel.idButtonSolution !== undefined && 
+      currentAnswerPanel.idButtonSolution !== null &&
+      currentAnswerPanel.idButtonSolution !== ""
+    ) {
+      document.getElementById(currentAnswerPanel.idButtonSolution).addEventListener(
+        'click', currentAnswerPanel.showSolution.bind(currentAnswerPanel)
       );
     }
     
@@ -384,7 +393,7 @@ Problem.prototype.modifyWeight = function() {
   theURL += `${pathnames.mainInput}=${encodeURIComponent(JSON.stringify(modifyObject))}`;
   submitRequests.submitGET({
     url: theURL,
-    progress: "spanProgressReportGeneral",
+    progress: ids.domElements.spanProgressReportGeneral,
     callback: this.callbackModifyWeight.bind(this)
   });
 }
@@ -676,16 +685,18 @@ function updateProblemPageCallback(input, outputComponent) {
   currentProblem.randomSeed = theProblem.randomSeed;
 
   for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++) {
+    var currentVector = answerVectors[counterAnswers];
     currentProblem.answers[counterAnswers] = new initializeButtons.InputPanelData({
-      problemId: currentProblem.idURLed,
-      idMQSpan: answerVectors[counterAnswers].answerMQspanId,
-      idPureLatex: answerVectors[counterAnswers].answerIdPureLatex,
-      idButtonContainer: answerVectors[counterAnswers].preferredButtonContainer,
-      idButtonSubmit: answerVectors[counterAnswers].idButtonSubmit,
-      idButtonInterpret: answerVectors[counterAnswers].idButtonInterpret,
-      idButtonAnswer: answerVectors[counterAnswers].idButtonAnswer,
-      idVerificationSpan: answerVectors[counterAnswers].idVerificationSpan,
-      flagAnswerPanel: true,
+      problemId:           currentProblem.idURLed,
+      idMQSpan:            currentVector.answerMQspanId,
+      idPureLatex:         currentVector.answerIdPureLatex,
+      idButtonContainer:   currentVector.preferredButtonContainer,
+      idButtonSubmit:      currentVector.idButtonSubmit,
+      idButtonInterpret:   currentVector.idButtonInterpret,
+      idButtonAnswer:      currentVector.idButtonAnswer,
+      idButtonSolution:    currentVector.idButtonSolution,
+      idVerificationSpan:  currentVector.idVerificationSpan,
+      flagAnswerPanel:     true,
       flagCalculatorPanel: false,
     });
   }
@@ -716,7 +727,7 @@ function updateProblemPage() {
   submitRequests.submitGET({
     url: theURL,
     callback: updateProblemPageCallback,
-    progress: "spanProgressReportGeneral"
+    progress: ids.domElements.spanProgressReportGeneral
   });
 }
 

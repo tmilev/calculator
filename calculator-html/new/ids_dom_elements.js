@@ -11,6 +11,7 @@ var domElements = {
   inputEmail: "inputEmail",
   inputPassword: "inputPassword",
   labelNewEmail: "labelNewEmail",
+  spanProgressReportGeneral: "spanProgressReportGeneral",
   spanUserIdInActivateAccountPage: "spanUserIdInActivateAccountPage",
   spanUserIdInAccountsPage: "spanUserIdInAccountsPage",
   spanCurrentActivationEmail: "spanCurrentActivationEmail",

@@ -1,6 +1,7 @@
 "use srict";
 const submitRequests = require('./submit_requests');
 const miscellaneous = require('./miscellaneous');
+const ids = require('./ids_dom_elements');
 
 function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
   if (typeof theDomComponent === "string") {
@@ -24,7 +25,7 @@ function deleteDatabaseItem(containerLabel, labels, selector) {
   submitRequests.submitGET({
     url: theURL,
     callback: deleteDatabaseItemCallback.bind(containerLabel),
-    progress: "spanProgressReportGeneral"
+    progress: ids.domElements.spanProgressReportGeneral
   });  
 }
 

@@ -1,5 +1,6 @@
 "use strict";
 const submitRequests = require('./submit_requests');
+const ids = require('./ids_dom_elements');
 
 function getAccountsTable(inputAccounts) {
   var result = "";
@@ -82,7 +83,7 @@ function addEmailsOrUsers(
   theURL += `filterAccounts=&`;
   submitRequests.submitGET({
     url: theURL,
-    progress: "spanProgressReportGeneral",
+    progress: ids.domElements.spanProgressReportGeneral,
     result: idOutput,
     callback: callbackAddEmailsOrUsers
   });
@@ -103,7 +104,7 @@ function getTeachersStudents() {
   theURL += `teachersAndSections=${encodeURIComponent(JSON.stringify(teachersAndSections))}&`;
   submitRequests.submitGET({
     url: theURL,
-    progress: "spanProgressReportGeneral",
+    progress: ids.domElements.spanProgressReportGeneral,
     result: "idOutputSections",
     callback: getTeachersStudentsCallback
   });
@@ -116,7 +117,7 @@ function updateAccountsPage() {
   submitRequests.submitGET({
     url: theURL,
     callback: updateAccountsPageCallback,
-    progress: "spanProgressReportGeneral"
+    progress: ids.domElements.spanProgressReportGeneral,
   });
 
 }

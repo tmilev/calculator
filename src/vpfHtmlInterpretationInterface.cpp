@@ -1611,7 +1611,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     << theProblem.fileName
     << "<br><b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
-    << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     { out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
       //out << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
@@ -1787,12 +1787,12 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
   findStudents[DatabaseStrings::labelInstructor] = theGlobalVariables.userDefault.username;
   findAdmins[DatabaseStrings::labelUserRole] = "admin";
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
-      (DatabaseStrings::tableUsers, findStudents, students, - 1, &totalStudents, &commentsOnFailure))
+       (DatabaseStrings::tableUsers, findStudents, students, - 1, &totalStudents, &commentsOnFailure))
   { out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
     return out.str();
   }
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
-      (DatabaseStrings::tableUsers, findAdmins, admins, - 1, 0, &commentsOnFailure))
+       (DatabaseStrings::tableUsers, findAdmins, admins, - 1, 0, &commentsOnFailure))
   { out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
     return out.str();
   }

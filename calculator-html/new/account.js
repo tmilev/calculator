@@ -26,7 +26,7 @@ function submitChangePassRequest() {
   submitRequests.submitGET({
     url: theURL,
     callback: submitChangePassRequestCallback,
-    progress: "spanProgressReportGeneral"
+    progress: ids.domElements.spanProgressReportGeneral
   });
 }
 

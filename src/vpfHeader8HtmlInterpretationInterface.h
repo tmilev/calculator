@@ -33,11 +33,10 @@ public:
   static std::string GetBrowseProblems();
   static std::string GetJavascriptCaptcha();
   static std::string GetCaptchaDiv();
-  static std::string GetExamPage();
   static std::string GetExamPageJSON();
   static std::string GetPageFromTemplate();
   static std::string GetJSONFromTemplate();
-  static std::string GetJSONUserInfo();
+  static std::string GetJSONUserInfo(const std::string &comments);
   static std::string GetTopicTableJSON();
   static std::string GetExamPageInterpreter();
   static std::string GetAnswerOnGiveUp();

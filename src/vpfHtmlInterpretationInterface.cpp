@@ -813,9 +813,14 @@ std::string HtmlInterpretation::GetTopicTableJSON()
   return out.str();
 }
 
-std::string HtmlInterpretation::GetJSONUserInfo()
+std::string HtmlInterpretation::GetJSONUserInfo(const std::string& comments)
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetJSONUserInfo");
   JSData output;
+  std::stringstream outLinkApp, outLinkAppNoCache;
+  outLinkApp << "You've reached the calculator's backend. The app can be accessed here: <a href = '" << theGlobalVariables.DisplayNameExecutableApp << "'>app</a>";
+  output["linkApp"] = outLinkApp.str();
+  outLinkAppNoCache << "<a href = '" << theGlobalVariables.DisplayNameExecutableAppNoCache << "'>app no browser cache</a>";
+  output["linkAppNoCache"] = outLinkAppNoCache.str();
   if (!theGlobalVariables.flagLoggedIn)
   { output["status"] = "not logged in";
     if (theGlobalVariables.GetWebInput("error") != "")
@@ -823,6 +828,9 @@ std::string HtmlInterpretation::GetJSONUserInfo()
     return output.ToString(false);
   }
   output["status"] = "logged in";
+  if (comments != "") {
+    output["comments"] = comments;
+  }
   output[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
   output[DatabaseStrings::labelAuthenticationToken] = theGlobalVariables.userDefault.actualAuthenticationToken;
   output[DatabaseStrings::labelUserRole] = theGlobalVariables.userDefault.userRole;
@@ -859,37 +867,6 @@ std::string HtmlInterpretation::GetJSONFromTemplate()
   out << thePage.outputHtmlBodyNoTag;
   out << "<small>Generated in " << theGlobalVariables.GetElapsedSeconds()
   << " second(s).</small>";
-  return out.str();
-}
-
-std::string HtmlInterpretation::GetExamPage()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPage");
-  CalculatorHTML theFile;
-  std::string problemBody = theFile.LoadAndInterpretCurrentProblemItem
-  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(),
-   theGlobalVariables.GetWebInput("randomSeed"));
-  std::stringstream out;
-  out << "<html>"
-  << "<head>"
-  << HtmlRoutines::GetJavascriptStandardCookiesWithTags() << "\n"
-  << HtmlRoutines::GetJavascriptMathjax() << "\n";
-  if (theFile.flagMathQuillWithMatrices)
-    out << HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull() << "\n";
-  else
-    out << HtmlRoutines::GetJavascriptMathQuillDefaultFull() << "\n";
-  out << HtmlRoutines::GetMathQuillStyleSheetLink() << "\n"
-  << HtmlRoutines::GetCSSLinkCalculator() << "\n"  ;
-  out << HtmlRoutines::GetJavascriptInitializeButtonsLink() << "\n";
-  if (theFile.flagLoadedSuccessfully)
-    out << theFile.outputHtmlHeadNoTag;
-  //<-must come after theFile.outputHtmlHeadNoTag
-  out << "</head>"
-  << "<body onload =\"loadSettings(); initializeMathQuill(); ";
-  out << "initializeButtons();";
-  out << "\">\n";
-  out << problemBody;
-  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  out << "</body></html>";
   return out.str();
 }
 

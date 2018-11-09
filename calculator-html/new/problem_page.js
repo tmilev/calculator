@@ -261,9 +261,12 @@ Problem.prototype.writeToHTML = function(outputElement) {
       currentAnswerPanel.idButtonSolution !== null &&
       currentAnswerPanel.idButtonSolution !== ""
     ) {
-      document.getElementById(currentAnswerPanel.idButtonSolution).addEventListener(
-        'click', currentAnswerPanel.showSolution.bind(currentAnswerPanel)
-      );
+      var theSolutionButton = document.getElementById(currentAnswerPanel.idButtonSolution);
+      if (theSolutionButton !== null) {
+        theSolutionButton.addEventListener(
+          'click', currentAnswerPanel.showSolution.bind(currentAnswerPanel)
+        );
+      }
     }
     
     //theElement.addEventListener('onchange', latexChangeHandler);

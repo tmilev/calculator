@@ -132,6 +132,7 @@ GlobalVariables::GlobalVariables()
   this->MutexProgressReportinG.mutexName = "ProgressReport";
   this->flagCachingInternalFilesOn = true;
   this->flagRunServerOnEmptyCommandLine = false;
+  this->flagRequestComingLocally = false;
 //  this->flagIgnoreSecurityToWorkaroundSafarisBugs = false;
   //  this->flagLogInterProcessCommunication = true;
   //  stOutput << "Global variables created!";

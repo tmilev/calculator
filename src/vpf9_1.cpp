@@ -265,7 +265,8 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->DisplayNameExtraOutputWithPath = this->DisplayPathOutputFolder + this->DisplayNameExtraOutputNoPath;
 
   this->DisplayNameExecutable = "/cgi-bin/" + this->PhysicalNameExecutableNoPath;
-  this->DisplayNameExecutableApp = "/" + WebAPI::appNoCache;
+  this->DisplayNameExecutableApp = "/" + WebAPI::app;
+  this->DisplayNameExecutableAppNoCache = "/" + WebAPI::appNoCache;
   this->initOutputReportAndCrashFileNames("", "");
 }
 

@@ -107,6 +107,8 @@ public:
   std::string hostWithPort;
   std::string hostNoPort;
 
+  bool flagRequestComingLocally;
+
 //internal infrastructure flags
   bool flagServerForkedIntoWorker;
   bool flagNotAllocated;
@@ -180,6 +182,7 @@ public:
   // DisplayNameExecutable ="/cgi-bin/calculator";
   std::string DisplayNameExecutable;
   std::string DisplayNameExecutableApp;
+  std::string DisplayNameExecutableAppNoCache;
 
   std::string IPAdressCaller;
 

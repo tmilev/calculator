@@ -479,8 +479,7 @@ bool UserCalculator::Authenticate(std::stringstream* commentsOnFailure)
   if (!this->LoadFromDB(&secondCommentsStream))
   { if (commentsOnFailure != 0)
     { *commentsOnFailure << "User " << this->username << " does not exist. ";
-      if (theGlobalVariables.hostNoPort == "localhost" ||
-          theGlobalVariables.hostNoPort == "127.0.0.1")
+      if (theGlobalVariables.flagRequestComingLocally)
         *commentsOnFailure << "If this is your first run, set the username to "
         << "admin and enter the password you desire. "
         << "The password will then be automatically set. "

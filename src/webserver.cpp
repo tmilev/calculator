@@ -2012,6 +2012,11 @@ void WebWorker::ExtractHostInfo()
     this->hostNoPort = this->hostWithPort;
   theGlobalVariables.hostWithPort = this->hostWithPort;
   theGlobalVariables.hostNoPort = this->hostNoPort;
+  if (theGlobalVariables.hostNoPort == "localhost" ||
+      theGlobalVariables.hostNoPort == "127.0.0.1")
+    theGlobalVariables.flagRequestComingLocally = true;
+  else
+    theGlobalVariables.flagRequestComingLocally = false;
 }
 
 void WebWorker::ExtractAddressParts()
@@ -2814,122 +2819,6 @@ std::string WebWorker::GetJavascriptSubmitLoginInfo()
   return out.str();
 }
 
-std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
-{ MacroRegisterFunctionWithName("WebWorker::GetLoginHTMLinternal");
-  std::stringstream out;
-  if (reasonForLogin != "")
-    out
-//    << "DEBUG: reasonforlogin<br>" << theGlobalVariables.CookiesToSetUsingHeaders.ToStringHtml() << "<br>"
-
-    << "<div style =\"text-align:center\">"
-    << reasonForLogin
-    << "</div>";
-  if (theGlobalVariables.GetWebInput("error") != "")
-    out << "<div style =\"text-align:center\">"
-    << HtmlRoutines::ConvertStringToHtmlString
-    (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("error"), false), true)
-    << "</div>";
-  if (theGlobalVariables.userCalculatorRequestType == "template" ||
-      theGlobalVariables.userCalculatorRequestType == "exercise")
-  { std::string topicList = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
-    std::string courseHome = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-    out << "<div style =\"text-align:center\">"
-    << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?"
-    << "request=" << theGlobalVariables.userCalculatorRequestType << "NoLogin"
-    << "&"
-    << "topicList=" << topicList << "&"
-    << "courseHome=" << courseHome << "&"
-    << "\" class =\"courseLink\">Proceed without login</a><br>"
-    << "<b style =\"color:red\">Your scores will not be recorded.</b>"
-    << "<br><br><b>OR</b><br></div>";
-  }
-  out << "<br><div class =\"divLogin\"><form class =\"formLogin\" name =\"login\" id =\"login\">";
-  out << "<table class =\"tableLogin\">";
-  out
-  << "<tr><td>"
-  << "<b>User:</b>"
-  << "</td>"
-  << "<td>"
-  << "<input class =\"textInputUsername\" type =\"text\" id =\"username\" name =\"username\" placeholder =\"username\" ";
-  if (theGlobalVariables.GetWebInput("username") != "")
-    out << "value =\"" << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("username"), false) << "\" ";
-  out << "required>";
-  out << "</input>\n";
-  out << "</td></tr>";
-
-  out
-  << "<tr><td>"
-  << "<b>Password:</b>"
-  << "</td>";
-  out
-  << "<td>"
-  << "<input class =\"textInputUsername\" type =\"password\" id =\"password\" name =\"password\" placeholder =\"password\" autocomplete =\"on\">"
-  << "</td></tr>";
-  //out << "<tr><td></td><td>";
-  //out << "</td></tr>";
-  out << "</table>";
-  out << this->GetHtmlHiddenInputs(false, false);
-  out << "<input type =\"hidden\" name =\"request\" id =\"request\"";
-  if (theGlobalVariables.userCalculatorRequestType != "logout" &&
-      theGlobalVariables.userCalculatorRequestType != "login")
-    out << " value =\"" << theGlobalVariables.userCalculatorRequestType << "\"";
-  else
-    out << "value =\"selectCourse\"";
-  out << ">";
-  out << "<input type =\"hidden\" name =\"googleToken\" id =\"googleToken\" value =\"\">";
-  out << "<br>";
-  out << "<button class =\"buttonLogin\" type =\"submit\" value =\"Submit\" ";
-  out << "action =\"" << theWebServer.GetActiveWorker().addressComputed;
-  out << "\"";
-  out << ">Login</button>";
-  out << "</form>";
-  out << "<span id =\"loginResult\"></span>";
-  out << "</div>";
-  out << "<br>"
-  << "<div class =\"divForgotLogin\">"
-  << "<a class =\"linkForgotLoginPass\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=forgotLoginPage\">"
-  << "Forgot login/password?</a></div>";
-  /////////////////////////
-  out << "<br><div class =\"divSignUp\">"
-  << "<a class =\"linkSignUp\" href=\""
-  << theGlobalVariables.DisplayNameExecutable << "?request=signUpPage"
-  << "\">Sign up</a></div>";
-  /////////////////////////
-  out << "<br>";
-  out << "<div class =\"divExternalLogin\">";
-  out << "<script src =\"https://apis.google.com/js/platform.js\" async defer></script>";
-  out << "<meta name =\"google-signin-client_id\" content =\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
-  out << "<div class =\"g-signin2\" data-onsuccess =\"onSignIn\">Google login unavailable (no Internet?).</div> "
-  << "<br><br><button class =\"buttonLogin\" style =\"opacity:0; transition: 0.6s\" id =\"doSignInWithGoogleToken\" "
-  << "onclick=\""
-  << "document.getElementById('username').required = false;"
-  << "document.getElementById('username').value ='';"
-  << "document.getElementById('password').value ='';"
-  << "document.getElementById('login').submit();"
-  << "\">Proceed with Google</button>";
-  out << "<script language =\"javascript\">\n"
-  << "function onSignIn(googleUser)\n"
-  << "{ document.getElementById(\"googleToken\").value =googleUser.getAuthResponse().id_token;\n"
-  << "  addCookie(\"googleToken\", googleUser.getAuthResponse().id_token, 5, true);\n"
-  << "  document.getElementById(\"doSignInWithGoogleToken\").style.opacity =\"1\";\n"
-  //<< "  document.getElementById(\"doSignInWithGoogleToken\").style.visibility =\"visible\";\n"
-  << "}\n"
-  << "</script>\n";
-
-  out << "<br><small>Log-in with google: if not already present, creates account automatically. "
-  << "<br>Your username will be set to your gmail address. <br> "
-  << "<b style =\"color:green\">We do not store any personal information from google except your gmail address. "
-  << "<br>We do not have access (and don't wish to have one) "
-  << "<br>to your google password or other sensitive information. </span></b><br>"
-  << "<br></small>";
-  out << "</div>";
-  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-
-  //out << "<hr><hr>DEBUG: " << this->ToStringMessageFullUnsafe();
-  return out.str();
-}
-
 std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField)
 { MacroRegisterFunctionWithName("WebWorker::GetChangePasswordPagePartOne");
   std::stringstream out;
@@ -3462,9 +3351,7 @@ int WebWorker::ProcessLogout()
 { MacroRegisterFunctionWithName("WebWorker::ProcessLogout");
   this->SetHeaderOKNoContentLength("");
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
-  theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
-  stOutput << this->GetLoginPage();
-  return 0;
+  return this->ProcessLoginUserInfo("");
 }
 
 int WebWorker::ProcessSelectCourse()
@@ -3522,10 +3409,11 @@ int WebWorker::ProcessTemplate()
   return 0;
 }
 
-int WebWorker::ProcessUserInfoJSON()
+int WebWorker::ProcessLoginUserInfo(const std::string& comments)
 { MacroRegisterFunctionWithName("WebWorker::ProcessUserInfoJSON");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetJSONUserInfo();
+  theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
+  stOutput << HtmlInterpretation::GetJSONUserInfo(comments);
   //if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
   //  stOutput << "<!--" << this->ToStringMessageFullUnsafe() << "-->";
   return 0;
@@ -3547,13 +3435,6 @@ int WebWorker::ProcessExamPageJSON()
   return 0;
 }
 
-int WebWorker::ProcessExamPage()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessExamPage");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetExamPage();
-  return 0;
-}
-
 int WebWorker::ProcessExamPageInterpreter()
 { stOutput << this->GetExamPageInterpreter();
   return 0;
@@ -3570,13 +3451,6 @@ int WebWorker::ProcessGetAuthenticationToken(const std::string& reasonForNoAuthe
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetAuthenticationToken");
   this->SetHeaderOKNoContentLength("");
   stOutput << this->GetAuthenticationToken(reasonForNoAuthentication);
-  return 0;
-}
-
-int WebWorker::ProcessLoginPage(const std::string& reasonForLogin)
-{ MacroRegisterFunctionWithName("WebWorker::ProcessLoginPage");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << this->GetLoginPage(reasonForLogin);
   return 0;
 }
 
@@ -4015,31 +3889,6 @@ std::string WebWorker::GetSignUpPage()
   return out.str();
 }
 
-std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
-{ MacroRegisterFunctionWithName("WebWorker::GetLoginPage");
-  std::stringstream out;
-  if (theGlobalVariables.GetWebInput("useJSON") != "false")
-  { this->SetHeaderOKNoContentLength("");
-    out << HtmlInterpretation::GetApp(true);
-    return out.str();
-  }
-  out << "<html><head>\n"
-  << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
-  << WebWorker::GetJavascriptSubmitLoginInfo()
-  << HtmlRoutines::GetCSSLinkCalculator()
-  << "\n</head><body";
-  out << " onload =\"loadSettings();";
-  out << "\"";
-  out << ">\n";
-  theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
-  //out << "DEBUG: " << this->ToStringMessageFullUnsafe();
-  //out << WebWorker::ToStringCalculatorArgumentsHumanReadable();
-  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
-  << "</calculatorNavigation>\n";
-  out << WebWorker::GetLoginHTMLinternal(reasonForLogin) << "</body></html>";
-  return out.str();
-}
-
 bool WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified()
 { MacroRegisterFunctionWithName("WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified");
   bool stateNotModified = true;
@@ -4267,7 +4116,7 @@ int WebWorker::ServeClient()
     theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
     if (argumentProcessingFailureComments.str() != "")
       theGlobalVariables.SetWebInpuT("authenticationToken", "");
-    return this->ProcessLoginPage(argumentProcessingFailureComments.str());
+    return this->ProcessLoginUserInfo(argumentProcessingFailureComments.str());
   }
   //logWorker << "DEBUG: argumentProcessingFailureComments: " <<  argumentProcessingFailureComments.str() << logger::endL;
   if (argumentProcessingFailureComments.str() != "" &&
@@ -4345,7 +4194,7 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType == "forgotLoginPage")
     return this->ProcessForgotLoginPage();
   else if (theGlobalVariables.userCalculatorRequestType == "login")
-    return this->ProcessLoginPage();
+    return this->ProcessLoginUserInfo("");
   else if (theGlobalVariables.userCalculatorRequestType == "logout")
     return this->ProcessLogout();
   else if ((theGlobalVariables.userCalculatorRequestType == "addEmails"||
@@ -4384,15 +4233,10 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType == "submitExercisePreviewNoLogin" &&
            theGlobalVariables.UserGuestMode())
     return this->ProcessSubmitAnswersPreview();
-  else if ((theGlobalVariables.userCalculatorRequestType == "scoredQuiz" ||
-            theGlobalVariables.userCalculatorRequestType == "exercise"))
-  { if (theGlobalVariables.UserSecureNonAdminOperationsAllowed())
-      return this->ProcessExamPage();
-    else
-      return this->ProcessLoginPage();
-  } else if (theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin")
-    return this->ProcessExamPage();
-  else if (theGlobalVariables.userCalculatorRequestType == "exerciseJSON" ||
+  else if (theGlobalVariables.userCalculatorRequestType == "scoredQuiz" ||
+           theGlobalVariables.userCalculatorRequestType == "exercise" ||
+           theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin" ||
+           theGlobalVariables.userCalculatorRequestType == "exerciseJSON" ||
            theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON")
     return this->ProcessExamPageJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "template" ||
@@ -4402,7 +4246,7 @@ int WebWorker::ServeClient()
            theGlobalVariables.userCalculatorRequestType == "templateJSONNoLogin")
     return this->ProcessTemplateJSON();
   else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorUserInfoJSON)
-    return this->ProcessUserInfoJSON();
+    return this->ProcessLoginUserInfo("");
   else if (theGlobalVariables.userCalculatorRequestType == "editPage")
     return this->ProcessEditPage();
   else if (theGlobalVariables.userCalculatorRequestType == "editPageJSON")

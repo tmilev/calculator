@@ -195,7 +195,6 @@ public:
   bool ProcessRedirectAwayFromWWW();
   int ProcessLogout();
   int ProcessSignUP();
-  int ProcessSignUpPage();
   int ProcessForgotLogin();
   int ProcessForgotLoginPage();
   int ProcessNavigation();
@@ -257,7 +256,6 @@ public:
   std::string GetModifyProblemReport();
   std::string GetForgotLoginPage();
   std::string GetSignUpRequestResult();
-  std::string GetSignUpPage();
   std::string GetAuthenticationToken(const std::string& reasonForNoAuthentication = "");
   std::string GetBrowseProblems();
   std::string GetEditPageHTML();

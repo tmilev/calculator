@@ -34,7 +34,6 @@ function updateDatabasePageResetCurrentTable() {
 
 function updateDatabasePage() {
   var thePage = window.calculator.mainPage;
-  thePage.storeSettings();
   var currentTable = thePage.storage.variables.database.currentTable.getValue();
   var theUrl = `${pathnames.urls.calculatorAPI}?${pathnames.request}=${pathnames.requestDatabase}&${pathnames.databaseTable}=${currentTable}`;
   submitRequests.submitGET({

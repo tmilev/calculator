@@ -74,14 +74,15 @@ Browserifier.prototype.require = function (inputFileName) {
 
 Browserifier.prototype.browserify = function() {
   //console.log(`Debug: js content keys: ` + Object.keys(theJSContent));
-  var expectedStart = "/calculator" + "-html/new/"; 
+  var expectedStart = "/calculator" + "-html/"; 
   //<- please keep strings separated; the cpp builder auto-replaces the string /calculator-html
+  //<- To do: fix this.
   for (var fileName in theJSContent) {
     var newFileName = "";
     if (!fileName.startsWith(expectedStart)) {
       continue;
     }
-    var fileEnd = fileName.slice(21);
+    var fileEnd = fileName.slice(17);
     newFileName = `./${fileEnd}`;
     this.sanitizedFileNameContents[newFileName] = theJSContent[fileName];
   }

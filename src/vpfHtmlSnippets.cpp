@@ -11,114 +11,6 @@ ProjectInformationInstance projectInfoInstanceHtmlSnippets
 
 MapLisT<std::string, std::string, MathRoutines::hashString> HtmlRoutines::preLoadedFiles;
 
-std::string HtmlRoutines::GetJavascriptSubmitEmails()
-{ std::stringstream out;
-  std::string deadlineInfoRowId = "defaultDeadlines";
-  std::string problemInfoRowId = "defaultProblemInfo";
-  out
-  << "<script type =\"text/javascript\" id =\"scriptSubmitEmails\"> \n"
-  << "function addEmailsOrUsers(idEmailList, problemCollectionName, idOutput, userRole, idUserGroup, idPasswords, requestType){\n"
-  << "  spanOutput = document.getElementById(idOutput);\n"
-  << "  if (spanOutput == null){\n"
-  << "    spanOutput = document.createElement('span');\n"
-  << "    document.body.appendChild(spanOutput);\n"
-  << "    spanOutput.innerHTML= \"<span style ='color:red'> ERROR: span with id \" + idEmailList + \"MISSING! </span>\";\n"
-  << "  }\n"
-  << "  spanEmailList = document.getElementById(idEmailList);\n"
-  << "  spanUserGroup = document.getElementById(idUserGroup);\n"
-  << "  spanPasswords = document.getElementById(idPasswords);\n"
-  << "  params ='request='+requestType +'&';\n"
-  << "  params+='userRole ='+userRole;\n"
-  << "  params+='&userList =' + encodeURIComponent(spanEmailList.value);\n"
-  << "  params+='&" << DatabaseStrings::labelSection << "=' + encodeURIComponent(spanUserGroup.value);\n"
-  << "  params+='&passwordList =' + encodeURIComponent(spanPasswords.value);\n"
-  << "  params+='&deadlineInfoRowId =' + encodeURIComponent('" << deadlineInfoRowId << "');\n"
-  << "  params+='&problemInfoRowId =' + encodeURIComponent('" << problemInfoRowId << "');\n"
-  << "  params+='&filterAccounts=' + '" << theGlobalVariables.GetWebInput("filterAccounts") << "';\n"
-  << "  var https = new XMLHttpRequest();\n"
-  << "  https.open(\"POST\", '" << theGlobalVariables.DisplayNameExecutable << "', true);\n"
-  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
-  << "  https.onload = function() {\n"
-  << "    spanOutput.innerHTML=https.responseText;\n"
-  << "  }\n"
-  << "  https.send(params);\n"
-  << "}\n"
-  << "</script>";
-  return out.str();
-}
-
-std::string HtmlRoutines::GetJavascriptHideHtmlWithTags()
-{ std::stringstream output;
-  output << " <!>\n";
-  output << " <script type =\"text/javascript\"> \n";
-  output << "\"use strict\";\n";
-  output << "function switchMenu(obj) {\n";
-  output << "  var el = document.getElementById(obj);\n";
-  output << "  if (el.classList.contains(\"hiddenClass\")) {";
-  output << "    el.classList.remove(\"hiddenClass\");";
-  output << "  } else {";
-  output << "    el.classList.add(\"hiddenClass\");";
-  output << "  }";
-  output << "}";
-  output << " function hideItem(obj)\n";
-  output << " { document.getElementById(obj).style.display =\"none\";\n";
-  output << " }\n";
-  output << " function showItem(obj)\n";
-  output << " { document.getElementById(obj).style.display =\"\";\n";
-  output << " }\n";
-  output << " </script>\n";
-  return output.str();
-}
-
-const std::string HtmlRoutines::GetJavascriptCookieFunctionsLink()
-{ return HtmlRoutines::GetJavascriptLink("/calculator-html/cookie-functions.js");
-}
-
-const std::string& HtmlRoutines::GetJavascriptCookieFunctionSNoTags()
-{ return HtmlRoutines::GetFile("/calculator-html/cookie-functions.js");
-}
-
-const std::string HtmlRoutines::GetJavascriptForgotLogin()
-{ return HtmlRoutines::GetJavascriptLink("/calculator-html/forgot-login.js");
-}
-
-const std::string HtmlRoutines::GetJavascriptProblemLinksLink()
-{ return HtmlRoutines::GetJavascriptLink("/calculator-html/problemlinkstyles.js");
-}
-
-const std::string& HtmlRoutines::GetJavascriptProblemLinkSWithTags()
-{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptProblemLinkSWithTags");
-  return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/problemlinkstyles.js");
-}
-
-const std::string& HtmlRoutines::GetJavascriptTopicLisTWithTags()
-{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptTopicListWithTags");
-  return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/topiclist.js");
-}
-
-const std::string HtmlRoutines::GetJavascriptTopicListLink()
-{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptTopicListLink");
-  return HtmlRoutines::GetJavascriptLink("/calculator-html/topiclist.js");
-}
-
-const std::string& HtmlRoutines::GetJavascriptCanvasGraphicSWithTags()
-{ return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/three-d.js");
-}
-
-const std::string HtmlRoutines::GetJavascriptCanvasGraphicsLink()
-{ return HtmlRoutines::GetJavascriptLink("/calculator-html/three-d.js");
-}
-
-const std::string& HtmlRoutines::GetJavascriptDatabaseRoutineSWithTags()
-{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags");
-  return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/database-routines.js");
-}
-
-const std::string HtmlRoutines::GetJavascriptDatabaseRoutinesLink()
-{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags");
-  return HtmlRoutines::GetJavascriptLink("/calculator-html/database-routines.js");
-}
-
 std::string HtmlRoutines::GetJavascriptVariable(const std::string& theVar)
 { std::stringstream sanitizer;
   for (unsigned i = 0; i < theVar.size(); i ++)
@@ -131,25 +23,6 @@ std::string HtmlRoutines::GetJavascriptVariable(const std::string& theVar)
     sanitizer << ((int) theVar[i]);
   }
   return sanitizer.str();
-}
-
-std::string HtmlRoutines::GetDatePickerJavascriptInit()
-{ std::stringstream out;
-  if (!theGlobalVariables.flagAceIsAvailable)
-    out
-    << "<link rel =\"stylesheet\" href=\"//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css\">\n"
-    << "<script src =\"https://code.jquery.com/jquery-3.1.0.min.js\" "
-    << "integrity =\"sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s =\" "
-    << "crossorigin =\"anonymous\"></script>\n"
-    << "<script src =\"https://code.jquery.com/ui/1.12.0/jquery-ui.min.js\"   "
-    << "integrity =\"sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E=\" crossorigin =\"anonymous\"></script>\n";
-  else
-    out
-    << "<link rel =\"stylesheet\" href=\"/html-common/jquery-ui.css\">\n"
-    << "<script src =\"/html-common/jquery.min.js\"></script>\n"
-    << "<script src =\"/html-common/jquery-ui.min.js\"></script>\n";
-
-  return out.str();
 }
 
 std::string HtmlRoutines::GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc, int line)
@@ -220,44 +93,16 @@ std::string HtmlRoutines::GetMathSpanBeginArrayL(const std::string& input, int u
 void HtmlRoutines::LoadStrings()
 { if (HtmlRoutines::preLoadedFiles.size() > 0)
     return;
-  HtmlRoutines::GetJavascriptCookieFunctionSNoTags();
   HtmlRoutines::GetMathQuillStyleSheeTWithTags();
-  HtmlRoutines::GetJavascriptInitializeButtonSWithTags();
   HtmlRoutines::GetJavascriptAceEditorScriptWithTags();
-  HtmlRoutines::GetJavascriptCalculatorPageWithTags();
-  HtmlRoutines::GetJavascriptAccountManagemenTWithTags();
   HtmlRoutines::GetCSSLinkCalculator();
-  HtmlRoutines::GetJavascriptAutocompletEWithTags();
-  HtmlRoutines::GetJavascriptSha1();
   HtmlRoutines::GetJavascriptMathjax();
   HtmlRoutines::GetJavascriptMathQuillDefaulTWithTags();
   HtmlRoutines::GetJavascriptMathQuillMatrixSupporTWithTags();
-  HtmlRoutines::GetJavascriptProblemLinkSWithTags();
-  HtmlRoutines::GetJavascriptDatabaseRoutineSWithTags();
-  HtmlRoutines::GetJavascriptCanvasGraphicSWithTags();
-  HtmlRoutines::GetJavascriptTopicLisTWithTags();
 }
 
 extern logger logWorker;
 extern logger logServer;
-
-const std::string& HtmlRoutines::GetJavascriptCalculatorPageWithTags()
-{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptCalculatorPage");
-  return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/calculatorPage.js");
-}
-
-const std::string HtmlRoutines::GetJavascriptCalculatorPageLink()
-{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptCalculatorPageLink");
-  return HtmlRoutines::GetJavascriptLink("/calculator-html/calculatorPage.js");
-}
-
-const std::string& HtmlRoutines::GetJavascriptAccountManagemenTWithTags()
-{ return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/account-management.js");
-}
-
-const std::string HtmlRoutines::GetJavascriptAccountManagementLink()
-{ return HtmlRoutines::GetJavascriptLink("/calculator-html/account-management.js");
-}
 
 const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags()
 { if (HtmlRoutines::preLoadedFiles.Contains("AceEditor"))
@@ -323,14 +168,6 @@ const std::string& HtmlRoutines::GetCSSAddStyleTags(const std::string& fileNameV
   return HtmlRoutines::GetFile(fileNameVirtual, "<style>", "</style>");
 }
 
-const std::string& HtmlRoutines::GetJavascriptInitializeButtonSWithTags()
-{ return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/initializebuttons.js");
-}
-
-const std::string HtmlRoutines::GetJavascriptInitializeButtonsLink()
-{ return HtmlRoutines::GetJavascriptLink("/calculator-html/initializebuttons.js");
-}
-
 const std::string& HtmlRoutines::GetMathQuillStyleSheeTWithTags()
 { return HtmlRoutines::GetCSSAddStyleTags("/html-common/mathquill.css");
 }
@@ -375,18 +212,6 @@ std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull()
   << HtmlRoutines::GetJavascriptMathQuillMatrixSupportLink() << "\n"
   << "<script type =\"text/javascript\">var globalMQ = MathQuill.getInterface(2); var MathQuillHasMatrixSupport = true;</script>";
   return out.str();
-}
-
-const std::string& HtmlRoutines::GetJavascriptAutocompletEWithTags()
-{ return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/autocomplete.js");
-}
-
-const std::string HtmlRoutines::GetJavascriptAutocompleteLink()
-{ return HtmlRoutines::GetJavascriptLink("/calculator-html/autocomplete.js");
-}
-
-const std::string& HtmlRoutines::GetJavascriptSha1()
-{ return HtmlRoutines::GetJavascriptAddScriptTags("/html-common/sha1.js");
 }
 
 std::string HtmlRoutines::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)

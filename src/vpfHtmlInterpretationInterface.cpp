@@ -725,11 +725,6 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
-  bool includeDeadlineJavascript =
-  theGlobalVariables.UserDefaultHasAdminRights() &&
-  !theGlobalVariables.UserStudentVieWOn();
-  bool includeInitializeButtonsJS =
-  theGlobalVariables.UserDefaultHasAdminRights();
   thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   if (!thePage.LoadMe(true, comments, theGlobalVariables.GetWebInput("randomSeed")))
   { out << "<html>"
@@ -761,13 +756,6 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   << ".-->\n";
   out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << thePage.outputHtmlHeadNoTag;
-  out << HtmlRoutines::GetJavascriptStandardCookiesWithTags();
-  out << HtmlRoutines::GetJavascriptProblemLinksLink();
-  out << HtmlRoutines::GetJavascriptInitializeButtonsLink();
-  if (includeDeadlineJavascript || includeInitializeButtonsJS)
-    out << HtmlRoutines::GetJavascriptCalculatorPageLink();
-  if (theGlobalVariables.UserDefaultHasProblemComposingRights())
-    out << HtmlRoutines::GetJavascriptTopicListLink();
   out << "</head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << "<body" //<< ">"
   << " onload =\"loadSettings();";
@@ -993,7 +981,6 @@ std::string HtmlInterpretation::GetEditPageHTML()
   theFile.LoadFileNames();
   ouT << "<html>";
   outHead << "<head>"
-  << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   //  << HtmlRoutines::GetLaTeXProcessingJavascript()
   //  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
   //<< HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
@@ -1802,7 +1789,6 @@ std::string HtmlInterpretation::GetScoresPage()
   out << "<html>"
   << "<head>"
   << HtmlRoutines::GetCSSLinkCalculator()
-  << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << "<link rel =\"stylesheet\" href=\"/calculator-html/styleScorePage.css\">"
   << "</head>"
   << "<body onload =\"loadSettings();\">\n";
@@ -1824,8 +1810,6 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   out << "<html>"
   << "<head>"
   << HtmlRoutines::GetCSSLinkCalculator()
-  << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
-  << HtmlRoutines::GetJavascriptSubmitEmails()
   //<< HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "</head>"
   << "<body onload =\"loadSettings();\">\n";

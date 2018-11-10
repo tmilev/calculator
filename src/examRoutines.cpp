@@ -2966,16 +2966,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before execution");
   if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
     return false;
-  if (theInterpreter.theProgramExpression.HasInputBoxVariables())
-    outHeadPt2 << HtmlRoutines::GetJavascriptCalculatorPageLink();
-//////////////////////////////interpretation takes place before javascript generation as the latter depends on the former.
+  //////////////////////////////interpretation takes place before javascript generation as the latter depends on the former.
   if (this->flagIsExamProblem)
     outHeadPt2 << this->GetJavascriptSubmitAnswers();
-  if (this->flagIsExamHome && theGlobalVariables.UserDefaultHasAdminRights() &&
-      !theGlobalVariables.UserStudentVieWOn())
-  { outHeadPt2 << HtmlRoutines::GetJavascriptHideHtmlWithTags();
-    outHeadPt2 << HtmlRoutines::GetDatePickerJavascriptInit();
-  }
   std::string problemLabel = "";
   if (!this->flagIsExamHome &&
       theGlobalVariables.userCalculatorRequestType != "template" &&
@@ -3073,8 +3066,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (this->flagIsExamProblem)
   { outHeadPt2 << this->GetJavascriptMathQuillBoxes();
     if (theInterpreter.flagHasGraphics)
-    { outHeadPt2 << HtmlRoutines::GetJavascriptCanvasGraphicsLink();
-      MapReferenceS<std::string, std::string, MathRoutines::hashString>& theScripts =
+    { MapReferenceS<std::string, std::string, MathRoutines::hashString>& theScripts =
       theInterpreter.theObjectContainer.graphicsScripts;
       for (int i = 0; i < theScripts.size(); i ++)
         this->theScripts.SetKeyValue(theScripts.theKeys[i], theScripts.theValues[i]);

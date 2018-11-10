@@ -63,49 +63,23 @@ public:
   (const std::string& fileNameVirtual, const std::string& additionalBeginTag = "",
    const std::string& additionalEndTag = "");
 
-  static const std::string& GetJavascriptCookieFunctionSNoTags();
-  static const std::string GetJavascriptCookieFunctionsLink();
   static const std::string& GetMathQuillStyleSheeTWithTags();
   static const std::string GetMathQuillStyleSheetLink();
 
   static const std::string& GetJavascriptAceEditorScriptWithTags();
 
-  static const std::string& GetJavascriptCalculatorPageWithTags();
-  static const std::string GetJavascriptCalculatorPageLink();
-
-  static const std::string& GetJavascriptAccountManagemenTWithTags();
-  static const std::string GetJavascriptAccountManagementLink();
 
   static const std::string& GetStyleSheetCalculatorWithTags();
   static const std::string GetCSSLinkCalculator();
 
-  static const std::string& GetJavascriptInitializeButtonSWithTags();
-  static const std::string GetJavascriptInitializeButtonsLink();
-  static const std::string& GetJavascriptAutocompletEWithTags();
-  static const std::string GetJavascriptAutocompleteLink();
-  static const std::string& GetJavascriptSha1();
   static const std::string& GetJavascriptMathjax();
   static const std::string& GetJavascriptMathQuillDefaulTWithTags();
   static const std::string GetJavascriptMathQuillDefaultLink();
   static const std::string& GetJavascriptMathQuillMatrixSupporTWithTags();
   static const std::string GetJavascriptMathQuillMatrixSupportLink();
-  static const std::string& GetJavascriptProblemLinkSWithTags();
-
-  static const std::string GetJavascriptForgotLogin();
-  static const std::string GetJavascriptProblemLinksLink();
-  static const std::string& GetJavascriptDatabaseRoutineSWithTags();
-  static const std::string GetJavascriptDatabaseRoutinesLink();
-  static const std::string& GetJavascriptCanvasGraphicSWithTags();
-  static const std::string GetJavascriptCanvasGraphicsLink();
-  static const std::string& GetJavascriptTopicLisTWithTags();
-  static const std::string GetJavascriptTopicListLink();
 
   static std::string GetJavascriptMathQuillDefaultFull();
   static std::string GetJavascriptMathQuillMatrixSupportFull();
-  static std::string GetJavascriptStandardCookiesWithTags();
-  static std::string GetJavascriptHideHtmlWithTags();
-  static std::string GetJavascriptSubmitEmails();
-  static std::string GetDatePickerJavascriptInit();
   static std::string GetJavascriptVariable(const std::string& theVar);
 
 

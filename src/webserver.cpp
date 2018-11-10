@@ -89,107 +89,6 @@ bool WebWorker::IsAllowedAsRequestCookie(const std::string& input)
   input != WebAPI::calculatorActivateAccountJSON;
 }
 
-std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
-{ std::stringstream out;
-  out
-  << "<script type =\"text/javascript\"> \n"
-  << HtmlRoutines::GetJavascriptCookieFunctionSNoTags()
-  << "function storeSettings()\n"
-  << "{ theCalculatorForm= document.getElementById(\"mainInputID\");  \n"
-  << "  //alert(theCalculatorForm.style.width);\n"
-  << "  if (theCalculatorForm!= null){\n"
-  << "    addCookie(\"widthCalculatorText\", theCalculatorForm.style.width, 100);  \n"
-  << "    addCookie(\"heightCalculatorText\", theCalculatorForm.style.height, 100);\n"
-  << "  }\n"
-//  << " storeSettingsProgress();\n"
-  << "}\n";
-  out
-  << "function storeSettingsProgress(){\n";
-  if (theGlobalVariables.GetWebInput("debugFlag") != "")
-    out << "  addCookie(\"debugFlag\", \"" << theGlobalVariables.GetWebInput("debugFlag") << "\", 100, false);  \n";
-  if (theGlobalVariables.GetWebInput("problemLinkStyle") != "")
-    out << "  addCookie(\"problemLinkStyle\", \"" << theGlobalVariables.GetWebInput("problemLinkStyle") << "\", 100, false);  \n";
-  if (theGlobalVariables.GetWebInput("studentSection") != "")
-    out << "  addCookie(\"studentSection\", \""
-    << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false) << "\", 100, true);  \n";
-  if (theGlobalVariables.GetWebInput("studentView") != "")
-    out << "  addCookie(\"studentView\", \"" << theGlobalVariables.GetWebInput("studentView") << "\", 100, true);  \n";
-  if (WebWorker::IsAllowedAsRequestCookie(theGlobalVariables.userCalculatorRequestType))
-    out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100, false);\n";
-  if ( theGlobalVariables.userCalculatorRequestType != "" &&
-       theGlobalVariables.userCalculatorRequestType != "calculator")
-  { if (theGlobalVariables.GetWebInput("fileName") != "")
-      out << "  addCookie(\"fileName\", \""
-      << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false)
-      << "\", 100, false);\n";
-    if (theGlobalVariables.GetWebInput("courseHome") != "")
-      out << "  addCookie(\"courseHome\", \""
-      << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false)
-      << "\", 100, false);\n";
-    if (theGlobalVariables.GetWebInput("topicList") != "")
-      out << "  addCookie(\"topicList\", \""
-      << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false)
-      << "\", 100, false);\n";
-  }
-  out
-  << "}\n";
-  out
-  //<< "function getCalculatorCGIsettings(){\n"
-  //<< "  result =\"examStatus=\"+getCookie(\"examStatus\");\n"
-  //<< "  result +=\"&username=\"+getCookie(\"username\");\n"
-  //<< "  result +=\"&authenticationToken =\"+getCookie(\"authenticationToken\");\n"
-  //<< "  result +=\"&fileName=\"+getCookie(\"fileName\");\n"
-  //<< "  return result;\n"
-  //<< "}\n"
-  << "var setProblemLinkStyle;\n"
-  << "function loadSettings(){\n"
-  << "  storeSettingsProgress();\n"
-  << "  theCalculatorForm= document.getElementById(\"mainInputID\");  \n"
-  << "  if (theCalculatorForm!= null){\n"
-  << "    theOldWidth =getCookie(\"widthCalculatorText\");\n"
-  << "    theOldHeight =getCookie(\"heightCalculatorText\");\n"
-  << "    theCalculatorForm.style.width  = theOldWidth;\n"
-  << "    theCalculatorForm.style.height = theOldHeight;\n"
-  << "  }\n"
-  << "  if (document.getElementById(\"debugFlag\") != null)\n "
-  << "    if (getCookie(\"debugFlag\") !='')\n"
-  << "      document.getElementById(\"debugFlag\").value =getCookie(\"debugFlag\");\n"
-  << "  if (getCookie(\"problemLinkStyle\") !='')\n"
-  << "  { if (setProblemLinkStyle !==undefined)\n"
-     "      setProblemLinkStyle(getCookie(\"problemLinkStyle\"));\n"
-  << "  }\n"
-  << "  if (document.getElementById(\"studentView\") != null)\n "
-  << "    if (getCookie(\"studentView\") !='')\n"
-  << "      document.getElementById(\"studentView\").value =getCookie(\"studentView\");\n"
-  << "  if (document.getElementById(\"studentSection\") != null)\n "
-  << "    if (getCookie(\"studentSection\") !='')\n"
-  << "      document.getElementById(\"studentSection\").value =getCookie(\"studentSection\");\n"
-  << "  if (document.getElementById(\"request\") != null)\n "
-  << "    if (getCookie(\"request\") !='')\n"
-  << "    { var theReq=getCookie(\"request\");\n"
-  << "      if (theReq== 'template' || theReq== 'calculator' || theReq== 'exercise' || "
-  << "         theReq== 'scoredQuiz' || theReq== 'exerciseNoLogin')\n"
-  << "        document.getElementById(\"request\").value =getCookie(\"request\");\n"
-  << "    }"
-  << "  if (document.getElementById(\"fileName\") != null)\n "
-  << "    if (getCookie(\"fileName\") !='')\n"
-  << "      document.getElementById(\"fileName\").value =getCookie(\"fileName\");\n"
-  << "  if (document.getElementById(\"courseHome\") != null)\n "
-  << "    if (getCookie(\"courseHome\") !='')\n"
-  << "      document.getElementById(\"courseHome\").value =getCookie(\"courseHome\");\n"
-  << "  if (document.getElementById(\"authenticationToken\") != null)\n"
-  << "    if (getCookie(\"authenticationToken\") !='')\n"
-  << "      document.getElementById(\"authenticationToken\").value =getCookie(\"authenticationToken\");\n ";
-  out
-  << "  if (document.getElementById(\"username\") != null)\n"
-  << "    if (document.getElementById(\"username\").value == '' || document.getElementById(\"username\").value == null)\n "
-  << "      if (getCookie(\"username\") !='')\n"
-  << "        document.getElementById(\"username\").value =getCookie(\"username\");\n ";
-  out << "}\n";
-  out << " </script>\n";
-  return out.str();
-}
-
 std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
 { MacroRegisterFunctionWithName("WebWorker::GetJavaScriptIndicatorBuiltInServer");
   std::stringstream out;
@@ -2863,7 +2762,6 @@ std::string WebWorker::GetChangePasswordPage()
   std::stringstream out;
   out << "<html>";
   out << "<head>";
-  out << HtmlRoutines::GetJavascriptAccountManagementLink();
   out << HtmlRoutines::GetCSSLinkCalculator();
   out << "</head>";
   out << "<body> ";
@@ -3136,17 +3034,11 @@ int WebWorker::ProcessCalculator()
   << "</title>";
   stOutput << HtmlRoutines::GetJavascriptMathjax();
   stOutput << HtmlRoutines::GetCSSLinkCalculator();
-  stOutput << HtmlRoutines::GetJavascriptHideHtmlWithTags();
-  stOutput << HtmlRoutines::GetJavascriptStandardCookiesWithTags();
-  stOutput << HtmlRoutines::GetJavascriptCanvasGraphicsLink();
-  stOutput << HtmlRoutines::GetJavascriptAutocompleteLink();
-  stOutput << HtmlRoutines::GetJavascriptInitializeButtonsLink();
   stOutput << HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull();
   //stOutput << HtmlRoutines::GetJavascriptMathQuillDefault();
   stOutput << HtmlRoutines::GetMathQuillStyleSheetLink();
 
   stOutput << this->GetJavaScriptIndicatorBuiltInServer();
-  stOutput << HtmlRoutines::GetJavascriptCalculatorPageLink();
 
   stOutput << "\n\n<script language =\"javascript\">\n"
   << "  var theAutocompleteDictionary = [\n  ";
@@ -3302,15 +3194,6 @@ int WebWorker::ProcessForgotLoginPage()
     theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
   }
   stOutput << this->GetForgotLoginPage();
-  return 0;
-}
-
-int WebWorker::ProcessSignUpPage()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessSignUpPage");
-  this->SetHeaderOKNoContentLength("");
-  DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
-  theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
-  stOutput << this->GetSignUpPage();
   return 0;
 }
 
@@ -3742,10 +3625,8 @@ std::string WebWorker::GetForgotLoginPage()
 { MacroRegisterFunctionWithName("WebWorker::GetForgotLoginPage");
   std::stringstream out;
   out << "<html>"
-  << HtmlRoutines::GetJavascriptHideHtmlWithTags()
   << HtmlRoutines::GetCSSLinkCalculator();
   out << HtmlInterpretation::GetJavascriptCaptcha();
-  out << HtmlRoutines::GetJavascriptForgotLogin();
   out << "<body>\n";
   out << "<calculatorNavigation>"
   << theGlobalVariables.ToStringNavigation()
@@ -3767,83 +3648,6 @@ std::string WebWorker::GetForgotLoginPage()
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
 
-  return out.str();
-}
-
-std::string WebWorker::GetSignUpPage()
-{ MacroRegisterFunctionWithName("WebWorker::GetSignUpPage");
-  std::stringstream out;
-  out << "<html>"
-  << HtmlRoutines::GetJavascriptHideHtmlWithTags()
-  << HtmlRoutines::GetCSSLinkCalculator();
-  out << "<script language =\"javascript\">\n";
-  out
-  << "function resetRecaptchaOnLoad()\n"
-  << "{ grecaptcha.reset();\n"
-  << "}\n";
-  out << "function submitSignUpInfo()\n";
-  out << "{";
-  //<< " document.getElementById('desiredAccount')"
-  //out << "  var grecaptcha;\n";
-  out
-  << "  var theInput =\"request=signUp&\";\n"
-  << "  theInput +=\"desiredUsername=\" +encodeURIComponent(document.getElementById('desiredUsername').value) + \"&\";\n"
-  << "  theInput +=\"email=\" +encodeURIComponent(document.getElementById('email').value) + \"&\";\n"
-  << "  if (grecaptcha ===undefined || grecaptcha === null)\n"
-  << "  { document.getElementById('signUpResult').innerHTML="
-  << "\"<span style ='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>\";\n"
-  << "   return false;\n"
-  << "  }\n"
-  << "  var theToken =grecaptcha.getResponse();\n"
-  << "  if (theToken === '' || theToken === null)"
-  << "  { document.getElementById('signUpResult').innerHTML="
-  << "\"<span style ='color:red'><b>Please don't forget to solve the captcha. </b></span>\";\n"
-  << "    return false;\n"
-  << "  }\n"
-  << "  theInput +=\"recaptchaToken=\" +encodeURIComponent(theToken) + \"&\";\n"
-  << "  submitStringCalculatorArgument(theInput, 'signUpResult', resetRecaptchaOnLoad, 'signUpResultReport');\n"
-  << "}\n";
-  out << "</script>";
-  out << HtmlInterpretation::GetJavascriptCaptcha();
-  out << "<body>\n";
-  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
-  << "</calculatorNavigation>\n";
-  theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
-  out << "<form name =\"desiredAccount\" id =\"login\">";
-  out <<  "<table>"
-  << "<tr>"
-  << "<td> Desired user name:</td>"
-  << "<td> <input type =\"text\" id =\"desiredUsername\" name =\"desiredUsername\" placeholder =\"username\">\n</td>\n"
-  << "</tr>"
-  << "<tr>"
-  << "<td> Email:</td>"
-  << "<td> <input type =\"text\" id =\"email\" name =\"email\" placeholder =\"email\">\n</td>\n"
-  << "</tr>"
-  //<< "<tr>"
-  //<< "<td>"
-  //<< "Password:"
-  //<< "</td>\n"
-  //<< "<td>"
-  //<< "<input type =\"password\" id =\"desiredPassword\" name =\"desiredPassword\" placeholder =\"password\">\n"
-  //<< "</td>\n"
-  //<< "</tr>"
-  //<< "<tr>"
-  //<< "<td>"
-  //<<  "Repeat password:\n"
-  //<< "\n</td>"
-  //<< "<td>\n"
-  //<< "<input type =\"password\" id =\"reenteredPassword\" name =\"reenteredPassword\" placeholder =\"re-enter password\">\n<br>\n"
-  //<< "</td>\n"
-  //<< "</tr>"
-  << "</table>";
-  out << HtmlInterpretation::GetCaptchaDiv();
-  out << "</form>";
-  out << "<button onclick=\"submitSignUpInfo();\">Sign up</button>"
-  << "<span id =\"signUpResultReport\"></span>"
-  << "\n<br>\n"
-  << "<span id =\"signUpResult\"></span>";
-  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  out << "</body></html>";
   return out.str();
 }
 
@@ -4141,8 +3945,6 @@ int WebWorker::ServeClient()
     return this->ProcessActivateAccount();
   else if (theGlobalVariables.userCalculatorRequestType == "signUp")
     return this->ProcessSignUP();
-  else if (theGlobalVariables.userCalculatorRequestType == "signUpPage")
-    return this->ProcessSignUpPage();
   else if (theGlobalVariables.userCalculatorRequestType == "forgotLogin")
     return this->ProcessForgotLogin();
   else if (theGlobalVariables.userCalculatorRequestType == "forgotLoginPage")

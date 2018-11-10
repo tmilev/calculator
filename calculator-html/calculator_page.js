@@ -130,7 +130,7 @@ function processOneFunctionAtom(handlers, isComposite) {
     }
     var encodedAtom = encodeURIComponent(handlers[counterHandlers].atom);
     currentId += `${encodedAtom}_${counterHandlers}_${handlers.length}`;
-    resultString += `<a href = '#' class = 'linkInfo' onclick = "switchMenu('${currentId}')">info</a>`;
+    resultString += `<a href = '#' class = 'linkInfo' onclick = "window.calculator.hideHtmlWithTags.switchMenu('${currentId}')">info</a>`;
     resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${currentDescription}<br><b>Example:</b><br>${currentExample}</calculatorExampleInfo>`;
     resultString += `<a href = "#" class = "linkInfo" onclick = "this.composite =${isComposite}; this.index =${counterHandlers}; this.atom='${encodedAtom}'; window.calculator.calculator.exampleClick(this);"> Example</a>`;
     //resultString += currentExample;

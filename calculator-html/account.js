@@ -34,8 +34,8 @@ function updateAccountPage() {
   var thePage = window.calculator.mainPage;
   var usernameInput = document.getElementById("spanUserIdInAccountsPage");
   var emailSpan = document.getElementById(ids.domElements.spanOldEmail);
-  usernameInput.innerHTML = thePage.storage.user.name.getValue();
-  emailSpan.innerHTML = thePage.storage.user.email.getValue();
+  usernameInput.innerHTML = thePage.storage.variables.user.name.getValue();
+  emailSpan.innerHTML = thePage.storage.variables.user.email.getValue();
   var spanExtraInfo = document.getElementById(ids.domElements.spanUserExtraInfo);
   var extraInfo = "";
   extraInfo += "<table>";

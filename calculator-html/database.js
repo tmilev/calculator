@@ -4,7 +4,8 @@ const ids = require('./ids_dom_elements');
 
 function updateDatabasePageCallback(incoming, output) {
   try {
-    var currentTable = thePage.storage.database.currentTable.getValue();
+    var thePage = window.calculator.mainPage;
+    var currentTable = thePage.storage.variables.database.currentTable.getValue();
     var theParsed = JSON.parse(incoming);
     var theOutput = document.getElementById("divDatabaseOutput");
     if ("rows" in theParsed) {
@@ -26,13 +27,15 @@ function updateDatabasePageCallback(incoming, output) {
 }
 
 function updateDatabasePageResetCurrentTable() {
-  thePage.storage.database.currentTable.setAndStore("");
+  var thePage = window.calculator.mainPage;
+  thePage.storage.variables.database.currentTable.setAndStore("");
   updateDatabasePage();
 }
 
 function updateDatabasePage() {
+  var thePage = window.calculator.mainPage;
   thePage.storeSettings();
-  var currentTable = thePage.storage.database.currentTable.getValue();
+  var currentTable = thePage.storage.variables.database.currentTable.getValue();
   var theUrl = `${pathnames.urls.calculatorAPI}?${pathnames.request}=${pathnames.requestDatabase}&${pathnames.databaseTable}=${currentTable}`;
   submitRequests.submitGET({
     url: theUrl,

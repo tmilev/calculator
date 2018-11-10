@@ -51,8 +51,8 @@ User.prototype.hideProfilePicture = function() {
 
 User.prototype.makeFromUserInfo = function(inputData) {
   var thePage = window.calculator.mainPage;
-  thePage.storage.user.authenticationToken.setAndStore(inputData.authenticationToken);
-  thePage.storage.user.name.setAndStore(inputData.username);
+  thePage.storage.variables.user.authenticationToken.setAndStore(inputData.authenticationToken);
+  thePage.storage.variables.user.name.setAndStore(inputData.username);
   this.role = inputData.userRole;
   this.flagLoggedIn = true;
   this.sectionsTaught = inputData.sectionsTaught;
@@ -60,12 +60,15 @@ User.prototype.makeFromUserInfo = function(inputData) {
   this.sectionInDB = inputData.studentSection;
   this.sectionComputed = inputData.studentSection;
   this.deadlineSchema = inputData.deadlineSchema;
-  document.getElementById(ids.domElements.spanUserIdInAccountsPage).innerHTML = thePage.storage.user.name.value;
-  document.getElementById(ids.domElements.inputUsername).value = thePage.storage.user.name.value;
+  document.getElementById(ids.domElements.spanUserIdInAccountsPage).innerHTML = thePage.storage.variables.user.name.value;
+  document.getElementById(ids.domElements.inputUsername).value = thePage.storage.variables.user.name.value;
 
 }
 
-function StorageVariable(inputs) {
+function StorageVariable(
+/**@type @{{name: string, nameURL: string, nameCookie: string, nameLocalStorage: string, associatedDOMId: string, type: string, secure: string, showInURLByDefault: bool, callbackOnValueChange: function}} */
+  inputs
+) {
   this.value = "";
   this.name = inputs.name;
   this.nameURL = "";
@@ -74,7 +77,13 @@ function StorageVariable(inputs) {
   this.associatedDOMId = "";
   this.type = "string";
   this.secure = true;
-  var labelsToRead = ["nameURL", "nameCookie", "nameLocalStorage", "associatedDOMId", "type", "secure"];
+  this.showInURLByDefault = false;
+  /**@type {function} */
+  this.callbackOnValueChange = null;
+  var labelsToRead = [
+    "nameURL", "nameCookie", "nameLocalStorage", 
+    "associatedDOMId", "type", "secure", "callbackOnValueChange", "showInURLByDefault"
+  ];
   for (var counterLabel = 0; counterLabel < labelsToRead.length; counterLabel ++) {
     var currentLabel = labelsToRead[counterLabel];
     var incoming = inputs[currentLabel];
@@ -91,42 +100,238 @@ StorageVariable.prototype.getValue = function() {
 StorageVariable.prototype.loadMe = function(hashParsed) {
   var incomingValue = "";
   if (Storage !== undefined || localStorage !== undefined && this.nameLocalStorage !== "") {
-    incomingValue = localStorage.getItem(this.nameLocalStorage);
-    if (incomingValue !== "" && incomingValue !== null && incomingValue !== undefined) {
-      this.value = localStorage[this.nameLocalStorage];
+    var candidate = localStorage.getItem(this.nameLocalStorage);
+    if (candidate !== "" && candidate !== null && candidate !== undefined) {
+      incomingValue = candidate;
     }
   }
   if (this.nameCookie !== "") {
-    incomingValue = cookies.getCookie(this.nameCookie);
-    if (incomingValue !== "" && incomingValue !== null && incomingValue !== undefined) {
-      this.value = incomingValue;
+    var candidate = cookies.getCookie(this.nameCookie);
+    if (candidate !== "" && candidate !== null && candidate !== undefined) {
+      incomingValue = candidate;
     }
   }
   if (this.nameURL !== "") {
     if (this.nameURL in hashParsed) {
-      this.value = decodeURIComponent(hashParsed[this.nameURL]);
-      if (this.associatedDOMId !== "") {
-        var theComponent = document.getElementById(this.associatedDOMId);
-        theComponent.value = this.value;
+      var candidate = hashParsed[this.nameURL];
+      if (candidate !== null && candidate !== undefined) {
+        candidate = incomingValue;
       }
     }
   }
+  this.setAndStore(incomingValue, false);
 }
 
-StorageVariable.prototype.storeMe = function() {
+StorageVariable.prototype.storeMe = function(/**@type {boolean} */ updateURL) {
   if (Storage !== undefined || localStorage !== undefined) {
-    if (this.nameLocalStorage !== "") {
-      localStorage[this.nameLocalStorage] = this.value
+    if (this.nameLocalStorage !== "" && this.nameLocalStorage !== null && this.nameLocalStorage !== undefined) {
+      localStorage[this.nameLocalStorage] = this.value;
     }
   }
   if (this.nameCookie !== "") {
     cookies.setCookie(this.nameCookie, this.value, 150, this.secure);
   }
+  if (updateURL !== false) {
+    mainPage().storage.setURL();
+  }
 }
 
-StorageVariable.prototype.setAndStore = function(newValue) {
+StorageVariable.prototype.setAndStore = function(newValue, updateURL) {
+  if (updateURL === undefined ) {
+    updateURL = true;
+  }
+  if (this.value === newValue) {
+    return;
+  }
   this.value = newValue;
-  this.storeMe();
+  this.storeMe(updateURL);
+  if (this.callbackOnValueChange !== null && this.callbackOnValueChange !== undefined) {
+    this.callbackOnValueChange(this.value);
+  }
+}
+
+function StorageCalculator() {
+  this.variables = {
+    currentPage: new StorageVariable({
+      name: "currentPage", 
+      nameLocalStorage: "currentPage", //<- when given and non-empty, local storage will be used to store variable
+      nameCookie: "", //<- when given and non-empty, cookies will be used to store variable
+      nameURL: "currentPage", //<- when given and non-empty, url will be used to store variable
+      showInURLByDefault: true, // <- when given and true, url will be added to the window hash
+    }),
+    database: {
+      currentTable: new StorageVariable({
+        name: "currentTable", 
+        nameLocalStorage: "currentTable"
+      }), 
+    },
+    editor: {
+      currentlyEditedPage: new StorageVariable({
+        name: "currentlyEditedPage",
+        nameLocalStorage: "currentlyEditedPage"
+      })
+    },
+    currentSectionComputed: new StorageVariable({
+      name: "currentSectionComputed",
+      nameLocalStorage: "currentSectionComputed"
+    }),
+    currentCourse: {
+      courseHome: new StorageVariable({
+        name: "courseHome",
+        nameCookie: "courseHome",
+        nameURL: "courseHome"
+      }),
+      topicList: new StorageVariable({
+        name: "topicList",
+        nameCookie: "topicList",
+        nameURL: "topicList"
+      }),
+      fileName: new StorageVariable({
+        name: "fileName",
+        nameCookie: "fileName",
+        nameURL: "fileName"
+      }),
+      problemFileName: new StorageVariable({
+        name: "problemFileName",
+        nameCookie: "problemFileName",
+        nameURL: "problemFileName"
+      }),
+      currentProblemId: new StorageVariable({
+        name: "currentProblemId",
+        nameLocalStorage: "currentProblemId",
+        nameURL: "currentProblemId"
+      }),
+      exerciseType: new StorageVariable({
+        name: "exerciseType",
+        nameLocalStorage: "exerciseType",
+        nameURL: "exerciseType"
+      })
+    },
+    flagDebug: new StorageVariable({
+      name: "debugFlag", 
+      nameURL: "debugFlag", 
+      nameCookie: "debugFlag",
+      secure: false
+    }),
+    flagStudentView: new StorageVariable({
+      name: "studentView", 
+      nameURL: "studentView", 
+      nameCookie: "studentView",
+      secure: true
+    }),
+    calculator: {
+      input: new StorageVariable({
+        name: "calculatorInput", 
+        nameURL: "calculatorInput",
+        associatedDOMId: "mainInputID"
+      }),
+      request: new StorageVariable({
+        name: "calculatorRequest", 
+        nameURL: "calculatorRequest", 
+        nameLocalStorage: "calculatorRequest"
+      }),
+    },
+    user: {
+      activationToken: new StorageVariable({
+        name: "activationToken",
+        nameURL: "activationToken",
+      }),
+      googleToken: new StorageVariable({
+        name: "googleToken"
+      }),
+      name: new StorageVariable({
+        name: "username", 
+        nameCookie: "username", 
+        nameURL: "username"
+      }),
+      authenticationToken: new StorageVariable({
+        name: "authenticationToken",
+        nameCookie: "authenticationToken",
+        nameURL: "authenticationToken"
+      }),
+      email: new StorageVariable({
+        name: "email",
+        nameURL: "email"
+      })
+    }
+  };
+  this.oldHash = "";
+  this.currentHash = "";
+  this.urlObject = {};
+}
+
+StorageCalculator.prototype.parseURL = function() {
+  this.oldHash = this.currentHash;
+  this.currentHash = window.location.hash;
+  try {
+    if (this.oldHash !== this.currentHash) {
+      this.urlObject = JSON.parse(this.currentHash);
+    }
+  } catch (e) {
+    console.log(`Failed to parse your url hash ${this.currentHash}. ${e}`);
+  }
+}
+
+StorageCalculator.prototype.loadSettings = function() {
+  this.parseURL();
+  this.loadSettingsRecursively(this.variables, this.urlObject);
+}
+
+StorageCalculator.prototype.loadSettingsRecursively = function(currentStorage, inputHashParsed) {
+  if (currentStorage instanceof StorageVariable) {
+    currentStorage.loadMe(inputHashParsed);
+    return;
+  } 
+  if (typeof currentStorage === "object") {
+    for (var subLabel in currentStorage) {
+      this.loadSettingsRecursively(currentStorage[subLabel], inputHashParsed);
+    }
+  }  
+}
+
+/** Returns true if output has meaningful information, false otherwise.
+ * @returns {boolean} 
+ * */
+StorageCalculator.prototype.computeURLRecursively = function(currentStorage, currentURL) {
+  if (currentStorage instanceof StorageVariable) {
+    var urlName = currentStorage.nameURL; 
+    if (urlName !== undefined && urlName !== null && urlName !== "") {
+      if (currentStorage.showInURLByDefault || (urlName in currentURL)) {
+        currentURL[urlName] = currentStorage.value;
+        //<- we show url variable only if typed in by the user
+        // or if it shown in the url by default
+        return true
+      } 
+    }
+    return false;
+  }
+  if (typeof currentStorage !== "object") {
+    throw (`Unexpected currentStorage input while computing url: ${currentStorage}`);
+  }
+  var hasNonTrivialInformation = false;
+  for (var label in currentStorage) {
+    if  (typeof currentURL[label] !== "object") {
+      var urlAdditionCandidate = {}
+      if (this.computeURLRecursively(currentStorage[label], urlAdditionCandidate)) {
+        currentURL[label] = urlAdditionCandidate[label];
+        hasNonTrivialInformation = true;
+      }
+      
+    } else {
+      if (this.computeURLRecursively(currentStorage[label], currentURL[label])) {
+        hasNonTrivialInformation = true;
+      }
+    }
+  }
+  return hasNonTrivialInformation;
+}
+
+StorageCalculator.prototype.setURL = function () {
+  this.computeURLRecursively(this.variables, this.urlObject);
+  var incomingHash = JSON.stringify(this.urlObject);
+  if (incomingHash !== this.currentHash) {
+    window.location.hash = incomingHash;
+  } 
 }
 
 function Page() {
@@ -247,109 +452,7 @@ function Page() {
       flagModifyURL: true
     }
   };
-  this.storage = {
-    currentPage: new StorageVariable({
-      name: "currentPage", 
-      nameLocalStorage: "currentPage", //<- when given and non-empty, local storage will be used to store variable
-      nameCookie: "", //<- when given and non-empty, cookies will be used to store variable
-      nameURL: "currentPage" //<- when given and non-empty, url will be used to store variable      
-    }),
-    database: {
-      currentTable: new StorageVariable({
-        name: "currentTable", 
-        nameLocalStorage: "currentTable"
-      }), 
-    },
-    editor: {
-      currentlyEditedPage: new StorageVariable({
-        name: "currentlyEditedPage",
-        nameLocalStorage: "currentlyEditedPage"
-      })
-    },
-    currentSectionComputed: new StorageVariable({
-      name: "currentSectionComputed",
-      nameLocalStorage: "currentSectionComputed"
-    }),
-    currentCourse: {
-      courseHome: new StorageVariable({
-        name: "courseHome",
-        nameCookie: "courseHome",
-        nameURL: "courseHome"
-      }),
-      topicList: new StorageVariable({
-        name: "topicList",
-        nameCookie: "topicList",
-        nameURL: "topicList"
-      }),
-      fileName: new StorageVariable({
-        name: "fileName",
-        nameCookie: "fileName",
-        nameURL: "fileName"
-      }),
-      problemFileName: new StorageVariable({
-        name: "problemFileName",
-        nameCookie: "problemFileName",
-        nameURL: "problemFileName"
-      }),
-      currentProblemId: new StorageVariable({
-        name: "currentProblemId",
-        nameLocalStorage: "currentProblemId",
-        nameURL: "currentProblemId"
-      }),
-      exerciseType: new StorageVariable({
-        name: "exerciseType",
-        nameLocalStorage: "exerciseType",
-        nameURL: "exerciseType"
-      })
-    },
-    flagDebug: new StorageVariable({
-      name: "debugFlag", 
-      nameURL: "debugFlag", 
-      nameCookie: "debugFlag",
-      secure: false
-    }),
-    flagStudentView: new StorageVariable({
-      name: "studentView", 
-      nameURL: "studentView", 
-      nameCookie: "studentView",
-      secure: true
-    }),
-    calculator: {
-      input: new StorageVariable({
-        name: "calculatorInput", 
-        nameURL: "calculatorInput",
-        associatedDOMId: "mainInputID"
-      }),
-      request: new StorageVariable({
-        name: "calculatorRequest", 
-        nameURL: "calculatorRequest", 
-        nameLocalStorage: "calculatorRequest"
-      }),
-    },
-    user: {
-      activationToken: new StorageVariable({
-        name: "activationToken",
-        nameURL: "activationToken"
-      }),
-        googleToken: new StorageVariable({
-        name: "googleToken"
-      }),
-      name: new StorageVariable({
-        name: "username", 
-        nameCookie: "username", 
-        nameURL: "username"
-      }),
-      authenticationToken: new StorageVariable({
-        name: "authenticationToken",
-        nameCookie: "authenticationToken",
-        nameURL: "authenticationToken"
-      }),
-      email: new StorageVariable({
-        name: "email",
-        nameURL: "email"
-      })
-    }
-  }
+  this.storage = new StorageCalculator();
   
   cookies.setCookie("useJSON", true, 300, false);
   this.initMenuBar();
@@ -365,7 +468,7 @@ function Page() {
   this.scriptsInjected = {};
   this.logoutRequestFromUrl = null;
   this.locationRequestFromUrl = null;
-  this.loadSettings(location.hash); 
+  this.storage.loadSettings(); 
   this.hashHistory = []; 
   this.previousProblemId = null;
   this.problems = {};
@@ -383,8 +486,8 @@ function Page() {
   //Select page on first load
   //////////////////////////////////////
   //////////////////////////////////////
-  this.selectPage(this.storage.currentPage.getValue());
-  if (this.storage.currentPage.getValue() != this.pages.activateAccount.name) {
+  this.selectPage(this.storage.variables.currentPage.getValue());
+  if (this.storage.variables.currentPage.getValue() != this.pages.activateAccount.name) {
     login.loginTry();
   }
   this.setSwitches();
@@ -410,51 +513,6 @@ Page.prototype.initMenuBar = function() {
 Page.prototype.resetProblems = function() {
   this.problems = {};
   this.theChapterIds = {};
-}
-
-Page.prototype.loadSettings = function(inputHash) {
-  var inputHashParsed = {};
-  if (typeof inputHash === "string") {
-    var inputString = inputHash;
-    if (inputHash[0] === '#') {
-      inputString = inputHash.slice(1);
-    }
-    if (inputString === "" || inputString === undefined || inputString === null) {
-      inputString = "{}";
-    }
-    var decodedInputString = decodeURIComponent(inputString);
-    inputHashParsed = JSON.parse(decodedInputString);
-  }
-  this.loadSettingsRecursively(this.storage, inputHashParsed);
-}
-
-Page.prototype.loadSettingsRecursively = function(currentStorage, inputHashParsed) {
-  if (currentStorage instanceof StorageVariable) {
-    currentStorage.loadMe(inputHashParsed);
-  } else if (typeof currentStorage === "object") {
-    for (var subLabel in currentStorage) {
-      this.loadSettingsRecursively(currentStorage[subLabel], inputHashParsed);
-    }
-  }  
-}
-
-Page.prototype.storeSettings = function() {
-  try {
-    this.storeSettingsRecursively(this.storage);
-  } catch (e) {
-    console.log("Error loading settings from cookies: " + e);
-  }
-}
-
-Page.prototype.storeSettingsRecursively = function(currentStorage) {
-  if (currentStorage instanceof StorageVariable) {
-    currentStorage.storeMe();
-  }
-  if (typeof currentStorage === "object") {
-    for (var subLabel in currentStorage) {
-      this.storeSettingsRecursively(currentStorage[subLabel]);
-    }
-  }  
 }
 
 Page.prototype.showProfilePicture = function() {
@@ -487,7 +545,7 @@ Page.prototype.initializeCalculatorPage = function() {
 
 function sectionSelect(sectionNumber) {
   console.log(`DEBUG: section select: ${sectionNumber}`);
-  thePage.storage.currentSectionComputed.setAndStore(sectionNumber);
+  thePage.storage.variables.currentSectionComputed.setAndStore(sectionNumber);
   thePage.user.sectionComputed = thePage.user.sectionsTaught[sectionNumber];
   var deadlineSpans = document.getElementsByClassName(ids.domElements.classSpanDeadlineContainer);
   for (var counterDeadlines = 0; counterDeadlines < deadlineSpans.length; counterDeadlines ++) {
@@ -504,16 +562,16 @@ function sectionSelect(sectionNumber) {
 }
 
 Page.prototype.flipStudentView = function () {
-  var oldValue = this.storage.flagStudentView.getValue();
-  this.storage.flagStudentView.setAndStore(document.getElementById(ids.domElements.sliderStudentView).checked);    
+  var oldValue = this.storage.variables.flagStudentView.getValue();
+  this.storage.variables.flagStudentView.setAndStore(document.getElementById(ids.domElements.sliderStudentView).checked);    
   var spanView = document.getElementById(ids.domElements.spanStudentViewFlagToggleReport);
   var radioHTML = "";
-  if (this.storage.flagStudentView.getValue()) {
+  if (this.storage.variables.flagStudentView.getValue()) {
     spanView.innerHTML = "Student view";
     for (var counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections ++) {
       radioHTML += `<br><label class = "containerRadioButton">`;
       radioHTML += `<input type = "radio" name = "radioSection" onchange = "sectionSelect(${counterSections});" `; 
-      var counterFromStorage = parseInt(thePage.storage.currentSectionComputed.getValue());
+      var counterFromStorage = parseInt(thePage.storage.variables.currentSectionComputed.getValue());
       if (counterSections === counterFromStorage) {
         radioHTML += "checked = 'true'";
       }
@@ -527,17 +585,17 @@ Page.prototype.flipStudentView = function () {
   }
   document.getElementById(ids.domElements.spanStudentViewSectionSelectPanel).innerHTML = radioHTML;
 
-  if (oldValue !== this.storage.flagStudentView.getValue()) {
+  if (oldValue !== this.storage.variables.flagStudentView.getValue()) {
     this.pages.problemPage.flagLoaded = false;
     login.toggleAdminPanels();
-    this.selectPage(this.storage.currentPage.getValue());
+    this.selectPage(this.storage.variables.currentPage.getValue());
   }
 }
 
 Page.prototype.flipDebugSwitch = function () {
-  this.storage.flagDebug.setAndStore(document.getElementById(ids.domElements.sliderDebugFlag).checked);
+  this.storage.variables.flagDebug.setAndStore(document.getElementById(ids.domElements.sliderDebugFlag).checked);
   var debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
-  if (this.storage.flagDebug.getValue()) {
+  if (this.storage.variables.flagDebug.getValue()) {
     debugSpan.innerHTML = "Debug on";
   } else {
     debugSpan.innerHTML = "Debug off";
@@ -546,12 +604,12 @@ Page.prototype.flipDebugSwitch = function () {
 
 Page.prototype.setSwitches = function () {
   //console.log ("DEBUG flag: " + this.flagDebug);
-  if (this.storage.flagDebug.getValue() === true || this.storage.flagDebug.getValue() === "true") {
+  if (this.storage.variables.flagDebug.getValue() === true || this.storage.variables.flagDebug.getValue() === "true") {
     document.getElementById(ids.domElements.sliderDebugFlag).checked = true;
   } else {
     document.getElementById(ids.domElements.sliderDebugFlag).checked = false;
   }
-  if (this.storage.flagStudentView.getValue() === true || this.storage.flagStudentView.getValue() === "true") {
+  if (this.storage.variables.flagStudentView.getValue() === true || this.storage.variables.flagStudentView.getValue() === "true") {
     document.getElementById(ids.domElements.sliderStudentView).checked = true;
   } else {
     document.getElementById(ids.domElements.sliderStudentView).checked = false;
@@ -561,7 +619,7 @@ Page.prototype.setSwitches = function () {
 }
 
 Page.prototype.studentView = function () {
-  if (this.storage.flagStudentView.getValue() === true) {
+  if (this.storage.variables.flagStudentView.getValue() === true) {
     return true;
   }
   return false;
@@ -624,11 +682,15 @@ Page.prototype.injectScript = function(scriptId, scriptContent) {
   document.getElementsByTagName('head')[0].appendChild(scriptChild);
 }
 
+Page.prototype.getURLFromStorage = function () {
+
+}
+
 Page.prototype.selectPage = function(inputPage) {
   if (this.pages[inputPage] === undefined) {
     inputPage = "calculator";
   }
-  this.storage.currentPage.setAndStore(inputPage);
+  this.storage.variables.currentPage.setAndStore(inputPage);
   for (var page in this.pages) {
     this.pages[page].container.style.display = "none";
     if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
@@ -641,9 +703,9 @@ Page.prototype.selectPage = function(inputPage) {
   }
   if (this.pages[inputPage].flagModifyURL === true) {
     var urlObject = { 
-      currentPage: this.storage.currentPage.getValue()
+      currentPage: this.storage.variables.currentPage.getValue()
     };
-    location.href = `${pathnames.urls.app}#${encodeURIComponent(JSON.stringify(urlObject))}`;
+    location.href = `${pathnames.urls.app}#${JSON.stringify(urlObject)}`;
   }
   if (this.pages[inputPage].selectFunction !== null && this.pages[inputPage].selectFunction !== undefined) {
     this.pages[inputPage].selectFunction();
@@ -652,7 +714,7 @@ Page.prototype.selectPage = function(inputPage) {
 }
 
 Page.prototype.getCurrentProblem = function() {
-  var label = this.storage.currentCourse.currentProblemId.getValue();
+  var label = this.storage.variables.currentCourse.currentProblemId.getValue();
   return this.problems[label];
 }
 

@@ -7,8 +7,8 @@ const ids = require('./ids_dom_elements');
 function selectCourse(courseIndex) {
   var thePage = window.calculator.mainPage;
   var theCourse = thePage.theCourses[courseIndex];
-  thePage.storage.currentCourse.courseHome.setAndStore(theCourse.courseHome);
-  thePage.storage.currentCourse.topicList.setAndStore(theCourse.topicList);
+  thePage.storage.variables.currentCourse.courseHome.setAndStore(theCourse.courseHome);
+  thePage.storage.variables.currentCourse.topicList.setAndStore(theCourse.topicList);
   thePage.selectPage(thePage.pages.currentCourse.name);
 }
 

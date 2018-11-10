@@ -1,4 +1,16 @@
 /*styleCalculator.css*/
+calculatorExampleInfo{
+  display: block;
+  transition: all 1s;
+  opacity: 1;
+}
+calculatorAtom{
+  font-weight: bold;
+  color: red;
+}
+calculatorCompositeAtom{
+  color:green;
+}
 calculatorNavigation {
   background-color: #e8e8e8;
   display: block;
@@ -12,36 +24,52 @@ calculatorNavigation {
 calculatorNavigation:after{
 clear:both;
 }
+tiny {
+  font-size: x-small
+}
 tr.problemContainerRow{
 /*height: 500px;*/
 }
 td.problemContainerCell{
 /*height: 500px;*/
 }
-problemNavigation {
-  text-align: center;
-  background-color: #f0f0f0;
+
+.problemInfoBar{
+  /*display: block;*/
+  background-color: #fafafa;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;  
   width: 100%;
-  overflow: none;
-  display: block;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  margin: 0;
+  margin-bottom: 10px;
+}
+span.spanFileInfo {
+  display: inline-block;
+  border-radius: 3px;
+  margin:  3px;
+  padding: 3px;
+  text-align: left;
+  white-space: nowrap;
+  background-color: #f8f8f8;
+}
+span.problemTitle {
+  display: inline-block;
+  border-radius: 3px;
+  margin:  3px;
+  padding: 3px;
+  text-align: center;
   white-space: nowrap;
 }
-problemNavigation:after{
-clear:both;
-}
-editPagePanel{
+span.problemNavigation {
+  display: inline-block;
+  border-radius: 3px;
+  margin:  3px;
+  padding: 3px;
   text-align: center;
-  display: block;
-  width: 100%;
-  background-color:#fafafa;
   white-space: nowrap;
-  margin: 0;
-  padding-top: 2px;
-  padding-bottom: 2px;
+/*  border: 1px solid black;*/
 }
+
 textarea.textareaCalculatorMain{
   white-space:normal;
   resize: auto;
@@ -70,7 +98,7 @@ text-align: center;
 }
 .problemForm{
 }
-.normalButton{
+.buttonNormal{
 }
 sectionSelection{
   position:fixed;
@@ -78,31 +106,121 @@ sectionSelection{
   bottom:0;
   right:0;
 }
-.submitButton{
+.buttonSubmit{
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  padding:3px;
+  margin: 3px;
+  transition: all 2s;
+  box-shadow: none;
+  border: none;
   color:red;
   width:60px;
 }
-.showSolutionButton{
+.buttonSolution{
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: all 2s;
+  padding:3px;
+  margin: 3px;
+  box-shadow: none;
+  border: none;
   color:green;
   width:60px;
 }
-.submitButton:hover {
+.buttonSubmit:hover {
   background-color:#878787;
 }
-.previewButton {
+.buttonPreview {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: all 2s;
+  padding:3px;
+  margin: 3px;
+  box-shadow: none;
+  border: none;
   color:green;
   width:60px;
 }
-.previewButton:hover {
+.buttonPreview:hover {
   background-color:#878787;
 }
-.showAnswerButton {
+.buttonAnswer {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: all 2s;
+  padding:3px;
+  margin: 3px;
+  box-shadow: none;
+  border: none;
   color:green;
   width:60px;
 }
-.showAnswerButton:hover {
+.buttonAnswer:hover {
   background-color:#878787;
 }
+button.accordionLikeIndividual {
+  display: inline;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #efefef;
+  padding: 2px;
+  color: #444;
+  cursor: pointer;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s;
+}
+button.accordionLikeIndividual.active, button.accordionLikeIndividual:hover {
+  background-color: #ddd;
+}
+.panelExpandable {
+  transition: 2s all;
+}
+.panelExpandableCollapsed {
+  transition: 2s all;
+  max-height: 0;
+  height: 0;
+  opacity: 0;
+  display: none;
+}
+.panelExpandableExpanded {
+  transition: 2s all;
+  opacity: 1;
+  display: inline;
+}
+
+button.accordionLikeProblemWeight {
+  display: inline;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #efefef;
+  padding: 2px;
+  color: #444;
+  cursor: pointer;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s;
+}
+button.accordionLikeProblemWeight.active, button.accordionLikeProblemWeight:hover {
+  background-color: #ddd;
+}
+
+
 button.accordionLike {
   display: inline;
   -moz-border-radius: 3px;
@@ -151,7 +269,20 @@ button.accordion:after {
 button.accordion.active:after {
 }
 button.buttonStandard{
-  margin: 2px;
+  margin:  3px;
+  padding: 3px;
+  border-radius: 3px;
+  display: inline;
+  background-color: lightblue;
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s; 
+}
+button.buttonStandard:hover{
+  background-color: lightskyblue;
 }
 button.buttonSaveEdit{
   margin:  3px;
@@ -160,36 +291,44 @@ button.buttonSaveEdit{
   -webkit-border-radius: 3px;
   border-radius: 4px;
   display: inline;
-  background-color: PaleGreen;
+  background-color: #caff99;
   color: #444;
   cursor: pointer;
   border: none;
-  text-align: left;
+  text-align: center;
   outline: none;
   font-size: medium;
   transition: 0.6s; 
 }
 button.buttonSaveEdit:hover{
-  background-color: green;
+  background-color: lightgreen;
 }
 button.buttonClone{
   margin:  3px;
   padding: 3px;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
   border-radius: 3px;
   display: inline;
-  background-color: PaleGreen;
+  background-color: #caff99;
   color: #444;
   cursor: pointer;
   border: none;
-  text-align: left;
+  text-align: center;
   outline: none;
   font-size: medium;
   transition: 0.6s; 
 }
 button.buttonClone:hover{
-  background-color: green;
+  background-color: lightgreen;
+}
+button.buttonProgress{
+  box-shadow: none;
+  border: none;
+  background: none;
+  font-size: x-small;
+  transition: 2s;
+}
+button.buttonProgress:hover{
+  background: lightgray;
 }
 answerCalculatorHighlight{
 display: inline-block;
@@ -202,10 +341,24 @@ border-radius: 3px;
 font-weight: bold;
 /*max-width: 200px;*/
 }
+span.panelAnswer table, tr, td{
+  margin-left: 0px;
+  padding-left: 0px;
+  border-collapse: collapse;
+}
+span.panelAnswer tr{
+  margin-left: 0px;
+  padding-left: 0px;
+}
+
 span.panelAnswer{
   display: inline-block;
-  margin:  3px;
-  padding: 3px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  padding-right: 5px;
+  padding-bottom: 5px;
+  padding-top: 5px;
   background-color: #ffffff;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -247,6 +400,8 @@ button.buttonToggleTopics{
   margin-top: 0px;
   margin-bottom: 0px;
   margin-left: 5px;
+  width: 20px;
+  height: 23px;
   font-size: medium;
   font-weight: normal;
   background-color: Transparent;
@@ -318,9 +473,19 @@ span.panelProblemWeights{
   margin-top: 0px;
   margin-bottom: 0px;
   overflow: hidden;
+  transition: 2s linear;
+  opacity: 0;
+}
+span.panelDeadlines{
+  display: block;
+  max-height: 0;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  overflow: hidden;
   transition: 1s linear;
   opacity: 0;
 }
+
 span.studentScoresWrapper{
   width: 420px;
   font-size: medium;
@@ -333,7 +498,33 @@ span.deadlineAndTitleContainer{
 }
 span.titleContainer{
 }
+span.spanProgressReport{
+  word-wrap: break-word;
+}
+#spanCalculatorExamplesContainer {
+  overflow: auto;
+  display: inline-block;
+  vertical-align:top;
+  white-space:nowrap;
+}
+#idAutocompletePanel{
+  overflow: none;
+  display: inline-block;
+  max-height: 150px;
+  vertical-align:top;
+  white-space:nowrap;
+}
+#idAutocompleteSpan{
+  overflow: auto;
+  max-height: 100px;
+}
 
+.tableCalculatorInputs{
+display: inline-table;
+}
+.tableCalculatorInputs td{
+  vertical-align: top;
+}
 table.tableCalculatorOutput{
   border-collapse: collapse;
 }
@@ -401,6 +592,43 @@ textarea.currentFileNameArea {
   margin-bottom: -8px;
   overflow-x: hidden;
 }
+div.divPage{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  visibility: visible;
+}
+div.divMainPage{
+  width: 90%;
+  height: 100%;
+  overflow: auto;
+}
+#spanProgressReportGeneral{
+  max-width: 120px;
+  overflow-wrap: break-word;
+}
+div.divTheMainMenu{
+  display: flex;
+  flex-direction: column;
+  transition: all 1s;
+  max-width: 120px;
+  width: 10%;
+  position: absolute;
+  right: 0.8%;
+  overflow:none;
+}
+div.divMainMenuCollapsed{
+  display: flex;
+  max-width: 20px;
+  width: 20px;
+  flex-direction: column;
+  transition: all 1s;
+}
+div.divMenuSeparator{
+  font-size: small;
+  text-align: center;
+  border-bottom: 1px solid black;
+}
 div.headChapter{
   padding-bottom: 10px; 
   padding-left: 0;
@@ -415,6 +643,7 @@ div.bodyChapter{
   padding: 0px; 
   margin: 0px;
   display: block;
+  width: 100%;
   -webkit-transition: all 2s ease;
   -moz-transition: all 2s ease;
   transition: all 2s ease;
@@ -432,6 +661,7 @@ div.bodySection{
   padding: 0px; 
   margin: 0px;
   display: block;
+  width: 100%;
   -webkit-transition: all 2s ease;
   -moz-transition: all 2s ease;
   transition: all 2s ease;
@@ -448,6 +678,7 @@ div.headSubsection{
 div.bodySubsection{
   padding: 0px; 
   margin: 0px;
+  width: 100%;
   display: block;
   -webkit-transition: all 2s ease;
   -moz-transition: all 2s ease;
@@ -481,6 +712,30 @@ table.tableDatabaseItem{
 }
 table.tableDatabaseItem td{
   border: 1px solid;
+}
+table.tableJSON {
+  border-collapse: collapse;
+/*  width: 100%;
+  height: 100%;*/
+}
+table.tableJSON th{
+  font-size: x-small;
+}
+table.tableJSON td{
+  border: 1px solid;
+}
+table.tableJSON tr:nth-child(even){
+  background-color: #f6f6f6;
+}
+table.tableJSONItem{
+  border-collapse: collapse;
+  border: 1px solid;
+}
+table.tableJSONItem td{
+  border: 1px solid;
+}
+table.tableJSONItem tr:nth-child(even){
+  background-color: #f6f6f6;
 }
 
 table.tableItem{
@@ -533,16 +788,21 @@ table.lectureMaterials col:nth-child(2){
 table.lectureMaterials col:nth-child(3){
   width: 15%;
 }
-table.lectureMaterials tr:nth-child(even){}
+/*table.lectureMaterials tr:nth-child(even){}*/
 table.lectureMaterials tr:nth-child(odd){background-color: #fafafa}
 table.lectureMaterials th {
   padding-top: 12px;
   padding-bottom: 12px;
 }
-
+topicList {
+  width: 100%;
+}
+#divCurrentCourse{
+  width: 90%;
+}
 table.topicList {
   border-collapse: collapse;
-/*  width: 100%;*/
+  width: 100%;
   font-weight: normal;
   font-size: 1em;
   margin-top: 4px;
@@ -570,12 +830,24 @@ table.topicList col:nth-child(4){
 table.topicList col:nth-child(5){
   width: 20%;
 }
-table.topicList tr:nth-child(even){}
+/*table.topicList tr:nth-child(even){}*/
 table.topicList tr:nth-child(odd){background-color: #fafafa}
 /*table.topicList tr:hover {background-color: #ddd;}*/
 table.topicList th {
   padding-top: 12px;
   padding-bottom: 12px;
+}
+a.linkLogoutInactive{
+  transition: all 1s;
+  opacity: 0;
+}
+a.linkLogoutActive{
+  transition: all 1s;
+  opacity: 1;
+}
+a.linkInfo{
+  margin-left: 10px;
+  margin-right: 10px;
 }
 a.linkStandardButtonLike{
   margin:  3px;
@@ -590,6 +862,32 @@ a.linkStandardButtonLike{
 a.linkStandardButtonLike:hover{
   background-color: #dfdfdf;
 }
+span.problemLinkSelectedPractice{
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  text-decoration: none;  
+}
+span.problemLinkSelectedQuiz{
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  font-weight: bold;
+  text-decoration: none;  
+}
+a.linkProgressReport{
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  overflow: hidden;
+  font-size: small;
+  max-width: 120px;
+}
 a.problemLinkQuiz{
   display: inline-block;
   margin:  3px;
@@ -598,7 +896,8 @@ a.problemLinkQuiz{
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
-  transition: 0.6s;
+  transition: all 1.5s;
+  font-weight: bold;
   text-decoration: none;
 }
 a.problemLinkQuiz:hover{ 
@@ -612,7 +911,7 @@ a.problemLinkPractice{
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
-  transition: 0.6s;
+  transition: all 1.5s;
   text-decoration: none;
 }
 a.problemLinkPractice:hover{
@@ -692,6 +991,37 @@ a.courseLink{
 a.courseLink:hover{
   background-color: LawnGreen;
 }
+
+div.divProfilePictureContainerExpanded{
+  max-width: 96px;
+  max-height: 96px;
+  transition: all 1s;
+  margin-left: auto;
+  margin-right: auto;  
+}
+
+div.divProfilePictureContainerCollapsed{
+  max-width: 25px;
+  max-height: 25px;
+  transition: all 1s;
+}
+img {
+  transition: all 1;
+  width: 100%; 
+  object-fit: scale-down;
+  /*object-fit: contain;*/
+}
+.profilePicture{
+  transition: all 1s;
+  display: block;
+}
+
+div.divLoginPanel{
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
 div.divLogin{
 text-align: center;
 }
@@ -712,6 +1042,42 @@ overflow: hidden;
 -moz-transition: all 1s ease;
 transition: all 1s ease;
 }
+div.centerHorizontallyInPageContainer{
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+div.centerVerticallyInPageContainer{
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+div.divCenteredItem{
+  margin: 10px;
+  padding: 0px;
+}
+div.divVisible{
+  transition: all 1s;
+  opacity: 1;
+}
+
+div.divInvisible{
+  transition: all 1s;
+  opacity: 0;
+}
+div.divSmall{
+  font-size: x-small;
+}
 
 form.formLogin > * {
 font-size: 1.1em;
@@ -719,26 +1085,59 @@ font-size: 1.1em;
 table.tableLogin{
 margin: 0 auto;
 }
-button.buttonLogin{
-  display: inline;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
-  background-color: #ccffcc;
-  padding: 5px;
-  color: #444;
-  cursor: pointer;
-  margin-top: 0px;
-  margin-bottom: 0px;
+button.buttonSignUp{
+  display: inline-block;
+  box-shadow: none;
   border: none;
-  text-align: left;
-  outline: none;
-  font-size: 1.25em;
-  font-weight: bold;
-  transition: 0.6s;
+  width: 100%;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  text-decoration: none;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 1.5s;
 }
-button.buttonLogin:hover {
-  background-color: LawnGreen
+button.buttonSignUp:hover{ 
+  background-color: lightgreen;
+}
+button.buttonSelectPage{
+  border-radius: 3px;
+  background-color: lightblue;
+  box-shadow: none;
+  border: none;
+  font-weight: bold;
+  padding: 8px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  transition: 1.5s;
+  width: 100%;
+  white-space: nowrap;
+  cursor:pointer;
+  transition: all 1.5s;
+}
+button.buttonSelectPageSelected{
+  background-color: skyblue;
+}
+button.buttonSelectPage:hover{
+  background-color: lightskyblue;
+}
+button.buttonMQ{
+  width: 25px; 
+  height: 21.2px; 
+  padding: 0;
+  box-shadow: none;
+  border: none;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: all 2s;
+  background-color: #e8e8e8;
+}
+button.buttonMQ:hover{
+  background-color: silver;
 }
 lectureTag{
 color: green;
@@ -787,6 +1186,10 @@ span.currentCourseIndicator{
   transition: 0.6s;
 }
 
+.datePicker{
+
+}
+
 .textInputUsername{
 font-size: 0.9em;
 font-weight: bold;
@@ -806,3 +1209,126 @@ font-weight: bold;
   transition: all 1s;
 }
 
+#divEditorAce { 
+  height: 85%;
+  font-size: 100%;
+}
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 18px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {display:none;}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 5;
+  left: 0;
+  right: 0;
+  bottom: -5;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 4px;
+  bottom: 3px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(11px);
+  -ms-transform: translateX(11px);
+  transform: translateX(12px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 10px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* Customize the label (the container) */
+.containerRadioButton {
+  position: relative;
+  padding-left: 20px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default radio button */
+.containerRadioButton input {
+  position: absolute;
+  opacity: 0;
+}
+
+/* Create a custom radio button */
+.radioMark {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 15px;
+  width: 15px;
+  background-color: #eee;
+  border-radius: 50%;
+}
+
+/* On mouse-over, add a grey background color */
+.containerRadioButton:hover input ~ .radioMark {
+  background-color: #ccc;
+}
+
+/* When the radio button is checked, add a blue background */
+.containerRadioButton input:checked ~ .radioMark {
+  background-color: lightskyblue;
+}
+
+/* Create the indicator (the dot/circle - hidden when not checked) */
+.radioMark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the indicator (dot/circle) when checked */
+.containerRadioButton input:checked ~ .radioMark:after {
+  display: block;
+}
+
+/* Style the indicator (dot/circle) */
+.containerRadioButton .radioMark:after {
+  top: 4px;
+  left: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: white;
+}

@@ -160,7 +160,7 @@ void GlobalVariables::initModifiableDatabaseFields()
   currentEntry.AddOnTop(DatabaseStrings::tableEmailInfo);
   modifiableData.AddOnTop(currentEntry);
   std::fstream outputFile;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(outputFile, "/calculator-html/new/modifiable_database_fields.js", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(outputFile, "/calculator-html/modifiable_database_fields.js", false, true, false);
 
   JSData modifiableDataJSON;
   modifiableDataJSON = modifiableData;

@@ -170,7 +170,6 @@ public:
    std::stringstream* commentsGeneralSensitive);
   int ProcessChangePasswordPage();
   int ProcessCalculator();
-  int ProcessDatabase();
   int ProcessDatabaseJSON();
   int ProcessDatabaseDeleteEntry();
   int ProcessDatabaseModifyEntry();
@@ -265,7 +264,6 @@ public:
   std::string GetExamPageInterpreter();
   std::string GetDatabaseJSON();
   std::string GetDatabaseDeleteOneItem();
-  std::string GetDatabasePage();
   //std::string GetEmailChangePage();
   std::string GetNavigationPage();
   std::string GetAddUserEmails();

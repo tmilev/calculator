@@ -9,6 +9,7 @@ function SignUp() {
 }
 
 SignUp.prototype.signUp = function() {
+  var thePage = window.calculator.mainPage;
   if (recaptchaIdForSignUp === null) {
     recaptchaIdForSignUp = grecaptcha.render("recaptchaSignUp", {'sitekey' : '6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql'});
   }

@@ -1,38 +1,94 @@
 "use srict";
+const pathnames = require('./pathnames');
+const miscellaneous = require('./miscellaneous');
 
-function recordProgressDone(progress){
-  if (progress === null || progress === undefined){
+function recordProgressDone(progress, timeFinished) {
+  if (progress === null || progress === undefined) {
     return;
   }
-  if (typeof progress === "string"){
+  if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
   var theButton = progress.childNodes[0];
-  theButton.innerHTML = "<b style='color:green'>Received</b>";
+  var timeTotal = timeFinished - progress.getAttribute("timeStarted");
+  theButton.innerHTML = `<b style ='color:green'>Received</b> ${timeTotal} ms`;
 }
 
-function recordProgressStarted(progress, address){
-  if (progress === null || progress === undefined){
+function doToggleContent(button) {
+  var theSpan = button.nextSibling;
+  if (theSpan.classList.contains("panelExpandableCollapsed")) {
+    theSpan.classList.remove("panelExpandableCollapsed");
+    theSpan.classList.add("panelExpandableExpanded");
+    button.childNodes[1].innerHTML = "&#9662;";
+  } else {
+    theSpan.classList.remove("panelExpandableExpanded");
+    theSpan.classList.add("panelExpandableCollapsed");
+    button.childNodes[1].innerHTML = "&#9666;";
+  }
+}
+
+function getToggleButton(address, label) {
+  var result = "";
+  result += `<button class = "buttonProgress accordionLikeIndividual" onclick = "window.calculator.submitRequests.doToggleContent(this);">`;
+  result += `<span>${label}</span><span>&#9666;</span>`;
+  result += "</button>";
+  result += `<span class = "spanProgressReport panelExpandable panelExpandableCollapsed">${address}</span>`;
+  return result;
+}
+
+function convertStringToHtml(input) {
+  var result = "";
+  for (var counter = 0; counter < input.length; counter ++) {
+    if (input[counter] === '&') {
+      result += '&amp;';
+      continue;
+    }
+    result += input[counter];
+  }
+  return result;
+}
+
+function recordProgressStarted(progress, address, isPost, timeStarted) {
+  if (progress === null || progress === undefined) {
     return;
   }
-  if (typeof progress === "string"){
+  if (isPost === undefined || isPost === null) {
+    isPost = false;
+  }
+  if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
-  progress.innerHTML = "<button class = \"buttonProgress\"" +
-  "onclick=\"if (this.nextSibling.nextSibling.style.display === 'none')" +
-  "{this.nextSibling.nextSibling.style.display = ''; } else {" +
-  "this.nextSibling.nextSibling.style.display = 'none';}\">" +
-  "<b style=\"color:orange\">Sent</b></button><br><span style=\"display:none\">" + address + "</span>";
+  progress.setAttribute("timeStarted", timeStarted);
+  var theHTML = "";
+  var content = "";
+  var label = '<b style ="color:orange">Sent</b>';
+  var addressSpreadOut = address.split("&").join(" &");
+  addressSpreadOut = addressSpreadOut.split("=").join("= ");
+  addressSpreadOut = addressSpreadOut.split("?").join("? ");
+  var addressPassSplit = addressSpreadOut.split("password=");
+  if (addressPassSplit.length > 1) {
+    var indexAmpersand = addressPassSplit[1].search("&");
+    addressPassSplit[1] = addressPassSplit[1].substr(indexAmpersand);
+    addressPassSplit[1] = "***" + addressPassSplit[1];
+    addressSpreadOut = addressPassSplit.join("password= ");
+  }
+  if (!isPost) {
+    content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${convertStringToHtml(addressSpreadOut)}</a>`;
+  } else {
+    content += addressSpreadOut;
+  }
+  theHTML += getToggleButton(content, label);
+  progress.innerHTML = theHTML;
 }
 
-function recordResult(resultText, resultSpan){
-  if (resultSpan === null || resultSpan === undefined){
+function recordResult(resultText, resultSpan) {
+  if (resultSpan === null || resultSpan === undefined) {
     return;
   }
-  if (typeof resultSpan === "string"){
+  if (typeof resultSpan === "string") {
     resultSpan = document.getElementById(resultSpan);
   }
-  resultSpan.innerHTML = escapeHtml(resultText);
+  resultSpan.innerHTML = resultText;
 }
 
 /**
@@ -43,11 +99,6 @@ function recordResult(resultText, resultSpan){
  *
  * inputObject.service: if url is missing, this is appended to the default server name and used
  *   in place of inputObject.url. If inputObject.url is specified, this argument is ignored.
- *
- * inputObject.authorization: Authorization token.
- *   If you omit it (undefined) or pass null, the function will automatically
- *   use globalVars.getAuthenticationToken().
- *   If you pass the empty string "", no authorization token will be passed.
  *
  * inputObject.callback: function to callback. The function will be passed on
  *   as arguments the received result.
@@ -65,85 +116,68 @@ function recordResult(resultText, resultSpan){
  *   but otherwise non-processed final result.
  *   Pass null or undefined if you don't want to show the result.
  */
-function submitGET(inputObject){
+function submitGET(inputObject) {
   var theAddress = inputObject.url;
-  if (theAddress === undefined || theAddress === null){
-    theAddress = `${globalVars.serverInfo.imappServer}${inputObject.service}`;
-  }
   var progress = inputObject.progress;
   var result = inputObject.result;
   var callback = inputObject.callback;
-  var callbackArguments = inputObject.callbackArguments;
   var xhr = new XMLHttpRequest();
-  var authorization = inputObject.authorization;
-  if (authorization === null || authorization === undefined){
-    authorization = globalVars.getAuthenticationToken();
-    if (authorization === null || authorization === undefined){
-      authorization = "";
-    }
-  }
-  recordProgressStarted(progress, theAddress);
+  recordProgressStarted(progress, theAddress, false, (new Date()).getTime());
   xhr.open('GET', theAddress, true);
   xhr.setRequestHeader('Accept', 'text/html');
-  if (authorization !== ""){
-    xhr.setRequestHeader('Authorization', authorization);
-  }
   xhr.onload = function () {
-    recordProgressDone(progress);
+    recordProgressDone(progress, (new Date()).getTime());
     recordResult(xhr.responseText, result);
-    if (callback !== undefined && callback !== null){
-      callback(xhr.responseText, result, callbackArguments);
+    if (callback !== undefined && callback !== null) {
+      callback(xhr.responseText, result);
     }
   };
   xhr.send();
 }
 
-var GlobalSubmitStringAsMainInputCounter = 0;
-function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus)
-{ var spanOutput = document.getElementById(idOutput);
-  if (spanOutput === null)
-  { spanOutput = document.createElement('span');
+function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus) {
+  var spanOutput = document.getElementById(idOutput);
+  if (spanOutput === null) {
+    spanOutput = document.createElement('span');
+    spanOutput.innerHTML = `<span style ='color:red'> ERROR: span with id ${idOutput} MISSING! </span>`;
     document.body.appendChild(spanOutput);
-    spanOutput.innerHTML = "<span style='color:red'> ERROR: span with id " + idOutput + "MISSING! </span>";
   }
   var https = new XMLHttpRequest();
-  var theAddress = "/cgi-bin/calculator";
-  https.open("POST", "/cgi-bin/calculator", true);
+  https.open("POST", pathnames.urls.calculatorAPI, true);
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-  if (idStatus === undefined)
+  if (idStatus === undefined) {
     idStatus = idOutput;
-  var statusSpan = document.getElementById(idStatus);
-  timeOutCounter = 0;
-  GlobalSubmitStringAsMainInputCounter ++;
-  var addressDetailsIndicatorID = "addressDetailsID" + GlobalSubmitStringAsMainInputCounter;
-  var tranmissionIndicatorID = "transmissionIndicatorID" + GlobalSubmitStringAsMainInputCounter;
-  var postRequest = "<br>POST " + theAddress + "<br>" + inputParams;
-  var stringSwitchMenu = "switchMenu('" + addressDetailsIndicatorID + "');";
-  statusSpan.innerHTML = "<button style = 'background:none; border:0; cursor:pointer' id='" +
-  tranmissionIndicatorID + "' onclick = '" + stringSwitchMenu + "'>Connection details</button>" +
-  "<span style='display:none' id='" + addressDetailsIndicatorID + "'>" + postRequest + "</span>";
-  var buttonHandle = document.getElementById(tranmissionIndicatorID);
-  var lastRequestCounter = GlobalSubmitStringAsMainInputCounter;
-  https.onload = function()
-  { if (lastRequestCounter !== GlobalSubmitStringAsMainInputCounter)
-    { statusSpan.innerHTML += "<br><span style='color:red'><b>Old request number " + lastRequestCounter + " just received, output suppressed.</b></span>"
-      return;
-    }
-    buttonHandle.innerHTML = "<span style='color:green'><b>Received</b></span>";
-    spanOutput.innerHTML = https.responseText;
-    if (onLoadFunction !== undefined && onLoadFunction !== null && onLoadFunction !== 0)
-      onLoadFunction(idOutput);
   }
-  buttonHandle.innerHTML = "<span style='color:orange'><b>Sent</b></span>";
+  timeOutCounter = 0;
+
+  var postRequest = `POST ${pathnames.urls.calculatorAPI}<br>message: ${miscellaneous.shortenString(inputParams, 200)}`;
+  recordProgressStarted(idStatus, postRequest, true, (new Date()).getTime());
+
+  https.onload = function() { 
+    recordProgressDone(idStatus, (new Date()).getTime());
+    spanOutput.innerHTML = https.responseText;
+    if (onLoadFunction !== undefined && onLoadFunction !== null && onLoadFunction !== 0) {
+      onLoadFunction(idOutput);
+    }
+  }
   ////////////////////////////////////////////
   https.send(inputParams);
   ////////////////////////////////////////////
 }
 
-function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus){
-  var inputParams='';
-  inputParams += 'request=' + requestType + '&';
-  inputParams += '&mainInput=' + encodeURIComponent(theString);
+function getQueryStringSubmitStringAsMainInput(theString, requestType) {
+  var inputParams = '';
+  var thePage = window.calculator.mainPage;
+  inputParams += `${pathnames.urlFields.request}=${requestType}&`;
+  inputParams += `${pathnames.urlFields.mainInput}=${encodeURIComponent(theString)}&`;
+  if (thePage.flagDebug === true) {
+    inputParams += `${pathnames.urlFields.debugFlag}=true&`;
+  }
+  return inputParams;
+}
+
+function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
+  var inputParams = getQueryStringSubmitStringAsMainInput(theString, requestType);
   submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);
 }
 
@@ -152,78 +186,114 @@ var isFinished = false;
 var timeIncrementInTenthsOfSecond = 20; //measured in tenths of a second\n";
 var timeOutCounter = 0; //measured in tenths of a second\n";
 var currentWorkerNumber = - 1;
-function progressReport()
-{ if (isFinished)
+function progressReport() { 
+  if (isFinished) {
     return;
+  }
   clearTimeout(this.timeoutID);
   var progReport = document.getElementById("idProgressReport");
   var requestStatus = document.getElementById("idProgressReportRequestStatus");
-  var progReportTimer = document.getElementById("idProgressReportTimer");
-  if (isPaused)
+  var progressReportTimer = document.getElementById("idProgressReportTimer");
+  if (isPaused) {
     return;
-  progReportTimer.innerHTML = "<hr>Refreshing every " + timeIncrementInTenthsOfSecond / 10 +
-  " second(s). Client time: ~" + Math.floor(timeOutCounter / 10) + " second(s)<br>";
+  }
+  var progressReportContent = "";
+  progressReportContent += `<hr>Refreshing every ${timeIncrementInTenthsOfSecond / 10}`;
+  progressReportContent += ` second(s). Client time: ~ ${Math.floor(timeOutCounter / 10)} second(s)<br>`;
+  progressReportTimer.innerHTML = progressReportContent;
   timeOutCounter += timeIncrementInTenthsOfSecond;
-  var sURL  = "/cgi-bin/calculator?request=indicator&mainInput=" + currentWorkerNumber;
+  var sURL  = `${pathnames.urls.calculatorAPI}?request=indicator&mainInput=${currentWorkerNumber}`;
   var https = new XMLHttpRequest();
   https.open("GET", sURL, true);
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   https.onload = function() {
-    newReportString= https.responseText;
-    if (https.responseText === "finished")
-    { isFinished = true;
-      requestStatus.innerHTML = "<span style='color:green'><b>Computation finished.</b></span>";
+    newReportString = https.responseText;
+    if (https.responseText === "finished") { 
+      isFinished = true;
+      requestStatus.innerHTML = "<span style ='color:green'><b>Computation finished.</b></span>";
       return;
     }
-    if (https.responseText !== "")
-    { progReport.innerHTML = newReportString + "<hr>";
+    if (https.responseText !== "") { 
+      progReport.innerHTML = `${newReportString}<hr>`;
       requestStatus.innerHTML = '';
-    } else
-      requestStatus.innerHTML = "<span style='color:red'><b>Empty response</b></span>";
+    } else {
+      requestStatus.innerHTML = "<span style ='color:red'><b>Empty response</b></span>";
+    }
   }
   ////////////////////////////////////////////
-  requestStatus.innerHTML = "<span style='color:orange'><b>Request sent</b></span>";
+  requestStatus.innerHTML = "<span style ='color:orange'><b>Request sent</b></span>";
   https.send(null);
-    this.timeoutID = window.setTimeout("progressReport()", timeIncrementInTenthsOfSecond * 100);
+  this.timeoutID = window.setTimeout("progressReport()", timeIncrementInTenthsOfSecond * 100);
 }
 
-function SendTogglePauseRequest()
-{ if (isFinished)
+function SendTogglePauseRequest() { 
+  if (isFinished) {
     return;
+  }
   var requestStatus = document.getElementById("idProgressReportRequestStatus");
   var pauseRequest = new XMLHttpRequest();
-  var pauseURL = "/cgi-bin/calculator?request=pause&mainInput=" + currentWorkerNumber;
+  var pauseURL = `${pathnames.urls.calculatorAPI}?request=pause&mainInput=${currentWorkerNumber}`;
   pauseRequest.open("GET", pauseURL, true);
   pauseRequest.onload = function() {
-    if (pauseRequest.status !== 200)
+    if (pauseRequest.status !== 200) {
       return;
+    }
     requestStatus.innerHTML = pauseRequest.responseText;
-    if (pauseRequest.responseText === "paused")
+    if (pauseRequest.responseText === "paused") {
       isPaused = true;
-    if (pauseRequest.responseText === "unpaused")
+    }
+    if (pauseRequest.responseText === "unpaused") {
       isPaused = false;
-    if (isPaused)
+    }
+    if (isPaused) {
       document.getElementById("idButtonSendTogglePauseRequest").innerHTML = "Continue";
-    else
+    } else {
       document.getElementById("idButtonSendTogglePauseRequest").innerHTML = "Pause";
+    }
     document.getElementById("idProgressReportRequestStatus").innerHTML = pauseRequest.responseText;
-    if (!isPaused)
+    if (!isPaused) {
       progressReport();
+    }
   };
   pauseRequest.send(null);
 }
 
-function submitCalculatorInputOnEnter()
-{ if (event.keyCode !== 13 || !(event.shiftKey))
-    return;
+var submissionCalculatorCounter = 0;
+function calculatorLinkClickHandler() {
+  window.calculator.mainPage.loadSettings(this.href.split('#')[1]); 
   submitCalculatorComputation();
-  event.preventDefault();
 }
 
-function submitCalculatorComputation()
-{ submitStringAsMainInput(
-    document.getElementById('mainInputID').value,
-    'calculatorOutput', 'compute', onLoadDefaultFunction,
-    'mainComputationStatus'
+function submitCalculatorComputation() {
+  var result = "";
+  var thePage = window.calculator.mainPage;
+  var calculatorInput = document.getElementById("mainInputID").value;
+  if (calculatorInput === thePage.calculatorInputLastSubmitted) {
+    return;
+  }
+  thePage.calculatorInputLastSubmitted = calculatorInput;
+  var calculatorInputEncoded = encodeURIComponent(calculatorInput);
+  var theJSON = {
+    calculatorRequest: "calculatorOutput",
+    calculatorInput : calculatorInputEncoded,
+    currentPage: thePage.pages.calculator.name
+  };
+  var theId = `submitCalculatorLink${submissionCalculatorCounter}`;
+  result += `<a href = '#${encodeURIComponent(JSON.stringify(theJSON))}' id = "${theId}">Link to your input</a>`;
+  document.getElementById("spanComputationLink").innerHTML = result;
+  theAnchor = document.getElementById(theId); 
+  theAnchor.addEventListener('click', calculatorLinkClickHandler.bind(theAnchor));
+  submitStringAsMainInput(
+    document.getElementById("mainInputID").value,
+    "calculatorOutput", 
+    "compute", 
+    thePage.defaultOnLoadInjectScriptsAndProcessLaTeX.bind(thePage),
+    "mainComputationStatus"
   );
+}
+
+module.exports = {
+  submitCalculatorComputation,
+  submitGET,
+  doToggleContent,
 }

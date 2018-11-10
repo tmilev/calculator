@@ -7,15 +7,15 @@ const initializeButtons = require('./initialize_buttons');
 
 function selectCurrentProblem(problemIdURLed, exerciseType) {
   var thePage = window.calculator.mainPage;
-  thePage.storage.currentCourse.currentProblemId.setAndStore(problemIdURLed);
-  thePage.storage.currentCourse.fileName.setAndStore(decodeURIComponent(problemIdURLed));
-  thePage.storage.currentCourse.exerciseType.setAndStore(exerciseType);
+  thePage.storage.variables.currentCourse.currentProblemId.setAndStore(problemIdURLed);
+  thePage.storage.variables.currentCourse.fileName.setAndStore(decodeURIComponent(problemIdURLed));
+  thePage.storage.variables.currentCourse.exerciseType.setAndStore(exerciseType);
   var theProblem = thePage.getCurrentProblem();
   theProblem.flagForReal = false;
   if (exerciseType === pathnames.urlFields.scoredQuizJSON) {
     theProblem.flagForReal = true;
   }
-  //thePage.storage.currentCourse.request = exerciseType;
+  //thePage.storage.variables.currentCourse.request = exerciseType;
   thePage.pages.problemPage.flagLoaded = false;
   thePage.selectPage(thePage.pages.problemPage.name);
 }
@@ -92,7 +92,7 @@ function Problem(problemData, inputParentIdURLed) {
 
 function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   var thePage = window.calculator.mainPage;
-  var currentCourse = thePage.storage.currentCourse; 
+  var currentCourse = thePage.storage.variables.currentCourse; 
   var exerciseType = currentCourse.exerciseType.getValue();
   if (exerciseType === "" || exerciseType === null || exerciseType === undefined) {
     exerciseType = pathnames.urlFields.exerciseJSON;
@@ -118,8 +118,8 @@ Problem.prototype.getAppAnchorRequestFileCourseTopics = function(isScoredQuiz) {
     currentPage: thePage.pages.problemPage.name,
     exerciseType: theExerciseType,
     fileName: this.fileName,
-    courseHome: thePage.storage.currentCourse.courseHome.getValue(),
-    topicList: thePage.storage.currentCourse.topicList.getValue()
+    courseHome: thePage.storage.variables.currentCourse.courseHome.getValue(),
+    topicList: thePage.storage.variables.currentCourse.topicList.getValue()
   };
   return encodeURIComponent(JSON.stringify(requestJSON));
 }
@@ -128,8 +128,8 @@ Problem.prototype.getCalculatorURLFileCourseTopics = function() {
   var thePage = window.calculator.mainPage;
   var result = "";
   result += `fileName=${this.fileName}&`;
-  result += `courseHome=${thePage.storage.currentCourse.courseHome.getValue()}&`;
-  result += `topicList=${thePage.storage.currentCourse.topicList.getValue()}&`;
+  result += `courseHome=${thePage.storage.variables.currentCourse.courseHome.getValue()}&`;
+  result += `topicList=${thePage.storage.variables.currentCourse.topicList.getValue()}&`;
   return result;
 }
 
@@ -287,7 +287,7 @@ Problem.prototype.toStringDeadline = function() {
     return "Deadlines";
   }
   if (thePage.user.hasInstructorRights() && thePage.studentView()) {
-    var sectionIndex = thePage.storage.currentSectionComputed.getValue();
+    var sectionIndex = thePage.storage.variables.currentSectionComputed.getValue();
     this.deadlineString = this.deadlines[sectionIndex];
   }
   if (this.deadlineString === "" || this.deadlineString === null || this.deadlineString === undefined) {
@@ -611,8 +611,8 @@ function initializeProblemWeightsAndDeadlines() {
 function writeEditCoursePagePanel() {
   var thePanel = "";
   var thePage = window.calculator.mainPage;
-  thePanel += editPage.getEditPanel(thePage.storage.currentCourse.courseHome.getValue());
-  thePanel += editPage.getEditPanel(thePage.storage.currentCourse.topicList.getValue());
+  thePanel += editPage.getEditPanel(thePage.storage.variables.currentCourse.courseHome.getValue());
+  thePanel += editPage.getEditPanel(thePage.storage.variables.currentCourse.topicList.getValue());
   if (
     thePage.theTopics.topicBundleFile !== undefined && 
     thePage.theTopics.topicBundleFile !== null &&
@@ -670,7 +670,7 @@ function updateProblemPageCallback(input, outputComponent) {
   }
   var currentProblem = thePage.getCurrentProblem();
   if (currentProblem === null || currentProblem === undefined) {
-    thePage.problems[thePage.storage.currentCourse.currentProblemId.getValue()] = new Problem(theProblem, null);
+    thePage.problems[thePage.storage.variables.currentCourse.currentProblemId.getValue()] = new Problem(theProblem, null);
     currentProblem = thePage.getCurrentProblem();
   }
   currentProblem.decodedProblem = decodeURIComponent(theProblem["problemContent"]);
@@ -726,7 +726,7 @@ function updateProblemPage() {
   } else {
     theURL = getCalculatorURLRequestFileCourseTopicsFromStorage();
   }
-  //console.log("Current course: " + JSON.stringify(thePage.storage.currentCourse));
+  //console.log("Current course: " + JSON.stringify(thePage.storage.variables.currentCourse));
   submitRequests.submitGET({
     url: theURL,
     callback: updateProblemPageCallback,

@@ -2958,8 +2958,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before after loading problem list");
-  outHeadPt2 << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
-  << HtmlRoutines::GetJavascriptMathjax();
+  outHeadPt2 << HtmlRoutines::GetJavascriptMathjax();
 //  else
 //    out << " no date picker";
   //stOutput << "DEBUG: theInterpreter.flagPlotNoControls: " << theInterpreter.flagPlotNoControls;
@@ -3320,88 +3319,6 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
     << "'"
     << ");"
     << "\" >Clone</button> <span id =\"" << spanCloningAttemptResultID << "\"></span>";
-  return out.str();
-}
-
-std::string HtmlRoutines::GetJavascriptSubmitURLString()
-{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptSubmitURLString");
-  std::stringstream out;
-  out
-  << "var GlobalSubmitStringAsMainInputCounter = 0;\n"
-  << "function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus)\n"
-  << "{ var spanOutput = document.getElementById(idOutput);\n"
-  << "  if (spanOutput == null)\n"
-  << "  { spanOutput = document.createElement('span');\n"
-  << "    document.body.appendChild(spanOutput);\n"
-  << "    spanOutput.innerHTML= \"<span style ='color:red'> ERROR: span with id \" + idOutput + \"MISSING! </span>\";\n"
-  << "  }\n";
-
-  ////////////////////////////////////////////
-  out
-  << "  var https = new XMLHttpRequest();\n"
-  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutable << "\", true);\n"
-  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
-  << "  if (idStatus ===undefined)\n"
-  << "    idStatus = idOutput;\n"
-  << "  var statusSpan = document.getElementById(idStatus);\n "
-  << "  timeOutCounter = 0;"
-  << "  GlobalSubmitStringAsMainInputCounter ++;\n"
-  << "  var addressDetailsIndicatorID=\"addressDetailsID\"+GlobalSubmitStringAsMainInputCounter;\n"
-  << "  var tranmissionIndicatorID=\"transmissionIndicatorID\"+GlobalSubmitStringAsMainInputCounter;\n"
-  << "  var postRequest ="
-  << "'<br>POST "
-  << theGlobalVariables.DisplayNameExecutable
-  << "'+\n '<br>'"
-  << "+\n inputParams;\n"
-  << "  var stringSwitchMenu='switchMenu(\\\"'+"
-  << "  addressDetailsIndicatorID+'\\\");';\n"
-  << "  statusSpan.innerHTML="
-  << "\"<button style ='background:none; border:0; cursor:pointer' id ='\"+tranmissionIndicatorID + \"'' "
-  << "onclick='\"+ stringSwitchMenu+\"'>Connection details</button>\""
-  << "+ \"<span style ='display:none' id ='\"+ addressDetailsIndicatorID + \"'>\"+"
-  << "postRequest + \"</span>\""
-  << ";\n"
-  << "  var buttonHandle = document.getElementById(tranmissionIndicatorID);"
-  << "  var lastRequestCounter = GlobalSubmitStringAsMainInputCounter;\n"
-  << "  https.onload = function()\n"
-  << "  { if (lastRequestCounter!== GlobalSubmitStringAsMainInputCounter)\n"
-  << "    { statusSpan.innerHTML+=\"<br><span style ='color:red'><b>Old request number \" + lastRequestCounter +\" just received, output suppressed.</b></span>\" \n"
-  << "      return;\n"
-  << "    }\n"
-  << "    buttonHandle.innerHTML=\"<span style ='color:green'><b>Received</b></span>\";\n"
-  << "    spanOutput.innerHTML=https.responseText;\n"
-  << "    if (onLoadFunction !==undefined && onLoadFunction !== null && onLoadFunction !== 0)\n"
-  << "      onLoadFunction(idOutput);\n"
-  << "  }\n"
-  << " buttonHandle.innerHTML=\"<span style ='color:orange'><b>Sent</b></span>\";\n"
-  ////////////////////////////////////////////
-  << "  https.send(inputParams);\n"
-  /////////////////or/////////////////////////
-  //  << "  https.send();\n"
-  ////////////////////////////////////////////
-  << "}\n";
-  return out.str();
-}
-
-std::string HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
-{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile");
-  std::stringstream out;
-  out
-  << "<script type =\"text/javascript\"> \n";
-  out << "\"use srict\";\n";
-  out << HtmlRoutines::GetJavascriptSubmitURLString()
-  << "function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus){\n"
-  << "  var inputParams ='';\n"
-  << "  inputParams+='request='+requestType +'&';\n"
-  << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << "';\n"
-//  << "  inputParams+='&debugFlag= true';\n"
-  << "  inputParams+='&fileName=" << theGlobalVariables.GetWebInput("fileName") << "';\n"
-  << "  inputParams+='&topicList=" << theGlobalVariables.GetWebInput("topicList") << "';\n"
-  << "  inputParams+='&courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "';\n"
-  << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
-  << "  submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);\n"
-  << "}\n"
-  << "</script>";
   return out.str();
 }
 

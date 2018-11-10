@@ -509,7 +509,7 @@ std::string HtmlInterpretation::GetOnePageJS(bool appendBuildHash)
   std::stringstream out;
   std::stringstream errorStream;
   if (!FileOperations::LoadFileToStringVirtual
-       ("/calculator-html/new/index.html", theInterpretation.htmlRaw, false, false, &errorStream))
+       ("/calculator-html/index.html", theInterpretation.htmlRaw, false, false, &errorStream))
   { out << "<html><body><b>Failed to load the application file. "
     << "Further comments follow. " << errorStream.str() << "</body></html>";
     return out.str();
@@ -547,7 +547,7 @@ std::string HtmlInterpretation::GetApp(bool appendBuildHash)
   std::stringstream out;
   std::stringstream errorStream;
   if (!FileOperations::LoadFileToStringVirtual
-       ("/calculator-html/new/index.html", theInterpretation.htmlRaw, false, false, &errorStream))
+       ("/calculator-html/index.html", theInterpretation.htmlRaw, false, false, &errorStream))
   { out << "<html><body><b>Failed to load the application file. "
     << "Further comments follow. " << errorStream.str() << "</body></html>";
     return out.str();
@@ -996,7 +996,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   //  << HtmlRoutines::GetLaTeXProcessingJavascript()
   //  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
-  << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
+  //<< HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << HtmlRoutines::GetCSSLinkCalculator()
   << "<style type =\"text/css\" media =\"screen\">\n"
   << "    #editor { \n"
@@ -1826,7 +1826,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   << HtmlRoutines::GetCSSLinkCalculator()
   << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << HtmlRoutines::GetJavascriptSubmitEmails()
-  << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
+  //<< HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "</head>"
   << "<body onload =\"loadSettings();\">\n";
   bool isOK = theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();

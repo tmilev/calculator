@@ -1,5 +1,10 @@
 "use strict";
 const ids = require('./ids_dom_elements');
+const pathnames = require('./pathnames');
+const submitRequests = require('./submit_requests');
+function ForgotLogin() {
+
+}
 
 function callbackForgotLogin(input, output) {
   if (typeof output === "string") {
@@ -9,14 +14,15 @@ function callbackForgotLogin(input, output) {
 }
 
 var recaptchaIdForForgotLogin = null;
-function forgotLoginPage() {
+ForgotLogin.prototype.forgotLoginPage = function() {
+  var thePage = window.calculator.mainPage;
   if (recaptchaIdForForgotLogin === null) {
     recaptchaIdForForgotLogin = grecaptcha.render("recaptchaForgotPassword", {sitekey : "6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql"});
   }
   thePage.selectPage(thePage.pages.forgotLogin.name);
 }
 
-function submitForgotPassword() {  
+ForgotLogin.prototype.submitForgotPassword = function() {  
   if (grecaptcha === undefined || grecaptcha === null) { 
     document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>";
     return false;
@@ -36,4 +42,10 @@ function submitForgotPassword() {
     result: "forgotLoginResult",
     progress: ids.domElements.spanProgressReportGeneral
   });
+}
+
+var forgotLogin = new ForgotLogin();
+
+module.exports = {
+  forgotLogin
 }

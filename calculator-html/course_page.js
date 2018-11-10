@@ -107,7 +107,7 @@ function selectCurrentCoursePage() {
     topicRequest = "templateJSON";
   }
   var urlObject = { 
-    currentPage: thePage.storage.currentPage.getValue()
+    currentPage: thePage.storage.variables.currentPage.getValue()
   };
   location.href = `${pathnames.urls.app}#${encodeURIComponent(JSON.stringify(urlObject))}`;
   submitRequests.submitGET({

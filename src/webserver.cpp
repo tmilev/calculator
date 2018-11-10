@@ -1386,38 +1386,6 @@ std::string WebWorker::GetDatabaseDeleteOneItem()
   return commentsStream.str();
 }
 
-std::string WebWorker::GetDatabasePage()
-{ MacroRegisterFunctionWithName("WebWorker::GetDatabasePage");
-  std::stringstream out;
-  out << "<html>"
-  << "<head>"
-  << HtmlRoutines::GetCSSLinkCalculator()
-  << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
-  << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile();
-
-  std::string currentTable =
-  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"), false);
-  //  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << "</calculatorNavigation>\n";
-  std::stringstream dbOutput;
-#ifdef MACRO_use_MongoDB
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
-    dbOutput << "Browsing database allowed only for logged-in admins.";
-  else
-    dbOutput << "Database: " << DatabaseStrings::theDatabaseName << "<br>"
-    << DatabaseRoutinesGlobalFunctionsMongo::ToHtmlDatabaseCollection(currentTable);
-#else
-  dbOutput << "<b>Database not available. </b>";
-#endif // MACRO_use_MongoDB
-  out << HtmlRoutines::GetJavascriptDatabaseRoutinesLink();
-  out << "</head>"
-  << "<body onload =\"loadSettings();\">\n";
-  out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
-  out << dbOutput.str();
-  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  out << "</body></html>";
-  return out.str();
-}
-
 bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments)
 { MacroRegisterFunctionWithName("WebWorker::ExtractArgumentsFromCookies");
   MapLisT<std::string, std::string, MathRoutines::hashString> newlyFoundArgs;
@@ -3170,7 +3138,6 @@ int WebWorker::ProcessCalculator()
   stOutput << HtmlRoutines::GetCSSLinkCalculator();
   stOutput << HtmlRoutines::GetJavascriptHideHtmlWithTags();
   stOutput << HtmlRoutines::GetJavascriptStandardCookiesWithTags();
-  stOutput << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile();
   stOutput << HtmlRoutines::GetJavascriptCanvasGraphicsLink();
   stOutput << HtmlRoutines::GetJavascriptAutocompleteLink();
   stOutput << HtmlRoutines::GetJavascriptInitializeButtonsLink();
@@ -3517,13 +3484,6 @@ int WebWorker::ProcessDatabaseJSON()
   return 0;
 }
 
-int WebWorker::ProcessDatabase()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessDatabase");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << this->GetDatabasePage();
-  return 0;
-}
-
 int WebWorker::ProcessDatabaseDeleteEntry()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseDeleteEntry");
   this->SetHeaderOKNoContentLength("");
@@ -3782,7 +3742,6 @@ std::string WebWorker::GetForgotLoginPage()
 { MacroRegisterFunctionWithName("WebWorker::GetForgotLoginPage");
   std::stringstream out;
   out << "<html>"
-  << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << HtmlRoutines::GetJavascriptHideHtmlWithTags()
   << HtmlRoutines::GetCSSLinkCalculator();
   out << HtmlInterpretation::GetJavascriptCaptcha();
@@ -3815,7 +3774,6 @@ std::string WebWorker::GetSignUpPage()
 { MacroRegisterFunctionWithName("WebWorker::GetSignUpPage");
   std::stringstream out;
   out << "<html>"
-  << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << HtmlRoutines::GetJavascriptHideHtmlWithTags()
   << HtmlRoutines::GetCSSLinkCalculator();
   out << "<script language =\"javascript\">\n";
@@ -4134,11 +4092,7 @@ int WebWorker::ServeClient()
       //stOutput << "spoofhostname: " << theGlobalVariables.GetWebInput("spoofHostName");
       theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", theGlobalVariables.hostNoPort);
     }
-  //stOutput << "DEBUG: got to here pt 4.";
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-      theGlobalVariables.userCalculatorRequestType == "database")
-    return this->ProcessDatabase();
-  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType == "databaseJSON")
     return this->ProcessDatabaseJSON();
   else if (theGlobalVariables.flagLoggedIn &&
@@ -5257,7 +5211,7 @@ void WebServer::WriteVersionJSFile()
   out << "module.exports = {\nserverInformation,\n};\n";
   std::fstream theFileStream;
   FileOperations::OpenFileCreateIfNotPresentVirtual
-  (theFileStream, "/calculator-html/new/server_information.js", false, true, false, false);
+  (theFileStream, "/calculator-html/server_information.js", false, true, false, false);
   theFileStream << out.str();
 
 }
@@ -5965,7 +5919,7 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
 
   folderSubstitutionsNonSensitive.SetKeyValue
-  ("/MathJax-2.7-latest/config/mathjax-calculator-setup.js", "./calculator-html/new/mathjax-calculator-setup.js");//<-coming from web server
+  ("/MathJax-2.7-latest/config/mathjax-calculator-setup.js", "./calculator-html/mathjax-calculator-setup.js");//<-coming from web server
   folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");//<-coming from webserver
 
   folderSubstitutionsNonSensitive.SetKeyValue("/LaTeX-materials/", "../LaTeX-materials/");

@@ -39,8 +39,8 @@ var oldUserRole;
 function logout() {
   var thePage = window.calculator.mainPage;
   oldUserRole = thePage.user.role;
-  thePage.storage.user.name.setAndStore("");
-  thePage.storage.user.authenticationToken.setAndStore("");
+  thePage.storage.variables.user.name.setAndStore("");
+  thePage.storage.variables.user.authenticationToken.setAndStore("");
   hideLogoutButton();
   thePage.user.hideProfilePicture();
   thePage.user.role = "";
@@ -141,8 +141,8 @@ function loginWithServerCallback(incomingString, result) {
     if (loginErrorMessage!== undefined && loginErrorMessage !== "") {
       document.getElementById("spanLoginStatus").innerHTML = decodeURIComponent(loginErrorMessage);
     }
-    thePage.storage.user.authenticationToken.setAndStore("");
-    thePage.storage.user.name.setAndStore("");
+    thePage.storage.variables.user.authenticationToken.setAndStore("");
+    thePage.storage.variables.user.name.setAndStore("");
     thePage.user.role = "";
     thePage.user.flagLoggedIn = false;
     showLoginCalculatorButtons();
@@ -155,7 +155,7 @@ function loginWithServerCallback(incomingString, result) {
 function onGoogleSignIn(googleUser) { 
   var theToken = googleUser.getAuthResponse().id_token;
   thePage.user.googleToken = theToken;
-  thePage.storage.user.name.setAndStore("");
+  thePage.storage.variables.user.name.setAndStore("");
   try {
     thePage.user.googleProfile = window.calculator.jwt.decode(theToken);
     thePage.showProfilePicture();
@@ -206,7 +206,7 @@ function hideLoginCalculatorButtons() {
   var thePage = window.calculator.mainPage;
   document.getElementById("divLoginCalculatorPanel").classList.remove("divVisible");
   document.getElementById("divLoginCalculatorPanel").classList.add("divInvisible");
-  document.getElementById("divLoginPanelUsernameReport").innerHTML = thePage.storage.user.name.value;
+  document.getElementById("divLoginPanelUsernameReport").innerHTML = thePage.storage.variables.user.name.value;
   document.getElementById("divLoginPanelUsernameReport").classList.remove("divInvisible");
   document.getElementById("divLoginPanelUsernameReport").classList.add("divVisible");
 }
@@ -234,7 +234,7 @@ function hideLogoutButton() {
 }
 
 function logoutGoogle() {
-  thePage.storage.user.googleToken.setAndStore("");
+  thePage.storage.variables.user.googleToken.setAndStore("");
   thePage.user.googleProfile = {};
   if (gapi !== undefined && gapi !== null) {
     gapi.auth2.getAuthInstance().signOut();

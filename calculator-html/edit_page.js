@@ -71,7 +71,7 @@ function storeEditedPage() {
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
   theURL += submitRequests.getQueryStringSubmitStringAsMainInput(editor.getValue(), pathnames.requestModifyPage);
-  theURL += `${pathnames.fileName}=${thePage.storage.editor.currentlyEditedPage.getValue()}&`;
+  theURL += `${pathnames.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}&`;
   //console.log("DEBUG: about to submit: " + theURL); 
   submitRequests.submitGET({
     url: theURL,
@@ -107,13 +107,13 @@ function selectEditPageCallback(input, outputComponent) {
 function selectEditPage(currentlyEditedPage) {
   var thePage = window.calculator.mainPage;
   if (currentlyEditedPage === undefined || currentlyEditedPage === null) { 
-    currentlyEditedPage = thePage.storage.editor.currentlyEditedPage.getValue();
+    currentlyEditedPage = thePage.storage.variables.editor.currentlyEditedPage.getValue();
   }
   if (currentlyEditedPage === undefined || currentlyEditedPage === null) { 
     currentlyEditedPage = "/coursesavailable/default.txt";
   }
-  thePage.storage.editor.currentlyEditedPage.setAndStore(currentlyEditedPage);
-  if (thePage.storage.currentPage.getValue() !== thePage.pages.editPage.name) {
+  thePage.storage.variables.editor.currentlyEditedPage.setAndStore(currentlyEditedPage);
+  if (thePage.storage.variables.currentPage.getValue() !== thePage.pages.editPage.name) {
     thePage.selectPage(thePage.pages.editPage.name);
     return;
   }
@@ -122,7 +122,7 @@ function selectEditPage(currentlyEditedPage) {
   theTopicTextArea.cols = currentlyEditedPage.length + 15;
 
   var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.request}=${pathnames.requestEditPage}&`;
-  theURL += `fileName=${thePage.storage.editor.currentlyEditedPage.getValue()}`;
+  theURL += `fileName=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}`;
   submitRequests.submitGET({
     url: theURL,
     callback: selectEditPageCallback

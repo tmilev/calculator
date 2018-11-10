@@ -105,8 +105,6 @@ public:
   static std::string GetJavascriptStandardCookiesWithTags();
   static std::string GetJavascriptHideHtmlWithTags();
   static std::string GetJavascriptSubmitEmails();
-  static std::string GetJavascriptSubmitMainInputIncludeCurrentFile();
-  static std::string GetJavascriptSubmitURLString();
   static std::string GetDatePickerJavascriptInit();
   static std::string GetJavascriptVariable(const std::string& theVar);
 

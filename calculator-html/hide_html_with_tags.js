@@ -16,3 +16,7 @@ function hideItem(obj) {
 function showItem(obj) { 
   document.getElementById(obj).style.display = "";
 }
+
+module.exports = {
+  switchMenu
+}

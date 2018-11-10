@@ -14,9 +14,10 @@ function submitAccountActivationRequestCallback(result, outputComponent) {
 }
 
 function submitActivateAccountRequest() {
+  var thePage = window.calculator.mainPage;
   var inputNewPassword = document.getElementById(ids.domElements.inputNewPasswordInActivationAccount).value;
   var inputNewPasswordReentered = document.getElementById(ids.domElements.inputReenteredPasswordInActivationAccount).value;
-  var userName = thePage.storage.user.name.getValue();
+  var userName = thePage.storage.variables.user.name.getValue();
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?request=changePassword&`;
   theURL += `newPassword=${encodeURIComponent(inputNewPassword)}&`;
@@ -31,13 +32,14 @@ function submitActivateAccountRequest() {
 }
 
 function submitDoActivateAccount() {
+  var thePage = window.calculator.mainPage;
   var inputNewPassword = document.getElementById(ids.domElements.inputNewPasswordInActivationAccount).value;
   var inputNewPasswordReentered = document.getElementById(ids.domElements.inputReenteredPasswordInActivationAccount).value;
-  var activationToken = thePage.storage.user.activationToken.getValue();
-  thePage.storage.user.activationToken.setAndStore("");
-  var userName = thePage.storage.user.name.getValue();
+  var activationToken = thePage.storage.variables.user.activationToken.getValue();
+  thePage.storage.variables.user.activationToken.setAndStore("");
+  var userName = thePage.storage.variables.user.name.getValue();
   var theURL = "";
-  var email = thePage.storage.user.email.getValue();
+  var email = thePage.storage.variables.user.email.getValue();
   theURL += `${pathnames.urls.calculatorAPI}?request=activateAccountJSON&`;
   theURL += `activationToken=${encodeURIComponent(activationToken)}&`;
   theURL += `email=${encodeURIComponent(email)}&`;
@@ -53,11 +55,12 @@ function submitDoActivateAccount() {
 }
 
 function updateAccountActivationPage() {
+  var thePage = window.calculator.mainPage;
   var emailSpan = document.getElementById(ids.domElements.spanCurrentActivationEmail);
   var usernameInput = document.getElementById(ids.domElements.spanUserIdInActivateAccountPage);
-  usernameInput.innerHTML = thePage.storage.user.name.getValue();
-  emailSpan.innerHTML = thePage.storage.user.email.getValue();
-  var activationToken = thePage.storage.user.activationToken.getValue();
+  usernameInput.innerHTML = thePage.storage.variables.user.name.getValue();
+  emailSpan.innerHTML = thePage.storage.variables.user.email.getValue();
+  var activationToken = thePage.storage.variables.user.activationToken.getValue();
   if (activationToken !== null && activationToken !== undefined && activationToken !== "") {
     submitDoActivateAccount();
   }
@@ -65,4 +68,5 @@ function updateAccountActivationPage() {
 
 module.exports = {
   updateAccountActivationPage,
+  submitActivateAccountRequest,
 }

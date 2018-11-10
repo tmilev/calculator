@@ -102,11 +102,11 @@ const std::string HtmlRoutines::GetJavascriptTopicListLink()
 }
 
 const std::string& HtmlRoutines::GetJavascriptCanvasGraphicSWithTags()
-{ return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/new/three-d.js");
+{ return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/three-d.js");
 }
 
 const std::string HtmlRoutines::GetJavascriptCanvasGraphicsLink()
-{ return HtmlRoutines::GetJavascriptLink("/calculator-html/new/three-d.js");
+{ return HtmlRoutines::GetJavascriptLink("/calculator-html/three-d.js");
 }
 
 const std::string& HtmlRoutines::GetJavascriptDatabaseRoutineSWithTags()
@@ -512,7 +512,7 @@ const std::string& HtmlRoutines::GetJavascriptMathjax()
     return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("MathJax");
   std::stringstream out;
   std::string mathjaxSetupScript = FileOperations::GetVirtualNameWithHash
-  ("/calculator-html/new/mathjax-calculator-setup.js");
+  ("/calculator-html/mathjax-calculator-setup.js");
   out << "<script type =\"text/javascript\">MathJaxSetupScriptURL=\"" << mathjaxSetupScript << "\"</script>";
   out << "<script type =\"text/javascript\" src =\"/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full"
 //  << ","

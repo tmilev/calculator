@@ -6169,7 +6169,7 @@ void WebWorker::SendAllBytesHttp()
   tv.tv_usec = 0; // Not init'ing this can cause strange errors
   int numTimesRunWithoutSending = 0;
   int timeOutInSeconds = 20;
-  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO,(void*)(&tv), sizeof(timeval));
+  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO, (void*)(&tv), sizeof(timeval));
   while (this->remainingBytesToSenD.size > 0)
   { if (theGlobalVariables.GetElapsedSeconds() - startTime > timeOutInSeconds)
     { logWorker << "WebWorker::SendAllBytes failed: more than " << timeOutInSeconds << " seconds have elapsed. "

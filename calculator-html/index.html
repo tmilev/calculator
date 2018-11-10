@@ -82,7 +82,7 @@ Browserifier.prototype.browserify = function() {
     if (!fileName.startsWith(expectedStart)) {
       continue;
     }
-    var fileEnd = fileName.slice(17);
+    var fileEnd = fileName.slice(expectedStart.length);
     newFileName = `./${fileEnd}`;
     this.sanitizedFileNameContents[newFileName] = theJSContent[fileName];
   }

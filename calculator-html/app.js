@@ -20,6 +20,7 @@ window.calculator = {
   accountActivation: null,
   manageAccounts: null,
   panels: null,
+  database: null,
 };
 
 //load globals:
@@ -40,6 +41,7 @@ window.calculator.hideHtmlWithTags = require('./hide_html_with_tags');
 window.calculator.accountActivation = require('./account_activation');
 window.calculator.manageAccounts = require('./manage_accounts');
 window.calculator.panels = require('./panels');
+window.calculator.database = require('./database');
 
 //initialize everything not initilized while loading:
 window.calculator.mainPage.initializeCalculatorPage();

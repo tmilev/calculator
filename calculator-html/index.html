@@ -173,7 +173,7 @@ function browserify() {
   <button class = "buttonSaveEdit" onclick = "storeEditedPage();">Save</button> 
   <span id = "spanSubmitEditPageReport"></span><br>
   <textarea id = "textareaTopicListEntry"></textarea>
-  <div id = "divEditorAce" onkeydown = "ctrlSPressAceEditorHandler(event);" name = "divEditorAce">
+  <div id = "divEditorAce" onkeydown = "window.calculator.editPage.ctrlSPressAceEditorHandler(event);" name = "divEditorAce">
   </div>
   </div>
 </div>
@@ -304,7 +304,7 @@ function browserify() {
   both educational and general mathematical software. 
 </div><!--divAboutPage-->
 <div id = "divDatabase" class = "divMainPage">
-  <button class = "buttonStandard" onclick = "updateDatabasePageResetCurrentTable();">Tables</button>
+  <button class = "buttonStandard" onclick = "window.calculator.database.updateDatabasePageResetCurrentTable();">Tables</button>
 <div id = "divDatabaseOutput"> </div>
 </div>
 <div id = "divAccount" class = "divMainPage">

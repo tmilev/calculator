@@ -1,5 +1,6 @@
 "use strict";
 const submitRequests = require('./submit_requests');
+const pathnames = require('./pathnames');
 
 var staticWordCompleter = {
   getCompletions: function(editor, session, pos, prefix, callback) {
@@ -90,7 +91,11 @@ function selectEditPageCallback(input, outputComponent) {
     }
     var editor = thePage.pages.editPage.editor;
     editor.$blockScrolling = Infinity;
-    editor.getSession().setValue(decodeURIComponent(parsedInput.content));
+    var incomingContent = "";
+    if (parsedInput.content !== null && parsedInput.content !== undefined) {
+      incomingContent = decodeURIComponent(parsedInput.content);
+    }
+    editor.getSession().setValue(incomingContent);
     editor.setTheme("ace/theme/chrome");
     editor.getSession().setMode("ace/mode/xml");
     editor.setOptions({
@@ -121,7 +126,7 @@ function selectEditPage(currentlyEditedPage) {
   theTopicTextArea.value = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
   theTopicTextArea.cols = currentlyEditedPage.length + 15;
 
-  var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.request}=${pathnames.requestEditPage}&`;
+  var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requestEditPage}&`;
   theURL += `fileName=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}`;
   submitRequests.submitGET({
     url: theURL,
@@ -132,5 +137,6 @@ function selectEditPage(currentlyEditedPage) {
 module.exports = {
   selectEditPage, 
   getEditPanel,
-  handleClone
+  handleClone,
+  ctrlSPressAceEditorHandler
 }

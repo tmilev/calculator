@@ -167,7 +167,10 @@ void GlobalVariables::initModifiableDatabaseFields()
   JSData toWrite;
   toWrite["universalSelector"] = DatabaseStrings::anyField;
   toWrite["modifiableFields"] = modifiableDataJSON;
-  outputFile << "var modifiableDatabaseData = " << toWrite.ToString(true) << ";";
+  outputFile << "//File automatically generated. Please do not modify.\n";
+  outputFile << "\"use strict\";\n";
+  outputFile << "var modifiableDatabaseData = " << toWrite.ToString(true) << ";\n";
+  outputFile << "module.exports = {modifiableDatabaseData}";
 }
 
 ProblemData::ProblemData()

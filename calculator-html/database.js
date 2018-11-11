@@ -2,6 +2,12 @@
 const submitRequests = require('./submit_requests');
 const ids = require('./ids_dom_elements');
 const pathnames = require('./pathnames');
+const jsonToHtml = require('./json_to_html');
+
+function clickDatabaseTable(currentCollection) {
+  window.calculator.mainPage.storage.variables.database.currentTable.setAndStore(currentCollection); 
+  updateDatabasePage();
+}
 
 function updateDatabasePageCallback(incoming, output) {
   try {
@@ -10,17 +16,16 @@ function updateDatabasePageCallback(incoming, output) {
     var theParsed = JSON.parse(incoming);
     var theOutput = document.getElementById("divDatabaseOutput");
     if ("rows" in theParsed) {
-      theOutput.innerHTML = getHtmlFromArrayOfObjects(theParsed.rows, {table: currentTable});
+      theOutput.innerHTML = jsonToHtml.getHtmlFromArrayOfObjects(theParsed.rows, {table: currentTable});
     } else {
       for (var counterCollection = 0; counterCollection < theParsed.collections.length; counterCollection ++) {
         var currentCollection = theParsed.collections[counterCollection]; 
         var linkHTML = "";
-        linkHTML += `<a href = "#" onclick = `;
-        linkHTML += `"thePage.storage.database.currentTable.setAndStore('${currentCollection}'); updateDatabasePage();"`;
-        linkHTML += `>${currentCollection}</a>`;
+        linkHTML += `<a href = "#" onclick = window.calculator.database.clickDatabaseTable('${currentCollection}')>`;
+        linkHTML += `${currentCollection}</a>`;
         theParsed.collections[counterCollection] = linkHTML;
       }
-      theOutput.innerHTML = getHtmlFromArrayOfObjects(theParsed.collections);
+      theOutput.innerHTML = jsonToHtml.getHtmlFromArrayOfObjects(theParsed.collections);
     }
   } catch (e) {
     console.log(`Error parsing calculator output. ${e}`);
@@ -36,7 +41,10 @@ function updateDatabasePageResetCurrentTable() {
 function updateDatabasePage() {
   var thePage = window.calculator.mainPage;
   var currentTable = thePage.storage.variables.database.currentTable.getValue();
-  var theUrl = `${pathnames.urls.calculatorAPI}?${pathnames.request}=${pathnames.requestDatabase}&${pathnames.databaseTable}=${currentTable}`;
+  var theUrl = "";
+  theUrl += `${pathnames.urls.calculatorAPI}?`;
+  theUrl += `${pathnames.urlFields.request}=${pathnames.urlFields.requestDatabase}&`;
+  theUrl += `${pathnames.urlFields.databaseTable}=${currentTable}&`;
   submitRequests.submitGET({
     url: theUrl,
     progress: ids.domElements.spanProgressReportGeneral,
@@ -45,5 +53,7 @@ function updateDatabasePage() {
 }
 
 module.exports = {
-  updateDatabasePage
+  updateDatabasePage,
+  clickDatabaseTable,
+  updateDatabasePageResetCurrentTable
 }

@@ -2,12 +2,13 @@
 const submitRequests = require('./submit_requests');
 const miscellaneous = require('./miscellaneous');
 const ids = require('./ids_dom_elements');
+const modifiableDatabaseData = require('./modifiable_database_fields').modifiableDatabaseData;
 
 function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
   if (typeof theDomComponent === "string") {
     theDomComponent = document.getElementById(theDomComponent);
   }
-  theDomComponent.innerHTML = getHtmlFromArrayOfObjects(inputJSON);
+  theDomComponent.innerHTML = jsonToHtml.getHtmlFromArrayOfObjects(inputJSON);
 }
 
 function deleteDatabaseItemCallback(input, output) {
@@ -85,7 +86,7 @@ function fitsPattern(currentLabels, selector, pattern) {
 }
 
 function getDeleteButtonFromLabels(theLabels, selector, containerLabel) {
-  return `<button onclick='deleteDatabaseItem("${containerLabel}", ${JSON.stringify(theLabels)}, ${JSON.stringify(selector)})'>Delete</button>`;
+  return `<button onclick='window.calculator.database.deleteDatabaseItem("${containerLabel}", ${JSON.stringify(theLabels)}, ${JSON.stringify(selector)})'>Delete</button>`;
 }
 
 var counterDatabaseTables = 0;
@@ -267,4 +268,9 @@ function getHtmlFromArrayOfObjects(input, selector) {
     result += inputJSON + "<br>";
   }
   return result;
+}
+
+module.exports = {
+  getHtmlFromArrayOfObjects,
+  deleteDatabaseItem
 }

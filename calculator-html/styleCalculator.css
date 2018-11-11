@@ -160,9 +160,11 @@ sectionSelection{
   color:green;
   width:60px;
 }
+
 .buttonAnswer:hover {
   background-color:#878787;
 }
+
 button.accordionLikeIndividual {
   display: inline;
   -moz-border-radius: 3px;
@@ -180,23 +182,9 @@ button.accordionLikeIndividual {
   font-size: medium;
   transition: 0.6s;
 }
+
 button.accordionLikeIndividual.active, button.accordionLikeIndividual:hover {
   background-color: #ddd;
-}
-.panelExpandable {
-  transition: 2s all;
-}
-.panelExpandableCollapsed {
-  transition: 2s all;
-  max-height: 0;
-  height: 0;
-  opacity: 0;
-  display: none;
-}
-.panelExpandableExpanded {
-  transition: 2s all;
-  opacity: 1;
-  display: inline;
 }
 
 button.accordionLikeProblemWeight {
@@ -219,7 +207,6 @@ button.accordionLikeProblemWeight {
 button.accordionLikeProblemWeight.active, button.accordionLikeProblemWeight:hover {
   background-color: #ddd;
 }
-
 
 button.accordionLike {
   display: inline;
@@ -494,13 +481,25 @@ span.studentScoresWrapper{
   margin-top: 0;
   margin-bottom: 0;
 }
-span.deadlineAndTitleContainer{
+
+.panelExpandable{
+  transition: all 2s;
+  overflow: hidden;
 }
-span.titleContainer{
+a.linkProgressReport{
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  overflow: hidden;
+  font-size: small;
+  max-width: 120px;
 }
-span.spanProgressReport{
+
+
+.spanProgressReport{
+  max-width: 120px;
   word-wrap: break-word;
 }
+
 #spanCalculatorExamplesContainer {
   overflow: auto;
   display: inline-block;
@@ -602,10 +601,6 @@ div.divMainPage{
   width: 90%;
   height: 100%;
   overflow: auto;
-}
-#spanProgressReportGeneral{
-  max-width: 120px;
-  overflow-wrap: break-word;
 }
 div.divTheMainMenu{
   display: flex;
@@ -880,13 +875,6 @@ span.problemLinkSelectedQuiz{
   border-radius: 3px;
   font-weight: bold;
   text-decoration: none;  
-}
-a.linkProgressReport{
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  overflow: hidden;
-  font-size: small;
-  max-width: 120px;
 }
 a.problemLinkQuiz{
   display: inline-block;

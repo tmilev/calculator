@@ -3,37 +3,43 @@ const pathnames = require('./pathnames');
 const miscellaneous = require('./miscellaneous');
 
 function recordProgressDone(progress, timeFinished) {
-  if (progress === null || progress === undefined) {
+  if (progress === null || progress === undefined || progress === "") {
     return;
   }
   if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
-  var theButton = progress.childNodes[0];
+  var panelInfo = getPanelInfoInitializeIfNeeded(progress);
+  var messageComponent = document.getElementById(panelInfo.messageStatusId);
   var timeTotal = timeFinished - progress.getAttribute("timeStarted");
-  theButton.innerHTML = `<b style ='color:green'>Received</b> ${timeTotal} ms`;
+  messageComponent.innerHTML = `<b style ='color:green'>Received</b> ${timeTotal} ms`;
 }
 
-function doToggleContent(button) {
-  var theSpan = button.nextSibling;
-  if (theSpan.classList.contains("panelExpandableCollapsed")) {
-    theSpan.classList.remove("panelExpandableCollapsed");
-    theSpan.classList.add("panelExpandableExpanded");
-    button.childNodes[1].innerHTML = "&#9662;";
+function setStatusToBeCalledThroughTimeout(panel, status, originalHeight) {
+  if (status === "expanded") {
+    panel.style.maxHeight = originalHeight;
+    panel.style.height = originalHeight;
+    //panel.style.opacity = "1";
   } else {
-    theSpan.classList.remove("panelExpandableExpanded");
-    theSpan.classList.add("panelExpandableCollapsed");
-    button.childNodes[1].innerHTML = "&#9666;";
+    panel.style.maxHeight = "0px";
+    panel.style.height = "0px";
+    //panel.style.opacity = "0";
   }
 }
 
-function getToggleButton(address, label) {
-  var result = "";
-  result += `<button class = "buttonProgress accordionLikeIndividual" onclick = "window.calculator.submitRequests.doToggleContent(this);">`;
-  result += `<span>${label}</span><span>&#9666;</span>`;
-  result += "</button>";
-  result += `<span class = "spanProgressReport panelExpandable panelExpandableCollapsed">${address}</span>`;
-  return result;
+function doToggleContent(progressId) {
+  var progress = document.getElementById(progressId);
+  var panelInfo = getPanelInfoInitializeIfNeeded(progress);
+  var panel = document.getElementById(panelInfo.panelId);
+  if (panelInfo.panelStatus === "collapsed") {
+    document.getElementById(panelInfo.expandedMarkerId).innerHTML = "&#9662;";    
+    panelInfo.panelStatus = "expanded";
+  } else {
+    document.getElementById(panelInfo.expandedMarkerId).innerHTML = "&#9666;";    
+    panelInfo.panelStatus = "collapsed";
+  }
+  progress.setAttribute("panelStatus", panelInfo.panelStatus);
+  setTimeout(setStatusToBeCalledThroughTimeout.bind(null, panel, panelInfo.panelStatus, panelInfo.originalHeight), 0);
 }
 
 function convertStringToHtml(input) {
@@ -48,8 +54,62 @@ function convertStringToHtml(input) {
   return result;
 }
 
+var numberOfButtonToggleProgressReport = 0;
+
+/** @typedef {{buttonId: string, panelId: string, expandedMarkerId: string, messageStatusId: string, panelStatus: string, originalHeight: string}} PanelInfo */
+/** @returns {PanelInfo} */
+function getPanelInfoInitializeIfNeeded(progressDOMComponent) {
+  var result = {
+    buttonId: null, 
+    panelId: null,
+    expandedMarkerId: null,
+    messageStatusId: null,
+    panelStatus: null,
+    originalHeight: "0px",
+  }
+  if (progressDOMComponent === null || progressDOMComponent === undefined) {
+    return result;
+  }
+  if (typeof progressDOMComponent === "string") {
+    progressDOMComponent = document.getElementById(progressDOMComponent);
+  }
+  var isGood = true;
+  for (var label in result) {
+    var incoming = progressDOMComponent.getAttribute(label);
+    result[label] = incoming;
+    if (incoming === null || incoming === undefined || incoming === undefined) {
+      isGood = false;
+    }
+  }
+  if (!isGood) {
+    numberOfButtonToggleProgressReport ++;
+    for (var label in result) {
+      result[label] = `progressReport${label}${numberOfButtonToggleProgressReport}`;
+    }
+    result.panelStatus = "collapsed";
+    initializeProgressPanel(progressDOMComponent, result);
+  }
+  return result;
+}
+
+function initializeProgressPanel(progressDOMComponent, /**@type {PanelInfo} */result) {
+  for (var label in result) {
+    progressDOMComponent.setAttribute(label, result[label]);
+  }  
+  var spanContainer = document.createElement("span");
+  var spanContent = "";
+  spanContent += `<button  id = "${result.buttonId}" `; 
+  spanContent += `class = "buttonProgress accordionLikeIndividual" `;
+  spanContent += `onclick = "window.calculator.submitRequests.doToggleContent('${progressDOMComponent.id}');">`;
+  spanContent += `<span id = "${result.messageStatusId}"></span> <span id = "${result.expandedMarkerId}">&#9666;</span>`;
+  spanContent += "</button>";
+  spanContent += `<div id = "${result.panelId}" class = "spanProgressReport panelExpandable"></div>`;
+  spanContainer.innerHTML = spanContent;
+  progressDOMComponent.appendChild(spanContainer);
+}
+
 function recordProgressStarted(progress, address, isPost, timeStarted) {
-  if (progress === null || progress === undefined) {
+  if (progress === "" || progress === null || progress === undefined) {
     return;
   }
   if (isPost === undefined || isPost === null) {
@@ -58,10 +118,12 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
+  var panelInfo = getPanelInfoInitializeIfNeeded(progress);
   progress.setAttribute("timeStarted", timeStarted);
-  var theHTML = "";
-  var content = "";
-  var label = '<b style ="color:orange">Sent</b>';
+
+  var messageStatus = document.getElementById(panelInfo.messageStatusId);
+  var panel = document.getElementById(panelInfo.panelId);
+  messageStatus.innerHTML = `<b style ="color:orange">Sent</b>`
   var addressSpreadOut = address.split("&").join(" &");
   addressSpreadOut = addressSpreadOut.split("=").join("= ");
   addressSpreadOut = addressSpreadOut.split("?").join("? ");
@@ -72,13 +134,24 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
     addressPassSplit[1] = "***" + addressPassSplit[1];
     addressSpreadOut = addressPassSplit.join("password= ");
   }
+  var content = "";
   if (!isPost) {
     content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${convertStringToHtml(addressSpreadOut)}</a>`;
   } else {
     content += addressSpreadOut;
   }
-  theHTML += getToggleButton(content, label);
-  progress.innerHTML = theHTML;
+  panel.innerHTML = content;
+  panel.style.maxHeight = "";
+  panel.style.height = "";
+  var originalHeight = window.getComputedStyle(panel).height;
+  progress.setAttribute("originalHeight", originalHeight);
+  if (panelInfo.panelStatus === "collapsed") {
+    panel.style.maxHeight = "0px";
+    panel.style.height = "0px";
+  } else {
+    panel.style.maxHeight = originalHeight;
+    panel.style.height = originalHeight;
+  }
 }
 
 function recordResult(resultText, resultSpan) {

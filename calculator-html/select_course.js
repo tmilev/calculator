@@ -18,15 +18,26 @@ function afterLoadSelectCoursePage(incomingPage, result) {
   thePage.theCourses = JSON.parse(incomingPage)["courses"];
   //resultString += JSON.stringify(thePage.theCourses);
   if (thePage.user.hasProblemEditRights()) {
-    resultString += "<div class ='problemInfoBar'>";
+    resultString += "<div class = 'problemInfoBar'>";
     resultString += editPage.getEditPanel("/coursesavailable/default.txt");
     resultString += "</div>";
   }
-  resultString += "<div style='text-align:center; width:100%'>";
+  resultString += "<div style = 'text-align:center; width:100%'>";
   for (var counterCourses = 0; counterCourses < thePage.theCourses.length; counterCourses ++) {
     var currentCourse = thePage.theCourses[counterCourses];
-    resultString += `<a href="#" onclick="window.calculator.selectCourse.selectCourse(${counterCourses})" class = "courseLink">`;
-    resultString += `${currentCourse.title}</a>`;
+    var isRoughDraft = false;
+    if (currentCourse.roughDraft === "true" || currentCourse.roughDraft === true) {
+      isRoughDraft = true;
+      if (! thePage.serverIsOnLocalHost()) {
+        continue;
+      }
+    }
+    resultString += `<a href = "#" onclick = "window.calculator.selectCourse.selectCourse(${counterCourses})" class = "courseLink">`;
+    resultString += `${currentCourse.title}`;
+    if (isRoughDraft) {
+      resultString += "<b style = 'color:red; font-size: x-small'>rough draft</b>";
+    }
+    resultString += `</a>`;
     if (counterCourses != thePage.theCourses.length - 1) {
       resultString += "<br>";
     }
@@ -37,7 +48,7 @@ function afterLoadSelectCoursePage(incomingPage, result) {
 
 function selectCoursePage() {
   submitRequests.submitGET({
-    url: `${pathnames.urls.calculatorAPI}?request=selectCourseJSON`,
+    url: `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.selectCourse}`,
     callback: afterLoadSelectCoursePage,
     progress: ids.domElements.spanProgressReportGeneral
   });

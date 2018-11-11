@@ -3204,13 +3204,6 @@ int WebWorker::ProcessLogout()
   return this->ProcessLoginUserInfo("");
 }
 
-int WebWorker::ProcessSelectCourse()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessSelectCourse");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetSelectCourse();
-  return 0;
-}
-
 int WebWorker::ProcessSelectCourseJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSelectCourseJSON");
   this->SetHeaderOKNoContentLength("");
@@ -4023,8 +4016,6 @@ int WebWorker::ServeClient()
     return this->ProcessCalculator();
   else if (theGlobalVariables.userCalculatorRequestType == "compute")
     return this->ProcessCompute();
-  else if (theGlobalVariables.userCalculatorRequestType == "selectCourse")
-    return this->ProcessSelectCourse();
   else if (theGlobalVariables.userCalculatorRequestType == "selectCourseJSON")
     return this->ProcessSelectCourseJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "about")

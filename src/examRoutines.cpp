@@ -576,21 +576,6 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
     this->flagLoadedSuccessfully = false;
 //  stOutput << "<hr>DEBUG: loaded<hr>";
 //  stOutput << "<hr>DEBUG: OK<hr>";
-  if (!this->flagLoadedSuccessfully)
-  { if (!this->flagUseJSON)
-    { this->comments << "<calculatorNavigation>"
-      << theGlobalVariables.ToStringNavigation()
-      << "</calculatorNavigation>";
-      this->FigureOutCurrentProblemList(this->comments);
-      this->flagIsExamProblem = true;
-      this->comments << "<problemNavigation>"
-      << this->ToStringProblemNavigation()
-      << "</problemNavigation>";
-      this->comments << commentsStream.str();
-      this->comments << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request=selectCourse\">Go to course list page.</a>";
-    }
-  }
   this->theProblemData.CheckConsistency();
 }
 

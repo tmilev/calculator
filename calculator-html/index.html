@@ -255,7 +255,6 @@ function browserify() {
   <div id = "divCalculatorExamples">
   </div><!--divCalculatorExamples-->
   </span>
-  <a href = "https://github.com/tmilev/calculator" target = "_blank">Source code</a>
 </td></tr>
 </table><!--tableCalculatorExamples-->
 </div><!--divCalculatorPage-->
@@ -270,31 +269,28 @@ function browserify() {
   </blockquote>
   
   <h2>About the software</h2>
-  The source code of the calculator can be found here. 
-  <br>
-  <a href="https://github.com/tmilev/calculator" target="_blank">Calculator source code</a>
-  <br>
+  The calculator is free and open source software. The calculator's <a href="https://github.com/tmilev/calculator" target="_blank">source code is here</a>.
   The code is to be compiled on a Linux machine.
   
   <br>
   <br>
-  Most of the functionality of the system should work out of the box
-  (if not, it's a bug).
-  However, for obvious reasons, parts of the calculator will not work immediately 
-  - for example, the officially signed security certificates of calculator-algebra.org 
-  are kept secret. If you need help setting up the calculator on your machine, write me an email
+  The system should work out of the box on your own Linux machine (on localhost). 
+  When installed locally, you access the system through your browser and get the admin password on first login.  
+  However, if you wish to run the calculator open to the entire internet, you will have to do quite a bit of extra work - just as with any website.
+  For example, you will need to get your own officially signed security certificates. 
+  If you need help setting up the calculator on your linux machine, write me an email
   (todor.milev at google's email).
   
   <h3>Software license</h3>
-  The software is licensed to you under the Apache License, Version 2.0.
-  This a permissive free software license which, roughly speaking, states that you
+  The software is licensed to you under the <a href = 'https://www.apache.org/licenses/LICENSE-2.0', target = "_blank">Apache License, Version 2.0</a>.
+  This is a permissive free software license which, roughly speaking, states that you
   are free to use the calculator, install it on your machine, use it to run your website, 
   modify its source code to suit your needs and redistribute the resulting work. 
   <br>
   <br>
-  The calculator is fully functional without any homework problem files, 
-  and provides facilities for creating such files 
-  (I create my own homework files through the calculator interface). 
+  The calculator is fully functional without any homework/problem files, 
+  and provides facilities for creating such. 
+  All of my materials were created through the calculator interface. 
   Should you install the calculator on your own machine and 
   create your own homework problems, 
   you own the copyright to the resulting files; those are not subject  
@@ -427,7 +423,7 @@ function browserify() {
 
 <div id = "divTheMainMenuPanel" class = "divTheMainMenu">
 <div class = "divLoginPanel">
-  <button id = "buttonToggleTheMainMenu" onclick = "toggleMenu(this);" class = "buttonToggleTopics">
+  <button id = "buttonToggleTheMainMenu" onclick = "window.calculator.panels.toggleMenu(this);" class = "buttonToggleTopics">
   &#9660;
   </button>
   <div id = "divProfilePicture" class = "divProfilePictureContainerExpanded divInvisible"></div>
@@ -452,7 +448,7 @@ function browserify() {
 <div> 
   <div><!--div containing debug flag-->
   <label class = "switch">
-    <input id = "sliderDebugFlag" type = "checkbox" onchange = "thePage.flipDebugSwitch();">
+    <input id = "sliderDebugFlag" type = "checkbox" onchange = "window.calculator.mainPage.flipDebugSwitch();">
     <span class = "slider round"></span>
   </label><span id = "spanDebugFlagToggleReport">-</span>
   </div><!--div containing debug flag-->
@@ -471,7 +467,10 @@ function browserify() {
 </div>
 </div>
 
-<div style = "text-align: center; font-size: small;"><a href = "https://github.com/tmilev/calculator" id = "anchorCalculatorBuildVersion" target = "_blank"></a></div>
+<div style = "text-align: center; font-size: small;">
+<a href = "https://github.com/tmilev/calculator" id = "anchorCalculatorBuildVersion" target = "_blank"></a>
+<a href = "https://github.com/tmilev/calculator/issues" target = "_blank">Issues/bugs</a>
+</div>
 </div> <!--divTheMainMenuPanel-->
   
 </div><!--divMainPage-->

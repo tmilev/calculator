@@ -1,6 +1,7 @@
 "use strict";
 const submitRequests = require('./submit_requests');
 const ids = require('./ids_dom_elements');
+const pathnames = require('./pathnames');
 
 function getAccountsTable(inputAccounts) {
   var result = "";
@@ -112,7 +113,7 @@ function getTeachersStudents() {
 }
 
 function updateAccountsPage() {
-  var theURL = `${pathnames.urls.calculatorAPI}?request=accountsJSON`;
+  var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.accountsJSON}`;
 
   submitRequests.submitGET({
     url: theURL,

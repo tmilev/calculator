@@ -1,6 +1,7 @@
 "use strict";
 const submitRequests = require('./submit_requests');
 const ids = require('./ids_dom_elements');
+const pathnames = require('./pathnames');
 
 function updateDatabasePageCallback(incoming, output) {
   try {

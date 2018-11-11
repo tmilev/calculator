@@ -825,7 +825,8 @@ bool WebCrawler::VerifyRecaptcha
       << "<br><span style =\"color:green\">"
       << "<b>" << "Your recaptcha answer appears to be valid. "
       << "</b></span>\n<br>\n"
-      << "DEBUG: " << response;
+//      << "DEBUG: " << response
+      ;
     if (commentsGeneralSensitive != 0)
       *commentsGeneralSensitive
       << "The response from google was: "

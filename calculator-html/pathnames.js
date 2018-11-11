@@ -4,7 +4,6 @@ var urls = {
   calculatorAPI: "/cgi-bin/calculator",
   appNoCache: "/appNoCache",
   appWithCache: "/app",
-  app: "/appNoCache",
 };
 
 var urlFields = {
@@ -18,6 +17,7 @@ var urlFields = {
   databaseTable: "currentDatabaseTable",
   setProblemData: "setProblemData",
   debugFlag: "debugFlag",
+  selectCourse: "selectCourseJSON",
   scoredQuizJSON: "scoredQuizJSON",
   exerciseJSON: "exerciseJSON",
   problemGiveUp: "problemGiveUp",
@@ -31,6 +31,8 @@ var urlFields = {
   submitAnswersPreview: "submitAnswersPreview",
   submitExercisePreviewNoLogin: "submitExercisePreviewNoLogin",
   submitExercisePreview: "submitExercisePreview",  
+  accountsJSON: "accountsJSON",
+  signUp: "signUp",
 }
 
 module.exports = {

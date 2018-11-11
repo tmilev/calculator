@@ -1,6 +1,7 @@
 "use strict";
 const submitRequests = require('./submit_requests');
 const ids = require('./ids_dom_elements');
+const pathnames = require('./pathnames');
 
 var recaptchaIdForSignUp = null;
 
@@ -45,7 +46,7 @@ SignUp.prototype.submitSignUpInfo = function () {
   }
   var desiredUsernameEncoded = encodeURIComponent(document.getElementById('desiredUsername').value);
   var desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForSignUp').value);
-  var theURL = `${pathnames.urls.calculatorAPI}?request=signUp&desiredUsername=${desiredUsernameEncoded}&`;
+  var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.signUp}&desiredUsername=${desiredUsernameEncoded}&`;
   theURL += `email=${desiredEmailEncoded}&`;
   var theToken = grecaptcha.getResponse(recaptchaIdForSignUp);
   if (theToken === '' || theToken === null) { 

@@ -531,8 +531,7 @@ std::string HtmlInterpretation::GetOnePageJSBrowserify()
   for (int i = 0; i < this->jsFileContents.size; i ++)
   { std::string fileNameNoJS;
     if (!MathRoutines::StringEndsWith(this->jsFileNames[i], ".js", &fileNameNoJS))
-    { fileNameNoJS = this->jsFileNames[i];
-    }
+      fileNameNoJS = this->jsFileNames[i];
     out << "\"" << fileNameNoJS << "\" : function(require, module, exports){\n";
     out << this->jsFileContents[i];
     out << "\n},\n";
@@ -562,10 +561,22 @@ public:
   std::string courseTemplate;
   std::string courseTopics;
   std::string title;
+  std::string flagRoughDraft;
   bool IsEmpty();
   void reset();
   std::string ToString() const;
+  JSData ToJSON() const;
 };
+
+JSData Course::ToJSON() const
+{ JSData result;
+  result["title"] = this->title;
+  result["courseHome"] = "coursetemplates/" + this->courseTemplate;
+  result["topicList"] = "topiclists/" + this->courseTopics;
+  if (this->flagRoughDraft != "")
+    result["roughDraft"] = this->flagRoughDraft;
+  return result;
+}
 
 std::string Course::ToString() const
 { std::stringstream out;
@@ -582,6 +593,7 @@ void Course::reset()
 { this->courseTemplate = "";
   this->courseTopics = "";
   this->title = "";
+  this->flagRoughDraft = "";
 }
 
 class CourseList
@@ -626,6 +638,13 @@ void CourseList::LoadFromString(const std::string& input, std::stringstream* com
       }
       current.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
     }
+    if (MathRoutines::StringBeginsWith(currentLine, "RoughDraft:", &currentArgument))
+    { if (current.flagRoughDraft != "")
+      { this->theCourses.AddOnTop(current);
+        current.reset();
+      }
+      current.flagRoughDraft = MathRoutines::StringTrimWhiteSpace(currentArgument);
+    }
   }
   if (!current.IsEmpty())
     this->theCourses.AddOnTop(current);
@@ -652,64 +671,10 @@ std::string HtmlInterpretation::GetSelectCourseJSON()
   theCourses.LoadFromString(theTopicFile, &comments);
   output["courses"].type = JSData::JSarray;
   for (int i = 0; i < theCourses.theCourses.size; i ++)
-  { JSData currentCourse;
-    currentCourse["title"] = theCourses.theCourses[i].title;
-    currentCourse["courseHome"] = "coursetemplates/" + theCourses.theCourses[i].courseTemplate;
-    currentCourse["topicList"] = "topiclists/" + theCourses.theCourses[i].courseTopics;
-    output["courses"].list.AddOnTop(currentCourse);
+  { Course& currentCourse = theCourses.theCourses[i];
+    output["courses"].list.AddOnTop(currentCourse.ToJSON());
   }
   return output.ToString(false);
-}
-
-std::string HtmlInterpretation::GetSelectCourse()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetSelectCourse");
-  std::stringstream out;
-  out << "<!DOCTYPE html>";
-  out << "<html>";
-  out << "<head>"
-  << HtmlRoutines::GetCSSLinkCalculator()
-  << "</head>";
-  out << "<body>";
-  out << "<calculatorNavigation>"
-  << HtmlInterpretation::ToStringNavigation()
-  << "</calculatorNavigation>";
-  CalculatorHTML tempObject;
-  std::string coursesAvailableList = "/coursesavailable/default.txt";
-  if (theGlobalVariables.UserDefaultHasAdminRights())
-    out
-    << "<editPagePanel>"
-    << tempObject.GetEditPageButton(coursesAvailableList, false)
-    << "</editPagePanel>";
-
-  std::string theTopicFile;
-  std::stringstream commentsOnFailure;
-  std::string temp;
-  FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly
-  (coursesAvailableList, temp, &commentsOnFailure);
-  //stOutput << "DEBUG: coursesAvailableList: " << temp;
-  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly
-      ("/coursesavailable/default.txt", theTopicFile, &commentsOnFailure))
-  { out << "<b>Failed to fetch available courses from /coursesavailable/default.txt</b>. " << commentsOnFailure.str();
-    out << " </body></html>";
-    return out.str();
-  }
-  CourseList theCourses;
-  theCourses.LoadFromString(theTopicFile, &out);
-  out << "<div style =\"text-align:center\">";
-  for (int i = 0; i < theCourses.theCourses.size; i ++)
-  { out << "<a class =\"courseLink\" href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=template&courseHome=coursetemplates/"
-    << theCourses.theCourses[i].courseTemplate
-    << "&topicList=topiclists/"
-    << theCourses.theCourses[i].courseTopics
-    << "\">" << theCourses.theCourses[i].title << "</a>";
-    if (i != theCourses.theCourses.size - 1)
-      out << "<br>";
-  }
-  out << "</div>";
-  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  out << "</body></html>";
-  return out.str();
 }
 
 std::string HtmlInterpretation::GetHtmlTagWithManifest()

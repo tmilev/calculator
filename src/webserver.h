@@ -187,7 +187,6 @@ public:
   int ProcessTemplate();
   int ProcessTemplateJSON();
   int ProcessLoginUserInfo(const std::string &comments);
-  int ProcessSelectCourse();
   int ProcessSelectCourseJSON();
   int ProcessExamPageInterpreter();
   int ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication);

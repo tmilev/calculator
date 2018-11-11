@@ -109,7 +109,7 @@ function selectCurrentCoursePage() {
   var urlObject = { 
     currentPage: thePage.storage.variables.currentPage.getValue()
   };
-  location.href = `${pathnames.urls.app}#${encodeURIComponent(JSON.stringify(urlObject))}`;
+  window.location.hash = `${encodeURIComponent(JSON.stringify(urlObject))}`;
   submitRequests.submitGET({
     url: `${pathnames.urls.calculatorAPI}?request=${topicRequest}`,
     callback: afterLoadCoursePage,

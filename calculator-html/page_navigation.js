@@ -98,28 +98,28 @@ StorageVariable.prototype.getValue = function() {
 }
 
 StorageVariable.prototype.loadMe = function(hashParsed) {
-  var incomingValue = "";
+  var candidate = "";
   if (Storage !== undefined || localStorage !== undefined && this.nameLocalStorage !== "") {
-    var candidate = localStorage.getItem(this.nameLocalStorage);
-    if (candidate !== "" && candidate !== null && candidate !== undefined) {
-      incomingValue = candidate;
+    var incoming = localStorage.getItem(this.nameLocalStorage);
+    if (incoming !== "" && incoming !== null && incoming !== undefined) {
+      candidate = incoming;
     }
   }
   if (this.nameCookie !== "") {
-    var candidate = cookies.getCookie(this.nameCookie);
-    if (candidate !== "" && candidate !== null && candidate !== undefined) {
-      incomingValue = candidate;
+    var incoming = cookies.getCookie(this.nameCookie);
+    if (incoming !== "" && incoming !== null && incoming !== undefined) {
+      candidate = incoming;
     }
   }
   if (this.nameURL !== "") {
     if (this.nameURL in hashParsed) {
-      var candidate = hashParsed[this.nameURL];
-      if (candidate !== null && candidate !== undefined) {
-        candidate = incomingValue;
+      var incoming = hashParsed[this.nameURL];
+      if (incoming !== null && incoming !== undefined) {
+        candidate = incoming;
       }
     }
   }
-  this.setAndStore(incomingValue, false);
+  this.setAndStore(candidate, false);
 }
 
 StorageVariable.prototype.storeMe = function(/**@type {boolean} */ updateURL) {
@@ -261,8 +261,12 @@ function StorageCalculator() {
 }
 
 StorageCalculator.prototype.parseURL = function() {
+  console.log(`DEBUG: current hash: ${window.location.hash}`);
   this.oldHash = this.currentHash;
-  this.currentHash = window.location.hash;
+  this.currentHash = decodeURIComponent(window.location.hash);
+  if (this.currentHash.startsWith('#')) {
+    this.currentHash = this.currentHash.slice(1);
+  }
   try {
     if (this.oldHash !== this.currentHash) {
       this.urlObject = JSON.parse(this.currentHash);
@@ -344,7 +348,6 @@ function Page() {
       container: null,
       selectFunction: null,
       initialized: false,
-      flagModifyURL: false
     },
     selectCourse : {
       name: "selectCourse", //<-for autocomplete
@@ -352,7 +355,6 @@ function Page() {
       menuButtonId: "buttonSelectCourse",
       container: null,
       selectFunction: selectCourse.selectCoursePage,
-      flagModifyURL: true
     },
     currentCourse : {
       name: "currentCourse", //<-for autocomplete
@@ -360,7 +362,6 @@ function Page() {
       menuButtonId: "buttonCurrentCourse",
       container: null,
       selectFunction: coursePage.selectCurrentCoursePage,
-      flagModifyURL: true
     },
     problemPage : {
       name: "problemPage", //<-for autocomplete
@@ -369,7 +370,6 @@ function Page() {
       container: null,
       selectFunction: problemPage.updateProblemPage,
       flagLoaded: false,
-      flagModifyURL: false
     },
     editPage : {
       name: "editPage", //<-for autocomplete
@@ -379,7 +379,6 @@ function Page() {
       selectFunction: edigPage.selectEditPage,
       flagLoaded: false,
       editor: null,
-      flagModifyURL: false
     },
     calculator: {
       name: "calculator", //<-for autocomplete
@@ -388,21 +387,18 @@ function Page() {
       container: null,
       selectFunction: submitRequests.submitCalculatorComputation,
       scriptIds: [],
-      flagModifyURL: false
     },
     signUp: {
       name: "signUp", //<-for autocomplete
       id: "divSignUpPage",
       container: null,
       selectFunction: null,
-      flagModifyURL: false
     },
     forgotLogin: {
       name: "forgotLogin",
       id: "divForgotLogin",
       container: null,
       selectFunction: null,
-      flagModifyURL: false   
     },
     about: {
       name: "about", //<-for autocomplete
@@ -410,7 +406,6 @@ function Page() {
       menuButtonId: "buttonAboutPage",
       container: null,
       selectFunction: null,
-      flagModifyURL: true
     },
     database: {
       name: "database", //<-for autocomplete
@@ -418,7 +413,6 @@ function Page() {
       menuButtonId: "buttonSelectDatabase",
       container: null,
       selectFunction: database.updateDatabasePage,
-      flagModifyURL: false
     },
     server: {
       name: "server", //<-for autocomplete
@@ -426,7 +420,6 @@ function Page() {
       menuButtonId: "buttonSelectServer",
       container: null,
       selectFunction: serverStatus.updateServerStatus,
-      flagModifyURL: true
     },
     account: {
       name: "account", //<-for autocomplete
@@ -434,14 +427,12 @@ function Page() {
       menuButtonId: "buttonSelectAccount",
       container: null,
       selectFunction: accountPage.updateAccountPage,
-      flagModifyURL: false
     },
     activateAccount: {
       name: "activateAccount", //<-for autocomplete
       id: "divActivateAccount",
       container: null,
       selectFunction: activateAccount.updateAccountActivationPage,
-      flagModifyURL: true
     },
     accounts: {
       name: "accounts", //<-for autocomplete
@@ -449,7 +440,6 @@ function Page() {
       menuButtonId: "buttonSelectAccounts",
       container: null,
       selectFunction: accountManagement.updateAccountsPage,
-      flagModifyURL: true
     }
   };
   this.storage = new StorageCalculator();
@@ -496,7 +486,14 @@ function Page() {
 }
 
 Page.prototype.initBuildVersion = function() {
-  document.getElementById(ids.domElements.calculatorBuildVersion).innerHTML = `Build version ${serverInformation.version}`;
+  document.getElementById(ids.domElements.calculatorBuildVersion).innerHTML = `Build version ${serverInformation.serverInformation.version}`;
+}
+
+Page.prototype.serverIsOnLocalHost = function() {
+  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    return true;
+  }
+  return false;
 }
 
 Page.prototype.initMenuBar = function() {
@@ -682,10 +679,6 @@ Page.prototype.injectScript = function(scriptId, scriptContent) {
   document.getElementsByTagName('head')[0].appendChild(scriptChild);
 }
 
-Page.prototype.getURLFromStorage = function () {
-
-}
-
 Page.prototype.selectPage = function(inputPage) {
   if (this.pages[inputPage] === undefined) {
     inputPage = "calculator";
@@ -700,12 +693,6 @@ Page.prototype.selectPage = function(inputPage) {
   this.pages[inputPage].container.style.display = "";
   if (this.pages[inputPage].menuButtonId !== null && this.pages[inputPage].menuButtonId !== undefined) {
     document.getElementById(this.pages[inputPage].menuButtonId).classList.add("buttonSelectPageSelected");
-  }
-  if (this.pages[inputPage].flagModifyURL === true) {
-    var urlObject = { 
-      currentPage: this.storage.variables.currentPage.getValue()
-    };
-    location.href = `${pathnames.urls.app}#${JSON.stringify(urlObject)}`;
   }
   if (this.pages[inputPage].selectFunction !== null && this.pages[inputPage].selectFunction !== undefined) {
     this.pages[inputPage].selectFunction();

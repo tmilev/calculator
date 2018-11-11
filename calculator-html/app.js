@@ -18,6 +18,8 @@ window.calculator = {
   drawing: null,
   hideHtmlWithTags: null,
   accountActivation: null,
+  manageAccounts: null,
+  panels: null,
 };
 
 //load globals:
@@ -36,6 +38,8 @@ window.calculator.editPage = require('./edit_page');
 window.calculator.drawing = require('./three-d').drawing;
 window.calculator.hideHtmlWithTags = require('./hide_html_with_tags');
 window.calculator.accountActivation = require('./account_activation');
+window.calculator.manageAccounts = require('./manage_accounts');
+window.calculator.panels = require('./panels');
 
 //initialize everything not initilized while loading:
 window.calculator.mainPage.initializeCalculatorPage();

@@ -42,10 +42,10 @@ function toggleHeight(currentButton, currentPanelID) {
     currentButton.innerHTML = "&#9656;";
   }
   currentPanel.addEventListener("transitionend", transitionDone);
-  setTimeout(function() { 
-    toggleHeightForTimeout(currentPanel);
-  },
-    0
+  setTimeout(
+    function() { 
+      toggleHeightForTimeout(currentPanel);
+    }, 0
   );
 }
 
@@ -109,5 +109,6 @@ function toggleMenu() {
 }
 
 module.exports = {
-  modifyHeightForTimeout
+  modifyHeightForTimeout,
+  toggleMenu,
 }

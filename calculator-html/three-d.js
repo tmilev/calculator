@@ -38,6 +38,8 @@ function Drawing() {
   this.firstCriticalRunTimeError = "";
   this.firstCanvas = null;
   this.numberOfControlsConstructed = 0;
+  this.plotUpdaters = {};
+  this.Surface = Surface;
 }
 
 function calculatorError(x) { 
@@ -1052,38 +1054,34 @@ CanvasTwoD.prototype.redraw = function()
   this.redrawStart = new Date().getTime();
   var theSurface = this.surface;
   theSurface.clearRect(0, 0, this.width, this.height);
-  for (this.numDrawnObjects = 0; this.numDrawnObjects<this.theObjects.length; this.numDrawnObjects++)
+  for (this.numDrawnObjects = 0; this.numDrawnObjects < this.theObjects.length; this.numDrawnObjects ++) {
     this.theObjects[this.numDrawnObjects].draw(this);
+  }
   var redrawTime = new Date().getTime();
-  if (this.flagShowPerformance)
-  { this.textPerformance =
-    "Redraw time (ms): " + (redrawTime-this.redrawStart);
+  if (this.flagShowPerformance) { 
+    this.textPerformance = "Redraw time (ms): " + (redrawTime - this.redrawStart);
     this.showMessages();
   }
 }
 
-CanvasTwoD.prototype.computeBasis = function ()
-{ //if (this.screenBasisOrthonormal.length<2)
-  //  this.screenBasisOrthonormal.length =2;
-  this.screenBasisOrthonormal[0] =[1,0];
-  this.screenBasisOrthonormal[1] =[0,1];
-  this.textProjectionInfo ="";
-  this.textProjectionInfo+=
-  "<br>e1: " + this.screenBasisOrthonormal[0] +
-  "<br>e2: " + this.screenBasisOrthonormal[1];
+CanvasTwoD.prototype.computeBasis = function () { 
+  this.screenBasisOrthonormal[0] = [1, 0];
+  this.screenBasisOrthonormal[1] = [0, 1];
+  this.textProjectionInfo = "";
+  this.textProjectionInfo += "<br>e1: " + this.screenBasisOrthonormal[0] + "<br>e2: " + this.screenBasisOrthonormal[1];
 }
 
-CanvasTwoD.prototype.init = function(inputCanvasId)
-{ this.canvasId = inputCanvasId;
+CanvasTwoD.prototype.init = function(inputCanvasId) { 
+  this.canvasId = inputCanvasId;
   this.canvasContainer = document.getElementById(inputCanvasId);
   this.surface = this.canvasContainer.getContext("2d");
   this.canvasContainer.addEventListener("DOMMouseScroll", drawing.mouseWheel.bind(drawing), false);
   this.canvasContainer.addEventListener("mousewheel", drawing.mouseWheel.bind(drawing), false);
 //    this.canvasContainer.addEventListener("wheel", drawing.mouseWheel.bind(drawing), true);
-  this.theObjects =[];
-  this.spanMessages = document.getElementById(this.canvasId+"Messages");
-  this.spanCriticalErrors = document.getElementById(this.canvasId+"CriticalErrors");
-  this.spanControls = document.getElementById(this.canvasId+"Controls");
+  this.theObjects = [];
+  this.spanMessages = document.getElementById(this.canvasId + "Messages");
+  this.spanCriticalErrors = document.getElementById(this.canvasId + "CriticalErrors");
+  this.spanControls = document.getElementById(this.canvasId + "Controls");
   this.constructControls();
   this.computeBasis();
 }
@@ -2054,7 +2052,11 @@ Canvas.prototype.resetViewNoRedraw = function() {
 
 Canvas.prototype.constructControls = function() { 
   var thisString = `document.getElementById('${this.canvasId}')`;
-  this.spanControls.innerHTML = "<button style =\"border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer\" onclick=\"calculatorGetCanvas("+thisString+ ").resetView();\">reset view</button><small> shift +drag to rotate</small>";
+  var incomingButton = ""
+  incomingButton += `<button style ="border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer"`;
+  incomingButton += `onclick = "window.calculator.drawing.getCanvas('${thisString}').resetView();">reset view</button>`;
+  incomingButton += `<small> shift + drag to rotate</small>`;
+  this.spanControls.innerHTML = incomingButton;
 }
 
 Canvas.prototype.init = function(inputCanvasId) { 
@@ -2664,6 +2666,11 @@ Drawing.prototype.canvasClick = function(theCanvasContainer, theEvent) {
 }
 
 var drawing = new Drawing();
+if (window.calculator === undefined) {
+  window.calculator = {};
+}
+window.calculator.drawing = drawing;
+
 module.exports = {
-  drawing
+  drawing, 
 }

@@ -1031,7 +1031,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   out << "function " << canvasFunctionName << "(){\n";
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++)
   { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
-    out << "  calculatorPlotUpdaters['"
+    out << " window.calculator.drawing.plotUpdaters['"
     << currentBox.GetSliderName() << "'] =" << "'" << this->canvasName << "'"
     << ";\n";
   }
@@ -1047,7 +1047,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     { out << currentO.GetJavascriptCurveImmersionIn3d(the3dObjects[i], this->canvasName, funCounter) << "\n ";
     }
   }
-  out << "var theDrawer = window.calculator.drawing";
+  out << "var theDrawer = window.calculator.drawing;\n";
   out << "theDrawer.resetCanvas(document.getElementById('"
   << this->canvasName << "'));\n";
   out << "var theCanvas = theDrawer.getCanvas(document.getElementById('"
@@ -1117,7 +1117,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   out
   << "theCanvas.redraw();\n"
   << "}\n"
-  << "calculatorGetCanvas(document.getElementById('"
+  << "window.calculator.drawing.getCanvas(document.getElementById('"
   << this->canvasName
   << "')).canvasResetFunction =" << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n"
@@ -1215,7 +1215,7 @@ std::string PlotObject::GetJavascriptSurfaceImmersion
     << this->theVarRangesJS.size;
   else
   { std::stringstream surfaceInstStream;
-    surfaceInstStream << "new Surface("
+    surfaceInstStream << "new window.calculator.drawing.Surface("
     << fnName
     << ", [[" << this->theVarRangesJS[0][0] << "," << this->theVarRangesJS[1][0] << "],"
     << " ["   << this->theVarRangesJS[0][1] << ", " << this->theVarRangesJS[1][1] << "]], ";
@@ -1481,7 +1481,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++)
   { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.
     GetValueCreate(this->boxesThatUpdateMe[i]);
-    outScript << " calculatorPlotUpdaters['"
+    outScript << " window.calculator.drawing.plotUpdaters['"
     << currentBox.GetSliderName() << "'] ="
     << "'" << this->canvasName << "'"
     << ";\n";

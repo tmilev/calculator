@@ -1,6 +1,7 @@
 "use strict";
 const submitRequests = require('./submit_requests');
 const pathnames = require('./pathnames');
+const drawing = require('./three-d').drawing;
 
 function Calculator() {
 
@@ -14,7 +15,6 @@ function Calculator() {
 var calculatorMQString;
 var calculatorMQStringIsOK = true;
 var ignoreNextMathQuillUpdateEvent = false;
-var calculatorPlotUpdaters = {};
 var startingCharacterSectionUnderMathQuillEdit;
 
 function createSelectionNoFocus(field, start, end) { 
@@ -66,8 +66,8 @@ Calculator.prototype.updateCalculatorSliderToInputBox =  function(boxName, slide
   for (var i = 0; i < theBoxes.length; i ++) {
     theBoxes[i].value = sliderValue;
   }
-  if (calculatorPlotUpdaters[sliderName] !== undefined) { 
-    var theCanvas = this.canvases[calculatorPlotUpdaters[sliderName]];
+  if (drawing.plotUpdaters[sliderName] !== undefined) { 
+    var theCanvas = this.canvases[drawing.plotUpdaters[sliderName]];
     if (theCanvas !== undefined) { 
       if (theCanvas.canvasResetFunction !== null) {
         theCanvas.canvasResetFunction();
@@ -191,5 +191,5 @@ Calculator.prototype.toggleExamples = function(theButton) {
 var calculator = new Calculator();
 
 module.exports = {
-  calculator
+  calculator,
 }

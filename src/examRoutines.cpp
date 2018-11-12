@@ -1121,9 +1121,9 @@ std::string CalculatorHTML::PrepareUserInputBoxes()
   for (int i = 0; i < theArgs.size(); i ++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader))
       if (inputNonAnswerReader != "" && theArgs.theValues[i] != "")
-      { out << "setInputBox(name ="
+      { out << "setInputBox(name = "
         << inputNonAnswerReader
-        << ", value =" << HtmlRoutines::ConvertURLStringToNormal(theArgs.theValues[i], false)
+        << ", value = " << HtmlRoutines::ConvertURLStringToNormal(theArgs.theValues[i], false)
         << "); ";
       }
   return out.str();
@@ -1374,8 +1374,7 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
       << "email it to the site admin(s). ";
   }
   for (int i = 0; i < theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.size(); i ++)
-    this->theProblemData.inputNonAnswerIds.AddOnTop
-    (theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.theKeys[i]);
+    this->theProblemData.inputNonAnswerIds.AddOnTop(theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.theKeys[i]);
   return result;
 }
 

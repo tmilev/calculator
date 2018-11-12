@@ -821,7 +821,7 @@ var calculatorPanel =  new InputPanelData({
   idMQSpan: "mainInputMQfield",
   idMQcomments: "mqPanelComments",
   problemId: "",
-  idPureLatex: "mainInputID",
+  idPureLatex: ids.domElements.inputMain,
   idButtonContainer: 'mainInputMQfieldButtons',
   flagCalculatorPanel: true,
 });

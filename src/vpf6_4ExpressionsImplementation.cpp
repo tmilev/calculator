@@ -2676,7 +2676,7 @@ std::string Expression::ToStringAllSlidersInExpression() const
       out << "value =\"" << theReader << "\" ";
     else
       out << "value =\"1\" ";
-    out << "oninput =\"updateCalculatorSliderToInputBox('"
+    out << "oninput =\"window.calculator.calculator.updateSliderToInputBox('"
     << boxNames[i]
     << "','"
     << theSliderName

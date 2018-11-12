@@ -5,12 +5,15 @@ var stringResources = {
 };
 
 var domElements = {
+  inputMain: "mainInputID",
   spanOldEmail: "spanOldEmail",
   buttonChangeEmail: "buttonChangeEmail",
   inputUsername: "inputUsername",
   inputEmail: "inputEmail",
   inputPassword: "inputPassword",
   labelNewEmail: "labelNewEmail",
+  spanCalculatorMainOutput: "spanCalculatorMainOutput",
+  spanProgressCalculatorInput: "spanProgressCalculatorInput",
   spanProgressReportGeneral: "spanProgressReportGeneral",
   spanUserIdInActivateAccountPage: "spanUserIdInActivateAccountPage",
   spanUserIdInAccountsPage: "spanUserIdInAccountsPage",

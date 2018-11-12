@@ -754,6 +754,10 @@ class Plot
 
 struct InputBox
 {
+  friend std::ostream& operator<<(std::ostream& output, const InputBox& input)
+  { output << "name: " << input.name << ", ...";
+    return output;
+  }
   std::string name;
   Expression value;
   Expression min;

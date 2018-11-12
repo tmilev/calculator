@@ -13,6 +13,7 @@ var urlFields = {
   requestDatabase: "databaseJSON",
   requestEditPage: "editPageJSON", 
   requestModifyPage: "modifyPage",
+  calculatorCompute: "compute",
   requestClonePage: "clonePageJSON",
   databaseTable: "currentDatabaseTable",
   setProblemData: "setProblemData",

@@ -2649,8 +2649,9 @@ WeylGroupData& ObjectContainer::GetWeylGroupDataCreateIfNotPresent(const DynkinT
 
 std::string ObjectContainer::ToStringJavascriptForUserInputBoxes()
 { std::stringstream out;
+  //stOutput << "DEBUG: user boxes: " << this->theUserInputTextBoxesWithValues.ToStringHtml() << "<br>";
   out << "<script>\n";
-  out << "calculatorInputBoxNames =[";
+  out << "window.calculator.calculator.inputBoxNames = [";
   for (int i = 0; i < this->theUserInputTextBoxesWithValues.size(); i ++)
   { InputBox& currentBox = this->theUserInputTextBoxesWithValues.theValues[i];
     out << "'" << currentBox.name << "'";
@@ -2658,13 +2659,14 @@ std::string ObjectContainer::ToStringJavascriptForUserInputBoxes()
       out << ", ";
   }
   out << "];\n";
-  out << "calculatorInputBoxToSliderUpdaters = {};";
+  out << "window.calculator.calculator.inputBoxToSliderUpdaters = {};";
   for (int i = 0; i < this->theUserInputTextBoxesWithValues.size(); i ++)
   { InputBox& currentBox = this->theUserInputTextBoxesWithValues.theValues[i];
-    out << "calculatorInputBoxToSliderUpdaters['"
+    out << "window.calculator.calculator.inputBoxToSliderUpdaters['"
     << currentBox.name << "'] ='"
     << currentBox.GetSliderName() << "';\n";
   }
+  //out << "console.log(window.calculator.calculator.inputBoxNames);\n ";
   out << "</script>";
   return out.str();
 }

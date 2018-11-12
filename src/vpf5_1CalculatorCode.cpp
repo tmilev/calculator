@@ -1048,11 +1048,8 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     }
   }
   out << "var theDrawer = window.calculator.drawing;\n";
-  out << "theDrawer.resetCanvas(document.getElementById('"
-  << this->canvasName << "'));\n";
-  out << "var theCanvas = theDrawer.getCanvas(document.getElementById('"
-  << this->canvasName
-  << "'));\n"
+  out << "theDrawer.deleteCanvas('" << this->canvasName << "');\n";
+  out << "var theCanvas = theDrawer.getCanvas('" << this->canvasName << "');\n"
   << "theCanvas.init('" << this->canvasName << "');\n";
   for (int i = 0; i < this->thePlots.size; i ++)
   { PlotObject& currentPlot = this->thePlots[i];
@@ -1117,9 +1114,8 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   out
   << "theCanvas.redraw();\n"
   << "}\n"
-  << "window.calculator.drawing.getCanvas(document.getElementById('"
-  << this->canvasName
-  << "')).canvasResetFunction =" << canvasFunctionName << ";\n"
+  << "window.calculator.drawing.getCanvas('" << this->canvasName << "').canvasResetFunction = "
+  << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n"
   << "</script>";
   return out.str();
@@ -1476,12 +1472,10 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   }
   std::stringstream outScript;
   std::string canvasFunctionName = "functionMake" + this->canvasName;
-  outScript << "function " << canvasFunctionName << "()\n"
-  << "{ ";
+  outScript << "function " << canvasFunctionName << "() {\n";
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++)
-  { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.
-    GetValueCreate(this->boxesThatUpdateMe[i]);
-    outScript << " window.calculator.drawing.plotUpdaters['"
+  { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
+    outScript << "  window.calculator.drawing.plotUpdaters['"
     << currentBox.GetSliderName() << "'] ="
     << "'" << this->canvasName << "'"
     << ";\n";
@@ -1492,14 +1486,11 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   for (int i = 0; i < this->thePlots.size; i ++)
   { PlotObject& currentPlot = this->thePlots[i];
     if (currentPlot.thePlotType == "plotFunction")
-    { outScript << currentPlot.GetJavascript2dPlot(theFnPlots[i], this->canvasName, funCounter) << "\n ";
-    }
+      outScript << currentPlot.GetJavascript2dPlot(theFnPlots[i], this->canvasName, funCounter) << "\n ";
     if (currentPlot.thePlotType == "parametricCurve")
-    { outScript << currentPlot.GetJavascriptParametricCurve2D(theFnPlots[i], this->canvasName, funCounter) << "\n ";
-    }
+      outScript << currentPlot.GetJavascriptParametricCurve2D(theFnPlots[i], this->canvasName, funCounter) << "\n ";
     if (currentPlot.thePlotType == "plotDirectionField")
-    { outScript << currentPlot.GetJavascriptDirectionField(theFnPlots[i], this->canvasName, funCounter) << "\n ";
-    }
+      outScript << currentPlot.GetJavascriptDirectionField(theFnPlots[i], this->canvasName, funCounter) << "\n ";
     if (currentPlot.thePlotType == "points")
       currentPlot.GetJavascriptPoints(theFnPlots[i], this->canvasName, funCounter);
   }
@@ -1507,11 +1498,8 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   //outScript << "console.log('calculator' + window.calculator);";
   //outScript << "console.log('drawing' + window.calculator.drawing);";
   outScript << "var drawing = window.calculator.drawing;\n";
-  outScript << "drawing.resetCanvas(document.getElementById('"
-  << this->canvasName << "'));\n";
-  outScript << "var theCanvas = drawing.getCanvasTwoD(document.getElementById('"
-  << this->canvasName
-  << "'));\n"
+  outScript << "drawing.deleteCanvas('" << this->canvasName << "');\n";
+  outScript << "var theCanvas = drawing.getCanvasTwoD('" << this->canvasName << "');\n"
   << "theCanvas.init('" << this->canvasName << "');\n";
   if (owner.flagPlotNoControls)
     outScript << "theCanvas.flagShowPerformance = false;\n";
@@ -1603,9 +1591,8 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   outScript
   << "theCanvas.redraw();\n"
   << "}\n"
-  << "window.calculator.drawing.getCanvasTwoD(document.getElementById('"
-  << this->canvasName
-  << "')).canvasResetFunction = " << canvasFunctionName << ";\n"
+  << "window.calculator.drawing.getCanvasTwoD('" << this->canvasName << "').canvasResetFunction = "
+  << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n";
   owner.theObjectContainer.graphicsScripts.SetKeyValue(this->canvasName, outScript.str());
   out << "<script language =\"javascript\">\n" << outScript.str() << "</script>";

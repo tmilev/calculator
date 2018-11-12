@@ -16,10 +16,13 @@ bool CalculatorHtmlFunctions::innerUserInputBox
   if (!theArguments.Contains("name"))
     return theCommands << "User input name not specified in: " << input.ToString();
   std::string boxName = CalculatorHtmlFunctions::GetUserInputBoxName(input);
+  //stOutput << "DEBUG: box name first: " << boxName << "<br>input boxes: "
+  //<< theCommands.theObjectContainer.theUserInputTextBoxesWithValues.ToStringHtml() << "<hr>";
   if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName))
     return output.AssignValue(theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(boxName), theCommands);
   InputBox newBox;
   newBox.name = boxName;
+  //stOutput << "DEBUG: box name: " << newBox.name << "<br>";
   for (int i = 0; i < theArguments.theKeys.size; i ++)
   { if (theArguments.theKeys[i] == "value")
       newBox.value = theArguments.theValues[i];
@@ -79,10 +82,15 @@ bool CalculatorHtmlFunctions::innerSetInputBox
   if (!theArguments.Contains("value") )
     return theCommands << "Input box value not specified in: " << input.ToString();
   std::string boxName = CalculatorHtmlFunctions::GetUserInputBoxName(input);
+  //stOutput << "DEBUG: box name before getvaluecreate: " << boxName << ", all boxes: "
+  //<< "<br>" << theCommands.theObjectContainer.theUserInputTextBoxesWithValues.ToStringHtml() << "<hr>";
   if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName))
     return theCommands << "Input box with name: " << boxName << " already has value.";
   InputBox& theBox =
   theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(boxName);
+  theBox.name = boxName;
+  //stOutput << "DEBUG: box name AFTER getvaluecreate: " << boxName << ", all boxes: "
+  //<< "<br>" << theCommands.theObjectContainer.theUserInputTextBoxesWithValues.ToStringHtml() << "<hr>";
   theBox.value = theArguments.GetValueCreate("value");
   std::stringstream out;
   out << "Set value to input box name: " << boxName;

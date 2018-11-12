@@ -1,6 +1,7 @@
 "use strict";
 const submitRequests = require('./submit_requests');
 const pathnames = require('./pathnames');
+const calculatorPage = require('./calculator_page');
 
 var staticWordCompleter = {
   getCompletions: function(editor, session, pos, prefix, callback) {
@@ -56,7 +57,7 @@ function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
   console.log(`DEBUG: handle clone with input: ${fileName}, new file name: ${newFileName}`); 
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
-  theURL += submitRequests.getQueryStringSubmitStringAsMainInput(newFileName, pathnames.requestClonePage);
+  theURL += calculatorPage.calculator.getQueryStringSubmitStringAsMainInput(newFileName, pathnames.requestClonePage);
   theURL += `${pathnames.fileName}=${fileName}&`;
   //console.log("DEBUG: about to submit: " + theURL); 
   submitRequests.submitGET({
@@ -71,7 +72,7 @@ function storeEditedPage() {
   var editor = thePage.pages.editPage.editor;
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
-  theURL += submitRequests.getQueryStringSubmitStringAsMainInput(editor.getValue(), pathnames.requestModifyPage);
+  theURL += calculatorPage.calculator.getQueryStringSubmitStringAsMainInput(editor.getValue(), pathnames.requestModifyPage);
   theURL += `${pathnames.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}&`;
   //console.log("DEBUG: about to submit: " + theURL); 
   submitRequests.submitGET({

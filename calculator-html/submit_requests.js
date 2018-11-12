@@ -1,6 +1,7 @@
 "use srict";
 const pathnames = require('./pathnames');
 const miscellaneous = require('./miscellaneous');
+const ids = require('./ids_dom_elements');
 
 function recordProgressDone(progress, timeFinished) {
   if (progress === null || progress === undefined || progress === "") {
@@ -170,9 +171,6 @@ function recordResult(resultText, resultSpan) {
  *
  * inputObject.url: url of the address to get. If omitted, service must be specified.
  *
- * inputObject.service: if url is missing, this is appended to the default server name and used
- *   in place of inputObject.url. If inputObject.url is specified, this argument is ignored.
- *
  * inputObject.callback: function to callback. The function will be passed on
  *   as arguments the received result.
  *   The result may in addition be displayed in the component inputObject.result, should
@@ -189,7 +187,10 @@ function recordResult(resultText, resultSpan) {
  *   but otherwise non-processed final result.
  *   Pass null or undefined if you don't want to show the result.
  */
-function submitGET(inputObject) {
+function submitGET(
+  /** @type {{url: string, callback: Function, progress: string, result: string}}*/
+  inputObject
+) {
   var theAddress = inputObject.url;
   var progress = inputObject.progress;
   var result = inputObject.result;
@@ -208,50 +209,36 @@ function submitGET(inputObject) {
   xhr.send();
 }
 
-function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus) {
-  var spanOutput = document.getElementById(idOutput);
-  if (spanOutput === null) {
-    spanOutput = document.createElement('span');
-    spanOutput.innerHTML = `<span style ='color:red'> ERROR: span with id ${idOutput} MISSING! </span>`;
-    document.body.appendChild(spanOutput);
-  }
+function submitPOST(
+  /** @type {{url: string, parameters: string, callback: Function, progress: string, result: string}}*/
+  inputObject
+) {
+  var theAddress = inputObject.url;
+  var progress = inputObject.progress;
+  var result = inputObject.result;
+  var callback = inputObject.callback;
   var https = new XMLHttpRequest();
-  https.open("POST", pathnames.urls.calculatorAPI, true);
+  var parameters = inputObject.parameters;
+  https.open("POST", theAddress, true);
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-  if (idStatus === undefined) {
-    idStatus = idOutput;
+  if (progress === undefined) {
+    progress = ids.domElements.spanProgressReportGeneral;
   }
   timeOutCounter = 0;
 
-  var postRequest = `POST ${pathnames.urls.calculatorAPI}<br>message: ${miscellaneous.shortenString(inputParams, 200)}`;
-  recordProgressStarted(idStatus, postRequest, true, (new Date()).getTime());
+  var postRequest = `POST ${pathnames.urls.calculatorAPI}<br>message: ${miscellaneous.shortenString(parameters, 200)}`;
+  recordProgressStarted(progress, postRequest, true, (new Date()).getTime());
 
   https.onload = function() { 
-    recordProgressDone(idStatus, (new Date()).getTime());
-    spanOutput.innerHTML = https.responseText;
-    if (onLoadFunction !== undefined && onLoadFunction !== null && onLoadFunction !== 0) {
-      onLoadFunction(idOutput);
+    recordProgressDone(progress, (new Date()).getTime());
+    recordResult(https.responseText, result);
+    if (callback !== undefined && callback !== null) {
+      callback(result);
     }
   }
   ////////////////////////////////////////////
-  https.send(inputParams);
+  https.send(parameters);
   ////////////////////////////////////////////
-}
-
-function getQueryStringSubmitStringAsMainInput(theString, requestType) {
-  var inputParams = '';
-  var thePage = window.calculator.mainPage;
-  inputParams += `${pathnames.urlFields.request}=${requestType}&`;
-  inputParams += `${pathnames.urlFields.mainInput}=${encodeURIComponent(theString)}&`;
-  if (thePage.flagDebug === true) {
-    inputParams += `${pathnames.urlFields.debugFlag}=true&`;
-  }
-  return inputParams;
-}
-
-function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
-  var inputParams = getQueryStringSubmitStringAsMainInput(theString, requestType);
-  submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);
 }
 
 var isPaused = false;
@@ -331,42 +318,9 @@ function SendTogglePauseRequest() {
   pauseRequest.send(null);
 }
 
-var submissionCalculatorCounter = 0;
-function calculatorLinkClickHandler() {
-  window.calculator.mainPage.loadSettings(this.href.split('#')[1]); 
-  submitCalculatorComputation();
-}
-
-function submitCalculatorComputation() {
-  var result = "";
-  var thePage = window.calculator.mainPage;
-  var calculatorInput = document.getElementById("mainInputID").value;
-  if (calculatorInput === thePage.calculatorInputLastSubmitted) {
-    return;
-  }
-  thePage.calculatorInputLastSubmitted = calculatorInput;
-  var calculatorInputEncoded = encodeURIComponent(calculatorInput);
-  var theJSON = {
-    calculatorRequest: "calculatorOutput",
-    calculatorInput : calculatorInputEncoded,
-    currentPage: thePage.pages.calculator.name
-  };
-  var theId = `submitCalculatorLink${submissionCalculatorCounter}`;
-  result += `<a href = '#${encodeURIComponent(JSON.stringify(theJSON))}' id = "${theId}">Link to your input</a>`;
-  document.getElementById("spanComputationLink").innerHTML = result;
-  theAnchor = document.getElementById(theId); 
-  theAnchor.addEventListener('click', calculatorLinkClickHandler.bind(theAnchor));
-  submitStringAsMainInput(
-    document.getElementById("mainInputID").value,
-    "calculatorOutput", 
-    "compute", 
-    thePage.defaultOnLoadInjectScriptsAndProcessLaTeX.bind(thePage),
-    "mainComputationStatus"
-  );
-}
-
 module.exports = {
-  submitCalculatorComputation,
   submitGET,
+  submitPOST,
   doToggleContent,
+
 }

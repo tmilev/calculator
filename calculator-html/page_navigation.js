@@ -3,7 +3,6 @@ const selectCourse = require('./select_course');
 const coursePage = require('./course_page'); 
 const problemPage = require('./problem_page');
 const edigPage = require('./edit_page');
-const submitRequests = require('./submit_requests');
 const database = require('./database');
 const serverStatus = require('./server_status');
 const accountPage = require('./account');
@@ -14,7 +13,6 @@ const ids = require('./ids_dom_elements');
 const serverInformation = require('./server_information');
 const login = require('./login');
 const initializeButtons = require('./initialize_buttons');
-const pathnames = require('./pathnames');
 const calculatorPage = require('./calculator_page');
 
 function User() {
@@ -93,6 +91,14 @@ function StorageVariable(
   }
 }
 
+/**@returns {Boolean}  */
+StorageVariable.prototype.isTrue = function() {
+  if (this.value === "true" || this.value === true) {
+    return true;
+  }
+  return false;
+}
+
 StorageVariable.prototype.getValue = function() {
   return this.value;
 }
@@ -119,10 +125,10 @@ StorageVariable.prototype.loadMe = function(hashParsed) {
       }
     }
   }
-  this.setAndStore(candidate, false);
+  this.setAndStore(candidate, false, true);
 }
 
-StorageVariable.prototype.storeMe = function(/**@type {boolean} */ updateURL) {
+StorageVariable.prototype.storeMe = function(/**@type {boolean} */ updateURL, /**@type {boolean} */ updateAssociatedInput) {
   if (Storage !== undefined || localStorage !== undefined) {
     if (this.nameLocalStorage !== "" && this.nameLocalStorage !== null && this.nameLocalStorage !== undefined) {
       localStorage[this.nameLocalStorage] = this.value;
@@ -134,9 +140,14 @@ StorageVariable.prototype.storeMe = function(/**@type {boolean} */ updateURL) {
   if (updateURL !== false) {
     mainPage().storage.setURL();
   }
+  if (updateAssociatedInput === true) {
+    if (this.associatedDOMId !== null && this.associatedDOMId !== undefined && this.associatedDOMId !== "") {
+      document.getElementById(this.associatedDOMId).value = this.value;
+    }
+  }
 }
 
-StorageVariable.prototype.setAndStore = function(newValue, updateURL) {
+StorageVariable.prototype.setAndStore = function(newValue, /**@type {boolean} */ updateURL, /**@type {boolean} */ updateAssociatedInput) {
   if (updateURL === undefined ) {
     updateURL = true;
   }
@@ -144,7 +155,7 @@ StorageVariable.prototype.setAndStore = function(newValue, updateURL) {
     return;
   }
   this.value = newValue;
-  this.storeMe(updateURL);
+  this.storeMe(updateURL, updateAssociatedInput);
   if (this.callbackOnValueChange !== null && this.callbackOnValueChange !== undefined) {
     this.callbackOnValueChange(this.value);
   }
@@ -223,7 +234,7 @@ function StorageCalculator() {
       input: new StorageVariable({
         name: "calculatorInput", 
         nameURL: "calculatorInput",
-        associatedDOMId: "mainInputID"
+        associatedDOMId: ids.domElements.inputMain,
       }),
       request: new StorageVariable({
         name: "calculatorRequest", 
@@ -281,7 +292,7 @@ StorageCalculator.prototype.loadSettings = function() {
   this.loadSettingsRecursively(this.variables, this.urlObject);
 }
 
-StorageCalculator.prototype.loadSettingsRecursively = function(currentStorage, inputHashParsed) {
+StorageCalculator.prototype.loadSettingsRecursively = function(/**@type {StorageVariable} */ currentStorage, inputHashParsed) {
   if (currentStorage instanceof StorageVariable) {
     currentStorage.loadMe(inputHashParsed);
     return;
@@ -385,7 +396,7 @@ function Page() {
       id: "divCalculatorPage",
       menuButtonId: "buttonSelectCalculator",
       container: null,
-      selectFunction: submitRequests.submitCalculatorComputation,
+      selectFunction: calculatorPage.calculator.submitComputation.bind(calculatorPage.calculator),
       scriptIds: [],
     },
     signUp: {
@@ -452,7 +463,6 @@ function Page() {
   //Initialize global variables
   //////////////////////////////////////
   //////////////////////////////////////
-  this.calculatorInputLastSubmitted = "";
   this.theTopics = {};
   this.theCourses = {}; 
   this.scriptsInjected = {};
@@ -600,8 +610,8 @@ Page.prototype.flipDebugSwitch = function () {
 }
 
 Page.prototype.setSwitches = function () {
-  //console.log ("DEBUG flag: " + this.flagDebug);
-  if (this.storage.variables.flagDebug.getValue() === true || this.storage.variables.flagDebug.getValue() === "true") {
+
+  if (this.storage.variables.flagDebug.isTrue()) {
     document.getElementById(ids.domElements.sliderDebugFlag).checked = true;
   } else {
     document.getElementById(ids.domElements.sliderDebugFlag).checked = false;
@@ -638,7 +648,7 @@ Page.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(idElement) {
     this.injectScript(newId, incomingScripts[i].innerHTML);
   }
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById(idElement)]);
-  MathJax.Hub.Queue([calculator.addListenersToInputBoxes]);
+  MathJax.Hub.Queue([calculator.addListenersToInputBoxes.bind(calculator)]);
 //  alert(theString);
 }
 

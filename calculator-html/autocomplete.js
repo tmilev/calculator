@@ -1,4 +1,5 @@
 "use strict";
+const ids = require('./ids_dom_elements');
 var theAutocompleteDictionary = require('./autocomplete_keywords').theAutocompleteDictionary;
 
 var minLengthAutocompleteTrigger = 2;
@@ -29,7 +30,7 @@ function initializeAutocomplete() {
   AutocompleteIsInitialized = true;
   theAutocompleteDictionaryLowerCase = new Array;
   theAutocompleteDictionaryByKey = new Array;
-  theText = document.getElementById('mainInputID');
+  theText = document.getElementById(ids.domElements.inputMain);
   theSuggestions = new Array;
   theSuggestionsHighlighted = new Array;
   theAutoComplete = document.getElementById('idAutocompleteSpan');

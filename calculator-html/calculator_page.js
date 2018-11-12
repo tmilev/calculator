@@ -2,6 +2,7 @@
 const submitRequests = require('./submit_requests');
 const pathnames = require('./pathnames');
 const drawing = require('./three-d').drawing;
+const ids = require('./ids_dom_elements');
 
 function Calculator() {
 
@@ -9,7 +10,8 @@ function Calculator() {
   this.inputBoxToSliderUpdaters = {};
   this.canvases = null;
   this.examples = null;
-
+  this.submissionCalculatorCounter = 0;
+  this.lastSubmittedInput = "";
 }
 
 var calculatorMQString;
@@ -38,36 +40,37 @@ function createSelectionNoFocus(field, start, end) {
   }
 }
 
-Calculator.prototype.updateCalculatorSliderEventHandler = function () {
+Calculator.prototype.updateCalculatorSliderEventHandler = function (inputBox) {
   event.preventDefault();
-  var sliderName = this.inputBoxToSliderUpdaters[this.name];
+  var sliderName = this.inputBoxToSliderUpdaters[inputBox.name];
   var theSliders = document.getElementsByName(sliderName);
   for (var counterSlider = 0; counterSlider < theSliders.length; counterSlider ++) {
     var currentSlider = theSliders[counterSlider];
-    currentSlider.value = this.value;
+    currentSlider.value = inputBox.value;
   }
-  updateCalculatorSliderToInputBox(this.name, sliderName);
+  this.updateSliderToInputBox(inputBox.name, sliderName);
 }
 
 Calculator.prototype.addListenersToInputBoxes = function() {
   //var theString=" updating: box names, slider names: ";
-  for (var i = 0; i < this.calculatorInputBoxNames.length; i ++) {
-    var theBoxes = document.getElementsByName(this.calculatorInputBoxNames[i]);
+  for (var i = 0; i < this.inputBoxNames.length; i ++) {
+    var theBoxes = document.getElementsByName(this.inputBoxNames[i]);
     for (var j = 0; j < theBoxes.length; j ++) {
-      theBoxes[j].addEventListener("input", updateCalculatorSliderEventHandler.bind(theBoxes[j]));
+      theBoxes[j].addEventListener("input", this.updateCalculatorSliderEventHandler.bind(this, theBoxes[j]));
     }
   }
 }
 
-Calculator.prototype.updateCalculatorSliderToInputBox =  function(boxName, sliderName) { 
+Calculator.prototype.updateSliderToInputBox =  function(boxName, sliderName) { 
   var theBoxes = document.getElementsByName(boxName);
   var theSliders = document.getElementsByName(sliderName);
   var sliderValue = theSliders[0].value;
   for (var i = 0; i < theBoxes.length; i ++) {
     theBoxes[i].value = sliderValue;
   }
-  if (drawing.plotUpdaters[sliderName] !== undefined) { 
-    var theCanvas = this.canvases[drawing.plotUpdaters[sliderName]];
+  var plodtId = drawing.plotUpdaters[sliderName];
+  if (plodtId !== undefined) { 
+    var theCanvas = drawing.canvases[plodtId];
     if (theCanvas !== undefined) { 
       if (theCanvas.canvasResetFunction !== null) {
         theCanvas.canvasResetFunction();
@@ -107,9 +110,9 @@ Calculator.prototype.exampleClick = function(theLink) {
   }
 
   //console.log(theHandler);
-  var mainInput = document.getElementById("mainInputID");
+  var mainInput = document.getElementById(ids.domElements.inputMain);
   mainInput.value = theHandler.example;
-  submitRequests.submitCalculatorComputation();
+  this.submitComputation();
 }
 
 function processOneFunctionAtom(handlers, isComposite) {
@@ -165,7 +168,7 @@ Calculator.prototype.submitCalculatorInputOnEnter = function () {
   if (event.keyCode !== 13 || !event.shiftKey) {
     return;
   }
-  submitRequests.submitCalculatorComputation();
+  this.submitComputation();
   event.preventDefault();
 }
 
@@ -186,6 +189,59 @@ Calculator.prototype.toggleExamples = function(theButton) {
       theButton.innerHTML = "&#9656;";
     }
   }
+}
+
+Calculator.prototype.calculatorLinkClickHandler = function(theAnchor) {
+  window.calculator.mainPage.storage.loadSettings(theAnchor.href.split('#')[1]); 
+  this.submitComputation();
+}
+
+Calculator.prototype.submitComputation = function() {
+  var result = "";
+  var thePage = window.calculator.mainPage;
+  var calculatorInput = document.getElementById(ids.domElements.inputMain).value;
+  if (calculatorInput === this.lastSubmittedInput) {
+    return;
+  }
+  this.lastSubmittedInput = calculatorInput;
+
+
+  var calculatorInputEncoded = encodeURIComponent(calculatorInput);
+  var theJSON = {
+    calculatorInput : calculatorInputEncoded,
+    currentPage: thePage.pages.calculator.name,
+  };
+  this.submissionCalculatorCounter ++;
+  var theId = `submitCalculatorLink${this.submissionCalculatorCounter}`;
+  result += `<a href = '#${JSON.stringify(theJSON)}' id = "${theId}">Link to your input</a>`;
+  document.getElementById("spanComputationLink").innerHTML = result;
+  var theAnchor = document.getElementById(theId); 
+  theAnchor.addEventListener('click', this.calculatorLinkClickHandler.bind(this, theAnchor));
+  var url = pathnames.urls.calculatorAPI;
+  var parameters = this.getQueryStringSubmitStringAsMainInput(this.lastSubmittedInput, pathnames.urlFields.calculatorCompute);
+  submitRequests.submitPOST ({
+    url: url,
+    parameters:  parameters,
+    result: ids.domElements.spanCalculatorMainOutput,
+    callback: thePage.defaultOnLoadInjectScriptsAndProcessLaTeX.bind(thePage),
+    progress: ids.domElements.spanProgressCalculatorInput
+  });
+}
+
+Calculator.prototype.getQueryStringSubmitStringAsMainInput = function(theString, requestType) {
+  var inputParams = '';
+  var thePage = window.calculator.mainPage;
+  inputParams += `${pathnames.urlFields.request}=${requestType}&`;
+  inputParams += `${pathnames.urlFields.mainInput}=${encodeURIComponent(theString)}&`;
+  if (thePage.storage.variables.flagDebug.isTrue()) {
+    inputParams += `${pathnames.urlFields.debugFlag}=true&`;
+  }
+  return inputParams;
+}
+
+Calculator.prototype.submitStringAsMainInput= function (theString, idOutput, requestType, onLoadFunction, idStatus) {
+  var inputParams = this.getQueryStringSubmitStringAsMainInput(theString, requestType);
+  this.submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);
 }
 
 var calculator = new Calculator();

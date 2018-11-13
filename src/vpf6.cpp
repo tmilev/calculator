@@ -24,10 +24,6 @@ Calculator::Calculator()
   this->flagPlotShowJavascriptOnly = false;
 }
 
-std::string Calculator::GetCalculatorLink(const std::string& input)
-{ return HtmlRoutines::GetCalculatorLink(theGlobalVariables.DisplayNameExecutable, input);
-}
-
 std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
 (const std::string& fileContent, std::string* outputFileNameNoExtension, bool useLatexDviPSpsToPNG)
 { std::fstream theFile;
@@ -1043,7 +1039,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   out << "<br>Weyl group size: " << theWeyl.theGroup.GetSize().ToString() << "." << "<br>To get extra details: ";
   std::stringstream tempStream;
   tempStream << "PrintSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
-  out << theCommands.GetCalculatorLink(tempStream.str()) << "<br>";
+  out << HtmlRoutines::GetCalculatorComputationLink(tempStream.str()) << "<br>";
   if (Verbose)
   { DrawingVariables theDV;
     theWeyl.DrawRootSystem(theDV, true, true, 0, true, 0);

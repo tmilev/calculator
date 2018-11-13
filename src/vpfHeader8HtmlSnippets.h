@@ -47,7 +47,7 @@ public:
   static bool URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out, bool replacePlusBySpace);
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
-  static std::string GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input);
+  static std::string GetCalculatorComputationLink(const std::string& input);
   static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label = "Expand/collapse", const std::string& desiredID = "");
   static std::string GetHtmlLinkFromProjectFileName
   (const std::string& fileName, const std::string& fileDesc = "", int line = - 1);

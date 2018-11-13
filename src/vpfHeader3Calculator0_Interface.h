@@ -1155,7 +1155,6 @@ public:
   std::string ToStringSyntacticStackHumanReadable(bool includeLispifiedExpressions, bool ignoreCommandEnclosures);
   std::string WriteDefaultLatexFileReturnHtmlLink
   (const std::string& fileContent, std::string* outputFileNameNoExtension, bool useLatexDviPSpsToPNG = false);
-  std::string GetCalculatorLink(const std::string& input);
   std::string ToStringIsCorrectAsciiCalculatorString(const std::string& input);
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);

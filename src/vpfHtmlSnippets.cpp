@@ -5,6 +5,7 @@
 #include "vpfHeader1General4General_Logging_GlobalVariables.h"
 #include "vpfHeader1General7FileOperations_Encodings.h"
 #include <iomanip>
+#include "vpfWebAPI.h"
 
 ProjectInformationInstance projectInfoInstanceHtmlSnippets
 (__FILE__, "Html Snippets.");
@@ -214,10 +215,14 @@ std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull()
   return out.str();
 }
 
-std::string HtmlRoutines::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)
+std::string HtmlRoutines::GetCalculatorComputationLink(const std::string& input)
 { std::stringstream out;
-  out << "<a href=\"" << DisplayNameCalculator << "?request=calculator&mainInput="
-  << HtmlRoutines::ConvertStringToURLString(input, false) << "\"> " << input << "</a>";
+  JSData theRequest;
+  theRequest[DatabaseStrings::labelCalculatorInput] = input;
+  theRequest[DatabaseStrings::labelCurrentPage] = WebAPI::calculatorCalculatorPage;
+  out << "<a href = \"#" << HtmlRoutines::ConvertStringToURLString(theRequest.ToString(false), false)
+  << "\" onclick = \"window.calculator.calculator.calculatorLinkClickHandler(this);\">"
+  << HtmlRoutines::ConvertStringToHtmlString(input, false) << "</a>";
   return out.str();
 }
 

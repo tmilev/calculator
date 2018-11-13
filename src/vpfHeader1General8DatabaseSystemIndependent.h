@@ -142,5 +142,6 @@ public:
   static std::string labelPageAccount;
   static std::string labelPageActivateAccount;
   static std::string labelCalculatorRequest;
+  static std::string labelCalculatorInput;
 };
 #endif

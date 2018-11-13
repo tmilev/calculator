@@ -140,6 +140,7 @@ std::string DatabaseStrings::labelIdMongo = "_id";
 std::string DatabaseStrings::labelCurrentPage = "currentPage";
 std::string DatabaseStrings::labelPageSignUp = "signUp";
 std::string DatabaseStrings::labelCalculatorRequest = "calculatorRequest";
+std::string DatabaseStrings::labelCalculatorInput = "calculatorInput";
 std::string DatabaseStrings::labelPageAccount = "account";
 std::string DatabaseStrings::labelPageActivateAccount = "activateAccount";
 

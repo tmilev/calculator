@@ -4470,8 +4470,8 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SltwoSubalgebras::ToHTML");
   std::string physicalPathSAs = this->owner->VirtualNameSSAlgOutputFolder;
   //std::string htmlPathServerSAs = this->owner->DisplayNameSSalgOutputFolder;
-  std::string RelativePhysicalPathSl2s = this->owner->VirtualNameSSAlgOutputFolder+"sl2s/";
-  std::string htmlPathServerSl2s = this->owner->DisplayNameSSalgOutputFolder+"sl2s/";
+  std::string RelativePhysicalPathSl2s = this->owner->VirtualNameSSAlgOutputFolder + "sl2s/";
+  std::string htmlPathServerSl2s = this->owner->DisplayNameSSalgOutputFolder + "sl2s/";
   ProgressReport theReport;
   theReport.Report("Preparing html pages for sl(2) subalgebras. This might take a while.");
   this->theRootSAs.ToHTML(theFormat);
@@ -4484,7 +4484,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
   outNotationCommand << "PrintSemisimpleLieAlgebra{}("
   << this->GetOwnerWeyl().theDynkinType.ToString() << ")" ;
   outNotation << "Notation, structure constants and Weyl group info: "
-  << HtmlRoutines::GetCalculatorLink(theGlobalVariables.DisplayNameExecutable, outNotationCommand.str())
+  << HtmlRoutines::GetCalculatorComputationLink(outNotationCommand.str())
   << "<br> <a href=\"" << theGlobalVariables.DisplayNameExecutable
   << "?request=calculator"
   << "\"> Calculator main page</a><br><a href=\"../rootSubalgebras.html\">Root subsystem table</a><br>";

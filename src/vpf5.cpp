@@ -1828,7 +1828,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   }
   if (allWentGreat)
     out << "<span style =\"color:#0000FF\">All " << commandStrings.size << " results coincide with previously recorded values.</span> ";
-  out << "<br>The command for updating the test file is " << theCommands.GetCalculatorLink("AutomatedTestSetKnownGoodCopy 0");
+  out << "<br>The command for updating the test file is " << HtmlRoutines::GetCalculatorComputationLink("AutomatedTestSetKnownGoodCopy 0");
   out << "<br>Total time for the test: " << theGlobalVariables.GetElapsedSeconds() - startingTime;
   return output.AssignValue(out.str(), theCommands);
 }

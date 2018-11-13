@@ -11,6 +11,7 @@ public:
   static std::string appNoCache;
   static std::string app;
 
+  static std::string calculatorCalculatorPage;
   static std::string calculatorSetProblemData;
   static std::string calculatorChangePassword;
   static std::string calculatorActivateAccount;

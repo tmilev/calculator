@@ -122,7 +122,7 @@ std::string DrawingVariables::GetHtmlDiv(int theDimension)
   theData["dimension"] = theDimension;
   out << "<script>\n";
   out << "var " << graphicsVar << " = " << theData.ToString(false, false) << ";\n";
-  out << "CreateGraphicsFromObject(" << graphicsVar << ");\n";
+  out << "window.calculator.graphicsNDimension.createGraphicsFromObject(" << graphicsVar << ");\n";
   out << "</script>";
   return out.str();
 }

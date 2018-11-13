@@ -12,6 +12,7 @@ std::string WebAPI::app = "app";
 std::string WebAPI::calculatorHTML = "/calculator-html";
 std::string WebAPI::calculatorOnePageJS = "/calculator-html/javascript_all_in_one.js";
 std::string WebAPI::calculatorOnePageJSWithHash = "/calculator-html/javascript_all_in_one.js";
+std::string WebAPI::calculatorCalculatorPage = "calculator";
 std::string WebAPI::calculatorSetProblemData = "setProblemData";
 std::string WebAPI::calculatorChangePassword = "changePassword";
 std::string WebAPI::calculatorActivateAccount = "activateAccount";

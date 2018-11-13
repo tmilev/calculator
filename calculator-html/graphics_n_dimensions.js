@@ -151,7 +151,7 @@ GraphicsNDimensions.prototype.initInfo = function () {
     }
     result += "<br>";
   }
-  result += `<button onclick = "startProjectionPlaneUser('${this.idCanvas}')">`;
+  result += `<button onclick = "window.calculator.graphicsNDimensions.startProjectionPlaneUser('${this.idCanvas}')">`;
   result += `Change to basis</button><br>`;
   //result += `<button onclick = "snapShotLaTeX('${this.idCanvas}')>LaTeX snapshot</button>`;
   result += `<span id = "${this.idCanvas}snapShotLateXspan"> </span>\n`;
@@ -1073,7 +1073,7 @@ GraphicsNDimensions.prototype.animate = function () {
   this.animation.timeoutHandle = setTimeout(this.animate.bind(this), this.animation.frameLength);
 }
 
-function CreateGraphicsFromObject(input) {
+function createGraphicsFromObject(input) {
   if (input.idCanvas === undefined || input.idCanvas === null) {
     throw("idCanvas missing.");
   }
@@ -1144,4 +1144,25 @@ function testA4(idCanvas, idSpanInformation) {
   }
   theA4.graphicsUnit = 150;
   theA4.drawAll();
+}
+
+var module;
+if (window.calculator === undefined) {
+  window.calculator = {};
+}
+
+if (window.calculator.graphicsNDimensions === undefined) {
+  window.calculator.graphicsNDimensions = {
+    startProjectionPlaneUser: startProjectionPlaneUser
+  };
+}
+
+if (module === undefined) {
+  module = {};
+}
+
+module.exports = {
+  createGraphicsFromObject,
+  GraphicsNDimensions,
+  startProjectionPlaneUser
 }

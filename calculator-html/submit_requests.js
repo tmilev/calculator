@@ -322,5 +322,4 @@ module.exports = {
   submitGET,
   submitPOST,
   doToggleContent,
-
 }

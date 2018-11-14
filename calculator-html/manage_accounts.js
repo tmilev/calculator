@@ -76,7 +76,7 @@ function addEmailsOrUsers(
   var spanPasswords = document.getElementById(idPasswords);
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
-  theURL += `request=${requestType}&`;
+  theURL += `${pathnames.urlFields.request}=${requestType}&`;
   theURL += `userRole=${userRole}&`;
   theURL += `userList=${encodeURIComponent(spanEmailList.value)}&`;
   theURL += `studentSection=${encodeURIComponent(spanUserGroup.value)}&`;
@@ -124,5 +124,6 @@ function updateAccountsPage() {
 }
 
 module.exports = {
+  addEmailsOrUsers,
   updateAccountsPage
 }

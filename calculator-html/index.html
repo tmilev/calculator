@@ -121,7 +121,7 @@ function browserify() {
     <b>Google login:</b>
     <div id = "divGoogleLoginButton">Google unavailable (did page fully load? Internet?).</div>
   </div><!--divCenteredItem-->
-  <div>
+  <div class = "divCenteredItem">
     <div id = "spanLoginStatus" style = "height: 10px; width: 190px; text-align: center"></div>
   </div>
   <div class = "divCenteredItem">
@@ -392,7 +392,7 @@ function browserify() {
     <textarea width = "500px" id = "inputAddDefaultPasswordsadmin" placeholder = "default passwords"></textarea>
     <textarea width = "500px" id = "inputAddExtraInfoadmin" placeholder = "section/class #"></textarea>
     <br>
-    <button class = "buttonNormal" onclick = "addEmailsOrUsers('inputAddUsersadmin', '', 'idOutputAdmins', 'admin', 'inputAddExtraInfoadmin', 'inputAddDefaultPasswordsadmin', 'addUsers' )"> Add users</button> 
+    <button class = "buttonNormal" onclick = "window.calculator.manageAccounts.addEmailsOrUsers('inputAddUsersadmin', '', 'idOutputAdmins', 'admin', 'inputAddExtraInfoadmin', 'inputAddDefaultPasswordsadmin', 'addUsers' )"> Add users</button> 
     <br>
     <span id = "idOutputAdmins"></span>
     <ul>
@@ -410,7 +410,7 @@ function browserify() {
     <textarea width = "500px" id = "inputAddDefaultPasswordsstudent" placeholder = "default passwords"></textarea>
     <textarea width = "500px" id = "inputAddExtraInfostudent" placeholder = "section/class #"></textarea>
     <br>
-    <button class = "normalButton" onclick = "addEmailsOrUsers('inputAddUsersstudent', '', 'idOutputStudents', 'student', 'inputAddExtraInfostudent', 'inputAddDefaultPasswordsstudent', 'addUsers' )"> Add users</button>
+    <button class = "normalButton" onclick = "window.calculator.manageAccounts.addEmailsOrUsers('inputAddUsersstudent', '', 'idOutputStudents', 'student', 'inputAddExtraInfostudent', 'inputAddDefaultPasswordsstudent', 'addUsers' )"> Add users</button>
     <br>
     <span id = "idOutputStudents"></span>
   </div>

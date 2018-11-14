@@ -280,8 +280,8 @@ UserCalculator::UserCalculator()
 UserCalculator::~UserCalculator()
 { for (unsigned i = 0; i < this->enteredPassword.size(); i ++)
     this->enteredPassword[i] = ' ';
-  for (unsigned i = 0; i < this->usernamePlusPassWord.size(); i ++)
-    this->usernamePlusPassWord[i] = ' ';
+  for (unsigned i = 0; i < this->usernameHashedPlusPassWordHashed.size(); i ++)
+    this->usernameHashedPlusPassWordHashed[i] = ' ';
   for (unsigned i = 0; i < this->enteredHashedSaltedPassword.size(); i ++)
     this->enteredHashedSaltedPassword[i] = ' ';
   for (unsigned i = 0; i < this->actualHashedSaltedPassword.size(); i ++)
@@ -520,16 +520,18 @@ bool UserCalculator::Iexist(std::stringstream* comments)
 
 void UserCalculator::ComputeHashedSaltedPassword()
 { MacroRegisterFunctionWithName("UserCalculator::ComputeShaonedSaltedPassword");
-  this->usernamePlusPassWord.resize(this->username.size() + this->enteredPassword.size());
-  //<-careful copying those around. We want to avoid leaving
+  this->usernameHashedPlusPassWordHashed.resize(Crypto::LengthSha3DefaultInBytes * 2);
+  List<unsigned char> hasher;
+  Crypto::computeSha3_256(this->enteredPassword, hasher);
+  //<-careful copying entered password around. We want to avoid leaving
   //passwords in non-zeroed memory, even if properly freed (to the extent possible and practical).
-  for (unsigned i = 0; i < this->username.size(); i ++)
-    this->usernamePlusPassWord[i] = this->username[i];
-  unsigned offset = this->username.size();
-  for (unsigned i = 0; i < this->enteredPassword.size(); i ++)
-    this->usernamePlusPassWord[i + offset] = this->enteredPassword[i];
+  for (unsigned i = 0; i < Crypto::LengthSha3DefaultInBytes; i ++)
+    this->usernameHashedPlusPassWordHashed[i + Crypto::LengthSha3DefaultInBytes] = hasher[i];
+  Crypto::computeSha3_256(this->username, hasher);
+  for (unsigned i = 0; i < Crypto::LengthSha3DefaultInBytes; i ++)
+    this->usernameHashedPlusPassWordHashed[i] = hasher[i];
   //stOutput << "DEBUG: usernamePlusPassword: " << this->usernamePlusPassWord;
-  this->enteredHashedSaltedPassword = Crypto::computeSha3_256OutputBase64URL(this->usernamePlusPassWord);
+  this->enteredHashedSaltedPassword = Crypto::computeSha3_256OutputBase64URL(this->usernameHashedPlusPassWordHashed);
 }
 
 bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailure)

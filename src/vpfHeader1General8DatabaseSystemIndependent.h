@@ -11,7 +11,7 @@ class UserCalculatorData
 {
   public:
   double approximateHoursSinceLastTokenWasIssued;
-  std::string usernamePlusPassWord;
+  std::string usernameHashedPlusPassWordHashed;
   std::string userId;
   std::string username;
   std::string email;

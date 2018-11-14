@@ -24,6 +24,7 @@ class Crypto
 public:
 
   static const int RIPEMD160LengthInBytes = 20;
+  static const int LengthSha3DefaultInBytes = 32;
   static bool flagRIPEMDBigEndian;
 
   static List<Certificate> knownCertificates;

@@ -485,7 +485,9 @@ span.studentScoresWrapper{
 .panelExpandable{
   transition: all 2s;
   overflow: hidden;
+  word-wrap: break-word;
 }
+
 a.linkProgressReport{
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -494,10 +496,8 @@ a.linkProgressReport{
   max-width: 120px;
 }
 
-
 .spanProgressReport{
   max-width: 120px;
-  word-wrap: break-word;
 }
 
 #spanCalculatorExamplesContainer {

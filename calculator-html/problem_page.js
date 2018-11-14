@@ -206,20 +206,6 @@ Problem.prototype.getEditPanel = function() {
   return editPage.getEditPanel(decodeURIComponent(this.idURLed));
 }
 
-function toggleClonePanel(button) {
-  var thePanel = button.nextElementSibling; 
-  if (thePanel.style.maxHeight === '200px') {
-    thePanel.style.opacity = '0';
-    thePanel.style.maxHeight = '0';
-    button.innerHTML = `Clone panel &#9666;`;
-  } else {
-    thePanel.style.opacity = '1';
-    thePanel.style.maxHeight = '200px';
-    button.innerHTML = `Clone panel &#9660;`;
-  }
-
-}
-
 Problem.prototype.writeToHTML = function(outputElement) {
   if (typeof outputElement === "string") {
     outputElement = document.getElementById(outputElement);

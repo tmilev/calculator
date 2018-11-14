@@ -108,7 +108,133 @@ function toggleMenu() {
   }
 }
 
+function PanelExpandable(
+  container, 
+  /** @type {Boolean} */ 
+  resetPanel
+) {
+  this.attributes = {
+    buttonId: null,
+    panelId: null,
+    expandedMarkerId: null,
+    panelLabelId: null,
+    panelStatus: null,
+    originalHeight: "0px",
+  }
+  this.containerId = "";
+  this.container = null;
+  this.initialize(container, resetPanel);
+}
+
+PanelExpandable.prototype.matchPanelStatus = function() {
+  var thePanel = document.getElementById(this.attributes.panelId);
+  thePanel.style.maxHeight = "";
+  thePanel.style.height = "";
+  if (this.attributes.panelStatus === "collapsed") {
+    thePanel.style.maxHeight = "0px";
+    thePanel.style.height = "0px";
+  } else {
+    thePanel.style.maxHeight = this.attributes.originalHeight;
+    thePanel.style.height = this.attributes.originalHeight;
+  }
+}
+
+PanelExpandable.prototype.setPanelContent = function(input) {
+  var thePanel = document.getElementById(this.attributes.panelId);
+  thePanel.innerHTML = input;
+  var originalHeight = window.getComputedStyle(thePanel).height;
+  this.container.setAttribute("originalHeight", originalHeight);
+}
+
+PanelExpandable.prototype.setPanelLabel = function(input) {
+  var panelLabel = document.getElementById(this.attributes.panelLabelId);
+  panelLabel.innerHTML = input;
+}
+
+PanelExpandable.prototype.initialize = function(container, resetPanel) {
+  if (container === null || container === undefined || container === "") {
+    return this;
+  }
+  this.container = container;
+  if (typeof this.container === "string") {
+    this.container = document.getElementById(this.container);
+  }
+  this.containerId = this.container.id;
+  if (resetPanel !== true) { 
+    for (var label in this.attributes) {
+      var incoming = this.container.getAttribute(label);
+      this.attributes[label] = incoming;
+      if (incoming === null || incoming === undefined || incoming === undefined) {
+        resetPanel = true;
+        break;
+      }
+    }
+  }
+  if (resetPanel === true) {
+    numberOfButtonToggleProgressReport ++;
+    for (var label in this.attributes) {
+      this.attributes[label] = `progressReport${label}${numberOfButtonToggleProgressReport}`;
+    }
+    this.attributes.panelStatus = "collapsed";
+    this.initializeProgressPanel();
+  }
+}
+
+PanelExpandable.prototype.setStatusToBeCalledThroughTimeout = function() {
+  var panel = document.getElementById(this.attributes.panelId);
+  if (this.attributes.panelStatus === "expanded") {
+    panel.style.maxHeight = this.attributes.originalHeight;
+    panel.style.height = this.attributes.originalHeight;
+    //panel.style.opacity = "1";
+  } else {
+    panel.style.maxHeight = "0px";
+    panel.style.height = "0px";
+    //panel.style.opacity = "0";
+  }
+}
+
+function doToggleContent(progressId) {
+  var thePanel = new PanelExpandable(progressId); 
+  thePanel.doToggleContent();
+}
+
+PanelExpandable.prototype.doToggleContent = function() {
+  if (this.attributes.panelStatus === "collapsed") {
+    document.getElementById(this.attributes.expandedMarkerId).innerHTML = "&#9662;";    
+    this.attributes.panelStatus = "expanded";
+  } else {
+    document.getElementById(this.attributes.expandedMarkerId).innerHTML = "&#9666;";    
+    this.attributes.panelStatus = "collapsed";
+  }
+  this.container.setAttribute("panelStatus", this.attributes.panelStatus);
+  setTimeout(this.setStatusToBeCalledThroughTimeout.bind(this), 0);
+}
+
+
+var numberOfButtonToggleProgressReport = 0;
+
+PanelExpandable.prototype.initializeProgressPanel = function() {
+  for (var label in this.attributes) {
+    this.container.setAttribute(label, this.attributes[label]);
+  }  
+  var spanContainer = document.createElement("span");
+  var spanContent = "";
+  spanContent += `<button id = "${this.attributes.buttonId}" `; 
+  spanContent += `class = "buttonProgress accordionLikeIndividual" `;
+  spanContent += `onclick = "window.calculator.panels.doToggleContent('${this.containerId}');">`;
+  spanContent += `<span id = "${this.attributes.panelLabelId}"></span> <span id = "${this.attributes.expandedMarkerId}">&#9666;</span>`;
+  spanContent += "</button>";
+  spanContent += `<div id = "${this.attributes.panelId}" class = "panelExpandable"></div>`;
+  spanContainer.innerHTML = spanContent;
+  while (this.container.firstChild) {
+    this.container.removeChild(this.container.firstChild);
+  }
+  this.container.appendChild(spanContainer);
+}
+
 module.exports = {
   modifyHeightForTimeout,
   toggleMenu,
+  doToggleContent,
+  PanelExpandable,
 }

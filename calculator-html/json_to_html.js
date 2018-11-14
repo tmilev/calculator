@@ -3,6 +3,13 @@ const submitRequests = require('./submit_requests');
 const miscellaneous = require('./miscellaneous');
 const ids = require('./ids_dom_elements');
 const modifiableDatabaseData = require('./modifiable_database_fields').modifiableDatabaseData;
+const panels = require('./panels');
+
+
+function JSONToHTML() {
+  /** @type {Array.<{panelId: string, label: string, content: string}>} */
+  this.panelInformation = [];
+}
 
 function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
   if (typeof theDomComponent === "string") {
@@ -31,13 +38,13 @@ function deleteDatabaseItem(containerLabel, labels, selector) {
 }
 
 var minimizableDatabase = [
-  ["users", "problemDataJSON"]
+  ["users", "problemDataJSON"],
 ];
 
 var abbreviatedDatabase = [
   ["users", "activationToken"],
   ["users", "authenticationToken"],
-  ["users", "password"]
+  ["users", "password"],
 ];
 
 function matchesPattern(currentLabels, selector, pattern) {
@@ -85,18 +92,30 @@ function fitsPattern(currentLabels, selector, pattern) {
   return false;
 }
 
+var counterToggleButtons = 0;
+JSONToHTML.prototype.getToggleButton = function(input, label) {
+  counterToggleButtons ++;
+  var panelId = `panelFromJSONFormatter${counterToggleButtons}`;
+  this.panelInformation.push({
+    panelId: panelId,
+    label: label,
+    content: input,
+  });
+  return `<div id = "${panelId}"></div>`;
+}
+
 function getDeleteButtonFromLabels(theLabels, selector, containerLabel) {
-  return `<button onclick='window.calculator.database.deleteDatabaseItem("${containerLabel}", ${JSON.stringify(theLabels)}, ${JSON.stringify(selector)})'>Delete</button>`;
+  return `<button onclick = 'window.calculator.database.deleteDatabaseItem("${containerLabel}", ${JSON.stringify(theLabels)}, ${JSON.stringify(selector)})'>Delete</button>`;
 }
 
 var counterDatabaseTables = 0;
 
-function getTableHorizontallyLaidFromJSON(input, currentLabels, selector) {
+JSONToHTML.prototype.getTableHorizontallyLaidFromJSON = function(input, currentLabels, selector) {
   var inputType = typeof input; 
   if (inputType === "string" || inputType === "number" || inputType === "boolean") {
     if (shouldBeAbbreviated(currentLabels, selector)) {
       var label = miscellaneous.shortenString(input, 4);
-      input = getToggleButton(input, label);
+      input = this.getToggleButton(input, label);
     }
     if (isDeleteable(currentLabels, selector)) {
       return `${input} ${getDeleteButtonFromLabels(currentLabels, selector)}`;
@@ -114,13 +133,13 @@ function getTableHorizontallyLaidFromJSON(input, currentLabels, selector) {
     //if (isMinimizable(newLabels, selector)) {
     //  result += `min`;
     //}
-    result += "<table class='tableJSONItem'>";
+    result += "<table class = 'tableJSONItem'>";
     for (var counterInput = 0; counterInput < input.length; counterInput ++) {
       if (hasLabels) {
         newLabels[newLabels.length - 1] = `${counterInput}`;
       }
       var item = input[counterInput];
-      result += `<tr><td><tiny>${counterInput}</tiny></td><td>${getTableHorizontallyLaidFromJSON(item, newLabels, selector)}</td></tr>`; 
+      result += `<tr><td><tiny>${counterInput}</tiny></td><td>${this.getTableHorizontallyLaidFromJSON(item, newLabels, selector)}</td></tr>`; 
     }
     result += "</table>";
     return result;
@@ -133,7 +152,7 @@ function getTableHorizontallyLaidFromJSON(input, currentLabels, selector) {
       newLabels.push("");
     }
     var flagIsDeleteable = false;
-    result += "<table class='tableJSONItem'>"; 
+    result += "<table class = 'tableJSONItem'>"; 
     if (isDeleteable(newLabels, selector)) {
       flagIsDeleteable = true;
     }
@@ -149,7 +168,7 @@ function getTableHorizontallyLaidFromJSON(input, currentLabels, selector) {
       } else {
         result += `<tr>`;
       }
-      result += `<td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item], newLabels, selector)}</td>`;
+      result += `<td>${item}</td><td>${this.getTableHorizontallyLaidFromJSON(input[item], newLabels, selector)}</td>`;
       if (flagIsDeleteable) {
         result += `<td>${getDeleteButtonFromLabels(newLabels, selector, tableLabel)}</td>`;
       }
@@ -157,7 +176,7 @@ function getTableHorizontallyLaidFromJSON(input, currentLabels, selector) {
     }
     result += "</table>";
     if (isMinimizable(currentLabels, selector)) {
-      result = getToggleButton(result, "show");
+      result = this.getToggleButton(result, "show");
     }
 
     return result;
@@ -203,7 +222,21 @@ function getLabelsRows(input) {
   return result;
 }
 
-function getHtmlFromArrayOfObjects(input, selector) {
+JSONToHTML.prototype.bindButtons = function() {
+  for (var i = this.panelInformation.length - 1; i >= 0; i--) {
+    var currentInfo = this.panelInformation[i];
+    var currentPanel = new panels.PanelExpandable(currentInfo.panelId, true);
+    currentPanel.setPanelContent(currentInfo.content);
+    currentPanel.setPanelLabel(currentInfo.label);
+  }
+  for (var i = 0; i < this.panelInformation.length; i ++) {
+    var currentInfo = this.panelInformation[i];
+    var currentPanel = new panels.PanelExpandable(currentInfo.panelId, false);
+    currentPanel.matchPanelStatus();  
+  }
+}
+
+JSONToHTML.prototype.getHtmlFromArrayOfObjects = function(input, selector) {
   var inputJSON = input;
   var hasLabels = (selector !== null && selector !== undefined);
 
@@ -252,7 +285,7 @@ function getHtmlFromArrayOfObjects(input, selector) {
             newLabel = [labelsRows.labels[counterColumn]];
           }
           result += "<td>";
-          result += getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], newLabel, selector);
+          result += this.getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], newLabel, selector);
           if (currentIsDeleteable && counterColumn === labelsRows.idRow) {
             result += getDeleteButtonFromLabels([], selector, trIdIfNeeded);
           }
@@ -262,7 +295,7 @@ function getHtmlFromArrayOfObjects(input, selector) {
       }
       result += "</table>";
     } else {
-      result += getTableHorizontallyLaidFromJSON(inputJSON);
+      result += this.getTableHorizontallyLaidFromJSON(inputJSON);
     }
   } else {
     result += inputJSON + "<br>";
@@ -271,6 +304,6 @@ function getHtmlFromArrayOfObjects(input, selector) {
 }
 
 module.exports = {
-  getHtmlFromArrayOfObjects,
+  JSONToHTML,
   deleteDatabaseItem
 }

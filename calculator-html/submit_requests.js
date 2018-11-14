@@ -2,6 +2,7 @@
 const pathnames = require('./pathnames');
 const miscellaneous = require('./miscellaneous');
 const ids = require('./ids_dom_elements');
+const panels = require('./panels');
 
 function recordProgressDone(progress, timeFinished) {
   if (progress === null || progress === undefined || progress === "") {
@@ -10,37 +11,10 @@ function recordProgressDone(progress, timeFinished) {
   if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
-  var panelInfo = getPanelInfoInitializeIfNeeded(progress);
-  var messageComponent = document.getElementById(panelInfo.messageStatusId);
   var timeTotal = timeFinished - progress.getAttribute("timeStarted");
-  messageComponent.innerHTML = `<b style ='color:green'>Received</b> ${timeTotal} ms`;
-}
-
-function setStatusToBeCalledThroughTimeout(panel, status, originalHeight) {
-  if (status === "expanded") {
-    panel.style.maxHeight = originalHeight;
-    panel.style.height = originalHeight;
-    //panel.style.opacity = "1";
-  } else {
-    panel.style.maxHeight = "0px";
-    panel.style.height = "0px";
-    //panel.style.opacity = "0";
-  }
-}
-
-function doToggleContent(progressId) {
-  var progress = document.getElementById(progressId);
-  var panelInfo = getPanelInfoInitializeIfNeeded(progress);
-  var panel = document.getElementById(panelInfo.panelId);
-  if (panelInfo.panelStatus === "collapsed") {
-    document.getElementById(panelInfo.expandedMarkerId).innerHTML = "&#9662;";    
-    panelInfo.panelStatus = "expanded";
-  } else {
-    document.getElementById(panelInfo.expandedMarkerId).innerHTML = "&#9666;";    
-    panelInfo.panelStatus = "collapsed";
-  }
-  progress.setAttribute("panelStatus", panelInfo.panelStatus);
-  setTimeout(setStatusToBeCalledThroughTimeout.bind(null, panel, panelInfo.panelStatus, panelInfo.originalHeight), 0);
+  var panelLabel = `<b style ='color:green'>Received</b> ${timeTotal} ms`;
+  var panel = new panels.PanelExpandable(progress, false);
+  panel.setPanelLabel(panelLabel);
 }
 
 function convertStringToHtml(input) {
@@ -55,60 +29,6 @@ function convertStringToHtml(input) {
   return result;
 }
 
-var numberOfButtonToggleProgressReport = 0;
-
-/** @typedef {{buttonId: string, panelId: string, expandedMarkerId: string, messageStatusId: string, panelStatus: string, originalHeight: string}} PanelInfo */
-/** @returns {PanelInfo} */
-function getPanelInfoInitializeIfNeeded(progressDOMComponent) {
-  var result = {
-    buttonId: null, 
-    panelId: null,
-    expandedMarkerId: null,
-    messageStatusId: null,
-    panelStatus: null,
-    originalHeight: "0px",
-  }
-  if (progressDOMComponent === null || progressDOMComponent === undefined) {
-    return result;
-  }
-  if (typeof progressDOMComponent === "string") {
-    progressDOMComponent = document.getElementById(progressDOMComponent);
-  }
-  var isGood = true;
-  for (var label in result) {
-    var incoming = progressDOMComponent.getAttribute(label);
-    result[label] = incoming;
-    if (incoming === null || incoming === undefined || incoming === undefined) {
-      isGood = false;
-    }
-  }
-  if (!isGood) {
-    numberOfButtonToggleProgressReport ++;
-    for (var label in result) {
-      result[label] = `progressReport${label}${numberOfButtonToggleProgressReport}`;
-    }
-    result.panelStatus = "collapsed";
-    initializeProgressPanel(progressDOMComponent, result);
-  }
-  return result;
-}
-
-function initializeProgressPanel(progressDOMComponent, /**@type {PanelInfo} */result) {
-  for (var label in result) {
-    progressDOMComponent.setAttribute(label, result[label]);
-  }  
-  var spanContainer = document.createElement("span");
-  var spanContent = "";
-  spanContent += `<button  id = "${result.buttonId}" `; 
-  spanContent += `class = "buttonProgress accordionLikeIndividual" `;
-  spanContent += `onclick = "window.calculator.submitRequests.doToggleContent('${progressDOMComponent.id}');">`;
-  spanContent += `<span id = "${result.messageStatusId}"></span> <span id = "${result.expandedMarkerId}">&#9666;</span>`;
-  spanContent += "</button>";
-  spanContent += `<div id = "${result.panelId}" class = "spanProgressReport panelExpandable"></div>`;
-  spanContainer.innerHTML = spanContent;
-  progressDOMComponent.appendChild(spanContainer);
-}
-
 function recordProgressStarted(progress, address, isPost, timeStarted) {
   if (progress === "" || progress === null || progress === undefined) {
     return;
@@ -119,12 +39,10 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
-  var panelInfo = getPanelInfoInitializeIfNeeded(progress);
+  var panelWithButton = new panels.PanelExpandable(progress, true);
   progress.setAttribute("timeStarted", timeStarted);
+  panelWithButton.setPanelLabel(`<b style ="color:orange">Sent</b>`)
 
-  var messageStatus = document.getElementById(panelInfo.messageStatusId);
-  var panel = document.getElementById(panelInfo.panelId);
-  messageStatus.innerHTML = `<b style ="color:orange">Sent</b>`
   var addressSpreadOut = address.split("&").join(" &");
   addressSpreadOut = addressSpreadOut.split("=").join("= ");
   addressSpreadOut = addressSpreadOut.split("?").join("? ");
@@ -141,18 +59,8 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   } else {
     content += addressSpreadOut;
   }
-  panel.innerHTML = content;
-  panel.style.maxHeight = "";
-  panel.style.height = "";
-  var originalHeight = window.getComputedStyle(panel).height;
-  progress.setAttribute("originalHeight", originalHeight);
-  if (panelInfo.panelStatus === "collapsed") {
-    panel.style.maxHeight = "0px";
-    panel.style.height = "0px";
-  } else {
-    panel.style.maxHeight = originalHeight;
-    panel.style.height = originalHeight;
-  }
+  panelWithButton.setPanelContent(content);
+  panelWithButton.matchPanelStatus();
 }
 
 function recordResult(resultText, resultSpan) {
@@ -321,5 +229,4 @@ function SendTogglePauseRequest() {
 module.exports = {
   submitGET,
   submitPOST,
-  doToggleContent,
 }

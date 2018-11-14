@@ -10,13 +10,15 @@ function clickDatabaseTable(currentCollection) {
 }
 
 function updateDatabasePageCallback(incoming, output) {
-  try {
+  //try {
     var thePage = window.calculator.mainPage;
     var currentTable = thePage.storage.variables.database.currentTable.getValue();
     var theParsed = JSON.parse(incoming);
     var theOutput = document.getElementById("divDatabaseOutput");
     if ("rows" in theParsed) {
-      theOutput.innerHTML = jsonToHtml.getHtmlFromArrayOfObjects(theParsed.rows, {table: currentTable});
+      var transformer = new jsonToHtml.JSONToHTML();
+      theOutput.innerHTML = transformer.getHtmlFromArrayOfObjects(theParsed.rows, {table: currentTable});
+      transformer.bindButtons();
     } else {
       for (var counterCollection = 0; counterCollection < theParsed.collections.length; counterCollection ++) {
         var currentCollection = theParsed.collections[counterCollection]; 
@@ -25,11 +27,13 @@ function updateDatabasePageCallback(incoming, output) {
         linkHTML += `${currentCollection}</a>`;
         theParsed.collections[counterCollection] = linkHTML;
       }
-      theOutput.innerHTML = jsonToHtml.getHtmlFromArrayOfObjects(theParsed.collections);
+      var transformer = new jsonToHtml.JSONToHTML();
+      theOutput.innerHTML = transformer.getHtmlFromArrayOfObjects(theParsed.collections);
+      transformer.bindButtons();
     }
-  } catch (e) {
-    console.log(`Error parsing calculator output. ${e}`);
-  }
+  //} catch (e) {
+  //  console.log(`Error parsing calculator output. ${e}`);
+  //}
 }
 
 function updateDatabasePageResetCurrentTable() {

@@ -37,8 +37,8 @@ function getEditPanel(fileName) {
   }
   var result = "";
   result += `<span class = 'spanFileInfo'>`;
-  result += `<button class = "buttonSaveEdit" onclick = "selectEditPage('${fileName}')" style = 'width:50px'>Edit</button>${fileName}&nbsp;`;
-  result += `<button class = "accordionLike" onclick = "toggleClonePanel(this)">Clone panel &#9666;</button>`;
+  result += `<button class = "buttonSaveEdit" onclick = "window.calculator.editPage.selectEditPage('${fileName}')" style = 'width:50px'>Edit</button>${fileName}&nbsp;`;
+  result += `<button class = "accordionLike" onclick = "window.calculator.editPage.toggleClonePanel(this)">Clone panel &#9666;</button>`;
   result += `<span class = "panelDeadlines">`;
   var idCloneInput = encodeURIComponent(`cloneButton${fileName}`);
   var idSpanClonePageReport = encodeURIComponent(`cloneButtonReport${fileName}`);
@@ -135,7 +135,22 @@ function selectEditPage(currentlyEditedPage) {
   });
 }
 
+function toggleClonePanel(button) {
+  var thePanel = button.nextElementSibling; 
+  if (thePanel.style.maxHeight === '200px') {
+    thePanel.style.opacity = '0';
+    thePanel.style.maxHeight = '0';
+    button.innerHTML = `Clone panel &#9666;`;
+  } else {
+    thePanel.style.opacity = '1';
+    thePanel.style.maxHeight = '200px';
+    button.innerHTML = `Clone panel &#9660;`;
+  }
+
+}
+
 module.exports = {
+  toggleClonePanel,
   selectEditPage, 
   getEditPanel,
   handleClone,

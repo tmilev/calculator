@@ -2,7 +2,7 @@
 const selectCourse = require('./select_course');
 const coursePage = require('./course_page'); 
 const problemPage = require('./problem_page');
-const edigPage = require('./edit_page');
+const editPage = require('./edit_page');
 const database = require('./database');
 const serverStatus = require('./server_status');
 const accountPage = require('./account');
@@ -387,7 +387,7 @@ function Page() {
       id: "divEditPage",
       menuButtonId: "buttonEditPage",
       container: null,
-      selectFunction: edigPage.selectEditPage,
+      selectFunction: editPage.selectEditPage,
       flagLoaded: false,
       editor: null,
     },

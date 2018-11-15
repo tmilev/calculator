@@ -29,5 +29,5 @@ external-source
 
 configuration
 
-calculator-html/new/autocomplete_keywords.js
-calculator-html/new/server_information.js
+calculator-html/autocomplete_keywords.js
+calculator-html/server_information.js

@@ -774,6 +774,8 @@ std::string HtmlInterpretation::GetJSONUserInfo(const std::string& comments)
   output["linkApp"] = outLinkApp.str();
   outLinkAppNoCache << "<a href = '" << theGlobalVariables.DisplayNameExecutableAppNoCache << "'>app no browser cache</a>";
   output["linkAppNoCache"] = outLinkAppNoCache.str();
+  if (comments != "")
+    output["comments"] = comments;
   if (!theGlobalVariables.flagLoggedIn)
   { output["status"] = "not logged in";
     if (theGlobalVariables.GetWebInput("error") != "")
@@ -781,9 +783,6 @@ std::string HtmlInterpretation::GetJSONUserInfo(const std::string& comments)
     return output.ToString(false);
   }
   output["status"] = "logged in";
-  if (comments != "") {
-    output["comments"] = comments;
-  }
   output[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
   output[DatabaseStrings::labelAuthenticationToken] = theGlobalVariables.userDefault.actualAuthenticationToken;
   output[DatabaseStrings::labelUserRole] = theGlobalVariables.userDefault.userRole;

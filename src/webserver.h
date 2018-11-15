@@ -282,6 +282,7 @@ public:
   bool ReceiveAllHttpSSL();
   void ReportDisplayUserInput();
   enum requestTypes {requestUnknown, requestGet, requestPost, requestHead, requestChunked};
+  std::string ToStringAddressRequest() const;
   std::string ToStringStatus() const;
   std::string ToStringMessageUnsafe(bool useHTML = true) const;
   std::string ToStringMessageShortUnsafe(FormatExpressions* theFormat = 0) const;

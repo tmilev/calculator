@@ -2339,7 +2339,8 @@ int WebWorker::ProcessFile()
     stOutput << "<html>"
     << HtmlRoutines::GetCSSLinkCalculator()
     << "<body>";
-    stOutput << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
+    stOutput << "One page <a href = \"" << theGlobalVariables.DisplayNameExecutableApp << "\">app</a>. ";
+    stOutput << " Same app without browser cache: <a href = \"" << theGlobalVariables.DisplayNameExecutableAppNoCache << "\">app no cache</a>.<hr>";
     stOutput << "<b>File does not exist.</b>";
     if (this->flagFileNameSanitized)
     { stOutput << "<hr>You requested virtual file: " << this->VirtualFileName
@@ -3202,7 +3203,7 @@ int WebWorker::ProcessLogout()
 { MacroRegisterFunctionWithName("WebWorker::ProcessLogout");
   this->SetHeaderOKNoContentLength("");
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
-  return this->ProcessLoginUserInfo("");
+  return this->ProcessLoginUserInfo("Coming from logout");
 }
 
 int WebWorker::ProcessSelectCourseJSON()
@@ -3656,7 +3657,8 @@ bool WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified()
       stateNotModified = false;
     }
   if (this->addressComputed == "/" || this->addressComputed == "")
-  { this->addressComputed = WebAPI::app; //was: theGlobalVariables.DisplayNameExecutable;
+  { this->addressComputed = theGlobalVariables.DisplayNameExecutableApp; //was: theGlobalVariables.DisplayNameExecutable;
+    theGlobalVariables.userCalculatorRequestType = WebAPI::app;
     //theGlobalVariables.userCalculatorRequestType = "selectCourse";
     stateNotModified = false;
   }
@@ -3722,7 +3724,7 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified()
     if (this->addressComputed == theGlobalVariables.DisplayNameExecutable &&
         theGlobalVariables.userCalculatorRequestType == "")
     { this->addressComputed = theGlobalVariables.DisplayNameExecutable;
-      theGlobalVariables.userCalculatorRequestType = "calculator";
+      theGlobalVariables.userCalculatorRequestType = WebAPI::app;
       stateNotModified = false;
     }
   if (theGlobalVariables.flagLoggedIn)
@@ -3734,8 +3736,8 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified()
       shouldFallBackToDefaultPage = true;
   }
   if (shouldFallBackToDefaultPage)
-  { this->addressComputed = theGlobalVariables.DisplayNameExecutable;
-    theGlobalVariables.userCalculatorRequestType = "selectCourse";
+  { this->addressComputed = theGlobalVariables.DisplayNameExecutableApp;
+    theGlobalVariables.userCalculatorRequestType = WebAPI::app;
     stateNotModified = false;
   }
   return stateNotModified;
@@ -3829,25 +3831,34 @@ int WebWorker::ServeClient()
   theGlobalVariables.userCalculatorRequestType = "";
   if (this->addressComputed == theGlobalVariables.DisplayNameExecutable)
     theGlobalVariables.userCalculatorRequestType = theGlobalVariables.GetWebInput("request");
-  //std::cout << "Address computed: " << this->addressComputed << std::endl;
-  this->CorrectRequestsBEFORELoginReturnFalseIfModified();
+  std::stringstream comments;
+  comments << "Address, request computed: " << this->addressComputed << ", "
+  << theGlobalVariables.userCalculatorRequestType << ". ";
+  bool isNotModified = this->CorrectRequestsBEFORELoginReturnFalseIfModified();
+  if (!isNotModified)
+    comments << this->ToStringAddressRequest() << ": modified before login. ";
   if (theWebServer.addressStartsInterpretedAsCalculatorRequest.Contains(this->addressComputed))
   { theGlobalVariables.userCalculatorRequestType = this->addressComputed;
     std::string correctedRequest;
     if (MathRoutines::StringBeginsWith(theGlobalVariables.userCalculatorRequestType, "/", &correctedRequest))
     { //std::cout << "Got to here";
       theGlobalVariables.userCalculatorRequestType = correctedRequest;
+      comments << "Address was interpretted as request, so your request was set to: " << theGlobalVariables.userCalculatorRequestType << ". ";
     }
     //std::cout << "Address request set to: " << theGlobalVariables.userCalculatorRequestType << std::endl;
   }
   theUser.flagMustLogin = this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
+  if (! theUser.flagMustLogin)
+    comments << "Login not needed. ";
   if (theUser.flagMustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
     return this->ProcessLoginNeededOverUnsecureConnection();
   if (this->ProcessRedirectAwayFromWWW())
     return 0;
   this->flagArgumentsAreOK = this->Login(argumentProcessingFailureComments);
   //stOutput << "DEBUG: got to here pt 2.";
-  this->CorrectRequestsAFTERLoginReturnFalseIfModified();
+  isNotModified = this->CorrectRequestsAFTERLoginReturnFalseIfModified();
+  if (!isNotModified)
+    comments << this->ToStringAddressRequest() << ": modified after login. ";
   if (this->RedirectIfNeeded(argumentProcessingFailureComments))
   { //logWorker << "DEBUG: redirecting as needed: " <<  argumentProcessingFailureComments.str() << logger::endL;
     return 0;
@@ -3862,13 +3873,8 @@ int WebWorker::ServeClient()
   if (theUser.flagStopIfNoLogin)
   { if (theGlobalVariables.userCalculatorRequestType != "logout" &&
         theGlobalVariables.userCalculatorRequestType != "login")
-    { argumentProcessingFailureComments << "<b>Accessing: ";
-      if (theGlobalVariables.userCalculatorRequestType != "")
-        argumentProcessingFailureComments << theGlobalVariables.userCalculatorRequestType;
-      else
-        argumentProcessingFailureComments << "[html base folder]";
-      argumentProcessingFailureComments << " requires login. </b>";
-    }
+      argumentProcessingFailureComments << this->ToStringAddressRequest() << " requires login. ";
+    argumentProcessingFailureComments << comments.str();
     theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
     if (argumentProcessingFailureComments.str() != "")
       theGlobalVariables.SetWebInpuT("authenticationToken", "");
@@ -3944,7 +3950,7 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType == "forgotLoginPage")
     return this->ProcessForgotLoginPage();
   else if (theGlobalVariables.userCalculatorRequestType == "login")
-    return this->ProcessLoginUserInfo("");
+    return this->ProcessLoginUserInfo(comments.str());
   else if (theGlobalVariables.userCalculatorRequestType == "logout")
     return this->ProcessLogout();
   else if ((theGlobalVariables.userCalculatorRequestType == "addEmails"||
@@ -3996,7 +4002,7 @@ int WebWorker::ServeClient()
            theGlobalVariables.userCalculatorRequestType == "templateJSONNoLogin")
     return this->ProcessTemplateJSON();
   else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorUserInfoJSON)
-    return this->ProcessLoginUserInfo("");
+    return this->ProcessLoginUserInfo(comments.str());
   else if (theGlobalVariables.userCalculatorRequestType == "editPage")
     return this->ProcessEditPage();
   else if (theGlobalVariables.userCalculatorRequestType == "editPageJSON")
@@ -4145,6 +4151,22 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   //theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: exiting function.");
   //this->SignalIamDoneReleaseEverything();
   //logWorker << consoleGreen("Indicator: released everything and signalled end.") << logger::endL;
+}
+
+std::string WebWorker::ToStringAddressRequest() const
+{ std::stringstream out;
+  out << "Address = ";
+  if (this->addressComputed == "")
+    out << "[empty]";
+  else
+    out << this->addressComputed;
+  out << "; ";
+  out << " request = ";
+  if (theGlobalVariables.userCalculatorRequestType == "")
+    out << "[empty]";
+  else
+    out << theGlobalVariables.userCalculatorRequestType;
+  return out.str();
 }
 
 std::string WebWorker::ToStringStatus() const

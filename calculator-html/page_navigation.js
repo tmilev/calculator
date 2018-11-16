@@ -14,6 +14,7 @@ const serverInformation = require('./server_information');
 const login = require('./login');
 const initializeButtons = require('./initialize_buttons');
 const calculatorPage = require('./calculator_page');
+const signUp = require('./signup').signUp;
 
 function User() {
   this.flagLoggedIn = false;
@@ -405,7 +406,7 @@ function Page() {
       name: "signUp", //<-for autocomplete
       id: "divSignUpPage",
       container: null,
-      selectFunction: null,
+      selectFunction: signUp.signUp.bind(signUp),
     },
     forgotLogin: {
       name: "forgotLogin",

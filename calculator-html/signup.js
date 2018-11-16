@@ -8,13 +8,30 @@ var recaptchaIdForSignUp = null;
 function SignUp() {
 
 }
+function getRecaptchaId () {
+  var localRecaptcha = '6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql';
+  var calculatorRecaptcha = "6LcgwR8UAAAAALQq02qZShfA1ZUZvZKRNWJ2CPPf";
+  if (
+    window.location.hostname == "localhost" || 
+    window.location.hostname == "127.0.0.1"
+  ) {
+    return localRecaptcha;
+  }
+  if (
+    window.location.hostname == "calculator-algebra.org" ||
+    window.location.hostname == "www.calculator-algebra.org"
+  ) {
+    return calculatorRecaptcha;
+  }
+  throw (`Recaptcha not supported for your hostname: ${window.location.hostname}. Post an issue on our project's github if you need this feature. `)
+  return "";
+}
 
 SignUp.prototype.signUp = function() {
-  var thePage = window.calculator.mainPage;
+
   if (recaptchaIdForSignUp === null) {
-    recaptchaIdForSignUp = grecaptcha.render("recaptchaSignUp", {'sitekey' : '6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql'});
+    recaptchaIdForSignUp = grecaptcha.render("recaptchaSignUp", {'sitekey' : getRecaptchaId()});
   }
-  thePage.selectPage(thePage.pages.signUp.name);
 }
 
 SignUp.prototype.resetRecaptchaOnLoad = function() { 
@@ -53,7 +70,8 @@ SignUp.prototype.submitSignUpInfo = function () {
     document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>Please don't forget to solve the captcha. </b></span>";
     return false;
   }
-  theURL += `recaptchaToken=${encodeURIComponent(theToken)}&`;
+  recaptchaIdForSignUp = null;
+  theURL += `${pathnames.urlFields.recaptchaToken}=${encodeURIComponent(theToken)}&`;
   submitRequests.submitGET({
     url: theURL,
     callback: callbackSignUp,

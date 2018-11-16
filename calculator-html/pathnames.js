@@ -41,6 +41,7 @@ var urlFields = {
   signUp: "signUp",
   username: "username",
   email: "email",
+  recaptchaToken: "recaptchaToken",
 }
 
 module.exports = {

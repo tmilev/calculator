@@ -280,6 +280,7 @@ public:
   void AttemptUnknownRequestErrorCorrection();
   bool ReceiveAllHttp();
   bool ReceiveAllHttpSSL();
+  bool RequireSSL();
   void ReportDisplayUserInput();
   enum requestTypes {requestUnknown, requestGet, requestPost, requestHead, requestChunked};
   std::string ToStringAddressRequest() const;

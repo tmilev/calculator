@@ -3776,8 +3776,7 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection()
   newAddressStream << "https://" << this->hostNoPort;
   if (this->hostNoPort == "")
     newAddressStream << "calculator-algebra.org";
-  if (!this->parent->flagPort8155)
-    newAddressStream << ":" << this->parent->httpSSLPort;
+  newAddressStream << ":" << this->parent->httpSSLPort;
   if (this->addressGetOrPost.size() != 0)
     if (this->addressGetOrPost[0] != '/')
       this->addressGetOrPost = '/' + this->addressGetOrPost;
@@ -3804,6 +3803,10 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection()
     << "</a>. If using bookmarks, don't forget to re-bookmark to the secure site. ";
   stOutput << "</body></html>";
   return 0;
+}
+
+bool WebWorker::RequireSSL()
+{ return theGlobalVariables.flagSSLisAvailable;
 }
 
 int WebWorker::ServeClient()
@@ -3855,7 +3858,8 @@ int WebWorker::ServeClient()
   theUser.flagMustLogin = this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
   if (!theUser.flagMustLogin)
     comments << "Login not needed. ";
-  if (theUser.flagMustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
+
+  if (this->RequireSSL() && !theGlobalVariables.flagUsingSSLinCurrentConnection)
     return this->ProcessLoginNeededOverUnsecureConnection();
   if (this->ProcessRedirectAwayFromWWW())
     return 0;

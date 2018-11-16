@@ -51,15 +51,12 @@ function logout() {
   document.getElementById("inputPassword").value = "";
   document.getElementById("divProblemPageContentContainer").innerHTML = "";
   document.getElementById(ids.domElements.divCurrentCourseBody).innerHTML = "";
-  try {
-    logoutGoogle();
-  } catch (e) {
-    console.log(`Failed to log out with google. ${e}`);
-  }
+  logoutGoogle();
   logoutPartTwo();
 }
 
 function logoutPartTwo() {
+  var thePage = window.calculator.mainPage;
   if (oldUserRole === "admin") {
     reloadPage("<b>Logging out admin: mandatory page reload. </b>", 0);
   } else { 
@@ -80,7 +77,7 @@ function loginTry() {
     callback: loginWithServerCallback,
     progress: ids.domElements.spanProgressReportGeneral
   });
-  startGoogleLogin();
+  initGoogleLogin();
 }
 
 function toggleAccountPanels() {
@@ -155,45 +152,47 @@ function loginWithServerCallback(incomingString, result) {
 
 function onGoogleSignIn(googleUser) { 
   var theToken = googleUser.getAuthResponse().id_token;
+  var thePage = window.calculator.mainPage;
   thePage.user.googleToken = theToken;
   thePage.storage.variables.user.name.setAndStore("");
-  try {
-    thePage.user.googleProfile = window.calculator.jwt.decode(theToken);
-    thePage.showProfilePicture();
-    showLogoutButton();
-    var theURL = "";
-    theURL += `${pathnames.urls.calculatorAPI}?request=userInfoJSON&`;
-    theURL += `googleToken=${theToken}&`;
-    submitRequests.submitGET({
-      url: theURL,
-      callback: loginWithServerCallback,
-      progress: ids.domElements.spanProgressReportGeneral
-    });
-  } catch (e) {
-    console.log("Error decoding google token: " + e);
-  }
+  thePage.user.googleProfile = window.calculator.jwt.decode(theToken);
+  thePage.showProfilePicture();
+  showLogoutButton();
+  var theURL = "";
+  theURL += `${pathnames.urls.calculatorAPI}?request=userInfoJSON&`;
+  theURL += `googleToken=${theToken}&`;
+  submitRequests.submitGET({
+    url: theURL,
+    callback: loginWithServerCallback,
+    progress: ids.domElements.spanProgressReportGeneral
+  });
 }
 
-function startGoogleLogin() {
-  //console.log("Got to here");
-  var thePage = window.calculator.mainPage;
-  if (typeof (gapi) !== "undefined") {
-    if (!thePage.pages.login.initialized) {
-      gapi.signin2.render('divGoogleLoginButton', {
-        scope: 'profile email',
-        onsuccess: onGoogleSignIn,
-        onfailure: null
-      });
-    }
-    gapi.load('auth2', function() {
-      //auth2Google = 
-      gapi.auth2.init({
-        client_id: '538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com',
-        // Scopes to request in addition to 'profile' and 'email'
-        //scope: 'additional_scope'
-      });
-    });
+function initGoogleLogin() {
+  if (typeof (gapi) === "undefined") {
+    return;
   }
+  var thePage = window.calculator.mainPage;
+  if (thePage.pages.login.initialized === true) {
+    return;
+  }
+  gapi.signin2.render('divGoogleLoginButton', {
+    scope: 'profile email',
+    prompt: "select_account",
+    onsuccess: onGoogleSignIn,
+    onfailure: null
+  });
+}
+
+function doSignInWithGoogle() {
+  gapi.load('auth2', function() {
+    //auth2Google = 
+    gapi.auth2.init({
+      client_id: '538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com',
+      // Scopes to request in addition to 'profile' and 'email'
+      //scope: 'additional_scope'
+    });
+  });
 }
 
 function showLoginCalculatorButtons() {
@@ -235,6 +234,7 @@ function hideLogoutButton() {
 }
 
 function logoutGoogle() {
+  var thePage = window.calculator.mainPage;
   thePage.storage.variables.user.googleToken.setAndStore("");
   thePage.user.googleProfile = {};
   if (gapi !== undefined && gapi !== null) {

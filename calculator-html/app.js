@@ -25,6 +25,7 @@ window.calculator = {
   storageVariables: null,
   graphicsNDimension: null,
   account: null,
+  jwt: null,
 };
 
 //load globals:
@@ -52,3 +53,5 @@ window.calculator.graphicsNDimension = require('./graphics_n_dimensions');
 //initialize everything not initilized while loading:
 window.calculator.mainPage.initializeCalculatorPage();
 window.calculator.storageVariables = window.calculator.mainPage.storage.variables;
+
+require('./external/build/output')

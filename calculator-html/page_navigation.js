@@ -151,13 +151,13 @@ StorageVariable.prototype.setAndStore = function(newValue, /**@type {boolean} */
   if (updateURL === undefined ) {
     updateURL = true;
   }
-  if (this.value === newValue) {
-    return;
-  }
+  var changed = (this.value === newValue);
   this.value = newValue;
   this.storeMe(updateURL, updateAssociatedInput);
-  if (this.callbackOnValueChange !== null && this.callbackOnValueChange !== undefined) {
-    this.callbackOnValueChange(this.value);
+  if (changed) {
+    if (this.callbackOnValueChange !== null && this.callbackOnValueChange !== undefined) {
+      this.callbackOnValueChange(this.value);
+    }
   }
 }
 

@@ -162,7 +162,7 @@ public:
   int ProcessFolderOrFile();
   int ProcessFolder();
   int ProcessFile();
-  int ProcessChangePassword();
+  int ProcessChangePassword(const std::string& reasonForNoAuthentication);
   int SetEmail(const std::string& input);
   bool DoSetEmail
   (UserCalculatorData& inputOutputUser,

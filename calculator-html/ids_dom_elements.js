@@ -18,6 +18,7 @@ var domElements = {
   spanUserIdInActivateAccountPage: "spanUserIdInActivateAccountPage",
   spanUserIdInAccountsPage: "spanUserIdInAccountsPage",
   spanCurrentActivationEmail: "spanCurrentActivationEmail",
+  spanCurrentActivationToken: "spanCurrentActivationToken",
   spanVerificationActivation: "spanVerificationActivation",
   inputNewPasswordInActivationAccount: "inputNewPasswordInActivationAccount",
   inputReenteredPasswordInActivationAccount: "inputReenteredPasswordInActivationAccount",

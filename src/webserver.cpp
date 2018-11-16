@@ -1374,7 +1374,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   //argumentProcessingFailureComments << "<br>DEBUG: username as read from web input: "
   //<< theGlobalVariables.GetWebInput("username");
   //argumentProcessingFailureComments << "<br>DEBUG: username decoded to: "
-  //<< theUser.username.value;
+  //<< theUser.username;
   //argumentProcessingFailureComments << "<br>DEBUG: pure password as read from web input: "
   //<< theGlobalVariables.GetWebInput("password");
   //argumentProcessingFailureComments << "<br>DEBUG: password deurled: "
@@ -1497,11 +1497,16 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
       if (theUser.enteredActivationToken != "0" && theUser.enteredActivationToken != "")
         shouldDisplayMessage = true;
   }
-  theUser.clearPasswordFromMemory();
+  //if (theGlobalVariables.userDefault.enteredAuthenticationToken != "")
+  //  argumentProcessingFailureComments << "DEBUG: Entered authentication token: " << theGlobalVariables.userDefault.enteredAuthenticationToken;
+  //if (theGlobalVariables.userDefault.enteredActivationToken != "")
+  //  argumentProcessingFailureComments << "DEBUG: Entered activation token: " << theGlobalVariables.userDefault.enteredActivationToken;
+
+  theUser.clearAuthenticationTokenAndPassword();
   if (shouldDisplayMessage)
-  { theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
-    //stOutput << "<br>DEBUG: Invalid user or pass";
-    argumentProcessingFailureComments << "Invalid user and/or authentication. ";
+  { //stOutput << "<br>DEBUG: Invalid user or pass";
+    argumentProcessingFailureComments
+    << "Invalid user and/or authentication. ";
   }
   //stOutput << "<br>DEBUG: Login success: " << theGlobalVariables.flagLoggedIn
   //<< " entered auth token: " << theUser.enteredAuthenticationToken.value
@@ -2915,7 +2920,7 @@ int WebWorker::SetEmail(const std::string& input)
   return 0;
 }
 
-int WebWorker::ProcessChangePassword()
+int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthentication)
 { MacroRegisterFunctionWithName("WebWorker::ProcessChangePassword");
   //stOutput << " ere i am";
   //if (theGlobalVariables.UserDebugFlagOn())
@@ -2926,11 +2931,11 @@ int WebWorker::ProcessChangePassword()
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theUser.enteredAuthenticationToken = "";
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { stOutput << "<span style =\"color:red\"><b>Please use secure connection.</b></span>";
+  { stOutput << "<b style =\"color:red\">Please use secure connection.</b>";
     return 0;
   }
   if (!theGlobalVariables.flagLoggedIn)
-  { stOutput << "<span style =\"color:red\"><b>Please enter (old) password.</b></span>";
+  { stOutput << "<b style =\"color:red\">Please enter (old) password.</b> " << reasonForNoAuthentication;
     return 0;
   }
   std::string newPassword =
@@ -3848,7 +3853,7 @@ int WebWorker::ServeClient()
     //std::cout << "Address request set to: " << theGlobalVariables.userCalculatorRequestType << std::endl;
   }
   theUser.flagMustLogin = this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
-  if (! theUser.flagMustLogin)
+  if (!theUser.flagMustLogin)
     comments << "Login not needed. ";
   if (theUser.flagMustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
     return this->ProcessLoginNeededOverUnsecureConnection();
@@ -3937,7 +3942,7 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorSetProblemData)
     return this->ProcessSetProblemDatabaseInfo();
   else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorChangePassword)
-    return this->ProcessChangePassword();
+    return this->ProcessChangePassword(argumentProcessingFailureComments.str());
   else if (theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
            theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccount)
     return this->ProcessChangePasswordPage();

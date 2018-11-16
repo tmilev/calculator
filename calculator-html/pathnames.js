@@ -7,6 +7,7 @@ var urls = {
 };
 
 var urlFields = {
+  activationToken: "activationToken",
   request: "request",
   mainInput: "mainInput",
   fileName: "fileName",
@@ -20,6 +21,10 @@ var urlFields = {
   debugFlag: "debugFlag",
   selectCourse: "selectCourseJSON",
   scoredQuizJSON: "scoredQuizJSON",
+  changePassword: "changePassword",
+  password: "password",
+  newPassword: "newPassword",
+  reenteredPassword: "reenteredPassword",
   exerciseJSON: "exerciseJSON",
   problemGiveUp: "problemGiveUp",
   problemGiveUpNoLogin: "problemGiveUpNoLogin",
@@ -34,6 +39,8 @@ var urlFields = {
   submitExercisePreview: "submitExercisePreview",  
   accountsJSON: "accountsJSON",
   signUp: "signUp",
+  username: "username",
+  email: "email",
 }
 
 module.exports = {

@@ -46,12 +46,19 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   var addressSpreadOut = address.split("&").join(" &");
   addressSpreadOut = addressSpreadOut.split("=").join("= ");
   addressSpreadOut = addressSpreadOut.split("?").join("? ");
-  var addressPassSplit = addressSpreadOut.split("password=");
-  if (addressPassSplit.length > 1) {
-    var indexAmpersand = addressPassSplit[1].search("&");
-    addressPassSplit[1] = addressPassSplit[1].substr(indexAmpersand);
-    addressPassSplit[1] = "***" + addressPassSplit[1];
-    addressSpreadOut = addressPassSplit.join("password= ");
+  censoredAddressStarts = [
+    pathnames.urlFields.newPassword, 
+    pathnames.urlFields.reenteredPassword, 
+    pathnames.urlFields.password,
+  ];
+  for (var i = 0; i < censoredAddressStarts.length; i ++) {
+    var addressPassSplit = addressSpreadOut.split(censoredAddressStarts[i]);
+    if (addressPassSplit.length > 1) {
+      var indexAmpersand = addressPassSplit[1].search("&");
+      addressPassSplit[1] = addressPassSplit[1].substr(indexAmpersand);
+      addressPassSplit[1] = "***" + addressPassSplit[1];
+      addressSpreadOut = addressPassSplit.join(censoredAddressStarts[i] + "=");
+    }
   }
   var content = "";
   if (!isPost) {

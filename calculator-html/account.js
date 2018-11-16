@@ -1,6 +1,8 @@
 "use strict";
 const ids = require('./ids_dom_elements');
 const submitRequests = require('./submit_requests');
+const pathnames = require('./pathnames');
+const login = require('./login');
 
 function submitChangePassRequestCallback(result, outputComponent) {
   outputComponent = document.getElementById("spanVerification").innerHTML = result;
@@ -8,7 +10,7 @@ function submitChangePassRequestCallback(result, outputComponent) {
   document.getElementById("inputOldPasswordInAccount").value = "";
   document.getElementById("inputNewPasswordInAccount").value = "";
   document.getElementById("inputReenteredPasswordInAccount").value = "";
-  loginCalculator();
+  login.loginCalculator();
 }
 
 function submitChangePassRequest() {
@@ -52,5 +54,6 @@ function updateAccountPage() {
 }
 
 module.exports = {
-  updateAccountPage
+  updateAccountPage,
+  submitChangePassRequest
 }

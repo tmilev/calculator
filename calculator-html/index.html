@@ -122,9 +122,6 @@ function browserify() {
     <div id = "divGoogleLoginButton">Google unavailable (did page fully load? Internet?).</div>
   </div><!--divCenteredItem-->
   <div class = "divCenteredItem">
-    <div id = "spanLoginStatus" style = "height: 10px; width: 190px; text-align: center"></div>
-  </div>
-  <div class = "divCenteredItem">
     <small> We do not have (and do not wish to have) access 
       <br> to your google password or other sensitive information. 
       <br> We only store your email for registration, password recovery,
@@ -132,6 +129,9 @@ function browserify() {
       <br> You are most welcome to use the site without login/account.
     </small>
   </div><!--divCenteredItem-->
+  <div class = "divCenteredItem">
+    <div id = "spanLoginStatus" style = "height: 15px; width: 190px; text-align: center"></div>
+  </div>
   </div><!--centerVerticallyInPageContainer-->
 </div><!--centerHorizontallyInPageContainer-->
 </div><!--divLoginPage-->
@@ -329,7 +329,7 @@ function browserify() {
     </td>
   </tr>
   </table>
-  <button class = "buttonStandard" onclick = "submitChangePassRequest()">Change password</button>
+  <button class = "buttonStandard" onclick = "window.calculator.account.submitChangePassRequest()">Change password</button>
   <table>
   <tr><td>Current email:</td><td><span id = 'spanOldEmail'></span></td></tr>
   <tr>
@@ -339,7 +339,7 @@ function browserify() {
     </td>
   </tr>
   </table>
-  <button class = "buttonStandard" onclick = "submitChangePassRequest()" id = "buttonChangeEmail">Change email</button> 
+  <button class = "buttonStandard" onclick = "window.calculator.account.submitChangePassRequest()" id = "buttonChangeEmail">Change email</button> 
   <br>
   <span id = "spanVerification"></span> 
   <hr>
@@ -350,6 +350,7 @@ function browserify() {
   <table>
   <tr><td>User:</td><td><span id = "spanUserIdInActivateAccountPage"></span></td></tr>
   <tr><td>Current email:</td><td><span id = "spanCurrentActivationEmail"></span></td></tr>
+  <tr><td>Activation token:</td><td><span id = "spanCurrentActivationToken"></span></td></tr>
   <tr>
   <td>New password:</td>
   <td>

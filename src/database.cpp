@@ -1262,6 +1262,10 @@ bool EmailRoutines::SendEmailWithMailGun
 
   if (mailGunKey.size() > 0)
     mailGunKey.resize(mailGunKey.size() - 1);
+  logEmail << "Sending email via "
+  << "https://api.mailgun.net/v3/mail2."
+  << hostnameToSendEmailFrom
+  << "/messages " << logger::endL;
   std::stringstream commandToExecute;
   commandToExecute << "curl -s --user 'api:" << mailGunKey
   << "' ";
@@ -1432,25 +1436,16 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
   //<< "shaone-ing to: " << userWrapper.enteredShaonedSaltedPassword
   //<< ". Actual pass sha: " << userWrapper.actualShaonedSaltedPassword;
   if (userWrapper.enteredAuthenticationToken != "" &&
-      userWrapper.enteredActivationToken == "" &&
       userWrapper.enteredAuthenticationToken != "0" &&
       comments != 0)
   { *comments << "<b> Authentication of user: " << userWrapper.username
     << " with token " << userWrapper.enteredAuthenticationToken << " failed. </b>";
   }
-  if (userWrapper.enteredActivationToken != "" && comments != 0)
-  { //*comments << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
-    //<< ". Entered activation token: " << userWrapper.enteredActivationToken
-    //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
-    //stOutput << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
-    //<< ". Entered activation token: " << userWrapper.enteredActivationToken
-    //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
-  }
-  if (theGlobalVariables.userCalculatorRequestType == "changePassword" ||
-      theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
-      theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccount ||
-      theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccountJSON)
-    if (userWrapper.enteredActivationToken != "")
+  if (userWrapper.enteredActivationToken != "")
+  { if (theGlobalVariables.userCalculatorRequestType == "changePassword" ||
+        theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
+        theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccount ||
+        theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccountJSON)
     { if (userWrapper.actualActivationToken != "activated" &&
           userWrapper.actualActivationToken != "" &&
           userWrapper.actualActivationToken != "error")
@@ -1464,7 +1459,12 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
         else
           *comments << "<b>An error during activation ocurred.</b>";
       }
-    }
+    } else
+      if (comments != 0)
+        *comments << "Activation token entered but the user request type: "
+        << theGlobalVariables.userCalculatorRequestType
+        << " does not allow login with activation token. ";
+  }
   if (userWrapper.username == "admin" && userWrapper.enteredPassword != "")
     if (!userWrapper.Iexist(0))
     { if (comments != 0)
@@ -1523,10 +1523,10 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
   else
     out << theGlobalVariables.hopefullyPermanentWebAdress;
   JSData theJS;
-  theJS[DatabaseStrings::labelActivationToken] = HtmlRoutines::ConvertStringToURLString(theActivationToken, false);
-  theJS[DatabaseStrings::labelUsername] = HtmlRoutines::ConvertStringToURLString(inputUserNameUnsafe, false);
+  theJS[DatabaseStrings::labelActivationToken] = theActivationToken;
+  theJS[DatabaseStrings::labelUsername] = inputUserNameUnsafe;
   theJS[DatabaseStrings::labelCalculatorRequest] = WebAPI::calculatorActivateAccountJSON;
-  theJS[DatabaseStrings::labelEmail] = HtmlRoutines::ConvertStringToURLString(inputEmailUnsafe, false);
+  theJS[DatabaseStrings::labelEmail] = inputEmailUnsafe;
   theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageActivateAccount;
   out << theGlobalVariables.DisplayNameExecutableApp
   << "#" << HtmlRoutines::ConvertStringToURLString(theJS.ToString(false), false);

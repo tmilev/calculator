@@ -14,7 +14,7 @@ function updateDatabasePageCallback(incoming, output) {
     var thePage = window.calculator.mainPage;
     var currentTable = thePage.storage.variables.database.currentTable.getValue();
     var theParsed = JSON.parse(incoming);
-    var theOutput = document.getElementById("divDatabaseOutput");
+    var theOutput = document.getElementById(ids.domElements.divDatabaseOutput);
     if ("rows" in theParsed) {
       var transformer = new jsonToHtml.JSONToHTML();
       theOutput.innerHTML = transformer.getHtmlFromArrayOfObjects(theParsed.rows, {table: currentTable});
@@ -44,6 +44,10 @@ function updateDatabasePageResetCurrentTable() {
 
 function updateDatabasePage() {
   var thePage = window.calculator.mainPage;
+  if (!thePage.isLoggedIn()) {
+    document.getElementById(ids.domElements.divDatabaseOutput).innerHTML = "<b>Not logged-in.</b>";
+    return;
+  }
   var currentTable = thePage.storage.variables.database.currentTable.getValue();
   var theUrl = "";
   theUrl += `${pathnames.urls.calculatorAPI}?`;

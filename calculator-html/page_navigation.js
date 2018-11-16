@@ -497,6 +497,10 @@ function Page() {
   document.getElementById("divPage").className = "divPage";
 }
 
+Page.prototype.isLoggedIn = function() {
+  return this.user.isLoggedIn();
+}
+
 Page.prototype.initBuildVersion = function() {
   document.getElementById(ids.domElements.calculatorBuildVersion).innerHTML = `Build version ${serverInformation.serverInformation.version}`;
 }

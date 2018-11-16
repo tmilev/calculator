@@ -31,8 +31,8 @@ var domElements = {
   spanStudentViewSectionSelectPanel: "spanStudentViewSectionSelectPanel",
   divCurrentCourseBody: "divCurrentCourseBody",
   classSpanDeadlineContainer: "spanDeadlineContainer",
-  calculatorBuildVersion: "anchorCalculatorBuildVersion"
-
+  calculatorBuildVersion: "anchorCalculatorBuildVersion",
+  divDatabaseOutput: "divDatabaseOutput",
 };
 
 module.exports = {

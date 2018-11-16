@@ -19,11 +19,11 @@ function submitChangePassRequest() {
   var inputReenteredPassword = document.getElementById("inputReenteredPasswordInAccount");
   var inputEmail = document.getElementById("inputEmail");
   var theURL = "";
-  theURL += `${pathnames.urls.calculatorAPI}?request=changePassword&`;
-  theURL += `password=${encodeURIComponent(inputOldPassword.value)}&`;
-  theURL += `newPassword=${encodeURIComponent(inputNewPassword.value)}&`;
-  theURL += `reenteredPassword=${encodeURIComponent(inputReenteredPassword.value)}&`;
-  theURL += `email=${encodeURIComponent(inputEmail.value)}&`;
+  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.changePassword}&`;
+  theURL += `${pathnames.urlFields.password}=${encodeURIComponent(inputOldPassword.value)}&`;
+  theURL += `${pathnames.urlFields.newPassword}=${encodeURIComponent(inputNewPassword.value)}&`;
+  theURL += `${pathnames.urlFields.reenteredPassword}=${encodeURIComponent(inputReenteredPassword.value)}&`;
+  theURL += `${pathnames.urlFields.email}=${encodeURIComponent(inputEmail.value)}&`;
   theURL += "doReload=false&"
   submitRequests.submitGET({
     url: theURL,

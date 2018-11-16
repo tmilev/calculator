@@ -49,7 +49,9 @@ User.prototype.hideProfilePicture = function() {
 
 User.prototype.makeFromUserInfo = function(inputData) {
   var thePage = window.calculator.mainPage;
-  //thePage.storage.variables.user.authenticationToken.setAndStore(inputData.authenticationToken);
+  //Please note: the authentication token is silently set through the cookie headers. Please do not take explicit action as 
+  //inputdata.authenticationToken may not contain the authentication token.
+  //not ok: thePage.storage.variables.user.authenticationToken.setAndStore(inputData.authenticationToken);
   thePage.storage.variables.user.name.setAndStore(inputData.username);
   this.role = inputData.userRole;
   this.flagLoggedIn = true;

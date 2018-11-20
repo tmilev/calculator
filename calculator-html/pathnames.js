@@ -9,6 +9,9 @@ var urls = {
 var urlFields = {
   activationToken: "activationToken",
   request: "request",
+  requests: {
+    forgotLogin: "forgotLogin",
+  },
   mainInput: "mainInput",
   fileName: "fileName",
   requestDatabase: "databaseJSON",

@@ -83,5 +83,6 @@ SignUp.prototype.submitSignUpInfo = function () {
 var signUp = new SignUp();
 
 module.exports = {
+  getRecaptchaId,
   signUp,
 }

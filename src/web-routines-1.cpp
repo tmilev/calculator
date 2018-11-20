@@ -448,14 +448,21 @@ void WebCrawler::FetchWebPagePart2
   this->flagContinueWasNeeded = false;
   if (commentsGeneral != 0)
     *commentsGeneral << "<hr>";
+  std::stringstream commentsOnSSLFailure;
   if (!theWebServer.theSSLdata.SSLwriteLoop
       (10, theWebServer.theSSLdata.sslClient, theMessageHeader.str(),
-       commentsOnFailure, commentsGeneral, true))
+       &commentsOnSSLFailure, commentsGeneral, true))
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "SSL critical error: " << commentsOnSSLFailure.str();
     return;
+  }
   if (!theWebServer.theSSLdata.SSLreadLoop
       (10, theWebServer.theSSLdata.sslClient, this->headerReceived, 0,
-       commentsOnFailure, commentsGeneral, true))
+       &commentsOnSSLFailure, commentsGeneral, true))
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "SSL critical error: " << commentsOnSSLFailure.str();
     return;
+  }
   unsigned bodyStart = 0;
   int numcrlfs = 0;
   //std::stringstream tempStream;
@@ -512,14 +519,19 @@ void WebCrawler::FetchWebPagePart2
   //theContinueHeader << "\r\n\r\n";
   if (!theWebServer.theSSLdata.SSLwriteLoop
       (10, theWebServer.theSSLdata.sslClient, theContinueHeader.str(),
-       commentsOnFailure, commentsGeneral, true))
+       &commentsOnSSLFailure, commentsGeneral, true))
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "SSL critical error: " << commentsOnSSLFailure.str();
     return;
-  //}
+  }
   std::string secondPart;
   if (!theWebServer.theSSLdata.SSLreadLoop
       (10,theWebServer.theSSLdata.sslClient, secondPart, expectedLength,
-       commentsOnFailure, commentsGeneral, true))
+       &commentsOnSSLFailure, commentsGeneral, true))
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "SSL critical error: " << commentsOnSSLFailure.str();
     return;
+  }
   if (commentsGeneral != 0)
     *commentsGeneral << "<br>Second part length: "
     << secondPart.size();
@@ -760,7 +772,7 @@ bool WebCrawler::VerifyRecaptcha
   if (commentsOnFailure == 0)
     commentsOnFailure = &notUsed;
   if (!FileOperations::LoadFileToStringVirtual
-      ("certificates/recaptcha-secret.txt", secret, true, true, commentsOnFailure))
+       ("certificates/recaptcha-secret.txt", secret, true, true, commentsOnFailure))
   { if (commentsOnFailure != 0)
       *commentsOnFailure << "<span style =\"color:red\"><b>"
       << "Failed to load recaptcha secret."
@@ -781,7 +793,7 @@ bool WebCrawler::VerifyRecaptcha
   << "secret="
   << secret;
   this->flagDoUseGET = true;
-  this->addressToConnectTo = "https://www.google.com/recaptcha/api/siteverify";;
+  this->addressToConnectTo = "https://www.google.com/recaptcha/api/siteverify";
   this->addressToConnectTo += "?" + messageToSendStream.str();
   this->serverToConnectTo = "www.google.com";
   this->portOrService = "https";
@@ -848,9 +860,7 @@ std::string WebWorker::GetSignUpRequestResult()
   std::stringstream generalCommentsStream;
   std::stringstream outputStream;
   generalCommentsStream
-  << "<b>Please excuse our verbose messages, they are used "
-  << "for debugging and will soon be turned off.</b>"
-  << "<br>Our code works just fine but we are still checking for unexpected bugs ...";
+  << "<b>Please excuse our technical messages, they will be removed soon.</b>";
   WebCrawler theCrawler;
   if (!theCrawler.VerifyRecaptcha(&errorStream, &generalCommentsStream, 0))
   { result["error"] = errorStream.str();
@@ -906,7 +916,7 @@ std::string WebWorker::GetSignUpRequestResult()
 #else
   result["error"] = "Error: database not available. ";
 #endif
-  return errorStream.str();
+  return result.ToString(false);
 }
 
 int WebWorker::ProcessSignUP()

@@ -661,8 +661,8 @@ bool SSLdata::InspectCertificates
 }
 
 int SSLdata::SSLread
-(SSL *theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
- std::stringstream *commentsGeneral, bool includeNoErrorInComments)
+(SSL* theSSL, void* buffer, int bufferSize, std::stringstream* commentsOnFailure,
+ std::stringstream* commentsGeneral, bool includeNoErrorInComments)
 { ERR_clear_error();
   int result = SSL_read(theSSL, buffer, bufferSize);
   this->ClearErrorQueue
@@ -671,8 +671,8 @@ int SSLdata::SSLread
 }
 
 int SSLdata::SSLwrite
-(SSL *theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
- std::stringstream *commentsGeneral, bool includeNoErrorInComments)
+(SSL* theSSL, void* buffer, int bufferSize, std::stringstream* commentsOnFailure,
+ std::stringstream* commentsGeneral, bool includeNoErrorInComments)
 { ERR_clear_error();
   int result = SSL_write(theSSL, buffer, bufferSize);
   this->ClearErrorQueue

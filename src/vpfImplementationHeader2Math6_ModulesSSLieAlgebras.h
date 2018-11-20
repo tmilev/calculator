@@ -736,8 +736,6 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
   if (outputReport != 0)
     *outputReport = out2.str();
   this->flagIsInitialized = true;
-  //stOutput << "<hr>MakeHW result: <br>" << this->ToString();
-  //this->TestConsistency(theGlobalVariables);
   theReport.Report("Done with module generation");
   return true;
 }
@@ -1039,7 +1037,6 @@ void ElementTensorsGeneralizedVermas<coefficient>::Substitution(const Polynomial
     output.AddMonomial(currentMon, tempCF);
   }
   *this = output;
-  //stOutput << "<hr>result: " << this->ToString(theGlobalVariables);
 }
 
 template <class coefficient>
@@ -1167,8 +1164,6 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg
       tempElt.AddMonomial(currentMon.theMons[j], theRingUnit);
       //stOutput << "<hr> Acting by " << theGenerator.ToString() << " on " << tempElt.ToString() << "<br>";
       tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator);
-      //if (tempElt.size >0)
-      //  stOutput << "<br> result: " << tempElt.ToString() << ", the first coeff of tempElt is : " << tempElt.theCoeffs[0].ToString();
       for (int k = 0; k < tempElt.size(); k ++)
       { currentCoeff = this->theCoeffs[i];
         //stOutput << "<br>coeff: " << currentCoeff.ToString() << " times " << tempElt.theCoeffs[k].ToString() << " equals ";

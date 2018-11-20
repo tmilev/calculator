@@ -6665,7 +6665,6 @@ void MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT
     output += buffer;
 //    stOutput << " equals: " << buffer.ToString();
   }
-//  stOutput << "<br>result: " << this->ToString();
 }
 
 template <class coefficient>

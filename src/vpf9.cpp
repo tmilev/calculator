@@ -1059,9 +1059,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded
   std::string folderName = FileOperations::GetPathFromFileNameWithPath(computedFileName);
   std::stringstream mkDirCommand;
   mkDirCommand << "mkdir -p " << folderName;
-  //std::cout << "\nDEBUG: about to execute: " << mkDirCommand.str() << "\n";
-  std::string commandResult = theGlobalVariables.CallSystemWithOutput(mkDirCommand.str());
-  //std::cout << "\nDEBUG: result: " << commandResult << "\n";
+  theGlobalVariables.CallSystemWithOutput(mkDirCommand.str());
   return FileOperations::OpenFileCreateIfNotPresentUnsecure
   (theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
 }
@@ -4405,7 +4403,6 @@ LargeInt DynkinType::GetWeylGroupSizeByFormula() const
   if (result <= 0)
     crash << "Something has gone very wrong: Weyl group size reported to be " << result.ToString()
     << " which appears to not be a positive integer! " << crash;
-  //stOutput << "DEBUG: result: " << result.ToString();
   return result;
 }
 
@@ -7363,11 +7360,9 @@ void Lattice::IntersectWithPreimageOfLattice(const Matrix<Rational> & theLinearM
   KernelPart = *this;
   tempRoots.AssignMatrixRows(theLinearMap);
   KernelPart.IntersectWithLinearSubspaceGivenByNormals(tempRoots);
-  //stOutput << "<br>Kernel part of the result: " << KernelPart.ToString(true, false);
   result.AssignMatrixRows(KernelPart.basisRationalForm);
   result.AddListOnTop(resultNonKernelPart);
   this->MakeFromRoots(result);
-  //stOutput << "<br> And the result is.... " << this->ToString(true, false);
 }
 
 void Lattice::IntersectWith(const Lattice& other)
@@ -7423,7 +7418,6 @@ void Lattice::IntersectWithBothOfMaxRank(const Lattice& other)
   dualLatticeThis.RefineByOtherLattice(dualLatticeOther);
   //stOutput << "<br> common refinement of dual lattice: " << dualLatticeThis.ToString();
   dualLatticeThis.GetDualLattice(*this);
-  //stOutput << "<br>final result: " << this->ToString();
 }
 
 void QuasiPolynomial::operator+=(const QuasiPolynomial& other)

@@ -1311,8 +1311,6 @@ std::string HtmlInterpretation::SubmitAnswers
     //  << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString()
     //  << "<hr>";
     theUser.SetProblemData(theProblem.fileName, currentProblemData);
-    //if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-    //  stOutput << "<hr>result: " << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString() << "<hr>";
     if (!theUser.StoreProblemDataToDatabaseJSON(comments))
       out << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
       << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "

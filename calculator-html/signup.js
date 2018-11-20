@@ -48,11 +48,15 @@ function callbackSignUp(input, output) {
     if (inputParsed.result !== undefined) {
       result += `${inputParsed.result}<hr>`;
     }
-    result += `<span style='color:red; font-weight:bold;'>${inputParsed.error}</span>`;
-    result += `<hr>${inputParsed.comments}`;
+    if (inputParsed.error !== "") {
+      result += `<span style = 'color:red; font-weight:bold;'>${inputParsed.error}</span>`;
+    }
+    if (inputParsed.comments !== "") {
+      result += `<hr>${inputParsed.comments}`;
+    }
     output.innerHTML = result;
   } catch (e) {
-    output.innerHTML = `Result:${input}. Error: ${e}. ${input}`;    
+    output.innerHTML = `Result: ${input}. Error: ${e}. ${input}`;    
   }
 }
 

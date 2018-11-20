@@ -538,7 +538,6 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output)
     }
     output.push_back(nextByte);
   }
-  //stOutput << "result: " << output.ToString();
   return result;
 }
 
@@ -570,7 +569,6 @@ bool Crypto::ConvertHexToInteger(const std::string& input, LargeIntUnsigned& out
       outputNumLeadingZeroPairs --;
   }
   outputNumLeadingZeroPairs /= 2;
-  //stOutput << "result: " << output.ToString();
   return true;
 }
 

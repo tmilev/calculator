@@ -357,8 +357,6 @@ void LaTeXcrawler::BuildFreecalC()
       reportStream << currentSysCommand;
       theReport.Report(reportStream.str());
       theGlobalVariables.CallSystemNoOutput(currentSysCommand, true);
-//      executedCommands << "<br>result: "
-//      << theGlobalVariables.CallSystemWithOutput(currentSysCommand);
       std::stringstream thePdfFileNameNormal;
       thePdfFileNameNormal << "./";
       if (k == 0)

@@ -20,7 +20,6 @@ Expression operator*(const Expression& left, const Expression& right)
   Expression result;
 
   result.MakeXOX(*left.owner, left.owner->opTimes(), left, right);
-//  stOutput << "<br>result: " << result.ToString();
   return result;
 }
 

@@ -610,9 +610,9 @@ Page.prototype.flipDebugSwitch = function () {
   this.storage.variables.flagDebug.setAndStore(document.getElementById(ids.domElements.sliderDebugFlag).checked);
   var debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
   if (this.storage.variables.flagDebug.getValue()) {
-    debugSpan.innerHTML = "Debug on";
+    debugSpan.innerHTML = "Debug <b style='color:red'>on</b>";
   } else {
-    debugSpan.innerHTML = "Debug off";
+    debugSpan.innerHTML = "Debug <b style='color:green'>off</b>";
   }
 }
 

@@ -2022,26 +2022,13 @@ int WebWorker::ProcessServerStatusPublic()
 }
 
 int WebWorker::ProcessToggleMonitoring()
-{ MacroRegisterFunctionWithName("WebWorker::ToggleMonitoring");
+{ MacroRegisterFunctionWithName("WebWorker::ProcessToggleMonitoring");
   this->SetHeaderOKNoContentLength("");
-  stOutput << "<html><head> ";
-  stOutput << HtmlRoutines::GetCSSLinkCalculator();
-  stOutput << "</head>";
-  stOutput << "<body>";
-  stOutput << "<calculatorNavigation>"
-  << theGlobalVariables.ToStringNavigation()
-  << "</calculatorNavigation>\n";
   if (theGlobalVariables.UserDefaultHasAdminRights())
-  { this->flagToggleMonitoring = true;
-    if (theGlobalVariables.flagAllowProcessMonitoring)
-      stOutput << "Attemping to turn monitoring <b>off</b>. ";
-    else
-      stOutput << "Attemping to turn monitoring <b>on</b>. ";
-    stOutput << "The changes, if successful, will take effect "
-    << "with the next link you click.";
-  } else
-    stOutput << "Toggling process monitoring is allowed only for admins.";
-  stOutput << "</body></html>";
+    this->flagToggleMonitoring = true;
+  JSData result;
+  HtmlInterpretation::GetJSDataUserInfo(result, "Attempt to toggle monitoring. ");
+  stOutput << result.ToString(false);
   return 0;
 }
 
@@ -2128,6 +2115,8 @@ int WebWorker::ProcessMonitor()
 { MacroRegisterFunctionWithName("WebWorker::ProcessMonitor");
   this->SetHeaderOKNoContentLength("");
   logWorker << "Processing get monitor." << logger::endL;
+  JSData result;
+  HtmlInterpretation::GetJSDataUserInfo(result, "");
   std::string theMainInput = theGlobalVariables.GetWebInput("mainInput");
   if (theMainInput == "")
   { stOutput << "<b>Monitor takes as argument the number of the child process that is running the computation.</b>";
@@ -2712,7 +2701,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   }
   std::string actualEmailActivationToken, usernameAssociatedWithToken;
   if (theGlobalVariables.userDefault.email == claimedEmail)
-  { out << "\n<b><span style =\"color:green\">Email " << claimedEmail << " already updated. </span></b>";
+  { out << "\n<b><span style =\"color:green\">Email " << claimedEmail << " updated. </span></b>";
     return out.str();
   }
   JSData findEmail, emailInfo, findUser, userInfo;
@@ -5327,7 +5316,8 @@ int WebWorker::Run()
       break;
     if (!this->flagAllBytesSentUsingFile)
       this->SendAllBytesWithHeaders();
-    if (!this->flagKeepAlive || this->flagEncounteredErrorWhileServingFile)
+    // We break the connection if we need to turn on monitoring as that concerns other processes.
+    if (!this->flagKeepAlive || this->flagEncounteredErrorWhileServingFile || this->flagToggleMonitoring)
       break;
     //The function call needs security audit.
     this->resetConnection();

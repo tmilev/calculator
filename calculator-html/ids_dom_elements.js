@@ -12,6 +12,7 @@ var domElements = {
   inputEmail: "inputEmail",
   inputPassword: "inputPassword",
   labelNewEmail: "labelNewEmail",
+  spanMonitoringStatus: "spanMonitoringStatus",
   spanCalculatorMainOutput: "spanCalculatorMainOutput",
   spanProgressCalculatorInput: "spanProgressCalculatorInput",
   spanProgressReportGeneral: "spanProgressReportGeneral",

@@ -97,7 +97,6 @@ function browserify() {
 
 <script src ='https://www.google.com/recaptcha/api.js'></script>
 
-<meta name = "google-signin-client_id" content = "538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com">
 <title>Calculator</title>
 </head>
 <body onload = "browserify();">
@@ -170,7 +169,7 @@ function browserify() {
 </div><!--divProblemPage-->
 <div id = "divEditPage" class = "divMainPage">
   <div id = "divEditPageContainer">
-  <button class = "buttonSaveEdit" onclick = "storeEditedPage();">Save</button> 
+  <button class = "buttonSaveEdit" onclick = "window.calculator.editPage.storeEditedPage();">Save</button> 
   <span id = "spanSubmitEditPageReport"></span><br>
   <textarea id = "textareaTopicListEntry"></textarea>
   <div id = "divEditorAce" onkeydown = "window.calculator.editPage.ctrlSPressAceEditorHandler(event);" name = "divEditorAce">
@@ -234,6 +233,11 @@ function browserify() {
     <button class = "buttonPreview" title = "Shift + Enter = shortcut from input text box. " name = "Go" onclick = "window.calculator.calculator.submitComputation(); event.preventDefault();">
     Go
     </button>
+    <button class = "buttonSubmit" onclick = "window.calculator.calculator.toggleMonitoring();">
+    Monitor
+    </button>
+    <span id = "spanMonitoringStatus"></span>
+      
     <span id = "spanProgressCalculatorInput"></span>
     <br>
     <span id = "spanComputationLink"></span>

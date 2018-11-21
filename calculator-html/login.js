@@ -7,8 +7,11 @@ function loginCalculator() {
   var password = document.getElementById("inputPassword").value;
   document.getElementById("inputPassword").value = "";
   var username = document.getElementById("inputUsername").value;
+  var url = "";
+  url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}&`;
+  url += `password=${password}&username=${username}&`;
   submitRequests.submitGET({
-    url: `${pathnames.urls.calculatorAPI}?request=userInfoJSON&password=${password}&username=${username}`,
+    url: url,
     callback: loginWithServerCallback,
     progress: ids.domElements.spanProgressReportGeneral
   });
@@ -61,7 +64,7 @@ function logoutPartTwo() {
     reloadPage("<b>Logging out admin: mandatory page reload. </b>", 0);
   } else { 
     var loginStatus = "";
-    loginStatus += `<b><a href='#' onclick='reloadPage("<b>User requested reload. </b>", 0);'>Reload page</a>`;
+    loginStatus += `<b><a href='#' onclick = "window.calculator.login.reloadPage('<b>User requested reload. </b>', 0);">Reload page</a>`;
     loginStatus += ` for complete logout (when <span style='color:red'>using public computer</span>).</b>`;
     document.getElementById("spanLoginStatus").innerHTML = loginStatus;
     showLoginCalculatorButtons();
@@ -73,7 +76,7 @@ function logoutPartTwo() {
 
 function loginTry() {
   submitRequests.submitGET({
-    url: `${pathnames.urls.calculatorAPI}?request=userInfoJSON`,
+    url: `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}`,
     callback: loginWithServerCallback,
     progress: ids.domElements.spanProgressReportGeneral
   });
@@ -159,7 +162,7 @@ function onGoogleSignIn(googleUser) {
   thePage.showProfilePicture();
   showLogoutButton();
   var theURL = "";
-  theURL += `${pathnames.urls.calculatorAPI}?request=userInfoJSON&`;
+  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}&`;
   theURL += `googleToken=${theToken}&`;
   submitRequests.submitGET({
     url: theURL,
@@ -176,15 +179,7 @@ function initGoogleLogin() {
   if (thePage.pages.login.initialized === true) {
     return;
   }
-  gapi.signin2.render('divGoogleLoginButton', {
-    scope: 'profile email',
-    prompt: "select_account",
-    onsuccess: onGoogleSignIn,
-    onfailure: null
-  });
-}
 
-function doSignInWithGoogle() {
   gapi.load('auth2', function() {
     //auth2Google = 
     gapi.auth2.init({
@@ -192,6 +187,12 @@ function doSignInWithGoogle() {
       // Scopes to request in addition to 'profile' and 'email'
       //scope: 'additional_scope'
     });
+    gapi.signin2.render('divGoogleLoginButton', {
+      scope: 'profile email',
+      prompt: "select_account",
+      onsuccess: onGoogleSignIn,
+      onfailure: null
+    });  
   });
 }
 
@@ -263,6 +264,7 @@ function init() {
 }
 
 module.exports = {
+  reloadPage,
   init, 
   logoutGoogle,
   logout,

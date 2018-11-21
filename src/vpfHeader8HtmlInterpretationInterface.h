@@ -5,6 +5,7 @@
 #include "vpfMacros.h"
 #include <ctime>
 
+class JSData;
 
 static ProjectInformationInstance ProjectInfoHeaderHtmlInterpretationInterface(__FILE__, "Html interpretation interface.");
 
@@ -37,6 +38,7 @@ public:
   static std::string GetPageFromTemplate();
   static std::string GetJSONFromTemplate();
   static std::string GetJSONUserInfo(const std::string &comments);
+  static void GetJSDataUserInfo(JSData& outputAppend, const std::string &comments);
   static std::string GetTopicTableJSON();
   static std::string GetExamPageInterpreter();
   static std::string GetAnswerOnGiveUp();

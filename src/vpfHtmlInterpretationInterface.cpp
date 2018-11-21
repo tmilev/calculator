@@ -766,31 +766,40 @@ std::string HtmlInterpretation::GetTopicTableJSON()
   return out.str();
 }
 
+void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::string& comments)
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetJSDataUserInfo");
+  std::stringstream outLinkApp, outLinkAppNoCache;
+  outLinkApp << "You've reached the calculator's backend. The app can be accessed here: <a href = '" << theGlobalVariables.DisplayNameExecutableApp << "'>app</a>";
+  outputAppend["linkApp"] = outLinkApp.str();
+  outLinkAppNoCache << "<a href = '" << theGlobalVariables.DisplayNameExecutableAppNoCache << "'>app no browser cache</a>";
+  outputAppend["linkAppNoCache"] = outLinkAppNoCache.str();
+  if (comments != "")
+    outputAppend["comments"] = comments;
+  if (theGlobalVariables.flagAllowProcessMonitoring)
+    outputAppend["monitoring"] = "true";
+  else
+    outputAppend["monitoring"] = "false";
+  if (!theGlobalVariables.flagLoggedIn)
+  { outputAppend["status"] = "not logged in";
+    if (theGlobalVariables.GetWebInput("error") != "")
+      outputAppend["error"] = theGlobalVariables.GetWebInput("error");
+    return;
+  }
+  outputAppend["status"] = "logged in";
+  outputAppend[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
+  outputAppend[DatabaseStrings::labelAuthenticationToken] = theGlobalVariables.userDefault.actualAuthenticationToken;
+  outputAppend[DatabaseStrings::labelUserRole] = theGlobalVariables.userDefault.userRole;
+  outputAppend[DatabaseStrings::labelInstructor] = theGlobalVariables.userDefault.instructorInDB;
+  outputAppend[DatabaseStrings::labelSection] = theGlobalVariables.userDefault.sectionInDB;
+  outputAppend[DatabaseStrings::labelCurrentCourses] = theGlobalVariables.userDefault.courseInDB;
+  outputAppend[DatabaseStrings::labelSectionsTaught] = theGlobalVariables.userDefault.sectionsTaught;
+  outputAppend[DatabaseStrings::labelDeadlinesSchema] = theGlobalVariables.userDefault.deadlineSchema;
+}
+
 std::string HtmlInterpretation::GetJSONUserInfo(const std::string& comments)
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetJSONUserInfo");
   JSData output;
-  std::stringstream outLinkApp, outLinkAppNoCache;
-  outLinkApp << "You've reached the calculator's backend. The app can be accessed here: <a href = '" << theGlobalVariables.DisplayNameExecutableApp << "'>app</a>";
-  output["linkApp"] = outLinkApp.str();
-  outLinkAppNoCache << "<a href = '" << theGlobalVariables.DisplayNameExecutableAppNoCache << "'>app no browser cache</a>";
-  output["linkAppNoCache"] = outLinkAppNoCache.str();
-  if (comments != "")
-    output["comments"] = comments;
-  if (!theGlobalVariables.flagLoggedIn)
-  { output["status"] = "not logged in";
-    if (theGlobalVariables.GetWebInput("error") != "")
-      output["error"] = theGlobalVariables.GetWebInput("error");
-    return output.ToString(false);
-  }
-  output["status"] = "logged in";
-  output[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
-  output[DatabaseStrings::labelAuthenticationToken] = theGlobalVariables.userDefault.actualAuthenticationToken;
-  output[DatabaseStrings::labelUserRole] = theGlobalVariables.userDefault.userRole;
-  output[DatabaseStrings::labelInstructor] = theGlobalVariables.userDefault.instructorInDB;
-  output[DatabaseStrings::labelSection] = theGlobalVariables.userDefault.sectionInDB;
-  output[DatabaseStrings::labelCurrentCourses] = theGlobalVariables.userDefault.courseInDB;
-  output[DatabaseStrings::labelSectionsTaught] = theGlobalVariables.userDefault.sectionsTaught;
-  output[DatabaseStrings::labelDeadlinesSchema] = theGlobalVariables.userDefault.deadlineSchema;
+  HtmlInterpretation::GetJSDataUserInfo(output, comments);
   return output.ToString(false);
 }
 

@@ -11,6 +11,9 @@ var urlFields = {
   request: "request",
   requests: {
     forgotLogin: "forgotLogin",
+    monitor: "monitor",
+    toggleMonitoring: "toggleMonitoring",
+    userInfoJSON: "userInfoJSON",
   },
   mainInput: "mainInput",
   fileName: "fileName",

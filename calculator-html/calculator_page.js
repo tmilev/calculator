@@ -228,6 +228,26 @@ Calculator.prototype.submitComputation = function() {
   });
 }
 
+Calculator.prototype.callbackToggleMonitoring = function (input, output) {
+  var monitorResult = document.getElementById(ids.domElements.spanMonitoringStatus);
+  monitorResult.innerHTML = input;
+  var url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}`;
+  submitRequests.submitGET({
+    url: url,
+    result: ids.domElements.spanMonitoringStatus,
+    progress: ids.domElements.spanProgressReportGeneral,
+  });
+}
+
+Calculator.prototype.toggleMonitoring = function () {
+  var url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.toggleMonitoring}`;
+  submitRequests.submitGET({
+    url: url,
+    callback: this.callbackToggleMonitoring.bind(this),
+    progress: ids.domElements.spanProgressReportGeneral,
+  });
+}
+
 Calculator.prototype.getQueryStringSubmitStringAsMainInput = function(theString, requestType) {
   var inputParams = '';
   var thePage = window.calculator.mainPage;

@@ -344,7 +344,7 @@ Problem.prototype.toStringDeadlinePanel = function() {
   result += "</table>";
   //console.log("Problem data problem: " + JSON.stringify(this.fileName));
   //console.log("Problem data title: " + JSON.stringify(this.title));
-  result += `<button onclick = "modifyDeadlines('${this.idURLed}')">Set</button>`;
+  result += `<button onclick = "window.calculator.coursePage.modifyDeadlines('${this.idURLed}')">Set</button>`;
   result += `<span id = '${this.idModifyReportDeadline}'></span>`;
   result += `</span>`;
   return result;
@@ -358,7 +358,7 @@ Problem.prototype.toHTMLWeights = function() {
     result += this.weight;
   }
   result += "</textarea>";
-  result += `<button id = '${this.idButtonPoints}' onclick = "modifyWeight('${this.idURLed}')">Modify</button><br>`;
+  result += `<button id = '${this.idButtonPoints}' onclick = "window.calculator.problemPage.modifyWeight('${this.idURLed}')">Modify</button><br>`;
   result += `<span id = '${this.idModifyReportPoints}'></span>`;
   result += "</span>";
   return result;
@@ -469,11 +469,13 @@ Problem.prototype.getHTMLOneProblemTr = function () {
   result += "<tr>";
   result += `<td>${this.problemNumberString} ${this.title}</td>`;
   result += "<td>";
-  result += `<a class ='videoLink' href='${this.video}' target = '_blank'>Video</a>`;
-  result += `<a class ='slidesLink' href='${this.slidesProjector}' target = '_blank'>Printable slides</a>`;
-  result += `<a class ='slidesLink' href='${this.slidesPrintable}' target = '_blank'>Slides</a>`;
+  if (this.video !== "" && this.video !== undefined && this.video !== null) {
+    result += `<a class = 'videoLink' href = '${this.video}' target = '_blank'>Video</a>`;
+  }
+  result += `<a class ='slidesLink' href = '${this.slidesProjector}' target = '_blank'>Printable slides</a>`;
+  result += `<a class ='slidesLink' href = '${this.slidesPrintable}' target = '_blank'>Slides</a>`;
   if (this.linkSlidesLaTeX !== "" && this.linkSlidesLaTeX !== undefined) {
-    result += `<a class ='slidesLink' href='${this.linkSlidesLaTeX}' target = '_blank' `;
+    result += `<a class ='slidesLink' href = '${this.linkSlidesLaTeX}' target = '_blank' `;
     result += `download ='${convertStringToLaTeXFileName(this.title)}.tex'>.tex</a>`;
   }
   result += "</td>";
@@ -510,7 +512,7 @@ Problem.prototype.getHTMLProblems = function () {
 
 Problem.prototype.getHTMLSubSection = function() {
   var result = "";
-  result += `<div class = \"headSubsection\">${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}</div>`;
+  result += `<div class = "headSubsection">${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}</div>`;
   result += this.getHTMLProblems();
   return result;  
 }
@@ -725,4 +727,5 @@ module.exports = {
   afterLoadTopics,
   writeEditCoursePagePanel,
   selectCurrentProblem,
+  modifyWeight,
 }

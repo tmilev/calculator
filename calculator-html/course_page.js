@@ -118,6 +118,7 @@ function selectCurrentCoursePage() {
 }
 
 module.exports =  {
+  modifyDeadlines,
   selectCurrentCoursePage,
   toggleDeadline,
   toggleProblemWeights,

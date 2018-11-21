@@ -150,6 +150,7 @@ function toggleClonePanel(button) {
 }
 
 module.exports = {
+  storeEditedPage,
   toggleClonePanel,
   selectEditPage, 
   getEditPanel,

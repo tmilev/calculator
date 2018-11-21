@@ -233,10 +233,6 @@ function browserify() {
     <button class = "buttonPreview" title = "Shift + Enter = shortcut from input text box. " name = "Go" onclick = "window.calculator.calculator.submitComputation(); event.preventDefault();">
     Go
     </button>
-    <button class = "buttonSubmit" onclick = "window.calculator.calculator.toggleMonitoring();">
-    Monitor
-    </button>
-    <span id = "spanMonitoringStatus"></span>
       
     <span id = "spanProgressCalculatorInput"></span>
     <br>
@@ -450,6 +446,12 @@ function browserify() {
 <div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectDatabase">Database</button></div>
 <div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectServer">Server</button></div>
 <br>
+<div class = "divAdminPanel divInvisible"><!--div monitor flag-->
+<label class = "switch">
+  <input id = "sliderMonitoring" type = "checkbox" onchange = "window.calculator.calculator.toggleMonitoring();">
+  <span class = "slider round"></span>
+</label><span id = "spanMonitoringStatus"></span>
+</div><!--div monitor flag-->  
 <div> 
   <div><!--div containing debug flag-->
   <label class = "switch">
@@ -458,26 +460,33 @@ function browserify() {
   </label><span id = "spanDebugFlagToggleReport">-</span>
   </div><!--div containing debug flag-->
 </div>
-  <div id = "spanProgressReportGeneral" class = "spanProgressReport"></div>
-<div id = "spanStudentViewPanel">
 <div>
   <label class = "switch">
   <input id = "sliderStudentView" type = "checkbox" onchange = "window.calculator.mainPage.flipStudentView();">
   <span class = "slider round"></span>
 </label><span id = "spanStudentViewToggleReport">-</span>
 </div>
+
+<br>
+<div id = "spanProgressReportGeneral" class = "spanProgressReport"></div>
+<div id = "spanStudentViewPanel">
 <div>
 <span id = "spanStudentViewSectionSelectPanel">  
 </span>
 </div>
 </div>
+<br>
 
 <div style = "text-align: center; font-size: small;">
 <a href = "https://github.com/tmilev/calculator" id = "anchorCalculatorBuildVersion" target = "_blank"></a>
 <a href = "https://github.com/tmilev/calculator/issues" target = "_blank">Issues/bugs</a>
 </div>
+
+
+
 </div> <!--divTheMainMenuPanel-->
   
+
 </div><!--divMainPage-->
 
 </body>

@@ -149,8 +149,8 @@ function loginWithServerCallback(incomingString, result) {
     showLoginCalculatorButtons();
     toggleAccountPanels();
     toggleAdminPanels();
-    return;
   }
+  window.calculator.calculator.callbackToggleStatus(incomingString);
 }
 
 function onGoogleSignIn(googleUser) { 

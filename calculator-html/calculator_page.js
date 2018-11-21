@@ -228,14 +228,28 @@ Calculator.prototype.submitComputation = function() {
   });
 }
 
-Calculator.prototype.callbackToggleMonitoring = function (input, output) {
+Calculator.prototype.callbackToggleStatus = function (input, output) {
   var monitorResult = document.getElementById(ids.domElements.spanMonitoringStatus);
-  monitorResult.innerHTML = input;
+  var parsedInput = JSON.parse(input);
+  var monitoring = parsedInput["monitoring"];
+  if (monitoring === "true" || monitoring === true) {
+    monitorResult.innerHTML = "Monitor <b style = 'color:red'>on</b>";
+    document.getElementById(ids.domElements.switch.monitoring).checked = true;
+    event.preventDefault();
+  } else {
+    document.getElementById(ids.domElements.switch.monitoring).checked = false;
+    monitorResult.innerHTML = "Monitor <b style = 'color:green'>off</b>";
+    event.preventDefault();
+  }
+}
+
+Calculator.prototype.callbackToggleMonitoring = function (input, output) {
   var url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}`;
   submitRequests.submitGET({
     url: url,
     result: ids.domElements.spanMonitoringStatus,
     progress: ids.domElements.spanProgressReportGeneral,
+    callback: this.callbackToggleStatus.bind(this)
   });
 }
 

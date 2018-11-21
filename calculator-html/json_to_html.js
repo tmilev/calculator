@@ -28,7 +28,7 @@ function deleteDatabaseItem(containerLabel, labels, selector) {
     table: selector.table,
     object: selector.object,
     fields: labels
-  }
+  };
   var theURL = `${pathnames.urls.calculatorAPI}?request=databaseDeleteOneEntry&item=${escape(JSON.stringify(finalSelector))}`;
   submitRequests.submitGET({
     url: theURL,

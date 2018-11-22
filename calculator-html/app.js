@@ -26,6 +26,7 @@ window.calculator = {
   graphicsNDimension: null,
   account: null,
   jwt: null,
+  processMonitoring: null,
 };
 
 //load globals:
@@ -50,6 +51,7 @@ window.calculator.panels = require('./panels');
 window.calculator.database = require('./database');
 window.calculator.mathJaxSetup = require('./mathjax-calculator-setup');
 window.calculator.graphicsNDimension = require('./graphics_n_dimensions');
+window.calculator.processMonitoring = require('./process_monitoring');
 //initialize everything not initilized while loading:
 window.calculator.mainPage.initializeCalculatorPage();
 window.calculator.storageVariables = window.calculator.mainPage.storage.variables;

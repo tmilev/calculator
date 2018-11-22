@@ -1097,8 +1097,8 @@ button.buttonSelectPage{
   border: none;
   font-weight: bold;
   padding: 8px;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  margin-top: 5px;
+  margin-bottom: 5px;
   font-size: 14px;
   transition: 1.5s;
   width: 100%;

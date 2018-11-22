@@ -90,85 +90,6 @@ bool WebWorker::IsAllowedAsRequestCookie(const std::string& input)
   input != WebAPI::calculatorActivateAccountJSON;
 }
 
-std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
-{ MacroRegisterFunctionWithName("WebWorker::GetJavaScriptIndicatorBuiltInServer");
-  std::stringstream out;
-  out << "\n<script type =\"text/javascript\" id =\"progressReportJavascript\"> \n";
-  out << "var isPaused = false;\n";
-  out << "var isFinished = false;\n";
-  out << "var timeIncrementInTenthsOfSecond =20;//measured in tenths of a second\n";
-  out << "var timeOutCounter = 0;//measured in tenths of a second\n";
-  out << "var currentWorkerNumber = - 1;//\n";
-  out << "\nfunction progressReport()\n";
-  out << "{ if (isFinished)\n";
-  out << "    return;\n";
-  out << "  clearTimeout(this.timeoutID);\n";
-  out << "  var progReport = document.getElementById(\"idProgressReport\");	\n";
-  out << "  var requestStatus = document.getElementById(\"idProgressReportRequestStatus\");	\n";
-  out << "  var progReportTimer = document.getElementById(\"idProgressReportTimer\");	\n";
-  out << "  if (isPaused)\n";
-  out << "    return;\n";
-  out << "  progReportTimer.innerHTML =\"<hr>Refreshing every \"+timeIncrementInTenthsOfSecond/10+\" second(s). Client time: ~\"+ Math.floor(timeOutCounter/10) +\" second(s)<br>\";\n";
-  out << "  timeOutCounter += timeIncrementInTenthsOfSecond;\n";
-  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable
-  << "?request=indicator&mainInput=\"+currentWorkerNumber;\n";
-  out << "  var https = new XMLHttpRequest();\n";
-  //out << "alert(sURL);\n";
-  out << "  https.open(\"GET\",sURL,true);\n"
-  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
-  << "  https.onload = function() {\n"
-  << "    newReportString= https.responseText;\n"
-  << "    if (https.responseText ==\"finished\")\n"
-  << "    { isFinished = true;\n"
-  << "      requestStatus.innerHTML=\"<span style ='color:green'><b>Computation finished.</b></span>\";\n"
-  << "      return;\n"
-  << "    }\n"
-  << "    if (https.responseText !=\"\")\n"
-  << "    { progReport.innerHTML= newReportString+\"<hr>\";\n"
-  << "      requestStatus.innerHTML='';"
-  << "    }else"
-  << "      requestStatus.innerHTML=\"<span style ='color:red'><b>Empty response</b></span>\";"
-  << "  }\n"
-  ////////////////////////////////////////////
-  //<< "  requestStatus.innerHTML = \"<span style ='color:orange'><b>Request sent</b></span>\";\n"
-  << "  https.send(null);\n";
-  //out << "  if (oRequest.status ==200)\n";
-  out << "   this.timeoutID =window.setTimeout(\"progressReport()\",timeIncrementInTenthsOfSecond*100);\n";
-  out << " }\n";
-  out << "function SendTogglePauseRequest()\n";
-  out << "{ if (isFinished)\n";
-  out << "    return;\n";
-  out << "  var requestStatus = document.getElementById(\"idProgressReportRequestStatus\");	\n";
-  out << "  var pauseRequest = new XMLHttpRequest();\n";
-  out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameExecutable
-  << "?request=pause&mainInput=\"+currentWorkerNumber;\n";
-  out << "  pauseRequest.open(\"GET\",pauseURL,true);\n";
-  out << "  pauseRequest.onload = function() {\n";
-  out << "    if (pauseRequest.status !=200)\n";
-  out << "      return;\n";
-  out << "    requestStatus.innerHTML=pauseRequest.responseText;\n";
-  out << "    if (pauseRequest.responseText ==\"paused\")\n";
-  out << "      isPaused = true;\n";
-  out << "    if (pauseRequest.responseText ==\"unpaused\")\n";
-  out << "      isPaused = false;\n";
-  out << "    if (isPaused)\n";
-  out << "      document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Continue\";\n";
-  out << "    else\n";
-  out << "      document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Pause\";\n";
-  out << "    document.getElementById(\"idProgressReportRequestStatus\").innerHTML= pauseRequest.responseText;\n";
-  out << "    if (!isPaused)\n";
-  out << "      progressReport();\n";
-  out << "   }\n";
-  out << "  pauseRequest.send(null);\n";
-  out << "}\n";
-  //out << " progressReport();";
-  //out << " var newReportString=\"\";\n";
-  out << " </script>\n";
-  out << " \n";
-  out << " \n";
-  return out.str();
-}
-
 #ifdef MACRO_use_open_ssl
 void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString)
 { MacroRegisterFunctionWithName("SSL_write_Wrapper");
@@ -2118,27 +2039,22 @@ int WebWorker::ProcessMonitor()
   JSData result;
   HtmlInterpretation::GetJSDataUserInfo(result, "");
   std::string theMainInput = theGlobalVariables.GetWebInput("mainInput");
-  if (theMainInput == "")
-  { stOutput << "<b>Monitor takes as argument the number of the child process that is running the computation.</b>";
+  if (theMainInput == "") {
+    result["error"] = "<b>Monitor takes as argument the number of the child process that is running the computation.</b>";
+    stOutput << result.ToString(false);
     return 0;
   }
-  int inputWebWorkerNumber = atoi(theMainInput.c_str());
-  stOutput << "<html>"
-  << "<head>"
-  << HtmlRoutines::GetCSSLinkCalculator()
-  << this->GetJavaScriptIndicatorBuiltInServer()
-  << "</head>"
-  << "<body>";
-  stOutput << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << "</calculatorNavigation>";
   if (theGlobalVariables.flagAllowProcessMonitoring && theGlobalVariables.UserDefaultHasAdminRights())
-    stOutput << "<script language =\"javascript\">\n"
-    << "currentWorkerNumber =" << inputWebWorkerNumber << ";\n"
-    << "progressReport();\n"
-    << " </script>";
-  else
-    stOutput << "Process monitoring is allowed only for logged-in admins with process monitoring turned on. "
+  { result["webWorkerNumber"] = atoi(theMainInput.c_str());
+    result["authenticated"] = "true";
+  } else
+  { result["authenticated"] = "false";
+    std::stringstream commentStream;
+    commentStream << "Process monitoring is allowed only for logged-in admins with process monitoring turned on. "
     << "The link to turn on process monitoring in the calculator navigation panel. ";
-  stOutput << "</body></html>";
+    result["comments"] = commentStream.str();
+  }
+  stOutput << result.ToString(false);
   return 0;
 }
 
@@ -2597,44 +2513,6 @@ bool WebWorker::ShouldDisplayLoginPage()
   return false;
 }
 
-std::string WebWorker::GetJavaScriptIndicatorFromHD()
-{ std::stringstream out;
-  out << " <!>\n";
-  out << " <script type =\"text/javascript\"> \n";
-  out << " var timeOutCounter = 0;\n";
-  //  out << " var newReportString=\"\";\n";
-  out << " var showProgress = false;";
-  out << " function progressReport()\n";
-  out << "{ var el = document.getElementById(\"idProgressReport\");	\n";
-  out << "  if (!showProgress) \n";
-  out << "  { el.style.display = 'none';\n";
-  out << "    return;";
-  out << "  }\n";
-  out << "  el.style.display = '';\n";
-  out << "  timeOutCounter ++;\n";
-  out << "  var oRequest = new XMLHttpRequest();\n";
-  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable << "\";\n";
-  out << "  oRequest.open(\"GET\",sURL,false);\n";
-  //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
-  out << "  oRequest.send(null)\n";
-  out << "  if (oRequest.status ==200)\n";
-  out << "  { newReportString= oRequest.responseText;\n";
-  out << "    el.innerHTML= \"<hr>Refreshing each second. Client time: ~\"+ timeOutCounter+\" second(s)<br>\" +newReportString+\"<hr>\";\n";
-  out << "  }\n";
-  out << "   window.setTimeout(\"progressReport()\",1000);\n";
-  out << " }\n";
-  out << " </script>\n";
-  out << HtmlRoutines::GetHtmlButton
-  ("progressReportButton", "showProgress =!showProgress; progressReport()", "expand/collapse progress report");
-  out << "<br><div "
-  //<< "src =\"" << this->indicatorFileNameDisplaY << "\" "
-  << "id =\"idProgressReport\" style =\"display:none\">\n";
-  out << " </div>\n";
-  out << " \n";
-  out << " \n";
-  return out.str();
-}
-
 std::string WebWorker::GetAuthenticationToken(const std::string& reasonForNoAuthentication)
 { MacroRegisterFunctionWithName("WebWorker::GetAuthenticationToken");
   //  std::stringstream out;
@@ -3033,8 +2911,6 @@ int WebWorker::ProcessCalculator()
   stOutput << HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull();
   //stOutput << HtmlRoutines::GetJavascriptMathQuillDefault();
   stOutput << HtmlRoutines::GetMathQuillStyleSheetLink();
-
-  stOutput << this->GetJavaScriptIndicatorBuiltInServer();
 
   stOutput << "\n\n<script language =\"javascript\">\n"
   << "  var theAutocompleteDictionary = [\n  ";
@@ -4109,35 +3985,17 @@ void WebWorker::OutputShowIndicatorOnTimeout()
     << "achieved through manually compiling the calculator from source.<br> ";
     return;
   }
-  stOutput << "A progress indicator, as reported by your current computation, is displayed below. "
-  << "When done, your computation result will be displayed below. ";
-  stOutput << " <!>\n";
-  //out << "\n<br>\n<button onclick=\"progressReport()\">Manual report</button>";
   if (this->indexInParent < 0)
     crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
   stOutput << "\n<script language =\"javascript\">\n"
-  << "isFinished = false;\n "
-  << "isPaused = false;\n "
-  << "currentWorkerNumber =" << this->indexInParent + 1 << ";\n "
-  << "progressReport();\n"
+  << "window.calculator.processMonitoring.monitor.start("
+  << this->indexInParent + 1
+  << ");\n"
   << "</script>";
-  stOutput << "\n<br>\n<button id =\"idButtonSendTogglePauseRequest\" onclick=\"SendTogglePauseRequest()\">Pause</button>";
-  stOutput << "\n<span id =\"idProgressReportRequestStatus\"></span>";
-  stOutput << "<span id =\"idProgressReportTimer\"></span>\n";
-  stOutput << "\n<br>\n<div id =\"idProgressReport\"></div>\n";
-
   this->SendAllBytesWithHeaders();
   for (int i = 0; i < this->parent->theWorkers.size; i ++)
     if (i != this->indexInParent)
       this->parent->theWorkers[i].Release();
-  //this->parent->Release(this->pipeServerToWorkerControls[0]);
-  //this->parent->Release(this->pipeServerToWorkerControls[1]);
-  //this->parent->Release(this->pipeWorkerToServerControls[0]);
-  //this->parent->Release(this->pipeWorkerToServerControls[1]);
-  //this->parent->Release(this->pipeServerToWorkerIndicator[0]);
-  //this->parent->Release(this->pipeServerToWorkerIndicator[1]);
-  //this->parent->Release(this->pipeWorkerToServerIndicator[0]);
-  //this->parent->Release(this->pipeWorkerToServerIndicator[1]);
   this->parent->Release(this->connectedSocketID);
   //set flags properly:
   //we need to rewire the standard output and the crashing mechanism:
@@ -6041,7 +5899,6 @@ int WebServer::mainApache()
     theWorker.requestTypE = theWorker.requestGet;
   if (theRequestMethod == "POST")
     theWorker.requestTypE = theWorker.requestPost;
-  theParser->javaScriptDisplayingIndicator = WebWorker::GetJavaScriptIndicatorFromHD();
   theGlobalVariables.flagComputationCompletE = true;
   MathRoutines::StringSplitExcludeDelimiter(theWorker.cookiesApache, ' ', theWorker.cookies);
   for (int i = 0; i < theWorker.cookies.size; i ++)

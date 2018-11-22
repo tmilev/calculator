@@ -17,7 +17,7 @@ void GraphOLD::AddEdge(int v1, int v2)
         // the DeleteEdge method packs the vertices when it finishes
 void GraphOLD::AddDiEdge(int v1, int v2)
 { for (int i = 0; i < this->max_edges; i ++)
-  { if (this->data[v1 * this->max_edges+ i] == v2)
+  { if (this->data[v1 * this->max_edges + i] == v2)
       return;
     if (this->data[v1 * this->max_edges + i] == - 1)
     { this->data[v1 * this->max_edges + i] = v2;

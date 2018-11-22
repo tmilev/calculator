@@ -247,7 +247,6 @@ public:
   void SendAllBytesHttp();
   void SendAllBytesHttpSSL();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
-  std::string GetJavaScriptIndicatorBuiltInServer();
 
   std::string GetChangePasswordPage();
   std::string GetChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField);
@@ -264,7 +263,6 @@ public:
   //std::string GetEmailChangePage();
   std::string GetNavigationPage();
   std::string GetAddUserEmails();
-  static std::string GetJavaScriptIndicatorFromHD();
   static std::string GetJavascriptSubmitLoginInfo();
   std::string GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken);
   void SetHeaderOKNoContentLength(const std::string& extraHeader);

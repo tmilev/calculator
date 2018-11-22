@@ -471,7 +471,7 @@ bool Calculator::innerPrintSSsubalgebras
   SemisimpleSubalgebras& theSSsubalgebras =
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
 
-  theSSsubalgebras.ToStringExpressionString=CalculatorConversions::innerStringFromSemisimpleSubalgebras;
+  theSSsubalgebras.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   theSSsubalgebras.ComputeFolderNames(theSSsubalgebras.currentFormat);
   //  out << "<script> var ReservedCountDownToRefresh = 5; setInterval(function(){document.getElementById('ReservedCountDownToRefresh').innerHTML "
   //  << "= --ReservedCountDownToRefresh;}, 1000); </script>";

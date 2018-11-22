@@ -201,38 +201,6 @@ function progressReport() {
   this.timeoutID = window.setTimeout("progressReport()", timeIncrementInTenthsOfSecond * 100);
 }
 
-function SendTogglePauseRequest() { 
-  if (isFinished) {
-    return;
-  }
-  var requestStatus = document.getElementById("idProgressReportRequestStatus");
-  var pauseRequest = new XMLHttpRequest();
-  var pauseURL = `${pathnames.urls.calculatorAPI}?request=pause&mainInput=${currentWorkerNumber}`;
-  pauseRequest.open("GET", pauseURL, true);
-  pauseRequest.onload = function() {
-    if (pauseRequest.status !== 200) {
-      return;
-    }
-    requestStatus.innerHTML = pauseRequest.responseText;
-    if (pauseRequest.responseText === "paused") {
-      isPaused = true;
-    }
-    if (pauseRequest.responseText === "unpaused") {
-      isPaused = false;
-    }
-    if (isPaused) {
-      document.getElementById("idButtonSendTogglePauseRequest").innerHTML = "Continue";
-    } else {
-      document.getElementById("idButtonSendTogglePauseRequest").innerHTML = "Pause";
-    }
-    document.getElementById("idProgressReportRequestStatus").innerHTML = pauseRequest.responseText;
-    if (!isPaused) {
-      progressReport();
-    }
-  };
-  pauseRequest.send(null);
-}
-
 module.exports = {
   submitGET,
   submitPOST,

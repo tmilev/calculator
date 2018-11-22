@@ -15,6 +15,7 @@ var domElements = {
   switch: {
     monitoring: "sliderMonitoring"
   },
+  buttonSendTogglePauseRequest: "buttonSendTogglePauseRequest",
   spanMonitoringStatus: "spanMonitoringStatus",
   spanCalculatorMainOutput: "spanCalculatorMainOutput",
   spanProgressCalculatorInput: "spanProgressCalculatorInput",

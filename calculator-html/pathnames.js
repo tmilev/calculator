@@ -14,6 +14,9 @@ var urlFields = {
     monitor: "monitor",
     toggleMonitoring: "toggleMonitoring",
     userInfoJSON: "userInfoJSON",
+    indicator: "indicator",
+    mainInput: "mainInput",
+    pause: "pause"
   },
   mainInput: "mainInput",
   fileName: "fileName",

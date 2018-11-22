@@ -49,6 +49,7 @@
 <script type = "text/javascript" src = "/calculator-html/edit_page.js"></script>
 <script type = "text/javascript" src = "/calculator-html/calculator_page.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/app.js"></script>
+<script type = "text/javascript" src = "/calculator-html/process_monitoring.js"></script>
 <script type = "text/javascript" src = "/calculator-html/external/build/output.js"></script>
 
 <script type = "text/javascript">
@@ -233,8 +234,11 @@ function browserify() {
     <button class = "buttonPreview" title = "Shift + Enter = shortcut from input text box. " name = "Go" onclick = "window.calculator.calculator.submitComputation(); event.preventDefault();">
     Go
     </button>
-      
+    <span> 
+    <button id = "buttonSendTogglePauseRequest" onclick="window.calculator.processMonitoring.monitor.togglePause()">Pause</button>
+    </span>      
     <span id = "spanProgressCalculatorInput"></span>
+    <span id = "idProgressReportTimer\"></span>
     <br>
     <span id = "spanComputationLink"></span>
     </td>

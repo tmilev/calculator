@@ -50,7 +50,7 @@ ProjectInformationInstance project_RIPEMD160_implementation(__FILE__, "Ripemd160
 
 bool Crypto::flagRIPEMDBigEndian = false;
 
-typedef struct
+struct Ripemd160State
 { uint64_t length;
   union
   { uint32_t w[16];
@@ -58,7 +58,7 @@ typedef struct
   } buf;
   uint32_t h[5];
   uint8_t bufpos;
-} ripemd160_state;
+};
 
 struct RIPEMD160Internal
 { static const uint32_t initial_h[5];
@@ -169,7 +169,7 @@ const uint32_t RIPEMD160Internal::KR[5] =
   0x00000000u     /* Round 5: 0 */
 };
 
-void ripemd160_init(ripemd160_state *self)
+void ripemd160_init(Ripemd160State *self)
 { memcpy(self->h, RIPEMD160Internal::initial_h, Crypto::RIPEMD160LengthInBytes);
   memset(&self->buf, 0, sizeof(self->buf));
   self->length = 0;
@@ -190,18 +190,18 @@ static inline void byteswap32(uint32_t *v)
   x.w = y.w = 0;
 }
 
-static inline void byteswap_digest(uint32_t *p)
+static inline void byteswap_digest(uint32_t* p)
 { unsigned int i;
-  for (i = 0; i < 4; i++)
-  { byteswap32(p++);
-    byteswap32(p++);
-    byteswap32(p++);
-    byteswap32(p++);
+  for (i = 0; i < 4; i ++)
+  { byteswap32(p ++);
+    byteswap32(p ++);
+    byteswap32(p ++);
+    byteswap32(p ++);
   }
 }
 
 /* The RIPEMD160 compression function.  Operates on self->buf */
-static void ripemd160_compress(ripemd160_state *self)
+static void ripemd160_compress(Ripemd160State* self)
 { uint8_t w, round;
   uint32_t T;
   uint32_t AL, BL, CL, DL, EL;    /* left line */
@@ -293,7 +293,7 @@ static void ripemd160_compress(ripemd160_state *self)
   self->bufpos = 0;
 }
 
-void ripemd160_process(ripemd160_state *self, const unsigned char *p, unsigned long length)
+void ripemd160_process(Ripemd160State* self, const unsigned char* p, unsigned long length)
 { unsigned long bytes_needed;
   /* We never leave a full buffer */
   if (self->bufpos >= 64)
@@ -322,9 +322,9 @@ void ripemd160_process(ripemd160_state *self, const unsigned char *p, unsigned l
   }
 }
 
-void ripemd160_done(ripemd160_state *self, unsigned char *out)
+void ripemd160_done(Ripemd160State* self, unsigned char *out)
 { /* Append the padding */
-  self->buf.b[self->bufpos++] = 0x80;
+  self->buf.b[self->bufpos ++] = 0x80;
   if (self->bufpos > 56)
   { self->bufpos = 64;
     ripemd160_compress(self);
@@ -347,7 +347,7 @@ void ripemd160_done(ripemd160_state *self, unsigned char *out)
 
 void Crypto::computeRIPEMD160(const std::string& input, List<unsigned char>& output)
 { MacroRegisterFunctionWithName("Crypto::computeRIPEMD160");
-  ripemd160_state md;
+  Ripemd160State md;
   ripemd160_init(&md);
   output.SetSize(20);
   ripemd160_process(&md, (unsigned char*) input.c_str(), input.size());

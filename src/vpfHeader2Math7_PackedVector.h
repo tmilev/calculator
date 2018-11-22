@@ -20,7 +20,7 @@ public:
   inline scalar operator[](int i) const;
   bool operator!=(const PackedVector<scalar>& other) const;
   bool operator==(const PackedVector<scalar>& other) const;
-  bool operator>(const PackedVector<scalar>&other) const;
+  bool operator>(const PackedVector<scalar>& other) const;
   // passing in d for compatibility with Vector
   void MakeZero(int d);
   void MakeEi(int d, int i);

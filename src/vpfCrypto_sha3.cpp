@@ -145,7 +145,7 @@ static void keccakf(uint64_t s[25])
     for (j = 0; j < 25; j += 5)
     { for(i = 0; i < 5; i ++)
         bc[i] = s[j + i];
-      for(i = 0; i < 5; i++)
+      for(i = 0; i < 5; i ++)
         s[j + i] ^= (~bc[(i + 1) % 5]) & bc[(i + 2) % 5];
     }
     // Iota
@@ -204,7 +204,7 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len)
     // endian-independent code follows:
     len -= old_tail;
     while (old_tail --)
-        ctx->saved |= (uint64_t) (*(buf ++)) << ((ctx->byteIndex ++) * 8);
+      ctx->saved |= (uint64_t) (*(buf ++)) << ((ctx->byteIndex ++) * 8);
 
     // now ready to add saved to the sponge
     ctx->s[ctx->wordIndex] ^= ctx->saved;
@@ -212,9 +212,9 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len)
       crash << "Internal sha3 computation error. " << crash;
     ctx->byteIndex = 0;
     ctx->saved = 0;
-    if (++ ctx->wordIndex == (Sha3::numberOfSpongeWords - ctx->capacityWords)) {
-        keccakf(ctx->s);
-        ctx->wordIndex = 0;
+    if (++ ctx->wordIndex == (Sha3::numberOfSpongeWords - ctx->capacityWords))
+    { keccakf(ctx->s);
+      ctx->wordIndex = 0;
     }
   }
   // now work in full words directly from input

@@ -554,9 +554,9 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("Ripemd160", CalculatorFunctionsGeneral::innerRIPEMD160OfString, "",
    "Ripemd160 hash function. See wikipedia page. ",
-   "ConvertStringToHex RIPEMD160(\"The quick brown fox jumps over the lazy dog\");\n"
+   "ConvertStringToHex Ripemd160(\"The quick brown fox jumps over the lazy dog\");\n"
    "\"37f332f68db77bd9d7edd4969571ad671cf9dd3b\";\n"
-   "ConvertStringToHex RIPEMD160(\"The quick brown fox jumps over the lazy cog\");\n"
+   "ConvertStringToHex Ripemd160(\"The quick brown fox jumps over the lazy cog\");\n"
    "\"132072df690933835eb8b6ad0b77e7b6f14acad7\";\n",
    true, false,
    "CalculatorFunctionsGeneral::innerRIPEMD160OfString",

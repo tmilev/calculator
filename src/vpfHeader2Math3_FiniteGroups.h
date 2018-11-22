@@ -38,13 +38,13 @@ public:
   bool IsMonEqualToZero() const
   { return this->data.IsEqualToZero();
   }
-  coefficient InnerProduct(const ClassFunction &other) const;
+  coefficient InnerProduct(const ClassFunction& other) const;
   coefficient Norm() const;
-  ClassFunction operator*(const ClassFunction &other) const;
+  ClassFunction operator*(const ClassFunction& other) const;
   ClassFunction Sym2() const;
   ClassFunction Alt2() const;
-  ClassFunction operator+(const ClassFunction &other) const;
-  ClassFunction operator-(const ClassFunction &other) const;
+  ClassFunction operator+(const ClassFunction& other) const;
+  ClassFunction operator-(const ClassFunction& other) const;
   ClassFunction ReducedWithChars(const List<ClassFunction> chars = 0);
   coefficient& operator[](int i) const;
   std::string ToString(FormatExpressions* theFormat = 0) const;
@@ -52,7 +52,7 @@ public:
   inline unsigned int HashFunction() const
   { return this->HashFunction(*this);
   }
-  void operator*= (const coefficient& inputCF)
+  void operator*=(const coefficient& inputCF)
   { this->data *= inputCF;
   }
   ClassFunction operator*(const coefficient& inputCF) const
@@ -274,8 +274,7 @@ public:
   LargeInt (*GetSizeByFormula)(FiniteGroup<elementSomeGroup>& G);
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
   bool AreConjugate_OLD_Deprecated_Version_By_Todor(const elementSomeGroup& left, const elementSomeGroup& right);
-  bool ComputeAllElements
-  (bool andWords, int MaxElements = 1000000);
+  bool ComputeAllElements(bool andWords, int MaxElements = 1000000);
   //MaxElements gives an upper bound to the number of elements this function will try to find.
   //Set MaxElements = - 1 for "unlimited" upper bound.
   bool ComputeAllElementsLargeGroup(bool andWords, int MaxElements = 1000000);
@@ -284,8 +283,7 @@ public:
 
   // Historical note: this was from Thomas' second finite group class, and is
   // as of 2015- 11 the only way to generate the words and conjugacy information
-  void ComputeCCfromAllElements
-  ();
+  void ComputeCCfromAllElements();
   void ComputeCCfromCCindicesInAllElements(const List<List<int> >& ccIndices);
 
   void ComputeCCSizeOrCCFromRepresentative
@@ -394,7 +392,7 @@ public:
   bool flagDeallocated;
   ElementWeylGroup(const ElementWeylGroup& other)
   { this->flagDeallocated = false;
-    this->operator= (other);
+    this->operator=(other);
   }
   ElementWeylGroup(): owner(0), flagDeallocated(false)
   {
@@ -478,7 +476,7 @@ public:
   ElementWeylGroup<WeylGroupData> Inverse() const;
   bool HasDifferentConjugacyInvariantsFrom(const ElementWeylGroup<templateWeylGroup>& right) const;
   void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& output) const;
-  bool operator== (const ElementWeylGroup<WeylGroupData>& other) const
+  bool operator==(const ElementWeylGroup<WeylGroupData>& other) const
   { if (this->owner != other.owner)
       return false;
     return this->generatorsLastAppliedFirst == other.generatorsLastAppliedFirst;
@@ -919,7 +917,7 @@ class GroupHomomorphism
 
   elementSecondGroup operator()(const elementFirstGroup& g) const
   { List<int> word;
-    this->preimageGroup->GetWord(g,word);
+    this->preimageGroup->GetWord(g, word);
     if (word.size == 0)
     { elementSecondGroup out;
       out.MakeID(generatorImages[0]);
@@ -985,7 +983,7 @@ class GroupRepresentation
       this->GetMatrixOfElement(this->ownerGroup->theElements[i], repms[i]);
     for (int i = 0; i < this->ownerGroup->theElements.size; i ++)
       for (int j = 0; j < this->ownerGroup->theElements.size; j ++)
-        if (repms[i]*repms[j] != repms[this->ownerGroup->theElements.GetIndex(this->ownerGroup->theElements[i]*this->ownerGroup->theElements[j])])
+        if (repms[i] * repms[j] != repms[this->ownerGroup->theElements.GetIndex(this->ownerGroup->theElements[i] * this->ownerGroup->theElements[j])])
           crash << "bad rep" << crash;
     stOutput << "Expensive verification complete, this is indeed a representation\n";
     return true;
@@ -1002,9 +1000,9 @@ class GroupRepresentation
   { return data.IntoStream(out);
   }
   bool operator== (const GroupRepresentation<someGroup, coefficient>& right) const
-  { if (this->ownerGroup!=right.ownerGroup)
+  { if (this->ownerGroup != right.ownerGroup)
       return false;
-    if (this->generatorS !=right.generatorS)
+    if (this->generatorS != right.generatorS)
       return false;
     return true;
     // if it ever becomes useful to compare element matrices...
@@ -1043,7 +1041,7 @@ bool GroupRepresentation<someGroup, coefficient>::GetMatrixOfElement(const eleme
   List<int> word;
   if (!this->ownerGroup->GetWord(g, word))
     return false;
-  for (int i = 0; i <word.size; i ++)
+  for (int i = 0; i < word.size; i ++)
     out *= this->generatorS[word[i]];
   return true;
   //stOutput << "GroupRepresentation::GetMatrixOfElement: Assembled for element " << g << " having word " << word.ToStringCommaDelimited() << " the matrix\n" << out.ToStringPlainText() << '\n';
@@ -1221,7 +1219,7 @@ public:
     return result;
   }
   bool operator== (const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other) const
-  { return this->ownerGroup == other.ownerGroup && this->theCharacteR== other.theCharacteR;
+  { return this->ownerGroup == other.ownerGroup && this->theCharacteR == other.theCharacteR;
   }
   void SpreadVector(const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace);
   std::string GetName() const;

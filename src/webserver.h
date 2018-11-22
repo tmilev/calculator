@@ -55,14 +55,14 @@ public:
   (SSL* theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
    std::stringstream *commentsGeneral, bool includeNoErrorInComments);
   bool SSLreadLoop
-  (int numTries, SSL* theSSL, std::string& output, const LargeInt& expectedLength, std::stringstream *commentsOnFailure,
-   std::stringstream *commentsGeneral, bool includeNoErrorInComments);
+  (int numTries, SSL* theSSL, std::string& output, const LargeInt& expectedLength, std::stringstream* commentsOnFailure,
+   std::stringstream* commentsGeneral, bool includeNoErrorInComments);
   bool SSLwriteLoop
   (int numTries, SSL* theSSL, const std::string& input, std::stringstream *commentsOnFailure,
    std::stringstream *commentsGeneral, bool includeNoErrorInComments);
   int SSLwrite
-  (SSL* theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
-   std::stringstream *commentsGeneral, bool includeNoErrorInComments);
+  (SSL* theSSL, void* buffer, int bufferSize, std::stringstream* commentsOnFailure,
+   std::stringstream* commentsGeneral, bool includeNoErrorInComments);
   SSLdata();
   ~SSLdata();
   void FreeSSL();
@@ -344,7 +344,7 @@ public:
   static void CheckMathJaxSetup();
   static void CheckFreecalcSetup();
   static void CheckSVNSetup();
-  static void AnalyzeMainArguments(int argC, char **argv);
+  static void AnalyzeMainArguments(int argC, char** argv);
   void InitializeGlobalVariables();
   void InitializeGlobalVariablesHashes();
   bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);
@@ -396,7 +396,7 @@ public:
   static void TurnProcessMonitoringOff();
   static void ToggleProcessMonitoring();
   static std::string GetEnvironment(const std::string& envVarName);
-  static int main(int argc, char **argv);
+  static int main(int argc, char** argv);
   static int mainApache();
   static int mainCommandLine();
 };

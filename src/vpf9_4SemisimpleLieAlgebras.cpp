@@ -273,7 +273,7 @@ void SemisimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int ind
   //this->ComputeDebugString();
   this->ExploitSymmetryChevalleyConstants(indexI, indexJ);
   //this->ComputeDebugString();
-  //int indexRootIPlusRootJ = this->theWeyl.RootSystem.GetIndex(rootI+rootJ);
+  //int indexRootIPlusRootJ = this->theWeyl.RootSystem.GetIndex(rootI + rootJ);
   int indexMinusIMinusJ = this->theWeyl.RootSystem.GetIndex(- rootI - rootJ);
   this->ExploitTheCyclicTrick(indexI, indexJ, indexMinusIMinusJ);
   //this->ComputeDebugString();

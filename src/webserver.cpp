@@ -5454,7 +5454,7 @@ void WebServer::CheckMongoDBSetup()
   theGlobalVariables.ChDir("./mongo-c-driver-1.9.3");
   theGlobalVariables.CallSystemNoOutput("./configure", true);
   theGlobalVariables.CallSystemNoOutput("make -j8", true);
-  logServer  << "Need sudo access for command: "
+  logServer << "Need sudo access for command: "
   << logger::red << "sudo make install" << logger::endL;
   theGlobalVariables.CallSystemNoOutput("sudo make install", true);
   theGlobalVariables.ChDir("../libbson-1.9.3");

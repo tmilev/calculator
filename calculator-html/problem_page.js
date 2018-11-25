@@ -74,6 +74,12 @@ function Problem(problemData, inputParentIdURLed) {
   this.video = problemData.video;
   this.slidesProjector = problemData.slidesProjector;
   this.slidesPrintable = problemData.slidesPrintable;
+  if (this.slidesProjector === undefined || this.slidesProjector === null) {
+    this.slidesProjector = "";
+  }
+  if (this.slidesPrintable === undefined || this.slidesPrintable === null) {
+    this.slidesPrintable = "";
+  }
   this.linkSlidesLaTeX = problemData.linkSlidesLaTeX;
 
   thePage.problems[this.idURLed] = this;
@@ -472,8 +478,12 @@ Problem.prototype.getHTMLOneProblemTr = function () {
   if (this.video !== "" && this.video !== undefined && this.video !== null) {
     result += `<a class = 'videoLink' href = '${this.video}' target = '_blank'>Video</a>`;
   }
-  result += `<a class ='slidesLink' href = '${this.slidesProjector}' target = '_blank'>Printable slides</a>`;
-  result += `<a class ='slidesLink' href = '${this.slidesPrintable}' target = '_blank'>Slides</a>`;
+  if (this.slidesProjector !== "" && this.slidesProjector !== null && this.slidesProjector !== undefined) {
+    result += `<a class ='slidesLink' href = '${this.slidesProjector}' target = '_blank'>Printable slides</a>`;
+  } 
+  if (this.slidesPrintable !== "" && this.slidesPrintable !== null && this.slidesProjector !== undefined) {
+    result += `<a class ='slidesLink' href = '${this.slidesPrintable}' target = '_blank'>Slides</a>`;
+  }
   if (this.linkSlidesLaTeX !== "" && this.linkSlidesLaTeX !== undefined) {
     result += `<a class ='slidesLink' href = '${this.linkSlidesLaTeX}' target = '_blank' `;
     result += `download ='${convertStringToLaTeXFileName(this.title)}.tex'>.tex</a>`;

@@ -3332,18 +3332,10 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource()
       theGlobalVariables.userCalculatorRequestType == "homeworkSource")
     theCrawler.flagHomeworkRatherThanSlides = true;
   if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments))
-  { this->flagDoAddContentLength = true;
-    stOutput << "<!DOCTYPE html>"
-    << "<html>"
-    << "<head>"
-    << HtmlRoutines::GetCSSLinkCalculator()
-    << "</head>"
-    << "<body>"
-    << "<calculatorNavigation>"
-    << HtmlInterpretation::ToStringNavigation()
-    << "</calculatorNavigation>";
-    stOutput << comments.str();
-    stOutput << "</body></html>";
+  { JSData result;
+    HtmlInterpretation::GetJSDataUserInfo(result, comments.str());
+    this->flagDoAddContentLength = true;
+    stOutput << result.ToString(false);
     return 0;
   }
   this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: application/pdf; Access-Control-Allow-Origin: *");

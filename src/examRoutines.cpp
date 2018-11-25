@@ -4448,7 +4448,11 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   if (this->handwrittenSolution != "")
     this->displayHandwrittenSolution = "<a href=\"" +
     this->handwrittenSolution + "\" class =\"slidesLink\">Handwritten solutions</a>";
-  if (this->slidesProjector == "" && this->slidesPrintable == "")
+  bool doComputeSlides = false;
+  if (this->slidesPrintable == "" && this->slidesProjector == "")
+    if (this->sourceSlides.size > 0 || this->sourceHomework.size > 0)
+      doComputeSlides = true;
+  if (doComputeSlides)
   { std::stringstream
     slideFromSourceStreamHandouT, slideFromSourceStreamHandoutLink,
     slideFromSourceStreamProjectoR, homeworkFromSourceStreamNoAnswerKey, homeworkFromSourceStreamAnswerKey,
@@ -4641,8 +4645,10 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
   output["problemNumberString"] = this->problemNumberString;
   output["video"] = this->video;
   output["videoHandwritten"] = this->videoHandwritten;
-  output["slidesProjector"] = this->slidesProjector;
-  output["slidesPrintable"] = this->slidesPrintable;
+  if (this->slidesProjector != "")
+    output["slidesProjector"] = this->slidesProjector;
+  if (this->slidesPrintable != "")
+    output["slidesPrintable"] = this->slidesPrintable;
   output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSectioN;
   //stOutput << "DEBUG: deadlinesPerSection: " << this->deadlinesPerSectioN.ToStringCommaDelimited();
   if (!theGlobalVariables.UserDefaultHasProblemComposingRights())

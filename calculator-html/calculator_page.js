@@ -3,6 +3,7 @@ const submitRequests = require('./submit_requests');
 const pathnames = require('./pathnames');
 const drawing = require('./three-d').drawing;
 const ids = require('./ids_dom_elements');
+const hideHtmlWithTags = require('./hide_html_with_tags');
 
 function Calculator() {
 
@@ -157,7 +158,7 @@ Calculator.prototype.processExamples = function(inputJSONtext) {
     }
     var resultString = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
     resultString += examplesString;
-    document.getElementById("divCalculatorExamples").innerHTML = resultString;
+    document.getElementById(ids.domElements.calculatorExamples).innerHTML = resultString;
   } catch (e) {
     console.log(`Bad json: ${e}\n Input JSON follows.`);
     console.log(inputJSONtext);
@@ -173,7 +174,7 @@ Calculator.prototype.submitCalculatorInputOnEnter = function () {
 }
 
 Calculator.prototype.toggleExamples = function(theButton) {
-  var theExamples = document.getElementById('divCalculatorExamples');
+  var theExamples = document.getElementById(ids.domElements.calculatorExamples);
   if (theExamples.innerHTML.length < 300) {
     submitRequests.submitGET({
       url: `${pathnames.urls.calculatorAPI}?request=calculatorExamplesJSON`,
@@ -182,7 +183,7 @@ Calculator.prototype.toggleExamples = function(theButton) {
     });
     theButton.innerHTML = "&#9660;";
   } else {
-    switchMenu('divCalculatorExamples');
+    hideHtmlWithTags.switchMenu(ids.domElements.calculatorExamples);
     if (! theExamples.classList.contains("hiddenClass")) {
       theButton.innerHTML = "&#9660;";
     } else {

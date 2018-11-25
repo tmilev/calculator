@@ -675,6 +675,10 @@ div.divMenuSeparator {
   border-bottom: 1px solid black;
 }
 
+#divCalculatorExamples {
+  max-height: 850px;
+}
+
 div.headChapter {
   padding-bottom: 10px; 
   padding-left: 0;

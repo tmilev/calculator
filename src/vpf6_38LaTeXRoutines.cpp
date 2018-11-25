@@ -581,9 +581,9 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   this->targetPDFVirtualPath = FileOperations::GetPathFromFileNameWithPath(firstSignificantSlideName);
   std::string tempString;
   if (MathRoutines::StringBeginsWith(this->targetPDFVirtualPath, "freecalc", &tempString))
-    this->targetPDFVirtualPath = "slides-videos" + tempString;
+    this->targetPDFVirtualPath = "slides-video" + tempString;
   if (MathRoutines::StringBeginsWith(this->targetPDFVirtualPath, "LaTeX-materials", &tempString))
-    this->targetPDFVirtualPath = "slides-videos" + tempString;
+    this->targetPDFVirtualPath = "slides-video" + tempString;
   this->targetPDFNoPath = FileOperations::GetFileNameFromFileNameWithPath(firstSignificantSlideName);
   FileOperations::GetFileExtensionWithDot(this->targetPDFNoPath, &this->targetPDFNoPath);
   if (!this->flagHomeworkRatherThanSlides)
@@ -603,10 +603,10 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   this->targetPDFNoPath += ".pdf";
   this->targetPDFFileNameWithPathVirtual = this->targetPDFVirtualPath + this->targetPDFNoPath;
   this->targetPDFLatexPath = "../../" + this->targetPDFVirtualPath;
-  if (!MathRoutines::StringBeginsWith(this->targetPDFVirtualPath, "slides-videos/modules/", &tempString))
+  if (!MathRoutines::StringBeginsWith(this->targetPDFVirtualPath, "slides-video/modules/", &tempString))
     this->targetVideoLatexPath = "";
   else
-    this->targetVideoLatexPath = "../../slides-videos/modules-video/" + tempString;
+    this->targetVideoLatexPath = "../../slides-video/modules-video/" + tempString;
   this->targetPDFFileNameWithLatexPath = this->targetPDFLatexPath + this->targetPDFNoPath;
   return true;
 }
@@ -771,19 +771,20 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
   if (commentsGeneral != 0)
     *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
   if (!FileOperations::LoadFileToStringUnsecure
-     (this->targetPDFFileNameWithLatexPath, this->targetPDFbinaryContent, commentsOnFailure))
+       (this->targetPDFFileNameWithLatexPath, this->targetPDFbinaryContent, commentsOnFailure))
     return false;
-  std::stringstream svnAddFileCommand, svnAddDirCommand, svnResult;
   if (!FileOperations::IsFileNameSafeForSystemCommands(this->targetPDFFileNameWithLatexPath, commentsOnFailure))
     return true;
-  svnAddDirCommand << "svn add " << this->targetPDFLatexPath << " --depth=empty";
-  svnResult << "<br>Command: " << svnAddDirCommand.str() << "<br>Result: ";
-  svnResult << theGlobalVariables.CallSystemWithOutput(svnAddDirCommand.str());
-  svnAddFileCommand << "svn add " << this->targetPDFFileNameWithLatexPath;
-  svnResult << "<br>Command: " << svnAddFileCommand.str() << "<br>Result: ";
-  svnResult << theGlobalVariables.CallSystemWithOutput(svnAddFileCommand.str());
-  if (commentsGeneral != 0)
-    *commentsGeneral << svnResult.str();
+  //  std::stringstream svnAddFileCommand, svnAddDirCommand, svnResult;
+  //Old code to add pdf files to svn repo:
+  //svnAddDirCommand << "svn add " << this->targetPDFLatexPath << " --depth=empty";
+  //svnResult << "<br>Command: " << svnAddDirCommand.str() << "<br>Result: ";
+  //svnResult << theGlobalVariables.CallSystemWithOutput(svnAddDirCommand.str());
+  //svnAddFileCommand << "svn add " << this->targetPDFFileNameWithLatexPath;
+  //svnResult << "<br>Command: " << svnAddFileCommand.str() << "<br>Result: ";
+  //svnResult << theGlobalVariables.CallSystemWithOutput(svnAddFileCommand.str());
+  //if (commentsGeneral != 0)
+  //  *commentsGeneral << svnResult.str();
   return true;
 }
 
@@ -813,14 +814,14 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.sourcesHomeworkHeaders);
   this->slideFilesExtraFlags.initFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
   for (int i = 0; i < topicParser.theTopicS.size()
-//  && numProcessed < 2
-  ; i ++)
+//        && numProcessed < 2
+        ; i ++)
   { TopicElement& currentElt = topicParser.theTopicS[i];
     if (currentElt.sourceHomework.size == 0)
       continue;
     std::stringstream reportStream;
-    numProcessed++;
-    reportStream << "Processing slide pair " << numProcessed << " out of " << numSlidePairsToBuild;
+    numProcessed ++;
+    reportStream << "Processing homework pdfs: " << numProcessed << " out of " << numSlidePairsToBuild << ". ";
     theReport.Report(reportStream.str());
 
     this->slideFileNamesVirtualWithPatH.SetSize(topicParser.sourcesHomeworkHeaders.size);
@@ -856,14 +857,15 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   numProcessed = 0;
   this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.slidesSourcesHeaders);
   for (int i = 0; i < topicParser.theTopicS.size()
-  //&& numProcessed < 0
-  ; i ++)
+//        && numProcessed < 2
+        ; i ++)
   { TopicElement& currentElt = topicParser.theTopicS[i];
     if (currentElt.sourceSlides.size == 0)
       continue;
     std::stringstream reportStream;
-    numProcessed++;
-    reportStream << "Processing slide pair " << numProcessed << " out of " << numSlidePairsToBuild;
+    numProcessed ++;
+    reportStream << "Processing lecture slides: " << numProcessed << " out of " << numSlidePairsToBuild << ". ";
+    reportStream << "<br>Slide file names: " << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
     theReport.Report(reportStream.str());
 
     this->slideFileNamesVirtualWithPatH.SetSize(topicParser.slidesSourcesHeaders.size);

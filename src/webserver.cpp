@@ -5629,8 +5629,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("/freecalc/", "../freecalc/");
   //referred to by site:
   folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/slides-videos/", "../slides-videos/");
-  folderSubstitutionsNonSensitive.SetKeyValue("slides-videos/", "../slides-videos/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/slides-video/", "../slides-video/");
+  folderSubstitutionsNonSensitive.SetKeyValue("slides-video/", "../slides-video/");
 
   folderSubstitutionsSensitive.Clear();
   folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");//<-internal use

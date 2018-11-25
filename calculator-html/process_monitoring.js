@@ -6,49 +6,75 @@ const ids = require('./ids_dom_elements');
 function Monitor() {
   this.isPaused = false;
   this.isFinished = true;
-  this.timeIncrementInTenthsOfSecond = 20;
+  this.timeIncrement = 2;
+  this.timeOutOldCounter = 0;
   this.timeOutCounter = 0;
   this.currentWorkerNumber = - 1; 
+  this.currentTimeOutHandler = null;
 }
 
 Monitor.prototype.start = function(inputWorkerNumber) {
   this.isFinished = false;
   this.isPaused = false;
-  this.currentWorkerNumber = inputWorkerNumber;
+  this.timeOutCounter = 0;
+  this.timeOutOldCounter = 0;
+  this.currentWorkerNumber = Number(inputWorkerNumber);
+  document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest).innerHTML = "Pause";
+  this.progressReport();
 }
 
 Monitor.prototype.progressReport = function() { 
-  if (isFinished) {
+  if (this.isFinished) {
     return;
   }
   clearTimeout(this.timeoutID);
-  var progReportTimer = document.getElementById("idProgressReportTimer");
-  if (isPaused) {
+  if (this.isPaused) {
     return;
   }
-  progressReportContent = "";
-  progressReportContent += `<hr>Refreshing every ${timeIncrementInTenthsOfSecond / 10} second(s). `;
-  progressReportContent += `Client time: ~${Math.floor(timeOutCounter / 10)} second(s)<br>`;
-  progReportTimer.innerHTML += progressReportContent;
-  timeOutCounter += timeIncrementInTenthsOfSecond;
+  this.timeOutOldCounter = this.timeOutCounter;
+  this.timeOutCounter += this.timeIncrement;
   var sURL = "";
   sURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.indicator}`;
-  sURL += `&${pathnames.urlFields.requests.mainInput}=${currentWorkerNumber}`;
+  sURL += `&${pathnames.urlFields.requests.mainInput}=${this.currentWorkerNumber}`;
   submitRequests.submitGET({
     url: sURL,
     progress: ids.domElements.spanProgressCalculatorInput,
-    result: ids.domElements.spanCalculatorMainOutput
+    callback: this.callbackPauseRequest.bind(this), 
   });
+  clearTimeout(this.currentTimeOutHandler);
+  this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
 }
 
 Monitor.prototype.callbackPauseRequest = function(input, output) {
-  var isPaused = null;
-  if (input === "paused") {
-    isPaused = true;
-    document.getElementById("idButtonSendTogglePauseRequest").innerHTML = "Continue";
+  clearTimeout(this.currentTimeOutHandler);
+  var progressReportContent = "";
+  progressReportContent += `Refreshing every ${this.timeIncrement} second(s). `;
+  progressReportContent += `Client time: ~${Math.floor(this.timeOutOldCounter)} second(s)<br>`;
+  var progReportTimer = document.getElementById(ids.domElements.monitoring.progressTimer);
+  progReportTimer.innerHTML = progressReportContent;
+  if (input === "") {
+    this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
+    return;
+  }
+  var indicatorButton = document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest);
+  var resultComponent = document.getElementById(ids.domElements.spanCalculatorMainOutput);
+  var resultJSON = JSON.parse(input);
+  var status = resultJSON.status;
+  var resultContent = resultJSON.data;
+  if (resultContent !== null && resultContent !== undefined) {
+    resultComponent.innerHTML = resultContent;
+  }
+  if (status === "finished") {
+    this.isFinished = true;
+    this.isPaused = false;
+    indicatorButton.innerHTML = "Finished";
+  } else if (status === "paused") {
+    this.isPaused = true;
+    indicatorButton.innerHTML = "Continue";
   } else {
-    isPaused = false;
-    document.getElementById("idButtonSendTogglePauseRequest").innerHTML = "Pause";
+    this.isPaused = false;
+    indicatorButton.innerHTML = "Pause";
+    this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
   }
 }
 

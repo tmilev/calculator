@@ -211,7 +211,7 @@ std::string GlobalVariables::ToStringProgressReportHtml()
       << " second(s) [system crash if limit exceeded]."
       << "<br> Soft limit: "
       << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit / 2
-      << " second(s) [computation error if limit exceeded].";
+      << " second(s) [computation error if limit exceeded, triggered between calculator/atomic functions].";
   }
   return reportStream.str();
 }

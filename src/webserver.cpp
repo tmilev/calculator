@@ -1465,7 +1465,7 @@ void WebWorker::OutputResultAfterTimeout()
   std::string theLink = "output/" + HtmlRoutines::ConvertStringToURLString
   (theGlobalVariables.RelativePhysicalNameOutpuT, false);
   out << "Output written in: <a href=\"/"
-  << theLink << "\"> " << theLink << "</a><br>";
+  << theLink << "\" target = \"_blank\"> " << theLink << "</a><br>";
   //out <<  "DEBUG: filename: " << theFileName << "<br>";
   if (standardOutputStreamAfterTimeout.str().size() != 0)
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
@@ -1493,17 +1493,14 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input)
   //requesting pause which will be cleared by the receiver of pipeWorkerToWorkerIndicatorData
   theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked(false, false);
   logWorker << logger::blue << "Sending result through indicator pipe." << logger::endL;
-
   theWebServer.GetActiveWorker().pipeWorkerToWorkerIndicatorData.WriteAfterEmptying(input, false, false);
   logBlock << logger::blue << "Final output written to indicator, blocking until data "
   << "is received on the other end." << logger::endL;
   if (!theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut(false, false))
-  {}
-  else
+  {} else
   {//requesting pause which will be cleared by the receiver of pipeWorkerToWorkerIndicatorData
     theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked(false, false);
   }
-  //logWorker << logger::red << "Result data is received, sending \"finished\"." << logger::endL;
   theWebServer.GetActiveWorker().pipeWorkerToWorkerIndicatorData.WriteAfterEmptying("finished", false, false);
   logWorker << logger::red << "\"finished\" sent through indicator pipe, waiting." << logger::endL;
   theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut(false, false);
@@ -1999,35 +1996,46 @@ int WebWorker::ProcessPauseWorker()
 { MacroRegisterFunctionWithName("WebWorker::ProcessPauseWorker");
   this->SetHeaderOKNoContentLength("");
   std::string theMainInput = theGlobalVariables.GetWebInput("mainInput");
+  std::stringstream out;
+  JSData result;
   if (theMainInput == "")
-  { stOutput << "<b>To pause a worker please provide the worker number in the mainInput field.</b>";
+  { result["error"] = "To pause a worker please 1) turn on monitoring and 2) provide the worker number in the mainInput field. ";
+    stOutput << result.ToString(false);
     return 0;
   }
   int inputWebWorkerNumber = atoi(theMainInput.c_str());
   int inputWebWorkerIndex = inputWebWorkerNumber - 1;
   if (inputWebWorkerIndex < 0 || inputWebWorkerIndex >= this->parent->theWorkers.size)
-  { stOutput << "<b>User requested worker number " << inputWebWorkerNumber
+  { out << "<b>User requested worker number " << inputWebWorkerNumber
     << " out of " << this->parent->theWorkers.size << " which is out of range. </b>";
+    result["error"] = out.str();
+    stOutput << result.ToString(false);
     return 0;
   }
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
-  { stOutput << "<b>Requested worker number " << inputWebWorkerNumber << " is not in use. Total number of workers: "
+  { out << "<b>Requested worker number " << inputWebWorkerNumber << " is not in use. Total number of workers: "
     << this->parent->theWorkers.size << ". </b>";
+    result["error"] = out.str();
+    stOutput << result.ToString(false);
     return 0;
   }
   if (inputWebWorkerIndex == this->indexInParent)
-  { stOutput << "Worker " << inputWebWorkerIndex
+  { out << "Worker " << inputWebWorkerIndex
     << " attempts to pause itself, this is not allowed.";
+    result["error"] = out.str();
+    stOutput << result.ToString(false);
     return 0;
   }
   logWorker << "Proceeding to toggle worker pause." << logger::endL;
   WebWorker& otherWorker = this->parent->theWorkers[inputWebWorkerIndex];
   if (!otherWorker.PauseWorker.CheckPauseIsRequested(false, false, false))
   { otherWorker.PauseWorker.RequestPausePauseIfLocked(false, false);
-    stOutput << "paused";
+    result["status"]= "paused";
+    stOutput << result.ToString(false);
     return 0;
   }
-  stOutput << "unpaused";
+  result["status"]= "unpaused";
+  stOutput << result.ToString(false);
   otherWorker.PauseWorker.ResumePausedProcessesIfAny(false, false);
   return 0;
 }
@@ -2063,54 +2071,69 @@ int WebWorker::ProcessComputationIndicator()
   this->SetHeaderOKNoContentLength("");
   logWorker << "Processing get request indicator." << logger::endL;
   std::string theMainInput = theGlobalVariables.GetWebInput("mainInput");
+  JSData result;
+  std::stringstream out, comments;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { result["error"] = "Process monitoring only allowed to logged-in admins. ";
+    stOutput << result.ToString(false);
+    return 0;
+  }
   if (theMainInput == "")
-  { stOutput << "<b>To get a computation indicator you need to supply the number "
-    << "of the child process in the mainInput field.</b>";
+  { out << "To get a computation indicator you need to supply the number of "
+    << "the child process in the mainInput field.";
+    result["error"] = out.str();
+    stOutput << result.ToString(false);
     return 0;
   }
   int inputWebWorkerNumber = atoi(theMainInput.c_str());
   int inputWebWorkerIndex = inputWebWorkerNumber - 1;
   if (inputWebWorkerIndex < 0 || inputWebWorkerIndex >= this->parent->theWorkers.size)
-  { stOutput << "<b>Indicator error. Worker number "
+  { out << "Indicator error. Worker number "
     << inputWebWorkerNumber << " is out of range: there are "
     << this->parent->theWorkers.size
-    << " workers. </b>";
+    << " workers. ";
+    result["error"] = out.str();
+    stOutput << result.ToString(false);
     return 0;
   }
-  std::stringstream theErrorMessageStream;
-  theErrorMessageStream
-  << "<span style =\"color:red\">Your computation may have terminated unexpectedly. The maximum number of "
+  comments
+  << "The maximum number of "
   << " connections/computations you can run is: "
-  << theWebServer.MaxNumWorkersPerIPAdress << ". </span>"
-  << "At the time of writing, you use up 1 connection per computation, "
-  << "1 - 4 connections for each web browser request (depending on the browser) "
-  << "and 1 per computation window request. The "
-  << "most recent error message reported by the "
+  << theWebServer.MaxNumWorkersPerIPAdress << ". "
+  << "The most recent error message reported by the "
   << "worker you want to monitor is: "
   << this->parent->theWorkers[inputWebWorkerIndex].pingMessage;
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
-  { stOutput << "<b>Indicator error. Worker number "
+  { out << "Indicator error. Worker number "
     << inputWebWorkerNumber << " is not in use. "
-    << theErrorMessageStream.str()
     << " Total number of workers: "
-    << this->parent->theWorkers.size << ". </b>";
+    << this->parent->theWorkers.size << ". ";
+    result["error"] = out.str();
+    result["comments"] = comments.str();
+    stOutput << result.ToString(false);
     return 0;
   }
   if (inputWebWorkerIndex == this->indexInParent)
-  { stOutput << "<b>Indicator error. Worker number "
+  { out << "Indicator error. Worker number "
     << inputWebWorkerNumber << " requested to monitor itself. "
-    << " This is not allowed. " << theErrorMessageStream.str() << "</b>";
+    << " This is not allowed. ";
+    result["error"] = out.str();
+    result["comments"] = comments.str();
+    stOutput << result.ToString(false);
     return 0;
   }
   WebWorker& otherWorker = this->parent->theWorkers[inputWebWorkerIndex];
   if (otherWorker.userAddress.theObject != this->userAddress.theObject)
-  { stOutput << "User address: " << this->userAddress.theObject
-    << " does not coincide with the monitored address, this is not allowed. ";
+  { out << "User ip address: " << this->userAddress.theObject
+    << " does not coincide with address that initiated the process. This is not allowed. ";
+    result["error"] = out.str();
+    stOutput << result.ToString(false);
     return 0;
   }
-  if (otherWorker.flagUsingSSLInWorkerProcess != this->flagUsingSSLInWorkerProcess)
-  { stOutput << "Monitoring https connections over http, "
-    << "http connection over https is not allowed. ";
+  if (this->flagUsingSSLInWorkerProcess != true)
+  { out << "Monitoring allowed only over https. ";
+    result["error"] = out.str();
+    stOutput << result.ToString(false);
     return 0;
   }
 //  logWorker << "Worker " << this->parent->activeWorker
@@ -2122,8 +2145,12 @@ int WebWorker::ProcessComputationIndicator()
   if (otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.size > 0)
   { std::string outputString;
     outputString.assign(otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.TheObjects, otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.size);
-    //logWorker << logger::yellow << "Indicator string read: " << logger::blue << outputString << logger::endL;
-    stOutput << outputString;
+    if (outputString != "finished")
+    { result["data"] = outputString;
+      result["status"] = "running";
+    } else
+      result["status"] = "finished";
+    stOutput << result.ToString(false);
     otherWorker.PauseComputationReportReceived.ResumePausedProcessesIfAny(false, false);
   } //else
   //Empty response
@@ -3946,7 +3973,7 @@ void WebWorker::ResetPipesNoAllocation()
 }
 
 void WebWorker::ReleaseKeepInUseFlag()
-{ MacroRegisterFunctionWithName("WebWorker::ReleaseMyPipe");
+{ MacroRegisterFunctionWithName("WebWorker::ReleaseKeepInUseFlag");
   this->pipeWorkerToServerTimerPing.Release();
   this->pipeWorkerToServerControls.Release();
   this->pipeWorkerToWorkerRequestIndicator.Release();
@@ -3987,7 +4014,7 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   }
   if (this->indexInParent < 0)
     crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
-  stOutput << "\n<script language =\"javascript\">\n"
+  stOutput << "<script language = \"javascript\">\n"
   << "window.calculator.processMonitoring.monitor.start("
   << this->indexInParent + 1
   << ");\n"
@@ -4669,14 +4696,14 @@ void WebServer::RecycleChildrenIfPossible()
       if (currentControlPipe.lastRead.size > 0)
       { this->theWorkers[i].flagInUse = false;
         this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
-        std::string messageStr = this->theWorkers[i].pipeWorkerToServerControls.GetLastRead();
+        std::string messageString = this->theWorkers[i].pipeWorkerToServerControls.GetLastRead();
         logServer << logger::green << "Worker "
         << i + 1 << " done with message: "
-        << messageStr
+        << messageString
         << ". Marking for reuse. " << logger::endL;
         numInUse --;
         this->NumWorkersNormallyExited ++;
-        if (messageStr == "toggleMonitoring")
+        if (messageString == "toggleMonitoring")
           this->ToggleProcessMonitoring();
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
       } else
@@ -4710,7 +4737,7 @@ void WebServer::RecycleChildrenIfPossible()
           << ", pid: "
           << this->theWorkers[i].ProcessPID << ". ";
           logProcessKills << logger::red << pingTimeoutStream.str() << logger::endL;
-          this->theWorkers[i].pingMessage = "<span style =\"color:red\"><b>" + pingTimeoutStream.str() + "</b></span>";
+          this->theWorkers[i].pingMessage = "<b style =\"color:red\">" + pingTimeoutStream.str() + "</b>";
           numInUse --;
           this->NumProcessAssassinated ++;
         }
@@ -5573,6 +5600,7 @@ void WebServer::InitializeGlobalVariables()
   //Warning: order of substitutions is important. Only the first rule that applies is applied, only once.
   //No further rules are applied after that.
   folderSubstitutionsNonSensitive.SetKeyValue("/output/", "output/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("output/", "output/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/certificates-public/", "certificates-public/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("certificates-public/", "certificates-public/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("problemtemplates/", "../problemtemplates/");

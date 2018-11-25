@@ -6833,6 +6833,11 @@ bool CalculatorFunctionsGeneral::innerTestTopCommand
 bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
 //  stOutput << "Report html return!";
+  if (!theGlobalVariables.flagAllowProcessMonitoring) {
+    std::stringstream out;
+    out << "Process monitoring not allowed (can be turned on by admin). ";
+    return output.AssignValue(out.str(), theCommands);
+  }
   int numRuns = - 1;
   if (!input.IsIntegerFittingInInt(&numRuns))
     return theCommands << "Argument of CalculatorFunctionsGeneral::innerTestIndicator is not a small integer, instead it equals: " << numRuns << ".";

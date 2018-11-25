@@ -1,16 +1,19 @@
 /*styleCalculator.css*/
-calculatorExampleInfo{
+calculatorExampleInfo {
   display: block;
   transition: all 1s;
   opacity: 1;
 }
-calculatorAtom{
+
+calculatorAtom {
   font-weight: bold;
   color: red;
 }
-calculatorCompositeAtom{
+
+calculatorCompositeAtom {
   color:green;
 }
+
 calculatorNavigation {
   background-color: #e8e8e8;
   display: block;
@@ -21,20 +24,16 @@ calculatorNavigation {
   white-space: nowrap;
   width: 100%;
 }
-calculatorNavigation:after{
-clear:both;
+
+calculatorNavigation:after {
+  clear:both;
 }
+
 tiny {
   font-size: x-small
 }
-tr.problemContainerRow{
-/*height: 500px;*/
-}
-td.problemContainerCell{
-/*height: 500px;*/
-}
 
-.problemInfoBar{
+.problemInfoBar {
   /*display: block;*/
   background-color: #fafafa;
   -moz-border-radius: 3px;
@@ -43,6 +42,7 @@ td.problemContainerCell{
   width: 100%;
   margin-bottom: 10px;
 }
+
 span.spanFileInfo {
   display: inline-block;
   border-radius: 3px;
@@ -52,6 +52,7 @@ span.spanFileInfo {
   white-space: nowrap;
   background-color: #f8f8f8;
 }
+
 span.problemTitle {
   display: inline-block;
   border-radius: 3px;
@@ -60,6 +61,7 @@ span.problemTitle {
   text-align: center;
   white-space: nowrap;
 }
+
 span.problemNavigation {
   display: inline-block;
   border-radius: 3px;
@@ -70,43 +72,46 @@ span.problemNavigation {
 /*  border: 1px solid black;*/
 }
 
-textarea.textareaCalculatorMain{
+textarea.textareaCalculatorMain {
   white-space:normal;
   resize: auto;
   width: 300px;
   height: 100px;
 }
-textarea.textAreaStudentPoints{
-resize: both
+
+textarea.textAreaStudentPoints {
+  resize: both
 }
-.calculatorHidden{
+
+.calculatorHidden {
   display:none;
 }
-.calculatorCommentBeforeSubmission{
+
+.calculatorCommentBeforeSubmission {
   display:none;
 }
-td.tableCellMQfield{
-vertical-align: center;
-padding: 5px;
-/*min-width: 100px;*/
-text-align: center;
+
+td.tableCellMQfield {
+  vertical-align: center;
+  padding: 5px;
+  /*min-width: 100px;*/
+  text-align: center;
 }
-.calculatorMQfieldEnclosure{
+
+.calculatorMQfieldEnclosure {
   display:inline-block;
   background-color:white;
   padding: 0px;
 }
-.problemForm{
-}
-.buttonNormal{
-}
-sectionSelection{
+
+sectionSelection {
   position:fixed;
   background: silver;
   bottom:0;
   right:0;
 }
-.buttonSubmit{
+
+.buttonSubmit {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
@@ -118,7 +123,8 @@ sectionSelection{
   color:red;
   width:60px;
 }
-.buttonSolution{
+
+.buttonSolution {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
@@ -130,9 +136,11 @@ sectionSelection{
   color:green;
   width:60px;
 }
+
 .buttonSubmit:hover {
   background-color:#878787;
 }
+
 .buttonPreview {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -145,9 +153,11 @@ sectionSelection{
   color:green;
   width:60px;
 }
+
 .buttonPreview:hover {
   background-color:#878787;
 }
+
 .buttonAnswer {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -204,6 +214,7 @@ button.accordionLikeProblemWeight {
   font-size: medium;
   transition: 0.6s;
 }
+
 button.accordionLikeProblemWeight.active, button.accordionLikeProblemWeight:hover {
   background-color: #ddd;
 }
@@ -225,9 +236,11 @@ button.accordionLike {
   font-size: medium;
   transition: 0.6s;
 }
+
 button.accordionLike.active, button.accordionLike:hover {
   background-color: #ddd;
 }
+
 button.accordion {
   border-radius: 3px;
   padding: 2px;
@@ -245,17 +258,18 @@ button.accordion {
   font-size: medium;
   transition: 0.6s;
 }
+
 button.accordion.active, button.accordion:hover {
   background-color: #dfdfdf;
 }
+
 button.accordion:after {
   vertical-align: middle;
   color: #777;
   margin-left: 0px;
 }
-button.accordion.active:after {
-}
-button.buttonStandard{
+
+button.buttonStandard {
   margin:  3px;
   padding: 3px;
   border-radius: 3px;
@@ -268,10 +282,12 @@ button.buttonStandard{
   font-size: medium;
   transition: 0.6s; 
 }
-button.buttonStandard:hover{
+
+button.buttonStandard:hover {
   background-color: lightskyblue;
 }
-button.buttonSaveEdit{
+
+button.buttonSaveEdit {
   margin:  3px;
   padding: 3px;
   -moz-border-radius: 3px;
@@ -287,10 +303,12 @@ button.buttonSaveEdit{
   font-size: medium;
   transition: 0.6s; 
 }
-button.buttonSaveEdit:hover{
+
+button.buttonSaveEdit:hover {
   background-color: lightgreen;
 }
-button.buttonClone{
+
+button.buttonClone {
   margin:  3px;
   padding: 3px;
   border-radius: 3px;
@@ -304,41 +322,47 @@ button.buttonClone{
   font-size: medium;
   transition: 0.6s; 
 }
-button.buttonClone:hover{
+
+button.buttonClone:hover {
   background-color: lightgreen;
 }
-button.buttonProgress{
+
+button.buttonProgress {
   box-shadow: none;
   border: none;
   background: none;
   font-size: x-small;
   transition: 2s;
 }
-button.buttonProgress:hover{
+
+button.buttonProgress:hover {
   background: lightgray;
 }
-answerCalculatorHighlight{
-display: inline-block;
-background-color: #fbfbfb;
-/*background-color: #bbbbbb;*/
--moz-border-radius: 3px;
--webkit-border-radius: 3px;
-font-size: 1em;
-border-radius: 3px;
-font-weight: bold;
-/*max-width: 200px;*/
+
+answerCalculatorHighlight {
+  display: inline-block;
+  background-color: #fbfbfb;
+  /*background-color: #bbbbbb;*/
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  font-size: 1em;
+  border-radius: 3px;
+  font-weight: bold;
+  /*max-width: 200px;*/
 }
-span.panelAnswer table, tr, td{
+
+span.panelAnswer table, tr, td {
   margin-left: 0px;
   padding-left: 0px;
   border-collapse: collapse;
 }
-span.panelAnswer tr{
+
+span.panelAnswer tr {
   margin-left: 0px;
   padding-left: 0px;
 }
 
-span.panelAnswer{
+span.panelAnswer {
   display: inline-block;
   margin-right: 5px;
   margin-bottom: 5px;
@@ -353,13 +377,12 @@ span.panelAnswer{
   border-radius: 3px;
   transition: 0.6s;
 }
-span.panelAnswer:hover{
+
+span.panelAnswer:hover {
   background-color: #fbfbfb;
 }
-/*span.panelAnswer:hover .calculatorMQfieldEnclosureOuter{
-  background-color: orange;
-}*/
-span.panelAnswer:hover .mq-editable-field.mq-math-mode{
+
+span.panelAnswer:hover .mq-editable-field.mq-math-mode {
   -webkit-box-shadow: #8bd 0 0 1px 2px, inset #6ae 0 0 2px 0;
   -moz-box-shadow: #8bd 0 0 1px 2px, inset #6ae 0 0 2px 0;
   box-shadow: #8bd 0 0 1px 2px, inset #6ae 0 0 2px 0;
@@ -367,6 +390,7 @@ span.panelAnswer:hover .mq-editable-field.mq-math-mode{
   border-radius: 1px;
   transition: 2s;
 }
+
 span.panel {
   display:none;
   padding: 0 0px;
@@ -378,12 +402,14 @@ span.panel {
   transition: 0.6s linear;
   opacity: 0;
 }
+
 span.panel.show {
   transition: 0.6s linear;
   opacity: 1;
   max-height: 500px;
 }
-button.buttonToggleTopics{
+
+button.buttonToggleTopics {
   margin-top: 0px;
   margin-bottom: 0px;
   margin-left: 5px;
@@ -404,10 +430,12 @@ button.buttonToggleTopics{
   outline:none;
   transition: 0.6s;
 }
+
 button.buttonToggleTopics.active, button.buttonToggleTopics:hover {
   background-color: #d0d0d0;
 }
-button.studentScoresButton{
+
+button.studentScoresButton {
   margin-top: 0;
   margin-bottom: 0px;
   font-size: medium;
@@ -425,14 +453,17 @@ button.studentScoresButton{
   outline:none;
   transition: 0.6s;
 }
+
 button.studentScoresButton.active, button.studentScoresButton:hover {
   background-color: #d0d0d0;
 }
-span.studentScoresContent{
+
+span.studentScoresContent {
   transition: opacity 1s linear;
   opacity: 1;
 }
-panelStudentScores{
+
+panelStudentScores {
   display: inline-block;
   margin:  3px;
   padding: 3px;
@@ -443,7 +474,8 @@ panelStudentScores{
   border-radius: 3px;
   transition: 0.6s;
 }
-panelCourseInfo{
+
+panelCourseInfo {
   display: inline-block;
   margin:  3px;
   padding: 3px;
@@ -454,7 +486,8 @@ panelCourseInfo{
   border-radius: 3px;
   transition: 0.6s;
 }
-span.panelProblemWeights{
+
+span.panelProblemWeights {
   display: block;
   max-height: 0;
   margin-top: 0px;
@@ -463,7 +496,8 @@ span.panelProblemWeights{
   transition: 2s linear;
   opacity: 0;
 }
-span.panelDeadlines{
+
+span.panelDeadlines {
   display: block;
   max-height: 0;
   margin-top: 0px;
@@ -473,7 +507,7 @@ span.panelDeadlines{
   opacity: 0;
 }
 
-span.studentScoresWrapper{
+span.studentScoresWrapper {
   width: 420px;
   font-size: medium;
   font-weight: normal;
@@ -482,13 +516,13 @@ span.studentScoresWrapper{
   margin-bottom: 0;
 }
 
-.panelExpandable{
+.panelExpandable {
   transition: all 2s;
   overflow: hidden;
   word-wrap: break-word;
 }
 
-a.linkProgressReport{
+a.linkProgressReport {
   word-wrap: break-word;
   overflow-wrap: break-word;
   overflow: hidden;
@@ -496,7 +530,7 @@ a.linkProgressReport{
   max-width: 120px;
 }
 
-.spanProgressReport{
+.spanProgressReport {
   max-width: 120px;
 }
 
@@ -506,28 +540,33 @@ a.linkProgressReport{
   vertical-align:top;
   white-space:nowrap;
 }
-#idAutocompletePanel{
+
+#idAutocompletePanel {
   overflow: none;
   display: inline-block;
   max-height: 150px;
   vertical-align:top;
   white-space:nowrap;
 }
-#idAutocompleteSpan{
+
+#idAutocompleteSpan {
   overflow: auto;
   max-height: 100px;
 }
 
-.tableCalculatorInputs{
-display: inline-table;
+.tableCalculatorInputs {
+  display: inline-table;
 }
-.tableCalculatorInputs td{
+
+.tableCalculatorInputs td {
   vertical-align: top;
 }
-table.tableCalculatorOutput{
+
+table.tableCalculatorOutput {
   border-collapse: collapse;
 }
-td.cellCalculatorInput{
+
+td.cellCalculatorInput {
   border: 1px solid grey;
   padding-left: 5px;
   padding-right: 20px;
@@ -539,7 +578,8 @@ td.cellCalculatorInput{
   margin-left:  5px;
   vertical-align: top;
 }
-td.cellCalculatorResult{
+
+td.cellCalculatorResult {
   border: 1px solid grey;
   padding-left: 20px;
   padding-right: 5px;
@@ -552,7 +592,7 @@ td.cellCalculatorResult{
   vertical-align: top;
 }
 
-td.deadlineCell{
+td.deadlineCell {
   padding: 8px;
   margin-left: 10px;
   margin-top: 0px;
@@ -564,14 +604,17 @@ td.deadlineCell{
   font-size: medium;
   vertical-align: middle;
 }
-table.deadlineTable tr td{
+
+table.deadlineTable tr td {
   margin: 0;
   padding: 0;
 }
-table.deadlineTable tr th{
+
+table.deadlineTable tr th {
   margin: 0;
   padding: 0;
 }
+
 textarea.calculatorAnswer {
   padding: 0 0px;
   background-color: white;
@@ -582,27 +625,32 @@ textarea.calculatorAnswer {
   word-wrap: break-word;
   width: 60px
 }
+
 textarea.calculatorAnswer.show {
   opacity: 1;
   max-height: 500px;
 }
+
 textarea.currentFileNameArea {
   height: 25px;
   margin-bottom: -8px;
   overflow-x: hidden;
 }
-div.divPage{
+
+div.divPage {
   display: flex;
   flex-direction: row;
   width: 100%;
   visibility: visible;
 }
-div.divMainPage{
+
+div.divMainPage {
   width: 90%;
   height: 100%;
   overflow: auto;
 }
-div.divTheMainMenu{
+
+div.divTheMainMenu {
   display: flex;
   flex-direction: column;
   transition: all 1s;
@@ -612,19 +660,22 @@ div.divTheMainMenu{
   right: 0.8%;
   overflow:none;
 }
-div.divMainMenuCollapsed{
+
+div.divMainMenuCollapsed {
   display: flex;
   max-width: 20px;
   width: 20px;
   flex-direction: column;
   transition: all 1s;
 }
-div.divMenuSeparator{
+
+div.divMenuSeparator {
   font-size: small;
   text-align: center;
   border-bottom: 1px solid black;
 }
-div.headChapter{
+
+div.headChapter {
   padding-bottom: 10px; 
   padding-left: 0;
   margin-left: 0;
@@ -634,7 +685,8 @@ div.headChapter{
   font-weight: bold;
   font-size: 1.3rem;
 }
-div.bodyChapter{
+
+div.bodyChapter {
   padding: 0px; 
   margin: 0px;
   display: block;
@@ -643,7 +695,8 @@ div.bodyChapter{
   -moz-transition: all 2s ease;
   transition: all 2s ease;
 }
-div.headSection{
+
+div.headSection {
   padding-bottom: 10px; 
   margin-left: 0;
   margin-right: 0;
@@ -652,7 +705,8 @@ div.headSection{
   font-weight: bold;
   font-size: 1.2rem;
 }
-div.bodySection{
+
+div.bodySection {
   padding: 0px; 
   margin: 0px;
   display: block;
@@ -661,7 +715,8 @@ div.bodySection{
   -moz-transition: all 2s ease;
   transition: all 2s ease;
 }
-div.headSubsection{
+
+div.headSubsection {
   padding-bottom: 10px; 
   margin-left: 0;
   margin-right: 0;
@@ -670,7 +725,8 @@ div.headSubsection{
   font-weight: bold;
   font-size: 1.1rem;
 }
-div.bodySubsection{
+
+div.bodySubsection {
   padding: 0px; 
   margin: 0px;
   width: 100%;
@@ -679,7 +735,8 @@ div.bodySubsection{
   -moz-transition: all 2s ease;
   transition: all 2s ease;
 }
-div.bodyItem{
+
+div.bodyItem {
   margin-left: 0;
   margin-right: 0;
   padding-left: 0;
@@ -690,83 +747,99 @@ div.bodyItem{
   -moz-transition: all 2s ease;
   transition: all 2s ease;
 }
+
 table.tableDatabase {
   border-collapse: collapse;
-/*  width: 100%;
-  height: 100%;*/
 }
-table.tableDatabase td{
+
+table.tableDatabase td {
   border: 1px solid;
 }
-table.tableDatabase tr:nth-child(odd){
+
+table.tableDatabase tr:nth-child(odd) {
   background-color: #eeeeee;
 }
-table.tableDatabaseItem{
+
+table.tableDatabaseItem {
   border-collapse: collapse;
   border: 1px solid;
 }
-table.tableDatabaseItem td{
+
+table.tableDatabaseItem td {
   border: 1px solid;
 }
+
 table.tableJSON {
   border-collapse: collapse;
-/*  width: 100%;
-  height: 100%;*/
 }
-table.tableJSON th{
+
+table.tableJSON th {
   font-size: x-small;
 }
-table.tableJSON td{
+
+table.tableJSON td {
   border: 1px solid;
 }
-table.tableJSON tr:nth-child(even){
-  background-color: #f6f6f6;
-}
-table.tableJSONItem{
-  border-collapse: collapse;
-  border: 1px solid;
-}
-table.tableJSONItem td{
-  border: 1px solid;
-}
-table.tableJSONItem tr:nth-child(even){
+
+table.tableJSON tr:nth-child(even) {
   background-color: #f6f6f6;
 }
 
-table.tableItem{
+table.tableJSONItem {
+  border-collapse: collapse;
+  border: 1px solid;
+}
+
+table.tableJSONItem td {
+  border: 1px solid;
+}
+
+table.tableJSONItem tr:nth-child(even) {
+  background-color: #f6f6f6;
+}
+
+table.tableItem {
   width: 100%;
 }
+
 table.tableItem td, table.tableItem th {
   text-align: left;
   padding-left: 0px;
 }
+
 tr.calculatorProblem {
   counter-increment: rowNumber;
 }
-table.tableItem col:nth-child(1){
+
+table.tableItem col:nth-child(1) {
   width: 35%;
 }
-table.tableItem col:nth-child(2){
+
+table.tableItem col:nth-child(2) {
   width: 20%;
 }
-table.tableItem col:nth-child(3){
+
+table.tableItem col:nth-child(3) {
   width: 12%;
 }
-table.tableItem col:nth-child(4){
+
+table.tableItem col:nth-child(4) {
   width: 13%;
 }
-table.tableItem col:nth-child(5){
+
+table.tableItem col:nth-child(5) {
   width: 20%;
 }
 
 table.lectureMaterials {
   border-collapse: collapse;
-/*  width: 100%;*/
+  /*  width: 100%;*/
   font-weight: normal;
   font-size: 1em;
   margin-top: 4px;
   counter-reset: rowNumber;
 }
+
 table.lectureMaterials td, table.lectureMaterials th {
   border: 1px solid #dfdfdf;
   text-align: left;
@@ -774,27 +847,36 @@ table.lectureMaterials td, table.lectureMaterials th {
   padding-top: 8px;
   padding-bottom: 8px;
 }
-table.lectureMaterials col:nth-child(1){
+
+table.lectureMaterials col:nth-child(1) {
   width: 45%;
 }
-table.lectureMaterials col:nth-child(2){
+
+table.lectureMaterials col:nth-child(2) {
   width: 40%;
 }
-table.lectureMaterials col:nth-child(3){
+
+table.lectureMaterials col:nth-child(3) {
   width: 15%;
 }
+
 /*table.lectureMaterials tr:nth-child(even){}*/
-table.lectureMaterials tr:nth-child(odd){background-color: #fafafa}
+table.lectureMaterials tr:nth-child(odd) {
+  background-color: #fafafa;
+}
 table.lectureMaterials th {
   padding-top: 12px;
   padding-bottom: 12px;
 }
+
 topicList {
   width: 100%;
 }
-#divCurrentCourse{
+
+#divCurrentCourse {
   width: 90%;
 }
+
 table.topicList {
   border-collapse: collapse;
   width: 100%;
@@ -803,6 +885,7 @@ table.topicList {
   margin-top: 4px;
   counter-reset: rowNumber;
 }
+
 table.topicList td, table.topicList th {
   border: 1px solid #dfdfdf;
   text-align: left;
@@ -810,41 +893,54 @@ table.topicList td, table.topicList th {
   padding-top: 8px;
   padding-bottom: 8px;
 }
-table.topicList col:nth-child(1){
+
+table.topicList col:nth-child(1) {
   width: 35%;
 }
-table.topicList col:nth-child(2){
+
+table.topicList col:nth-child(2) {
   width: 20%;
 }
-table.topicList col:nth-child(3){
+
+table.topicList col:nth-child(3) {
   width: 12%;
 }
-table.topicList col:nth-child(4){
+
+table.topicList col:nth-child(4) {
   width: 13%;
 }
-table.topicList col:nth-child(5){
+
+table.topicList col:nth-child(5) {
   width: 20%;
 }
+
 /*table.topicList tr:nth-child(even){}*/
-table.topicList tr:nth-child(odd){background-color: #fafafa}
+table.topicList tr:nth-child(odd) {
+  background-color: #fafafa;
+}
+
 /*table.topicList tr:hover {background-color: #ddd;}*/
 table.topicList th {
   padding-top: 12px;
   padding-bottom: 12px;
 }
-a.linkLogoutInactive{
+
+a.linkLogoutInactive {
   transition: all 1s;
   opacity: 0;
 }
-a.linkLogoutActive{
+
+a.linkLogoutActive {
   transition: all 1s;
   opacity: 1;
 }
-a.linkInfo{
+
+a.linkInfo {
   margin-left: 10px;
   margin-right: 10px;
 }
-a.linkStandardButtonLike{
+
+a.linkStandardButtonLike {
   margin:  3px;
   padding: 3px;
   background-color: #efefef;
@@ -854,19 +950,22 @@ a.linkStandardButtonLike{
   transition: 0.6s;
   text-decoration: none;
 }
-a.linkStandardButtonLike:hover{
+
+a.linkStandardButtonLike:hover {
   background-color: #dfdfdf;
 }
-span.problemLinkSelectedPractice{
+
+span.problemLinkSelectedPractice {
   display: inline-block;
   margin:  3px;
   padding: 3px;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
-  text-decoration: none;  
+  text-decoration: none;
 }
-span.problemLinkSelectedQuiz{
+
+span.problemLinkSelectedQuiz {
   display: inline-block;
   margin:  3px;
   padding: 3px;
@@ -876,7 +975,8 @@ span.problemLinkSelectedQuiz{
   font-weight: bold;
   text-decoration: none;  
 }
-a.problemLinkQuiz{
+
+a.problemLinkQuiz {
   display: inline-block;
   margin:  3px;
   padding: 3px;
@@ -888,10 +988,12 @@ a.problemLinkQuiz{
   font-weight: bold;
   text-decoration: none;
 }
-a.problemLinkQuiz:hover{ 
+
+a.problemLinkQuiz:hover { 
   background-color: Orange;
 }
-a.problemLinkPractice{
+
+a.problemLinkPractice {
   display: inline-block;
   margin:  3px;
   padding: 3px;
@@ -902,10 +1004,12 @@ a.problemLinkPractice{
   transition: all 1.5s;
   text-decoration: none;
 }
-a.problemLinkPractice:hover{
+
+a.problemLinkPractice:hover {
   background-color: PaleGreen;
 }
-a.slidesLink{
+
+a.slidesLink {
   display: inline-block;
   margin:  3px;
   padding: 3px;
@@ -916,10 +1020,12 @@ a.slidesLink{
   transition: 0.6s;
   text-decoration: none;
 }
-a.slidesLink:hover{
+
+a.slidesLink:hover {
   background-color: #dfdfdf;
 }
-a.videoLink{
+
+a.videoLink {
   display: inline-block;
   margin:  3px;
   padding: 3px;
@@ -930,10 +1036,12 @@ a.videoLink{
   transition: 0.6s;
   text-decoration: none;
 }
-a.videoLink:hover{
+
+a.videoLink:hover {
   background-color: #dfdfdf;
 }
-a.linkForgotLoginPass{
+
+a.linkForgotLoginPass {
   display: inline-block;
   margin:  3px;
   padding: 3px;
@@ -945,10 +1053,12 @@ a.linkForgotLoginPass{
   border-radius: 3px;
   transition: 0.6s;
 }
-a.linkForgotLoginPass:hover{ 
+
+a.linkForgotLoginPass:hover { 
   background-color: Orange;
 }
-a.linkSignUp{
+
+a.linkSignUp {
   display: inline-block;
   margin:  3px;
   padding: 3px;
@@ -960,10 +1070,12 @@ a.linkSignUp{
   border-radius: 3px;
   transition: 0.6s;
 }
-a.linkSignUp:hover{ 
+
+a.linkSignUp:hover { 
   background-color: LawnGreen;
 }
-a.courseLink{
+
+a.courseLink {
   display: inline-block;
   margin:  10px;
   padding: 3px;
@@ -976,11 +1088,12 @@ a.courseLink{
   transition: 0.6s;
   text-decoration: none;
 }
-a.courseLink:hover{
+
+a.courseLink:hover {
   background-color: LawnGreen;
 }
 
-div.divProfilePictureContainerExpanded{
+div.divProfilePictureContainerExpanded {
   max-width: 96px;
   max-height: 96px;
   transition: all 1s;
@@ -988,49 +1101,56 @@ div.divProfilePictureContainerExpanded{
   margin-right: auto;  
 }
 
-div.divProfilePictureContainerCollapsed{
+div.divProfilePictureContainerCollapsed {
   max-width: 25px;
   max-height: 25px;
   transition: all 1s;
 }
+
 img {
   transition: all 1;
   width: 100%; 
   object-fit: scale-down;
   /*object-fit: contain;*/
 }
-.profilePicture{
+
+.profilePicture {
   transition: all 1s;
   display: block;
 }
 
-div.divLoginPanel{
+div.divLoginPanel {
   align-items: center;
   text-align: center;
   width: 100%;
 }
 
-div.divLogin{
-text-align: center;
+div.divLogin {
+  text-align: center;
 }
-div.divForgotLogin{
-text-align: center;
+
+div.divForgotLogin {
+  text-align: center;
 }
-div.divSignUp{
-text-align: center;
+
+div.divSignUp {
+  text-align: center;
 }
-div.divExternalLogin{
-text-align: center;
+
+div.divExternalLogin {
+  text-align: center;
 }
-div.mqButtonPanel{
-margin: 0;
-padding: 0;
-overflow: hidden;
--webkit-transition: all 1s ease;
--moz-transition: all 1s ease;
-transition: all 1s ease;
+
+div.mqButtonPanel {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  -webkit-transition: all 1s ease;
+  -moz-transition: all 1s ease;
+  transition: all 1s ease;
 }
-div.centerHorizontallyInPageContainer{
+
+div.centerHorizontallyInPageContainer {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -1040,7 +1160,8 @@ div.centerHorizontallyInPageContainer{
   justify-content: center;
   text-align: center;
 }
-div.centerVerticallyInPageContainer{
+
+div.centerVerticallyInPageContainer {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -1050,30 +1171,35 @@ div.centerVerticallyInPageContainer{
   width: 100%;
   height: 100%;
 }
-div.divCenteredItem{
+
+div.divCenteredItem {
   margin: 10px;
   padding: 0px;
 }
-div.divVisible{
+
+div.divVisible {
   transition: all 1s;
   opacity: 1;
 }
 
-div.divInvisible{
+div.divInvisible {
   transition: all 1s;
   opacity: 0;
 }
-div.divSmall{
+
+div.divSmall {
   font-size: x-small;
 }
 
 form.formLogin > * {
-font-size: 1.1em;
+  font-size: 1.1em;
 }
-table.tableLogin{
-margin: 0 auto;
+
+table.tableLogin {
+  margin: 0 auto;
 }
-button.buttonSignUp{
+
+button.buttonSignUp {
   display: inline-block;
   box-shadow: none;
   border: none;
@@ -1087,10 +1213,12 @@ button.buttonSignUp{
   border-radius: 3px;
   transition: 1.5s;
 }
-button.buttonSignUp:hover{ 
+
+button.buttonSignUp:hover { 
   background-color: lightgreen;
 }
-button.buttonSelectPage{
+
+button.buttonSelectPage {
   border-radius: 3px;
   background-color: lightblue;
   box-shadow: none;
@@ -1106,13 +1234,16 @@ button.buttonSelectPage{
   cursor:pointer;
   transition: all 1.5s;
 }
-button.buttonSelectPageSelected{
+
+button.buttonSelectPageSelected {
   background-color: skyblue;
 }
-button.buttonSelectPage:hover{
+
+button.buttonSelectPage:hover {
   background-color: lightskyblue;
 }
-button.buttonMQ{
+
+button.buttonMQ {
   width: 25px; 
   height: 21.2px; 
   padding: 0;
@@ -1124,30 +1255,36 @@ button.buttonMQ{
   transition: all 2s;
   background-color: #e8e8e8;
 }
-button.buttonMQ:hover{
+
+button.buttonMQ:hover {
   background-color: silver;
 }
-lectureTag{
-color: green;
-font-weight: bold;
-font-size: 1.25em;
+
+lectureTag {
+  color: green;
+  font-weight: bold;
+  font-size: 1.25em;
 }
-actualExamProblem{
-font-weight: bold;
-color: brown;
-font-size: 1.25em;
+
+actualExamProblem {
+  font-weight: bold;
+  color: brown;
+  font-size: 1.25em;
 }
-advancedTopic{
-font-weight: bold;
-color: orange;
-font-size: 1.25em;
+
+advancedTopic {
+  font-weight: bold;
+  color: orange;
+  font-size: 1.25em;
 }
-reviewProblem{
-font-weight: bold;
-color: LawnGreen;
-font-size: 1.25em;
+
+reviewProblem {
+  font-weight: bold;
+  color: LawnGreen;
+  font-size: 1.25em;
 }
-panelProblemLinkStyleSelection{
+
+panelProblemLinkStyleSelection {
   display: inline-block;
   margin:  3px;
   padding: 3px;
@@ -1158,10 +1295,12 @@ panelProblemLinkStyleSelection{
   border-radius: 3px;
   transition: 0.6s;
 }
-panelProblemLinkStyleSelection:hover{
+
+panelProblemLinkStyleSelection:hover {
   background-color: #dfdfdf;
 }
-span.currentCourseIndicator{
+
+span.currentCourseIndicator {
   display: inline-block;
   margin:  3px;
   padding: 3px;
@@ -1174,22 +1313,20 @@ span.currentCourseIndicator{
   transition: 0.6s;
 }
 
-.datePicker{
-
+.textInputUsername {
+  font-size: 0.9em;
+  font-weight: bold;
 }
 
-.textInputUsername{
-font-size: 0.9em;
-font-weight: bold;
-}
-.g-signin2{
+.g-signin2 {
   width: 100%;
 }
-.g-signin2 > div{
+
+.g-signin2 > div {
   margin: 0 auto;
 }
 
-.hiddenClass{
+.hiddenClass {
   display: none;
   max-height: 0px;
   height: 0px;
@@ -1211,7 +1348,9 @@ font-weight: bold;
 }
 
 /* Hide default HTML checkbox */
-.switch input {display:none;}
+.switch input {
+  display:none;
+}
 
 /* The slider */
 .slider {

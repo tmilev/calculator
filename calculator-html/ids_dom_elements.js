@@ -13,10 +13,13 @@ var domElements = {
   inputPassword: "inputPassword",
   labelNewEmail: "labelNewEmail",
   switch: {
-    monitoring: "sliderMonitoring"
+    monitoring: "sliderMonitoring",
   },
-  buttonSendTogglePauseRequest: "buttonSendTogglePauseRequest",
-  spanMonitoringStatus: "spanMonitoringStatus",
+  monitoring: {
+    progressTimer: "idProgressReportTimer",
+    spanStatus: "spanMonitoringStatus",
+    buttonTogglePauseRequest: "buttonSendTogglePauseRequest",
+  },  
   spanCalculatorMainOutput: "spanCalculatorMainOutput",
   spanProgressCalculatorInput: "spanProgressCalculatorInput",
   spanProgressReportGeneral: "spanProgressReportGeneral",

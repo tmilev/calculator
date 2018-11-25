@@ -1,4 +1,0 @@
-User-agent: *
-Disallow: /vectorpartition/cgi-bin/
-Disallow: /calculator
-Disallow: /

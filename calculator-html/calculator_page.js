@@ -229,7 +229,7 @@ Calculator.prototype.submitComputation = function() {
 }
 
 Calculator.prototype.callbackToggleStatus = function (input, output) {
-  var monitorResult = document.getElementById(ids.domElements.spanMonitoringStatus);
+  var monitorResult = document.getElementById(ids.domElements.monitoring.spanStatus);
   var parsedInput = JSON.parse(input);
   var monitoring = parsedInput["monitoring"];
   if (monitoring === "true" || monitoring === true) {
@@ -247,7 +247,7 @@ Calculator.prototype.callbackToggleMonitoring = function (input, output) {
   var url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}`;
   submitRequests.submitGET({
     url: url,
-    result: ids.domElements.spanMonitoringStatus,
+    result: ids.domElements.monitoring.spanStatus,
     progress: ids.domElements.spanProgressReportGeneral,
     callback: this.callbackToggleStatus.bind(this)
   });

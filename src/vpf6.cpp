@@ -41,7 +41,7 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   theFile << fileContent;
   theFile.flush();
   theFile.close();
-  systemCommand1 << " latex -output-directory =" << baseFolder << " " << fileName.str() << ".tex";
+  systemCommand1 << " latex -output-directory=" << baseFolder << " " << fileName.str() << ".tex";
   theGlobalVariables.CallSystemNoOutput(systemCommand1.str(), false);
   if (useLatexDviPSpsToPNG)
   { systemCommand2 << " dvips -o " << fileNameWithPathPhysical << ".ps "

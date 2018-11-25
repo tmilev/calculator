@@ -7246,8 +7246,9 @@ bool CalculatorFunctionsGeneral::innerCrash
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrash");
   (void) input;//portable way of avoiding unused parameter warning
-  crash << "This is a test of the crashing mechanism. Are log files created correctly? "
-  << "If you're admin, check out the <a href=\"/LogFiles/crashes/\">crash report folder<a>." << crash;
+  crash << "This is a test of the crashing mechanism. "
+  << "If you're admin, check out the <a href=\"/LogFiles/crashes/\" target=\"_blank\">"
+  << "crash report folder<a> [requires admin access]." << crash;
   return output.AssignValue((std::string) "Crashed succesfully", theCommands);
 }
 

@@ -79,16 +79,16 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
 }
 
 Monitor.prototype.togglePause = function() {
-  if (isFinished) {
+  if (this.isFinished) {
     return;
   }
   var pauseURL = "";
   pauseURL += `${pathnames.urls.calculatorAPI}?`
-  pauseURL += `${pathnames.urls.request}=${pathnames.urlFields.requests.pause}&`;
-  pauseURL += `${pathnames.urlFields.requests.mainInput}=${currentWorkerNumber}&`;
+  pauseURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.pause}&`;
+  pauseURL += `${pathnames.urlFields.requests.mainInput}=${this.currentWorkerNumber}&`;
   submitRequests.submitGET({
     url: pauseURL,
-    callback: callbackPauseRequest,
+    callback: this.callbackPauseRequest.bind(this),
     progress: ids.domElements.spanProgressCalculatorInput
   });
 }

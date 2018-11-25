@@ -21,7 +21,7 @@ Crasher::Crasher()
 
 void Crasher::FirstRun()
 { if (!this->flagCrashInitiateD && (theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer) )
-    this->theCrashReport << "\n<span style =\"color:red\"><b>Crash</b></span> "
+    this->theCrashReport << "\n<b style =\"color:red\">Crash</b> "
     << theGlobalVariables.GetElapsedSeconds() << " second(s) from the start.<hr>";
   this->flagCrashInitiateD = true;
 }
@@ -62,10 +62,10 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
       stOutput << "<hr>Crash dumped in file "
       << "<a href=\"/LogFiles/crashes/"
       << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.RelativePhysicalNameCrashLog, false)
-      << "\" >"
+      << "\" target=\"_blank\">"
       << theGlobalVariables.RelativePhysicalNameCrashLog
       << "</a>"
-      << " located inside the output folder.";
+      << ". May require admin access to view online. ";
     else
       stOutput << "<hr>Failed to create a crash report: check if folder exists and the "
       << "executable has file permissions for file " << theGlobalVariables.RelativePhysicalNameCrashLog

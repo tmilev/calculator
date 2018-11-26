@@ -720,8 +720,8 @@ bool Crypto::VerifyJWTagainstKnownKeys
   //stOutput << "DEBUG:Got to here";
   int theIndex = - 1;
   if (commentsGeneral != 0)
-    *commentsGeneral << "Seeking key: <span style =\"color:brown\"><b>"
-    << keyIDstring << "</b></span>. ";
+    *commentsGeneral << "Seeking key: <b style =\"color:brown\">"
+    << keyIDstring << "</b>. ";
   for (int i = 0; i < 2; i ++)
   { Crypto::LoadKnownCertificates(commentsOnFailure, commentsGeneral);
     //if (commentsOnFailure != 0)

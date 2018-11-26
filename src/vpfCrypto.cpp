@@ -1175,7 +1175,9 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
   for (int i = 0; i < theFileNames.size; i ++)
   { if (theFileNames[i] == "." || theFileNames[i] == "..")
       continue;
-    if (MathRoutines::StringBeginsWith(theFileNames[i],"debug"))
+    if (MathRoutines::StringBeginsWith(theFileNames[i], "debug"))
+      continue;
+    if (MathRoutines::StringEndsWith(theFileNames[i], "readme.md"))
       continue;
     std::string currentCert;
     if (!FileOperations::LoadFileToStringVirtual

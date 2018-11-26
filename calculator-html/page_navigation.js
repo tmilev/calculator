@@ -275,7 +275,7 @@ function StorageCalculator() {
 }
 
 StorageCalculator.prototype.parseURL = function() {
-  console.log(`DEBUG: current hash: ${window.location.hash}`);
+  //console.log(`DEBUG: current hash: ${window.location.hash}`);
   this.oldHash = this.currentHash;
   this.currentHash = decodeURIComponent(window.location.hash);
   if (this.currentHash.startsWith('#')) {

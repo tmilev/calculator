@@ -341,7 +341,7 @@ Problem.prototype.toStringDeadlinePanel = function() {
   result += "<tr><th>Grp.</th><th>Deadline</th></tr>";
   for (var counterGroup = 0; counterGroup < thePage.user.sectionsTaught.length; counterGroup ++) {
     result += `<tr><td>${thePage.user.sectionsTaught[counterGroup]}</td>`;
-    result += `<td><input class = "datePicker" name = "${this.idURLed}" `;
+    result += `<td><input class = "datePicker" name = "datePicker${this.idURLed}" `;
     if (this.deadlines[counterGroup] !== "" && this.deadlines[counterGroup] !== undefined) {
       result += `value = "${this.deadlines[counterGroup]}"`;
     }
@@ -384,8 +384,8 @@ Problem.prototype.modifyWeight = function() {
     weight: incomingPoints
   };
   var theURL = ""; 
-  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.request}=${pathnames.setProblemData}&`;
-  theURL += `${pathnames.mainInput}=${encodeURIComponent(JSON.stringify(modifyObject))}`;
+  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemData}&`;
+  theURL += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(modifyObject))}`;
   submitRequests.submitGET({
     url: theURL,
     progress: ids.domElements.spanProgressReportGeneral,
@@ -395,6 +395,7 @@ Problem.prototype.modifyWeight = function() {
 
 function modifyWeight(id) {
   var thePage = window.calculator.mainPage;
+  /**@type {Problem} */
   var theProblemWeight = thePage.problems[id];
   theProblemWeight.modifyWeight();
 }

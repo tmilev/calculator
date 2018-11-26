@@ -34,7 +34,7 @@ tiny {
 }
 
 .problemInfoBar {
-  /*display: block;*/
+  display: table;
   background-color: #fafafa;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -44,7 +44,7 @@ tiny {
 }
 
 span.spanFileInfo {
-  display: inline-block;
+  display: table-cell;
   border-radius: 3px;
   margin:  3px;
   padding: 3px;
@@ -54,7 +54,7 @@ span.spanFileInfo {
 }
 
 span.problemTitle {
-  display: inline-block;
+  display: table-cell;
   border-radius: 3px;
   margin:  3px;
   padding: 3px;
@@ -63,7 +63,7 @@ span.problemTitle {
 }
 
 span.problemNavigation {
-  display: inline-block;
+  display: table-cell;
   border-radius: 3px;
   margin:  3px;
   padding: 3px;

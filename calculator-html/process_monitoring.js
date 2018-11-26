@@ -35,7 +35,7 @@ Monitor.prototype.progressReport = function() {
   this.timeOutCounter += this.timeIncrement;
   var sURL = "";
   sURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.indicator}`;
-  sURL += `&${pathnames.urlFields.requests.mainInput}=${this.currentWorkerNumber}`;
+  sURL += `&${pathnames.urlFields.mainInput}=${this.currentWorkerNumber}`;
   submitRequests.submitGET({
     url: sURL,
     progress: ids.domElements.spanProgressCalculatorInput,
@@ -85,7 +85,7 @@ Monitor.prototype.togglePause = function() {
   var pauseURL = "";
   pauseURL += `${pathnames.urls.calculatorAPI}?`
   pauseURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.pause}&`;
-  pauseURL += `${pathnames.urlFields.requests.mainInput}=${this.currentWorkerNumber}&`;
+  pauseURL += `${pathnames.urlFields.mainInput}=${this.currentWorkerNumber}&`;
   submitRequests.submitGET({
     url: pauseURL,
     callback: this.callbackPauseRequest.bind(this),

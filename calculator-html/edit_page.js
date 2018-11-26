@@ -58,7 +58,7 @@ function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
   theURL += calculatorPage.calculator.getQueryStringSubmitStringAsMainInput(newFileName, pathnames.urlFields.requests.clonePage);
-  theURL += `${pathnames.urlFields.request.fileName}=${fileName}&`;
+  theURL += `${pathnames.urlFields.fileName}=${fileName}&`;
   //console.log("DEBUG: about to submit: " + theURL); 
   submitRequests.submitGET({
     url: theURL,
@@ -74,7 +74,7 @@ function storeEditedPage() {
   theURL += `${pathnames.urls.calculatorAPI}?`;
   var queryParameters = "";
   queryParameters += calculatorPage.calculator.getQueryStringSubmitStringAsMainInput(editor.getValue(), pathnames.urlFields.requests.modifyPage);
-  queryParameters += `${pathnames.urlFields.requests.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}&`;
+  queryParameters += `${pathnames.urlFields.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}&`;
   //console.log("DEBUG: about to submit: " + theURL); 
   submitRequests.submitPOST({
     url: theURL,

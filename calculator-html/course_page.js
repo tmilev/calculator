@@ -11,7 +11,8 @@ function callbackModifyDeadlines(incomingId, input, output) {
 
 function modifyDeadlines(incomingId) {
   var thePage = window.calculator.mainPage;
-  var theDates = document.getElementsByName(incomingId);
+  var nameDatePicker = `datePicker${incomingId}`;
+  var theDates = document.getElementsByName(nameDatePicker);
   var jsonToSubmit = {};
   var idDecoded = decodeURIComponent(incomingId);
   jsonToSubmit[idDecoded] = {
@@ -19,11 +20,12 @@ function modifyDeadlines(incomingId) {
   };
 
   for (var counterDates = 0; counterDates < theDates.length; counterDates ++) {
-    jsonToSubmit[idDecoded].deadlines[thePage.user.sectionsTaught[counterDates]] = theDates[counterDates].value;
+    var currentSection = thePage.user.sectionsTaught[counterDates];
+    jsonToSubmit[idDecoded].deadlines[currentSection] = theDates[counterDates].value;
   }
   var theURL = "";
-  theURL += `${pathnames.urls.calculatorAPI}?request=setProblemData&`;
-  theURL += `mainInput=${encodeURIComponent(JSON.stringify(jsonToSubmit))}`;
+  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemData}&`;
+  theURL += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(jsonToSubmit))}`;
   submitRequests.submitGET({
     url: theURL,
     progress: ids.domElements.spanProgressReportGeneral,

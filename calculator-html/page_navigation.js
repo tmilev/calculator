@@ -558,15 +558,15 @@ Page.prototype.initializeCalculatorPage = function() {
   window.calculator.mathJaxSetup.configureMathJaxForCalculator();
 }
 
-function sectionSelect(sectionNumber) {
+Page.prototype.sectionSelect = function(sectionNumber) {
   console.log(`DEBUG: section select: ${sectionNumber}`);
-  thePage.storage.variables.currentSectionComputed.setAndStore(sectionNumber);
-  thePage.user.sectionComputed = thePage.user.sectionsTaught[sectionNumber];
+  this.storage.variables.currentSectionComputed.setAndStore(sectionNumber);
+  this.user.sectionComputed = this.user.sectionsTaught[sectionNumber];
   var deadlineSpans = document.getElementsByClassName(ids.domElements.classSpanDeadlineContainer);
   for (var counterDeadlines = 0; counterDeadlines < deadlineSpans.length; counterDeadlines ++) {
     var currentDeadlineSpan = deadlineSpans[counterDeadlines];
     var currentDeadlineId = currentDeadlineSpan.id.substr(ids.stringResources.prefixDeadlineContainer.length);
-    var currentProblem = thePage.problems[currentDeadlineId];
+    var currentProblem = this.problems[currentDeadlineId];
     if (currentProblem === undefined) {
       continue;
     }
@@ -585,8 +585,8 @@ Page.prototype.flipStudentView = function () {
     spanView.innerHTML = "Student view";
     for (var counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections ++) {
       radioHTML += `<br><label class = "containerRadioButton">`;
-      radioHTML += `<input type = "radio" name = "radioSection" onchange = "sectionSelect(${counterSections});" `; 
-      var counterFromStorage = parseInt(thePage.storage.variables.currentSectionComputed.getValue());
+      radioHTML += `<input type = "radio" name = "radioSection" onchange = "window.calculator.mainPage.sectionSelect(${counterSections});" `; 
+      var counterFromStorage = parseInt(this.storage.variables.currentSectionComputed.getValue());
       if (counterSections === counterFromStorage) {
         radioHTML += "checked = 'true'";
       }

@@ -70,14 +70,13 @@ function addEmailsOrUsers(
   idOutput, userRole, idUserGroup, 
   idPasswords, requestType
 ) {
-  var spanOutput = document.getElementById(idOutput);
   var spanEmailList = document.getElementById(idEmailList);
   var spanUserGroup = document.getElementById(idUserGroup);
   var spanPasswords = document.getElementById(idPasswords);
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
   theURL += `${pathnames.urlFields.request}=${requestType}&`;
-  theURL += `userRole=${userRole}&`;
+  theURL += `${pathnames.urlFields.userRole}=${userRole}&`;
   theURL += `userList=${encodeURIComponent(spanEmailList.value)}&`;
   theURL += `studentSection=${encodeURIComponent(spanUserGroup.value)}&`;
   theURL += `passwordList=${encodeURIComponent(spanPasswords.value)}&`;
@@ -95,14 +94,14 @@ function getTeachersStudentsCallback(input, output) {
 }
 
 function getTeachersStudents() { 
-  var theURL = `${pathnames.urls.calculatorAPI}?request=setTeacher&`;
+  var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.setTeacher}&`;
   var inputSections = document.getElementById('inputSections').value;
   var inputTeachers = document.getElementById('inputSetTeacher').value;
   var teachersAndSections = {
     teachers: encodeURIComponent(inputTeachers),
     students: encodeURIComponent(inputSections)
   }
-  theURL += `teachersAndSections=${encodeURIComponent(JSON.stringify(teachersAndSections))}&`;
+  theURL += `${pathnames.urlFields.teachersAndSections}=${encodeURIComponent(JSON.stringify(teachersAndSections))}&`;
   submitRequests.submitGET({
     url: theURL,
     progress: ids.domElements.spanProgressReportGeneral,
@@ -125,5 +124,6 @@ function updateAccountsPage() {
 
 module.exports = {
   addEmailsOrUsers,
-  updateAccountsPage
+  updateAccountsPage,
+  getTeachersStudents
 }

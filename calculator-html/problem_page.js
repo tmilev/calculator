@@ -53,6 +53,7 @@ function Problem(problemData, inputParentIdURLed) {
   this.deadlineString = null;
   this.deadline = null;
   this.weight = problemData.weight;
+  this.links = {};
   if (problemData.deadlines !== undefined) {
     this.deadlines = problemData.deadlines;
   } 
@@ -72,15 +73,14 @@ function Problem(problemData, inputParentIdURLed) {
   }
   this.problemNumberString = problemData.problemNumberString;
   this.video = problemData.video;
-  this.slidesProjector = problemData.slidesProjector;
-  this.slidesPrintable = problemData.slidesPrintable;
-  if (this.slidesProjector === undefined || this.slidesProjector === null) {
-    this.slidesProjector = "";
+  this.querySlides = problemData.querySlides;
+  if (this.querySlides === undefined || this.querySlides === null) {
+    this.querySlides = "";
   }
-  if (this.slidesPrintable === undefined || this.slidesPrintable === null) {
-    this.slidesPrintable = "";
+  this.queryHomework = problemData.queryHomework;
+  if (this.queryHomework === undefined || this.queryHomework === null) {
+    this.queryHomework = "";
   }
-  this.linkSlidesLaTeX = problemData.linkSlidesLaTeX;
 
   thePage.problems[this.idURLed] = this;
   if (this.type === "chapter") {
@@ -469,6 +469,80 @@ function convertStringToLaTeXFileName(input) {
   return result;
 }
 
+var linkSpecs = {
+  slidesProjector: { 
+    request: pathnames.urlFields.requests.slidesFromSource,
+    name: "Slides",
+    options: "layout=projector&",
+  }, 
+  slidesPrintable: {
+    request: pathnames.urlFields.requests.slidesFromSource,
+    name: "Printable",
+    options: "layout=printable&",
+  }, 
+  slidesTex: {
+    request: pathnames.urlFields.requests.sourceSlides,
+    name: ".tex",
+    options: "",
+    download: true,
+    adminView: true,
+  }, 
+  homeworkWithAnswers: {
+    request: pathnames.urlFields.requests.homeworkFromSource,
+    name: "HW",
+    options: "answerKey=true&",
+  }, 
+  homeworkNoAnswers: {
+    request: pathnames.urlFields.requests.homeworkFromSource,
+    name: "HW+answ.",
+    options: "answerKey=false&",
+  }, 
+  homeworkTex: {
+    request: pathnames.urlFields.requests.sourceHomework,
+    name: ".tex",
+    options: "",
+    download: true,
+    adminView: true,
+  },
+};
+
+Problem.prototype.getLinkFromSpec = function(
+  /**@type {{request: string, name: string, options: string, download: boolean}} */
+  linkSpec, 
+  /**@type {string} */
+  query
+) {
+  if (linkSpec.adminView === true) {
+    var studentView = window.calculator.mainPage.storage.variables.flagStudentView.getValue();
+    if (studentView !== false && studentView !== "false") {
+      return "";
+    }
+  }
+  var href  = "";
+  href += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${linkSpec.request}&`;
+  href += `${query}&${linkSpec.options}`;
+  var result = "";
+  result += `<a class = 'slidesLink' href = '${href}' `;
+  if (linkSpec.download === true) {
+    result += `download = '${convertStringToLaTeXFileName(this.title)}.tex'`; 
+  }
+  result += ``
+  result += `target = '_blank'>${linkSpec.name}</a>`;
+  return result;
+}
+
+var linkSlides = [
+  "slidesProjector",
+  "slidesPrintable",
+  "slidesTex",
+];
+
+var linkHomework = [
+  "homeworkWithAnswers",
+  "homeworkNoAnswers",
+  "homeworkTex",
+];
+
 Problem.prototype.getHTMLOneProblemTr = function () {
   var thePage = window.calculator.mainPage;
   var result = "";
@@ -478,15 +552,16 @@ Problem.prototype.getHTMLOneProblemTr = function () {
   if (this.video !== "" && this.video !== undefined && this.video !== null) {
     result += `<a class = 'videoLink' href = '${this.video}' target = '_blank'>Video</a>`;
   }
-  if (this.slidesProjector !== "" && this.slidesProjector !== null && this.slidesProjector !== undefined) {
-    result += `<a class ='slidesLink' href = '${this.slidesProjector}' target = '_blank'>Printable slides</a>`;
+  this.links = {};
+  if (this.querySlides !== "" && this.querySlides !== null && this.querySlides !== undefined) {
+    for (var counter in linkSlides) {
+      result += this.getLinkFromSpec(linkSpecs[linkSlides[counter]], this.querySlides);
+    }
   } 
-  if (this.slidesPrintable !== "" && this.slidesPrintable !== null && this.slidesProjector !== undefined) {
-    result += `<a class ='slidesLink' href = '${this.slidesPrintable}' target = '_blank'>Slides</a>`;
-  }
-  if (this.linkSlidesLaTeX !== "" && this.linkSlidesLaTeX !== undefined) {
-    result += `<a class ='slidesLink' href = '${this.linkSlidesLaTeX}' target = '_blank' `;
-    result += `download ='${convertStringToLaTeXFileName(this.title)}.tex'>.tex</a>`;
+  if (this.queryHomework !== "" && this.queryHomework !== null && this.queryHomework !== undefined) {
+    for (var counter in linkHomework) {
+      result += this.getLinkFromSpec(linkSpecs[linkHomework[counter]], this.queryHomework);
+    }
   }
   result += "</td>";
   result += "<td>";

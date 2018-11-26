@@ -16,7 +16,11 @@ var urlFields = {
     userInfoJSON: "userInfoJSON",
     indicator: "indicator",
     mainInput: "mainInput",
-    pause: "pause"
+    pause: "pause",
+    slidesFromSource: "slidesFromSource",
+    homeworkFromSource: "homeworkFromSource",
+    sourceSlides: "slidesSource",
+    sourceHomework: "homeworkSource"
   },
   mainInput: "mainInput",
   fileName: "fileName",

@@ -40,21 +40,19 @@ public:
   std::string title;
   std::string video;
   std::string videoHandwritten;
-  std::string slidesProjector;
+
+  std::string querySlides;
+  std::string queryHomework;
+
   std::string handwrittenSolution;
-  std::string linkSlidesTex;
-  std::string linkHomeworkTex;
   List<std::string> sourceSlides;
   List<std::string> sourceHomework;
   List<bool> sourceHomeworkIsSolution;
-  std::string slidesPrintable;
   std::string problemFileName;
   std::string error;
   std::string displayTitle;
   std::string displayVideoLink;
   std::string displayVideoHandwrittenLink;
-  std::string displaySlidesLink;
-  std::string displaySlidesPrintableLink;
   std::string displayHandwrittenSolution;
   std::string displayProblemLink;
   std::string displayResourcesLinks;
@@ -80,6 +78,8 @@ public:
   std::string ToString() const;
   JSData ToJSON(CalculatorHTML& owner);
   std::string GetItemFinish(CalculatorHTML& owner);
+  void ComputeSlides(CalculatorHTML& owner);
+  void ComputeHomework(CalculatorHTML& owner);
   void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
   TopicElement()
   { this->reset(0, 0);

@@ -1214,11 +1214,13 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
   for (int i = 0; i < this->cookies.size; i ++)
     if (!HtmlRoutines::ChopCGIStringAppend(this->cookies[i], newlyFoundArgs, argumentProcessingFailureComments))
       result = false;
+  //argumentProcessingFailureComments << "DEBUG: found: " << this->cookies.size << " cookies. ";
   for (int i = 0; i < newlyFoundArgs.size(); i ++)
-  { if (theGlobalVariables.webArguments.Contains(newlyFoundArgs.theKeys[i]))
+  { //argumentProcessingFailureComments << "DEBUG: Considering cookie key: " << newlyFoundArgs.theKeys[i] << ". ";
+    if (theGlobalVariables.webArguments.Contains(newlyFoundArgs.theKeys[i]))
       //if (theGlobalVariables.webArguments.GetValueCreate(newlyFoundArgs.theKeys[i]) != "")
       continue; //<-if a key is already given cookie entries are ignored.
-    //argumentProcessingFailureComments << "Found new cookie key: " << newlyFoundArgs.theKeys[i] << "<br>";
+    //argumentProcessingFailureComments << "DEBUG: Found new cookie key: " << newlyFoundArgs.theKeys[i] << ". ";
     std::string trimmed = newlyFoundArgs.theValues[i];
     if (trimmed.size() > 0)
       if (trimmed[trimmed.size() - 1] == ';')
@@ -1306,7 +1308,6 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   //HtmlRoutines::ConvertURLStringToNormal( theGlobalVariables.GetWebInput("password"), true), false
   //)
   //;
-
   theUser.enteredPassword =
   HtmlRoutines::ConvertStringToURLString
   (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("password"), true), false);
@@ -1323,6 +1324,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theUser.flagEnteredAuthenticationToken = false;
     theUser.flagEnteredActivationToken = false;
     theGlobalVariables.flagLogInAttempted = true;
+    argumentProcessingFailureComments << "Password given: overrides other authentication methods. ";
   }
   if (theUser.enteredActivationToken != "")
   { theUser.enteredGoogleToken = "";
@@ -1330,7 +1332,9 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theUser.flagEnteredAuthenticationToken = false;
     theUser.flagEnteredActivationToken = true;
     theGlobalVariables.flagLogInAttempted = true;
+    argumentProcessingFailureComments << "Activation token given: overrides authentication and google token. ";
   }
+  //argumentProcessingFailureComments << "DEBUG: entered authentication token: " << theUser.enteredAuthenticationToken << ". ";
   //stOutput << "DEBUG: Entered activation token: " << theUser.enteredActivationToken
   //<< ", username: " << theUser.username;
   //stOutput << "DEBUG: logging-in: " << theUser.ToStringUnsecure();

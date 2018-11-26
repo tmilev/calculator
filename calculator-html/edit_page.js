@@ -57,8 +57,8 @@ function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
   console.log(`DEBUG: handle clone with input: ${fileName}, new file name: ${newFileName}`); 
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
-  theURL += calculatorPage.calculator.getQueryStringSubmitStringAsMainInput(newFileName, pathnames.requestClonePage);
-  theURL += `${pathnames.fileName}=${fileName}&`;
+  theURL += calculatorPage.calculator.getQueryStringSubmitStringAsMainInput(newFileName, pathnames.urlFields.requests.clonePage);
+  theURL += `${pathnames.urlFields.request.fileName}=${fileName}&`;
   //console.log("DEBUG: about to submit: " + theURL); 
   submitRequests.submitGET({
     url: theURL,
@@ -72,11 +72,13 @@ function storeEditedPage() {
   var editor = thePage.pages.editPage.editor;
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
-  theURL += calculatorPage.calculator.getQueryStringSubmitStringAsMainInput(editor.getValue(), pathnames.requestModifyPage);
-  theURL += `${pathnames.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}&`;
+  var queryParameters = "";
+  queryParameters += calculatorPage.calculator.getQueryStringSubmitStringAsMainInput(editor.getValue(), pathnames.urlFields.requests.modifyPage);
+  queryParameters += `${pathnames.urlFields.requests.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}&`;
   //console.log("DEBUG: about to submit: " + theURL); 
-  submitRequests.submitGET({
+  submitRequests.submitPOST({
     url: theURL,
+    parameters: queryParameters,
     result: "spanSubmitEditPageReport"
   });
 }

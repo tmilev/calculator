@@ -1,7 +1,7 @@
-#Notes on external project installation
+# Notes on external project installation
 
 
-##MongoDB C driver
+## MongoDB C driver
 
 Instructions taken from: http://mongoc.org/libmongoc/1.1.5/installing.html
 

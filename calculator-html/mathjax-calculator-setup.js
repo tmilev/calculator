@@ -77,10 +77,11 @@ function configureMathJaxForCalculator() {
     jsMath2jax: {
       preview: "TeX"
     },
-    });
+  });
 
   MathJax.Hub.Register.StartupHook("MathEvents Ready", function () {
-    var HUB = MathJax.Hub, MENUSETTINGS = HUB.config.menuSettings;
+    var HUB = MathJax.Hub;
+    var MENUSETTINGS = HUB.config.menuSettings;
     var EVENT = MathJax.Extension.MathEvents.Event;
     var MENU = MathJax.Menu;
     //
@@ -107,7 +108,7 @@ function configureMathJaxForCalculator() {
     }
     MathJax.Hub.Register.StartupHook("MathMenu Ready", function () {
       MENU = MathJax.Menu;
-      MENU.menu.Find("Math Settings", "Zoom Trigger","Double-Click").disabled = true;
+      MENU.menu.Find("Math Settings", "Zoom Trigger", "Double-Click").disabled = true;
     });
   });
 
@@ -178,7 +179,7 @@ function configureMathJaxForCalculator() {
         });
         input.setAttribute("xmlns","http://www.w3.org/1999/xhtml");
         var mml = MML["annotation-xml"](MML.xml(input)).With({
-          encoding:"application/xhtml+xml", isToken:true
+          encoding: "application/xhtml+xml", isToken: true
         });
         this.Push(MML.semantics(mml));
       }
@@ -196,22 +197,13 @@ function configureMathJaxForCalculator() {
 
   //});
 
-  MathJax.Ajax.loadComplete("mathjax-calculator-setup.js");
+  MathJax.Ajax.loadComplete(calculatorHtmlBaseFolder + "mathjax-calculator-setup.js");
 }
 
-var waitingForMathJaxCounter = 0;
+var module;
 
-function waitForMathJax() { 
-  waitingForMathJaxCounter ++;
-  if (waitingForMathJaxCounter > 100) {
-    return;
-  }
-  if (MathJax === undefined) { 
-    setTimeout(waitForMathJax, 100);
-    return;
-  }
-  configureMathJaxForCalculator();
-//  setTimeout(ConfigureMathJaxForCalculator,2000);
+if (module !== undefined) {
+  module.exports = {
+    configureMathJaxForCalculator
+  };
 }
-//waitForMathJax();
-configureMathJaxForCalculator();

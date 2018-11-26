@@ -473,7 +473,12 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash)
 
   for (std::string currentLine; std::getline(theReader, currentLine, '\n');)
   { int startChar = currentLine.find(WebAPI::calculatorHTML);
+    bool shouldShortCut = false;
     if (startChar == - 1)
+      shouldShortCut = true;
+    //else
+    //  shouldShortCut = (currentLine.find("/MathJax.js?") != std::string::npos);
+    if (shouldShortCut)
     { if (this->jsFileNames.size > 0)
         outSecondPart << currentLine << "\n";
       else
@@ -483,7 +488,8 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash)
     std::string firstPart, secondAndThirdPart, thirdPart, notUsed;
     MathRoutines::SplitStringInTwo(currentLine, startChar, firstPart, secondAndThirdPart);
     MathRoutines::SplitStringInTwo(secondAndThirdPart, WebAPI::calculatorHTML.size(), notUsed, thirdPart);
-    if (currentLine.find("<script") == std::string::npos)
+    if (currentLine.find("<script") == std::string::npos ||
+        currentLine.find("/MathJax.js?") != std::string::npos)
     { std::stringstream lineStream;
       lineStream << firstPart << virtualFolder << thirdPart << "\n";
       if (this->jsFileNames.size > 0)

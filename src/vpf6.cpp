@@ -2401,7 +2401,7 @@ void Calculator::WriteAutoCompleteKeyWordsToFile()
   out << "  var theAutocompleteDictionary = [\n  ";
   for (int i = 0; i < this->autoCompleteKeyWords.size; i ++)
     if (this->autoCompleteKeyWords[i].size() > 2)
-    { out << "\"" << this->autoCompleteKeyWords[i] << "\"";
+    { out << "\"" << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->autoCompleteKeyWords[i]) << "\"";
       if (i != this->autoCompleteKeyWords.size - 1)
         out << ", ";
     }

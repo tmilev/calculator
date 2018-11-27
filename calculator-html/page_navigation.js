@@ -364,21 +364,21 @@ function Page() {
       initialized: false,
     },
     selectCourse : {
-      name: "selectCourse", //<-for autocomplete
+      name: "selectCourse", 
       id: "divSelectCourse",
       menuButtonId: "buttonSelectCourse",
       container: null,
       selectFunction: selectCourse.selectCoursePage,
     },
     currentCourse : {
-      name: "currentCourse", //<-for autocomplete
+      name: "currentCourse",
       id: "divCurrentCourse",
       menuButtonId: "buttonCurrentCourse",
       container: null,
       selectFunction: coursePage.selectCurrentCoursePage,
     },
     problemPage : {
-      name: "problemPage", //<-for autocomplete
+      name: "problemPage",
       id: "divProblemPage",
       menuButtonId: "buttonProblemPage",
       container: null,
@@ -386,7 +386,7 @@ function Page() {
       flagLoaded: false,
     },
     editPage : {
-      name: "editPage", //<-for autocomplete
+      name: "editPage",
       id: "divEditPage",
       menuButtonId: "buttonEditPage",
       container: null,
@@ -395,7 +395,7 @@ function Page() {
       editor: null,
     },
     calculator: {
-      name: "calculator", //<-for autocomplete
+      name: "calculator",
       id: "divCalculatorPage",
       menuButtonId: "buttonSelectCalculator",
       container: null,
@@ -403,7 +403,7 @@ function Page() {
       scriptIds: [],
     },
     signUp: {
-      name: "signUp", //<-for autocomplete
+      name: "signUp",
       id: "divSignUpPage",
       container: null,
       selectFunction: signUp.signUp.bind(signUp),
@@ -415,41 +415,41 @@ function Page() {
       selectFunction: null,
     },
     about: {
-      name: "about", //<-for autocomplete
+      name: "about",
       id: "divAboutPage",
       menuButtonId: "buttonAboutPage",
       container: null,
       selectFunction: null,
     },
     database: {
-      name: "database", //<-for autocomplete
+      name: "database",
       id: "divDatabase",
       menuButtonId: "buttonSelectDatabase",
       container: null,
       selectFunction: database.updateDatabasePage,
     },
     server: {
-      name: "server", //<-for autocomplete
+      name: "server",
       id: "divServer",
       menuButtonId: "buttonSelectServer",
       container: null,
       selectFunction: serverStatus.updateServerStatus,
     },
     account: {
-      name: "account", //<-for autocomplete
+      name: "account",
       id: "divAccount",
       menuButtonId: "buttonSelectAccount",
       container: null,
       selectFunction: accountPage.updateAccountPage,
     },
     activateAccount: {
-      name: "activateAccount", //<-for autocomplete
+      name: "activateAccount",
       id: "divActivateAccount",
       container: null,
       selectFunction: activateAccount.updateAccountActivationPage,
     },
     accounts: {
-      name: "accounts", //<-for autocomplete
+      name: "accounts",
       id: "divAccounts",
       menuButtonId: "buttonSelectAccounts",
       container: null,

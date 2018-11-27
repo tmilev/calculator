@@ -258,7 +258,7 @@ std::string Graph::ToStringPsTricksEdge(int fromIndex, int toIndex, FormatExpres
 }
 
 std::string Graph::ToStringPsTricks(FormatExpressions* theFormat)
-{ MacroRegisterFunctionWithName("Graph::ToStringLatex");
+{ MacroRegisterFunctionWithName("Graph::ToStringPsTricks");
   this->ComputeEdgesPerNodesNoMultiplicities();
   this->ComputeConnectedComponentsAndBaseNodeDistances();
   this->ComputeDisplayGroups();
@@ -268,7 +268,7 @@ std::string Graph::ToStringPsTricks(FormatExpressions* theFormat)
   out << "<br>\\documentclass{article}<br>\n\n";
   out << "\\usepackage{pstricks}\\usepackage{lscape}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}<br>\n";
   out << "\\begin{document}<br>\n";
-  out << "\\psset{xunit =1.5cm, yunit =1.5cm}\\begin{pspicture}(0," << - (this->groupMaxSize + 1) / 2 << ")("
+  out << "\\psset{xunit=1.5cm,yunit=1.5cm}\\begin{pspicture}(0," << - (this->groupMaxSize + 1) / 2 << ")("
   << this->nodeGroupsForDisplay.size << ", " << (this->groupMaxSize + 1) / 2 << ")"
   << "\n<br>\\tiny\n<br>\n";
   for (int i = 0; i < this->edgesPerNodeNoMultiplicities.size; i ++)

@@ -2,6 +2,7 @@
 const submitRequests = require('./submit_requests');
 const pathnames = require('./pathnames');
 const calculatorPage = require('./calculator_page');
+const ids = require('./ids_dom_elements');
 
 var staticWordCompleter = {
   getCompletions: function(editor, session, pos, prefix, callback) {
@@ -92,6 +93,9 @@ function selectEditPageCallback(input, outputComponent) {
     if (thePage.pages.editPage.editor === null) {
       thePage.pages.editPage.editor = ace.edit("divEditorAce");
     }
+    if (parsedInput.autoComplete !== null && parsedInput.autoComplete !== undefined) {
+      thePage.aceEditorAutoCompletionWordList = parsedInput.autoComplete;
+    }
     var editor = thePage.pages.editPage.editor;
     editor.$blockScrolling = Infinity;
     var incomingContent = "";
@@ -105,7 +109,8 @@ function selectEditPageCallback(input, outputComponent) {
       enableBasicAutocompletion: true,
       enableLiveAutocompletion: true
     });
-    editor.completers = [staticWordCompleter];    
+    editor.completers = [staticWordCompleter];
+    if (input)
     editor.$blockScrolling = Infinity;
   } catch (e) {
     console.log("Error: " + e)
@@ -133,7 +138,8 @@ function selectEditPage(currentlyEditedPage) {
   theURL += `fileName=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}`;
   submitRequests.submitGET({
     url: theURL,
-    callback: selectEditPageCallback
+    callback: selectEditPageCallback,
+    progress: ids.domElements.spanProgressReportGeneral,
   });
 }
 

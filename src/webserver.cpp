@@ -2947,7 +2947,7 @@ int WebWorker::ProcessCalculator()
   << "  var theAutocompleteDictionary = [\n  ";
   for (int i = 0; i < theParser->autoCompleteKeyWords.size; i ++)
     if (theParser->autoCompleteKeyWords[i].size() > 2)
-    { stOutput << "\"" << theParser->autoCompleteKeyWords[i] << "\"";
+    { stOutput << "\"" << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(theParser->autoCompleteKeyWords[i]) << "\"";
       if (i != theParser->autoCompleteKeyWords.size - 1)
         stOutput << ", ";
     }

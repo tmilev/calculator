@@ -1229,7 +1229,7 @@ bool JSONWebToken::VerifyRSA256
     //*commentsGeneral << "<br>Payload, json: " << intValues.ToStringCommaDelimited();
   }
   List<uint32_t> outputSha, RSAresultInts;
-  Crypto::computeSha256(payload, outputSha);\
+  Crypto::computeSha256(payload, outputSha);
   if (commentsGeneral != 0)
   { LargeIntUnsigned theSha;
     Crypto::ConvertListUintToLargeUInt(outputSha, theSha);

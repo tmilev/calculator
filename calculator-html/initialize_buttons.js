@@ -4,6 +4,7 @@ const panels = require('./panels');
 const pathnames = require('./pathnames');
 const ids = require('./ids_dom_elements');
 
+
 var calculatorLeftPosition = 0;
 var calculatorRightPosition = 0;
 
@@ -383,11 +384,20 @@ InputPanelData.prototype.submitOrPreviewAnswers = function(requestQuery) {
   });
 }
 
+/**@returns {Boolean} */
+function isForRealProblem(problem) {
+  var isForReal = true;
+  if (problem  !== null && problem !== undefined) {
+    isForReal = problem.flagForReal;
+  }
+  return isForReal;
+}
+
 InputPanelData.prototype.showSolution = function() {
   var theRequest = "";
   var thePage = window.calculator.mainPage;
   var currentProblem = thePage.problems[this.problemId];
-  if (!currentProblem.flagForReal) {
+  if (!isForRealProblem(currentProblem)) {
     if (thePage.user.flagLoggedIn) {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolution}&`;
     } else {
@@ -404,7 +414,7 @@ InputPanelData.prototype.submitAnswers = function() {
   var thePage = window.calculator.mainPage;
   var currentProblem = thePage.problems[this.problemId];
   if (thePage.user.flagLoggedIn) {
-    if (currentProblem.flagForReal) {
+    if (isForRealProblem(currentProblem)) {
       theRequest = `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswers}`;
     } else {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercise}&`
@@ -436,7 +446,7 @@ InputPanelData.prototype.submitPreview = function() {
   var theRequest = "";
   var currentProblem = thePage.problems[this.problemId];
   if (thePage.user.flagLoggedIn) {
-    if (currentProblem.flagForReal) {
+    if (isForRealProblem(currentProblem)) {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswersPreview}&`;
     } else {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreview}&`;

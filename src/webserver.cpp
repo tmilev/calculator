@@ -3455,18 +3455,18 @@ std::string HtmlInterpretation::ModifyProblemReport()
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
   std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   std::string fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
-  std::stringstream out;
-  if (!FileOperations::FileExistsVirtualCustomizedReadOnly(fileName, &out))
-  { out << "<b>File " << fileName << " does not appear to exist. </b>";
-    return out.str();
-  }
+  std::stringstream commentsOnFailure;
+  bool fileExists = FileOperations::FileExistsVirtualCustomizedReadOnly(fileName, &commentsOnFailure);
   std::fstream theFile;
-  if (!FileOperations::OpenFileVirtualCustomizedWriteOnly(theFile, fileName, false, true, false, &out))
-  { out << "<b><span style =\"color:red\">Failed to open file: " << fileName << ". </span></b>";
-    return out.str();
+  if (!FileOperations::OpenFileVirtualCustomizedWriteOnly(theFile, fileName, false, true, false, &commentsOnFailure))
+  { commentsOnFailure << "<b><span style =\"color:red\">Failed to open/create file: " << fileName << ". </span></b>";
+    return commentsOnFailure.str();
   }
   theFile << mainInput;
   theFile.close();
+  std::stringstream out;
+  if (!fileExists)
+    out << "File " << fileName << " didn't previously exist: just created it for you. ";
   out << "<b><span style =\"color:green\"> Written content to file: "
   << fileName << ". </span></b>";
   return out.str();

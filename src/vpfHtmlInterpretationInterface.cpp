@@ -402,25 +402,17 @@ std::string HtmlInterpretation::ClonePageResult(bool useJSON)
   //out << "DEBUG: here be i part2. So far output: " << out.str();
   theFile << startingFileString;
   theFile.close();
-  std::stringstream svnAddCommand;
   std::string fileNameNonVirtual;
-  std::stringstream commandResult;
-  if (FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(fileNameResulT, fileNameNonVirtual, &commandResult))
-  { if (FileOperations::IsFileNameSafeForSystemCommands(fileNameNonVirtual, &commandResult))
-    { svnAddCommand << "svn add " << fileNameNonVirtual;
-      commandResult << "<b>Command:</b> " << svnAddCommand.str() << "<br>";
-      commandResult << "<b>Result: </b>"
-      << theGlobalVariables.CallSystemWithOutput(svnAddCommand.str());
-    }
-  } else
-    commandResult << "SVN: Could not get physical file name from virtual. ";
+  std::stringstream comments;
+  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(fileNameResulT, fileNameNonVirtual, &comments))
+    comments << "Could not get physical file name from virtual. ";
   if (!useJSON)
   { CalculatorHTML linkInterpreter;
     out << "<br>" << linkInterpreter.ToStringLinkFromFileName(fileNameResulT);
     out << "<br><b><span style =\"color:green\">Written content to file: "
-    << fileNameResulT << ". </span></b>" << "<br> " << commandResult.str();
+    << fileNameResulT << ". </span></b>" << "<br> " << comments.str();
   } else
-    out << "<br>Written content to file: " << fileNameResulT << "<br>" << commandResult.str();
+    out << "<br>Written content to file: " << fileNameResulT;
   return out.str();
 }
 

@@ -120,6 +120,7 @@ function PanelExpandable(
     panelLabelId: null,
     panelStatus: null,
     originalHeight: "0px",
+    originalWidth: "0px",
   }
   this.containerId = "";
   this.container = null;
@@ -132,10 +133,10 @@ PanelExpandable.prototype.matchPanelStatus = function() {
   thePanel.style.height = "";
   if (this.attributes.panelStatus === "collapsed") {
     thePanel.style.maxHeight = "0px";
-    thePanel.style.height = "0px";
+    thePanel.style.maxWidth = "0px";
   } else {
     thePanel.style.maxHeight = this.attributes.originalHeight;
-    thePanel.style.height = this.attributes.originalHeight;
+    thePanel.style.maxWidth = this.attributes.originalWidth;
   }
 }
 
@@ -143,7 +144,9 @@ PanelExpandable.prototype.setPanelContent = function(input) {
   var thePanel = document.getElementById(this.attributes.panelId);
   thePanel.innerHTML = input;
   var originalHeight = window.getComputedStyle(thePanel).height;
+  var originalWidth = window.getComputedStyle(thePanel).width;
   this.container.setAttribute("originalHeight", originalHeight);
+  this.container.setAttribute("originalWidth", originalWidth);
 }
 
 PanelExpandable.prototype.setPanelLabel = function(input) {
@@ -184,12 +187,10 @@ PanelExpandable.prototype.setStatusToBeCalledThroughTimeout = function() {
   var panel = document.getElementById(this.attributes.panelId);
   if (this.attributes.panelStatus === "expanded") {
     panel.style.maxHeight = this.attributes.originalHeight;
-    panel.style.height = this.attributes.originalHeight;
-    //panel.style.opacity = "1";
+    panel.style.maxWidth = this.attributes.originalWidth;
   } else {
     panel.style.maxHeight = "0px";
-    panel.style.height = "0px";
-    //panel.style.opacity = "0";
+    panel.style.maxWidth = "0px";
   }
 }
 
@@ -209,7 +210,6 @@ PanelExpandable.prototype.doToggleContent = function() {
   this.container.setAttribute("panelStatus", this.attributes.panelStatus);
   setTimeout(this.setStatusToBeCalledThroughTimeout.bind(this), 0);
 }
-
 
 var numberOfButtonToggleProgressReport = 0;
 

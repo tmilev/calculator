@@ -25,6 +25,7 @@ std::string WebAPI::problemId = "id";
 
 std::string WebAPI::calculatorUserInfoJSON = "userInfoJSON";
 std::string WebAPI::problemSingleDeadline = "deadline";
+std::string WebAPI::queryParameters::currentDatabaseTable = "currentDatabaseTable";
 
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 WebServer theWebServer;
@@ -1173,10 +1174,9 @@ std::string WebWorker::GetDatabaseJSON()
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "Only logged-in admins can access database. ";
   std::stringstream out;
-  std::string currentTable =
-  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"), false);
+  std::string currentTableRaw = theGlobalVariables.GetWebInput(WebAPI::queryParameters::currentDatabaseTable);
 #ifdef MACRO_use_MongoDB
-  out << DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(currentTable);
+  out << DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(currentTableRaw);
 #else
   out << "<b>Database not available. </b>";
 #endif // MACRO_use_MongoDB
@@ -3459,7 +3459,7 @@ std::string HtmlInterpretation::ModifyProblemReport()
   bool fileExists = FileOperations::FileExistsVirtualCustomizedReadOnly(fileName, &commentsOnFailure);
   std::fstream theFile;
   if (!FileOperations::OpenFileVirtualCustomizedWriteOnly(theFile, fileName, false, true, false, &commentsOnFailure))
-  { commentsOnFailure << "<b><span style =\"color:red\">Failed to open/create file: " << fileName << ". </span></b>";
+  { commentsOnFailure << "<b style =\"color:red\">Failed to open/create file: " << fileName << ". </b>";
     return commentsOnFailure.str();
   }
   theFile << mainInput;
@@ -3467,8 +3467,8 @@ std::string HtmlInterpretation::ModifyProblemReport()
   std::stringstream out;
   if (!fileExists)
     out << "File " << fileName << " didn't previously exist: just created it for you. ";
-  out << "<b><span style =\"color:green\"> Written content to file: "
-  << fileName << ". </span></b>";
+  out << "<b style =\"color:green\"> Written content to file: "
+  << fileName << ". </b>";
   return out.str();
 }
 
@@ -3686,7 +3686,7 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection()
   }
   //stOutput << "<br>" << redirectStream.str();
   if (theGlobalVariables.flagRunningApache)
-    stOutput << "To avoid seeing this message, <b><span \"style = color:red\">please use the secure version:</span></b> "
+    stOutput << "To avoid seeing this message, <b style = \"color:red\">please use the secure version:</b> "
     << "<a href=\"https://" << this->hostNoPort << "\">https://" << this->hostNoPort
     << "</a>. If using bookmarks, don't forget to re-bookmark to the secure site. ";
   stOutput << "</body></html>";

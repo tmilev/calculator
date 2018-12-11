@@ -8,6 +8,7 @@ mongoc_database_t *database = 0;
 #include "vpfJson.h"
 #include "vpfHeader1General4General_Logging_GlobalVariables.h"
 #include "vpfHeader8HtmlSnippets.h"
+#include "vpfWebAPI.h"
 ProjectInformationInstance ProjectInfoVpfDatabaseMongo(__FILE__, "Database mongoDB.");
 
 int DatabaseRoutinesGlobalFunctionsMongo::numDatabaseInstancesMustBeOneOrZero = 0;
@@ -15,9 +16,19 @@ DatabaseRoutinesGlobalFunctionsMongo databaseMongo;
 
 extern logger logWorker;
 
+JSData DatabaseRoutinesGlobalFunctionsMongo::GetStandardProjectors()
+{ JSData result;
+  //std::cout << "DEBUG: GOT to here";
+  JSData userProjector;
+  //std::cout << "DEBUG: GOT to here pt 2";
+  userProjector[DatabaseStrings::labelProblemDataJSON] = 0;
+  userProjector[DatabaseStrings::labelProblemDatA] = 0;
+  result[DatabaseStrings::tableUsers]["projection"] = userProjector;
+  return result;
+}
+
 DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo()
 { this->flagInitialized = false;
-
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::initialize(std::stringstream* commentsOnFailure)
@@ -109,7 +120,9 @@ public:
   bool flagFindOneOnly;
   MongoQuery();
   ~MongoQuery();
-  bool FindMultiple(List<JSData>& output, const JSData& inputOptions, std::stringstream* commentsOnFailure);
+  bool FindMultiple
+  (List<JSData>& output, const JSData& inputOptions, std::stringstream* commentsOnFailure,
+   std::stringstream *commentsGeneralNonSensitive);
   bool UpdateOneWithOptions(std::stringstream* commentsOnFailure);
   bool RemoveOne(std::stringstream* commentsOnFailure);
   bool UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert);
@@ -275,12 +288,18 @@ bool MongoQuery::UpdateOneWithOptions(std::stringstream* commentsOnFailure)
 { return this->UpdateOne(commentsOnFailure, true);
 }
 
-bool MongoQuery::FindMultiple(List<JSData>& output, const JSData& inputOptions, std::stringstream* commentsOnFailure)
+bool MongoQuery::FindMultiple
+(List<JSData>& output, const JSData& inputOptions, std::stringstream* commentsOnFailure,
+ std::stringstream* commentsGeneralNonSensitive)
 { MacroRegisterFunctionWithName("MongoQuery::FindMultiple");
   if (!databaseMongo.initialize(commentsOnFailure))
     return false;
   MongoCollection theCollection(this->collectionName);
-  //logWorker << "Query: " << this->findQuery << " inside: " << this->collectionName << logger::endL;
+  if (commentsGeneralNonSensitive != 0 && theGlobalVariables.UserDefaultHasAdminRights())
+  { *commentsGeneralNonSensitive
+    << "Query: " << this->findQuery << ". Options: " << inputOptions.ToString(false);
+    //logWorker << "Query: " << this->findQuery << " inside: " << this->collectionName << logger::endL;
+  }
   if (this->query != 0)
     crash << "At this point of code, query is supposed to be 0. " << crash;
   this->query = bson_new_from_json((const uint8_t*) this->findQuery.c_str(), this->findQuery.size(), &this->theError);
@@ -410,8 +429,8 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
 bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
 (const std::string& collectionName, const JSData& findQuery,
  List<JSData>& output, const JSData& options, int maxOutputItems,
- long long* totalItems, std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON");
+ long long* totalItems, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions");
 #ifdef MACRO_use_MongoDB
   //logWorker << logger::blue << "Query input JSON: " << findQuery.ToString(true) << logger::endL;
   //stOutput << "Find query: " << theData.ToString();
@@ -419,7 +438,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
   query.collectionName = collectionName;
   query.findQuery = findQuery.ToString(true);
   query.maxOutputItems = maxOutputItems;
-  bool result = query.FindMultiple(output, options, commentsOnFailure);
+  bool result = query.FindMultiple(output, options, commentsOnFailure, commentsGeneralNonSensitive);
   if (totalItems != 0)
     *totalItems = query.totalItems;
   return result;
@@ -548,7 +567,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSONWithProjection
 
 bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
 (const std::string& collectionName, const std::string& findQuery, const JSData& options,
- JSData& output, std::stringstream* commentsOnFailure)
+ JSData& output, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions");
 #ifdef MACRO_use_MongoDB
   MongoQuery query;
@@ -557,7 +576,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
   //logWorker << logger::blue << "DEBUG: Query input: " << query.findQuery << logger::endL;
   query.maxOutputItems = 1;
   List<JSData> outputList;
-  query.FindMultiple(outputList, options, commentsOnFailure);
+  query.FindMultiple(outputList, options, commentsOnFailure, commentsGeneralNonSensitive);
   if (outputList.size == 0)
     return false;
   output = outputList[0];
@@ -915,38 +934,63 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchTable
   return true;
 }
 
-std::string DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(const std::string& currentTable)
-{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection");
+JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection
+(const std::string& currentTableRaw)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo");
   JSData result;
   std::stringstream out;
+  std::string currentTable = HtmlRoutines::ConvertURLStringToNormal(currentTableRaw, false);
+  result["currentTableRaw"] = currentTableRaw;
+  result["currentTable"] = currentTable;
+  if (theGlobalVariables.UserDebugFlagOn())
+    result["currentTableQuery"] = theGlobalVariables.GetWebInput(WebAPI::queryParameters::currentDatabaseTable);
   if (currentTable == "")
-  { List<std::string> theCollectionNames;
+  { if (theGlobalVariables.UserDebugFlagOn() != 0)
+      result["comments"] = "Requested table empty, returning list of tables. ";
+    List<std::string> theCollectionNames;
     if (DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames(theCollectionNames, &out))
     { JSData collectionNames;
       collectionNames.type = collectionNames.JSarray;
       collectionNames.list = theCollectionNames;
       result["collections"] = collectionNames;
     } else
-      result.string = out.str();
-    return result.ToString(false);
+      result["error"] = out.str();
+    return result;
   }
-  JSData findQuery;
+  JSData allProjectors, projector, findQuery;
+  allProjectors = DatabaseRoutinesGlobalFunctionsMongo::GetStandardProjectors();
+  if (allProjectors.HasKey(currentTable))
+    projector = allProjectors[currentTable];
   findQuery.type = findQuery.JSObject;
   List<JSData> rowsJSON;
   long long totalItems = 0;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(currentTable, findQuery, rowsJSON, 200, &totalItems, &out))
-  { result.string = out.str();
-    return result.ToString(false);
+  std::stringstream comments;
+  std::stringstream* commentsPointer = 0;
+  bool flagDebuggingAdmin = theGlobalVariables.UserDefaultIsDebuggingAdmin();
+  if (flagDebuggingAdmin)
+    commentsPointer = &comments;
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
+       (currentTable, findQuery, rowsJSON, projector, 200, &totalItems, &out, commentsPointer))
+  { result["error"] = out.str();
+    return result;
   }
   if (rowsJSON.size == 0)
-    return DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection("");
+  { result = DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection("");
+    if (flagDebuggingAdmin)
+    { std::stringstream moreComments;
+      moreComments << "First query returned 0 rows, fetching all tables instead. ";
+      result["moreComments"] = moreComments.str();
+      result["commentsOnFirstQuery"] = commentsPointer->str();
+      result["currentTableRawOriginal"] = currentTableRaw;
+    }
+    return result;
+  }
   JSData theRows;
   theRows.type = theRows.JSarray;
   theRows.list = rowsJSON;
   result["rows"] = theRows;
   result["totalRows"] = (int) totalItems;
-  result["currentTable"] = currentTable;
-  return result.ToString(false);
+  return result;
 }
 
 std::string DatabaseRoutinesGlobalFunctionsMongo::ToHtmlDatabaseCollection(const std::string& currentTable)

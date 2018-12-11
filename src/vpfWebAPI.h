@@ -20,7 +20,11 @@ public:
   static std::string calculatorOnePageJS;
   static std::string calculatorOnePageJSWithHash;
   static std::string calculatorUserInfoJSON;
-
+  class queryParameters
+  {
+  public:
+    static std::string currentDatabaseTable;
+  };
   static std::string HeaderCacheControl;
   static std::string problemContent;
   static std::string problemFileName;

@@ -220,6 +220,7 @@ public:
     return - 1;
   }
   static void InitThreadsExecutableStart();
+  bool UserDefaultIsDebuggingAdmin();
   bool UserDefaultHasAdminRights();
   bool UserDefaultHasProblemComposingRights();
   bool UserRequestRequiresLoadingRealExamData();

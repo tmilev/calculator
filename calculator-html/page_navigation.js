@@ -421,6 +421,11 @@ function Page() {
       container: null,
       selectFunction: null,
     },
+    privacyPolicy: {
+      name: "privacyPolicy",
+      id: ids.domElements.pages.privacyPolicy.div,
+      menuButtonId: ids.domElements.pages.privacyPolicy.button,
+    },
     database: {
       name: "database",
       id: "divDatabase",

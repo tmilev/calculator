@@ -5,6 +5,12 @@ var stringResources = {
 };
 
 var domElements = {
+  pages: {
+    privacyPolicy: {
+      div: "divPrivacyPolicy",
+      button: "buttonPrivacyPolicy",
+    }
+  },
   inputMain: "mainInputID",
   spanOldEmail: "spanOldEmail",
   buttonChangeEmail: "buttonChangeEmail",

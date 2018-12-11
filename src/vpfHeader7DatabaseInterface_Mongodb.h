@@ -26,7 +26,7 @@ public:
   static bool FindFromJSONWithOptions
   (const std::string& collectionName, const JSData& findQuery,
    List<JSData>& output, const JSData& options, int maxOutputItems = - 1,
-   long long* totalItems = 0, std::stringstream* commentsOnFailure = 0);
+   long long* totalItems = 0, std::stringstream* commentsOnFailure = 0, std::stringstream* commentsGeneralNonSensitive = 0);
   static bool FindOneFromQueryString
   (const std::string& collectionName, const std::string& findQuery,
    JSData& output, std::stringstream* commentsOnFailure = 0);
@@ -36,7 +36,7 @@ public:
   static JSData GetProjectionFromFieldNames(const List<std::string>& fieldsToProjectTo);
   static bool FindOneFromQueryStringWithOptions
   (const std::string& collectionName, const std::string& findQuery, const JSData& options,
-   JSData& output, std::stringstream* commentsOnFailure = 0);
+   JSData& output, std::stringstream* commentsOnFailure = 0, std::stringstream* commentsGeneralNonSensitive = 0);
   static bool FindOneFromJSONWithProjection
   (const std::string& collectionName, const JSData& findQuery, const List<std::string>& fieldsToProjectTo,
    JSData& output, std::stringstream* commentsOnFailure, bool doEncodeFindFields);
@@ -77,13 +77,14 @@ public:
   (const std::string& tableName, const JSData& findQuery, List<std::string>& selector,
    std::stringstream* commentsOnFailure);
   static std::string ToHtmlDatabaseCollection(const std::string& currentTable);
-  static std::string ToJSONDatabaseCollection(const std::string& currentTable);
+  static JSData ToJSONDatabaseCollection(const std::string& currentTableRaw);
   void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
   static bool getLabels(const JSData& fieldEntries, List<std::string>& theLabels, std::stringstream* commentsOnFailure);
   static bool isDeleteable(const std::string& tableName, const List<std::string>& theLabels, List<std::string>** outputPattern, std::stringstream* commentsOnFailure);
   static bool isDeleteable(const JSData& theEntry, List<std::string>** outputPattern, std::stringstream* commentsOnFailure);
   static bool matchesPattern
   (const std::string &tableName, const List<std::string>& fieldLabel, const List<std::string>& pattern);
+  static JSData GetStandardProjectors();
   DatabaseRoutinesGlobalFunctionsMongo();
   ~DatabaseRoutinesGlobalFunctionsMongo();
 };

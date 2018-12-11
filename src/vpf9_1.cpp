@@ -287,6 +287,10 @@ bool GlobalVariables::UserStudentVieWOn()
 { return theGlobalVariables.GetWebInput("studentView") == "true";
 }
 
+bool GlobalVariables::UserDefaultIsDebuggingAdmin()
+{ return this->UserDefaultHasAdminRights() && this->UserDebugFlagOn();
+}
+
 bool GlobalVariables::UserDefaultHasAdminRights()
 { return this->flagLoggedIn && (this->userDefault.userRole == "admin");
 }

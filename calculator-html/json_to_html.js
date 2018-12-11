@@ -261,6 +261,7 @@ JSONToHTML.prototype.getHtmlFromArrayOfObjects = function(input, selector) {
     if (labelsRows !== null) { 
       result += "<table class='tableJSON'>";
       result += "<tr>";
+      result += "<th></th>";
       for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
         result += `<th>${labelsRows.labels[counterColumn]}</th>`;
       }

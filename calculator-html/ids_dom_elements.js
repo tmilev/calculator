@@ -39,6 +39,7 @@ var domElements = {
   inputReenteredPasswordInActivationAccount: "inputReenteredPasswordInActivationAccount",
   sliderDebugFlag: "sliderDebugFlag",
   sliderStudentView: "sliderStudentView",
+  spanDatabaseComments: "spanDatabaseComments",
   spanDebugFlagToggleReport: "spanDebugFlagToggleReport",
   spanStudentViewFlagToggleReport: "spanStudentViewToggleReport",
   spanUserExtraInfo: "spanUserExtraInfo",

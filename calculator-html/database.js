@@ -17,6 +17,7 @@ function updateDatabasePageCallback(incoming, output) {
     var theOutput = document.getElementById(ids.domElements.divDatabaseOutput);
     if ("rows" in theParsed) {
       var transformer = new jsonToHtml.JSONToHTML();
+      document.getElementById(ids.domElements.spanDatabaseComments).innerHTML = `${theParsed.rows.length} out of ${theParsed.totalRows} rows displayed.<br> `;
       theOutput.innerHTML = transformer.getHtmlFromArrayOfObjects(theParsed.rows, {table: currentTable});
       transformer.bindButtons();
     } else {

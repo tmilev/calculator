@@ -280,6 +280,7 @@ JSONToHTML.prototype.getHtmlFromArrayOfObjects = function(input, selector) {
         } else {
           result += "<tr>";
         }
+        result += `<td><tiny>${counterRow}</tiny></td>`
         for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
           if (hasLabels) {
             newLabel = [labelsRows.labels[counterColumn]];

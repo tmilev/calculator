@@ -603,27 +603,26 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::matchesPattern
-(const std::string& tableName, const List<std::string>& fieldLabel, const List<std::string>& pattern)
+(const List<std::string>& fieldLabel, const List<std::string>& pattern)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::matchesPattern");
-  if (fieldLabel.size != pattern.size - 1)
+  if (fieldLabel.size != pattern.size)
     return false;
-  if (tableName != pattern[0])
-    return false;
-  for (int i = 1; i < pattern.size; i ++)
-  { if (pattern[i] == DatabaseStrings::anyField)
+  for (int i = 0; i < pattern.size; i ++)
+  { if (pattern[i] == DatabaseStrings::anyFielD)
       continue;
-    if (pattern[i] == DatabaseStrings::objectSelector)
+    if (pattern[i] == DatabaseStrings::objectSelectoR)
       continue;
-    if (fieldLabel[i - 1] != pattern[i])
+    if (fieldLabel[i] != pattern[i])
       return false;
   }
   return true;
 }
 
-bool DatabaseRoutinesGlobalFunctionsMongo::isDeleteable(const std::string& tableName, const List<std::string>& theLabels, List<std::string>** outputPattern, std::stringstream* commentsOnFailure)
+bool DatabaseRoutinesGlobalFunctionsMongo::isDeleteable
+(const List<std::string>& theLabels, List<std::string>** outputPattern, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::isDeleteable");
   for (int i = 0; i < theGlobalVariables.databaseModifiableFields.size; i ++)
-    if (DatabaseRoutinesGlobalFunctionsMongo::matchesPattern(tableName, theLabels, theGlobalVariables.databaseModifiableFields[i]))
+    if (DatabaseRoutinesGlobalFunctionsMongo::matchesPattern(theLabels, theGlobalVariables.databaseModifiableFields[i]))
     { if (outputPattern != 0)
         *outputPattern = &theGlobalVariables.databaseModifiableFields[i];
       return true;
@@ -647,14 +646,13 @@ bool DatabaseRoutinesGlobalFunctionsMongo::getLabels(const JSData& fieldEntries,
   return true;
 }
 
-bool DatabaseRoutinesGlobalFunctionsMongo::isDeleteable(const JSData& theEntry, List<std::string>** outputPattern, std::stringstream* commentsOnFailure)
+bool DatabaseRoutinesGlobalFunctionsMongo::isDeleteable
+(const JSData& theEntry, List<std::string>** outputPattern, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::isDeleteable");
-  if (theEntry.type != JSData::JSObject                 ||
-      !theEntry.HasKey(DatabaseStrings::labelTable)     ||
-      !theEntry.HasKey(DatabaseStrings::objectSelector) ||
-      !theEntry.HasKey(DatabaseStrings::labelFields))
+  if (theEntry.type != JSData::JSObject || !theEntry.HasKey(DatabaseStrings::labelFields))
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "The labels json is required to be an object of the form {table: ..., object: ..., fields: [...]}. ";
+      *commentsOnFailure
+      << "The labels json is required to be an object of the form {fields: [tableName, objectId,...]}. ";
     return false;
   }
   List<std::string> theLabels;
@@ -662,7 +660,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::isDeleteable(const JSData& theEntry, 
        (theEntry.objects.GetValueConstCrashIfNotPresent("fields"), theLabels, commentsOnFailure))
     return false;
   return DatabaseRoutinesGlobalFunctionsMongo::isDeleteable
-  (theEntry.objects.GetValueConstCrashIfNotPresent("table").string, theLabels, outputPattern, commentsOnFailure);
+  (theLabels, outputPattern, commentsOnFailure);
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure)
@@ -683,10 +681,17 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry
        (theEntry.objects.GetValueConstCrashIfNotPresent(DatabaseStrings::labelFields),
         theLabels, commentsOnFailure))
     return false;
+  if (theLabels.size < 2)
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure
+      << "When deleting an object, it needs at least two labels: table name and objectid. "
+      << "Your input appears to have only " << theLabels.size << " entries: " << theLabels.ToStringCommaDelimited()
+      << ". ";
+    return false;
+  }
   JSData findQuery;
-  findQuery[DatabaseStrings::labelIdMongo][DatabaseStrings::objectSelectorMongo] =
-  theEntry.objects.GetValueConstCrashIfNotPresent(DatabaseStrings::objectSelector);
-  std::string tableName = theEntry.objects.GetValueConstCrashIfNotPresent(DatabaseStrings::labelTable).string;
+  std::string tableName = theLabels[0];
+  findQuery[DatabaseStrings::labelIdMongo][DatabaseStrings::objectSelectorMongo] = theLabels[1];
   if (theLabels.size == 0)
     return DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById
     (tableName, findQuery, commentsOnFailure);

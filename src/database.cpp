@@ -131,8 +131,8 @@ std::string DatabaseStrings::labelUsernameAssociatedWithToken = "usernameAssocia
 
 std::string DatabaseStrings::tableDeleted = "deleted";
 
-std::string DatabaseStrings::anyField = "ANY";
-std::string DatabaseStrings::objectSelector = "object";
+std::string DatabaseStrings::anyFielD = "${any}";
+std::string DatabaseStrings::objectSelectoR = "${number}";
 std::string DatabaseStrings::objectSelectorMongo = "$oid";
 std::string DatabaseStrings::labelFields = "fields";
 std::string DatabaseStrings::labelTable = "table";
@@ -150,15 +150,18 @@ void GlobalVariables::initModifiableDatabaseFields()
   List<std::string> currentEntry;
   modifiableData.Reserve(10);
   currentEntry.AddOnTop(DatabaseStrings::tableUsers);
+  currentEntry.AddOnTop(DatabaseStrings::objectSelectoR);
   currentEntry.AddOnTop(DatabaseStrings::labelProblemDataJSON);
-  currentEntry.AddOnTop(DatabaseStrings::anyField);
+  currentEntry.AddOnTop(DatabaseStrings::anyFielD);
   modifiableData.AddOnTop(currentEntry);
   currentEntry.SetSize(0);
   currentEntry.AddOnTop(DatabaseStrings::tableUsers);
+  currentEntry.AddOnTop(DatabaseStrings::objectSelectoR);
   currentEntry.AddOnTop(DatabaseStrings::labelProblemDatA);
   modifiableData.AddOnTop(currentEntry);
   currentEntry.SetSize(0);
   currentEntry.AddOnTop(DatabaseStrings::tableEmailInfo);
+  currentEntry.AddOnTop(DatabaseStrings::objectSelectoR);
   modifiableData.AddOnTop(currentEntry);
   std::fstream outputFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual(outputFile, "/calculator-html/modifiable_database_fields.js", false, true, false);
@@ -166,12 +169,11 @@ void GlobalVariables::initModifiableDatabaseFields()
   JSData modifiableDataJSON;
   modifiableDataJSON = modifiableData;
   JSData toWrite;
-  toWrite["universalSelector"] = DatabaseStrings::anyField;
   toWrite["modifiableFields"] = modifiableDataJSON;
   outputFile << "//File automatically generated. Please do not modify.\n";
   outputFile << "\"use strict\";\n";
-  outputFile << "var modifiableDatabaseData = " << toWrite.ToString(true) << ";\n";
-  outputFile << "module.exports = {modifiableDatabaseData}";
+  outputFile << "var modifiableDatabaseData = " << toWrite.ToString(false) << ";\n";
+  outputFile << "module.exports = {modifiableDatabaseData};";
 }
 
 ProblemData::ProblemData()

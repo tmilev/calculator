@@ -80,10 +80,10 @@ public:
   static JSData ToJSONDatabaseCollection(const std::string& currentTableRaw);
   void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
   static bool getLabels(const JSData& fieldEntries, List<std::string>& theLabels, std::stringstream* commentsOnFailure);
-  static bool isDeleteable(const std::string& tableName, const List<std::string>& theLabels, List<std::string>** outputPattern, std::stringstream* commentsOnFailure);
+  static bool isDeleteable(const List<std::string>& theLabels, List<std::string>** outputPattern, std::stringstream* commentsOnFailure);
   static bool isDeleteable(const JSData& theEntry, List<std::string>** outputPattern, std::stringstream* commentsOnFailure);
   static bool matchesPattern
-  (const std::string &tableName, const List<std::string>& fieldLabel, const List<std::string>& pattern);
+  (const List<std::string>& fieldLabel, const List<std::string>& pattern);
   static JSData GetStandardProjectors();
   DatabaseRoutinesGlobalFunctionsMongo();
   ~DatabaseRoutinesGlobalFunctionsMongo();

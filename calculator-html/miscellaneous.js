@@ -1,6 +1,6 @@
 "use srict";
 
-function shortenString(input, charsOnEachSide) {
+function shortenString(charsOnEachSide, input) {
   if (charsOnEachSide * 2 + 3 > input.length) {
     return input;
   }

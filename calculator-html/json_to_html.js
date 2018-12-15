@@ -19,7 +19,7 @@ function JSONToHTML() {
   this.tableName = "";
   this.ambientObject = null;
   this.labelsRows = null;
-  this.options = {};
+  this.optionsConstant = {};
   this.inputParsed = null;
 }
 
@@ -54,16 +54,44 @@ function getDeleteButtonFromLabels(theLabels, selector, containerLabel) {
 
 var counterDatabaseTables = 0;
 
-JSONToHTML.prototype.getOptionFromLabel = function(currentLabels) {
-  //for ()
+JSONToHTML.prototype.getOptionFromLabel = function(
+  /**@type {String[]} */
+  currentLabelsGeneralized,
+) {
+  if (this.optionsConstant.transformers === null || this.optionsConstant.transformers === undefined) {
+    return null;
+  }
+  for (var i = - 1; i < currentLabelsGeneralized.length; i ++) {
+    var labelTry = currentLabelsGeneralized.slice();
+    if (i >= 0) {
+      labelTry[i] = "${any}";
+    }
+    var currentLabel = labelTry.join(".");
+    if (currentLabel in this.optionsConstant.transformers) {
+      return this.optionsConstant.transformers[currentLabel];
+    }
+  }
 }
 
-JSONToHTML.prototype.getSingleEntry = function(input, currentLabels) {
-  var currentOption = this.getOptionFromLabel(currentLabels);
+JSONToHTML.prototype.getSingleEntry = function(
+  input, 
+  /**@type {String[]} */
+  currentLabels,
+  /**@type {String[]} */
+  currentLabelsGeneralized,
+) {
+  var currentOption = this.getOptionFromLabel(currentLabelsGeneralized);
   if (currentOption === null || currentOption === undefined) {
     return input;
   }
-  return input;
+  if (typeof currentOption.transformer !== "function") {
+    return input;
+  }
+  var inputTransformed = currentOption.transformer(input);
+  if (inputTransformed === input) {
+    return input;
+  }
+  return getToggleButton(this, input, inputTransformed);
 }
 
 JSONToHTML.prototype.getTableHorizontallyLaidFromJSON = function(
@@ -77,7 +105,7 @@ JSONToHTML.prototype.getTableHorizontallyLaidFromJSON = function(
 ) {
   var inputType = typeof input; 
   if (inputType === "string" || inputType === "number" || inputType === "boolean") {
-    output.write(this.getSingleEntry(input, currentLabels));
+    output.write(this.getSingleEntry(input, currentLabels, currentLabelsGeneralized));
     return;
   }  
   if (Array.isArray(input)) {
@@ -227,7 +255,7 @@ JSONToHTML.prototype.bindButtons = function() {
 JSONToHTML.prototype.getHtmlFromArrayOfObjects = function(input, optionsConstant, optionsModified) {
   this.inputParsed = input;
   this.optionsConstant = {};
-  if (typeof this.optionsConstant === "object") {
+  if ((typeof optionsConstant) === "object") {
     this.optionsConstant = optionsConstant;
   } 
   if (typeof optionsModified !== "object") {

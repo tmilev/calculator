@@ -3,6 +3,7 @@ const submitRequests = require('./submit_requests');
 const ids = require('./ids_dom_elements');
 const pathnames = require('./pathnames');
 const jsonToHtml = require('./json_to_html');
+const miscellaneous = require('./miscellaneous');
 
 function clickDatabaseTable(currentCollection) {
   window.calculator.mainPage.storage.variables.database.currentTable.setAndStore(currentCollection); 
@@ -13,44 +14,47 @@ function fetchProblemData() {
 
 }
 
-function deleteDatabaseItemCallback(input, output) {
-  document.getElementById(this).remove();
-  //this.parentElement.innerHTML = "";
+function deleteDatabaseItemCallback(
+  /**@type {JSONToHTML} */
+  transformer, 
+  deletedItem, 
+  labels,
+  input,
+  output,
+) {
+  document.getElementById(deletedItem).remove();
 }
 
 function deleteDatabaseItem(
   /**@type {JSONToHTML} */
   transformer, 
-  containerLabel, 
+  input, 
   labels,
 ) {
   var finalSelector = {
-    table: selector.table,
-    object: selector.object,
     fields: labels
   };
   var theURL = `${pathnames.urls.calculatorAPI}?request=databaseDeleteOneEntry&item=${escape(JSON.stringify(finalSelector))}`;
   submitRequests.submitGET({
     url: theURL,
-    callback: deleteDatabaseItemCallback.bind(containerLabel),
+    callback: deleteDatabaseItemCallback.bind(null, transformer, input, labels),
     progress: ids.domElements.spanProgressReportGeneral
   });  
 }
 
 var optionsDatabase = {
   transformers: {
-    "users.${row}.problemDataJSON": {
-      clickHandler: fetchProblemData,
-      transformer: deleteDatabaseItem
+    "users.${number}.problemDataJSON": {
+      clickHandler: fetchProblemData
     },
-    "users.${row}.activationToken" : {
-      transformer: jsonToHtml.getToggleButton,
+    "users.${number}.activationToken" : {
+      transformer: miscellaneous.shortenString.bind(null, 3),
     },
-    "users.${row}.authenticationToken": {
-      transformer: jsonToHtml.getToggleButton,
+    "users.${number}.authenticationToken": {
+      transformer: miscellaneous.shortenString.bind(null, 3),
     },
-    "users.${row}.password": {
-      transformer: jsonToHtml.getToggleButton,
+    "users.${number}.password": {
+      transformer: miscellaneous.shortenString.bind(null, 3),
     },
   },
 };

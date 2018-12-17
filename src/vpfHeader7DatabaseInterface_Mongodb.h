@@ -77,7 +77,9 @@ public:
   (const std::string& tableName, const JSData& findQuery, List<std::string>& selector,
    std::stringstream* commentsOnFailure);
   static std::string ToHtmlDatabaseCollection(const std::string& currentTable);
-  static JSData ToJSONDatabaseCollection(const std::string& currentTableRaw);
+  static JSData ToJSONFetchItem(const List<std::string>& labelStrings);
+  static JSData ToJSONDatabaseCollection(const std::string& currentTable);
+  static JSData ToJSONDatabaseFetch(const std::string& incomingLabels);
   void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
   static bool getLabels(const JSData& fieldEntries, List<std::string>& theLabels, std::stringstream* commentsOnFailure);
   static bool isDeleteable(const List<std::string>& theLabels, List<std::string>** outputPattern, std::stringstream* commentsOnFailure);

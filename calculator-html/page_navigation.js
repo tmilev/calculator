@@ -83,7 +83,7 @@ function StorageVariable(
   this.callbackOnValueChange = null;
   var labelsToRead = [
     "nameURL", "nameCookie", "nameLocalStorage", 
-    "associatedDOMId", "type", "secure", "callbackOnValueChange", "showInURLByDefault"
+    "associatedDOMId", "type", "secure", "callbackOnValueChange", "showInURLByDefault",
   ];
   for (var counterLabel = 0; counterLabel < labelsToRead.length; counterLabel ++) {
     var currentLabel = labelsToRead[counterLabel];
@@ -150,7 +150,13 @@ StorageVariable.prototype.storeMe = function(/**@type {boolean} */ updateURL, /*
   }
 }
 
-StorageVariable.prototype.setAndStore = function(newValue, /**@type {boolean} */ updateURL, /**@type {boolean} */ updateAssociatedInput) {
+StorageVariable.prototype.setAndStore = function(
+  newValue, 
+  /**@type {Boolean} */ 
+  updateURL, 
+  /**@type {Boolean} */ 
+  updateAssociatedInput,
+) {
   if (updateURL === undefined ) {
     updateURL = true;
   }
@@ -174,9 +180,9 @@ function StorageCalculator() {
       showInURLByDefault: true, // <- when given and true, url will be added to the window hash
     }),
     database: {
-      currentTable: new StorageVariable({
-        name: "currentTable", 
-        nameLocalStorage: "currentTable"
+      labels: new StorageVariable({
+        name: "databaseLabels", 
+        nameLocalStorage: "databaseLabels"
       }), 
     },
     editor: {

@@ -108,6 +108,7 @@ public:
   template <typename coefficient>
   void operator=(const Matrix<coefficient>& other);
   bool isTrueRepresentationInJSON();
+  bool isListOfStrings(List<std::string>* whichStrings);
   // parsing
   void ExtractScalar(const std::string& json, int begin, int end);
   bool IsValidElement();

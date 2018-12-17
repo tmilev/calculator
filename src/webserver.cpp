@@ -24,8 +24,12 @@ std::string WebAPI::problemFileName = "fileName";
 std::string WebAPI::problemId = "id";
 
 std::string WebAPI::calculatorUserInfoJSON = "userInfoJSON";
+std::string WebAPI::databaseParameters::entryPoint = "database";
+std::string WebAPI::databaseParameters::labels = "databaseLabels";
+std::string WebAPI::databaseParameters::operation = "databaseOperation";
+std::string WebAPI::databaseParameters::fetch = "databaseFetch";
+
 std::string WebAPI::problemSingleDeadline = "deadline";
-std::string WebAPI::queryParameters::currentDatabaseTable = "currentDatabaseTable";
 
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 WebServer theWebServer;
@@ -1174,9 +1178,20 @@ std::string WebWorker::GetDatabaseJSON()
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "Only logged-in admins can access database. ";
   std::stringstream out;
-  std::string currentTableRaw = theGlobalVariables.GetWebInput(WebAPI::queryParameters::currentDatabaseTable);
+  std::string operation = theGlobalVariables.GetWebInput(WebAPI::databaseParameters::operation);
+  std::string labels = HtmlRoutines::ConvertURLStringToNormal
+  (theGlobalVariables.GetWebInput(WebAPI::databaseParameters::labels), false);
 #ifdef MACRO_use_MongoDB
-  out << DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(currentTableRaw);
+  JSData result;
+  if (operation == WebAPI::databaseParameters::fetch)
+    result = DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseFetch(labels);
+  else
+    result["error"] = "Uknown database operation: " + operation + ". ";
+  if (theGlobalVariables.UserDebugFlagOn())
+  { result["databaseOperation"] = operation;
+    result["databaseLabels"] = labels;
+  }
+  out << result.ToString(false);
 #else
   out << "<b>Database not available. </b>";
 #endif // MACRO_use_MongoDB
@@ -3794,7 +3809,7 @@ int WebWorker::ServeClient()
       theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", theGlobalVariables.hostNoPort);
     }
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-      theGlobalVariables.userCalculatorRequestType == "databaseJSON")
+      theGlobalVariables.userCalculatorRequestType == WebAPI::databaseParameters::entryPoint)
     return this->ProcessDatabaseJSON();
   else if (theGlobalVariables.flagLoggedIn &&
            theGlobalVariables.userCalculatorRequestType == "databaseDeleteOneEntry")

@@ -225,7 +225,7 @@ function initializeAccordionButtons() {
   if (localStorage !== undefined) {
     if (localStorage.panels !== undefined) { 
       panelsCollapseStatus = JSON.parse(localStorage.panels)
-      var theProps =Object.getOwnPropertyNames(panelsCollapseStatus);
+      var theProps = Object.getOwnPropertyNames(panelsCollapseStatus);
       for (var i = 0; i < theProps.length; i ++) { 
         var current = panelsCollapseStatus[theProps[i]];
         if (current.isCollapsed) {

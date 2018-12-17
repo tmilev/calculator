@@ -107,13 +107,13 @@ function selectEditPageCallback(input, outputComponent) {
     editor.getSession().setMode("ace/mode/xml");
     editor.setOptions({
       enableBasicAutocompletion: true,
-      enableLiveAutocompletion: true
+      enableLiveAutocompletion: true,
     });
     editor.completers = [staticWordCompleter];
     if (input)
     editor.$blockScrolling = Infinity;
   } catch (e) {
-    console.log("Error: " + e)
+    console.log(`Error: ${e}`);
   }
 }
 
@@ -154,7 +154,6 @@ function toggleClonePanel(button) {
     thePanel.style.maxHeight = '200px';
     button.innerHTML = `Clone panel &#9660;`;
   }
-
 }
 
 module.exports = {

@@ -6,12 +6,29 @@ const jsonToHtml = require('./json_to_html');
 const miscellaneous = require('./miscellaneous');
 
 function clickDatabaseTable(currentCollection) {
-  window.calculator.mainPage.storage.variables.database.currentTable.setAndStore(currentCollection); 
+  window.calculator.mainPage.storage.variables.database.labels.setAndStore(JSON.stringify(currentCollection)); 
   updateDatabasePage();
 }
 
-function fetchProblemData() {
+function callbackFetchProblemData(button, input, output) {
+  button.parentNode.innerHTML = input;
+}
 
+function fetchProblemData() {
+  var labelsString = this.getAttribute("labels");
+  //var labels = JSON.parse(labelsString);
+  var theURL = "";
+  theURL += `${pathnames.urls.calculatorAPI}?`;
+  theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
+  theURL += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`
+  theURL += `${pathnames.urlFields.database.labels}=${labelsString}&`;
+  console.log("DEBUG: labelString: " + labelsString )
+  console.log(" URL: " + theURL);
+  submitRequests.submitGET({
+    url: theURL,
+    progress: ids.domElements.spanProgressReportGeneral,
+    callback: callbackFetchProblemData.bind(null, this),
+  });  
 }
 
 function deleteDatabaseItemCallback(
@@ -34,7 +51,7 @@ function deleteDatabaseItem(
   var finalSelector = {
     fields: labels
   };
-  var theURL = `${pathnames.urls.calculatorAPI}?request=databaseDeleteOneEntry&item=${escape(JSON.stringify(finalSelector))}`;
+  var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=databaseDeleteOneEntry&item=${escape(JSON.stringify(finalSelector))}`;
   submitRequests.submitGET({
     url: theURL,
     callback: deleteDatabaseItemCallback.bind(null, transformer, input, labels),
@@ -42,26 +59,39 @@ function deleteDatabaseItem(
   });  
 }
 
+function bounceString(input) {
+  return input;
+}
+
+var transformersDatabase = {
+  deleteProblemDataItem: {
+    clickHandler: deleteDatabaseItem,
+  },
+  fetchProblemData: {
+    clickHandler: fetchProblemData,
+    transformer: bounceString.bind(null, "problem data"),
+  },
+};
+
 var optionsDatabase = {
   transformers: {
-    "users.${number}.problemDataJSON": {
-      clickHandler: fetchProblemData
-    },
-    "users.${number}.activationToken" : {
-      transformer: miscellaneous.shortenString.bind(null, 3),
-    },
-    "users.${number}.authenticationToken": {
-      transformer: miscellaneous.shortenString.bind(null, 3),
-    },
-    "users.${number}.password": {
-      transformer: miscellaneous.shortenString.bind(null, 3),
-    },
+    "users.${number}.problemDataJSON": transformersDatabase.fetchProblemData,
+    "users.${number}.activationToken" : jsonToHtml.transformersStandard.shortener,
+    "users.${number}.authenticationToken": jsonToHtml.transformersStandard.shortener,
+    "users.${number}.password": jsonToHtml.transformersStandard.shortener,
+    "users.${number}._id": jsonToHtml.transformersStandard.shortener,
   },
 };
 
 function updateDatabasePageCallback(incoming, output) {
   var thePage = window.calculator.mainPage;
-  var currentTable = thePage.storage.variables.database.currentTable.getValue();
+  var labelString = thePage.storage.variables.database.labels.getValue();
+  var labels = [];
+  try {
+    labels = JSON.parse(labelString);
+  } catch (e) {
+    labels = [""];
+  }
   var theParsed = JSON.parse(incoming);
   var theOutput = document.getElementById(ids.domElements.divDatabaseOutput);
   if ("rows" in theParsed) {
@@ -70,13 +100,16 @@ function updateDatabasePageCallback(incoming, output) {
       theParsed.rows[i]["problemDataJSON"] = "";
     }
     document.getElementById(ids.domElements.spanDatabaseComments).innerHTML = `${theParsed.rows.length} out of ${theParsed.totalRows} rows displayed.<br> `;
-    theOutput.innerHTML = transformer.getHtmlFromArrayOfObjects(theParsed.rows, optionsDatabase, {table: currentTable});
+    theOutput.innerHTML = transformer.getHtmlFromArrayOfObjects(theParsed.rows, optionsDatabase, {table: labels[0]});
     transformer.bindButtons();
   } else {
     for (var counterCollection = 0; counterCollection < theParsed.collections.length; counterCollection ++) {
       var currentCollection = theParsed.collections[counterCollection]; 
       var linkHTML = "";
-      linkHTML += `<a href = "#" onclick = "window.calculator.database.clickDatabaseTable('${currentCollection}')">`;
+      var urlObjectIncoming = {};
+      miscellaneous.deepCopy(thePage.storage.urlObject, urlObjectIncoming);
+      urlObjectIncoming.databaseLabels = currentCollection;
+      linkHTML += `<a href = '#${JSON.stringify(urlObjectIncoming)}' onclick = 'window.calculator.database.clickDatabaseTable(["${currentCollection}"]);'>`;
       linkHTML += `${currentCollection}</a>`;
       theParsed.collections[counterCollection] = linkHTML;
     }
@@ -88,7 +121,7 @@ function updateDatabasePageCallback(incoming, output) {
 
 function updateDatabasePageResetCurrentTable() {
   var thePage = window.calculator.mainPage;
-  thePage.storage.variables.database.currentTable.setAndStore("");
+  thePage.storage.variables.database.labels.setAndStore("[]");
   updateDatabasePage();
 }
 
@@ -98,11 +131,12 @@ function updateDatabasePage() {
     document.getElementById(ids.domElements.divDatabaseOutput).innerHTML = "<b>Not logged-in.</b>";
     return;
   }
-  var currentTable = thePage.storage.variables.database.currentTable.getValue();
+  var labels = thePage.storage.variables.database.labels.getValue();
   var theUrl = "";
   theUrl += `${pathnames.urls.calculatorAPI}?`;
-  theUrl += `${pathnames.urlFields.request}=${pathnames.urlFields.requestDatabase}&`;
-  theUrl += `${pathnames.urlFields.databaseTable}=${currentTable}&`;
+  theUrl += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
+  theUrl += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`
+  theUrl += `${pathnames.urlFields.database.labels}=${labels}&`;
   submitRequests.submitGET({
     url: theUrl,
     progress: ids.domElements.spanProgressReportGeneral,

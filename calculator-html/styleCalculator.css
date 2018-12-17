@@ -184,8 +184,6 @@ button.accordionLikeIndividual {
   padding: 2px;
   color: #444;
   cursor: pointer;
-  margin-top: 0px;
-  margin-bottom: 0px;
   border: none;
   text-align: left;
   outline: none;
@@ -206,8 +204,6 @@ button.accordionLikeProblemWeight {
   padding: 2px;
   color: #444;
   cursor: pointer;
-  margin-top: 0px;
-  margin-bottom: 0px;
   border: none;
   text-align: left;
   outline: none;
@@ -228,8 +224,6 @@ button.accordionLike {
   padding: 2px;
   color: #444;
   cursor: pointer;
-  margin-top: 0px;
-  margin-bottom: 0px;
   border: none;
   text-align: left;
   outline: none;
@@ -250,8 +244,6 @@ button.accordion {
   background-color: #efefef;
   color: #444;
   cursor: pointer;
-  margin-top: 0px;
-  margin-bottom: 0px;
   border: none;
   text-align: left;
   outline: none;
@@ -331,7 +323,8 @@ button.buttonProgress {
   box-shadow: none;
   border: none;
   background: none;
-  font-size: x-small;
+  padding-left: 6px;
+  padding-right: 7px;
   transition: 2s;
 }
 
@@ -532,6 +525,7 @@ a.linkProgressReport {
 
 .spanProgressReport {
   max-width: 120px;
+  font-size: small;
 }
 
 #spanCalculatorExamplesContainer {

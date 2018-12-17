@@ -664,7 +664,7 @@ function getHTMLfromTopics() {
 
 function initializeDatePickers() {
   var thePickers = document.getElementsByClassName("datePicker");
-  for (var counterPicker = 0; counterPicker < thePickers.length; counterPicker ++ ) {
+  for (var counterPicker = 0; counterPicker < thePickers.length; counterPicker ++) {
     $(thePickers[counterPicker]).datepicker();
   }
 }

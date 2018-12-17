@@ -99,6 +99,20 @@ bool JSData::isTrueRepresentationInJSON()
   return this->string == "true";
 }
 
+bool JSData::isListOfStrings(List<std::string>* whichStrings)
+{ if (this->type != this->JSarray)
+    return false;
+  for (int i = 0; i < this->list.size; i ++)
+    if (this->list[i].type != this->JSstring)
+      return false;
+  if (whichStrings != 0)
+  { whichStrings->SetSize(this->list.size);
+    for (int i = 0; i < this->list.size; i ++)
+      (*whichStrings)[i] = this->list[i].string;
+  }
+  return true;
+}
+
 bool JSData::IsValidElement()
 { return
   this->type == this->JSnull   ||

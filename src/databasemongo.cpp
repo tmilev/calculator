@@ -695,7 +695,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry
   if (theLabels.size == 0)
     return DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById
     (tableName, findQuery, commentsOnFailure);
-  return  DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(tableName, findQuery, theLabels, commentsOnFailure);
+  return DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(tableName, findQuery, theLabels, commentsOnFailure);
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById
@@ -939,16 +939,80 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchTable
   return true;
 }
 
+JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseFetch(const std::string& incomingLabels)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseFetch");
+  JSData result;
+  JSData labels;
+  std::stringstream commentsOnFailure;
+  if (!labels.readstring(incomingLabels, false, &commentsOnFailure))
+  { commentsOnFailure << "Failed to parse labels. ";
+    result["error"] = commentsOnFailure.str();
+    return result;
+  }
+  List<std::string> labelStrings;
+  if (!labels.isListOfStrings(&labelStrings))
+  { commentsOnFailure << "Labels required to be an array of strings. ";
+    result["error"] = commentsOnFailure.str();
+    return result;
+  }
+  if (labelStrings.size == 0)
+    return DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection("");
+  if (labelStrings.size == 1)
+    return DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(labelStrings[0]);
+  return DatabaseRoutinesGlobalFunctionsMongo::ToJSONFetchItem(labelStrings);
+}
+
+JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONFetchItem(const List<std::string>& labelStrings)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::ToJSONFetchItem");
+  JSData result;
+  if (labelStrings.size < 1)
+  { result["error"] = "No collection specified. ";
+    return result;
+  }
+  std::stringstream out;
+  std::string currentTable = labelStrings[0];
+  result["currentTable"] = currentTable;
+  JSData projector, findQuery;
+  findQuery.type = findQuery.JSObject;
+  projector.type = projector.JSObject;
+  findQuery[DatabaseStrings::labelIdMongo][DatabaseStrings::objectSelectorMongo] = labelStrings[1];
+  List<JSData> rowsJSON;
+  long long totalItems = 0;
+  std::stringstream comments;
+  std::stringstream* commentsPointer = 0;
+  bool flagDebuggingAdmin = theGlobalVariables.UserDefaultIsDebuggingAdmin();
+  if (flagDebuggingAdmin)
+    commentsPointer = &comments;
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
+       (currentTable, findQuery, rowsJSON, projector, 200, &totalItems, &out, commentsPointer))
+  { result["error"] = out.str();
+    return result;
+  }
+  if (rowsJSON.size == 0)
+  { result = DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection("");
+    if (flagDebuggingAdmin)
+    { std::stringstream moreComments;
+      moreComments << "First query returned 0 rows, fetching all tables instead. ";
+      result["moreComments"] = moreComments.str();
+      result["commentsOnFirstQuery"] = commentsPointer->str();
+      result["currentTableRawOriginal"] = currentTable;
+    }
+    return result;
+  }
+  JSData theRows;
+  theRows.type = theRows.JSarray;
+  theRows.list = rowsJSON;
+  result["rows"] = theRows;
+  result["totalRows"] = (int) totalItems;
+  return result;
+}
+
 JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection
-(const std::string& currentTableRaw)
-{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo");
+(const std::string& currentTable)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection");
   JSData result;
   std::stringstream out;
-  std::string currentTable = HtmlRoutines::ConvertURLStringToNormal(currentTableRaw, false);
-  result["currentTableRaw"] = currentTableRaw;
   result["currentTable"] = currentTable;
-  if (theGlobalVariables.UserDebugFlagOn())
-    result["currentTableQuery"] = theGlobalVariables.GetWebInput(WebAPI::queryParameters::currentDatabaseTable);
   if (currentTable == "")
   { if (theGlobalVariables.UserDebugFlagOn() != 0)
       result["comments"] = "Requested table empty, returning list of tables. ";
@@ -986,7 +1050,7 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection
       moreComments << "First query returned 0 rows, fetching all tables instead. ";
       result["moreComments"] = moreComments.str();
       result["commentsOnFirstQuery"] = commentsPointer->str();
-      result["currentTableRawOriginal"] = currentTableRaw;
+      result["currentTableRawOriginal"] = currentTable;
     }
     return result;
   }

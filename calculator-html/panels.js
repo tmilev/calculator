@@ -219,10 +219,10 @@ PanelExpandable.prototype.initializeProgressPanel = function() {
   }  
   var spanContainer = document.createElement("span");
   var spanContent = "";
-  spanContent += `<button id = "${this.attributes.buttonId}" `; 
+  spanContent += `<span id = "${this.attributes.panelLabelId}"></span><button id = "${this.attributes.buttonId}" `; 
   spanContent += `class = "buttonProgress accordionLikeIndividual" `;
   spanContent += `onclick = "window.calculator.panels.doToggleContent('${this.containerId}');">`;
-  spanContent += `<span id = "${this.attributes.panelLabelId}"></span> <span id = "${this.attributes.expandedMarkerId}">&#9666;</span>`;
+  spanContent += `<span id = "${this.attributes.expandedMarkerId}">&#9666;</span>`;
   spanContent += "</button>";
   spanContent += `<div id = "${this.attributes.panelId}" class = "panelExpandable"></div>`;
   spanContainer.innerHTML = spanContent;

@@ -1339,7 +1339,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theUser.flagEnteredAuthenticationToken = false;
     theUser.flagEnteredActivationToken = false;
     theGlobalVariables.flagLogInAttempted = true;
-    argumentProcessingFailureComments << "Password given: overrides other authentication methods. ";
+    argumentProcessingFailureComments << "Password was entered: all other authentication methods ignored. ";
   }
   if (theUser.enteredActivationToken != "")
   { theUser.enteredGoogleToken = "";
@@ -1347,7 +1347,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theUser.flagEnteredAuthenticationToken = false;
     theUser.flagEnteredActivationToken = true;
     theGlobalVariables.flagLogInAttempted = true;
-    argumentProcessingFailureComments << "Activation token given: overrides authentication and google token. ";
+    argumentProcessingFailureComments << "Activation token entered: authentication token and google token ignored. ";
   }
   //argumentProcessingFailureComments << "DEBUG: entered authentication token: " << theUser.enteredAuthenticationToken << ". ";
   //stOutput << "DEBUG: Entered activation token: " << theUser.enteredActivationToken

@@ -155,6 +155,14 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorConversions::innerAnd",
    "and");
   this->AddOperationInnerHandler
+  ("ConvertElementZmodPToInteger", CalculatorFunctionsGeneral::innerConvertElementZmodPToInteger, "",
+   "Converts element of Z mod p to an integer between 0 and p - 1. ",
+   "5^(ConvertElementZmodPToInteger( 9 mod 7))",
+   true, false,
+   "CalculatorFunctionsGeneral::innerConvertElementZmodPToInteger",
+   "ConvertElementZmodPToInteger");
+
+  this->AddOperationInnerHandler
   ("URLStringToNormalString",
    CalculatorFunctionsGeneral::innerUrlStringToNormalString, "",
    "Converts an url-encoded string to a normal string. ",
@@ -394,13 +402,37 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test",
    "TestBase64");
   this->AddOperationInnerHandler
+  ("EllipticCurveOrderNIST", CalculatorFunctionsGeneral::innerNISTEllipticCurveOrder, "",
+   "Get a NIST curve order. At present implemented for secp256k1 only. ",
+   "g = EllipticCurveGeneratorNIST(\"secp256k1\");\n"
+   "order = EllipticCurveOrderNIST(\"secp256k1\");\n"
+   "g^order",
+   true, false,
+   "CalculatorFunctionsGeneral::innerNISTEllipticCurveOrder",
+   "EllipticCurveOrderNIST");
+
+  this->AddOperationInnerHandler
   ("EllipticCurveGeneratorNIST", CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator, "",
-   "Makes generator of a NIST curve",
+   "Makes generator of a NIST curve. At present implemented for secp256k1 only. ",
    "g=EllipticCurveGeneratorNIST(\"secp256k1\");\n"
    "g^3; g^115792089237316195423570985008687907852837564279074904382605163141518161494337",
    true, false,
-   "CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58",
-   "ConvertIntegerToBase58");
+   "CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator",
+   "EllipticCurveGeneratorNIST");
+
+  this->AddOperationInnerHandler
+  ("Slice", CalculatorFunctionsGeneral::innerSliceString, "",
+   "Slices a string in an interval [a,b), "
+   "where a is the first included index and b the first excluded index. "
+   "If b is omitted, then the entire string is sliced. "
+   "If b is negative, it is replaced by its sum with the string size. ",
+   "a= \"abcd\";\n"
+   "Slice(a, 0,2);\n"
+   "Slice(a,0,- 1);\n"
+   "Slice(a,1)\n",
+   true, false,
+   "CalculatorFunctionsGeneral::innerSliceString",
+   "Slice");
 
   this->AddOperationInnerHandler
   ("ConvertIntegerToBase58", CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58, "",
@@ -3503,6 +3535,13 @@ void Calculator::initPredefinedInnerFunctions()
    true, false,
    "CalculatorFunctionsGeneral::innerTrace",
    "Trace");
+  this->AddOperationInnerHandler
+  ("ReverseBytes", CalculatorFunctionsGeneral::innerReverseBytes, "",
+   "Reverses the bytes of a string. Does not respect utf-8 encoding. ",
+   "ReverseBytes{}(\"abc\")",
+   true, false,
+   "Calculator::innerReverseBytes", "ReverseBytes");
+
   this->AddOperationInnerHandler
   ("Reverse", Calculator::innerReverseOrdeR, "",
    "Reverses order of elements. This operation will reverse products, lists, etc. "

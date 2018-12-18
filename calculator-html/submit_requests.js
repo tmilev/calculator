@@ -141,7 +141,7 @@ function submitPOST(
   }
   timeOutCounter = 0;
 
-  var postRequest = `POST ${pathnames.urls.calculatorAPI}<br>message: ${miscellaneous.shortenString(parameters, 200)}`;
+  var postRequest = `POST ${pathnames.urls.calculatorAPI}<br>message: ${miscellaneous.shortenString(200, parameters)}`;
   recordProgressStarted(progress, postRequest, true, (new Date()).getTime());
 
   https.onload = function() { 

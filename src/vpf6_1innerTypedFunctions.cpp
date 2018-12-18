@@ -1876,8 +1876,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(Calculator& t
   ElementZmodP theElt;
   if (!leftE.IsOfType(&theElt))
     return false;
-  int thePower = 0;
-  if (!rightE.IsSmallInteger(& thePower))
+  LargeInt thePower = 0;
+  if (!rightE.IsInteger(&thePower))
     return false;
   if (thePower < 0)
   { ElementZmodP copy = theElt;

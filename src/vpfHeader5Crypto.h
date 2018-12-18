@@ -54,7 +54,7 @@ public:
   static void ConvertStringToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output);
   static void ConvertLargeIntUnsignedToBase58SignificantDigitsLAST(const LargeIntUnsigned& input, std::string& output);
   static void ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(const LargeIntUnsigned& input, std::string& output, int numberOfOnesToPrepend);
-  static bool ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& inputSignificantDigitsFirst, LargeIntUnsigned& output, std::stringstream *commentsOnFailure);
+  static bool ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& inputSignificantDigitsFirst, LargeIntUnsigned& output, int &numberOfLeadingZeroes, std::stringstream *commentsOnFailure);
   static bool ConvertBase58ToHexSignificantDigitsFirst(const std::string& input, std::string& output, std::stringstream* commentsOnFailure);
   static bool ConvertHexToString(const std::string& input, std::string& output);
   static bool ConvertHexToInteger(const std::string& input, LargeIntUnsigned &output, int &outputNumLeadingZeroPairs);
@@ -91,11 +91,11 @@ public:
   static bool ConvertLargeUnsignedIntToBase64SignificantDigitsFirst
   (const LargeIntUnsigned& input, std::string& outputBase64);
   static bool ConvertLargeUnsignedIntToHexSignificantDigitsFirst
-  (const LargeIntUnsigned& input, std::string& outputHex);
+  (const LargeIntUnsigned& input, int numberOfLeadingZeroesToPadWith, std::string& outputHex);
   static bool ConvertLargeUnsignedIntToStringSignificantDigitsLast
   (const LargeIntUnsigned& input, std::string& output);
   static bool ConvertLargeUnsignedIntToStringSignificantDigitsFirst
-  (const LargeIntUnsigned& input, std::string& output);
+  (const LargeIntUnsigned& input, int numberOfLeadingZeroesToPadWith, std::string& output);
   static bool VerifyJWTagainstKnownKeys
   (const std::string& inputToken, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   static void computeRIPEMD160(const std::string& input, List<unsigned char>& output);

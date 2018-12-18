@@ -15,6 +15,7 @@ public:
   LargeIntUnsigned order;
   LargeIntUnsigned modulo;
   void MakeSecp256k1();
+  static bool GetOrderNISTCurve(const std::string& curveName, LargeIntUnsigned& output, std::stringstream *commentsOnFailure);
   static unsigned int HashFunction(const EllipticCurveWeierstrassNormalForm& input);
   bool operator==(const EllipticCurveWeierstrassNormalForm& other) const;
 };

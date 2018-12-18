@@ -810,14 +810,14 @@ void Crypto::initSha256()
 }
 
 bool Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst
-(const LargeIntUnsigned& input, std::string& output)
+(const LargeIntUnsigned& input, int numberOfLeadingZeroesToPadWith, std::string& output)
 { std::string outputString;
-  Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(input, outputString);
+  Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(input, numberOfLeadingZeroesToPadWith, outputString);
   Crypto::ConvertStringToHex(outputString, output);
   return true;
 }
 
-bool Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(const LargeIntUnsigned& input, std::string& output)
+bool Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(const LargeIntUnsigned& input, int numberOfLeadingZeroesToPadWith, std::string& output)
 { List<char> result;
   LargeIntUnsigned digit, inputCopy = input;
   while (inputCopy > 0)
@@ -828,6 +828,8 @@ bool Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(const LargeIn
     char digitChar = (char) digitInt;
     result.AddOnTop(digitChar);
   }
+  for (int i = 0; i < numberOfLeadingZeroesToPadWith; i ++)
+    result.AddOnTop(0);
   result.ReverseOrderElements();
   output.assign(result.TheObjects, result.size);
   return true;
@@ -836,7 +838,7 @@ bool Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(const LargeIn
 bool Crypto::ConvertLargeUnsignedIntToBase64SignificantDigitsFirst
 (const LargeIntUnsigned& input, std::string& outputBase64)
 { std::string theString;
-  Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(input, theString);
+  Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(input, 0, theString);
   outputBase64 = Crypto::ConvertStringToBase64(theString, false);
   return true;
 }
@@ -897,9 +899,11 @@ void Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST
     output.push_back(outputReversed[outputReversed.size() - 1 - i]);
 }
 
-bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output, std::stringstream* commentsOnFailure)
+bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned
+(const std::string& input, LargeIntUnsigned& output, int& numberOfLeadingZeroes, std::stringstream* commentsOnFailure)
 { output = 0;
   bool result = true;
+  numberOfLeadingZeroes = 0;
   for (unsigned i = 0; i < input.size(); i ++)
   { output *= 58;
     uint32_t currentChar;
@@ -911,6 +915,8 @@ bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::st
       result = false;
     }
     output += currentChar;
+    if (output.IsEqualToZero())
+      numberOfLeadingZeroes ++;
   }
   return result;
 }
@@ -919,9 +925,10 @@ bool Crypto::ConvertBase58ToHexSignificantDigitsFirst(const std::string& input, 
 { MacroRegisterFunctionWithName("Crypto::ConvertBase58ToHexSignificantDigitsFirst");
   LargeIntUnsigned outputLIU;
   bool result = true;
-  if (!Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(input, outputLIU, commentsOnFailure))
+  int numberOfLeadingZeroes = 0;
+  if (!Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(input, outputLIU, numberOfLeadingZeroes, commentsOnFailure))
     result = false;
-  if (!Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(outputLIU, output))
+  if (!Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(outputLIU, numberOfLeadingZeroes, output))
     return false;
   return result;
 }
@@ -1252,7 +1259,7 @@ bool JSONWebToken::VerifyRSA256
     *commentsGeneral << "<br>RSA encryption took: "
     << theGlobalVariables.GetElapsedSeconds() - timeStart << " second(s).<br>";
   std::string RSAresultBitstream, RSAresultLast32bytes;
-  Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(RSAresult, RSAresultBitstream);
+  Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(RSAresult, 0, RSAresultBitstream);
   if (RSAresultBitstream.size() > 32)
     RSAresultLast32bytes = RSAresultBitstream.substr(RSAresultBitstream.size() - 32, 32);
   Crypto::ConvertStringToListUInt32BigendianZeroPad(RSAresultLast32bytes, RSAresultInts);
@@ -1268,7 +1275,7 @@ bool JSONWebToken::VerifyRSA256
     RSAresultBase64 = Crypto::ConvertStringToBase64Standard(RSAresultBitstream);
     Crypto::ConvertStringToHex(RSAresultBitstream, RSAresultHex);
     Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex);
-    Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theShaUI, theShaHex);
+    Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theShaUI, 0, theShaHex);
     if (!result && commentsOnFailure != 0)
       *commentsOnFailure << "<br><b><span style =\"color:red\">Token invalid: the SHA does not match the RSA result. </span></b>";
     else if (commentsGeneral != 0)

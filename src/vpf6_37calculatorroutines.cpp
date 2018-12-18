@@ -459,9 +459,9 @@ bool CalculatorFunctionsGeneral::innerIntegerToHex(Calculator& theCommands, cons
   if (theLI < 0)
     return theCommands << "I only convert positive integers to hex strings. ";
   std::string result;
-  if (!Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theLI.value, result))
+  if (!Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theLI.value, 0, result))
     return theCommands << "Failed to convert " << theLI
-    << " as a hex string ";
+    << " to a hex string. ";
   return output.AssignValue(result, theCommands);
 }
 

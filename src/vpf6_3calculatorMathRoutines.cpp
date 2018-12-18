@@ -293,6 +293,19 @@ bool CalculatorFunctionsGeneral::innerBase64ToString(Calculator& theCommands, co
   return output.AssignValue(result, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerNISTEllipticCurveOrder(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator");
+  if (!input.IsOfType<std::string>())
+  { return theCommands
+    << "Function NISTEllipticCurveGenerator takes as input a string with an EC curve name. "
+    << "Available curve names: secp256k1";
+  }
+  LargeIntUnsigned result;
+  if (!EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(input.GetValue<std::string>(), result, &theCommands.Comments))
+    return false;
+  return output.AssignValue(result, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator");
   if (!input.IsOfType<std::string>())
@@ -309,6 +322,33 @@ bool CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator(Calculator& the
   theVars.AddOnTop("y");
   theContext.ContextMakeContextWithPolyVars(theCommands, theVars);
   return output.AssignValueWithContext(generator, theContext, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerSliceString(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSliceString");
+  if (input.size() < 3)
+    return false;
+  std::string inputString;
+  if (!input[1].IsOfType<std::string>(&inputString))
+    return false;
+  int leftIndex = 0;
+  if (!input[2].IsSmallInteger(&leftIndex))
+    return theCommands << "Failed to convert slice input " << input[2] << " to small integer. ";
+  if (leftIndex < 0)
+    return theCommands << "Slice input " << input[2] << " appears to be negative. ";
+  if (leftIndex >= (signed) inputString.size())
+    return output.AssignValue(std::string(""), theCommands);
+  if (input.size() <= 3)
+    return output.AssignValue(inputString.substr(leftIndex), theCommands);
+  int rightIndex = 0;
+  if (!input[3].IsSmallInteger(&rightIndex))
+    return theCommands << "Failed to convert slice input " << input[3] << " to small integer. ";
+  if (rightIndex < 0)
+    rightIndex = ((int) inputString.size()) + rightIndex;
+  int size = rightIndex - leftIndex ;
+  if (size <= 0)
+    return output.AssignValue(std::string(""), theCommands);
+  return output.AssignValue(inputString.substr(leftIndex, size), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58(Calculator& theCommands, const Expression& input, Expression& output)
@@ -434,6 +474,14 @@ bool CalculatorFunctionsGeneral::innerURLKeyValuePairsToNormalRecursive(Calculat
   if (!input.IsOfType<std::string>(&theString))
     return false;
   return output.AssignValue(HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theString), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerConvertElementZmodPToInteger(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertElementZmodPToInteger");
+  ElementZmodP theElement;
+  if (!input.IsOfType<ElementZmodP>(&theElement))
+    return false;
+  return output.AssignValue(theElement.theValue, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerUrlStringToNormalString(Calculator& theCommands, const Expression& input, Expression& output)
@@ -4357,6 +4405,18 @@ bool CalculatorFunctionsGeneral::innerCharPolyMatrix(Calculator& theCommands, co
   Polynomial<Rational> theCharPoly;
   theCharPoly.AssignCharPoly(theMat);
   return output.AssignValue(theCharPoly.ToString(&tempF), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerReverseBytes(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerReverseBytes");
+  std::string inputString;
+  if (!input.IsOfType<std::string>(&inputString))
+    return false;
+  std::string result;
+  result.resize(inputString.size());
+  for (unsigned i = 0; i < inputString.size(); i ++)
+    result[i] = inputString[inputString.size() - i - 1];
+  return output.AssignValue(result, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerTrace(Calculator& theCommands, const Expression& input, Expression& output)

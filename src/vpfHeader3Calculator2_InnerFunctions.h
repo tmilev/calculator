@@ -51,6 +51,7 @@ public:
   static bool innerSetRandomSeed
   (Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerConvertElementZmodPToInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerUrlStringToNormalString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerStringToURL(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerURLKeyValuePairsToNormalRecursive(Calculator& theCommands, const Expression& input, Expression& output);
@@ -68,7 +69,9 @@ public:
   static bool innerConvertBase58ToHex(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConvertHexToBase58(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConvertIntegerUnsignedToBase58(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSliceString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNISTEllipticCurveGenerator(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerNISTEllipticCurveOrder(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLoadKnownCertificates(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerJWTverifyAgainstKnownKeys(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerJWTverifyAgainstRSA256(Calculator& theCommands, const Expression& input, Expression& output);
@@ -337,6 +340,7 @@ public:
   static bool innerCanBeExtendedParabolicallyTo(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetSymmetricCartan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTrace(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerReverseBytes(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMinPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCharPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output);
 

@@ -33,7 +33,7 @@ public:
   static bool FindOneFromQueryStringWithProjection
   (const std::string& collectionName, const std::string& findQuery, const List<std::string>& fieldsToProjectTo,
    JSData& output, std::stringstream* commentsOnFailure = 0);
-  static JSData GetProjectionFromFieldNames(const List<std::string>& fieldsToProjectTo);
+  static JSData GetProjectionFromFieldNames(const List<std::string>& fieldsToProjectTo, int offset);
   static bool FindOneFromQueryStringWithOptions
   (const std::string& collectionName, const std::string& findQuery, const JSData& options,
    JSData& output, std::stringstream* commentsOnFailure = 0, std::stringstream* commentsGeneralNonSensitive = 0);

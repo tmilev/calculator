@@ -397,11 +397,12 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromString
 
 }
 
-JSData DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(const List<std::string>& fieldsToProjectTo)
+JSData DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames
+(const List<std::string>& fieldsToProjectTo, int offset)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames");
   JSData result;
   JSData fields;
-  for (int i = 0; i < fieldsToProjectTo.size; i ++)
+  for (int i = offset; i < fieldsToProjectTo.size; i ++)
     fields[fieldsToProjectTo[i]] = 1;
   result["projection"] = fields;
   return result;
@@ -413,7 +414,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection
  long long* totalItems, std::stringstream* commentsOnFailure)
 { return DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
   (collectionName, findQuery, output,
-   DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(fieldsToProjectTo),
+   DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(fieldsToProjectTo, 0),
    maxOutputItems, totalItems, commentsOnFailure);
 }
 
@@ -432,7 +433,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
  long long* totalItems, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions");
 #ifdef MACRO_use_MongoDB
-  //logWorker << logger::blue << "Query input JSON: " << findQuery.ToString(true) << logger::endL;
+  logWorker << logger::blue << "Query input JSON: " << findQuery.ToString(true) << logger::endL;
   //stOutput << "Find query: " << theData.ToString();
   MongoQuery query;
   query.collectionName = collectionName;
@@ -550,7 +551,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithProjection
 (const std::string& collectionName, const std::string& findQuery, const List<std::string>& fieldsToProjectTo,
  JSData& output, std::stringstream* commentsOnFailure)
 { return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
-  (collectionName, findQuery, DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(fieldsToProjectTo),
+  (collectionName, findQuery, DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(fieldsToProjectTo, 0),
    output, commentsOnFailure);
 }
 
@@ -558,7 +559,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSONWithProjection
 (const std::string& collectionName, const JSData& findQuery, const List<std::string>& fieldsToProjectTo,
  JSData& output, std::stringstream* commentsOnFailure, bool doEncodeFindFields)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSONWithOptions");
-  JSData theProjection = DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(fieldsToProjectTo);
+  JSData theProjection = DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(fieldsToProjectTo, 0);
   std::string findQueryString = findQuery.ToString(doEncodeFindFields);
 
  return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
@@ -742,7 +743,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure
 
   std::stringstream selectorStream;
   for (int i = 0; i < selector.size; i ++)
-  { selectorStream << HtmlRoutines::ConvertStringToURLStringIncludingDots(selector[i], false);
+  { selectorStream << JSData::EncodeKeyForMongo(selector[i]);
     if (i != selector.size - 1)
       selectorStream << ".";
   }
@@ -809,8 +810,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
   { updateQueryStream << "{\"$set\":{";
     updateQueryStream << "\"";
     for (int i = 0; i < fieldsToSetIfNullUseFirstFieldIfUpdateQuery->size; i ++)
-    { updateQueryStream << HtmlRoutines::ConvertStringToURLStringIncludingDots
-      ((*fieldsToSetIfNullUseFirstFieldIfUpdateQuery)[i], false);
+    { updateQueryStream << JSData::EncodeKeyForMongo((*fieldsToSetIfNullUseFirstFieldIfUpdateQuery)[i]);
       if (i != fieldsToSetIfNullUseFirstFieldIfUpdateQuery->size - 1)
         updateQueryStream << ".";
     }
@@ -969,6 +969,10 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONFetchItem(const List<std::str
   { result["error"] = "No collection specified. ";
     return result;
   }
+  if (labelStrings.size < 2)
+  { result["error"] = "No id specified. ";
+    return result;
+  }
   std::stringstream out;
   std::string currentTable = labelStrings[0];
   result["currentTable"] = currentTable;
@@ -976,6 +980,9 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONFetchItem(const List<std::str
   findQuery.type = findQuery.JSObject;
   projector.type = projector.JSObject;
   findQuery[DatabaseStrings::labelIdMongo][DatabaseStrings::objectSelectorMongo] = labelStrings[1];
+  if (labelStrings.size > 2) {
+    projector = DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(labelStrings, 2);
+  }
   List<JSData> rowsJSON;
   long long totalItems = 0;
   std::stringstream comments;
@@ -988,20 +995,11 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONFetchItem(const List<std::str
   { result["error"] = out.str();
     return result;
   }
-  if (rowsJSON.size == 0)
-  { result = DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection("");
-    if (flagDebuggingAdmin)
-    { std::stringstream moreComments;
-      moreComments << "First query returned 0 rows, fetching all tables instead. ";
-      result["moreComments"] = moreComments.str();
-      result["commentsOnFirstQuery"] = commentsPointer->str();
-      result["currentTableRawOriginal"] = currentTable;
-    }
-    return result;
-  }
   JSData theRows;
   theRows.type = theRows.JSarray;
   theRows.list = rowsJSON;
+  if (flagDebuggingAdmin)
+    result["findQuery"] = findQuery;
   result["rows"] = theRows;
   result["totalRows"] = (int) totalItems;
   return result;

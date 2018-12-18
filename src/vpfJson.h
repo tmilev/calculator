@@ -113,7 +113,8 @@ public:
   void ExtractScalar(const std::string& json, int begin, int end);
   bool IsValidElement();
   void reset(char inputType = JSData::JSUndefined);
-  std::string ToString(bool percentEncodeKeysIncludingDots, bool useHTML = false) const;
+  std::string ToString(bool percentEncodeKeysIncludingDotsExcludingDollarSigns, bool useHTML = false) const;
+  static std::string EncodeKeyForMongo(const std::string& input);
   template <typename somestream>
   somestream& IntoStream(somestream& out, bool percentEncodeStrings, int indentation = 0, bool useHTML = false) const;
   void readfile(const char* filename);

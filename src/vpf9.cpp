@@ -8496,7 +8496,7 @@ bool HtmlRoutines::IsRepresentedByItselfInURLs(char input)
     return true;
   if (MathRoutines::isALatinLetter(input))
     return true;
-  return input == '.' || input == '-';
+  return input == '.' || input == '-' || input == '_';
 }
 
 std::string HtmlRoutines::ConvertStringToURLStringExceptDashesAndSlashes(const std::string& input)
@@ -8517,21 +8517,6 @@ std::string HtmlRoutines::ConvertStringToURLString(const std::string& input, boo
 { std::stringstream out;
   for (unsigned int i = 0; i < input.size(); i ++)
     if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]))
-      out << input[i];
-    else if (input[i] == ' ' && usePlusesForSpacebars)
-      out << '+';
-    else
-    { out << "%";
-      int x = (char) input[i];
-      out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
-    }
-  return out.str();
-}
-
-std::string HtmlRoutines::ConvertStringToURLStringIncludingDots(const std::string& input, bool usePlusesForSpacebars)
-{ std::stringstream out;
-  for (unsigned int i = 0; i < input.size(); i ++)
-    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) && input[i] != '.')
       out << input[i];
     else if (input[i] == ' ' && usePlusesForSpacebars)
       out << '+';

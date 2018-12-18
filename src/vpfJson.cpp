@@ -320,6 +320,21 @@ bool JSData::readstring
   return true;
 }
 
+std::string JSData::EncodeKeyForMongo(const std::string& input)
+{ std::stringstream out;
+  for (unsigned int i = 0; i < input.size(); i ++)
+    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) && input[i] != '.')
+      out << input[i];
+    else if (input[i] == '$')
+      out << input[i];
+    else
+    { out << "%";
+      int x = (char) input[i];
+      out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
+    }
+  return out.str();
+}
+
 template <typename somestream>
 somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int indentation, bool useHTML) const
 { //MacroRegisterFunctionWithName("JSData::IntoStream");
@@ -347,7 +362,7 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
         out << "false";
       return out;
     case JSstring:
-      if (! percentEncodeStrings)
+      if (!percentEncodeStrings)
         out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->string) << '"';
       else
         out << '"' << HtmlRoutines::ConvertStringToURLString(this->string, false) << '"';
@@ -367,7 +382,7 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
       { if (!percentEncodeStrings)
           out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->objects.theKeys[i]) << '"';
         else
-          out << '"' << HtmlRoutines::ConvertStringToURLStringIncludingDots(this->objects.theKeys[i], false) << '"';
+          out << '"' << JSData::EncodeKeyForMongo(this->objects.theKeys[i]) << '"';
         out << ':';
         this->objects.theValues[i].IntoStream(out, percentEncodeStrings, indentation, useHTML);
         if (i != this->objects.size() - 1)
@@ -454,9 +469,9 @@ void JSData::reset(char inputType)
   this->objects.Clear();
 }
 
-std::string JSData::ToString(bool percentEncodeKeysIncludingDots, bool useHTML) const
+std::string JSData::ToString(bool percentEncodeKeysIncludingDotsExcludingDollarSigns, bool useHTML) const
 { std::stringstream out;
-  this->IntoStream(out, percentEncodeKeysIncludingDots, 2, useHTML);
+  this->IntoStream(out, percentEncodeKeysIncludingDotsExcludingDollarSigns, 2, useHTML);
   return out.str();
 }
 

@@ -1028,7 +1028,12 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   }
   out << "<script language =\"javascript\">\n";
   std::string canvasFunctionName = "functionMake" + this->canvasName;
-  out << "function " << canvasFunctionName << "(){\n";
+  std::string canvasResetFunctionName = "functionReset" + this->canvasName;
+  out
+  << "function " << canvasResetFunctionName << "() {\n"
+  << canvasFunctionName << "();\n"
+  << "}\n";
+  out << "function " << canvasFunctionName << "() {\n";
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++)
   { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
     out << " window.calculator.drawing.plotUpdaters['"
@@ -1051,6 +1056,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   out << "theDrawer.deleteCanvas('" << this->canvasName << "');\n";
   out << "var theCanvas = theDrawer.getCanvas('" << this->canvasName << "');\n"
   << "theCanvas.init('" << this->canvasName << "');\n";
+  out << "theCanvas.canvasResetFunction = " << canvasResetFunctionName << ";\n";
   for (int i = 0; i < this->thePlots.size; i ++)
   { PlotObject& currentPlot = this->thePlots[i];
     if (currentPlot.thePlotType == "surface")
@@ -1110,13 +1116,10 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     out << "theCanvas.flagShowPerformance = false;\n";
   else
     out << "theCanvas.flagShowPerformance = true;\n";
-  out << "theCanvas.setBoundingBoxAsDefaultViewWindow();\n";
-  out
+  out << "theCanvas.setBoundingBoxAsDefaultViewWindow();\n"
   << "theCanvas.redraw();\n"
-  << "}\n"
-  << "window.calculator.drawing.getCanvas('" << this->canvasName << "').canvasResetFunction = "
-  << canvasFunctionName << ";\n"
-  << canvasFunctionName << "();\n"
+  << "}\n";
+  out << canvasFunctionName << "();\n"
   << "</script>";
   return out.str();
 }
@@ -1472,6 +1475,12 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   }
   std::stringstream outScript;
   std::string canvasFunctionName = "functionMake" + this->canvasName;
+  std::string canvasResetFunctionName = "functionReset" + this->canvasName;
+  outScript
+  << "function " << canvasResetFunctionName << "() {\n"
+  << canvasFunctionName << "();\n"
+  << "}\n";
+
   outScript << "function " << canvasFunctionName << "() {\n";
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++)
   { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
@@ -1501,6 +1510,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   outScript << "drawing.deleteCanvas('" << this->canvasName << "');\n";
   outScript << "var theCanvas = drawing.getCanvasTwoD('" << this->canvasName << "');\n"
   << "theCanvas.init('" << this->canvasName << "');\n";
+  outScript << "theCanvas.canvasResetFunction = " << canvasResetFunctionName << ";\n";
   if (owner.flagPlotNoControls)
     outScript << "theCanvas.flagShowPerformance = false;\n";
   else
@@ -1593,6 +1603,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   << "}\n"
   << "window.calculator.drawing.getCanvasTwoD('" << this->canvasName << "').canvasResetFunction = "
   << canvasFunctionName << ";\n"
+  << "console.log(\"DEBUG: Set canvas reset function to \" + "<< canvasFunctionName << ");\n"
   << canvasFunctionName << "();\n";
   owner.theObjectContainer.graphicsScripts.SetKeyValue(this->canvasName, outScript.str());
   out << "<script language =\"javascript\">\n" << outScript.str() << "</script>";

@@ -901,8 +901,8 @@ function PlotFillTwoD(inputCanvas, inputColor)
   }
 }
 
-function CanvasTwoD(inputCanvas)
-{ this.canvasResetFunction = null;
+function CanvasTwoD(inputCanvas) { 
+  this.canvasResetFunction = null;
   this.theObjects =[];
   this.surface = null;
   this.canvasContainer = null;
@@ -942,37 +942,39 @@ function CanvasTwoD(inputCanvas)
   this.flagShowGrid = false;
 }
 
-CanvasTwoD.prototype.drawPoints = function (inputPoints, inputColor)
-{ this.theObjects.push(new PointsTwoD(inputPoints, inputColor));
-};
+CanvasTwoD.prototype.drawPoints = function (inputPoints, inputColor) { 
+  this.theObjects.push(new PointsTwoD(inputPoints, inputColor));
+}
 
-CanvasTwoD.prototype.drawLine = function (inputLeftPt, inputRightPt, inputColor, inputLineWidth)
-{ var newLine = new SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth);
+CanvasTwoD.prototype.drawLine = function (inputLeftPt, inputRightPt, inputColor, inputLineWidth) { 
+  var newLine = new SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth);
   this.theObjects.push(newLine);
-};
+}
 
-CanvasTwoD.prototype.drawGrid = function ()
-{ this.flagShowAxesTicks = true;
+CanvasTwoD.prototype.drawGrid = function () { 
+  this.flagShowAxesTicks = true;
   this.flagShowGrid = true;
   this.theObjects.push(new AxesGrid());
-};
+}
 
-CanvasTwoD.prototype.drawCoordinateAxes = function ()
-{ this.theObjects.push(new drawCoordinateAxesTwoD());
-};
+CanvasTwoD.prototype.drawCoordinateAxes = function () { 
+  this.theObjects.push(new drawCoordinateAxesTwoD());
+}
 
 CanvasTwoD.prototype.drawVectorField = function (
   inputField, inputIsDirectionField, inputLowLeft,
   inputHighRight, inputNumSegmentsXY,
   inputDesiredLengthDirectionVectors,
-  inputColor, inputLineWidth)
-{ var newLine = new VectorFieldTwoD(
+  inputColor, inputLineWidth
+) { 
+  var newLine = new VectorFieldTwoD(
     inputField, inputIsDirectionField, inputLowLeft, inputHighRight,
     inputNumSegmentsXY,
     inputDesiredLengthDirectionVectors,
-    inputColor, inputLineWidth);
+    inputColor, inputLineWidth
+  );
   this.theObjects.push(newLine);
-};
+}
 
 CanvasTwoD.prototype.drawPath = function (inputPath, inputColor, inputLineWidth) { 
   var newPath = new PathTwoD(inputPath, inputColor, inputColor, inputLineWidth);
@@ -1033,8 +1035,8 @@ CanvasTwoD.prototype.computeViewWindow = function() {
   this.setViewWindow(this.boundingBoxMath[0], this.boundingBoxMath[1]);
 };
 
-CanvasTwoD.prototype.setViewWindow = function(leftLowPt, rightUpPt)
-{ this.viewWindowDefault =[leftLowPt,rightUpPt];
+CanvasTwoD.prototype.setViewWindow = function(leftLowPt, rightUpPt) { 
+  this.viewWindowDefault =[leftLowPt,rightUpPt];
   var leftLowScreen = this.coordsMathToScreen(leftLowPt);
   var rightUpScreen = this.coordsMathToScreen(rightUpPt);
   var desiredHeight =Math.abs(rightUpScreen[1]-leftLowScreen[1]);
@@ -1050,8 +1052,8 @@ CanvasTwoD.prototype.setViewWindow = function(leftLowPt, rightUpPt)
   this.centerY+= this.centerCanvasY-centerViewWindowScreen[1];
 }
 
-CanvasTwoD.prototype.redraw = function()
-{ this.textPerformance ="";
+CanvasTwoD.prototype.redraw = function() { 
+  this.textPerformance ="";
   this.redrawStart = new Date().getTime();
   var theSurface = this.surface;
   theSurface.clearRect(0, 0, this.width, this.height);
@@ -2307,12 +2309,19 @@ Canvas.prototype.pointsWithinClickTolerance = function (leftXY, rightXY) {
   return squaredDistance < 7;
 }
 
-Canvas.prototype.canvasClick = function (screenX, screenY) { 
+Canvas.prototype.canvasClick = function (screenX, screenY, event) { 
   this.clickedPosition = this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
   this.mousePosition = [];
   var mustSelectOrigin = true;
-  if (window.event.shiftKey) {
-    mustSelectOrigin = false;
+  if (event !== undefined) {
+    if (event.shiftKey) {
+      mustSelectOrigin = false;
+    }
+  }
+  if (window.event !== undefined) {
+    if (window.event.shiftKey) {
+      mustSelectOrigin = false;
+    }
   }
   if (this.pointsWithinClickTolerance(this.clickedPosition, [0, 0]) || mustSelectOrigin) {
     this.selectedElement = "origin";
@@ -2734,7 +2743,7 @@ Drawing.prototype.mouseUp = function(inputCanvas) {
 }
 
 Drawing.prototype.canvasClick = function(theCanvasContainer, theEvent) { 
-  this.canvases[theCanvasContainer.id].canvasClick(theEvent.clientX, theEvent.clientY);
+  this.canvases[theCanvasContainer.id].canvasClick(theEvent.clientX, theEvent.clientY, theEvent);
 }
 
 var drawing = new Drawing();

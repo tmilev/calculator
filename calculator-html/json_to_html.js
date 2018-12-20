@@ -23,7 +23,7 @@ function JSONToHTML() {
   this.panelInformation = [];
   /** @type {String} */
   this.tableName = "";
-  /**@type {Object.<string,{clickHandler: Function, labels: String[]}>} */
+  /**@type {Object.<string,{clickHandler: Function, labels: String[], panelId: String}>} */
   this.buttonBindings = {};
   /**@type {String[]} */
   this.buttonIdsInOrderOfCreation = [];
@@ -37,19 +37,19 @@ function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
   if (typeof theDomComponent === "string") {
     theDomComponent = document.getElementById(theDomComponent);
   }
-  theDomComponent.innerHTML = jsonToHtml.getHtmlFromArrayOfObjects(inputJSON);
+  theDomComponent.innerHTML = jsonToHtml.getTableFromObject(inputJSON);
 }
 
 var counterToggleButtons = 0;
 
 function getToggleButton(
   /**@type {JSONToHTML} */
-  transformer, 
+  transformer,
+  /**@type {String} */ 
+  panelId,
   input, 
   label,
 ) {
-  counterToggleButtons ++;
-  var panelId = `panelFromJSONFormatter${counterToggleButtons}`;
   transformer.panelInformation.push({
     panelId: panelId,
     label: label,
@@ -87,6 +87,8 @@ var numberOfButtonsGenerated = 0;
 
 JSONToHTML.prototype.getButtonFromLabels = function(
   input, 
+  /**@type {String} */
+  panelId,
   inputTransformed, 
   /**@type {String[]} */
   currentLabels, 
@@ -99,7 +101,8 @@ JSONToHTML.prototype.getButtonFromLabels = function(
   result += `<button id = "${id}">${inputTransformed}</button>`;
   this.buttonBindings[id] = {
     clickHandler : clickHandler,
-    labels: currentLabels.slice()
+    labels: currentLabels.slice(),
+    panelId: panelId,
   };
   this.buttonIdsInOrderOfCreation.push(id);
   return result;
@@ -120,13 +123,15 @@ JSONToHTML.prototype.getSingleEntry = function(
   if (typeof currentOption.transformer === "function") {
     inputTransformed = currentOption.transformer(input);
   }
+  counterToggleButtons ++;
+  var panelId = `panelFromJSONFormatter${counterToggleButtons}`;
   if (typeof currentOption.clickHandler === "function") {
-    inputTransformed = this.getButtonFromLabels(input, inputTransformed, currentLabels, currentOption.clickHandler);
+    inputTransformed = this.getButtonFromLabels(input, panelId, inputTransformed, currentLabels, currentOption.clickHandler);
   }
   if (inputTransformed === input) {
     return input;
   }
-  return getToggleButton(this, input, inputTransformed);
+  return getToggleButton(this, panelId, input, inputTransformed);
 }
 
 JSONToHTML.prototype.getTableHorizontallyLaidFromJSON = function(
@@ -286,6 +291,7 @@ JSONToHTML.prototype.bindButtons = function() {
     var currentButton = document.getElementById(currentId);
     currentButton.addEventListener('click', currentBinding.clickHandler);
     currentButton.setAttribute("labels", JSON.stringify(currentBinding.labels));
+    currentButton.setAttribute("panelId", currentBinding.panelId);
   }
   for (var i = 0; i < this.panelInformation.length; i ++) {
     var currentInfo = this.panelInformation[i];
@@ -294,7 +300,22 @@ JSONToHTML.prototype.bindButtons = function() {
   }
 }
 
-JSONToHTML.prototype.getHtmlFromArrayOfObjects = function(input, optionsConstant, optionsModified) {
+JSONToHTML.prototype.transformObjectToRows = function(input) {
+  var result = [];
+  for (var labelRow in input) {
+    var currentInputItem = input[labelRow];
+    currentInputItem["_rowLabel"] = labelRow;
+    result.push(currentInputItem);
+  }
+  return result;
+}
+
+JSONToHTML.prototype.getTableFromObject = function(
+  input, 
+  optionsConstant,
+  /**@type {{table: String, forceRowLayout: Boolean}} */ 
+  optionsModified,
+) {
   this.inputParsed = input;
   this.optionsConstant = {};
   if ((typeof optionsConstant) === "object") {
@@ -306,6 +327,10 @@ JSONToHTML.prototype.getHtmlFromArrayOfObjects = function(input, optionsConstant
   if (typeof optionsModified.table === "string") {
     this.tableName = optionsModified.table;
   }
+  var forceRowLayout = false;
+  if (optionsModified.forceRowLayout === true) {
+    forceRowLayout = true;
+  }
   if (typeof this.inputParsed === "string") {
     this.inputParsed = input.replace(/[\r\n]/g, " "); 
     if (this.inputParsed[0] !== "{" && this.inputParsed[0] !== "[" && input[0] !== "\"") {
@@ -316,6 +341,9 @@ JSONToHTML.prototype.getHtmlFromArrayOfObjects = function(input, optionsConstant
     } catch (e) {
       return `<b style = 'color:red'>Error while parsing ${escape(this.inputParsed)}: ${e}</b>`;
     }
+  }
+  if (forceRowLayout && typeof this.inputParsed === "object" && !Array.isArray(this.inputParsed)) {
+    this.inputParsed = this.transformObjectToRows(this.inputParsed);
   }
   var resultBuffer = new BufferCalculator();
   if (typeof this.inputParsed === "object" && !Array.isArray(this.inputParsed)) {

@@ -130,7 +130,7 @@ function PanelExpandable(
 PanelExpandable.prototype.matchPanelStatus = function() {
   var thePanel = document.getElementById(this.attributes.panelId);
   thePanel.style.maxHeight = "";
-  thePanel.style.height = "";
+  thePanel.style.maxWidth = "";
   if (this.attributes.panelStatus === "collapsed") {
     thePanel.style.maxHeight = "0px";
     thePanel.style.maxWidth = "0px";
@@ -142,6 +142,8 @@ PanelExpandable.prototype.matchPanelStatus = function() {
 
 PanelExpandable.prototype.setPanelContent = function(input) {
   var thePanel = document.getElementById(this.attributes.panelId);
+  thePanel.style.maxHeight = "";
+  thePanel.style.maxWidth = "";
   thePanel.innerHTML = input;
   var originalHeight = window.getComputedStyle(thePanel).height;
   var originalWidth = window.getComputedStyle(thePanel).width;

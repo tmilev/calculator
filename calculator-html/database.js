@@ -4,6 +4,7 @@ const ids = require('./ids_dom_elements');
 const pathnames = require('./pathnames');
 const jsonToHtml = require('./json_to_html');
 const miscellaneous = require('./miscellaneous');
+const panels = require('./panels');
 
 function clickDatabaseTable(currentCollection) {
   window.calculator.mainPage.storage.variables.database.labels.setAndStore(JSON.stringify(currentCollection)); 
@@ -11,7 +12,34 @@ function clickDatabaseTable(currentCollection) {
 }
 
 function callbackFetchProblemData(button, input, output) {
-  button.parentNode.innerHTML = input;
+  var inputParsed = JSON.parse(input);
+  var panelId = button.getAttribute("panelId");
+  var thePanel = new panels.PanelExpandable(panelId, false);
+  var transformer = new jsonToHtml.JSONToHTML();
+  var problemData = [];
+  try {
+    var inputParsed = JSON.parse(input);
+    var problemDataRaw = inputParsed.rows[0].problemDataJSON;
+    for (var label in problemDataRaw) {
+      var incomingProblem = {
+        problemName: label,
+        problemInfo: problemDataRaw[label],
+      }
+      problemData.push(incomingProblem)
+    }
+  } catch (e) {
+    problemData = {
+      error: e,
+      input: input,
+    };
+  }
+  var resultHTML = transformer.getTableFromObject(problemData);
+  thePanel.setPanelContent(resultHTML);
+  transformer.bindButtons();
+  thePanel.attributes.panelStatus = "collapsed";
+  thePanel.matchPanelStatus();
+  setTimeout(thePanel.doToggleContent.bind(thePanel), 0);
+  console.log("DEBUG: parsed input: " + JSON.stringify(inputParsed));
 }
 
 function fetchProblemData() {
@@ -20,9 +48,9 @@ function fetchProblemData() {
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
   theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
-  theURL += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`
+  theURL += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
   theURL += `${pathnames.urlFields.database.labels}=${labelsString}&`;
-  console.log("DEBUG: labelString: " + labelsString )
+  console.log("DEBUG: labelString: " + labelsString);
   console.log(" URL: " + theURL);
   submitRequests.submitGET({
     url: theURL,
@@ -100,7 +128,7 @@ function updateDatabasePageCallback(incoming, output) {
       theParsed.rows[i]["problemDataJSON"] = "";
     }
     document.getElementById(ids.domElements.spanDatabaseComments).innerHTML = `${theParsed.rows.length} out of ${theParsed.totalRows} rows displayed.<br> `;
-    theOutput.innerHTML = transformer.getHtmlFromArrayOfObjects(theParsed.rows, optionsDatabase, {table: labels[0]});
+    theOutput.innerHTML = transformer.getTableFromObject(theParsed.rows, optionsDatabase, {table: labels[0]});
     transformer.bindButtons();
   } else {
     for (var counterCollection = 0; counterCollection < theParsed.collections.length; counterCollection ++) {
@@ -114,7 +142,7 @@ function updateDatabasePageCallback(incoming, output) {
       theParsed.collections[counterCollection] = linkHTML;
     }
     var transformer = new jsonToHtml.JSONToHTML();
-    theOutput.innerHTML = transformer.getHtmlFromArrayOfObjects(theParsed.collections);
+    theOutput.innerHTML = transformer.getTableFromObject(theParsed.collections);
     transformer.bindButtons();
   }
 }
@@ -135,7 +163,7 @@ function updateDatabasePage() {
   var theUrl = "";
   theUrl += `${pathnames.urls.calculatorAPI}?`;
   theUrl += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
-  theUrl += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`
+  theUrl += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
   theUrl += `${pathnames.urlFields.database.labels}=${labels}&`;
   submitRequests.submitGET({
     url: theUrl,

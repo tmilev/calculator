@@ -203,7 +203,7 @@ function browserify() {
   <input type = "hidden" name = "request" id = "request" value = "compute">
   <textarea class = "textareaCalculatorMain"
   rows = "3" cols = "30" name = "mainInput" id = "mainInputID"
-  onkeypress = "window.calculator.calculator.submitCalculatorInputOnEnter();"
+  onkeypress = "window.calculator.calculator.submitCalculatorInputOnEnter(event);"
   onkeyup    = "window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"
   onkeydown  = "window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator(); window.calculator.autocomplete.arrowAction(event);"
   onmouseup  = "window.calculator.autocomplete.suggestWord(); window.calculator.initializeButtons.calculatorPanel.mQHelpCalculator();"

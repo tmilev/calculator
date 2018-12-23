@@ -79,7 +79,7 @@ function StorageVariable(
   this.type = "string";
   this.secure = true;
   this.showInURLByDefault = false;
-  /**@type {function} */
+  /**@type {Function} */
   this.callbackOnValueChange = null;
   var labelsToRead = [
     "nameURL", "nameCookie", "nameLocalStorage", 
@@ -165,12 +165,15 @@ StorageVariable.prototype.setAndStore = function(
   if (updateURL === undefined ) {
     updateURL = true;
   }
-  var changed = (this.value === newValue);
+  var changed = (this.value !== newValue);
   this.value = newValue;
   this.storeMe(updateURL, updateAssociatedInput);
   if (changed) {
     if (this.callbackOnValueChange !== null && this.callbackOnValueChange !== undefined) {
-      this.callbackOnValueChange(this.value);
+      //calling function with timeout ensures the current function sequence is finished first.
+      setTimeout(() => {
+        this.callbackOnValueChange(this.value);        
+      }, 0);
     }
   }
 }
@@ -249,11 +252,12 @@ function StorageCalculator() {
         name: "calculatorInput", 
         nameURL: "calculatorInput",
         associatedDOMId: ids.domElements.inputMain,
+        callbackOnValueChange: calculatorPage.calculator.submitComputationPartTwo.bind(calculatorPage.calculator),
       }),
       request: new StorageVariable({
         name: "calculatorRequest", 
         nameURL: "calculatorRequest", 
-        nameLocalStorage: "calculatorRequest"
+        nameLocalStorage: "calculatorRequest",
       }),
     },
     user: {
@@ -262,21 +266,21 @@ function StorageCalculator() {
         nameURL: "activationToken",
       }),
       googleToken: new StorageVariable({
-        name: "googleToken"
+        name: "googleToken",
       }),
       name: new StorageVariable({
         name: "username", 
         nameCookie: "username", 
-        nameURL: "username"
+        nameURL: "username",
       }),
       authenticationToken: new StorageVariable({
         name: "authenticationToken",
         nameCookie: "authenticationToken",
-        nameURL: "authenticationToken"
+        nameURL: "authenticationToken",
       }),
       email: new StorageVariable({
         name: "email",
-        nameURL: "email"
+        nameURL: "email",
       })
     }
   };
@@ -307,8 +311,9 @@ StorageCalculator.prototype.loadSettings = function() {
 }
 
 StorageCalculator.prototype.loadSettingsRecursively = function(
-  /**@type {StorageVariable} */ currentStorage, 
-  inputHashParsed
+  /**@type {StorageVariable} */ 
+  currentStorage, 
+  inputHashParsed,
 ) {
   if (currentStorage instanceof StorageVariable) {
     currentStorage.loadMe(inputHashParsed);
@@ -347,8 +352,7 @@ StorageCalculator.prototype.computeURLRecursively = function(currentStorage, cur
       if (this.computeURLRecursively(currentStorage[label], urlAdditionCandidate)) {
         currentURL[label] = urlAdditionCandidate[label];
         hasNonTrivialInformation = true;
-      }
-      
+      }      
     } else {
       if (this.computeURLRecursively(currentStorage[label], currentURL[label])) {
         hasNonTrivialInformation = true;
@@ -480,6 +484,7 @@ function Page() {
   cookies.setCookie("useJSON", true, 300, false);
   this.initMenuBar();
   this.initBuildVersion();
+  this.initHandlers();
   //////////////////////////////////////
   //////////////////////////////////////
   //Initialize global variables
@@ -530,6 +535,10 @@ Page.prototype.serverIsOnLocalHost = function() {
     return true;
   }
   return false;
+}
+
+Page.prototype.initHandlers = function() {
+  window.addEventListener("hashchange", this.storage.loadSettings.bind(this.storage));
 }
 
 Page.prototype.initMenuBar = function() {
@@ -637,13 +646,15 @@ Page.prototype.flipDebugSwitch = function () {
 }
 
 Page.prototype.setSwitches = function () {
-
   if (this.storage.variables.flagDebug.isTrue()) {
     document.getElementById(ids.domElements.sliderDebugFlag).checked = true;
   } else {
     document.getElementById(ids.domElements.sliderDebugFlag).checked = false;
   }
-  if (this.storage.variables.flagStudentView.getValue() === true || this.storage.variables.flagStudentView.getValue() === "true") {
+  if (
+    this.storage.variables.flagStudentView.getValue() === true || 
+    this.storage.variables.flagStudentView.getValue() === "true"
+  ) {
     document.getElementById(ids.domElements.sliderStudentView).checked = true;
   } else {
     document.getElementById(ids.domElements.sliderStudentView).checked = false;
@@ -682,7 +693,6 @@ Page.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(idElement) {
 function Script() {
   this.id = "";
   this.content = "";
-
 } 
 
 Page.prototype.removeOneScript = function(scriptId) {
@@ -749,10 +759,6 @@ Page.prototype.cleanUpLoginSpan = function(componentToCleanUp) {
       loginInfo.innerHTML = "<b>...</b>";
     }
   }
-}
-
-function loadProfilePic() {
-
 }
 
 /**

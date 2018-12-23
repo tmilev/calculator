@@ -105,17 +105,6 @@ function vectorLength(vector) {
   return Math.sqrt(vectorScalarVector(vector, vector));
 }
 
-function deepCopy(from, to) { 
-  to = new Array(from.length);
-  for (var i = 0; i < from.length; i ++) {
-    if (from[i] instanceof Array) {
-      deepCopy(from[i], to[i]);
-    } else {
-      to[i] = from[i];
-    }
-  }
-}
-
 function vectorRound(vector) { 
   for (var i = 0; i < vector.length; i ++) {
     vector[i] = Math.round(vector[i]);

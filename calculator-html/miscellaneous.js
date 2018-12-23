@@ -7,22 +7,22 @@ function shortenString(charsOnEachSide, input) {
   return `${input.slice(0, charsOnEachSide)}...${input.slice(input.length - charsOnEachSide, input.length)}`;
 }
 
-function deepCopy(from, to) { 
+function deepCopy(from) { 
   if (typeof from !== "object") {
-    to = from;
-    return;
+    return from;
   }
+  var result = {};
   for (var label in from) {
     if (typeof from[label] === "object") {
-      to[label] = {};
-      deepCopy(from[label], to[label])
+      result[label] = deepCopy(from[label])
       continue;
     } 
-    to[label] = from[label];
+    result[label] = from[label];
   }
+  return result;
 }
 
 module.exports = {
   shortenString,
-  deepCopy
+  deepCopy,
 }

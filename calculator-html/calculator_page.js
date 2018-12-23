@@ -4,6 +4,7 @@ const pathnames = require('./pathnames');
 const drawing = require('./three-d').drawing;
 const ids = require('./ids_dom_elements');
 const hideHtmlWithTags = require('./hide_html_with_tags');
+const miscellaneous = require('./miscellaneous');
 
 function Calculator() {
 
@@ -192,12 +193,15 @@ Calculator.prototype.toggleExamples = function(theButton) {
   }
 }
 
-Calculator.prototype.calculatorLinkClickHandler = function(theAnchor) {
-  var anchorLink = theAnchor.href.split('#')[1];
-  window.location.hash = anchorLink;
-  window.calculator.mainPage.storage.loadSettings(); 
-  this.submitComputation();
-}
+//Calculator.prototype.submitComputation = function() {
+  //var anchorLink = theAnchor.href.split('#')[1];
+  //window.location.hash = anchorLink;
+  //var thePage = window.calculator.mainPage;
+//  thePage.storage.calculator.input.setAndStore(anchorLink);
+  //  window.calculator.mainPage.storage.loadSettings(); 
+//  this.submitComputation();
+
+//}
 
 Calculator.prototype.submitComputation = function() {
   var result = "";
@@ -207,21 +211,23 @@ Calculator.prototype.submitComputation = function() {
     return;
   }
   this.lastSubmittedInput = calculatorInput;
-
-
   var calculatorInputEncoded = encodeURIComponent(calculatorInput);
-  var theJSON = {
-    calculatorInput : calculatorInputEncoded,
-    currentPage: thePage.pages.calculator.name,
-  };
+  var theHash = miscellaneous.deepCopy(thePage.storage.urlObject); 
+  theHash.calculatorInput = calculatorInputEncoded;
   this.submissionCalculatorCounter ++;
   var theId = `submitCalculatorLink${this.submissionCalculatorCounter}`;
-  result += `<a href = '#${JSON.stringify(theJSON)}' id = "${theId}">Link to your input</a>`;
+  result += `<a href = '#${JSON.stringify(theHash)}' id = "${theId}">Link to your input</a>`;
   document.getElementById("spanComputationLink").innerHTML = result;
-  var theAnchor = document.getElementById(theId); 
-  theAnchor.addEventListener('click', this.calculatorLinkClickHandler.bind(this, theAnchor));
+  //var theAnchor = document.getElementById(theId); 
+  //theAnchor.addEventListener('click', this.calculatorLinkClickHandler.bind(this, theAnchor));
+  window.location.hash = JSON.stringify(theHash);
+  thePage.storage.variables.calculator.input.setAndStore(this.lastSubmittedInput);
+}
+
+Calculator.prototype.submitComputationPartTwo = function(input) {
   var url = pathnames.urls.calculatorAPI;
-  var parameters = this.getQueryStringSubmitStringAsMainInput(this.lastSubmittedInput, pathnames.urlFields.calculatorCompute);
+  var parameters = this.getQueryStringSubmitStringAsMainInput(input, pathnames.urlFields.calculatorCompute);
+  var thePage = window.calculator.mainPage;
   submitRequests.submitPOST ({
     url: url,
     parameters:  parameters,

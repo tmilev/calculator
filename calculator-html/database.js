@@ -134,8 +134,7 @@ function updateDatabasePageCallback(incoming, output) {
     for (var counterCollection = 0; counterCollection < theParsed.collections.length; counterCollection ++) {
       var currentCollection = theParsed.collections[counterCollection]; 
       var linkHTML = "";
-      var urlObjectIncoming = {};
-      miscellaneous.deepCopy(thePage.storage.urlObject, urlObjectIncoming);
+      var urlObjectIncoming = miscellaneous.deepCopy(thePage.storage.urlObject);
       urlObjectIncoming.databaseLabels = currentCollection;
       linkHTML += `<a href = '#${JSON.stringify(urlObjectIncoming)}' onclick = 'window.calculator.database.clickDatabaseTable(["${currentCollection}"]);'>`;
       linkHTML += `${currentCollection}</a>`;

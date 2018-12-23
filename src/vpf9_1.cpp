@@ -400,53 +400,6 @@ void FileInformation::AddProjectInfo(const std::string& fileName, const std::str
   theGlobalVariables.theSourceCodeFiles().AddOnTopNoRepetition(theInfo);
 }
 
-std::string GlobalVariables::ToStringSourceCodeInfo()
-{ std::stringstream out;
-  out << "<button " << HtmlRoutines::GetStyleButtonLikeHtml()
-  << " onclick=\"switchMenu('sourceDetails');\" >Source code</button>";
-  out << "<div id =\"sourceDetails\" style =\"display: none\">";
-  out << "<br>The calculator is a standalone application that can either be used "
-  << " as a web server (similarly to SAGE) or "
-  << " via an <a href=\"http://httpd.apache.org/\">Apache web server</a>. "
-  << "The standard way of running the calculator is as a stand-alone linux webserver. "
-  << "If you want to run the calculator through Apache, best is to contact the authors for instructions."
-  << "\nTo get the calculator as a stand-alone linux webserver do the following. "
-  << "\n "
-  << "\n<br>\n0) You need a Linux machine. Tested on Ubuntu, OpenSUSE and CENTOS."
-  << " If you are interested in making the system run on Windows please write us an email. "
-  << "\n<br>\n1) Install subversion. On Ubuntu the command is as follows.  <br>sudo apt-get install subversion"
-  << "\n<br>\n2) Install g++ (the minimum for compiling c++ programs). "
-  << "On Ubuntu the command is the following.  <br>sudo apt-get install g++"
-  << "\n<br>\n3) [Optional] Install the development packages for openssl. To do so, google-search ``how to install ... on ...''"
-  << "\n<br>\n4) Checkout the calculator project. The command is as follows.<br>"
-  << "git clone https://github.com/tmilev/calculator.git"
-  << "<br> The command fetches the latest source code from sourceforge."
-  << "\n<br>\n5) Navigate to the newly created calculator folder.  "
-  << "\n<br>\n6) Type the following command. <br>make nossl =1 nosql =1"
-  << "\n<br>\nAlternatively, if you installed openssl in the preceding optional step, you can use the following command. "
-  << "\n<br>\n make"
-  << "\n<br>\nWait until the command is completed (takes about 8 minutes on my machine). "
-  << "The installation is now complete. To run the calculator, see the next two points."
-  << "\n<br>\n7) Through the command-line, navigate to the following directory. <br>calculator/bin/ "
-  << "\n<br>\n8) Type the following command. Make sure to include the dot.  <br>./calculator server"
-  << "\n<br>\n9) The calculator will display a message saying on which port it got bound. "
-  << "The default ports should be 8155 and 8166 for http and https. "
-  << "Type the address:  <br>localhost:8155<br>"
-  << " in your web browser to get to the calculator. "
-  << "If the calculator didn't succeed in binding to port 8155"
-  << " (say, the port is already taken) it will try to bind next to ports 8080, 8081 and 8082. "
-  << "In that case replace "
-  << " the 8155 in the address above with the port number reported by the calculator. ";
-  out << "<hr>" << this->theSourceCodeFiles().size << " files total. ";
-  out << "<br>svn checkout command:<br>svn checkout https://github.com/tmilev/calculator.git/trunk calculator";
-  for (int i = 0; i < this->theSourceCodeFiles().size; i ++)
-  { out << " <br>\n";
-    out << HtmlRoutines::GetHtmlLinkFromProjectFileName(this->theSourceCodeFiles()[i].FileName, this->theSourceCodeFiles()[i].FileDescription);
-  }
-  out << "</div>";
-  return out.str();
-}
-
 UserCalculatorData::UserCalculatorData()
 { this->approximateHoursSinceLastTokenWasIssued = - 1;
   this->flagEnteredAuthenticationToken = false;

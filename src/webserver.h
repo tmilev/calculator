@@ -169,7 +169,6 @@ public:
    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive,
    std::stringstream* commentsGeneralSensitive);
   int ProcessChangePasswordPage();
-  int ProcessCalculator();
   int ProcessDatabaseJSON();
   int ProcessDatabaseDeleteEntry();
   int ProcessDatabaseModifyEntry();

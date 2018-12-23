@@ -32,7 +32,7 @@
 <script type = "text/javascript" src = "/calculator-html/json_to_html.js"></script>
 <script type = "text/javascript" src = "/calculator-html/buffer.js"></script>
 <script type = "text/javascript" src = "/calculator-html/mathjax-calculator-setup.js"></script>
-<script type = "text/javascript" src = "/calculator-html/hide_html_with_tags.js"></script>
+<script type = "text/javascript" src = "/calculator-html/miscellaneous_frontend.js"></script>
 <script type = "text/javascript" src = "/calculator-html/cookies.js"></script>
 <script type = "text/javascript" src = "/calculator-html/submit_requests.js"></script>
 <script type = "text/javascript" src = "/calculator-html/autocomplete_keywords.js"></script>
@@ -223,8 +223,9 @@ function browserify() {
 </td>
 <td>
   <span id = "idAutocompletePanel">
-  <span id = "idAutocompleteHints">
-    Ctrl+space, ctrl+arrow = autocomplete, select
+  <span id = "idAutocompleteHints" style = "font-size: x-small">
+    Ctrl+space = autocomplete<br>
+    Ctrl+arrow = select
   </span>
   <br>
   <div id = "idAutocompleteSpan" style = "display:block; overflow:auto;" height = "100px"></div>

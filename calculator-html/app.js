@@ -16,7 +16,7 @@ window.calculator = {
   submitRequests: null,
   editPage: null,
   drawing: null,
-  hideHtmlWithTags: null,
+  miscellaneousFrontend: null,
   accountActivation: null,
   manageAccounts: null,
   panels: null,
@@ -43,7 +43,7 @@ window.calculator.problemPage = require('./problem_page');
 window.calculator.submitRequests = require('./submit_requests');
 window.calculator.editPage = require('./edit_page');
 window.calculator.drawing = require('./three-d').drawing;
-window.calculator.hideHtmlWithTags = require('./hide_html_with_tags');
+window.calculator.miscellaneousFrontend = require('./miscellaneous_frontend');
 window.calculator.accountActivation = require('./account_activation');
 window.calculator.manageAccounts = require('./manage_accounts');
 window.calculator.account = require('./account');

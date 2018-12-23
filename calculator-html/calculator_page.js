@@ -3,8 +3,9 @@ const submitRequests = require('./submit_requests');
 const pathnames = require('./pathnames');
 const drawing = require('./three-d').drawing;
 const ids = require('./ids_dom_elements');
-const hideHtmlWithTags = require('./hide_html_with_tags');
+const miscellaneousFrontend = require('./miscellaneous_frontend');
 const miscellaneous = require('./miscellaneous');
+const BufferCalculator = require('./buffer').BufferCalculator;
 
 function Calculator() {
 
@@ -135,7 +136,7 @@ function processOneFunctionAtom(handlers, isComposite) {
     }
     var encodedAtom = encodeURIComponent(handlers[counterHandlers].atom);
     currentId += `${encodedAtom}_${counterHandlers}_${handlers.length}`;
-    resultString += `<a href = '#' class = 'linkInfo' onclick = "window.calculator.hideHtmlWithTags.switchMenu('${currentId}')">info</a>`;
+    resultString += `<a href = '#' class = 'linkInfo' onclick = "window.calculator.miscellaneousFrontend.switchMenu('${currentId}')">info</a>`;
     resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${currentDescription}<br><b>Example:</b><br>${currentExample}</calculatorExampleInfo>`;
     resultString += `<a href = "#" class = "linkInfo" onclick = "this.composite =${isComposite}; this.index =${counterHandlers}; this.atom='${encodedAtom}'; window.calculator.calculator.exampleClick(this);"> Example</a>`;
     //resultString += currentExample;
@@ -184,7 +185,7 @@ Calculator.prototype.toggleExamples = function(theButton) {
     });
     theButton.innerHTML = "&#9660;";
   } else {
-    hideHtmlWithTags.switchMenu(ids.domElements.calculatorExamples);
+    miscellaneousFrontend.switchMenu(ids.domElements.calculatorExamples);
     if (! theExamples.classList.contains("hiddenClass")) {
       theButton.innerHTML = "&#9660;";
     } else {
@@ -193,41 +194,27 @@ Calculator.prototype.toggleExamples = function(theButton) {
   }
 }
 
-//Calculator.prototype.submitComputation = function() {
-  //var anchorLink = theAnchor.href.split('#')[1];
-  //window.location.hash = anchorLink;
-  //var thePage = window.calculator.mainPage;
-//  thePage.storage.calculator.input.setAndStore(anchorLink);
-  //  window.calculator.mainPage.storage.loadSettings(); 
-//  this.submitComputation();
-
-//}
-
 Calculator.prototype.submitComputation = function() {
-  var result = "";
   var thePage = window.calculator.mainPage;
   var calculatorInput = document.getElementById(ids.domElements.inputMain).value;
   if (calculatorInput === this.lastSubmittedInput) {
     return;
   }
   this.lastSubmittedInput = calculatorInput;
-  var calculatorInputEncoded = encodeURIComponent(calculatorInput);
-  var theHash = miscellaneous.deepCopy(thePage.storage.urlObject); 
-  theHash.calculatorInput = calculatorInputEncoded;
-  this.submissionCalculatorCounter ++;
-  var theId = `submitCalculatorLink${this.submissionCalculatorCounter}`;
-  result += `<a href = '#${JSON.stringify(theHash)}' id = "${theId}">Link to your input</a>`;
-  document.getElementById("spanComputationLink").innerHTML = result;
-  //var theAnchor = document.getElementById(theId); 
-  //theAnchor.addEventListener('click', this.calculatorLinkClickHandler.bind(this, theAnchor));
-  window.location.hash = JSON.stringify(theHash);
+  //var theHash = miscellaneous.deepCopy(thePage.storage.urlObject); 
+  //theHash.calculatorInput = calculatorInput;
+  //var stringifiedHash = JSON.stringify(theHash);
+  //window.location.hash = stringifiedHash;
   thePage.storage.variables.calculator.input.setAndStore(this.lastSubmittedInput);
 }
 
 Calculator.prototype.submitComputationPartTwo = function(input) {
+  var thePage = window.calculator.mainPage;
+  var stringifiedHash = thePage.storage.getCleanedUpURL();
+  document.getElementById("spanComputationLink").innerHTML = `<a href = '#${stringifiedHash}'>Link to your input</a>`;
+
   var url = pathnames.urls.calculatorAPI;
   var parameters = this.getQueryStringSubmitStringAsMainInput(input, pathnames.urlFields.calculatorCompute);
-  var thePage = window.calculator.mainPage;
   submitRequests.submitPOST ({
     url: url,
     parameters:  parameters,

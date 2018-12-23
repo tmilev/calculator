@@ -108,12 +108,8 @@ function selectCurrentCoursePage() {
   if (thePage.user.flagLoggedIn) {
     topicRequest = "templateJSON";
   }
-  var urlObject = { 
-    currentPage: thePage.storage.variables.currentPage.getValue()
-  };
-  window.location.hash = `${encodeURIComponent(JSON.stringify(urlObject))}`;
   submitRequests.submitGET({
-    url: `${pathnames.urls.calculatorAPI}?request=${topicRequest}`,
+    url: `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicRequest}`,
     callback: afterLoadCoursePage,
     progress: ids.domElements.spanProgressReportGeneral
   });

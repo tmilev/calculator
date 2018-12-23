@@ -251,7 +251,6 @@ public:
   std::string CallSystemWithOutput(const std::string& systemCommand);
   void ChDir(const std::string& systemCommand);
   std::string ToStringHTMLTopCommandLinuxSystem();
-  std::string ToStringSourceCodeInfo();
   std::string ToStringFolderInfo() const;
   std::string ToStringProgressReportHtml();
   std::string ToStringProgressReportConsole();

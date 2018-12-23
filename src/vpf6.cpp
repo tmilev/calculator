@@ -2512,11 +2512,11 @@ std::string Calculator::ToString()
   else
   { std::stringstream theExampleInjector;
     theExampleInjector
-    << "if (document.getElementById('calculatorExamples').innerHTML.length<300)"
-    << "  submitStringAsMainInput('', 'calculatorExamples', 'calculatorExamples', null); "
-    << "else"
-    << "  switchMenu('calculatorExamples');"
-    ;
+    << "if (document.getElementById('calculatorExamples').innerHTML.length < 300) {\n"
+    << "  submitStringAsMainInput('', 'calculatorExamples', 'calculatorExamples', null);\n"
+    << "} else {\n"
+    << "  window.calculator.miscellaneousFrontend.switchMenu('calculatorExamples');\n"
+    << "}\n";
     out2 << HtmlRoutines::GetHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Examples.");
     out2 << "<span id =\"calculatorExamples\"></span>";
   }

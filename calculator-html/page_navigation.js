@@ -82,8 +82,14 @@ function StorageVariable(
   /**@type {Function} */
   this.callbackOnValueChange = null;
   var labelsToRead = [
-    "nameURL", "nameCookie", "nameLocalStorage", 
-    "associatedDOMId", "type", "secure", "callbackOnValueChange", "showInURLByDefault",
+    "nameURL", 
+    "nameCookie", 
+    "nameLocalStorage", 
+    "associatedDOMId", 
+    "type", 
+    "secure", 
+    "callbackOnValueChange", 
+    "showInURLByDefault",
   ];
   for (var counterLabel = 0; counterLabel < labelsToRead.length; counterLabel ++) {
     var currentLabel = labelsToRead[counterLabel];
@@ -162,7 +168,7 @@ StorageVariable.prototype.setAndStore = function(
   /**@type {Boolean} */ 
   updateAssociatedInput,
 ) {
-  if (updateURL === undefined ) {
+  if (updateURL === undefined) {
     updateURL = true;
   }
   var changed = (this.value !== newValue);
@@ -186,6 +192,7 @@ function StorageCalculator() {
       nameCookie: "", //<- when given and non-empty, cookies will be used to store variable
       nameURL: "currentPage", //<- when given and non-empty, url will be used to store variable
       showInURLByDefault: true, // <- when given and true, url will be added to the window hash
+      callbackOnValueChange: mainPage().selectPage.bind(mainPage()), //<- when given will be triggered after a genuine change of the variable
     }),
     database: {
       labels: new StorageVariable({
@@ -253,6 +260,7 @@ function StorageCalculator() {
         nameURL: "calculatorInput",
         associatedDOMId: ids.domElements.inputMain,
         callbackOnValueChange: calculatorPage.calculator.submitComputationPartTwo.bind(calculatorPage.calculator),
+        showInURLByDefault: true,
       }),
       request: new StorageVariable({
         name: "calculatorRequest", 
@@ -289,19 +297,37 @@ function StorageCalculator() {
   this.urlObject = {};
 }
 
+/**@returns {String} */
+StorageCalculator.prototype.getCleanedUpURL = function() {
+  var stringifiedInput = JSON.stringify(this.urlObject);
+  var isGood = true;
+  try {
+    var decodedAsURL = decodeURIComponent(stringifiedInput);
+    if (stringifiedInput !== decodedAsURL) {
+      isGood = false;
+    }
+  } catch (e) {
+    isGood = false;
+  }
+  if (!isGood) {
+    stringifiedInput = encodeURIComponent(stringifiedInput);
+  }  
+  return stringifiedInput; 
+}
+
 StorageCalculator.prototype.parseURL = function() {
   //console.log(`DEBUG: current hash: ${window.location.hash}`);
   this.oldHash = this.currentHash;
-  this.currentHash = decodeURIComponent(window.location.hash);
-  if (this.currentHash.startsWith('#')) {
-    this.currentHash = this.currentHash.slice(1);
-  }
   try {
+    this.currentHash = decodeURIComponent(window.location.hash);
+    if (this.currentHash.startsWith('#')) {
+      this.currentHash = this.currentHash.slice(1);
+    }
     if (this.oldHash !== this.currentHash) {
       this.urlObject = JSON.parse(this.currentHash);
     }
   } catch (e) {
-    console.log(`Failed to parse your url hash ${this.currentHash}. ${e}`);
+    console.log(`Failed to parse your url hash ${this.currentHash} obtained from ${window.location.hash}. ${e}`);
   }
 }
 
@@ -326,45 +352,44 @@ StorageCalculator.prototype.loadSettingsRecursively = function(
   }  
 }
 
-/** Returns true if output has meaningful information, false otherwise.
- * @returns {boolean} 
- * */
-StorageCalculator.prototype.computeURLRecursively = function(currentStorage, currentURL) {
+StorageCalculator.prototype.computeURLRecursively = function(currentStorage, recursionDepth) {
+  if (recursionDepth === undefined) {
+    recursionDepth = 0;
+  }
+  if (recursionDepth > 100) {
+    throw("Recursion is too deeply nested. This must be a programming error. ");
+  }
+  var result = {};
   if (currentStorage instanceof StorageVariable) {
     var urlName = currentStorage.nameURL; 
-    if (urlName !== undefined && urlName !== null && urlName !== "") {
-      if (currentStorage.showInURLByDefault || (urlName in currentURL)) {
-        currentURL[urlName] = currentStorage.value;
-        //<- we show url variable only if typed in by the user
-        // or if it shown in the url by default
-        return true
-      } 
+    if (urlName === undefined || urlName === null || urlName === "") {
+      return null;
     }
-    return false;
+    if (currentStorage.showInURLByDefault !== true) {
+      return null;
+    }
+    if (currentStorage.value === null || currentStorage.value == undefined || currentStorage.value == "") {
+      return null;  
+    }
+    result[urlName] = currentStorage.value;
+    return result;
   }
   if (typeof currentStorage !== "object") {
     throw (`Unexpected currentStorage input while computing url: ${currentStorage}`);
   }
-  var hasNonTrivialInformation = false;
   for (var label in currentStorage) {
-    if  (typeof currentURL[label] !== "object") {
-      var urlAdditionCandidate = {}
-      if (this.computeURLRecursively(currentStorage[label], urlAdditionCandidate)) {
-        currentURL[label] = urlAdditionCandidate[label];
-        hasNonTrivialInformation = true;
-      }      
-    } else {
-      if (this.computeURLRecursively(currentStorage[label], currentURL[label])) {
-        hasNonTrivialInformation = true;
-      }
+    var incoming = this.computeURLRecursively(currentStorage[label], recursionDepth + 1);
+    if (incoming === null) {
+      continue;
     }
+    Object.assign(result, incoming);
   }
-  return hasNonTrivialInformation;
+  return result;
 }
 
 StorageCalculator.prototype.setURL = function () {
-  this.computeURLRecursively(this.variables, this.urlObject);
-  var incomingHash = JSON.stringify(this.urlObject);
+  this.urlObject = this.computeURLRecursively(this.variables);
+  var incomingHash = this.getCleanedUpURL();
   if (incomingHash !== this.currentHash) {
     window.location.hash = incomingHash;
   } 

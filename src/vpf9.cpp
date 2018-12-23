@@ -9042,7 +9042,7 @@ std::string HtmlRoutines::GetHtmlSpanHidableStartsHiddeN
   std::stringstream spanLabel;
   spanLabel << "hidableSpan" << desiredIdStart << HtmlRoutines::GlobalGeneralPurposeID;
   buttonLabel << "buttonHS" << HtmlRoutines::GlobalGeneralPurposeID;
-  out << HtmlRoutines::GetHtmlButton(buttonLabel.str(), "switchMenu('" + spanLabel.str() + "');", labelExpandButton);
+  out << HtmlRoutines::GetHtmlButton(buttonLabel.str(), "window.calculator.miscellaneousFrontend.switchMenu('" + spanLabel.str() + "');", labelExpandButton);
   out << "<span";
   out << " id =\"" << spanLabel.str() << "\" class=\"hiddenClass\">";
   out << input << "</span>";

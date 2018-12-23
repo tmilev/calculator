@@ -298,8 +298,8 @@ function StorageCalculator() {
 }
 
 /**@returns {String} */
-StorageCalculator.prototype.getCleanedUpURL = function() {
-  var stringifiedInput = JSON.stringify(this.urlObject);
+StorageCalculator.prototype.getCleanedUpURL = function(input) {
+  var stringifiedInput = JSON.stringify(input);
   var isGood = true;
   try {
     var decodedAsURL = decodeURIComponent(stringifiedInput);
@@ -389,7 +389,7 @@ StorageCalculator.prototype.computeURLRecursively = function(currentStorage, rec
 
 StorageCalculator.prototype.setURL = function () {
   this.urlObject = this.computeURLRecursively(this.variables);
-  var incomingHash = this.getCleanedUpURL();
+  var incomingHash = this.getCleanedUpURL(this.urlObject);
   if (incomingHash !== this.currentHash) {
     window.location.hash = incomingHash;
   } 

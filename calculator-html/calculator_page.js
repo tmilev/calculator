@@ -100,33 +100,16 @@ function createSelection(field, start, end) {
   }
 }
 
-Calculator.prototype.exampleClick = function(theLink) {
-  var theAtom = decodeURIComponent(theLink.atom);
-  var theIndex = theLink.index;
-  var isComposite = theLink.composite;
-  var theHandler = null;
-  //console.log(theLink);
-  if (isComposite) {
-    theHandler = this.examples[theAtom].composite[theIndex];
-  } else {
-    theHandler = this.examples[theAtom].regular[theIndex];
-  }
-
-  //console.log(theHandler);
-  var mainInput = document.getElementById(ids.domElements.inputMain);
-  mainInput.value = theHandler.example;
-  this.submitComputation();
-}
-
-function processOneFunctionAtom(handlers, isComposite) {
+Calculator.prototype.processOneFunctionAtom = function(handlers, isComposite) {
   var resultString = "";
   for (var counterHandlers = 0; counterHandlers < handlers.length; counterHandlers ++) {
     resultString += "<br>";
     var currentDescription = handlers[counterHandlers].description;
     var currentExample = handlers[counterHandlers].example;
     resultString += `<calculatorAtom>${handlers[counterHandlers].atom}</calculatorAtom>`;
-    if (handlers[counterHandlers].composite === "true")
-        resultString += "<calculatorCompositeAtom>(composite)</calculatorCompositeAtom>";
+    if (handlers[counterHandlers].composite === "true") {
+      resultString += "<calculatorCompositeAtom>(composite)</calculatorCompositeAtom>";
+    }
     resultString += ` (${counterHandlers + 1} out of ${handlers.length})`;
     var currentId = "example_";
     if (isComposite) {
@@ -138,7 +121,9 @@ function processOneFunctionAtom(handlers, isComposite) {
     currentId += `${encodedAtom}_${counterHandlers}_${handlers.length}`;
     resultString += `<a href = '#' class = 'linkInfo' onclick = "window.calculator.miscellaneousFrontend.switchMenu('${currentId}')">info</a>`;
     resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${currentDescription}<br><b>Example:</b><br>${currentExample}</calculatorExampleInfo>`;
-    resultString += `<a href = "#" class = "linkInfo" onclick = "this.composite =${isComposite}; this.index =${counterHandlers}; this.atom='${encodedAtom}'; window.calculator.calculator.exampleClick(this);"> Example</a>`;
+
+    var theLink = this.getComputationLink(currentExample);
+    resultString += `<a href = '#${theLink}' class = "linkInfo"> Example</a>`;
     //resultString += currentExample;
     //console.log(handlers[counterHandlers]);
   }
@@ -154,8 +139,8 @@ Calculator.prototype.processExamples = function(inputJSONtext) {
     for (var counterAtoms = 0; counterAtoms < atomsSorted.length; counterAtoms ++) {
       var atom = atomsSorted[counterAtoms];
       var currentExamples = this.examples[atom];
-      examplesString += processOneFunctionAtom(currentExamples.regular, false);
-      examplesString += processOneFunctionAtom(currentExamples.composite, true);
+      examplesString += this.processOneFunctionAtom(currentExamples.regular, false);
+      examplesString += this.processOneFunctionAtom(currentExamples.composite, true);
       numHandlers += this.examples[atom].regular.length + this.examples[atom].composite.length;
     }
     var resultString = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
@@ -201,16 +186,26 @@ Calculator.prototype.submitComputation = function() {
     return;
   }
   this.lastSubmittedInput = calculatorInput;
-  //var theHash = miscellaneous.deepCopy(thePage.storage.urlObject); 
-  //theHash.calculatorInput = calculatorInput;
-  //var stringifiedHash = JSON.stringify(theHash);
-  //window.location.hash = stringifiedHash;
+  //submitComputationPartTwo is called by a callback in the function below:
   thePage.storage.variables.calculator.input.setAndStore(this.lastSubmittedInput);
 }
 
-Calculator.prototype.submitComputationPartTwo = function(input) {
+/**@returns {String} */
+Calculator.prototype.getComputationLink = function(input) {
+  var theURL = {
+    currentPage: "calculator",
+    calculatorInput: input,
+  };
   var thePage = window.calculator.mainPage;
-  var stringifiedHash = thePage.storage.getCleanedUpURL();
+  var stringifiedHash = thePage.storage.getCleanedUpURL(theURL);
+  return stringifiedHash;
+}
+
+Calculator.prototype.submitComputationPartTwo = function(input) {
+  //<- this function is called by a callback trigerred when calling 
+  //thePage.storage.variables.calculator.input.setAndStore(...)
+  var thePage = window.calculator.mainPage;
+  var stringifiedHash = thePage.storage.getCleanedUpURL(thePage.storage.urlObject);
   document.getElementById("spanComputationLink").innerHTML = `<a href = '#${stringifiedHash}'>Link to your input</a>`;
 
   var url = pathnames.urls.calculatorAPI;

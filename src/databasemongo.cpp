@@ -292,6 +292,7 @@ bool MongoQuery::FindMultiple
 (List<JSData>& output, const JSData& inputOptions, std::stringstream* commentsOnFailure,
  std::stringstream* commentsGeneralNonSensitive)
 { MacroRegisterFunctionWithName("MongoQuery::FindMultiple");
+  //double timeBeforeDatabase = theGlobalVariables.GetElapsedSeconds();
   if (!databaseMongo.initialize(commentsOnFailure))
     return false;
   MongoCollection theCollection(this->collectionName);
@@ -326,6 +327,8 @@ bool MongoQuery::FindMultiple
       return false;
     }
   }
+  //logWorker << logger::red << "DEBUG: about to fire up mongo query: " << this->findQuery << logger::endL;
+  double timeBeforeQuery = theGlobalVariables.GetElapsedSeconds();
   this->cursor = mongoc_collection_find_with_opts(theCollection.collection, this->query, this->options, NULL);
   if (this->cursor == NULL)
   { if (commentsOnFailure != 0)
@@ -354,6 +357,11 @@ bool MongoQuery::FindMultiple
     { logWorker << logger::red << "Mongo/JSData error: failed to read string" << logger::endL;
       return false;
     }
+  //double timeAfterQuery = theGlobalVariables.GetElapsedSeconds();
+  //double timeInMsDouble = (timeAfterQuery - timeBeforeQuery ) * 1000;
+  //double timeWithDBStart = (timeAfterQuery - timeBeforeDatabase) *1000 ;
+  //logWorker << logger::green << "Time in ms: " << timeInMsDouble << logger::endL;
+  //logWorker << logger::blue << "Time in ms INDCLUDING first connection: " << timeWithDBStart << logger::endL;
   //logWorker << logger::green << "DEBUG: Query successful. Output size: " << output.size << ". "
   //<< output.ToStringCommaDelimited() << logger::endL;
   return true;
@@ -434,7 +442,6 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions");
 #ifdef MACRO_use_MongoDB
   logWorker << logger::blue << "Query input JSON: " << findQuery.ToString(true) << logger::endL;
-  //stOutput << "Find query: " << theData.ToString();
   MongoQuery query;
   query.collectionName = collectionName;
   query.findQuery = findQuery.ToString(true);

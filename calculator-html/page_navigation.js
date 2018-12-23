@@ -131,7 +131,12 @@ StorageVariable.prototype.loadMe = function(hashParsed) {
   this.setAndStore(candidate, false, true);
 }
 
-StorageVariable.prototype.storeMe = function(/**@type {boolean} */ updateURL, /**@type {boolean} */ updateAssociatedInput) {
+StorageVariable.prototype.storeMe = function(
+  /**@type {boolean} */ 
+  updateURL, 
+  /**@type {boolean} */ 
+  updateAssociatedInput,
+) {
   if (Storage !== undefined || localStorage !== undefined) {
     if (this.nameLocalStorage !== "" && this.nameLocalStorage !== null && this.nameLocalStorage !== undefined) {
       localStorage[this.nameLocalStorage] = this.value;
@@ -301,7 +306,10 @@ StorageCalculator.prototype.loadSettings = function() {
   this.loadSettingsRecursively(this.variables, this.urlObject);
 }
 
-StorageCalculator.prototype.loadSettingsRecursively = function(/**@type {StorageVariable} */ currentStorage, inputHashParsed) {
+StorageCalculator.prototype.loadSettingsRecursively = function(
+  /**@type {StorageVariable} */ currentStorage, 
+  inputHashParsed
+) {
   if (currentStorage instanceof StorageVariable) {
     currentStorage.loadMe(inputHashParsed);
     return;

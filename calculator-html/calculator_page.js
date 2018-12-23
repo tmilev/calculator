@@ -193,7 +193,9 @@ Calculator.prototype.toggleExamples = function(theButton) {
 }
 
 Calculator.prototype.calculatorLinkClickHandler = function(theAnchor) {
-  window.calculator.mainPage.storage.loadSettings(theAnchor.href.split('#')[1]); 
+  var anchorLink = theAnchor.href.split('#')[1];
+  window.location.hash = anchorLink;
+  window.calculator.mainPage.storage.loadSettings(); 
   this.submitComputation();
 }
 

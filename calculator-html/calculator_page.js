@@ -206,16 +206,27 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
   var inputHtml = null;
   var commentsHtml = "";
   var performanceHtml = "";
+  var logParsing = "";
   try {
     inputParsed = JSON.parse(input);
     inputHtml = inputParsed.resultHtml;
     commentsHtml = inputParsed.comments;
     performanceHtml = inputParsed.performance;
+    logParsing = inputParsed.parsingLog;
+    var buffer = new BufferCalculator();
+    buffer.write(`<table><tr><td>`);
+    buffer.write(`<table><tr><th>Input</th><th>Output</th></tr>`);
+    for (var i = 0; i < inputParsed.result.input.length; i ++) {
+      buffer.write(`<tr><td> ${inputParsed.result.input[i]}</td><td>${inputParsed.result.output[i]}</td></tr>`);    
+    }
+    buffer.write("</table>");  
+    buffer.write(`</td><td>${performanceHtml} ${commentsHtml}</td></tr><table>${logParsing}`)
+    inputHtml = buffer.toString();
   } catch (e) {
     inputHtml = input;
   }
   var spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
-  spanVerification.innerHTML = `<table><tr><td>${inputHtml}</td><td>${performanceHtml} ${commentsHtml}</td></tr><table>`;    
+  spanVerification.innerHTML = inputHtml;
   var incomingScripts = spanVerification.getElementsByTagName('script');
   var thePage = window.calculator.mainPage;
   var oldScripts = thePage.pages.calculator.scriptIds;

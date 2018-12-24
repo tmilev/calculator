@@ -2699,22 +2699,26 @@ JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& star
           input[i - 1] = "No matching starting expression - possible use of the Melt keyword.";
       } else
         input[i - 1] = "...";
-      if ((*this)[i].IsOfType<std::string>())
-        output[i - 1] = currentE.GetValue<std::string>();
+      std::stringstream out;
+      if (currentE.IsOfType<std::string>())
+        out << currentE.GetValue<std::string>();
       else if (currentE.HasType<Plot> () ||
                currentE.IsOfType<SemisimpleSubalgebras>() ||
                currentE.IsOfType<WeylGroupData>() ||
                currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >())
-        output[i - 1] = currentE.ToString(theFormat);
+        out << currentE.ToString(theFormat);
       else
-        output[i - 1] = HtmlRoutines::GetMathSpanPure(currentE.ToString(theFormat), 1700);
-      output[i - 1] = currentE.ToStringAllSlidersInExpression();
+        out << HtmlRoutines::GetMathSpanPure(currentE.ToString(theFormat), 1700);
+      out << currentE.ToStringAllSlidersInExpression();
+      output[i - 1] = out.str();
     }
   } else
   { input[0] = HtmlRoutines::GetMathSpanPure(startingExpression.ToString(theFormat), 1700);
     if (this->IsOfType<std::string>() || this->IsOfType<Plot>() ||
         this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroupData>())
-    input[0] = HtmlRoutines::GetMathSpanPure(this->ToString(theFormat), 1700);
+      output[0] = this->ToString(theFormat);
+    else
+      output[0] = HtmlRoutines::GetMathSpanPure(this->ToString(theFormat), 1700);
   }
   result["input"] = input;
   result["output"] = output;

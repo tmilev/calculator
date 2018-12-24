@@ -2725,9 +2725,11 @@ JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& star
   return result;
 }
 
-std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression, bool unfoldCommandEnclosures) const
+std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression, bool unfoldCommandEnclosures, JSData* outputJS) const
 { MacroRegisterFunctionWithName("Expression::ToString");
   MemorySaving<FormatExpressions> tempFormat;
+  //if (outputJS != 0)
+  //  (*outputJS)["comments"] = "DEBUG: got to here. part 1";
   if (theFormat == 0)
   { theFormat = &tempFormat.GetElement();
     theFormat->flagUseQuotes = false;
@@ -2740,10 +2742,13 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   RecursionDepthCounter theRecursionCounter(&this->owner->RecursionDeptH);
   this->CheckConsistency();
   if (startingExpression != 0 && unfoldCommandEnclosures)
-  { Expression newStart, newMe;
+  { //if (outputJS != 0)
+    //  (*outputJS)["comments"] = "DEBUG: inside unfold enclosures.";
+
+    Expression newStart, newMe;
     if (this->owner->innerFlattenCommandEnclosuresOneLayer(*this->owner, *this, newMe) &&
         this->owner->innerFlattenCommandEnclosuresOneLayer(*this->owner, *startingExpression, newStart))
-      return newMe.ToString(theFormat, &newStart, false);
+      return newMe.ToString(theFormat, &newStart, false, outputJS);
   }
   int notationIndex = owner->theObjectContainer.ExpressionWithNotation.GetIndex(*this);
   if (notationIndex != - 1)
@@ -2757,6 +2762,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   bool allowNewLine = theFormat->flagExpressionNewLineAllowed;
   bool oldAllowNewLine = allowNewLine;
   bool useFrac = this->owner->flagUseFracInRationalLaTeX;
+  //if (outputJS != 0)
+  //  (*outputJS)["comments"] = "DEBUG: got to here. part 2";
   if (!this->IsOfType<std::string>() &&
       !this->StartsWith(this->owner->opEndStatement()))
   { if (startingExpression == 0)
@@ -2767,10 +2774,14 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   int lineBreak = 50;
   int charCounter = 0;
   std::string tempS;
+  if (outputJS != 0)
+    (*outputJS)["comments"] = "DEBUG: got to here. ";
   //stOutput << "DEBUG:" << this->theData << " [";
   //for (int i = 0; i < this->size(); i ++)
   //  stOutput << (*this)[i].theData << ", ";
   //stOutput << "]";
+  if (outputJS != 0)
+    outputJS->reset();
   if (this->ToStringData(tempS, theFormat))
     out << tempS;
   else if (this->StartsWith(this->owner->opDefine(), 3))
@@ -3274,48 +3285,63 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << "(";
     if (createSingleTable)
       out << "<table class =\"tableCalculatorOutput\">";
-    for (int i = 1; i < this->children.size; i ++)
+    std::string currentInput, currentOutput;
+    if (outputJS != 0)
+    { (*outputJS)["input"].type = JSData::JSarray;
+      (*outputJS)["output"].type = JSData::JSarray;
+    }
+    for (int i = 1; i < this->size(); i ++)
     { const Expression currentE = (*this)[i];
       if (createTable)
       { out << "<tr><td class =\"cellCalculatorInput\">";
         if (!this->owner->flagHideLHS)
-        { if (i < (*startingExpression).children.size)
-            out << HtmlRoutines::GetMathSpanPure((*startingExpression)[i].ToString(theFormat));
+        { if (i < (*startingExpression).size())
+            currentInput = HtmlRoutines::GetMathSpanPure((*startingExpression)[i].ToString(theFormat));
           else
-            out << "No matching starting expression- possible use of the Melt keyword.";
+            currentInput = "No matching starting expression- possible use of the Melt keyword.";
         } else
-          out << "...";
-        if (i != this->children.size - 1)
+          currentInput = "...";
+        out << currentInput;
+        if (outputJS != 0)
+          (*outputJS)["input"][i - 1] = currentInput;
+        if (i != this->size() - 1)
           out << ";";
         out << "</td><td class =\"cellCalculatorResult\">";
         if ((*this)[i].IsOfType<std::string>() && isFinal)
-          out << currentE.GetValue<std::string>();
+          currentOutput = currentE.GetValue<std::string>();
         else if ((currentE.HasType<Plot> () ||
                   currentE.IsOfType<SemisimpleSubalgebras>() ||
                   currentE.IsOfType<WeylGroupData>() ||
                   currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()) && isFinal)
-          out << currentE.ToString(theFormat);
+          currentOutput = currentE.ToString(theFormat);
         else
-          out << HtmlRoutines::GetMathSpanPure(currentE.ToString(theFormat), 1700);
-        out << currentE.ToStringAllSlidersInExpression();
+          currentOutput = HtmlRoutines::GetMathSpanPure(currentE.ToString(theFormat), 1700);
+        currentOutput += currentE.ToStringAllSlidersInExpression();
+        if (outputJS != 0)
+          (*outputJS)["output"][i - 1] = currentOutput;
+        out << currentOutput;
         out << "</td></tr>";
       } else
       { bool addLatexDelimiter = true;
+        std::stringstream outWithDelimiter;
         if (createSingleTable)
         { out << "<tr><td>\n";
           addLatexDelimiter = !currentE.HasType<Plot>();
           if (addLatexDelimiter)
-            out << "\\(";
+            outWithDelimiter << "\\(";
         }
-        out << currentE.ToString(theFormat);
+        outWithDelimiter << currentE.ToString(theFormat);
         //stOutput << "<hr>DEBUG: GOT TO HERE";
         if (createSingleTable && addLatexDelimiter)
-          out << "\\)";
-        out << currentE.ToStringAllSlidersInExpression();
+          outWithDelimiter << "\\)";
+        outWithDelimiter << currentE.ToStringAllSlidersInExpression();
+        out << outWithDelimiter.str();
+        if (outputJS != 0)
+          (*outputJS)["output"][i] = outWithDelimiter.str();
         //stOutput << "<hr>DEBUG: GOT TO HERE";
         if (createSingleTable)
           out << "</td><tr>\n";
-        if (i != this->children.size - 1 && !createSingleTable)
+        if (i != this->size() - 1 && !createSingleTable)
           out << ";";
       }
       if (theFormat != 0)
@@ -3358,33 +3384,34 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
 //    stOutput << "<br>tostringing: " << out.str() << "   lispified: " << this->ToStringFull();
 
   } else //<-not sure if this case is possible
-    out << "(ProgrammingError:NotDocumented)" ;
+    out << "(ProgrammingError:NotDocumented)";
+  std::string input, output;
   if (startingExpression != 0)
   { std::stringstream outTrue;
     outTrue << "<table class =\"tableCalculatorOutput\">";
-    //outTrue << "<tr><th colspan =\"2\"> Dbl click f-la to get LaTeX.</th></tr> ";
-    //out << "Many thanks to the <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a> project!</td></tr>";
     outTrue << "<tr><th>Input</th><th>Result</th></tr>";
-    // stOutput << this->Lispify();
     if (this->IsListStartingWithAtom(this->owner->opEndStatement()))
       outTrue << out.str();
     else
-    { outTrue << "<tr><td class =\"cellCalculatorInput\">"
-      << HtmlRoutines::GetMathSpanPure(startingExpression->ToString(theFormat), 1700);
+    { input = HtmlRoutines::GetMathSpanPure(startingExpression->ToString(theFormat), 1700);
+      outTrue << "<tr><td class =\"cellCalculatorInput\">" << input << "</td>";
       if ((this->IsOfType<std::string>() || this->IsOfType<Plot>() ||
            this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroupData>()) && isFinal)
-        outTrue << "</td><td class =\"cellCalculatorResult\">" << out.str() << "</td></tr>";
+        output = out.str();
       else
-        outTrue << "</td><td class =\"cellCalculatorResult\">"
-        << HtmlRoutines::GetMathSpanPure(out.str(), 1700) << "</td></tr>";
+        output = HtmlRoutines::GetMathSpanPure(out.str(), 1700);
+      outTrue << "<td class =\"cellCalculatorResult\">" << output << "</td></tr>";
+      if (outputJS != 0)
+      { (*outputJS)["input"] = input;
+        (*outputJS)["output"] = output;
+      }
     }
     outTrue << "</table>";
     return outTrue.str();
   }
-//  if (useLatex && recursionDepth == 0 && this->theOperation != owner->opEndStatement())
-//    return HtmlRoutines::GetHtmlMathSpanFromLatexFormula(out.str());
-//  if (this->format == this->formatTimesDenotedByStar)
-//    stOutput << "DEBUG: Formatted by star: " << out.str() << "<br>";
+  if (outputJS != 0)
+    if (outputJS->type == JSData::JSUndefined)
+      (*outputJS) = out.str();
   return out.str();
 }
 

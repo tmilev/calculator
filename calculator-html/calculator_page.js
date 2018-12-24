@@ -215,9 +215,9 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
     logParsing = inputParsed.parsingLog;
     var buffer = new BufferCalculator();
     buffer.write(`<table><tr><td>`);
-    buffer.write(`<table><tr><th>Input</th><th>Output</th></tr>`);
+    buffer.write(`<table class = "tableCalculatorOutput"><tr><th>Input</th><th>Output</th></tr>`);
     for (var i = 0; i < inputParsed.result.input.length; i ++) {
-      buffer.write(`<tr><td> ${inputParsed.result.input[i]}</td><td>${inputParsed.result.output[i]}</td></tr>`);    
+      buffer.write(`<tr><td class = "cellCalculatorInput"> ${inputParsed.result.input[i]}</td><td class = "cellCalculatorResult">${inputParsed.result.output[i]}</td></tr>`);    
     }
     buffer.write("</table>");  
     buffer.write(`</td><td>${performanceHtml} ${commentsHtml}</td></tr><table>${logParsing}`)

@@ -882,11 +882,12 @@ void Calculator::EvaluateCommands()
     if (javascriptString != "")
       this->outputJS["javascriptForUserInputBoxes"] = javascriptString;
     out << javascriptString;
+    JSData result;
+    result.type = JSData::JSObject;
     std::string resultString = this->theProgramExpression.ToString
-    (&theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression);
+    (&theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression, true, &result);
+    this->outputJS["result"] = result;
     out << resultString;
-    this->outputJS["result"] = this->theProgramExpression.ToJSData
-    (&theGlobalVariables.theDefaultFormat.GetElement(), StartingExpression);
   } else
   { std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharsString != "")

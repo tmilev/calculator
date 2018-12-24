@@ -2368,7 +2368,7 @@ std::string ObjectContainer::ToString()
 }
 
 std::string Calculator::ToStringOutputAndSpecials()
-{ MacroRegisterFunctionWithName("Calculator::ToStringOutputSpecials");
+{ MacroRegisterFunctionWithName("Calculator::ToStringOutputAndSpecials");
   if (this->inputString == "")
     return "";
   JSData result = this->outputJS;

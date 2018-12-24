@@ -424,7 +424,8 @@ private:
   std::string ToUTF8String(FormatExpressions* theFormat = 0) const;
   bool GetListExpressionsFromExpressionHistoryRecursiveNested(Expression& outputAppend) const;
   std::string ToStringExpressionHistoryRecursiveNested();
-  std::string ToString(FormatExpressions* theFormat = 0, Expression* startingExpression = 0, bool unfoldCommandEnclosures = true) const;
+  std::string ToString
+  (FormatExpressions* theFormat = 0, Expression* startingExpression = 0, bool unfoldCommandEnclosures = true, JSData* outputJS = 0) const;
   JSData ToJSData(FormatExpressions* theFormat, const Expression& startingExpression) const;
   static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();

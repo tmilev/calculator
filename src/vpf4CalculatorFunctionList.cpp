@@ -872,6 +872,21 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorConversions::innerPolynomial",
    "PolynomialAlgebraicNumbers");
   this->AddOperationInnerHandler
+  ("ConvertAlgebraicNumberToMatrix",
+   CalculatorFunctionsGeneral::innerConvertAlgebraicNumberToMatrix, "",
+   "Converts the algebraic number to its internal matrix representation. ",
+   "a = \\sqrt{2};\n"
+   "A = ConvertAlgebraicNumberToMatrix(a);\n"
+   "b = \\sqrt{3};\n"
+   "B = ConvertAlgebraicNumberToMatrix(b);\n"
+   "c = \\sqrt{6};\n"
+   "C = ConvertAlgebraicNumberToMatrix(c);\n"
+   "A\\otimes B",
+   true, false,
+   "CalculatorFunctionsGeneral::innerConvertAlgebraicNumberToMatrix",
+   "ConvertAlgebraicNumberToMatrix");
+
+  this->AddOperationInnerHandler
   ("AlgebraicNumberFromPoly",
    CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly, "",
    "Creates an algebraic number that is a root of a polynomial with algebraic number coefficients. ",

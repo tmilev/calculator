@@ -948,6 +948,20 @@ bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerConvertAlgebraicNumberToMatrix(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertAlgebraicNumberToMatrix");
+  AlgebraicNumber theNumber;
+  if (!input.IsOfType(&theNumber))
+    return theCommands << "Failed to convert " << input.ToString() << " to algebraic number. ";
+  int dimension = theNumber.owner->GetDimensionOverTheRationals();
+
+  MatrixTensor<Rational> numberMatrixTensor;
+  theNumber.owner->GetMultiplicationBy(theNumber, numberMatrixTensor);
+  Matrix<Rational> result;
+  numberMatrixTensor.GetMatrix(result, dimension);
+  return output.AssignMatrix(result, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly");
   Expression polyE;

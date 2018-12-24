@@ -257,6 +257,7 @@ public:
   static bool innerInvertMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDFQsEulersMethod(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerConvertAlgebraicNumberToMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetAlgebraicNumberFromMinPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMakeMakeFile(Calculator& theCommands, const Expression& input, Expression& output);
 

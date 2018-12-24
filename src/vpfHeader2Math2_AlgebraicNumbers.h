@@ -196,7 +196,7 @@ public:
   bool ReduceMe();
   void ComputeDisplayStringsFromRadicals();
   bool GetRadicalSelectionFromIndex(int inputIndex, Selection& theSel);
-
+  int GetDimensionOverTheRationals() const;
   static int GetIndexFromRadicalSelection(const Selection& theSel);
   void GetMultiplicativeOperatorFromRadicalSelection(const Selection& theSel, MatrixTensor<Rational>& outputOp);
   void GetMultiplicationBy(const AlgebraicNumber& input, MatrixTensor<Rational>& output);

@@ -15,6 +15,10 @@ std::string MonomialVector::ToString(FormatExpressions* theFormat) const
   return out.str();
 }
 
+int AlgebraicClosureRationals::GetDimensionOverTheRationals() const
+{ return this->theBasisMultiplicative.size;
+}
+
 bool AlgebraicClosureRationals::CheckConsistency() const
 { return true;
 }

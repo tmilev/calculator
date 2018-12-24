@@ -2684,6 +2684,43 @@ std::string Expression::ToStringAllSlidersInExpression() const
   return out.str();
 }
 
+JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& startingExpression) const
+{ MacroRegisterFunctionWithName("Expression::ToJSData");
+  JSData result, input, output;
+  input.type = JSData::JSarray;
+  output.type = JSData::JSarray;
+  if (this->IsListStartingWithAtom(this->owner->opEndStatement()))
+  { for (int i = 1; i < this->size(); i ++)
+    { const Expression currentE = (*this)[i];
+      if (!this->owner->flagHideLHS)
+      { if (i < startingExpression.size())
+          input[i - 1] = startingExpression[i].ToString(theFormat);
+        else
+          input[i - 1] = "No matching starting expression - possible use of the Melt keyword.";
+      } else
+        input[i - 1] = "...";
+      if ((*this)[i].IsOfType<std::string>())
+        output[i - 1] = currentE.GetValue<std::string>();
+      else if (currentE.HasType<Plot> () ||
+               currentE.IsOfType<SemisimpleSubalgebras>() ||
+               currentE.IsOfType<WeylGroupData>() ||
+               currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >())
+        output[i - 1] = currentE.ToString(theFormat);
+      else
+        output[i - 1] = HtmlRoutines::GetMathSpanPure(currentE.ToString(theFormat), 1700);
+      output[i - 1] = currentE.ToStringAllSlidersInExpression();
+    }
+  } else
+  { input[0] = HtmlRoutines::GetMathSpanPure(startingExpression.ToString(theFormat), 1700);
+    if (this->IsOfType<std::string>() || this->IsOfType<Plot>() ||
+        this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroupData>())
+    input[0] = HtmlRoutines::GetMathSpanPure(this->ToString(theFormat), 1700);
+  }
+  result["input"] = input;
+  result["output"] = output;
+  return result;
+}
+
 std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression, bool unfoldCommandEnclosures) const
 { MacroRegisterFunctionWithName("Expression::ToString");
   MemorySaving<FormatExpressions> tempFormat;

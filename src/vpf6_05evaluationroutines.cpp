@@ -871,25 +871,37 @@ void Calculator::EvaluateCommands()
     (&theGlobalVariables.theDefaultFormat.GetElement())
     << logger::normalConsole() << std::endl;
   } else if (!this->flagDisplayFullExpressionTree)
-  { std::string badCharsString =
-    this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
+  { std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharsString != "")
-      out << badCharsString << "<hr>";
+    { out << badCharsString << "<hr>";
+      this->outputJS["badInput"] = badCharsString;
+    }
     this->theObjectContainer.resetSliders();
     this->theObjectContainer.resetPlots();
-    out << this->theObjectContainer.ToStringJavascriptForUserInputBoxes();
-    out << this->theProgramExpression.ToString
+    std::string javascriptString = this->theObjectContainer.ToStringJavascriptForUserInputBoxes();
+    if (javascriptString != "")
+      this->outputJS["javascriptForUserInputBoxes"] = javascriptString;
+    out << javascriptString;
+    std::string resultString = this->theProgramExpression.ToString
     (&theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression);
+    out << resultString;
+    this->outputJS["result"] = this->theProgramExpression.ToJSData
+    (&theGlobalVariables.theDefaultFormat.GetElement(), StartingExpression);
   } else
-  { std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString
-    (this->inputString);
+  { std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharsString != "")
-      out << badCharsString << "<hr>";
+    { out << badCharsString << "<hr>";
+      this->outputJS["badInput"] = badCharsString;
+    }
     this->theObjectContainer.resetSliders();
     out << "<hr>Input:<br> " << StartingExpression.ToStringFull() << "<hr>"
     << "Output:<br>" << this->theProgramExpression.ToStringFull();
+    this->outputJS["result"]["input"] = StartingExpression.ToStringFull();
+    this->outputJS["result"]["output"] = this->theProgramExpression.ToStringFull();
   }
   this->outputString = out.str();
+  this->outputJS["resultHtml"] = out.str();
+  this->outputJS["comments"] = this->Comments.str();
   std::stringstream commentsStream;
   if (this->theObjectContainer.theAlgebraicClosure.theBasisMultiplicative.size > 1)
     commentsStream << "<b>Algebraic number closure status. </b><br>"

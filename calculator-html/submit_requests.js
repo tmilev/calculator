@@ -148,7 +148,7 @@ function submitPOST(
     recordProgressDone(progress, (new Date()).getTime());
     recordResult(https.responseText, result);
     if (callback !== undefined && callback !== null) {
-      callback(result);
+      callback(https.responseText, result);
     }
   }
   ////////////////////////////////////////////

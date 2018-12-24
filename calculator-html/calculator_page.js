@@ -201,6 +201,39 @@ Calculator.prototype.getComputationLink = function(input) {
   return stringifiedHash;
 }
 
+Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input, output) { 
+  var inputParsed = null;
+  var inputHtml = null;
+  var commentsHtml = "";
+  var performanceHtml = "";
+  try {
+    inputParsed = JSON.parse(input);
+    inputHtml = inputParsed.resultHtml;
+    commentsHtml = inputParsed.comments;
+    performanceHtml = inputParsed.performance;
+  } catch (e) {
+    inputHtml = input;
+  }
+  var spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
+  spanVerification.innerHTML = `<table><tr><td>${inputHtml}</td><td>${performanceHtml} ${commentsHtml}</td></tr><table>`;    
+  var incomingScripts = spanVerification.getElementsByTagName('script');
+  var thePage = window.calculator.mainPage;
+  var oldScripts = thePage.pages.calculator.scriptIds;
+  thePage.removeScripts(oldScripts);
+  this.inputBoxNames = [];
+  this.inputBoxToSliderUpdaters = {};
+  this.canvases = {};
+  thePage.pages.calculator.sciptIds = [];
+  for (var i = 0; i < incomingScripts.length; i ++) { 
+    var newId = `calculatorMainPageId_${i}`;
+    thePage.pages.calculator.sciptIds.push(newId);
+    thePage.injectScript(newId, incomingScripts[i].innerHTML);
+  }
+  MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById(ids.domElements.spanCalculatorMainOutput)]);
+  MathJax.Hub.Queue([this.addListenersToInputBoxes.bind(this)]);
+//  alert(theString);
+}
+
 Calculator.prototype.submitComputationPartTwo = function(input) {
   //<- this function is called by a callback trigerred when calling 
   //thePage.storage.variables.calculator.input.setAndStore(...)
@@ -213,8 +246,7 @@ Calculator.prototype.submitComputationPartTwo = function(input) {
   submitRequests.submitPOST ({
     url: url,
     parameters:  parameters,
-    result: ids.domElements.spanCalculatorMainOutput,
-    callback: thePage.defaultOnLoadInjectScriptsAndProcessLaTeX.bind(thePage),
+    callback: this.defaultOnLoadInjectScriptsAndProcessLaTeX.bind(this),
     progress: ids.domElements.spanProgressCalculatorInput
   });
 }

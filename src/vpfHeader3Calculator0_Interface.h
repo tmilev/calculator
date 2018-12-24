@@ -425,6 +425,7 @@ private:
   bool GetListExpressionsFromExpressionHistoryRecursiveNested(Expression& outputAppend) const;
   std::string ToStringExpressionHistoryRecursiveNested();
   std::string ToString(FormatExpressions* theFormat = 0, Expression* startingExpression = 0, bool unfoldCommandEnclosures = true) const;
+  JSData ToJSData(FormatExpressions* theFormat, const Expression& startingExpression) const;
   static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();
   }
@@ -1065,6 +1066,8 @@ public:
   //std::string inputStringRawestOfTheRaw;
   std::string inputString;
   std::string outputString;
+  JSData outputJS;
+
   std::string outputCommentsString;
   std::string parsingLog;
   ObjectContainer theObjectContainer;

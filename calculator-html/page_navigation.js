@@ -695,26 +695,6 @@ Page.prototype.studentView = function () {
   return false;
 }
 
-Page.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(idElement) { 
-  var spanVerification = document.getElementById(idElement);
-  var incomingScripts = spanVerification.getElementsByTagName('script');
-  var oldScripts = this.pages.calculator.scriptIds;
-  this.removeScripts(oldScripts);
-  var calculator = calculatorPage.calculator;
-  calculator.inputBoxNames = [];
-  calculator.inputBoxToSliderUpdaters = {};
-  calculator.canvases = {};
-  this.pages.calculator.sciptIds = [];
-  for (var i = 0; i < incomingScripts.length; i ++) { 
-    var newId = `calculatorMainPageId_${i}`;
-    this.pages.calculator.sciptIds.push(newId);
-    this.injectScript(newId, incomingScripts[i].innerHTML);
-  }
-  MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById(idElement)]);
-  MathJax.Hub.Queue([calculator.addListenersToInputBoxes.bind(calculator)]);
-//  alert(theString);
-}
-
 function Script() {
   this.id = "";
   this.content = "";

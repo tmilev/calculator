@@ -228,8 +228,8 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
       var outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
       panelIdPairs.push([inputPanelId, outputPanelId]);
       buffer.write("<tr>");
-      buffer.write(`<td class = "cellCalculatorInput"> <span id = "${inputPanelId}"></span></td>`)
-      buffer.write(`<td class = "cellCalculatorResult"><span id = "${outputPanelId}"></span></td>`);
+      buffer.write(`<td class = "cellCalculatorInput"> <div id = "${inputPanelId}"></div></td>`)
+      buffer.write(`<td class = "cellCalculatorResult"><div id = "${outputPanelId}"></div></td>`);
       buffer.write("</tr>");    
     }
     buffer.write("</table>");  

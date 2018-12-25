@@ -975,61 +975,6 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
   theWebServer.GetActiveWorker().pipeWorkerToWorkerStatus.WriteAfterEmptying(toBePiped.str(), false, false);
 }
 
-//void WebServer::Signal_SIGINT_handler(int s)
-//{ MacroRegisterFunctionWithName("WebServer::Signal_SIGINT_handler");
-//  if (theGlobalVariables.flagIsChildProcess)
-//    return;
-//  logProcessKills << theWebServer.ToStringActiveWorker() << "Signal interrupt handler called with input: " << s;
-////  << ". Waiting for children to exit... " << logger::endL;
-//  theWebServer.ReleaseActiveWorker();
-//  theWebServer.ReleaseNonActiveWorkers();
-//  while (waitpid(- 1, NULL, WNOHANG | WEXITED) > 0)
-//  { }
-//  logProcessKills << theWebServer.ToStringActiveWorker() << "All children have exited. " << logger::endL;
-//  exit(0);
-//}
-
-//void WebServer::Signal_SIGCHLD_handler(int s)
-//{ (void) s; //avoid unused parameter warning, portable.
-//  if (theGlobalVariables.flagIsChildProcess)
-//    return;
-//  if (theGlobalVariables.flagServerDetailedLog)
-//    logProcessStats << "DEBUG: "
-//    << theWebServer.ToStringActiveWorker() << " received SIGCHLD signal. " << logger::endL;
-//  theWebServer.flagReapingChildren = true;
-//  theWebServer.ReapChildren();
-//  theWebServer.flagReapingChildren = false;
-//}
-
-//void WebServer::ReapChildren() //<-Code not used, propose deletion of this code
-//{ MacroRegisterFunctionWithName("WebServer::ReapChildren");
-//  int waitResult = 0;
-//  int exitFlags = WNOHANG| WEXITED;
-//  if (theGlobalVariables.flagServerDetailedLog)
-//    logProcessStats << logger::red
-//    << this->ToStringActiveWorker() << " DEBUG: Enter the reaper. " << logger::endL;
-//  do
-//  { waitResult = waitpid(- 1, NULL, exitFlags);
-////    logWorker << "waitresult is: " << waitResult << logger::endL;
-//    if (waitResult>0)
-//      for (int i = 0; i < this->theWorkers.size; i ++)
-//        if (this->theWorkers[i].ProcessPID==waitResult)
-//        { logProcessStats << logger::yellow << this->ToStringActiveWorker()
-//          << " child " << i
-//          << " with pid " << waitResult << " successfully reaped. " << logger::endL;
-//          this->theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close", false, true);
-//          logProcessStats << logger::green << this->ToStringActiveWorker()
-//          << " Close message sent through pipe successfully. " << logger::endL;
-//          this->theWorkers[i].flagInUse = false;
-//          this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
-//          this->NumProcessesReaped++;
-//        }
-//  } while (waitResult>0);
-//  if (theGlobalVariables.flagServerDetailedLog)
-//    logProcessStats << logger::green << this->ToStringActiveWorker()
-//    << " DEBUG: EXIT the reaper. " << logger::endL;
-//}
-
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr* sa)
 { if (sa->sa_family == AF_INET)
@@ -2439,6 +2384,7 @@ void WebWorker::reset()
   theGlobalVariables.flagLoggedIn = false;
   theGlobalVariables.userDefault.reset();
   this->RelativePhysicalFileNamE = "";
+  this->numberOfReceivesCurrentConnection = 0;
   this->Release();
 }
 
@@ -2469,10 +2415,12 @@ void WebWorker::WrapUpConnection()
 { MacroRegisterFunctionWithName("WebWorker::WrapUpConnection");
   if (theGlobalVariables.flagServerDetailedLog)
     logIO << "DEBUG: wrapping up connection. " << logger::endL;
+  this->resultWork["connectionsServed"] = this->numberOfReceivesCurrentConnection;
   if (this->flagToggleMonitoring)
-    this->pipeWorkerToServerControls.WriteAfterEmptying("toggleMonitoring", false, false);
+    this->resultWork["result"] = "toggleMonitoring";
   else
-    this->pipeWorkerToServerControls.WriteAfterEmptying("close", false, false);
+    this->resultWork["result"] = "close";
+  this->pipeWorkerToServerControls.WriteAfterEmptying(this->resultWork.ToString(false), false, false);
   if (theGlobalVariables.flagServerDetailedLog)
     logIO << "DEBUG: done with pipes, releasing resources. " << logger::endL;
   this->Release();
@@ -4045,6 +3993,7 @@ WebServer::WebServer()
   this->NumConnectionsSoFar = 0;
   this->NumWorkersNormallyExited = 0;
   this->WebServerPingIntervalInSeconds = 10;
+  this->NumberOfServerRequestsWithinAllConnections = 0;
 }
 
 WebWorker& WebServer::GetActiveWorker()
@@ -4277,7 +4226,8 @@ std::string WebServer::ToStringStatusPublicNoTop()
   int numConnectionsSoFarApprox = this->NumConnectionsSoFar - approxNumPings;
   if (numConnectionsSoFarApprox < 0)
     numConnectionsSoFarApprox = 0;
-  out << "~" << numConnectionsSoFarApprox << " actual connections + ~"
+  out << "~" << numConnectionsSoFarApprox << " actual connections "
+  << "(with " << this->NumberOfServerRequestsWithinAllConnections << " server requests served)" << " + ~"
   << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total)"
   << " served since last restart. "
   << "This counts one connection per problem answer preview, page visit, progress report ping, etc. ";
@@ -4537,6 +4487,30 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     << "DEBUG: connection cleanup successful. " << logger::endL;
 }
 
+void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse)
+{
+  std::string messageString = this->theWorkers[childIndex].pipeWorkerToServerControls.GetLastRead();
+  this->theWorkers[childIndex].flagInUse = false;
+  this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[childIndex].userAddress, 1);
+  std::stringstream commentsOnFailure;
+  JSData workerMessage;
+  if (!workerMessage.readstring(messageString, false, &commentsOnFailure))
+    logServer << logger::red << "Worker "
+    << childIndex + 1 << " sent corrupted result message: "
+    << messageString << ". Marking for reuse. " << logger::endL;
+  else
+    logServer << logger::green << "Worker "
+    << childIndex + 1 << " done with message: "
+    << messageString
+    << ". Marking for reuse. " << logger::endL;
+  outputNumInUse --;
+  this->NumWorkersNormallyExited ++;
+  if (workerMessage["result"].string == "toggleMonitoring")
+    this->ToggleProcessMonitoring();
+  if (workerMessage["connectionsServed"].type == JSData::JSnumber)
+    this->NumberOfServerRequestsWithinAllConnections += (int) workerMessage["connectionsServed"].number;
+}
+
 void WebServer::RecycleChildrenIfPossible()
 { //Listen for children who have exited properly.
   //This might need to be rewritten: I wasn't able to make this work with any
@@ -4558,19 +4532,8 @@ void WebServer::RecycleChildrenIfPossible()
         crash << "Pipe: " << currentControlPipe.ToString() << " has blocking read end. " << crash;
       currentControlPipe.ReadIfFailThenCrash(false, true);
       if (currentControlPipe.lastRead.size > 0)
-      { this->theWorkers[i].flagInUse = false;
-        this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
-        std::string messageString = this->theWorkers[i].pipeWorkerToServerControls.GetLastRead();
-        logServer << logger::green << "Worker "
-        << i + 1 << " done with message: "
-        << messageString
-        << ". Marking for reuse. " << logger::endL;
-        numInUse --;
-        this->NumWorkersNormallyExited ++;
-        if (messageString == "toggleMonitoring")
-          this->ToggleProcessMonitoring();
-//        waitpid(this->theWorkers[i].ProcessPID, 0, )
-      } else
+        this->ProcessOneChildMessage(i, numInUse);
+      else
         logServer << logger::orange << "Worker " << i + 1 << " not done yet. " << logger::endL;
       PipePrimitive& currentPingPipe = this->theWorkers[i].pipeWorkerToServerTimerPing;
       if (currentPingPipe.flagReadEndBlocks)
@@ -5038,24 +5001,24 @@ int WebWorker::Run()
   /////////////////////////////////////////////////////////////////////////
   stOutput.theOutputFunction = WebServer::SendStringThroughActiveWorker;
   int result = 0;
-  int numReceivesThisConnection = 0;
+  this->numberOfReceivesCurrentConnection = 0;
   while (true)
   { StateMaintainerCurrentFolder preserveCurrentFolder;
     InitializeTimer();
     this->flagAllBytesSentUsingFile = false;
     this->flagEncounteredErrorWhileServingFile = false;
     if (!this->ReceiveAll())
-    { if (numReceivesThisConnection > 0)
+    { if (this->numberOfReceivesCurrentConnection > 0)
         return 0;
       this->WrapUpConnection();
       logIO << logger::red << "Failed to receive all with error: " << this->error;
       return - 1;
     }
-    numReceivesThisConnection ++;
+    this->numberOfReceivesCurrentConnection ++;
     if (theParser == 0)
     { theParser = new Calculator;
       theParser->init();
-      logWorker << logger::blue << "Created new calculator for connection: " << numReceivesThisConnection << logger::endL;
+      logWorker << logger::blue << "Created new calculator for connection: " << this->numberOfReceivesCurrentConnection << logger::endL;
     }
     PointerObjectDestroyer<Calculator> calculatorDestroyer(theParser);
     if (this->messageHead.size() == 0)
@@ -5070,7 +5033,7 @@ int WebWorker::Run()
       break;
     //The function call needs security audit.
     this->resetConnection();
-    logWorker << logger::blue << "Received " << numReceivesThisConnection << " times on this connection, waiting for more. "
+    logWorker << logger::blue << "Received " << this->numberOfReceivesCurrentConnection << " times on this connection, waiting for more. "
     << logger::endL;
   }
   this->WrapUpConnection();

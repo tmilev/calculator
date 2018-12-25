@@ -84,10 +84,13 @@ public:
   WebServer* parent;
   int indexInParent;
   int ProcessPID;
+  int numberOfReceivesCurrentConnection;
   std::string displayUserInput;
 
   std::string messageHead;
   std::string messageBody;
+
+  JSData resultWork;
 
   MonomialWrapper<std::string, MathRoutines::hashString> userAddress;
   std::string hostWithPort;
@@ -302,6 +305,7 @@ public:
   int MaxNumWorkersPerIPAdress;
   int MaxTotalUsedWorkers;
   int NumConnectionsSoFar;
+  int NumberOfServerRequestsWithinAllConnections;
   int NumProcessesReaped;
   int NumProcessAssassinated;
   int NumWorkersNormallyExited;
@@ -363,13 +367,7 @@ public:
   static void ReturnActiveIndicatorAlthoughComputationIsNotDone();
   static void SendStringThroughActiveWorker(const std::string& input);
   static void PipeProgressReportToParentProcess(const std::string& input);
-  //static void Signal_SIGINT_handler(int s); //<- signals appear to be racy. No signals please!
-  //static void Signal_SIGCHLD_handler(int s);//<- signals appear to be racy. No signals please!
   static void fperror_sigaction(int signal);
-  //<- this signal should never happen in
-  //<- server, so even if racy, we take the risk of a hang.
-  //<- racy-ness in child process does not bother us: hanged children are still fine.
-  //void ReapChildren();
   bool initPrepareWebServerALL();
   void initPrepareSignals();
   bool initBindToPorts();
@@ -378,6 +376,7 @@ public:
   void initSSL();
   void SSLServerSideHandShake();
   void TerminateChildSystemCall(int i);
+  void ProcessOneChildMessage(int childIndex, int& outputNumInUse);
   void RecycleChildrenIfPossible();
   void HandleTooManyConnections(const std::string& incomingUserAddress);
   void Restart();

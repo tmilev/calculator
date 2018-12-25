@@ -152,7 +152,7 @@ bool PauseProcess::PauseIfRequestedWithTimeOut(bool restartServerOnFail, bool do
     return false;
   }
   this->thePausePipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
-  if (this->thePausePipe.lastRead.size >0)
+  if (this->thePausePipe.lastRead.size > 0)
     this->thePausePipe.WriteIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
   return true;
 }

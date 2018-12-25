@@ -36,10 +36,10 @@ function callbackFetchProblemData(button, input, output) {
   var resultHTML = transformer.getTableFromObject(problemData);
   thePanel.setPanelContent(resultHTML);
   transformer.bindButtons();
-  thePanel.attributes.panelStatus = "collapsed";
+  //thePanel.attributes.panelStatus = "collapsed";
+  thePanel.doToggleContent();
   thePanel.matchPanelStatus();
-  setTimeout(thePanel.doToggleContent.bind(thePanel), 0);
-  console.log("DEBUG: parsed input: " + JSON.stringify(inputParsed));
+  //console.log("DEBUG: parsed input: " + JSON.stringify(inputParsed));
 }
 
 function fetchProblemData() {

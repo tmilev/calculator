@@ -111,7 +111,7 @@ function toggleMenu() {
 function PanelExpandable(
   container, 
   /** @type {Boolean} */ 
-  resetPanel
+  resetPanel,
 ) {
   this.attributes = {
     buttonId: null,

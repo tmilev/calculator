@@ -6,6 +6,7 @@ const ids = require('./ids_dom_elements');
 const miscellaneousFrontend = require('./miscellaneous_frontend');
 const miscellaneous = require('./miscellaneous');
 const BufferCalculator = require('./buffer').BufferCalculator;
+const PanelExpandable = require('./panels').PanelExpandable;
 
 function Calculator() {
 
@@ -15,6 +16,7 @@ function Calculator() {
   this.examples = null;
   this.submissionCalculatorCounter = 0;
   this.lastSubmittedInput = "";
+  this.numberOfCalculatorPanels = 0;
 }
 
 var calculatorMQString;
@@ -207,6 +209,8 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
   var commentsHtml = "";
   var performanceHtml = "";
   var logParsing = "";
+  var numEntries = 0;
+  var panelIdPairs = [];
   try {
     inputParsed = JSON.parse(input);
     inputHtml = inputParsed.resultHtml;
@@ -216,17 +220,48 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
     var buffer = new BufferCalculator();
     buffer.write(`<table><tr><td>`);
     buffer.write(`<table class = "tableCalculatorOutput"><tr><th>Input</th><th>Output</th></tr>`);
-    for (var i = 0; i < inputParsed.result.input.length; i ++) {
-      buffer.write(`<tr><td class = "cellCalculatorInput"> ${inputParsed.result.input[i]}</td><td class = "cellCalculatorResult">${inputParsed.result.output[i]}</td></tr>`);    
+    numEntries = Math.max(inputParsed.result.input.length, inputParsed.result.output.length);
+
+    for (var i = 0; i < numEntries; i ++) {
+      this.numberOfCalculatorPanels ++;
+      var inputPanelId = `calculatorInputPanel${this.numberOfCalculatorPanels}`;
+      var outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
+      panelIdPairs.push([inputPanelId, outputPanelId]);
+      buffer.write("<tr>");
+      buffer.write(`<td class = "cellCalculatorInput"> <span id = "${inputPanelId}"></span></td>`)
+      buffer.write(`<td class = "cellCalculatorResult"><span id = "${outputPanelId}"></span></td>`);
+      buffer.write("</tr>");    
     }
     buffer.write("</table>");  
     buffer.write(`</td><td>${performanceHtml} ${commentsHtml}</td></tr><table>${logParsing}`)
     inputHtml = buffer.toString();
   } catch (e) {
-    inputHtml = input;
+    inputHtml = input + "<br>" + e;
   }
   var spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
   spanVerification.innerHTML = inputHtml;
+  for (var i = 0; i < panelIdPairs.length; i ++) {
+    var currentInput = inputParsed.result.input[i];
+    var currentOutput = inputParsed.result.output[i];
+    var inputPanelId = panelIdPairs[i][0];
+    var outputPanelId = panelIdPairs[i][1];
+    var inputPanel = new PanelExpandable(inputPanelId, true);
+    var outputPanel = new PanelExpandable(outputPanelId, true);
+    if (currentInput.length > 200) {
+      inputPanel.setPanelContent(currentInput);
+      inputPanel.doToggleContent();
+      inputPanel.matchPanelStatus();
+    } else {
+      document.getElementById(inputPanelId).innerHTML = currentInput;
+    }
+    if (currentOutput.length > 150) {
+      outputPanel.setPanelContent(currentOutput);
+      outputPanel.doToggleContent();
+      outputPanel.matchPanelStatus();
+    } else {
+      document.getElementById(outputPanelId).innerHTML = currentOutput;
+    }
+  }
   var incomingScripts = spanVerification.getElementsByTagName('script');
   var thePage = window.calculator.mainPage;
   var oldScripts = thePage.pages.calculator.scriptIds;

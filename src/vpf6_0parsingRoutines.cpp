@@ -62,7 +62,6 @@ void Calculator::reset()
   this->flagUseLnAbsInsteadOfLogForIntegrationNotation = false;
   this->flagLogFullTreeCrunching = false;
   this->flagNewContextNeeded = true;
-  this->flagProduceLatexLink = false;
   this->flagDisplayFullExpressionTree = false;
   this->flagHidePolynomialBuiltInTypeIndicator = false;
   this->flagUseFracInRationalLaTeX = true;
@@ -295,7 +294,6 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("DontUsePredefinedWordSplits");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotShowJavascriptOnly");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotDetails");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LatexLink");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnInsteadOfLog");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnAbsInsteadOfLog");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("CalculatorStatus");
@@ -1938,11 +1936,6 @@ bool Calculator::ApplyOneRule()
   }
   if (secondToLastS == "%" && lastS == "ShowContext")
   { this->flagDisplayContext = true;
-    this->PopTopSyntacticStack();
-    return this->PopTopSyntacticStack();
-  }
-  if (secondToLastS == "%" && lastS == "LatexLink")
-  { this->flagProduceLatexLink = true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

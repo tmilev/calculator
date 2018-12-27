@@ -211,11 +211,16 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
   var logParsing = "";
   var numEntries = 0;
   var panelIdPairs = [];
+  var mainPage = window.calculator.mainPage;
   try {
     inputParsed = JSON.parse(input);
     inputHtml = inputParsed.resultHtml;
     commentsHtml = inputParsed.comments;
     performanceHtml = inputParsed.performance;
+    if (mainPage.storage.variables.flagDebug.isTrue()) {
+      console.log("Debug flag is on, printing LaTeX link. ");
+      console.log(inputParsed.latexLink);
+    }
     logParsing = inputParsed.parsingLog;
     var buffer = new BufferCalculator();
     buffer.write(`<table><tr><td>`);
@@ -233,7 +238,11 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
       buffer.write("</tr>");    
     }
     buffer.write("</table>");  
-    buffer.write(`</td><td>${performanceHtml} ${commentsHtml}</td></tr><table>${logParsing}`)
+    buffer.write(`</td><td>${performanceHtml} ${commentsHtml}</td>`);
+    if (inputParsed.debug !== undefined && inputParsed.debug !== null) {
+      buffer.write(`<td>${inputParsed.debug}</td>`);
+    }
+    buffer.write(`</tr><table>${logParsing}`)
     inputHtml = buffer.toString();
   } catch (e) {
     inputHtml = input + "<br>" + e;

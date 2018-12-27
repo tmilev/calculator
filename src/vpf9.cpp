@@ -222,7 +222,7 @@ int DrawingVariables::GetColorFromChamberIndex(int index)
 { static const int NumColorsBase = 3;
   int tempI = index % (NumColorsBase * NumColorsBase * NumColorsBase);
   if (tempI < 0)
-    tempI += (NumColorsBase*NumColorsBase*NumColorsBase);
+    tempI += (NumColorsBase * NumColorsBase * NumColorsBase);
   int r = (255 * (tempI % NumColorsBase)) / NumColorsBase;
   int g = (255 * (tempI % (NumColorsBase * NumColorsBase))) / (NumColorsBase * NumColorsBase);
   int b = (255 * (tempI % (NumColorsBase * NumColorsBase * NumColorsBase))) / (NumColorsBase * NumColorsBase * NumColorsBase);
@@ -7270,7 +7270,7 @@ bool Lattice::GetAllRepresentativesProjectingDownTo(const Lattice& rougherLattic
 { Vectors<Rational> tempRepresentatives;
   if (!this->GetAllRepresentatives(rougherLattice, tempRepresentatives))
     return false;
-  output.SetExpectedSize(startingShifts.size*tempRepresentatives.size);
+  output.SetExpectedSize(startingShifts.size * tempRepresentatives.size);
   output.size = 0;
   for (int i = 0; i < startingShifts.size; i ++)
     for (int j = 0; j < tempRepresentatives.size; j ++)
@@ -8902,7 +8902,7 @@ bool Cone::DrawMeLastCoordAffine
   Vector<Rational> ZeroRoot;
   ZeroRoot.MakeZero(this->GetDim() - 1);
   Vectors<Rational> VerticesScaled;
-//  VerticesScaled.Reserve(this->Vertices.size*2);
+//  VerticesScaled.Reserve(this->Vertices.size * 2);
   VerticesScaled = this->Vertices;
   Rational tempRat;
   List<bool> DrawVertex;
@@ -9964,7 +9964,7 @@ void ConeComplex::TransformToWeylProjective()
 //          if (k == 0)
 //            oldDirections.AddOnBottomNoRepetition(wallToSliceWith);
           wallToSliceWith.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-          if (k>0)
+          if (k > 0)
             this->NewHyperplanesToSliceWith.AddOnTopNoRepetition(wallToSliceWith);
           this->theHyperplanes.AddOnTopNoRepetition(wallToSliceWith);
         }

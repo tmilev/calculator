@@ -1066,7 +1066,7 @@ class polynom1al
 
   polynom1al<coefficient> operator*(const polynom1al &right) const
   { polynom1al<coefficient> out;
-    out.data.SetSize(tmp.data.size*right.data.size);
+    out.data.SetSize(tmp.data.size * right.data.size);
     for (int i = 0; i < this->data.size; i ++)
       for (int j = 0; j<right.data.size; j ++)
         out.data[i*j] = this->data[i]*right.data[j];
@@ -1074,7 +1074,7 @@ class polynom1al
   }
   void operator*=(const polynom1al &right)
   { polynom1al<coefficient> tmp = *this;
-    this->data.SetSize(tmp.data.size*right.data.size)
+    this->data.SetSize(tmp.data.size * right.data.size)
     for (int i = 0; i < tmp.data.size; i ++)
       for (int j = 0; j<right.data.size; j ++)
         this->data[i*j] = tmp.data[i]*right.data[j];
@@ -2750,7 +2750,7 @@ void TestInduction(int n =4, int m=3)
       Rational zero = Rational(0,1);
       Rational one = Rational(1,1);
       Rational two = Rational(2,1);
-      stOutput << zero*one << "\n" << zero+one << one*two << one +two << two*two << "\n";
+      stOutput << zero*one << "\n" << zero+one << one * two << one +two << two*two << "\n";
 
   //    Vector<Rational> v;
   //    v.SetSize(3);

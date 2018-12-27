@@ -419,7 +419,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
     }
   }
   Vector<Rational> left, right;
-  while (NonExplored.CardinalitySelection>0)
+  while (NonExplored.CardinalitySelection > 0)
   { for (int i = 0; i < NonExplored.CardinalitySelection; i ++)
     { int theIndex = NonExplored.elements[i];
       const Vector<Rational>& current = this->theWeyl.RootSystem[theIndex];
@@ -1690,7 +1690,7 @@ template <class coefficient>
 void ElementUniversalEnveloping<coefficient>::AssignFromCoordinateFormWRTBasis
 (List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& input, SemisimpleLieAlgebra& owner)
 { /*int numVars = 0;
-  if (theBasis.size >0)
+  if (theBasis.size > 0)
     numVars = theBasis[0].GetNumVars();*/
   this->MakeZero(owner);
   ElementUniversalEnveloping<coefficient> tempElt;
@@ -1833,7 +1833,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements
     currentElt.ElementToVectorNegativeRootSpacesFirst(theRootForm[i]);
   }
 //  int theRank = 0; int numRoots = 0;
-//  if (theElements.size >0)
+//  if (theElements.size > 0)
 //  { theRank = theElements.TheObjects[0].Hcomponent.size;
 //    numRoots = theElements.TheObjects[0].coeffsRootSpaces.size;
 //  }

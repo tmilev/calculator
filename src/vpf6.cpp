@@ -2367,16 +2367,22 @@ std::string ObjectContainer::ToString()
   return out.str();
 }
 
-std::string Calculator::ToStringOutputAndSpecials()
-{ MacroRegisterFunctionWithName("Calculator::ToStringOutputAndSpecials");
-  if (this->inputString == "")
-    return "";
+JSData Calculator::ToJSONOutputAndSpecials()
+{ MacroRegisterFunctionWithName("Calculator::ToJSONOutputAndSpecials");
   JSData result = this->outputJS;
+  if (this->inputString == "")
+    return result;
   std::string urledInput = HtmlRoutines::ConvertStringToURLString(this->inputString, false);
   result["latexLink"] = HtmlRoutines::GetLatexEmbeddableLinkFromCalculatorInput(urledInput, this->inputString);
   result["performance"] = this->ToStringPerformance();
   result["parsingLog"] = this->parsingLog;
-  return result.ToString(false);
+
+  return result;
+}
+
+std::string Calculator::ToStringOutputAndSpecials()
+{ MacroRegisterFunctionWithName("Calculator::ToStringOutputAndSpecials");
+  return this->ToJSONOutputAndSpecials().ToString(false);
 }
 
 void Calculator::WriteAutoCompleteKeyWordsToFile()

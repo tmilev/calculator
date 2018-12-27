@@ -583,7 +583,7 @@ bool Calculator::EvaluateExpression
         if (output[0].IsAtom())
           indexOp = output[0].theData;
       for (int i = 0; i < output.size() && !theCommands.flagAbortComputationASAP; i ++)
-      { if (i>0 && output.StartsWith(theCommands.opEndStatement()))
+      { if (i > 0 && output.StartsWith(theCommands.opEndStatement()))
         { if (doReportEvalRules)
           { std::stringstream reportStream;
             reportStream << "Substitution rules so far:";

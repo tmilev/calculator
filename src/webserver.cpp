@@ -2884,10 +2884,12 @@ int WebWorker::ProcessCompute()
     { this->OutputResultAfterTimeout();
       return 0;
     }
-  stOutput << theParser->ToStringOutputAndSpecials();
+  JSData result;
+  result = theParser->ToJSONOutputAndSpecials();
   if (theGlobalVariables.UserDebugFlagOn())
-    stOutput << this->ToStringMessageFullUnsafe();
+    result["debug"] = this->ToStringMessageFullUnsafe();
 
+  stOutput << result.ToString(false);
   theGlobalVariables.flagComputationCompletE = true;
   return 0;
 }

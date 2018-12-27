@@ -1162,7 +1162,7 @@ void SemisimpleSubalgebras::GetHCandidates
   int indexNewRooT=*currentRootInjection.LastObject();
   int indexNewRootInSmallType = indexNewRooT-currentType.GetRank() +theSmallType.theRank;
 //  stOutput << "Ere be trouble!!!!";
-  Rational desiredHScaledToActByTwoLengthSquared = theSmallType.CartanSymmetricInverseScale*4/
+  Rational desiredHScaledToActByTwoLengthSquared = theSmallType.CartanSymmetricInverseScale * 4 /
   theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
 //  stOutput << " Desired h length: " << desiredHScaledToActByTwoLengthSquared.ToString();
   outputHCandidatesScaledToActByTwo.SetSize(0);
@@ -4271,16 +4271,16 @@ void slTwoSubalgebra::ComputeModuleDecomposition
   { tempRat = this->hCharacteristic.ScalarEuclidean(coordsInPreferredSimpleBasis[k]);
     if (tempRat.DenShort != 1)
       crash << crash;
-    if (tempRat>positiveRootsContainingRegularSA.size*2)
+    if (tempRat>positiveRootsContainingRegularSA.size * 2)
     { crash << "This is a programming error. The scalar product of the h-Characteristic " << this->hCharacteristic.ToString()
-      << " with the simple root " << coordsInPreferredSimpleBasis[k].ToString() << " is larger than " << positiveRootsContainingRegularSA.size*2
+      << " with the simple root " << coordsInPreferredSimpleBasis[k].ToString() << " is larger than " << positiveRootsContainingRegularSA.size * 2
       << ". The affected sl(2) subalgebra is " << this->ToString() << ". " << crash;
       break;
     }
-    outputModuleDimensions[IndexZeroWeight +tempRat.NumShort] ++;
-    outputModuleDimensions[IndexZeroWeight-tempRat.NumShort] ++;
+    outputModuleDimensions[IndexZeroWeight + tempRat.NumShort] ++;
+    outputModuleDimensions[IndexZeroWeight - tempRat.NumShort] ++;
   }
-  BufferHighestWeights =(outputModuleDimensions);
+  BufferHighestWeights = (outputModuleDimensions);
   outputHWs.SetExpectedSize( positiveRootsContainingRegularSA.size * 2);
   outputHWs.MakeZero();
 //  this->hCharacteristic.ComputeDebugString();

@@ -218,7 +218,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy
   if ((classFunctionMatrices.size > 0) && (other.classFunctionMatrices.size > 0))
   { U.classFunctionMatrices.SetSize(G->ccCount);
     for (int i = 0; i <classFunctionMatrices.size; i ++)
-    { if ((classFunctionMatrices[i].NumCols>0) && (other.classFunctionMatrices[i].NumCols>0))
+    { if ((classFunctionMatrices[i].NumCols > 0) && (other.classFunctionMatrices[i].NumCols > 0))
       U.classFunctionMatrices[i].AssignTensorProduct(classFunctionMatrices[i],other.classFunctionMatrices[i]);
     }
   }*/

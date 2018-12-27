@@ -1028,17 +1028,17 @@ CanvasTwoD.prototype.setViewWindow = function(leftLowPt, rightUpPt) {
   this.viewWindowDefault =[leftLowPt,rightUpPt];
   var leftLowScreen = this.coordsMathToScreen(leftLowPt);
   var rightUpScreen = this.coordsMathToScreen(rightUpPt);
-  var desiredHeight =Math.abs(rightUpScreen[1]-leftLowScreen[1]);
-  var desiredWidth =Math.abs(rightUpScreen[0]-leftLowScreen[0]);
-  var candidateScaleHeight = this.scale* this.height/desiredHeight;
-  var candidateScaleWidth = this.scale* this.width/desiredWidth;
-  this.scale =Math.min(candidateScaleHeight, candidateScaleWidth);
+  var desiredHeight = Math.abs(rightUpScreen[1] - leftLowScreen[1]);
+  var desiredWidth = Math.abs(rightUpScreen[0] - leftLowScreen[0]);
+  var candidateScaleHeight = this.scale * this.height / desiredHeight;
+  var candidateScaleWidth = this.scale * this.width / desiredWidth;
+  this.scale = Math.min(candidateScaleHeight, candidateScaleWidth);
   //console.log("new scale: "+ this.scale);
   var centerViewWindowMath = vectorPlusVector(leftLowPt,rightUpPt);
-  vectorTimesScalar(centerViewWindowMath,0.5);
+  vectorTimesScalar(centerViewWindowMath, 0.5);
   var centerViewWindowScreen = this.coordsMathToScreen(centerViewWindowMath);
-  this.centerX+= this.centerCanvasX-centerViewWindowScreen[0];
-  this.centerY+= this.centerCanvasY-centerViewWindowScreen[1];
+  this.centerX += this.centerCanvasX - centerViewWindowScreen[0];
+  this.centerY += this.centerCanvasY - centerViewWindowScreen[1];
 }
 
 CanvasTwoD.prototype.redraw = function() { 
@@ -1382,21 +1382,21 @@ Canvas.prototype.pointRelativeToPatch = function(thePoint, thePatch)
 
   if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen1) *
       vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen1)
-      >0)
+      > 0)
     if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen1) *
         vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen1)
-        >0)
+        > 0)
       if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen2) *
           vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen2)
-          >0)
+          > 0)
         if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen2) *
             vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen2)
-            >0)
+            > 0)
         { if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normal) *
-              vectorScalarVector(this.screenNormal, thePatch.normal)<= 0)
+              vectorScalarVector(this.screenNormal, thePatch.normal) <= 0)
             return - 1;
           if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normal) *
-              vectorScalarVector(this.screenNormal, thePatch.normal)>= 0)
+              vectorScalarVector(this.screenNormal, thePatch.normal) >= 0)
             return 1;
         }
   return 0;
@@ -1407,7 +1407,7 @@ Canvas.prototype.pointIsBehindPatch = function(thePoint, thePatch)
 }
 
 Canvas.prototype.pointIsInFrontOfPatch = function(thePoint, thePatch)
-{ return this.pointRelativeToPatch(thePoint, thePatch) ===1;
+{ return this.pointRelativeToPatch(thePoint, thePatch) === 1;
 }
 
 Canvas.prototype.pointIsInForeGround = function(thePoint, containerPatches)
@@ -2137,7 +2137,7 @@ Canvas.prototype.coordsMathToScreen = function(vector) {
 
 Canvas.prototype.coordsMathToSelectedScreen = function(vector) { 
   return [
-    this.scale*vectorScalarVector(vector, this.selectedScreenBasis[0]) + this.centerX,
+    this.scale * vectorScalarVector(vector, this.selectedScreenBasis[0]) + this.centerX,
     (- 1) * this.scale * vectorScalarVector(vector, this.selectedScreenBasis[1]) + this.centerY
   ];
 }
@@ -2154,7 +2154,7 @@ Canvas.prototype.coordsScreenAbsoluteToMathScreen = function(screenX, screenY) {
 }
 
 Canvas.prototype.coordsMathScreenToScreen = function(theCoords) { 
-  return [this.scale*theCoords[0] + this.centerX, this.centerY - this.scale * theCoords[1]];
+  return [this.scale * theCoords[0] + this.centerX, this.centerY - this.scale * theCoords[1]];
 }
 
 Canvas.prototype.rotateOutOfPlane = function (input, orthoBasis1, orthoBasis2, theAngle) { 

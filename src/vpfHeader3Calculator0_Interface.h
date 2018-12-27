@@ -850,7 +850,7 @@ struct ExpressionTripleCrunchers
   {
   }
   static unsigned int HashFunction(const ExpressionTripleCrunchers& input)
-  { return (unsigned int) input.leftType*SomeRandomPrimes[0] + (unsigned int) input.rightType * SomeRandomPrimes[1] + (unsigned int) input.theOp * SomeRandomPrimes[2];
+  { return (unsigned int) input.leftType * SomeRandomPrimes[0] + (unsigned int) input.rightType * SomeRandomPrimes[1] + (unsigned int) input.theOp * SomeRandomPrimes[2];
   }
 };
 
@@ -1007,7 +1007,6 @@ public:
   bool flagLogCache;
   bool flagLogPatternMatching;
   bool flagLogFullTreeCrunching;
-  bool flagProduceLatexLink;
   bool flagHideLHS;
   bool flagHidePolynomialBuiltInTypeIndicator;
   bool flagDisplayFullExpressionTree;
@@ -1092,6 +1091,7 @@ public:
   void ComputeAutoCompleteKeyWords();
   void WriteAutoCompleteKeyWordsToFile();
   std::string ElementToStringNonBoundVars();
+  JSData ToJSONOutputAndSpecials();
   std::string ToStringOutputAndSpecials();
   std::string ToStringFunctionHandlers();
   std::string ToStringFunctionHandlersJSON();

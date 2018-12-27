@@ -32,7 +32,7 @@ DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo()
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::initialize(std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo");
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::initialize");
 #ifdef MACRO_use_MongoDB
   if (this->flagInitialized)
     return true;
@@ -172,7 +172,7 @@ MongoQuery::~MongoQuery()
 }
 
 bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("MongoQuery::UpdateOne");
+{ MacroRegisterFunctionWithName("MongoQuery::RemoveOne");
   if (!databaseMongo.initialize(commentsOnFailure))
     return false;
   MongoCollection theCollection(this->collectionName);
@@ -328,7 +328,7 @@ bool MongoQuery::FindMultiple
     }
   }
   //logWorker << logger::red << "DEBUG: about to fire up mongo query: " << this->findQuery << logger::endL;
-  double timeBeforeQuery = theGlobalVariables.GetElapsedSeconds();
+  //double timeBeforeQuery = theGlobalVariables.GetElapsedSeconds();
   this->cursor = mongoc_collection_find_with_opts(theCollection.collection, this->query, this->options, NULL);
   if (this->cursor == NULL)
   { if (commentsOnFailure != 0)
@@ -826,8 +826,8 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
     updateQueryStream << "}}";
   }
   query.updateQuery = updateQueryStream.str();
-  logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
-  logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
   return query.UpdateOneWithOptions(commentsOnFailure);
 #else
   (void) collectionName;
@@ -1077,7 +1077,7 @@ std::string DatabaseRoutinesGlobalFunctionsMongo::ToHtmlDatabaseCollection(const
       for (int i = 0; i < theCollectionNames.size; i ++)
       { out << "<br>";
         out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-        << "?request=database&currentDatabaseTable ="
+        << "?request=database&currentDatabaseTable="
         << theCollectionNames[i] << "\">" << theCollectionNames[i] << "</a>";
       }
     }

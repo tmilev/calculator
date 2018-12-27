@@ -1021,7 +1021,7 @@ void Calculator::initPredefinedInnerFunctions()
    "IntegratePullConstant");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateSqrtOneMinusXsquared, "",
-   "Integrates \\int \\sqrt{a-x^2}dx, a>0.",
+   "Integrates \\int \\sqrt{a-x^2}dx, a > 0.",
    "\\int 2\\sqrt{2-x^2} dx ",
    true, false,
    "CalculatorFunctionsGeneral::innerIntegrateSqrtOneminusXsquared",
@@ -4342,7 +4342,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("-", Calculator::outerMinus, "",
    "Transforms a-b to a +(- 1)*b and -b to (- 1)*b. Equivalent to a rule "
-   "-{{b}}=MinusOne*b; {{a}}-{{b}}=a +MinusOne*b", "- 1+(-5)",
+   "-{{b}}=MinusOne * b; {{a}}-{{b}}=a + MinusOne * b", "- 1 + (- 5)",
    true, false,
    "Calculator::outerMinus",
    "Minus");
@@ -4633,7 +4633,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("*", Calculator::outerAssociate, "",
    "Associative law: reorders the multiplicative tree in standard form. ",
-   "(a*b)*(c*(d*e)*f) - a*b*c*d*e*f;(a*b)*(c*(e*d)*f) - a*b*c*d*e*f",
+   "(a*b)*(c*(d*e)*f) - a*b*c*d* e *f;(a*b)*(c*(e * d)*f) - a*b*c*d* e *f",
    true, false,
    "Calculator::outerAssociate",
    "AssociativeRule");

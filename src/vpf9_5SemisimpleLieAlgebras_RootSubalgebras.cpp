@@ -407,7 +407,7 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(rootSubalge
 void rootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List<int>& oppositeKmods)
 { output.SetSize(this->Modules.size);
   oppositeKmods.SetSize(this->Modules.size);
-  int numTotal = this->Modules.size* this->Modules.size;
+  int numTotal = this->Modules.size * this->Modules.size;
   std::stringstream out;
   out << "Computing pairing table for the module decomposition of the root subalgebra of type "
   << this->theDynkinDiagram.ToString()
@@ -612,7 +612,7 @@ void rootSubalgebra::ComputeKModules()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputeKModules");
   this->ComputeRootsOfK();
   this->scalarProdInvertedMatrixOrdered = this->scalarProdMatrixOrdered;
-  if (this->scalarProdInvertedMatrixOrdered.NumRows>0)
+  if (this->scalarProdInvertedMatrixOrdered.NumRows > 0)
     this->scalarProdInvertedMatrixOrdered.Invert();
   this->ComputeHighestVectorsHighestWeights();
   this->ComputeModulesFromHighestVectors();
@@ -621,8 +621,8 @@ void rootSubalgebra::ComputeKModules()
   //Handle the elements of the Cartan.
   int dimFinal = 0;
   for (int i = 0; i < this->Modules.size; i ++)
-    dimFinal+= this->Modules[i].size;
-  if (dimFinal!= this->GetOwnerSSalg().GetNumGenerators())
+    dimFinal += this->Modules[i].size;
+  if (dimFinal != this->GetOwnerSSalg().GetNumGenerators())
     crash << "Sum of k-module dimensions does not equal the dimension of the ambient Lie algebra. " << crash;
 }
 
@@ -923,11 +923,11 @@ void rootSubalgebra::ComputeEpsCoordsWRTk()
   simpleBasisG.SetSize(theDimension);
   for (int i = 0; i < theDimension; i ++)
   { simpleBasisG[i].MakeZero(theDimension);
-    simpleBasisG[i][i] =1;
+    simpleBasisG[i][i] = 1;
   }
   Vector<Rational> tempRoot, tempRoot2, tempRoot3;
   for (int i = 0; i < this->Modules.size; i ++)
-  { if (this->SimpleBasisK.size >0)
+  { if (this->SimpleBasisK.size > 0)
     { EpsCoordsWRTk.size = 0;
       for (int j = 0; j < this->Modules[i].size; j ++)
       { tempRoot.SetSize(this->SimpleBasisK.size);
@@ -2870,11 +2870,11 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
     if (row == this->NumLinesPerTableLatex)
       row = 0;
     out << "</td>";
-    if (col == this->NumColsPerTableLatex- 1 || i == this->theSubalgebras.size- 1)
+    if (col == this->NumColsPerTableLatex - 1 || i == this->theSubalgebras.size - 1)
       out << "</tr>";
   }
   out << "</table>\n\n";
-  if (this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size >0)
+  if (this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size > 0)
   { out << "<hr>There are " << this->NumParabolic << " parabolic, " << this->NumPseudoParabolicNonParabolic << " pseudo-parabolic but not parabolic and "
     << this->NumNonPseudoParabolic << " non pseudo-parabolic root subsystems.";
     HashedList<Vector<Rational> > GAPPosRootSystem;
@@ -3158,7 +3158,7 @@ void rootSubalgebras::initForNilradicalGeneration()
   this->IndexCurrentSANilradicalsGeneration = 0;
   this->ReportStringNonNilradicalParabolic ="";
   this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration = this->theSubalgebras.size- 1;
-  if (this->theSubalgebras.size >0)
+  if (this->theSubalgebras.size > 0)
   { this->theSubalgebras[0].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
     this->NumConeConditionHoldsBySSpart.initFillInObject(this->theSubalgebras.size, 0);
   }
@@ -3208,8 +3208,8 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
       out << " $\\mathfrak{g}\\simeq \\mathrm{sp(" << this->GetOwnerWeyl().CartanSymmetric.NumRows*2 << ")}$";
     out << "} \\\\\\hline";
   }
-  for (int i = 0; i < this->theSubalgebras.size- 1; i ++)
-    if (this->storedNilradicals[i].size >0)
+  for (int i = 0; i < this->theSubalgebras.size - 1; i ++)
+    if (this->storedNilradicals[i].size > 0)
     { rootSubalgebra& currentRootSA = this->theSubalgebras[i];
       tempRoots.size = 0;
       for (int j = 0; j<currentRootSA.PositiveRootsK.size; j ++)
@@ -3234,15 +3234,15 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
       int numNonReductiveCurrent = 0;
       for (int j = 0; j < this->storedNilradicals[i].size; j ++)
       { List<int>& currentNilrad = this->storedNilradicals[i][j];
-        if (currentNilrad.size >0)
+        if (currentNilrad.size > 0)
         { numNonSolvableNonReductive ++;
           numNonReductiveCurrent ++;
-          tempRoots.size = currentRootSA.PositiveRootsK.size*2;
-          for (int k = 0; k<currentNilrad.size; k++)
+          tempRoots.size = currentRootSA.PositiveRootsK.size * 2;
+          for (int k = 0; k < currentNilrad.size; k ++)
             tempRoots.AddListOnTop(currentRootSA.WeightsModulesPrimalSimple[currentNilrad[k]]);
           this->ElementToStringRootSpaces(tempS, includeMatrixForm, tempRoots);
           out << tempS << "\n";
-          if (numNonReductiveCurrent%2== 0)
+          if (numNonReductiveCurrent % 2 == 0)
           { out << "\n\n";
             if (!includeMatrixForm)
               out << "\\\\";
@@ -3271,7 +3271,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
     crash << "This is a programming error: ElementToStringConeConditionNotSatisfying called on a non-simple Lie algebra. " << crash;
   if (simpleType == 'B')
   { this->GetOwnerWeyl().GetEpsilonCoords(input, epsCoords);
-    tempMat.MakeIdMatrix(theDimension*2+ 1, 1, 0);
+    tempMat.MakeIdMatrix(theDimension * 2 + 1, 1, 0);
     tempMat.elements[theDimension][theDimension] = 0;
     for (int i = 0; i < epsCoords.size; i ++)
     { bool isShort = false;
@@ -3282,7 +3282,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
       Vector<Rational>& currentRoot = epsCoords[i];
       for (int j = 0; j < theDimension; j ++)
       { if (currentRoot[j] != 0)
-        { isShort =!isShort;
+        { isShort = !isShort;
           if (isShort)
           { if (currentRoot[j].IsPositive())
               firstSignIsPositive = true;
@@ -3304,7 +3304,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
         { int positiveIndex, negativeIndex;
           if (firstSignIsPositive)
           { positiveIndex = firstIndex;
-            negativeIndex =secondIndex;
+            negativeIndex = secondIndex;
           } else
           { positiveIndex = secondIndex;
             negativeIndex = firstIndex;
@@ -3313,27 +3313,27 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
           tempMat.elements[theDimension + 1+negativeIndex][theDimension + 1+positiveIndex] = - 1;
         } else
         { if (firstSignIsPositive)
-          { tempMat.elements[firstIndex][secondIndex +theDimension + 1] =1;
-            tempMat.elements[secondIndex][firstIndex +theDimension + 1] = - 1;
+          { tempMat.elements[firstIndex][secondIndex + theDimension + 1] = 1;
+            tempMat.elements[secondIndex][firstIndex + theDimension + 1] = - 1;
           } else
-          { tempMat.elements[theDimension + 1+firstIndex][secondIndex] =1;
-            tempMat.elements[theDimension + 1+secondIndex][firstIndex] = - 1;
+          { tempMat.elements[theDimension + 1 + firstIndex][secondIndex] = 1;
+            tempMat.elements[theDimension + 1 + secondIndex][firstIndex] = - 1;
           }
         }
       } else
       { if (firstSignIsPositive)
-        { tempMat.elements[firstIndex][theDimension] =1;
-          tempMat.elements[theDimension][theDimension + 1+firstIndex] = - 1;
+        { tempMat.elements[firstIndex][theDimension] = 1;
+          tempMat.elements[theDimension][theDimension + 1 + firstIndex] = - 1;
         } else
-        { tempMat.elements[theDimension][firstIndex] =1;
-          tempMat.elements[firstIndex + 1+theDimension][theDimension] = - 1;
+        { tempMat.elements[theDimension][firstIndex] = 1;
+          tempMat.elements[firstIndex + 1 + theDimension][theDimension] = - 1;
         }
       }
     }
   }
   if (simpleType == 'C')
   { this->GetOwnerWeyl().GetEpsilonCoords(input, epsCoords);
-    tempMat.MakeIdMatrix(theDimension*2, 1, 0);
+    tempMat.MakeIdMatrix(theDimension * 2, 1, 0);
     for (int i = 0; i < epsCoords.size; i ++)
     { bool isLong= false;
       int firstIndex = - 1;
@@ -3343,7 +3343,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
       Vector<Rational>& currentRoot = epsCoords[i];
       for (int j = 0; j < theDimension; j ++)
       { if (currentRoot[j] != 0)
-        { isLong=!isLong;
+        { isLong = !isLong;
           if (isLong)
           { if (currentRoot[j].IsPositive())
               firstSignIsPositive = true;
@@ -3360,7 +3360,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
         }
       }
       if (!isLong)
-      { bool signsAreDifferent =(firstSignIsPositive !=secondSignIsPositive);
+      { bool signsAreDifferent = (firstSignIsPositive !=secondSignIsPositive);
         if (signsAreDifferent)
         { int positiveIndex = - 1, negativeIndex = - 1;
           if (firstSignIsPositive)
@@ -3370,22 +3370,22 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
           { positiveIndex = secondIndex;
             negativeIndex = firstIndex;
           }
-          tempMat.elements[positiveIndex][negativeIndex] =1;
-          tempMat.elements[theDimension +negativeIndex][theDimension +positiveIndex] = - 1;
+          tempMat.elements[positiveIndex][negativeIndex] = 1;
+          tempMat.elements[theDimension + negativeIndex][theDimension + positiveIndex] = - 1;
         } else
         { if (firstSignIsPositive)
-          { tempMat.elements[firstIndex][secondIndex +theDimension] =1;
-            tempMat.elements[secondIndex][firstIndex +theDimension] =1;
+          { tempMat.elements[firstIndex][secondIndex + theDimension] = 1;
+            tempMat.elements[secondIndex][firstIndex + theDimension] = 1;
           } else
-          { tempMat.elements[theDimension +firstIndex][secondIndex] =1;
-            tempMat.elements[theDimension +secondIndex][firstIndex] =1;
+          { tempMat.elements[theDimension + firstIndex][secondIndex] = 1;
+            tempMat.elements[theDimension + secondIndex][firstIndex] = 1;
           }
         }
       } else
       { if (firstSignIsPositive)
-          tempMat.elements[firstIndex][theDimension +firstIndex] =1;
+          tempMat.elements[firstIndex][theDimension + firstIndex] = 1;
         else
-          tempMat.elements[theDimension +firstIndex][firstIndex] =1;
+          tempMat.elements[theDimension + firstIndex][firstIndex] = 1;
       }
     }
   }
@@ -3410,7 +3410,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   { out << "\\end{tabular} & $\\mathfrak{l}=\\left(\\begin{array}{";
     for (int i = 0; i < tempMat.NumCols; i ++)
     { out << "c";
-      if (simpleType == 'B' && (i == theDimension- 1 || i == theDimension))
+      if (simpleType == 'B' && (i == theDimension - 1 || i == theDimension))
         out << "|";
     }
     out << "}";
@@ -3647,7 +3647,7 @@ void coneRelation::ComputeConnectedComponents(Vectors<Rational>& input, rootSuba
 { output.SetSize(input.size);
   for (int i = 0; i < input.size; i ++)
   { output[i].size = 0;
-    for (int j = 0; j<owner.theDynkinDiagram.SimpleBasesConnectedComponents.size; j ++)
+    for (int j = 0; j < owner.theDynkinDiagram.SimpleBasesConnectedComponents.size; j ++)
       if (owner.theDynkinDiagram.SimpleBasesConnectedComponents[j].
           ContainsARootNonPerpendicularTo(input[i], owner.GetAmbientWeyl().CartanSymmetric))
         output[i].AddOnTop(j);

@@ -857,7 +857,7 @@ public:
     // informed some other object of the object's address, then moving an object
     // without using assignment operator would cause trouble
     // this->SetSize(this->size + 1);
-    // memmove(this->TheObjects+desiredIndex + 1, this->TheObjects+desiredIndex, num_to_move*sizeof(o));
+    // memmove(this->TheObjects+desiredIndex + 1, this->TheObjects+desiredIndex, num_to_move * sizeof(o));
     // std::copy_backward(this->TheObjects+desiredIndex, this->TheObjects+this->size- 1, this->TheObjects+this->size);
     // std::move_backward(this->TheObjects+desiredIndex, this->TheObjects+this->size- 1, this->TheObjects+this->size);
     // this->TheObjects[desiredIndex] = o;

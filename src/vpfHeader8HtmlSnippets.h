@@ -50,7 +50,6 @@ public:
   static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label = "Expand/collapse", const std::string& desiredID = "");
   static std::string GetHtmlLinkFromProjectFileName
   (const std::string& fileName, const std::string& fileDesc = "", int line = - 1);
-  static std::string GetLatexEmbeddableLinkFromCalculatorInput(const std::string& address, const std::string& display);
   static std::string DoubleBackslashes(const std::string& input);
 
   static std::string GetCSSLink(const std::string& fileNameVirtual);
@@ -116,7 +115,9 @@ public:
     HtmlRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml);
     return result;
   }
-  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return HtmlRoutines::ElementToStringTooltip(input, inputTooltip, true); }
+  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip)
+  { return HtmlRoutines::ElementToStringTooltip(input, inputTooltip, true);
+  }
   static uint32_t RedGreenBlue(unsigned int r, unsigned int g, unsigned int b);
   static void MakeStdCoutReport(const std::string& input);
   static void MakeReportIndicatorFile(const std::string& input);

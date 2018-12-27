@@ -203,6 +203,36 @@ Calculator.prototype.getComputationLink = function(input) {
   return stringifiedHash;
 }
 
+/**@returns {String} */
+Calculator.prototype.latexifyLink = function(inputURL, inputDisplay) {
+  var result = "";
+  for (var i = 0; i < inputURL.length; i ++) { 
+    if (inputURL[i] == '%') {
+      result += "\\%";
+    } else if (inputURL[i] == '_') {
+      result += "\\_";
+    } else {
+      result += inputURL[i];
+    }
+  }
+  result += "}{";
+  for (var i = 0; i < inputDisplay.length; i ++) { 
+    if (inputDisplay[i] == '%') {
+      result += "\\%";
+    } else if (inputDisplay[i] == '_') {
+      result += "\\_";
+    } else if (inputDisplay[i] == '{') {
+      result += "\\{";
+    } else if (inputDisplay[i] == '}') {
+      result += "\\}";
+    } else {
+      result += inputDisplay[i];
+    }
+  }
+  result += "}";
+  return result;
+}
+
 Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input, output) { 
   var inputParsed = null;
   var inputHtml = null;
@@ -217,10 +247,6 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
     inputHtml = inputParsed.resultHtml;
     commentsHtml = inputParsed.comments;
     performanceHtml = inputParsed.performance;
-    if (mainPage.storage.variables.flagDebug.isTrue()) {
-      console.log("Debug flag is on, printing LaTeX link. ");
-      console.log(inputParsed.latexLink);
-    }
     logParsing = inputParsed.parsingLog;
     var buffer = new BufferCalculator();
     buffer.write(`<table><tr><td>`);
@@ -233,19 +259,25 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
       var outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
       panelIdPairs.push([inputPanelId, outputPanelId]);
       buffer.write("<tr>");
-      buffer.write(`<td class = "cellCalculatorInput"> <div id = "${inputPanelId}"></div></td>`)
+      buffer.write(`<td class = "cellCalculatorInput"> <div id = "${inputPanelId}"></div></td>`);
       buffer.write(`<td class = "cellCalculatorResult"><div id = "${outputPanelId}"></div></td>`);
       buffer.write("</tr>");    
     }
     buffer.write("</table>");  
     buffer.write(`</td><td>${performanceHtml} ${commentsHtml}</td>`);
-    if (inputParsed.debug !== undefined && inputParsed.debug !== null) {
-      buffer.write(`<td>${inputParsed.debug}</td>`);
+    if (mainPage.storage.variables.flagDebug.isTrue()) {
+      buffer.write(`<td>`);
+      buffer.write("<b>LaTeX link:</b> ");
+      buffer.write(this.latexifyLink(window.location.href, window.location.href));
+      buffer.write("<br>");
+      buffer.write(inputParsed.debug);
+      buffer.write(`</td>`);
     }
-    buffer.write(`</tr><table>${logParsing}`)
+    buffer.write(`</tr><table>${logParsing}`);
     inputHtml = buffer.toString();
   } catch (e) {
     inputHtml = input + "<br>" + e;
+    console.log("Error processing calculator output: " + e);
   }
   var spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
   spanVerification.innerHTML = inputHtml;

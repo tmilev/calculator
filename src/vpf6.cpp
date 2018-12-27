@@ -2372,11 +2372,8 @@ JSData Calculator::ToJSONOutputAndSpecials()
   JSData result = this->outputJS;
   if (this->inputString == "")
     return result;
-  std::string urledInput = HtmlRoutines::ConvertStringToURLString(this->inputString, false);
-  result["latexLink"] = HtmlRoutines::GetLatexEmbeddableLinkFromCalculatorInput(urledInput, this->inputString);
   result["performance"] = this->ToStringPerformance();
   result["parsingLog"] = this->parsingLog;
-
   return result;
 }
 

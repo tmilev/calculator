@@ -39,40 +39,6 @@ std::string HtmlRoutines::GetHtmlLinkFromProjectFileName(const std::string& file
   return out.str();
 }
 
-std::string HtmlRoutines::GetLatexEmbeddableLinkFromCalculatorInput(const std::string& address, const std::string& display)
-{ std::stringstream out;
-  out << "\\href{" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?";
-  for (unsigned i = 0; i < address.size(); i ++)
-  { //if (input[i] == '&')
-     // out << "\\&";
-    //else
-    if (address[i] == '%')
-      out << "\\%";
-    else if (address[i] == '_')
-      out << "\\_";
-    else
-      out << address[i];
-  }
-  out << "}{";
-  for (unsigned i = 0; i < display.size(); i ++)
-  { //if (input[i] == '&')
-     // out << "\\&";
-    //else
-    if (display[i] == '%')
-      out << "\\%";
-    else if (display[i] == '_')
-      out << "\\_";
-    else if (display[i] == '{')
-      out << "\\{";
-    else if (display[i] == '}')
-      out << "\\}";
-    else
-      out << display[i];
-  }
-  out << "}";
-  return out.str();
-}
-
 std::string HtmlRoutines::GetMathMouseHoverBeginArrayL(const std::string& input, int upperNumChars)
 { std::stringstream out;
   out << "\\begin{array}{l}" << input << "\\end{array}";

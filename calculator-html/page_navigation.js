@@ -67,7 +67,7 @@ User.prototype.makeFromUserInfo = function(inputData) {
 }
 
 function StorageVariable(
-/**@type @{{name: string, nameURL: string, nameCookie: string, nameLocalStorage: string, associatedDOMId: string, type: string, secure: string, showInURLByDefault: bool, callbackOnValueChange: function}} */
+/**@type @{{name: string, nameURL: string, nameCookie: string, nameLocalStorage: string, associatedDOMId: string, type: string, secure: string, showInURLByDefault: bool, showInURLOnPages: Object, callbackOnValueChange: function}} */
   inputs
 ) {
   this.value = "";
@@ -90,6 +90,7 @@ function StorageVariable(
     "secure", 
     "callbackOnValueChange", 
     "showInURLByDefault",
+    "showInURLOnPages",
   ];
   for (var counterLabel = 0; counterLabel < labelsToRead.length; counterLabel ++) {
     var currentLabel = labelsToRead[counterLabel];
@@ -184,6 +185,13 @@ StorageVariable.prototype.setAndStore = function(
   }
 }
 
+var pageNamesOnWhichToShowProblemURLs = {
+  selectCourse: true,
+  currentCourse: true,
+  problemPage: true,
+  editPage: true,
+};
+
 function StorageCalculator() {
   this.variables = {
     currentPage: new StorageVariable({
@@ -214,22 +222,26 @@ function StorageCalculator() {
       courseHome: new StorageVariable({
         name: "courseHome",
         nameCookie: "courseHome",
-        nameURL: "courseHome"
+        nameURL: "courseHome",
+        showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
       }),
       topicList: new StorageVariable({
         name: "topicList",
         nameCookie: "topicList",
-        nameURL: "topicList"
+        nameURL: "topicList",
+        showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
       }),
       fileName: new StorageVariable({
         name: "fileName",
         nameCookie: "fileName",
-        nameURL: "fileName"
+        nameURL: "fileName",
+        showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
       }),
       problemFileName: new StorageVariable({
         name: "problemFileName",
         nameCookie: "problemFileName",
-        nameURL: "problemFileName"
+        nameURL: "problemFileName",
+        showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
       }),
       currentProblemId: new StorageVariable({
         name: "currentProblemId",
@@ -365,7 +377,16 @@ StorageCalculator.prototype.computeURLRecursively = function(currentStorage, rec
     if (urlName === undefined || urlName === null || urlName === "") {
       return null;
     }
-    if (currentStorage.showInURLByDefault !== true) {
+    var shouldShow = false;
+    if (currentStorage.showInURLByDefault === true) {
+      shouldShow = true;
+    }
+    if (currentStorage.showInURLOnPages !== null && currentStorage.showInURLOnPages !== undefined) {
+      if (mainPage().storage.variables.currentPage.value in currentStorage.showInURLOnPages) {
+        shouldShow = true;
+      }
+    }
+    if (!shouldShow) {
       return null;
     }
     if (currentStorage.value === null || currentStorage.value == undefined || currentStorage.value == "") {

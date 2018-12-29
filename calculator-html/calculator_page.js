@@ -19,11 +19,6 @@ function Calculator() {
   this.numberOfCalculatorPanels = 0;
 }
 
-var calculatorMQString;
-var calculatorMQStringIsOK = true;
-var ignoreNextMathQuillUpdateEvent = false;
-var startingCharacterSectionUnderMathQuillEdit;
-
 function createSelectionNoFocus(field, start, end) { 
   if (field.createTextRange) { 
     var selRange = field.createTextRange();
@@ -204,8 +199,26 @@ Calculator.prototype.getComputationLink = function(input) {
 }
 
 /**@returns {String} */
-Calculator.prototype.latexifyLink = function(inputURL, inputDisplay) {
+Calculator.prototype.getLatexLink = function() {
+  var firstPart = window.location.href.split("#")[0];
+  var hash = window.location.hash;
+  if (hash.startsWith('#')) {
+    hash = hash.substring(1);
+  }
+  if (hash.indexOf("%22") !== - 1) {
+    hash = decodeURIComponent(hash);
+  }
+  if (hash.indexOf("{") !== - 1) {
+    hash = encodeURIComponent(hash);
+  }
+  var theURL = `${firstPart}#${hash}`;
+  return this.latexifyLink(theURL);
+}
+
+/**@returns {String} */
+Calculator.prototype.latexifyLink = function(inputURL) {
   var result = "";
+  result += "\\href{";
   for (var i = 0; i < inputURL.length; i ++) { 
     if (inputURL[i] == '%') {
       result += "\\%";
@@ -215,21 +228,7 @@ Calculator.prototype.latexifyLink = function(inputURL, inputDisplay) {
       result += inputURL[i];
     }
   }
-  result += "}{";
-  for (var i = 0; i < inputDisplay.length; i ++) { 
-    if (inputDisplay[i] == '%') {
-      result += "\\%";
-    } else if (inputDisplay[i] == '_') {
-      result += "\\_";
-    } else if (inputDisplay[i] == '{') {
-      result += "\\{";
-    } else if (inputDisplay[i] == '}') {
-      result += "\\}";
-    } else {
-      result += inputDisplay[i];
-    }
-  }
-  result += "}";
+  result += "}{Click-able sample algebraic computation}";
   return result;
 }
 
@@ -258,18 +257,18 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
       var inputPanelId = `calculatorInputPanel${this.numberOfCalculatorPanels}`;
       var outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
       panelIdPairs.push([inputPanelId, outputPanelId]);
-      buffer.write("<tr>");
+      buffer.write(`<tr>`);
       buffer.write(`<td class = "cellCalculatorInput"> <div id = "${inputPanelId}"></div></td>`);
       buffer.write(`<td class = "cellCalculatorResult"><div id = "${outputPanelId}"></div></td>`);
-      buffer.write("</tr>");    
+      buffer.write(`</tr>`);    
     }
-    buffer.write("</table>");  
+    buffer.write(`</table>`);  
     buffer.write(`</td><td>${performanceHtml} ${commentsHtml}</td>`);
     if (mainPage.storage.variables.flagDebug.isTrue()) {
       buffer.write(`<td>`);
-      buffer.write("<b>LaTeX link:</b> ");
-      buffer.write(this.latexifyLink(window.location.href, window.location.href));
-      buffer.write("<br>");
+      buffer.write(`<b>LaTeX link:</b> `);
+      buffer.write(this.getLatexLink());
+      buffer.write(`<br>`);
       buffer.write(inputParsed.debug);
       buffer.write(`</td>`);
     }

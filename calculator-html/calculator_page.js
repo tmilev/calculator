@@ -204,6 +204,7 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
   var commentsHtml = "";
   var performanceHtml = "";
   var logParsing = "";
+  var syntaxErrors = "";
   var numEntries = 0;
   var panelIdPairs = [];
   var mainPage = window.calculator.mainPage;
@@ -213,9 +214,22 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
     commentsHtml = inputParsed.comments;
     performanceHtml = inputParsed.performance;
     logParsing = inputParsed.parsingLog;
+    syntaxErrors = inputParsed.syntaxErrors;
+    if (logParsing === null || logParsing === undefined) {
+      logParsing = "";
+    }
+    if (syntaxErrors === null || syntaxErrors === undefined){
+      syntaxErrors = "";
+    }
     var buffer = new BufferCalculator();
-    buffer.write(`<table><tr><td>`);
+    buffer.write(`<table><tr><td>${syntaxErrors}`);
     buffer.write(`<table class = "tableCalculatorOutput"><tr><th>Input</th><th>Output</th></tr>`);
+    if (typeof inputParsed.result.input === "string") {
+      inputParsed.result.input = [inputParsed.result.input];
+    }
+    if (typeof inputParsed.result.output === "string") {
+      inputParsed.result.output = [inputParsed.result.output];
+    }
     numEntries = Math.max(inputParsed.result.input.length, inputParsed.result.output.length);
 
     for (var i = 0; i < numEntries; i ++) {

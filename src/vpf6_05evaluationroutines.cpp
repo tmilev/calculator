@@ -836,6 +836,7 @@ void Calculator::EvaluateCommands()
       out << "<hr><b>Syntax errors encountered</b><br>";
     else
       out << logger::redConsole() << "Syntax errors encountered: " << logger::normalConsole();
+    this->outputJS["syntaxErrors"] = this->syntaxErrors;
     out << this->syntaxErrors;
     out << "<hr>";
   }

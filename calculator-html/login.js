@@ -42,12 +42,11 @@ function reloadPage(reason, time) {
 var oldUserRole;
 function logout() {
   var thePage = window.calculator.mainPage;
-  oldUserRole = thePage.user.role;
   thePage.storage.variables.user.name.setAndStore("");
   thePage.storage.variables.user.authenticationToken.setAndStore("");
+  thePage.storage.variables.user.role.setAndStore("");
   hideLogoutButton();
   thePage.user.hideProfilePicture();
-  thePage.user.role = "";
   thePage.user.flagLoggedIn = false;
   thePage.user.sectionsTaught = [];
   thePage.pages.problemPage.flagLoaded = false;
@@ -69,7 +68,7 @@ function logoutPartTwo() {
     document.getElementById("spanLoginStatus").innerHTML = loginStatus;
     showLoginCalculatorButtons();
     toggleAccountPanels();
-    toggleAdminPanels();
+    setAdminPanels();
     thePage.selectPage(thePage.pages.login.name);  
   }
 }
@@ -97,11 +96,13 @@ function toggleAccountPanels() {
   }
 }
 
-function toggleAdminPanels() {
+function setAdminPanels() {
   var thePage = window.calculator.mainPage;
   var adminPanels = document.getElementsByClassName("divAdminPanel");
+  var currentRole = thePage.user.getRole();
+  var studentView = thePage.studentView();
   for (var counterPanels = 0; counterPanels < adminPanels.length; counterPanels ++) {
-    if (thePage.user.role === "admin" && !thePage.studentView()) {
+    if (currentRole === "admin" && !studentView) {
       adminPanels[counterPanels].classList.remove("divInvisible");
       adminPanels[counterPanels].classList.add("divVisible");
     } else {
@@ -110,7 +111,7 @@ function toggleAdminPanels() {
     }
   }
   var studentViewPanel = document.getElementById(ids.domElements.spanStudentViewPanel);
-  if (thePage.user.role === "admin") {
+  if (currentRole === "admin") {
     studentViewPanel.classList.remove("divInvisible")
     studentViewPanel.classList.add("divVisible");
   } else {
@@ -129,10 +130,9 @@ function loginWithServerCallback(incomingString, result) {
     success = true;
     thePage.user.makeFromUserInfo(parsedAuthentication);
     toggleAccountPanels();
-    toggleAdminPanels();
+    setAdminPanels();
     hideLoginCalculatorButtons();
     showLogoutButton();
-    thePage.setSwitches();
   } else if (parsedAuthentication["status"] === "not logged in") {
     if (parsedAuthentication["error"] !== undefined) {
       loginErrorMessage = parsedAuthentication["error"];
@@ -144,11 +144,11 @@ function loginWithServerCallback(incomingString, result) {
     }
     thePage.storage.variables.user.authenticationToken.setAndStore("");
     thePage.storage.variables.user.name.setAndStore("");
-    thePage.user.role = "";
+    thePage.storage.variables.user.role.setAndStore("");
     thePage.user.flagLoggedIn = false;
     showLoginCalculatorButtons();
     toggleAccountPanels();
-    toggleAdminPanels();
+    setAdminPanels();
   }
   window.calculator.calculator.callbackToggleStatus(incomingString);
 }
@@ -269,6 +269,6 @@ module.exports = {
   logoutGoogle,
   logout,
   loginTry,
-  toggleAdminPanels,
+  setAdminPanels,
   loginCalculator,
 };

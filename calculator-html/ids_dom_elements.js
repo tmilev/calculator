@@ -35,6 +35,7 @@ var domElements = {
   spanCurrentActivationEmail: "spanCurrentActivationEmail",
   spanCurrentActivationToken: "spanCurrentActivationToken",
   spanVerificationActivation: "spanVerificationActivation",
+  spanProblemLinkWithRandomSeed: "spanProblemLinkWithRandomSeed",
   inputNewPasswordInActivationAccount: "inputNewPasswordInActivationAccount",
   inputReenteredPasswordInActivationAccount: "inputReenteredPasswordInActivationAccount",
   sliderDebugFlag: "sliderDebugFlag",

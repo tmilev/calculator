@@ -41,7 +41,7 @@ function updateAccountPage() {
   var spanExtraInfo = document.getElementById(ids.domElements.spanUserExtraInfo);
   var extraInfo = "";
   extraInfo += "<table>";
-  extraInfo += `<tr><td>Role: </td><td>${thePage.user.role}</td><tr>`;
+  extraInfo += `<tr><td>Role: </td><td>${thePage.user.getRole()}</td><tr>`;
   if (thePage.user.sectionsTaught.length > 0 && !thePage.studentView()) {
     extraInfo += `<tr><td>Sections taught: </td><td>${thePage.user.sectionsTaught.join(", ")}</td><tr>`;
   }

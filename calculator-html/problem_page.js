@@ -107,10 +107,14 @@ function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   var fileName = currentCourse.fileName.getValue();
   var topicList = currentCourse.topicList.getValue();
   var courseHome = currentCourse.courseHome.getValue();
+  var randomSeed = currentCourse.randomSeed.getValue();
   var result = "";
   result += `${pathnames.urls.calculatorAPI}?`;
   result += `request=${exerciseType}&fileName=${fileName}&`;
-  result += `topicList=${topicList}&courseHome=${courseHome}`;
+  result += `topicList=${topicList}&courseHome=${courseHome}&`;
+  if (randomSeed !== null && randomSeed !== "" && randomSeed !== undefined) {
+    result += `randomSeed=${randomSeed}&`;
+  }
   return result;
 }
 
@@ -125,9 +129,14 @@ Problem.prototype.getAppAnchorRequestFileCourseTopics = function(isScoredQuiz) {
     exerciseType: theExerciseType,
     fileName: this.fileName,
     courseHome: thePage.storage.variables.currentCourse.courseHome.getValue(),
-    topicList: thePage.storage.variables.currentCourse.topicList.getValue()
+    topicList: thePage.storage.variables.currentCourse.topicList.getValue(),
   };
-  return encodeURIComponent(JSON.stringify(requestJSON));
+  if (this.randomSeed !== "" && this.randomSeed !== null && this.randomSeed !== undefined) {
+    requestJSON["randomSeed"] = this.randomSeed;
+  }
+  var thePage = window.calculator.mainPage;
+  var stringifiedHash = thePage.storage.getCleanedUpURL(requestJSON);
+  return stringifiedHash;
 }
 
 Problem.prototype.getCalculatorURLFileCourseTopics = function() {
@@ -154,23 +163,10 @@ Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQui
   return result;
 }
 
-Problem.prototype.getURLRandomSeedRequestFileCourseTopics = function(isScoredQuiz) {
-  var result = this.getAppAnchorRequestFileCourseTopics(isScoredQuiz);
-  if (
-    !this.flagForReal && 
-    this.randomSeed !== undefined && 
-    this.randomSeed !== "" && 
-    this.randomSeed !== null  
-  ) {
-    result += `randomSeed=${this.randomSeed}&`;
-  }
-  return result;
-}
-
 Problem.prototype.getProblemNavigation = function() {
   var thePage = window.calculator.mainPage;
   var result = "";
-  result += "<span class='problemNavigation'>";
+  result += `<span class = 'problemNavigation'>`;
   var linkType = "problemLinkPractice";
   var defaultRequest = pathnames.urlFields.exerciseJSON;
   if (this.flagForReal && thePage.user.flagLoggedIn) {
@@ -199,8 +195,9 @@ Problem.prototype.getProblemNavigation = function() {
     var nextURL = thePage.problems[this.nextProblemId].getAppAnchorRequestFileCourseTopics();
     result += `<a class = '${linkType}' href = '#${nextURL}' onclick = "window.calculator.problemPage.selectCurrentProblem('${this.nextProblemId}', '${defaultRequest}')">&#8594;</a>`;
   }
+  
   if (this.flagForReal !== true && this.flagForReal !== "true") {
-    result += `<b style = 'color:green'>Scores not recorded. </b>`;
+    result += `<b style = 'color:green'>Scores not recorded. </b> <span id = "${ids.domElements.spanProblemLinkWithRandomSeed}"></span>`;
   } else {
     result += `<b style = 'color:brown'>Scores are recorded. </b>`;
   }
@@ -568,10 +565,10 @@ Problem.prototype.getHTMLOneProblemTr = function () {
   result += "<td>";
   if (this.fileName !== "") {
     if (thePage.user.flagLoggedIn) {
-      result += `<a class = "problemLinkQuiz" href = "#${this.getAppAnchorRequestFileCourseTopics(true)}" `; 
+      result += `<a class = "problemLinkQuiz" href = '#${this.getAppAnchorRequestFileCourseTopics(true)}' `; 
       result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.idURLed}', 'scoredQuizJSON');">Quiz</a>`;
     }
-    result += `<a class = "problemLinkPractice" href = "#${this.getAppAnchorRequestFileCourseTopics(false)}" `;
+    result += `<a class = "problemLinkPractice" href = '#${this.getAppAnchorRequestFileCourseTopics(false)}' `;
     result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.idURLed}', 'exerciseJSON');">Practice</a>`;
   }
   result += "</td>";
@@ -639,8 +636,8 @@ Problem.prototype.getHTMLSection = function() {
 Problem.prototype.toHTMLChapter =  function() {
   var thePage = window.calculator.mainPage;
   var result = "";
-  result += `<div class =\"headChapter\">${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}</div>`;
-  result += "<div class =\"bodyChapter\">";
+  result += `<div class = "headChapter">${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}</div>`;
+  result += `<div class = "bodyChapter">`;
   if (this.isProblemContainer()) {
     result += this.getHTMLProblems();
   } else {
@@ -778,7 +775,10 @@ function updateProblemPageCallback(input, outputComponent) {
     });
   }
   currentProblem.writeToHTML("divProblemPageContentContainer");
-
+  var problemLinkWithRandomSeed = document.getElementById(ids.domElements.spanProblemLinkWithRandomSeed);
+  if (problemLinkWithRandomSeed !== null) {
+    problemLinkWithRandomSeed.innerHTML = `<a href = '#${currentProblem.getAppAnchorRequestFileCourseTopics()}'>#${currentProblem.randomSeed}</a>`;
+  }
   currentProblem.scriptIds = [];
   for (var scriptLabel in theProblem.scripts) {
     var newLabel = encodeURIComponent(currentProblem.idURLed + scriptLabel);

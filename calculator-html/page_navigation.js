@@ -19,7 +19,6 @@ const signUp = require('./signup').signUp;
 function User() {
   this.flagLoggedIn = false;
   this.googleProfile = null;
-  this.role = "";
   this.sectionsTaught = [];
   this.instructor = "";
   this.sectionInDB = "";
@@ -31,16 +30,20 @@ User.prototype.isLoggedIn = function() {
   return this.flagLoggedIn;
 }
 
+User.prototype.getRole = function() {
+  return mainPage().storage.variables.user.role.getValue();
+}
+
 User.prototype.hasAdminRights = function() {
-  return this.role === "admin" && this.isLoggedIn();
+  return this.getRole() === "admin" && this.isLoggedIn();
 }
 
 User.prototype.hasProblemEditRights = function() {
-  return this.role === "admin" && this.isLoggedIn();
+  return this.getRole() === "admin" && this.isLoggedIn();
 }
 
 User.prototype.hasInstructorRights = function() {
-  return this.role === "admin" && this.isLoggedIn();
+  return this.getRole() === "admin" && this.isLoggedIn();
 }
 
 User.prototype.hideProfilePicture = function() {
@@ -54,7 +57,7 @@ User.prototype.makeFromUserInfo = function(inputData) {
   //inputdata.authenticationToken may not contain the authentication token.
   //not ok: thePage.storage.variables.user.authenticationToken.setAndStore(inputData.authenticationToken);
   thePage.storage.variables.user.name.setAndStore(inputData.username);
-  this.role = inputData.userRole;
+  mainPage().storage.variables.user.role.setAndStore(inputData.userRole);
   this.flagLoggedIn = true;
   this.sectionsTaught = inputData.sectionsTaught;
   this.instructor = inputData.instructor;
@@ -252,19 +255,25 @@ function StorageCalculator() {
         name: "exerciseType",
         nameLocalStorage: "exerciseType",
         nameURL: "exerciseType"
+      }),
+      randomSeed: new StorageVariable({
+        name: "randomSeed",
+        nameURL: "randomSeed",
       })
     },
     flagDebug: new StorageVariable({
       name: "debugFlag", 
       nameURL: "debugFlag", 
       nameCookie: "debugFlag",
-      secure: false
+      secure: false,
+      callbackOnValueChange: mainPage().onDebugValueChange.bind(mainPage()),
     }),
     flagStudentView: new StorageVariable({
       name: "studentView", 
       nameURL: "studentView", 
       nameCookie: "studentView",
-      secure: true
+      secure: true,
+      callbackOnValueChange: mainPage().onStudentViewChange.bind(mainPage()),
     }),
     calculator: {
       input: new StorageVariable({
@@ -297,6 +306,11 @@ function StorageCalculator() {
         name: "authenticationToken",
         nameCookie: "authenticationToken",
         nameURL: "authenticationToken",
+      }),
+      role: new StorageVariable({
+        name: "userRole",
+        nameCookie: "userRole",
+        nameURL: "userRole",
       }),
       email: new StorageVariable({
         name: "email",
@@ -563,7 +577,6 @@ function Page() {
   if (this.storage.variables.currentPage.getValue() != this.pages.activateAccount.name) {
     login.loginTry();
   }
-  this.setSwitches();
   document.getElementById("divPage").style.display = "";
   document.getElementById("divPage").className = "divPage";
 }
@@ -650,12 +663,12 @@ Page.prototype.sectionSelect = function(sectionNumber) {
   }
 }
 
-Page.prototype.flipStudentView = function () {
-  var oldValue = this.storage.variables.flagStudentView.getValue();
-  this.storage.variables.flagStudentView.setAndStore(document.getElementById(ids.domElements.sliderStudentView).checked);    
+Page.prototype.onStudentViewChange = function () {
+  var studentView = this.storage.variables.flagStudentView.isTrue();
+  document.getElementById(ids.domElements.sliderStudentView).checked = studentView;
   var spanView = document.getElementById(ids.domElements.spanStudentViewFlagToggleReport);
   var radioHTML = "";
-  if (this.storage.variables.flagStudentView.getValue()) {
+  if (studentView) {
     spanView.innerHTML = "Student view";
     for (var counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections ++) {
       radioHTML += `<br><label class = "containerRadioButton">`;
@@ -672,48 +685,38 @@ Page.prototype.flipStudentView = function () {
   } else {
     spanView.innerHTML = "Admin view";
   }
+  login.setAdminPanels();
   document.getElementById(ids.domElements.spanStudentViewSectionSelectPanel).innerHTML = radioHTML;
-
-  if (oldValue !== this.storage.variables.flagStudentView.getValue()) {
-    this.pages.problemPage.flagLoaded = false;
-    login.toggleAdminPanels();
-    this.selectPage(this.storage.variables.currentPage.getValue());
-  }
 }
 
-Page.prototype.flipDebugSwitch = function () {
-  this.storage.variables.flagDebug.setAndStore(document.getElementById(ids.domElements.sliderDebugFlag).checked);
+Page.prototype.onDebugValueChange = function () {
+  var sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
+  var debugOn = this.storage.variables.flagDebug.isTrue();
+  sliderDebug.checked = debugOn;
   var debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
-  if (this.storage.variables.flagDebug.getValue()) {
-    debugSpan.innerHTML = "Debug <b style='color:red'>on</b>";
+  if (debugOn) {
+    debugSpan.innerHTML = "Debug <b style = 'color:red'>on</b>";
   } else {
-    debugSpan.innerHTML = "Debug <b style='color:green'>off</b>";
+    debugSpan.innerHTML = "Debug <b style = 'color:green'>off</b>";
   }
 }
 
-Page.prototype.setSwitches = function () {
-  if (this.storage.variables.flagDebug.isTrue()) {
-    document.getElementById(ids.domElements.sliderDebugFlag).checked = true;
-  } else {
-    document.getElementById(ids.domElements.sliderDebugFlag).checked = false;
-  }
-  if (
-    this.storage.variables.flagStudentView.getValue() === true || 
-    this.storage.variables.flagStudentView.getValue() === "true"
-  ) {
-    document.getElementById(ids.domElements.sliderStudentView).checked = true;
-  } else {
-    document.getElementById(ids.domElements.sliderStudentView).checked = false;
-  }
-  this.flipDebugSwitch();
-  this.flipStudentView();
+Page.prototype.setSwitchDebug = function () {
+  var sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
+  this.storage.variables.flagDebug.setAndStore(sliderDebug.checked);
+  this.pages.problemPage.flagLoaded = false;
+  this.selectPage(this.storage.variables.currentPage.getValue());
+}
+
+Page.prototype.setSwitchStudentView = function () {
+  var sliderStudentView = document.getElementById(ids.domElements.sliderStudentView);
+  this.storage.variables.flagStudentView.setAndStore(sliderStudentView.checked);
+  this.pages.problemPage.flagLoaded = false;
+  this.selectPage(this.storage.variables.currentPage.getValue());
 }
 
 Page.prototype.studentView = function () {
-  if (this.storage.variables.flagStudentView.getValue() === true) {
-    return true;
-  }
-  return false;
+  return this.storage.variables.flagStudentView.isTrue();
 }
 
 function Script() {
@@ -794,7 +797,13 @@ function mainPage () {
   return window.calculator.mainPage;
 }
 
+/**@returns {String} */
+function getCleanedUpURL(input) {
+  return mainPage().storage.getCleanedUpURL(input);
+}
+
 module.exports = {
   Page,
   mainPage,
+  getCleanedUpURL,
 }

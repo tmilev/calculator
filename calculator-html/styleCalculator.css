@@ -34,7 +34,6 @@ tiny {
 }
 
 .problemInfoBar {
-  display: table;
   background-color: #fafafa;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;

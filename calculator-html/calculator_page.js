@@ -198,40 +198,6 @@ Calculator.prototype.getComputationLink = function(input) {
   return stringifiedHash;
 }
 
-/**@returns {String} */
-Calculator.prototype.getLatexLink = function() {
-  var firstPart = window.location.href.split("#")[0];
-  var hash = window.location.hash;
-  if (hash.startsWith('#')) {
-    hash = hash.substring(1);
-  }
-  if (hash.indexOf("%22") !== - 1) {
-    hash = decodeURIComponent(hash);
-  }
-  if (hash.indexOf("{") !== - 1) {
-    hash = encodeURIComponent(hash);
-  }
-  var theURL = `${firstPart}#${hash}`;
-  return this.latexifyLink(theURL);
-}
-
-/**@returns {String} */
-Calculator.prototype.latexifyLink = function(inputURL) {
-  var result = "";
-  result += "\\href{";
-  for (var i = 0; i < inputURL.length; i ++) { 
-    if (inputURL[i] == '%') {
-      result += "\\%";
-    } else if (inputURL[i] == '_') {
-      result += "\\_";
-    } else {
-      result += inputURL[i];
-    }
-  }
-  result += "}{Click-able sample algebraic computation}";
-  return result;
-}
-
 Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input, output) { 
   var inputParsed = null;
   var inputHtml = null;
@@ -266,9 +232,6 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
     buffer.write(`</td><td>${performanceHtml} ${commentsHtml}</td>`);
     if (mainPage.storage.variables.flagDebug.isTrue()) {
       buffer.write(`<td>`);
-      buffer.write(`<b>LaTeX link:</b> `);
-      buffer.write(this.getLatexLink());
-      buffer.write(`<br>`);
       buffer.write(inputParsed.debug);
       buffer.write(`</td>`);
     }

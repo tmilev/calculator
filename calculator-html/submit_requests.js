@@ -29,6 +29,40 @@ function convertStringToHtml(input) {
   return result;
 }
 
+/**@returns {String} */
+getLatexLink = function() {
+  var firstPart = window.location.href.split("#")[0];
+  var hash = window.location.hash;
+  if (hash.startsWith('#')) {
+    hash = hash.substring(1);
+  }
+  if (hash.indexOf("%22") !== - 1) {
+    hash = decodeURIComponent(hash);
+  }
+  if (hash.indexOf("{") !== - 1) {
+    hash = encodeURIComponent(hash);
+  }
+  var theURL = `${firstPart}#${hash}`;
+  return latexifyLink(theURL);
+}
+
+/**@returns {String} */
+latexifyLink = function(inputURL) {
+  var result = "";
+  result += "\\href{";
+  for (var i = 0; i < inputURL.length; i ++) { 
+    if (inputURL[i] == '%') {
+      result += "\\%";
+    } else if (inputURL[i] == '_') {
+      result += "\\_";
+    } else {
+      result += inputURL[i];
+    }
+  }
+  result += "}{Click-able sample algebraic computation}";
+  return result;
+}
+
 function recordProgressStarted(progress, address, isPost, timeStarted) {
   if (progress === "" || progress === null || progress === undefined) {
     return;
@@ -65,6 +99,10 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
     content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${convertStringToHtml(addressSpreadOut)}</a>`;
   } else {
     content += addressSpreadOut;
+  }
+  if (window.calculator.mainPage.storage.variables.flagDebug.isTrue()) {
+    content += `<br> <b>LaTeX link:</b> `;
+    content += getLatexLink();
   }
   panelWithButton.setPanelContent(content);
   panelWithButton.matchPanelStatus();

@@ -211,6 +211,7 @@ Calculator.prototype.writeCrashReport = function(
 Calculator.prototype.writeResult = function(
   /**@type {BufferCalculator} */ buffer,
   inputParsed,
+  panelIdPairs,
 ) {
   if (inputParsed.result === undefined) {
     return;
@@ -226,7 +227,7 @@ Calculator.prototype.writeResult = function(
   if (typeof inputParsed.result.output === "string") {
     inputParsed.result.output = [inputParsed.result.output];
   }
-  numEntries = Math.max(inputParsed.result.input.length, inputParsed.result.output.length);
+  var numEntries = Math.max(inputParsed.result.input.length, inputParsed.result.output.length);
   for (var i = 0; i < numEntries; i ++) {
     this.numberOfCalculatorPanels ++;
     var inputPanelId = `calculatorInputPanel${this.numberOfCalculatorPanels}`;
@@ -238,15 +239,24 @@ Calculator.prototype.writeResult = function(
     buffer.write(`</tr>`);    
   }
   buffer.write(`</table>`);  
-  buffer.write(`</td><td>${performanceHtml} ${commentsHtml}</td>`);
+  buffer.write(`</td><td>`);
+  if (inputParsed.performance !== undefined) {
+    buffer.write(inputParsed.performance);
+    buffer.write("<br>");
+  }
+  if (inputParsed.comments !== undefined ){
+    buffer.write(inputParsed.comments);
+  }
+  buffer.write(`</td>`);
+  var mainPage = window.calculator.mainPage;
   if (mainPage.storage.variables.flagDebug.isTrue() && inputParsed.debug !== undefined) {
     buffer.write(`<td>`);
     buffer.write(inputParsed.debug);
     buffer.write(`</td>`);
   }
   buffer.write(`</tr><table>`);
-  if (input.logParsing !== undefined) {
-    buffer.write(logParsing); 
+  if (inputParsed.parsingLog !== undefined) {
+    buffer.write(inputParsed.parsingLog); 
   }
 }
 
@@ -260,7 +270,7 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
     inputHtml = inputParsed.resultHtml;
     var buffer = new BufferCalculator();
     this.writeCrashReport(buffer, inputParsed);
-    this.writeResult(buffer, inputParsed);
+    this.writeResult(buffer, inputParsed, panelIdPairs);
     inputHtml = buffer.toString();
   } catch (e) {
     inputHtml = input + "<br>" + e;

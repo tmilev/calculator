@@ -903,14 +903,14 @@ void Calculator::EvaluateCommands()
   }
   this->outputString = out.str();
   this->outputJS["resultHtml"] = out.str();
-  this->outputJS["comments"] = this->Comments.str();
   std::stringstream commentsStream;
   if (this->theObjectContainer.theAlgebraicClosure.theBasisMultiplicative.size > 1)
-    commentsStream << "<b>Algebraic number closure status. </b><br>"
-    << this->theObjectContainer.theAlgebraicClosure.ToString() << "<hr>";
+    commentsStream << "<b>Algebraic closure status.</b><br>"
+    << this->theObjectContainer.theAlgebraicClosure.ToString();
   if (this->Comments.str() != "")
     commentsStream << "<br><span>" << this->Comments.str() << "</span>";
   this->outputCommentsString = commentsStream.str();
+  this->outputJS["comments"] = this->outputCommentsString;
   if (theGlobalVariables.flagRunningCommandLine && this->Comments.str() != "")
     this->outputString += this->outputCommentsString;
   //std::cout << "DEBUG: got to end of story. " ;

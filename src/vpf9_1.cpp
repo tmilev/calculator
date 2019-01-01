@@ -50,16 +50,15 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     { this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>"
       << theGlobalVariables.ToStringProgressReportHtml();
     }
-  if (stOutput.theOutputFunction != 0)
+  if (stOutput.theOutputFunction == 0)
     std::cout << this->theCrashReport.str() << std::endl;
-  stOutput << this->theCrashReport.str();
-  stOutput.Flush();
+
   if (!theGlobalVariables.flagNotAllocated)
   { std::fstream theFile;
     bool succeededToOpen = FileOperations::OpenFileCreateIfNotPresentVirtual
     (theFile, "crashes/" + theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false, true);
     if (succeededToOpen)
-      stOutput << "<hr>Crash dumped in file "
+      this->theCrashReport << "<hr>Crash dumped in file "
       << "<a href=\"/LogFiles/crashes/"
       << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.RelativePhysicalNameCrashLog, false)
       << "\" target=\"_blank\">"
@@ -67,23 +66,24 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
       << "</a>"
       << ". May require admin access to view online. ";
     else
-      stOutput << "<hr>Failed to create a crash report: check if folder exists and the "
+      this->theCrashReport << "<hr>Failed to create a crash report: check if folder exists and the "
       << "executable has file permissions for file " << theGlobalVariables.RelativePhysicalNameCrashLog
       << " located inside the output folder.";
     theFile << this->theCrashReport.str();
     theFile.flush();
     if (theParser != 0)
-    { theFile << "<hr>Additional comments follow. " << theParser->Comments.str();
-    }
+      theFile << "<hr>Additional comments follow. " << theParser->Comments.str();
     theFile.close();
   } else
-    stOutput << "GlobalVariables.flagNotAllocated is true. ";
+    this->theCrashReport << "GlobalVariables.flagNotAllocated is true. ";
   if (theParser != 0)
-  { stOutput << "<hr>Additional comments follow. " << theParser->Comments.str();
-  }
+    this->theCrashReport << "<hr>Additional comments follow. " << theParser->Comments.str();
+  JSData output;
+  output["crashReport"] = this->theCrashReport.str();
+  stOutput << output.ToString(false);
+  stOutput.Flush();
   if (this->CleanUpFunction != 0)
     this->CleanUpFunction();
-  std::cout.flush();
   assert(false);
   return *this;
 }

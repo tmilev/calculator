@@ -198,58 +198,69 @@ Calculator.prototype.getComputationLink = function(input) {
   return stringifiedHash;
 }
 
+Calculator.prototype.writeCrashReport = function(
+  /**@type {BufferCalculator} */ buffer,
+  inputParsed,
+) {
+  if (inputParsed.crashReport === undefined) {
+    return;
+  }
+  buffer.write(inputParsed.crashReport);
+}
+
+Calculator.prototype.writeResult = function(
+  /**@type {BufferCalculator} */ buffer,
+  inputParsed,
+) {
+  if (inputParsed.result === undefined) {
+    return;
+  }
+  buffer.write(`<table><tr><td>`);
+  if (inputParsed.syntaxErrors !== undefined) {
+    buffer.write(inputParsed.syntaxErrors);
+  }
+  buffer.write(`<table class = "tableCalculatorOutput"><tr><th>Input</th><th>Output</th></tr>`);
+  if (typeof inputParsed.result.input === "string") {
+    inputParsed.result.input = [inputParsed.result.input];
+  }
+  if (typeof inputParsed.result.output === "string") {
+    inputParsed.result.output = [inputParsed.result.output];
+  }
+  numEntries = Math.max(inputParsed.result.input.length, inputParsed.result.output.length);
+  for (var i = 0; i < numEntries; i ++) {
+    this.numberOfCalculatorPanels ++;
+    var inputPanelId = `calculatorInputPanel${this.numberOfCalculatorPanels}`;
+    var outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
+    panelIdPairs.push([inputPanelId, outputPanelId]);
+    buffer.write(`<tr>`);
+    buffer.write(`<td class = "cellCalculatorInput"> <div id = "${inputPanelId}"></div></td>`);
+    buffer.write(`<td class = "cellCalculatorResult"><div id = "${outputPanelId}"></div></td>`);
+    buffer.write(`</tr>`);    
+  }
+  buffer.write(`</table>`);  
+  buffer.write(`</td><td>${performanceHtml} ${commentsHtml}</td>`);
+  if (mainPage.storage.variables.flagDebug.isTrue() && inputParsed.debug !== undefined) {
+    buffer.write(`<td>`);
+    buffer.write(inputParsed.debug);
+    buffer.write(`</td>`);
+  }
+  buffer.write(`</tr><table>`);
+  if (input.logParsing !== undefined) {
+    buffer.write(logParsing); 
+  }
+}
+
+
 Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input, output) { 
   var inputParsed = null;
   var inputHtml = null;
-  var commentsHtml = "";
-  var performanceHtml = "";
-  var logParsing = "";
-  var syntaxErrors = "";
-  var numEntries = 0;
   var panelIdPairs = [];
-  var mainPage = window.calculator.mainPage;
   try {
     inputParsed = JSON.parse(input);
     inputHtml = inputParsed.resultHtml;
-    commentsHtml = inputParsed.comments;
-    performanceHtml = inputParsed.performance;
-    logParsing = inputParsed.parsingLog;
-    syntaxErrors = inputParsed.syntaxErrors;
-    if (logParsing === null || logParsing === undefined) {
-      logParsing = "";
-    }
-    if (syntaxErrors === null || syntaxErrors === undefined){
-      syntaxErrors = "";
-    }
     var buffer = new BufferCalculator();
-    buffer.write(`<table><tr><td>${syntaxErrors}`);
-    buffer.write(`<table class = "tableCalculatorOutput"><tr><th>Input</th><th>Output</th></tr>`);
-    if (typeof inputParsed.result.input === "string") {
-      inputParsed.result.input = [inputParsed.result.input];
-    }
-    if (typeof inputParsed.result.output === "string") {
-      inputParsed.result.output = [inputParsed.result.output];
-    }
-    numEntries = Math.max(inputParsed.result.input.length, inputParsed.result.output.length);
-
-    for (var i = 0; i < numEntries; i ++) {
-      this.numberOfCalculatorPanels ++;
-      var inputPanelId = `calculatorInputPanel${this.numberOfCalculatorPanels}`;
-      var outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
-      panelIdPairs.push([inputPanelId, outputPanelId]);
-      buffer.write(`<tr>`);
-      buffer.write(`<td class = "cellCalculatorInput"> <div id = "${inputPanelId}"></div></td>`);
-      buffer.write(`<td class = "cellCalculatorResult"><div id = "${outputPanelId}"></div></td>`);
-      buffer.write(`</tr>`);    
-    }
-    buffer.write(`</table>`);  
-    buffer.write(`</td><td>${performanceHtml} ${commentsHtml}</td>`);
-    if (mainPage.storage.variables.flagDebug.isTrue()) {
-      buffer.write(`<td>`);
-      buffer.write(inputParsed.debug);
-      buffer.write(`</td>`);
-    }
-    buffer.write(`</tr><table>${logParsing}`);
+    this.writeCrashReport(buffer, inputParsed);
+    this.writeResult(buffer, inputParsed);
     inputHtml = buffer.toString();
   } catch (e) {
     inputHtml = input + "<br>" + e;

@@ -159,6 +159,9 @@ std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem()
   { std::getline(topStream, lineString);
     out << lineString << "<br>\n ";
   }
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+    return out.str();
+  }
   out << "<table>";
   for (; std::getline(topStream, lineString);)
   { out << "<tr>";

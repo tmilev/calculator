@@ -154,10 +154,8 @@ public:
   int ProcessClonePage(bool useJSON);
   int ProcessModifyPage();
   int ProcessAddUserEmails();
-  int ProcessServerStatus();
-  int ProcessServerStatusJSON();
   int ProcessToggleMonitoring();
-  int ProcessServerStatusPublic();
+  int ProcessServerStatusJSON();
   int ProcessComputationIndicator();
   int ProcessBrowseProblems();
   int ProcessEditPage();
@@ -326,7 +324,7 @@ public:
   //List<int> theListeningSocketsReadyToAccept;
   ListReferences<WebWorker> theWorkers;
 
-  List<std::string> requestStartsNotNeedingLogin;
+  HashedList<std::string, MathRoutines::hashString> requestsNotNeedingLogin;
   List<std::string> addressStartsNotNeedingLogin;
   List<std::string> addressStartsSentWithCacheMaxAge;
   HashedList<std::string, MathRoutines::hashString> addressStartsInterpretedAsCalculatorRequest;
@@ -385,7 +383,6 @@ public:
   std::string ToStringLastErrorDescription();
   std::string ToStringStatusActive();
   std::string ToStringStatusAll();
-  std::string ToStringStatusPublic();
   std::string ToStringStatusPublicNoTop();
   std::string ToStringStatusForLogFile();
   static void TurnProcessMonitoringOn();

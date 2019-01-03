@@ -16,6 +16,7 @@ public:
   static std::string calculatorChangePassword;
   static std::string calculatorActivateAccount;
   static std::string calculatorActivateAccountJSON;
+  static std::string serverStatusJSON;
   static std::string calculatorHTML;
   static std::string calculatorOnePageJS;
   static std::string calculatorOnePageJSWithHash;

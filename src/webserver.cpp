@@ -17,6 +17,7 @@ std::string WebAPI::calculatorSetProblemData = "setProblemData";
 std::string WebAPI::calculatorChangePassword = "changePassword";
 std::string WebAPI::calculatorActivateAccount = "activateAccount";
 std::string WebAPI::calculatorActivateAccountJSON = "activateAccountJSON";
+std::string WebAPI::serverStatusJSON = "serverStatusJSON";
 std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
 
 std::string WebAPI::problemContent = "problemContent";
@@ -1896,13 +1897,6 @@ int WebWorker::ProcessCalculatorExamplesJSON()
   return 0;
 }
 
-int WebWorker::ProcessServerStatusPublic()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessServerStatusPublic");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << theWebServer.ToStringStatusPublic();
-  return 0;
-}
-
 int WebWorker::ProcessToggleMonitoring()
 { MacroRegisterFunctionWithName("WebWorker::ProcessToggleMonitoring");
   this->SetHeaderOKNoContentLength("");
@@ -1914,45 +1908,17 @@ int WebWorker::ProcessToggleMonitoring()
   return 0;
 }
 
-int WebWorker::ProcessServerStatus()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessServerStatus");
-  this->SetHeaderOKNoContentLength("");
-  std::stringstream out;
-  out << "<html>"
-  << "<head>"
-  << HtmlRoutines::GetCSSLinkCalculator()
-  << "</head>"
-  << "<body>";
-  std::stringstream pageBody;
-  if (theGlobalVariables.UserDefaultHasAdminRights())
-    pageBody << " <table><tr><td style =\"vertical-align:top\">"
-    << this->parent->ToStringStatusAll() << "</td><td>"
-    << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
-    << "</td></tr></table>";
-  else
-    pageBody << "<b>Viewing server status available only to logged-in admins.</b>";
-  if (theGlobalVariables.flagLoggedIn)
-    out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
-  out << pageBody.str();
-  out << "</body></html>";
-  stOutput << out.str();
-  return 0;
-}
-
 int WebWorker::ProcessServerStatusJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessServerStatusJSON");
   this->SetHeaderOKNoContentLength("");
   std::stringstream out;
-  if (theGlobalVariables.UserDefaultHasAdminRights())
-    out << " <table><tr><td style =\"vertical-align:top\">"
-    << this->parent->ToStringStatusAll() << "</td><td>"
-    << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
-    << "</td></tr></table>";
-  else
-    out << "<b>Viewing server status available only to logged-in admins.</b>";
-  //if (theGlobalVariables.flagLoggedIn)
-  //  out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
-  stOutput << out.str();
+  out << " <table><tr><td style =\"vertical-align:top\">"
+  << this->parent->ToStringStatusAll() << "</td><td>"
+  << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
+  << "</td></tr></table>";
+  JSData outputJS;
+  outputJS["result"] = out.str();
+  stOutput << outputJS.ToString(false);
   return 0;
 }
 
@@ -3635,12 +3601,8 @@ int WebWorker::ServeClient()
     return this->ProcessCalculatorExamplesJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "toggleMonitoring")
     return this->ProcessToggleMonitoring();
-  else if (theGlobalVariables.userCalculatorRequestType == "status")
-    return this->ProcessServerStatus();
   else if (theGlobalVariables.userCalculatorRequestType == "serverStatusJSON")
     return this->ProcessServerStatusJSON();
-  else if (theGlobalVariables.userCalculatorRequestType == "statusPublic")
-    return this->ProcessServerStatusPublic();
   if (theGlobalVariables.userCalculatorRequestType == "monitor")
     return this->ProcessMonitor();
   else if (theGlobalVariables.userCalculatorRequestType == "pause" && theGlobalVariables.flagAllowProcessMonitoring)
@@ -4222,7 +4184,7 @@ std::string WebServer::ToStringStatusPublicNoTop()
      (this->GetActiveWorker().timeOfLastPingServerSideOnly, false, false)
   << " web server uptime. ";
   int approxNumPings =
-  this->GetActiveWorker().timeOfLastPingServerSideOnly/this->WebServerPingIntervalInSeconds;
+  this->GetActiveWorker().timeOfLastPingServerSideOnly / this->WebServerPingIntervalInSeconds;
   if (approxNumPings < 0)
     approxNumPings = 0;
   int numConnectionsSoFarApprox = this->NumConnectionsSoFar - approxNumPings;
@@ -4231,8 +4193,7 @@ std::string WebServer::ToStringStatusPublicNoTop()
   out << "~" << numConnectionsSoFarApprox << " actual connections "
   << "(with " << this->NumberOfServerRequestsWithinAllConnections << " server requests served)" << " + ~"
   << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total)"
-  << " served since last restart. "
-  << "This counts one connection per problem answer preview, page visit, progress report ping, etc. ";
+  << " served since last restart. ";
   int numInUse = 0;
   for (int i = 0; i < this->theWorkers.size; i ++)
     if (this->theWorkers[i].flagInUse)
@@ -4251,36 +4212,18 @@ std::string WebServer::ToStringStatusPublicNoTop()
   return out.str();
 }
 
-std::string WebServer::ToStringStatusPublic()
-{ MacroRegisterFunctionWithName("WebServer::ToStringStatusPublic");
-  std::stringstream out;
-  out << "<html><body>";
-  out << this->ToStringStatusPublicNoTop();
-  std::string topString = theGlobalVariables.CallSystemWithOutput("top -b -n 1 -s");
-  //out << "<br>" << topString;
-  std::string lineString;
-  std::stringstream topStream(topString);
-  out << "<hr><b>Server machine details.</b><br>";
-  for (int i = 0; i < 5; i ++)
-  { std::getline(topStream, lineString);
-    out << lineString << "<br>\n ";
-  }
-  out << "The math libraries of the calculator can be found here: "
-  << "<a href=\"https://sourceforge.net/p/vectorpartition/code/HEAD/tree/\">calculator source code</a>. "
-  << "The problem templates are, for the time being, proprietary. ";
-
-  out << "</body></html>";
-  return out.str();
-}
-
 std::string WebServer::ToStringStatusAll()
 { MacroRegisterFunctionWithName("WebServer::ToStringStatusAll");
   if (theGlobalVariables.flagRunningApache)
     return "Running through Apache. ";
   std::stringstream out;
+  out << this->ToStringStatusPublicNoTop();
+
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return out.str();
+  out << "<hr>";
   out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><br>";
   out << "<a href=\"/LogFiles/" << GlobalVariables::GetDateForLogFiles() << "/\">" << "Current log files</a><hr>";
-  out << this->ToStringStatusPublicNoTop() << "<hr>";
   if (this->activeWorker == - 1)
     out << "The process is functioning as a server.";
   else
@@ -4410,9 +4353,8 @@ void WebServer::ReleaseWorkerSideResources()
 bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string& inputAddress)
 { MacroRegisterFunctionWithName("WebServer::RequiresLogin");
   if (inputAddress == theGlobalVariables.DisplayNameExecutable)
-    for (int i = 0; i < this->requestStartsNotNeedingLogin.size; i ++)
-      if (MathRoutines::StringBeginsWith(inputRequest, this->requestStartsNotNeedingLogin[i]))
-        return false;
+    if (this->requestsNotNeedingLogin.Contains(inputRequest))
+      return false;
   for (int i = 0; i < this->addressStartsNotNeedingLogin.size; i ++)
     if (MathRoutines::StringBeginsWith(inputAddress, this->addressStartsNotNeedingLogin[i]))
       return false;
@@ -5361,31 +5303,32 @@ void WebServer::InitializeGlobalVariables()
   theGlobalVariables.flagReportEverything = true;
   ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
   this->InitializeGlobalVariablesHashes();
-  this->requestStartsNotNeedingLogin.AddOnTop("about");
-  this->requestStartsNotNeedingLogin.AddOnTop("signUp");
-  this->requestStartsNotNeedingLogin.AddOnTop("signUpPage");
-  this->requestStartsNotNeedingLogin.AddOnTop("forgotLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("forgotLoginPage");
-  this->requestStartsNotNeedingLogin.AddOnTop("compute");
-  this->requestStartsNotNeedingLogin.AddOnTop("calculator");
-  this->requestStartsNotNeedingLogin.AddOnTop("calculatorExamples");
-  this->requestStartsNotNeedingLogin.AddOnTop("exerciseNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("exerciseJSON");
-  this->requestStartsNotNeedingLogin.AddOnTop("templateNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("templateJSONNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("topicListJSONNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("submitExerciseNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("submitExercisePreviewNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("problemSolutionNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("selectCourse");
-  this->requestStartsNotNeedingLogin.AddOnTop("slidesFromSource");
-  this->requestStartsNotNeedingLogin.AddOnTop("homeworkFromSource");
-  this->requestStartsNotNeedingLogin.AddOnTop("slidesSource");
-  this->requestStartsNotNeedingLogin.AddOnTop("homeworkSource");
-  this->requestStartsNotNeedingLogin.AddOnTop(WebAPI::app);
-  this->requestStartsNotNeedingLogin.AddOnTop(WebAPI::appNoCache);
-  this->requestStartsNotNeedingLogin.AddOnTop(WebAPI::calculatorUserInfoJSON);
+  this->requestsNotNeedingLogin.AddOnTop("about");
+  this->requestsNotNeedingLogin.AddOnTop("signUp");
+  this->requestsNotNeedingLogin.AddOnTop("signUpPage");
+  this->requestsNotNeedingLogin.AddOnTop("forgotLogin");
+  this->requestsNotNeedingLogin.AddOnTop("forgotLoginPage");
+  this->requestsNotNeedingLogin.AddOnTop("compute");
+  this->requestsNotNeedingLogin.AddOnTop("calculator");
+  this->requestsNotNeedingLogin.AddOnTop("calculatorExamples");
+  this->requestsNotNeedingLogin.AddOnTop("exerciseNoLogin");
+  this->requestsNotNeedingLogin.AddOnTop("exerciseJSON");
+  this->requestsNotNeedingLogin.AddOnTop("templateNoLogin");
+  this->requestsNotNeedingLogin.AddOnTop("templateJSONNoLogin");
+  this->requestsNotNeedingLogin.AddOnTop("topicListJSONNoLogin");
+  this->requestsNotNeedingLogin.AddOnTop("submitExerciseNoLogin");
+  this->requestsNotNeedingLogin.AddOnTop("submitExercisePreviewNoLogin");
+  this->requestsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");
+  this->requestsNotNeedingLogin.AddOnTop("problemSolutionNoLogin");
+  this->requestsNotNeedingLogin.AddOnTop("selectCourse");
+  this->requestsNotNeedingLogin.AddOnTop("slidesFromSource");
+  this->requestsNotNeedingLogin.AddOnTop("homeworkFromSource");
+  this->requestsNotNeedingLogin.AddOnTop("slidesSource");
+  this->requestsNotNeedingLogin.AddOnTop("homeworkSource");
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::app);
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::appNoCache);
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::calculatorUserInfoJSON);
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::serverStatusJSON);
 
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");

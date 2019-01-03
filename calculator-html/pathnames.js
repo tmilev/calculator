@@ -25,6 +25,7 @@ var urlFields = {
     setProblemData: "setProblemData",
     setTeacher: "setTeacher",
     database: "database",
+    serverStatusJSON: "serverStatusJSON",
   },
   teachersAndSections: "teachersAndSections",
   fileName: "fileName",

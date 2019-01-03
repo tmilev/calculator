@@ -383,8 +383,8 @@ public:
   std::string ToStringLastErrorDescription();
   std::string ToStringStatusActive();
   std::string ToStringStatusAll();
-  std::string ToStringStatusPublicNoTop();
   std::string ToStringStatusForLogFile();
+  std::string ToStringConnectionSummary();
   static void TurnProcessMonitoringOn();
   static void TurnProcessMonitoringOff();
   static void ToggleProcessMonitoring();

@@ -4125,54 +4125,8 @@ std::string WebServer::ToStringStatusActive()
   return out.str();
 }
 
-std::string WebServer::ToStringStatusForLogFile()
-{ MacroRegisterFunctionWithName("WebServer::ToStringStatusForLogFile");
-  if (theGlobalVariables.flagRunningApache)
-     return "Running through standard Apache web server, no connection details to display. ";
-  std::stringstream out;
-  out << "<b>The calculator web server status.</b><br>";
-  double timeSoFar = theGlobalVariables.GetElapsedSeconds();
-  out
-  << timeSoFar
-  << " seconds = "
-  << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
-  (timeSoFar, false, false)
-  << " web server uptime. ";
-  int approxNumPings = timeSoFar / this->WebServerPingIntervalInSeconds;
-  if (approxNumPings < 0)
-    approxNumPings = 0;
-  int numConnectionsSoFarApprox = this->NumConnectionsSoFar - approxNumPings;
-  if (numConnectionsSoFarApprox < 0)
-    numConnectionsSoFarApprox = 0;
-  out << "~" << numConnectionsSoFarApprox << " actual connections + ~"
-  << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total)"
-  << " served since last restart. "
-  << "This counts one connection per problem answer preview, page visit, progress report ping, etc. ";
-  int numInUse = 0;
-  for (int i = 0; i < this->theWorkers.size; i ++)
-    if (this->theWorkers[i].flagInUse)
-      numInUse ++;
-  out << "<hr>Currently, there are " << numInUse << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
-
-  out
-  << " The number tends to be high as many browsers open more than one connection per page visit. <br>"
-  << "<b>The following policies are only temporary and will be relaxed as we roll the webserver into"
-  << " production. </b><br>"
-  << this->MaxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
-  << "When the limit is exceeded, all connections except a randomly chosen one will be terminated. "
-  << "<br> " << this->MaxNumWorkersPerIPAdress
-  << " maximum simultaneous connection per IP address. "
-  << "When the limit is exceeded, all connections from that IP address are terminated. ";
-  out
-  << "<br>kill commands: " << this->NumProcessAssassinated
-  << ", processes reaped: " << this->NumProcessesReaped
-  << ", normally reclaimed workers: " << this->NumWorkersNormallyExited
-  << ", connections so far: " << this->NumConnectionsSoFar;
-  return out.str();
-}
-
-std::string WebServer::ToStringStatusPublicNoTop()
-{ MacroRegisterFunctionWithName("WebServer::ToStringStatusPublicNoTop");
+std::string WebServer::ToStringConnectionSummary()
+{ MacroRegisterFunctionWithName("WebServer::ToStringConnectionSummary");
   if (theGlobalVariables.flagRunningApache)
      return "Running through standard Apache web server, no connection details to display. ";
   std::stringstream out;
@@ -4202,8 +4156,7 @@ std::string WebServer::ToStringStatusPublicNoTop()
 
   out
   << " The number tends to be high as many browsers open more than one connection per page visit. <br>"
-  << "<b>The following policies are only temporary and will be relaxed as we roll the webserver into"
-  << " production. </b><br>"
+  << "<b>The following policies are quite strict and will be relaxed in the future. </b><br>"
   << this->MaxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
   << "When the limit is exceeded, all connections except a randomly chosen one will be terminated. "
   << "<br> " << this->MaxNumWorkersPerIPAdress
@@ -4212,15 +4165,31 @@ std::string WebServer::ToStringStatusPublicNoTop()
   return out.str();
 }
 
+std::string WebServer::ToStringStatusForLogFile()
+{ MacroRegisterFunctionWithName("WebServer::ToStringStatusForLogFile");
+  if (theGlobalVariables.flagRunningApache)
+     return "Running through standard Apache web server, no connection details to display. ";
+  std::stringstream out;
+  out << this->ToStringConnectionSummary();
+  out
+  << "<br>kill commands: " << this->NumProcessAssassinated
+  << ", processes reaped: " << this->NumProcessesReaped
+  << ", normally reclaimed workers: " << this->NumWorkersNormallyExited
+  << ", connections so far: " << this->NumConnectionsSoFar;
+  return out.str();
+}
+
 std::string WebServer::ToStringStatusAll()
 { MacroRegisterFunctionWithName("WebServer::ToStringStatusAll");
   if (theGlobalVariables.flagRunningApache)
     return "Running through Apache. ";
   std::stringstream out;
-  out << this->ToStringStatusPublicNoTop();
 
   if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << this->ToStringConnectionSummary();
     return out.str();
+  }
+  out << this->ToStringStatusForLogFile();
   out << "<hr>";
   out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><br>";
   out << "<a href=\"/LogFiles/" << GlobalVariables::GetDateForLogFiles() << "/\">" << "Current log files</a><hr>";

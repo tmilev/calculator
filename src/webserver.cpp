@@ -4148,11 +4148,6 @@ std::string WebServer::ToStringConnectionSummary()
   << "(with " << this->NumberOfServerRequestsWithinAllConnections << " server requests served)" << " + ~"
   << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total)"
   << " served since last restart. ";
-  int numInUse = 0;
-  for (int i = 0; i < this->theWorkers.size; i ++)
-    if (this->theWorkers[i].flagInUse)
-      numInUse ++;
-  out << "<hr>Currently, there are " << numInUse << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
 
   out
   << " The number tends to be high as many browsers open more than one connection per page visit. <br>"
@@ -4171,6 +4166,11 @@ std::string WebServer::ToStringStatusForLogFile()
      return "Running through standard Apache web server, no connection details to display. ";
   std::stringstream out;
   out << this->ToStringConnectionSummary();
+  int numInUse = 0;
+  for (int i = 0; i < this->theWorkers.size; i ++)
+    if (this->theWorkers[i].flagInUse)
+      numInUse ++;
+  out << "<hr>Currently, there are " << numInUse << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
   out
   << "<br>kill commands: " << this->NumProcessAssassinated
   << ", processes reaped: " << this->NumProcessesReaped

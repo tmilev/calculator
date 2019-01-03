@@ -151,6 +151,8 @@ std::string Crasher::GetStackTraceShort()
 
 std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringHTMLTopCommandLinuxSystem");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return "Login as admin for RAM memory statistics.";
   std::string topString = this->CallSystemWithOutput("top -b -n 1 -s");
   std::stringstream out;
   std::string lineString, wordString;
@@ -158,9 +160,6 @@ std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem()
   for (int i = 0; i < 4; i ++)
   { std::getline(topStream, lineString);
     out << lineString << "<br>\n ";
-  }
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-    return out.str();
   }
   out << "<table>";
   for (; std::getline(topStream, lineString);)

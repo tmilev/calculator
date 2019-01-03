@@ -4131,14 +4131,18 @@ std::string WebServer::ToStringConnectionSummary()
      return "Running through standard Apache web server, no connection details to display. ";
   std::stringstream out;
   out << "<b>The calculator web server status.</b><br>";
+  double timeRunning = - 1;
+  if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size)
+    timeRunning = theGlobalVariables.GetElapsedSeconds();
+  else
+    timeRunning = this->GetActiveWorker().timeOfLastPingServerSideOnly;
   out
-  << this->GetActiveWorker().timeOfLastPingServerSideOnly
+  << timeRunning
   << " seconds = "
   << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
-     (this->GetActiveWorker().timeOfLastPingServerSideOnly, false, false)
+     (timeRunning, false, false)
   << " web server uptime. ";
-  int approxNumPings =
-  this->GetActiveWorker().timeOfLastPingServerSideOnly / this->WebServerPingIntervalInSeconds;
+  int approxNumPings = timeRunning / this->WebServerPingIntervalInSeconds;
   if (approxNumPings < 0)
     approxNumPings = 0;
   int numConnectionsSoFarApprox = this->NumConnectionsSoFar - approxNumPings;

@@ -18,6 +18,7 @@ std::string WebAPI::calculatorChangePassword = "changePassword";
 std::string WebAPI::calculatorActivateAccount = "activateAccount";
 std::string WebAPI::calculatorActivateAccountJSON = "activateAccountJSON";
 std::string WebAPI::serverStatusJSON = "serverStatusJSON";
+std::string WebAPI::calculatorSelectCourseJSON = "selectCourseJSON";
 std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
 
 std::string WebAPI::problemContent = "problemContent";
@@ -3700,7 +3701,7 @@ int WebWorker::ServeClient()
     return this->ProcessClonePage(true);
   else if (theGlobalVariables.userCalculatorRequestType == "compute")
     return this->ProcessCompute();
-  else if (theGlobalVariables.userCalculatorRequestType == "selectCourseJSON")
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorSelectCourseJSON)
     return this->ProcessSelectCourseJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "about")
     return this->ProcessAbout();
@@ -5293,7 +5294,7 @@ void WebServer::InitializeGlobalVariables()
   this->requestsNotNeedingLogin.AddOnTop("submitExercisePreviewNoLogin");
   this->requestsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");
   this->requestsNotNeedingLogin.AddOnTop("problemSolutionNoLogin");
-  this->requestsNotNeedingLogin.AddOnTop("selectCourse");
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::calculatorSelectCourseJSON);
   this->requestsNotNeedingLogin.AddOnTop("slidesFromSource");
   this->requestsNotNeedingLogin.AddOnTop("homeworkFromSource");
   this->requestsNotNeedingLogin.AddOnTop("slidesSource");

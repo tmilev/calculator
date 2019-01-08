@@ -21,6 +21,7 @@ public:
   static std::string calculatorOnePageJS;
   static std::string calculatorOnePageJSWithHash;
   static std::string calculatorUserInfoJSON;
+  static std::string calculatorSelectCourseJSON;
   class databaseParameters
   {
   public:

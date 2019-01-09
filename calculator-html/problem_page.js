@@ -110,7 +110,7 @@ function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   var randomSeed = currentCourse.randomSeed.getValue();
   var result = "";
   result += `${pathnames.urls.calculatorAPI}?`;
-  result += `request=${exerciseType}&fileName=${fileName}&`;
+  result += `${pathnames.urlFields.request}=${exerciseType}&fileName=${fileName}&`;
   result += `topicList=${topicList}&courseHome=${courseHome}&`;
   if (randomSeed !== null && randomSeed !== "" && randomSeed !== undefined) {
     result += `randomSeed=${randomSeed}&`;

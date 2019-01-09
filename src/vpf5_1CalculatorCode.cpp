@@ -1005,12 +1005,12 @@ bool Plot::IsOKVector(const Vector<double>& input)
 std::string Plot::GetPlotHtml3d_New(Calculator& owner)
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml3d_New");
   owner.flagHasGraphics = true;
-  std::stringstream out;
+  std::stringstream outContent, outScript;
   this->ComputeCanvasNameIfNecessary();
   //stOutput << "DEBUG: width: " << this->DesiredHtmlWidthInPixels
   //<< " height: " << this->DesiredHtmlHeightInPixels;
   if (!owner.flagPlotShowJavascriptOnly)
-  { out << "<canvas width =\"" << this->DesiredHtmlWidthInPixels
+  { outContent << "<canvas width =\"" << this->DesiredHtmlWidthInPixels
     << "\" height =\"" << this->DesiredHtmlHeightInPixels << "\" "
     << "style =\"border:solid 1px\" id =\""
     << this->canvasName
@@ -1026,17 +1026,17 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     << "<span id =\"" << this->canvasName << "Controls\"></span>"
     << "<span id =\"" << this->canvasName << "Messages\"></span>";
   }
-  out << "<script language =\"javascript\">\n";
+  outContent << "<script language =\"javascript\">\n";
   std::string canvasFunctionName = "functionMake" + this->canvasName;
   std::string canvasResetFunctionName = "functionReset" + this->canvasName;
-  out
+  outScript
   << "function " << canvasResetFunctionName << "() {\n"
   << canvasFunctionName << "();\n"
   << "}\n";
-  out << "function " << canvasFunctionName << "() {\n";
+  outScript << "function " << canvasFunctionName << "() {\n";
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++)
   { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
-    out << " window.calculator.drawing.plotUpdaters['"
+    outScript << " window.calculator.drawing.plotUpdaters['"
     << currentBox.GetSliderName() << "'] =" << "'" << this->canvasName << "'"
     << ";\n";
   }
@@ -1046,44 +1046,42 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   for (int i = 0; i < this->thePlots.size; i ++)
   { PlotObject& currentO = this->thePlots[i];
     if (currentO.thePlotType == "surface")
-    { out << currentO.GetJavascriptSurfaceImmersion(the3dObjects[i], this->canvasName, funCounter) << "\n ";
-    }
+      outScript << currentO.GetJavascriptSurfaceImmersion(the3dObjects[i], this->canvasName, funCounter) << "\n ";
     if (currentO.thePlotType == "parametricCurve")
-    { out << currentO.GetJavascriptCurveImmersionIn3d(the3dObjects[i], this->canvasName, funCounter) << "\n ";
-    }
+      outScript << currentO.GetJavascriptCurveImmersionIn3d(the3dObjects[i], this->canvasName, funCounter) << "\n ";
   }
-  out << "var theDrawer = window.calculator.drawing;\n";
-  out << "theDrawer.deleteCanvas('" << this->canvasName << "');\n";
-  out << "var theCanvas = theDrawer.getCanvas('" << this->canvasName << "');\n"
+  outScript << "var theDrawer = window.calculator.drawing;\n";
+  outScript << "theDrawer.deleteCanvas('" << this->canvasName << "');\n";
+  outScript << "var theCanvas = theDrawer.getCanvas('" << this->canvasName << "');\n"
   << "theCanvas.init('" << this->canvasName << "');\n";
-  out << "theCanvas.canvasResetFunction = " << canvasResetFunctionName << ";\n";
+  outScript << "theCanvas.canvasResetFunction = " << canvasResetFunctionName << ";\n";
   for (int i = 0; i < this->thePlots.size; i ++)
   { PlotObject& currentPlot = this->thePlots[i];
     if (currentPlot.thePlotType == "surface")
-    { out
+    { outScript
       << "theCanvas.drawSurface("
       <<  the3dObjects[i]
       << ");\n";
     }
     if (currentPlot.thePlotType == "parametricCurve")
     { //stOutput << "DEBUG: here be i";
-      out
+      outScript
       << "theCanvas.drawCurve("
       <<  the3dObjects[i]
       << ");\n";
     }
     if (currentPlot.thePlotType == "setProjectionScreen" && currentPlot.thePointsDouble.size >= 2)
-    { out
-      << "theCanvas.screenBasisUserDefault ="
+    { outScript
+      << "theCanvas.screenBasisUserDefault = "
       << "["
       << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
       << ","
       << currentPlot.thePointsDouble[1].ToStringSquareBracketsBasicType()
       << "];\n";
-      out << "theCanvas.screenBasisUser = theCanvas.screenBasisUserDefault.slice();\n";
+      outScript << "theCanvas.screenBasisUser = theCanvas.screenBasisUserDefault.slice();\n";
     }
     if (currentPlot.thePlotType == "label")
-    { out
+    { outScript
       << "theCanvas.drawText({"
       << "location: "
       << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
@@ -1098,7 +1096,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
       << "});\n";
     }
     if (currentPlot.thePlotType == "segment" && currentPlot.thePointsDouble.size >= 2)
-    { out
+    { outScript
       << "theCanvas.drawLine("
       << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
       << ", "
@@ -1113,15 +1111,17 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     }
   }
   if (owner.flagPlotNoControls)
-    out << "theCanvas.flagShowPerformance = false;\n";
+    outScript << "theCanvas.flagShowPerformance = false;\n";
   else
-    out << "theCanvas.flagShowPerformance = true;\n";
-  out << "theCanvas.setBoundingBoxAsDefaultViewWindow();\n"
+    outScript << "theCanvas.flagShowPerformance = true;\n";
+  outScript << "theCanvas.setBoundingBoxAsDefaultViewWindow();\n"
   << "theCanvas.redraw();\n"
   << "}\n";
-  out << canvasFunctionName << "();\n"
-  << "</script>";
-  return out.str();
+  outScript << canvasFunctionName << "();\n";
+  outContent << outScript.str();
+  outContent << "</script>";
+  owner.theObjectContainer.graphicsScripts.SetKeyValue(this->canvasName, outScript.str());
+  return outContent.str();
 }
 
 std::string Plot::ToStringDebug()
@@ -1171,7 +1171,7 @@ std::string PlotObject::GetJavascriptCurveImmersionIn3d
     << this->coordinateFunctionsJS.size
     << " elements instead of 3 (expected).\n";
   std::stringstream curveInstStream;
-  curveInstStream << "new CurveThreeD(" << fnName
+  curveInstStream << "new theDrawer.CurveThreeD(" << fnName
   << ", " << this->paramLowJS << ", " << this->paramHighJS;
   if (this->numSegmenTsJS.size > 0)
     curveInstStream << ", " << this->numSegmenTsJS[0];

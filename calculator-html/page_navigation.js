@@ -349,12 +349,8 @@ StorageCalculator.prototype.parseURL = function() {
     if (this.currentHash.startsWith('#')) {
       this.currentHash = this.currentHash.slice(1);
     }
-    if (this.oldHash !== this.currentHash) {
-      if (this.currentHash === "") {
-        this.urlObject = {};
-      } else {
-        this.urlObject = JSON.parse(this.currentHash);
-      }
+    if (this.oldHash !== this.currentHash && this.currentHash !== "") {
+      this.urlObject = JSON.parse(this.currentHash);
     }
   } catch (e) {
     console.log(`Failed to parse your url hash ${this.currentHash} obtained from ${window.location.hash}. ${e}`);

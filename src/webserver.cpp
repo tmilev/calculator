@@ -9,23 +9,24 @@
 
 std::string WebAPI::appNoCache = "appNoCache";
 std::string WebAPI::app = "app";
-std::string WebAPI::calculatorHTML = "/calculator-html";
-std::string WebAPI::calculatorOnePageJS = "/calculator-html/javascript_all_in_one.js";
-std::string WebAPI::calculatorOnePageJSWithHash = "/calculator-html/javascript_all_in_one.js";
-std::string WebAPI::calculatorCalculatorPage = "calculator";
-std::string WebAPI::calculatorSetProblemData = "setProblemData";
-std::string WebAPI::calculatorChangePassword = "changePassword";
-std::string WebAPI::calculatorActivateAccount = "activateAccount";
-std::string WebAPI::calculatorActivateAccountJSON = "activateAccountJSON";
+std::string WebAPI::request::calculatorHTML = "/calculator-html";
+std::string WebAPI::request::onePageJS = "/calculator-html/javascript_all_in_one.js";
+std::string WebAPI::request::onePageJSWithHash = "/calculator-html/javascript_all_in_one.js";
+std::string WebAPI::request::calculatorPage = "calculator";
+std::string WebAPI::request::setProblemData = "setProblemData";
+std::string WebAPI::request::changePassword = "changePassword";
+std::string WebAPI::request::activateAccount = "activateAccount";
+std::string WebAPI::request::activateAccountJSON = "activateAccountJSON";
 std::string WebAPI::serverStatusJSON = "serverStatusJSON";
-std::string WebAPI::calculatorSelectCourseJSON = "selectCourseJSON";
+std::string WebAPI::request::selectCourseJSON = "selectCourseJSON";
 std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
 
 std::string WebAPI::problemContent = "problemContent";
 std::string WebAPI::problemFileName = "fileName";
 std::string WebAPI::problemId = "id";
 
-std::string WebAPI::calculatorUserInfoJSON = "userInfoJSON";
+std::string WebAPI::request::userInfoJSON = "userInfoJSON";
+std::string WebAPI::request::examplesJSON = "calculatorExamplesJSON";
 std::string WebAPI::databaseParameters::entryPoint = "database";
 std::string WebAPI::databaseParameters::labels = "databaseLabels";
 std::string WebAPI::databaseParameters::operation = "databaseOperation";
@@ -92,9 +93,9 @@ std::string WebWorker::closeIndentTag(const std::string& theTag)
 
 bool WebWorker::IsAllowedAsRequestCookie(const std::string& input)
 { return
-  input != "login" && input != "logout" && input != WebAPI::calculatorChangePassword &&
-  input != "changePasswordPage" && input != WebAPI::calculatorActivateAccount &&
-  input != WebAPI::calculatorActivateAccountJSON;
+  input != "login" && input != "logout" && input != WebAPI::request::changePassword &&
+  input != "changePasswordPage" && input != WebAPI::request::activateAccount &&
+  input != WebAPI::request::activateAccountJSON;
 }
 
 #ifdef MACRO_use_open_ssl
@@ -1339,9 +1340,9 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   ////////////////////////////
   //stOutput << "DEBUG: Password: " << theUser.enteredPassword;
   bool changingPass =
-  theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorChangePassword ||
-  theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccount ||
-  theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccountJSON;
+  theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword ||
+  theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount ||
+  theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON;
   if (changingPass)
     theUser.enteredAuthenticationToken = "";
   if (doAttemptGoogleTokenLogin)
@@ -1882,13 +1883,6 @@ void WebWorker::SanitizeVirtualFileName()
   this->VirtualFileName = "";
   for (int i = resultName.size() - 1; i >= 0; i --)
     this->VirtualFileName.push_back(resultName[i]);
-}
-
-int WebWorker::ProcessCalculatorExamples()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorExamples");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << theParser->ToStringFunctionHandlers();
-  return 0;
 }
 
 int WebWorker::ProcessCalculatorExamplesJSON()
@@ -2622,7 +2616,7 @@ std::string WebWorker::GetChangePasswordPage()
     << "<b><span style =\"color:orange\">"
     << "To fully activate your account, "
     << "please choose a password.</span></b></td></tr>";
-  if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccount)
+  if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount)
     out << "<tr><td colspan =\"2\">" << WebWorker::GetChangePasswordPagePartOne(doShowPasswordChangeField) << "</td></tr>";
   else
   { if (theGlobalVariables.userDefault.actualActivationToken != "" &&
@@ -3351,8 +3345,8 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
   if (!theUser.flagEnteredPassword)
     return false;
   if (theGlobalVariables.userCalculatorRequestType == "changePassword" ||
-      theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccount ||
-      theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccountJSON)
+      theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount ||
+      theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON)
     return false;
   std::stringstream redirectedAddress;
   if (this->addressComputed == theGlobalVariables.DisplayNameExecutable)
@@ -3566,7 +3560,7 @@ int WebWorker::ServeClient()
   }
   //logWorker << "DEBUG: argumentProcessingFailureComments: " <<  argumentProcessingFailureComments.str() << logger::endL;
   if (argumentProcessingFailureComments.str() != "" &&
-      (theUser.flagMustLogin || theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorUserInfoJSON))
+      (theUser.flagMustLogin || theGlobalVariables.userCalculatorRequestType == WebAPI::request::userInfoJSON))
   { theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
     //logWorker << "DEBUG: set global error" << logger::endL;
   }
@@ -3596,9 +3590,7 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
            theGlobalVariables.userCalculatorRequestType == "navigation")
     return this->ProcessNavigation();
-  else if (theGlobalVariables.userCalculatorRequestType == "calculatorExamples")
-    return this->ProcessCalculatorExamples();
-  else if (theGlobalVariables.userCalculatorRequestType == "calculatorExamplesJSON")
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::examplesJSON)
     return this->ProcessCalculatorExamplesJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "toggleMonitoring")
     return this->ProcessToggleMonitoring();
@@ -3614,14 +3606,14 @@ int WebWorker::ServeClient()
   //this->parent->ReleaseNonActiveWorkers();
   //Reason: the architecture changed, now multiple requests
   //can be piped through one worker.
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorSetProblemData)
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::setProblemData)
     return this->ProcessSetProblemDatabaseInfo();
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorChangePassword)
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword)
     return this->ProcessChangePassword(argumentProcessingFailureComments.str());
   else if (theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
-           theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccount)
+           theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount)
     return this->ProcessChangePasswordPage();
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccountJSON)
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON)
     return this->ProcessActivateAccount();
   else if (theGlobalVariables.userCalculatorRequestType == "signUp")
     return this->ProcessSignUP();
@@ -3681,7 +3673,7 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType == "templateJSON" ||
            theGlobalVariables.userCalculatorRequestType == "templateJSONNoLogin")
     return this->ProcessTemplateJSON();
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorUserInfoJSON)
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::userInfoJSON)
     return this->ProcessLoginUserInfo(comments.str());
   else if (theGlobalVariables.userCalculatorRequestType == "editPage")
     return this->ProcessEditPage();
@@ -3701,7 +3693,7 @@ int WebWorker::ServeClient()
     return this->ProcessClonePage(true);
   else if (theGlobalVariables.userCalculatorRequestType == "compute")
     return this->ProcessCompute();
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorSelectCourseJSON)
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::selectCourseJSON)
     return this->ProcessSelectCourseJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "about")
     return this->ProcessAbout();
@@ -3712,9 +3704,9 @@ int WebWorker::ServeClient()
     return this->ProcessApp(true);
   else if (theGlobalVariables.userCalculatorRequestType == WebAPI::appNoCache)
     return this->ProcessApp(false);
-  else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorOnePageJS)
+  else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::request::onePageJS)
     return this->ProcessCalculatorOnePageJS(false);
-  else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorOnePageJSWithHash)
+  else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::request::onePageJSWithHash)
     return this->ProcessCalculatorOnePageJS(true);
   return this->ProcessFolderOrFile();
 }
@@ -5268,8 +5260,8 @@ void WebServer::InitializeGlobalVariablesHashes()
   theGlobalVariables.ChDir(theDir);
 
   FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
-  (WebAPI::calculatorHTML);
-  WebAPI::calculatorOnePageJSWithHash = FileOperations::GetVirtualNameWithHash(WebAPI::calculatorOnePageJS);
+  (WebAPI::request::calculatorHTML);
+  WebAPI::request::onePageJSWithHash = FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS);
 }
 
 void WebServer::InitializeGlobalVariables()
@@ -5284,7 +5276,7 @@ void WebServer::InitializeGlobalVariables()
   this->requestsNotNeedingLogin.AddOnTop("forgotLoginPage");
   this->requestsNotNeedingLogin.AddOnTop("compute");
   this->requestsNotNeedingLogin.AddOnTop("calculator");
-  this->requestsNotNeedingLogin.AddOnTop("calculatorExamples");
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::examplesJSON);
   this->requestsNotNeedingLogin.AddOnTop("exerciseNoLogin");
   this->requestsNotNeedingLogin.AddOnTop("exerciseJSON");
   this->requestsNotNeedingLogin.AddOnTop("templateNoLogin");
@@ -5294,14 +5286,14 @@ void WebServer::InitializeGlobalVariables()
   this->requestsNotNeedingLogin.AddOnTop("submitExercisePreviewNoLogin");
   this->requestsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");
   this->requestsNotNeedingLogin.AddOnTop("problemSolutionNoLogin");
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::calculatorSelectCourseJSON);
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::selectCourseJSON);
   this->requestsNotNeedingLogin.AddOnTop("slidesFromSource");
   this->requestsNotNeedingLogin.AddOnTop("homeworkFromSource");
   this->requestsNotNeedingLogin.AddOnTop("slidesSource");
   this->requestsNotNeedingLogin.AddOnTop("homeworkSource");
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::app);
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::appNoCache);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::calculatorUserInfoJSON);
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::userInfoJSON);
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::serverStatusJSON);
 
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
@@ -5314,15 +5306,15 @@ void WebServer::InitializeGlobalVariables()
   this->addressStartsNotNeedingLogin.AddOnTop("/login");
   this->addressStartsNotNeedingLogin.AddOnTop("/" + WebAPI::app);
   this->addressStartsNotNeedingLogin.AddOnTop("/" + WebAPI::appNoCache);
-  this->addressStartsNotNeedingLogin.AddOnTop(WebAPI::calculatorOnePageJS);
+  this->addressStartsNotNeedingLogin.AddOnTop(WebAPI::request::onePageJS);
 
 
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/" + WebAPI::app);
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::app);
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/" + WebAPI::appNoCache);
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::appNoCache);
-  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::calculatorOnePageJS);
-  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::calculatorOnePageJSWithHash);
+  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::request::onePageJS);
+  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::request::onePageJSWithHash);
   //NO! Adding "logout", for example: this->addressStartsNotNeedingLogin.AddOnTop("logout");
   //is FORBIDDEN! Logging someone out definitely requires authentication (imagine someone
   //asking for logouts on your account once every second: this would be fatal as proper logout resets

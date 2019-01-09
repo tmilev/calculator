@@ -3,53 +3,6 @@
 #include "vpf.h"
 ProjectInformationInstance ProjectInfoVpf6_05cpp(__FILE__, "Calculator core evaluation engine. ");
 
-std::string Calculator::ToStringFunctionHandlers()
-{ MacroRegisterFunctionWithName("Calculator::ToStringFunctionHandlers");
-  std::stringstream out;
-  int numOpsHandled = 0;
-  int numHandlers = 0;
-  int numInnerHandlers = 0;
-  for (int i = 0; i < this->theAtoms.size; i ++)
-  { if (this->FunctionHandlers[i].size != 0)
-      numOpsHandled ++;
-    numHandlers += this->FunctionHandlers[i].size;
-    for (int j = 0; j < this->FunctionHandlers[i].size; j ++)
-      if (this->FunctionHandlers[i][j].flagIsInner)
-        numInnerHandlers ++;
-  }
-  out << "\n <b> " << numOpsHandled << " built-in atoms are handled by a total of " << numHandlers << " handler functions ("
-  << numInnerHandlers << " inner and " << numHandlers-numInnerHandlers << " outer).</b><br>\n";
-  bool found = false;
-  List<std::string> atomsSorted = this->theAtoms;
-  List<int> theIndices;
-  theIndices.SetSize(this->theAtoms.size);
-  for (int i = 0; i < theIndices.size; i ++)
-    theIndices[i] = i;
-  atomsSorted.QuickSortAscending(0, &theIndices);
-
-  for (int k = 0; k < this->theAtoms.size; k ++)
-  { int theAtomIndex = theIndices[k];
-    int indexCompositeHander = this->operationsComposite.GetIndex(this->theAtoms[theAtomIndex]);
-    if (this->FunctionHandlers[theAtomIndex].size > 0)
-      for (int j = 0; j < this->FunctionHandlers[theAtomIndex].size; j ++)
-        if (this->FunctionHandlers[theAtomIndex][j].flagIamVisible)
-        { if (found)
-            out << "<br>\n";
-          found = true;
-          out << this->FunctionHandlers[theAtomIndex][j].ToStringFull();
-        }
-    if (indexCompositeHander != - 1)
-      for (int j = 0; j < this->operationsCompositeHandlers[indexCompositeHander].size; j ++)
-        if (this->operationsCompositeHandlers[indexCompositeHander][j].flagIamVisible)
-        { if (found)
-            out << "<br>\n";
-          found = true;
-          out << this->operationsCompositeHandlers[indexCompositeHander][j].ToStringFull();
-        }
-  }
-  return out.str();
-}
-
 std::string Calculator::ToStringFunctionHandlersJSON()
 { MacroRegisterFunctionWithName("Calculator::ToStringFunctionHandlersJSON");
   JSData output(JSData::JSObject);

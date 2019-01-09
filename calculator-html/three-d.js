@@ -1111,19 +1111,19 @@ CanvasTwoD.prototype.coordsMathToScreen = function(vector) {
   ];
 }
 
-CanvasTwoD.prototype.coordsScreenAbsoluteToScreen = function(screenX, screenY)
-{ return getPosXPosYObject(this.canvasContainer, screenX, screenY);
+CanvasTwoD.prototype.coordsScreenAbsoluteToScreen = function(screenX, screenY) { 
+  return getPosXPosYObject(this.canvasContainer, screenX, screenY);
 }
 
-CanvasTwoD.prototype.coordsScreenToMathScreen = function(screenPos)
-{ return [ 
+CanvasTwoD.prototype.coordsScreenToMathScreen = function(screenPos) { 
+  return [ 
     (screenPos[0] - this.centerX) / this.scale, 
     (this.centerY - screenPos[1]) / this.scale
   ];
 }
 
-CanvasTwoD.prototype.coordsScreenAbsoluteToMathScreen = function(screenX, screenY)
-{ return this.coordsScreenToMathScreen(this.coordsScreenAbsoluteToScreen(screenX, screenY));
+CanvasTwoD.prototype.coordsScreenAbsoluteToMathScreen = function(screenX, screenY) { 
+  return this.coordsScreenToMathScreen(this.coordsScreenAbsoluteToScreen(screenX, screenY));
 }
 
 CanvasTwoD.prototype.coordsMathScreenToScreen = function(theCoords) { 
@@ -1177,7 +1177,7 @@ CanvasTwoD.prototype.pointsWithinClickTolerance = function (leftXY, rightXY) {
   return squaredDistance < 1000;
 }
 
-CanvasTwoD.prototype.canvasClick = function (screenX, screenY){ 
+CanvasTwoD.prototype.canvasClick = function (screenX, screenY) {
   this.clickedPosition = this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
   this.mousePosition = [];
   //if (this.pointsWithinClickTolerance(this.clickedPosition,[0,0]))
@@ -1308,8 +1308,8 @@ Canvas.prototype.drawCurve = function(theCurve) {
   this.theIIIdObjects.theContours.push(new Contour(contourPoints, theCurve.color, theCurve.lineWidth));
 }
 
-Canvas.prototype.drawPatchStraight = function(base, edge1, edge2, color)
-{ this.theIIIdObjects.thePatches.push(new Patch(base, edge1, edge2, color));
+Canvas.prototype.drawPatchStraight = function(base, edge1, edge2, color) { 
+  this.theIIIdObjects.thePatches.push(new Patch(base, edge1, edge2, color));
   var patchIndex = this.theIIIdObjects.thePatches.length- 1;
   var thePatch = this.theIIIdObjects.thePatches[patchIndex];
   thePatch.index = patchIndex;
@@ -1358,8 +1358,8 @@ Canvas.prototype.drawLine = function (leftPt, rightPt, inputColor, inputLineWidt
   return this.theIIIdObjects.theContours.length - 1;
 }
 
-Canvas.prototype.computePatch = function(thePatch)
-{ thePatch.normalScreen1= vectorCrossVector(this.screenNormal, thePatch.edge1);
+Canvas.prototype.computePatch = function(thePatch) { 
+  thePatch.normalScreen1= vectorCrossVector(this.screenNormal, thePatch.edge1);
   thePatch.normalScreen2= vectorCrossVector(this.screenNormal, thePatch.edge2);
   thePatch.normal = vectorCrossVector(thePatch.edge1, thePatch.edge2);
   thePatch.internalPoint = thePatch.base.slice();
@@ -1367,91 +1367,116 @@ Canvas.prototype.computePatch = function(thePatch)
   vectorAddVectorTimesScalar(thePatch.internalPoint, thePatch.edge2, 0.5);
 }
 
-Canvas.prototype.computeContour = function(theContour)
-{ if (theContour.thePointsMathScreen.length!== theContour.thePoints.length)
+Canvas.prototype.computeContour = function(theContour) { 
+  if (theContour.thePointsMathScreen.length!== theContour.thePoints.length) {
     theContour.thePointsMathScreen = new Array(theContour.thePoints.length);
-  for (var i = 0; i < theContour.thePoints.length; i ++)
+  }
+  for (var i = 0; i < theContour.thePoints.length; i ++) {
     theContour.thePointsMathScreen[i] = this.coordsMathToMathScreen(theContour.thePoints[i]);
+  }
 }
 
-Canvas.prototype.pointRelativeToPatch = function(thePoint, thePatch)
-{ if (vectorLength(thePatch.normalScreen1)<0.00001 ||
-      vectorLength(thePatch.normalScreen2)<0.00001 ||
-      vectorLength(thePatch.normal)<0.00001)
+Canvas.prototype.pointRelativeToPatch = function(thePoint, thePatch) { 
+  if (
+    vectorLength(thePatch.normalScreen1) < 0.00001 ||
+    vectorLength(thePatch.normalScreen2) < 0.00001 ||
+    vectorLength(thePatch.normal) < 0.00001
+  ) {
     return 0;
-
-  if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen1) *
-      vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen1)
-      > 0)
-    if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen1) *
-        vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen1)
-        > 0)
-      if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen2) *
-          vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen2)
-          > 0)
-        if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen2) *
-            vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen2)
-            > 0)
-        { if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normal) *
-              vectorScalarVector(this.screenNormal, thePatch.normal) <= 0)
+  }
+  if (
+    vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen1) *
+    vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen1) > 0
+  ) {
+    if (
+      vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen1) *
+      vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen1) > 0
+    ) {
+      if (
+        vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen2) *
+        vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen2) > 0
+      ) {
+        if (
+          vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen2) *
+          vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen2) > 0
+        ) { 
+          if (
+            vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normal) *
+            vectorScalarVector(this.screenNormal, thePatch.normal) <= 0
+          ) {
             return - 1;
-          if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normal) *
-              vectorScalarVector(this.screenNormal, thePatch.normal) >= 0)
+          }
+          if (
+            vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normal) *
+            vectorScalarVector(this.screenNormal, thePatch.normal) >= 0
+          ) {
             return 1;
+          }
         }
+      }
+    }
+  }
   return 0;
 }
 
-Canvas.prototype.pointIsBehindPatch = function(thePoint, thePatch)
-{ return this.pointRelativeToPatch(thePoint, thePatch) === - 1;
+Canvas.prototype.pointIsBehindPatch = function(thePoint, thePatch) { 
+  return this.pointRelativeToPatch(thePoint, thePatch) === - 1;
 }
 
-Canvas.prototype.pointIsInFrontOfPatch = function(thePoint, thePatch)
-{ return this.pointRelativeToPatch(thePoint, thePatch) === 1;
+Canvas.prototype.pointIsInFrontOfPatch = function(thePoint, thePatch) { 
+  return this.pointRelativeToPatch(thePoint, thePatch) === 1;
 }
 
-Canvas.prototype.pointIsInForeGround = function(thePoint, containerPatches)
-{ var thePatches = this.theIIIdObjects.thePatches;
-  for (var i = 0; i < thePatches.length; i ++)
-  { if (containerPatches.indexOf(i) !== - 1)
+Canvas.prototype.pointIsInForeGround = function(thePoint, containerPatches) { 
+  var thePatches = this.theIIIdObjects.thePatches;
+  for (var i = 0; i < thePatches.length; i ++) { 
+    if (containerPatches.indexOf(i) !== - 1) {
       continue;
-    if (this.pointIsBehindPatch(thePoint, thePatches[i]))
+    }
+    if (this.pointIsBehindPatch(thePoint, thePatches[i])) {
       return false;
+    }
   }
   return true;
 }
 
-Canvas.prototype.paintMouseInfo = function()
-{ if (this.selectedElement !== "default" || this.selectedElement ===undefined || this.selectedVector ===[] || this.selectedVector ===undefined)
+Canvas.prototype.paintMouseInfo = function() { 
+  if (
+    this.selectedElement !== "default" || this.selectedElement === undefined || 
+    this.selectedVector === [] || this.selectedVector === undefined
+  ) {
     return;
-  if (this.selectedVector.length === 0 || this.selectedVector.length ===undefined)
+  }
+  if (this.selectedVector.length === 0 || this.selectedVector.length === undefined) {
     return;
+  }
 //    if (true)
 //      return;
   var currentPt;
   this.surface.beginPath();
-  this.surface.setLineDash([4,4]);
-  this.surface.lineWidth =2;
-  this.surface.strokeStyle ="green";
+  this.surface.setLineDash([4, 4]);
+  this.surface.lineWidth = 2;
+  this.surface.strokeStyle = "green";
   currentPt = this.coordsMathToSelectedScreen(this.selectedVector);
   this.surface.moveTo(currentPt[0], currentPt[1]);
-  currentPt = this.coordsMathToSelectedScreen([0,0,0]);
+  currentPt = this.coordsMathToSelectedScreen([0, 0, 0]);
   this.surface.lineTo(currentPt[0], currentPt[1]);
   this.surface.stroke();
   this.surface.beginPath();
   this.surface.setLineDash([]);
-  this.surface.lineWidth =2;
-  this.surface.strokeStyle ="green";
+  this.surface.lineWidth = 2;
+  this.surface.strokeStyle = "green";
   currentPt = this.coordsMathToScreen(this.selectedVector);
   this.surface.moveTo(currentPt[0], currentPt[1]);
-  currentPt = this.coordsMathToScreen([0,0,0]);
+  currentPt = this.coordsMathToScreen([0, 0, 0]);
   this.surface.lineTo(currentPt[0], currentPt[1]);
   this.surface.stroke();
 }
 
-Canvas.prototype.paintOneContour = function(theContour)
-{ if (theContour.thePoints.length<2)
+Canvas.prototype.paintOneContour = function(theContour) { 
+  if (theContour.thePoints.length < 2) {
     return;
+  }
   var theSurface = this.surface;
   var thePts = theContour.thePoints;
   //console.log("line start\n");
@@ -1464,36 +1489,34 @@ Canvas.prototype.paintOneContour = function(theContour)
   var dashIsOn = false;
   theSurface.beginPath();
   theSurface.setLineDash([]);
-  this.numContourPaths++;
+  this.numContourPaths ++;
 //    theSurface.setLineDash([]);
   theSurface.strokeStyle = colorRGBToString(theContour.color);
-  if (theContour.lineWidth!==undefined)
+  if (theContour.lineWidth !== undefined) {
     theSurface.lineWidth = theContour.lineWidth;
-  else
-    theSurface.lineWidth =1;
+  } else {
+    theSurface.lineWidth = 1;
+  }
   theSurface.moveTo(currentPt[0], currentPt[1]);
-  this.numContourPoints+= thePts.length;
-  for (var i =1; i < thePts.length; i ++)
-  { newIsInForeground = this.pointIsInForeGround(theContour.thePoints[i],theContour.adjacentPatches);
-    if (!newIsInForeground && !oldIsInForeGround && !dashIsOn)
-    { if (i>1)
-      { theSurface.stroke();
-        theSurface.setLineDash([4,4]);
+  this.numContourPoints += thePts.length;
+  for (var i = 1; i < thePts.length; i ++) { 
+    newIsInForeground = this.pointIsInForeGround(theContour.thePoints[i],theContour.adjacentPatches);
+    if (!newIsInForeground && !oldIsInForeGround && !dashIsOn) { 
+      if (i > 1) { 
+        theSurface.stroke();
+        theSurface.setLineDash([4, 4]);
         theSurface.beginPath();
-        this.numContourPaths++;
-//          theSurface.setLineDash([4,4]);
+        this.numContourPaths ++;
         theSurface.moveTo(currentPt[0], currentPt[1]);
       }
       theSurface.setLineDash([4,4]);
-      //console.log("set dash\n");
       dashIsOn = true;
-
-    } else if (dashIsOn && newIsInForeground)
-    { theSurface.stroke();
+    } else if (dashIsOn && newIsInForeground) { 
+      theSurface.stroke();
       theSurface.setLineDash([]);
       theSurface.beginPath();
-      this.numContourPaths++;
-//        theSurface.setLineDash([]);
+      this.numContourPaths ++;
+      //theSurface.setLineDash([]);
       //console.log("removed dash\n");
       theSurface.moveTo(currentPt[0], currentPt[1]);
       dashIsOn = false;
@@ -1519,8 +1542,8 @@ Canvas.prototype.paintOneContour = function(theContour)
   //console.log("line end\n");
 }
 
-Canvas.prototype.paintOnePatch = function(thePatch)
-{ var theSurface = this.surface;
+Canvas.prototype.paintOnePatch = function(thePatch) { 
+  var theSurface = this.surface;
   var visibilityScalarProd = vectorScalarVector(this.screenNormal, thePatch.normal);
   var depthScalarProd = vectorScalarVector(this.screenNormal, thePatch.internalPoint);
   var depthRatio = (depthScalarProd - this.boundingSegmentZ[0]) / (this.boundingSegmentZ[1] - this.boundingSegmentZ[0]) - 0.5;
@@ -1549,10 +1572,10 @@ Canvas.prototype.paintOnePatch = function(thePatch)
     return;
   }*/
   var first = true;
-  for (var i = 0; i < thePatch.adjacentContours.length; i ++)
-  { var currentContour = this.theIIIdObjects.theContours[thePatch.adjacentContours[i]];
-    for (var j = 0; j<currentContour.thePoints.length; j ++)
-    { var theIndex = (thePatch.traversalOrder[i] === - 1) ? j : currentContour.thePoints.length-j- 1;
+  for (var i = 0; i < thePatch.adjacentContours.length; i ++) { 
+    var currentContour = this.theIIIdObjects.theContours[thePatch.adjacentContours[i]];
+    for (var j = 0; j<currentContour.thePoints.length; j ++) { 
+      var theIndex = (thePatch.traversalOrder[i] === - 1) ? j : currentContour.thePoints.length-j- 1;
       var theCoords = this.coordsMathToScreen(currentContour.thePoints[theIndex]);
       if (this.flagRoundPatches) {
         vectorRound(theCoords);
@@ -1568,30 +1591,30 @@ Canvas.prototype.paintOnePatch = function(thePatch)
   theSurface.closePath();
 //    theSurface.clip();
   theSurface.fill();
-  if (0)
-  { theCoords = this.coordsMathToScreen(thePatch.internalPoint);
-    theSurface.fillStyle ="black";
-    theSurface.font ="20pt sans-serif";
-    theSurface.fillStyle ="cyan";
+  if (0) { 
+    theCoords = this.coordsMathToScreen(thePatch.internalPoint);
+    theSurface.fillStyle = "black";
+    theSurface.font = "20pt sans-serif";
+    theSurface.fillStyle = "cyan";
     //if (thePatch.index ===90)
     theSurface.fillText(thePatch.index, theCoords[0], theCoords[1]);
   }
 //    theSurface.stroke();
 }
 
-Canvas.prototype.paintText = function(theText)
-{ var theSurface = this.surface;
+Canvas.prototype.paintText = function(theText) { 
+  var theSurface = this.surface;
   var isInForeGround = this.pointIsInForeGround(theText.location, []);
   theSurface.beginPath();
   theSurface.strokeStyle = theText.color;
   var theCoords = this.coordsMathToScreen(theText.location);
-  theSurface.font ="15pt sans-serif";
-  theSurface.lineWidth =1;
-  if (isInForeGround)
-  { theSurface.fillStyle = theText.color;
+  theSurface.font = "15pt sans-serif";
+  theSurface.lineWidth = 1;
+  if (isInForeGround) { 
+    theSurface.fillStyle = theText.color;
     theSurface.fillText(theText.text, theCoords[0], theCoords[1]);
-  } else
-  { theSurface.strokeStyle = theText.color;
+  } else { 
+    theSurface.strokeStyle = theText.color;
     theSurface.strokeText(theText.text, theCoords[0], theCoords[1]);
   }
 }
@@ -1620,7 +1643,7 @@ Canvas.prototype.getExtremePoint = function(indexToCompareBy, getLarger, pt1, pt
     if (result < pt3[indexToCompareBy]) {
       result = pt3[indexToCompareBy];
     }
-    if (result<pt4[indexToCompareBy]) {
+    if (result < pt4[indexToCompareBy]) {
       result = pt4[indexToCompareBy];
     }
   } else { 
@@ -1643,8 +1666,9 @@ Canvas.prototype.coordsMathScreenToBufferIndicesROWSFloat = function (input) {
 
 Canvas.prototype.coordsMathScreenToBufferIndicesROWS = function (input) { 
   var result = Math.floor(this.coordsMathScreenToBufferIndicesROWSFloat(input));
-  if (result >= this.zBufferRowCount)
+  if (result >= this.zBufferRowCount) {
     result --;
+  }
   return result;
 }
 
@@ -1734,7 +1758,7 @@ Canvas.prototype.accountOnePatch = function(patchIndex) {
   this.accountEdgeInBufferStrip(thePatch.v2, thePatch.edge1,   patchIndex);
   for (var i = low; i <= high; i ++) {
     for (var j = this.zBufferIndexStrip[i][0]; j<= this.zBufferIndexStrip[i][1]; j ++) { 
-      if (i === - 1 || j === - 1){
+      if (i === - 1 || j === - 1) {
         continue;
       }
       this.zBuffer[i][j].push(patchIndex);
@@ -1742,8 +1766,8 @@ Canvas.prototype.accountOnePatch = function(patchIndex) {
   }
 }
 
-Canvas.prototype.computeBoundingBoxAccountPoint = function(input)
-{ var theV= this.coordsMathToMathScreen(input);
+Canvas.prototype.computeBoundingBoxAccountPoint = function(input) { 
+  var theV = this.coordsMathToMathScreen(input);
   for (var i = 0; i < 2; i ++) {
     if (theV[i] < this.boundingBoxMathScreen[0][i]) {
       this.boundingBoxMathScreen[0][i] = theV[i];
@@ -1773,8 +1797,8 @@ Canvas.prototype.computeBoundingBoxAccountPoint = function(input)
   }
 }
 
-Canvas.prototype.computeBoundingBox = function()
-{ var thePatches = this.theIIIdObjects.thePatches;
+Canvas.prototype.computeBoundingBox = function() { 
+  var thePatches = this.theIIIdObjects.thePatches;
   var theContours = this.theIIIdObjects.theContours;
   var thePoints = this.theIIIdObjects.thePoints;
   for (var i = 0; i < thePatches.length; i ++) { 
@@ -1793,8 +1817,8 @@ Canvas.prototype.computeBoundingBox = function()
   }
 }
 
-Canvas.prototype.computeBuffers = function()
-{ var thePatches = this.theIIIdObjects.thePatches;
+Canvas.prototype.computeBuffers = function() { 
+  var thePatches = this.theIIIdObjects.thePatches;
   for (var i = 0; i < this.zBuffer.length; i ++) {
     for (var j = 0; j < this.zBuffer[i].length; j ++) {
       this.zBuffer[i][j].length = 0;
@@ -1809,8 +1833,8 @@ Canvas.prototype.computeBuffers = function()
   this.computePatchOrder();
 }
 
-Canvas.prototype.computePatchOrderOneContourPoint = function(thePatch, theContour, ptIndex)
-{ var thePointMathScreen = theContour.thePointsMathScreen[ptIndex];
+Canvas.prototype.computePatchOrderOneContourPoint = function(thePatch, theContour, ptIndex) { 
+  var thePointMathScreen = theContour.thePointsMathScreen[ptIndex];
   var thePoint = theContour.thePoints[ptIndex];
   var theIndices = this.coordsMathScreenToBufferIndices(thePointMathScreen);
   var currentBuffer = this.zBuffer[theIndices[0]][theIndices[1]];
@@ -1820,8 +1844,8 @@ Canvas.prototype.computePatchOrderOneContourPoint = function(thePatch, theContou
       continue;
     }
     if (
-      thePatch.patchesAboveMe.indexOf(currentBuffer[i])>= 0 ||
-      thePatch.patchesBelowMe.indexOf(currentBuffer[i])>= 0
+      thePatch.patchesAboveMe.indexOf(currentBuffer[i]) >= 0 ||
+      thePatch.patchesBelowMe.indexOf(currentBuffer[i]) >= 0
     ) {
       continue;
     }
@@ -1830,7 +1854,7 @@ Canvas.prototype.computePatchOrderOneContourPoint = function(thePatch, theContou
     if (relativePosition === - 1) { 
       otherPatch.patchesBelowMe.push(thePatch.index);
       thePatch.patchesAboveMe.push(currentBuffer[i]);
-    } else if (relativePosition ===1) { 
+    } else if (relativePosition === 1) { 
       otherPatch.patchesAboveMe.push(thePatch.index);
       thePatch.patchesBelowMe.push(currentBuffer[i]);
     }
@@ -1881,14 +1905,14 @@ Canvas.prototype.computePatchOrder = function() {
     var currentIndex = 0;
     while (currentIndex < this.numAccountedPatches) { 
       var currentPatch = thePatches[this.thePatchOrder[currentIndex]];
-      for (i = 0; i <currentPatch.patchesAboveMe.length; i ++) { 
+      for (i = 0; i < currentPatch.patchesAboveMe.length; i ++) { 
         var nextIndex = currentPatch.patchesAboveMe[i];
         if (this.patchIsAccounted[nextIndex] === 1) {
           continue;
         }
         var nextPatch = thePatches[nextIndex];
         var isGood = 1;
-        for (var j = 0; j<nextPatch.patchesBelowMe.length; j ++) {
+        for (var j = 0; j< nextPatch.patchesBelowMe.length; j ++) {
           if (this.patchIsAccounted[nextPatch.patchesBelowMe[j]] !== 1) { 
             isGood = 0;
             break;
@@ -1950,7 +1974,7 @@ Canvas.prototype.allocateZbuffer = function() {
       for (var j = 0; j < this.zBufferColCount; j ++) {
         this.zBuffer[i][j] = [];
       }
-      this.zBufferIndexStrip[i] = [- 1,- 1];
+      this.zBufferIndexStrip[i] = [- 1, - 1];
     }
   }
 }
@@ -2358,7 +2382,7 @@ Canvas.prototype.showMessages = function() {
     theHTML += `<span style =\"red\"><b>${this.textErrors}</b></span><hr>`;
   }
   theHTML += `<span>${this.textMouseInfo}</span><hr><span>${this.textProjectionInfo}</span>`;
-  if (this.textPatchInfo != "") {
+  if (this.textPatchInfo !== "") {
     theHTML += `<hr><span>${this.textPatchInfo}</span>`;
   }
   this.spanMessages.innerHTML = theHTML;
@@ -2379,8 +2403,9 @@ Canvas.prototype.infoPatchesCompute = function() {
       }
     }
     this.textPatchInfo += `<b>${i}</b>`;
-    if (currentPatch.patchesBelowMe.length > 0)
+    if (currentPatch.patchesBelowMe.length > 0) {
       this.textPatchInfo += "->";
+    }
     for (j = 0; j < currentPatch.patchesBelowMe.length; j ++) { 
       this.textPatchInfo += currentPatch.patchesBelowMe[j];
       if (j !== currentPatch.patchesBelowMe.length) {
@@ -2719,8 +2744,9 @@ Drawing.prototype.mouseWheel = function(theEvent) {
   }
   var theWheelDelta = theEvent.detail ? theEvent.detail * - 1 : theEvent.wheelDelta / 40;
   var theCanvas = this.canvases[theEvent.target.id];
-  if (theCanvas === undefined || theCanvas === null)
+  if (theCanvas === undefined || theCanvas === null) {
     return;
+  }
   var theIncrement = 0.6;
   theCanvas.mouseWheel(theWheelDelta * theIncrement, theEvent.clientX, theEvent.clientY);
 }
@@ -2743,4 +2769,4 @@ window.calculator.drawing = drawing;
 
 module.exports = {
   drawing, 
-}
+};

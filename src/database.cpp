@@ -1446,8 +1446,8 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
   if (userWrapper.enteredActivationToken != "")
   { if (theGlobalVariables.userCalculatorRequestType == "changePassword" ||
         theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
-        theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccount ||
-        theGlobalVariables.userCalculatorRequestType == WebAPI::calculatorActivateAccountJSON)
+        theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount ||
+        theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON)
     { if (userWrapper.actualActivationToken != "activated" &&
           userWrapper.actualActivationToken != "" &&
           userWrapper.actualActivationToken != "error")
@@ -1527,7 +1527,7 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
   JSData theJS;
   theJS[DatabaseStrings::labelActivationToken] = theActivationToken;
   theJS[DatabaseStrings::labelUsername] = inputUserNameUnsafe;
-  theJS[DatabaseStrings::labelCalculatorRequest] = WebAPI::calculatorActivateAccountJSON;
+  theJS[DatabaseStrings::labelCalculatorRequest] = WebAPI::request::activateAccountJSON;
   theJS[DatabaseStrings::labelEmail] = inputEmailUnsafe;
   theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageActivateAccount;
   out << theGlobalVariables.DisplayNameExecutableApp

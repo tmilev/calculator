@@ -198,7 +198,6 @@ public:
   int ProcessForgotLoginPage();
   int ProcessNavigation();
   int ProcessCompute();
-  int ProcessCalculatorExamples();
   int ProcessCalculatorExamplesJSON();
   int ProcessSubmitAnswers();
   int ProcessSubmitAnswersPreview();

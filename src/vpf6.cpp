@@ -2495,9 +2495,7 @@ std::string Calculator::ToString()
 //  stOutput << "DEBUG: flags on;";
 //  this->flagShowCalculatorInternalStatus = true;
 
-  if (this->flagShowCalculatorExamples)
-    out2 << this->ToStringFunctionHandlers();
-  else
+  if (!this->flagShowCalculatorExamples)
   { std::stringstream theExampleInjector;
     theExampleInjector
     << "if (document.getElementById('calculatorExamples').innerHTML.length < 300) {\n"

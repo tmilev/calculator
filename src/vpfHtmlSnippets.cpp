@@ -185,7 +185,7 @@ std::string HtmlRoutines::GetCalculatorComputationLink(const std::string& input)
 { std::stringstream out;
   JSData theRequest;
   theRequest[DatabaseStrings::labelCalculatorInput] = input;
-  theRequest[DatabaseStrings::labelCurrentPage] = WebAPI::calculatorCalculatorPage;
+  theRequest[DatabaseStrings::labelCurrentPage] = WebAPI::request::calculatorPage;
   out << "<a href = \"#" << HtmlRoutines::ConvertStringToURLString(theRequest.ToString(false), false)
   << "\" onclick = \"window.calculator.calculator.calculatorLinkClickHandler(this);\">"
   << HtmlRoutines::ConvertStringToHtmlString(input, false) << "</a>";

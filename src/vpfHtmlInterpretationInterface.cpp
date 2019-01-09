@@ -460,11 +460,11 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash)
   theReader.seekg(0);
   List<std::string> splitterStrings;
   std::string virtualFolder = appendBuildHash ?
-  FileOperations::GetVirtualNameWithHash(WebAPI::calculatorHTML) :
-  WebAPI::calculatorHTML;
+  FileOperations::GetVirtualNameWithHash(WebAPI::request::calculatorHTML) :
+  WebAPI::request::calculatorHTML;
 
   for (std::string currentLine; std::getline(theReader, currentLine, '\n');)
-  { int startChar = currentLine.find(WebAPI::calculatorHTML);
+  { int startChar = currentLine.find(WebAPI::request::calculatorHTML);
     bool shouldShortCut = false;
     if (startChar == - 1)
       shouldShortCut = true;
@@ -479,7 +479,7 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash)
     }
     std::string firstPart, secondAndThirdPart, thirdPart, notUsed;
     MathRoutines::SplitStringInTwo(currentLine, startChar, firstPart, secondAndThirdPart);
-    MathRoutines::SplitStringInTwo(secondAndThirdPart, WebAPI::calculatorHTML.size(), notUsed, thirdPart);
+    MathRoutines::SplitStringInTwo(secondAndThirdPart, WebAPI::request::calculatorHTML.size(), notUsed, thirdPart);
     if (currentLine.find("<script") == std::string::npos ||
         currentLine.find("/MathJax.js?") != std::string::npos)
     { std::stringstream lineStream;
@@ -494,8 +494,8 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash)
     }
   }
   std::string virtualOnePageJS = appendBuildHash ?
-  FileOperations::GetVirtualNameWithHash(WebAPI::calculatorOnePageJS) :
-  WebAPI::calculatorOnePageJS;
+  FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS) :
+  WebAPI::request::onePageJS;
   outFirstPart << "<script src=\"" << virtualOnePageJS << "\"></script>\n"
   << outSecondPart.str();
   this->htmlJSbuild = outFirstPart.str();

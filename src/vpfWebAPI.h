@@ -10,22 +10,22 @@ class WebAPI
 public:
   static std::string appNoCache;
   static std::string app;
-
-  static std::string calculatorCalculatorPage;
-  static std::string calculatorSetProblemData;
-  static std::string calculatorChangePassword;
-  static std::string calculatorActivateAccount;
-  static std::string calculatorActivateAccountJSON;
+  struct request
+  { static std::string calculatorPage;
+    static std::string setProblemData;
+    static std::string changePassword;
+    static std::string examplesJSON;
+    static std::string activateAccount;
+    static std::string activateAccountJSON;
+    static std::string calculatorHTML;
+    static std::string onePageJS;
+    static std::string onePageJSWithHash;
+    static std::string userInfoJSON;
+    static std::string selectCourseJSON;
+  };
   static std::string serverStatusJSON;
-  static std::string calculatorHTML;
-  static std::string calculatorOnePageJS;
-  static std::string calculatorOnePageJSWithHash;
-  static std::string calculatorUserInfoJSON;
-  static std::string calculatorSelectCourseJSON;
-  class databaseParameters
-  {
-  public:
-    static std::string entryPoint;
+  struct databaseParameters
+  { static std::string entryPoint;
     static std::string labels;
     static std::string operation;
     static std::string fetch;

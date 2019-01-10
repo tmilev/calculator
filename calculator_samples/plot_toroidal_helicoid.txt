@@ -1,0 +1,5 @@
+R = MakeInputBox( name = R, value = 2);
+r=  MakeInputBox( name = r, value = 0.5);
+coeff = MakeInputBox( name = coeff, value = 20); 
+s = coeff t;
+PlotCurve ( ( (R+r cos s) cos t,(R+r cos s) sin t, r sin (s)), 0, 2\pi)

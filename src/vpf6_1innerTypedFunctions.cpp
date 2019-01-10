@@ -1048,13 +1048,16 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   LargeIntUnsigned exponentDenominator = exponentWorking.GetDenominator();
   LargeIntUnsigned exponentNumeratorNoSign = exponentWorking.GetNumerator().value;
   List<LargeInt> numeratorFactors, denominatorFactors;
-  List<LargeIntUnsigned> numeratorPowers, denominatorPowers;
-  if (!base.GetPrimeFactorsAbsoluteValue(numeratorFactors, numeratorPowers, denominatorFactors, denominatorPowers))
+  List<int> numeratorPowersInt, denominatorPowersInt;
+  if (!base.GetPrimeFactorsAbsoluteValue(numeratorFactors, numeratorPowersInt, denominatorFactors, denominatorPowersInt))
     return false;
+  List<LargeIntUnsigned> numeratorPowerS, denominatorPowerS;
+  numeratorPowerS = numeratorPowersInt;
+  denominatorPowerS = denominatorPowersInt;
   for (int i = 0; i < numeratorFactors.size; i ++)
-    numeratorPowers[i] *= exponentNumeratorNoSign;
+    numeratorPowerS[i] *= exponentNumeratorNoSign;
   for (int i = 0; i < denominatorFactors.size; i ++)
-    denominatorPowers[i] *= exponentNumeratorNoSign;
+    denominatorPowerS[i] *= exponentNumeratorNoSign;
   //stOutput << "DEBUG: part - 1: exponent working: " << exponentWorking;
   exponentWorking /= exponentNumeratorNoSign;
   //stOutput << "DEBUG: part 0: exponent working: " << exponentWorking;
@@ -1063,7 +1066,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   LargeIntUnsigned currentPower;
   int currentInsidePowerInt = - 1, currentOutsidePowerInt = - 1;
   for (int k = 0; k < 2; k ++)
-  { List<LargeIntUnsigned>& currentPowers = (k == 0) ? numeratorPowers : denominatorPowers;
+  { List<LargeIntUnsigned>& currentPowers = (k == 0) ? numeratorPowerS : denominatorPowerS;
     List<LargeInt>& currentFactors = (k == 0) ? numeratorFactors : denominatorFactors;
     for (int i = 0; i < currentFactors.size; i ++)
     { currentPower = currentPowers[i];
@@ -1086,37 +1089,37 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
     }
   }
   LargeIntUnsigned theGCD = 1;
-  if (numeratorPowers.size > 0)
-    theGCD = numeratorPowers[0];
-  else if (denominatorPowers.size > 0)
-    theGCD = denominatorPowers[0];
-  for (int i = 0; i < numeratorPowers.size; i ++)
-    theGCD = MathRoutines::gcd(theGCD, numeratorPowers[i]);
-  for (int i = 0; i < denominatorPowers.size; i ++)
-    theGCD = MathRoutines::gcd(theGCD, denominatorPowers[i]);
+  if (numeratorPowerS.size > 0)
+    theGCD = numeratorPowerS[0];
+  else if (denominatorPowerS.size > 0)
+    theGCD = denominatorPowerS[0];
+  for (int i = 0; i < numeratorPowerS.size; i ++)
+    theGCD = MathRoutines::gcd(theGCD, numeratorPowerS[i]);
+  for (int i = 0; i < denominatorPowerS.size; i ++)
+    theGCD = MathRoutines::gcd(theGCD, denominatorPowerS[i]);
   if (theGCD > 0)
-  { for (int i = 0; i < numeratorPowers.size; i ++)
-      numeratorPowers[i] /= theGCD;
-    for (int i = 0; i < denominatorPowers.size; i ++)
-      denominatorPowers[i] /= theGCD;
+  { for (int i = 0; i < numeratorPowerS.size; i ++)
+      numeratorPowerS[i] /= theGCD;
+    for (int i = 0; i < denominatorPowerS.size; i ++)
+      denominatorPowerS[i] /= theGCD;
     exponentWorking *= theGCD;
     exponentDenominator = exponentWorking.GetDenominator();
   }
   Rational insideTheRadical = 1;
   LargeInt currentContribution, currentNumerator = 1, currentDenominator = 1;
   int currentExpSmallInt = - 1;
-  for (int i = 0; i < numeratorPowers.size; i ++)
+  for (int i = 0; i < numeratorPowerS.size; i ++)
   { currentContribution = numeratorFactors[i];
-    if (!numeratorPowers[i].IsIntegerFittingInInt(&currentExpSmallInt))
+    if (!numeratorPowerS[i].IsIntegerFittingInInt(&currentExpSmallInt))
       return false;
     currentContribution.RaiseToPower(currentExpSmallInt);
     currentNumerator *= currentContribution;
     if (!currentNumerator.IsIntegerFittingInInt(0))
       return false;
   }
-  for (int i = 0; i < denominatorPowers.size; i ++)
+  for (int i = 0; i < denominatorPowerS.size; i ++)
   { currentContribution = denominatorFactors[i];
-    if (!denominatorPowers[i].IsIntegerFittingInInt(&currentExpSmallInt))
+    if (!denominatorPowerS[i].IsIntegerFittingInInt(&currentExpSmallInt))
       return false;
     currentContribution.RaiseToPower(currentExpSmallInt);
     currentDenominator *= currentContribution;

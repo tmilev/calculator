@@ -1350,15 +1350,11 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
     //stOutput << "<br>value at " << AllPointsOfEvaluation[i].ToString() << " = " << theValuesAtPoints[i].ToString();
     if (i < degreeLeft + 1)
     { theValuesAtPoints[i].IsInteger(&tempLI);
-      if (!tempLI.value.Factor(thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i]))
+      if (!tempLI.value.FactorReturnFalseIfFactorizationIncomplete(thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i], 0, comments))
       { if (comments != 0)
           *comments << "<br>Aborting polynomial factorization: failed to factor the integer " << theValuesAtPoints[i].ToString() << " (most probably the integer is too large).";
         return false;
       }
-/*      stOutput << "=+/- ";
-      for (int j = 0; j < thePrimeFactorsAtPoints[i].size; j ++)
-        for (int k = 0; k<thePrimeFactorsMults[i][j]; k++)
-          stOutput << thePrimeFactorsAtPoints[i][j] << "*";*/
     }
   }
   Incrementable<Incrementable<SelectionOneItem> > theDivisorSel;

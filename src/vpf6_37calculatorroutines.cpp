@@ -562,7 +562,7 @@ bool CalculatorFunctionsGeneral::innerIsSquare(Calculator& theCommands, const Ex
     return output.AssignValue(1, theCommands);
   List<int> theMults;
   List<LargeInt> theFactors;
-  if (!theLI.value.Factor(theFactors, theMults))
+  if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, 0))
     return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
   int result = 1;
   for (int i = 0; i < theMults.size; i ++)
@@ -580,7 +580,7 @@ bool CalculatorFunctionsGeneral::innerIsSquareFree(Calculator& theCommands, cons
     return false;
   List<int> theMults;
   List<LargeInt> theFactors;
-  if (!theLI.value.Factor(theFactors, theMults))
+  if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, &theCommands.Comments))
     return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
   int result = 1;
   for (int i = 0; i < theMults.size; i ++)
@@ -600,7 +600,7 @@ bool CalculatorFunctionsGeneral::innerIsPower(Calculator& theCommands, const Exp
     return false;
   List<int> theMults;
   List<LargeInt> theFactors;
-  if (!theLI.value.Factor(theFactors, theMults))
+  if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, &theCommands.Comments))
     return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
   int result = 1;
   if (theMults.size > 0)
@@ -616,24 +616,46 @@ bool CalculatorFunctionsGeneral::innerIsPower(Calculator& theCommands, const Exp
 bool CalculatorFunctionsGeneral::innerFactorInteger(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFactorInteger");
   LargeInt theLI;
-  if (!input.IsInteger(&theLI))
+  int upperBound = 30000;
+  int opFactorInteger = theCommands.theAtoms.GetIndexIMustContainTheObject("FactorInteger");
+
+  if (input.StartsWith(opFactorInteger) && input.size() == 3)
+  { if (!input[1].IsInteger(&theLI))
+      return false;
+    if (!input[2].IsIntegerFittingInInt(&upperBound))
+      return theCommands << "Failed to extract integer from " << upperBound;
+  } else if (!input.IsInteger(&theLI))
     return false;
   if (theLI.IsEqualToZero())
     return false;
   List<LargeInt> primeFactors;
-  List<int> mults;
-  if (!theLI.value.Factor(primeFactors,mults))
+  List<int> multiplicities;
+  bool complete = theLI.value.FactorReturnFalseIfFactorizationIncomplete(primeFactors, multiplicities, upperBound, &theCommands.Comments);
+  if (!complete && primeFactors.size <= 1)
     return false;
   List<Expression> result;
-  for (int i = 0; i < primeFactors.size; i ++)
+  int numberOfPrimeFactors = primeFactors.size;
+  if (!complete)
+    numberOfPrimeFactors --;
+  for (int i = 0; i < numberOfPrimeFactors; i ++)
   { Expression currentE;
-    currentE.AssignValue((Rational) primeFactors[i],theCommands);
-    for (int j = 0; j < mults[i]; j ++)
+    currentE.AssignValue((Rational) primeFactors[i], theCommands);
+    for (int j = 0; j < multiplicities[i]; j ++)
       result.AddOnTop(currentE);
   }
   if (theLI < 0 && result.size > 0)
     result[0] *= - 1;
-  return output.MakeSequence(theCommands, &result);
+  if (complete)
+    return output.MakeSequence(theCommands, &result);
+  else
+  { Expression factorsSoFar, factorNext, numberLast;
+    factorsSoFar.MakeSequence(theCommands, &result);
+    factorNext.reset(theCommands);
+    factorNext.AddChildAtomOnTop(opFactorInteger);
+    numberLast.AssignValue((Rational) primeFactors[primeFactors.size - 1], theCommands);
+    factorNext.AddChildOnTop(numberLast);
+    return output.MakeXOX(theCommands, theCommands.opUnion(), factorsSoFar, factorNext);
+  }
 }
 
 bool CalculatorFunctionsGeneral::innerFactorOutNumberContent(Calculator& theCommands, const Expression& input, Expression& output)

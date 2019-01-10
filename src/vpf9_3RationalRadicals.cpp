@@ -956,7 +956,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
   List<LargeInt> primeFactors;
   List<int> theMults;
   //stOutput << "<br>So far so good ... ";
-  if (!squareFreeInput.value.Factor(primeFactors, theMults))
+  if (!squareFreeInput.value.FactorReturnFalseIfFactorizationIncomplete(primeFactors, theMults, 0, 0))
     return false;
   squareFreeInput.value = 1;
   Rational squareRootRationalPart = 1;

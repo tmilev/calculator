@@ -709,61 +709,94 @@ void LargeIntUnsigned::FitSize()
 //  if (!this->CheckForConsistensy())crash << crash;
 }
 
-void LargeIntUnsigned::AccountPrimeFactor(const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMults) const
+void LargeIntUnsigned::AccountFactor(const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<int>& outputMultiplicities) const
 { if (outputPrimeFactors.size == 0)
   { outputPrimeFactors.AddOnTop(theP);
-    outputMults.AddOnTop(1);
+    outputMultiplicities.AddOnTop(1);
     return;
   }
   if ((*outputPrimeFactors.LastObject()).operator==(theP))
-    (*outputMults.LastObject()) ++;
+    (*outputMultiplicities.LastObject()) ++;
   else
   { outputPrimeFactors.AddOnTop(theP);
-    outputMults.AddOnTop(1);
+    outputMultiplicities.AddOnTop(1);
   }
 }
 
-bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<int>& outputMultiplicites) const
-{ MacroRegisterFunctionWithName("LargeIntUnsigned::Factor");
-  List<LargeIntUnsigned> buffer;
-  if (!this->Factor(outputPrimeFactors, buffer))
+bool LargeIntUnsigned::FactorLargeReturnFalseIfFactorizationIncomplete
+(List<LargeInt>& outputFactors, List<int>& outputMultiplicites, int dontSearchForDivisorsLargerThan,
+ std::stringstream* commentsOnFailure) const
+{ MacroRegisterFunctionWithName("LargeIntUnsigned::FactorLarge");
+  int maximumNumberOfDigits = 1000;
+  if (this->theDigits.size > maximumNumberOfDigits)
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "Number has too many digits: maximum " << maximumNumberOfDigits
+      << " digits accepted for factorization attempt. ";
     return false;
-  outputMultiplicites.SetSize(buffer.size);
-  for (int i = 0; i < buffer.size; i ++)
-    if (!buffer[i].IsIntegerFittingInInt(&outputMultiplicites[i]))
+  }
+  if (this->IsEqualToZero())
+    crash << "This is a programming error: it was requested that I factor 0, which is forbidden. " << crash;
+  LargeIntUnsigned toBeFactored = *this;
+  outputFactors.SetSize(0);
+  outputMultiplicites.SetSize(0);
+  if (dontSearchForDivisorsLargerThan <= 0)
+    dontSearchForDivisorsLargerThan = 100000;
+  List<bool> theSieve;
+  theSieve.initFillInObject(dontSearchForDivisorsLargerThan + 1, true);
+  for (unsigned int i = 2; i <= (unsigned) dontSearchForDivisorsLargerThan; i ++)
+  { if (!theSieve[i])
+      continue;
+    //LargeIntUnsigned current = toBeFactored % i;
+    while (toBeFactored % i == 0)
+    { this->AccountFactor(i, outputFactors, outputMultiplicites);
+      toBeFactored /= i;
+    }
+    for (unsigned int j = i; j <= (unsigned) dontSearchForDivisorsLargerThan; j += i)
+      theSieve[j] = false;
+  }
+  if (toBeFactored > 1)
+  { this->AccountFactor(toBeFactored, outputFactors, outputMultiplicites);
+    if (!toBeFactored.IsPossiblyPrimeMillerRabin(10, 0))
+    { *commentsOnFailure
+      << "The largest remaining factor "
+      << toBeFactored
+      << " is known not to be prime (Miller-Rabin test) "
+      << "but I could not factor it. I checked all factors smaller than or equal to: "
+      << dontSearchForDivisorsLargerThan;
       return false;
+    }
+  }
   return true;
 }
 
-bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMultiplicites) const
+bool LargeIntUnsigned::FactorReturnFalseIfFactorizationIncomplete
+(List<LargeInt>& outputFactors, List<int>& outputMultiplicites,
+ int dontSearchForDivisorsLargerThan, std::stringstream* commentsOnFailure) const
 { MacroRegisterFunctionWithName("LargeIntUnsigned::Factor");
   if (this->theDigits.size > 1)
-    return false;
+    return this->FactorLargeReturnFalseIfFactorizationIncomplete(outputFactors, outputMultiplicites, dontSearchForDivisorsLargerThan, commentsOnFailure);
   if (this->IsEqualToZero())
     crash << "This is a programming error: it was requested that I factor 0, which is forbidden." << crash;
   //stOutput << "Factoring: " << this->ToString();
-  unsigned int n = this->theDigits[0];
-  outputPrimeFactors.SetSize(0);
+  unsigned int toBeFactored = this->theDigits[0];
+  outputFactors.SetSize(0);
   outputMultiplicites.SetSize(0);
-  while (n % 2 == 0)
-  { this->AccountPrimeFactor(2, outputPrimeFactors, outputMultiplicites);
-    n /= 2;
-  }
-  unsigned int upperboundPrimeDivisors = (unsigned int) FloatingPoint::sqrt((double) n);
+  int upperboundPrimeDivisors = (unsigned int) FloatingPoint::sqrt((double) toBeFactored);
   List<bool> theSieve;
-  theSieve.initFillInObject(upperboundPrimeDivisors + 1,true);
-  for (unsigned int i = 3; i <= upperboundPrimeDivisors; i += 2)
-    if (theSieve[i])
-    { while (n % i == 0)
-      { this->AccountPrimeFactor(i, outputPrimeFactors, outputMultiplicites);
-        n /= i;
-        upperboundPrimeDivisors = (unsigned int) FloatingPoint::sqrt((double) n);
-      }
-      for (unsigned int j = i; j <= upperboundPrimeDivisors; j += i)
-        theSieve[j] = false;
+  theSieve.initFillInObject(upperboundPrimeDivisors + 1, true);
+  for (unsigned int i = 2; i <= (unsigned) upperboundPrimeDivisors; i ++)
+  { if (!theSieve[i])
+      continue;
+    while (toBeFactored % i == 0)
+    { this->AccountFactor(i, outputFactors, outputMultiplicites);
+      toBeFactored /= i;
+      upperboundPrimeDivisors = (unsigned int) FloatingPoint::sqrt((double) toBeFactored);
     }
-  if (n > 1)
-    this->AccountPrimeFactor(n, outputPrimeFactors, outputMultiplicites);
+    for (unsigned int j = i; j <= (unsigned) upperboundPrimeDivisors; j += i)
+      theSieve[j] = false;
+  }
+  if (toBeFactored > 1)
+    this->AccountFactor(toBeFactored, outputFactors, outputMultiplicites);
   //stOutput << " ... and the factors are: " << outputPrimeFactors
   //<< " with mults: " << outputMultiplicites;
   return true;
@@ -1260,10 +1293,10 @@ bool Rational::GetSquareRootIfRational(Rational& output) const
   LargeInt theNum = this->GetNumerator();
   LargeIntUnsigned theDen = this->GetDenominator();
   List<LargeInt> primeFactorsNum, primeFactorsDen;
-  List<LargeIntUnsigned> multsNum, multsDen;
-  if (!theNum.value.Factor(primeFactorsNum, multsNum))
+  List<int> multsNum, multsDen;
+  if (!theNum.value.FactorReturnFalseIfFactorizationIncomplete(primeFactorsNum, multsNum, 0, 0))
     return false;
-  if (!theDen.Factor(primeFactorsDen, multsDen))
+  if (!theDen.FactorReturnFalseIfFactorizationIncomplete(primeFactorsDen, multsDen, 0, 0))
     return false;
   output = 1;
   Rational tempRat;
@@ -1271,9 +1304,7 @@ bool Rational::GetSquareRootIfRational(Rational& output) const
   { if (multsNum[i] % 2 != 0)
       return false;
     tempRat = primeFactorsNum[i];
-    int currentMult = - 1;
-    if (!multsNum[i].IsIntegerFittingInInt(&currentMult))
-      return false;
+    int currentMult = multsNum[i];
     tempRat.RaiseToPower(currentMult / 2);
     output *= tempRat;
   }
@@ -1281,9 +1312,7 @@ bool Rational::GetSquareRootIfRational(Rational& output) const
   { if (multsDen[i] % 2 != 0)
       return false;
     tempRat = primeFactorsDen[i];
-    int currentMult = - 1;
-    if (!multsDen[i].IsIntegerFittingInInt(&currentMult))
-      return false;
+    int currentMult = multsDen[i];
     tempRat.RaiseToPower(currentMult / 2);
     output /= tempRat;
   }
@@ -1291,12 +1320,12 @@ bool Rational::GetSquareRootIfRational(Rational& output) const
 }
 
 bool Rational::GetPrimeFactorsAbsoluteValue
-  (List<LargeInt>& numeratorPrimeFactors, List<LargeIntUnsigned>& numeratorMultiplicities,
-   List<LargeInt>& denominatorPrimeFactors, List<LargeIntUnsigned>& denominatorMultiplicities)
+(List<LargeInt>& numeratorPrimeFactors, List<int>& numeratorMultiplicities,
+ List<LargeInt>& denominatorPrimeFactors, List<int>& denominatorMultiplicities)
 { MacroRegisterFunctionWithName("Rational::GetPrimeFactorsAbsoluteValue");
-  if (!this->GetNumerator().value.Factor(numeratorPrimeFactors, numeratorMultiplicities))
+  if (!this->GetNumerator().value.FactorReturnFalseIfFactorizationIncomplete(numeratorPrimeFactors, numeratorMultiplicities, 0, 0))
     return false;
-  return this->GetDenominator().Factor(denominatorPrimeFactors, denominatorMultiplicities);
+  return this->GetDenominator().FactorReturnFalseIfFactorizationIncomplete(denominatorPrimeFactors, denominatorMultiplicities, 0, 0);
 }
 
 void Rational::AssignInteger(int x)

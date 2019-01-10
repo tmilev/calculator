@@ -75,9 +75,13 @@ public:
   void MultiplyByUInt(unsigned int x);
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void AssignShiftedUInt(unsigned int x, int shift);
-  void AccountPrimeFactor(const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMults) const;
-  bool Factor(List<LargeInt>& outputPrimeFactors, List<int>& outputMultiplicites) const;
-  bool Factor(List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMultiplicites) const;
+  void AccountFactor(const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<int>& outputMultiplicities) const;
+  bool FactorReturnFalseIfFactorizationIncomplete
+  (List<LargeInt>& outputFactors, List<int>& outputMultiplicites, int dontSearchForDivisorsLargerThan,
+   std::stringstream *commentsOnFailure) const;
+  bool FactorLargeReturnFalseIfFactorizationIncomplete
+  (List<LargeInt>& outputFactors, List<int>& outputMultiplicites, int dontSearchForDivisorsLargerThan,
+   std::stringstream *commentsOnFailure) const;
   void AssignString(const std::string& input);
   bool AssignStringFailureAllowed(const std::string& input, bool ignoreNonDigits);
   int GetUnsignedIntValueTruncated();
@@ -544,9 +548,8 @@ public:
     return result;
   }
   bool GetPrimeFactorsAbsoluteValue
-  (List<LargeInt>& numeratorPrimeFactors, List<LargeIntUnsigned>& numeratorMultiplicities,
-   List<LargeInt>& denominatorPrimeFactors, List<LargeIntUnsigned>& denominatorMultiplicities)
-;
+  (List<LargeInt>& numeratorPrimeFactors, List<int> &numeratorMultiplicities,
+   List<LargeInt>& denominatorPrimeFactors, List<int> &denominatorMultiplicities);
   inline const Rational& GetComplexConjugate() const
   { return *this;
   }

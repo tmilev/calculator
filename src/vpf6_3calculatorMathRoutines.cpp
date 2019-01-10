@@ -4600,7 +4600,7 @@ bool LargeIntUnsigned::TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& ou
 { MacroRegisterFunctionWithName("LargeIntUnsigned::TryToFindWhetherIsPower");
   List<LargeInt> theFactors;
   List<int> theMults;
-  if (!this->Factor(theFactors,theMults))
+  if (!this->FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, 0))
     return false;
   if (theMults.size == 0)
   { outputIsPower = true;

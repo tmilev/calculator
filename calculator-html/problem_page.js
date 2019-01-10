@@ -53,7 +53,11 @@ function Problem(problemData, inputParentIdURLed) {
   this.deadlineString = null;
   this.deadline = null;
   this.weight = problemData.weight;
-  this.links = {};
+  this.links = {
+    video: "",
+    slides: "",
+    homework: "",
+  };
   if (problemData.deadlines !== undefined) {
     this.deadlines = problemData.deadlines;
   } 
@@ -217,6 +221,8 @@ Problem.prototype.writeToHTML = function(outputElement) {
   topPart += "<div class = 'problemInfoBar'>";
   topPart += this.getProblemNavigation();
   topPart += `<span class = "problemTitle">${this.problemLabel} ${this.title}</span>`;
+  topPart += this.links.slides;
+  topPart += this.links.video;
   //topPart += "<br>"
   topPart += this.getEditPanel();
   topPart += "</div>";
@@ -550,17 +556,21 @@ Problem.prototype.getHTMLOneProblemTr = function () {
   if (this.video !== "" && this.video !== undefined && this.video !== null) {
     result += `<a class = 'videoLink' href = '${this.video}' target = '_blank'>Video</a>`;
   }
-  this.links = {};
+  this.links.slides = "";
+  this.links.video = "";
+  this.links.homework = "";
   if (this.querySlides !== "" && this.querySlides !== null && this.querySlides !== undefined) {
     for (var counter in linkSlides) {
-      result += this.getLinkFromSpec(linkSpecs[linkSlides[counter]], this.querySlides);
+      this.links.slides += this.getLinkFromSpec(linkSpecs[linkSlides[counter]], this.querySlides);
     }
   } 
+  result += this.links.slides;
   if (this.queryHomework !== "" && this.queryHomework !== null && this.queryHomework !== undefined) {
     for (var counter in linkHomework) {
-      result += this.getLinkFromSpec(linkSpecs[linkHomework[counter]], this.queryHomework);
+      this.links.homework += this.getLinkFromSpec(linkSpecs[linkHomework[counter]], this.queryHomework);
     }
   }
+  result += this.links.homework;
   result += "</td>";
   result += "<td>";
   if (this.fileName !== "") {
@@ -739,6 +749,7 @@ function updateProblemPageCallback(input, outputComponent) {
     thePage.cleanUpLoginSpan(outputComponent);
     return;
   }
+  /**@type {Problem} */
   var currentProblem = thePage.getCurrentProblem();
   if (currentProblem === null || currentProblem === undefined) {
     thePage.problems[thePage.storage.variables.currentCourse.currentProblemId.getValue()] = new Problem(theProblem, null);

@@ -43,7 +43,7 @@ tiny {
 }
 
 span.spanFileInfo {
-  display: table-cell;
+/*  display: table-cell;*/
   border-radius: 3px;
   margin:  3px;
   padding: 3px;
@@ -53,7 +53,7 @@ span.spanFileInfo {
 }
 
 span.problemTitle {
-  display: table-cell;
+/*  display: table-cell;*/
   border-radius: 3px;
   margin:  3px;
   padding: 3px;
@@ -62,7 +62,7 @@ span.problemTitle {
 }
 
 span.problemNavigation {
-  display: table-cell;
+/*  display: table-cell;*/
   border-radius: 3px;
   margin:  3px;
   padding: 3px;
@@ -974,7 +974,6 @@ span.problemLinkSelectedQuiz {
 }
 
 a.problemLinkQuiz {
-  display: inline-block;
   margin:  3px;
   padding: 3px;
   background-color: #efefef;
@@ -991,7 +990,6 @@ a.problemLinkQuiz:hover {
 }
 
 a.problemLinkPractice {
-  display: inline-block;
   margin:  3px;
   padding: 3px;
   background-color: #efefef;
@@ -1007,7 +1005,6 @@ a.problemLinkPractice:hover {
 }
 
 a.slidesLink {
-  display: inline-block;
   margin:  3px;
   padding: 3px;
   background-color: #efefef;

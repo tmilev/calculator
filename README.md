@@ -25,12 +25,13 @@ Please note that **the files you create with the calculator will be placed in ba
 cd trunk
 make
 ```
-4. Run the calculator for the first time. This may prompt you for further setup (mysql, openssl, and initial setup). 
+4. Run the calculator for the first time. This may prompt you for further setup (mongoDB, openssl, and initial setup). 
 ```
 cd bin
 ./calculator
 ```
-Follow the prompts - you **will be asked for your sudo password**. Leave the mysql password blank.
+Follow the prompts. If asked for sudo password, that means the calculator is installing libraries, most likely mongoDB, curl, or another reasonable dependency. 
+Bravely enter your sudo password, it shouldn't break anything on your system.
 ### Running the calculator
 5. Once the installation steps are complete start the calculator as a web server:
 ```
@@ -49,11 +50,13 @@ This completes the setup and your first run.
 - Ubuntu   (all systems using the apt package manager should work too, but that hasn't been tested).
 - CentOS   (all systems using the yum package manager should work too, but that hasn't been tested).
 - We will add your Linux flavor upon request. We may need your help with your package manager. 
-2. **subversion/git**. needed to download the source. 
+2. **git**. needed to download the source. 
 3. **sudo**. The initial calculator setup uses the sudo command, make sure that is installed on your system (should be there out of the box on most machines). 
 4. **unzip**. If not already present, the calculator will attempt to install that on first run.
-5. **mysql development libraries**. If not already present, the calculator will attempt to install them on first run.
+5. [Optional] **mongoDB development libraries**. If not already present, the calculator will attempt to install them on first run. 
+Without mongoDB, the calculator will not be able to provide any login services, and some "admin-only" functions may be missing.
 6. [Optional] **openssl development libraries**. If not already present, the calculator will attempt to install them on first run.
+Without openSSL, the calculator will not be able to provide any login services.
 
 ### Port redirect with ip tables
 
@@ -126,6 +129,3 @@ calculator-algebra.org
 The following people have contributed code directly.
 - **Todor Milev** (project mastermind)
 - **Thomas-Folz Donahue**
-
-## License
-This project is licensed under the LGPL license - see the license file in the source code.

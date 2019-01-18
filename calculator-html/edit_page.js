@@ -37,18 +37,19 @@ function getEditPanel(fileName) {
     return "";
   }
   var result = "";
-  result += `<span class = 'spanFileInfo'>`;
-  result += `<button class = "buttonSaveEdit" onclick = "window.calculator.editPage.selectEditPage('${fileName}')" style = 'width:50px'>Edit</button>${fileName}&nbsp;`;
+  result += `<div class = 'spanFileInfo'>`;
+  result += `<button class = "buttonSaveEdit" onclick = "window.calculator.editPage.selectEditPage('${fileName}')" style = 'width:50px'>Edit</button> ${fileName} `;
   result += `<button class = "accordionLike" onclick = "window.calculator.editPage.toggleClonePanel(this)">Clone panel &#9666;</button>`;
   result += `<span class = "panelDeadlines">`;
   var idCloneInput = encodeURIComponent(`cloneButton${fileName}`);
   var idSpanClonePageReport = encodeURIComponent(`cloneButtonReport${fileName}`);
   result += `<button class = 'buttonClone' style = 'width:50px' onclick = `;
   result += `"window.calculator.editPage.handleClone('${fileName}', '${idCloneInput}', '${idSpanClonePageReport}')">Clone</button>`;
-  result += `<input type = "text" value = '${fileName}' style = 'width:80%' id = '${idCloneInput}'></input><br>`
-  result += `<div id = "${idSpanClonePageReport}" style = 'width:80%'></div>`;
+  var sizeFile = fileName.length;
+  result += `<input type = "text" value = '${fileName}' size = '${sizeFile}' id = '${idCloneInput}'></input>`
+  result += `<div id = "${idSpanClonePageReport}"></div>`;
   result += "</span>";
-  result += `</span>`;
+  result += `</div>`;
   return result;
 }
 

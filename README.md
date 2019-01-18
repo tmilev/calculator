@@ -15,14 +15,14 @@ mkdir baseFolder
 2. Download the source code **inside** that folder. 
 ```
 cd baseFolder
-svn checkout https://github.com/tmilev/calculator.git/trunk
+git clone https://github.com/tmilev/calculator.git
 
 ```
 Please note that **the files you create with the calculator will be placed in baseFolder**, i.e., inside the first folder you created and where you checked out the calculator trunk, but outside of that calculator trunk. In this way, the files you create via the calculator are kept outside of the calculator folder, and so, you can put **baseFolder** in a repository of your own. 
 
 3. Compile the calculator.
 ```
-cd trunk
+cd calculator
 make
 ```
 4. Run the calculator for the first time. This may prompt you for further setup (mongoDB, openssl, and initial setup). 

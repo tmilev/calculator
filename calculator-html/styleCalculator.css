@@ -34,6 +34,8 @@ tiny {
 }
 
 .problemInfoBar {
+  display: flex;
+  align-items: center;
   background-color: #fafafa;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -42,8 +44,8 @@ tiny {
   margin-bottom: 10px;
 }
 
-span.spanFileInfo {
-/*  display: table-cell;*/
+div.spanFileInfo {
+  display: inline-block;
   border-radius: 3px;
   margin:  3px;
   padding: 3px;
@@ -52,8 +54,13 @@ span.spanFileInfo {
   background-color: #f8f8f8;
 }
 
-span.problemTitle {
-/*  display: table-cell;*/
+div.problemTitle {
+  display: flex;
+  align-items: center;
+}
+
+div.problemTitleContainer {
+  display: inline-block;
   border-radius: 3px;
   margin:  3px;
   padding: 3px;
@@ -61,8 +68,8 @@ span.problemTitle {
   white-space: nowrap;
 }
 
-span.problemNavigation {
-/*  display: table-cell;*/
+div.problemNavigation {
+  display: inline-block;
   border-radius: 3px;
   margin:  3px;
   padding: 3px;

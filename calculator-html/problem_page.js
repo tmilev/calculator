@@ -170,7 +170,7 @@ Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQui
 Problem.prototype.getProblemNavigation = function() {
   var thePage = window.calculator.mainPage;
   var result = "";
-  result += `<span class = 'problemNavigation'>`;
+  result += `<div class = 'problemNavigation'>`;
   var linkType = "problemLinkPractice";
   var defaultRequest = pathnames.urlFields.exerciseJSON;
   if (this.flagForReal && thePage.user.flagLoggedIn) {
@@ -205,7 +205,7 @@ Problem.prototype.getProblemNavigation = function() {
   } else {
     result += `<b style = 'color:brown'>Scores are recorded. </b>`;
   }
-  result += "</span>";
+  result += "</div>";
   return result;
 }
 
@@ -220,7 +220,7 @@ Problem.prototype.writeToHTML = function(outputElement) {
   var topPart = "";
   topPart += "<div class = 'problemInfoBar'>";
   topPart += this.getProblemNavigation();
-  topPart += `<span class = "problemTitle">${this.problemLabel} ${this.title}</span>`;
+  topPart += `<div class = "problemTitle"><div class = "problemTitleContainer">${this.problemLabel} ${this.title}</div></div>`;
   topPart += this.links.slides;
   topPart += this.links.video;
   //topPart += "<br>"

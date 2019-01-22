@@ -120,12 +120,20 @@ function setAdminPanels() {
   }
 }
 
+function resetPagesNeedingReload() {
+  window.calculator.selectCourse.pageSetup.needsLoad = true;
+  window.calculator.coursePage.lastLoadedCourse.courseHome = null;
+  window.calculator.coursePage.lastLoadedCourse.topicList = null;
+}
+
 function loginWithServerCallback(incomingString, result) {
   document.getElementById("spanLoginStatus").innerHTML = "";
   var thePage = window.calculator.mainPage;
   var success = false;
   var loginErrorMessage = "";
   var parsedAuthentication = JSON.parse(incomingString);
+  resetPagesNeedingReload();
+  
   if (parsedAuthentication["status"] === "logged in") {
     success = true;
     thePage.user.makeFromUserInfo(parsedAuthentication);
@@ -264,6 +272,7 @@ function init() {
 }
 
 module.exports = {
+  resetPagesNeedingReload,
   reloadPage,
   init, 
   logoutGoogle,

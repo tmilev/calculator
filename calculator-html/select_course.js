@@ -16,6 +16,8 @@ function afterLoadSelectCoursePage(incomingPage, result) {
   var resultString = "";
   var thePage = window.calculator.mainPage;
   thePage.theCourses = JSON.parse(incomingPage)["courses"];
+  pageSetup.needsLoad = false;
+
   //resultString += JSON.stringify(thePage.theCourses);
   if (thePage.user.hasProblemEditRights()) {
     resultString += "<div class = 'problemInfoBar'>";
@@ -46,7 +48,14 @@ function afterLoadSelectCoursePage(incomingPage, result) {
   document.getElementById("divSelectCourse").innerHTML = resultString;
 }
 
+var pageSetup = {
+  needsLoad: true
+};
+
 function selectCoursePage() {
+  if (pageSetup.needsLoad !== true) {
+    return;
+  }
   submitRequests.submitGET({
     url: `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.selectCourse}`,
     callback: afterLoadSelectCoursePage,
@@ -55,6 +64,7 @@ function selectCoursePage() {
 }
 
 module.exports = {
+  pageSetup,
   selectCoursePage,
   selectCourse,
 }

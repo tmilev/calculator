@@ -38,7 +38,7 @@ function getEditPanel(fileName) {
   }
   var result = "";
   result += `<div class = 'spanFileInfo'>`;
-  result += `<button class = "buttonSaveEdit" onclick = "window.calculator.editPage.selectEditPage('${fileName}')" style = 'width:50px'>Edit</button> ${fileName} `;
+  result += `<button class = "buttonSaveEdit" onclick = "window.calculator.editPage.selectEditPage('${fileName}');" style = 'width:50px'>Edit</button> ${fileName} `;
   result += `<button class = "accordionLike" onclick = "window.calculator.editPage.toggleClonePanel(this)">Clone panel &#9666;</button>`;
   result += `<span class = "panelDeadlines">`;
   var idCloneInput = encodeURIComponent(`cloneButton${fileName}`);
@@ -46,7 +46,7 @@ function getEditPanel(fileName) {
   result += `<button class = 'buttonClone' style = 'width:50px' onclick = `;
   result += `"window.calculator.editPage.handleClone('${fileName}', '${idCloneInput}', '${idSpanClonePageReport}')">Clone</button>`;
   var sizeFile = fileName.length;
-  result += `<input type = "text" value = '${fileName}' size = '${sizeFile}' id = '${idCloneInput}'></input>`
+  result += `<input type = "text" value = '${fileName}' size = '${sizeFile}' id = '${idCloneInput}'></input>`;
   result += `<div id = "${idSpanClonePageReport}"></div>`;
   result += "</span>";
   result += `</div>`;
@@ -56,7 +56,7 @@ function getEditPanel(fileName) {
 function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
   var newFileName = document.getElementById(idCloneInput).value;
 
-  console.log(`DEBUG: handle clone with input: ${fileName}, new file name: ${newFileName}`); 
+  //console.log(`DEBUG: handle clone with input: ${fileName}, new file name: ${newFileName}`); 
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
   theURL += calculatorPage.calculator.getQueryStringSubmitStringAsMainInput(newFileName, pathnames.urlFields.requests.clonePage);

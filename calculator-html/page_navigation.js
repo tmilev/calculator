@@ -685,6 +685,7 @@ Page.prototype.onStudentViewChange = function () {
   } else {
     spanView.innerHTML = "Admin view";
   }
+  login.resetPagesNeedingReload();
   login.setAdminPanels();
   document.getElementById(ids.domElements.spanStudentViewSectionSelectPanel).innerHTML = radioHTML;
 }

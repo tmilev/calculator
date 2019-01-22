@@ -129,6 +129,7 @@ function selectCurrentCoursePage() {
 }
 
 module.exports =  {
+  lastLoadedCourse,
   modifyDeadlines,
   selectCurrentCoursePage,
   toggleDeadline,

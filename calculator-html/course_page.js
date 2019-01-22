@@ -102,8 +102,21 @@ function afterLoadCoursePage(incomingPage, result) {
   });
 }
 
+var lastLoadedCourse = {
+  courseHome: null,
+  topicList: null,
+};
+
 function selectCurrentCoursePage() {
   var thePage = window.calculator.mainPage;
+  var storageVariables = thePage.storage.variables;
+  var incomingCourse = storageVariables.currentCourse.courseHome.getValue();
+  var incomingTopicList = storageVariables.currentCourse.topicList.getValue();
+  if (lastLoadedCourse.courseHome === incomingCourse && lastLoadedCourse.topicList === incomingTopicList) {
+    return;
+  }
+  lastLoadedCourse.courseHome = incomingCourse;
+  lastLoadedCourse.topicList = incomingTopicList;
   var topicRequest = "templateJSONNoLogin";
   if (thePage.user.flagLoggedIn) {
     topicRequest = "templateJSON";

@@ -19,7 +19,8 @@ function afterLoadSelectCoursePage(incomingPage, result) {
   pageSetup.needsLoad = false;
 
   //resultString += JSON.stringify(thePage.theCourses);
-  if (thePage.user.hasProblemEditRights()) {
+  var userHasProblemEditRights = thePage.user.hasProblemEditRights();
+  if (userHasProblemEditRights) {
     resultString += "<div class = 'problemInfoBar'>";
     resultString += editPage.getEditPanel("/coursesavailable/default.txt");
     resultString += "</div>";
@@ -30,7 +31,7 @@ function afterLoadSelectCoursePage(incomingPage, result) {
     var isRoughDraft = false;
     if (currentCourse.roughDraft === "true" || currentCourse.roughDraft === true) {
       isRoughDraft = true;
-      if (! thePage.serverIsOnLocalHost()) {
+      if (!thePage.serverIsOnLocalHost() && !userHasProblemEditRights) {
         continue;
       }
     }

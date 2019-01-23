@@ -68,7 +68,7 @@ void LaTeXcrawler::BuildFreecalC()
   { this->displayResult << "Build freecalc command allowed only for logged-in admins.";
     return;
   }
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 50000;
+  theGlobalVariables.MaxComputationMilliseconds = 50000000; //50k seconds: ok as we are admin.
   if (!this->ExtractFileNamesFromRelativeFileName(&this->errorStream))
     return;
   std::fstream inputFile;

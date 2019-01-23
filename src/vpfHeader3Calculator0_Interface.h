@@ -1071,7 +1071,7 @@ public:
   std::string outputCommentsString;
   std::string parsingLog;
   ObjectContainer theObjectContainer;
-  double StartTimeEvaluationInSecondS;
+  int64_t startTimeEvaluationMilliseconds;
 
   char DefaultWeylLetter;
   int DefaultWeylRank;
@@ -2100,6 +2100,7 @@ public:
   void initComputationStats();
   bool ExtractExpressions(Expression& outputExpression, std::string* outputErrors);
   void EvaluateCommands();
+  bool TimedOut();
   static bool EvaluateExpression(Calculator& theCommands, const Expression& input, Expression& output);
   static bool EvaluateExpression
   (Calculator& theCommands, const Expression& input, Expression& output,

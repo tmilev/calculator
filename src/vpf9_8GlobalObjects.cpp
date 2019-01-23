@@ -58,10 +58,8 @@ void InitializeGlobalObjects()
 { //stOutput << "Content-Type: text/html\n\n";
   theGlobalVariables.processType = ProcessTypes::server;
   theGlobalVariables.flagIsChildProcess = false;
-  InitializeTimer();
+  InitializeTimeR();
   theGlobalVariables.IndicatorStringOutputFunction = &HtmlRoutines::MakeReportIndicatorFile;
-  theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
-  theGlobalVariables.sleepFunction = SleepFunction;
   theGlobalVariables.pointerCallSystemNoOutput = &CallSystemWrapperNoOutput;
   theGlobalVariables.pointerCallSystemWithOutput = &CallSystemWrapperReturnStandardOutput;
   theGlobalVariables.pointerCallChDir = &CallChDirWrapper;

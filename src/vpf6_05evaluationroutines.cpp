@@ -372,6 +372,22 @@ bool Calculator::EvaluateExpression
   return theCommands.EvaluateExpression(theCommands, input, output, notUsed, - 1);
 }
 
+bool Calculator::TimedOut()
+{ if (theGlobalVariables.MaxComputationMilliseconds <= 0)
+    return false;
+  int64_t elapsedMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+  int64_t halfTimeLimit = theGlobalVariables.MaxComputationMilliseconds / 2;
+  if (elapsedMilliseconds <= halfTimeLimit)
+    return false;
+  if (!this->flagTimeLimitErrorDetected)
+    stOutput << "<br><b>Max allowed computational time is " << halfTimeLimit << " ms;"
+    << " so far, " << elapsedMilliseconds
+    << " have elapsed -> aborting computation ungracefully.</b>";
+  this->flagTimeLimitErrorDetected = true;
+  this->flagAbortComputationASAP = true;
+  return true;
+}
+
 bool Calculator::EvaluateExpression
 (Calculator& theCommands, const Expression& input, Expression& output,
  bool& outputIsNonCacheable, int opIndexParentIfAvailable)
@@ -495,21 +511,8 @@ bool Calculator::EvaluateExpression
     if (indexInCache != - 1)
       theCommands.imagesCachedExpressions[indexInCache] = output;
     //////------Handling naughty expressions------
-    if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 0)
-      if (theGlobalVariables.GetElapsedSeconds() != 0)
-        if (theGlobalVariables.GetElapsedSeconds() >
-            theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit / 2)
-        { if (!theCommands.flagTimeLimitErrorDetected)
-            stOutput << "<br><b>Max allowed computational time is "
-            << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit / 2
-            << " second(s)"
-            << ";  so far, "
-            << theGlobalVariables.GetElapsedSeconds()
-            << " have elapsed -> aborting computation ungracefully.</b>";
-          theCommands.flagTimeLimitErrorDetected = true;
-          theCommands.flagAbortComputationASAP = true;
-          break;
-        }
+    if (theCommands.TimedOut())
+      break;
     if (counterNumTransformations > theCommands.MaxAlgTransformationsPerExpression)
     { if (!theCommands.flagMaxTransformationsErrorEncountered)
       { std::stringstream out;
@@ -757,16 +760,16 @@ bool Calculator::ParseAndExtractExpressions
 
 
 void Calculator::initComputationStats()
-{ this->StartTimeEvaluationInSecondS = theGlobalVariables.GetElapsedSeconds();
-  this->NumListsStart                = ParallelComputing::NumListsCreated;
-  this->NumListResizesStart          = ParallelComputing::NumListResizesTotal;
-  this->NumHashResizesStart          = ParallelComputing::NumHashResizes;
-  this->NumSmallAdditionsStart       = Rational::TotalSmallAdditions;
-  this->NumSmallMultiplicationsStart = Rational::TotalSmallMultiplications;
-  this->NumSmallGCDcallsStart        = Rational::TotalSmallGCDcalls;
-  this->NumLargeAdditionsStart       = Rational::TotalLargeAdditions;
-  this->NumLargeMultiplicationsStart = Rational::TotalLargeMultiplications;
-  this->NumLargeGCDcallsStart        = Rational::TotalLargeGCDcalls;
+{ this->startTimeEvaluationMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+  this->NumListsStart                   = ParallelComputing::NumListsCreated;
+  this->NumListResizesStart             = ParallelComputing::NumListResizesTotal;
+  this->NumHashResizesStart             = ParallelComputing::NumHashResizes;
+  this->NumSmallAdditionsStart          = Rational::TotalSmallAdditions;
+  this->NumSmallMultiplicationsStart    = Rational::TotalSmallMultiplications;
+  this->NumSmallGCDcallsStart           = Rational::TotalSmallGCDcalls;
+  this->NumLargeAdditionsStart          = Rational::TotalLargeAdditions;
+  this->NumLargeMultiplicationsStart    = Rational::TotalLargeMultiplications;
+  this->NumLargeGCDcallsStart           = Rational::TotalLargeGCDcalls;
 }
 
 void Calculator::Evaluate(const std::string& theInput)

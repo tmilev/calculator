@@ -490,9 +490,7 @@ bool Calculator::innerPrintSSsubalgebras
     theSSsubalgebras.flagAttemptToAdjustCentralizers = doAdjustCentralizers;
     theSSsubalgebras.CheckFileWritePermissions();
     if (!isAlreadySubalgebrasObject)
-    { theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = - 1;
       theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS);
-    }
     theSSsubalgebras.WriteReportToFiles();
   } else
     out << "Files precomputed, serving from HD. ";

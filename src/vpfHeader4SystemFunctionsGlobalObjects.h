@@ -29,16 +29,15 @@ extern logger logSuccessfulForks  ;
 extern FormatExpressions consoleFormat;
 extern Calculator* theParser;
 
-extern double GetElapsedTimeInSeconds();
+extern int GetElapsedMilliseconds();
 extern void CallSystemWrapperNoOutput(const std::string& theCommand, bool ignoreNonZeroReturn);
 extern std::string CallSystemWrapperReturnStandardOutput(const std::string& theCommand);
 extern void CallChDirWrapper(const std::string& theCommand);
 extern void ignoreUserAbortSignal();
 
-extern void SleepFunction(int nanoseconds);
 extern void InitializeGlobalObjects();
-extern void InitializeTimer(void* desiredStartTime = 0);
 extern void CreateTimerThread();
+extern void InitializeTimeR();
 
 extern void* RunTimerVoidPtr(void* ptr);
 

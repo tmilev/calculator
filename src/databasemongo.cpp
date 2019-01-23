@@ -440,6 +440,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
  List<JSData>& output, const JSData& options, int maxOutputItems,
  long long* totalItems, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions");
+  (void) commentsGeneralNonSensitive;
 #ifdef MACRO_use_MongoDB
   logWorker << logger::blue << "Query input JSON: " << findQuery.ToString(true) << logger::endL;
   MongoQuery query;
@@ -577,6 +578,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
 (const std::string& collectionName, const std::string& findQuery, const JSData& options,
  JSData& output, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions");
+  (void) commentsGeneralNonSensitive;
 #ifdef MACRO_use_MongoDB
   MongoQuery query;
   query.collectionName = collectionName;
@@ -803,6 +805,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
  List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
  std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString");
+  (void) fieldsToSetIfNullUseFirstFieldIfUpdateQuery;
 #ifdef MACRO_use_MongoDB
   if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery(updateQuery, commentsOnFailure))
     return false;

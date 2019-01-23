@@ -448,19 +448,19 @@ void WebCrawler::FetchWebPagePart2
   this->flagContinueWasNeeded = false;
   if (commentsGeneral != 0)
     *commentsGeneral << "<hr>";
-  std::stringstream commentsOnSSLFailure;
-  if (!theWebServer.theSSLdata.SSLwriteLoop
+  std::string errorSSL;
+  if (!theWebServer.theSSLdata.SSLWriteLoop
       (10, theWebServer.theSSLdata.sslClient, theMessageHeader.str(),
-       &commentsOnSSLFailure, commentsGeneral, true))
+       &errorSSL, commentsGeneral, true))
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "SSL critical error: " << commentsOnSSLFailure.str();
+      *commentsOnFailure << "SSL critical error: " << errorSSL;
     return;
   }
-  if (!theWebServer.theSSLdata.SSLreadLoop
+  if (!theWebServer.theSSLdata.SSLReadLoop
       (10, theWebServer.theSSLdata.sslClient, this->headerReceived, 0,
-       &commentsOnSSLFailure, commentsGeneral, true))
+       &errorSSL, commentsGeneral, true))
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "SSL critical error: " << commentsOnSSLFailure.str();
+      *commentsOnFailure << "SSL critical error: " << errorSSL;
     return;
   }
   unsigned bodyStart = 0;
@@ -517,19 +517,19 @@ void WebCrawler::FetchWebPagePart2
   //{
   theContinueHeader << "HTTP/1.0 100 Continue\r\n\r\n";
   //theContinueHeader << "\r\n\r\n";
-  if (!theWebServer.theSSLdata.SSLwriteLoop
+  if (!theWebServer.theSSLdata.SSLWriteLoop
       (10, theWebServer.theSSLdata.sslClient, theContinueHeader.str(),
-       &commentsOnSSLFailure, commentsGeneral, true))
+       &errorSSL, commentsGeneral, true))
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "SSL critical error: " << commentsOnSSLFailure.str();
+      *commentsOnFailure << "SSL critical error: " << errorSSL;
     return;
   }
   std::string secondPart;
-  if (!theWebServer.theSSLdata.SSLreadLoop
-      (10,theWebServer.theSSLdata.sslClient, secondPart, expectedLength,
-       &commentsOnSSLFailure, commentsGeneral, true))
+  if (!theWebServer.theSSLdata.SSLReadLoop
+       (10, theWebServer.theSSLdata.sslClient, secondPart, expectedLength,
+        &errorSSL, commentsGeneral, true))
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "SSL critical error: " << commentsOnSSLFailure.str();
+      *commentsOnFailure << "SSL critical error: " << errorSSL;
     return;
   }
   if (commentsGeneral != 0)

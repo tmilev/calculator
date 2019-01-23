@@ -54,30 +54,27 @@ class GlobalVariables
   //a file being compiled before the declaration of theGlobalVariables. This causes a nasty and difficult to catch
   //crash before main.
   /// @cond
-private:
-  double (*getElapsedTimePrivate)();
 public:
   void (*pointerCallSystemNoOutput)(const std::string& theSystemCommand, bool ignoreOutput);
   std::string (*pointerCallSystemWithOutput)(const std::string& theSystemCommand);
   void (*pointerCallChDir)(const std::string& theDirectoryName);
   void (*IndicatorStringOutputFunction)(const std::string& input);
-  void (*sleepFunction)(int microseconds);
   void (*WebServerReturnDisplayIndicatorCloseConnection)();
-  void (*WebServerTimerPing)(double pingTime);
+  void (*WebServerTimerPing)(int64_t pingTime);
   void (*PauseUponUserRequest)();
   void Pause()
   { if (this->PauseUponUserRequest != 0)
       this->PauseUponUserRequest();
   }
-  void FallAsleep(int microseconds)
-  { if (this->sleepFunction != 0)
-      this->sleepFunction(microseconds);
-  }
+  void FallAsleep(int microseconds);
 //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
-  double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
-  double MaxTimeNoPingBeforeChildIsPresumedDead;
-  double MaxComputationTimeBeforeWeTakeAction;
-//  bool flagLogInterProcessCommunication;
+  int64_t millisecondOffset;
+  int64_t MaxComputationMilliseconds;
+  int64_t MaxTimeNoPingBeforeChildIsPresumedDead;
+  int64_t takeActionAfterComputationMilliseconds;
+  int64_t timeServeClientStart;
+
+  //  bool flagLogInterProcessCommunication;
 //flags: what mode are we running in?
 
   bool flagRunningApache;
@@ -197,7 +194,6 @@ public:
   MemorySaving<Matrix<Rational> > matIdMatrix;
   MemorySaving<Matrix<Rational> > matOneColumn;
 
-
   MemorySaving<DynkinDiagramRootSubalgebra > dynGetEpsCoords;
   MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;
 
@@ -208,16 +204,10 @@ public:
   ~GlobalVariables();
   static HashedList<FileInformation>& theSourceCodeFiles();
   void WriteSourceCodeFilesJS();
-  //These functions were written before std::chrono was available.
-  //To do: get rid of them in favor of std::chrono.
-  void SetTimerFunction(double (*timerFunction)())
-  { this->getElapsedTimePrivate = timerFunction;
-  }
   int GetGlobalTimeInSeconds();
+  int64_t GetElapsedMilliseconds();
   double GetElapsedSeconds()
-  { if (this->getElapsedTimePrivate != 0)
-      return this->getElapsedTimePrivate();
-    return - 1;
+  { return ((double) this->GetElapsedMilliseconds()) / 1000;
   }
   static void InitThreadsExecutableStart();
   bool UserDefaultIsDebuggingAdmin();

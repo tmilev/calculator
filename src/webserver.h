@@ -36,6 +36,9 @@ public:
   List<int> socketStackServer;
   List<int> socketStackClient;
   List<char> buffer;
+  struct errors {
+    static std::string errorWantRead;
+  };
   std::string otherCertificateIssuerName, otherCertificateSubjectName;
   bool flagSSLHandshakeSuccessful;
   void DoSetSocket(int theSocket, SSL *theSSL);
@@ -45,23 +48,23 @@ public:
   void RemoveLastSocketClient();
   void FreeClientSSL();
   void ClearErrorQueue
-  (int errorCode, SSL* theSSL, std::stringstream* commentsOnError,
+  (int errorCode, SSL* theSSL, std::string *outputError,
    std::stringstream* commentsGeneral, bool includeNoErrorInComments);
   static bool initSSLkeyFiles();
   void initSSLlibrary();
   void initSSLserver();
   void initSSLclient();
-  int SSLread
-  (SSL* theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
+  int SSLRead
+  (SSL* theSSL, void *buffer, int bufferSize, std::string *outputError,
    std::stringstream *commentsGeneral, bool includeNoErrorInComments);
-  bool SSLreadLoop
-  (int numTries, SSL* theSSL, std::string& output, const LargeInt& expectedLength, std::stringstream* commentsOnFailure,
+  bool SSLReadLoop
+  (int numTries, SSL* theSSL, std::string& output, const LargeInt& expectedLength, std::string* commentsOnFailure,
    std::stringstream* commentsGeneral, bool includeNoErrorInComments);
-  bool SSLwriteLoop
-  (int numTries, SSL* theSSL, const std::string& input, std::stringstream *commentsOnFailure,
+  bool SSLWriteLoop
+  (int numTries, SSL* theSSL, const std::string& input, std::string *outputError,
    std::stringstream *commentsGeneral, bool includeNoErrorInComments);
-  int SSLwrite
-  (SSL* theSSL, void* buffer, int bufferSize, std::stringstream* commentsOnFailure,
+  int SSLWrite
+  (SSL* theSSL, void* buffer, int bufferSize, std::string* outputError,
    std::stringstream* commentsGeneral, bool includeNoErrorInComments);
   SSLdata();
   ~SSLdata();
@@ -85,6 +88,7 @@ public:
   int indexInParent;
   int ProcessPID;
   int numberOfReceivesCurrentConnection;
+  int64_t millisecondOffset;
   std::string displayUserInput;
 
   std::string messageHead;
@@ -357,7 +361,7 @@ public:
   int Run();
   void WriteVersionJSFile();
   WebWorker& GetActiveWorker();
-  static void WorkerTimerPing(double pingTime);
+  static void WorkerTimerPing(int64_t pingTime);
   static void Release(int& theDescriptor);
   static void SignalActiveWorkerDoneReleaseEverything();
   static void FlushActiveWorker();

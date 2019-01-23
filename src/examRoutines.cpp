@@ -1642,6 +1642,7 @@ std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
 
 std::string CalculatorHTML::GetDeadlineNoInheritance(const std::string& id)
 { MacroRegisterFunctionWithName("CalculatorHTML::GetDeadlineNoInheritance");
+  (void) id;
 #ifdef MACRO_use_MongoDB
   if (!this->currentUseR.theProblemData.Contains(id))
     return "";

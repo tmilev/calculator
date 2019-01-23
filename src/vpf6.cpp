@@ -2417,19 +2417,31 @@ void Calculator::ComputeAutoCompleteKeyWords()
 std::string Calculator::ToStringPerformance()
 { MacroRegisterFunctionWithName("Calculator::ToStringPerformance");
   std::stringstream out;
-  double elapsedSecs = theGlobalVariables.GetElapsedSeconds();
+  int64_t elapsedMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+  int64_t computationMilliseconds = elapsedMilliseconds - this->startTimeEvaluationMilliseconds;
+  int64_t requestMilliseconds = elapsedMilliseconds - theGlobalVariables.timeServeClientStart;
+  int64_t waitingMilliseconds = elapsedMilliseconds - requestMilliseconds;
   out << "<b>Double-click formulas to get their LaTeX.</b>"
   << "<br>Double-click back to hide the LaTeX. ";
-  out << "<br>Time: computation: " << (elapsedSecs - this->StartTimeEvaluationInSecondS)
-  << " (" << (elapsedSecs - this->StartTimeEvaluationInSecondS) * 1000
-  << " ms), total: " << elapsedSecs << " ("
-  << (elapsedSecs * 1000) << " ms).";
-  out << "<br>Total expressions created: " << this->theExpressionContainer.size;
-  out << "<br>Expression evaluations: " << this->NumCallsEvaluateExpression;
+  out << "<br>Computation time: "
+  << computationMilliseconds
+  << " ms (~"
+  << (((double) computationMilliseconds) / 1000)
+  << " s).<br>";
+  out << "Total process request time: "
+  << requestMilliseconds << " ms (~"
+  << (((double) requestMilliseconds) / 1000)
+  << " s).<br>";
+  out << "Time waiting on open connection: "
+  << waitingMilliseconds << " ms (~"
+  << (((double) waitingMilliseconds) / 1000)
+  << " s).<br>";
+  out << "<br>Total expressions: " << this->theExpressionContainer.size;
+  out << "<br>Total evaluations: " << this->NumCallsEvaluateExpression;
   std::stringstream moreDetails;
   moreDetails << "Max computation time: "
-  << (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit / 2)
-  << " second(s). <br>"
+  << (theGlobalVariables.MaxComputationMilliseconds / 2)
+  << " ms. <br>"
   << "Total number of pattern matches performed: "
   << this->TotalNumPatternMatchedPerformed << "";
   if (this->DepthRecursionReached > 0)
@@ -2476,12 +2488,12 @@ std::string Calculator::ToStringPerformance()
 std::string Calculator::ToString()
 { MacroRegisterFunctionWithName("Calculator::ToString");
   std::stringstream out2;
-  std::string openTag1 = "<span style =\"color:#0000FF\">";
+  std::string openTag1 = "<span style =\"color:blue\">";
   std::string closeTag1 = "</span>";
-  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 0)
+  if (theGlobalVariables.MaxComputationMilliseconds > 0)
     out2 << "Computation time limit: "
-    << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
-    << " second(s).<hr>";
+    << theGlobalVariables.MaxComputationMilliseconds
+    << " ms.<hr>";
   else
     out2 << "No computation time limit.<hr> ";
   if (this->RuleStack.children.size > 1)

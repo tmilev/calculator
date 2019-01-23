@@ -186,12 +186,11 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, theSSalg))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theSSowner = *theSSalg;
-  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit < 50)
-    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 50;
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir;
   theCasimir.MakeCasimir(theSSowner);
 //  theCasimir.Simplify(theGlobalVariables);
-  theCommands << "Context Lie algebra: " << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ToString()
+  theCommands << "Context Lie algebra: " << theSSowner.theWeyl.theDynkinType.ToString()
+  << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ToString()
   <<  ". The Casimir element of the ambient Lie algebra. ";
   Expression contextE;
   contextE.MakeContextSSLieAlg(theCommands, theSSowner);
@@ -887,7 +886,6 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   theG2Casimir.MakeCasimir(theG2B3Data.theHmm.theDomain());
 
   theG2B3Data.theChars.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 400;
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++)
   { Vector<RationalFunctionOld>& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
     theG2CasimirCopy = theG2Casimir;
@@ -1749,8 +1747,10 @@ bool Calculator::WriteTestStrings(List<std::string>& inputCommands, List<std::st
 
 bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerAutomatedTestSetKnownGoodCopy");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return theCommands << "Function requires admin access. ";
   (void) input;//avoid unused variable warning, portable
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 30000;
+  theGlobalVariables.MaxComputationMilliseconds = 30000000; //30k seconds: ok, we have admin access.
   List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
   std::stringstream out;
   theCommands.theTestFileName = "automatedTest.txt";
@@ -1759,14 +1759,16 @@ bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, con
   double startTime = theGlobalVariables.GetElapsedSeconds();
   theCommands.AutomatedTestRun(inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit);
   theCommands.WriteTestStrings(inputStringsTest, outputStringsTestWithInit);
-  out << "Test run completed in " << theGlobalVariables.GetElapsedSeconds()-startTime << " seconds.";
+  out << "Test run completed in " << theGlobalVariables.GetElapsedSeconds() - startTime << " seconds.";
   return output.AssignValue(out.str(), theCommands);
 }
 
 bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerAutomatedTest");
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 30000;
-  double startingTime = theGlobalVariables.GetElapsedSeconds();
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return theCommands << "Automated test requires admin access";
+  theGlobalVariables.MaxComputationMilliseconds = 30000000; //30k seconds, ok as we have admin access
+  int64_t startTime = theGlobalVariables.GetElapsedMilliseconds();
   theCommands.theTestFileName = "automatedTest.txt";
   if (!FileOperations::FileExistsVirtual("output/" + theCommands.theTestFileName))
     return theCommands.innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
@@ -1825,7 +1827,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   if (allWentGreat)
     out << "<span style =\"color:#0000FF\">All " << commandStrings.size << " results coincide with previously recorded values.</span> ";
   out << "<br>The command for updating the test file is " << HtmlRoutines::GetCalculatorComputationLink("AutomatedTestSetKnownGoodCopy 0");
-  out << "<br>Total time for the test: " << theGlobalVariables.GetElapsedSeconds() - startingTime;
+  out << "<br>Total time for the test: " << theGlobalVariables.GetElapsedMilliseconds() - startTime << " ms. ";
   return output.AssignValue(out.str(), theCommands);
 }
 

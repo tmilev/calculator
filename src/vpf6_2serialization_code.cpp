@@ -441,7 +441,6 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
 bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theCommands, const Expression& inpuT, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerLoadSemisimpleSubalgebras");
   Expression input = inpuT;
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = - 1;
   Expression theAmbientTypeE, numExploredHsE, numExploredTypesE, theSAsE, currentChainE;
   if (!CalculatorConversions::innerLoadKey(theCommands, input, "AmbientDynkinType", theAmbientTypeE))
     return theCommands << "<hr>Failed to load Dynkin type from: " << input.ToString();

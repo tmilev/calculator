@@ -542,8 +542,6 @@ bool CalculatorFunctionsGeneral::innerCasimirWRTlevi(Calculator& theCommands, co
   SemisimpleLieAlgebra* theSSalg = 0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
-  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit < 50)
-    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 50;
   Vector<Rational> leviSelection;
   if (!theCommands.GetVectoR(input[2], leviSelection, 0, theSSalg->GetRank()))
     return theCommands << "<hr>Failed to extract parabolic selection. ";
@@ -6930,8 +6928,6 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
   { std::stringstream reportStream;
     reportStream << " Running indicator test, " << i + 1 << " out of " << numRuns << ".";
     theReport.Report(reportStream.str());
-    if (theGlobalVariables.sleepFunction == 0)
-      crash << "fall asleep function is zero!" << crash;
     theGlobalVariables.FallAsleep(4000);
   }
   std::stringstream out;
@@ -6946,7 +6942,6 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   SemisimpleLieAlgebra* ownerSS;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, ownerSS))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 10000;
   ownerSS->ComputeFolderNames();
   FormatExpressions theFormat;
   theFormat.flagUseHTML = true;
@@ -6974,7 +6969,6 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
     theGlobalVariables.CallSystemNoOutput(outMkDirCommand1.str(), false);
     theGlobalVariables.CallSystemNoOutput(outMkDirCommand2.str(), false);
   }
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 1000;
   if (!FileOperations::FileExistsVirtual(outSltwoMainFile.str()) ||
       !FileOperations::FileExistsVirtual(outRootHtmlFileName.str()))
     MustRecompute = true;

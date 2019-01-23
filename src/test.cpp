@@ -3575,6 +3575,6 @@ int mainTest(List<std::string>& inputArguments)
   stOutput << "\nRational::TotalLargeAdditions: " << Rational::TotalLargeAdditions;
   stOutput << "\nRational::TotalSmallMultiplications: " << Rational::TotalSmallMultiplications;
   stOutput << "\nRational::TotalLargeMultiplications: " << Rational::TotalLargeMultiplications << "\n";
-  stOutput << "GetElapsedTimeInSeconds(): " << GetElapsedTimeInSeconds() << "\n";
+  stOutput << "GetElapsedTimeInSeconds(): " << theGlobalVariables.GetElapsedSeconds() << "\n";
   return 0;
 }

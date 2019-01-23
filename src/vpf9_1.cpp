@@ -205,15 +205,15 @@ std::string GlobalVariables::ToStringProgressReportHtml()
   }
   if (!crash.flagCrashInitiateD)
   { reportStream << crash.GetStackTraceEtcErrorMessage();
-    reportStream << theGlobalVariables.GetElapsedSeconds()
-    << " second(s) passed. ";
-    if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 0)
+    reportStream << theGlobalVariables.GetElapsedMilliseconds()
+    << " ms passed. ";
+    if (theGlobalVariables.MaxComputationMilliseconds > 0)
       reportStream << "<br>Hard limit: "
-      << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
-      << " second(s) [system crash if limit exceeded]."
+      << theGlobalVariables.MaxComputationMilliseconds
+      << " ms [system crash if limit exceeded]."
       << "<br> Soft limit: "
-      << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit / 2
-      << " second(s) [computation error if limit exceeded, triggered between calculator/atomic functions].";
+      << theGlobalVariables.MaxComputationMilliseconds / 2
+      << " ms [computation error if limit exceeded, triggered between calculator/atomic functions].";
   }
   return reportStream.str();
 }
@@ -1241,7 +1241,6 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   out << "<br> The small Weyl chamber: " << smallWeylChamber.ToString(&theFormat);
   Vector<Rational> highestWeightSmallAlgBasisChanged = - translationsProjectedFinal[0];
 //  stOutput << highestWeightSmallAlgBasisChanged.ToString();
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 100;
   for (int i = 0; i < this->theLinearOperators.size; i ++)
   { this->theLinearOperators[i].ActOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]);
     translationsProjectedFinal[i] += this->theTranslationsProjectedBasisChanged[i];

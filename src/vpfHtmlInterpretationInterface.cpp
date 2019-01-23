@@ -1177,7 +1177,7 @@ std::string HtmlInterpretation::SubmitAnswers
   }
   //stOutput << "<br>DEBUG: input to the calculator: " << completedProblemStream.str() << "<hr>";
   if (timeSafetyBrake)
-    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = theGlobalVariables.GetElapsedSeconds() + 20;
+    theGlobalVariables.MaxComputationMilliseconds = theGlobalVariables.GetElapsedMilliseconds() + 20000; // + 20 sec
   Calculator theInterpreter;
   theInterpreter.init();
   theInterpreter.flagWriteLatexPlots = false;
@@ -1201,7 +1201,7 @@ std::string HtmlInterpretation::SubmitAnswers
     isolatedInterpreter.flagWriteLatexPlots = false;
     isolatedInterpreter.flagPlotNoControls = true;
     if (timeSafetyBrake)
-      theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = theGlobalVariables.GetElapsedSeconds() + 20;
+      theGlobalVariables.MaxComputationMilliseconds = theGlobalVariables.GetElapsedMilliseconds() + 20000; //+20 sec
     isolatedInterpreter.Evaluate("(" + currentA.currentAnswerClean + ")");
     if (isolatedInterpreter.syntaxErrors != "")
       out << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false, true);

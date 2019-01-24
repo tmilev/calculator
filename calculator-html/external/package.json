@@ -7,11 +7,12 @@
     "browserify": "^16.1.1",
     "colors": "^1.2.1",
     "fs": "^0.0.1-security",
-    "jsonwebtoken": "^8.2.0"
+    "jsonwebtoken": "^8.2.0",
+    "uglify": "^0.1.5"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "browserify": "node ./browserify.js"
   },
   "author": "Todor Milev",
   "license": "ISC"

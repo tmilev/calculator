@@ -56,4 +56,4 @@ window.calculator.processMonitoring = require('./process_monitoring');
 window.calculator.mainPage.initializeCalculatorPage();
 window.calculator.storageVariables = window.calculator.mainPage.storage.variables;
 
-require('./external/build/output')
+require('./external/build/output-min');

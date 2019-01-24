@@ -417,11 +417,11 @@ InputPanelData.prototype.submitAnswers = function() {
     if (isForRealProblem(currentProblem)) {
       theRequest = `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswers}`;
     } else {
-      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercise}&`
+      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercise}&`;
       theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
     }
   } else {
-    theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExerciseNoLogin}&`
+    theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExerciseNoLogin}&`;
     theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;  
   }
    //"submitAnswersPreview"
@@ -543,10 +543,8 @@ InputPanelData.prototype.chopStrings = function() {
   var calculatorInput = document.getElementById(this.idPureLatex);
   this.theLaTeXString = calculatorInput.value.
   substring(calculatorLeftPosition, calculatorRightPosition + 1);
-  this.calculatorLeftString = calculatorInput.value.
-  substring(0, calculatorLeftPosition);
-  this.calculatorRightString = calculatorInput.value.
-  substring(calculatorRightPosition + 1);
+  this.calculatorLeftString = calculatorInput.value.substring(0, calculatorLeftPosition);
+  this.calculatorRightString = calculatorInput.value.substring(calculatorRightPosition + 1);
 }
 
 function isKeyWordStartKnownToMathQuill(input) { 

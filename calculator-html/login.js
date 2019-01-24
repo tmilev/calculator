@@ -24,7 +24,6 @@ function doReload() {
 var reloadPageTimer = null;
 
 function reloadPage(reason, time) {
-  console.log('DEBUG: reloading page. ');
   clearTimeout(reloadPageTimer);
   reloadPageTimer = null;
   if (time < 0) {

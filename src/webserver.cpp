@@ -1841,9 +1841,9 @@ void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const st
     this->remainingHeaderToSend.AddOnTop(finalHeader[i]);
 }
 
-void WebWorker::SetHeaderOKNoContentLength(const std::string& extraHeader)
+void WebWorker::SetHeaderOKNoContentLength(const std::string& extraHeader, const std::string &contentType)
 { MacroRegisterFunctionWithName("WebWorker::SetHeaderOKNoContentLength");
-  std::string header = "Content-Type: text/html; charset=utf-8\r\nAccess-Control-Allow-Origin: *";
+  std::string header = "Content-Type: " + contentType + "; charset=utf-8\r\nAccess-Control-Allow-Origin: *";
   if (extraHeader != "")
     header += "\r\n" + extraHeader;
   this->SetHeadeR("HTTP/1.0 200 OK", header);
@@ -2894,9 +2894,9 @@ int WebWorker::ProcessTopicListJSON()
 int WebWorker::ProcessCalculatorOnePageJS(bool appendBuildHash)
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorOnePageJS");
   if (appendBuildHash)
-    this->SetHeaderOKNoContentLength(WebAPI::HeaderCacheControl);
+    this->SetHeaderOKNoContentLength(WebAPI::HeaderCacheControl, "text/javascript");
   else
-    this->SetHeaderOKNoContentLength("");
+    this->SetHeaderOKNoContentLength("", "text/javascript");
   stOutput << HtmlInterpretation::GetOnePageJS(appendBuildHash);
   return 0;
 }

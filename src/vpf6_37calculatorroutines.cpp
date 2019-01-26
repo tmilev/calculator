@@ -38,7 +38,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   input[2].IsSmallInteger(&numDesiredTests);
   input[3].IsSmallInteger(&numSamples);
   FileOperations::GetFolderFileNamesVirtual
-  ("DefaultProblemLocation/", theFileNames, &theFileTypes, false);
+  ("problems/", theFileNames, &theFileTypes, false);
   std::stringstream randSeedStreaM;
   randSeedStreaM << theCommands.theObjectContainer.CurrentRandomSeed;
   std::string randomSeedCurrent =randSeedStreaM.str();
@@ -82,7 +82,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     theReport.Report(reportStream.str());
     CalculatorHTML theProblem;
     std::stringstream problemComments;
-    theProblem.fileName = "DefaultProblemLocation/" + theFileNames[i];
+    theProblem.fileName = "problems/" + theFileNames[i];
     bool isGoodLoad = theProblem.LoadMe(false, problemComments, randomSeedCurrent);
     bool isGoodInterpretation = false;
     out << "<tr>";

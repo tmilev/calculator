@@ -824,8 +824,7 @@ std::string HtmlInterpretation::GetJSONFromTemplate()
   << theGlobalVariables.GetWebInput("fileName")
   << ".-->\n";
   out << thePage.outputHtmlBodyNoTag;
-  out << "<small>Generated in " << theGlobalVariables.GetElapsedSeconds()
-  << " second(s).</small>";
+  out << "<small>Generated in " << theGlobalVariables.GetElapsedMilliseconds() << " ms.</small>";
   return out.str();
 }
 
@@ -846,15 +845,19 @@ std::string HtmlInterpretation::GetExamPageJSON()
   (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), theGlobalVariables.GetWebInput("randomSeed"));
   //<-must come after theFile.outputHtmlHeadNoTag
   out << problemBody;
-  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-
+  std::string commentsWebserver = HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  std::string commentsProblem = theFile.comments.str();
   JSData output;
   output[WebAPI::problemContent] = HtmlRoutines::ConvertStringToURLString(out.str(), false);
+  if (commentsWebserver != "")
+    output[WebAPI::commentsServer] = commentsWebserver;
+  if (commentsProblem != "")
+    output[WebAPI::commentsProblem] = commentsProblem;
   if (theFile.flagLoadedSuccessfully)
   { output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
     output["deadline"] = theFile.outputDeadlineString;
     output["problemLabel"] = theFile.outputProblemLabel;
-    output["title"] = theFile.outputProblemTitle;
+    output["title"] = theFile.outputProblemTitle;  
     output[WebAPI::problemFileName] = theFile.fileName;
     output[WebAPI::problemId] = theFile.fileName;
     JSData theScripts(JSData::JSarray);

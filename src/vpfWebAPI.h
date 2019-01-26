@@ -32,6 +32,8 @@ public:
   };
   static std::string HeaderCacheControl;
   static std::string problemContent;
+  static std::string commentsProblem;
+  static std::string commentsServer;
   static std::string problemFileName;
   static std::string problemId;
   static std::string problemSingleDeadline;

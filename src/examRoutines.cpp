@@ -399,6 +399,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, co
   { comments << "Failed to get physical file name from " << this->fileName << ". ";
     return false;
   }
+  comments << "DEBUG: about to load: " << this->RelativePhysicalFileNameWithFolder << "\n<br>\n";
   (void) doLoadDatabase;
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(this->fileName, this->inputHtml, &comments))
   { comments << "<b>Failed to open: " << this->fileName

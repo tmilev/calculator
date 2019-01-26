@@ -24,6 +24,8 @@ std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, publ
 std::string WebAPI::problemContent = "problemContent";
 std::string WebAPI::problemFileName = "fileName";
 std::string WebAPI::problemId = "id";
+std::string WebAPI::commentsProblem = "commentsProblem";
+std::string WebAPI::commentsServer = "commentsServer";
 
 std::string WebAPI::request::userInfoJSON = "userInfoJSON";
 std::string WebAPI::request::examplesJSON = "calculatorExamplesJSON";
@@ -5339,7 +5341,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("output/", "output/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/certificates-public/", "certificates-public/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("certificates-public/", "certificates-public/");//<-internal use
-  folderSubstitutionsNonSensitive.SetKeyValue("problemtemplates/", "../problemtemplates/");
+  folderSubstitutionsNonSensitive.SetKeyValue("problems/", "../problems/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/problems/", "../problems/");
 
   folderSubstitutionsNonSensitive.SetKeyValue("/html/", "../public_html/");//<-coming from webserver
 
@@ -5349,7 +5352,7 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("/html-common/font/", "./html-common/fonts/");
   folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "./html-common/");//<-coming from webserver
 
-  folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");//<-internal use
+  folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problems/");//<-internal use
   //referred to by site:
   folderSubstitutionsNonSensitive.SetKeyValue("coursetemplates/", "../coursetemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("/coursesavailable/", "../coursesavailable/"); //<-web server
@@ -5386,7 +5389,7 @@ void WebServer::InitializeGlobalVariables()
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("topiclists/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("coursetemplates/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/coursesavailable/");
-  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("problemtemplates/");
+  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("problems/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("DefaultProblemLocation/");
 }
 

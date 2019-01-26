@@ -726,7 +726,7 @@ FileOperations::FolderVirtualLinksNonSensitive()
     static MutexRecursiveWrapper theMutex;
     MutexLockGuard theGuard(theMutex);
     result.SetKeyValue("output/", "output/");
-    result.SetKeyValue("problemtemplates/", "../problemtemplates/");
+    result.SetKeyValue("problems/", "../problems/");
     result.SetKeyValue("html/", "../public_html/");
     result.SetKeyValue("html-common/", "html-common/");
     result.SetKeyValue("certificates-public/", "certificates-public/");

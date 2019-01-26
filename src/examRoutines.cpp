@@ -392,18 +392,19 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 #endif
 }
 
-bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, const std::string& inputRandomSeed)
+bool CalculatorHTML::LoadMe(bool doLoadDatabase, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
   if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly
-       (this->fileName, this->RelativePhysicalFileNameWithFolder, &comments))
-  { comments << "Failed to get physical file name from " << this->fileName << ". ";
+       (this->fileName, this->RelativePhysicalFileNameWithFolder, commentsOnFailure))
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "Failed to get physical file name from " << this->fileName << ". ";
     return false;
   }
-  comments << "DEBUG: about to load: " << this->RelativePhysicalFileNameWithFolder << "\n<br>\n";
   (void) doLoadDatabase;
-  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(this->fileName, this->inputHtml, &comments))
-  { comments << "<b>Failed to open: " << this->fileName
-    << " with computed file name: " << this->RelativePhysicalFileNameWithFolder << "</b> ";
+  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(this->fileName, this->inputHtml, commentsOnFailure))
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "<b>Failed to open: " << this->fileName
+      << " with computed file name: " << this->RelativePhysicalFileNameWithFolder << "</b> ";
     return false;
   }
   //stOutput << "Debug: got to here pt1";
@@ -414,7 +415,10 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, co
   //this->theProblemData.CheckConsistency();
   //stOutput << "Debug: got to here pt3";
   if (doLoadDatabase)
-  { this->LoadDatabaseInfo(comments);
+  { std::stringstream errorStream;
+    this->LoadDatabaseInfo(errorStream);
+    if (commentsOnFailure != nullptr)
+      *commentsOnFailure << errorStream.str();
    // stOutput << "DEBUG: the topics: " << this->theTopicS.ToStringHtml();
     for (int i = 0; i < this->theTopicS.size(); i ++)
       this->ComputeDeadlinesAllSectionsNoInheritance(this->theTopicS[i]);
@@ -440,15 +444,19 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, co
   return true;
 }
 
-std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed)
+std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON
+(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON");
   double startTime = theGlobalVariables.GetElapsedSeconds();
-
-  this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore, desiredRandomSeed);
+  std::stringstream errorStream;
+  this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore, desiredRandomSeed, &errorStream);
   if (!this->flagLoadedSuccessfully)
-    return this->comments.str();
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << errorStream.str();
+    return errorStream.str();
+  }
   std::stringstream out;
-  if (!this->InterpretHtml(this->comments))
+  if (!this->InterpretHtml(errorStream))
   { out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds() - startTime)
@@ -475,7 +483,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(bool needToLo
     out << "<br><span style =\"color:red\"><b>If the problem persists after a couple of page refreshes, "
     << "it's a bug. Please take a screenshot and email the site admin/your instructor. </b></span>";
     if (theGlobalVariables.UserDefaultHasProblemComposingRights())
-      out << "<hr> <b>Comments, admin view only.</b><br> " << this->comments.str();
+      out << "<hr> <b>Comments, admin view only.</b><br> " << errorStream.str();
     return out.str();
   }
   //out << "DEBUG: flagMathQuillWithMatrices =" << this->flagMathQuillWithMatrices << "<br>";
@@ -488,21 +496,23 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(bool needToLo
   }
   if (this->flagDoPrependProblemNavigationBar)
     out << this->outputProblemNavigatioN;
-  out << this->comments.str();
+  out << errorStream.str();
   out << this->outputHtmlBodyNoTag;
   return out.str();
 }
 
-std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed)
+std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem
+(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItem");
   double startTime = theGlobalVariables.GetElapsedSeconds();
 //  this->theProblemData.CheckConsistency();
-  this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore, desiredRandomSeed);
+  std::stringstream errorStream;
+  this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore, desiredRandomSeed, &errorStream);
 //  this->theProblemData.CheckConsistency();
   if (!this->flagLoadedSuccessfully)
-    return this->comments.str();
+    return errorStream.str();
   std::stringstream out;
-  if (!this->InterpretHtml(this->comments))
+  if (!this->InterpretHtml(errorStream))
   { out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds() - startTime)
@@ -529,7 +539,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
     out << "<br><span style =\"color:red\"><b>If the problem persists after a couple of page refreshes, "
     << "it's a bug. Please take a screenshot and email the site admin/your instructor. </b></span>";
     if (theGlobalVariables.UserDefaultHasProblemComposingRights())
-      out << "<hr> <b>Comments, admin view only.</b><br> " << this->comments.str();
+      out << "<hr> <b>Comments, admin view only.</b><br> " << errorStream.str();
     return out.str();
   }
   //out << "DEBUG: flagMathQuillWithMatrices =" << this->flagMathQuillWithMatrices << "<br>";
@@ -542,7 +552,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
   }
   if (this->flagDoPrependProblemNavigationBar)
     out << this->outputProblemNavigatioN;
-  out << this->comments.str();
+  out << errorStream.str();
   out << this->outputHtmlBodyNoTag;
   return out.str();
 }
@@ -553,7 +563,7 @@ void CalculatorHTML::LoadFileNames()
   this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
 }
 
-void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed)
+void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadCurrentProblemItem");
   this->LoadFileNames();
   this->flagLoadedSuccessfully = false;
@@ -567,13 +577,13 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
   this->flagLoadedSuccessfully = true;
   if (this->fileName == "")
   { this->flagLoadedSuccessfully = false;
-    this->comments << "<b>No problem file name found. </b>";
+    if (commentsOnFailure != 0)
+      *commentsOnFailure << "<b>No problem file name found. </b>";
   }
 
 //  this->theProblemData.CheckConsistency();
 //  stOutput << "<hr>DEBUG: got to before loading<hr>";
-  std::stringstream commentsStream;
-  if (!this->LoadMe(needToLoadDatabaseMayIgnore, commentsStream, inputRandomSeed))
+  if (!this->LoadMe(needToLoadDatabaseMayIgnore, inputRandomSeed, commentsOnFailure))
     this->flagLoadedSuccessfully = false;
 //  stOutput << "<hr>DEBUG: loaded<hr>";
 //  stOutput << "<hr>DEBUG: OK<hr>";

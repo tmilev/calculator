@@ -26,6 +26,8 @@ function Problem(problemData, inputParentIdURLed) {
   //if (inputParentIdURLed === undefined) {
   //  console.log("DEBUG: bad parent id");
   //}
+  this.decodedProblem = "";
+  this.commentsProblem = "";
   this.parentIdURLed = inputParentIdURLed;
   this.randomSeed = null;
   this.answers = [];
@@ -227,7 +229,7 @@ Problem.prototype.writeToHTML = function(outputElement) {
   topPart += this.getEditPanel();
   topPart += "</div>";
   topPart += "<br>";
-  outputElement.innerHTML = topPart + this.decodedProblem;
+  outputElement.innerHTML = topPart + this.decodedProblem + this.commentsProblem;
   for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++) {
     var currentAnswerPanel = this.answers[counterAnswers];
     var latexChangeHandler = currentAnswerPanel.editLaTeX;
@@ -756,6 +758,10 @@ function updateProblemPageCallback(input, outputComponent) {
     currentProblem = thePage.getCurrentProblem();
   }
   currentProblem.decodedProblem = decodeURIComponent(theProblem["problemContent"]);
+  currentProblem.commentsProblem = theProblem["commentsProblem"];
+  if (currentProblem.commentsProblem === undefined) {
+    currentProblem.commentsProblem = "";
+  }
   //var theScripts = currentProblem.scripts.split ("</script>");
   //for (var counterScripts = 0; counterScripts < theScripts.length; counterScripts++) {
   //  console.log(`Scripts: ${theScripts[counterScripts]}`);

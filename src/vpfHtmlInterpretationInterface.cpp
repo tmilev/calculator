@@ -15,13 +15,14 @@ std::string HtmlInterpretation::GetProblemSolution()
   double startTime = theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
   std::stringstream out;
-  theProblem.LoadCurrentProblemItem(false, theGlobalVariables.GetWebInput("randomSeed"));
+  std::stringstream errorStream;
+  theProblem.LoadCurrentProblemItem(false, theGlobalVariables.GetWebInput("randomSeed"), &errorStream);
   if (!theProblem.flagLoadedSuccessfully)
   { out << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
     << CalculatorHTML::BugsGenericMessage << "</b>";
-    if (theProblem.comments.str() != "")
-      out << " Comments: " << theProblem.comments.str();
+    if (errorStream.str() != "")
+      out << " Comments: " << errorStream.str();
     return out.str();
   }
   if (theProblem.flagIsForReal)
@@ -233,10 +234,11 @@ std::string HtmlInterpretation::submitAnswersPreview()
   studentAnswerSream << lastAnswer;
   out << "Your answer(s): \\(\\displaystyle " << lastAnswer << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
+  std::stringstream errorStream;
   theProblem.LoadCurrentProblemItem
-  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), theGlobalVariables.GetWebInput("randomSeed"));
+  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), theGlobalVariables.GetWebInput("randomSeed"), &errorStream);
   if (!theProblem.flagLoadedSuccessfully)
-    out << "<br><b>Failed to load problem.</b> Comments: " << theProblem.comments.str();
+    out << "<br><b>Failed to load problem.</b> Comments: " << errorStream.str();
   std::stringstream comments;
   if (!theProblem.ParseHTMLPrepareCommands(comments))
     out << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
@@ -689,7 +691,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   CalculatorHTML thePage;
   std::stringstream comments;
   thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-  if (!thePage.LoadMe(true, comments, theGlobalVariables.GetWebInput("randomSeed")))
+  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments))
   { out << "<html>"
     << "<head>" << HtmlRoutines::GetCSSLinkCalculator() << "</head>"
     << "<body>";
@@ -748,7 +750,7 @@ std::string HtmlInterpretation::GetTopicTableJSON()
   { out << "Failed to load and parse topic list.";
     return out.str();
   }
-  if (!thePage.LoadMe(true, comments, theGlobalVariables.GetWebInput("randomSeed")))
+  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments))
   { out << "\"Failed to load file: "
     << theGlobalVariables.GetWebInput("courseHome") << ""
     << "<br>Comments:<br> " << comments.str();
@@ -808,7 +810,7 @@ std::string HtmlInterpretation::GetJSONFromTemplate()
   thePage.flagUseJSON = true;
   std::stringstream comments;
   thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-  if (!thePage.LoadMe(true, comments, theGlobalVariables.GetWebInput("randomSeed")))
+  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments))
   { out << "<b>Failed to load file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str();
@@ -841,12 +843,13 @@ std::string HtmlInterpretation::GetExamPageJSON()
   theFile.flagDoPrependCalculatorNavigationBar = false;
   theFile.flagDoPrependProblemNavigationBar = false;
   theFile.flagUseJSON = true;
+  std::stringstream errorStream;
   std::string problemBody = theFile.LoadAndInterpretCurrentProblemItemJSON
-  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), theGlobalVariables.GetWebInput("randomSeed"));
+  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), theGlobalVariables.GetWebInput("randomSeed"), &errorStream);
   //<-must come after theFile.outputHtmlHeadNoTag
   out << problemBody;
   std::string commentsWebserver = HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  std::string commentsProblem = theFile.comments.str();
+  std::string commentsProblem = errorStream.str();
   JSData output;
   output[WebAPI::problemContent] = HtmlRoutines::ConvertStringToURLString(out.str(), false);
   if (commentsWebserver != "")
@@ -905,7 +908,7 @@ std::string HtmlInterpretation::GetEditPageJSON()
   CalculatorHTML theFile;
   theFile.LoadFileNames();
   std::stringstream failureStream;
-  if (!theFile.LoadMe(false, failureStream, theGlobalVariables.GetWebInput("randomSeed")))
+  if (!theFile.LoadMe(false, theGlobalVariables.GetWebInput("randomSeed"), &failureStream))
   { std::stringstream errorStream;
     errorStream << " <b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>"
     << failureStream.str();
@@ -970,7 +973,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   outBody << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</calculatorNavigation>";
   std::stringstream failureStream;
-  if (!theFile.LoadMe(false, failureStream, theGlobalVariables.GetWebInput("randomSeed")))
+  if (!theFile.LoadMe(false, theGlobalVariables.GetWebInput("randomSeed"), &failureStream))
   { outBody << "<b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>";
     outBody << "</body></html>";
     ouT << outHead.str() << outBody.str();
@@ -1086,10 +1089,11 @@ std::string HtmlInterpretation::SubmitAnswers
   std::stringstream out;
   double startTime = theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
+  std::stringstream errorStream;
   theProblem.LoadCurrentProblemItem
-  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), inputRandomSeed);
+  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream);
   if (!theProblem.flagLoadedSuccessfully)
-  { out << "Failed to load problem. " << theProblem.comments.str();
+  { out << "Failed to load problem. " << errorStream.str();
     return out.str();
   }
   std::stringstream comments;
@@ -1513,14 +1517,15 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     *outputDidSucceed = false;
   double startTime = theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
-  theProblem.LoadCurrentProblemItem(false, inputRandomSeed);
+  std::stringstream errorStream;
+  theProblem.LoadCurrentProblemItem(false, inputRandomSeed, &errorStream);
   std::stringstream out;
   if (!theProblem.flagLoadedSuccessfully)
   { out << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
     << CalculatorHTML::BugsGenericMessage << "</b>";
-    if (theProblem.comments.str() != "")
-      out << " Comments: " << theProblem.comments.str();
+    if (errorStream.str() != "")
+      out << " Comments: " << errorStream.str();
     return out.str();
   }
   if (theProblem.flagIsForReal)
@@ -2040,8 +2045,8 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   << problemName << ", trying to read problem from hd. " << logger::endL;
   CalculatorHTML problemParser;
   problemParser.fileName = problemName;
-  if (!problemParser.LoadMe(false, commentsOnFailure, ""))
-  { logWorker << logger::yellow << "Couldn't parse problem: "
+  if (!problemParser.LoadMe(false, "", &commentsOnFailure))
+  { logWorker << logger::yellow << "Failed to load problem. "
     << commentsOnFailure.str() << logger::endL;
     return 0;
   }

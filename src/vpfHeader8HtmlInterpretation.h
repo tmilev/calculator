@@ -187,12 +187,11 @@ public:
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
   /////////////////
-  std::stringstream comments;
   int GetAnswerIndex(const std::string& desiredAnswerId);
   bool CheckContent(std::stringstream& comments);
   bool CheckConsistencyTopics();
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
-  bool LoadMe(bool doLoadDatabase, std::stringstream& comments, const std::string& inputRandomSeed);
+  bool LoadMe(bool doLoadDatabase, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure);
   bool LoadAndParseTopicList(std::stringstream& comments);
   bool LoadDatabaseInfo(std::stringstream& comments);
   std::string GetSectionSelector();
@@ -292,10 +291,10 @@ public:
   std::string GetJavascriptSubmitAnswers();
   std::string GetJavascriptMathQuillBoxes();
   JSData GetJavascriptMathQuillBoxesForJSON();
-  void LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed);
+  void LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure);
   void FigureOutCurrentProblemList(std::stringstream& comments);
   std::string LoadAndInterpretCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed);
-  std::string LoadAndInterpretCurrentProblemItemJSON(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed);
+  std::string LoadAndInterpretCurrentProblemItemJSON(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed, std::stringstream *commentsOnFailure);
   static unsigned int HashFunction(const CalculatorHTML& input)
   { return input.HashFunction();
   }

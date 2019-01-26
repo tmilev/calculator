@@ -403,8 +403,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, const std::string& inputRandomS
   (void) doLoadDatabase;
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(this->fileName, this->inputHtml, commentsOnFailure))
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "<b>Failed to open: " << this->fileName
-      << " with computed file name: " << this->RelativePhysicalFileNameWithFolder << "</b> ";
+      *commentsOnFailure << "Failed to load problem file. Entered file name: " << this->fileName << ".";
     return false;
   }
   //stOutput << "Debug: got to here pt1";
@@ -448,15 +447,11 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON
 (bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON");
   double startTime = theGlobalVariables.GetElapsedSeconds();
-  std::stringstream errorStream;
-  this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore, desiredRandomSeed, &errorStream);
+  this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore, desiredRandomSeed, commentsOnFailure);
   if (!this->flagLoadedSuccessfully)
-  { if (commentsOnFailure != 0)
-      *commentsOnFailure << errorStream.str();
-    return errorStream.str();
-  }
+    return "Failed to load problem. ";
   std::stringstream out;
-  if (!this->InterpretHtml(errorStream))
+  if (!this->InterpretHtml(commentsOnFailure))
   { out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds() - startTime)
@@ -482,8 +477,6 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON
       out << "<b>Your random seed must have been reset. </b>";
     out << "<br><span style =\"color:red\"><b>If the problem persists after a couple of page refreshes, "
     << "it's a bug. Please take a screenshot and email the site admin/your instructor. </b></span>";
-    if (theGlobalVariables.UserDefaultHasProblemComposingRights())
-      out << "<hr> <b>Comments, admin view only.</b><br> " << errorStream.str();
     return out.str();
   }
   //out << "DEBUG: flagMathQuillWithMatrices =" << this->flagMathQuillWithMatrices << "<br>";
@@ -496,7 +489,6 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON
   }
   if (this->flagDoPrependProblemNavigationBar)
     out << this->outputProblemNavigatioN;
-  out << errorStream.str();
   out << this->outputHtmlBodyNoTag;
   return out.str();
 }
@@ -512,7 +504,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem
   if (!this->flagLoadedSuccessfully)
     return errorStream.str();
   std::stringstream out;
-  if (!this->InterpretHtml(errorStream))
+  if (!this->InterpretHtml(&errorStream))
   { out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds() - startTime)
@@ -861,7 +853,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblem
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
   theProblem.theProblemData.flagRandomSeedGiven = true;
   theProblem.theProblemData.randomSeed = theCommands.theObjectContainer.CurrentRandomSeed;
-  theProblem.InterpretHtml(theCommands.Comments);
+  theProblem.InterpretHtml(&theCommands.Comments);
   std::stringstream out;
   out << theProblem.outputHtmlBodyNoTag;
   out << "<hr>Time to parse html: " << std::fixed << theProblem.timeToParseHtml << " second(s). ";
@@ -1156,7 +1148,7 @@ std::string CalculatorHTML::GetProblemHeaderWithoutEnclosure()
   return out.str();
 }
 
-bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream &comments)
+bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream* comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsGenerateProblem");
   (void) comments;
   std::stringstream streamCommands, streamCommandsNoEnclosures;
@@ -1187,14 +1179,14 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream &comments)
   return true;
 }
 
-bool CalculatorHTML::ParseHTMLPrepareCommands(std::stringstream &comments)
+bool CalculatorHTML::ParseHTMLPrepareCommands(std::stringstream* comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::ParseHTMLPrepareCommands");
   if (!this->ParseHTML(comments))
     return false;
   return this->PrepareCommands(comments);
 }
 
-bool CalculatorHTML::PrepareCommands(std::stringstream &comments)
+bool CalculatorHTML::PrepareCommands(std::stringstream* comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommands");
   if (!this->PrepareCommandsGenerateProblem(comments))
     return false;
@@ -1213,8 +1205,7 @@ bool CalculatorHTML::PrepareCommands(std::stringstream &comments)
   return true;
 }
 
-bool CalculatorHTML::PrepareCommandsAnswerOnGiveUp
-(Answer& theAnswer, std::stringstream& comments)
+bool CalculatorHTML::PrepareCommandsAnswerOnGiveUp(Answer& theAnswer, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsAnswerOnGiveUp");
   (void) comments;
   std::stringstream streamCommands;
@@ -1235,7 +1226,7 @@ bool CalculatorHTML::PrepareCommandsAnswerOnGiveUp
 }
 
 bool CalculatorHTML::PrepareCommentsBeforeSubmission
-(Answer& theAnswer, std::stringstream& comments)
+(Answer& theAnswer, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommentsBeforeSubmission");
   (void) comments;
   std::stringstream streamCommands;
@@ -1257,7 +1248,7 @@ bool CalculatorHTML::PrepareCommentsBeforeSubmission
 }
 
 bool CalculatorHTML::PrepareCommentsBeforeInterpretation
-(Answer& theAnswer, std::stringstream& comments)
+(Answer& theAnswer, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommentsBeforeInterpretation");
   (void) comments;
   std::stringstream streamCommands;
@@ -1273,8 +1264,7 @@ bool CalculatorHTML::PrepareCommentsBeforeInterpretation
   return true;
 }
 
-bool CalculatorHTML::PrepareCommandsSolution
-(Answer& theAnswer, std::stringstream& comments)
+bool CalculatorHTML::PrepareCommandsSolution(Answer& theAnswer, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsSolution");
   (void) comments;
   std::stringstream streamCommands;
@@ -1305,8 +1295,7 @@ bool CalculatorHTML::PrepareCommandsSolution
   return true;
 }
 
-bool CalculatorHTML::PrepareCommandsAnswer
-(Answer& theAnswer, std::stringstream& comments)
+bool CalculatorHTML::PrepareCommandsAnswer(Answer& theAnswer, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsAnswer");
   std::stringstream streamCommandS;
   std::stringstream streamCommandsNoEnclosures;
@@ -1337,12 +1326,13 @@ bool CalculatorHTML::PrepareCommandsAnswer
       streamCommandsBodyNoEnclosures << commandCleaned;
     }
   }
-  comments << "<b>Something is wrong: did not find answer for answer tag: "
-  << theAnswer.answerId << ". </b>";
+  if (comments != 0)
+    *comments << "<b>Something is wrong: did not find answer for answer tag: "
+    << theAnswer.answerId << ". </b>";
   return false;
 }
 
-bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments)
+bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream* comments)
 { MacroRegisterFunctionWithName("Problem::PrepareAndExecuteCommands");
   double startTime = theGlobalVariables.GetElapsedSeconds();
   this->PrepareCommands(comments);
@@ -1367,8 +1357,8 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   this->timeIntermediateComments.LastObject()->AddOnTop("calculator evaluation time");
   //stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
   bool result = !theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors == "";
-  if (!result)
-  { comments << "<br>Failed to interpret your file. "
+  if (!result && comments != 0)
+  { *comments << "<br>Failed to interpret your file. "
     << "<a href=\""
     << theGlobalVariables.DisplayNameExecutable
     << "?request=calculator&mainInput="
@@ -1377,11 +1367,11 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
     << "The interpretation input was:<br> "
     << this->theProblemData.commandsGenerateProblem << "<br>";
     if (theGlobalVariables.UserDefaultHasAdminRights())
-      comments << "The result of the interpretation attempt is:<br>"
+      *comments << "The result of the interpretation attempt is:<br>"
       << theInterpreter.outputString << "<br><b>Comments</b><br>"
       << theInterpreter.outputCommentsString;
     else
-      comments << "This may be a bug with the problem. Feel free to take a screenshot of the issue and "
+      *comments << "This may be a bug with the problem. Feel free to take a screenshot of the issue and "
       << "email it to the site admin(s). ";
   }
   for (int i = 0; i < theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.size(); i ++)
@@ -2062,7 +2052,7 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
   this->LoadAndParseTopicList(comments);
 }
 
-bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
+bool CalculatorHTML::InterpretHtml(std::stringstream* comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtml");
   double startTime = theGlobalVariables.GetElapsedSeconds();
 //  stOutput << "<hr>DEBUG: Checking consistency 1 passed<hr>";
@@ -2104,14 +2094,16 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
       return true;
     }
     this->timePerAttempt.AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
-    if (this->NumAttemptsToInterpret >= this->MaxInterpretationAttempts)
-      comments << commentsOnLastFailure.str();
+    if (this->NumAttemptsToInterpret >= this->MaxInterpretationAttempts && comments != 0)
+      *comments << commentsOnLastFailure.str();
   }
-  comments << "<hr>Failed to evaluate the commands: " << this->NumAttemptsToInterpret
-  << " attempts made. ";
+  if (comments != 0)
+    *comments << "<hr>Failed to evaluate the commands: " << this->NumAttemptsToInterpret
+    << " attempts made. ";
   if (this->flagIsForReal)
   { this->StoreRandomSeedCurrent(comments);
-    comments << "<b>Your random seed has been reset due to a finicky problem generation. </b>";
+    if (comments != 0)
+      *comments << "<b>Your random seed has been reset due to a finicky problem generation. </b>";
   }
   this->theProblemData.CheckConsistency();
   return false;
@@ -2271,7 +2263,7 @@ void CalculatorHTML::initBuiltInSpanClasses()
   }
 }
 
-bool CalculatorHTML::ParseHTML(std::stringstream& comments)
+bool CalculatorHTML::ParseHTML(std::stringstream* comments)
 { MacroRegisterFunctionWithName("Problem::ParseHTML");
   std::stringstream theReader(this->inputHtml);
   theReader.seekg(0);
@@ -2524,10 +2516,10 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
         secondToLast.syntacticRole = "command";
       else
       { secondToLast.content =secondToLast.ToStringOpenTag("");
-        if (theGlobalVariables.UserDefaultHasProblemComposingRights())
+        if (theGlobalVariables.UserDefaultHasProblemComposingRights() && comments != 0)
           if (MathRoutines::StringBeginsWith(tagClass, "calculator"))
             if (!this->calculatorClasses.Contains(tagClass))
-              comments
+              *comments
               << "<hr><b><span style =\"color:red\">Warning: found class tag: "
               << tagClass
               << ". The name of this class starts with calculator yet this is not"
@@ -2561,8 +2553,9 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
         this->flagMathQuillWithMatrices = true;
     if (eltsStack[i].syntacticRole != "command" && eltsStack[i].syntacticRole != "")
     { result = false;
-      comments << "<br>Syntactic element: " << eltsStack[i].ToStringDebug()
-      << " is not a command but has non-empty syntactic role.";
+      if (comments != 0)
+        *comments << "<br>Syntactic element: " << eltsStack[i].ToStringDebug()
+        << " is not a command but has non-empty syntactic role.";
     }
     if (!needNewTag)
       this->theContent.LastObject()->content += eltsStack[i].content;
@@ -2578,8 +2571,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   }
 //  stOutput << "<hr>DEBUG: About to check consistency while parsing<hr>";
   //this->theProblemData.CheckConsistency();
-  if (!result)
-    comments << "<hr>Parsing stack.<hr>" << this->ToStringParsingStack(this->eltsStack);
+  if (!result && comments != 0)
+    *comments << "<hr>Parsing stack.<hr>" << this->ToStringParsingStack(this->eltsStack);
   //this->theProblemData.CheckConsistency();
   //stOutput << "<hr>DEBUG: got to extracting answer ids<hr>";
   if (result)
@@ -2693,7 +2686,7 @@ bool CalculatorHTML::PrepareAnswerElements(std::stringstream &comments)
   return true;
 }
 
-bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
+bool CalculatorHTML::ExtractAnswerIds(std::stringstream* comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::ExtractAnswerIds");
   //we shouldn't clear this->theProblemData.theAnswers: it may contain
   //outdated information loaded from the database. We don't want to loose that info
@@ -2704,15 +2697,17 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
     if (currentE.IsAnswer())
     { std::string currentId = MathRoutines::StringTrimWhiteSpace(currentE.GetKeyValue("id"));
       if (currentId == "")
-      { comments << "The answer element: " << currentE.ToStringDebug() << " has empty id. This is not allowed. ";
+      { if (comments != 0)
+          *comments << "The answer element: " << currentE.ToStringDebug() << " has empty id. This is not allowed. ";
         return false;
       }
       int theIndex = this->GetAnswerIndex(currentId);
       if (theIndex == - 1)
         this->theProblemData.AddEmptyAnswerIdOnTop(currentId);
       if (answerIdsSeenSoFar.Contains(currentId))
-      { comments << "<b>Answer with id: "
-        << currentId << " contained more than once. </b>";
+      { if (comments != 0)
+          *comments << "<b>Answer with id: "
+          << currentId << " contained more than once. </b>";
         return false;
       }
       answerIdsSeenSoFar.AddOnTopNoRepetition(currentId);
@@ -2726,13 +2721,14 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
         !currentE.IsSolution())
       continue;
     if (answerIdsSeenSoFar.size == 0 && currentE.GetKeyValue("name") == "")
-    { comments << "Auxilary answer element: " << currentE.ToStringDebug()
-      << " has no name and appears before the first answer tag."
-      << " Auxilary answers apply the answer tag whose id is specified in the name"
-      << " tag of the auxilary answer. If the auxilary answer has no "
-      << " name tag, it is assumed to apply to the (nearest) answer tag above it."
-      << " To fix the issue either place the auxilary element after the answer or "
-      << " specify the answer's id in the name tag of the auxilary element. ";
+    { if (comments != 0)
+        *comments << "Auxilary answer element: " << currentE.ToStringDebug()
+        << " has no name and appears before the first answer tag."
+        << " Auxilary answers apply the answer tag whose id is specified in the name"
+        << " tag of the auxilary answer. If the auxilary answer has no "
+        << " name tag, it is assumed to apply to the (nearest) answer tag above it."
+        << " To fix the issue either place the auxilary element after the answer or "
+        << " specify the answer's id in the name tag of the auxilary element. ";
       return false;
     }
     if (currentE.GetKeyValue("name") == "")
@@ -2755,7 +2751,7 @@ bool CalculatorHTML::CheckConsistencyTopics()
   return true;
 }
 
-bool CalculatorHTML::CheckContent(std::stringstream& comments)
+bool CalculatorHTML::CheckContent(std::stringstream* comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::CheckContent");
   bool result = true;
   for (int i = 0; i < this->theContent.size; i ++)
@@ -2763,8 +2759,9 @@ bool CalculatorHTML::CheckContent(std::stringstream& comments)
     if (currentElt.syntacticRole == "command" && currentElt.IsAnswer() &&
         currentElt.GetKeyValue("id").find('=') != std::string::npos)
     { result = false;
-      comments << "Error: the id of tag " << currentElt.ToStringDebug()
-      << " contains the equality sign which is not allowed. ";
+      if (comments != 0)
+        *comments << "Error: the id of tag " << currentElt.ToStringDebug()
+        << " contains the equality sign which is not allowed. ";
     }
   }
   return result;
@@ -2824,7 +2821,7 @@ bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml
   CalculatorHTML theFile;
   if (!input.IsOfType<std::string>(&theFile.inputHtml))
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
-  if (!theFile.ParseHTML(theCommands.Comments))
+  if (!theFile.ParseHTML(&theCommands.Comments))
     return false;
   return output.AssignValue(theFile.ToStringExtractedCommands(), theCommands);
 }
@@ -2923,16 +2920,17 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
   return out.str();
 }
 
-bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream& commentsOnFailure)
+bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::StoreRandomSeedCurrent");
 #ifdef MACRO_use_MongoDB
   this->theProblemData.flagRandomSeedGiven = true;
   this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
   if (!this->currentUseR.StoreProblemDataToDatabaseJSON(commentsOnFailure))
-  { commentsOnFailure << "<span style =\"color:red\"> <b>"
-    << "Error: failed to store problem in database. "
-    << "If you see this message, please take a screenshot and email your instructor. "
-    << "</b></span>";
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "<span style =\"color:red\"> <b>"
+      << "Error: failed to store problem in database. "
+      << "If you see this message, please take a screenshot and email your instructor. "
+      << "</b></span>";
     return false;
   }
   return true;
@@ -2955,12 +2953,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before after loading problem list");
   outHeadPt2 << HtmlRoutines::GetJavascriptMathjax();
-//  else
-//    out << " no date picker";
-  //stOutput << "DEBUG: theInterpreter.flagPlotNoControls: " << theInterpreter.flagPlotNoControls;
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before execution");
-  if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
+  if (!this->PrepareAndExecuteCommands(theInterpreter, &comments))
     return false;
   //////////////////////////////interpretation takes place before javascript generation as the latter depends on the former.
   if (this->flagIsExamProblem)
@@ -3092,7 +3087,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     << "this is a bug. Please take a screenshot and send it to your instructor. </b></span>";
   }
   if (shouldResetTheRandomSeed)
-  { bool successStoringSeed = this->StoreRandomSeedCurrent(comments);
+  { bool successStoringSeed = this->StoreRandomSeedCurrent(&comments);
     if (!successStoringSeed)
       logWorker << logger::red << "This should not happen: failed to store random seed." << logger::endL
       << logger::yellow << comments.str() << logger::endL;

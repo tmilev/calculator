@@ -34,7 +34,7 @@ std::string HtmlInterpretation::GetProblemSolution()
     return out.str();
   }
   std::stringstream comments;
-  if (!theProblem.ParseHTMLPrepareCommands(comments))
+  if (!theProblem.ParseHTMLPrepareCommands(&comments))
   { stOutput << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
     return out.str();
   }
@@ -59,7 +59,7 @@ std::string HtmlInterpretation::GetProblemSolution()
   theInterpreteR.init();
   theInterpreteR.flagPlotNoControls = true;
   theInterpreteR.flagWriteLatexPlots = false;
-  if (!theProblem.PrepareCommands(comments))
+  if (!theProblem.PrepareCommands(&comments))
   { out << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();
     return out.str();
   }
@@ -240,7 +240,7 @@ std::string HtmlInterpretation::submitAnswersPreview()
   if (!theProblem.flagLoadedSuccessfully)
     out << "<br><b>Failed to load problem.</b> Comments: " << errorStream.str();
   std::stringstream comments;
-  if (!theProblem.ParseHTMLPrepareCommands(comments))
+  if (!theProblem.ParseHTMLPrepareCommands(&comments))
     out << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
   int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId == - 1)
@@ -251,7 +251,7 @@ std::string HtmlInterpretation::submitAnswersPreview()
     return out.str();
   }
   Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
-  if (!theProblem.PrepareCommands(comments))
+  if (!theProblem.PrepareCommands(&comments))
   { out << "Something went wrong while interpreting the problem file. ";
     if (theGlobalVariables.UserDebugFlagOn() &&
         theGlobalVariables.UserDefaultHasAdminRights())
@@ -702,7 +702,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
     out << "</body></html>";
     return out.str();
   }
-  if (!thePage.InterpretHtml(comments))
+  if (!thePage.InterpretHtml(&comments))
   { out << "<html>"
     << "<head>"
     << HtmlRoutines::GetCSSLinkCalculator()
@@ -816,7 +816,7 @@ std::string HtmlInterpretation::GetJSONFromTemplate()
     << "<br>Comments:<br> " << comments.str();
     return out.str();
   }
-  if (!thePage.InterpretHtml(comments))
+  if (!thePage.InterpretHtml(&comments))
   { out << "<b>Failed to interpret as template the following file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str();
@@ -915,7 +915,7 @@ std::string HtmlInterpretation::GetEditPageJSON()
     output["error"] = errorStream.str();
     return output.ToString(false);
   }
-  if (!theFile.ParseHTML(failureStream))
+  if (!theFile.ParseHTML(&failureStream))
   { std::stringstream errorStream;
     errorStream << "<b>Failed to parse file: " << theFile.fileName
     << ".</b> Details:<br>" << failureStream.str();
@@ -979,7 +979,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
     ouT << outHead.str() << outBody.str();
     return ouT.str();
   }
-  if (!theFile.ParseHTML(failureStream))
+  if (!theFile.ParseHTML(&failureStream))
     outBody << "<b>Failed to parse file: " << theFile.fileName
     << ".</b> Details:<br>" << failureStream.str();
   if (theFile.flagIsExamProblem)
@@ -1093,11 +1093,11 @@ std::string HtmlInterpretation::SubmitAnswers
   theProblem.LoadCurrentProblemItem
   (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream);
   if (!theProblem.flagLoadedSuccessfully)
-  { out << "Failed to load problem. " << errorStream.str();
+  { out << "Failed to load current problem. " << errorStream.str();
     return out.str();
   }
   std::stringstream comments;
-  if (!theProblem.ParseHTMLPrepareCommands(comments))
+  if (!theProblem.ParseHTMLPrepareCommands(&comments))
   { out << "<b>Failed to parse problem. </b>Comments: " << comments.str();
     return out.str();
   }
@@ -1325,7 +1325,7 @@ std::string HtmlInterpretation::SubmitAnswers
     //  << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString()
     //  << "<hr>";
     theUser.SetProblemData(theProblem.fileName, currentProblemData);
-    if (!theUser.StoreProblemDataToDatabaseJSON(comments))
+    if (!theUser.StoreProblemDataToDatabaseJSON(&comments))
       out << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
       << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "
       << comments.str() << "</td></tr>";
@@ -1537,7 +1537,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     return out.str();
   }
   std::stringstream comments;
-  if (!theProblem.ParseHTMLPrepareCommands(comments))
+  if (!theProblem.ParseHTMLPrepareCommands(&comments))
   { out << "<br><b>Problem preparation failed.</b><br>" << comments.str();
     return out.str();
   }
@@ -2050,7 +2050,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
     << commentsOnFailure.str() << logger::endL;
     return 0;
   }
-  if (!problemParser.ParseHTML(commentsOnFailure))
+  if (!problemParser.ParseHTML(&commentsOnFailure))
   { logWorker << logger::red << "<b>Failed to parse file: " << problemParser.fileName
     << ".</b> Details:<br>" << commentsOnFailure.str();
     return 0;

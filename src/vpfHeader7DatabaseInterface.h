@@ -239,7 +239,7 @@ public:
   bool InterpretDatabaseProblemDatA(const std::string& theInfo, std::stringstream& commentsOnFailure);
   bool InterpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure);
   bool StoreProblemDataToDatabasE(std::stringstream& commentsOnFailure);
-  bool StoreProblemDataToDatabaseJSON(std::stringstream& commentsOnFailure);
+  bool StoreProblemDataToDatabaseJSON(std::stringstream* commentsOnFailure);
   std::string GetSelectedRowEntry(const std::string& theKey);
   std::string GetMySQLclauseIdentifyingUserByEmailOrID();
   bool LoadFromDB(std::stringstream* failureStream, std::stringstream* commentsGeneral = 0);

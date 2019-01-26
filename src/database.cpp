@@ -972,7 +972,7 @@ bool UserCalculator::StoreProblemDataToDatabasE(std::stringstream& commentsOnFai
   (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure);
 }
 
-bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream& commentsOnFailure)
+bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabaseJSON");
   JSData problemData;
   for (int i = 0; i < this->theProblemData.size(); i ++)
@@ -985,7 +985,7 @@ bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream& commentsO
   JSData setQuery;
   setQuery[DatabaseStrings::labelProblemDataJSON] = problemData;
   return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON
-  (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure);
+  (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, commentsOnFailure);
 }
 
 bool DatabaseRoutineS::AddUsersFromEmails

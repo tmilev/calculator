@@ -266,7 +266,6 @@ public:
   //std::string GetEmailChangePage();
   std::string GetNavigationPage();
   std::string GetAddUserEmails();
-  static std::string GetJavascriptSubmitLoginInfo();
   std::string GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken);
   void SetHeaderOKNoContentLength(const std::string& extraHeader, const std::string& contentType = "text/html");
   void SetHeadeR(const std::string& httpResponseNoTermination, const std::string& remainingHeaderNoTermination);

@@ -1224,19 +1224,16 @@ bool WebWorker::ExtractArgumentsFromMessage
   return true;
 }
 
+//Returns false if something unexpected happens during the login procedure.
+//Returning true does not necessarily mean the login information was accepted.
+//Returning false guarantees the login information was not accepted.
 bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
 { MacroRegisterFunctionWithName("WebWorker::Login");
-  //this function returns false if something unexpected during the login procedure.
-  //Returning true does not necessarily mean the login information was accepted.
-  //Returning false guarantees the login information was not accepted.
   theGlobalVariables.flagLoggedIn = false;
   MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs = theGlobalVariables.webArguments;
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theUser.username = HtmlRoutines::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("username"), true);
-  //stOutput << "<hr>DEBUG: debug stuff: "
-  //<< HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
-  //<< "<hr><hr><hr>";
   if (theUser.username.find('%') != std::string::npos)
     argumentProcessingFailureComments << "<b>Unusual behavior: % sign in username.</b>";
   theUser.enteredAuthenticationToken = HtmlRoutines::ConvertURLStringToNormal
@@ -1246,20 +1243,6 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   theUser.enteredActivationToken = HtmlRoutines::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("activationToken"), false);
 
-  //argumentProcessingFailureComments << "<br>DEBUG: username as read from web input: "
-  //<< theGlobalVariables.GetWebInput("username");
-  //argumentProcessingFailureComments << "<br>DEBUG: username decoded to: "
-  //<< theUser.username;
-  //argumentProcessingFailureComments << "<br>DEBUG: pure password as read from web input: "
-  //<< theGlobalVariables.GetWebInput("password");
-  //argumentProcessingFailureComments << "<br>DEBUG: password deurled: "
-  //<< HtmlRoutines::ConvertURLStringToNormal( theGlobalVariables.GetWebInput("password"), false);
-  //argumentProcessingFailureComments << "<br>DEBUG: password deurled and then urled: "
-  //<<
-  //HtmlRoutines::ConvertStringToURLString(
-  //HtmlRoutines::ConvertURLStringToNormal( theGlobalVariables.GetWebInput("password"), true), false
-  //)
-  //;
   theUser.enteredPassword =
   HtmlRoutines::ConvertStringToURLString
   (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("password"), true), false);
@@ -1286,10 +1269,6 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theGlobalVariables.flagLogInAttempted = true;
     argumentProcessingFailureComments << "Activation token entered: authentication token and google token ignored. ";
   }
-  //argumentProcessingFailureComments << "DEBUG: entered authentication token: " << theUser.enteredAuthenticationToken << ". ";
-  //stOutput << "DEBUG: Entered activation token: " << theUser.enteredActivationToken
-  //<< ", username: " << theUser.username;
-  //stOutput << "DEBUG: logging-in: " << theUser.ToStringUnsecure();
   if (theUser.username != "")
     theUser.enteredGoogleToken = "";
   if (theUser.enteredAuthenticationToken != "")
@@ -1324,10 +1303,6 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   { //stOutput << "DEBUG: no username specified";
     return !theUser.flagMustLogin;
   }
-  /////////////////
-  //doAttemptGoogleTokenLogin = false;
-  ////////////////////////////
-  //stOutput << "DEBUG: Password: " << theUser.enteredPassword;
   bool changingPass =
   theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword ||
   theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount ||
@@ -1335,27 +1310,21 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   if (changingPass)
     theUser.enteredAuthenticationToken = "";
   if (doAttemptGoogleTokenLogin)
-  { //stOutput << "DEBUG: Attempting google token login ...";
-    //std::stringstream comments
-    theGlobalVariables.flagLoggedIn =
+  { theGlobalVariables.flagLoggedIn =
     DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded
     (theUser, &argumentProcessingFailureComments, 0);
   } else if (theUser.enteredAuthenticationToken != "" || theUser.enteredPassword != "" ||
              theUser.enteredActivationToken != "")
-  { //stOutput << "DEBUG: About to login via database";
-    theGlobalVariables.flagLoggedIn = DatabaseRoutinesGlobalFunctions::LoginViaDatabase
+  { theGlobalVariables.flagLoggedIn = DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (theUser, &argumentProcessingFailureComments);
   }
   theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("username",
    HtmlRoutines::ConvertStringToURLString(theUser.username, false)
    //<-User name must be stored in URL-encoded fashion, NO PLUSES.
   );
-  //stOutput << "<br>DEBUG: did do the authentication.";
   if (theGlobalVariables.flagLoggedIn && theUser.enteredActivationToken == "")
   { //in case the user logged in with password, we need
     //to give him/her the correct authentication token
-    //stOutput << "DEBUG: disclosing auth token. Entered activation token: "
-    //<< theUser.enteredActivationToken.value;
     theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue
     (DatabaseStrings::labelAuthenticationToken,
      HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false)
@@ -1374,20 +1343,9 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
       if (theUser.enteredActivationToken != "0" && theUser.enteredActivationToken != "")
         shouldDisplayMessage = true;
   }
-  //if (theGlobalVariables.userDefault.enteredAuthenticationToken != "")
-  //  argumentProcessingFailureComments << "DEBUG: Entered authentication token: " << theGlobalVariables.userDefault.enteredAuthenticationToken;
-  //if (theGlobalVariables.userDefault.enteredActivationToken != "")
-  //  argumentProcessingFailureComments << "DEBUG: Entered activation token: " << theGlobalVariables.userDefault.enteredActivationToken;
-
   theUser.clearAuthenticationTokenAndPassword();
   if (shouldDisplayMessage)
-  { //stOutput << "<br>DEBUG: Invalid user or pass";
-    argumentProcessingFailureComments
-    << "Invalid user and/or authentication. ";
-  }
-  //stOutput << "<br>DEBUG: Login success: " << theGlobalVariables.flagLoggedIn
-  //<< " entered auth token: " << theUser.enteredAuthenticationToken.value
-  //<< " actual auth token: " << theUser.actualAuthenticationToken.value;
+    argumentProcessingFailureComments << "Invalid user and/or authentication. ";
   theArgs.SetKeyValue("password", "********************************************");
   return true;
 }
@@ -1405,7 +1363,6 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
   if (this->flagFoundMalformedFormInput)
     out << "<b>Your input formed had malformed entries.</b>";
   out
-  //<< "<input type =\"hidden\" id =\"debugFlag\" name =\"debugFlag\">\n"
   << "<input type =\"hidden\" id =\"studentView\" name =\"studentView\">\n"
   << "<input type =\"hidden\" id =\"studentSection\" name =\"studentSection\">\n"
   << "<input type =\"hidden\" id =\"courseHome\" name =\"courseHome\">\n"
@@ -1562,7 +1519,6 @@ void WebWorker::ParseMessageHead()
       }
     }
   theGlobalVariables.hostWithPort = this->hostWithPort;
-  //std::cout << "Got thus far 14" << std::endl;
 }
 
 void WebWorker::AttemptUnknownRequestErrorCorrection()
@@ -1686,7 +1642,6 @@ bool WebWorker::ReceiveAllHttp()
       this->displayUserInput = this->error;
       return false;
     }
-    //logWorker << logger::red << "DEBUG: about to receive...  " << logger::endL;
     numBytesInBuffer = recv(this->connectedSocketID, &buffer, bufferSize - 1, 0);
     if (numBytesInBuffer == 0)
     { this->error = "While trying to fetch message-body, received 0 bytes. " +
@@ -1695,8 +1650,6 @@ bool WebWorker::ReceiveAllHttp()
       this->displayUserInput = this->error;
       return false;
     }
-    //logWorker << logger::red << "DEBUG: received! "  << logger::endL;
-
     if (numBytesInBuffer < 0)
     { if (errno == EAGAIN ||
           errno == EWOULDBLOCK ||
@@ -1800,12 +1753,11 @@ std::string WebWorker::GetHeaderConnectionKeepAlive()
 
 std::string WebWorker::GetHeaderSetCookie()
 { std::stringstream out;
-  //stOutput << "DEBUG: setting headers: " << theGlobalVariables.CookiesToSetUsingHeaders.ToStringHtml();
   for (int i = 0; i < theGlobalVariables.CookiesToSetUsingHeaders.size(); i ++)
   { out << "Set-Cookie: " << theGlobalVariables.CookiesToSetUsingHeaders.theKeys[i]
     << "="
     << theGlobalVariables.CookiesToSetUsingHeaders.theValues[i]
-    << "; Path=/; Expires =Sat, 01 Jan 2030 20:00:00 GMT; Secure";
+    << "; Path=/; Expires=Sat, 01 Jan 2030 20:00:00 GMT; Secure";
     if (i != theGlobalVariables.CookiesToSetUsingHeaders.size() - 1)
       out << "\r\n";
   }
@@ -1835,8 +1787,6 @@ void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const st
       WebWorker::GetHeaderSetCookie() != "")
     out << WebWorker::GetHeaderSetCookie() << "\r\n";
   std::string finalHeader = out.str();
-  //stOutput << "<br>DEBUG: flagloginattempted: " << theGlobalVariables.flagLogInAttempted;
-  //stOutput << "<br>DEBUG: final header: " << HtmlRoutines::ConvertStringToHtmlString(finalHeader, true);
   this->remainingHeaderToSend.SetSize(0);
   this->remainingHeaderToSend.SetExpectedSize(finalHeader.size());
   for (unsigned i = 0; i < finalHeader.size(); i ++)
@@ -2050,12 +2000,8 @@ int WebWorker::ProcessComputationIndicator()
     stOutput << result.ToString(false);
     return 0;
   }
-//  logWorker << "Worker " << this->parent->activeWorker
-//  << consoleYellow(" piping 'indicator'" ) << logger::endL;
   otherWorker.pipeWorkerToWorkerRequestIndicator.WriteAfterEmptying("!", false, false);
-//  logWorker << "'indicator' piped, waiting for return." << logger::endL;
   otherWorker.pipeWorkerToWorkerIndicatorData.Read(false, false);
-//  logWorker << "indicator returned." << logger::endL;
   if (otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.size > 0)
   { std::string outputString;
     outputString.assign(otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.TheObjects, otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.size);
@@ -2069,8 +2015,8 @@ int WebWorker::ProcessComputationIndicator()
   } //else
   //Empty response
   //will not be displayed, keeping the previous response displayed.
-//  stOutput << "<b>Not implemented: request for indicator for worker " << inputWebWorkerNumber
-//  << " out of " << this->parent->theWorkers.size << ".</b>";
+  //  stOutput << "<b>Not implemented: request for indicator for worker " << inputWebWorkerNumber
+  //  << " out of " << this->parent->theWorkers.size << ".</b>";
   return 0;
 }
 
@@ -2091,22 +2037,12 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
 { if (!this->flagProgressReportAllowed)
     return;
   MacroRegisterFunctionWithName("WebWorker::PipeProgressReportToParentProcess");
-//  static int counter = 0;
-//  counter ++;
   this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked(false, false);
-//    logWorker << "about to potentially block " << logger::endL;
-  //debugStream2 << "PipeProgressReportToParentProcess called "
-  //<< counter << " times. Pause passed...";
-  //std::cout << debugStream2.str();
-  //theReport.SetStatus(debugStream2.str());
   if (this->PauseWorker.CheckPauseIsRequested(false, false, false))
-  { //std::cout << "DEBUG: PipeProgressReportToParentProcess: pausing as requested...";
-    logBlock << ": pausing as requested ..." << logger::endL;
+  { logBlock << ": pausing as requested ..." << logger::endL;
     this->WriteProgressReportToFile(input);
   }
   this->PauseWorker.PauseIfRequested(false, false);     //if pause was requested, here we block
-  //  logWorker << "(possible) block passed" << logger::endL;
-  //theReport.SetStatus("PipeProgressReportToParentProcess: computing...");
   this->pipeWorkerToWorkerRequestIndicator.Read(false, false);
   if (this->pipeWorkerToWorkerRequestIndicator.thePipe.lastRead.size == 0)
   { this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny(false, false);
@@ -2116,13 +2052,8 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   { this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny(false, false);
     return;
   }
-  //if (theGlobalVariables.flagLogInterProcessCommunication)
-  //logWorker << " data written!";
-  //theReport.SetStatus("PipeProgressReportToParentProcess: piping computation process...");
   this->pipeWorkerToWorkerIndicatorData.WriteAfterEmptying(input, false, false);
-  //theReport.SetStatus("PipeProgressReportToParentProcess: exiting 1...");
   this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny(false, false);
-  //theReport.SetStatus("PipeProgressReportToParentProcess: exiting 2...");
 }
 
 int WebWorker::ProcessFolder()
@@ -2130,7 +2061,6 @@ int WebWorker::ProcessFolder()
   this->SetHeaderOKNoContentLength("");
   std::stringstream out;
   out << "<html><body>";
-//  out << this->ToString();
   if (this->RelativePhysicalFileNamE.size() > 0)
     if (this->RelativePhysicalFileNamE[this->RelativePhysicalFileNamE.size() - 1] != '/')
       this->RelativePhysicalFileNamE.push_back('/');
@@ -2159,8 +2089,6 @@ int WebWorker::ProcessFolder()
     currentStream << "<a href=\"" << this->addressGetOrPost << HtmlRoutines::ConvertStringToURLString(theFileNames[i], false);
     if (isDir)
       currentStream << "/";
-    //else
-    //  logWorker <<
     currentStream << "\">" << theFileNames[i];
     if (isDir)
       currentStream << "/";
@@ -2176,8 +2104,6 @@ int WebWorker::ProcessFolder()
     out << theFolderNamesHtml[i];
   for (int i = 0; i < theFileNamesHtml.size; i ++)
     out << theFileNamesHtml[i];
-  //out << "DEBUG: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  //out << this->ToStringMessageFullUnsafe();
   out << "\n</body></html>";
   stOutput << out.str();
   return 0;
@@ -2287,13 +2213,6 @@ int WebWorker::ProcessFile()
   theFile.seekg(0);
   theFile.read(&this->bufferFileIO[0], this->bufferFileIO.size);
   int numBytesRead = theFile.gcount();
-  ///////////////////
-  //logWorker << "*****Message summary begin\r\n" << theHeader.str();
-  //logWorker << "Sending file  " << this->RelativePhysicalFileName; << " with file extension " << fileExtension
-  //<< ", file size: " << fileSize;
-  //logWorker << "\r\n*****Message summary end\r\n";
-  ///////////////////
-
   while (numBytesRead != 0)
   { this->bufferFileIO.SetSize(numBytesRead);
     this->QueueBytesForSendingNoHeadeR(this->bufferFileIO);
@@ -2460,49 +2379,9 @@ bool WebWorker::ShouldDisplayLoginPage()
 
 std::string WebWorker::GetAuthenticationToken(const std::string& reasonForNoAuthentication)
 { MacroRegisterFunctionWithName("WebWorker::GetAuthenticationToken");
-  //  std::stringstream out;
-  //  out << "DEBUG: username: " << theGlobalVariables.userDefault
-  //  << "\npassword: " << theGlobalVariables.GetWebInput("password");
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection)
     return theGlobalVariables.userDefault.actualActivationToken;
   return reasonForNoAuthentication;
-}
-
-std::string WebWorker::GetJavascriptSubmitLoginInfo()
-{ std::stringstream out;
-  out
-  << "<script type =\"text/javascript\"> \n"
-  << "function submitLoginInfo(){\n"
-  << "  spanOutput = document.getElementById('loginResult');\n"
-  << "  if (spanOutput == null){\n"
-  << "    spanOutput = document.createElement('span');\n"
-  << "    document.body.appendChild(spanOutput);\n"
-  << "    spanOutput.innerHTML= \"<span style ='color:red'> ERROR: span with id loginResult MISSING! </span>\";\n"
-  << "  }\n"
-  << "  theRequest ='getAuthenticationToken?';\n"
-  << "  theRequest +='username=' + encodeURIComponent(document.getElementById('username').value) +'&';\n"
-  << "  theRequest +='password='+ encodeURIComponent(document.getElementById('password').value);\n"
-  << "  var https = new XMLHttpRequest();\n"
-////////////////////////////////////////////
-  << "  https.open(\"GET\", theRequest, true);\n"
-/////////////////or/////////////////////////
-//  << "  https.open(\"GET\", \"" << theGlobalVariables.DisplayNameExecutableWithPath << "\""
-//  << "+ \"?\"+theRequest"
-//  << ", true);\n"
-////////////////////////////////////////////
-  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
-  << "  https.onload = function() {\n"
-  << "    spanOutput.textContent =https.responseText;\n"
-  << "    addCookie(\"authenticationToken\", https.responseText, 150, true);\n"
-  << "  }\n"
-////////////////////////////////////////////
-  << "  https.send(theRequest);\n"
-/////////////////or/////////////////////////
-//  << "  https.send();\n"
-////////////////////////////////////////////
-  << "}\n"
-  << "</script>";
-  return out.str();
 }
 
 std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField)
@@ -2594,7 +2473,7 @@ std::string WebWorker::GetChangePasswordPage()
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
   //out << "<form name =\"login\" id =\"login\" action =\"calculator\" method =\"GET\" accept-charset =\"utf-8\">";
   out
-  <<  "User: " << theGlobalVariables.userDefault.username
+  << "User: " << theGlobalVariables.userDefault.username
   << "<input type =\"hidden\" id =\"username\" placeholder =\"username\" "
   << "value =\"" << theGlobalVariables.userDefault.username << "\" "
   << "required>";

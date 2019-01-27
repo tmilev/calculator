@@ -29,6 +29,7 @@ std::string WebAPI::commentsServer = "commentsServer";
 
 std::string WebAPI::request::userInfoJSON = "userInfoJSON";
 std::string WebAPI::request::examplesJSON = "calculatorExamplesJSON";
+std::string WebAPI::request::editPage = "editPageJSON";
 std::string WebAPI::databaseParameters::entryPoint = "database";
 std::string WebAPI::databaseParameters::labels = "databaseLabels";
 std::string WebAPI::databaseParameters::operation = "databaseOperation";
@@ -2930,13 +2931,6 @@ int WebWorker::ProcessBrowseProblems()
   return 0;
 }
 
-int WebWorker::ProcessEditPage()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessEditPage");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << this->GetEditPageHTML();
-  return 0;
-}
-
 int WebWorker::ProcessEditPageJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessEditPageJSON");
   this->SetHeaderOKNoContentLength("");
@@ -3115,12 +3109,6 @@ std::string HtmlInterpretation::ModifyProblemReport()
   out << "<b style =\"color:green\"> Written content to file: "
   << fileName << ". </b>";
   return out.str();
-}
-
-std::string WebWorker::GetEditPageHTML()
-{ MacroRegisterFunctionWithName("WebWorker::GetEditPageHTML");
-  this->SetHeaderOKNoContentLength("");
-  return HtmlInterpretation::GetEditPageHTML();
 }
 
 int WebWorker::ProcessSubmitAnswers()
@@ -3533,9 +3521,7 @@ int WebWorker::ServeClient()
     return this->ProcessTemplateJSON();
   else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::userInfoJSON)
     return this->ProcessLoginUserInfo(comments.str());
-  else if (theGlobalVariables.userCalculatorRequestType == "editPage")
-    return this->ProcessEditPage();
-  else if (theGlobalVariables.userCalculatorRequestType == "editPageJSON")
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::editPage)
     return this->ProcessEditPageJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "modifyPage")
     return this->ProcessModifyPage();

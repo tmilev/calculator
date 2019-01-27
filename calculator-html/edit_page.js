@@ -55,18 +55,14 @@ function getEditPanel(fileName) {
 
 function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
   var newFileName = document.getElementById(idCloneInput).value;
-
-  //console.log(`DEBUG: handle clone with input: ${fileName}, new file name: ${newFileName}`); 
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
   theURL += calculatorPage.calculator.getQueryStringSubmitStringAsMainInput(newFileName, pathnames.urlFields.requests.clonePage);
   theURL += `${pathnames.urlFields.fileName}=${fileName}&`;
-  //console.log("DEBUG: about to submit: " + theURL); 
   submitRequests.submitGET({
     url: theURL,
     result: idSpanClonePageReport
   });
-
 }
 
 function storeEditedPage() {
@@ -77,7 +73,6 @@ function storeEditedPage() {
   var queryParameters = "";
   queryParameters += calculatorPage.calculator.getQueryStringSubmitStringAsMainInput(editor.getValue(), pathnames.urlFields.requests.modifyPage);
   queryParameters += `${pathnames.urlFields.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}&`;
-  //console.log("DEBUG: about to submit: " + theURL); 
   submitRequests.submitPOST({
     url: theURL,
     parameters: queryParameters,
@@ -89,7 +84,6 @@ function selectEditPageCallback(input, outputComponent) {
   var thePage = window.calculator.mainPage;
   try {
     var parsedInput = JSON.parse(input);
-    //document.getElementById('divEditorAce').textContent = decodeURIComponent(parsedInput.content);
     ace.require("ace/ext/language_tools");
     if (thePage.pages.editPage.editor === null) {
       thePage.pages.editPage.editor = ace.edit("divEditorAce");
@@ -100,6 +94,12 @@ function selectEditPageCallback(input, outputComponent) {
     var editor = thePage.pages.editPage.editor;
     editor.$blockScrolling = Infinity;
     var incomingContent = "";
+    var errorSpan = document.getElementById(ids.domElements.spanErrorsEditPage);
+    if (parsedInput.error !== null && parsedInput.error !== undefined) {
+      errorSpan.innerHTML = `<br>${parsedInput.error}`;
+    } else {
+      errorSpan.innerHTML = "";
+    }
     if (parsedInput.content !== null && parsedInput.content !== undefined) {
       incomingContent = decodeURIComponent(parsedInput.content);
     }

@@ -812,7 +812,7 @@ std::string HtmlInterpretation::GetJSONFromTemplate()
   << theGlobalVariables.GetWebInput("fileName")
   << ".-->\n";
   out << thePage.outputHtmlBodyNoTag;
-  out << "<small>Generated in " << theGlobalVariables.GetElapsedMilliseconds() << " ms.</small>";
+  out << "<small>Generated in " << theGlobalVariables.GetElapsedMilliseconds() << " ms. </small>";
   return out.str();
 }
 
@@ -931,137 +931,6 @@ std::string HtmlInterpretation::GetEditPageJSON()
   output["autoComplete"] = theAutoCompleteWordsJS;
   output["content"] = HtmlRoutines::ConvertStringToURLString(theFile.inputHtml, false);
   return output.ToString(false);
-}
-
-std::string HtmlInterpretation::GetEditPageHTML()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetEditPageHTML");
-  std::stringstream ouT, outHead, outBody;
-  if ((!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights()) &&
-      !theGlobalVariables.flagRunningApache)
-    return "<b>Only logged-in admins are allowed to edit pages. </b>";
-  CalculatorHTML theFile;
-  theFile.LoadFileNames();
-  ouT << "<html>";
-  outHead << "<head>"
-  //  << HtmlRoutines::GetLaTeXProcessingJavascript()
-  //  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
-  //<< HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
-  << HtmlRoutines::GetCSSLinkCalculator()
-  << "<style type =\"text/css\" media =\"screen\">\n"
-  << "    #editor { \n"
-  << "      height: 380px;\n"
-  << "      font-size: 100%;\n"
-  << "   }\n"
-  << "</style>\n";
-  outHead << HtmlRoutines::GetJavascriptAceEditorScriptWithTags();
-  outBody << "<body onload =\"loadSettings();\">\n";
-  outBody << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
-  << "</calculatorNavigation>";
-  std::stringstream failureStream;
-  if (!theFile.LoadMe(false, theGlobalVariables.GetWebInput("randomSeed"), &failureStream))
-  { outBody << "<b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>";
-    outBody << "</body></html>";
-    ouT << outHead.str() << outBody.str();
-    return ouT.str();
-  }
-  if (!theFile.ParseHTML(&failureStream))
-    outBody << "<b>Failed to parse file: " << theFile.fileName
-    << ".</b> Details:<br>" << failureStream.str();
-  if (theFile.flagIsExamProblem)
-  { theFile.FigureOutCurrentProblemList(outBody);
-    outBody << "<problemNavigation>" << theFile.ToStringProblemNavigation() << "</problemNavigation>";
-  }
-  HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
-  theFile.initBuiltInSpanClasses();
-  if (theFile.flagIsExamProblem)
-  { Calculator tempCalculator;
-    tempCalculator.init();
-    tempCalculator.ComputeAutoCompleteKeyWords();
-    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClasses);
-    theAutocompleteKeyWords.AddOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
-    theFile.initAutocompleteExtras();
-    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.autoCompleteExtras);
-  } else
-  { theFile.LoadAndParseTopicList(outBody);
-    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClasses);
-    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClassesAnswerFields);
-    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicElementNames);
-    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicBundles);
-  }
-  outHead << "<script type =\"text/javascript\">\n";
-  outHead << "var AceEditorAutoCompletionWordList =[";
-  bool found = false;
-  for (int i = 0; i < theAutocompleteKeyWords.size; i ++)
-    if (theAutocompleteKeyWords[i].size() > 2)
-    { if (found)
-        outHead << ", ";
-      found = true;
-      outHead << "\"" << theAutocompleteKeyWords[i] << "\"";
-    }
-  outHead << "];\n";
-  outHead << "\n</script>";
-  outHead << "</head>";
-  std::stringstream buttonStream, submitModPageJS;
-  submitModPageJS
-  << "submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage', null, 'spanSubmitReport');";
-  buttonStream
-  << "<button class =\"buttonSaveEdit\" "
-  << "onclick=\"" << submitModPageJS.str() << "\" >Save changes</button>";
-  //  out << "<form>";
-  //  out << "<input type =\"submit\" value =\"Save changes\"> ";
-  outBody << buttonStream.str();
-  outBody << "To include the problem in your topic list, add the following two lines. <br>"
-  << "<textarea cols =\"140\", rows =\"2\">"
-  << theFile.ToStringCalculatorProblemSourceFromFileName(theFile.fileName) << "</textarea>";
-  outBody << "<br>\n";
-  outBody << "Ctrl+S saves your changes. Edit bravely, you are not overwriting the defaults, "
-  << "but only editing your (and your students') version. ";
-//  outBody << "<br>\n";
-  outBody
-  << "Many thanks to the <a href=\"https://ace.c9.io\">ace editor</a> project. <br>"
-  << "<div id =\"editor\" onkeydown =\"ctrlSPress(event);\" name =\"editor\">"
-  //<< "<textarea cols =\"150\", rows =\"30\" id =\"mainInput\" name =\"mainInput\" onkeydown =\"ctrlSPress(event);\">"
-  ;
-  outBody
-  //<< "</textarea>"
-  << "</div>"
-  << "\n<br>\n";
-  outBody << "<script type =\"text/javascript\"> \n"
-  << "function ctrlSPress(event){\n"
-  << "   if (event.ctrlKey!= true)\n"
-  << "     return;\n"
-  << "   if (event.keyCode !=83)\n"
-  << "     return;\n"
-  << "   event.preventDefault();"
-  << submitModPageJS.str() << "\n"
-  << "}\n"
-  << "</script>\n";
-  outBody
-  << "<script src =\"/html-common/ace/src-min/ext-language_tools.js\"></script>";
-  outBody << "<script type =\"text/javascript\"> \n"
-  //<< " document.getElementById('mainInput').value = decodeURIComponent(\""
-  << " document.getElementById('editor').textContent = decodeURIComponent(\""
-  << HtmlRoutines::ConvertStringToURLString(theFile.inputHtml, false)
-  << "\");\n"
-  << "    ace.require(\"ace/ext/language_tools\");\n"
-  << "    var editor = ace.edit(\"editor\");\n"
-  << "    editor.setTheme(\"ace/theme/chrome\");\n"
-  << "    editor.getSession().setMode(\"ace/mode/xml\");\n"
-  << "    editor.setOptions({\n"
-  << "      enableBasicAutocompletion: true,\n"
-  << "      enableLiveAutocompletion: true\n"
-  << "    });\n"
-  << "    editor.completers = [staticWordCompleter];"
-  << "    editor.$blockScrolling = Infinity;"
-  << "</script>\n";
-  outBody << buttonStream.str();
-  outBody << "<span id =\"spanSubmitReport\"></span><br>";
-  outBody << theFile.ToStringLinkFromFileName(theFile.fileName);
-  //  out << "<input type =\"submit\" value =\"Save changes\">";
-  //  out << "</form>";
-  outBody << "</body>";
-  ouT << outHead.str() << outBody.str() << "</html>";
-  return ouT.str();
 }
 
 std::string HtmlInterpretation::SubmitAnswers()

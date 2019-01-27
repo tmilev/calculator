@@ -162,7 +162,6 @@ public:
   int ProcessServerStatusJSON();
   int ProcessComputationIndicator();
   int ProcessBrowseProblems();
-  int ProcessEditPage();
   int ProcessEditPageJSON();
   int ProcessFolderOrFile();
   int ProcessFolder();
@@ -259,7 +258,6 @@ public:
   std::string GetSignUpRequestResult();
   std::string GetAuthenticationToken(const std::string& reasonForNoAuthentication = "");
   std::string GetBrowseProblems();
-  std::string GetEditPageHTML();
   std::string GetDatabaseJSON();
   std::string GetDatabaseDeleteOneItem();
   std::string GetNavigationPage();

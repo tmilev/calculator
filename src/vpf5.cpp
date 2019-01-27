@@ -1127,7 +1127,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
 //      double timeBeforeOrbit = theGlobalVariables.GetElapsedSeconds();
       hwPath.GenerateOrbit
       (tempList, theStrings, MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).NumShort), 0);
-      reportStream << "\nPath orbit size = " << theStrings.size << " generated in " << theGlobalVariables.GetElapsedSeconds() << " seconds.";
+      reportStream << "\nPath orbit size = " << theStrings.size << " generated in " << theGlobalVariables.GetElapsedSeconds() << " seconds. ";
       theReport.Report(reportStream.str());
       for (int k = 0; k < theStrings.size; k ++)
       { LittelmannPath& currentPath = tempList[k];

@@ -467,7 +467,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON
     out
     << "Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds() - startTime)
-    << " second(s).";
+    << " second(s). ";
     return out.str();
   }
   if (this->flagDoPrependProblemNavigationBar)

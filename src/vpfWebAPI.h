@@ -21,6 +21,7 @@ public:
     static std::string onePageJS;
     static std::string onePageJSWithHash;
     static std::string userInfoJSON;
+    static std::string editPage;
     static std::string selectCourseJSON;
   };
   static std::string serverStatusJSON;

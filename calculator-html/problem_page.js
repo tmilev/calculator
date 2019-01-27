@@ -4,6 +4,7 @@ const pathnames = require('./pathnames');
 const ids = require('./ids_dom_elements');
 const editPage = require('./edit_page');
 const initializeButtons = require('./initialize_buttons');
+const ButtonPanel = initializeButtons.InputPanelData;
 
 function selectCurrentProblem(problemIdURLed, exerciseType) {
   var thePage = window.calculator.mainPage;
@@ -15,21 +16,22 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
   if (exerciseType === pathnames.urlFields.scoredQuizJSON) {
     theProblem.flagForReal = true;
   }
-  //thePage.storage.variables.currentCourse.request = exerciseType;
   thePage.pages.problemPage.flagLoaded = false;
   thePage.selectPage(thePage.pages.problemPage.name);
 }
 
-function Problem(problemData, inputParentIdURLed) {
+function Problem() {
+
+}
+
+Problem.prototype.initialize = function(problemData, inputParentIdURLed) {
   var thePage = window.calculator.mainPage;
   this.idURLed = encodeURIComponent(problemData.id);
-  //if (inputParentIdURLed === undefined) {
-  //  console.log("DEBUG: bad parent id");
-  //}
   this.decodedProblem = "";
   this.commentsProblem = "";
   this.parentIdURLed = inputParentIdURLed;
   this.randomSeed = null;
+  /**@type {ButtonPanel[]} */
   this.answers = [];
   this.problemLabel = "";
   this.flagForReal = true;
@@ -93,14 +95,59 @@ function Problem(problemData, inputParentIdURLed) {
     thePage.theChapterIds[this.idURLed] = true;
   }
   this.childrenIds = [];
-  if (problemData.children === undefined) {
-    return;
+  if (Array.isArray(problemData.children)) {
+    for (var counterChildren = 0; counterChildren < problemData.children.length; counterChildren ++) {
+      var currentChild = new Problem(problemData.children[counterChildren], this.idURLed);
+      this.childrenIds.push(currentChild.idURLed);
+    }
   }
-  for (var counterChildren = 0; counterChildren < problemData.children.length; counterChildren ++) {
-    var currentChild = new Problem(problemData.children[counterChildren], this.idURLed);
-    this.childrenIds.push(currentChild.idURLed);
+  this.initializePartTwo(problemData, inputParentIdURLed);
+}
+
+Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) {
+  this.decodedProblem = decodeURIComponent(problemData["problemContent"]);
+  this.commentsProblem = problemData["commentsProblem"];
+  if (this.commentsProblem === undefined) {
+    this.commentsProblem = "";
+  }
+  var answerVectors = problemData["answers"];
+  if (answerVectors === undefined) {
+    this.writeToHTML("divProblemPageContentContainer");
+    return;    
+  }
+  this.problemLabel = problemData["problemLabel"];
+  this.flagForReal = problemData["forReal"];
+  this.randomSeed = problemData.randomSeed;
+
+  for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++) {
+    var currentVector = answerVectors[counterAnswers];
+    this.answers[counterAnswers] = new initializeButtons.InputPanelData({
+      problemId:           this.idURLed,
+      idMQSpan:            currentVector.answerMQspanId,
+      idPureLatex:         currentVector.answerIdPureLatex,
+      idButtonContainer:   currentVector.preferredButtonContainer,
+      idButtonSubmit:      currentVector.idButtonSubmit,
+      idButtonInterpret:   currentVector.idButtonInterpret,
+      idButtonAnswer:      currentVector.idButtonAnswer,
+      idButtonSolution:    currentVector.idButtonSolution,
+      idVerificationSpan:  currentVector.idVerificationSpan,
+      flagAnswerPanel:     true,
+      flagCalculatorPanel: false,
+    });
+  }
+  this.writeToHTML("divProblemPageContentContainer");
+  var problemLinkWithRandomSeed = document.getElementById(ids.domElements.spanProblemLinkWithRandomSeed);
+  if (problemLinkWithRandomSeed !== null) {
+    problemLinkWithRandomSeed.innerHTML = `<a href = '#${this.getAppAnchorRequestFileCourseTopics()}'>#${this.randomSeed}</a>`;
+  }
+  this.scriptIds = [];
+  for (var scriptLabel in problemData.scripts) {
+    var newLabel = encodeURIComponent(this.idURLed + scriptLabel);
+    this.scriptIds.push(newLabel); 
+    thePage.injectScript(newLabel, decodeURIComponent(problemData.scripts[scriptLabel]));
   }
 }
+
 
 function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   var thePage = window.calculator.mainPage;
@@ -265,13 +312,7 @@ Problem.prototype.writeToHTML = function(outputElement) {
         );
       }
     }
-    
-    //theElement.addEventListener('onchange', latexChangeHandler);
-    //theElement.attributes.onkeyup = latexChangeHandler;
-    //console.log(theElement);
-    //console.log(latexChangeHandler);
     currentAnswerPanel.initialize();
-
   }
 
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divProblemPageContentContainer")]);
@@ -754,54 +795,10 @@ function updateProblemPageCallback(input, outputComponent) {
   /**@type {Problem} */
   var currentProblem = thePage.getCurrentProblem();
   if (currentProblem === null || currentProblem === undefined) {
-    thePage.problems[thePage.storage.variables.currentCourse.currentProblemId.getValue()] = new Problem(theProblem, null);
+    thePage.problems[thePage.storage.variables.currentCourse.currentProblemId.getValue()] = new Problem();
     currentProblem = thePage.getCurrentProblem();
   }
-  currentProblem.decodedProblem = decodeURIComponent(theProblem["problemContent"]);
-  currentProblem.commentsProblem = theProblem["commentsProblem"];
-  if (currentProblem.commentsProblem === undefined) {
-    currentProblem.commentsProblem = "";
-  }
-  //var theScripts = currentProblem.scripts.split ("</script>");
-  //for (var counterScripts = 0; counterScripts < theScripts.length; counterScripts++) {
-  //  console.log(`Scripts: ${theScripts[counterScripts]}`);
-  //}
-  var answerVectors = theProblem["answers"];
-  if (answerVectors === undefined) {
-    currentProblem.writeToHTML("divProblemPageContentContainer");
-    return;    
-  }
-  currentProblem.problemLabel = theProblem["problemLabel"];
-  currentProblem.flagForReal = theProblem["forReal"];
-  currentProblem.randomSeed = theProblem.randomSeed;
-
-  for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++) {
-    var currentVector = answerVectors[counterAnswers];
-    currentProblem.answers[counterAnswers] = new initializeButtons.InputPanelData({
-      problemId:           currentProblem.idURLed,
-      idMQSpan:            currentVector.answerMQspanId,
-      idPureLatex:         currentVector.answerIdPureLatex,
-      idButtonContainer:   currentVector.preferredButtonContainer,
-      idButtonSubmit:      currentVector.idButtonSubmit,
-      idButtonInterpret:   currentVector.idButtonInterpret,
-      idButtonAnswer:      currentVector.idButtonAnswer,
-      idButtonSolution:    currentVector.idButtonSolution,
-      idVerificationSpan:  currentVector.idVerificationSpan,
-      flagAnswerPanel:     true,
-      flagCalculatorPanel: false,
-    });
-  }
-  currentProblem.writeToHTML("divProblemPageContentContainer");
-  var problemLinkWithRandomSeed = document.getElementById(ids.domElements.spanProblemLinkWithRandomSeed);
-  if (problemLinkWithRandomSeed !== null) {
-    problemLinkWithRandomSeed.innerHTML = `<a href = '#${currentProblem.getAppAnchorRequestFileCourseTopics()}'>#${currentProblem.randomSeed}</a>`;
-  }
-  currentProblem.scriptIds = [];
-  for (var scriptLabel in theProblem.scripts) {
-    var newLabel = encodeURIComponent(currentProblem.idURLed + scriptLabel);
-    currentProblem.scriptIds.push(newLabel); 
-    thePage.injectScript(newLabel, decodeURIComponent(theProblem.scripts[scriptLabel]));
-  }
+  currentProblem.initialize(theProblem, null);
 }
 
 function updateProblemPage() {

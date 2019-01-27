@@ -11,7 +11,6 @@ var calculatorRightPosition = 0;
 var keyWordsKnownToMathQuill = ['sqrt', 'frac', 'cdot', 'left', 'right', 'infty', 'otimes', 'times', 'oplus', 'pmatrix','int', 'begin', 'end'];
 
 var studentScoresInHomePage = [];
-//var lastFocus;
 var charsToSplit = ['x','y'];
 var panelsCollapseStatus = {};
 var calculatorSeparatorLeftDelimiters = {
@@ -56,10 +55,6 @@ function processMathQuillLatex(theText) {
     }
   }
   return theText;
-}
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 var MathQuillCommandButtonCollection = {};
@@ -243,11 +238,8 @@ function initializeAccordionButtons() {
         for (var j = 0; j < theDeadlines.length; j ++) {
           $('#' + theDeadlines[j].id).datepicker();
         }
-//        console.log("first run: "+theDeadlines);
         this.nextElementSibling.style.display = "inline-block";
-        //await sleep(400);
       }
-      //this.nextElementSibling.style.transition ="0.6s linear";
       this.classList.toggle("active");
       this.nextElementSibling.classList.toggle("show");
     }
@@ -256,43 +248,6 @@ function initializeAccordionButtons() {
 
 function initializeButtons() { 
   initializeAccordionButtons();
-}
-
-function registerStatus(thePanel, isCollapsed) { 
-  panelsCollapseStatus[thePanel.id] = {
-    'button' : thePanel.buttonThatModifiesMe.id, 
-    'isCollapsed' : isCollapsed
-  };
-  if (localStorage === undefined) {
-    return;
-  }
-  localStorage.panels = JSON.stringify(panelsCollapseStatus);
-}
-
-function transitionDone(event) { 
-  //console.log("CAlled transitionDone");
-  this.removeEventListener("transitionend", transitionDone);
-  if (this.transitionState === "collapsing") { 
-    this.style.display = "none";
-    this.transitionState = "collapsed";
-    registerStatus(this, true)
-  } else if (this.transitionState === "expanding") { 
-    this.style.display = "";
-    this.transitionState = "expanded";
-    registerStatus(this, false)
-  }
-}
-
-function toggleHeightForTimeout(currentPanel) { 
-  if (currentPanel.transitionState === "expanding") { 
-    currentPanel.style.maxHeight = currentPanel.startingMaxHeight;
-    currentPanel.style.height = currentPanel.startingMaxHeight;
-    currentPanel.style.opacity = "1";
-  } else if (currentPanel.transitionState === "collapsing") { 
-    currentPanel.style.opacity = "0";
-    currentPanel.style.maxHeight = "0px";
-    currentPanel.style.height = "0px";
-  }
 }
 
 function initializeCalculatorPage() { 
@@ -405,7 +360,6 @@ InputPanelData.prototype.showSolution = function() {
     }
     theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
   } 
-   //"submitAnswersPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 
@@ -424,7 +378,6 @@ InputPanelData.prototype.submitAnswers = function() {
     theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExerciseNoLogin}&`;
     theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;  
   }
-   //"submitAnswersPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 
@@ -501,7 +454,7 @@ InputPanelData.prototype.initialize = function() {
   if (this.flagInitialized) {
     return;
   }
-  var currentSpanVariable = document.getElementById(this.idPureLatex);
+  //var currentSpanVariable = document.getElementById(this.idPureLatex);
   globalMQ.config({
     autoFunctionize: 'sin cos tan sec csc cot log ln'
   });
@@ -649,7 +602,8 @@ InputPanelData.prototype.getSemiColumnEnclosure = function() {
 
 InputPanelData.prototype.initializePartTwo = function(forceShowAll) { 
   var currentButtonPanel = document.getElementById(this.idButtonContainer);
-  var buttonArray = currentButtonPanel.attributes.buttons.value.toLowerCase().split(/(?:,| ) +/);
+  var buttonsNonSplit = currentButtonPanel.attributes.buttons.value.toLowerCase();
+  var buttonArray = buttonsNonSplit.split(/(?:,| ) +/);
   //console.log(buttonArray);
   var buttonBindings = [];
   function addCommand(theCmd) { 
@@ -691,28 +645,35 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
     addCommand("sec");
     addCommand("csc");
   }
-  if (buttonArray.indexOf("inversetrig") > - 1 ||
-      buttonArray.indexOf("inverse_trig") > - 1 ||
-      buttonArray.indexOf("inverse-trig") > - 1 ||
-      buttonArray.indexOf("inverseTrig") > - 1 ||
-      buttonArray.indexOf("InverseTrig") > - 1 ||
-      buttonArray.indexOf("inversetrigonometry") > - 1 ||
-      buttonArray.indexOf("inverse_trigonometry") > - 1 ||
-      buttonArray.indexOf("inverse-trigonometry") > - 1 ||
-      includeAll) { 
+  if (
+    buttonArray.indexOf("inversetrig") > - 1 ||
+    buttonArray.indexOf("inverse_trig") > - 1 ||
+    buttonArray.indexOf("inverse-trig") > - 1 ||
+    buttonArray.indexOf("inverseTrig") > - 1 ||
+    buttonArray.indexOf("InverseTrig") > - 1 ||
+    buttonArray.indexOf("inversetrigonometry") > - 1 ||
+    buttonArray.indexOf("inverse_trigonometry") > - 1 ||
+    buttonArray.indexOf("inverse-trigonometry") > - 1 ||
+    includeAll
+  ) { 
     addCommand("arcsin");
     addCommand("arccos");
     addCommand("arctan");
   }
-  if (buttonArray.indexOf("brackets") > - 1 ||
-      buttonArray.indexOf("comma") > - 1 ||
-      buttonArray.indexOf("commas") > - 1 ||
-      buttonArray.indexOf("intervals") > - 1 ||
-      includeAll) {
+  if (
+    buttonArray.indexOf("brackets") > - 1 ||
+    buttonArray.indexOf("comma") > - 1 ||
+    buttonArray.indexOf("commas") > - 1 ||
+    buttonArray.indexOf("intervals") > - 1 ||
+    includeAll
+  ) {
     addCommand(",");
   }
-  if (buttonArray.indexOf("brackets") > - 1 ||
-      buttonArray.indexOf("intervals") > - 1 || includeAll) { 
+  if (
+    buttonArray.indexOf("brackets") > - 1 ||
+    buttonArray.indexOf("intervals") > - 1 || 
+    includeAll
+  ) { 
     addCommand("[");
     addCommand("]");
   }
@@ -730,13 +691,15 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
     addCommand("ln");
     addCommand("e");
   }
-  if (buttonArray.indexOf("infinity") > - 1 || buttonArray.indexOf("infty") > - 1 ||
-      buttonArray.indexOf("\infty") > - 1 ||
-      buttonArray.indexOf("interval") > - 1 ||
-      buttonArray.indexOf("intervals") > - 1 ||
-      buttonArray.indexOf("limits") > - 1 ||
-      buttonArray.indexOf("limit") > - 1 ||
-      includeAll || noOptions) {
+  if (
+    buttonArray.indexOf("infinity") > - 1 || buttonArray.indexOf("infty") > - 1 ||
+    buttonArray.indexOf("\infty") > - 1 ||
+    buttonArray.indexOf("interval") > - 1 ||
+    buttonArray.indexOf("intervals") > - 1 ||
+    buttonArray.indexOf("limits") > - 1 ||
+    buttonArray.indexOf("limit") > - 1 ||
+    includeAll || noOptions
+  ) {
     addCommand("infty");
   }
   if (buttonArray.indexOf("limits") > - 1 ||
@@ -776,12 +739,14 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
     addCommand("gamma");
     addCommand("theta");
   }
-  if (buttonArray.indexOf("NewtonsMethod") > - 1 ||
-      buttonArray.indexOf("newtonsmethod") > - 1 ||
-      buttonArray.indexOf("NewtonMethod") > - 1 ||
-      buttonArray.indexOf("newtonmethod") > - 1 ||
-      buttonArray.indexOf("newton") > - 1 ||
-      includeAll) { 
+  if (
+    buttonArray.indexOf("NewtonsMethod") > - 1 ||
+    buttonArray.indexOf("newtonsmethod") > - 1 ||
+    buttonArray.indexOf("NewtonMethod") > - 1 ||
+    buttonArray.indexOf("newtonmethod") > - 1 ||
+    buttonArray.indexOf("newton") > - 1 ||
+    includeAll
+  ) { 
     addCommand("NewtonsMethod (,,)");
   }
   var theContent = "<table>";

@@ -30,8 +30,7 @@ public:
   std::string syntacticRole;
   std::string content;
   std::string tag;
-  List<std::string> tagKeys;
-  List<std::string> tagValues;
+  MapLisT<std::string, std::string, MathRoutines::hashString> properties;
   List<std::string> defaultKeysIfMissing;
   List<std::string> defaultValuesIfMissing;
   List<std::string> tagKeysWithoutValue;

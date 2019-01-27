@@ -819,8 +819,7 @@ std::string CalculatorHTML::ToStringContent()
 
 void SyntacticElementHTML::resetAllExceptContent()
 { this->tag = "";
-  this->tagKeys.SetSize(0);
-  this->tagValues.SetSize(0);
+  this->properties.Clear();
   this->syntacticRole = "";
   this->flagUseDisplaystyleInMathMode = false;
   this->children.SetSize(0);
@@ -834,10 +833,10 @@ std::string SyntacticElementHTML::ToStringOpenTag(const std::string& overrideTag
     out << "<" << this->tag;
   else
     out << "<" << overrideTagIfNonEmpty;
-  for (int i = 0; i < this->tagKeys.size; i ++)
-    out << " " << this->tagKeys[i] << "=\"" << this->tagValues[i] << "\"";
+  for (int i = 0; i < this->properties.size(); i ++)
+    out << " " << this->properties.theKeys[i] << "=\"" << this->properties.theValues[i] << "\"";
   for (int i = 0; i < this->defaultKeysIfMissing.size; i ++)
-    if (!this->tagKeys.Contains(this->defaultKeysIfMissing[i]))
+    if (!this->properties.Contains(this->defaultKeysIfMissing[i]))
       out << " " << this->defaultKeysIfMissing[i] << "=\"" << this->defaultValuesIfMissing[i] << "\"";
   if (this->tagKeysWithoutValue.size > 0)
     out << " " << this->tagKeysWithoutValue[0];
@@ -888,23 +887,14 @@ std::string SyntacticElementHTML::ToStringDebug()
 
 std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey) const
 { MacroRegisterFunctionWithName("SyntacticElementHTML::GetKeyValue");
-  int theIndex = this->tagKeys.GetIndex(theKey);
-  if (theIndex == - 1)
+  if (!this->properties.Contains(theKey))
     return "";
-  return this->tagValues[theIndex];
+  return this->properties.GetValueConstCrashIfNotPresent(theKey);
 }
 
 void SyntacticElementHTML::SetKeyValue(const std::string& theKey, const std::string& theValue)
 { MacroRegisterFunctionWithName("SyntacticElementHTML::SetKeyValue");
-  if (this->tagKeys.size != this->tagValues.size)
-    crash << "Programming error: number of keys different from number of values" << crash;
-  int theIndex = this->tagKeys.GetIndex(theKey);
-  if (theIndex == - 1)
-  { theIndex = this->tagKeys.size;
-    this->tagKeys.AddOnTop(theKey);
-    this->tagValues.SetSize(this->tagKeys.size);
-  }
-  this->tagValues[theIndex] = theValue;
+  this->properties.SetKeyValue(theKey, theValue);
 }
 
 std::string SyntacticElementHTML::ToStringInterpretedBody()
@@ -2271,7 +2261,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments)
       else if (this->calculatorClasses.Contains(tagClass))
         thirdToLast.syntacticRole = "command";
       else
-      { thirdToLast.content = thirdToLast.ToStringOpenTag("",true);
+      { thirdToLast.content = thirdToLast.ToStringOpenTag("", true);
         thirdToLast.resetAllExceptContent();
       }
       eltsStack.RemoveLastObject();
@@ -2404,6 +2394,12 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments)
       //stOutput << "<hr>Rule ZZ executed<hr> ";
       continue;
     }
+    if (fifthToLast.syntacticRole == "<openTag" && thirdToLast == "=" && secondToLast == "\"" &&
+        last == "\"" )
+    { fifthToLast.SetKeyValue(fourthToLast.content, "");
+      eltsStack.SetSize(eltsStack.size - 4);
+      continue;
+    }
     if (thirdToLast == "\"" && secondToLast != "\"" && last == "\"")
     { thirdToLast.content += secondToLast.content;
       thirdToLast.content += last.content;
@@ -2489,15 +2485,10 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments)
       this->theContent.AddOnTop(eltsStack[i]);
     }
   }
-//  stOutput << "<hr>DEBUG: About to check consistency while parsing<hr>";
-  //this->theProblemData.CheckConsistency();
   if (!result && comments != 0)
     *comments << "<hr>Parsing stack.<hr>" << this->ToStringParsingStack(this->eltsStack);
-  //this->theProblemData.CheckConsistency();
-  //stOutput << "<hr>DEBUG: got to extracting answer ids<hr>";
   if (result)
     result = this->ExtractAnswerIds(comments);
-  //stOutput << "<hr>DEBUG: after extracting answer ids<hr>";
   for (int i = 0; i < this->theContent.size; i ++)
     this->theContent[i].indexInOwner = i;
   if (result)

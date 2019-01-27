@@ -905,7 +905,7 @@ std::string HtmlInterpretation::GetEditPageJSON()
     errorStream << "<b>Failed to parse file: " << theFile.fileName
     << ".</b> Details:<br>" << failureStream.str();
     output["error"] = errorStream.str();
-    return output.ToString(false);
+    //return output.ToString(false);
   }
   HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
   theFile.initBuiltInSpanClasses();

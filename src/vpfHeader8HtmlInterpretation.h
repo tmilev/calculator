@@ -124,7 +124,6 @@ public:
   bool flagTagHtmlPresent;
   bool flagTagHeadPresent;
   bool flagTagBodyPresent;
-  bool flagDoPrependCalculatorNavigationBar;
   bool flagDoPrependProblemNavigationBar;
   bool flagDoPrependEditPagePanel;
   bool flagMathQuillWithMatrices;
@@ -284,7 +283,6 @@ public:
   std::string GetEditPagePanel();
   void InterpretEditPagePanel(SyntacticElementHTML& inputOutput);
   void InterpretProblemNavigationBar(SyntacticElementHTML& inputOutput);
-  void InterpretCalculatorNavigationBar(SyntacticElementHTML& inputOutput);
   void InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
   void InterpretJavascripts(SyntacticElementHTML& inputOutput);
   std::string GetEditPageButton(const std::string& desiredFileName, bool includeCloneButton = true);
@@ -293,7 +291,6 @@ public:
   JSData GetJavascriptMathQuillBoxesForJSON();
   void LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure);
   void FigureOutCurrentProblemList(std::stringstream& comments);
-  std::string LoadAndInterpretCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed);
   std::string LoadAndInterpretCurrentProblemItemJSON(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed, std::stringstream *commentsOnFailure);
   static unsigned int HashFunction(const CalculatorHTML& input)
   { return input.HashFunction();

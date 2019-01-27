@@ -812,10 +812,21 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerRemoveDuplicates(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRemoveDuplicates");
+  if (!input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("RemoveDuplicates")) &&
+      !input.IsSequenceNElementS())
+    return false;
+  HashedList<Expression> result;
+  for (int i = 1; i < input.size(); i ++)
+    result.AddOnTopNoRepetition(input[i]);
+  return output.MakeSequence(theCommands, &result);
+}
+
 bool CalculatorFunctionsGeneral::innerSort(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSort");
-  if (!input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("Sort"))
-      && !input.IsSequenceNElementS())
+  if (!input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("Sort")) &&
+      !input.IsSequenceNElementS())
     return false;
   List<Expression> sortedExpressions;
   sortedExpressions.Reserve(input.size() - 1);

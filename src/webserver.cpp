@@ -2832,11 +2832,6 @@ int WebWorker::ProcessExamPageJSON()
   return 0;
 }
 
-int WebWorker::ProcessExamPageInterpreter()
-{ stOutput << this->GetExamPageInterpreter();
-  return 0;
-}
-
 int WebWorker::ProcessNavigation()
 { MacroRegisterFunctionWithName("WebWorker::ProcessNavigation");
   this->SetHeaderOKNoContentLength("");
@@ -3050,7 +3045,6 @@ int WebWorker::ProcessSlidesSource()
   return 0;
 }
 
-
 int WebWorker::ProcessClonePage(bool useJSON)
 { MacroRegisterFunctionWithName("WebWorker::ProcessClonePage");
   this->SetHeaderOKNoContentLength("");
@@ -3127,12 +3121,6 @@ std::string WebWorker::GetEditPageHTML()
 { MacroRegisterFunctionWithName("WebWorker::GetEditPageHTML");
   this->SetHeaderOKNoContentLength("");
   return HtmlInterpretation::GetEditPageHTML();
-}
-
-std::string WebWorker::GetExamPageInterpreter()
-{ MacroRegisterFunctionWithName("WebWorker::GetExamPageInterpreter");
-  this->SetHeaderOKNoContentLength("");
-  return HtmlInterpretation::GetExamPageInterpreter();
 }
 
 int WebWorker::ProcessSubmitAnswers()

@@ -260,10 +260,8 @@ public:
   std::string GetAuthenticationToken(const std::string& reasonForNoAuthentication = "");
   std::string GetBrowseProblems();
   std::string GetEditPageHTML();
-  std::string GetExamPageInterpreter();
   std::string GetDatabaseJSON();
   std::string GetDatabaseDeleteOneItem();
-  //std::string GetEmailChangePage();
   std::string GetNavigationPage();
   std::string GetAddUserEmails();
   std::string GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken);

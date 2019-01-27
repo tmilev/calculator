@@ -40,7 +40,6 @@ CalculatorHTML::CalculatorHTML()
   this->flagTagHeadPresent = false;
   this->flagTagHtmlPresent = false;
   this->flagTagBodyPresent = false;
-  this->flagDoPrependCalculatorNavigationBar = true;
   this->flagDoPrependProblemNavigationBar = true;
   this->flagDoPrependEditPagePanel = true;
 
@@ -403,7 +402,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, const std::string& inputRandomS
   (void) doLoadDatabase;
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(this->fileName, this->inputHtml, commentsOnFailure))
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "Failed to load problem file. Entered file name: " << this->fileName << ".";
+      *commentsOnFailure << "<br>Entered file name:<br><b>" << this->fileName << "</b>";
     return false;
   }
   //stOutput << "Debug: got to here pt1";
@@ -452,19 +451,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON
     return "Failed to load problem. ";
   std::stringstream out;
   if (!this->InterpretHtml(commentsOnFailure))
-  { out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
-    << "<small>Generated in "
-    << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds() - startTime)
-    << " second(s).</small>"
-    << "</calculatorNavigation>";
-    if (theGlobalVariables.UserDefaultHasAdminRights())
-      out
-      << "<editPagePanel>"
-      << this->GetEditPageButton(this->fileName)
-      << "</editPagePanel>"
-      << "<br>";
-    out << "<b>Failed to interpret file: " << this->fileName
-    << "</b>. ";
+  { out << "<b>Failed to interpret file: " << this->fileName << "</b>. ";
     out << "<br>We limit the number of generation attemps to 10 for performance reasons; "
     << "with bad luck, some finicky problems require more. "
     << "<br> <b>Please refresh the page.</b><br>";
@@ -477,74 +464,14 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON
       out << "<b>Your random seed must have been reset. </b>";
     out << "<br><span style =\"color:red\"><b>If the problem persists after a couple of page refreshes, "
     << "it's a bug. Please take a screenshot and email the site admin/your instructor. </b></span>";
-    return out.str();
-  }
-  //out << "DEBUG: flagMathQuillWithMatrices =" << this->flagMathQuillWithMatrices << "<br>";
-  if (this->flagDoPrependCalculatorNavigationBar)
-  { out << "<calculatorNavigation>"
-    << theGlobalVariables.ToStringNavigation()
-    << "<small>Generated in "
+    out
+    << "Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds() - startTime)
-    << " second(s).</small>" << "</calculatorNavigation>\n";
+    << " second(s).";
+    return out.str();
   }
   if (this->flagDoPrependProblemNavigationBar)
     out << this->outputProblemNavigatioN;
-  out << this->outputHtmlBodyNoTag;
-  return out.str();
-}
-
-std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem
-(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed)
-{ MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItem");
-  double startTime = theGlobalVariables.GetElapsedSeconds();
-//  this->theProblemData.CheckConsistency();
-  std::stringstream errorStream;
-  this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore, desiredRandomSeed, &errorStream);
-//  this->theProblemData.CheckConsistency();
-  if (!this->flagLoadedSuccessfully)
-    return errorStream.str();
-  std::stringstream out;
-  if (!this->InterpretHtml(&errorStream))
-  { out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
-    << "<small>Generated in "
-    << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds() - startTime)
-    << " second(s).</small>"
-    << "</calculatorNavigation>";
-    if (theGlobalVariables.UserDefaultHasAdminRights())
-      out
-      << "<editPagePanel>"
-      << this->GetEditPageButton(this->fileName)
-      << "</editPagePanel>"
-      << "<br>";
-    out << "<b>Failed to interpret file: " << this->fileName
-    << "</b>. ";
-    out << "<br>We limit the number of generation attemps to 10 for performance reasons; "
-    << "with bad luck, some finicky problems require more. "
-    << "<br> <b>Please refresh the page.</b><br>";
-    if (!this->flagIsForReal)
-      out
-      << "If you specified the problem through the 'problem link' link,"
-      << " please go back to the course page. Alternatively, remove the randomSeed=... "
-      << "portion of the page address and reload the page (with the randomSeed portion removed). ";
-    else
-      out << "<b>Your random seed must have been reset. </b>";
-    out << "<br><span style =\"color:red\"><b>If the problem persists after a couple of page refreshes, "
-    << "it's a bug. Please take a screenshot and email the site admin/your instructor. </b></span>";
-    if (theGlobalVariables.UserDefaultHasProblemComposingRights())
-      out << "<hr> <b>Comments, admin view only.</b><br> " << errorStream.str();
-    return out.str();
-  }
-  //out << "DEBUG: flagMathQuillWithMatrices =" << this->flagMathQuillWithMatrices << "<br>";
-  if (this->flagDoPrependCalculatorNavigationBar)
-  { out << "<calculatorNavigation>"
-    << theGlobalVariables.ToStringNavigation()
-    << "<small>Generated in "
-    << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds() - startTime)
-    << " second(s).</small>" << "</calculatorNavigation>\n";
-  }
-  if (this->flagDoPrependProblemNavigationBar)
-    out << this->outputProblemNavigatioN;
-  out << errorStream.str();
   out << this->outputHtmlBodyNoTag;
   return out.str();
 }
@@ -561,11 +488,6 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
   this->flagLoadedSuccessfully = false;
   if (theGlobalVariables.UserGuestMode())
     needToLoadDatabaseMayIgnore = false;
-  this->flagDoPrependCalculatorNavigationBar = true;
-  if (theGlobalVariables.GetWebInput("navigationBar") == "false" ||
-      theGlobalVariables.userCalculatorRequestType == "exerciseJSON" ||
-      theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON")
-    this->flagDoPrependCalculatorNavigationBar = false;
   this->flagLoadedSuccessfully = true;
   if (this->fileName == "")
   { this->flagLoadedSuccessfully = false;
@@ -1608,8 +1530,6 @@ void CalculatorHTML::InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inp
     this->InterpretAccountInformationLinks(inputOutput);
   else if (tagClass == "calculatorJavascript")
     this->InterpretJavascripts(inputOutput);
-  else if (tagClass == "calculatorNavigationHere")
-    this->InterpretCalculatorNavigationBar(inputOutput);
   else if (tagClass == "calculatorProblemNavigationHere")
     this->InterpretProblemNavigationBar(inputOutput);
   else if (tagClass == "calculatorEditPageHere")
@@ -3239,10 +3159,6 @@ std::string CalculatorHTML::ToStringProblemNavigation() const
     return "";
   std::stringstream outFinal;
   outFinal << "<problemNavigation>" << out.str();
-  if (!this->flagDoPrependCalculatorNavigationBar)
-    outFinal << " | <small>Generated in: "
-    << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds())
-    << " second(s).</small>";
   outFinal << "</problemNavigation>";
   return outFinal.str();
 }
@@ -3827,15 +3743,6 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
   }
   this->CheckConsistencyTopics();
   return true;
-}
-
-void CalculatorHTML::InterpretCalculatorNavigationBar(SyntacticElementHTML& inputOutput)
-{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretCalculatorNavigationBar");
-  std::stringstream out;
-  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
-    << "</calculatorNavigation>";
-  inputOutput.interpretedCommand = out.str();
-  this->flagDoPrependCalculatorNavigationBar = false;
 }
 
 void CalculatorHTML::InterpretProblemNavigationBar(SyntacticElementHTML& inputOutput)

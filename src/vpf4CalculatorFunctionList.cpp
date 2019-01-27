@@ -2991,6 +2991,13 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorFunctionsGeneral::innerGetFirstSummandContaining",
    "GetFirstSummandContaining");
   this->AddOperationInnerHandler
+  ("RemoveDuplicates",
+   CalculatorFunctionsGeneral::innerRemoveDuplicates, "",
+   "Removes duplicates. ",
+   "RemoveDuplicates(a,a,c,a,b,a,b,d) ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerRemoveDuplicates", "RemoveDuplicates");
+  this->AddOperationInnerHandler
   ("Sort",
    CalculatorFunctionsGeneral::innerSort, "",
    "Sorts a sequence. ",

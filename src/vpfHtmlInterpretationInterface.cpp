@@ -418,15 +418,6 @@ std::string HtmlInterpretation::ClonePageResult(bool useJSON)
   return out.str();
 }
 
-std::string HtmlInterpretation::GetExamPageInterpreter()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPageInterpreter");
-  CalculatorHTML theFile;
-  std::stringstream out;
-  out << theFile.LoadAndInterpretCurrentProblemItem(false, theGlobalVariables.GetWebInput("randomSeed"));
-  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  return out.str();
-}
-
 std::string HtmlInterpretation::GetAboutPage()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetAboutPage");
   std::stringstream out;
@@ -726,11 +717,6 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   << " onload =\"loadSettings();";
   out << " initializeButtonsCommon(); ";
   out << "\"><!-- tag added automatically; user-specified body tag ignored-->\n";
-  if (thePage.flagDoPrependCalculatorNavigationBar)
-  { out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
-    << "<small>Generated in " << theGlobalVariables.GetElapsedSeconds()
-    << " second(s).</small>" << "</calculatorNavigation>\n";
-  }
   if (thePage.flagDoPrependProblemNavigationBar)
     out << thePage.outputProblemNavigatioN;
   out << thePage.outputHtmlBodyNoTag;
@@ -840,7 +826,6 @@ std::string HtmlInterpretation::GetExamPageJSON()
     return out.str();
   }
   CalculatorHTML theFile;
-  theFile.flagDoPrependCalculatorNavigationBar = false;
   theFile.flagDoPrependProblemNavigationBar = false;
   theFile.flagUseJSON = true;
   std::stringstream errorStream;

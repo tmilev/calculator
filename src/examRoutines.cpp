@@ -1347,6 +1347,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   else
     currentA.htmlAnswerHighlight = "";
   std::string& answerId = currentA.answerId;
+  currentA.idAnswerPanel = "spanAnswerPanel" + answerId;
   currentA.varAnswerId = answerId + "spanVariable";
   currentA.varMQfield = answerId + "MQspanVar";
   currentA.MQobject = "answerMathQuillObjects[" + std::to_string(this->NumAnswerIdsMathquilled) + "]";
@@ -1368,34 +1369,6 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.idButtonInterpret = "buttonInterpret" + answerId;
   currentA.idButtonAnswer = "buttonAnswer" + answerId;
   currentA.idButtonSolution = "buttonSolution" + answerId;
-
-  currentA.htmlButtonSubmit = "<button class =\"buttonSubmit\" id =\"" + currentA.idButtonSubmit + "\"";
-  if (!this->flagUseJSON)
-    currentA.htmlButtonSubmit += " onclick = \"submitAnswers('" + answerId + "', '" + currentA.idVerificationSpan + "')\"";
-  currentA.htmlButtonSubmit +=  ">Submit</button>";
-  currentA.htmlButtonInterpret = (std::string) "<button class =\"buttonPreview\" ";
-  currentA.htmlButtonInterpret += " id =\"" + currentA.idButtonInterpret + "\" ";
-  if (!this->flagUseJSON)
-    currentA.htmlButtonInterpret += "onclick=\"previewAnswersNoTimeOut('" + answerId + "', '" + currentA.idVerificationSpan + "')" + "\"";
-  currentA.htmlButtonInterpret += ">Interpret</button>";
-  if (!this->flagIsForReal)
-  { if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly != "")
-    { currentA.htmlButtonAnswer = "<button id =\"" + currentA.idButtonAnswer +
-      "\" class =\"buttonAnswer\"";
-      if (!this->flagUseJSON)
-        currentA.htmlButtonAnswer += " onclick=\"giveUp('" + answerId + "', '" + currentA.idVerificationSpan + "')\"";
-      currentA.htmlButtonAnswer += ">Answer</button>";
-    } else
-      currentA.htmlButtonAnswer = "No ``give-up'' answer available. ";
-    if (currentA.flagSolutionFound)
-    { currentA.htmlButtonSolution = "<button id =\"" + currentA.idButtonSolution + "\" class =\"buttonSolution\"";
-      if (!this->flagUseJSON)
-        currentA.htmlButtonSolution += " onclick=\"showSolution('" + answerId +
-        "','" + currentA.idSpanSolution + "')\"";
-      currentA.htmlButtonSolution += "> Solution</button>";
-    } else
-      currentA.htmlButtonSolution = "";
-  }
   if (!this->flagUseJSON)
   { inputOutput.defaultKeysIfMissing.AddOnTop("onkeyup");
     inputOutput.defaultValuesIfMissing.AddOnTop
@@ -1403,19 +1376,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   }
 //  inputOutput.defaultKeysIfMissing.AddOnTop("style");
 //  inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
-  currentA.htmlTextareaLatexAnswer =
-  inputOutput.ToStringOpenTag("textarea") + inputOutput.ToStringCloseTag("textarea");
-  currentA.htmlSpanMQfield =
-  (std::string)"<div class =\"calculatorMQfieldEnclosure\">" +
-  "<span id ='" + currentA.idMQfield + "'>" + "</span>" +
-  "</div>";
-  //currentA.htmlMQjavascript = CalculatorHtmlFunctions::GetJavascriptMathQuillBox(currentA);
-  currentA.htmlSpanMQButtonPanel =
-  "<div class =\"mqButtonPanel\" id =\"" + currentA.idMQButtonPanelLocation + "\" "+  "buttons =\"" +
-  currentA.MQpanelButtonOptions + "\"></div>";
-  currentA.htmlSpanSolution = "<span id =\"" + currentA.idSpanSolution + "\"></span>";
   std::stringstream verifyStream;
-  verifyStream << "<span id =\"" << currentA.idVerificationSpan << "\">";
   int numCorrectSubmissions = currentA.numCorrectSubmissions;
   int numSubmissions = currentA.numSubmissions;
   if (theGlobalVariables.userCalculatorRequestType == "scoredQuiz" ||
@@ -1432,7 +1393,6 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
     }
   } else
     verifyStream << " <b><span style =\"color:brown\">Waiting for answer [unlimited tries]</span></b>";
-  verifyStream << "</span>";
   currentA.htmlSpanVerifyAnswer = verifyStream.str();
   return true;
 }
@@ -1441,56 +1401,9 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateStudentAnswerButton");
   if (!this->ComputeAnswerRelatedStrings(inputOutput))
     return;
-  Answer& currentA = this->theProblemData.
-  theAnswers[this->GetAnswerIndex(inputOutput.GetKeyValue("id"))];
-  if (!currentA.flagAutoGenerateMQButtonPanel && !currentA.flagAutoGenerateMQfield &&
-      !currentA.flagAutoGenerateSubmitButtons && !currentA.flagAutoGenerateVerificationField)
-  { inputOutput.interpretedCommand = currentA.htmlTextareaLatexAnswer;
-    return;
-  }
+  Answer& currentA = this->theProblemData.theAnswers[this->GetAnswerIndex(inputOutput.GetKeyValue("id"))];
   std::stringstream out;
-  out << "<br><span class =\"panelAnswer\">";
-  out << "<table>";
-  out << "<tr><td>";
-  out << "<table><tr>";
-  if (currentA.htmlAnswerHighlight != "")
-    out << "<td><answerCalculatorHighlight>" << currentA.htmlAnswerHighlight << "</answerCalculatorHighlight></td>";
-  if (currentA.flagAutoGenerateMQfield)
-    out << "<td class =\"tableCellMQfield\">" << currentA.htmlSpanMQfield  << "</td>";
-  if (currentA.flagAutoGenerateMQButtonPanel)
-    out << "<td>" << currentA.htmlSpanMQButtonPanel << "</td>";
-  out << "</tr></table>";
-  out << "</td>";
-  if (currentA.flagAutoGenerateSubmitButtons)
-  { out << "<td>";
-    out << "<table>";
-    out << "<tr><td>";
-    out << currentA.htmlButtonSubmit;
-    out << "</td></tr>";
-    out << "<tr><td>";
-    out << currentA.htmlButtonInterpret;
-    out << "</td></tr>";
-    out << "<tr><td>";
-    out << currentA.htmlButtonAnswer;
-    out << "</td></tr>";
-    out << "<tr><td>";
-    out << currentA.htmlButtonSolution;
-    out << "</td></tr>";
-    out << "</table>";
-    out << "</td>";
-  }
-  out << "<td>";
-  out << "<button class =\"accordion\">details</button>";
-//  out << "<div class =\"panel\">";
-  out << currentA.htmlTextareaLatexAnswer;
-//  out << "</div>";
-  out << "</td>";
-  out << "</tr>";
-  out << "</table>";
-  if (currentA.flagAutoGenerateVerificationField)
-    out << currentA.htmlSpanVerifyAnswer;
-  out << "</span>";
-
+  out << "<br><span class =\"panelAnswer\" id = \"" << currentA.idAnswerPanel << "\"></span>";
   inputOutput.interpretedCommand = out.str();
 }
 
@@ -2513,22 +2426,8 @@ bool CalculatorHTML::InterpretOneAnswerElement(SyntacticElementHTML& inputOutput
     return true;
   }
   Answer& currentA = this->theProblemData.theAnswers[theIndex];
-  if (tagClass == "calculatorButtonInterpret")
-    inputOutput.interpretedCommand = currentA.htmlButtonInterpret;
-  if (tagClass == "calculatorButtonGiveUp")
-    inputOutput.interpretedCommand = currentA.htmlButtonAnswer;
-  if (tagClass == "calculatorButtonSolution")
-    inputOutput.interpretedCommand = currentA.htmlButtonSolution;
-  if (tagClass == "calculatorMQField")
-    inputOutput.interpretedCommand = currentA.htmlSpanMQfield;
-  if (tagClass == "calculatorMQButtonPanel")
-    inputOutput.interpretedCommand = currentA.htmlSpanMQButtonPanel;
   if (tagClass == "calculatorAnswerVerification")
     inputOutput.interpretedCommand = currentA.htmlSpanVerifyAnswer;
-  if (tagClass == "calculatorButtonSubmit")
-    inputOutput.interpretedCommand = currentA.htmlButtonSubmit;
-  if (tagClass == "calculatorSolution")
-    inputOutput.interpretedCommand = currentA.htmlSpanSolution;
   return true;
 }
 
@@ -2745,14 +2644,20 @@ JSData CalculatorHTML::GetJavascriptMathQuillBoxesForJSON()
   { JSData currentAnswerJS;
     Answer& currentAnswer = this->theProblemData.theAnswers[i];
     ///////////////
+    currentAnswerJS["answerPanelId"] = currentAnswer.idAnswerPanel;
+    currentAnswerJS["answerHighlight"] = currentAnswer.htmlAnswerHighlight;
     currentAnswerJS["answerMQspanId"] = currentAnswer.idMQfield;
     currentAnswerJS["preferredButtonContainer"] = currentAnswer.idMQButtonPanelLocation;
+    currentAnswerJS["MQpanelButtonOptions"] = currentAnswer.MQpanelButtonOptions;
     currentAnswerJS["answerIdPureLatex"] = currentAnswer.answerId;
     currentAnswerJS["idButtonSubmit"] = currentAnswer.idButtonSubmit;
     currentAnswerJS["idButtonInterpret"] = currentAnswer.idButtonInterpret;
-    currentAnswerJS["idButtonAnswer"] = currentAnswer.idButtonAnswer;
-    currentAnswerJS["idButtonSolution"] = currentAnswer.idButtonSolution;
+    if (currentAnswer.commandsNoEnclosureAnswerOnGiveUpOnly != "")
+      currentAnswerJS["idButtonAnswer"] = currentAnswer.idButtonAnswer;
+    if (currentAnswer.flagSolutionFound)
+      currentAnswerJS["idButtonSolution"] = currentAnswer.idButtonSolution;
     currentAnswerJS["idVerificationSpan"] = currentAnswer.idVerificationSpan;
+    currentAnswerJS["previousAnswers"] = currentAnswer.htmlSpanVerifyAnswer;
     ///////////////
     output[i] = currentAnswerJS;
   }

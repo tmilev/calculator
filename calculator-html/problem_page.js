@@ -4,7 +4,7 @@ const pathnames = require('./pathnames');
 const ids = require('./ids_dom_elements');
 const editPage = require('./edit_page');
 const initializeButtons = require('./initialize_buttons');
-const ButtonPanel = initializeButtons.InputPanelData;
+const InputPanelData = initializeButtons.InputPanelData;
 
 function selectCurrentProblem(problemIdURLed, exerciseType) {
   var thePage = window.calculator.mainPage;
@@ -31,7 +31,7 @@ Problem.prototype.initialize = function(problemData, inputParentIdURLed) {
   this.commentsProblem = "";
   this.parentIdURLed = inputParentIdURLed;
   this.randomSeed = null;
-  /**@type {ButtonPanel[]} */
+  /**@type {InputPanelData[]} */
   this.answers = [];
   this.problemLabel = "";
   this.flagForReal = true;
@@ -121,18 +121,22 @@ Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) 
 
   for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++) {
     var currentVector = answerVectors[counterAnswers];
-    this.answers[counterAnswers] = new initializeButtons.InputPanelData({
-      problemId:           this.idURLed,
-      idMQSpan:            currentVector.answerMQspanId,
-      idPureLatex:         currentVector.answerIdPureLatex,
-      idButtonContainer:   currentVector.preferredButtonContainer,
-      idButtonSubmit:      currentVector.idButtonSubmit,
-      idButtonInterpret:   currentVector.idButtonInterpret,
-      idButtonAnswer:      currentVector.idButtonAnswer,
-      idButtonSolution:    currentVector.idButtonSolution,
-      idVerificationSpan:  currentVector.idVerificationSpan,
-      flagAnswerPanel:     true,
-      flagCalculatorPanel: false,
+    this.answers[counterAnswers] = new InputPanelData({
+      problemId:            this.idURLed,
+      previousAnswers:      currentVector.previousAnswers,
+      answerHighlight:      currentVector.answerHighlight,
+      answerPanelId:        currentVector.answerPanelId,
+      MQpanelButtonOptions: currentVector.MQpanelButtonOptions,
+      idMQSpan:             currentVector.answerMQspanId,
+      idPureLatex:          currentVector.answerIdPureLatex,
+      idButtonContainer:    currentVector.preferredButtonContainer,
+      idButtonSubmit:       currentVector.idButtonSubmit,
+      idButtonInterpret:    currentVector.idButtonInterpret,
+      idButtonAnswer:       currentVector.idButtonAnswer,
+      idButtonSolution:     currentVector.idButtonSolution,
+      idVerificationSpan:   currentVector.idVerificationSpan,
+      flagAnswerPanel:      true,
+      flagCalculatorPanel:  false,
     });
   }
   this.writeToHTML("divProblemPageContentContainer");
@@ -147,7 +151,6 @@ Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) 
     thePage.injectScript(newLabel, decodeURIComponent(problemData.scripts[scriptLabel]));
   }
 }
-
 
 function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   var thePage = window.calculator.mainPage;
@@ -262,6 +265,103 @@ Problem.prototype.getEditPanel = function() {
   return editPage.getEditPanel(decodeURIComponent(this.idURLed));
 }
 
+Problem.prototype.onePanel = function(/**@type {InputPanelData} */ currentAnswerPanel) {
+  var latexChangeHandler = currentAnswerPanel.editLaTeX;
+  var latexChangeHandlerBound = latexChangeHandler.bind(currentAnswerPanel);
+  var panelContent = "";
+  panelContent += "<table>";
+  panelContent += "<tr><td>";
+  panelContent += "<table><tr>";
+  if (currentAnswerPanel.answerHighlight !== undefined && currentAnswerPanel.answerHighlight !== "") {
+    panelContent += `<td><answerCalculatorHighlight>${currentAnswerPanel.answerHighlight}</answerCalculatorHighlight></td>`;
+  }
+  panelContent += `<td class = "tableCellMQfield">`;
+  panelContent += `<div class = "calculatorMQfieldEnclosure"><span id ="${currentAnswerPanel.idMQSpan}"></span></div>`;
+  panelContent += `</td>`;
+  panelContent += `<td>`;
+  panelContent += `<div class = "mqButtonPanel" id = "${currentAnswerPanel.idButtonContainer}" `;
+  panelContent += `buttons = "${currentAnswerPanel.MQpanelButtonOptions}"></div>`;
+  panelContent +=  "</td>";
+  panelContent += "</tr></table>";
+  panelContent += "</td>";
+  panelContent += "<td>";
+  panelContent += "<table>";
+  panelContent += "<tr><td>";
+  panelContent += `<button class = "buttonSubmit" id = "${currentAnswerPanel.idButtonSubmit}">Submit</button>`;
+  panelContent += "</td></tr>";
+  panelContent += "<tr><td>";
+  panelContent += `<button class = "buttonPreview" id = "${currentAnswerPanel.idButtonInterpret}">Interpret</button>`;
+  panelContent += `</td></tr>`;
+  if (this.flagForReal !== true) {
+    panelContent += "<tr><td>";
+    if (currentAnswerPanel.idButtonAnswer !== null && currentAnswerPanel.idButtonAnswer !== undefined) {
+      panelContent += `<button class = "buttonAnswer" id = "${currentAnswerPanel.idButtonAnswer}">Answer</button>`;
+    } else {
+      panelContent += "Answer not available. ";
+    }
+    panelContent += "</td></tr>";
+    if (currentAnswerPanel.idButtonSolution !== null && currentAnswerPanel.idButtonSolution !== undefined) { 
+      panelContent += "<tr><td>";
+      panelContent += `<button class = "buttonSolution" id = "${currentAnswerPanel.idButtonSolution}">Solution</button>`;
+      panelContent += "</td></tr>";  
+    } 
+  }
+  panelContent += "</table>";
+  panelContent += "</td>";
+  panelContent += "<td>";
+  panelContent += `<button class = "accordion">details</button>`;
+  panelContent += `<textarea class = "calculatorAnswer" id = "${currentAnswerPanel.idPureLatex}"></textarea>`;
+  panelContent += "</td>";
+  panelContent += "</tr>";
+  panelContent += "</table>";
+  panelContent += `<span id = "${currentAnswerPanel.idVerificationSpan}">`;
+  if (currentAnswerPanel.previousAnswers !== undefined && currentAnswerPanel.previousAnswers !== "") {
+    panelContent += currentAnswerPanel.previousAnswers;
+  } else {
+    panelContent += `<b style = "color:brown">Waiting for answer [unlimited tries]</b>`;
+  }
+  panelContent += "</span>";
+  if (this.flagForReal !== true && currentAnswerPanel.idSpanSolution !== undefined && currentAnswerPanel.idSpanSolution !== null) {
+    panelContent += `<span id = "${currentA.idSpanSolution}"></span>`;
+  }
+  var panelSpan = document.getElementById(currentAnswerPanel.answerPanelId);
+  panelSpan.innerHTML = panelContent;
+  var theElement = document.getElementById(currentAnswerPanel.idPureLatex);
+  theElement.addEventListener('keyup', latexChangeHandlerBound);
+  var interpretHandler = currentAnswerPanel.submitPreview;
+  var interpretHandlerBound = interpretHandler.bind(currentAnswerPanel);
+  theElement = document.getElementById(currentAnswerPanel.idButtonInterpret);
+  theElement.addEventListener('click', interpretHandlerBound);
+  document.getElementById(currentAnswerPanel.idButtonInterpret).addEventListener(
+    'click', 
+    currentAnswerPanel.submitPreview.bind(currentAnswerPanel)
+  );
+  document.getElementById(currentAnswerPanel.idButtonSubmit).addEventListener(
+    'click', 
+    currentAnswerPanel.submitAnswers.bind(currentAnswerPanel)
+  );
+  if (this.flagForReal !== true) {
+    var buttonAnswer = document.getElementById(currentAnswerPanel.idButtonAnswer); 
+    buttonAnswer.addEventListener(
+      'click', 
+      currentAnswerPanel.submitGiveUp.bind(currentAnswerPanel)
+    );
+  }
+  if (
+    currentAnswerPanel.idButtonSolution !== undefined && 
+    currentAnswerPanel.idButtonSolution !== null &&
+    currentAnswerPanel.idButtonSolution !== ""
+  ) {
+    var theSolutionButton = document.getElementById(currentAnswerPanel.idButtonSolution);
+    if (theSolutionButton !== null) {
+      theSolutionButton.addEventListener(
+        'click', currentAnswerPanel.showSolution.bind(currentAnswerPanel)
+      );
+    }
+  }
+  currentAnswerPanel.initialize();
+}
+
 Problem.prototype.writeToHTML = function(outputElement) {
   if (typeof outputElement === "string") {
     outputElement = document.getElementById(outputElement);
@@ -278,43 +378,8 @@ Problem.prototype.writeToHTML = function(outputElement) {
   topPart += "<br>";
   outputElement.innerHTML = topPart + this.decodedProblem + this.commentsProblem;
   for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++) {
-    var currentAnswerPanel = this.answers[counterAnswers];
-    var latexChangeHandler = currentAnswerPanel.editLaTeX;
-    var latexChangeHandlerBound = latexChangeHandler.bind(currentAnswerPanel);
-    var theElement = document.getElementById(currentAnswerPanel.idPureLatex);
-    theElement.addEventListener('keyup', latexChangeHandlerBound);
-
-    var interpretHandler = currentAnswerPanel.submitPreview;
-    var interpretHandlerBound = interpretHandler.bind(currentAnswerPanel);
-
-    theElement = document.getElementById(currentAnswerPanel.idButtonInterpret);
-    theElement.addEventListener('click', interpretHandlerBound);
-    document.getElementById(currentAnswerPanel.idButtonInterpret).addEventListener(
-      'click', currentAnswerPanel.submitPreview.bind(currentAnswerPanel)
-    );
-    document.getElementById(currentAnswerPanel.idButtonSubmit).addEventListener(
-      'click', currentAnswerPanel.submitAnswers.bind(currentAnswerPanel)
-    );
-    if (!this.flagForReal) {
-      document.getElementById(currentAnswerPanel.idButtonAnswer).addEventListener(
-        'click', currentAnswerPanel.submitGiveUp.bind(currentAnswerPanel)
-      );
-    }
-    if (
-      currentAnswerPanel.idButtonSolution !== undefined && 
-      currentAnswerPanel.idButtonSolution !== null &&
-      currentAnswerPanel.idButtonSolution !== ""
-    ) {
-      var theSolutionButton = document.getElementById(currentAnswerPanel.idButtonSolution);
-      if (theSolutionButton !== null) {
-        theSolutionButton.addEventListener(
-          'click', currentAnswerPanel.showSolution.bind(currentAnswerPanel)
-        );
-      }
-    }
-    currentAnswerPanel.initialize();
+    this.onePanel(this.answers[counterAnswers]);
   }
-
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divProblemPageContentContainer")]);
   initializeButtons.initializeAccordionButtons();
 }

@@ -224,7 +224,7 @@ function initializeAccordionButtons() {
       for (var i = 0; i < theProps.length; i ++) { 
         var current = panelsCollapseStatus[theProps[i]];
         if (current.isCollapsed) {
-          toggleHeight(document.getElementById(current.button),theProps[i]);
+          toggleHeight(document.getElementById(current.button), theProps[i]);
         }
       }
     }
@@ -267,6 +267,8 @@ function InputPanelData(input) {
   this.idButtonAnswer = input.idButtonAnswer;
   this.idVerificationSpan = input.idVerificationSpan;
   this.idButtonSolution = input.idButtonSolution;
+  this.answerHighlight = input.answerHighlight;
+  this.answerPanelId = input.answerPanelId;
   //just in case we forget some entry above:
   Object.assign(this, input);
   panelDataRegistry[this.idButtonContainer] = this;
@@ -291,8 +293,7 @@ function InputPanelData(input) {
   }
 }
 
-InputPanelData.prototype.mQHelpCalculator = function() { 
-  //event.preventDefault();
+InputPanelData.prototype.mQHelpCalculator = function() {
   this.getSemiColumnEnclosure();
   if (this.mqObject === null) {
     return;
@@ -416,7 +417,6 @@ InputPanelData.prototype.submitPreviewWithTimeOut = function() { // useful event
 }
 
 InputPanelData.prototype.editLaTeX = function() { // useful event handlers
-  //console.log("here i am");
   this.ignoreNextMathQuillUpdateEvent = true;
   this.mqObject.latex(document.getElementById(this.idPureLatex).value + ' ');
   this.ignoreNextMathQuillUpdateEvent = false;
@@ -774,7 +774,7 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
   currentButtonPanel.style.maxHeight = "";
   currentButtonPanel.style.height = "";
   currentButtonPanel.innerHTML = theContent;
-  for (var j = 0; j< buttonBindings.length; j ++) {
+  for (var j = 0; j < buttonBindings.length; j ++) {
     document.getElementById(buttonBindings[j].getButtonId(this)).addEventListener(
       'click', buttonBindings[j].clickFunction.bind(buttonBindings[j], this)
     );

@@ -105,21 +105,14 @@ struct Answer
   std::string answerId;
   std::string varAnswerId;
   std::string idVerificationSpan;
+  std::string idAnswerPanel;
   std::string idButtonSubmit;
   std::string idButtonInterpret;
   std::string idButtonAnswer;
   std::string idButtonSolution;
   std::string javascriptPreviewAnswer;
   //std::string htmlMQjavascript;
-  std::string htmlButtonInterpret;
-  std::string htmlButtonAnswer;
-  std::string htmlButtonSubmit;
-  std::string htmlButtonSolution;
-  std::string htmlTextareaLatexAnswer;
-  std::string htmlSpanMQfield;
   std::string htmlSpanVerifyAnswer;
-  std::string htmlSpanSolution;
-  std::string htmlSpanMQButtonPanel;
   std::string htmlAnswerHighlight;
   //////////////////////////////////////
   std::string MQpanelButtonOptions;

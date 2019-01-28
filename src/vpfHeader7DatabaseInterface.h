@@ -102,6 +102,7 @@ struct Answer
   std::string commandsSolutionOnly;
   std::string commandsNoEnclosureAnswerOnGiveUpOnly;
   List<SyntacticElementHTML> solutionElements;
+  MapLisT<std::string, std::string, MathRoutines::hashString> properties;
   std::string answerId;
   std::string varAnswerId;
   std::string idVerificationSpan;

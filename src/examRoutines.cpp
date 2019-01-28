@@ -1363,6 +1363,12 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
 
   previewAnswerStream << "previewAnswers('" << answerId << "', '"
   << currentA.idVerificationSpan << "');";
+  currentA.properties.Clear();
+  for (int i = 0; i < inputOutput.properties.size(); i ++)
+  { if (inputOutput.properties.theKeys[i] == "id")
+      continue;
+    currentA.properties.SetKeyValue(inputOutput.properties.theKeys[i], inputOutput.properties.theValues[i]);
+  }
 
   currentA.javascriptPreviewAnswer = previewAnswerStream.str();
   currentA.idButtonSubmit = "buttonSubmit" + answerId;
@@ -1391,8 +1397,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
       if (numSubmissions > 0)
         verifyStream << numSubmissions << " attempt(s) so far. ";
     }
-  } else
-    verifyStream << " <b><span style =\"color:brown\">Waiting for answer [unlimited tries]</span></b>";
+  }
   currentA.htmlSpanVerifyAnswer = verifyStream.str();
   return true;
 }
@@ -2644,6 +2649,12 @@ JSData CalculatorHTML::GetJavascriptMathQuillBoxesForJSON()
   { JSData currentAnswerJS;
     Answer& currentAnswer = this->theProblemData.theAnswers[i];
     ///////////////
+    JSData properties;
+    for (int j = 0; j < currentAnswer.properties.size(); j ++)
+      properties[currentAnswer.properties.theKeys[j]] = currentAnswer.properties.theValues[j];
+    if (currentAnswer.properties.size() > 0) {
+      currentAnswerJS["properties"] = properties;
+    }
     currentAnswerJS["answerPanelId"] = currentAnswer.idAnswerPanel;
     currentAnswerJS["answerHighlight"] = currentAnswer.htmlAnswerHighlight;
     currentAnswerJS["answerMQspanId"] = currentAnswer.idMQfield;

@@ -857,6 +857,11 @@ function updateProblemPageCallback(input, outputComponent) {
     thePage.cleanUpLoginSpan(outputComponent);
     return;
   }
+  if (theProblem.crashReport !== undefined && theProblem.crashReport !== null) {
+    outputComponent.innerHTML = theProblem.crashReport;
+    return;
+  }
+
   /**@type {Problem} */
   var currentProblem = thePage.getCurrentProblem();
   if (currentProblem === null || currentProblem === undefined) {

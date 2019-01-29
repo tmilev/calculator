@@ -26,7 +26,7 @@ function Problem() {
 
 Problem.prototype.initialize = function(problemData, inputParentIdURLed) {
   var thePage = window.calculator.mainPage;
-  this.idURLed = encodeURIComponent(problemData.id);
+  this.problemId = encodeURIComponent(problemData.id);
   this.decodedProblem = "";
   this.commentsProblem = "";
   this.parentIdURLed = inputParentIdURLed;
@@ -45,12 +45,12 @@ Problem.prototype.initialize = function(problemData, inputParentIdURLed) {
   }
   this.title = problemData.title;
   this.problemNumberString = problemData.problemNumberString;
-  this.idButtonPoints = `modifyPoints${this.idURLed}`;
-  this.idTextareaPoints = `points${this.idURLed}`;
-  this.idModifyReportDeadline = `deadlines${this.idURLed}`;
-  this.idDeadlinePanel = `deadlinesPanel${this.idURLed}`;
-  this.idDeadlineContainer = `${ids.stringResources.prefixDeadlineContainer}${this.idURLed}`;
-  this.idModifyReportPoints = `report${this.idURLed}`;
+  this.idButtonPoints = `modifyPoints${this.problemId}`;
+  this.idTextareaPoints = `points${this.problemId}`;
+  this.idModifyReportDeadline = `deadlines${this.problemId}`;
+  this.idDeadlinePanel = `deadlinesPanel${this.problemId}`;
+  this.idDeadlineContainer = `${ids.stringResources.prefixDeadlineContainer}${this.problemId}`;
+  this.idModifyReportPoints = `report${this.problemId}`;
   this.correctlyAnswered = problemData.correctlyAnswered;
   this.totalQuestions = problemData.totalQuestions;
   this.deadlines = [];
@@ -75,9 +75,9 @@ Problem.prototype.initialize = function(problemData, inputParentIdURLed) {
       this.previousProblemId !== undefined && 
       this.previousProblemId !== ""
     ) {
-      thePage.problems[this.previousProblemId].nextProblemId = this.idURLed;
+      thePage.problems[this.previousProblemId].nextProblemId = this.problemId;
     }
-    thePage.previousProblemId = this.idURLed;
+    thePage.previousProblemId = this.problemId;
   }
   this.problemNumberString = problemData.problemNumberString;
   this.video = problemData.video;
@@ -90,15 +90,16 @@ Problem.prototype.initialize = function(problemData, inputParentIdURLed) {
     this.queryHomework = "";
   }
 
-  thePage.problems[this.idURLed] = this;
+  thePage.problems[this.problemId] = this;
   if (this.type === "chapter") {
-    thePage.theChapterIds[this.idURLed] = true;
+    thePage.theChapterIds[this.problemId] = true;
   }
   this.childrenIds = [];
   if (Array.isArray(problemData.children)) {
     for (var counterChildren = 0; counterChildren < problemData.children.length; counterChildren ++) {
-      var currentChild = new Problem(problemData.children[counterChildren], this.idURLed);
-      this.childrenIds.push(currentChild.idURLed);
+      var currentChild = new Problem();
+      currentChild.initialize(problemData.children[counterChildren], this.problemId);
+      this.childrenIds.push(currentChild.problemId);
     }
   }
   this.initializePartTwo(problemData, inputParentIdURLed);
@@ -122,14 +123,15 @@ Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) 
   for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++) {
     var currentVector = answerVectors[counterAnswers];
     this.answers[counterAnswers] = new InputPanelData({
-      problemId:            this.idURLed,
+      problemId:            this.problemId,
+      properties:           currentVector.properties,
       previousAnswers:      currentVector.previousAnswers,
       answerHighlight:      currentVector.answerHighlight,
       answerPanelId:        currentVector.answerPanelId,
       MQpanelButtonOptions: currentVector.MQpanelButtonOptions,
-      idMQSpan:             currentVector.answerMQspanId,
-      idPureLatex:          currentVector.answerIdPureLatex,
-      idButtonContainer:    currentVector.preferredButtonContainer,
+      idMQSpan:             currentVector.idMQSpan,
+      idPureLatex:          currentVector.idPureLatex,
+      idButtonContainer:    currentVector.idButtonContainer,
       idButtonSubmit:       currentVector.idButtonSubmit,
       idButtonInterpret:    currentVector.idButtonInterpret,
       idButtonAnswer:       currentVector.idButtonAnswer,
@@ -146,7 +148,7 @@ Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) 
   }
   this.scriptIds = [];
   for (var scriptLabel in problemData.scripts) {
-    var newLabel = encodeURIComponent(this.idURLed + scriptLabel);
+    var newLabel = encodeURIComponent(this.problemId + scriptLabel);
     this.scriptIds.push(newLabel); 
     thePage.injectScript(newLabel, decodeURIComponent(problemData.scripts[scriptLabel]));
   }
@@ -236,12 +238,12 @@ Problem.prototype.getProblemNavigation = function() {
   }
 
   if (this.flagForReal && thePage.user.flagLoggedIn) {
-    result += `<a class = 'problemLinkPractice' href = '#${this.getAppAnchorRequestFileCourseTopics()}' onclick = "window.calculator.problemPage.selectCurrentProblem('${this.idURLed}' ,'exerciseJSON')">Practice</a>`;
+    result += `<a class = 'problemLinkPractice' href = '#${this.getAppAnchorRequestFileCourseTopics()}' onclick = "window.calculator.problemPage.selectCurrentProblem('${this.problemId}' ,'exerciseJSON')">Practice</a>`;
   } else {
     result += "<span class = 'problemLinkSelectedPractice' style='color:green'>Practice</span>";
   }
   if (!this.flagForReal && thePage.user.flagLoggedIn) { 
-    result += `<a class = 'problemLinkQuiz' href = '#${this.getAppAnchorRequestFileCourseTopics()}' onclick = "window.calculator.problemPage.selectCurrentProblem('${this.idURLed}' ,'scoredQuizJSON')">Quiz</a>`;
+    result += `<a class = 'problemLinkQuiz' href = '#${this.getAppAnchorRequestFileCourseTopics()}' onclick = "window.calculator.problemPage.selectCurrentProblem('${this.problemId}' ,'scoredQuizJSON')">Quiz</a>`;
   } else {
     if (this.flagForReal) {
       result += "<span class = 'problemLinkSelectedQuiz' style='color:brown'>Quiz</span>";
@@ -262,7 +264,7 @@ Problem.prototype.getProblemNavigation = function() {
 }
 
 Problem.prototype.getEditPanel = function() {
-  return editPage.getEditPanel(decodeURIComponent(this.idURLed));
+  return editPage.getEditPanel(decodeURIComponent(this.problemId));
 }
 
 Problem.prototype.onePanel = function(/**@type {InputPanelData} */ currentAnswerPanel) {
@@ -274,6 +276,13 @@ Problem.prototype.onePanel = function(/**@type {InputPanelData} */ currentAnswer
   panelContent += "<table><tr>";
   if (currentAnswerPanel.answerHighlight !== undefined && currentAnswerPanel.answerHighlight !== "") {
     panelContent += `<td><answerCalculatorHighlight>${currentAnswerPanel.answerHighlight}</answerCalculatorHighlight></td>`;
+  }
+  console.log("Debug: current answer panel props: " + JSON.stringify(currentAnswerPanel.properties));
+  var layoutVertical = true;
+  if (currentAnswerPanel.properties !== undefined) {
+    if (currentAnswerPanel.properties.layoutSubmit === "horizontal") {
+      layoutVertical = false;
+    }
   }
   panelContent += `<td class = "tableCellMQfield">`;
   panelContent += `<div class = "calculatorMQfieldEnclosure"><span id ="${currentAnswerPanel.idMQSpan}"></span></div>`;
@@ -288,23 +297,44 @@ Problem.prototype.onePanel = function(/**@type {InputPanelData} */ currentAnswer
   panelContent += "<table>";
   panelContent += "<tr><td>";
   panelContent += `<button class = "buttonSubmit" id = "${currentAnswerPanel.idButtonSubmit}">Submit</button>`;
-  panelContent += "</td></tr>";
-  panelContent += "<tr><td>";
+  panelContent += "</td>";
+  if (layoutVertical) {
+    panelContent += "</tr><tr>";
+  }
+  panelContent += "<td>";
   panelContent += `<button class = "buttonPreview" id = "${currentAnswerPanel.idButtonInterpret}">Interpret</button>`;
-  panelContent += `</td></tr>`;
+  panelContent += `</td>`;
+  if (layoutVertical) {
+    panelContent += `</tr>`;
+  }
   if (this.flagForReal !== true) {
-    panelContent += "<tr><td>";
+    if (layoutVertical) {
+      panelContent += `<tr>`;
+    }
+    panelContent += "<td>";
     if (currentAnswerPanel.idButtonAnswer !== null && currentAnswerPanel.idButtonAnswer !== undefined) {
       panelContent += `<button class = "buttonAnswer" id = "${currentAnswerPanel.idButtonAnswer}">Answer</button>`;
     } else {
       panelContent += "Answer not available. ";
     }
-    panelContent += "</td></tr>";
+    panelContent += "</td>";
+    if (layoutVertical) {
+      panelContent += "</tr>";
+    }
     if (currentAnswerPanel.idButtonSolution !== null && currentAnswerPanel.idButtonSolution !== undefined) { 
-      panelContent += "<tr><td>";
+      if (layoutVertical) {
+        panelContent += "<tr>";
+      }
+      panelContent += "<td>";
       panelContent += `<button class = "buttonSolution" id = "${currentAnswerPanel.idButtonSolution}">Solution</button>`;
-      panelContent += "</td></tr>";  
+      panelContent += "</td>";
+      if (layoutVertical) {
+        panelContent += "</tr>";
+      }
     } 
+  }
+  if (!layoutVertical) {
+    panelContent += "</tr>";
   }
   panelContent += "</table>";
   panelContent += "</td>";
@@ -445,14 +475,14 @@ Problem.prototype.toStringDeadlinePanel = function() {
   }
   var result = "";
   result += `<button class = "accordionLike" `;
-  result += `onclick = "window.calculator.coursePage.toggleDeadline('${this.idDeadlinePanel}', '${this.idURLed}', this);">`;
+  result += `onclick = "window.calculator.coursePage.toggleDeadline('${this.idDeadlinePanel}', '${this.problemId}', this);">`;
   result += `${this.toStringDeadline()} &#9666;</button>`;
   result += `<span class = "panelDeadlines" id = "${this.idDeadlinePanel}">`;
   result += "<table>";
   result += "<tr><th>Grp.</th><th>Deadline</th></tr>";
   for (var counterGroup = 0; counterGroup < thePage.user.sectionsTaught.length; counterGroup ++) {
     result += `<tr><td>${thePage.user.sectionsTaught[counterGroup]}</td>`;
-    result += `<td><input class = "datePicker" name = "datePicker${this.idURLed}" `;
+    result += `<td><input class = "datePicker" name = "datePicker${this.problemId}" `;
     if (this.deadlines[counterGroup] !== "" && this.deadlines[counterGroup] !== undefined) {
       result += `value = "${this.deadlines[counterGroup]}"`;
     }
@@ -461,7 +491,7 @@ Problem.prototype.toStringDeadlinePanel = function() {
   result += "</table>";
   //console.log("Problem data problem: " + JSON.stringify(this.fileName));
   //console.log("Problem data title: " + JSON.stringify(this.title));
-  result += `<button onclick = "window.calculator.coursePage.modifyDeadlines('${this.idURLed}')">Set</button>`;
+  result += `<button onclick = "window.calculator.coursePage.modifyDeadlines('${this.problemId}')">Set</button>`;
   result += `<span id = '${this.idModifyReportDeadline}'></span>`;
   result += `</span>`;
   return result;
@@ -475,7 +505,7 @@ Problem.prototype.toHTMLWeights = function() {
     result += this.weight;
   }
   result += "</textarea>";
-  result += `<button id = '${this.idButtonPoints}' onclick = "window.calculator.problemPage.modifyWeight('${this.idURLed}')">Modify</button><br>`;
+  result += `<button id = '${this.idButtonPoints}' onclick = "window.calculator.problemPage.modifyWeight('${this.problemId}')">Modify</button><br>`;
   result += `<span id = '${this.idModifyReportPoints}'></span>`;
   result += "</span>";
   return result;
@@ -486,10 +516,10 @@ Problem.prototype.callbackModifyWeight = function(input, output) {
 }
 
 Problem.prototype.modifyWeight = function() {
-  var problemWeightTextareaId = `points${this.idURLed}`;
+  var problemWeightTextareaId = `points${this.problemId}`;
   var incomingPoints = document.getElementById(problemWeightTextareaId).value;
   var modifyObject = {};
-  var idDecoded = decodeURIComponent(this.idURLed);
+  var idDecoded = decodeURIComponent(this.problemId);
   //var problemModifyWeightReport = `report${id}`;
   modifyObject[idDecoded] = {
     weight: incomingPoints
@@ -522,7 +552,7 @@ Problem.prototype.toStringProblemWeightCell = function() {
   }
   var pointsString = ""; 
   pointsString += `<button class = 'accordionLikeProblemWeight' onclick = "window.calculator.coursePage.toggleProblemWeights()" `;
-  pointsString += `name = "${this.idURLed}">${this.toStringProblemWeight()} &#9666;</button>`;
+  pointsString += `name = "${this.problemId}">${this.toStringProblemWeight()} &#9666;</button>`;
   var problemWeightString = this.toHTMLWeights();
   result += `<td>${pointsString}<br> ${problemWeightString}</td>`;
   return result;
@@ -684,10 +714,10 @@ Problem.prototype.getHTMLOneProblemTr = function () {
   if (this.fileName !== "") {
     if (thePage.user.flagLoggedIn) {
       result += `<a class = "problemLinkQuiz" href = '#${this.getAppAnchorRequestFileCourseTopics(true)}' `; 
-      result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.idURLed}', 'scoredQuizJSON');">Quiz</a>`;
+      result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.problemId}', 'scoredQuizJSON');">Quiz</a>`;
     }
     result += `<a class = "problemLinkPractice" href = '#${this.getAppAnchorRequestFileCourseTopics(false)}' `;
-    result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.idURLed}', 'exerciseJSON');">Practice</a>`;
+    result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.problemId}', 'exerciseJSON');">Practice</a>`;
   }
   result += "</td>";
 
@@ -827,7 +857,8 @@ function afterLoadTopics(incomingTopics, result) {
     thePage.theTopics = JSON.parse(incomingTopics);
     for (var counterChapter = 0; counterChapter < thePage.theTopics["children"].length; counterChapter ++) {
       var currentChapter = thePage.theTopics["children"][counterChapter];
-      new Problem(currentChapter, null);
+      var incomingProblem = new Problem();
+      incomingProblem.initialize(currentChapter, null);
     }
     stringHTMLContent += getHTMLfromTopics();
     writeEditCoursePagePanel();

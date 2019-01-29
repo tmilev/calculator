@@ -2641,6 +2641,20 @@ bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml
   return output.AssignValue(theFile.ToStringExtractedCommands(), theCommands);
 }
 
+std::string CalculatorHTML::answerLabels::properties = "properties";
+std::string CalculatorHTML::answerLabels::idPanel = "answerPanelId";
+std::string CalculatorHTML::answerLabels::answerHighlight = "answerHighlight";
+std::string CalculatorHTML::answerLabels::idMQSpan = "idMQSpan";
+std::string CalculatorHTML::answerLabels::idButtonContainer = "idButtonContainer";
+std::string CalculatorHTML::answerLabels::MQpanelButtonOptions = "MQpanelButtonOptions";
+std::string CalculatorHTML::answerLabels::idPureLatex = "idPureLatex";
+std::string CalculatorHTML::answerLabels::idButtonSubmit = "idButtonSubmit";
+std::string CalculatorHTML::answerLabels::idButtonInterpret = "idButtonInterpret";
+std::string CalculatorHTML::answerLabels::idButtonAnswer = "idButtonAnswer";
+std::string CalculatorHTML::answerLabels::idButtonSolution = "idButtonSolution";
+std::string CalculatorHTML::answerLabels::idVerificationSpan = "idVerificationSpan";
+std::string CalculatorHTML::answerLabels::previousAnswers = "previousAnswers";
+
 JSData CalculatorHTML::GetJavascriptMathQuillBoxesForJSON()
 { MacroRegisterFunctionWithName("CalculatorHTML::GetJavascriptMathQuillBoxesForJSON");
   ////////////////////////////////////////////////////////////////////
@@ -2653,22 +2667,22 @@ JSData CalculatorHTML::GetJavascriptMathQuillBoxesForJSON()
     for (int j = 0; j < currentAnswer.properties.size(); j ++)
       properties[currentAnswer.properties.theKeys[j]] = currentAnswer.properties.theValues[j];
     if (currentAnswer.properties.size() > 0) {
-      currentAnswerJS["properties"] = properties;
+      currentAnswerJS[answerLabels::properties] = properties;
     }
-    currentAnswerJS["answerPanelId"] = currentAnswer.idAnswerPanel;
-    currentAnswerJS["answerHighlight"] = currentAnswer.htmlAnswerHighlight;
-    currentAnswerJS["answerMQspanId"] = currentAnswer.idMQfield;
-    currentAnswerJS["preferredButtonContainer"] = currentAnswer.idMQButtonPanelLocation;
-    currentAnswerJS["MQpanelButtonOptions"] = currentAnswer.MQpanelButtonOptions;
-    currentAnswerJS["answerIdPureLatex"] = currentAnswer.answerId;
-    currentAnswerJS["idButtonSubmit"] = currentAnswer.idButtonSubmit;
-    currentAnswerJS["idButtonInterpret"] = currentAnswer.idButtonInterpret;
+    currentAnswerJS[answerLabels::idPanel] = currentAnswer.idAnswerPanel;
+    currentAnswerJS[answerLabels::answerHighlight] = currentAnswer.htmlAnswerHighlight;
+    currentAnswerJS[answerLabels::idMQSpan] = currentAnswer.idMQfield;
+    currentAnswerJS[answerLabels::idButtonContainer] = currentAnswer.idMQButtonPanelLocation;
+    currentAnswerJS[answerLabels::MQpanelButtonOptions] = currentAnswer.MQpanelButtonOptions;
+    currentAnswerJS[answerLabels::idPureLatex] = currentAnswer.answerId;
+    currentAnswerJS[answerLabels::idButtonSubmit] = currentAnswer.idButtonSubmit;
+    currentAnswerJS[answerLabels::idButtonInterpret] = currentAnswer.idButtonInterpret;
     if (currentAnswer.commandsNoEnclosureAnswerOnGiveUpOnly != "")
-      currentAnswerJS["idButtonAnswer"] = currentAnswer.idButtonAnswer;
+      currentAnswerJS[answerLabels::idButtonAnswer] = currentAnswer.idButtonAnswer;
     if (currentAnswer.flagSolutionFound)
-      currentAnswerJS["idButtonSolution"] = currentAnswer.idButtonSolution;
-    currentAnswerJS["idVerificationSpan"] = currentAnswer.idVerificationSpan;
-    currentAnswerJS["previousAnswers"] = currentAnswer.htmlSpanVerifyAnswer;
+      currentAnswerJS[answerLabels::idButtonSolution] = currentAnswer.idButtonSolution;
+    currentAnswerJS[answerLabels::idVerificationSpan] = currentAnswer.idVerificationSpan;
+    currentAnswerJS[answerLabels::previousAnswers] = currentAnswer.htmlSpanVerifyAnswer;
     ///////////////
     output[i] = currentAnswerJS;
   }

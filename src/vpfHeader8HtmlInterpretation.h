@@ -148,6 +148,21 @@ public:
   std::string fileName;
   std::string RelativePhysicalFileNameWithFolder;
   std::string inputHtml;
+  struct answerLabels {
+    static std::string properties;
+    static std::string idPanel;
+    static std::string answerHighlight;
+    static std::string idMQSpan;
+    static std::string idButtonContainer;
+    static std::string MQpanelButtonOptions;
+    static std::string idPureLatex;
+    static std::string idButtonSubmit;
+    static std::string idButtonInterpret;
+    static std::string idButtonAnswer;
+    static std::string idButtonSolution;
+    static std::string idVerificationSpan;
+    static std::string previousAnswers;
+  };
 
   std::string outputHtmlBodyNoTag;
   std::string outputHtmlHeadNoTag;

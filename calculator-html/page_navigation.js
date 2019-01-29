@@ -659,7 +659,7 @@ Page.prototype.sectionSelect = function(sectionNumber) {
     }
     currentDeadlineSpan.innerHTML = currentProblem.toStringDeadlinePanel();
     //console.log(`DEBUG: current id: ${currentDeadlineId}`);
-    //console.log(`DEBUG: counter deadlines ${currentProblem.idURLed}`);
+    //console.log(`DEBUG: counter deadlines ${currentProblem.problemId}`);
   }
 }
 

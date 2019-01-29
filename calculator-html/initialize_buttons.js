@@ -269,6 +269,7 @@ function InputPanelData(input) {
   this.idButtonSolution = input.idButtonSolution;
   this.answerHighlight = input.answerHighlight;
   this.answerPanelId = input.answerPanelId;
+  this.properties = input.properties;
   //just in case we forget some entry above:
   Object.assign(this, input);
   panelDataRegistry[this.idButtonContainer] = this;

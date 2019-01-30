@@ -106,6 +106,7 @@ Problem.prototype.initialize = function(problemData, inputParentIdURLed) {
 }
 
 Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) {
+  //this.parentIdURLed = inputParentIdURLed;
   this.decodedProblem = decodeURIComponent(problemData["problemContent"]);
   this.commentsProblem = problemData["commentsProblem"];
   if (this.commentsProblem === undefined) {
@@ -267,129 +268,163 @@ Problem.prototype.getEditPanel = function() {
   return editPage.getEditPanel(decodeURIComponent(this.problemId));
 }
 
-Problem.prototype.onePanel = function(/**@type {InputPanelData} */ currentAnswerPanel) {
-  var latexChangeHandler = currentAnswerPanel.editLaTeX;
-  var latexChangeHandlerBound = latexChangeHandler.bind(currentAnswerPanel);
-  var panelContent = "";
-  panelContent += "<table>";
-  panelContent += "<tr><td>";
-  panelContent += "<table><tr>";
-  if (currentAnswerPanel.answerHighlight !== undefined && currentAnswerPanel.answerHighlight !== "") {
-    panelContent += `<td><answerCalculatorHighlight>${currentAnswerPanel.answerHighlight}</answerCalculatorHighlight></td>`;
-  }
-  console.log("Debug: current answer panel props: " + JSON.stringify(currentAnswerPanel.properties));
-  var layoutVertical = true;
-  if (currentAnswerPanel.properties !== undefined) {
-    if (currentAnswerPanel.properties.layoutSubmit === "horizontal") {
-      layoutVertical = false;
-    }
-  }
-  panelContent += `<td class = "tableCellMQfield">`;
-  panelContent += `<div class = "calculatorMQfieldEnclosure"><span id ="${currentAnswerPanel.idMQSpan}"></span></div>`;
-  panelContent += `</td>`;
-  panelContent += `<td>`;
-  panelContent += `<div class = "mqButtonPanel" id = "${currentAnswerPanel.idButtonContainer}" `;
-  panelContent += `buttons = "${currentAnswerPanel.MQpanelButtonOptions}"></div>`;
-  panelContent +=  "</td>";
-  panelContent += "</tr></table>";
-  panelContent += "</td>";
-  panelContent += "<td>";
-  panelContent += "<table>";
-  panelContent += "<tr><td>";
-  panelContent += `<button class = "buttonSubmit" id = "${currentAnswerPanel.idButtonSubmit}">Submit</button>`;
-  panelContent += "</td>";
-  if (layoutVertical) {
-    panelContent += "</tr><tr>";
-  }
-  panelContent += "<td>";
-  panelContent += `<button class = "buttonPreview" id = "${currentAnswerPanel.idButtonInterpret}">Interpret</button>`;
-  panelContent += `</td>`;
-  if (layoutVertical) {
-    panelContent += `</tr>`;
-  }
-  if (this.flagForReal !== true) {
-    if (layoutVertical) {
-      panelContent += `<tr>`;
-    }
-    panelContent += "<td>";
-    if (currentAnswerPanel.idButtonAnswer !== null && currentAnswerPanel.idButtonAnswer !== undefined) {
-      panelContent += `<button class = "buttonAnswer" id = "${currentAnswerPanel.idButtonAnswer}">Answer</button>`;
-    } else {
-      panelContent += "Answer not available. ";
-    }
-    panelContent += "</td>";
-    if (layoutVertical) {
-      panelContent += "</tr>";
-    }
-    if (currentAnswerPanel.idButtonSolution !== null && currentAnswerPanel.idButtonSolution !== undefined) { 
-      if (layoutVertical) {
-        panelContent += "<tr>";
-      }
-      panelContent += "<td>";
-      panelContent += `<button class = "buttonSolution" id = "${currentAnswerPanel.idButtonSolution}">Solution</button>`;
-      panelContent += "</td>";
-      if (layoutVertical) {
-        panelContent += "</tr>";
-      }
-    } 
-  }
-  if (!layoutVertical) {
-    panelContent += "</tr>";
-  }
-  panelContent += "</table>";
-  panelContent += "</td>";
-  panelContent += "<td>";
-  panelContent += `<button class = "accordion">details</button>`;
-  panelContent += `<textarea class = "calculatorAnswer" id = "${currentAnswerPanel.idPureLatex}"></textarea>`;
-  panelContent += "</td>";
-  panelContent += "</tr>";
-  panelContent += "</table>";
-  panelContent += `<span id = "${currentAnswerPanel.idVerificationSpan}">`;
-  if (currentAnswerPanel.previousAnswers !== undefined && currentAnswerPanel.previousAnswers !== "") {
-    panelContent += currentAnswerPanel.previousAnswers;
+Problem.prototype.onePanelComputeHtmlElements = function(/**@type {InputPanelData} */ thePanel) {
+  if (thePanel.answerHighlight !== undefined && thePanel.answerHighlight !== "") {
+    thePanel.htmlAnswerHighlight = `<answerCalculatorHighlight>${thePanel.answerHighlight}</answerCalculatorHighlight>`;
   } else {
-    panelContent += `<b style = "color:brown">Waiting for answer [unlimited tries]</b>`;
+    thePanel.htmlAnswerHighlight = "";
   }
-  panelContent += "</span>";
-  if (this.flagForReal !== true && currentAnswerPanel.idSpanSolution !== undefined && currentAnswerPanel.idSpanSolution !== null) {
-    panelContent += `<span id = "${currentA.idSpanSolution}"></span>`;
+  if (this.flagForReal === true) {
+    thePanel.htmlButtonAnswer = "";
+    thePanel.htmlButtonSolution = "";
+  } else {
+    if (thePanel.idButtonAnswer !== null && thePanel.idButtonAnswer !== undefined) {
+      thePanel.htmlButtonAnswer = `<button class = "buttonAnswer" id = "${thePanel.idButtonAnswer}">Answer</button>`;
+    } else {
+      thePanel.htmlButtonAnswer = "Answer not available. ";
+    }
+    if (thePanel.idButtonSolution !== null && thePanel.idButtonSolution !== undefined) {
+      thePanel.htmlButtonSolution = `<button class = "buttonSolution" id = "${thePanel.idButtonSolution}">Solution</button>`;
+    } else {
+      thePanel.htmlButtonSolution = "";
+    }
+  } 
+  thePanel.htmlButtonSubmit = `<button class = "buttonSubmit" id = "${thePanel.idButtonSubmit}">Submit</button>`;
+  thePanel.htmlButtonInterpret = `<button class = "buttonPreview" id = "${thePanel.idButtonInterpret}">Interpret</button>`;
+  thePanel.htmlPureLatex = `<button class = "accordion">details</button>`;
+  thePanel.htmlPureLatex += `<textarea class = "calculatorAnswer" id = "${thePanel.idPureLatex}"></textarea>`;
+  thePanel.htmlButtonContainer = `<div class = "mqButtonPanel" id = "${thePanel.idButtonContainer}" `;
+  thePanel.htmlButtonContainer += `buttons = "${thePanel.MQpanelButtonOptions}"></div>`;
+  thePanel.htmlMQFieldEnclosure = `<div class = "calculatorMQfieldEnclosure"><span id ="${thePanel.idMQSpan}"></span></div>`;
+
+  thePanel.htmlVerificationSpan = `<span id = "${thePanel.idVerificationSpan}">`;
+  if (thePanel.previousAnswers !== undefined && thePanel.previousAnswers !== "") {
+    thePanel.htmlVerificationSpan += thePanel.previousAnswers;
+  } else {
+    if (thePanel.layoutVertical) {
+      thePanel.htmlVerificationSpan += `<b style = "color:brown">Waiting for answer [unlimited tries]</b>`;
+    } else {
+      thePanel.htmlVerificationSpan += ``;
+    }
   }
-  var panelSpan = document.getElementById(currentAnswerPanel.answerPanelId);
-  panelSpan.innerHTML = panelContent;
-  var theElement = document.getElementById(currentAnswerPanel.idPureLatex);
-  theElement.addEventListener('keyup', latexChangeHandlerBound);
-  var interpretHandler = currentAnswerPanel.submitPreview;
-  var interpretHandlerBound = interpretHandler.bind(currentAnswerPanel);
-  theElement = document.getElementById(currentAnswerPanel.idButtonInterpret);
-  theElement.addEventListener('click', interpretHandlerBound);
-  document.getElementById(currentAnswerPanel.idButtonInterpret).addEventListener(
-    'click', 
-    currentAnswerPanel.submitPreview.bind(currentAnswerPanel)
-  );
-  document.getElementById(currentAnswerPanel.idButtonSubmit).addEventListener(
-    'click', 
-    currentAnswerPanel.submitAnswers.bind(currentAnswerPanel)
-  );
+  thePanel.htmlVerificationSpan += "</span>";
+  if (this.flagForReal !== true && thePanel.idSpanSolution !== undefined && thePanel.idSpanSolution !== null) {
+    thePanel.htmlSolution = `<span id = "${thePanel.idSpanSolution}"></span>`;
+  }
+}
+
+Problem.prototype.onePanelQuestionAndAnswerField = function(/**@type {InputPanelData} */ thePanel) {
+  var result = "";
+  result += "<table><tr>";
+  if (thePanel.htmlAnswerHighlight !== "") {
+    result += `<td>${thePanel.htmlAnswerHighlight}</td>`;
+  }
+  result += `<td class = "tableCellMQfield">`;
+  result += thePanel.htmlMQFieldEnclosure;
+  result += `</td>`;
+  result += "</tr></table>";
+  return result;
+}
+
+Problem.prototype.onePanelButtonsVerticalLayout = function(/**@type {InputPanelData} */ thePanel) {
+  var result = "";
+  result += "<table>";
+  result += `<tr><td>${thePanel.htmlButtonSubmit}</td></tr>`;
+  result += `<tr><td>${thePanel.htmlButtonInterpret}</td></tr>`;
   if (this.flagForReal !== true) {
-    var buttonAnswer = document.getElementById(currentAnswerPanel.idButtonAnswer); 
+    if (thePanel.htmlButtonAnswer !== "") {
+      result += `<tr><td>${thePanel.htmlButtonAnswer}</td></tr>`;
+    }
+    if (thePanel.htmlButtonSolution !== "") {
+      result += `<tr><td>${thePanel.htmlButtonSolution}</td></tr>`;
+    }
+  }
+  result += "</table>";
+  return result;
+}
+
+Problem.prototype.onePanelButtonsHorizontalLayout = function(/**@type {InputPanelData} */ thePanel) {
+  var result = "";
+  result += "<table><tr>";
+  result += `<td>${thePanel.htmlButtonSubmit}</td>`;
+  result += `<td>${thePanel.htmlButtonInterpret}</td>`;
+  if (this.flagForReal !== true) {
+    if (thePanel.htmlButtonAnswer !== "") {
+      result += `<td>${thePanel.htmlButtonAnswer}</td>`;
+    }
+    if (thePanel.htmlButtonSolution !== "") {
+      result += `<td>${thePanel.htmlButtonSolution}</td>`;
+    }
+  }
+  result += "</tr></table>";
+  return result;
+}
+
+Problem.prototype.onePanel = function(/**@type {InputPanelData} */ thePanel) {
+  var latexChangeHandler = thePanel.editLaTeX;
+  var latexChangeHandlerBound = latexChangeHandler.bind(thePanel);
+  thePanel.layoutVertical = true;
+  if (thePanel.properties !== undefined) {
+    if (thePanel.properties.layout === "horizontal") {
+      thePanel.layoutVertical = false;
+    }
+  }
+  this.onePanelComputeHtmlElements(thePanel);
+  var panelContent = "";
+  if (thePanel.layoutVertical === true) { 
+    panelContent += "<table><tr>";
+    panelContent += `<td>${this.onePanelQuestionAndAnswerField(thePanel)}</td>`;
+    panelContent += `<td>${thePanel.htmlButtonContainer}</td>`;
+    panelContent += `<td>${this.onePanelButtonsVerticalLayout(thePanel)}</td>`;
+    panelContent += `<td>${thePanel.htmlPureLatex}</td>`;
+    panelContent += "</tr></table>";
+    panelContent += thePanel.htmlVerificationSpan;
+    panelContent += thePanel.htmlSolution;
+  } else {
+    panelContent += "<table><tr>";
+    panelContent += `<td>${this.onePanelQuestionAndAnswerField(thePanel)}</td>`;
+    panelContent += `<td>${this.onePanelButtonsHorizontalLayout(thePanel)}</td>`;
+    panelContent += `<td>${thePanel.htmlButtonContainer}</td>`;
+    panelContent += `<td>${thePanel.htmlPureLatex}</td>`;
+    panelContent += "</tr></table>";
+    panelContent += `${thePanel.htmlVerificationSpan}${thePanel.htmlSolution}`;
+  }
+  var panelSpan = document.getElementById(thePanel.answerPanelId);
+  panelSpan.innerHTML = panelContent;
+  var theElement = document.getElementById(thePanel.idPureLatex);
+  theElement.addEventListener('keyup', latexChangeHandlerBound);
+  var interpretHandler = thePanel.submitPreview;
+  var interpretHandlerBound = interpretHandler.bind(thePanel);
+  theElement = document.getElementById(thePanel.idButtonInterpret);
+  theElement.addEventListener('click', interpretHandlerBound);
+  document.getElementById(thePanel.idButtonInterpret).addEventListener(
+    'click', 
+    thePanel.submitPreview.bind(thePanel)
+  );
+  document.getElementById(thePanel.idButtonSubmit).addEventListener(
+    'click', 
+    thePanel.submitAnswers.bind(thePanel)
+  );
+  if (this.flagForReal !== true && thePanel.htmlButtonAnswer !== "") {
+    var buttonAnswer = document.getElementById(thePanel.idButtonAnswer); 
     buttonAnswer.addEventListener(
       'click', 
-      currentAnswerPanel.submitGiveUp.bind(currentAnswerPanel)
+      thePanel.submitGiveUp.bind(thePanel)
     );
   }
   if (
-    currentAnswerPanel.idButtonSolution !== undefined && 
-    currentAnswerPanel.idButtonSolution !== null &&
-    currentAnswerPanel.idButtonSolution !== ""
+    thePanel.idButtonSolution !== undefined && 
+    thePanel.idButtonSolution !== null &&
+    thePanel.idButtonSolution !== ""
   ) {
-    var theSolutionButton = document.getElementById(currentAnswerPanel.idButtonSolution);
+    var theSolutionButton = document.getElementById(thePanel.idButtonSolution);
     if (theSolutionButton !== null) {
       theSolutionButton.addEventListener(
-        'click', currentAnswerPanel.showSolution.bind(currentAnswerPanel)
+        'click', thePanel.showSolution.bind(thePanel)
       );
     }
   }
-  currentAnswerPanel.initialize();
+  thePanel.initialize();
 }
 
 Problem.prototype.writeToHTML = function(outputElement) {
@@ -410,8 +445,8 @@ Problem.prototype.writeToHTML = function(outputElement) {
   for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++) {
     this.onePanel(this.answers[counterAnswers]);
   }
-  MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divProblemPageContentContainer")]);
   initializeButtons.initializeAccordionButtons();
+  MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divProblemPageContentContainer")]);
 }
 
 Problem.prototype.toStringDeadline = function() {
@@ -841,7 +876,7 @@ function writeEditCoursePagePanel() {
       thePanel += editPage.getEditPanel(thePage.theTopics.topicBundleFile[counterTopicBundle]);
     }
   }
-  document.getElementById("divCurrentCourseEditPanel").innerHTML = thePanel;
+  document.getElementById(ids.domElements.courseEditPanel).innerHTML = thePanel;
 }
 
 function afterLoadTopics(incomingTopics, result) {
@@ -852,24 +887,27 @@ function afterLoadTopics(incomingTopics, result) {
   }
   thePage.previousProblemId = null;
   var stringHTMLContent = "";
-  //try {
-    thePage.resetProblems();
-    thePage.theTopics = JSON.parse(incomingTopics);
-    for (var counterChapter = 0; counterChapter < thePage.theTopics["children"].length; counterChapter ++) {
-      var currentChapter = thePage.theTopics["children"][counterChapter];
-      var incomingProblem = new Problem();
-      incomingProblem.initialize(currentChapter, null);
-    }
-    stringHTMLContent += getHTMLfromTopics();
-    writeEditCoursePagePanel();
-  //} catch (e) {
-  //  stringHTMLContent = "<b style ='color:red'>Data error</b>. " + e;
-  //}
+  thePage.resetProblems();
+  thePage.theTopics = JSON.parse(incomingTopics);
+  for (var counterChapter = 0; counterChapter < thePage.theTopics["children"].length; counterChapter ++) {
+    var currentChapter = thePage.theTopics["children"][counterChapter];
+    var incomingProblem = new Problem();
+    incomingProblem.initialize(currentChapter, null);
+  }
+  stringHTMLContent += getHTMLfromTopics();
+  writeEditCoursePagePanel();
   topicsElements[0].innerHTML = stringHTMLContent;
   initializeProblemWeightsAndDeadlines();
   initializeDatePickers();
   thePage.previousProblemId = null;
-  MathJax.Hub.Queue(['Typeset', MathJax.Hub, topicsElements[0]]);
+  //MathJax.Hub.Queue([
+  //  'Typeset', 
+  //  MathJax.Hub, 
+  //  topicsElements[0]
+  //]);
+  MathJax.Hub.Typeset(topicsElements[0]);
+  //MathJax.Hub.queue.pending = 0;
+  //MathJax.Hub.Typeset(ids.domElements.divCurrentCourseBody);
 }
 
 function updateProblemPageCallback(input, outputComponent) {

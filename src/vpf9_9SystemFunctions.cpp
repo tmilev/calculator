@@ -54,7 +54,7 @@ bool TimerThreadData::HandleComputationTimer()
 { if (theGlobalVariables.flagComputationStarted)
     if (this->computationStartTimeInMilliseconds < 0)
       this->computationStartTimeInMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
-  this->elapsedTimeInMilliseconds = theGlobalVariables.GetElapsedSeconds();
+  this->elapsedTimeInMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
   if (this->computationStartTimeInMilliseconds > 0)
     this->elapsedComputationTimeInMilliseconds = this->elapsedTimeInMilliseconds - this->computationStartTimeInMilliseconds;
   return false;

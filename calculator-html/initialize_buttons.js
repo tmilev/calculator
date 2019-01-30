@@ -265,10 +265,23 @@ function InputPanelData(input) {
   this.idButtonSubmit = input.idButtonSubmit;
   this.idButtonInterpret = input.idButtonInterpret;
   this.idButtonAnswer = input.idButtonAnswer;
-  this.idVerificationSpan = input.idVerificationSpan;
   this.idButtonSolution = input.idButtonSolution;
+  this.idVerificationSpan = input.idVerificationSpan;
   this.answerHighlight = input.answerHighlight;
   this.answerPanelId = input.answerPanelId;
+
+  this.htmlPureLatex = "";
+  this.htmlButtonContainer = "";
+  this.htmlButtonSubmit = "";
+  this.htmlButtonInterpret = ""
+  this.htmlButtonAnswer = "";
+  this.htmlButtonSolution = "";
+  this.htmlVerificationSpan = "";
+  this.htmlSolution = "";
+  this.htmlAnswerHighlight = "";
+  this.htmlMQFieldEnclosure = "";
+  this.layoutVertical = true;
+
   this.properties = input.properties;
   //just in case we forget some entry above:
   Object.assign(this, input);

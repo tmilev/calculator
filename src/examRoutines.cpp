@@ -1392,11 +1392,8 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
       << currentA.firstCorrectAnswerClean << "\\) </span></b> ";
       if (numSubmissions > 0)
         verifyStream << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
-    } else
-    { verifyStream << " <b><span style =\"color:brown\">Waiting for answer. </span></b>";
-      if (numSubmissions > 0)
-        verifyStream << numSubmissions << " attempt(s) so far. ";
-    }
+    } else if (numSubmissions > 0)
+      verifyStream << numSubmissions << " attempt(s) so far. ";
   }
   currentA.htmlSpanVerifyAnswer = verifyStream.str();
   return true;

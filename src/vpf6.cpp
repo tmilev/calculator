@@ -2427,7 +2427,9 @@ std::string Calculator::ToStringPerformance()
   << computationMilliseconds
   << " ms (~"
   << (((double) computationMilliseconds) / 1000)
-  << " s).<br>";
+  << " s).<br>"
+   <<"Max computation time: " << theGlobalVariables.MaxComputationMilliseconds
+  << " ms (" << (((double) theGlobalVariables.MaxComputationMilliseconds) / 1000) << ") s.<br>";
   out << "Total process request time: "
   << requestMilliseconds << " ms (~"
   << (((double) requestMilliseconds) / 1000)

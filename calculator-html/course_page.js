@@ -76,16 +76,19 @@ function toggleProblemWeights() {
 
 function afterLoadCoursePage(incomingPage, result) {
   var thePage = window.calculator.mainPage;
-  var theCourseDiv = document.getElementById(ids.domElements.divCurrentCourseBody); 
-  theCourseDiv.innerHTML = incomingPage;
-  var titleElements = theCourseDiv.getElementsByTagName('title');
+  var courseBody = document.getElementById(ids.domElements.divCurrentCourseBody); 
+  var coursePage = document.getElementById(ids.domElements.divCurrentCourse);
+  courseBody.innerHTML = incomingPage;
+  var titleElements = courseBody.getElementsByTagName('title');
   if (titleElements !== null && titleElements !== undefined) {
     if (titleElements.length > 0) {
       document.getElementsByTagName('title')[0].text = titleElements[0].text;
     }
   }
-  MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentCourse")]);
-  //MathJax.Hub.Process();
+  //MathJax.Hub.queue.pending = 0;
+  //MathJax.Hub.Queue(['Typeset', MathJax.Hub, coursePage]);
+  MathJax.Hub.Typeset(coursePage);
+  //MathJax.Hub.Process( MathJax.Hub, coursePage);
   var theTopics = document.getElementsByTagName("topicList");
   var topicList = "topicListJSONNoLogin";
   if (thePage.user.flagLoggedIn) {
@@ -96,7 +99,7 @@ function afterLoadCoursePage(incomingPage, result) {
     return;
   }
   submitRequests.submitGET({
-    url: `${pathnames.urls.calculatorAPI}?request=${topicList}`,
+    url: `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicList}`,
     callback: problemPage.afterLoadTopics,
     progress: ids.domElements.spanProgressReportGeneral
   });

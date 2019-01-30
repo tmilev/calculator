@@ -1,32 +1,3 @@
-/* -*- Mode: Javascript; indent-tabs-mode:nil; js-indent-level: 2 -*- */
-/* vim: set ts =2 et sw =2 tw =80: */
-
-/*************************************************************
- *
- *  MathJax/config/local/local.js
- *
- *  Include changes and configuration local to your installation
- *  in this file.  For example, common macros can be defined here
- *  (see below).  To use this file, add "local/local.js" to the
- *  config array in MathJax.js or your MathJax.Hub.Config() call.
- *
- *  ---------------------------------------------------------------------
- *
- *  Copyright (c) 2009-2015 The MathJax Consortium
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
 function selectElementContents(el) { 
   var range = document.createRange();
   range.selectNodeContents(el);
@@ -156,12 +127,6 @@ function configureMathJaxForCalculator() {
         var size = this.GetBrackets(name);
         var cls = this.GetBrackets(name);
         var inputName = this.GetArgument(name);
-        //if (window.mathjaxIdCounter === undefined) {
-        //  window.mathjaxIdCounter = 0;
-        //}
-        //window.mathjaxIdCounter ++;
-//        var id = `mathjax_id_${window.mathjaxIdCounter}_${inputName}`;
-        //alert("name: " + name + " size: "+ size + " cls: " + cls + " val: " + val + " id: "+ id);
         if (size === null || size === "" || size === undefined) {
           size = "2";
         }
@@ -186,19 +151,10 @@ function configureMathJaxForCalculator() {
     });
 
   }));
-
-
-  //MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
-  //  var TEX = MathJax.InputJax.TeX;
-
-    // place macros here.  E.g.:
-    //   TEX.Macro("R","{\\bf R}");
-    //   TEX.Macro("op","\\mathop{\\rm #1}",1); // a macro with 1 parameter
-
-  //});
-
   MathJax.Ajax.loadComplete(calculatorHtmlBaseFolder + "mathjax-calculator-setup.js");
 }
+
+configureMathJaxForCalculator();
 
 var module;
 

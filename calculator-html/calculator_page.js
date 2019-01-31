@@ -7,6 +7,7 @@ const miscellaneousFrontend = require('./miscellaneous_frontend');
 const miscellaneous = require('./miscellaneous');
 const BufferCalculator = require('./buffer').BufferCalculator;
 const PanelExpandable = require('./panels').PanelExpandable;
+const mathjax = require('./mathjax-calculator-setup');
 
 function Calculator() {
 
@@ -260,7 +261,6 @@ Calculator.prototype.writeResult = function(
   }
 }
 
-
 Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input, output) { 
   var inputParsed = null;
   var inputHtml = null;
@@ -313,11 +313,8 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
     thePage.pages.calculator.sciptIds.push(newId);
     thePage.injectScript(newId, incomingScripts[i].innerHTML);
   }
-  MathJax.Hub.Typeset(document.getElementById(ids.domElements.spanCalculatorMainOutput));
   this.addListenersToInputBoxes();
-  //MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById(ids.domElements.spanCalculatorMainOutput)]);
-  //MathJax.Hub.Queue([this.addListenersToInputBoxes.bind(this)]);
-//  alert(theString);
+  mathjax.typeSetHard(ids.domElements.spanCalculatorMainOutput);
 }
 
 Calculator.prototype.submitComputationPartTwo = function(input) {

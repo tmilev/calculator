@@ -3,6 +3,7 @@ const submitRequests = require('./submit_requests');
 const panels = require('./panels');
 const pathnames = require('./pathnames');
 const ids = require('./ids_dom_elements');
+const mathjax = require('./mathjax-calculator-setup');
 
 
 var calculatorLeftPosition = 0;
@@ -339,7 +340,7 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outpu
     this.numInsertedJavascriptChildren ++;
   }
   this.javascriptInsertionAlreadyCalled = true;
-  MathJax.Hub.Queue(['Typeset', MathJax.Hub, outputComponent]);
+  mathjax.typeSetSoft(outputComponent);
 }
 
 InputPanelData.prototype.submitOrPreviewAnswers = function(requestQuery) {

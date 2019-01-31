@@ -4,6 +4,7 @@ const pathnames = require('./pathnames');
 const ids = require('./ids_dom_elements');
 const editPage = require('./edit_page');
 const problemPage = require('./problem_page');
+const mathjax = require('./mathjax-calculator-setup');
 
 function callbackModifyDeadlines(incomingId, input, output) {
   document.getElementById(`deadlines${incomingId}`).innerHTML = input;
@@ -85,10 +86,7 @@ function afterLoadCoursePage(incomingPage, result) {
       document.getElementsByTagName('title')[0].text = titleElements[0].text;
     }
   }
-  //MathJax.Hub.queue.pending = 0;
-  //MathJax.Hub.Queue(['Typeset', MathJax.Hub, coursePage]);
-  MathJax.Hub.Typeset(coursePage);
-  //MathJax.Hub.Process( MathJax.Hub, coursePage);
+  mathjax.typeSetSoft(coursePage);
   var theTopics = document.getElementsByTagName("topicList");
   var topicList = "topicListJSONNoLogin";
   if (thePage.user.flagLoggedIn) {

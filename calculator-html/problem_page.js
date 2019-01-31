@@ -5,6 +5,7 @@ const ids = require('./ids_dom_elements');
 const editPage = require('./edit_page');
 const initializeButtons = require('./initialize_buttons');
 const InputPanelData = initializeButtons.InputPanelData;
+const mathjax = require('./mathjax-calculator-setup');
 
 function selectCurrentProblem(problemIdURLed, exerciseType) {
   var thePage = window.calculator.mainPage;
@@ -114,7 +115,7 @@ Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) 
   }
   var answerVectors = problemData["answers"];
   if (answerVectors === undefined) {
-    this.writeToHTML("divProblemPageContentContainer");
+    this.writeToHTML(ids.domElements.problemPageContentContainer);
     return;    
   }
   this.problemLabel = problemData["problemLabel"];
@@ -142,7 +143,7 @@ Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) 
       flagCalculatorPanel:  false,
     });
   }
-  this.writeToHTML("divProblemPageContentContainer");
+  this.writeToHTML(ids.domElements.problemPageContentContainer);
   var problemLinkWithRandomSeed = document.getElementById(ids.domElements.spanProblemLinkWithRandomSeed);
   if (problemLinkWithRandomSeed !== null) {
     problemLinkWithRandomSeed.innerHTML = `<a href = '#${this.getAppAnchorRequestFileCourseTopics()}'>#${this.randomSeed}</a>`;
@@ -446,7 +447,7 @@ Problem.prototype.writeToHTML = function(outputElement) {
     this.onePanel(this.answers[counterAnswers]);
   }
   initializeButtons.initializeAccordionButtons();
-  MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divProblemPageContentContainer")]);
+  mathjax.typeSetSoft(ids.domElements.problemPageContentContainer);
 }
 
 Problem.prototype.toStringDeadline = function() {
@@ -900,12 +901,7 @@ function afterLoadTopics(incomingTopics, result) {
   initializeProblemWeightsAndDeadlines();
   initializeDatePickers();
   thePage.previousProblemId = null;
-  //MathJax.Hub.Queue([
-  //  'Typeset', 
-  //  MathJax.Hub, 
-  //  topicsElements[0]
-  //]);
-  MathJax.Hub.Typeset(topicsElements[0]);
+  mathjax.typeSetHard(topicsElements[0]);
   //MathJax.Hub.queue.pending = 0;
   //MathJax.Hub.Typeset(ids.domElements.divCurrentCourseBody);
 }
@@ -916,7 +912,7 @@ function updateProblemPageCallback(input, outputComponent) {
     outputComponent = document.getElementById(outputComponent);
   }
   if (outputComponent === null || outputComponent === undefined) {
-    outputComponent = document.getElementById("divProblemPageContentContainer");
+    outputComponent = document.getElementById(ids.domElements.problemPageContentContainer);
   }
   var theProblem = null;
   try {

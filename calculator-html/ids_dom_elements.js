@@ -53,6 +53,7 @@ var domElements = {
   classSpanDeadlineContainer: "spanDeadlineContainer",
   calculatorBuildVersion: "anchorCalculatorBuildVersion",
   divDatabaseOutput: "divDatabaseOutput",
+  problemPageContentContainer: "divProblemPageContentContainer",
 };
 
 module.exports = {

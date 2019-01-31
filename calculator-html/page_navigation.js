@@ -642,7 +642,6 @@ Page.prototype.showProfilePicture = function() {
 Page.prototype.initializeCalculatorPage = function() {
   initializeButtons.initializeButtons();
   initializeButtons.initializeCalculatorPage();
-  //window.calculator.mathJaxSetup.configureMathJaxForCalculator();
 }
 
 Page.prototype.sectionSelect = function(sectionNumber) {

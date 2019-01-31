@@ -1,3 +1,5 @@
+"use strict"
+
 function selectElementContents(el) { 
   var range = document.createRange();
   range.selectNodeContents(el);
@@ -5,6 +7,21 @@ function selectElementContents(el) {
   sel.removeAllRanges();
   sel.addRange(range);
   el.focus();
+}
+
+function typeSetHard(element) {
+  if (typeof element === "string") {
+    element = document.getElementById(element);
+  }
+  MathJax.Hub.Typeset(element);
+  typeSetSoft(element);
+}
+
+function typeSetSoft(element) {
+  if (typeof element === "string") {
+    element = document.getElementById(element);
+  }
+  MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);  
 }
 
 function showTex(originalTex, item, event) { 
@@ -158,8 +175,12 @@ configureMathJaxForCalculator();
 
 var module;
 
-if (module !== undefined) {
-  module.exports = {
-    configureMathJaxForCalculator
-  };
+if (module === undefined) {
+  module = {};
 }
+
+module.exports = {
+  configureMathJaxForCalculator,
+  typeSetHard,
+  typeSetSoft,
+};

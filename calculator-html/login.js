@@ -50,7 +50,7 @@ function logout() {
   thePage.user.sectionsTaught = [];
   thePage.pages.problemPage.flagLoaded = false;
   document.getElementById("inputPassword").value = "";
-  document.getElementById("divProblemPageContentContainer").innerHTML = "";
+  document.getElementById(ids.domElements.problemPageContentContainer).innerHTML = "";
   document.getElementById(ids.domElements.divCurrentCourseBody).innerHTML = "";
   logoutGoogle();
   logoutPartTwo();

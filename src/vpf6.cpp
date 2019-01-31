@@ -2427,24 +2427,24 @@ std::string Calculator::ToStringPerformance()
   << computationMilliseconds
   << " ms (~"
   << (((double) computationMilliseconds) / 1000)
-  << " s).<br>"
-   <<"Max computation time: " << theGlobalVariables.MaxComputationMilliseconds
-  << " ms (" << (((double) theGlobalVariables.MaxComputationMilliseconds) / 1000) << ") s.<br>";
-  out << "Total process request time: "
+  << " s). ";
+  std::stringstream moreDetails;
+  moreDetails << "<br>Max computation time soft: "
+  << ((double)(theGlobalVariables.MaxComputationMilliseconds / 2000))
+  << " s [calculator error when exceeded]. ";
+  moreDetails << "<br>Max computation time hard: "
+  << (((double) theGlobalVariables.MaxComputationMilliseconds) / 1000) << " s [worker crash when exceeded]. ";
+  moreDetails << "<br>Total process request time: "
   << requestMilliseconds << " ms (~"
   << (((double) requestMilliseconds) / 1000)
-  << " s).<br>";
-  out << "Time waiting on open connection: "
+  << " s). ";
+  moreDetails << "<br>Time waiting on open connection: "
   << waitingMilliseconds << " ms (~"
   << (((double) waitingMilliseconds) / 1000)
-  << " s).<br>";
-  out << "<br>Total expressions: " << this->theExpressionContainer.size;
-  out << "<br>Total evaluations: " << this->NumCallsEvaluateExpression;
-  std::stringstream moreDetails;
-  moreDetails << "Max computation time: "
-  << (theGlobalVariables.MaxComputationMilliseconds / 2)
-  << " ms. <br>"
-  << "Total number of pattern matches performed: "
+  << " s).";
+  moreDetails << "<br>Total expressions: " << this->theExpressionContainer.size << ". ";
+  moreDetails << "<br>Total evaluations: " << this->NumCallsEvaluateExpression << ". ";
+  moreDetails << "<br>Total number of pattern matches performed: "
   << this->TotalNumPatternMatchedPerformed << "";
   if (this->DepthRecursionReached > 0)
     moreDetails << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
@@ -2482,7 +2482,7 @@ std::string Calculator::ToStringPerformance()
     moreDetails << "<br>Large gcd calls: "
     << Rational::TotalLargeGCDcalls - this->NumLargeGCDcallsStart
     << ", total: " << Rational::TotalLargeGCDcalls;
-  out << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(moreDetails.str(), "More details");
+  out << "<br>" << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(moreDetails.str(), "More details");
   #endif
   return out.str();
 }

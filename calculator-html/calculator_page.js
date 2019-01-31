@@ -314,7 +314,7 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
     thePage.injectScript(newId, incomingScripts[i].innerHTML);
   }
   this.addListenersToInputBoxes();
-  mathjax.typeSetHard(ids.domElements.spanCalculatorMainOutput);
+  mathjax.typeSetSoft(ids.domElements.spanCalculatorMainOutput);
 }
 
 Calculator.prototype.submitComputationPartTwo = function(input) {

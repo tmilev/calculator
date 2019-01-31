@@ -1236,6 +1236,15 @@ button.buttonSelectPage {
   transition: all 1.5s;
 }
 
+button.buttonSlowTransition {
+  transition: all 10s;
+}
+
+button.buttonFlash {
+  background-color: pink;
+  transition: all 10s;
+}
+
 button.buttonSelectPageSelected {
   background-color: skyblue;
 }

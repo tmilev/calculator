@@ -113,6 +113,15 @@ function selectCurrentCoursePage() {
   var storageVariables = thePage.storage.variables;
   var incomingCourse = storageVariables.currentCourse.courseHome.getValue();
   var incomingTopicList = storageVariables.currentCourse.topicList.getValue();
+  if (incomingCourse === null || incomingCourse === "" || incomingCourse === undefined) {
+    var courseBody = document.getElementById(ids.domElements.divCurrentCourseBody); 
+    var temporarySelectCourseId = "buttonTemporarySelectCourse";
+    courseBody.innerHTML = `<button id = '${temporarySelectCourseId}' class = "buttonSelectPage buttonSlowTransition buttonFlash" style = "width:150px" onclick = "window.calculator.mainPage.selectPage('selectCourse')">Please select course</button>`;
+    setTimeout(() => {
+      document.getElementById(temporarySelectCourseId).classList.remove("buttonFlash");
+    }, 100);
+    return;
+  }
   if (lastLoadedCourse.courseHome === incomingCourse && lastLoadedCourse.topicList === incomingTopicList) {
     return;
   }

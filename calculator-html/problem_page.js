@@ -766,8 +766,8 @@ Problem.prototype.getHTMLOneProblemTr = function () {
 Problem.prototype.getHTMLProblems = function () {
   var thePage = window.calculator.mainPage;
   var result = "";
-  result += "<div class = \"bodySubsection\">";
-  result += "<table class = \"topicList\"><colgroup><col><col><col><col><col></colgroup>";
+  result += `<div class = "bodySubsection">`;
+  result += `<table class = "topicList"><colgroup><col><col><col><col><col></colgroup>`;
   for (var counterSubSection = 0; counterSubSection < this.childrenIds.length; counterSubSection ++) {
     var currentProblem = thePage.problems[this.childrenIds[counterSubSection]];
     result += currentProblem.getHTMLOneProblemTr();
@@ -800,9 +800,9 @@ Problem.prototype.getHTMLSection = function() {
   var thePage = window.calculator.mainPage;
   var result = "";
   if (this.type === "section") {
-    result += `<div class =\"headSection\">${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}</div>`;    
+    result += `<div class = "headSection">${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}</div>`;    
   }
-  result += "<div class =\"bodySection\">";
+  result += `<div class = "bodySection">`;
   if (this.isProblemContainer()) {
     result += this.getHTMLProblems();
   } else if (this.type === "section") {
@@ -941,14 +941,27 @@ function updateProblemPage() {
   if (thePage.pages.problemPage.flagLoaded) {
     return;
   }
-  thePage.pages.problemPage.flagLoaded = true;
   var theProblem = thePage.getCurrentProblem();
   var theURL;
-  if (theProblem !== undefined && theProblem !== null) {
+  if (theProblem !== undefined && theProblem !== null) { 
     theURL = `${pathnames.urls.calculatorAPI}?${theProblem.getCalculatorURLRequestFileCourseTopics()}`;
   } else {
+    var fileName = thePage.storage.variables.currentCourse.fileName.getValue();
+    if (fileName === "" || fileName === undefined || fileName === null) {
+      var courseBody = document.getElementById(ids.domElements.problemPageContentContainer); 
+      var temporarySelectProblem = "buttonTemporarySelectProblem";
+      var selectProblemHtml = "";
+      selectProblemHtml += `Problems are selected from the <button id = '${temporarySelectProblem}' class = "buttonSelectPage buttonSlowTransition buttonFlash" style = "width:150px" onclick = "window.calculator.mainPage.selectPage('currentCourse')">Current course</button>`;
+      selectProblemHtml += "<br>To select a problem, click Practice or Quiz within the course page. ";
+      courseBody.innerHTML = selectProblemHtml;
+      setTimeout(() => {
+        document.getElementById(temporarySelectProblem).classList.remove("buttonFlash");
+      }, 100);
+      return; 
+    } 
     theURL = getCalculatorURLRequestFileCourseTopicsFromStorage();
   }
+  thePage.pages.problemPage.flagLoaded = true;
   //console.log("Current course: " + JSON.stringify(thePage.storage.variables.currentCourse));
   submitRequests.submitGET({
     url: theURL,

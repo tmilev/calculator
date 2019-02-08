@@ -15,6 +15,7 @@ const login = require('./login');
 const initializeButtons = require('./initialize_buttons');
 const calculatorPage = require('./calculator_page');
 const signUp = require('./signup').signUp;
+const mathjax = require('./mathjax-calculator-setup');
 
 function User() {
   this.flagLoggedIn = false;
@@ -537,6 +538,10 @@ function Page() {
       menuButtonId: "buttonSelectAccounts",
       container: null,
       selectFunction: accountManagement.updateAccountsPage,
+    },
+    mathJaxPreloader: {
+      name: "mathJaxPreloader",
+      id: ids.domElements.pages.mathJaxPreloader.div
     }
   };
   this.storage = new StorageCalculator();
@@ -642,6 +647,7 @@ Page.prototype.showProfilePicture = function() {
 Page.prototype.initializeCalculatorPage = function() {
   initializeButtons.initializeButtons();
   initializeButtons.initializeCalculatorPage();
+  mathjax.typeSetHard(ids.domElements.divMathjaxProblematicRender);
 }
 
 Page.prototype.sectionSelect = function(sectionNumber) {

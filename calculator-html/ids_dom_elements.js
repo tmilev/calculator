@@ -9,6 +9,9 @@ var domElements = {
     privacyPolicy: {
       div: "divPrivacyPolicy",
       button: "buttonPrivacyPolicy",
+    },
+    mathJaxPreloader: {
+      div: "divMathJaxPreloader",
     }
   },
   inputMain: "mainInputID",
@@ -49,6 +52,7 @@ var domElements = {
   spanStudentViewSectionSelectPanel: "spanStudentViewSectionSelectPanel",
   divCurrentCourse: "divCurrentCourse",
   divCurrentCourseBody: "divCurrentCourseBody",
+  divMathjaxProblematicRender: "divMathjaxProblematicRender",
   courseEditPanel: "divCurrentCourseEditPanel",
   classSpanDeadlineContainer: "spanDeadlineContainer",
   calculatorBuildVersion: "anchorCalculatorBuildVersion",

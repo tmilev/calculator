@@ -113,6 +113,15 @@ function browserify() {
 <body onload = "browserify();">
 <div id = "divPage"> 
 
+  <div id = "divMathJaxPreloader" class = "divMainPage">
+    Some mathjax symbols require fetching fonts, which, for some reason, result in
+    terrible mathjax delays, despite correct usage of MathJax.Hub.Queue(...) on our side.
+    This page aims to pre-render some problematic symbols, thus reducing bugs in other pages. 
+    <div id = "divMathjaxProblematicRender">
+    \(\mathcal L \)\(\S\)
+    </div>
+  </div>
+
 <div id = "divLoginPage" class = "divMainPage">
 <div class = "centerHorizontallyInPageContainer">
   <div class = "centerVerticallyInPageContainer">

@@ -474,7 +474,7 @@ bool Calculator::ReplaceOXEEXByEX()
 }
 
 bool Calculator::ReplaceOXXEXEXEXByE()
-{ SyntacticElement& opElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-9];
+{ SyntacticElement& opElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 9];
   SyntacticElement& leftE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 6];
   SyntacticElement& middleE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4];
   SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
@@ -1845,7 +1845,7 @@ bool Calculator::ApplyOneRule()
   const std::string& seventhToLastS = this->controlSequences[seventhToLastE.controlIndex];
   const SyntacticElement& eighthToLastE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 8];
   const std::string& eighthToLastS = this->controlSequences[eighthToLastE.controlIndex];
-//  const SyntacticElement& ninthToLastE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() -9];
+//  const SyntacticElement& ninthToLastE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 9];
 //  const std::string& ninthToLastS = this->theBoss->controlSequences[ninthToLastE.controlIndex];
   if (this->flagLogSyntaxRules)
     this->parsingLog += "<hr>" + this->ToStringSyntacticStackHTMLTable(false);

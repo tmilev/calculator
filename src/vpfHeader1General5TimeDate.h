@@ -11,13 +11,16 @@ static ProjectInformationInstance ProjectInfoHeaderDateAndtimeWrappers(__FILE__,
 struct TimeWrapper
 {
 public:
-  tm theTime;
+  tm timeGM;
+  tm timeLocal;
   std::string theTimeStringNonReadable;
 //  std::string GetRFC1123time();
   void AssignLocalTime();
   void ComputeTimeStringNonReadable();
-  std::string ToStringHumanReadable();
-  std::string ToString();
+  std::string ToString() const;
+  static std::string ToStringYMDHMS(const tm* input);
+  std::string ToStringGM() const;
+  std::string ToStringLocal() const;
   void operator=(const std::string& inputTime);
   double SubtractAnotherTimeFromMeInSeconds(TimeWrapper& other);
   double SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(TimeWrapper& other);

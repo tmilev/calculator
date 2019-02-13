@@ -220,7 +220,8 @@ public:
   std::string ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude);
 
   static std::string GetDateForLogFiles();
-  static std::string GetDateTime();
+  static std::string GetTimeGM();
+  static std::string GetTimeLocal();
   void SetWebInpuT(const std::string& inputName, const std::string& inputValue);
   std::string GetWebInput(const std::string& inputName);
   void initModifiableDatabaseFields();

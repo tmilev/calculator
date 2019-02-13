@@ -16,17 +16,25 @@ std::string GlobalVariables::GetDateForLogFiles()
     return tempDate;
   TimeWrapper now;
   now.AssignLocalTime();
-  tempDate = now.ToStringHumanReadable();
+  std::stringstream out;
+  out << "GM_" << now.ToStringGM();
+  tempDate = out.str();
   for (unsigned i = 0; i < tempDate.size(); i ++)
     if (tempDate[i] == ' ')
       tempDate[i] = '_';
   return tempDate;
 }
 
-std::string GlobalVariables::GetDateTime()
+std::string GlobalVariables::GetTimeGM()
 { TimeWrapper now;
   now.AssignLocalTime();
-  return now.ToStringHumanReadable();
+  return now.ToStringGM();
+}
+
+std::string GlobalVariables::GetTimeLocal()
+{ TimeWrapper now;
+  now.AssignLocalTime();
+  return now.ToStringLocal();
 }
 
 std::string ProcessTypes::worker = "worker";

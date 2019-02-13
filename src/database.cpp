@@ -642,10 +642,10 @@ bool UserCalculator::ComputeAndStoreActivationStats
     lastActivationOnThisAccount.operator=(this->timeOfActivationTokenCreation);
     if (commentsGeneral != 0)
       *commentsGeneral
-      << "<br>Last activation on this email: "
-      << lastActivationOnThisEmail.ToStringHumanReadable() << ".\n"
-      << "<br>Last activation on this account: "
-      << lastActivationOnThisEmail.ToStringHumanReadable() << ".\n";
+      << "<br>Last activation on this email, GM time: "
+      << lastActivationOnThisEmail.ToStringGM() << ".\n"
+      << "<br>Last activation on this account, GM time: "
+      << lastActivationOnThisEmail.ToStringGM() << ".\n";
   }
   if (commentsGeneral != 0)
     *commentsGeneral

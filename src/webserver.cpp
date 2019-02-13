@@ -17,7 +17,7 @@ std::string WebAPI::request::setProblemData = "setProblemData";
 std::string WebAPI::request::changePassword = "changePassword";
 std::string WebAPI::request::activateAccount = "activateAccount";
 std::string WebAPI::request::activateAccountJSON = "activateAccountJSON";
-std::string WebAPI::serverStatusJSON = "serverStatusJSON";
+std::string WebAPI::request::serverStatusJSON = "serverStatusJSON";
 std::string WebAPI::request::selectCourseJSON = "selectCourseJSON";
 std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
 
@@ -72,7 +72,6 @@ bool WebWorker::ReceiveAll()
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   if (theGlobalVariables.flagUsingSSLinCurrentConnection)
     return this->ReceiveAllHttpSSL();
-  //logWorker << logger::red << "DEBUG: Worker " << this->indexInParent + 1 << " receiving all. " << logger::endL;
   return this->ReceiveAllHttp();
 }
 
@@ -252,8 +251,6 @@ void SSLdata::initSSLserver()
   FileOperations::GetPhysicalFileNameFromVirtual(fileCertificate, fileCertificatePhysical, true, true, 0);
   FileOperations::GetPhysicalFileNameFromVirtual(fileKey, fileKeyPhysical, true, true, 0);
   FileOperations::GetPhysicalFileNameFromVirtual(signedFileKey, signedFileKeyPhysical, true, true, 0);
-  //std::cout << "\n\nproject base: " << theGlobalVariables.PhysicalPathProjectBase;
-  //std::cout << "\n\nfileKey physical: " << fileKeyPhysical;
   //////////////////////////////////////////////////////////
   if (!this->initSSLkeyFiles())
     return;
@@ -318,20 +315,15 @@ void SSLdata::initSSLserver()
 void SSLdata::HandShakeIamServer(int inputSocketID)
 {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamServer");
-  //logWorker << "Got to here 1" << logger::endL;
   this->sslServeR = SSL_new(this->contextServer);
-  //logWorker << "Got to here 1.05" << logger::endL;
   if (this->sslServeR == 0)
   { logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
   }
   this->SetSocketAddToStackServer(inputSocketID);
   int maxNumHandshakeTries = 3;
-  //int theError = - 1;
   for (int i = 0; i < maxNumHandshakeTries; i ++)
-  { //logWorker << logger::yellow << "DEBUG: ssl is server before call: " << SSL_is_server(this->sslServeR) << logger::endL;
-    this->errorCode = SSL_accept(this->sslServeR);
-    //logWorker << logger::red << "DEBUG: ssl is server: " << SSL_is_server(this->sslServeR) << logger::endL;
+  { this->errorCode = SSL_accept(this->sslServeR);
     this->flagSSLHandshakeSuccessful = false;
     if (this->errorCode != 1)
     { if (this->errorCode == 0)
@@ -538,7 +530,6 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup
     return false;
   }
   //CHK_SSL(err);
-  //logWorker << "Got to here 2" << logger::endL;
   /* Get the cipher - opt */
   /* Get client's certificate (note: beware of dynamic allocation) - opt */
   if (false)
@@ -747,8 +738,6 @@ bool WebWorker::ReceiveAllHttpSSL()
   this->requestTypE = this->requestUnknown;
   unsigned const int bufferSize = 60000;
   char buffer[bufferSize];
-  //std::cout << "Got thus far 9" << std::endl;
-  //std::cout.flush();
   if (this->connectedSocketID == - 1)
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   struct timeval tv; //<- code involving tv taken from stackexchange
@@ -819,7 +808,6 @@ bool WebWorker::ReceiveAllHttpSSL()
       this->displayUserInput = this->error;
       return false;
     }
-    //logIO << logger::blue << "about to read ..." << logger::endL;
     numBytesInBuffer = this->parent->theSSLdata.SSLRead
     (this->parent->theSSLdata.sslServeR, &buffer, bufferSize - 1, &errorString, 0, true);
     if (numBytesInBuffer == 0)
@@ -872,7 +860,6 @@ void WebWorker::SendAllBytesHttpSSL()
     crash << "Error: WebWorker::SendAllBytesHttpSSL called while flagUsingSSLinCurrentConnection is set to false. " << crash;
   if (this->connectedSocketID == - 1)
   { logWorker << logger::red << "Socket::SendAllBytes failed: connectedSocketID= - 1." << logger::endL;
-    //theReport.SetStatus("Socket::SendAllBytes failed: connectedSocketID= - 1. WebWorker::SendAllBytes - finished.");
     return;
   }
   logWorker << "SSL Worker " << this->indexInParent + 1
@@ -946,12 +933,8 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
   if (!theGlobalVariables.flagRunningBuiltInWebServer)
     return;
   theWebServer.CheckConsistency();
-  //logWorker << logger::endL << logger::red << "SetStatus: outputFunction: "
-  //<< (int) stOutput.theOutputFunction << logger::endL;
   MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerStaticFiasco;
-  //std::cout << "Got thus far ProgressReportWebServer::SetStatus 2" << std::endl;
   safetyFirst.LockMe();
-  //std::cout << "Got thus far ProgressReportWebServer::SetStatus 3" << std::endl;
   if (this->indexProgressReport >= theWebServer.theProgressReports.size)
     theWebServer.theProgressReports.SetSize(this->indexProgressReport + 1);
   theWebServer.theProgressReports[this->indexProgressReport] = inputStatus;
@@ -961,8 +944,6 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
     if (theWebServer.theProgressReports[i] != "")
       toBePiped << "<br>" << theWebServer.theProgressReports[i];
   safetyFirst.UnlockMe();
-  //logWorker << logger::endL << logger::red << "SetStatus before the issue: outputFunction: "
-  //<< (int) stOutput.theOutputFunction << logger::endL;
   if (!theGlobalVariables.flagRunningBuiltInWebServer)
     return;
   theWebServer.GetActiveWorker().pipeWorkerToWorkerStatus.WriteAfterEmptying(toBePiped.str(), false, false);
@@ -1088,8 +1069,6 @@ void WebWorker::resetMessageComponentsExceptRawMessage()
 static std::stringstream standardOutputStreamAfterTimeout;
 void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 { standardOutputStreamAfterTimeout << input;
-  //logWorker << logger::endL << logger::green << " Standard output: " << standardOutputStreamAfterTimeout.str()
-  //<< logger::endL;
 }
 
 std::string WebWorker::GetNavigationPage()
@@ -1143,7 +1122,6 @@ std::string WebWorker::GetDatabaseDeleteOneItem()
   std::stringstream commentsStream;
   std::string inputEncoded = theGlobalVariables.GetWebInput("item");
   std::string inputString = HtmlRoutines::ConvertURLStringToNormal(inputEncoded, false);
-  commentsStream << "DEBUG: Encoded input: " << inputEncoded << " decodes to: " << inputString << "\n";
   JSData inputParsed;
   if (!inputParsed.readstring(inputString, false, &commentsStream))
   { commentsStream << "Failed to parse input string. ";
@@ -1167,13 +1145,10 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
   for (int i = 0; i < this->cookies.size; i ++)
     if (!HtmlRoutines::ChopCGIStringAppend(this->cookies[i], newlyFoundArgs, argumentProcessingFailureComments))
       result = false;
-  //argumentProcessingFailureComments << "DEBUG: found: " << this->cookies.size << " cookies. ";
   for (int i = 0; i < newlyFoundArgs.size(); i ++)
-  { //argumentProcessingFailureComments << "DEBUG: Considering cookie key: " << newlyFoundArgs.theKeys[i] << ". ";
-    if (theGlobalVariables.webArguments.Contains(newlyFoundArgs.theKeys[i]))
+  { if (theGlobalVariables.webArguments.Contains(newlyFoundArgs.theKeys[i]))
       //if (theGlobalVariables.webArguments.GetValueCreate(newlyFoundArgs.theKeys[i]) != "")
       continue; //<-if a key is already given cookie entries are ignored.
-    //argumentProcessingFailureComments << "DEBUG: Found new cookie key: " << newlyFoundArgs.theKeys[i] << ". ";
     std::string trimmed = newlyFoundArgs.theValues[i];
     if (trimmed.size() > 0)
       if (trimmed[trimmed.size() - 1] == ';')
@@ -1203,7 +1178,6 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
 bool WebWorker::ExtractArgumentsFromMessage
 (const std::string& input, std::stringstream& argumentProcessingFailureComments, int recursionDepth)
 { MacroRegisterFunctionWithName("WebWorker::ExtractArgumentsFromMessage");
-  //stOutput << "DEBUG: here I am.";
   if (recursionDepth > 1)
   { argumentProcessingFailureComments << "Error: input string encoded too many times";
     return false;
@@ -2153,7 +2127,7 @@ int WebWorker::ProcessFile()
     << this->addressGetOrPost << "<br><b>Virtual file name: </b>"
     << this->VirtualFileName << "</body></html>";
     return 0;
-  }  
+  }
   theFile.seekp(0, std::ifstream::end);
   unsigned int fileSize = theFile.tellp();
   if (fileSize > 100000000)
@@ -3440,7 +3414,7 @@ int WebWorker::ServeClient()
     return this->ProcessCalculatorExamplesJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "toggleMonitoring")
     return this->ProcessToggleMonitoring();
-  else if (theGlobalVariables.userCalculatorRequestType == "serverStatusJSON")
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::serverStatusJSON)
     return this->ProcessServerStatusJSON();
   if (theGlobalVariables.userCalculatorRequestType == "monitor")
     return this->ProcessMonitor();
@@ -3967,7 +3941,9 @@ std::string WebServer::ToStringConnectionSummary()
   if (theGlobalVariables.flagRunningApache)
      return "Running through standard Apache web server, no connection details to display. ";
   std::stringstream out;
-  out << "<b>The calculator web server status.</b><br>";
+  TimeWrapper now;
+  now.AssignLocalTime();
+  out << "<b>Server status.</b> Server time: local: " << now.ToStringLocal() << ", gm: " << now.ToStringGM() << ".<br>";
   double timeRunning = - 1;
   if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size)
     timeRunning = theGlobalVariables.GetElapsedSeconds();
@@ -4056,7 +4032,6 @@ std::string WebServer::ToStringStatusAll()
 
 void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload)
 { struct stat theFileStat;
-  //std::cout << "DEBUG: Checking for restart";
   if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0)
     return;
   if (this->timeLastExecutableModification != - 1)
@@ -5147,7 +5122,7 @@ void WebServer::InitializeGlobalVariables()
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::app);
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::appNoCache);
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::userInfoJSON);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::serverStatusJSON);
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::serverStatusJSON);
 
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");

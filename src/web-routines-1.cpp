@@ -140,7 +140,8 @@ void WebServerMonitor::Monitor()
       numConsecutiveFailedPings ++;
       logServerMonitor << logger::red << "Connection monitor: Ping of " << theCrawler.addressToConnectTo
       << " at port/service " << theCrawler.portOrService
-      << " failed on " << now.ToStringHumanReadable() << ". " << "Got the following errors/messages: "
+      << " failed. GM time: " << now.ToStringGM() << ", local time: " << now.ToStringLocal()
+      << ". " << "Got the following errors/messages: "
       << theCrawler.lastTransactionErrors << theCrawler.lastTransaction << ". "
       << numConsecutiveFailedPings << " consecutive fails so far, restarting on " << maxNumPingFailures
       << ". " << logger::endL;
@@ -149,12 +150,13 @@ void WebServerMonitor::Monitor()
       numConsecutiveFailedPings = 0;
     }
     if (numConsecutiveFailedPings >= maxNumPingFailures)
-    { logServerMonitor << logger::red << "Server stopped responding (probably locked pipe?)"
+    { now.AssignLocalTime();
+      logServerMonitor << logger::red << "Server stopped responding (probably locked pipe?)"
       << ", restarting. " << logger::endL;
       FileOperations::OpenFileCreateIfNotPresentVirtual
-      (theFile,"LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true);
-      theFile << "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: "
-      << now.ToStringHumanReadable() << "</b><br>\n";
+      (theFile, "LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true);
+      theFile << "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: local: "
+      << now.ToStringLocal() << ", GM: " << now.ToStringGM() << "</b><br>\n";
       theFile.flush();
       theWebServer.Restart();
     }

@@ -23,8 +23,8 @@ public:
     static std::string userInfoJSON;
     static std::string editPage;
     static std::string selectCourseJSON;
+    static std::string serverStatusJSON;
   };
-  static std::string serverStatusJSON;
   struct databaseParameters
   { static std::string entryPoint;
     static std::string labels;

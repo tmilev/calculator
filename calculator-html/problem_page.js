@@ -107,7 +107,7 @@ Problem.prototype.initialize = function(problemData, inputParentIdURLed) {
 }
 
 Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) {
-  //this.parentIdURLed = inputParentIdURLed;
+  var thePage = window.calculator.mainPage;
   this.decodedProblem = decodeURIComponent(problemData["problemContent"]);
   this.commentsProblem = problemData["commentsProblem"];
   if (this.commentsProblem === undefined) {

@@ -24,6 +24,7 @@ PipePrimitive::PipePrimitive()
 { this->flagDeallocated = false;
   this->flagReadEndBlocks = true;
   this->flagWriteEndBlocks = true;
+  this->numberOfBytesLastWrite = 0;
   this->pipeEnds.initFillInObject(2, - 1);
 }
 
@@ -45,6 +46,7 @@ PipePrimitive::~PipePrimitive()
 void PipePrimitive::Release()
 { PauseProcess::Release(this->pipeEnds[0]);
   PauseProcess::Release(this->pipeEnds[1]);
+  this->numberOfBytesLastWrite = 0;
   this->lastRead.SetSize(0);
 }
 
@@ -373,6 +375,25 @@ bool PipePrimitive::WriteAfterEmptying(const std::string& input, bool restartSer
   return this->WriteIfFailThenCrash(input, restartServerOnFail, dontCrashOnFail);
 }
 
+bool PipePrimitive::HandleFailedWriteReturnFalse
+(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail, int numBadAttempts)
+{ std::stringstream errorStream;
+  errorStream << "Failed write: " << toBeSent.size() << " bytes ["
+  << MathRoutines::StringShortenInsertDots(toBeSent, 200) << "] onto: " << this->ToString() << numBadAttempts
+  << " or more times. Last error: "
+  << strerror(errno) << ". ";
+  if (theGlobalVariables.processType == ProcessTypes::worker)
+    logIO << logger::red << errorStream.str() << logger::endL;
+  if (theGlobalVariables.processType == ProcessTypes::server)
+    logServer << logger::red << errorStream.str() << logger::endL;
+  if (restartServerOnFail)
+    theWebServer.Restart();
+  else if (!dontCrashOnFail)
+    crash << "Failed write on: " << this->ToString() << numBadAttempts << " or more times. Last error: "
+    << strerror(errno) << ". " << crash;
+  return false;
+}
+
 bool PipePrimitive::WriteIfFailThenCrash(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail)
 { MacroRegisterFunctionWithName("PipePrimitive::WriteIfFailThenCrash");
   if (this->pipeEnds[1] == - 1)
@@ -383,47 +404,29 @@ bool PipePrimitive::WriteIfFailThenCrash(const std::string& toBeSent, bool resta
   if (toBeSent.size() == 0)
     return true;
 //  std::string toBeSentCopy = toBeSent;
-  int numBytesWritten = 0;
+  this->numberOfBytesLastWrite = 0;
   int numBadAttempts = 0;
   for (;;)
-  { numBytesWritten = write(this->pipeEnds[1], toBeSent.c_str(), toBeSent.size());
-    if (numBytesWritten < 0)
+  { this->numberOfBytesLastWrite = write(this->pipeEnds[1], toBeSent.c_str(), toBeSent.size());
+    if (this->numberOfBytesLastWrite < 0)
       if (errno == EAI_AGAIN || errno == EWOULDBLOCK ||
           errno == EINTR || errno == EIO)
       { numBadAttempts ++;
-        if (theGlobalVariables.processType == ProcessTypes::worker)
-          logIO << logger::red << "Failed write on pipe: " << this->ToString() << numBadAttempts
-          << " times. Last error: " << strerror(errno) << ". " << logger::endL;
-        if (theGlobalVariables.processType == ProcessTypes::server)
-          logServer << logger::red << "Failed write on pipe: " << this->ToString() << numBadAttempts
-          << " times. Last error: " << strerror(errno) << ". " << logger::endL;
         if (numBadAttempts > 30)
-        { if (theGlobalVariables.processType == ProcessTypes::worker)
-            logIO << logger::red << "Failed write on pipe: " << this->ToString() << ". Last error: "
-            << strerror(errno) << ". " << logger::endL;
-          if (theGlobalVariables.processType == ProcessTypes::server)
-            logServer << logger::red << "Failed write on pipe: " << this->ToString() << ". Last error: "
-            << strerror(errno) << ". " << logger::endL;
-          if (restartServerOnFail)
-            theWebServer.Restart();
-          else if (!dontCrashOnFail)
-            crash << "Failed write on pipe: " << this->ToString() << ". Last error: "
-            << strerror(errno) << ". " << crash;
-          return false;
-        }
+          return this->HandleFailedWriteReturnFalse(toBeSent, restartServerOnFail, dontCrashOnFail, numBadAttempts);
         continue;
       }
     break;
   }
-  if (numBytesWritten < 0)
+  if (this->numberOfBytesLastWrite < 0)
     return false;
-  if ((unsigned) numBytesWritten < toBeSent.size())
+  if ((unsigned) this->numberOfBytesLastWrite < toBeSent.size())
   { if (theGlobalVariables.processType == ProcessTypes::worker)
       logIO << logger::red << this->ToString() << ": wrote only "
-      << numBytesWritten << " bytes out of " << toBeSent.size() << " total. " << logger::endL;
+      << this->numberOfBytesLastWrite << " bytes out of " << toBeSent.size() << " total. " << logger::endL;
     if (theGlobalVariables.processType == ProcessTypes::server)
       logServer << logger::red << this->ToString() << ": wrote only "
-      << numBytesWritten << " bytes out of " << toBeSent.size() << " total. " << logger::endL;
+      << this->numberOfBytesLastWrite << " bytes out of " << toBeSent.size() << " total. " << logger::endL;
   }
   return true;
 }

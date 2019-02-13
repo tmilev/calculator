@@ -23,6 +23,7 @@ public:
   bool flagWriteEndBlocks;
   bool flagDeallocated;
   std::string name;
+  int numberOfBytesLastWrite;
   void Release();
   bool CreateMe
   (const std::string& inputPipeName,
@@ -43,7 +44,7 @@ public:
   bool ReadIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
   bool WriteAfterEmptying(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
   bool ReadWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
-
+  bool HandleFailedWriteReturnFalse(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail, int numBadAttempts);
   std::string ToString() const;
   PipePrimitive();
   ~PipePrimitive();

@@ -41,7 +41,7 @@ Leave the terminal window open if you'd like to monitor what's going on. The cal
 
 6. Open your favorite browser and navigate to 
 
-http://localhost:8155/cgi-bin/calculator
+http://localhost:8155
 
 This completes the setup and your first run.
 

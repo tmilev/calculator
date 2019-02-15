@@ -310,6 +310,7 @@ public:
   long long NumSuccessfulSelectsSoFar;
   bool flagTryToKillOlderProcesses;
   bool flagReapingChildren;
+  bool flagNoMonitor;
 #ifdef MACRO_use_open_ssl
   SSLdata theSSLdata;
 #endif

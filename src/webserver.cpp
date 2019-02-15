@@ -3769,6 +3769,7 @@ WebServer::WebServer()
   this->NumWorkersNormallyExited = 0;
   this->WebServerPingIntervalInSeconds = 10;
   this->NumberOfServerRequestsWithinAllConnections = 0;
+  this->flagNoMonitor = false;
 }
 
 WebWorker& WebServer::GetActiveWorker()
@@ -4075,7 +4076,9 @@ void WebServer::Restart()
   *currentLog << logger::red << " restarting with time limit " << timeLimitSeconds << logger::endL;
   theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath << " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
-  if (theWebServer.flagPort8155)
+  if (theWebServer.flagNoMonitor)
+    theCommand << " serverNoMonitor " << " nokill " << timeLimitSeconds;
+  else if (theWebServer.flagPort8155)
     theCommand << " server " << " nokill " << timeLimitSeconds;
   else
     theCommand << " server8080 " << " nokill " << timeLimitSeconds;
@@ -4494,7 +4497,7 @@ int WebServer::Run()
     logSuccessfulForks.reset();
     logSuccessfulForks.flagWriteImmediately = true;
   }
-  if (true)
+  if (!this->flagNoMonitor)
   { int pidMonitor = fork();
     if (pidMonitor < 0)
       crash << "Failed to create server process. " << crash;
@@ -5024,9 +5027,11 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
     return;
   }
   std::string& secondArgument = theGlobalVariables.programArguments[1];
-  if (secondArgument == "server" || secondArgument == "server8080")
+  if (secondArgument == "server" || secondArgument == "server8080" || secondArgument == "serverNoMonitor")
   { if (secondArgument == "server8080")
       theWebServer.flagPort8155 = false;
+    if (secondArgument == "serverNoMonitor")
+      theWebServer.flagNoMonitor = true;
     theGlobalVariables.flagRunningBuiltInWebServer = true;
     theGlobalVariables.flagRunningAce = false;
     theWebServer.flagTryToKillOlderProcesses = true;

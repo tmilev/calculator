@@ -2773,7 +2773,8 @@ bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream* commentsOnFailure
   }
   return true;
 #else
-  commentsOnFailure << "Error: database not running. ";
+  if (commentsOnFailure != 0)
+    *commentsOnFailure << "Error: database not running. ";
   return false;
 #endif
 }

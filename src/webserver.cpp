@@ -4738,7 +4738,11 @@ int WebWorker::Run()
     this->flagEncounteredErrorWhileServingFile = false;
     if (!this->ReceiveAll())
     { this->WrapUpConnection();
-      if (this->numberOfReceivesCurrentConnection > 0 && this->error == SSLdata::errors::errorWantRead)
+      bool sslWasOK = true;
+#ifdef MACRO_use_open_ssl
+      sslWasOK = (this->error == SSLdata::errors::errorWantRead);
+#endif
+      if (this->numberOfReceivesCurrentConnection > 0 && sslWasOK)
       { logIO << logger::green << "Connection timed out after successfully receiving "
         << this->numberOfReceivesCurrentConnection << " times. " << logger::endL;
         return 0;

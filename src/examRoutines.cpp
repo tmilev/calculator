@@ -4301,7 +4301,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
       std::stringstream newTitle;
       newTitle
       << titleWithLectureNumber.substr(0, lectureTagStart)
-      << "<lectureTag>\\(\\mathcal L\\) "
+      << "<lectureTag>&#8466;"
       << "</lectureTag>"
       << "Lecture "
       << owner.topicLectureCounter

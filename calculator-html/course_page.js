@@ -86,7 +86,8 @@ function afterLoadCoursePage(incomingPage, result) {
       document.getElementsByTagName('title')[0].text = titleElements[0].text;
     }
   }
-  mathjax.typeSetHard(coursePage);
+  //mathjax.typeSetHard(coursePage);
+  mathjax.typeSetSoft(coursePage);
   var theTopics = document.getElementsByTagName("topicList");
   var topicList = "topicListJSONNoLogin";
   if (thePage.user.flagLoggedIn) {

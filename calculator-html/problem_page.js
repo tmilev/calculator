@@ -901,7 +901,8 @@ function afterLoadTopics(incomingTopics, result) {
   initializeProblemWeightsAndDeadlines();
   initializeDatePickers();
   thePage.previousProblemId = null;
-  mathjax.typeSetHard(topicsElements[0]);
+  //mathjax.typeSetHard(topicsElements[0]);
+  mathjax.typeSetSoft(topicsElements[0]);
   //MathJax.Hub.queue.pending = 0;
   //MathJax.Hub.Typeset(ids.domElements.divCurrentCourseBody);
 }

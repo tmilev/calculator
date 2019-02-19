@@ -12,7 +12,11 @@ class DatabaseRoutinesGlobalFunctions
 {
 public:
   static bool LogoutViaDatabase();
-  static bool LoginViaDatabase(UserCalculatorData& theUseR, std::stringstream* comments);
+  static bool LoginViaDatabase(
+    UserCalculatorData& theUseR,
+    std::stringstream* commentsOnFailure,
+    std::stringstream *commentsGeneral
+  );
   static bool LoginViaGoogleTokenCreateNewAccountIfNeeded
   (UserCalculatorData& theUseR, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   static bool SetPassword

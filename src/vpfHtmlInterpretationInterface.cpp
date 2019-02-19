@@ -752,8 +752,8 @@ std::string HtmlInterpretation::GetTopicTableJSON()
   return out.str();
 }
 
-void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::string& comments)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetJSDataUserInfo");
+void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::string& comments) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetJSDataUserInfo");
   std::stringstream outLinkApp, outLinkAppNoCache;
   outLinkApp << "You've reached the calculator's backend. The app can be accessed here: <a href = '" << theGlobalVariables.DisplayNameExecutableApp << "'>app</a>";
   outputAppend["linkApp"] = outLinkApp.str();
@@ -765,10 +765,11 @@ void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::stri
     outputAppend["monitoring"] = "true";
   else
     outputAppend["monitoring"] = "false";
-  if (!theGlobalVariables.flagLoggedIn)
-  { outputAppend["status"] = "not logged in";
-    if (theGlobalVariables.GetWebInput("error") != "")
-      outputAppend["error"] = theGlobalVariables.GetWebInput("error");
+  if (theGlobalVariables.GetWebInput("error") != "") {
+    outputAppend["error"] = theGlobalVariables.GetWebInput("error");
+  }
+  if (!theGlobalVariables.flagLoggedIn) {
+    outputAppend["status"] = "not logged in";
     return;
   }
   outputAppend["status"] = "logged in";

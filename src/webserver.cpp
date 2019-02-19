@@ -1186,7 +1186,6 @@ bool WebWorker::ExtractArgumentsFromMessage
   theGlobalVariables.webArguments;
   if (!HtmlRoutines::ChopCGIStringAppend(input, theArgs, argumentProcessingFailureComments))
     return false;
-  //argumentProcessingFailureComments << "DEBUG: args from message pure: " << theArgs.ToStringHtml();
   if (theGlobalVariables.flagRunningApache)
     if (this->addressComputed == "")
       this->addressComputed = theGlobalVariables.GetWebInput("request");
@@ -1202,52 +1201,60 @@ bool WebWorker::ExtractArgumentsFromMessage
 //Returns false if something unexpected happens during the login procedure.
 //Returning true does not necessarily mean the login information was accepted.
 //Returning false guarantees the login information was not accepted.
-bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
-{ MacroRegisterFunctionWithName("WebWorker::Login");
+bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments, std::stringstream* comments) {
+  MacroRegisterFunctionWithName("WebWorker::Login");
   theGlobalVariables.flagLoggedIn = false;
   MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs = theGlobalVariables.webArguments;
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
-  theUser.username = HtmlRoutines::ConvertURLStringToNormal
-  (theGlobalVariables.GetWebInput("username"), true);
-  if (theUser.username.find('%') != std::string::npos)
+  theUser.username = HtmlRoutines::ConvertURLStringToNormal(
+    theGlobalVariables.GetWebInput("username"), true
+  );
+  if (theUser.username.find('%') != std::string::npos) {
     argumentProcessingFailureComments << "<b>Unusual behavior: % sign in username.</b>";
-  theUser.enteredAuthenticationToken = HtmlRoutines::ConvertURLStringToNormal
-  (theGlobalVariables.GetWebInput("authenticationToken"), false);
-  theUser.enteredGoogleToken = HtmlRoutines::ConvertURLStringToNormal
-  (theGlobalVariables.GetWebInput("googleToken"), false);
-  theUser.enteredActivationToken = HtmlRoutines::ConvertURLStringToNormal
-  (theGlobalVariables.GetWebInput("activationToken"), false);
-
-  theUser.enteredPassword =
-  HtmlRoutines::ConvertStringToURLString
-  (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("password"), true), false);
+  }
+  theUser.enteredAuthenticationToken = HtmlRoutines::ConvertURLStringToNormal(
+    theGlobalVariables.GetWebInput("authenticationToken"), false
+  );
+  theUser.enteredGoogleToken = HtmlRoutines::ConvertURLStringToNormal(
+    theGlobalVariables.GetWebInput("googleToken"), false
+  );
+  theUser.enteredActivationToken = HtmlRoutines::ConvertURLStringToNormal(
+    theGlobalVariables.GetWebInput("activationToken"), false
+  );
+  theUser.enteredPassword = HtmlRoutines::ConvertStringToURLString(
+    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("password"), true), false
+  );
   //<-Passwords are ONE-LAYER url-encoded
   //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
   //<-Incoming pluses must be re-coded as spaces (%20).
 
   theUser.flagEnteredPassword = (theUser.enteredPassword != "");
-  if (theUser.flagEnteredPassword)
-  { theUser.flagMustLogin = true;
+  if (theUser.flagEnteredPassword) {
+    theUser.flagMustLogin = true;
     theUser.enteredGoogleToken = "";
     theUser.enteredAuthenticationToken = "";
     theUser.enteredActivationToken = "";
     theUser.flagEnteredAuthenticationToken = false;
     theUser.flagEnteredActivationToken = false;
     theGlobalVariables.flagLogInAttempted = true;
-    argumentProcessingFailureComments << "Password was entered: all other authentication methods ignored. ";
+    if (theGlobalVariables.UserDebugFlagOn() && comments != 0) {
+      *comments << "Password was entered: all other authentication methods ignored. ";
+    }
   }
-  if (theUser.enteredActivationToken != "")
-  { theUser.enteredGoogleToken = "";
+  if (theUser.enteredActivationToken != "") {
+    theUser.enteredGoogleToken = "";
     theUser.enteredAuthenticationToken = "";
     theUser.flagEnteredAuthenticationToken = false;
     theUser.flagEnteredActivationToken = true;
     theGlobalVariables.flagLogInAttempted = true;
-    argumentProcessingFailureComments << "Activation token entered: authentication token and google token ignored. ";
+    if (theGlobalVariables.UserDebugFlagOn() && comments != 0) {
+      *comments << "Activation token entered: authentication token and google token ignored. ";
+    }
   }
   if (theUser.username != "")
     theUser.enteredGoogleToken = "";
-  if (theUser.enteredAuthenticationToken != "")
-  { theUser.flagEnteredAuthenticationToken = true;
+  if (theUser.enteredAuthenticationToken != "") {
+    theUser.flagEnteredAuthenticationToken = true;
     theGlobalVariables.flagLogInAttempted = true;
   }
   /////////////////////////////////////////////
@@ -1257,70 +1264,88 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   //if the attacker has control of the server executable - which probably means we
   //already are in big trouble - so this really shouldn't be such a big deal.
   /////////////////////////////////////////////
-  if (theUser.flagEnteredPassword &&
-      theUser.flagEnteredAuthenticationToken &&
-      theUser.enteredActivationToken == "" &&
-      theUser.enteredGoogleToken == "")
+  if (
+    !theUser.flagEnteredPassword &&
+    !theUser.flagEnteredAuthenticationToken &&
+    theUser.enteredActivationToken == "" &&
+    theUser.enteredGoogleToken == ""
+  ) {
     return !theUser.flagMustLogin;
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+  }
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return false;
+  }
   bool doAttemptGoogleTokenLogin = false;
-  if (theUser.enteredGoogleToken != "")
-  { if (theUser.enteredActivationToken == "" &&
-        theUser.enteredPassword == "" &&
-        theUser.enteredAuthenticationToken == "")
-    { theUser.username = "";
+  if (theUser.enteredGoogleToken != "") {
+    if (
+      theUser.enteredActivationToken == "" &&
+      theUser.enteredPassword == "" &&
+      theUser.enteredAuthenticationToken == ""
+    ) {
+      theUser.username = "";
       doAttemptGoogleTokenLogin = true;
     }
-    if (theUser.username == "")
+    if (theUser.username == "") {
       doAttemptGoogleTokenLogin = true;
-  } else if (theUser.username == "")
-  { //stOutput << "DEBUG: no username specified";
+    }
+  } else if (theUser.username == "") {
     return !theUser.flagMustLogin;
   }
   bool changingPass =
   theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword ||
   theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount ||
   theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON;
-  if (changingPass)
+
+  if (changingPass) {
     theUser.enteredAuthenticationToken = "";
-  if (doAttemptGoogleTokenLogin)
-  { theGlobalVariables.flagLoggedIn =
-    DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded
-    (theUser, &argumentProcessingFailureComments, 0);
-  } else if (theUser.enteredAuthenticationToken != "" || theUser.enteredPassword != "" ||
-             theUser.enteredActivationToken != "")
-  { theGlobalVariables.flagLoggedIn = DatabaseRoutinesGlobalFunctions::LoginViaDatabase
-    (theUser, &argumentProcessingFailureComments);
   }
-  theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("username",
-   HtmlRoutines::ConvertStringToURLString(theUser.username, false)
-   //<-User name must be stored in URL-encoded fashion, NO PLUSES.
-  );
-  if (theGlobalVariables.flagLoggedIn && theUser.enteredActivationToken == "")
-  { //in case the user logged in with password, we need
-    //to give him/her the correct authentication token
-    theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue
-    (DatabaseStrings::labelAuthenticationToken,
-     HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false)
-     //<-URL-encoded fashion, NO PLUSES.
+  if (doAttemptGoogleTokenLogin) {
+    theGlobalVariables.flagLoggedIn = DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded(
+      theUser, &argumentProcessingFailureComments, 0
     );
-    theGlobalVariables.SetWebInpuT
-    (DatabaseStrings::labelAuthenticationToken,
-     HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false));
-  } else
+  } else if (
+    theUser.enteredAuthenticationToken != "" || theUser.enteredPassword != "" ||
+    theUser.enteredActivationToken != ""
+  ) {
+    theGlobalVariables.flagLoggedIn = DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
+      theUser, &argumentProcessingFailureComments, comments
+    );
+  }
+  theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue(
+    "username",
+    HtmlRoutines::ConvertStringToURLString(theUser.username, false)
+    //<-User name must be stored in URL-encoded fashion, NO PLUSES.
+  );
+  if (theGlobalVariables.flagLoggedIn && theUser.enteredActivationToken == "") {
+    //in case the user logged in with password, we need
+    //to give him/her the correct authentication token
+    theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue(
+      DatabaseStrings::labelAuthenticationToken,
+      HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false)
+      //<-URL-encoded fashion, NO PLUSES.
+    );
+    theGlobalVariables.SetWebInpuT(
+      DatabaseStrings::labelAuthenticationToken,
+      HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false)
+    );
+  } else {
     theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "0");
+  }
   bool shouldDisplayMessage = false;
-  if (!theGlobalVariables.flagLoggedIn && theUser.username != "")
-  { if (theUser.flagEnteredPassword || theUser.flagEnteredActivationToken)
+  if (!theGlobalVariables.flagLoggedIn && theUser.username != "") {
+    if (theUser.flagEnteredPassword || theUser.flagEnteredActivationToken) {
       shouldDisplayMessage = true;
-    if (theUser.flagEnteredAuthenticationToken)
-      if (theUser.enteredActivationToken != "0" && theUser.enteredActivationToken != "")
+    }
+    if (theUser.flagEnteredAuthenticationToken) {
+      if (theUser.enteredActivationToken != "0" && theUser.enteredActivationToken != "") {
         shouldDisplayMessage = true;
+      }
+    }
   }
   theUser.clearAuthenticationTokenAndPassword();
-  if (shouldDisplayMessage)
+  if (shouldDisplayMessage) {
     argumentProcessingFailureComments << "Invalid user and/or authentication. ";
+  }
   theArgs.SetKeyValue("password", "********************************************");
   return true;
 }
@@ -1354,7 +1379,6 @@ void WebWorker::OutputResultAfterTimeout()
   (theGlobalVariables.RelativePhysicalNameOutpuT, false);
   out << "Output written in: <a href=\"/"
   << theLink << "\" target = \"_blank\"> " << theLink << "</a><br>";
-  //out <<  "DEBUG: filename: " << theFileName << "<br>";
   if (standardOutputStreamAfterTimeout.str().size() != 0)
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
   out << theParser->ToStringOutputAndSpecials();
@@ -1609,7 +1633,6 @@ bool WebWorker::ReceiveAllHttp()
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
-  //logWorker << logger::red << "DEBUG: expecting: " << this->ContentLength << " bytes " << logger::endL;
   while ((signed) this->messageBody.size() < this->ContentLength)
   { if (theGlobalVariables.GetElapsedSeconds() - numSecondsAtStart > 180)
     { this->error = "Receiving bytes timed out (180 seconds).";
@@ -2259,7 +2282,7 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
 void WebWorker::WrapUpConnection()
 { MacroRegisterFunctionWithName("WebWorker::WrapUpConnection");
   if (theGlobalVariables.flagServerDetailedLog)
-    logIO << "DEBUG: wrapping up connection. " << logger::endL;
+    logIO << "Detail: wrapping up connection. " << logger::endL;
   this->resultWork["connectionsServed"] = this->numberOfReceivesCurrentConnection;
   if (this->flagToggleMonitoring)
     this->resultWork["result"] = "toggleMonitoring";
@@ -2267,10 +2290,10 @@ void WebWorker::WrapUpConnection()
     this->resultWork["result"] = "close";
   this->pipeWorkerToServerControls.WriteAfterEmptying(this->resultWork.ToString(false), false, false);
   if (theGlobalVariables.flagServerDetailedLog)
-    logIO << "DEBUG: done with pipes, releasing resources. " << logger::endL;
+    logIO << "Detail: done with pipes, releasing resources. " << logger::endL;
   this->Release();
   if (theGlobalVariables.flagServerDetailedLog)
-    logIO << "DEBUG: released. " << logger::endL;
+    logIO << "Detail: released. " << logger::endL;
   theGlobalVariables.flagComputationCompletE = true;
   theGlobalVariables.flagComputationFinishedAllOutputSentClosing = true;
 }
@@ -2318,8 +2341,8 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
   return "Content-Type: application/octet-stream\r\n";
 }
 
-int WebWorker::ProcessUnknown()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
+int WebWorker::ProcessUnknown() {
+  MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
   this->SetHeadeR("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
   stOutput << "<html><head>"
   << HtmlRoutines::GetCSSLinkCalculator()
@@ -2392,7 +2415,6 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   actualEmailActivationToken = emailInfo[DatabaseStrings::labelActivationToken].string;
   if (actualEmailActivationToken != claimedActivationToken)
   { out << "\n<span style =\"color:red\"><b>Bad activation token. Could not activate your email. </b></span>";
-    //out << "DEBUG: actual token: " << actualEmailActivationToken << ". Claimed token: " << claimedActivationToken;
     return out.str();
   }
   if (usernameAssociatedWithToken != theGlobalVariables.userDefault.username)
@@ -2532,7 +2554,6 @@ bool WebWorker::DoSetEmail
   theEmail.toEmail = inputOutputUser.email;
   if (!theEmail.IsOKEmail(theEmail.toEmail, commentsOnFailure))
     return false;
-  //out << "DEBUG: got to here part 2. ";
   UserCalculator userCopy;
   userCopy.UserCalculatorData::operator=(inputOutputUser);
   userCopy.email = inputOutputUser.email;
@@ -2589,10 +2610,6 @@ int WebWorker::SetEmail(const std::string& input)
 int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthentication)
 { MacroRegisterFunctionWithName("WebWorker::ProcessChangePassword");
   (void) reasonForNoAuthentication;
-  //stOutput << " ere i am";
-  //if (theGlobalVariables.UserDebugFlagOn())
-  //theGlobalVariables.SetWebInpuT("debugFlag", "true");
-  //stOutput << "DEBUG: " << this->ToStringCalculatorArgumentsHumanReadable();
   this->SetHeaderOKNoContentLength("");
 #ifdef MACRO_use_MongoDB
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
@@ -2650,8 +2667,6 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
     << commentsOnFailure.str() << "</b></span>";
 
   stOutput << "<span style =\"color:green\"> <b>Password change successful. </b></span>";
-  //stOutput << "DEBUG: computed sha1salted, entered: " << theUser.actualShaonedSaltedPassword
-  //<< ", " << theUser.enteredShaonedSaltedPassword;
   if (theGlobalVariables.GetWebInput("doReload") != "false")
   { stOutput
     << "<meta http-equiv=\"refresh\" content =\"0; url ='"
@@ -2676,8 +2691,6 @@ int WebWorker::ProcessCompute()
   theGlobalVariables.initOutputReportAndCrashFileNames
   (HtmlRoutines::ConvertStringToURLString(theParser->inputString, false), theParser->inputString);
 
-  //std::cout << "DEBUG: input string: " << theParser.inputString;
-  //std::cout.flush();
   ////////////////////////////////////////////////
   //  the initialization below moved to the start of the web server!
   //  theParser.init();
@@ -2786,8 +2799,6 @@ int WebWorker::ProcessLoginUserInfo(const std::string& comments)
   this->SetHeaderOKNoContentLength("");
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
   stOutput << HtmlInterpretation::GetJSONUserInfo(comments);
-  //if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-  //  stOutput << "<!--" << this->ToStringMessageFullUnsafe() << "-->";
   return 0;
 }
 
@@ -2919,8 +2930,6 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource()
   LaTeXcrawler theCrawler;
   for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++)
   { std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
-    //stOutput << "DEBUG: considering key: " << theKey
-    //<< " with value: " << theGlobalVariables.webArguments.theValues[i] << "<br>";
     if (theKey != "fileName" && MathRoutines::StringBeginsWith(theKey, "file"))
     { theCrawler.slideFileNamesVirtualWithPatH.AddOnTop
       (MathRoutines::StringTrimWhiteSpace
@@ -2968,8 +2977,6 @@ int WebWorker::ProcessSlidesSource()
   LaTeXcrawler theCrawler;
   for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++)
   { std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
-    //stOutput << "DEBUG: considering key: " << theKey
-    //<< " with value: " << theGlobalVariables.webArguments.theValues[i] << "<br>";
     if (theKey != "fileName" && MathRoutines::StringBeginsWith(theKey, "file"))
     { theCrawler.slideFileNamesVirtualWithPatH.AddOnTop
       (MathRoutines::StringTrimWhiteSpace
@@ -3196,14 +3203,6 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
   << "</head>";
   stOutput << "<body>Click <a href=\"" << redirectedAddress.str() << "\">"
   << " here " << "</a> if your browser does not redirect the page automatically. ";
-  //stOutput << "<hr>DEBUG: addressComputed: <br>" << HtmlRoutines::ConvertStringToHtmlString(this->addressComputed, true)
-  //<< "<hr>addressToRedirectTo: <br>\n" << HtmlRoutines::ConvertStringToHtmlString(redirectedAddress.str(), true)
-  //<< "<hr>argumentComputed: <br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->argumentComputed, true)
-  //<< "<hr>addressGetOrPost: <br>" << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true)
-  //<< "<hr>MessageBody: <br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageBody, true)
-  //<< " <br>MessageHead: <br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageHead, true)
-  //<< HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
-  //<< this->ToStringMessageFullUnsafe();
   stOutput << "</body></html>";
   return true;
 }
@@ -3306,104 +3305,126 @@ int WebWorker::ServeClient()
   theGlobalVariables.userDefault.flagStopIfNoLogin = true;
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theGlobalVariables.IndicatorStringOutputFunction = WebServer::PipeProgressReportToParentProcess;
-  if (this->requestTypE != this->requestGet &&
-      this->requestTypE != this->requestPost &&
-      this->requestTypE != this->requestHead)
-  { if (this->requestTypE != this->requestUnknown &&
-        this->requestTypE != this->requestChunked)
+  if (
+    this->requestTypE != this->requestGet &&
+    this->requestTypE != this->requestPost &&
+    this->requestTypE != this->requestHead
+  ) {
+    if (
+      this->requestTypE != this->requestUnknown &&
+      this->requestTypE != this->requestChunked
+    ) {
       crash << "Something is wrong: request type does not have any of the expected values. " << crash;
+    }
     this->ProcessUnknown();
     return 0;
   }
-  if (theGlobalVariables.theThreads.size <= 1)
+  if (theGlobalVariables.theThreads.size <= 1) {
     crash << "Number of threads must be at least 2 in this point of code..." << crash;
+  }
   this->ExtractHostInfo();
   this->ExtractAddressParts();
   std::stringstream argumentProcessingFailureComments;
   this->flagArgumentsAreOK = true;
-  if (!this->ExtractArgumentsFromMessage(this->argumentComputed, argumentProcessingFailureComments))
+  if (!this->ExtractArgumentsFromMessage(this->argumentComputed, argumentProcessingFailureComments)) {
     this->flagArgumentsAreOK = false;
-  if (!this->ExtractArgumentsFromCookies(argumentProcessingFailureComments))
+  }
+  if (!this->ExtractArgumentsFromCookies(argumentProcessingFailureComments)) {
     this->flagArgumentsAreOK = false;
+  }
   theGlobalVariables.userCalculatorRequestType = "";
-  if (this->addressComputed == theGlobalVariables.DisplayNameExecutable)
+  if (this->addressComputed == theGlobalVariables.DisplayNameExecutable) {
     theGlobalVariables.userCalculatorRequestType = theGlobalVariables.GetWebInput("request");
+  }
   std::stringstream comments;
   comments << "Address, request computed: " << this->addressComputed << ", "
   << theGlobalVariables.userCalculatorRequestType << ". ";
   bool isNotModified = this->CorrectRequestsBEFORELoginReturnFalseIfModified();
-  if (!isNotModified)
+  if (!isNotModified) {
     comments << this->ToStringAddressRequest() << ": modified before login. ";
-  if (theWebServer.addressStartsInterpretedAsCalculatorRequest.Contains(this->addressComputed))
-  { theGlobalVariables.userCalculatorRequestType = this->addressComputed;
+  }
+  if (theWebServer.addressStartsInterpretedAsCalculatorRequest.Contains(this->addressComputed)) {
+    theGlobalVariables.userCalculatorRequestType = this->addressComputed;
     std::string correctedRequest;
-    if (MathRoutines::StringBeginsWith(theGlobalVariables.userCalculatorRequestType, "/", &correctedRequest))
-    { //std::cout << "Got to here";
+    if (MathRoutines::StringBeginsWith(theGlobalVariables.userCalculatorRequestType, "/", &correctedRequest)) {
       theGlobalVariables.userCalculatorRequestType = correctedRequest;
       comments << "Address was interpretted as request, so your request was set to: " << theGlobalVariables.userCalculatorRequestType << ". ";
     }
-    //std::cout << "Address request set to: " << theGlobalVariables.userCalculatorRequestType << std::endl;
   }
   theUser.flagMustLogin = this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
-  if (!theUser.flagMustLogin)
+  if (!theUser.flagMustLogin) {
     comments << "Login not needed. ";
-
-  if (this->RequireSSL() && !theGlobalVariables.flagUsingSSLinCurrentConnection)
+  }
+  if (this->RequireSSL() && !theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return this->ProcessLoginNeededOverUnsecureConnection();
-  if (this->ProcessRedirectAwayFromWWW())
+  }
+  if (this->ProcessRedirectAwayFromWWW()) {
     return 0;
-  this->flagArgumentsAreOK = this->Login(argumentProcessingFailureComments);
-  //stOutput << "DEBUG: got to here pt 2.";
+  }
+  this->flagArgumentsAreOK = this->Login(argumentProcessingFailureComments, &comments);
   isNotModified = this->CorrectRequestsAFTERLoginReturnFalseIfModified();
-  if (!isNotModified)
+  if (!isNotModified) {
     comments << this->ToStringAddressRequest() << ": modified after login. ";
-  if (this->RedirectIfNeeded(argumentProcessingFailureComments))
-  { //logWorker << "DEBUG: redirecting as needed: " <<  argumentProcessingFailureComments.str() << logger::endL;
+  }
+  if (this->RedirectIfNeeded(argumentProcessingFailureComments)) {
     return 0;
   }
-  theUser.flagStopIfNoLogin =
-  (!theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection &&
-   theUser.flagMustLogin);
-  if (theUser.flagStopIfNoLogin)
-  { if (theGlobalVariables.userCalculatorRequestType == "changePassword")
+  theUser.flagStopIfNoLogin = (
+    !theGlobalVariables.flagLoggedIn &&
+    theGlobalVariables.flagUsingSSLinCurrentConnection &&
+    theUser.flagMustLogin
+  );
+  if (theUser.flagStopIfNoLogin) {
+    if (theGlobalVariables.userCalculatorRequestType == "changePassword") {
       theUser.flagStopIfNoLogin = false;
+    }
   }
-  if (theUser.flagStopIfNoLogin)
-  { if (theGlobalVariables.userCalculatorRequestType != "logout" &&
-        theGlobalVariables.userCalculatorRequestType != "login")
+  if (theUser.flagStopIfNoLogin) {
+    if (
+      theGlobalVariables.userCalculatorRequestType != "logout" &&
+      theGlobalVariables.userCalculatorRequestType != "login"
+    ) {
       argumentProcessingFailureComments << this->ToStringAddressRequest() << " requires login. ";
+    }
     argumentProcessingFailureComments << comments.str();
     theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
-    if (argumentProcessingFailureComments.str() != "")
+    if (argumentProcessingFailureComments.str() != "") {
       theGlobalVariables.SetWebInpuT("authenticationToken", "");
+    }
     return this->ProcessLoginUserInfo(argumentProcessingFailureComments.str());
   }
-  //logWorker << "DEBUG: argumentProcessingFailureComments: " <<  argumentProcessingFailureComments.str() << logger::endL;
-  if (argumentProcessingFailureComments.str() != "" &&
-      (theUser.flagMustLogin || theGlobalVariables.userCalculatorRequestType == WebAPI::request::userInfoJSON))
-  { theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
-    //logWorker << "DEBUG: set global error" << logger::endL;
+  if (
+    argumentProcessingFailureComments.str() != "" && (
+      theUser.flagMustLogin ||
+      theGlobalVariables.userCalculatorRequestType == WebAPI::request::userInfoJSON
+    )
+  ) {
+    theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
   }
-  //stOutput << "DEBUG: got to here pt 3.";
-  if (theUser.flagMustLogin)
-    this->errorLogin = argumentProcessingFailureComments.str();
-  if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.flagLoggedIn)
-    if (theGlobalVariables.GetWebInput("spoofHostName") != "")
-    { theGlobalVariables.hostNoPort = HtmlRoutines::ConvertURLStringToNormal
-      (theGlobalVariables.GetWebInput("spoofHostName"), false);
-      //stOutput << "spoofhostname: " << theGlobalVariables.GetWebInput("spoofHostName");
+  if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.flagLoggedIn) {
+    if (theGlobalVariables.GetWebInput("spoofHostName") != "") {
+      theGlobalVariables.hostNoPort = HtmlRoutines::ConvertURLStringToNormal(
+        theGlobalVariables.GetWebInput("spoofHostName"), false
+      );
       theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", theGlobalVariables.hostNoPort);
     }
-  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-      theGlobalVariables.userCalculatorRequestType == WebAPI::databaseParameters::entryPoint)
+  }
+  if (
+    theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
+    theGlobalVariables.userCalculatorRequestType == WebAPI::databaseParameters::entryPoint
+  ) {
     return this->ProcessDatabaseJSON();
-  else if (theGlobalVariables.flagLoggedIn &&
-           theGlobalVariables.userCalculatorRequestType == "databaseDeleteOneEntry")
+  } else if (
+    theGlobalVariables.flagLoggedIn &&
+    theGlobalVariables.userCalculatorRequestType == "databaseDeleteOneEntry"
+  ) {
     return this->ProcessDatabaseDeleteEntry();
-  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-           theGlobalVariables.userCalculatorRequestType == "databaseModifyEntry")
+  } else if (
+    theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
+    theGlobalVariables.userCalculatorRequestType == "databaseModifyEntry"
+  ) {
     return this->ProcessDatabaseModifyEntry();
-  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accounts")
+  } else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accounts")
     return this->ProcessAccounts();
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accountsJSON")
     return this->ProcessAccountsJSON();
@@ -3493,9 +3514,9 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType == "templateJSON" ||
            theGlobalVariables.userCalculatorRequestType == "templateJSONNoLogin")
     return this->ProcessTemplateJSON();
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::userInfoJSON)
+  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::userInfoJSON) {
     return this->ProcessLoginUserInfo(comments.str());
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::editPage)
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::editPage)
     return this->ProcessEditPageJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "modifyPage")
     return this->ProcessModifyPage();
@@ -3704,19 +3725,19 @@ void WebServer::ReleaseEverything()
   theGlobalVariables.PauseUponUserRequest = 0;
   this->activeWorker = - 1;
   if (theGlobalVariables.flagServerDetailedLog)
-    currentLog << logger::red << "DEBUG: "
+    currentLog << logger::red << "Detail: "
     << " About to close socket: " << this->listeningSocketHTTP << ". " << logger::endL;
   if (this->listeningSocketHTTP != - 1)
   { close(this->listeningSocketHTTP);
     if (theGlobalVariables.flagServerDetailedLog)
-      currentLog << logger::red << "DEBUG: "
+      currentLog << logger::red << "Detail: "
       << " Just closed socket: " << this->listeningSocketHTTP << logger::endL;
     this->listeningSocketHTTP = - 1;
   }
   if (this->listeningSocketHttpSSL != - 1)
   { close(this->listeningSocketHttpSSL);
     if (theGlobalVariables.flagServerDetailedLog)
-      currentLog << logger::red << "DEBUG: "
+      currentLog << logger::red << "Detail: "
       << " Just closed socket: " << this->listeningSocketHttpSSL << logger::endL;
   }
   this->listeningSocketHttpSSL = - 1;
@@ -4131,10 +4152,10 @@ void WebServer::ReleaseWorkerSideResources()
 { MacroRegisterFunctionWithName("WebServer::ReleaseWorkerSideResources");
   logger& currentLog = theGlobalVariables.flagIsChildProcess ? logWorker : logProcessKills;
   if (theGlobalVariables.flagServerDetailedLog)
-    currentLog << logger::red << "DEBUG: server about to RELEASE active workder. " << logger::endL;
+    currentLog << logger::red << "Detail: server about to RELEASE active workder. " << logger::endL;
   this->Release(this->GetActiveWorker().connectedSocketID);
   if (theGlobalVariables.flagServerDetailedLog)
-    currentLog << logger::green << "DEBUG: server RELEASED active worker. " << logger::endL;
+    currentLog << logger::green << "Detail: server RELEASED active worker. " << logger::endL;
   //<-release socket- communication is handled by the worker.
   this->activeWorker = - 1; //<-The active worker is needed only in the child process.
 }
@@ -4173,7 +4194,7 @@ void WebServer::TerminateChildSystemCall(int i)
   this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
   if (this->theWorkers[i].ProcessPID > 0)
   { if (theGlobalVariables.flagServerDetailedLog)
-      logProcessKills << "DEBUG: " << " killing child index: " << i << "." << logger::endL;
+      logProcessKills << "Detail: " << " killing child index: " << i << "." << logger::endL;
     kill(this->theWorkers[i].ProcessPID, SIGKILL);
     this->theWorkers[i].ProcessPID = - 1;
   }
@@ -4185,7 +4206,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
   if (theGlobalVariables.flagIsChildProcess)
     return;
   if (theGlobalVariables.flagServerDetailedLog)
-    logProcessStats << logger::red << "DEBUG: "
+    logProcessStats << logger::red << "Detail: "
     << " too many connections handler start. " << logger::endL;
   MonomialWrapper<std::string, MathRoutines::hashString>
   incomingAddress(incomingUserAddress);
@@ -4215,9 +4236,10 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     logProcessKills << logger::red << errorStream.str() << logger::endL;
     this->NumProcessAssassinated ++;
   }
-  if (theGlobalVariables.flagServerDetailedLog)
+  if (theGlobalVariables.flagServerDetailedLog) {
     logProcessStats << logger::green
-    << "DEBUG: connection cleanup successful. " << logger::endL;
+    << "Detail: connection cleanup successful. " << logger::endL;
+  }
 }
 
 void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse)
@@ -4244,16 +4266,17 @@ void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse)
     this->NumberOfServerRequestsWithinAllConnections += (int) workerMessage["connectionsServed"].number;
 }
 
-void WebServer::RecycleChildrenIfPossible()
-{ //Listen for children who have exited properly.
+void WebServer::RecycleChildrenIfPossible() {
+  //Listen for children who have exited properly.
   //This might need to be rewritten: I wasn't able to make this work with any
   //mechanism other than pipes.
   MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
   if (theGlobalVariables.flagIsChildProcess)
     return;
-  if (theGlobalVariables.flagServerDetailedLog)
-    logProcessStats << logger::red << "DEBUG: RecycleChildrenIfPossible start. " << logger::endL;
-//  this->ReapChildren();
+  if (theGlobalVariables.flagServerDetailedLog) {
+    logProcessStats << logger::red << "Detail: RecycleChildrenIfPossible start. " << logger::endL;
+  }
+    //  this->ReapChildren();
   int numInUse = 0;
   for (int i = 0; i < this->theWorkers.size; i ++)
     if (this->theWorkers[i].flagInUse)
@@ -4305,10 +4328,11 @@ void WebServer::RecycleChildrenIfPossible()
         }
       }
     }
-  if (numInUse <= this->MaxTotalUsedWorkers)
-  { if (theGlobalVariables.flagServerDetailedLog)
+  if (numInUse <= this->MaxTotalUsedWorkers) {
+    if (theGlobalVariables.flagServerDetailedLog) {
       logProcessStats << logger::green
-      << "DEBUG: RecycleChildrenIfPossible exit point 1. " << logger::endL;
+      << "Detail: RecycleChildrenIfPossible exit point 1. " << logger::endL;
+    }
     return;
   }
   for (int i = 0; i < this->theWorkers.size && numInUse > 1; i ++)
@@ -4325,9 +4349,10 @@ void WebServer::RecycleChildrenIfPossible()
       this->NumProcessAssassinated ++;
     }
   }
-  if (theGlobalVariables.flagServerDetailedLog)
+  if (theGlobalVariables.flagServerDetailedLog) {
     logProcessStats << logger::green
-    << "DEBUG: RecycleChildrenIfPossible exit point 2. " << logger::endL;
+    << "Detail: RecycleChildrenIfPossible exit point 2. " << logger::endL;
+  }
 }
 
 bool WebServer::initPrepareWebServerALL()
@@ -4540,8 +4565,9 @@ int WebServer::Run()
     FD_ZERO(&FDListenSockets);
     for (int i = 0; i < this->theListeningSockets.size; i ++)
       FD_SET(this->theListeningSockets[i], &FDListenSockets);
-    if (theGlobalVariables.flagServerDetailedLog)
-      logServer << logger::red << "DEBUG: About to enter select loop. " << logger::endL;
+    if (theGlobalVariables.flagServerDetailedLog) {
+      logServer << logger::red << "Detail: About to enter select loop. " << logger::endL;
+    }
     while (select(this->highestSocketNumber + 1, &FDListenSockets, 0, 0, 0) == - 1)
     { if (this->flagReapingChildren)
         logServer << logger::yellow << "Select interrupted while reaping children. "
@@ -4551,8 +4577,9 @@ int WebServer::Run()
         << strerror(errno) << logger::endL;
       this->NumFailedSelectsSoFar ++;
     }
-    if (theGlobalVariables.flagServerDetailedLog)
-      logServer << logger::green << "DEBUG: select success. " << logger::endL;
+    if (theGlobalVariables.flagServerDetailedLog) {
+      logServer << logger::green << "Detail: select success. " << logger::endL;
+    }
     int64_t millisecondsBeforeFork = theGlobalVariables.GetElapsedMilliseconds();
     this->NumSuccessfulSelectsSoFar ++;
     if ((this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar) - previousReportedNumberOfSelects > 100)
@@ -4603,13 +4630,18 @@ int WebServer::Run()
     if (newConnectedSocket < 0 && !found)
       logSocketAccept << logger::red << "This is not supposed to to happen: select succeeded "
       << "but I found no set socket. " << logger::endL;
-    if (newConnectedSocket < 0)
-    { if (theGlobalVariables.flagServerDetailedLog)
-        logServer << "DEBUG: newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. " << logger::endL;
+    if (newConnectedSocket < 0) {
+      if (theGlobalVariables.flagServerDetailedLog) {
+        logServer << "Detail: newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. " << logger::endL;
+      }
       continue;
     }
-    inet_ntop
-    (their_addr.ss_family, get_in_addr((struct sockaddr *) &their_addr), userAddressBuffer, sizeof userAddressBuffer);
+    inet_ntop(
+      their_addr.ss_family,
+      get_in_addr((struct sockaddr *) &their_addr),
+      userAddressBuffer,
+      sizeof userAddressBuffer
+    );
     this->HandleTooManyConnections(userAddressBuffer);
     this->RecycleChildrenIfPossible();
     if (!this->CreateNewActiveWorker())
@@ -4635,14 +4667,14 @@ int WebServer::Run()
 //    logWorker << this->ToStringStatus();
     /////////////
     if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << "DEBUG: about to fork, sigprocmasking " << logger::endL;
+      logProcessStats << "Detail: about to fork, sigprocmasking " << logger::endL;
     int error = sigprocmask(SIG_BLOCK, &allSignals, &oldSignals);
-    if (error < 0)
-    { logServer << logger::red << "DEBUG: Sigprocmask failed. The server is going to crash. " << logger::endL;
+    if (error < 0) {
+      logServer << logger::red << "Fatal error: sigprocmask failed. The server is going to crash. " << logger::endL;
       crash << "Sigprocmas failed. This should not happen. " << crash;
     }
-    if (theGlobalVariables.flagServerDetailedLog)
-    { logProcessStats << "DEBUG: Sigprocmask done. Proceeding to fork. "
+    if (theGlobalVariables.flagServerDetailedLog) {
+      logProcessStats << "Detail: Sigprocmask done. Proceeding to fork. "
       << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
       << logger::endL;
     }
@@ -4654,48 +4686,51 @@ int WebServer::Run()
     //logWorker << "\r\nChildPID: " << this->childPID;
     if (incomingPID == 0)
       theGlobalVariables.processType = "worker";
-    if (theGlobalVariables.flagServerDetailedLog)
-      if (incomingPID == 0)
-      { logWorker << "DEBUG: fork() successful in worker; elapsed ms @ fork(): "
-        << theGlobalVariables.GetElapsedMilliseconds() << logger::endL;
-      }
-    if (theGlobalVariables.flagServerDetailedLog)
-      if (incomingPID > 0)
-      { logSuccessfulForks << "DEBUG: fork() successful; elapsed ms @ fork(): "
-        << theGlobalVariables.GetElapsedMilliseconds() << logger::endL;
-      }
+    if (theGlobalVariables.flagServerDetailedLog && incomingPID == 0) {
+      logWorker << "Detail: fork() successful in worker; elapsed ms @ fork(): "
+      << theGlobalVariables.GetElapsedMilliseconds() << logger::endL;
+    }
+    if (theGlobalVariables.flagServerDetailedLog && incomingPID > 0) {
+      logSuccessfulForks << "Detail: fork() successful; elapsed ms @ fork(): "
+      << theGlobalVariables.GetElapsedMilliseconds() << logger::endL;
+    }
     if (incomingPID < 0)
       logProcessKills << logger::red << " FAILED to spawn a child process. " << logger::endL;
     this->GetActiveWorker().ProcessPID = incomingPID;
     if (this->GetActiveWorker().ProcessPID == 0)
     { // this is the child (worker) process
       theGlobalVariables.flagIsChildProcess = true;
-      if (theGlobalVariables.flagServerDetailedLog)
-        logWorker << logger::green << "DEBUG: "
+      if (theGlobalVariables.flagServerDetailedLog) {
+        logWorker << logger::green << "Detail: "
         << " FORK successful in worker, next step. Time elapsed: " << theGlobalVariables.GetElapsedSeconds()
         << " second(s). Calling sigprocmask. " << logger::endL;
+      }
       sigprocmask(SIG_SETMASK, &oldSignals, NULL);
-      if (theGlobalVariables.flagServerDetailedLog)
-        logWorker << logger::green << "DEBUG: sigprocmask success, running... " << logger::endL;
+      if (theGlobalVariables.flagServerDetailedLog) {
+        logWorker << logger::green << "Detail: sigprocmask success, running... " << logger::endL;
+      }
       int result = this->GetActiveWorker().Run();
-      if (theGlobalVariables.flagServerDetailedLog)
-        logWorker << "DEBUG: run finished, releasing resources. " << logger::endL;
+      if (theGlobalVariables.flagServerDetailedLog) {
+        logWorker << "Detail: run finished, releasing resources. " << logger::endL;
+      }
       this->ReleaseEverything();
-      if (theGlobalVariables.flagServerDetailedLog)
-        logWorker << logger::green << "DEBUG: resources released, returning. " << logger::endL;
+      if (theGlobalVariables.flagServerDetailedLog) {
+        logWorker << logger::green << "Detail: resources released, returning. " << logger::endL;
+      }
       return result;
     }
     if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << logger::green << "DEBUG: fork successful. Time elapsed: "
+      logProcessStats << logger::green << "Detail: fork successful. Time elapsed: "
       << theGlobalVariables.GetElapsedMilliseconds() << " ms. "
       << "About to unmask signals. " << logger::endL;
     error = sigprocmask(SIG_SETMASK, &oldSignals, NULL);
-    if (error < 0)
-    { logServer << "Sigprocmask failed on server, I shall now crash. " << logger::endL;
+    if (error < 0) {
+      logServer << "Sigprocmask failed on server, I shall now crash. " << logger::endL;
       crash << "Sigprocmask failed on server." << crash;
     }
-    if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << logger::green << "DEBUG: unmask successful. " << logger::endL;
+    if (theGlobalVariables.flagServerDetailedLog) {
+      logProcessStats << logger::green << "Detail: unmask successful. " << logger::endL;
+    }
     this->ReleaseWorkerSideResources();
   }
   this->ReleaseEverything();
@@ -5269,7 +5304,6 @@ bool GlobalVariables::LoadConfiguration()
   std::string configuration;
   std::stringstream out;
   bool createConfiguration = false;
-  //std::cout << "DEBUG: loading config:" << std::endl;
   if (FileOperations::LoadFileToStringVirtual("/configuration/configuration.json", configuration, true, false, &out))
   { if (!theGlobalVariables.configuration.readstring(configuration, false, &out))
     { logServer << logger::red << out.str() << logger::endL;
@@ -5277,7 +5311,6 @@ bool GlobalVariables::LoadConfiguration()
     }
   } else
   { createConfiguration = true;
-    //std::cout << "DEBUG: no congig:" << out.str() << std::endl;
     logServer << logger::yellow << out.str() << logger::endL;
   }
   if (createConfiguration)
@@ -5389,7 +5422,6 @@ int WebServer::main(int argc, char **argv)
         << " seconds. " << logger::endL
         << logger::purple << "************************" << logger::endL;
     }
-    //logServer << "DEBUG: got to here pt 3" << logger::endL;
     if (theGlobalVariables.flagRunningConsoleTest)
       return mainTest(theGlobalVariables.programArguments);
     if (theGlobalVariables.flagRunningApache)
@@ -5409,16 +5441,10 @@ int WebServer::main(int argc, char **argv)
 int WebServer::mainCommandLine()
 { MacroRegisterFunctionWithName("main_command_input");
   theGlobalVariables.IndicatorStringOutputFunction = HtmlRoutines::MakeStdCoutReport;
-  //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
-  //  return 0;
-//std::cout << "Running cmd line. \n";
-  //logServer << "DEBUG: got to here pt 5" << logger::endL;
   PointerObjectDestroyer<Calculator> theDestroyer(theParser);
   theParser = new Calculator;
   theParser->init();
-  //logServer << "DEBUG: got to here pt 5.3" << logger::endL;
   logger result("", 0, false, "server");
-  //logServer << "DEBUG: got to here pt 5.5" << logger::endL;
   if (theGlobalVariables.programArguments.size > 1)
     for (int i = 1; i < theGlobalVariables.programArguments.size; i ++)
     { theParser->inputString += theGlobalVariables.programArguments[i];
@@ -5430,7 +5456,6 @@ int WebServer::mainCommandLine()
     std::cin >> theParser->inputString;
   }
   theParser->flagUseHtml = false;
-  //logServer << "DEBUG: got to here pt 6" << logger::endL;
   theParser->Evaluate(theParser->inputString);
   std::fstream outputFile;
   std::string outputFileName;
@@ -5508,23 +5533,7 @@ int WebServer::mainApache()
   MathRoutines::StringSplitExcludeDelimiter(theWorker.cookiesApache, ' ', theWorker.cookies);
   for (int i = 0; i < theWorker.cookies.size; i ++)
     theWorker.cookies[i] = MathRoutines::StringTrimWhiteSpace(theWorker.cookies[i]);
-/*  stOutput << "<html><body>";
-  stOutput << "DEBUG: your input, bounced back: "
-  << "\n<hr>server port: <br>\n" << thePort
-  << "\n<hr>Server base: <br>\n" << theGlobalVariables.PhysicalPathProjectBase
-  << "\n<hr>Calculator display name apache: <br>\n" << theGlobalVariables.DisplayNameCalculatorApache
-  << "\n<hr>Cookies: <br>\n" << theWorker.cookiesApache;
-  for (int i = 0; i < theWorker.cookies.size; i ++)
-    stOutput << "<br>\n" << theWorker.cookies[i] << "\n";
-  stOutput << "\n<hr>query string:<br>\n" << theWorker.addressGetOrPost
-  << "\n<hr>message body:<br>\n" << theWorker.messageBody
-  << "\n<hr>request method:<br>\n" << theRequestMethod
-  << "\n</body></html>";
-  */
   theWorker.ServeClient();
-//  std::string theOutputHeader(theWorker.remainingHeaderToSend.TheObjects, theWorker.remainingHeaderToSend.size);
-  //std::string theOutputBody(theWorker.remainingBodyToSend.TheObjects, theWorker.remainingBodyToSend.size);
-  //stOutput << theOutputBody;
   theGlobalVariables.flagComputationFinishedAllOutputSentClosing = true;
   return 0;
 }
@@ -5576,18 +5585,12 @@ void WebWorker::PrepareFullMessageHeaderAndFooter()
   this->remainingBytesToSenD = this->remainingHeaderToSend;
   this->remainingHeaderToSend.SetSize(0);
   std::stringstream contentLengthStream;
-//  double fixme;
-//  if (false)
   if (this->flagDoAddContentLength)
     contentLengthStream << "Content-Length: " << this->remainingBodyToSend.size << "\r\n";
   contentLengthStream << "\r\n";
   std::string contentLengthString = contentLengthStream.str();
   for (unsigned i = 0; i < contentLengthString.size(); i ++)
     this->remainingBytesToSenD.AddOnTop(contentLengthString[i]);
-  //std::string debugString(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
-  //std::cout << "DEBUG: headers+ body ="
-  //<< this->remainingBytesToSenD.size << " + "
-  //<< this->remainingBodyToSend.size << "\n" << debugString;
   if (this->requestTypE != this->requestHead)
     this->remainingBytesToSenD.AddListOnTop(this->remainingBodyToSend);
   this->remainingBodyToSend.SetSize(0);

@@ -1412,19 +1412,27 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   theUseR = userWrapper;
   return true;
 #else
+  //When compiled without database, we assume the user is an admin.
+  //In this way, users can modify files in the system from the one-page app.
+  theUseR.userRole = "admin";
   return true;
 #endif
 }
 
-bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUseR, std::stringstream* comments)
-{ (void) comments;
+bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
+  UserCalculatorData& theUseR,
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneral
+) {
+  (void) commentsOnFailure;
+  (void) commentsGeneral;
   (void) theUseR;
 #ifdef MACRO_use_MongoDB
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
   //stOutput << "DEBUG: before user wrapper authenticate";
-  if (userWrapper.Authenticate(comments))
+  if (userWrapper.Authenticate(commentsOnFailure))
   { theUseR = userWrapper;
     return true;
   }
@@ -1434,13 +1442,13 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
   //stOutput << "DEBUG: entered pass: " << userWrapper.enteredPassword
   //<< "shaone-ing to: " << userWrapper.enteredShaonedSaltedPassword
   //<< ". Actual pass sha: " << userWrapper.actualShaonedSaltedPassword;
-  //*comments << "DEBUG: entered pass: " << userWrapper.enteredPassword
+  //*commentsOnFailure << "DEBUG: entered pass: " << userWrapper.enteredPassword
   //<< "shaone-ing to: " << userWrapper.enteredShaonedSaltedPassword
   //<< ". Actual pass sha: " << userWrapper.actualShaonedSaltedPassword;
   if (userWrapper.enteredAuthenticationToken != "" &&
       userWrapper.enteredAuthenticationToken != "0" &&
-      comments != 0)
-  { *comments << "<b> Authentication of user: " << userWrapper.username
+      commentsOnFailure != 0)
+  { *commentsOnFailure << "<b> Authentication of user: " << userWrapper.username
     << " with token " << userWrapper.enteredAuthenticationToken << " failed. </b>";
   }
   if (userWrapper.enteredActivationToken != "")
@@ -1455,37 +1463,44 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
         { theUseR = userWrapper;
           return true;
         }
-      } else if (comments != 0)
+      } else if (commentsOnFailure != 0)
       { if (userWrapper.actualActivationToken != "error")
-          *comments << "<b>Account already activated. </b>";
+          *commentsOnFailure << "<b>Account already activated. </b>";
         else
-          *comments << "<b>An error during activation ocurred.</b>";
+          *commentsOnFailure << "<b>An error during activation ocurred.</b>";
       }
     } else
-      if (comments != 0)
-        *comments << "Activation token entered but the user request type: "
+      if (commentsOnFailure != 0)
+        *commentsOnFailure << "Activation token entered but the user request type: "
         << theGlobalVariables.userCalculatorRequestType
         << " does not allow login with activation token. ";
   }
   if (userWrapper.username == "admin" && userWrapper.enteredPassword != "")
     if (!userWrapper.Iexist(0))
-    { if (comments != 0)
-        *comments << "First login of user admin: setting admin password. ";
+    { if (commentsOnFailure != 0)
+        *commentsOnFailure << "First login of user admin: setting admin password. ";
       logWorker << logger::yellow << "First login of user admin: setting admin password." << logger::endL;
-      //*comments << "DEBUG: user before storing: " << userWrapper.ToJSON().ToString();
+      //*commentsOnFailure << "DEBUG: user before storing: " << userWrapper.ToJSON().ToString();
       userWrapper.actualActivationToken = "activated";
       userWrapper.userRole = "admin";
-      if (!userWrapper.StoreToDB(true, comments))
+      if (!userWrapper.StoreToDB(true, commentsOnFailure))
       { logWorker << logger::red << "Failed to store admin pass to database. ";
-        if (comments != 0)
-          logWorker << comments->str();
+        if (commentsOnFailure != 0)
+          logWorker << commentsOnFailure->str();
       }
-      //*comments << "DEBUG: admin user: " << userWrapper.ToJSON().ToString() ;
+      //*commentsOnFailure << "DEBUG: admin user: " << userWrapper.ToJSON().ToString() ;
       theUseR = userWrapper;
       return true;
     }
   return false;
 #else
+  //When compiled without database, we assume the user is an admin.
+  //In this way, users can modify files in the system from the one-page app.
+  theUseR.userRole = "admin";
+  theUseR.actualAuthenticationToken = "compiledWithoutDatabaseSupport";
+  if (commentsGeneral != 0) {
+    *commentsGeneral << "Automatic login as admin: calculator compiled without DB. ";
+  }
   return true;
 #endif
 }

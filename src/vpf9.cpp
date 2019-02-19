@@ -132,9 +132,11 @@ GlobalVariables::GlobalVariables()
   this->flagCachingInternalFilesOn = true;
   this->flagRunServerOnEmptyCommandLine = false;
   this->flagRequestComingLocally = false;
-//  this->flagIgnoreSecurityToWorkaroundSafarisBugs = false;
-  //  this->flagLogInterProcessCommunication = true;
-  //  stOutput << "Global variables created!";
+#ifdef MACRO_use_MongoDB
+  this->flagDatabaseCompiled = true;
+#else
+  this->flagDatabaseCompiled = false;
+#endif
 }
 
 void GlobalVariables::WriteSourceCodeFilesJS()

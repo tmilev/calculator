@@ -148,7 +148,6 @@ public:
   PipePrimitive pipeWorkerToServerTimerPing;
 
   std::string error;
-  std::string errorLogin;
   void PrepareFullMessageHeaderAndFooter();
   std::string openIndentTag(const std::string& theTag);
   std::string closeIndentTag(const std::string& theTag);
@@ -220,7 +219,7 @@ public:
   bool IsFileServedRaw();
 
   static bool IsAllowedAsRequestCookie(const std::string& input);
-  bool Login(std::stringstream& argumentProcessingFailureComments);
+  bool Login(std::stringstream& argumentProcessingFailureComments, std::stringstream *comments);
   bool CorrectRequestsBEFORELoginReturnFalseIfModified();
   bool CorrectRequestsAFTERLoginReturnFalseIfModified();
   bool RedirectIfNeeded(std::stringstream& argumentProcessingFailureComments);

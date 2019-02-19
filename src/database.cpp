@@ -1412,9 +1412,27 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   theUseR = userWrapper;
   return true;
 #else
+  return DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(theUseR, commentsGeneral);
+#endif
+}
+
+bool DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(
+  UserCalculatorData& theUser, std::stringstream* commentsGeneral
+) {
+  (void) theUser;
+  (void) commentsGeneral;
+#ifdef MACRO_use_MongoDB
+  return false;
+#else
   //When compiled without database, we assume the user is an admin.
-  //In this way, users can modify files in the system from the one-page app.
-  theUseR.userRole = "admin";
+  //In this way, users who do not have a mongoDB installed
+  //can still use the admin functions of the calculator, for example,
+  //modify problem files from the one-page app.
+  theUser.userRole = "admin";
+  theUser.actualAuthenticationToken = "compiledWithoutDatabaseSupport";
+  if (commentsGeneral != 0) {
+    *commentsGeneral << "Automatic login as admin: calculator compiled without DB. ";
+  }
   return true;
 #endif
 }
@@ -1494,14 +1512,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
     }
   return false;
 #else
-  //When compiled without database, we assume the user is an admin.
-  //In this way, users can modify files in the system from the one-page app.
-  theUseR.userRole = "admin";
-  theUseR.actualAuthenticationToken = "compiledWithoutDatabaseSupport";
-  if (commentsGeneral != 0) {
-    *commentsGeneral << "Automatic login as admin: calculator compiled without DB. ";
-  }
-  return true;
+  return DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(theUseR, commentsGeneral);
 #endif
 }
 

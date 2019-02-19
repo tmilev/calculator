@@ -17,6 +17,7 @@ public:
     std::stringstream* commentsOnFailure,
     std::stringstream *commentsGeneral
   );
+  static bool LoginNoDatabaseSupport(UserCalculatorData &theUser, std::stringstream *commentsGeneral);
   static bool LoginViaGoogleTokenCreateNewAccountIfNeeded
   (UserCalculatorData& theUseR, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   static bool SetPassword

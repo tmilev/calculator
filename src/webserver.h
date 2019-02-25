@@ -112,7 +112,8 @@ public:
   std::string pingMessage;
   double timeServerAtWorkerStart;
   double timeOfLastPingServerSideOnly;
-  bool flagInUse;
+  bool flagInUsE;
+  bool flagExited;
   bool flagDeallocated;
   bool flagKeepAlive;
   bool flagFileNameSanitized;
@@ -364,8 +365,11 @@ public:
   static void SendStringThroughActiveWorker(const std::string& input);
   static void PipeProgressReportToParentProcess(const std::string& input);
   static void fperror_sigaction(int signal);
+  void ReapOneChild();
+  void ReapChildren();
+  static void Signal_SIGCHLD_handler(int s);
   bool initPrepareWebServerALL();
-  void initPrepareSignals();
+  void initSignals();
   bool initBindToPorts();
   void initPortsITry();
   void initListeningSockets();
@@ -374,7 +378,9 @@ public:
   void TerminateChildSystemCall(int i);
   void ProcessOneChildMessage(int childIndex, int& outputNumInUse);
   void RecycleChildrenIfPossible();
+  void RecycleOneChild(int childIndex, int& numberInUse);
   void HandleTooManyConnections(const std::string& incomingUserAddress);
+  void HandleTooManyWorkers(int &numInUse);
   void Restart();
   void CheckExecutableVersionAndRestartIfNeeded(bool callReload);
   void initDates();

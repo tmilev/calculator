@@ -3,7 +3,6 @@
 #include "vpf.h"
 #include <assert.h>
 
-// ^ that is first for precompilation
 
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 
@@ -22,88 +21,15 @@
 
 /*
 // The Plan:
-// * HomoSemidirectElement class takes a GroupHomomorphism pointer, a bool, and a group element
+// * HomomorphismSemidirectElement class takes a GroupHomomorphism pointer, a bool, and a group element
 // * That group element is permitted to be of any type, including GenericElement
 
 class GlobalVariablesStdoutClass: public StdoutClass
 { GlobalVariables* theGlobalVariables;
 };
 
-template <typename theType>
-class MilevObject
-{ public:
-  GlobalVariablesStdoutClass IntoStream(GlobalVariablesStdoutClass& out)
-  { return this->IntoStream(out, out.theGlobalVariables); }
-  std::string ToString(GlobalVariables* theGlobalVariables = 0)
-  { std::stringstream ss;
-    this->IntoStream(ss, theGlobalVariables);
-    return ss.str();
-  }
-};
 
 class GlobalAtomicStringVoidPointerTableClass;
-
-class AtomicString: public MilevObject<AtomicString>
-{ public:
-  const char *theString;
-  mutable int vpti;
-
-  AtomicString()
-  { this->theString = NULL;
-    this->vpti = - 1;
-  }
-
-  // its 2016 and this is just like in K&R
-  // in 2016, memory access patterns are the most important thing
-  // both of these short strings are cached
-  AtomicString operator+(const char* right) const
-  { AtomicString out;
-    int l = 0;
-    int i = 0;
-    while (this->theString[i] != 0)
-    { i ++;
-      l ++;
-    }
-    i = 0;
-    while (right[i] != 0)
-    { i ++;
-      l ++;
-    }
-    char* outs = (char*) malloc(l- 1);
-    l = 0;
-    i = 0;
-    while (this->theString[i] != 0)
-    { outs[l] = this->theString[i];
-      i ++;
-      l ++;
-    }
-    i = 0;
-    while (right[i] != 0)
-    { outs[l] = right[i];
-      i ++;
-      l ++;
-    }
-    l ++;
-    outs[l] = 0;
-    out.theString = outs;
-    return out;
-  }
-
-  unsigned int HashFunction() const
-  { unsigned int acc = 0;
-    for (int i = 0; i <SomeRandomPrimesSize; i ++)
-    { if (theString[i] == 0)
-        break;
-      acc += theString[i] * SomeRandomPrimes[i];
-    }
-    return acc;
-  }
-  static unsigned int HashFunction(const AtomicString& o) {return o.HashFunction();}
-
-
-  template <typename somestream>
-  somestream IntoStream(somestream& out, GlobalVariables* unused = 0);
-};
 
 class GlobalAtomicStringVoidPointerTableClass
 { public:
@@ -118,10 +44,6 @@ class GlobalAtomicStringVoidPointerTableClass
         if (s[ssz] == 0)
           break;
     }
-    // const is a stupid attempt at using the type system to enforce a contract
-    // that doesn't actually matter for optimization purposes.  restrict solves
-    // a real problem, which is why it isn't in c++
-    // in the future, there will be two programming languages, c and javascript
     char* aString = (char*) malloc(ssz);
     for (int i = 0; i <ssz; i ++)
       aString[i] = s[i];
@@ -157,78 +79,18 @@ somestream AtomicString::IntoStream(somestream& out, GlobalVariables* unused)
   out << "AtomicString[" << this->vpti << "]: " << this->theString;
   return out;
 }
-
-// Java and Python have put a lot more effort into making this fast
-class GenericElement: public MilevObject<GenericElement>, public GroupConjugacyImplementation<GenericElement>
-{ AtomicString* type;
-  void* data;
-  bool ownsData;
-
-  GenericElement(){type = 0; data = 0; ownsData = false;}
-  ~GenericElement(){if (ownsData) delete data;}
-  GenericElement operator*(const GenericElement& right) const
-  { static AtomicString* typecache;
-    static void* opcache;
-    if (typecache != type)
-    { typecache = type;
-      AtomicString fps = *type +"::operator*";
-      opcache = VPT.GetPointer(fps);
-    }
-    *((void*)(void*,void*)) op = (*((void*)(void*,void*))) opcache;
-    GenericElement out;
-    out.data = op(this->data, right.data);
-    out.ownsData = true;
-    out.type = this->type;
-    return out;
-  }
-  GenericElement Invert()
-  { static AtomicString* typecache;
-    static void* opcache;
-    if (typecache != type)
-    { typecache = type;
-      AtomicString fps = *type +"::Invert";
-      opcache = VPT.GetPointer(fps);
-    }
-    (void)(void*) op = ((void)(void*)) opcache;
-    op(this->data);
-  }
-  unsigned int HashFunction()
-  { static AtomicString* typecache;
-    static void* opcache;
-    if (typecache != type)
-    { typecache = type;
-      AtomicString fps = *type +"::HashFunction";
-      opcache = VPT.GetPointer(fps);
-    }
-    (unsigned int)(void*) op = ((unsigned int)(void*)) opcache;
-    return ((unsigned int) type) + op(this->data);
-  }
-  GlobalVariablesStdoutClass& IntoStream(GlobalVariablesStdoutClass &out)
-  { out << "GenericElement wrapping ";
-    static AtomicString* typecache;
-    static void* opcache;
-    if (typecache != type)
-    { typecache = type;
-      AtomicString fps = *type +"::IntoStream";
-      opcache = VPT.GetPointer(fps);
-    }
-    (GlobalVariablesStdoutClass&)(void*,GlobalVariablesStdoutClass&) op =
-        ((GlobalVariablesStdoutClass&)(void*,GlobalVariablesStdoutClass&)) opcache;
-    return op(this->data, out);
-  }
-};
 */
 
 //TODO: Semidirect product groups have a product of elements, whereas we only need a product of pointers and a sum of
 // elements in memory.  Fortunately HomoSemidirectElements only carry twice as much elements.
 template <typename kelt>
-class HomoSemidirectElement: public GroupConjugacyImplementation<HomoSemidirectElement<kelt> >
+class HomomorphismSemidirectElement: public GroupConjugacyImplementation<HomomorphismSemidirectElement<kelt> >
 { bool h;
   kelt k;
   GroupHomomorphism<kelt, kelt>* oa;
 
-  HomoSemidirectElement operator*(const HomoSemidirectElement& right) const
-  { HomoSemidirectElement out;
+  HomomorphismSemidirectElement operator*(const HomomorphismSemidirectElement& right) const
+  { HomomorphismSemidirectElement out;
     out.h = this->h ^ right.h;
     kelt tmp = this->h ? this->oa(this->k) : this->k;
     out.k = tmp * right.k;
@@ -242,7 +104,7 @@ class HomoSemidirectElement: public GroupConjugacyImplementation<HomoSemidirectE
     //this->k.Invert();
   }
 
-  void MakeID(const HomoSemidirectElement& prototype)
+  void MakeID(const HomomorphismSemidirectElement& prototype)
   { this->h = false;
     this->k.MakeID(prototype.k);
   }
@@ -252,7 +114,7 @@ class HomoSemidirectElement: public GroupConjugacyImplementation<HomoSemidirectE
     this->k = theKelt;
   }
 
-  bool operator==(const HomoSemidirectElement& right) const
+  bool operator==(const HomomorphismSemidirectElement& right) const
   { if (!(this->h == right.h))
       return false;
     if (!(this->k == right.k))
@@ -260,7 +122,7 @@ class HomoSemidirectElement: public GroupConjugacyImplementation<HomoSemidirectE
     return true;
   }
 
-  bool operator>(const HomoSemidirectElement& right) const
+  bool operator>(const HomomorphismSemidirectElement& right) const
   { if (!this->h && right.h)
       return false;
     if (this->h && !right.h)
@@ -273,8 +135,8 @@ template <typename kelt>
 class HomoSemidrectGroupData
 { GroupHomomorphism<kelt, kelt>* oa;
   FiniteGroup<kelt>* theSubgroup;
-  FiniteGroup<HomoSemidirectElement<kelt> >* theGroup;
-  FiniteGroup<HomoSemidirectElement<kelt> > theGroupMayBeHereNameIsLongToDiscourageUse;
+  FiniteGroup<HomomorphismSemidirectElement<kelt> >* theGroup;
+  FiniteGroup<HomomorphismSemidirectElement<kelt> > theGroupMayBeHereNameIsLongToDiscourageUse;
 
   void MakeHomoSemidirectGroupData(FiniteGroup<kelt>* subgroup, GroupHomomorphism<kelt, kelt>* outer)
   { this->theSubgroup = subgroup;

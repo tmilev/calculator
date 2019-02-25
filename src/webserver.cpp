@@ -48,11 +48,64 @@ WebServer theWebServer;
 #include <fcntl.h>//<-setting flags of file descriptors
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
 
-struct sigaction SignalSEGV, SignalFPE, SignalChild, SignalINT;
+struct SignalsInfrastructure {
+  struct sigaction SignalSEGV;
+  struct sigaction SignalFPE;
+  struct sigaction SignalChild;
+  struct sigaction SignalINT;
+  sigset_t allSignals;
+  sigset_t oldSignals;
+  bool flagSignalsAreBlocked;
+  bool flagSignalsAreStored;
+  SignalsInfrastructure() {
+    this->flagSignalsAreBlocked = false;
+    this->flagSignalsAreStored = false;
+  }
+  void blockSignals();
+  void unblockSignals();
+  void initSignals();
+};
+
+SignalsInfrastructure theSignals;
 //sigset_t SignalSetToBlockWhileHandlingSIGCHLD;
 
-bool WebWorker::CheckConsistency()
-{ auto oldOutputFn = stOutput.theOutputFunction;
+//This class locks/unlocks all signals within its scope
+struct SignalLock {
+  SignalLock() {
+    theSignals.blockSignals();
+  }
+  ~SignalLock() {
+    theSignals.unblockSignals();
+  }
+};
+
+void SignalsInfrastructure::unblockSignals() {
+  int error = sigprocmask(SIG_SETMASK, &oldSignals, NULL);
+  if (error < 0) {
+    logServer << "Sigprocmask failed on server, I shall now crash. " << logger::endL;
+    crash << "Sigprocmask failed on server." << crash;
+  }
+  if (theGlobalVariables.flagServerDetailedLog) {
+    logProcessStats << logger::green << "Detail: unmask successful. " << logger::endL;
+  }
+}
+
+void SignalsInfrastructure::blockSignals() {
+  sigset_t* theSignals = 0;
+  if (!this->flagSignalsAreStored) {
+    //store signals on first run.
+    theSignals = &this->oldSignals;
+  }
+  int error = sigprocmask(SIG_BLOCK, &this->allSignals, theSignals);
+  this->flagSignalsAreStored = true;
+  if (error < 0) {
+    logServer << logger::red << "Fatal error: sigprocmask failed. The server is going to crash. " << logger::endL;
+    crash << "Sigprocmas failed. This should not happen. " << crash;
+  }
+}
+
+bool WebWorker::CheckConsistency() {
+  auto oldOutputFn = stOutput.theOutputFunction;
   stOutput.theOutputFunction = 0;
   if (this->flagDeallocated)
     crash << "Use after free of webworker." << crash;
@@ -1874,8 +1927,8 @@ int WebWorker::ProcessPauseWorker()
     stOutput << result.ToString(false);
     return 0;
   }
-  if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
-  { out << "<b>Requested worker number " << inputWebWorkerNumber << " is not in use. Total number of workers: "
+  if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUsE) {
+    out << "<b>Requested worker number " << inputWebWorkerNumber << " is not in use. Total number of workers: "
     << this->parent->theWorkers.size << ". </b>";
     result["error"] = out.str();
     stOutput << result.ToString(false);
@@ -1965,8 +2018,8 @@ int WebWorker::ProcessComputationIndicator()
   << "The most recent error message reported by the "
   << "worker you want to monitor is: "
   << this->parent->theWorkers[inputWebWorkerIndex].pingMessage;
-  if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
-  { out << "Indicator error. Worker number "
+  if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUsE) {
+    out << "Indicator error. Worker number "
     << inputWebWorkerNumber << " is not in use. "
     << " Total number of workers: "
     << this->parent->theWorkers.size << ". ";
@@ -3555,10 +3608,14 @@ int WebWorker::ProcessFolderOrFile()
   this->VirtualFileName = HtmlRoutines::ConvertURLStringToNormal(this->addressComputed, true);
   this->SanitizeVirtualFileName();
   std::stringstream commentsOnFailure;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual
-      (this->VirtualFileName, this->RelativePhysicalFileNamE, theGlobalVariables.UserDefaultHasAdminRights(), false,
-       &commentsOnFailure))
-  { //  std::cout << "GOT TO not found!" << std::endl;
+  if (
+    !FileOperations::GetPhysicalFileNameFromVirtual(
+      this->VirtualFileName,
+      this->RelativePhysicalFileNamE,
+      theGlobalVariables.UserDefaultHasAdminRights(),
+      false,
+      &commentsOnFailure
+  )) {
     this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
     stOutput << "<html><body><b>File name deemed unsafe. "
     << "Please note that folder names are not allowed to contain dots and file names "
@@ -3571,8 +3628,8 @@ int WebWorker::ProcessFolderOrFile()
   return this->ProcessFile();
 }
 
-void WebWorker::ResetPipesNoAllocation()
-{ MacroRegisterFunctionWithName("WebWorker::ResetPipesNoAllocation");
+void WebWorker::ResetPipesNoAllocation() {
+  MacroRegisterFunctionWithName("WebWorker::ResetPipesNoAllocation");
   this->PauseComputationReportReceived.ResetNoAllocation();
   this->PauseWorker.ResetNoAllocation();
   this->PauseIndicatorPipeInUse.ResetNoAllocation();
@@ -3595,9 +3652,9 @@ void WebWorker::ReleaseKeepInUseFlag()
   WebServer::Release(this->connectedSocketID);
 }
 
-void WebWorker::Release()
-{ this->ReleaseKeepInUseFlag();
-  this->flagInUse = false;
+void WebWorker::Release() {
+  this->ReleaseKeepInUseFlag();
+  this->flagInUsE = false;
 }
 
 void WebWorker::OutputShowIndicatorOnTimeout()
@@ -3608,8 +3665,8 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   theGlobalVariables.flagTimedOutComputationIsDone = false;
   //ProgressReportWebServer theReport("WebServer::OutputShowIndicatorOnTimeout");
   logWorker << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
-  if (theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed)
-  { stOutput << "Your computation is taking more than "
+  if (theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed) {
+    stOutput << "Your computation is taking more than "
     << theGlobalVariables.takeActionAfterComputationMilliseconds
     << " ms. ";
   }
@@ -3665,15 +3722,20 @@ std::string WebWorker::ToStringStatus() const
 { std::stringstream out;
   //if (theWebServer.currentlyConnectedAddresses.GetCoefficientsSum() != theWebServer.
   out << "<br>Worker " << this->indexInParent + 1;
-  if (this->flagInUse)
-  { if (this->parent->activeWorker == this->indexInParent)
+  if (this->flagExited) {
+    out << ", <span style = 'color:red'><b>exited</b></span>";
+  }
+  if (this->flagInUsE) {
+    if (this->parent->activeWorker == this->indexInParent) {
       out << ", <span style =\"color:green\"><b>current process</b></span>";
-    else
+    } else {
       out << ", <b>in use</b>";
+    }
     out << ", <a href=\"calculator?request=monitor&mainInput=" << this->indexInParent + 1 << "\">monitor process "
     << this->indexInParent + 1 << "</a>";
-  } else
+  } else {
     out << ", not in use";
+  }
   if (this->displayUserInput != "")
     out << ", user input: <span style =\"color:blue\">" << this->displayUserInput << "</span>";
   out << ", connection " << this->connectionID << ", process ID: ";
@@ -3705,14 +3767,13 @@ std::string WebWorker::ToStringStatus() const
   return out.str();
 }
 
-bool WebServer::CheckConsistency()
-{ if (this->flagDeallocated)
+bool WebServer::CheckConsistency() {
+  if (this->flagDeallocated)
     crash << "Use after free of WebServer." << crash;
   return true;
 }
 
-void WebServer::ReleaseEverything()
-{
+void WebServer::ReleaseEverything() {
 #ifdef MACRO_use_open_ssl
   this->theSSLdata.FreeSSL();
 #endif
@@ -3727,15 +3788,15 @@ void WebServer::ReleaseEverything()
   if (theGlobalVariables.flagServerDetailedLog)
     currentLog << logger::red << "Detail: "
     << " About to close socket: " << this->listeningSocketHTTP << ". " << logger::endL;
-  if (this->listeningSocketHTTP != - 1)
-  { close(this->listeningSocketHTTP);
+  if (this->listeningSocketHTTP != - 1) {
+    close(this->listeningSocketHTTP);
     if (theGlobalVariables.flagServerDetailedLog)
       currentLog << logger::red << "Detail: "
       << " Just closed socket: " << this->listeningSocketHTTP << logger::endL;
     this->listeningSocketHTTP = - 1;
   }
-  if (this->listeningSocketHttpSSL != - 1)
-  { close(this->listeningSocketHttpSSL);
+  if (this->listeningSocketHttpSSL != - 1) {
+    close(this->listeningSocketHttpSSL);
     if (theGlobalVariables.flagServerDetailedLog)
       currentLog << logger::red << "Detail: "
       << " Just closed socket: " << this->listeningSocketHttpSSL << logger::endL;
@@ -3743,17 +3804,13 @@ void WebServer::ReleaseEverything()
   this->listeningSocketHttpSSL = - 1;
 }
 
-WebServer::~WebServer()
-{ this->flagDeallocated = true;
+WebServer::~WebServer() {
+  this->flagDeallocated = true;
 }
 
-void WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone()
-{ //logWorker << logger::red << ("Got THUS far") << logger::endL;
-  //logWorker << "here am i";
+void WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone() {
   MacroRegisterFunctionWithName("WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone");
   theWebServer.GetActiveWorker().OutputShowIndicatorOnTimeout();
-  //stOutput << "What the hell";
-  //stOutput.Flush();
 }
 
 void WebServer::FlushActiveWorker()
@@ -3793,8 +3850,41 @@ WebServer::WebServer()
   this->flagNoMonitor = false;
 }
 
-WebWorker& WebServer::GetActiveWorker()
-{ MacroRegisterFunctionWithName("WebServer::GetActiveWorker");
+void WebServer::Signal_SIGCHLD_handler(int s) {
+  (void) s; //avoid unused parameter warning, portable.
+  if (theGlobalVariables.flagIsChildProcess)
+    return;
+  if (theGlobalVariables.flagServerDetailedLog)
+    logProcessStats << "Detail: webServer received SIGCHLD signal. " << logger::endL;
+  theWebServer.flagReapingChildren = true;
+  theWebServer.ReapChildren();
+  theWebServer.flagReapingChildren = false;
+}
+
+
+void WebServer::ReapChildren() {
+  //Attention: this function is executed simultaneously with the
+  //main execution path. Any non-standard operations here may be racy.
+  //Please avoid allocating RAM memory outside of the stack.
+  //Do not use anything that is not thread-safe here.
+  //In particular, do not use any logger outside of logChildReaping as loggers are not thread-safe.
+  int waitResult = 0;
+  int exitFlags = WNOHANG| WEXITED;
+  do {
+    waitResult = waitpid(- 1, NULL, exitFlags);
+    if (waitResult > 0) {
+      for (int i = 0; i < this->theWorkers.size; i++) {
+        if (this->theWorkers[i].ProcessPID == waitResult) {
+          this->theWorkers[i].flagExited = true;
+          this->NumProcessesReaped ++;
+        }
+      }
+    }
+  } while (waitResult > 0);
+}
+
+WebWorker& WebServer::GetActiveWorker() {
+  MacroRegisterFunctionWithName("WebServer::GetActiveWorker");
   void (*oldOutputFunction)(const std::string& stringToOutput) = stOutput.theOutputFunction;
   stOutput.theOutputFunction = 0; //<- We are checking if the web server is in order.
   //Before that we prevent the crashing mechanism from trying to use (the eventually corrupt) web server
@@ -3862,25 +3952,27 @@ bool WebServer::CreateNewActiveWorker()
     return false;
   }
   bool found = false;
-  for (int i = 0; i < this->theWorkers.size; i ++)
-    if (!this->theWorkers[i].flagInUse)
-    { this->activeWorker = i;
+  for (int i = 0; i < this->theWorkers.size; i ++) {
+    if (!this->theWorkers[i].flagInUsE) {
+      this->activeWorker = i;
       found = true;
       break;
     }
-  if (this->activeWorker == - 1)
-  { this->activeWorker = this->theWorkers.size;
+  }
+  if (this->activeWorker == - 1) {
+    this->activeWorker = this->theWorkers.size;
     this->theWorkers.SetSize(this->theWorkers.size + 1);
   }
   this->GetActiveWorker().indexInParent = this->activeWorker;
   this->GetActiveWorker().parent = this;
   this->GetActiveWorker().pingMessage = "";
-  if (found)
-  { this->theWorkers[this->activeWorker].flagInUse = true;
+  if (found) {
+    this->theWorkers[this->activeWorker].flagInUsE = true;
+    this->theWorkers[this->activeWorker].flagExited = false;
     return true;
   }
   this->GetActiveWorker().Release();
-  this->theWorkers[this->activeWorker].flagInUse = false; //<-until everything is initialized, we cannot be in use.
+  this->theWorkers[this->activeWorker].flagInUsE = false; //<-until everything is initialized, we cannot be in use.
   std::stringstream stowstream, wtosStream, wtowStream;
   stowstream << "S->W" << this->activeWorker + 1 << ": ";
   wtosStream << "W" << this->activeWorker + 1 << "->S: ";
@@ -3888,48 +3980,48 @@ bool WebServer::CreateNewActiveWorker()
   std::string stow = stowstream.str();
   std::string wtos = wtosStream.str();
   std::string wtow = wtowStream.str();
-  if (!this->GetActiveWorker().PauseComputationReportReceived.CreateMe(stow + "report received", false, true))
-  { logPlumbing << "Failed to create pipe: "
+  if (!this->GetActiveWorker().PauseComputationReportReceived.CreateMe(stow + "report received", false, true)) {
+    logPlumbing << "Failed to create pipe: "
     << this->GetActiveWorker().PauseComputationReportReceived.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().PauseWorker.CreateMe(stow + "pause", false, true))
-  { logPlumbing << "Failed to create pipe: "
+  if (!this->GetActiveWorker().PauseWorker.CreateMe(stow + "pause", false, true)) {
+    logPlumbing << "Failed to create pipe: "
     << this->GetActiveWorker().PauseWorker.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe(stow + "ind. pipe busy", false, true))
-  { logPlumbing << "Failed to create pipe: "
+  if (!this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe(stow + "ind. pipe busy", false, true)) {
+    logPlumbing << "Failed to create pipe: "
     << this->GetActiveWorker().PauseIndicatorPipeInUse.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().pipeWorkerToWorkerRequestIndicator.CreateMe(wtow + "request-indicator"))
-  { logPlumbing << "Failed to create pipe: "
+  if (!this->GetActiveWorker().pipeWorkerToWorkerRequestIndicator.CreateMe(wtow + "request-indicator")) {
+    logPlumbing << "Failed to create pipe: "
     << this->GetActiveWorker().pipeWorkerToWorkerRequestIndicator.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe(wtos + "ping", false, false, false, true))
-  { logPlumbing << "Failed to create pipe: "
+  if (!this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe(wtos + "ping", false, false, false, true)) {
+    logPlumbing << "Failed to create pipe: "
     << this->GetActiveWorker().pipeWorkerToServerTimerPing.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().pipeWorkerToServerControls.CreateMe(wtos + "controls", false, false, false, true))
-  { logPlumbing << "Failed to create pipe: "
+  if (!this->GetActiveWorker().pipeWorkerToServerControls.CreateMe(wtos + "controls", false, false, false, true)) {
+    logPlumbing << "Failed to create pipe: "
     << this->GetActiveWorker().pipeWorkerToServerControls.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().pipeWorkerToWorkerIndicatorData.CreateMe(wtow + "indicator-data"))
-  { logPlumbing << "Failed to create pipe: "
+  if (!this->GetActiveWorker().pipeWorkerToWorkerIndicatorData.CreateMe(wtow + "indicator-data")) {
+    logPlumbing << "Failed to create pipe: "
     << this->GetActiveWorker().pipeWorkerToWorkerIndicatorData.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().pipeWorkerToWorkerUserInput.CreateMe(wtow + "user input", false, false, false, true))
-  { logPlumbing << "Failed to create pipe: "
+  if (!this->GetActiveWorker().pipeWorkerToWorkerUserInput.CreateMe(wtow + "user input", false, false, false, true)) {
+    logPlumbing << "Failed to create pipe: "
     << this->GetActiveWorker().pipeWorkerToWorkerUserInput.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().pipeWorkerToWorkerStatus.CreateMe(wtos + "worker status", false, false, false, true))
-  { logPlumbing << "Failed to create pipe: "
+  if (!this->GetActiveWorker().pipeWorkerToWorkerStatus.CreateMe(wtos + "worker status", false, false, false, true)) {
+    logPlumbing << "Failed to create pipe: "
     << this->GetActiveWorker().pipeWorkerToWorkerStatus.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
@@ -3937,7 +4029,8 @@ bool WebServer::CreateNewActiveWorker()
   << "Allocated new worker & plumbing data structures. Total worker data structures: "
   << this->theWorkers.size << ". "
   << logger::endL;
-  this->theWorkers[this->activeWorker].flagInUse = true;
+  this->theWorkers[this->activeWorker].flagInUsE = true;
+  this->theWorkers[this->activeWorker].flagExited = false;
   return true;
 }
 
@@ -3974,8 +4067,7 @@ std::string WebServer::ToStringConnectionSummary()
   out
   << timeRunning
   << " seconds = "
-  << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
-     (timeRunning, false, false)
+  << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(timeRunning, false, false)
   << " web server uptime. ";
   int approxNumPings = timeRunning / this->WebServerPingIntervalInSeconds;
   if (approxNumPings < 0)
@@ -4007,7 +4099,7 @@ std::string WebServer::ToStringStatusForLogFile()
   out << this->ToStringConnectionSummary();
   int numInUse = 0;
   for (int i = 0; i < this->theWorkers.size; i ++)
-    if (this->theWorkers[i].flagInUse)
+    if (this->theWorkers[i].flagInUsE)
       numInUse ++;
   out << "<hr>Currently, there are " << numInUse << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
   out
@@ -4024,8 +4116,8 @@ std::string WebServer::ToStringStatusAll()
     return "Running through Apache. ";
   std::stringstream out;
 
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
-  { out << this->ToStringConnectionSummary();
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+    out << this->ToStringConnectionSummary();
     return out.str();
   }
   out << this->ToStringStatusForLogFile();
@@ -4034,13 +4126,13 @@ std::string WebServer::ToStringStatusAll()
   out << "<a href=\"/LogFiles/" << GlobalVariables::GetDateForLogFiles() << "/\">" << "Current log files</a><hr>";
   if (this->activeWorker == - 1)
     out << "The process is functioning as a server.";
-  else
-  { out << "The process is functioning as a worker. The active worker is number " << this->activeWorker + 1 << ". ";
+  else {
+    out << "The process is functioning as a worker. The active worker is number " << this->activeWorker + 1 << ". ";
     out << "<br>" << this->ToStringStatusActive();
   }
-  for (int i = 0; i < this->theWorkers.size; i ++)
-  { WebWorker& currentWorker = this->theWorkers[i];
-    if (!currentWorker.flagInUse)
+  for (int i = 0; i < this->theWorkers.size; i ++) {
+    WebWorker& currentWorker = this->theWorkers[i];
+    if (!currentWorker.flagInUsE)
       continue;
     currentWorker.pipeWorkerToWorkerStatus.ReadWithoutEmptying(false, false);
     currentWorker.status = currentWorker.pipeWorkerToWorkerStatus.GetLastRead();
@@ -4187,22 +4279,26 @@ void WebServer::fperror_sigaction(int signal)
   exit(0);
 }
 
-void WebServer::TerminateChildSystemCall(int i)
-{ if (!this->theWorkers[i].flagInUse)
+void WebServer::TerminateChildSystemCall(int i) {
+  SignalLock lockSignals;
+  if (!this->theWorkers[i].flagInUsE || this->theWorkers[i].flagExited) {
     return;
-  this->theWorkers[i].flagInUse = false;
+  }
+  this->theWorkers[i].flagInUsE = false;
   this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
-  if (this->theWorkers[i].ProcessPID > 0)
-  { if (theGlobalVariables.flagServerDetailedLog)
+  if (this->theWorkers[i].ProcessPID > 0) {
+    if (theGlobalVariables.flagServerDetailedLog) {
       logProcessKills << "Detail: " << " killing child index: " << i << "." << logger::endL;
+    }
     kill(this->theWorkers[i].ProcessPID, SIGKILL);
     this->theWorkers[i].ProcessPID = - 1;
   }
   this->theWorkers[i].ResetPipesNoAllocation();
+  theSignals.unblockSignals();
 }
 
-void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
-{ MacroRegisterFunctionWithName("WebServer::HandleTooManyConnections");
+void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress) {
+  MacroRegisterFunctionWithName("WebServer::HandleTooManyConnections");
   if (theGlobalVariables.flagIsChildProcess)
     return;
   if (theGlobalVariables.flagServerDetailedLog)
@@ -4217,15 +4313,18 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     return;
   List<double> theTimes;
   List<int> theIndices;
-  for (int i = 0; i < this->theWorkers.size; i ++)
-    if (this->theWorkers[i].flagInUse)
-      if (this->theWorkers[i].userAddress == incomingAddress)
-      { theTimes.AddOnTop(this->theWorkers[i].timeServerAtWorkerStart);
+  for (int i = 0; i < this->theWorkers.size; i ++) {
+    if (this->theWorkers[i].flagInUsE) {
+      if (this->theWorkers[i].userAddress == incomingAddress) {
+        theTimes.AddOnTop(this->theWorkers[i].timeServerAtWorkerStart);
         theIndices.AddOnTop(i);
       }
+    }
+  }
   theTimes.QuickSortAscending(0, &theIndices);
-  for (int j = 0; j < theTimes.size; j ++)
-  { this->TerminateChildSystemCall(theIndices[j]);
+  for (int j = 0; j < theTimes.size; j ++) {
+    this->TerminateChildSystemCall(theIndices[j]);
+    this->NumProcessAssassinated ++;
     std::stringstream errorStream;
     errorStream
     << "Terminating child " << theIndices[j] + 1 << " with PID "
@@ -4234,7 +4333,6 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     << this->MaxNumWorkersPerIPAdress << " simultaneous connections. ";
     this->theWorkers[theIndices[j]].pingMessage = errorStream.str();
     logProcessKills << logger::red << errorStream.str() << logger::endL;
-    this->NumProcessAssassinated ++;
   }
   if (theGlobalVariables.flagServerDetailedLog) {
     logProcessStats << logger::green
@@ -4242,10 +4340,9 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
   }
 }
 
-void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse)
-{
+void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse) {
   std::string messageString = this->theWorkers[childIndex].pipeWorkerToServerControls.GetLastRead();
-  this->theWorkers[childIndex].flagInUse = false;
+  this->theWorkers[childIndex].flagInUsE = false;
   this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[childIndex].userAddress, 1);
   std::stringstream commentsOnFailure;
   JSData workerMessage;
@@ -4266,6 +4363,91 @@ void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse)
     this->NumberOfServerRequestsWithinAllConnections += (int) workerMessage["connectionsServed"].number;
 }
 
+void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
+  if (!this->theWorkers[childIndex].flagInUsE) {
+    return;
+  }
+  WebWorker& currentWorker = this->theWorkers[childIndex];
+  PipePrimitive& currentControlPipe = currentWorker.pipeWorkerToServerControls;
+  if (currentControlPipe.flagReadEndBlocks) {
+    crash << "Pipe: " << currentControlPipe.ToString() << " has blocking read end. " << crash;
+  }
+  currentControlPipe.ReadIfFailThenCrash(false, true);
+  if (currentControlPipe.lastRead.size > 0)
+    this->ProcessOneChildMessage(childIndex, numberInUse);
+  else
+    logServer << logger::orange << "Worker " << childIndex + 1 << " not done yet. " << logger::endL;
+  PipePrimitive& currentPingPipe = currentWorker.pipeWorkerToServerTimerPing;
+  if (currentPingPipe.flagReadEndBlocks)
+    crash << "Pipe: " << currentPingPipe.ToString() << " has blocking read end. " << crash;
+  currentPingPipe.ReadIfFailThenCrash(false, true);
+  if (currentPingPipe.lastRead.size > 0) {
+    currentWorker.pingMessage = currentPingPipe.GetLastRead();
+    currentWorker.timeOfLastPingServerSideOnly = theGlobalVariables.GetElapsedSeconds();
+    if (currentWorker.pingMessage != "") {
+      logServer << logger::blue << "Worker " << childIndex + 1 << " ping: " << currentWorker.pingMessage << ". " << logger::endL;
+    }
+    return;
+  }
+  if (currentWorker.PauseWorker.CheckPauseIsRequested(false, true, true)) {
+    currentWorker.pingMessage = "worker paused, no pings.";
+    currentWorker.timeOfLastPingServerSideOnly = theGlobalVariables.GetElapsedSeconds();
+    return;
+  }
+  if (theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead <= 0) {
+    return;
+  }
+  double timeElapsedInSeconds = theGlobalVariables.GetElapsedSeconds() - currentWorker.timeOfLastPingServerSideOnly;
+  if (timeElapsedInSeconds <= theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead) {
+    return;
+  }
+  this->TerminateChildSystemCall(childIndex);
+  std::stringstream pingTimeoutStream;
+  pingTimeoutStream
+  << timeElapsedInSeconds
+  << " seconds passed since worker " << childIndex + 1
+  << " last pinged the server; "
+  << "the maximum allowed is: " << theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead
+  << ". ";
+  pingTimeoutStream << "Killing connection "
+  << currentWorker.connectionID
+  << ", pid: "
+  << currentWorker.ProcessPID << ". ";
+  logProcessKills << logger::red << pingTimeoutStream.str() << logger::endL;
+  currentWorker.pingMessage = "<b style =\"color:red\">" + pingTimeoutStream.str() + "</b>";
+  numberInUse --;
+  this->NumProcessAssassinated ++;
+}
+
+void WebServer::HandleTooManyWorkers(int& numInUse) {
+  if (numInUse <= this->MaxTotalUsedWorkers) {
+    if (theGlobalVariables.flagServerDetailedLog) {
+      logProcessStats << logger::green
+      << "Detail: RecycleChildrenIfPossible exit point 1. " << logger::endL;
+    }
+    return;
+  }
+  for (int i = 0; i < this->theWorkers.size && numInUse > 1; i ++) {
+    if (!this->theWorkers[i].flagInUsE) {
+      continue;
+    }
+    this->TerminateChildSystemCall(i);
+    std::stringstream errorStream;
+    errorStream
+    << "Terminating child " << i + 1 << " with PID "
+    << this->theWorkers[i].ProcessPID
+    << ": too many workers in use. ";
+    this->theWorkers[i].pingMessage = errorStream.str();
+    logProcessKills << logger::red << errorStream.str() << logger::endL;
+    numInUse --;
+    this->NumProcessAssassinated ++;
+  }
+  if (theGlobalVariables.flagServerDetailedLog) {
+    logProcessStats << logger::green
+    << "Detail: RecycleChildrenIfPossible exit point 2. " << logger::endL;
+  }
+}
+
 void WebServer::RecycleChildrenIfPossible() {
   //Listen for children who have exited properly.
   //This might need to be rewritten: I wasn't able to make this work with any
@@ -4276,87 +4458,20 @@ void WebServer::RecycleChildrenIfPossible() {
   if (theGlobalVariables.flagServerDetailedLog) {
     logProcessStats << logger::red << "Detail: RecycleChildrenIfPossible start. " << logger::endL;
   }
-    //  this->ReapChildren();
   int numInUse = 0;
-  for (int i = 0; i < this->theWorkers.size; i ++)
-    if (this->theWorkers[i].flagInUse)
+  for (int i = 0; i < this->theWorkers.size; i ++) {
+    if (this->theWorkers[i].flagInUsE) {
       numInUse ++;
-  for (int i = 0; i < this->theWorkers.size; i ++)
-    if (this->theWorkers[i].flagInUse)
-    { PipePrimitive& currentControlPipe = this->theWorkers[i].pipeWorkerToServerControls;
-      if (currentControlPipe.flagReadEndBlocks)
-        crash << "Pipe: " << currentControlPipe.ToString() << " has blocking read end. " << crash;
-      currentControlPipe.ReadIfFailThenCrash(false, true);
-      if (currentControlPipe.lastRead.size > 0)
-        this->ProcessOneChildMessage(i, numInUse);
-      else
-        logServer << logger::orange << "Worker " << i + 1 << " not done yet. " << logger::endL;
-      PipePrimitive& currentPingPipe = this->theWorkers[i].pipeWorkerToServerTimerPing;
-      if (currentPingPipe.flagReadEndBlocks)
-        crash << "Pipe: " << currentPingPipe.ToString() << " has blocking read end. " << crash;
-      currentPingPipe.ReadIfFailThenCrash(false, true);
-      if (currentPingPipe.lastRead.size > 0)
-      { this->theWorkers[i].pingMessage = currentPingPipe.GetLastRead();
-        this->theWorkers[i].timeOfLastPingServerSideOnly = theGlobalVariables.GetElapsedSeconds();
-        if (this->theWorkers[i].pingMessage != "")
-          logServer << logger::blue << "Worker " << i + 1 << " ping: " << this->theWorkers[i].pingMessage << ". " << logger::endL;
-      } else if (this->theWorkers[i].PauseWorker.CheckPauseIsRequested(false, true, true))
-      { this->theWorkers[i].pingMessage = "worker paused, no pings.";
-        this->theWorkers[i].timeOfLastPingServerSideOnly = theGlobalVariables.GetElapsedSeconds();
-      } else
-      { bool presumedDead = false;
-        if (this->theWorkers[i].flagInUse)
-          if (theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead > 0)
-            if (theGlobalVariables.GetElapsedSeconds() -
-                this->theWorkers[i].timeOfLastPingServerSideOnly >
-                theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead)
-              presumedDead = true;
-        if (presumedDead)
-        { this->TerminateChildSystemCall(i);
-          std::stringstream pingTimeoutStream;
-          pingTimeoutStream
-          << theGlobalVariables.GetElapsedSeconds() - this->theWorkers[i].timeOfLastPingServerSideOnly
-          << " seconds passed since worker " << i + 1
-          << " last pinged the server; killing connection "
-          << this->theWorkers[i].connectionID
-          << ", pid: "
-          << this->theWorkers[i].ProcessPID << ". ";
-          logProcessKills << logger::red << pingTimeoutStream.str() << logger::endL;
-          this->theWorkers[i].pingMessage = "<b style =\"color:red\">" + pingTimeoutStream.str() + "</b>";
-          numInUse --;
-          this->NumProcessAssassinated ++;
-        }
-      }
-    }
-  if (numInUse <= this->MaxTotalUsedWorkers) {
-    if (theGlobalVariables.flagServerDetailedLog) {
-      logProcessStats << logger::green
-      << "Detail: RecycleChildrenIfPossible exit point 1. " << logger::endL;
-    }
-    return;
-  }
-  for (int i = 0; i < this->theWorkers.size && numInUse > 1; i ++)
-  { if (this->theWorkers[i].flagInUse)
-    { this->TerminateChildSystemCall(i);
-      std::stringstream errorStream;
-      errorStream
-      << "Terminating child " << i + 1 << " with PID "
-      << this->theWorkers[i].ProcessPID
-      << ": too many workers in use. ";
-      this->theWorkers[i].pingMessage = errorStream.str();
-      logProcessKills << logger::red << errorStream.str() << logger::endL;
-      numInUse --;
-      this->NumProcessAssassinated ++;
     }
   }
-  if (theGlobalVariables.flagServerDetailedLog) {
-    logProcessStats << logger::green
-    << "Detail: RecycleChildrenIfPossible exit point 2. " << logger::endL;
+  for (int i = 0; i < this->theWorkers.size; i ++) {
+    this->RecycleOneChild(i, numInUse);
   }
+  this->HandleTooManyWorkers(numInUse);
 }
 
-bool WebServer::initPrepareWebServerALL()
-{ MacroRegisterFunctionWithName("WebServer::initPrepareWebServerALL");
+bool WebServer::initPrepareWebServerALL() {
+  MacroRegisterFunctionWithName("WebServer::initPrepareWebServerALL");
   this->initPortsITry();
   if (this->flagTryToKillOlderProcesses)
     this->Restart();
@@ -4364,13 +4479,13 @@ bool WebServer::initPrepareWebServerALL()
   this->initDates();
   if (!this->initBindToPorts())
     return false;
-  this->initPrepareSignals();
+  this->initSignals();
   this->initListeningSockets();
   return true;
 }
 
-bool WebServer::initBindToPorts()
-{ MacroRegisterFunctionWithName("WebServer::initBindToPorts");
+bool WebServer::initBindToPorts() {
+  MacroRegisterFunctionWithName("WebServer::initBindToPorts");
   addrinfo hints;
   addrinfo *servinfo = 0;
   addrinfo *p = 0;
@@ -4384,37 +4499,39 @@ bool WebServer::initBindToPorts()
   List<std::string>* thePorts = &this->PortsITryHttp;
   int* theListeningSocket = 0;
   theListeningSocket = &this->listeningSocketHTTP;
-  for (int j = 0; j < 2; j ++, thePorts = &this->PortsITryHttpSSL, theListeningSocket = &this->listeningSocketHttpSSL)
-    for (int i = 0; i < (*thePorts).size; i ++)
-    { rv = getaddrinfo(NULL, (*thePorts)[i].c_str(), &hints, &servinfo);
-      if (rv != 0)
-      { logWorker << "getaddrinfo: " << gai_strerror(rv) << logger::endL;
+  for (int j = 0; j < 2; j ++, thePorts = &this->PortsITryHttpSSL, theListeningSocket = &this->listeningSocketHttpSSL) {
+    for (int i = 0; i < (*thePorts).size; i ++) {
+      rv = getaddrinfo(NULL, (*thePorts)[i].c_str(), &hints, &servinfo);
+      if (rv != 0) {
+        logWorker << "getaddrinfo: " << gai_strerror(rv) << logger::endL;
         return false;
       }
-      for (p = servinfo; p != NULL; p = p->ai_next)
-      { *theListeningSocket = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (*theListeningSocket == - 1)
-        { logWorker << "Error: socket failed.\n";
+      for (p = servinfo; p != NULL; p = p->ai_next) {
+        *theListeningSocket = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        if (*theListeningSocket == - 1) {
+          logWorker << "Error: socket failed.\n";
           continue;
         }
-        if (setsockopt(*theListeningSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == - 1)
+        if (setsockopt(*theListeningSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == - 1) {
           crash << "Error: setsockopt failed, error: \n" << strerror(errno) << crash;
-        if (bind(*theListeningSocket, p->ai_addr, p->ai_addrlen) == - 1)
-        { close(*theListeningSocket);
+        }
+        if (bind(*theListeningSocket, p->ai_addr, p->ai_addrlen) == - 1) {
+          close(*theListeningSocket);
           *theListeningSocket = - 1;
           logServer << "Error: bind failed at port: " << (*thePorts)[i] << ". Error: "
           << this->ToStringLastErrorDescription() << logger::endL;
           continue;
         }
         int setFlagCounter = 0;
-        while (fcntl(*theListeningSocket, F_SETFL, O_NONBLOCK) != 0)
-        { if (++ setFlagCounter > 10)
+        while (fcntl(*theListeningSocket, F_SETFL, O_NONBLOCK) != 0) {
+          if (++ setFlagCounter > 10) {
             crash << "Error: failed to set non-blocking status to listening socket. " << crash;
+          }
         }
         break;
       }
-      if (p != NULL)
-      { logServer << logger::yellow << "Successfully bound to port " << (*thePorts)[i] << logger::endL;
+      if (p != NULL) {
+        logServer << logger::yellow << "Successfully bound to port " << (*thePorts)[i] << logger::endL;
         if (j == 0)
           this->httpPort = (*thePorts)[i];
         else
@@ -4423,6 +4540,7 @@ bool WebServer::initBindToPorts()
       }
       freeaddrinfo(servinfo); // all done with this structure
     }
+  }
   if (this->listeningSocketHTTP == - 1)
     crash << "Failed to bind to any of the ports " << this->PortsITryHttp.ToStringCommaDelimited() << "\n" << crash;
   if (theGlobalVariables.flagSSLisAvailable && this->listeningSocketHttpSSL == - 1)
@@ -4430,12 +4548,18 @@ bool WebServer::initBindToPorts()
   return true;
 }
 
-void WebServer::initPrepareSignals()
-{ MacroRegisterFunctionWithName("WebServer::initPrepareSignals");
-  if (sigemptyset(&SignalSEGV.sa_mask) == - 1)
+void WebServer::initSignals() {
+  theSignals.initSignals();
+}
+
+void SignalsInfrastructure::initSignals() {
+  MacroRegisterFunctionWithName("SignalsInfrastructure::initSignals");
+  sigfillset(&this->allSignals);
+  if (sigemptyset(&this->SignalSEGV.sa_mask) == - 1) {
     crash << "Failed to initialize SignalSEGV mask. Crashing to let you know. " << crash;
-  SignalSEGV.sa_sigaction = &segfault_sigaction;
-  SignalSEGV.sa_flags = SA_SIGINFO;
+  }
+  this->SignalSEGV.sa_sigaction = &segfault_sigaction;
+  this->SignalSEGV.sa_flags = SA_SIGINFO;
   if (sigaction(SIGSEGV, &SignalSEGV, NULL) == - 1)
     crash << "Failed to register SIGSEGV handler (segmentation fault (attempt to write memory without permission))."
     << " Crashing to let you know. " << crash;
@@ -4472,8 +4596,14 @@ void WebServer::initPrepareSignals()
   //if (sigaddset(&SignalChild.sa_mask, SIGSEGV) == - 1)
   //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
   SignalChild.sa_flags = SA_NOCLDWAIT;
-  SignalChild.sa_handler =  NULL;
-  //&WebServer::Signal_SIGCHLD_handler; // reap all dead processes
+  bool handleChildExit = false;
+  if (handleChildExit) {
+    logServer << logger::red << "Sected an unstable feature: signal child exit handler. "
+    << " Please use with caution. " << logger::endL;
+    SignalChild.sa_handler = &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
+  } else {
+    SignalChild.sa_handler = NULL;
+  }
   if (sigaction(SIGCHLD, &SignalChild, NULL) == - 1)
     crash << "Was not able to register SIGCHLD handler (reaping child processes). Crashing to let you know." << crash;
 //  sigemptyset(&sa.sa_mask);
@@ -4505,9 +4635,10 @@ int WebServer::Run()
 #ifdef MACRO_use_open_ssl
   SSLdata::initSSLkeyFiles();
 #endif
-  if (!this->flagTryToKillOlderProcesses)//<-worker log resets are needed, else forked processes reset their common log.
-  //<-resets of the server logs are not needed, but I put them here nonetheless.
-  { logWorker         .reset();
+  if (!this->flagTryToKillOlderProcesses) {
+    //<-worker log resets are needed, else forked processes reset their common log.
+    //<-resets of the server logs are not needed, but I put them here nonetheless.
+    logWorker         .reset();
     logServerMonitor  .reset();
     logHttpErrors     .reset();
     logBlock          .reset();
@@ -4522,17 +4653,18 @@ int WebServer::Run()
     logSuccessfulForks.reset();
     logSuccessfulForks.flagWriteImmediately = true;
   }
-  if (!this->flagNoMonitor)
-  { int pidMonitor = fork();
+  if (!this->flagNoMonitor) {
+    int pidMonitor = fork();
     if (pidMonitor < 0)
       crash << "Failed to create server process. " << crash;
-    if (pidMonitor == 0)
-    { theGlobalVariables.processType = "serverMonitor";
+    if (pidMonitor == 0) {
+      theGlobalVariables.processType = "serverMonitor";
       theGlobalVariables.flagIsChildProcess = true;
       MonitorWebServer();//<-this attempts to connect to the server over the internet and restarts if it can't.
       return 0;
     }
   }
+  this->initSignals();
   if (theParser == 0)
     theParser = new Calculator;
   PointerObjectDestroyer<Calculator> calculatorDestroyer(theParser);
@@ -4557,8 +4689,6 @@ int WebServer::Run()
   long long previousReportedNumberOfSelects = 0;
   int previousServerStatReport = 0;
   int previousServerStatDetailedReport = 0;
-  sigset_t allSignals, oldSignals;
-  sigfillset(&allSignals);
   while (true)
   { // main accept() loop
     //    logWorker << logger::red << "select returned!" << logger::endL;
@@ -4668,11 +4798,7 @@ int WebServer::Run()
     /////////////
     if (theGlobalVariables.flagServerDetailedLog)
       logProcessStats << "Detail: about to fork, sigprocmasking " << logger::endL;
-    int error = sigprocmask(SIG_BLOCK, &allSignals, &oldSignals);
-    if (error < 0) {
-      logServer << logger::red << "Fatal error: sigprocmask failed. The server is going to crash. " << logger::endL;
-      crash << "Sigprocmas failed. This should not happen. " << crash;
-    }
+    theSignals.blockSignals();
     if (theGlobalVariables.flagServerDetailedLog) {
       logProcessStats << "Detail: Sigprocmask done. Proceeding to fork. "
       << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
@@ -4705,7 +4831,7 @@ int WebServer::Run()
         << " FORK successful in worker, next step. Time elapsed: " << theGlobalVariables.GetElapsedSeconds()
         << " second(s). Calling sigprocmask. " << logger::endL;
       }
-      sigprocmask(SIG_SETMASK, &oldSignals, NULL);
+      theSignals.unblockSignals();
       if (theGlobalVariables.flagServerDetailedLog) {
         logWorker << logger::green << "Detail: sigprocmask success, running... " << logger::endL;
       }
@@ -4723,14 +4849,7 @@ int WebServer::Run()
       logProcessStats << logger::green << "Detail: fork successful. Time elapsed: "
       << theGlobalVariables.GetElapsedMilliseconds() << " ms. "
       << "About to unmask signals. " << logger::endL;
-    error = sigprocmask(SIG_SETMASK, &oldSignals, NULL);
-    if (error < 0) {
-      logServer << "Sigprocmask failed on server, I shall now crash. " << logger::endL;
-      crash << "Sigprocmask failed on server." << crash;
-    }
-    if (theGlobalVariables.flagServerDetailedLog) {
-      logProcessStats << logger::green << "Detail: unmask successful. " << logger::endL;
-    }
+    theSignals.unblockSignals();
     this->ReleaseWorkerSideResources();
   }
   this->ReleaseEverything();
@@ -5495,7 +5614,7 @@ int WebServer::mainApache()
   theGlobalVariables.flagComputationStarted = true;
 //  stOutput << "<hr>First line<hr>";
   theGlobalVariables.MaxComputationMilliseconds = 30000; //<-30 second computation time restriction!
-  theWebServer.initPrepareSignals();
+  theWebServer.initSignals();
   CreateTimerThread();
   theWebServer.CreateNewActiveWorker();
   WebWorker& theWorker = theWebServer.GetActiveWorker();

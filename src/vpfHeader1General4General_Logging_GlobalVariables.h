@@ -270,9 +270,10 @@ class logger
   bool flagWriteImmediately;
   std::string processType;
   logger* carbonCopy;
-  logger
-  (const std::string& logFileName, logger* inputCarbonCopy,
-   bool inputResetLogWhenTooLarge, const std::string& inputProcessType);
+  logger(
+   const std::string& logFileName, logger* inputCarbonCopy,
+   bool inputResetLogWhenTooLarge, const std::string& inputProcessType
+  );
   void CheckLogSize();
   enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
   static std::string redConsole();
@@ -293,22 +294,22 @@ class logger
   logger& operator << (const loggerSpecialSymbols& input);
   void flush();
   template <typename theType>
-  logger& operator << (const theType& toBePrinted)
-  { if (theGlobalVariables.flagRunningApache)
+  logger& operator << (const theType& toBePrinted) {
+    if (theGlobalVariables.flagRunningApache)
       return *this;
     this->initializeIfNeeded();
-    if (!this->flagStopWritingToFile)
-    { std::stringstream out;
+    if (!this->flagStopWritingToFile) {
+      std::stringstream out;
       if (this->processType != theGlobalVariables.processType)
         out << "WARNING: logger is for process type: " << this->processType
         << " but current process is of type: " << theGlobalVariables.processType << ". ";
       out << toBePrinted;
       this->buffer += out.str();
-      if (this->flagWriteImmediately)
-      //<- Please do not use flagWriteImmediately
-      //unless it is an extremely time-sensitive logging
-      //issue such as investigating fork hangups.
-      { this->theFile << this->buffer;
+      if (this->flagWriteImmediately) {
+        //<- Please do not use flagWriteImmediately
+        //unless it is an extremely time-sensitive logging
+        //issue such as investigating fork hangups.
+        this->theFile << this->buffer;
         this->theFile.flush();
       }
     }

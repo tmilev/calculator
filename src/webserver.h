@@ -291,8 +291,7 @@ public:
   int ServeClient();
 };
 
-class WebServer
-{
+class WebServer {
 public:
   static const int maxNumPendingConnections;     // how many pending connections queue will hold
   int listeningSocketHTTP;
@@ -306,6 +305,8 @@ public:
   int NumProcessAssassinated;
   int NumWorkersNormallyExited;
   int WebServerPingIntervalInSeconds;
+  int previousServerStatReport;
+  int previousServerStatDetailedReport;
   long long NumFailedSelectsSoFar;
   long long NumSuccessfulSelectsSoFar;
   bool flagTryToKillOlderProcesses;

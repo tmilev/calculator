@@ -573,8 +573,8 @@ class Function
     this->flagIsInner = true;
   }
   bool inputFitsMyInnerType(const Expression& input);
-  Function()
-  { this->theFunction = 0;
+  Function() {
+    this->theFunction = 0;
     this->indexAmongOperationHandlers = - 1;
     this->indexOperation = - 1;
     this->indexOperationParentThatBansHandler = - 1;
@@ -1095,8 +1095,8 @@ public:
   std::string ToStringOutputAndSpecials();
   std::string ToStringFunctionHandlersJSON();
   //the purpose of the operator below is to save on typing when returning false with a comment.
-  operator bool() const
-  { return false;
+  operator bool() const {
+    return false;
   }
   void ExpressionHistoryPop();
   void ExpressionHistoryAddEmptyHistory();
@@ -1112,14 +1112,14 @@ public:
   Function& GetFunctionHandlerFromNamedRule(const std::string& inputRuleName);
   bool CheckConsistencyAfterInitializationExpressionStackEmpty();
   //to make operations read only, we make operations private and return const pointer to it.
-  inline const HashedList<std::string, MathRoutines::hashString>& GetOperations()
-  { return this->theAtoms;
+  const HashedList<std::string, MathRoutines::hashString>& GetOperations() {
+    return this->theAtoms;
   }
-  inline const HashedList<std::string, MathRoutines::hashString>& GetBuiltInTypes()
-  { return this->builtInTypes;
+  const HashedList<std::string, MathRoutines::hashString>& GetBuiltInTypes() {
+    return this->builtInTypes;
   }
-  const List<Function>* GetOperationCompositeHandlers(int theOp)
-  { int theIndex = this->operationsComposite.GetIndex(this->GetOperations()[theOp]);
+  const List<Function>* GetOperationCompositeHandlers(int theOp) {
+    int theIndex = this->operationsComposite.GetIndex(this->GetOperations()[theOp]);
     if (theIndex == - 1)
       return 0;
     return &this->operationsCompositeHandlers[theIndex];

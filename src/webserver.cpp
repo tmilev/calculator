@@ -3827,8 +3827,8 @@ void WebServer::PipeProgressReportToParentProcess(const std::string& theString)
   theWebServer.GetActiveWorker().PipeProgressReportToParentProcess(theString);
 }
 
-WebServer::WebServer()
-{ this->flagPort8155 = true;
+WebServer::WebServer() {
+  this->flagPort8155 = true;
   this->flagDeallocated = false;
   this->flagTryToKillOlderProcesses = true;
   this->activeWorker = - 1;
@@ -3848,6 +3848,8 @@ WebServer::WebServer()
   this->WebServerPingIntervalInSeconds = 10;
   this->NumberOfServerRequestsWithinAllConnections = 0;
   this->flagNoMonitor = false;
+  this->previousServerStatReport = 0;
+  this->previousServerStatDetailedReport = 0;
 }
 
 void WebServer::Signal_SIGCHLD_handler(int s) {
@@ -4629,8 +4631,8 @@ void WebServer::WriteVersionJSFile()
 
 }
 
-int WebServer::Run()
-{ MacroRegisterFunctionWithName("WebServer::Run");
+int WebServer::Run() {
+  MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog = "crash_WebServerRun.html";
 #ifdef MACRO_use_open_ssl
   SSLdata::initSSLkeyFiles();
@@ -4687,19 +4689,16 @@ int WebServer::Run()
   this->NumSuccessfulSelectsSoFar = 0;
   this->NumFailedSelectsSoFar = 0;
   long long previousReportedNumberOfSelects = 0;
-  int previousServerStatReport = 0;
-  int previousServerStatDetailedReport = 0;
-  while (true)
-  { // main accept() loop
-    //    logWorker << logger::red << "select returned!" << logger::endL;
+  while (true) {
+    // main accept() loop
     FD_ZERO(&FDListenSockets);
     for (int i = 0; i < this->theListeningSockets.size; i ++)
       FD_SET(this->theListeningSockets[i], &FDListenSockets);
     if (theGlobalVariables.flagServerDetailedLog) {
       logServer << logger::red << "Detail: About to enter select loop. " << logger::endL;
     }
-    while (select(this->highestSocketNumber + 1, &FDListenSockets, 0, 0, 0) == - 1)
-    { if (this->flagReapingChildren)
+    while (select(this->highestSocketNumber + 1, &FDListenSockets, 0, 0, 0) == - 1) {
+      if (this->flagReapingChildren)
         logServer << logger::yellow << "Select interrupted while reaping children. "
         << logger::endL;
       else
@@ -4712,51 +4711,51 @@ int WebServer::Run()
     }
     int64_t millisecondsBeforeFork = theGlobalVariables.GetElapsedMilliseconds();
     this->NumSuccessfulSelectsSoFar ++;
-    if ((this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar) - previousReportedNumberOfSelects > 100)
-    { logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and "
+    if ((this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar) - previousReportedNumberOfSelects > 100) {
+      logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and "
       << this->NumFailedSelectsSoFar << " bad ("
       << this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar << " total) selects. " << logger::endL;
       previousReportedNumberOfSelects = this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar;
     }
-    if (this->NumProcessAssassinated + this->NumProcessesReaped + this->NumWorkersNormallyExited +
-        this->NumConnectionsSoFar - previousServerStatReport > 99)
-    { previousServerStatReport = this->NumProcessAssassinated + this->NumProcessesReaped +
+    int reportCount =
+      this->NumProcessAssassinated + this->NumProcessesReaped +
       this->NumWorkersNormallyExited + this->NumConnectionsSoFar;
+    if (reportCount - previousServerStatReport > 99) {
+      this->previousServerStatReport = reportCount;
       logProcessStats << "# kill commands: " << this->NumProcessAssassinated
       << " #processes reaped: " << this->NumProcessesReaped
       << " #normally reclaimed workers: " << this->NumWorkersNormallyExited
       << " #connections so far: " << this->NumConnectionsSoFar << logger::endL;
     }
-    if (this->NumProcessAssassinated + this->NumProcessesReaped + this->NumWorkersNormallyExited +
-        this->NumConnectionsSoFar - previousServerStatDetailedReport > 499)
-    { previousServerStatDetailedReport = this->NumProcessAssassinated + this->NumProcessesReaped +
-      this->NumWorkersNormallyExited + this->NumConnectionsSoFar;
+    if (reportCount - previousServerStatDetailedReport > 499) {
+      this->previousServerStatDetailedReport = reportCount;
       logProcessStats << this->ToStringStatusForLogFile() << logger::endL;
     }
     int newConnectedSocket = - 1;
     theGlobalVariables.flagUsingSSLinCurrentConnection = false;
     bool found = false;
-    for (int i = theListeningSockets.size - 1; i >= 0; i --)
-      if (FD_ISSET(this->theListeningSockets[i], &FDListenSockets))
-      { //if (this->theListeningSockets[i] == this->listeningSocketHTTP)
+    for (int i = theListeningSockets.size - 1; i >= 0; i --) {
+      if (FD_ISSET(this->theListeningSockets[i], &FDListenSockets)) {
         newConnectedSocket = accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
-        if (newConnectedSocket >= 0)
-        { logServer << logger::green << "Connection candidate "
+        if (newConnectedSocket >= 0) {
+          logServer << logger::green << "Connection candidate "
           << this->NumConnectionsSoFar + 1 << ". "
           << "Connected via listening socket " << this->theListeningSockets[i]
           << " on socket: " << newConnectedSocket;
-          if (this->theListeningSockets[i] == this->listeningSocketHttpSSL)
-          { theGlobalVariables.flagUsingSSLinCurrentConnection = true;
+          if (this->theListeningSockets[i] == this->listeningSocketHttpSSL) {
+            theGlobalVariables.flagUsingSSLinCurrentConnection = true;
             logServer << logger::purple << " (SSL encrypted). " << logger::endL;
-          } else
+          } else {
             logServer << logger::yellow << " (non-encrypted). " << logger::endL;
+          }
           break;
-        } else
-        { logSocketAccept << logger::red << "This is not supposed to happen: accept failed. Error: "
+        } else {
+          logSocketAccept << logger::red << "This is not supposed to happen: accept failed. Error: "
           << this->ToStringLastErrorDescription() << logger::endL;
           found = true;
         }
       }
+    }
     if (newConnectedSocket < 0 && !found)
       logSocketAccept << logger::red << "This is not supposed to to happen: select succeeded "
       << "but I found no set socket. " << logger::endL;
@@ -4859,8 +4858,8 @@ int WebServer::Run()
   return 0;
 }
 
-int WebWorker::Run()
-{ MacroRegisterFunctionWithName("WebWorker::Run");
+int WebWorker::Run() {
+  MacroRegisterFunctionWithName("WebWorker::Run");
   theGlobalVariables.millisecondOffset = this->millisecondOffset;
   this->CheckConsistency();
   if (this->connectedSocketID == - 1)
@@ -4874,9 +4873,11 @@ int WebWorker::Run()
   CreateTimerThread();
 #ifdef MACRO_use_open_ssl
   theWebServer.SSLServerSideHandShake();
-  if (theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection &&
-      !this->parent->theSSLdata.flagSSLHandshakeSuccessful)
-  { theGlobalVariables.flagUsingSSLinCurrentConnection = false;
+  if (
+    theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection &&
+    !this->parent->theSSLdata.flagSSLHandshakeSuccessful
+  ) {
+    theGlobalVariables.flagUsingSSLinCurrentConnection = false;
     this->parent->SignalActiveWorkerDoneReleaseEverything();
     this->parent->ReleaseEverything();
     logOpenSSL << logger::red << "ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
@@ -4889,18 +4890,18 @@ int WebWorker::Run()
   stOutput.theOutputFunction = WebServer::SendStringThroughActiveWorker;
   int result = 0;
   this->numberOfReceivesCurrentConnection = 0;
-  while (true)
-  { StateMaintainerCurrentFolder preserveCurrentFolder;
+  while (true) {
+    StateMaintainerCurrentFolder preserveCurrentFolder;
     this->flagAllBytesSentUsingFile = false;
     this->flagEncounteredErrorWhileServingFile = false;
-    if (!this->ReceiveAll())
-    { this->WrapUpConnection();
+    if (!this->ReceiveAll()) {
+      this->WrapUpConnection();
       bool sslWasOK = true;
 #ifdef MACRO_use_open_ssl
       sslWasOK = (this->error == SSLdata::errors::errorWantRead);
 #endif
-      if (this->numberOfReceivesCurrentConnection > 0 && sslWasOK)
-      { logIO << logger::green << "Connection timed out after successfully receiving "
+      if (this->numberOfReceivesCurrentConnection > 0 && sslWasOK) {
+        logIO << logger::green << "Connection timed out after successfully receiving "
         << this->numberOfReceivesCurrentConnection << " times. " << logger::endL;
         return 0;
       }
@@ -4908,8 +4909,8 @@ int WebWorker::Run()
       return - 1;
     }
     this->numberOfReceivesCurrentConnection ++;
-    if (theParser == 0)
-    { theParser = new Calculator;
+    if (theParser == 0) {
+      theParser = new Calculator;
       theParser->init();
       logWorker << logger::blue << "Created new calculator for connection: " << this->numberOfReceivesCurrentConnection << logger::endL;
     }
@@ -4935,14 +4936,14 @@ int WebWorker::Run()
   return result;
 }
 
-void WebServer::Release(int& theDescriptor)
-{ PauseProcess::Release(theDescriptor);
+void WebServer::Release(int& theDescriptor) {
+  PauseProcess::Release(theDescriptor);
 }
 
 extern int mainTest(List<std::string>& remainingArgs);
 
-void WebServer::FigureOutOperatingSystem()
-{ MacroRegisterFunctionWithName("WebServer::FigureOutOperatingSystem");
+void WebServer::FigureOutOperatingSystem() {
+  MacroRegisterFunctionWithName("WebServer::FigureOutOperatingSystem");
   if (theGlobalVariables.OperatingSystem != "")
     return;
   List<std::string> supportedOSes;

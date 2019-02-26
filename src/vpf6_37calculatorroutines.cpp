@@ -17,17 +17,22 @@
 ///////////////////////////////////
 ProjectInformationInstance ProjectInfoVpf6_37cpp(__FILE__, "More calculator built-in functions. ");
 
-bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
-(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation");
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
+bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation");
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
     return theCommands << "Automated tests available to logged-in admins only. ";
-  if (input.size() != 4)
+  }
+  if (input.size() != 4) {
     return theCommands
     << "I expected three arguments: "
     << "1) first problem number to test (1 or less = start at the beginning) "
     << "2) number of tests to run (0 or less = run all) and "
     << "3) number of tests to interpret. ";
+  }
   std::stringstream out;
   ProgressReport theReport;
   List<std::string> theFileNames, theFileTypes;
@@ -37,12 +42,32 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   input[1].IsSmallInteger(&firstTestToRun);
   input[2].IsSmallInteger(&numDesiredTests);
   input[3].IsSmallInteger(&numSamples);
-  FileOperations::GetFolderFileNamesVirtual
-  ("problems/", theFileNames, &theFileTypes, false);
+  FileOperations::GetFolderFileNamesVirtual(
+    "problems/default/",
+    theFileNames,
+    &theFileTypes,
+    false
+  );
   std::stringstream randSeedStreaM;
   randSeedStreaM << theCommands.theObjectContainer.CurrentRandomSeed;
-  std::string randomSeedCurrent =randSeedStreaM.str();
+  std::string randomSeedCurrent = randSeedStreaM.str();
   out << "Random seed at start: " << randomSeedCurrent << "<br>";
+  if (numDesiredTests <= 0) {
+    numDesiredTests = theFileNames.size;
+  }
+  if (firstTestToRun < 1) {
+    firstTestToRun = 1;
+  }
+  int numInterpretations = 0;
+  int totalToInterpret = 0;
+  for (int i = 0; i < theFileNames.size; i ++) {
+    if (theFileTypes[i] == ".html") {
+      totalToInterpret ++;
+    }
+  }
+  totalToInterpret = MathRoutines::Minimum(numDesiredTests, totalToInterpret);
+  out << "Total to interpret: " << totalToInterpret << "<br>";
+  out << "DEBUG: all file names: " << theFileNames << "<br>";
   out << "<table>";
   out << "<tr><th></th>"
   << "<th>File name </th>"
@@ -51,20 +76,11 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   << "<th>AnswerGeneration</th>"
   << "<th>Accepting built in answer?</th>"
   << "</tr>";
-  if (numDesiredTests <= 0)
-    numDesiredTests = theFileNames.size;
-  if (firstTestToRun < 1)
-    firstTestToRun = 1;
-  int numInterpretations = 0;
-  int totalToInterpret = 0;
-  for (int i = 0; i < theFileNames.size; i ++)
-    if (theFileTypes[i] == ".html")
-      totalToInterpret ++;
-  totalToInterpret = MathRoutines::Minimum(numDesiredTests, totalToInterpret);
+
   MapLisT<std::string, std::string, MathRoutines::hashString>&
   globalKeys = theGlobalVariables.webArguments;
-  for (int i = 0; i < theFileNames.size; i ++)
-  { if (numInterpretations >= numDesiredTests)
+  for (int i = 0; i < theFileNames.size; i ++) {
+    if (numInterpretations >= numDesiredTests)
       break;
     if (theFileTypes[i] != ".html")
       continue;
@@ -86,14 +102,8 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     bool isGoodLoad = theProblem.LoadMe(false, randomSeedCurrent, &problemComments);
     bool isGoodInterpretation = false;
     out << "<tr>";
-    //out << "<td>DEBUG: Random seed at start: "
-    //<< theProblem.theProblemData.randomSeed;
-
     if (isGoodLoad)
       isGoodInterpretation = theProblem.InterpretHtml(&problemComments);
-    //out << ".<br>DEBUG: random seed end: "
-    //<< theProblem.theProblemData.randomSeed
-    //<< "</td>";
     std::stringstream randSeedCurrentStream;
     randSeedCurrentStream << theProblem.theProblemData.randomSeed;
     randomSeedCurrent = randSeedCurrentStream.str();
@@ -108,26 +118,28 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     << theFileNames[i]
     << "</a>"
     << "</td>";  
-    if (!isGoodLoad)
-    { out << "<td><b>Couldn't load. </b>"
+    if (!isGoodLoad) {
+      out << "<td><b>Couldn't load. </b>"
       << problemComments.str() << "</td>";
       out << "</tr>";
       break;
-    } else
+    } else {
       out << "<td><span style =\"color:green\">Success</span></td>";
-    if (!isGoodInterpretation)
-    { out << "<td><span style =\"color:red\"><b>Failure.</b></span> "
+    }
+    if (!isGoodInterpretation) {
+      out << "<td><span style =\"color:red\"><b>Failure.</b></span> "
       << "Comments: " << problemComments.str();
       out << "</td></tr>";
       break;
-    } else
+    } else {
       out << "<td><span style =\"color:green\">Success</span></td>";
+    }
     bool answerGenerated = false;
     bool answersWork = false;
     std::string answerGeneration;
     std::string solutionReport;
-    for (int j = 0; j < theProblem.theProblemData.theAnswers.size(); j ++)
-    { std::string currentAnswer;
+    for (int j = 0; j < theProblem.theProblemData.theAnswers.size(); j ++) {
+      std::string currentAnswer;
       std::string currentKey = "calculatorAnswer" +
       theProblem.theProblemData.theAnswers[j].answerId;
       theGlobalVariables.SetWebInpuT(currentKey, "1");

@@ -618,22 +618,36 @@ std::string FileOperations::GetPathFromFileNameWithPath(const std::string& fileN
   return folderName.str();
 }
 
-bool FileOperations::GetFolderFileNamesVirtual
-(const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes, bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
-{ MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesOnTopOfProjectBase");
+bool FileOperations::GetFolderFileNamesVirtual(
+  const std::string& theFolderName,
+  List<std::string>& outputFileNamesNoPath,
+  List<std::string>* outputFileTypes,
+  bool accessSensitiveFolders,
+  bool accessULTRASensitiveFolders,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesVirtual");
   std::string computedFolderName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual
-      (theFolderName, computedFolderName, accessSensitiveFolders, accessULTRASensitiveFolders, 0))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+    theFolderName,
+    computedFolderName,
+    accessSensitiveFolders,
+    accessULTRASensitiveFolders,
+    commentsOnFailure
+  )) {
     return false;
-  //stOutput << "DEBUG: Getting folder names from physical folder: "
-  //<< computedFolderName;
-  return FileOperations::GetFolderFileNamesUnsecure
-  (computedFolderName, outputFileNamesNoPath, outputFileTypes);
+  }
+  return FileOperations::GetFolderFileNamesUnsecure(
+    computedFolderName, outputFileNamesNoPath, outputFileTypes
+  );
 }
 
-bool FileOperations::GetFolderFileNamesUnsecure
-(const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes)
-{ MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesUnsecure");
+bool FileOperations::GetFolderFileNamesUnsecure(
+  const std::string& theFolderName,
+  List<std::string>& outputFileNamesNoPath,
+  List<std::string>* outputFileTypes
+) {
+  MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesUnsecure");
   DIR *theDirectory = opendir(theFolderName.c_str());
   if (theDirectory == NULL)
     return false;

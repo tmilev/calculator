@@ -56,10 +56,14 @@ public:
    List<std::string>* outputFileTypes = 0);
   static std::string GetCurrentFolder();
   static std::string GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath);
-  static bool GetFolderFileNamesVirtual
-  (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
-   List<std::string>* outputFileTypes = 0, bool accessSensitiveFolders = false,
-   bool accessULTRASensitiveFolders = false);
+  static bool GetFolderFileNamesVirtual(
+    const std::string& theFolderName,
+    List<std::string>& outputFileNamesNoPath,
+    List<std::string>* outputFileTypes = 0,
+    bool accessSensitiveFolders = false,
+    bool accessULTRASensitiveFolders = false,
+    std::stringstream *commentsOnFailure = 0
+  );
   static bool GetPhysicalFileNameFromVirtualCustomizedReadOnly
   (const std::string& inputFileName, std::string& output,
    std::stringstream* commentsOnFailure);

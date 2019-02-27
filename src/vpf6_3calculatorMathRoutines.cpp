@@ -7286,15 +7286,15 @@ void Calculator::AutomatedTestRun
   ProgressReport theReport;
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal = true;
-  for (int i = 0; i < outputCommandStrings.size; i ++)
-  { double startingTime = theGlobalVariables.GetElapsedSeconds();
+  for (int i = 0; i < outputCommandStrings.size; i ++) {
+    double startingTime = theGlobalVariables.GetElapsedSeconds();
     std::stringstream reportStream;
     reportStream << "<br>Testing expression:<br> " << outputCommandStrings[i]
     << "<br>Test progress: testing " << i + 1 << " out of " << outputCommandStrings.size << ". ";
     theReport.Report(reportStream.str());
     theTester.reset();
     theTester.CheckConsistencyAfterInitializationExpressionStackEmpty();
-    theTester.init();
+    theTester.initialize();
     theTester.Evaluate(outputCommandStrings[i]);
     outputResultsWithInit[i] = theTester.theProgramExpression.ToString(&theFormat);
     reportStream << "<br>Result: " << theTester.theProgramExpression.ToString();
@@ -7374,8 +7374,8 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults(Calculator& the
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerDrawRootSystem(Calculator& theCommands, const Expression& input, Expression& output)
-{ //theNode.owner->theHmm.MakeG2InB3(theParser);
+bool CalculatorFunctionsGeneral::innerDrawRootSystem(Calculator& theCommands, const Expression& input, Expression& output) {
+  //theNode.owner->theHmm.MakeG2InB3(theParser);
   bool hasPreferredProjectionPlane = input.IsListNElements(4);
   const Expression& typeNode = hasPreferredProjectionPlane ? input[1] : input;
   SemisimpleLieAlgebra* theAlgPointer;
@@ -7384,8 +7384,8 @@ bool CalculatorFunctionsGeneral::innerDrawRootSystem(Calculator& theCommands, co
   SemisimpleLieAlgebra& theAlg = *theAlgPointer;
   WeylGroupData& theWeyl = theAlg.theWeyl;
   Vectors<Rational> preferredProjectionPlane;
-  if (hasPreferredProjectionPlane)
-  { preferredProjectionPlane.SetSize(2);
+  if (hasPreferredProjectionPlane) {
+    preferredProjectionPlane.SetSize(2);
     bool isGood =
     theCommands.GetVectoR(input[2], preferredProjectionPlane[0], 0, theWeyl.GetDim(), 0) && theCommands.GetVectoR(input[3], preferredProjectionPlane[1], 0, theWeyl.GetDim(), 0);
     if (!isGood)

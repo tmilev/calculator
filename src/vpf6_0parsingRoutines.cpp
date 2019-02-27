@@ -33,8 +33,8 @@ std::string SyntacticElement::ToStringHumanReadable(Calculator& theBoss, bool in
   return out.str();
 }
 
-void Calculator::reset()
-{ this->MaxAlgTransformationsPerExpression = 100;
+void Calculator::reset() {
+  this->MaxAlgTransformationsPerExpression = 100;
   this->MaxRuleStacksCached = 500;
   this->MaxCachedExpressionPerRuleStack = 100000;
   this->MaxRecursionDeptH = 10000;
@@ -124,8 +124,8 @@ void Calculator::reset()
   this->theExpressionContainer.Clear();
 }
 
-void Calculator::init()
-{ MacroRegisterFunctionWithName("Calculator::init");
+void Calculator::initialize() {
+  MacroRegisterFunctionWithName("Calculator::init");
   this->reset();
 
   this->theAtoms.SetExpectedSize(1000);

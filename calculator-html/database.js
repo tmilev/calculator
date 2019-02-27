@@ -175,4 +175,4 @@ module.exports = {
   updateDatabasePage,
   clickDatabaseTable,
   updateDatabasePageResetCurrentTable
-}
+};

@@ -1117,36 +1117,32 @@ bool CalculatorHTML::PrepareCommands(std::stringstream* comments)
   return true;
 }
 
-bool CalculatorHTML::PrepareCommandsAnswerOnGiveUp(Answer& theAnswer, std::stringstream* comments)
-{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsAnswerOnGiveUp");
+bool CalculatorHTML::PrepareCommandsAnswerOnGiveUp(Answer& theAnswer, std::stringstream* comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsAnswerOnGiveUp");
   (void) comments;
   std::stringstream streamCommands;
-  //stOutput << "<hr>DEBUG: Preparing give-up commands for: " << theAnswer.answerId << "<hr>";
-  for (int i = 0; i < this->theContent.size; i ++)
-  { SyntacticElementHTML& currentElt = this->theContent[i];
+  for (int i = 0; i < this->theContent.size; i ++) {
+    SyntacticElementHTML& currentElt = this->theContent[i];
     if (!currentElt.IsAnswerOnGiveUp())
       continue;
-    //stOutput << "<br>Current element: " << currentElt.ToStringDebug();
-    //stOutput << "<br>Comparing: " << theAnswer.answerId << " to: "
-    //<< currentElt.GetKeyValue("name");
     if (currentElt.GetKeyValue("name") == theAnswer.answerId)
       streamCommands << this->CleanUpCommandString(currentElt.content);
   }
   theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly = streamCommands.str();
-  //stOutput << "<br>Final give up command: " << theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly;
   return true;
 }
 
-bool CalculatorHTML::PrepareCommentsBeforeSubmission
-(Answer& theAnswer, std::stringstream* comments)
-{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommentsBeforeSubmission");
+bool CalculatorHTML::PrepareCommentsBeforeSubmission(
+  Answer& theAnswer, std::stringstream* comments
+) {
+  MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommentsBeforeSubmission");
   (void) comments;
   std::stringstream streamCommands;
   //stOutput << "<hr>DEBUG: Preparing comment commands for: "
   //<< theAnswer.answerId << "<hr>";
 //  stOutput << "<hr>DEBUG: Call stack: " << crash.GetStackTraceEtcErrorMessage();
-  for (int i = 0; i < this->theContent.size; i ++)
-  { SyntacticElementHTML& currentElt = this->theContent[i];
+  for (int i = 0; i < this->theContent.size; i ++) {
+    SyntacticElementHTML& currentElt = this->theContent[i];
     if (!currentElt.IsCommentBeforeSubmission())
       continue;
     if (currentElt.GetKeyValue("name") != theAnswer.answerId)
@@ -1159,13 +1155,14 @@ bool CalculatorHTML::PrepareCommentsBeforeSubmission
   return true;
 }
 
-bool CalculatorHTML::PrepareCommentsBeforeInterpretation
-(Answer& theAnswer, std::stringstream* comments)
-{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommentsBeforeInterpretation");
+bool CalculatorHTML::PrepareCommentsBeforeInterpretation(
+  Answer& theAnswer, std::stringstream* comments
+) {
+  MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommentsBeforeInterpretation");
   (void) comments;
   std::stringstream streamCommands;
-  for (int i = 0; i < this->theContent.size; i ++)
-  { SyntacticElementHTML& currentElt = this->theContent[i];
+  for (int i = 0; i < this->theContent.size; i ++) {
+    SyntacticElementHTML& currentElt = this->theContent[i];
     if (!currentElt.IsCommentBeforeInterpretation())
       continue;
     if (currentElt.GetKeyValue("name") != theAnswer.answerId)
@@ -1176,13 +1173,13 @@ bool CalculatorHTML::PrepareCommentsBeforeInterpretation
   return true;
 }
 
-bool CalculatorHTML::PrepareCommandsSolution(Answer& theAnswer, std::stringstream* comments)
-{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsSolution");
+bool CalculatorHTML::PrepareCommandsSolution(Answer& theAnswer, std::stringstream* comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsSolution");
   (void) comments;
   std::stringstream streamCommands;
   //stOutput << "<hr>DEBUG: Preparing give-up commands for: " << theAnswer.answerId << "<hr>";
-  for (int i = 0; i < this->theContent.size; i ++)
-  { SyntacticElementHTML& solutionElt = this->theContent[i];
+  for (int i = 0; i < this->theContent.size; i ++) {
+    SyntacticElementHTML& solutionElt = this->theContent[i];
     if (!solutionElt.IsSolution())
       continue;
     //stOutput << "<br>Current element: " << currentElt.ToStringDebug();
@@ -1192,10 +1189,11 @@ bool CalculatorHTML::PrepareCommandsSolution(Answer& theAnswer, std::stringstrea
       continue;
     int numCommandsSoFar = 2;
     theAnswer.solutionElements = solutionElt.children;
-    for (int j = 0; j < theAnswer.solutionElements.size; j ++)
-    { SyntacticElementHTML& currentElt = theAnswer.solutionElements[j];
-      if (!currentElt.IsCalculatorCommand() && !currentElt.IsCalculatorHidden())
+    for (int j = 0; j < theAnswer.solutionElements.size; j ++) {
+      SyntacticElementHTML& currentElt = theAnswer.solutionElements[j];
+      if (!currentElt.IsCalculatorCommand() && !currentElt.IsCalculatorHidden()) {
         continue;
+      }
       currentElt.commandIndex = numCommandsSoFar;
       numCommandsSoFar ++;
       streamCommands << "CommandEnclosure{}("
@@ -1207,25 +1205,28 @@ bool CalculatorHTML::PrepareCommandsSolution(Answer& theAnswer, std::stringstrea
   return true;
 }
 
-bool CalculatorHTML::PrepareCommandsAnswer(Answer& theAnswer, std::stringstream* comments)
-{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsAnswer");
+bool CalculatorHTML::PrepareCommandsAnswer(Answer& theAnswer, std::stringstream* comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsAnswer");
   std::stringstream streamCommandS;
   std::stringstream streamCommandsNoEnclosures;
   streamCommandS << this->GetProblemHeaderEnclosure();//first calculator enclosure contains the header
   streamCommandsNoEnclosures << this->GetProblemHeaderWithoutEnclosure();
   std::stringstream streamCommandsBody;
   std::stringstream streamCommandsBodyNoEnclosures;
-  for (int i = 0; i < this->theContent.size; i ++)
-  { SyntacticElementHTML& currentElt = this->theContent[i];
-    if (!currentElt.IsCalculatorHidden() && !currentElt.IsCalculatorCommand()
-        && !currentElt.IsAnswer())
+  for (int i = 0; i < this->theContent.size; i ++) {
+    SyntacticElementHTML& currentElt = this->theContent[i];
+    if (
+      !currentElt.IsCalculatorHidden() && !currentElt.IsCalculatorCommand()
+      && !currentElt.IsAnswer()
+    ) {
       continue;
+    }
     std::string commandCleaned = this->CleanUpCommandString(this->theContent[i].content);
     std::string commandEnclosed = "CommandEnclosure{}( " + commandCleaned + " );";
-    if (currentElt.IsAnswer() && currentElt.GetKeyValue("id") == theAnswer.answerId)
-    { std::string stringCommandsBody = streamCommandsBody.str();
-      if (stringCommandsBody != "")
-      { streamCommandS << "CommandEnclosure{}(" << stringCommandsBody << ");\n";
+    if (currentElt.IsAnswer() && currentElt.GetKeyValue("id") == theAnswer.answerId) {
+      std::string stringCommandsBody = streamCommandsBody.str();
+      if (stringCommandsBody != "") {
+        streamCommandS << "CommandEnclosure{}(" << stringCommandsBody << ");\n";
         streamCommandsNoEnclosures << streamCommandsBodyNoEnclosures.str();
       }
       theAnswer.commandsBeforeAnswer = streamCommandS.str();
@@ -1233,31 +1234,32 @@ bool CalculatorHTML::PrepareCommandsAnswer(Answer& theAnswer, std::stringstream*
       theAnswer.commandVerificationOnly = commandCleaned;
       return true;
     }
-    if (this->theContent[i].IsCalculatorHidden() || this->theContent[i].IsCalculatorCommand())
-    { streamCommandsBody << commandEnclosed;
+    if (this->theContent[i].IsCalculatorHidden() || this->theContent[i].IsCalculatorCommand()) {
+      streamCommandsBody << commandEnclosed;
       streamCommandsBodyNoEnclosures << commandCleaned;
     }
   }
-  if (comments != 0)
+  if (comments != 0) {
     *comments << "<b>Something is wrong: did not find answer for answer tag: "
     << theAnswer.answerId << ". </b>";
+  }
   return false;
 }
 
-bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream* comments)
-{ MacroRegisterFunctionWithName("Problem::PrepareAndExecuteCommands");
+bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream* comments) {
+  MacroRegisterFunctionWithName("Problem::PrepareAndExecuteCommands");
   double startTime = theGlobalVariables.GetElapsedSeconds();
   this->PrepareCommands(comments);
 
-  theInterpreter.init();
+  theInterpreter.initialize();
   theInterpreter.flagWriteLatexPlots = false;
   theInterpreter.flagPlotNoControls = true;
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("calculator init time");
 
   //stOutput << "nput cmds: " << calculatorCommands.str();
-  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasProblemComposingRights())
-  { this->logCommandsProblemGeneratioN << "<b>Input commands:</b> "
+  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasProblemComposingRights()) {
+    this->logCommandsProblemGeneratioN << "<b>Input commands:</b> "
     << this->theProblemData.commandsGenerateProblemLink
     << "<br>\n"
     << this->theProblemData.commandsGenerateProblem << "<br>";
@@ -1269,8 +1271,8 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   this->timeIntermediateComments.LastObject()->AddOnTop("calculator evaluation time");
   //stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
   bool result = !theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors == "";
-  if (!result && comments != 0)
-  { *comments << "<br>Failed to interpret your file. "
+  if (!result && comments != 0) {
+    *comments << "<br>Failed to interpret your file. "
     << "<a href=\""
     << theGlobalVariables.DisplayNameExecutable
     << "?request=calculator&mainInput="
@@ -1278,13 +1280,14 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
     << "\">Input link</a><br>"
     << "The interpretation input was:<br> "
     << this->theProblemData.commandsGenerateProblem << "<br>";
-    if (theGlobalVariables.UserDefaultHasAdminRights())
+    if (theGlobalVariables.UserDefaultHasAdminRights()) {
       *comments << "The result of the interpretation attempt is:<br>"
       << theInterpreter.outputString << "<br><b>Comments</b><br>"
       << theInterpreter.outputCommentsString;
-    else
+    } else {
       *comments << "This may be a bug with the problem. Feel free to take a screenshot of the issue and "
       << "email it to the site admin(s). ";
+    }
   }
   for (int i = 0; i < theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.size(); i ++)
     this->theProblemData.inputNonAnswerIds.AddOnTop(theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.theKeys[i]);
@@ -1316,8 +1319,8 @@ bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure)
 #endif
 }
 
-void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
-{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretManageClass");
+void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput) {
+  MacroRegisterFunctionWithName("CalculatorHTML::InterpretManageClass");
   if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentVieWOn())
     return;
 #ifdef MACRO_use_MongoDB
@@ -1329,11 +1332,11 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
 #endif // MACRO_use_MongoDB
 }
 
-bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput)
-{ MacroRegisterFunctionWithName("CalculatorHTML::ComputeAnswerRelatedStrings");
+bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput) {
+  MacroRegisterFunctionWithName("CalculatorHTML::ComputeAnswerRelatedStrings");
   std::string desiredAnswerId = inputOutput.GetKeyValue("id");
-  if (desiredAnswerId == "")
-  { inputOutput.interpretedCommand = "<b>Error: could not generate submit button: the answer tag does not have a valid id. Please fix the problem template.</b>";
+  if (desiredAnswerId == "") {
+    inputOutput.interpretedCommand = "<b>Error: could not generate submit button: the answer tag does not have a valid id. Please fix the problem template.</b>";
     return false;
   }
   int theIndex = this->GetAnswerIndex(desiredAnswerId);
@@ -1364,8 +1367,8 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   previewAnswerStream << "previewAnswers('" << answerId << "', '"
   << currentA.idVerificationSpan << "');";
   currentA.properties.Clear();
-  for (int i = 0; i < inputOutput.properties.size(); i ++)
-  { if (inputOutput.properties.theKeys[i] == "id")
+  for (int i = 0; i < inputOutput.properties.size(); i ++) {
+    if (inputOutput.properties.theKeys[i] == "id")
       continue;
     currentA.properties.SetKeyValue(inputOutput.properties.theKeys[i], inputOutput.properties.theValues[i]);
   }
@@ -1375,25 +1378,27 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.idButtonInterpret = "buttonInterpret" + answerId;
   currentA.idButtonAnswer = "buttonAnswer" + answerId;
   currentA.idButtonSolution = "buttonSolution" + answerId;
-  if (!this->flagUseJSON)
-  { inputOutput.defaultKeysIfMissing.AddOnTop("onkeyup");
-    inputOutput.defaultValuesIfMissing.AddOnTop
-    (currentA.javascriptPreviewAnswer + currentA.MQUpdateFunction + "();");
+  if (!this->flagUseJSON) {
+    inputOutput.defaultKeysIfMissing.AddOnTop("onkeyup");
+    inputOutput.defaultValuesIfMissing.AddOnTop(
+      currentA.javascriptPreviewAnswer + currentA.MQUpdateFunction + "();"
+    );
   }
-//  inputOutput.defaultKeysIfMissing.AddOnTop("style");
-//  inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
   std::stringstream verifyStream;
   int numCorrectSubmissions = currentA.numCorrectSubmissions;
   int numSubmissions = currentA.numSubmissions;
-  if (theGlobalVariables.userCalculatorRequestType == "scoredQuiz" ||
-      theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON")
-  { if (numCorrectSubmissions > 0)
-    { verifyStream << "<b><span style =\"color:green\">Correctly answered: \\("
+  if (
+    theGlobalVariables.userCalculatorRequestType == "scoredQuiz" ||
+    theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON"
+  ) {
+    if (numCorrectSubmissions > 0) {
+      verifyStream << "<b><span style =\"color:green\">Correctly answered: \\("
       << currentA.firstCorrectAnswerClean << "\\) </span></b> ";
       if (numSubmissions > 0)
         verifyStream << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
-    } else if (numSubmissions > 0)
+    } else if (numSubmissions > 0) {
       verifyStream << numSubmissions << " attempt(s) so far. ";
+    }
   }
   currentA.htmlSpanVerifyAnswer = verifyStream.str();
   return true;

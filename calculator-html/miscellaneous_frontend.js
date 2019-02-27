@@ -19,4 +19,4 @@ function showItem(obj) {
 
 module.exports = {
   switchMenu
-}
+};

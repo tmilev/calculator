@@ -97,4 +97,4 @@ var monitor = new Monitor();
 
 module.exports = {
   monitor
-}
+};

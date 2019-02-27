@@ -849,8 +849,8 @@ bool WebCrawler::VerifyRecaptcha
   return true;
 }
 
-std::string WebWorker::GetSignUpRequestResult()
-{ MacroRegisterFunctionWithName("WebWorker::GetSignUpRequestResult");
+std::string WebWorker::GetSignUpRequestResult() {
+  MacroRegisterFunctionWithName("WebWorker::GetSignUpRequestResult");
   //double startTime =theGlobalVariables.GetElapsedSeconds();
   JSData result;
   std::stringstream errorStream;

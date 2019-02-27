@@ -36,6 +36,11 @@ std::string WebAPI::databaseParameters::operation = "databaseOperation";
 std::string WebAPI::databaseParameters::fetch = "databaseFetch";
 
 std::string WebAPI::problemSingleDeadline = "deadline";
+std::string WebAPI::result::resultHtml = "resultHtml";
+std::string WebAPI::result::syntaxErrors = "syntaxErrors";
+std::string WebAPI::result::resultLabel = "result";
+std::string WebAPI::result::badInput = "badInput";
+std::string WebAPI::result::comments = "comments";
 
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 WebServer theWebServer;
@@ -1423,24 +1428,22 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
   return out.str();
 }
 
-void WebWorker::OutputResultAfterTimeout()
-{ MacroRegisterFunctionWithName("WebWorker::OutputResultAfterTimeout");
-  std::stringstream out;
+void WebWorker::OutputResultAfterTimeout() {
+  MacroRegisterFunctionWithName("WebWorker::OutputResultAfterTimeout");
   //out << theParser.ToStringOutputSpecials();
   std::string theFileName = "output/" + theGlobalVariables.RelativePhysicalNameOutpuT;
-  std::string theLink = "output/" + HtmlRoutines::ConvertStringToURLString
-  (theGlobalVariables.RelativePhysicalNameOutpuT, false);
-  out << "Output written in: <a href=\"/"
-  << theLink << "\" target = \"_blank\"> " << theLink << "</a><br>";
-  if (standardOutputStreamAfterTimeout.str().size() != 0)
-    out << standardOutputStreamAfterTimeout.str() << "<hr>";
-  out << theParser->ToStringOutputAndSpecials();
+  std::string theLink = "output/" + HtmlRoutines::ConvertStringToURLString(
+    theGlobalVariables.RelativePhysicalNameOutpuT, false
+  );
+  JSData output = theParser->ToJSONOutputAndSpecials();
+  output["outputFile"] = theLink;
   std::fstream outputTimeOutFile;
-  FileOperations::OpenFileCreateIfNotPresentVirtual
-  (outputTimeOutFile, theFileName, false, true, false);
-  outputTimeOutFile << "<html><body>" << out.str() << "</body></html>";
+  FileOperations::OpenFileCreateIfNotPresentVirtual(
+    outputTimeOutFile, theFileName, false, true, false
+  );
+  outputTimeOutFile << "<html><body>" << theParser->ToStringOutputAndSpecials() << "</body></html>";
   outputTimeOutFile.close();
-  WebWorker::OutputSendAfterTimeout(out.str());
+  WebWorker::OutputSendAfterTimeout(output.ToString(false));
 }
 
 void WebWorker::OutputCrashAfterTimeout()
@@ -1450,8 +1453,8 @@ void WebWorker::OutputCrashAfterTimeout()
   theWebServer.SignalActiveWorkerDoneReleaseEverything();
 }
 
-void WebWorker::OutputSendAfterTimeout(const std::string& input)
-{ MacroRegisterFunctionWithName("WebWorker::OutputSendAfterTimeout");
+void WebWorker::OutputSendAfterTimeout(const std::string& input) {
+  MacroRegisterFunctionWithName("WebWorker::OutputSendAfterTimeout");
   theGlobalVariables.flagTimedOutComputationIsDone = true;
   logWorker << "WebWorker::StandardOutputPart2ComputationTimeout called with worker number "
   << theWebServer.GetActiveWorker().indexInParent + 1 << "." << logger::endL;
@@ -1461,9 +1464,9 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input)
   theWebServer.GetActiveWorker().pipeWorkerToWorkerIndicatorData.WriteAfterEmptying(input, false, false);
   logBlock << logger::blue << "Final output written to indicator, blocking until data "
   << "is received on the other end." << logger::endL;
-  if (!theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut(false, false))
-  {} else
-  {//requesting pause which will be cleared by the receiver of pipeWorkerToWorkerIndicatorData
+  if (!theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut(false, false)) {
+  } else {
+    //requesting pause which will be cleared by the receiver of pipeWorkerToWorkerIndicatorData
     theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked(false, false);
   }
   theWebServer.GetActiveWorker().pipeWorkerToWorkerIndicatorData.WriteAfterEmptying("finished", false, false);
@@ -3657,34 +3660,39 @@ void WebWorker::Release() {
   this->flagInUsE = false;
 }
 
-void WebWorker::OutputShowIndicatorOnTimeout()
-{ MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
+void WebWorker::OutputShowIndicatorOnTimeout() {
+  MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
   MutexLockGuard theLock(this->PauseIndicatorPipeInUse.mutexForProcessBlocking.GetElement());
   //this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
   theGlobalVariables.flagOutputTimedOut = true;
   theGlobalVariables.flagTimedOutComputationIsDone = false;
   //ProgressReportWebServer theReport("WebServer::OutputShowIndicatorOnTimeout");
   logWorker << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
+  std::stringstream out;
+  JSData result;
   if (theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed) {
-    stOutput << "Your computation is taking more than "
+    out << "Your computation is taking more than "
     << theGlobalVariables.takeActionAfterComputationMilliseconds
     << " ms. ";
   }
-  if (!theGlobalVariables.flagAllowProcessMonitoring)
-  { stOutput << "Monitoring computations is not allowed on this server.<br> "
+  if (!theGlobalVariables.flagAllowProcessMonitoring) {
+    out << "Monitoring computations is not allowed on this server.<br> "
     << "If you want to carry out a long computation you will need to install the calculator on your own machine.<br> "
     << "At the moment, the only way to do that is by setting the variable "
     << "theGlobalVariables.flagAllowProcessMonitoring to true, "
     << "achieved through manually compiling the calculator from source.<br> ";
+    result[WebAPI::result::resultHtml] = out.str();
     return;
   }
   if (this->indexInParent < 0)
     crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
-  stOutput << "<script language = \"javascript\">\n"
+  out << "<script language = \"javascript\">\n"
   << "window.calculator.processMonitoring.monitor.start("
   << this->indexInParent + 1
   << ");\n"
   << "</script>";
+  result[WebAPI::result::resultHtml] = out.str();
+  stOutput << result.ToString(false);
   this->SendAllBytesWithHeaders();
   for (int i = 0; i < this->parent->theWorkers.size; i ++)
     if (i != this->indexInParent)
@@ -4670,7 +4678,8 @@ int WebServer::Run() {
   if (theParser == 0)
     theParser = new Calculator;
   PointerObjectDestroyer<Calculator> calculatorDestroyer(theParser);
-  theParser->init();
+  theParser->initialize();
+  //cannot call initializeMutex here: not before we execute fork();
   theParser->ComputeAutoCompleteKeyWords();
   theParser->WriteAutoCompleteKeyWordsToFile();
   this->WriteVersionJSFile();
@@ -4773,8 +4782,8 @@ int WebServer::Run() {
     );
     this->HandleTooManyConnections(userAddressBuffer);
     this->RecycleChildrenIfPossible();
-    if (!this->CreateNewActiveWorker())
-    { logPlumbing << logger::purple
+    if (!this->CreateNewActiveWorker()) {
+      logPlumbing << logger::purple
       << " failed to create an active worker. System error string: "
       << strerror(errno) << "\n"
       << logger::red << "Failed to create active worker: closing connection. " << logger::endL;
@@ -4822,8 +4831,8 @@ int WebServer::Run() {
     if (incomingPID < 0)
       logProcessKills << logger::red << " FAILED to spawn a child process. " << logger::endL;
     this->GetActiveWorker().ProcessPID = incomingPID;
-    if (this->GetActiveWorker().ProcessPID == 0)
-    { // this is the child (worker) process
+    if (this->GetActiveWorker().ProcessPID == 0) {
+      // this is the child (worker) process
       theGlobalVariables.flagIsChildProcess = true;
       if (theGlobalVariables.flagServerDetailedLog) {
         logWorker << logger::green << "Detail: "
@@ -4911,7 +4920,7 @@ int WebWorker::Run() {
     this->numberOfReceivesCurrentConnection ++;
     if (theParser == 0) {
       theParser = new Calculator;
-      theParser->init();
+      theParser->initialize();
       logWorker << logger::blue << "Created new calculator for connection: " << this->numberOfReceivesCurrentConnection << logger::endL;
     }
     PointerObjectDestroyer<Calculator> calculatorDestroyer(theParser);
@@ -5558,30 +5567,32 @@ int WebServer::main(int argc, char **argv)
   return - 1;
 }
 
-int WebServer::mainCommandLine()
-{ MacroRegisterFunctionWithName("main_command_input");
+int WebServer::mainCommandLine() {
+  MacroRegisterFunctionWithName("main_command_input");
   theGlobalVariables.IndicatorStringOutputFunction = HtmlRoutines::MakeStdCoutReport;
   PointerObjectDestroyer<Calculator> theDestroyer(theParser);
   theParser = new Calculator;
-  theParser->init();
+  theParser->initialize();
   logger result("", 0, false, "server");
-  if (theGlobalVariables.programArguments.size > 1)
-    for (int i = 1; i < theGlobalVariables.programArguments.size; i ++)
-    { theParser->inputString += theGlobalVariables.programArguments[i];
-      if (i != theGlobalVariables.programArguments.size - 1)
+  if (theGlobalVariables.programArguments.size > 1) {
+    for (int i = 1; i < theGlobalVariables.programArguments.size; i ++) {
+      theParser->inputString += theGlobalVariables.programArguments[i];
+      if (i != theGlobalVariables.programArguments.size - 1) {
         theParser->inputString += " ";
+      }
     }
-  else
-  { result << "Input: " << logger::yellow;
+  } else {
+    result << "Input: " << logger::yellow;
     std::cin >> theParser->inputString;
   }
   theParser->flagUseHtml = false;
   theParser->Evaluate(theParser->inputString);
   std::fstream outputFile;
   std::string outputFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual
-      ("output/outputFileCommandLine.html", outputFileName, false, false, 0))
-  { outputFileName = "Failed to extract output file from output/outputFileCommandLine.html";
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+    "output/outputFileCommandLine.html", outputFileName, false, false, 0
+  )) {
+    outputFileName = "Failed to extract output file from output/outputFileCommandLine.html";
   }
   FileOperations::OpenFileCreateIfNotPresentVirtual
   (outputFile, "output/outputFileCommandLine.html", false, true, false);
@@ -5621,7 +5632,7 @@ int WebServer::mainApache()
   WebWorker& theWorker = theWebServer.GetActiveWorker();
   PointerObjectDestroyer<Calculator> theDestroyer(theParser);
   theParser = new Calculator;
-  theParser->init();
+  theParser->initialize();
   std::cin >> theWorker.messageBody;
   theWebServer.httpSSLPort = "443";
   theWebServer.httpPort = "80";
@@ -5716,47 +5727,20 @@ void WebWorker::PrepareFullMessageHeaderAndFooter()
   this->remainingBodyToSend.SetSize(0);
 }
 
-void WebWorker::SendAllBytesWithHeaders()
-{ MacroRegisterFunctionWithName("WebWorker::SendAllBytesWithHeaders");
-//  static bool calledOnce = false;
-//  if (calledOnce)
-//  { crash << "WebWorker::SendAllBytesNoHeaders called more than once" << crash;
-//  }
-//  calledOnce = true;
+void WebWorker::SendAllBytesWithHeaders() {
+  MacroRegisterFunctionWithName("WebWorker::SendAllBytesWithHeaders");
   this->PrepareFullMessageHeaderAndFooter();
-  //std::string tempS(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
-  //logWorker << logger::red << "DEBUG Message:\n" << logger::normalColor << tempS << logger::endL;
   this->SendAllBytesNoHeaders();
 }
 
-void WebWorker::SendAllBytesHttp()
-{ MacroRegisterFunctionWithName("WebWorker::SendAllBytesHttp");
+void WebWorker::SendAllBytesHttp() {
+  MacroRegisterFunctionWithName("WebWorker::SendAllBytesHttp");
   if (this->remainingBytesToSenD.size == 0)
     return;
   this->CheckConsistency();
-//  firstCallStream << "WebWorker::SendAllBytesHttp called once. Input: \n "
-//  << this->ToStringMessageFullUnsafe() << "\nStack trace:\n"
-//  << crash.GetStackTraceEtcErrorMessage() ;
-//  if (this->flagDidSendAll)
-//  { static std::stringstream firstCallStream;
-//    firstCallStream
-//    << "\n<br>\n"
-//    << "WebWorker::SendAllBytesHttp called more than once. "
-//    << "Input: \n "
-//    << this->ToStringMessageFullUnsafe() << "\nStack trace:\n"
-//    << crash.GetStackTraceEtcErrorMessage()
-//    << "\n<hr>Sending back:<hr>\n";
-//
-//    std::string theBytes(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
-//    ;
-//    firstCallStream << theBytes;
-//    logHttpErrors << firstCallStream.str() << logger::endL;
-//  }
   this->flagDidSendAll = true;
-  //std::string tempS(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
-  //logWorker << logger::green << "Sending: " << tempS << logger::endL;
-  if (this->connectedSocketID == - 1)
-  { logWorker << logger::red << "Socket::SendAllBytes failed: connectedSocketID= - 1." << logger::endL;
+  if (this->connectedSocketID == - 1) {
+    logWorker << logger::red << "Socket::SendAllBytes failed: connectedSocketID= - 1." << logger::endL;
     return;
   }
   logWorker << "Sending " << this->remainingBytesToSenD.size << " bytes in chunks of: ";
@@ -5768,29 +5752,36 @@ void WebWorker::SendAllBytesHttp()
   int numTimesRunWithoutSending = 0;
   int timeOutInSeconds = 20;
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO, (void*)(&tv), sizeof(timeval));
-  while (this->remainingBytesToSenD.size > 0)
-  { if (theGlobalVariables.GetElapsedSeconds() - startTime > timeOutInSeconds)
-    { logWorker << "WebWorker::SendAllBytes failed: more than " << timeOutInSeconds << " seconds have elapsed. "
+  while (this->remainingBytesToSenD.size > 0) {
+    if (theGlobalVariables.GetElapsedSeconds() - startTime > timeOutInSeconds) {
+      logWorker << "WebWorker::SendAllBytes failed: more than " << timeOutInSeconds << " seconds have elapsed. "
       << logger::endL;
       return;
     }
-    int numBytesSent =send
-    (this->connectedSocketID, &this->remainingBytesToSenD[0], this->remainingBytesToSenD.size, 0);
-    if (numBytesSent < 0)
-    { if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR || errno == EIO)
-      logIO << "WebWorker::SendAllBytes failed. Error: " << this->parent->ToStringLastErrorDescription() << logger::endL;
+    int numBytesSent = send(
+      this->connectedSocketID,
+      &this->remainingBytesToSenD[0],
+      this->remainingBytesToSenD.size,
+      0
+    );
+    if (numBytesSent < 0) {
+      if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR || errno == EIO) {
+        logIO << "WebWorker::SendAllBytes failed. Error: " << this->parent->ToStringLastErrorDescription() << logger::endL;
+      }
       return;
     }
-    if (numBytesSent == 0)
+    if (numBytesSent == 0) {
       numTimesRunWithoutSending ++;
-    else
+    } else {
       numTimesRunWithoutSending = 0;
+    }
     logWorker << numBytesSent;
     this->remainingBytesToSenD.Slice(numBytesSent, this->remainingBytesToSenD.size - numBytesSent);
-    if (this->remainingBytesToSenD.size > 0)
+    if (this->remainingBytesToSenD.size > 0) {
       logWorker << ", ";
-    if (numTimesRunWithoutSending > 3)
-    { logWorker << "WebWorker::SendAllBytes failed: send function went through 3 cycles without "
+    }
+    if (numTimesRunWithoutSending > 3) {
+      logWorker << "WebWorker::SendAllBytes failed: send function went through 3 cycles without "
       << " sending any bytes. "
       << logger::endL;
       return;
@@ -5800,16 +5791,16 @@ void WebWorker::SendAllBytesHttp()
   logWorker << "All bytes sent. " << logger::endL;
 }
 
-void WebWorker::QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool MustSendAll)
-{ MacroRegisterFunctionWithName("WebWorker::QueueBytesForSending");
+void WebWorker::QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool MustSendAll) {
+  MacroRegisterFunctionWithName("WebWorker::QueueBytesForSendingNoHeadeR");
   (void) MustSendAll;
   this->remainingBytesToSenD.AddListOnTop(bytesToSend);
 //  if (this->remainingBytesToSend.size >=1024*512 || MustSendAll)
 //    this->SendAllBytes();
 }
 
-void WebWorker::QueueStringForSendingWithHeadeR(const std::string& stringToSend, bool MustSendAll)
-{ MacroRegisterFunctionWithName("WebWorker::QueueStringForSendingWithHeadeR");
+void WebWorker::QueueStringForSendingWithHeadeR(const std::string& stringToSend, bool MustSendAll) {
+  MacroRegisterFunctionWithName("WebWorker::QueueStringForSendingWithHeadeR");
   (void) MustSendAll;
   int oldSize = this->remainingBodyToSend.size;
   this->remainingBodyToSend.SetSize(this->remainingBodyToSend.size + stringToSend.size());
@@ -5817,8 +5808,8 @@ void WebWorker::QueueStringForSendingWithHeadeR(const std::string& stringToSend,
     this->remainingBodyToSend[i + oldSize] = stringToSend[i];
 }
 
-void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll)
-{ MacroRegisterFunctionWithName("WebWorker::QueueStringForSendingNoHeadeR");
+void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll) {
+  MacroRegisterFunctionWithName("WebWorker::QueueStringForSendingNoHeadeR");
   (void) MustSendAll;
   int oldSize = this->remainingBytesToSenD.size;
   this->remainingBytesToSenD.SetSize(this->remainingBytesToSenD.size + stringToSend.size());
@@ -5826,10 +5817,10 @@ void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, b
     this->remainingBytesToSenD[i + oldSize] = stringToSend[i];
 }
 
-void WebWorker::SendAllBytesNoHeaders()
-{ MacroRegisterFunctionWithName("WebWorker::SendAllBytesNoHeaders");
-  if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { this->SendAllBytesHttpSSL();
+void WebWorker::SendAllBytesNoHeaders() {
+  MacroRegisterFunctionWithName("WebWorker::SendAllBytesNoHeaders");
+  if (theGlobalVariables.flagUsingSSLinCurrentConnection) {
+    this->SendAllBytesHttpSSL();
     return;
   }
   this->SendAllBytesHttp();

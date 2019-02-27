@@ -18,4 +18,4 @@ function updateServerStatus() {
 
 module.exports = {
   updateServerStatus
-}
+};

@@ -36,12 +36,11 @@ void MutexRecursiveWrapper::CheckConsistency()
   }
 }
 
-void MutexRecursiveWrapper::initConstructorCallOnly()
-{ //    std::cout << "MutexRecursiveWrapper::MutexRecursiveWrapper. theMutexesGlobal.size: " << theMutexesGlobal.size << std::endl;
-//  static bool allowToRun = true;
-//  while (!allowToRun)
-//  {}
-//  allowToRun = false;
+void MutexRecursiveWrapper::initConstructorCallOnly() {
+  //  static bool allowToRun = true;
+  //  while (!allowToRun)
+  //  {}
+  //  allowToRun = false;
 
   this->flagDeallocated = false;
   this->flagInitialized = false;
@@ -53,8 +52,8 @@ ParallelComputing::GlobalPointerCounter ++;
 #endif
 }
 
-bool MutexRecursiveWrapper::InitializeIfNeeded()
-{ if (this->flagInitialized)
+bool MutexRecursiveWrapper::InitializeIfNeeded() {
+  if (this->flagInitialized)
     return true;
   if (!theGlobalVariables.flagServerForkedIntoWorker)
     return false;
@@ -63,8 +62,8 @@ bool MutexRecursiveWrapper::InitializeIfNeeded()
   return true;
 }
 
-MutexRecursiveWrapper::~MutexRecursiveWrapper()
-{ delete (std::mutex*)(this->theMutexImplementation);
+MutexRecursiveWrapper::~MutexRecursiveWrapper() {
+  delete (std::mutex*)(this->theMutexImplementation);
   this->theMutexImplementation = 0;
   this->flagDeallocated = true;
   this->flagInitialized = false;
@@ -81,11 +80,11 @@ void MutexRecursiveWrapper::LockMe()
   this->CheckConsistency();
   if (!this->InitializeIfNeeded())
     return;
-  try
-  { if (this->flagUnsafeFlagForDebuggingIsLocked)
-    { int currentThreadId = ThreadData::getCurrentThreadId();
-      if (currentThreadId == this->lastLockerThread)
-      { logBlock << logger::red << "DEBUG: about to self-lock: ["
+  try {
+    if (this->flagUnsafeFlagForDebuggingIsLocked) {
+      int currentThreadId = ThreadData::getCurrentThreadId();
+      if (currentThreadId == this->lastLockerThread) {
+        logBlock << logger::red << "Fatal: about to self-lock: ["
         << this->mutexName << "] thread: "
         << currentThreadId
         << "." << logger::endL

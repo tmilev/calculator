@@ -145,4 +145,4 @@ module.exports =  {
   selectCurrentCoursePage,
   toggleDeadline,
   toggleProblemWeights,
-}
+};

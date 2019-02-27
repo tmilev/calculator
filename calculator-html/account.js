@@ -56,4 +56,4 @@ function updateAccountPage() {
 module.exports = {
   updateAccountPage,
   submitChangePassRequest
-}
+};

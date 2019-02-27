@@ -870,11 +870,10 @@ public:
   ~StateMaintainerCalculator();
 };
 
-class Calculator
-{
+class Calculator {
   template<typename anyType>
-  friend Calculator& operator << (Calculator& output, const anyType& any)
-  { output.Comments << any;
+  friend Calculator& operator << (Calculator& output, const anyType& any) {
+    output.Comments << any;
     return output;
   }
 private:
@@ -1063,6 +1062,7 @@ public:
 
   std::string syntaxErrors;
   List<std::string> evaluationErrors;
+
   //std::string inputStringRawestOfTheRaw;
   std::string inputString;
   std::string outputString;
@@ -1098,6 +1098,7 @@ public:
   operator bool() const {
     return false;
   }
+
   void ExpressionHistoryPop();
   void ExpressionHistoryAddEmptyHistory();
   void ExpressionHistoryAdd(Expression& theExpression, int expressionLabel);
@@ -2072,13 +2073,8 @@ public:
    const std::string& inputAdditionalIdentifier = "",
    const std::string& inputCalculatorIdentifier = "",
    bool inputDisabledByDefault = false,
-   const std::string& parentOpThatBansHandler = "")
-  { this->AddOperationHandler
-    (theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, false,
-     visible, experimental, inputAdditionalIdentifier, inputCalculatorIdentifier,
-     inputDisabledByDefault, parentOpThatBansHandler);
-  }
-  void init();
+   const std::string& parentOpThatBansHandler = "");
+  void initialize();
   void reset();
   void initPredefinedWordSplits();
   void initAtomsThatFreezeArguments();

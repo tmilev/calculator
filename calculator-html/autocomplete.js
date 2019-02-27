@@ -242,4 +242,4 @@ function setCursorPosition(caretPos) {
 module.exports = {
   suggestWord,
   arrowAction,
-}
+};

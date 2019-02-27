@@ -409,4 +409,4 @@ module.exports = {
   JSONToHTML,
   getToggleButton,
   transformersStandard,
-}
+};

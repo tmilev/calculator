@@ -38,8 +38,8 @@ private:
   bool flagInitialized;
   void operator=(const MutexRecursiveWrapper& other);
   MutexRecursiveWrapper(const MutexRecursiveWrapper& other);
-  bool InitializeIfNeeded();
 public:
+  bool InitializeIfNeeded();
   std::string mutexName;
   void* theMutexImplementation;
   //note: the mutex implementation is not a named type for system portability.
@@ -51,32 +51,31 @@ public:
   void UnlockMe();
   void CheckConsistency();
   void initConstructorCallOnly();
-  MutexRecursiveWrapper()
-  { this->initConstructorCallOnly();
+  MutexRecursiveWrapper() {
+    this->initConstructorCallOnly();
   }
-  MutexRecursiveWrapper(const std::string& inputMutexName)
-  { this->mutexName = inputMutexName;
+  MutexRecursiveWrapper(const std::string& inputMutexName) {
+    this->mutexName = inputMutexName;
     this->initConstructorCallOnly();
   }
   ~MutexRecursiveWrapper();
 };
 
 //this class uses RAII to lock MutexRecursiveWrapper's -> equivalent to std::lock_guard
-class MutexLockGuard{
+class MutexLockGuard {
 public:
   MutexRecursiveWrapper* theMutex;
-  MutexLockGuard(MutexRecursiveWrapper& inputMutex)
-  { this->theMutex = &inputMutex;
+  MutexLockGuard(MutexRecursiveWrapper& inputMutex) {
+    this->theMutex = &inputMutex;
     this->theMutex->LockMe();
   }
-  ~MutexLockGuard()
-  { this->theMutex->UnlockMe();
+  ~MutexLockGuard() {
+    this->theMutex->UnlockMe();
     this->theMutex = 0;
   }
 };
 
-class PauseThread
-{
+class PauseThread {
   private:
   MutexRecursiveWrapper mutexLockMeToPauseCallersOfSafePoint;
   MutexRecursiveWrapper mutexSignalMeWhenReachingSafePoint;

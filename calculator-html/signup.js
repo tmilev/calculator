@@ -89,4 +89,4 @@ var signUp = new SignUp();
 module.exports = {
   getRecaptchaId,
   signUp,
-}
+};

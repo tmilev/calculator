@@ -977,4 +977,4 @@ module.exports = {
   writeEditCoursePagePanel,
   selectCurrentProblem,
   modifyWeight,
-}
+};

@@ -242,4 +242,4 @@ function progressReport() {
 module.exports = {
   submitGET,
   submitPOST,
-}
+};

@@ -821,4 +821,4 @@ module.exports = {
   initializeCalculatorPage,
   calculatorPanel,
   InputPanelData,
-}
+};

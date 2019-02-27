@@ -14,8 +14,8 @@
 
 ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Calculator parser, implementation. ");
 
-Calculator::Calculator()
-{ this->numOutputFileS = 0;
+Calculator::Calculator() {
+  this->numOutputFileS = 0;
   this->flagHideLHS = false;
   this->flagUseHtml = true;
   this->flagShowCalculatorExamples = true;
@@ -24,9 +24,12 @@ Calculator::Calculator()
   this->flagPlotShowJavascriptOnly = false;
 }
 
-std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
-(const std::string& fileContent, std::string* outputFileNameNoExtension, bool useLatexDviPSpsToPNG)
-{ std::fstream theFile;
+std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
+  const std::string& fileContent,
+  std::string* outputFileNameNoExtension,
+  bool useLatexDviPSpsToPNG
+) {
+  std::fstream theFile;
   std::stringstream fileName;
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
   fileName << "defaultOutput" << MathRoutines::hashString(fileContent);
@@ -36,8 +39,9 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   std::string baseFolder;
   std::string fileNameWithPathPhysical;
   FileOperations::GetPhysicalFileNameFromVirtual("output/", baseFolder, false, false, 0);
-  FileOperations::GetPhysicalFileNameFromVirtual
-  ("output/" + fileName.str(), fileNameWithPathPhysical, false, false, 0);
+  FileOperations::GetPhysicalFileNameFromVirtual(
+    "output/" + fileName.str(), fileNameWithPathPhysical, false, false, 0
+  );
   theFile << fileContent;
   theFile.flush();
   theFile.close();
@@ -2119,33 +2123,54 @@ void Calculator::RegisterCalculatorFunctionIdentifier
   this->namedRulesLocations[namedRuleIndex] = triple;
 }
 
-void Calculator::AddOperationHandler
-(const std::string& theOpName, Expression::FunctionAddress handler,
- const std::string& opArgumentListIgnoredForTheTimeBeing,
- const std::string& opDescription,
- const std::string& opExample, bool isInner, bool visible,
- bool experimental,
- const std::string& inputAdditionalIdentifier,
- const std::string& inputCalculatorIdentifier,
- bool inputDisabledByDefault,
- const std::string& parentOpThatBansHandler)
-{ int indexOp = this->theAtoms.GetIndex(theOpName);
+void Calculator::AddOperationOuterHandler(
+  const std::string& theOpName,
+  Expression::FunctionAddress outerHandler,
+  const std::string& opArgumentListIgnoredForTheTimeBeing,
+  const std::string& opDescription,
+  const std::string& opExample,
+  bool visible,
+  bool experimental,
+  const std::string& inputAdditionalIdentifier,
+  const std::string& inputCalculatorIdentifier,
+  bool inputDisabledByDefault,
+  const std::string& parentOpThatBansHandler
+) {
+  this->AddOperationHandler(
+    theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription,
+    opExample, false, visible, experimental, inputAdditionalIdentifier,
+    inputCalculatorIdentifier, inputDisabledByDefault, parentOpThatBansHandler
+  );
+}
+
+void Calculator::AddOperationHandler(
+  const std::string& theOpName, Expression::FunctionAddress handler,
+  const std::string& opArgumentListIgnoredForTheTimeBeing,
+  const std::string& opDescription,
+  const std::string& opExample, bool isInner, bool visible,
+  bool experimental, const std::string& inputAdditionalIdentifier,
+  const std::string& inputCalculatorIdentifier,
+  bool inputDisabledByDefault,
+  const std::string& parentOpThatBansHandler
+) {
+  int indexOp = this->theAtoms.GetIndex(theOpName);
   int indexParentOpThatBansHandler = - 1;
   if (parentOpThatBansHandler != "")
     indexParentOpThatBansHandler = this->theAtoms.GetIndexIMustContainTheObject(parentOpThatBansHandler);
-  if (indexOp == - 1)
-  { this->theAtoms.AddOnTop(theOpName);
+  if (indexOp == - 1) {
+    this->theAtoms.AddOnTop(theOpName);
     indexOp = this->theAtoms.size - 1;
     this->FunctionHandlers.SetSize(this->theAtoms.size);
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
   if (opArgumentListIgnoredForTheTimeBeing != "")
     crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
-  Function theFun
-  (*this, indexOp, this->FunctionHandlers[indexOp].size, handler,
-   0, opDescription, opExample,
-   isInner, visible, experimental, false,
-   inputDisabledByDefault, indexParentOpThatBansHandler);
+  Function theFun(
+    *this, indexOp, this->FunctionHandlers[indexOp].size, handler,
+    0, opDescription, opExample,
+    isInner, visible, experimental, false,
+    inputDisabledByDefault, indexParentOpThatBansHandler
+  );
   theFun.additionalIdentifier = inputAdditionalIdentifier;
   theFun.calculatorIdentifier = inputCalculatorIdentifier;
 
@@ -2346,19 +2371,19 @@ std::string Function::ToStringFull() const
 std::string ObjectContainer::ToString()
 { MacroRegisterFunctionWithName("ObjectContainer::ToString");
   std::stringstream out;
-  if (this->theSSLieAlgebras.theValues.size > 0)
-  { out << "Lie algebras created (" << this->theSSLieAlgebras.theValues.size << " total): ";
-    for (int i = 0; i < this->theSSLieAlgebras.theValues.size; i ++)
-    { out << this->theSSLieAlgebras.theValues[i].GetLieAlgebraName();
+  if (this->theSSLieAlgebras.theValues.size > 0) {
+    out << "Lie algebras created (" << this->theSSLieAlgebras.theValues.size << " total): ";
+    for (int i = 0; i < this->theSSLieAlgebras.theValues.size; i ++) {
+      out << this->theSSLieAlgebras.theValues[i].GetLieAlgebraName();
       if (i != this->theSSLieAlgebras.theValues.size - 1)
         out << ", ";
     }
   }
-  if (this->theSSSubalgebraS.theValues.size > 0)
-  { out << "<br>Lie semisimple subalgebras computation data structures ("
+  if (this->theSSSubalgebraS.theValues.size > 0) {
+    out << "<br>Lie semisimple subalgebras computation data structures ("
     << this->theSSSubalgebraS.theValues.size << " total): ";
-    for (int i = 0; i < this->theSSSubalgebraS.theValues.size; i ++)
-    { out << " Type " << this->theSSSubalgebraS.theValues[i].owner->GetLieAlgebraName() << " with "
+    for (int i = 0; i < this->theSSSubalgebraS.theValues.size; i ++) {
+      out << " Type " << this->theSSSubalgebraS.theValues[i].owner->GetLieAlgebraName() << " with "
       << this->theSSSubalgebraS.theValues[i].theSubalgebras.theValues.size << " candidates";
       if (i != this->theSSSubalgebraS.theValues.size - 1)
         out << ", ";
@@ -2367,8 +2392,8 @@ std::string ObjectContainer::ToString()
   return out.str();
 }
 
-JSData Calculator::ToJSONOutputAndSpecials()
-{ MacroRegisterFunctionWithName("Calculator::ToJSONOutputAndSpecials");
+JSData Calculator::ToJSONOutputAndSpecials() {
+  MacroRegisterFunctionWithName("Calculator::ToJSONOutputAndSpecials");
   JSData result = this->outputJS;
   if (this->inputString == "")
     return result;
@@ -2377,32 +2402,35 @@ JSData Calculator::ToJSONOutputAndSpecials()
   return result;
 }
 
-std::string Calculator::ToStringOutputAndSpecials()
-{ MacroRegisterFunctionWithName("Calculator::ToStringOutputAndSpecials");
+std::string Calculator::ToStringOutputAndSpecials() {
+  MacroRegisterFunctionWithName("Calculator::ToStringOutputAndSpecials");
   return this->ToJSONOutputAndSpecials().ToString(false);
 }
 
-void Calculator::WriteAutoCompleteKeyWordsToFile()
-{ MacroRegisterFunctionWithName("Calculator::WriteAutoCompleteKeyWordsToFile");
+void Calculator::WriteAutoCompleteKeyWordsToFile() {
+  MacroRegisterFunctionWithName("Calculator::WriteAutoCompleteKeyWordsToFile");
   std::stringstream out;
   out << "\"use strict\"; //This file is automatically generated, please do not modify.\n";
   out << "  var theAutocompleteDictionary = [\n  ";
-  for (int i = 0; i < this->autoCompleteKeyWords.size; i ++)
-    if (this->autoCompleteKeyWords[i].size() > 2)
-    { out << "\"" << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->autoCompleteKeyWords[i]) << "\"";
+  for (int i = 0; i < this->autoCompleteKeyWords.size; i ++) {
+    if (this->autoCompleteKeyWords[i].size() > 2) {
+      out << "\"" << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->autoCompleteKeyWords[i]) << "\"";
       if (i != this->autoCompleteKeyWords.size - 1)
         out << ", ";
     }
+  }
   out << "];\n";
   out << "module.exports = {theAutocompleteDictionary};";
   std::fstream theFileStream;
-  FileOperations::OpenFileCreateIfNotPresentVirtual
-  (theFileStream, "/calculator-html/autocomplete_keywords.js", false, true, false, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(
+    theFileStream, "/calculator-html/autocomplete_keywords.js",
+    false, true, false, false
+  );
   theFileStream << out.str();
 }
 
-void Calculator::ComputeAutoCompleteKeyWords()
-{ MacroRegisterFunctionWithName("Calculator::ComputeAutoCompleteKeyWords");
+void Calculator::ComputeAutoCompleteKeyWords() {
+  MacroRegisterFunctionWithName("Calculator::ComputeAutoCompleteKeyWords");
   this->autoCompleteKeyWords.SetExpectedSize(this->theAtoms.size * 2);
   for (int i = 0; i < this->theAtoms.size; i ++)
     this->autoCompleteKeyWords.AddOnTopNoRepetition(this->theAtoms[i]);

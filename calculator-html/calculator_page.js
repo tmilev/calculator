@@ -215,6 +215,9 @@ Calculator.prototype.writeResult = function(
   panelIdPairs,
 ) {
   if (inputParsed.result === undefined) {
+    if (inputParsed.resultHtml !== undefined) {
+      buffer.write(inputParsed.resultHtml);
+    }
     return;
   }
   buffer.write(`<table><tr><td>`);
@@ -245,7 +248,7 @@ Calculator.prototype.writeResult = function(
     buffer.write(inputParsed.performance);
     buffer.write("<br>");
   }
-  if (inputParsed.comments !== undefined ){
+  if (inputParsed.comments !== undefined ) {
     buffer.write(inputParsed.comments);
   }
   buffer.write(`</td>`);
@@ -255,7 +258,7 @@ Calculator.prototype.writeResult = function(
     buffer.write(inputParsed.debug);
     buffer.write(`</td>`);
   }
-  buffer.write(`</tr><table>`);
+  buffer.write(`</tr></table>`);
   if (inputParsed.parsingLog !== undefined) {
     buffer.write(inputParsed.parsingLog); 
   }
@@ -330,7 +333,7 @@ Calculator.prototype.submitComputationPartTwo = function(input) {
     url: url,
     parameters:  parameters,
     callback: this.defaultOnLoadInjectScriptsAndProcessLaTeX.bind(this),
-    progress: ids.domElements.spanProgressCalculatorInput
+    progress: ids.domElements.spanProgressCalculatorInput,
   });
 }
 
@@ -388,4 +391,4 @@ var calculator = new Calculator();
 
 module.exports = {
   calculator,
-}
+};

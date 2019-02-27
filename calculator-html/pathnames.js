@@ -67,4 +67,4 @@ var urlFields = {
 module.exports = {
   urls,
   urlFields,
-}
+};

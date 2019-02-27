@@ -67,7 +67,6 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
   }
   totalToInterpret = MathRoutines::Minimum(numDesiredTests, totalToInterpret);
   out << "Total to interpret: " << totalToInterpret << "<br>";
-  out << "DEBUG: all file names: " << theFileNames << "<br>";
   out << "<table>";
   out << "<tr><th></th>"
   << "<th>File name </th>"

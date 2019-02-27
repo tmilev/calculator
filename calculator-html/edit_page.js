@@ -164,4 +164,4 @@ module.exports = {
   getEditPanel,
   handleClone,
   ctrlSPressAceEditorHandler
-}
+};

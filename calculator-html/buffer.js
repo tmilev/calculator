@@ -16,4 +16,4 @@ BufferCalculator.prototype.toString = function() {
 
 module.exports = {
   BufferCalculator
-}
+};

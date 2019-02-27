@@ -50,4 +50,4 @@ var forgotLogin = new ForgotLogin();
 
 module.exports = {
   forgotLogin
-}
+};

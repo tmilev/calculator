@@ -543,12 +543,12 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
 }
 
 Calculator tempCalculator; //<-needs a rewrite
-std::string CalculatorConversions::innerStringFromSemisimpleSubalgebras(SemisimpleSubalgebras& input)
-{ MacroRegisterFunctionWithName("CalculatorConversions::innerStringFromSemisimpleSubalgebras");
+std::string CalculatorConversions::innerStringFromSemisimpleSubalgebras(SemisimpleSubalgebras& input) {
+  MacroRegisterFunctionWithName("CalculatorConversions::innerStringFromSemisimpleSubalgebras");
   static bool staticFirstRun = true; //<-this needs a rewrite
-  if (staticFirstRun)
-  { staticFirstRun = false;
-    tempCalculator.init();
+  if (staticFirstRun) {
+    staticFirstRun = false;
+    tempCalculator.initialize();
   }
   Expression tempE;
   FormatExpressions theFormat;

@@ -1165,4 +1165,4 @@ module.exports = {
   createGraphicsFromObject,
   GraphicsNDimensions,
   startProjectionPlaneUser
-}
+};

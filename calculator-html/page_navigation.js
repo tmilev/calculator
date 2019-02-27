@@ -812,4 +812,4 @@ module.exports = {
   Page,
   mainPage,
   getCleanedUpURL,
-}
+};

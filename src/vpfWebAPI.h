@@ -4,14 +4,12 @@
 
 static ProjectInformationInstance vpfWEBAPI_HEADER_Hinstance(__FILE__, "Header, web api strings. ");
 
-
-class WebAPI
-{
+class WebAPI {
 public:
   static std::string appNoCache;
   static std::string app;
-  struct request
-  { static std::string calculatorPage;
+  struct request {
+    static std::string calculatorPage;
     static std::string setProblemData;
     static std::string changePassword;
     static std::string examplesJSON;
@@ -25,8 +23,15 @@ public:
     static std::string selectCourseJSON;
     static std::string serverStatusJSON;
   };
-  struct databaseParameters
-  { static std::string entryPoint;
+  struct result {
+    static std::string resultHtml;
+    static std::string syntaxErrors;
+    static std::string resultLabel;
+    static std::string badInput;
+    static std::string comments;
+  };
+  struct databaseParameters {
+    static std::string entryPoint;
     static std::string labels;
     static std::string operation;
     static std::string fetch;

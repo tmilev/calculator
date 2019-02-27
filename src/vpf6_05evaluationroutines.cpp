@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
+#include "vpfWebAPI.h"
 ProjectInformationInstance ProjectInfoVpf6_05cpp(__FILE__, "Calculator core evaluation engine. ");
 
 std::string Calculator::ToStringFunctionHandlersJSON()
@@ -268,23 +269,25 @@ StateMaintainerCalculator::StateMaintainerCalculator(Calculator& inputBoss)
   this->startingRuleStackSize = inputBoss.RuleStack.size();
 }
 
-StateMaintainerCalculator::~StateMaintainerCalculator()
-{ if (this->owner == 0)
+StateMaintainerCalculator::~StateMaintainerCalculator() {
+  if (this->owner == 0)
     return;
   this->owner->historyStack.SetSize(this->historyOuterSize);
   this->owner->historyRuleNames.SetSize(this->historyOuterSize);
-  if (this->owner->historyStack.size > 0)
-  { this->owner->historyStack.LastObject().SetSize(this->historyMiddleSize);
+  if (this->owner->historyStack.size > 0) {
+    this->owner->historyStack.LastObject().SetSize(this->historyMiddleSize);
     this->owner->historyRuleNames.LastObject().SetSize(this->historyMiddleSize);
   }
   Expression& theRuleStack = this->owner->RuleStack;
   std::string currentRuleName;
   bool shouldUpdateRules = false;
-  for (int i = this->startingRuleStackSize; i < theRuleStack.size(); i ++)
-    if (theRuleStack[i].StartsWith(this->owner->opRulesOn()) ||
-        theRuleStack[i].StartsWith(this->owner->opRulesOff()))
-      for (int j = 1; j < theRuleStack[i].size(); j ++)
-      { if (!theRuleStack[i][j].IsOfType<std::string>(&currentRuleName))
+  for (int i = this->startingRuleStackSize; i < theRuleStack.size(); i ++) {
+    if (
+      theRuleStack[i].StartsWith(this->owner->opRulesOn()) ||
+      theRuleStack[i].StartsWith(this->owner->opRulesOff())
+    ) {
+      for (int j = 1; j < theRuleStack[i].size(); j ++) {
+        if (!theRuleStack[i][j].IsOfType<std::string>(&currentRuleName))
           continue;
         if (!this->owner->namedRules.Contains(currentRuleName))
           continue;
@@ -297,44 +300,48 @@ StateMaintainerCalculator::~StateMaintainerCalculator()
         //<< this->startingRuleStackSize;
         shouldUpdateRules = true;
       }
-  if (shouldUpdateRules)
-    for (int i = 0; i < this->startingRuleStackSize; i ++)
-    { if (theRuleStack[i].StartsWith(this->owner->opRulesOn()))
-        for (int j = 1; j < theRuleStack[i].size(); j ++)
-        { Function& currentFun =
+    }
+  }
+  if (shouldUpdateRules) {
+    for (int i = 0; i < this->startingRuleStackSize; i ++) {
+      if (theRuleStack[i].StartsWith(this->owner->opRulesOn())) {
+        for (int j = 1; j < theRuleStack[i].size(); j ++) {
+          Function& currentFun =
           this->owner->GetFunctionHandlerFromNamedRule
           (theRuleStack[i][j].GetValue<std::string>());
           currentFun.flagDisabledByUser = false;
         }
-      else if (theRuleStack[i].StartsWith(this->owner->opRulesOff()))
-        for (int j = 1; j < theRuleStack[i].size(); j ++)
-        { Function& currentFun =
+      } else if (theRuleStack[i].StartsWith(this->owner->opRulesOff())) {
+        for (int j = 1; j < theRuleStack[i].size(); j ++) {
+          Function& currentFun =
           this->owner->GetFunctionHandlerFromNamedRule
           (theRuleStack[i][j].GetValue<std::string>());
           currentFun.flagDisabledByUser = true;
         }
+      }
     }
+  }
   this->owner->RuleStackCacheIndex = this->startingRuleStackIndex;
   this->owner->RuleStack.children.SetSize(this->startingRuleStackSize);
   this->owner = 0;
 }
 
-Expression Calculator::GetNewBoundVar()
-{ Expression result(*this);
+Expression Calculator::GetNewBoundVar() {
+  Expression result(*this);
   result.AddChildAtomOnTop(this->opBind());
   result.AddChildOnTop(this->GetNewAtom());
   return result;
 }
 
-Expression Calculator::GetNewAtom()
-{ std::string atomPrefix;
+Expression Calculator::GetNewAtom() {
+  std::string atomPrefix;
   std::string candidate;
-  while (true)
-  { for (char a = 'a'; a <= 'z'; a ++)
-    { candidate = atomPrefix;
+  while (true) {
+    for (char a = 'a'; a <= 'z'; a ++) {
+      candidate = atomPrefix;
       candidate.push_back(a);
-      if (!this->theAtoms.Contains(candidate))
-      { Expression result;
+      if (!this->theAtoms.Contains(candidate)) {
+        Expression result;
         result.MakeAtom(candidate, *this);
         return result;
       }
@@ -348,8 +355,8 @@ bool Calculator::AccountRule(const Expression& ruleE, StateMaintainerCalculator&
   RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH > this->MaxRecursionDeptH)
     return false;
-  if (ruleE.IsCalculatorStatusChanger())
-  { theRuleStackMaintainer.AddRule(ruleE);
+  if (ruleE.IsCalculatorStatusChanger()) {
+    theRuleStackMaintainer.AddRule(ruleE);
     //stOutput << "<br>DEBUG: rule stack: "
     //<< this->RuleStackCacheIndex << ": accounted rule: " << ruleE.ToString();
   }
@@ -365,22 +372,23 @@ bool Calculator::AccountRule(const Expression& ruleE, StateMaintainerCalculator&
   return true;
 }
 
-bool Calculator::EvaluateExpression
-(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
+bool Calculator::EvaluateExpression(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
   bool notUsed = false;
   return theCommands.EvaluateExpression(theCommands, input, output, notUsed, - 1);
 }
 
-bool Calculator::TimedOut()
-{ if (theGlobalVariables.MaxComputationMilliseconds <= 0)
+bool Calculator::TimedOut() {
+  if (theGlobalVariables.MaxComputationMilliseconds <= 0)
     return false;
   int64_t elapsedMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
   int64_t halfTimeLimit = theGlobalVariables.MaxComputationMilliseconds / 2;
   if (elapsedMilliseconds <= halfTimeLimit)
     return false;
   if (!this->flagTimeLimitErrorDetected)
-    stOutput << "<br><b>Max allowed computational time is " << halfTimeLimit << " ms;"
+    *this << "<br><b>Max allowed computational time is " << halfTimeLimit << " ms;"
     << " so far, " << elapsedMilliseconds
     << " have elapsed -> aborting computation ungracefully.</b>";
   this->flagTimeLimitErrorDetected = true;
@@ -388,10 +396,14 @@ bool Calculator::TimedOut()
   return true;
 }
 
-bool Calculator::EvaluateExpression
-(Calculator& theCommands, const Expression& input, Expression& output,
- bool& outputIsNonCacheable, int opIndexParentIfAvailable)
-{ RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+bool Calculator::EvaluateExpression(
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  bool& outputIsNonCacheable,
+  int opIndexParentIfAvailable
+) {
+  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
   theCommands.NumCallsEvaluateExpression ++;
   //////////////////////////////
@@ -402,33 +414,23 @@ bool Calculator::EvaluateExpression
   //  input.CheckConsistency();
   //  input.HashFunction();
   //////////////////////////////
-  if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH < 3)
-  { theCommands << "<br>";
+  if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH < 3) {
+    theCommands << "<br>";
     for (int i = 0; i < theCommands.RecursionDeptH; i ++)
       theCommands << "&nbsp&nbsp&nbsp&nbsp";
-      //stOutput << "&nbsp&nbsp&nbsp&nbsp";
     theCommands << "Evaluating " << input.Lispify()
     << " with rule stack cache index "
     << theCommands.RuleStackCacheIndex; // << this->RuleStack.ToString();
-//    stOutput << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
   }
   if (theCommands.RecursionDepthExceededHandleRoughly())
     return theCommands << " Evaluating expression: " << input.ToString() << " aborted. ";
   output = input;
-  if (output.IsError())
-  { theCommands.flagAbortComputationASAP = true;
+  if (output.IsError()) {
+    theCommands.flagAbortComputationASAP = true;
     return true;
   }
-  //////////////////////////////
-  //  stOutput << "DEBUG: temporary check comment me out. Evaluating:"
-  //  << input.ToString()
-  //  << " <hr>"
-  //  ;
-  //  input.CheckConsistency();
-  //  input.HashFunction();
-  //////////////////////////////
-  if (theCommands.EvaluatedExpressionsStack.Contains(input))
-  { std::stringstream errorStream;
+  if (theCommands.EvaluatedExpressionsStack.Contains(input)) {
+    std::stringstream errorStream;
     errorStream << "I think I have detected an infinite cycle: I am asked to reduce "
     << input.ToString()
     << " but I have already seen that expression in the expression stack. ";
@@ -443,9 +445,9 @@ bool Calculator::EvaluateExpression
   theExpressionWithContext.AddChildValueOnTop(theCommands.RuleStackCacheIndex);
   theExpressionWithContext.AddChildOnTop(input);
   int indexInCache = theCommands.cachedExpressions.GetIndex(theExpressionWithContext);
-  if (indexInCache != - 1)
-  { if (theCommands.flagLogCache)
-    { theCommands << "<hr>Cache hit with state identifier "
+  if (indexInCache != - 1) {
+    if (theCommands.flagLogCache) {
+      theCommands << "<hr>Cache hit with state identifier "
       << theCommands.RuleStackCacheIndex << ": "
       << output.ToString() << " -> "
       << theCommands.imagesCachedExpressions[indexInCache].ToString();
@@ -453,12 +455,12 @@ bool Calculator::EvaluateExpression
       //<< theCommands.RuleStack.ToString();
     }
     output = theCommands.imagesCachedExpressions[indexInCache];
-  } else
-  { bool shouldCache =
+  } else {
+    bool shouldCache =
     theCommands.cachedExpressions.size<theCommands.MaxCachedExpressionPerRuleStack &&
     !output.IsBuiltInTypE() && !output.IsBuiltInAtom();
-    if (shouldCache)
-    { theCommands.cachedExpressions.AddOnTop(theExpressionWithContext);
+    if (shouldCache) {
+      theCommands.cachedExpressions.AddOnTop(theExpressionWithContext);
       indexInCache = theCommands.cachedExpressions.size - 1;
       theCommands.imagesCachedExpressions.SetSize(indexInCache + 1);
       theCommands.imagesCachedExpressions.LastObject()->reset(theCommands);
@@ -486,8 +488,8 @@ bool Calculator::EvaluateExpression
   if (doExpressionHistory)
     theCommands.ExpressionHistoryAddEmptyHistory();
   //stOutput << "Debug: got here pt1.";
-  while (ReductionOcurred && !theCommands.flagAbortComputationASAP)
-  { StateMaintainerCalculator theRuleStackMaintainer(theCommands);
+  while (ReductionOcurred && !theCommands.flagAbortComputationASAP) {
+    StateMaintainerCalculator theRuleStackMaintainer(theCommands);
     ReductionOcurred = false;
     counterNumTransformations ++;
     if (doExpressionHistory)
@@ -499,9 +501,9 @@ bool Calculator::EvaluateExpression
     //complicated/obfuscated for my taste
     //and perhaps needs a rewrite. However, at the moment of writing, I see
     //no better way of doing this, so here we go.
-    if (outputIsNonCacheable)
-    { if (indexInCache != - 1)
-      { //We "undo" the caching process by
+    if (outputIsNonCacheable) {
+      if (indexInCache != - 1) {
+        //We "undo" the caching process by
         //replacing the cached value with the minusOneExpression,
         //which, having no context, will never match another expression.
         theCommands.cachedExpressions.SetObjectAtIndex(indexInCache, theCommands.EMOne());
@@ -746,9 +748,14 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub
   return true;
 }
 
-bool Calculator::ParseAndExtractExpressions
-(const std::string& theInputString, Expression& outputExp, List<SyntacticElement>& outputSynSoup, List<SyntacticElement>& outputSynStack, std::string* outputSynErrors)
-{ MacroRegisterFunctionWithName("Calculator::ParseAndExtractExpressions");
+bool Calculator::ParseAndExtractExpressions(
+  const std::string& theInputString,
+  Expression& outputExp,
+  List<SyntacticElement>& outputSynSoup,
+  List<SyntacticElement>& outputSynStack,
+  std::string* outputSynErrors
+) {
+  MacroRegisterFunctionWithName("Calculator::ParseAndExtractExpressions");
   this->CurrentSyntacticStacK = &outputSynStack;
   this->CurrrentSyntacticSouP = &outputSynSoup;
   this->ParseFillDictionary(theInputString);
@@ -758,9 +765,8 @@ bool Calculator::ParseAndExtractExpressions
   return result;
 }
 
-
-void Calculator::initComputationStats()
-{ this->startTimeEvaluationMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+void Calculator::initComputationStats() {
+  this->startTimeEvaluationMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
   this->NumListsStart                   = ParallelComputing::NumListsCreated;
   this->NumListResizesStart             = ParallelComputing::NumListResizesTotal;
   this->NumHashResizesStart             = ParallelComputing::NumHashResizes;
@@ -772,39 +778,34 @@ void Calculator::initComputationStats()
   this->NumLargeGCDcallsStart           = Rational::TotalLargeGCDcalls;
 }
 
-void Calculator::Evaluate(const std::string& theInput)
-{ MacroRegisterFunctionWithName("Calculator::Evaluate");
+void Calculator::Evaluate(const std::string& theInput) {
+  MacroRegisterFunctionWithName("Calculator::Evaluate");
   this->initComputationStats();
   this->inputString = theInput;
   this->ParseAndExtractExpressions(theInput, this->theProgramExpression, this->syntacticSouP, this->syntacticStacK, &this->syntaxErrors);
   this->EvaluateCommands();
 }
 
-void Calculator::EvaluateCommands()
-{ MacroRegisterFunctionWithName("Calculator::EvaluateCommands");
+void Calculator::EvaluateCommands() {
+  MacroRegisterFunctionWithName("Calculator::EvaluateCommands");
   std::stringstream out;
-
-//  this->theLogs.resize(this->theCommands.size());
-//this->ToString();
-  //std::stringstream comments;
-  if (this->syntaxErrors != "")
-  { if (!theGlobalVariables.flagRunningCommandLine)
+  if (this->syntaxErrors != "") {
+    if (!theGlobalVariables.flagRunningCommandLine) {
       out << "<hr><b>Syntax errors encountered</b><br>";
-    else
+    } else {
       out << logger::redConsole() << "Syntax errors encountered: " << logger::normalConsole();
-    this->outputJS["syntaxErrors"] = this->syntaxErrors;
+    }
+    this->outputJS[WebAPI::result::syntaxErrors] = this->syntaxErrors;
     out << this->syntaxErrors;
     out << "<hr>";
   }
-//  stOutput
-//  << "Starting expression: " << this->theProgramExpression.ToString()
-//  << "<hr>";
   Expression StartingExpression = this->theProgramExpression;
   this->flagAbortComputationASAP = false;
   this->Comments.clear();
   ProgressReport theReport;
-  if (!theGlobalVariables.flagRunningCommandLine)
+  if (!theGlobalVariables.flagRunningCommandLine) {
     theReport.Report("Evaluating expressions, current expression stack:\n");
+  }
   this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
   if (this->RecursionDeptH != 0)
     crash << "This is a programming error: the starting recursion depth before evaluation was 0, but after evaluation it is "
@@ -815,8 +816,8 @@ void Calculator::EvaluateCommands()
   theGlobalVariables.theDefaultFormat.GetElement().flagIncludeExtraHtmlDescriptionsInPlots = !this->flagPlotNoControls;
   theGlobalVariables.theDefaultFormat.GetElement().flagLatexDetailsInHtml = this->flagWriteLatexPlots;
   theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
-  if (theGlobalVariables.flagRunningCommandLine)
-  { theGlobalVariables.theDefaultFormat.GetElement().flagUseQuotes = false;
+  if (theGlobalVariables.flagRunningCommandLine) {
+    theGlobalVariables.theDefaultFormat.GetElement().flagUseQuotes = false;
     theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
     if (theGlobalVariables.programArguments.size > 1)
       out << "Input: " << logger::yellowConsole()
@@ -827,11 +828,11 @@ void Calculator::EvaluateCommands()
     << this->theProgramExpression.ToString
     (&theGlobalVariables.theDefaultFormat.GetElement())
     << logger::normalConsole() << std::endl;
-  } else if (!this->flagDisplayFullExpressionTree)
-  { std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
-    if (badCharsString != "")
-    { out << badCharsString << "<hr>";
-      this->outputJS["badInput"] = badCharsString;
+  } else if (!this->flagDisplayFullExpressionTree) {
+    std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
+    if (badCharsString != "") {
+      out << badCharsString << "<hr>";
+      this->outputJS[WebAPI::result::badInput] = badCharsString;
     }
     this->theObjectContainer.resetSliders();
     this->theObjectContainer.resetPlots();
@@ -841,24 +842,25 @@ void Calculator::EvaluateCommands()
     out << javascriptString;
     JSData result;
     result.type = JSData::JSObject;
-    std::string resultString = this->theProgramExpression.ToString
-    (&theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression, true, &result);
-    this->outputJS["result"] = result;
+    std::string resultString = this->theProgramExpression.ToString(
+      &theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression, true, &result
+    );
+    this->outputJS[WebAPI::result::resultLabel] = result;
     out << resultString;
-  } else
-  { std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
-    if (badCharsString != "")
-    { out << badCharsString << "<hr>";
-      this->outputJS["badInput"] = badCharsString;
+  } else {
+    std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
+    if (badCharsString != "") {
+      out << badCharsString << "<hr>";
+      this->outputJS[WebAPI::result::badInput] = badCharsString;
     }
     this->theObjectContainer.resetSliders();
     out << "<hr>Input:<br> " << StartingExpression.ToStringFull() << "<hr>"
     << "Output:<br>" << this->theProgramExpression.ToStringFull();
-    this->outputJS["result"]["input"] = StartingExpression.ToStringFull();
-    this->outputJS["result"]["output"] = this->theProgramExpression.ToStringFull();
+    this->outputJS[WebAPI::result::resultLabel]["input"] = StartingExpression.ToStringFull();
+    this->outputJS[WebAPI::result::resultLabel]["output"] = this->theProgramExpression.ToStringFull();
   }
   this->outputString = out.str();
-  this->outputJS["resultHtml"] = out.str();
+  this->outputJS[WebAPI::result::resultHtml] = out.str();
   std::stringstream commentsStream;
   if (this->theObjectContainer.theAlgebraicClosure.theBasisMultiplicative.size > 1)
     commentsStream << "<b>Algebraic closure status.</b><br>"
@@ -866,8 +868,7 @@ void Calculator::EvaluateCommands()
   if (this->Comments.str() != "")
     commentsStream << "<br><span>" << this->Comments.str() << "</span>";
   this->outputCommentsString = commentsStream.str();
-  this->outputJS["comments"] = this->outputCommentsString;
+  this->outputJS[WebAPI::result::comments] = this->outputCommentsString;
   if (theGlobalVariables.flagRunningCommandLine && this->Comments.str() != "")
     this->outputString += this->outputCommentsString;
-  //std::cout << "DEBUG: got to end of story. " ;
 }

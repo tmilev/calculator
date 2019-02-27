@@ -78,4 +78,4 @@ function updateAccountActivationPage() {
 module.exports = {
   updateAccountActivationPage,
   submitActivateAccountRequest,
-}
+};

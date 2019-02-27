@@ -63,4 +63,4 @@ var domElements = {
 module.exports = {
   domElements,
   stringResources
-}
+};

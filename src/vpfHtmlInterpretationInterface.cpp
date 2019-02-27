@@ -10,32 +10,32 @@
 ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation
 (__FILE__, "Routines for calculus teaching: calculator exam mode.");
 
-std::string HtmlInterpretation::GetProblemSolution()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetProblemSolution");
+std::string HtmlInterpretation::GetProblemSolution() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetProblemSolution");
   double startTime = theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
   std::stringstream out;
   std::stringstream errorStream;
   theProblem.LoadCurrentProblemItem(false, theGlobalVariables.GetWebInput("randomSeed"), &errorStream);
-  if (!theProblem.flagLoadedSuccessfully)
-  { out << "Problem name is: " << theProblem.fileName
+  if (!theProblem.flagLoadedSuccessfully) {
+    out << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
     << CalculatorHTML::BugsGenericMessage << "</b>";
     if (errorStream.str() != "")
       out << " Comments: " << errorStream.str();
     return out.str();
   }
-  if (theProblem.flagIsForReal)
-  { out << " <b>Not allowed to show answer of a problem being tested for real. </b>";
+  if (theProblem.flagIsForReal) {
+    out << " <b>Not allowed to show answer of a problem being tested for real. </b>";
     return out.str();
   }
-  if (theGlobalVariables.GetWebInput("randomSeed") == "")
-  { out << " <b>I could not figure out the exercise problem (missing random seed). </b>";
+  if (theGlobalVariables.GetWebInput("randomSeed") == "") {
+    out << " <b>I could not figure out the exercise problem (missing random seed). </b>";
     return out.str();
   }
   std::stringstream comments;
-  if (!theProblem.ParseHTMLPrepareCommands(&comments))
-  { stOutput << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
+  if (!theProblem.ParseHTMLPrepareCommands(&comments)) {
+    stOutput << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
     return out.str();
   }
   std::string lastStudentAnswerID;
@@ -43,12 +43,12 @@ std::string HtmlInterpretation::GetProblemSolution()
   for (int i = 0; i < theArgs.size(); i ++)
     MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
-  if (indexLastAnswerId == - 1)
-  { out << "<b>Student submitted answerID: " << lastStudentAnswerID
+  if (indexLastAnswerId == - 1) {
+    out << "<b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
-    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-    { out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
+    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
+      out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
       //out << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
       out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
     }
@@ -56,15 +56,15 @@ std::string HtmlInterpretation::GetProblemSolution()
   }
   Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
   Calculator theInterpreteR;
-  theInterpreteR.init();
+  theInterpreteR.initialize();
   theInterpreteR.flagPlotNoControls = true;
   theInterpreteR.flagWriteLatexPlots = false;
-  if (!theProblem.PrepareCommands(&comments))
-  { out << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();
+  if (!theProblem.PrepareCommands(&comments)) {
+    out << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();
     return out.str();
   }
-  if (currentA.solutionElements.size == 0)
-  { out << "<b> Unfortunately there is no solution given for this question (answerID: " << lastStudentAnswerID << ").";
+  if (currentA.solutionElements.size == 0) {
+    out << "<b> Unfortunately there is no solution given for this question (answerID: " << lastStudentAnswerID << ").";
     return out.str();
   }
   std::stringstream answerCommands, answerCommandsNoEnclosures;
@@ -74,16 +74,16 @@ std::string HtmlInterpretation::GetProblemSolution()
   << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING
   << currentA.commandsSolutionOnly;
   theInterpreteR.Evaluate(answerCommands.str());
-  if (theInterpreteR.syntaxErrors != "")
-  { out << "<span style =\"color:red\"><b>Failed to compose the solution. "
+  if (theInterpreteR.syntaxErrors != "") {
+    out << "<span style =\"color:red\"><b>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b></span>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
   }
-  if (theInterpreteR.flagAbortComputationASAP)
-  { out << "<span style =\"color:red\"><b>Failed to compose the solution. "
+  if (theInterpreteR.flagAbortComputationASAP) {
+    out << "<span style =\"color:red\"><b>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b></span>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.outputString
@@ -262,7 +262,7 @@ std::string HtmlInterpretation::submitAnswersPreview()
   }
   Calculator theInterpreteR;
   theInterpreteR.flagUseLnInsteadOfLog = true;
-  theInterpreteR.init();
+  theInterpreteR.initialize();
   theInterpreteR.flagWriteLatexPlots = false;
   theInterpreteR.flagPlotNoControls = true;
   std::stringstream studentAnswerWithComments;
@@ -273,13 +273,13 @@ std::string HtmlInterpretation::submitAnswersPreview()
   << studentAnswerSream.str();
 
   theInterpreteR.Evaluate(studentAnswerWithComments.str());
-  if (theInterpreteR.syntaxErrors != "")
-  { out << "<span style =\"color:red\"><b>Failed to parse your answer, got:</b></span><br>"
+  if (theInterpreteR.syntaxErrors != "") {
+    out << "<span style =\"color:red\"><b>Failed to parse your answer, got:</b></span><br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, true);
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
-  } else if (theInterpreteR.flagAbortComputationASAP)
-  { out << "<span style =\"color:red\"><b>Failed to evaluate your answer, got:</b></span><br>"
+  } else if (theInterpreteR.flagAbortComputationASAP) {
+    out << "<span style =\"color:red\"><b>Failed to evaluate your answer, got:</b></span><br>"
     << theInterpreteR.outputString;
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
@@ -294,7 +294,7 @@ std::string HtmlInterpretation::submitAnswersPreview()
   << studentAnswerNoContextE.ToString(&theFormat) << "\\)";
   Calculator theInterpreterWithAdvice;
   theInterpreterWithAdvice.flagUseLnInsteadOfLog = true;
-  theInterpreterWithAdvice.init();
+  theInterpreterWithAdvice.initialize();
   theInterpreterWithAdvice.flagWriteLatexPlots = false;
   theInterpreterWithAdvice.flagPlotNoControls = true;
   std::stringstream calculatorInputStream,
@@ -911,16 +911,16 @@ std::string HtmlInterpretation::GetEditPageJSON()
   HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
   theFile.initBuiltInSpanClasses();
   std::stringstream comments;
-  if (theFile.flagIsExamProblem)
-  { Calculator tempCalculator;
-    tempCalculator.init();
+  if (theFile.flagIsExamProblem) {
+    Calculator tempCalculator;
+    tempCalculator.initialize();
     tempCalculator.ComputeAutoCompleteKeyWords();
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClasses);
     theAutocompleteKeyWords.AddOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
     theFile.initAutocompleteExtras();
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.autoCompleteExtras);
-  } else
-  { theFile.LoadAndParseTopicList(comments);
+  } else {
+    theFile.LoadAndParseTopicList(comments);
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClasses);
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClassesAnswerFields);
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicElementNames);
@@ -934,13 +934,14 @@ std::string HtmlInterpretation::GetEditPageJSON()
   return output.ToString(false);
 }
 
-std::string HtmlInterpretation::SubmitAnswers()
-{ return HtmlInterpretation::SubmitAnswers(theGlobalVariables.GetWebInput("randomSeed"), 0, true);
+std::string HtmlInterpretation::SubmitAnswers() {
+  return HtmlInterpretation::SubmitAnswers(theGlobalVariables.GetWebInput("randomSeed"), 0, true);
 }
 
-std::string HtmlInterpretation::SubmitAnswers
-(const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswers");
+std::string HtmlInterpretation::SubmitAnswers(
+  const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
+) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswers");
   std::stringstream out;
   double startTime = theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
@@ -1041,7 +1042,7 @@ std::string HtmlInterpretation::SubmitAnswers
   if (timeSafetyBrake)
     theGlobalVariables.MaxComputationMilliseconds = theGlobalVariables.GetElapsedMilliseconds() + 20000; // + 20 sec
   Calculator theInterpreter;
-  theInterpreter.init();
+  theInterpreter.initialize();
   theInterpreter.flagWriteLatexPlots = false;
   theInterpreter.flagPlotNoControls = true;
 
@@ -1059,7 +1060,7 @@ std::string HtmlInterpretation::SubmitAnswers
       << "generated division by zero during checking. ";
     out << "<br>Here's what I understood. ";
     Calculator isolatedInterpreter;
-    isolatedInterpreter.init();
+    isolatedInterpreter.initialize();
     isolatedInterpreter.flagWriteLatexPlots = false;
     isolatedInterpreter.flagPlotNoControls = true;
     if (timeSafetyBrake)
@@ -1425,7 +1426,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     return out.str();
   }
   Calculator theInterpreteR;
-  theInterpreteR.init();
+  theInterpreteR.initialize();
   theInterpreteR.flagPlotNoControls = true;
   theInterpreteR.flagWriteLatexPlots = false;
   std::stringstream answerCommands, answerCommandsNoEnclosure;

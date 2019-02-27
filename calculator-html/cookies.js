@@ -34,4 +34,4 @@ function setCookie(theName, theValue, expiryDays, secure) {
 module.exports = {
   setCookie,
   getCookie
-}
+};

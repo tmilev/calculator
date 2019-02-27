@@ -75,15 +75,15 @@ bool TimerThreadData::HandleTimerSignalToServer()
   return false;
 }
 
-bool TimerThreadData::HandleMaxComputationTime()
-{ if (theGlobalVariables.MaxComputationMilliseconds <= 0)
+bool TimerThreadData::HandleMaxComputationTime() {
+  if (theGlobalVariables.MaxComputationMilliseconds <= 0)
     return false;
   if (this->elapsedComputationTimeInMilliseconds <= 0)
     return false;
   if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.MaxComputationMilliseconds)
     return false;
-  if (theGlobalVariables.flagComputationCompletE)
-  { //theReport2.SetStatus((std::string)"The allowed clock time has ran out, but it seems the computation is already done. "+
+  if (theGlobalVariables.flagComputationCompletE) {
+    //theReport2.SetStatus((std::string)"The allowed clock time has ran out, but it seems the computation is already done. "+
     //                     (std::string)"Continuing to run (in order to wrap it up)...");
     return false;
   }
@@ -134,13 +134,10 @@ bool TimerThreadData::HandleComputationTimeout()
   if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.takeActionAfterComputationMilliseconds)
     return false;
   MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
-//  std::cout << "GOT TO HERE\n";
   if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection == 0)
     return false;
-//  std::cout << "GOT TO HERE pt 2\n";
   if (theGlobalVariables.flagOutputTimedOut)
     return false;
-//  std::cout << "GOT TO HERE pt 3\n";
   theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed = true;
   //theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();

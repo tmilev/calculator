@@ -25,4 +25,4 @@ function deepCopy(from) {
 module.exports = {
   shortenString,
   deepCopy,
-}
+};

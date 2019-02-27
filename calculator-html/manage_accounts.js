@@ -126,4 +126,4 @@ module.exports = {
   addEmailsOrUsers,
   updateAccountsPage,
   getTeachersStudents
-}
+};

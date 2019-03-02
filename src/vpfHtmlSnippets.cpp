@@ -5,7 +5,7 @@
 #include "vpfHeader1General4General_Logging_GlobalVariables.h"
 #include "vpfHeader1General7FileOperations_Encodings.h"
 #include <iomanip>
-#include "vpfWebAPI.h"
+#include "string_constants.h"
 
 ProjectInformationInstance projectInfoInstanceHtmlSnippets
 (__FILE__, "Html Snippets.");

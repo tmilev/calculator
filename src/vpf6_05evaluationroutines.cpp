@@ -1,14 +1,14 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
-#include "vpfWebAPI.h"
+#include "string_constants.h"
 ProjectInformationInstance ProjectInfoVpf6_05cpp(__FILE__, "Calculator core evaluation engine. ");
 
-std::string Calculator::ToStringFunctionHandlersJSON()
-{ MacroRegisterFunctionWithName("Calculator::ToStringFunctionHandlersJSON");
+std::string Calculator::ToStringFunctionHandlersJSON() {
+  MacroRegisterFunctionWithName("Calculator::ToStringFunctionHandlersJSON");
   JSData output(JSData::JSObject);
-  for (int currentAtomIndex = 0; currentAtomIndex < this->theAtoms.size; currentAtomIndex ++)
-  { const std::string& currentAtom = this->theAtoms[currentAtomIndex];
+  for (int currentAtomIndex = 0; currentAtomIndex < this->theAtoms.size; currentAtomIndex ++) {
+    const std::string& currentAtom = this->theAtoms[currentAtomIndex];
     JSData currentAtomJSON(JSData::JSObject);
     JSData currentFunctionListDirect(JSData::JSarray);
     JSData currentFunctionListComposite(JSData::JSarray);

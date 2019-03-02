@@ -5,7 +5,7 @@
 #include "webserver.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
-#include "vpfWebAPI.h"
+#include "string_constants.h"
 
 ProjectInformationInstance ProjectInfoVpfDatabasecpp(__FILE__, "Database-related code. ");
 
@@ -88,61 +88,6 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
   return true;
 #endif
 }
-
-std::string DatabaseStrings::labelUserId = "id";
-std::string DatabaseStrings::labelUsername = "username";
-std::string DatabaseStrings::labelPassword = "password";
-std::string DatabaseStrings::labelUserRole = "userRole";
-std::string DatabaseStrings::labelProblemDatA = "problemData";
-std::string DatabaseStrings::labelProblemDataJSON = "problemDataJSON";
-std::string DatabaseStrings::labelAuthenticationToken = "authenticationToken";
-std::string DatabaseStrings::labelActivationToken = "activationToken";
-std::string DatabaseStrings::labelTimeOfActivationTokenCreation = "activationTokenCreationTime";
-std::string DatabaseStrings::labelTimeOfAuthenticationTokenCreation = "authenticationCreationTime";
-std::string DatabaseStrings::labelEmail = "email";
-
-std::string DatabaseStrings::tableUsers = "users";
-std::string DatabaseStrings::theDatabaseUser = "ace";
-std::string DatabaseStrings::theDatabaseName = "aceDB";
-std::string DatabaseStrings::theDatabaseNameMongo = "calculator";
-std::string DatabaseStrings::tableDeadlines = "deadlines";
-std::string DatabaseStrings::labelDeadlines = "deadlines";
-
-std::string DatabaseStrings::labelSection = "studentSection";
-std::string DatabaseStrings::labelCurrentCourses = "currentCourses";
-std::string DatabaseStrings::labelDeadlinesSchema = "deadlineSchema";
-std::string DatabaseStrings::labelInstructor = "instructor";
-std::string DatabaseStrings::labelSemester = "semester";
-
-std::string DatabaseStrings::tableProblemWeights = "problemWeights";
-std::string DatabaseStrings::labelProblemWeightsSchema = "problemWeightsSchema";
-std::string DatabaseStrings::labelProblemWeights = "weight";
-
-std::string DatabaseStrings::tableProblemInformation = "problemInformation";
-std::string DatabaseStrings::labelProblemTotalQuestions = "problemsTotalQuestions";
-std::string DatabaseStrings::labelProblemName = "problemName";
-
-std::string DatabaseStrings::labelSectionsTaught = "sectionsTaught";
-
-std::string DatabaseStrings::tableEmailInfo = "emailInfo";
-std::string DatabaseStrings::labelLastActivationEmailTime = "lastActivationEmailTime";
-std::string DatabaseStrings::labelNumActivationEmails = "numActivationEmails";
-std::string DatabaseStrings::labelUsernameAssociatedWithToken = "usernameAssociatedWithToken";
-
-std::string DatabaseStrings::tableDeleted = "deleted";
-
-std::string DatabaseStrings::anyFielD = "${any}";
-std::string DatabaseStrings::objectSelectoR = "${number}";
-std::string DatabaseStrings::objectSelectorMongo = "$oid";
-std::string DatabaseStrings::labelFields = "fields";
-std::string DatabaseStrings::labelTable = "table";
-std::string DatabaseStrings::labelIdMongo = "_id";
-std::string DatabaseStrings::labelCurrentPage = "currentPage";
-std::string DatabaseStrings::labelPageSignUp = "signUp";
-std::string DatabaseStrings::labelCalculatorRequest = "calculatorRequest";
-std::string DatabaseStrings::labelCalculatorInput = "calculatorInput";
-std::string DatabaseStrings::labelPageAccount = "account";
-std::string DatabaseStrings::labelPageActivateAccount = "activateAccount";
 
 void GlobalVariables::initModifiableDatabaseFields()
 { MacroRegisterFunctionWithName("GlobalVariables::initModifiableDatabaseFields");

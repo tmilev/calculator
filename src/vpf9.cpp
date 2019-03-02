@@ -90,8 +90,8 @@ void GlobalVariables::ChDir(const std::string& systemCommand)
     this->pointerCallChDir(FileOperations::ConvertStringToEscapedStringFileNameSafe(systemCommand));
 }
 
-GlobalVariables::GlobalVariables()
-{ this->flagNotAllocated = false;
+GlobalVariables::GlobalVariables() {
+  this->flagNotAllocated = false;
   this->flagAllowProcessMonitoring = false;
   this->flagCertificatesAreOfficiallySigned = false;
   this->flagIsChildProcess = false;

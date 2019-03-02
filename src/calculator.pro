@@ -71,7 +71,8 @@ SOURCES += \
     vpfEllipticCurves.cpp \
     vpfCrypto_ripemd.cpp \
     vpfCrypto_sha3.cpp \
-    vpfCrypto_AES.cpp
+    vpfCrypto_AES.cpp \
+    string_constants.cpp
 
 HEADERS += \
     webserver.h \
@@ -133,7 +134,7 @@ HEADERS += \
     vpfImplementationHeader2Math0_General.h \
     vpfHeader2Math11_EllipticCurves.h \
     vpfImplementationHeader2Math11_EllipticCurves.h \
-    vpfWebAPI.h
+    string_constants.h
 
 DISTFILES += \
     ../calculator-html/app.js \

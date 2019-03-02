@@ -5,7 +5,7 @@
 #include "vpfHeader8HtmlInterpretationInterface.h"
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
 #include <iomanip>
-#include "vpfWebAPI.h"
+#include "string_constants.h"
 
 ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation
 (__FILE__, "Routines for calculus teaching: calculator exam mode.");
@@ -2434,9 +2434,9 @@ std::string HtmlInterpretation::ToStringNavigation()
   out << "<a href=\"https://github.com/tmilev/calculator/issues\" target =\"_blank\">Feedback, bugs</a>"
   << linkBigSeparator;
 
-  if (!theGlobalVariables.flagRunningApache)
-  { if (theGlobalVariables.flagAllowProcessMonitoring)
-    { if (!theGlobalVariables.UserDefaultHasAdminRights())
+  if (!theGlobalVariables.flagRunningApache) {
+    if (theGlobalVariables.flagAllowProcessMonitoring) {
+      if (!theGlobalVariables.UserDefaultHasAdminRights())
         out << "<span style =\"color:red\"><b>Monitoring on</b></span>" << linkSeparator;
       else
         out << "<a style =\"color:red\" href=\""

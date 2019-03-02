@@ -156,7 +156,8 @@ vpfFiniteFields.cpp \
 vpfGraph.cpp \
 vpfJson.cpp \
 vpfWebServerInterProcessLogistics.cpp \
-vpf9_85TimeDateWrappers.cpp
+vpf9_85TimeDateWrappers.cpp \
+string_constants.cpp
 
 
 OBJECTS=$(addprefix bin/, $(notdir $(SOURCES_NO_PATH:.cpp=.o)))

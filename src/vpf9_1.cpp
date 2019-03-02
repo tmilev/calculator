@@ -9,12 +9,12 @@
 #include <assert.h>
 #include "vpfHeader3Calculator0_Interface.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
-#include "vpfWebAPI.h"
+#include "string_constants.h"
 
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
 
-Crasher::Crasher()
-{ this->flagCrashInitiateD = false;
+Crasher::Crasher() {
+  this->flagCrashInitiateD = false;
   this->flagFinishingCrash = false;
   this->CleanUpFunction = 0;
 }

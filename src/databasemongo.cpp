@@ -8,7 +8,7 @@ mongoc_database_t *database = 0;
 #include "vpfJson.h"
 #include "vpfHeader1General4General_Logging_GlobalVariables.h"
 #include "vpfHeader8HtmlSnippets.h"
-#include "vpfWebAPI.h"
+#include "string_constants.h"
 ProjectInformationInstance ProjectInfoVpfDatabaseMongo(__FILE__, "Database mongoDB.");
 
 int DatabaseRoutinesGlobalFunctionsMongo::numDatabaseInstancesMustBeOneOrZero = 0;

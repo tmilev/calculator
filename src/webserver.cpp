@@ -5,42 +5,7 @@
 #include "vpfHeader7DatabaseInterface.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
 #include "vpfHeader8HtmlSnippets.h"
-#include "vpfWebAPI.h"
-
-std::string WebAPI::appNoCache = "appNoCache";
-std::string WebAPI::app = "app";
-std::string WebAPI::request::calculatorHTML = "/calculator-html";
-std::string WebAPI::request::onePageJS = "/calculator-html/javascript_all_in_one.js";
-std::string WebAPI::request::onePageJSWithHash = "/calculator-html/javascript_all_in_one.js";
-std::string WebAPI::request::calculatorPage = "calculator";
-std::string WebAPI::request::setProblemData = "setProblemData";
-std::string WebAPI::request::changePassword = "changePassword";
-std::string WebAPI::request::activateAccount = "activateAccount";
-std::string WebAPI::request::activateAccountJSON = "activateAccountJSON";
-std::string WebAPI::request::serverStatusJSON = "serverStatusJSON";
-std::string WebAPI::request::selectCourseJSON = "selectCourseJSON";
-std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
-
-std::string WebAPI::problemContent = "problemContent";
-std::string WebAPI::problemFileName = "fileName";
-std::string WebAPI::problemId = "id";
-std::string WebAPI::commentsProblem = "commentsProblem";
-std::string WebAPI::commentsServer = "commentsServer";
-
-std::string WebAPI::request::userInfoJSON = "userInfoJSON";
-std::string WebAPI::request::examplesJSON = "calculatorExamplesJSON";
-std::string WebAPI::request::editPage = "editPageJSON";
-std::string WebAPI::databaseParameters::entryPoint = "database";
-std::string WebAPI::databaseParameters::labels = "databaseLabels";
-std::string WebAPI::databaseParameters::operation = "databaseOperation";
-std::string WebAPI::databaseParameters::fetch = "databaseFetch";
-
-std::string WebAPI::problemSingleDeadline = "deadline";
-std::string WebAPI::result::resultHtml = "resultHtml";
-std::string WebAPI::result::syntaxErrors = "syntaxErrors";
-std::string WebAPI::result::resultLabel = "result";
-std::string WebAPI::result::badInput = "badInput";
-std::string WebAPI::result::comments = "comments";
+#include "string_constants.h"
 
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 WebServer theWebServer;
@@ -5515,6 +5480,8 @@ void WebServer::TurnProcessMonitoringOn() {
   << logger::purple << "************************" << logger::endL;
   theGlobalVariables.flagAllowProcessMonitoring = true;
   theGlobalVariables.takeActionAfterComputationMilliseconds = 5000; //5 seconds
+  theGlobalVariables.configuration[Configuration::processMonitoringAllowedByDefault] = true;
+  theGlobalVariables.StoreConfiguration();
 }
 
 void WebServer::TurnProcessMonitoringOff() {
@@ -5525,6 +5492,8 @@ void WebServer::TurnProcessMonitoringOff() {
   << logger::green << "************************" << logger::endL;
   theGlobalVariables.flagAllowProcessMonitoring = false;
   theGlobalVariables.takeActionAfterComputationMilliseconds = 0;
+  theGlobalVariables.configuration[Configuration::processMonitoringAllowedByDefault] = false;
+  theGlobalVariables.StoreConfiguration();
 }
 
 bool GlobalVariables::LoadConfiguration() {
@@ -5548,8 +5517,6 @@ bool GlobalVariables::LoadConfiguration() {
     this->StoreConfiguration();
     return false;
   }
-  //logServer << logger::green << "Successfully loaded configuration: "
-  //<< theGlobalVariables.configuration.ToString(false) << logger::endL;
   return true;
 }
 
@@ -5605,6 +5572,15 @@ void GlobalVariables::ComputeConfigurationFlags() {
     theGlobalVariables.MaxComputationMilliseconds = 30000; // 30 seconds, default
     theWebServer.flagTryToKillOlderProcesses = false;
     theWebServer.flagPort8155 = true;
+  }
+  theGlobalVariables.flagAllowProcessMonitoring = theGlobalVariables.configuration[
+    Configuration::processMonitoringAllowedByDefault
+  ].isTrueRepresentationInJSON();
+  if (theGlobalVariables.flagAllowProcessMonitoring) {
+    logServer
+    << logger::red << "Process monitoring enabled by default. "
+    << "This option is for personal use only, "
+    << "please do not put on public internet-facing machines. " << logger::endL;
   }
 }
 

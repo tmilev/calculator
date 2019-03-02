@@ -275,18 +275,24 @@ public:
 class DatabaseRoutineS
 {
 public:
-  static bool StoreProblemInfoToDatabase
-  (const UserCalculatorData& theUser, bool overwrite, std::stringstream& commentsOnFailure);
-  static bool SendActivationEmail
-  (const std::string& emailList, std::stringstream* commentsOnFailure,
-   std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive);
-  static bool SendActivationEmail
-  (const List<std::string>& theEmails, std::stringstream* commentsOnFailure,
-   std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive);
-  static bool AddUsersFromEmails
-  (const std::string& emailList, const std::string& userPasswords,
-   std::string& userRole, std::string& userGroup,
-   std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers);
+  static List<std::string> modifyableColumns;
+
+  static bool StoreProblemInfoToDatabase(
+    const UserCalculatorData& theUser, bool overwrite, std::stringstream& commentsOnFailure
+  );
+  static bool SendActivationEmail(
+    const std::string& emailList, std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive
+  );
+  static bool SendActivationEmail(
+    const List<std::string>& theEmails, std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive
+  );
+  static bool AddUsersFromEmails(
+    const std::string& emailList, const std::string& userPasswords,
+    std::string& userRole, std::string& userGroup,
+    std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers
+  );
 };
 
 #endif // vpfHeader7_databaseMySQL_already_included

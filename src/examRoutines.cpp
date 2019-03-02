@@ -10,7 +10,7 @@
 #include "vpfHeader2Math10_LaTeXRoutines.h"
 #include <iomanip>
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
-#include "vpfWebAPI.h"
+#include "string_constants.h"
 
 ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutinesCustomCode
 (__FILE__, "Routines for calculus teaching: calculator exam mode. Shared code. ");

@@ -36,6 +36,7 @@ std::string WebAPI::result::syntaxErrors = "syntaxErrors";
 std::string WebAPI::result::resultLabel = "result";
 std::string WebAPI::result::badInput = "badInput";
 std::string WebAPI::result::comments = "comments";
+std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 
 
 std::string DatabaseStrings::labelUserId = "id";
@@ -94,3 +95,5 @@ std::string DatabaseStrings::labelPageAccount = "account";
 std::string DatabaseStrings::labelPageActivateAccount = "activateAccount";
 
 std::string Configuration::processMonitoringAllowedByDefault = "processMonitoringAllowedByDefault";
+std::string Configuration::replyAfterComputationMillisecondsDefault = "replyAfterComputationMillisecondsDefault";
+std::string Configuration::replyAfterComputationMilliseconds = "replyAfterComputationMilliseconds";

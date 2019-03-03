@@ -85,8 +85,8 @@ std::string GlobalVariables::CallSystemWithOutput(const std::string& systemComma
   return this->pointerCallSystemWithOutput(systemCommand);
 }
 
-void GlobalVariables::ChDir(const std::string& systemCommand)
-{ if (this->pointerCallChDir != 0)
+void GlobalVariables::ChDir(const std::string& systemCommand) {
+  if (this->pointerCallChDir != 0)
     this->pointerCallChDir(FileOperations::ConvertStringToEscapedStringFileNameSafe(systemCommand));
 }
 
@@ -101,7 +101,8 @@ GlobalVariables::GlobalVariables() {
   this->MaxComputationMilliseconds = 1000000; //1000 seconds
   this->millisecondOffset = 0;
   this->timeServeClientStart = 0;
-  this->takeActionAfterComputationMilliseconds = 0;
+  this->replyAfterComputationMilliseconds = 0;
+  this->replyAfterComputationMillisecondsDefault = 5000; //5 seconds
   this->pointerCallSystemWithOutput = 0;
   this->pointerCallSystemNoOutput = 0;
   this->pointerCallChDir = 0;

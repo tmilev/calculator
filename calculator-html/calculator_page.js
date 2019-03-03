@@ -340,7 +340,7 @@ Calculator.prototype.submitComputationPartTwo = function(input) {
 Calculator.prototype.callbackToggleStatus = function (input, output) {
   var monitorResult = document.getElementById(ids.domElements.monitoring.spanStatus);
   var parsedInput = JSON.parse(input);
-  var monitoring = parsedInput["monitoring"];
+  var monitoring = parsedInput["processMonitoring"];
   if (monitoring === "true" || monitoring === true) {
     monitorResult.innerHTML = "Monitor <b style = 'color:red'>on</b>";
     document.getElementById(ids.domElements.switch.monitoring).checked = true;

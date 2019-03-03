@@ -761,10 +761,12 @@ void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::stri
   outputAppend["linkAppNoCache"] = outLinkAppNoCache.str();
   if (comments != "")
     outputAppend["comments"] = comments;
-  if (theGlobalVariables.flagAllowProcessMonitoring)
-    outputAppend["monitoring"] = "true";
-  else
-    outputAppend["monitoring"] = "false";
+  if (theGlobalVariables.flagAllowProcessMonitoring) {
+    outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
+    outputAppend[Configuration::replyAfterComputationMilliseconds] = (double) theGlobalVariables.replyAfterComputationMilliseconds;
+  } else {
+    outputAppend[WebAPI::UserInfo::processMonitoring] = "false";
+  }
   if (theGlobalVariables.GetWebInput("error") != "") {
     outputAppend["error"] = theGlobalVariables.GetWebInput("error");
   }

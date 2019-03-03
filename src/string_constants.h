@@ -43,10 +43,16 @@ public:
   static std::string problemFileName;
   static std::string problemId;
   static std::string problemSingleDeadline;
+  struct UserInfo {
+    static std::string processMonitoring;
+  };
 };
 
 struct Configuration {
   static std::string processMonitoringAllowedByDefault;
+  static std::string processMonitoringTriggerTime;
+  static std::string replyAfterComputationMillisecondsDefault;
+  static std::string replyAfterComputationMilliseconds;
 };
 
 struct DatabaseStrings

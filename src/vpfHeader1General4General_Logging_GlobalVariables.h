@@ -11,8 +11,7 @@
 
 static ProjectInformationInstance projectInfoHeaderLoggingRoutines(__FILE__, "Logging routines, global variables. ");
 
-class ThreadData
-{
+class ThreadData {
 public:
   std::thread::id theId;
   int index;
@@ -29,16 +28,14 @@ public:
   ~ThreadData();
 };
 
-struct ProcessTypes
-{
+struct ProcessTypes {
 public:
   static std::string worker;
   static std::string server;
   static std::string serverMonitor;
 };
 
-class GlobalVariables
-{
+class GlobalVariables {
   //Warning: please pay attention to the static initialization order fiasco.
   //The fiasco states that global objects (allocated before main)
   //may be allocated in an unexpected order.
@@ -62,30 +59,29 @@ public:
   void (*WebServerReturnDisplayIndicatorCloseConnection)();
   void (*WebServerTimerPing)(int64_t pingTime);
   void (*PauseUponUserRequest)();
-  void Pause()
-  { if (this->PauseUponUserRequest != 0)
+  void Pause() {
+    if (this->PauseUponUserRequest != 0)
       this->PauseUponUserRequest();
   }
   void FallAsleep(int microseconds);
-//  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
+  //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   int64_t millisecondOffset;
   int64_t MaxComputationMilliseconds;
   int64_t MaxTimeNoPingBeforeChildIsPresumedDead;
-  int64_t takeActionAfterComputationMilliseconds;
+  int64_t replyAfterComputationMilliseconds;
+  int64_t replyAfterComputationMillisecondsDefault;
   int64_t timeServeClientStart;
 
   //  bool flagLogInterProcessCommunication;
-//flags: what mode are we running in?
-
+  //flags: what mode are we running in?
   bool flagRunningApache;
   bool flagRunningCommandLine;
   bool flagRunningConsoleTest;
   bool flagRunningBuiltInWebServer;
-
-//special flags
+  //special flags
   bool flagRunningAce;
   bool flagAceIsAvailable;
-//webserver flags and variables
+  //webserver flags and variables
   bool flagRunServerOnEmptyCommandLine;
   bool flagCachingInternalFilesOn;
   bool flagServerDetailedLog;
@@ -106,23 +102,23 @@ public:
 
   bool flagRequestComingLocally;
 
-//internal infrastructure flags
+  //internal infrastructure flags
   bool flagServerForkedIntoWorker;
   bool flagNotAllocated;
 
   MemorySaving<FormatExpressions> theDefaultFormat;
   MemorySaving<FormatExpressions> thePolyFormat;
-//status flags:
+  //status flags:
   bool flagComputationCompletE;
   bool flagComputationStarted;
   bool flagTimeOutExplanationAlreadyDisplayed;
   bool flagTimedOutComputationIsDone;
   bool flagOutputTimedOut;
   bool flagComputationFinishedAllOutputSentClosing;
-//experimental flags, known to cause stability issues when set to true:
+  //experimental flags, known to cause stability issues when set to true:
   bool flagAllowProcessMonitoring;
-//progress report flags:  
-//  bool flagPreparingReport;
+  //progress report flags:
+  //  bool flagPreparingReport;
   bool flagReportEverything;
   bool flagReportFileIO;
   bool flagReportLargeIntArithmetic;
@@ -206,8 +202,8 @@ public:
   void WriteSourceCodeFilesJS();
   int GetGlobalTimeInSeconds();
   int64_t GetElapsedMilliseconds();
-  double GetElapsedSeconds()
-  { return ((double) this->GetElapsedMilliseconds()) / 1000;
+  double GetElapsedSeconds() {
+    return ((double) this->GetElapsedMilliseconds()) / 1000;
   }
   static void InitThreadsExecutableStart();
   bool UserDefaultIsDebuggingAdmin();
@@ -225,11 +221,11 @@ public:
   void SetWebInpuT(const std::string& inputName, const std::string& inputValue);
   std::string GetWebInput(const std::string& inputName);
   void initModifiableDatabaseFields();
-  void initDefaultFolderAndFileNames
-  (const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow);
-  void initOutputReportAndCrashFileNames
-  (const std::string& inputUserStringRAW,
-   const std::string& inputUserStringCivilized);
+  void initDefaultFolderAndFileNames(const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow);
+  void initOutputReportAndCrashFileNames(
+    const std::string& inputUserStringRAW,
+    const std::string& inputUserStringCivilized
+  );
   bool UserSecureNonAdminOperationsAllowed();
   bool UserGuestMode();
   bool UserDebugFlagOn();
@@ -245,17 +241,17 @@ public:
   std::string ToStringFolderInfo() const;
   std::string ToStringProgressReportHtml();
   std::string ToStringProgressReportConsole();
-  inline void MakeReport(const std::string& input)
-  { if (this->IndicatorStringOutputFunction != 0)
+  void MakeReport(const std::string& input) {
+    if (this->IndicatorStringOutputFunction != 0) {
       this->IndicatorStringOutputFunction(input);
+    }
   }
   void MakeReport();
   /// @endcond
 };
 //extern GlobalVariables theGlobalVariables;
 
-class logger
-{
+class logger {
   public:
   int currentColor;
   int MaxLogSize;
@@ -313,10 +309,11 @@ class logger
         this->theFile.flush();
       }
     }
-    if (this->carbonCopy != 0)
+    if (this->carbonCopy != 0) {
       (*(this->carbonCopy)) << toBePrinted;
-    else if (theGlobalVariables.flagRunningBuiltInWebServer || theGlobalVariables.flagRunningCommandLine)
+    } else if (theGlobalVariables.flagRunningBuiltInWebServer || theGlobalVariables.flagRunningCommandLine) {
       std::cout << toBePrinted;
+    }
     this->CheckLogSize();
     return *this;
   }

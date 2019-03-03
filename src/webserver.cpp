@@ -1996,7 +1996,7 @@ int WebWorker::ProcessMonitor() {
     result["authenticated"] = "false";
     std::stringstream commentStream;
     commentStream << "Process monitoring is allowed only for logged-in admins with process monitoring turned on. "
-    << "The link to turn on process monitoring in the calculator navigation panel. ";
+    << "There must be a link/button to turn on process monitoring in the calculator app. ";
     result["comments"] = commentStream.str();
   }
   stOutput << result.ToString(false);
@@ -3735,7 +3735,7 @@ void WebWorker::OutputShowIndicatorOnTimeout() {
   JSData result;
   if (theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed) {
     out << "Your computation is taking more than "
-    << theGlobalVariables.takeActionAfterComputationMilliseconds
+    << theGlobalVariables.replyAfterComputationMilliseconds
     << " ms. ";
   }
   if (!theGlobalVariables.flagAllowProcessMonitoring) {
@@ -4258,7 +4258,7 @@ void WebServer::Restart() {
     currentLog = &logServer;
   int timeLimitSeconds = theGlobalVariables.MaxComputationMilliseconds / 1000;
 
-  *currentLog << logger::red << " restarting with time limit " << timeLimitSeconds << logger::endL;
+  *currentLog << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
   theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath << " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
   if (theWebServer.flagNoMonitor)
@@ -5330,7 +5330,7 @@ void WebServer::InitializeGlobalVariablesHashes() {
 }
 
 void WebServer::InitializeGlobalVariables() {
-  theGlobalVariables.takeActionAfterComputationMilliseconds = 0;
+  theGlobalVariables.replyAfterComputationMilliseconds = 0;
   theGlobalVariables.flagReportEverything = true;
   ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
   this->InitializeGlobalVariablesHashes();
@@ -5479,8 +5479,9 @@ void WebServer::TurnProcessMonitoringOn() {
   << logger::red << "WARNING: process monitoring IS ON. " << logger::endL
   << logger::purple << "************************" << logger::endL;
   theGlobalVariables.flagAllowProcessMonitoring = true;
-  theGlobalVariables.takeActionAfterComputationMilliseconds = 5000; //5 seconds
+  theGlobalVariables.replyAfterComputationMilliseconds = theGlobalVariables.replyAfterComputationMillisecondsDefault;
   theGlobalVariables.configuration[Configuration::processMonitoringAllowedByDefault] = true;
+
   theGlobalVariables.StoreConfiguration();
 }
 
@@ -5491,7 +5492,7 @@ void WebServer::TurnProcessMonitoringOff() {
   << logger::green << "Process monitoring is now off. " << logger::endL
   << logger::green << "************************" << logger::endL;
   theGlobalVariables.flagAllowProcessMonitoring = false;
-  theGlobalVariables.takeActionAfterComputationMilliseconds = 0;
+  theGlobalVariables.replyAfterComputationMilliseconds = 0;
   theGlobalVariables.configuration[Configuration::processMonitoringAllowedByDefault] = false;
   theGlobalVariables.StoreConfiguration();
 }
@@ -5573,14 +5574,19 @@ void GlobalVariables::ComputeConfigurationFlags() {
     theWebServer.flagTryToKillOlderProcesses = false;
     theWebServer.flagPort8155 = true;
   }
-  theGlobalVariables.flagAllowProcessMonitoring = theGlobalVariables.configuration[
-    Configuration::processMonitoringAllowedByDefault
-  ].isTrueRepresentationInJSON();
-  if (theGlobalVariables.flagAllowProcessMonitoring) {
-    logServer
-    << logger::red << "Process monitoring enabled by default. "
-    << "This option is for personal use only, "
-    << "please do not put on public internet-facing machines. " << logger::endL;
+  int reader = 0;
+  if (theGlobalVariables.configuration[
+    Configuration::replyAfterComputationMillisecondsDefault
+  ].isIntegerFittingInInt(&reader)) {
+    theGlobalVariables.replyAfterComputationMillisecondsDefault = reader;
+  }
+  if (
+    theGlobalVariables.configuration[
+      Configuration::processMonitoringAllowedByDefault
+    ].isTrueRepresentationInJSON()
+  ) {
+    logServer << logger::blue << "Process monitoring turned on from configuration.json. " << logger::endL;
+    WebServer::TurnProcessMonitoringOn();
   }
 }
 
@@ -5706,7 +5712,7 @@ int WebServer::mainApache() {
   theGlobalVariables.IndicatorStringOutputFunction = 0;
   theGlobalVariables.flagServerForkedIntoWorker = true;
   theGlobalVariables.flagComputationStarted = true;
-//  stOutput << "<hr>First line<hr>";
+  //  stOutput << "<hr>First line<hr>";
   theGlobalVariables.MaxComputationMilliseconds = 30000; //<-30 second computation time restriction!
   theWebServer.initSignals();
   CreateTimerThread();
@@ -5789,8 +5795,9 @@ void WebWorker::PrepareFullMessageHeaderAndFooter() {
   this->remainingBytesToSenD.SetSize(0);
   this->remainingBytesToSenD.SetExpectedSize(this->remainingBodyToSend.size + this->remainingHeaderToSend.size + 30);
   if (this->remainingHeaderToSend.size == 0) {
-    if (this->requestTypE != this->requestHead)
+    if (this->requestTypE != this->requestHead) {
       this->remainingBytesToSenD = this->remainingBodyToSend;
+    }
     this->remainingBodyToSend.SetSize(0);
     return;
   }
@@ -5821,7 +5828,7 @@ void WebWorker::SendAllBytesHttp() {
   this->CheckConsistency();
   this->flagDidSendAll = true;
   if (this->connectedSocketID == - 1) {
-    logWorker << logger::red << "Socket::SendAllBytes failed: connectedSocketID= - 1." << logger::endL;
+    logWorker << logger::red << "Socket::SendAllBytes failed: connectedSocketID = - 1." << logger::endL;
     return;
   }
   logWorker << "Sending " << this->remainingBytesToSenD.size << " bytes in chunks of: ";

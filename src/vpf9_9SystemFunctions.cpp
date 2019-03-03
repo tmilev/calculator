@@ -124,14 +124,14 @@ bool TimerThreadData::HandleMaxComputationTime() {
   return true;
 }
 
-bool TimerThreadData::HandleComputationTimeout()
-{ if (!theGlobalVariables.flagRunningBuiltInWebServer)
+bool TimerThreadData::HandleComputationTimeout() {
+  if (!theGlobalVariables.flagRunningBuiltInWebServer)
     return false;
-  if (theGlobalVariables.takeActionAfterComputationMilliseconds <= 0)
+  if (theGlobalVariables.replyAfterComputationMilliseconds <= 0)
     return false;
   if (this->elapsedComputationTimeInMilliseconds <= 0)
     return false;
-  if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.takeActionAfterComputationMilliseconds)
+  if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.replyAfterComputationMilliseconds)
     return false;
   MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
   if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection == 0)
@@ -145,12 +145,12 @@ bool TimerThreadData::HandleComputationTimeout()
   return false;
 }
 
-bool TimerThreadData::HandleEverythingIsDone()
-{ return theGlobalVariables.flagComputationFinishedAllOutputSentClosing;
+bool TimerThreadData::HandleEverythingIsDone() {
+  return theGlobalVariables.flagComputationFinishedAllOutputSentClosing;
 }
 
-bool TimerThreadData::HandlePingServerIamAlive()
-{ if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing)
+bool TimerThreadData::HandlePingServerIamAlive() {
+  if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing)
     return true;
   if (theGlobalVariables.WebServerTimerPing == 0)
     return false;
@@ -158,25 +158,25 @@ bool TimerThreadData::HandlePingServerIamAlive()
   return false;
 }
 
-TimerThreadData::TimerThreadData()
-{ this->reset();
+TimerThreadData::TimerThreadData() {
+  this->reset();
 }
 
-void TimerThreadData::reset()
-{ this->elapsedTimeInMilliseconds = - 1;
+void TimerThreadData::reset() {
+  this->elapsedTimeInMilliseconds = - 1;
   this->elapsedComputationTimeInMilliseconds = - 1;
   this->computationStartTimeInMilliseconds = - 1;
   this->counter = 0;
   this->intervalBetweenChecksInMilliseconds = 100000;
 }
 
-void TimerThreadData::Run()
-{ MacroRegisterFunctionWithName("TimerThreadData::Run");
+void TimerThreadData::Run() {
+  MacroRegisterFunctionWithName("TimerThreadData::Run");
   this->reset();
 //  ProgressReport theReport;
 //  std::cout << "Got thus far RunTimerVoidPtr - 2" << std::endl;
-  for (;;)
-  { this->counter ++;
+  for (;;) {
+    this->counter ++;
     this->HandleComputationTimer();
     theGlobalVariables.FallAsleep(this->intervalBetweenChecksInMilliseconds);
     this->HandleComputationCompleteStandard();

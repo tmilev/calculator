@@ -34,8 +34,7 @@ class Matrix;
 template <typename coefficient>
 class Vector;
 
-class JSData
-{
+class JSData {
 public:
   static const int numEmptyTokensAtStart = 6;
   static const char JSUndefined    = 0;
@@ -70,21 +69,21 @@ public:
   bool HasKey(const std::string& key) const;
   void SetKeyValue(const std::string& key, const JSData& value);
   int GetKeyIndex(const std::string& key) const;
-  JSData()
-  { this->reset();
+  JSData() {
+    this->reset();
   }
-  JSData(const JSData& other)
-  { this->operator=(other);
-  }
-  JSData(const char* other)
-  { this->reset();
+  JSData(const JSData& other) {
     this->operator=(other);
   }
-  JSData(char other)
-  { this->reset(other);
+  JSData(const char* other) {
+    this->reset();
+    this->operator=(other);
   }
-  void operator=(const JSData& other)
-  { this->type = other.type;
+  JSData(char other) {
+    this->reset(other);
+  }
+  void operator=(const JSData& other) {
+    this->type = other.type;
     this->boolean = other.boolean;
     this->number = other.number;
     this->string = other.string;
@@ -93,8 +92,8 @@ public:
   }
   void operator=(const List<JSData>& other);
   template <typename any>
-  void operator=(const List<any>& other)
-  { this->reset();
+  void operator=(const List<any>& other) {
+    this->reset();
     this->type = this->JSarray;
     this->list.SetSize(other.size);
     for (int i = 0; i < other.size; i ++)
@@ -107,6 +106,7 @@ public:
   void operator=(const Vector<coefficient>& other);
   template <typename coefficient>
   void operator=(const Matrix<coefficient>& other);
+  bool isIntegerFittingInInt(int* whichInteger);
   bool isTrueRepresentationInJSON();
   bool isListOfStrings(List<std::string>* whichStrings);
   // parsing

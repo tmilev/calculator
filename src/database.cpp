@@ -917,11 +917,11 @@ bool UserCalculator::StoreProblemDataToDatabasE(std::stringstream& commentsOnFai
   (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure);
 }
 
-bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabaseJSON");
+bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabaseJSON");
   JSData problemData;
-  for (int i = 0; i < this->theProblemData.size(); i ++)
-  { JSData nextProblem = this->theProblemData.theValues[i].StoreJSON();
+  for (int i = 0; i < this->theProblemData.size(); i ++) {
+    JSData nextProblem = this->theProblemData.theValues[i].StoreJSON();
     if (nextProblem.objects.size() == 0)
       continue;
     problemData[HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false)] = nextProblem;
@@ -929,26 +929,29 @@ bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream* commentsO
   theGlobalVariables.userDefault.problemDataJSON = problemData;
   JSData setQuery;
   setQuery[DatabaseStrings::labelProblemDataJSON] = problemData;
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON
-  (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, commentsOnFailure);
+  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(
+    DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, commentsOnFailure
+  );
 }
 
-bool DatabaseRoutineS::AddUsersFromEmails
-(const std::string& emailList, const std::string& userPasswords, std::string& userRole,
- std::string& userGroup, std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
+bool DatabaseRoutineS::AddUsersFromEmails(
+  const std::string& emailList, const std::string& userPasswords, std::string& userRole,
+  std::string& userGroup, std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers
+) {
+  MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
   theGlobalVariables.MaxComputationMilliseconds = 100000; //100 seconds
-  theGlobalVariables.takeActionAfterComputationMilliseconds = 200000;
+  theGlobalVariables.replyAfterComputationMilliseconds = 200000; // 200 seconds
   List<std::string> theEmails, thePasswords;
   MathRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
   MathRoutines::StringSplitDefaultDelimiters(userPasswords, thePasswords);
-  if (thePasswords.size > 0)
-    if (thePasswords.size != theEmails.size)
-    { comments << "Different number of usernames/emails and passwords: " << theEmails.size << " emails and "
+  if (thePasswords.size > 0) {
+    if (thePasswords.size != theEmails.size) {
+      comments << "Different number of usernames/emails and passwords: " << theEmails.size << " emails and "
       << thePasswords.size << " passwords. "
       << "If you want to enter usernames without password, you need to leave the password input box empty. ";
       return false;
     }
+  }
   //stOutput << " <br>Debug: creating users: " << theEmails.ToStringCommaDelimited()
   //<< "<br>Number of users: " << theEmails.size
   //<< "<br>Number of passwords: " << thePasswords.size << "<hr>Passwords string: " << thePasswords;
@@ -959,8 +962,8 @@ bool DatabaseRoutineS::AddUsersFromEmails
   outputNumUpdatedUsers = 0;
   //stOutput << "DEBUG: courseHome: " << currentUser.currentCourses.value
   //<< "\n<br>\ncurrentUser.currentTable: " << currentUser.currentTable.value << "\n<br>\n";
-  for (int i = 0; i < theEmails.size; i ++)
-  { currentUser.reset();
+  for (int i = 0; i < theEmails.size; i ++) {
+    currentUser.reset();
     currentUser.username = theEmails[i];
     currentUser.courseInDB = theGlobalVariables.GetWebInput("courseHome");
     currentUser.sectionInDB = userGroup;
@@ -969,41 +972,44 @@ bool DatabaseRoutineS::AddUsersFromEmails
     currentUser.userRole = userRole;
 
     bool isEmail = true;
-    if (theEmails[i].find('@') == std::string::npos)
-    { isEmail = false;
+    if (theEmails[i].find('@') == std::string::npos) {
+      isEmail = false;
       currentUser.email = "";
-    } else
+    } else {
       currentUser.email = theEmails[i];
+    }
     JSData foundUser;
     List<JSData> findUser;
     findUser.SetSize(2);
     findUser[0][DatabaseStrings::labelUsername] = currentUser.username;
     findUser[1][DatabaseStrings::labelEmail] = currentUser.email;
-    //stOutput << "DEBUG: user json: " << currentUser.ToJSON();
-    if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(DatabaseStrings::tableUsers, findUser, foundUser, &comments))
-    { if (!currentUser.Iexist(&comments))
-      { if (!currentUser.StoreToDB(false, &comments))
-        { comments << "Failed to create user: " << currentUser.username;
+    if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(DatabaseStrings::tableUsers, findUser, foundUser, &comments)) {
+      if (!currentUser.Iexist(&comments)) {
+        if (!currentUser.StoreToDB(false, &comments)) {
+          comments << "Failed to create user: " << currentUser.username;
           result = false;
           continue;
-        } else
+        } else {
           outputNumNewUsers ++;
+        }
       }
-      if (isEmail)
+      if (isEmail) {
         DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, foundUser, &comments);
-    } else
-    { outputNumUpdatedUsers ++;
+      }
+    } else {
+      outputNumUpdatedUsers ++;
       //currentUser may have its updated entries modified by the functions above.
-      //stOutput << "DEBUG: before updating user json: " << currentUser.ToJSON().ToString(false);
       if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, currentUser.ToJSON(), &comments))
         result = false;
     }
-    if (thePasswords.size == 0 || thePasswords.size != theEmails.size)
-    { if (currentUser.actualHashedSaltedPassword == "" && currentUser.actualAuthenticationToken == "")
-        if (!currentUser.ComputeAndStoreActivationToken(&comments))
+    if (thePasswords.size == 0 || thePasswords.size != theEmails.size) {
+      if (currentUser.actualHashedSaltedPassword == "" && currentUser.actualAuthenticationToken == "") {
+        if (!currentUser.ComputeAndStoreActivationToken(&comments)) {
           result = false;
-    } else
-    { currentUser.enteredPassword = HtmlRoutines::ConvertStringToURLString(thePasswords[i], false);
+        }
+      }
+    } else {
+      currentUser.enteredPassword = HtmlRoutines::ConvertStringToURLString(thePasswords[i], false);
       //<-Passwords are ONE-LAYER url-encoded
       //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
       //<-Incoming pluses must be re-coded as spaces (%20).
@@ -1020,8 +1026,8 @@ bool DatabaseRoutineS::AddUsersFromEmails
   }
   if (!result)
     comments << "<br>Failed to create all users. ";
-  if (doSendEmails)
-  { std::stringstream* commentsGeneralSensitive = 0;
+  if (doSendEmails) {
+    std::stringstream* commentsGeneralSensitive = 0;
     if (theGlobalVariables.UserDefaultHasAdminRights())
       commentsGeneralSensitive = &comments;
     if (!DatabaseRoutineS::SendActivationEmail(theEmails, &comments, &comments, commentsGeneralSensitive))
@@ -1030,40 +1036,44 @@ bool DatabaseRoutineS::AddUsersFromEmails
   return result;
 }
 
-bool UserCalculator::GetActivationAbsoluteAddress(std::string& output, std::stringstream& comments)
-{ MacroRegisterFunctionWithName("UserCalculator::GetActivationAbsoluteAddress");
-  return this->GetActivationAddress
-  (output, theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable, comments);
+bool UserCalculator::GetActivationAbsoluteAddress(std::string& output, std::stringstream& comments) {
+  MacroRegisterFunctionWithName("UserCalculator::GetActivationAbsoluteAddress");
+  return this->GetActivationAddress(
+    output, theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable, comments
+  );
 }
 
-bool UserCalculator::GetActivationAddress
-(std::string& output, const std::string& calculatorBase, std::stringstream& comments)
-{ MacroRegisterFunctionWithName("UserCalculator::GetActivationAbsoluteAddress");
+bool UserCalculator::GetActivationAddress(
+  std::string& output, const std::string& calculatorBase, std::stringstream& comments
+) {
+  MacroRegisterFunctionWithName("UserCalculator::GetActivationAddress");
   if (!this->LoadFromDB(&comments, &comments))
     return false;
   this->actualActivationToken = this->GetSelectedRowEntry("activationToken");
-  if (this->actualActivationToken == "")
-  { comments << "Failed to fetch activation token for user: " << this->username;
+  if (this->actualActivationToken == "") {
+    comments << "Failed to fetch activation token for user: " << this->username;
     return false;
   }
-  if (this->actualActivationToken == "activated")
-  { comments << "Account of user: " << this->username << "already activated";
+  if (this->actualActivationToken == "activated") {
+    comments << "Account of user: " << this->username << "already activated";
     return false;
   }
-  output = this->GetActivationAddressFromActivationToken
-  (this->actualActivationToken, calculatorBase, this->username, this->email);
+  output = this->GetActivationAddressFromActivationToken(
+    this->actualActivationToken, calculatorBase, this->username, this->email
+  );
   return true;
 }
 
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
 #include "vpfHeader3Calculator5_Database_Mongo.h"
 
-bool CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords
-(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::innerRepairDatabaseEmailRecords");
+bool CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("DatabaseRoutines::innerRepairDatabaseEmailRecords");
   std::stringstream out;
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
-  { out << "Function available to logged-in admins only. ";
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+    out << "Function available to logged-in admins only. ";
     return output.AssignValue(out.str(), theCommands);
   }
   theGlobalVariables.MaxComputationMilliseconds = 20000000; //20k seconds, ok as this is admin-only.

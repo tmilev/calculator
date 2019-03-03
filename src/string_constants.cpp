@@ -36,6 +36,9 @@ std::string WebAPI::result::syntaxErrors = "syntaxErrors";
 std::string WebAPI::result::resultLabel = "result";
 std::string WebAPI::result::badInput = "badInput";
 std::string WebAPI::result::comments = "comments";
+std::string WebAPI::result::timeOut = "timeOut";
+std::string WebAPI::result::timeOutComments = "timeOutComments";
+std::string WebAPI::result::workerId = "workerId";
 std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 
 

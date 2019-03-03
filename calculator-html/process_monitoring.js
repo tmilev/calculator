@@ -24,6 +24,8 @@ Monitor.prototype.start = function(inputWorkerNumber) {
 }
 
 Monitor.prototype.progressReport = function() { 
+  //Process monitor is started by 
+  console.log("DEBUG: running monitor.progressReport");
   if (this.isFinished) {
     return;
   }

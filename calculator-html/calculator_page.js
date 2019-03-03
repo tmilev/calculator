@@ -8,6 +8,7 @@ const miscellaneous = require('./miscellaneous');
 const BufferCalculator = require('./buffer').BufferCalculator;
 const PanelExpandable = require('./panels').PanelExpandable;
 const mathjax = require('./mathjax-calculator-setup');
+const processMonitoring = require('./process_monitoring');
 
 function Calculator() {
 
@@ -214,10 +215,12 @@ Calculator.prototype.writeResult = function(
   inputParsed,
   panelIdPairs,
 ) {
-  if (inputParsed.result === undefined) {
-    if (inputParsed.resultHtml !== undefined) {
-      buffer.write(inputParsed.resultHtml);
+  console.log("DEBUG: writing result: " + JSON.stringify(inputParsed));
+  if (inputParsed.timeOut === true) {
+    if (inputParsed.timeOutComments !== undefined) {
+      buffer.write(inputParsed.timeOutComments);
     }
+    processMonitoring.monitor.start(inputParsed.workerId);
     return;
   }
   buffer.write(`<table><tr><td>`);
@@ -270,6 +273,7 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
   var panelIdPairs = [];
   try {
     inputParsed = JSON.parse(input);
+    console.log("DEBUG: result: " + JSON.stringify(inputParsed));
     inputHtml = inputParsed.resultHtml;
     var buffer = new BufferCalculator();
     this.writeCrashReport(buffer, inputParsed);

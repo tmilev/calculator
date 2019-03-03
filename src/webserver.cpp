@@ -3731,46 +3731,42 @@ void WebWorker::OutputShowIndicatorOnTimeout() {
   theGlobalVariables.flagTimedOutComputationIsDone = false;
   //ProgressReportWebServer theReport("WebServer::OutputShowIndicatorOnTimeout");
   logWorker << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
-  std::stringstream out;
+  std::stringstream timeOutComments;
   JSData result;
-  if (theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed) {
-    out << "Your computation is taking more than "
+  result[WebAPI::result::timeOut] = true;
+  if (!theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed) {
+    timeOutComments << "Your computation is taking more than "
     << theGlobalVariables.replyAfterComputationMilliseconds
     << " ms. ";
   }
   if (!theGlobalVariables.flagAllowProcessMonitoring) {
-    out << "Monitoring computations is not allowed on this server.<br> "
+    timeOutComments << "Monitoring computations is not allowed on this server.<br> "
     << "If you want to carry out a long computation you will need to install the calculator on your own machine.<br> "
     << "At the moment, the only way to do that is by setting the variable "
     << "theGlobalVariables.flagAllowProcessMonitoring to true, "
     << "achieved through manually compiling the calculator from source.<br> ";
-    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::result::timeOutComments] = timeOutComments.str();
     return;
   }
-  if (this->indexInParent < 0)
+  result[WebAPI::result::workerId] = this->indexInParent + 1;
+  result[WebAPI::result::timeOutComments] = timeOutComments.str();
+  if (this->indexInParent < 0) {
     crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
-  out << "<script language = \"javascript\">\n"
-  << "window.calculator.processMonitoring.monitor.start("
-  << this->indexInParent + 1
-  << ");\n"
-  << "</script>";
-  result[WebAPI::result::resultHtml] = out.str();
+  }
   stOutput << result.ToString(false);
   this->SendAllBytesWithHeaders();
-  for (int i = 0; i < this->parent->theWorkers.size; i ++)
-    if (i != this->indexInParent)
+  for (int i = 0; i < this->parent->theWorkers.size; i ++) {
+    if (i != this->indexInParent) {
       this->parent->theWorkers[i].Release();
+    }
+  }
   this->parent->Release(this->connectedSocketID);
   //set flags properly:
   //we need to rewire the standard output and the crashing mechanism:
   crash.CleanUpFunction = WebWorker::OutputCrashAfterTimeout;
   //note that standard output cannot be rewired in the beginning of the function as we use the old stOutput
   stOutput.theOutputFunction = WebWorker::StandardOutputAfterTimeOut;
-  //theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: continuing computation.");
   this->PauseIndicatorPipeInUse.mutexForProcessBlocking.GetElement().UnlockMe();
-  //theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: exiting function.");
-  //this->SignalIamDoneReleaseEverything();
-  //logWorker << consoleGreen("Indicator: released everything and signalled end.") << logger::endL;
 }
 
 std::string WebWorker::ToStringAddressRequest() const {

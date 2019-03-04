@@ -75,11 +75,11 @@ bool MutexRecursiveWrapper::isLockedUnsafeUseForWINguiOnly()
   return this->flagUnsafeFlagForDebuggingIsLocked;
 }
 
-void MutexRecursiveWrapper::LockMe()
-{ //std::cout << "checking consistency from lockme";
+void MutexRecursiveWrapper::LockMe() {
   this->CheckConsistency();
-  if (!this->InitializeIfNeeded())
+  if (!this->InitializeIfNeeded()) {
     return;
+  }
   try {
     if (this->flagUnsafeFlagForDebuggingIsLocked) {
       int currentThreadId = ThreadData::getCurrentThreadId();
@@ -88,20 +88,18 @@ void MutexRecursiveWrapper::LockMe()
         << this->mutexName << "] thread: "
         << currentThreadId
         << "." << logger::endL
-        << theGlobalVariables.ToStringProgressReportHtml() << logger::endL;
+        << theGlobalVariables.ToStringProgressReportHtmL() << logger::endL;
       }
     }
     ((std::mutex*)this->theMutexImplementation)->lock();
-  }
-  catch (int theException)
-  { crash << "Fatal error: mutex lock failed." << crash;
+  } catch (int theException) {
+    crash << "Fatal error: mutex lock failed." << crash;
   }
   this->flagUnsafeFlagForDebuggingIsLocked = true;
   this->lastLockerThread = ThreadData::getCurrentThreadId();
 }
 
-void MutexRecursiveWrapper::UnlockMe()
-{// std::cout << "checking consistency from unlockme";
+void MutexRecursiveWrapper::UnlockMe() {
   this->CheckConsistency();
   if (!this->InitializeIfNeeded())
     return;

@@ -19,6 +19,7 @@ function Calculator() {
   this.submissionCalculatorCounter = 0;
   this.lastSubmittedInput = "";
   this.numberOfCalculatorPanels = 0;
+  processMonitoring.monitor.ownerCalculator = this;
 }
 
 function createSelectionNoFocus(field, start, end) { 
@@ -200,27 +201,51 @@ Calculator.prototype.getComputationLink = function(input) {
   return stringifiedHash;
 }
 
-Calculator.prototype.writeCrashReport = function(
-  /**@type {BufferCalculator} */ buffer,
-  inputParsed,
-) {
-  if (inputParsed.crashReport === undefined) {
-    return;
-  }
-  buffer.write(inputParsed.crashReport);
-}
-
-Calculator.prototype.writeResult = function(
-  /**@type {BufferCalculator} */ buffer,
+Calculator.prototype.writeResultUndefined = function(
+  /**@type {BufferCalculator} */ 
+  buffer,
   inputParsed,
   panelIdPairs,
 ) {
-  console.log("DEBUG: writing result: " + JSON.stringify(inputParsed));
+  if (inputParsed.resultHtml !== undefined) {
+    buffer.write(inputParsed.resultHtml);
+    return;
+  }
+  if (inputParsed.resultStringified !== undefined) {
+    try {
+      var resultNonStringified;
+      resultNonStringified = JSON.parse(inputParsed.resultStringified);
+      //warning: this is a recursive call:
+      this.writeResult(buffer, resultNonStringified, panelIdPairs);
+    } catch (e) {
+      buffer.write(`Failed to parse result. ${e}. The raw result was: <br>${inputParsed.resultStringified}`);
+    }
+    return;
+  }
+  if (inputParsed.crashReport === undefined || inputParsed.crashReport === null) {
+    buffer.write("Unexpected input. <br>");
+    buffer.write(JSON.stringify(inputParsed));
+  }
+}
+
+Calculator.prototype.writeResult = function(
+  /**@type {BufferCalculator} */ 
+  buffer,
+  inputParsed,
+  panelIdPairs,
+) {
+  if (inputParsed.crashReport !== undefined) {
+    buffer.write(inputParsed.crashReport);
+  }
   if (inputParsed.timeOut === true) {
     if (inputParsed.timeOutComments !== undefined) {
       buffer.write(inputParsed.timeOutComments);
     }
     processMonitoring.monitor.start(inputParsed.workerId);
+    return;
+  }
+  if (inputParsed.result === undefined) {
+    this.writeResultUndefined(buffer, inputParsed, panelIdPairs);
     return;
   }
   buffer.write(`<table><tr><td>`);
@@ -273,10 +298,11 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
   var panelIdPairs = [];
   try {
     inputParsed = JSON.parse(input);
-    console.log("DEBUG: result: " + JSON.stringify(inputParsed));
+    //console.log("DEBUG: result: " + JSON.stringify(inputParsed));
     inputHtml = inputParsed.resultHtml;
     var buffer = new BufferCalculator();
-    this.writeCrashReport(buffer, inputParsed);
+    var progReportTimer = document.getElementById(ids.domElements.monitoring.progressTimer);
+    progReportTimer.innerHTML = "";
     this.writeResult(buffer, inputParsed, panelIdPairs);
     inputHtml = buffer.toString();
   } catch (e) {

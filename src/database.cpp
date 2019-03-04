@@ -9,17 +9,18 @@
 
 ProjectInformationInstance ProjectInfoVpfDatabasecpp(__FILE__, "Database-related code. ");
 
-bool DatabaseRoutinesGlobalFunctions::SetPassword
-(const std::string& inputUsername, const std::string& inputNewPassword, std::string& outputAuthenticationToken,
- std::stringstream& comments)
-{ (void) inputUsername;
+bool DatabaseRoutinesGlobalFunctions::SetPassword(
+  const std::string& inputUsername, const std::string& inputNewPassword, std::string& outputAuthenticationToken,
+  std::stringstream& comments
+) {
+  (void) inputUsername;
   (void) inputNewPassword;
   (void) outputAuthenticationToken;
   (void) comments;
 #ifdef MACRO_use_MongoDB
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::SetPassword");
-  if (!theGlobalVariables.flagLoggedIn)
-  { comments << "Changing passwords allowed for logged-in users only. ";
+  if (!theGlobalVariables.flagLoggedIn) {
+    comments << "Changing passwords allowed for logged-in users only. ";
     return false;
   }
   UserCalculator theUser;
@@ -35,9 +36,10 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword
 #endif // MACRO_use_MongoDB
 }
 
-bool DatabaseRoutinesGlobalFunctions::UserExists
-(const std::string& inputUsername, std::stringstream& comments)
-{ (void) inputUsername;
+bool DatabaseRoutinesGlobalFunctions::UserExists(
+  const std::string& inputUsername, std::stringstream& comments
+){
+  (void) inputUsername;
   (void) comments;
 #ifdef MACRO_use_MongoDB
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserExists");
@@ -54,8 +56,8 @@ bool DatabaseRoutinesGlobalFunctions::UserExists
 #endif // MACRO_use_MongoDB
 }
 
-bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights()
-{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights");
+bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights() {
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights");
   if (theGlobalVariables.UserDefaultHasAdminRights())
     return true;
 #ifdef MACRO_use_MongoDB
@@ -68,19 +70,15 @@ bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights()
 #endif
 }
 
-bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
-{
+bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase() {
 #ifdef MACRO_use_MongoDB
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LogoutViaDatabase");
-  if (!theGlobalVariables.flagLoggedIn)
-  { //stOutput << "but not resetting token. ";
+  if (!theGlobalVariables.flagLoggedIn) {
     return true;
   }
   UserCalculator theUser;
   theUser.UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  //stOutput << "<hr>DEBUG: logout: resetting token ... ";
   theUser.ResetAuthenticationToken(0);
-//  stOutput << "token reset!... <hr>";
   theGlobalVariables.SetWebInpuT("authenticationToken", "");
   theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
   return true;
@@ -89,8 +87,8 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 #endif
 }
 
-void GlobalVariables::initModifiableDatabaseFields()
-{ MacroRegisterFunctionWithName("GlobalVariables::initModifiableDatabaseFields");
+void GlobalVariables::initModifiableDatabaseFields() {
+  MacroRegisterFunctionWithName("GlobalVariables::initModifiableDatabaseFields");
   List<List<std::string> >& modifiableData = theGlobalVariables.databaseModifiableFields;
   List<std::string> currentEntry;
   modifiableData.Reserve(10);
@@ -121,8 +119,8 @@ void GlobalVariables::initModifiableDatabaseFields()
   outputFile << "module.exports = {modifiableDatabaseData};";
 }
 
-ProblemData::ProblemData()
-{ this->randomSeed = 0;
+ProblemData::ProblemData() {
+  this->randomSeed = 0;
   this->flagRandomSeedGiven = false;
   this->numCorrectlyAnswered = 0;
   this->totalNumSubmissions = 0;
@@ -131,26 +129,27 @@ ProblemData::ProblemData()
   this->flagProblemWeightIsOK = false;
 }
 
-void ProblemData::AddEmptyAnswerIdOnTop(const std::string& inputAnswerId)
-{ Answer theAnswer;
+void ProblemData::AddEmptyAnswerIdOnTop(const std::string& inputAnswerId) {
+  Answer theAnswer;
   theAnswer.answerId = inputAnswerId;
   this->theAnswers.SetKeyValue(inputAnswerId, theAnswer);
 }
 
-std::string ProblemData::ToStringAvailableAnswerIds()
-{ std::stringstream out;
+std::string ProblemData::ToStringAvailableAnswerIds() {
+  std::stringstream out;
   out << "Available answer ids: ";
-  for (int i = 0; i < this->theAnswers.size(); i ++)
-  { out << this->theAnswers[i].answerId;
+  for (int i = 0; i < this->theAnswers.size(); i ++) {
+    out << this->theAnswers[i].answerId;
     if (i != this->theAnswers.size() - 1)
       out << ", ";
   }
   return out.str();
 }
 
-bool ProblemDataAdministrative::GetWeightFromCoursE
-(const std::string& theCourseNonURLed, Rational& output, std::string *outputAsGivenByInstructor)
-{ MacroRegisterFunctionWithName("ProblemDataAdministrative::GetWeightFromSection");
+bool ProblemDataAdministrative::GetWeightFromCoursE(
+  const std::string& theCourseNonURLed, Rational& output, std::string* outputAsGivenByInstructor
+) {
+  MacroRegisterFunctionWithName("ProblemDataAdministrative::GetWeightFromSection");
   if (!this->problemWeightsPerCoursE.Contains(theCourseNonURLed))
     return false;
   std::string tempString;
@@ -160,31 +159,28 @@ bool ProblemDataAdministrative::GetWeightFromCoursE
   return output.AssignStringFailureAllowed(*outputAsGivenByInstructor);
 }
 
-std::string ProblemDataAdministrative::ToString() const
-{ std::stringstream out;
+std::string ProblemDataAdministrative::ToString() const {
+  std::stringstream out;
   out << this->deadlinesPerSection.ToStringHtml();
   out << this->problemWeightsPerCoursE.ToStringHtml();
   return out.str();
 }
 
-bool ProblemData::CheckConsistency() const
-{ MacroRegisterFunctionWithName("ProblemData::CheckConsistency");
-  for (int i = 0; i < this->theAnswers.size(); i ++)
-  { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].answerId) == "")
+bool ProblemData::CheckConsistency() const {
+  MacroRegisterFunctionWithName("ProblemData::CheckConsistency");
+  for (int i = 0; i < this->theAnswers.size(); i ++) {
+    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].answerId) == "") {
       crash << "This is not supposed to happen: empty answer id." << crash;
-//    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield) == "")
-//      crash << "This is not supposed to happen: empty idMQfield. The answer id is: "
-//      << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>All the answers are: "
-//      << this->ToString() << crash;
+    }
   }
   return true;
 }
 
-bool ProblemData::CheckConsistencyMQids() const
-{ MacroRegisterFunctionWithName("ProblemData::CheckConsistencyMQids");
-  for (int i = 0; i < this->theAnswers.size(); i ++)
-    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield) == "")
-    { std::stringstream errorStream;
+bool ProblemData::CheckConsistencyMQids() const {
+  MacroRegisterFunctionWithName("ProblemData::CheckConsistencyMQids");
+  for (int i = 0; i < this->theAnswers.size(); i ++) {
+    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield) == "") {
+      std::stringstream errorStream;
       errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
       << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>Answer information: "
       << this->ToString() << "<br>";
@@ -193,18 +189,19 @@ bool ProblemData::CheckConsistencyMQids() const
       else
         crash << errorStream.str() << crash;
     }
+  }
   return true;
 }
 
-std::string ProblemData::ToString() const
-{ std::stringstream out;
+std::string ProblemData::ToString() const {
+  std::stringstream out;
   out << "Problem data. "
   << "Random seed: " << this->randomSeed;
   if (this->flagRandomSeedGiven)
     out << " (given)";
   out << ". <br>";
-  for (int i = 0; i < this->theAnswers.size(); i ++)
-  { Answer& currentA = this->theAnswers[i];
+  for (int i = 0; i < this->theAnswers.size(); i ++) {
+    Answer& currentA = this->theAnswers[i];
     out << "AnswerId: " << currentA.answerId;
     out << ", numCorrectSubmissions: " << currentA.numCorrectSubmissions;
     out << ", numSubmissions: " << currentA.numSubmissions;
@@ -219,13 +216,13 @@ std::string ProblemData::ToString() const
   return out.str();
 }
 
-UserCalculator::UserCalculator()
-{ this->flagNewAuthenticationTokenComputedUserNeedsIt = false;
+UserCalculator::UserCalculator() {
+  this->flagNewAuthenticationTokenComputedUserNeedsIt = false;
   this->approximateHoursSinceLastTokenWasIssued = 2;
 }
 
-UserCalculator::~UserCalculator()
-{ for (unsigned i = 0; i < this->enteredPassword.size(); i ++)
+UserCalculator::~UserCalculator() {
+  for (unsigned i = 0; i < this->enteredPassword.size(); i ++)
     this->enteredPassword[i] = ' ';
   for (unsigned i = 0; i < this->usernameHashedPlusPassWordHashed.size(); i ++)
     this->usernameHashedPlusPassWordHashed[i] = ' ';
@@ -237,8 +234,8 @@ UserCalculator::~UserCalculator()
 
 #ifdef MACRO_use_MongoDB
 
-std::string UserCalculator::ToStringSelectedColumns()
-{ MacroRegisterFunctionWithName("DatabaseRoutines::ToStringSelectedColumns");
+std::string UserCalculator::ToStringSelectedColumns() {
+  MacroRegisterFunctionWithName("DatabaseRoutines::ToStringSelectedColumns");
   std::stringstream out;
   out << this->selectedColumnsUnsafe.size << " columns selected. ";
   for (int i = 0; i < this->selectedColumnsUnsafe.size; i ++)
@@ -246,8 +243,8 @@ std::string UserCalculator::ToStringSelectedColumns()
   return out.str();
 }
 
-std::string UserCalculator::ToString()
-{ MacroRegisterFunctionWithName("UserCalculator::ToString");
+std::string UserCalculator::ToString() {
+  MacroRegisterFunctionWithName("UserCalculator::ToString");
   std::stringstream out;
 
   out << "Calculator user: " << this->username
@@ -257,8 +254,8 @@ std::string UserCalculator::ToString()
   << "<br>Course: computed: " << this->courseInDB << ", in DB: " << this->courseComputed;
 
   Rational weightRat;
-  for (int i = 0; i < this->theProblemData.size(); i ++)
-  { out << "<br>Problem: " << this->theProblemData.theKeys[i] << "; random seed: "
+  for (int i = 0; i < this->theProblemData.size(); i ++) {
+    out << "<br>Problem: " << this->theProblemData.theKeys[i] << "; random seed: "
     << this->theProblemData.theValues[i].randomSeed << "; numSubmissions: "
     << this->theProblemData.theValues[i].totalNumSubmissions
     << "; correct: "
@@ -276,10 +273,11 @@ std::string UserCalculator::ToString()
   return out.str();
 }
 
-bool UserCalculator::FetchOneColumn
-(const std::string& columnNameUnsafe, std::string& outputUnsafe,
- std::stringstream* failureComments)
-{ MacroRegisterFunctionWithName("UserCalculator::FetchOneColumn");
+bool UserCalculator::FetchOneColumn(
+  const std::string& columnNameUnsafe, std::string& outputUnsafe,
+  std::stringstream* failureComments
+) {
+  MacroRegisterFunctionWithName("UserCalculator::FetchOneColumn");
   (void) columnNameUnsafe;
   (void) outputUnsafe;
   (void) failureComments;
@@ -287,11 +285,9 @@ bool UserCalculator::FetchOneColumn
   return false;
 }
 
-bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::AuthenticateWithToken");
+bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("UserCalculator::AuthenticateWithToken");
   (void) commentsOnFailure;
-//  stOutput << "<br>DEBUG: token-authenticating user: " << this->username.value << " with entered token: " << this->enteredAuthenticationToken.value
-//  << " against actual token: " << this->actualAuthenticationToken.value;
   if (this->enteredAuthenticationToken == "")
     return false;
   TimeWrapper now;
@@ -302,40 +298,39 @@ bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure)
   return this->enteredAuthenticationToken == this->actualAuthenticationToken;
 }
 
-bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstream* commentsGeneral)
-{ MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
+bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstream* commentsGeneral) {
+  MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
   (void) failureStream;
   (void) commentsGeneral;
   double startTime = theGlobalVariables.GetElapsedSeconds();
   if (!DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(*this))
     return false;
   this->ComputeCourseInfo();
-  //stOutput << "DEBUG:  GOT to hereE!!!";
-  if (this->deadlineSchema != "")
-  { //stOutput << "DEBUG: Fetching deadline schema id: " << this->courseInfo.deadlineSchemaIDComputed;
+  if (this->deadlineSchema != "") {
     JSData findDeadlinesQuery, outDeadlinesQuery;
     findDeadlinesQuery[DatabaseStrings::labelDeadlinesSchema] = this->deadlineSchema;
-    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
-        (DatabaseStrings::tableDeadlines, findDeadlinesQuery, outDeadlinesQuery, failureStream, true))
+    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(
+      DatabaseStrings::tableDeadlines, findDeadlinesQuery, outDeadlinesQuery, failureStream, true
+    )) {
       this->deadlines = outDeadlinesQuery[DatabaseStrings::labelDeadlines];
+    }
   }
-  //stOutput << "DEBUG: deadlineInfo: " << this->deadlines.ToString(false);
-  //stOutput << "DEBUG: problem info row id: " << this->problemInfoRowId.value;
-  if (this->problemWeightSchema != "")
-  { JSData findProblemWeightsQuery, outProblemWeightsQuery;
-    //stOutput << "DEBUG: Problem weight schema: " << this->problemWeightSchema;
+  if (this->problemWeightSchema != "") {
+    JSData findProblemWeightsQuery, outProblemWeightsQuery;
     findProblemWeightsQuery[DatabaseStrings::labelProblemWeightsSchema] = this->problemWeightSchema;
-    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
-        (DatabaseStrings::tableProblemWeights, findProblemWeightsQuery, outProblemWeightsQuery, failureStream, true))
+    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(
+      DatabaseStrings::tableProblemWeights, findProblemWeightsQuery, outProblemWeightsQuery, failureStream, true
+    )) {
       this->problemWeights = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights];
+    }
   }
   theGlobalVariables.timeStats["userLoadTime"] = theGlobalVariables.GetElapsedSeconds() - startTime;
   return true;
 }
 #endif
 
-bool UserCalculatorData::LoadFromJSON(JSData& input)
-{ MacroRegisterFunctionWithName("UserCalculatorData::LoadFromJSON");
+bool UserCalculatorData::LoadFromJSON(JSData& input) {
+  MacroRegisterFunctionWithName("UserCalculatorData::LoadFromJSON");
   this->userId                            = input[DatabaseStrings::labelUserId                            ].string;
   this->username                          = input[DatabaseStrings::labelUsername                          ].string;
   this->email                             = input[DatabaseStrings::labelEmail                             ].string;
@@ -360,8 +355,8 @@ bool UserCalculatorData::LoadFromJSON(JSData& input)
   return true;
 }
 
-JSData UserCalculatorData::ToJSON()
-{ MacroRegisterFunctionWithName("UserCalculatorData::ToJSON");
+JSData UserCalculatorData::ToJSON() {
+  MacroRegisterFunctionWithName("UserCalculatorData::ToJSON");
   JSData result;
   result[DatabaseStrings::labelUserId                            ] = this->userId                                ;
   result[DatabaseStrings::labelUsername                          ] = this->username                              ;
@@ -389,8 +384,8 @@ JSData UserCalculatorData::ToJSON()
   for (int i = 0; i < this->sectionsTaught.size; i ++)
     sectionsTaughtList[i] = this->sectionsTaught[i];
   result[DatabaseStrings::labelSectionsTaught] = sectionsTaughtList;
-  for (int i = result.objects.size() - 1; i >= 0; i --)
-  { JSData& currentValue = result.objects.theValues[i];
+  for (int i = result.objects.size() - 1; i >= 0; i --) {
+    JSData& currentValue = result.objects.theValues[i];
     if (currentValue.string == "" && currentValue.type == JSData::JSstring)
       result.objects.RemoveKey(result.objects.theKeys[i]);
   }
@@ -398,17 +393,20 @@ JSData UserCalculatorData::ToJSON()
 }
 
 #ifdef MACRO_use_MongoDB
-bool UserCalculatorData::ComputeCourseInfo()
-{ MacroRegisterFunctionWithName("UserCalculator::ComputeCourseInfo");
+bool UserCalculatorData::ComputeCourseInfo() {
+  MacroRegisterFunctionWithName("UserCalculator::ComputeCourseInfo");
   bool isAdmin = (this->userRole == "admin" && this->username == theGlobalVariables.userDefault.username);
-  if (theGlobalVariables.UserStudentVieWOn() && isAdmin &&
-      theGlobalVariables.GetWebInput("studentSection") != "")
-  //<- warning, the user may not be
-  //fully logged-in yet so theGlobalVariables.UserDefaultHasAdminRights()
-  //does not work right.
+  if (
+    theGlobalVariables.UserStudentVieWOn() && isAdmin &&
+    theGlobalVariables.GetWebInput("studentSection") != ""
+  ) {
+    //<- warning, the user may not be
+    //fully logged-in yet so theGlobalVariables.UserDefaultHasAdminRights()
+    //does not work right.
     this->sectionComputed = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
-  else
+  } else {
     this->sectionComputed = this->sectionInDB;
+  }
   if (isAdmin && theGlobalVariables.GetWebInput("courseHome") != "")
     this->courseComputed =
     HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
@@ -423,27 +421,22 @@ bool UserCalculatorData::ComputeCourseInfo()
   return true;
 }
 
-bool UserCalculator::Authenticate(std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::Authenticate");
-  //stOutput << "<hr>DEBUG: Authenticating user: " << this->username.value << " with password: " << this->enteredPassword;
+bool UserCalculator::Authenticate(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   std::stringstream secondCommentsStream;
-  if (!this->LoadFromDB(&secondCommentsStream))
-  { if (commentsOnFailure != 0)
-    { *commentsOnFailure << "User " << this->username << " does not exist. ";
+  if (!this->LoadFromDB(&secondCommentsStream)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "User " << this->username << " does not exist. ";
       if (theGlobalVariables.flagRequestComingLocally)
         *commentsOnFailure << "If this is your first run, set the username to "
         << "admin and enter the password you desire. "
         << "The password will then be automatically set. "
         << "To add further accounts login as admin and go to 'Accounts'. ";
     }
-    //stOutput << "<hr>DEBUG: user " << this->username.value << " does not exist. More details: "
-    //<< secondCommentsStream.str() << "<hr>";
     return false;
   }
   if (this->AuthenticateWithToken(&secondCommentsStream))
     return true;
-  //*commentsOnFailure << " DEBUG: User could not authenticate with token. Actual auth token: "
-  //<< this->actualShaonedSaltedPassword;
   bool result = this->AuthenticateWithUserNameAndPass(commentsOnFailure);
   if (this->enteredPassword != "")
     this->ResetAuthenticationToken(commentsOnFailure);
@@ -451,22 +444,23 @@ bool UserCalculator::Authenticate(std::stringstream* commentsOnFailure)
   return result;
 }
 
-bool UserCalculator::AuthenticateWithUserNameAndPass(std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::Authenticate");
+bool UserCalculator::AuthenticateWithUserNameAndPass(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   (void) commentsOnFailure;
   this->ComputeHashedSaltedPassword();
   return this->enteredHashedSaltedPassword == this->actualHashedSaltedPassword;
 }
 
-bool UserCalculator::Iexist(std::stringstream* comments)
-{ MacroRegisterFunctionWithName("UserCalculator::Iexist");
+bool UserCalculator::Iexist(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("UserCalculator::Iexist");
   JSData notUsed;
-  return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome
-  (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), notUsed, comments);
+  return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(
+    DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), notUsed, comments
+  );
 }
 
-void UserCalculator::ComputeHashedSaltedPassword()
-{ MacroRegisterFunctionWithName("UserCalculator::ComputeShaonedSaltedPassword");
+void UserCalculator::ComputeHashedSaltedPassword() {
+  MacroRegisterFunctionWithName("UserCalculator::ComputeShaonedSaltedPassword");
   this->usernameHashedPlusPassWordHashed.resize(Crypto::LengthSha3DefaultInBytes * 2);
   List<unsigned char> hasher;
   Crypto::computeSha3_256(this->enteredPassword, hasher);
@@ -481,10 +475,9 @@ void UserCalculator::ComputeHashedSaltedPassword()
   this->enteredHashedSaltedPassword = Crypto::computeSha3_256OutputBase64URL(this->usernameHashedPlusPassWordHashed);
 }
 
-bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::ResetAuthenticationToken");
+bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("UserCalculator::ResetAuthenticationToken");
   TimeWrapper now;
-  //stOutput << "<hr>Resetting authentication token... ";
   now.AssignLocalTime();
   std::stringstream out;
   out << now.theTimeStringNonReadable << rand();
@@ -493,16 +486,17 @@ bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailu
   findUser[DatabaseStrings::labelUsername] = this->username;
   setUser[DatabaseStrings::labelAuthenticationToken] = this->actualAuthenticationToken;
   setUser[DatabaseStrings::labelTimeOfAuthenticationTokenCreation] = now.theTimeStringNonReadable;
-  DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-  (DatabaseStrings::tableUsers, findUser, setUser, 0, commentsOnFailure);
+  DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+    DatabaseStrings::tableUsers, findUser, setUser, 0, commentsOnFailure
+  );
   this->flagNewAuthenticationTokenComputedUserNeedsIt = true;
   return true;
 }
 
-bool UserCalculator::SetPassword(std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::SetPassword");
-  if (this->enteredPassword == "")
-  { if (commentsOnFailure != 0)
+bool UserCalculator::SetPassword(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("UserCalculator::SetPassword");
+  if (this->enteredPassword == "") {
+    if (commentsOnFailure != 0)
       *commentsOnFailure << "Empty password not allowed. ";
     return false;
   }
@@ -510,17 +504,18 @@ bool UserCalculator::SetPassword(std::stringstream* commentsOnFailure)
   JSData findUser, setUser;
   findUser[DatabaseStrings::labelUsername] = this->username;
   setUser[DatabaseStrings::labelPassword] = this->enteredHashedSaltedPassword;
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-  (DatabaseStrings::tableUsers, findUser, setUser, 0, commentsOnFailure);
+  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+    DatabaseStrings::tableUsers, findUser, setUser, 0, commentsOnFailure
+  );
 }
 
-bool UserCalculator::IsAcceptableCharDatabaseInpuT(char theChar)
-{ if (MathRoutines::isADigit(theChar))
+bool UserCalculator::IsAcceptableCharDatabaseInpuT(char theChar) {
+  if (MathRoutines::isADigit(theChar))
     return true;
   if (MathRoutines::isALatinLetter(theChar))
     return true;
-  switch (theChar)
-  { case '.':
+  switch (theChar) {
+    case '.':
     case '@':
     case '+':
     case '/':
@@ -533,45 +528,50 @@ bool UserCalculator::IsAcceptableCharDatabaseInpuT(char theChar)
   }
 }
 
-bool UserCalculator::IsAcceptableDatabaseInpuT(const std::string& input, std::stringstream* comments)
-{ MacroRegisterFunctionWithName("UserCalculator::IsAcceptableDatabaseInput");
-  for (unsigned i = 0; i < input.size(); i ++)
-    if (!UserCalculator::IsAcceptableCharDatabaseInpuT(input[i]))
-    { if (comments != 0)
+bool UserCalculator::IsAcceptableDatabaseInpuT(const std::string& input, std::stringstream* comments) {
+  MacroRegisterFunctionWithName("UserCalculator::IsAcceptableDatabaseInput");
+  for (unsigned i = 0; i < input.size(); i ++) {
+    if (!UserCalculator::IsAcceptableCharDatabaseInpuT(input[i])) {
+      if (comments != 0)
         *comments << "Input: " << input << " contains at least one invalid character: " << input[i] << ".";
       return false;
     }
+  }
   return true;
 }
 
-std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey)
-{ MacroRegisterFunctionWithName("UserCalculator::GetSelectedRowEntry");
+std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey) {
+  MacroRegisterFunctionWithName("UserCalculator::GetSelectedRowEntry");
   int theIndex = this->selectedRowFieldNamesUnsafe.GetIndex(theKey);
   if (theIndex == - 1)
     return "";
   return this->selectedRowFieldsUnsafe[theIndex];
 }
 
-bool DatabaseRoutineS::SendActivationEmail
-(const std::string& emailList, std::stringstream* commentsOnFailure,
- std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
+bool DatabaseRoutineS::SendActivationEmail(
+  const std::string& emailList, std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive
+) {
+  MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   List<std::string> theEmails;
   MathRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
-  return DatabaseRoutineS::SendActivationEmail
-  (theEmails, commentsOnFailure, commentsGeneral, commentsGeneralSensitive);
+  return DatabaseRoutineS::SendActivationEmail(
+    theEmails, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
+  );
 }
 
-bool UserCalculator::ComputeAndStoreActivationStats
-(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
-{ MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationStats");
-  std::string activationAddress = this->GetActivationAddressFromActivationToken
-  (this->actualActivationToken, theGlobalVariables.hostWithPort, this->username, this->email);
+bool UserCalculator::ComputeAndStoreActivationStats(
+  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+) {
+  MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationStats");
+  std::string activationAddress = this->GetActivationAddressFromActivationToken(
+    this->actualActivationToken, theGlobalVariables.hostWithPort, this->username, this->email
+  );
   JSData findQuery, emailStatQuery;
   findQuery[DatabaseStrings::labelEmail] = this->email;
-  DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
-  (DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, commentsOnFailure, true);
-
+  DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(
+    DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, commentsOnFailure, true
+  );
   std::string lastEmailTime, emailCountForThisEmail;
   lastEmailTime = emailStatQuery[DatabaseStrings::labelLastActivationEmailTime].string;
   emailCountForThisEmail = emailStatQuery[DatabaseStrings::labelNumActivationEmails].string;
@@ -582,8 +582,8 @@ bool UserCalculator::ComputeAndStoreActivationStats
   numActivationsThisEmail ++;
   TimeWrapper now, lastActivationOnThisEmail, lastActivationOnThisAccount;
   now.AssignLocalTime();
-  if (lastEmailTime != "")
-  { lastActivationOnThisEmail.operator=(lastEmailTime);
+  if (lastEmailTime != "") {
+    lastActivationOnThisEmail.operator=(lastEmailTime);
     lastActivationOnThisAccount.operator=(this->timeOfActivationTokenCreation);
     if (commentsGeneral != 0)
       *commentsGeneral
@@ -602,15 +602,17 @@ bool UserCalculator::ComputeAndStoreActivationStats
     findQueryInUsers[DatabaseStrings::labelUserId] = this->userId;
   else if (this->username != "")
     findQueryInUsers[DatabaseStrings::labelUsername] = this->username;
-  else
-  { if (commentsOnFailure != 0)
+  else {
+    if (commentsOnFailure != 0)
       *commentsOnFailure
       << "This shouldn't happen: both the username and the user id are empty. ";
     return false;
   }
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-       (DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, 0, commentsOnFailure))
-  { if (commentsOnFailure != 0)
+  if (
+    !DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+      DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, 0, commentsOnFailure
+  )) {
+    if (commentsOnFailure != 0)
       *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
     return false;
   }
@@ -632,18 +634,18 @@ bool UserCalculator::ComputeAndStoreActivationStats
   return true;
 }
 
-bool UserCalculator::ComputeAndStoreActivationEmailAndTokens
-(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
-{ MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationEmailAndTokens");
+bool UserCalculator::ComputeAndStoreActivationEmailAndTokens(
+  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+) {
+  MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationEmailAndTokens");
   if (!this->ComputeAndStoreActivationToken(commentsOnFailure))
     return false;
   return this->ComputeAndStoreActivationStats(commentsOnFailure, commentsGeneral);
 }
 
-bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationToken");
+bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationToken");
   TimeWrapper now;
-  //stOutput << "Resetting authentication token. ";
   now.AssignLocalTime();
   std::stringstream activationTokenStream;
   // activation token randomness strength: rand() has some randomness in it
@@ -655,9 +657,10 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
   JSData findUserQuery, setUserQuery;
   findUserQuery[DatabaseStrings::labelUsername] = this->username;
   setUserQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-       (DatabaseStrings::tableUsers, findUserQuery, setUserQuery, 0, commentsOnFailure))
-  { if (commentsOnFailure != 0)
+  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+    DatabaseStrings::tableUsers, findUserQuery, setUserQuery, 0, commentsOnFailure
+  )) {
+    if (commentsOnFailure != 0)
       *commentsOnFailure << "Setting activation token failed.";
     this->actualActivationToken = "";
     return false;
@@ -667,21 +670,23 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
 
 extern WebServer theWebServer;
 
-bool DatabaseRoutineS::SendActivationEmail
-(const List<std::string>& theEmails,
- std::stringstream* commentsOnFailure,
- std::stringstream* commentsGeneral,
- std::stringstream* commentsGeneralSensitive)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
+bool DatabaseRoutineS::SendActivationEmail(
+  const List<std::string>& theEmails,
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneral,
+  std::stringstream* commentsGeneralSensitive
+) {
+  MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   UserCalculator currentUser;
   bool result = true;
-  for (int i = 0; i < theEmails.size; i ++)
-  { logEmail << "Sending activation email, user "
+  for (int i = 0; i < theEmails.size; i ++) {
+    logEmail << "Sending activation email, user "
     << i + 1 << " out of " << theEmails.size << " ... ";
     currentUser.username = theEmails[i];
     currentUser.email = theEmails[i];
-    theWebServer.GetActiveWorker().DoSetEmail
-    (currentUser, commentsOnFailure, commentsGeneral, commentsGeneralSensitive);
+    theWebServer.GetActiveWorker().DoSetEmail(
+      currentUser, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
+    );
   }
   if (commentsOnFailure != 0)
     logEmail << commentsOnFailure->str();
@@ -692,46 +697,43 @@ bool DatabaseRoutineS::SendActivationEmail
   return result;
 }
 
-ProblemData& UserCalculator::GetProblemDataAddIfNotPresent(const std::string& problemName)
-{ MacroRegisterFunctionWithName("UserCalculator::GetProblemDataAddIfNotPresent");
+ProblemData& UserCalculator::GetProblemDataAddIfNotPresent(const std::string& problemName) {
+  MacroRegisterFunctionWithName("UserCalculator::GetProblemDataAddIfNotPresent");
   return this->theProblemData.GetValueCreate(problemName);
 }
 
-void UserCalculator::SetProblemData(const std::string& problemName, const ProblemData& inputData)
-{ MacroRegisterFunctionWithName("UserCalculator::SetProblemData");
+void UserCalculator::SetProblemData(const std::string& problemName, const ProblemData& inputData) {
+  MacroRegisterFunctionWithName("UserCalculator::SetProblemData");
   this->theProblemData.SetKeyValue(problemName, inputData);
 }
 
-bool ProblemData::LoadFroM(const std::string& inputData, std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("ProblemData::LoadFrom");
+bool ProblemData::LoadFroM(const std::string& inputData, std::stringstream& commentsOnFailure) {
+  MacroRegisterFunctionWithName("ProblemData::LoadFrom");
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::ChopCGIString(inputData, theMap, commentsOnFailure))
     return false;
-  //stOutput << "<hr>DEBUG: Interpreting: <br>" << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml( inputData )<< "<hr>";
   this->Points = 0;
   this->numCorrectlyAnswered = 0;
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
-  if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
-  { if (theMap.Contains("randomSeed"))
-    { this->randomSeed = atoi(theMap.GetValueCreate("randomSeed").c_str());
+  if (theGlobalVariables.UserRequestRequiresLoadingRealExamData()) {
+    if (theMap.Contains("randomSeed")) {
+      this->randomSeed = atoi(theMap.GetValueCreate("randomSeed").c_str());
       this->flagRandomSeedGiven = true;
-      //stOutput << "<br>DEBUG: random seed found. <br>";
-    } //else
-      //stOutput << "<br>DEBUG: random seed  NOT NOT NOT found. <br>";
+    }
   }
   this->theAnswers.Clear();
   bool result = true;
   MapLisT<std::string, std::string, MathRoutines::hashString> currentQuestionMap;
-  for (int i = 0; i < theMap.size(); i ++)
-  { if (theMap.theKeys[i] == "randomSeed")
+  for (int i = 0; i < theMap.size(); i ++) {
+    if (theMap.theKeys[i] == "randomSeed")
       continue;
     this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
     Answer& currentA = *this->theAnswers.theValues.LastObject();
     std::string currentQuestion = HtmlRoutines::ConvertURLStringToNormal(theMap.theValues[i], false);
     result = HtmlRoutines::ChopCGIString(currentQuestion, currentQuestionMap, commentsOnFailure);
-    if (!result)
-    { commentsOnFailure << "Failed to interpret as key-value pair: "
+    if (!result) {
+      commentsOnFailure << "Failed to interpret as key-value pair: "
       << currentQuestion << ". ";
       continue;
     }
@@ -741,8 +743,8 @@ bool ProblemData::LoadFroM(const std::string& inputData, std::stringstream& comm
     if (currentQuestionMap.Contains("numSubmissions"))
       currentA.numSubmissions =
       atoi(currentQuestionMap.GetValueCreate("numSubmissions").c_str());
-    if (currentQuestionMap.Contains("firstCorrectAnswer"))
-    { currentA.firstCorrectAnswerURLed = currentQuestionMap.GetValueCreate("firstCorrectAnswer");
+    if (currentQuestionMap.Contains("firstCorrectAnswer")) {
+      currentA.firstCorrectAnswerURLed = currentQuestionMap.GetValueCreate("firstCorrectAnswer");
       currentA.firstCorrectAnswerClean = HtmlRoutines::ConvertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
       currentA.firstCorrectAnswerURLed = HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
       //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly.
@@ -752,16 +754,16 @@ bool ProblemData::LoadFroM(const std::string& inputData, std::stringstream& comm
   return result;
 }
 
-bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("ProblemData::LoadFromJSON");
+bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& commentsOnFailure) {
+  MacroRegisterFunctionWithName("ProblemData::LoadFromJSON");
   (void) commentsOnFailure;
   this->Points = 0;
   this->numCorrectlyAnswered = 0;
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
-  if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
-  { if (inputData.objects.Contains("randomSeed"))
-    { this->randomSeed = atoi(inputData.objects.GetValueConstCrashIfNotPresent("randomSeed").string.c_str());
+  if (theGlobalVariables.UserRequestRequiresLoadingRealExamData()) {
+    if (inputData.objects.Contains("randomSeed")) {
+      this->randomSeed = atoi(inputData.objects.GetValueConstCrashIfNotPresent("randomSeed").string.c_str());
       this->flagRandomSeedGiven = true;
       //stOutput << "<br>DEBUG: random seed found. <br>";
     } //else
@@ -769,8 +771,8 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
   }
   this->theAnswers.Clear();
   bool result = true;
-  for (int i = 0; i < inputData.objects.size(); i ++)
-  { if (inputData.objects.theKeys[i] == "randomSeed")
+  for (int i = 0; i < inputData.objects.size(); i ++) {
+    if (inputData.objects.theKeys[i] == "randomSeed")
       continue;
     this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(inputData.objects.theKeys[i], false));
     Answer& currentA = *this->theAnswers.theValues.LastObject();
@@ -781,8 +783,8 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
     if (currentQuestionJSON.objects.Contains("numSubmissions"))
       currentA.numSubmissions =
       atoi(currentQuestionJSON.objects.GetValueConstCrashIfNotPresent("numSubmissions").string.c_str());
-    if (currentQuestionJSON.objects.Contains("firstCorrectAnswer"))
-    { currentA.firstCorrectAnswerURLed = currentQuestionJSON.objects.GetValueConstCrashIfNotPresent("firstCorrectAnswer").string;
+    if (currentQuestionJSON.objects.Contains("firstCorrectAnswer")) {
+      currentA.firstCorrectAnswerURLed = currentQuestionJSON.objects.GetValueConstCrashIfNotPresent("firstCorrectAnswer").string;
       currentA.firstCorrectAnswerClean = HtmlRoutines::ConvertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
       currentA.firstCorrectAnswerURLed = HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
       //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly,
@@ -793,13 +795,13 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
   return result;
 }
 
-std::string ProblemData::StorE()
-{ MacroRegisterFunctionWithName("ProblemData::StorE");
+std::string ProblemData::StorE(){
+  MacroRegisterFunctionWithName("ProblemData::StorE");
   std::stringstream out;
   if (this->flagRandomSeedGiven)
     out << "randomSeed=" << this->randomSeed;
-  for (int i = 0; i < this->theAnswers.size(); i ++)
-  { Answer& currentA = this->theAnswers[i];
+  for (int i = 0; i < this->theAnswers.size(); i ++) {
+    Answer& currentA = this->theAnswers[i];
     if (this->flagRandomSeedGiven || i != 0)
       out << "&";
     out << HtmlRoutines::ConvertStringToURLString(currentA.answerId, false) << "=";
@@ -813,14 +815,14 @@ std::string ProblemData::StorE()
   return out.str();
 }
 
-JSData ProblemData::StoreJSON()
-{ MacroRegisterFunctionWithName("ProblemData::StoreJSON");
+JSData ProblemData::StoreJSON() {
+  MacroRegisterFunctionWithName("ProblemData::StoreJSON");
   JSData result;
   result.type = JSData::JSObject;
   if (this->flagRandomSeedGiven)
     result["randomSeed"] = std::to_string(this->randomSeed);
-  for (int i = 0; i < this->theAnswers.size(); i ++)
-  { Answer& currentA = this->theAnswers[i];
+  for (int i = 0; i < this->theAnswers.size(); i ++) {
+    Answer& currentA = this->theAnswers[i];
     JSData currentAnswerJSON;
     currentAnswerJSON["numCorrectSubmissions"] = std::to_string(currentA.numCorrectSubmissions);
     currentAnswerJSON["numSubmissions"] = std::to_string(currentA.numSubmissions);
@@ -830,24 +832,19 @@ JSData ProblemData::StoreJSON()
   return result;
 }
 
-bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemData");
+bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, std::stringstream& commentsOnFailure) {
+  MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemData");
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::ChopCGIString(theInfo, theMap, commentsOnFailure))
     return false;
   this->theProblemData.Clear();
   this->theProblemData.SetExpectedSize(theMap.size());
   bool result = true;
-  //stOutput << "<hr>DEBUG: Interpreting: <br>" << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theInfo)
-  //<< "<br>Map has: "
-  //<< theMap.size() << " entries. ";
   ProblemData reader;
   std::string probNameNoWhiteSpace;
-  for (int i = 0; i < theMap.size(); i ++)
-  { //stOutput << "<hr>Reading data: " << theMap.theKeys[i] << ", value: "
-    //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theMap[i]);
-    if (!reader.LoadFroM(HtmlRoutines::ConvertURLStringToNormal(theMap[i], false), commentsOnFailure))
-    { result = false;
+  for (int i = 0; i < theMap.size(); i ++) {
+    if (!reader.LoadFroM(HtmlRoutines::ConvertURLStringToNormal(theMap[i], false), commentsOnFailure)) {
+      result = false;
       continue;
     }
     probNameNoWhiteSpace = MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
@@ -858,21 +855,16 @@ bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, st
   return result;
 }
 
-bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemDataJSON");
+bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure) {
+  MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemDataJSON");
   this->theProblemData.Clear();
   this->theProblemData.SetExpectedSize(theData.objects.size());
   bool result = true;
-  //stOutput << "<hr>DEBUG: Interpreting: <br>" << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theInfo)
-  //<< "<br>Map has: "
-  //<< theMap.size() << " entries. ";
   ProblemData reader;
   std::string probNameNoWhiteSpace;
-  for (int i = 0; i < theData.objects.size(); i ++)
-  { //stOutput << "<hr>Reading data: " << theMap.theKeys[i] << ", value: "
-    //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theMap[i]);
-    if (!reader.LoadFromJSON(theData.objects.theValues[i], commentsOnFailure))
-    { result = false;
+  for (int i = 0; i < theData.objects.size(); i ++) {
+    if (!reader.LoadFromJSON(theData.objects.theValues[i], commentsOnFailure)) {
+      result = false;
       continue;
     }
     probNameNoWhiteSpace = MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(theData.objects.theKeys[i], false));
@@ -884,15 +876,15 @@ bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std
 }
 #endif
 
-List<JSData> UserCalculatorData::GetFindMeFromUserNameQuery()
-{ List<JSData> result;
-  if (this->username != "")
-  { JSData currentJS;
+List<JSData> UserCalculatorData::GetFindMeFromUserNameQuery() {
+  List<JSData> result;
+  if (this->username != "") {
+    JSData currentJS;
     currentJS[DatabaseStrings::labelUsername] = this->username;
     result.AddOnTop(currentJS);
   }
-  if (this->email != "")
-  { JSData currentJS;
+  if (this->email != "") {
+    JSData currentJS;
     currentJS[DatabaseStrings::labelEmail] = this->email;
     result.AddOnTop(currentJS);
   }
@@ -902,8 +894,8 @@ List<JSData> UserCalculatorData::GetFindMeFromUserNameQuery()
 }
 
 #ifdef MACRO_use_MongoDB
-bool UserCalculator::StoreProblemDataToDatabasE(std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabasE");
+bool UserCalculator::StoreProblemDataToDatabasE(std::stringstream& commentsOnFailure) {
+  MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabasE");
   std::stringstream problemDataStream;
   for (int i = 0; i < this->theProblemData.size(); i ++)
     problemDataStream << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false) << "="
@@ -913,8 +905,9 @@ bool UserCalculator::StoreProblemDataToDatabasE(std::stringstream& commentsOnFai
   //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
   JSData setQuery;
   setQuery[DatabaseStrings::labelProblemDatA] = problemDataStream.str();
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON
-  (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure);
+  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(
+    DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure
+  );
 }
 
 bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream* commentsOnFailure) {
@@ -952,16 +945,11 @@ bool DatabaseRoutineS::AddUsersFromEmails(
       return false;
     }
   }
-  //stOutput << " <br>Debug: creating users: " << theEmails.ToStringCommaDelimited()
-  //<< "<br>Number of users: " << theEmails.size
-  //<< "<br>Number of passwords: " << thePasswords.size << "<hr>Passwords string: " << thePasswords;
   UserCalculator currentUser;
   bool result = true;
   bool doSendEmails = false;
   outputNumNewUsers = 0;
   outputNumUpdatedUsers = 0;
-  //stOutput << "DEBUG: courseHome: " << currentUser.currentCourses.value
-  //<< "\n<br>\ncurrentUser.currentTable: " << currentUser.currentTable.value << "\n<br>\n";
   for (int i = 0; i < theEmails.size; i ++) {
     currentUser.reset();
     currentUser.username = theEmails[i];
@@ -1191,32 +1179,34 @@ bool CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords(
   return output.AssignValue(out.str(), theCommands);*/
 }
 
-bool EmailRoutines::SendEmailWithMailGun
-(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral,
- std::stringstream* commentsGeneralSensitive)
-{ MacroRegisterFunctionWithName("EmailRoutines::SendEmailWithMailGun");
+bool EmailRoutines::SendEmailWithMailGun(
+  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral,
+  std::stringstream* commentsGeneralSensitive
+) {
+  MacroRegisterFunctionWithName("EmailRoutines::SendEmailWithMailGun");
   std::string mailGunKey, hostnameToSendEmailFrom;
-  if (!FileOperations::LoadFileToStringVirtual("certificates/mailgun-api.txt", mailGunKey, true, true, commentsOnFailure))
-  { if (commentsOnFailure != 0)
+  if (!FileOperations::LoadFileToStringVirtual(
+    "certificates/mailgun-api.txt", mailGunKey, true, true, commentsOnFailure
+  )) {
+    if (commentsOnFailure != 0)
       *commentsOnFailure << "Could not find mailgun key. The key must be located in file: "
       << "<br>\ncertificates/mailgun-api.txt\n<br>\n "
       << "The file must be uploaded manually to the server. ";
     return false;
   }
-  if (!FileOperations::LoadFileToStringVirtual("certificates/mailgun-hostname.txt", hostnameToSendEmailFrom, true, true, 0))
-  { hostnameToSendEmailFrom = theGlobalVariables.hostNoPort;
-    if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != 0)
-    { *commentsGeneral << "Did not find the mailgun hostname file: certificates/mailgun-hostname.txt. Using the "
+  if (!FileOperations::LoadFileToStringVirtual("certificates/mailgun-hostname.txt", hostnameToSendEmailFrom, true, true, 0)) {
+    hostnameToSendEmailFrom = theGlobalVariables.hostNoPort;
+    if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != 0) {
+      *commentsGeneral << "Did not find the mailgun hostname file: certificates/mailgun-hostname.txt. Using the "
       << "domain name: " << hostnameToSendEmailFrom << " instead. ";
     }
-  } else
-  { hostnameToSendEmailFrom = MathRoutines::StringTrimWhiteSpace(hostnameToSendEmailFrom);
-    if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != 0)
-    { *commentsGeneral << "Hostname loaded: "
+  } else {
+    hostnameToSendEmailFrom = MathRoutines::StringTrimWhiteSpace(hostnameToSendEmailFrom);
+    if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != 0) {
+      *commentsGeneral << "Hostname loaded: "
       << HtmlRoutines::ConvertStringToURLString(hostnameToSendEmailFrom, false);
     }
   }
-
   if (mailGunKey.size() > 0)
     mailGunKey.resize(mailGunKey.size() - 1);
   logEmail << "Sending email via "
@@ -1234,13 +1224,13 @@ bool EmailRoutines::SendEmailWithMailGun
   << "<noreply@mail2."
   << hostnameToSendEmailFrom
   << ">' ";
-  if (this->toEmail == "")
-  { if (commentsOnFailure != 0)
+  if (this->toEmail == "") {
+    if (commentsOnFailure != 0)
       *commentsOnFailure << "Receiver address is missing. ";
     return false;
   }
-  if (this->subject == "" && this->emailContent == "")
-  { if (commentsOnFailure != 0)
+  if (this->subject == "" && this->emailContent == "") {
+    if (commentsOnFailure != 0)
       *commentsOnFailure << "Empty emails not allowed. ";
     return false;
   }
@@ -1256,8 +1246,8 @@ bool EmailRoutines::SendEmailWithMailGun
   << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->emailContent)
   << "\"";
   std::string commandResult = theGlobalVariables.CallSystemWithOutput(commandToExecute.str());
-  if (commentsGeneralSensitive != 0)
-  { *commentsGeneralSensitive << "Command: " << HtmlRoutines::ConvertStringToHtmlString(commandToExecute.str(), true);
+  if (commentsGeneralSensitive != 0) {
+    *commentsGeneralSensitive << "Command: " << HtmlRoutines::ConvertStringToHtmlString(commandToExecute.str(), true);
     bool isBad = false;
     if (commandResult.find("Forbidden") != std::string::npos)
       isBad = true;
@@ -1272,9 +1262,9 @@ bool EmailRoutines::SendEmailWithMailGun
 }
 
 List<bool> EmailRoutines::recognizedEmailCharacters;
-List<bool>& EmailRoutines::GetRecognizedEmailChars()
-{ if (recognizedEmailCharacters.size == 0)
-  { recognizedEmailCharacters.initFillInObject(256, false);
+List<bool>& EmailRoutines::GetRecognizedEmailChars() {
+  if (recognizedEmailCharacters.size == 0) {
+    recognizedEmailCharacters.initFillInObject(256, false);
     std::string theChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     theChars += "0123456789";
     theChars += "@";
@@ -1285,18 +1275,18 @@ List<bool>& EmailRoutines::GetRecognizedEmailChars()
   return EmailRoutines::recognizedEmailCharacters;
 }
 
-bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* commentsOnError)
-{ MacroRegisterFunctionWithName("EmailRoutines::IsOKEmail");
+bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* commentsOnError) {
+  MacroRegisterFunctionWithName("EmailRoutines::IsOKEmail");
   //stOutput << "DEBUG: got to isokemail";
-  if (input.size() == 0)
-  { if (commentsOnError != 0)
+  if (input.size() == 0) {
+    if (commentsOnError != 0)
       *commentsOnError << "Empty email not allowed. ";
     return false;
   }
   int numAts = 0;
-  for (unsigned i = 0; i < input.size(); i ++)
-  { if (!EmailRoutines::GetRecognizedEmailChars()[((unsigned char) input[i])])
-    { if (commentsOnError != 0)
+  for (unsigned i = 0; i < input.size(); i ++) {
+    if (!EmailRoutines::GetRecognizedEmailChars()[((unsigned char) input[i])]) {
+      if (commentsOnError != 0)
         *commentsOnError << "Email: " << input << " contains the unrecognized character "
         << input[i] << ". ";
       return false;
@@ -1310,8 +1300,8 @@ bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* comme
   return numAts == 1;
 }
 
-EmailRoutines::EmailRoutines()
-{ this->fromEmail = "calculator.todor.milev@gmail.com";
+EmailRoutines::EmailRoutines() {
+  this->fromEmail = "calculator.todor.milev@gmail.com";
   //this->ccEmail ="todor.milev@gmail.com";
   this->smtpWithPort = "smtp.gmail.com:587";
   this->fromEmailAuth = Crypto::ConvertStringToBase64URL("A good day to use a computer algebra system");
@@ -1319,9 +1309,10 @@ EmailRoutines::EmailRoutines()
 
 #endif //MACRO_use_MongoDB
 
-bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded
-(UserCalculatorData& theUseR, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
-{ (void) commentsOnFailure;
+bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded(
+  UserCalculatorData& theUseR, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+) {
+  (void) commentsOnFailure;
   (void) theUseR;
   (void) commentsGeneral;
 #ifdef MACRO_use_MongoDB
@@ -1338,15 +1329,15 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   JSData theData;
   if (!theData.readstring(theToken.claimsJSON, false, commentsOnFailure))
     return false;
-  if (theData.GetValue("email").type != JSData::JSstring)
-  { if (commentsOnFailure != 0)
+  if (theData.GetValue("email").type != JSData::JSstring) {
+    if (commentsOnFailure != 0)
       *commentsOnFailure << "Could not find email entry in the json data " << theData.ToString(true);
     return false;
   }
   userWrapper.email = theData.GetValue("email").string;
   userWrapper.username = "";
-  if (!userWrapper.Iexist(commentsOnFailure))
-  { if (commentsGeneral != 0)
+  if (!userWrapper.Iexist(commentsOnFailure)) {
+    if (commentsGeneral != 0)
       *commentsGeneral << "User with email " << userWrapper.email << " does not exist. ";
     //stOutput << "\n<br>\nDEBUG: User with email " << userWrapper.email.value << " does not exist. ";
     userWrapper.username = userWrapper.email;
@@ -1357,8 +1348,8 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
     theUseR = userWrapper;
     return true;
   }
-  if (!userWrapper.LoadFromDB(commentsOnFailure))
-  { if (commentsOnFailure != 0)
+  if (!userWrapper.LoadFromDB(commentsOnFailure)) {
+    if (commentsOnFailure != 0)
       *commentsOnFailure << "Failed to fetch user with email " << userWrapper.email << ". ";
     return false;
   }
@@ -1405,8 +1396,8 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
   //stOutput << "DEBUG: before user wrapper authenticate";
-  if (userWrapper.Authenticate(commentsOnFailure))
-  { theUseR = userWrapper;
+  if (userWrapper.Authenticate(commentsOnFailure)) {
+    theUseR = userWrapper;
     return true;
   }
   //stOutput << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
@@ -1418,46 +1409,54 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
   //*commentsOnFailure << "DEBUG: entered pass: " << userWrapper.enteredPassword
   //<< "shaone-ing to: " << userWrapper.enteredShaonedSaltedPassword
   //<< ". Actual pass sha: " << userWrapper.actualShaonedSaltedPassword;
-  if (userWrapper.enteredAuthenticationToken != "" &&
-      userWrapper.enteredAuthenticationToken != "0" &&
-      commentsOnFailure != 0)
-  { *commentsOnFailure << "<b> Authentication of user: " << userWrapper.username
+  if (
+    userWrapper.enteredAuthenticationToken != "" &&
+    userWrapper.enteredAuthenticationToken != "0" &&
+    commentsOnFailure != 0
+  ) {
+    *commentsOnFailure << "<b> Authentication of user: " << userWrapper.username
     << " with token " << userWrapper.enteredAuthenticationToken << " failed. </b>";
   }
-  if (userWrapper.enteredActivationToken != "")
-  { if (theGlobalVariables.userCalculatorRequestType == "changePassword" ||
-        theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
-        theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount ||
-        theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON)
-    { if (userWrapper.actualActivationToken != "activated" &&
-          userWrapper.actualActivationToken != "" &&
-          userWrapper.actualActivationToken != "error")
-      { if (userWrapper.enteredActivationToken == userWrapper.actualActivationToken)
-        { theUseR = userWrapper;
+  if (userWrapper.enteredActivationToken != "") {
+    if (
+      theGlobalVariables.userCalculatorRequestType == "changePassword" ||
+      theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
+      theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount ||
+      theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON
+    ) {
+      if (
+        userWrapper.actualActivationToken != "activated" &&
+        userWrapper.actualActivationToken != "" &&
+        userWrapper.actualActivationToken != "error"
+      ) {
+        if (userWrapper.enteredActivationToken == userWrapper.actualActivationToken) {
+          theUseR = userWrapper;
           return true;
         }
-      } else if (commentsOnFailure != 0)
-      { if (userWrapper.actualActivationToken != "error")
+      } else if (commentsOnFailure != 0) {
+        if (userWrapper.actualActivationToken != "error")
           *commentsOnFailure << "<b>Account already activated. </b>";
         else
           *commentsOnFailure << "<b>An error during activation ocurred.</b>";
       }
-    } else
-      if (commentsOnFailure != 0)
+    } else {
+      if (commentsOnFailure != 0) {
         *commentsOnFailure << "Activation token entered but the user request type: "
         << theGlobalVariables.userCalculatorRequestType
         << " does not allow login with activation token. ";
+      }
+    }
   }
-  if (userWrapper.username == "admin" && userWrapper.enteredPassword != "")
-    if (!userWrapper.Iexist(0))
-    { if (commentsOnFailure != 0)
+  if (userWrapper.username == "admin" && userWrapper.enteredPassword != "") {
+    if (!userWrapper.Iexist(0)) {
+      if (commentsOnFailure != 0)
         *commentsOnFailure << "First login of user admin: setting admin password. ";
       logWorker << logger::yellow << "First login of user admin: setting admin password." << logger::endL;
       //*commentsOnFailure << "DEBUG: user before storing: " << userWrapper.ToJSON().ToString();
       userWrapper.actualActivationToken = "activated";
       userWrapper.userRole = "admin";
-      if (!userWrapper.StoreToDB(true, commentsOnFailure))
-      { logWorker << logger::red << "Failed to store admin pass to database. ";
+      if (!userWrapper.StoreToDB(true, commentsOnFailure)) {
+        logWorker << logger::red << "Failed to store admin pass to database. ";
         if (commentsOnFailure != 0)
           logWorker << commentsOnFailure->str();
       }
@@ -1465,6 +1464,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
       theUseR = userWrapper;
       return true;
     }
+  }
   return false;
 #else
   return DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(theUseR, commentsGeneral);
@@ -1478,26 +1478,26 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
 //#include <time.h>
 //#include <ctime>
 
-bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::StoreToDB");
+bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("UserCalculator::StoreToDB");
   JSData findUser;
   findUser[DatabaseStrings::labelUsername] = this->username;
-  if (this->enteredPassword != "" && doSetPassword)
-  { //*commentsOnFailure << " DEBUG: Computing sha- 1 salted pass from: " << this->enteredPassword;
+  if (this->enteredPassword != "" && doSetPassword) {
     this->ComputeHashedSaltedPassword();
     this->actualHashedSaltedPassword = this->enteredHashedSaltedPassword;
   }
   JSData setUser = this->ToJSON();
-  //*commentsOnFailure << " DEBUG: About to Store: " << setUser.ToString();
 
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-  (DatabaseStrings::tableUsers, findUser, setUser, 0, commentsOnFailure);
+  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+    DatabaseStrings::tableUsers, findUser, setUser, 0, commentsOnFailure
+  );
 }
 
-std::string UserCalculator::GetActivationAddressFromActivationToken
-(const std::string& theActivationToken, const std::string& calculatorBase,
- const std::string& inputUserNameUnsafe, const std::string& inputEmailUnsafe)
-{ MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
+std::string UserCalculator::GetActivationAddressFromActivationToken(
+  const std::string& theActivationToken, const std::string& calculatorBase,
+  const std::string& inputUserNameUnsafe, const std::string& inputEmailUnsafe
+) {
+  MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
   std::stringstream out;
   if (MathRoutines::StringBeginsWith(calculatorBase, "localhost"))
     out << "https://" << calculatorBase;

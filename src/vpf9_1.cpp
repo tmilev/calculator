@@ -40,24 +40,28 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   this->flagFinishingCrash = true;
   if (!theGlobalVariables.flagNotAllocated)
     this->theCrashReport << " ";
-  if (!theGlobalVariables.flagNotAllocated)
-    if (theGlobalVariables.userInputStringIfAvailable != "")
+  if (!theGlobalVariables.flagNotAllocated) {
+    if (theGlobalVariables.userInputStringIfAvailable != "") {
       this->theCrashReport << "<hr>User input: <br> "
       << theGlobalVariables.userInputStringIfAvailable << "<hr>";
-  this->theCrashReport << Crasher::GetStackTraceEtcErrorMessage();
-  if (!theGlobalVariables.flagNotAllocated)
-    if (theGlobalVariables.ProgressReportStringS.size > 0)
-    { this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>"
-      << theGlobalVariables.ToStringProgressReportHtml();
     }
-  if (stOutput.theOutputFunction == 0)
+  }
+  this->theCrashReport << Crasher::GetStackTraceEtcErrorMessage();
+  if (!theGlobalVariables.flagNotAllocated) {
+    if (theGlobalVariables.ProgressReportStringS.size > 0) {
+      this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>"
+      << theGlobalVariables.ToStringProgressReportHtmL();
+    }
+  }
+  if (stOutput.theOutputFunction == 0) {
     std::cout << this->theCrashReport.str() << std::endl;
-
-  if (!theGlobalVariables.flagNotAllocated)
-  { std::fstream theFile;
-    bool succeededToOpen = FileOperations::OpenFileCreateIfNotPresentVirtual
-    (theFile, "crashes/" + theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false, true);
-    if (succeededToOpen)
+  }
+  if (!theGlobalVariables.flagNotAllocated) {
+    std::fstream theFile;
+    bool succeededToOpen = FileOperations::OpenFileCreateIfNotPresentVirtual(
+      theFile, "crashes/" + theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false, true
+    );
+    if (succeededToOpen) {
       this->theCrashReport << "<hr>Crash dumped in file "
       << "<a href=\"/LogFiles/crashes/"
       << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.RelativePhysicalNameCrashLog, false)
@@ -65,21 +69,25 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
       << theGlobalVariables.RelativePhysicalNameCrashLog
       << "</a>"
       << ". May require admin access to view online. ";
-    else
+    } else {
       this->theCrashReport << "<hr>Failed to create a crash report: check if folder exists and the "
       << "executable has file permissions for file " << theGlobalVariables.RelativePhysicalNameCrashLog
       << " located inside the output folder.";
+    }
     theFile << this->theCrashReport.str();
     theFile.flush();
-    if (theParser != 0)
+    if (theParser != 0) {
       theFile << "<hr>Additional comments follow. " << theParser->Comments.str();
+    }
     theFile.close();
-  } else
+  } else {
     this->theCrashReport << "GlobalVariables.flagNotAllocated is true. ";
-  if (theParser != 0)
+  }
+  if (theParser != 0) {
     this->theCrashReport << "<hr>Additional comments follow. " << theParser->Comments.str();
+  }
   JSData output;
-  output["crashReport"] = this->theCrashReport.str();
+  output[WebAPI::result::crashReport] = this->theCrashReport.str();
   stOutput << output.ToString(false);
   stOutput.Flush();
   if (this->CleanUpFunction != 0)
@@ -149,21 +157,21 @@ std::string Crasher::GetStackTraceShort()
   return out.str();
 }
 
-std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem()
-{ MacroRegisterFunctionWithName("GlobalVariables::ToStringHTMLTopCommandLinuxSystem");
+std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem() {
+  MacroRegisterFunctionWithName("GlobalVariables::ToStringHTMLTopCommandLinuxSystem");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "Login as admin for RAM memory statistics.";
   std::string topString = this->CallSystemWithOutput("top -b -n 1 -s");
   std::stringstream out;
   std::string lineString, wordString;
   std::stringstream topStream(topString);
-  for (int i = 0; i < 4; i ++)
-  { std::getline(topStream, lineString);
+  for (int i = 0; i < 4; i ++) {
+    std::getline(topStream, lineString);
     out << lineString << "<br>\n ";
   }
   out << "<table>";
-  for (; std::getline(topStream, lineString);)
-  { out << "<tr>";
+  for (; std::getline(topStream, lineString);) {
+    out << "<tr>";
     for (std::stringstream nextLineStream(lineString); nextLineStream >> wordString;)
       out << "<td>" << wordString << "</td>";
     out << "</tr>";
@@ -172,8 +180,8 @@ std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem()
   return out.str();
 }
 
-std::string GlobalVariables::ToStringFolderInfo() const
-{ std::stringstream out;
+std::string GlobalVariables::ToStringFolderInfo() const {
+  std::stringstream out;
   out << "<br>Physical path server base: " << this->PhysicalPathServerBasE;
   out << "<br>Diplay name executable: " << this->DisplayNameExecutable;
   out << "<br>Physical name folder below executable: " << this->PhysicalNameFolderBelowExecutable;
@@ -183,80 +191,92 @@ std::string GlobalVariables::ToStringFolderInfo() const
   return out.str();
 }
 
-std::string GlobalVariables::ToStringProgressReportHtml()
-{ MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtml");
+JSData GlobalVariables::ToStringProgressReportJSData() {
+  JSData result;
+  result[WebAPI::result::resultHtml] = this->ToStringProgressReportHtmL();
+  return result;
+}
+
+std::string GlobalVariables::ToStringProgressReportHtmL() {
+  MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtml");
   std::stringstream reportStream;
-  for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++)
-  { reportStream << "<hr><b>" << this->theThreadData[threadIndex].ToStringHtml()
+  for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++) {
+    reportStream << "<hr><b>" << this->theThreadData[threadIndex].ToStringHtml()
     << "</b><br>";
     int currentThreadID = ThreadData::getCurrentThreadId();
-    if (currentThreadID != threadIndex)
-    { reportStream << "<b>Progress report available only "
+    if (currentThreadID != threadIndex){
+      reportStream << "<b>Progress report available only "
       << "for the current thread of index: "
       << currentThreadID
       << ". </b>";
       //<-to avoid coordinating threads
       continue;
     }
-    for (int i = 0; i < this->ProgressReportStringS[threadIndex].size; i ++)
-      if (this->ProgressReportStringS[threadIndex][i] != "")
+    for (int i = 0; i < this->ProgressReportStringS[threadIndex].size; i ++) {
+      if (this->ProgressReportStringS[threadIndex][i] != "") {
         reportStream << "\n<div id =\"divProgressReport" << i << "\">"
         << this->ProgressReportStringS[threadIndex][i] << "\n</div>\n<hr>";
+      }
+    }
   }
-  if (!crash.flagCrashInitiateD)
-  { reportStream << crash.GetStackTraceEtcErrorMessage();
+  if (!crash.flagCrashInitiateD) {
+    reportStream << crash.GetStackTraceEtcErrorMessage();
     reportStream << theGlobalVariables.GetElapsedMilliseconds()
     << " ms passed. ";
-    if (theGlobalVariables.MaxComputationMilliseconds > 0)
+    if (theGlobalVariables.MaxComputationMilliseconds > 0) {
       reportStream << "<br>Hard limit: "
       << theGlobalVariables.MaxComputationMilliseconds
       << " ms [system crash if limit exceeded]."
       << "<br> Soft limit: "
       << theGlobalVariables.MaxComputationMilliseconds / 2
       << " ms [computation error if limit exceeded, triggered between calculator/atomic functions].";
+    }
   }
   return reportStream.str();
 }
 
-std::string GlobalVariables::ToStringProgressReportConsole()
-{ MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportConsole");
+std::string GlobalVariables::ToStringProgressReportConsole() {
+  MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportConsole");
   std::stringstream reportStream;
-  for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++)
-  { if (ThreadData::getCurrentThreadId() != threadIndex)
-    { reportStream << "Progress report available only for current thread.<br>";
+  for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++) {
+    if (ThreadData::getCurrentThreadId() != threadIndex) {
+      reportStream << "Progress report available only for current thread.<br>";
       //<-to avoid coordinating threads
       continue;
     }
     reportStream << this->theThreadData[threadIndex].ToStringConsole();
-    for (int i = 0; i < this->ProgressReportStringS[threadIndex].size; i ++)
+    for (int i = 0; i < this->ProgressReportStringS[threadIndex].size; i ++) {
       reportStream << this->ProgressReportStringS[threadIndex][i];
+    }
   }
   reportStream << "\n";
   return reportStream.str();
 }
 
-void GlobalVariables::InitThreadsExecutableStart()
-{ //<-Stack trace forbidden this is running before anything has been initialized!
+void GlobalVariables::InitThreadsExecutableStart() {
+  //<-Stack trace forbidden this is running before anything has been initialized!
   ThreadData::RegisterFirstThread("main");
 }
 
-void GlobalVariables::initDefaultFolderAndFileNames
-(const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow)
-{ this->PhysicalNameFolderBelowExecutable = "";
+void GlobalVariables::initDefaultFolderAndFileNames(
+  const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow
+) {
+  this->PhysicalNameFolderBelowExecutable = "";
   this->PhysicalNameExecutableNoPath = "";
   this->PhysicalPathProjectBase = "";
-  for (unsigned i = 0; i < inputPhysicalExecutableWithPathServerBaseIsFolderBelow.size(); i ++)
-  { this->PhysicalNameExecutableNoPath.push_back(inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i]);
-    if (inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i] == '/')
-    { this->PhysicalPathProjectBase += this->PhysicalNameFolderBelowExecutable;
+  for (unsigned i = 0; i < inputPhysicalExecutableWithPathServerBaseIsFolderBelow.size(); i ++) {
+    this->PhysicalNameExecutableNoPath.push_back(inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i]);
+    if (inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i] == '/') {
+      this->PhysicalPathProjectBase += this->PhysicalNameFolderBelowExecutable;
       //this->DisplayPathServerBasE= this->PhysicalNameFolderBelowExecutable;
       this->PhysicalNameFolderBelowExecutable = this->PhysicalNameExecutableNoPath;
       this->PhysicalNameExecutableNoPath = "";
     }
   }
   this->PhysicalNameExecutableWithPath = this->PhysicalNameFolderBelowExecutable + this->PhysicalNameExecutableNoPath;
-  if (this->PhysicalPathProjectBase == "")
+  if (this->PhysicalPathProjectBase == "") {
     this->PhysicalPathProjectBase = "./../";
+  }
   this->PhysicalPathHtmlFolder = this->PhysicalPathProjectBase + "../public_html/";
   this->PhysicalPathServerBasE = this->PhysicalPathHtmlFolder;
   this->DisplayPathOutputFolder = "/output/";
@@ -272,8 +292,8 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->initOutputReportAndCrashFileNames("", "");
 }
 
-void GlobalVariables::SetWebInpuT(const std::string& inputName, const std::string& inputValue)
-{ MacroRegisterFunctionWithName("GlobalVariables::SetWebInput");
+void GlobalVariables::SetWebInpuT(const std::string& inputName, const std::string& inputValue) {
+  MacroRegisterFunctionWithName("GlobalVariables::SetWebInput");
   this->webArguments.SetKeyValue(inputName, inputValue);
 }
 
@@ -358,31 +378,34 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tag
   return out.str();
 }
 
-std::string GlobalVariables::GetWebInput(const std::string& inputName)
-{ return this->webArguments.GetValueCreate(inputName);
+std::string GlobalVariables::GetWebInput(const std::string& inputName) {
+  return this->webArguments.GetValueCreate(inputName);
 }
 
-void GlobalVariables::MakeReport()
-{ MacroRegisterFunctionWithName("GlobalVariables::MakeReport");
+void GlobalVariables::MakeReport() {
+  MacroRegisterFunctionWithName("GlobalVariables::MakeReport");
   if (this->IndicatorStringOutputFunction == 0)
     return;
-  if (this->flagRunningCommandLine || this->flagRunningConsoleTest)
+  if (this->flagRunningCommandLine || this->flagRunningConsoleTest) {
     this->MakeReport(this->ToStringProgressReportConsole());
-  else
-    this->MakeReport(this->ToStringProgressReportHtml());
+  } else {
+    this->MakeReport(this->ToStringProgressReportJSData().ToString(false));
+  }
 }
 
-void GlobalVariables::initOutputReportAndCrashFileNames
-(const std::string& inputUserStringRAW, const std::string& inputUserStringCivilized)
-{ std::string inputAbbreviated;
+void GlobalVariables::initOutputReportAndCrashFileNames(
+  const std::string& inputUserStringRAW, const std::string& inputUserStringCivilized
+) {
+  std::string inputAbbreviated;
   this->userInputStringIfAvailable =
-  HtmlRoutines::CleanUpForFileNameUse
-  (HtmlRoutines::ConvertStringToURLString(inputUserStringCivilized, false));
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { this->userInputStringRAWIfAvailable = inputUserStringRAW;
+  HtmlRoutines::CleanUpForFileNameUse(
+    HtmlRoutines::ConvertStringToURLString(inputUserStringCivilized, false)
+  );
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
+    this->userInputStringRAWIfAvailable = inputUserStringRAW;
     inputAbbreviated = this->userInputStringRAWIfAvailable;
-  } else
-  { this->userInputStringRAWIfAvailable = "Raw user input string not available in SSL mode. ";
+  } else {
+    this->userInputStringRAWIfAvailable = "Raw user input string not available in SSL mode. ";
     inputAbbreviated = this->userInputStringIfAvailable;
   }
   MathRoutines::StringTrimToLengthWithHash(inputAbbreviated, 150);
@@ -391,19 +414,19 @@ void GlobalVariables::initOutputReportAndCrashFileNames
   this->RelativePhysicalNameOutpuT = "output_" + inputAbbreviated + ".html";
 }
 
-void FileInformation::AddProjectInfo(const std::string& fileName, const std::string& fileDescription)
-{ FileInformation theInfo;
+void FileInformation::AddProjectInfo(const std::string& fileName, const std::string& fileDescription) {
+  FileInformation theInfo;
   theInfo.FileName = fileName;
   theInfo.FileDescription = fileDescription;
-  if (theGlobalVariables.flagNotAllocated)
-  { std::cout << "The global variables are not allocated: this is the static initialization order fiasco at work! ";
+  if (theGlobalVariables.flagNotAllocated) {
+    std::cout << "The global variables are not allocated: this is the static initialization order fiasco at work! ";
     assert(false);//cannot crash with mechanisms: nothing works yet!
   }
   theGlobalVariables.theSourceCodeFiles().AddOnTopNoRepetition(theInfo);
 }
 
-UserCalculatorData::UserCalculatorData()
-{ this->approximateHoursSinceLastTokenWasIssued = - 1;
+UserCalculatorData::UserCalculatorData() {
+  this->approximateHoursSinceLastTokenWasIssued = - 1;
   this->flagEnteredAuthenticationToken = false;
   this->flagMustLogin = true;
   this->flagEnteredPassword = false;
@@ -413,8 +436,8 @@ UserCalculatorData::UserCalculatorData()
   this->flagEnteredActivationToken = false;
 }
 
-void UserCalculatorData::reset()
-{ MacroRegisterFunctionWithName("UserCalculatorData::reset");
+void UserCalculatorData::reset() {
+  MacroRegisterFunctionWithName("UserCalculatorData::reset");
   for (unsigned i = 0; i < this->username.size(); i ++)
     this->username[i] = '*';
   this->username = "";
@@ -422,8 +445,8 @@ void UserCalculatorData::reset()
   this->clearAuthenticationTokenAndPassword();
 }
 
-void UserCalculatorData::clearPasswordFromMemory()
-{ MacroRegisterFunctionWithName("UserCalculatorData::resetPassword");
+void UserCalculatorData::clearPasswordFromMemory() {
+  MacroRegisterFunctionWithName("UserCalculatorData::clearPasswordFromMemory");
   for (unsigned i = 0; i < this->actualHashedSaltedPassword.size(); i ++)
     this->actualHashedSaltedPassword[i] = ' ';
   this->actualHashedSaltedPassword = "";
@@ -441,24 +464,24 @@ void UserCalculatorData::clearPasswordFromMemory()
   this->enteredActivationToken = "";
 }
 
-void UserCalculatorData::clearAuthenticationTokenAndPassword()
-{ MacroRegisterFunctionWithName("UserCalculatorData::reset");
+void UserCalculatorData::clearAuthenticationTokenAndPassword() {
+  MacroRegisterFunctionWithName("UserCalculatorData::clearAuthenticationTokenAndPassword");
   this->clearPasswordFromMemory();
   for (unsigned i = 0; i < this->actualAuthenticationToken.size(); i ++)
     this->actualAuthenticationToken[i] = ' ';
   this->actualAuthenticationToken = "";
 }
 
-std::string UserCalculatorData::ToStringCourseInfo()
-{ std::stringstream out;
+std::string UserCalculatorData::ToStringCourseInfo() {
+  std::stringstream out;
   out << "Course name:\n" << this->courseComputed
   << "\n<br>Deadline schema:\n" << this->deadlines.ToString(false)
   << "\n<hr>Problem weight schema:\n" << this->problemWeights.ToString(false);
   return out.str();
 }
 
-std::string UserCalculatorData::ToStringUnsecure()
-{ MacroRegisterFunctionWithName("UserCalculatorData::ToStringUnsecure");
+std::string UserCalculatorData::ToStringUnsecure() {
+  MacroRegisterFunctionWithName("UserCalculatorData::ToStringUnsecure");
   std::stringstream out;
   out << "User: " << this->username << "\n<br>"
   << this->ToStringCourseInfo()
@@ -477,28 +500,28 @@ std::string UserCalculatorData::ToStringUnsecure()
 
 template<>
 List<Weight<RationalFunctionOld> >::OrderLeftGreaterThanRight
-FormatExpressions::GetMonOrder<Weight<RationalFunctionOld> >()
-{ return 0;
+FormatExpressions::GetMonOrder<Weight<RationalFunctionOld> >() {
+  return 0;
 }
 
 template<>
 List<Weight<Rational> >::OrderLeftGreaterThanRight
-FormatExpressions::GetMonOrder<Weight<Rational> >()
-{ return 0;
+FormatExpressions::GetMonOrder<Weight<Rational> >() {
+  return 0;
 }
 
-void DynkinDiagramRootSubalgebra::SwapDynkinStrings(int i, int j)
-{ this->SimpleComponentTypes.SwapTwoIndices(i, j);
+void DynkinDiagramRootSubalgebra::SwapDynkinStrings(int i, int j) {
+  this->SimpleComponentTypes.SwapTwoIndices(i, j);
   this->SimpleBasesConnectedComponents.SwapTwoIndices(i, j);
   this->indicesThreeNodes.SwapTwoIndices(i, j);
   this->indicesEnds.SwapTwoIndices(i, j);
 }
 
-void DynkinDiagramRootSubalgebra::Sort()
-{ //doing bubble sort
-  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++)
-    for (int j = i + 1; j < this->SimpleBasesConnectedComponents.size; j ++)
-    { bool tempBool = false;
+void DynkinDiagramRootSubalgebra::Sort() {
+  //doing bubble sort -> shortest to code
+  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
+    for (int j = i + 1; j < this->SimpleBasesConnectedComponents.size; j ++) {
+      bool tempBool = false;
       if (this->SimpleBasesConnectedComponents[i].size < this->SimpleBasesConnectedComponents[j].size)
         tempBool = true;
       if (this->SimpleBasesConnectedComponents[i].size == this->SimpleBasesConnectedComponents[j].size)
@@ -506,14 +529,15 @@ void DynkinDiagramRootSubalgebra::Sort()
       if (tempBool)
         this->SwapDynkinStrings(i, j);
     }
+  }
   this->sameTypeComponents.size = 0;
   this->indexInUniComponent.SetSize(this->SimpleBasesConnectedComponents.size);
   this->indexUniComponent.SetSize(this->SimpleBasesConnectedComponents.size);
   this->sameTypeComponents.Reserve(this->SimpleBasesConnectedComponents.size);
   DynkinSimpleType tempType;
-  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++)
-  { if (!(this->SimpleComponentTypes[i] == tempType))
-    { this->sameTypeComponents.SetSize(this->sameTypeComponents.size + 1);
+  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
+    if (!(this->SimpleComponentTypes[i] == tempType)) {
+      this->sameTypeComponents.SetSize(this->sameTypeComponents.size + 1);
       this->sameTypeComponents.LastObject()->size = 0;
       tempType = this->SimpleComponentTypes[i];
     }
@@ -523,20 +547,21 @@ void DynkinDiagramRootSubalgebra::Sort()
   }
 }
 
-Rational DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo(const Vector<Rational>& inputVector)
-{ MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo");
+Rational DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo(const Vector<Rational>& inputVector) {
+  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo");
   Rational result = 0;
-  for (int i = 0; i < this->AmbientRootSystem.size; i ++)
-    if (inputVector.ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm) != 0)
-    { Rational squareLength = this->AmbientRootSystem[i].ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm);
+  for (int i = 0; i < this->AmbientRootSystem.size; i ++) {
+    if (inputVector.ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm) != 0) {
+      Rational squareLength = this->AmbientRootSystem[i].ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm);
       if (result < squareLength)
         result = squareLength;
     }
+  }
   return result;
 }
 
-Rational DynkinDiagramRootSubalgebra::GetSquareLengthShortestRootLinkedTo(const Vector<Rational>& inputVector)
-{ MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo");
+Rational DynkinDiagramRootSubalgebra::GetSquareLengthShortestRootLinkedTo(const Vector<Rational>& inputVector) {
+  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo");
   Rational result = inputVector.ScalarProduct(inputVector, this->AmbientBilinearForm);
   for (int i = 0; i < this->AmbientRootSystem.size; i ++)
     if (inputVector.ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm) != 0)
@@ -547,8 +572,8 @@ Rational DynkinDiagramRootSubalgebra::GetSquareLengthShortestRootLinkedTo(const 
   return result;
 }
 
-void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
-{ MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDynkinString");
+void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
+  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDynkinString");
   this->CheckInitialization();
   if (indexComponent >= this->SimpleBasesConnectedComponents.size)
     crash << crash;
@@ -560,8 +585,8 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
     crash << "This is a programming error: currentComponent is empty which is impossible. " << crash;
 //  stOutput << "<hr> Extracting component from " << currentComponent.ToString() << " with bilinear form "
 //  << this->AmbientBilinearForm.ToString();
-  if (this->numberOfThreeValencyNodes(indexComponent) == 1)
-  { //type D or E
+  if (this->numberOfThreeValencyNodes(indexComponent) == 1) {
+    //type D or E
     //in type D first comes the triple node, then the long string, then the one-root strings
     //the long string is oriented with the end that is connected to the triple node having
     //smaller index
@@ -581,16 +606,21 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
 //    stOutput << " ... to get: " << diagramWithoutTripleNode.ToStringRelativeToAmbientType(DynkinSimpleType('A',1));
     if (diagramWithoutTripleNode.SimpleBasesConnectedComponents.size != 3)
       crash << "This is a programming error: Dynkin diagram has a triple node whose removal does not yield 3 connected components. " << crash;
-    for (int i = 0; i < 3; i ++)
-      if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i][0].ScalarProduct(tripleNode, this->AmbientBilinearForm) == 0)
+    for (int i = 0; i < 3; i ++) {
+      if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i][0].ScalarProduct(tripleNode, this->AmbientBilinearForm) == 0) {
         diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].ReverseOrderElements();
-    for (int i = 0; i < 3; i ++)
-      for (int j = i + 1; j < 3; j ++)
-        if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].size < diagramWithoutTripleNode.SimpleBasesConnectedComponents[j].size)
+      }
+    }
+    for (int i = 0; i < 3; i ++) {
+      for (int j = i + 1; j < 3; j ++) {
+        if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].size < diagramWithoutTripleNode.SimpleBasesConnectedComponents[j].size) {
           diagramWithoutTripleNode.SwapDynkinStrings(i, j);
+        }
+      }
+    }
     currentComponent.SetSize(0);
-    if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size == 1)
-    { //<- components are sorted by length, therefore the second and third component are of length 1,
+    if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size == 1) {
+      //<- components are sorted by length, therefore the second and third component are of length 1,
       //therefore we have type D_n
       Rational theScale = DynkinSimpleType::GetDefaultLongRootLengthSquared('D') / tripleNode.ScalarProduct(tripleNode, this->AmbientBilinearForm);
       currentComponent.AddListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0]);//<-first long component
@@ -600,8 +630,8 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
       currentComponent.AddListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1]);//<-last two vectors
       currentComponent.AddListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[2]);//<-last two vectors
       outputType.MakeArbitrary('D', currentComponent.size, theScale);
-    } else
-    { //the second largest component has more than one element, hence we are in type E_n.
+    } else {
+      //the second largest component has more than one element, hence we are in type E_n.
       Rational theScale = DynkinSimpleType::GetDefaultLongRootLengthSquared('E') / tripleNode.ScalarProduct(tripleNode, this->AmbientBilinearForm);
       if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size != 2)
         crash << "This is a programming error: the dynkin diagram has two components of length larger than 2 linked to the triple node."
@@ -623,34 +653,35 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
   length1 = currentComponent[0].ScalarProduct(currentComponent[0], this->AmbientBilinearForm);
   int numLength1 = 1;
   int numLength2 = 0;
-  for (int i = 1; i < currentComponent.size; i ++)
-    if (currentComponent[i].ScalarProduct(currentComponent[i], this->AmbientBilinearForm) == length1)
+  for (int i = 1; i < currentComponent.size; i ++) {
+    if (currentComponent[i].ScalarProduct(currentComponent[i], this->AmbientBilinearForm) == length1) {
       numLength1 ++;
-    else
-    { numLength2 ++;
+    } else {
+      numLength2 ++;
       length2 = currentComponent[i].ScalarProduct(currentComponent[i], this->AmbientBilinearForm);
     }
-  if (numLength2 == 0)
-  { //type A
+  }
+  if (numLength2 == 0) {
+    //type A
     outputType.MakeArbitrary('A', numLength1, DynkinSimpleType::GetDefaultLongRootLengthSquared('A') / length1);
-  } else
-  { if (length1 < length2)
-    { MathRoutines::swap(length1, length2);
+  } else {
+    if (length1 < length2) {
+      MathRoutines::swap(length1, length2);
       MathRoutines::swap(numLength1, numLength2);
       currentEnds.SwapTwoIndices(0, 1);
     }//<-so far we made sure the first length is long
     //By convention, in types G and C, in the Dynkin diagram the long root comes last
     //This is handled at the very end of this function (outside all the if clauses).
-    if (numLength1 == numLength2)
-    {//B2, C2, F4 or G2
+    if (numLength1 == numLength2) {
+      //B2, C2, F4 or G2
       if (numLength1 == 2)
         outputType.MakeArbitrary('F', 4, DynkinSimpleType::GetDefaultLongRootLengthSquared('F') / length1);
       else if (length1 / length2 == 3)
         outputType.MakeArbitrary('G', 2, DynkinSimpleType::GetDefaultLongRootLengthSquared('G') / length1);
       else
         outputType.MakeArbitrary('B', 2, DynkinSimpleType::GetDefaultLongRootLengthSquared('B') / length1);
-    } else
-    { if (numLength1>numLength2)
+    } else {
+      if (numLength1>numLength2)
         outputType.MakeArbitrary
         ('B', currentComponent.size, DynkinSimpleType::GetDefaultLongRootLengthSquared('B') / length1);
       else
@@ -660,24 +691,26 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
   }
   //The following code ensures the Dynkin diagram is properly ordered
   currentComponent.SwapTwoIndices(0, currentEnds[0]);
-  for (int i = 0; i < currentComponent.size; i ++)
-    for (int j = i + 1; j < currentComponent.size; j ++)
-      if (!currentComponent[i].ScalarProduct(currentComponent[j], this->AmbientBilinearForm).IsEqualToZero())
-      { currentComponent.SwapTwoIndices(i + 1, j);
+  for (int i = 0; i < currentComponent.size; i ++) {
+    for (int j = i + 1; j < currentComponent.size; j ++) {
+      if (!currentComponent[i].ScalarProduct(currentComponent[j], this->AmbientBilinearForm).IsEqualToZero()) {
+        currentComponent.SwapTwoIndices(i + 1, j);
         break;
       }
-//  stOutput << "<br>after swapping:" << currentComponent.ToString();
+    }
+  }
   //so far we made sure the entire component is one properly ordered string, starting with the long root.
   if (outputType.theLetter == 'G' || outputType.theLetter == 'C' )
     currentComponent.ReverseOrderElements();//<-in G_2 and C_n the short root comes first so we need to reverse elements.
   //stOutput << "The output type was computed to be: " << outputType.ToString();
 }
 
-std::string DynkinDiagramRootSubalgebra::ToString(FormatExpressions* theFormat) const
-{ DynkinType theType;
+std::string DynkinDiagramRootSubalgebra::ToString(FormatExpressions* theFormat) const {
+  DynkinType theType;
   theType.MakeZero();
-  for (int j = 0; j < this->SimpleComponentTypes.size; j ++)
+  for (int j = 0; j < this->SimpleComponentTypes.size; j ++) {
     theType.AddMonomial(this->SimpleComponentTypes[j], 1);
+  }
   return theType.ToString(theFormat);
 }
 

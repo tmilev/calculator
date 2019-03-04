@@ -239,7 +239,8 @@ public:
   void ChDir(const std::string& systemCommand);
   std::string ToStringHTMLTopCommandLinuxSystem();
   std::string ToStringFolderInfo() const;
-  std::string ToStringProgressReportHtml();
+  std::string ToStringProgressReportHtmL();
+  JSData ToStringProgressReportJSData();
   std::string ToStringProgressReportConsole();
   void MakeReport(const std::string& input) {
     if (this->IndicatorStringOutputFunction != 0) {

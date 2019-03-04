@@ -22,9 +22,11 @@ public:
     static std::string editPage;
     static std::string selectCourseJSON;
     static std::string serverStatusJSON;
+    static std::string indicator;
   };
   struct result {
     static std::string resultHtml;
+    static std::string resultStringified;
     static std::string syntaxErrors;
     static std::string resultLabel;
     static std::string badInput;
@@ -32,6 +34,9 @@ public:
     static std::string timeOut;
     static std::string timeOutComments;
     static std::string workerId;
+    static std::string error;
+    static std::string status;
+    static std::string crashReport;
   };
   struct databaseParameters {
     static std::string entryPoint;

@@ -209,11 +209,12 @@ void SSLdata::FreeContext() {
 }
 
 void WebServer::SSLServerSideHandShake() {
-  if (!theGlobalVariables.flagSSLisAvailable)
+  if (!theGlobalVariables.flagSSLisAvailable) {
     return;
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+  }
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return;
-//  logOpenSSL << "Initiating SSL handshake. " << logger::endL;
+  }
 #ifdef MACRO_use_open_ssl
   this->theSSLdata.HandShakeIamServer(this->GetActiveWorker().connectedSocketID);
 #endif
@@ -358,8 +359,7 @@ void SSLdata::HandShakeIamServer(int inputSocketID) {
       else
         logOpenSSL << "OpenSSL handshake not successful with a fatal error. ";
       logOpenSSL << "Attempt " << i + 1 << " out of " << maxNumHandshakeTries << " failed. ";
-      switch(SSL_get_error(this->sslServeR, this->errorCode))
-      {
+      switch(SSL_get_error(this->sslServeR, this->errorCode)) {
       case SSL_ERROR_NONE:
         logOpenSSL << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
         maxNumHandshakeTries = 1;
@@ -458,8 +458,9 @@ void SSLdata::RemoveLastSocketClient() {
     int lastSocket = this->socketStackClient.PopLastObject();
     close(lastSocket);
   }
-  if (this->socketStackClient.size <= 0)
+  if (this->socketStackClient.size <= 0) {
     return;
+  }
   this->DoSetSocket(*this->socketStackClient.LastObject(), this->sslClient);
 }
 
@@ -551,11 +552,13 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(
     }
   }
   if (this->flagSSLHandshakeSuccessful) {
-    if (commentsGeneral != 0)
+    if (commentsGeneral != 0) {
       *commentsGeneral << "<span style =\"color:green\">SSL handshake successfull.</span>\n<br>\n";
+    }
   } else {
-    if (commentsOnFailure != 0)
+    if (commentsOnFailure != 0) {
       *commentsOnFailure << "<span style =\"color:red\">SSL handshake failed.</span>\n<br>\n";
+    }
     return false;
   }
   //CHK_SSL(err);
@@ -575,13 +578,15 @@ bool SSLdata::InspectCertificates(
   this->peer_certificate = SSL_get_peer_certificate(this->sslClient);
   if (this->peer_certificate != 0) {
     char* tempCharPtr = 0;
-    if (commentsGeneral != 0)
+    if (commentsGeneral != 0) {
       *commentsGeneral << "SSL connection using: "
       << SSL_get_cipher(this->sslClient) << ".<br>\n";
+    }
     tempCharPtr = X509_NAME_oneline(X509_get_subject_name (this->peer_certificate), 0, 0);
     if (tempCharPtr == 0) {
-      if (commentsOnFailure != 0)
+      if (commentsOnFailure != 0) {
         *commentsOnFailure << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
+      }
       return false;
     }
     this->otherCertificateSubjectName = tempCharPtr;
@@ -591,15 +596,17 @@ bool SSLdata::InspectCertificates(
       << "subject: " << this->otherCertificateSubjectName << "<br>\n";
     tempCharPtr = X509_NAME_oneline(X509_get_issuer_name(this->peer_certificate), 0, 0);
     if (tempCharPtr == 0) {
-      if (commentsOnFailure != 0)
+      if (commentsOnFailure != 0) {
         *commentsOnFailure << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
+      }
       return false;
     }
     this->otherCertificateIssuerName = tempCharPtr;
     OPENSSL_free(tempCharPtr);
-    if (commentsGeneral != 0)
+    if (commentsGeneral != 0) {
       *commentsGeneral << "Issuer name: "
       << this->otherCertificateIssuerName << "<br>\n";
+    }
     X509_free(this->peer_certificate);
     this->peer_certificate = 0;
     return true;
@@ -655,11 +662,13 @@ bool SSLdata::SSLReadLoop(
     if (numBytes > 0) {
       next.assign(this->buffer.TheObjects, numBytes);
       output += next;
-      if (expectedLength <= 0)
+      if (expectedLength <= 0) {
         break;
-      else
-        if (expectedLength <= output.size())
+      } else {
+        if (expectedLength <= output.size()) {
           break;
+        }
+      }
     }
     if (numBytes == 0)
       break;
@@ -980,9 +989,11 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus) {
   theWebServer.theProgressReports[this->indexProgressReport] = inputStatus;
   //std::cout << "SetStatus: passed mutex section" << std::endl;
   std::stringstream toBePiped;
-  for (int i = 0; i < theWebServer.theProgressReports.size; i ++)
-    if (theWebServer.theProgressReports[i] != "")
+  for (int i = 0; i < theWebServer.theProgressReports.size; i ++) {
+    if (theWebServer.theProgressReports[i] != "") {
       toBePiped << "<br>" << theWebServer.theProgressReports[i];
+    }
+  }
   safetyFirst.UnlockMe();
   if (!theGlobalVariables.flagRunningBuiltInWebServer)
     return;
@@ -1030,8 +1041,9 @@ std::string WebWorker::ToStringMessageFullUnsafe(bool useHTML) const {
   out << this->ToStringMessageUnsafe(useHTML);
   if (this->theMessageHeaderStrings.size > 0) {
     out << "<hr>\nStrings extracted from message: ";
-    for (int i = 0; i < this->theMessageHeaderStrings.size; i ++)
+    for (int i = 0; i < this->theMessageHeaderStrings.size; i ++) {
       out << "<br>" << this->theMessageHeaderStrings[i];
+    }
   }
   return out.str();
 }
@@ -1185,17 +1197,21 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
   MacroRegisterFunctionWithName("WebWorker::ExtractArgumentsFromCookies");
   MapLisT<std::string, std::string, MathRoutines::hashString> newlyFoundArgs;
   bool result = true;
-  for (int i = 0; i < this->cookies.size; i ++)
-    if (!HtmlRoutines::ChopCGIStringAppend(this->cookies[i], newlyFoundArgs, argumentProcessingFailureComments))
+  for (int i = 0; i < this->cookies.size; i ++) {
+    if (!HtmlRoutines::ChopCGIStringAppend(this->cookies[i], newlyFoundArgs, argumentProcessingFailureComments)) {
       result = false;
+    }
+  }
   for (int i = 0; i < newlyFoundArgs.size(); i ++) {
     if (theGlobalVariables.webArguments.Contains(newlyFoundArgs.theKeys[i]))
       //if (theGlobalVariables.webArguments.GetValueCreate(newlyFoundArgs.theKeys[i]) != "")
       continue; //<-if a key is already given cookie entries are ignored.
     std::string trimmed = newlyFoundArgs.theValues[i];
-    if (trimmed.size() > 0)
-      if (trimmed[trimmed.size() - 1] == ';')
+    if (trimmed.size() > 0) {
+      if (trimmed[trimmed.size() - 1] == ';') {
         trimmed = trimmed.substr(0, trimmed.size() - 1);
+      }
+    }
     //<-except the last cookie, cookies have extra semicolumn at the end, trimming.
     bool isGood = true;
     if (newlyFoundArgs.theKeys[i] == "request") { //<- we are careful about
@@ -1233,9 +1249,11 @@ bool WebWorker::ExtractArgumentsFromMessage(
   theGlobalVariables.webArguments;
   if (!HtmlRoutines::ChopCGIStringAppend(input, theArgs, argumentProcessingFailureComments))
     return false;
-  if (theGlobalVariables.flagRunningApache)
-    if (this->addressComputed == "")
+  if (theGlobalVariables.flagRunningApache) {
+    if (this->addressComputed == "") {
       this->addressComputed = theGlobalVariables.GetWebInput("request");
+    }
+  }
   if (theArgs.Contains("doubleURLencodedInput")) {
     std::string newInput = theGlobalVariables.GetWebInput("doubleURLencodedInput");
     theArgs.Clear();
@@ -1482,24 +1500,28 @@ void WebWorker::ParseMessageHead() {
   for (unsigned i = 0; i < this->messageHead.size(); i ++) {
     if (this->messageHead[i] != ' ' && this->messageHead[i] != '\n' && this->messageHead[i] != '\r') {
       buffer.push_back(this->messageHead[i]);
-      if (i == this->messageHead.size() - 1)
+      if (i == this->messageHead.size() - 1) {
         this->theMessageHeaderStrings.AddOnTop(buffer);
+      }
     } else {
       if (buffer != "") {
         this->theMessageHeaderStrings.AddOnTop(buffer);
         buffer = "";
       }
-      if (i > 0)
-        if (this->messageHead[i - 1] == '\r' && this->messageHead[i] == '\n')
+      if (i > 0) {
+        if (this->messageHead[i - 1] == '\r' && this->messageHead[i] == '\n') {
           this->theMessageHeaderStrings.AddOnTop("\n");
+        }
+      }
     }
   }
   for (int i = 0; i < this->theMessageHeaderStrings.size; i ++) {
     if (this->theMessageHeaderStrings[i] == "GET") {
       this->requestTypE = this->requestGet;
       i ++;
-      if (i < this->theMessageHeaderStrings.size)
+      if (i < this->theMessageHeaderStrings.size) {
         this->addressGetOrPost = this->theMessageHeaderStrings[i];
+      }
     } else if (this->theMessageHeaderStrings[i] == "POST") {
       this->requestTypE = this->requestPost;
       i ++;
@@ -1507,16 +1529,18 @@ void WebWorker::ParseMessageHead() {
       //if that is the case the message does not end in \n
       if (i < this->theMessageHeaderStrings.size) {
         this->addressGetOrPost = this->theMessageHeaderStrings[i];
-        if (*this->theMessageHeaderStrings.LastObject() != "\n")
+        if (*this->theMessageHeaderStrings.LastObject() != "\n") {
           this->messageBody = *this->theMessageHeaderStrings.LastObject();
-        else
+        } else {
           this->messageBody = "";
+        }
       }
     } else if (this->theMessageHeaderStrings[i] == "HEAD") {
       this->requestTypE = this->requestHead;
       i ++;
-      if (i < this->theMessageHeaderStrings.size)
+      if (i < this->theMessageHeaderStrings.size) {
         this->addressGetOrPost = this->theMessageHeaderStrings[i];
+      }
     } else if (
       this->theMessageHeaderStrings[i] == "transfer-coding:" ||
       this->theMessageHeaderStrings[i] == "Transfer-coding:" ||
@@ -1551,8 +1575,9 @@ void WebWorker::ParseMessageHead() {
       this->theMessageHeaderStrings[i] == "host:"
     ) {
       i ++;
-      if (i < this->theMessageHeaderStrings.size)
+      if (i < this->theMessageHeaderStrings.size) {
         this->hostWithPort = this->theMessageHeaderStrings[i];
+      }
     } else if (
       this->theMessageHeaderStrings[i] == "Cookie:" ||
       this->theMessageHeaderStrings[i] == "cookie:"
@@ -1569,8 +1594,9 @@ void WebWorker::ParseMessageHead() {
     ) {
       i ++;
       for (; i < this->theMessageHeaderStrings.size; i ++) {
-        if (this->theMessageHeaderStrings[i] == "\n")
+        if (this->theMessageHeaderStrings[i] == "\n") {
           break;
+        }
         this->connectionFlags.AddOnTop(this->theMessageHeaderStrings[i]);
         if (
           this->theMessageHeaderStrings[i] == "keep-alive" ||
@@ -1587,8 +1613,9 @@ void WebWorker::ParseMessageHead() {
 
 void WebWorker::AttemptUnknownRequestErrorCorrection() {
   MacroRegisterFunctionWithName("WebWorker::AttemptUnknownRequestErrorCorrection");
-  if (this->requestTypE != this->requestUnknown)
+  if (this->requestTypE != this->requestUnknown) {
     return;
+  }
   logIO << logger::red << "Unknown request." << logger::endL;
   logIO << logger::blue << "Message head length: " << this->messageHead.size() << logger::endL;
   logIO << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->messageHead, false, 300) << logger::endL;
@@ -1626,9 +1653,9 @@ bool WebWorker::ReceiveAllHttp() {
   this->requestTypE = this->requestUnknown;
   unsigned const int bufferSize = 60000;
   char buffer[bufferSize];
-  if (this->connectedSocketID == - 1)
+  if (this->connectedSocketID == - 1) {
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
-  //std::cout << "Got thus far 10" << std::endl;
+  }
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
@@ -1772,13 +1799,16 @@ void WebWorker::ReportDisplayUserInput() {
 void WebWorker::ExtractHostInfo() {
   MacroRegisterFunctionWithName("WebWorker::ExtractHostInfo");
   unsigned int i = 0;
-  for (i = 0; i < this->hostWithPort.size(); i ++)
-    if (this->hostWithPort[i] == ':')
+  for (i = 0; i < this->hostWithPort.size(); i ++) {
+    if (this->hostWithPort[i] == ':') {
       break;
-  if (i < this->hostWithPort.size())
+    }
+  }
+  if (i < this->hostWithPort.size()) {
     this->hostNoPort = this->hostWithPort.substr(0, i);
-  else
+  } else {
     this->hostNoPort = this->hostWithPort;
+  }
   theGlobalVariables.hostWithPort = this->hostWithPort;
   theGlobalVariables.hostNoPort = this->hostNoPort;
   if (
@@ -1831,8 +1861,9 @@ std::string WebWorker::GetHeaderSetCookie() {
     << "="
     << theGlobalVariables.CookiesToSetUsingHeaders.theValues[i]
     << "; Path=/; Expires=Sat, 01 Jan 2030 20:00:00 GMT; Secure";
-    if (i != theGlobalVariables.CookiesToSetUsingHeaders.size() - 1)
+    if (i != theGlobalVariables.CookiesToSetUsingHeaders.size() - 1) {
       out << "\r\n";
+    }
   }
   return out.str();
 }
@@ -1855,14 +1886,18 @@ void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const st
     out << this->GetHeaderConnectionKeepAlive() << "\r\n";
   if (remainingHeaderNoTermination != "")
     out << remainingHeaderNoTermination << "\r\n";
-  if ((theGlobalVariables.flagLoggedIn || theGlobalVariables.flagLogInAttempted) &&
-      WebWorker::GetHeaderSetCookie() != "")
+  if (
+    (theGlobalVariables.flagLoggedIn || theGlobalVariables.flagLogInAttempted) &&
+    WebWorker::GetHeaderSetCookie() != ""
+  ) {
     out << WebWorker::GetHeaderSetCookie() << "\r\n";
+  }
   std::string finalHeader = out.str();
   this->remainingHeaderToSend.SetSize(0);
   this->remainingHeaderToSend.SetExpectedSize(finalHeader.size());
-  for (unsigned i = 0; i < finalHeader.size(); i ++)
+  for (unsigned i = 0; i < finalHeader.size(); i ++) {
     this->remainingHeaderToSend.AddOnTop(finalHeader[i]);
+  }
 }
 
 void WebWorker::SetHeaderOKNoContentLength(const std::string& extraHeader, const std::string &contentType) {
@@ -1893,8 +1928,9 @@ void WebWorker::SanitizeVirtualFileName() {
       foundslash = true;
   }
   this->VirtualFileName = "";
-  for (int i = resultName.size() - 1; i >= 0; i --)
+  for (int i = resultName.size() - 1; i >= 0; i --) {
     this->VirtualFileName.push_back(resultName[i]);
+  }
 }
 
 int WebWorker::ProcessCalculatorExamplesJSON() {
@@ -1936,7 +1972,7 @@ int WebWorker::ProcessPauseWorker() {
   std::stringstream out;
   JSData result;
   if (theMainInput == "") {
-    result["error"] = "To pause a worker please 1) turn on monitoring and 2) provide the worker number in the mainInput field. ";
+    result[WebAPI::result::error] = "To pause a worker please 1) turn on monitoring and 2) provide the worker number in the mainInput field. ";
     stOutput << result.ToString(false);
     return 0;
   }
@@ -1945,21 +1981,21 @@ int WebWorker::ProcessPauseWorker() {
   if (inputWebWorkerIndex < 0 || inputWebWorkerIndex >= this->parent->theWorkers.size) {
     out << "<b>User requested worker number " << inputWebWorkerNumber
     << " out of " << this->parent->theWorkers.size << " which is out of range. </b>";
-    result["error"] = out.str();
+    result[WebAPI::result::error] = out.str();
     stOutput << result.ToString(false);
     return 0;
   }
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUsE) {
     out << "<b>Requested worker number " << inputWebWorkerNumber << " is not in use. Total number of workers: "
     << this->parent->theWorkers.size << ". </b>";
-    result["error"] = out.str();
+    result[WebAPI::result::error] = out.str();
     stOutput << result.ToString(false);
     return 0;
   }
   if (inputWebWorkerIndex == this->indexInParent) {
     out << "Worker " << inputWebWorkerIndex
     << " attempts to pause itself, this is not allowed.";
-    result["error"] = out.str();
+    result[WebAPI::result::error] = out.str();
     stOutput << result.ToString(false);
     return 0;
   }
@@ -1967,11 +2003,11 @@ int WebWorker::ProcessPauseWorker() {
   WebWorker& otherWorker = this->parent->theWorkers[inputWebWorkerIndex];
   if (!otherWorker.PauseWorker.CheckPauseIsRequested(false, false, false)) {
     otherWorker.PauseWorker.RequestPausePauseIfLocked(false, false);
-    result["status"]= "paused";
+    result[WebAPI::result::status]= "paused";
     stOutput << result.ToString(false);
     return 0;
   }
-  result["status"]= "unpaused";
+  result[WebAPI::result::status]= "unpaused";
   stOutput << result.ToString(false);
   otherWorker.PauseWorker.ResumePausedProcessesIfAny(false, false);
   return 0;
@@ -1997,7 +2033,7 @@ int WebWorker::ProcessMonitor() {
     std::stringstream commentStream;
     commentStream << "Process monitoring is allowed only for logged-in admins with process monitoring turned on. "
     << "There must be a link/button to turn on process monitoring in the calculator app. ";
-    result["comments"] = commentStream.str();
+    result[WebAPI::result::comments] = commentStream.str();
   }
   stOutput << result.ToString(false);
   return 0;
@@ -2011,14 +2047,14 @@ int WebWorker::ProcessComputationIndicator() {
   JSData result;
   std::stringstream out, comments;
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-    result["error"] = "Process monitoring only allowed to logged-in admins. ";
+    result[WebAPI::result::error] = "Process monitoring only allowed to logged-in admins. ";
     stOutput << result.ToString(false);
     return 0;
   }
   if (theMainInput == "") {
     out << "To get a computation indicator you need to supply the number of "
     << "the child process in the mainInput field.";
-    result["error"] = out.str();
+    result[WebAPI::result::error] = out.str();
     stOutput << result.ToString(false);
     return 0;
   }
@@ -2029,7 +2065,7 @@ int WebWorker::ProcessComputationIndicator() {
     << inputWebWorkerNumber << " is out of range: there are "
     << this->parent->theWorkers.size
     << " workers. ";
-    result["error"] = out.str();
+    result[WebAPI::result::error] = out.str();
     stOutput << result.ToString(false);
     return 0;
   }
@@ -2045,8 +2081,8 @@ int WebWorker::ProcessComputationIndicator() {
     << inputWebWorkerNumber << " is not in use. "
     << " Total number of workers: "
     << this->parent->theWorkers.size << ". ";
-    result["error"] = out.str();
-    result["comments"] = comments.str();
+    result[WebAPI::result::error] = out.str();
+    result[WebAPI::result::comments] = comments.str();
     stOutput << result.ToString(false);
     return 0;
   }
@@ -2054,8 +2090,8 @@ int WebWorker::ProcessComputationIndicator() {
     out << "Indicator error. Worker number "
     << inputWebWorkerNumber << " requested to monitor itself. "
     << " This is not allowed. ";
-    result["error"] = out.str();
-    result["comments"] = comments.str();
+    result[WebAPI::result::error] = out.str();
+    result[WebAPI::result::comments] = comments.str();
     stOutput << result.ToString(false);
     return 0;
   }
@@ -2063,13 +2099,13 @@ int WebWorker::ProcessComputationIndicator() {
   if (otherWorker.userAddress.theObject != this->userAddress.theObject) {
     out << "User ip address: " << this->userAddress.theObject
     << " does not coincide with address that initiated the process. This is not allowed. ";
-    result["error"] = out.str();
+    result[WebAPI::result::error] = out.str();
     stOutput << result.ToString(false);
     return 0;
   }
   if (this->flagUsingSSLInWorkerProcess != true) {
     out << "Monitoring allowed only over https. ";
-    result["error"] = out.str();
+    result[WebAPI::result::error] = out.str();
     stOutput << result.ToString(false);
     return 0;
   }
@@ -2082,14 +2118,15 @@ int WebWorker::ProcessComputationIndicator() {
       otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.size
     );
     if (outputString != "finished") {
-      result["data"] = outputString;
-      result["status"] = "running";
+      result[WebAPI::result::resultStringified] = outputString;
+      result[WebAPI::result::status] = "running";
     } else {
-      result["status"] = "finished";
+      result[WebAPI::result::status] = "finished";
     }
     stOutput << result.ToString(false);
     otherWorker.PauseComputationReportReceived.ResumePausedProcessesIfAny(false, false);
-  } return 0;
+  }
+  return 0;
 }
 
 void WebWorker::WriteProgressReportToFile(const std::string& input) {
@@ -2137,12 +2174,16 @@ int WebWorker::ProcessFolder() {
   this->SetHeaderOKNoContentLength("");
   std::stringstream out;
   out << "<html><body>";
-  if (this->RelativePhysicalFileNamE.size() > 0)
-    if (this->RelativePhysicalFileNamE[this->RelativePhysicalFileNamE.size() - 1] != '/')
+  if (this->RelativePhysicalFileNamE.size() > 0) {
+    if (this->RelativePhysicalFileNamE[this->RelativePhysicalFileNamE.size() - 1] != '/') {
       this->RelativePhysicalFileNamE.push_back('/');
-  if (this->addressGetOrPost.size() > 0)
-    if (this->addressGetOrPost[this->addressGetOrPost.size() - 1] != '/')
+    }
+  }
+  if (this->addressGetOrPost.size() > 0) {
+    if (this->addressGetOrPost[this->addressGetOrPost.size() - 1] != '/') {
       this->addressGetOrPost.push_back('/');
+    }
+  }
   if (this->flagFileNameSanitized) {
     out << "<hr>The virtual file name I extracted was: " << this->VirtualFileName
     << "<br>However, I do not allow folder names that contain dots. "
@@ -2564,14 +2605,15 @@ std::string WebWorker::GetChangePasswordPage() {
   bool doShowPasswordChangeField = true;
   out << "<table>";
   JSData findUser, updateUser;
-  if (theGlobalVariables.userDefault.flagUserHasActivationToken)
+  if (theGlobalVariables.userDefault.flagUserHasActivationToken) {
     out << "<tr><td colspan =\"2\">"
     << "<b><span style =\"color:orange\">"
     << "To fully activate your account, "
     << "please choose a password.</span></b></td></tr>";
-  if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount)
+  }
+  if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount) {
     out << "<tr><td colspan =\"2\">" << WebWorker::GetChangePasswordPagePartOne(doShowPasswordChangeField) << "</td></tr>";
-  else {
+  } else {
     if (
       theGlobalVariables.userDefault.actualActivationToken != "" &&
       theGlobalVariables.userDefault.actualActivationToken != "activated" &&
@@ -3560,8 +3602,12 @@ int WebWorker::ServeClient() {
     return this->ProcessMonitor();
   else if (theGlobalVariables.userCalculatorRequestType == "pause" && theGlobalVariables.flagAllowProcessMonitoring)
     return this->ProcessPauseWorker();
-  else if (theGlobalVariables.userCalculatorRequestType == "indicator" && theGlobalVariables.flagAllowProcessMonitoring)
+  else if (
+    theGlobalVariables.userCalculatorRequestType == WebAPI::request::indicator &&
+    theGlobalVariables.flagAllowProcessMonitoring
+  ) {
     return this->ProcessComputationIndicator();
+  }
   //The following line is NOT ALLOWED:
   //this->parent->ReleaseNonActiveWorkers();
   //Reason: the architecture changed, now multiple requests

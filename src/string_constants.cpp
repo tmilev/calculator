@@ -4,16 +4,6 @@ static ProjectInformationInstance ProjectInfoVpfJSON(__FILE__, "String constants
 
 std::string WebAPI::appNoCache = "appNoCache";
 std::string WebAPI::app = "app";
-std::string WebAPI::request::calculatorHTML = "/calculator-html";
-std::string WebAPI::request::onePageJS = "/calculator-html/javascript_all_in_one.js";
-std::string WebAPI::request::onePageJSWithHash = "/calculator-html/javascript_all_in_one.js";
-std::string WebAPI::request::calculatorPage = "calculator";
-std::string WebAPI::request::setProblemData = "setProblemData";
-std::string WebAPI::request::changePassword = "changePassword";
-std::string WebAPI::request::activateAccount = "activateAccount";
-std::string WebAPI::request::activateAccountJSON = "activateAccountJSON";
-std::string WebAPI::request::serverStatusJSON = "serverStatusJSON";
-std::string WebAPI::request::selectCourseJSON = "selectCourseJSON";
 std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
 
 std::string WebAPI::problemContent = "problemContent";
@@ -31,6 +21,10 @@ std::string WebAPI::databaseParameters::operation = "databaseOperation";
 std::string WebAPI::databaseParameters::fetch = "databaseFetch";
 
 std::string WebAPI::problemSingleDeadline = "deadline";
+
+std::string WebAPI::result::error = "error";
+std::string WebAPI::result::status = "status";
+std::string WebAPI::result::resultStringified = "resultStringified";
 std::string WebAPI::result::resultHtml = "resultHtml";
 std::string WebAPI::result::syntaxErrors = "syntaxErrors";
 std::string WebAPI::result::resultLabel = "result";
@@ -39,8 +33,21 @@ std::string WebAPI::result::comments = "comments";
 std::string WebAPI::result::timeOut = "timeOut";
 std::string WebAPI::result::timeOutComments = "timeOutComments";
 std::string WebAPI::result::workerId = "workerId";
-std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
+std::string WebAPI::result::crashReport = "crashReport";
 
+std::string WebAPI::request::calculatorHTML = "/calculator-html";
+std::string WebAPI::request::onePageJS = "/calculator-html/javascript_all_in_one.js";
+std::string WebAPI::request::onePageJSWithHash = "/calculator-html/javascript_all_in_one.js";
+std::string WebAPI::request::calculatorPage = "calculator";
+std::string WebAPI::request::setProblemData = "setProblemData";
+std::string WebAPI::request::changePassword = "changePassword";
+std::string WebAPI::request::activateAccount = "activateAccount";
+std::string WebAPI::request::activateAccountJSON = "activateAccountJSON";
+std::string WebAPI::request::serverStatusJSON = "serverStatusJSON";
+std::string WebAPI::request::selectCourseJSON = "selectCourseJSON";
+std::string WebAPI::request::indicator = "indicator";
+
+std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 
 std::string DatabaseStrings::labelUserId = "id";
 std::string DatabaseStrings::labelUsername = "username";

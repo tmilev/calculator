@@ -1758,12 +1758,30 @@ bool CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly(Calculator& theComma
   return output.AssignValueWithContext(theArgumentPoly, theEWAE.GetContext(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMakeMakeFile");
+bool CalculatorFunctionsGeneral::innerFormatCPPSourceCode(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+    return theCommands << "Cpp code formatting available only to logged-in admins. ";
+  }
+  std::string fileName;
+  if (!input.IsOfType(&fileName)) {
+    return false;
+  }
+  std::stringstream report;
+  HtmlRoutines::FormatCPPSourceCode(fileName, &report);
+  theCommands << report.str();
+  return output.AssignValue((std::string) "Code formatted. ", theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerMakeMakeFile(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMakeMakeFile");
   (void) input;
   List<std::string> cppFilesNoExtension;
-  for (int i = 0; i < theGlobalVariables.theSourceCodeFiles().size; i ++)
-  { std::string theFileNameWithPath = theGlobalVariables.theSourceCodeFiles()[i].FileName;
+  for (int i = 0; i < theGlobalVariables.theSourceCodeFiles().size; i ++) {
+    std::string theFileNameWithPath = theGlobalVariables.theSourceCodeFiles()[i].FileName;
     if (theFileNameWithPath[theFileNameWithPath.size() - 1] == 'h')
       continue;
     theFileNameWithPath.resize(theFileNameWithPath.size() - 4);

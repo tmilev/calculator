@@ -482,9 +482,10 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output)
   { return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, false, true);
   }
-  static bool innerSolveSerreLikeSystemAlgebraicUpperLimit
-  (Calculator& theCommands, const Expression& input, Expression& output)
-  { return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, true, true);
+  static bool innerSolveSerreLikeSystemAlgebraicUpperLimit(
+    Calculator& theCommands, const Expression& input, Expression& output
+  ) {
+    return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, true, true);
   }
   static bool innerFetchWebPagePOST
   (Calculator& theCommands, const Expression& input, Expression& output);
@@ -495,8 +496,12 @@ public:
   static bool innerSendEmailWithMailGun
   (Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerElementEllipticCurveNormalForm
-  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerElementEllipticCurveNormalForm(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
+  static bool innerFormatCPPSourceCode(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
 };
 
 #endif

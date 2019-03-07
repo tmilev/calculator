@@ -425,9 +425,13 @@ uint32_t HtmlRoutines::RedGreenBlue(unsigned int r, unsigned int g, unsigned int
   return r * 65536 + g * 256 + b;
 }
 
-void HtmlRoutines::FormatCPPSourceCode(const std::string& FileName)
-{ std::fstream fileIn, fileOut;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(fileIn, "output/"+ FileName, false, false, false);
+void HtmlRoutines::FormatCPPSourceCode(const std::string& FileName, std::stringstream* comments) {
+  if (comments != nullptr) {
+    *comments << "Not implemented yet. ";
+  }
+  return;
+  std::fstream fileIn, fileOut;
+  FileOperations::OpenFileCreateIfNotPresentVirtual(fileIn, FileName, false, false, false);
   if (!fileIn.is_open())
     crash << "Can't open file for code formatting: something is wrong." << crash;
   fileIn.clear(std::ios::goodbit);
@@ -439,11 +443,11 @@ void HtmlRoutines::FormatCPPSourceCode(const std::string& FileName)
   fileIn.read(theBuffer.TheObjects, theSize * 2);
   std::string nameFileOut = FileName;
   nameFileOut.append(".new");
-  FileOperations::OpenFileCreateIfNotPresentVirtual(fileOut, "output/"+nameFileOut, false, true, false);
-  for (int i = 0; i < theSize; i ++)
-  { char lookAhead = (i < theSize - 1) ? theBuffer[i + 1] : ' ';
-    switch(theBuffer[i])
-    { case'\t':
+  FileOperations::OpenFileCreateIfNotPresentVirtual(fileOut, nameFileOut, false, true, false);
+  for (int i = 0; i < theSize; i ++) {
+    char lookAhead = (i < theSize - 1) ? theBuffer[i + 1] : ' ';
+    switch(theBuffer[i]) {
+    case'\t':
         fileOut << "  ";
         break;
       case ',':
@@ -463,12 +467,12 @@ void HtmlRoutines::FormatCPPSourceCode(const std::string& FileName)
   }
 }
 
-bool FileOperations::IsFolderUnsecure(const std::string& theFolderName)
-{ MacroRegisterFunctionWithName("FileOperations::IsFolderUnsecure");
+bool FileOperations::IsFolderUnsecure(const std::string& theFolderName) {
+  MacroRegisterFunctionWithName("FileOperations::IsFolderUnsecure");
   DIR *pDir;
   pDir = opendir(theFolderName.c_str());
-  if (pDir != NULL)
-  { closedir(pDir);
+  if (pDir != NULL) {
+    closedir(pDir);
     return true;
   }
   return false;

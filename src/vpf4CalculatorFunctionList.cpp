@@ -12,31 +12,31 @@
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
 //This file lists calculator functions and various hard-coded rules. Please do not use for any other purposes.
 
-void Calculator::initAdminFunctions()
-{
+void Calculator::initAdminFunctions() {
 #ifdef MACRO_use_MongoDB
-  this->AddOperationInnerHandler
-  ("MongoFind", CalculatorDatabaseFunctions::innerExecuteMongoQuery, "",
-   "Executes a mongoDB query. Requires admin rights. "
-   "The database name is calculator (can't be modified). "
-   "First argument: collection name. Second argument: query. ",
-   "MongoFind(\"users\", \"{}\")",
-   true, false,
-   "CalculatorDatabaseFunctions::innerExecuteMongoQuery",
-   "MongoFind");
-  this->AddOperationInnerHandler
-  ("RepairDatabaseEmailRecords", CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords, "",
-   "Repairs username/email mismatches. Admin use only. ",
-   "TurnOnRules(RepairDatabaseEmailRecords); RepairDatabaseEmailRecords(0)", false, true,
-   "DatabaseRoutines::innerRepairDatabaseEmailRecords",
-   "RepairDatabaseEmailRecords",
-   true);
+  this->AddOperationInnerHandler(
+    "MongoFind", CalculatorDatabaseFunctions::innerExecuteMongoQuery, "",
+    "Executes a mongoDB query. Requires admin rights. "
+    "The database name is calculator (can't be modified). "
+    "First argument: collection name. Second argument: query. ",
+    "MongoFind(\"users\", \"{}\")",
+    true, false,
+    "CalculatorDatabaseFunctions::innerExecuteMongoQuery",
+    "MongoFind"
+  );
+  this->AddOperationInnerHandler(
+    "RepairDatabaseEmailRecords", CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords, "",
+    "Repairs username/email mismatches. Admin use only. ",
+    "TurnOnRules(RepairDatabaseEmailRecords); RepairDatabaseEmailRecords(0)", false, true,
+    "DatabaseRoutines::innerRepairDatabaseEmailRecords",
+    "RepairDatabaseEmailRecords",
+    true
+  );
 
 #endif // MACRO_use_MongoDB
 }
 
-void Calculator::initCalculusTestingFunctions()
-{
+void Calculator::initCalculusTestingFunctions() {
 #ifdef MACRO_use_MongoDB
   this->initAdminFunctions();
 #endif // MACRO_use_MongoDB
@@ -688,6 +688,15 @@ void Calculator::initPredefinedInnerFunctions()
    false, false,
    "CalculatorFunctionsGeneral::innerMakeMakeFile",
    "MakeMakefile");
+
+  this->AddOperationInnerHandler(
+    "FormatCPPCode", CalculatorFunctionsGeneral::innerFormatCPPSourceCode, "",
+    "Format cpp code. ",
+    "FormatCPPCode{}(\"src/database.cpp\")",
+    false, false,
+    "Calculator::innerFormatCPPSourceCode",
+    "FormatCPPCode", false
+  );
 
   this->AddOperationInnerHandler
   ("AutomatedTest", Calculator::innerAutomatedTest, "",

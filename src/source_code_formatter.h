@@ -14,5 +14,6 @@ public:
 
   std::string inputCode, outputCode;
   bool FormatCPPSourceCode(const std::string& fileName, std::stringstream* comments);
+  bool initializeFileNames(const std::string& fileName, std::stringstream* comments);
 };
 #endif

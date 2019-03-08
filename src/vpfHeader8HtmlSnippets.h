@@ -121,7 +121,6 @@ public:
   static uint32_t RedGreenBlue(unsigned int r, unsigned int g, unsigned int b);
   static void MakeStdCoutReport(const std::string& input);
   static void MakeReportIndicatorFile(const std::string& input);
-  static void FormatCPPSourceCode(const std::string& FileName, std::stringstream *comments);
   static std::string ToHtmlTable(List<std::string>& labels, List<List<std::string> >& content, bool nestTables);
   static std::string ToHtmlTableRowsFromStringContainingJSON(const std::string& theJSON);
   static std::string ToHtmlTableRowsFromJSON(const JSData& input);

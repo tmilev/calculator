@@ -425,48 +425,6 @@ uint32_t HtmlRoutines::RedGreenBlue(unsigned int r, unsigned int g, unsigned int
   return r * 65536 + g * 256 + b;
 }
 
-void HtmlRoutines::FormatCPPSourceCode(const std::string& FileName, std::stringstream* comments) {
-  if (comments != nullptr) {
-    *comments << "Not implemented yet. ";
-  }
-  return;
-  std::fstream fileIn, fileOut;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(fileIn, FileName, false, false, false);
-  if (!fileIn.is_open())
-    crash << "Can't open file for code formatting: something is wrong." << crash;
-  fileIn.clear(std::ios::goodbit);
-  fileIn.seekg(0, std::ios_base::end);
-  int theSize = fileIn.tellg();
-  fileIn.seekg(0);
-  List<char> theBuffer;
-  theBuffer.SetSize(theSize * 2 + 1);
-  fileIn.read(theBuffer.TheObjects, theSize * 2);
-  std::string nameFileOut = FileName;
-  nameFileOut.append(".new");
-  FileOperations::OpenFileCreateIfNotPresentVirtual(fileOut, nameFileOut, false, true, false);
-  for (int i = 0; i < theSize; i ++) {
-    char lookAhead = (i < theSize - 1) ? theBuffer[i + 1] : ' ';
-    switch(theBuffer[i]) {
-    case'\t':
-        fileOut << "  ";
-        break;
-      case ',':
-        fileOut << theBuffer[i];
-        if (lookAhead != ' ' && lookAhead != '\n' && lookAhead != '\'')
-          fileOut << " ";
-        break;
-      case ';':
-        fileOut << theBuffer[i];
-        if (lookAhead != ' ' && lookAhead != '\n' && lookAhead != '\'')
-          fileOut << " ";
-        break;
-      default:
-        fileOut << theBuffer[i];
-        break;
-    }
-  }
-}
-
 bool FileOperations::IsFolderUnsecure(const std::string& theFolderName) {
   MacroRegisterFunctionWithName("FileOperations::IsFolderUnsecure");
   DIR *pDir;
@@ -679,50 +637,61 @@ bool FileOperations::GetFolderFileNamesUnsecure(
   return true;
 }
 
-bool FileOperations::LoadFileToStringVirtualCustomizedReadOnly
-(const std::string& theFileName, std::string& output,
- std::stringstream* commentsOnFailure)
-{ if (theFileName == "")
-  { if (commentsOnFailure != 0)
+bool FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
+  const std::string& theFileName,
+  std::string& output,
+  std::stringstream* commentsOnFailure
+) {
+  if (theFileName == "") {
+    if (commentsOnFailure != 0) {
       *commentsOnFailure << "Empty file name not allowed. ";
+    }
     return false;
   }
   std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(theFileName, computedFileName, commentsOnFailure))
-  { if (commentsOnFailure != 0)
+  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(theFileName, computedFileName, commentsOnFailure)) {
+    if (commentsOnFailure != 0) {
       *commentsOnFailure << "Failed to extract physical file name from the virtual file name: " << theFileName;
+    }
     return false;
   }
   return FileOperations::LoadFileToStringUnsecure(computedFileName, output, commentsOnFailure);
 }
 
-bool FileOperations::LoadFileToStringVirtual
-(const std::string& theFileName, std::string& output,
- bool accessSensitiveFolders, bool accessULTRASensitiveFolders, std::stringstream* commentsOnFailure)
-{ std::string computedFileName;
-//  stOutput << "DEBUG: loading string virtual from: " << theFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual
-      (theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, commentsOnFailure))
+bool FileOperations::LoadFileToStringVirtual(
+  const std::string& theFileName,
+  std::string& output,
+  bool accessSensitiveFolders,
+  bool accessULTRASensitiveFolders,
+  std::stringstream* commentsOnFailure
+) {
+  std::string computedFileName;
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+    theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, commentsOnFailure
+  )) {
     return false;
-  //stOutput << "DEBUG: computed file name: " << computedFileName;
+  }
   return FileOperations::LoadFileToStringUnsecure(computedFileName, output, commentsOnFailure);
 }
 
-bool FileOperations::LoadFileToStringUnsecure
-(const std::string& fileNameUnsecure, std::string& output, std::stringstream* commentsOnFailure)
-{ if (!FileOperations::FileExistsUnsecure(fileNameUnsecure))
-  { if (commentsOnFailure != 0)
+bool FileOperations::LoadFileToStringUnsecure(
+  const std::string& fileNameUnsecure, std::string& output, std::stringstream* commentsOnFailure
+) {
+  if (!FileOperations::FileExistsUnsecure(fileNameUnsecure)) {
+    if (commentsOnFailure != 0) {
       *commentsOnFailure << "The requested file "
       << HtmlRoutines::ConvertStringToHtmlString(fileNameUnsecure, false)
       << " does not appear to exist. ";
+    }
     return false;
   }
   std::ifstream theFile;
-  if (!FileOperations::OpenFileUnsecureReadOnly(theFile, fileNameUnsecure, false))
-  { if (commentsOnFailure != 0)
+  if (!FileOperations::OpenFileUnsecureReadOnly(theFile, fileNameUnsecure, false)) {
+    if (commentsOnFailure != 0) {
       *commentsOnFailure << "The requested file "
       << HtmlRoutines::ConvertStringToHtmlString(fileNameUnsecure, false)
       << " exists but I failed to open it in text mode (perhaps not a valid ASCII/UTF8 file). ";
+    }
     return false;
   }
   std::stringstream contentStream;
@@ -734,11 +703,11 @@ bool FileOperations::LoadFileToStringUnsecure
 #include "vpfHeader1General2Multitasking.h"
 
 MapLisT<std::string, std::string, MathRoutines::hashString>&
-FileOperations::FolderVirtualLinksNonSensitive()
-{ static MapLisT<std::string, std::string, MathRoutines::hashString> result;
+FileOperations::FolderVirtualLinksNonSensitive() {
+  static MapLisT<std::string, std::string, MathRoutines::hashString> result;
   static bool firstRun = false;
-  if (!firstRun)
-  { firstRun = true;
+  if (!firstRun) {
+    firstRun = true;
     static MutexRecursiveWrapper theMutex;
     MutexLockGuard theGuard(theMutex);
     result.SetKeyValue("output/", "output/");
@@ -751,20 +720,20 @@ FileOperations::FolderVirtualLinksNonSensitive()
 }
 
 HashedList<std::string, MathRoutines::hashString>&
-FileOperations::FilesStartsToWhichWeAppendHostName()
-{ static HashedList<std::string, MathRoutines::hashString> result;
+FileOperations::FilesStartsToWhichWeAppendHostName() {
+  static HashedList<std::string, MathRoutines::hashString> result;
   return result;
 }
 
 HashedList<std::string, MathRoutines::hashString>&
-FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()
-{ static HashedList<std::string, MathRoutines::hashString> result;
+FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash() {
+  static HashedList<std::string, MathRoutines::hashString> result;
   return result;
 }
 
 HashedList<std::string, MathRoutines::hashString>&
-FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()
-{ static HashedList<std::string, MathRoutines::hashString> result;
+FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash() {
+  static HashedList<std::string, MathRoutines::hashString> result;
   return result;
 }
 
@@ -1079,10 +1048,11 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded
   (theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
 }
 
-bool FileOperations::OpenFileCreateIfNotPresentVirtual
-(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode,
- bool truncate, bool openAsBinary, bool accessSensitiveFolders)
-{ std::string computedFileName;
+bool FileOperations::OpenFileCreateIfNotPresentVirtual(
+  std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode,
+  bool truncate, bool openAsBinary, bool accessSensitiveFolders
+) {
+  std::string computedFileName;
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, false, 0))
   { //stOutput << "DEBUG: couldn't get physical file name from: " << theFileName << "<br>";

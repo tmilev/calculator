@@ -139,12 +139,12 @@ const std::string& HtmlRoutines::GetMathQuillStyleSheeTWithTags()
 { return HtmlRoutines::GetCSSAddStyleTags("/html-common/mathquill.css");
 }
 
-const std::string HtmlRoutines::GetMathQuillStyleSheetLink()
-{ return HtmlRoutines::GetCSSLink("/html-common/mathquill.css");
+const std::string HtmlRoutines::GetMathQuillStyleSheetLink() {
+  return HtmlRoutines::GetCSSLink("/html-common/mathquill.css");
 }
 
-const std::string HtmlRoutines::GetCSSLinkCalculator()
-{ return HtmlRoutines::GetCSSLink("/calculator-html/styleCalculator.css");
+const std::string HtmlRoutines::GetCSSLinkCalculator() {
+  return HtmlRoutines::GetCSSLink("/calculator-html/styleCalculator.css");
 }
 
 const std::string& HtmlRoutines::GetJavascriptMathQuillDefaulTWithTags()
@@ -246,13 +246,11 @@ std::string HtmlRoutines::GetMathMouseHover(const std::string& input, int upperN
 
 std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth)
 { MacroRegisterFunctionWithName("HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml");
-//  stOutput << "I'm here<br>";
   if (recursionDepth > 50)
     return input;
   MapLisT<std::string, std::string, MathRoutines::hashString> currentMap;
   std::stringstream notUsed;
-  if (!HtmlRoutines::ChopCGIString(input, currentMap, notUsed))
-  { //stOutput << "oh no: " << notUsed.str();
+  if (!HtmlRoutines::ChopCGIString(input, currentMap, notUsed)) {
     return input;
   }
   if (currentMap.size() == 0)
@@ -319,10 +317,12 @@ const std::string& HtmlRoutines::GetJavascriptMathjax()
   return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("MathJax");
 }
 
-bool HtmlRoutines::AccountOneInputCGIString
-(const std::string& fieldName, const std::string& fieldValue, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
- std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("HtmlRoutines::AccountOneInputCGIString");
+bool HtmlRoutines::AccountOneInputCGIString(
+  const std::string& fieldName, const std::string& fieldValue,
+  MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
+  std::stringstream& commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("HtmlRoutines::AccountOneInputCGIString");
   if (fieldName == "")
     return true;
   (void) commentsOnFailure;
@@ -337,17 +337,21 @@ bool HtmlRoutines::AccountOneInputCGIString
   return true;
 }
 
-bool HtmlRoutines::ChopCGIString(const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
- std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIString");
+bool HtmlRoutines::ChopCGIString(
+  const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
+  std::stringstream& commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIString");
   outputMap.Clear();
   outputMap.SetExpectedSize(15);
   return HtmlRoutines::ChopCGIStringAppend(input, outputMap, commentsOnFailure);
 }
 
-bool HtmlRoutines::ChopCGIStringAppend(const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
- std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIStringAppend");
+bool HtmlRoutines::ChopCGIStringAppend(
+  const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
+  std::stringstream& commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIStringAppend");
   int inputLength = (signed) input.size();
   bool readingData = false;
   std::string currentFieldName = "";
@@ -375,27 +379,31 @@ bool HtmlRoutines::ChopCGIStringAppend(const std::string& input, MapLisT<std::st
   return HtmlRoutines::AccountOneInputCGIString(currentFieldName, currentFieldValue, outputMap, commentsOnFailure);
 }
 
-bool HtmlRoutines::URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out, bool replacePlusBySpace)
-{ if (replacePlusBySpace)
-    if (readAhead[0] == '+')
-      { out << " ";
-        return true;
-      }
+bool HtmlRoutines::URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out, bool replacePlusBySpace) {
+  if (replacePlusBySpace) {
+    if (readAhead[0] == '+') {
+      out << " ";
+      return true;
+    }
+  }
   bool isOK = readAhead[0] != '%' && readAhead[0] != '&';
-  if (isOK)
-  { out << readAhead[0];
+  if (isOK) {
+    out << readAhead[0];
     return true;
   }
-  if (readAhead == "&")
-  { out << " ";
+  if (readAhead == "&") {
+    out << " ";
     return true;
   }
-  if (readAhead.size() == 3)
-    if (readAhead[0] == '%' && MathRoutines::IsAHexDigit(readAhead[1])
-        && MathRoutines::IsAHexDigit(readAhead[2]))
-    { out << (char)(MathRoutines::ConvertHumanReadableHexToCharValue(readAhead[1]) * 16 +
+  if (readAhead.size() == 3) {
+    if (
+      readAhead[0] == '%' && MathRoutines::IsAHexDigit(readAhead[1]) &&
+      MathRoutines::IsAHexDigit(readAhead[2])
+    ) {
+      out << (char)(MathRoutines::ConvertHumanReadableHexToCharValue(readAhead[1]) * 16 +
       MathRoutines::ConvertHumanReadableHexToCharValue(readAhead[2]));
       return true;
     }
+  }
   return false;
 }

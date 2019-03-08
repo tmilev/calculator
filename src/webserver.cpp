@@ -5407,6 +5407,7 @@ void WebServer::InitializeGlobalVariables() {
   this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/html-common/");
   this->addressStartsNotNeedingLogin.AddOnTop("/calculator-html/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/src/");
   this->addressStartsNotNeedingLogin.AddOnTop("/css/");
   this->addressStartsNotNeedingLogin.AddOnTop("/javascriptlibs/");
   this->addressStartsNotNeedingLogin.AddOnTop("/MathJax-2.7-latest/");
@@ -5433,19 +5434,24 @@ void WebServer::InitializeGlobalVariables() {
   folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
   FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
   folderSubstitutionsNonSensitive.Clear();
-  this->addressStartsNotNeedingLogin.AddListOnTop
-  (FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash());
+  this->addressStartsNotNeedingLogin.AddListOnTop(
+    FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()
+  );
 
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.7-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/");
-  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++)
-    this->addressStartsSentWithCacheMaxAge.AddOnTop
-    (FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] +
-     theGlobalVariables.buildHeadHashWithServerTime);
+  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
+    this->addressStartsSentWithCacheMaxAge.AddOnTop(
+      FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] +
+      theGlobalVariables.buildHeadHashWithServerTime
+    );
+  }
   //Warning: order of substitutions is important. Only the first rule that applies is applied, only once.
   //No further rules are applied after that.
   folderSubstitutionsNonSensitive.SetKeyValue("/output/", "output/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("output/", "output/");//<-internal use
+  folderSubstitutionsNonSensitive.SetKeyValue("/src/", "src/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("src/", "src/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/certificates-public/", "certificates-public/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("certificates-public/", "certificates-public/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("problems/", "../problems/");

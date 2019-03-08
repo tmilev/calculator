@@ -13,8 +13,8 @@
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h" // undefined reference to `charSSAlgMod<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, charSSAlgMod<RationalFunctionOld>&, branchingData&, GlobalVariables&)'
 #include "vpfHeader8HtmlSnippets.h"
 #include "vpfHeader2Math10_LaTeXRoutines.h"
+#include "source_code_formatter.h"
 #include <cmath>
-
 
 ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");
 
@@ -1769,7 +1769,8 @@ bool CalculatorFunctionsGeneral::innerFormatCPPSourceCode(
     return false;
   }
   std::stringstream report;
-  HtmlRoutines::FormatCPPSourceCode(fileName, &report);
+  SourceCodeFormatter formatter;
+  formatter.FormatCPPSourceCode(fileName, &report);
   theCommands << report.str();
   return output.AssignValue((std::string) "Code formatted. ", theCommands);
 }

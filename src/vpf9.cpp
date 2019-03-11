@@ -530,7 +530,7 @@ bool FileOperations::IsFileNameWithoutDotsAndSlashes(const std::string& theFileN
 List<bool> FileOperations::safeFileCharacters;
 List<bool>& FileOperations::GetSafeFileChars()
 { if (FileOperations::safeFileCharacters.size == 0)
-  { FileOperations::safeFileCharacters.initFillInObject(256, false);
+  { FileOperations::safeFileCharacters.initializeFillInObject(256, false);
     std::string theChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     theChars += "0123456789";
     theChars += "@";
@@ -3793,8 +3793,8 @@ int PartFractions::getIndexDoubleOfARoot(const Vector<Rational>& TheRoot)
 }
 
 void SelectionWithDifferentMaxMultiplicities::initPart1(int NumElements)
-{ this->Multiplicities.initFillInObject(NumElements, 0);
-  this->MaxMultiplicities.initFillInObject(NumElements,0);
+{ this->Multiplicities.initializeFillInObject(NumElements, 0);
+  this->MaxMultiplicities.initializeFillInObject(NumElements,0);
   this->elements.Reserve(NumElements);
   this->elements.size = 0;
 }
@@ -3838,7 +3838,7 @@ void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinali
 { if (Cardinality < 1 || Cardinality > this->MaxMultiplicity * this->Multiplicities.size)
     return;
   if (this->CardinalitySelectionWithMultiplicities() != Cardinality)
-    this->Multiplicities.initFillInObject(this->Multiplicities.size, 0);
+    this->Multiplicities.initializeFillInObject(this->Multiplicities.size, 0);
   if (this->CardinalitySelectionWithMultiplicities() == 0)
   { for (int i = this->Multiplicities.size - 1; Cardinality > 0; i --)
     { if (Cardinality >= this->MaxMultiplicity)
@@ -3943,16 +3943,16 @@ LargeInt SelectionWithDifferentMaxMultiplicities::TotalNumSubsets()
 }
 
 void SelectionWithDifferentMaxMultiplicities::initFromInts(int* theMaxMults, int NumberMaxMults)
-{ this->Multiplicities.initFillInObject(NumberMaxMults, 0);
+{ this->Multiplicities.initializeFillInObject(NumberMaxMults, 0);
   this->MaxMultiplicities.SetSize(NumberMaxMults);
   for (int i = 0; i < this->MaxMultiplicities.size; i ++)
     this->MaxMultiplicities[i] = theMaxMults[i];
-  this->elements.initFillInObject(NumberMaxMults, 0);
+  this->elements.initializeFillInObject(NumberMaxMults, 0);
 }
 
 void SelectionWithDifferentMaxMultiplicities::initFromInts(const List<int>& theMaxMults)
-{ this->Multiplicities.initFillInObject(theMaxMults.size, 0);
-  this->elements.initFillInObject(theMaxMults.size, 0);
+{ this->Multiplicities.initializeFillInObject(theMaxMults.size, 0);
+  this->elements.initializeFillInObject(theMaxMults.size, 0);
   this->MaxMultiplicities = theMaxMults;
 }
 
@@ -5413,7 +5413,7 @@ std::string WeylGroupData::ToStringCppConjugacyClasses(FormatExpressions* theFor
   out << "output.ComputeRho(true);";
   out << "\n<br>&nbsp;&nbsp;WeylGroup::ConjugacyClass emptyClass;";
   out << "\n<br>&nbsp;&nbsp;emptyClass.flagRepresentativeComputed = true;";
-  out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS.initFillInObject(" << this->theGroup.conjugacyClasseS.size << ", emptyClass);";
+  out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS.initializeFillInObject(" << this->theGroup.conjugacyClasseS.size << ", emptyClass);";
   for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++)
   { out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS[" << i;
     for (int j = ((Rational) i).ToString().size(); j < 3; j ++) //<-if the index i is smaller than 100, make sure it takes
@@ -6688,13 +6688,13 @@ bool KLpolys::ComputeKLPolys(WeylGroupData* theWeylGroup)
   this->ComputeRPolys();
   this->theKLPolys.SetSize(this->size);
   this->theKLcoeffs.SetSize(this->size);
-  this->Explored.initFillInObject(this->size, false);
+  this->Explored.initializeFillInObject(this->size, false);
   for (int i = 0; i < this->theKLPolys.size; i ++)
   { this->theKLPolys[i].SetSize(this->size);
     this->theKLcoeffs[i].SetSize(this->size);
   }
   for (int i = 0; i < this->size; i ++)
-  { this->Explored.initFillInObject(this->size, false);
+  { this->Explored.initializeFillInObject(this->size, false);
     int highestNonExplored = this->FindMaximalBruhatNonExplored(this->Explored);
     while (highestNonExplored != - 1)
     { this->ComputeKLxy(highestNonExplored, i);
@@ -8891,7 +8891,7 @@ bool Cone::DrawMeLastCoordAffine
   VerticesScaled = this->Vertices;
   Rational tempRat;
   List<bool> DrawVertex;
-  DrawVertex.initFillInObject(this->Vertices.size, true);
+  DrawVertex.initializeFillInObject(this->Vertices.size, true);
   bool foundBadVertex = false;
   for (int i = 0; i < this->Vertices.size; i ++)
   { tempRat = *VerticesScaled[i].LastObject();
@@ -9768,7 +9768,7 @@ void PiecewiseQuasipolynomial::DrawMe(DrawingVariables& theDrawingVars, int numL
     { this->theProjectivizedComplex[i].GetLatticePointsInCone
       (this->theQPs[i].AmbientLatticeReduced, this->theQPs[i].LatticeShifts[j], numLatticePointsPerDim, true, latticePoints,
       distinguishedPoint);
-      tempList.initFillInObject(latticePoints.size, chamberWallColor);
+      tempList.initializeFillInObject(latticePoints.size, chamberWallColor);
       if (RestrictingChamber != 0)
         for (int k = 0; k < latticePoints.size; k ++)
         { tempRoot = latticePoints[k];
@@ -10001,7 +10001,7 @@ void ConeLatticeAndShiftMaxComputation::init
   this->complexRefinedPerRepresentative.size = 0;
   this->theConesLargerDim.AddOnTop(theCLS);
   this->LPtoMaximizeLargerDim.AddOnTop(theNEq);
-  this->IsInfinity.initFillInObject(1, false);
+  this->IsInfinity.initializeFillInObject(1, false);
 }
 
 void Cone::SliceInDirection(Vector<Rational>& theDirection, ConeComplex& output)

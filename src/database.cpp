@@ -1264,7 +1264,7 @@ bool EmailRoutines::SendEmailWithMailGun(
 List<bool> EmailRoutines::recognizedEmailCharacters;
 List<bool>& EmailRoutines::GetRecognizedEmailChars() {
   if (recognizedEmailCharacters.size == 0) {
-    recognizedEmailCharacters.initFillInObject(256, false);
+    recognizedEmailCharacters.initializeFillInObject(256, false);
     std::string theChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     theChars += "0123456789";
     theChars += "@";

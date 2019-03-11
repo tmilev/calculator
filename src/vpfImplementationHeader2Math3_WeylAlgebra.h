@@ -32,7 +32,7 @@ template <class coefficient>
 void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output) const
 { SelectionWithDifferentMaxMultiplicities tempSel;
   int theDimensioN = MathRoutines::Maximum(left.GetMinNumVars(), right.GetMinNumVars());
-  tempSel.Multiplicities.initFillInObject(theDimensioN, 0);
+  tempSel.Multiplicities.initializeFillInObject(theDimensioN, 0);
   tempSel.MaxMultiplicities.SetSize(theDimensioN);
   int theExpectedSize = 1;
   for (int i = 0; i < theDimensioN; i ++)
@@ -43,7 +43,7 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlg
     tempSel.MaxMultiplicities[i] = powerDiffOp;
     theExpectedSize *= powerDiffOp;
   }
-  tempSel.elements.initFillInObject(theDimensioN, 0);
+  tempSel.elements.initializeFillInObject(theDimensioN, 0);
   MonomialWeylAlgebra buffer;
   buffer.MakeOne(theDimensioN);
   output.MakeZero();

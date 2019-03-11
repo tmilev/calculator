@@ -86,7 +86,7 @@ void Partition::GetPartitions(List<Partition>& out, int n)
     return;
   }
   List<int> p;
-  p.initFillInObject(n,0);
+  p.initializeFillInObject(n,0);
   p[1] = n;
   int k = 1;
   while (k != 0)
@@ -377,7 +377,7 @@ std::string Tableau::ToString() const
 void PermutationR2::MakeCanonical()
 { int bon = this->BiggestOccurringNumber();
   List<bool> used;
-  used.initFillInObject(bon + 1, false);
+  used.initializeFillInObject(bon + 1, false);
   for (int i = 0; i < used.size; i ++)
     used[i] = false;
   List<List<int> > tmp;
@@ -623,7 +623,7 @@ void PermutationR2::GetCycleStructure(List<int>& out) const
   for (int i = 0; i < this->cycles.size; i ++)
     if (N < this->cycles[i].size)
       N = this->cycles[i].size;
-  out.initFillInObject(N + 1, 0);
+  out.initializeFillInObject(N + 1, 0);
 
   for (int i = 0; i < this->cycles.size; i ++)
     out[this->cycles[i].size] += 1;
@@ -902,9 +902,9 @@ void EnsureSameRank(ElementHyperoctahedralGroup& left, ElementHyperoctahedralGro
   if (theRank == 0)
     return;
   if (left.s.size == 0)
-    left.s.initFillInObject(theRank, false);
+    left.s.initializeFillInObject(theRank, false);
   if (right.s.size == 0)
-    right.s.initFillInObject(theRank, false);
+    right.s.initializeFillInObject(theRank, false);
 }
 
 void ElementHyperoctahedralGroup::MakeFromMul(const ElementHyperoctahedralGroup& left, const ElementHyperoctahedralGroup& right)

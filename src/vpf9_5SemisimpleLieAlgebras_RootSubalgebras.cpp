@@ -944,7 +944,7 @@ void rootSubalgebra::ComputeEpsCoordsWRTk()
       this->GetAmbientWeyl().GetEpsilonCoordsWRTsubalgebra(simpleBasisG, this->WeightsModulesPrimalSimple[i], this->kModulesgEpsCoords[i]);
     } else
     { Vector<Rational> emptyV;
-      this->kModulesgEpsCoords[i].initFillInObject(this->Modules[i].size, emptyV);
+      this->kModulesgEpsCoords[i].initializeFillInObject(this->Modules[i].size, emptyV);
     }
     Vector<Rational> tempRoot;
     if (this->kModulesKepsCoords[i].size > 0)
@@ -2443,7 +2443,7 @@ void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder()
   parSel.init(this->owner->GetRank());
   Vectors<Rational> basis, currentBasis;
   List<bool> Explored;
-  Explored.initFillInObject(this->theSubalgebras.size, false);
+  Explored.initializeFillInObject(this->theSubalgebras.size, false);
   this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.SetSize(0);
   this->NumNonPseudoParabolic = 0;
   this->NumParabolic = 0;
@@ -3160,7 +3160,7 @@ void rootSubalgebras::initForNilradicalGeneration()
   this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration = this->theSubalgebras.size- 1;
   if (this->theSubalgebras.size > 0)
   { this->theSubalgebras[0].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
-    this->NumConeConditionHoldsBySSpart.initFillInObject(this->theSubalgebras.size, 0);
+    this->NumConeConditionHoldsBySSpart.initializeFillInObject(this->theSubalgebras.size, 0);
   }
 }
 
@@ -3555,8 +3555,8 @@ void coneRelation::RelationOneSideToString(std::string& output, const std::strin
     out << "\\\\";
   List<int> TakenIndices;
   List<int> NumPrimesUniTypicComponent;
-  TakenIndices.initFillInObject(owner.theDynkinDiagram.SimpleBasesConnectedComponents.size, - 1);
-  NumPrimesUniTypicComponent.initFillInObject(owner.theDynkinDiagram.sameTypeComponents.size, - 1);
+  TakenIndices.initializeFillInObject(owner.theDynkinDiagram.SimpleBasesConnectedComponents.size, - 1);
+  NumPrimesUniTypicComponent.initializeFillInObject(owner.theDynkinDiagram.sameTypeComponents.size, - 1);
   for (int i = 0; i < kComponents.size; i ++)
   { if (useLatex)
       out << "\\tiny{ ";

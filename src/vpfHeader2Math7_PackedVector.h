@@ -293,7 +293,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC()
   if (this->rhoOrbit.size == 0)
     this->ComputeAllElements();
   List<bool> Accounted;
-  Accounted.initFillInObject(this->size(), false);
+  Accounted.initializeFillInObject(this->size(), false);
   this->conjugacyClasses.SetSize(0);
   this->conjugacyClasses.Reserve(50);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;

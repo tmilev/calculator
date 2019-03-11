@@ -174,6 +174,8 @@ public:
   // Example:
   // DisplayNameExecutable ="/cgi-bin/calculator";
   std::string DisplayNameExecutable;
+  // Example:
+  // DisplayNameExecutableApp ="/app";
   std::string DisplayNameExecutableApp;
   std::string DisplayNameExecutableAppNoCache;
 

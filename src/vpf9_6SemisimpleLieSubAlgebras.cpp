@@ -3025,7 +3025,7 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals()
   List<int> theSel;
   this->RecursionDepthCounterForNilradicalGeneration = 0;
   //0 stands for not selected, 1 for selected from nilradical, 3 for selected from semisimple part, 2 stands for unknown.
-  theSel.initFillInObject(this->NilradicalPairingTable.size, 2);
+  theSel.initializeFillInObject(this->NilradicalPairingTable.size, 2);
   for (int i = 0; i < this->primalSubalgebraModules.size; i ++)
     theSel[this->primalSubalgebraModules[i]] = 1;
   std::stringstream out;
@@ -4260,7 +4260,7 @@ void slTwoSubalgebra::ComputeModuleDecomposition
   if (positiveRootsContainingRegularSA.size <= 0)
     crash << "This is a programming error: positiveRootsContainingRegularSA has less than one element. " << crash;
   int IndexZeroWeight = positiveRootsContainingRegularSA.size * 2;
-  outputModuleDimensions.initFillInObject(4 * positiveRootsContainingRegularSA.size + 1, 0);
+  outputModuleDimensions.initializeFillInObject(4 * positiveRootsContainingRegularSA.size + 1, 0);
   outputModuleDimensions[IndexZeroWeight] = dimensionContainingRegularSA;
   List<int> BufferHighestWeights;
   Rational tempRat;

@@ -286,7 +286,7 @@ void ElementWeylGroup<templateWeylGroup>::GetCycleStructure
   outputIndexIsCycleSizeCoordinateIsCycleMult.MakeZero();
   List<bool> Explored;
   HashedList<Vector<Rational> >& theRootSystem = this->owner->RootSystem;
-  Explored.initFillInObject(theRootSystem.size, false);
+  Explored.initializeFillInObject(theRootSystem.size, false);
   Vector<Rational> currentRoot;
   for (int i = 0; i < Explored.size; i ++)
     if (!Explored[i])
@@ -896,7 +896,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements()
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeCCfromAllElements");
   this->ComputeAllElements(false, - 1);
   List<bool> Accounted;
-  Accounted.initFillInObject(this->theElements.size, false);
+  Accounted.initializeFillInObject(this->theElements.size, false);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
   theStack.SetExpectedSize(this->theElements.size);
   List<elementSomeGroup> inversesOfGenerators;
@@ -1305,7 +1305,7 @@ bool WeylGroupData::FreudenthalEval
   Vector<coefficient> hwSimpleCoords = this->GetSimpleCoordinatesFromFundamental(inputHWfundamentalCoords);
   if (!this->GetAlLDominantWeightsHWFDIM(hwSimpleCoords, outputDominantWeightsSimpleCoords, UpperBoundFreudenthal, outputDetails))
     return false;
-  Explored.initFillInObject(outputDominantWeightsSimpleCoords.size, false);
+  Explored.initializeFillInObject(outputDominantWeightsSimpleCoords.size, false);
   outputMultsSimpleCoords.SetSize(outputDominantWeightsSimpleCoords.size);
   Vector<coefficient> currentWeight, currentDominantRepresentative, convertor;
   coefficient hwPlusRhoSquared;
@@ -1513,9 +1513,9 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::init(somegro
   this->ownerGroup->CheckInitializationConjugacyClasses();
   this->generatorS.SetSize(this->ownerGroup->generators.size);
   this->theElementImageS.SetSize(this->ownerGroup->theElements.size);
-  this->theElementIsComputed.initFillInObject(this->ownerGroup->theElements.size, false);
+  this->theElementIsComputed.initializeFillInObject(this->ownerGroup->theElements.size, false);
   this->classFunctionMatrices.SetSize(this->ownerGroup->ConjugacyClassCount());
-  this->classFunctionMatricesComputed.initFillInObject(this->ownerGroup->ConjugacyClassCount(), false);
+  this->classFunctionMatricesComputed.initializeFillInObject(this->ownerGroup->ConjugacyClassCount(), false);
   this->CheckInitialization();
 }
 
@@ -1957,7 +1957,7 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
 //  << outputDomWeightsSimpleCoordsLeviPart.size << "):<br> ";
 //  for (int i = 0; i <outputDomWeightsSimpleCoordsLeviPart.size; i ++)
 //    stOutput << "<br>" << outputDomWeightsSimpleCoordsLeviPart[i].ToString();
-  Explored.initFillInObject(outputDomWeightsSimpleCoordsLeviPart.size, false);
+  Explored.initializeFillInObject(outputDomWeightsSimpleCoordsLeviPart.size, false);
   outputMultsSimpleCoords.SetSize(outputDomWeightsSimpleCoordsLeviPart.size);
   Vector<coefficient> currentWeight, currentDominantRepresentative;
   Vector<coefficient> Rho;

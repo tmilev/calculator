@@ -2043,9 +2043,9 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   this->userNames.SetSize(0);
   this->userInfos.SetSize(0);
   this->scoresBreakdown.SetSize(0);
-  this->numStudentsSolvedEntireTopic.initFillInObject(this->theProblem.theTopicS.size(), 0);
-  this->numStudentsSolvedPartOfTopic.initFillInObject(this->theProblem.theTopicS.size(), 0);
-  this->numStudentsSolvedNothingInTopic.initFillInObject(this->theProblem.theTopicS.size(), 0);
+  this->numStudentsSolvedEntireTopic.initializeFillInObject(this->theProblem.theTopicS.size(), 0);
+  this->numStudentsSolvedPartOfTopic.initializeFillInObject(this->theProblem.theTopicS.size(), 0);
+  this->numStudentsSolvedNothingInTopic.initializeFillInObject(this->theProblem.theTopicS.size(), 0);
   bool ignoreSectionsIdontTeach = true;
   this->currentSection = theGlobalVariables.userDefault.sectionComputed;
   this->currentCourse = theGlobalVariables.GetWebInput("courseHome");

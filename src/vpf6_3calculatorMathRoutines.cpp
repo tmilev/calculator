@@ -1771,8 +1771,7 @@ bool CalculatorFunctionsGeneral::innerFormatCPPSourceCode(
   std::stringstream report;
   SourceCodeFormatter formatter;
   formatter.FormatCPPSourceCode(fileName, &report);
-  theCommands << report.str();
-  return output.AssignValue((std::string) "Code formatted. ", theCommands);
+  return output.AssignValue(report.str(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerMakeMakeFile(
@@ -4810,7 +4809,7 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
     if (pointsCounter > numPoints)
       break; //<-in case floating point arithmetic is misbehaving
   }
-  YValues.initFillInObject(XValues.size, 0);
+  YValues.initializeFillInObject(XValues.size, 0);
   YValues[indexXinitial] = yInitial;
   Expression functionE = input[1];
   double currentYprimeApprox = 0;
@@ -7139,7 +7138,7 @@ bool CalculatorFunctionsGeneral::innerFindProductDistanceModN(Calculator& theCom
   }
   List<LargeIntUnsigned> theList;
   List<int> theIndexStack;
-  theList.initFillInObject(theSize, 0);
+  theList.initializeFillInObject(theSize, 0);
   theIndexStack.Reserve(theSize);
   LargeIntUnsigned theMod;
   theMod = theSize;

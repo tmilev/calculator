@@ -477,7 +477,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
   this->EmbeddingsRootSpaces.SetSize(this->theWeyl.RootSystem.size);
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
   List<bool> Explored;
-  Explored.initFillInObject(this->theWeyl.RootSystem.size, false);
+  Explored.initializeFillInObject(this->theWeyl.RootSystem.size, false);
   int numExplored = 0;
   for (int i = 0; i < this->theWeyl.RootSystem.size; i ++)
   { Vector<Rational>& current = this->theWeyl.RootSystem.TheObjects[i];
@@ -1003,7 +1003,7 @@ bool VectorPartition::init(const Vectors<Rational>& inputPartitioningRoots, cons
   if (this->goalVector.IsEqualToZero())
     return false;
   this->goalVector = inputRoot;
-  this->currentPartition.initFillInObject(this->PartitioningRoots.size, 0);
+  this->currentPartition.initializeFillInObject(this->PartitioningRoots.size, 0);
   this->currentPartitionSum.MakeZero(this->goalVector.size);
   return true;
 }

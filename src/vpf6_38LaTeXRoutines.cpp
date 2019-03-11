@@ -511,8 +511,8 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
       *commentsOnFailure << "Could not find slide/homework file names. ";
     return false;
   }
-  this->slideFileNamesWithLatexPathNoExtension.initFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
-  this->latexSnippets.initFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
+  this->slideFileNamesWithLatexPathNoExtension.initializeFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
+  this->latexSnippets.initializeFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
   for (int i = 0; i < this->slideFileNamesVirtualWithPatH.size; i ++)
   { if (MathRoutines::StringBeginsWith(this->slideFileNamesVirtualWithPatH[i], "LaTeX: ", &this->latexSnippets[i]))
     { if (i == 0)
@@ -812,7 +812,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   bool result = true;
   int numProcessed = 0;
   this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.sourcesHomeworkHeaders);
-  this->slideFilesExtraFlags.initFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
+  this->slideFilesExtraFlags.initializeFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
   for (int i = 0; i < topicParser.theTopicS.size()
 //        && numProcessed < 2
         ; i ++)

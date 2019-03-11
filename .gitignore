@@ -11,6 +11,8 @@
 #.d files from c++ compiler
 *.d
 
+*.new
+
 certificates*
 
 LogFiles*

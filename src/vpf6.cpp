@@ -1443,7 +1443,7 @@ bool Calculator::GetVectorLargeIntFromFunctionArguments(const Expression& input,
   Vector<Rational> theRats;
   if (!this->GetVectorFromFunctionArguments(input, theRats))
     return false;
-  output.initFillInObject(theRats.size, 0);
+  output.initializeFillInObject(theRats.size, 0);
   for (int i = 0; i < theRats.size; i ++)
     if (!theRats[i].IsInteger(&output[i]))
       return *this << "<hr>Succeeded to convert " << input.ToString() << " to the vector of rationals: "
@@ -1456,7 +1456,7 @@ bool Calculator::GetVectoRInt(const Expression& input, List<int>& output)
   Vector<Rational> theRats;
   if (!this->GetVectoR(input, theRats))
     return false;
-  output.initFillInObject(theRats.size,0);
+  output.initializeFillInObject(theRats.size,0);
   for (int i = 0; i < theRats.size; i ++)
     if (!theRats[i].IsSmallInteger(&output[i]))
       return *this << "<hr>Succeeded to convert " << input.ToString() << " to the vector of rationals: "
@@ -2701,7 +2701,7 @@ void ObjectContainer::resetPlots()
 }
 
 void ObjectContainer::resetSliders()
-{ this->userInputBoxSliderDisplayed.initFillInObject(this->theUserInputTextBoxesWithValues.size(), false);
+{ this->userInputBoxSliderDisplayed.initializeFillInObject(this->theUserInputTextBoxesWithValues.size(), false);
 }
 
 void ObjectContainer::reset()

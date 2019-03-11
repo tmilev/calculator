@@ -25,7 +25,7 @@ PipePrimitive::PipePrimitive()
   this->flagReadEndBlocks = true;
   this->flagWriteEndBlocks = true;
   this->numberOfBytesLastWrite = 0;
-  this->pipeEnds.initFillInObject(2, - 1);
+  this->pipeEnds.initializeFillInObject(2, - 1);
 }
 
 std::string PipePrimitive::ToString() const

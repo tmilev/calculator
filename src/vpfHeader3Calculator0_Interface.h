@@ -1329,7 +1329,7 @@ public:
   bool ApplyOneRule();
   void resetStack()
   { SyntacticElement emptyElement = this->GetEmptySyntacticElement();
-    (*this->CurrentSyntacticStacK).initFillInObject(this->numEmptyTokensStart, emptyElement);
+    (*this->CurrentSyntacticStacK).initializeFillInObject(this->numEmptyTokensStart, emptyElement);
   }
   int conError()
   { return this->controlSequences.GetIndexIMustContainTheObject("Error");

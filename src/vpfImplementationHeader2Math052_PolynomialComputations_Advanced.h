@@ -1198,7 +1198,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
   List<Polynomial<coefficient> > workingSystem = inputSystem;
   for (int i = 0; i < workingSystem.size; i ++)
     numVars = MathRoutines::Maximum(numVars, workingSystem[i].GetMinNumVars());
-  this->systemSolution.GetElement().initFillInObject(numVars, 0);
+  this->systemSolution.GetElement().initializeFillInObject(numVars, 0);
   this->solutionsFound.GetElement().init(numVars);
   ProgressReport theReport;
   std::stringstream reportStream;

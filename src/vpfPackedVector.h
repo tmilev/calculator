@@ -414,7 +414,7 @@ void AnotherWeylGroup<scalar, vector>::ComputeConjugacyClasses()
   if (this->rhoOrbit.size == 0)
     this->ComputeAllElements();
   List<bool> Accounted;
-  Accounted.initFillInObject(this->size, false);
+  Accounted.initializeFillInObject(this->size, false);
   this->conjugacyClasses.SetSize(0);
   this->conjugacyClasses.ReservE(50);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
@@ -738,7 +738,7 @@ bool Subgroup<somegroup>::MakeFrom(somegroup &G, const List<int>& generators, in
 template <typename somegroup>
 void Subgroup<somegroup>::ComputeConjugacyClasses()
 { List<bool> Accounted;
-  Accounted.initFillInObject(this->theElements.size, false);
+  Accounted.initializeFillInObject(this->theElements.size, false);
   this->conjugacyClasses.SetSize(0);
   this->conjugacyClasses.ReservE(50);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;

@@ -182,7 +182,7 @@ void WebCrawler::init()
   this->flagContinueWasNeeded = false;
   MacroRegisterFunctionWithName("WebCrawler::init");
   this->flagDoUseGET = true;
-  buffer.initFillInObject(50000, 0);
+  buffer.initializeFillInObject(50000, 0);
   if (!theWebServer.flagPort8155)
   { this->portOrService = "8080";
 //    this->addressToConnectTo ="localhost";

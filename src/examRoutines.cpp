@@ -1632,8 +1632,8 @@ std::string CalculatorHTML::ToStringDeadline
 
 void CalculatorHTML::ComputeDeadlinesAllSections(TopicElement& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::ComputeDeadlinesAllSections");
-  inputOutput.deadlinesPerSectioN.initFillInObject(this->databaseStudentSections.size, "");
-  inputOutput.deadlinesAreInherited.initFillInObject(this->databaseStudentSections.size, false);
+  inputOutput.deadlinesPerSectioN.initializeFillInObject(this->databaseStudentSections.size, "");
+  inputOutput.deadlinesAreInherited.initializeFillInObject(this->databaseStudentSections.size, false);
   for (int i = 0; i < this->databaseStudentSections.size; i ++)
   { inputOutput.deadlinesPerSectioN[i] = this->GetDeadline
     (inputOutput.id, this->databaseStudentSections[i], inputOutput.deadlinesAreInherited[i]);
@@ -1644,7 +1644,7 @@ void CalculatorHTML::ComputeDeadlinesAllSections(TopicElement& inputOutput)
 
 void CalculatorHTML::ComputeDeadlinesAllSectionsNoInheritance(TopicElement& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::ComputeDeadlinesAllSectionsNoInheritance");
-  inputOutput.deadlinesPerSectioN.initFillInObject(this->databaseStudentSections.size, "");
+  inputOutput.deadlinesPerSectioN.initializeFillInObject(this->databaseStudentSections.size, "");
   //stOutput << "<hr>DEBUG: deadlinespersection: "
   //<< this->databaseStudentSections.ToStringCommaDelimited() << "<hr>";
   for (int i = 0; i < this->databaseStudentSections.size; i ++)
@@ -1674,7 +1674,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   << "\">";
   deadlineStream << "<tr><th>Grp.</th><th>Deadline</th></tr>";
   inputOutput.idsDeadlines.SetSize(this->databaseStudentSections.size);
-  inputOutput.deadlinesPerSectionFormatted.initFillInObject
+  inputOutput.deadlinesPerSectionFormatted.initializeFillInObject
   (this->databaseStudentSections.size, "");
   for (int i = 0; i < this->databaseStudentSections.size; i ++)
   { std::string& currentDeadlineId = inputOutput.idsDeadlines[i];
@@ -3384,7 +3384,7 @@ void TopicElement::reset(int parentSize, MapLisT<std::string, TopicElement, Math
   if (parentSize != - 1)
   { this->parentTopics.SetSize(MathRoutines::Minimum(parentSize, this->parentTopics.size));
     if (this->problemNumber.size < 4)
-      this->problemNumber.initFillInObject(4, 0);
+      this->problemNumber.initializeFillInObject(4, 0);
     for (int i = parentSize + 1; i < this->problemNumber.size; i ++)
       this->problemNumber[i] = 0;
     this->problemNumber[parentSize] ++;
@@ -3457,7 +3457,7 @@ void TopicElement::GetTopicList
   std::string currentLine, currentArgument;
   TopicElement currentElt;
   bool found = false;
-  currentElt.problemNumber.initFillInObject(4, 0);
+  currentElt.problemNumber.initializeFillInObject(4, 0);
   MemorySaving<MapLisT<std::string, List<std::string>, MathRoutines::hashString> > topicBundles;
   List<std::string> lineStack;
   owner.initTopicElementNames();

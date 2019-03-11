@@ -621,7 +621,7 @@ public:
   { return this->IndexInList(o) != - 1;
   }
   void SetSize(int theSize);
-  inline void initFillInObject(int theSize, const Object& o)
+  inline void initializeFillInObject(int theSize, const Object& o)
   { this->SetSize(theSize);
     for (int i = 0; i < this->size; i ++)
       this->TheObjects[i] = o;
@@ -845,7 +845,7 @@ public:
     for (int i = 0; i < numRows; i ++)
       this->TheObjects[i].SetSize(numCols);
   }
-  void initFillInObject(int theSize, const Object& o);
+  void initializeFillInObject(int theSize, const Object& o);
   inline void AddObjectOnTopCreateNew();
   void Reserve(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void SortedInsert(const Object& o)
@@ -1491,7 +1491,7 @@ public:
       return;
     MacroIncrementCounter(ParallelComputing::NumHashResizes);
     List<int> emptyList; //<-empty list has size 0
-    this->TheHashedArrays.initFillInObject(HS, emptyList);
+    this->TheHashedArrays.initializeFillInObject(HS, emptyList);
     if (this->size > 0)
       for (int i = 0; i < this->size; i ++)
       { int theIndex = this->GetHash((*this)[i]);
@@ -1886,7 +1886,7 @@ void List<Object>::Slice(int StartingIndex, int SizeOfSlice)
 }
 
 template <class Object>
-void List<Object>::initFillInObject(int theSize, const Object& o)
+void List<Object>::initializeFillInObject(int theSize, const Object& o)
 { this->SetSize(theSize);
   for (int i = 0; i < this->size; i ++)
     this->TheObjects[i] = o;
@@ -2031,7 +2031,7 @@ List<Object>::List(int StartingSize)
 template <class Object>
 List<Object>::List(int StartingSize, const Object& fillInObject)
 { this->initConstructorCallOnly();
-  this->initFillInObject(StartingSize, fillInObject);
+  this->initializeFillInObject(StartingSize, fillInObject);
 }
 
 template <class Object>

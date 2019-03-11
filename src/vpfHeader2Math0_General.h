@@ -271,11 +271,11 @@ private:
   List<Rational> monBody;
 public:
   MonomialP(int letterIndex)
-  { this->monBody.initFillInObject(letterIndex + 1, 0);
+  { this->monBody.initializeFillInObject(letterIndex + 1, 0);
     this->monBody[letterIndex] = 1;
   }
   MonomialP(int letterIndex, int power)
-  { this->monBody.initFillInObject(letterIndex + 1, 0);
+  { this->monBody.initializeFillInObject(letterIndex + 1, 0);
     this->monBody[letterIndex] = power;
   }
   MonomialP(const MonomialP& other)
@@ -330,7 +330,7 @@ public:
   }
   std::string ToString(FormatExpressions* PolyFormat = 0) const;
   void MakeOne(int ExpectedNumVars = 0)
-  { this->monBody.initFillInObject(ExpectedNumVars, (Rational) 0);
+  { this->monBody.initializeFillInObject(ExpectedNumVars, (Rational) 0);
   }
   bool operator>(const MonomialP& other) const;
   bool IsDivisibleBy(const MonomialP& other) const;

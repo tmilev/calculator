@@ -1211,7 +1211,7 @@ bool LoadConjugacyClassesG1_2(WeylGroupData& output)
 { output.ComputeRho(true);
   FiniteGroup<ElementWeylGroup<WeylGroupData> >::ConjugacyClass emptyClass;
   emptyClass.flagRepresentativeComputed = true;
-  output.theGroup.conjugacyClasseS.initFillInObject(6, emptyClass);
+  output.theGroup.conjugacyClasseS.initializeFillInObject(6, emptyClass);
   output.theGroup.conjugacyClasseS[0  ].representative.MakeFromReadableReflections(output, false, "");
   output.theGroup.conjugacyClasseS[1  ].representative.MakeFromReadableReflections(output, false, "1");
   output.theGroup.conjugacyClasseS[2  ].representative.MakeFromReadableReflections(output, false, "2");
@@ -1260,7 +1260,7 @@ bool LoadConjugacyClassesE1_6(WeylGroupData& output)
 { output.ComputeRho(true);
   FiniteGroup<ElementWeylGroup<WeylGroupData> >::ConjugacyClass emptyClass;
   emptyClass.flagRepresentativeComputed = true;
-  output.theGroup.conjugacyClasseS.initFillInObject(25, emptyClass);
+  output.theGroup.conjugacyClasseS.initializeFillInObject(25, emptyClass);
   output.theGroup.conjugacyClasseS[0  ].representative.MakeFromReadableReflections(output, false, "   ");
   output.theGroup.conjugacyClasseS[1  ].representative.MakeFromReadableReflections(output, false, "3, 4, 3, 2, 4, 3, 5, 4, 3, 2, 4, 5 ");
   output.theGroup.conjugacyClasseS[2  ].representative.MakeFromReadableReflections(output, false, "1, 4 ");

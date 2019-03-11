@@ -166,7 +166,7 @@ bool LargeIntUnsigned::IsGEQ(const LargeIntUnsigned& x) const
 
 void LargeIntUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output)
 { List<int> theSieve;
-  theSieve.initFillInObject(n + 1, 1);
+  theSieve.initializeFillInObject(n + 1, 1);
   output.Reserve(n / 2);
   output.size = 0;
   for (unsigned int i = 2; i <= n; i ++)
@@ -742,7 +742,7 @@ bool LargeIntUnsigned::FactorLargeReturnFalseIfFactorizationIncomplete
   if (dontSearchForDivisorsLargerThan <= 0)
     dontSearchForDivisorsLargerThan = 100000;
   List<bool> theSieve;
-  theSieve.initFillInObject(dontSearchForDivisorsLargerThan + 1, true);
+  theSieve.initializeFillInObject(dontSearchForDivisorsLargerThan + 1, true);
   for (unsigned int i = 2; i <= (unsigned) dontSearchForDivisorsLargerThan; i ++)
   { if (!theSieve[i])
       continue;
@@ -783,7 +783,7 @@ bool LargeIntUnsigned::FactorReturnFalseIfFactorizationIncomplete
   outputMultiplicites.SetSize(0);
   int upperboundPrimeDivisors = (unsigned int) FloatingPoint::sqrt((double) toBeFactored);
   List<bool> theSieve;
-  theSieve.initFillInObject(upperboundPrimeDivisors + 1, true);
+  theSieve.initializeFillInObject(upperboundPrimeDivisors + 1, true);
   for (unsigned int i = 2; i <= (unsigned) upperboundPrimeDivisors; i ++)
   { if (!theSieve[i])
       continue;

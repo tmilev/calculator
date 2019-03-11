@@ -211,9 +211,9 @@ void SemisimpleLieAlgebra::ComputeMultTable()
   int numGenerators = numRoots + theRank;
   this->theLiebrackets.init(numGenerators, numGenerators);
 //  this->theLiebracketPairingIndices.init(numGenerators, numGenerators);
-  this->UEGeneratorOrderIncludingCartanElts.initFillInObject(numGenerators, - 1);
+  this->UEGeneratorOrderIncludingCartanElts.initializeFillInObject(numGenerators, - 1);
 //  this->theLiebracketPairingIndices.MakeZero(- 1);
-//  this->OppositeRootSpaces.initFillInObject(numRoots+theDimension, - 1);
+//  this->OppositeRootSpaces.initializeFillInObject(numRoots+theDimension, - 1);
   Vector<Rational> leftWeight, rightWeight, hRoot;
   for (int i = 0; i < numGenerators; i ++)
   { leftWeight = this->GetWeightOfGenerator(i);

@@ -93,7 +93,7 @@ bool Graph::CheckConsistency() const
 void Graph::ComputeEdgesPerNodesNoMultiplicities()
 { MacroRegisterFunctionWithName("Graph::ComputeEdgesPerNodesNoMultiplicities");
   List<int> emptyList;
-  this->edgesPerNodeNoMultiplicities.initFillInObject(this->numNodes, emptyList);
+  this->edgesPerNodeNoMultiplicities.initializeFillInObject(this->numNodes, emptyList);
   this->CheckConsistency();
   for (int i = 0; i < this->theEdges.size(); i ++)
     this->edgesPerNodeNoMultiplicities[this->theEdges[i].vStart].AddOnTop(this->theEdges[i].vEnd);
@@ -126,8 +126,8 @@ void Graph::AddNodeToComponent(int nodeIndex)
 
 void Graph::ComputeConnectedComponentsAndBaseNodeDistances()
 { MacroRegisterFunctionWithName("Graph::ComputeConnectedComponentsAndBaseNodeDistances");
-  this->distanceToBaseNode.initFillInObject(this->numNodes, - 1);
-  this->baseNode.initFillInObject(this->numNodes, - 1);
+  this->distanceToBaseNode.initializeFillInObject(this->numNodes, - 1);
+  this->baseNode.initializeFillInObject(this->numNodes, - 1);
   List<int> theOrbit;
   theOrbit.SetExpectedSize(this->theEdges.size());
   for (int indexBaseNode = 0; indexBaseNode < this->numNodes; indexBaseNode ++)
@@ -164,8 +164,8 @@ void Graph::ComputeDisplayGroups()
   this->groupMaxSize = 0;
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++)
     this->groupMaxSize =MathRoutines::Maximum(this->groupMaxSize, this->nodeGroupsForDisplay[i].size);
-  this->positionInDisplayGroup.initFillInObject(this->numNodes, - 1);
-  this->displayGroupIndices.initFillInObject(this->numNodes, - 1);
+  this->positionInDisplayGroup.initializeFillInObject(this->numNodes, - 1);
+  this->displayGroupIndices.initializeFillInObject(this->numNodes, - 1);
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++)
     for (int j = 0; j < this->nodeGroupsForDisplay[i].size; j ++)
     { this->positionInDisplayGroup[this->nodeGroupsForDisplay[i][j]] = j;

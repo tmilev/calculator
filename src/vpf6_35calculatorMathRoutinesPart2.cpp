@@ -201,7 +201,7 @@ void MeshTriangles::ComputeImplicitPlotPart2()
 { MacroRegisterFunctionWithName("MeshTriangles::ComputeImplicitPlotPart2");
   this->theTriangles.SetExpectedSize(this->maxNumTriangles * 2);
   this->trianglesUsed.SetExpectedSize(this->maxNumTriangles * 2);
-  this->trianglesUsed.initFillInObject(this->theTriangles.size, true);
+  this->trianglesUsed.initializeFillInObject(this->theTriangles.size, true);
   this->theEvaluatedPoints.SetExpectedSize(this->maxNumTriangles * 4);
   this->flagTriangleLimitReached = false;
   for (int i = 0; i < this->theTriangles.size; i ++)
@@ -266,9 +266,9 @@ void MeshTriangles::ComputeImplicitPlot()
   double DeltaX = (this->Width) / this->XstartingGridCount;
   double DeltaY = (this->Height) / this->YstartingGridCount;
   Vector<double> currentPoint;
-  currentPoint.initFillInObject(2, 0);
+  currentPoint.initializeFillInObject(2, 0);
   List<Vector<double> > currentTriangle;
-  currentTriangle.initFillInObject(3, currentPoint);
+  currentTriangle.initializeFillInObject(3, currentPoint);
   for (int i = 0; i < this->XstartingGridCount; i ++)
     for (int j = 0; j < this->YstartingGridCount; j ++)
     { currentTriangle[0][0] = this->lowerLeftCorner[0] + DeltaX * i;
@@ -2383,7 +2383,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder
     [this->allMonomials.GetIndex(this->theBasiS[indexCurrentDivisor][i])].
     AddOnTop(currentSlideNumber);
   if (this->fcAnswerMonsSubtracands[remainderIndex].size != this->allMonomials.size)
-    this->fcAnswerMonsSubtracands[remainderIndex].initFillInObject(this->allMonomials.size, - 1);
+    this->fcAnswerMonsSubtracands[remainderIndex].initializeFillInObject(this->allMonomials.size, - 1);
   for (int i = 0; i < this->intermediateSubtractands.GetElement()[remainderIndex].size(); i ++)
     this->fcAnswerMonsSubtracands[remainderIndex]
     [this->allMonomials.GetIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])] =
@@ -2447,23 +2447,23 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
   List<List<int> > dummyListList;
   List<int> dummyList;
   dummyListList.SetSize(this->allMonomials.size);
-  dummyList.initFillInObject(this->allMonomials.size, - 1);
-  this->firstNonZeroIndicesPerIntermediateSubtracand.initFillInObject(theSubtracands.size, 0);
-  this->highlightMonsRemainders.initFillInObject(theRemainders.size,   dummyListList);
-  this->highlightMonsSubtracands.initFillInObject(theSubtracands.size, dummyListList);
-  this->highlightMonsQuotients.initFillInObject(this->theBasiS.size,   dummyListList);
-  this->highlightMonsDivisors.initFillInObject (this->theBasiS.size,   dummyListList);
-  this->fcAnswerMonsRemainders.initFillInObject(theRemainders.size,    dummyList);
-  this->fcAnswerMonsSubtracands.initFillInObject(theSubtracands.size,  dummyList);
-  this->fcAnswerMonsQuotients.initFillInObject(this->theBasiS.size,    dummyList);
-  this->fcAnswerMonsDivisors.initFillInObject (this->theBasiS.size,    dummyList);
-  this->uncoverAllMonsRemainders.initFillInObject (theRemainders.size, 1);
-  this->uncoverAllMonsSubtracands.initFillInObject(theSubtracands.size, 1);
-  this->uncoverAllMonsQuotients.initFillInObject  (this->theBasiS.size, 1);
-  this->uncoverAllMonsDivisors.initFillInObject   (this->theBasiS.size, 1);
-  this->uncoverMonsFinalRemainder.initFillInObject(this->allMonomials.size, - 1);
-  this->additionalHighlightFinalRemainder.initFillInObject(this->allMonomials.size,- 1);
-  this->additionalHighlightRemainders.initFillInObject(this->allMonomials.size, dummyList);
+  dummyList.initializeFillInObject(this->allMonomials.size, - 1);
+  this->firstNonZeroIndicesPerIntermediateSubtracand.initializeFillInObject(theSubtracands.size, 0);
+  this->highlightMonsRemainders.initializeFillInObject(theRemainders.size,   dummyListList);
+  this->highlightMonsSubtracands.initializeFillInObject(theSubtracands.size, dummyListList);
+  this->highlightMonsQuotients.initializeFillInObject(this->theBasiS.size,   dummyListList);
+  this->highlightMonsDivisors.initializeFillInObject (this->theBasiS.size,   dummyListList);
+  this->fcAnswerMonsRemainders.initializeFillInObject(theRemainders.size,    dummyList);
+  this->fcAnswerMonsSubtracands.initializeFillInObject(theSubtracands.size,  dummyList);
+  this->fcAnswerMonsQuotients.initializeFillInObject(this->theBasiS.size,    dummyList);
+  this->fcAnswerMonsDivisors.initializeFillInObject (this->theBasiS.size,    dummyList);
+  this->uncoverAllMonsRemainders.initializeFillInObject (theRemainders.size, 1);
+  this->uncoverAllMonsSubtracands.initializeFillInObject(theSubtracands.size, 1);
+  this->uncoverAllMonsQuotients.initializeFillInObject  (this->theBasiS.size, 1);
+  this->uncoverAllMonsDivisors.initializeFillInObject   (this->theBasiS.size, 1);
+  this->uncoverMonsFinalRemainder.initializeFillInObject(this->allMonomials.size, - 1);
+  this->additionalHighlightFinalRemainder.initializeFillInObject(this->allMonomials.size,- 1);
+  this->additionalHighlightRemainders.initializeFillInObject(this->allMonomials.size, dummyList);
   this->highlightAllMonsFinalRemainder = - 1;
   int currentSlideNumer = this->firstIndexLatexSlide + 1;
   //stOutput

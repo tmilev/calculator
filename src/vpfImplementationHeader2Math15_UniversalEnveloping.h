@@ -811,7 +811,7 @@ void ElementUniversalEnveloping<coefficient>::GetCoordinateFormOfSpanOfElements
   ZeroPoly.MakeZero();
   for (int i = 0; i < theElements.size; i ++)
   { Vector<coefficient>& current = outputCoordinates[i];
-    current.initFillInObject(outputCorrespondingMonomials.size, ZeroPoly);
+    current.initializeFillInObject(outputCorrespondingMonomials.size, ZeroPoly);
     ElementUniversalEnveloping& currentElt = theElements[i];
     for (int j = 0; j < currentElt.size; j ++)
     { MonomialUniversalEnveloping<coefficient>& currentMon = currentElt[j];
@@ -925,7 +925,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::GetCoordinateFormOfSpanOfEl
   ZeroPoly.MakeZero();
   for (int i = 0; i < theElements.size; i ++)
   { Vector<Polynomial<coefficient> >& current = outputCoordinates[i];
-    current.initFillInObject(outputCorrespondingMonomials.size, ZeroPoly);
+    current.initializeFillInObject(outputCorrespondingMonomials.size, ZeroPoly);
     ElementUniversalEnvelopingOrdered& currentElt = theElements[i];
     for (int j = 0; j < currentElt.size; j ++)
     { MonomialUniversalEnvelopingOrdered<coefficient>& currentMon = currentElt[j];

@@ -5,11 +5,9 @@
 static ProjectInformationInstance ProjectInfoVpfSourceCodeFormatter(__FILE__, "Source code formatter implementation.");
 
 bool SourceCodeFormatter::initializeFileNames(const std::string& fileName, std::stringstream* comments) {
-  if (comments != 0) {
-    *comments << "Not implemented yet. ";
-  }
+  MacroRegisterFunctionWithName("SourceCodeFormatter::initializeFileNames");
   this->inputFileName = fileName;
-  if (! FileOperations::LoadFileToStringVirtual(this->inputFileName, this->inputCode, false, false, comments)) {
+  if (!FileOperations::LoadFileToStringVirtual(this->inputFileName, this->inputCode, false, false, comments)) {
     if (comments != 0) {
       *comments << "Failed to load file. ";
     }
@@ -21,10 +19,11 @@ bool SourceCodeFormatter::initializeFileNames(const std::string& fileName, std::
 }
 
 std::string SourceCodeFormatter::ToStringLinks() {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::ToStringLinks");
   std::stringstream out;
   out
   << "<a href = '"
-   << this->inputFileName
+  << this->inputFileName
   << "'>"
   << this->inputFileName << "</a>, ";
   out
@@ -36,10 +35,14 @@ std::string SourceCodeFormatter::ToStringLinks() {
 }
 
 bool SourceCodeFormatter::FormatCPPSourceCode(const std::string& fileName, std::stringstream* comments) {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::FormatCPPSourceCode");
   if (!this->initializeFileNames(fileName, comments)) {
     return false;
   }
   if (!this->ExtractCodeElements(comments)) {
+    return false;
+  }
+  if (!this->ApplyFormattingRules(comments)) {
     return false;
   }
   if (!this->WriteFormatedCode(comments)) {
@@ -55,12 +58,16 @@ void SourceCodeFormatter::AddCurrentWord() {
   if (this->currentWord.size() == 0) {
     return;
   }
-  this->codeElements.AddOnTop(this->currentWord);
+  this->originalElements.AddOnTop(this->currentWord);
   this->currentWord = "";
 }
 
+bool SourceCodeFormatter::isSeparatorCharacter(char input) {
+  return this->separatorCharactersMap[(unsigned) input];
+}
+
 bool SourceCodeFormatter::ProcessSeparatorCharacters() {
-  if (this->separatorCharacterMap[this->currentChar]) {
+  if (this->isSeparatorCharacter(this->currentChar)) {
     this->AddCurrentWord();
     this->currentWord = this->currentChar;
     this->AddCurrentWord();
@@ -91,8 +98,9 @@ bool SourceCodeFormatter::ProcessCharacterInQuotes() {
 }
 
 bool SourceCodeFormatter::ExtractCodeElements(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::ExtractCodeElements");
   (void) comments;
-  this->codeElements.SetExpectedSize(this->inputCode.size());
+  this->originalElements.SetExpectedSize(this->inputCode.size());
   this->flagInQuotes = false;
   this->flagPreviousIsStandaloneBackSlash = false;
   for (unsigned i = 0; i < this->inputCode.size(); i ++) {
@@ -108,18 +116,84 @@ bool SourceCodeFormatter::ExtractCodeElements(std::stringstream* comments) {
   return true;
 }
 
+bool SourceCodeFormatter::isWhiteSpaceNoNewLine(const std::string& input) {
+  for (unsigned i = 0; i < input.size(); i ++) {
+    if (!this->whiteSpaceCharacterNoNewLineMap[(unsigned) input[i]]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool SourceCodeFormatter::DecreaseStack(int numberToPop) {
+  this->transformedElements.SetSize(this->transformedElements.size - numberToPop);
+  return true;
+}
+
+bool SourceCodeFormatter::ApplyOneRule() {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::ApplyOneRule");
+  int lastIndex = this->transformedElements.size - 1;
+  std::string& last = this->transformedElements[lastIndex];
+  std::string& secondToLast = this->transformedElements[lastIndex - 1];
+  std::string& thirdToLast = this->transformedElements[lastIndex - 2];
+  std::string& fourthToLast = this->transformedElements[lastIndex - 3];
+  //std::string& fifthToLast = this->transformedElements[lastIndex - 4];
+  if (this->isWhiteSpaceNoNewLine(last) && this->isWhiteSpaceNoNewLine(secondToLast)) {
+    secondToLast = secondToLast + last;
+    return this->DecreaseStack(1);
+  }
+  if (
+    fourthToLast == ")" &&
+    thirdToLast == "\n" &&
+    this->isWhiteSpaceNoNewLine(secondToLast) &&
+    last == "{"
+  ) {
+    thirdToLast = " {\n";
+    secondToLast = secondToLast + " ";
+    return this->DecreaseStack(1);
+  }
+  return false;
+}
+
+bool SourceCodeFormatter::ApplyFormattingRules(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::ApplyFormattingRules");
+  this->transformedElements.SetExpectedSize(this->originalElements.size);
+  this->transformedElements.initializeFillInObject(6, "");
+  for (int i = 0; i < this->originalElements.size; i ++) {
+    this->transformedElements.AddOnTop(this->originalElements[i]);
+    int tooManyRulesCounter = 0;
+    int maximumRules = 200;
+    while (this->ApplyOneRule()) {
+      tooManyRulesCounter ++;
+      if (tooManyRulesCounter > maximumRules) {
+        if (comments != 0) {
+          *comments << "Too many rules, this must be a programming error. ";
+        }
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 SourceCodeFormatter::SourceCodeFormatter() {
   this->flagInQuotes = false;
   this->flagPreviousIsStandaloneBackSlash= false;
   this->currentChar = 0;
-  this->separatorCharacters = "(){} \t\n,:;.*&+-/[]";
-  this->separatorCharacterMap.initializeFillInObject(256, false);
+  this->separatorCharacters = "(){} \t\n\r,:;.*&+-/[]";
+  this->separatorCharactersMap.initializeFillInObject(256, false);
   for (unsigned i = 0; i < this->separatorCharacters.size(); i ++) {
-    this->separatorCharacterMap[this->separatorCharacters[i]] = true;
+    this->separatorCharactersMap[(unsigned) this->separatorCharacters[i]] = true;
+  }
+  this->whiteSpaceCharactersNoNewLine = " \t\r";
+  this->whiteSpaceCharacterNoNewLineMap.initializeFillInObject(256, false);
+  for (unsigned i = 0; i < this->whiteSpaceCharactersNoNewLine.size(); i ++) {
+    this->whiteSpaceCharacterNoNewLineMap[(unsigned) this->whiteSpaceCharactersNoNewLine[i]] = true;
   }
 }
 
 bool SourceCodeFormatter::WriteFormatedCode(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::WriteFormatedCode");
   std::fstream fileOut;
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(fileOut, this->outputFileName, false, true, false)) {
     if (comments != 0) {
@@ -127,8 +201,8 @@ bool SourceCodeFormatter::WriteFormatedCode(std::stringstream* comments) {
     }
     return false;
   }
-  for (int i = 0; i < this->codeElements.size; i ++) {
-    fileOut << this->codeElements[i];
+  for (int i = 0; i < this->transformedElements.size; i ++) {
+    fileOut << this->transformedElements[i];
   }
   return true;
 }

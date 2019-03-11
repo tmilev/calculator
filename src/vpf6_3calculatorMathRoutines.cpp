@@ -1771,6 +1771,7 @@ bool CalculatorFunctionsGeneral::innerFormatCPPSourceCode(
   std::stringstream report;
   SourceCodeFormatter formatter;
   formatter.FormatCPPSourceCode(fileName, &report);
+  //report << "DEBUG: GOT to here!! report ptr: "  << &report;
   return output.AssignValue(report.str(), theCommands);
 }
 

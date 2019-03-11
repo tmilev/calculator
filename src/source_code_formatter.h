@@ -10,22 +10,31 @@ static ProjectInformationInstance ProjectInfoHeaderSourceCodeFormatterHeader(__F
 
 class SourceCodeFormatter {
 public:
-  std::string inputFileName, outputFileName;
+  std::string inputFileName;
+  std::string outputFileName;
   bool flagInQuotes;
   bool flagPreviousIsStandaloneBackSlash;
   std::string inputCode, outputCode;
   char currentChar;
   std::string currentWord;
-  List<std::string> codeElements;
+  List<std::string> originalElements;
+  List<std::string> transformedElements;
+  std::string whiteSpaceCharactersNoNewLine;
   std::string separatorCharacters;
-  List<bool> separatorCharacterMap;
+  List<bool> separatorCharactersMap;
+  List<bool> whiteSpaceCharacterNoNewLineMap;
   SourceCodeFormatter();
   void AddCurrentWord();
   bool FormatCPPSourceCode(const std::string& fileName, std::stringstream* comments);
   bool ProcessCharacterInQuotes();
+  bool isSeparatorCharacter(char input);
   bool ProcessSeparatorCharacters();
   bool ExtractCodeElements(std::stringstream* comments);
   bool WriteFormatedCode(std::stringstream* comments);
+  bool ApplyFormattingRules(std::stringstream* comments);
+  bool ApplyOneRule();
+  bool DecreaseStack(int numberToPop);
+  bool isWhiteSpaceNoNewLine(const std::string& input);
   bool initializeFileNames(const std::string& fileName, std::stringstream* comments);
   std::string ToStringLinks();
 };

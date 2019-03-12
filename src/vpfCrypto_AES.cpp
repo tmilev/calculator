@@ -87,15 +87,15 @@ public:
   // NOTES: you need to set IV in ctx with AES_init_ctx_iv() or AES_ctx_set_iv()
   //        no IV should ever be reused with the same key
   void AES_CTR_xcrypt_buffer(uint8_t* buf, uint32_t length);
-  static inline uint8_t xtime(uint8_t x)
-  { return ((x << 1) ^ (((x >> 7) & 1) * 0x1b));
+  static inline uint8_t xtime(uint8_t x) {
+    return ((x << 1) ^ (((x >> 7) & 1) * 0x1b));
   }
   // Multiply is used to multiply numbers in the field GF(2^8)
   // Note: The last call to xtime() is unneeded, but often ends up generating a smaller binary
   //       The compiler seems to be able to vectorize the operation better this way.
   //       See https://github.com/kokke/tiny-AES-c/pull/34
-  static inline uint8_t Multiply(uint8_t x, uint8_t y)
-  { return
+  static inline uint8_t Multiply(uint8_t x, uint8_t y) {
+    return
     (((y & 1) * x) ^
     ((y>>1 & 1) * xtime(x)) ^
     ((y>>2 & 1) * xtime(xtime(x))) ^
@@ -114,32 +114,32 @@ public:
   void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key);
 };
 
-void AESContext::SetNumBits(int inputNumBits)
-{ this->numBits = inputNumBits;
+void AESContext::SetNumBits(int inputNumBits) {
+  this->numBits = inputNumBits;
   if (this->numBits != 256 && this->numBits != 192 && this->numBits != 128)
     crash << "Bad number of bits: " << inputNumBits << " for AES cipher. Allowed inputs: 256, 192, 128. " << crash;
-  if (this->numBits == 256)
-  { this->keyExpSize = 240;
+  if (this->numBits == 256) {
+    this->keyExpSize = 240;
     this->keyLength = 32;
     this->Nk = 8; // The number of 32 bit words in a key.
     this->Nr = 14;// The number of rounds in AES Cipher.
   }
-  if (this->numBits == 192)
-  { this->keyExpSize = 208;
+  if (this->numBits == 192) {
+    this->keyExpSize = 208;
     this->keyLength = 24;
     this->Nk = 6;
     this->Nr = 12;
   }
-  if (this->numBits == 128)
-  { this->keyExpSize = 176;
+  if (this->numBits == 128) {
+    this->keyExpSize = 176;
     this->keyLength = 16;
     this->Nk = 4;
     this->Nr = 10;
   }
 }
 
-AESContext::AESContext()
-{ this->flagUseCBC = true;
+AESContext::AESContext() {
+  this->flagUseCBC = true;
   this->flagUseCTR = false;
   this->flagUseECB = false;
   for (int i = 0; i < 16; i ++)
@@ -201,36 +201,36 @@ static const uint8_t Rcon[11] = { 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40
  *  up to rcon[8] for AES-192, up to rcon[7] for AES-256. rcon[0] is not used in AES algorithm."
  */
 
-static uint8_t getSBoxValue(uint8_t num)
-{ return AESContext::sbox[num];
+static uint8_t getSBoxValue(uint8_t num) {
+  return AESContext::sbox[num];
 }
 
-static uint8_t getSBoxInvert(uint8_t num)
-{ return AESContext::rsbox[num];
+static uint8_t getSBoxInvert(uint8_t num) {
+  return AESContext::rsbox[num];
 }
 
 // This function produces Nb(Nr+1) round keys. The round keys are used in each round to decrypt the states.
-void AESContext::KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
-{ unsigned i, j, k;
+void AESContext::KeyExpansion(uint8_t* RoundKey, const uint8_t* Key) {
+  unsigned i, j, k;
   uint8_t tempa[4]; // Used for the column/row operations
 
   // The first round key is the key itself.
-  for (i = 0; i < Nk; ++i)
-  { RoundKey[(i * 4) + 0] = Key[(i * 4) + 0];
+  for (i = 0; i < Nk; ++i) {
+    RoundKey[(i * 4) + 0] = Key[(i * 4) + 0];
     RoundKey[(i * 4) + 1] = Key[(i * 4) + 1];
     RoundKey[(i * 4) + 2] = Key[(i * 4) + 2];
     RoundKey[(i * 4) + 3] = Key[(i * 4) + 3];
   }
 
   // All other round keys are found from the previous round keys.
-  for (i = Nk; i < Nb * (Nr + 1); ++ i)
-  { k = (i - 1) * 4;
+  for (i = Nk; i < Nb * (Nr + 1); ++ i) {
+    k = (i - 1) * 4;
     tempa[0] = RoundKey[k + 0];
     tempa[1] = RoundKey[k + 1];
     tempa[2] = RoundKey[k + 2];
     tempa[3] = RoundKey[k + 3];
-    if (i % Nk == 0)
-    { // This function shifts the 4 bytes in a word to the left once.
+    if (i % Nk == 0) {
+      // This function shifts the 4 bytes in a word to the left once.
       // [a0, a1, a2, a3] becomes [a1, a2, a3, a0]
       // Function RotWord()
       k = tempa[0];
@@ -248,8 +248,8 @@ void AESContext::KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
       tempa[0] = tempa[0] ^ Rcon[i / Nk];
     }
     if (this->numBits == 256)
-      if (i % Nk == 4)
-      { tempa[0] = getSBoxValue(tempa[0]);
+      if (i % Nk == 4) {
+        tempa[0] = getSBoxValue(tempa[0]);
         tempa[1] = getSBoxValue(tempa[1]);
         tempa[2] = getSBoxValue(tempa[2]);
         tempa[3] = getSBoxValue(tempa[3]);
@@ -263,23 +263,23 @@ void AESContext::KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
   }
 }
 
-void AESContext::AES_init_ctx(const uint8_t* key)
-{ KeyExpansion(this->RoundKey, key);
+void AESContext::AES_init_ctx(const uint8_t* key) {
+  KeyExpansion(this->RoundKey, key);
 }
 
-void AESContext::AES_init_ctx_iv(const uint8_t* key, const uint8_t* iv)
-{ KeyExpansion(this->RoundKey, key);
+void AESContext::AES_init_ctx_iv(const uint8_t* key, const uint8_t* iv) {
+  KeyExpansion(this->RoundKey, key);
   memcpy(this->initializationVector, iv, this->blockLength);
 }
 
-void AESContext::AES_ctx_set_iv(const uint8_t* iv)
-{ memcpy(this->initializationVector, iv, this->blockLength);
+void AESContext::AES_ctx_set_iv(const uint8_t* iv) {
+  memcpy(this->initializationVector, iv, this->blockLength);
 }
 
 // This function adds the round key to state.
 // The round key is added to the state by an XOR function.
-void AESContext::AddRoundKey(uint8_t round, state_t* state, uint8_t* RoundKey)
-{ uint8_t i, j;
+void AESContext::AddRoundKey(uint8_t round, state_t* state, uint8_t* RoundKey) {
+  uint8_t i, j;
   for (i = 0; i < 4; ++ i)
     for (j = 0; j < 4; ++ j)
       (*state)[i][j] ^= RoundKey[(round * Nb * 4) + (i * Nb) + j];
@@ -287,8 +287,8 @@ void AESContext::AddRoundKey(uint8_t round, state_t* state, uint8_t* RoundKey)
 
 // The SubBytes Function Substitutes the values in the
 // state matrix with values in an S-box.
-void AESContext::SubBytes(state_t* state)
-{ uint8_t i, j;
+void AESContext::SubBytes(state_t* state) {
+  uint8_t i, j;
   for (i = 0; i < 4; ++ i)
     for (j = 0; j < 4; ++ j)
       (*state)[j][i] = getSBoxValue((*state)[j][i]);
@@ -297,8 +297,8 @@ void AESContext::SubBytes(state_t* state)
 // The ShiftRows() function shifts the rows in the state to the left.
 // Each row is shifted with different offset.
 // Offset = Row number. So the first row is not shifted.
-void AESContext::ShiftRows(state_t* state)
-{ uint8_t temp;
+void AESContext::ShiftRows(state_t* state) {
+  uint8_t temp;
   // Rotate first row 1 columns to left
   temp           = (*state)[0][1];
   (*state)[0][1] = (*state)[1][1];
@@ -321,11 +321,11 @@ void AESContext::ShiftRows(state_t* state)
 }
 
 // MixColumns function mixes the columns of the state matrix
-void AESContext::MixColumns(state_t* state)
-{ uint8_t i;
+void AESContext::MixColumns(state_t* state) {
+  uint8_t i;
   uint8_t Tmp, Tm, t;
-  for (i = 0; i < 4; ++i)
-  { t   = (*state)[i][0];
+  for (i = 0; i < 4; ++i) {
+    t   = (*state)[i][0];
     Tmp = (*state)[i][0] ^ (*state)[i][1] ^ (*state)[i][2] ^ (*state)[i][3] ;
     Tm  = (*state)[i][0] ^ (*state)[i][1]; Tm = AESContext::xtime(Tm);  (*state)[i][0] ^= Tm ^ Tmp;
     Tm  = (*state)[i][1] ^ (*state)[i][2]; Tm = AESContext::xtime(Tm);  (*state)[i][1] ^= Tm ^ Tmp;
@@ -337,11 +337,11 @@ void AESContext::MixColumns(state_t* state)
 // MixColumns function mixes the columns of the state matrix.
 // The method used to multiply may be difficult to understand for the inexperienced.
 // Please use the references to gain more information.
-void AESContext::InvMixColumns(state_t* state)
-{ int i;
+void AESContext::InvMixColumns(state_t* state) {
+  int i;
   uint8_t a, b, c, d;
-  for (i = 0; i < 4; ++i)
-  { a = (*state)[i][0];
+  for (i = 0; i < 4; ++i) {
+    a = (*state)[i][0];
     b = (*state)[i][1];
     c = (*state)[i][2];
     d = (*state)[i][3];
@@ -355,15 +355,15 @@ void AESContext::InvMixColumns(state_t* state)
 
 // The SubBytes Function Substitutes the values in the
 // state matrix with values in an S-box.
-void AESContext::InvSubBytes(state_t* state)
-{ uint8_t i, j;
+void AESContext::InvSubBytes(state_t* state) {
+  uint8_t i, j;
   for (i = 0; i < 4; ++ i)
     for (j = 0; j < 4; ++ j)
       (*state)[j][i] = getSBoxInvert((*state)[j][i]);
 }
 
-void AESContext::InvShiftRows(state_t* state)
-{ uint8_t temp;
+void AESContext::InvShiftRows(state_t* state) {
+  uint8_t temp;
   // Rotate first row 1 columns to right
   temp = (*state)[3][1];
   (*state)[3][1] = (*state)[2][1];
@@ -386,15 +386,15 @@ void AESContext::InvShiftRows(state_t* state)
 }
 
 // Cipher is the main function that encrypts the PlainText.
-void AESContext::Cipher(state_t* state, uint8_t* RoundKey)
-{ uint8_t round = 0;
+void AESContext::Cipher(state_t* state, uint8_t* RoundKey) {
+  uint8_t round = 0;
   // Add the First round key to the state before starting the rounds.
   AddRoundKey(0, state, RoundKey);
   // There will be Nr rounds.
   // The first Nr-1 rounds are identical.
   // These Nr-1 rounds are executed in the loop below.
-  for (round = 1; round < this->Nr; ++ round)
-  { SubBytes(state);
+  for (round = 1; round < this->Nr; ++ round) {
+    SubBytes(state);
     ShiftRows(state);
     MixColumns(state);
     AddRoundKey(round, state, RoundKey);
@@ -406,15 +406,15 @@ void AESContext::Cipher(state_t* state, uint8_t* RoundKey)
   AddRoundKey(this->Nr, state, RoundKey);
 }
 
-void AESContext::InvCipher(state_t* state, uint8_t* RoundKey)
-{ uint8_t round = 0;
+void AESContext::InvCipher(state_t* state, uint8_t* RoundKey) {
+  uint8_t round = 0;
   // Add the First round key to the state before starting the rounds.
   AddRoundKey(Nr, state, RoundKey);
   // There will be Nr rounds.
   // The first Nr-1 rounds are identical.
   // These Nr-1 rounds are executed in the loop below.
-  for (round = (Nr - 1); round > 0; -- round)
-  { InvShiftRows(state);
+  for (round = (Nr - 1); round > 0; -- round) {
+    InvShiftRows(state);
     InvSubBytes(state);
     AddRoundKey(round, state, RoundKey);
     InvMixColumns(state);
@@ -426,27 +426,27 @@ void AESContext::InvCipher(state_t* state, uint8_t* RoundKey)
   AddRoundKey(0, state, RoundKey);
 }
 
-void AESContext::AES_ECB_encrypt(uint8_t* buf)
-{ // The next function call encrypts the PlainText with the Key using AES algorithm.
+void AESContext::AES_ECB_encrypt(uint8_t* buf) {
+  // The next function call encrypts the PlainText with the Key using AES algorithm.
   Cipher((state_t*) buf, this->RoundKey);
 }
 
-void AESContext::AES_ECB_decrypt(uint8_t* buf)
-{ // The next function call decrypts the PlainText with the Key using AES algorithm.
+void AESContext::AES_ECB_decrypt(uint8_t* buf) {
+  // The next function call decrypts the PlainText with the Key using AES algorithm.
   InvCipher((state_t*) buf, this->RoundKey);
 }
 
-static void XorWithIv(uint8_t* buf, uint8_t* Iv)
-{ uint8_t i;
+static void XorWithIv(uint8_t* buf, uint8_t* Iv) {
+  uint8_t i;
   for (i = 0; i < AESContext::blockLength; ++ i) // The block in AES is always 128bit no matter the key size
     buf[i] ^= Iv[i];
 }
 
-void AESContext::AES_CBC_encrypt_buffer(uint8_t* buf, uint32_t length)
-{ uintptr_t i;
+void AESContext::AES_CBC_encrypt_buffer(uint8_t* buf, uint32_t length) {
+  uintptr_t i;
   uint8_t *Iv = this->initializationVector;
-  for (i = 0; i < length; i += AESContext::blockLength)
-  { XorWithIv(buf, Iv);
+  for (i = 0; i < length; i += AESContext::blockLength) {
+    XorWithIv(buf, Iv);
     Cipher((state_t*) buf, this->RoundKey);
     Iv = buf;
     buf += AESContext::blockLength;
@@ -456,11 +456,11 @@ void AESContext::AES_CBC_encrypt_buffer(uint8_t* buf, uint32_t length)
   memcpy(this->initializationVector, Iv, AESContext::blockLength);
 }
 
-void AESContext::AES_CBC_decrypt_buffer(uint8_t* buf, uint32_t length)
-{ uintptr_t i;
+void AESContext::AES_CBC_decrypt_buffer(uint8_t* buf, uint32_t length) {
+  uintptr_t i;
   uint8_t storeNextIv[this->blockLength];
-  for (i = 0; i < length; i += this->blockLength)
-  { memcpy(storeNextIv, buf, this->blockLength);
+  for (i = 0; i < length; i += this->blockLength) {
+    memcpy(storeNextIv, buf, this->blockLength);
     InvCipher((state_t*)buf, this->RoundKey);
     XorWithIv(buf, this->initializationVector);
     memcpy(this->initializationVector, storeNextIv, this->blockLength);
@@ -469,19 +469,19 @@ void AESContext::AES_CBC_decrypt_buffer(uint8_t* buf, uint32_t length)
 }
 
 /* Symmetrical operation: same function for encrypting as for decrypting. Note any IV/nonce should never be reused with the same key */
-void AESContext::AES_CTR_xcrypt_buffer(uint8_t* buf, uint32_t length)
-{ uint8_t buffer[this->blockLength];
+void AESContext::AES_CTR_xcrypt_buffer(uint8_t* buf, uint32_t length) {
+  uint8_t buffer[this->blockLength];
   unsigned i;
   int bi;
-  for (i = 0, bi = this->blockLength; i < length; ++ i, ++ bi)
-  { if (bi == this->blockLength) /* we need to regen xor compliment in buffer */
+  for (i = 0, bi = this->blockLength; i < length; ++ i, ++ bi) {
+    if (bi == this->blockLength) /* we need to regen xor compliment in buffer */
     { memcpy(buffer, this->initializationVector, this->blockLength);
       Cipher((state_t*) buffer, this->RoundKey);
       /* Increment Iv and handle overflow */
-      for (bi = (this->blockLength - 1); bi >= 0; -- bi)
-      { /* inc will owerflow */
-        if (this->initializationVector[bi] == 255)
-        { this->initializationVector[bi] = 0;
+      for (bi = (this->blockLength - 1); bi >= 0; -- bi) {
+        /* inc will owerflow */
+        if (this->initializationVector[bi] == 255) {
+          this->initializationVector[bi] = 0;
           continue;
         }
         this->initializationVector[bi] += 1;
@@ -495,17 +495,17 @@ void AESContext::AES_CTR_xcrypt_buffer(uint8_t* buf, uint32_t length)
 
 bool Crypto::decryptAES_CBC_256
 (const std::string& inputKey, const std::string& inputCipherText, List<unsigned char>& output,
- std::stringstream* commentsOnFailure)
-{ output.SetSize(inputCipherText.size());
-  if (inputKey.size() != 32)
-  { if (commentsOnFailure != 0)
+ std::stringstream* commentsOnFailure) {
+  output.SetSize(inputCipherText.size());
+  if (inputKey.size() != 32) {
+    if (commentsOnFailure != 0)
       *commentsOnFailure << "Input key: " << inputKey << " is of length: "
       << inputKey.size() << " (expected: 32). ";
     return false;
   }
   int remainderMod16 = inputCipherText.size() % 16;
-  if (remainderMod16 > 0)
-  { int numberOfBytesToPad = 16 - remainderMod16;
+  if (remainderMod16 > 0) {
+    int numberOfBytesToPad = 16 - remainderMod16;
     std::string newInput;
     newInput.reserve(inputCipherText.size() + numberOfBytesToPad);
     newInput = inputCipherText;
@@ -524,8 +524,8 @@ bool Crypto::decryptAES_CBC_256
 
 bool Crypto::decryptAES_CBC_256
 (const std::string& inputKey, const std::string& inputCipherText, std::string& output,
- std::stringstream* commentsOnFailure)
-{ List<unsigned char> outputList;
+ std::stringstream* commentsOnFailure) {
+  List<unsigned char> outputList;
   if (!Crypto::decryptAES_CBC_256(inputKey, inputCipherText, outputList, commentsOnFailure))
     return false;
   output.assign((char *) outputList.TheObjects, outputList.size);
@@ -533,8 +533,8 @@ bool Crypto::decryptAES_CBC_256
 }
 
 bool Crypto::encryptAES_CBC_256
-(const std::string& inputKey, const std::string& inputPlainText, std::string& output, std::stringstream* commentsOnFailure)
-{ List<unsigned char> outputList;
+(const std::string& inputKey, const std::string& inputPlainText, std::string& output, std::stringstream* commentsOnFailure) {
+  List<unsigned char> outputList;
   if (!Crypto::encryptAES_CBC_256(inputKey, inputPlainText, outputList, commentsOnFailure))
     return false;
   output.assign((char *) outputList.TheObjects, outputList.size);
@@ -542,17 +542,17 @@ bool Crypto::encryptAES_CBC_256
 }
 
 bool Crypto::encryptAES_CBC_256
-(const std::string& inputKey, const std::string& inputPlainText, List<unsigned char>& output, std::stringstream* commentsOnFailure)
-{ output.SetSize(inputPlainText.size());
-  if (inputKey.size() != 32)
-  { if (commentsOnFailure != 0)
+(const std::string& inputKey, const std::string& inputPlainText, List<unsigned char>& output, std::stringstream* commentsOnFailure) {
+  output.SetSize(inputPlainText.size());
+  if (inputKey.size() != 32) {
+    if (commentsOnFailure != 0)
       *commentsOnFailure << "Input key: " << inputKey << " is of length: "
       << inputKey.size() << " (expected: 32). ";
     return false;
   }
   int remainderMod16 = inputPlainText.size() % 16;
-  if (remainderMod16 > 0)
-  { int numberOfBytesToPad = 16 - remainderMod16;
+  if (remainderMod16 > 0) {
+    int numberOfBytesToPad = 16 - remainderMod16;
     std::string newInput;
     newInput.reserve(inputPlainText.size() + numberOfBytesToPad);
     newInput = inputPlainText;

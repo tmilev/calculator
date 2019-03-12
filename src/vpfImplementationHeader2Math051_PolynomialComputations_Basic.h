@@ -7,16 +7,16 @@
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialComputationsBasic(__FILE__, "Implementation header, basic polynomial computations. ");
 
 template <class coefficient>
-bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output) const
-{ MacroRegisterFunctionWithName("MonomialP::Substitution");
+bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output) const {
+  MacroRegisterFunctionWithName("MonomialP::Substitution");
   output.MakeConst(1);
   if (this->IsConstant())
     return true;
   Polynomial<coefficient> tempPoly;
 //  stOutput << "<hr>subbing in monomial " << this->ToString();
   for (int i = 0; i < this->monBody.size; i ++)
-    if (this->monBody[i] != 0)
-    { if (i >= TheSubstitution.size)
+    if (this->monBody[i] != 0) {
+      if (i >= TheSubstitution.size)
         crash << "This is a programming error. Attempting to carry out a substitution in the monomial "
         << this->ToString()
         << " which does have non-zero exponent of variable x_{" << i + 1 << "}; however, the input substitution has "
@@ -24,9 +24,9 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
         << " variable images. More precisely, the input substitution is:  "
         << TheSubstitution.ToString() << ". " << crash;
       int theExponent = 0;
-      if (!this->monBody[i].IsSmallInteger(&theExponent) || this->monBody[i] < 0)
-      { if (TheSubstitution[i].IsMonomialCoeffOne())
-        { MonomialP tempMon = TheSubstitution[i][0];
+      if (!this->monBody[i].IsSmallInteger(&theExponent) || this->monBody[i] < 0) {
+        if (TheSubstitution[i].IsMonomialCoeffOne()) {
+          MonomialP tempMon = TheSubstitution[i][0];
           tempMon.RaiseToPower(this->monBody[i]);
           output *= tempMon;
           continue;
@@ -47,15 +47,15 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
 }
 
 template<class coefficient>
-bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable) const
-{ int tempInt;
+bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable) const {
+  int tempInt;
   if (whichVariable == 0)
     whichVariable = &tempInt;
   *whichVariable = - 1;
   for (int i = 0; i < this->size(); i ++)
     for (int j = 0; j < (*this)[i].GetMinNumVars(); j ++)
-      if ((*this)[i](j) != 0)
-      { if (*whichVariable == - 1)
+      if ((*this)[i](j) != 0) {
+        if (*whichVariable == - 1)
           *whichVariable = j;
         else if (*whichVariable != j)
           return false;
@@ -64,8 +64,8 @@ bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable) const
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<coefficient> >& theMat)
-{ if (theMat.NumCols != theMat.NumRows)
+void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<coefficient> >& theMat) {
+  if (theMat.NumCols != theMat.NumRows)
     crash << "Cannot compute determinant: matrix has " << theMat.NumRows << " rows and " << theMat.NumCols << " columns. " << crash;
   permutation thePerm;
   thePerm.initPermutation(theMat.NumRows);
@@ -76,8 +76,8 @@ void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polyn
   Polynomial<coefficient> result, theMonomial;
   result.MakeZero();
   result.SetExpectedSize(numCycles);
-  for (int i = 0; i < numCycles; i ++, thePerm.incrementAndGetPermutation(permutationIndices))
-  { theMonomial.MakeOne();
+  for (int i = 0; i < numCycles; i ++, thePerm.incrementAndGetPermutation(permutationIndices)) {
+    theMonomial.MakeOne();
     for (int j = 0; j < permutationIndices.size; j ++)
       theMonomial *= theMat(j, permutationIndices[j]);
     //the following can be made much faster, but no need right now as it won't be a bottleneck.
@@ -94,16 +94,16 @@ void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polyn
 }
 
 template<class coefficient>
-void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs()
-{ if (this->size() == 0)
+void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs() {
+  if (this->size() == 0)
     return;
   int indexHighestMon = 0;
   LargeIntUnsigned tempInt1, accumNum, accumDen;
   LargeInt tempInt2;
   accumDen.MakeOne();
   accumNum = this->theCoeffs[0].GetNumerator().value;
-  for (int i = 0; i < this->size(); i ++)
-  { if ((*this)[i].IsGEQLexicographicLastVariableStrongest((*this)[indexHighestMon]))
+  for (int i = 0; i < this->size(); i ++) {
+    if ((*this)[i].IsGEQLexicographicLastVariableStrongest((*this)[indexHighestMon]))
       indexHighestMon = i;
     Rational& tempRat = this->theCoeffs[i];
     tempInt1 = tempRat.GetDenominator();
@@ -125,29 +125,29 @@ void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs()
 }
 
 template <class coefficient>
-Rational Polynomial<coefficient>::TotalDegree() const
-{ Rational result = 0;
+Rational Polynomial<coefficient>::TotalDegree() const {
+  Rational result = 0;
   for (int i = 0; i < this->size(); i ++)
     result = MathRoutines::Maximum((*this)[i].TotalDegree(), result);
   return result;
 }
 
 template <class coefficient>
-int Polynomial<coefficient>::TotalDegreeInt() const
-{ int result = - 1;
+int Polynomial<coefficient>::TotalDegreeInt() const {
+  int result = - 1;
   if (!this->TotalDegree().IsSmallInteger(&result))
     crash << "This is a programming error: requested total degree of a polynomial in int formal, but the degree of the polynomial is not a small integer. " << crash;
   return result;
 }
 
 template <class coefficient>
-bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >& TheSubstitution)
-{ MacroRegisterFunctionWithName("Polynomial::Substitution");
+bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >& TheSubstitution) {
+  MacroRegisterFunctionWithName("Polynomial::Substitution");
   Polynomial<coefficient> Accum, TempPoly;
 //  int commentGrandMasterCheckWhenDone;
 //  this->GrandMasterConsistencyCheck();
-  for (int i = 0; i < this->size(); i ++)
-  { if (!(*this)[i].SubstitutioN(TheSubstitution, TempPoly))
+  for (int i = 0; i < this->size(); i ++) {
+    if (!(*this)[i].SubstitutioN(TheSubstitution, TempPoly))
       return false;
     TempPoly *= this->theCoeffs[i];
     Accum += TempPoly;
@@ -160,21 +160,21 @@ bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >&
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::MakeOne(int ExpectedNumVars)
-{ this->MakeConst(1, ExpectedNumVars);
+void Polynomial<coefficient>::MakeOne(int ExpectedNumVars) {
+  this->MakeConst(1, ExpectedNumVars);
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff)
-{ this->MakeZero();
+void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff) {
+  this->MakeZero();
   MonomialP tempM;
   tempM.MakeEi(NonZeroIndex, 1, NVar);
   this->AddMonomial(tempM, coeff);
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex1, int NonZeroIndex2, const coefficient& coeff1, const coefficient& coeff2)
-{ this->MakeZero();
+void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex1, int NonZeroIndex2, const coefficient& coeff1, const coefficient& coeff2) {
+  this->MakeZero();
   MonomialP tempM;
   tempM.MakeEi(NonZeroIndex1);
   this->AddMonomial(tempM, coeff1);
@@ -183,21 +183,21 @@ void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex1, int Non
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff1, const coefficient& ConstantTerm)
-{ this->MakeDegreeOne(NVar, NonZeroIndex, coeff1);
+void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff1, const coefficient& ConstantTerm) {
+  this->MakeDegreeOne(NVar, NonZeroIndex, coeff1);
   *this += ConstantTerm;
 }
 
 template <class coefficient>
-coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input)
-{ MacroRegisterFunctionWithName("Polynomial::Evaluate");
+coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) {
+  MacroRegisterFunctionWithName("Polynomial::Evaluate");
   coefficient output = 0;
-  for (int i = 0; i < this->size(); i ++)
-  { const MonomialP& currentMon = (*this)[i];
+  for (int i = 0; i < this->size(); i ++) {
+    const MonomialP& currentMon = (*this)[i];
     coefficient accum = this->theCoeffs[i];
     coefficient tempElt;
-    for (int j = 0; j < currentMon.GetMinNumVars(); j ++)
-    { int numCycles = 0;
+    for (int j = 0; j < currentMon.GetMinNumVars(); j ++) {
+      int numCycles = 0;
       if (!(*this)[i](j).IsSmallInteger(&numCycles))
         crash << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i + 1 << "^{th} variable is raised to the power "
         << (*this)[i](j).ToString() << ". Raising variables to power is allowed only if the power is a small integer. "
@@ -217,8 +217,8 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input)
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
-{ MacroRegisterFunctionWithName("Polynomial_CoefficientType::SetNumVariablesSubDeletedVarsByOne");
+void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars) {
+  MacroRegisterFunctionWithName("Polynomial_CoefficientType::SetNumVariablesSubDeletedVarsByOne");
   if (newNumVars >= this->GetMinNumVars())
     return;
   if (newNumVars < 0)
@@ -227,8 +227,8 @@ void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
   Accum.MakeZero();
   Accum.SetExpectedSize(this->size());
   MonomialP tempM;
-  for (int i = 0; i < this->size(); i ++)
-  { tempM.MakeOne(newNumVars);
+  for (int i = 0; i < this->size(); i ++) {
+    tempM.MakeOne(newNumVars);
     for (int j = 0; j < newNumVars; j ++)
       tempM[j] = (*this)[i](j);
     Accum.AddMonomial(tempM, this->theCoeffs[i]);
@@ -237,8 +237,8 @@ void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift)
-{ if (VarIndexShift < 0)
+void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) {
+  if (VarIndexShift < 0)
     crash << "This is a programming error. Requesting negative variable shift (more precisely, " << VarIndexShift << ") not allowed. " << crash;
   if (VarIndexShift == 0)
     return;
@@ -248,8 +248,8 @@ void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift)
   Accum.MakeZero();
   Accum.SetExpectedSize(this->size());
   MonomialP tempM;
-  for (int i = 0; i < this->size(); i ++)
-  { tempM.MakeOne(newNumVars);
+  for (int i = 0; i < this->size(); i ++) {
+    tempM.MakeOne(newNumVars);
     for (int j = 0; j < oldNumVars; j ++)
       tempM[j + VarIndexShift] = (*this)[i](j);
     Accum.AddMonomial(tempM, this->theCoeffs[i]);
@@ -263,8 +263,8 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
   Matrix<coefficient> output, tempElt, idMat;
   idMat.MakeIdMatrix(input.NumCols);
   output.MakeZeroMatrix(input.NumCols);
-  for (int i = 0; i < this->size; i ++)
-  { const MonomialP& currentMon = (*this)[i];
+  for (int i = 0; i < this->size; i ++) {
+    const MonomialP& currentMon = (*this)[i];
     int numCycles = 0;
     if (!currentMon(0).IsSmallInteger(&numCycles) )
       crash << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i + 1 << "^{th} variable is raised to the power "
@@ -285,13 +285,13 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
 }
 
 template <class coefficient>
-int Polynomial<coefficient>::GetIndexMaxMonomialLexicographicLastVariableStrongest() const
-{ return this->GetIndexMaxMonomial(MonomialP::LeftGreaterThanLexicographicLastVariableStrongest);
+int Polynomial<coefficient>::GetIndexMaxMonomialLexicographicLastVariableStrongest() const {
+  return this->GetIndexMaxMonomial(MonomialP::LeftGreaterThanLexicographicLastVariableStrongest);
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::ScaleToPositiveMonomials(MonomialP& outputScale)
-{ int numVars = this->GetMinNumVars();
+void Polynomial<coefficient>::ScaleToPositiveMonomials(MonomialP& outputScale) {
+  int numVars = this->GetMinNumVars();
   outputScale.MakeOne(numVars);
   for (int i = 0; i < numVars; i ++)
     for (int j = 0; j < this->size(); j ++)
@@ -301,11 +301,11 @@ void Polynomial<coefficient>::ScaleToPositiveMonomials(MonomialP& outputScale)
 }
 
 template <class coefficient>
-bool Polynomial<coefficient>::IsProportionalTo(const Polynomial<coefficient>& other, coefficient& TimesMeEqualsOther, const coefficient& theRingUnit) const
-{ if (this->size() != other.size())
+bool Polynomial<coefficient>::IsProportionalTo(const Polynomial<coefficient>& other, coefficient& TimesMeEqualsOther, const coefficient& theRingUnit) const {
+  if (this->size() != other.size())
     return false;
-  if (other.size() == 0)
-  { TimesMeEqualsOther = theRingUnit;
+  if (other.size() == 0) {
+    TimesMeEqualsOther = theRingUnit;
     return true;
   }
   const MonomialP& firstMon = (*this)[0];
@@ -322,10 +322,10 @@ bool Polynomial<coefficient>::IsProportionalTo(const Polynomial<coefficient>& ot
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivisor, Polynomial<coefficient>& outputQuotient, Polynomial<coefficient>& outputRemainder) const
-{ MacroRegisterFunctionWithName("Polynomial::DivideBy");
-  if (&outputRemainder == this || &outputQuotient == this || &outputRemainder == &inputDivisor || &outputQuotient == &inputDivisor)
-  { Polynomial<coefficient> newQuot, newRemaind;
+void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivisor, Polynomial<coefficient>& outputQuotient, Polynomial<coefficient>& outputRemainder) const {
+  MacroRegisterFunctionWithName("Polynomial::DivideBy");
+  if (&outputRemainder == this || &outputQuotient == this || &outputRemainder == &inputDivisor || &outputQuotient == &inputDivisor) {
+    Polynomial<coefficient> newQuot, newRemaind;
     this->DivideBy(inputDivisor, newQuot, newRemaind);
     outputQuotient = newQuot;
     outputRemainder = newRemaind;
@@ -361,8 +361,8 @@ void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivis
 //  stOutput << "<hr>Dividing " << this->ToString() << " by " << inputDivisor.ToString();
 //  stOutput << " comparing " << outputRemainder[remainderMaxMonomial].ToString()
 //  << " and " << tempInput[inputMaxMonomial].ToString();
-  while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest(tempInput[inputMaxMonomial]))
-  { if (remainderMaxMonomial >= outputRemainder.size())
+  while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest(tempInput[inputMaxMonomial])) {
+    if (remainderMaxMonomial >= outputRemainder.size())
       crash << "Remainder max monomial too large. " << crash;
     tempMon = outputRemainder[remainderMaxMonomial];
     tempMon /= tempInput[inputMaxMonomial];
@@ -394,21 +394,21 @@ void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivis
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::DivideByConstant(const coefficient& r)
-{ for (int i = 0; i < this->size; i ++)
+void Polynomial<coefficient>::DivideByConstant(const coefficient& r) {
+  for (int i = 0; i < this->size; i ++)
     this->TheObjects[i].Coefficient /= r;
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::TimesInteger(int a)
-{ Rational r;
+void Polynomial<coefficient>::TimesInteger(int a) {
+  Rational r;
   r.AssignInteger(a);
   this->TimesRational(r);
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input)
-{ MacroRegisterFunctionWithName("Polynomial::AssignCharPoly");
+void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input) {
+  MacroRegisterFunctionWithName("Polynomial::AssignCharPoly");
   if (input.NumCols != input.NumRows)
     crash << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << crash;
   int n = input.NumCols;
@@ -417,8 +417,8 @@ void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input)
   this->MakeConst(1);
   Matrix<coefficient> acc = input;
   coefficient currenCF;
-  for (int i = 1; i < n; i ++)
-  { currenCF = - acc.GetTrace() / i;
+  for (int i = 1; i < n; i ++) {
+    currenCF = - acc.GetTrace() / i;
     this->AddMonomial(MonomialP(0, i), currenCF);
     for (int j = 0; j < n; j ++)
       acc(j, j) += currenCF;
@@ -428,8 +428,8 @@ void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input)
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input)
-{ MacroRegisterFunctionWithName("Polynomial::AssignMinPoly");
+void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
+  MacroRegisterFunctionWithName("Polynomial::AssignMinPoly");
   if (input.NumCols != input.NumRows)
     crash << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << crash;
   int theDim = input.NumCols;
@@ -439,12 +439,12 @@ void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input)
   Vector<coefficient> firstDependentPower;
   Polynomial<coefficient> currentFactor;
   MonomialP tempM;
-  for (int col = 0; col < theDim; col ++)
-  { theVectorPowers.MakeEi(theDim,col);
+  for (int col = 0; col < theDim; col ++) {
+    theVectorPowers.MakeEi(theDim,col);
     theBasis.SetSize(0);
     theBasis.AddOnTop(theVectorPowers);
-    for (int i = 0; i < theDim; i ++)
-    { input.ActOnVectorColumn(*theBasis.LastObject(), theVectorPowers);
+    for (int i = 0; i < theDim; i ++) {
+      input.ActOnVectorColumn(*theBasis.LastObject(), theVectorPowers);
       if (theBasis.LinSpanContainsVector(theVectorPowers))
         break;
       theBasis.AddOnTop(theVectorPowers);
@@ -452,8 +452,8 @@ void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input)
     theVectorPowers.GetCoordsInBasiS(theBasis, firstDependentPower);
     currentFactor.SetExpectedSize(theBasis.size + 1);
     currentFactor.MakeZero();
-    for (int i = 0; i < theBasis.size; i ++)
-    { tempM.MakeEi(0, i, 1);
+    for (int i = 0; i < theBasis.size; i ++) {
+      tempM.MakeEi(0, i, 1);
       currentFactor.AddMonomial(tempM, - firstDependentPower[i]);
     }
     tempM.MakeEi(0, theBasis.size, 1);
@@ -465,10 +465,10 @@ void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input)
 }
 
 template <class coefficient>
-int Polynomial<coefficient>::GetMaxPowerOfVariableIndex(int VariableIndex)
-{ int result = 0;
-  for (int i = 0; i < this->size(); i ++)
-  { result = MathRoutines::Maximum(result, (*this)[i](VariableIndex).NumShort);
+int Polynomial<coefficient>::GetMaxPowerOfVariableIndex(int VariableIndex) {
+  int result = 0;
+  for (int i = 0; i < this->size(); i ++) {
+    result = MathRoutines::Maximum(result, (*this)[i](VariableIndex).NumShort);
     if (!(*this)[i](VariableIndex).IsSmallInteger())
       crash << " This is a programming error: GetMaxPowerOfVariableIndex is called on a polynomial whose monomials"
       << " have degrees that are not small integers. This needs to be fixed! " << crash;
@@ -477,8 +477,8 @@ int Polynomial<coefficient>::GetMaxPowerOfVariableIndex(int VariableIndex)
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::GetConstantTerm(coefficient& output, const coefficient& theRingZero) const
-{ MonomialP tempM;
+void Polynomial<coefficient>::GetConstantTerm(coefficient& output, const coefficient& theRingZero) const {
+  MonomialP tempM;
   tempM.MakeOne();
   int i = this->theMonomials.GetIndex(tempM);
   if (i == - 1)
@@ -488,8 +488,8 @@ void Polynomial<coefficient>::GetConstantTerm(coefficient& output, const coeffic
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output)
-{ MonomialP tempM;
+void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output) {
+  MonomialP tempM;
   tempM.MakeEi(index);
   int i = this->theMonomials.GetIndex(tempM);
   if (i == - 1)
@@ -499,8 +499,8 @@ void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index
 }
 
 template<class coefficient>
-bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output)
-{ MacroRegisterFunctionWithName("Polynomial::FindOneVarRatRoots");
+bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
+  MacroRegisterFunctionWithName("Polynomial::FindOneVarRatRoots");
   if (this->GetMinNumVars() > 1)
     return false;
   output.SetSize(0);
@@ -511,8 +511,8 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output)
   myCopy.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
   Rational lowestTerm, highestTerm;
   this->GetConstantTerm(lowestTerm);
-  if (lowestTerm == 0)
-  { Polynomial<Rational> x1, tempP;
+  if (lowestTerm == 0) {
+    Polynomial<Rational> x1, tempP;
     x1.MakeMonomiaL(0, 1, 1);
     myCopy.DivideBy(x1, myCopy, tempP);
     List<Rational> tempList;
@@ -537,13 +537,13 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output)
   if (!hT.GetDivisors(divisorsH, false) || !lT.GetDivisors(divisorsS, true))
     return false;
   for (int i = 0; i < divisorsH.size; i ++)
-    for (int j = 0; j < divisorsS.size; j ++)
-    { tempV[0].AssignNumeratorAndDenominator(divisorsS[j],divisorsH[i]);
+    for (int j = 0; j < divisorsS.size; j ++) {
+      tempV[0].AssignNumeratorAndDenominator(divisorsS[j],divisorsH[i]);
       val = myCopy.Evaluate(tempV);
 //      stOutput << "<br>" << myCopy.ToString() << " eval at "
 //      << tempV.ToString() << " equals " << val.ToString();
-      if (val == 0)
-      { Polynomial<Rational> divisor, tempP;
+      if (val == 0) {
+        Polynomial<Rational> divisor, tempP;
         divisor.MakeDegreeOne(1, 0, 1, - tempV[0]);
         myCopy.DivideBy(divisor, myCopy, tempP);
         output.AddOnTop(tempV[0]);
@@ -557,8 +557,8 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output)
 }
 
 template <class coefficient>
-bool PolynomialOrder<coefficient>::CompareLeftGreaterThanRight(const Polynomial<coefficient>& left, const Polynomial<coefficient>& right) const
-{ MacroRegisterFunctionWithName("PolynomialOrder::CompareLeftGreaterThanRight");
+bool PolynomialOrder<coefficient>::CompareLeftGreaterThanRight(const Polynomial<coefficient>& left, const Polynomial<coefficient>& right) const {
+  MacroRegisterFunctionWithName("PolynomialOrder::CompareLeftGreaterThanRight");
   Polynomial<coefficient> difference = left;
   difference -= right;
   if (difference.IsEqualToZero())

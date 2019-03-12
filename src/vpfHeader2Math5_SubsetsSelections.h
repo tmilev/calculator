@@ -14,28 +14,28 @@ public:
   List<bool> selected;
   int MaxSize;
   int CardinalitySelection;
-  inline static std::string GetXMLClassName()
-  { return "Selection";
+  inline static std::string GetXMLClassName() {
+    return "Selection";
   }
   void AddSelectionAppendNewIndex(int index);
   void RemoveLastSelection();
-  void RemoveSelection(int index)
-  { this->selected[index] = false;
+  void RemoveSelection(int index) {
+    this->selected[index] = false;
     this->ComputeIndicesFromSelection();
   }
-  void MakeFullSelection(int inputMaxSize)
-  { this->init(inputMaxSize);
+  void MakeFullSelection(int inputMaxSize) {
+    this->init(inputMaxSize);
     this->MakeFullSelection();
   }
-  void MakeFullSelection()
-  { for (int i = 0; i < this->MaxSize; i ++)
-    { this->elements[i] = i;
+  void MakeFullSelection() {
+    for (int i = 0; i < this->MaxSize; i ++) {
+      this->elements[i] = i;
       this->selected[i] = true;
     }
     this->CardinalitySelection = this->MaxSize;
   }
-  bool IsSubset(const Selection& other) const
-  { if (this->MaxSize != other.MaxSize)
+  bool IsSubset(const Selection& other) const {
+    if (this->MaxSize != other.MaxSize)
       return false;
     for (int i = 0; i < this->CardinalitySelection; i ++)
       if (!other.selected[this->elements[i]])
@@ -46,21 +46,21 @@ public:
   void ComputeIndicesFromSelection();
   void initNoMemoryAllocation();
   unsigned int HashFunction() const;
-  static inline unsigned int HashFunction(const Selection& input)
-  { return input.HashFunction();
+  static inline unsigned int HashFunction(const Selection& input) {
+    return input.HashFunction();
   }
   std::string ToString() const;
   void incrementSelection();
-  bool IncrementReturnFalseIfPastLast()
-  { this->incrementSelection();
+  bool IncrementReturnFalseIfPastLast() {
+    this->incrementSelection();
     if (this->CardinalitySelection == 0)
       return false;
     return true;
   }
   int SelectionToIndex();
   void ExpandMaxSize();
-  int GetNumCombinationsFixedCardinality(int theCardinality)
-  { return MathRoutines::NChooseK(this->MaxSize, theCardinality);
+  int GetNumCombinationsFixedCardinality(int theCardinality) {
+    return MathRoutines::NChooseK(this->MaxSize, theCardinality);
   }
   void ShrinkMaxSize();
   void MakeSubSelection(Selection& theSelection, Selection& theSubSelection);
@@ -68,8 +68,8 @@ public:
   void incrementSelectionFixedCardinality(int card);
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
-  void InvertSelection()
-  { for (int i = 0; i < this->MaxSize; i ++)
+  void InvertSelection() {
+    for (int i = 0; i < this->MaxSize; i ++)
       this->selected[i] = !this->selected[i];
     this->ComputeIndicesFromSelection();
   }
@@ -78,8 +78,8 @@ public:
 //  void operator=(const std::string& other);
   //warning: to call the comparison operator sucessfully, cardinalitySelection must
   //be properly computed!
-  inline bool operator==(const Selection& right) const
-  { if (this->MaxSize != right.MaxSize || this->CardinalitySelection != right.CardinalitySelection)
+  inline bool operator==(const Selection& right) const {
+    if (this->MaxSize != right.MaxSize || this->CardinalitySelection != right.CardinalitySelection)
       return false;
     for (int i = 0; i < this->CardinalitySelection; i ++)
       if (this->selected[this->elements[i]] != right.selected[this->elements[i]])
@@ -88,11 +88,11 @@ public:
   }
   Selection();
   Selection(int m);
-  Selection(const Vector<Rational>& other)
-  { this->operator=(other);
+  Selection(const Vector<Rational>& other) {
+    this->operator=(other);
   }
-  Selection(const Selection& other): MaxSize(0), CardinalitySelection(0)
-  { *this = other;
+  Selection(const Selection& other): MaxSize(0), CardinalitySelection(0) {
+    *this = other;
   }
 };
 
@@ -100,19 +100,19 @@ class SelectionWithMultiplicities
 {
 public:
   std::string DebugString;
-  void ComputeDebugString()
-  { this->ToString(this->DebugString);
+  void ComputeDebugString() {
+    this->ToString(this->DebugString);
   }
   void ToString(std::string& output);
-  std::string ToString()
-  { std::string tempS;
+  std::string ToString() {
+    std::string tempS;
     this->ToString(tempS);
     return tempS;
   }
   List<int> elements;
   List<int> Multiplicities;
-  static unsigned int HashFunction(const SelectionWithMultiplicities& input)
-  { unsigned int result = 0;
+  static unsigned int HashFunction(const SelectionWithMultiplicities& input) {
+    unsigned int result = 0;
     for (int i = 0; i < input.elements.size; i ++)
       result += input.Multiplicities[input.elements[i]] * SomeRandomPrimes[input.elements[i]];
     return result;
@@ -131,19 +131,19 @@ public:
   void initMaxMultiplicity(int NumElements, int MaxMult);
   int NumCombinationsOfCardinality(int cardinality);
   LargeInt GetNumTotalCombinations() const;
-  int NumSelectionsTotal()
-  { return MathRoutines::KToTheNth(MaxMultiplicity, this->Multiplicities.size);
+  int NumSelectionsTotal() {
+    return MathRoutines::KToTheNth(MaxMultiplicity, this->Multiplicities.size);
   }
   bool IncrementReturnFalseIfPastLast();
   void IncrementSubset();
   void IncrementSubsetFixedCardinality(int Cardinality);
   bool HasMultiplicitiesZeroAndOneOnly();
-  int MaxCardinalityWithMultiplicities()
-  { return this->MaxMultiplicity*this->Multiplicities.size;
+  int MaxCardinalityWithMultiplicities() {
+    return this->MaxMultiplicity*this->Multiplicities.size;
   }
   int CardinalitySelectionWithMultiplicities();
-  static unsigned int HashFunction(const SelectionWithMaxMultiplicity& input)
-  { return input.MaxMultiplicity*SomeRandomPrimes[0] +
+  static unsigned int HashFunction(const SelectionWithMaxMultiplicity& input) {
+    return input.MaxMultiplicity*SomeRandomPrimes[0] +
     input.::SelectionWithMultiplicities::HashFunction(input);
   }
 };
@@ -163,11 +163,11 @@ public:
   int MaxTotalMultiplicity();
   void initFromInts(int* theMaxMults, int NumberMaxMults);
   void initFromInts(const List<int>& theMaxMults);
-  bool HasSameMaxMultiplicities(SelectionWithDifferentMaxMultiplicities& other)
-  { return this->MaxMultiplicities.IsEqualTo(other.MaxMultiplicities);
+  bool HasSameMaxMultiplicities(SelectionWithDifferentMaxMultiplicities& other) {
+    return this->MaxMultiplicities.IsEqualTo(other.MaxMultiplicities);
   }
-  void operator=(const SelectionWithDifferentMaxMultiplicities& right)
-  { this->Multiplicities = right.Multiplicities;
+  void operator=(const SelectionWithDifferentMaxMultiplicities& right) {
+    this->Multiplicities = right.Multiplicities;
     this->MaxMultiplicities = right.MaxMultiplicities;
     this->elements = right.elements;
   }
@@ -178,23 +178,23 @@ class SelectionOneItem
   public:
   int MaxMultiplicity;
   int SelectedMult;
-  SelectionOneItem(): MaxMultiplicity(0), SelectedMult(- 1)
-  {
+  SelectionOneItem(): MaxMultiplicity(0), SelectedMult(- 1) {
+   
   }
-  bool IncrementReturnFalseIfPastLast()
-  { if (this->MaxMultiplicity == 0)
+  bool IncrementReturnFalseIfPastLast() {
+    if (this->MaxMultiplicity == 0)
       return false;
     this->SelectedMult ++;
     if (this->SelectedMult > this->MaxMultiplicity)
       this->SelectedMult = 0;
     return this->SelectedMult != 0;
   }
-  void initFromMults(int theMult)
-  { this->MaxMultiplicity = theMult;
+  void initFromMults(int theMult) {
+    this->MaxMultiplicity = theMult;
     this->SelectedMult = 0;
   }
-  std::string ToString() const
-  { std::stringstream out;
+  std::string ToString() const {
+    std::stringstream out;
     out << this->SelectedMult << " out of " << this->MaxMultiplicity;
     return out.str();
   }
@@ -204,40 +204,40 @@ template <class Base>
 class Incrementable
 { public:
   List<Base> theElements;
-  Base& operator[](int i)
-  { return this->theElements[i];
+  Base& operator[](int i) {
+    return this->theElements[i];
   }
-  LargeInt GetNumTotalCombinations()
-  { LargeInt result = 1;
+  LargeInt GetNumTotalCombinations() {
+    LargeInt result = 1;
     for (int i = 0; i < this->theElements.size; i ++)
       result *= this->theElements[i].GetNumTotalCombinations();
     return result;
   }
-  bool IncrementReturnFalseIfPastLast()
-  { for (int i = this->theElements.size - 1; i >= 0; i --)
+  bool IncrementReturnFalseIfPastLast() {
+    for (int i = this->theElements.size - 1; i >= 0; i --)
       if (this->theElements[i].IncrementReturnFalseIfPastLast())
         return true;
     return false;
   }
-  void initFromMults(int inputBase, int numElts)
-  { this->theElements.SetSize(numElts);
+  void initFromMults(int inputBase, int numElts) {
+    this->theElements.SetSize(numElts);
     for (int i = 0; i < this->theElements.size; i ++)
       this->theElements[i].initFromMults(inputBase);
   }
   template<class Element>
-  void initFromMults(const List<Element>& input, int useOnlyNElementsOnly = 0)
-  { if (useOnlyNElementsOnly > 0 && useOnlyNElementsOnly <= input.size)
+  void initFromMults(const List<Element>& input, int useOnlyNElementsOnly = 0) {
+    if (useOnlyNElementsOnly > 0 && useOnlyNElementsOnly <= input.size)
       this->theElements.SetSize(useOnlyNElementsOnly);
     else
       this->theElements.SetSize(input.size);
     for (int i = 0; i < this->theElements.size; i ++)
       this->theElements[i].initFromMults(input[i]);
   }
-  std::string ToString() const
-  { std::stringstream out;
+  std::string ToString() const {
+    std::stringstream out;
     out << "(";
-    for (int i = 0; i < this->theElements.size; i ++)
-    { out << this->theElements[i].ToString();
+    for (int i = 0; i < this->theElements.size; i ++) {
+      out << this->theElements[i].ToString();
       if (i != this->theElements.size - 1)
         out << ", ";
     }
@@ -251,13 +251,13 @@ class SelectionFixedRank
 public:
   Selection theSelection;
   int DesiredSubsetSize;
-  LargeInt GetNumTotalCombinations()
-  { LargeInt result;
+  LargeInt GetNumTotalCombinations() {
+    LargeInt result;
     MathRoutines::NChooseK(theSelection.MaxSize, DesiredSubsetSize, result);
     return result;
   }
-  void SetNumItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumItems)
-  { if (inputDesiredSubsetSize < 0 || inputNumItems < 0)
+  void SetNumItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumItems) {
+    if (inputDesiredSubsetSize < 0 || inputNumItems < 0)
       crash << "This is a programming error: requesting to initialize a selection of size " << inputDesiredSubsetSize << " out of "
       << inputNumItems << " elements, which does not make sense. " << crash;
     this->theSelection.init(inputNumItems);
@@ -265,11 +265,11 @@ public:
     if (this->DesiredSubsetSize > 0)
       this->theSelection.incrementSelectionFixedCardinality(this->DesiredSubsetSize);
   }
-  std::string ToString() const
-  { return this->theSelection.ToString();
+  std::string ToString() const {
+    return this->theSelection.ToString();
   }
-  bool IncrementReturnFalseIfPastLast()
-  { this->theSelection.incrementSelectionFixedCardinality(this->DesiredSubsetSize);
+  bool IncrementReturnFalseIfPastLast() {
+    this->theSelection.incrementSelectionFixedCardinality(this->DesiredSubsetSize);
     for (int i = 0; i < this->DesiredSubsetSize; i ++)
       if (!this->theSelection.selected[i])
         return true;
@@ -281,25 +281,25 @@ class SelectionPositiveIntegers
 {
   public:
   Vector<LargeIntUnsigned> theInts;
-  std::string ToString(FormatExpressions* theFormat = 0)
-  { (void) theFormat;//avoid unused parameter warning, portable
+  std::string ToString(FormatExpressions* theFormat = 0) {
+    (void) theFormat;//avoid unused parameter warning, portable
     return this->theInts.ToString();
   }
-  LargeIntUnsigned GetGrading()
-  { return this->theInts.SumCoords();
+  LargeIntUnsigned GetGrading() {
+    return this->theInts.SumCoords();
   }
-  void init(int numIntegers)
-  { this->theInts.MakeZero(numIntegers);
+  void init(int numIntegers) {
+    this->theInts.MakeZero(numIntegers);
   }
-  void SetFirstInGradeLevel(const LargeIntUnsigned& inputGradingLevel)
-  { this->theInts[0] = inputGradingLevel;
+  void SetFirstInGradeLevel(const LargeIntUnsigned& inputGradingLevel) {
+    this->theInts[0] = inputGradingLevel;
     for (int i = 1; i < this->theInts.size; i ++)
       this->theInts[i] = 0;
   }
-  bool IncrementReturnFalseIfPastLast()
-  { for (int i = this->theInts.size - 2; i >= 0; i --)
-      if (this->theInts[i] > 0)
-      { this->theInts[i] --;
+  bool IncrementReturnFalseIfPastLast() {
+    for (int i = this->theInts.size - 2; i >= 0; i --)
+      if (this->theInts[i] > 0) {
+        this->theInts[i] --;
         this->theInts[i + 1] = *this->theInts.LastObject();
         this->theInts[i + 1] ++;
         if (i != this->theInts.size - 2)
@@ -312,20 +312,20 @@ class SelectionPositiveIntegers
 };
 
 template<class coefficient>
-bool Vectors<coefficient>::IsRegular(Vector<coefficient>& r, Vector<coefficient>& outputFailingNormal, int theDimension)
-{ //this function needs a complete rewrite
+bool Vectors<coefficient>::IsRegular(Vector<coefficient>& r, Vector<coefficient>& outputFailingNormal, int theDimension) {
+  //this function needs a complete rewrite
   Selection WallSelection;
   WallSelection.init(this->size);
   int x = MathRoutines::NChooseK(this->size, theDimension - 1);
   Matrix<coefficient> bufferMat;
   Vector<coefficient> tempRoot;
   coefficient theScalarProduct;
-  for (int i = 0; i < x; i ++)
-  { WallSelection.incrementSelectionFixedCardinality(theDimension - 1);
-    if (this->ComputeNormalFromSelection(tempRoot, WallSelection, bufferMat, theDimension))
-    { tempRoot.ScalarEuclidean(r, theScalarProduct);
-      if (theScalarProduct.IsEqualToZero())
-      { outputFailingNormal = tempRoot;
+  for (int i = 0; i < x; i ++) {
+    WallSelection.incrementSelectionFixedCardinality(theDimension - 1);
+    if (this->ComputeNormalFromSelection(tempRoot, WallSelection, bufferMat, theDimension)) {
+      tempRoot.ScalarEuclidean(r, theScalarProduct);
+      if (theScalarProduct.IsEqualToZero()) {
+        outputFailingNormal = tempRoot;
         return false;
       }
     }
@@ -335,15 +335,15 @@ bool Vectors<coefficient>::IsRegular(Vector<coefficient>& r, Vector<coefficient>
 
 template<class coefficient>
 bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots
-(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot1, Vector<coefficient>& ExtraRoot2, Selection& theSelection, Matrix<coefficient>& bufferMat, Selection& bufferSel)
-{ Selection& NonPivotPoints = bufferSel;
+(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot1, Vector<coefficient>& ExtraRoot2, Selection& theSelection, Matrix<coefficient>& bufferMat, Selection& bufferSel) {
+  Selection& NonPivotPoints = bufferSel;
   if (this->size == 0)
     return false;
   int theDimension = this->TheObjects[0].size;
   output.SetSize(theDimension);
   bufferMat.init((int) theSelection.CardinalitySelection + 2, (int) theDimension);
-  for (int j = 0; j < theDimension; j ++)
-  { for (int i = 0; i < theSelection.CardinalitySelection; i ++)
+  for (int j = 0; j < theDimension; j ++) {
+    for (int i = 0; i < theSelection.CardinalitySelection; i ++)
       bufferMat.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
     bufferMat.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot1.TheObjects[j]);
     bufferMat.elements[theSelection.CardinalitySelection + 1][j].Assign(ExtraRoot2.TheObjects[j]);
@@ -356,32 +356,32 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots
 }
 
 template <typename coefficient>
-void Vectors<coefficient>::SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output)
-{ output.init((int)OutputDimension, (int)theSelection.CardinalitySelection);
+void Vectors<coefficient>::SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output) {
+  output.init((int)OutputDimension, (int)theSelection.CardinalitySelection);
   this->SelectionToMatrix(theSelection, OutputDimension, output, 0);
 }
 
 template <typename coefficient>
-void Vectors<coefficient>::SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex)
-{ for (int i = 0; i < theSelection.CardinalitySelection; i ++)
-  { Vector<coefficient>& tempRoot = this->TheObjects[theSelection.elements[i]];
+void Vectors<coefficient>::SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex) {
+  for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
+    Vector<coefficient>& tempRoot = this->TheObjects[theSelection.elements[i]];
     for (int j = 0; j < OutputDimension; j ++)
       output.elements[StartRowIndex + i][j] = tempRoot[j];
   }
 }
 
 template <typename coefficient>
-void Vectors<coefficient>::SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex)
-{ for (int i = 0; i < theSelection.CardinalitySelection; i ++)
-  { Vector<Rational>& tempRoot = this->TheObjects[theSelection.elements[i]];
+void Vectors<coefficient>::SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex) {
+  for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
+    Vector<Rational>& tempRoot = this->TheObjects[theSelection.elements[i]];
     for (int j = 0; j < OutputDimension; j ++)
       output.elements[StartRowIndex + i][j] = tempRoot[j];
   }
 }
 
 template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalExcludingIndex(Vector<coefficient>& output, int index, Matrix<coefficient>& bufferMatrix)
-{ Selection NonPivotPoints;
+bool Vectors<coefficient>::ComputeNormalExcludingIndex(Vector<coefficient>& output, int index, Matrix<coefficient>& bufferMatrix) {
+  Selection NonPivotPoints;
   if (this->size == 0)
     return false;
   int theDimension = this->TheObjects[0].size;
@@ -389,8 +389,8 @@ bool Vectors<coefficient>::ComputeNormalExcludingIndex(Vector<coefficient>& outp
   bufferMatrix.init((int) this->size - 1, (int) theDimension);
   int k = - 1;
   for (int i = 0; i < this->size; i ++)
-    if (i != index)
-    { k ++;
+    if (i != index) {
+      k ++;
       for (int j = 0; j < theDimension; j ++)
         bufferMatrix.elements[k][j] = (*this)[i][j];
     }
@@ -402,8 +402,8 @@ bool Vectors<coefficient>::ComputeNormalExcludingIndex(Vector<coefficient>& outp
 }
 
 template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalFromSelection(Vector<coefficient>& output, Selection& theSelection, Matrix<coefficient>& bufferMatrix, int theDimension)
-{ Selection NonPivotPoints;
+bool Vectors<coefficient>::ComputeNormalFromSelection(Vector<coefficient>& output, Selection& theSelection, Matrix<coefficient>& bufferMatrix, int theDimension) {
+  Selection NonPivotPoints;
   output.SetSize(theDimension);
   bufferMatrix.init((int)theSelection.CardinalitySelection, (int)theDimension);
   for (int i = 0; i < theSelection.CardinalitySelection; i ++)
@@ -418,8 +418,8 @@ bool Vectors<coefficient>::ComputeNormalFromSelection(Vector<coefficient>& outpu
 
 template<class coefficient>
 bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot
-(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot, Selection& theSelection, Matrix<coefficient>& bufferMatrix, Selection& bufferSel)
-{ if (this->size == 0)
+(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot, Selection& theSelection, Matrix<coefficient>& bufferMatrix, Selection& bufferSel) {
+  if (this->size == 0)
     return false;
   int theDimension = this->TheObjects[0].size;
   output.SetSize(theDimension);
@@ -427,8 +427,8 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot
   Selection& NonPivotPoints = bufferSel;
   bufferMatrix.init((int) theSelection.CardinalitySelection + 1, (int) theDimension);
   matOutputEmpty.init(- 1, - 1);
-  for (int j = 0; j < theDimension; j ++)
-  { for (int i = 0; i < theSelection.CardinalitySelection; i ++)
+  for (int j = 0; j < theDimension; j ++) {
+    for (int i = 0; i < theSelection.CardinalitySelection; i ++)
       bufferMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]][j]);
     bufferMatrix.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot[j]);
   }
@@ -440,8 +440,8 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot
 }
 
 template <class coefficient>
-void Vectors<coefficient>::GaussianEliminationForNormalComputation(Matrix<coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension) const
-{ inputMatrix.init((int) this->size, (int) theDimension);
+void Vectors<coefficient>::GaussianEliminationForNormalComputation(Matrix<coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension) const {
+  inputMatrix.init((int) this->size, (int) theDimension);
   outputNonPivotPoints.init(theDimension);
   for (int i = 0; i < this->size; i ++)
     for (int j = 0; j < theDimension; j ++)
@@ -450,8 +450,8 @@ void Vectors<coefficient>::GaussianEliminationForNormalComputation(Matrix<coeffi
 }
 
 template <class coefficient>
-int Vectors<coefficient>::GetRankOfSpanOfElements(Matrix<coefficient>* buffer, Selection* bufferSelection) const
-{ if (this->size == 0)
+int Vectors<coefficient>::GetRankOfSpanOfElements(Matrix<coefficient>* buffer, Selection* bufferSelection) const {
+  if (this->size == 0)
     return 0;
   int theDimension = this->TheObjects[0].size;
   MemorySaving<Matrix<coefficient> > emergencyMatBuf;
@@ -465,8 +465,8 @@ int Vectors<coefficient>::GetRankOfSpanOfElements(Matrix<coefficient>* buffer, S
 }
 
 template <class coefficient>
-bool Vectors<coefficient>::GetLinearDependence(Matrix<coefficient>& outputTheLinearCombination)
-{ Matrix<coefficient> tempMat;
+bool Vectors<coefficient>::GetLinearDependence(Matrix<coefficient>& outputTheLinearCombination) {
+  Matrix<coefficient> tempMat;
   Selection nonPivotPoints;
   this->GetLinearDependenceRunTheLinearAlgebra(tempMat, nonPivotPoints);
   //stOutput << tempMat.ToString(true, false);
@@ -479,9 +479,9 @@ bool Vectors<coefficient>::GetLinearDependence(Matrix<coefficient>& outputTheLin
 }
 
 template <class coefficient>
-void Vector<coefficient>::operator=(const Selection& other)
-{ if (other.MaxSize < 0)
-  { this->SetSize(0);
+void Vector<coefficient>::operator=(const Selection& other) {
+  if (other.MaxSize < 0) {
+    this->SetSize(0);
     return;
   }
   this->SetSize(other.MaxSize);
@@ -493,15 +493,15 @@ void Vector<coefficient>::operator=(const Selection& other)
 }
 
 template <class coefficient>
-void Vector<coefficient>::operator=(const SelectionWithMultiplicities& other)
-{ this->SetSize(other.Multiplicities.size);
+void Vector<coefficient>::operator=(const SelectionWithMultiplicities& other) {
+  this->SetSize(other.Multiplicities.size);
   for (int i = 0; i < other.Multiplicities.size; i ++)
     this->TheObjects[i] = other.Multiplicities[i];
 }
 
 template <class coefficient>
-bool Vectors<coefficient>::LinearAlgebraForVertexComputation(Selection& theSelection, Vector<coefficient>& output, Matrix<coefficient>& buffer, Selection& NonPivotPointsBuffer)
-{ if (this->size == 0)
+bool Vectors<coefficient>::LinearAlgebraForVertexComputation(Selection& theSelection, Vector<coefficient>& output, Matrix<coefficient>& buffer, Selection& NonPivotPointsBuffer) {
+  if (this->size == 0)
     return false;
   int theDimension = this->TheObjects[0].size;
   output.SetSize(theDimension);
@@ -512,8 +512,8 @@ bool Vectors<coefficient>::LinearAlgebraForVertexComputation(Selection& theSelec
     for (int j = 0; j < theDimension; j ++)
       buffer.elements[i][j] = (this->Externalwalls[theSelection.elements[i]].normal[j]);
   buffer.GaussianEliminationByRows(0, NonPivotPointsBuffer);
-  if (NonPivotPointsBuffer.CardinalitySelection == 1)
-  { buffer.NonPivotPointsToEigenVector(NonPivotPointsBuffer, output);
+  if (NonPivotPointsBuffer.CardinalitySelection == 1) {
+    buffer.NonPivotPointsToEigenVector(NonPivotPointsBuffer, output);
     return true;
   }
   return false;

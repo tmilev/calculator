@@ -67,26 +67,26 @@ public:
   std::string ToStringCloseTag(const std::string& overrideTagIfNonEmpty);
   std::string GetTagClass();
   std::string ToStringDebug();
-  SyntacticElementHTML()
-  { this->flagUseDisplaystyleInMathMode = false;
+  SyntacticElementHTML() {
+    this->flagUseDisplaystyleInMathMode = false;
     this->indexInOwner = - 1;
     this->commandIndex = - 1;
     this->flagUseMathMode = true;
     this->flagUseMathSpan = true;
   }
-  SyntacticElementHTML(const std::string& inputContent)
-  { this->flagUseDisplaystyleInMathMode = false;
+  SyntacticElementHTML(const std::string& inputContent) {
+    this->flagUseDisplaystyleInMathMode = false;
     this->flagUseMathMode = true;
     this->flagUseMathSpan = true;
     this->content = inputContent;
     this->indexInOwner = - 1;
     this->commandIndex = - 1;
   }
-  bool operator==(const std::string& other)
-  { return this->content == other;
+  bool operator==(const std::string& other) {
+    return this->content == other;
   }
-  bool operator!=(const std::string& other)
-  { return this->content != other;
+  bool operator!=(const std::string& other) {
+    return this->content != other;
   }
 };
 
@@ -133,8 +133,8 @@ struct Answer
   std::string currentAnswerClean;
   std::string firstCorrectAnswerURLed;
   std::string firstCorrectAnswerClean;
-  Answer()
-  { this->numSubmissions = 0;
+  Answer() {
+    this->numSubmissions = 0;
     this->numCorrectSubmissions = 0;
     this->flagAutoGenerateSubmitButtons = true;
     this->flagAutoGenerateMQButtonPanel = true;
@@ -161,8 +161,8 @@ private:
   int expectedNumberOfAnswersFromDB;
   int knownNumberOfAnswersFromHD;
 public:
-  friend std::ostream& operator << (std::ostream& output, const ProblemData& theData)
-  { output << theData.ToString();
+  friend std::ostream& operator << (std::ostream& output, const ProblemData& theData) {
+    output << theData.ToString();
     return output;
   }
   bool flagRandomSeedGiven;

@@ -5,8 +5,8 @@
 #include "vpfHeader2Math9DrawingVariables.h"
 ProjectInformationInstance ProjectInfoVpf5_2cpp(__FILE__, "Calculator javascript/html/graphics. ");
 
-std::string CreateJavaScriptVectors(Vectors<double>& inputVectors, const std::string& arrayName, bool useVar)
-{ MacroRegisterFunctionWithName("CreateStaticJavaScriptVectorsArrayWithProjection");
+std::string CreateJavaScriptVectors(Vectors<double>& inputVectors, const std::string& arrayName, bool useVar) {
+  MacroRegisterFunctionWithName("CreateStaticJavaScriptVectorsArrayWithProjection");
   if (inputVectors.size == 0)
     return "";
   std::stringstream out;
@@ -15,10 +15,10 @@ std::string CreateJavaScriptVectors(Vectors<double>& inputVectors, const std::st
     out << "var ";
   out << arrayName << "= new Array(" << inputVectors.size << ");\n";
   int theDimension = inputVectors[0].size;
-  for (int i = 0; i < inputVectors.size; i ++)
-  { out << arrayName << "[" << i << "] =[";
-    for (int j = 0; j < theDimension; j ++)
-    { out << inputVectors[i][j];
+  for (int i = 0; i < inputVectors.size; i ++) {
+    out << arrayName << "[" << i << "] =[";
+    for (int j = 0; j < theDimension; j ++) {
+      out << inputVectors[i][j];
       if (j != theDimension - 1)
         out << ",";
      }
@@ -28,8 +28,8 @@ std::string CreateJavaScriptVectors(Vectors<double>& inputVectors, const std::st
 }
 
 std::string CreateStaticJavaScriptVectorsArrayWithProjection
-(Vectors<double>& inputVectors, const std::string& arrayName, const std::string& projectionsName)
-{ MacroRegisterFunctionWithName("CreateStaticJavaScriptVectorsArrayWithProjection");
+(Vectors<double>& inputVectors, const std::string& arrayName, const std::string& projectionsName) {
+  MacroRegisterFunctionWithName("CreateStaticJavaScriptVectorsArrayWithProjection");
   if (inputVectors.size == 0)
     return "";
   std::stringstream out;
@@ -37,17 +37,17 @@ std::string CreateStaticJavaScriptVectorsArrayWithProjection
   out << "var " << projectionsName << "= new Array(" << inputVectors.size << ");\n";
 
   int theDimension = inputVectors[0].size;
-  for (int i = 0; i < inputVectors.size; i ++)
-  { out << arrayName << "[" << i << "] =[";
-    for (int j = 0; j < theDimension; j ++)
-    { out << inputVectors[i][j];
+  for (int i = 0; i < inputVectors.size; i ++) {
+    out << arrayName << "[" << i << "] =[";
+    for (int j = 0; j < theDimension; j ++) {
+      out << inputVectors[i][j];
       if (j != theDimension - 1)
         out << ",";
      }
     out <<  "];\n";
   }
-  for (int i = 0; i < inputVectors.size; i ++)
-  { ////////////////////
+  for (int i = 0; i < inputVectors.size; i ++) {
+    ////////////////////
 //    out << projectionsName << "[" << i << "] = new Array(2);\n";
     out << projectionsName << "[" << i << "] =[0,0];\n";
   }
@@ -55,15 +55,15 @@ std::string CreateStaticJavaScriptVectorsArrayWithProjection
 }
 
 std::string CreateStaticJavaScriptListVectorsWithProjection
-(List<Vectors<double> >& inputVectors, const std::string& arrayName, const std::string& projectionsName)
-{ MacroRegisterFunctionWithName("CreateStaticJavaScriptListVectorsWithProjection");
+(List<Vectors<double> >& inputVectors, const std::string& arrayName, const std::string& projectionsName) {
+  MacroRegisterFunctionWithName("CreateStaticJavaScriptListVectorsWithProjection");
   if (inputVectors.size == 0)
     return "";
   std::stringstream out;
   out << "\nvar " << arrayName << "= new Array(" << inputVectors.size << ");\n";
   out << "var " << projectionsName << "= new Array(" << inputVectors.size << ");\n";
-  for (int i = 0; i < inputVectors.size; i ++)
-  { std::stringstream projNamesWithIndex, arrayNameWithIndex;
+  for (int i = 0; i < inputVectors.size; i ++) {
+    std::stringstream projNamesWithIndex, arrayNameWithIndex;
     arrayNameWithIndex << arrayName << "[" << i << "]";
     projNamesWithIndex << projectionsName << "[" << i << "]";
     out << CreateStaticJavaScriptVectorsArrayWithProjection(inputVectors[i], arrayNameWithIndex.str(), projNamesWithIndex.str());
@@ -71,22 +71,22 @@ std::string CreateStaticJavaScriptListVectorsWithProjection
   return out.str();
 }
 
-std::string CreateJavaScriptListVectors(List<Vectors<double> >& inputVectors, const std::string& arrayName)
-{ MacroRegisterFunctionWithName("CreateStaticJavaScriptListVectors");
+std::string CreateJavaScriptListVectors(List<Vectors<double> >& inputVectors, const std::string& arrayName) {
+  MacroRegisterFunctionWithName("CreateStaticJavaScriptListVectors");
   if (inputVectors.size == 0)
     return "";
   std::stringstream out;
   out << "\nvar " << arrayName << "= new Array(" << inputVectors.size << ");\n";
-  for (int i = 0; i < inputVectors.size; i ++)
-  { std::stringstream arrayNameWithIndex;
+  for (int i = 0; i < inputVectors.size; i ++) {
+    std::stringstream arrayNameWithIndex;
     arrayNameWithIndex << arrayName << "[" << i << "]";
     out << CreateJavaScriptVectors(inputVectors[i], arrayNameWithIndex.str(), false);
   }
   return out.str();
 }
 
-std::string CreateStaticJavaScriptTextArray(List<std::string>& theLabels, const std::string& arrayName)
-{ MacroRegisterFunctionWithName("CreateStaticJavaScriptVectorsArrayWithProjection");
+std::string CreateStaticJavaScriptTextArray(List<std::string>& theLabels, const std::string& arrayName) {
+  MacroRegisterFunctionWithName("CreateStaticJavaScriptVectorsArrayWithProjection");
   if (theLabels.size == 0)
     return "";
   std::stringstream out;
@@ -96,8 +96,8 @@ std::string CreateStaticJavaScriptTextArray(List<std::string>& theLabels, const 
   return out.str();
 }
 
-std::string DrawingVariables::GetHtmlDiv(int theDimension)
-{ std::stringstream out;
+std::string DrawingVariables::GetHtmlDiv(int theDimension) {
+  std::stringstream out;
   this->NumHtmlGraphics ++;
   std::string idCanvas = "idCanvasNDimensionalGraphics" + std::to_string(this->NumHtmlGraphics);
   std::string idSpanInformation = "idCanvasInfoNDimensionalGraphics" + std::to_string(this->NumHtmlGraphics);
@@ -127,6 +127,6 @@ std::string DrawingVariables::GetHtmlDiv(int theDimension)
   return out.str();
 }
 
-std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension)
-{ return this->GetHtmlDiv(theDimension);
+std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension) {
+  return this->GetHtmlDiv(theDimension);
 }

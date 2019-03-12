@@ -4257,8 +4257,8 @@ std::string WebServer::ToStringStatusAll() {
   return out.str();
 }
 
-void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload)
-{ struct stat theFileStat;
+void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload) {
+  struct stat theFileStat;
   if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0)
     return;
   if (this->timeLastExecutableModification != - 1) {
@@ -4387,8 +4387,8 @@ void segfault_sigaction(int signal, siginfo_t* si, void* arg)
   exit(0);
 }
 
-void WebServer::fperror_sigaction(int signal)
-{ (void) signal;
+void WebServer::fperror_sigaction(int signal) {
+  (void) signal;
   crash << "Fatal arithmetic error. " << crash;
   exit(0);
 }

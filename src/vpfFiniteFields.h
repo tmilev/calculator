@@ -17,12 +17,12 @@ class f65521
 
   f65521(){};
 
-  f65521(const int right)
-  { *this = right;
+  f65521(const int right) {
+    *this = right;
   }
 
-  f65521(const Rational right)
-  { *this = right;
+  f65521(const Rational right) {
+    *this = right;
   }
 
   f65521 operator+(const f65521 right) const;
@@ -43,8 +43,8 @@ class f65521
   bool operator!=(const f65521 rhs) const;
   bool IsEqualToZero() const;
   bool IsEqualToOne() const;
-  bool NeedsParenthesisForMultiplication()
-  { return false;
+  bool NeedsParenthesisForMultiplication() {
+    return false;
   }
 
   std::string ToString(FormatExpressions* f = 0) const;
@@ -58,12 +58,12 @@ class f211
 
   f211(){};
 
-  f211(const int right)
-  { *this = right;
+  f211(const int right) {
+    *this = right;
   }
 
-  f211(const Rational right)
-  { *this = right;
+  f211(const Rational right) {
+    *this = right;
   }
 
   f211 operator+(const f211 right) const;

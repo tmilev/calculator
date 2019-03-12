@@ -2,25 +2,25 @@
 #include "vpfHeader2Math0_General.h"
 static ProjectInformationInstance ProjectInfoVpfGraphs(__FILE__, "A graph class.");
 
-GraphOLD::GraphOLD(int max_vertices, int max_edges)
-{ this->vertices = max_vertices;
+GraphOLD::GraphOLD(int max_vertices, int max_edges) {
+  this->vertices = max_vertices;
   this->edges = 0;
   this->max_edges = max_edges;
   this->data = List<int>(max_vertices * max_edges, - 1);
 }
 
-void GraphOLD::AddEdge(int v1, int v2)
-{ this->AddDiEdge(v1, v2);
+void GraphOLD::AddEdge(int v1, int v2) {
+  this->AddDiEdge(v1, v2);
   this->AddDiEdge(v2, v1);
 }
         // assuming that - 1 only happens after all the edges is okay because
         // the DeleteEdge method packs the vertices when it finishes
-void GraphOLD::AddDiEdge(int v1, int v2)
-{ for (int i = 0; i < this->max_edges; i ++)
-  { if (this->data[v1 * this->max_edges + i] == v2)
+void GraphOLD::AddDiEdge(int v1, int v2) {
+  for (int i = 0; i < this->max_edges; i ++) {
+    if (this->data[v1 * this->max_edges + i] == v2)
       return;
-    if (this->data[v1 * this->max_edges + i] == - 1)
-    { this->data[v1 * this->max_edges + i] = v2;
+    if (this->data[v1 * this->max_edges + i] == - 1) {
+      this->data[v1 * this->max_edges + i] = v2;
       this->edges ++;
       return;
     }
@@ -29,11 +29,11 @@ void GraphOLD::AddDiEdge(int v1, int v2)
 }
 
 // methods that can only be called once can have long names
-List<List<int> > GraphOLD::DestructivelyGetConnectedComponents()
-{ List<List<int> > outerl;
-  for (int i = 0; i < this->vertices * this->max_edges; i ++)
-  { if (this->data[i] != - 1)
-    { List<int> l;
+List<List<int> > GraphOLD::DestructivelyGetConnectedComponents() {
+  List<List<int> > outerl;
+  for (int i = 0; i < this->vertices * this->max_edges; i ++) {
+    if (this->data[i] != - 1) {
+      List<int> l;
       l.AddOnTop(i / this->max_edges);
       this->TreeRecurseCopyDelete(l, i / this->max_edges, this->max_edges);
       outerl.AddOnTop(l);
@@ -44,10 +44,10 @@ List<List<int> > GraphOLD::DestructivelyGetConnectedComponents()
   return outerl;
 }
 
-void GraphOLD::TreeRecurseCopyDelete(List<int> &l, int v, int m)
-{ for (int i = 0; i < m; i ++)
-    if (this->data[v * m + i] != - 1)
-    { int w = this->data[v * m + i];
+void GraphOLD::TreeRecurseCopyDelete(List<int> &l, int v, int m) {
+  for (int i = 0; i < m; i ++)
+    if (this->data[v * m + i] != - 1) {
+      int w = this->data[v * m + i];
       if (!l.Contains(w))
         l.AddOnTop(w);
       this->data[v * m + i] = - 1;
@@ -55,8 +55,8 @@ void GraphOLD::TreeRecurseCopyDelete(List<int> &l, int v, int m)
     }
 }
 
-std::string GraphEdge::ToString(FormatExpressions* theFormat) const
-{ (void) theFormat; //avoid unused parameter warning, portable.
+std::string GraphEdge::ToString(FormatExpressions* theFormat) const {
+  (void) theFormat; //avoid unused parameter warning, portable.
   std::stringstream out;
   out << this->vStart + 1 << "->" << this->vEnd + 1;
   if (this->label != "")
@@ -64,20 +64,20 @@ std::string GraphEdge::ToString(FormatExpressions* theFormat) const
   return out.str();
 }
 
-void Graph::AddEdge(int i, int j)
-{ GraphEdge theEdge(i, j);
+void Graph::AddEdge(int i, int j) {
+  GraphEdge theEdge(i, j);
   this->theEdges.AddMonomial(theEdge, 1);
 }
 
-void Graph::AddEdge(int i, int j, const std::string& inputLabel)
-{ GraphEdge theEdge(i, j, inputLabel);
+void Graph::AddEdge(int i, int j, const std::string& inputLabel) {
+  GraphEdge theEdge(i, j, inputLabel);
 //  stOutput << " adding edge: " << theEdge.ToString();
   this->theEdges.AddMonomial(theEdge, 1);
 }
 
-bool Graph::CheckConsistency() const
-{ for (int i = 0; i < this->theEdges.size(); i ++)
-  { if (this->theEdges[i].vStart < 0 || this->theEdges[i].vStart >= this->numNodes ||
+bool Graph::CheckConsistency() const {
+  for (int i = 0; i < this->theEdges.size(); i ++) {
+    if (this->theEdges[i].vStart < 0 || this->theEdges[i].vStart >= this->numNodes ||
         this->theEdges[i].vEnd  < 0 || this->theEdges[i].vEnd >= this->numNodes)
       crash << "Graph error in graph with " << this->numNodes << " nodes: detected a corrupt edge: "
       << this->theEdges[i].ToString() << " is a bad." << crash;
@@ -90,8 +90,8 @@ bool Graph::CheckConsistency() const
   return true;
 }
 
-void Graph::ComputeEdgesPerNodesNoMultiplicities()
-{ MacroRegisterFunctionWithName("Graph::ComputeEdgesPerNodesNoMultiplicities");
+void Graph::ComputeEdgesPerNodesNoMultiplicities() {
+  MacroRegisterFunctionWithName("Graph::ComputeEdgesPerNodesNoMultiplicities");
   List<int> emptyList;
   this->edgesPerNodeNoMultiplicities.initializeFillInObject(this->numNodes, emptyList);
   this->CheckConsistency();
@@ -99,13 +99,13 @@ void Graph::ComputeEdgesPerNodesNoMultiplicities()
     this->edgesPerNodeNoMultiplicities[this->theEdges[i].vStart].AddOnTop(this->theEdges[i].vEnd);
 }
 
-void Graph::AddNodeToComponent(int nodeIndex)
-{ MacroRegisterFunctionWithName("Graph::AddNodeToComponent");
+void Graph::AddNodeToComponent(int nodeIndex) {
+  MacroRegisterFunctionWithName("Graph::AddNodeToComponent");
   int componentIndex = this->baseNode[nodeIndex];
   if (componentIndex == - 1)
     crash << "Bad component index." << crash;
-  if (componentIndex >= this->connectedComponents.size)
-  { int oldSize = this->connectedComponents.size;
+  if (componentIndex >= this->connectedComponents.size) {
+    int oldSize = this->connectedComponents.size;
     this->connectedComponents.SetSize(componentIndex + 1);
     for (int i = oldSize; i < this->connectedComponents.size; i ++)
       this->connectedComponents[i].SetSize(0);
@@ -114,8 +114,8 @@ void Graph::AddNodeToComponent(int nodeIndex)
   int distanceFromBase = this->distanceToBaseNode[nodeIndex];
   if (distanceFromBase == - 1)
     crash << "Bad node distance." << crash;
-  if (distanceFromBase >= currentComponent.size)
-  { int oldSize = currentComponent.size;
+  if (distanceFromBase >= currentComponent.size) {
+    int oldSize = currentComponent.size;
     currentComponent.SetSize(distanceFromBase + 1);
     for (int i = oldSize; i < currentComponent.size; i ++)
       currentComponent[i].SetSize(0);
@@ -124,23 +124,23 @@ void Graph::AddNodeToComponent(int nodeIndex)
   currentDistanceGroup.AddOnTop(nodeIndex);
 }
 
-void Graph::ComputeConnectedComponentsAndBaseNodeDistances()
-{ MacroRegisterFunctionWithName("Graph::ComputeConnectedComponentsAndBaseNodeDistances");
+void Graph::ComputeConnectedComponentsAndBaseNodeDistances() {
+  MacroRegisterFunctionWithName("Graph::ComputeConnectedComponentsAndBaseNodeDistances");
   this->distanceToBaseNode.initializeFillInObject(this->numNodes, - 1);
   this->baseNode.initializeFillInObject(this->numNodes, - 1);
   List<int> theOrbit;
   theOrbit.SetExpectedSize(this->theEdges.size());
   for (int indexBaseNode = 0; indexBaseNode < this->numNodes; indexBaseNode ++)
-    if (this->baseNode[indexBaseNode] == - 1)
-    { this->distanceToBaseNode[indexBaseNode] = 0;
+    if (this->baseNode[indexBaseNode] == - 1) {
+      this->distanceToBaseNode[indexBaseNode] = 0;
       this->baseNode[indexBaseNode] = indexBaseNode;
       theOrbit.SetSize(0);
       theOrbit.AddOnTop(indexBaseNode);
-      for (int i = 0; i < theOrbit.size; i ++)
-      { List<int>& currentHeirs = this->edgesPerNodeNoMultiplicities[theOrbit[i]];
+      for (int i = 0; i < theOrbit.size; i ++) {
+        List<int>& currentHeirs = this->edgesPerNodeNoMultiplicities[theOrbit[i]];
         for (int j = 0; j<currentHeirs.size; j ++)
-          if (this->distanceToBaseNode[currentHeirs[j]] == - 1)
-          { this->distanceToBaseNode[currentHeirs[j]] = this->distanceToBaseNode[theOrbit[i]] + 1;
+          if (this->distanceToBaseNode[currentHeirs[j]] == - 1) {
+            this->distanceToBaseNode[currentHeirs[j]] = this->distanceToBaseNode[theOrbit[i]] + 1;
             this->baseNode[currentHeirs[j]] = indexBaseNode;
             theOrbit.AddOnTop(currentHeirs[j]);
           }
@@ -151,8 +151,8 @@ void Graph::ComputeConnectedComponentsAndBaseNodeDistances()
     this->AddNodeToComponent(i);
 }
 
-void Graph::ComputeDisplayGroups()
-{ MacroRegisterFunctionWithName("Graph::ComputeDisplayGroups");
+void Graph::ComputeDisplayGroups() {
+  MacroRegisterFunctionWithName("Graph::ComputeDisplayGroups");
   int numGroups = 0;
   for (int i = 0; i < this->connectedComponents.size; i ++)
     numGroups += this->connectedComponents[i].size;
@@ -167,14 +167,14 @@ void Graph::ComputeDisplayGroups()
   this->positionInDisplayGroup.initializeFillInObject(this->numNodes, - 1);
   this->displayGroupIndices.initializeFillInObject(this->numNodes, - 1);
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++)
-    for (int j = 0; j < this->nodeGroupsForDisplay[i].size; j ++)
-    { this->positionInDisplayGroup[this->nodeGroupsForDisplay[i][j]] = j;
+    for (int j = 0; j < this->nodeGroupsForDisplay[i].size; j ++) {
+      this->positionInDisplayGroup[this->nodeGroupsForDisplay[i][j]] = j;
       this->displayGroupIndices[this->nodeGroupsForDisplay[i][j]] = i;
     }
 }
 
-std::string Graph::GetNodePSStrings(int groupIndex, int indexInGroup)
-{ MacroRegisterFunctionWithName("Graph::GetNodePSStrings");
+std::string Graph::GetNodePSStrings(int groupIndex, int indexInGroup) {
+  MacroRegisterFunctionWithName("Graph::GetNodePSStrings");
   std::stringstream out;
 //  out << "\\pscircle*[linecolor =blue](" << this->GetXnode(groupIndex, indexInGroup) << ", " << this->GetYnode(groupIndex, indexInGroup)
 //  << "){0.05}";
@@ -189,39 +189,39 @@ std::string Graph::GetNodePSStrings(int groupIndex, int indexInGroup)
   return out.str();
 }
 
-double Graph::GetXnode(int groupIndex, int indexInGroup)
-{ (void) indexInGroup; //avoid unused parameter warning, portable.
+double Graph::GetXnode(int groupIndex, int indexInGroup) {
+  (void) indexInGroup; //avoid unused parameter warning, portable.
   return groupIndex;
 }
 
-double Graph::GetYnode(int groupIndex, int indexInGroup)
-{ double result = 0;
-  if (groupIndex % 2 == 1)
-  { result = indexInGroup / 2;
+double Graph::GetYnode(int groupIndex, int indexInGroup) {
+  double result = 0;
+  if (groupIndex % 2 == 1) {
+    result = indexInGroup / 2;
     if (indexInGroup % 2 == 1)
       result = - 1 - result;
     result += 0.5;
-  } else
-  { result = - indexInGroup / 2;
+  } else {
+    result = - indexInGroup / 2;
     if (indexInGroup % 2 == 1)
       result = 1 - result;
   }
   return result;
 }
 
-std::string Graph::ToStringNodesAndEdges(FormatExpressions* theFormat)
-{ MacroRegisterFunctionWithName("Graph::ToStringNodesAndEdges");
+std::string Graph::ToStringNodesAndEdges(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("Graph::ToStringNodesAndEdges");
   (void) theFormat; //avoid unused parameter warning, portable.
   std::stringstream out;
   out << "The graph has " << this->theEdges.size() << " edges: <br>\n";
-  for (int i = 0; i < this->theEdges.size(); i ++)
-  { out << this->theEdges[i].ToString();
+  for (int i = 0; i < this->theEdges.size(); i ++) {
+    out << this->theEdges[i].ToString();
     if (i != this->theEdges.size()- 1)
       out << ", ";
   }
   out << "<br>DisplayGroups:";
-  for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++)
-  { out << "<br>Group " << i + 1 << ", nodes: ";
+  for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++) {
+    out << "<br>Group " << i + 1 << ", nodes: ";
     for (int j = 0; j < this->nodeGroupsForDisplay[i].size; j ++)
       out << this->nodeGroupsForDisplay[i][j] << ", ";
   }
@@ -230,8 +230,8 @@ std::string Graph::ToStringNodesAndEdges(FormatExpressions* theFormat)
   return out.str();
 }
 
-std::string Graph::ToStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat)
-{ MacroRegisterFunctionWithName("Graph::ToStringPsTricksEdge");
+std::string Graph::ToStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("Graph::ToStringPsTricksEdge");
   (void) theFormat; //avoid unused parameter warning, portable.
   std::stringstream out;
   int startGroupIndex = this->displayGroupIndices[fromIndex];
@@ -257,8 +257,8 @@ std::string Graph::ToStringPsTricksEdge(int fromIndex, int toIndex, FormatExpres
   return out.str();
 }
 
-std::string Graph::ToStringPsTricks(FormatExpressions* theFormat)
-{ MacroRegisterFunctionWithName("Graph::ToStringPsTricks");
+std::string Graph::ToStringPsTricks(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("Graph::ToStringPsTricks");
   this->ComputeEdgesPerNodesNoMultiplicities();
   this->ComputeConnectedComponentsAndBaseNodeDistances();
   this->ComputeDisplayGroups();

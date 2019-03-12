@@ -108,8 +108,8 @@ public:
 };
 
 template <class theType>
-bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyTypeByType");
+bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyTypeByType");
   if (input.size() != 3)
     return false;
   Expression inputContextsMerged;
@@ -122,8 +122,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theComman
 }
 
 template <class theType>
-bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
+bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
   if (input.size() != 3)
     return false;
   Expression inputContextsMerged;
@@ -135,8 +135,8 @@ bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, c
 }
 
 template <class theType>
-bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
+bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
   if (input.size() != 3)
     return false;
   Expression inputContextsMerged;
@@ -150,8 +150,8 @@ bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands
 }
 
 template <class coefficient>
-bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorConversions::innerPolynomial");
+bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorConversions::innerPolynomial");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
   //stOutput << "DEBUG: Extracting poly from: " << input.ToString() << "<br>";
   //if (input.size() > 0)
@@ -159,22 +159,22 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
   if (theCommands.RecursionDeptH > theCommands.MaxRecursionDeptH)
     return theCommands << "Max recursion depth of " << theCommands.MaxRecursionDeptH
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
-  if (input.IsOfType<Polynomial<coefficient> >())
-  { output = input;
+  if (input.IsOfType<Polynomial<coefficient> >()) {
+    output = input;
     return true;
   }
-  if (input.IsOfType<coefficient>() || input.IsOfType<Rational>())
-  { if (!input.ConvertToType<Polynomial<coefficient> >(output))
+  if (input.IsOfType<coefficient>() || input.IsOfType<Rational>()) {
+    if (!input.ConvertToType<Polynomial<coefficient> >(output))
       crash << "This is a programming error: failed to convert coefficient to polynomial. " << crash;
     return true;
   }
   Expression theConverted, theComputed;
   if (input.IsListStartingWithAtom(theCommands.opTimes()) ||
-      input.IsListStartingWithAtom(theCommands.opPlus()))
-  { theComputed.reset(theCommands, input.size());
+      input.IsListStartingWithAtom(theCommands.opPlus())) {
+    theComputed.reset(theCommands, input.size());
     theComputed.AddChildOnTop(input[0]);
-    for (int i = 1; i < input.size(); i ++)
-    { if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
+    for (int i = 1; i < input.size(); i ++) {
+      if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
         return theCommands << "<hr>Failed to extract polynomial from " << input[i].ToString();
       theComputed.AddChildOnTop(theConverted);
     }
@@ -184,11 +184,11 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
       return CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(theCommands, theComputed, output);
     crash << "Error, this line of code should never be reached. " << crash;
   }
-  if (input.StartsWith(theCommands.opMinus(), 3))
-  { theComputed.reset(theCommands, input.size());
+  if (input.StartsWith(theCommands.opMinus(), 3)) {
+    theComputed.reset(theCommands, input.size());
     theComputed.AddChildOnTop(input[0]);
-    for (int i = 1; i < 3; i ++)
-    { Expression summand = input[i];
+    for (int i = 1; i < 3; i ++) {
+      Expression summand = input[i];
       if (i == 2)
         summand *= - 1;
       if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, summand, theConverted))
@@ -200,14 +200,14 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
 
   int thePower = - 1;
   if (input.StartsWith(theCommands.opThePower(), 3))
-    if (input[2].IsSmallInteger(&thePower))
-    { if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
+    if (input[2].IsSmallInteger(&thePower)) {
+      if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
         return theCommands << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
       Polynomial<coefficient> resultP = theConverted.GetValue<Polynomial<coefficient> >();
-      if (thePower < 0)
-      { coefficient theConst;
-        if (!resultP.IsConstant(&theConst))
-        { theCommands << "<hr>Failed to extract polynomial from  "
+      if (thePower < 0) {
+        coefficient theConst;
+        if (!resultP.IsConstant(&theConst)) {
+          theCommands << "<hr>Failed to extract polynomial from  "
           << input.ToString() << " because the exponent was negative. "
           << "Please make sure that this is not a typo."
           << " I am treating " << input.ToString() << " as a single variable. ";

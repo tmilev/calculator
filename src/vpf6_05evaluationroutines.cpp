@@ -247,8 +247,8 @@ void StateMaintainerCalculator::AddRule(const Expression& theRule) {
   }
   this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.GetIndex(this->owner->RuleStack);
   if (this->owner->RuleStackCacheIndex == - 1) {
-    if (this->owner->cachedRuleStacks.size< this->owner->MaxCachedExpressionPerRuleStack)
-    { this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.size;
+    if (this->owner->cachedRuleStacks.size< this->owner->MaxCachedExpressionPerRuleStack) {
+      this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.size;
       this->owner->cachedRuleStacks.AddOnTop(this->owner->RuleStack);
     }
   }
@@ -625,8 +625,8 @@ bool Calculator::EvaluateExpression(
       ReductionOcurred = true;
       if (theCommands.flagLogEvaluatioN) {
         /* *this << "<br>";
-        if (theCommands.flagLogRules)
-        { *this << "<br>Rule stack size: " << theCommands.RuleStack.size << ", context identifier: "
+        if (theCommands.flagLogRules) {
+          *this << "<br>Rule stack size: " << theCommands.RuleStack.size << ", context identifier: "
           << theCommands.RuleContextIdentifier << "<br>Rules: " << theCommands.RuleStack.ToString() << "<br>";
         }*/
         theCommands << "<br>Rule context identifier: " << theCommands.RuleStackCacheIndex

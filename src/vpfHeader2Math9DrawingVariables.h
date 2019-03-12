@@ -35,8 +35,8 @@ public:
   static void projectionMultiplicityMergeOnBasisChange(DrawOperations& theOps);
   void MakeMeAStandardBasis(int theDim);
   void operator+=(const DrawOperations& other);
-  void initDimensions(Matrix<double>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane)
-  { this->theBilinearForm = bilinearForm;
+  void initDimensions(Matrix<double>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane) {
+    this->theBilinearForm = bilinearForm;
     this->BasisToDrawCirclesAt = draggableBasis;
     this->BasisProjectionPlane = startingPlane;
     this->centerX = 300;
@@ -44,8 +44,8 @@ public:
     this->GraphicsUnit = DrawOperations::GraphicsUnitDefault;
     this->ComputeProjectionsEiVectors();
   }
-  void initDimensions(Matrix<Rational>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane)
-  { Matrix<double> tempMat;
+  void initDimensions(Matrix<Rational>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane) {
+    Matrix<double> tempMat;
     tempMat.init(bilinearForm.NumRows, bilinearForm.NumCols);
     for (int i = 0; i < bilinearForm.NumRows; i ++)
       for (int j = 0; j < bilinearForm.NumCols; j ++)
@@ -55,29 +55,29 @@ public:
   void initDimensions(int theDim);
   int GetDimFirstDimensionDependentOperation();
   int GetDimFromBilinearForm();
-  void GetCoordsDrawingComputeAll(Vector<double>& input, double& X1, double& Y1)
-  { X1 = this->theBilinearForm.ScalarProduct(input, this->BasisProjectionPlane[0]);
+  void GetCoordsDrawingComputeAll(Vector<double>& input, double& X1, double& Y1) {
+    X1 = this->theBilinearForm.ScalarProduct(input, this->BasisProjectionPlane[0]);
     Y1 = this->theBilinearForm.ScalarProduct(input, this->BasisProjectionPlane[1]);
     X1 = X1 * this->GraphicsUnit + this->centerX;
     Y1 = Y1 * this->GraphicsUnit + this->centerY;
   }
-  void GetCoordsForDrawingProjectionsComputed(Vector<double>& input, double& X1, double& Y1)
-  { X1 = 0;
+  void GetCoordsForDrawingProjectionsComputed(Vector<double>& input, double& X1, double& Y1) {
+    X1 = 0;
     Y1 = 0;
-    for (int j = 0; j < input.size; j ++)
-    { X1 += this->ProjectionsEiVectors[j][0] * input[j];
+    for (int j = 0; j < input.size; j ++) {
+      X1 += this->ProjectionsEiVectors[j][0] * input[j];
       Y1 += this->ProjectionsEiVectors[j][1] * input[j];
     }
     X1 = X1 * this->GraphicsUnit + this->centerX;
     Y1 = Y1 * this->GraphicsUnit + this->centerY;
   }
-  void GetCoordsForDrawingProjectionsComputed(Vector<double>& input1, Vector<double>& input2, double& X1, double& Y1, double& X2, double& Y2)
-  { X1 = 0;
+  void GetCoordsForDrawingProjectionsComputed(Vector<double>& input1, Vector<double>& input2, double& X1, double& Y1, double& X2, double& Y2) {
+    X1 = 0;
     X2 = 0;
     Y1 = 0;
     Y2 = 0;
-    for (int j = 0; j < input1.size; j ++)
-    { X1 += this->ProjectionsEiVectors[j][0] * input1[j];
+    for (int j = 0; j < input1.size; j ++) {
+      X1 += this->ProjectionsEiVectors[j][0] * input1[j];
       Y1 += this->ProjectionsEiVectors[j][1] * input1[j];
       X2 += this->ProjectionsEiVectors[j][0] * input2[j];
       Y2 += this->ProjectionsEiVectors[j][1] * input2[j];
@@ -88,8 +88,8 @@ public:
     Y2 = Y2 * this->GraphicsUnit + this->centerY;
   }
   void EnsureProperInitialization();
-  bool AreWithinClickTolerance(double x1, double y1, double x2, double y2)
-  { x1 -= x2;
+  bool AreWithinClickTolerance(double x1, double y1, double x2, double y2) {
+    x1 -= x2;
     y1 -= y2;
     if (x1 < 0)
       x1 = - x1;
@@ -97,17 +97,17 @@ public:
       y1 = - y1;
     return x1 <= this->ClickToleranceX && y1 <= this->ClickToleranceY;
   }
-  bool mouseMoveRedraw(int X, int Y)
-  { if (this->SelectedCircleMinus2noneMinus1Center == - 2)
+  bool mouseMoveRedraw(int X, int Y) {
+    if (this->SelectedCircleMinus2noneMinus1Center == - 2)
       return false;
-    if (this->SelectedCircleMinus2noneMinus1Center == - 1)
-    { this->centerX = X;
+    if (this->SelectedCircleMinus2noneMinus1Center == - 1) {
+      this->centerX = X;
       this->centerY = Y;
       return true;
     }
-    if (this->SelectedCircleMinus2noneMinus1Center >= 0)
-    { if (this->flagRotatingPreservingAngles)
-      { this->changeBasisPReserveAngles((double) X , (double) Y);
+    if (this->SelectedCircleMinus2noneMinus1Center >= 0) {
+      if (this->flagRotatingPreservingAngles) {
+        this->changeBasisPReserveAngles((double) X , (double) Y);
         return true;
       }
     }
@@ -132,8 +132,8 @@ public:
   void drawCircleAtVectorBufferRational(const Vector<Rational>& input, const std::string& color, double radius, const std::string& frameId = "", int frameIndex = - 1);
   void drawCircleAtVectorBufferDouble(const Vector<double>& input, const std::string& color, double radius);
   double getAngleFromXandY(double x, double y);
-  void ScaleToUnitLength(Vector<double>& theRoot)
-  { double theLength = this->theBilinearForm.ScalarProduct(theRoot, theRoot);
+  void ScaleToUnitLength(Vector<double>& theRoot) {
+    double theLength = this->theBilinearForm.ScalarProduct(theRoot, theRoot);
     theLength = FloatingPoint::sqrt(theLength);
     theRoot /= theLength;
   }
@@ -143,8 +143,8 @@ public:
   void ModifyToOrthonormalNoShiftSecond(Vector<double>& root1, Vector<double>& root2);
   void ComputeXYsFromProjectionsEisAndGraphicsUnit();
   void ComputeProjectionsEiVectors();
-  DrawOperations()
-  { this->initDimensions(2);
+  DrawOperations() {
+    this->initDimensions(2);
     this->flagAnimatingMovingCoordSystem = false;
     this->specialOperationsOnBasisChange = 0;
     this->indexStartingModifiableTextCommands = 0;
@@ -215,20 +215,20 @@ public:
   int DefaultHtmlWidth;
   int DefaultHtmlHeight;
   void initDrawingVariables();
-  DrawingVariables()
-  { this->initDrawingVariables();
+  DrawingVariables() {
+    this->initDrawingVariables();
   }
-  void SetDrawLineFunction(drawLineFunction theFunction)
-  { this->theDrawLineFunction = theFunction;
+  void SetDrawLineFunction(drawLineFunction theFunction) {
+    this->theDrawLineFunction = theFunction;
   }
-  void SetDrawTextFunction(drawTextFunction theFunction)
-  { this->theDrawTextFunction = theFunction;
+  void SetDrawTextFunction(drawTextFunction theFunction) {
+    this->theDrawTextFunction = theFunction;
   }
-  void SetDrawCircleFunction(drawCircleFunction theFunction)
-  { this->theDrawCircleFunction = theFunction;
+  void SetDrawCircleFunction(drawCircleFunction theFunction) {
+    this->theDrawCircleFunction = theFunction;
   }
-  void SetDrawClearFunction(drawClearScreenFunction theFunction)
-  { this->theDrawClearScreenFunction = theFunction;
+  void SetDrawClearFunction(drawClearScreenFunction theFunction) {
+    this->theDrawClearScreenFunction = theFunction;
   }
   int GetColorFromChamberIndex(int index);
   static void GetCoordsForDrawing(DrawingVariables& TDV, Vector<Rational>& r, double& x, double& y);
@@ -254,27 +254,27 @@ public:
   //if the LatexOutFile is zero then the procedure defaults to the screen
   void drawLineBufferOld(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
   void drawLineBetweenTwoVectorsBufferRational
-  (const Vector<Rational>& r1, const Vector<Rational>& r2, const std::string& color, double lineWidth = 1)
-  { this->theBuffer.drawLineBetweenTwoVectorsBufferRational(r1, r2, color, lineWidth);
+  (const Vector<Rational>& r1, const Vector<Rational>& r2, const std::string& color, double lineWidth = 1) {
+    this->theBuffer.drawLineBetweenTwoVectorsBufferRational(r1, r2, color, lineWidth);
   }
   void drawCircleAtVector
-  (const Vector<Rational>& point, const std::string& color, double radius, const std::string& frameId = "", int frameIndex = - 1)
-  { this->theBuffer.drawCircleAtVectorBufferRational(point, color, radius, frameId, frameIndex);
+  (const Vector<Rational>& point, const std::string& color, double radius, const std::string& frameId = "", int frameIndex = - 1) {
+    this->theBuffer.drawCircleAtVectorBufferRational(point, color, radius, frameId, frameIndex);
   }
   void drawPath
-  (const Vectors<Rational>& theVectors,  const std::string& color, double lineWidth, const std::string& frameId = "", int frameIndex = - 1)
-  { this->theBuffer.drawPath(theVectors, color, lineWidth, frameId, frameIndex);
+  (const Vectors<Rational>& theVectors,  const std::string& color, double lineWidth, const std::string& frameId = "", int frameIndex = - 1) {
+    this->theBuffer.drawPath(theVectors, color, lineWidth, frameId, frameIndex);
   }
   void drawLineBetweenTwoVectorsBufferDouble
-  (const Vector<double>& r1, const Vector<double>& r2, const std::string& color, double lineWidth = 1)
-  { this->theBuffer.drawLineBetweenTwoVectorsBufferDouble(r1, r2, color, lineWidth);
+  (const Vector<double>& r1, const Vector<double>& r2, const std::string& color, double lineWidth = 1) {
+    this->theBuffer.drawLineBetweenTwoVectorsBufferDouble(r1, r2, color, lineWidth);
   }
   void drawTextAtVectorBufferRational(const Vector<Rational>& point, const std::string& inputText, const std::string& color);
   void drawTextAtVectorBufferDouble(const Vector<double>& point, const std::string& inputText, int textColor, int theTextStyle);
   void drawCircleAtVectorBufferRational(const Vector<Rational>& point, const std::string& color, double radius, const std::string& frameId = "", int frameIndex = - 1);
   void drawCircleAtVectorBufferDouble(const Vector<double>& point, const std::string& color, double radius);
-  void operator=(const DrawingVariables& other)
-  { this->theDrawLineFunction = other.theDrawLineFunction;
+  void operator=(const DrawingVariables& other) {
+    this->theDrawLineFunction = other.theDrawLineFunction;
     this->theDrawTextFunction = other.theDrawTextFunction;
   }
 };

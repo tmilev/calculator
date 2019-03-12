@@ -4,8 +4,8 @@
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 ProjectInformationInstance ProjectInfoVpf9_4cpp(__FILE__, "Semisimple Lie algebras. ");
 
-std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
-{ MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ToString");
+std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ToString");
   std::stringstream out;
   std::string tempS;
   Vector<Rational> tempRoot, tempRoot2;
@@ -15,8 +15,8 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
 //  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
   std::string hLetter = "h";
   std::string gLetter = "g";
-  if (theFormat != 0)
-  { hLetter = theFormat->chevalleyHgeneratorLetter;
+  if (theFormat != 0) {
+    hLetter = theFormat->chevalleyHgeneratorLetter;
     gLetter = theFormat->chevalleyGgeneratorLetter;
   }
   out << "Type " << this->theWeyl.theDynkinType.ToString() << ".";
@@ -34,8 +34,8 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
     theTableLateXStream << "c";
   theTableLateXStream << "}\n";
   theTableLateXStream << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
-  for (int i = 0; i < numRoots + theDimension; i ++)
-  { tempElt1.MakeGenerator(i, *this);
+  for (int i = 0; i < numRoots + theDimension; i ++) {
+    tempElt1.MakeGenerator(i, *this);
     tempS = tempElt1.ToString(theFormat);
     theHtmlStream << "<td>" << tempS << "</td>";
     theTableLateXStream << " & ";
@@ -44,8 +44,8 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   theTableLateXStream << "\\\\\n";
   theHtmlStream << "</tr>";
   //int lineCounter = 0;
-  for (int i = 0; i < theDimension + numRoots; i ++)
-  { tempRoot = this->GetWeightOfGenerator(i);
+  for (int i = 0; i < theDimension + numRoots; i ++) {
+    tempRoot = this->GetWeightOfGenerator(i);
     theTableLateXStream << tempRoot.ToString() << "&";
     theHtmlStream << "<tr><td>" << tempRoot.ToString() << "</td>";
     this->theWeyl.GetEpsilonCoords(tempRoot, tempRoot2);
@@ -55,8 +55,8 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
     tempS = tempElt1.ToString(theFormat);
     theTableLateXStream << tempS;
     theHtmlStream << "<td>" << tempS << "</td>";
-    for (int j = 0; j < numRoots + theDimension; j ++)
-    { tempElt2.MakeGenerator(j, *this);
+    for (int j = 0; j < numRoots + theDimension; j ++) {
+      tempElt2.MakeGenerator(j, *this);
       this->LieBracket(tempElt1, tempElt2, tempElt3);
       tempS = tempElt3.ToString(theFormat);
       theTableLateXStream << "& ";
@@ -68,8 +68,8 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   }
   theHtmlStream << "</table>";
   theTableLateXStream << "\\end{array}";
-  if (this->GetNumGenerators() < 22)
-  { out << "<div class =\"math\">" << theTableLateXStream.str() << "</div>";
+  if (this->GetNumGenerators() < 22) {
+    out << "<div class =\"math\">" << theTableLateXStream.str() << "</div>";
     return out.str();
   }
   out << "<br><b> The Lie bracket table is too large to be rendered in LaTeX, displaying in"
@@ -84,8 +84,8 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   return out.str();
 }
 
-void SemisimpleLieAlgebra::ComputeFolderNames()
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
+void SemisimpleLieAlgebra::ComputeFolderNames() {
+  MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
   std::stringstream outMainDisplayPath;
   this->CheckConsistency();
   DynkinType& theType = this->theWeyl.theDynkinType;
@@ -95,8 +95,8 @@ void SemisimpleLieAlgebra::ComputeFolderNames()
   this->DisplayNameSSalgOutputFolder = outMainDisplayPath.str();
 }
 
-void SemisimpleLieAlgebra::ComputeChevalleyConstants()
-{ MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ComputeChevalleyConstants");
+void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ComputeChevalleyConstants");
   this->theWeyl.ComputeRho(true);
   this->ChevalleyConstants.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
   this->Computed.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
@@ -109,39 +109,39 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants()
   std::stringstream out;
   ProgressReport theReport;
   double startTimer = - 1;
-  if (theGlobalVariables.flagReportEverything)
-  { out << "Initializing matrix for structure constant computation of " << this->GetLieAlgebraName() << "... ";
+  if (theGlobalVariables.flagReportEverything) {
+    out << "Initializing matrix for structure constant computation of " << this->GetLieAlgebraName() << "... ";
     startTimer = theGlobalVariables.GetElapsedSeconds();
     theReport.Report(out.str());
   }
   for (int i = 0; i < this->theWeyl.RootSystem.size; i ++)
-    for (int j = i; j < this->theWeyl.RootSystem.size; j ++)
-    { tempRoot = this->theWeyl.RootSystem[i] + this->theWeyl.RootSystem[j];
+    for (int j = i; j < this->theWeyl.RootSystem.size; j ++) {
+      tempRoot = this->theWeyl.RootSystem[i] + this->theWeyl.RootSystem[j];
       if (!tempRoot.IsEqualToZero())
-        if (!this->theWeyl.IsARoot(tempRoot))
-        { this->Computed.elements[i][j] = true;
+        if (!this->theWeyl.IsARoot(tempRoot)) {
+          this->Computed.elements[i][j] = true;
           this->ChevalleyConstants.elements[i][j].MakeZero();
           this->Computed.elements[j][i] = true;
           this->ChevalleyConstants.elements[j][i].MakeZero();
         }
     }
   double startStructureConstantComputation = - 1;
-  if (theGlobalVariables.flagReportEverything)
-  { out << "done in " << theGlobalVariables.GetElapsedSeconds() - startTimer
+  if (theGlobalVariables.flagReportEverything) {
+    out << "done in " << theGlobalVariables.GetElapsedSeconds() - startTimer
     << " seconds.<br> " << "Computing structure constants...";
     theReport.Report(out.str());
     startStructureConstantComputation = theGlobalVariables.GetElapsedSeconds();
   }
   Rational tempRat;
-  while (nonExploredRoots.CardinalitySelection > 0)
-  { //this->ComputeDebugString();
+  while (nonExploredRoots.CardinalitySelection > 0) {
+    //this->ComputeDebugString();
     //nonExploredRoots.ComputeDebugString();
     int theBorelIndex = nonExploredRoots.elements[0];
     Rational theHeight = posRoots[theBorelIndex].SumCoords();
-    for (int i = 1; i < nonExploredRoots.CardinalitySelection; i ++)
-    { tempRat = posRoots[nonExploredRoots.elements[i]].SumCoords();
-      if (theHeight.IsGreaterThan(tempRat))
-      { theHeight = tempRat;
+    for (int i = 1; i < nonExploredRoots.CardinalitySelection; i ++) {
+      tempRat = posRoots[nonExploredRoots.elements[i]].SumCoords();
+      if (theHeight.IsGreaterThan(tempRat)) {
+        theHeight = tempRat;
         theBorelIndex = nonExploredRoots.elements[i];
       }
     }
@@ -153,18 +153,18 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants()
     int SecondIndexFirstPosChoice = - 1;
 //    int SecondIndexFirstNegChoice;
     Rational CurrentHeight;
-    for (int i = 0; i < this->theWeyl.RootsOfBorel.size; i ++)
-    { Vector<Rational>& smallRoot1 = this->theWeyl.RootsOfBorel[i];
+    for (int i = 0; i < this->theWeyl.RootsOfBorel.size; i ++) {
+      Vector<Rational>& smallRoot1 = this->theWeyl.RootsOfBorel[i];
       CurrentHeight = smallRoot1.SumCoords();
       int FirstPosIndex = this->theWeyl.RootSystem.GetIndex(smallRoot1);
       int FirstNegIndex = this->theWeyl.RootSystem.GetIndex(- smallRoot1);
-      if (theHeight.IsGreaterThan(CurrentHeight))
-      { smallRoot2 = theRoot - smallRoot1;
+      if (theHeight.IsGreaterThan(CurrentHeight)) {
+        smallRoot2 = theRoot - smallRoot1;
         int SecondPosIndex = this->theWeyl.RootSystem.GetIndex(smallRoot2);
-        if (FirstPosIndex<SecondPosIndex)
-        { int SecondNegIndex = this->theWeyl.RootSystem.GetIndex(- smallRoot2);
-          if (FirstIndexFirstPosChoice == - 1)
-          { FirstIndexFirstPosChoice = FirstPosIndex;
+        if (FirstPosIndex<SecondPosIndex) {
+          int SecondNegIndex = this->theWeyl.RootSystem.GetIndex(- smallRoot2);
+          if (FirstIndexFirstPosChoice == - 1) {
+            FirstIndexFirstPosChoice = FirstPosIndex;
             SecondIndexFirstPosChoice = SecondPosIndex;
 //             FirstIndexFirstNegChoice =FirstNegIndex;
 //             SecondIndexFirstNegChoice = SecondNegIndex;
@@ -186,15 +186,15 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants()
     nonExploredRoots.ComputeIndicesFromSelection();
   }
   double startMultTable = - 1;
-  if (theGlobalVariables.flagReportEverything)
-  { out << "done in " << theGlobalVariables.GetElapsedSeconds() - startStructureConstantComputation
+  if (theGlobalVariables.flagReportEverything) {
+    out << "done in " << theGlobalVariables.GetElapsedSeconds() - startStructureConstantComputation
     << " seconds.<br> Computing Lie bracket pairing (``multiplication'') table...";
     theReport.Report(out.str());
     startMultTable = theGlobalVariables.GetElapsedSeconds();
   }
   this->ComputeMultTable();
-  if (theGlobalVariables.flagReportEverything)
-  { out << " done in " << theGlobalVariables.GetElapsedSeconds() - startMultTable
+  if (theGlobalVariables.flagReportEverything) {
+    out << " done in " << theGlobalVariables.GetElapsedSeconds() - startMultTable
     << " seconds. Total structure constant computation time: "
     << theGlobalVariables.GetElapsedSeconds() - startTimer << " seconds. ";
     theReport.Report(out.str());
@@ -204,8 +204,8 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants()
 //  this->TestForConsistency(theGlobalVariables);
 }
 
-void SemisimpleLieAlgebra::ComputeMultTable()
-{ int numPosRoots = this->theWeyl.RootsOfBorel.size;
+void SemisimpleLieAlgebra::ComputeMultTable() {
+  int numPosRoots = this->theWeyl.RootsOfBorel.size;
   int theRank = this->theWeyl.CartanSymmetric.NumRows;
   int numRoots = numPosRoots * 2;
   int numGenerators = numRoots + theRank;
@@ -215,38 +215,38 @@ void SemisimpleLieAlgebra::ComputeMultTable()
 //  this->theLiebracketPairingIndices.MakeZero(- 1);
 //  this->OppositeRootSpaces.initializeFillInObject(numRoots+theDimension, - 1);
   Vector<Rational> leftWeight, rightWeight, hRoot;
-  for (int i = 0; i < numGenerators; i ++)
-  { leftWeight = this->GetWeightOfGenerator(i);
-    for (int j = i; j < numGenerators; j ++)
-    { rightWeight = this->GetWeightOfGenerator(j);
-      if (leftWeight.IsEqualToZero() && rightWeight.IsEqualToZero())
-      { this->theLiebrackets.elements[i][j].MakeZero();
+  for (int i = 0; i < numGenerators; i ++) {
+    leftWeight = this->GetWeightOfGenerator(i);
+    for (int j = i; j < numGenerators; j ++) {
+      rightWeight = this->GetWeightOfGenerator(j);
+      if (leftWeight.IsEqualToZero() && rightWeight.IsEqualToZero()) {
+        this->theLiebrackets.elements[i][j].MakeZero();
         continue;
       }
-      if (leftWeight.IsEqualToZero() && !rightWeight.IsEqualToZero())
-      { this->theLiebrackets.elements[i][j].MakeGenerator(j, *this);
+      if (leftWeight.IsEqualToZero() && !rightWeight.IsEqualToZero()) {
+        this->theLiebrackets.elements[i][j].MakeGenerator(j, *this);
         hRoot.MakeEi(theRank, i - numPosRoots);
         this->theLiebrackets.elements[i][j] *= Vector<Rational>::ScalarProduct(hRoot, rightWeight, this->theWeyl.CartanSymmetric);
         continue;
       }
-      if (!leftWeight.IsEqualToZero() && rightWeight.IsEqualToZero())
-      { this->theLiebrackets.elements[i][j].MakeGenerator(i, *this);
+      if (!leftWeight.IsEqualToZero() && rightWeight.IsEqualToZero()) {
+        this->theLiebrackets.elements[i][j].MakeGenerator(i, *this);
         hRoot.MakeEi(theRank, j - numPosRoots);
         this->theLiebrackets.elements[i][j] *= - Vector<Rational>::ScalarProduct(hRoot, leftWeight, this->theWeyl.CartanSymmetric);
         continue;
       }
-      if (!leftWeight.IsEqualToZero() && !rightWeight.IsEqualToZero())
-      { int newIndex = this->GetGeneratorFromRoot(leftWeight + rightWeight);
-        if (newIndex != - 1)
-        { this->theLiebrackets.elements[i][j].MakeGenerator(newIndex, *this);
+      if (!leftWeight.IsEqualToZero() && !rightWeight.IsEqualToZero()) {
+        int newIndex = this->GetGeneratorFromRoot(leftWeight + rightWeight);
+        if (newIndex != - 1) {
+          this->theLiebrackets.elements[i][j].MakeGenerator(newIndex, *this);
           int leftIndex = this->GetRootIndexFromGenerator(i);
           int rightIndex = this->GetRootIndexFromGenerator(j);
           this->theLiebrackets.elements[i][j] *= this->ChevalleyConstants.elements[leftIndex][rightIndex];
-        } else
-        { if (!(leftWeight +rightWeight).IsEqualToZero())
+        } else {
+          if (!(leftWeight +rightWeight).IsEqualToZero())
             this->theLiebrackets.elements[i][j].MakeZero();
-          else
-          { ElementSemisimpleLieAlgebra<Rational>& current = this->theLiebrackets.elements[i][j];
+          else {
+            ElementSemisimpleLieAlgebra<Rational>& current = this->theLiebrackets.elements[i][j];
             current.MakeHgenerator(leftWeight * 2 / (this->theWeyl.RootScalarCartanRoot(leftWeight, leftWeight)), *this);
           }
         }
@@ -255,16 +255,16 @@ void SemisimpleLieAlgebra::ComputeMultTable()
     }
   }
   for (int i = 0; i < numGenerators; i ++)
-    for (int j = i + 1; j < numGenerators; j ++)
-    { this->theLiebrackets.elements[j][i] = this->theLiebrackets.elements[i][j];
+    for (int j = i + 1; j < numGenerators; j ++) {
+      this->theLiebrackets.elements[j][i] = this->theLiebrackets.elements[i][j];
       this->theLiebrackets.elements[j][i] *= - 1;
     }
   for (int i = 0; i < numGenerators; i ++)
     this->UEGeneratorOrderIncludingCartanElts[i] = i;
 }
 
-void SemisimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ)
-{ const Vector<Rational>& rootI = this->theWeyl.RootSystem[indexI];
+void SemisimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ) {
+  const Vector<Rational>& rootI = this->theWeyl.RootSystem[indexI];
   const Vector<Rational>& rootJ = this->theWeyl.RootSystem[indexJ];
   if ((rootI + rootJ).IsEqualToZero())
     crash << crash;
@@ -281,8 +281,8 @@ void SemisimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int ind
   //this->ComputeDebugString();
 }
 
-void SemisimpleLieAlgebra::ExploitSymmetryChevalleyConstants(int indexI, int indexJ)
-{ const Vector<Rational>& rootI = this->theWeyl.RootSystem[indexI];
+void SemisimpleLieAlgebra::ExploitSymmetryChevalleyConstants(int indexI, int indexJ) {
+  const Vector<Rational>& rootI = this->theWeyl.RootSystem[indexI];
   const Vector<Rational>& rootJ = this->theWeyl.RootSystem[indexJ];
   if (!this->Computed.elements[indexI][indexJ])
     crash << crash;
@@ -306,8 +306,8 @@ void SemisimpleLieAlgebra::ExploitSymmetryChevalleyConstants(int indexI, int ind
   //this->ComputeDebugString();
 }
 
-void SemisimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
-{ const Vector<Rational>& rootI = this->theWeyl.RootSystem[i];
+void SemisimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k) {
+  const Vector<Rational>& rootI = this->theWeyl.RootSystem[i];
   const Vector<Rational>& rootK = this->theWeyl.RootSystem[k];
   const Vector<Rational>& rootJ = this->theWeyl.RootSystem[j];
   //the following three checks can be commented out to increase speed. They have never failed so far.
@@ -329,14 +329,14 @@ void SemisimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
 }
 
 bool SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot
-(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output) const
-{ output = - 1;
+(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output) const {
+  output = - 1;
   Vector<Rational> tempRoot = beta;
   if (alpha.IsEqualToZero())
     crash << "This is a programming error: calling function GetMaxQForWhichBetaMinusQAlphaIsARoot with zero value for alpha is not allowed. " << crash;
   bool foundRoot = false;
-  while (this->theWeyl.IsARoot(tempRoot))
-  { output ++;
+  while (this->theWeyl.IsARoot(tempRoot)) {
+    output ++;
     tempRoot -= alpha;
     foundRoot = true;
   }
@@ -344,8 +344,8 @@ bool SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot
 }
 
 void SemisimpleLieAlgebra::ComputeOneChevalleyConstant
-(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta)
-{//using formula (**), 2.9, page 49, Samelson, Notes on Lie algebras, 1989
+(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta) {
+ //using formula (**), 2.9, page 49, Samelson, Notes on Lie algebras, 1989
   const Vector<Rational>& gamma = this->theWeyl.RootSystem[indexGamma];
   const Vector<Rational>& delta = this->theWeyl.RootSystem[indexDelta];
   const Vector<Rational>& minusEpsilon = this->theWeyl.RootSystem[indexMinusEpsilon];
@@ -362,14 +362,14 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant
   int indexDeltaMinusEpsilon = this->theWeyl.RootSystem.GetIndex(delta + minusEpsilon);
   int indexGammaMinusEpsilon = this->theWeyl.RootSystem.GetIndex(gamma + minusEpsilon);
   Rational FirstSummand, SecondSummand;
-  if (indexDeltaMinusEpsilon != - 1)
-  { if (!this->Computed.elements[indexGamma][indexDeltaMinusEpsilon] || !this->Computed.elements[indexDelta][indexMinusEpsilon])
+  if (indexDeltaMinusEpsilon != - 1) {
+    if (!this->Computed.elements[indexGamma][indexDeltaMinusEpsilon] || !this->Computed.elements[indexDelta][indexMinusEpsilon])
       crash << crash;
     FirstSummand = this->ChevalleyConstants.elements[indexGamma][indexDeltaMinusEpsilon] * this->ChevalleyConstants.elements[indexDelta][indexMinusEpsilon];
   } else
     FirstSummand.MakeZero();
-  if (indexGammaMinusEpsilon != - 1)
-  { if (!this->Computed.elements[indexDelta][indexGammaMinusEpsilon] || !this->Computed.elements[indexMinusEpsilon][indexGamma])
+  if (indexGammaMinusEpsilon != - 1) {
+    if (!this->Computed.elements[indexDelta][indexGammaMinusEpsilon] || !this->Computed.elements[indexMinusEpsilon][indexGamma])
       crash << crash;
     SecondSummand = this->ChevalleyConstants.elements[indexDelta][indexGammaMinusEpsilon]*this->ChevalleyConstants.elements[indexMinusEpsilon][indexGamma];
   } else
@@ -381,17 +381,17 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant
   this->Computed.elements[indexMinusEpsilon][indexMinusZeta] = true;
 }
 
-bool SemisimpleLieAlgebra::TestForConsistency()
-{ //HashedList<Vector<Rational> >& theRoots = this->theWeyl.RootSystem;
+bool SemisimpleLieAlgebra::TestForConsistency() {
+  //HashedList<Vector<Rational> >& theRoots = this->theWeyl.RootSystem;
   FormatExpressions& theFormat = theGlobalVariables.theDefaultFormat.GetElement();
   ElementSemisimpleLieAlgebra<Rational> g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
   //this->ComputeDebugString(false, false, theGlobalVariables);
-  for (int i = 0; i < this->GetNumGenerators(); i ++)
-  { g1.MakeGenerator(i, *this);
-    for (int j = 0; j < this->GetNumGenerators(); j ++)
-    { g2.MakeGenerator(j, *this);
-      for (int k = 0; k < this->GetNumGenerators(); k ++)
-      { g3.MakeGenerator(k, *this);
+  for (int i = 0; i < this->GetNumGenerators(); i ++) {
+    g1.MakeGenerator(i, *this);
+    for (int j = 0; j < this->GetNumGenerators(); j ++) {
+      g2.MakeGenerator(j, *this);
+      for (int k = 0; k < this->GetNumGenerators(); k ++) {
+        g3.MakeGenerator(k, *this);
         this->LieBracket(g2, g3, g23);
         this->LieBracket(g1, g23, g123);
         this->LieBracket(g3, g1, g31);
@@ -401,8 +401,8 @@ bool SemisimpleLieAlgebra::TestForConsistency()
         temp = g123;
         temp += g231;
         temp += g312;
-        if (!temp.IsEqualToZero())
-        { crash << "This is a programming error. The computed structure constants are wrong: the Jacobi identity fails. More precisely, I get that "
+        if (!temp.IsEqualToZero()) {
+          crash << "This is a programming error. The computed structure constants are wrong: the Jacobi identity fails. More precisely, I get that "
           << "<br>[" << g1.ToString(&theFormat) << ", " << g2.ToString(&theFormat) << "] =" << g12.ToString(&theFormat)
           << "<br>[" << g2.ToString(&theFormat) << ", " << g3.ToString(&theFormat) << "] =" << g23.ToString(&theFormat)
           << "<br>[" << g3.ToString(&theFormat) << ", " << g1.ToString(&theFormat) << "] =" << g31.ToString(&theFormat)
@@ -417,8 +417,8 @@ bool SemisimpleLieAlgebra::TestForConsistency()
   return true;
 }
 
-Rational SemisimpleLieAlgebra::GetConstant(const Vector<Rational>& root1, const Vector<Rational>& root2)
-{ int index1 = this->theWeyl.RootSystem.GetIndex(root1);
+Rational SemisimpleLieAlgebra::GetConstant(const Vector<Rational>& root1, const Vector<Rational>& root2) {
+  int index1 = this->theWeyl.RootSystem.GetIndex(root1);
   int index2 = this->theWeyl.RootSystem.GetIndex(root2);
   if (index1 == - 1 || index2 == - 1)
     return 0;
@@ -426,21 +426,21 @@ Rational SemisimpleLieAlgebra::GetConstant(const Vector<Rational>& root1, const 
 }
 
 bool SemisimpleLieAlgebra::GetConstantOrHElement
-(const Vector<Rational>& root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH)
-{ if (!(root1 + root2).IsEqualToZero())
-  { outputRat = this->GetConstant(root1, root2);
+(const Vector<Rational>& root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH) {
+  if (!(root1 + root2).IsEqualToZero()) {
+    outputRat = this->GetConstant(root1, root2);
     return true;
   }
-  if (this->theWeyl.RootSystem.GetIndex(root1) == - 1 || this->theWeyl.RootSystem.GetIndex(root2) == - 1)
-  { outputRat.MakeZero();
+  if (this->theWeyl.RootSystem.GetIndex(root1) == - 1 || this->theWeyl.RootSystem.GetIndex(root2) == - 1) {
+    outputRat.MakeZero();
     return true;
   }
   outputH = (root1 * 2) / Vector<Rational>::ScalarProduct(root1, root1, this->theWeyl.CartanSymmetric);
   return false;
 }
 
-void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total)
-{ if (theGlobalVariables.IndicatorStringOutputFunction == 0)
+void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total) {
+  if (theGlobalVariables.IndicatorStringOutputFunction == 0)
     return;
   std::stringstream out2, out3;
   int x = (i * Total * Total + j * Total + k + 1);

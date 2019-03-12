@@ -26,8 +26,8 @@ private:
 
 struct GraphEdge
 {
-  friend std::ostream& operator << (std::ostream& output, const GraphEdge& theEdge)
-  { output << theEdge.ToString();
+  friend std::ostream& operator << (std::ostream& output, const GraphEdge& theEdge) {
+    output << theEdge.ToString();
     return output;
   }
   int vStart;
@@ -38,17 +38,17 @@ struct GraphEdge
   GraphEdge(int inputStart, int inputEnd, const std::string& inputLabel)
   :vStart(inputStart), vEnd(inputEnd), label(inputLabel) {}
   std::string ToString(FormatExpressions* theFormat = 0) const;
-  static unsigned int HashFunction(const GraphEdge& input)
-  { return input.HashFunction();
+  static unsigned int HashFunction(const GraphEdge& input) {
+    return input.HashFunction();
   }
-  unsigned int HashFunction() const
-  { return vStart + vEnd * SomeRandomPrimes[0];
+  unsigned int HashFunction() const {
+    return vStart + vEnd * SomeRandomPrimes[0];
   }
-  inline static bool IsMonEqualToZero()
-  { return false;
+  inline static bool IsMonEqualToZero() {
+    return false;
   }
-  bool operator== (const GraphEdge& other) const
-  { return this->vStart == other.vStart && this->vEnd == other.vEnd
+  bool operator== (const GraphEdge& other) const {
+    return this->vStart == other.vStart && this->vEnd == other.vEnd
     && this->label == other.label;
   }
 };

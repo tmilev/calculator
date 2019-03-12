@@ -25,7 +25,12 @@ public:
   List<bool> whiteSpaceCharacterNoNewLineMap;
   SourceCodeFormatter();
   void AddCurrentWord();
-  bool FormatCPPSourceCode(const std::string& fileName, std::stringstream* comments);
+  static bool FormatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments);
+  bool FormatCPPSourceCode(
+    const std::string& inputFileName,
+    const std::string& inputOutputFileNameEmptyForAuto,
+    std::stringstream* comments
+  );
   bool ProcessCharacterInQuotes();
   bool isSeparatorCharacter(char input);
   bool ProcessSeparatorCharacters();
@@ -35,7 +40,11 @@ public:
   bool ApplyOneRule();
   bool DecreaseStack(int numberToPop);
   bool isWhiteSpaceNoNewLine(const std::string& input);
-  bool initializeFileNames(const std::string& fileName, std::stringstream* comments);
+  bool initializeFileNames(
+    const std::string& fileName,
+    const std::string& inputOutputFileNameEmptyForAuto,
+    std::stringstream* comments
+  );
   std::string ToStringLinks();
 };
 #endif

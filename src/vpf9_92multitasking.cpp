@@ -8,13 +8,13 @@
 
 ProjectInformationInstance vpfGeneral2Mutexes(__FILE__, "Multitasking implementation.");
 
-void ParallelComputing::CheckPointerCounters()
-{ if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList)
-  { MutexRecursiveWrapper& tempMutex =
+void ParallelComputing::CheckPointerCounters() {
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList) {
+    MutexRecursiveWrapper& tempMutex =
     theGlobalVariables.MutexParallelComputingStaticFiasco;
     tempMutex.LockMe();
-    if (ParallelComputing::flagUngracefulExitInitiated)
-    { tempMutex.UnlockMe();
+    if (ParallelComputing::flagUngracefulExitInitiated) {
+      tempMutex.UnlockMe();
       return;
     }
     ParallelComputing::flagUngracefulExitInitiated = true;
@@ -28,9 +28,9 @@ void ParallelComputing::CheckPointerCounters()
     ParallelComputing::PointerCounterPeakRamUse = ParallelComputing::GlobalPointerCounter;
 }
 
-void MutexRecursiveWrapper::CheckConsistency()
-{ if (this->flagDeallocated)
-  { logBlock << logger::red << "Use after free of mutex. "
+void MutexRecursiveWrapper::CheckConsistency() {
+  if (this->flagDeallocated) {
+    logBlock << logger::red << "Use after free of mutex. "
     << crash.GetStackTraceShort() << logger::endL;
     assert(false);
   }
@@ -69,8 +69,8 @@ MutexRecursiveWrapper::~MutexRecursiveWrapper() {
   this->flagInitialized = false;
 }
 
-bool MutexRecursiveWrapper::isLockedUnsafeUseForWINguiOnly()
-{// std::cout << "checking consistency from isLockedUnsafeUseForWINguiOnly";
+bool MutexRecursiveWrapper::isLockedUnsafeUseForWINguiOnly() {
+ // std::cout << "checking consistency from isLockedUnsafeUseForWINguiOnly";
   this->CheckConsistency();
   return this->flagUnsafeFlagForDebuggingIsLocked;
 }
@@ -108,17 +108,17 @@ void MutexRecursiveWrapper::UnlockMe() {
   ((std::mutex*) this->theMutexImplementation)->unlock();
 }
 
-void PauseThread::SafePointDontCallMeFromDestructors()
-{ this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
+void PauseThread::SafePointDontCallMeFromDestructors() {
+  this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
   this->mutexLockMeToPauseCallersOfSafePoint.LockMe();
   this->mutexSignalMeWhenReachingSafePoint.LockMe();
   this->mutexLockMeToPauseCallersOfSafePoint.UnlockMe();
 }
 
-void PauseThread::SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint()
-{ this->mutexHoldMeWhenReadingOrWritingInternalFlags.LockMe();
-  if (this->flagIsPausedWhileRunning)
-  { this->mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
+void PauseThread::SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint() {
+  this->mutexHoldMeWhenReadingOrWritingInternalFlags.LockMe();
+  if (this->flagIsPausedWhileRunning) {
+    this->mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
     return;
   }
   this->mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
@@ -128,49 +128,49 @@ void PauseThread::SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesS
   this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
 }
 
-void PauseThread::UnlockSafePoint()
-{ this->flagIsPausedWhileRunning = false;
+void PauseThread::UnlockSafePoint() {
+  this->flagIsPausedWhileRunning = false;
   this->mutexLockMeToPauseCallersOfSafePoint.UnlockMe();
 }
 
-void PauseThread::InitComputation()
-{ this->mutexSignalMeWhenReachingSafePoint.LockMe();
+void PauseThread::InitComputation() {
+  this->mutexSignalMeWhenReachingSafePoint.LockMe();
   this->flagIsRunning = true;
 }
 
-void PauseThread::ExitComputation()
-{ this->flagIsRunning = false;
+void PauseThread::ExitComputation() {
+  this->flagIsRunning = false;
   this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
 }
 
-bool& PauseThread::GetFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe()
-{ return this->flagIsPausedWhileRunning;
+bool& PauseThread::GetFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe() {
+  return this->flagIsPausedWhileRunning;
 }
 
-bool& PauseThread::GetFlagIsRunningUnsafeUseWithMutexHoldMe()
-{ return this->flagIsRunning;
+bool& PauseThread::GetFlagIsRunningUnsafeUseWithMutexHoldMe() {
+  return this->flagIsRunning;
 }
 
-PauseThread::PauseThread()
-{ this->flagIsRunning = false;
+PauseThread::PauseThread() {
+  this->flagIsRunning = false;
   this->flagIsPausedWhileRunning = false;
 }
 
-bool PauseThread::IsPausedWhileRunning() const
-{ return this->flagIsPausedWhileRunning;
+bool PauseThread::IsPausedWhileRunning() const {
+  return this->flagIsPausedWhileRunning;
 }
 
-ThreadData::ThreadData()
-{ this->index = 0;
+ThreadData::ThreadData() {
+  this->index = 0;
 //  this->theId = 0;
 }
 
-ThreadData::~ThreadData()
-{
+ThreadData::~ThreadData() {
+ 
 }
 
-GlobalVariables::~GlobalVariables()
-{ //double startTime = this->GetElapsedSeconds();
+GlobalVariables::~GlobalVariables() {
+  //double startTime = this->GetElapsedSeconds();
 //  logBlock << logger::yellow << "joining threads ..." << logger::endL;
   this->flagComputationFinishedAllOutputSentClosing = true;
   for (int i = 1; i < this->theThreads.size; i ++)
@@ -178,13 +178,13 @@ GlobalVariables::~GlobalVariables()
 //  logBlock << logger::yellow << " done in " << logger::green << this->GetElapsedSeconds()-startTime << " seconds. " << logger::endL;
 }
 
-void ThreadData::RegisterFirstThread(const std::string& inputName)
-{ ThreadData::RegisterNewThread(inputName).theId =
+void ThreadData::RegisterFirstThread(const std::string& inputName) {
+  ThreadData::RegisterNewThread(inputName).theId =
   std::this_thread::get_id();
 }
 
-ThreadData& ThreadData::RegisterNewThread(const std::string& inputName)
-{ ListReferences<ThreadData>& theThreadData =
+ThreadData& ThreadData::RegisterNewThread(const std::string& inputName) {
+  ListReferences<ThreadData>& theThreadData =
   theGlobalVariables.theThreadData;
   ThreadData newThreadData;
   newThreadData.name = inputName;
@@ -200,15 +200,15 @@ ThreadData& ThreadData::RegisterNewThread(const std::string& inputName)
   return theGlobalVariables.theThreadData.LastObject();
 }
 
-void ThreadData::CreateThread(void (*InputFunction)(int), const std::string& inputName)
-{ MutexLockGuard(theGlobalVariables.MutexRegisterNewThread);
+void ThreadData::CreateThread(void (*InputFunction)(int), const std::string& inputName) {
+  MutexLockGuard(theGlobalVariables.MutexRegisterNewThread);
   ThreadData& theData = ThreadData::RegisterNewThread(inputName);
   std::thread newThread(InputFunction, theData.index);
   theGlobalVariables.theThreads.LastObject().swap(newThread);
 }
 
-int ThreadData::getCurrentThreadId()
-{ std::thread::id currentId = std::this_thread::get_id();
+int ThreadData::getCurrentThreadId() {
+  std::thread::id currentId = std::this_thread::get_id();
   ListReferences<ThreadData>& theThreadData = theGlobalVariables.theThreadData;
   for (int i = 0; i < theThreadData.size; i ++)
     if (currentId == theThreadData[i].theId)
@@ -216,8 +216,8 @@ int ThreadData::getCurrentThreadId()
   return - 1;
 }
 
-std::string ThreadData::ToStringHtml() const
-{ std::stringstream out;
+std::string ThreadData::ToStringHtml() const {
+  std::stringstream out;
   if (this->getCurrentThreadId() == this->index)
     out << "<span style =\"color:green\"><b>Current thread </b></span> ";
   else
@@ -232,8 +232,8 @@ std::string ThreadData::ToStringHtml() const
   return out.str();
 }
 
-std::string ThreadData::ToStringConsole() const
-{ std::stringstream out;
+std::string ThreadData::ToStringConsole() const {
+  std::stringstream out;
   out << "Thread ";
   if (this->name == "")
     out << "(thread name not set)";
@@ -243,16 +243,16 @@ std::string ThreadData::ToStringConsole() const
   return out.str();
 }
 
-std::string ThreadData::ToStringAllThreadsHtml()
-{ std::stringstream out;
+std::string ThreadData::ToStringAllThreadsHtml() {
+  std::stringstream out;
   out << theGlobalVariables.theThreadData.size << " threads registered. <br> " << theGlobalVariables.theThreads.size << " total threads.<br>";
   for (int i = 0; i < theGlobalVariables.theThreadData.size; i ++)
     out << theGlobalVariables.theThreadData[i].ToStringHtml() << "<br>";
   return out.str();
 }
 
-std::string ThreadData::ToStringAllThreadsConsole()
-{ std::stringstream out;
+std::string ThreadData::ToStringAllThreadsConsole() {
+  std::stringstream out;
   out << theGlobalVariables.theThreadData.size << " threads registered. "
   << theGlobalVariables.theThreads.size << " total threads.\n";
   for (int i = 0; i < theGlobalVariables.theThreadData.size; i ++)

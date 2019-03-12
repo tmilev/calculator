@@ -10,8 +10,8 @@
 ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global objects");
 
 GlobalVariables theGlobalVariables;
-std::string GlobalVariables::GetDateForLogFiles()
-{ static std::string tempDate;
+std::string GlobalVariables::GetDateForLogFiles() {
+  static std::string tempDate;
   if (tempDate != "")
     return tempDate;
   TimeWrapper now;
@@ -25,14 +25,14 @@ std::string GlobalVariables::GetDateForLogFiles()
   return tempDate;
 }
 
-std::string GlobalVariables::GetTimeGM()
-{ TimeWrapper now;
+std::string GlobalVariables::GetTimeGM() {
+  TimeWrapper now;
   now.AssignLocalTime();
   return now.ToStringGM();
 }
 
-std::string GlobalVariables::GetTimeLocal()
-{ TimeWrapper now;
+std::string GlobalVariables::GetTimeLocal() {
+  TimeWrapper now;
   now.AssignLocalTime();
   return now.ToStringLocal();
 }
@@ -62,8 +62,8 @@ FormatExpressions consoleFormat;
 Crasher crash;
 StdoutClass stOutput;
 
-void InitializeGlobalObjects()
-{ //stOutput << "Content-Type: text/html\n\n";
+void InitializeGlobalObjects() {
+  //stOutput << "Content-Type: text/html\n\n";
   theGlobalVariables.processType = ProcessTypes::server;
   theGlobalVariables.flagIsChildProcess = false;
   InitializeTimeR();
@@ -77,8 +77,8 @@ void InitializeGlobalObjects()
   consoleFormat.flagUseLatex = false;
 }
 
-void HtmlRoutines::MakeReportIndicatorFile(const std::string& input)
-{ //calling stOutput forbidden! stOutput itself calls HtmlRoutines::MakeReportIndicatorFile.
+void HtmlRoutines::MakeReportIndicatorFile(const std::string& input) {
+  //calling stOutput forbidden! stOutput itself calls HtmlRoutines::MakeReportIndicatorFile.
   static int counter = - 1;
   counter ++;
   //  if (counter%10!= 0)
@@ -93,8 +93,8 @@ void HtmlRoutines::MakeReportIndicatorFile(const std::string& input)
   theFile.close();
 }
 
-void HtmlRoutines::MakeStdCoutReport(const std::string& input)
-{ stOutput << input;
+void HtmlRoutines::MakeStdCoutReport(const std::string& input) {
+  stOutput << input;
   HtmlRoutines::MakeReportIndicatorFile(input);
 }
 

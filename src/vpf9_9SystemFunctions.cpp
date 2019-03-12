@@ -12,23 +12,23 @@ ProjectInformationInstance projectInfoInstanceCalculatorSystem(__FILE__, "System
 
 timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
 
-int64_t GlobalVariables::GetElapsedMilliseconds()
-{ gettimeofday(&LastMeasureOfCurrentTime, NULL);
+int64_t GlobalVariables::GetElapsedMilliseconds() {
+  gettimeofday(&LastMeasureOfCurrentTime, NULL);
   return (LastMeasureOfCurrentTime.tv_sec - ComputationStartGlobal.tv_sec) * 1000 +
     (LastMeasureOfCurrentTime.tv_usec - ComputationStartGlobal.tv_usec) / 1000 - theGlobalVariables.millisecondOffset;
 }
 
-void InitializeTimeR()
-{ gettimeofday(&ComputationStartGlobal, NULL);
+void InitializeTimeR() {
+  gettimeofday(&ComputationStartGlobal, NULL);
 }
 
-int GlobalVariables::GetGlobalTimeInSeconds()
-{ time_t result = time(0);
+int GlobalVariables::GetGlobalTimeInSeconds() {
+  time_t result = time(0);
   return (int) result;
 }
 
-void GlobalVariables::FallAsleep(int microseconds)
-{ usleep(microseconds);
+void GlobalVariables::FallAsleep(int microseconds) {
+  usleep(microseconds);
 }
 
 struct TimerThreadData{
@@ -50,8 +50,8 @@ struct TimerThreadData{
   bool HandleComputationTimeout();
 };
 
-bool TimerThreadData::HandleComputationTimer()
-{ if (theGlobalVariables.flagComputationStarted)
+bool TimerThreadData::HandleComputationTimer() {
+  if (theGlobalVariables.flagComputationStarted)
     if (this->computationStartTimeInMilliseconds < 0)
       this->computationStartTimeInMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
   this->elapsedTimeInMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
@@ -60,14 +60,14 @@ bool TimerThreadData::HandleComputationTimer()
   return false;
 }
 
-bool TimerThreadData::HandleComputationCompleteStandard()
-{ //if (theGlobalVariables.flagComputationCompletE)
+bool TimerThreadData::HandleComputationCompleteStandard() {
+  //if (theGlobalVariables.flagComputationCompletE)
   //  theReport1.SetStatus("Starting timer cycle break: computation is complete.");
   return false;
 }
 
-bool TimerThreadData::HandleTimerSignalToServer()
-{ if (this->counter % 20 != 0)
+bool TimerThreadData::HandleTimerSignalToServer() {
+  if (this->counter % 20 != 0)
     return false;
 //  std::stringstream reportStream;
 //  reportStream << "Timer: " << this->elapsedtime << " seconds elapsed since the timer was launched.";
@@ -189,26 +189,26 @@ void TimerThreadData::Run() {
   }
 }
 
-void RunTimerThread(int threadIndex)
-{ theGlobalVariables.theThreadData[threadIndex].theId = std::this_thread::get_id();
+void RunTimerThread(int threadIndex) {
+  theGlobalVariables.theThreadData[threadIndex].theId = std::this_thread::get_id();
   MacroRegisterFunctionWithName("RunTimerThread");
 //  std::cout << "Got thus far RunTimerVoidPtr" << std::endl;
   TimerThreadData theThread;
   theThread.Run();
 }
 
-void CreateTimerThread()
-{ ThreadData::CreateThread(RunTimerThread, "timer");
+void CreateTimerThread() {
+  ThreadData::CreateThread(RunTimerThread, "timer");
 }
 
-void CallSystemWrapperNoOutput(const std::string& theCommand, bool ignoreNonZeroReturn)
-{ int systemOutput = system(theCommand.c_str());
+void CallSystemWrapperNoOutput(const std::string& theCommand, bool ignoreNonZeroReturn) {
+  int systemOutput = system(theCommand.c_str());
   if (systemOutput != 0 && !ignoreNonZeroReturn)
     logWorker << logger::red << "System command: " << theCommand << " exited with " << systemOutput << ". " << logger::endL;
 }
 
-std::string CallSystemWrapperReturnStandardOutput(const std::string& inputCommand)
-{ std::string inputCommandWithRedirection = inputCommand + " 2>&1";
+std::string CallSystemWrapperReturnStandardOutput(const std::string& inputCommand) {
+  std::string inputCommandWithRedirection = inputCommand + " 2>&1";
   std::shared_ptr<FILE> pipe(popen(inputCommandWithRedirection.c_str(), "r"), pclose);
   if (!pipe)
     return "ERROR";
@@ -221,8 +221,8 @@ std::string CallSystemWrapperReturnStandardOutput(const std::string& inputComman
   return result;
 }
 
-void CallChDirWrapper(const std::string& theDir)
-{ int systemOutput = chdir(theDir.c_str());
+void CallChDirWrapper(const std::string& theDir) {
+  int systemOutput = chdir(theDir.c_str());
   if (systemOutput != 0)
     logWorker << logger::red << "Chdir command to directory: " << theDir << " exited with " << systemOutput
     << ". " << logger::endL;

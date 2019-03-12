@@ -52,8 +52,8 @@ void Calculator::initCalculusTestingFunctions() {
 /// 2) functions that have already been assigned keywords starting with non-capital letter
 /// and have been used too often.
 ///
-void Calculator::initPredefinedInnerFunctions()
-{ this->AddOperationInnerHandler
+void Calculator::initPredefinedInnerFunctions() {
+  this->AddOperationInnerHandler
   ("SetRandomSeed", CalculatorFunctionsGeneral::innerSetRandomSeed, "",
    "Sets the random seed of the calculator to the given integer value",
    "SetRandomSeed(123); RandomInteger(- 100,100); RandomInteger(- 100,100)",
@@ -697,38 +697,49 @@ void Calculator::initPredefinedInnerFunctions()
     "Calculator::innerFormatCPPSourceCode",
     "FormatCPPCode", false
   );
+  this->AddOperationInnerHandler(
+    "FormatCPPDirectory", CalculatorFunctionsGeneral::innerFormatCPPDirectory, "",
+    "Format cpp directory. ",
+    "FormatCPPDirectory{}(\"src/\")",
+    false, false,
+    "Calculator::innerFormatCPPDirectory",
+    "FormatCPPDirectory", false
+  );
 
-  this->AddOperationInnerHandler
-  ("AutomatedTest", Calculator::innerAutomatedTest, "",
-   "Runs a big bad automated test of all built in functions "
-   "against a set of known good results. ",
-   "AutomatedTest{}(0)",
-   false, false,
-   "Calculator::innerAutomatedTest",
-   "AutomatedTest", true);
-  this->AddOperationInnerHandler
-  ("AutomatedTestSetKnownGoodCopy",
-   Calculator::innerAutomatedTestSetKnownGoodCopy, "",
-   "Runs a big bad automated test of all built-in "
-   "functions to create a file containing a set of known good results.",
-   "AutomatedTestSetKnownGoodCopy 0",
-   false, false,
-   "Calculator::innerAutomatedTestSetKnownGoodCopy",
-   "AutomatedTestSetKnownGoodCopy",
-   true);
-  this->AddOperationInnerHandler
-  ("AutomatedTestProblemInterpretation",
-   CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation, "",
-   "Runs a big bad automated test of all built in "
-   "problems located in the DefaultProblemLocation / folder. "
-   "<b style ='color:red'>The example below will not work out of the box: "
-   "the automated test rule has to be activated first.</b> To activate the test, "
-   "please first use the command: TurnOnRules(AutomatedTestProblemInterpretation).",
-   "AutomatedTestProblemInterpretation{}(0,0,0)",
-   false, false,
-   "CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation",
-   "AutomatedTestProblemInterpretation",
-   true);
+  this->AddOperationInnerHandler(
+    "AutomatedTest", Calculator::innerAutomatedTest, "",
+    "Runs a big bad automated test of all built in functions "
+    "against a set of known good results. ",
+    "AutomatedTest{}(0)",
+    false, false,
+    "Calculator::innerAutomatedTest",
+    "AutomatedTest", true
+  );
+  this->AddOperationInnerHandler(
+    "AutomatedTestSetKnownGoodCopy",
+    Calculator::innerAutomatedTestSetKnownGoodCopy, "",
+    "Runs a big bad automated test of all built-in "
+    "functions to create a file containing a set of known good results.",
+    "AutomatedTestSetKnownGoodCopy 0",
+    false, false,
+    "Calculator::innerAutomatedTestSetKnownGoodCopy",
+    "AutomatedTestSetKnownGoodCopy",
+    true
+  );
+  this->AddOperationInnerHandler(
+    "AutomatedTestProblemInterpretation",
+    CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation, "",
+    "Runs a big bad automated test of all built in "
+    "problems located in the DefaultProblemLocation / folder. "
+    "<b style ='color:red'>The example below will not work out of the box: "
+    "the automated test rule has to be activated first.</b> To activate the test, "
+    "please first use the command: TurnOnRules(AutomatedTestProblemInterpretation).",
+    "AutomatedTestProblemInterpretation{}(0,0,0)",
+    false, false,
+    "CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation",
+    "AutomatedTestProblemInterpretation",
+    true
+  );
   this->AddOperationInnerHandler
   ("!", CalculatorFunctionsGeneral::innerFactorial, "",
    "Factorial function. ",
@@ -4057,8 +4068,8 @@ void Calculator::initPredefinedInnerFunctions()
    "IsProductTermsUpToPower");
 }
 
-void Calculator::initPredefinedStandardOperations()
-{ //IMPORTANT.
+void Calculator::initPredefinedStandardOperations() {
+  //IMPORTANT.
   //The order of registration of operation handlers for the same operation name
   // defines the order in which operation
   //handlers are called. Operations handlers registered first are executed first.
@@ -5574,8 +5585,8 @@ void Calculator::initPredefinedStandardOperations()
    "\\sqcup");
 }
 
-void Calculator::initPredefinedOperationsComposite()
-{ MacroRegisterFunctionWithName("Calculator::initPredefinedOperationsComposite");
+void Calculator::initPredefinedOperationsComposite() {
+  MacroRegisterFunctionWithName("Calculator::initPredefinedOperationsComposite");
 
   this->AddOperationComposite
   ("\\sum", CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation, "",
@@ -5664,8 +5675,8 @@ void Calculator::initPredefinedOperationsComposite()
    "DifferentiateLog");
 }
 
-void Calculator::initPredefinedStandardOperationsWithoutHandler()
-{ MacroRegisterFunctionWithName("Calculator::initPredefinedStandardOperationsWithoutHandler");
+void Calculator::initPredefinedStandardOperationsWithoutHandler() {
+  MacroRegisterFunctionWithName("Calculator::initPredefinedStandardOperationsWithoutHandler");
   //additional operations treated like function names but otherwise not parsed as syntactic elements.
 
   this->AddOperationNoRepetitionAllowed("RulesOff");
@@ -5697,8 +5708,8 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   this->AddOperationNoRepetitionAllowed("ExpressionHistory");
 }
 
-void Calculator::initAtomsNonCacheable()
-{ MacroRegisterFunctionWithName("Calculator::initAtomsNonCacheable");
+void Calculator::initAtomsNonCacheable() {
+  MacroRegisterFunctionWithName("Calculator::initAtomsNonCacheable");
   this->atomsThatMustNotBeCached.SetExpectedSize(30);
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("RandomInteger");
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("SelectAtRandom");
@@ -5707,13 +5718,13 @@ void Calculator::initAtomsNonCacheable()
 //  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("PrintRuleStack");
 }
 
-void Calculator::initAtomsNotGoodForChainRule()
-{ MacroRegisterFunctionWithName("Calculator::initAtomsNotGoodForChainRule");
+void Calculator::initAtomsNotGoodForChainRule() {
+  MacroRegisterFunctionWithName("Calculator::initAtomsNotGoodForChainRule");
   this->atomsNotAllowingChainRule.AddOnTopNoRepetitionMustBeNewCrashIfNot("Bind");
 }
 
-void Calculator::initStringsThatSplitIfFollowedByDigit()
-{ MacroRegisterFunctionWithName("Calculator::initStringsThatSplitIfFollowedByDigit");
+void Calculator::initStringsThatSplitIfFollowedByDigit() {
+  MacroRegisterFunctionWithName("Calculator::initStringsThatSplitIfFollowedByDigit");
   this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cdot");
   this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\circ");
   this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\frac");
@@ -5730,8 +5741,8 @@ void Calculator::initStringsThatSplitIfFollowedByDigit()
   this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arccos");
 }
 
-void Calculator::initAtomsThatAllowCommutingOfArguments()
-{ MacroRegisterFunctionWithName("Calculator::initAtomsThatAllowCommutingOfArguments");
+void Calculator::initAtomsThatAllowCommutingOfArguments() {
+  MacroRegisterFunctionWithName("Calculator::initAtomsThatAllowCommutingOfArguments");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.SetExpectedSize(30);
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
@@ -5743,8 +5754,8 @@ void Calculator::initAtomsThatAllowCommutingOfArguments()
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
 }
 
-void Calculator::initArithmeticOperations()
-{ MacroRegisterFunctionWithName("Calculator::initArithmeticOperations");
+void Calculator::initArithmeticOperations() {
+  MacroRegisterFunctionWithName("Calculator::initArithmeticOperations");
   this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
   this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("-");
   this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
@@ -5752,8 +5763,8 @@ void Calculator::initArithmeticOperations()
   this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("^");
 }
 
-void Calculator::initBuiltInAtomsWhosePowersAreInterpretedAsFunctions()
-{ MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsWhosePowersAreInterpretedAsFunctions");
+void Calculator::initBuiltInAtomsWhosePowersAreInterpretedAsFunctions() {
+  MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsWhosePowersAreInterpretedAsFunctions");
   //Related heavily to initOperationsInterpretedAsFunctionsMultiplicatively
   this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
   this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
@@ -5764,8 +5775,8 @@ void Calculator::initBuiltInAtomsWhosePowersAreInterpretedAsFunctions()
   this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
 }
 
-void Calculator::initOperationsInterpretedAsFunctionsMultiplicatively()
-{ MacroRegisterFunctionWithName("Calculator::initOperationsInterpretedAsFunctionsMultiplicatively");
+void Calculator::initOperationsInterpretedAsFunctionsMultiplicatively() {
+  MacroRegisterFunctionWithName("Calculator::initOperationsInterpretedAsFunctionsMultiplicatively");
   //Related heavily to initBuiltInAtomsWhosePowersAreInterpretedAsFunctions
   this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
   this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
@@ -5779,8 +5790,8 @@ void Calculator::initOperationsInterpretedAsFunctionsMultiplicatively()
   this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
 }
 
-void Calculator::initOperationsThatAreKnownFunctions()
-{ MacroRegisterFunctionWithName("Calculator::initOperationsThatAreKnownFunctions");
+void Calculator::initOperationsThatAreKnownFunctions() {
+  MacroRegisterFunctionWithName("Calculator::initOperationsThatAreKnownFunctions");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("-");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
@@ -5801,16 +5812,16 @@ void Calculator::initOperationsThatAreKnownFunctions()
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogBase");
 }
 
-void Calculator::AddKnownDoubleConstant(const std::string& theConstantName, double theConstantValue)
-{ this->atomsNotInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot(theConstantName);
+void Calculator::AddKnownDoubleConstant(const std::string& theConstantName, double theConstantValue) {
+  this->atomsNotInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot(theConstantName);
   Expression theConstantE;
   theConstantE.MakeAtom(theConstantName, *this);
   this->knownDoubleConstants.AddOnTopNoRepetitionMustBeNewCrashIfNot(theConstantE);
   this->knownDoubleConstantValues.AddOnTop(theConstantValue);
 }
 
-void Calculator::initBuiltInAtomsNotInterpretedAsFunctions()
-{ MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsNotInterpretedAsFunctions");
+void Calculator::initBuiltInAtomsNotInterpretedAsFunctions() {
+  MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsNotInterpretedAsFunctions");
   this->atomsNotInterpretedAsFunctions.SetExpectedSize(30);
 
   this->AddKnownDoubleConstant("\\pi", MathRoutines::Pi());
@@ -5819,11 +5830,11 @@ void Calculator::initBuiltInAtomsNotInterpretedAsFunctions()
   this->atomsNotInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("i");
 }
 
-void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string>& theVars)
-{ MacroRegisterFunctionWithName("Calculator::AddTrigSplit");
+void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string>& theVars) {
+  MacroRegisterFunctionWithName("Calculator::AddTrigSplit");
   List<std::string> theSplit;
-  for (int i = 0; i < theVars.size; i ++)
-  { const std::string& theVar = theVars[i];
+  for (int i = 0; i < theVars.size; i ++) {
+    const std::string& theVar = theVars[i];
     theSplit.SetSize(0);
     theSplit.AddOnTop("\\" + trigFun);
     theSplit.AddOnTop(theVar);
@@ -5836,8 +5847,8 @@ void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string
     this->predefinedWordSplits.SetKeyValue(theVar + "\\" + trigFun, theSplit);
   }
   for (int i = 0; i < theVars.size; i ++)
-    for (int j = 0; j < theVars.size; j ++)
-    { theSplit.SetSize(0);
+    for (int j = 0; j < theVars.size; j ++) {
+      theSplit.SetSize(0);
       theSplit.AddOnTop(theVars[i]);
       theSplit.AddOnTop("\\" + trigFun);
       theSplit.AddOnTop(theVars[j]);
@@ -5845,8 +5856,8 @@ void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string
     }
 }
 
-void Calculator::initPredefinedWordSplits()
-{ MacroRegisterFunctionWithName("Calculator::initPredefinedWordSplits");
+void Calculator::initPredefinedWordSplits() {
+  MacroRegisterFunctionWithName("Calculator::initPredefinedWordSplits");
   List<std::string> theSplit;
   List<std::string> theVars;
   theVars.AddOnTop("x");
@@ -5865,8 +5876,8 @@ void Calculator::initPredefinedWordSplits()
   this->AddTrigSplit("csc", theVars);
 }
 
-void Calculator::initAtomsThatFreezeArguments()
-{ MacroRegisterFunctionWithName("Calculator::initAtomsThatFreezeArguments");
+void Calculator::initAtomsThatFreezeArguments() {
+  MacroRegisterFunctionWithName("Calculator::initAtomsThatFreezeArguments");
   this->atomsThatFreezeArguments.SetExpectedSize(this->builtInTypes.size + 100);
   this->atomsThatFreezeArguments.AddOnTop(this->builtInTypes);
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraDO"); //<-needed to facilitate civilized context handling

@@ -61,27 +61,27 @@ public:
   int NumRationalMultiplicationsAndAdditionsBeforeSimpleGen;
   int MaxNumCachedPairs;
   void reset();
-  bool operator==(const ModuleSSalgebra<coefficient>& other)
-  { return
+  bool operator==(const ModuleSSalgebra<coefficient>& other) {
+    return
     this->owner == other.owner && this->theHWFundamentalCoordsBaseField == other.theHWFundamentalCoordsBaseField
     && this->parabolicSelectionNonSelectedAreElementsLevi == other.parabolicSelectionNonSelectedAreElementsLevi;
   }
-  bool HasFreeAction(int generatorIndex) const
-  { Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(generatorIndex);
+  bool HasFreeAction(int generatorIndex) const {
+    Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(generatorIndex);
     for (int i = 0; i < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i ++)
       if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].IsNegative())
         return true;
     return false;
   }
-  bool HasZeroActionFDpart(int generatorIndex) const
-  { Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(generatorIndex);
+  bool HasZeroActionFDpart(int generatorIndex) const {
+    Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(generatorIndex);
     for (int i = 0; i < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i ++)
       if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].IsPositive())
         return true;
     return false;
   }
-  int GetOffsetFromWeightIndex(int weightIndex)
-  { int result = 0;
+  int GetOffsetFromWeightIndex(int weightIndex) {
+    int result = 0;
     for (int i = 0; i < weightIndex; i ++)
       result += this->theGeneratingWordsGrouppedByWeight[i].size;
     return result;
@@ -95,8 +95,8 @@ public:
 //  List<Matrix<coefficient> > ActionsChevalleyGenerators;
   MatrixTensor<coefficient>& GetActionGeneratorIndeX(int generatorIndex);
   MatrixTensor<coefficient>& GetActionSimpleGeneratorIndex(int generatorIndex);
-  int GetMinNumVars()
-  { if (this->theHWFundamentalCoordsBaseField.size <= 0)
+  int GetMinNumVars() {
+    if (this->theHWFundamentalCoordsBaseField.size <= 0)
       return - 1;
     int result = 0;
     for (int i = 0; i < this->theHWFundamentalCoordsBaseField.size; i ++)
@@ -104,11 +104,11 @@ public:
       (result, this->theHWFundamentalCoordsBaseField[i].GetMinNumVars());
     return result;
   }
-  int GetDim() const
-  { return this->theGeneratingWordsNonReduced.size;
+  int GetDim() const {
+    return this->theGeneratingWordsNonReduced.size;
   }
-  bool CheckInitialization() const
-  { if (this->flagDeallocated)
+  bool CheckInitialization() const {
+    if (this->flagDeallocated)
       crash << "Use after free of ModuleSSalgebra. " << crash;
     if (this->owner == 0)
       crash << "ModuleSSalgebra does not have its owner Semisimple algebra properly set. " << crash;
@@ -119,8 +119,8 @@ public:
   (SemisimpleLieAlgebra& inputAlgebra, Vector<coefficient>& HWFundCoords, const Selection& selNonSelectedAreElementsLevi,
    const coefficient& theRingUnit, const coefficient& theRingZero, std::string* outputReport,
   bool computeSimpleGens = true);
-  SemisimpleLieAlgebra& GetOwner() const
-  { if (this->owner == 0)
+  SemisimpleLieAlgebra& GetOwner() const {
+    if (this->owner == 0)
       crash << "This is a programming error: calling GetOwner() on a non-initialized generalized Verma module. " << crash;
     return *this->owner;
   }
@@ -135,8 +135,8 @@ public:
   (ElementUniversalEnveloping<coefficient>& inputHomogeneous, ElementUniversalEnveloping<coefficient>& outputHomogeneous, int indexInputBasis,
    const Vector<coefficient>& subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero);
   std::string ToString(FormatExpressions* theFormat = 0) const;
-  std::string ElementToStringHWV(FormatExpressions* theFormat = 0) const
-  { if (this->highestWeightVectorNotation != "")
+  std::string ElementToStringHWV(FormatExpressions* theFormat = 0) const {
+    if (this->highestWeightVectorNotation != "")
       return this->highestWeightVectorNotation;
     std::stringstream out;
     out << "v_{" << this->theHWFundamentalCoordsBaseField.ToString(theFormat) << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString() << "}";
@@ -171,11 +171,11 @@ public:
   (ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output,
    bool useNilWeight, bool ascending);
   bool GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO);
-  ModuleSSalgebra() : owner(0), flagIsInitialized(false), flagDeallocated(false), MaxNumCachedPairs(1000000)
-  {
+  ModuleSSalgebra() : owner(0), flagIsInitialized(false), flagDeallocated(false), MaxNumCachedPairs(1000000) {
+   
   }
-  ~ModuleSSalgebra()
-  { this->flagDeallocated = true;
+  ~ModuleSSalgebra() {
+    this->flagDeallocated = true;
   }
 };
 
@@ -196,8 +196,8 @@ public:
   (ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra, int indexGenerator,
    const coefficient& theRingUnit) const;
   void MultiplyBy(const ElementTensorsGeneralizedVermas<coefficient>& standsOnTheRight);
-  bool IsHWV() const
-  { if (this->theCoeffs.size != 1)
+  bool IsHWV() const {
+    if (this->theCoeffs.size != 1)
       return false;
     if (!this->theCoeffs[0].IsEqualToOne())
       return false;
@@ -205,15 +205,15 @@ public:
   }
   void MakeHWV(ModuleSSalgebra<coefficient>& theOwner, const coefficient& theRingUnit);
   void Substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods);
-  void SetNumVariables(int GoalNumVars)
-  { for (int i = 0; i < this->size; i ++)
+  void SetNumVariables(int GoalNumVars) {
+    for (int i = 0; i < this->size; i ++)
       this->TheObjects[i].SetNumVariables(GoalNumVars);
   }
-  SemisimpleLieAlgebra& GetOwnerSS() const
-  { return this->GetOwnerModule().GetOwner();
+  SemisimpleLieAlgebra& GetOwnerSS() const {
+    return this->GetOwnerModule().GetOwner();
   }
-  ModuleSSalgebra<coefficient>& GetOwnerModule() const
-  { if (this->size() <= 0)
+  ModuleSSalgebra<coefficient>& GetOwnerModule() const {
+    if (this->size() <= 0)
       crash << "This is a programming error: calling GetOwnerModule() on a tensor element which has no monomials."
       << " This is not allowed as the index of the owner modules are stored in the monomials. " << crash;
     const MonomialTensorGeneralizedVermas<coefficient>& theMon = (*this)[0];
@@ -223,8 +223,8 @@ public:
     MonomialGeneralizedVerma<coefficient>& theGmon = theMon.theMons[0];
     return *theGmon.owner;
   }
-  int GetNumVars()
-  { if (this->size == 0)
+  int GetNumVars() {
+    if (this->size == 0)
       return - 1;
     int theAnswer = this->TheObjects[0].GetNumVars();
     for (int i = 1; i < this->size; i ++)
@@ -232,15 +232,15 @@ public:
         return - 1;
     return theAnswer;
   }
-  unsigned int HashFunction() const
-  { return this->:: MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coefficient >::HashFunction();
+  unsigned int HashFunction() const {
+    return this->:: MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coefficient >::HashFunction();
   }
-  void operator=(const ElementTensorsGeneralizedVermas<coefficient>& other)
-  { this->::MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coefficient>::operator=(other);
+  void operator=(const ElementTensorsGeneralizedVermas<coefficient>& other) {
+    this->::MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coefficient>::operator=(other);
   }
   void operator=(const ElementSumGeneralizedVermas<coefficient>& other);
-  static unsigned int HashFunction(const ElementTensorsGeneralizedVermas<coefficient>& input)
-  { return input.HashFunction();
+  static unsigned int HashFunction(const ElementTensorsGeneralizedVermas<coefficient>& input) {
+    return input.HashFunction();
   }
 };
 #endif

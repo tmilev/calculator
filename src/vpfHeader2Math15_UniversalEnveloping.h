@@ -16,28 +16,28 @@ public:
   SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
-  friend std::ostream& operator << (std::ostream& output, const MonomialUniversalEnveloping<coefficient>& theMon)
-  { output << theMon.ToString();
+  friend std::ostream& operator << (std::ostream& output, const MonomialUniversalEnveloping<coefficient>& theMon) {
+    output << theMon.ToString();
     return output;
   }
-  bool IsConstant() const
-  { return this->IsEqualToOne();
+  bool IsConstant() const {
+    return this->IsEqualToOne();
   }
-  static bool IsMonEqualToZero()
-  { return false;
+  static bool IsMonEqualToZero() {
+    return false;
   }
   bool AdjointRepresentationAction(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output) const;
   template<class otherType>
-  void operator=(const MonomialUniversalEnveloping<otherType>& other)
-  { this->MonomialTensor<coefficient>::operator=(other);
+  void operator=(const MonomialUniversalEnveloping<otherType>& other) {
+    this->MonomialTensor<coefficient>::operator=(other);
     this->owners = other.owners;
     this->indexInOwners = other.indexInOwners;
   }
-  SemisimpleLieAlgebra& GetOwner() const
-  { return *this->owner;
+  SemisimpleLieAlgebra& GetOwner() const {
+    return *this->owner;
   }
-  void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner)
-  { if (generatorIndex < 0 || generatorIndex>inputOwner.GetNumGenerators())
+  void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner) {
+    if (generatorIndex < 0 || generatorIndex>inputOwner.GetNumGenerators())
       crash << "This is a programming error: attempting to assign impossible index to monomial UE. " << crash;
     this->owner = &inputOwner;
     this->generatorsIndices.SetSize(1);
@@ -52,15 +52,15 @@ public:
   (coefficient& outputCoeff, const Vector<coefficient>* subHiGoesToIthElement = 0, const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0);
   void SetNumVariables(int newNumVars);
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
-  unsigned int HashFunction() const
-  { return this->::MonomialTensor<coefficient>::HashFunction();
+  unsigned int HashFunction() const {
+    return this->::MonomialTensor<coefficient>::HashFunction();
   }
-  static inline unsigned int HashFunction(const MonomialUniversalEnveloping<coefficient>& input)
-  { return input.HashFunction();
+  static inline unsigned int HashFunction(const MonomialUniversalEnveloping<coefficient>& input) {
+    return input.HashFunction();
   }
-  void GetDegree(coefficient& output) const
-  { if (this->Powers.size == 0)
-    { output.MakeZero();
+  void GetDegree(coefficient& output) const {
+    if (this->Powers.size == 0) {
+      output.MakeZero();
       return;
     }
     output = this->Powers[0];
@@ -70,8 +70,8 @@ public:
   bool CommutingABntoBnAPlusLowerOrderAllowed(coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex);
   bool CommutingAnBtoBAnPlusLowerOrderAllowed(coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex);
   bool SwitchConsecutiveIndicesIfTheyCommute(int theLeftIndex);
-  void MakeOne(SemisimpleLieAlgebra& inputOwner)
-  { this->generatorsIndices.size = 0;
+  void MakeOne(SemisimpleLieAlgebra& inputOwner) {
+    this->generatorsIndices.size = 0;
     this->Powers.size = 0;
     this->owner = &inputOwner;
   }
@@ -89,18 +89,18 @@ public:
   void CommuteABntoBnAPlusLowerOrder(int theIndeX, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
   void CommuteAnBtoBAnPlusLowerOrder(int indexA, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
   MonomialUniversalEnveloping():owner(0){}
-  bool operator>(const MonomialUniversalEnveloping& other)
-  { return this->::MonomialTensor<coefficient>::operator>(other);
+  bool operator>(const MonomialUniversalEnveloping& other) {
+    return this->::MonomialTensor<coefficient>::operator>(other);
   }
-  bool operator==(const MonomialUniversalEnveloping& other) const
-  { return this->owner == other.owner && this->Powers == other.Powers && this->generatorsIndices == other.generatorsIndices;
+  bool operator==(const MonomialUniversalEnveloping& other) const {
+    return this->owner == other.owner && this->Powers == other.Powers && this->generatorsIndices == other.generatorsIndices;
   }
-  inline void operator=(const MonomialUniversalEnveloping& other)
-  { this->::MonomialTensor<coefficient>::operator=(other);
+  inline void operator=(const MonomialUniversalEnveloping& other) {
+    this->::MonomialTensor<coefficient>::operator=(other);
     this->owner = other.owner;
   }
-  inline void operator*=(const MonomialUniversalEnveloping& other)
-  { this->::MonomialTensor<coefficient>::operator*=(other);
+  inline void operator*=(const MonomialUniversalEnveloping& other) {
+    this->::MonomialTensor<coefficient>::operator*=(other);
   }
 };
 
@@ -114,8 +114,8 @@ public:
   SemisimpleLieAlgebra* owner;
   bool AdjointRepresentationAction(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output) const;
   bool ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output);
-  bool IsEqualToZero() const
-  { return this->size() == 0;
+  bool IsEqualToZero() const {
+    return this->size() == 0;
   }
   bool HWMTAbilinearForm
   (const ElementUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement,
@@ -126,14 +126,14 @@ public:
   (const ElementUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement,
    const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0) const;
   bool HWTAAbilinearForm
-  (const MonomialUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0) const
-  { ElementUniversalEnveloping<coefficient> tempElt;
+  (const MonomialUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0) const {
+    ElementUniversalEnveloping<coefficient> tempElt;
     tempElt.MakeZero(*this->owner);
     tempElt.AddMonomial(right, theRingUnit);
     return this->HWTAAbilinearForm(tempElt, output, subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, logStream);
   }
-  bool NeedsBracketForMultiplication()
-  { return this->size > 1;
+  bool NeedsBracketForMultiplication() {
+    return this->size > 1;
   }
   bool ApplyMinusTransposeAutoOnMe();
   bool ApplyTransposeAntiAutoOnMe();
@@ -143,24 +143,24 @@ public:
   void MakeOneGenerator(int theIndex, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit);
   void MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& inputOwners, const coefficient& theRingUnit = 1);
   void MakeOneGeneratorCoeffOne(int theIndex, int numVars, SemisimpleLieAlgebra& inputOwner);
-  void MakeOneGeneratorCoeffOne(const Vector<Rational>& rootSpace, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit = 1)
-  { this->MakeOneGeneratorCoeffOne(inputOwner.GetGeneratorFromRoot(rootSpace), inputOwner, theRingUnit);
+  void MakeOneGeneratorCoeffOne(const Vector<Rational>& rootSpace, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit = 1) {
+    this->MakeOneGeneratorCoeffOne(inputOwner.GetGeneratorFromRoot(rootSpace), inputOwner, theRingUnit);
   }
   coefficient GetKillingFormProduct(const ElementUniversalEnveloping<coefficient>& right) const;
   void MakeZero(SemisimpleLieAlgebra& inputOwner);
   bool GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const;
   void MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebra& inputOwner);
-  void MakeConst(const coefficient& coeff, SemisimpleLieAlgebra& inputOwner)
-  { this->MakeZero(inputOwner);
+  void MakeConst(const coefficient& coeff, SemisimpleLieAlgebra& inputOwner) {
+    this->MakeZero(inputOwner);
     MonomialUniversalEnveloping<coefficient> tempMon;
     tempMon.MakeOne(inputOwner);
     this->AddMonomial(tempMon, coeff);
   }
   void Simplify(const coefficient& theRingUnit = 1);
-  int GetMinNumVars() const
-  { int result = 0;
-    for (int i = 0; i < this->size; i ++)
-    { result = MathRoutines::Maximum(result, this->theCoeffs[i].GetMinNumVars());
+  int GetMinNumVars() const {
+    int result = 0;
+    for (int i = 0; i < this->size; i ++) {
+      result = MathRoutines::Maximum(result, this->theCoeffs[i].GetMinNumVars());
       result = MathRoutines::Maximum(result, (*this)[i].GetMinNumVars());
     }
     return result;
@@ -173,11 +173,11 @@ public:
    GlobalVariables& theGlobalVariables);
   bool GetCoordsInBasis
   (List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables& theGlobalVariables) const;
-  static inline unsigned int HashFunction (const ElementUniversalEnveloping<coefficient>& input)
-  { return input.HashFunction();
+  static inline unsigned int HashFunction (const ElementUniversalEnveloping<coefficient>& input) {
+    return input.HashFunction();
   }
-  unsigned int HashFunction() const
-  { return this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>::HashFunction();
+  unsigned int HashFunction() const {
+    return this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>::HashFunction();
   }
   template<class CoefficientTypeQuotientField>
   static bool GetBasisFromSpanOfElements
@@ -185,8 +185,8 @@ public:
    const CoefficientTypeQuotientField& theFieldUnit, const CoefficientTypeQuotientField& theFieldZero, GlobalVariables& theGlobalVariables);
   void AssignFromCoordinateFormWRTBasis(List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& input, SemisimpleLieAlgebra& owner);
   void RaiseToPower(int thePower);
-  bool IsAPowerOfASingleGenerator() const
-  { if (this->size() != 1)
+  bool IsAPowerOfASingleGenerator() const {
+    if (this->size() != 1)
       return false;
     if (!this->theCoeffs[0].IsEqualToOne())
       return false;
@@ -196,53 +196,53 @@ public:
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
   void MakeCasimir(SemisimpleLieAlgebra& theOwner);
   void MakeCasimirWRTLeviParabolic(SemisimpleLieAlgebra& theOwner, const Selection& theLeviRoots);
-  static void LieBracket(const ElementUniversalEnveloping<coefficient>& left, const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output)
-  { left.LieBracketOnTheRight(right, output);
+  static void LieBracket(const ElementUniversalEnveloping<coefficient>& left, const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output) {
+    left.LieBracketOnTheRight(right, output);
     output.Simplify();
   }
   void LieBracketOnTheRight(const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output) const;
   void LieBracketOnTheLeft(const ElementSemisimpleLieAlgebra<Rational>& left);
-  void AssignInt(int coeff, int numVars, SemisimpleLieAlgebra& theOwner)
-  { Rational tempRat = coeff;
+  void AssignInt(int coeff, int numVars, SemisimpleLieAlgebra& theOwner) {
+    Rational tempRat = coeff;
     this->MakeConst(tempRat, numVars, &theOwner);
   }
-  SemisimpleLieAlgebra& GetOwner() const
-  { return *this->owner;
+  SemisimpleLieAlgebra& GetOwner() const {
+    return *this->owner;
   }
   template <class otherType>
-  void Assign(const ElementUniversalEnveloping<otherType>& other)
-  { this->owners = other.owners;
+  void Assign(const ElementUniversalEnveloping<otherType>& other) {
+    this->owners = other.owners;
     this->indexInOwners = other.indexInOwners;
     MonomialUniversalEnveloping<coefficient> tempMon;
     coefficient theCoeff;
-    for (int i = 0; i < other.size; i ++)
-    { tempMon = other[i];
+    for (int i = 0; i < other.size; i ++) {
+      tempMon = other[i];
       theCoeff = other.theCoeffs[i];
       this->AddMonomial(tempMon, theCoeff);
     }
   }
-  void operator=(const Rational& other)
-  { this->MakeConst(other, 0, *this->owner);
+  void operator=(const Rational& other) {
+    this->MakeConst(other, 0, *this->owner);
   }
-  void operator=(const ElementUniversalEnveloping<coefficient>& other)
-  { this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>::operator=(other);
+  void operator=(const ElementUniversalEnveloping<coefficient>& other) {
+    this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>::operator=(other);
     this->owner = other.owner;
   }
   void operator*=(const ElementUniversalEnveloping<coefficient>& standsOnTheRight);
-  void operator*=(const coefficient& other)
-  { this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>
+  void operator*=(const coefficient& other) {
+    this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>
     ::operator*=(other);
   }
   template<class otherType>
-  void operator/=(const otherType& other)
-  { this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>
+  void operator/=(const otherType& other) {
+    this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>
     ::operator/=(other);
   }
-  ElementUniversalEnveloping<coefficient>():owner(0)
-  {
+  ElementUniversalEnveloping<coefficient>():owner(0) {
+   
   }
-  ElementUniversalEnveloping<coefficient>(const ElementUniversalEnveloping<coefficient>& other)
-  { this->operator=(other);
+  ElementUniversalEnveloping<coefficient>(const ElementUniversalEnveloping<coefficient>& other) {
+    this->operator=(other);
   }
 };
 

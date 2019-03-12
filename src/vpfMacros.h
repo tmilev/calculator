@@ -86,8 +86,8 @@ class Crasher
   static std::string GetStackTraceShort();
   Crasher& operator<<(const Crasher& dummyCrasherSignalsActualCrash);
   template <class AnyObject>
-  Crasher& operator<<(const AnyObject& input)
-  { this->FirstRun();
+  Crasher& operator<<(const AnyObject& input) {
+    this->FirstRun();
     this->theCrashReport << input;
     return *this;
   }
@@ -97,22 +97,22 @@ class StdoutClass
 {
 public:
   template <typename anyType>
-  StdoutClass& operator<<(const anyType& toBePiped)
-  { if (this->theOutputFunction == 0)
+  StdoutClass& operator<<(const anyType& toBePiped) {
+    if (this->theOutputFunction == 0)
       std::cout << toBePiped;
-    else
-    { std::stringstream out;
+    else {
+      std::stringstream out;
       out << toBePiped;
       this->theOutputFunction(out.str());
     }
     return *this;
   }
   template <typename anyType>
-  StdoutClass& operator<<(anyType& toBePiped)
-  { if (this->theOutputFunction == 0)
+  StdoutClass& operator<<(anyType& toBePiped) {
+    if (this->theOutputFunction == 0)
       std::cout << toBePiped;
-    else
-    { std::stringstream out;
+    else {
+      std::stringstream out;
       out << toBePiped;
       this->theOutputFunction(out.str());
     }
@@ -121,9 +121,9 @@ public:
   void (*theOutputFunction)(const std::string& stringToOutput);
   void (*flushOutputFunction)();
   StdoutClass(): theOutputFunction(0), flushOutputFunction(0){}
-  void Flush()
-  { if (this->flushOutputFunction == 0)
-    { std::cout.flush();
+  void Flush() {
+    if (this->flushOutputFunction == 0) {
+      std::cout.flush();
       return;
     }
     this->flushOutputFunction();

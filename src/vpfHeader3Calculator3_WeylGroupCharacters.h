@@ -9,11 +9,11 @@ class CalculatorFunctionsWeylGroup
 public:
   static bool innerWeylOrbit(Calculator& theCommands, const Expression& input, Expression& output, bool useFundCoords, bool useRho);
   static bool innerWeylRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output, bool useOuter);
-  static bool innerWeylOuterRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output)
-  { return CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(theCommands, input, output, true);
+  static bool innerWeylOuterRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output) {
+    return CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(theCommands, input, output, true);
   }
-  static bool innerWeylNoOuterRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output)
-  { return CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(theCommands, input, output, false);
+  static bool innerWeylNoOuterRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output) {
+    return CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(theCommands, input, output, false);
   }
   static bool innerTestSpechtModules(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupOrbitSize(Calculator& theCommands, const Expression& input, Expression& output);

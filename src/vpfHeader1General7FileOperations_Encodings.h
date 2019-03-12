@@ -60,17 +60,15 @@ public:
   );
   static bool FileExistsVirtualCustomizedReadOnly(const std::string& theFileName, std::stringstream* commentsOnFailure);
   static bool IsFolderUnsecure(const std::string& theFolderName);
-  static bool GetFolderFileNamesUnsecure(
-    const std::string& theFolderName,
+  static bool GetFolderFileNamesUnsecure(const std::string& theFolderName,
     List<std::string>& outputFileNamesNoPath,
-    List<std::string>* outputFileTypes = 0
+    List<std::string>* outputFileTypesWithDot = 0
   );
   static std::string GetCurrentFolder();
   static std::string GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath);
-  static bool GetFolderFileNamesVirtual(
-    const std::string& theFolderName,
+  static bool GetFolderFileNamesVirtual(const std::string& theFolderName,
     List<std::string>& outputFileNamesNoPath,
-    List<std::string>* outputFileTypes = 0,
+    List<std::string>* outputFileTypesWithDot = 0,
     bool accessSensitiveFolders = false,
     bool accessULTRASensitiveFolders = false,
     std::stringstream *commentsOnFailure = 0

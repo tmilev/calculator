@@ -78,13 +78,13 @@ public:
   static void sha3_Init384(void* priv);
   static void sha3_Init512(void* priv);
   static void sha3_Update(void *priv, void const *bufIn, size_t len);
-  static inline uint64_t rotl64(uint64_t x, unsigned y)
-  { return ((x << y) | (x >> ((sizeof(uint64_t) * 8) - y)));
+  static inline uint64_t rotl64(uint64_t x, unsigned y) {
+    return ((x << y) | (x >> ((sizeof(uint64_t) * 8) - y)));
   }
 };
 
-Sha3::Sha3()
-{ this->flagUseKeccak = false;
+Sha3::Sha3() {
+  this->flagUseKeccak = false;
 }
 
 // Define SHA3_USE_KECCAK to run "pure" Keccak, as opposed to SHA3.
@@ -121,29 +121,29 @@ static const unsigned keccakf_piln[24] =
 /* generally called after SHA3_KECCAK_SPONGE_WORDS-ctx->capacityWords words
  * are XORed into the state s
  */
-static void keccakf(uint64_t s[25])
-{ int i, j, round;
+static void keccakf(uint64_t s[25]) {
+  int i, j, round;
   uint64_t t, bc[5];
-  for (round = 0; round < Sha3::numberOfKeccakRounds; round ++)
-  { // Theta
+  for (round = 0; round < Sha3::numberOfKeccakRounds; round ++) {
+    // Theta
     for (i = 0; i < 5; i ++)
       bc[i] = s[i] ^ s[i + 5] ^ s[i + 10] ^ s[i + 15] ^ s[i + 20];
-    for (i = 0; i < 5; i ++)
-    { t = bc[(i + 4) % 5] ^ Sha3::rotl64(bc[(i + 1) % 5], 1);
+    for (i = 0; i < 5; i ++) {
+      t = bc[(i + 4) % 5] ^ Sha3::rotl64(bc[(i + 1) % 5], 1);
       for (j = 0; j < 25; j += 5)
         s[j + i] ^= t;
     }
     // Rho Pi
     t = s[1];
-    for(i = 0; i < 24; i ++)
-    { j = keccakf_piln[i];
+    for(i = 0; i < 24; i ++) {
+      j = keccakf_piln[i];
       bc[0] = s[j];
       s[j] = Sha3::rotl64(t, keccakf_rotc[i]);
       t = bc[0];
     }
     // Chi
-    for (j = 0; j < 25; j += 5)
-    { for(i = 0; i < 5; i ++)
+    for (j = 0; j < 25; j += 5) {
+      for(i = 0; i < 5; i ++)
         bc[i] = s[j + i];
       for(i = 0; i < 5; i ++)
         s[j + i] ^= (~bc[(i + 1) % 5]) & bc[(i + 2) % 5];
@@ -156,8 +156,8 @@ static void keccakf(uint64_t s[25])
 // *************************** Public Inteface ************************
 
 // For Init or Reset call these:
-void Sha3::sha3_Init256(void *priv)
-{ Sha3 *ctx = (Sha3 *) priv;
+void Sha3::sha3_Init256(void *priv) {
+  Sha3 *ctx = (Sha3 *) priv;
   bool flagOldUseKeccak = ctx->flagUseKeccak;
   memset(ctx, 0, sizeof(*ctx));
   ctx->flagUseKeccak = flagOldUseKeccak;
@@ -165,21 +165,21 @@ void Sha3::sha3_Init256(void *priv)
 }
 
 void
-sha3_Init384(void *priv)
-{ Sha3 *ctx = (Sha3 *) priv;
+sha3_Init384(void *priv) {
+  Sha3 *ctx = (Sha3 *) priv;
   memset(ctx, 0, sizeof(*ctx));
   ctx->capacityWords = 2 * 384 / (8 * sizeof(uint64_t));
 }
 
 void
-sha3_Init512(void *priv)
-{ Sha3 *ctx = (Sha3 *) priv;
+sha3_Init512(void *priv) {
+  Sha3 *ctx = (Sha3 *) priv;
   memset(ctx, 0, sizeof(*ctx));
   ctx->capacityWords = 2 * 512 / (8 * sizeof(uint64_t));
 }
 
-void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len)
-{ Sha3 *ctx = (Sha3 *) priv;
+void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len) {
+  Sha3 *ctx = (Sha3 *) priv;
   /* 0...7 -- how much is needed to have a word */
   unsigned old_tail = (8 - ctx->byteIndex) & 7;
   size_t words;
@@ -190,8 +190,8 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len)
     crash << "Internal sha3 computation error. " << crash;
   if (ctx->wordIndex >= (sizeof(ctx->s) / sizeof(ctx->s[0])))
     crash << "Internal sha3 computation error. " << crash;
-  if (len < old_tail)
-  { // Have no complete word or haven't started the word yet.
+  if (len < old_tail) {
+    // Have no complete word or haven't started the word yet.
     // Endian-independent code follows:
     while (len --)
       ctx->saved |= (uint64_t) (*(buf ++)) << ((ctx->byteIndex ++) * 8);
@@ -199,8 +199,8 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len)
       crash << "Internal sha3 computation error. " << crash;
     return;
   }
-  if (old_tail)
-  { // will have one word to process
+  if (old_tail) {
+    // will have one word to process
     // endian-independent code follows:
     len -= old_tail;
     while (old_tail --)
@@ -212,8 +212,8 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len)
       crash << "Internal sha3 computation error. " << crash;
     ctx->byteIndex = 0;
     ctx->saved = 0;
-    if (++ ctx->wordIndex == (Sha3::numberOfSpongeWords - ctx->capacityWords))
-    { keccakf(ctx->s);
+    if (++ ctx->wordIndex == (Sha3::numberOfSpongeWords - ctx->capacityWords)) {
+      keccakf(ctx->s);
       ctx->wordIndex = 0;
     }
   }
@@ -222,8 +222,8 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len)
     crash << "Internal sha3 computation error. " << crash;
   words = len / sizeof(uint64_t);
   tail = len - words * sizeof(uint64_t);
-  for (i = 0; i < words; i ++, buf += sizeof(uint64_t))
-  { const uint64_t t =
+  for (i = 0; i < words; i ++, buf += sizeof(uint64_t)) {
+    const uint64_t t =
     (uint64_t) (buf[0]) |
     ((uint64_t) (buf[1]) << 8 * 1) |
     ((uint64_t) (buf[2]) << 8 * 2) |
@@ -233,16 +233,16 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len)
     ((uint64_t) (buf[6]) << 8 * 6) |
     ((uint64_t) (buf[7]) << 8 * 7);
     ctx->s[ctx->wordIndex] ^= t;
-    if (++ ctx->wordIndex == (Sha3::numberOfSpongeWords - ctx->capacityWords))
-    { keccakf(ctx->s);
+    if (++ ctx->wordIndex == (Sha3::numberOfSpongeWords - ctx->capacityWords)) {
+      keccakf(ctx->s);
       ctx->wordIndex = 0;
     }
   }
   // finally, save the partial word
   if (!(ctx->byteIndex == 0 && tail < 8))
     crash << "Internal sha3 computation error. " << crash;
-  while (tail --)
-  { ctx->saved |= (uint64_t) (*(buf ++)) << ((ctx->byteIndex ++) * 8);
+  while (tail --) {
+    ctx->saved |= (uint64_t) (*(buf ++)) << ((ctx->byteIndex ++) * 8);
   }
   if (ctx->byteIndex >= 8)
     crash << "Internal sha3 computation error. " << crash;
@@ -251,17 +251,17 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len)
 // This is simply the 'update' with the padding block.
 // The padding block is 0x01 || 0x00* || 0x80. First 0x01 and last 0x80
 // bytes are always present, but they can be the same byte.
-void const * Sha3::sha3_Finalize(void *priv)
-{ Sha3 *ctx = (Sha3 *) priv;
+void const * Sha3::sha3_Finalize(void *priv) {
+  Sha3 *ctx = (Sha3 *) priv;
   // Append 2-bit suffix 01, per SHA-3 spec. Instead of 1 for padding we
   // use 1 << 2 below. The 0x02 below corresponds to the suffix 01.
   // Overall, we feed 0, then 1, and finally 1 to start padding. Without
   // M || 01, we would simply use 1 to start padding.
-  if (!ctx->flagUseKeccak)
-  { // SHA3 version
+  if (!ctx->flagUseKeccak) {
+    // SHA3 version
     ctx->s[ctx->wordIndex] ^= (ctx->saved ^ ((uint64_t) ((uint64_t) (0x02 | (1 << 2)) << ((ctx->byteIndex) * 8))));
-  } else
-  { // For testing the "pure" Keccak version
+  } else {
+    // For testing the "pure" Keccak version
     ctx->s[ctx->wordIndex] ^= (ctx->saved ^ ((uint64_t) ((uint64_t) 1 << (ctx->byteIndex * 8))));
   }
   ctx->s[Sha3::numberOfSpongeWords - ctx->capacityWords - 1] ^= 0x8000000000000000UL;
@@ -272,8 +272,8 @@ void const * Sha3::sha3_Finalize(void *priv)
   //    ... the conversion below ...
   //
   { unsigned i;
-    for (i = 0; i < Sha3::numberOfSpongeWords; i ++)
-    { const unsigned t1 = (uint32_t) ctx->s[i];
+    for (i = 0; i < Sha3::numberOfSpongeWords; i ++) {
+      const unsigned t1 = (uint32_t) ctx->s[i];
       const unsigned t2 = (uint32_t) ((ctx->s[i] >> 16) >> 16);
       ctx->sb[i * 8 + 0] = (uint8_t) (t1);
       ctx->sb[i * 8 + 1] = (uint8_t) (t1 >> 8);
@@ -288,36 +288,36 @@ void const * Sha3::sha3_Finalize(void *priv)
   return (ctx->sb);
 }
 
-void Sha3::init()
-{ this->sha3_Init256(this);
+void Sha3::init() {
+  this->sha3_Init256(this);
 }
 
-void Sha3::update(const std::string& input)
-{ this->update(input.c_str(), input.size());
+void Sha3::update(const std::string& input) {
+  this->update(input.c_str(), input.size());
 }
 
-void Sha3::update(List<unsigned char>& input)
-{ this->update(input.TheObjects, input.size);
+void Sha3::update(List<unsigned char>& input) {
+  this->update(input.TheObjects, input.size);
 }
 
-void Sha3::update(const void* inputBuffer, size_t length)
-{ this->sha3_Update(this, inputBuffer, length);
+void Sha3::update(const void* inputBuffer, size_t length) {
+  this->sha3_Update(this, inputBuffer, length);
 }
 
-void Sha3::finalize()
-{ this->sha3_Finalize(this);
+void Sha3::finalize() {
+  this->sha3_Finalize(this);
 }
 
-std::string Sha3::computeSha3_256(const std::string& input)
-{ this->flagUseKeccak = false;
+std::string Sha3::computeSha3_256(const std::string& input) {
+  this->flagUseKeccak = false;
   this->init();
   this->update(input.c_str(), input.size());
   this->finalize();
   return this->getResultString();
 }
 
-std::string Sha3::getResultString()
-{ std::string result;
+std::string Sha3::getResultString() {
+  std::string result;
   result.resize(32);
   for (int i = 0; i < 32; i ++) {
     result[i] = this->sb[i];
@@ -325,20 +325,20 @@ std::string Sha3::getResultString()
   return result;
 }
 
-void Sha3::getResultVector(List<unsigned char>& output)
-{ output.SetSize(32);
+void Sha3::getResultVector(List<unsigned char>& output) {
+  output.SetSize(32);
   for (int i = 0; i < 32; i ++)
     output[i] = this->sb[i];
 }
 
-std::string Crypto::computeSha3_256OutputBase64URL(const std::string& input)
-{ List<unsigned char> outputList;
+std::string Crypto::computeSha3_256OutputBase64URL(const std::string& input) {
+  List<unsigned char> outputList;
   Crypto::computeSha3_256(input, outputList);
   return Crypto::ConvertStringToBase64(outputList, true);
 }
 
-void Crypto::computeKeccak3_256(const std::string& input, List<unsigned char>& output)
-{ Sha3 theHasher;
+void Crypto::computeKeccak3_256(const std::string& input, List<unsigned char>& output) {
+  Sha3 theHasher;
   theHasher.flagUseKeccak = true;
   theHasher.init();
   theHasher.update(input.c_str(), input.size());
@@ -346,8 +346,8 @@ void Crypto::computeKeccak3_256(const std::string& input, List<unsigned char>& o
   theHasher.getResultVector(output);
 }
 
-void Crypto::computeSha3_256(const std::string& input, List<unsigned char>& output)
-{ Sha3 theHasher;
+void Crypto::computeSha3_256(const std::string& input, List<unsigned char>& output) {
+  Sha3 theHasher;
   theHasher.flagUseKeccak = false;
   theHasher.init();
   theHasher.update(input.c_str(), input.size());

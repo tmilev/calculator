@@ -166,12 +166,12 @@ public:
   static bool innerPolynomialRelations(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerEnsureExpressionDependsOnlyOnMandatoryVariables(Calculator& theCommands, const Expression& input, Expression& output, bool excludeNamedConstants);
   static bool innerEnsureExpressionDependsOnlyOnMandatoryVariablesExcludeNamedConstants
-  (Calculator& theCommands, const Expression& input, Expression& output)
-  { return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables(theCommands, input, output, true);
+  (Calculator& theCommands, const Expression& input, Expression& output) {
+    return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables(theCommands, input, output, true);
   }
   static bool innerEnsureExpressionDependsOnlyOnMandatoryVariablesIncludeNamedConstants
-  (Calculator& theCommands, const Expression& input, Expression& output)
-  { return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables(theCommands, input, output, false);
+  (Calculator& theCommands, const Expression& input, Expression& output) {
+    return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables(theCommands, input, output, false);
   }
   static bool innerEnsureExpressionDependsOnlyOnStandard(Calculator& theCommands, const Expression& input, Expression& output);
 
@@ -352,12 +352,12 @@ public:
   static bool innerDrawExpressionGraphWithOptions
   (Calculator& theCommands, const Expression& input, Expression& output, bool useFullTree);
   static bool innerDrawExpressionGraph
-  (Calculator& theCommands, const Expression& input, Expression& output)
-  { return innerDrawExpressionGraphWithOptions(theCommands, input, output, false);
+  (Calculator& theCommands, const Expression& input, Expression& output) {
+    return innerDrawExpressionGraphWithOptions(theCommands, input, output, false);
   }
   static bool innerDrawExpressionGraphFull
-  (Calculator& theCommands, const Expression& input, Expression& output)
-  { return innerDrawExpressionGraphWithOptions(theCommands, input, output, true);
+  (Calculator& theCommands, const Expression& input, Expression& output) {
+    return innerDrawExpressionGraphWithOptions(theCommands, input, output, true);
   }
 
   static bool innerIf(Calculator& theCommands, const Expression& input, Expression& output);
@@ -454,14 +454,14 @@ public:
   static bool innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestStandardOutput(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRootSAsAndSltwos(Calculator& theCommands, const Expression& input, Expression& output, bool showSLtwos, bool MustRecompute);
-  static bool innerPrintRootSAs(Calculator& theCommands, const Expression& input, Expression& output)
-  { return CalculatorFunctionsGeneral::innerRootSAsAndSltwos(theCommands, input, output, false, false);
+  static bool innerPrintRootSAs(Calculator& theCommands, const Expression& input, Expression& output) {
+    return CalculatorFunctionsGeneral::innerRootSAsAndSltwos(theCommands, input, output, false, false);
   }
-  static bool innerPrintRootSAsForceRecompute(Calculator& theCommands, const Expression& input, Expression& output)
-  { return CalculatorFunctionsGeneral::innerRootSAsAndSltwos(theCommands, input, output, false, true);
+  static bool innerPrintRootSAsForceRecompute(Calculator& theCommands, const Expression& input, Expression& output) {
+    return CalculatorFunctionsGeneral::innerRootSAsAndSltwos(theCommands, input, output, false, true);
   }
-  static bool innerPrintSltwos(Calculator& theCommands, const Expression& input, Expression& output)
-  { return CalculatorFunctionsGeneral::innerRootSAsAndSltwos(theCommands, input, output, true, false);
+  static bool innerPrintSltwos(Calculator& theCommands, const Expression& input, Expression& output) {
+    return CalculatorFunctionsGeneral::innerRootSAsAndSltwos(theCommands, input, output, true, false);
   }
   static bool innerFindProductDistanceModN
   (Calculator& theCommands, const Expression& input, Expression& output);
@@ -471,16 +471,16 @@ public:
   static bool innerSolveSerreLikeSystem
   (Calculator& theCommands, const Expression& input, Expression& output, bool useUpperLimit, bool startWithAlgebraicClosure);
   static bool innerSolveSerreLikeSystemNoUpperLimit
-  (Calculator& theCommands, const Expression& input, Expression& output)
-  { return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, false, false);
+  (Calculator& theCommands, const Expression& input, Expression& output) {
+    return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, false, false);
   }
   static bool innerSolveSerreLikeSystemUpperLimit
-  (Calculator& theCommands, const Expression& input, Expression& output)
-  { return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, true, false);
+  (Calculator& theCommands, const Expression& input, Expression& output) {
+    return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, true, false);
   }
   static bool innerSolveSerreLikeSystemAlgebraic
-  (Calculator& theCommands, const Expression& input, Expression& output)
-  { return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, false, true);
+  (Calculator& theCommands, const Expression& input, Expression& output) {
+    return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, false, true);
   }
   static bool innerSolveSerreLikeSystemAlgebraicUpperLimit(
     Calculator& theCommands, const Expression& input, Expression& output
@@ -500,6 +500,9 @@ public:
     Calculator& theCommands, const Expression& input, Expression& output
   );
   static bool innerFormatCPPSourceCode(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
+  static bool innerFormatCPPDirectory(
     Calculator& theCommands, const Expression& input, Expression& output
   );
 };

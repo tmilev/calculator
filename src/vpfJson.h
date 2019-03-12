@@ -128,14 +128,14 @@ public:
 std::ostream& operator<<(std::ostream& out, const JSData& data);
 
 template <typename coefficient>
-void JSData::operator=(const Vector<coefficient>& other)
-{ for (int i = 0; i < other.size; i ++)
+void JSData::operator=(const Vector<coefficient>& other) {
+  for (int i = 0; i < other.size; i ++)
     (*this)[i] = other[i];
 }
 
 template <typename coefficient>
-void JSData::operator=(const Matrix<coefficient>& other)
-{ for (int i = 0; i < other.NumRows; i ++)
+void JSData::operator=(const Matrix<coefficient>& other) {
+  for (int i = 0; i < other.NumRows; i ++)
     for (int j = 0; j < other.NumCols; j ++)
       (*this)[i][j] = other(i, j);
 }

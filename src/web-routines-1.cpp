@@ -145,8 +145,8 @@ void WebServerMonitor::Monitor() {
       << theCrawler.lastTransactionErrors << theCrawler.lastTransaction << ". "
       << numConsecutiveFailedPings << " consecutive fails so far, restarting on " << maxNumPingFailures
       << ". " << logger::endL;
-    } else
-    { std::cout << "Connection monitor: Ping success #" << numPings << std::endl;
+    } else {
+      std::cout << "Connection monitor: Ping success #" << numPings << std::endl;
       numConsecutiveFailedPings = 0;
     }
     if (numConsecutiveFailedPings >= maxNumPingFailures) {
@@ -187,8 +187,8 @@ void WebCrawler::init() {
     this->portOrService = "8080";
 //    this->addressToConnectTo ="localhost";
     this->addressToConnectTo = "127.0.0.1";
-  } else
-  { this->portOrService = "8155";
+  } else {
+    this->portOrService = "8155";
     this->addressToConnectTo = "127.0.0.1";
   }
 }
@@ -236,8 +236,8 @@ void WebCrawler::PingCalculatorStatus() {
       struct sockaddr_in *ipv4 = (struct sockaddr_in *) p->ai_addr;
       theAddress = &(ipv4->sin_addr);
       reportStream << "IPv4: ";
-    } else
-    { // IPv6
+    } else {
+      // IPv6
       struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *) p->ai_addr;
       theAddress = &(ipv6->sin6_addr);
       reportStream << "IPv6: ";
@@ -251,8 +251,8 @@ void WebCrawler::PingCalculatorStatus() {
     if (this->theSocket < 0) {
       this->lastTransactionErrors = "failed to create socket ";
       continue;
-    } else
-    { fd_set fdConnectSockets;
+    } else {
+      fd_set fdConnectSockets;
       FD_ZERO(&fdConnectSockets);
       FD_SET(this->theSocket, &fdConnectSockets);
       timeval timeOut;
@@ -351,8 +351,8 @@ void WebCrawler::FetchWebPage
       theAddress = &(ipv4->sin_addr);
       if (commentsGeneral != 0)
         *commentsGeneral << "IPv4: ";
-    } else
-    { // IPv6
+    } else {
+      // IPv6
       struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *) p->ai_addr;
       theAddress = &(ipv6->sin6_addr);
       if (commentsGeneral!= 0)
@@ -368,8 +368,8 @@ void WebCrawler::FetchWebPage
     if (this->theSocket < 0) {
       this->lastTransactionErrors = "failed to create socket ";
       continue;
-    } else
-    { fd_set fdConnectSockets;
+    } else {
+      fd_set fdConnectSockets;
       FD_ZERO(&fdConnectSockets);
       FD_SET(this->theSocket, &fdConnectSockets);
       timeOut.tv_sec = 1;
@@ -407,8 +407,8 @@ void WebCrawler::FetchWebPage
       this->lastTransactionErrors = errorStream.str();
       close(this->theSocket);
       continue;
-    } else
-    { if (commentsGeneral != 0)
+    } else {
+      if (commentsGeneral != 0)
         *commentsGeneral << "connected: "
         << this->addressToConnectTo << " port: " << this->portOrService << ". <hr>";
     }
@@ -431,8 +431,8 @@ void WebCrawler::FetchWebPagePart2
   if (this->flagDoUseGET) {
     theMessageHeader << "GET " << this->addressToConnectTo << " HTTP/1.0"
     << "\r\n" << "Host: " << this->serverToConnectTo << "\r\n\r\n";
-  } else
-  { theMessageHeader << "POST " << this->addressToConnectTo << " HTTP/1.0"
+  } else {
+    theMessageHeader << "POST " << this->addressToConnectTo << " HTTP/1.0"
     << "\r\n" << "Host: " << this->serverToConnectTo;
     theMessageHeader << "\r\nContent-length: " << this->postMessageToSend.size();
     theMessageHeader << "\r\n\r\n";
@@ -478,8 +478,8 @@ void WebCrawler::FetchWebPagePart2
       //  tempStream << "\\N";
       //else
       //  tempStream << "\\R";
-    } else
-    { numcrlfs = 0;
+    } else {
+      numcrlfs = 0;
       //tempStream << fullMessage[bodyStart];
     }
   }
@@ -833,8 +833,8 @@ bool WebCrawler::VerifyRecaptcha
       << response
       << "</span>";
     return false;
-  } else
-  { if (commentsGeneralNONsensitive != 0)
+  } else {
+    if (commentsGeneralNONsensitive != 0)
       *commentsGeneralNONsensitive
       << "<br><span style =\"color:green\">"
       << "<b>" << "Your recaptcha answer appears to be valid. "
@@ -891,8 +891,8 @@ std::string WebWorker::GetSignUpRequestResult() {
     result["error"] = errorStream.str();
     result["comments"] = generalCommentsStream.str();
     return result.ToString(false);
-  } else
-  { outputStream << "<span style =\"color:green\"><b>"
+  } else {
+    outputStream << "<span style =\"color:green\"><b>"
     << "Username ("
     << theUser.username
     << ") with email ("

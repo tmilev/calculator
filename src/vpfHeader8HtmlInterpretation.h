@@ -68,8 +68,8 @@ public:
   //  Rational maxCorrectAnswersInAllChildren;
   void ComputeID();
   void reset(int parentSize, MapLisT<std::string, TopicElement, MathRoutines::hashString>* containerElements);
-  friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt)
-  { output << theElt.ToString();
+  friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt) {
+    output << theElt.ToString();
     return output;
   }
   std::string GetItemStart(CalculatorHTML& owner, bool doIncludeScoreButton, bool plainStyle);
@@ -81,8 +81,8 @@ public:
   void ComputeSlides(CalculatorHTML& owner);
   void ComputeHomework(CalculatorHTML& owner);
   void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
-  TopicElement()
-  { this->reset(0, 0);
+  TopicElement() {
+    this->reset(0, 0);
   }
   static void GetTopicList
   (const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output,
@@ -307,14 +307,14 @@ public:
   void LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure);
   void FigureOutCurrentProblemList(std::stringstream& comments);
   std::string LoadAndInterpretCurrentProblemItemJSON(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed, std::stringstream *commentsOnFailure);
-  static unsigned int HashFunction(const CalculatorHTML& input)
-  { return input.HashFunction();
+  static unsigned int HashFunction(const CalculatorHTML& input) {
+    return input.HashFunction();
   }
-  unsigned int HashFunction() const
-  { return MathRoutines::hashString(this->fileName);
+  unsigned int HashFunction() const {
+    return MathRoutines::hashString(this->fileName);
   }
-  bool operator==(const CalculatorHTML& other) const
-  { return this->fileName == other.fileName;
+  bool operator==(const CalculatorHTML& other) const {
+    return this->fileName == other.fileName;
   }
   std::string ToStringAllSectionDeadlines(const std::string& topicID, bool isSection);
   std::string ToStringOnEDeadlineFormatted

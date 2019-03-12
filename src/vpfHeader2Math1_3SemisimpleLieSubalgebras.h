@@ -51,8 +51,8 @@ class NilradicalCandidate
   Vectors<Rational> theNilradicalSubsetWeights;
   Vectors<Rational> theNonFKhwVectorsStrongRelativeToSubsetWeights;
 
-  NilradicalCandidate() : owner(0), flagRestrictedCentralizerConditionHoldS(false), flagParabolicACextendsToParabolicAC(false), flagLinfiniteRelFound(false)
-  {
+  NilradicalCandidate() : owner(0), flagRestrictedCentralizerConditionHoldS(false), flagParabolicACextendsToParabolicAC(false), flagLinfiniteRelFound(false) {
+   
   }
   void reset();
   void CheckInitialization() const;
@@ -91,8 +91,8 @@ public:
 
 class CandidateSSSubalgebra
 {
-  friend std::ostream& operator << (std::ostream& output, const CandidateSSSubalgebra& theCandidate)
-  { output << theCandidate.ToString();
+  friend std::ostream& operator << (std::ostream& output, const CandidateSSSubalgebra& theCandidate) {
+    output << theCandidate.ToString();
     return output;
   }
 
@@ -196,8 +196,8 @@ public:
 
   bool flagDeallocated;
   CandidateSSSubalgebra();
-  ~CandidateSSSubalgebra()
-  { this->flagDeallocated = true;
+  ~CandidateSSSubalgebra() {
+    this->flagDeallocated = true;
   }
   WeylGroupData& GetWeylNonEmbeddedDefaultScale();
   void reset(SemisimpleSubalgebras* inputOwner = 0);
@@ -371,16 +371,16 @@ public:
   std::string GetRelativePhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra) const;
   std::string GetDisplayFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat) const;
   const CandidateSSSubalgebra& baseSubalgebra();
-  bool operator==(const SemisimpleSubalgebras& other)
-  { MacroRegisterFunctionWithName("SemisimpleSubalgebras::operator==");
+  bool operator==(const SemisimpleSubalgebras& other) {
+    MacroRegisterFunctionWithName("SemisimpleSubalgebras::operator==");
     if (this->owner == other.owner)
       return true;
     if (this->owner == 0 || other.owner == 0)
       crash << "This is a programming error: comparing non-initialized Semisimple Lie Subalgebras. " << crash;
     return *this->owner == *other.owner;
   }
-  SemisimpleLieAlgebra& GetSSowner() const
-  { if (this->owner == 0)
+  SemisimpleLieAlgebra& GetSSowner() const {
+    if (this->owner == 0)
       crash << "This is a programming error: attempted to access non-initialized semisimple Lie subalgerbas. " << crash;
     return *this->owner;
   }
@@ -399,11 +399,11 @@ public:
    MapReferenceS<DynkinType, SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
    ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras);
   void reset();
-  ~SemisimpleSubalgebras()
-  { this->flagDeallocated = true;
+  ~SemisimpleSubalgebras() {
+    this->flagDeallocated = true;
   }
-  SemisimpleSubalgebras(): flagDeallocated(false)
-  { this->reset();
+  SemisimpleSubalgebras(): flagDeallocated(false) {
+    this->reset();
   }
   void AddSubalgebraIfNewSetToStackTop(CandidateSSSubalgebra& input);
   void AddSubalgebraToStack

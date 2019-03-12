@@ -109,8 +109,8 @@ std::string HtmlInterpretation::GetProblemSolution() {
   return out.str();
 }
 
-std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetSetProblemDatabaseInfoHtml");
+std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetSetProblemDatabaseInfoHtml");
 #ifdef MACRO_use_MongoDB
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "<b>Only admins may set problem weights.</b>";
@@ -123,22 +123,22 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
   //stOutput << "DEBUG: userDefault: " << theGlobalVariables.userDefault.ToStringUnsecure();
   theProblem.currentUseR.UserCalculatorData::operator=(theGlobalVariables.userDefault);
   std::stringstream out;
-  if (!theProblem.PrepareSectionList(commentsOnFailure))
-  { out << "<span style =\"color:red\"><b>Failed to prepare section list. </b></span>" << commentsOnFailure.str();
+  if (!theProblem.PrepareSectionList(commentsOnFailure)) {
+    out << "<span style =\"color:red\"><b>Failed to prepare section list. </b></span>" << commentsOnFailure.str();
     return out.str();
   }
   if (!theProblem.LoadProblemInfoFromJSONAppend
-       (theProblem.currentUseR.problemWeights, theProblem.currentUseR.theProblemData, out))
-  { out << "Failed to interpret the problem weight string. ";
+       (theProblem.currentUseR.problemWeights, theProblem.currentUseR.theProblemData, out)) {
+    out << "Failed to interpret the problem weight string. ";
     return out.str();
   }
   if (!theProblem.LoadProblemInfoFromJSONAppend
-       (theProblem.currentUseR.deadlines, theProblem.currentUseR.theProblemData, out))
-  { out << "Failed to interpret the deadline string. ";
+       (theProblem.currentUseR.deadlines, theProblem.currentUseR.theProblemData, out)) {
+    out << "Failed to interpret the deadline string. ";
     return out.str();
   }
-  if (theProblem.MergeProblemInfoInDatabaseJSON(inputProblemInfo, commentsOnFailure))
-  { out << "<span style =\"color:green\"><b>Modified. </b></span>";
+  if (theProblem.MergeProblemInfoInDatabaseJSON(inputProblemInfo, commentsOnFailure)) {
+    out << "<span style =\"color:green\"><b>Modified. </b></span>";
     //out << "<meta http-equiv=\"refresh\" content =\"0;\">";
   } else
     out << "<span style =\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
@@ -152,8 +152,8 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
 }
 
 std::string HtmlInterpretation::GetSanitizedComment
-(const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetSanitizedComment");
+(const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetSanitizedComment");
   theFormat.flagUseQuotes = false;
   resultIsPlot = false;
   //if (input.IsOfType<std::string>(&theString))
@@ -161,13 +161,13 @@ std::string HtmlInterpretation::GetSanitizedComment
   //  << theString;
   //}
   std::string theString;
-  if (input.IsOfType<std::string>(&theString))
-  { if (MathRoutines::StringBeginsWith(theString, "Approximations have been"))
+  if (input.IsOfType<std::string>(&theString)) {
+    if (MathRoutines::StringBeginsWith(theString, "Approximations have been"))
       return "";
     return input.ToString(&theFormat);
   }
-  if (input.IsOfType<Plot>())
-  { resultIsPlot = true;
+  if (input.IsOfType<Plot>()) {
+    resultIsPlot = true;
     return input.ToString(&theFormat);
   }
   if (input.HasType<Plot>())
@@ -183,23 +183,23 @@ std::string HtmlInterpretation::GetSanitizedComment
 
 std::string HtmlInterpretation::GetCommentsInterpretation
 (Calculator& theInterpreterWithAdvice,
- int indexShift, FormatExpressions& theFormat)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetCommentsInterpretation");
+ int indexShift, FormatExpressions& theFormat) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetCommentsInterpretation");
   std::stringstream out;
   theFormat.flagExpressionIsFinal = true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
   theInterpreterWithAdvice.theObjectContainer.resetPlots();
   //stOutput << "DEBUG: theInterpreterWithAdvice.flagPlotNoCtrls: "
   //<< theInterpreterWithAdvice.flagPlotNoControls;
-  if (indexShift >= theInterpreterWithAdvice.theProgramExpression.size())
-  { stOutput << "<br>DEBUG: something is very wrong with indexshift in comments!";
+  if (indexShift >= theInterpreterWithAdvice.theProgramExpression.size()) {
+    stOutput << "<br>DEBUG: something is very wrong with indexshift in comments!";
     return "";
   }
   const Expression& currentE = theInterpreterWithAdvice.theProgramExpression[indexShift][1];
   //out << "<br>DEBUG: currentE: " << HtmlRoutines::ConvertStringToHtmlString(currentE.ToString(), true);
   bool resultIsPlot = false;
-  if (!currentE.StartsWith(theInterpreterWithAdvice.opEndStatement()))
-  { //out << "<hr>DEBUG: currentE is not starting with commands!<hr>";
+  if (!currentE.StartsWith(theInterpreterWithAdvice.opEndStatement())) {
+    //out << "<hr>DEBUG: currentE is not starting with commands!<hr>";
     out << HtmlInterpretation::GetSanitizedComment(currentE, theFormat, resultIsPlot);
     return out.str();
   }
@@ -207,8 +207,8 @@ std::string HtmlInterpretation::GetCommentsInterpretation
   //<< HtmlRoutines::StringToHtmlString(currentE.ToString(), true)
   //;
   std::string currentS;
-  for (int i = 1; i < currentE.size(); i ++)
-  { currentS = HtmlInterpretation::GetSanitizedComment(currentE[i], theFormat,resultIsPlot);
+  for (int i = 1; i < currentE.size(); i ++) {
+    currentS = HtmlInterpretation::GetSanitizedComment(currentE[i], theFormat,resultIsPlot);
     if (MathRoutines::StringTrimWhiteSpace(currentS) == "")
       continue;
     out << currentS;
@@ -220,8 +220,8 @@ std::string HtmlInterpretation::GetCommentsInterpretation
   return out.str();
 }
 
-std::string HtmlInterpretation::submitAnswersPreview()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswersPreview");
+std::string HtmlInterpretation::submitAnswersPreview() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswersPreview");
   double startTime = theGlobalVariables.GetElapsedSeconds();
   std::string lastStudentAnswerID;
   std::string lastAnswer;
@@ -243,16 +243,16 @@ std::string HtmlInterpretation::submitAnswersPreview()
   if (!theProblem.ParseHTMLPrepareCommands(&comments))
     out << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
   int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
-  if (indexLastAnswerId == - 1)
-  { out << "<br>Student submitted answerID: " << lastStudentAnswerID
+  if (indexLastAnswerId == - 1) {
+    out << "<br>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime
     << " second(s).";
     return out.str();
   }
   Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
-  if (!theProblem.PrepareCommands(&comments))
-  { out << "Something went wrong while interpreting the problem file. ";
+  if (!theProblem.PrepareCommands(&comments)) {
+    out << "Something went wrong while interpreting the problem file. ";
     if (theGlobalVariables.UserDebugFlagOn() &&
         theGlobalVariables.UserDefaultHasAdminRights())
       out << comments.str();
@@ -314,8 +314,8 @@ std::string HtmlInterpretation::submitAnswersPreview()
   bool hasCommentsBeforeSubmission =
   (MathRoutines::StringTrimWhiteSpace
   (currentA.commandsCommentsBeforeSubmission) != "");
-  if (hasCommentsBeforeSubmission)
-  { calculatorInputStream << "CommandEnclosure{}("
+  if (hasCommentsBeforeSubmission) {
+    calculatorInputStream << "CommandEnclosure{}("
     <<  currentA.commandsCommentsBeforeSubmission
     << ");";
     calculatorInputStreamNoEnclosures
@@ -329,8 +329,8 @@ std::string HtmlInterpretation::submitAnswersPreview()
   << HtmlRoutines::ConvertStringToURLString(calculatorInputStreamNoEnclosures.str(), false)
   << "\">Input link</a>";
   theInterpreterWithAdvice.Evaluate(calculatorInputStream.str());
-  if (theInterpreterWithAdvice.syntaxErrors != "")
-  { out << "<br><span style =\"color:red\"><b>"
+  if (theInterpreterWithAdvice.syntaxErrors != "") {
+    out << "<br><span style =\"color:red\"><b>"
     << "Something went wrong when parsing your answer "
     << "in the context of the current problem. "
     << "</b></span>";
@@ -342,13 +342,13 @@ std::string HtmlInterpretation::submitAnswersPreview()
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
   }
-  if (theInterpreterWithAdvice.flagAbortComputationASAP )
-  { out << "<br><span style =\"color:red\"><b>"
+  if (theInterpreterWithAdvice.flagAbortComputationASAP ) {
+    out << "<br><span style =\"color:red\"><b>"
     << "Something went wrong when interpreting your answer "
     << "in the context of the current problem. "
     << "</b></span>";
-    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-    { out << "<br>Logged-in as admin with debug flag on => printing error details. "
+    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn()) {
+      out << "<br>Logged-in as admin with debug flag on => printing error details. "
       << theInterpreterWithAdvice.outputString << "<br>"
       << theInterpreterWithAdvice.outputCommentsString;
       out << "<hr><b>Calculator input:</b> "
@@ -365,8 +365,8 @@ std::string HtmlInterpretation::submitAnswersPreview()
   << theGlobalVariables.GetElapsedSeconds() - startTime
   << " second(s).<hr>";
   if (theGlobalVariables.UserDefaultHasAdminRights() &&
-      theGlobalVariables.UserDebugFlagOn())
-  { out << "<hr> " << problemLinkStream.str()
+      theGlobalVariables.UserDebugFlagOn()) {
+    out << "<hr> " << problemLinkStream.str()
     << "<br>"
     << calculatorInputStreamNoEnclosures.str()
     << "<br>"
@@ -377,8 +377,8 @@ std::string HtmlInterpretation::submitAnswersPreview()
   return out.str();
 }
 
-std::string HtmlInterpretation::ClonePageResult(bool useJSON)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::ClonePageResult");
+std::string HtmlInterpretation::ClonePageResult(bool useJSON) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::ClonePageResult");
   if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights() ||
       !theGlobalVariables.flagUsingSSLinCurrentConnection)
     return "<b>Cloning problems allowed only for logged-in admins under ssl connection. </b>";
@@ -387,18 +387,18 @@ std::string HtmlInterpretation::ClonePageResult(bool useJSON)
   std::stringstream out;
   std::string startingFileString;
   //out << "DEBUG: here be i.";
-  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileNameToBeCloned, startingFileString, &out))
-  { out << "Could not find file: " << fileNameToBeCloned;
+  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileNameToBeCloned, startingFileString, &out)) {
+    out << "Could not find file: " << fileNameToBeCloned;
     return out.str();
   }
   std::fstream theFile;
-  if (FileOperations::FileExistsVirtualCustomizedReadOnly(fileNameResulT, 0))
-  { out << "<b>File: " << fileNameResulT << " already exists. </b>";
+  if (FileOperations::FileExistsVirtualCustomizedReadOnly(fileNameResulT, 0)) {
+    out << "<b>File: " << fileNameResulT << " already exists. </b>";
     return out.str();
   }
   if (!FileOperations::OpenFileVirtualCustomizedWriteOnlyCreateIfNeeded
-       (theFile, fileNameResulT, false, false, false, &out))
-  { out << "<b><span style =\"color:red\">Failed to open output file: " << fileNameResulT << ". </span></b>";
+       (theFile, fileNameResulT, false, false, false, &out)) {
+    out << "<b><span style =\"color:red\">Failed to open output file: " << fileNameResulT << ". </span></b>";
     return out.str();
   }
   //out << "DEBUG: here be i part2. So far output: " << out.str();
@@ -408,8 +408,8 @@ std::string HtmlInterpretation::ClonePageResult(bool useJSON)
   std::stringstream comments;
   if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(fileNameResulT, fileNameNonVirtual, &comments))
     comments << "Could not get physical file name from virtual. ";
-  if (!useJSON)
-  { CalculatorHTML linkInterpreter;
+  if (!useJSON) {
+    CalculatorHTML linkInterpreter;
     out << "<br>" << linkInterpreter.ToStringLinkFromFileName(fileNameResulT);
     out << "<br><b><span style =\"color:green\">Written content to file: "
     << fileNameResulT << ". </span></b>" << "<br> " << comments.str();
@@ -418,8 +418,8 @@ std::string HtmlInterpretation::ClonePageResult(bool useJSON)
   return out.str();
 }
 
-std::string HtmlInterpretation::GetAboutPage()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetAboutPage");
+std::string HtmlInterpretation::GetAboutPage() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetAboutPage");
   std::stringstream out;
   out << "<!DOCTYPE html>";
   out << "<html>";
@@ -436,8 +436,8 @@ std::string HtmlInterpretation::GetAboutPage()
   ("/calculator-html/about.html", theFile, false, false, &commentsOnFailure);
   if (!isGood)
     isGood = FileOperations::LoadFileToStringVirtual("/html/about.html", theFile, false, false, &commentsOnFailure);
-  if (!isGood)
-  { out << "<span style =\"color:red\"><b>"
+  if (!isGood) {
+    out << "<span style =\"color:red\"><b>"
     << commentsOnFailure.str()
     << "</b></span>";
   } else
@@ -446,8 +446,8 @@ std::string HtmlInterpretation::GetAboutPage()
   return out.str();
 }
 
-void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::BuildHtmlJSpage");
+void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::BuildHtmlJSpage");
   std::stringstream outFirstPart, outSecondPart;
   std::stringstream theReader(this->htmlRaw);
   theReader.seekg(0);
@@ -456,15 +456,15 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash)
   FileOperations::GetVirtualNameWithHash(WebAPI::request::calculatorHTML) :
   WebAPI::request::calculatorHTML;
 
-  for (std::string currentLine; std::getline(theReader, currentLine, '\n');)
-  { int startChar = currentLine.find(WebAPI::request::calculatorHTML);
+  for (std::string currentLine; std::getline(theReader, currentLine, '\n');) {
+    int startChar = currentLine.find(WebAPI::request::calculatorHTML);
     bool shouldShortCut = false;
     if (startChar == - 1)
       shouldShortCut = true;
     //else
     //  shouldShortCut = (currentLine.find("/MathJax.js?") != std::string::npos);
-    if (shouldShortCut)
-    { if (this->jsFileNames.size > 0)
+    if (shouldShortCut) {
+      if (this->jsFileNames.size > 0)
         outSecondPart << currentLine << "\n";
       else
         outFirstPart << currentLine << "\n";
@@ -474,15 +474,15 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash)
     MathRoutines::SplitStringInTwo(currentLine, startChar, firstPart, secondAndThirdPart);
     MathRoutines::SplitStringInTwo(secondAndThirdPart, WebAPI::request::calculatorHTML.size(), notUsed, thirdPart);
     if (currentLine.find("<script") == std::string::npos ||
-        currentLine.find("/MathJax.js?") != std::string::npos)
-    { std::stringstream lineStream;
+        currentLine.find("/MathJax.js?") != std::string::npos) {
+      std::stringstream lineStream;
       lineStream << firstPart << virtualFolder << thirdPart << "\n";
       if (this->jsFileNames.size > 0)
         outSecondPart << lineStream.str();
       else
         outFirstPart << lineStream.str();
-    } else
-    { MathRoutines::StringSplitExcludeDelimiter(secondAndThirdPart, '"', splitterStrings);
+    } else {
+      MathRoutines::StringSplitExcludeDelimiter(secondAndThirdPart, '"', splitterStrings);
       this->jsFileNames.AddOnTop(splitterStrings[0]);
     }
   }
@@ -494,33 +494,33 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash)
   this->htmlJSbuild = outFirstPart.str();
 }
 
-std::string HtmlInterpretation::GetOnePageJS(bool appendBuildHash)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetOnePageJS");
+std::string HtmlInterpretation::GetOnePageJS(bool appendBuildHash) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetOnePageJS");
   HtmlInterpretation theInterpretation;
   std::stringstream out;
   std::stringstream errorStream;
   if (!FileOperations::LoadFileToStringVirtual
-       ("/calculator-html/index.html", theInterpretation.htmlRaw, false, false, &errorStream))
-  { out << "<html><body><b>Failed to load the application file. "
+       ("/calculator-html/index.html", theInterpretation.htmlRaw, false, false, &errorStream)) {
+    out << "<html><body><b>Failed to load the application file. "
     << "Further comments follow. " << errorStream.str() << "</body></html>";
     return out.str();
   }
   theInterpretation.BuildHtmlJSpage(appendBuildHash);
   theInterpretation.jsFileContents.SetSize(theInterpretation.jsFileNames.size);
-  for (int i = 0; i < theInterpretation.jsFileNames.size; i ++)
-  { if (!FileOperations::LoadFileToStringVirtual
+  for (int i = 0; i < theInterpretation.jsFileNames.size; i ++) {
+    if (!FileOperations::LoadFileToStringVirtual
          (theInterpretation.jsFileNames[i], theInterpretation.jsFileContents[i], false, false, &errorStream))
       return errorStream.str();
   }
   return theInterpretation.GetOnePageJSBrowserify();
 }
 
-std::string HtmlInterpretation::GetOnePageJSBrowserify()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetOnePageJSBrowserify");
+std::string HtmlInterpretation::GetOnePageJSBrowserify() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetOnePageJSBrowserify");
   std::stringstream out;
   out << "var theJSContent = {\n";
-  for (int i = 0; i < this->jsFileContents.size; i ++)
-  { std::string fileNameNoJS;
+  for (int i = 0; i < this->jsFileContents.size; i ++) {
+    std::string fileNameNoJS;
     if (!MathRoutines::StringEndsWith(this->jsFileNames[i], ".js", &fileNameNoJS))
       fileNameNoJS = this->jsFileNames[i];
     out << "\"" << fileNameNoJS << "\" : function(require, module, exports){\n";
@@ -531,14 +531,14 @@ std::string HtmlInterpretation::GetOnePageJSBrowserify()
   return out.str();
 }
 
-std::string HtmlInterpretation::GetApp(bool appendBuildHash)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetApp");
+std::string HtmlInterpretation::GetApp(bool appendBuildHash) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetApp");
   HtmlInterpretation theInterpretation;
   std::stringstream out;
   std::stringstream errorStream;
   if (!FileOperations::LoadFileToStringVirtual
-       ("/calculator-html/index.html", theInterpretation.htmlRaw, false, false, &errorStream))
-  { out << "<html><body><b>Failed to load the application file. "
+       ("/calculator-html/index.html", theInterpretation.htmlRaw, false, false, &errorStream)) {
+    out << "<html><body><b>Failed to load the application file. "
     << "Further comments follow. " << errorStream.str() << "</body></html>";
     return out.str();
   }
@@ -559,8 +559,8 @@ public:
   JSData ToJSON() const;
 };
 
-JSData Course::ToJSON() const
-{ JSData result;
+JSData Course::ToJSON() const {
+  JSData result;
   result["title"] = this->title;
   result["courseHome"] = "coursetemplates/" + this->courseTemplate;
   result["topicList"] = "topiclists/" + this->courseTopics;
@@ -569,19 +569,19 @@ JSData Course::ToJSON() const
   return result;
 }
 
-std::string Course::ToString() const
-{ std::stringstream out;
+std::string Course::ToString() const {
+  std::stringstream out;
   out << "Html: " << this->courseTemplate
   << "\n" << "Topics: " << this->courseTopics;
   return out.str();
 }
 
-bool Course::IsEmpty()
-{ return this->courseTemplate == "" && this->courseTopics == "" && this->title == "";
+bool Course::IsEmpty() {
+  return this->courseTemplate == "" && this->courseTopics == "" && this->title == "";
 }
 
-void Course::reset()
-{ this->courseTemplate = "";
+void Course::reset() {
+  this->courseTemplate = "";
   this->courseTopics = "";
   this->title = "";
   this->flagRoughDraft = "";
@@ -596,42 +596,42 @@ public:
 
 };
 
-std::string CourseList::ToHtml()
-{ return this->theCourses.ToString();
+std::string CourseList::ToHtml() {
+  return this->theCourses.ToString();
 
 }
 
-void CourseList::LoadFromString(const std::string& input, std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("CourseList::LoadFromString");
+void CourseList::LoadFromString(const std::string& input, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("CourseList::LoadFromString");
   (void) commentsOnFailure;
   std::stringstream tableReader(input);
   std::string currentLine, currentArgument;
   Course current;
-  while (std::getline(tableReader, currentLine, '\n'))
-  { if (MathRoutines::StringBeginsWith(currentLine, "Html:", &currentArgument))
-    { if (current.courseTemplate != "")
-      { this->theCourses.AddOnTop(current);
+  while (std::getline(tableReader, currentLine, '\n')) {
+    if (MathRoutines::StringBeginsWith(currentLine, "Html:", &currentArgument)) {
+      if (current.courseTemplate != "") {
+        this->theCourses.AddOnTop(current);
         current.reset();
       }
       current.courseTemplate = MathRoutines::StringTrimWhiteSpace(currentArgument);
     }
-    if (MathRoutines::StringBeginsWith(currentLine, "Topics:", &currentArgument))
-    { if (current.courseTopics != "")
-      { this->theCourses.AddOnTop(current);
+    if (MathRoutines::StringBeginsWith(currentLine, "Topics:", &currentArgument)) {
+      if (current.courseTopics != "") {
+        this->theCourses.AddOnTop(current);
         current.reset();
       }
       current.courseTopics = MathRoutines::StringTrimWhiteSpace(currentArgument);
     }
-    if (MathRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument))
-    { if (current.title != "")
-      { this->theCourses.AddOnTop(current);
+    if (MathRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument)) {
+      if (current.title != "") {
+        this->theCourses.AddOnTop(current);
         current.reset();
       }
       current.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
     }
-    if (MathRoutines::StringBeginsWith(currentLine, "RoughDraft:", &currentArgument))
-    { if (current.flagRoughDraft != "")
-      { this->theCourses.AddOnTop(current);
+    if (MathRoutines::StringBeginsWith(currentLine, "RoughDraft:", &currentArgument)) {
+      if (current.flagRoughDraft != "") {
+        this->theCourses.AddOnTop(current);
         current.reset();
       }
       current.flagRoughDraft = MathRoutines::StringTrimWhiteSpace(currentArgument);
@@ -641,8 +641,8 @@ void CourseList::LoadFromString(const std::string& input, std::stringstream* com
     this->theCourses.AddOnTop(current);
 }
 
-std::string HtmlInterpretation::GetSelectCourseJSON()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetSelectCourseJSON");
+std::string HtmlInterpretation::GetSelectCourseJSON() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetSelectCourseJSON");
   JSData output;
   std::stringstream comments;
   std::string coursesAvailableList = "/coursesavailable/default.txt";
@@ -652,8 +652,8 @@ std::string HtmlInterpretation::GetSelectCourseJSON()
   FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly
   (coursesAvailableList, temp, &commentsOnFailure);
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly
-       ("/coursesavailable/default.txt", theTopicFile, &commentsOnFailure))
-  { comments << "Failed to fetch available courses from /coursesavailable/default.txt. "
+       ("/coursesavailable/default.txt", theTopicFile, &commentsOnFailure)) {
+    comments << "Failed to fetch available courses from /coursesavailable/default.txt. "
     << commentsOnFailure.str();
     output["error"] = comments.str();
     return output.ToString(false);
@@ -661,29 +661,29 @@ std::string HtmlInterpretation::GetSelectCourseJSON()
   CourseList theCourses;
   theCourses.LoadFromString(theTopicFile, &comments);
   output["courses"].type = JSData::JSarray;
-  for (int i = 0; i < theCourses.theCourses.size; i ++)
-  { Course& currentCourse = theCourses.theCourses[i];
+  for (int i = 0; i < theCourses.theCourses.size; i ++) {
+    Course& currentCourse = theCourses.theCourses[i];
     output["courses"].list.AddOnTop(currentCourse.ToJSON());
   }
   return output.ToString(false);
 }
 
-std::string HtmlInterpretation::GetHtmlTagWithManifest()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetHtmlTagWithManifest");
+std::string HtmlInterpretation::GetHtmlTagWithManifest() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetHtmlTagWithManifest");
   std::stringstream out;
   out << "<!DOCTYPE HTML>\n";
   out << "<html>\n<!-- tag added automatically; user-specified html tag ignored-->\n";
   return out.str();
 }
 
-std::string HtmlInterpretation::GetPageFromTemplate()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetPageFromTemplate");
+std::string HtmlInterpretation::GetPageFromTemplate() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetPageFromTemplate");
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
   thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments))
-  { out << "<html>"
+  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments)) {
+    out << "<html>"
     << "<head>" << HtmlRoutines::GetCSSLinkCalculator() << "</head>"
     << "<body>";
     out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
@@ -693,8 +693,8 @@ std::string HtmlInterpretation::GetPageFromTemplate()
     out << "</body></html>";
     return out.str();
   }
-  if (!thePage.InterpretHtml(&comments))
-  { out << "<html>"
+  if (!thePage.InterpretHtml(&comments)) {
+    out << "<html>"
     << "<head>"
     << HtmlRoutines::GetCSSLinkCalculator()
     << "</head>"
@@ -725,19 +725,19 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   return out.str();
 }
 
-std::string HtmlInterpretation::GetTopicTableJSON()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetTopicTableJSON");
+std::string HtmlInterpretation::GetTopicTableJSON() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetTopicTableJSON");
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
   thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   thePage.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
-  if (!thePage.LoadAndParseTopicList(out))
-  { out << "Failed to load and parse topic list.";
+  if (!thePage.LoadAndParseTopicList(out)) {
+    out << "Failed to load and parse topic list.";
     return out.str();
   }
-  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments))
-  { out << "\"Failed to load file: "
+  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments)) {
+    out << "\"Failed to load file: "
     << theGlobalVariables.GetWebInput("courseHome") << ""
     << "<br>Comments:<br> " << comments.str();
     out << "\"";
@@ -785,28 +785,28 @@ void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::stri
   outputAppend[DatabaseStrings::labelDeadlinesSchema] = theGlobalVariables.userDefault.deadlineSchema;
 }
 
-std::string HtmlInterpretation::GetJSONUserInfo(const std::string& comments)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetJSONUserInfo");
+std::string HtmlInterpretation::GetJSONUserInfo(const std::string& comments) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetJSONUserInfo");
   JSData output;
   HtmlInterpretation::GetJSDataUserInfo(output, comments);
   return output.ToString(false);
 }
 
-std::string HtmlInterpretation::GetJSONFromTemplate()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetJSONFromTemplate");
+std::string HtmlInterpretation::GetJSONFromTemplate() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetJSONFromTemplate");
   std::stringstream out;
   CalculatorHTML thePage;
   thePage.flagUseJSON = true;
   std::stringstream comments;
   thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments))
-  { out << "<b>Failed to load file: "
+  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments)) {
+    out << "<b>Failed to load file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str();
     return out.str();
   }
-  if (!thePage.InterpretHtml(&comments))
-  { out << "<b>Failed to interpret as template the following file: "
+  if (!thePage.InterpretHtml(&comments)) {
+    out << "<b>Failed to interpret as template the following file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str();
     return out.str();
@@ -821,11 +821,11 @@ std::string HtmlInterpretation::GetJSONFromTemplate()
 
 extern logger logWorker;
 
-std::string HtmlInterpretation::GetExamPageJSON()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPageJSON");
+std::string HtmlInterpretation::GetExamPageJSON() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPageJSON");
   std::stringstream out;
-  if (!theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON")
-  { out << "<b style ='color:red'>Scored quiz requires login</b>";
+  if (!theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON") {
+    out << "<b style ='color:red'>Scored quiz requires login</b>";
     return out.str();
   }
   CalculatorHTML theFile;
@@ -844,8 +844,8 @@ std::string HtmlInterpretation::GetExamPageJSON()
     output[WebAPI::commentsServer] = commentsWebserver;
   if (commentsProblem != "")
     output[WebAPI::commentsProblem] = commentsProblem;
-  if (theFile.flagLoadedSuccessfully)
-  { output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
+  if (theFile.flagLoadedSuccessfully) {
+    output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
     output["deadline"] = theFile.outputDeadlineString;
     output["problemLabel"] = theFile.outputProblemLabel;
     output["title"] = theFile.outputProblemTitle;  
@@ -858,8 +858,8 @@ std::string HtmlInterpretation::GetExamPageJSON()
       HtmlRoutines::ConvertStringToURLString(theFile.theScripts.theValues[i], false);
     output["scripts"] = theScripts;
     output["forReal"] = theFile.flagIsForReal;
-    if (!theFile.flagIsForReal)
-    { std::stringstream randomSeedStream;
+    if (!theFile.flagIsForReal) {
+      std::stringstream randomSeedStream;
       randomSeedStream << theFile.theProblemData.randomSeed;
       output["randomSeed"] = randomSeedStream.str();
     }
@@ -867,8 +867,8 @@ std::string HtmlInterpretation::GetExamPageJSON()
   return output.ToString(false, false);
 }
 
-std::string HtmlInterpretation::GetBrowseProblems()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetBrowseProblems");
+std::string HtmlInterpretation::GetBrowseProblems() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetBrowseProblems");
   std::stringstream out;
   out << "<!DOCTYPE html>";
   out << "<html>";
@@ -885,26 +885,26 @@ std::string HtmlInterpretation::GetBrowseProblems()
 
 }
 
-std::string HtmlInterpretation::GetEditPageJSON()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetEditPageJSON");
+std::string HtmlInterpretation::GetEditPageJSON() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetEditPageJSON");
   JSData output;
   if ((!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights()) &&
-      !theGlobalVariables.flagRunningApache)
-  { output["error"] ="Only logged-in admins are allowed to edit pages.";
+      !theGlobalVariables.flagRunningApache) {
+    output["error"] ="Only logged-in admins are allowed to edit pages.";
     return output.ToString(false);
   }
   CalculatorHTML theFile;
   theFile.LoadFileNames();
   std::stringstream failureStream;
-  if (!theFile.LoadMe(false, theGlobalVariables.GetWebInput("randomSeed"), &failureStream))
-  { std::stringstream errorStream;
+  if (!theFile.LoadMe(false, theGlobalVariables.GetWebInput("randomSeed"), &failureStream)) {
+    std::stringstream errorStream;
     errorStream << " <b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>"
     << failureStream.str();
     output["error"] = errorStream.str();
     return output.ToString(false);
   }
-  if (!theFile.ParseHTML(&failureStream))
-  { std::stringstream errorStream;
+  if (!theFile.ParseHTML(&failureStream)) {
+    std::stringstream errorStream;
     errorStream << "<b>Failed to parse file: " << theFile.fileName
     << ".</b> Details:<br>" << failureStream.str();
     output["error"] = errorStream.str();
@@ -950,13 +950,13 @@ std::string HtmlInterpretation::SubmitAnswers(
   std::stringstream errorStream;
   theProblem.LoadCurrentProblemItem
   (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream);
-  if (!theProblem.flagLoadedSuccessfully)
-  { out << "Failed to load current problem. " << errorStream.str();
+  if (!theProblem.flagLoadedSuccessfully) {
+    out << "Failed to load current problem. " << errorStream.str();
     return out.str();
   }
   std::stringstream comments;
-  if (!theProblem.ParseHTMLPrepareCommands(&comments))
-  { out << "<b>Failed to parse problem. </b>Comments: " << comments.str();
+  if (!theProblem.ParseHTMLPrepareCommands(&comments)) {
+    out << "<b>Failed to parse problem. </b>Comments: " << comments.str();
     return out.str();
   }
   if (!theProblem.theProblemData.flagRandomSeedGiven && !theProblem.flagIsForReal)
@@ -969,33 +969,33 @@ std::string HtmlInterpretation::SubmitAnswers(
   MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs = theGlobalVariables.webArguments;
   int answerIdIndex = - 1;
   for (int i = 0; i < theArgs.size(); i ++)
-    if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader))
-    { int newAnswerIndex = theProblem.GetAnswerIndex(studentAnswerNameReader);
+    if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader)) {
+      int newAnswerIndex = theProblem.GetAnswerIndex(studentAnswerNameReader);
       if (answerIdIndex == - 1)
         answerIdIndex = newAnswerIndex;
-      else if (answerIdIndex != newAnswerIndex && answerIdIndex != - 1 && newAnswerIndex != - 1)
-      { out << "<b>You submitted two or more answers [answer tags: "
+      else if (answerIdIndex != newAnswerIndex && answerIdIndex != - 1 && newAnswerIndex != - 1) {
+        out << "<b>You submitted two or more answers [answer tags: "
         << theProblem.theProblemData.theAnswers[answerIdIndex].answerId
         << " and " << theProblem.theProblemData.theAnswers[newAnswerIndex].answerId
         << "].</b> At present, multiple answer submission is not supported. ";
         return out.str();
       }
-      if (answerIdIndex == - 1)
-      { out << "<b> You submitted an answer to tag with id "
+      if (answerIdIndex == - 1) {
+        out << "<b> You submitted an answer to tag with id "
         << studentAnswerNameReader
         << " which is not on my list of answerable tags. </b>";
         return out.str();
       }
       Answer& currentProblemData = theProblem.theProblemData.theAnswers[answerIdIndex];
       currentProblemData.currentAnswerURLed = theArgs.theValues[i];
-      if (currentProblemData.currentAnswerURLed == "")
-      { out << "<b> Your answer to tag with id " << studentAnswerNameReader
+      if (currentProblemData.currentAnswerURLed == "") {
+        out << "<b> Your answer to tag with id " << studentAnswerNameReader
         << " appears to be empty, please resubmit. </b>";
         return out.str();
       }
     }
-  if (answerIdIndex == - 1)
-  { out << "<b>Something is wrong: I found no submitted answers.</b>";
+  if (answerIdIndex == - 1) {
+    out << "<b>Something is wrong: I found no submitted answers.</b>";
     return out.str();
   }
   ProblemData& currentProblemData = theProblem.theProblemData;
@@ -1021,8 +1021,8 @@ std::string HtmlInterpretation::SubmitAnswers(
   //stOutput << "DEBUG: " << "adding: commands: " << currentA.commandsCommentsBeforeSubmissionOnly;
   bool hasCommentsBeforeSubmission =
   (MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != "");
-  if (hasCommentsBeforeSubmission)
-  { completedProblemStream
+  if (hasCommentsBeforeSubmission) {
+    completedProblemStream
     << "CommandEnclosure{}("
     << currentA.commandsCommentsBeforeSubmission
     << ");";
@@ -1032,8 +1032,8 @@ std::string HtmlInterpretation::SubmitAnswers(
   completedProblemStreamNoEnclosures << theProblem.CleanUpCommandString(currentA.commandVerificationOnly);
 
   std::stringstream debugInputStream;
-  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-  { debugInputStream
+  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
+    debugInputStream
     << "Input, no enclosures, direct link: "
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=calculator&mainInput="
@@ -1049,8 +1049,8 @@ std::string HtmlInterpretation::SubmitAnswers(
   theInterpreter.flagPlotNoControls = true;
 
   theInterpreter.Evaluate(completedProblemStream.str());
-  if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors != "")
-  { if (theInterpreter.errorsPublic.str() != "")
+  if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors != "") {
+    if (theInterpreter.errorsPublic.str() != "")
       out << "While checking your answer, got the error: "
       << "<br><b><span style =\"color:red\">"
       << theInterpreter.errorsPublic.str()
@@ -1072,8 +1072,8 @@ std::string HtmlInterpretation::SubmitAnswers(
       out << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false, true);
     else
       out << isolatedInterpreter.outputString;
-    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-    { out << "<hr><b>Admin view internals.</b><hr>"
+    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
+      out << "<hr><b>Admin view internals.</b><hr>"
       << debugInputStream.str() << "<hr>"
       << theInterpreter.outputString
       << "<br>" << theInterpreter.outputCommentsString
@@ -1096,10 +1096,10 @@ std::string HtmlInterpretation::SubmitAnswers(
     *outputIsCorrect = (mustBeOne == 1);
   FormatExpressions theFormat;
   out << "<table width =\"300\">";
-  if (!(*outputIsCorrect))
-  { out << "<tr><td><span style =\"color:red\"><b>Your answer appears to be incorrect. </b></span></td></tr>";
-    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-    { out << "<tr><td>Admin view internals. "
+  if (!(*outputIsCorrect)) {
+    out << "<tr><td><span style =\"color:red\"><b>Your answer appears to be incorrect. </b></span></td></tr>";
+    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn()) {
+      out << "<tr><td>Admin view internals. "
       << "<hr>" << debugInputStream.str()
       << "<br>The calculator output is: " << theInterpreter.outputString
       << "Comments: " << theInterpreter.Comments.str()
@@ -1108,8 +1108,8 @@ std::string HtmlInterpretation::SubmitAnswers(
       out << "<hr>Input, full:<hr>"
       << theInterpreter.inputString << "<hr></td></tr>";
     }
-  } else
-  { out << "<tr><td><span style =\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
+  } else {
+    out << "<tr><td><span style =\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
   }
   if (hasCommentsBeforeSubmission)
     out << "<tr><td>" << HtmlInterpretation::GetCommentsInterpretation
@@ -1120,15 +1120,15 @@ std::string HtmlInterpretation::SubmitAnswers(
   bool deadLinePassed = false;
   bool hasDeadline = true;
   double secondsTillDeadline = - 1;
-  if (theProblem.flagIsForReal)
-  { //out << "<tr><td><hr><hr><hr>DEBUG: before interpreting anything prob data is: "
+  if (theProblem.flagIsForReal) {
+    //out << "<tr><td><hr><hr><hr>DEBUG: before interpreting anything prob data is: "
     //<< theUser.theProblemData.ToStringHtml() << "<hr><hr><hr></td></tr>";
     if (!theProblem.LoadAndParseTopicList(out))
       hasDeadline = false;
     std::string theSQLstring;
     theSQLstring = theUser.sectionComputed;
-    if (hasDeadline)
-    { bool unused = false;
+    if (hasDeadline) {
+      bool unused = false;
       std::string theDeadlineString =
       theProblem.GetDeadline(theProblem.fileName, HtmlRoutines::ConvertStringToURLString(theSQLstring, false), unused);
       //out << "<tr><td>DEBUG: getting deadline for section: " << theUser.userGroup.value
@@ -1141,12 +1141,12 @@ std::string HtmlInterpretation::SubmitAnswers(
 
       if (theDeadlineString == "" || theDeadlineString == " ")
         hasDeadline = false;
-      else
-      { TimeWrapper now, deadline; //<-needs a fix for different time formats.
+      else {
+        TimeWrapper now, deadline; //<-needs a fix for different time formats.
         //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
         std::stringstream badDateStream;
-        if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream))
-        { out << "<tr><td><b>Problem reading deadline. </b> The deadline string was: "
+        if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream)) {
+          out << "<tr><td><b>Problem reading deadline. </b> The deadline string was: "
           << theDeadlineString << ". Comments: "
           << "<span style =\"color:red\">" << badDateStream.str() << "</span>"
           << "</td></tr><tr><td> This should not happen. " << CalculatorHTML::BugsGenericMessage << "</td></tr>";
@@ -1161,10 +1161,10 @@ std::string HtmlInterpretation::SubmitAnswers(
     }
     if (deadLinePassed)
       out << "<tr><td><span style =\"color:red\"><b>Deadline passed, attempt not recorded.</b></span></td></tr>";
-    else
-    { currentA.numSubmissions ++;
-      if ((*outputIsCorrect))
-      { currentA.numCorrectSubmissions ++;
+    else {
+      currentA.numSubmissions ++;
+      if ((*outputIsCorrect)) {
+        currentA.numCorrectSubmissions ++;
         if (currentA.firstCorrectAnswerClean == "")
           currentA.firstCorrectAnswerClean = currentA.currentAnswerClean;
         else
@@ -1174,8 +1174,8 @@ std::string HtmlInterpretation::SubmitAnswers(
   }
 #endif // MACRO_use_MongoDB
 #ifdef MACRO_use_MongoDB
-  if (theProblem.flagIsForReal)
-  { std::stringstream comments;
+  if (theProblem.flagIsForReal) {
+    std::stringstream comments;
     //if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
     //  stOutput << "<hr>DEBUG: adding prob data for file name: " << theProblem.fileName
     //  << "<br>"
@@ -1191,8 +1191,8 @@ std::string HtmlInterpretation::SubmitAnswers(
       out << "<tr><td>So far " << currentA.numCorrectSubmissions << " correct and "
       << currentA.numSubmissions - currentA.numCorrectSubmissions
       << " incorrect submissions.</td></tr>";
-    if (hasDeadline)
-    { if (secondsTillDeadline < 0)
+    if (hasDeadline) {
+      if (secondsTillDeadline < 0)
         secondsTillDeadline *= - 1;
       if (deadLinePassed)
         out << "<tr><td><span style =\"color:red\"><b>Submission "
@@ -1232,25 +1232,25 @@ std::string HtmlInterpretation::SubmitAnswers(
   return out.str();
 }
 
-std::string HtmlInterpretation::AddTeachersSections()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::AddTeachersSections");
+std::string HtmlInterpretation::AddTeachersSections() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::AddTeachersSections");
   std::stringstream out;
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { out << "<b>Only admins may assign sections to teachers.</b>";
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagUsingSSLinCurrentConnection) {
+    out << "<b>Only admins may assign sections to teachers.</b>";
     return out.str();
   }
   std::string input = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("teachersAndSections"), false);
   JSData inputParsed;
-  if (!inputParsed.readstring(input, false, &out))
-  { out << "<b style='color:red'>Failed to interpret your input. </b>";
+  if (!inputParsed.readstring(input, false, &out)) {
+    out << "<b style='color:red'>Failed to interpret your input. </b>";
     return out.str();
   }
-  if (inputParsed["teachers"].type != JSData::JSstring)
-  { out << "<b style='color:red'>Failed to extract key 'teachers' from your input. </b>";
+  if (inputParsed["teachers"].type != JSData::JSstring) {
+    out << "<b style='color:red'>Failed to extract key 'teachers' from your input. </b>";
     return out.str();
   }
-  if (inputParsed["students"].type != JSData::JSstring)
-  { out << "<b style='color:red'>Failed to find key 'students' in your input. </b>";
+  if (inputParsed["students"].type != JSData::JSstring) {
+    out << "<b style='color:red'>Failed to find key 'students' in your input. </b>";
     return out.str();
   }
 
@@ -1274,8 +1274,8 @@ std::string HtmlInterpretation::AddTeachersSections()
 
   MathRoutines::StringSplitExcludeDelimiters(desiredUsers, delimiters, theTeachers);
 //  MathRoutines::StringSplitExcludeDelimiters(desiredSections, delimiters, theSections);
-  if (theTeachers.size == 0)
-  { out << "<b>Could not extract teachers from " << desiredUsers << ".</b>";
+  if (theTeachers.size == 0) {
+    out << "<b>Could not extract teachers from " << desiredUsers << ".</b>";
     return out.str();
   }
 //  if (theSections.size == 0)
@@ -1283,11 +1283,11 @@ std::string HtmlInterpretation::AddTeachersSections()
 //    return out.str();
 //  }
   UserCalculator currentTeacher;
-  for (int i = 0; i < theTeachers.size; i ++)
-  { currentTeacher.reset();
+  for (int i = 0; i < theTeachers.size; i ++) {
+    currentTeacher.reset();
     currentTeacher.username = theTeachers[i];
-    if (!currentTeacher.LoadFromDB(&out, &out))
-    { out << "<span style =\"color:red\">Failed to fetch teacher: " << theTeachers[i] << "</span><br>";
+    if (!currentTeacher.LoadFromDB(&out, &out)) {
+      out << "<span style =\"color:red\">Failed to fetch teacher: " << theTeachers[i] << "</span><br>";
       continue;
     }
     currentTeacher.sectionsTaught = desiredSectionsList;
@@ -1307,12 +1307,12 @@ std::string HtmlInterpretation::AddTeachersSections()
 #endif // MACRO_use_MongoDB
 }
 
-std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressWithPort)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::AddUserEmails");
+std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressWithPort) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::AddUserEmails");
   (void) hostWebAddressWithPort;
   std::stringstream out;
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { out << "<b>Only admins may add users, under ssl connection. </b>";
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagUsingSSLinCurrentConnection) {
+    out << "<b>Only admins may add users, under ssl connection. </b>";
     return out.str();
   }
   //stOutput << "<br>DEBUG: userlist: " << theGlobalVariables.GetWebInput("userList") << "<br>";
@@ -1324,8 +1324,8 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   (theGlobalVariables.GetWebInput(DatabaseStrings::labelSection), false));
   std::string userRole = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userRole"), false);
 
-  if (inputEmails == "")
-  { out << "<b>No emails to add</b>";
+  if (inputEmails == "") {
+    out << "<b>No emails to add</b>";
     return out.str();
   }
 #ifdef MACRO_use_MongoDB
@@ -1337,15 +1337,15 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   int numUpdatedUsers = 0;
   bool createdUsers = DatabaseRoutineS::AddUsersFromEmails
   (inputEmails, userPasswords, userRole, userGroup, comments, numNewUsers, numUpdatedUsers);
-  if (createdUsers)
-  { out << "<span style =\"color:green\">Success: "
+  if (createdUsers) {
+    out << "<span style =\"color:green\">Success: "
     << numNewUsers << " new users and " << numUpdatedUsers
     << " user updates. </span> User roles: " << userRole;
   } else
     out << "<span style =\"color:red\">Failed to add all users. </span> Errors follow. <hr>"
     << comments.str() << "<hr>";
-  if (doSendEmails)
-  { if (sentEmails)
+  if (doSendEmails) {
+    if (sentEmails)
       out << "<span style =\"color:green\">Activation emails successfully sent. </span>";
     else
       out << "<span style =\"color:red\">Failed to send all activation emails. </span>";
@@ -1362,13 +1362,13 @@ const std::string CalculatorHTML::BugsGenericMessage =
 "Please take a screenshot, copy the link address and send those along \
 with a short explanation to the administrator of the web site. ";
 
-std::string HtmlInterpretation::GetAnswerOnGiveUp()
-{ return HtmlInterpretation::GetAnswerOnGiveUp(theGlobalVariables.GetWebInput("randomSeed"));
+std::string HtmlInterpretation::GetAnswerOnGiveUp() {
+  return HtmlInterpretation::GetAnswerOnGiveUp(theGlobalVariables.GetWebInput("randomSeed"));
 }
 
 std::string HtmlInterpretation::GetAnswerOnGiveUp
-(const std::string& inputRandomSeed, std::string* outputNakedAnswer, bool* outputDidSucceed)
-{ MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
+(const std::string& inputRandomSeed, std::string* outputNakedAnswer, bool* outputDidSucceed) {
+  MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
   if (outputNakedAnswer != 0)
     *outputNakedAnswer = "";
   if (outputDidSucceed != 0)
@@ -1378,25 +1378,25 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   std::stringstream errorStream;
   theProblem.LoadCurrentProblemItem(false, inputRandomSeed, &errorStream);
   std::stringstream out;
-  if (!theProblem.flagLoadedSuccessfully)
-  { out << "Problem name is: " << theProblem.fileName
+  if (!theProblem.flagLoadedSuccessfully) {
+    out << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
     << CalculatorHTML::BugsGenericMessage << "</b>";
     if (errorStream.str() != "")
       out << " Comments: " << errorStream.str();
     return out.str();
   }
-  if (theProblem.flagIsForReal)
-  { out << " <b>Not allowed to show answer of a problem being tested for real. </b>";
+  if (theProblem.flagIsForReal) {
+    out << " <b>Not allowed to show answer of a problem being tested for real. </b>";
     return out.str();
   }
-  if (inputRandomSeed == "")
-  { out << " <b>I could not figure out the exercise problem (missing random seed). </b>";
+  if (inputRandomSeed == "") {
+    out << " <b>I could not figure out the exercise problem (missing random seed). </b>";
     return out.str();
   }
   std::stringstream comments;
-  if (!theProblem.ParseHTMLPrepareCommands(&comments))
-  { out << "<br><b>Problem preparation failed.</b><br>" << comments.str();
+  if (!theProblem.ParseHTMLPrepareCommands(&comments)) {
+    out << "<br><b>Problem preparation failed.</b><br>" << comments.str();
     return out.str();
   }
   std::string lastStudentAnswerID;
@@ -1405,22 +1405,22 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     MathRoutines::StringBeginsWith
     (theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
-  if (indexLastAnswerId == - 1)
-  { out << "File: "
+  if (indexLastAnswerId == - 1) {
+    out << "File: "
     << theProblem.fileName
     << "<br><b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
-    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-    { out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
+    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
+      out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
       //out << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
       out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
     }
     return out.str();
   }
   Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
-  if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly == "")
-  { out << "<b> Unfortunately there is no answer given for this "
+  if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly == "") {
+    out << "<b> Unfortunately there is no answer given for this "
     << "question (answerID: " << lastStudentAnswerID << ").</b>";
     if (theGlobalVariables.UserDebugFlagOn() &&
         theGlobalVariables.UserDefaultHasProblemComposingRights())
@@ -1437,8 +1437,8 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   answerCommands << "CommandEnclosure{}(" << currentA.commandsNoEnclosureAnswerOnGiveUpOnly << ");";
   answerCommandsNoEnclosure << currentA.commandsNoEnclosureAnswerOnGiveUpOnly;
   theInterpreteR.Evaluate(answerCommands.str());
-  if (theInterpreteR.syntaxErrors != "")
-  { out << "<span style =\"color:red\"><b>Failed to evaluate the default answer. "
+  if (theInterpreteR.syntaxErrors != "") {
+    out << "<span style =\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>";
     if (theGlobalVariables.UserDefaultHasProblemComposingRights())
       out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable
@@ -1451,8 +1451,8 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
   }
-  if (theInterpreteR.flagAbortComputationASAP)
-  { out << "<span style =\"color:red\"><b>Failed to evaluate the default answer. "
+  if (theInterpreteR.flagAbortComputationASAP) {
+    out << "<span style =\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>";
     if (theGlobalVariables.UserDefaultHasProblemComposingRights())
       out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable
@@ -1476,15 +1476,15 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   bool isFirst = true;
   const Expression& currentE =
   theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size() - 1][1];
-  if (!currentE.StartsWith(theInterpreteR.opEndStatement()))
-  { out << "\\(\\displaystyle " << currentE.ToString(&theFormat) << "\\)";
+  if (!currentE.StartsWith(theInterpreteR.opEndStatement())) {
+    out << "\\(\\displaystyle " << currentE.ToString(&theFormat) << "\\)";
     if (outputNakedAnswer != 0)
       *outputNakedAnswer = currentE.ToString(&theFormat);
     if (outputDidSucceed != 0)
       *outputDidSucceed = true;
   } else
-    for (int j = 1; j < currentE.size(); j ++)
-    { if (currentE[j].StartsWith(theInterpreteR.opRulesOff()) ||
+    for (int j = 1; j < currentE.size(); j ++) {
+      if (currentE[j].StartsWith(theInterpreteR.opRulesOff()) ||
           currentE[j].StartsWith(theInterpreteR.opRulesOn()))
         continue;
       std::string stringAnswer;
@@ -1502,8 +1502,8 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
       else
         out << "\\(\\displaystyle " << currentE[j].ToString(&theFormat) << "\\)";
 //      if (j == currentE.size()- 1)
-      if (isFirst)
-      { if (outputNakedAnswer != 0)
+      if (isFirst) {
+        if (outputNakedAnswer != 0)
           *outputNakedAnswer = currentE[j].ToString(&theFormat);
         if (outputDidSucceed != 0)
           *outputDidSucceed = true;
@@ -1524,13 +1524,13 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   return out.str();
 }
 
-std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAddressWithPort)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetAccountsPageJSON");
+std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAddressWithPort) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetAccountsPageJSON");
   (void) hostWebAddressWithPort;
   JSData output;
 #ifdef MACRO_use_MongoDB
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { output["error"] = "Must be logged-in admin over ssl.";
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection) {
+    output["error"] = "Must be logged-in admin over ssl.";
     return output.ToString(false);
   }
   std::stringstream commentsOnFailure;
@@ -1550,13 +1550,13 @@ std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAd
   columnsToRetain.AddOnTop(DatabaseStrings::labelSection);
   columnsToRetain.AddOnTop(DatabaseStrings::labelSemester);
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection
-       (DatabaseStrings::tableUsers, findStudents, students, columnsToRetain, - 1, &totalStudents, &commentsOnFailure))
-  { output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
+       (DatabaseStrings::tableUsers, findStudents, students, columnsToRetain, - 1, &totalStudents, &commentsOnFailure)) {
+    output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
     return output.ToString(false);
   }
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection
-       (DatabaseStrings::tableUsers, findAdmins, admins, columnsToRetain, - 1, 0, &commentsOnFailure))
-  { output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
+       (DatabaseStrings::tableUsers, findAdmins, admins, columnsToRetain, - 1, 0, &commentsOnFailure)) {
+    output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
     return output.ToString(false);
   }
   output["admins"] = admins;
@@ -1568,13 +1568,13 @@ std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAd
 #endif // MACRO_use_MongoDB
 }
 
-std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAddressWithPort)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetAccountsPageBody");
+std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAddressWithPort) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetAccountsPageBody");
   (void) hostWebAddressWithPort;
 #ifdef MACRO_use_MongoDB
   std::stringstream out;
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { out << "Browsing accounts allowed only for logged-in admins over ssl connection.";
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection) {
+    out << "Browsing accounts allowed only for logged-in admins over ssl connection.";
     return out.str();
   }
   std::stringstream commentsOnFailure;
@@ -1586,13 +1586,13 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
   findStudents[DatabaseStrings::labelInstructor] = theGlobalVariables.userDefault.username;
   findAdmins[DatabaseStrings::labelUserRole] = "admin";
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
-       (DatabaseStrings::tableUsers, findStudents, students, - 1, &totalStudents, &commentsOnFailure))
-  { out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
+       (DatabaseStrings::tableUsers, findStudents, students, - 1, &totalStudents, &commentsOnFailure)) {
+    out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
     return out.str();
   }
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
-       (DatabaseStrings::tableUsers, findAdmins, admins, - 1, 0, &commentsOnFailure))
-  { out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
+       (DatabaseStrings::tableUsers, findAdmins, admins, - 1, 0, &commentsOnFailure)) {
+    out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
     return out.str();
   }
 //  out << "DEBUG: Usertable: " << userTable.ToStringCommaDelimited();
@@ -1608,8 +1608,8 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
 #endif // MACRO_use_MongoDB
 }
 
-std::string HtmlInterpretation::GetNavigationPanelWithGenerationTime()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetNavigationPanelWithGenerationTime");
+std::string HtmlInterpretation::GetNavigationPanelWithGenerationTime() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::GetNavigationPanelWithGenerationTime");
   std::stringstream out;
   out.precision(3);
   out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
@@ -1618,8 +1618,8 @@ std::string HtmlInterpretation::GetNavigationPanelWithGenerationTime()
   return out.str();
 }
 
-std::string HtmlInterpretation::GetScoresPage()
-{ MacroRegisterFunctionWithName("WebWorker::GetScoresPage");
+std::string HtmlInterpretation::GetScoresPage() {
+  MacroRegisterFunctionWithName("WebWorker::GetScoresPage");
   std::stringstream out;
   out << "<html>"
   << "<head>"
@@ -1639,8 +1639,8 @@ std::string HtmlInterpretation::GetScoresPage()
   return out.str();
 }
 
-std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddressWithPort)
-{ MacroRegisterFunctionWithName("WebWorker::GetAccountsPage");
+std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddressWithPort) {
+  MacroRegisterFunctionWithName("WebWorker::GetAccountsPage");
   std::stringstream out;
   out << "<html>"
   << "<head>"
@@ -1656,8 +1656,8 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   thePage.LoadDatabaseInfo(out);
   out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
   out << "<problemNavigation>" << thePage.ToStringProblemNavigation() << "</problemNavigation>";
-  if (!isOK)
-  { out << "<b>Viewing accounts is allowed for logged-in admins only</b>"
+  if (!isOK) {
+    out << "<b>Viewing accounts is allowed for logged-in admins only</b>"
     << "</body></html>";
     return out.str();
   }
@@ -1669,16 +1669,16 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
 }
 
 std::string HtmlInterpretation::ToStringUserDetailsTable
-(bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserDetailsTable");
+(bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserDetailsTable");
 #ifdef MACRO_use_MongoDB
   std::stringstream out;
   //std::string userRole = adminsOnly ? "admin" : "student";
   bool flagFilterCourse = (!adminsOnly) && (theGlobalVariables.GetWebInput("filterAccounts") == "true");
   std::string currentCourse =
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-  if (flagFilterCourse)
-  { out << "<br>Displaying only students in course: <span style =\"color:blue\"><b>"
+  if (flagFilterCourse) {
+    out << "<br>Displaying only students in course: <span style =\"color:blue\"><b>"
     << currentCourse << "</b></span>. "
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=accounts&"
@@ -1693,13 +1693,13 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   List<List<std::string> > activatedAccountBucketsBySection;
   List<List<std::string> > preFilledLinkBucketsBySection;
   List<List<std::string> > nonActivatedAccountBucketsBySection;
-  for (int i = 0; i < theUsers.size; i ++)
-  { currentUser.LoadFromJSON(theUsers[i]);
+  for (int i = 0; i < theUsers.size; i ++) {
+    currentUser.LoadFromJSON(theUsers[i]);
     if (flagFilterCourse &&
         (currentUser.courseInDB != currentCourse || currentUser.instructorInDB != theGlobalVariables.userDefault.username))
       continue;
-    if (!theSections.Contains(currentUser.sectionInDB))
-    { std::stringstream currentSectionInfo;
+    if (!theSections.Contains(currentUser.sectionInDB)) {
+      std::stringstream currentSectionInfo;
       currentSectionInfo << "<b>Section: </b>" << currentUser.sectionInDB
       << ", <b>Course: </b>" << currentUser.courseInDB
       << ", <b>Instructor: </b>" << currentUser.instructorInDB;
@@ -1713,10 +1713,10 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   nonActivatedAccountBucketsBySection.SetSize(theSections.size);
   preFilledLinkBucketsBySection.SetSize(theSections.size);
   int numActivatedUsers = 0;
-  for (int i = 0; i < theUsers.size; i ++)
-  { currentUser.LoadFromJSON(theUsers[i]);
-    if (currentUser.courseInDB.find('%') != std::string::npos)
-    { out << "<span style =\"color:red\"><b>Non-expected behavior: user: "
+  for (int i = 0; i < theUsers.size; i ++) {
+    currentUser.LoadFromJSON(theUsers[i]);
+    if (currentUser.courseInDB.find('%') != std::string::npos) {
+      out << "<span style =\"color:red\"><b>Non-expected behavior: user: "
       << currentUser.username
       << "current course: "
       << currentUser.courseInDB
@@ -1728,8 +1728,8 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     << "<td>" << currentUser.email << "</td>";
     bool isActivated = true;
     std::string webAddress = "https://" + hostWebAddressWithPort + "/cgi-bin/calculator";
-    if (currentUser.actualActivationToken != "activated" && currentUser.actualActivationToken != "error")
-    { isActivated = false;
+    if (currentUser.actualActivationToken != "activated" && currentUser.actualActivationToken != "error") {
+      isActivated = false;
       numActivatedUsers ++;
       oneTableLineStream << "<td><span style =\"color:red\">not activated</span></td>";
       if (currentUser.actualActivationToken != "")
@@ -1775,8 +1775,8 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     //oneTableLineStream << "<td>" << currentUser.courseInfo.ToStringHumanReadable() << "</td>";
     oneTableLineStream << "</tr>";
     int indexCurrentBucket = theSections.GetIndex(currentUser.sectionInDB);
-    if (indexCurrentBucket != - 1)
-    { if (isActivated)
+    if (indexCurrentBucket != - 1) {
+      if (isActivated)
         activatedAccountBucketsBySection[indexCurrentBucket].AddOnTop(oneTableLineStream.str());
       else
         nonActivatedAccountBucketsBySection[indexCurrentBucket].AddOnTop(oneTableLineStream.str());
@@ -1793,15 +1793,15 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
   << "<th>Activation manual email</th>"
   << " <th>Pre-filled login link</th><th>Course info</th></tr>";
-  for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++)
-  { if (!adminsOnly)
+  for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++) {
+    if (!adminsOnly)
       if (nonActivatedAccountBucketsBySection[i].size > 0)
         tableStream << "<tr><td colspan =\"6\" style =\"text-align:center\">" << theSections[i] << "</td></tr>";
     for (int j = 0; j < nonActivatedAccountBucketsBySection[i].size; j ++)
       tableStream << nonActivatedAccountBucketsBySection[i][j];
   }
-  for (int i = 0; i < activatedAccountBucketsBySection.size; i ++)
-  { if (!adminsOnly)
+  for (int i = 0; i < activatedAccountBucketsBySection.size; i ++) {
+    if (!adminsOnly)
       if (activatedAccountBucketsBySection[i].size > 0)
         tableStream << "<tr><td colspan =\"7\" style =\"text-align:center\">"
         << theSections[i] << "</td></tr>";
@@ -1810,9 +1810,9 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   }
   tableStream << "</table>";
   std::stringstream preFilledLoginLinks;
-  if (!adminsOnly)
-  { for (int i = 0; i < preFilledLinkBucketsBySection.size; i ++)
-    { if (preFilledLinkBucketsBySection[i].size > 0)
+  if (!adminsOnly) {
+    for (int i = 0; i < preFilledLinkBucketsBySection.size; i ++) {
+      if (preFilledLinkBucketsBySection[i].size > 0)
         preFilledLoginLinks << theSections[i] << "<br>";
       for (int j = 0; j < preFilledLinkBucketsBySection[i].size; j ++)
         preFilledLoginLinks << preFilledLinkBucketsBySection[i][j] << "<br>";
@@ -1833,8 +1833,8 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
 #endif
 }
 
-std::string HtmlInterpretation::ToStringAssignSection()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::ToStringAssignSection");
+std::string HtmlInterpretation::ToStringAssignSection() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::ToStringAssignSection");
   std::stringstream out;
   std::string idAddressTextarea = "inputSetTeacher";
   std::string idExtraTextarea = "inputSections";
@@ -1866,12 +1866,12 @@ std::string HtmlInterpretation::ToStringAssignSection()
 #ifdef MACRO_use_MongoDB
 
 extern logger logWorker;
-int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("ProblemData::getExpectedNumberOfAnswers");
+int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure) {
+  MacroRegisterFunctionWithName("ProblemData::getExpectedNumberOfAnswers");
   if (this->knownNumberOfAnswersFromHD != - 1)
     return this->knownNumberOfAnswersFromHD;
-  if (theGlobalVariables.problemExpectedNumberOfAnswers.size() == 0)
-  { JSData findProblemInfo;
+  if (theGlobalVariables.problemExpectedNumberOfAnswers.size() == 0) {
+    JSData findProblemInfo;
     findProblemInfo.type = JSData::JSarray;
     List<JSData> result;
     List<std::string> fields;
@@ -1880,8 +1880,8 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
     //logWorker << logger::yellow << "DEBUG: About to query db to find problem info." << logger::endL;
     if (DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection
          (DatabaseStrings::tableProblemInformation, findProblemInfo, result, fields, - 1, 0, &commentsOnFailure))
-      for (int i = 0; i < result.size; i ++)
-      { const std::string& currentProblemName = result[i][DatabaseStrings::labelProblemName].string;
+      for (int i = 0; i < result.size; i ++) {
+        const std::string& currentProblemName = result[i][DatabaseStrings::labelProblemName].string;
         if (currentProblemName == "")
           continue;
         const std::string& expectedNumberOfAnswersString = result[i][DatabaseStrings::labelProblemTotalQuestions].string;
@@ -1903,13 +1903,13 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   << problemName << ", trying to read problem from hd. " << logger::endL;
   CalculatorHTML problemParser;
   problemParser.fileName = problemName;
-  if (!problemParser.LoadMe(false, "", &commentsOnFailure))
-  { logWorker << logger::yellow << "Failed to load problem. "
+  if (!problemParser.LoadMe(false, "", &commentsOnFailure)) {
+    logWorker << logger::yellow << "Failed to load problem. "
     << commentsOnFailure.str() << logger::endL;
     return 0;
   }
-  if (!problemParser.ParseHTML(&commentsOnFailure))
-  { logWorker << logger::red << "<b>Failed to parse file: " << problemParser.fileName
+  if (!problemParser.ParseHTML(&commentsOnFailure)) {
+    logWorker << logger::red << "<b>Failed to parse file: " << problemParser.fileName
     << ".</b> Details:<br>" << commentsOnFailure.str();
     return 0;
   }
@@ -1930,21 +1930,21 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
 
 void UserCalculator::ComputePointsEarned
 (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
- MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics, std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
+ MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics, std::stringstream& commentsOnFailure) {
+  MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
   this->pointsEarned = 0;
   this->pointsMax = 0;
   if (theTopics != 0)
-    for (int i = 0; i < theTopics->size(); i ++)
-    { (*theTopics).theValues[i].totalPointsEarned = 0;
+    for (int i = 0; i < theTopics->size(); i ++) {
+      (*theTopics).theValues[i].totalPointsEarned = 0;
       (*theTopics).theValues[i].pointsEarnedInProblemsThatAreImmediateChildren = 0;
       (*theTopics).theValues[i].maxPointsInAllChildren = 0;
       (*theTopics).theValues[i].flagSubproblemHasNoWeight = false;
       //(*theTopics).theValues[i].maxCorrectAnswersInAllChildren = 0;
       //(*theTopics).theValues[i].numAnsweredInAllChildren = 0;
     }
-  for (int i = 0; i < this->theProblemData.size(); i ++)
-  { const std::string problemName = this->theProblemData.theKeys[i];
+  for (int i = 0; i < this->theProblemData.size(); i ++) {
+    const std::string problemName = this->theProblemData.theKeys[i];
     if (!gradableProblems.Contains(problemName))
       continue;
     ProblemData& currentP = this->theProblemData.theValues[i];
@@ -1954,33 +1954,33 @@ void UserCalculator::ComputePointsEarned
     Rational currentWeight;
     currentP.flagProblemWeightIsOK =
     currentP.adminData.GetWeightFromCoursE(this->courseComputed, currentWeight);
-    if (!currentP.flagProblemWeightIsOK)
-    { currentWeight = 0;
+    if (!currentP.flagProblemWeightIsOK) {
+      currentWeight = 0;
       //stOutput << "Debug: weight not ok: " << problemName << "<br>";
     }// else
      // stOutput << "Debug: weight IS ok: " << problemName << "<br>";
 
 //    this->problemData[i].numAnswersSought = this->problemData[i].answerIds.size;
-    for (int j = 0; j < currentP.theAnswers.size(); j ++)
-    { if (currentP.theAnswers[j].numCorrectSubmissions > 0)
+    for (int j = 0; j < currentP.theAnswers.size(); j ++) {
+      if (currentP.theAnswers[j].numCorrectSubmissions > 0)
         currentP.numCorrectlyAnswered ++;
       currentP.totalNumSubmissions += currentP.theAnswers[j].numSubmissions;
     }
-    if (currentP.flagProblemWeightIsOK)
-    { int expectedNumberOfAnswers = currentP.getExpectedNumberOfAnswers(problemName, commentsOnFailure);
-      if (expectedNumberOfAnswers > 0)
-      { currentP.Points = (currentWeight * currentP.numCorrectlyAnswered) / expectedNumberOfAnswers;
+    if (currentP.flagProblemWeightIsOK) {
+      int expectedNumberOfAnswers = currentP.getExpectedNumberOfAnswers(problemName, commentsOnFailure);
+      if (expectedNumberOfAnswers > 0) {
+        currentP.Points = (currentWeight * currentP.numCorrectlyAnswered) / expectedNumberOfAnswers;
         this->pointsEarned += currentP.Points;
         //stOutput << "<br>DEBUG: Accounting points: " << currentP.Points
         //<< " to get: " << this->pointsEarned ;
       }
     }
     if (theTopics != 0)
-      if (theTopics->Contains(problemName))
-      { TopicElement& currentElt = theTopics->GetValueCreate(problemName);
+      if (theTopics->Contains(problemName)) {
+        TopicElement& currentElt = theTopics->GetValueCreate(problemName);
         this->pointsMax += currentWeight;
-        for (int j = 0; j < currentElt.parentTopics.size; j ++)
-        { (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned += currentP.Points;
+        for (int j = 0; j < currentElt.parentTopics.size; j ++) {
+          (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned += currentP.Points;
           (*theTopics).theValues[currentElt.parentTopics[j]].maxPointsInAllChildren += currentWeight;
           if (currentWeight == 0)
             (*theTopics).theValues[currentElt.parentTopics[j]].flagSubproblemHasNoWeight = true;
@@ -2010,8 +2010,8 @@ public:
   bool ComputeScoresAndStats(std::stringstream& comments);
 };
 
-bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
-{ MacroRegisterFunctionWithName("UserScores::ComputeScoresAndStats");
+bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
+  MacroRegisterFunctionWithName("UserScores::ComputeScoresAndStats");
 #ifdef MACRO_use_MongoDB
   //stOutput << "DEBUG: Computing scores and stats. ";
   theProblem.currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
@@ -2055,17 +2055,17 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
     (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false));
   //stOutput << "<br>DEBUG: ignoreSectionIdontTEach: " << ignoreSectionsIdontTeach;
   //stOutput << "<br>DEBUG: currentSection: " << this->currentSection;
-  for (int i = 0; i < this->userProblemData.size; i ++)
-  { //currentUserRecord.currentUseR.courseInfo.rawStringStoredInDB = this->userTablE[i][courseInfoIndex];
+  for (int i = 0; i < this->userProblemData.size; i ++) {
+    //currentUserRecord.currentUseR.courseInfo.rawStringStoredInDB = this->userTablE[i][courseInfoIndex];
     //currentUserRecord.currentUseR.AssignCourseInfoString(&comments);
-    if (ignoreSectionsIdontTeach)
-    { if (currentUserRecord.currentUseR.courseComputed != this->currentCourse)
+    if (ignoreSectionsIdontTeach) {
+      if (currentUserRecord.currentUseR.courseComputed != this->currentCourse)
         continue;
-      if (theGlobalVariables.UserStudentVieWOn())
-      { if (currentUserRecord.currentUseR.sectionInDB != this->currentSection)
+      if (theGlobalVariables.UserStudentVieWOn()) {
+        if (currentUserRecord.currentUseR.sectionInDB != this->currentSection)
           continue;
-      } else
-      { if (currentUserRecord.currentUseR.sectionInDB != this->currentSection)
+      } else {
+        if (currentUserRecord.currentUseR.sectionInDB != this->currentSection)
           continue;
       }
     }
@@ -2086,8 +2086,8 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
 //    out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
     currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.theTopicS, comments);
     this->scoresBreakdown.LastObject()->Clear();
-    for (int j = 0; j < theProblem.theTopicS.size(); j ++)
-    { TopicElement& currentTopic = theProblem.theTopicS[j];
+    for (int j = 0; j < theProblem.theTopicS.size(); j ++) {
+      TopicElement& currentTopic = theProblem.theTopicS[j];
       Rational currentPts = currentTopic.totalPointsEarned;
       Rational maxPts = currentTopic.maxPointsInAllChildren;
       this->scoresBreakdown.LastObject()->SetKeyValue
@@ -2109,8 +2109,8 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
 #endif
 }
 
-std::string HtmlInterpretation::GetScoresInCoursePage()
-{ MacroRegisterFunctionWithName("WebWorker::GetScoresInCoursePage");
+std::string HtmlInterpretation::GetScoresInCoursePage() {
+  MacroRegisterFunctionWithName("WebWorker::GetScoresInCoursePage");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "Only admins are allowed to view student scores.";
   std::stringstream out;
@@ -2143,8 +2143,8 @@ std::string HtmlInterpretation::GetScoresInCoursePage()
   out << "<script type =\"text/javascript\">\n";
   out << "studentScoresInHomePage = new Array("
   << theScores.theProblem.theTopicS.size() << ");\n";
-  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
-  { TopicElement& currentElt = theScores.theProblem.theTopicS[i];
+  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++) {
+    TopicElement& currentElt = theScores.theProblem.theTopicS[i];
     out << "studentScoresInHomePage[" << i << "] = new Object;\n";
     if (currentElt.flagSubproblemHasNoWeight)
       out << "studentScoresInHomePage[" << i << "].weightsOK = false;\n";
@@ -2168,8 +2168,8 @@ std::string HtmlInterpretation::GetScoresInCoursePage()
   return out.str();
 }
 
-std::string HtmlInterpretation::ToStringUserScores()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserScores");
+std::string HtmlInterpretation::ToStringUserScores() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserScores");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "only admins are allowed to view scores";
 #ifdef MACRO_use_open_ssl
@@ -2184,8 +2184,8 @@ std::string HtmlInterpretation::ToStringUserScores()
   << theScores.currentCourse << "\n<br>\n";
   out << "<table class =\"scoreTable\"><tr><th rowspan =\"3\">User</th>"
   << "<th rowspan =\"3\">Section</th><th rowspan =\"3\"> Total score</th>";
-  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
-  { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
+  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++) {
+    TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
     if (currentElt.problemFileName != "" || currentElt.type != currentElt.tChapter)
       continue;
     int numCols = currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
@@ -2197,8 +2197,8 @@ std::string HtmlInterpretation::ToStringUserScores()
   }
   out << "</tr>\n";
   out << "<tr>";
-  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
-  { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
+  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++) {
+    TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
     if (currentElt.problemFileName != "" || currentElt.type != currentElt.tSection)
       continue;
     int numCols = currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
@@ -2210,11 +2210,11 @@ std::string HtmlInterpretation::ToStringUserScores()
   }
   out << "</tr>\n";
   out << "<tr>";
-  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
-  { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
+  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++) {
+    TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
     if (currentElt.problemFileName == "" && currentElt.type != currentElt.tProblem &&
-        currentElt.type != currentElt.tSubSection && currentElt.type != currentElt.tTexHeader)
-    { if ((currentElt.flagContainsProblemsNotInSubsection &&
+        currentElt.type != currentElt.tSubSection && currentElt.type != currentElt.tTexHeader) {
+      if ((currentElt.flagContainsProblemsNotInSubsection &&
            currentElt.totalSubSectionsUnderMeIncludingEmptySubsections > 1)
           || currentElt.immediateChildren.size == 0)
         out << "<td></td>";
@@ -2236,8 +2236,8 @@ std::string HtmlInterpretation::ToStringUserScores()
   out
   << "<td>Database not running.</td>";
 #endif
-  for (int j = 0; j < theScores.theProblem.theTopicS.size(); j ++)
-  { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[j];
+  for (int j = 0; j < theScores.theProblem.theTopicS.size(); j ++) {
+    TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[j];
     if (currentElt.problemFileName != "")
       continue;
     if (currentElt.type != currentElt.tSubSection &&
@@ -2246,12 +2246,12 @@ std::string HtmlInterpretation::ToStringUserScores()
     out << "<td>" << currentElt.maxPointsInAllChildren << "</td>";
   }
   out << "</tr>";
-  for (int i = 0; i < theScores.userInfos.size; i ++)
-  { out << "<tr><td>" << theScores.userNames[i] << "</td>"
+  for (int i = 0; i < theScores.userInfos.size; i ++) {
+    out << "<tr><td>" << theScores.userNames[i] << "</td>"
     << "<td>" << theScores.userInfos[i] << "</td>"
     << "<td>" << theScores.userScores[i].GetDoubleValue() << "</td>";
-    for (int j = 0; j < theScores.theProblem.theTopicS.size(); j ++)
-    { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[j];
+    for (int j = 0; j < theScores.theProblem.theTopicS.size(); j ++) {
+      TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[j];
       if (currentElt.problemFileName != "")
         continue;
       if (currentElt.type != currentElt.tSubSection && !currentElt.flagContainsProblemsNotInSubsection)
@@ -2271,8 +2271,8 @@ std::string HtmlInterpretation::ToStringUserScores()
 }
 
 std::string HtmlInterpretation::ToStringUserDetails
-(bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserDetails");
+(bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort) {
+  MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserDetails");
   std::stringstream out;
 #ifdef MACRO_use_MongoDB
   std::string userRole = adminsOnly ? "admin" : "student";
@@ -2328,12 +2328,12 @@ std::string HtmlInterpretation::ToStringUserDetails
   return out.str();
 }
 
-std::string GlobalVariables::ToStringNavigation()
-{ return HtmlInterpretation::ToStringNavigation();
+std::string GlobalVariables::ToStringNavigation() {
+  return HtmlInterpretation::ToStringNavigation();
 }
 
-std::string HtmlInterpretation::ToStringNavigation()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::ToStringNavigation");
+std::string HtmlInterpretation::ToStringNavigation() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::ToStringNavigation");
   std::stringstream out;
   //out << "<table>";
   //out << "DEBUG: auth token: " << theGlobalVariables.GetWebInput("authenticationToken") << "<br>";
@@ -2343,11 +2343,11 @@ std::string HtmlInterpretation::ToStringNavigation()
   if (theGlobalVariables.userCalculatorRequestType == "template" ||
       theGlobalVariables.userCalculatorRequestType == "templateNoLogin")
     out << "<b>Home</b>" << linkSeparator;
-  else
-  { std::string topicList = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
+  else {
+    std::string topicList = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
     std::string courseHome = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-    if (topicList != "" && courseHome != "")
-    { std::string studentView = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentView"), false);
+    if (topicList != "" && courseHome != "") {
+      std::string studentView = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentView"), false);
       std::string section = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable;
       if (theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin")
@@ -2369,18 +2369,18 @@ std::string HtmlInterpretation::ToStringNavigation()
     out << "<b>Select course</b>" << linkBigSeparator;
   else
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=selectCourse\">Select course</a>" << linkBigSeparator;
-  if (theGlobalVariables.flagLoggedIn)
-  { out << "User";
+  if (theGlobalVariables.flagLoggedIn) {
+    out << "User";
     if (theGlobalVariables.UserDefaultHasAdminRights())
       out << " <b>(admin)</b>";
     out << ": " << theGlobalVariables.userDefault.username << linkSeparator;
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout&";
     out << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">Log out</a>" << linkSeparator;
-    if (theGlobalVariables.userCalculatorRequestType == "changePasswordPage")
-    { out << "<b>Account";
+    if (theGlobalVariables.userCalculatorRequestType == "changePasswordPage") {
+      out << "<b>Account";
       out << "</b>" << linkSeparator;
-    } else
-    { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+    } else {
+      if (theGlobalVariables.flagUsingSSLinCurrentConnection)
         out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage&"
         << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << "\">Account</a>" << linkSeparator;
       else
@@ -2395,8 +2395,8 @@ std::string HtmlInterpretation::ToStringNavigation()
     //  << linkSeparator;
   } else
     out << "<b style ='color:red'>logged out</b>" << linkSeparator;
-  if (theGlobalVariables.UserDefaultHasAdminRights())
-  { if (theGlobalVariables.userCalculatorRequestType != "accounts")
+  if (theGlobalVariables.UserDefaultHasAdminRights()) {
+    if (theGlobalVariables.userCalculatorRequestType != "accounts")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=accounts&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)

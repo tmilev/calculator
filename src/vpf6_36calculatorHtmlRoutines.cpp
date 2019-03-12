@@ -8,8 +8,8 @@
 ProjectInformationInstance ProjectInfoVpf6_36pp(__FILE__, "Calculator html functions implementation. ");
 
 bool CalculatorHtmlFunctions::innerUserInputBox
-(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
+(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
   MapLisT<std::string, Expression, MathRoutines::hashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theArguments, &theCommands.Comments))
     return false;
@@ -23,8 +23,8 @@ bool CalculatorHtmlFunctions::innerUserInputBox
   InputBox newBox;
   newBox.name = boxName;
   //stOutput << "DEBUG: box name: " << newBox.name << "<br>";
-  for (int i = 0; i < theArguments.theKeys.size; i ++)
-  { if (theArguments.theKeys[i] == "value")
+  for (int i = 0; i < theArguments.theKeys.size; i ++) {
+    if (theArguments.theKeys[i] == "value")
       newBox.value = theArguments.theValues[i];
     if (theArguments.theKeys[i] == "min")
       newBox.min = theArguments.theValues[i];
@@ -37,8 +37,8 @@ bool CalculatorHtmlFunctions::innerUserInputBox
 }
 
 bool CalculatorHtmlFunctions::innerEvaluateSymbols
-(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerEvaluateSymbols");
+(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerEvaluateSymbols");
   std::string theString;
   if (!input.IsOfType(&theString))
     return false;
@@ -47,15 +47,15 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols
   Expression evaluatedE;
   std::stringstream out;
   bool previousWasInteger = false;
-  for (int i = 0; i < theElts.size; i ++)
-  { SyntacticElement& currentElt = theElts[i];
-    if (currentElt.controlIndex == theCommands.conVariable())
-    { theCommands.EvaluateExpression(theCommands, currentElt.theData, evaluatedE);
+  for (int i = 0; i < theElts.size; i ++) {
+    SyntacticElement& currentElt = theElts[i];
+    if (currentElt.controlIndex == theCommands.conVariable()) {
+      theCommands.EvaluateExpression(theCommands, currentElt.theData, evaluatedE);
       out << evaluatedE.ToString();
       continue;
     }
-    if (currentElt.controlIndex == theCommands.conInteger())
-    { if (!previousWasInteger)
+    if (currentElt.controlIndex == theCommands.conInteger()) {
+      if (!previousWasInteger)
         out << "{";
       out << currentElt.theData.ToString();
       previousWasInteger = true;
@@ -72,8 +72,8 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols
 }
 
 bool CalculatorHtmlFunctions::innerSetInputBox
-(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
+(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
   MapLisT<std::string, Expression, MathRoutines::hashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theArguments, &theCommands.Comments))
     return false;
@@ -97,8 +97,8 @@ bool CalculatorHtmlFunctions::innerSetInputBox
   return output.AssignValue(out.str(), theCommands);
 }
 
-std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBox)
-{ MacroRegisterFunctionWithName("CalculatorHtmlFunctions::GetUserInputBoxName");
+std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBox) {
+  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::GetUserInputBoxName");
   if (theBox.owner == 0)
     return "non-initialized-expression";
   Calculator& theCommands = *theBox.owner;

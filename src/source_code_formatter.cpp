@@ -4,7 +4,11 @@
 
 static ProjectInformationInstance ProjectInfoVpfSourceCodeFormatter(__FILE__, "Source code formatter implementation.");
 
-bool SourceCodeFormatter::initializeFileNames(const std::string& fileName, std::stringstream* comments) {
+bool SourceCodeFormatter::initializeFileNames(
+  const std::string& fileName,
+  const std::string& inputOutputFileNameEmptyForAuto,
+  std::stringstream* comments
+) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::initializeFileNames");
   this->inputFileName = fileName;
   if (!FileOperations::LoadFileToStringVirtual(this->inputFileName, this->inputCode, false, false, comments)) {
@@ -13,8 +17,11 @@ bool SourceCodeFormatter::initializeFileNames(const std::string& fileName, std::
     }
     return false;
   }
-  this->outputFileName = this->inputFileName;
-  this->outputFileName.append(".new");
+  if (inputOutputFileNameEmptyForAuto != "") {
+    this->outputFileName = inputOutputFileNameEmptyForAuto;
+  } else {
+    this->outputFileName = this->inputFileName + ".new";
+  }
   return true;
 }
 
@@ -34,9 +41,46 @@ std::string SourceCodeFormatter::ToStringLinks() {
   return out.str();
 }
 
-bool SourceCodeFormatter::FormatCPPSourceCode(const std::string& fileName, std::stringstream* comments) {
+bool SourceCodeFormatter::FormatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments) {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::FormatCPPDirectory");
+  std::string directory = inputDirectory;
+  if (directory == "") {
+    if (comments != 0) {
+      *comments << "Format cpp directory: empty directory name not allowed. ";
+    }
+    return false;
+  }
+  if (directory[directory.size() - 1] != '/') {
+    directory += "/";
+  }
+  List<std::string> allFiles, newFileNames, oldFileNames, allFileExtensions;
+  if (!FileOperations::GetFolderFileNamesVirtual(directory, allFiles, &allFileExtensions, false, false, comments)) {
+    return false;
+  }
+  newFileNames.SetExpectedSize(allFiles.size);
+  oldFileNames.SetExpectedSize(allFiles.size);
+  for (int i = 0; i < allFiles.size; i ++) {
+    if (allFileExtensions[i] == ".cpp" || allFileExtensions[i] == ".h") {
+      oldFileNames.AddOnTop(directory + allFiles[i]);
+      newFileNames.AddOnTop(directory + "new/" + allFiles[i]);
+    }
+  }
+  for (int i = 0; i < newFileNames.size; i ++) {
+    SourceCodeFormatter theFormatter;
+    if (!theFormatter.FormatCPPSourceCode(oldFileNames[i], newFileNames[i], comments)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool SourceCodeFormatter::FormatCPPSourceCode(
+  const std::string& inputFileName,
+  const std::string& inputOutputFileNameEmptyForAuto,
+  std::stringstream* comments
+) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::FormatCPPSourceCode");
-  if (!this->initializeFileNames(fileName, comments)) {
+  if (!this->initializeFileNames(inputFileName, inputOutputFileNameEmptyForAuto, comments)) {
     return false;
   }
   if (!this->ExtractCodeElements(comments)) {
@@ -63,7 +107,8 @@ void SourceCodeFormatter::AddCurrentWord() {
 }
 
 bool SourceCodeFormatter::isSeparatorCharacter(char input) {
-  return this->separatorCharactersMap[(unsigned) input];
+  unsigned char inputUnsigned = input;
+  return this->separatorCharactersMap[inputUnsigned];
 }
 
 bool SourceCodeFormatter::ProcessSeparatorCharacters() {
@@ -118,7 +163,8 @@ bool SourceCodeFormatter::ExtractCodeElements(std::stringstream* comments) {
 
 bool SourceCodeFormatter::isWhiteSpaceNoNewLine(const std::string& input) {
   for (unsigned i = 0; i < input.size(); i ++) {
-    if (!this->whiteSpaceCharacterNoNewLineMap[(unsigned) input[i]]) {
+    unsigned char currentChar = input[i];
+    if (!this->whiteSpaceCharacterNoNewLineMap[currentChar]) {
       return false;
     }
   }
@@ -137,13 +183,14 @@ bool SourceCodeFormatter::ApplyOneRule() {
   std::string& secondToLast = this->transformedElements[lastIndex - 1];
   std::string& thirdToLast = this->transformedElements[lastIndex - 2];
   std::string& fourthToLast = this->transformedElements[lastIndex - 3];
-  //std::string& fifthToLast = this->transformedElements[lastIndex - 4];
+  std::string& fifthToLast = this->transformedElements[lastIndex - 4];
+  std::string& sixthToLast = this->transformedElements[lastIndex - 5];
   if (this->isWhiteSpaceNoNewLine(last) && this->isWhiteSpaceNoNewLine(secondToLast)) {
     secondToLast = secondToLast + last;
     return this->DecreaseStack(1);
   }
   if (
-    fourthToLast == ")" &&
+    (fourthToLast == ")" || fourthToLast == "else") &&
     thirdToLast == "\n" &&
     this->isWhiteSpaceNoNewLine(secondToLast) &&
     last == "{"
@@ -153,12 +200,40 @@ bool SourceCodeFormatter::ApplyOneRule() {
     return this->DecreaseStack(1);
   }
   if (
-    thirdToLast == ")" &&
+    (thirdToLast == ")" || thirdToLast == "else") &&
     secondToLast == "\n" &&
     last == "{"
   ) {
     secondToLast = " {\n";
     last = " ";
+    return true;
+  }
+  if (
+    fifthToLast == ")" &&
+    this->isWhiteSpaceNoNewLine(fourthToLast) &&
+    thirdToLast == "const" &&
+    secondToLast == "\n" &&
+    last == "{"
+  ) {
+    thirdToLast = "const {\n";
+    secondToLast = " ";
+    return this->DecreaseStack(1);
+  }
+  if (
+    sixthToLast == ")" &&
+    this->isWhiteSpaceNoNewLine(fifthToLast) &&
+    fourthToLast == "const" &&
+    thirdToLast == "\n" &&
+    this->isWhiteSpaceNoNewLine(secondToLast) &&
+    last == "{"
+  ) {
+    fourthToLast = "const {";
+    secondToLast = secondToLast + " ";
+    return this->DecreaseStack(1);
+  }
+  if (secondToLast == ")" && last == "const") {
+    last = " ";
+    this->transformedElements.AddOnTop("const");
     return true;
   }
   return false;
@@ -204,7 +279,9 @@ SourceCodeFormatter::SourceCodeFormatter() {
 bool SourceCodeFormatter::WriteFormatedCode(std::stringstream* comments) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::WriteFormatedCode");
   std::fstream fileOut;
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(fileOut, this->outputFileName, false, true, false)) {
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
+    fileOut, this->outputFileName, false, true, false
+  )) {
     if (comments != 0) {
       *comments << "Failed to open source code formatting output file. ";
     }

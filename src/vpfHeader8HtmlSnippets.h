@@ -110,13 +110,13 @@ public:
   (const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
    std::stringstream& commentsOnFailure);
   static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
-  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml)
-  { std::string result;
+  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml) {
+    std::string result;
     HtmlRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml);
     return result;
   }
-  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip)
-  { return HtmlRoutines::ElementToStringTooltip(input, inputTooltip, true);
+  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip) {
+    return HtmlRoutines::ElementToStringTooltip(input, inputTooltip, true);
   }
   static uint32_t RedGreenBlue(unsigned int r, unsigned int g, unsigned int b);
   static void MakeStdCoutReport(const std::string& input);

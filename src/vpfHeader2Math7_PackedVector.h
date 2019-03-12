@@ -68,8 +68,8 @@ public:
   int MultiplyElements(int g, int h) const;
   //<-multiply elements is better name than multiply (groups can be tensored/direct product multiplied.
   //MultiplyElements is unambiguous.
-  int ConjugacyClassCount() const
-  { return this->conjugacyClasses.size;
+  int ConjugacyClassCount() const {
+    return this->conjugacyClasses.size;
   }
   int Invert(int g) const;
 
@@ -99,15 +99,15 @@ public:
 };
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::MakeArbitrarySimple(char letter, int number)
-{ DynkinType D;
+void AnotherWeylGroup<scalar, templateVector>::MakeArbitrarySimple(char letter, int number) {
+  DynkinType D;
   D.MakeSimpleType(letter, number);
   D.GetCartanSymmetric(this->CartanSymmetric);
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::SimpleReflection(int i, templateVector& v) const
-{ // next i'll put some printfs in addition
+void AnotherWeylGroup<scalar, templateVector>::SimpleReflection(int i, templateVector& v) const {
+  // next i'll put some printfs in addition
   //stOutput << "Debugging simple reflections: templateVector " << v << " transformed by reflection " << i;
   scalar x = 0;
   for (int j = 0; j < this->rank; j ++)
@@ -121,17 +121,17 @@ void AnotherWeylGroup<scalar, templateVector>::SimpleReflection(int i, templateV
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::SimpleReflection(int i, const templateVector& v, templateVector& out) const
-{ out = v;
+void AnotherWeylGroup<scalar, templateVector>::SimpleReflection(int i, const templateVector& v, templateVector& out) const {
+  out = v;
   this->SimpleReflection(i,out);
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::GetSimpleReflections(const templateVector& v, List<int>& out) const
-{ templateVector w = v;
-  while (w != this->twiceRho)
-  { for (int i = 0; i < this->rank; i ++)
-    { scalar x = 0;
+void AnotherWeylGroup<scalar, templateVector>::GetSimpleReflections(const templateVector& v, List<int>& out) const {
+  templateVector w = v;
+  while (w != this->twiceRho) {
+    for (int i = 0; i < this->rank; i ++) {
+      scalar x = 0;
       for (int j = 0; j < this->rank; j ++)
         if (this->unrationalCartanSymmetric.elements[i][j] != 0)
           x += this->unrationalCartanSymmetric.elements[i][j] * w[j];
@@ -144,15 +144,15 @@ void AnotherWeylGroup<scalar, templateVector>::GetSimpleReflections(const templa
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::GetWord(int i, List<int>& out) const
-{ this->GetSimpleReflections(this->rhoOrbit[i], out);
+void AnotherWeylGroup<scalar, templateVector>::GetWord(int i, List<int>& out) const {
+  this->GetSimpleReflections(this->rhoOrbit[i], out);
 }
 
 // copypaste another function into this so the autovectorizer will work
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::ApplyReflectionList(const List<int>& simpleReflections, templateVector& v) const
-{ for (int ii = simpleReflections.size - 1; ii >= 0; ii --)
-  { //this->SimpleReflection(simpleReflections[i],v);
+void AnotherWeylGroup<scalar, templateVector>::ApplyReflectionList(const List<int>& simpleReflections, templateVector& v) const {
+  for (int ii = simpleReflections.size - 1; ii >= 0; ii --) {
+    //this->SimpleReflection(simpleReflections[i],v);
     int i = simpleReflections[ii];
     scalar x = 0;
     for (int j = 0; j < this->rank; j ++)
@@ -166,28 +166,28 @@ void AnotherWeylGroup<scalar, templateVector>::ApplyReflectionList(const List<in
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::ActOn(int i, templateVector& v) const
-{ List<int> simpleReflections;
+void AnotherWeylGroup<scalar, templateVector>::ActOn(int i, templateVector& v) const {
+  List<int> simpleReflections;
   GetSimpleReflections(this->rhoOrbit[i],simpleReflections);
   this->ApplyReflectionList(simpleReflections, v);
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::ActOn(int i, const templateVector& v, templateVector& out) const
-{ out = v;
+void AnotherWeylGroup<scalar, templateVector>::ActOn(int i, const templateVector& v, templateVector& out) const {
+  out = v;
   this->ActOn(i,out);
 }
 
 template <typename scalar, typename templateVector>
-int AnotherWeylGroup<scalar, templateVector>::MultiplyElements(int i, int j) const
-{ templateVector v = this->rhoOrbit[j];
+int AnotherWeylGroup<scalar, templateVector>::MultiplyElements(int i, int j) const {
+  templateVector v = this->rhoOrbit[j];
   this->ActOn(i, v);
   return this->rhoOrbit.GetIndex(v);
 }
 
 template <typename scalar, typename templateVector>
-int AnotherWeylGroup<scalar, templateVector>::Invert(int i) const
-{ List<int> srsl;
+int AnotherWeylGroup<scalar, templateVector>::Invert(int i) const {
+  List<int> srsl;
   GetSimpleReflections(this->rhoOrbit[i], srsl);
   templateVector v = twiceRho;
   for (int i = srsl.size - 1; i >= 0; i --)
@@ -196,9 +196,9 @@ int AnotherWeylGroup<scalar, templateVector>::Invert(int i) const
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::ComputeRho()
-{ if (unrationalCartanSymmetric.NumRows < CartanSymmetric.NumRows)
-  { int den = 1;
+void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
+  if (unrationalCartanSymmetric.NumRows < CartanSymmetric.NumRows) {
+    int den = 1;
     for (int i = 0; i < CartanSymmetric.NumRows; i ++)
       for (int j = 0; j < CartanSymmetric.NumCols; j ++)
         den = MathRoutines::lcm(den,CartanSymmetric.elements[i][j].GetDenominator().GetUnsignedIntValueTruncated());
@@ -207,21 +207,21 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho()
     //for (int i = 0; i <CartanSymmetric.NumRows; i ++)
     //  this->ucsm[i].SetSize(CartanSymmetric.NumCols);
     for (int i = 0; i < CartanSymmetric.NumRows; i ++)
-      for (int j = 0; j < CartanSymmetric.NumCols; j ++)
-      { unrationalCartanSymmetric.elements[i][j] = (CartanSymmetric.elements[i][j] * den).GetNumerator().GetIntValueTruncated();
+      for (int j = 0; j < CartanSymmetric.NumCols; j ++) {
+        unrationalCartanSymmetric.elements[i][j] = (CartanSymmetric.elements[i][j] * den).GetNumerator().GetIntValueTruncated();
         //ucsm[i][j] = unrationalCartanSymmetric.elements[i][j];
       }
 
   }
   stOutput << "symmetric Cartan matrix is" << "\n";
-  for (int i = 0; i < unrationalCartanSymmetric.NumRows; i ++)
-  { for (int j = 0; j < unrationalCartanSymmetric.NumCols; j ++)
+  for (int i = 0; i < unrationalCartanSymmetric.NumRows; i ++) {
+    for (int j = 0; j < unrationalCartanSymmetric.NumCols; j ++)
       stOutput << unrationalCartanSymmetric.elements[i][j] << '\t';
     stOutput << '\n';
   }
   this->rank = this->unrationalCartanSymmetric.NumRows;
-  for (int rvi = 0; rvi < rank; rvi ++)
-  { templateVector vi;
+  for (int rvi = 0; rvi < rank; rvi ++) {
+    templateVector vi;
     vi.MakeEi(rank, rvi);
     if (this->RootSystem.Contains(vi))
       continue;
@@ -229,12 +229,12 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho()
     List<int> newelts;
     templateVector w;
     newelts.AddOnTop(this->RootSystem.GetIndex(vi));
-    while (newelts.size > 0)
-    { int i = newelts.PopLastObject();
-      for (int si = 0; si < this->rank; si ++)
-      { this->SimpleReflection(si, this->RootSystem[i], w);
-        if (this->RootSystem.GetIndex(w) == - 1)
-        { this->RootSystem.AddOnTop(w);
+    while (newelts.size > 0) {
+      int i = newelts.PopLastObject();
+      for (int si = 0; si < this->rank; si ++) {
+        this->SimpleReflection(si, this->RootSystem[i], w);
+        if (this->RootSystem.GetIndex(w) == - 1) {
+          this->RootSystem.AddOnTop(w);
           int j = this->RootSystem.GetIndex(w);
           newelts.AddOnTop(j);
         }
@@ -245,11 +245,11 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho()
   stOutput << this->RootSystem << "\n";
   this->RootSystem.QuickSortAscending();
   this->twiceRho.MakeZero(rank);
-  for (int i = 0; i < this->RootSystem.size; i ++)
-  { bool usethis = true;
+  for (int i = 0; i < this->RootSystem.size; i ++) {
+    bool usethis = true;
     for (int j = 0; j < this->RootSystem[i].size; j ++)
-      if (this->RootSystem[i][j] < 0)
-      { usethis = false;
+      if (this->RootSystem[i][j] < 0) {
+        usethis = false;
         break;
       }
     if (usethis)
@@ -262,8 +262,8 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho()
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::ComputeAllElements()
-{ stOutput << "Getting elements...";
+void AnotherWeylGroup<scalar, templateVector>::ComputeAllElements() {
+  stOutput << "Getting elements...";
   if (this->RootSystem.size == 0)
     this->ComputeRho();
   stOutput << "(twiceRho is " << this->twiceRho << ")" << "\n";
@@ -271,12 +271,12 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeAllElements()
   List<int> newelts;
   this->rhoOrbit.AddOnTop(twiceRho);
   newelts.AddOnTop(this->rhoOrbit.GetIndex(twiceRho));
-  while (newelts.size > 0)
-  { int i = newelts.PopLastObject();
-    for (int si = 0; si < this->rank; si ++)
-    { this->SimpleReflection(si,this->rhoOrbit[i],w);
-      if (this->rhoOrbit.GetIndex(w) == - 1)
-      { this->rhoOrbit.AddOnTop(w);
+  while (newelts.size > 0) {
+    int i = newelts.PopLastObject();
+    for (int si = 0; si < this->rank; si ++) {
+      this->SimpleReflection(si,this->rhoOrbit[i],w);
+      if (this->rhoOrbit.GetIndex(w) == - 1) {
+        this->rhoOrbit.AddOnTop(w);
         int j = this->rhoOrbit.GetIndex(w);
         newelts.AddOnTop(j);
       }
@@ -288,8 +288,8 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeAllElements()
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::ComputeCC()
-{ stOutput << "Getting conjugacy classes...";
+void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
+  stOutput << "Getting conjugacy classes...";
   if (this->rhoOrbit.size == 0)
     this->ComputeAllElements();
   List<bool> Accounted;
@@ -302,12 +302,12 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC()
   templateVector theRhoImage;
   stOutput << "number of conjugacy classes... ";
   for (int i = 0; i < this->size(); i ++)
-    if (!Accounted[i])
-    { theStack.Clear();
+    if (!Accounted[i]) {
+      theStack.Clear();
       theStack.AddOnTop(i);
       for (int j = 0; j < theStack.size; j ++)
-        for (int k = 0; k < theRank; k ++)
-        { theRhoImage = this->twiceRho;
+        for (int k = 0; k < theRank; k ++) {
+          theRhoImage = this->twiceRho;
           this->SimpleReflection(k, theRhoImage);
           this->ActOn(theStack[j], theRhoImage);
           this->SimpleReflection(k, theRhoImage);
@@ -324,17 +324,17 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC()
 }
 
 template<typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::ComputeClassMap()
-{ this->classMap.SetSize(this->size);
+void AnotherWeylGroup<scalar, templateVector>::ComputeClassMap() {
+  this->classMap.SetSize(this->size);
   for (int i = 0; i < this->ConjugacyClassCount(); i ++)
     for (int j = 0; j < this->conjugacyClasses[i].size; j ++)
       this->classmap[this->conjugacyClasses[i][j]] = i;
 }
 
 template<typename scalar, typename templateVector>
-Matrix<Rational>& AnotherWeylGroup<scalar, templateVector>::GetClassMatrix(int cc)
-{ if (this->classMatrices.size == 0)
-  { if (this->ConjugacyClassCount() == 0)
+Matrix<Rational>& AnotherWeylGroup<scalar, templateVector>::GetClassMatrix(int cc) {
+  if (this->classMatrices.size == 0) {
+    if (this->ConjugacyClassCount() == 0)
       this.ComputeCC();
     this->classMatrices.SetSize(this->ConjugacyClassCount());
   }
@@ -345,35 +345,35 @@ Matrix<Rational>& AnotherWeylGroup<scalar, templateVector>::GetClassMatrix(int c
 }
 
 template<typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::ComputeClassMatrices()
-{ if (this->ConjugacyClassCount() == 0)
+void AnotherWeylGroup<scalar, templateVector>::ComputeClassMatrices() {
+  if (this->ConjugacyClassCount() == 0)
     this->ComputeCC();
-  for (int i = 0; i < this->ConjugacyClassCount(); i ++)
-  { stOutput << "//getting class matrix " << i << "\n";
+  for (int i = 0; i < this->ConjugacyClassCount(); i ++) {
+    stOutput << "//getting class matrix " << i << "\n";
     this->GetClassMatrix(i);
   }
 }
 
 template <typename scalar, typename templateVector>
-int AnotherWeylGroup<scalar, templateVector>::GetRank() const
-{ return this->CartanSymmetric.NumRows;
+int AnotherWeylGroup<scalar, templateVector>::GetRank() const {
+  return this->CartanSymmetric.NumRows;
 }
 
 template <typename scalar, typename templateVector>
-int AnotherWeylGroup<scalar, templateVector>::GetRootReflection(int i) const
-{ scalar x = this->RootSystem[i].ScalarProduct(this->twiceRho,this->unrationalCartanSymmetric);
+int AnotherWeylGroup<scalar, templateVector>::GetRootReflection(int i) const {
+  scalar x = this->RootSystem[i].ScalarProduct(this->twiceRho,this->unrationalCartanSymmetric);
   x *= - 2;
   x /= this->RootSystem[i].ScalarProduct(this->RootSystem[i],this->unrationalCartanSymmetric);
   return this->rhoOrbit.GetIndexIMustContainTheObject(twiceRho+this->RootSystem[i] * x);
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::GetSignCharacter(Vector<Rational>& out)
-{ if (this->ConjugacyClassCount() == 0)
+void AnotherWeylGroup<scalar, templateVector>::GetSignCharacter(Vector<Rational>& out) {
+  if (this->ConjugacyClassCount() == 0)
     this->ComputeCC();
   out.SetSize(this->ConjugacyClassCount());
-  for (int i = 0; i < this->ConjugacyClassCount(); i ++)
-  { List<int> srs;
+  for (int i = 0; i < this->ConjugacyClassCount(); i ++) {
+    List<int> srs;
     this->GetWord(this->conjugacyClasses[i][0], srs);
     int yn = srs.size % 2;
     if (yn == 0)
@@ -385,8 +385,8 @@ void AnotherWeylGroup<scalar, templateVector>::GetSignCharacter(Vector<Rational>
 
 // there are like 3 copies of this function with slightly different argument types
 template <typename scalar, typename templateVector>
-Rational AnotherWeylGroup<scalar, templateVector>::GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const
-{ Rational acc = 0;
+Rational AnotherWeylGroup<scalar, templateVector>::GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const {
+  Rational acc = 0;
   for (int i = 0; i < X1.size; i ++)
     acc += X1[i].GetComplexConjugate() * X2[i] * this->conjugacyClasses[i].size;
   return acc / this->size();
@@ -396,11 +396,11 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkD
 
 
 template <typename coefficient>
-List<VectorSpace<coefficient> > GetEigenspaces(const Matrix<coefficient> &M)
-{ List<List<Vector<coefficient> > > es = eigenspaces(M);
+List<VectorSpace<coefficient> > GetEigenspaces(const Matrix<coefficient> &M) {
+  List<List<Vector<coefficient> > > es = eigenspaces(M);
   List<VectorSpace<coefficient> > vs;
-  for (int spi = 0; spi < es.size; spi ++)
-  { VectorSpace<coefficient> V;
+  for (int spi = 0; spi < es.size; spi ++) {
+    VectorSpace<coefficient> V;
     for (int j = 0; j < es[spi].size; j ++)
       V.AddVector(es[spi][j]);
     vs.AddOnTop(V);
@@ -411,8 +411,8 @@ List<VectorSpace<coefficient> > GetEigenspaces(const Matrix<coefficient> &M)
 // As in Schneider, 1990
 // well, so far not using any of his improvements
 template <typename somegroup>
-List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G)
-{ if (G.ConjugacyClassCount() == 0)
+List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
+  if (G.ConjugacyClassCount() == 0)
     G.ComputeCCfromAllElements();
   List<int> classmap;
   int sizeOfG = - 1;
@@ -427,17 +427,17 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G)
   for (int i = 0; i < G.ConjugacyClassCount(); i ++)
     form.elements[i][i] = G.conjugacyClasseS[i].size;
   List<VectorSpace<Rational> > spaces;
-  if (G.characterTable.size > 0)
-  { VectorSpace<Rational> allchars;
-    for (int i = 0; i < G.characterTable.size; i ++)
-    { VectorSpace<Rational> xspi;
+  if (G.characterTable.size > 0) {
+    VectorSpace<Rational> allchars;
+    for (int i = 0; i < G.characterTable.size; i ++) {
+      VectorSpace<Rational> xspi;
       xspi.AddVector(G.characterTable[i].data);
       spaces.AddOnTop(xspi);
       allchars.AddVector(G.characterTable[i].data);
     }
     spaces.AddOnTop(allchars.OrthogonalComplement(0, &form));
-  } else
-  { Vector<Rational> X1;
+  } else {
+    Vector<Rational> X1;
     X1.SetSize(G.ConjugacyClassCount());
     for (int i = 0; i < G.ConjugacyClassCount(); i ++)
       X1[i] = 1;
@@ -447,24 +447,24 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G)
     spaces.AddOnTop(sp1.OrthogonalComplement(0, &form));
   }
   bool foundEmAll = false;
-  for (int i = 0; !foundEmAll && i < G.ConjugacyClassCount(); i ++)
-  { Matrix<Rational> M;
+  for (int i = 0; !foundEmAll && i < G.ConjugacyClassCount(); i ++) {
+    Matrix<Rational> M;
     stOutput << "Getting class matrix " << i << "\n";
     M = GetClassMatrix(G,i,&classmap);
     //stOutput << M.ToString(&consoleFormat) << "\n";
     List<VectorSpace<Rational> > es = GetEigenspaces(M);
-    for (int esi = 0; !foundEmAll && esi < es.size; esi ++)
-    { int spsize = spaces.size;
-      for (int spi = 0; !foundEmAll &&spi < spsize; spi ++)
-      { if (spaces[spi].rank == 1)
+    for (int esi = 0; !foundEmAll && esi < es.size; esi ++) {
+      int spsize = spaces.size;
+      for (int spi = 0; !foundEmAll &&spi < spsize; spi ++) {
+        if (spaces[spi].rank == 1)
           continue;
         VectorSpace<Rational> V = spaces[spi].Intersection(es[esi]);
-        if ((V.rank > 0) and (V.rank < spaces[spi].rank))
-        { VectorSpace<Rational> W = es[esi].OrthogonalComplement(&spaces[spi],&form);
+        if ((V.rank > 0) and (V.rank < spaces[spi].rank)) {
+          VectorSpace<Rational> W = es[esi].OrthogonalComplement(&spaces[spi],&form);
           spaces[spi] = V;
           spaces.AddOnTop(W);
-          if (spaces.size == G.ConjugacyClassCount())
-          { foundEmAll = true;
+          if (spaces.size == G.ConjugacyClassCount()) {
+            foundEmAll = true;
             break;
           }
         }
@@ -478,12 +478,12 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G)
   }
   List<ClassFunction<somegroup, Rational> > chars;
   chars.SetSize(spaces.size);
-  for (int i = 0; i < spaces.size; i ++)
-  { chars[i].data = spaces[i].GetCanonicalBasisVector(0);
+  for (int i = 0; i < spaces.size; i ++) {
+    chars[i].data = spaces[i].GetCanonicalBasisVector(0);
     chars[i].G = &G;
   }
-  for (int i = 0; i < spaces.size; i ++)
-  { Rational x = chars[i].InnerProduct(chars[i]);
+  for (int i = 0; i < spaces.size; i ++) {
+    Rational x = chars[i].InnerProduct(chars[i]);
     int x2 = x.GetDenominator().GetUnsignedIntValueTruncated();
     x2 = FloatingPoint::sqrt(x2);
     chars[i] *= x2;
@@ -506,8 +506,8 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G)
 }
 
 template <typename somegroup>
-Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap = 0)
-{ List<int> invl;
+Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap = 0) {
+  List<int> invl;
   int classSize = - 1;
   G.conjugacyClasseS[cci].size.IsIntegerFittingInInt(&classSize);
   invl.SetSize(classSize);
@@ -516,15 +516,15 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap
   Matrix<int> M;
   M.MakeZeroMatrix(G.ConjugacyClassCount());
   for (int t = 0; t < G.ConjugacyClassCount(); t ++)
-    for (int xi = 0; xi < invl.size; xi ++)
-    { int yi = G.MultiplyElements(invl[xi], G.theElements.GetIndex(G.conjugacyClasseS[t].representative));
+    for (int xi = 0; xi < invl.size; xi ++) {
+      int yi = G.MultiplyElements(invl[xi], G.theElements.GetIndex(G.conjugacyClasseS[t].representative));
       int ci;
       if (classmap)
         M.elements[t][(*classmap)[yi]] += 1;
       else
         for (ci = 0; ci < G.ConjugacyClassCount(); ci ++)
-          if (G.conjugacyClasseS[ci].indicesEltsInOwner.BSContains(yi))
-          { M.elements[t][ci] += 1;
+          if (G.conjugacyClasseS[ci].indicesEltsInOwner.BSContains(yi)) {
+            M.elements[t][ci] += 1;
             break;
           }
     }
@@ -536,8 +536,8 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap
   return out;
 }
 
-void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup<WeylGroupData> >& gens, List<bool>& out)
-{ /*List<ElementWeylGroup<WeylGroup>> genes;
+void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup<WeylGroupData> >& gens, List<bool>& out) {
+  /*List<ElementWeylGroup<WeylGroup>> genes;
   genes.SetSize(gens.size);
   for (int i = 0; i <gens.size; i ++)
     genes[i] = G.theElements[gens[i]];
@@ -555,12 +555,12 @@ void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup<
 
   List<int> ccPreimages;
   ccPreimages.SetSize(H.ConjugacyClassCount());
-  for (int i = 0; i < H.ConjugacyClassCount(); i ++)
-  { bool notFound = true;
+  for (int i = 0; i < H.ConjugacyClassCount(); i ++) {
+    bool notFound = true;
     for (int ci = 0; notFound && ci < G.theGroup.ConjugacyClassCount(); ci ++)
       for (int cj = 0; notFound && cj < G.theGroup.conjugacyClasseS[ci].size; cj ++)
-        if (G.theGroup.conjugacyClasseS[ci].theElements[cj] == H.conjugacyClasseS[i].representative)
-        { ccPreimages[i] = ci;
+        if (G.theGroup.conjugacyClasseS[ci].theElements[cj] == H.conjugacyClasseS[i].representative) {
+          ccPreimages[i] = ci;
           notFound = false;
         }
     if (notFound)
@@ -569,8 +569,8 @@ void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup<
   out.SetSize(G.theGroup.characterTable.size);
   Vector<Rational> HXi;
   HXi.SetSize(H.ConjugacyClassCount());
-  for (int i = 0; i < G.theGroup.characterTable.size; i ++)
-  { Vector<Rational> GXi = G.theGroup.characterTable[i].data;
+  for (int i = 0; i < G.theGroup.characterTable.size; i ++) {
+    Vector<Rational> GXi = G.theGroup.characterTable[i].data;
     for (int j = 0; j < HXi.size; j ++)
       HXi[j] = GXi[ccPreimages[j]];
     if (H.GetHermitianProduct(HXs, HXi) == 0)
@@ -580,15 +580,15 @@ void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup<
   }
 }
 
-void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bool pseudo = false)
-{ Selection sel;
+void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bool pseudo = false) {
+  Selection sel;
   sel.init(G->CartanSymmetric.NumCols);
   int numCycles = MathRoutines::TwoToTheNth(sel.MaxSize);
   List<List<bool> > tss;
   tss.SetSize(numCycles);
   List<ElementWeylGroup<WeylGroupData> > theGenerators;
-  for (int i = 0; i < numCycles - 2; i ++)
-  { sel.incrementSelection();
+  for (int i = 0; i < numCycles - 2; i ++) {
+    sel.incrementSelection();
     theGenerators.SetSize(sel.CardinalitySelection);
     for (int j = 0; j < sel.CardinalitySelection; j ++)
       theGenerators[j].MakeSimpleReflection(sel.elements[j], *G);
@@ -602,12 +602,12 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
     tsg[i] =  G->theGroup.characterTable[i].data == Xs;
   tss.AddOnTop(tsg);
 
-  if (pseudo)
-  { stOutput << "pseudo-parabolics" << "\n";
+  if (pseudo) {
+    stOutput << "pseudo-parabolics" << "\n";
     ElementWeylGroup<WeylGroupData> hr = G->GetRootReflection(G->RootSystem.size- 1);
     sel.init(G->CartanSymmetric.NumCols);
-    for (int i = 0; i < numCycles - 1; i ++)
-    { theGenerators.SetSize(sel.CardinalitySelection);
+    for (int i = 0; i < numCycles - 1; i ++) {
+      theGenerators.SetSize(sel.CardinalitySelection);
       for (int j = 0; j < sel.CardinalitySelection; j ++)
         theGenerators[j].MakeSimpleReflection(sel.elements[j], *G);
       theGenerators.AddOnTop(hr);
@@ -622,14 +622,14 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
 
 
   tauSignatures.SetSize(G->theGroup.characterTable.size);
-  for (int i = 0; i < G->theGroup.characterTable.size; i ++)
-  { tauSignatures[i].SetSize(tss.size + 1);
+  for (int i = 0; i < G->theGroup.characterTable.size; i ++) {
+    tauSignatures[i].SetSize(tss.size + 1);
     tauSignatures[i][0] = 1;
     for (int j = 1; j < tss.size + 1; j ++)
       tauSignatures[i][j] = tss[j - 1][i];
   }
-  for (int i = 0; i < G->theGroup.characterTable.size; i ++)
-  { stOutput << G->theGroup.characterTable[i] << "\n";
+  for (int i = 0; i < G->theGroup.characterTable.size; i ++) {
+    stOutput << G->theGroup.characterTable[i] << "\n";
     for (int j = 0; j < tauSignatures[i].size; j ++)
       stOutput << tauSignatures[i][j] << ' ';
     stOutput << "\n";
@@ -637,28 +637,28 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
 }
 
 template <typename elementSomeGroup>
-void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData &data)
-{ data.type = JSData::JSObject;
+void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData &data) {
+  data.type = JSData::JSObject;
   JSData& representatives = data.objects.GetValueCreate("representatives");
   JSData& sizes = data.objects.GetValueCreate("sizes");
   JSData& characters = data.objects.GetValueCreate("characters");
   representatives.type = JSData::JSarray;
   representatives.list.SetSize(G.ConjugacyClassCount());
 
-  for (int i = 0; i < G.ConjugacyClassCount(); i ++)
-  { List<int> reprefs;
+  for (int i = 0; i < G.ConjugacyClassCount(); i ++) {
+    List<int> reprefs;
     G.GetWord(G.conjugacyClasseS[i].representative, reprefs);
     representatives.list[i].type = JSData::JSarray;
     representatives.list[i].list.SetSize(reprefs.size);
-    for (int j = 0; j < reprefs.size; j ++)
-    { representatives.list[i].list[j].type = JSData::JSnumber;
+    for (int j = 0; j < reprefs.size; j ++) {
+      representatives.list[i].list[j].type = JSData::JSnumber;
       representatives.list[i].list[j].number = reprefs[j];
     }
   }
   sizes.type = JSData::JSarray;
   sizes.list.SetSize(G.ConjugacyClassCount());
-  for (int i = 0; i < G.ConjugacyClassCount(); i ++)
-  { sizes.list[i].type = JSData::JSnumber;
+  for (int i = 0; i < G.ConjugacyClassCount(); i ++) {
+    sizes.list[i].type = JSData::JSnumber;
     sizes.list[i].number = ((Rational) G.conjugacyClasseS[i].size).GetDoubleValue();
   }
   characters.type = JSData::JSarray;
@@ -668,20 +668,20 @@ void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData &data)
       characters[i][j] = G.characterTable[i][j].GetDoubleValue();
 }
 
-void ExportTauSignatures(WeylGroupData& G, const List<List<bool> > ts, JSData &data)
-{ ExportCharTable(G.theGroup, data["chartable"]);
+void ExportTauSignatures(WeylGroupData& G, const List<List<bool> > ts, JSData &data) {
+  ExportCharTable(G.theGroup, data["chartable"]);
   for (int i = 0; i < ts.size; i ++)
     for (int j = 0; j < ts[i].size; j ++)
       data["tausigs"][i][j] = ts[i][j];
 }
 
-void LoadAndPrintTauSignatures(char letter, int number)
-{ std::stringstream s;
+void LoadAndPrintTauSignatures(char letter, int number) {
+  std::stringstream s;
   s << letter << number << "signsigs";
   JSData data;
   data.readfile(s.str().c_str());
-  if (data.type == JSData::JSnull)
-  { WeylGroupData G;
+  if (data.type == JSData::JSnull) {
+    WeylGroupData G;
     G.MakeArbitrarySimple(letter, number);
     ComputeCharacterTable(G.theGroup);
     List<List<bool> > ts;
@@ -703,8 +703,8 @@ void LoadAndPrintTauSignatures(char letter, int number)
     stOutput << "<td>" << data["chartable"]["sizes"][i] << "</td>";
   stOutput << "</tr>";
 
-  for (int i = 0; i < data["chartable"]["characters"].list.size; i ++)
-  { stOutput << "<tr><td>" << i << "</td>";
+  for (int i = 0; i < data["chartable"]["characters"].list.size; i ++) {
+    stOutput << "<tr><td>" << i << "</td>";
     for (int j = 0; j < data["chartable"]["characters"][i].list.size; j ++)
       stOutput << "<td>" << data["chartable"]["characters"][i][j] << "</td>";
     stOutput << "</tr>";
@@ -717,10 +717,10 @@ void LoadAndPrintTauSignatures(char letter, int number)
   int numCycles = MathRoutines::TwoToTheNth(sel.MaxSize);
   stOutput << "<table>";
   stOutput << "<tr>";
-  for (int i = 0; i < numCycles; i ++)
-  { stOutput << "<td>";
-    for (int j = 0; j < sel.CardinalitySelection; j ++)
-    { stOutput << sel.elements[j];
+  for (int i = 0; i < numCycles; i ++) {
+    stOutput << "<td>";
+    for (int j = 0; j < sel.CardinalitySelection; j ++) {
+      stOutput << sel.elements[j];
       if (j + 1 < sel.elements.size)
         stOutput << ' ';
     }
@@ -729,10 +729,10 @@ void LoadAndPrintTauSignatures(char letter, int number)
   }
   stOutput << "</tr>";
 
-  for (int i = 0; i < data["tausigs"].list.size; i ++)
-  { stOutput << "<tr>";
-    for (int j = 0; j < numCycles; j ++)
-    { stOutput << "<td>";
+  for (int i = 0; i < data["tausigs"].list.size; i ++) {
+    stOutput << "<tr>";
+    for (int j = 0; j < numCycles; j ++) {
+      stOutput << "<td>";
       stOutput << data["tausigs"][i][j] << "</td>";
     }
     stOutput << "</tr>";
@@ -740,11 +740,11 @@ void LoadAndPrintTauSignatures(char letter, int number)
   stOutput << "</table>" << "\n";
 /*
 // now the pseudo tau signatures
-  if (pseudo)
-  {
+  if (pseudo) {
+   
 
-    if (ts[0].size > numCycles)
-    { stOutput << "hr is ";
+    if (ts[0].size > numCycles) {
+      stOutput << "hr is ";
 // WeylGroup is alittle different from AnotherWeylGroup<derp>
 //    ElementWeylGroup<WeylGroup> hr = G.theElements[G.GetRootReflection(G.RootSystem.size- 1)];
       List<int> hr;
@@ -761,8 +761,8 @@ void LoadAndPrintTauSignatures(char letter, int number)
 
       // labels at the top
       sel.init(G.CartanSymmetric.NumCols);
-      for (int i = 0; i <numCycles- 1; i ++)
-      { stOutput << "&\\rotatebox{90}{(";
+      for (int i = 0; i <numCycles- 1; i ++) {
+        stOutput << "&\\rotatebox{90}{(";
         for (int j = 0; j<sel.CardinalitySelection; j ++)
           stOutput << sel.elements[j] << ' ';
         stOutput << "hr";
@@ -772,9 +772,9 @@ void LoadAndPrintTauSignatures(char letter, int number)
 
       // data goes out here
       stOutput << "\\\\" << "\n";
-      for (int i = 0; i < ts.size; i ++)
-      { for (int j = numCycles; j<numCycles+numCycles- 1; j ++)
-        { stOutput << '&';
+      for (int i = 0; i < ts.size; i ++) {
+        for (int j = numCycles; j<numCycles+numCycles- 1; j ++) {
+          stOutput << '&';
           stOutput << ts[i][j] << '\t';
         }
         stOutput << "\\\\\n";

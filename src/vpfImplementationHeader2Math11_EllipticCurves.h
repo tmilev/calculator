@@ -8,8 +8,8 @@
 static ProjectInformationInstance ProjectInfovpfImplementationHeader_HeaderEllipticCurves(__FILE__, "Implementation header, elliptic curves. ");
 
 template <typename coefficient>
-unsigned int ElementEllipticCurve<coefficient>::HashFunction(const ElementEllipticCurve<coefficient>& input)
-{ if (input.flagInfinity)
+unsigned int ElementEllipticCurve<coefficient>::HashFunction(const ElementEllipticCurve<coefficient>& input) {
+  if (input.flagInfinity)
     return 0;
   return input.xCoordinate.HashFunction() * SomeRandomPrimes[0] +
   input.yCoordinate.HashFunction() * SomeRandomPrimes[1] +
@@ -17,8 +17,8 @@ unsigned int ElementEllipticCurve<coefficient>::HashFunction(const ElementEllipt
 }
 
 template <typename coefficient>
-bool ElementEllipticCurve<coefficient>::operator==(const ElementEllipticCurve& other) const
-{ if (!(this->owner == other.owner))
+bool ElementEllipticCurve<coefficient>::operator==(const ElementEllipticCurve& other) const {
+  if (!(this->owner == other.owner))
     return false;
   if (this->flagInfinity == true && other.flagInfinity == true)
     return true;
@@ -28,29 +28,29 @@ bool ElementEllipticCurve<coefficient>::operator==(const ElementEllipticCurve& o
 }
 
 template <typename coefficient>
-void ElementEllipticCurve<coefficient>::Invert()
-{ if (this->flagInfinity)
+void ElementEllipticCurve<coefficient>::Invert() {
+  if (this->flagInfinity)
     return;
   this->yCoordinate *= - 1;
 }
 
 template <typename coefficient>
-void ElementEllipticCurve<coefficient>::MakeOne(const EllipticCurveWeierstrassNormalForm& inputCurve)
-{ this->owner = inputCurve;
+void ElementEllipticCurve<coefficient>::MakeOne(const EllipticCurveWeierstrassNormalForm& inputCurve) {
+  this->owner = inputCurve;
   this->flagInfinity = true;
 }
 
 template <typename coefficient>
-bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& other)
-{ if (!(this->owner == other.owner))
+bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& other) {
+  if (!(this->owner == other.owner))
     return false;
   //if (this == &other)
   //{ ElementEllipticCurve otherCopy = other;
   //  return this->operator*=(otherCopy);
   //}
   //stOutput << "<br>DEBUG: Multiplying: " << this->ToString() << " by: " << other.ToString();
-  if (this->flagInfinity)
-  { *this = other;
+  if (this->flagInfinity) {
+    *this = other;
     //stOutput << "<br>DEBUG: Multiplying: " << this->ToString() << " by: " << other.ToString();
     return true;
   }
@@ -61,9 +61,9 @@ bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& o
   //x_C = s^2 - x_A - x_B
   //y_C = -s(x_C - x_A)-y_A
   coefficient slope;
-  if (this->xCoordinate == other.xCoordinate)
-  { if (this->yCoordinate == other.yCoordinate * (- 1))
-    { this->flagInfinity = true;
+  if (this->xCoordinate == other.xCoordinate) {
+    if (this->yCoordinate == other.yCoordinate * (- 1)) {
+      this->flagInfinity = true;
       this->xCoordinate = 0;
       this->yCoordinate = 0;
       stOutput << " DEBUG: product is: infinity";
@@ -85,13 +85,13 @@ bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& o
 }
 
 template <typename coefficient>
-ElementEllipticCurve<coefficient>::ElementEllipticCurve()
-{ this->flagInfinity = true;
+ElementEllipticCurve<coefficient>::ElementEllipticCurve() {
+  this->flagInfinity = true;
 }
 
 template <typename coefficient>
-std::string ElementEllipticCurve<coefficient>::ToString(FormatExpressions* theFormat) const
-{ std::stringstream out;
+std::string ElementEllipticCurve<coefficient>::ToString(FormatExpressions* theFormat) const {
+  std::stringstream out;
   Polynomial<Rational> leftHandSide, rightHandSide;
   leftHandSide.MakeMonomiaL(1, 2, 1);
   rightHandSide.MakeMonomiaL(0, 3, 1);

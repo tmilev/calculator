@@ -30,11 +30,11 @@ public:
   //static const int SquareRootOfCarryOverBound =3;//<-for extreme "corner case" testing
   static const int SquareRootOfCarryOverBound = 31000; //31000*31000=961000000<1000000000
 //  static const int SquareRootOfCarryOverBound =32768; //=2^15
-  friend bool operator<(int left, const LargeIntUnsigned& right)
-  { return right > left;
+  friend bool operator<(int left, const LargeIntUnsigned& right) {
+    return right > left;
   }
-  friend std::ostream& operator << (std::ostream& output, const LargeIntUnsigned& theLIU)
-  { output << theLIU.ToString();
+  friend std::ostream& operator << (std::ostream& output, const LargeIntUnsigned& theLIU) {
+    output << theLIU.ToString();
     return output;
   }
   void PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
@@ -120,79 +120,79 @@ public:
 
 class LargeInt
 { friend class Rational;
-  friend LargeInt operator*(const LargeInt& left, const LargeInt& right)
-  { LargeInt tempI;
+  friend LargeInt operator*(const LargeInt& left, const LargeInt& right) {
+    LargeInt tempI;
     tempI = left;
     tempI *= right;
     return tempI;
   }
-  friend bool operator<(int left, const LargeInt& right)
-  { LargeInt leftCopy = left;
+  friend bool operator<(int left, const LargeInt& right) {
+    LargeInt leftCopy = left;
     return right > leftCopy;
   }
-  friend LargeInt operator*(const LargeInt& left, const LargeIntUnsigned& right)
-  { LargeInt tempI;
+  friend LargeInt operator*(const LargeInt& left, const LargeIntUnsigned& right) {
+    LargeInt tempI;
     tempI = right;
     return left * tempI;
   }
-  friend std::ostream& operator << (std::ostream& output, const LargeInt& theLI)
-  { output << theLI.ToString();
+  friend std::ostream& operator << (std::ostream& output, const LargeInt& theLI) {
+    output << theLI.ToString();
     return output;
   }
 public:
-  inline static const std::string GetXMLClassName()
-  { return "LInt";
+  inline static const std::string GetXMLClassName() {
+    return "LInt";
   }
   signed char sign;
   LargeIntUnsigned value;
-  void operator*=(const LargeInt& x)
-  { this->sign *= x.sign;
+  void operator*=(const LargeInt& x) {
+    this->sign *= x.sign;
     this->value.MultiplyBy(x.value);
   }
   void MultiplyByInt(int x);
   void ToString(std::string& output) const;
-  inline std::string ToString(FormatExpressions* theFormat = 0) const
-  { (void) theFormat;//avoid unused parameter warning, portable
+  inline std::string ToString(FormatExpressions* theFormat = 0) const {
+    (void) theFormat;//avoid unused parameter warning, portable
     std::string tempS;
     this->ToString(tempS);
     return tempS;
   }
   bool IsIntegerFittingInInt(int* whichInt);
-  bool IsPositive() const
-  { return this->sign == 1 && (this->value.IsPositive());
+  bool IsPositive() const {
+    return this->sign == 1 && (this->value.IsPositive());
   }
-  bool IsNegative() const
-  { return this->sign == - 1 && (this->value.IsPositive());
+  bool IsNegative() const {
+    return this->sign == - 1 && (this->value.IsPositive());
   }
-  bool BeginsWithMinus()
-  { return this->IsNegative();
+  bool BeginsWithMinus() {
+    return this->IsNegative();
   }
-  bool IsPositiveOrZero() const
-  { return !this->IsNegative();
+  bool IsPositiveOrZero() const {
+    return !this->IsNegative();
   }
-  bool IsNonPositive() const
-  { return !this->IsPositive();
+  bool IsNonPositive() const {
+    return !this->IsPositive();
   }
   bool TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& outputBase, int& outputPower) const;
-  bool NeedsParenthesisForMultiplication() const
-  { return false;
+  bool NeedsParenthesisForMultiplication() const {
+    return false;
   }
   bool operator==(const LargeInt& x) const;
-  bool IsEqualToZero() const
-  { return this->value.IsEqualToZero();
+  bool IsEqualToZero() const {
+    return this->value.IsEqualToZero();
   }
   bool IsEven() const;
-  bool IsEqualToOne() const
-  { return this->value.IsEqualToOne() && this->sign == 1;
+  bool IsEqualToOne() const {
+    return this->value.IsEqualToOne() && this->sign == 1;
   }
-  void AssignLargeIntUnsigned(const LargeIntUnsigned& x)
-  { this->value = x;
+  void AssignLargeIntUnsigned(const LargeIntUnsigned& x) {
+    this->value = x;
     this->sign = 1;
   }
   void AssignInt(int x);
   void AddLargeIntUnsigned(const LargeIntUnsigned& x);
-  inline void AddInt(int x)
-  { LargeInt tempInt;
+  inline void AddInt(int x) {
+    LargeInt tempInt;
     tempInt.AssignInt(x);
     *this += (tempInt);
   }
@@ -204,73 +204,73 @@ public:
   void checkConsistency(){}
   void MakeZero();
   bool GetDivisors(List<int>& output, bool includeNegative);
-  void MakeOne()
-  { this->value.MakeOne();
+  void MakeOne() {
+    this->value.MakeOne();
     this->sign = 1;
   }
-  void MakeMOne()
-  { this->value.MakeOne();
+  void MakeMOne() {
+    this->value.MakeOne();
     this->sign = - 1;
   }
-  static unsigned int HashFunction (const LargeInt& input)
-  { return input.HashFunction();
+  static unsigned int HashFunction (const LargeInt& input) {
+    return input.HashFunction();
   }
-  unsigned int HashFunction() const
-  { return this->value.HashFunction() + this->sign + 3;
+  unsigned int HashFunction() const {
+    return this->value.HashFunction() + this->sign + 3;
   }
-  int GetIntValueTruncated()
-  {return this->sign * this->value.GetUnsignedIntValueTruncated();
+  int GetIntValueTruncated() {
+   return this->sign * this->value.GetUnsignedIntValueTruncated();
   }
   double GetDoubleValue() const;
   int operator %(int x);
   inline void AssignFloor(){}
   void operator=(const Rational& x);
   void operator=(const LargeInt& x);
-  inline void operator=(int x)
-  { this->AssignInt(x);
+  inline void operator=(int x) {
+    this->AssignInt(x);
   }
-  inline void operator=(const LargeIntUnsigned& other)
-  { this->value = other;
+  inline void operator=(const LargeIntUnsigned& other) {
+    this->value = other;
     this->sign = 1;
   }
-  void operator*=(const LargeIntUnsigned& other)
-  { if (other.IsEqualToZero())
-    { this->MakeZero();
+  void operator*=(const LargeIntUnsigned& other) {
+    if (other.IsEqualToZero()) {
+      this->MakeZero();
       return;
     }
     this->value *= other;
   }
-  inline void operator++(int)
-  { *this += 1;
+  inline void operator++(int) {
+    *this += 1;
   }
-  inline void operator*=(int x)
-  { this->MultiplyByInt(x);
+  inline void operator*=(int x) {
+    this->MultiplyByInt(x);
   }
-  inline void Minus()
-  { if (!this->IsEqualToZero())
+  inline void Minus() {
+    if (!this->IsEqualToZero())
       this->sign *= - 1;
   }
   void operator+=(const LargeInt& other);
-  inline void operator+=(const LargeIntUnsigned& other)
-  { this->AddLargeIntUnsigned(other);
+  inline void operator+=(const LargeIntUnsigned& other) {
+    this->AddLargeIntUnsigned(other);
   }
-  inline void operator+=(int x)
-  { this->AddInt(x);
+  inline void operator+=(int x) {
+    this->AddInt(x);
   }
-  inline bool operator!=(const LargeInt& other) const
-  { return !(*this == other);
+  inline bool operator!=(const LargeInt& other) const {
+    return !(*this == other);
   }
-  inline void operator-=(const LargeInt& other)
-  { this->Minus();
+  inline void operator-=(const LargeInt& other) {
+    this->Minus();
     *this += (other);
     this->Minus();
   }
-  inline bool operator<=(const LargeInt& other) const
-  { return !(other<*this);
+  inline bool operator<=(const LargeInt& other) const {
+    return !(other<*this);
   }
-  inline bool operator<(const LargeInt& other) const
-  { if (other.IsPositiveOrZero())
-    { if (this->IsPositiveOrZero())
+  inline bool operator<(const LargeInt& other) const {
+    if (other.IsPositiveOrZero()) {
+      if (this->IsPositiveOrZero())
         return this->value<other.value;
       return true;
     }
@@ -278,42 +278,42 @@ public:
       return other.value < this->value;
     return false;
   }
-  inline LargeInt operator+(const LargeInt& other) const
-  { LargeInt tempInt;
+  inline LargeInt operator+(const LargeInt& other) const {
+    LargeInt tempInt;
     tempInt = (*this);
     tempInt += (other);
     return tempInt;
   }
-  inline LargeInt operator-(const LargeInt& other) const
-  { LargeInt result = *this;
+  inline LargeInt operator-(const LargeInt& other) const {
+    LargeInt result = *this;
     result -= (other);
     return result;
   }
-  inline LargeInt operator+(int x) const
-  { LargeInt result = *this;
+  inline LargeInt operator+(int x) const {
+    LargeInt result = *this;
     result.AddInt(x);
     return result;
   }
-  LargeInt operator*(int x)
-  { LargeInt result = *this;
+  LargeInt operator*(int x) {
+    LargeInt result = *this;
     result.MultiplyByInt(x);
     return result;
   }
   LargeInt operator/(int x) const;
   LargeInt operator/(LargeInt& x) const;
-  void operator/=(const LargeInt& other)
-  { if (this->IsEqualToZero())
+  void operator/=(const LargeInt& other) {
+    if (this->IsEqualToZero())
       return;
     this->sign*= other.sign;
     LargeIntUnsigned quotient, remainder;
     this->value.DivPositive(other.value, quotient, remainder);
     this->value =quotient;
   }
-  inline bool operator>(const LargeInt& other) const
-  { return other < *this;
+  inline bool operator>(const LargeInt& other) const {
+    return other < *this;
   }
-  void operator%=(const LargeInt& other)
-  { if (this->IsEqualToZero())
+  void operator%=(const LargeInt& other) {
+    if (this->IsEqualToZero())
       return;
     LargeIntUnsigned quotient, remainder;
     this->value.DivPositive(other.value, quotient, remainder);
@@ -321,22 +321,22 @@ public:
     if (this->IsNegative())
       *this += other.value;
   }
-  void RaiseToPower(int thePower)
-  { MathRoutines::RaiseToPower(*this, thePower, (LargeInt) 1);
+  void RaiseToPower(int thePower) {
+    MathRoutines::RaiseToPower(*this, thePower, (LargeInt) 1);
   }
-  LargeInt operator%(const LargeInt& other) const
-  { LargeInt result = *this;
+  LargeInt operator%(const LargeInt& other) const {
+    LargeInt result = *this;
     result %= other;
     return result;
   }
-  LargeInt(const LargeInt& x)
-  { this->operator=(x);
+  LargeInt(const LargeInt& x) {
+    this->operator=(x);
   }
-  LargeInt(int x)
-  { this->AssignInt(x);
+  LargeInt(int x) {
+    this->AssignInt(x);
   }
-  LargeInt(const LargeIntUnsigned& other):sign(1), value(other)
-  {}
+  LargeInt(const LargeIntUnsigned& other):sign(1), value(other) {
+   }
   LargeInt(): sign(1){}
 };
 
@@ -365,23 +365,23 @@ private:
   };
   friend Rational operator-(const Rational& argument);
   friend Rational operator/(int left, const Rational& right);
-  friend std::ostream& operator << (std::ostream& output, const Rational& theRat)
-  { output << theRat.ToString();
+  friend std::ostream& operator << (std::ostream& output, const Rational& theRat) {
+    output << theRat.ToString();
     return output;
   }
-  friend std::istream& operator >> (std::istream& input, const Rational& output)
-  { (void) output;
+  friend std::istream& operator >> (std::istream& input, const Rational& output) {
+    (void) output;
     crash << "This line of code should not be running. " << crash;
     return input;
   }
-  friend Rational operator*(int left, const Rational& right)
-  { return (Rational) left * right;
+  friend Rational operator*(int left, const Rational& right) {
+    return (Rational) left * right;
   }
-  friend bool operator<(int left, const Rational& right)
-  { return (Rational) left < right;
+  friend bool operator<(int left, const Rational& right) {
+    return (Rational) left < right;
   }
-  inline bool TryToAddQuickly(int OtherNum, int OtherDen)
-  { register int OtherNumAbs, thisNumAbs;
+  inline bool TryToAddQuickly(int OtherNum, int OtherDen) {
+    register int OtherNumAbs, thisNumAbs;
     if (this->DenShort <= 0 || OtherDen <= 0)
       crash << "This is a programming error: trying to add corrupt rational number(s) with denominators " << this->DenShort << " and " << OtherDen
       << ". The cause of the error should be in some of the calling functions. " << crash;
@@ -398,8 +398,8 @@ private:
       return false;
     register int N = this->NumShort * OtherDen + this->DenShort * OtherNum;
     register int D = this->DenShort * OtherDen;
-    if (N == 0)
-    { this->NumShort = 0;
+    if (N == 0) {
+      this->NumShort = 0;
       this->DenShort = 1;
       MacroIncrementCounter(Rational::TotalSmallAdditions);
       return true;
@@ -414,10 +414,10 @@ private:
     MacroIncrementCounter(Rational::TotalSmallAdditions);
     return true;
   }
-  inline bool TryToMultiplyQuickly(int OtherNum, int OtherDen)
-  { register int OtherNumAbs, thisNumAbs;
-    if (this->DenShort <= 0 || OtherDen <= 0)
-    { if (DenShort == 0 || OtherDen == 0)
+  inline bool TryToMultiplyQuickly(int OtherNum, int OtherDen) {
+    register int OtherNumAbs, thisNumAbs;
+    if (this->DenShort <= 0 || OtherDen <= 0) {
+      if (DenShort == 0 || OtherDen == 0)
         crash << "This is a programming error: division by zero. ";
       else
         crash << "This is a programming error during rational number multiplication: corrupt rational number denominator. ";
@@ -436,12 +436,12 @@ private:
       return false;
     register int N = this->NumShort * OtherNum;
     register int D = this->DenShort * OtherDen;
-    if (N == 0)
-    { this->NumShort = 0;
+    if (N == 0) {
+      this->NumShort = 0;
       this->DenShort = 1;
     }
-    else
-    { register int tempGCD;
+    else {
+      register int tempGCD;
       if (N > 0)
         tempGCD = Rational::gcd(N, D);
       else
@@ -452,8 +452,8 @@ private:
     MacroIncrementCounter(Rational::TotalSmallMultiplications);
     return true;
   }
-  void AllocateExtended()
-  { if (this->Extended != 0)
+  void AllocateExtended() {
+    if (this->Extended != 0)
       return;
     this->Extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
@@ -461,8 +461,8 @@ private:
   ParallelComputing::CheckPointerCounters();
 #endif
   }
-  bool InitExtendedFromShortIfNeeded()
-  { if (this->Extended != 0)
+  bool InitExtendedFromShortIfNeeded() {
+    if (this->Extended != 0)
       return false;
     this->Extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
@@ -473,8 +473,8 @@ private:
     this->Extended->num.AssignInt(this->NumShort);
     return true;
   }
-  inline void FreeExtended()
-  { if (this->Extended == 0)
+  inline void FreeExtended() {
+    if (this->Extended == 0)
       return;
     delete this->Extended;
     this->Extended = 0;
@@ -497,8 +497,8 @@ public:
   static unsigned long long int TotalLargeMultiplications;
   static unsigned long long int TotalSmallGCDcalls;
   static unsigned long long int TotalLargeGCDcalls;
-/*  operator int() const
-  { int result = 0;
+/*  operator int() const {
+    int result = 0;
     if (!this->IsSmallInteger(&result))
       crash << "This is a programming error. I am asked to assign a rational number to a small integer, but the rational "
       << " number is either too large or is not an integer. Namely, the rational number equals " << this->ToString()
@@ -507,36 +507,36 @@ public:
       << crash;
     return result;
   }*/
-  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const
-  { return this->IsNegative();
+  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
+    return this->IsNegative();
   }
-  bool NeedsParenthesisForMultiplication() const
-  { return false;
+  bool NeedsParenthesisForMultiplication() const {
+    return false;
     //return this->IsNegative();
   }
   bool GetSquareRootIfRational(Rational& output) const;
-  inline Rational GetDenominatorRationalPart()
-  { return this->GetDenominator();
+  inline Rational GetDenominatorRationalPart() {
+    return this->GetDenominator();
   }
-  Rational GetNumeratorRationalPart()
-  { return this->GetNumerator();
+  Rational GetNumeratorRationalPart() {
+    return this->GetNumerator();
   }
-  inline LargeIntUnsigned GetDenominator() const
-  { LargeIntUnsigned result;
-    if (this->Extended == 0)
-    { unsigned int tempI = (unsigned int) this->DenShort;
+  inline LargeIntUnsigned GetDenominator() const {
+    LargeIntUnsigned result;
+    if (this->Extended == 0) {
+      unsigned int tempI = (unsigned int) this->DenShort;
       result.AssignShiftedUInt(tempI, 0);
     } else
       result = (this->Extended->den);
     return result;
   }
-  bool BeginsWithMinus()
-  { return this->IsNegative();
+  bool BeginsWithMinus() {
+    return this->IsNegative();
   }
-  LargeInt GetNumerator() const
-  { LargeInt result;
-    if (this->Extended == 0)
-    { if (this->NumShort < 0)
+  LargeInt GetNumerator() const {
+    LargeInt result;
+    if (this->Extended == 0) {
+      if (this->NumShort < 0)
         result.value.AssignShiftedUInt((unsigned int)(- this->NumShort), 0);
       else
         result.value.AssignShiftedUInt((unsigned int) this->NumShort, 0);
@@ -550,28 +550,28 @@ public:
   bool GetPrimeFactorsAbsoluteValue
   (List<LargeInt>& numeratorPrimeFactors, List<int> &numeratorMultiplicities,
    List<LargeInt>& denominatorPrimeFactors, List<int> &denominatorMultiplicities);
-  inline const Rational& GetComplexConjugate() const
-  { return *this;
+  inline const Rational& GetComplexConjugate() const {
+    return *this;
   }
 //  inline void SetDynamicSubtype(int dummyParameter)
 //  {(void) dummyParameter;
 //  }
-  Rational RationalValue()
-  { return *this;
+  Rational RationalValue() {
+    return *this;
   }
   void Subtract(const Rational& r);
-  void AdD(const Rational& r)
-  { this->operator+=(r);
+  void AdD(const Rational& r) {
+    this->operator+=(r);
   }
   void AddInteger(int x);
-  void AssignLargeIntUnsigned(const LargeIntUnsigned& other)
-  { LargeInt tempInt;
+  void AssignLargeIntUnsigned(const LargeIntUnsigned& other) {
+    LargeInt tempInt;
     tempInt.AssignLargeIntUnsigned(other);
     this->AssignLargeInteger(tempInt);
   }
-  void AssignLargeInteger(const LargeInt& other)
-  { if (this->Extended == 0)
-    { this->Extended = new LargeRationalExtended;
+  void AssignLargeInteger(const LargeInt& other) {
+    if (this->Extended == 0) {
+      this->Extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter ++;
   ParallelComputing::CheckPointerCounters();
@@ -583,15 +583,15 @@ public:
   }
   void AssignString(const std::string& input);
   bool AssignStringFailureAllowed(const std::string& input);
-  Rational GetZero()
-  { return 0;
+  Rational GetZero() {
+    return 0;
   }
-  Rational GetOne()
-  { return 1;
+  Rational GetOne() {
+    return 1;
   }
   void AssignFracValue();
-  void AssignFloor()
-  { Rational tempRat = *this;
+  void AssignFloor() {
+    Rational tempRat = *this;
     tempRat.AssignFracValue();
     *this -= tempRat;
   }
@@ -599,17 +599,17 @@ public:
   //IMPORTANT NOTE ON HASHFUNCTIONS
   //The Hash function of zero MUST be equal to zero.
   //See Note on Hashes before the definition of SomeRandomPrimes;
-  unsigned int HashFunction() const
-  { if (this->Extended == 0)
-    { if (this->NumShort == 0)
+  unsigned int HashFunction() const {
+    if (this->Extended == 0) {
+      if (this->NumShort == 0)
         return 0;
       return this->NumShort*SomeRandomPrimes[0] + this->DenShort * ::SomeRandomPrimes[1];
     }
     return this->Extended->num.HashFunction() * SomeRandomPrimes[0] +
     this->Extended->den.HashFunction() * SomeRandomPrimes[1];
   }
-  static inline unsigned int HashFunction(const Rational& input)
-  { return input.HashFunction();
+  static inline unsigned int HashFunction(const Rational& input) {
+    return input.HashFunction();
   }
   //void MultiplyByLargeRational(int num, int den);
   void MultiplyByInt(int x);
@@ -618,14 +618,14 @@ public:
   void Assign(const Rational& r);
   void AssignInteger(int x);
   bool IsInteger(LargeInt* whichInteger = 0) const;
-  bool IsIntegerFittingInInt(int* whichInt) const
-  { LargeInt theInt;
+  bool IsIntegerFittingInInt(int* whichInt) const {
+    LargeInt theInt;
     if (!this->IsInteger(&theInt))
       return false;
     return theInt.IsIntegerFittingInInt(whichInt);
   }
-  bool IsSmallInteger(int* whichInteger = 0) const
-  { if (this->Extended != 0)
+  bool IsSmallInteger(int* whichInteger = 0) const {
+    if (this->Extended != 0)
       return false;
     if (this->DenShort != 1)
       return false;
@@ -634,9 +634,9 @@ public:
     return true;
   }
   bool IsGreaterThan(const Rational& r) const;
-  inline void AssignNumeratorAndDenominator(int n, int d)
-  { if (d < 0)
-    { d = - d;
+  inline void AssignNumeratorAndDenominator(int n, int d) {
+    if (d < 0) {
+      d = - d;
       n = - n;
     }
     this->NumShort = n;
@@ -645,13 +645,13 @@ public:
     this->Simplify();
   }
   void DivideBy(const Rational& r);
-  void DivideByInteger(int x)
-  { int tempDen; signed char tempSign;
-    if (x < 0)
-    { tempDen = - x;
+  void DivideByInteger(int x) {
+    int tempDen; signed char tempSign;
+    if (x < 0) {
+      tempDen = - x;
       tempSign = - 1;
-    } else
-    { tempDen = x;
+    } else {
+      tempDen = x;
       tempSign = 1;
     }
     if (this->TryToMultiplyQuickly(tempSign, tempDen))
@@ -661,14 +661,14 @@ public:
     this->Extended->num.sign *= tempSign;
     this->Simplify();
   }
-  void DivideByLargeInteger(LargeInt& x)
-  { this->InitExtendedFromShortIfNeeded();
+  void DivideByLargeInteger(LargeInt& x) {
+    this->InitExtendedFromShortIfNeeded();
     this->Extended->den.MultiplyBy(x.value);
     this->Extended->num.sign*=x.sign;
     this->Simplify();
   }
-  void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x)
-  { this->InitExtendedFromShortIfNeeded();
+  void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x) {
+    this->InitExtendedFromShortIfNeeded();
     this->Extended->den.MultiplyBy(x);
     this->Simplify();
   }
@@ -677,63 +677,63 @@ public:
   std::string ToStringForFileOperations(FormatExpressions* notUsed = 0) const;
   bool IsEqualTo(const Rational& r) const;
   bool IsGreaterThanOrEqualTo(const Rational& right) const;
-  bool IsEven() const
-  { Rational tempRat = *this;
+  bool IsEven() const {
+    Rational tempRat = *this;
     tempRat /= 2;
     return tempRat.IsInteger();
   }
-  inline bool IsEqualToOne() const
-  { if (this->Extended == 0)
+  inline bool IsEqualToOne() const {
+    if (this->Extended == 0)
       return (this->NumShort == 1 && this->DenShort == 1);
     else
       return (this->Extended->num.IsEqualToOne() && this->Extended->den.IsEqualToOne());
   }
-  inline bool IsEqualToZero() const
-  { if (this->Extended == 0)
+  inline bool IsEqualToZero() const {
+    if (this->Extended == 0)
       return this->NumShort == 0;
     else
       return this->Extended->num.IsEqualToZero();
   }
-  inline bool operator<=(const Rational& other) const
-  { return !(other < *this);
+  inline bool operator<=(const Rational& other) const {
+    return !(other < *this);
   }
-  inline bool IsPositiveOrZero() const
-  { if (this->Extended == 0)
+  inline bool IsPositiveOrZero() const {
+    if (this->Extended == 0)
       return this->NumShort >= 0;
     else
       return this->Extended->num.IsPositiveOrZero();
   }
-  bool IsNegative() const
-  { if (this->Extended == 0)
+  bool IsNegative() const {
+    if (this->Extended == 0)
       return this->NumShort < 0;
     else
       return this->Extended->num.IsNegative();
   }
-  bool IsNonPositive() const
-  { if (this->Extended == 0)
+  bool IsNonPositive() const {
+    if (this->Extended == 0)
       return this->NumShort <= 0;
     else
       return this->Extended->num.IsNonPositive();
   }
-  bool IsPositive() const
-  { if (this->Extended == 0)
+  bool IsPositive() const {
+    if (this->Extended == 0)
       return this->NumShort > 0;
     else
       return this->Extended->num.IsPositive();
   }
   void Simplify();
   void Invert();
-  void Minus()
-  { if (this->Extended == 0)
+  void Minus() {
+    if (this->Extended == 0)
       this->NumShort *= - 1;
     else
       this->Extended->num.sign *= - 1;
   }
   double GetDoubleValue() const;
-  int floorIfSmall()
-  { if (this->Extended == 0)
-    { if (NumShort < 0)
-      { if (DenShort != 1)
+  int floorIfSmall() {
+    if (this->Extended == 0) {
+      if (NumShort < 0) {
+        if (DenShort != 1)
           return (this->NumShort / this->DenShort) - 1;
         else
           return this->NumShort / this->DenShort;
@@ -743,36 +743,36 @@ public:
     crash << crash;
     return - 1;
   }
-  void MakeZero()
-  { this->NumShort = 0;
+  void MakeZero() {
+    this->NumShort = 0;
     this->DenShort = 1;
     this->FreeExtended();
   }
-  void MakeOne()
-  { this->NumShort = 1;
+  void MakeOne() {
+    this->NumShort = 1;
     this->DenShort = 1;
     this->FreeExtended();
   }
-  void MakeMOne()
-  { this->NumShort = - 1;
+  void MakeMOne() {
+    this->NumShort = - 1;
     this->DenShort = 1;
     this->FreeExtended();
   }
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::istream& input);
   void DrawElement(DrawElementInputOutput& theDrawData);
-  inline void AssignAbsoluteValue()
-  { if (this->IsNegative())
+  inline void AssignAbsoluteValue() {
+    if (this->IsNegative())
       this->Minus();
   }
-  static long long int TotalAdditions()
-  { return Rational::TotalLargeAdditions + Rational::TotalSmallAdditions;
+  static long long int TotalAdditions() {
+    return Rational::TotalLargeAdditions + Rational::TotalSmallAdditions;
   }
-  static long long int TotalMultiplications()
-  { return Rational::TotalLargeMultiplications + Rational::TotalSmallMultiplications;
+  static long long int TotalMultiplications() {
+    return Rational::TotalLargeMultiplications + Rational::TotalSmallMultiplications;
   }
-  static long long int TotalArithmeticOperations()
-  { return Rational::TotalAdditions() + Rational::TotalMultiplications();
+  static long long int TotalArithmeticOperations() {
+    return Rational::TotalAdditions() + Rational::TotalMultiplications();
   }
   static Rational NChooseK(const Rational& n, int k);
   static Rational Factorial(int n);
@@ -781,87 +781,87 @@ public:
   void RaiseToPower(int x);
   //don't ever call the below manually or you can get memory leak (extended must be nullified here by
   //default!
-  Rational(int n, int d)
-  { this->Extended = 0;
+  Rational(int n, int d) {
+    this->Extended = 0;
     this->AssignNumeratorAndDenominator(n, d);
     ParallelComputing::SafePointDontCallMeFromDestructors();
   }
-  Rational(const LargeInt& other)
-  { this->Extended = 0;
+  Rational(const LargeInt& other) {
+    this->Extended = 0;
     *this = other;
   }
-  Rational(const LargeIntUnsigned& other)
-  { this->Extended = 0;
+  Rational(const LargeIntUnsigned& other) {
+    this->Extended = 0;
     *this = other;
   }
-  Rational(): NumShort(0), DenShort(0), Extended(0)
-  { ParallelComputing::SafePointDontCallMeFromDestructors();
+  Rational(): NumShort(0), DenShort(0), Extended(0) {
+    ParallelComputing::SafePointDontCallMeFromDestructors();
   }
-  Rational(int n)
-  { this->Extended = 0;
+  Rational(int n) {
+    this->Extended = 0;
     this->AssignNumeratorAndDenominator(n, 1);
     ParallelComputing::SafePointDontCallMeFromDestructors();
   }
-  Rational(const Rational& right)
-  { this->Extended = 0;
+  Rational(const Rational& right) {
+    this->Extended = 0;
     this->Assign(right);
     ParallelComputing::SafePointDontCallMeFromDestructors();
   }
-  Rational(const std::string& input): NumShort(0), DenShort(0), Extended(0)
-  { this->AssignString(input);
+  Rational(const std::string& input): NumShort(0), DenShort(0), Extended(0) {
+    this->AssignString(input);
   }
 //  Rational(int x){this->Extended = 0; this->AssignInteger(x); };
-  ~Rational()
-  { this->FreeExtended();
+  ~Rational() {
+    this->FreeExtended();
   }
   //the below must be called only with positive arguments!
-  static inline int gcd(int a, int b)
-  { MacroIncrementCounter(Rational::TotalSmallGCDcalls);
+  static inline int gcd(int a, int b) {
+    MacroIncrementCounter(Rational::TotalSmallGCDcalls);
     return MathRoutines::gcd(a, b);
   }
-  static int gcdSigned(int a, int b)
-  { if (a < 0)
+  static int gcdSigned(int a, int b) {
+    if (a < 0)
       a *= - 1;
     if (b < 0)
       b *= - 1;
     return Rational::gcd(a, b);
   }
-  inline bool CheckForElementSanity()
-  { return this->Extended == 0;
+  inline bool CheckForElementSanity() {
+    return this->Extended == 0;
   }
-  inline bool checkConsistency()
-  { return this->CheckConsistency();
+  inline bool checkConsistency() {
+    return this->CheckConsistency();
   }
-  inline bool CheckConsistency()
-  { if (this->Extended == 0)
+  inline bool CheckConsistency() {
+    if (this->Extended == 0)
       return this->DenShort > 0;
     return true;
   }
   void operator=(const AlgebraicNumber& other);
-  void operator=(const LargeIntUnsigned& right)
-  { LargeInt tempI;
+  void operator=(const LargeIntUnsigned& right) {
+    LargeInt tempI;
     tempI = right;
     this->operator=(tempI);
   }
-  void operator=(const Rational& right)
-  { this->Assign(right);
+  void operator=(const Rational& right) {
+    this->Assign(right);
   }
   void operator=(const Polynomial<Rational>& other);
-  bool operator==(const int other) const
-  { if (other == 0)
+  bool operator==(const int other) const {
+    if (other == 0)
       return this->IsEqualToZero();
     return this->IsEqualTo(other);
   }
-  inline bool operator==(const Rational& right) const
-  { return this->IsEqualTo(right);
+  inline bool operator==(const Rational& right) const {
+    return this->IsEqualTo(right);
   }
-  inline void operator+=(const Rational& r)
-  { //static std::string tempS1, tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
+  inline void operator+=(const Rational& r) {
+    //static std::string tempS1, tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
     if (r.Extended == 0 && this->Extended == 0)
       if (this->TryToAddQuickly(r.NumShort, r.DenShort))
         return;
-    if (this == &r)
-    { this->MultiplyByInt(2);
+    if (this == &r) {
+      this->MultiplyByInt(2);
       return;
     }
     MacroIncrementCounter(Rational::TotalLargeAdditions);
@@ -877,48 +877,48 @@ public:
     this->Extended->den.MultiplyBy(tempRat.Extended->den);
     this->Simplify();
   }
-  inline void operator-=(const Rational& right)
-  { this->Subtract(right);
+  inline void operator-=(const Rational& right) {
+    this->Subtract(right);
   }
-  inline void operator*=(const Rational& right)
-  { this->MultiplyBy(right);
+  inline void operator*=(const Rational& right) {
+    this->MultiplyBy(right);
   }
 //  inline void operator*=(const Polynomial<Rational>& right);
-  void operator/=(const Rational& right)
-  { this->DivideBy(right);
+  void operator/=(const Rational& right) {
+    this->DivideBy(right);
   }
 //  inline void operator/=(const LargeInt& right){Rational tempRat; tempRat =right; this->DivideBy(tempRat);}
 //  inline void operator/=(const LargeIntUnsigned& right){Rational tempRat; tempRat =right; this->DivideBy(tempRat);}
-  void operator+=(int right)
-  { this->AddInteger(right);
+  void operator+=(int right) {
+    this->AddInteger(right);
   }
-  void operator-=(int right)
-  { Rational tempRat = right;
+  void operator-=(int right) {
+    Rational tempRat = right;
     this->Subtract(tempRat);
   }
 //  inline bool operator==(int right){Rational tempRat; tempRat.AssignInteger(right); return this->IsEqualTo(tempRat); }
-  void operator=(int right)
-  { this->AssignInteger(right);
+  void operator=(int right) {
+    this->AssignInteger(right);
   }
-  inline void operator=(const LargeInt& other)
-  { this->AssignLargeInteger(other);
+  inline void operator=(const LargeInt& other) {
+    this->AssignLargeInteger(other);
   }
   Rational operator*(const Rational& right) const;
 //  { Rational result =*this;
 //    result*=right;
 //    return result;
 //  }
-  void operator++(int)
-  { *this += 1;
+  void operator++(int) {
+    *this += 1;
   }
-  Rational operator*(int right) const
-  { Rational tempRat;
+  Rational operator*(int right) const {
+    Rational tempRat;
     tempRat.Assign(*this);
     tempRat.MultiplyByInt(right);
     return tempRat;
   }
-  Rational operator/(int right) const
-  { Rational tempRat;
+  Rational operator/(int right) const {
+    Rational tempRat;
     tempRat.Assign(*this);
     tempRat.DivideByInteger(right);
     return tempRat;
@@ -927,28 +927,28 @@ public:
   Rational operator+(const Rational& right) const;
   Rational operator-(const Rational& right) const;
   Rational operator/(const Rational& right) const;
-  inline bool operator!=(const Rational& right) const
-  { return !this->IsEqualTo(right);
+  inline bool operator!=(const Rational& right) const {
+    return !this->IsEqualTo(right);
   }
-  inline bool operator!=(const int& right) const
-  { return !((*this) == right);
+  inline bool operator!=(const int& right) const {
+    return !((*this) == right);
   }
-  inline bool operator>(const Rational& right) const
-  { return this->IsGreaterThan(right);
+  inline bool operator>(const Rational& right) const {
+    return this->IsGreaterThan(right);
   }
-  inline bool operator<(const Rational& right) const
-  { return right.IsGreaterThan(*this);
+  inline bool operator<(const Rational& right) const {
+    return right.IsGreaterThan(*this);
   }
-  inline bool operator>(const int right) const
-  { Rational tempRat;
+  inline bool operator>(const int right) const {
+    Rational tempRat;
     tempRat.AssignInteger(right);
     return this->IsGreaterThan(tempRat);
   }
-  inline bool operator>=(const Rational& right) const
-  { return this->IsGreaterThanOrEqualTo(right);
+  inline bool operator>=(const Rational& right) const {
+    return this->IsGreaterThanOrEqualTo(right);
   }
-  inline bool operator<(const int right) const
-  { Rational tempRat;
+  inline bool operator<(const int right) const {
+    Rational tempRat;
     tempRat.AssignInteger(right);
     return tempRat.IsGreaterThan(*this);
   }

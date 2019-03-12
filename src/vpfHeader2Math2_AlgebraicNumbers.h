@@ -9,12 +9,12 @@ static ProjectInformationInstance ProjectInfoVpfHeader1_3(__FILE__, "Header, alg
 class AlgebraicClosureRationals;
 class AlgebraicNumber
 {
-  friend std::ostream& operator <<(std::ostream& output, const AlgebraicNumber& theNumber)
-  { output << theNumber.ToString();
+  friend std::ostream& operator <<(std::ostream& output, const AlgebraicNumber& theNumber) {
+    output << theNumber.ToString();
     return output;
   }
-  friend AlgebraicNumber operator-(const AlgebraicNumber& argument)
-  { argument.CheckConsistency();
+  friend AlgebraicNumber operator-(const AlgebraicNumber& argument) {
+    argument.CheckConsistency();
     AlgebraicNumber result = argument;
     result.CheckConsistency();
     result *= - 1;
@@ -28,20 +28,20 @@ class AlgebraicNumber
   VectorSparse<Rational> theElT;
   bool flagDeallocated;
   AlgebraicNumber():owner(0), basisIndex(0), flagDeallocated(false) {}
-  AlgebraicNumber(const Rational& other):owner(0), basisIndex(0), flagDeallocated(false)
-  { this->operator= (other);
+  AlgebraicNumber(const Rational& other):owner(0), basisIndex(0), flagDeallocated(false) {
+    this->operator= (other);
   }
-  AlgebraicNumber(int other):owner(0), basisIndex(0), flagDeallocated(false)
-  { this->operator= ((Rational)other);
+  AlgebraicNumber(int other):owner(0), basisIndex(0), flagDeallocated(false) {
+    this->operator= ((Rational)other);
   }
-  AlgebraicNumber(const AlgebraicNumber& other):owner(0), basisIndex(0), flagDeallocated(false)
-  { this->operator= (other);
+  AlgebraicNumber(const AlgebraicNumber& other):owner(0), basisIndex(0), flagDeallocated(false) {
+    this->operator= (other);
   }
   bool IsExpressedViaLatestBasis() const;
   void ExpressViaLatestBasis();
   bool AssignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner);
-  bool AssignSinRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner)
-  { Rational rHalf(1, 2);
+  bool AssignSinRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner) {
+    Rational rHalf(1, 2);
     return this->AssignCosRationalTimesPi(rHalf - input, inputOwner);
   }
   bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const;
@@ -50,44 +50,44 @@ class AlgebraicNumber
   bool CheckNonZeroOwner() const;
   bool CheckCommonOwner(const AlgebraicNumber& other) const;
   unsigned int HashFunction() const;
-  static inline unsigned int HashFunction(const AlgebraicNumber& input)
-  { return input.HashFunction();
+  static inline unsigned int HashFunction(const AlgebraicNumber& input) {
+    return input.HashFunction();
   }
-  inline LargeIntUnsigned GetNumerator() const
-  { return this->theElT.FindGCDCoefficientNumeratorsOverRationals().GetNumerator().value;
+  inline LargeIntUnsigned GetNumerator() const {
+    return this->theElT.FindGCDCoefficientNumeratorsOverRationals().GetNumerator().value;
   }
-  inline LargeIntUnsigned GetDenominator() const
-  { return this->GetDenominatorRationalPart().GetDenominator();
+  inline LargeIntUnsigned GetDenominator() const {
+    return this->GetDenominatorRationalPart().GetDenominator();
   }
-  bool IsPositive()
-  { Rational ratPart;
+  bool IsPositive() {
+    Rational ratPart;
     if (this->IsRational(&ratPart))
       return ratPart.IsPositive();
     return false;
   }
   bool IsRational(Rational* whichRational = 0) const;
-  bool IsNegative() const
-  { Rational theRationalValue;
+  bool IsNegative() const {
+    Rational theRationalValue;
     if (this->IsRational(&theRationalValue))
       return theRationalValue.IsNegative();
     return false;
   }
   bool IsEqualToZero() const;
-  bool IsEqualToOne() const
-  { return (*this == 1);
+  bool IsEqualToOne() const {
+    return (*this == 1);
   }
-  void operator= (const AlgebraicNumber& other)
-  { this->basisIndex = other.basisIndex;
+  void operator= (const AlgebraicNumber& other) {
+    this->basisIndex = other.basisIndex;
     this->owner = other.owner;
     this->theElT = other.theElT;
   }
   void operator=(const Rational& other);
-  void operator=(int other)
-  { *this = (Rational) other;
+  void operator=(int other) {
+    *this = (Rational) other;
   }
   bool ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner);
-  bool ConstructFromMinPoly(const Polynomial<Rational>& thePoly, AlgebraicClosureRationals& inputOwner)
-  { Polynomial<AlgebraicNumber> polyConverted;
+  bool ConstructFromMinPoly(const Polynomial<Rational>& thePoly, AlgebraicClosureRationals& inputOwner) {
+    Polynomial<AlgebraicNumber> polyConverted;
     polyConverted = thePoly;
     return this->ConstructFromMinPoly(polyConverted, inputOwner);
   }
@@ -96,14 +96,14 @@ class AlgebraicNumber
   Rational GetDenominatorRationalPart() const;
   Rational GetNumeratorRationalPart() const;
   void SqrtMeDefault();
-  bool IsSmallInteger(int* whichInteger) const
-  { Rational theRat;
+  bool IsSmallInteger(int* whichInteger) const {
+    Rational theRat;
     if (!this->IsRational(&theRat))
       return false;
     return theRat.IsSmallInteger(whichInteger);
   }
-  bool IsInteger(LargeInt* whichInteger) const
-  { Rational theRat;
+  bool IsInteger(LargeInt* whichInteger) const {
+    Rational theRat;
     if (!this->IsRational(&theRat))
       return false;
     return theRat.IsInteger(whichInteger);
@@ -114,22 +114,22 @@ class AlgebraicNumber
   void operator/=(const AlgebraicNumber& other);
   bool operator==(const AlgebraicNumber& other) const;
   bool operator==(const Rational& other) const;
-  bool operator==(int other) const
-  { return *this == (Rational) other;
+  bool operator==(int other) const {
+    return *this == (Rational) other;
   }
 
-  inline bool operator!= (const AlgebraicNumber& other) const
-  { return !(*this == other);
+  inline bool operator!= (const AlgebraicNumber& other) const {
+    return !(*this == other);
   }
-  inline bool operator!= (int other) const
-  { return !(*this == other);
+  inline bool operator!= (int other) const {
+    return !(*this == other);
   }
-  void Minus()
-  { this->theElT *= - 1;
+  void Minus() {
+    this->theElT *= - 1;
   }
   void operator= (const Polynomial<AlgebraicNumber>& other);
-  AlgebraicNumber operator+(const AlgebraicNumber& other) const
-  { this->CheckConsistency();
+  AlgebraicNumber operator+(const AlgebraicNumber& other) const {
+    this->CheckConsistency();
     AlgebraicNumber result = *this;
     result.CheckConsistency();
     other.CheckConsistency();
@@ -137,18 +137,18 @@ class AlgebraicNumber
     result.CheckConsistency();
     return result;
   }
-  AlgebraicNumber operator-(const AlgebraicNumber& other) const
-  { AlgebraicNumber result = *this;
+  AlgebraicNumber operator-(const AlgebraicNumber& other) const {
+    AlgebraicNumber result = *this;
     result -= other;
     return result;
   }
-  AlgebraicNumber operator*(const AlgebraicNumber& other) const
-  { AlgebraicNumber result = *this;
+  AlgebraicNumber operator*(const AlgebraicNumber& other) const {
+    AlgebraicNumber result = *this;
     result *= other;
     return result;
   }
-  AlgebraicNumber operator/(const AlgebraicNumber& other) const
-  { this->CheckConsistency();
+  AlgebraicNumber operator/(const AlgebraicNumber& other) const {
+    this->CheckConsistency();
     other.CheckConsistency();
     AlgebraicNumber result = *this;
 
@@ -159,11 +159,11 @@ class AlgebraicNumber
   void operator-= (const AlgebraicNumber& other);
   void operator*= (const AlgebraicNumber& other);
   void operator*= (const Rational& other);
-  void operator*= (LargeInt other)
-  { this->operator *= ((Rational)other);
+  void operator*= (LargeInt other) {
+    this->operator *= ((Rational)other);
   }
-  void operator*= (int other)
-  { this->operator *= ((Rational)other);
+  void operator*= (int other) {
+    this->operator *= ((Rational)other);
   }
   bool operator>(const AlgebraicNumber& other) const;
   std::string ToString(FormatExpressions* theFormat = 0) const;
@@ -188,8 +188,8 @@ public:
   void RegisterNewBasis(const MatrixTensor<Rational>& theInjection);
   void reset();
   bool CheckConsistency() const;
-  AlgebraicClosureRationals()
-  { this->reset();
+  AlgebraicClosureRationals() {
+    this->reset();
   }
   bool MergeRadicals(const List<LargeInt>& theRadicals);
   void ChooseGeneratingElement();
@@ -218,30 +218,30 @@ public:
   LargeIntUnsigned theModulo;
   LargeIntUnsigned theValue;
   bool flagDeallocated;
-  friend ElementZmodP operator*(int left, const ElementZmodP& right)
-  { ElementZmodP result;
+  friend ElementZmodP operator*(int left, const ElementZmodP& right) {
+    ElementZmodP result;
     result = right;
     result *= left;
     return result;
   }
   unsigned int HashFunction() const;
-  static unsigned int HashFunction(const ElementZmodP& input)
-  { return input.HashFunction();
+  static unsigned int HashFunction(const ElementZmodP& input) {
+    return input.HashFunction();
   }
-  ElementZmodP()
-  { this->flagDeallocated = false;
+  ElementZmodP() {
+    this->flagDeallocated = false;
   }
-  ElementZmodP(const ElementZmodP& other)
-  { this->flagDeallocated = false;
+  ElementZmodP(const ElementZmodP& other) {
+    this->flagDeallocated = false;
     *this = other;
   }
-  ~ElementZmodP()
-  { this->flagDeallocated = true;
+  ~ElementZmodP() {
+    this->flagDeallocated = true;
   }
   void CheckIamInitialized() const;
   std::string ToString(FormatExpressions* theFormat = 0) const;
-  bool IsEqualToZero() const
-  { return this->theValue.IsEqualToZero();
+  bool IsEqualToZero() const {
+    return this->theValue.IsEqualToZero();
   }
   void operator=(const ElementZmodP& other);
   void operator=(const LargeIntUnsigned& other);
@@ -255,8 +255,8 @@ public:
   void operator+=(const ElementZmodP& other);
   void operator-=(const ElementZmodP& other);
   bool operator+=(const Rational& other);
-  void operator=(const int other)
-  { LargeInt otherLI = other;
+  void operator=(const int other) {
+    LargeInt otherLI = other;
     *this = otherLI;
   }
   ElementZmodP operator+(const Rational& other) const;
@@ -267,8 +267,8 @@ public:
   ElementZmodP operator*(const ElementZmodP& other) const;
   void operator=(const LargeInt& other);
   bool AssignRational(const Rational& other);
-  void operator=(const Rational& other)
-  { bool tempB = this->AssignRational(other);
+  void operator=(const Rational& other) {
+    bool tempB = this->AssignRational(other);
     if (!tempB)
       crash << "This is a programming error: using ElementZmodP::operator= to assign a Rational number failed. "
       << " Operator = does not allow failure. " << crash;

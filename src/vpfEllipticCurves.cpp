@@ -1,15 +1,15 @@
 #include "vpfImplementationHeader2Math11_EllipticCurves.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
 
-unsigned int EllipticCurveWeierstrassNormalForm::HashFunction(const EllipticCurveWeierstrassNormalForm& input)
-{ return
+unsigned int EllipticCurveWeierstrassNormalForm::HashFunction(const EllipticCurveWeierstrassNormalForm& input) {
+  return
   input.linearCoefficient.HashFunction() * SomeRandomPrimes[0] +
   input.constantTerm.HashFunction() * SomeRandomPrimes[1] ;
 }
 
-bool EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(const std::string& curveName, LargeIntUnsigned &output, std::stringstream* commentsOnFailure)
-{ if (curveName == "secp256k1")
-  { output.AssignString("115792089237316195423570985008687907852837564279074904382605163141518161494337");
+bool EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(const std::string& curveName, LargeIntUnsigned &output, std::stringstream* commentsOnFailure) {
+  if (curveName == "secp256k1") {
+    output.AssignString("115792089237316195423570985008687907852837564279074904382605163141518161494337");
     return true;
   }
   if (commentsOnFailure != 0)
@@ -17,14 +17,14 @@ bool EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(const std::string& cu
   return false;
 }
 
-bool EllipticCurveWeierstrassNormalForm::operator==(const EllipticCurveWeierstrassNormalForm& other) const
-{ return this->linearCoefficient == other.linearCoefficient &&
+bool EllipticCurveWeierstrassNormalForm::operator==(const EllipticCurveWeierstrassNormalForm& other) const {
+  return this->linearCoefficient == other.linearCoefficient &&
   this->constantTerm == other.constantTerm;
 }
 
 template < >
-void ElementEllipticCurve<ElementZmodP>::MakeGeneratorSecp256k1()
-{
+void ElementEllipticCurve<ElementZmodP>::MakeGeneratorSecp256k1() {
+ 
   LargeIntUnsigned theModulo;
   theModulo.AssignString  ("115792089237316195423570985008687907853269984665640564039457584007908834671663");
   this->xCoordinate.theModulo = theModulo;
@@ -40,10 +40,10 @@ void ElementEllipticCurve<ElementZmodP>::MakeGeneratorSecp256k1()
 
 template < >
 bool ElementEllipticCurve<ElementZmodP>::MakeGeneratorNISTCurve
-(const std::string& input, std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("ElementEllipticCurve::MakeGeneratorNISTCurve");
-  if (input == "secp256k1")
-  { this->MakeGeneratorSecp256k1();
+(const std::string& input, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("ElementEllipticCurve::MakeGeneratorNISTCurve");
+  if (input == "secp256k1") {
+    this->MakeGeneratorSecp256k1();
     return true;
   }
   if (commentsOnFailure != 0)

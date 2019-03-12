@@ -20,8 +20,8 @@ static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file, 
 class Expression
 {
 private:
-  void reset()
-  { this->owner = 0;
+  void reset() {
+    this->owner = 0;
     this->children.size = 0;
     this->theData = - 1;
   }
@@ -116,23 +116,23 @@ private:
 //////
   typedef bool (*FunctionAddress) (Calculator& theCommands, const Expression& input, Expression& output);
 //////
-  void operator=(const Expression& other)
-  { this->theData = other.theData;
+  void operator=(const Expression& other) {
+    this->theData = other.theData;
     this->children = other.children;
     this->owner = other.owner;
   }
-  void operator=(const Rational& other)
-  { MacroRegisterFunctionWithName("Expression::operator=(Rational)");
+  void operator=(const Rational& other) {
+    MacroRegisterFunctionWithName("Expression::operator=(Rational)");
     this->CheckInitialization();
     this->AssignValue(other, *this->owner);
   }
-  void operator=(int other)
-  { MacroRegisterFunctionWithName("Expression::operator=(int)");
+  void operator=(int other) {
+    MacroRegisterFunctionWithName("Expression::operator=(int)");
     this->CheckInitialization();
     this->AssignValue(other, *this->owner);
   }
-  friend std::ostream& operator << (std::ostream& output, const Expression& theMon)
-  { output << theMon.ToString();
+  friend std::ostream& operator << (std::ostream& output, const Expression& theMon) {
+    output << theMon.ToString();
     return output;
   }
   friend Expression operator*(const Expression& left, const Expression& right);
@@ -140,8 +140,8 @@ private:
   friend Expression operator+(const Expression& left, const Expression& right);
   friend Expression operator-(const Expression& left, const Expression& right);
 
-  void reset(Calculator& newBoss, int numExpectedChildren = 0)
-  { this->owner = &newBoss;
+  void reset(Calculator& newBoss, int numExpectedChildren = 0) {
+    this->owner = &newBoss;
     this->theData = 0;
     this->children.Clear();
     this->children.SetExpectedSize(numExpectedChildren);
@@ -149,8 +149,8 @@ private:
   bool AddChildRationalOnTop(const Rational& inputRat);
   bool AddChildOnTop(const Expression& inputChild);
   bool AddChildAtomOnTop(const std::string& theOperationString);
-  bool AddChildAtomOnTop(int theOp)
-  { this->CheckInitialization();
+  bool AddChildAtomOnTop(int theOp) {
+    this->CheckInitialization();
     Expression tempE;
     tempE.MakeAtom(theOp, *this->owner);
     return this->AddChildOnTop(tempE);
@@ -164,8 +164,8 @@ private:
   void GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff) const;
   bool SetChildAtomValue(int childIndex, const std::string& theAtom);
   bool SetChildAtomValue(int childIndex, int TheAtomValue);
-  int size() const
-  { return this->children.size;
+  int size() const {
+    return this->children.size;
   }
   bool SetChilD(int childIndexInMe, const Expression& inputChild);
   bool AssignMatrixExpressions
@@ -178,14 +178,14 @@ private:
    bool reduceOneRowToSequenceAndOneByOneToNonMatrix = true);
   bool DivisionByMeShouldBeWrittenInExponentForm() const;
   bool IsCalculatorStatusChanger() const;
-  bool AssignMeMyChild(int childIndex)
-  { Expression tempExp = (*this)[childIndex];
+  bool AssignMeMyChild(int childIndex) {
+    Expression tempExp = (*this)[childIndex];
     this->operator=(tempExp);
     return true;
   }
   bool IsLisT() const;
-  bool IsListNElements(int N = - 1) const
-  { if (!this->IsLisT())
+  bool IsListNElements(int N = - 1) const {
+    if (!this->IsLisT())
       return false;
     if (N == - 1)
       return true;
@@ -196,8 +196,8 @@ private:
   bool StartsWithArithmeticOperation() const;
   bool StartsWith(int theOp = - 1, int N = - 1) const;
   bool StartsWithGivenAtom(const std::string& theAtom, int desiredChildren = - 1) const;
-  bool IsListStartingWithAtom(int theOp = - 1) const
-  { if (!this->IsLisT())
+  bool IsListStartingWithAtom(int theOp = - 1) const {
+    if (!this->IsLisT())
       return false;
     if (!(*this)[0].IsAtom())
       return false;
@@ -205,8 +205,8 @@ private:
       return true;
     return (*this)[0].theData == theOp;
   }
-  bool IsListOfTwoAtomsStartingWith(int theOp) const
-  { if (!this->IsListStartingWithAtom(theOp))
+  bool IsListOfTwoAtomsStartingWith(int theOp) const {
+    if (!this->IsListStartingWithAtom(theOp))
       return false;
     if (this->children.size != 2)
       return false;
@@ -254,8 +254,8 @@ private:
   template <class theType>
   bool ConvertsToType(theType* whichElement = 0) const;
   template <class theType>
-  bool IsOfType() const
-  { MacroRegisterFunctionWithName("Expression::IsOfType");
+  bool IsOfType() const {
+    MacroRegisterFunctionWithName("Expression::IsOfType");
     if (this->owner == 0)
       return false;
     if (!this->StartsWith(this->GetTypeOperation<theType>()))
@@ -265,8 +265,8 @@ private:
     return true;
   }
   template <class theType>
-  bool HasType() const
-  { if (this->IsOfType<theType>())
+  bool HasType() const {
+    if (this->IsOfType<theType>())
       return true;
     if (this->IsElementaryObject())
       return false;
@@ -276,8 +276,8 @@ private:
     return false;
   }
   template <class theType>
-  bool IsOfType(theType* whichElement) const
-  { MacroRegisterFunctionWithName("Expression::IsOfType");
+  bool IsOfType(theType* whichElement) const {
+    MacroRegisterFunctionWithName("Expression::IsOfType");
     if (this->owner == 0)
       return false;
     if (!this->StartsWith(this->GetTypeOperation<theType>()))
@@ -290,8 +290,8 @@ private:
     return true;
   }
   template <class theType>
-  const theType& GetValue() const
-  { return this->GetValueNonConst<theType>();
+  const theType& GetValue() const {
+    return this->GetValueNonConst<theType>();
   }
   template <class theType>
   theType& GetValueNonConst() const;
@@ -306,15 +306,15 @@ private:
   template <class theType>
   bool AssignValueWithContext(const theType& inputValue, const Expression& theContext, Calculator& owner);
   template <class theType>
-  bool AddChildValueOnTop(const theType& inputValue)
-  { this->CheckInitialization();
+  bool AddChildValueOnTop(const theType& inputValue) {
+    this->CheckInitialization();
     Expression tempE;
     tempE.AssignValue(inputValue, *this->owner);
     return this->AddChildOnTop(tempE);
   }
   template <class theType>
-  bool AssignValueWithContextToChild(int childIndex, const theType& inputValue, const Expression& theContext, Calculator& owner)
-  { Expression tempE;
+  bool AssignValueWithContextToChild(int childIndex, const theType& inputValue, const Expression& theContext, Calculator& owner) {
+    Expression tempE;
     tempE.AssignValueWithContext(inputValue, theContext, owner);
     return this->SetChilD(childIndex, tempE);
   }
@@ -351,13 +351,13 @@ private:
   Expression ContextGetContextType(int theType) const;
   bool ContextSetSSLieAlgebrA(int indexInOwners, Calculator& owner);
   bool ContextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar);
-  bool ContextMakeContextSSLieAlgebrA(int indexInOwners, Calculator& owner)
-  { this->MakeEmptyContext(owner);
+  bool ContextMakeContextSSLieAlgebrA(int indexInOwners, Calculator& owner) {
+    this->MakeEmptyContext(owner);
     return this->ContextSetSSLieAlgebrA(indexInOwners, owner);
   }
   SemisimpleLieAlgebra* GetAmbientSSAlgebraNonConstUseWithCaution() const;
-  const SemisimpleLieAlgebra* GetAmbientSSAlgebra() const
-  { return this->GetAmbientSSAlgebraNonConstUseWithCaution();
+  const SemisimpleLieAlgebra* GetAmbientSSAlgebra() const {
+    return this->GetAmbientSSAlgebraNonConstUseWithCaution();
   }
   bool IsEqualToZero() const;
   bool IsMonEqualToZero() const;
@@ -370,8 +370,8 @@ private:
   bool MakeIdMatrixExpressions(int theDim, Calculator& inputBoss);
   void MakeMonomialGenVerma(const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, Calculator& newBoss);
   void MakeElementTensorsGeneralizedVermas(const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon, Calculator& newBoss);
-  bool MakeAtom(int input, Calculator& newBoss)
-  { this->reset(newBoss);
+  bool MakeAtom(int input, Calculator& newBoss) {
+    this->reset(newBoss);
     this->theData = input;
     return true;
   }
@@ -404,8 +404,8 @@ private:
 
   void SubstituteRecursively(const Expression& toBeSubbed, const Expression& toBeSubbedWith);
   void SubstituteRecursivelyInChildren(const Expression& toBeSubbed, const Expression& toBeSubbedWith);
-  void AssignXOXToChild(int childIndex, Calculator& owner, int theOp, const Expression& left, const Expression& right)
-  { Expression tempE;
+  void AssignXOXToChild(int childIndex, Calculator& owner, int theOp, const Expression& left, const Expression& right) {
+    Expression tempE;
     tempE.MakeXOX(owner, theOp, left, right);
     this->SetChilD(childIndex, tempE);
   }
@@ -427,14 +427,14 @@ private:
   std::string ToString
   (FormatExpressions* theFormat = 0, Expression* startingExpression = 0, bool unfoldCommandEnclosures = true, JSData* outputJS = 0) const;
   JSData ToJSData(FormatExpressions* theFormat, const Expression& startingExpression) const;
-  static unsigned int HashFunction(const Expression& input)
-  { return input.HashFunction();
+  static unsigned int HashFunction(const Expression& input) {
+    return input.HashFunction();
   }
-  unsigned int HashFunction() const
-  { return this->HashFunctionRecursive(0, 1000);
+  unsigned int HashFunction() const {
+    return this->HashFunctionRecursive(0, 1000);
   }
-  int HashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth) const
-  { if (RecursionDepth > MaxRecursionDepth)
+  int HashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth) const {
+    if (RecursionDepth > MaxRecursionDepth)
       return 0;
     int result = this->theData*SomeRandomPrimes[0];
     int numCycles = MathRoutines::Minimum(this->children.size, SomeRandomPrimesSize);
@@ -442,32 +442,32 @@ private:
       result += (*this)[i].HashFunctionRecursive(RecursionDepth + 1, MaxRecursionDepth) * SomeRandomPrimes[i];
     return result;
   }
-  int GetIndexChild(const Expression& input) const
-  { for (int i = 0; i < this->children.size; i ++)
+  int GetIndexChild(const Expression& input) const {
+    for (int i = 0; i < this->children.size; i ++)
       if (input == (*this)[i])
         return i;
     return - 1;
   }
-  Expression() :flagDeallocated(false)
-  { this->reset();
+  Expression() :flagDeallocated(false) {
+    this->reset();
   }
-  Expression(int x) :flagDeallocated(false)
-  { MacroRegisterFunctionWithName("Expression::Expression(int)");
+  Expression(int x) :flagDeallocated(false) {
+    MacroRegisterFunctionWithName("Expression::Expression(int)");
     this->reset();
     this->theData = x;
   }
-  const Expression& GetLastChild() const
-  { return (*this)[this->children.size - 1];
+  const Expression& GetLastChild() const {
+    return (*this)[this->children.size - 1];
   }
   bool MakeError (const std::string& theError, Calculator& owner, bool isPublicError = false);
-  Expression(const Expression& other):flagDeallocated(false)
-  { this->operator=(other);
+  Expression(const Expression& other):flagDeallocated(false) {
+    this->operator=(other);
   }
-  Expression(Calculator& inputBoss):flagDeallocated(false)
-  { this->reset(inputBoss);
+  Expression(Calculator& inputBoss):flagDeallocated(false) {
+    this->reset(inputBoss);
   }
-  ~Expression()
-  { this->flagDeallocated = true;
+  ~Expression() {
+    this->flagDeallocated = true;
   }
   bool CheckInitialization() const;
   bool CheckInitializationRecursively() const;
@@ -492,8 +492,8 @@ private:
   bool HasBoundVariables() const;
   bool HasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames = 0) const;
   bool IsMeltable(int* numResultingChildren = 0) const;
-  bool AreEqualExcludingChildren(const Expression& other) const
-  { return this->owner == other.owner &&
+  bool AreEqualExcludingChildren(const Expression& other) const {
+    return this->owner == other.owner &&
     this->theData == other.theData &&
     this->children.size == other.children.size;
   }
@@ -521,12 +521,12 @@ private:
   bool operator==(int other) const;
   bool operator==(const Expression& other) const;
   bool operator==(const std::string& other) const;
-  bool operator!=(const std::string& other) const
-  { return !this->operator==(other);
+  bool operator!=(const std::string& other) const {
+    return !this->operator==(other);
   }
 
-  bool operator!=(const Expression& other) const
-  { return ! (*this == other);
+  bool operator!=(const Expression& other) const {
+    return ! (*this == other);
   }
 //  void operator=(const Expression& other);
   bool operator>(const Expression& other) const;
@@ -562,13 +562,13 @@ class Function
   std::string ToStringFull() const;
   JSData ToJSON() const;
   bool ShouldBeApplied(int parentOpIfAvailable);
-  bool operator==(const Function& other) const
-  { return this->theArgumentTypes == other.theArgumentTypes &&
+  bool operator==(const Function& other) const {
+    return this->theArgumentTypes == other.theArgumentTypes &&
     this->theFunction == other.theFunction &&
     this->flagIsInner == other.flagIsInner;
   }
-  void reset(Calculator& owner)
-  { this->theArgumentTypes.reset(owner);
+  void reset(Calculator& owner) {
+    this->theArgumentTypes.reset(owner);
     this->theFunction = 0;
     this->flagIsInner = true;
   }
@@ -593,8 +593,8 @@ class Function
    bool inputIsExperimental = false,
    bool inputflagMayActOnBoundVars = false,
    bool inputDisabledByUser = false,
-   int inputIndexParentThatBansHandler = - 1)
-  { this->owner = &inputOwner;
+   int inputIndexParentThatBansHandler = - 1) {
+    this->owner = &inputOwner;
     this->indexOperation = inputIndexOperation;
     this->indexAmongOperationHandlers = inputIndexAmongOperationHandlers;
     this->theFunction = functionPointer;
@@ -611,11 +611,11 @@ class Function
     this->flagDisabledByUser = inputDisabledByUser;
     this->indexOperationParentThatBansHandler = inputIndexParentThatBansHandler;
   }
-  static unsigned int HashFunction(const Function& input)
-  { return input.HashFunction();
+  static unsigned int HashFunction(const Function& input) {
+    return input.HashFunction();
   }
-  unsigned int HashFunction() const
-  { return (unsigned int)(uintptr_t)this->theFunction;
+  unsigned int HashFunction() const {
+    return (unsigned int)(uintptr_t)this->theFunction;
   }
 };
 
@@ -629,8 +629,8 @@ class SyntacticElement
   Expression theData;
   List<Expression> dataList;
   std::string ToStringHumanReadable(Calculator& theBoss, bool includeLispifiedExpressions) const;
-  SyntacticElement()
-  { this->controlIndex = 0;//controlIndex = 0 *MUST* point to the empty control sequence.
+  SyntacticElement() {
+    this->controlIndex = 0;//controlIndex = 0 *MUST* point to the empty control sequence.
     this->errorString = "";
     this->numNonBoundVariablesInherited = - 1; // - 1 stands for unknown
     this->numBoundVariablesInherited = - 1; // - 1 stands for unknown
@@ -756,8 +756,8 @@ class Plot
 
 struct InputBox
 {
-  friend std::ostream& operator<<(std::ostream& output, const InputBox& input)
-  { output << "name: " << input.name << ", ...";
+  friend std::ostream& operator<<(std::ostream& output, const InputBox& input) {
+    output << "name: " << input.name << ", ...";
     return output;
   }
   std::string name;
@@ -835,22 +835,22 @@ struct ExpressionTripleCrunchers
   int theOp;
   int leftType;
   int rightType;
-  bool operator==(const ExpressionTripleCrunchers& other) const
-  { return this->leftType == other.leftType && this->rightType == other.rightType && this->theOp == other.theOp;
+  bool operator==(const ExpressionTripleCrunchers& other) const {
+    return this->leftType == other.leftType && this->rightType == other.rightType && this->theOp == other.theOp;
   }
-  void operator=(const ExpressionTripleCrunchers& other)
-  { this->leftType = other.leftType;
+  void operator=(const ExpressionTripleCrunchers& other) {
+    this->leftType = other.leftType;
     this->rightType = other.rightType;
     this->theOp = other.theOp;
   }
-  ExpressionTripleCrunchers(): theOp(- 1), leftType(- 1), rightType(- 1)
-  {
+  ExpressionTripleCrunchers(): theOp(- 1), leftType(- 1), rightType(- 1) {
+   
   }
-  ExpressionTripleCrunchers(int inputOp, int inputLeft, int inputRight): theOp(inputOp), leftType(inputLeft), rightType(inputRight)
-  {
+  ExpressionTripleCrunchers(int inputOp, int inputLeft, int inputRight): theOp(inputOp), leftType(inputLeft), rightType(inputRight) {
+   
   }
-  static unsigned int HashFunction(const ExpressionTripleCrunchers& input)
-  { return (unsigned int) input.leftType * SomeRandomPrimes[0] + (unsigned int) input.rightType * SomeRandomPrimes[1] + (unsigned int) input.theOp * SomeRandomPrimes[2];
+  static unsigned int HashFunction(const ExpressionTripleCrunchers& input) {
+    return (unsigned int) input.leftType * SomeRandomPrimes[0] + (unsigned int) input.rightType * SomeRandomPrimes[1] + (unsigned int) input.theOp * SomeRandomPrimes[2];
   }
 };
 
@@ -1125,13 +1125,13 @@ public:
       return 0;
     return &this->operationsCompositeHandlers[theIndex];
   }
-  SyntacticElement GetSyntacticElementEnd()
-  { SyntacticElement result;
+  SyntacticElement GetSyntacticElementEnd() {
+    SyntacticElement result;
     result.controlIndex = this->controlSequences.GetIndex(";");
     return result;
   }
-  bool DecreaseStackSetCharacterRangeS(int decrease)
-  { if (decrease <= 0)
+  bool DecreaseStackSetCharacterRangeS(int decrease) {
+    if (decrease <= 0)
       return true;
     if ((*this->CurrentSyntacticStacK).size - decrease <= 0)
       crash << crash;
@@ -1188,8 +1188,8 @@ public:
   bool AllowsTimesInPreceding(const std::string& lookAhead);
   bool AllowsTensorInPreceding(const std::string& lookAhead);
   bool AllowsDivideInPreceding(const std::string& lookAhead);
-  bool PopTopSyntacticStack()
-  { (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 1);
+  bool PopTopSyntacticStack() {
+    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 1);
     return true;
   }
   bool ReplaceEXXEXEByEusingO(int theOp);
@@ -1203,8 +1203,8 @@ public:
   bool ReplaceEXEXByEXUsingO(int theOp);
   bool ReplaceSsSsXdotsXbySsXdotsX(int numDots);
   bool ReplaceEXdotsXbySsXdotsX(int numDots);
-  bool ReplaceEXdotsXBySs(int numDots)
-  { this->ReplaceEXdotsXbySsXdotsX(numDots);
+  bool ReplaceEXdotsXBySs(int numDots) {
+    this->ReplaceEXdotsXbySsXdotsX(numDots);
     return this->DecreaseStackSetCharacterRangeS(numDots);
   }
   bool ReplaceOEXByE();
@@ -1240,8 +1240,8 @@ public:
   bool ReplaceSequenceUXEYBySequenceZY(int theControlIndex);
   bool ReplaceCEByC();
   bool ReplaceCCByC();
-  bool ReplaceEOEByE()
-  { return this->ReplaceEXEByEusingO((*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].controlIndex);
+  bool ReplaceEOEByE() {
+    return this->ReplaceEXEByEusingO((*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].controlIndex);
   }
   bool ReplaceMatrixEXByMatrix();
   bool ReplaceMatrixEXByMatrixX();
@@ -1251,20 +1251,20 @@ public:
   bool ReplaceCXByEX();
   bool ReplaceXEXEXByEusingO(int theOperation);
   bool ReplaceEXEByEusingO  (int theOperation);
-  bool ReplaceXYByConY(int theCon)
-  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].controlIndex = theCon;
+  bool ReplaceXYByConY(int theCon) {
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].controlIndex = theCon;
     return true;
   }
-  bool ReplaceXYYByConYY(int theCon)
-  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3].controlIndex = theCon;
+  bool ReplaceXYYByConYY(int theCon) {
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3].controlIndex = theCon;
     return true;
   }
-  bool ReplaceXYYYByConYYY(int theCon)
-  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4].controlIndex = theCon;
+  bool ReplaceXYYYByConYYY(int theCon) {
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4].controlIndex = theCon;
     return true;
   }
-  bool ReplaceXXByCon(int theCon)
-  { this->ReplaceXYByConY(theCon);
+  bool ReplaceXXByCon(int theCon) {
+    this->ReplaceXYByConY(theCon);
     return this->DecreaseStackSetCharacterRangeS(1);
   }
   bool ReplaceXByCon(int theCon);
@@ -1277,30 +1277,30 @@ public:
   bool ReplaceXXXXByConCon (int con1, int con2);
   bool ReplaceXdotsXByMatrixStart(int numXes);
   bool ReplaceXXXXByCon(int con1);
-  bool ReplaceXXYByY()
-  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
-    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 2);
-    return true;
-  }
-  bool ReplaceXXYXByYX()
-  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
+  bool ReplaceXXYByY() {
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 2);
     return true;
   }
-  bool ReplaceXYYXByYY()
-  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
+  bool ReplaceXXYXByYX() {
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
+    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 2);
+    return true;
+  }
+  bool ReplaceXYYXByYY() {
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 2);
     return true;
   }
-  bool ReplaceXYXByY()
-  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
+  bool ReplaceXYXByY() {
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
     this->DecreaseStackSetCharacterRangeS(2);
     return true;
   }
-  bool ReplaceXYByY()
-  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
+  bool ReplaceXYByY() {
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 1);
     return true;
   }
@@ -1327,445 +1327,445 @@ public:
   SyntacticElement GetEmptySyntacticElement();
   bool AccountRule(const Expression& ruleE, StateMaintainerCalculator& theRuleStackMaintainer);
   bool ApplyOneRule();
-  void resetStack()
-  { SyntacticElement emptyElement = this->GetEmptySyntacticElement();
+  void resetStack() {
+    SyntacticElement emptyElement = this->GetEmptySyntacticElement();
     (*this->CurrentSyntacticStacK).initializeFillInObject(this->numEmptyTokensStart, emptyElement);
   }
-  int conError()
-  { return this->controlSequences.GetIndexIMustContainTheObject("Error");
+  int conError() {
+    return this->controlSequences.GetIndexIMustContainTheObject("Error");
   }
-  int conExpression()
-  { return this->controlSequences.GetIndexIMustContainTheObject("Expression");
+  int conExpression() {
+    return this->controlSequences.GetIndexIMustContainTheObject("Expression");
   }
-  int conVariable()
-  { return this->controlSequences.GetIndexIMustContainTheObject("Variable");
+  int conVariable() {
+    return this->controlSequences.GetIndexIMustContainTheObject("Variable");
   }
-  int conBindVariable()
-  { return this->controlSequences.GetIndexIMustContainTheObject("{{}}");
+  int conBindVariable() {
+    return this->controlSequences.GetIndexIMustContainTheObject("{{}}");
   }
-  int conInteger()
-  { return this->controlSequences.GetIndexIMustContainTheObject("Integer");
+  int conInteger() {
+    return this->controlSequences.GetIndexIMustContainTheObject("Integer");
   }
-  int conEqualEqual()
-  { return this->controlSequences.GetIndexIMustContainTheObject("==");
+  int conEqualEqual() {
+    return this->controlSequences.GetIndexIMustContainTheObject("==");
   }
-  int conEqualEqualEqual()
-  { return this->controlSequences.GetIndexIMustContainTheObject("===");
+  int conEqualEqualEqual() {
+    return this->controlSequences.GetIndexIMustContainTheObject("===");
   }
-  int conApplyFunction()
-  { return this->controlSequences.GetIndexIMustContainTheObject("{}");
+  int conApplyFunction() {
+    return this->controlSequences.GetIndexIMustContainTheObject("{}");
   }
-  int conTimes()
-  { return this->controlSequences.GetIndexIMustContainTheObject("*");
+  int conTimes() {
+    return this->controlSequences.GetIndexIMustContainTheObject("*");
   }
-  int conEndStatement()
-  { return this->controlSequences.GetIndexIMustContainTheObject(";");
+  int conEndStatement() {
+    return this->controlSequences.GetIndexIMustContainTheObject(";");
   }
-  int conDefineConditional()
-  { return this->controlSequences.GetIndexIMustContainTheObject("if=");
+  int conDefineConditional() {
+    return this->controlSequences.GetIndexIMustContainTheObject("if=");
   }
-  int conGEQ()
-  { return this->controlSequences.GetIndexIMustContainTheObject("\\geq");
+  int conGEQ() {
+    return this->controlSequences.GetIndexIMustContainTheObject("\\geq");
   }
-  int conComma()
-  { return this->controlSequences.GetIndexIMustContainTheObject(",");
+  int conComma() {
+    return this->controlSequences.GetIndexIMustContainTheObject(",");
   }
-  int conDefine()
-  { return this->controlSequences.GetIndexIMustContainTheObject("=");
+  int conDefine() {
+    return this->controlSequences.GetIndexIMustContainTheObject("=");
   }
-  int conIsDenotedBy()
-  { return this->controlSequences.GetIndexIMustContainTheObject("=:");
+  int conIsDenotedBy() {
+    return this->controlSequences.GetIndexIMustContainTheObject("=:");
   }
-  int conLisT()
-  { return this->controlSequences.GetIndexIMustContainTheObject("");
+  int conLisT() {
+    return this->controlSequences.GetIndexIMustContainTheObject("");
   }
-  int conSequenceStatements()
-  { return this->controlSequences.GetIndexIMustContainTheObject("SequenceStatements");
+  int conSequenceStatements() {
+    return this->controlSequences.GetIndexIMustContainTheObject("SequenceStatements");
   }
-  int conSequence()
-  { return this->controlSequences.GetIndexIMustContainTheObject("Sequence");
+  int conSequence() {
+    return this->controlSequences.GetIndexIMustContainTheObject("Sequence");
   }
-  int conSequenceNoRepetition()
-  { return this->controlSequences.GetIndexIMustContainTheObject("SequenceNoRepetition");
+  int conSequenceNoRepetition() {
+    return this->controlSequences.GetIndexIMustContainTheObject("SequenceNoRepetition");
   }
-  int conMatrixStart()
-  { return this->controlSequences.GetIndexIMustContainTheObject("Matrix");
+  int conMatrixStart() {
+    return this->controlSequences.GetIndexIMustContainTheObject("Matrix");
   }
-  int conMatrixEnd()
-  { return this->controlSequences.GetIndexIMustContainTheObject("MatrixEnd");
+  int conMatrixEnd() {
+    return this->controlSequences.GetIndexIMustContainTheObject("MatrixEnd");
   }
-  int conLieBracket()
-  { return this->controlSequences.GetIndexIMustContainTheObject("[]");
+  int conLieBracket() {
+    return this->controlSequences.GetIndexIMustContainTheObject("[]");
   }
-  int conOpenBracket()
-  { return this->controlSequences.GetIndexIMustContainTheObject("(");
+  int conOpenBracket() {
+    return this->controlSequences.GetIndexIMustContainTheObject("(");
   }
-  int conCloseBracket()
-  { return this->controlSequences.GetIndexIMustContainTheObject(")");
+  int conCloseBracket() {
+    return this->controlSequences.GetIndexIMustContainTheObject(")");
   }
-  int conEndProgram()
-  { return this->controlSequences.GetIndexIMustContainTheObject("EndProgram");
+  int conEndProgram() {
+    return this->controlSequences.GetIndexIMustContainTheObject("EndProgram");
   }
-  int opEltZmodP()
-  { return this->theAtoms.GetIndexIMustContainTheObject("EltZmodP");
+  int opEltZmodP() {
+    return this->theAtoms.GetIndexIMustContainTheObject("EltZmodP");
   }
   //int opApplyFunction()
   //{ return this->theAtoms.GetIndexIMustContainTheObject("{}");
   //}
-  int opIsDenotedBy()
-  { return this->theAtoms.GetIndexIMustContainTheObject("=:");
+  int opIsDenotedBy() {
+    return this->theAtoms.GetIndexIMustContainTheObject("=:");
   }
-  int opDefine()
-  { return this->theAtoms.GetIndexIMustContainTheObject("=");
+  int opDefine() {
+    return this->theAtoms.GetIndexIMustContainTheObject("=");
   }
-  int opCoefficientOf()
-  { return this->theAtoms.GetIndexIMustContainTheObject("CoefficientOf");
+  int opCoefficientOf() {
+    return this->theAtoms.GetIndexIMustContainTheObject("CoefficientOf");
   }
-  int opCommandEnclosure()
-  { return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosure");
+  int opCommandEnclosure() {
+    return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosure");
   }
-  int opRulesOff()
-  { return this->theAtoms.GetIndexIMustContainTheObject("RulesOff");
+  int opRulesOff() {
+    return this->theAtoms.GetIndexIMustContainTheObject("RulesOff");
   }
-  int opRulesOn()
-  { return this->theAtoms.GetIndexIMustContainTheObject("RulesOn");
+  int opRulesOn() {
+    return this->theAtoms.GetIndexIMustContainTheObject("RulesOn");
   }
-  int opCommandEnclosureStart()
-  { return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosureStart");
+  int opCommandEnclosureStart() {
+    return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosureStart");
   }
-  int opCommandEnclosureFinish()
-  { return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosureFinish");
+  int opCommandEnclosureFinish() {
+    return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosureFinish");
   }
-  int opTurnOnRules()
-  { return this->theAtoms.GetIndexIMustContainTheObject("TurnOnRules");
+  int opTurnOnRules() {
+    return this->theAtoms.GetIndexIMustContainTheObject("TurnOnRules");
   }
-  int opTurnOffRules()
-  { return this->theAtoms.GetIndexIMustContainTheObject("TurnOffRules");
+  int opTurnOffRules() {
+    return this->theAtoms.GetIndexIMustContainTheObject("TurnOffRules");
   }
-  int opSqrt()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\sqrt");
+  int opSqrt() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\sqrt");
   }
-  int opIf()
-  { return this->theAtoms.GetIndexIMustContainTheObject("if");
+  int opIf() {
+    return this->theAtoms.GetIndexIMustContainTheObject("if");
   }
-  int opDefineConditional()
-  { return this->theAtoms.GetIndexIMustContainTheObject("if=");
+  int opDefineConditional() {
+    return this->theAtoms.GetIndexIMustContainTheObject("if=");
   }
-  int opThePower()
-  { return this->theAtoms.GetIndexIMustContainTheObject("^");
+  int opThePower() {
+    return this->theAtoms.GetIndexIMustContainTheObject("^");
   }
-  int opUnderscore()
-  { return this->theAtoms.GetIndexIMustContainTheObject("_");
+  int opUnderscore() {
+    return this->theAtoms.GetIndexIMustContainTheObject("_");
   }
-  int opEqualEqual()
-  { return this->theAtoms.GetIndexIMustContainTheObject("==");
+  int opEqualEqual() {
+    return this->theAtoms.GetIndexIMustContainTheObject("==");
   }
-  int opEqualEqualEqual()
-  { return this->theAtoms.GetIndexIMustContainTheObject("===");
+  int opEqualEqualEqual() {
+    return this->theAtoms.GetIndexIMustContainTheObject("===");
   }
-  int opGreaterThanOrEqualTo()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\geq");
+  int opGreaterThanOrEqualTo() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\geq");
   }
-  int opLessThanOrEqualTo()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\leq");
+  int opLessThanOrEqualTo() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\leq");
   }
-  int opGreaterThan()
-  { return this->theAtoms.GetIndexIMustContainTheObject(">");
+  int opGreaterThan() {
+    return this->theAtoms.GetIndexIMustContainTheObject(">");
   }
-  int opLessThan()
-  { return this->theAtoms.GetIndexIMustContainTheObject("<");
+  int opLessThan() {
+    return this->theAtoms.GetIndexIMustContainTheObject("<");
   }
-  int opWeightLieAlg()
-  { return this->theAtoms.GetIndexIMustContainTheObject("weightLieAlg");
+  int opWeightLieAlg() {
+    return this->theAtoms.GetIndexIMustContainTheObject("weightLieAlg");
   }
-  int opWeightLieAlgPoly()
-  { return this->theAtoms.GetIndexIMustContainTheObject("weightLieAlgPoly");
+  int opWeightLieAlgPoly() {
+    return this->theAtoms.GetIndexIMustContainTheObject("weightLieAlgPoly");
   }
-  int opError()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Error");
+  int opError() {
+    return this->theAtoms.GetIndexIMustContainTheObject("Error");
   }
-  int opLisT()
-  { return this->theAtoms.GetIndexIMustContainTheObject("");
+  int opLisT() {
+    return this->theAtoms.GetIndexIMustContainTheObject("");
   }
-  int opMonomialCollection()
-  { return this->theAtoms.GetIndexIMustContainTheObject("MonomialCollection");
+  int opMonomialCollection() {
+    return this->theAtoms.GetIndexIMustContainTheObject("MonomialCollection");
   }
-  int opMonomialPoly()
-  { return this->theAtoms.GetIndexIMustContainTheObject("MonomialPoly");
+  int opMonomialPoly() {
+    return this->theAtoms.GetIndexIMustContainTheObject("MonomialPoly");
   }
-  int opCalculusPlot()
-  { return this->theAtoms.GetIndexIMustContainTheObject("CalculusPlot");
+  int opCalculusPlot() {
+    return this->theAtoms.GetIndexIMustContainTheObject("CalculusPlot");
   }
-  int opMatriX()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Matrix");
+  int opMatriX() {
+    return this->theAtoms.GetIndexIMustContainTheObject("Matrix");
   }
-  int opSequence()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Sequence");
+  int opSequence() {
+    return this->theAtoms.GetIndexIMustContainTheObject("Sequence");
   }
-  int opIntervalOpen()
-  { return this->theAtoms.GetIndexIMustContainTheObject("IntervalOpen");
+  int opIntervalOpen() {
+    return this->theAtoms.GetIndexIMustContainTheObject("IntervalOpen");
   }
-  int opIntervalLeftClosed()
-  { return this->theAtoms.GetIndexIMustContainTheObject("[)");
+  int opIntervalLeftClosed() {
+    return this->theAtoms.GetIndexIMustContainTheObject("[)");
   }
-  int opIntervalRightClosed()
-  { return this->theAtoms.GetIndexIMustContainTheObject("(]");
+  int opIntervalRightClosed() {
+    return this->theAtoms.GetIndexIMustContainTheObject("(]");
   }
-  int opIntervalClosed()
-  { return this->theAtoms.GetIndexIMustContainTheObject("IntervalClosed");
+  int opIntervalClosed() {
+    return this->theAtoms.GetIndexIMustContainTheObject("IntervalClosed");
   }
-  int opExpressionHistory()
-  { return this->theAtoms.GetIndexIMustContainTheObject("ExpressionHistory");
+  int opExpressionHistory() {
+    return this->theAtoms.GetIndexIMustContainTheObject("ExpressionHistory");
   }
-  int opQuote()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\"");
+  int opQuote() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\"");
   }
-  int opMelt()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Melt");
+  int opMelt() {
+    return this->theAtoms.GetIndexIMustContainTheObject("Melt");
   }
-  int opRational()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Rational");
+  int opRational() {
+    return this->theAtoms.GetIndexIMustContainTheObject("Rational");
   }
-  int opElementHyperOctahedral()
-  { return this->theAtoms.GetIndexIMustContainTheObject("ElementHyperoctahedral");
+  int opElementHyperOctahedral() {
+    return this->theAtoms.GetIndexIMustContainTheObject("ElementHyperoctahedral");
   }
-  int opDouble()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Double");
+  int opDouble() {
+    return this->theAtoms.GetIndexIMustContainTheObject("Double");
   }
-  int opAlgNumber()
-  { return this->theAtoms.GetIndexIMustContainTheObject("AlgebraicNumber");
+  int opAlgNumber() {
+    return this->theAtoms.GetIndexIMustContainTheObject("AlgebraicNumber");
   }
-  int opElementWeylAlgebra()
-  { return this->theAtoms.GetIndexIMustContainTheObject("ElementWeylAlgebra");
+  int opElementWeylAlgebra() {
+    return this->theAtoms.GetIndexIMustContainTheObject("ElementWeylAlgebra");
   }
-  int opPoly()
-  { return this->theAtoms.GetIndexIMustContainTheObject("PolynomialRational");
+  int opPoly() {
+    return this->theAtoms.GetIndexIMustContainTheObject("PolynomialRational");
   }
-  int opPolyOverANs()
-  { return this->theAtoms.GetIndexIMustContainTheObject("PolynomialOverANs");
+  int opPolyOverANs() {
+    return this->theAtoms.GetIndexIMustContainTheObject("PolynomialOverANs");
   }
-  int opEllipticCurveElementsRational()
-  { return this->theAtoms.GetIndexIMustContainTheObject("EllipticCurveElementsRational");
+  int opEllipticCurveElementsRational() {
+    return this->theAtoms.GetIndexIMustContainTheObject("EllipticCurveElementsRational");
   }
-  int opEllipticCurveElementsZmodP()
-  { return this->theAtoms.GetIndexIMustContainTheObject("EllipticCurveElementsZmodP");
+  int opEllipticCurveElementsZmodP() {
+    return this->theAtoms.GetIndexIMustContainTheObject("EllipticCurveElementsZmodP");
   }
-  int opRationalFunction()
-  { return this->theAtoms.GetIndexIMustContainTheObject("RationalFunction");
+  int opRationalFunction() {
+    return this->theAtoms.GetIndexIMustContainTheObject("RationalFunction");
   }
-  int opDifferentiate()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Differentiate");
+  int opDifferentiate() {
+    return this->theAtoms.GetIndexIMustContainTheObject("Differentiate");
   }
-  int opDifferential()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\diff");
+  int opDifferential() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\diff");
   }
-  int opIndefiniteIndicator()
-  { return this->theAtoms.GetIndexIMustContainTheObject("IndefiniteIndicator");
+  int opIndefiniteIndicator() {
+    return this->theAtoms.GetIndexIMustContainTheObject("IndefiniteIndicator");
   }
-  int opIntegral()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\int");
+  int opIntegral() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\int");
   }
-  int opAbsoluteValue()
-  { return this->theAtoms.GetIndexIMustContainTheObject("|");
+  int opAbsoluteValue() {
+    return this->theAtoms.GetIndexIMustContainTheObject("|");
   }
-  int opMatTensorRat()
-  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixTensorRational");
+  int opMatTensorRat() {
+    return this->theAtoms.GetIndexIMustContainTheObject("MatrixTensorRational");
   }
-  int opWeylGroupRep()
-  { return this->theAtoms.GetIndexIMustContainTheObject("WeylGroupRep");
+  int opWeylGroupRep() {
+    return this->theAtoms.GetIndexIMustContainTheObject("WeylGroupRep");
   }
-  int opFreeze()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Freeze");
+  int opFreeze() {
+    return this->theAtoms.GetIndexIMustContainTheObject("Freeze");
   }
-  int opString()
-  { return this->theAtoms.GetIndexIMustContainTheObject("string");
+  int opString() {
+    return this->theAtoms.GetIndexIMustContainTheObject("string");
   }
-  int opElementUEoverRF()
-  { return this->theAtoms.GetIndexIMustContainTheObject("ElementUEoverRF");
+  int opElementUEoverRF() {
+    return this->theAtoms.GetIndexIMustContainTheObject("ElementUEoverRF");
   }
-  int opHyperoctahedralGroupRep()
-  { return this->theAtoms.GetIndexIMustContainTheObject("HyperoctahedralGroupRepresentation");
+  int opHyperoctahedralGroupRep() {
+    return this->theAtoms.GetIndexIMustContainTheObject("HyperoctahedralGroupRepresentation");
   }
-  int opWeylGroupVirtualRep()
-  { return this->theAtoms.GetIndexIMustContainTheObject("WeylGroupVirtualRep");
+  int opWeylGroupVirtualRep() {
+    return this->theAtoms.GetIndexIMustContainTheObject("WeylGroupVirtualRep");
   }
-  int opElementTensorGVM()
-  { return this->theAtoms.GetIndexIMustContainTheObject("ElementTensorGVM");
+  int opElementTensorGVM() {
+    return this->theAtoms.GetIndexIMustContainTheObject("ElementTensorGVM");
   }
-  int opCharSSAlgMod()
-  { return this->theAtoms.GetIndexIMustContainTheObject("CharSSAlgMod");
+  int opCharSSAlgMod() {
+    return this->theAtoms.GetIndexIMustContainTheObject("CharSSAlgMod");
   }
-  int opSSLieAlg()
-  { return this->theAtoms.GetIndexIMustContainTheObject("SemisimpleLieAlg");
+  int opSSLieAlg() {
+    return this->theAtoms.GetIndexIMustContainTheObject("SemisimpleLieAlg");
   }
-  int opSemisimpleSubalgebras()
-  { return this->theAtoms.GetIndexIMustContainTheObject("SemisimpleSubalgebras");
+  int opSemisimpleSubalgebras() {
+    return this->theAtoms.GetIndexIMustContainTheObject("SemisimpleSubalgebras");
   }
-  int opCandidateSSsubalgebra()
-  { return this->theAtoms.GetIndexIMustContainTheObject("CandidateSSsubalgebra");
+  int opCandidateSSsubalgebra() {
+    return this->theAtoms.GetIndexIMustContainTheObject("CandidateSSsubalgebra");
   }
-  int opInfinity()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\infty");
+  int opInfinity() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\infty");
   }
-  int opEmptySet()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\emptyset");
+  int opEmptySet() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\emptyset");
   }
-  int opIn()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\in");
+  int opIn() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\in");
   }
-  int opPi()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\pi");
+  int opPi() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\pi");
   }
-  int opE()
-  { return this->theAtoms.GetIndexIMustContainTheObject("e");
+  int opE() {
+    return this->theAtoms.GetIndexIMustContainTheObject("e");
   }
-  int opImaginaryUnit()
-  { return this->theAtoms.GetIndexIMustContainTheObject("i");
+  int opImaginaryUnit() {
+    return this->theAtoms.GetIndexIMustContainTheObject("i");
   }
-  int opLogBase()
-  { return this->theAtoms.GetIndexIMustContainTheObject("LogBase");
+  int opLogBase() {
+    return this->theAtoms.GetIndexIMustContainTheObject("LogBase");
   }
-  int opLog()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\log");
+  int opLog() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\log");
   }
-  int opPhantom()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\phantom");
+  int opPhantom() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\phantom");
   }
-  int opCirc()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\circ");
+  int opCirc() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\circ");
   }
-  int opSin()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\sin");
+  int opSin() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\sin");
   }
-  int opFactorial()
-  { return this->theAtoms.GetIndexIMustContainTheObject("!");
+  int opFactorial() {
+    return this->theAtoms.GetIndexIMustContainTheObject("!");
   }
-  int opLimitBoundary()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\limits");
+  int opLimitBoundary() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\limits");
   }
-  int opLimitProcess()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\to");
+  int opLimitProcess() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\to");
   }
-  int opLimit()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\lim");
+  int opLimit() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\lim");
   }
-  int opCos()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\cos");
+  int opCos() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\cos");
   }
-  int opArcTan()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\arctan");
+  int opArcTan() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\arctan");
   }
-  int opArcSin()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\arcsin");
+  int opArcSin() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\arcsin");
   }
-  int opArcCos()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\arccos");
+  int opArcCos() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\arccos");
   }
-  int opTan()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\tan");
+  int opTan() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\tan");
   }
-  int opCot()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\cot");
+  int opCot() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\cot");
   }
-  int opSec()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\sec");
+  int opSec() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\sec");
   }
-  int opCsc()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\csc");
+  int opCsc() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\csc");
   }
-  int opLittelmannPath()
-  { return this->theAtoms.GetIndexIMustContainTheObject("LittelmannPath");
+  int opLittelmannPath() {
+    return this->theAtoms.GetIndexIMustContainTheObject("LittelmannPath");
   }
-  int opLRO()
-  { return this->theAtoms.GetIndexIMustContainTheObject("LRO");
+  int opLRO() {
+    return this->theAtoms.GetIndexIMustContainTheObject("LRO");
   }
-  int opWeylGroup()
-  { return this->theAtoms.GetIndexIMustContainTheObject("WeylGroup");
+  int opWeylGroup() {
+    return this->theAtoms.GetIndexIMustContainTheObject("WeylGroup");
   }
-  int opUnion()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\cup");
+  int opUnion() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\cup");
   }
-  int opIntersection()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\cap");
+  int opIntersection() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\cap");
   }
-  int opPolynomialVariables()
-  { return this->theAtoms.GetIndexIMustContainTheObject("PolyVars");
+  int opPolynomialVariables() {
+    return this->theAtoms.GetIndexIMustContainTheObject("PolyVars");
   }
-  int opWeylAlgebraVariables()
-  { return this->theAtoms.GetIndexIMustContainTheObject("DiffOpVars");
+  int opWeylAlgebraVariables() {
+    return this->theAtoms.GetIndexIMustContainTheObject("DiffOpVars");
   }
-  int opContexT()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Context");
+  int opContexT() {
+    return this->theAtoms.GetIndexIMustContainTheObject("Context");
   }
-  int opWeylGroupElement()
-  { return this->theAtoms.GetIndexIMustContainTheObject("ElementWeylGroup");
+  int opWeylGroupElement() {
+    return this->theAtoms.GetIndexIMustContainTheObject("ElementWeylGroup");
   }
-  int opEndStatement()
-  { return this->theAtoms.GetIndexIMustContainTheObject(";");
+  int opEndStatement() {
+    return this->theAtoms.GetIndexIMustContainTheObject(";");
   }
-  int opUnionNoRepetition()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\sqcup");
+  int opUnionNoRepetition() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\sqcup");
   }
-  int opBind()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Bind");
+  int opBind() {
+    return this->theAtoms.GetIndexIMustContainTheObject("Bind");
   }
-  int opOr()
-  { return this->theAtoms.GetIndexIMustContainTheObject("or");
+  int opOr() {
+    return this->theAtoms.GetIndexIMustContainTheObject("or");
   }
-  int opAnd()
-  { return this->theAtoms.GetIndexIMustContainTheObject("and");
+  int opAnd() {
+    return this->theAtoms.GetIndexIMustContainTheObject("and");
   }
-  int opPlus()
-  { return this->theAtoms.GetIndexIMustContainTheObject("+");
+  int opPlus() {
+    return this->theAtoms.GetIndexIMustContainTheObject("+");
   }
-  int opDirectSum()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\oplus");
+  int opDirectSum() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\oplus");
   }
-  int opUserInputTextBox()
-  { return this->theAtoms.GetIndexIMustContainTheObject("userInputTextBox");
+  int opUserInputTextBox() {
+    return this->theAtoms.GetIndexIMustContainTheObject("userInputTextBox");
   }
-  int opMod()
-  { return this->theAtoms.GetIndexIMustContainTheObject("mod");
+  int opMod() {
+    return this->theAtoms.GetIndexIMustContainTheObject("mod");
   }
-  int opMinus()
-  { return this->theAtoms.GetIndexIMustContainTheObject("-");
+  int opMinus() {
+    return this->theAtoms.GetIndexIMustContainTheObject("-");
   }
-  int opTimes()
-  { return this->theAtoms.GetIndexIMustContainTheObject("*");
+  int opTimes() {
+    return this->theAtoms.GetIndexIMustContainTheObject("*");
   }
-  int opSum()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\sum");
+  int opSum() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\sum");
   }
-  int opCrossProduct()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\times");
+  int opCrossProduct() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\times");
   }
-  int opTensor()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\otimes");
+  int opTensor() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\otimes");
   }
-  int opBinom()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\binom");
+  int opBinom() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\binom");
   }
-  int opSetMinus()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\setminus");
+  int opSetMinus() {
+    return this->theAtoms.GetIndexIMustContainTheObject("\\setminus");
   }
-  int opLieBracket()
-  { return this->theAtoms.GetIndexIMustContainTheObject("[]");
+  int opLieBracket() {
+    return this->theAtoms.GetIndexIMustContainTheObject("[]");
   }
-  int opDivide()
-  { return this->theAtoms.GetIndexIMustContainTheObject("/");
+  int opDivide() {
+    return this->theAtoms.GetIndexIMustContainTheObject("/");
   }
-  int opInterpretProblem()
-  { return this->theAtoms.GetIndexIMustContainTheObject("InterpretProblem");
+  int opInterpretProblem() {
+    return this->theAtoms.GetIndexIMustContainTheObject("InterpretProblem");
   }
-  int opInterpretProblemGiveUp()
-  { return this->theAtoms.GetIndexIMustContainTheObject("ProblemGiveUp");
+  int opInterpretProblemGiveUp() {
+    return this->theAtoms.GetIndexIMustContainTheObject("ProblemGiveUp");
   }
   bool AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp);
-  bool AppendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output)
-  { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());
+  bool AppendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output) {
+    return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());
   }
-  bool AppendSummandsReturnTrueIfOrderNonCanonical(const Expression& theExpression, List<Expression>& output)
-  { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus());
+  bool AppendSummandsReturnTrueIfOrderNonCanonical(const Expression& theExpression, List<Expression>& output) {
+    return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus());
   }
   void SpecializeBoundVars(Expression& toBeSubbedIn, MapLisT<Expression, Expression>& matchedPairs);
   Expression* PatternMatch
@@ -1773,39 +1773,39 @@ public:
    std::stringstream* theLog = 0);
   bool ProcessOneExpressionOnePatternOneSub
   (const Expression& thePattern, Expression& theExpression, MapLisT<Expression, Expression>& bufferPairs, std::stringstream* theLog = 0);
-  static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output)
-  { if (&input == &output)
+  static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output) {
+    if (&input == &output)
       crash << "This is a programming error: the input expression, equal to " << input.ToString() << " has the same address as the output expression. "
       << crash;
   }
 //  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
   template <class theType>
-  bool ConvertToTypeUsingFunction(Expression::FunctionAddress theFun, const Expression& input, Expression& output)
-  { MacroRegisterFunctionWithName("Calculator::ConvertToTypeUsingFunction");
-    if (input.IsOfType<theType>())
-    { output = input;
+  bool ConvertToTypeUsingFunction(Expression::FunctionAddress theFun, const Expression& input, Expression& output) {
+    MacroRegisterFunctionWithName("Calculator::ConvertToTypeUsingFunction");
+    if (input.IsOfType<theType>()) {
+      output = input;
       return true;
     }
     if (theFun == 0)
       return false;
-    if (!theFun(*this, input, output))
-    { this->Comments << "<hr>Conversion function failed on " << input.ToString() << ". ";
+    if (!theFun(*this, input, output)) {
+      this->Comments << "<hr>Conversion function failed on " << input.ToString() << ". ";
       return false;
     }
     return output.IsOfType<theType>();
   }
   template <class theType>
-  bool CallConversionFunctionReturnsNonConstUseCarefully(Expression::FunctionAddress theFun, const Expression& input, theType*& outputData)
-  { MacroRegisterFunctionWithName("Calculator::CallConversionFunctionReturnsNonConstUseCarefully");
+  bool CallConversionFunctionReturnsNonConstUseCarefully(Expression::FunctionAddress theFun, const Expression& input, theType*& outputData) {
+    MacroRegisterFunctionWithName("Calculator::CallConversionFunctionReturnsNonConstUseCarefully");
     Expression tempE;
     if (!this->ConvertToTypeUsingFunction<theType>(theFun, input, tempE))
       return false;
     outputData = &tempE.GetValueNonConst<theType>();
     return true;
   }
-  bool CallCalculatorFunction(Expression::FunctionAddress theFun, const Expression& input, Expression& output)
-  { if (&input == &output)
-    { Expression inputCopy = input;
+  bool CallCalculatorFunction(Expression::FunctionAddress theFun, const Expression& input, Expression& output) {
+    if (&input == &output) {
+      Expression inputCopy = input;
       return this->CallCalculatorFunction(theFun, inputCopy, output);
     }
     if (!theFun(*this, input, output))
@@ -1821,17 +1821,17 @@ public:
 
   static bool innerReverseOrdeR(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerReverseOrderRecursively(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialWithEWA(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerEWAorPoly(theCommands, input, output, true);
+  static bool innerPolynomialWithEWA(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerEWAorPoly(theCommands, input, output, true);
   }
-  static bool innerElementWeylAlgebra(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerEWAorPoly(theCommands, input, output, false);
+  static bool innerElementWeylAlgebra(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerEWAorPoly(theCommands, input, output, false);
   }
   static bool innerEWAorPoly(Calculator& theCommands, const Expression& input, Expression& output, bool assignPoly);
   static bool innerOperationBinary(Calculator& theCommands, const Expression& input, Expression& output, int theOp);
   static bool innerInterpolatePoly(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerTimes(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
+  static bool innerTimes(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
   }
   bool ReadTestStrings(HashedList<std::string, MathRoutines::hashString>& outputCommands, List<std::string>& outputResults);
   bool WriteTestStrings(List<std::string>& inputCommands, List<std::string>& inputResults);
@@ -1884,8 +1884,8 @@ public:
   static bool EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output);
   template<class theType>
   bool GetMatriXFromArguments
-  (const Expression& theExpression, Matrix<theType>& outputMat, Expression* inputOutputStartingContext = 0, int targetNumColsNonMandatory = - 1, Expression::FunctionAddress conversionFunction = 0)
-  { Expression tempE = theExpression;
+  (const Expression& theExpression, Matrix<theType>& outputMat, Expression* inputOutputStartingContext = 0, int targetNumColsNonMandatory = - 1, Expression::FunctionAddress conversionFunction = 0) {
+    Expression tempE = theExpression;
     if (tempE.IsLisT())
       tempE.SetChildAtomValue(0, this->opSequence());
     return this->GetMatrix(tempE, outputMat, inputOutputStartingContext, targetNumColsNonMandatory, conversionFunction);
@@ -1895,10 +1895,10 @@ public:
   (const Expression& input, Matrix<theType>& outputMat, Expression* inputOutputStartingContext = 0, int targetNumColsNonMandatory = - 1, Expression::FunctionAddress conversionFunction = 0);
   template <class theType>
   bool GetVectorFromFunctionArguments
-  (const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext = 0, int targetDimNonMandatory = - 1, Expression::FunctionAddress conversionFunction = 0)
-  { Expression tempE = input;
-    if (tempE.IsLisT())
-    { //stOutput << "<hr>tempE: " << tempE.Lispify();
+  (const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext = 0, int targetDimNonMandatory = - 1, Expression::FunctionAddress conversionFunction = 0) {
+    Expression tempE = input;
+    if (tempE.IsLisT()) {
+      //stOutput << "<hr>tempE: " << tempE.Lispify();
       tempE.SetChildAtomValue(0, this->opSequence());
       //stOutput << "<br>tempE after change: " << tempE.Lispify();
     }
@@ -1928,11 +1928,11 @@ public:
   static bool innerFreudenthalFull(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerKillingForm(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGCDOrLCMPoly(Calculator& theCommands, const Expression& input, Expression& output, bool doGCD);
-  static bool innerLCMPoly(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerGCDOrLCMPoly(theCommands, input, output, false);
+  static bool innerLCMPoly(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerGCDOrLCMPoly(theCommands, input, output, false);
   }
-  static bool innerGCDPoly(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerGCDOrLCMPoly(theCommands, input, output, true);
+  static bool innerGCDPoly(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerGCDOrLCMPoly(theCommands, input, output, true);
   }
   bool GetListPolysVariableLabelsInLex(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext);
   static bool innerPrintAllVectorPartitions(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1945,11 +1945,11 @@ public:
   static bool innerGetChevGen(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetCartanGen(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitFDpartB3overG2CharsOnly(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPrintSSLieAlgebraShort(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerPrintSSLieAlgebra(theCommands, input, output, false);
+  static bool innerPrintSSLieAlgebraShort(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerPrintSSLieAlgebra(theCommands, input, output, false);
   }
-  static bool innerPrintSSLieAlgebraVerbose(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerPrintSSLieAlgebra(theCommands, input, output, true);
+  static bool innerPrintSSLieAlgebraVerbose(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerPrintSSLieAlgebra(theCommands, input, output, true);
   }
   static bool innerPrintSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output, bool Verbose);
   static bool innerRootSubsystem(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1964,17 +1964,17 @@ public:
   bool GetTypeHighestWeightParabolic
   (Calculator& theCommands, const Expression& input, Expression& output, Vector<coefficient>& outputWeightHWFundcoords, Selection& outputInducingSel,
    Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra, Expression::FunctionAddress ConversionFun);
-  static bool innerGroebnerGrLex(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerGroebner(theCommands, input, output, true);
+  static bool innerGroebnerGrLex(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerGroebner(theCommands, input, output, true);
   }
-  static bool innerGroebnerLex(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerGroebner(theCommands, input, output, false);
+  static bool innerGroebnerLex(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerGroebner(theCommands, input, output, false);
   }
-  static bool innerGroebnerRevLex(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerGroebner(theCommands, input, output, false, true);
+  static bool innerGroebnerRevLex(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerGroebner(theCommands, input, output, false, true);
   }
-  static bool innerGroebnerModZpLex(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerGroebner(theCommands, input, output, false, false, true);
+  static bool innerGroebnerModZpLex(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerGroebner(theCommands, input, output, false, false, true);
   }
   static bool innerGroebner(Calculator& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex = false, bool useModZp = false);
   static bool innerKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2011,16 +2011,16 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output,
    bool AllGenerators, bool useNilWeight, bool ascending);
   static bool innerWriteGenVermaModAsDiffOperatorsGeneratorOrder
-  (Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, false, false, true);
+  (Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, false, false, true);
   }
   static bool innerWriteGenVermaModAsDiffOperatorsNilOrderDescending
-  (Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, false, true, false);
+  (Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, false, true, false);
   }
   static bool innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending
-  (Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, true, false, false);
+  (Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, true, false, false);
   }
   static bool innerCasimir(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2062,8 +2062,8 @@ public:
    const std::string& inputAdditionalIdentifier = "",
    const std::string& inputCalculatorIdentifier = "",
    bool inputDisabledByDefault = false,
-   const std::string& parentOpThatBansHandler = "")
-  { this->AddOperationHandler
+   const std::string& parentOpThatBansHandler = "") {
+    this->AddOperationHandler
     (theOpName, innerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, true,
      visible, experimental, inputAdditionalIdentifier, inputCalculatorIdentifier, inputDisabledByDefault, parentOpThatBansHandler);
   }
@@ -2201,8 +2201,8 @@ public:
 
 template <class theType>
 bool Calculator::GetVectoR
-(const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext, int targetDimNonMandatory, Expression::FunctionAddress conversionFunction)
-{ MacroRegisterFunctionWithName("Calculator::GetVector");
+(const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext, int targetDimNonMandatory, Expression::FunctionAddress conversionFunction) {
+  MacroRegisterFunctionWithName("Calculator::GetVector");
   List<Expression> nonConvertedEs;
   if (!this->GetVectorExpressions(input, nonConvertedEs, targetDimNonMandatory))
     return false;
@@ -2224,8 +2224,8 @@ bool Calculator::GetVectoR
 
 template <class theType>
 bool Calculator::GetMatrix
-(const Expression& input, Matrix<theType>& outputMat, Expression* inputOutputStartingContext, int targetNumColsNonMandatory, Expression::FunctionAddress conversionFunction)
-{ MacroRegisterFunctionWithName("Calculator::GetMatrix");
+(const Expression& input, Matrix<theType>& outputMat, Expression* inputOutputStartingContext, int targetNumColsNonMandatory, Expression::FunctionAddress conversionFunction) {
+  MacroRegisterFunctionWithName("Calculator::GetMatrix");
   Matrix<Expression> nonConvertedEs;
   //stOutput << " Getting matrix from: " << input.ToString();
   if (!this->GetMatrixExpressions(input, nonConvertedEs, - 1, targetNumColsNonMandatory))
@@ -2239,8 +2239,8 @@ bool Calculator::GetMatrix
     if (inputOutputStartingContext->IsContext())
       theContext =*inputOutputStartingContext;
   for (int i = 0; i <nonConvertedEs.NumRows; i ++)
-    for (int j = 0; j<nonConvertedEs.NumCols; j ++)
-    { if (!this->ConvertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs(i, j), convertedEs(i, j)))
+    for (int j = 0; j<nonConvertedEs.NumCols; j ++) {
+      if (!this->ConvertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs(i, j), convertedEs(i, j)))
         if (!nonConvertedEs(i, j).ConvertToType<theType>(convertedEs.elements[i][j]))
           return false;
       theContext.ContextMergeContexts(theContext, convertedEs(i, j).GetContext(), theContext);
@@ -2259,20 +2259,20 @@ bool Calculator::GetMatrix
 }
 
 template <class coefficient>
-bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expression, coefficient>& theSum)
-{ MacroRegisterFunctionWithName("Expression::MakeSum");
+bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expression, coefficient>& theSum) {
+  MacroRegisterFunctionWithName("Expression::MakeSum");
   Expression oneE; //used to record the constant term
   oneE.AssignValue<Rational>(1, theCommands);
   if (theSum.IsEqualToZero())
     return this->AssignValue<Rational>(0, theCommands);
   List<Expression> summandsWithCoeff;
   summandsWithCoeff.SetSize(theSum.size());
-  for (int i = 0; i < theSum.size(); i ++)
-  { Expression& current = summandsWithCoeff[i];
+  for (int i = 0; i < theSum.size(); i ++) {
+    Expression& current = summandsWithCoeff[i];
     if (theSum[i] == oneE)
       current.AssignValue(theSum.theCoeffs[i], theCommands);
-    else if (!(theSum.theCoeffs[i] == 1))
-    { current.reset(theCommands, 3);
+    else if (!(theSum.theCoeffs[i] == 1)) {
+      current.reset(theCommands, 3);
       current.AddChildAtomOnTop(theCommands.opTimes());
       current.AddChildValueOnTop(theSum.theCoeffs[i]);
       current.AddChildOnTop(theSum[i]);
@@ -2291,22 +2291,22 @@ bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expre
 }
 
 template <class theType>
-bool Expression::AssignValueWithContext(const theType& inputValue, const Expression& theContext, Calculator& owner)
-{ this->reset(owner, 3);
+bool Expression::AssignValueWithContext(const theType& inputValue, const Expression& theContext, Calculator& owner) {
+  this->reset(owner, 3);
   this->AddChildAtomOnTop(this->GetTypeOperation<theType>());
   this->AddChildOnTop(theContext);
   return this->AddChildAtomOnTop(this->AddObjectReturnIndex(inputValue));
 }
 
 template <class theType>
-bool Expression::AssignValue(const theType& inputValue, Calculator& owner)
-{ Expression tempE;
+bool Expression::AssignValue(const theType& inputValue, Calculator& owner) {
+  Expression tempE;
   tempE.owner = &owner;
   int curType = tempE.GetTypeOperation<theType>();
   if (curType == owner.opPoly() || curType == owner.opRationalFunction() || curType == owner.opElementTensorGVM() ||
       curType == owner.opElementUEoverRF() ||
-      curType == owner.opElementWeylAlgebra() || curType == owner.opWeightLieAlgPoly())
-  { crash << "This may or may not be a programming error. Assigning value WITHOUT CONTEXT to data type "
+      curType == owner.opElementWeylAlgebra() || curType == owner.opWeightLieAlgPoly()) {
+    crash << "This may or may not be a programming error. Assigning value WITHOUT CONTEXT to data type "
     << this->owner->GetOperations()[curType] << " is discouraged, and most likely is an error. Crashing to let you know. "
     << crash;
   }
@@ -2316,8 +2316,8 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner)
 }
 
 template <class theType>
-bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output, std::stringstream* commentsOnFailure) const
-{ MacroRegisterFunctionWithName("Expression::MergeContextsMyArumentsAndConvertThem");
+bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output, std::stringstream* commentsOnFailure) const {
+  MacroRegisterFunctionWithName("Expression::MergeContextsMyArumentsAndConvertThem");
 //  stOutput << "<hr>Merging context arguments of " << this->ToString();
   this->CheckInitialization();
   Expression mergedContexts;
@@ -2327,9 +2327,9 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output, std::
   output.reset(*this->owner, this->children.size);
   output.AddChildOnTop((*this)[0]);
   Expression convertedE;
-  for (int i = 1; i < mergedContexts.children.size; i ++)
-  { if (!mergedContexts[i].ConvertToType<theType>(convertedE))
-    { if (commentsOnFailure != 0)
+  for (int i = 1; i < mergedContexts.children.size; i ++) {
+    if (!mergedContexts[i].ConvertToType<theType>(convertedE)) {
+      if (commentsOnFailure != 0)
         *commentsOnFailure << "<hr>Failed to convert "
         << mergedContexts[i].ToString() << " to the desired type. ";
       return false;
@@ -2343,23 +2343,23 @@ template<class coefficient>
 bool Calculator::GetTypeWeight
 (Calculator& theCommands, const Expression& input, Vector<coefficient>& outputWeightSimpleCoords,
  Expression& outputWeightContext, SemisimpleLieAlgebra*& ambientSSalgebra,
- Expression::FunctionAddress ConversionFun)
-{ MacroRegisterFunctionWithName("Calculator::GetTypeWeight");
-  if (!input.IsListNElements(3))
-  { theCommands
+ Expression::FunctionAddress ConversionFun) {
+  MacroRegisterFunctionWithName("Calculator::GetTypeWeight");
+  if (!input.IsListNElements(3)) {
+    theCommands
     << "Function TypeHighestWeightParabolic is expected to have two arguments: "
     << "Semisimple  algebra type, highest weight in simple coordinates. ";
     return false;
   }
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
-  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, leftE, ambientSSalgebra))
-  { theCommands << "Error extracting Lie algebra from " << leftE.ToString();
+  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, leftE, ambientSSalgebra)) {
+    theCommands << "Error extracting Lie algebra from " << leftE.ToString();
     return false;
   }
   if (!theCommands.GetVectoR<coefficient>
-      (middleE, outputWeightSimpleCoords, &outputWeightContext, ambientSSalgebra->GetRank(), ConversionFun))
-  { theCommands << "Failed to convert the second argument of HWV to a list of " << ambientSSalgebra->GetRank()
+      (middleE, outputWeightSimpleCoords, &outputWeightContext, ambientSSalgebra->GetRank(), ConversionFun)) {
+    theCommands << "Failed to convert the second argument of HWV to a list of " << ambientSSalgebra->GetRank()
     << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
     return false;
   }
@@ -2374,32 +2374,32 @@ bool Calculator::GetTypeWeight
 template<class coefficient>
 bool Calculator::GetTypeHighestWeightParabolic
 (Calculator& theCommands, const Expression& input, Expression& output, Vector<coefficient>& outputWeightHWFundcoords,
- Selection& outputInducingSel, Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra, Expression::FunctionAddress ConversionFun)
-{ if (!input.IsListNElements(4) && !input.IsListNElements(3))
+ Selection& outputInducingSel, Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra, Expression::FunctionAddress ConversionFun) {
+  if (!input.IsListNElements(4) && !input.IsListNElements(3))
     return output.MakeError
     ("Function TypeHighestWeightParabolic is expected to have two or three arguments: SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
   if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, leftE, ambientSSalgebra))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
-  if (!theCommands.GetVectoR<coefficient>(middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(), ConversionFun))
-  { std::stringstream tempStream;
+  if (!theCommands.GetVectoR<coefficient>(middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(), ConversionFun)) {
+    std::stringstream tempStream;
     tempStream << "Failed to convert the second argument of HWV to a list of " << ambientSSalgebra->GetRank()
     << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
     return output.MakeError(tempStream.str(), theCommands);
   }
-  if (input.IsListNElements(4))
-  { Vector<Rational> parabolicSel;
+  if (input.IsListNElements(4)) {
+    Vector<Rational> parabolicSel;
     const Expression& rightE = input[3];
-    if (!theCommands.GetVectoR<Rational>(rightE, parabolicSel, &outputHWContext, ambientSSalgebra->GetRank(), 0))
-    { std::stringstream tempStream;
+    if (!theCommands.GetVectoR<Rational>(rightE, parabolicSel, &outputHWContext, ambientSSalgebra->GetRank(), 0)) {
+      std::stringstream tempStream;
       tempStream << "Failed to convert the third argument of HWV to a list of " << ambientSSalgebra->GetRank()
       << " rationals. The third argument you gave is " << rightE.ToString() << ".";
       return output.MakeError(tempStream.str(), theCommands);
     }
     outputInducingSel = parabolicSel;
-  } else
-  { outputInducingSel.init(ambientSSalgebra->GetRank());
+  } else {
+    outputInducingSel.init(ambientSSalgebra->GetRank());
     for (int i = 0; i < outputWeightHWFundcoords.size; i ++)
       if (!outputWeightHWFundcoords[i].IsSmallInteger())
         outputInducingSel.AddSelectionAppendNewIndex(i);
@@ -2416,14 +2416,14 @@ template <class coefficient>
 bool Expression::AssignMatrix
 (const Matrix<coefficient>& input, Calculator& owner,
  Expression const* inputContext,
- bool reduceOneRowToSequenceAndOneByOneToNonMatrix)
-{ MacroRegisterFunctionWithName("Expression::AssignMatrix");
+ bool reduceOneRowToSequenceAndOneByOneToNonMatrix) {
+  MacroRegisterFunctionWithName("Expression::AssignMatrix");
   Matrix<Expression> theMatEs;
   theMatEs.init(input.NumRows, input.NumCols);
   Expression currentElt;
   for (int i = 0; i < input.NumRows; i ++)
-    for (int j = 0; j < input.NumCols; j ++)
-    { if (inputContext == 0)
+    for (int j = 0; j < input.NumCols; j ++) {
+      if (inputContext == 0)
         currentElt.AssignValue(input(i, j), owner);
       else
         currentElt.AssignValueWithContext(input(i, j), *inputContext, owner);
@@ -2433,8 +2433,8 @@ bool Expression::AssignMatrix
 }
 
 template <typename theType>
-bool Expression::IsMatrixGivenType(int* outputNumRows, int* outputNumCols, Matrix<theType>* outputMat) const
-{ MacroRegisterFunctionWithName("Expression::IsMatrixGivenType");
+bool Expression::IsMatrixGivenType(int* outputNumRows, int* outputNumCols, Matrix<theType>* outputMat) const {
+  MacroRegisterFunctionWithName("Expression::IsMatrixGivenType");
   int numRows = - 1, numCols = - 1;
   if (outputNumRows == 0)
     outputNumRows = &numRows;

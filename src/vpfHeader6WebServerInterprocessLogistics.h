@@ -87,8 +87,8 @@ public:
   bool flagDeallocated;
   std::string name;
 //  static int ConnectWithTimeoutViaSelect(int theFD, const std::string& input);
-  std::string GetLastRead()
-  { return this->thePipe.GetLastRead();
+  std::string GetLastRead() {
+    return this->thePipe.GetLastRead();
   }
   static bool SetPipeNonBlockingIfFailThenCrash(int inputPipe, bool restartServerOnFail, bool dontCrashOnFail);
   static bool SetPipeBlockingModeIfFailThenCrash(int inputPipe, bool restartServerOnFail, bool dontCrashOnFail);

@@ -31,8 +31,8 @@ public:
   int ToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts);
   int RootsToScalarProductString(Vectors<Rational>& inputLeft, Vectors<Rational>& inputRight, const std::string& letterTypeLeft, const std::string& letterTypeRight, std::string& output, rootSubalgebra& owner);
   void ComputeConnectedComponents(Vectors<Rational>& input, rootSubalgebra& owner, List<List<int> >& output);
-  void ComputeDebugString(rootSubalgebras& owner, bool includeScalarsProducts, bool includeMixedScalarProducts)
-  { this->ToString(this->DebugString, owner, true, includeScalarsProducts, includeMixedScalarProducts);
+  void ComputeDebugString(rootSubalgebras& owner, bool includeScalarsProducts, bool includeMixedScalarProducts) {
+    this->ToString(this->DebugString, owner, true, includeScalarsProducts, includeMixedScalarProducts);
   }
   void MakeLookCivilized(rootSubalgebra& owner);
   bool IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots, rootSubalgebras& owners, int indexInOwner);
@@ -43,21 +43,21 @@ public:
   void GetSumAlphas(Vector<Rational>& output, int theDimension);
   bool CheckForBugs(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
   void SortRelation(rootSubalgebra& owner);
-  bool operator==(const coneRelation& right)
-  { return this->DebugString == right.DebugString;
+  bool operator==(const coneRelation& right) {
+    return this->DebugString == right.DebugString;
   }
-  unsigned int HashFunction() const
-  { int tempI= ::MathRoutines::Minimum((int) this->DebugString.length(), ::SomeRandomPrimesSize);
+  unsigned int HashFunction() const {
+    int tempI= ::MathRoutines::Minimum((int) this->DebugString.length(), ::SomeRandomPrimesSize);
     unsigned int result = 0;
     for (int i = 0; i < tempI; i ++)
       result += this->DebugString[i]*::SomeRandomPrimes[i];
     return result;
   }
-  static inline unsigned int HashFunction(const coneRelation& input)
-  { return input.HashFunction();
+  static inline unsigned int HashFunction(const coneRelation& input) {
+    return input.HashFunction();
   }
-  coneRelation()
-  {this->IndexOwnerRootSubalgebra = - 1;
+  coneRelation() {
+   this->IndexOwnerRootSubalgebra = - 1;
   }
 };
 
@@ -77,8 +77,8 @@ public:
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input, rootSubalgebras& owner);
   void AddRelationNoRepetition(coneRelation& input, rootSubalgebras& owners);
-  coneRelations()
-  { this->NumAllowedLatexLines = 40;
+  coneRelations() {
+    this->NumAllowedLatexLines = 40;
     this->flagIncludeSmallerRelations = true;
     this->flagIncludeCoordinateRepresentation = false;
     this->flagIncludeSubalgebraDataInDebugString = false;
@@ -87,8 +87,8 @@ public:
 
 class rootSubalgebra
 {
-  friend std::ostream& operator << (std::ostream& output, rootSubalgebra& theSA)
-  { output << theSA.ToString();
+  friend std::ostream& operator << (std::ostream& output, rootSubalgebra& theSA) {
+    output << theSA.ToString();
     return output;
   }
 public:
@@ -165,8 +165,8 @@ public:
   VectorSparse<Rational> moduleDecompoAmbientAlgebraDimensionsOnly;
 //  int indexInOwners;
   rootSubalgebra();
-  ~rootSubalgebra()
-  { this->flagDeallocated = true;
+  ~rootSubalgebra() {
+    this->flagDeallocated = true;
   }
   WeylGroupData& GetAmbientWeyl() const;
   SemisimpleLieAlgebra& GetOwnerSSalg() const;
@@ -176,8 +176,8 @@ public:
   bool CheckScalarProdMatrixOrdered() const;
   Vector<Rational> GetFundamentalCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords) const;
   Vector<Rational> GetSimpleCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords) const;
-  inline int GetNumModules() const
-  { return this->HighestVectors.size;
+  inline int GetNumModules() const {
+    return this->HighestVectors.size;
   }
   int GetIndexKmoduleContainingRoot(const Vector<Rational>& input);
   void GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2);
@@ -351,8 +351,8 @@ class slTwoSubalgebra
 {
 public:
 /////////////////////////////////////////////
-  friend std::ostream& operator << (std::ostream& output, const slTwoSubalgebra& theSl2)
-  { output << theSl2.ToString();
+  friend std::ostream& operator << (std::ostream& output, const slTwoSubalgebra& theSl2) {
+    output << theSl2.ToString();
     return output;
   }
 /////////////////////////////////////////////
@@ -386,23 +386,23 @@ public:
   int DynkinsEpsilon;
   bool flagDeallocated;
   void init();
-  slTwoSubalgebra()
-  { this->flagDeallocated = false;
+  slTwoSubalgebra() {
+    this->flagDeallocated = false;
     this->init();
   }
-  ~slTwoSubalgebra()
-  { this->flagDeallocated = true;
+  ~slTwoSubalgebra() {
+    this->flagDeallocated = true;
   }
   bool CheckConsistency() const;
 
-  SltwoSubalgebras& GetContainerSl2s()
-  { if (this->container == 0)
+  SltwoSubalgebras& GetContainerSl2s() {
+    if (this->container == 0)
       crash << "This is a programming error: attempting to access the container list of a non-initialized sl(2)-subalgebra. " << crash;
     return *this->container;
   }
   WeylGroupData& GetOwnerWeyl();
-  SemisimpleLieAlgebra& GetOwnerSSAlgebra()
-  { if (this->owner == 0)
+  SemisimpleLieAlgebra& GetOwnerSSAlgebra() {
+    if (this->owner == 0)
       crash << "This is a programming error: attempting to access the ambient Lie algebra of a non-initialized sl(2)-subalgebra. " << crash;
     return *this->owner;
   }
@@ -437,15 +437,15 @@ public:
   void ToHTML(std::string& filePath);
   bool operator==(const slTwoSubalgebra& right) const;
   bool operator>(const slTwoSubalgebra& right) const;
-  unsigned int HashFunction() const
-  { int tempI = MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
+  unsigned int HashFunction() const {
+    int tempI = MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
     int result = 0;
     for (int i = 0; i < tempI; i ++)
       result += this->hCharacteristic[i].NumShort*SomeRandomPrimes[i];
     return result;
   }
-  static inline unsigned int HashFunction(const slTwoSubalgebra& input)
-  { return input.HashFunction();
+  static inline unsigned int HashFunction(const slTwoSubalgebra& input) {
+    return input.HashFunction();
   }
 };
 
@@ -460,32 +460,32 @@ public:
   int IndexZeroWeight;
   rootSubalgebras theRootSAs;
   bool flagDeallocated;
-  ~SltwoSubalgebras()
-  { this->flagDeallocated = true;
+  ~SltwoSubalgebras() {
+    this->flagDeallocated = true;
   }
-  SltwoSubalgebras(): owner(0), flagDeallocated(false)
-  {
+  SltwoSubalgebras(): owner(0), flagDeallocated(false) {
+   
   }
-  SltwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner), flagDeallocated(false)
-  {
+  SltwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner), flagDeallocated(false) {
+   
   }
-  bool operator==(const SltwoSubalgebras& other) const
-  { if (this->owner == 0)
+  bool operator==(const SltwoSubalgebras& other) const {
+    if (this->owner == 0)
       return other.owner == 0;
     if (other.owner == 0)
       return false;
     return this->GetOwner() == other.GetOwner();
   }
   bool CheckConsistency() const;
-  void CheckForCorrectInitializationCrashIfNot() const
-  { if (this->owner == 0)
+  void CheckForCorrectInitializationCrashIfNot() const {
+    if (this->owner == 0)
       crash << "<br>This is a programming error. Object SltwoSubalgebras is not initialized, although it is supposed to be. " << crash;
   }
-  WeylGroupData& GetOwnerWeyl() const
-  { return this->GetOwner().theWeyl;
+  WeylGroupData& GetOwnerWeyl() const {
+    return this->GetOwner().theWeyl;
   }
-  SemisimpleLieAlgebra& GetOwner() const
-  { this->CheckForCorrectInitializationCrashIfNot();
+  SemisimpleLieAlgebra& GetOwner() const {
+    this->CheckForCorrectInitializationCrashIfNot();
     return *this->owner;
   }
   void ComputeModuleDecompositionsOfAmbientLieAlgebra();

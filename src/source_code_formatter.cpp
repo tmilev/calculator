@@ -152,6 +152,15 @@ bool SourceCodeFormatter::ApplyOneRule() {
     secondToLast = secondToLast + " ";
     return this->DecreaseStack(1);
   }
+  if (
+    thirdToLast == ")" &&
+    secondToLast == "\n" &&
+    last == "{"
+  ) {
+    secondToLast = " {\n";
+    last = " ";
+    return true;
+  }
   return false;
 }
 

@@ -753,11 +753,11 @@ void SSLdata::ClearErrorQueue(
     if (outputError != 0)
       *outputError = "SSL_ERROR_SYSCALL";
     extraErrorCode = ERR_get_error();
-    if (extraErrorCode == 0)
-    { if (commentsGeneral != 0)
+    if (extraErrorCode == 0) {
+      if (commentsGeneral != 0)
         *commentsGeneral << "Bad eof. ";
-    } else if (extraErrorCode == - 1)
-    { if (commentsGeneral != 0)
+    } else if (extraErrorCode == - 1) {
+      if (commentsGeneral != 0)
         *commentsGeneral << "I/O error outside of ssl. "
         << theWebServer.ToStringLastErrorDescription();
     }

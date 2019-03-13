@@ -33,8 +33,8 @@ static ProjectInformationInstance vpfHeader1instance(__FILE__, "Header, general 
 
 //used for hashing various things.
 const int SomeRandomPrimesSize = 25;
-const int SomeRandomPrimes[SomeRandomPrimesSize] =
-{ 607,  1013, 2207, 3001, 4057, 5419, 5849, 6221,
+const int SomeRandomPrimes[SomeRandomPrimesSize] ={
+  607,  1013, 2207, 3001, 4057, 5419, 5849, 6221,
   7057, 7411, 7417, 7681, 7883, 8011, 8209, 8369, 8447,
   9539, 10267, 10657, 11489, 12071, 12613, 13933, 14759
 };
@@ -138,15 +138,14 @@ class Expression;
 
 //this class is used as a custom completely portable
 //stack trace log.
-class RegisterFunctionCall
-{ public:
+class RegisterFunctionCall {
+public:
   int threadIndex;
   RegisterFunctionCall(const char* fileName, int line, const std::string& functionName ="");
   ~RegisterFunctionCall();
 };
 
-class ParallelComputing
-{
+class ParallelComputing {
 public:
   static long long GlobalPointerCounter;
   static long long PointerCounterPeakRamUse;
@@ -168,8 +167,7 @@ typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int 
 typedef void (*drawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
 typedef void (*drawClearScreenFunction)();
 
-class MathRoutines
-{
+class MathRoutines {
 public:
   template <class coefficient>
   static bool InvertXModN(const coefficient& X, const coefficient& N, coefficient& output) {
@@ -217,12 +215,10 @@ public:
   }
   template <typename integral>
   static integral lcm(integral a, integral b) {
-    //stOutput << "<br>\nlcm(" << a << ',' << b << ")=" << "\n";
     integral result;
     result = a;
     result /= MathRoutines::gcd(a, b);
     result *= b;
-    //stOutput << result << "\n";
     return result;
   }
   static int TwoToTheNth(int n);
@@ -232,13 +228,17 @@ public:
   static bool isADigit(char theChar, int* whichDigit = 0);
   template <class theType>
   static bool GenerateVectorSpaceClosedWRTLieBracket(List<theType>& inputOutputElts, int upperDimensionBound) {
-    return MathRoutines::GenerateVectorSpaceClosedWRTOperation(inputOutputElts, upperDimensionBound, theType::LieBracket);
+    return MathRoutines::GenerateVectorSpaceClosedWRTOperation(
+      inputOutputElts, upperDimensionBound, theType::LieBracket
+    );
   }
   static Vector<double> GetVectorDouble(Vector<Rational>& input);
   template <class theType>
-  static bool GenerateVectorSpaceClosedWRTOperation
-  (List<theType>& inputOutputElts, int upperDimensionBound, void (*theBinaryOperation)(const theType& left, const theType& right, theType& output));
-//  static void NChooseK(int n, int k, LargeInt& output);//
+  static bool GenerateVectorSpaceClosedWRTOperation(
+    List<theType>& inputOutputElts,
+    int upperDimensionBound,
+    void (*theBinaryOperation)(const theType& left, const theType& right, theType& output)
+  );
   static bool StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd = 0);
   static bool StringEndsWith(const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning= 0);
   static char ConvertHumanReadableHexToCharValue(char input);
@@ -260,8 +260,8 @@ public:
   static inline double Pi() {
     return 3.141592653589793238462643383279;
   }
-// the MS compiler refuses to compile the following (WTF?), hence the above line.
-//  static const double Pi =(double)3.141592653589793238462643383279;
+  // the MS compiler refuses to compile the following (WTF?), hence the above line.
+  //  static const double Pi =(double)3.141592653589793238462643383279;
   static int KToTheNth(int k, int n);
   static void KToTheNth(int k, int n, LargeInt& output);
   inline static int parity(int n);
@@ -271,9 +271,8 @@ public:
   template <class coefficient, typename theIntegerType>
   static void RaiseToPower(coefficient& theElement, const theIntegerType& thePower, const coefficient& theRingUnit);
   template <typename coefficient>
-  inline static coefficient Maximum
-  (const coefficient& a, const coefficient& b) {
-    if (a>b)
+  inline static coefficient Maximum(const coefficient& a, const coefficient& b) {
+    if (a > b)
       return a;
     else
       return b;
@@ -295,7 +294,7 @@ public:
       return a;
   }
   template<class Element>
-  static inline std::string ElementToStringBrackets(const Element& input) {
+  static std::string ElementToStringBrackets(const Element& input) {
     if (!input.NeedsParenthesisForMultiplication())
       return input.ToString();
     std::string result;
@@ -305,7 +304,7 @@ public:
     return result;
   }
   template<class Element>
-  static inline std::string ElementToStringBrackets(const Element& input, FormatExpressions* theFormat) {
+  static std::string ElementToStringBrackets(const Element& input, FormatExpressions* theFormat) {
     if (!input.NeedsParenthesisForMultiplication())
       return input.ToString(theFormat);
     std::string result;
@@ -314,8 +313,6 @@ public:
     result.append(")");
     return result;
   }
-//  template<class
-
   static double ReducePrecision(double x);
   inline static unsigned int HashDouble(const double& input) {
     return (unsigned) (input * 10000);
@@ -355,9 +352,11 @@ public:
       return 0;
   }
   template <class templateList, typename objectType, class otherList>
-  static void QuickSortAscending
-  (templateList& theList, bool theOrder(const objectType& left, const objectType& right) = 0,
-   otherList* carbonCopy = 0) {
+  static void QuickSortAscending(
+    templateList& theList,
+    bool theOrder(const objectType& left, const objectType& right) = 0,
+    otherList* carbonCopy = 0
+  ) {
     if (carbonCopy != 0)
       if (carbonCopy->size != theList.size)
         crash << "Programming error: requesting quicksort with carbon copy on a list with "
@@ -371,9 +370,11 @@ public:
       MathRoutines::QuickSortAscendingOrder(theList, 0, theList.size - 1, theOrder, carbonCopy);
   }
   template <class templateList, typename objectType, class otherList>
-  static void QuickSortDescending
-  (templateList& theList, bool theOrder(const objectType& left, const objectType& right) = 0,
-   otherList* carbonCopy = 0) {
+  static void QuickSortDescending(
+    templateList& theList,
+    bool theOrder(const objectType& left, const objectType& right) = 0,
+    otherList* carbonCopy = 0
+  ) {
     MathRoutines::QuickSortAscending(theList, theOrder, carbonCopy);
     theList.ReverseOrderElements();
     if (carbonCopy != 0)
@@ -381,20 +382,25 @@ public:
   }
 private:
   template <class templateList, typename objectType, class otherList>
-  static void QuickSortAscendingOrder
-  (templateList& theList, int BottomIndex, int TopIndex,
-   bool theOrder(const objectType& left, const objectType& right), otherList* carbonCopy) {
+  static void QuickSortAscendingOrder(
+    templateList& theList,
+    int BottomIndex,
+    int TopIndex,
+    bool theOrder(const objectType& left, const objectType& right),
+    otherList* carbonCopy
+  ) {
     if (TopIndex <= BottomIndex)
       return;
     int HighIndex = TopIndex;
-    for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++)
+    for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
       if (theOrder(theList[LowIndex],(theList[BottomIndex]))) {
         theList.SwapTwoIndices(LowIndex, HighIndex);
         if (carbonCopy != 0)
           carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
-        LowIndex--;
-        HighIndex--;
+        LowIndex --;
+        HighIndex --;
       }
+    }
     if (theOrder(theList[HighIndex], theList[BottomIndex])) {
       if (HighIndex == BottomIndex) {
         crash.theCrashReport << "This is a programming error. The programmer has given me a bad strict order: the order claims that object "
@@ -403,7 +409,7 @@ private:
         << "non-strict order instead of strict one by mistake? ";
         crash << crash;
       }
-      HighIndex--;
+      HighIndex --;
     }
     theList.SwapTwoIndices(BottomIndex, HighIndex);
     if (carbonCopy != 0)
@@ -412,31 +418,37 @@ private:
     MathRoutines::QuickSortAscendingOrder(theList, HighIndex + 1, TopIndex, theOrder, carbonCopy);
   }
   template <class templateList, class otherList>
-  static void QuickSortAscendingNoOrder
-  (templateList& theList, int BottomIndex, int TopIndex, otherList* carbonCopy) {
+  static void QuickSortAscendingNoOrder(
+    templateList& theList,
+    int BottomIndex,
+    int TopIndex,
+    otherList* carbonCopy
+  ) {
     if (TopIndex <= BottomIndex)
       return;
     int HighIndex = TopIndex;
-    for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++)
+    for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
       if (theList[LowIndex] > theList[BottomIndex]) {
         theList.SwapTwoIndices(LowIndex, HighIndex);
         if (carbonCopy != 0)
           carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
-        LowIndex--;
-        HighIndex--;
+        LowIndex --;
+        HighIndex --;
       }
-    if (theList[HighIndex] > theList[BottomIndex])
-      HighIndex--;
+    }
+    if (theList[HighIndex] > theList[BottomIndex]) {
+      HighIndex --;
+    }
     theList.SwapTwoIndices(BottomIndex, HighIndex);
-    if (carbonCopy != 0)
+    if (carbonCopy != 0) {
       carbonCopy->SwapTwoIndices(BottomIndex, HighIndex);
+    }
     MathRoutines::QuickSortAscendingNoOrder(theList, BottomIndex, HighIndex - 1, carbonCopy);
     MathRoutines::QuickSortAscendingNoOrder(theList, HighIndex + 1, TopIndex, carbonCopy);
   }
 };
 
-class XML
-{
+class XML {
 private:
   static std::string GetOpenTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters) {
     std::string result = "<";
@@ -467,7 +479,10 @@ private:
     result.append("> ");
     return result;
   }
-  inline static bool ReadThroughFirstOpenTag(std::istream& streamToMoveIn, const std::string& tagNameNoSpacesNoForbiddenCharacters) {
+  inline static bool ReadThroughFirstOpenTag(
+    std::istream& streamToMoveIn,
+    const std::string& tagNameNoSpacesNoForbiddenCharacters
+  ) {
     int tempInt;
     return XML::ReadThroughFirstOpenTag(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
   }
@@ -475,7 +490,11 @@ private:
     int tempInt;
     return XML::ReadEverythingPassedTagOpenUntilTagClose(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
   }
-  static bool ReadThroughFirstOpenTag(std::istream& streamToMoveIn, int& NumReadWordsExcludingTag, const std::string& tagNameNoSpacesNoForbiddenCharacters) {
+  static bool ReadThroughFirstOpenTag(
+    std::istream& streamToMoveIn,
+    int& NumReadWordsExcludingTag,
+    const std::string& tagNameNoSpacesNoForbiddenCharacters
+  ) {
     std::string tagOpen = XML::GetOpenTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
     std::string tempS;
     NumReadWordsExcludingTag = 0;
@@ -487,7 +506,11 @@ private:
     }
     return false;
   }
-  static bool ReadEverythingPassedTagOpenUntilTagClose(std::istream& streamToMoveIn, int& NumReadWordsExcludingTag, const std::string& tagNameNoSpacesNoForbiddenCharacters) {
+  static bool ReadEverythingPassedTagOpenUntilTagClose(
+    std::istream& streamToMoveIn,
+    int& NumReadWordsExcludingTag,
+    const std::string& tagNameNoSpacesNoForbiddenCharacters
+  ) {
     std::string tagClose = XML::GetCloseTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
     std::string tagOpen = XML::GetOpenTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
     int TagDepth = 1;
@@ -508,9 +531,8 @@ private:
   bool GetStringEnclosedIn(const std::string& theTagName, std::string& outputString);
 };
 
-class DrawElementInputOutput
-{
- public:
+class DrawElementInputOutput {
+public:
   int TopLeftCornerX;
   int TopLeftCornerY;
   int outputWidth;
@@ -518,28 +540,29 @@ class DrawElementInputOutput
 };
 
 template <class Object>
-class MemorySaving
-{
+class MemorySaving {
 private:
   Object* theValue;
   MemorySaving(const MemorySaving<Object>& other) {
-    crash << crash;
+    crash << "This constructor should not be used. " << crash;
   }
 public:
   void operator=(const MemorySaving<Object>& other) {
-    //stOutput << "Calling memorysaving=";
-    if (!other.IsZeroPointer())
+    if (!other.IsZeroPointer()) {
       this->GetElement() = other.GetElementConst();
-    else
+    } else {
       this->FreeMemory();
+    }
   }
   const Object& GetElementConst() const;
   Object& GetElement();
   bool operator==(const MemorySaving<Object>& other) const {
-    if (this->IsZeroPointer() != other.IsZeroPointer())
+    if (this->IsZeroPointer() != other.IsZeroPointer()) {
       return false;
-    if (this->IsZeroPointer())
+    }
+    if (this->IsZeroPointer()) {
       return true;
+    }
     return this->GetElementConst() == other.GetElementConst();
   }
   int HashFunction() const {
@@ -560,8 +583,7 @@ public:
   ~MemorySaving();
 };
 
-class RecursionDepthCounter
-{
+class RecursionDepthCounter {
 public:
   int* theCounter;
   RecursionDepthCounter(int* inputCounter): theCounter(0) {
@@ -578,8 +600,7 @@ public:
 };
 
 template <class Object>
-class PointerObjectDestroyer
-{
+class PointerObjectDestroyer {
   public:
   Object** theObjectPointer;
   PointerObjectDestroyer(Object*& inputObject): theObjectPointer(&inputObject) {
@@ -599,8 +620,7 @@ class PointerObjectDestroyer
 //use the full functionality of List.
 //Then copy the buffer List back to the light version to store to RAM.
 template <class Object>
-class ListLight
-{
+class ListLight {
 private:
   ListLight(const ListLight<Object>& right);
 public:
@@ -663,7 +683,7 @@ void ListLight<Object>::PopIndexSwapWithLastLight(int index) {
 }
 
 template <class Object>
-inline void ListLight<Object>::operator= (const ListLight<Object>& right) {
+inline void ListLight<Object>::operator=(const ListLight<Object>& right) {
   this->CopyFromLight(right);
 }
 
@@ -766,8 +786,8 @@ std::iostream& operator>>(std::iostream& input, List<Object>& theList) {
 //List is not thread safe!!!!
 //Lists are used in the implementation of mutexes!!!
 template <class Object>
-class List
-{ friend std::ostream& operator<< <Object>(std::ostream& output, const List<Object>& theList);
+class List {
+  friend std::ostream& operator<< <Object>(std::ostream& output, const List<Object>& theList);
   friend std::iostream& operator>> <Object>(std::iostream& input, List<Object>& theList);
 public:
   typedef bool (*OrderLeftGreaterThanRight) (const Object& left, const Object& right);
@@ -852,8 +872,8 @@ public:
     this->BSInsert(o); //fixed :) now all this function does is throw away the return value
   }
   void InsertAtIndexShiftElementsUp(const Object& o, int desiredIndex) {
-    // is this not a nice thing to do to c++ objects?  or, not a nice thing
-    // to do to milev objects?  what if the assignment operator as a side effect
+    // is this not a nice thing to do to c++ objects?
+    // What if the assignment operator as a side effect
     // informed some other object of the object's address, then moving an object
     // without using assignment operator would cause trouble
     // this->SetSize(this->size + 1);
@@ -884,7 +904,7 @@ public:
   void RemoveIndexShiftDown(int index) {
     for (int i = index; i < this->size - 1; i ++)
       this->TheObjects[i] = this->TheObjects[i + 1];
-    this->size--;
+    this->size --;
   }
   void RemoveIndicesShiftDown(int firstToRemove, int numberToRemove) {
     for (int i = firstToRemove; i < this->size - numberToRemove; i ++)
@@ -960,9 +980,11 @@ public:
     return this->GetIndex(o) != - 1;
   }
   bool ContainsAtLeastOneCopyOfEach(const List<Object>& other) const {
-    for (int i = 0; i < other.size; i ++)
-      if (!this->Contains(other[i]))
+    for (int i = 0; i < other.size; i ++) {
+      if (!this->Contains(other[i])) {
         return false;
+      }
+    }
     return true;
   }
 
@@ -987,16 +1009,18 @@ public:
     while (true) {
       int halflength = (end - start) / 2;
       if (halflength == 0) {
-        if ((start == this->size )|| (o > this->TheObjects[start]))
+        if ((start == this->size )|| (o > this->TheObjects[start])) {
           return end;
-        else
+        } else {
           return start;
+        }
       }
       int n = start + halflength;
-      if (o > this->TheObjects[n])
+      if (o > this->TheObjects[n]) {
         start = n + 1;
-      else
+      } else {
         end = n;
+      }
     }
   }
 
@@ -1024,14 +1048,18 @@ public:
   // BSGetIndex
   int BSGetIndex(const Object& o) const {
     int n = this->BSIndexFirstNotLessThan(o);
-    if (n != this->size)
-      if (this->TheObjects[n] == o)
+    if (n != this->size) {
+      if (this->TheObjects[n] == o) {
         return n;
+      }
+    }
     for (int i = n - 1; i > - 1; i --) {
-      if (this->TheObjects[i] == o)
+      if (this->TheObjects[i] == o) {
         return i;
-      if (o > this->TheObjects[i])
+      }
+      if (o > this->TheObjects[i]) {
         return - 1;
+      }
     }
     return - 1;
   }
@@ -1137,15 +1165,18 @@ public:
   bool IsEqualTo(const List<Object>& Other) const {
     if (this->size != Other.size)
       return false;
-    for (int i = 0; i < Other.size; i ++)
-      if (!(this->TheObjects[i] == Other.TheObjects[i]))
+    for (int i = 0; i < Other.size; i ++) {
+      if (!(this->TheObjects[i] == Other.TheObjects[i])) {
         return false;
+      }
+    }
     return true;
   }
   Object& operator[](int i) const {
     this->CheckConsistency();
-    if ( (i >= this->size) || i < 0)
+    if ( (i >= this->size) || i < 0) {
       crash << "Programming error: attempting to access the entry of index " << i << " in an array of " << this->size << " elements. " << crash;
+    }
     return this->TheObjects[i];
   }
   inline bool operator!=(const List<Object>& other) const {
@@ -1172,8 +1203,9 @@ public:
   List(const std::string& input) {
     this->initConstructorCallOnly();
     this->SetSize((signed) input.size());
-    for (int i = 0; i < this->size; i ++)
+    for (int i = 0; i < this->size; i ++) {
       this->TheObjects[i] = input[i];
+    }
   }
   List();//<-newly constructed lists start with size = 0; This default is used in critical places in HashedList and other classes, do not change!
   ~List();
@@ -1183,15 +1215,16 @@ public:
       count += input[i].size;
     this->SetSize(0);
     this->Reserve(count);
-    for (int i = 0; i < input.size; i ++)
-      for (int j = 0; j < input[i].size; j ++)
+    for (int i = 0; i < input.size; i ++) {
+      for (int j = 0; j < input[i].size; j ++) {
         this->AddOnTop(input[i][j]);
+      }
+    }
   }
 };
 
 template <class ObjectType1, class ObjectType2, unsigned int hashFunction1(const ObjectType1&),unsigned int hashFunction2(const ObjectType2&)>
-class Pair
-{
+class Pair {
   friend std::ostream& operator << (std::ostream& output, const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& thePair) {
     output << "("  << thePair.Object1 << ", " <<  thePair.Object2 << ")";
     return output;
@@ -1201,10 +1234,12 @@ public:
   ObjectType2 Object2;
   Pair(){}
   Pair(const ObjectType1& o1, const ObjectType2& o2): Object1(o1), Object2(o2) {}
-  static unsigned int HashFunction
-  (const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& input) {
-    return SomeRandomPrimes[0] * hashFunction1(input.Object1) +
-    SomeRandomPrimes[1] * hashFunction2(input.Object2);
+  static unsigned int HashFunction(
+    const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& input
+  ) {
+    return
+      SomeRandomPrimes[0] * hashFunction1(input.Object1) +
+      SomeRandomPrimes[1] * hashFunction2(input.Object2);
   }
   unsigned int HashFunction() const {
     return Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>::HashFunction(*this);
@@ -1232,8 +1267,7 @@ typedef Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignI
 
 
 template <class Object, class TemplateList, unsigned int hashFunction(const Object&) = Object::HashFunction>
-class HashTemplate: public TemplateList
-{
+class HashTemplate: public TemplateList {
 private:
   void AddObjectOnBottom(const Object& o);
   void AddListOnTop(List<Object>& theList);
@@ -1267,14 +1301,16 @@ public:
     //detect a faulty hash).
     //If this program ever gets to do some hard-core number crunching, the 20 entries
     //should be increased.
-    if (this->IsSparse() && this->TheHashedArrays.size > 20)
+    if (this->IsSparse() && this->TheHashedArrays.size > 20) {
       for (int i = 0; i < this->size; i ++) {
         int hashIndex = this->GetHash((*this)[i]);
         this->TheHashedArrays[hashIndex].size = 0;
       }
-    else
-      for (int i = 0; i < (signed) this->TheHashedArrays.size; i ++)
+    } else {
+      for (int i = 0; i < (signed) this->TheHashedArrays.size; i ++) {
         this->TheHashedArrays[i].size = 0;
+      }
+    }
     this->size = 0;
   }
   std::string GetReport() {
@@ -1285,8 +1321,9 @@ public:
     int numNonZeroHashes = 0;
     for (int i = 0; i < this->TheHashedArrays.size; i ++) {
       maxHashSize = MathRoutines::Maximum(maxHashSize, this->TheHashedArrays[i].size);
-      if (this->TheHashedArrays[i].size > 0)
+      if (this->TheHashedArrays[i].size > 0) {
         numNonZeroHashes ++;
+      }
     }
     out << "<br>Max hash array size: " << maxHashSize;
     out << "<br>Average hash array size: " << ((double) this->size) / ((double) numNonZeroHashes);
@@ -1325,12 +1362,15 @@ public:
           crash << "<hr>This is a programming error: the hashed element in position " << theIndex << " is recorded in hash array of index "
           << i << ", however its hash value is instead " << this->GetHash((*this)[theIndex]) << ". The hash size is "
           << this->TheHashedArrays.size << "<br>hashes of objects: ";
-          for (int l = 0; l < this->size; l ++)
+          for (int l = 0; l < this->size; l ++) {
             crash << this->GetHash((*this)[l]) << "= " << this->GetHash((*this)[l]) % this->TheHashedArrays.size << ", ";
+          }
           crash << "<br>hashes recorded: ";
-          for (int l = 0; l < this->TheHashedArrays.size; l ++)
-            for (int k = 0; k < this->TheHashedArrays[l].size; k ++)
+          for (int l = 0; l < this->TheHashedArrays.size; l ++) {
+            for (int k = 0; k < this->TheHashedArrays[l].size; k ++) {
               crash << this->TheHashedArrays[l][k] << ", ";
+            }
+          }
           crash << crash;
         }
       }
@@ -1403,7 +1443,7 @@ public:
     int hashIndexPop = this->GetHash(*oPop);
     this->TheHashedArrays[hashIndexPop].RemoveFirstOccurenceSwapWithLast(index);
     if (index == this->size - 1) {
-      this->size--;
+      this->size --;
       return;
     }
     int tempI = this->size - 1;
@@ -1429,20 +1469,24 @@ public:
     return this->GetIndex(o) != - 1;
   }
   inline bool Contains(const List<Object>& theList) const {
-    for (int i = 0; i < theList.size; i ++)
-      if (this->GetIndex(theList[i]) == - 1)
+    for (int i = 0; i < theList.size; i ++) {
+      if (this->GetIndex(theList[i]) == - 1) {
         return false;
+      }
+    }
     return true;
   }
   int GetIndex(const Object& o) const {
     unsigned int hashIndex = this->GetHash(o);
     for (int i = 0; i < this->TheHashedArrays[hashIndex].size; i ++) {
       int j = this->TheHashedArrays[hashIndex].TheObjects[i];
-      if (j >= this->size)
+      if (j >= this->size) {
         crash << "This is a programming error: corrupt hash table: at hashindex = " << hashIndex << " I get instructed to look up index " << j
         << " but I have only " << this->size << " elements. " << crash;
-      if ((*this)[j] == o)
+      }
+      if ((*this)[j] == o) {
         return j;
+      }
     }
     return - 1;
   }
@@ -1492,11 +1536,12 @@ public:
     MacroIncrementCounter(ParallelComputing::NumHashResizes);
     List<int> emptyList; //<-empty list has size 0
     this->TheHashedArrays.initializeFillInObject(HS, emptyList);
-    if (this->size > 0)
+    if (this->size > 0) {
       for (int i = 0; i < this->size; i ++) {
         int theIndex = this->GetHash((*this)[i]);
         this->TheHashedArrays[theIndex].AddOnTop(i);
       }
+    }
   }
   template<typename otherType = int>
   void QuickSortAscending(typename List<Object>::OrderLeftGreaterThanRight theOrder = 0, List<otherType>* carbonCopy = 0) {
@@ -1535,14 +1580,15 @@ public:
     this->Clear();
     this->SetHashSizE(From.TheHashedArrays.size);
     this->::List<Object>::operator=(From);
-    if (From.IsSparse())
+    if (From.IsSparse()) {
       for (int i = 0; i < this->size; i ++) {
         unsigned int hashIndex = this->GetHash(this->TheObjects[i]);
         this->TheHashedArrays[hashIndex].Reserve(From.TheHashedArrays[hashIndex].size);
         this->TheHashedArrays[hashIndex].AddOnTop(i);
       }
-    else
+    } else {
       this->TheHashedArrays = From.TheHashedArrays;
+    }
   }
   const Object& operator[](int i) const {
     return TemplateList::operator[](i);
@@ -1555,16 +1601,16 @@ public:
       return;
     this->Clear();
     this->SetExpectedSize(other.size);
-    for (int i = 0; i < other.size; i ++)
+    for (int i = 0; i < other.size; i ++) {
       this->AddOnTop(other.TheObjects[i]);
+    }
 //    int commentmewhendone;
 //    this->GrandMasterConsistencyCheck();
   }
 };
 
 template <class Object, unsigned int hashFunction(const Object&) = Object::HashFunction>
-class HashedList: public HashTemplate<Object, List<Object>, hashFunction>
-{
+class HashedList: public HashTemplate<Object, List<Object>, hashFunction> {
 public:
   HashedList(const HashedList& other):HashTemplate<Object, List<Object>, hashFunction>() {
     this->operator=(other);
@@ -1629,18 +1675,15 @@ public:
   inline void SetExpectedSize(int expectedSize) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::SetExpectedSize(expectedSize);
   }
-
 };
 
 //class used to avoid a gcc compiler bug.
 //This class should probably be removed as soon as the bug is resolved.
 template <class Object>
-class HashedListSpecialized: public HashedList<Object, Object::HashFunction>
-{
+class HashedListSpecialized: public HashedList<Object, Object::HashFunction> {
 };
 
-struct stackInfo
-{
+struct stackInfo {
 public:
   std::string fileName;
   int line;
@@ -1652,8 +1695,7 @@ public:
   }
 };
 
-class FileInformation
-{
+class FileInformation {
   friend std::ostream& operator << (std::ostream& output, const FileInformation& theFI) {
     output << theFI.ToString();
     return output;
@@ -1732,15 +1774,18 @@ bool List<Object>::QuickSortAscendingCustomRecursive(int BottomIndex, int TopInd
   if (TopIndex <= BottomIndex)
     return true;
   int HighIndex = TopIndex;
-  for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++)
-    if (theCompareror.CompareLeftGreaterThanRight
-        (this->TheObjects[LowIndex], this->TheObjects[BottomIndex])) {
-      if (carbonCopy != 0)
+  for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
+    if (theCompareror.CompareLeftGreaterThanRight(
+      this->TheObjects[LowIndex], this->TheObjects[BottomIndex]
+    )) {
+      if (carbonCopy != 0) {
         carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
+      }
       this->SwapTwoIndices(LowIndex, HighIndex);
       LowIndex --;
       HighIndex --;
     }
+  }
   if (theCompareror.CompareLeftGreaterThanRight(this->TheObjects[HighIndex], this->TheObjects[BottomIndex]))
     HighIndex --;
   if (carbonCopy != 0)
@@ -1764,9 +1809,11 @@ void List<Object>::AddListOnTop(const List<Object>& theList) {
 
 template<class Object>
 void List<Object>::SwapTwoIndices(int index1, int index2) {
-  if (index1 < 0 || index1 >= this->size || index2 < 0 || index2 >= this->size)
-    crash << "This is a programming error: requested elements with indices " << index1 << " and " << index2 << " in a list that has "
+  if (index1 < 0 || index1 >= this->size || index2 < 0 || index2 >= this->size) {
+    crash << "This is a programming error: requested elements with indices "
+    << index1 << " and " << index2 << " in a list that has "
     << this->size << " elements. This is impossible. " << crash;
+  }
   if (index1 == index2)
     return;
   Object tempO;
@@ -1779,9 +1826,11 @@ template<class Object>
 void List<Object>::CycleIndices(const List<int>& cycle) {
   if (cycle.size < 2)
     return;
-  for (int i = 0; i < cycle.size; i ++)
-    if ((cycle[i] >= this->size) || (cycle[i] < 0))
+  for (int i = 0; i < cycle.size; i ++) {
+    if ((cycle[i] >= this->size) || (cycle[i] < 0)) {
       crash << "Programming error: request to cycle indices " << cycle << " in list of " << this->size << " elements." << crash;
+    }
+  }
   // ironically, it's easier to program the cycles to go backwards XD
   Object tail;
   tail = this->TheObjects[cycle[cycle.size - 1]];
@@ -1910,10 +1959,13 @@ inline Object* List<Object>::LastObject() const {
 
 template <class Object>
 bool List<Object>::HasACommonElementWith(List<Object>& right) {
-  for (int i = 0; i < this->size; i ++)
-    for (int j = 0; j < right.size; j ++)
-      if (this->TheObjects[i] == right.TheObjects[j])
+  for (int i = 0; i < this->size; i ++) {
+    for (int j = 0; j < right.size; j ++) {
+      if (this->TheObjects[i] == right.TheObjects[j]) {
         return true;
+      }
+    }
+  }
   return false;
 }
 
@@ -1933,11 +1985,12 @@ void List<Object>::Reserve(int theSize) {
 
 template <class Object>
 void List<Object>::RemoveFirstOccurenceSwapWithLast(const Object& o) {
-  for (int i = 0; i < this->size; i ++)
+  for (int i = 0; i < this->size; i ++) {
     if (o == this->TheObjects[i]) {
       this->RemoveIndexSwapWithLast(i);
       return;
     }
+  }
 }
 
 template <class Object>
@@ -1963,8 +2016,9 @@ std::string List<Object>::ToStringCommaDelimited() const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
     out << this->TheObjects[i]; // was this calling ToString() for a reason other than not having decided to implement operator<< on all objects?
-    if (i != this->size - 1)
+    if (i != this->size - 1) {
       out << ", ";
+    }
   }
   return out.str();
 }
@@ -1982,8 +2036,9 @@ std::string List<Object>::ToStringCommaDelimited(FormatExpressions* theFormat) c
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
     out << this->TheObjects[i].ToString(theFormat);
-    if (i != this->size - 1)
+    if (i != this->size - 1) {
       out << ", ";
+    }
   }
   return out.str();
 }
@@ -2079,24 +2134,27 @@ inline void StackTraceOut() {
   for (i = 0; i < size; i ++) {
    // stOutput << strings[i] << '\n';
     int symstart = 0;
-    for (int j = 0; strings[i][j + 1] != 0; j ++)
+    for (int j = 0; strings[i][j + 1] != 0; j ++) {
       if ((strings[i][j] == '(') && (strings[i][j + 1] == '_')) {
         symstart = j + 1;
         break;
       }
+    }
     // that code up there never fails
     int symend = symstart;
-    for (int j = symend; strings[i][j + 1] != 0; j ++)
+    for (int j = symend; strings[i][j + 1] != 0; j ++) {
       if (strings[i][j] == ')' && strings[i][j + 1] == ' ') {
         symend = j;
         break;
       }
+    }
     int offsetstart = 0;
-    for (int j = symend; j > 0; j --)
+    for (int j = symend; j > 0; j --) {
       if (strings[i][j] == '+') {
         offsetstart = j;
         break;
       }
+    }
     std::string beforetext = std::string(strings[i], symstart);
     std::string mangled = std::string(strings[i] + symstart, offsetstart - symstart);
     std::string offset = std::string(strings[i] + offsetstart, symend - offsetstart);
@@ -2117,8 +2175,8 @@ void List<Object>::ExpandArrayOnTop(int increase) {
     return;
   MacroIncrementCounter(ParallelComputing::NumListResizesTotal);
   Object* newArray = 0;
-  try
-  { newArray = new Object[this->ActualSize + increase];
+  try {
+    newArray = new Object[this->ActualSize + increase];
   }
   catch(std::bad_alloc& theBA) {
     crash << "Memory allocation failure: failed to allocate " << this->ActualSize + increase << " objects. " << crash;

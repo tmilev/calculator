@@ -808,7 +808,6 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromSc
   if (!output.IsOfType<WeylGroupData>())
     return true;
   WeylGroupData& theGroupData = output.GetValueNonConst<WeylGroupData>();
-//  stOutput << "And the group is: " << theGroup.ToString();
   theGroupData.ComputeInitialIrreps();
   theGroupData.theGroup.ComputeIrreducibleRepresentationsTodorsVersion();
   FormatExpressions tempFormat;
@@ -885,8 +884,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFund(Calculator& theComman
   return CalculatorFunctionsWeylGroup::innerWeylOrbit(theCommands, input, output, true, false);
 }
 
-bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSimple
-(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSimple(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   return CalculatorFunctionsWeylGroup::innerWeylOrbit(theCommands, input, output, false, false);
 }
 
@@ -1185,8 +1185,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
   return out.str();
 }
 
-class KostkaNumber
-{
+class KostkaNumber {
 public:
   List<int> partition;
   List<int> tuple;
@@ -1207,8 +1206,7 @@ public:
   bool Compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments = 0);
 };
 
-class SelectionFixedRankDifferentMaxMultiplicities
-{
+class SelectionFixedRankDifferentMaxMultiplicities {
 public:
   List<int> Multiplicities;
   List<int> MaxMultiplicities;

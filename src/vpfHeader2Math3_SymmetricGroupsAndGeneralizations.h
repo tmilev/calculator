@@ -11,14 +11,13 @@
 
 static ProjectInformationInstance ProjectInfoVpfSymmetricGroups(__FILE__, "Header file, symmetric and related groups. Work in progress.");
 
-
 // dense bases for sparse spaces
 // should this carry around the
 // List<MonomialCollection<templateMonomial, coefficient> >
 // it came from?
 template <class templateVector, class templateMonomial, class coefficient>
-class SparseSubspaceBasis
-{ public:
+class SparseSubspaceBasis {
+public:
   bool flagDeallocated;
   int rank;
   List<templateMonomial> involvedMonomials;
@@ -104,8 +103,8 @@ class PermutationR2;
 class PermutationGroup;
 
 // Partitions are ordered from largest to smallest
-class Partition
-{ public:
+class Partition {
+public:
   int n;
   List<int> p;
 
@@ -150,8 +149,8 @@ class Partition
 };
 
 // Tableau methods assume the partition ordering from largest to smallest
-class Tableau
-{ public:
+class Tableau {
+public:
   List<List<int> > t;
 
   bool IsStandard() const;
@@ -175,8 +174,7 @@ class Tableau
 // with the smallest numbers coming first.  each cycle is expected
 // to be at least a transposition
 // Permutations are also elements of the direct limit of the symmetric groups
-class PermutationR2
-{
+class PermutationR2 {
 public:
   List<List<int> > cycles;
 
@@ -272,8 +270,8 @@ public:
 };
 
 template <typename helt, typename kelt>
-class TrivialOuterAutomorphism
-{ kelt oa(helt& x, kelt& y) {
+class TrivialOuterAutomorphism {
+  kelt oa(helt& x, kelt& y) {
     kelt z = y;
     return z;
   }
@@ -296,8 +294,8 @@ class TrivialOuterAutomorphism
 
 // see operator* for how this is supposed to work
 template <typename helt, typename kelt, typename oa>
-class SemidirectProductElement
-{ public:
+class SemidirectProductElement {
+public:
   helt h;
   kelt k;
 
@@ -345,7 +343,7 @@ class SemidirectProductElement
     return false;
   }
 
-  void MakeID(const SemidirectProductElement<helt,kelt,oa>& prototype) {
+  void MakeID(const SemidirectProductElement<helt, kelt, oa>& prototype) {
     this->k.MakeID(prototype.k);
     this->h.MakeID(prototype.h);
   }
@@ -397,12 +395,12 @@ class SemidirectProductElement
 };
 
 template <typename helt, typename kelt>
-class DirectProductElement: SemidirectProductElement<helt, kelt, TrivialOuterAutomorphism<helt, kelt> >
-{};
+class DirectProductElement: SemidirectProductElement<helt, kelt, TrivialOuterAutomorphism<helt, kelt> >{
+};
 
 template <typename hg, typename kg, typename helt, typename kelt, typename oa>
-class SemidirectProductGroup: public FiniteGroup<SemidirectProductElement<helt, kelt, oa> >
-{ public:
+class SemidirectProductGroup: public FiniteGroup<SemidirectProductElement<helt, kelt, oa> > {
+public:
   hg* H;
   kg* K;
 

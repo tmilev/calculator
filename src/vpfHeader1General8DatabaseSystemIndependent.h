@@ -7,8 +7,7 @@
 static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemIndependentinstance(__FILE__, "Header, system independent database data structures. ");
 #include "vpfJson.h"
 
-class UserCalculatorData
-{
+class UserCalculatorData {
   public:
   double approximateHoursSinceLastTokenWasIssued;
   std::string usernameHashedPlusPassWordHashed;

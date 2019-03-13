@@ -6,8 +6,7 @@
 #include "vpfHeader1General0_General.h"
 static ProjectInformationInstance ProjectInfovpfHeader1General6Maps(__FILE__, "Header, Map implementation. ");
 template <class listType, class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
-class MapTemplatE
-{
+class MapTemplatE {
 public:
   HashedList<key, hashFunction> theKeys;
   listType theValues;

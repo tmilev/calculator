@@ -7,8 +7,7 @@
 #include "vpfHeader2Math02_Vectors.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1_5(__FILE__, "Header, selections, subsets, etc. ");
 
-class Selection
-{
+class Selection {
 public:
   List<int> elements;
   List<bool> selected;
@@ -96,8 +95,7 @@ public:
   }
 };
 
-class SelectionWithMultiplicities
-{
+class SelectionWithMultiplicities {
 public:
   std::string DebugString;
   void ComputeDebugString() {
@@ -122,8 +120,8 @@ public:
   void ComputeElements();
 };
 
-class SelectionWithMaxMultiplicity: public SelectionWithMultiplicities
-{ void init(int NumElements);
+class SelectionWithMaxMultiplicity: public SelectionWithMultiplicities {
+  void init(int NumElements);
   void InitMe(int NumElements);
   void initWithMultiplicities(int NumElements);
 public:
@@ -148,8 +146,7 @@ public:
   }
 };
 
-class SelectionWithDifferentMaxMultiplicities
-{
+class SelectionWithDifferentMaxMultiplicities {
 public:
   List<int> elements;
   List<int> Multiplicities;
@@ -173,8 +170,7 @@ public:
   }
 };
 
-class SelectionOneItem
-{
+class SelectionOneItem {
   public:
   int MaxMultiplicity;
   int SelectedMult;
@@ -201,8 +197,8 @@ class SelectionOneItem
 };
 
 template <class Base>
-class Incrementable
-{ public:
+class Incrementable {
+public:
   List<Base> theElements;
   Base& operator[](int i) {
     return this->theElements[i];
@@ -246,8 +242,7 @@ class Incrementable
   }
 };
 
-class SelectionFixedRank
-{
+class SelectionFixedRank {
 public:
   Selection theSelection;
   int DesiredSubsetSize;
@@ -277,8 +272,7 @@ public:
   }
 };
 
-class SelectionPositiveIntegers
-{
+class SelectionPositiveIntegers {
   public:
   Vector<LargeIntUnsigned> theInts;
   std::string ToString(FormatExpressions* theFormat = 0) {
@@ -334,8 +328,14 @@ bool Vectors<coefficient>::IsRegular(Vector<coefficient>& r, Vector<coefficient>
 }
 
 template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots
-(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot1, Vector<coefficient>& ExtraRoot2, Selection& theSelection, Matrix<coefficient>& bufferMat, Selection& bufferSel) {
+bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots(
+  Vector<coefficient>& output,
+  Vector<coefficient>& ExtraRoot1,
+  Vector<coefficient>& ExtraRoot2,
+  Selection& theSelection,
+  Matrix<coefficient>& bufferMat,
+  Selection& bufferSel
+) {
   Selection& NonPivotPoints = bufferSel;
   if (this->size == 0)
     return false;
@@ -343,8 +343,9 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots
   output.SetSize(theDimension);
   bufferMat.init((int) theSelection.CardinalitySelection + 2, (int) theDimension);
   for (int j = 0; j < theDimension; j ++) {
-    for (int i = 0; i < theSelection.CardinalitySelection; i ++)
+    for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
       bufferMat.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
+    }
     bufferMat.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot1.TheObjects[j]);
     bufferMat.elements[theSelection.CardinalitySelection + 1][j].Assign(ExtraRoot2.TheObjects[j]);
   }
@@ -356,31 +357,41 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots
 }
 
 template <typename coefficient>
-void Vectors<coefficient>::SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output) {
+void Vectors<coefficient>::SelectionToMatrix(
+  Selection& theSelection, int OutputDimension, Matrix<coefficient>& output
+) {
   output.init((int)OutputDimension, (int)theSelection.CardinalitySelection);
   this->SelectionToMatrix(theSelection, OutputDimension, output, 0);
 }
 
 template <typename coefficient>
-void Vectors<coefficient>::SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex) {
+void Vectors<coefficient>::SelectionToMatrixAppend(
+  Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex
+) {
   for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
     Vector<coefficient>& tempRoot = this->TheObjects[theSelection.elements[i]];
-    for (int j = 0; j < OutputDimension; j ++)
+    for (int j = 0; j < OutputDimension; j ++) {
       output.elements[StartRowIndex + i][j] = tempRoot[j];
+    }
   }
 }
 
 template <typename coefficient>
-void Vectors<coefficient>::SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex) {
+void Vectors<coefficient>::SelectionToMatrix(
+  Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex
+) {
   for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
     Vector<Rational>& tempRoot = this->TheObjects[theSelection.elements[i]];
-    for (int j = 0; j < OutputDimension; j ++)
+    for (int j = 0; j < OutputDimension; j ++) {
       output.elements[StartRowIndex + i][j] = tempRoot[j];
+    }
   }
 }
 
 template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalExcludingIndex(Vector<coefficient>& output, int index, Matrix<coefficient>& bufferMatrix) {
+bool Vectors<coefficient>::ComputeNormalExcludingIndex(
+  Vector<coefficient>& output, int index, Matrix<coefficient>& bufferMatrix
+) {
   Selection NonPivotPoints;
   if (this->size == 0)
     return false;
@@ -388,12 +399,14 @@ bool Vectors<coefficient>::ComputeNormalExcludingIndex(Vector<coefficient>& outp
   output.SetSize(theDimension);
   bufferMatrix.init((int) this->size - 1, (int) theDimension);
   int k = - 1;
-  for (int i = 0; i < this->size; i ++)
+  for (int i = 0; i < this->size; i ++) {
     if (i != index) {
       k ++;
-      for (int j = 0; j < theDimension; j ++)
+      for (int j = 0; j < theDimension; j ++) {
         bufferMatrix.elements[k][j] = (*this)[i][j];
+      }
     }
+  }
   bufferMatrix.GaussianEliminationByRows(0, &NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection != 1)
     return false;
@@ -402,13 +415,17 @@ bool Vectors<coefficient>::ComputeNormalExcludingIndex(Vector<coefficient>& outp
 }
 
 template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalFromSelection(Vector<coefficient>& output, Selection& theSelection, Matrix<coefficient>& bufferMatrix, int theDimension) {
+bool Vectors<coefficient>::ComputeNormalFromSelection(
+  Vector<coefficient>& output, Selection& theSelection, Matrix<coefficient>& bufferMatrix, int theDimension
+) {
   Selection NonPivotPoints;
   output.SetSize(theDimension);
   bufferMatrix.init((int)theSelection.CardinalitySelection, (int)theDimension);
-  for (int i = 0; i < theSelection.CardinalitySelection; i ++)
-    for (int j = 0; j < theDimension; j ++)
+  for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
+    for (int j = 0; j < theDimension; j ++) {
       bufferMatrix.elements[i][j] = this->TheObjects[theSelection.elements[i]].TheObjects[j];
+    }
+  }
   bufferMatrix.GaussianEliminationByRows(0, &NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection != 1)
     return false;
@@ -417,8 +434,13 @@ bool Vectors<coefficient>::ComputeNormalFromSelection(Vector<coefficient>& outpu
 }
 
 template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot
-(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot, Selection& theSelection, Matrix<coefficient>& bufferMatrix, Selection& bufferSel) {
+bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot(
+  Vector<coefficient>& output,
+  Vector<coefficient>& ExtraRoot,
+  Selection& theSelection,
+  Matrix<coefficient>& bufferMatrix,
+  Selection& bufferSel
+) {
   if (this->size == 0)
     return false;
   int theDimension = this->TheObjects[0].size;
@@ -440,12 +462,16 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot
 }
 
 template <class coefficient>
-void Vectors<coefficient>::GaussianEliminationForNormalComputation(Matrix<coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension) const {
+void Vectors<coefficient>::GaussianEliminationForNormalComputation(
+  Matrix<coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension
+) const {
   inputMatrix.init((int) this->size, (int) theDimension);
   outputNonPivotPoints.init(theDimension);
-  for (int i = 0; i < this->size; i ++)
-    for (int j = 0; j < theDimension; j ++)
+  for (int i = 0; i < this->size; i ++) {
+    for (int j = 0; j < theDimension; j ++) {
       inputMatrix(i, j) = (*this)[i][j];
+    }
+  }
   inputMatrix.GaussianEliminationByRows(0, &outputNonPivotPoints);
 }
 
@@ -469,12 +495,9 @@ bool Vectors<coefficient>::GetLinearDependence(Matrix<coefficient>& outputTheLin
   Matrix<coefficient> tempMat;
   Selection nonPivotPoints;
   this->GetLinearDependenceRunTheLinearAlgebra(tempMat, nonPivotPoints);
-  //stOutput << tempMat.ToString(true, false);
   if (nonPivotPoints.CardinalitySelection == 0)
     return false;
-//  outputTheLinearCombination.ComputeDebugString();
   tempMat.NonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputTheLinearCombination);
-  //outputTheLinearCombination.ComputeDebugString();
   return true;
 }
 
@@ -485,11 +508,13 @@ void Vector<coefficient>::operator=(const Selection& other) {
     return;
   }
   this->SetSize(other.MaxSize);
-  for (int i = 0; i < other.MaxSize; i ++)
-    if (other.selected[i])
+  for (int i = 0; i < other.MaxSize; i ++) {
+    if (other.selected[i]) {
       this->TheObjects[i] = 1;
-    else
+    } else {
       this->TheObjects[i] = 0;
+    }
+  }
 }
 
 template <class coefficient>

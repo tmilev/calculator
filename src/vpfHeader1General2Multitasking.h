@@ -29,8 +29,7 @@ static ProjectInformationInstance vpfHeader1General2Mutexes(__FILE__, "Header, m
 //controller object (which uses two mutexes to achieve guaranteed wake-up).
 //3) Mutexes cannot be copied: once allocated, they stay in place.
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class MutexRecursiveWrapper
-{
+class MutexRecursiveWrapper {
 private:
   bool flagUnsafeFlagForDebuggingIsLocked;
   int lastLockerThread;
@@ -96,8 +95,7 @@ public:
   PauseThread();
 };
 
-class ControllerStartsRunning: public PauseThread
-{
+class ControllerStartsRunning: public PauseThread {
   public:
     ControllerStartsRunning() {
       this->InitComputation();

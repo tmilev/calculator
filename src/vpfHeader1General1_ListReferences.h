@@ -6,11 +6,10 @@
 #include "vpfHeader1General0_General.h"
 static ProjectInformationInstance ProjectInfoVpfHeader3(__FILE__, "Header, ListReferences and HashedListReferences implementation. ");
 
-
 //class ListReferences is to be used in the same way as class List.
 //The essential difference between ListReferences and List is in the way the objects are
 //stored in memory. A copy of each object of ListReferences
-// is allocated with an individual copy constructor (call of new Object; rather than new Object[size];),
+//is allocated with an individual copy constructor (call of new Object; rather than new Object[size];),
 //and a pointer to the so allocated memory is stored.
 //Motivation for this class: when a pointer/reference to an object is requested,
 //the class returns a pointer to the individually allocated object.
@@ -33,8 +32,7 @@ static ProjectInformationInstance ProjectInfoVpfHeader3(__FILE__, "Header, ListR
 //Whenever in doubt, use ListReferences.
 
 template <class Object>
-class ListReferences
-{
+class ListReferences {
 public:
   bool flagDeallocated;
   List<Object*> theReferences;
@@ -130,22 +128,16 @@ public:
 
 template<class Object>
 void ListReferences<Object>::AllocateElements(int newSize) {
-  //std::cout << "Setting size to " << newSize << ", this->theReferences.size: " << this->theReferences.size << std::endl;
   if (newSize < 0)
     crash << "This is a programming error: requested to set negative size " << newSize << " of List of References. If a "
     << " List is to be set empty, then one should call SetSize(0), rather than provide a negative argument to SetSize." << crash;
-  //std::cout << "newSize: " << newSize << ", this->theReferences.size: " << this->theReferences.size << std::endl;
   if (newSize <= this->theReferences.size) {
-    //std::cout << "Got no f***ing clue what's going on here: " << newSize
-    //<< ", this->theReferences.size: " << this->theReferences.size << std::endl;
     return;
   }
   int oldReferencesSize = this->theReferences.size;
   this->theReferences.SetSize(newSize);
-  //std::cout << "old ref size " << oldReferencesSize << ", newsize: " << newSize << std::endl;
   for (int i = oldReferencesSize; i < newSize; i ++)
     this->theReferences[i] = (new Object);
-  //std::cout << "Elements allocated!" << std::endl;
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter += newSize - oldReferencesSize;
   ParallelComputing::CheckPointerCounters();
@@ -174,15 +166,16 @@ void ListReferences<Object>::AddOnTop(const Object& o) {
 
 template<class Object>
 int ListReferences<Object>::GetIndex(const Object& o) const {
-  for (int i = 0; i < this->size; i ++)
-    if ((*this)[i] == o)
+  for (int i = 0; i < this->size; i ++) {
+    if ((*this)[i] == o) {
       return i;
+    }
+  }
   return - 1;
 }
 
 template <class Object, unsigned int hashFunction(const Object&)=Object::HashFunction>
-class HashedListReferences : public HashTemplate<Object, ListReferences<Object>, hashFunction>
-{
+class HashedListReferences : public HashTemplate<Object, ListReferences<Object>, hashFunction> {
   public:
   //Note The following function specializations are declared entirely in order to
   //facilitate autocomplete in my current IDE. If I find a better autocompletion

@@ -8,8 +8,7 @@
 #include "vpfHeader1General6Maps.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1General7FileOperations_EncodingsHeader1instance(__FILE__, "Header, file routines, encodings and more. ");
 
-struct FileOperations
-{
+struct FileOperations {
 public:
   static HashedList<std::string, MathRoutines::hashString>&
   FilesStartsToWhichWeAppendHostName();
@@ -30,15 +29,21 @@ public:
 
   static std::string ConvertStringToEscapedStringFileNameSafe(const std::string& input);
   static std::string ConvertStringToLatexFileName(const std::string& input);
-  static bool LoadFileToStringUnsecure
-  (const std::string& fileNameUnsecure, std::string& output, std::stringstream* commentsOnFailure);
+  static bool LoadFileToStringUnsecure(
+    const std::string& fileNameUnsecure,
+    std::string& output,
+    std::stringstream* commentsOnFailure
+  );
   static bool LoadFileToStringVirtualCustomizedReadOnly(
-    const std::string& fileName, std::string& output,
+    const std::string& fileName,
+    std::string& output,
     std::stringstream* commentsOnFailure
   );
   static bool LoadFileToStringVirtual(
-    const std::string& fileName, std::string& output,
-    bool accessSensitiveFolders, bool accessULTRASensitiveFolders,
+    const std::string& fileName,
+    std::string& output,
+    bool accessSensitiveFolders,
+    bool accessULTRASensitiveFolders,
     std::stringstream* commentsOnFailure
   );
   static bool IsOKfileNameVirtual(
@@ -60,13 +65,15 @@ public:
   );
   static bool FileExistsVirtualCustomizedReadOnly(const std::string& theFileName, std::stringstream* commentsOnFailure);
   static bool IsFolderUnsecure(const std::string& theFolderName);
-  static bool GetFolderFileNamesUnsecure(const std::string& theFolderName,
+  static bool GetFolderFileNamesUnsecure(
+    const std::string& theFolderName,
     List<std::string>& outputFileNamesNoPath,
     List<std::string>* outputFileTypesWithDot = 0
   );
   static std::string GetCurrentFolder();
   static std::string GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath);
-  static bool GetFolderFileNamesVirtual(const std::string& theFolderName,
+  static bool GetFolderFileNamesVirtual(
+    const std::string& theFolderName,
     List<std::string>& outputFileNamesNoPath,
     List<std::string>* outputFileTypesWithDot = 0,
     bool accessSensitiveFolders = false,
@@ -84,7 +91,6 @@ public:
     std::stringstream* commentsOnFailure
   );
   static std::string GetVirtualNameWithHash(const std::string& inputFileName);
-
   static bool GetPhysicalFileNameFromVirtual(
     const std::string& inputFileName,
     std::string& output,
@@ -92,13 +98,46 @@ public:
     bool accessULTRASensitiveFolders,
     std::stringstream* commentsOnFailure
   );
-  static bool OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
-  static bool OpenFileCreateIfNotPresentVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders = false);
-  static bool OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders = false);
+  static bool OpenFileCreateIfNotPresentUnsecure(
+    std::fstream& theFile,
+    const std::string& theFileName,
+    bool OpenInAppendMode,
+    bool truncate,
+    bool openAsBinary
+  );
+  static bool OpenFileCreateIfNotPresentVirtual(
+    std::fstream& theFile,
+    const std::string& theFileName,
+    bool OpenInAppendMode,
+    bool truncate,
+    bool openAsBinary,
+    bool accessSensitiveFolders = false
+  );
+  static bool OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
+    std::fstream& theFile,
+    const std::string& theFileName,
+    bool OpenInAppendMode,
+    bool truncate,
+    bool openAsBinary,
+    bool accessSensitiveFolders = false
+  );
 
-  static bool OpenFileUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFileUnsecure(
+    std::fstream& theFile,
+    const std::string& theFileName,
+    bool OpenInAppendMode,
+    bool truncate,
+    bool openAsBinary
+  );
   static bool OpenFileUnsecureReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary);
-  static bool OpenFileVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders = false);
+  static bool OpenFileVirtual(
+    std::fstream& theFile,
+    const std::string& theFileName,
+    bool OpenInAppendMode,
+    bool truncate,
+    bool openAsBinary,
+    bool accessSensitiveFolders = false
+  );
   static bool OpenFileVirtualCustomizedReadOnly(
     std::fstream& theFile,
     const std::string& theFileName,
@@ -123,11 +162,15 @@ public:
     bool openAsBinary,
     std::stringstream* commentsOnFailure
   );
-  static bool OpenFileVirtualReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary, bool accessSensitiveFolders = false);
+  static bool OpenFileVirtualReadOnly(
+    std::ifstream& theFile,
+    const std::string& theFileName,
+    bool openAsBinary,
+    bool accessSensitiveFolders = false
+  );
 };
 
-struct StateMaintainerCurrentFolder
-{
+struct StateMaintainerCurrentFolder {
 public:
   std::string currentFolderPhysicalAbsolute;
   StateMaintainerCurrentFolder();

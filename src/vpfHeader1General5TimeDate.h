@@ -5,11 +5,9 @@
 #include "vpfMacros.h"
 #include <ctime>
 
-
 static ProjectInformationInstance ProjectInfoHeaderDateAndtimeWrappers(__FILE__, "Date and time wrapper classes. ");
 
-struct TimeWrapper
-{
+struct TimeWrapper {
 public:
   tm timeGM;
   tm timeLocal;
@@ -25,8 +23,7 @@ public:
   double SubtractAnotherTimeFromMeInSeconds(TimeWrapper& other);
   double SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(TimeWrapper& other);
   bool AssignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure);
-  static std::string ToStringSecondsToDaysHoursSecondsString
-  (double input, bool includeSeconds, bool beShort);
+  static std::string ToStringSecondsToDaysHoursSecondsString(double input, bool includeSeconds, bool beShort);
   TimeWrapper();
 };
 

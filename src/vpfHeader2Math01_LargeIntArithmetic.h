@@ -5,8 +5,8 @@
 
 #include "vpfHeader1General0_General.h"
 static ProjectInformationInstance vpfHeader2Math_01LargeIntegersInstance(__FILE__, "Header, large integer/rational number arithmetic. ");
-class LargeIntUnsigned
-{ void AddNoFitSize(const LargeIntUnsigned& x);
+class LargeIntUnsigned {
+  void AddNoFitSize(const LargeIntUnsigned& x);
 public:
   //The zero element is assumed to have length one array with a zero entry.
   //
@@ -53,9 +53,12 @@ public:
   bool IsPositive() const;
   bool TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& outputBase, int& outputPower) const;
   bool IsPossiblyPrimeMillerRabin(int numTimesToRun = 1, std::stringstream* comments = 0);
-  bool IsPossiblyPrimeMillerRabinOnce
-  (unsigned int theBase, int theExponentOfThePowerTwoFactorOfNminusOne,
-   const LargeIntUnsigned& theOddFactorOfNminusOne, std::stringstream* comments);
+  bool IsPossiblyPrimeMillerRabinOnce(
+    unsigned int theBase,
+    int theExponentOfThePowerTwoFactorOfNminusOne,
+    const LargeIntUnsigned& theOddFactorOfNminusOne,
+    std::stringstream* comments
+  );
   bool IsEqualToOne() const;
   bool IsGEQ(const LargeIntUnsigned& x) const;
   static void GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output);
@@ -76,12 +79,18 @@ public:
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void AssignShiftedUInt(unsigned int x, int shift);
   void AccountFactor(const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<int>& outputMultiplicities) const;
-  bool FactorReturnFalseIfFactorizationIncomplete
-  (List<LargeInt>& outputFactors, List<int>& outputMultiplicites, int dontSearchForDivisorsLargerThan,
-   std::stringstream *commentsOnFailure) const;
-  bool FactorLargeReturnFalseIfFactorizationIncomplete
-  (List<LargeInt>& outputFactors, List<int>& outputMultiplicites, int dontSearchForDivisorsLargerThan,
-   std::stringstream *commentsOnFailure) const;
+  bool FactorReturnFalseIfFactorizationIncomplete(
+    List<LargeInt>& outputFactors,
+    List<int>& outputMultiplicites,
+    int dontSearchForDivisorsLargerThan,
+    std::stringstream *commentsOnFailure
+  ) const;
+  bool FactorLargeReturnFalseIfFactorizationIncomplete(
+    List<LargeInt>& outputFactors,
+    List<int>& outputMultiplicites,
+    int dontSearchForDivisorsLargerThan,
+    std::stringstream *commentsOnFailure
+  ) const;
   void AssignString(const std::string& input);
   bool AssignStringFailureAllowed(const std::string& input, bool ignoreNonDigits);
   int GetUnsignedIntValueTruncated();
@@ -103,10 +112,10 @@ public:
   LargeIntUnsigned operator*(const LargeIntUnsigned& x) const;
   LargeIntUnsigned(unsigned int x);
   LargeIntUnsigned(const LargeIntUnsigned& x);
-//  LargeIntUnsigned(LargeIntUnsigned x);
+  //  LargeIntUnsigned(LargeIntUnsigned x);
   LargeIntUnsigned();
-//  LargeIntUnsigned(unsigned int value){this->operator=(value); }
-//  LargeIntUnsigned(unsigned int x) {this->AssignShiftedUInt(x,0);}
+  //  LargeIntUnsigned(unsigned int value){this->operator=(value); }
+  //  LargeIntUnsigned(unsigned int x) {this->AssignShiftedUInt(x,0);}
   static LargeIntUnsigned GetOne();
   bool operator<(int other) const;
   bool operator>(int other) const;
@@ -118,8 +127,8 @@ public:
   void FitSize();
 };
 
-class LargeInt
-{ friend class Rational;
+class LargeInt {
+  friend class Rational;
   friend LargeInt operator*(const LargeInt& left, const LargeInt& right) {
     LargeInt tempI;
     tempI = left;
@@ -336,15 +345,14 @@ public:
     this->AssignInt(x);
   }
   LargeInt(const LargeIntUnsigned& other):sign(1), value(other) {
-   }
+  }
   LargeInt(): sign(1){}
 };
 
 Rational operator-(const Rational& argument);
 Rational operator/(int left, const Rational& right);
 
-class Rational
-{
+class Rational {
 private:
 //C++ official feature which is so bad I call it a bug:
 //the following doesn't compile, when it should. The standard is BAD.
@@ -357,8 +365,7 @@ private:
 //      << crash;
 //    return left;
 //  }
-  struct LargeRationalExtended
-  {
+  struct LargeRationalExtended {
   public:
     LargeInt num;
     LargeIntUnsigned den;
@@ -431,16 +438,21 @@ private:
       thisNumAbs = - this->NumShort;
     else
       thisNumAbs = this->NumShort;
-    if (////!this->flagMinorRoutinesOnDontUseFullPrecision &&
-        (this->Extended != 0 || thisNumAbs >= LargeIntUnsigned::SquareRootOfCarryOverBound || this->DenShort >= LargeIntUnsigned::SquareRootOfCarryOverBound || OtherNumAbs >= LargeIntUnsigned::SquareRootOfCarryOverBound || OtherDen >= LargeIntUnsigned::SquareRootOfCarryOverBound))
+    if (
+      this->Extended != 0 ||
+      thisNumAbs >= LargeIntUnsigned::SquareRootOfCarryOverBound ||
+      this->DenShort >= LargeIntUnsigned::SquareRootOfCarryOverBound ||
+      OtherNumAbs >= LargeIntUnsigned::SquareRootOfCarryOverBound ||
+      OtherDen >= LargeIntUnsigned::SquareRootOfCarryOverBound
+    ) {
       return false;
+    }
     register int N = this->NumShort * OtherNum;
     register int D = this->DenShort * OtherDen;
     if (N == 0) {
       this->NumShort = 0;
       this->DenShort = 1;
-    }
-    else {
+    } else {
       register int tempGCD;
       if (N > 0)
         tempGCD = Rational::gcd(N, D);
@@ -453,8 +465,9 @@ private:
     return true;
   }
   void AllocateExtended() {
-    if (this->Extended != 0)
+    if (this->Extended != 0) {
       return;
+    }
     this->Extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter ++;
@@ -547,9 +560,12 @@ public:
       result.sign = - 1;
     return result;
   }
-  bool GetPrimeFactorsAbsoluteValue
-  (List<LargeInt>& numeratorPrimeFactors, List<int> &numeratorMultiplicities,
-   List<LargeInt>& denominatorPrimeFactors, List<int> &denominatorMultiplicities);
+  bool GetPrimeFactorsAbsoluteValue(
+    List<LargeInt>& numeratorPrimeFactors,
+    List<int> &numeratorMultiplicities,
+    List<LargeInt>& denominatorPrimeFactors,
+    List<int> &denominatorMultiplicities
+  );
   inline const Rational& GetComplexConjugate() const {
     return *this;
   }
@@ -664,7 +680,7 @@ public:
   void DivideByLargeInteger(LargeInt& x) {
     this->InitExtendedFromShortIfNeeded();
     this->Extended->den.MultiplyBy(x.value);
-    this->Extended->num.sign*=x.sign;
+    this->Extended->num.sign *= x.sign;
     this->Simplify();
   }
   void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x) {
@@ -698,10 +714,11 @@ public:
     return !(other < *this);
   }
   inline bool IsPositiveOrZero() const {
-    if (this->Extended == 0)
+    if (this->Extended == 0) {
       return this->NumShort >= 0;
-    else
+    } else {
       return this->Extended->num.IsPositiveOrZero();
+    }
   }
   bool IsNegative() const {
     if (this->Extended == 0)
@@ -710,35 +727,40 @@ public:
       return this->Extended->num.IsNegative();
   }
   bool IsNonPositive() const {
-    if (this->Extended == 0)
+    if (this->Extended == 0) {
       return this->NumShort <= 0;
-    else
+    } else {
       return this->Extended->num.IsNonPositive();
+    }
   }
   bool IsPositive() const {
-    if (this->Extended == 0)
+    if (this->Extended == 0) {
       return this->NumShort > 0;
-    else
+    } else {
       return this->Extended->num.IsPositive();
+    }
   }
   void Simplify();
   void Invert();
   void Minus() {
-    if (this->Extended == 0)
+    if (this->Extended == 0) {
       this->NumShort *= - 1;
-    else
+    } else {
       this->Extended->num.sign *= - 1;
+    }
   }
   double GetDoubleValue() const;
   int floorIfSmall() {
     if (this->Extended == 0) {
       if (NumShort < 0) {
-        if (DenShort != 1)
+        if (DenShort != 1) {
           return (this->NumShort / this->DenShort) - 1;
-        else
+        } else {
           return this->NumShort / this->DenShort;
-      } else
+        }
+      } else {
         return this->NumShort / this->DenShort;
+      }
     }
     crash << crash;
     return - 1;
@@ -820,10 +842,12 @@ public:
     return MathRoutines::gcd(a, b);
   }
   static int gcdSigned(int a, int b) {
-    if (a < 0)
+    if (a < 0) {
       a *= - 1;
-    if (b < 0)
+    }
+    if (b < 0) {
       b *= - 1;
+    }
     return Rational::gcd(a, b);
   }
   inline bool CheckForElementSanity() {
@@ -857,9 +881,11 @@ public:
   }
   inline void operator+=(const Rational& r) {
     //static std::string tempS1, tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
-    if (r.Extended == 0 && this->Extended == 0)
-      if (this->TryToAddQuickly(r.NumShort, r.DenShort))
+    if (r.Extended == 0 && this->Extended == 0) {
+      if (this->TryToAddQuickly(r.NumShort, r.DenShort)) {
         return;
+      }
+    }
     if (this == &r) {
       this->MultiplyByInt(2);
       return;

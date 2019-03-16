@@ -702,9 +702,9 @@ bool FileOperations::LoadFileToStringUnsecure(
 
 #include "vpfHeader1General2Multitasking.h"
 
-MapLisT<std::string, std::string, MathRoutines::hashString>&
+MapLisT<std::string, std::string, MathRoutines::HashString>&
 FileOperations::FolderVirtualLinksNonSensitive() {
-  static MapLisT<std::string, std::string, MathRoutines::hashString> result;
+  static MapLisT<std::string, std::string, MathRoutines::HashString> result;
   static bool firstRun = false;
   if (!firstRun) {
     firstRun = true;
@@ -719,27 +719,27 @@ FileOperations::FolderVirtualLinksNonSensitive() {
   return result;
 }
 
-HashedList<std::string, MathRoutines::hashString>&
+HashedList<std::string, MathRoutines::HashString>&
 FileOperations::FilesStartsToWhichWeAppendHostName() {
-  static HashedList<std::string, MathRoutines::hashString> result;
+  static HashedList<std::string, MathRoutines::HashString> result;
   return result;
 }
 
-HashedList<std::string, MathRoutines::hashString>&
+HashedList<std::string, MathRoutines::HashString>&
 FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash() {
-  static HashedList<std::string, MathRoutines::hashString> result;
+  static HashedList<std::string, MathRoutines::HashString> result;
   return result;
 }
 
-HashedList<std::string, MathRoutines::hashString>&
+HashedList<std::string, MathRoutines::HashString>&
 FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash() {
-  static HashedList<std::string, MathRoutines::hashString> result;
+  static HashedList<std::string, MathRoutines::HashString> result;
   return result;
 }
 
-MapLisT<std::string, std::string, MathRoutines::hashString>&
+MapLisT<std::string, std::string, MathRoutines::HashString>&
 FileOperations::FolderVirtualLinksSensitive() {
-  static MapLisT<std::string, std::string, MathRoutines::hashString> result;
+  static MapLisT<std::string, std::string, MathRoutines::HashString> result;
   static bool firstRun = false;
   if (!firstRun) {
     firstRun = true;
@@ -753,9 +753,9 @@ FileOperations::FolderVirtualLinksSensitive() {
   return result;
 }
 
-MapLisT<std::string, std::string, MathRoutines::hashString>&
+MapLisT<std::string, std::string, MathRoutines::HashString>&
 FileOperations::FolderVirtualLinksULTRASensitive() {
-  static MapLisT<std::string, std::string, MathRoutines::hashString> result;
+  static MapLisT<std::string, std::string, MathRoutines::HashString> result;
   static bool firstRun = false;
   if (!firstRun) {
     firstRun = true;
@@ -1356,11 +1356,12 @@ char MathRoutines::ConvertHumanReadableHexToCharValue(char input) {
   }
 }
 
-unsigned int MathRoutines::ListIntsHash(const List<int>& input) {
+unsigned int MathRoutines::HashListStrings(const List<std::string>& input) {
   unsigned int result = 0;
   int numCycles = MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
-  for (int i = 0; i < numCycles; i ++)
-    result += SomeRandomPrimes[i] * input[i];
+  for (int i = 0; i < numCycles; i ++) {
+    result += SomeRandomPrimes[i] * MathRoutines::HashString(input[i]);
+  }
   return result;
 }
 
@@ -1380,7 +1381,7 @@ unsigned int MathRoutines::HashListInts(const List<int>& input) {
   return result;
 }
 
-unsigned int MathRoutines::hashString(const std::string& x) {
+unsigned int MathRoutines::HashString(const std::string& x) {
   int numCycles = x.size();
   unsigned int result = 0;
   for (int i = 0; i < numCycles; i ++)
@@ -1423,7 +1424,7 @@ void MathRoutines::StringTrimToLengthWithHash(std::string& inputOutput, int desi
     return;
   std::stringstream inputAbbreviatedStream;
   inputAbbreviatedStream << inputOutput.substr(0, desiredLength50AtLeast - 30)
-  << "_abbrev_hash_" << MathRoutines::hashString(inputOutput);
+  << "_abbrev_hash_" << MathRoutines::HashString(inputOutput);
   inputOutput = inputAbbreviatedStream.str();
 }
 
@@ -1879,8 +1880,8 @@ unsigned int Selection::HashFunction() const {
 //Format expression monomial orders (for the ToString() function follow.
 
 template<>
-List<MonomialWrapper<std::string, MathRoutines::hashString> >::OrderLeftGreaterThanRight
-FormatExpressions::GetMonOrder<MonomialWrapper<std::string, MathRoutines::hashString> >() {
+List<MonomialWrapper<std::string, MathRoutines::HashString> >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<MonomialWrapper<std::string, MathRoutines::HashString> >() {
   return 0;
 }
 

@@ -96,7 +96,7 @@ public:
 
   JSData resultWork;
 
-  MonomialWrapper<std::string, MathRoutines::hashString> userAddress;
+  MonomialWrapper<std::string, MathRoutines::HashString> userAddress;
   std::string hostWithPort;
   std::string hostNoPort;
   std::string cookiesApache;
@@ -127,7 +127,7 @@ public:
   bool flagAllBytesSentUsingFile;
   bool flagEncounteredErrorWhileServingFile;
   List<std::string> theMessageHeaderStrings;
-  MapLisT<std::string, std::string, MathRoutines::hashString> requestHeaders;
+  MapLisT<std::string, std::string, MathRoutines::HashString> requestHeaders;
   int ContentLength;
   int requestTypE;
   int connectedSocketID;
@@ -315,7 +315,7 @@ public:
 #ifdef MACRO_use_open_ssl
   SSLdata theSSLdata;
 #endif
-  MonomialCollection<MonomialWrapper<std::string, MathRoutines::hashString>, LargeInt> currentlyConnectedAddresses;
+  MonomialCollection<MonomialWrapper<std::string, MathRoutines::HashString>, LargeInt> currentlyConnectedAddresses;
   List<std::string> PortsITryHttp;
   List<std::string> PortsITryHttpSSL;
   std::string httpPort;
@@ -324,10 +324,10 @@ public:
   //List<int> theListeningSocketsReadyToAccept;
   ListReferences<WebWorker> theWorkers;
 
-  HashedList<std::string, MathRoutines::hashString> requestsNotNeedingLogin;
+  HashedList<std::string, MathRoutines::HashString> requestsNotNeedingLogin;
   List<std::string> addressStartsNotNeedingLogin;
   List<std::string> addressStartsSentWithCacheMaxAge;
-  HashedList<std::string, MathRoutines::hashString> addressStartsInterpretedAsCalculatorRequest;
+  HashedList<std::string, MathRoutines::HashString> addressStartsInterpretedAsCalculatorRequest;
 
   int activeWorker;
   int timeLastExecutableModification;

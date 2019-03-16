@@ -4,7 +4,7 @@
 
 static ProjectInformationInstance ProjectInfoVpfSourceCodeFormatter(__FILE__, "Source code formatter implementation.");
 
-bool SourceCodeFormatter::initializeFileNames(
+bool CodeFormatter::initializeFileNames(
   const std::string& fileName,
   const std::string& inputOutputFileNameEmptyForAuto,
   std::stringstream* comments
@@ -25,7 +25,7 @@ bool SourceCodeFormatter::initializeFileNames(
   return true;
 }
 
-std::string SourceCodeFormatter::ToStringLinks() {
+std::string CodeFormatter::ToStringLinks() {
   MacroRegisterFunctionWithName("SourceCodeFormatter::ToStringLinks");
   std::stringstream out;
   out
@@ -41,7 +41,7 @@ std::string SourceCodeFormatter::ToStringLinks() {
   return out.str();
 }
 
-bool SourceCodeFormatter::FormatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments) {
+bool CodeFormatter::FormatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::FormatCPPDirectory");
   std::string directory = inputDirectory;
   if (directory == "") {
@@ -66,7 +66,7 @@ bool SourceCodeFormatter::FormatCPPDirectory(const std::string& inputDirectory, 
     }
   }
   for (int i = 0; i < newFileNames.size; i ++) {
-    SourceCodeFormatter theFormatter;
+    CodeFormatter theFormatter;
     if (!theFormatter.FormatCPPSourceCode(oldFileNames[i], newFileNames[i], comments)) {
       return false;
     }
@@ -74,7 +74,7 @@ bool SourceCodeFormatter::FormatCPPDirectory(const std::string& inputDirectory, 
   return true;
 }
 
-bool SourceCodeFormatter::FormatCPPSourceCode(
+bool CodeFormatter::FormatCPPSourceCode(
   const std::string& inputFileName,
   const std::string& inputOutputFileNameEmptyForAuto,
   std::stringstream* comments
@@ -98,7 +98,7 @@ bool SourceCodeFormatter::FormatCPPSourceCode(
   return true;
 }
 
-void SourceCodeFormatter::AddCurrentWord() {
+void CodeFormatter::AddCurrentWord() {
   if (this->currentWord.size() == 0) {
     return;
   }
@@ -106,12 +106,12 @@ void SourceCodeFormatter::AddCurrentWord() {
   this->currentWord = "";
 }
 
-bool SourceCodeFormatter::isSeparatorCharacter(char input) {
+bool CodeFormatter::isSeparatorCharacter(char input) {
   unsigned char inputUnsigned = input;
   return this->separatorCharactersMap[inputUnsigned];
 }
 
-bool SourceCodeFormatter::ProcessSeparatorCharacters() {
+bool CodeFormatter::ProcessSeparatorCharacters() {
   if (this->isSeparatorCharacter(this->currentChar)) {
     this->AddCurrentWord();
     this->currentWord = this->currentChar;
@@ -122,7 +122,7 @@ bool SourceCodeFormatter::ProcessSeparatorCharacters() {
   return true;
 }
 
-bool SourceCodeFormatter::ProcessCharacterInQuotes() {
+bool CodeFormatter::ProcessCharacterInQuotes() {
   if (!this->flagInQuotes) {
     return false;
   }
@@ -142,7 +142,7 @@ bool SourceCodeFormatter::ProcessCharacterInQuotes() {
   return true;
 }
 
-bool SourceCodeFormatter::ExtractCodeElements(std::stringstream* comments) {
+bool CodeFormatter::ExtractCodeElements(std::stringstream* comments) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::ExtractCodeElements");
   (void) comments;
   this->originalElements.SetExpectedSize(this->inputCode.size());
@@ -161,7 +161,7 @@ bool SourceCodeFormatter::ExtractCodeElements(std::stringstream* comments) {
   return true;
 }
 
-bool SourceCodeFormatter::isWhiteSpaceNoNewLine(const std::string& input) {
+bool CodeFormatter::isWhiteSpaceNoNewLine(const std::string& input) {
   for (unsigned i = 0; i < input.size(); i ++) {
     unsigned char currentChar = input[i];
     if (!this->whiteSpaceCharacterNoNewLineMap[currentChar]) {
@@ -171,12 +171,12 @@ bool SourceCodeFormatter::isWhiteSpaceNoNewLine(const std::string& input) {
   return true;
 }
 
-bool SourceCodeFormatter::DecreaseStack(int numberToPop) {
+bool CodeFormatter::DecreaseStack(int numberToPop) {
   this->transformedElements.SetSize(this->transformedElements.size - numberToPop);
   return true;
 }
 
-bool SourceCodeFormatter::ApplyOneRule() {
+bool CodeFormatter::ApplyOneRule() {
   MacroRegisterFunctionWithName("SourceCodeFormatter::ApplyOneRule");
   int lastIndex = this->transformedElements.size - 1;
   std::string& last = this->transformedElements[lastIndex];
@@ -239,7 +239,7 @@ bool SourceCodeFormatter::ApplyOneRule() {
   return false;
 }
 
-bool SourceCodeFormatter::ApplyFormattingRules(std::stringstream* comments) {
+bool CodeFormatter::ApplyFormattingRules(std::stringstream* comments) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::ApplyFormattingRules");
   this->transformedElements.SetExpectedSize(this->originalElements.size);
   this->transformedElements.initializeFillInObject(6, "");
@@ -260,7 +260,7 @@ bool SourceCodeFormatter::ApplyFormattingRules(std::stringstream* comments) {
   return true;
 }
 
-SourceCodeFormatter::SourceCodeFormatter() {
+CodeFormatter::CodeFormatter() {
   this->flagInQuotes = false;
   this->flagPreviousIsStandaloneBackSlash= false;
   this->currentChar = 0;
@@ -276,7 +276,7 @@ SourceCodeFormatter::SourceCodeFormatter() {
   }
 }
 
-bool SourceCodeFormatter::WriteFormatedCode(std::stringstream* comments) {
+bool CodeFormatter::WriteFormatedCode(std::stringstream* comments) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::WriteFormatedCode");
   std::fstream fileOut;
   if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(

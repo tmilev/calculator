@@ -57,7 +57,7 @@ public:
   double number;
   std::string string;
   List<JSData> list;
-  MapReferenceS<std::string, JSData, MathRoutines::hashString> objects;
+  MapReferenceS<std::string, JSData, MathRoutines::HashString> objects;
   void operator=(const bool other);
   void operator=(int other);
   void operator=(const double other);

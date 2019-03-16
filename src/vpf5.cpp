@@ -1714,7 +1714,7 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   return output.AssignValueWithContext(outputEWA, endContext, theCommands);
 }
 
-bool Calculator::ReadTestStrings(HashedList<std::string, MathRoutines::hashString>& outputCommands, List<std::string>& outputResults) {
+bool Calculator::ReadTestStrings(HashedList<std::string, MathRoutines::HashString>& outputCommands, List<std::string>& outputResults) {
   MacroRegisterFunctionWithName("Calculator::ReadTestStrings");
   XML theFileReader;
   if (!theFileReader.ReadFromFile(this->theTestFile))
@@ -1776,7 +1776,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theCommands.theTestFile, "ouput/" + theCommands.theTestFileName, false, false, false))
     crash << "This is a programming error or worse: failed to open an existing file: " << theCommands.theTestFileName << ". Something is very wrong. " << crash;
   List<std::string> knownResults;
-  HashedList<std::string, MathRoutines::hashString> knownCommands;
+  HashedList<std::string, MathRoutines::HashString> knownCommands;
   std::stringstream out;
   if (!theCommands.ReadTestStrings(knownCommands, knownResults)) {
     out << "Error: failed to load test strings: the test file " << theCommands.theTestFileName << " may be corrupt. ";

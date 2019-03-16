@@ -8,7 +8,7 @@
 
 static ProjectInformationInstance ProjectInfoHeaderSourceCodeFormatterHeader(__FILE__, "Source code formatter header.");
 
-class SourceCodeFormatter {
+class CodeFormatter {
 public:
   std::string inputFileName;
   std::string outputFileName;
@@ -23,7 +23,7 @@ public:
   std::string separatorCharacters;
   List<bool> separatorCharactersMap;
   List<bool> whiteSpaceCharacterNoNewLineMap;
-  SourceCodeFormatter();
+  CodeFormatter();
   void AddCurrentWord();
   static bool FormatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments);
   bool FormatCPPSourceCode(

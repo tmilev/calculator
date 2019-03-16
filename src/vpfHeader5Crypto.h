@@ -123,7 +123,7 @@ public:
   std::string signatureBase64;
   std::string headerJSON;
   std::string claimsJSON;
-  MapLisT<std::string, std::string, MathRoutines::hashString> payloadKeys;
+  MapLisT<std::string, std::string, MathRoutines::HashString> payloadKeys;
 
   bool AssignString(const std::string& other, std::stringstream* commentsOnFailure);
   std::string ToString();

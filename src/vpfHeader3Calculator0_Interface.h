@@ -512,7 +512,7 @@ private:
   bool EvaluatesToDoubleUnderSubstitutions
   (const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble = 0) const;
   bool HasBoundVariables() const;
-  bool HasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames = 0) const;
+  bool HasInputBoxVariables(HashedList<std::string, MathRoutines::HashString>* boxNames = 0) const;
   bool IsMeltable(int* numResultingChildren = 0) const;
   bool AreEqualExcludingChildren(const Expression& other) const {
     return this->owner == other.owner &&
@@ -527,7 +527,7 @@ private:
   //The inputExpressions give us the ability to specify substitutions
   bool AssignStringParsed(
     const std::string& theString,
-    MapLisT<std::string, Expression, MathRoutines::hashString>* substitutions,
+    MapLisT<std::string, Expression, MathRoutines::HashString>* substitutions,
     Calculator& owner
   );
   void operator/=(const Expression& other);
@@ -752,7 +752,7 @@ public:
 class Plot {
 public:
   List<PlotObject> thePlots;
-  HashedList<std::string, MathRoutines::hashString> boxesThatUpdateMe;
+  HashedList<std::string, MathRoutines::HashString> boxesThatUpdateMe;
   double theLowerBoundAxes;
   double theUpperBoundAxes;
   double lowBoundY;
@@ -827,8 +827,8 @@ public:
   HashedListReferences<Rational> theRationals;
   HashedListReferences<charSSAlgMod<Rational> > theCharsSSLieAlgFD;
   HashedListReferences<double, MathRoutines::HashDouble> theDoubles;
-  HashedListReferences<std::string, MathRoutines::hashString> theStrings;
-  HashedListReferences<std::string, MathRoutines::hashString> ExpressionNotation;
+  HashedListReferences<std::string, MathRoutines::HashString> theStrings;
+  HashedListReferences<std::string, MathRoutines::HashString> ExpressionNotation;
   HashedListReferences<Expression> ExpressionWithNotation;
   HashedListReferences<LittelmannPath> theLSpaths;
   HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
@@ -843,8 +843,8 @@ public:
   ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
   ListReferences<Plot> thePlots;
   List<bool> userInputBoxSliderDisplayed;
-  MapReferenceS<std::string, InputBox, MathRoutines::hashString> theUserInputTextBoxesWithValues;
-  MapReferenceS<std::string, std::string, MathRoutines::hashString> graphicsScripts;
+  MapReferenceS<std::string, InputBox, MathRoutines::HashString> theUserInputTextBoxesWithValues;
+  MapReferenceS<std::string, std::string, MathRoutines::HashString> graphicsScripts;
 
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
@@ -919,26 +919,26 @@ private:
 public:
   //Operations parametrize the expression elements.
   //Operations are the labels of the atom nodes of the expression tree.
-  HashedList<std::string, MathRoutines::hashString> theAtoms;
-  HashedList<std::string, MathRoutines::hashString> atomsThatAllowCommutingOfCompositesStartingWithThem;
-  HashedList<std::string, MathRoutines::hashString> atomsNotAllowingChainRule;
-  HashedList<std::string, MathRoutines::hashString> builtInTypes;
-  HashedList<std::string, MathRoutines::hashString> arithmeticOperations;
-  HashedList<std::string, MathRoutines::hashString> knownOperationsInterpretedAsFunctionsMultiplicatively;
-  HashedList<std::string, MathRoutines::hashString> knownFunctionsWithComplexRange;
-  HashedList<std::string, MathRoutines::hashString> atomsThatFreezeArguments;
-  HashedList<std::string, MathRoutines::hashString> atomsWhoseExponentsAreInterpretedAsFunctions;
-  HashedList<std::string, MathRoutines::hashString> atomsNotInterpretedAsFunctions;
-  HashedList<std::string, MathRoutines::hashString> atomsThatMustNotBeCached;
-  HashedList<std::string, MathRoutines::hashString> operationsComposite;
-  HashedList<std::string, MathRoutines::hashString> autoCompleteKeyWords;
+  HashedList<std::string, MathRoutines::HashString> theAtoms;
+  HashedList<std::string, MathRoutines::HashString> atomsThatAllowCommutingOfCompositesStartingWithThem;
+  HashedList<std::string, MathRoutines::HashString> atomsNotAllowingChainRule;
+  HashedList<std::string, MathRoutines::HashString> builtInTypes;
+  HashedList<std::string, MathRoutines::HashString> arithmeticOperations;
+  HashedList<std::string, MathRoutines::HashString> knownOperationsInterpretedAsFunctionsMultiplicatively;
+  HashedList<std::string, MathRoutines::HashString> knownFunctionsWithComplexRange;
+  HashedList<std::string, MathRoutines::HashString> atomsThatFreezeArguments;
+  HashedList<std::string, MathRoutines::HashString> atomsWhoseExponentsAreInterpretedAsFunctions;
+  HashedList<std::string, MathRoutines::HashString> atomsNotInterpretedAsFunctions;
+  HashedList<std::string, MathRoutines::HashString> atomsThatMustNotBeCached;
+  HashedList<std::string, MathRoutines::HashString> operationsComposite;
+  HashedList<std::string, MathRoutines::HashString> autoCompleteKeyWords;
 
-  HashedList<std::string, MathRoutines::hashString> stringsThatSplitIfFollowedByDigit;
+  HashedList<std::string, MathRoutines::HashString> stringsThatSplitIfFollowedByDigit;
 
-  MapLisT<std::string, List<std::string>, MathRoutines::hashString> predefinedWordSplits;
+  MapLisT<std::string, List<std::string>, MathRoutines::HashString> predefinedWordSplits;
   List<List<Function> > FunctionHandlers;
   List<List<Function> > operationsCompositeHandlers;
-  HashedList<std::string, MathRoutines::hashString> namedRules;
+  HashedList<std::string, MathRoutines::HashString> namedRules;
   List<List<int> > namedRulesLocations;//for each named rule we store a list of triple of ints.
   //If first int is 0 then the named rule is a function handler.
   //If first int is 1 then the named rule is a composite operation handler.
@@ -992,7 +992,7 @@ public:
 
 
   //control sequences parametrize the syntactical elements
-  HashedList<std::string, MathRoutines::hashString> controlSequences;
+  HashedList<std::string, MathRoutines::HashString> controlSequences;
 
   HashedList<ExpressionTripleCrunchers> theCruncherIds;
   List<Function> theCruncherS;
@@ -1143,10 +1143,10 @@ public:
   Function& GetFunctionHandlerFromNamedRule(const std::string& inputRuleName);
   bool CheckConsistencyAfterInitializationExpressionStackEmpty();
   //to make operations read only, we make operations private and return const pointer to it.
-  const HashedList<std::string, MathRoutines::hashString>& GetOperations() {
+  const HashedList<std::string, MathRoutines::HashString>& GetOperations() {
     return this->theAtoms;
   }
-  const HashedList<std::string, MathRoutines::hashString>& GetBuiltInTypes() {
+  const HashedList<std::string, MathRoutines::HashString>& GetBuiltInTypes() {
     return this->builtInTypes;
   }
   const List<Function>* GetOperationCompositeHandlers(int theOp) {
@@ -1878,7 +1878,7 @@ public:
     return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
   }
   bool ReadTestStrings(
-    HashedList<std::string, MathRoutines::hashString>& outputCommands, List<std::string>& outputResults
+    HashedList<std::string, MathRoutines::HashString>& outputCommands, List<std::string>& outputResults
   );
   bool WriteTestStrings(List<std::string>& inputCommands, List<std::string>& inputResults);
   static bool innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2395,7 +2395,7 @@ public:
   static bool innerLoadKeysFromStatementList(
     Calculator& theCommands,
     const Expression& input,
-    MapLisT<std::string, Expression, MathRoutines::hashString>& output,
+    MapLisT<std::string, Expression, MathRoutines::HashString>& output,
     std::stringstream* commentsOnFailure = 0,
     bool allowFailure = false
   );

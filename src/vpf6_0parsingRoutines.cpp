@@ -1123,7 +1123,7 @@ bool Calculator::ReplaceAXbyEX() {
 
 std::string Calculator::ToStringIsCorrectAsciiCalculatorString(const std::string& input) {
   std::stringstream out;
-  HashedList<char, MathRoutines::hashChar> theBadChars;
+  HashedList<char, MathRoutines::HashChar> theBadChars;
 /*  List<int> charCodes;
   for (unsigned i = 0; i < input.size(); i ++)
     charCodes.AddOnTop(input[i]);

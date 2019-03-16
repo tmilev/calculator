@@ -320,12 +320,12 @@ public:
   static unsigned int HashVectorDoubles(const Vector<double>& input);
   static unsigned int HashListDoubles(const List<double>& input);
   static unsigned int HashListInts(const List<int>& input);
+  static unsigned int HashListStrings(const List<std::string>& input);
   inline static unsigned int IntUnsignIdentity(const int& input) {
     return (unsigned) input;
   }
-  inline static unsigned int ListIntsHash(const List<int>& input);
-  static unsigned int hashString(const std::string& x);
-  static unsigned int hashChar(const char& x) {
+  static unsigned int HashString(const std::string& x);
+  static unsigned int HashChar(const char& x) {
     return x;
   }
   template <class Element>
@@ -1715,7 +1715,7 @@ class FileInformation {
     return this->FileName == other.FileName;
   }
   static unsigned int HashFunction(const FileInformation& input) {
-    return MathRoutines::hashString(input.FileName);
+    return MathRoutines::HashString(input.FileName);
   }
   static void AddProjectInfo(const std::string& fileName, const std::string& fileDescription);
 };

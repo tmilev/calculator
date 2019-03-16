@@ -59,7 +59,7 @@ extern logger logWorker;
 #ifdef MACRO_use_MongoDB
 bool CalculatorHTML::LoadProblemInfoFromJSONAppend
 (const JSData& inputJSON,
- MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
+ MapLisT<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
  std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemInfoFromJSONAppend");
   (void) commentsOnFailure;
@@ -116,10 +116,10 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend
 
 bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend
 (const std::string& inputInfoString,
- MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
+ MapLisT<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
  std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemInfoFromURLedInputAppend");
-  MapLisT<std::string, std::string, MathRoutines::hashString>
+  MapLisT<std::string, std::string, MathRoutines::HashString>
   CGIedProbs, currentKeyValues, sectionDeadlineInfo, problemWeightInfo;
   if (!HtmlRoutines::ChopCGIString(inputInfoString, CGIedProbs, commentsOnFailure))
     return false;
@@ -174,7 +174,7 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend
 }
 
 JSData CalculatorHTML::ToJSONDeadlines
-(MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo) {
+(MapLisT<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo) {
   MacroRegisterFunctionWithName("CalculatorHTML::ToJSONDeadlines");
   JSData output;
   output.type = output.JSObject;
@@ -200,7 +200,7 @@ JSData CalculatorHTML::ToJSONDeadlines
 }
 
 JSData CalculatorHTML::ToJSONProblemWeights
-(MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo) {
+(MapLisT<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo) {
   MacroRegisterFunctionWithName("CalculatorHTML::ToJSONProblemWeights");
   JSData output;
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
@@ -296,13 +296,13 @@ bool CalculatorHTML::MergeOneProblemAdminData
     this->currentUseR.theProblemData.SetKeyValue(inputProblemName, inputProblemInfo);
   ProblemDataAdministrative& currentProblem =
   this->currentUseR.theProblemData.GetValueCreate(inputProblemName).adminData;
-  MapLisT<std::string, std::string, MathRoutines::hashString>&
+  MapLisT<std::string, std::string, MathRoutines::HashString>&
   currentDeadlines = currentProblem.deadlinesPerSection;
-  MapLisT<std::string, std::string, MathRoutines::hashString>&
+  MapLisT<std::string, std::string, MathRoutines::HashString>&
   incomingDeadlines = inputProblemInfo.adminData.deadlinesPerSection;
-  MapLisT<std::string, std::string, MathRoutines::hashString>&
+  MapLisT<std::string, std::string, MathRoutines::HashString>&
   currentWeightS = currentProblem.problemWeightsPerCoursE;
-  MapLisT<std::string, std::string, MathRoutines::hashString>&
+  MapLisT<std::string, std::string, MathRoutines::HashString>&
   incomingWeightS = inputProblemInfo.adminData.problemWeightsPerCoursE;
 
   for (int i = 0; i < incomingDeadlines.size(); i ++) {
@@ -327,7 +327,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabaseJSON
   JSData theProblemJSON;
   if (!theProblemJSON.readstring(incomingProblemInfo, false, &commentsOnFailure))
     return false;
-  MapLisT<std::string, ProblemData, MathRoutines::hashString> incomingProblems;
+  MapLisT<std::string, ProblemData, MathRoutines::HashString> incomingProblems;
   if (!this->LoadProblemInfoFromJSONAppend(theProblemJSON, incomingProblems, commentsOnFailure)) {
     commentsOnFailure << "Failed to parse your request";
     return false;
@@ -1031,7 +1031,7 @@ std::string CalculatorHTML::PrepareUserInputBoxes() {
   if (this->flagIsForReal)
     return "";
   std::stringstream out;
-  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs = theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   std::string inputNonAnswerReader;
   for (int i = 0; i < theArgs.size(); i ++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader))
@@ -2901,7 +2901,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (this->flagIsExamProblem) {
     outHeadPt2 << this->GetJavascriptMathQuillBoxes();
     if (theInterpreter.flagHasGraphics) {
-      MapReferenceS<std::string, std::string, MathRoutines::hashString>& theScripts =
+      MapReferenceS<std::string, std::string, MathRoutines::HashString>& theScripts =
       theInterpreter.theObjectContainer.graphicsScripts;
       for (int i = 0; i < theScripts.size(); i ++)
         this->theScripts.SetKeyValue(theScripts.theKeys[i], theScripts.theValues[i]);
@@ -3309,7 +3309,7 @@ void TopicElement::ComputeID() {
   this->studentScoresSpanId = "topic" + Crypto::computeSha3_256OutputBase64URL(this->id);
 }
 
-void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output) {
+void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::HashString>& output) {
   MacroRegisterFunctionWithName("TopicElement::AddTopic");
   int numToCheck = 4;
   if (output.size() >= numToCheck && inputElt.type != inputElt.tTexHeader && inputElt.type != inputElt.tChapter) {
@@ -3362,7 +3362,7 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicEl
   //  }
 }
 
-void TopicElement::reset(int parentSize, MapLisT<std::string, TopicElement, MathRoutines::hashString>* containerElements) {
+void TopicElement::reset(int parentSize, MapLisT<std::string, TopicElement, MathRoutines::HashString>* containerElements) {
   this->type = this->tUndefined;
   this->indexInParent = - 1;
   this->flagSubproblemHasNoWeight = false;
@@ -3415,7 +3415,7 @@ void TopicElement::reset(int parentSize, MapLisT<std::string, TopicElement, Math
 }
 
 bool TopicElement::LoadTopicBundle
-(const std::string& inputFileName, MapLisT<std::string, List<std::string>, MathRoutines::hashString>& output,
+(const std::string& inputFileName, MapLisT<std::string, List<std::string>, MathRoutines::HashString>& output,
  CalculatorHTML& owner, std::stringstream& errorStream) {
   MacroRegisterFunctionWithName("TopicElement::LoadTopicBundle");
   std::string fileName = MathRoutines::StringTrimWhiteSpace(inputFileName);
@@ -3450,7 +3450,7 @@ bool TopicElement::LoadTopicBundle
 }
 
 void TopicElement::GetTopicList
-(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output,
+(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::HashString>& output,
  CalculatorHTML& owner) {
   MacroRegisterFunctionWithName("TopicElement::GetTopicList");
   std::stringstream tableReader(inputString);
@@ -3458,7 +3458,7 @@ void TopicElement::GetTopicList
   TopicElement currentElt;
   bool found = false;
   currentElt.problemNumber.initializeFillInObject(4, 0);
-  MemorySaving<MapLisT<std::string, List<std::string>, MathRoutines::hashString> > topicBundles;
+  MemorySaving<MapLisT<std::string, List<std::string>, MathRoutines::HashString> > topicBundles;
   List<std::string> lineStack;
   owner.initTopicElementNames();
   int numLinesSoFar = 0;
@@ -4037,7 +4037,7 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
   theGlobalVariables.UserDefaultHasAdminRights() &&
   !theGlobalVariables.UserStudentVieWOn() &&
   theGlobalVariables.userCalculatorRequestType != "templateNoLogin";
-  HashedList<std::string, MathRoutines::hashString> gradableProblems;
+  HashedList<std::string, MathRoutines::HashString> gradableProblems;
   for (int i = 0; i < this->theTopicS.size(); i ++)
     if (this->theTopicS[i].type == TopicElement::tProblem) {
       gradableProblems.AddOnTopNoRepetition(this->theTopicS[i].id);

@@ -1779,13 +1779,13 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
           << input[i][2][j + 1].ToString() << " to a javascript expression. ";
       }
     }
-  MapLisT<std::string, Expression, MathRoutines::hashString> theKeys;
+  MapLisT<std::string, Expression, MathRoutines::HashString> theKeys;
   if (CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theKeys, &theCommands.Comments, true)) {
     if (theKeys.Contains("color1"))
       thePlot.colorUV = theKeys.GetValueCreate("color1").ToString();
     if (theKeys.Contains("color2"))
       thePlot.colorVU = theKeys.GetValueCreate("color2").ToString();
-    MapLisT<std::string, std::string, MathRoutines::hashString> keysToConvert;
+    MapLisT<std::string, std::string, MathRoutines::HashString> keysToConvert;
     keysToConvert.GetValueCreate("numSegments1");
     keysToConvert.GetValueCreate("numSegments2");
     keysToConvert.GetValueCreate("lineWidth");

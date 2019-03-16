@@ -39,7 +39,7 @@ std::string HtmlInterpretation::GetProblemSolution() {
     return out.str();
   }
   std::string lastStudentAnswerID;
-  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs = theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   for (int i = 0; i < theArgs.size(); i ++)
     MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
@@ -226,7 +226,7 @@ std::string HtmlInterpretation::submitAnswersPreview() {
   std::string lastStudentAnswerID;
   std::string lastAnswer;
   std::stringstream out, studentAnswerSream;
-  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs =
+  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs =
   theGlobalVariables.webArguments;
   for (int i = 0; i < theArgs.size(); i ++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID))
@@ -910,7 +910,7 @@ std::string HtmlInterpretation::GetEditPageJSON() {
     output["error"] = errorStream.str();
     //return output.ToString(false);
   }
-  HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
+  HashedList<std::string, MathRoutines::HashString> theAutocompleteKeyWords;
   theFile.initBuiltInSpanClasses();
   std::stringstream comments;
   if (theFile.flagIsExamProblem) {
@@ -966,7 +966,7 @@ std::string HtmlInterpretation::SubmitAnswers(
     crash << "This shouldn't happen: empty file name: theProblem.fileName." << crash;
   std::string studentAnswerNameReader;
   theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size());
-  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs = theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   int answerIdIndex = - 1;
   for (int i = 0; i < theArgs.size(); i ++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader)) {
@@ -1400,7 +1400,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     return out.str();
   }
   std::string lastStudentAnswerID;
-  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs = theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   for (int i = 0; i < theArgs.size(); i ++)
     MathRoutines::StringBeginsWith
     (theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
@@ -1688,7 +1688,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     << "<br>";
   }
   UserCalculator currentUser;
-  HashedList<std::string, MathRoutines::hashString> theSections;
+  HashedList<std::string, MathRoutines::HashString> theSections;
   List<std::string> sectionDescriptions;
   List<List<std::string> > activatedAccountBucketsBySection;
   List<List<std::string> > preFilledLinkBucketsBySection;
@@ -1929,8 +1929,8 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
 }
 
 void UserCalculator::ComputePointsEarned
-(const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
- MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics, std::stringstream& commentsOnFailure) {
+(const HashedList<std::string, MathRoutines::HashString>& gradableProblems,
+ MapLisT<std::string, TopicElement, MathRoutines::HashString>* theTopics, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
   this->pointsEarned = 0;
   this->pointsMax = 0;
@@ -1999,7 +1999,7 @@ public:
   CalculatorHTML theProblem;
   std::string currentSection;
   std::string currentCourse;
-  List<MapLisT<std::string, Rational, MathRoutines::hashString> > scoresBreakdown;
+  List<MapLisT<std::string, Rational, MathRoutines::HashString> > scoresBreakdown;
   List<JSData> userProblemData;
   List<Rational> userScores;
   List<std::string> userInfos;

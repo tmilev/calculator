@@ -10,7 +10,7 @@ ProjectInformationInstance ProjectInfoVpf6_36pp(__FILE__, "Calculator html funct
 bool CalculatorHtmlFunctions::innerUserInputBox
 (Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
-  MapLisT<std::string, Expression, MathRoutines::hashString> theArguments;
+  MapLisT<std::string, Expression, MathRoutines::HashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theArguments, &theCommands.Comments))
     return false;
   if (!theArguments.Contains("name"))
@@ -74,7 +74,7 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols
 bool CalculatorHtmlFunctions::innerSetInputBox
 (Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
-  MapLisT<std::string, Expression, MathRoutines::hashString> theArguments;
+  MapLisT<std::string, Expression, MathRoutines::HashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theArguments, &theCommands.Comments))
     return false;
   if (!theArguments.Contains("name"))
@@ -102,7 +102,7 @@ std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBo
   if (theBox.owner == 0)
     return "non-initialized-expression";
   Calculator& theCommands = *theBox.owner;
-  MapLisT<std::string, Expression, MathRoutines::hashString> theArguments;
+  MapLisT<std::string, Expression, MathRoutines::HashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, theBox, theArguments))
     return "corrupt-box";
   if (!theArguments.Contains("name"))

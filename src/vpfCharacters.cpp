@@ -19,8 +19,9 @@ Vector<Rational> WeylGroupData::ApplyReflectionList(const List<int>& rightReflec
   Vector<Rational> v = vv;
   for (int i = rightReflectionsActFirst.size - 1; i >= 0; i --) {
     Rational x = 0;
-    for (int j = 0; j < this->GetDim(); j ++)
+    for (int j = 0; j < this->GetDim(); j ++) {
       x += v[j] * CartanSymmetric(rightReflectionsActFirst[i], j);
+    }
     //CartanSymmetric(i, j) is slower than CartanSymmetric.elements[i][j] but includes index checking
     //(we want to catch a rogue call to ApplyReflectionList
     v[rightReflectionsActFirst[i]] -= x * 2 / CartanSymmetric(rightReflectionsActFirst[i], rightReflectionsActFirst[i]);
@@ -32,8 +33,9 @@ void WeylGroupData::GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Ration
   MacroRegisterFunctionWithName("WeylGroup::GetSimpleReflectionMatrix");
   int rank = this->GetDim();
   output.MakeIdMatrix(rank);
-  for (int j = 0; j < rank; j ++)
+  for (int j = 0; j < rank; j ++) {
     output(indexSimpleRoot, j) -= (this->CartanSymmetric(indexSimpleRoot, j) / CartanSymmetric(indexSimpleRoot, indexSimpleRoot)) * 2;
+  }
 }
 
 Matrix<Rational> WeylGroupData::SimpleReflectionMatrix(int i) const {
@@ -95,9 +97,11 @@ template <typename coefficient>
 void MatrixInBasis(Matrix<coefficient>& out, const Matrix<coefficient>& in, const List<Vector<coefficient> >& basis, const Matrix<coefficient>& gramMatrix) {
   int d = basis.size;
   out.init(d, d);
-  for (int i = 0; i < d; i ++)
-    for (int j = 0; j < d; j ++)
+  for (int i = 0; i < d; i ++) {
+    for (int j = 0; j < d; j ++) {
       out.elements[i][j] = basis[i].ScalarEuclidean(in * basis[j]);
+    }
+  }
   out.MultiplyOnTheLeft(gramMatrix);
 }
 
@@ -112,8 +116,9 @@ void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, 
   for (int i = 0; i < d; i ++) {
     int jj = 0;
     for (int j = 0; j < d; j ++) {
-      while ((jj < M.NumCols) and (M.elements[i][jj] == 0))
+      while ((jj < M.NumCols) and (M.elements[i][jj] == 0)) {
         jj ++;
+      }
       if (jj == M.NumCols) {
         out.elements[i][j] = 0;
         continue;
@@ -123,17 +128,15 @@ void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, 
         continue;
       }
       out.elements[i][j] = M.elements[i][jj] / BM.elements[j][jj];
-      for (int k = jj; k < M.NumCols; k ++)
+      for (int k = jj; k < M.NumCols; k ++) {
         M.elements[i][k] -= BM.elements[j][k] * out.elements[i][j];
+      }
     }
   }
-//  stOutput << "MatrixInBasisFast" << "\n";
-//  stOutput << in.ToString(&consoleFormat) << '\n' << BM.ToString(&consoleFormat) << '\n' << out.ToString(&consoleFormat) << "\n";
 }
 
 template <typename coefficient>
-class SpaceTree
-{
+class SpaceTree {
 public:
    List<Vector<coefficient> > space;
    List<SpaceTree<coefficient> > subspaces;
@@ -148,10 +151,12 @@ void SpaceTree<coefficient>::PlaceInTree(const List<Vector<coefficient> > &V) {
   List<Vector<coefficient> > U;
   for (int i = 0; i < subspaces.size; i ++) {
     intersection(V, subspaces[i].space, U);
-    if (U.size == 0)
+    if (U.size == 0) {
       continue;
-    if (U.size == subspaces[i].space.size)
+    }
+    if (U.size == subspaces[i].space.size) {
       return;
+    }
     subspaces[i].PlaceInTree(U);
   }
   List<Vector<coefficient> > W, tempVspace;
@@ -185,8 +190,10 @@ void SpaceTree<coefficient>::DisplayTree() const {
 }
 
 template <typename somegroup, typename coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy
-(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other, GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output) const {
+void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy(
+  const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other,
+  GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output
+) const {
   //lazy programmers handling://////
   if (&output == this || &output == &other) {
     GroupRepresentationCarriesAllMatrices<somegroup, coefficient> thisCopy, otherCopy;
@@ -197,7 +204,8 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy
   }
   //////////////////////////////////
   if (this->ownerGroup != other.ownerGroup)
-    crash << "This is a programming error: attempting to multiply representations with different owner groups. " << crash;
+    crash << "This is a programming error: attempting to multiply "
+    << "representations with different owner groups. " << crash;
   output.reset(this->G);
   int Vd = this->basis[0].size;
   int Wd = other.basis[0].size;
@@ -206,9 +214,11 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy
     for (int wi = 0; wi < other.basis.size; wi ++) {
       Vector<coefficient> u;
       u.SetSize(Ud);
-      for (int i = 0; i < Vd; i ++)
-        for (int j = 0; j < Wd; j ++)
+      for (int i = 0; i < Vd; i ++) {
+        for (int j = 0; j < Wd; j ++) {
           u[i * Wd + j] = this->basis[vi][i] * other.basis[wi][j];
+        }
+      }
       output.basis.AddOnTop(u);
     }
   output.generators.SetSize(this->generators.size);
@@ -231,9 +241,11 @@ GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Reduced() const {
   int d = basis.size;
   Matrix<coefficient> GM;
   GM.init(d, d);
-  for (int i = 0; i < d; i ++)
-    for (int j = 0; j < d; j ++)
+  for (int i = 0; i < d; i ++) {
+    for (int j = 0; j < d; j ++) {
       GM.elements[i][j] = this->basis[i].ScalarEuclidean(this->basis[j]);
+    }
+  }
   GM.Invert();
   GroupRepresentationCarriesAllMatrices<somegroup, coefficient> out;
   out.generatorS.SetSize(this->generatorS.size);
@@ -264,12 +276,14 @@ VectorSpace<coefficient> GroupRepresentationCarriesAllMatrices<somegroup, coeffi
   int d = this->generators[0].NumCols;
   for (int geni = 0; geni < this->generators.size; geni ++) {
     List<Vector<coefficient> > ess = eigenspaces(this->generators[geni]);
-    for (int essi = 0; essi < ess.size; essi ++)
+    for (int essi = 0; essi < ess.size; essi ++) {
       for (int esi = 0; esi < ess[essi].size; esi ++) {
         // the best laid coding practices of mice and men oft go astray
-        if (!V.AddVectorToBasis(ess[essi][esi]))
+        if (!V.AddVectorToBasis(ess[essi][esi])) {
           return V;
+        }
       }
+    }
   }
   // This should not be possible
   for (int i = 0; i < d; i ++) {
@@ -299,7 +313,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
   }
   List<Vector<coefficient> > Vb = this->basis;
   List<Vector<coefficient> > tempVectors;
-  for (int i = 0; i < this->ownerGroup->characterTable.size; i ++)
+  for (int i = 0; i < this->ownerGroup->characterTable.size; i ++) {
     if (this->theCharacteR.InnerProduct(this->ownerGroup->characterTable[i]) != 0) {
       stOutput << "contains irrep " << i << "\n";
       this->ClassFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
@@ -307,6 +321,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
       intersection(Vb, splittingMatrixKernel, tempVectors);
       Vb= tempVectors;
     }
+  }
   if ((Vb.size < this->basis.size) && (Vb.size > 0)) {
     stOutput << "calculating remaining subrep... ";
     GroupRepresentationCarriesAllMatrices<somegroup, coefficient> V;
@@ -374,36 +389,6 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
     out.AddOnTop(outeme.Reduced());
   }
   return out;
-}
-
-
-// trial division is pretty good.  the factors of 2 were cleared earlier
-// by masking. dividing by 3 a few times earlier and only checking
-// 1 and 5 mod 6 would require more complicated iteration that +=2
-void factor_integer_l(int n, List<int> f) {
-  for (int i = 2; i < FloatingPoint::sqrt(n); i += 2)
-    if (n % i == 0) {
-      f.AddOnTop(i);
-      factor_integer_l(n / i,f);
-      return;
-    }
-}
-
-/* It might be a good idea to give an error for attempts to factor 0 */
-List<int> factor_integer(int n) {
-  List<int> f;
-  if (n == 0)
-    return f;
-  if (n < 0)
-    n = - n;
-  if (n == 1)
-    return f;
-  while ((n & 1) == 0) {
-    f.AddOnTop(2);
-    n = n >> 1;
-  }
-  factor_integer_l(n, f);
-  return f;
 }
 
 int ithfactor(int i, List<int> f) {
@@ -541,12 +526,16 @@ void getunion(const List<Vector<coefficient> >& V, const List<Vector<coefficient
   int d = V[0].size;
   Matrix<coefficient> M;
   M.init(V.size + W.size,d);
-  for (int i = 0; i < V.size; i ++)
-    for (int j = 0; j < d; j ++)
+  for (int i = 0; i < V.size; i ++) {
+    for (int j = 0; j < d; j ++) {
       M.elements[i][j] = V[i][j];
-  for (int i = 0; i < W.size; i ++)
-    for (int j = 0; j < d; j ++)
+    }
+  }
+  for (int i = 0; i < W.size; i ++) {
+    for (int j = 0; j < d; j ++) {
       M.elements[V.size + i][j] = W[i][j];
+    }
+  }
   M.GaussianEliminationByRows(M);
   output.SetSize(0);
   Vector<coefficient> v;
@@ -561,7 +550,11 @@ void getunion(const List<Vector<coefficient> >& V, const List<Vector<coefficient
 }
 
 template<typename coefficient>
-void intersection(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W, List<Vector<coefficient> >& output) {
+void intersection(
+  const List<Vector<coefficient> > &V,
+  const List<Vector<coefficient> > &W,
+  List<Vector<coefficient> >& output
+) {
   if ((V.size == 0) or (W.size == 0)) {
     output.SetSize(0);
     return;
@@ -570,9 +563,11 @@ void intersection(const List<Vector<coefficient> > &V, const List<Vector<coeffic
 
   Matrix<coefficient> MV;
   MV.init(V.size, d);
-  for (int i = 0; i < V.size; i ++)
-    for (int j = 0; j < d; j ++)
+  for (int i = 0; i < V.size; i ++) {
+    for (int j = 0; j < d; j ++) {
       MV.elements[i][j] = V[i][j];
+    }
+  }
   List<Vector<coefficient> > Vperp;
   MV.GetZeroEigenSpaceModifyMe(Vperp);
 
@@ -597,7 +592,9 @@ void intersection(const List<Vector<coefficient> > &V, const List<Vector<coeffic
 }
 
 template <typename coefficient>
-List<Vector<coefficient> > orthogonal_complement(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &WW) {
+List<Vector<coefficient> > orthogonal_complement(
+  const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &WW
+) {
   List<Vector<coefficient> > W = intersection(V, WW);
   if (W.size == 0)
     return V;
@@ -706,9 +703,9 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkD
 //     continue;
   UDPolynomial<Rational> p;
   p.AssignMinPoly(M);
-  for (int ii = 0; ii < 2 * n + 2; ii ++) // lol, this did end up working though
-  { int i = ((ii + 1) / 2) * (2 * (ii % 2)- 1); // 0,1,- 1,2,-2,3,-3,...
-//    stOutput << "checking " << i << " found " << found << "\n";
+  for (int ii = 0; ii < 2 * n + 2; ii ++) {
+    // lol, this did end up working though
+    int i = ((ii + 1) / 2) * (2 * (ii % 2)- 1); // 0,1,- 1,2,-2,3,-3,...
     Rational r = i;
     if (p(r) == 0) {
       Matrix<Rational> M2 = M;
@@ -725,23 +722,27 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkD
 
 template <typename coefficient>
 Vector<coefficient> PutInBasis(const Vector<coefficient>& v, const List<Vector<coefficient> >& B) {
-   Vector<coefficient> w;
-   w.MakeZero(B.size);
-   Matrix<coefficient> M;
-   M.MakeZeroMatrix(B.size);
-   for (int i = 0; i < B.size; i ++) {
-      for (int j = 0; j < v.size; j ++)
-         w[i] += B[i][j] * v[j];
-      for (int j = 0; j < B.size; j ++)
-         for (int k = 0; k < v.size; k ++)
-            M.elements[i][j] += B[i][k] * B[j][k];
-   }
-   M.Invert();
-   Vector<coefficient> v2 = M * w;
-   Vector<coefficient> v3;
-   v3.MakeZero(v.size);
-   for (int i = 0; i < B.size; i ++)
+  Vector<coefficient> w;
+  w.MakeZero(B.size);
+  Matrix<coefficient> M;
+  M.MakeZeroMatrix(B.size);
+  for (int i = 0; i < B.size; i ++) {
+    for (int j = 0; j < v.size; j ++) {
+      w[i] += B[i][j] * v[j];
+    }
+    for (int j = 0; j < B.size; j ++) {
+      for (int k = 0; k < v.size; k ++) {
+        M.elements[i][j] += B[i][k] * B[j][k];
+      }
+    }
+  }
+  M.Invert();
+  Vector<coefficient> v2 = M * w;
+  Vector<coefficient> v3;
+  v3.MakeZero(v.size);
+  for (int i = 0; i < B.size; i ++) {
       v3 += B[i] * v2[i];
+  }
    if (!(v3 == v)) {
       Vector<coefficient> out;
       return out;

@@ -932,7 +932,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchTable
   findQuery.type = findQuery.JSObject;
   List<JSData> rowsJSON;
   DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(tableName, findQuery, rowsJSON, 200, totalItems, commentsOnFailure);
-  HashedList<std::string, MathRoutines::hashString> theLabels;
+  HashedList<std::string, MathRoutines::HashString> theLabels;
   for (int i = 0; i < rowsJSON.size; i ++)
     for (int j = 0; j < rowsJSON[i].objects.size(); j ++)
       theLabels.AddOnTopNoRepetition(rowsJSON[i].objects.theKeys[j]);

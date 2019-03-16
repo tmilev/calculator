@@ -1678,9 +1678,9 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& 
     theWeyl.GetSignSignatureParabolics(parabolicSubgroupS);
     theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups);
     theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups);
-    List<Pair<std::string, List<Rational>, MathRoutines::hashString> > tauSigPairs;
+    List<Pair<std::string, List<Rational>, MathRoutines::HashString> > tauSigPairs;
     finalSubGroups.Reserve(allRootSubgroups.size);
-    Pair<std::string, List<Rational>, MathRoutines::hashString> currentTauSig;
+    Pair<std::string, List<Rational>, MathRoutines::HashString> currentTauSig;
     for (int j = 0; j < 3; j ++) {
       List<SubgroupDataRootReflections>* currentSGs = 0;
       if (j == 0)

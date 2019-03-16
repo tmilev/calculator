@@ -10,7 +10,7 @@
 ProjectInformationInstance projectInfoInstanceHtmlSnippets
 (__FILE__, "Html Snippets.");
 
-MapLisT<std::string, std::string, MathRoutines::hashString> HtmlRoutines::preLoadedFiles;
+MapLisT<std::string, std::string, MathRoutines::HashString> HtmlRoutines::preLoadedFiles;
 
 std::string HtmlRoutines::GetJavascriptVariable(const std::string& theVar) {
   std::stringstream sanitizer;
@@ -248,7 +248,7 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
   MacroRegisterFunctionWithName("HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml");
   if (recursionDepth > 50)
     return input;
-  MapLisT<std::string, std::string, MathRoutines::hashString> currentMap;
+  MapLisT<std::string, std::string, MathRoutines::HashString> currentMap;
   std::stringstream notUsed;
   if (!HtmlRoutines::ChopCGIString(input, currentMap, notUsed)) {
     return input;
@@ -319,7 +319,7 @@ const std::string& HtmlRoutines::GetJavascriptMathjax() {
 
 bool HtmlRoutines::AccountOneInputCGIString(
   const std::string& fieldName, const std::string& fieldValue,
-  MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
+  MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::AccountOneInputCGIString");
@@ -338,7 +338,7 @@ bool HtmlRoutines::AccountOneInputCGIString(
 }
 
 bool HtmlRoutines::ChopCGIString(
-  const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
+  const std::string& input, MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIString");
@@ -348,7 +348,7 @@ bool HtmlRoutines::ChopCGIString(
 }
 
 bool HtmlRoutines::ChopCGIStringAppend(
-  const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
+  const std::string& input, MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIStringAppend");

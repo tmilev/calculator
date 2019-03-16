@@ -1195,7 +1195,7 @@ std::string WebWorker::GetDatabaseDeleteOneItem() {
 
 bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments) {
   MacroRegisterFunctionWithName("WebWorker::ExtractArgumentsFromCookies");
-  MapLisT<std::string, std::string, MathRoutines::hashString> newlyFoundArgs;
+  MapLisT<std::string, std::string, MathRoutines::HashString> newlyFoundArgs;
   bool result = true;
   for (int i = 0; i < this->cookies.size; i ++) {
     if (!HtmlRoutines::ChopCGIStringAppend(this->cookies[i], newlyFoundArgs, argumentProcessingFailureComments)) {
@@ -1245,7 +1245,7 @@ bool WebWorker::ExtractArgumentsFromMessage(
     argumentProcessingFailureComments << "Error: input string encoded too many times";
     return false;
   }
-  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs =
+  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs =
   theGlobalVariables.webArguments;
   if (!HtmlRoutines::ChopCGIStringAppend(input, theArgs, argumentProcessingFailureComments))
     return false;
@@ -1270,7 +1270,7 @@ bool WebWorker::ExtractArgumentsFromMessage(
 bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments, std::stringstream* comments) {
   MacroRegisterFunctionWithName("WebWorker::Login");
   theGlobalVariables.flagLoggedIn = false;
-  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs = theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theUser.username = HtmlRoutines::ConvertURLStringToNormal(
     theGlobalVariables.GetWebInput("username"), true
@@ -4418,7 +4418,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
   if (theGlobalVariables.flagServerDetailedLog)
     logProcessStats << logger::red << "Detail: "
     << " too many connections handler start. " << logger::endL;
-  MonomialWrapper<std::string, MathRoutines::hashString>
+  MonomialWrapper<std::string, MathRoutines::HashString>
   incomingAddress(incomingUserAddress);
   bool purgeIncomingAddress =
   (this->currentlyConnectedAddresses.GetMonomialCoefficient(incomingAddress) >
@@ -5428,9 +5428,9 @@ void WebServer::InitializeGlobalVariables() {
   //asking for logouts on your account once every second: this would be fatal as proper logout resets
   //the authentication tokens.
 
-  MapLisT<std::string, std::string, MathRoutines::hashString>&
+  MapLisT<std::string, std::string, MathRoutines::HashString>&
   folderSubstitutionsNonSensitive = FileOperations::FolderVirtualLinksNonSensitive();
-  MapLisT<std::string, std::string, MathRoutines::hashString>&
+  MapLisT<std::string, std::string, MathRoutines::HashString>&
   folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
   FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
   folderSubstitutionsNonSensitive.Clear();

@@ -132,10 +132,10 @@ public:
   ListReferences<ListReferences<std::string> > ProgressReportStringS;
   List<std::string> programArguments;
 
-  MapLisT<std::string, std::string, MathRoutines::hashString> webArguments;
-  MapLisT<std::string, std::string, MathRoutines::hashString> CookiesToSetUsingHeaders;
+  MapLisT<std::string, std::string, MathRoutines::HashString> webArguments;
+  MapLisT<std::string, std::string, MathRoutines::HashString> CookiesToSetUsingHeaders;
   UserCalculatorData userDefault;
-  MapLisT<std::string, int, MathRoutines::hashString> problemExpectedNumberOfAnswers;
+  MapLisT<std::string, int, MathRoutines::HashString> problemExpectedNumberOfAnswers;
 
   std::string userCalculatorRequestType;
 

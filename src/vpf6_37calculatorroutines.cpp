@@ -76,7 +76,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
   << "<th>Accepting built in answer?</th>"
   << "</tr>";
 
-  MapLisT<std::string, std::string, MathRoutines::hashString>&
+  MapLisT<std::string, std::string, MathRoutines::HashString>&
   globalKeys = theGlobalVariables.webArguments;
   for (int i = 0; i < theFileNames.size; i ++) {
     if (numInterpretations >= numDesiredTests)
@@ -1674,7 +1674,7 @@ bool CalculatorFunctionsGeneral::innerNewtonsMethod(Calculator& theCommands, con
     << " iterations. However, the number of iterations is required to be a number between 1 and 50. ";
     return output.MakeError(errorStream.str(), theCommands);
   }
-  MapLisT<std::string, Expression, MathRoutines::hashString> theSub;
+  MapLisT<std::string, Expression, MathRoutines::HashString> theSub;
   theSub.SetKeyValue("x", theVars[0]);
   theSub.SetKeyValue("f", theFun);
   theSub.SetKeyValue("a", theCommands.GetNewAtom());

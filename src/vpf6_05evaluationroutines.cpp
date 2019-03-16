@@ -314,16 +314,16 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
     for (int i = 0; i < this->startingRuleStackSize; i ++) {
       if (theRuleStack[i].StartsWith(this->owner->opRulesOn())) {
         for (int j = 1; j < theRuleStack[i].size(); j ++) {
-          Function& currentFun =
-          this->owner->GetFunctionHandlerFromNamedRule
-          (theRuleStack[i][j].GetValue<std::string>());
+          Function& currentFun = this->owner->GetFunctionHandlerFromNamedRule(
+            theRuleStack[i][j].GetValue<std::string>()
+          );
           currentFun.flagDisabledByUser = false;
         }
       } else if (theRuleStack[i].StartsWith(this->owner->opRulesOff())) {
         for (int j = 1; j < theRuleStack[i].size(); j ++) {
-          Function& currentFun =
-          this->owner->GetFunctionHandlerFromNamedRule
-          (theRuleStack[i][j].GetValue<std::string>());
+          Function& currentFun = this->owner->GetFunctionHandlerFromNamedRule(
+            theRuleStack[i][j].GetValue<std::string>()
+          );
           currentFun.flagDisabledByUser = true;
         }
       }
@@ -502,9 +502,11 @@ bool Calculator::EvaluateExpression(
     counterNumTransformations ++;
     if (doExpressionHistory)
       theCommands.ExpressionHistoryAdd(output, - 1);
-    if (output.IsAtom(&inputIfAtom))
-      if (theCommands.atomsThatMustNotBeCached.Contains(inputIfAtom))
+    if (output.IsAtom(&inputIfAtom)) {
+      if (theCommands.atomsThatMustNotBeCached.Contains(inputIfAtom)) {
         outputIsNonCacheable = true;
+      }
+    }
     //The following code enclosed in the if clause is too
     //complicated/obfuscated for my taste
     //and perhaps needs a rewrite. However, at the moment of writing, I see
@@ -616,7 +618,6 @@ bool Calculator::EvaluateExpression(
         theRuleStackMaintainer.GetCurrentHistory().children.SetSize(historyStackSizeAtStart);
       }
     }
-    //stOutput << "Debug: got here pt3.";
     /////-------Children evaluation end-------
     if (theCommands.flagAbortComputationASAP)
       break;
@@ -624,11 +625,6 @@ bool Calculator::EvaluateExpression(
     if (theCommands.outerStandardFunction(theCommands, output, transformationE, opIndexParentIfAvailable)) {
       ReductionOcurred = true;
       if (theCommands.flagLogEvaluatioN) {
-        /* *this << "<br>";
-        if (theCommands.flagLogRules) {
-          *this << "<br>Rule stack size: " << theCommands.RuleStack.size << ", context identifier: "
-          << theCommands.RuleContextIdentifier << "<br>Rules: " << theCommands.RuleStack.ToString() << "<br>";
-        }*/
         theCommands << "<br>Rule context identifier: " << theCommands.RuleStackCacheIndex
         << "<br>" << HtmlRoutines::GetMathMouseHover(output.ToString()) << " -> "
         << HtmlRoutines::GetMathMouseHover(transformationE.ToString());
@@ -665,10 +661,6 @@ bool Calculator::EvaluateExpression(
       theCommands << "&nbsp&nbsp&nbsp&nbsp";
     theCommands << "to get: " << output.Lispify();
   }
-  //if (logEvaluationStepsRequested && counterNumTransformations>1)
-  //{ logStream << "<br>";
-  //  *theCommands.logEvaluationSteps.LastObject()= logStream.str() +*theCommands.logEvaluationSteps.LastObject();
-  //}
   return true;
 }
 
@@ -708,9 +700,10 @@ Expression* Calculator::PatternMatch(
     (*theLog) << "<hr>Specialized condition: " << tempExp.ToString() << "; evaluating...";
   Expression conditionResult;
   this->EvaluateExpression(*this, tempExp, conditionResult);
-  if (theLog != 0)
+  if (theLog != 0) {
     (*theLog) << "<hr>The evaluated specialized condition: " << conditionResult.ToString()
     << "; evaluating...";
+  }
   if (conditionResult.IsEqualToOne())
     return &theExpression;
   return 0;

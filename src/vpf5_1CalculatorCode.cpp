@@ -1649,7 +1649,7 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml) {
   return resultStream.str();
 }
 
-bool Expression::AssignStringParsed(const std::string& theString, MapLisT<std::string, Expression, MathRoutines::hashString>* substitutions, Calculator& owner) {
+bool Expression::AssignStringParsed(const std::string& theString, MapLisT<std::string, Expression, MathRoutines::HashString>* substitutions, Calculator& owner) {
   MacroRegisterFunctionWithName("Expression::AssignStringParsed");
   Expression commands, result;
   List<SyntacticElement> outputSyntacticSoup, outputSyntacticStack;
@@ -2232,8 +2232,8 @@ public:
   List<Expression> output;
   List<List<std::string> > rulesNames;
   List<List<std::string> > rulesDisplayNames;
-  HashedList<std::string, MathRoutines::hashString> rulesToBeIgnored;
-  MapLisT<std::string, std::string, MathRoutines::hashString> rulesDisplayNamesMap;
+  HashedList<std::string, MathRoutines::HashString> rulesToBeIgnored;
+  MapLisT<std::string, std::string, MathRoutines::HashString> rulesDisplayNamesMap;
   Calculator* owner;
   bool initialized;
   bool IncrementReturnFalseIfPastLast();

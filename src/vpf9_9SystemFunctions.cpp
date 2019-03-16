@@ -173,8 +173,6 @@ void TimerThreadData::reset() {
 void TimerThreadData::Run() {
   MacroRegisterFunctionWithName("TimerThreadData::Run");
   this->reset();
-//  ProgressReport theReport;
-//  std::cout << "Got thus far RunTimerVoidPtr - 2" << std::endl;
   for (;;) {
     this->counter ++;
     this->HandleComputationTimer();
@@ -192,7 +190,6 @@ void TimerThreadData::Run() {
 void RunTimerThread(int threadIndex) {
   theGlobalVariables.theThreadData[threadIndex].theId = std::this_thread::get_id();
   MacroRegisterFunctionWithName("RunTimerThread");
-//  std::cout << "Got thus far RunTimerVoidPtr" << std::endl;
   TimerThreadData theThread;
   theThread.Run();
 }
@@ -215,9 +212,11 @@ std::string CallSystemWrapperReturnStandardOutput(const std::string& inputComman
   const int bufferSize = 20000;
   char buffer[bufferSize];
   std::string result = "";
-  while (!feof(pipe.get()))
-    if (fgets(buffer, bufferSize, pipe.get()) != 0)
+  while (!feof(pipe.get())) {
+    if (fgets(buffer, bufferSize, pipe.get()) != 0) {
       result += buffer;
+    }
+  }
   return result;
 }
 

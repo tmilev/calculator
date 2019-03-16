@@ -35,7 +35,7 @@ public:
   std::string syntacticRole;
   std::string content;
   std::string tag;
-  MapLisT<std::string, std::string, MathRoutines::hashString> properties;
+  MapLisT<std::string, std::string, MathRoutines::HashString> properties;
   List<std::string> defaultKeysIfMissing;
   List<std::string> defaultValuesIfMissing;
   List<std::string> tagKeysWithoutValue;
@@ -107,7 +107,7 @@ struct Answer
   std::string commandsSolutionOnly;
   std::string commandsNoEnclosureAnswerOnGiveUpOnly;
   List<SyntacticElementHTML> solutionElements;
-  MapLisT<std::string, std::string, MathRoutines::hashString> properties;
+  MapLisT<std::string, std::string, MathRoutines::HashString> properties;
   std::string answerId;
   std::string varAnswerId;
   std::string idVerificationSpan;
@@ -149,8 +149,8 @@ struct Answer
 struct ProblemDataAdministrative
 {
 public:
-  MapLisT<std::string, std::string, MathRoutines::hashString> problemWeightsPerCoursE;
-  MapLisT<std::string, std::string, MathRoutines::hashString> deadlinesPerSection;
+  MapLisT<std::string, std::string, MathRoutines::HashString> problemWeightsPerCoursE;
+  MapLisT<std::string, std::string, MathRoutines::HashString> deadlinesPerSection;
   bool GetWeightFromCoursE(const std::string& theCourseNonURLed, Rational& output, std::string* outputAsGivenByInstructor = 0);
   std::string ToString() const;
 };
@@ -176,7 +176,7 @@ public:
   std::string commandsGenerateProblem;
   std::string commandsGenerateProblemNoEnclosures;
   std::string commandsGenerateProblemLink;
-  MapLisT<std::string, Answer, MathRoutines::hashString> theAnswers;
+  MapLisT<std::string, Answer, MathRoutines::HashString> theAnswers;
   List<std::string> inputNonAnswerIds;
   int getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure);
   void AddEmptyAnswerIdOnTop(const std::string& inputAnswerId);
@@ -222,14 +222,14 @@ class UserCalculator : public UserCalculatorData
 // Those are internally (and automatically) converted to safe entries (stored in the private variables below), and only then stored in
 // the database.
 public:
-  MapLisT<std::string, ProblemData, MathRoutines::hashString> theProblemData;
+  MapLisT<std::string, ProblemData, MathRoutines::HashString> theProblemData;
   TimeWrapper authenticationCreationTime;
   Rational pointsEarned;
   Rational pointsMax;
   void ComputeExpectedNumberOfAnswersPerProblem();
   void ComputePointsEarned
-  (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
-   MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics, std::stringstream& commentsOnFailure);
+  (const HashedList<std::string, MathRoutines::HashString>& gradableProblems,
+   MapLisT<std::string, TopicElement, MathRoutines::HashString>* theTopics, std::stringstream& commentsOnFailure);
   ProblemData& HasProblemData(const std::string& problemName);
   ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);
   void SetProblemData(const std::string& problemName, const ProblemData& inputData);

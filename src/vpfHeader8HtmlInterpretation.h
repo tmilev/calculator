@@ -67,7 +67,7 @@ public:
   //  Rational numAnsweredInAllChildren;
   //  Rational maxCorrectAnswersInAllChildren;
   void ComputeID();
-  void reset(int parentSize, MapLisT<std::string, TopicElement, MathRoutines::hashString>* containerElements);
+  void reset(int parentSize, MapLisT<std::string, TopicElement, MathRoutines::HashString>* containerElements);
   friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt) {
     output << theElt.ToString();
     return output;
@@ -85,12 +85,12 @@ public:
     this->reset(0, 0);
   }
   static void GetTopicList
-  (const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output,
+  (const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::HashString>& output,
    CalculatorHTML& owner);
   static bool LoadTopicBundle
-  (const std::string& inputFileName, MapLisT<std::string, List<std::string>, MathRoutines::hashString>& output,
+  (const std::string& inputFileName, MapLisT<std::string, List<std::string>, MathRoutines::HashString>& output,
    CalculatorHTML& owner, std::stringstream& errorStream);
-  static void AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output);
+  static void AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::HashString>& output);
 };
 
 struct ProblemResources{
@@ -170,15 +170,15 @@ public:
   std::string outputDeadlineString;
   std::string outputProblemLabel;
   std::string outputProblemTitle;
-  MapLisT<std::string, std::string, MathRoutines::hashString> outputScripts;
+  MapLisT<std::string, std::string, MathRoutines::HashString> outputScripts;
 
   std::stringstream logCommandsProblemGeneratioN;
   std::string courseHome;
   std::string topicListJavascriptWithTag;
 
   static const std::string BugsGenericMessage;
-  HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
-  HashedList<std::string, MathRoutines::hashString> calculatorTopicBundles;
+  HashedList<std::string, MathRoutines::HashString> tagKeysNoValue;
+  HashedList<std::string, MathRoutines::HashString> calculatorTopicBundles;
   List<std::string> calculatorTopicElementNames;
   List<std::string> calculatorTagsRecordedLiterally;
   List<std::string> calculatorClasses;
@@ -194,9 +194,9 @@ public:
   int topicLectureCounter;
   std::string topicListContent;
   std::string topicListFileName;
-  HashedList<std::string, MathRoutines::hashString> problemNamesNoTopics;
-  MapLisT<std::string, TopicElement, MathRoutines::hashString> theTopicS;
-  MapLisT<std::string, std::string, MathRoutines::hashString> theScripts;
+  HashedList<std::string, MathRoutines::HashString> problemNamesNoTopics;
+  MapLisT<std::string, TopicElement, MathRoutines::HashString> theTopicS;
+  MapLisT<std::string, std::string, MathRoutines::HashString> theScripts;
   List<std::string> databaseStudentSections;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
@@ -254,11 +254,11 @@ public:
   bool MergeProblemInfoInDatabaseJSON(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure);
   bool LoadProblemInfoFromURLedInputAppend
   (const std::string& inputInfoString,
-   MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
+   MapLisT<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
    std::stringstream& commentsOnFailure);
   bool LoadProblemInfoFromJSONAppend
   (const JSData& inputJSON,
-   MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
+   MapLisT<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
    std::stringstream& commentsOnFailure);
   //  bool LoadDeadlineInfoFromJSONStringAppend
   //  (const std::string& inputJSONString,
@@ -268,9 +268,9 @@ public:
   //(JSData& outputData,
   // MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
   JSData ToJSONProblemWeights
-  (MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
+  (MapLisT<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
   JSData ToJSONDeadlines
-  (MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
+  (MapLisT<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
   std::string ToStringDeadline
   (const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection);
   void ComputeDeadlinesAllSections(TopicElement& inputOutput);
@@ -311,7 +311,7 @@ public:
     return input.HashFunction();
   }
   unsigned int HashFunction() const {
-    return MathRoutines::hashString(this->fileName);
+    return MathRoutines::HashString(this->fileName);
   }
   bool operator==(const CalculatorHTML& other) const {
     return this->fileName == other.fileName;

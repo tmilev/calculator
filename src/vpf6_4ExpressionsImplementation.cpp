@@ -2638,14 +2638,14 @@ bool Calculator::innerFlattenCommandEnclosuresOneLayer(Calculator& theCommands, 
 }
 
 std::string Expression::ToStringAllSlidersInExpression() const {
-  HashedList<std::string, MathRoutines::hashString> boxNames;
+  HashedList<std::string, MathRoutines::HashString> boxNames;
   if (!this->HasInputBoxVariables(&boxNames))
     return "";
   //stOutput << "DEBUG: I do have input boxes";
   if (this->owner->theObjectContainer.userInputBoxSliderDisplayed.size <
       this->owner->theObjectContainer.theUserInputTextBoxesWithValues.size())
     this->owner->theObjectContainer.resetSliders();
-  MapReferenceS<std::string, InputBox, MathRoutines::hashString>&
+  MapReferenceS<std::string, InputBox, MathRoutines::HashString>&
   theSliders = this->owner->theObjectContainer.theUserInputTextBoxesWithValues;
   std::stringstream out;
   for (int i = 0; i < boxNames.size; i ++) {

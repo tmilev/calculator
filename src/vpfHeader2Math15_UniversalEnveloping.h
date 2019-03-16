@@ -45,11 +45,20 @@ public:
     this->Powers.SetSize(1);
     this->Powers[0] = 1;
   }
-  bool HWTAAbilinearForm
-  (const MonomialUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
-   const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0);
-  void ModOutVermaRelations
-  (coefficient& outputCoeff, const Vector<coefficient>* subHiGoesToIthElement = 0, const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0);
+  bool HWTAAbilinearForm(
+    const MonomialUniversalEnveloping<coefficient>& right,
+    coefficient& output,
+    const Vector<coefficient>* subHiGoesToIthElement,
+    const coefficient& theRingUnit,
+    const coefficient& theRingZero,
+    std::stringstream* logStream = 0
+  );
+  void ModOutVermaRelations(
+    coefficient& outputCoeff,
+    const Vector<coefficient>* subHiGoesToIthElement = 0,
+    const coefficient& theRingUnit = 1,
+    const coefficient& theRingZero = 0
+  );
   void SetNumVariables(int newNumVars);
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
   unsigned int HashFunction() const {
@@ -85,10 +94,10 @@ public:
   //in WeylGroup::RootSystem.
   // The "zero level roots" - i.e. the elements of the Cartan subalgebra lie in between
   // the negative and positive rootss.
-  void Simplify(ElementUniversalEnveloping<coefficient>& output, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit = 1);
+  void Simplify(ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
   void CommuteABntoBnAPlusLowerOrder(int theIndeX, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
   void CommuteAnBtoBAnPlusLowerOrder(int indexA, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
-  MonomialUniversalEnveloping():owner(0){}
+  MonomialUniversalEnveloping(): owner(0) {}
   bool operator>(const MonomialUniversalEnveloping& other) {
     return this->::MonomialTensor<coefficient>::operator>(other);
   }
@@ -105,8 +114,7 @@ public:
 };
 
 template <class coefficient>
-class ElementUniversalEnveloping: public ElementMonomialAlgebra<MonomialUniversalEnveloping<coefficient>, coefficient>
-{
+class ElementUniversalEnveloping: public ElementMonomialAlgebra<MonomialUniversalEnveloping<coefficient>, coefficient> {
 private:
   void CleanUpZeroCoeff();
   friend class MonomialUniversalEnveloping<coefficient>;
@@ -122,15 +130,26 @@ public:
    const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0);
   std::string IsInProperSubmodule
   (const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero);
-  bool HWTAAbilinearForm
-  (const ElementUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement,
-   const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0) const;
-  bool HWTAAbilinearForm
-  (const MonomialUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0) const {
+  bool HWTAAbilinearForm(
+    const ElementUniversalEnveloping<coefficient>&right,
+    coefficient& output,
+    const Vector<coefficient>* subHiGoesToIthElement,
+    const coefficient& theRingUnit,
+    const coefficient& theRingZero,
+    std::stringstream* logStream = 0
+  ) const;
+  bool HWTAAbilinearForm(
+    const MonomialUniversalEnveloping<coefficient>& right,
+    coefficient& output,
+    const Vector<coefficient>* subHiGoesToIthElement,
+    const coefficient& theRingUnit,
+    const coefficient& theRingZero,
+    std::stringstream* logStream = 0
+  ) const {
     ElementUniversalEnveloping<coefficient> tempElt;
     tempElt.MakeZero(*this->owner);
     tempElt.AddMonomial(right, theRingUnit);
-    return this->HWTAAbilinearForm(tempElt, output, subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, logStream);
+    return this->HWTAAbilinearForm(tempElt, output, subHiGoesToIthElement, theRingUnit, theRingZero, logStream);
   }
   bool NeedsBracketForMultiplication() {
     return this->size > 1;
@@ -166,13 +185,19 @@ public:
     return result;
   }
   void MultiplyBy(const MonomialUniversalEnveloping<coefficient>& standsOnTheRight, const coefficient& theCoeff);
-  void ModToMinDegreeFormFDRels(const Vector<Rational> & theHWinSimpleCoords, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero);
+  void ModToMinDegreeFormFDRels(const Vector<Rational> & theHWinSimpleCoords, const coefficient& theRingUnit, const coefficient& theRingZero);
   void ModOutVermaRelations(const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0);
-  static void GetCoordinateFormOfSpanOfElements
-  (List<ElementUniversalEnveloping<coefficient> >& theElements, Vectors<coefficient>& outputCoordinates, ElementUniversalEnveloping<coefficient>& outputCorrespondingMonomials,
-   GlobalVariables& theGlobalVariables);
-  bool GetCoordsInBasis
-  (List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables& theGlobalVariables) const;
+  static void GetCoordinateFormOfSpanOfElements(
+    List<ElementUniversalEnveloping<coefficient> >& theElements,
+    Vectors<coefficient>& outputCoordinates,
+    ElementUniversalEnveloping<coefficient>& outputCorrespondingMonomials
+  );
+  bool GetCoordsInBasis(
+    List<ElementUniversalEnveloping<coefficient> >& theBasis,
+    Vector<coefficient>& output,
+    const coefficient& theRingUnit,
+    const coefficient& theRingZero
+  ) const;
   static inline unsigned int HashFunction (const ElementUniversalEnveloping<coefficient>& input) {
     return input.HashFunction();
   }
@@ -180,9 +205,13 @@ public:
     return this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>::HashFunction();
   }
   template<class CoefficientTypeQuotientField>
-  static bool GetBasisFromSpanOfElements
-  (List<ElementUniversalEnveloping<coefficient> >& theElements, Vectors<CoefficientTypeQuotientField>& outputCoords, List<ElementUniversalEnveloping<coefficient> >& outputTheBasis,
-   const CoefficientTypeQuotientField& theFieldUnit, const CoefficientTypeQuotientField& theFieldZero, GlobalVariables& theGlobalVariables);
+  static bool GetBasisFromSpanOfElements(
+    List<ElementUniversalEnveloping<coefficient> >& theElements,
+    Vectors<CoefficientTypeQuotientField>& outputCoords,
+    List<ElementUniversalEnveloping<coefficient> >& outputTheBasis,
+    const CoefficientTypeQuotientField& theFieldUnit,
+    const CoefficientTypeQuotientField& theFieldZero
+  );
   void AssignFromCoordinateFormWRTBasis(List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& input, SemisimpleLieAlgebra& owner);
   void RaiseToPower(int thePower);
   bool IsAPowerOfASingleGenerator() const {
@@ -192,7 +221,9 @@ public:
       return false;
     return (*this)[0].generatorsIndices.size == 1;
   }
-  void SubstitutionCoefficients(PolynomialSubstitution<Rational>& theSub, GlobalVariables* theContext, const coefficient& theRingUnit, const coefficient& theRingZero);
+  void SubstitutionCoefficients(
+    PolynomialSubstitution<Rational>& theSub, const coefficient& theRingUnit, const coefficient& theRingZero
+  );
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
   void MakeCasimir(SemisimpleLieAlgebra& theOwner);
   void MakeCasimirWRTLeviParabolic(SemisimpleLieAlgebra& theOwner, const Selection& theLeviRoots);

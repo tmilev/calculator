@@ -7,8 +7,7 @@
 
 static ProjectInformationInstance ProjectInfoVpfSSlieAlgRootSAs(__FILE__, "Header, root and sl2 subalgebras of semisimple Lie algebras. ");
 
-class coneRelation
-{
+class coneRelation {
 public:
   Vectors<Rational> Alphas;
   Vectors<Rational> Betas;
@@ -49,8 +48,9 @@ public:
   unsigned int HashFunction() const {
     int tempI= ::MathRoutines::Minimum((int) this->DebugString.length(), ::SomeRandomPrimesSize);
     unsigned int result = 0;
-    for (int i = 0; i < tempI; i ++)
-      result += this->DebugString[i]*::SomeRandomPrimes[i];
+    for (int i = 0; i < tempI; i ++) {
+      result += this->DebugString[i] * ::SomeRandomPrimes[i];
+    }
     return result;
   }
   static inline unsigned int HashFunction(const coneRelation& input) {
@@ -61,8 +61,7 @@ public:
   }
 };
 
-class coneRelations: public HashedList<coneRelation>
-{
+class coneRelations: public HashedList<coneRelation> {
 public:
   int NumAllowedLatexLines;
   bool flagIncludeSmallerRelations;
@@ -71,8 +70,7 @@ public:
   std::string DebugString;
   List<std::string> CoordinateReps;
   void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
-  void ToString
-  (std::string& output, rootSubalgebras& owners, bool useLatex);
+  void ToString(std::string& output, rootSubalgebras& owners, bool useLatex);
   void ComputeDebugString(rootSubalgebras& owners);
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input, rootSubalgebras& owner);

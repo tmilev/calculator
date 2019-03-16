@@ -95,7 +95,7 @@ class affineCones;
 
 //Hybrid classes that serve both memory-management and mathematical purposes
 //(Matrices, Vectors, PolynomialSubstitution, etc.)
-template <class ObjectType1, class ObjectType2, unsigned int hashFunction1(const ObjectType1&)=ObjectType1::HashFunction, unsigned int hashFunction2(const ObjectType2&)=ObjectType2::HashFunction>
+template <class ObjectType1, class ObjectType2, unsigned int hashFunction1(const ObjectType1&) = ObjectType1::HashFunction, unsigned int hashFunction2(const ObjectType2&)=ObjectType2::HashFunction>
 class Pair;
 template <class Object>
 class List;
@@ -197,8 +197,9 @@ public:
     if (!(p == 1))
       return false;//d and p were not relatively prime.
     p = vP[1] % N;
-    if (p < 0)
+    if (p < 0) {
       p += N;
+    }
     output = p;
     return true;
   }
@@ -239,12 +240,18 @@ public:
     int upperDimensionBound,
     void (*theBinaryOperation)(const theType& left, const theType& right, theType& output)
   );
-  static bool StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd = 0);
-  static bool StringEndsWith(const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning= 0);
+  static bool StringBeginsWith(
+    const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd = 0
+  );
+  static bool StringEndsWith(
+    const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning = 0
+  );
   static char ConvertHumanReadableHexToCharValue(char input);
   static void StringSplitDefaultDelimiters(const std::string& inputString, List<std::string>& output);
   static void StringSplitExcludeDelimiter(const std::string& inputString, char delimiter, List<std::string>& output);
-  static void StringSplitExcludeDelimiters(const std::string& inputString, const List<char>& delimiters, List<std::string>& output);
+  static void StringSplitExcludeDelimiters(
+    const std::string& inputString, const List<char>& delimiters, List<std::string>& output
+  );
   static void StringTrimWhiteSpace(const std::string& inputString, std::string& output);
   static void StringTrimToLengthWithHash(std::string& inputOutput, int desiredLength50AtLeast = 150);
   static std::string StringTrimToLengthForDisplay(const std::string& input, int desiredLength20AtLeast = 50);
@@ -272,10 +279,11 @@ public:
   static void RaiseToPower(coefficient& theElement, const theIntegerType& thePower, const coefficient& theRingUnit);
   template <typename coefficient>
   inline static coefficient Maximum(const coefficient& a, const coefficient& b) {
-    if (a > b)
+    if (a > b) {
       return a;
-    else
+    } else {
       return b;
+    }
   }
   template <typename T>
   inline static void swap(T& a, T& b) {
@@ -288,10 +296,11 @@ public:
   }
   template <class Element>
   inline static Element Minimum(const Element& a, const Element& b) {
-    if (a > b)
+    if (a > b) {
       return b;
-    else
+    } else {
       return a;
+    }
   }
   template<class Element>
   static std::string ElementToStringBrackets(const Element& input) {
@@ -357,17 +366,20 @@ public:
     bool theOrder(const objectType& left, const objectType& right) = 0,
     otherList* carbonCopy = 0
   ) {
-    if (carbonCopy != 0)
-      if (carbonCopy->size != theList.size)
+    if (carbonCopy != 0) {
+      if (carbonCopy->size != theList.size) {
         crash << "Programming error: requesting quicksort with carbon copy on a list with "
         << theList.size << " elements, but the but the carbon copy has "
         << carbonCopy->size << " elements. " << crash;
+      }
+    }
     if (theList.size == 0)
       return;
-    if (theOrder == 0)
+    if (theOrder == 0) {
       MathRoutines::QuickSortAscendingNoOrder(theList, 0, theList.size - 1, carbonCopy);
-    else
+    } else {
       MathRoutines::QuickSortAscendingOrder(theList, 0, theList.size - 1, theOrder, carbonCopy);
+    }
   }
   template <class templateList, typename objectType, class otherList>
   static void QuickSortDescending(
@@ -377,8 +389,9 @@ public:
   ) {
     MathRoutines::QuickSortAscending(theList, theOrder, carbonCopy);
     theList.ReverseOrderElements();
-    if (carbonCopy != 0)
+    if (carbonCopy != 0) {
       carbonCopy->ReverseOrderElements();
+    }
   }
 private:
   template <class templateList, typename objectType, class otherList>
@@ -652,15 +665,18 @@ public:
   void operator= (const ListLight<Object>& right);
   void operator= (const List<Object>& right) {
     this->SetSize(right.size);
-    for (int i = 0; i < right.size; i ++)
+    for (int i = 0; i < right.size; i ++) {
       this->TheObjects[i] = right[i];
+    }
   }
   inline bool operator== (const ListLight<Object>& right) const {
     if (this->size != right.size)
       return false;
-    for (int i = 0; i < this->size; i ++)
-      if (!(this->TheObjects[i] == right[i]))
+    for (int i = 0; i < this->size; i ++) {
+      if (!(this->TheObjects[i] == right[i])) {
         return false;
+      }
+    }
     return true;
   }
   inline Object* LastObject() const {
@@ -742,15 +758,17 @@ ListLight<Object>::~ListLight() {
 template <class Object>
 void ListLight<Object>::CopyFromHeavy(const List<Object>& from) {
   this->SetSize(from.size);
-  for (int i = 0; i < this->size; i ++)
+  for (int i = 0; i < this->size; i ++) {
     this->TheObjects[i] = from.TheObjects[i];
+  }
 }
 
 template <class Object>
 void ListLight<Object>::CopyFromLight(const ListLight<Object>& from) {
   this->SetSize(from.size);
-  for (int i = 0; i < this->size; i ++)
+  for (int i = 0; i < this->size; i ++) {
     this->TheObjects[i] = from.TheObjects[i];
+  }
 }
 
 template <class Object>
@@ -763,8 +781,9 @@ std::ostream& operator<<(std::ostream& output, const List<Object>& theList) {
   output << theList.size << " elements: \n";
   for (int i = 0; i < theList.size; i ++) {
     output << theList[i];
-    if (i != theList.size - 1)
+    if (i != theList.size - 1) {
       output << ", ";
+    }
   }
   return output;
 }
@@ -798,7 +817,9 @@ private:
   friend class PartFraction;
   void ExpandArrayOnTop(int increase);
   template <class compareClass, class carbonCopyType>
-  bool QuickSortAscendingCustomRecursive(int BottomIndex, int TopIndex, compareClass& theCompareror, List<carbonCopyType>* carbonCopy);
+  bool QuickSortAscendingCustomRecursive(
+    int BottomIndex, int TopIndex, compareClass& theCompareror, List<carbonCopyType>* carbonCopy
+  );
   void QuickSortDescending(int BottomIndex, int TopIndex);
   inline void initConstructorCallOnly() {
     this->TheObjects = 0;
@@ -862,8 +883,9 @@ public:
   void SetSize(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void SetSizeMakeMatrix(int numRows, int numCols) {
     this->SetSize(numRows);
-    for (int i = 0; i < numRows; i ++)
+    for (int i = 0; i < numRows; i ++) {
       this->TheObjects[i].SetSize(numCols);
+    }
   }
   void initializeFillInObject(int theSize, const Object& o);
   inline void AddObjectOnTopCreateNew();
@@ -902,24 +924,27 @@ public:
     return indexOfObject;
   }
   void RemoveIndexShiftDown(int index) {
-    for (int i = index; i < this->size - 1; i ++)
+    for (int i = index; i < this->size - 1; i ++) {
       this->TheObjects[i] = this->TheObjects[i + 1];
+    }
     this->size --;
   }
   void RemoveIndicesShiftDown(int firstToRemove, int numberToRemove) {
-    for (int i = firstToRemove; i < this->size - numberToRemove; i ++)
+    for (int i = firstToRemove; i < this->size - numberToRemove; i ++) {
       this->TheObjects[i] = this->TheObjects[i + numberToRemove];
+    }
     this->size -= numberToRemove;
   }
   void RemoveIndexSwapWithLast(int index);
   void RemoveLastObject();
   void RemoveObjectsShiftDown(const List<Object>& theList) {
     int currentIndex = 0;
-    for (int i = 0; i < this->size; i ++)
+    for (int i = 0; i < this->size; i ++) {
       if (!theList.Contains((*this)[i])) {
         theList.SwapTwoIndices(i, currentIndex);
         currentIndex ++;
       }
+    }
     this->SetSize(currentIndex);
   }
   // the below function is named a bit awkwardly because otherwise there is a risk of confusion
@@ -1032,16 +1057,18 @@ public:
     while (true) {
       int halflength = (end - start) / 2;
       if (halflength == 0) {
-        if (!(this->TheObjects[start] > o))
+        if (!(this->TheObjects[start] > o)) {
           return end;
-        else
+        } else {
           return start;
+        }
       }
       int n = start + halflength;
-      if (!(this->TheObjects[n] > o))
+      if (!(this->TheObjects[n] > o)) {
         start = n + 1;
-      else
+      } else {
         end = n;
+      }
     }
   }
 
@@ -1070,18 +1097,20 @@ public:
   // are both O(1)
   int BSInsert(const Object& o) {
     int n = BSIndexFirstGreaterThan(o);
-    if (n == this->size)
+    if (n == this->size) {
       this->AddOnTop(o);
-    else
+    } else {
       this->InsertAtIndexShiftElementsUp(o, n);
+    }
     return n;
   }
 
   int BSInsertDontDup(const Object& o) {
     int n = BSIndexFirstNotLessThan(o);
     for (int i = n; i < this->size; i ++) {
-      if (this->TheObjects[i] == o)
+      if (this->TheObjects[i] == o) {
         return - 1;
+      }
       if (this->TheObjects[i] > o) {
         this->InsertAtIndexShiftElementsUp(o, i);
         return i;
@@ -1096,20 +1125,22 @@ public:
     int existing_index = - 1;
     int bin_end_index = - 1;
     for (int i = n; i < this->size; i ++) {
-      if (this->TheObjects[i] == o)
+      if (this->TheObjects[i] == o) {
         existing_index = i;
+      }
       if (this->TheObjects[i] > o) {
         bin_end_index = i;
         break;
       }
     }
     int outdex;
-    if (existing_index != - 1)
+    if (existing_index != - 1) {
       outdex = existing_index + 1;
-    else if (bin_end_index != - 1)
+    } else if (bin_end_index != - 1) {
       outdex = bin_end_index;
-    else
+    } else {
       outdex = this->size;
+    }
     this->InsertAtIndexShiftElementsUp(o, outdex);
     return outdex;
   }
@@ -1264,7 +1295,6 @@ public:
   }
 };
 typedef Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> PairInts;
-
 
 template <class Object, class TemplateList, unsigned int hashFunction(const Object&) = Object::HashFunction>
 class HashTemplate: public TemplateList {

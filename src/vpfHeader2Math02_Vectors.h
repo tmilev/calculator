@@ -90,7 +90,12 @@ public:
     return this->ToStringLetterFormat("\\varepsilon", theFormat);
   }
   template <class otherType>
-  static void ScalarProduct(const Vector<coefficient>& r1, const Vector<coefficient>& r2, const Matrix<otherType>& TheBilinearForm, coefficient& result) {
+  static void ScalarProduct(
+    const Vector<coefficient>& r1,
+    const Vector<coefficient>& r2,
+    const Matrix<otherType>& TheBilinearForm,
+    coefficient& result
+  ) {
     if (r1.size != TheBilinearForm.NumRows || r1.size != r2.size || r1.size != TheBilinearForm.NumCols) {
       crash << "This is a programming error: attempting to take "
       << "a bilinear form represented by matrix with " << TheBilinearForm.NumRows
@@ -112,13 +117,18 @@ public:
     }
   }
   template <class otherType>
-  static coefficient ScalarProduct(const Vector<coefficient>& r1, const Vector<coefficient>& r2, const Matrix<otherType>& TheBilinearForm) {
+  static coefficient ScalarProduct(
+    const Vector<coefficient>& r1, const Vector<coefficient>& r2, const Matrix<otherType>& TheBilinearForm
+  ) {
     coefficient result;
     Vector<coefficient>::ScalarProduct(r1, r2, TheBilinearForm, result);
     return result;
   }
   void PerturbNoZeroScalarProductWithMe(const List<Vector<coefficient> >& inputVectors);
-  void PerturbNormalRelativeToVectorsInGeneralPosition(const Vectors<Rational>& NonStrictConeNonPositiveScalar, const List<Vector<Rational> >& VectorsToBeInGeneralPosition);
+  void PerturbNormalRelativeToVectorsInGeneralPosition(
+    const Vectors<Rational>& NonStrictConeNonPositiveScalar,
+    const List<Vector<Rational> >& VectorsToBeInGeneralPosition
+  );
   coefficient ScalarProduct (const Vector<coefficient>& r2, const Matrix<coefficient>& form) const {
     return ScalarProduct(*this, r2, form);
   }

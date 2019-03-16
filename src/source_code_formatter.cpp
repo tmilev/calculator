@@ -93,17 +93,23 @@ bool CodeFormatter::FormatCPPSourceCode(
     return false;
   }
   if (comments != 0) {
-    *comments << this->ToStringLinks();
+    (*comments) << this->ToStringLinks();
   }
   return true;
 }
 
 void CodeFormatter::AddCurrentWord() {
-  if (this->currentWord.size() == 0) {
+  this->AddWord(this->currentWord);
+  this->currentWord = "";
+}
+
+void CodeFormatter::AddWord(const std::string& incomingString) {
+  if (incomingString == "") {
     return;
   }
-  this->originalElements.AddOnTop(this->currentWord);
-  this->currentWord = "";
+  CodeElement incoming;
+  this->SetContentComputeType(incomingString, incoming);
+  this->originalElements.AddOnTop(incoming);
 }
 
 bool CodeFormatter::isSeparatorCharacter(char input) {
@@ -142,6 +148,13 @@ bool CodeFormatter::ProcessCharacterInQuotes() {
   return true;
 }
 
+void CodeFormatter::SetContentComputeType(const std::string& input, CodeElement& output) {
+  output.content = input;
+  if (this->builtInTypes.Contains(input)) {
+    output.type = this->builtInTypes.GetValueConstCrashIfNotPresent(input);
+  }
+}
+
 bool CodeFormatter::ExtractCodeElements(std::stringstream* comments) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::ExtractCodeElements");
   (void) comments;
@@ -161,16 +174,6 @@ bool CodeFormatter::ExtractCodeElements(std::stringstream* comments) {
   return true;
 }
 
-bool CodeFormatter::isWhiteSpaceNoNewLine(const std::string& input) {
-  for (unsigned i = 0; i < input.size(); i ++) {
-    unsigned char currentChar = input[i];
-    if (!this->whiteSpaceCharacterNoNewLineMap[currentChar]) {
-      return false;
-    }
-  }
-  return true;
-}
-
 bool CodeFormatter::DecreaseStack(int numberToPop) {
   this->transformedElements.SetSize(this->transformedElements.size - numberToPop);
   return true;
@@ -179,61 +182,70 @@ bool CodeFormatter::DecreaseStack(int numberToPop) {
 bool CodeFormatter::ApplyOneRule() {
   MacroRegisterFunctionWithName("SourceCodeFormatter::ApplyOneRule");
   int lastIndex = this->transformedElements.size - 1;
-  std::string& last = this->transformedElements[lastIndex];
-  std::string& secondToLast = this->transformedElements[lastIndex - 1];
-  std::string& thirdToLast = this->transformedElements[lastIndex - 2];
-  std::string& fourthToLast = this->transformedElements[lastIndex - 3];
-  std::string& fifthToLast = this->transformedElements[lastIndex - 4];
-  std::string& sixthToLast = this->transformedElements[lastIndex - 5];
-  if (this->isWhiteSpaceNoNewLine(last) && this->isWhiteSpaceNoNewLine(secondToLast)) {
-    secondToLast = secondToLast + last;
+  CodeElement& last = this->transformedElements[lastIndex];
+  CodeElement& secondToLast = this->transformedElements[lastIndex - 1];
+  CodeElement& thirdToLast = this->transformedElements[lastIndex - 2];
+  CodeElement& fourthToLast = this->transformedElements[lastIndex - 3];
+  CodeElement& fifthToLast = this->transformedElements[lastIndex - 4];
+  CodeElement& sixthToLast = this->transformedElements[lastIndex - 5];
+  if (last.type == "whiteSpace" && secondToLast.type == "whiteSpace") {
+    secondToLast.content = secondToLast.content + last.content;
     return this->DecreaseStack(1);
   }
   if (
-    (fourthToLast == ")" || fourthToLast == "else") &&
-    thirdToLast == "\n" &&
-    this->isWhiteSpaceNoNewLine(secondToLast) &&
-    last == "{"
+    (fourthToLast.content == ")" || fourthToLast.content == "else") &&
+    thirdToLast.type == "\n" &&
+    secondToLast.content == "whiteSpace" &&
+    last.content == "{"
   ) {
-    thirdToLast = " {\n";
-    secondToLast = secondToLast + " ";
-    return this->DecreaseStack(1);
-  }
-  if (
-    (thirdToLast == ")" || thirdToLast == "else") &&
-    secondToLast == "\n" &&
-    last == "{"
-  ) {
-    secondToLast = " {\n";
-    last = " ";
+    thirdToLast.content = " {";
+    thirdToLast.type = "openCurlyBrace";
+    this->SetContentComputeType("\n", secondToLast);
+    last.content += " ";
     return true;
   }
   if (
-    fifthToLast == ")" &&
-    this->isWhiteSpaceNoNewLine(fourthToLast) &&
-    thirdToLast == "const" &&
-    secondToLast == "\n" &&
-    last == "{"
+    (thirdToLast.content == ")" || thirdToLast.content == "else") &&
+    secondToLast.content == "\n" &&
+    last.content == "{"
   ) {
-    thirdToLast = "const {\n";
-    secondToLast = " ";
-    return this->DecreaseStack(1);
+    secondToLast.content = " {";
+    secondToLast.type = "openCurlyBrace";
+    this->SetContentComputeType("\n", last);
+    this->AddWord(" ");
+    return true;
   }
   if (
-    sixthToLast == ")" &&
-    this->isWhiteSpaceNoNewLine(fifthToLast) &&
-    fourthToLast == "const" &&
-    thirdToLast == "\n" &&
-    this->isWhiteSpaceNoNewLine(secondToLast) &&
-    last == "{"
+    fifthToLast.content == ")" &&
+    fourthToLast.type == "whiteSpace" &&
+    thirdToLast.content == "const" &&
+    secondToLast.content == "\n" &&
+    last.content == "{"
   ) {
-    fourthToLast = "const {";
-    secondToLast = secondToLast + " ";
-    return this->DecreaseStack(1);
+    thirdToLast.content = "const ";
+    this->SetContentComputeType("{", secondToLast);
+    this->SetContentComputeType("\n", last);
+    this->AddWord(" ");
+    return true;
   }
-  if (secondToLast == ")" && last == "const") {
-    last = " ";
-    this->transformedElements.AddOnTop("const");
+  if (
+    sixthToLast.content == ")" &&
+    fifthToLast.type == "whiteSpace" &&
+    fourthToLast.content == "const" &&
+    thirdToLast.content == "\n" &&
+    secondToLast.type == "whiteSpace" &&
+    last.content == "{"
+  ) {
+    fourthToLast.content = "const ";
+    this->SetContentComputeType("{", thirdToLast);
+    last.content = secondToLast.content + " ";
+    last.type = "whiteSpace";
+    this->SetContentComputeType("\n", secondToLast);
+    return true;
+  }
+  if (secondToLast.content == ")" && last.content == "const") {
+    this->SetContentComputeType(" ", last);
+    this->AddWord("const");
     return true;
   }
   return false;
@@ -242,7 +254,8 @@ bool CodeFormatter::ApplyOneRule() {
 bool CodeFormatter::ApplyFormattingRules(std::stringstream* comments) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::ApplyFormattingRules");
   this->transformedElements.SetExpectedSize(this->originalElements.size);
-  this->transformedElements.initializeFillInObject(6, "");
+  CodeElement empty;
+  this->transformedElements.initializeFillInObject(6, empty);
   for (int i = 0; i < this->originalElements.size; i ++) {
     this->transformedElements.AddOnTop(this->originalElements[i]);
     int tooManyRulesCounter = 0;
@@ -269,11 +282,8 @@ CodeFormatter::CodeFormatter() {
   for (unsigned i = 0; i < this->separatorCharacters.size(); i ++) {
     this->separatorCharactersMap[(unsigned) this->separatorCharacters[i]] = true;
   }
-  this->whiteSpaceCharactersNoNewLine = " \t\r";
-  this->whiteSpaceCharacterNoNewLineMap.initializeFillInObject(256, false);
-  for (unsigned i = 0; i < this->whiteSpaceCharactersNoNewLine.size(); i ++) {
-    this->whiteSpaceCharacterNoNewLineMap[(unsigned) this->whiteSpaceCharactersNoNewLine[i]] = true;
-  }
+  this->builtInTypes.SetKeyValue(" ", "whiteSpace");
+  this->builtInTypes.SetKeyValue("\t", "whiteSpace");
 }
 
 bool CodeFormatter::WriteFormatedCode(std::stringstream* comments) {
@@ -288,7 +298,7 @@ bool CodeFormatter::WriteFormatedCode(std::stringstream* comments) {
     return false;
   }
   for (int i = 0; i < this->transformedElements.size; i ++) {
-    fileOut << this->transformedElements[i];
+    fileOut << this->transformedElements[i].content;
   }
   return true;
 }

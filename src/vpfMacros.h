@@ -63,8 +63,7 @@
 //-----------------Preprocessor macros end-------------------
 //-----------------------------------------------------------
 
-class ProjectInformationInstance
-{
+class ProjectInformationInstance {
   public:
   ProjectInformationInstance(const char* fileName, const std::string& fileDescription);
 };
@@ -73,8 +72,7 @@ extern GlobalVariables theGlobalVariables;
 
 static ProjectInformationInstance vpfMacrosHprojectInstance(__FILE__, "Header, External includes + macros. Macro/build configuration.");
 
-class Crasher
-{
+class Crasher {
   public:
   std::stringstream theCrashReport;
   void (*CleanUpFunction)();

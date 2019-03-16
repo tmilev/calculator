@@ -94,6 +94,10 @@ public:
   bool flagSSLisAvailable;
   bool flagCertificatesAreOfficiallySigned;
   bool flagCrashInitiated;
+
+  bool flagDatabaseCompiled;
+
+
   std::string buildVersionSimple;
   std::string buildHeadHashWithServerTime;
   std::string OperatingSystem;

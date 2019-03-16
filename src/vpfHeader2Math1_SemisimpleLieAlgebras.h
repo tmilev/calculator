@@ -6,8 +6,7 @@
 #include "vpfHeader2Math3_FiniteGroups.h"
 static ProjectInformationInstance ProjectInfoVpfHeaderSemisimpleLieAlgebras(__FILE__, "Header, semisimple Lie algebras. ");
 
-class SemisimpleLieAlgebra
-{
+class SemisimpleLieAlgebra {
 private:
   void operator=(const SemisimpleLieAlgebra& other);//<-semisimple Lie algebra can't be moved once created.
   //<-Too many objects have pointers to it.

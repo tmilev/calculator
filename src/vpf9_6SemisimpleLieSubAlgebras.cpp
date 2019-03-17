@@ -4392,7 +4392,7 @@ void slTwoSubalgebra::ComputeModuleDecompositionOfMinimalContainingRegularSAs(Sl
   this->moduleDecompositionMinimalContainingRootSAs.SetSize(this->IndicesMinimalContainingRootSAs.size);
   List<int> buffer;
   for (int i = 0; i < this->IndicesMinimalContainingRootSAs.size; i ++) {
-    rootSubalgebra& theSA = owne.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[i]];
+    rootSubalgebra& theSA = owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[i]];
     this->ComputeModuleDecomposition
     (theSA.PositiveRootsK, theSA.SimpleBasisK.size, this->moduleDecompositionMinimalContainingRootSAs[i],
      buffer);

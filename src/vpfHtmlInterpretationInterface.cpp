@@ -1585,13 +1585,15 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
   long long totalStudents;
   findStudents[DatabaseStrings::labelInstructor] = theGlobalVariables.userDefault.username;
   findAdmins[DatabaseStrings::labelUserRole] = "admin";
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
-       (DatabaseStrings::tableUsers, findStudents, students, - 1, &totalStudents, &commentsOnFailure)) {
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(
+    DatabaseStrings::tableUsers, findStudents, students, - 1, &totalStudents, &commentsOnFailure
+  )) {
     out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
     return out.str();
   }
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
-       (DatabaseStrings::tableUsers, findAdmins, admins, - 1, 0, &commentsOnFailure)) {
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(
+    DatabaseStrings::tableUsers, findAdmins, admins, - 1, 0, &commentsOnFailure
+  )) {
     out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
     return out.str();
   }

@@ -1149,12 +1149,12 @@ std::string WebWorker::GetDatabaseJSON() {
   MacroRegisterFunctionWithName("WebWorker::GetDatabaseJSON");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "Only logged-in admins can access database. ";
-  std::stringstream out;
-  std::string operation = theGlobalVariables.GetWebInput(WebAPI::databaseParameters::operation);
-  std::string labels = HtmlRoutines::ConvertURLStringToNormal
-  (theGlobalVariables.GetWebInput(WebAPI::databaseParameters::labels), false);
-#ifdef MACRO_use_MongoDB
   JSData result;
+#ifdef MACRO_use_MongoDB
+  std::string operation = theGlobalVariables.GetWebInput(WebAPI::databaseParameters::operation);
+  std::string labels = HtmlRoutines::ConvertURLStringToNormal(
+    theGlobalVariables.GetWebInput(WebAPI::databaseParameters::labels), false
+  );
   if (operation == WebAPI::databaseParameters::fetch)
     result = DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseFetch(labels);
   else
@@ -1163,11 +1163,10 @@ std::string WebWorker::GetDatabaseJSON() {
     result["databaseOperation"] = operation;
     result["databaseLabels"] = labels;
   }
-  out << result.ToString(false);
 #else
-  out << "<b>Database not available. </b>";
+  result["error"] = "<b>Database not available. </b>";
 #endif // MACRO_use_MongoDB
-  return out.str();
+  return result.ToString(false);
 }
 
 std::string WebWorker::GetDatabaseDeleteOneItem() {
@@ -1203,9 +1202,9 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
     }
   }
   for (int i = 0; i < newlyFoundArgs.size(); i ++) {
-    if (theGlobalVariables.webArguments.Contains(newlyFoundArgs.theKeys[i]))
-      //if (theGlobalVariables.webArguments.GetValueCreate(newlyFoundArgs.theKeys[i]) != "")
+    if (theGlobalVariables.webArguments.Contains(newlyFoundArgs.theKeys[i])) {
       continue; //<-if a key is already given cookie entries are ignored.
+    }
     std::string trimmed = newlyFoundArgs.theValues[i];
     if (trimmed.size() > 0) {
       if (trimmed[trimmed.size() - 1] == ';') {
@@ -1231,8 +1230,9 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
         isGood = true;
       }
     }
-    if (isGood)
+    if (isGood) {
       theGlobalVariables.webArguments.SetKeyValue(newlyFoundArgs.theKeys[i], trimmed);
+    }
   }
   return result;
 }
@@ -1566,9 +1566,11 @@ void WebWorker::ParseMessageHead() {
     ) {
       if (this->theMessageHeaderStrings[i + 1].size() < 10000) {
         LargeIntUnsigned theLI;
-        if (theLI.AssignStringFailureAllowed(this->theMessageHeaderStrings[i + 1], true))
-          if (!theLI.IsIntegerFittingInInt(&this->ContentLength))
+        if (theLI.AssignStringFailureAllowed(this->theMessageHeaderStrings[i + 1], true)) {
+          if (!theLI.IsIntegerFittingInInt(&this->ContentLength)) {
             this->ContentLength = - 1;
+          }
+        }
       }
     } else if (
       this->theMessageHeaderStrings[i] == "Host:" ||
@@ -1694,24 +1696,27 @@ bool WebWorker::ReceiveAllHttp() {
   if (numBytesInBuffer == 0)
     return true;
   this->ParseMessageHead();
-  if (this->requestTypE == WebWorker::requestTypes::requestPost)
+  if (this->requestTypE == WebWorker::requestTypes::requestPost) {
     this->displayUserInput = "POST " + this->addressGetOrPost;
-  else if (this->requestTypE == WebWorker::requestTypes::requestGet)
+  } else if (this->requestTypE == WebWorker::requestTypes::requestGet) {
     this->displayUserInput = "GET " + this->addressGetOrPost;
-  else if (this->requestTypE == WebWorker::requestTypes::requestHead)
+  } else if (this->requestTypE == WebWorker::requestTypes::requestHead) {
     this->displayUserInput = "HEAD " + this->addressGetOrPost;
-  else if (this->requestTypE == WebWorker::requestTypes::requestChunked)
+  } else if (this->requestTypE == WebWorker::requestTypes::requestChunked) {
     this->displayUserInput = "GET or POST **chunked** " + this->addressGetOrPost;
-  else
+  } else {
     this->displayUserInput = "UNKNOWN REQUEST " + this->addressGetOrPost;
+  }
   if (this->ContentLength <= 0) {
-    if (this->requestTypE == this->requestUnknown)
+    if (this->requestTypE == this->requestUnknown) {
       this->AttemptUnknownRequestErrorCorrection();
+    }
     return true;
   }
   if (this->messageBody.size() == (unsigned) this->ContentLength) {
-    if (this->requestTypE == this->requestUnknown)
+    if (this->requestTypE == this->requestUnknown) {
       this->AttemptUnknownRequestErrorCorrection();
+    }
     return true;
   }
   this->messageBody.clear();//<-needed else the length error check won't work out.
@@ -1871,10 +1876,12 @@ std::string WebWorker::GetHeaderSetCookie() {
 void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const std::string& remainingHeaderNoTermination) {
   MacroRegisterFunctionWithName("WebWorker::SetHeader");
   if (theGlobalVariables.flagRunningApache) {
-    if (remainingHeaderNoTermination != "")
+    if (remainingHeaderNoTermination != "") {
       stOutput << remainingHeaderNoTermination << "\r\n";
-    if (theGlobalVariables.flagLoggedIn && WebWorker::GetHeaderSetCookie() != "")
+    }
+    if (theGlobalVariables.flagLoggedIn && WebWorker::GetHeaderSetCookie() != "") {
       stOutput << WebWorker::GetHeaderSetCookie() << "\r\n";
+    }
     stOutput << "\r\n";
     return;
   }
@@ -1922,10 +1929,12 @@ void WebWorker::SanitizeVirtualFileName() {
         isOK = false;
       }
     }
-    if (isOK)
+    if (isOK) {
       resultName.push_back(this->VirtualFileName[i]);
-    if (this->VirtualFileName[i] == '/')
+    }
+    if (this->VirtualFileName[i] == '/') {
       foundslash = true;
+    }
   }
   this->VirtualFileName = "";
   for (int i = resultName.size() - 1; i >= 0; i --) {
@@ -2209,10 +2218,11 @@ int WebWorker::ProcessFolder() {
     if (isDir)
       currentStream << "/";
     currentStream << "</a><br>";
-    if (isDir)
+    if (isDir) {
       theFolderNamesHtml.AddOnTop(currentStream.str());
-    else
+    } else {
       theFileNamesHtml.AddOnTop(currentStream.str());
+    }
   }
   theFolderNamesHtml.QuickSortAscending();
   theFileNamesHtml.QuickSortAscending();
@@ -2936,8 +2946,6 @@ int WebWorker::ProcessTemplate() {
   MacroRegisterFunctionWithName("WebWorker::ProcessTemplate");
   this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetPageFromTemplate();
-  //if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-  //  stOutput << "<!--" << this->ToStringMessageFullUnsafe() << "-->";
   return 0;
 }
 
@@ -2953,8 +2961,6 @@ int WebWorker::ProcessTemplateJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessTemplateJSON");
   this->SetHeaderOKNoContentLength("");
   stOutput << HtmlInterpretation::GetJSONFromTemplate();
-  //if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-  //  stOutput << "<!--" << this->ToStringMessageFullUnsafe() << "-->";
   return 0;
 }
 
@@ -3088,18 +3094,22 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource() {
       ));
     }
   }
-  if (theCrawler.slideFilesExtraFlags.size > theCrawler.slideFileNamesVirtualWithPatH.size)
+  if (theCrawler.slideFilesExtraFlags.size > theCrawler.slideFileNamesVirtualWithPatH.size) {
     theCrawler.slideFilesExtraFlags.SetSize(theCrawler.slideFileNamesVirtualWithPatH.size);
-  else
-    for (int i = theCrawler.slideFilesExtraFlags.size; i < theCrawler.slideFileNamesVirtualWithPatH.size; i ++)
+  } else {
+    for (int i = theCrawler.slideFilesExtraFlags.size; i < theCrawler.slideFileNamesVirtualWithPatH.size; i ++) {
       theCrawler.slideFilesExtraFlags.AddOnTop("");
+    }
+  }
   theCrawler.desiredPresentationTitle =
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("title"), false);
   std::stringstream comments;
-  if (theGlobalVariables.GetWebInput("layout") == "printable")
+  if (theGlobalVariables.GetWebInput("layout") == "printable") {
     theCrawler.flagProjectorMode = false;
-  if (theGlobalVariables.GetWebInput("answerKey") == "true")
+  }
+  if (theGlobalVariables.GetWebInput("answerKey") == "true") {
     theCrawler.flagAnswerKey = true;
+  }
   if (
     theGlobalVariables.userCalculatorRequestType == "homeworkFromSource" ||
     theGlobalVariables.userCalculatorRequestType == "homeworkSource"
@@ -3300,8 +3310,10 @@ bool WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified() {
   MacroRegisterFunctionWithName("WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified");
   bool stateNotModified = true;
   if (!theGlobalVariables.flagSSLisAvailable) {
-    if (this->addressComputed == theGlobalVariables.DisplayNameExecutable &&
-        theGlobalVariables.userCalculatorRequestType == "") {
+    if (
+      this->addressComputed == theGlobalVariables.DisplayNameExecutable &&
+      theGlobalVariables.userCalculatorRequestType == ""
+    ) {
       this->addressComputed = theGlobalVariables.DisplayNameExecutable;
       theGlobalVariables.userCalculatorRequestType = "calculator";
       stateNotModified = false;
@@ -3321,16 +3333,20 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   if (!theUser.flagEnteredPassword)
     return false;
-  if (theGlobalVariables.userCalculatorRequestType == "changePassword" ||
-      theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount ||
-      theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON)
+  if (
+    theGlobalVariables.userCalculatorRequestType == "changePassword" ||
+    theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount ||
+    theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON
+  ) {
     return false;
+  }
   std::stringstream redirectedAddress;
-  if (this->addressComputed == theGlobalVariables.DisplayNameExecutable)
+  if (this->addressComputed == theGlobalVariables.DisplayNameExecutable) {
     redirectedAddress << theGlobalVariables.DisplayNameExecutable << "?request="
     << theGlobalVariables.userCalculatorRequestType << "&";
-  else
+  } else {
     redirectedAddress << this->addressComputed << "?";
+  }
   for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++) {
     if (
       theGlobalVariables.webArguments.theKeys[i] != "password" &&
@@ -3364,8 +3380,9 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified() {
   MacroRegisterFunctionWithName("WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified");
   bool stateNotModified = true;
   bool shouldFallBackToDefaultPage = false;
-  if (this->addressComputed == "/" || this->addressComputed == "")
+  if (this->addressComputed == "/" || this->addressComputed == "") {
     shouldFallBackToDefaultPage = true;
+  }
   if (!theGlobalVariables.flagSSLisAvailable) {
     if (
       this->addressComputed == theGlobalVariables.DisplayNameExecutable &&
@@ -3403,9 +3420,11 @@ bool WebWorker::ProcessRedirectAwayFromWWW() {
     return false;
   std::stringstream newAddressStream, redirectHeaderStream;
   newAddressStream << "https://" << addressNoWWW;
-  if (this->addressGetOrPost.size() != 0)
-    if (this->addressGetOrPost[0] != '/')
+  if (this->addressGetOrPost.size() != 0) {
+    if (this->addressGetOrPost[0] != '/') {
       this->addressGetOrPost = '/' + this->addressGetOrPost;
+    }
+  }
   newAddressStream << this->addressGetOrPost;
   if (theGlobalVariables.flagRunningApache)
     redirectHeaderStream << "Content-Type: text/html\r\n";
@@ -3426,9 +3445,11 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection() {
   if (this->hostNoPort == "")
     newAddressStream << "calculator-algebra.org";
   newAddressStream << ":" << this->parent->httpSSLPort;
-  if (this->addressGetOrPost.size() != 0)
-    if (this->addressGetOrPost[0] != '/')
+  if (this->addressGetOrPost.size() != 0) {
+    if (this->addressGetOrPost[0] != '/') {
       this->addressGetOrPost = '/' + this->addressGetOrPost;
+    }
+  }
   newAddressStream << this->addressGetOrPost;
   if (theGlobalVariables.flagRunningApache)
     redirectStream << "Content-Type: text/html\r\n";
@@ -3585,133 +3606,168 @@ int WebWorker::ServeClient() {
     theGlobalVariables.userCalculatorRequestType == "databaseModifyEntry"
   ) {
     return this->ProcessDatabaseModifyEntry();
-  } else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accounts")
+  } else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accounts") {
     return this->ProcessAccounts();
-  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accountsJSON")
+  } else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accountsJSON") {
     return this->ProcessAccountsJSON();
-  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-           theGlobalVariables.userCalculatorRequestType == "navigation")
+  } else if (
+    theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
+    theGlobalVariables.userCalculatorRequestType == "navigation"
+  ) {
     return this->ProcessNavigation();
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::examplesJSON)
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::examplesJSON) {
     return this->ProcessCalculatorExamplesJSON();
-  else if (theGlobalVariables.userCalculatorRequestType == "toggleMonitoring")
+  } else if (theGlobalVariables.userCalculatorRequestType == "toggleMonitoring") {
     return this->ProcessToggleMonitoring();
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::serverStatusJSON)
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::serverStatusJSON) {
     return this->ProcessServerStatusJSON();
-  if (theGlobalVariables.userCalculatorRequestType == "monitor")
+  }
+  if (theGlobalVariables.userCalculatorRequestType == "monitor") {
     return this->ProcessMonitor();
-  else if (theGlobalVariables.userCalculatorRequestType == "pause" && theGlobalVariables.flagAllowProcessMonitoring)
+  } else if (theGlobalVariables.userCalculatorRequestType == "pause" && theGlobalVariables.flagAllowProcessMonitoring) {
     return this->ProcessPauseWorker();
-  else if (
+  } else if (
     theGlobalVariables.userCalculatorRequestType == WebAPI::request::indicator &&
     theGlobalVariables.flagAllowProcessMonitoring
   ) {
     return this->ProcessComputationIndicator();
-  }
-  //The following line is NOT ALLOWED:
-  //this->parent->ReleaseNonActiveWorkers();
-  //Reason: the architecture changed, now multiple requests
-  //can be piped through one worker.
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::setProblemData)
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::setProblemData) {
     return this->ProcessSetProblemDatabaseInfo();
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword)
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword) {
     return this->ProcessChangePassword(argumentProcessingFailureComments.str());
-  else if (theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
-           theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount)
+  } else if (
+    theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
+    theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount
+  ) {
     return this->ProcessChangePasswordPage();
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON)
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON) {
     return this->ProcessActivateAccount();
-  else if (theGlobalVariables.userCalculatorRequestType == "signUp")
+  } else if (theGlobalVariables.userCalculatorRequestType == "signUp") {
     return this->ProcessSignUP();
-  else if (theGlobalVariables.userCalculatorRequestType == "forgotLogin")
+  } else if (theGlobalVariables.userCalculatorRequestType == "forgotLogin") {
     return this->ProcessForgotLogin();
-  else if (theGlobalVariables.userCalculatorRequestType == "forgotLoginPage")
+  } else if (theGlobalVariables.userCalculatorRequestType == "forgotLoginPage") {
     return this->ProcessForgotLoginPage();
-  else if (theGlobalVariables.userCalculatorRequestType == "login")
+  } else if (theGlobalVariables.userCalculatorRequestType == "login") {
     return this->ProcessLoginUserInfo(comments.str());
-  else if (theGlobalVariables.userCalculatorRequestType == "logout")
+  } else if (theGlobalVariables.userCalculatorRequestType == "logout") {
     return this->ProcessLogout();
-  else if ((theGlobalVariables.userCalculatorRequestType == "addEmails"||
-            theGlobalVariables.userCalculatorRequestType == "addUsers") &&
-            theGlobalVariables.flagLoggedIn)
+  } else if ((
+      theGlobalVariables.userCalculatorRequestType == "addEmails"||
+      theGlobalVariables.userCalculatorRequestType == "addUsers"
+    ) &&
+    theGlobalVariables.flagLoggedIn
+  ) {
     return this->ProcessAddUserEmails();
-  else if (theGlobalVariables.userCalculatorRequestType == "setTeacher" &&
-           theGlobalVariables.flagLoggedIn)
+  } else if (
+    theGlobalVariables.userCalculatorRequestType == "setTeacher" &&
+    theGlobalVariables.flagLoggedIn
+  ) {
     return this->ProcessAssignTeacherToSection();
-  else if ((theGlobalVariables.userCalculatorRequestType == "submitAnswers" ||
-            theGlobalVariables.userCalculatorRequestType == "submitExercise") &&
-           theGlobalVariables.flagLoggedIn)
+  } else if ((
+      theGlobalVariables.userCalculatorRequestType == "submitAnswers" ||
+      theGlobalVariables.userCalculatorRequestType == "submitExercise"
+    ) &&
+    theGlobalVariables.flagLoggedIn
+  ) {
     return this->ProcessSubmitAnswers();
-  else if (theGlobalVariables.userCalculatorRequestType == "scores" && theGlobalVariables.flagLoggedIn)
+  } else if (theGlobalVariables.userCalculatorRequestType == "scores" && theGlobalVariables.flagLoggedIn) {
     return this->ProcessScores();
-  else if (theGlobalVariables.userCalculatorRequestType == "scoresInCoursePage" && theGlobalVariables.flagLoggedIn)
+  } else if (theGlobalVariables.userCalculatorRequestType == "scoresInCoursePage" && theGlobalVariables.flagLoggedIn) {
     return this->ProcessScoresInCoursePage();
-  else if (theGlobalVariables.UserGuestMode() && theGlobalVariables.userCalculatorRequestType == "submitExerciseNoLogin")
+  } else if (theGlobalVariables.UserGuestMode() && theGlobalVariables.userCalculatorRequestType == "submitExerciseNoLogin") {
     return this->ProcessSubmitAnswers();
-  else if ((theGlobalVariables.userCalculatorRequestType == "problemGiveUp" &&
-            theGlobalVariables.flagLoggedIn) ||
-            theGlobalVariables.userCalculatorRequestType == "problemGiveUpNoLogin")
+  } else if ((
+      theGlobalVariables.userCalculatorRequestType == "problemGiveUp" &&
+      theGlobalVariables.flagLoggedIn
+    ) ||
+    theGlobalVariables.userCalculatorRequestType == "problemGiveUpNoLogin"
+  ) {
     return this->ProcessProblemGiveUp();
-  else if ((theGlobalVariables.userCalculatorRequestType == "problemGiveUpJSON" &&
-            theGlobalVariables.flagLoggedIn) ||
-            theGlobalVariables.userCalculatorRequestType == "problemGiveUpNoLoginJSON")
+  } else if ((
+      theGlobalVariables.userCalculatorRequestType == "problemGiveUpJSON" &&
+      theGlobalVariables.flagLoggedIn
+    ) ||
+    theGlobalVariables.userCalculatorRequestType == "problemGiveUpNoLoginJSON"
+  ) {
     return this->ProcessProblemGiveUpJSON();
-  else if ((theGlobalVariables.userCalculatorRequestType == "problemSolution" &&
-            theGlobalVariables.flagLoggedIn) ||
-            theGlobalVariables.userCalculatorRequestType == "problemSolutionNoLogin")
+  } else if ((
+      theGlobalVariables.userCalculatorRequestType == "problemSolution" &&
+      theGlobalVariables.flagLoggedIn
+    ) ||
+    theGlobalVariables.userCalculatorRequestType == "problemSolutionNoLogin"
+  ) {
     return this->ProcessProblemSolution();
-  else if ((theGlobalVariables.userCalculatorRequestType == "submitAnswersPreview" ||
-            theGlobalVariables.userCalculatorRequestType == "submitExercisePreview") &&
-           theGlobalVariables.flagLoggedIn)
+  } else if ((
+      theGlobalVariables.userCalculatorRequestType == "submitAnswersPreview" ||
+      theGlobalVariables.userCalculatorRequestType == "submitExercisePreview"
+    ) &&
+    theGlobalVariables.flagLoggedIn
+  ) {
     return this->ProcessSubmitAnswersPreview();
-  else if (theGlobalVariables.userCalculatorRequestType == "submitExercisePreviewNoLogin" &&
-           theGlobalVariables.UserGuestMode())
+  } else if (
+    theGlobalVariables.userCalculatorRequestType == "submitExercisePreviewNoLogin" &&
+    theGlobalVariables.UserGuestMode()
+  ) {
     return this->ProcessSubmitAnswersPreview();
-  else if (theGlobalVariables.userCalculatorRequestType == "scoredQuiz" ||
-           theGlobalVariables.userCalculatorRequestType == "exercise" ||
-           theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin" ||
-           theGlobalVariables.userCalculatorRequestType == "exerciseJSON" ||
-           theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON")
+  } else if (
+    theGlobalVariables.userCalculatorRequestType == "scoredQuiz" ||
+    theGlobalVariables.userCalculatorRequestType == "exercise" ||
+    theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin" ||
+    theGlobalVariables.userCalculatorRequestType == "exerciseJSON" ||
+    theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON"
+  ) {
     return this->ProcessExamPageJSON();
-  else if (theGlobalVariables.userCalculatorRequestType == "template" ||
-           theGlobalVariables.userCalculatorRequestType == "templateNoLogin")
+  } else if (
+    theGlobalVariables.userCalculatorRequestType == "template" ||
+    theGlobalVariables.userCalculatorRequestType == "templateNoLogin"
+  ) {
     return this->ProcessTemplate();
-  else if (theGlobalVariables.userCalculatorRequestType == "templateJSON" ||
-           theGlobalVariables.userCalculatorRequestType == "templateJSONNoLogin")
+  } else if (
+    theGlobalVariables.userCalculatorRequestType == "templateJSON" ||
+    theGlobalVariables.userCalculatorRequestType == "templateJSONNoLogin"
+  ) {
     return this->ProcessTemplateJSON();
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::userInfoJSON) {
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::userInfoJSON) {
     return this->ProcessLoginUserInfo(comments.str());
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::editPage)
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::editPage) {
     return this->ProcessEditPageJSON();
-  else if (theGlobalVariables.userCalculatorRequestType == "modifyPage")
+  } else if (theGlobalVariables.userCalculatorRequestType == "modifyPage") {
     return this->ProcessModifyPage();
-  else if (theGlobalVariables.userCalculatorRequestType == "slidesFromSource" ||
-           theGlobalVariables.userCalculatorRequestType == "homeworkFromSource")
+  } else if (
+    theGlobalVariables.userCalculatorRequestType == "slidesFromSource" ||
+    theGlobalVariables.userCalculatorRequestType == "homeworkFromSource"
+  ) {
     return this->ProcessSlidesOrHomeworkFromSource();
-  else if (theGlobalVariables.userCalculatorRequestType == "slidesSource" ||
-           theGlobalVariables.userCalculatorRequestType == "homeworkSource")
+  } else if (
+    theGlobalVariables.userCalculatorRequestType == "slidesSource" ||
+    theGlobalVariables.userCalculatorRequestType == "homeworkSource"
+  ) {
     return this->ProcessSlidesSource();
-  else if (theGlobalVariables.userCalculatorRequestType == "clonePage")
+  } else if (theGlobalVariables.userCalculatorRequestType == "clonePage") {
     return this->ProcessClonePage(false);
-  else if (theGlobalVariables.userCalculatorRequestType == "clonePageJSON")
+  } else if (theGlobalVariables.userCalculatorRequestType == "clonePageJSON") {
     return this->ProcessClonePage(true);
-  else if (theGlobalVariables.userCalculatorRequestType == "compute")
+  } else if (theGlobalVariables.userCalculatorRequestType == "compute") {
     return this->ProcessCompute();
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::selectCourseJSON)
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::selectCourseJSON) {
     return this->ProcessSelectCourseJSON();
-  else if (theGlobalVariables.userCalculatorRequestType == "about")
+  } else if (theGlobalVariables.userCalculatorRequestType == "about") {
     return this->ProcessAbout();
-  else if (theGlobalVariables.userCalculatorRequestType == "topicListJSON" ||
-           theGlobalVariables.userCalculatorRequestType == "topicListJSONNoLogin")
+  } else if (
+    theGlobalVariables.userCalculatorRequestType == "topicListJSON" ||
+    theGlobalVariables.userCalculatorRequestType == "topicListJSONNoLogin"
+  ) {
     return this->ProcessTopicListJSON();
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::app)
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::app) {
     return this->ProcessApp(true);
-  else if (theGlobalVariables.userCalculatorRequestType == WebAPI::appNoCache)
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::appNoCache) {
     return this->ProcessApp(false);
-  else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::request::onePageJS)
+  } else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::request::onePageJS) {
     return this->ProcessCalculatorOnePageJS(false);
-  else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::request::onePageJSWithHash)
+  } else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::request::onePageJSWithHash) {
     return this->ProcessCalculatorOnePageJS(true);
+  }
   return this->ProcessFolderOrFile();
 }
 
@@ -3824,10 +3880,11 @@ std::string WebWorker::ToStringAddressRequest() const {
     out << this->addressComputed;
   out << "; ";
   out << " request = ";
-  if (theGlobalVariables.userCalculatorRequestType == "")
+  if (theGlobalVariables.userCalculatorRequestType == "") {
     out << "[empty]";
-  else
+  } else {
     out << theGlobalVariables.userCalculatorRequestType;
+  }
   return out.str();
 }
 
@@ -3880,8 +3937,9 @@ std::string WebWorker::ToStringStatus() const {
 }
 
 bool WebServer::CheckConsistency() {
-  if (this->flagDeallocated)
+  if (this->flagDeallocated) {
     crash << "Use after free of WebServer." << crash;
+  }
   return true;
 }
 
@@ -3902,16 +3960,18 @@ void WebServer::ReleaseEverything() {
     << " About to close socket: " << this->listeningSocketHTTP << ". " << logger::endL;
   if (this->listeningSocketHTTP != - 1) {
     close(this->listeningSocketHTTP);
-    if (theGlobalVariables.flagServerDetailedLog)
+    if (theGlobalVariables.flagServerDetailedLog) {
       currentLog << logger::red << "Detail: "
       << " Just closed socket: " << this->listeningSocketHTTP << logger::endL;
+    }
     this->listeningSocketHTTP = - 1;
   }
   if (this->listeningSocketHttpSSL != - 1) {
     close(this->listeningSocketHttpSSL);
-    if (theGlobalVariables.flagServerDetailedLog)
+    if (theGlobalVariables.flagServerDetailedLog) {
       currentLog << logger::red << "Detail: "
       << " Just closed socket: " << this->listeningSocketHttpSSL << logger::endL;
+    }
   }
   this->listeningSocketHttpSSL = - 1;
 }
@@ -3934,8 +3994,9 @@ void WebServer::SendStringThroughActiveWorker(const std::string& theString) {
 }
 
 void WebServer::PipeProgressReportToParentProcess(const std::string& theString) {
-  if (theWebServer.activeWorker == - 1)
+  if (theWebServer.activeWorker == - 1) {
     return;
+  }
   theWebServer.GetActiveWorker().PipeProgressReportToParentProcess(theString);
 }
 
@@ -4002,9 +4063,10 @@ WebWorker& WebServer::GetActiveWorker() {
   stOutput.theOutputFunction = 0; //<- We are checking if the web server is in order.
   //Before that we prevent the crashing mechanism from trying to use (the eventually corrupt) web server
   //to report the error over the Internet.
-  if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size)
+  if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size) {
     crash << "Active worker index is " << this->activeWorker << " however I have " << this->theWorkers.size
     << " workers. " << crash;
+  }
   stOutput.theOutputFunction = oldOutputFunction;//<-the web server is in order,
   //therefore we restore the ability to report crashes over the internet.
   return this->theWorkers[this->activeWorker];
@@ -4039,16 +4101,20 @@ void WebServer::WorkerTimerPing(int64_t pingTime) {
 
 void WebServer::ReleaseNonActiveWorkers() {
   MacroRegisterFunctionWithName("WebServer::ReleaseNonActiveWorkers");
-  for (int i = 0; i < this->theWorkers.size; i ++)
-    if (i != this->activeWorker)
+  for (int i = 0; i < this->theWorkers.size; i ++) {
+    if (i != this->activeWorker) {
       this->theWorkers[i].ReleaseKeepInUseFlag();
+    }
+  }
 }
 
 void WebServer::ReleaseSocketsNonActiveWorkers() {
   MacroRegisterFunctionWithName("WebServer::ReleaseSocketsNonActiveWorkers");
-  for (int i = 0; i < this->theWorkers.size; i ++)
-    if (i != this->activeWorker)
+  for (int i = 0; i < this->theWorkers.size; i ++) {
+    if (i != this->activeWorker) {
       this->Release(this->theWorkers[i].connectedSocketID);
+    }
+  }
 }
 
 bool WebServer::EmergencyRemoval_LastCreatedWorker() {
@@ -4206,14 +4272,17 @@ std::string WebServer::ToStringConnectionSummary() {
 
 std::string WebServer::ToStringStatusForLogFile() {
   MacroRegisterFunctionWithName("WebServer::ToStringStatusForLogFile");
-  if (theGlobalVariables.flagRunningApache)
-     return "Running through standard Apache web server, no connection details to display. ";
+  if (theGlobalVariables.flagRunningApache) {
+    return "Running through standard Apache web server, no connection details to display. ";
+  }
   std::stringstream out;
   out << this->ToStringConnectionSummary();
   int numInUse = 0;
-  for (int i = 0; i < this->theWorkers.size; i ++)
-    if (this->theWorkers[i].flagInUsE)
+  for (int i = 0; i < this->theWorkers.size; i ++) {
+    if (this->theWorkers[i].flagInUsE) {
       numInUse ++;
+    }
+  }
   out << "<hr>Currently, there are " << numInUse << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
   out
   << "<br>kill commands: " << this->NumProcessAssassinated
@@ -4237,16 +4306,17 @@ std::string WebServer::ToStringStatusAll() {
   out << "<hr>";
   out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><br>";
   out << "<a href=\"/LogFiles/" << GlobalVariables::GetDateForLogFiles() << "/\">" << "Current log files</a><hr>";
-  if (this->activeWorker == - 1)
+  if (this->activeWorker == - 1) {
     out << "The process is functioning as a server.";
-  else {
+  } else {
     out << "The process is functioning as a worker. The active worker is number " << this->activeWorker + 1 << ". ";
     out << "<br>" << this->ToStringStatusActive();
   }
   for (int i = 0; i < this->theWorkers.size; i ++) {
     WebWorker& currentWorker = this->theWorkers[i];
-    if (!currentWorker.flagInUsE)
+    if (!currentWorker.flagInUsE) {
       continue;
+    }
     currentWorker.pipeWorkerToWorkerStatus.ReadWithoutEmptying(false, false);
     currentWorker.status = currentWorker.pipeWorkerToWorkerStatus.GetLastRead();
   }
@@ -4265,12 +4335,13 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload) {
     if (this->timeLastExecutableModification != theFileStat.st_ctime) {
       stOutput << "<b>The server executable was updated, but the server has not been restarted yet. "
       << "Restarting in 0.5 seconds...</b>";
-      if (callReload)
+      if (callReload) {
         stOutput << "<script language =\"javascript\">setTimeout(resubmit, 500); "
         << " function resubmit() { location.reload(true);}</script>";
-      else
+      } else {
         stOutput << "<script language =\"javascript\">setTimeout(resubmit, 500); "
         << " function resubmit() { document.getElementById('formCalculator').submit();}</script>";
+      }
       if (this->activeWorker != - 1) {
         this->GetActiveWorker().SendAllBytesWithHeaders();
         this->ReleaseActiveWorker();
@@ -4303,13 +4374,13 @@ void WebServer::Restart() {
   *currentLog << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
   theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath << " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
-  if (theWebServer.flagNoMonitor)
+  if (theWebServer.flagNoMonitor) {
     theCommand << " serverNoMonitor " << " nokill " << timeLimitSeconds;
-  else if (theWebServer.flagPort8155)
+  } else if (theWebServer.flagPort8155) {
     theCommand << " server " << " nokill " << timeLimitSeconds;
-  else
+  } else {
     theCommand << " server8080 " << " nokill " << timeLimitSeconds;
-//  std::cout << "\nCalling: " << theCommand.str() << "\n";
+  }
   theGlobalVariables.CallSystemNoOutput(theCommand.str(), true); //kill any other running copies of the calculator.
 }
 
@@ -4330,11 +4401,14 @@ void WebServer::initPortsITry() {
 
 void WebServer::initListeningSockets() {
   MacroRegisterFunctionWithName("WebServer::initListeningSockets");
-  if (listen(this->listeningSocketHTTP, WebServer::maxNumPendingConnections) == - 1)
+  if (listen(this->listeningSocketHTTP, WebServer::maxNumPendingConnections) == - 1) {
     crash << "Listen function failed on http port." << crash;
-  if (theGlobalVariables.flagSSLisAvailable)
-    if (listen(this->listeningSocketHttpSSL, WebServer::maxNumPendingConnections) == - 1)
+  }
+  if (theGlobalVariables.flagSSLisAvailable) {
+    if (listen(this->listeningSocketHttpSSL, WebServer::maxNumPendingConnections) == - 1) {
       crash << "Listen function failed on https port." << crash;
+    }
+  }
   this->highestSocketNumber = - 1;
   if (this->listeningSocketHTTP != - 1) {
     this->theListeningSockets.AddOnTop(this->listeningSocketHTTP);
@@ -4377,11 +4451,11 @@ bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string
   return true;
 }
 
-void segfault_sigaction(int signal, siginfo_t* si, void* arg)
+void segfault_sigaction(int signal, siginfo_t* si, void* arg) {
 //<- this signal should never happen in
 //<- server, so even if racy, we take the risk of a hang.
 //<- racy-ness in child process does not bother us: hanged children are still fine.
-{ (void) signal; //avoid unused parameter warning, portable.
+  (void) signal; //avoid unused parameter warning, portable.
   (void) arg;
   crash << "Caught segfault at address: " << si->si_addr << crash;
   exit(0);
@@ -4460,21 +4534,23 @@ void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse) {
   this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[childIndex].userAddress, 1);
   std::stringstream commentsOnFailure;
   JSData workerMessage;
-  if (!workerMessage.readstring(messageString, false, &commentsOnFailure))
+  if (!workerMessage.readstring(messageString, false, &commentsOnFailure)) {
     logServer << logger::red << "Worker "
     << childIndex + 1 << " sent corrupted result message: "
     << messageString << ". Marking for reuse. " << logger::endL;
-  else
+  } else {
     logServer << logger::green << "Worker "
     << childIndex + 1 << " done with message: "
     << messageString
     << ". Marking for reuse. " << logger::endL;
+  }
   outputNumInUse --;
   this->NumWorkersNormallyExited ++;
   if (workerMessage["result"].string == "toggleMonitoring")
     this->ToggleProcessMonitoring();
-  if (workerMessage["connectionsServed"].type == JSData::JSnumber)
+  if (workerMessage["connectionsServed"].type == JSData::JSnumber) {
     this->NumberOfServerRequestsWithinAllConnections += (int) workerMessage["connectionsServed"].number;
+  }
 }
 
 void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
@@ -4646,10 +4722,11 @@ bool WebServer::initBindToPorts() {
       }
       if (p != NULL) {
         logServer << logger::yellow << "Successfully bound to port " << (*thePorts)[i] << logger::endL;
-        if (j == 0)
+        if (j == 0) {
           this->httpPort = (*thePorts)[i];
-        else
+        } else {
           this->httpSSLPort = (*thePorts)[i];
+        }
         break;
       }
       freeaddrinfo(servinfo); // all done with this structure
@@ -4811,12 +4888,13 @@ int WebServer::Run() {
       logServer << logger::red << "Detail: About to enter select loop. " << logger::endL;
     }
     while (select(this->highestSocketNumber + 1, &FDListenSockets, 0, 0, 0) == - 1) {
-      if (this->flagReapingChildren)
+      if (this->flagReapingChildren) {
         logServer << logger::yellow << "Select interrupted while reaping children. "
         << logger::endL;
-      else
+      } else {
         logServer << logger::red << " Select failed: possibly due to reaping children. Error message: "
         << strerror(errno) << logger::endL;
+      }
       this->NumFailedSelectsSoFar ++;
     }
     if (theGlobalVariables.flagServerDetailedLog) {
@@ -4957,10 +5035,11 @@ int WebServer::Run() {
       }
       return result;
     }
-    if (theGlobalVariables.flagServerDetailedLog)
+    if (theGlobalVariables.flagServerDetailedLog) {
       logProcessStats << logger::green << "Detail: fork successful. Time elapsed: "
       << theGlobalVariables.GetElapsedMilliseconds() << " ms. "
       << "About to unmask signals. " << logger::endL;
+    }
     theSignals.unblockSignals();
     this->ReleaseWorkerSideResources();
   }
@@ -5063,13 +5142,16 @@ void WebServer::FigureOutOperatingSystem() {
   supportedOSes.AddOnTop("Ubuntu");
   supportedOSes.AddOnTop("CentOS");
   std::string commandOutput = theGlobalVariables.CallSystemWithOutput("cat /etc/*-release");
-  if (commandOutput.find("ubuntu") != std::string::npos || commandOutput.find("Ubuntu") != std::string::npos ||
-      commandOutput.find("UBUNTU") != std::string::npos)
+  if (
+    commandOutput.find("ubuntu") != std::string::npos || commandOutput.find("Ubuntu") != std::string::npos ||
+    commandOutput.find("UBUNTU") != std::string::npos
+  ) {
     theGlobalVariables.OperatingSystem = "Ubuntu";
-  else if (commandOutput.find("CentOS") != std::string::npos)
+  } else if (commandOutput.find("CentOS") != std::string::npos) {
     theGlobalVariables.OperatingSystem = "CentOS";
-  else
+  } else {
     theGlobalVariables.OperatingSystem = "";
+  }
   if (theGlobalVariables.OperatingSystem != "")
     return;
   logWorker << logger::red << "Your Linux flavor is not currently supported. " << logger::endL;
@@ -5296,10 +5378,12 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   }
   std::string& secondArgument = theGlobalVariables.programArguments[1];
   if (secondArgument == "server" || secondArgument == "server8080" || secondArgument == "serverNoMonitor") {
-    if (secondArgument == "server8080")
+    if (secondArgument == "server8080") {
       theWebServer.flagPort8155 = false;
-    if (secondArgument == "serverNoMonitor")
+    }
+    if (secondArgument == "serverNoMonitor") {
       theWebServer.flagNoMonitor = true;
+    }
     theGlobalVariables.flagRunningBuiltInWebServer = true;
     theGlobalVariables.flagRunningAce = false;
     theWebServer.flagTryToKillOlderProcesses = true;
@@ -5308,22 +5392,25 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
     std::string& thirdArgument = theGlobalVariables.programArguments[2];
     std::string timeLimitString = "100";
     std::string killOrder = "";
-    if (thirdArgument == "nokill")
+    if (thirdArgument == "nokill") {
       killOrder = "nokill";
-    else
+    } else {
       timeLimitString = thirdArgument;
-    if (argC >= 4 && killOrder == "nokill")
+    }
+    if (argC >= 4 && killOrder == "nokill") {
       timeLimitString = theGlobalVariables.programArguments[3];
+    }
     theWebServer.flagTryToKillOlderProcesses = !(killOrder == "nokill");
     Rational timeLimit;
     timeLimit.AssignString(timeLimitString);
     int timeLimitInt = 0;
     if (timeLimit.IsIntegerFittingInInt(&timeLimitInt)) {
       theGlobalVariables.MaxComputationMilliseconds = timeLimitInt;
-      if (theGlobalVariables.MaxComputationMilliseconds <= 0)
+      if (theGlobalVariables.MaxComputationMilliseconds <= 0) {
         theGlobalVariables.MaxComputationMilliseconds = 0;
-      else
+      } else {
         theGlobalVariables.MaxComputationMilliseconds *= 1000;
+      }
       std::cout << "Max computation time: " << theGlobalVariables.MaxComputationMilliseconds << " ms." << std::endl;
     }
     return;
@@ -5471,8 +5558,10 @@ void WebServer::InitializeGlobalVariables() {
   folderSubstitutionsNonSensitive.SetKeyValue("/coursesavailable/", "../coursesavailable/"); //<-web server
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
 
-  folderSubstitutionsNonSensitive.SetKeyValue
-  ("/MathJax-2.7-latest/config/mathjax-calculator-setup.js", "./calculator-html/mathjax-calculator-setup.js");//<-coming from web server
+  folderSubstitutionsNonSensitive.SetKeyValue(
+    "/MathJax-2.7-latest/config/mathjax-calculator-setup.js",
+    "./calculator-html/mathjax-calculator-setup.js"
+  );//<-coming from web server
   folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");//<-coming from webserver
 
   folderSubstitutionsNonSensitive.SetKeyValue("/LaTeX-materials/", "../LaTeX-materials/");
@@ -5665,12 +5754,9 @@ int WebServer::main(int argc, char **argv) {
     theWebServer.CheckFreecalcSetup();
 
     theGlobalVariables.flagAceIsAvailable = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
-    if (!theGlobalVariables.flagAceIsAvailable && theGlobalVariables.flagRunningBuiltInWebServer)
+    if (!theGlobalVariables.flagAceIsAvailable && theGlobalVariables.flagRunningBuiltInWebServer) {
       logServer << logger::red << "MathJax not available. " << logger::endL;
-  //  if (false &&
-  //      theGlobalVariables.flagRunningBuiltInWebServer)
-  //  { theWebServer.TurnProcessMonitoringOn();
-  //  }
+    }
     if (theGlobalVariables.flagRunningBuiltInWebServer) {
       if (theGlobalVariables.MaxComputationMilliseconds <= 0) {
         logServer
@@ -5693,8 +5779,9 @@ int WebServer::main(int argc, char **argv) {
       return WebServer::mainApache();
     if (theGlobalVariables.flagRunningBuiltInWebServer)
       return theWebServer.Run();
-    if (theGlobalVariables.flagRunningCommandLine)
+    if (theGlobalVariables.flagRunningCommandLine) {
       return WebServer::mainCommandLine();
+    }
   }
   catch (...) {
     crash << "Exception caught: something very wrong has happened. " << crash;
@@ -5781,9 +5868,11 @@ int WebServer::mainApache() {
   theGlobalVariables.hostNoPort = theWorker.hostNoPort;
   std::string theURL = WebServer::GetEnvironment("REQUEST_URI");
   unsigned numBytesBeforeQuestionMark = 0;
-  for (numBytesBeforeQuestionMark = 0; numBytesBeforeQuestionMark < theURL.size(); numBytesBeforeQuestionMark++)
-    if (theURL[numBytesBeforeQuestionMark] == '?')
+  for (numBytesBeforeQuestionMark = 0; numBytesBeforeQuestionMark < theURL.size(); numBytesBeforeQuestionMark ++) {
+    if (theURL[numBytesBeforeQuestionMark] == '?') {
       break;
+    }
+  }
   theGlobalVariables.DisplayNameExecutable = theURL.substr(0, numBytesBeforeQuestionMark);
   theWorker.addressGetOrPost = theGlobalVariables.DisplayNameExecutable +
   "?" + WebServer::GetEnvironment("QUERY_STRING");
@@ -5817,16 +5906,20 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable() {
   out << "\n<br>\nRequest:\n" << theGlobalVariables.userCalculatorRequestType;
   if (theGlobalVariables.UserDefaultHasAdminRights())
     out << "\n<br>\n<b>User has admin rights</b>";
-  if (theWebServer.RequiresLogin(theGlobalVariables.userCalculatorRequestType, theWebServer.GetActiveWorker().addressComputed))
+  if (theWebServer.RequiresLogin(
+    theGlobalVariables.userCalculatorRequestType, theWebServer.GetActiveWorker().addressComputed
+  )) {
     out << "\n<br>\nAddress requires login. ";
-  else
+  } else {
     out << "\n<br>\nAddress <b>does not</b> require any login. ";
+  }
   out << "\n<hr>\n";
   for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++) {
     out << theGlobalVariables.webArguments.theKeys[i] << ": "
     << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.webArguments[i], true);
-    if (i != theGlobalVariables.webArguments.size() - 1)
+    if (i != theGlobalVariables.webArguments.size() - 1) {
       out << "\n<br>\n";
+    }
   }
   out << "\n<hr>\n";
   if (theGlobalVariables.flagRunningBuiltInWebServer) {
@@ -5902,7 +5995,8 @@ void WebWorker::SendAllBytesHttp() {
     );
     if (numBytesSent < 0) {
       if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR || errno == EIO) {
-        logIO << "WebWorker::SendAllBytes failed. Error: " << this->parent->ToStringLastErrorDescription() << logger::endL;
+        logIO << "WebWorker::SendAllBytes failed. Error: "
+        << this->parent->ToStringLastErrorDescription() << logger::endL;
       }
       return;
     }
@@ -5949,8 +6043,9 @@ void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, b
   (void) MustSendAll;
   int oldSize = this->remainingBytesToSenD.size;
   this->remainingBytesToSenD.SetSize(this->remainingBytesToSenD.size + stringToSend.size());
-  for (unsigned i = 0; i < stringToSend.size(); i ++)
+  for (unsigned i = 0; i < stringToSend.size(); i ++) {
     this->remainingBytesToSenD[i + oldSize] = stringToSend[i];
+  }
 }
 
 void WebWorker::SendAllBytesNoHeaders() {

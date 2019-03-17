@@ -37,8 +37,9 @@ public:
     return *this->owner;
   }
   void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner) {
-    if (generatorIndex < 0 || generatorIndex>inputOwner.GetNumGenerators())
+    if (generatorIndex < 0 || generatorIndex>inputOwner.GetNumGenerators()) {
       crash << "This is a programming error: attempting to assign impossible index to monomial UE. " << crash;
+    }
     this->owner = &inputOwner;
     this->generatorsIndices.SetSize(1);
     this->generatorsIndices[0] = generatorIndex;
@@ -73,8 +74,9 @@ public:
       return;
     }
     output = this->Powers[0];
-    for (int i = 1; i < this->generatorsIndices.size; i ++)
+    for (int i = 1; i < this->generatorsIndices.size; i ++) {
       output += (this->Powers[i]);
+    }
   }
   bool CommutingABntoBnAPlusLowerOrderAllowed(coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex);
   bool CommutingAnBtoBAnPlusLowerOrderAllowed(coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex);
@@ -125,11 +127,17 @@ public:
   bool IsEqualToZero() const {
     return this->size() == 0;
   }
-  bool HWMTAbilinearForm
-  (const ElementUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement,
-   const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0);
-  std::string IsInProperSubmodule
-  (const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero);
+  bool HWMTAbilinearForm(
+    const ElementUniversalEnveloping<coefficient>& right,
+    coefficient& output,
+    const Vector<coefficient>* subHiGoesToIthElement,
+    const coefficient& theRingUnit,
+    const coefficient& theRingZero,
+    std::stringstream* logStream = 0
+  );
+  std::string IsInProperSubmodule(
+    const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero
+  );
   bool HWTAAbilinearForm(
     const ElementUniversalEnveloping<coefficient>&right,
     coefficient& output,

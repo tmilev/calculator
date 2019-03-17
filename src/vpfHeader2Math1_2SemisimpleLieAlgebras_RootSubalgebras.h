@@ -46,7 +46,7 @@ public:
     return this->DebugString == right.DebugString;
   }
   unsigned int HashFunction() const {
-    int tempI= ::MathRoutines::Minimum((int) this->DebugString.length(), ::SomeRandomPrimesSize);
+    int tempI = ::MathRoutines::Minimum((int) this->DebugString.length(), ::SomeRandomPrimesSize);
     unsigned int result = 0;
     for (int i = 0; i < tempI; i ++) {
       result += this->DebugString[i] * ::SomeRandomPrimes[i];
@@ -83,8 +83,7 @@ public:
   }
 };
 
-class rootSubalgebra
-{
+class rootSubalgebra {
   friend std::ostream& operator << (std::ostream& output, rootSubalgebra& theSA) {
     output << theSA.ToString();
     return output;
@@ -258,8 +257,7 @@ public:
   bool operator>(const rootSubalgebra& other) const;
 };
 
-class rootSubalgebras
-{
+class rootSubalgebras {
 public:
   List<rootSubalgebra> theSubalgebras;
   coneRelations theBadRelations;
@@ -345,8 +343,7 @@ public:
   rootSubalgebras();
 };
 
-class slTwoSubalgebra
-{
+class slTwoSubalgebra {
 public:
 /////////////////////////////////////////////
   friend std::ostream& operator << (std::ostream& output, const slTwoSubalgebra& theSl2) {
@@ -407,28 +404,43 @@ public:
   std::string ToString(FormatExpressions* theFormat = 0) const;
   void GetInvolvedPosGenerators(List<ChevalleyGenerator>& output);
   void GetInvolvedNegGenerators(List<ChevalleyGenerator>& output);
-  void ElementToStringModuleDecompositionMinimalContainingRegularSAs
-  (bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output) const;
-  void ComputeModuleDecomposition
-  (Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA,
-   charSSAlgMod<Rational>& outputHWs, List<int>& outputModuleDimensions);
+  void ElementToStringModuleDecompositionMinimalContainingRegularSAs(
+    bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output
+  ) const;
+  void ComputeModuleDecomposition(
+    Vectors<Rational>& positiveRootsContainingRegularSA,
+    int dimensionContainingRegularSA,
+    charSSAlgMod<Rational>& outputHWs,
+    List<int>& outputModuleDimensions
+  );
   void ComputeModuleDecompositionAmbientLieAlgebra();
   bool AttemptToComputeCentralizer();
-  bool AttemptExtendingHFtoHEFWRTSubalgebra
-  (Vectors<Rational>& RootsWithCharacteristic2, Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
-   ElementSemisimpleLieAlgebra<Rational>& outputE, ElementSemisimpleLieAlgebra<Rational>& outputF, Matrix<Rational>& outputMatrixSystemToBeSolved,
-   PolynomialSubstitution<Rational>& outputSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector);
-  void initHEFSystemFromECoeffs
-  (Vectors<Rational>& rootsInPlay,
-   int numberVariables, int halfNumberVariables, Vector<Rational>& targetH, Matrix<Rational>& inputFCoeffs,
-   Matrix<Rational>& outputMatrixSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector, PolynomialSubstitution<Rational>& outputSystemToBeSolved);
-
-  void ComputeModuleDecompositionOfMinimalContainingRegularSAs
-  (SltwoSubalgebras& owne);
+  bool AttemptExtendingHFtoHEFWRTSubalgebra(
+    Vectors<Rational>& RootsWithCharacteristic2,
+    Selection& theZeroCharacteristics,
+    Vectors<Rational>& simpleBasisSA,
+    Vector<Rational>& h,
+    ElementSemisimpleLieAlgebra<Rational>& outputE,
+    ElementSemisimpleLieAlgebra<Rational>& outputF,
+    Matrix<Rational>& outputMatrixSystemToBeSolved,
+    PolynomialSubstitution<Rational>& outputSystemToBeSolved,
+    Matrix<Rational>& outputSystemColumnVector
+  );
+  void initHEFSystemFromECoeffs(
+    Vectors<Rational>& rootsInPlay,
+    int numberVariables,
+    int halfNumberVariables,
+    Vector<Rational>& targetH,
+    Matrix<Rational>& inputFCoeffs,
+    Matrix<Rational>& outputMatrixSystemToBeSolved,
+    Matrix<Rational>& outputSystemColumnVector,
+    PolynomialSubstitution<Rational>& outputSystemToBeSolved
+  );
+  void ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner);
   bool ModuleDecompositionFitsInto(const slTwoSubalgebra& other) const;
-  static bool ModuleDecompositionLeftFitsIntoRight
-  (const charSSAlgMod<Rational>& moduleDecompoLeft,
-   const charSSAlgMod<Rational>& moduleDecompoRight);
+  static bool ModuleDecompositionLeftFitsIntoRight(
+    const charSSAlgMod<Rational>& moduleDecompoLeft, const charSSAlgMod<Rational>& moduleDecompoRight
+  );
   void MakeReportPrecomputations(int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroupData& theWeyl);
@@ -438,8 +450,9 @@ public:
   unsigned int HashFunction() const {
     int tempI = MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
     int result = 0;
-    for (int i = 0; i < tempI; i ++)
+    for (int i = 0; i < tempI; i ++) {
       result += this->hCharacteristic[i].NumShort*SomeRandomPrimes[i];
+    }
     return result;
   }
   static inline unsigned int HashFunction(const slTwoSubalgebra& input) {
@@ -447,8 +460,7 @@ public:
   }
 };
 
-class SltwoSubalgebras : public HashedList<slTwoSubalgebra>
-{
+class SltwoSubalgebras : public HashedList<slTwoSubalgebra> {
   friend class SemisimpleSubalgebras;
   SemisimpleLieAlgebra* owner;
 public:
@@ -476,8 +488,10 @@ public:
   }
   bool CheckConsistency() const;
   void CheckForCorrectInitializationCrashIfNot() const {
-    if (this->owner == 0)
-      crash << "<br>This is a programming error. Object SltwoSubalgebras is not initialized, although it is supposed to be. " << crash;
+    if (this->owner == 0) {
+      crash << "<br>This is a programming error. Object SltwoSubalgebras "
+      << "is not initialized, although it is supposed to be. " << crash;
+    }
   }
   WeylGroupData& GetOwnerWeyl() const {
     return this->GetOwner().theWeyl;

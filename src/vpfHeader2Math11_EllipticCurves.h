@@ -6,8 +6,7 @@
 
 static ProjectInformationInstance ProjectInfovpfHeader_HeaderEllipticCurves(__FILE__, "Header, elliptic curves. ");
 
-class EllipticCurveWeierstrassNormalForm
-{
+class EllipticCurveWeierstrassNormalForm {
 public:
   LargeInt linearCoefficient;
   LargeInt constantTerm;
@@ -15,14 +14,15 @@ public:
   LargeIntUnsigned order;
   LargeIntUnsigned modulo;
   void MakeSecp256k1();
-  static bool GetOrderNISTCurve(const std::string& curveName, LargeIntUnsigned& output, std::stringstream *commentsOnFailure);
+  static bool GetOrderNISTCurve(
+    const std::string& curveName, LargeIntUnsigned& output, std::stringstream *commentsOnFailure
+  );
   static unsigned int HashFunction(const EllipticCurveWeierstrassNormalForm& input);
   bool operator==(const EllipticCurveWeierstrassNormalForm& other) const;
 };
 
 template <typename coefficient>
-class ElementEllipticCurve
-{
+class ElementEllipticCurve {
 public:
   EllipticCurveWeierstrassNormalForm owner;
   coefficient xCoordinate;

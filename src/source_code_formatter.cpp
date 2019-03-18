@@ -99,17 +99,26 @@ bool CodeFormatter::FormatCPPSourceCode(
 }
 
 void CodeFormatter::AddCurrentWord() {
-  this->AddWord(this->currentWord);
+  this->AddWordToOriginals(this->currentWord);
   this->currentWord = "";
 }
 
-void CodeFormatter::AddWord(const std::string& incomingString) {
+bool CodeFormatter::AddWordToTarget(const std::string& incomingString, List<CodeElement>& output) {
   if (incomingString == "") {
-    return;
+    return true;
   }
   CodeElement incoming;
   this->SetContentComputeType(incomingString, incoming);
-  this->originalElements.AddOnTop(incoming);
+  output.AddOnTop(incoming);
+  return true;
+}
+
+bool CodeFormatter::AddWordToTransformed(const std::string& incomingString) {
+  return this->AddWordToTarget(incomingString, this->transformedElements);
+}
+
+bool CodeFormatter::AddWordToOriginals(const std::string& incomingString) {
+  return this->AddWordToTarget(incomingString, this->originalElements);
 }
 
 bool CodeFormatter::isSeparatorCharacter(char input) {
@@ -152,6 +161,8 @@ void CodeFormatter::SetContentComputeType(const std::string& input, CodeElement&
   output.content = input;
   if (this->builtInTypes.Contains(input)) {
     output.type = this->builtInTypes.GetValueConstCrashIfNotPresent(input);
+  } else {
+    output.type = "";
   }
 }
 
@@ -179,8 +190,22 @@ bool CodeFormatter::DecreaseStack(int numberToPop) {
   return true;
 }
 
-bool CodeFormatter::ApplyOneRule() {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::ApplyOneRule");
+std::string CodeElement::ToString() {
+  std::stringstream out;
+  out << "[";
+  if (this->content == "\n") {
+    out << "\\n";
+  } else if (this->type == "whiteSpace" || this->content == " " || this->content == "  ") {
+    out << "[whiteSpace] " << this->content.size();
+  } else {
+    out << this->content;
+  }
+  out << "]";
+  return out.str();
+}
+
+std::string CodeFormatter::ToStringTransformed6() {
+  std::stringstream out;
   int lastIndex = this->transformedElements.size - 1;
   CodeElement& last = this->transformedElements[lastIndex];
   CodeElement& secondToLast = this->transformedElements[lastIndex - 1];
@@ -188,9 +213,101 @@ bool CodeFormatter::ApplyOneRule() {
   CodeElement& fourthToLast = this->transformedElements[lastIndex - 3];
   CodeElement& fifthToLast = this->transformedElements[lastIndex - 4];
   CodeElement& sixthToLast = this->transformedElements[lastIndex - 5];
-  if (last.type == "whiteSpace" && secondToLast.type == "whiteSpace") {
+  out
+  << "Indent: " << this->currentLineIndent << ", length: " << this->currentLineLength
+  << ", previous indent: " <<  this->previousLineIndent << ", previous length: "
+  << this->previousLineLength;
+  out << "<br>Last 6: "
+  << sixthToLast .ToString()
+  << fifthToLast .ToString()
+  << fourthToLast.ToString()
+  << thirdToLast .ToString()
+  << secondToLast.ToString()
+  << last        .ToString();
+  return out.str();
+}
+
+bool CodeFormatter::ApplyOneRule(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::ApplyOneRule");
+  (void) comments;
+  int lastIndex = this->transformedElements.size - 1;
+  CodeElement& last = this->transformedElements[lastIndex];
+  CodeElement& secondToLast = this->transformedElements[lastIndex - 1];
+  CodeElement& thirdToLast = this->transformedElements[lastIndex - 2];
+  CodeElement& fourthToLast = this->transformedElements[lastIndex - 3];
+  CodeElement& fifthToLast = this->transformedElements[lastIndex - 4];
+  CodeElement& sixthToLast = this->transformedElements[lastIndex - 5];
+  if (
+    (last.type == "whiteSpace" || last.content == " ") &&
+    (secondToLast.type == "whiteSpace" || secondToLast.content == " ")
+  ) {
     secondToLast.content = secondToLast.content + last.content;
+    secondToLast.type = "whiteSpace";
     return this->DecreaseStack(1);
+  }
+  if (secondToLast.content == "\\" && last.content == "\\") {
+    secondToLast.content = "\\\\";
+    secondToLast.type = "commentOneLine";
+    return this->DecreaseStack(1);
+  }
+  if (secondToLast.type == "commentOneLine" && last.content != "\n") {
+    secondToLast.content += last.content;
+    return this->DecreaseStack(1);
+  }
+  if (last.content == "\n" && secondToLast.content == ")" && this->currentLineLength > this->maximumDesiredLineLength) {
+    //if (comments != 0) {
+    //  *comments << "<hr>Rule 0.<br>" << this->ToStringTransformed6();
+    //}
+    this->SetContentComputeType("\n", secondToLast);
+    this->previousLineIndent = this->currentLineIndent;
+    last.type = "whiteSpace";
+    last.content.resize(this->currentLineIndent);
+    for (int i = 0; i < this->currentLineIndent; i ++) {
+      last.content[i] = ' ';
+    }
+    return this->AddWordToTransformed(")");
+  }
+  if (
+    this->previousLineLength > this->maximumDesiredLineLength &&
+    fifthToLast.content != "\n" &&
+    fourthToLast.content == ")" &&
+    thirdToLast.content == " " &&
+    secondToLast.content == "{" &&
+    last.content == "\n"
+  ) {
+    //if (comments != 0) {
+    //  *comments << "<hr>Rule 1.<br>" << this->ToStringTransformed6();
+    //}
+    this->SetContentComputeType("\n", fourthToLast);
+    this->previousLineIndent = this->currentLineIndent;
+    thirdToLast.type = "whiteSpace";
+    thirdToLast.content.resize(this->currentLineIndent);
+    for (int i = 0; i < this->currentLineIndent; i ++) {
+      thirdToLast.content[i] = ' ';
+    }
+    this->SetContentComputeType(")", secondToLast);
+    this->SetContentComputeType(" ", last);
+    this->AddWordToTransformed("{");
+    this->previousLineLength = thirdToLast.content.size() + 3;
+    this->currentLineLength = 0;
+    this->currentLineIndent = 0;
+    return this->AddWordToTransformed("\n");
+  }
+  if (
+    thirdToLast.content.size() > 1 &&
+    secondToLast.content == "\n" &&
+    last.content == "("
+  ) {
+    //if (comments != 0) {
+    //  *comments << "<hr>Rule 3.<br>" << this->ToStringTransformed6();
+    //}
+    this->SetContentComputeType("(", secondToLast);
+    this->SetContentComputeType("\n", last);
+    this->previousLineLength = this->currentLineLength;
+    this->currentLineLength = 2;
+    this->currentLineIndent = 0;
+    this->AddWordToTransformed(" ");
+    return this->AddWordToTransformed(" ");
   }
   if (
     (fourthToLast.content == ")" || fourthToLast.content == "else") &&
@@ -212,8 +329,7 @@ bool CodeFormatter::ApplyOneRule() {
     secondToLast.content = " {";
     secondToLast.type = "openCurlyBrace";
     this->SetContentComputeType("\n", last);
-    this->AddWord(" ");
-    return true;
+    return this->AddWordToTransformed(" ");
   }
   if (
     fifthToLast.content == ")" &&
@@ -225,7 +341,7 @@ bool CodeFormatter::ApplyOneRule() {
     thirdToLast.content = "const ";
     this->SetContentComputeType("{", secondToLast);
     this->SetContentComputeType("\n", last);
-    this->AddWord(" ");
+    this->AddWordToTransformed(" ");
     return true;
   }
   if (
@@ -245,10 +361,47 @@ bool CodeFormatter::ApplyOneRule() {
   }
   if (secondToLast.content == ")" && last.content == "const") {
     this->SetContentComputeType(" ", last);
-    this->AddWord("const");
+    this->AddWordToTransformed("const");
     return true;
   }
   return false;
+}
+
+bool CodeFormatter::ComputeState(int maximumElementsToProcess) {
+  int lineLength = 0;
+  int tooManyElementCounter = 0;
+  for (int i = this->transformedElements.size - 1; i >= 0; i --) {
+    tooManyElementCounter ++;
+    if (tooManyElementCounter > maximumElementsToProcess) {
+      return false;
+    }
+    CodeElement& current = this->transformedElements[i];
+    if (current.content == "\n" || current.type == "newLine") {
+      this->currentLineLength = lineLength;
+      return true;
+    }
+    lineLength += current.content.size();
+  }
+  this->currentLineLength = lineLength;
+  return true;
+}
+
+bool CodeFormatter::AddAndAccount(const CodeElement& incoming) {
+  this->transformedElements.AddOnTop(incoming);
+  if (incoming.content == "\n") {
+    this->previousLineIndent = this->currentLineIndent;
+    this->previousLineLength = this->currentLineLength;
+    this->currentLineLength = 0;
+    this->currentLineIndent = 0;
+  } else {
+    if (this->currentLineIndent == this->currentLineLength) {
+      if (incoming.type == "whiteSpace" || incoming.content == " ") {
+        this->currentLineIndent += incoming.content.size();
+      }
+    }
+    this->currentLineLength += incoming.content.size();
+  }
+  return true;
 }
 
 bool CodeFormatter::ApplyFormattingRules(std::stringstream* comments) {
@@ -257,15 +410,19 @@ bool CodeFormatter::ApplyFormattingRules(std::stringstream* comments) {
   CodeElement empty;
   this->transformedElements.initializeFillInObject(6, empty);
   for (int i = 0; i < this->originalElements.size; i ++) {
-    this->transformedElements.AddOnTop(this->originalElements[i]);
+    CodeElement& currentElement = this->originalElements[i];
+    this->AddAndAccount(currentElement);
     int tooManyRulesCounter = 0;
     int maximumRules = 200;
-    while (this->ApplyOneRule()) {
+    while (this->ApplyOneRule(comments)) {
+      this->ComputeState(200);
       tooManyRulesCounter ++;
       if (tooManyRulesCounter > maximumRules) {
         if (comments != 0) {
           *comments << "Too many rules, this must be a programming error. ";
         }
+        //return true;
+        //int fixme;
         return false;
       }
     }
@@ -279,6 +436,11 @@ CodeFormatter::CodeFormatter() {
   this->currentChar = 0;
   this->separatorCharacters = "(){} \t\n\r,:;.*&+-/[]";
   this->separatorCharactersMap.initializeFillInObject(256, false);
+  this->currentLineLength = 0;
+  this->currentLineIndent = 0;
+  this->previousLineIndent = 0;
+  this->previousLineLength = 0;
+  this->maximumDesiredLineLength = 120;
   for (unsigned i = 0; i < this->separatorCharacters.size(); i ++) {
     this->separatorCharactersMap[(unsigned) this->separatorCharacters[i]] = true;
   }

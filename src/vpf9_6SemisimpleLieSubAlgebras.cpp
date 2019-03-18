@@ -4316,24 +4316,28 @@ bool SltwoSubalgebras::ContainsSl2WithGivenH(Vector<Rational>& theH, int* output
   ElementSemisimpleLieAlgebra<Rational> tempH;
   this->CheckForCorrectInitializationCrashIfNot();
   tempH.MakeHgenerator(theH, *this->owner);
-  for (int i = 0; i < this->size; i ++)
+  for (int i = 0; i < this->size; i ++) {
     if (this->TheObjects[i].theH == tempH) {
-      if (outputIndex != 0)
+      if (outputIndex != 0) {
         *outputIndex = i;
+      }
       return true;
     }
+  }
   return false;
 }
 
 bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex) {
   if (outputIndex != 0)
     *outputIndex = - 1;
-  for (int i = 0; i < this->size; i ++)
+  for (int i = 0; i < this->size; i ++) {
     if ((*this)[i].hCharacteristic == theHCharacteristic) {
-      if (outputIndex != 0)
+      if (outputIndex != 0) {
         *outputIndex = i;
+      }
       return true;
     }
+  }
   return false;
 }
 
@@ -4343,38 +4347,31 @@ bool slTwoSubalgebra::AttemptToComputeCentralizer() {
   this->flagCentralizerTypeComputed = false;
   Weight<Rational> zeroWeight;
   zeroWeight.weightFundamentalCoordS.MakeZero(1);
-  if (!this->moduleDecompositionAmbientSA.GetMonomialCoefficient(zeroWeight).IsSmallInteger
-      (&this->dimensionCentralizer))
+  if (
+    !this->moduleDecompositionAmbientSA.GetMonomialCoefficient(zeroWeight).IsSmallInteger(
+      &this->dimensionCentralizer
+  )) {
     crash << "Dimension of centralizer of sl(2) subalgebra is not a small integer. This shouldn't happen. " << crash;
+  }
   for (int i = 0; i < this->IndicesMinimalContainingRootSAs.size; i ++) {
     rootSubalgebra& currentMinimalContainer =
     this->container->theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[i]];
     Rational dimOfSSpartOfCentralizerOfRootSA =
     currentMinimalContainer.theCentralizerDynkinType.GetRankRational() +
     currentMinimalContainer.theCentralizerDynkinType.GetRootSystemSize();
-//    stOutput << "<hr>Current minimal container: " << currentMinimalContainer.theDynkinType.ToString()
-//    << "<br> with centralizer: " << currentMinimalContainer.theCentralizerDynkinType.ToString()
-//    << ". <br>dimOfSSpartOfCentralizerOfRootSA is: " << dimOfSSpartOfCentralizerOfRootSA.ToString()
-//    << ". ";
     this->dimCentralizerToralPart =
     this->owner->GetRank() -
     currentMinimalContainer.theDynkinType.GetRank() -
     currentMinimalContainer.theCentralizerDynkinType.GetRank();
-//    stOutput << "<br>this->dimCentralizerToralPart is: " << this->dimCentralizerToralPart.ToString();
 
     Rational totalCentalizerCandidateDim = dimOfSSpartOfCentralizerOfRootSA + this->dimCentralizerToralPart;
-//    stOutput << "<br>totalCentalizerCandidateDim is: " << totalCentalizerCandidateDim.ToString()
-//    << "<br>this->dimensionCentralizer is: " << this->dimensionCentralizer;
 
     if (totalCentalizerCandidateDim == this->dimensionCentralizer) {
-      //stOutput << "<br>Centralizer computed successfully to be: "
-      //<< currentMinimalContainer.theCentralizerDynkinType.ToString();
       this->flagCentralizerIsRegular = true;
       this->flagCentralizerTypeComputed = true;
       this->CentralizerTypeIfKnown = currentMinimalContainer.theCentralizerDynkinType;
       return true;
     }
-
   }
   return false;
 }

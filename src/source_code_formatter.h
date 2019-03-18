@@ -12,6 +12,7 @@ class CodeElement {
 public:
   std::string content;
   std::string type;
+  std::string ToString();
 };
 
 class CodeFormatter {
@@ -29,9 +30,16 @@ public:
   std::string whiteSpaceCharactersNoNewLine;
   std::string separatorCharacters;
   List<bool> separatorCharactersMap;
+  int maximumDesiredLineLength;
+  int previousLineIndent;
+  int previousLineLength;
+  int currentLineIndent;
+  int currentLineLength;
   CodeFormatter();
   void AddCurrentWord();
-  void AddWord(const std::string& incomingString);
+  bool AddWordToTarget(const std::string& incomingString, List<CodeElement>& output);
+  bool AddWordToOriginals(const std::string& incomingString);
+  bool AddWordToTransformed(const std::string& incomingString);
   void SetContentComputeType(const std::string& input, CodeElement& output);
   static bool FormatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments);
   bool FormatCPPSourceCode(
@@ -45,7 +53,10 @@ public:
   bool ExtractCodeElements(std::stringstream* comments);
   bool WriteFormatedCode(std::stringstream* comments);
   bool ApplyFormattingRules(std::stringstream* comments);
-  bool ApplyOneRule();
+  bool ApplyOneRule(std::stringstream* comments);
+  std::string ToStringTransformed6();
+  bool ComputeState(int maximumElementsToProcess);
+  bool AddAndAccount(const CodeElement& incoming);
   bool DecreaseStack(int numberToPop);
   bool initializeFileNames(
     const std::string& fileName,

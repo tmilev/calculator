@@ -12,22 +12,25 @@ const int PackedVector<scalar>::size;
 template <typename scalar>
 PackedVector<scalar> PackedVector<scalar>::operator+(const PackedVector<scalar>& w) const {
   PackedVector<scalar> out;
-  for (int i = 0; i < this->size; i ++)
+  for (int i = 0; i < this->size; i ++) {
     out[i] = this->data[i] + w[i];
+  }
   return out;
 }
 
 template <typename scalar>
 void PackedVector<scalar>::operator+=(const PackedVector<scalar>& w) {
-  for (int i = 0; i < this->size; i ++)
+  for (int i = 0; i < this->size; i ++) {
     this->data[i] += w[i];
+  }
 }
 
 template <typename scalar>
 PackedVector<scalar> PackedVector<scalar>::operator*(scalar x) const {
   PackedVector<scalar> out;
-  for (int i = 0; i < this->size; i ++)
+  for (int i = 0; i < this->size; i ++) {
     out[i] = this->data[i] * x;
+  }
   return out;
 }
 
@@ -35,12 +38,15 @@ template <typename scalar>
 scalar PackedVector<scalar>::ScalarProduct(const PackedVector<scalar>& v, const Matrix<scalar>& B) const {
   PackedVector<scalar> Bv;
   Bv.MakeZero(B.NumRows);
-  for (int i = 0; i < B.NumRows; i ++)
-    for (int j = 0; j < B.NumCols; j ++)
+  for (int i = 0; i < B.NumRows; i ++) {
+    for (int j = 0; j < B.NumCols; j ++) {
       Bv[i] += B.elements[i][j] * v[j];
+    }
+  }
   scalar wBv = 0;
-  for (int i = 0; i < B.NumRows; i ++)
+  for (int i = 0; i < B.NumRows; i ++) {
     wBv += this->data[i] * Bv[i];
+  }
   return wBv;
 }
 /*
@@ -93,10 +99,12 @@ bool PackedVector<scalar>::operator==(const PackedVector<scalar>& w) const {
 template <typename scalar>
 bool PackedVector<scalar>::operator>(const PackedVector<scalar>&w) const {
   for (int i = 0; i < this->size; i ++) {
-    if (this->data[i] > w[i])
+    if (this->data[i] > w[i]) {
       return true;
-    if (this->data[i] < w[i])
+    }
+    if (this->data[i] < w[i]) {
       return false;
+    }
   }
   return false;
 }
@@ -104,14 +112,16 @@ bool PackedVector<scalar>::operator>(const PackedVector<scalar>&w) const {
 
 template <typename scalar>
 void PackedVector<scalar>::MakeZero(int n) {
-  for (int i = 0; i < this->size; i ++)
+  for (int i = 0; i < this->size; i ++) {
     this->data[i] = 0;
+  }
 }
 
 template <typename scalar>
 void PackedVector<scalar>::MakeEi(int d, int ei) {
-  for (int i = 0; i < this->size; i ++)
+  for (int i = 0; i < this->size; i ++) {
     this->data[i] = 0;
+  }
   this->data[ei] = 1;
 }
 
@@ -123,8 +133,9 @@ unsigned int PackedVector<scalar>::HashFunction(const PackedVector<scalar>& in) 
 template <typename scalar>
 unsigned int PackedVector<scalar>::HashFunction() const {
   unsigned int result = 0;
-  for (int i = 0; i < this->size; i ++)
+  for (int i = 0; i < this->size; i ++) {
     result += this->data[i].HashFunction() * SomeRandomPrimes[i];
+  }
   return result;
 }
 
@@ -133,8 +144,9 @@ std::ostream& operator<<(std::ostream& out, const PackedVector<scalar>& v) {
   out << '(';
   for (int i = 0; i < v.size; i ++) {
     out << v[i];
-    if (i != v.size - 1)
+    if (i != v.size - 1) {
       out << ", ";
+    }
   }
   out << ')';
   return out;

@@ -77,10 +77,12 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat) {
   << " Below you can find the same table in pure LaTeX, "
   << " which you can render in a separate LaTeX session, should "
   << " wish to do so on your own. " <<  theHtmlStream.str();
-  if (theFormat != 0)
-    if (theFormat->flagLatexDetailsInHtml)
+  if (theFormat != 0) {
+    if (theFormat->flagLatexDetailsInHtml) {
       out << "The above table in LaTex format follows. <hr>"
       << theTableLateXStream.str() << "<hr>";
+    }
+  }
   return out.str();
 }
 
@@ -114,17 +116,19 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
     startTimer = theGlobalVariables.GetElapsedSeconds();
     theReport.Report(out.str());
   }
-  for (int i = 0; i < this->theWeyl.RootSystem.size; i ++)
+  for (int i = 0; i < this->theWeyl.RootSystem.size; i ++) {
     for (int j = i; j < this->theWeyl.RootSystem.size; j ++) {
       tempRoot = this->theWeyl.RootSystem[i] + this->theWeyl.RootSystem[j];
-      if (!tempRoot.IsEqualToZero())
+      if (!tempRoot.IsEqualToZero()) {
         if (!this->theWeyl.IsARoot(tempRoot)) {
           this->Computed.elements[i][j] = true;
           this->ChevalleyConstants.elements[i][j].MakeZero();
           this->Computed.elements[j][i] = true;
           this->ChevalleyConstants.elements[j][i].MakeZero();
         }
+      }
     }
+  }
   double startStructureConstantComputation = - 1;
   if (theGlobalVariables.flagReportEverything) {
     out << "done in " << theGlobalVariables.GetElapsedSeconds() - startTimer
@@ -149,9 +153,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
     int theIndex = this->theWeyl.RootSystem.GetIndex(theRoot);
     Vector<Rational> smallRoot2;
     int FirstIndexFirstPosChoice = - 1;
-//    int FirstIndexFirstNegChoice;
     int SecondIndexFirstPosChoice = - 1;
-//    int SecondIndexFirstNegChoice;
     Rational CurrentHeight;
     for (int i = 0; i < this->theWeyl.RootsOfBorel.size; i ++) {
       Vector<Rational>& smallRoot1 = this->theWeyl.RootsOfBorel[i];
@@ -166,21 +168,18 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
           if (FirstIndexFirstPosChoice == - 1) {
             FirstIndexFirstPosChoice = FirstPosIndex;
             SecondIndexFirstPosChoice = SecondPosIndex;
-//             FirstIndexFirstNegChoice =FirstNegIndex;
-//             SecondIndexFirstNegChoice = SecondNegIndex;
             int thePower;
             this->GetMaxQForWhichBetaMinusQAlphaIsARoot(smallRoot1, smallRoot2, thePower);
             this->ChevalleyConstants.elements[FirstNegIndex][SecondNegIndex] = - 1 - thePower;
             this->Computed.elements[FirstNegIndex][SecondNegIndex] = true;
-          } else
-            this->ComputeOneChevalleyConstant(FirstIndexFirstPosChoice, SecondIndexFirstPosChoice, FirstNegIndex, SecondNegIndex, theIndex);
-          //this->ComputeDebugString();
+          } else {
+            this->ComputeOneChevalleyConstant(
+              FirstIndexFirstPosChoice, SecondIndexFirstPosChoice, FirstNegIndex, SecondNegIndex, theIndex
+            );
+          }
           this->ExploitSymmetryAndCyclicityChevalleyConstants(FirstNegIndex, SecondNegIndex);
-          //this->ComputeDebugString();
         }
       }
-//      if (this->flagAnErrorHasOccurredTimeToPanic)
-//        this->ComputeDebugString(false, false, theGlobalVariables);
     }
     nonExploredRoots.selected[theBorelIndex] = false;
     nonExploredRoots.ComputeIndicesFromSelection();
@@ -199,9 +198,10 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
     << theGlobalVariables.GetElapsedSeconds() - startTimer << " seconds. ";
     theReport.Report(out.str());
   }
-  if (this->GetNumPosRoots() <= 0)
-    crash << "This is a programming error: number of positive roots of a semisimple Lie algebra is reported to be zero. " << crash;
-//  this->TestForConsistency(theGlobalVariables);
+  if (this->GetNumPosRoots() <= 0) {
+    crash << "This is a programming error: number of positive roots of a "
+    << "semisimple Lie algebra is reported to be zero. " << crash;
+  }
 }
 
 void SemisimpleLieAlgebra::ComputeMultTable() {
@@ -226,13 +226,17 @@ void SemisimpleLieAlgebra::ComputeMultTable() {
       if (leftWeight.IsEqualToZero() && !rightWeight.IsEqualToZero()) {
         this->theLiebrackets.elements[i][j].MakeGenerator(j, *this);
         hRoot.MakeEi(theRank, i - numPosRoots);
-        this->theLiebrackets.elements[i][j] *= Vector<Rational>::ScalarProduct(hRoot, rightWeight, this->theWeyl.CartanSymmetric);
+        this->theLiebrackets.elements[i][j] *= Vector<Rational>::ScalarProduct(
+          hRoot, rightWeight, this->theWeyl.CartanSymmetric
+        );
         continue;
       }
       if (!leftWeight.IsEqualToZero() && rightWeight.IsEqualToZero()) {
         this->theLiebrackets.elements[i][j].MakeGenerator(i, *this);
         hRoot.MakeEi(theRank, j - numPosRoots);
-        this->theLiebrackets.elements[i][j] *= - Vector<Rational>::ScalarProduct(hRoot, leftWeight, this->theWeyl.CartanSymmetric);
+        this->theLiebrackets.elements[i][j] *= - Vector<Rational>::ScalarProduct(
+          hRoot, leftWeight, this->theWeyl.CartanSymmetric
+        );
         continue;
       }
       if (!leftWeight.IsEqualToZero() && !rightWeight.IsEqualToZero()) {
@@ -243,9 +247,9 @@ void SemisimpleLieAlgebra::ComputeMultTable() {
           int rightIndex = this->GetRootIndexFromGenerator(j);
           this->theLiebrackets.elements[i][j] *= this->ChevalleyConstants.elements[leftIndex][rightIndex];
         } else {
-          if (!(leftWeight +rightWeight).IsEqualToZero())
+          if (!(leftWeight +rightWeight).IsEqualToZero()) {
             this->theLiebrackets.elements[i][j].MakeZero();
-          else {
+          } else {
             ElementSemisimpleLieAlgebra<Rational>& current = this->theLiebrackets.elements[i][j];
             current.MakeHgenerator(leftWeight * 2 / (this->theWeyl.RootScalarCartanRoot(leftWeight, leftWeight)), *this);
           }
@@ -254,13 +258,15 @@ void SemisimpleLieAlgebra::ComputeMultTable() {
       }
     }
   }
-  for (int i = 0; i < numGenerators; i ++)
+  for (int i = 0; i < numGenerators; i ++) {
     for (int j = i + 1; j < numGenerators; j ++) {
       this->theLiebrackets.elements[j][i] = this->theLiebrackets.elements[i][j];
       this->theLiebrackets.elements[j][i] *= - 1;
     }
-  for (int i = 0; i < numGenerators; i ++)
+  }
+  for (int i = 0; i < numGenerators; i ++) {
     this->UEGeneratorOrderIncludingCartanElts[i] = i;
+  }
 }
 
 void SemisimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ) {
@@ -284,26 +290,25 @@ void SemisimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int ind
 void SemisimpleLieAlgebra::ExploitSymmetryChevalleyConstants(int indexI, int indexJ) {
   const Vector<Rational>& rootI = this->theWeyl.RootSystem[indexI];
   const Vector<Rational>& rootJ = this->theWeyl.RootSystem[indexJ];
-  if (!this->Computed.elements[indexI][indexJ])
-    crash << crash;
+  if (!this->Computed.elements[indexI][indexJ]) {
+    crash << "Structure constants computed in a wrong order. " << crash;
+  }
   int indexMinusI = this->theWeyl.RootSystem.GetIndex(- rootI);
   int indexMinusJ = this->theWeyl.RootSystem.GetIndex(- rootJ);
   this->ChevalleyConstants.elements[indexJ][indexI] = (this->ChevalleyConstants.elements[indexI][indexJ] * (- 1));
-  //this->ComputeDebugString();
   this->Computed.elements[indexJ][indexI] = true;
   if ((rootI + rootJ).IsEqualToZero())
-    crash << crash;
+    crash << "Bad root sum. " << crash;
   int thePower;
-  this->GetMaxQForWhichBetaMinusQAlphaIsARoot
-  (this->theWeyl.RootSystem[indexMinusI], this->theWeyl.RootSystem[indexMinusJ], thePower);
+  this->GetMaxQForWhichBetaMinusQAlphaIsARoot(
+    this->theWeyl.RootSystem[indexMinusI], this->theWeyl.RootSystem[indexMinusJ], thePower
+  );
   int i = 1 + thePower;
   this->ChevalleyConstants.elements[indexMinusI][indexMinusJ] = - i * i;
   this->ChevalleyConstants.elements[indexMinusI][indexMinusJ] /= this->ChevalleyConstants.elements[indexI][indexJ];
   this->Computed.elements[indexMinusI][indexMinusJ] = true;
-  //this->ComputeDebugString();
   this->ChevalleyConstants.elements[indexMinusJ][indexMinusI] = this->ChevalleyConstants.elements[indexMinusI][indexMinusJ] * (- 1);
   this->Computed.elements[indexMinusJ][indexMinusI] = true;
-  //this->ComputeDebugString();
 }
 
 void SemisimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k) {
@@ -311,12 +316,12 @@ void SemisimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k) {
   const Vector<Rational>& rootK = this->theWeyl.RootSystem[k];
   const Vector<Rational>& rootJ = this->theWeyl.RootSystem[j];
   //the following three checks can be commented out to increase speed. They have never failed so far.
-  if (!(rootI + rootK + rootJ).IsEqualToZero())
-    crash << crash;
-  //if ((rootI + rootJ).IsEqualToZero() || (rootK + rootK).IsEqualToZero() || (rootJ + rootI).IsEqualToZero())
-  //  crash << crash;
-  if (!this->Computed.elements[i][j])
-    crash << crash;
+  if (!(rootI + rootK + rootJ).IsEqualToZero()) {
+    crash << "Three roots do not sum to zero as required. " << crash;
+  }
+  if (!this->Computed.elements[i][j]) {
+    crash << "Bad structure constant computation order." << crash;
+  }
   /////////////////////////////////////////////////////////////////
   Rational& tempRat = this->ChevalleyConstants.elements[i][j];
   Rational tempRat2 = this->theWeyl.RootScalarCartanRoot(rootK, rootK);
@@ -328,12 +333,15 @@ void SemisimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k) {
   this->ExploitSymmetryChevalleyConstants(k, i);
 }
 
-bool SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot
-(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output) const {
+bool SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot(
+  const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output
+) const {
   output = - 1;
   Vector<Rational> tempRoot = beta;
-  if (alpha.IsEqualToZero())
-    crash << "This is a programming error: calling function GetMaxQForWhichBetaMinusQAlphaIsARoot with zero value for alpha is not allowed. " << crash;
+  if (alpha.IsEqualToZero()) {
+    crash << "This is a programming error: calling function "
+    << "GetMaxQForWhichBetaMinusQAlphaIsARoot with zero value for alpha is not allowed. " << crash;
+  }
   bool foundRoot = false;
   while (this->theWeyl.IsARoot(tempRoot)) {
     output ++;
@@ -343,41 +351,59 @@ bool SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot
   return foundRoot;
 }
 
-void SemisimpleLieAlgebra::ComputeOneChevalleyConstant
-(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta) {
+void SemisimpleLieAlgebra::ComputeOneChevalleyConstant(
+  int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta
+) {
  //using formula (**), 2.9, page 49, Samelson, Notes on Lie algebras, 1989
   const Vector<Rational>& gamma = this->theWeyl.RootSystem[indexGamma];
   const Vector<Rational>& delta = this->theWeyl.RootSystem[indexDelta];
   const Vector<Rational>& minusEpsilon = this->theWeyl.RootSystem[indexMinusEpsilon];
   const Vector<Rational>& eta = this->theWeyl.RootSystem[indexEta];
   const Vector<Rational>& minusZeta = this->theWeyl.RootSystem[indexMinusZeta];
-  if (eta != gamma + delta)
-    crash << crash;
-  if (!this->theWeyl.IsARoot(eta + minusEpsilon))
-    crash << crash;
-  if (!this->Computed.elements[indexDelta][indexMinusEpsilon] || !this->Computed.elements[indexMinusEpsilon][indexGamma] || !this->Computed.elements[indexGamma][indexDelta])
-   crash << crash;
+  if (eta != gamma + delta) {
+    crash << "Eta must equal gamma plus delta. " << crash;
+  }
+  if (!this->theWeyl.IsARoot(eta + minusEpsilon)) {
+    crash << "Eta minus epsilon must be a root. " << crash;
+  }
+  if (
+    !this->Computed.elements[indexDelta][indexMinusEpsilon] ||
+    !this->Computed.elements[indexMinusEpsilon][indexGamma] ||
+    !this->Computed.elements[indexGamma][indexDelta]
+  ) {
+    crash << "Bad structure constant computation order. " << crash;
+  }
   if (this->ChevalleyConstants.elements[indexGamma][indexDelta].IsEqualToZero())
-    crash << crash;
+    crash << "Unexpected zero structure constants" << crash;
   int indexDeltaMinusEpsilon = this->theWeyl.RootSystem.GetIndex(delta + minusEpsilon);
   int indexGammaMinusEpsilon = this->theWeyl.RootSystem.GetIndex(gamma + minusEpsilon);
   Rational FirstSummand, SecondSummand;
   if (indexDeltaMinusEpsilon != - 1) {
-    if (!this->Computed.elements[indexGamma][indexDeltaMinusEpsilon] || !this->Computed.elements[indexDelta][indexMinusEpsilon])
-      crash << crash;
+    if (
+      !this->Computed.elements[indexGamma][indexDeltaMinusEpsilon] ||
+      !this->Computed.elements[indexDelta][indexMinusEpsilon]
+    ) {
+      crash << "Structure constants must be computed at this point. " << crash;
+    }
     FirstSummand = this->ChevalleyConstants.elements[indexGamma][indexDeltaMinusEpsilon] * this->ChevalleyConstants.elements[indexDelta][indexMinusEpsilon];
-  } else
+  } else {
     FirstSummand.MakeZero();
+  }
   if (indexGammaMinusEpsilon != - 1) {
-    if (!this->Computed.elements[indexDelta][indexGammaMinusEpsilon] || !this->Computed.elements[indexMinusEpsilon][indexGamma])
-      crash << crash;
+    if (
+      !this->Computed.elements[indexDelta][indexGammaMinusEpsilon] ||
+      !this->Computed.elements[indexMinusEpsilon][indexGamma]
+    ) {
+      crash << "Structure constants must be computed at this point. " << crash;
+    }
     SecondSummand = this->ChevalleyConstants.elements[indexDelta][indexGammaMinusEpsilon]*this->ChevalleyConstants.elements[indexMinusEpsilon][indexGamma];
-  } else
+  } else {
     SecondSummand.MakeZero();
-  this->ChevalleyConstants.elements[indexMinusEpsilon][indexMinusZeta] =
-  (this->theWeyl.RootScalarCartanRoot(eta, eta) /
-   this->theWeyl.RootScalarCartanRoot(minusZeta, minusZeta)) *
-  (FirstSummand + SecondSummand) / this->ChevalleyConstants.elements[indexGamma][indexDelta];
+  }
+  this->ChevalleyConstants.elements[indexMinusEpsilon][indexMinusZeta] = (
+    this->theWeyl.RootScalarCartanRoot(eta, eta) /
+    this->theWeyl.RootScalarCartanRoot(minusZeta, minusZeta)
+  ) * (FirstSummand + SecondSummand) / this->ChevalleyConstants.elements[indexGamma][indexDelta];
   this->Computed.elements[indexMinusEpsilon][indexMinusZeta] = true;
 }
 
@@ -402,11 +428,15 @@ bool SemisimpleLieAlgebra::TestForConsistency() {
         temp += g231;
         temp += g312;
         if (!temp.IsEqualToZero()) {
-          crash << "This is a programming error. The computed structure constants are wrong: the Jacobi identity fails. More precisely, I get that "
+          crash << "This is a programming error. "
+          << "The computed structure constants are wrong: the Jacobi identity fails. "
+          << "More precisely, I get that "
           << "<br>[" << g1.ToString(&theFormat) << ", " << g2.ToString(&theFormat) << "] =" << g12.ToString(&theFormat)
           << "<br>[" << g2.ToString(&theFormat) << ", " << g3.ToString(&theFormat) << "] =" << g23.ToString(&theFormat)
           << "<br>[" << g3.ToString(&theFormat) << ", " << g1.ToString(&theFormat) << "] =" << g31.ToString(&theFormat)
-          << "<br>g123= " << g123.ToString(&theFormat) << "<br>g231=" << g231.ToString(&theFormat) << "<br>g312=" << g312.ToString(&theFormat) << "<br>"
+          << "<br>g123= " << g123.ToString(&theFormat)
+          << "<br>g231=" << g231.ToString(&theFormat)
+          << "<br>g312=" << g312.ToString(&theFormat) << "<br>"
           << crash;
           return false;
         }
@@ -420,13 +450,15 @@ bool SemisimpleLieAlgebra::TestForConsistency() {
 Rational SemisimpleLieAlgebra::GetConstant(const Vector<Rational>& root1, const Vector<Rational>& root2) {
   int index1 = this->theWeyl.RootSystem.GetIndex(root1);
   int index2 = this->theWeyl.RootSystem.GetIndex(root2);
-  if (index1 == - 1 || index2 == - 1)
+  if (index1 == - 1 || index2 == - 1) {
     return 0;
+  }
   return this->ChevalleyConstants(index1, index2);
 }
 
-bool SemisimpleLieAlgebra::GetConstantOrHElement
-(const Vector<Rational>& root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH) {
+bool SemisimpleLieAlgebra::GetConstantOrHElement(
+  const Vector<Rational>& root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH
+) {
   if (!(root1 + root2).IsEqualToZero()) {
     outputRat = this->GetConstant(root1, root2);
     return true;
@@ -440,11 +472,13 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement
 }
 
 void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total) {
-  if (theGlobalVariables.IndicatorStringOutputFunction == 0)
+  if (theGlobalVariables.IndicatorStringOutputFunction == 0) {
     return;
+  }
   std::stringstream out2, out3;
-  int x = (i * Total * Total + j * Total + k + 1);
-  out2 << "i: " << i + 1 << " of " << Total << " j: " << j + 1 << " of " << Total << " k: " << k + 1 << " of " << Total;
+  int x = i * Total * Total + j * Total + k + 1;
+  out2 << "i: " << i + 1 << " of " << Total << " j: " << j + 1 << " of "
+  << Total << " k: " << k + 1 << " of " << Total;
   out3 << "Total progress: " << x << " out of " << (Total * Total * Total);
   ProgressReport theReport;
   theReport.Report(out2.str() + out3.str());

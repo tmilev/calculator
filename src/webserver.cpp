@@ -797,9 +797,13 @@ bool WebWorker::ReceiveAllHttpSSL() {
   double numSecondsAtStart = theGlobalVariables.GetElapsedSeconds();
   int numBytesInBuffer = - 1;
   while (true) {
+    int64_t msBeforesslread = theGlobalVariables.GetElapsedMilliseconds();
+    logWorker << "DEBUG: about to execute ssl read ...";
     numBytesInBuffer = this->parent->theSSLdata.SSLRead(
       this->parent->theSSLdata.sslServeR, &buffer, bufferSize - 1, &errorString, 0, true
     );
+    int64_t readTime = theGlobalVariables.GetElapsedMilliseconds() - msBeforesslread;
+    logWorker << "DEBUG: ssl read done in " << readTime << " ms. ";
     if (numBytesInBuffer >= 0 && numBytesInBuffer <= (signed) bufferSize)
       break;
     numFailedReceives ++;
@@ -4494,9 +4498,10 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     << " too many connections handler start. " << logger::endL;
   MonomialWrapper<std::string, MathRoutines::HashString>
   incomingAddress(incomingUserAddress);
-  bool purgeIncomingAddress =
-  (this->currentlyConnectedAddresses.GetMonomialCoefficient(incomingAddress) >
-   this->MaxNumWorkersPerIPAdress);
+  bool purgeIncomingAddress =(
+    this->currentlyConnectedAddresses.GetMonomialCoefficient(incomingAddress) >
+    this->MaxNumWorkersPerIPAdress
+  );
   if (!purgeIncomingAddress)
     return;
   List<double> theTimes;
@@ -4882,8 +4887,9 @@ int WebServer::Run() {
   while (true) {
     // main accept() loop
     FD_ZERO(&FDListenSockets);
-    for (int i = 0; i < this->theListeningSockets.size; i ++)
+    for (int i = 0; i < this->theListeningSockets.size; i ++) {
       FD_SET(this->theListeningSockets[i], &FDListenSockets);
+    }
     if (theGlobalVariables.flagServerDetailedLog) {
       logServer << logger::red << "Detail: About to enter select loop. " << logger::endL;
     }
@@ -4927,7 +4933,7 @@ int WebServer::Run() {
     bool found = false;
     for (int i = theListeningSockets.size - 1; i >= 0; i --) {
       if (FD_ISSET(this->theListeningSockets[i], &FDListenSockets)) {
-        newConnectedSocket = accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
+        newConnectedSocket = accept(this->theListeningSockets[i], (struct sockaddr *)& their_addr, &sin_size);
         if (newConnectedSocket >= 0) {
           logServer << logger::green << "Connection candidate "
           << this->NumConnectionsSoFar + 1 << ". "

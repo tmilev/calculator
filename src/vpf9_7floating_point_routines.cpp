@@ -17,31 +17,28 @@ std::string FloatingPoint::DoubleToString(double input) {
   std::stringstream out;
   out.precision(8);
   out << std::fixed << input;
-  //out << " (" << std::scientific << input << ")";
   std::string result = out.str();
-//  stOutput << "got as input " << input << ", before resizing got: " << result << "";
   bool hasDot = false;
-  for (int i = result.size() - 1; i >= 0; i --)
+  for (int i = result.size() - 1; i >= 0; i --) {
     if (result[i] == '.') {
       hasDot = true;
       break;
     }
-  if (!hasDot)
+  }
+  if (!hasDot) {
     return result;
+  }
   int firstNonZeroIndex = 0;
   for (firstNonZeroIndex = result.size() - 1; firstNonZeroIndex >= 0; firstNonZeroIndex --) {
     if (result[firstNonZeroIndex] == '.') {
       result.resize(firstNonZeroIndex);
-//      result +="+\\varepsilon";
       return result;
-      //firstNonZeroIndex--;
-      //break;
     }
-    if (result[firstNonZeroIndex] != '0')
+    if (result[firstNonZeroIndex] != '0') {
       break;
+    }
   }
   result.resize(firstNonZeroIndex + 1);
-  //stOutput << "got as input " << input << ", am producing: " << result << " as output";
   return result;
 }
 

@@ -10,9 +10,6 @@ var domElements = {
       div: "divPrivacyPolicy",
       button: "buttonPrivacyPolicy",
     },
-    mathJaxPreloader: {
-      div: "divMathJaxPreloader",
-    }
   },
   inputMain: "mainInputID",
   spanOldEmail: "spanOldEmail",

@@ -18,9 +18,7 @@ extern logger logWorker;
 
 JSData DatabaseRoutinesGlobalFunctionsMongo::GetStandardProjectors() {
   JSData result;
-  //std::cout << "DEBUG: GOT to here";
   JSData userProjector;
-  //std::cout << "DEBUG: GOT to here pt 2";
   userProjector[DatabaseStrings::labelProblemDataJSON] = 0;
   userProjector[DatabaseStrings::labelProblemDatA] = 0;
   result[DatabaseStrings::tableUsers]["projection"] = userProjector;
@@ -78,8 +76,7 @@ DatabaseRoutinesGlobalFunctionsMongo::~DatabaseRoutinesGlobalFunctionsMongo() {
 }
 
 #ifdef MACRO_use_MongoDB
-class MongoCollection
-{
+class MongoCollection {
 public:
   mongoc_collection_t* collection;
   std::string name;
@@ -135,8 +132,9 @@ public:
 };
 
 MongoQuery::MongoQuery() {
-  if (!databaseMongo.initialize(0))
+  if (!databaseMongo.initialize(0)) {
     crash << "Mongo DB did not start correctly. " << crash;
+  }
   this->query = 0;
   this->command = 0;
   this->update = 0;
@@ -242,13 +240,13 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
   //bson_free(bufferOutpurStringFormat);
   //logWorker << logger::red << "Update result: " << updateResultString << logger::endL;
   return true;
-
 }
 
 bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) {
   MacroRegisterFunctionWithName("MongoQuery::UpdateOne");
-  if (!databaseMongo.initialize(commentsOnFailure))
+  if (!databaseMongo.initialize(commentsOnFailure)) {
     return false;
+  }
   MongoCollection theCollection(this->collectionName);
 //  logWorker << "DEBUG: Update: " << this->findQuery << " to: "
 //  << this->updateQuery << " inside: " << this->collectionName << logger::endL;
@@ -311,8 +309,9 @@ bool MongoQuery::FindMultiple(
   std::stringstream* commentsGeneralNonSensitive
 ) {
   MacroRegisterFunctionWithName("MongoQuery::FindMultiple");
-  if (!databaseMongo.initialize(commentsOnFailure))
+  if (!databaseMongo.initialize(commentsOnFailure)) {
     return false;
+  }
   MongoCollection theCollection(this->collectionName);
   if (commentsGeneralNonSensitive != 0 && theGlobalVariables.UserDefaultHasAdminRights()) {
     *commentsGeneralNonSensitive
@@ -396,7 +395,9 @@ void DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(
   std::stringstream theCommand;
   theCommand << "{\"createIndexes\":\"" << collectionName << "\", \"indexes\": [{\"key\":{\""
   << theKey << "\": \"hashed\"}, \"name\": \"" << collectionName  << "_" << theKey << "_hash\"" << "}]} ";
-  query.command = bson_new_from_json((const uint8_t*) theCommand.str().c_str(), theCommand.str().size(), &query.theError);
+  query.command = bson_new_from_json(
+    (const uint8_t*) theCommand.str().c_str(), theCommand.str().size(), &query.theError
+  );
   mongoc_database_write_command_with_opts(database, query.command, NULL, query.updateResult, &query.theError);
 }
 
@@ -627,8 +628,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::GetOrFindQuery(
   return true;
 }
 
-bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString
-(const std::string& collectionName, const std::string& findQuery, JSData& output, std::stringstream* commentsOnFailure) {
+bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString(
+  const std::string& collectionName, const std::string& findQuery, JSData& output, std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString");
   JSData options(JSData::JSUndefined);
   return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions(
@@ -711,7 +713,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(
   if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoFindQuery(findQuery, commentsOnFailure, true)) {
     return false;
   }
-  return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString(collectionName, findQuery.ToString(doEncodeFindFields), output, commentsOnFailure);
+  return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString(
+    collectionName, findQuery.ToString(doEncodeFindFields), output, commentsOnFailure
+  );
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::matchesPattern(
@@ -749,7 +753,8 @@ bool DatabaseRoutinesGlobalFunctionsMongo::isDeleteable(
     }
   }
   if (commentsOnFailure != 0) {
-    *commentsOnFailure << "Labels: " << theLabels.ToStringCommaDelimited() << " do not match any modifiable field pattern. ";
+    *commentsOnFailure << "Labels: " << theLabels.ToStringCommaDelimited()
+    << " do not match any modifiable field pattern. ";
   }
   return false;
 }
@@ -828,7 +833,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry
   if (theLabels.size == 0) {
     return DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById(tableName, findQuery, commentsOnFailure);
   }
-  return DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(tableName, findQuery, theLabels, commentsOnFailure);
+  return DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(
+    tableName, findQuery, theLabels, commentsOnFailure
+  );
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById(
@@ -866,9 +873,12 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById(
 
 }
 
-bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure
-(const std::string& tableName, const JSData& findQuery, List<std::string>& selector,
- std::stringstream* commentsOnFailure) {
+bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(
+  const std::string& tableName,
+  const JSData& findQuery,
+  List<std::string>& selector,
+  std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsecure");
 #ifdef MACRO_use_MongoDB
 
@@ -1000,8 +1010,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSONSpecifyField(
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSONSpecifyField");
   List<std::string> fields;
   fields.AddOnTop(fieldToSet);
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-  (collectionName, findQuery, updateQuery, &fields, commentsOnFailure);
+  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+    collectionName, findQuery, updateQuery, &fields, commentsOnFailure
+  );
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
@@ -1027,7 +1038,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(UserCalculatorData& outp
     return false;
   }
   JSData userEntry;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(DatabaseStrings::tableUsers, output.GetFindMeFromUserNameQuery(), userEntry)) {
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(
+    DatabaseStrings::tableUsers, output.GetFindMeFromUserNameQuery(), userEntry
+  )) {
     return false;
   }
   return output.LoadFromJSON(userEntry);
@@ -1037,8 +1050,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames");
-  if (!databaseMongo.initialize(commentsOnFailure))
+  if (!databaseMongo.initialize(commentsOnFailure)) {
     return false;
+  }
 #ifdef MACRO_use_MongoDB
   bson_t opts = BSON_INITIALIZER;
   bson_error_t error;
@@ -1195,16 +1209,18 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(const std:
   }
   JSData allProjectors, projector, findQuery;
   allProjectors = DatabaseRoutinesGlobalFunctionsMongo::GetStandardProjectors();
-  if (allProjectors.HasKey(currentTable))
+  if (allProjectors.HasKey(currentTable)) {
     projector = allProjectors[currentTable];
+  }
   findQuery.type = findQuery.JSObject;
   List<JSData> rowsJSON;
   long long totalItems = 0;
   std::stringstream comments;
   std::stringstream* commentsPointer = 0;
   bool flagDebuggingAdmin = theGlobalVariables.UserDefaultIsDebuggingAdmin();
-  if (flagDebuggingAdmin)
+  if (flagDebuggingAdmin) {
     commentsPointer = &comments;
+  }
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions(
     currentTable, findQuery, rowsJSON, projector, 200, &totalItems, &out, commentsPointer
   )) {

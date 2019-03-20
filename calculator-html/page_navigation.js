@@ -539,10 +539,6 @@ function Page() {
       container: null,
       selectFunction: accountManagement.updateAccountsPage,
     },
-    mathJaxPreloader: {
-      name: "mathJaxPreloader",
-      id: ids.domElements.pages.mathJaxPreloader.div
-    }
   };
   this.storage = new StorageCalculator();
   

@@ -1842,8 +1842,9 @@ void SemisimpleLieAlgebraOrdered::GetLinearCombinationFrom(ElementSemisimpleLieA
   }
   int numPosRoots = this->theOwner->GetNumPosRoots();
   Vector<Rational> tempH = input.GetCartanPart();
-  for (int i = 0; i < this->theOwner->GetRank(); i ++)
+  for (int i = 0; i < this->theOwner->GetRank(); i ++) {
     theCoeffs[numPosRoots + i] = tempH[i];
+  }
   this->ChevalleyGeneratorsInCurrentCoords.ActOnVectorColumn(theCoeffs);
 }
 
@@ -1857,8 +1858,9 @@ int SemisimpleLieAlgebraOrdered::GetDisplayIndexFromGeneratorIndex(int Generator
   return - numPosRoots + GeneratorIndex;
 }
 
-void SemisimpleLieAlgebraOrdered::init
-(List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner) {
+void SemisimpleLieAlgebraOrdered::init(
+  List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner
+) {
   crash << "not implemented" << crash;
   if (inputOrder.size != owner.GetNumGenerators())
     return;
@@ -1893,21 +1895,25 @@ void SemisimpleLieAlgebraOrdered::initDefaultOrder(SemisimpleLieAlgebra& owner) 
 
 template <class coefficient>
 bool ElementSemisimpleLieAlgebra<coefficient>::MustUseBracketsWhenDisplayingMeRaisedToPower() {
-  if (this->size == 1)
-    if (this->theCoeffs[0] == 1)
+  if (this->size == 1) {
+    if (this->theCoeffs[0] == 1) {
       return false;
+    }
+  }
   return true;
 }
 
 template <class coefficient>
 bool ElementSemisimpleLieAlgebra<coefficient>::IsACoeffOneChevalleyGenerator(int& outputGenerator, SemisimpleLieAlgebra& owner) {
-  if (this->size == 1)
+  if (this->size == 1) {
     return this->theCoeffs[0] == 1;
+  }
   return false;
 }
 
-void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK
-(Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts) {
+void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK(
+  Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts
+) {
   outputWeights.SetSize(inputElts.size);
   Rational tempRat;
   ElementSemisimpleLieAlgebra<Rational> tempLieElement;
@@ -1916,9 +1922,14 @@ void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK
     currentWeight.MakeZero(this->theDomain().GetRank());
     ElementSemisimpleLieAlgebra<Rational>& currentLieElt = inputElts[i];
     for (int j = 0; j < this->theDomain().GetRank(); j ++) {
-      this->theRange().LieBracket(this->imagesAllChevalleyGenerators[j+this->theDomain().GetNumPosRoots()], currentLieElt, tempLieElement);
-      if (!currentLieElt.IsProportionalTo(tempLieElement, tempRat))
-        crash << crash;
+      this->theRange().LieBracket(
+        this->imagesAllChevalleyGenerators[j + this->theDomain().GetNumPosRoots()],
+        currentLieElt,
+        tempLieElement
+      );
+      if (!currentLieElt.IsProportionalTo(tempLieElement, tempRat)) {
+        crash << "Lie algebra elements not proportional as expected. " << crash;
+      }
       currentWeight[j] = tempRat;
     }
   }
@@ -1928,8 +1939,11 @@ void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK
 }
 
 template <class coefficient>
-void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements
-(List<ElementSemisimpleLieAlgebra>& theElements, Vectors<RationalFunctionOld>& outputCoords, List<ElementSemisimpleLieAlgebra>& outputTheBasis) {
+void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements(
+  List<ElementSemisimpleLieAlgebra>& theElements,
+  Vectors<RationalFunctionOld>& outputCoords,
+  List<ElementSemisimpleLieAlgebra>& outputTheBasis
+) {
   Vectors<Rational> theRootForm;
   theRootForm.SetSize(theElements.size);
   for (int i = 0; i < theElements.size; i ++) {
@@ -1945,32 +1959,34 @@ void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements
   outputTheBasis.SetSize(theRootForm.size);
   for (int i = 0; i < theRootForm.size; i ++) {
     ElementSemisimpleLieAlgebra& currentElt = outputTheBasis[i];
-    currentElt.AssignVectorNegRootSpacesCartanPosRootSpaces(theRootForm[i], (*currentElt.ownerArray)[currentElt.indexOfOwnerAlgebra]);
+    currentElt.AssignVectorNegRootSpacesCartanPosRootSpaces(
+      theRootForm[i], (*currentElt.ownerArray)[currentElt.indexOfOwnerAlgebra]
+    );
   }
 
 }
 
-bool RationalFunctionOld::gcdQuicK(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output) {
-  if (left.TotalDegree() > 1 && right.TotalDegree() > 1)
+bool RationalFunctionOld::gcdQuicK(
+  const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output
+) {
+  if (left.TotalDegree() > 1 && right.TotalDegree() > 1) {
     return false;
+  }
   Polynomial<Rational> quotient, remainder;
   if (left.TotalDegree() > right.TotalDegree()) {
     left.DivideBy(right, quotient, remainder);
-    if (remainder.IsEqualToZero())
+    if (remainder.IsEqualToZero()) {
       output = right;
-    else
+    } else {
       output.MakeOne(left.GetMinNumVars());
+    }
   } else {
-    //std::string tempS1, tempS2, tempS3, tempS4;
-//    tempS1= left.ToString(theGlobalVariables.theDefaultPolyFormat);
-//    tempS2=right.ToString(theGlobalVariables.theDefaultPolyFormat);
     right.DivideBy(left, quotient, remainder);
-//    tempS3=quotient.ToString();
-//    tempS4=remainder.ToString();
-    if (remainder.IsEqualToZero())
+    if (remainder.IsEqualToZero()) {
       output = left;
-    else
+    } else {
       output.MakeOne(left.GetMinNumVars());
+    }
   }
   return true;
 }
@@ -1983,8 +1999,9 @@ void RationalFunctionOld::RaiseToPower(int thePower) {
     thePower = - thePower;
   }
   if (thePower == 0) {
-    if (this->IsEqualToZero())
+    if (this->IsEqualToZero()) {
       crash << "This is a programming error: attempting to raise 0 to the 0th power, which is undefined. " << crash;
+    }
     this->MakeOne();
     return;
   }
@@ -2028,13 +2045,14 @@ void RationalFunctionOld::ClearDenominators(RationalFunctionOld& outputWasMultip
 
 template <class coefficient>
 bool ElementSemisimpleLieAlgebra<coefficient>::NeedsParenthesisForMultiplication() const {
-  return this->size>1;
+  return this->size > 1;
 }
 
 void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String(Matrix<Rational>& input, Matrix<Rational>& output, Rational& outputCoeff, int generatorPower) {
   MacroRegisterFunctionWithName("slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String");
-  if (&input == &output)
-    crash << "input coincides with output. " << crash;
+  if (&input == &output) {
+    crash << "Input coincides with output. " << crash;
+  }
   Rational currentWeight;
   Matrix<Rational>::LieBracket(this->theH, input, output);
   bool tempBool = input.IsProportionalTo(output, currentWeight);
@@ -2069,15 +2087,17 @@ std::string slTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
   int firstNonZeroRow = - 1, firstNonZeroColumn = - 1;
   bool found = false;
   for (int i = 0; i < currentHW.NumRows; i ++) {
-    if (found)
+    if (found) {
       break;
-    for (int j = 0; j < currentHW.NumCols; j ++)
+    }
+    for (int j = 0; j < currentHW.NumCols; j ++) {
       if (!currentHW.elements[i][j].IsEqualToZero()) {
         firstNonZeroColumn = j;
         firstNonZeroRow = i;
         found = true;
         break;
       }
+    }
   }
   int sRow, kRow, sColumn, kColumn;
   this->GetIsPlusKIndexingFrom(firstNonZeroRow, sRow, kRow);
@@ -2085,12 +2105,14 @@ std::string slTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
   std::stringstream out;
   out << "V_{";
   if (currentEtaHw != 0) {
-    if (currentEtaHw != 1)
+    if (currentEtaHw != 1) {
       out << currentEtaHw;
+    }
     out << "\\frac\\eta 2";
   }
-  if (sRow != sColumn)
+  if (sRow != sColumn) {
     out << "-\\zeta_" << sColumn << "+\\zeta_" << sRow;
+  }
   out << "}";
   return out.str();
 }
@@ -2098,15 +2120,16 @@ std::string slTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
 void slTwoInSlN::GetIsPlusKIndexingFrom(int input, int& s, int& k) {
   s = 0;
   k = input;
-  if (input >= this->theDimension || input < 0)
+  if (input >= this->theDimension || input < 0) {
     return;
+  }
   for (int offset = 0; offset <= input; offset += this->thePartition[s - 1]) {
     k = input - offset;
     s ++;
   }
 }
 
-std::string slTwoInSlN::ElementMatrixToTensorString(const Matrix<Rational> & input, bool useHtml) {
+std::string slTwoInSlN::ElementMatrixToTensorString(const Matrix<Rational>& input, bool useHtml) {
   std::string beginMath, endMath, newLine;
   if (useHtml) {
     beginMath = "<span class =\"math\">";
@@ -2120,33 +2143,42 @@ std::string slTwoInSlN::ElementMatrixToTensorString(const Matrix<Rational> & inp
   std::stringstream out;
   std::string tempS;
   bool found = false;
-  for (int i = 0; i < input.NumRows; i ++)
-    for (int j = 0; j < input.NumCols; j ++)
+  for (int i = 0; i < input.NumRows; i ++) {
+    for (int j = 0; j < input.NumCols; j ++) {
       if (!input.elements[i][j].IsEqualToZero()) {
         tempS = input.elements[i][j].ToString();
-        if (tempS == "- 1" || tempS == "-1")
+        if (tempS == "- 1" || tempS == "-1") {
           tempS = "-";
+        }
         if (tempS == "1") {
           tempS = "";
-          if (found)
+          if (found) {
             out << "+";
-        } else
-          if (found)
-            if (tempS[0] != '-')
+          }
+        } else {
+          if (found) {
+            if (tempS[0] != '-') {
               out << "+";
+            }
+          }
+        }
         found = true;
         out << tempS;
         int sI, kI, sJ, kJ;
         this->GetIsPlusKIndexingFrom(i, sI, kI);
         this->GetIsPlusKIndexingFrom(j, sJ, kJ);
         out << "v_{i_{" << sI << "}";
-        if (kI != 0)
+        if (kI != 0) {
           out << "+" << kI;
+        }
         out << "}\\otimes v^*_{i_{" << sJ << "}";
-        if (kJ != 0)
+        if (kJ != 0) {
           out  << "+" << kJ;
+        }
         out << "}";
       }
+    }
+  }
   return out.str();
 }
 
@@ -2159,9 +2191,7 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector(Matrix<Rational> & input,
   Rational theCoeff, tempRat;
   int largestPowerNotKillingInput;
   while (!remainder.IsEqualToZero() ) {
-    //stOutput << "<br>remainder:<div class =\"math\">" << remainder.ToString(false, true) << "</div>";
     this->ClimbUpFromVector(remainder, highestWeightVector, largestPowerNotKillingInput);
-    //stOutput << "<br>highest weight vector:<div class =\"math\">" << highestWeightVector.ToString(false, true) << "</div>";
     this->ClimbDownFromHighestWeightAlongSl2String(highestWeightVector, component, theCoeff, largestPowerNotKillingInput);
     for (int i = 0; i < this->theProjectors.size; i ++) {
       Matrix<Rational>& currentProjector = this->theProjectors[i];
@@ -2173,7 +2203,6 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector(Matrix<Rational> & input,
         outputTheHWVectors.AddOnTop(tempMat);
       }
     }
-    //if (theCoeff.IsEqualToZero())
       crash << crash;
     component /= theCoeff;
     outputDecompositionOfInput.AddOnTop(component);
@@ -2216,8 +2245,8 @@ std::string slTwoInSlN::GetNotationString(bool useHtml) {
   int offset = 1;
   for (int i = 0; i < this->thePartition.size; i ++) {
     out << beginMath << "i_" << i + 1 << "=" << offset << endMath << " ";
-    out << " (size of block = " << this->thePartition.TheObjects[i] << "), ";
-    offset += this->thePartition.TheObjects[i];
+    out << " (size of block = " << this->thePartition[i] << "), ";
+    offset += this->thePartition[i];
   }
   out << newLine << "Let " << beginMath << "\\eta" << endMath << " be the weight corresponding to h.";
   out << newLine << "Let " << beginMath << "\\zeta_{j}" << endMath << " be the weight corresponding to the j-th block";
@@ -2273,43 +2302,46 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   List<Matrix<Rational> > Decomposition, theHwCandidatesBeforeProjection, theHwCandidatesProjected;
   this->theHighestWeightVectors.size = 0;
   this->theGmodKModules.size = 0;
-  for (int i = 0; i < this->theDimension; i ++)
+  for (int i = 0; i < this->theDimension; i ++) {
     for (int j = 0; j < this->theDimension; j ++) {
       tempMat.MakeZero();
       tempMat.elements[i][j] = 1;
       this->ExtractHighestWeightVectorsFromVector(tempMat, Decomposition, theHwCandidatesBeforeProjection);
       theHwCandidatesProjected.size = 0;
-      for (int k = 0; k < theHwCandidatesBeforeProjection.size; k ++)
+      for (int k = 0; k < theHwCandidatesBeforeProjection.size; k ++) {
         for (int l = 0; l < this->theProjectors.size; l ++) {
           tempMat = theHwCandidatesBeforeProjection[k];
           tempMat.MultiplyOnTheLeft(this->theProjectors[l]);
-          if (!tempMat.IsEqualToZero())
+          if (!tempMat.IsEqualToZero()) {
             theHwCandidatesProjected.AddOnTop(tempMat);
+          }
         }
-      for (int k = 0; k < theHwCandidatesProjected.size; k ++)
+      }
+      for (int k = 0; k < theHwCandidatesProjected.size; k ++) {
         if (this->GetModuleIndexFromHighestWeightVector(theHwCandidatesProjected[k]) == - 1) {
           Matrix<Rational>& currentHighest = theHwCandidatesProjected[k];
           this->theHighestWeightVectors.AddOnTop(currentHighest);
           this->theGmodKModules.ExpandOnTop(1);
           List<Matrix<Rational> >& currentMod = *this->theGmodKModules.LastObject();
           currentMod.size = 0;
-          for (tempMat = currentHighest; !tempMat.IsEqualToZero(); Matrix<Rational> ::LieBracket(this->theF, tempMat, tempMat))
+          for (tempMat = currentHighest; !tempMat.IsEqualToZero(); Matrix<Rational> ::LieBracket(this->theF, tempMat, tempMat)) {
             currentMod.AddOnTop(tempMat);
+          }
         }
+      }
     }
+  }
   out << this->GetNotationString(useHtml);
-  out << newLine << "...and the highest weights of the module decomposition are (" <<
-  this->theHighestWeightVectors.size << " modules):";
+  out << newLine << "...and the highest weights of the module decomposition are ("
+  << this->theHighestWeightVectors.size << " modules):";
   for (int i = 0; i < this->theHighestWeightVectors.size; i ++) {
     out << newLine << beginMath << this->ElementMatrixToTensorString(theHighestWeightVectors[i], useHtml)
     << endMath << ", highest weight of ";
     out << beginMath << this->ElementModuleIndexToString(i, useHtml) << endMath;
-   //for (int j =1; j < this->theGmodKModules[i].size; j ++)
-   //   out << "<br><div class =\"math\">" << this->theGmodKModules.TheObjects[i].TheObjects[j].ToString(false, true) << "</div>";
-   // out << "<br><br><br>";
   }
-  if (computePairingTable)
+  if (computePairingTable) {
     out << this->initPairingTable(useHtml);
+  }
   return out.str();
 }
 
@@ -2347,7 +2379,7 @@ std::string slTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
   Matrix<Rational> tempMat;
   List<Matrix<Rational> > HighestWeightsContainingModules;
   List<Matrix<Rational> > tempDecomposition;
-  for (int i = 0; i < leftElements.size; i ++)
+  for (int i = 0; i < leftElements.size; i ++) {
     for (int j = 0; j < rightElements.size; j ++) {
       Matrix<Rational>& leftElt = leftElements[i];
       Matrix<Rational>& rightElt = rightElements[j];
@@ -2362,17 +2394,20 @@ std::string slTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
         }
       }
     }
+  }
   out << newLine << beginMath << this->ElementModuleIndexToString(leftIndex, useHtml) << endMath << " and "
   << beginMath << this->ElementModuleIndexToString(rightIndex, useHtml) << endMath << " pair to: ";
   for (int i = 0; i <output.size; i ++) {
     out << beginMath << this->ElementModuleIndexToString(output[i], useHtml) << endMath;
-    if (i != output.size - 1)
+    if (i != output.size - 1) {
       out << beginMath << "\\oplus" << endMath;
+    }
   }
   if (output.size > 0) {
     out << "  hw vectors: ";
-    for (int i = 0; i < output.size; i ++)
+    for (int i = 0; i < output.size; i ++) {
       out << beginMath << this->ElementMatrixToTensorString(this->theHighestWeightVectors[output[i]], useHtml) << endMath << ",";
+    }
   }
   return out.str();
 }
@@ -2403,8 +2438,9 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other) {
     this->ReduceMemory();
     this->SimplifyLeadingCoefficientOnly();
   }
-  if (!this->checkConsistency())
+  if (!this->checkConsistency()) {
     crash << "Inconsistent rational function. " << crash;
+  }
 }
 
 void MonomialP::MakeEi(int LetterIndex, int Power, int ExpectedNumVars) {
@@ -2414,8 +2450,9 @@ void MonomialP::MakeEi(int LetterIndex, int Power, int ExpectedNumVars) {
 }
 
 void MonomialP::ExponentMeBy(const Rational& theExp) {
-  for (int i = 0; i < this->monBody.size; i ++)
+  for (int i = 0; i < this->monBody.size; i ++) {
     this->monBody[i] *= theExp;
+  }
 }
 
 bool MonomialP::operator>(const MonomialP& other) const {
@@ -2425,49 +2462,65 @@ bool MonomialP::operator>(const MonomialP& other) const {
 }
 
 bool MonomialP::IsDivisibleBy(const MonomialP& other) const {
-  for (int i = other.monBody.size - 1; i >= this->monBody.size; i --)
-    if (other.monBody[i] > 0)
+  for (int i = other.monBody.size - 1; i >= this->monBody.size; i --) {
+    if (other.monBody[i] > 0) {
       return false;
+    }
+  }
   int upperLimit = MathRoutines::Minimum(this->monBody.size, other.monBody.size);
-  for (int i = 0; i <upperLimit; i ++)
-    if (this->monBody[i]<other.monBody[i])
+  for (int i = 0; i < upperLimit; i ++) {
+    if (this->monBody[i] < other.monBody[i]) {
       return false;
+    }
+  }
   return true;
 }
 
 bool MonomialP::operator==(const MonomialP& other) const {
-  for (int i = other.monBody.size - 1; i >= this->monBody.size; i --)
-    if (other.monBody[i] != 0)
+  for (int i = other.monBody.size - 1; i >= this->monBody.size; i --) {
+    if (other.monBody[i] != 0) {
       return false;
-  for (int i = this->monBody.size - 1; i >= other.monBody.size; i --)
-    if (this->monBody[i] != 0)
+    }
+  }
+  for (int i = this->monBody.size - 1; i >= other.monBody.size; i --) {
+    if (this->monBody[i] != 0) {
       return false;
+    }
+  }
   int highestIndex = MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars()) - 1;
-  for (int i = highestIndex; i >= 0; i --)
-    if (this->monBody[i] != other.monBody[i])
+  for (int i = highestIndex; i >= 0; i --) {
+    if (this->monBody[i] != other.monBody[i]) {
       return false;
+    }
+  }
   return true;
 }
 
 bool MonomialP::IsGEQLexicographicLastVariableStrongest(const MonomialP& other) const {
   for (int i = other.monBody.size - 1; i >= this->monBody.size; i --) {
-    if (other.monBody[i] > 0)
+    if (other.monBody[i] > 0) {
       return false;
-    if (other.monBody[i] < 0)
+    }
+    if (other.monBody[i] < 0) {
       return true;
+    }
   }
   for (int i = this->monBody.size - 1; i >= other.monBody.size; i --) {
-    if (this->monBody[i] > 0)
+    if (this->monBody[i] > 0) {
       return true;
-    if (this->monBody[i] < 0)
+    }
+    if (this->monBody[i] < 0) {
       return false;
+    }
   }
   int highestIndex = MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars()) - 1;
   for (int i = highestIndex; i >= 0; i --) {
-    if (this->monBody[i] > other.monBody[i])
+    if (this->monBody[i] > other.monBody[i]) {
       return true;
-    if (this->monBody[i] < other.monBody[i])
+    }
+    if (this->monBody[i] < other.monBody[i]) {
       return false;
+    }
   }
   return true;
 }
@@ -2475,22 +2528,28 @@ bool MonomialP::IsGEQLexicographicLastVariableStrongest(const MonomialP& other) 
 bool MonomialP::IsGEQLexicographicLastVariableWeakest(const MonomialP& other) const {
   int commonSize = MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars());
   for (int i = 0; i < commonSize; i ++) {
-    if (this->monBody[i] > other.monBody[i])
+    if (this->monBody[i] > other.monBody[i]) {
       return true;
-    if (this->monBody[i] < other.monBody[i])
+    }
+    if (this->monBody[i] < other.monBody[i]) {
       return false;
+    }
   }
   for (int i = this->monBody.size; i < other.monBody.size; i ++) {
-    if (other.monBody[i] > 0)
+    if (other.monBody[i] > 0) {
       return false;
-    if (other.monBody[i] < 0)
+    }
+    if (other.monBody[i] < 0) {
       return true;
+    }
   }
   for (int i = other.monBody.size; i < this->monBody.size; i ++) {
-    if (this->monBody[i] > 0)
+    if (this->monBody[i] > 0) {
       return true;
-    if (this->monBody[i] < 0)
+    }
+    if (this->monBody[i] < 0) {
       return false;
+    }
   }
   return true;
 }
@@ -2506,31 +2565,37 @@ bool MonomialP::IsGEQTotalDegThenLexicographicLastVariableStrongest(const Monomi
 bool MonomialP::IsGEQpartialOrder(MonomialP& m) {
   if (this->monBody.size != m.monBody.size)
     crash << "This is a programming error: comparing two monomials with different number of variables. " << crash;
-  for (int i = 0; i < m.monBody.size; i ++)
-    if ((*this)[i] < m[i])
+  for (int i = 0; i < m.monBody.size; i ++) {
+    if ((*this)[i] < m[i]) {
       return false;
+    }
+  }
   return true;
 }
 
 void MonomialP::operator*=(const MonomialP& other) {
   this->SetNumVariablesSubDeletedVarsByOne(MathRoutines::Maximum(this->monBody.size, other.monBody.size));
-  for (int i = 0; i < other.monBody.size; i ++)
+  for (int i = 0; i < other.monBody.size; i ++) {
     this->monBody[i] += other.monBody[i];
+  }
 }
 
 void MonomialP::operator/=(const MonomialP& other) {
   this->SetNumVariablesSubDeletedVarsByOne(MathRoutines::Maximum(this->monBody.size, other.monBody.size));
-  for (int i = 0; i < other.monBody.size; i ++)
+  for (int i = 0; i < other.monBody.size; i ++) {
     this->monBody[i] -= other.monBody[i];
+  }
 }
 
 void MonomialP::SetNumVariablesSubDeletedVarsByOne(int newNumVars) {
-  if (newNumVars<0)
+  if (newNumVars < 0) {
     newNumVars = 0;
+  }
   int oldSize = this->monBody.size;
   this->monBody.SetSize(newNumVars);
-  for (int i = oldSize; i < this->monBody.size; i ++)
+  for (int i = oldSize; i < this->monBody.size; i ++) {
     (*this)[i] = 0;
+  }
 }
 
 bool Cone::IsInCone(const Vector<Rational>& point) const {
@@ -2539,8 +2604,9 @@ bool Cone::IsInCone(const Vector<Rational>& point) const {
   Rational tempRat;
   for (int i = 0; i < this->Normals.size; i ++) {
     tempRat = point.ScalarEuclidean(this->Normals[i]);
-    if (tempRat.IsNegative())
+    if (tempRat.IsNegative()) {
       return false;
+    }
   }
   return true;
 }
@@ -2548,17 +2614,21 @@ bool Cone::IsInCone(const Vector<Rational>& point) const {
 std::string MonomialP::ToString(FormatExpressions* theFormat) const {
   std::stringstream out;
   MemorySaving<FormatExpressions> tempFormat;
-  if (theFormat == 0)
+  if (theFormat == 0) {
     theFormat = &tempFormat.GetElement();
-  if (this->IsConstant())
+  }
+  if (this->IsConstant()) {
     return "1";
-  for (int i = 0; i < this->monBody.size; i ++)
+  }
+  for (int i = 0; i < this->monBody.size; i ++) {
     if (!(this->monBody[i].IsEqualToZero())) {
       out << theFormat->GetPolyLetter(i);
-      if (!(this->monBody[i] == 1))
+      if (!(this->monBody[i] == 1)) {
         out << "^{" << this->monBody[i] << "}";
-      else
+      } else {
         out << " ";
+      }
     }
+  }
   return out.str();
 }

@@ -20,9 +20,12 @@ Crasher::Crasher() {
 }
 
 void Crasher::FirstRun() {
-  if (!this->flagCrashInitiateD && (theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer) )
+  if (!this->flagCrashInitiateD && (
+    theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer
+  )) {
     this->theCrashReport << "\n<b style =\"color:red\">Crash</b> "
     << theGlobalVariables.GetElapsedSeconds() << " second(s) from the start.<hr>";
+  }
   this->flagCrashInitiateD = true;
 }
 
@@ -38,8 +41,9 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
     assert(false);
   }
   this->flagFinishingCrash = true;
-  if (!theGlobalVariables.flagNotAllocated)
+  if (!theGlobalVariables.flagNotAllocated) {
     this->theCrashReport << " ";
+  }
   if (!theGlobalVariables.flagNotAllocated) {
     if (theGlobalVariables.userInputStringIfAvailable != "") {
       this->theCrashReport << "<hr>User input: <br> "
@@ -120,14 +124,14 @@ std::string Crasher::GetStackTraceEtcErrorMessage() {
       //<-to avoid coordinating threads
       continue;
     }
-    ListReferences<stackInfo>& currentInfo =
-    theGlobalVariables.CustomStackTrace[threadCounter];
+    ListReferences<stackInfo>& currentInfo = theGlobalVariables.CustomStackTrace[threadCounter];
     out << "<td><table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
     for (int i = currentInfo.size - 1; i >= 0; i --) {
       out << "<tr><td>" << HtmlRoutines::GetHtmlLinkFromProjectFileName(currentInfo[i].fileName, "", currentInfo[i].line)
       << "</td><td>" << currentInfo[i].line << "</td>";
-      if (currentInfo[i].functionName != "")
+      if (currentInfo[i].functionName != "") {
         out << "<td>" << currentInfo[i].functionName << "</td>";
+      }
       out << "</tr>";
     }
     out << "</table></td>";
@@ -151,8 +155,9 @@ std::string Crasher::GetStackTraceShort() {
       continue;
     }
     ListReferences<stackInfo>& currentInfo = theGlobalVariables.CustomStackTrace[threadCounter];
-    for (int i = currentInfo.size - 1; i >= 0; i --)
+    for (int i = currentInfo.size - 1; i >= 0; i --) {
       out << currentInfo[i].functionName << "\n";
+    }
   }
   return out.str();
 }
@@ -172,8 +177,9 @@ std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem() {
   out << "<table>";
   for (; std::getline(topStream, lineString);) {
     out << "<tr>";
-    for (std::stringstream nextLineStream(lineString); nextLineStream >> wordString;)
+    for (std::stringstream nextLineStream(lineString); nextLineStream >> wordString;) {
       out << "<td>" << wordString << "</td>";
+    }
     out << "</tr>";
   }
   out << "</table>";
@@ -185,7 +191,6 @@ std::string GlobalVariables::ToStringFolderInfo() const {
   out << "<br>Physical path server base: " << this->PhysicalPathServerBasE;
   out << "<br>Diplay name executable: " << this->DisplayNameExecutable;
   out << "<br>Physical name folder below executable: " << this->PhysicalNameFolderBelowExecutable;
-//  out << "<br>Display path server base: " << this->DisplayPathServerBasE;
   out << "<br>Physical path output folder: " << this->PhysicalPathHtmlFolder;
   out << "<br>Display path output folder: " << this->DisplayPathOutputFolder;
   return out.str();

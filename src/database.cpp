@@ -10,7 +10,9 @@
 ProjectInformationInstance ProjectInfoVpfDatabasecpp(__FILE__, "Database-related code. ");
 
 bool DatabaseRoutinesGlobalFunctions::SetPassword(
-  const std::string& inputUsername, const std::string& inputNewPassword, std::string& outputAuthenticationToken,
+  const std::string& inputUsername,
+  const std::string& inputNewPassword,
+  std::string& outputAuthenticationToken,
   std::stringstream& comments
 ) {
   (void) inputUsername;
@@ -38,7 +40,7 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword(
 
 bool DatabaseRoutinesGlobalFunctions::UserExists(
   const std::string& inputUsername, std::stringstream& comments
-){
+) {
   (void) inputUsername;
   (void) comments;
 #ifdef MACRO_use_MongoDB
@@ -63,8 +65,10 @@ bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights() {
 #ifdef MACRO_use_MongoDB
   if (!theGlobalVariables.flagLoggedIn)
     return false;
-  return theGlobalVariables.userDefault.userRole == "admin" || theGlobalVariables.userDefault.userRole == "instructor"
-  || theGlobalVariables.userDefault.userRole == "teacher";
+  return
+    theGlobalVariables.userDefault.userRole == "admin" ||
+    theGlobalVariables.userDefault.userRole == "instructor" ||
+    theGlobalVariables.userDefault.userRole == "teacher";
 #else
   return false;
 #endif
@@ -107,7 +111,9 @@ void GlobalVariables::initModifiableDatabaseFields() {
   currentEntry.AddOnTop(DatabaseStrings::objectSelectoR);
   modifiableData.AddOnTop(currentEntry);
   std::fstream outputFile;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(outputFile, "/calculator-html/modifiable_database_fields.js", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(
+    outputFile, "/calculator-html/modifiable_database_fields.js", false, true, false
+  );
 
   JSData modifiableDataJSON;
   modifiableDataJSON = modifiableData;
@@ -140,8 +146,9 @@ std::string ProblemData::ToStringAvailableAnswerIds() {
   out << "Available answer ids: ";
   for (int i = 0; i < this->theAnswers.size(); i ++) {
     out << this->theAnswers[i].answerId;
-    if (i != this->theAnswers.size() - 1)
+    if (i != this->theAnswers.size() - 1) {
       out << ", ";
+    }
   }
   return out.str();
 }
@@ -153,8 +160,9 @@ bool ProblemDataAdministrative::GetWeightFromCoursE(
   if (!this->problemWeightsPerCoursE.Contains(theCourseNonURLed))
     return false;
   std::string tempString;
-  if (outputAsGivenByInstructor == 0)
+  if (outputAsGivenByInstructor == 0) {
     outputAsGivenByInstructor = &tempString;
+  }
   *outputAsGivenByInstructor = this->problemWeightsPerCoursE.GetValueCreate(theCourseNonURLed);
   return output.AssignStringFailureAllowed(*outputAsGivenByInstructor);
 }
@@ -184,10 +192,11 @@ bool ProblemData::CheckConsistencyMQids() const {
       errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
       << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>Answer information: "
       << this->ToString() << "<br>";
-      if (true)
+      if (true) {
         stOutput << errorStream.str();
-      else
+      } else {
         crash << errorStream.str() << crash;
+      }
     }
   }
   return true;
@@ -197,8 +206,9 @@ std::string ProblemData::ToString() const {
   std::stringstream out;
   out << "Problem data. "
   << "Random seed: " << this->randomSeed;
-  if (this->flagRandomSeedGiven)
+  if (this->flagRandomSeedGiven) {
     out << " (given)";
+  }
   out << ". <br>";
   for (int i = 0; i < this->theAnswers.size(); i ++) {
     Answer& currentA = this->theAnswers[i];
@@ -206,10 +216,11 @@ std::string ProblemData::ToString() const {
     out << ", numCorrectSubmissions: " << currentA.numCorrectSubmissions;
     out << ", numSubmissions: " << currentA.numSubmissions;
     out << ", firstCorrectAnswer: ";
-    if (currentA.firstCorrectAnswerClean == "")
+    if (currentA.firstCorrectAnswerClean == "") {
       out << "[none yet], ";
-    else
+    } else {
       out << "[" << currentA.firstCorrectAnswerClean << "], ";
+    }
     out << "<br>";
   }
   out << "Admin data: " << this->adminData.ToString();
@@ -222,14 +233,18 @@ UserCalculator::UserCalculator() {
 }
 
 UserCalculator::~UserCalculator() {
-  for (unsigned i = 0; i < this->enteredPassword.size(); i ++)
+  for (unsigned i = 0; i < this->enteredPassword.size(); i ++) {
     this->enteredPassword[i] = ' ';
-  for (unsigned i = 0; i < this->usernameHashedPlusPassWordHashed.size(); i ++)
+  }
+  for (unsigned i = 0; i < this->usernameHashedPlusPassWordHashed.size(); i ++) {
     this->usernameHashedPlusPassWordHashed[i] = ' ';
-  for (unsigned i = 0; i < this->enteredHashedSaltedPassword.size(); i ++)
+  }
+  for (unsigned i = 0; i < this->enteredHashedSaltedPassword.size(); i ++) {
     this->enteredHashedSaltedPassword[i] = ' ';
-  for (unsigned i = 0; i < this->actualHashedSaltedPassword.size(); i ++)
+  }
+  for (unsigned i = 0; i < this->actualHashedSaltedPassword.size(); i ++) {
     this->actualHashedSaltedPassword[i] = ' ';
+  }
 }
 
 #ifdef MACRO_use_MongoDB
@@ -238,8 +253,9 @@ std::string UserCalculator::ToStringSelectedColumns() {
   MacroRegisterFunctionWithName("DatabaseRoutines::ToStringSelectedColumns");
   std::stringstream out;
   out << this->selectedColumnsUnsafe.size << " columns selected. ";
-  for (int i = 0; i < this->selectedColumnsUnsafe.size; i ++)
+  for (int i = 0; i < this->selectedColumnsUnsafe.size; i ++) {
     out << "<br>" << this->selectedColumnsUnsafe[i] << ": " << this->selectedColumnsUnsafe[i] << this->selectedColumnsRetrievalFailureRemarks[i];
+  }
   return out.str();
 }
 
@@ -303,8 +319,9 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
   (void) failureStream;
   (void) commentsGeneral;
   double startTime = theGlobalVariables.GetElapsedSeconds();
-  if (!DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(*this))
+  if (!DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(*this)) {
     return false;
+  }
   this->ComputeCourseInfo();
   if (this->deadlineSchema != "") {
     JSData findDeadlinesQuery, outDeadlinesQuery;
@@ -386,8 +403,9 @@ JSData UserCalculatorData::ToJSON() {
   result[DatabaseStrings::labelSectionsTaught] = sectionsTaughtList;
   for (int i = result.objects.size() - 1; i >= 0; i --) {
     JSData& currentValue = result.objects.theValues[i];
-    if (currentValue.string == "" && currentValue.type == JSData::JSstring)
+    if (currentValue.string == "" && currentValue.type == JSData::JSstring) {
       result.objects.RemoveKey(result.objects.theKeys[i]);
+    }
   }
   return result;
 }
@@ -427,11 +445,12 @@ bool UserCalculator::Authenticate(std::stringstream* commentsOnFailure) {
   if (!this->LoadFromDB(&secondCommentsStream)) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "User " << this->username << " does not exist. ";
-      if (theGlobalVariables.flagRequestComingLocally)
+      if (theGlobalVariables.flagRequestComingLocally) {
         *commentsOnFailure << "If this is your first run, set the username to "
         << "admin and enter the password you desire. "
         << "The password will then be automatically set. "
         << "To add further accounts login as admin and go to 'Accounts'. ";
+      }
     }
     return false;
   }
@@ -496,8 +515,9 @@ bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailu
 bool UserCalculator::SetPassword(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::SetPassword");
   if (this->enteredPassword == "") {
-    if (commentsOnFailure != 0)
+    if (commentsOnFailure != 0) {
       *commentsOnFailure << "Empty password not allowed. ";
+    }
     return false;
   }
   this->ComputeHashedSaltedPassword();
@@ -532,8 +552,9 @@ bool UserCalculator::IsAcceptableDatabaseInpuT(const std::string& input, std::st
   MacroRegisterFunctionWithName("UserCalculator::IsAcceptableDatabaseInput");
   for (unsigned i = 0; i < input.size(); i ++) {
     if (!UserCalculator::IsAcceptableCharDatabaseInpuT(input[i])) {
-      if (comments != 0)
+      if (comments != 0) {
         *comments << "Input: " << input << " contains at least one invalid character: " << input[i] << ".";
+      }
       return false;
     }
   }
@@ -549,8 +570,10 @@ std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey) {
 }
 
 bool DatabaseRoutineS::SendActivationEmail(
-  const std::string& emailList, std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive
+  const std::string& emailList,
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneral,
+  std::stringstream* commentsGeneralSensitive
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   List<std::string> theEmails;
@@ -585,35 +608,39 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   if (lastEmailTime != "") {
     lastActivationOnThisEmail.operator=(lastEmailTime);
     lastActivationOnThisAccount.operator=(this->timeOfActivationTokenCreation);
-    if (commentsGeneral != 0)
+    if (commentsGeneral != 0) {
       *commentsGeneral
       << "<br>Last activation on this email, GM time: "
       << lastActivationOnThisEmail.ToStringGM() << ".\n"
       << "<br>Last activation on this account, GM time: "
       << lastActivationOnThisEmail.ToStringGM() << ".\n";
+    }
   }
-  if (commentsGeneral != 0)
+  if (commentsGeneral != 0) {
     *commentsGeneral
     << "<br>Total activations (attempted on) this email: "
     << numActivationsThisEmail.ToString() << ".\n<br>\n";
+  }
   JSData findQueryInUsers, setQueryInUsers;
   setQueryInUsers[DatabaseStrings::labelTimeOfActivationTokenCreation] = now.ToString();
-  if (this->userId != "")
+  if (this->userId != "") {
     findQueryInUsers[DatabaseStrings::labelUserId] = this->userId;
-  else if (this->username != "")
+  } else if (this->username != "") {
     findQueryInUsers[DatabaseStrings::labelUsername] = this->username;
-  else {
-    if (commentsOnFailure != 0)
+  } else {
+    if (commentsOnFailure != 0) {
       *commentsOnFailure
       << "This shouldn't happen: both the username and the user id are empty. ";
+    }
     return false;
   }
   if (
     !DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
       DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, 0, commentsOnFailure
   )) {
-    if (commentsOnFailure != 0)
+    if (commentsOnFailure != 0) {
       *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
+    }
     return false;
   }
   emailStatQuery[DatabaseStrings::labelLastActivationEmailTime] = now.ToString();
@@ -726,8 +753,9 @@ bool ProblemData::LoadFroM(const std::string& inputData, std::stringstream& comm
   bool result = true;
   MapLisT<std::string, std::string, MathRoutines::HashString> currentQuestionMap;
   for (int i = 0; i < theMap.size(); i ++) {
-    if (theMap.theKeys[i] == "randomSeed")
+    if (theMap.theKeys[i] == "randomSeed") {
       continue;
+    }
     this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
     Answer& currentA = *this->theAnswers.theValues.LastObject();
     std::string currentQuestion = HtmlRoutines::ConvertURLStringToNormal(theMap.theValues[i], false);
@@ -737,12 +765,14 @@ bool ProblemData::LoadFroM(const std::string& inputData, std::stringstream& comm
       << currentQuestion << ". ";
       continue;
     }
-    if (currentQuestionMap.Contains("numCorrectSubmissions"))
+    if (currentQuestionMap.Contains("numCorrectSubmissions")) {
       currentA.numCorrectSubmissions =
       atoi(currentQuestionMap.GetValueCreate("numCorrectSubmissions").c_str());
-    if (currentQuestionMap.Contains("numSubmissions"))
+    }
+    if (currentQuestionMap.Contains("numSubmissions")) {
       currentA.numSubmissions =
       atoi(currentQuestionMap.GetValueCreate("numSubmissions").c_str());
+    }
     if (currentQuestionMap.Contains("firstCorrectAnswer")) {
       currentA.firstCorrectAnswerURLed = currentQuestionMap.GetValueCreate("firstCorrectAnswer");
       currentA.firstCorrectAnswerClean = HtmlRoutines::ConvertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
@@ -802,8 +832,9 @@ std::string ProblemData::StorE(){
     out << "randomSeed=" << this->randomSeed;
   for (int i = 0; i < this->theAnswers.size(); i ++) {
     Answer& currentA = this->theAnswers[i];
-    if (this->flagRandomSeedGiven || i != 0)
+    if (this->flagRandomSeedGiven || i != 0) {
       out << "&";
+    }
     out << HtmlRoutines::ConvertStringToURLString(currentA.answerId, false) << "=";
     std::stringstream questionsStream;
     questionsStream
@@ -897,12 +928,10 @@ List<JSData> UserCalculatorData::GetFindMeFromUserNameQuery() {
 bool UserCalculator::StoreProblemDataToDatabasE(std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabasE");
   std::stringstream problemDataStream;
-  for (int i = 0; i < this->theProblemData.size(); i ++)
+  for (int i = 0; i < this->theProblemData.size(); i ++) {
     problemDataStream << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false) << "="
     << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theValues[i].StorE(), false) << "&";
-//  stOutput << "DEBUG: storing in database ... stack trace: "
-//  << crash.GetStackTraceEtcErrorMessage();
-  //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
+  }
   JSData setQuery;
   setQuery[DatabaseStrings::labelProblemDatA] = problemDataStream.str();
   return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(
@@ -915,8 +944,9 @@ bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream* commentsO
   JSData problemData;
   for (int i = 0; i < this->theProblemData.size(); i ++) {
     JSData nextProblem = this->theProblemData.theValues[i].StoreJSON();
-    if (nextProblem.objects.size() == 0)
+    if (nextProblem.objects.size() == 0) {
       continue;
+    }
     problemData[HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false)] = nextProblem;
   }
   theGlobalVariables.userDefault.problemDataJSON = problemData;
@@ -971,7 +1001,9 @@ bool DatabaseRoutineS::AddUsersFromEmails(
     findUser.SetSize(2);
     findUser[0][DatabaseStrings::labelUsername] = currentUser.username;
     findUser[1][DatabaseStrings::labelEmail] = currentUser.email;
-    if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(DatabaseStrings::tableUsers, findUser, foundUser, &comments)) {
+    if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(
+      DatabaseStrings::tableUsers, findUser, foundUser, &comments
+    )) {
       if (!currentUser.Iexist(&comments)) {
         if (!currentUser.StoreToDB(false, &comments)) {
           comments << "Failed to create user: " << currentUser.username;
@@ -1012,14 +1044,16 @@ bool DatabaseRoutineS::AddUsersFromEmails(
         currentUser.ComputeAndStoreActivationStats(&comments, &comments);
     }
   }
-  if (!result)
+  if (!result) {
     comments << "<br>Failed to create all users. ";
+  }
   if (doSendEmails) {
     std::stringstream* commentsGeneralSensitive = 0;
     if (theGlobalVariables.UserDefaultHasAdminRights())
       commentsGeneralSensitive = &comments;
-    if (!DatabaseRoutineS::SendActivationEmail(theEmails, &comments, &comments, commentsGeneralSensitive))
+    if (!DatabaseRoutineS::SendActivationEmail(theEmails, &comments, &comments, commentsGeneralSensitive)) {
       result = false;
+    }
   }
   return result;
 }
@@ -1255,8 +1289,9 @@ bool EmailRoutines::SendEmailWithMailGun(
     if (isBad)
       *commentsGeneralSensitive << "<span style =\"color:red\"><b>";
     *commentsGeneralSensitive << HtmlRoutines::ConvertStringToHtmlString(commandResult, true);
-    if (isBad)
+    if (isBad) {
       *commentsGeneralSensitive << "</b></span>";
+    }
   }
   return true;
 }
@@ -1279,24 +1314,28 @@ bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* comme
   MacroRegisterFunctionWithName("EmailRoutines::IsOKEmail");
   //stOutput << "DEBUG: got to isokemail";
   if (input.size() == 0) {
-    if (commentsOnError != 0)
+    if (commentsOnError != 0) {
       *commentsOnError << "Empty email not allowed. ";
+    }
     return false;
   }
   int numAts = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (!EmailRoutines::GetRecognizedEmailChars()[((unsigned char) input[i])]) {
-      if (commentsOnError != 0)
+      if (commentsOnError != 0) {
         *commentsOnError << "Email: " << input << " contains the unrecognized character "
         << input[i] << ". ";
+      }
       return false;
     }
-    if (input[i] == '@')
+    if (input[i] == '@') {
       numAts ++;
+    }
   }
-  if (numAts != 1 && commentsOnError != 0)
+  if (numAts != 1 && commentsOnError != 0) {
     *commentsOnError << "Email: "
     << input << " is required to have exactly one @ character. ";
+  }
   return numAts == 1;
 }
 
@@ -1330,8 +1369,9 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   if (!theData.readstring(theToken.claimsJSON, false, commentsOnFailure))
     return false;
   if (theData.GetValue("email").type != JSData::JSstring) {
-    if (commentsOnFailure != 0)
+    if (commentsOnFailure != 0) {
       *commentsOnFailure << "Could not find email entry in the json data " << theData.ToString(true);
+    }
     return false;
   }
   userWrapper.email = theData.GetValue("email").string;
@@ -1434,10 +1474,11 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
           return true;
         }
       } else if (commentsOnFailure != 0) {
-        if (userWrapper.actualActivationToken != "error")
+        if (userWrapper.actualActivationToken != "error") {
           *commentsOnFailure << "<b>Account already activated. </b>";
-        else
+        } else {
           *commentsOnFailure << "<b>An error during activation ocurred.</b>";
+        }
       }
     } else {
       if (commentsOnFailure != 0) {
@@ -1449,18 +1490,19 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
   }
   if (userWrapper.username == "admin" && userWrapper.enteredPassword != "") {
     if (!userWrapper.Iexist(0)) {
-      if (commentsOnFailure != 0)
+      if (commentsOnFailure != 0) {
         *commentsOnFailure << "First login of user admin: setting admin password. ";
+      }
       logWorker << logger::yellow << "First login of user admin: setting admin password." << logger::endL;
       //*commentsOnFailure << "DEBUG: user before storing: " << userWrapper.ToJSON().ToString();
       userWrapper.actualActivationToken = "activated";
       userWrapper.userRole = "admin";
       if (!userWrapper.StoreToDB(true, commentsOnFailure)) {
         logWorker << logger::red << "Failed to store admin pass to database. ";
-        if (commentsOnFailure != 0)
+        if (commentsOnFailure != 0) {
           logWorker << commentsOnFailure->str();
+        }
       }
-      //*commentsOnFailure << "DEBUG: admin user: " << userWrapper.ToJSON().ToString() ;
       theUseR = userWrapper;
       return true;
     }
@@ -1494,17 +1536,20 @@ bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOn
 }
 
 std::string UserCalculator::GetActivationAddressFromActivationToken(
-  const std::string& theActivationToken, const std::string& calculatorBase,
-  const std::string& inputUserNameUnsafe, const std::string& inputEmailUnsafe
+  const std::string& theActivationToken,
+  const std::string& calculatorBase,
+  const std::string& inputUserNameUnsafe,
+  const std::string& inputEmailUnsafe
 ) {
   MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
   std::stringstream out;
-  if (MathRoutines::StringBeginsWith(calculatorBase, "localhost"))
+  if (MathRoutines::StringBeginsWith(calculatorBase, "localhost")) {
     out << "https://" << calculatorBase;
-  else if (MathRoutines::StringBeginsWith(calculatorBase, "https://localhost"))
+  } else if (MathRoutines::StringBeginsWith(calculatorBase, "https://localhost")) {
     out << calculatorBase;
-  else
+  } else {
     out << theGlobalVariables.hopefullyPermanentWebAdress;
+  }
   JSData theJS;
   theJS[DatabaseStrings::labelActivationToken] = theActivationToken;
   theJS[DatabaseStrings::labelUsername] = inputUserNameUnsafe;

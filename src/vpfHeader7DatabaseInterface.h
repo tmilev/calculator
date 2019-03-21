@@ -6,10 +6,9 @@
 #include "vpfHeader1General5TimeDate.h"
 #include "vpfHeader1General8DatabaseSystemIndependent.h"
 
-static ProjectInformationInstance ProjectInfoVpf8_1HeaderDatabaseInterface_MySQLx(__FILE__, "MySQL interface header. ");
+static ProjectInformationInstance ProjectInfoVpf8_1HeaderDatabaseInterface_MySQLx(__FILE__, "Database interface header. ");
 
-class DatabaseRoutinesGlobalFunctions
-{
+class DatabaseRoutinesGlobalFunctions {
 public:
   static bool LogoutViaDatabase();
   static bool LoginViaDatabase(
@@ -18,17 +17,20 @@ public:
     std::stringstream *commentsGeneral
   );
   static bool LoginNoDatabaseSupport(UserCalculatorData &theUser, std::stringstream *commentsGeneral);
-  static bool LoginViaGoogleTokenCreateNewAccountIfNeeded
-  (UserCalculatorData& theUseR, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  static bool SetPassword
-  (const std::string& inputUsername, const std::string& inputNewPassword, std::string& outputAuthenticationToken,
-   std::stringstream& comments);
+  static bool LoginViaGoogleTokenCreateNewAccountIfNeeded(
+    UserCalculatorData& theUseR, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+  );
+  static bool SetPassword(
+    const std::string& inputUsername,
+    const std::string& inputNewPassword,
+    std::string& outputAuthenticationToken,
+    std::stringstream& comments
+  );
   static bool UserExists(const std::string& inputUsername, std::stringstream& comments);
   static bool UserDefaultHasInstructorRights();
 };
 
-class SyntacticElementHTML
-{
+class SyntacticElementHTML {
 public:
   int indexInOwner;
   int commandIndex;
@@ -90,8 +92,8 @@ public:
   }
 };
 
-struct Answer
-{ bool flagAutoGenerateSubmitButtons;
+struct Answer {
+  bool flagAutoGenerateSubmitButtons;
   bool flagAutoGenerateMQButtonPanel;
   bool flagAutoGenerateMQfield;
   bool flagAutoGenerateVerificationField;
@@ -146,8 +148,7 @@ struct Answer
   std::string ToString();
 };
 
-struct ProblemDataAdministrative
-{
+struct ProblemDataAdministrative {
 public:
   MapLisT<std::string, std::string, MathRoutines::HashString> problemWeightsPerCoursE;
   MapLisT<std::string, std::string, MathRoutines::HashString> deadlinesPerSection;
@@ -155,8 +156,7 @@ public:
   std::string ToString() const;
 };
 
-struct ProblemData
-{
+struct ProblemData {
 private:
   int expectedNumberOfAnswersFromDB;
   int knownNumberOfAnswersFromHD;
@@ -172,7 +172,7 @@ public:
   ProblemDataAdministrative adminData;
   int numCorrectlyAnswered;
   int totalNumSubmissions;
-//  int numAnswersSought;
+  //  int numAnswersSought;
   std::string commandsGenerateProblem;
   std::string commandsGenerateProblemNoEnclosures;
   std::string commandsGenerateProblemLink;
@@ -191,8 +191,7 @@ public:
   std::string ToStringAvailableAnswerIds();
 };
 
-class EmailRoutines
-{
+class EmailRoutines {
 public:
   std::string subject;
   std::string ccEmail;
@@ -206,14 +205,13 @@ public:
   EmailRoutines();
   //bool IsValidForMailgunCommand(std::stringstream* commentsOnFailure);
   static bool IsOKEmail(const std::string& input, std::stringstream* commentsOnError);
-  bool SendEmailWithMailGun
-  (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral,
-   std::stringstream* commentsGeneralSensitive);
+  bool SendEmailWithMailGun(
+    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive
+  );
 };
 
 class TopicElement;
-class UserCalculator : public UserCalculatorData
-{
+class UserCalculator : public UserCalculatorData {
 // Unsafe entries may contain arbitrary strings.
 // Safe entries, when enclosed with "" in ANSI mode are guaranteed to be valid safe Database identifiers.
 // In other words, safe entries are guaranteed to not allow bobby-tables-exploits-of-a-mom (https://xkcd.com/327/).
@@ -227,9 +225,11 @@ public:
   Rational pointsEarned;
   Rational pointsMax;
   void ComputeExpectedNumberOfAnswersPerProblem();
-  void ComputePointsEarned
-  (const HashedList<std::string, MathRoutines::HashString>& gradableProblems,
-   MapLisT<std::string, TopicElement, MathRoutines::HashString>* theTopics, std::stringstream& commentsOnFailure);
+  void ComputePointsEarned(
+    const HashedList<std::string, MathRoutines::HashString>& gradableProblems,
+    MapLisT<std::string, TopicElement, MathRoutines::HashString>* theTopics,
+    std::stringstream& commentsOnFailure
+  );
   ProblemData& HasProblemData(const std::string& problemName);
   ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);
   void SetProblemData(const std::string& problemName, const ProblemData& inputData);
@@ -241,8 +241,9 @@ public:
   std::string GetSelectedRowEntry(const std::string& theKey);
   std::string GetMySQLclauseIdentifyingUserByEmailOrID();
   bool LoadFromDB(std::stringstream* failureStream, std::stringstream* commentsGeneral = 0);
-  bool FetchOneColumn
-  (const std::string& columnNameUnsafe, std::string& outputUnsafe, std::stringstream* failureComments = 0);
+  bool FetchOneColumn(
+    const std::string& columnNameUnsafe, std::string& outputUnsafe, std::stringstream* failureComments = 0
+  );
   void FetchColumns();
   bool AuthenticateWithUserNameAndPass(std::stringstream* commentsOnFailure);
   bool AuthenticateWithToken(std::stringstream* commentsOnFailure);
@@ -255,25 +256,25 @@ public:
   static bool IsAcceptableCharDatabaseInpuT(char theChar);
   bool ComputeAndStoreActivationToken(std::stringstream* commentsOnFailure);
   void ComputeHashedSaltedPassword();
-  bool GetActivationAbsoluteAddress
-  (std::string& output, std::stringstream& comments);
-  bool GetActivationAddress
-  (std::string& output, const std::string& calculatorBase, std::stringstream& comments);
-  static std::string GetActivationAddressFromActivationToken
-  (const std::string& theActivationToken, const std::string& calculatorBase,
-   const std::string& inputUserNameUnsafe, const std::string& inputEmailUnsafe);
-  bool ComputeAndStoreActivationEmailAndTokens
-  (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  bool ComputeAndStoreActivationStats
-  (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool GetActivationAbsoluteAddress(std::string& output, std::stringstream& comments);
+  bool GetActivationAddress(std::string& output, const std::string& calculatorBase, std::stringstream& comments);
+  static std::string GetActivationAddressFromActivationToken(
+    const std::string& theActivationToken,
+    const std::string& calculatorBase,
+    const std::string& inputUserNameUnsafe,
+    const std::string& inputEmailUnsafe
+  );
+  bool ComputeAndStoreActivationEmailAndTokens(
+    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+  );
+  bool ComputeAndStoreActivationStats(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   std::string ToString();
   std::string ToStringSelectedColumns();
   UserCalculator();
   ~UserCalculator();
 };
 
-class DatabaseRoutineS
-{
+class DatabaseRoutineS {
 public:
   static List<std::string> modifyableColumns;
 
@@ -281,17 +282,25 @@ public:
     const UserCalculatorData& theUser, bool overwrite, std::stringstream& commentsOnFailure
   );
   static bool SendActivationEmail(
-    const std::string& emailList, std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive
+    const std::string& emailList,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral,
+    std::stringstream* commentsGeneralSensitive
   );
   static bool SendActivationEmail(
-    const List<std::string>& theEmails, std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive
+    const List<std::string>& theEmails,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral,
+    std::stringstream* commentsGeneralSensitive
   );
   static bool AddUsersFromEmails(
-    const std::string& emailList, const std::string& userPasswords,
-    std::string& userRole, std::string& userGroup,
-    std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers
+    const std::string& emailList,
+    const std::string& userPasswords,
+    std::string& userRole,
+    std::string& userGroup,
+    std::stringstream& comments,
+    int& outputNumNewUsers,
+    int& outputNumUpdatedUsers
   );
 };
 

@@ -29,8 +29,9 @@ bool ElementEllipticCurve<coefficient>::operator==(const ElementEllipticCurve& o
 
 template <typename coefficient>
 void ElementEllipticCurve<coefficient>::Invert() {
-  if (this->flagInfinity)
+  if (this->flagInfinity) {
     return;
+  }
   this->yCoordinate *= - 1;
 }
 
@@ -44,14 +45,8 @@ template <typename coefficient>
 bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& other) {
   if (!(this->owner == other.owner))
     return false;
-  //if (this == &other)
-  //{ ElementEllipticCurve otherCopy = other;
-  //  return this->operator*=(otherCopy);
-  //}
-  //stOutput << "<br>DEBUG: Multiplying: " << this->ToString() << " by: " << other.ToString();
   if (this->flagInfinity) {
     *this = other;
-    //stOutput << "<br>DEBUG: Multiplying: " << this->ToString() << " by: " << other.ToString();
     return true;
   }
   if (other.flagInfinity)
@@ -73,14 +68,13 @@ bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& o
     //We have that:
     //slope = (3x^2 - linearCoefficient)/(2y)
     slope = (3 * this->xCoordinate * this->xCoordinate + this->owner.linearCoefficient) / (2 * this->yCoordinate);
-  } else
+  } else {
     slope = (other.yCoordinate - this->yCoordinate) / (other.xCoordinate - this->xCoordinate);
-  //stOutput << "DEBUG: slope is: " << slope.ToString();
+  }
   coefficient originalX = this->xCoordinate;
   this->xCoordinate = slope * slope - this->xCoordinate - other.xCoordinate;
   this->yCoordinate = slope * (this->xCoordinate - originalX) * (- 1) - this->yCoordinate;
   this->flagInfinity = false;
-  //stOutput << "<br>DEBUG: product is: " << this->ToString();
   return true;
 }
 
@@ -106,6 +100,4 @@ std::string ElementEllipticCurve<coefficient>::ToString(FormatExpressions* theFo
     out << " Infinity. ";
   return out.str();
 }
-
-
 #endif

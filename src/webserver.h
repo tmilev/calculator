@@ -143,7 +143,6 @@ public:
   PauseProcess PauseIndicatorPipeInUse;
   Pipe pipeWorkerToWorkerRequestIndicator;
   Pipe pipeWorkerToWorkerIndicatorData;
-  PipePrimitive pipeWorkerToWorkerUserInput;
   PipePrimitive pipeWorkerToWorkerStatus;
   PipePrimitive pipeWorkerToServerControls;
   PipePrimitive pipeWorkerToServerTimerPing;
@@ -277,7 +276,6 @@ public:
   bool ReceiveAllHttp();
   bool ReceiveAllHttpSSL();
   bool RequireSSL();
-  void ReportDisplayUserInput();
   enum requestTypes {requestUnknown, requestGet, requestPost, requestHead, requestChunked};
   std::string ToStringAddressRequest() const;
   std::string ToStringStatus() const;

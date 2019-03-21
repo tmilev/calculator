@@ -9,8 +9,7 @@ class JSData;
 
 static ProjectInformationInstance ProjectInfoHeaderHtmlInterpretationInterface(__FILE__, "Html interpretation interface.");
 
-class HtmlInterpretation
-{
+class HtmlInterpretation {
 public:
   std::string htmlRaw;
   std::string htmlJSbuild;
@@ -25,8 +24,7 @@ public:
   static std::string ClonePageResult(bool useJSON);
   static std::string AddTeachersSections();
   static std::string AddUserEmails(const std::string& hostWebAddressWithPort);
-  static std::string SubmitAnswers
-  (const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake);
+  static std::string SubmitAnswers(const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake);
   static std::string SubmitAnswers();
   static std::string GetProblemSolution();
   static std::string GetEditPageJSON();
@@ -56,16 +54,20 @@ public:
   static std::string GetAccountsPageJSON(const std::string& hostWebAddressWithPort);
   static std::string GetAccountsPageBody(const std::string& hostWebAddressWithPort);
   static std::string ToStringAssignSection();
-  static std::string ToStringUserDetails
-  (bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort);
+  static std::string ToStringUserDetails(
+    bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort
+  );
   static std::string ToStringUserScores();
-  static std::string ToStringUserDetailsTable
-  (bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort);
+  static std::string ToStringUserDetailsTable(
+    bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort
+  );
   static std::string ToStringCalculatorArgumentsHumanReadable();
-  static std::string GetSanitizedComment
-  (const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot);
-  static std::string GetCommentsInterpretation
-  (Calculator& theInterpreterWithAdvice, int indexShift, FormatExpressions& theFormat);
+  static std::string GetSanitizedComment(
+    const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot
+  );
+  static std::string GetCommentsInterpretation(
+    Calculator& theInterpreterWithAdvice, int indexShift, FormatExpressions& theFormat
+  );
   static std::string ToStringNavigation();
 };
 

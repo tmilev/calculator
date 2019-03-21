@@ -120,9 +120,12 @@ bool PauseProcess::CreateMe
 }
 
 bool PauseProcess::ResetNoAllocation() {
-  if (this->thePausePipe.WriteIfFailThenCrash("!", false, true) &&
-      this->mutexPipe.WriteIfFailThenCrash("!", false, true))
+  if (
+    this->thePausePipe.WriteOnceIfFailThenCrash("!", false, true) &&
+    this->mutexPipe.WriteOnceIfFailThenCrash("!", false, true)
+  ) {
     return true;
+  }
   logIO << logger::red << this->ToString() << ": failed to reset without allocation. " << logger::endL;
   return false;
 }
@@ -131,9 +134,10 @@ void PauseProcess::PauseIfRequested(bool restartServerOnFail, bool dontCrashOnFa
   this->CheckConsistency();
   if (this->CheckPauseIsRequested(restartServerOnFail, dontCrashOnFail, false))
     logBlock << logger::blue << this->currentProcessName << "blocking on " << this->ToString() << logger::endL;
-  bool pauseWasRequested = !this->thePausePipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
-  if (!pauseWasRequested)
-    this->thePausePipe.WriteIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
+  bool pauseWasRequested = !this->thePausePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
+  if (!pauseWasRequested) {
+    this->thePausePipe.WriteOnceIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
+  }
 }
 
 bool PauseProcess::PauseIfRequestedWithTimeOut(bool restartServerOnFail, bool dontCrashOnFail) {
@@ -146,16 +150,18 @@ bool PauseProcess::PauseIfRequestedWithTimeOut(bool restartServerOnFail, bool do
   struct timeval timeout;
   timeout.tv_sec = 10;
   timeout.tv_usec = 0;
-  if (this->CheckPauseIsRequested(restartServerOnFail, dontCrashOnFail, false))
+  if (this->CheckPauseIsRequested(restartServerOnFail, dontCrashOnFail, false)) {
     logBlock << logger::blue << this->currentProcessName << "Blocking on " << this->ToString() << logger::endL;
+  }
   if (!(select(this->thePausePipe.pipeEnds[0] + 1, &read_fds, &write_fds, &except_fds, &timeout) == 1)) {
     logBlock << logger::green << this->currentProcessName << "Blocking on " << this->ToString() << logger::green
     << " timed out. " << logger::endL;
     return false;
   }
-  this->thePausePipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
-  if (this->thePausePipe.lastRead.size > 0)
-    this->thePausePipe.WriteIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
+  this->thePausePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
+  if (this->thePausePipe.lastRead.size > 0) {
+    this->thePausePipe.WriteOnceIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
+  }
   return true;
 }
 
@@ -165,33 +171,36 @@ void PauseProcess::RequestPausePauseIfLocked(bool restartServerOnFail, bool dont
   //through competing threads
   if (this->CheckPauseIsRequested(restartServerOnFail, dontCrashOnFail, false))
     logBlock << logger::blue << this->currentProcessName << "Blocking on " << this->ToString() << logger::endL;
-  this->thePausePipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
+  this->thePausePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   this->mutexForProcessBlocking.GetElement().UnlockMe();
 }
 
 bool PauseProcess::CheckPauseIsRequested(bool restartServerOnFail, bool dontCrashOnFail, bool dontLockImServer) {
   this->CheckConsistency();
   if (!dontLockImServer)
-    if (!this->mutexPipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
+    if (!this->mutexPipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
       return false;
   if (!this->thePausePipe.SetPipeReadNonBlockingIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
     return false;
-  if (!this->thePausePipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
+  if (!this->thePausePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
     return false;
   bool result = (this->thePausePipe.lastRead.size == 0);
-  if (!result)
-    if (!this->thePausePipe.WriteIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail))
+  if (!result) {
+    if (!this->thePausePipe.WriteOnceIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail)) {
       return false;
+    }
+  }
   if (!this->thePausePipe.SetPipeReadBlockingModeIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
     return false;
-  if (!this->mutexPipe.WriteIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail))
+  if (!this->mutexPipe.WriteOnceIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail)) {
     return false;
+  }
   return result;
 }
 
 void PauseProcess::ResumePausedProcessesIfAny(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("PauseController::ResumePausedProcessesIfAny");
-  this->thePausePipe.WriteIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
+  this->thePausePipe.WriteOnceIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
 }
 
 std::string PauseProcess::ToString() const {
@@ -343,40 +352,48 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
   return - 1;
 }
 
-void Pipe::WriteAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail) {
-  //logWorker << "Step - 1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
-  MacroRegisterFunctionWithName("Pipe::WriteAfterEmptying");
-  //logWorker << "Step 1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
+void Pipe::WriteOnceAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail) {
+  MacroRegisterFunctionWithName("Pipe::WriteOnceAfterEmptying");
   MutexLockGuard safety(theGlobalVariables.MutexWebWorkerPipeWriteLock);
   this->theMutexPipe.RequestPausePauseIfLocked(restartServerOnFail, dontCrashOnFail);
-//  logWorker << logger::endL << "Step 2: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
-//  << logger::endL;
-  this->thePipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
+  this->thePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   this->thePipe.lastRead.SetSize(0);
-  this->thePipe.WriteIfFailThenCrash(toBeSent, restartServerOnFail, dontCrashOnFail);
+  this->thePipe.WriteOnceIfFailThenCrash(toBeSent, restartServerOnFail, dontCrashOnFail);
   this->theMutexPipe.ResumePausedProcessesIfAny(restartServerOnFail, dontCrashOnFail);
-//  logWorker << logger::endL << "Step 3: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
-//  << logger::endL;
 }
 
-bool PipePrimitive::ReadWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail) {
-  if (this->flagReadEndBlocks || this->flagWriteEndBlocks)
+bool PipePrimitive::ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail) {
+  if (this->flagReadEndBlocks || this->flagWriteEndBlocks) {
     crash << this->ToString() << ": read without emptying allowed only on fully non-blocking pipes. " << crash;
-  if (!this->ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
+  }
+  if (!this->ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
     return false;
-  return this->WriteIfFailThenCrash(this->GetLastRead(), restartServerOnFail, dontCrashOnFail);
+  return this->WriteOnceIfFailThenCrash(this->GetLastRead(), restartServerOnFail, dontCrashOnFail);
 }
 
-bool PipePrimitive::WriteAfterEmptying(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail) {
-  if (this->flagReadEndBlocks)
+bool PipePrimitive::WriteAllAfterEmptying(const std::string& input, bool dontCrashOnFail) {
+  if (this->flagReadEndBlocks) {
     crash << this->ToString() << ": write after emptying allowed only on non-blocking read pipes. " << crash;
-  if (!this->ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
+  }
+  if (!this->ReadOnceIfFailThenCrash(false, dontCrashOnFail)) {
     return false;
-  return this->WriteIfFailThenCrash(input, restartServerOnFail, dontCrashOnFail);
+  }
+
 }
 
-bool PipePrimitive::HandleFailedWriteReturnFalse
-(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail, int numBadAttempts) {
+bool PipePrimitive::WriteOnceAfterEmptying(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail) {
+  if (this->flagReadEndBlocks) {
+    crash << this->ToString() << ": write after emptying allowed only on non-blocking read pipes. " << crash;
+  }
+  if (!this->ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
+    return false;
+  }
+  return this->WriteOnceIfFailThenCrash(input, restartServerOnFail, dontCrashOnFail);
+}
+
+bool PipePrimitive::HandleFailedWriteReturnFalse(
+  const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail, int numBadAttempts
+) {
   std::stringstream errorStream;
   errorStream << "Failed write: " << toBeSent.size() << " bytes ["
   << MathRoutines::StringShortenInsertDots(toBeSent, 200) << "] onto: " << this->ToString() << numBadAttempts
@@ -394,7 +411,7 @@ bool PipePrimitive::HandleFailedWriteReturnFalse
   return false;
 }
 
-bool PipePrimitive::WriteIfFailThenCrash(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail) {
+bool PipePrimitive::WriteOnceIfFailThenCrash(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("PipePrimitive::WriteIfFailThenCrash");
   if (this->pipeEnds[1] == - 1) {
     logIO << logger::yellow << "WARNING: " << this->ToString()
@@ -403,30 +420,36 @@ bool PipePrimitive::WriteIfFailThenCrash(const std::string& toBeSent, bool resta
   }
   if (toBeSent.size() == 0)
     return true;
-//  std::string toBeSentCopy = toBeSent;
+  int maximumBadAttempts = 30;
   this->numberOfBytesLastWrite = 0;
   int numBadAttempts = 0;
   for (;;) {
     this->numberOfBytesLastWrite = write(this->pipeEnds[1], toBeSent.c_str(), toBeSent.size());
-    if (this->numberOfBytesLastWrite < 0)
-      if (errno == EAI_AGAIN || errno == EWOULDBLOCK ||
-          errno == EINTR || errno == EIO) {
+    if (this->numberOfBytesLastWrite < 0) {
+      if (
+        errno == EAI_AGAIN || errno == EWOULDBLOCK || errno == EINTR || errno == EIO
+      ) {
         numBadAttempts ++;
-        if (numBadAttempts > 30)
+        if (numBadAttempts > maximumBadAttempts) {
           return this->HandleFailedWriteReturnFalse(toBeSent, restartServerOnFail, dontCrashOnFail, numBadAttempts);
+        }
         continue;
       }
+    }
     break;
   }
-  if (this->numberOfBytesLastWrite < 0)
+  if (this->numberOfBytesLastWrite < 0) {
     return false;
+  }
   if ((unsigned) this->numberOfBytesLastWrite < toBeSent.size()) {
-    if (theGlobalVariables.processType == ProcessTypes::worker)
+    if (theGlobalVariables.processType == ProcessTypes::worker) {
       logIO << logger::red << this->ToString() << ": wrote only "
       << this->numberOfBytesLastWrite << " bytes out of " << toBeSent.size() << " total. " << logger::endL;
-    if (theGlobalVariables.processType == ProcessTypes::server)
+    }
+    if (theGlobalVariables.processType == ProcessTypes::server) {
       logServer << logger::red << this->ToString() << ": wrote only "
       << this->numberOfBytesLastWrite << " bytes out of " << toBeSent.size() << " total. " << logger::endL;
+    }
   }
   return true;
 }
@@ -441,9 +464,9 @@ std::string Pipe::ToString() const {
 }
 
 bool Pipe::ResetNoAllocation() {
-  if (this->theMutexPipe.ResetNoAllocation() &&
-      this->thePipe.ReadIfFailThenCrash(false, true))
+  if (this->theMutexPipe.ResetNoAllocation() && this->thePipe.ReadOnceIfFailThenCrash(false, true)) {
     return true;
+  }
   logIO << logger::red << this->ToString() << ": failed to reset without allocation. " << logger::endL;
   return false;
 }
@@ -486,8 +509,8 @@ void Pipe::Release() {
   this->thePipe.Release();
 }
 
-bool PipePrimitive::ReadIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail) {
-  MacroRegisterFunctionWithName("PipePrimitive::ReadIfFailThenCrash");
+bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail) {
+  MacroRegisterFunctionWithName("PipePrimitive::ReadOnceIfFailThenCrash");
   this->CheckConsistency();
   this->lastRead.SetSize(0);
   if (this->pipeEnds[0] == - 1)
@@ -506,14 +529,16 @@ bool PipePrimitive::ReadIfFailThenCrash(bool restartServerOnFail, bool dontCrash
       logIO << logger::red << this->ToString()
       << ": more than 100 iterations of read resulted in an error. "
       << logger::endL;
-      if (restartServerOnFail)
+      if (restartServerOnFail) {
         theWebServer.Restart();
-      else if (!dontCrashOnFail)
+      } else if (!dontCrashOnFail) {
         crash << this->ToString() << ": more than 100 iterations of read resulted in an error. " << crash;
+      }
       return false;
     }
-    if (errno == EWOULDBLOCK)
+    if (errno == EWOULDBLOCK) {
       return true;
+    }
   }
   if (numReadBytes > 150000)
     logIO << logger::red << this->ToString()
@@ -525,32 +550,28 @@ bool PipePrimitive::ReadIfFailThenCrash(bool restartServerOnFail, bool dontCrash
   return true;
 }
 
-void Pipe::ReadWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail) {
+void Pipe::ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("Pipe::ReadWithoutEmptying");
   MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerPipeReadLock;
   safetyFirst.LockMe(); //preventing threads from locking one another
   this->theMutexPipe.RequestPausePauseIfLocked(restartServerOnFail, dontCrashOnFail);
-  this->thePipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
+  this->thePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   if (this->thePipe.lastRead.size > 0) {
     std::string tempS;
     tempS = this->GetLastRead();
-    this->thePipe.WriteIfFailThenCrash(tempS, restartServerOnFail, dontCrashOnFail);
+    this->thePipe.WriteOnceIfFailThenCrash(tempS, restartServerOnFail, dontCrashOnFail);
   }
   this->theMutexPipe.ResumePausedProcessesIfAny(restartServerOnFail, dontCrashOnFail);
   safetyFirst.UnlockMe();
 }
 
-void Pipe::Read(bool restartServerOnFail, bool dontCrashOnFail) {
+void Pipe::ReadOnce(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("Pipe::Read");
   this->CheckConsistency();
-//  logIO << "Reading from pipe: " << this->ToString() << logger::endL;
   MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerPipeReadLock;
   safetyFirst.LockMe(); //preventing threads from locking one another
-//  logIO << "Passed mutex safety: " << this->ToString() << logger::endL;
   this->theMutexPipe.RequestPausePauseIfLocked(restartServerOnFail, dontCrashOnFail);
-//  logIO << "Passed pause controller safety, ready to read pipe: " << this->ToString() << logger::endL;
-  this->thePipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
-//  logIO << "Read no locks successful? " << this->ToString() << logger::endL;
+  this->thePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   this->theMutexPipe.ResumePausedProcessesIfAny(restartServerOnFail, dontCrashOnFail);
   safetyFirst.UnlockMe(); //preventing threads from locking one another
 }
@@ -569,8 +590,9 @@ logger::logger(const std::string& logFileName, logger* inputCarbonCopy, bool inp
 }
 
 void logger::initializeIfNeeded() {
-  if (!this->flagInitialized)
+  if (!this->flagInitialized) {
     this->reset();
+  }
 }
 
 void logger::reset() {

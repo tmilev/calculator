@@ -10,8 +10,7 @@ static ProjectInformationInstance ProjectInfoHeaderHtmlSnippets(__FILE__, "Html 
 
 class JSData;
 
-class HtmlRoutines
-{
+class HtmlRoutines {
 public:
 public:
   static MapLisT<std::string, std::string, MathRoutines::HashString> preLoadedFiles;
@@ -28,18 +27,23 @@ public:
   static int scale;
   static void LoadStrings();
 
-  static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
+  static void outputLineJavaScriptSpecific(
+    const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter
+  );
   static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
   static std::string URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth = 0);
 
   static void ConvertURLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace);
   static std::string ConvertURLStringToNormal(const std::string& input, bool replacePlusBySpace);
-  static bool ConvertStringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output, bool doReplaceNewLineByBr);
+  static bool ConvertStringToHtmlStringReturnTrueIfModified(
+    const std::string& input, std::string& output, bool doReplaceNewLineByBr
+  );
   static std::string ConvertStringToURLStringExceptDashesAndSlashes(const std::string& input);
   static std::string ConvertStringToURLString(const std::string& input, bool usePlusesForSpacebars);
   static std::string ConvertStringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr);
-  static std::string ConvertStringToHtmlStringRestrictSize
-  (const std::string& theString, bool doReplaceNewLineByBr, int maxStringSize);
+  static std::string ConvertStringToHtmlStringRestrictSize(
+    const std::string& theString, bool doReplaceNewLineByBr, int maxStringSize
+  );
   static std::string ConvertStringEscapeQuotesAndBackslashes(const std::string& input);
   static std::string ConvertStringEscapeNewLinesQuotesBackslashes(const std::string& input);
 
@@ -47,9 +51,12 @@ public:
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
   static std::string GetCalculatorComputationLink(const std::string& input);
-  static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label = "Expand/collapse", const std::string& desiredID = "");
-  static std::string GetHtmlLinkFromProjectFileName
-  (const std::string& fileName, const std::string& fileDesc = "", int line = - 1);
+  static std::string GetSliderSpanStartsHidden(
+    const std::string& content, const std::string& label = "Expand/collapse", const std::string& desiredID = ""
+  );
+  static std::string GetHtmlLinkFromProjectFileName(
+    const std::string& fileName, const std::string& fileDesc = "", int line = - 1
+  );
   static std::string DoubleBackslashes(const std::string& input);
 
   static std::string GetCSSLink(const std::string& fileNameVirtual);
@@ -57,9 +64,11 @@ public:
 
   static const std::string& GetCSSAddStyleTags(const std::string& fileNameVirtual);
   static const std::string& GetJavascriptAddScriptTags(const std::string& fileNameVirtual);
-  static const std::string& GetFile
-  (const std::string& fileNameVirtual, const std::string& additionalBeginTag = "",
-   const std::string& additionalEndTag = "");
+  static const std::string& GetFile(
+    const std::string& fileNameVirtual,
+    const std::string& additionalBeginTag = "",
+    const std::string& additionalEndTag = ""
+  );
 
   static const std::string& GetMathQuillStyleSheeTWithTags();
   static const std::string GetMathQuillStyleSheetLink();
@@ -87,29 +96,42 @@ public:
   static std::string GetMathMouseHoverBeginArrayL(const std::string& input, int upperNumChars = 10000);
   static std::string GetStyleButtonLikeHtml();
   static std::string GetHtmlButton(const std::string& buttonID, const std::string& theScript, const std::string& buttonText);
-  static std::string GetHtmlSpanHidableStartsHiddeN
-  (const std::string& input, const std::string& labelExpandButton = "info expand/collapse", const std::string& desiredId = "");
+  static std::string GetHtmlSpanHidableStartsHiddeN(
+    const std::string& input,
+    const std::string& labelExpandButton = "info expand/collapse",
+    const std::string& desiredId = ""
+  );
   static std::string clearNewLines(const std::string& theString);
   static std::string backslashQuotes(const std::string& theString);
   static std::string clearSlashes(const std::string& theString);
   static std::string CleanUpForFileNameUse(const std::string& inputString);
   static std::string CleanUpForLaTeXLabelUse(const std::string& inputString);
   static std::string GetCalculatorLinkUnclosedPostArguments(const std::string& inputArguments);
-  static std::string GetCalculatorLinkUnclosedPostArguments
-  (const std::string& DisplayNameCalculator, const std::string& inputArguments);
+  static std::string GetCalculatorLinkUnclosedPostArguments(
+    const std::string& DisplayNameCalculator, const std::string& inputArguments
+  );
   static bool IsRepresentedByItselfInURLs(char input);
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
-  static bool AccountOneInputCGIString
-  (const std::string& fieldName, const std::string& fieldValue, MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
-   std::stringstream& commentsOnFailure);
-  static bool ChopCGIString
-  (const std::string& input, MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
-   std::stringstream& commentsOnFailure);
-  static bool ChopCGIStringAppend
-  (const std::string& input, MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
-   std::stringstream& commentsOnFailure);
-  static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
+  static bool AccountOneInputCGIString(
+    const std::string& fieldName,
+    const std::string& fieldValue,
+    MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
+    std::stringstream& commentsOnFailure
+  );
+  static bool ChopCGIString(
+    const std::string& input,
+    MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
+    std::stringstream& commentsOnFailure
+  );
+  static bool ChopCGIStringAppend(
+    const std::string& input,
+    MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
+    std::stringstream& commentsOnFailure
+  );
+  static void ElementToStringTooltip(
+    const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml
+  );
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml) {
     std::string result;
     HtmlRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml);

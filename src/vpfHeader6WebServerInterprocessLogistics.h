@@ -13,8 +13,8 @@ static ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogist
 //rather than across different threads.
 //inter-process communication is achieved via pipes.
 
-class PipePrimitive
-{
+// This is a basic wrapper around linux unnamed pipes.
+class PipePrimitive {
 public:
   List<int> pipeEnds; //pipeEnds[0] is the read end; pipeEnds[1] is the write end.
   List<char> lastRead;
@@ -25,10 +25,12 @@ public:
   std::string name;
   int numberOfBytesLastWrite;
   void Release();
-  bool CreateMe
-  (const std::string& inputPipeName,
-   bool readEndBlocks, bool writeEndBlocks,
-   bool restartServerOnFail, bool dontCrashOnFail);
+  bool CreateMe(
+    const std::string& inputPipeName,
+    bool readEndBlocks, bool writeEndBlocks,
+    bool restartServerOnFail,
+    bool dontCrashOnFail
+  );
   std::string GetLastRead();
   bool CheckConsistency();
   bool SetPipeFlagsIfFailThenCrash(int inputFlags, int whichEnd, bool restartServerOnFail, bool dontCrashOnFail);
@@ -40,20 +42,23 @@ public:
   bool SetPipeWriteNonBlockingIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
 
   bool SetPipeWriteFlagsIfFailThenCrash(int inputFlags, int whichEnd, bool restartServerOnFail, bool dontCrashOnFail);
-  bool WriteIfFailThenCrash(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
-  bool ReadIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
-  bool WriteAfterEmptying(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
-  bool ReadWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
+  bool WriteOnceIfFailThenCrash(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
+  bool ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
+  bool WriteOnceAfterEmptying(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
+  bool WriteAllAfterEmptying(const std::string& input, bool dontCrashOnFail);
+  bool ReadAll(const std::string& input, bool dontCrashOnFail);
+
+  bool ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
   bool HandleFailedWriteReturnFalse(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail, int numBadAttempts);
   std::string ToString() const;
   PipePrimitive();
   ~PipePrimitive();
 };
 
-class PauseProcess
-{
+class PauseProcess {
 public:
   static std::string currentProcessName;
+
   PipePrimitive thePausePipe;
   PipePrimitive mutexPipe;
   std::string name;
@@ -79,14 +84,19 @@ public:
   ~PauseProcess();
 };
 
-class Pipe
-{
+// This is an unnamed pipe with which may be shared by more than two processes
+// and by more than one thread in each process.
+// (multiple processes may try to send bytes through the pipe).
+// A writer to the pipe may lock access to the pipe via theMutexPipe lock.
+// TheMutexPipe lock has a (pipe-based) mechanism for locking out other processes and
+// a mutex-based mechanism for locking out other threads within the same process.
+class Pipe {
 public:
   PipePrimitive thePipe;
   PauseProcess theMutexPipe;
   bool flagDeallocated;
   std::string name;
-//  static int ConnectWithTimeoutViaSelect(int theFD, const std::string& input);
+  //  static int ConnectWithTimeoutViaSelect(int theFD, const std::string& input);
   std::string GetLastRead() {
     return this->thePipe.GetLastRead();
   }
@@ -94,17 +104,17 @@ public:
   static bool SetPipeBlockingModeIfFailThenCrash(int inputPipe, bool restartServerOnFail, bool dontCrashOnFail);
   bool ReadNoLocksIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
   static void WriteIfFailThenCrash(int theFD, const List<char>& input, bool restartServerOnFail, bool dontCrashOnFail);
-  static int ReadNoInterrupts(int theFD);
-  void Read(bool restartServerOnFail, bool dontCrashOnFail);
-  void ReadWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
-
-
+  void ReadOnce(bool restartServerOnFail, bool dontCrashOnFail);
+  void ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
   static int WriteNoInterrupts(int theFD, const std::string& input);
-  static int WriteWithTimeoutViaSelect
-  (int theFD, const std::string& input, int timeOutInSeconds, int maxNumTries = 10, std::stringstream* commentsOnFailure = 0);
-  static int ReadWithTimeOutViaSelect
-  (int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries = 10, std::stringstream* commentsOnFailure = 0);
-  void WriteAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail);
+  static int WriteWithTimeoutViaSelect(
+    int theFD, const std::string& input, int timeOutInSeconds, int maxNumTries = 10, std::stringstream* commentsOnFailure = 0
+  );
+  static int ReadWithTimeOutViaSelect(
+    int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries = 10, std::stringstream* commentsOnFailure = 0
+  );
+  void WriteOnceAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail);
+  void WriteAfterEmptyinG(const std::string& toBeSent, bool dontCrashOnFail);
 
   std::string ToString() const;
   void Release();

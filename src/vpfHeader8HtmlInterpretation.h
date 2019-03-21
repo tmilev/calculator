@@ -10,8 +10,7 @@ static ProjectInformationInstance ProjectInfoHeaderHtmlInterpretation(__FILE__, 
 
 class CalculatorHTML;
 
-struct TopicElement
-{
+struct TopicElement {
 public:
   static int scoreButtonCounter;
   int type;
@@ -84,16 +83,21 @@ public:
   TopicElement() {
     this->reset(0, 0);
   }
-  static void GetTopicList
-  (const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::HashString>& output,
-   CalculatorHTML& owner);
-  static bool LoadTopicBundle
-  (const std::string& inputFileName, MapLisT<std::string, List<std::string>, MathRoutines::HashString>& output,
-   CalculatorHTML& owner, std::stringstream& errorStream);
+  static void GetTopicList(
+    const std::string& inputString,
+    MapLisT<std::string, TopicElement, MathRoutines::HashString>& output,
+    CalculatorHTML& owner
+  );
+  static bool LoadTopicBundle(
+    const std::string& inputFileName,
+    MapLisT<std::string, List<std::string>, MathRoutines::HashString>& output,
+    CalculatorHTML& owner,
+    std::stringstream& errorStream
+  );
   static void AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::HashString>& output);
 };
 
-struct ProblemResources{
+struct ProblemResources {
 public:
   std::string video;
   std::string slides;
@@ -103,8 +107,7 @@ public:
   Rational maxPoints;
 };
 
-class CalculatorHTML
-{
+class CalculatorHTML {
 public:
   int NumAttemptsToInterpret;
   int MaxInterpretationAttempts;
@@ -223,7 +226,9 @@ public:
   bool InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
   std::string ToStringInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements);
   void LogProblemGenerationObsolete(Calculator& theInterpreter);
-  bool InterpretProcessExecutedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream& comments);
+  bool InterpretProcessExecutedCommands(
+    Calculator& theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream& comments
+  );
   bool PrepareAnswerElements(std::stringstream& comments);
   bool InterpretAnswerHighlights(std::stringstream& comments);
   bool InterpretAnswerElements(std::stringstream& comments);
@@ -246,20 +251,22 @@ public:
   void InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inputOutput);
   void InterpretIfAnswer(SyntacticElementHTML& inputOutput);
   std::string GetDeadlineNoInheritance(const std::string& id);
-  std::string GetDeadline
-  (const std::string& problemName, const std::string& sectionNumber, bool& outputIsInherited);
-  bool MergeOneProblemAdminData
-  (const std::string& inputProblemName, ProblemData& inputProblemInfo, std::stringstream& commentsOnFailure);
+  std::string GetDeadline(const std::string& problemName, const std::string& sectionNumber, bool& outputIsInherited);
+  bool MergeOneProblemAdminData(
+    const std::string& inputProblemName, ProblemData& inputProblemInfo, std::stringstream& commentsOnFailure
+  );
   //bool MergeProblemInfoInDatabaseURLed(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure);
   bool MergeProblemInfoInDatabaseJSON(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure);
-  bool LoadProblemInfoFromURLedInputAppend
-  (const std::string& inputInfoString,
-   MapLisT<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
-   std::stringstream& commentsOnFailure);
-  bool LoadProblemInfoFromJSONAppend
-  (const JSData& inputJSON,
-   MapLisT<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
-   std::stringstream& commentsOnFailure);
+  bool LoadProblemInfoFromURLedInputAppend(
+    const std::string& inputInfoString,
+    MapLisT<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
+    std::stringstream& commentsOnFailure
+  );
+  bool LoadProblemInfoFromJSONAppend(
+    const JSData& inputJSON,
+    MapLisT<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
+    std::stringstream& commentsOnFailure
+  );
   //  bool LoadDeadlineInfoFromJSONStringAppend
   //  (const std::string& inputJSONString,
   //   MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputDeadlineInfo,
@@ -267,21 +274,18 @@ public:
   //void StoreDeadlineInfoIntoJSON
   //(JSData& outputData,
   // MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
-  JSData ToJSONProblemWeights
-  (MapLisT<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
-  JSData ToJSONDeadlines
-  (MapLisT<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
-  std::string ToStringDeadline
-  (const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection);
+  JSData ToJSONProblemWeights(MapLisT<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
+  JSData ToJSONDeadlines(MapLisT<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
+  std::string ToStringDeadline(
+    const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection
+  );
   void ComputeDeadlinesAllSections(TopicElement& inputOutput);
   void ComputeDeadlinesAllSectionsNoInheritance(TopicElement& inputOutput);
-  void ComputeDeadlineModifyButton
-  (TopicElement& inputOutput, bool problemAlreadySolved, bool isProblemGroup);
+  void ComputeDeadlineModifyButton(TopicElement& inputOutput, bool problemAlreadySolved, bool isProblemGroup);
   std::string ToStringTopicListJSON();
   std::string ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay = "");
   std::string ToStringLinkFromFileName(const std::string& theFileName);
-  std::string ToStringLinkCurrentAdmin
-  (const std::string& displayString, bool setDebugFlag, bool includeRandomSeed);
+  std::string ToStringLinkCurrentAdmin(const std::string& displayString, bool setDebugFlag, bool includeRandomSeed);
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   std::string ToStringProblemWeightButton(const std::string& theFileName);
@@ -304,9 +308,13 @@ public:
   std::string GetJavascriptSubmitAnswers();
   std::string GetJavascriptMathQuillBoxes();
   JSData GetJavascriptMathQuillBoxesForJSON();
-  void LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure);
+  void LoadCurrentProblemItem(
+    bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure
+  );
   void FigureOutCurrentProblemList(std::stringstream& comments);
-  std::string LoadAndInterpretCurrentProblemItemJSON(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed, std::stringstream *commentsOnFailure);
+  std::string LoadAndInterpretCurrentProblemItemJSON(
+    bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed, std::stringstream* commentsOnFailure
+  );
   static unsigned int HashFunction(const CalculatorHTML& input) {
     return input.HashFunction();
   }
@@ -317,18 +325,24 @@ public:
     return this->fileName == other.fileName;
   }
   std::string ToStringAllSectionDeadlines(const std::string& topicID, bool isSection);
-  std::string ToStringOnEDeadlineFormatted
-  (const std::string& topicID, const std::string& sectionNumber,
-  bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection);
-  std::string ToStringCalculatorArgumentsForProblem
-  (const std::string& requestType, const std::string& studentView,
-   const std::string& studentSection = "", bool includeRandomSeedIfAppropriate = false) const;
+  std::string ToStringOnEDeadlineFormatted(
+    const std::string& topicID,
+    const std::string& sectionNumber,
+    bool problemAlreadySolved,
+    bool returnEmptyStringIfNoDeadline,
+    bool isSection
+  );
+  std::string ToStringCalculatorArgumentsForProblem(
+    const std::string& requestType,
+    const std::string& studentView,
+    const std::string& studentSection = "",
+    bool includeRandomSeedIfAppropriate = false
+  ) const;
   std::string ToStringProblemNavigation() const;
   std::string ToStringExtractedCommands();
   std::string ToStringContent();
   std::string ToStringParsingStack(List<SyntacticElementHTML>& theStack);
   CalculatorHTML();
 };
-
 
 #endif

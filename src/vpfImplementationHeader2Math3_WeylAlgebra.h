@@ -5,31 +5,39 @@
 
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
-static ProjectInformationInstance ProjectInfovpfImplementationHeaderWeylAlgebras(__FILE__, "Implementation header, Weyl algebra routines. ");
+static ProjectInformationInstance ProjectInfovpfImplementationHeaderWeylAlgebras(
+  __FILE__, "Implementation header, Weyl algebra routines. "
+);
 
 template <class coefficient>
 bool ElementWeylAlgebra<coefficient>::IsPolynomial(Polynomial<coefficient>* whichPoly) const {
   if (whichPoly != 0)
     whichPoly->MakeZero();
   for (int i = 0; i < this->size(); i ++) {
-    if (!(*this)[i].differentialPart.IsConstant())
+    if (!(*this)[i].differentialPart.IsConstant()) {
       return false;
-    if (whichPoly != 0)
+    }
+    if (whichPoly != 0) {
       whichPoly->AddMonomial((*this)[i].polynomialPart, this->theCoeffs[i]);
+    }
   }
   return true;
 }
 
 template <class coefficient>
 bool ElementWeylAlgebra<coefficient>::HasNonSmallPositiveIntegerDerivation() const {
-  for (int i = 0; i < this->size(); i ++)
-    if ((*this)[i].HasNonSmallPositiveIntegerDerivation())
+  for (int i = 0; i < this->size(); i ++) {
+    if ((*this)[i].HasNonSmallPositiveIntegerDerivation()) {
       return true;
+    }
+  }
   return false;
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output) const {
+void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(
+  const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output
+) const {
   SelectionWithDifferentMaxMultiplicities tempSel;
   int theDimensioN = MathRoutines::Maximum(left.GetMinNumVars(), right.GetMinNumVars());
   tempSel.Multiplicities.initializeFillInObject(theDimensioN, 0);
@@ -37,9 +45,13 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlg
   int theExpectedSize = 1;
   for (int i = 0; i < theDimensioN; i ++) {
     int powerDiffOp = 0;
-    if (!left.differentialPart(i).IsSmallInteger(&powerDiffOp))
-      crash << "This is a programming error. Requested operations with elements of Weyl algebra that have monomials of exponent "
-      << left.differentialPart(i).ToString() << " which I cannot handle. If this is bad user input, it should have been caught at an earlier level. " << crash;
+    if (!left.differentialPart(i).IsSmallInteger(&powerDiffOp)) {
+      crash << "This is a programming error. Requested operations with elements of Weyl algebra "
+      << "that have monomials of exponent "
+      << left.differentialPart(i).ToString()
+      << " which I cannot handle. If this is bad user input, "
+      << "it should have been caught at an earlier level. " << crash;
+    }
     tempSel.MaxMultiplicities[i] = powerDiffOp;
     theExpectedSize *= powerDiffOp;
   }
@@ -76,7 +88,9 @@ void ElementWeylAlgebra<coefficient>::LieBracketOnTheRightMakeReport(const Eleme
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::LieBracket(const ElementWeylAlgebra& left, const ElementWeylAlgebra& right, ElementWeylAlgebra& output) {
+void ElementWeylAlgebra<coefficient>::LieBracket(
+  const ElementWeylAlgebra& left, const ElementWeylAlgebra& right, ElementWeylAlgebra& output
+) {
   if (&output == &right || &output == &left) {
     ElementWeylAlgebra leftCopy = left;
     ElementWeylAlgebra rightCopy = right;
@@ -110,13 +124,10 @@ void ElementWeylAlgebra<coefficient>::LieBracketOnTheRight(const ElementWeylAlge
   ElementWeylAlgebra tempEl1, tempEl2;
   tempEl1 = standsOnTheRight;
   tempEl1.MultiplyOnTheLeft(*this);
-  //tempEl1.ComputeDebugString(false);
   tempEl2 = *this;
   tempEl2.MultiplyOnTheLeft(standsOnTheRight, theGlobalVariables);
-  //tempEl2.ComputeDebugString(false);
   *this = tempEl1;
   *this -= tempEl2;
-  //this->ComputeDebugString(false);
 }
 
 template <class coefficient>
@@ -125,7 +136,7 @@ void ElementWeylAlgebra<coefficient>::MultiplyOnTheLeft(const  ElementWeylAlgebr
   ElementWeylAlgebra Accum;
   Accum.MakeZero();
   coefficient currentCF;
-  for (int j = 0; j < standsOnTheLeft.size(); j ++)
+  for (int j = 0; j < standsOnTheLeft.size(); j ++) {
     for (int i = 0; i < this->size(); i ++) {
       this->MultiplyTwoMonomials(standsOnTheLeft[j], (*this)[i], buffer);
       currentCF = standsOnTheLeft.theCoeffs[j];
@@ -133,6 +144,7 @@ void ElementWeylAlgebra<coefficient>::MultiplyOnTheLeft(const  ElementWeylAlgebr
       buffer *= currentCF;
       Accum += buffer;
     }
+  }
   *this = Accum;
 }
 
@@ -142,7 +154,7 @@ void ElementWeylAlgebra<coefficient>::operator*=(const ElementWeylAlgebra& stand
   ElementWeylAlgebra Accum;
   Accum.MakeZero();
   coefficient currentCF;
-  for (int j = 0; j < standsOnTheRight.size(); j ++)
+  for (int j = 0; j < standsOnTheRight.size(); j ++) {
     for (int i = 0; i < this->size(); i ++) {
       this->MultiplyTwoMonomials((*this)[i], standsOnTheRight[j], buffer);
       currentCF = this->theCoeffs[i];
@@ -150,6 +162,7 @@ void ElementWeylAlgebra<coefficient>::operator*=(const ElementWeylAlgebra& stand
       buffer *= currentCF;
       Accum += buffer;
     }
+  }
   *this = Accum;
 }
 
@@ -258,11 +271,13 @@ void ElementWeylAlgebra<coefficient>::GetStandardOrderDiffOperatorCorrespondingT
   outputDO.MakeZero();
   int inputPower = 0;
   if (!inputRationalPower.IsSmallInteger(&inputPower))
-    crash << "This is a programming error: " << " I can give you a differential operator only from integer exponent. " << crash;
-  if (inputPower >= 0)
+    crash << "This is a programming error: "
+    << " I can give you a differential operator only from integer exponent. " << crash;
+  if (inputPower >= 0) {
     tempMon.polynomialPart.MakeEi(indexVar, inputPower);
-  else
+  } else {
     tempMon.differentialPart.MakeEi(indexVar, - inputPower);
+  }
   outputDO.AddMonomial(tempMon, 1);
   inputPower *= - 1;
   Polynomial<Rational> newMult;
@@ -282,18 +297,13 @@ bool ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<
   ElementWeylAlgebra output;
   output.MakeZero();
   coefficient theNewCoeff;
-  //stOutput << "<hr>Substituting " << SubPolyPart.ToString() << " into " << this->ToString();
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
-    //stOutput << "<hr>Substituting " << SubPolyPart.ToString() << " into " << currentMon.polynomialPart.ToString();
     if (!currentMon.polynomialPart.SubstitutioN(SubPolyPart, polyPart))
       return false;
-    //stOutput << " to get " << polyPart.ToString();
-    //stOutput << "<hr>Substituting " << SubPolyPart.ToString() << " into " << currentMon.differentialPart.ToString();
     if (!currentMon.differentialPart.SubstitutioN(SubDiffPArt, DOpart))
       return false;
-    //stOutput << " to get " << DOpart.ToString();
-    for (int j = 0; j < polyPart.size(); j ++)
+    for (int j = 0; j < polyPart.size(); j ++) {
       for (int k = 0; k < DOpart.size(); k ++) {
         theMon.polynomialPart = polyPart[j];
         theMon.differentialPart = DOpart[k];
@@ -302,6 +312,7 @@ bool ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<
         theNewCoeff *= DOpart.theCoeffs[k];
         output.AddMonomial(theMon, theNewCoeff);
       }
+    }
   }
   *this = output;
   return true;
@@ -323,17 +334,11 @@ void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coeffi
     const MonomialWeylAlgebra& currentMon = (*this)[i];
     if (!(currentMon.polynomialPart.TotalDegree() + currentMon.differentialPart.TotalDegree()).IsInteger(&totalDeg))
       crash << "This is a programming error: calling Fourier transoform on differential operator with non-integral exponents. " << crash;
-    //stOutput << "<br>totalDeg: " << totalDeg.ToString() << ", is even =" << totalDeg.IsEven();
     theMon.differentialPart = currentMon.polynomialPart;
     theMon.polynomialPart = currentMon.differentialPart;
     theCoeff = this->theCoeffs[i];
     if (totalDeg.IsEven())
       theCoeff *= - 1;
-    //totalDeg%=4;
-    //if (totalDeg==2 || totalDeg==3)
-    //  theCoeff*= - 1;
-    //if (totalDeg==1 || totalDeg==3)
-    //  theCoeff*=ImaginaryUnit;
     output.AddMonomial(theMon, theCoeff);
   }
 }
@@ -344,7 +349,7 @@ bool ElementWeylAlgebra<coefficient>::ActOnPolynomial(Polynomial<Rational>& theP
   result.MakeZero();
   MonomialP resultMon;
   Rational coeff;
-  for (int i = 0; i < this->size(); i ++)
+  for (int i = 0; i < this->size(); i ++) {
     for (int j = 0; j < thePoly.size(); j ++) {
       const MonomialP& currentPolMon = thePoly[j];
       const MonomialWeylAlgebra& currentOpMon = (*this)[i];
@@ -353,20 +358,24 @@ bool ElementWeylAlgebra<coefficient>::ActOnPolynomial(Polynomial<Rational>& theP
       coeff *= this->theCoeffs[i];
       for (int k = 0; k < currentOpMon.GetMinNumVars(); k ++) {
         int numDiff = 0;
-        if (!currentOpMon.differentialPart(k).IsSmallInteger(&numDiff))
+        if (!currentOpMon.differentialPart(k).IsSmallInteger(&numDiff)) {
           return false;
+        }
         for (; numDiff > 0; numDiff --) {
           coeff *= resultMon[k];
-          if (coeff.IsEqualToZero())
+          if (coeff.IsEqualToZero()) {
             break;
+          }
           resultMon[k] -= 1;
         }
-        if (coeff.IsEqualToZero())
+        if (coeff.IsEqualToZero()) {
           break;
+        }
       }
       resultMon *= currentOpMon.polynomialPart;
       result.AddMonomial(resultMon, coeff);
     }
+  }
   thePoly = result;
   return true;
 }

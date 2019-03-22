@@ -13,8 +13,9 @@ class Vector: public List<coefficient> {
   friend Vector<coefficient> operator-(const Vector<coefficient>& input) {
     Vector<coefficient> result;
     result.SetSize(input.size);
-    for (int i = 0; i < input.size; i ++)
+    for (int i = 0; i < input.size; i ++) {
       result[i] = - input[i];
+    }
     return result;
   }
   friend std::ostream& operator<< <coefficient>(std::ostream& output, const Vector<coefficient>& theVector);
@@ -185,8 +186,9 @@ public:
   }
   coefficient SumCoords() const {
     coefficient result = 0;
-    for (int i = 0; i < this->size; i ++)
+    for (int i = 0; i < this->size; i ++) {
       result += this->TheObjects[i];
+    }
     return result;
   }
   template <class otherType>
@@ -226,8 +228,9 @@ public:
     Vector<coefficient>& output
   ) {
     coefficient tempRat;
-    if (r1.size != r2.size)
+    if (r1.size != r2.size) {
       crash << "Adding vectors of different dimensions. " << crash;
+    }
     output = r1;
     for (int i = 0; i < r1.size; i ++) {
       tempRat = r2[i];
@@ -276,8 +279,9 @@ public:
     }
     if (input.NumRows == 1) {
       this->SetSize(input.NumCols);
-      for (int i = 0; i < this->size; i ++)
+      for (int i = 0; i < this->size; i ++) {
         this->TheObjects[i] = input.elements[0][i];
+      }
       return true;
     }
     return false;

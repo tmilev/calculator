@@ -354,10 +354,11 @@ void SSLdata::HandShakeIamServer(int inputSocketID) {
     this->errorCode = SSL_accept(this->sslServeR);
     this->flagSSLHandshakeSuccessful = false;
     if (this->errorCode != 1) {
-      if (this->errorCode == 0)
+      if (this->errorCode == 0) {
         logOpenSSL << "OpenSSL handshake not successful in a controlled manner. ";
-      else
+      } else {
         logOpenSSL << "OpenSSL handshake not successful with a fatal error. ";
+      }
       logOpenSSL << "Attempt " << i + 1 << " out of " << maxNumHandshakeTries << " failed. ";
       switch(SSL_get_error(this->sslServeR, this->errorCode)) {
       case SSL_ERROR_NONE:
@@ -465,8 +466,10 @@ void SSLdata::RemoveLastSocketClient() {
 }
 
 bool SSLdata::HandShakeIamClientNoSocketCleanup(
-  int inputSocketID, std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneral
+  int inputSocketID,
+  std::stringstream* commentsOnFailure,
+  std::stringstream*
+  commentsGeneral
 ) {
 #ifdef MACRO_use_open_ssl
   MacroRegisterFunctionWithName("WebServer::HandShakeIamClientNoSocketCleanup");
@@ -483,15 +486,17 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(
     this->flagSSLHandshakeSuccessful = false;
     if (this->errorCode != 1) {
       if (this->errorCode == 0) {
-        if (commentsOnFailure != 0)
+        if (commentsOnFailure != 0) {
           *commentsOnFailure << "Attempt " << i + 1
           << ": SSL handshake not successfull in a "
           << "controlled fashion (errorCode = 0). <br>";
+        }
       } else {
-        if (commentsOnFailure != 0)
+        if (commentsOnFailure != 0) {
           *commentsOnFailure << "Attempt " << i + 1
           << ": SSL handshake not successfull with a fatal error with "
           << "errorCode: " << this->errorCode << ". <br>";
+        }
       }
       switch(SSL_get_error(this->sslClient, this->errorCode)) {
       case SSL_ERROR_NONE:
@@ -670,12 +675,14 @@ bool SSLdata::SSLReadLoop(
         }
       }
     }
-    if (numBytes == 0)
+    if (numBytes == 0) {
       break;
+    }
   }
   if (numBytes < 0) {
-    if (commentsGeneral != 0)
+    if (commentsGeneral != 0) {
       *commentsGeneral << "SSL-ERROR reading from socket. ";
+    }
     return false;
   }
   return true;
@@ -695,12 +702,14 @@ bool SSLdata::SSLWriteLoop(
       theSSL, this->buffer.TheObjects, this->buffer.size,
       outputError, commentsGeneral, includeNoErrorInComments
     );
-    if (numBytes == this->buffer.size)
+    if (numBytes == this->buffer.size) {
       break;
+    }
   }
   if (numBytes != this->buffer.size) {
-    if (commentsGeneral != 0)
+    if (commentsGeneral != 0) {
       *commentsGeneral  << i << " errors writing to socket.\n NumBytes: " << numBytes << ". ";
+    }
     return false;
   }
   return true;
@@ -718,16 +727,18 @@ void SSLdata::ClearErrorQueue(
   int theCode = SSL_get_error(theSSL, errorCode);
   ERR_clear_error();
   if (theCode == SSL_ERROR_NONE) {
-    if (commentsGeneral != 0 && includeNoErrorInComments)
+    if (commentsGeneral != 0 && includeNoErrorInComments) {
       *commentsGeneral << "\n<br>\nNo error.\n";
+    }
     return;
   }
   numErrors ++;
   int extraErrorCode = 0;
   switch (theCode) {
   case SSL_ERROR_ZERO_RETURN:
-    if (outputError != 0)
+    if (outputError != 0) {
       *outputError = "SSL_ERROR_ZERO_RETURN";
+    }
     break;
   case SSL_ERROR_WANT_READ:
     if (outputError != 0)
@@ -804,8 +815,9 @@ bool WebWorker::ReceiveAllHttpSSL() {
     );
     int64_t readTime = theGlobalVariables.GetElapsedMilliseconds() - msBeforesslread;
     logWorker << "DEBUG: ssl read done in " << readTime << " ms. ";
-    if (numBytesInBuffer >= 0 && numBytesInBuffer <= (signed) bufferSize)
+    if (numBytesInBuffer >= 0 && numBytesInBuffer <= (signed) bufferSize) {
       break;
+    }
     numFailedReceives ++;
     if (numFailedReceives > maxNumFailedReceives) {
       if (errorString == SSLdata::errors::errorWantRead) {
@@ -821,17 +833,17 @@ bool WebWorker::ReceiveAllHttpSSL() {
         out << "Too many failed receives, aborting. ";
         this->error = out.str();
       }
-      //logIO << out.str() << logger::endL;
       numBytesInBuffer = 0;
       return false;
     }
   }
   this->messageHead.assign(buffer, numBytesInBuffer);
   this->ParseMessageHead();
-  if (this->requestTypE == WebWorker::requestTypes::requestPost)
+  if (this->requestTypE == WebWorker::requestTypes::requestPost) {
     this->displayUserInput = "POST " + this->addressGetOrPost;
-  else
+  } else {
     this->displayUserInput = "GET " + this->addressGetOrPost;
+  }
   if (this->ContentLength <= 0) {
     //logIO << " exiting successfully" << logger::endL;
     return true;
@@ -908,8 +920,11 @@ void WebWorker::SendAllBytesHttpSSL() {
   if (this->remainingBytesToSenD.size == 0)
     return;
   this->CheckConsistency();
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
-    crash << "Error: WebWorker::SendAllBytesHttpSSL called while flagUsingSSLinCurrentConnection is set to false. " << crash;
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
+    crash
+    << "Error: WebWorker::SendAllBytesHttpSSL called "
+    << "while flagUsingSSLinCurrentConnection is set to false. " << crash;
+  }
   if (this->connectedSocketID == - 1) {
     logWorker << logger::red << "Socket::SendAllBytes failed: connectedSocketID= - 1." << logger::endL;
     return;
@@ -938,14 +953,16 @@ void WebWorker::SendAllBytesHttpSSL() {
       logWorker << "WebWorker::SendAllBytes failed: SSL_write error. " << logger::endL;
       return;
     }
-    if (numBytesSent == 0)
+    if (numBytesSent == 0) {
       numTimesRunWithoutSending ++;
-    else
+    } else {
       numTimesRunWithoutSending = 0;
+    }
     logWorker << numBytesSent;
     this->remainingBytesToSenD.Slice(numBytesSent, this->remainingBytesToSenD.size - numBytesSent);
-    if (this->remainingBytesToSenD.size > 0)
+    if (this->remainingBytesToSenD.size > 0) {
       logWorker << ", ";
+    }
     if (numTimesRunWithoutSending > 3) {
       logWorker << "WebWorker::SendAllBytes failed: send function went through 3 cycles without "
       << " sending any bytes. "
@@ -1151,8 +1168,9 @@ std::string WebWorker::GetNavigationPage() {
 
 std::string WebWorker::GetDatabaseJSON() {
   MacroRegisterFunctionWithName("WebWorker::GetDatabaseJSON");
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
     return "Only logged-in admins can access database. ";
+  }
   JSData result;
 #ifdef MACRO_use_MongoDB
   std::string operation = theGlobalVariables.GetWebInput(WebAPI::databaseParameters::operation);
@@ -1321,8 +1339,9 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments, std:
       *comments << "Activation token entered: authentication token and google token ignored. ";
     }
   }
-  if (theUser.username != "")
+  if (theUser.username != "") {
     theUser.enteredGoogleToken = "";
+  }
   if (theUser.enteredAuthenticationToken != "") {
     theUser.flagEnteredAuthenticationToken = true;
     theGlobalVariables.flagLogInAttempted = true;
@@ -1430,8 +1449,9 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
   if (includeUserName)
     out << "<input type =\"hidden\" id =\"username\" name =\"username\">\n";
   //the values of the hidden inputs will be filled in via javascript
-  if (this->flagFoundMalformedFormInput)
+  if (this->flagFoundMalformedFormInput) {
     out << "<b>Your input formed had malformed entries.</b>";
+  }
   out
   << "<input type =\"hidden\" id =\"studentView\" name =\"studentView\">\n"
   << "<input type =\"hidden\" id =\"studentSection\" name =\"studentSection\">\n"
@@ -2128,6 +2148,9 @@ int WebWorker::ProcessComputationIndicator() {
     }
     stOutput << result.ToString(false);
     otherWorker.PauseComputationReportReceived.ResumePausedProcessesIfAny(false, false);
+  } else {
+    result[WebAPI::result::status] = "noReport";
+    stOutput << result.ToString(false);
   }
   return 0;
 }
@@ -2151,8 +2174,9 @@ void WebWorker::WriteProgressReportToFile(const std::string& input) {
 }
 
 void WebWorker::PipeProgressReportToParentProcess(const std::string& input) {
-  if (!this->flagProgressReportAllowed)
+  if (!this->flagProgressReportAllowed) {
     return;
+  }
   MacroRegisterFunctionWithName("WebWorker::PipeProgressReportToParentProcess");
   this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked(false, false);
   if (this->PauseWorker.CheckPauseIsRequested(false, false, false)) {
@@ -4940,9 +4964,10 @@ int WebServer::Run() {
         }
       }
     }
-    if (newConnectedSocket < 0 && !found)
+    if (newConnectedSocket < 0 && !found) {
       logSocketAccept << logger::red << "This is not supposed to to happen: select succeeded "
       << "but I found no set socket. " << logger::endL;
+    }
     if (newConnectedSocket < 0) {
       if (theGlobalVariables.flagServerDetailedLog) {
         logServer << "Detail: newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. " << logger::endL;

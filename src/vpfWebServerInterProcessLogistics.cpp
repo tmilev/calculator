@@ -132,8 +132,9 @@ bool PauseProcess::ResetNoAllocation() {
 
 void PauseProcess::PauseIfRequested(bool restartServerOnFail, bool dontCrashOnFail) {
   this->CheckConsistency();
-  if (this->CheckPauseIsRequested(restartServerOnFail, dontCrashOnFail, false))
+  if (this->CheckPauseIsRequested(restartServerOnFail, dontCrashOnFail, false)) {
     logBlock << logger::blue << this->currentProcessName << "blocking on " << this->ToString() << logger::endL;
+  }
   bool pauseWasRequested = !this->thePausePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   if (!pauseWasRequested) {
     this->thePausePipe.WriteOnceIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
@@ -177,21 +178,26 @@ void PauseProcess::RequestPausePauseIfLocked(bool restartServerOnFail, bool dont
 
 bool PauseProcess::CheckPauseIsRequested(bool restartServerOnFail, bool dontCrashOnFail, bool dontLockImServer) {
   this->CheckConsistency();
-  if (!dontLockImServer)
-    if (!this->mutexPipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
+  if (!dontLockImServer) {
+    if (!this->mutexPipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
       return false;
-  if (!this->thePausePipe.SetPipeReadNonBlockingIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
+    }
+  }
+  if (!this->thePausePipe.SetPipeReadNonBlockingIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
     return false;
-  if (!this->thePausePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
+  }
+  if (!this->thePausePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
     return false;
+  }
   bool result = (this->thePausePipe.lastRead.size == 0);
   if (!result) {
     if (!this->thePausePipe.WriteOnceIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail)) {
       return false;
     }
   }
-  if (!this->thePausePipe.SetPipeReadBlockingModeIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
+  if (!this->thePausePipe.SetPipeReadBlockingModeIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
     return false;
+  }
   if (!this->mutexPipe.WriteOnceIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail)) {
     return false;
   }
@@ -205,15 +211,17 @@ void PauseProcess::ResumePausedProcessesIfAny(bool restartServerOnFail, bool don
 
 std::string PauseProcess::ToString() const {
   std::stringstream out;
-  if (this->name != "")
+  if (this->name != "") {
     out << this->name << ": ";
+  }
   out << "pausing: " << this->thePausePipe.ToString() << ", mutex: "
   << this->mutexPipe.ToString();
   return out.str();
 }
 
-int Pipe::WriteWithTimeoutViaSelect
-(int theFD, const std::string& input, int timeOutInSeconds, int maxNumTries, std::stringstream* commentsOnFailure) {
+int Pipe::WriteWithTimeoutViaSelect(
+  int theFD, const std::string& input, int timeOutInSeconds, int maxNumTries, std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("Pipe::WriteWithTimeoutViaSelect");
   fd_set theFDcontainer;
   FD_ZERO(&theFDcontainer);
@@ -224,8 +232,8 @@ int Pipe::WriteWithTimeoutViaSelect
   int numFails = 0;
   int numSelected = - 1;
   std::stringstream failStream;
-  do
-  { if (numFails > maxNumTries) {
+  do {
+    if (numFails > maxNumTries) {
       failStream << maxNumTries << " failed or timed-out select attempts on file descriptor: " << theFD;
       break;
     }
@@ -235,15 +243,17 @@ int Pipe::WriteWithTimeoutViaSelect
     numFails ++;
   } while (numSelected < 0);
   if (numSelected <= 0) {
-    if (commentsOnFailure != 0)
+    if (commentsOnFailure != 0) {
       *commentsOnFailure << failStream.str();
+    }
     return - 1;
   }
   return Pipe::WriteNoInterrupts(theFD, input);
 }
 
-int Pipe::ReadWithTimeOutViaSelect
-(int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries, std::stringstream* commentsOnFailure) {
+int Pipe::ReadWithTimeOutViaSelect(
+  int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries, std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("Pipe::ReadWithTimeOutViaSelect");
   if (theFD < 0) {
     if (commentsOnFailure != 0)
@@ -259,8 +269,8 @@ int Pipe::ReadWithTimeOutViaSelect
   int numFails = 0;
   int numSelected = - 1;
   std::stringstream failStream;
-  do
-  { if (numFails > maxNumTries) {
+  do {
+    if (numFails > maxNumTries) {
       failStream << maxNumTries << " failed or timed-out select attempts on file descriptor: " << theFD;
       break;
     }
@@ -271,8 +281,9 @@ int Pipe::ReadWithTimeOutViaSelect
   } while (numSelected < 0);
   //numSelected == 0 most probably means timeout has expired.
   if (numSelected <= 0) {
-    if (commentsOnFailure != 0)
+    if (commentsOnFailure != 0) {
       *commentsOnFailure << failStream.str();
+    }
     return - 1;
   }
   return read(theFD, output.TheObjects, output.size - 1);
@@ -287,11 +298,12 @@ bool PipePrimitive::SetPipeFlagsIfFailThenCrash(int inputFlags, int whichEnd, bo
     << this->pipeEnds[whichEnd] << ": "
     << theError << ". " << logger::endL;
     if (++ counter > 100) {
-      if (restartServerOnFail)
+      if (restartServerOnFail) {
         theWebServer.Restart();
-      else if (!dontCrashOnFail)
+      } else if (!dontCrashOnFail) {
         crash << "fcntl failed more than 100 times on "
         << "file desciptor: " << this->pipeEnds[whichEnd] << ": " << theError << ". " << crash;
+      }
       return false;
     }
   }
@@ -301,8 +313,9 @@ bool PipePrimitive::SetPipeFlagsIfFailThenCrash(int inputFlags, int whichEnd, bo
 bool PipePrimitive::SetPipeReadNonBlockingIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("Pipe::SetPipeReadNonBlockingIfFailThenCrash");
   bool result = this->SetPipeFlagsIfFailThenCrash(O_NONBLOCK, 0, restartServerOnFail, dontCrashOnFail);
-  if (result)
+  if (result) {
     this->flagReadEndBlocks = false;
+  }
   return result;
 }
 
@@ -369,16 +382,6 @@ bool PipePrimitive::ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontC
   if (!this->ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
     return false;
   return this->WriteOnceIfFailThenCrash(this->GetLastRead(), restartServerOnFail, dontCrashOnFail);
-}
-
-bool PipePrimitive::WriteAllAfterEmptying(const std::string& input, bool dontCrashOnFail) {
-  if (this->flagReadEndBlocks) {
-    crash << this->ToString() << ": write after emptying allowed only on non-blocking read pipes. " << crash;
-  }
-  if (!this->ReadOnceIfFailThenCrash(false, dontCrashOnFail)) {
-    return false;
-  }
-
 }
 
 bool PipePrimitive::WriteOnceAfterEmptying(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail) {
@@ -513,8 +516,9 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
   MacroRegisterFunctionWithName("PipePrimitive::ReadOnceIfFailThenCrash");
   this->CheckConsistency();
   this->lastRead.SetSize(0);
-  if (this->pipeEnds[0] == - 1)
+  if (this->pipeEnds[0] == - 1) {
     return false;
+  }
   int counter = 0;
   const unsigned int bufferSize = 200000;
   this->buffer.SetSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
@@ -746,6 +750,21 @@ std::string logger::openTagHtml() {
   }
 }
 
+std::string logger::getStampShort() {
+  std::stringstream out;
+  out << "[" << theGlobalVariables.processType << ", ";
+  if (theWebServer.activeWorker != - 1) {
+    out << "w: " << theWebServer.activeWorker << ", ";
+  }
+  out << "c: " << theWebServer.NumConnectionsSoFar;
+  if (theWebServer.activeWorker != -1) {
+    out << "." << theWebServer.GetActiveWorker().numberOfReceivesCurrentConnection;
+  }
+  out << "] ";
+  //<-abbreviating worker to w and connection to c to reduce the log size.
+  return out.str();
+}
+
 std::string logger::getStamp() {
   std::stringstream out;
   out << theGlobalVariables.processType << ", ";
@@ -759,23 +778,28 @@ std::string logger::getStamp() {
   return out.str();
 }
 
-logger& logger::operator << (const loggerSpecialSymbols& input) {
-  if (theGlobalVariables.flagRunningApache)
+logger& logger::operator<<(const loggerSpecialSymbols& input) {
+  if (theGlobalVariables.flagRunningApache) {
     return *this;
+  }
   this->initializeIfNeeded();
   this->CheckLogSize();
   bool doUseColors = theGlobalVariables.flagRunningBuiltInWebServer || theGlobalVariables.flagRunningCommandLine;
   switch (input) {
     case logger::endL:
-      if (doUseColors)
+      std::cout << this->getStampShort() << this->bufferStandardOutput;
+      this->bufferStandardOutput.clear();
+      if (doUseColors) {
         std::cout << this->closeTagConsole() << std::endl;
+      }
       std::cout.flush();
       this->currentColor = logger::normalColor;
-      if (this->flagStopWritingToFile)
+      if (this->flagStopWritingToFile) {
         return *this;
-      this->buffer += this->closeTagHtml() + "\n<br>\n";
-      theFile << this->getStamp() << this->buffer;
-      this->buffer = "";
+      }
+      this->bufferFile += this->closeTagHtml() + "\n<br>\n";
+      theFile << this->getStamp() << this->bufferFile;
+      this->bufferFile = "";
       theFile.flush();
       return *this;
     case logger::red:
@@ -786,15 +810,26 @@ logger& logger::operator << (const loggerSpecialSymbols& input) {
     case logger::orange:
     case logger::cyan:
       this->currentColor = input;
-      if (doUseColors)
-        std::cout << this->openTagConsole();
-      if (this->flagStopWritingToFile)
+      if (doUseColors) {
+        if (this->flagWriteImmediately) {
+          std::cout << this->openTagConsole();
+        } else {
+          this->bufferStandardOutput += this->openTagConsole();
+        }
+      }
+      if (this->flagStopWritingToFile) {
         return *this;
+      }
       this->theFile << this->openTagHtml();
       return *this;
     case logger::normalColor:
-      if (doUseColors)
-        std::cout << this->closeTagConsole();
+      if (doUseColors) {
+        if (this->flagWriteImmediately) {
+          std::cout << this->closeTagConsole();
+        } else {
+          this->bufferStandardOutput += this->closeTagConsole();
+        }
+      }
       this->currentColor = logger::normalColor;
       if (this->flagStopWritingToFile)
         return *this;

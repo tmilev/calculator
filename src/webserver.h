@@ -224,8 +224,9 @@ public:
   bool CorrectRequestsAFTERLoginReturnFalseIfModified();
   bool RedirectIfNeeded(std::stringstream& argumentProcessingFailureComments);
 
-  bool ExtractArgumentsFromMessage
-  (const std::string& input, std::stringstream& argumentProcessingFailureComments, int recursionDepth = 0);
+  bool ExtractArgumentsFromMessage(
+    const std::string& input, std::stringstream& argumentProcessingFailureComments, int recursionDepth = 0
+  );
   bool ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments);
   static void OutputSendAfterTimeout(const std::string& input);
   void OutputResultAfterTimeout();

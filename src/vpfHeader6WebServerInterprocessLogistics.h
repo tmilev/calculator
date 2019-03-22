@@ -45,8 +45,6 @@ public:
   bool WriteOnceIfFailThenCrash(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
   bool ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
   bool WriteOnceAfterEmptying(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
-  bool WriteAllAfterEmptying(const std::string& input, bool dontCrashOnFail);
-  bool ReadAll(const std::string& input, bool dontCrashOnFail);
 
   bool ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
   bool HandleFailedWriteReturnFalse(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail, int numBadAttempts);

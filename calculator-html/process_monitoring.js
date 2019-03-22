@@ -71,10 +71,14 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
     this.isPaused = true;
     indicatorButton.innerHTML = "Continue";
   } else {
-    var panelIdPairs = [];
-    var buffer = new BufferCalculator();
-    this.ownerCalculator.writeResult(buffer, resultJSON, panelIdPairs);
-    resultComponent.innerHTML = buffer.toString();  
+    if (status === "noReport") {
+      progReportTimer.innerHTML += "No report on last ping."; 
+    } else {
+      var panelIdPairs = [];
+      var buffer = new BufferCalculator();
+      this.ownerCalculator.writeResult(buffer, resultJSON, panelIdPairs);
+      resultComponent.innerHTML = buffer.toString();
+    }  
     this.isPaused = false;
     indicatorButton.innerHTML = "Pause";
     this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);

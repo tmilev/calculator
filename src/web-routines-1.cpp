@@ -153,8 +153,9 @@ void WebServerMonitor::Monitor() {
       now.AssignLocalTime();
       logServerMonitor << logger::red << "Server stopped responding (probably locked pipe?)"
       << ", restarting. " << logger::endL;
-      FileOperations::OpenFileCreateIfNotPresentVirtual
-      (theFile, "LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true);
+      FileOperations::OpenFileCreateIfNotPresentVirtual(
+        theFile, "LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true
+      );
       theFile << "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: local: "
       << now.ToStringLocal() << ", GM: " << now.ToStringGM() << "</b><br>\n";
       theFile.flush();
@@ -261,9 +262,10 @@ void WebCrawler::PingCalculatorStatus() {
       int numPingFails = 0;
       int numSelected = 0;
       std::stringstream failStream;
-      do
-      { if (numPingFails > 10)
+      do {
+        if (numPingFails > 10) {
           break;
+        }
         numSelected = select(this->theSocket + 1, &fdConnectSockets, 0, 0, &timeOut);
         failStream << "While pinging, select failed. Error message: "
         << strerror(errno) << ". \n";
@@ -283,8 +285,9 @@ void WebCrawler::PingCalculatorStatus() {
       this->lastTransactionErrors = reportStream.str();
       close(this->theSocket);
       continue;
-    } else
+    } else {
       reportStream << "<br>connected: " << this->addressToConnectTo << " port: " << this->portOrService << ". ";
+    }
     std::string getMessage = "GET /cgi-bin/calculator?request=statusPublic";
     std::stringstream errorStream1;
     int numBytes = Pipe::WriteWithTimeoutViaSelect(this->theSocket,getMessage, 1, 10, &errorStream1);
@@ -309,8 +312,7 @@ void WebCrawler::PingCalculatorStatus() {
   this->FreeAddressInfo();
 }
 
-void WebCrawler::FetchWebPage
-(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("WebCrawler::FetchWebPage");
   (void) commentsOnFailure; (void) commentsGeneral;
 #ifdef MACRO_use_open_ssl
@@ -355,8 +357,9 @@ void WebCrawler::FetchWebPage
       // IPv6
       struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *) p->ai_addr;
       theAddress = &(ipv6->sin6_addr);
-      if (commentsGeneral!= 0)
+      if (commentsGeneral!= 0) {
         *commentsGeneral << "IPv6: ";
+      }
     }
     // convert the IP to a string and print it:
     inet_ntop(p->ai_family, theAddress, ipString, sizeof ipString);
@@ -377,9 +380,10 @@ void WebCrawler::FetchWebPage
       int numPingFails = 0;
       int numSelected = 0;
       std::stringstream failStream;
-      do
-      { if (numPingFails > 10)
+      do {
+        if (numPingFails > 10) {
           break;
+        }
         numSelected = select(this->theSocket + 1, &fdConnectSockets, 0, 0, &timeOut);
         failStream << "While pinging, select failed. Error message: "
         << strerror(errno) << ". \n";
@@ -387,12 +391,14 @@ void WebCrawler::FetchWebPage
       } while (numSelected < 0);
       if (numSelected <= 0) {
         logIO << logger::red << failStream.str() << logger::endL;
-        if (commentsOnFailure != 0)
+        if (commentsOnFailure != 0) {
           *commentsOnFailure << failStream.str()
           << "Could not connect through port. Select returned: " << numSelected;
+        }
         connectionResult = - 1;
-      } else
+      } else {
         connectionResult = connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
+      }
       timeOut.tv_sec = 3;  // 5 Secs Timeout
       timeOut.tv_usec = 0;  // Not init'ing this can cause strange errors
       setsockopt(connectionResult, SOL_SOCKET, SO_RCVTIMEO, (void*)(&timeOut), sizeof(timeval));

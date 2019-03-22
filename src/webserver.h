@@ -211,7 +211,7 @@ public:
   int ProcessUnknown();
   int Run();
   bool CheckConsistency();
-  void PipeProgressReportToParentProcess(const std::string& input);
+  void PipeProgressReport(const std::string& input);
   void WriteProgressReportToFile(const std::string& input);
 
   static void StandardOutputAfterTimeOut(const std::string& input);
@@ -363,7 +363,7 @@ public:
   static void FlushActiveWorker();
   static void ReturnActiveIndicatorAlthoughComputationIsNotDone();
   static void SendStringThroughActiveWorker(const std::string& input);
-  static void PipeProgressReportToParentProcess(const std::string& input);
+  static void PipeProgressReport(const std::string& input);
   static void fperror_sigaction(int signal);
   void ReapOneChild();
   void ReapChildren();

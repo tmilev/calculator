@@ -112,7 +112,6 @@ public:
     int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries = 10, std::stringstream* commentsOnFailure = 0
   );
   void WriteOnceAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail);
-  void WriteAfterEmptyinG(const std::string& toBeSent, bool dontCrashOnFail);
 
   std::string ToString() const;
   void Release();

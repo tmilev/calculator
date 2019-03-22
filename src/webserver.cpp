@@ -2173,11 +2173,11 @@ void WebWorker::WriteProgressReportToFile(const std::string& input) {
   theFile.close();
 }
 
-void WebWorker::PipeProgressReportToParentProcess(const std::string& input) {
+void WebWorker::PipeProgressReport(const std::string& input) {
   if (!this->flagProgressReportAllowed) {
     return;
   }
-  MacroRegisterFunctionWithName("WebWorker::PipeProgressReportToParentProcess");
+  MacroRegisterFunctionWithName("WebWorker::PipeProgressReport");
   this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked(false, false);
   if (this->PauseWorker.CheckPauseIsRequested(false, false, false)) {
     logBlock << ": pausing as requested ..." << logger::endL;
@@ -2189,6 +2189,7 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input) {
     this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny(false, false);
     return;
   }
+  this->pipeWorkerToWorkerIndicatorData.WriteOnceAfterEmptying(input, false, true);
   if (theGlobalVariables.flagTimedOutComputationIsDone) {
     this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny(false, false);
     return;
@@ -3507,7 +3508,7 @@ int WebWorker::ServeClient() {
   theGlobalVariables.userDefault.flagMustLogin = true;
   theGlobalVariables.userDefault.flagStopIfNoLogin = true;
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
-  theGlobalVariables.IndicatorStringOutputFunction = WebServer::PipeProgressReportToParentProcess;
+  theGlobalVariables.IndicatorStringOutputFunction = WebServer::PipeProgressReport;
   if (
     this->requestTypE != this->requestGet &&
     this->requestTypE != this->requestPost &&
@@ -4012,11 +4013,11 @@ void WebServer::SendStringThroughActiveWorker(const std::string& theString) {
   theWebServer.GetActiveWorker().QueueStringForSendingWithHeadeR(theString, false);
 }
 
-void WebServer::PipeProgressReportToParentProcess(const std::string& theString) {
+void WebServer::PipeProgressReport(const std::string& theString) {
   if (theWebServer.activeWorker == - 1) {
     return;
   }
-  theWebServer.GetActiveWorker().PipeProgressReportToParentProcess(theString);
+  theWebServer.GetActiveWorker().PipeProgressReport(theString);
 }
 
 WebServer::WebServer() {

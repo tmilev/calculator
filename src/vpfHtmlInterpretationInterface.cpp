@@ -1695,10 +1695,13 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   return out.str();
 }
 
-std::string HtmlInterpretation::ToStringUserDetailsTable
-(bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort) {
+std::string HtmlInterpretation::ToStringUserDetailsTable(
+  bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort
+) {
   MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserDetailsTable");
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return "Compiled without database support. ";
+  }
   std::stringstream out;
   //std::string userRole = adminsOnly ? "admin" : "student";
   bool flagFilterCourse = (!adminsOnly) && (theGlobalVariables.GetWebInput("filterAccounts") == "true");
@@ -1790,10 +1793,11 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       oneTableLineStream << "</td>";
       //      else
         //  oneTableLineStream << "<td>Activation token: " << currentUser.activationToken.value << "</td>";
-    } else if (currentUser.actualActivationToken == "error")
+    } else if (currentUser.actualActivationToken == "error") {
       oneTableLineStream << "<td>error</td><td></td>";
-    else
+    } else {
       oneTableLineStream << "<td><span style =\"color:green\">activated</span></td><td></td><td></td>";
+    }
     std::stringstream oneLink;
     oneLink << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=login&username="
     << currentUser.username << "\">" << currentUser.username << "</a>";
@@ -1803,61 +1807,67 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     oneTableLineStream << "</tr>";
     int indexCurrentBucket = theSections.GetIndex(currentUser.sectionInDB);
     if (indexCurrentBucket != - 1) {
-      if (isActivated)
+      if (isActivated) {
         activatedAccountBucketsBySection[indexCurrentBucket].AddOnTop(oneTableLineStream.str());
-      else
+      } else {
         nonActivatedAccountBucketsBySection[indexCurrentBucket].AddOnTop(oneTableLineStream.str());
+      }
       preFilledLinkBucketsBySection[indexCurrentBucket].AddOnTop(oneLink.str());
     }
   }
-  for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++)
+  for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++) {
     nonActivatedAccountBucketsBySection[i].QuickSortAscending();
-  for (int i = 0; i < activatedAccountBucketsBySection.size; i ++)
+  }
+  for (int i = 0; i < activatedAccountBucketsBySection.size; i ++) {
     activatedAccountBucketsBySection[i].QuickSortAscending();
-  for (int i = 0; i < preFilledLinkBucketsBySection.size; i ++)
+  }
+  for (int i = 0; i < preFilledLinkBucketsBySection.size; i ++) {
     preFilledLinkBucketsBySection[i].QuickSortAscending();
+  }
   std::stringstream tableStream;
   tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
   << "<th>Activation manual email</th>"
   << " <th>Pre-filled login link</th><th>Course info</th></tr>";
   for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++) {
-    if (!adminsOnly)
-      if (nonActivatedAccountBucketsBySection[i].size > 0)
+    if (!adminsOnly) {
+      if (nonActivatedAccountBucketsBySection[i].size > 0) {
         tableStream << "<tr><td colspan =\"6\" style =\"text-align:center\">" << theSections[i] << "</td></tr>";
-    for (int j = 0; j < nonActivatedAccountBucketsBySection[i].size; j ++)
+      }
+    }
+    for (int j = 0; j < nonActivatedAccountBucketsBySection[i].size; j ++) {
       tableStream << nonActivatedAccountBucketsBySection[i][j];
+    }
   }
   for (int i = 0; i < activatedAccountBucketsBySection.size; i ++) {
-    if (!adminsOnly)
-      if (activatedAccountBucketsBySection[i].size > 0)
+    if (!adminsOnly) {
+      if (activatedAccountBucketsBySection[i].size > 0) {
         tableStream << "<tr><td colspan =\"7\" style =\"text-align:center\">"
         << theSections[i] << "</td></tr>";
-    for (int j = 0; j < activatedAccountBucketsBySection[i].size; j ++)
+      }
+    }
+    for (int j = 0; j < activatedAccountBucketsBySection[i].size; j ++) {
       tableStream << activatedAccountBucketsBySection[i][j];
+    }
   }
   tableStream << "</table>";
   std::stringstream preFilledLoginLinks;
   if (!adminsOnly) {
     for (int i = 0; i < preFilledLinkBucketsBySection.size; i ++) {
-      if (preFilledLinkBucketsBySection[i].size > 0)
+      if (preFilledLinkBucketsBySection[i].size > 0) {
         preFilledLoginLinks << theSections[i] << "<br>";
-      for (int j = 0; j < preFilledLinkBucketsBySection[i].size; j ++)
+      }
+      for (int j = 0; j < preFilledLinkBucketsBySection[i].size; j ++) {
         preFilledLoginLinks << preFilledLinkBucketsBySection[i][j] << "<br>";
+      }
     }
   }
   out << "\n" << theUsers.size << " user(s)";
-  if (numActivatedUsers > 0)
+  if (numActivatedUsers > 0) {
     out << ", <span style =\"color:red\">" << numActivatedUsers
     << " have not activated their accounts. </span>";
+  }
   out << tableStream.str() << preFilledLoginLinks.str();
-
   return out.str();
-#else
-  (void) adminsOnly;
-  (void) theUsers;
-  (void) hostWebAddressWithPort;
-  return "Compiled without database support. ";
-#endif
 }
 
 std::string HtmlInterpretation::ToStringAssignSection() {
@@ -1903,24 +1913,29 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
     fields.AddOnTop(DatabaseStrings::labelProblemName);
     fields.AddOnTop(DatabaseStrings::labelProblemTotalQuestions);
     //logWorker << logger::yellow << "DEBUG: About to query db to find problem info." << logger::endL;
-    if (DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection
-         (DatabaseStrings::tableProblemInformation, findProblemInfo, result, fields, - 1, 0, &commentsOnFailure))
+    if (DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection(
+      DatabaseStrings::tableProblemInformation, findProblemInfo, result, fields, - 1, 0, &commentsOnFailure
+    )) {
       for (int i = 0; i < result.size; i ++) {
         const std::string& currentProblemName = result[i][DatabaseStrings::labelProblemName].string;
-        if (currentProblemName == "")
+        if (currentProblemName == "") {
           continue;
+        }
         const std::string& expectedNumberOfAnswersString = result[i][DatabaseStrings::labelProblemTotalQuestions].string;
-        if (expectedNumberOfAnswersString == "")
+        if (expectedNumberOfAnswersString == "") {
           continue;
+        }
         std::stringstream theStream(expectedNumberOfAnswersString);
         int numAnswers = - 1;
         theStream >> numAnswers;
-        if (numAnswers == - 1)
+        if (numAnswers == - 1) {
           continue;
+        }
         theGlobalVariables.problemExpectedNumberOfAnswers.SetKeyValue(currentProblemName, numAnswers);
         //logWorker << logger::green << "DEBUG: problem: " << currentProblemName
         //<< " got number of answers from DB: " << numAnswers;
       }
+    }
   }
   if (theGlobalVariables.problemExpectedNumberOfAnswers.Contains(problemName))
     return theGlobalVariables.problemExpectedNumberOfAnswers.GetValueCreate(problemName);
@@ -1948,18 +1963,21 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   std::stringstream stringConverter;
   stringConverter << this->knownNumberOfAnswersFromHD;
   newDBentry[DatabaseStrings::labelProblemTotalQuestions] = stringConverter.str();
-  DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-  (DatabaseStrings::tableProblemInformation, findDBentry, newDBentry, 0, &commentsOnFailure);
+  DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+    DatabaseStrings::tableProblemInformation, findDBentry, newDBentry, 0, &commentsOnFailure
+  );
   return this->knownNumberOfAnswersFromHD;
 }
 
-void UserCalculator::ComputePointsEarned
-(const HashedList<std::string, MathRoutines::HashString>& gradableProblems,
- MapLisT<std::string, TopicElement, MathRoutines::HashString>* theTopics, std::stringstream& commentsOnFailure) {
+void UserCalculator::ComputePointsEarned(
+  const HashedList<std::string, MathRoutines::HashString>& gradableProblems,
+  MapLisT<std::string, TopicElement, MathRoutines::HashString>* theTopics,
+  std::stringstream& commentsOnFailure
+) {
   MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
   this->pointsEarned = 0;
   this->pointsMax = 0;
-  if (theTopics != 0)
+  if (theTopics != 0) {
     for (int i = 0; i < theTopics->size(); i ++) {
       (*theTopics).theValues[i].totalPointsEarned = 0;
       (*theTopics).theValues[i].pointsEarnedInProblemsThatAreImmediateChildren = 0;
@@ -1968,10 +1986,12 @@ void UserCalculator::ComputePointsEarned
       //(*theTopics).theValues[i].maxCorrectAnswersInAllChildren = 0;
       //(*theTopics).theValues[i].numAnsweredInAllChildren = 0;
     }
+  }
   for (int i = 0; i < this->theProblemData.size(); i ++) {
     const std::string problemName = this->theProblemData.theKeys[i];
-    if (!gradableProblems.Contains(problemName))
+    if (!gradableProblems.Contains(problemName)) {
       continue;
+    }
     ProblemData& currentP = this->theProblemData.theValues[i];
     currentP.Points = 0;
     currentP.totalNumSubmissions = 0;
@@ -1982,13 +2002,11 @@ void UserCalculator::ComputePointsEarned
     if (!currentP.flagProblemWeightIsOK) {
       currentWeight = 0;
       //stOutput << "Debug: weight not ok: " << problemName << "<br>";
-    }// else
-     // stOutput << "Debug: weight IS ok: " << problemName << "<br>";
-
-//    this->problemData[i].numAnswersSought = this->problemData[i].answerIds.size;
+    }
     for (int j = 0; j < currentP.theAnswers.size(); j ++) {
-      if (currentP.theAnswers[j].numCorrectSubmissions > 0)
+      if (currentP.theAnswers[j].numCorrectSubmissions > 0) {
         currentP.numCorrectlyAnswered ++;
+      }
       currentP.totalNumSubmissions += currentP.theAnswers[j].numSubmissions;
     }
     if (currentP.flagProblemWeightIsOK) {
@@ -2000,7 +2018,7 @@ void UserCalculator::ComputePointsEarned
         //<< " to get: " << this->pointsEarned ;
       }
     }
-    if (theTopics != 0)
+    if (theTopics != 0) {
       if (theTopics->Contains(problemName)) {
         TopicElement& currentElt = theTopics->GetValueCreate(problemName);
         this->pointsMax += currentWeight;
@@ -2010,10 +2028,12 @@ void UserCalculator::ComputePointsEarned
           if (currentWeight == 0)
             (*theTopics).theValues[currentElt.parentTopics[j]].flagSubproblemHasNoWeight = true;
         }
-        if (currentElt.parentTopics.size > 1)
+        if (currentElt.parentTopics.size > 1) {
           (*theTopics).theValues[currentElt.parentTopics[currentElt.parentTopics.size - 2]]
           .pointsEarnedInProblemsThatAreImmediateChildren += currentP.Points;
+        }
       }
+    }
   }
 }
 
@@ -2035,8 +2055,9 @@ public:
 
 bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   MacroRegisterFunctionWithName("UserScores::ComputeScoresAndStats");
-#ifdef MACRO_use_MongoDB
-  //stOutput << "DEBUG: Computing scores and stats. ";
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return false;
+  }
   theProblem.currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   this->theProblem.LoadFileNames();
   if (!this->theProblem.LoadAndParseTopicList(comments))
@@ -2072,24 +2093,26 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   bool ignoreSectionsIdontTeach = true;
   this->currentSection = theGlobalVariables.userDefault.sectionComputed;
   this->currentCourse = theGlobalVariables.GetWebInput("courseHome");
-  if (theGlobalVariables.GetWebInput("request") == "scoresInCoursePage")
-    this->currentSection =
-    MathRoutines::StringTrimWhiteSpace
-    (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false));
-  //stOutput << "<br>DEBUG: ignoreSectionIdontTEach: " << ignoreSectionsIdontTeach;
-  //stOutput << "<br>DEBUG: currentSection: " << this->currentSection;
+  if (theGlobalVariables.GetWebInput("request") == "scoresInCoursePage") {
+    this->currentSection = MathRoutines::StringTrimWhiteSpace(
+      HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false)
+    );
+  }
   for (int i = 0; i < this->userProblemData.size; i ++) {
     //currentUserRecord.currentUseR.courseInfo.rawStringStoredInDB = this->userTablE[i][courseInfoIndex];
     //currentUserRecord.currentUseR.AssignCourseInfoString(&comments);
     if (ignoreSectionsIdontTeach) {
-      if (currentUserRecord.currentUseR.courseComputed != this->currentCourse)
+      if (currentUserRecord.currentUseR.courseComputed != this->currentCourse) {
         continue;
+      }
       if (theGlobalVariables.UserStudentVieWOn()) {
-        if (currentUserRecord.currentUseR.sectionInDB != this->currentSection)
+        if (currentUserRecord.currentUseR.sectionInDB != this->currentSection) {
           continue;
+        }
       } else {
-        if (currentUserRecord.currentUseR.sectionInDB != this->currentSection)
+        if (currentUserRecord.currentUseR.sectionInDB != this->currentSection) {
           continue;
+        }
       }
     }
     this->userScores.AddOnTop(- 1);
@@ -2100,12 +2123,16 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
 
 //    out << "<hr>Debug: reading db problem data from: "
 //    << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(userTable[i][problemDataIndex]) << "<br>";
-    if (!currentUserRecord.currentUseR.InterpretDatabaseProblemDataJSON
-         (this->userProblemData[i][DatabaseStrings::labelProblemDataJSON], comments))
+    if (!currentUserRecord.currentUseR.InterpretDatabaseProblemDataJSON(
+      this->userProblemData[i][DatabaseStrings::labelProblemDataJSON],
+      comments
+    )) {
       continue;
+    }
 //    out << "<br>DEBUG: after db data read: " << currentUserRecord.currentUseR.ToString();
-    currentUserRecord.LoadProblemInfoFromJSONAppend
-    (theProblem.currentUseR.problemWeights, currentUserRecord.currentUseR.theProblemData, comments);
+    currentUserRecord.LoadProblemInfoFromJSONAppend(
+      theProblem.currentUseR.problemWeights, currentUserRecord.currentUseR.theProblemData, comments
+    );
 //    out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
     currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.theTopicS, comments);
     this->scoresBreakdown.LastObject()->Clear();
@@ -2113,23 +2140,18 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
       TopicElement& currentTopic = theProblem.theTopicS[j];
       Rational currentPts = currentTopic.totalPointsEarned;
       Rational maxPts = currentTopic.maxPointsInAllChildren;
-      this->scoresBreakdown.LastObject()->SetKeyValue
-      (theProblem.theTopicS.theKeys[j],currentPts);
-      if (maxPts == currentPts)
+      this->scoresBreakdown.LastObject()->SetKeyValue(theProblem.theTopicS.theKeys[j],currentPts);
+      if (maxPts == currentPts) {
         this->numStudentsSolvedEntireTopic[j] ++;
-      else if (currentPts > 0)
+      } else if (currentPts > 0) {
         this->numStudentsSolvedPartOfTopic[j] ++;
-      else
+      } else {
         this->numStudentsSolvedNothingInTopic[j] ++;
+      }
     }
     *this->userScores.LastObject() = currentUserRecord.currentUseR.pointsEarned;
-    //out << "<br>DEBUG: Computed scores from: " << currentUserRecord.currentUseR.ToString();
   }
   return true;
-#else
-  (void) comments;
-  return false;
-#endif
 }
 
 std::string HtmlInterpretation::GetScoresInCoursePage() {
@@ -2195,7 +2217,10 @@ std::string HtmlInterpretation::ToStringUserScores() {
   MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserScores");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "only admins are allowed to view scores";
-#ifdef MACRO_use_open_ssl
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return "Error: database not running. ";
+  }
+
   std::stringstream out;
   out.precision(4);
   UserScores theScores;
@@ -2226,46 +2251,50 @@ std::string HtmlInterpretation::ToStringUserScores() {
       continue;
     int numCols = currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
     out << "<td colspan =\"" << numCols << "\"";
-    if (currentElt.totalSubSectionsUnderME == 0 &&
-        currentElt.flagContainsProblemsNotInSubsection)
+    if (currentElt.totalSubSectionsUnderME == 0 && currentElt.flagContainsProblemsNotInSubsection) {
       out << " rowspan =\"2\"";
+    }
     out << ">" << currentElt.title << "</td>";
   }
   out << "</tr>\n";
   out << "<tr>";
   for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++) {
     TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
-    if (currentElt.problemFileName == "" && currentElt.type != currentElt.tProblem &&
-        currentElt.type != currentElt.tSubSection && currentElt.type != currentElt.tTexHeader) {
-      if ((currentElt.flagContainsProblemsNotInSubsection &&
-           currentElt.totalSubSectionsUnderMeIncludingEmptySubsections > 1)
-          || currentElt.immediateChildren.size == 0)
+    if (
+      currentElt.problemFileName == "" &&
+      currentElt.type != currentElt.tProblem &&
+      currentElt.type != currentElt.tSubSection &&
+      currentElt.type != currentElt.tTexHeader
+    ) {
+      if ((
+          currentElt.flagContainsProblemsNotInSubsection &&
+          currentElt.totalSubSectionsUnderMeIncludingEmptySubsections > 1
+        ) || currentElt.immediateChildren.size == 0
+      ) {
         out << "<td></td>";
+      }
       continue;
     }
-    if (currentElt.problemFileName != "" || currentElt.type != currentElt.tSubSection)
+    if (currentElt.problemFileName != "" || currentElt.type != currentElt.tSubSection) {
       continue;
+    }
     out << "<td>" << currentElt.title << "</td>";
   }
   out << "</tr>\n";
 
   out << "<tr><td><b>Maximum score</b></td>"
   << "<td>-</td>";
-#ifdef MACRO_use_MongoDB
   out
   << "<td>" << theScores.theProblem.currentUseR.pointsMax.GetDoubleValue()
   << "</td>";
-#else
-  out
-  << "<td>Database not running.</td>";
-#endif
   for (int j = 0; j < theScores.theProblem.theTopicS.size(); j ++) {
     TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[j];
-    if (currentElt.problemFileName != "")
+    if (currentElt.problemFileName != "") {
       continue;
-    if (currentElt.type != currentElt.tSubSection &&
-        !currentElt.flagContainsProblemsNotInSubsection)
+    }
+    if (currentElt.type != currentElt.tSubSection && !currentElt.flagContainsProblemsNotInSubsection) {
       continue;
+    }
     out << "<td>" << currentElt.maxPointsInAllChildren << "</td>";
   }
   out << "</tr>";
@@ -2275,29 +2304,33 @@ std::string HtmlInterpretation::ToStringUserScores() {
     << "<td>" << theScores.userScores[i].GetDoubleValue() << "</td>";
     for (int j = 0; j < theScores.theProblem.theTopicS.size(); j ++) {
       TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[j];
-      if (currentElt.problemFileName != "")
+      if (currentElt.problemFileName != "") {
         continue;
-      if (currentElt.type != currentElt.tSubSection && !currentElt.flagContainsProblemsNotInSubsection)
+      }
+      if (currentElt.type != currentElt.tSubSection && !currentElt.flagContainsProblemsNotInSubsection) {
         continue;
-      if (theScores.scoresBreakdown[i].Contains(theScores.theProblem.theTopicS.theKeys[j]))
+      }
+      if (theScores.scoresBreakdown[i].Contains(theScores.theProblem.theTopicS.theKeys[j])) {
         out << "<td>" << theScores.scoresBreakdown[i].theValues[j].GetDoubleValue() << "</td>";
-      else
+      } else {
         out << "<td></td>";
+      }
     }
     out << "</tr>";
   }
   out << "</table>";
   return out.str();
-#else
-  return "Error: database not running. ";
-#endif
 }
 
-std::string HtmlInterpretation::ToStringUserDetails
-(bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort) {
+std::string HtmlInterpretation::ToStringUserDetails(
+  bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort
+) {
   MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserDetails");
   std::stringstream out;
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    out << "<b>Adding emails not available (database not present).</b> ";
+    return out.str();
+  }
   std::string userRole = adminsOnly ? "admin" : "student";
   std::string idAddressTextarea = "inputAddUsers" + userRole;
   std::string idExtraTextarea = "inputAddExtraInfo" + userRole;
@@ -2341,13 +2374,6 @@ std::string HtmlInterpretation::ToStringUserDetails
   out << "<br><span id =\"" << idOutput << "\">\n";
   out << HtmlInterpretation::ToStringUserDetailsTable(adminsOnly, theUsers, hostWebAddressWithPort);
   out << "</span>";
-#else
-  (void) adminsOnly;
-  (void) theUsers;
-  (void) hostWebAddressWithPort;
-  out << "<b>Adding emails not available (database not present).</b> ";
-
-#endif // MACRO_use_MongoDB
   return out.str();
 }
 
@@ -2358,15 +2384,14 @@ std::string GlobalVariables::ToStringNavigation() {
 std::string HtmlInterpretation::ToStringNavigation() {
   MacroRegisterFunctionWithName("HtmlInterpretation::ToStringNavigation");
   std::stringstream out;
-  //out << "<table>";
-  //out << "DEBUG: auth token: " << theGlobalVariables.GetWebInput("authenticationToken") << "<br>";
-  //out << "DEBUG: to string nav";
   std::string linkSeparator = " | ";
   std::string linkBigSeparator = " || ";
-  if (theGlobalVariables.userCalculatorRequestType == "template" ||
-      theGlobalVariables.userCalculatorRequestType == "templateNoLogin")
+  if (
+    theGlobalVariables.userCalculatorRequestType == "template" ||
+    theGlobalVariables.userCalculatorRequestType == "templateNoLogin"
+  ) {
     out << "<b>Home</b>" << linkSeparator;
-  else {
+  } else {
     std::string topicList = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
     std::string courseHome = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
     if (topicList != "" && courseHome != "") {
@@ -2379,9 +2404,10 @@ std::string HtmlInterpretation::ToStringNavigation() {
         out << "?request=template";
       out << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "studentView=" << studentView << "&";
-      if (section != "")
+      if (section != "") {
         out << "studentSection="
         << theGlobalVariables.GetWebInput("studentSection") << "&";
+      }
       out << "topicList=" << topicList << "&";
       out << "courseHome=" << courseHome << "&";
       out << "fileName=" << courseHome << "&\">Home</a>"
@@ -2403,78 +2429,85 @@ std::string HtmlInterpretation::ToStringNavigation() {
       out << "<b>Account";
       out << "</b>" << linkSeparator;
     } else {
-      if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+      if (theGlobalVariables.flagUsingSSLinCurrentConnection) {
         out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage&"
         << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << "\">Account</a>" << linkSeparator;
-      else
+      } else {
         out << "<b>Account settings: requires secure connection</b>" << linkSeparator;
+      }
     }
-    if (theGlobalVariables.userDefault.sectionComputed != "")
+    if (theGlobalVariables.userDefault.sectionComputed != "") {
       out << "Section: " << theGlobalVariables.userDefault.sectionComputed
       << linkSeparator;
-    //if (theGlobalVariables.UserDefaultHasAdminRights())
-    //  out << "Course home: "
-    //  << theGlobalVariables.userDefault.currentCourses.value
-    //  << linkSeparator;
-  } else
+    }
+  } else {
     out << "<b style ='color:red'>logged out</b>" << linkSeparator;
+  }
   if (theGlobalVariables.UserDefaultHasAdminRights()) {
-    if (theGlobalVariables.userCalculatorRequestType != "accounts")
+    if (theGlobalVariables.userCalculatorRequestType != "accounts") {
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=accounts&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "&filterAccounts=true"
       << "\">Accounts</a>" << linkSeparator;
-    else
+    } else {
       out << "<b>Accounts</b>" << linkSeparator;
-    if (theGlobalVariables.userCalculatorRequestType != "scores")
+    }
+    if (theGlobalVariables.userCalculatorRequestType != "scores") {
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scores&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "\">Scores</a>" << linkSeparator;
-    else
+    } else {
       out << "<b>Scores</b>" << linkSeparator;
-    if (theGlobalVariables.userCalculatorRequestType != "status")
+    }
+    if (theGlobalVariables.userCalculatorRequestType != "status") {
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=status&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "\">Server</a>" << linkSeparator;
-    else
+    } else {
       out << "<b>Server</b>" << linkBigSeparator;
-    if (theGlobalVariables.userCalculatorRequestType != "database")
+    }
+    if (theGlobalVariables.userCalculatorRequestType != "database") {
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "\">Database</a>" << linkBigSeparator;
-    else
+    } else {
       out << "<b>Database</b>" << linkBigSeparator;
+    }
   }
-  if (theGlobalVariables.userCalculatorRequestType != "calculator")
+  if (theGlobalVariables.userCalculatorRequestType != "calculator") {
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=calculator&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">Calculator</a>" << linkBigSeparator;
-  else
+  } else {
     out << "<b>Calculator</b> " << linkBigSeparator;
-  if (theGlobalVariables.userCalculatorRequestType != "about")
+  }
+  if (theGlobalVariables.userCalculatorRequestType != "about") {
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=about&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">About</a>" << linkBigSeparator;
-  else
+  } else {
     out << "<b>About</b> " << linkBigSeparator;
+  }
   out << "<a href=\"https://github.com/tmilev/calculator/issues\" target =\"_blank\">Feedback, bugs</a>"
   << linkBigSeparator;
 
   if (!theGlobalVariables.flagRunningApache) {
     if (theGlobalVariables.flagAllowProcessMonitoring) {
-      if (!theGlobalVariables.UserDefaultHasAdminRights())
+      if (!theGlobalVariables.UserDefaultHasAdminRights()) {
         out << "<span style =\"color:red\"><b>Monitoring on</b></span>" << linkSeparator;
-      else
+      } else {
         out << "<a style =\"color:red\" href=\""
         << theGlobalVariables.DisplayNameExecutable
         << "?request=toggleMonitoring\""
         << "><b>Monitoring on</b></a>" << linkSeparator;
-    } else
-      if (theGlobalVariables.UserDefaultHasAdminRights())
+      }
+    } else {
+      if (theGlobalVariables.UserDefaultHasAdminRights()) {
         out << "<a style =\"color:green\" href=\""
         << theGlobalVariables.DisplayNameExecutable
         << "?request=toggleMonitoring\""
         << "><b>Monitoring off</b></a>" << linkSeparator;
+      }
+    }
   }
-
   return out.str();
 }

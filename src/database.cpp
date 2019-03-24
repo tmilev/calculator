@@ -15,11 +15,10 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword(
   std::string& outputAuthenticationToken,
   std::stringstream& comments
 ) {
-  (void) inputUsername;
-  (void) inputNewPassword;
-  (void) outputAuthenticationToken;
-  (void) comments;
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    comments << "Database not present. ";
+    return false;
+  }
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::SetPassword");
   if (!theGlobalVariables.flagLoggedIn) {
     comments << "Changing passwords allowed for logged-in users only. ";
@@ -33,49 +32,48 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword(
   theUser.ResetAuthenticationToken(&comments);
   outputAuthenticationToken = theUser.actualAuthenticationToken;
   return result;
-#else
-  return false;
-#endif // MACRO_use_MongoDB
 }
 
 bool DatabaseRoutinesGlobalFunctions::UserExists(
   const std::string& inputUsername, std::stringstream& comments
 ) {
-  (void) inputUsername;
-  (void) comments;
-#ifdef MACRO_use_MongoDB
-  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserExists");
-  if (!theGlobalVariables.flagLoggedIn)
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    comments << "No database available.";
     return false;
+  }
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserExists");
+  if (!theGlobalVariables.flagLoggedIn) {
+    return false;
+  }
   JSData theUserQuery;
   theUserQuery[DatabaseStrings::labelUsername] = inputUsername;
   List<JSData> theUsers;
-  DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
-  (DatabaseStrings::tableUsers, theUserQuery, theUsers, - 1, 0, &comments);
+  DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(
+    DatabaseStrings::tableUsers, theUserQuery, theUsers, - 1, 0, &comments
+  );
   return theUsers.size > 0;
-#else
-  return false;
-#endif // MACRO_use_MongoDB
 }
 
 bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights() {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights");
   if (theGlobalVariables.UserDefaultHasAdminRights())
     return true;
-#ifdef MACRO_use_MongoDB
-  if (!theGlobalVariables.flagLoggedIn)
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return true;
+  }
+  if (!theGlobalVariables.flagLoggedIn) {
     return false;
+  }
   return
     theGlobalVariables.userDefault.userRole == "admin" ||
     theGlobalVariables.userDefault.userRole == "instructor" ||
     theGlobalVariables.userDefault.userRole == "teacher";
-#else
-  return false;
-#endif
 }
 
 bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase() {
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return true;
+  }
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LogoutViaDatabase");
   if (!theGlobalVariables.flagLoggedIn) {
     return true;
@@ -86,9 +84,6 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase() {
   theGlobalVariables.SetWebInpuT("authenticationToken", "");
   theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
   return true;
-#else
-  return true;
-#endif
 }
 
 void GlobalVariables::initModifiableDatabaseFields() {
@@ -277,10 +272,11 @@ std::string UserCalculator::ToString() {
     << "; points: "
     << this->theProblemData.theValues[i].Points
     << ";";
-    if (!this->theProblemData.theValues[i].adminData.GetWeightFromCoursE(this->courseComputed, weightRat))
+    if (!this->theProblemData.theValues[i].adminData.GetWeightFromCoursE(this->courseComputed, weightRat)) {
       out << " (weight not available). ";
-    else
+    } else {
       out << " weight: " << weightRat.ToString();
+    }
   }
   out << "<br>Deadline info: "
   << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(this->deadlines.ToString(false));
@@ -288,7 +284,8 @@ std::string UserCalculator::ToString() {
 }
 
 bool UserCalculator::FetchOneColumn(
-  const std::string& columnNameUnsafe, std::string& outputUnsafe,
+  const std::string& columnNameUnsafe,
+  std::string& outputUnsafe,
   std::stringstream* failureComments
 ) {
   MacroRegisterFunctionWithName("UserCalculator::FetchOneColumn");
@@ -814,13 +811,12 @@ bool UserCalculator::ComputeAndStoreActivationEmailAndTokens(
 bool UserCalculator::ComputeAndStoreActivationStats(
   std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
-#ifndef MACRO_use_MongoDB
-  (void) commentsGeneral;
-  if (commentsOnFailure != 0) {
-    *commentsOnFailure << "Compiled without database support. ";
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Compiled without database support. ";
+    }
+    return false;
   }
-  return false;
-#else
   MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationStats");
   std::string activationAddress = this->GetActivationAddressFromActivationToken(
     this->actualActivationToken, theGlobalVariables.hostWithPort, this->username, this->email
@@ -894,7 +890,6 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   << "\n\nSincerely, \nthe calculator-algebra.org team";
   this->activationEmail = emailBody.str();
   return true;
-#endif
 }
 
 List<JSData> UserCalculatorData::GetFindMeFromUserNameQuery() {
@@ -1414,10 +1409,9 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  (void) commentsOnFailure;
-  (void) commentsGeneral;
-  (void) theUseR;
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(theUseR, commentsGeneral);
+  }
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
@@ -1426,15 +1420,6 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
     theUseR = userWrapper;
     return true;
   }
-  //stOutput << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
-  //<< ". Entered activation token: " << userWrapper.enteredActivationToken
-  //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
-  //stOutput << "DEBUG: entered pass: " << userWrapper.enteredPassword
-  //<< "shaone-ing to: " << userWrapper.enteredShaonedSaltedPassword
-  //<< ". Actual pass sha: " << userWrapper.actualShaonedSaltedPassword;
-  //*commentsOnFailure << "DEBUG: entered pass: " << userWrapper.enteredPassword
-  //<< "shaone-ing to: " << userWrapper.enteredShaonedSaltedPassword
-  //<< ". Actual pass sha: " << userWrapper.actualShaonedSaltedPassword;
   if (
     userWrapper.enteredAuthenticationToken != "" &&
     userWrapper.enteredAuthenticationToken != "0" &&
@@ -1493,9 +1478,6 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
     }
   }
   return false;
-#else
-  return DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(theUseR, commentsGeneral);
-#endif
 }
 
 void UserCalculator::ComputeHashedSaltedPassword() {

@@ -13,7 +13,9 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 //This file lists calculator functions and various hard-coded rules. Please do not use for any other purposes.
 
 void Calculator::initAdminFunctions() {
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return;
+  }
   this->AddOperationInnerHandler(
     "MongoFind", CalculatorDatabaseFunctions::innerExecuteMongoQuery, "",
     "Executes a mongoDB query. Requires admin rights. "
@@ -32,14 +34,10 @@ void Calculator::initAdminFunctions() {
     "RepairDatabaseEmailRecords",
     true
   );
-
-#endif // MACRO_use_MongoDB
 }
 
 void Calculator::initCalculusTestingFunctions() {
-#ifdef MACRO_use_MongoDB
   this->initAdminFunctions();
-#endif // MACRO_use_MongoDB
 }
 
 ///////////////

@@ -2637,12 +2637,22 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
 }
 
 bool WebWorker::DoSetEmail(
-  UserCalculatorData& inputOutputUser, std::stringstream* commentsOnFailure,
+  UserCalculatorData& inputOutputUser,
+  std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive,
   std::stringstream* commentsGeneralSensitive
 ) {
   MacroRegisterFunctionWithName("WebWorker::DoSetEmail");
-#ifdef MACRO_use_MongoDB
+  (void) inputOutputUser;
+  (void) commentsOnFailure;
+  (void) commentsGeneralNonSensitive;
+  (void) commentsGeneralSensitive;
+  if (! theGlobalVariables.flagDatabaseCompiled) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Project compiled without database support. ";
+    }
+    return false;
+  }
   EmailRoutines theEmail;
   theEmail.toEmail = inputOutputUser.email;
   if (!theEmail.IsOKEmail(theEmail.toEmail, commentsOnFailure))
@@ -2671,20 +2681,15 @@ bool WebWorker::DoSetEmail(
   userCopy.actualActivationToken = "";
   inputOutputUser = userCopy;
   return true;
-#else
-  (void) inputOutputUser;
-  (void) commentsOnFailure;
-  (void) commentsGeneralNonSensitive;
-  (void) commentsGeneralSensitive;
-
-  return false; //MACRO_use_MongoDB
-#endif
 }
 
 int WebWorker::SetEmail(const std::string& input) {
   MacroRegisterFunctionWithName("WebWorker::SetEmail");
   (void) input;
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    stOutput << "<b>Error: database not available.</b>";
+    return 0;
+  }
   std::stringstream out, debugStream;
   //double startTime = theGlobalVariables.GetElapsedSeconds();
   theGlobalVariables.userDefault.email = input;
@@ -2696,9 +2701,6 @@ int WebWorker::SetEmail(const std::string& input) {
   if (theGlobalVariables.UserDefaultHasAdminRights())
     stOutput << "<hr><b>Admin view only. </b>" << debugStream.str();
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s).";
-#else
-  stOutput << "<b>Error: database not available.</b>";
-#endif
   return 0;
 }
 
@@ -2706,7 +2708,10 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
   MacroRegisterFunctionWithName("WebWorker::ProcessChangePassword");
   (void) reasonForNoAuthentication;
   this->SetHeaderOKNoContentLength("");
-#ifdef MACRO_use_MongoDB
+  if (! theGlobalVariables.flagDatabaseCompiled) {
+    stOutput << "Operation not possible: project compiled without database support.";
+    return 0;
+  }
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theUser.enteredAuthenticationToken = "";
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
@@ -2781,9 +2786,6 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
     << "&activationToken = &authenticationToken = &"
     << "'\" />";
   }
-#else
-  stOutput << "Operation not possible: project compiled without database support.";
-#endif
   return 0;
 }
 
@@ -5098,11 +5100,7 @@ void WebServer::CheckSystemInstallationOpenSSL() {
   MacroRegisterFunctionWithName("WebServer::CheckSystemInstallationOpenSSL");
   if (theGlobalVariables.flagRunningApache)
     return;
-  bool doInstallOpenSSL = false;
-#ifndef MACRO_use_MongoDB
-  doInstallOpenSSL = true;
-#endif
-  if (!doInstallOpenSSL)
+  if (!theGlobalVariables.flagDatabaseCompiled)
     return;
   if (theGlobalVariables.configuration["openSSL"].type != JSData::JSUndefined)
     return;
@@ -5160,11 +5158,11 @@ void WebServer::CheckSystemInstallationMongoDB() {
 
 void WebServer::CheckMongoDBSetup() {
   MacroRegisterFunctionWithName("WebServer::CheckMongoDBSetup");
-#ifdef MACRO_use_MongoDB
-  logServer << logger::green << "Compiled with mongo DB support. " << logger::endL;
-#else
-  logServer << logger::red << "Compiled without mongo DB support. " << logger::endL;
-#endif
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    logServer << logger::green << "Compiled with mongo DB support. " << logger::endL;
+  } else {
+    logServer << logger::red << "Compiled without mongo DB support. " << logger::endL;
+  }
   if (theGlobalVariables.configuration["mongoDBSetup"].type != JSData::JSUndefined) {
     return;
   }

@@ -57,7 +57,6 @@ CalculatorHTML::CalculatorHTML() {
 
 extern logger logWorker;
 
-#ifdef MACRO_use_MongoDB
 bool CalculatorHTML::LoadProblemInfoFromJSONAppend(
   const JSData& inputJSON,
   MapLisT<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
@@ -367,11 +366,12 @@ bool CalculatorHTML::MergeProblemInfoInDatabaseJSON(
   return true;
 }
 
-#endif // MACRO_use_MongoDB
-
 bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::LoadDatabaseInfo");
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    comments << "Database not available. ";
+    return false;
+  }
   this->currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   if (!this->PrepareSectionList(comments))
     return false;
@@ -404,10 +404,6 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments) {
   }
   theGlobalVariables.userDefault = this->currentUseR;
   return true;
-#else
-  comments << "Database not available. ";
-  return false;
-#endif
 }
 
 bool CalculatorHTML::LoadMe(
@@ -769,16 +765,16 @@ std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, 
   out << this->ToStringLinkFromFileName(theFileName);
   out << this->ToStringProblemScoreFull(theFileName);
   out << this->ToStringProblemWeightButton(theFileName);
-#ifdef MACRO_use_MongoDB
-  bool problemAlreadySolved = false;
-  if (this->currentUseR.theProblemData.Contains(theFileName)) {
-    ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(theFileName);
-    if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size()) {
-      problemAlreadySolved = true;
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    bool problemAlreadySolved = false;
+    if (this->currentUseR.theProblemData.Contains(theFileName)) {
+      ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(theFileName);
+      if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size()) {
+        problemAlreadySolved = true;
+      }
     }
+    out << this->ToStringDeadline(theFileName, problemAlreadySolved, false, false);
   }
-  out << this->ToStringDeadline(theFileName, problemAlreadySolved, false, false);
-#endif // MACRO_use_MongoDB
   std::string finalStringToDisplay = stringToDisplay;
   if (finalStringToDisplay == "") {
     finalStringToDisplay = FileOperations::GetFileNameFromFileNameWithPath(theFileName);
@@ -1349,7 +1345,10 @@ std::string SyntacticElementHTML::GetTagClass() {
 
 bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("CalculatorHTML::PrepareSectionList");
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    commentsOnFailure << "Database not running. ";
+    return false;
+  }
   (void) commentsOnFailure;
   if (this->flagSectionsPrepared)
     return true;
@@ -1365,23 +1364,20 @@ bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure) {
   }
   this->databaseStudentSections.AddListOnTop(this->currentUseR.sectionsTaught);
   return true;
-#else
-  commentsOnFailure << "Database not running. ";
-  return false;
-#endif
 }
 
 void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretManageClass");
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentVieWOn())
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentVieWOn()) {
     return;
-#ifdef MACRO_use_MongoDB
+  }
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    inputOutput.interpretedCommand = "<b>Managing class not available (no database).</b>";
+    return;
+  }
   std::stringstream out;
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\"> Manage accounts</a>";
   inputOutput.interpretedCommand = out.str();
-#else
-  inputOutput.interpretedCommand = "<b>Managing class not available (no database).</b>";
-#endif // MACRO_use_MongoDB
 }
 
 bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput) {
@@ -1538,17 +1534,17 @@ std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink) {
 std::string CalculatorHTML::GetDeadlineNoInheritance(const std::string& id) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetDeadlineNoInheritance");
   (void) id;
-#ifdef MACRO_use_MongoDB
-  if (!this->currentUseR.theProblemData.Contains(id))
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return "Database not present. ";
+  }
+  if (!this->currentUseR.theProblemData.Contains(id)) {
     return "";
-  ProblemDataAdministrative& currentProb =
-  this->currentUseR.theProblemData.GetValueCreateNoInit((id)).adminData;
-  if (!currentProb.deadlinesPerSection.Contains(this->currentUseR.sectionComputed))
+  }
+  ProblemDataAdministrative& currentProb = this->currentUseR.theProblemData.GetValueCreateNoInit((id)).adminData;
+  if (!currentProb.deadlinesPerSection.Contains(this->currentUseR.sectionComputed)) {
     return "";
+  }
   return currentProb.deadlinesPerSection.GetValueCreate(this->currentUseR.sectionComputed);
-#else
-  return "Database not present. ";
-#endif
 }
 
 std::string CalculatorHTML::GetDeadline(
@@ -1560,7 +1556,9 @@ std::string CalculatorHTML::GetDeadline(
   (void) outputIsInherited;
   outputIsInherited = true;
   std::string result;
-  #ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return "While getting deadline: database not compiled";
+  }
   int topicIndex = this->theTopicS.GetIndex(problemName);
   if (topicIndex == - 1) {
     return problemName + " not found in topic list. ";
@@ -1578,7 +1576,6 @@ std::string CalculatorHTML::GetDeadline(
       }
     }
   }
-  #endif
   return result;
 }
 
@@ -1601,7 +1598,10 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted(
     out << "<span style =\"color:orange\">No deadline yet</span>";
     return out.str();
   }
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    out  << "Database not running: no deadlines";
+    return out.str();
+  }
   TimeWrapper now, deadline; //<-needs a fix for different time formats.
   //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
   std::stringstream badDateStream;
@@ -1653,10 +1653,6 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted(
   return
   //"[<span style =\"color:green\"><b>disabled</b> </span>] "+
   out.str();
-#else
-  out  << "Database not running: no deadlines";
-  return out.str();
-#endif // MACRO_use_MongoDB
 }
 
 std::string CalculatorHTML::ToStringAllSectionDeadlines(const std::string& topicID, bool isSection) {
@@ -1687,7 +1683,9 @@ std::string CalculatorHTML::ToStringDeadline(
   (void) problemAlreadySolved;
   (void) returnEmptyStringIfNoDeadline;
   (void) isSection;
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return "Database not available";
+  }
   if (theGlobalVariables.UserGuestMode()) {
     return "deadlines require login";
   } else if (
@@ -1709,7 +1707,6 @@ std::string CalculatorHTML::ToStringDeadline(
       isSection
     );
   }
-#endif // MACRO_use_MongoDB
   return "";
 }
 
@@ -1749,10 +1746,8 @@ void CalculatorHTML::ComputeDeadlineModifyButton(
   (void) problemAlreadySolved;
   std::stringstream out;
   std::stringstream deadlineStream;
-  inputOutput.idDeadlineTable = "deadlineTable" +
-  Crypto::computeSha3_256OutputBase64URL(inputOutput.id);
-  inputOutput.idDeadlineButton = "deadlineButton" +
-  Crypto::computeSha3_256OutputBase64URL(inputOutput.id);
+  inputOutput.idDeadlineTable = "deadlineTable" + Crypto::computeSha3_256OutputBase64URL(inputOutput.id);
+  inputOutput.idDeadlineButton = "deadlineButton" + Crypto::computeSha3_256OutputBase64URL(inputOutput.id);
   deadlineStream << "<table class =\"deadlineTable\" id =\""
   << inputOutput.idDeadlineTable
   << "\">";
@@ -2920,7 +2915,12 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes() {
 
 bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("CalculatorHTML::StoreRandomSeedCurrent");
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Error: database not running. ";
+    }
+    return false;
+  }
   this->theProblemData.flagRandomSeedGiven = true;
   this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
   if (!this->currentUseR.StoreProblemDataToDatabaseJSON(commentsOnFailure)) {
@@ -2933,11 +2933,6 @@ bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream* commentsOnFailure
     return false;
   }
   return true;
-#else
-  if (commentsOnFailure != 0)
-    *commentsOnFailure << "Error: database not running. ";
-  return false;
-#endif
 }
 
 bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments) {
@@ -2981,26 +2976,25 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     theGlobalVariables.userCalculatorRequestType != "template" &&
     theGlobalVariables.userCalculatorRequestType != "templateNoLogin"
   ) {
-#ifdef MACRO_use_MongoDB
-    bool problemAlreadySolved = false;
-    if (this->currentUseR.theProblemData.Contains(this->fileName)) {
-      ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(this->fileName);
-      if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size()) {
-        problemAlreadySolved = true;
+    if (theGlobalVariables.flagDatabaseCompiled) {
+      bool problemAlreadySolved = false;
+      if (this->currentUseR.theProblemData.Contains(this->fileName)) {
+        ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(this->fileName);
+        if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size()) {
+          problemAlreadySolved = true;
+        }
+      }
+      this->outputDeadlineString = this->ToStringDeadline(this->fileName, problemAlreadySolved, true, true);
+      if (!this->flagUseJSON) {
+        if (this->outputDeadlineString == "") {
+          outBody << "<span style =\"color:orange\"><b>No deadline yet but scores are recorded. </b></span>";
+        } else {
+          outBody << "<span style =\"color:brown\"><b>Scores are recorded. </b></span>";
+        }
+        outBody << problemLabel;
+        outBody << this->outputDeadlineString << "\n<hr>\n";
       }
     }
-    this->outputDeadlineString = this->ToStringDeadline(this->fileName, problemAlreadySolved, true, true);
-    if (!this->flagUseJSON) {
-      if (this->outputDeadlineString == "") {
-        outBody << "<span style =\"color:orange\"><b>No deadline yet but scores are recorded. </b></span>";
-      } else {
-        outBody << "<span style =\"color:brown\"><b>Scores are recorded. </b></span>";
-      }
-      outBody << problemLabel;
-      outBody << this->outputDeadlineString << "\n<hr>\n";
-    }
-#endif
-    //outBody << "<br>";
   } else if (
     !this->flagIsExamHome && !this->flagIsForReal &&
     theGlobalVariables.userCalculatorRequestType != "template" &&
@@ -3085,49 +3079,49 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   //out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before database storage");
-#ifdef MACRO_use_MongoDB
-  bool shouldResetTheRandomSeed = false;
-  if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven)
-    shouldResetTheRandomSeed = true;
-  if (this->flagIsForReal && this->NumAttemptsToInterpret > 1) {
-    shouldResetTheRandomSeed = true;
-    outBody
-    << "<hr><span style =\"color:red\"><b>"
-    << "Your problem's random seed was just reset. </b></span> "
-    << "You should be seeing this message very rarely, "
-    << "<b>ONLY IF</b> your problem was changed by your instructor "
-    << "<b>AFTER</b> you started solving it. "
-    << "You should not be seeing this message a second time. "
-    << "<span style =\"color:red\"><b>If you see this message every "
-    << "time you reload the problem "
-    << "this is a bug. Please take a screenshot and send it to your instructor. </b></span>";
-  }
-  if (shouldResetTheRandomSeed) {
-    bool successStoringSeed = this->StoreRandomSeedCurrent(&comments);
-    if (!successStoringSeed) {
-      logWorker << logger::red << "This should not happen: failed to store random seed." << logger::endL
-      << logger::yellow << comments.str() << logger::endL;
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    bool shouldResetTheRandomSeed = false;
+    if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven)
+      shouldResetTheRandomSeed = true;
+    if (this->flagIsForReal && this->NumAttemptsToInterpret > 1) {
+      shouldResetTheRandomSeed = true;
+      outBody
+      << "<hr><span style =\"color:red\"><b>"
+      << "Your problem's random seed was just reset. </b></span> "
+      << "You should be seeing this message very rarely, "
+      << "<b>ONLY IF</b> your problem was changed by your instructor "
+      << "<b>AFTER</b> you started solving it. "
+      << "You should not be seeing this message a second time. "
+      << "<span style =\"color:red\"><b>If you see this message every "
+      << "time you reload the problem "
+      << "this is a bug. Please take a screenshot and send it to your instructor. </b></span>";
+    }
+    if (shouldResetTheRandomSeed) {
+      bool successStoringSeed = this->StoreRandomSeedCurrent(&comments);
+      if (!successStoringSeed) {
+        logWorker << logger::red << "This should not happen: failed to store random seed." << logger::endL
+        << logger::yellow << comments.str() << logger::endL;
+      }
+    }
+    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
+      outBody << "<hr>Debug information follows. ";
+      if (this->logCommandsProblemGeneratioN.str() != "") {
+        outBody << "<br>" << this->logCommandsProblemGeneratioN.str() << "<hr>";
+      }
+      if (this->flagIsExamProblem)
+        outBody << "Exam problem here. ";
+      outBody << "<br>Random seed: "
+      << this->theProblemData.randomSeed
+      << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
+      << this->theProblemData.flagRandomSeedGiven
+      << "<br>flagRandomSeedGiven: "
+      << this->theProblemData.flagRandomSeedGiven
+      << "\n<br>\n"
+      << "<hr>"
+      << "<hr>"
+      << HtmlRoutines::ConvertStringToHtmlString(this->ToStringCalculatorArgumentsForProblem("exercise", "false"), true);
     }
   }
-  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
-    outBody << "<hr>Debug information follows. ";
-    if (this->logCommandsProblemGeneratioN.str() != "") {
-      outBody << "<br>" << this->logCommandsProblemGeneratioN.str() << "<hr>";
-    }
-    if (this->flagIsExamProblem)
-      outBody << "Exam problem here. ";
-    outBody << "<br>Random seed: "
-    << this->theProblemData.randomSeed
-    << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
-    << this->theProblemData.flagRandomSeedGiven
-    << "<br>flagRandomSeedGiven: "
-    << this->theProblemData.flagRandomSeedGiven
-    << "\n<br>\n"
-    << "<hr>"
-    << "<hr>"
-    << HtmlRoutines::ConvertStringToHtmlString(this->ToStringCalculatorArgumentsForProblem("exercise", "false"), true);
-  }
-#endif // MACRO_use_MongoDB
   std::stringstream navigationAndEditTagStream;
   if (this->flagDoPrependProblemNavigationBar)
     navigationAndEditTagStream << this->ToStringProblemNavigation();
@@ -3343,7 +3337,10 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
     out << "scores require login";
     return out.str();
   }
-  #ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    out << "scores not available: no database. ";
+    return out.str();
+  }
   Rational currentWeight;
   if (this->currentUseR.theProblemData.Contains(theFileName)) {
     ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(theFileName);
@@ -3376,7 +3373,6 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
   } else {
     out << "<span style =\"color:brown\"><b>No submissions.</b> </span>" ;
   }
-  #endif // MACRO_use_MongoDB
   return out.str();
 }
 
@@ -3384,7 +3380,9 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemScoreShort");
   (void) theFileName;
   (void) outputAlreadySolved;
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return "Error: database not running. ";
+  }
   std::stringstream out;
   if (theGlobalVariables.UserGuestMode()) {
     out << "scores require login";
@@ -3441,9 +3439,6 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   << this->ToStringProblemWeightButton(theFileName)
   << "</span>";
   return finalOut.str();
-#else
-  return "Error: database not running. ";
-#endif // MACRO_use_MongoDB
 }
 
 std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFileName) {
@@ -3461,12 +3456,13 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
   out << "Pts: <textarea class =\"textareaStudentPoints\" rows =\"1\" cols =\"2\" id =\"" << idPoints << "\">";
   bool weightIsOK = false;
   std::string problemWeightAsGivenByInstructor;
-  #ifdef MACRO_use_MongoDB
-  Rational unusedRat;
-  weightIsOK = this->currentUseR.theProblemData.GetValueCreate(theFileName).
-  adminData.GetWeightFromCoursE(this->currentUseR.courseComputed, unusedRat, &problemWeightAsGivenByInstructor);
-  out << problemWeightAsGivenByInstructor;
-  #endif
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    Rational unusedRat;
+    weightIsOK = this->currentUseR.theProblemData.GetValueCreate(theFileName).adminData.GetWeightFromCoursE(
+      this->currentUseR.courseComputed, unusedRat, &problemWeightAsGivenByInstructor
+    );
+    out << problemWeightAsGivenByInstructor;
+  }
   out << "</textarea>";
   if (!weightIsOK && problemWeightAsGivenByInstructor != "")
     out << "<span style =\"color:red\"><b>Error</b></span>";
@@ -4190,7 +4186,9 @@ std::string CalculatorHTML::GetSectionSelector() {
   ) {
     return "";
   }
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return "";
+  }
   std::stringstream out;
   out << "<sectionSelection>Sections: ";
   for (int i = 0; i < this->databaseStudentSections.size; i ++) {
@@ -4209,10 +4207,6 @@ std::string CalculatorHTML::GetSectionSelector() {
   }
   out << "</sectionSelection>\n";
   return out.str();
-#else
-  return "";
-#endif
-
 }
 
 void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput) {
@@ -4280,23 +4274,23 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
       commentsOnFailure << "Error preparing section list. ";
     }
   }
-  #ifdef MACRO_use_MongoDB
-  this->flagIncludeStudentScores =
-  theGlobalVariables.UserDefaultHasAdminRights() &&
-  !theGlobalVariables.UserStudentVieWOn() &&
-  theGlobalVariables.userCalculatorRequestType != "templateNoLogin";
-  HashedList<std::string, MathRoutines::HashString> gradableProblems;
-  for (int i = 0; i < this->theTopicS.size(); i ++) {
-    if (this->theTopicS[i].type == TopicElement::tProblem) {
-      gradableProblems.AddOnTopNoRepetition(this->theTopicS[i].id);
-      if (this->theTopicS[i].immediateChildren.size > 0) {
-        crash << "Error: problem " << this->theTopicS[i].ToString() << " has children topics which is not allowed. "
-        << crash;
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    this->flagIncludeStudentScores =
+    theGlobalVariables.UserDefaultHasAdminRights() &&
+    !theGlobalVariables.UserStudentVieWOn() &&
+    theGlobalVariables.userCalculatorRequestType != "templateNoLogin";
+    HashedList<std::string, MathRoutines::HashString> gradableProblems;
+    for (int i = 0; i < this->theTopicS.size(); i ++) {
+      if (this->theTopicS[i].type == TopicElement::tProblem) {
+        gradableProblems.AddOnTopNoRepetition(this->theTopicS[i].id);
+        if (this->theTopicS[i].immediateChildren.size > 0) {
+          crash << "Error: problem " << this->theTopicS[i].ToString() << " has children topics which is not allowed. "
+          << crash;
+        }
       }
     }
+    this->currentUseR.ComputePointsEarned(gradableProblems, &this->theTopicS, commentsOnFailure);
   }
-  this->currentUseR.ComputePointsEarned(gradableProblems, &this->theTopicS, commentsOnFailure);
-  #endif
   this->initTopicElementNames();
   return true;
 }
@@ -4313,31 +4307,32 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
     return;
   }
   std::stringstream outFinal, outHead;
-#ifdef MACRO_use_MongoDB
-  if (this->currentUseR.pointsMax != 0) {
-    double percent = 100 * this->currentUseR.pointsEarned.GetDoubleValue() /
-    this->currentUseR.pointsMax.GetDoubleValue();
-    outHead.precision(2);
-    outHead << "<panelStudentScores>Total score: "
-    << std::fixed << percent << "% = ";
-    outHead << std::fixed << this->currentUseR.pointsEarned.GetDoubleValue()
-    << " out of " << this->currentUseR.pointsMax.GetDoubleValue()
-    << " points earned.</panelStudentScores>"
-    << "<button id =\"buttonToggleCourseInfo\" class =\"buttonToggleTopics\" "
-    << "onclick=\"toggleHeight(this,'bodyCourseInformation')\">&#9650;</button><br>\n";
-    outHead << "<div class =\"bodySection\" id = \"bodyCourseInformation\">"
-    << "<small>Includes problems without deadline, but not problems without weights.<br> "
-    << "If a problem is assigned a new weight, your % score may drop. </small><br>";
-    outHead << "<panelCourseInfo>" << this->currentUseR.ToStringCourseInfo() << "</panelCourseInfo></div><br>";
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    if (this->currentUseR.pointsMax != 0) {
+      double percent = 100 * this->currentUseR.pointsEarned.GetDoubleValue() /
+      this->currentUseR.pointsMax.GetDoubleValue();
+      outHead.precision(2);
+      outHead << "<panelStudentScores>Total score: "
+      << std::fixed << percent << "% = ";
+      outHead << std::fixed << this->currentUseR.pointsEarned.GetDoubleValue()
+      << " out of " << this->currentUseR.pointsMax.GetDoubleValue()
+      << " points earned.</panelStudentScores>"
+      << "<button id =\"buttonToggleCourseInfo\" class =\"buttonToggleTopics\" "
+      << "onclick=\"toggleHeight(this,'bodyCourseInformation')\">&#9650;</button><br>\n";
+      outHead << "<div class =\"bodySection\" id = \"bodyCourseInformation\">"
+      << "<small>Includes problems without deadline, but not problems without weights.<br> "
+      << "If a problem is assigned a new weight, your % score may drop. </small><br>";
+      outHead << "<panelCourseInfo>" << this->currentUseR.ToStringCourseInfo() << "</panelCourseInfo></div><br>";
+    }
   }
-#endif
   out << "<panelProblemLinkStyleSelection>Problem links open in: ";
 //  out << "<br>DEBUG: problinkstyle: "
 //  << theGlobalVariables.GetWebInput("problemLinkStyle")
 //  << "<br>";
   out << "<input type =\"radio\" name =\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('accordion');\" ";
-  if (theGlobalVariables.GetWebInput("problemLinkStyle") == "accordion")
+  if (theGlobalVariables.GetWebInput("problemLinkStyle") == "accordion") {
     out << "checked";
+  }
   out << ">same tab, under topics</input>";
   out << "<input type =\"radio\" name =\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('sameWindow');\" ";
   if (theGlobalVariables.GetWebInput("problemLinkStyle") == "sameWindow") {
@@ -4394,11 +4389,11 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
   topicListJS << "<script type =\"text/javascript\">";
 
   topicListJS << "var currentStudentSection =";
-#ifdef MACRO_use_MongoDB
-  topicListJS << "'" << this->currentUseR.sectionComputed << "'" << ";\n";
-#else
-  topicListJS << "''" << ";\n";
-#endif
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    topicListJS << "'" << this->currentUseR.sectionComputed << "'" << ";\n";
+  } else {
+    topicListJS << "''" << ";\n";
+  }
   topicListJS << "var studentSections =[";
   for (int i = 0; i < this->databaseStudentSections.size; i ++) {
     topicListJS
@@ -4734,21 +4729,21 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner) {
 
   output[WebAPI::problemFileName] = this->problemFileName;
   output[WebAPI::problemId] = this->id;
-#ifdef MACRO_use_MongoDB
-  if (owner.currentUseR.theProblemData.Contains(this->problemFileName)) {
-    ProblemData& currentData = owner.currentUseR.theProblemData.GetValueCreate(this->problemFileName);
-    output["correctlyAnswered"] = currentData.numCorrectlyAnswered;
-    output["totalQuestions"] = currentData.theAnswers.size();
-    Rational currentWeight;
-    std::string currentWeightAsGivenByInstructor;
-    currentData.flagProblemWeightIsOK = currentData.adminData.GetWeightFromCoursE(
-      owner.currentUseR.courseComputed, currentWeight, &currentWeightAsGivenByInstructor
-    );
-    if (currentData.flagProblemWeightIsOK) {
-      output["weight"] = currentWeightAsGivenByInstructor;
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    if (owner.currentUseR.theProblemData.Contains(this->problemFileName)) {
+      ProblemData& currentData = owner.currentUseR.theProblemData.GetValueCreate(this->problemFileName);
+      output["correctlyAnswered"] = currentData.numCorrectlyAnswered;
+      output["totalQuestions"] = currentData.theAnswers.size();
+      Rational currentWeight;
+      std::string currentWeightAsGivenByInstructor;
+      currentData.flagProblemWeightIsOK = currentData.adminData.GetWeightFromCoursE(
+        owner.currentUseR.courseComputed, currentWeight, &currentWeightAsGivenByInstructor
+      );
+      if (currentData.flagProblemWeightIsOK) {
+        output["weight"] = currentWeightAsGivenByInstructor;
+      }
     }
   }
-#endif
   return output;
 }
 

@@ -7,8 +7,9 @@
 #include <iomanip>
 #include "string_constants.h"
 
-ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation
-(__FILE__, "Routines for calculus teaching: calculator exam mode.");
+ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation(
+  __FILE__, "Routines for calculus teaching: calculator exam mode."
+);
 
 std::string HtmlInterpretation::GetProblemSolution() {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetProblemSolution");
@@ -111,48 +112,52 @@ std::string HtmlInterpretation::GetProblemSolution() {
 
 std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml() {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetSetProblemDatabaseInfoHtml");
-#ifdef MACRO_use_MongoDB
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return "Cannot modify problem weights (no database available)";
+  }
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
     return "<b>Only admins may set problem weights.</b>";
+  }
   CalculatorHTML theProblem;
   std::string inputProblemInfo = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   theProblem.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
   std::stringstream commentsOnFailure;
-  if (!theProblem.LoadAndParseTopicList(commentsOnFailure))
+  if (!theProblem.LoadAndParseTopicList(commentsOnFailure)) {
     return "Failed to load topic list from file name: " + theProblem.topicListFileName + ". " + commentsOnFailure.str();
-  //stOutput << "DEBUG: userDefault: " << theGlobalVariables.userDefault.ToStringUnsecure();
+  }
   theProblem.currentUseR.UserCalculatorData::operator=(theGlobalVariables.userDefault);
   std::stringstream out;
   if (!theProblem.PrepareSectionList(commentsOnFailure)) {
     out << "<span style =\"color:red\"><b>Failed to prepare section list. </b></span>" << commentsOnFailure.str();
     return out.str();
   }
-  if (!theProblem.LoadProblemInfoFromJSONAppend
-       (theProblem.currentUseR.problemWeights, theProblem.currentUseR.theProblemData, out)) {
+  if (!theProblem.LoadProblemInfoFromJSONAppend(
+    theProblem.currentUseR.problemWeights, theProblem.currentUseR.theProblemData, out
+  )) {
     out << "Failed to interpret the problem weight string. ";
     return out.str();
   }
-  if (!theProblem.LoadProblemInfoFromJSONAppend
-       (theProblem.currentUseR.deadlines, theProblem.currentUseR.theProblemData, out)) {
+  if (!theProblem.LoadProblemInfoFromJSONAppend(
+    theProblem.currentUseR.deadlines, theProblem.currentUseR.theProblemData, out
+  )) {
     out << "Failed to interpret the deadline string. ";
     return out.str();
   }
   if (theProblem.MergeProblemInfoInDatabaseJSON(inputProblemInfo, commentsOnFailure)) {
     out << "<span style =\"color:green\"><b>Modified. </b></span>";
     //out << "<meta http-equiv=\"refresh\" content =\"0;\">";
-  } else
+  } else {
     out << "<span style =\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
+  }
   //out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
   //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(inputProblemInfo)
   //<< "<br>inputProblemHome: " << inputProblemHome;
   return out.str();
-#else
-  return "Cannot modify problem weights (no database available)";
-#endif // MACRO_use_MongoDB
 }
 
-std::string HtmlInterpretation::GetSanitizedComment
-(const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot) {
+std::string HtmlInterpretation::GetSanitizedComment(
+  const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot
+) {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetSanitizedComment");
   theFormat.flagUseQuotes = false;
   resultIsPlot = false;
@@ -162,35 +167,35 @@ std::string HtmlInterpretation::GetSanitizedComment
   //}
   std::string theString;
   if (input.IsOfType<std::string>(&theString)) {
-    if (MathRoutines::StringBeginsWith(theString, "Approximations have been"))
+    if (MathRoutines::StringBeginsWith(theString, "Approximations have been")) {
       return "";
+    }
     return input.ToString(&theFormat);
   }
   if (input.IsOfType<Plot>()) {
     resultIsPlot = true;
     return input.ToString(&theFormat);
   }
-  if (input.HasType<Plot>())
+  if (input.HasType<Plot>()) {
     return "";
+  }
   //<- expression has a partially drawn plot-> not displaying.
   if (input.owner == 0)
     return "";
-  if (input.StartsWith(input.owner->opRulesOff()) ||
-      input.StartsWith(input.owner->opRulesOn()))
+  if (input.StartsWith(input.owner->opRulesOff()) || input.StartsWith(input.owner->opRulesOn())) {
     return "";
+  }
   return input.ToString(&theFormat);
 }
 
-std::string HtmlInterpretation::GetCommentsInterpretation
-(Calculator& theInterpreterWithAdvice,
- int indexShift, FormatExpressions& theFormat) {
+std::string HtmlInterpretation::GetCommentsInterpretation(
+  Calculator& theInterpreterWithAdvice, int indexShift, FormatExpressions& theFormat
+) {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetCommentsInterpretation");
   std::stringstream out;
   theFormat.flagExpressionIsFinal = true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
   theInterpreterWithAdvice.theObjectContainer.resetPlots();
-  //stOutput << "DEBUG: theInterpreterWithAdvice.flagPlotNoCtrls: "
-  //<< theInterpreterWithAdvice.flagPlotNoControls;
   if (indexShift >= theInterpreterWithAdvice.theProgramExpression.size()) {
     stOutput << "<br>DEBUG: something is very wrong with indexshift in comments!";
     return "";
@@ -214,8 +219,9 @@ std::string HtmlInterpretation::GetCommentsInterpretation
     out << currentS;
     //out << "<br>DEBUG: Lispified: "
     //<< HtmlRoutines::ConvertStringToHtmlString(currentE[i].ToString(), true);
-    if (i != currentE.size() - 1 && !resultIsPlot)
+    if (i != currentE.size() - 1 && !resultIsPlot) {
       out << "<br>";
+    }
   }
   return out.str();
 }
@@ -228,15 +234,18 @@ std::string HtmlInterpretation::submitAnswersPreview() {
   std::stringstream out, studentAnswerSream;
   MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs =
   theGlobalVariables.webArguments;
-  for (int i = 0; i < theArgs.size(); i ++)
-    if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID))
+  for (int i = 0; i < theArgs.size(); i ++) {
+    if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID)) {
       lastAnswer = "(" + HtmlRoutines::ConvertURLStringToNormal(theArgs[i], false) + "); ";
+    }
+  }
   studentAnswerSream << lastAnswer;
   out << "Your answer(s): \\(\\displaystyle " << lastAnswer << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
   std::stringstream errorStream;
-  theProblem.LoadCurrentProblemItem
-  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), theGlobalVariables.GetWebInput("randomSeed"), &errorStream);
+  theProblem.LoadCurrentProblemItem(
+    theGlobalVariables.UserRequestRequiresLoadingRealExamData(), theGlobalVariables.GetWebInput("randomSeed"), &errorStream
+  );
   if (!theProblem.flagLoadedSuccessfully)
     out << "<br><b>Failed to load problem.</b> Comments: " << errorStream.str();
   std::stringstream comments;
@@ -253,9 +262,9 @@ std::string HtmlInterpretation::submitAnswersPreview() {
   Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
   if (!theProblem.PrepareCommands(&comments)) {
     out << "Something went wrong while interpreting the problem file. ";
-    if (theGlobalVariables.UserDebugFlagOn() &&
-        theGlobalVariables.UserDefaultHasAdminRights())
+    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
       out << comments.str();
+    }
     out << "<br>Response time: "
     << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
@@ -310,17 +319,13 @@ std::string HtmlInterpretation::submitAnswersPreview() {
   << ");";
   calculatorInputStreamNoEnclosures
   << currentA.answerId << " = " << lastAnswer << "";
-  //stOutput << "<br>DEBUG: calculatorInputStreamNoEnclosures: " << calculatorInputStreamNoEnclosures.str();
-  bool hasCommentsBeforeSubmission =
-  (MathRoutines::StringTrimWhiteSpace
-  (currentA.commandsCommentsBeforeSubmission) != "");
+  bool hasCommentsBeforeSubmission = (MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != "");
   if (hasCommentsBeforeSubmission) {
     calculatorInputStream << "CommandEnclosure{}("
     <<  currentA.commandsCommentsBeforeSubmission
     << ");";
     calculatorInputStreamNoEnclosures
     << currentA.commandsCommentsBeforeSubmission;
-    //stOutput << "<br>DEBUG: commandsCommentsBeforeSubmission: " << currentA.commandsCommentsBeforeSubmission;
   }
   std::stringstream problemLinkStream;
   problemLinkStream
@@ -334,11 +339,12 @@ std::string HtmlInterpretation::submitAnswersPreview() {
     << "Something went wrong when parsing your answer "
     << "in the context of the current problem. "
     << "</b></span>";
-    if (theGlobalVariables.UserDefaultHasAdminRights())
+    if (theGlobalVariables.UserDefaultHasAdminRights()) {
       out
       << problemLinkStream.str()
       << theInterpreterWithAdvice.outputString << "<br>"
       << theInterpreterWithAdvice.outputCommentsString;
+    }
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
   }
@@ -358,14 +364,13 @@ std::string HtmlInterpretation::submitAnswersPreview() {
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
   }
-  if (hasCommentsBeforeSubmission)
-    out << HtmlInterpretation::GetCommentsInterpretation
-    (theInterpreterWithAdvice, 3, theFormat);
+  if (hasCommentsBeforeSubmission){
+    out << HtmlInterpretation::GetCommentsInterpretation(theInterpreterWithAdvice, 3, theFormat);
+  }
   out << "<br>Response time: "
   << theGlobalVariables.GetElapsedSeconds() - startTime
   << " second(s).<hr>";
-  if (theGlobalVariables.UserDefaultHasAdminRights() &&
-      theGlobalVariables.UserDebugFlagOn()) {
+  if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn()) {
     out << "<hr> " << problemLinkStream.str()
     << "<br>"
     << calculatorInputStreamNoEnclosures.str()
@@ -379,9 +384,13 @@ std::string HtmlInterpretation::submitAnswersPreview() {
 
 std::string HtmlInterpretation::ClonePageResult(bool useJSON) {
   MacroRegisterFunctionWithName("HtmlInterpretation::ClonePageResult");
-  if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights() ||
-      !theGlobalVariables.flagUsingSSLinCurrentConnection)
+  if (
+    !theGlobalVariables.flagLoggedIn ||
+    !theGlobalVariables.UserDefaultHasAdminRights() ||
+    !theGlobalVariables.flagUsingSSLinCurrentConnection
+  ) {
     return "<b>Cloning problems allowed only for logged-in admins under ssl connection. </b>";
+  }
   std::string fileNameResulT = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   std::string fileNameToBeCloned = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
   std::stringstream out;
@@ -413,8 +422,9 @@ std::string HtmlInterpretation::ClonePageResult(bool useJSON) {
     out << "<br>" << linkInterpreter.ToStringLinkFromFileName(fileNameResulT);
     out << "<br><b><span style =\"color:green\">Written content to file: "
     << fileNameResulT << ". </span></b>" << "<br> " << comments.str();
-  } else
+  } else {
     out << "<br>Written content to file: " << fileNameResulT;
+  }
   return out.str();
 }
 
@@ -432,16 +442,19 @@ std::string HtmlInterpretation::GetAboutPage() {
   << "</calculatorNavigation>";
   std::string theFile;
   std::stringstream commentsOnFailure;
-  bool isGood = FileOperations::LoadFileToStringVirtual
-  ("/calculator-html/about.html", theFile, false, false, &commentsOnFailure);
-  if (!isGood)
+  bool isGood = FileOperations::LoadFileToStringVirtual(
+    "/calculator-html/about.html", theFile, false, false, &commentsOnFailure
+  );
+  if (!isGood) {
     isGood = FileOperations::LoadFileToStringVirtual("/html/about.html", theFile, false, false, &commentsOnFailure);
+  }
   if (!isGood) {
     out << "<span style =\"color:red\"><b>"
     << commentsOnFailure.str()
     << "</b></span>";
-  } else
+  } else {
     out << theFile;
+  }
   out << "</body></html>";
   return out.str();
 }
@@ -459,28 +472,33 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash) {
   for (std::string currentLine; std::getline(theReader, currentLine, '\n');) {
     int startChar = currentLine.find(WebAPI::request::calculatorHTML);
     bool shouldShortCut = false;
-    if (startChar == - 1)
+    if (startChar == - 1) {
       shouldShortCut = true;
+    }
     //else
     //  shouldShortCut = (currentLine.find("/MathJax.js?") != std::string::npos);
     if (shouldShortCut) {
-      if (this->jsFileNames.size > 0)
+      if (this->jsFileNames.size > 0) {
         outSecondPart << currentLine << "\n";
-      else
+      } else {
         outFirstPart << currentLine << "\n";
+      }
       continue;
     }
     std::string firstPart, secondAndThirdPart, thirdPart, notUsed;
     MathRoutines::SplitStringInTwo(currentLine, startChar, firstPart, secondAndThirdPart);
     MathRoutines::SplitStringInTwo(secondAndThirdPart, WebAPI::request::calculatorHTML.size(), notUsed, thirdPart);
-    if (currentLine.find("<script") == std::string::npos ||
-        currentLine.find("/MathJax.js?") != std::string::npos) {
+    if (
+      currentLine.find("<script") == std::string::npos ||
+      currentLine.find("/MathJax.js?") != std::string::npos
+    ) {
       std::stringstream lineStream;
       lineStream << firstPart << virtualFolder << thirdPart << "\n";
-      if (this->jsFileNames.size > 0)
+      if (this->jsFileNames.size > 0) {
         outSecondPart << lineStream.str();
-      else
+      } else {
         outFirstPart << lineStream.str();
+      }
     } else {
       MathRoutines::StringSplitExcludeDelimiter(secondAndThirdPart, '"', splitterStrings);
       this->jsFileNames.AddOnTop(splitterStrings[0]);
@@ -499,8 +517,9 @@ std::string HtmlInterpretation::GetOnePageJS(bool appendBuildHash) {
   HtmlInterpretation theInterpretation;
   std::stringstream out;
   std::stringstream errorStream;
-  if (!FileOperations::LoadFileToStringVirtual
-       ("/calculator-html/index.html", theInterpretation.htmlRaw, false, false, &errorStream)) {
+  if (!FileOperations::LoadFileToStringVirtual(
+    "/calculator-html/index.html", theInterpretation.htmlRaw, false, false, &errorStream
+  )) {
     out << "<html><body><b>Failed to load the application file. "
     << "Further comments follow. " << errorStream.str() << "</body></html>";
     return out.str();
@@ -508,9 +527,11 @@ std::string HtmlInterpretation::GetOnePageJS(bool appendBuildHash) {
   theInterpretation.BuildHtmlJSpage(appendBuildHash);
   theInterpretation.jsFileContents.SetSize(theInterpretation.jsFileNames.size);
   for (int i = 0; i < theInterpretation.jsFileNames.size; i ++) {
-    if (!FileOperations::LoadFileToStringVirtual
-         (theInterpretation.jsFileNames[i], theInterpretation.jsFileContents[i], false, false, &errorStream))
+    if (!FileOperations::LoadFileToStringVirtual(
+      theInterpretation.jsFileNames[i], theInterpretation.jsFileContents[i], false, false, &errorStream
+    )) {
       return errorStream.str();
+    }
   }
   return theInterpretation.GetOnePageJSBrowserify();
 }
@@ -521,8 +542,9 @@ std::string HtmlInterpretation::GetOnePageJSBrowserify() {
   out << "var theJSContent = {\n";
   for (int i = 0; i < this->jsFileContents.size; i ++) {
     std::string fileNameNoJS;
-    if (!MathRoutines::StringEndsWith(this->jsFileNames[i], ".js", &fileNameNoJS))
+    if (!MathRoutines::StringEndsWith(this->jsFileNames[i], ".js", &fileNameNoJS)) {
       fileNameNoJS = this->jsFileNames[i];
+    }
     out << "\"" << fileNameNoJS << "\" : function(require, module, exports){\n";
     out << this->jsFileContents[i];
     out << "\n},\n";
@@ -536,8 +558,9 @@ std::string HtmlInterpretation::GetApp(bool appendBuildHash) {
   HtmlInterpretation theInterpretation;
   std::stringstream out;
   std::stringstream errorStream;
-  if (!FileOperations::LoadFileToStringVirtual
-       ("/calculator-html/index.html", theInterpretation.htmlRaw, false, false, &errorStream)) {
+  if (!FileOperations::LoadFileToStringVirtual(
+    "/calculator-html/index.html", theInterpretation.htmlRaw, false, false, &errorStream
+  )) {
     out << "<html><body><b>Failed to load the application file. "
     << "Further comments follow. " << errorStream.str() << "</body></html>";
     return out.str();
@@ -546,8 +569,7 @@ std::string HtmlInterpretation::GetApp(bool appendBuildHash) {
   return theInterpretation.htmlJSbuild;
 }
 
-class Course
-{
+class Course {
 public:
   std::string courseTemplate;
   std::string courseTopics;
@@ -564,8 +586,9 @@ JSData Course::ToJSON() const {
   result["title"] = this->title;
   result["courseHome"] = "coursetemplates/" + this->courseTemplate;
   result["topicList"] = "topiclists/" + this->courseTopics;
-  if (this->flagRoughDraft != "")
+  if (this->flagRoughDraft != "") {
     result["roughDraft"] = this->flagRoughDraft;
+  }
   return result;
 }
 
@@ -587,8 +610,7 @@ void Course::reset() {
   this->flagRoughDraft = "";
 }
 
-class CourseList
-{
+class CourseList {
 public:
   List<Course> theCourses;
   void LoadFromString(const std::string& input, std::stringstream* commentsOnFailure);
@@ -649,10 +671,10 @@ std::string HtmlInterpretation::GetSelectCourseJSON() {
   std::string theTopicFile;
   std::stringstream commentsOnFailure;
   std::string temp;
-  FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly
-  (coursesAvailableList, temp, &commentsOnFailure);
-  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly
-       ("/coursesavailable/default.txt", theTopicFile, &commentsOnFailure)) {
+  FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(coursesAvailableList, temp, &commentsOnFailure);
+  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
+    "/coursesavailable/default.txt", theTopicFile, &commentsOnFailure
+  )) {
     comments << "Failed to fetch available courses from /coursesavailable/default.txt. "
     << commentsOnFailure.str();
     output["error"] = comments.str();
@@ -832,18 +854,23 @@ std::string HtmlInterpretation::GetExamPageJSON() {
   theFile.flagDoPrependProblemNavigationBar = false;
   theFile.flagUseJSON = true;
   std::stringstream errorStream;
-  std::string problemBody = theFile.LoadAndInterpretCurrentProblemItemJSON
-  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), theGlobalVariables.GetWebInput("randomSeed"), &errorStream);
+  std::string problemBody = theFile.LoadAndInterpretCurrentProblemItemJSON(
+    theGlobalVariables.UserRequestRequiresLoadingRealExamData(),
+    theGlobalVariables.GetWebInput("randomSeed"),
+    &errorStream
+  );
   //<-must come after theFile.outputHtmlHeadNoTag
   out << problemBody;
   std::string commentsWebserver = HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   std::string commentsProblem = errorStream.str();
   JSData output;
   output[WebAPI::problemContent] = HtmlRoutines::ConvertStringToURLString(out.str(), false);
-  if (commentsWebserver != "")
+  if (commentsWebserver != "") {
     output[WebAPI::commentsServer] = commentsWebserver;
-  if (commentsProblem != "")
+  }
+  if (commentsProblem != "") {
     output[WebAPI::commentsProblem] = commentsProblem;
+  }
   if (theFile.flagLoadedSuccessfully) {
     output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
     output["deadline"] = theFile.outputDeadlineString;
@@ -888,8 +915,10 @@ std::string HtmlInterpretation::GetBrowseProblems() {
 std::string HtmlInterpretation::GetEditPageJSON() {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetEditPageJSON");
   JSData output;
-  if ((!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights()) &&
-      !theGlobalVariables.flagRunningApache) {
+  if (
+    (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights()) &&
+    !theGlobalVariables.flagRunningApache
+  ) {
     output["error"] ="Only logged-in admins are allowed to edit pages.";
     return output.ToString(false);
   }
@@ -929,8 +958,9 @@ std::string HtmlInterpretation::GetEditPageJSON() {
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicBundles);
   }
   JSData theAutoCompleteWordsJS(JSData::JSarray);
-  for (int i = 0; i < theAutocompleteKeyWords.size; i ++)
+  for (int i = 0; i < theAutocompleteKeyWords.size; i ++) {
     theAutoCompleteWordsJS[i] = theAutocompleteKeyWords[i];
+  }
   output["autoComplete"] = theAutoCompleteWordsJS;
   output["content"] = HtmlRoutines::ConvertStringToURLString(theFile.inputHtml, false);
   return output.ToString(false);
@@ -968,12 +998,12 @@ std::string HtmlInterpretation::SubmitAnswers(
   theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size());
   MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   int answerIdIndex = - 1;
-  for (int i = 0; i < theArgs.size(); i ++)
+  for (int i = 0; i < theArgs.size(); i ++) {
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader)) {
       int newAnswerIndex = theProblem.GetAnswerIndex(studentAnswerNameReader);
-      if (answerIdIndex == - 1)
+      if (answerIdIndex == - 1) {
         answerIdIndex = newAnswerIndex;
-      else if (answerIdIndex != newAnswerIndex && answerIdIndex != - 1 && newAnswerIndex != - 1) {
+      } else if (answerIdIndex != newAnswerIndex && answerIdIndex != - 1 && newAnswerIndex != - 1) {
         out << "<b>You submitted two or more answers [answer tags: "
         << theProblem.theProblemData.theAnswers[answerIdIndex].answerId
         << " and " << theProblem.theProblemData.theAnswers[newAnswerIndex].answerId
@@ -994,6 +1024,7 @@ std::string HtmlInterpretation::SubmitAnswers(
         return out.str();
       }
     }
+  }
   if (answerIdIndex == - 1) {
     out << "<b>Something is wrong: I found no submitted answers.</b>";
     return out.str();
@@ -1019,8 +1050,9 @@ std::string HtmlInterpretation::SubmitAnswers(
   completedProblemStreamNoEnclosures << currentA.answerId << "= (" << currentA.currentAnswerClean << ");";
 
   //stOutput << "DEBUG: " << "adding: commands: " << currentA.commandsCommentsBeforeSubmissionOnly;
-  bool hasCommentsBeforeSubmission =
-  (MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != "");
+  bool hasCommentsBeforeSubmission = (
+    MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != ""
+  );
   if (hasCommentsBeforeSubmission) {
     completedProblemStream
     << "CommandEnclosure{}("
@@ -1050,16 +1082,17 @@ std::string HtmlInterpretation::SubmitAnswers(
 
   theInterpreter.Evaluate(completedProblemStream.str());
   if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors != "") {
-    if (theInterpreter.errorsPublic.str() != "")
+    if (theInterpreter.errorsPublic.str() != "") {
       out << "While checking your answer, got the error: "
       << "<br><b><span style =\"color:red\">"
       << theInterpreter.errorsPublic.str()
       << "</span></b> "
       << "<br><b>Most likely your answer is wrong. </b>";
-    else
+    } else {
       out << "<b>Error while processing your answer(s).</b> "
       << "<br>Perhaps your answer was wrong and "
       << "generated division by zero during checking. ";
+    }
     out << "<br>Here's what I understood. ";
     Calculator isolatedInterpreter;
     isolatedInterpreter.initialize();
@@ -1112,101 +1145,94 @@ std::string HtmlInterpretation::SubmitAnswers(
     out << "<tr><td><span style =\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
   }
   if (hasCommentsBeforeSubmission)
-    out << "<tr><td>" << HtmlInterpretation::GetCommentsInterpretation
-    (theInterpreter, 3, theFormat) << "</td></tr>\n";
-#ifdef MACRO_use_MongoDB
-  UserCalculator& theUser = theProblem.currentUseR;
-  theUser.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  bool deadLinePassed = false;
-  bool hasDeadline = true;
-  double secondsTillDeadline = - 1;
-  if (theProblem.flagIsForReal) {
-    //out << "<tr><td><hr><hr><hr>DEBUG: before interpreting anything prob data is: "
-    //<< theUser.theProblemData.ToStringHtml() << "<hr><hr><hr></td></tr>";
-    if (!theProblem.LoadAndParseTopicList(out))
-      hasDeadline = false;
-    std::string theSQLstring;
-    theSQLstring = theUser.sectionComputed;
-    if (hasDeadline) {
-      bool unused = false;
-      std::string theDeadlineString =
-      theProblem.GetDeadline(theProblem.fileName, HtmlRoutines::ConvertStringToURLString(theSQLstring, false), unused);
-      //out << "<tr><td>DEBUG: getting deadline for section: " << theUser.userGroup.value
-      //<< "<br>The prob data is: "
-      //<< theUser.theProblemData.ToStringHtml()
-      //<< "<br> the dealineinfoString is: "
-      //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theUser.deadlineInfoString.value)
-      //<< " <br>getDeadline output: "
-      //<< theProblem.GetDeadline(theProblem.fileName, theUser.userGroup.GetDataNoQuotes(), unused) << "</td></tr>";
-
-      if (theDeadlineString == "" || theDeadlineString == " ")
+    out << "<tr><td>" << HtmlInterpretation::GetCommentsInterpretation(theInterpreter, 3, theFormat) << "</td></tr>\n";
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    UserCalculator& theUser = theProblem.currentUseR;
+    theUser.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
+    bool deadLinePassed = false;
+    bool hasDeadline = true;
+    double secondsTillDeadline = - 1;
+    if (theProblem.flagIsForReal) {
+      if (!theProblem.LoadAndParseTopicList(out)) {
         hasDeadline = false;
-      else {
-        TimeWrapper now, deadline; //<-needs a fix for different time formats.
-        //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
-        std::stringstream badDateStream;
-        if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream)) {
-          out << "<tr><td><b>Problem reading deadline. </b> The deadline string was: "
-          << theDeadlineString << ". Comments: "
-          << "<span style =\"color:red\">" << badDateStream.str() << "</span>"
-          << "</td></tr><tr><td> This should not happen. " << CalculatorHTML::BugsGenericMessage << "</td></tr>";
-          return out.str();
+      }
+      std::string theSQLstring;
+      theSQLstring = theUser.sectionComputed;
+      if (hasDeadline) {
+        bool unused = false;
+        std::string theDeadlineString =
+        theProblem.GetDeadline(theProblem.fileName, HtmlRoutines::ConvertStringToURLString(theSQLstring, false), unused);
+
+        if (theDeadlineString == "" || theDeadlineString == " ") {
+          hasDeadline = false;
+        } else {
+          TimeWrapper now, deadline; //<-needs a fix for different time formats.
+          //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
+          std::stringstream badDateStream;
+          if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream)) {
+            out << "<tr><td><b>Problem reading deadline. </b> The deadline string was: "
+            << theDeadlineString << ". Comments: "
+            << "<span style =\"color:red\">" << badDateStream.str() << "</span>"
+            << "</td></tr><tr><td> This should not happen. " << CalculatorHTML::BugsGenericMessage << "</td></tr>";
+            return out.str();
+          }
+          now.AssignLocalTime();
+          //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
+          //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
+          secondsTillDeadline = deadline.SubtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
+          deadLinePassed = (secondsTillDeadline < - 18000);
         }
-        now.AssignLocalTime();
-        //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
-        //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
-        secondsTillDeadline = deadline.SubtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
-        deadLinePassed = (secondsTillDeadline < - 18000);
+      }
+      if (deadLinePassed) {
+        out << "<tr><td><span style =\"color:red\"><b>Deadline passed, attempt not recorded.</b></span></td></tr>";
+      } else {
+        currentA.numSubmissions ++;
+        if ((*outputIsCorrect)) {
+          currentA.numCorrectSubmissions ++;
+          if (currentA.firstCorrectAnswerClean == "") {
+            currentA.firstCorrectAnswerClean = currentA.currentAnswerClean;
+          } else {
+            out << "<tr><td>[first correct answer: " << currentA.firstCorrectAnswerClean << "]</td></tr>";
+          }
+        }
       }
     }
-    if (deadLinePassed)
-      out << "<tr><td><span style =\"color:red\"><b>Deadline passed, attempt not recorded.</b></span></td></tr>";
-    else {
-      currentA.numSubmissions ++;
-      if ((*outputIsCorrect)) {
-        currentA.numCorrectSubmissions ++;
-        if (currentA.firstCorrectAnswerClean == "")
-          currentA.firstCorrectAnswerClean = currentA.currentAnswerClean;
-        else
-          out << "<tr><td>[first correct answer: " << currentA.firstCorrectAnswerClean << "]</td></tr>";
+    if (theProblem.flagIsForReal) {
+      std::stringstream comments;
+      //if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
+      //  stOutput << "<hr>DEBUG: adding prob data for file name: " << theProblem.fileName
+      //  << "<br>"
+      //  << currentProblemData.ToString() << "<br> into:<br> "
+      //  << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString()
+      //  << "<hr>";
+      theUser.SetProblemData(theProblem.fileName, currentProblemData);
+      if (!theUser.StoreProblemDataToDatabaseJSON(&comments)) {
+        out << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
+        << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "
+        << comments.str() << "</td></tr>";
+      } else {
+        out << "<tr><td>So far " << currentA.numCorrectSubmissions << " correct and "
+        << currentA.numSubmissions - currentA.numCorrectSubmissions
+        << " incorrect submissions.</td></tr>";
+      }
+      if (hasDeadline) {
+        if (secondsTillDeadline < 0) {
+          secondsTillDeadline *= - 1;
+        }
+        if (deadLinePassed) {
+          out << "<tr><td><span style =\"color:red\"><b>Submission "
+          << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, false)
+          << " after deadline. </b></span></td></tr>";
+        } else {
+          out << "<tr><td><span style =\"color:green\"><b>Submission "
+          << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, false)
+          << " before deadline. </b></span></td></tr>";
+        }
+      } else {
+        out << "<tr><td><span style =\"color:green\"><b>No deadline yet.</b></span></td></tr>";
       }
     }
   }
-#endif // MACRO_use_MongoDB
-#ifdef MACRO_use_MongoDB
-  if (theProblem.flagIsForReal) {
-    std::stringstream comments;
-    //if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-    //  stOutput << "<hr>DEBUG: adding prob data for file name: " << theProblem.fileName
-    //  << "<br>"
-    //  << currentProblemData.ToString() << "<br> into:<br> "
-    //  << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString()
-    //  << "<hr>";
-    theUser.SetProblemData(theProblem.fileName, currentProblemData);
-    if (!theUser.StoreProblemDataToDatabaseJSON(&comments))
-      out << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
-      << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "
-      << comments.str() << "</td></tr>";
-    else
-      out << "<tr><td>So far " << currentA.numCorrectSubmissions << " correct and "
-      << currentA.numSubmissions - currentA.numCorrectSubmissions
-      << " incorrect submissions.</td></tr>";
-    if (hasDeadline) {
-      if (secondsTillDeadline < 0)
-        secondsTillDeadline *= - 1;
-      if (deadLinePassed)
-        out << "<tr><td><span style =\"color:red\"><b>Submission "
-        << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, false)
-        << " after deadline. </b></span></td></tr>";
-      else
-        out << "<tr><td><span style =\"color:green\"><b>Submission "
-        << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, false)
-        << " before deadline. </b></span></td></tr>";
-    } else
-      out << "<tr><td><span style =\"color:green\"><b>No deadline yet.</b></span></td></tr>";
-  } //else
-    //stOutput << "<tr><td><b>Submitting problem solutions allowed only for logged-in users. </b></td></tr>";
-#endif
   out << "<tr><td>Your answer was: ";
   out << "\\(\\displaystyle ";
   out << currentA.currentAnswerClean;
@@ -1253,14 +1279,15 @@ std::string HtmlInterpretation::AddTeachersSections() {
     out << "<b style='color:red'>Failed to find key 'students' in your input. </b>";
     return out.str();
   }
-
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return "<b>no database present.</b>";
+  }
   std::string desiredUsers =
   HtmlRoutines::ConvertURLStringToNormal(inputParsed["teachers"].string, false);
   std::string desiredSectionsOneString =
   HtmlRoutines::ConvertURLStringToNormal(inputParsed["students"].string, false);
   List<std::string> desiredSectionsList;
 
-#ifdef MACRO_use_MongoDB
   List<std::string> theTeachers;
   List<char> delimiters;
   delimiters.AddOnTop(' ');
@@ -1302,9 +1329,6 @@ std::string HtmlInterpretation::AddTeachersSections() {
       << desiredSectionsList << "</span><br>";
   }
   return out.str();
-#else
-  return "<b>no database present.</b>";
-#endif // MACRO_use_MongoDB
 }
 
 std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressWithPort) {
@@ -1328,15 +1352,17 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
     out << "<b>No emails to add</b>";
     return out.str();
   }
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return "<b>no database present.</b>";
+  }
   std::stringstream comments;
   bool sentEmails = true;
-  //stOutput << "DEBUG: here be i!";
   bool doSendEmails = theGlobalVariables.userCalculatorRequestType == "sendEmails" ?  true : false;
   int numNewUsers = 0;
   int numUpdatedUsers = 0;
-  bool createdUsers = DatabaseRoutineS::AddUsersFromEmails
-  (inputEmails, userPasswords, userRole, userGroup, comments, numNewUsers, numUpdatedUsers);
+  bool createdUsers = DatabaseRoutineS::AddUsersFromEmails(
+    inputEmails, userPasswords, userRole, userGroup, comments, numNewUsers, numUpdatedUsers
+  );
   if (createdUsers) {
     out << "<span style =\"color:green\">Success: "
     << numNewUsers << " new users and " << numUpdatedUsers
@@ -1345,17 +1371,15 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
     out << "<span style =\"color:red\">Failed to add all users. </span> Errors follow. <hr>"
     << comments.str() << "<hr>";
   if (doSendEmails) {
-    if (sentEmails)
+    if (sentEmails) {
       out << "<span style =\"color:green\">Activation emails successfully sent. </span>";
-    else
+    } else {
       out << "<span style =\"color:red\">Failed to send all activation emails. </span>";
+    }
   }
 //  bool usersAreAdmins = (userRole == "admin");
   //out << "<b>Further comments missing</b>";
   return out.str();
-#else
-  return "<b>no database present.</b>";
-#endif // MACRO_use_MongoDB
 }
 
 const std::string CalculatorHTML::BugsGenericMessage =
@@ -1366,8 +1390,9 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp() {
   return HtmlInterpretation::GetAnswerOnGiveUp(theGlobalVariables.GetWebInput("randomSeed"));
 }
 
-std::string HtmlInterpretation::GetAnswerOnGiveUp
-(const std::string& inputRandomSeed, std::string* outputNakedAnswer, bool* outputDidSucceed) {
+std::string HtmlInterpretation::GetAnswerOnGiveUp(
+  const std::string& inputRandomSeed, std::string* outputNakedAnswer, bool* outputDidSucceed
+) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
   if (outputNakedAnswer != 0)
     *outputNakedAnswer = "";
@@ -1402,8 +1427,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   std::string lastStudentAnswerID;
   MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   for (int i = 0; i < theArgs.size(); i ++)
-    MathRoutines::StringBeginsWith
-    (theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
+    MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId == - 1) {
     out << "File: "
@@ -1422,9 +1446,9 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly == "") {
     out << "<b> Unfortunately there is no answer given for this "
     << "question (answerID: " << lastStudentAnswerID << ").</b>";
-    if (theGlobalVariables.UserDebugFlagOn() &&
-        theGlobalVariables.UserDefaultHasProblemComposingRights())
+    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasProblemComposingRights()) {
       out << "<br>Answer status: " << currentA.ToString();
+    }
     return out.str();
   }
   Calculator theInterpreteR;
@@ -1440,12 +1464,13 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   if (theInterpreteR.syntaxErrors != "") {
     out << "<span style =\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>";
-    if (theGlobalVariables.UserDefaultHasProblemComposingRights())
+    if (theGlobalVariables.UserDefaultHasProblemComposingRights()) {
       out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=calculator&"
       << "mainInput="
       << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str(), false)
       << "\">Calculator input no enclosures</a>";
+    }
     out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
@@ -1454,12 +1479,13 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   if (theInterpreteR.flagAbortComputationASAP) {
     out << "<span style =\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>";
-    if (theGlobalVariables.UserDefaultHasProblemComposingRights())
+    if (theGlobalVariables.UserDefaultHasProblemComposingRights()) {
       out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=calculator&"
       << "mainInput="
       << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str(), false)
       << "\">Calculator input no enclosures</a>";
+    }
     out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.outputString
     << theInterpreteR.outputCommentsString
@@ -1482,7 +1508,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
       *outputNakedAnswer = currentE.ToString(&theFormat);
     if (outputDidSucceed != 0)
       *outputDidSucceed = true;
-  } else
+  } else {
     for (int j = 1; j < currentE.size(); j ++) {
       if (currentE[j].StartsWith(theInterpreteR.opRulesOff()) ||
           currentE[j].StartsWith(theInterpreteR.opRulesOn()))
@@ -1510,6 +1536,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
       }
       isFirst = false;
     }
+  }
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     out
@@ -1528,7 +1555,10 @@ std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAd
   MacroRegisterFunctionWithName("HtmlInterpretation::GetAccountsPageJSON");
   (void) hostWebAddressWithPort;
   JSData output;
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    output["error"] = "Database not available.";
+    return output.ToString(false);
+  }
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection) {
     output["error"] = "Must be logged-in admin over ssl.";
     return output.ToString(false);
@@ -1562,16 +1592,14 @@ std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAd
   output["admins"] = admins;
   output["students"] = students;
   return output.ToString(false);
-#else
-  output["error"] = "Database not available.";
-  return output.ToString(false);
-#endif // MACRO_use_MongoDB
 }
 
 std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAddressWithPort) {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetAccountsPageBody");
   (void) hostWebAddressWithPort;
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    return "<b>Database not available. </b>";
+  }
   std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection) {
     out << "Browsing accounts allowed only for logged-in admins over ssl connection.";
@@ -1605,9 +1633,6 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
   out << "<hr>";
   out << HtmlInterpretation::ToStringUserDetails(false, students, hostWebAddressWithPort);
   return out.str();
-#else
-  return "<b>Database not available. </b>";
-#endif // MACRO_use_MongoDB
 }
 
 std::string HtmlInterpretation::GetNavigationPanelWithGenerationTime() {
@@ -1865,8 +1890,6 @@ std::string HtmlInterpretation::ToStringAssignSection() {
   return out.str();
 }
 
-#ifdef MACRO_use_MongoDB
-
 extern logger logWorker;
 int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("ProblemData::getExpectedNumberOfAnswers");
@@ -1993,10 +2016,8 @@ void UserCalculator::ComputePointsEarned
       }
   }
 }
-#endif
 
-struct UserScores
-{
+struct UserScores {
 public:
   CalculatorHTML theProblem;
   std::string currentSection;

@@ -860,7 +860,10 @@ std::string WebWorker::GetSignUpRequestResult() {
   //double startTime =theGlobalVariables.GetElapsedSeconds();
   JSData result;
   std::stringstream errorStream;
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    result["error"] = "Error: database not available. ";
+    return result.ToString(false);
+  }
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
   UserCalculator theUser;
   theUser.username = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
@@ -921,9 +924,6 @@ std::string WebWorker::GetSignUpRequestResult() {
   result["error"] = errorStream.str();
   result["comments"] = generalCommentsStream.str();
   result["result"] = outputStream.str();
-#else
-  result["error"] = "Error: database not available. ";
-#endif
   return result.ToString(false);
 }
 
@@ -936,12 +936,15 @@ int WebWorker::ProcessSignUP() {
 
 int WebWorker::ProcessForgotLogin() {
   MacroRegisterFunctionWithName("WebWorker::ProcessForgotLogin");
-  //double startTime =theGlobalVariables.GetElapsedSeconds();
   this->SetHeaderOKNoContentLength("");
-#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    stOutput << "Error: database not running. ";
+    return 0;
+  }
   std::stringstream out;
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
     DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
+  }
   UserCalculator theUser;
   theUser.email = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
   WebCrawler theCrawler;
@@ -954,7 +957,6 @@ int WebWorker::ProcessForgotLogin() {
     stOutput << out.str();
     return 0;
   }
-
   if (!theUser.Iexist(&out)) {
     out << "<br><b style =\"color:red\">"
     << "We failed to find your email: " << theUser.email << " in our records. "
@@ -972,16 +974,14 @@ int WebWorker::ProcessForgotLogin() {
   stOutput << "<b style =\"color:green\">"
   << "Your email is on record. "
   << "</b>";
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
     this->DoSetEmail(theUser, &out, &out, 0);
-  else
+  } else {
     this->DoSetEmail(theUser, &out, &out, &out);
+  }
   stOutput << out.str();
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
   << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";
-#else
-  stOutput << "Error: database not running. ";
-#endif
   return 0;
 }
 

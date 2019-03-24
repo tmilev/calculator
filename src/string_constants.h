@@ -13,7 +13,6 @@ public:
     static std::string setProblemData;
     static std::string changePassword;
     static std::string examplesJSON;
-    static std::string activateAccount;
     static std::string activateAccountJSON;
     static std::string calculatorHTML;
     static std::string onePageJS;

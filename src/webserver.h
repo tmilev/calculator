@@ -167,11 +167,12 @@ public:
   int ProcessFile();
   int ProcessChangePassword(const std::string& reasonForNoAuthentication);
   int SetEmail(const std::string& input);
-  bool DoSetEmail
-  (UserCalculatorData& inputOutputUser,
-   std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive,
-   std::stringstream* commentsGeneralSensitive);
-  int ProcessChangePasswordPage();
+  bool DoSetEmail(
+    UserCalculatorData& inputOutputUser,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneralNonSensitive,
+    std::stringstream* commentsGeneralSensitive
+  );
   int ProcessDatabaseJSON();
   int ProcessDatabaseDeleteEntry();
   int ProcessDatabaseModifyEntry();
@@ -250,7 +251,6 @@ public:
   void SendAllBytesHttpSSL();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
 
-  std::string GetChangePasswordPage();
   std::string GetChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField);
   std::string GetClonePageResult(bool useJSON);
   std::string GetModifyProblemReport();

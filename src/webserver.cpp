@@ -118,8 +118,10 @@ std::string WebWorker::closeIndentTag(const std::string& theTag) {
 
 bool WebWorker::IsAllowedAsRequestCookie(const std::string& input) {
   return
-  input != "login" && input != "logout" && input != WebAPI::request::changePassword &&
-  input != "changePasswordPage" && input != WebAPI::request::activateAccount &&
+  input != "login" &&
+  input != "logout" &&
+  input != WebAPI::request::changePassword &&
+  input != "changePasswordPage" &&
   input != WebAPI::request::activateAccountJSON;
 }
 
@@ -405,7 +407,7 @@ void SSLdata::HandShakeIamServer(int inputSocketID) {
         maxNumHandshakeTries = 1;
         break;
       }
-      logOpenSSL << "Retrying connection in 0.5 seconds...";
+      logOpenSSL << "Retrying connection in 0.5 seconds... ";
       theGlobalVariables.FallAsleep(500000);
     } else {
       this->flagSSLHandshakeSuccessful = true;
@@ -500,29 +502,34 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(
       }
       switch(SSL_get_error(this->sslClient, this->errorCode)) {
       case SSL_ERROR_NONE:
-        if (commentsOnFailure != 0)
+        if (commentsOnFailure != 0) {
           *commentsOnFailure << "No error reported, this shouldn't happen. <br>";
+        }
         maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_ZERO_RETURN:
-        if (commentsOnFailure != 0)
+        if (commentsOnFailure != 0) {
           *commentsOnFailure << "The TLS/SSL connection has been closed (possibly cleanly).  <br>";
+        }
         maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
-        if (commentsOnFailure != 0)
+        if (commentsOnFailure != 0) {
           *commentsOnFailure << " During regular I/O: repeat needed (not implemented).  <br>";
+        }
         break;
       case SSL_ERROR_WANT_CONNECT:
       case SSL_ERROR_WANT_ACCEPT:
-        if (commentsOnFailure != 0)
+        if (commentsOnFailure != 0) {
           *commentsOnFailure << " During handshake negotiations: repeat needed (not implemented). <br> ";
+        }
         break;
       case SSL_ERROR_WANT_X509_LOOKUP:
-        if (commentsOnFailure != 0)
+        if (commentsOnFailure != 0) {
           *commentsOnFailure << " Application callback set by SSL_CTX_set_client_cert_cb(): "
           << "repeat needed (not implemented).  <br>";
+        }
         maxNumHandshakeTries = 1;
         break;
       //case SSL_ERROR_WANT_ASYNC:
@@ -536,20 +543,23 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(
         maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_SSL:
-        if (commentsOnFailure != 0)
+        if (commentsOnFailure != 0) {
           *commentsOnFailure << "A failure in the SSL library occurred. <br>";
+        }
         //theError = ERR_get_error(3ssl);
         //if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
         //  maxNumHandshakeTries =1;
         break;
       default:
-        if (commentsOnFailure != 0)
+        if (commentsOnFailure != 0) {
           *commentsOnFailure << "Unknown error. <br>";
+        }
         maxNumHandshakeTries = 1;
         break;
       }
-      if (commentsOnFailure != 0)
-        *commentsOnFailure << "Retrying connection in 0.5 seconds...<br>";
+      if (commentsOnFailure != 0) {
+        *commentsOnFailure << "Retrying connection in 0.5 seconds... <br>";
+      }
       theGlobalVariables.FallAsleep(500000);
     } else {
       this->flagSSLHandshakeSuccessful = true;
@@ -741,36 +751,44 @@ void SSLdata::ClearErrorQueue(
     }
     break;
   case SSL_ERROR_WANT_READ:
-    if (outputError != 0)
+    if (outputError != 0) {
       *outputError = SSLdata::errors::errorWantRead;
+    }
     break;
   case SSL_ERROR_WANT_WRITE:
-    if (outputError != 0)
+    if (outputError != 0) {
       *outputError = "SSL_ERROR_WANT_WRITE";
+    }
     break;
   case SSL_ERROR_WANT_CONNECT:
-    if (outputError != 0)
+    if (outputError != 0) {
       *outputError = "SSL_ERROR_WANT_CONNECT";
+    }
     break;
   case SSL_ERROR_WANT_ACCEPT:
-    if (outputError != 0)
+    if (outputError != 0) {
       *outputError = "SSL_ERROR_WANT_ACCEPT";
+    }
     break;
   case SSL_ERROR_WANT_X509_LOOKUP:
-    if (outputError != 0)
+    if (outputError != 0) {
       *outputError = "SSL_ERROR_WANT_X509_LOOKUP";
+    }
     break;
   case SSL_ERROR_SYSCALL:
-    if (outputError != 0)
+    if (outputError != 0) {
       *outputError = "SSL_ERROR_SYSCALL";
+    }
     extraErrorCode = ERR_get_error();
     if (extraErrorCode == 0) {
-      if (commentsGeneral != 0)
+      if (commentsGeneral != 0) {
         *commentsGeneral << "Bad eof. ";
+      }
     } else if (extraErrorCode == - 1) {
-      if (commentsGeneral != 0)
+      if (commentsGeneral != 0) {
         *commentsGeneral << "I/O error outside of ssl. "
         << theWebServer.ToStringLastErrorDescription();
+      }
     }
     break;
   case SSL_ERROR_SSL:
@@ -796,8 +814,9 @@ bool WebWorker::ReceiveAllHttpSSL() {
   this->requestTypE = this->requestUnknown;
   unsigned const int bufferSize = 60000;
   char buffer[bufferSize];
-  if (this->connectedSocketID == - 1)
+  if (this->connectedSocketID == - 1) {
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
+  }
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
@@ -1078,19 +1097,24 @@ std::string WebWorker::ToStringMessageUnsafe(bool useHTML) const {
   out << this->ToStringMessageShortUnsafe(&tempFormat);
   out << "<hr>";
   out << "Main address: " << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true) << "<br>";
-  if (this->requestTypE == this->requestGet)
+  if (this->requestTypE == this->requestGet) {
     out << "GET " << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true);
-  if (this->requestTypE == this->requestPost)
+  }
+  if (this->requestTypE == this->requestPost) {
     out << "POST " << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true);
-  if (this->requestTypE == this->requestChunked)
+  }
+  if (this->requestTypE == this->requestChunked) {
     out << "POST or GET **chunked** " << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true);
-  if (this->flagKeepAlive)
+  }
+  if (this->flagKeepAlive) {
     out << "<br><b>Keeping alive.</b><br>";
-  else
+  } else {
     out << "<br><b>NOT</b> keeping alive.<br>";
+  }
   out << "<br>Cookies (" << this->cookies.size << " total):";
-  for (int i = 0; i < this->cookies.size; i ++)
+  for (int i = 0; i < this->cookies.size; i ++) {
     out << "<br>" << this->cookies[i];
+  }
   if (useHTML) {
     out << "\n<hr>\nHost with port:<br>\n" << theGlobalVariables.hostWithPort;
     out << "\n<hr>\nFull message head:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageHead, true);
@@ -1172,29 +1196,31 @@ std::string WebWorker::GetDatabaseJSON() {
     return "Only logged-in admins can access database. ";
   }
   JSData result;
-#ifdef MACRO_use_MongoDB
-  std::string operation = theGlobalVariables.GetWebInput(WebAPI::databaseParameters::operation);
-  std::string labels = HtmlRoutines::ConvertURLStringToNormal(
-    theGlobalVariables.GetWebInput(WebAPI::databaseParameters::labels), false
-  );
-  if (operation == WebAPI::databaseParameters::fetch)
-    result = DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseFetch(labels);
-  else
-    result["error"] = "Uknown database operation: " + operation + ". ";
-  if (theGlobalVariables.UserDebugFlagOn()) {
-    result["databaseOperation"] = operation;
-    result["databaseLabels"] = labels;
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    std::string operation = theGlobalVariables.GetWebInput(WebAPI::databaseParameters::operation);
+    std::string labels = HtmlRoutines::ConvertURLStringToNormal(
+      theGlobalVariables.GetWebInput(WebAPI::databaseParameters::labels), false
+    );
+    if (operation == WebAPI::databaseParameters::fetch) {
+      result = DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseFetch(labels);
+    } else {
+      result["error"] = "Uknown database operation: " + operation + ". ";
+    }
+    if (theGlobalVariables.UserDebugFlagOn()) {
+      result["databaseOperation"] = operation;
+      result["databaseLabels"] = labels;
+    }
+  } else {
+    result["error"] = "<b>Database not available. </b>";
   }
-#else
-  result["error"] = "<b>Database not available. </b>";
-#endif // MACRO_use_MongoDB
   return result.ToString(false);
 }
 
 std::string WebWorker::GetDatabaseDeleteOneItem() {
   MacroRegisterFunctionWithName("WebWorker::GetDatabaseDeleteOneItem");
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
     return "Only logged-in admins can execute the delete command. ";
+  }
   std::stringstream commentsStream;
   std::string inputEncoded = theGlobalVariables.GetWebInput("item");
   std::string inputString = HtmlRoutines::ConvertURLStringToNormal(inputEncoded, false);
@@ -1204,13 +1230,12 @@ std::string WebWorker::GetDatabaseDeleteOneItem() {
     return commentsStream.str();
   }
   commentsStream << "Parsed input string: " << inputParsed.ToString(false, false) << "\n";
-  if (DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(inputParsed, &commentsStream))
+  if (DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(inputParsed, &commentsStream)) {
     return "success";
-#ifdef MACRO_use_MongoDB
-
-#else
-  commentsStream << "<b>Database not available. </b>";
-#endif // MACRO_use_MongoDB
+  }
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    commentsStream << "<b>Database not available. </b>";
+  }
   return commentsStream.str();
 }
 
@@ -1382,7 +1407,6 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments, std:
   }
   bool changingPass =
   theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword ||
-  theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount ||
   theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON;
 
   if (changingPass) {
@@ -2612,104 +2636,6 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   return out.str();
 }
 
-std::string WebWorker::GetChangePasswordPage() {
-  MacroRegisterFunctionWithName("WebWorker::GetChangePasswordPage");
-  std::stringstream out;
-  out << "<html>";
-  out << "<head>";
-  out << HtmlRoutines::GetCSSLinkCalculator();
-  out << "</head>";
-  out << "<body> ";
-#ifdef MACRO_use_MongoDB
-  out << "<calculatorNavigation>" << HtmlInterpretation::ToStringNavigation() << "</calculatorNavigation>";
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
-    out << "Changing password requires secure connection. ";
-    out << "</body></html>";
-    return out.str();
-  }
-  theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
-  //out << "<form name =\"login\" id =\"login\" action =\"calculator\" method =\"GET\" accept-charset =\"utf-8\">";
-  out
-  << "User: " << theGlobalVariables.userDefault.username
-  << "<input type =\"hidden\" id =\"username\" placeholder =\"username\" "
-  << "value =\"" << theGlobalVariables.userDefault.username << "\" "
-  << "required>";
-  bool doShowPasswordChangeField = true;
-  out << "<table>";
-  JSData findUser, updateUser;
-  if (theGlobalVariables.userDefault.flagUserHasActivationToken) {
-    out << "<tr><td colspan =\"2\">"
-    << "<b><span style =\"color:orange\">"
-    << "To fully activate your account, "
-    << "please choose a password.</span></b></td></tr>";
-  }
-  if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount) {
-    out << "<tr><td colspan =\"2\">" << WebWorker::GetChangePasswordPagePartOne(doShowPasswordChangeField) << "</td></tr>";
-  } else {
-    if (
-      theGlobalVariables.userDefault.actualActivationToken != "" &&
-      theGlobalVariables.userDefault.actualActivationToken != "activated" &&
-      theGlobalVariables.userDefault.actualHashedSaltedPassword != "" &&
-      theGlobalVariables.userCalculatorRequestType == "changePasswordPage"
-    ) {
-      out << "<tr><td colspan =\"2\">";
-      out << "You already have a password but your account was marked as not activated "
-      << "- probably by an admin/instructor. ";
-      findUser[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
-      updateUser[DatabaseStrings::labelActivationToken] = "activated";
-      if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
-        DatabaseStrings::tableUsers, findUser, updateUser, 0, &out
-      )) {
-        out << " <span style =\"color:red\"><b>Failed to activate your account. </b></span>";
-      } else {
-        out << " <span style =\"color:green\"><b>Your account is now marked as activated.</b></span>";
-      }
-      out << "</td></tr>";
-    }
-    out
-    << "<tr><td>"
-    << "Old password:\n "
-    << "</td>"
-    << "<td>"
-    << "<input type =\"password\" id =\"password\" placeholder =\"password\">\n"
-    << "</td></tr>";
-  }
-  if (doShowPasswordChangeField) {
-    out
-    << "<tr>"
-    << "<td>"
-    << "New password:\n"
-    << "</td>"
-    << "<td>"
-    << "<input type =\"password\" id =\"newPassword\" placeholder =\"new password\">\n"
-    << "</td></tr>"
-    << "<tr><td>"
-    << "Re-enter new password: \n"
-    << "</td><td>"
-    << "<input type =\"password\"  id =\"reenteredPassword\" placeholder =\"re-enter\" "
-    << "onkeyup =\"if (event.keyCode == 13) submitChangePassRequest('passwordChangeResult');\">\n"
-    << "</td></tr>";
-  }
-  out
-  << "</table>";
-  if (doShowPasswordChangeField) {
-    out << "<button  onclick=\"submitChangePassRequest('passwordChangeResult') \"> Submit</button>\n"
-    << "<span id =\"passwordChangeResult\"> </span>\n";
-    out << "<hr>"
-    << "Email: " << theGlobalVariables.userDefault.email
-    << "<br>\n"
-    << "Change/set email: <input type =\"email\" id =\"emailInputID\">\n "
-    << "<button onclick=\"submitChangePassRequest('emailChangeResult') \"> Submit</button>\n";
-    out << "<span id =\"emailChangeResult\"></span>\n";
-  }
-  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-#else
-  out << "Database not available";
-#endif //MACRO_use_MongoDB
-  out << "</body></html>";
-  return out.str();
-}
-
 bool WebWorker::DoSetEmail(
   UserCalculatorData& inputOutputUser, std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive,
@@ -2897,13 +2823,6 @@ int WebWorker::ProcessActivateAccount() {
   this->SetHeaderOKNoContentLength("");
   bool doShowDetails = true;
   stOutput << WebWorker::GetChangePasswordPagePartOne(doShowDetails);
-  return 0;
-}
-
-int WebWorker::ProcessChangePasswordPage() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessChangePasswordPage");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << this->GetChangePasswordPage();
   return 0;
 }
 
@@ -3357,7 +3276,6 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
     return false;
   if (
     theGlobalVariables.userCalculatorRequestType == "changePassword" ||
-    theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount ||
     theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON
   ) {
     return false;
@@ -3657,11 +3575,6 @@ int WebWorker::ServeClient() {
     return this->ProcessSetProblemDatabaseInfo();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword) {
     return this->ProcessChangePassword(argumentProcessingFailureComments.str());
-  } else if (
-    theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
-    theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount
-  ) {
-    return this->ProcessChangePasswordPage();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON) {
     return this->ProcessActivateAccount();
   } else if (theGlobalVariables.userCalculatorRequestType == "signUp") {

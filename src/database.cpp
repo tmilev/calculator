@@ -1461,7 +1461,6 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
     if (
       theGlobalVariables.userCalculatorRequestType == "changePassword" ||
       theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
-      theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccount ||
       theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON
     ) {
       if (

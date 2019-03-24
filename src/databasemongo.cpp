@@ -766,8 +766,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::getLabels(
   output.SetSize(0);
   for (int i = 0; i < fieldEntries.list.size; i ++) {
     if (fieldEntries.list[i].type != JSData::JSstring) {
-      if (commentsOnFailure != 0)
+      if (commentsOnFailure != 0) {
         *commentsOnFailure << "Label index " << i << " is not of type string as required. ";
+      }
       return false;
     }
     output.AddOnTop(fieldEntries.list[i].string);

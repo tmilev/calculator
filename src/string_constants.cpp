@@ -41,7 +41,6 @@ std::string WebAPI::request::onePageJSWithHash = "/calculator-html/javascript_al
 std::string WebAPI::request::calculatorPage = "calculator";
 std::string WebAPI::request::setProblemData = "setProblemData";
 std::string WebAPI::request::changePassword = "changePassword";
-std::string WebAPI::request::activateAccount = "activateAccount";
 std::string WebAPI::request::activateAccountJSON = "activateAccountJSON";
 std::string WebAPI::request::serverStatusJSON = "serverStatusJSON";
 std::string WebAPI::request::selectCourseJSON = "selectCourseJSON";

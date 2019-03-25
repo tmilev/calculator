@@ -37,15 +37,17 @@ void JSData::operator=(const std::string& other) {
 
 JSData& JSData::operator[](int i) {
   this->type = this->JSarray;
-  if (this->list.size < i + 1)
+  if (this->list.size < i + 1) {
     this->list.SetSize(i + 1);
+  }
   return this->list[i];
 }
 
 JSData JSData::GetValue(const std::string& key) {
   int theIndex = this->GetKeyIndex(key);
-  if (theIndex != - 1)
+  if (theIndex != - 1) {
     return this->objects.theValues[theIndex];
+  }
   JSData result;
   result.type = JSData::JSUndefined;
   return result;
@@ -70,8 +72,9 @@ JSData& JSData::operator[](const std::string& key) {
 
 void JSData::readfile(const char* filename) {
   std::ifstream ifp(filename);
-  if (!ifp.is_open())
+  if (!ifp.is_open()) {
     return;
+  }
   struct stat f;
   stat(filename, &f);
   std::string json;
@@ -102,23 +105,29 @@ bool JSData::isIntegerFittingInInt(int* whichInteger) {
 }
 
 bool JSData::isTrueRepresentationInJSON() {
-  if (this->type == JSData::JSbool)
+  if (this->type == JSData::JSbool) {
     return this->boolean;
-  if (this->type != JSData::JSstring)
+  }
+  if (this->type != JSData::JSstring) {
     return false;
+  }
   return this->string == "true";
 }
 
 bool JSData::isListOfStrings(List<std::string>* whichStrings) {
-  if (this->type != this->JSarray)
+  if (this->type != this->JSarray) {
     return false;
-  for (int i = 0; i < this->list.size; i ++)
-    if (this->list[i].type != this->JSstring)
+  }
+  for (int i = 0; i < this->list.size; i ++) {
+    if (this->list[i].type != this->JSstring) {
       return false;
+    }
+  }
   if (whichStrings != 0) {
     whichStrings->SetSize(this->list.size);
-    for (int i = 0; i < this->list.size; i ++)
+    for (int i = 0; i < this->list.size; i ++) {
       (*whichStrings)[i] = this->list[i].string;
+    }
   }
   return true;
 }
@@ -134,10 +143,12 @@ bool JSData::IsValidElement() {
 }
 
 void JSData::TryToComputeType() {
-  if (this->type != this->JSUndefined)
+  if (this->type != this->JSUndefined) {
     return;
-  if (this->string == "")
+  }
+  if (this->string == "") {
     return;
+  }
   if (this->string == "null") {
     this->reset();
     this->type = this->JSnull;
@@ -185,8 +196,9 @@ bool JSData::Tokenize(const std::string& input, List<JSData>& output) {
         }
       } else {
         currentElt.TryToComputeType();
-        if (currentElt.type != currentElt.JSUndefined)
+        if (currentElt.type != currentElt.JSUndefined) {
           output.AddOnTop(currentElt);
+        }
         currentElt.reset();
         currentElt.type = currentElt.JSstring;
         inQuotes = true;
@@ -224,21 +236,28 @@ bool JSData::Tokenize(const std::string& input, List<JSData>& output) {
       input[i] == ':' || input[i] ==  ','
     ) {
       currentElt.TryToComputeType();
-      if (currentElt.type != JSData::JSUndefined)
+      if (currentElt.type != JSData::JSUndefined) {
         output.AddOnTop(currentElt);
+      }
       currentElt.reset();
-      if (input[i] == '{')
+      if (input[i] == '{') {
         currentElt.type = currentElt.JSopenBrace;
-      if (input[i] == '[')
+      }
+      if (input[i] == '[') {
         currentElt.type = currentElt.JSopenBracket;
-      if (input[i] == '}')
+      }
+      if (input[i] == '}') {
         currentElt.type = currentElt.JScloseBrace;
-      if (input[i] == ']')
+      }
+      if (input[i] == ']') {
         currentElt.type = currentElt.JScloseBracket;
-      if (input[i] == ':')
+      }
+      if (input[i] == ':') {
         currentElt.type = currentElt.JScolon;
-      if (input[i] == ',')
+      }
+      if (input[i] == ',') {
         currentElt.type = currentElt.JScomma;
+      }
       output.AddOnTop(currentElt);
       currentElt.reset();
       continue;
@@ -255,16 +274,21 @@ bool JSData::readstring(
   this->reset();
   List<JSData> theTokenS;
   JSData::Tokenize(json, theTokenS);
-  if (theTokenS.size == 0)
+  if (theTokenS.size == 0) {
     return false;
-  if (stringsWerePercentEncoded)
-    for (int i = 0; i < theTokenS.size; i ++)
-      if (theTokenS[i].type == JSData::JSstring)
+  }
+  if (stringsWerePercentEncoded) {
+    for (int i = 0; i < theTokenS.size; i ++) {
+      if (theTokenS[i].type == JSData::JSstring) {
         theTokenS[i].string = HtmlRoutines::ConvertURLStringToNormal(theTokenS[i].string, false);
+      }
+    }
+  }
   List<JSData> readingStack;
   JSData emptyElt;
-  for (int i = 0; i < JSData::numEmptyTokensAtStart; i ++)
+  for (int i = 0; i < JSData::numEmptyTokensAtStart; i ++) {
     readingStack.AddOnTop(emptyElt);
+  }
   readingStack.AddOnTop(theTokenS[0]);
   for (int i = 0;;) {
     int fourthToLastIndex = readingStack.size - 4; //<- used to avoid compiler warning
@@ -308,11 +332,11 @@ bool JSData::readstring(
       continue;
     }
     i ++;
-    if (i >= theTokenS.size)
+    if (i >= theTokenS.size) {
       break;
+    }
     readingStack.AddOnTop(theTokenS[i]);
   }
-//  stOutput << "DEBUG: " << "go to here finally. ";
   if (readingStack.size != JSData::numEmptyTokensAtStart + 1) {
     if (commentsOnFailure != 0) {
       std::stringstream calculatorInput;
@@ -329,24 +353,26 @@ bool JSData::readstring(
       << HtmlRoutines::ConvertStringToHtmlString(json, true)
       << "</a>"
       << "<br>Result:<br>\n ";
-      for (int i = JSData::numEmptyTokensAtStart; i < readingStack.size; i ++)
+      for (int i = JSData::numEmptyTokensAtStart; i < readingStack.size; i ++) {
         *commentsOnFailure << i << ": " << readingStack[i].ToString(true) << "\n<br>\n";
+      }
     }
     return false;
   }
-  if (JSData::numEmptyTokensAtStart < readingStack.size)
+  if (JSData::numEmptyTokensAtStart < readingStack.size) {
     *this = readingStack[JSData::numEmptyTokensAtStart];
+  }
   return true;
 }
 
 std::string JSData::EncodeKeyForMongo(const std::string& input) {
   std::stringstream out;
   for (unsigned int i = 0; i < input.size(); i ++) {
-    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) && input[i] != '.')
+    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) && input[i] != '.') {
       out << input[i];
-    else if (input[i] == '$')
+    } else if (input[i] == '$') {
       out << input[i];
-    else {
+    } else {
       out << "%";
       int x = (char) input[i];
       out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
@@ -360,10 +386,11 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
   //MacroRegisterFunctionWithName("JSData::IntoStream");
   std::string theIndentation = "";
   for (int i = 0; i < indentation; i ++) {
-    if (!useHTML)
+    if (!useHTML) {
       theIndentation += "";
-    else
+    } else {
       theIndentation += "&nbsp;";
+    }
   }
   out << theIndentation;
   std::string newLine = useHTML ? "\n<br>\n" : "";
@@ -376,95 +403,116 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
       out << this->number;
       return out;
     case JSbool:
-      if (this->boolean == true)
+      if (this->boolean == true) {
         out << "true";
-      else
+      } else {
         out << "false";
+      }
       return out;
     case JSstring:
-      if (!percentEncodeStrings)
+      if (!percentEncodeStrings) {
         out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->string) << '"';
-      else
+      } else {
         out << '"' << HtmlRoutines::ConvertStringToURLString(this->string, false) << '"';
+      }
       return out;
     case JSarray:
       out << "[" << newLine;
       for (int i = 0; i < this->list.size; i ++) {
         this->list[i].IntoStream(out, percentEncodeStrings, indentation, useHTML);
-        if (i != this->list.size - 1)
+        if (i != this->list.size - 1) {
           out << ", ";
+        }
       }
       out << newLine << ']';
       return out;
     case JSObject:
       out << "{" << newLine;
       for (int i = 0; i < this->objects.size(); i ++) {
-        if (!percentEncodeStrings)
+        if (!percentEncodeStrings) {
           out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->objects.theKeys[i]) << '"';
-        else
+        } else {
           out << '"' << JSData::EncodeKeyForMongo(this->objects.theKeys[i]) << '"';
+        }
         out << ':';
         this->objects.theValues[i].IntoStream(out, percentEncodeStrings, indentation, useHTML);
-        if (i != this->objects.size() - 1)
+        if (i != this->objects.size() - 1) {
           out << ", ";
+        }
       }
       out << newLine << '}';
       return out;
     case JSopenBrace:
-      if (useHTML)
+      if (useHTML) {
         out << "<b>";
+      }
       out << "{";
-      if (useHTML)
+      if (useHTML) {
         out << "</b>";
+      }
       return out;
     case JScloseBrace:
-      if (useHTML)
+      if (useHTML) {
         out << "<b>";
+      }
       out << "}";
-      if (useHTML)
+      if (useHTML) {
         out << "</b>";
+      }
       return out;
     case JSopenBracket:
-      if (useHTML)
+      if (useHTML) {
         out << "<b>";
+      }
       out << "[";
-      if (useHTML)
+      if (useHTML) {
         out << "</b>";
+      }
       return out;
     case JScloseBracket:
-      if (useHTML)
+      if (useHTML) {
         out << "<b>";
+      }
       out << "]";
-      if (useHTML)
+      if (useHTML) {
         out << "</b>";
+      }
       return out;
     case JScolon:
-      if (useHTML)
+      if (useHTML) {
         out << "<b>";
+      }
       out << ":";
-      if (useHTML)
+      if (useHTML) {
         out << "</b>";
+      }
       return out;
     case JScomma:
-      if (useHTML)
+      if (useHTML) {
         out << "<b>";
+      }
       out << ",";
-      if (useHTML)
+      if (useHTML) {
         out << "</b>";
+      }
       return out;
     case JSUndefined:
-      if (useHTML)
+      if (useHTML) {
         out << "<b>";
+      }
       out << "undefined";
-      if (useHTML)
+      if (useHTML) {
         out << "</b>";
+      }
       return out;
     case JSerror:
-      if (useHTML)
+      if (useHTML) {
         out << "<b>";
+      }
       out << "error";
-      if (useHTML)
+      if (useHTML) {
         out << "</b>";
+      }
       return out;
     default:
       break;

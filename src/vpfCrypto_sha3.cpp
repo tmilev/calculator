@@ -43,8 +43,18 @@ ProjectInformationInstance project_SHA3_implementation(__FILE__, "Sha3 implement
 // ----------------------------------------------------------------------
 //
 
-class Sha3
-{
+// Keccak and sha3 are almost synonyms:
+// keccak was the sha3 version that won the competition for a new sha3 standard.
+// However, the sha3 standard chose different initialization constants from keccak.
+// Since then, the original keccak constants are referred to as "keccak".
+// In contrast, the final sha3 constants are referred to as "sha3".
+//
+// The present class computes both sha3 and keccak.
+//
+// Attention: older implementations/documentations
+// related to sha3/keccak may call keccak sha3 or the other way round.
+
+class Sha3 {
 public:
   // 'Words' here refers to uint64_t
   static const int numberOfSpongeWords = (((1600) / 8) / sizeof(uint64_t));
@@ -52,8 +62,8 @@ public:
   // The portion of the input message that we didn't consume yet.
   bool flagUseKeccak;
   uint64_t saved;
-  union
-  { // Keccak's state
+  union {
+    // Keccak's state
     uint64_t s[Sha3::numberOfSpongeWords];
     uint8_t sb[Sha3::numberOfSpongeWords * 8];
   };
@@ -108,13 +118,13 @@ static const uint64_t keccakf_rndc[24] = {
   0x0000000080000001UL, 0x8000000080008008UL
 };
 
-static const unsigned keccakf_rotc[24] =
-{ 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62,
+static const unsigned keccakf_rotc[24] ={
+  1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62,
   18, 39, 61, 20, 44
 };
 
-static const unsigned keccakf_piln[24] =
-{ 10, 7, 11, 17, 18, 3, 5, 16, 8, 21, 24, 4, 15, 23, 19, 13, 12, 2, 20,
+static const unsigned keccakf_piln[24] = {
+  10, 7, 11, 17, 18, 3, 5, 16, 8, 21, 24, 4, 15, 23, 19, 13, 12, 2, 20,
   14, 22, 9, 6, 1
 };
 
@@ -126,12 +136,14 @@ static void keccakf(uint64_t s[25]) {
   uint64_t t, bc[5];
   for (round = 0; round < Sha3::numberOfKeccakRounds; round ++) {
     // Theta
-    for (i = 0; i < 5; i ++)
+    for (i = 0; i < 5; i ++) {
       bc[i] = s[i] ^ s[i + 5] ^ s[i + 10] ^ s[i + 15] ^ s[i + 20];
+    }
     for (i = 0; i < 5; i ++) {
       t = bc[(i + 4) % 5] ^ Sha3::rotl64(bc[(i + 1) % 5], 1);
-      for (j = 0; j < 25; j += 5)
+      for (j = 0; j < 25; j += 5) {
         s[j + i] ^= t;
+      }
     }
     // Rho Pi
     t = s[1];
@@ -143,10 +155,12 @@ static void keccakf(uint64_t s[25]) {
     }
     // Chi
     for (j = 0; j < 25; j += 5) {
-      for(i = 0; i < 5; i ++)
+      for(i = 0; i < 5; i ++) {
         bc[i] = s[j + i];
-      for(i = 0; i < 5; i ++)
+      }
+      for(i = 0; i < 5; i ++) {
         s[j + i] ^= (~bc[(i + 1) % 5]) & bc[(i + 2) % 5];
+      }
     }
     // Iota
     s[0] ^= keccakf_rndc[round];
@@ -193,18 +207,21 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len) {
   if (len < old_tail) {
     // Have no complete word or haven't started the word yet.
     // Endian-independent code follows:
-    while (len --)
+    while (len --) {
       ctx->saved |= (uint64_t) (*(buf ++)) << ((ctx->byteIndex ++) * 8);
-    if (ctx->byteIndex >= 8)
+    }
+    if (ctx->byteIndex >= 8) {
       crash << "Internal sha3 computation error. " << crash;
+    }
     return;
   }
   if (old_tail) {
     // will have one word to process
     // endian-independent code follows:
     len -= old_tail;
-    while (old_tail --)
+    while (old_tail --) {
       ctx->saved |= (uint64_t) (*(buf ++)) << ((ctx->byteIndex ++) * 8);
+    }
 
     // now ready to add saved to the sponge
     ctx->s[ctx->wordIndex] ^= ctx->saved;
@@ -239,13 +256,15 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len) {
     }
   }
   // finally, save the partial word
-  if (!(ctx->byteIndex == 0 && tail < 8))
+  if (!(ctx->byteIndex == 0 && tail < 8)) {
     crash << "Internal sha3 computation error. " << crash;
+  }
   while (tail --) {
     ctx->saved |= (uint64_t) (*(buf ++)) << ((ctx->byteIndex ++) * 8);
   }
-  if (ctx->byteIndex >= 8)
+  if (ctx->byteIndex >= 8) {
     crash << "Internal sha3 computation error. " << crash;
+  }
 }
 
 // This is simply the 'update' with the padding block.
@@ -271,7 +290,8 @@ void const * Sha3::sha3_Finalize(void *priv) {
   // || !defined(__ORDER_LITTLE_ENDIAN__) || __BYTE_ORDER__!=__ORDER_LITTLE_ENDIAN__
   //    ... the conversion below ...
   //
-  { unsigned i;
+  {
+    unsigned i;
     for (i = 0; i < Sha3::numberOfSpongeWords; i ++) {
       const unsigned t1 = (uint32_t) ctx->s[i];
       const unsigned t2 = (uint32_t) ((ctx->s[i] >> 16) >> 16);
@@ -327,8 +347,9 @@ std::string Sha3::getResultString() {
 
 void Sha3::getResultVector(List<unsigned char>& output) {
   output.SetSize(32);
-  for (int i = 0; i < 32; i ++)
+  for (int i = 0; i < 32; i ++) {
     output[i] = this->sb[i];
+  }
 }
 
 std::string Crypto::computeSha3_256OutputBase64URL(const std::string& input) {

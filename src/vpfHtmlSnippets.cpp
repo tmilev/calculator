@@ -7,8 +7,7 @@
 #include <iomanip>
 #include "string_constants.h"
 
-ProjectInformationInstance projectInfoInstanceHtmlSnippets
-(__FILE__, "Html Snippets.");
+ProjectInformationInstance projectInfoInstanceHtmlSnippets(__FILE__, "Html Snippets.");
 
 MapLisT<std::string, std::string, MathRoutines::HashString> HtmlRoutines::preLoadedFiles;
 
@@ -19,14 +18,17 @@ std::string HtmlRoutines::GetJavascriptVariable(const std::string& theVar) {
       sanitizer << theVar[i];
       continue;
     }
-    if (i == 0)
+    if (i == 0) {
       sanitizer << "_";
+    }
     sanitizer << ((int) theVar[i]);
   }
   return sanitizer.str();
 }
 
-std::string HtmlRoutines::GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc, int line) {
+std::string HtmlRoutines::GetHtmlLinkFromProjectFileName(
+  const std::string& fileName, const std::string& fileDesc, int line
+) {
   std::stringstream out;
   out << " <a href=\"https://github.com/tmilev/calculator/blob/master/src/"
   << FileOperations::GetFileNameFromFileNameWithPath(fileName);
@@ -42,24 +44,27 @@ std::string HtmlRoutines::GetHtmlLinkFromProjectFileName(const std::string& file
 std::string HtmlRoutines::GetMathMouseHoverBeginArrayL(const std::string& input, int upperNumChars) {
   std::stringstream out;
   out << "\\begin{array}{l}" << input << "\\end{array}";
-  if (out.str().size() < (unsigned) upperNumChars && upperNumChars > 0)
+  if (out.str().size() < (unsigned) upperNumChars && upperNumChars > 0) {
     return HtmlRoutines::GetMathMouseHover(out.str(), upperNumChars);
-  else
+  } else {
     return HtmlRoutines::GetMathMouseHover(input, upperNumChars);
+  }
 }
 
 std::string HtmlRoutines::GetMathSpanBeginArrayL(const std::string& input, int upperNumChars) {
   std::stringstream out;
   out << "\\begin{array}{l} " << input << " \\end{array}";
-  if (out.str().size() < (unsigned) upperNumChars && upperNumChars > 0)
+  if (out.str().size() < (unsigned) upperNumChars && upperNumChars > 0) {
     return HtmlRoutines::GetMathSpanPure(out.str(), upperNumChars);
-  else
+  } else {
     return HtmlRoutines::GetMathSpanPure(input, upperNumChars);
+  }
 }
 
 void HtmlRoutines::LoadStrings() {
-  if (HtmlRoutines::preLoadedFiles.size() > 0)
+  if (HtmlRoutines::preLoadedFiles.size() > 0) {
     return;
+  }
   HtmlRoutines::GetMathQuillStyleSheeTWithTags();
   HtmlRoutines::GetJavascriptAceEditorScriptWithTags();
   HtmlRoutines::GetCSSLinkCalculator();
@@ -72,8 +77,9 @@ extern logger logWorker;
 extern logger logServer;
 
 const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags() {
-  if (HtmlRoutines::preLoadedFiles.Contains("AceEditor"))
+  if (HtmlRoutines::preLoadedFiles.Contains("AceEditor")) {
     return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("AceEditor");
+  }
   std::stringstream out;
   out << "<script type =\"text/javascript\" src =\""
   << FileOperations::GetVirtualNameWithHash("/html-common/ace/src-min/ace.js")
@@ -83,25 +89,29 @@ const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags() {
   return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("AceEditor");
 }
 
-const std::string& HtmlRoutines::GetFile
-(const std::string& fileNameVirtual, const std::string& additionalBeginTag,
- const std::string& additionalEndTag) {
+const std::string& HtmlRoutines::GetFile(
+  const std::string& fileNameVirtual, const std::string& additionalBeginTag, const std::string& additionalEndTag
+) {
   MacroRegisterFunctionWithName("HtmlRoutines::GetFile");
   std::string theID = fileNameVirtual + additionalBeginTag + additionalEndTag;
-  if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::preLoadedFiles.GetValueCreate(theID) != "")
+  if (theGlobalVariables.flagCachingInternalFilesOn) {
+    if (HtmlRoutines::preLoadedFiles.GetValueCreate(theID) != "") {
       return HtmlRoutines::preLoadedFiles.GetValueCreate(theID);
+    }
+  }
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
-  if (FileOperations::LoadFileToStringVirtual(fileNameVirtual, fileReader, false, false, &commentsOnFailure))
+  if (FileOperations::LoadFileToStringVirtual(fileNameVirtual, fileReader, false, false, &commentsOnFailure)) {
     out << additionalBeginTag << fileReader << additionalEndTag;
-  else {
-    if (theGlobalVariables.processType == ProcessTypes::worker)
+  } else {
+    if (theGlobalVariables.processType == ProcessTypes::worker) {
       logWorker << logger::red << "File: "
       << fileNameVirtual << " not found. " << commentsOnFailure.str() << logger::endL;
-    if (theGlobalVariables.processType == ProcessTypes::server)
+    }
+    if (theGlobalVariables.processType == ProcessTypes::server) {
       logServer << logger::red << "File: "
       << fileNameVirtual << " not found. " << commentsOnFailure.str() << logger::endL;
+    }
     out << "<b style =\"color:red\">Failed to load file: " << fileNameVirtual
     << ". Comments: " << commentsOnFailure.str() << "</b>";
   }
@@ -169,7 +179,10 @@ std::string HtmlRoutines::GetJavascriptMathQuillDefaultFull() {
   << FileOperations::GetVirtualNameWithHash("/html-common/jquery.min.js")
   << "\"></script>\n"
   << HtmlRoutines::GetJavascriptMathQuillDefaultLink() << "\n"
-  << "<script type =\"text/javascript\">var globalMQ = MathQuill.getInterface(2); var MathQuillHasMatrixSupport = false;</script>";
+  << "<script type =\"text/javascript\">"
+  << "var globalMQ = MathQuill.getInterface(2); "
+  << "var MathQuillHasMatrixSupport = false;"
+  << "</script>";
   return out.str();
 }
 
@@ -177,7 +190,9 @@ std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull() {
   std::stringstream out;
   out << "<script src =\"/html-common/jquery.min.js\"></script>\n"
   << HtmlRoutines::GetJavascriptMathQuillMatrixSupportLink() << "\n"
-  << "<script type =\"text/javascript\">var globalMQ = MathQuill.getInterface(2); var MathQuillHasMatrixSupport = true;</script>";
+  << "<script type =\"text/javascript\">"
+  << "var globalMQ = MathQuill.getInterface(2); var MathQuillHasMatrixSupport = true;"
+  << "</script>";
   return out.str();
 }
 
@@ -196,7 +211,9 @@ std::string HtmlRoutines::GetCalculatorLinkUnclosedPostArguments(const std::stri
   return HtmlRoutines::GetCalculatorLinkUnclosedPostArguments(theGlobalVariables.DisplayNameExecutable, input);
 }
 
-std::string HtmlRoutines::GetCalculatorLinkUnclosedPostArguments(const std::string& DisplayNameCalculator, const std::string& input) {
+std::string HtmlRoutines::GetCalculatorLinkUnclosedPostArguments(
+  const std::string& DisplayNameCalculator, const std::string& input
+) {
   std::stringstream out;
   static int globalLinkCounter = 0;
   int linkCounter = ++ globalLinkCounter; //<-Using linkCounter should be thread safer than using globalLinkCounter.
@@ -246,18 +263,22 @@ std::string HtmlRoutines::GetMathMouseHover(const std::string& input, int upperN
 
 std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth) {
   MacroRegisterFunctionWithName("HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml");
-  if (recursionDepth > 50)
+  if (recursionDepth > 50) {
     return input;
+  }
   MapLisT<std::string, std::string, MathRoutines::HashString> currentMap;
   std::stringstream notUsed;
   if (!HtmlRoutines::ChopCGIString(input, currentMap, notUsed)) {
     return input;
   }
-  if (currentMap.size() == 0)
+  if (currentMap.size() == 0) {
     return "";
-  if (currentMap.size() == 1)
-    if (currentMap[0] == "")
+  }
+  if (currentMap.size() == 1) {
+    if (currentMap[0] == "") {
       return HtmlRoutines::ConvertURLStringToNormal(currentMap.theKeys[0], false);
+    }
+  }
   std::stringstream out;
   out << "<table border =\"1px solid black;\">";
   for (int i = 0; i < currentMap.size(); i ++) {
@@ -266,8 +287,11 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
     << HtmlRoutines::ConvertURLStringToNormal(currentMap.theKeys[i], false) << " </td>";
     if (currentMap[i] != "") {
       out << "<td>=</td><td>";
-      if (currentMap[i] != "")
-        out << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(HtmlRoutines::ConvertURLStringToNormal(currentMap.theValues[i], true), recursionDepth+ 1);
+      if (currentMap[i] != "") {
+        out << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
+          HtmlRoutines::ConvertURLStringToNormal(currentMap.theValues[i], true), recursionDepth + 1
+        );
+      }
       out << "</td>";
     }
     out << "</tr>";
@@ -289,8 +313,9 @@ void HtmlRoutines::ConvertURLStringToNormal(const std::string& input, std::strin
   for (int i = 0; i < inputSize; i ++) {
     readAhead = "";
     for (int j = 0; j < 6; j ++) {
-      if (i + j < inputSize)
+      if (i + j < inputSize) {
         readAhead.push_back(input[i + j]);
+      }
       if (HtmlRoutines::URLStringToNormalOneStep(readAhead, out, replacePlusBySpace)) {
         i += j;
         break;
@@ -302,11 +327,13 @@ void HtmlRoutines::ConvertURLStringToNormal(const std::string& input, std::strin
 
 const std::string& HtmlRoutines::GetJavascriptMathjax() {
   MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptMathjax");
-  if (HtmlRoutines::preLoadedFiles.Contains("MathJax"))
+  if (HtmlRoutines::preLoadedFiles.Contains("MathJax")) {
     return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("MathJax");
+  }
   std::stringstream out;
-  std::string mathjaxSetupScript = FileOperations::GetVirtualNameWithHash
-  ("/calculator-html/mathjax-calculator-setup.js");
+  std::string mathjaxSetupScript = FileOperations::GetVirtualNameWithHash(
+    "/calculator-html/mathjax-calculator-setup.js"
+  );
   out << "<script type =\"text/javascript\">MathJaxSetupScriptURL=\"" << mathjaxSetupScript << "\"</script>";
   out << "<script type =\"text/javascript\" src =\"/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full"
 //  << ","
@@ -323,8 +350,9 @@ bool HtmlRoutines::AccountOneInputCGIString(
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::AccountOneInputCGIString");
-  if (fieldName == "")
+  if (fieldName == "") {
     return true;
+  }
   (void) commentsOnFailure;
 //  if (fieldValue != "" && outputMap.Contains(fieldName))
 //    if (outputMap.GetValueCreateIfNotPresent(fieldName) != fieldValue &&
@@ -338,7 +366,8 @@ bool HtmlRoutines::AccountOneInputCGIString(
 }
 
 bool HtmlRoutines::ChopCGIString(
-  const std::string& input, MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
+  const std::string& input,
+  MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIString");
@@ -348,7 +377,8 @@ bool HtmlRoutines::ChopCGIString(
 }
 
 bool HtmlRoutines::ChopCGIStringAppend(
-  const std::string& input, MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
+  const std::string& input,
+  MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIStringAppend");
@@ -364,14 +394,16 @@ bool HtmlRoutines::ChopCGIStringAppend(
       continue;
     }
     if (input[i] != '&') {
-      if (readingData)
+      if (readingData) {
         currentFieldValue.push_back(input[i]);
-      else
+      } else {
         currentFieldName.push_back(input[i]);
+      }
       continue;
     }
-    if (!HtmlRoutines::AccountOneInputCGIString(currentFieldName, currentFieldValue, outputMap, commentsOnFailure))
+    if (!HtmlRoutines::AccountOneInputCGIString(currentFieldName, currentFieldValue, outputMap, commentsOnFailure)) {
       return false;
+    }
     currentFieldName = "";
     currentFieldValue = "";
     readingData = false;

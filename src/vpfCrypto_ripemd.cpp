@@ -50,18 +50,18 @@ ProjectInformationInstance project_RIPEMD160_implementation(__FILE__, "Ripemd160
 
 bool Crypto::flagRIPEMDBigEndian = false;
 
-struct Ripemd160State
-{ uint64_t length;
-  union
-  { uint32_t w[16];
+struct Ripemd160State {
+  uint64_t length;
+  union {
+    uint32_t w[16];
     uint8_t  b[64];
   } buf;
   uint32_t h[5];
   uint8_t bufpos;
 };
 
-struct RIPEMD160Internal
-{ static const uint32_t initial_h[5];
+struct RIPEMD160Internal {
+  static const uint32_t initial_h[5];
   static const uint8_t RL[5][16];
   static const uint8_t RR[5][16];
   static const uint8_t SL[5][16];
@@ -95,8 +95,8 @@ struct RIPEMD160Internal
 
 /* Initial values for the chaining variables.
  * This is just 0123456789ABCDEFFEDCBA9876543210F0E1D2C3 in little-endian. */
-const uint32_t RIPEMD160Internal::initial_h[5] =
-{ 0x67452301u, 0xEFCDAB89u, 0x98BADCFEu, 0x10325476u, 0xC3D2E1F0u
+const uint32_t RIPEMD160Internal::initial_h[5] = {
+  0x67452301u, 0xEFCDAB89u, 0x98BADCFEu, 0x10325476u, 0xC3D2E1F0u
 };
 
 /* Ordering of message words.  Based on the permutations rho(i) and pi(i), defined as follows:
@@ -111,8 +111,8 @@ const uint32_t RIPEMD160Internal::initial_h[5] =
  *  right |    pi     |   rho pi  |  rho^2 pi |  rho^3 pi |  rho^4 pi
  */
 /* Left line */
-const uint8_t RIPEMD160Internal::RL[5][16] =
-{ { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },   /* Round 1: id */
+const uint8_t RIPEMD160Internal::RL[5][16] = {
+  { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },   /* Round 1: id */
   { 7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5, 2, 14, 11, 8 },   /* Round 2: rho */
   { 3, 10, 14, 4, 9, 15, 8, 1, 2, 7, 0, 6, 13, 11, 5, 12 },   /* Round 3: rho^2 */
   { 1, 9, 11, 10, 0, 8, 12, 4, 13, 3, 7, 15, 14, 5, 6, 2 },   /* Round 4: rho^3 */
@@ -120,8 +120,8 @@ const uint8_t RIPEMD160Internal::RL[5][16] =
 };
 
 /* Right line */
-const uint8_t RIPEMD160Internal::RR[5][16] =
-{ { 5, 14, 7, 0, 9, 2, 11, 4, 13, 6, 15, 8, 1, 10, 3, 12 },   /* Round 1: pi */
+const uint8_t RIPEMD160Internal::RR[5][16] = {
+  { 5, 14, 7, 0, 9, 2, 11, 4, 13, 6, 15, 8, 1, 10, 3, 12 },   /* Round 1: pi */
   { 6, 11, 3, 7, 0, 13, 5, 10, 14, 15, 8, 12, 4, 9, 1, 2 },   /* Round 2: rho pi */
   { 15, 5, 1, 3, 7, 14, 6, 9, 11, 8, 12, 2, 10, 0, 4, 13 },   /* Round 3: rho^2 pi */
   { 8, 6, 4, 1, 3, 11, 15, 0, 5, 12, 2, 13, 9, 7, 10, 14 },   /* Round 4: rho^3 pi */
@@ -134,8 +134,8 @@ const uint8_t RIPEMD160Internal::RR[5][16] =
  * come with the permutations pre-applied.
  */
 /* Shifts, left line */
-const uint8_t RIPEMD160Internal::SL[5][16] =
-{ { 11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8 }, /* Round 1 */
+const uint8_t RIPEMD160Internal::SL[5][16] = {
+  { 11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8 }, /* Round 1 */
   { 7, 6, 8, 13, 11, 9, 7, 15, 7, 12, 15, 9, 11, 7, 13, 12 }, /* Round 2 */
   { 11, 13, 6, 7, 14, 9, 13, 15, 14, 8, 13, 6, 5, 12, 7, 5 }, /* Round 3 */
   { 11, 12, 14, 15, 14, 15, 9, 8, 9, 14, 5, 6, 8, 6, 5, 12 }, /* Round 4 */
@@ -143,8 +143,8 @@ const uint8_t RIPEMD160Internal::SL[5][16] =
 };
 
 /* Shifts, right line */
-const uint8_t RIPEMD160Internal::SR[5][16] =
-{ { 8, 9, 9, 11, 13, 15, 15, 5, 7, 7, 8, 11, 14, 14, 12, 6 }, /* Round 1 */
+const uint8_t RIPEMD160Internal::SR[5][16] = {
+  { 8, 9, 9, 11, 13, 15, 15, 5, 7, 7, 8, 11, 14, 14, 12, 6 }, /* Round 1 */
   { 9, 13, 15, 7, 12, 8, 9, 11, 7, 7, 12, 7, 6, 15, 13, 11 }, /* Round 2 */
   { 9, 7, 15, 11, 8, 6, 6, 14, 12, 13, 5, 14, 13, 13, 7, 5 }, /* Round 3 */
   { 15, 5, 8, 11, 14, 14, 6, 14, 6, 9, 12, 9, 12, 5, 15, 8 }, /* Round 4 */
@@ -152,8 +152,8 @@ const uint8_t RIPEMD160Internal::SR[5][16] =
 };
 
 /* Round constants, left line */
-const uint32_t RIPEMD160Internal::KL[5] =
-{ 0x00000000u,    /* Round 1: 0 */
+const uint32_t RIPEMD160Internal::KL[5] = {
+  0x00000000u,    /* Round 1: 0 */
   0x5A827999u,    /* Round 2: floor(2**30 * sqrt(2)) */
   0x6ED9EBA1u,    /* Round 3: floor(2**30 * sqrt(3)) */
   0x8F1BBCDCu,    /* Round 4: floor(2**30 * sqrt(5)) */
@@ -161,8 +161,8 @@ const uint32_t RIPEMD160Internal::KL[5] =
 };
 
 /* Round constants, right line */
-const uint32_t RIPEMD160Internal::KR[5] =
-{ 0x50A28BE6u,    /* Round 1: floor(2**30 * cubert(2)) */
+const uint32_t RIPEMD160Internal::KR[5] = {
+  0x50A28BE6u,    /* Round 1: floor(2**30 * cubert(2)) */
   0x5C4DD124u,    /* Round 2: floor(2**30 * cubert(3)) */
   0x6D703EF3u,    /* Round 3: floor(2**30 * cubert(5)) */
   0x7A6D76E9u,    /* Round 4: floor(2**30 * cubert(7)) */
@@ -208,11 +208,13 @@ static void ripemd160_compress(Ripemd160State* self) {
   uint32_t AR, BR, CR, DR, ER;    /* right line */
 
   /* Sanity check */
-  if (self->bufpos != 64)
+  if (self->bufpos != 64) {
     crash << "Internal error in RIPEMD160 implementation. " << crash;
+  }
   /* Byte-swap the buffer if we're on a big-endian machine */
-  if (Crypto::flagRIPEMDBigEndian)
+  if (Crypto::flagRIPEMDBigEndian) {
     byteswap_digest(self->buf.w);
+  }
   /* Load the left and right lines with the initial state */
   AL = AR = self->h[0];
   BL = BR = self->h[1];
@@ -223,37 +225,79 @@ static void ripemd160_compress(Ripemd160State* self) {
   round = 0;
   for (w = 0; w < 16; w ++) {
     /* left line */
-    T = RIPEMD160Internal::ROL(RIPEMD160Internal::SL[round][w], AL + RIPEMD160Internal::F1(BL, CL, DL) + self->buf.w[RIPEMD160Internal::RL[round][w]] + RIPEMD160Internal::KL[round]) + EL;
-    AL = EL; EL = DL; DL = RIPEMD160Internal::ROL(10, CL); CL = BL; BL = T;
+    T = RIPEMD160Internal::ROL(
+      RIPEMD160Internal::SL[round][w],
+      AL + RIPEMD160Internal::F1(BL, CL, DL) + self->buf.w[RIPEMD160Internal::RL[round][w]] + RIPEMD160Internal::KL[round]
+    ) + EL;
+    AL = EL;
+    EL = DL;
+    DL = RIPEMD160Internal::ROL(10, CL);
+    CL = BL;
+    BL = T;
   }
   for (w = 0; w < 16; w ++) {
     /* right line */
-    T = RIPEMD160Internal::ROL(RIPEMD160Internal::SR[round][w], AR + RIPEMD160Internal::F5(BR, CR, DR) + self->buf.w[RIPEMD160Internal::RR[round][w]] + RIPEMD160Internal::KR[round]) + ER;
-    AR = ER; ER = DR; DR = RIPEMD160Internal::ROL(10, CR); CR = BR; BR = T;
+    T = RIPEMD160Internal::ROL(
+      RIPEMD160Internal::SR[round][w],
+      AR + RIPEMD160Internal::F5(BR, CR, DR) + self->buf.w[RIPEMD160Internal::RR[round][w]] + RIPEMD160Internal::KR[round]
+    ) + ER;
+    AR = ER;
+    ER = DR;
+    DR = RIPEMD160Internal::ROL(10, CR);
+    CR = BR;
+    BR = T;
   }
   /* Round 2 */
   round++;
   for (w = 0; w < 16; w ++) {
     /* left line */
-    T = RIPEMD160Internal::ROL(RIPEMD160Internal::SL[round][w], AL + RIPEMD160Internal::F2(BL, CL, DL) + self->buf.w[RIPEMD160Internal::RL[round][w]] + RIPEMD160Internal::KL[round]) + EL;
-    AL = EL; EL = DL; DL = RIPEMD160Internal::ROL(10, CL); CL = BL; BL = T;
+    T = RIPEMD160Internal::ROL(
+      RIPEMD160Internal::SL[round][w],
+      AL + RIPEMD160Internal::F2(BL, CL, DL) + self->buf.w[RIPEMD160Internal::RL[round][w]] + RIPEMD160Internal::KL[round]
+    ) + EL;
+    AL = EL;
+    EL = DL;
+    DL = RIPEMD160Internal::ROL(10, CL);
+    CL = BL;
+    BL = T;
   }
   for (w = 0; w < 16; w ++) {
     /* right line */
-    T = RIPEMD160Internal::ROL(RIPEMD160Internal::SR[round][w], AR + RIPEMD160Internal::F4(BR, CR, DR) + self->buf.w[RIPEMD160Internal::RR[round][w]] + RIPEMD160Internal::KR[round]) + ER;
-    AR = ER; ER = DR; DR = RIPEMD160Internal::ROL(10, CR); CR = BR; BR = T;
+    T = RIPEMD160Internal::ROL(
+      RIPEMD160Internal::SR[round][w],
+      AR + RIPEMD160Internal::F4(BR, CR, DR) + self->buf.w[RIPEMD160Internal::RR[round][w]] + RIPEMD160Internal::KR[round]
+    ) + ER;
+    AR = ER;
+    ER = DR;
+    DR = RIPEMD160Internal::ROL(10, CR);
+    CR = BR;
+    BR = T;
   }
   /* Round 3 */
   round++;
   for (w = 0; w < 16; w ++) {
     /* left line */
-    T = RIPEMD160Internal::ROL(RIPEMD160Internal::SL[round][w], AL + RIPEMD160Internal::F3(BL, CL, DL) + self->buf.w[RIPEMD160Internal::RL[round][w]] + RIPEMD160Internal::KL[round]) + EL;
-    AL = EL; EL = DL; DL = RIPEMD160Internal::ROL(10, CL); CL = BL; BL = T;
+    T = RIPEMD160Internal::ROL(
+      RIPEMD160Internal::SL[round][w],
+      AL + RIPEMD160Internal::F3(BL, CL, DL) + self->buf.w[RIPEMD160Internal::RL[round][w]] + RIPEMD160Internal::KL[round]
+    ) + EL;
+    AL = EL;
+    EL = DL;
+    DL = RIPEMD160Internal::ROL(10, CL);
+    CL = BL;
+    BL = T;
   }
   for (w = 0; w < 16; w ++) {
     /* right line */
-    T = RIPEMD160Internal::ROL(RIPEMD160Internal::SR[round][w], AR + RIPEMD160Internal::F3(BR, CR, DR) + self->buf.w[RIPEMD160Internal::RR[round][w]] + RIPEMD160Internal::KR[round]) + ER;
-    AR = ER; ER = DR; DR = RIPEMD160Internal::ROL(10, CR); CR = BR; BR = T;
+    T = RIPEMD160Internal::ROL(
+      RIPEMD160Internal::SR[round][w],
+      AR + RIPEMD160Internal::F3(BR, CR, DR) + self->buf.w[RIPEMD160Internal::RR[round][w]] + RIPEMD160Internal::KR[round]
+    ) + ER;
+    AR = ER;
+    ER = DR;
+    DR = RIPEMD160Internal::ROL(10, CR);
+    CR = BR;
+    BR = T;
   }
   /* Round 4 */
   round ++;
@@ -264,20 +308,41 @@ static void ripemd160_compress(Ripemd160State* self) {
   }
   for (w = 0; w < 16; w ++) {
     /* right line */
-      T = RIPEMD160Internal::ROL(RIPEMD160Internal::SR[round][w], AR + RIPEMD160Internal::F2(BR, CR, DR) + self->buf.w[RIPEMD160Internal::RR[round][w]] + RIPEMD160Internal::KR[round]) + ER;
-      AR = ER; ER = DR; DR = RIPEMD160Internal::ROL(10, CR); CR = BR; BR = T;
+    T = RIPEMD160Internal::ROL(
+      RIPEMD160Internal::SR[round][w],
+      AR + RIPEMD160Internal::F2(BR, CR, DR) + self->buf.w[RIPEMD160Internal::RR[round][w]] + RIPEMD160Internal::KR[round]
+    ) + ER;
+    AR = ER;
+    ER = DR;
+    DR = RIPEMD160Internal::ROL(10, CR);
+    CR = BR;
+    BR = T;
   }
   /* Round 5 */
   round ++;
   for (w = 0; w < 16; w ++) {
     /* left line */
-      T = RIPEMD160Internal::ROL(RIPEMD160Internal::SL[round][w], AL + RIPEMD160Internal::F5(BL, CL, DL) + self->buf.w[RIPEMD160Internal::RL[round][w]] + RIPEMD160Internal::KL[round]) + EL;
-      AL = EL; EL = DL; DL = RIPEMD160Internal::ROL(10, CL); CL = BL; BL = T;
+    T = RIPEMD160Internal::ROL(
+      RIPEMD160Internal::SL[round][w],
+      AL + RIPEMD160Internal::F5(BL, CL, DL) + self->buf.w[RIPEMD160Internal::RL[round][w]] + RIPEMD160Internal::KL[round]
+    ) + EL;
+    AL = EL;
+    EL = DL;
+    DL = RIPEMD160Internal::ROL(10, CL);
+    CL = BL;
+    BL = T;
   }
   for (w = 0; w < 16; w ++) {
     /* right line */
-      T = RIPEMD160Internal::ROL(RIPEMD160Internal::SR[round][w], AR + RIPEMD160Internal::F1(BR, CR, DR) + self->buf.w[RIPEMD160Internal::RR[round][w]] + RIPEMD160Internal::KR[round]) + ER;
-      AR = ER; ER = DR; DR = RIPEMD160Internal::ROL(10, CR); CR = BR; BR = T;
+    T = RIPEMD160Internal::ROL(
+      RIPEMD160Internal::SR[round][w],
+      AR + RIPEMD160Internal::F1(BR, CR, DR) + self->buf.w[RIPEMD160Internal::RR[round][w]] + RIPEMD160Internal::KR[round]
+    ) + ER;
+    AR = ER;
+    ER = DR;
+    DR = RIPEMD160Internal::ROL(10, CR);
+    CR = BR;
+    BR = T;
   }
   /* Final mixing stage */
   T = self->h[1] + CL + DR;
@@ -296,8 +361,9 @@ static void ripemd160_compress(Ripemd160State* self) {
 void ripemd160_process(Ripemd160State* self, const unsigned char* p, unsigned long length) {
   unsigned long bytes_needed;
   /* We never leave a full buffer */
-  if (self->bufpos >= 64)
+  if (self->bufpos >= 64) {
     crash << "Internal error in RIPEMD160 computation. " << crash;
+  }
   while (length > 0) {
     /* Figure out how many bytes we need to fill the internal buffer. */
     bytes_needed = 64 - self->bufpos;
@@ -313,11 +379,11 @@ void ripemd160_process(Ripemd160State* self, const unsigned char* p, unsigned lo
       continue;
     }
 
-    /* We do not have enough bytes to fill the internal buffer.
-     * Copy what's there and return. */
+    // We do not have enough bytes to fill the internal buffer.
+    // Copy what's there and return.
     memcpy(&self->buf.b[self->bufpos], p, length);
     self->bufpos += length;
-    self->length += length << 3;    /* length is in bits */
+    self->length += length << 3;    // length is in bits
     return;
   }
 }
@@ -340,8 +406,9 @@ void ripemd160_done(Ripemd160State* self, unsigned char *out) {
   ripemd160_compress(self);
 
   /* Copy the final state into the output buffer */
-  if (Crypto::flagRIPEMDBigEndian)
+  if (Crypto::flagRIPEMDBigEndian) {
     byteswap_digest(self->h);
+  }
   memcpy(out, &self->h, Crypto::RIPEMD160LengthInBytes);
 }
 

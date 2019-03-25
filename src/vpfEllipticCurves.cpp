@@ -12,8 +12,9 @@ bool EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(const std::string& cu
     output.AssignString("115792089237316195423570985008687907852837564279074904382605163141518161494337");
     return true;
   }
-  if (commentsOnFailure != 0)
+  if (commentsOnFailure != 0) {
     *commentsOnFailure << "I have not yet been taught the order of your desired curve: " << curveName << ". ";
+  }
   return false;
 }
 
@@ -24,7 +25,6 @@ bool EllipticCurveWeierstrassNormalForm::operator==(const EllipticCurveWeierstra
 
 template < >
 void ElementEllipticCurve<ElementZmodP>::MakeGeneratorSecp256k1() {
- 
   LargeIntUnsigned theModulo;
   theModulo.AssignString  ("115792089237316195423570985008687907853269984665640564039457584007908834671663");
   this->xCoordinate.theModulo = theModulo;
@@ -46,9 +46,10 @@ bool ElementEllipticCurve<ElementZmodP>::MakeGeneratorNISTCurve
     this->MakeGeneratorSecp256k1();
     return true;
   }
-  if (commentsOnFailure != 0)
+  if (commentsOnFailure != 0) {
     *commentsOnFailure
     << "I do not recognize the requested curve name. The curves I have implemented are: "
     << "secp256k1";
+  }
   return false;
 }

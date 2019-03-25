@@ -34,8 +34,7 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 
 ProjectInformationInstance projectInfoCrypto_AES_implementation(__FILE__, "AES implementation.");
 
-class AESContext
-{
+class AESContext {
 public:
   static const int blockLength = 16;
   static const int maxKeyExpSize = 240;
@@ -116,8 +115,9 @@ public:
 
 void AESContext::SetNumBits(int inputNumBits) {
   this->numBits = inputNumBits;
-  if (this->numBits != 256 && this->numBits != 192 && this->numBits != 128)
+  if (this->numBits != 256 && this->numBits != 192 && this->numBits != 128) {
     crash << "Bad number of bits: " << inputNumBits << " for AES cipher. Allowed inputs: 256, 192, 128. " << crash;
+  }
   if (this->numBits == 256) {
     this->keyExpSize = 240;
     this->keyLength = 32;
@@ -142,16 +142,17 @@ AESContext::AESContext() {
   this->flagUseCBC = true;
   this->flagUseCTR = false;
   this->flagUseECB = false;
-  for (int i = 0; i < 16; i ++)
+  for (int i = 0; i < 16; i ++) {
     this->initializationVector[i] = i;
+  }
   this->SetNumBits(256);
 }
 
 // The lookup-tables are marked const so they can be placed in read-only storage instead of RAM
 // The numbers below can be computed dynamically trading ROM for RAM -
 // This can be useful in (embedded) bootloader applications, where ROM is often limited.
-const uint8_t AESContext::sbox[256] =
-{ //0     1    2      3     4    5     6     7      8    9     A      B    C     D     E     F
+const uint8_t AESContext::sbox[256] = {
+  //0     1    2      3     4    5     6     7      8    9     A      B    C     D     E     F
   0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
   0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
   0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15,
@@ -169,8 +170,8 @@ const uint8_t AESContext::sbox[256] =
   0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
   0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16 };
 
-const uint8_t AESContext::rsbox[256] =
-{ 0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
+const uint8_t AESContext::rsbox[256] = {
+  0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
   0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
   0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e,
   0x08, 0x2e, 0xa1, 0x66, 0x28, 0xd9, 0x24, 0xb2, 0x76, 0x5b, 0xa2, 0x49, 0x6d, 0x8b, 0xd1, 0x25,
@@ -188,7 +189,7 @@ const uint8_t AESContext::rsbox[256] =
   0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d };
 
 // The round constant word array, Rcon[i], contains the values given by
-// x to the power (i-1) being powers of x (x is denoted as {02}) in the field GF(2^8)
+// x to the power (i - 1) being powers of x (x is denoted as {02}) in the field GF(2^8)
 static const uint8_t Rcon[11] = { 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
 
 /*
@@ -247,13 +248,14 @@ void AESContext::KeyExpansion(uint8_t* RoundKey, const uint8_t* Key) {
       tempa[3] = getSBoxValue(tempa[3]);
       tempa[0] = tempa[0] ^ Rcon[i / Nk];
     }
-    if (this->numBits == 256)
+    if (this->numBits == 256) {
       if (i % Nk == 4) {
         tempa[0] = getSBoxValue(tempa[0]);
         tempa[1] = getSBoxValue(tempa[1]);
         tempa[2] = getSBoxValue(tempa[2]);
         tempa[3] = getSBoxValue(tempa[3]);
       }
+    }
     j = i * 4;
     k = (i - Nk) * 4;
     RoundKey[j + 0] = RoundKey[k + 0] ^ tempa[0];
@@ -280,18 +282,22 @@ void AESContext::AES_ctx_set_iv(const uint8_t* iv) {
 // The round key is added to the state by an XOR function.
 void AESContext::AddRoundKey(uint8_t round, state_t* state, uint8_t* RoundKey) {
   uint8_t i, j;
-  for (i = 0; i < 4; ++ i)
-    for (j = 0; j < 4; ++ j)
+  for (i = 0; i < 4; ++ i) {
+    for (j = 0; j < 4; ++ j) {
       (*state)[i][j] ^= RoundKey[(round * Nb * 4) + (i * Nb) + j];
+    }
+  }
 }
 
 // The SubBytes Function Substitutes the values in the
 // state matrix with values in an S-box.
 void AESContext::SubBytes(state_t* state) {
   uint8_t i, j;
-  for (i = 0; i < 4; ++ i)
-    for (j = 0; j < 4; ++ j)
+  for (i = 0; i < 4; ++ i) {
+    for (j = 0; j < 4; ++ j) {
       (*state)[j][i] = getSBoxValue((*state)[j][i]);
+    }
+  }
 }
 
 // The ShiftRows() function shifts the rows in the state to the left.
@@ -357,9 +363,11 @@ void AESContext::InvMixColumns(state_t* state) {
 // state matrix with values in an S-box.
 void AESContext::InvSubBytes(state_t* state) {
   uint8_t i, j;
-  for (i = 0; i < 4; ++ i)
-    for (j = 0; j < 4; ++ j)
+  for (i = 0; i < 4; ++ i) {
+    for (j = 0; j < 4; ++ j) {
       (*state)[j][i] = getSBoxInvert((*state)[j][i]);
+    }
+  }
 }
 
 void AESContext::InvShiftRows(state_t* state) {
@@ -438,8 +446,10 @@ void AESContext::AES_ECB_decrypt(uint8_t* buf) {
 
 static void XorWithIv(uint8_t* buf, uint8_t* Iv) {
   uint8_t i;
-  for (i = 0; i < AESContext::blockLength; ++ i) // The block in AES is always 128bit no matter the key size
+  for (i = 0; i < AESContext::blockLength; ++ i) {
+    // The block in AES is always 128-bit no matter the key size
     buf[i] ^= Iv[i];
+  }
 }
 
 void AESContext::AES_CBC_encrypt_buffer(uint8_t* buf, uint32_t length) {
@@ -474,8 +484,9 @@ void AESContext::AES_CTR_xcrypt_buffer(uint8_t* buf, uint32_t length) {
   unsigned i;
   int bi;
   for (i = 0, bi = this->blockLength; i < length; ++ i, ++ bi) {
-    if (bi == this->blockLength) /* we need to regen xor compliment in buffer */
-    { memcpy(buffer, this->initializationVector, this->blockLength);
+    if (bi == this->blockLength) {
+      /* we need to regen xor compliment in buffer */
+      memcpy(buffer, this->initializationVector, this->blockLength);
       Cipher((state_t*) buffer, this->RoundKey);
       /* Increment Iv and handle overflow */
       for (bi = (this->blockLength - 1); bi >= 0; -- bi) {
@@ -493,14 +504,18 @@ void AESContext::AES_CTR_xcrypt_buffer(uint8_t* buf, uint32_t length) {
   }
 }
 
-bool Crypto::decryptAES_CBC_256
-(const std::string& inputKey, const std::string& inputCipherText, List<unsigned char>& output,
- std::stringstream* commentsOnFailure) {
+bool Crypto::decryptAES_CBC_256(
+  const std::string& inputKey,
+  const std::string& inputCipherText,
+  List<unsigned char>& output,
+  std::stringstream* commentsOnFailure
+) {
   output.SetSize(inputCipherText.size());
   if (inputKey.size() != 32) {
-    if (commentsOnFailure != 0)
+    if (commentsOnFailure != 0) {
       *commentsOnFailure << "Input key: " << inputKey << " is of length: "
       << inputKey.size() << " (expected: 32). ";
+    }
     return false;
   }
   int remainderMod16 = inputCipherText.size() % 16;
@@ -509,45 +524,57 @@ bool Crypto::decryptAES_CBC_256
     std::string newInput;
     newInput.reserve(inputCipherText.size() + numberOfBytesToPad);
     newInput = inputCipherText;
-    for (int i = 0; i < numberOfBytesToPad; i ++)
+    for (int i = 0; i < numberOfBytesToPad; i ++) {
       newInput.push_back(0);
+    }
     return Crypto::decryptAES_CBC_256(inputKey, inputCipherText, output, commentsOnFailure);
   }
-
   AESContext context;
   context.AES_init_ctx((uint8_t*) inputKey.c_str());
-  for (unsigned i = 0; i < inputCipherText.size(); i ++)
+  for (unsigned i = 0; i < inputCipherText.size(); i ++) {
     output[i] = inputCipherText[i];
+  }
   context.AES_CBC_decrypt_buffer((uint8_t*) output.TheObjects, output.size);
   return true;
 }
 
-bool Crypto::decryptAES_CBC_256
-(const std::string& inputKey, const std::string& inputCipherText, std::string& output,
- std::stringstream* commentsOnFailure) {
+bool Crypto::decryptAES_CBC_256(
+  const std::string& inputKey, const std::string& inputCipherText, std::string& output, std::stringstream* commentsOnFailure
+) {
   List<unsigned char> outputList;
-  if (!Crypto::decryptAES_CBC_256(inputKey, inputCipherText, outputList, commentsOnFailure))
+  if (!Crypto::decryptAES_CBC_256(inputKey, inputCipherText, outputList, commentsOnFailure)) {
     return false;
+  }
   output.assign((char *) outputList.TheObjects, outputList.size);
   return true;
 }
 
-bool Crypto::encryptAES_CBC_256
-(const std::string& inputKey, const std::string& inputPlainText, std::string& output, std::stringstream* commentsOnFailure) {
+bool Crypto::encryptAES_CBC_256(
+  const std::string& inputKey,
+  const std::string& inputPlainText,
+  std::string& output,
+  std::stringstream* commentsOnFailure
+) {
   List<unsigned char> outputList;
-  if (!Crypto::encryptAES_CBC_256(inputKey, inputPlainText, outputList, commentsOnFailure))
+  if (!Crypto::encryptAES_CBC_256(inputKey, inputPlainText, outputList, commentsOnFailure)) {
     return false;
+  }
   output.assign((char *) outputList.TheObjects, outputList.size);
   return true;
 }
 
-bool Crypto::encryptAES_CBC_256
-(const std::string& inputKey, const std::string& inputPlainText, List<unsigned char>& output, std::stringstream* commentsOnFailure) {
+bool Crypto::encryptAES_CBC_256(
+  const std::string& inputKey,
+  const std::string& inputPlainText,
+  List<unsigned char>& output,
+  std::stringstream* commentsOnFailure
+) {
   output.SetSize(inputPlainText.size());
   if (inputKey.size() != 32) {
-    if (commentsOnFailure != 0)
+    if (commentsOnFailure != 0) {
       *commentsOnFailure << "Input key: " << inputKey << " is of length: "
       << inputKey.size() << " (expected: 32). ";
+    }
     return false;
   }
   int remainderMod16 = inputPlainText.size() % 16;
@@ -556,15 +583,17 @@ bool Crypto::encryptAES_CBC_256
     std::string newInput;
     newInput.reserve(inputPlainText.size() + numberOfBytesToPad);
     newInput = inputPlainText;
-    for (int i = 0; i < numberOfBytesToPad; i ++)
+    for (int i = 0; i < numberOfBytesToPad; i ++) {
       newInput.push_back((char) numberOfBytesToPad);
+    }
     return Crypto::encryptAES_CBC_256(inputKey, newInput, output, commentsOnFailure);
   }
   AESContext context;
   context.AES_init_ctx((uint8_t *) inputKey.c_str());
   output.SetSize(inputPlainText.size());
-  for (unsigned i = 0; i < inputPlainText.size(); i ++)
+  for (unsigned i = 0; i < inputPlainText.size(); i ++) {
     output[i] = inputPlainText[i];
-  context.AES_CBC_encrypt_buffer((uint8_t *) output.TheObjects, output.size);
+  }
+  context.AES_CBC_encrypt_buffer((uint8_t*) output.TheObjects, output.size);
   return true;
 }

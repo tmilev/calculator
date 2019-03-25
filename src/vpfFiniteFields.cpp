@@ -62,10 +62,11 @@ void f65521::Invert() {
     y = t;
   }
 
-  if (m>= 0)
+  if (m>= 0) {
     n = m;
-  else
-    n = m +65521;
+  } else {
+    n = m + 65521;
+  }
 }
 
 f65521 f65521::operator/(const f65521 right) const {
@@ -85,7 +86,7 @@ bool f65521::IsEqualToZero() const {
 }
 
 bool f65521::IsEqualToOne() const {
-  return n ==1;
+  return n == 1;
 }
 
 bool f65521::operator==(const f65521 rhs) const {
@@ -97,15 +98,16 @@ bool f65521::operator!=(const f65521 rhs) const {
 }
 
 void f65521::operator=(const int rhs) {
-  int tmp = rhs%65521;
-  if (tmp<0)
+  int tmp = rhs % 65521;
+  if (tmp < 0) {
     tmp += 65521;
+  }
   n = tmp;
 }
 
 void f65521::operator=(const Rational rhs) {
-  n = rhs.GetNumerator()%65521;
-  f65521 den = rhs.GetDenominator()%65521;
+  n = rhs.GetNumerator() % 65521;
+  f65521 den = rhs.GetDenominator() % 65521;
   *this /= den;
 }
 
@@ -136,22 +138,22 @@ void f211::operator+=(const f211 right) {
 }
 
 void f211::Minus() {
-  n = 211-n;
+  n = 211 - n;
 }
 
 f211 f211::operator-() const {
   f211 out;
-  out.n = 211-n;
+  out.n = 211 - n;
   return out;
 }
 
 f211 f211::operator-(const f211 right) const {
-  return *this+(-right);
+  return *this + (- right);
 }
 
 void f211::operator-=(const f211 right) {
   int tmp = n;
-  tmp += (-right).n;
+  tmp += (- right).n;
   tmp %= 211;
   n = tmp;
 }
@@ -194,10 +196,11 @@ void f211::Invert() {
     y = t;
   }
 
-  if (m>= 0)
+  if (m>= 0) {
     n = m;
-  else
-    n = m +211;
+  } else {
+    n = m + 211;
+  }
 }
 
 f211 f211::operator/(const f211 right) const {
@@ -230,48 +233,55 @@ bool f211::operator!=(const f211 rhs) const {
 
 void f211::operator=(const int rhs) {
   int tmp = rhs % 211;
-  if (tmp<0)
+  if (tmp < 0) {
     tmp += 211;
+  }
   n = tmp;
 }
 
 void f211::operator=(const Rational rhs) {
-  n = rhs.GetNumerator()%211;
-  f211 den = rhs.GetDenominator()%211;
+  n = rhs.GetNumerator() % 211;
+  f211 den = rhs.GetDenominator() % 211;
   *this /= den;
 }
 
 bool f211::operator<(int rhs) const {
   if (rhs != 0) {
-    stOutput << "finite fields are not ordered (if you think they are, modify around " << __FILE__ << ':' << __LINE__ << ", and may God have mercy on your soul)" << "\n";
+    stOutput << "finite fields are not ordered (if you think they are, modify around "
+    << __FILE__ << ':' << __LINE__ << ", and may God have mercy on your soul)" << "\n";
     assert(false);
   }
-  if (n>104)
+  if (n>104) {
     return true;
-  else
+  } else {
     return false;
+  }
 }
 
 bool f211::operator>(int rhs) const {
   if (rhs != 0) {
-    stOutput << "finite fields are not ordered (if you think they are, modify around " << __FILE__ << ':' << __LINE__ << ", and may God have mercy on your soul)" << "\n";
+    stOutput << "finite fields are not ordered (if you think they are, modify around "
+    << __FILE__ << ':' << __LINE__ << ", and may God have mercy on your soul)" << "\n";
     assert(false);
   }
-  if (n<105)
+  if (n < 105) {
     return true;
-  else
+  } else {
     return false;
+  }
 }
 
 bool f211::operator>(f211 rhs) const {
-  if (this->n > rhs.n)
+  if (this->n > rhs.n) {
     return true;
+  }
   return false;
 }
 
 bool f211::operator<(f211 rhs) const {
-  if (this->n < rhs.n)
+  if (this->n < rhs.n) {
     return true;
+  }
   return false;
 }
 

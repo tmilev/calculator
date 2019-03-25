@@ -771,8 +771,9 @@ std::string logger::getStamp() {
   out
   << theGlobalVariables.GetDateForLogFiles() << ", "
   << theGlobalVariables.GetElapsedSeconds() << " s, ";
-  if (theWebServer.activeWorker != - 1)
+  if (theWebServer.activeWorker != - 1) {
     out << "w: " << theWebServer.activeWorker << ",";
+  }
   out << " c: " << theWebServer.NumConnectionsSoFar << ". ";
   //<-abbreviating worker to w and connection to c to reduce the log size.
   return out.str();

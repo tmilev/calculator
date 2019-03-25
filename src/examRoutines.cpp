@@ -369,7 +369,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabaseJSON(
 bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::LoadDatabaseInfo");
   if (!theGlobalVariables.flagDatabaseCompiled) {
-    comments << "Database not available. ";
+    comments << "Database not available (cannot load problem info). ";
     return false;
   }
   this->currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);

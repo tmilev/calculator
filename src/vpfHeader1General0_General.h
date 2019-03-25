@@ -355,10 +355,11 @@ public:
     return in.HashFunction();
   }
   static unsigned int HashFunction(bool in) {
-    if (in)
+    if (in) {
       return 1;
-    else
+    } else {
       return 0;
+    }
   }
   template <class templateList, typename objectType, class otherList>
   static void QuickSortAscending(
@@ -531,12 +532,15 @@ private:
     NumReadWordsExcludingTag = 0;
     while (!streamToMoveIn.eof()) {
       streamToMoveIn >> tempS;
-      if (tempS == tagClose)
+      if (tempS == tagClose) {
         TagDepth --;
-      if (tempS == tagOpen)
-        TagDepth++;
-      if (TagDepth == 0)
+      }
+      if (tempS == tagOpen) {
+        TagDepth ++;
+      }
+      if (TagDepth == 0) {
         return true;
+      }
       NumReadWordsExcludingTag ++;
     }
     return false;
@@ -645,9 +649,11 @@ public:
   void PopIndexSwapWithLastLight(int index);
   int SizeWithoutObjects() const;
   int IndexInList(const Object& o) {
-    for (int i = 0; i < this->size; i ++)
-      if (this->TheObjects[i] == o)
+    for (int i = 0; i < this->size; i ++) {
+      if (this->TheObjects[i] == o) {
         return i;
+      }
+    }
     return - 1;
   }
   inline bool Contains(const Object& o) {
@@ -656,8 +662,9 @@ public:
   void SetSize(int theSize);
   inline void initializeFillInObject(int theSize, const Object& o) {
     this->SetSize(theSize);
-    for (int i = 0; i < this->size; i ++)
+    for (int i = 0; i < this->size; i ++) {
       this->TheObjects[i] = o;
+    }
   }
   inline Object& operator[](int i) const {
     return this->TheObjects[i];
@@ -670,8 +677,9 @@ public:
     }
   }
   inline bool operator== (const ListLight<Object>& right) const {
-    if (this->size != right.size)
+    if (this->size != right.size) {
       return false;
+    }
     for (int i = 0; i < this->size; i ++) {
       if (!(this->TheObjects[i] == right[i])) {
         return false;

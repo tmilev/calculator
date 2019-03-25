@@ -509,8 +509,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions(
   (void) output;
   (void) maxOutputItems;
   (void) totalItems;
-  if (commentsOnFailure != 0)
+  if (commentsOnFailure != 0) {
     *commentsOnFailure << "Project compiled without mongoDB support. ";
+  }
   return false;
 #endif
 }

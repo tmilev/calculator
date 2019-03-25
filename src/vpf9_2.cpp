@@ -14,8 +14,9 @@
 ProjectInformationInstance ProjectInfoVpf9_2cpp(__FILE__, "Math routines implementation. ");
 
 std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat) const {
-  if (this->IsConstant())
+  if (this->IsConstant()) {
     return "1";
+  }
   std::stringstream out;
   FormatExpressions tempFormat;
   if (theFormat == 0) {
@@ -26,10 +27,12 @@ std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat) const {
   }
   std::string firstS = this->polynomialPart.ToString(theFormat);
   std::string secondS = this->differentialPart.ToString(&tempFormat);
-  if (firstS != "1")
+  if (firstS != "1") {
     out << firstS;
-  if (secondS != "1")
+  }
+  if (secondS != "1") {
     out << secondS;
+  }
   return out.str();
 }
 
@@ -409,7 +412,6 @@ void WeylGroupData::WriteToFile(std::fstream& output) {
 
 void WeylGroupData::ReadFromFile(std::fstream& input) {
   std::string tempS;
-//  int tempI;
   input >> tempS;
   stOutput << "This code is not implemented yet (due to a regression).";
   crash << crash;

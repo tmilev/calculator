@@ -1556,7 +1556,7 @@ std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAd
   (void) hostWebAddressWithPort;
   JSData output;
   if (!theGlobalVariables.flagDatabaseCompiled) {
-    output["error"] = "Database not available.";
+    output["error"] = "Database not available (cannot get accounts). ";
     return output.ToString(false);
   }
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection) {
@@ -1598,7 +1598,7 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
   MacroRegisterFunctionWithName("HtmlInterpretation::GetAccountsPageBody");
   (void) hostWebAddressWithPort;
   if (!theGlobalVariables.flagDatabaseCompiled) {
-    return "<b>Database not available. </b>";
+    return "Database not available. ";
   }
   std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection) {

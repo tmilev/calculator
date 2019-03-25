@@ -122,7 +122,9 @@ function updateDatabasePageCallback(incoming, output) {
   }
   var theParsed = JSON.parse(incoming);
   var theOutput = document.getElementById(ids.domElements.divDatabaseOutput);
-  if ("rows" in theParsed) {
+  if ("error" in theParsed) {
+    theOutput.innerHTML = `<b style = 'color:red'>Error.</b> ${JSON.stringify(theParsed.error)}`;
+  } else if ("rows" in theParsed) {
     var transformer = new jsonToHtml.JSONToHTML();
     for (var i = 0; i < theParsed.rows.length; i ++) {
       theParsed.rows[i]["problemDataJSON"] = "";

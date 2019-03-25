@@ -861,7 +861,7 @@ std::string WebWorker::GetSignUpRequestResult() {
   JSData result;
   std::stringstream errorStream;
   if (!theGlobalVariables.flagDatabaseCompiled) {
-    result["error"] = "Error: database not available. ";
+    result["error"] = "Database not available (cannot sign up). ";
     return result.ToString(false);
   }
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();

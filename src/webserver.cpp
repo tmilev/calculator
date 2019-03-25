@@ -1211,7 +1211,7 @@ std::string WebWorker::GetDatabaseJSON() {
       result["databaseLabels"] = labels;
     }
   } else {
-    result["error"] = "<b>Database not available. </b>";
+    result["error"] = "Database not available (cannot get database info). ";
   }
   return result.ToString(false);
 }
@@ -1234,7 +1234,7 @@ std::string WebWorker::GetDatabaseDeleteOneItem() {
     return "success";
   }
   if (!theGlobalVariables.flagDatabaseCompiled) {
-    commentsStream << "<b>Database not available. </b>";
+    commentsStream << "Database not available (cannot delete item). ";
   }
   return commentsStream.str();
 }
@@ -2687,19 +2687,21 @@ int WebWorker::SetEmail(const std::string& input) {
   MacroRegisterFunctionWithName("WebWorker::SetEmail");
   (void) input;
   if (!theGlobalVariables.flagDatabaseCompiled) {
-    stOutput << "<b>Error: database not available.</b>";
+    stOutput << "Database not available (cannot set email). ";
     return 0;
   }
   std::stringstream out, debugStream;
   //double startTime = theGlobalVariables.GetElapsedSeconds();
   theGlobalVariables.userDefault.email = input;
   std::stringstream* adminOutputStream = 0;
-  if (theGlobalVariables.UserDefaultHasAdminRights())
+  if (theGlobalVariables.UserDefaultHasAdminRights()) {
     adminOutputStream = &out;
+  }
   this->DoSetEmail(theGlobalVariables.userDefault, &out, &out, adminOutputStream);
   stOutput << out.str();
-  if (theGlobalVariables.UserDefaultHasAdminRights())
+  if (theGlobalVariables.UserDefaultHasAdminRights()) {
     stOutput << "<hr><b>Admin view only. </b>" << debugStream.str();
+  }
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s).";
   return 0;
 }

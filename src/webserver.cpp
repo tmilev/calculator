@@ -1465,13 +1465,16 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments, std:
 
 std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken) {
   MacroRegisterFunctionWithName("WebWorker::GetHtmlHiddenInputs");
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return "";
+  }
   std::stringstream out;
-  if (includeAuthenticationToken)
+  if (includeAuthenticationToken) {
     out << "<input type =\"hidden\" id =\"authenticationToken\" name =\"authenticationToken\">\n";
-  if (includeUserName)
+  }
+  if (includeUserName) {
     out << "<input type =\"hidden\" id =\"username\" name =\"username\">\n";
+  }
   //the values of the hidden inputs will be filled in via javascript
   if (this->flagFoundMalformedFormInput) {
     out << "<b>Your input formed had malformed entries.</b>";
@@ -1875,10 +1878,12 @@ void WebWorker::ExtractAddressParts() {
       break;
     }
   }
-  if (!found)
+  if (!found) {
     this->addressComputed = this->addressGetOrPost;
-  if (this->messageBody != "")
+  }
+  if (this->messageBody != "") {
     this->argumentComputed = this->messageBody;
+  }
   if (theGlobalVariables.flagRunningApache && this->argumentComputed == "") {
     this->argumentComputed = this->addressComputed;
     this->addressComputed = "";
@@ -1925,12 +1930,14 @@ void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const st
   }
   std::stringstream out;
   out << httpResponseNoTermination << "\r\n";
-  if (!this->flagKeepAlive)
+  if (!this->flagKeepAlive) {
     out << this->GetHeaderConnectionClose() << "\r\n";
-  else
+  } else {
     out << this->GetHeaderConnectionKeepAlive() << "\r\n";
-  if (remainingHeaderNoTermination != "")
+  }
+  if (remainingHeaderNoTermination != "") {
     out << remainingHeaderNoTermination << "\r\n";
+  }
   if (
     (theGlobalVariables.flagLoggedIn || theGlobalVariables.flagLogInAttempted) &&
     WebWorker::GetHeaderSetCookie() != ""
@@ -1948,8 +1955,9 @@ void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const st
 void WebWorker::SetHeaderOKNoContentLength(const std::string& extraHeader, const std::string &contentType) {
   MacroRegisterFunctionWithName("WebWorker::SetHeaderOKNoContentLength");
   std::string header = "Content-Type: " + contentType + "; charset=utf-8\r\nAccess-Control-Allow-Origin: *";
-  if (extraHeader != "")
+  if (extraHeader != "") {
     header += "\r\n" + extraHeader;
+  }
   this->SetHeadeR("HTTP/1.0 200 OK", header);
   this->flagDoAddContentLength = true;
 }
@@ -1990,8 +1998,9 @@ int WebWorker::ProcessCalculatorExamplesJSON() {
 int WebWorker::ProcessToggleMonitoring() {
   MacroRegisterFunctionWithName("WebWorker::ProcessToggleMonitoring");
   this->SetHeaderOKNoContentLength("");
-  if (theGlobalVariables.UserDefaultHasAdminRights())
+  if (theGlobalVariables.UserDefaultHasAdminRights()) {
     this->flagToggleMonitoring = true;
+  }
   JSData result;
   HtmlInterpretation::GetJSDataUserInfo(result, "Attempt to toggle monitoring. ");
   stOutput << result.ToString(false);
@@ -2255,11 +2264,13 @@ int WebWorker::ProcessFolder() {
     std::stringstream currentStream;
     bool isDir = (theFileTypes[i] == ".d");
     currentStream << "<a href=\"" << this->addressGetOrPost << HtmlRoutines::ConvertStringToURLString(theFileNames[i], false);
-    if (isDir)
+    if (isDir) {
       currentStream << "/";
+    }
     currentStream << "\">" << theFileNames[i];
-    if (isDir)
+    if (isDir) {
       currentStream << "/";
+    }
     currentStream << "</a><br>";
     if (isDir) {
       theFolderNamesHtml.AddOnTop(currentStream.str());
@@ -2269,10 +2280,12 @@ int WebWorker::ProcessFolder() {
   }
   theFolderNamesHtml.QuickSortAscending();
   theFileNamesHtml.QuickSortAscending();
-  for (int i = 0; i < theFolderNamesHtml.size; i ++)
+  for (int i = 0; i < theFolderNamesHtml.size; i ++) {
     out << theFolderNamesHtml[i];
-  for (int i = 0; i < theFileNamesHtml.size; i ++)
+  }
+  for (int i = 0; i < theFileNamesHtml.size; i ++) {
     out << theFileNamesHtml[i];
+  }
   out << "\n</body></html>";
   stOutput << out.str();
   return 0;
@@ -2347,8 +2360,9 @@ int WebWorker::ProcessFile() {
   std::stringstream debugBytesStream;
   if (theGlobalVariables.UserDebugFlagOn() && fileExtension == ".html") {
     debugBytesStream << "<!-- DEBUG info: ";
-    if (withCacheHeader)
+    if (withCacheHeader) {
       debugBytesStream << "Sent with Cache-Control header.\n ";
+    }
     debugBytesStream << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
     << "-->";
   }
@@ -2365,8 +2379,9 @@ int WebWorker::ProcessFile() {
   }
   unsigned int totalLength = fileSize + debugBytesStream.str().size();
   theHeader << "Content-length: " << totalLength << "\r\n";
-  if (!this->flagKeepAlive)
+  if (!this->flagKeepAlive) {
     theHeader << this->GetHeaderConnectionClose() << "\r\n";
+  }
   //std::string theCookie = this->GetHeaderSetCookie();
   //if (theCookie != "")
   //  theHeader << theCookie << "\r\n";
@@ -2434,20 +2449,25 @@ WebWorker::WebWorker() {
 }
 
 bool WebWorker::IamActive() {
-  if (this->parent == 0 || this->indexInParent == - 1)
+  if (this->parent == 0 || this->indexInParent == - 1) {
     return false;
+  }
   return this->parent->activeWorker == this->indexInParent;
 }
 
 bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension) {
-  if (fileExtension == ".png")
+  if (fileExtension == ".png") {
     return true;
-  if (fileExtension == ".mp4")
+  }
+  if (fileExtension == ".mp4") {
     return true;
-  if (fileExtension == ".mpeg")
+  }
+  if (fileExtension == ".mpeg") {
     return true;
-  if (fileExtension == ".jpg")
+  }
+  if (fileExtension == ".jpg") {
     return true;
+  }
   return false;
 }
 
@@ -2491,28 +2511,39 @@ WebWorker::~WebWorker() {
 
 std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExtension) {
   MacroRegisterFunctionWithName("WebWorker::GetMIMEtypeFromFileExtension");
-  if (fileExtension == ".html")
+  if (fileExtension == ".html") {
     return "Content-Type: text/html\r\n";
-  if (fileExtension == ".txt")
+  }
+  if (fileExtension == ".txt") {
     return "Content-Type: text/plain\r\n";
-  if (fileExtension == ".png")
+  }
+  if (fileExtension == ".png") {
     return "Content-Type: image/png\r\n";
-  if (fileExtension == ".js")
+  }
+  if (fileExtension == ".js") {
     return "Content-Type: text/javascript\r\n";
-  if (fileExtension == ".ico")
+  }
+  if (fileExtension == ".ico") {
     return "Content-Type: image/x-icon\r\n";
-  if (fileExtension == ".css")
+  }
+  if (fileExtension == ".css") {
     return "Content-Type: text/css\r\n";
-  if (fileExtension == ".eot")
+  }
+  if (fileExtension == ".eot") {
     return "Content-Type: application/vnd.ms-fontobject\r\n";
-  if (fileExtension == ".ttf")
+  }
+  if (fileExtension == ".ttf") {
     return "Content-Type: application/octet-stream\r\n";
-  if (fileExtension == ".svg")
+  }
+  if (fileExtension == ".svg") {
     return "Content-Type: image/svg+xml\r\n";
-  if (fileExtension == ".appcache")
+  }
+  if (fileExtension == ".appcache") {
     return "Content-Type: text/cache-manifest\r\n";
-  if (fileExtension == ".woff")
+  }
+  if (fileExtension == ".woff") {
     return "Content-Type: application/font-woff\r\n";
+  }
   return "Content-Type: application/octet-stream\r\n";
 }
 
@@ -2529,34 +2560,38 @@ int WebWorker::ProcessUnknown() {
   << "<hr>The original message received from the server follows."
   << "<hr>\n" << this->ToStringMessageUnsafe();
 
-  if (this->requestTypE == this->requestChunked)
+  if (this->requestTypE == this->requestChunked) {
     logHttpErrors << logger::red << "Chunked messaging not implemented. Message follows. " << logger::endL
     << this->ToStringMessageFullUnsafe() << logger::endL;
-  else
+  } else {
     logHttpErrors << logger::red << "Method not implemented. Message follows. " << logger::endL
     << this->ToStringMessageFullUnsafe(false) << logger::endL;
+  }
   stOutput << "</body></html>";
   return 0;
 }
 
 bool WebWorker::ShouldDisplayLoginPage() {
-  if (theGlobalVariables.userCalculatorRequestType == "login")
+  if (theGlobalVariables.userCalculatorRequestType == "login") {
     return true;
+  }
   if (
     theGlobalVariables.flagUsingSSLinCurrentConnection && !theGlobalVariables.flagLoggedIn &&
     theGlobalVariables.userCalculatorRequestType != "calculator"
   ) {
     return true;
   }
-  if (theGlobalVariables.UserRequestMustBePromptedToLogInIfNotLoggedIn() && !theGlobalVariables.flagLoggedIn)
+  if (theGlobalVariables.UserRequestMustBePromptedToLogInIfNotLoggedIn() && !theGlobalVariables.flagLoggedIn) {
     return true;
+  }
   return false;
 }
 
 std::string WebWorker::GetAuthenticationToken(const std::string& reasonForNoAuthentication) {
   MacroRegisterFunctionWithName("WebWorker::GetAuthenticationToken");
-  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection)
+  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return theGlobalVariables.userDefault.actualActivationToken;
+  }
   return reasonForNoAuthentication;
 }
 
@@ -2655,17 +2690,20 @@ bool WebWorker::DoSetEmail(
   }
   EmailRoutines theEmail;
   theEmail.toEmail = inputOutputUser.email;
-  if (!theEmail.IsOKEmail(theEmail.toEmail, commentsOnFailure))
+  if (!theEmail.IsOKEmail(theEmail.toEmail, commentsOnFailure)) {
     return false;
+  }
   UserCalculator userCopy;
   userCopy.UserCalculatorData::operator=(inputOutputUser);
   userCopy.email = inputOutputUser.email;
-  if (!userCopy.ComputeAndStoreActivationEmailAndTokens(commentsOnFailure, commentsGeneralNonSensitive))
+  if (!userCopy.ComputeAndStoreActivationEmailAndTokens(commentsOnFailure, commentsGeneralNonSensitive)) {
     return false;
+  }
   theEmail.emailContent = userCopy.activationEmail;
   theEmail.subject = userCopy.activationEmailSubject;
-  if (commentsGeneralNonSensitive != 0)
+  if (commentsGeneralNonSensitive != 0) {
     *commentsGeneralNonSensitive << "<br><b>Sending email... </b>";
+  }
   theEmail.SendEmailWithMailGun(commentsOnFailure, commentsGeneralNonSensitive, commentsGeneralSensitive);
   if (commentsGeneralSensitive != 0) {
     if (theGlobalVariables.UserDefaultHasAdminRights()) {
@@ -2752,8 +2790,9 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
       return 0;
     }
   }
-  if (newPassword == "" && reenteredPassword == "" && newEmail != "")
+  if (newPassword == "" && reenteredPassword == "" && newEmail != "") {
     return this->SetEmail(newEmail);
+  }
   if (newPassword != reenteredPassword) {
     stOutput << "<b style =\"color:red\">Passwords don't match. </b>";
     return 0;
@@ -2815,8 +2854,9 @@ int WebWorker::ProcessCompute() {
   }
   JSData result;
   result = theParser->ToJSONOutputAndSpecials();
-  if (theGlobalVariables.UserDebugFlagOn())
+  if (theGlobalVariables.UserDebugFlagOn()) {
     result["debug"] = this->ToStringMessageFullUnsafe();
+  }
   stOutput << result.ToString(false);
   theGlobalVariables.flagComputationCompletE = true;
   return 0;
@@ -2864,10 +2904,11 @@ int WebWorker::ProcessTopicListJSON() {
 
 int WebWorker::ProcessCalculatorOnePageJS(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorOnePageJS");
-  if (appendBuildHash)
+  if (appendBuildHash) {
     this->SetHeaderOKNoContentLength(WebAPI::HeaderCacheControl, "text/javascript");
-  else
+  } else {
     this->SetHeaderOKNoContentLength("", "text/javascript");
+  }
   stOutput << HtmlInterpretation::GetOnePageJS(appendBuildHash);
   return 0;
 }
@@ -3088,19 +3129,22 @@ int WebWorker::ProcessSlidesSource() {
       ));
     }
   }
-  if (theGlobalVariables.userCalculatorRequestType == "homeworkSource")
+  if (theGlobalVariables.userCalculatorRequestType == "homeworkSource") {
     theCrawler.flagHomeworkRatherThanSlides = true;
-  else
+  } else {
     theCrawler.flagHomeworkRatherThanSlides = false;
+  }
   theCrawler.desiredPresentationTitle =
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("title"), false);
   std::stringstream comments;
-  if (theGlobalVariables.GetWebInput("layout") == "printable")
+  if (theGlobalVariables.GetWebInput("layout") == "printable") {
     theCrawler.flagProjectorMode = false;
-  if (theGlobalVariables.GetWebInput("answerKey") == "false")
+  }
+  if (theGlobalVariables.GetWebInput("answerKey") == "false") {
     theCrawler.flagAnswerKey = false;
-  else
+  } else {
     theCrawler.flagAnswerKey = true;
+  }
   theCrawler.flagSourceOnly = true;
   theCrawler.flagCrawlTexSourcesRecursively = true;
   if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments)) {
@@ -3189,8 +3233,9 @@ std::string HtmlInterpretation::ModifyProblemReport() {
   theFile << mainInput;
   theFile.close();
   std::stringstream out;
-  if (!fileExists)
+  if (!fileExists) {
     out << "File " << fileName << " didn't previously exist: just created it for you. ";
+  }
   out << "<b style =\"color:green\"> Written content to file: "
   << fileName << ". </b>";
   return out.str();
@@ -3214,10 +3259,12 @@ std::string HtmlInterpretation::GetCaptchaDiv() {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetCaptchaDiv");
   std::stringstream out;
   std::string recaptchaPublic;
-  if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-public.txt", recaptchaPublic, true, true, &out))
-    out << "<span style =\"color:red\"><b>Couldn't find the recaptcha key in file: certificates/recaptcha-public.txt. </b></span>";
-  else
+  if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-public.txt", recaptchaPublic, true, true, &out)) {
+    out << "<span style =\"color:red\"><b>Couldn't find the recaptcha key in file: "
+    << "certificates/recaptcha-public.txt</b></span>";
+  } else {
     out << "<div class =\"g-recaptcha\" data-sitekey =\"" << recaptchaPublic << "\"></div>";
+  }
   return out.str();
 }
 
@@ -3276,8 +3323,9 @@ bool WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified() {
 bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureComments) {
   MacroRegisterFunctionWithName("WebWorker::RedirectIfNeeded");
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
-  if (!theUser.flagEnteredPassword)
+  if (!theUser.flagEnteredPassword) {
     return false;
+  }
   if (
     theGlobalVariables.userCalculatorRequestType == "changePassword" ||
     theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON
@@ -3370,8 +3418,9 @@ bool WebWorker::ProcessRedirectAwayFromWWW() {
     }
   }
   newAddressStream << this->addressGetOrPost;
-  if (theGlobalVariables.flagRunningApache)
+  if (theGlobalVariables.flagRunningApache) {
     redirectHeaderStream << "Content-Type: text/html\r\n";
+  }
   redirectHeaderStream << "Location: " << newAddressStream.str();
   //double fixme;
   this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectHeaderStream.str());
@@ -3386,8 +3435,9 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection() {
   MacroRegisterFunctionWithName("WebWorker::ProcessLoginNeededOverUnsecureConnection");
   std::stringstream redirectStream, newAddressStream;
   newAddressStream << "https://" << this->hostNoPort;
-  if (this->hostNoPort == "")
+  if (this->hostNoPort == "") {
     newAddressStream << "calculator-algebra.org";
+  }
   newAddressStream << ":" << this->parent->httpSSLPort;
   if (this->addressGetOrPost.size() != 0) {
     if (this->addressGetOrPost[0] != '/') {
@@ -3395,8 +3445,9 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection() {
     }
   }
   newAddressStream << this->addressGetOrPost;
-  if (theGlobalVariables.flagRunningApache)
+  if (theGlobalVariables.flagRunningApache) {
     redirectStream << "Content-Type: text/html\r\n";
+  }
   if (this->hostNoPort != "") {
     redirectStream << "Location: " << newAddressStream.str();
     this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectStream.str());
@@ -3964,13 +4015,14 @@ WebServer::WebServer() {
 
 void WebServer::Signal_SIGCHLD_handler(int s) {
   (void) s; //avoid unused parameter warning, portable.
-  if (theGlobalVariables.flagIsChildProcess)
+  if (theGlobalVariables.flagIsChildProcess) {
     return;
-  if (theGlobalVariables.flagServerDetailedLog)
+  }
+  if (theGlobalVariables.flagServerDetailedLog) {
     logProcessStats << "Detail: webServer received SIGCHLD signal. " << logger::endL;
+  }
   theWebServer.flagReapingChildren = true;
   theWebServer.ReapChildren();
-  theWebServer.flagReapingChildren = false;
 }
 
 void WebServer::ReapChildren() {
@@ -3978,7 +4030,7 @@ void WebServer::ReapChildren() {
   //main execution path. Any non-standard operations here may be racy.
   //Please avoid allocating RAM memory outside of the stack.
   //Do not use anything that is not thread-safe here.
-  //In particular, do not use any logger outside of logChildReaping as loggers are not thread-safe.
+  //In particular, do not use any loggers.
   int waitResult = 0;
   int exitFlags = WNOHANG| WEXITED;
   do {
@@ -4721,7 +4773,7 @@ void SignalsInfrastructure::initSignals() {
   //if (sigaddset(&SignalChild.sa_mask, SIGSEGV) == - 1)
   //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
   SignalChild.sa_flags = SA_NOCLDWAIT;
-  bool handleChildExit = false;
+  bool handleChildExit = true;
   if (handleChildExit) {
     logServer << logger::red << "Sected an unstable feature: signal child exit handler. "
     << " Please use with caution. " << logger::endL;
@@ -4823,16 +4875,21 @@ int WebServer::Run() {
     if (theGlobalVariables.flagServerDetailedLog) {
       logServer << logger::red << "Detail: About to enter select loop. " << logger::endL;
     }
+    theSignals.unblockSignals();
     while (select(this->highestSocketNumber + 1, &FDListenSockets, 0, 0, 0) == - 1) {
       if (this->flagReapingChildren) {
-        logServer << logger::yellow << "Select interrupted while reaping children. "
-        << logger::endL;
+        if (theGlobalVariables.flagServerDetailedLog) {
+          logServer << logger::yellow << "Interrupted while by child exit signal. "
+          << logger::endL;
+        }
+        this->flagReapingChildren = false;
       } else {
-        logServer << logger::red << " Select failed: possibly due to reaping children. Error message: "
+        logServer << logger::red << "Select failed: this is not expected. Error message: "
         << strerror(errno) << logger::endL;
       }
       this->NumFailedSelectsSoFar ++;
     }
+    theSignals.blockSignals();
     if (theGlobalVariables.flagServerDetailedLog) {
       logServer << logger::green << "Detail: select success. " << logger::endL;
     }
@@ -4925,7 +4982,6 @@ int WebServer::Run() {
     /////////////
     if (theGlobalVariables.flagServerDetailedLog)
       logProcessStats << "Detail: about to fork, sigprocmasking " << logger::endL;
-    theSignals.blockSignals();
     if (theGlobalVariables.flagServerDetailedLog) {
       logProcessStats << "Detail: Sigprocmask done. Proceeding to fork. "
       << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
@@ -4977,7 +5033,6 @@ int WebServer::Run() {
       << theGlobalVariables.GetElapsedMilliseconds() << " ms. "
       << "About to unmask signals. " << logger::endL;
     }
-    theSignals.unblockSignals();
     this->ReleaseWorkerSideResources();
   }
   this->ReleaseEverything();

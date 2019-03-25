@@ -78,7 +78,6 @@ public:
 #endif
 ////////////////////////////////////////////
 
-
 class WebServer;
 
 class WebWorker
@@ -314,6 +313,7 @@ public:
 #ifdef MACRO_use_open_ssl
   SSLdata theSSLdata;
 #endif
+  PointerObjectDestroyer<Calculator> theCalculator;
   MonomialCollection<MonomialWrapper<std::string, MathRoutines::HashString>, LargeInt> currentlyConnectedAddresses;
   List<std::string> PortsITryHttp;
   List<std::string> PortsITryHttpSSL;

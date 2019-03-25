@@ -4790,9 +4790,9 @@ int WebServer::Run() {
     }
   }
   this->initSignals();
-  if (theParser == 0)
-    theParser = new Calculator;
-  PointerObjectDestroyer<Calculator> calculatorDestroyer(theParser);
+  // This object will delete theParser when out of scope:
+  this->theCalculator.theObjectPointer = &theParser;
+  this->theCalculator.RenewObject();
   theParser->initialize();
   //cannot call initializeMutex here: not before we execute fork();
   theParser->ComputeAutoCompleteKeyWords();
@@ -4802,8 +4802,9 @@ int WebServer::Run() {
   theGlobalVariables.initModifiableDatabaseFields();
   HtmlRoutines::LoadStrings();
   theParser->flagShowCalculatorExamples = false;
-  if (!this->initPrepareWebServerALL())
+  if (!this->initPrepareWebServerALL()) {
     return 1;
+  }
   logServer << logger::purple << "server: waiting for connections...\r\n" << logger::endL;
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size = sizeof their_addr;
@@ -5037,12 +5038,12 @@ int WebWorker::Run() {
       return - 1;
     }
     this->numberOfReceivesCurrentConnection ++;
-    if (theParser == 0) {
-      theParser = new Calculator;
+    if (this->numberOfReceivesCurrentConnection > 1) {
+      this->parent->theCalculator.RenewObject();
       theParser->initialize();
-      logWorker << logger::blue << "Created new calculator for connection: " << this->numberOfReceivesCurrentConnection << logger::endL;
+      logWorker << logger::blue << "Created new calculator for connection: "
+      << this->numberOfReceivesCurrentConnection << logger::endL;
     }
-    PointerObjectDestroyer<Calculator> calculatorDestroyer(theParser);
     if (this->messageHead.size() == 0)
       break;
     result = this->ServeClient();
@@ -5726,7 +5727,7 @@ int WebServer::mainCommandLine() {
   MacroRegisterFunctionWithName("main_command_input");
   theGlobalVariables.IndicatorStringOutputFunction = HtmlRoutines::MakeStdCoutReport;
   PointerObjectDestroyer<Calculator> theDestroyer(theParser);
-  theParser = new Calculator;
+  theDestroyer.RenewObject();
   theParser->initialize();
   logger result("", 0, false, "server");
   if (theGlobalVariables.programArguments.size > 1) {
@@ -5786,7 +5787,7 @@ int WebServer::mainApache() {
   theWebServer.CreateNewActiveWorker();
   WebWorker& theWorker = theWebServer.GetActiveWorker();
   PointerObjectDestroyer<Calculator> theDestroyer(theParser);
-  theParser = new Calculator;
+  theDestroyer.RenewObject();
   theParser->initialize();
   std::cin >> theWorker.messageBody;
   theWebServer.httpSSLPort = "443";

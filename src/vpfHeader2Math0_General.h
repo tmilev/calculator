@@ -1203,7 +1203,7 @@ inline void Matrix<Element>::Resize(int r, int c, bool PReserveValues, const Ele
   int newActualNumCols = MathRoutines::Maximum(this->ActualNumCols, c);
   int newActualNumRows = MathRoutines::Maximum(this->ActualNumRows, r);
   if (r > this->ActualNumRows || c > this->ActualNumCols) {
-    newElements  = new Element*[newActualNumRows];
+    newElements  = new Element * [newActualNumRows];
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter += newActualNumRows;
   ParallelComputing::CheckPointerCounters();

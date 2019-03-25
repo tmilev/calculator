@@ -556,6 +556,37 @@ public:
   int outputHeight;
 };
 
+// This object wraps a regular pointer
+// and ensures the regular pointer is deleted
+// when the object goes out of scope.
+template <class Object>
+class PointerObjectDestroyer {
+  public:
+  Object** theObjectPointer;
+
+  void RenewObject() {
+    if (this->theObjectPointer == 0) {
+      crash << "Unexpeced: uninitialized object pointer. " << crash;
+    }
+    delete *(this->theObjectPointer);
+    *(this->theObjectPointer) = 0;
+    *(this->theObjectPointer) = new Object;
+  }
+  PointerObjectDestroyer() {
+    this->theObjectPointer = 0;
+  }
+  PointerObjectDestroyer(Object*& inputObject): theObjectPointer(&inputObject) {
+  }
+  ~PointerObjectDestroyer() {
+    if (this->theObjectPointer == 0) {
+      return;
+    }
+    delete *(this->theObjectPointer);
+    *(this->theObjectPointer) = 0;
+  }
+};
+
+// This is a wrapper-allocate-on-first-use around a regular object.
 template <class Object>
 class MemorySaving {
 private:
@@ -613,20 +644,6 @@ public:
     if (this->theCounter != 0)
       (*this->theCounter) --;
     this->theCounter = 0;
-  }
-};
-
-template <class Object>
-class PointerObjectDestroyer {
-  public:
-  Object** theObjectPointer;
-  PointerObjectDestroyer(Object*& inputObject): theObjectPointer(&inputObject) {
-    //std::cout << "Monitoring destruction of object at: " << inputObject << std::endl;
-  }
-  ~PointerObjectDestroyer() {
-    //std::cout << "Deleting object pointer at:  " << *(this->theObjectPointer) << std::endl;
-    delete *(this->theObjectPointer);
-    *(this->theObjectPointer) = 0;
   }
 };
 

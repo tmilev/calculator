@@ -1118,11 +1118,11 @@ bool XML::ReadFromFile(std::fstream& inputFile) {
   MacroRegisterFunctionWithName("XML::ReadFromFile");
   inputFile.seekg(0, std::fstream::end);
   unsigned int theFileSize = inputFile.tellg();
-  char* memblock = new char [theFileSize];
+  List<char> memoryBlock;
+  memoryBlock.SetSize(theFileSize);
   inputFile.seekg (0, std::fstream::beg);
-  inputFile.read (memblock, theFileSize);
-  this->theString = memblock;
-  delete[] memblock;
+  inputFile.read (memoryBlock.TheObjects, theFileSize);
+  this->theString.assign(memoryBlock.TheObjects, memoryBlock.size);
   return true;
 }
 

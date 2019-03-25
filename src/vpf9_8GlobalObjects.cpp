@@ -12,16 +12,19 @@ ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global
 GlobalVariables theGlobalVariables;
 std::string GlobalVariables::GetDateForLogFiles() {
   static std::string tempDate;
-  if (tempDate != "")
+  if (tempDate != "") {
     return tempDate;
+  }
   TimeWrapper now;
   now.AssignLocalTime();
   std::stringstream out;
   out << "GM_" << now.ToStringGM();
   tempDate = out.str();
-  for (unsigned i = 0; i < tempDate.size(); i ++)
-    if (tempDate[i] == ' ')
+  for (unsigned i = 0; i < tempDate.size(); i ++) {
+    if (tempDate[i] == ' ') {
       tempDate[i] = '_';
+    }
+  }
   return tempDate;
 }
 
@@ -85,8 +88,9 @@ void HtmlRoutines::MakeReportIndicatorFile(const std::string& input) {
   //    return;
   //std::cout << "Making report " << counter << " in file " << theGlobalVariables.PhysicalNameIndicatorWithPath << "<br>";
   std::fstream theFile;
-  FileOperations::OpenFileCreateIfNotPresentVirtual
-  (theFile, "output/" + theGlobalVariables.RelativePhysicalNameProgressReport, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(
+    theFile, "output/" + theGlobalVariables.RelativePhysicalNameProgressReport, false, true, false
+  );
   theFile << " Elapsed calculator time: " << theGlobalVariables.GetElapsedSeconds() << " second(s).";
   theFile << input;
   theFile.flush();

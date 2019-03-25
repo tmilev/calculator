@@ -82,8 +82,9 @@ std::string TimeWrapper::ToStringSecondsToDaysHoursSecondsString(double input, b
   std::stringstream out;
   out.precision(2);
   bool isPositive = (input > 0);
-  if (!isPositive)
+  if (!isPositive) {
     input *= - 1;
+  }
   int days = (int) FloatingPoint::floor(input / (24 * 3600));
   if (beShort && days > 0) {
     double daysfloat = input / (24 * 3600);
@@ -127,7 +128,6 @@ std::string TimeWrapper::ToStringLocal() const {
   return this->ToStringYMDHMS(&this->timeLocal);
 }
 
-
 std::string TimeWrapper::ToString() const {
   std::stringstream out;
   out
@@ -143,11 +143,13 @@ std::string TimeWrapper::ToString() const {
 void TimeWrapper::operator=(const std::string& input) {
   std::string inputNoDashes;
   inputNoDashes.reserve(input.size());
-  for (unsigned int i = 0; i < input.size(); i ++)
-    if (input[i] != '-')
+  for (unsigned int i = 0; i < input.size(); i ++) {
+    if (input[i] != '-') {
       inputNoDashes.push_back(input[i]);
-    else
+    } else {
       inputNoDashes.push_back(' ');
+    }
+  }
   std::stringstream inputStream;
   inputStream << inputNoDashes;
   inputStream.seekg(0);

@@ -51,12 +51,15 @@ struct TimerThreadData{
 };
 
 bool TimerThreadData::HandleComputationTimer() {
-  if (theGlobalVariables.flagComputationStarted)
-    if (this->computationStartTimeInMilliseconds < 0)
+  if (theGlobalVariables.flagComputationStarted) {
+    if (this->computationStartTimeInMilliseconds < 0) {
       this->computationStartTimeInMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+    }
+  }
   this->elapsedTimeInMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
-  if (this->computationStartTimeInMilliseconds > 0)
+  if (this->computationStartTimeInMilliseconds > 0) {
     this->elapsedComputationTimeInMilliseconds = this->elapsedTimeInMilliseconds - this->computationStartTimeInMilliseconds;
+  }
   return false;
 }
 
@@ -182,8 +185,9 @@ void TimerThreadData::Run() {
     this->HandleMaxComputationTime();
     this->HandleComputationTimeout();
     this->HandlePingServerIamAlive();
-    if (this->HandleEverythingIsDone())
+    if (this->HandleEverythingIsDone()) {
       break;
+    }
   }
 }
 
@@ -200,8 +204,9 @@ void CreateTimerThread() {
 
 void CallSystemWrapperNoOutput(const std::string& theCommand, bool ignoreNonZeroReturn) {
   int systemOutput = system(theCommand.c_str());
-  if (systemOutput != 0 && !ignoreNonZeroReturn)
+  if (systemOutput != 0 && !ignoreNonZeroReturn) {
     logWorker << logger::red << "System command: " << theCommand << " exited with " << systemOutput << ". " << logger::endL;
+  }
 }
 
 std::string CallSystemWrapperReturnStandardOutput(const std::string& inputCommand) {
@@ -222,7 +227,8 @@ std::string CallSystemWrapperReturnStandardOutput(const std::string& inputComman
 
 void CallChDirWrapper(const std::string& theDir) {
   int systemOutput = chdir(theDir.c_str());
-  if (systemOutput != 0)
+  if (systemOutput != 0) {
     logWorker << logger::red << "Chdir command to directory: " << theDir << " exited with " << systemOutput
     << ". " << logger::endL;
+  }
 }

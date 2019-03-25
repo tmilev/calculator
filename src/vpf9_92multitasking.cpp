@@ -24,8 +24,9 @@ void ParallelComputing::CheckPointerCounters() {
     << ParallelComputing::cgiLimitRAMuseNumPointersInList
     << ".</b>" << crash;
   }
-  if (ParallelComputing::PointerCounterPeakRamUse<ParallelComputing::GlobalPointerCounter)
+  if (ParallelComputing::PointerCounterPeakRamUse<ParallelComputing::GlobalPointerCounter) {
     ParallelComputing::PointerCounterPeakRamUse = ParallelComputing::GlobalPointerCounter;
+  }
 }
 
 void MutexRecursiveWrapper::CheckConsistency() {
@@ -53,10 +54,12 @@ ParallelComputing::GlobalPointerCounter ++;
 }
 
 bool MutexRecursiveWrapper::InitializeIfNeeded() {
-  if (this->flagInitialized)
+  if (this->flagInitialized) {
     return true;
-  if (!theGlobalVariables.flagServerForkedIntoWorker)
+  }
+  if (!theGlobalVariables.flagServerForkedIntoWorker) {
     return false;
+  }
   this->theMutexImplementation = new std::mutex;
   this->flagInitialized = true;
   return true;
@@ -170,12 +173,10 @@ ThreadData::~ThreadData() {
 }
 
 GlobalVariables::~GlobalVariables() {
-  //double startTime = this->GetElapsedSeconds();
-//  logBlock << logger::yellow << "joining threads ..." << logger::endL;
   this->flagComputationFinishedAllOutputSentClosing = true;
-  for (int i = 1; i < this->theThreads.size; i ++)
+  for (int i = 1; i < this->theThreads.size; i ++) {
     this->theThreads[i].join();
-//  logBlock << logger::yellow << " done in " << logger::green << this->GetElapsedSeconds()-startTime << " seconds. " << logger::endL;
+  }
 }
 
 void ThreadData::RegisterFirstThread(const std::string& inputName) {
@@ -210,23 +211,27 @@ void ThreadData::CreateThread(void (*InputFunction)(int), const std::string& inp
 int ThreadData::getCurrentThreadId() {
   std::thread::id currentId = std::this_thread::get_id();
   ListReferences<ThreadData>& theThreadData = theGlobalVariables.theThreadData;
-  for (int i = 0; i < theThreadData.size; i ++)
-    if (currentId == theThreadData[i].theId)
+  for (int i = 0; i < theThreadData.size; i ++) {
+    if (currentId == theThreadData[i].theId) {
       return i;
+    }
+  }
   return - 1;
 }
 
 std::string ThreadData::ToStringHtml() const {
   std::stringstream out;
-  if (this->getCurrentThreadId() == this->index)
+  if (this->getCurrentThreadId() == this->index) {
     out << "<span style =\"color:green\"><b>Current thread </b></span> ";
-  else
+  } else {
     out << "Thread ";
+  }
   out << "<span style =\"color:red\">";
-  if (this->name == "")
+  if (this->name == "") {
     out << "(thread name not set)";
-  else
+  } else {
     out << this->name;
+  }
   out << "</span>.";
   out << " Index: " << this->index << ", id: " << this->theId << ".";
   return out.str();

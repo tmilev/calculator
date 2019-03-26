@@ -18,15 +18,17 @@ public:
   }
   void RemoveKey(const key& theKey) {
     int theIndex = this->theKeys.GetIndex(theKey);
-    if (theIndex == - 1)
+    if (theIndex == - 1) {
       return;
+    }
     this->theKeys.RemoveIndexSwapWithLast(theIndex);
     this->theValues.RemoveIndexSwapWithLast(theIndex);
   }
   const value& GetValueConstCrashIfNotPresent(const key& input) const {
     int theIndex = this->theKeys.GetIndex(input);
-    if (theIndex == - 1)
+    if (theIndex == - 1) {
       crash << "Map does not contain key at a place where that is not allowed. " << crash;
+    }
     return this->theValues[theIndex];
   }
   value& GetValueCreate(const key& input) {
@@ -75,13 +77,13 @@ public:
     out << "{";
     for (int i = 0; i < this->size(); i ++) {
       out << "\"" << this->theKeys[i] << "\":\"" << this->theValues[i] << "\"";
-      if (i != this->size() - 1)
+      if (i != this->size() - 1) {
         out << ", ";
+      }
     }
     out << "}";
     return out.str();
   }
-
 };
 
 //using C++ 11, not sure if that is a good idea:

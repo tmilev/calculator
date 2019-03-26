@@ -256,8 +256,9 @@ public:
     this->MultiplyByInt(x);
   }
   inline void Minus() {
-    if (!this->IsEqualToZero())
+    if (!this->IsEqualToZero()) {
       this->sign *= - 1;
+    }
   }
   void operator+=(const LargeInt& other);
   inline void operator+=(const LargeIntUnsigned& other) {
@@ -279,18 +280,20 @@ public:
   }
   inline bool operator<(const LargeInt& other) const {
     if (other.IsPositiveOrZero()) {
-      if (this->IsPositiveOrZero())
+      if (this->IsPositiveOrZero()) {
         return this->value<other.value;
+      }
       return true;
     }
-    if (this->IsNegative())
+    if (this->IsNegative()) {
       return other.value < this->value;
+    }
     return false;
   }
   inline LargeInt operator+(const LargeInt& other) const {
     LargeInt tempInt;
-    tempInt = (*this);
-    tempInt += (other);
+    tempInt = *this;
+    tempInt += other;
     return tempInt;
   }
   inline LargeInt operator-(const LargeInt& other) const {
@@ -327,8 +330,9 @@ public:
     LargeIntUnsigned quotient, remainder;
     this->value.DivPositive(other.value, quotient, remainder);
     this->value = remainder;
-    if (this->IsNegative())
+    if (this->IsNegative()) {
       *this += other.value;
+    }
   }
   void RaiseToPower(int thePower) {
     MathRoutines::RaiseToPower(*this, thePower, (LargeInt) 1);
@@ -389,20 +393,30 @@ private:
   }
   inline bool TryToAddQuickly(int OtherNum, int OtherDen) {
     register int OtherNumAbs, thisNumAbs;
-    if (this->DenShort <= 0 || OtherDen <= 0)
-      crash << "This is a programming error: trying to add corrupt rational number(s) with denominators " << this->DenShort << " and " << OtherDen
+    if (this->DenShort <= 0 || OtherDen <= 0) {
+      crash << "This is a programming error: trying to add corrupt rational number(s) with denominators "
+      << this->DenShort << " and " << OtherDen
       << ". The cause of the error should be in some of the calling functions. " << crash;
-    if (OtherNum < 0)
+    }
+    if (OtherNum < 0) {
       OtherNumAbs = - OtherNum;
-    else
+    } else {
       OtherNumAbs = OtherNum;
-    if (this->NumShort < 0)
+    }
+    if (this->NumShort < 0) {
       thisNumAbs = - this->NumShort;
-    else
+    } else {
       thisNumAbs = this->NumShort;
-    if (////!this->flagMinorRoutinesOnDontUseFullPrecision &&
-        (this->Extended != 0 || thisNumAbs >= LargeIntUnsigned::SquareRootOfCarryOverBound || this->DenShort >= LargeIntUnsigned::SquareRootOfCarryOverBound || OtherNumAbs >= LargeIntUnsigned::SquareRootOfCarryOverBound || OtherDen >= LargeIntUnsigned::SquareRootOfCarryOverBound)  )
+    }
+    if (
+      this->Extended != 0 ||
+      thisNumAbs >= LargeIntUnsigned::SquareRootOfCarryOverBound ||
+      this->DenShort >= LargeIntUnsigned::SquareRootOfCarryOverBound ||
+      OtherNumAbs >= LargeIntUnsigned::SquareRootOfCarryOverBound ||
+      OtherDen >= LargeIntUnsigned::SquareRootOfCarryOverBound
+    ) {
       return false;
+    }
     register int N = this->NumShort * OtherDen + this->DenShort * OtherNum;
     register int D = this->DenShort * OtherDen;
     if (N == 0) {
@@ -412,10 +426,11 @@ private:
       return true;
     }
     register int tempGCD;
-    if (N > 0)
+    if (N > 0) {
       tempGCD = Rational::gcd(N, D);
-    else
+    } else {
       tempGCD = Rational::gcd(- N, D);
+    }
     this->NumShort = N / tempGCD;
     this->DenShort = D / tempGCD;
     MacroIncrementCounter(Rational::TotalSmallAdditions);
@@ -424,20 +439,23 @@ private:
   inline bool TryToMultiplyQuickly(int OtherNum, int OtherDen) {
     register int OtherNumAbs, thisNumAbs;
     if (this->DenShort <= 0 || OtherDen <= 0) {
-      if (DenShort == 0 || OtherDen == 0)
+      if (DenShort == 0 || OtherDen == 0) {
         crash << "This is a programming error: division by zero. ";
-      else
+      } else {
         crash << "This is a programming error during rational number multiplication: corrupt rational number denominator. ";
+      }
       crash << crash;
     }
-    if (OtherNum < 0)
+    if (OtherNum < 0) {
       OtherNumAbs = - OtherNum;
-    else
+    } else {
       OtherNumAbs = OtherNum;
-    if (this->NumShort < 0)
+    }
+    if (this->NumShort < 0) {
       thisNumAbs = - this->NumShort;
-    else
+    } else {
       thisNumAbs = this->NumShort;
+    }
     if (
       this->Extended != 0 ||
       thisNumAbs >= LargeIntUnsigned::SquareRootOfCarryOverBound ||
@@ -454,10 +472,11 @@ private:
       this->DenShort = 1;
     } else {
       register int tempGCD;
-      if (N > 0)
+      if (N > 0) {
         tempGCD = Rational::gcd(N, D);
-      else
+      } else {
         tempGCD = Rational::gcd(- N, D);
+      }
       this->NumShort = N / ((signed int) tempGCD);
       this->DenShort = D / tempGCD;
     }
@@ -475,8 +494,9 @@ private:
 #endif
   }
   bool InitExtendedFromShortIfNeeded() {
-    if (this->Extended != 0)
+    if (this->Extended != 0) {
       return false;
+    }
     this->Extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter ++;
@@ -487,8 +507,9 @@ private:
     return true;
   }
   inline void FreeExtended() {
-    if (this->Extended == 0)
+    if (this->Extended == 0) {
       return;
+    }
     delete this->Extended;
     this->Extended = 0;
 #ifdef AllocationLimitsSafeguard
@@ -498,7 +519,9 @@ private:
   }
   bool ShrinkExtendedPartIfPossible();
 public:
-  inline static std::string GetXMLClassName(){ return "Rational";}
+  inline static std::string GetXMLClassName(){
+    return "Rational";
+  }
   int NumShort;
   //the requirement that the below be unsigned caused a huge problem, so I
   //changed it back to int. Grrrrr.
@@ -539,8 +562,9 @@ public:
     if (this->Extended == 0) {
       unsigned int tempI = (unsigned int) this->DenShort;
       result.AssignShiftedUInt(tempI, 0);
-    } else
+    } else {
       result = (this->Extended->den);
+    }
     return result;
   }
   bool BeginsWithMinus() {
@@ -549,15 +573,18 @@ public:
   LargeInt GetNumerator() const {
     LargeInt result;
     if (this->Extended == 0) {
-      if (this->NumShort < 0)
+      if (this->NumShort < 0) {
         result.value.AssignShiftedUInt((unsigned int)(- this->NumShort), 0);
-      else
+      } else {
         result.value.AssignShiftedUInt((unsigned int) this->NumShort, 0);
-    } else
+      }
+    } else {
       result.value = this->Extended->num.value;
+    }
     result.sign = 1;
-    if (this->IsNegative())
+    if (this->IsNegative()) {
       result.sign = - 1;
+    }
     return result;
   }
   bool GetPrimeFactorsAbsoluteValue(
@@ -617,8 +644,9 @@ public:
   //See Note on Hashes before the definition of SomeRandomPrimes;
   unsigned int HashFunction() const {
     if (this->Extended == 0) {
-      if (this->NumShort == 0)
+      if (this->NumShort == 0) {
         return 0;
+      }
       return this->NumShort*SomeRandomPrimes[0] + this->DenShort * ::SomeRandomPrimes[1];
     }
     return this->Extended->num.HashFunction() * SomeRandomPrimes[0] +
@@ -636,17 +664,21 @@ public:
   bool IsInteger(LargeInt* whichInteger = 0) const;
   bool IsIntegerFittingInInt(int* whichInt) const {
     LargeInt theInt;
-    if (!this->IsInteger(&theInt))
+    if (!this->IsInteger(&theInt)) {
       return false;
+    }
     return theInt.IsIntegerFittingInInt(whichInt);
   }
   bool IsSmallInteger(int* whichInteger = 0) const {
-    if (this->Extended != 0)
+    if (this->Extended != 0) {
       return false;
-    if (this->DenShort != 1)
+    }
+    if (this->DenShort != 1) {
       return false;
-    if (whichInteger != 0)
+    }
+    if (whichInteger != 0) {
       *whichInteger = this->NumShort;
+    }
     return true;
   }
   bool IsGreaterThan(const Rational& r) const;
@@ -670,8 +702,9 @@ public:
       tempDen = x;
       tempSign = 1;
     }
-    if (this->TryToMultiplyQuickly(tempSign, tempDen))
+    if (this->TryToMultiplyQuickly(tempSign, tempDen)) {
       return;
+    }
     this->InitExtendedFromShortIfNeeded();
     this->Extended->den.MultiplyByUInt(((unsigned int)tempDen));
     this->Extended->num.sign *= tempSign;
@@ -699,16 +732,18 @@ public:
     return tempRat.IsInteger();
   }
   inline bool IsEqualToOne() const {
-    if (this->Extended == 0)
+    if (this->Extended == 0) {
       return (this->NumShort == 1 && this->DenShort == 1);
-    else
+    } else {
       return (this->Extended->num.IsEqualToOne() && this->Extended->den.IsEqualToOne());
+    }
   }
   inline bool IsEqualToZero() const {
-    if (this->Extended == 0)
+    if (this->Extended == 0) {
       return this->NumShort == 0;
-    else
+    } else {
       return this->Extended->num.IsEqualToZero();
+    }
   }
   inline bool operator<=(const Rational& other) const {
     return !(other < *this);
@@ -721,10 +756,11 @@ public:
     }
   }
   bool IsNegative() const {
-    if (this->Extended == 0)
+    if (this->Extended == 0) {
       return this->NumShort < 0;
-    else
+    } else {
       return this->Extended->num.IsNegative();
+    }
   }
   bool IsNonPositive() const {
     if (this->Extended == 0) {
@@ -762,7 +798,7 @@ public:
         return this->NumShort / this->DenShort;
       }
     }
-    crash << crash;
+    crash << "This piece of code should not be reached. " << crash;
     return - 1;
   }
   void MakeZero() {
@@ -784,8 +820,9 @@ public:
   void ReadFromFile(std::istream& input);
   void DrawElement(DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue() {
-    if (this->IsNegative())
+    if (this->IsNegative()) {
       this->Minus();
+    }
   }
   static long long int TotalAdditions() {
     return Rational::TotalLargeAdditions + Rational::TotalSmallAdditions;
@@ -832,7 +869,6 @@ public:
   Rational(const std::string& input): NumShort(0), DenShort(0), Extended(0) {
     this->AssignString(input);
   }
-//  Rational(int x){this->Extended = 0; this->AssignInteger(x); };
   ~Rational() {
     this->FreeExtended();
   }
@@ -857,8 +893,9 @@ public:
     return this->CheckConsistency();
   }
   inline bool CheckConsistency() {
-    if (this->Extended == 0)
+    if (this->Extended == 0) {
       return this->DenShort > 0;
+    }
     return true;
   }
   void operator=(const AlgebraicNumber& other);
@@ -872,8 +909,9 @@ public:
   }
   void operator=(const Polynomial<Rational>& other);
   bool operator==(const int other) const {
-    if (other == 0)
+    if (other == 0) {
       return this->IsEqualToZero();
+    }
     return this->IsEqualTo(other);
   }
   inline bool operator==(const Rational& right) const {
@@ -909,12 +947,9 @@ public:
   inline void operator*=(const Rational& right) {
     this->MultiplyBy(right);
   }
-//  inline void operator*=(const Polynomial<Rational>& right);
   void operator/=(const Rational& right) {
     this->DivideBy(right);
   }
-//  inline void operator/=(const LargeInt& right){Rational tempRat; tempRat =right; this->DivideBy(tempRat);}
-//  inline void operator/=(const LargeIntUnsigned& right){Rational tempRat; tempRat =right; this->DivideBy(tempRat);}
   void operator+=(int right) {
     this->AddInteger(right);
   }
@@ -922,7 +957,6 @@ public:
     Rational tempRat = right;
     this->Subtract(tempRat);
   }
-//  inline bool operator==(int right){Rational tempRat; tempRat.AssignInteger(right); return this->IsEqualTo(tempRat); }
   void operator=(int right) {
     this->AssignInteger(right);
   }
@@ -930,10 +964,6 @@ public:
     this->AssignLargeInteger(other);
   }
   Rational operator*(const Rational& right) const;
-//  { Rational result =*this;
-//    result*=right;
-//    return result;
-//  }
   void operator++(int) {
     *this += 1;
   }
@@ -949,7 +979,7 @@ public:
     tempRat.DivideByInteger(right);
     return tempRat;
   }
-  Vector<Rational>  operator*(const Vector<Rational> & right) const;
+  Vector<Rational> operator*(const Vector<Rational> & right) const;
   Rational operator+(const Rational& right) const;
   Rational operator-(const Rational& right) const;
   Rational operator/(const Rational& right) const;

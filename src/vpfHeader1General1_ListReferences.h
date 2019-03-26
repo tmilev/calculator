@@ -4,7 +4,9 @@
 #define vpfHeader3_already_included
 
 #include "vpfHeader1General0_General.h"
-static ProjectInformationInstance ProjectInfoVpfHeader3(__FILE__, "Header, ListReferences and HashedListReferences implementation. ");
+static ProjectInformationInstance ProjectInfoVpfHeader3(
+  __FILE__, "Header, ListReferences and HashedListReferences implementation. "
+);
 
 //class ListReferences is to be used in the same way as class List.
 //The essential difference between ListReferences and List is in the way the objects are
@@ -38,16 +40,22 @@ public:
   List<Object*> theReferences;
   int size;
   Object& operator[](int i) const {
-    if (i < 0 || i >= this->size)
-      crash << "This is a programing error: attempting to access element of index " << i << " in ListReferences that has only " << this->size << " elements. " << crash;
-    if (this->theReferences[i] == 0)
-      crash << "This is a programing error: element of index " << i << " in ListReferences has zero pointer. This is not allowed. " << crash;
+    if (i < 0 || i >= this->size) {
+      crash << "This is a programing error: attempting to access element of index "
+      << i << " in ListReferences that has only " << this->size << " elements. " << crash;
+    }
+    if (this->theReferences[i] == 0) {
+      crash << "This is a programing error: element of index "
+      << i << " in ListReferences has zero pointer. This is not allowed. " << crash;
+    }
     return *this->theReferences[i];
   }
   bool Contains(const Object& theObject) const {
-    for (int i = 0; i < this->size; i ++)
-      if ((*this)[i] == theObject)
+    for (int i = 0; i < this->size; i ++) {
+      if ((*this)[i] == theObject) {
         return true;
+      }
+    }
     return false;
   }
   void RemoveIndexSwapWithLast(int theIndex) {
@@ -74,8 +82,9 @@ public:
   }
   void SetExpectedSize(int theSize) {
     int newSize = (theSize * 6) / 5;
-    if (newSize > 0)
+    if (newSize > 0) {
       this->AllocateElements(newSize);
+    }
   }
   void KillAllElements();
   void KillElementIndex(int i) {
@@ -86,12 +95,14 @@ public:
   int GetIndex(const Object& o) const;
   bool ContainsExactlyOnce(const Object& o) const {
     bool result = false;
-    for (int i = 0; i < this->size; i ++)
+    for (int i = 0; i < this->size; i ++) {
       if ((*this)[i] == o) {
-        if (result)
+        if (result) {
           return false;
+        }
         result = true;
       }
+    }
     return result;
   }
   int AddNoRepetitionOrReturnIndexFirst(const Object& o) {
@@ -103,12 +114,14 @@ public:
     return indexOfObject;
   }
   void operator=(const ListReferences<Object>& other) {
-    if (this == &other)
+    if (this == &other) {
       return;
+    }
     this->KillAllElements();
     this->Reserve(other.size);
-    for (int i = 0; i < other.size; i ++)
+    for (int i = 0; i < other.size; i ++) {
       this->AddOnTop(other[i]);
+    }
   }
   Object& LastObject() const {
     return (*this)[this->size - 1];
@@ -118,7 +131,6 @@ public:
     MathRoutines::QuickSortAscending(*this, theOrder, carbonCopy);
   }
   ListReferences():flagDeallocated(false), size(0) {
-   
   }
   ~ListReferences() {
     this->flagDeallocated = true;
@@ -128,16 +140,20 @@ public:
 
 template<class Object>
 void ListReferences<Object>::AllocateElements(int newSize) {
-  if (newSize < 0)
-    crash << "This is a programming error: requested to set negative size " << newSize << " of List of References. If a "
-    << " List is to be set empty, then one should call SetSize(0), rather than provide a negative argument to SetSize." << crash;
+  if (newSize < 0) {
+    crash << "This is a programming error: requested to set negative size "
+    << newSize << " of List of References. If a "
+    << " List is to be set empty, then one should call SetSize(0), "
+    << "rather than provide a negative argument to SetSize." << crash;
+  }
   if (newSize <= this->theReferences.size) {
     return;
   }
   int oldReferencesSize = this->theReferences.size;
   this->theReferences.SetSize(newSize);
-  for (int i = oldReferencesSize; i < newSize; i ++)
+  for (int i = oldReferencesSize; i < newSize; i ++) {
     this->theReferences[i] = (new Object);
+  }
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter += newSize - oldReferencesSize;
   ParallelComputing::CheckPointerCounters();

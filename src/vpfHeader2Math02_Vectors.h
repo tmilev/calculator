@@ -288,14 +288,17 @@ public:
   }
   void MakeZero(int theDim) {
     this->SetSize(theDim);
-    for (int i = 0; i < theDim; i ++)
+    for (int i = 0; i < theDim; i ++) {
       (*this)[i] = 0;
+    }
   }
   int GetNumNonZeroCoords() const {
     int result = 0;
-    for (int i = 0; i < this->size; i ++)
-      if (!this->TheObjects[i].IsEqualToZero())
+    for (int i = 0; i < this->size; i ++) {
+      if (!this->TheObjects[i].IsEqualToZero()) {
         result ++;
+      }
+    }
     return result;
   }
   bool IsProportionalTo(const Vector<coefficient>& other, coefficient& TimesMeEqualsOther) const;
@@ -314,31 +317,22 @@ public:
     this->SetSize(newDimension);
     this->RootScalarEuclideanRoot(normal, point, this->TheObjects[newDimension - 1]);
     this->TheObjects[newDimension - 1].Minus();
-    for (int j = 0; j < newDimension - 1; j ++)
+    for (int j = 0; j < newDimension - 1; j ++) {
       this->TheObjects[j] = normal[j];
+    }
   }
   bool ProjectToAffineSpace(Vector<coefficient> &output) {
-    if (this->TheObjects[this->size - 1].IsEqualToZero())
+    if (this->TheObjects[this->size - 1].IsEqualToZero()) {
       return false;
+    }
     output.SetSize(this->size - 1);
-    for (int i = 0; i < this->size - 1; i ++)
+    for (int i = 0; i < this->size - 1; i ++) {
       output[i] = this->TheObjects[i];
+    }
     output /= this->TheObjects[this->size - 1];
     return true;
   }
   bool MakeAffineProjectionFromNormal(affineHyperplane<Rational>& output);
-/*  { int tempI= this->GetIndexFirstNonZeroCoordinate();
-    if (tempI == this->size- 1)
-      return false;
-    output.affinePoint.MakeZero(this->size- 1);
-    output.normal.SetSize(this->size- 1);
-    output.affinePoint[tempI].Assign(*this->LastObject());
-    output.affinePoint[tempI].Minus();
-    output.affinePoint[tempI].DivideBy(this->TheObjects[tempI]);
-    for (int i = 0; i < this->size- 1; i ++)
-      output.normal[i] = this->TheObjects[i];
-    return true;
-  }*/
   int GetIndexFirstNonZeroCoordinate() {
     for (int i = 0; i < this->size; i ++) {
       if (!this->TheObjects[i].IsEqualToZero()) {
@@ -357,38 +351,45 @@ public:
   }
   Vector<coefficient> GetShiftToTheLeft(int numPositions) {
     Vector<coefficient> result;
-    if (numPositions > this->size)
+    if (numPositions > this->size) {
       crash << "You requested a shift of " << numPositions << " positions in a vector with "
       << this->size << "elements" << crash;
+    }
     result.SetSize(this->size - numPositions);
-    for (int i = 0; i < result.size; i ++)
+    for (int i = 0; i < result.size; i ++) {
       result[i] = this->TheObjects[i + numPositions];
+    }
     return result;
   }
   inline void ShiftToTheLeftOnePos() {
     this->ShiftToTheLeft(1);
   }
   void ShiftToTheLeft(int numPositions) {
-    if (numPositions > this->size)
-      crash << crash;
-    for (int i = 0; i < this->size - numPositions; i ++)
+    if (numPositions > this->size) {
+      crash << "Bad vector shift. " << crash;
+    }
+    for (int i = 0; i < this->size - numPositions; i ++) {
       this->TheObjects[i] = this->TheObjects[i + numPositions];
+    }
     this->size -= numPositions;
   }
   void ShiftToTheRightInsertZeroes(int numPositions, const coefficient& theRingZero) {
     if (numPositions < 0)
-      crash << crash;
+      crash << "Bad vector shift, cannot fill with zeroes. " << crash;
     this->SetSize(this->size + numPositions);
-    for (int i = this->size - 1; i >= numPositions; i --)
+    for (int i = this->size - 1; i >= numPositions; i --) {
       this->TheObjects[i] = this->TheObjects[i - numPositions];
-    for (int i = 0; i < numPositions; i ++)
+    }
+    for (int i = 0; i < numPositions; i ++) {
       this->TheObjects[i] = theRingZero;
+    }
   }
   void SetDimInsertZeroes(int newDim) {
     int oldDim = this->size;
     this->SetSize(newDim);
-    for (int i = oldDim; i < newDim; i ++)
+    for (int i = oldDim; i < newDim; i ++) {
       (*this)[i] = 0;
+    }
   }
   bool GetIntegralCoordsInBasisIfTheyExist(
     const Vectors<coefficient>& inputBasis,
@@ -399,12 +400,6 @@ public:
     const coefficient& theRingMinusUnit,
     const coefficient& theRingZero
   );
-/*  template<class OtherType>
-  void operator=(const Vector<OtherType>& other) {
-    this->SetSize(other.size);
-    for (int i = 0; i <other.size; i ++)
-      this->TheObjects[i] = other.TheObjects[i];
-  }*/
   void GetVectorsPerpendicularTo(
     Vectors<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero
   ) {
@@ -444,8 +439,10 @@ public:
     return result;
   }
   Vector<coefficient> operator/(const coefficient& other) const {
-    if (other.IsEqualToZero())
-      crash << "This is a programming error: division by zero. Division by zero error are supposed to be handled at an earlier level. " << crash;
+    if (other.IsEqualToZero()) {
+      crash << "This is a programming error: division by zero. "
+      << "Division by zero error are supposed to be handled at an earlier level. " << crash;
+    }
     Vector<coefficient> result;
     result.SetSize(this->size);
     for (int i = 0; i < this->size; i ++) {
@@ -477,32 +474,39 @@ public:
     return this->::List<coefficient>::operator>(other);
   }
   bool operator>(const Vector<coefficient>& other) const {
-    if (this->size != other.size)
+    if (this->size != other.size) {
       crash << "This is a programming error: comparing Vectors with different number of coordinates, namely, "
       << this->ToString() << " and " << other.ToString() << ". " << crash;
+    }
     coefficient c1 = 0, c2 = 0;
     for (int i = 0; i < this->size; i ++) {
       c1 += this->TheObjects[i];
       c2 += other.TheObjects[i];
     }
-    if (c1 > c2)
+    if (c1 > c2) {
       return true;
-    if (c2 > c1)
+    }
+    if (c2 > c1) {
       return false;
+    }
     for (int i = this->size - 1; i >= 0; i --) {
-      if (this->TheObjects[i] > other.TheObjects[i])
+      if (this->TheObjects[i] > other.TheObjects[i]) {
         return true;
-      if (other.TheObjects[i] > this->TheObjects[i])
+      }
+      if (other.TheObjects[i] > this->TheObjects[i]) {
         return false;
+      }
     }
     return false;
   }
   template <class otherType>
   void operator-=(const Vector<otherType>& other) {
-    if (this->size != other.size)
+    if (this->size != other.size) {
       crash << "This is a programming error: subtracting vectors with different dimensions. " << crash;
-    for (int i = 0; i < this->size; i ++)
+    }
+    for (int i = 0; i < this->size; i ++) {
       this->TheObjects[i] -= other[i];
+    }
   }
   Vector<coefficient> operator+(const Vector<coefficient>& right) const {
     Vector<coefficient> result = *this;
@@ -516,17 +520,20 @@ public:
   }
   template <class otherType>
   void operator=(const Vector<otherType>& other) {
-    if (this == (Vector<coefficient>*) &other)
+    if (this == (Vector<coefficient>*) &other) {
       return;
+    }
     this->SetSize(other.size);
-    for (int i = 0; i < other.size; i ++)
+    for (int i = 0; i < other.size; i ++) {
       this->TheObjects[i] = other[i];
+    }
   }
   template <class otherType>
   void operator=(const List<otherType>& other) {
     this->SetSize(other.size);
-    for (int i = 0; i < other.size; i ++)
+    for (int i = 0; i < other.size; i ++) {
       this->TheObjects[i] = other[i];
+    }
   }
   void operator=(const Selection& other);
   void operator=(const SelectionWithMultiplicities& other);
@@ -551,13 +558,15 @@ public:
   void ReadFromFile(std::fstream& input) {
     std::string tempS;
     input >> tempS;
-    if (tempS != "root_dim:")
-      crash << crash;
+    if (tempS != "root_dim:") {
+      crash << "Failed to read vector from file. " << crash;
+    }
     int tempI;
     input >> tempI;
     this->SetSize(tempI);
-    for (int i = 0; i < this->size; i ++)
+    for (int i = 0; i < this->size; i ++) {
       this->TheObjects[i].ReadFromFile(input);
+    }
   }
   inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables) {
     this->WriteToFile(output);
@@ -617,8 +626,9 @@ template <class coefficient>
 bool Vector<coefficient>::IsProportionalTo(
   const Vector<coefficient>& input, coefficient& outputTimesMeEqualsInput
 ) const {
-  if (this->size != input.size)
+  if (this->size != input.size) {
     return false;
+  }
   int IndexFirstNonZero = - 1;
   for (int i = 0; i < this->size; i ++) {
     if (!this->TheObjects[i].IsEqualToZero()) {
@@ -670,25 +680,33 @@ class Vectors: public List<Vector<coefficient> > {
   std::string ElementToStringEpsilonForm(bool useLatex, bool useHtml, bool makeTable) {
     std::string tempS;
     std::stringstream out;
-    if (useLatex)
+    if (useLatex) {
       useHtml = false;
-    if (useHtml && makeTable)
+    }
+    if (useHtml && makeTable) {
       out << "<table>";
-    if (useLatex && makeTable)
+    }
+    if (useLatex && makeTable) {
       out << "\\begin{array}{l}";
+    }
     for (int i = 0; i < this->size; i ++) {
       tempS = this->TheObjects[i].ToStringEpsilonFormat();
-      if (useHtml && makeTable)
+      if (useHtml && makeTable) {
         out << "<tr><td>";
-      if (!useLatex && useHtml)
+      }
+      if (!useLatex && useHtml) {
         out << "(";
+      }
       out << tempS;
-      if (!useLatex && useHtml)
+      if (!useLatex && useHtml) {
         out << ")";
-      if (useLatex && makeTable)
+      }
+      if (useLatex && makeTable) {
         out << "\\\\";
-      if (useHtml && makeTable)
+      }
+      if (useHtml && makeTable) {
         out << "</td></tr>";
+      }
       if (!makeTable) {
         if (i != this->size - 1) {
           out << ", ";
@@ -697,15 +715,21 @@ class Vectors: public List<Vector<coefficient> > {
         out << "\n";
       }
     }
-    if (useLatex && makeTable)
+    if (useLatex && makeTable) {
       out << "\\end{array}";
-    if (useHtml && makeTable)
+    }
+    if (useHtml && makeTable) {
       out << "</table>";
+    }
     return out.str();
   }
-  std::string ElementsToInequalitiesString(bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat) const;
+  std::string ElementsToInequalitiesString(
+    bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat
+  ) const;
   std::string ToString(FormatExpressions* theFormat = 0) const;
-  bool LinearAlgebraForVertexComputation(Selection& theSelection, Vector<coefficient>& output, Matrix<coefficient>& buffer, Selection& NonPivotPointsBuffer);
+  bool LinearAlgebraForVertexComputation(
+    Selection& theSelection, Vector<coefficient>& output, Matrix<coefficient>& buffer, Selection& NonPivotPointsBuffer
+  );
   void GetVectorsDouble(Vectors<double>& output) {
     output.SetSize(this->size);
     for (int i = 0; i < this->size; i ++) {
@@ -720,8 +744,9 @@ class Vectors: public List<Vector<coefficient> > {
   }
   void AssignListList(const List<Vectors<coefficient> >& input) {
     int count = 0;
-    for (int i = 0; i < input.size; i ++)
+    for (int i = 0; i < input.size; i ++) {
       count += input[i].size;
+    }
     this->SetSize(0);
     this->Reserve(count);
     for (int i = 0; i < input.size; i ++) {
@@ -777,22 +802,26 @@ class Vectors: public List<Vector<coefficient> > {
   void SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output);
   void SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex);
   void SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex);
-  void GetGramMatrix(Matrix<coefficient>& output, const Matrix<Rational>* theBilinearForm= 0) const;
+  void GetGramMatrix(Matrix<coefficient>& output, const Matrix<Rational>* theBilinearForm = 0) const;
   void GetMatrixRootsToRows(Matrix<Rational>& output) const;
-  void GetOrthogonalComplement(Vectors<coefficient>& output, Matrix<Rational>* theBilinearForm= 0);
-  bool LinSpanContainsVector(const Vector<coefficient>& input, Matrix<coefficient>& bufferMatrix, Selection& bufferSelection) const;
+  void GetOrthogonalComplement(Vectors<coefficient>& output, Matrix<Rational>* theBilinearForm = 0);
+  bool LinSpanContainsVector(
+    const Vector<coefficient>& input, Matrix<coefficient>& bufferMatrix, Selection& bufferSelection
+  ) const;
   void MakeEiBasis(int theDimension) {
     this->SetSize(theDimension);
-    for (int i = 0; i < this->size; i ++)
+    for (int i = 0; i < this->size; i ++) {
       this->TheObjects[i].MakeEi(theDimension, i);
+    }
   }
   bool LinSpanContainsVector(const Vector<coefficient>& input) const {
     Matrix<coefficient> buffer;
     Selection bufferSelection;
     return this->LinSpanContainsVector(input, buffer, bufferSelection);
   }
-  static void SelectABasisInSubspace
-  (const List<Vector<coefficient> >& input, List<Vector<coefficient> >& output, Selection& outputSelectedPivots);
+  static void SelectABasisInSubspace(
+    const List<Vector<coefficient> >& input, List<Vector<coefficient> >& output, Selection& outputSelectedPivots
+  );
   int GetRankOfSpanOfElements(Matrix<coefficient>* buffer = 0, Selection* bufferSelection = 0) const;
   static bool ConesIntersect(
     List<Vector<Rational> >& StrictCone,
@@ -883,8 +912,16 @@ class Vectors: public List<Vector<coefficient> > {
     return out.str();
   }
   bool ComputeNormalExcludingIndex(Vector<coefficient>& output, int index, Matrix<coefficient>& bufferMatrix);
-  bool ComputeNormalFromSelection(Vector<coefficient>& output, Selection& theSelection, Matrix<coefficient>& bufferMatrix, int theDimension);
-  bool ComputeNormalFromSelectionAndExtraRoot(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot, Selection& theSelection, Matrix<coefficient>& bufferMatrix, Selection& bufferSel);
+  bool ComputeNormalFromSelection(
+    Vector<coefficient>& output, Selection& theSelection, Matrix<coefficient>& bufferMatrix, int theDimension
+  );
+  bool ComputeNormalFromSelectionAndExtraRoot(
+    Vector<coefficient>& output,
+    Vector<coefficient>& ExtraRoot,
+    Selection& theSelection,
+    Matrix<coefficient>& bufferMatrix,
+    Selection& bufferSel
+  );
   bool ComputeNormalFromSelectionAndTwoExtraRoots(
     Vector<coefficient>& output,
     Vector<coefficient>& ExtraRoot1,
@@ -947,30 +984,37 @@ class Vectors: public List<Vector<coefficient> > {
     }
   }
   int GetDim() const {
-    if (this->size > 0)
+    if (this->size > 0) {
       return this->TheObjects[0].size;
+    }
     return - 1;
   }
-  void BeefUpWithEiToLinearlyIndependentBasis(int theDim, const coefficient& ringUnit =(coefficient) 1, const coefficient& ringZero =(coefficient) 0) {
+  void BeefUpWithEiToLinearlyIndependentBasis(
+    int theDim, const coefficient& ringUnit =(coefficient) 1, const coefficient& ringZero = (coefficient) 0
+  ) {
     Selection BufferSel;
     Matrix<coefficient> Buffer;
-    if (this->size != 0 && theDim != this->GetDim())
-      crash << crash;
+    if (this->size != 0 && theDim != this->GetDim()) {
+      crash << "Vector dimension is incorrect. " << crash;
+    }
     int currentRank = this->GetRankOfSpanOfElements(Buffer, BufferSel);
-    if (currentRank == theDim)
+    if (currentRank == theDim) {
       return;
+    }
     Vector<coefficient> theVect;
     for (int i = 0; i < theDim && currentRank < theDim; i ++) {
       theVect.MakeEi(theDim, i);
       this->AddOnTop(theVect);
       int candidateRank = this->GetRankOfSpanOfElements(Buffer, BufferSel);
-      if (candidateRank > currentRank)
+      if (candidateRank > currentRank) {
         currentRank = candidateRank;
-      else
+      } else {
         this->size --;
+      }
     }
-    if (currentRank != theDim)
-      crash << crash;
+    if (currentRank != theDim) {
+      crash << "Rank does not match dimension. " << crash;
+    }
   }
   void ChooseABasis() {
     Vectors<Rational> output;
@@ -978,8 +1022,9 @@ class Vectors: public List<Vector<coefficient> > {
     Selection tempSel;
     for (int i = 0; i < this->size; i ++) {
       output.AddOnTop(this->TheObjects[i]);
-      if (output.GetRankOfSpanOfElements(&tempMat, &tempSel) < output.size)
+      if (output.GetRankOfSpanOfElements(&tempMat, &tempSel) < output.size) {
         output.RemoveLastObject();
+      }
     }
     this->operator=(output);
   }
@@ -1029,20 +1074,23 @@ bool Vector<coefficient>::AssignString(const std::string& input) {
 
 template <class coefficient>
 bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output) const {
-  if (inputBasis.size == 0)
+  if (inputBasis.size == 0) {
     return false;
+  }
   MacroRegisterFunctionWithName("Vector::GetCoordsInBasiS");
   Vectors<coefficient> bufferVectors;
   Matrix<coefficient> bufferMat;
-  if (this->size != inputBasis[0].size)
+  if (this->size != inputBasis[0].size) {
     crash << "This is a programming error: asking to get coordinates of vector of "
     << this->size << " coordinates using a basis whose first vector has "
     << inputBasis[0].size << " coordinates." << crash;
+  }
   bufferVectors.Reserve(inputBasis.size + 1);
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddOnTop(*this);
-  if (!bufferVectors.GetLinearDependence(bufferMat))
+  if (!bufferVectors.GetLinearDependence(bufferMat)) {
     return false;
+  }
   coefficient tempCF = bufferMat(bufferMat.NumRows - 1, 0);
   bufferMat /= tempCF;
   output.SetSize(bufferMat.NumRows - 1);
@@ -1054,10 +1102,13 @@ bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasi
 }
 
 template <class coefficient>
-void Vectors<coefficient>::GetLinearDependenceRunTheLinearAlgebra(Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints) {
+void Vectors<coefficient>::GetLinearDependenceRunTheLinearAlgebra(
+  Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints
+) {
   MacroRegisterFunctionWithName("Vectors::GetLinearDependenceRunTheLinearAlgebra");
-  if (this->size == 0)
+  if (this->size == 0) {
     return;
+  }
   int Dimension = (int) (*this)[0].size;
   outputTheSystem.init(Dimension, (int)this->size);
   for (int i = 0; i < this->size; i ++) {
@@ -1075,7 +1126,8 @@ bool Vectors<coefficient>::LinSpanContainsVector(
   Vectors<coefficient> tempVectors;
   tempVectors = (*this);
   tempVectors.AddOnTop(input);
-  return this->GetRankOfSpanOfElements(&bufferMatrix, &bufferSelection) == tempVectors.GetRankOfSpanOfElements(&bufferMatrix, &bufferSelection);
+  return this->GetRankOfSpanOfElements(&bufferMatrix, &bufferSelection) ==
+  tempVectors.GetRankOfSpanOfElements(&bufferMatrix, &bufferSelection);
 }
 
 template <class coefficient>
@@ -1123,7 +1175,6 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist(
   output.MakeZero(inputBasis.size);
   theCombination = *this;
   int col = 0;
-//  stOutput << "<br>vector whose coords we wanna find: " << this->ToString();
   for (int i = 0; i < inputBasis.size; i ++) {
     for (; col < theDim; col ++) {
       if (!bufferMatGaussianElimination.elements[i][col].IsEqualToZero()) {
@@ -1139,8 +1190,9 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist(
     tempRoot *= output[i];
     theCombination -= tempRoot;
   }
-  if (!theCombination.IsEqualToZero())
+  if (!theCombination.IsEqualToZero()) {
     return false;
+  }
   bufferMatGaussianEliminationCC.ActMultiplyVectorRowOnTheRight(output);
   return true;
 }
@@ -1163,7 +1215,9 @@ void Vectors<coefficient>::GetGramMatrix(Matrix<coefficient>& output, const Matr
 }
 
 template<class coefficient>
-bool Vectors<coefficient>::ContainsARootNonPerpendicularTo(const Vector<coefficient>& input, const Matrix<coefficient>& theBilinearForm) {
+bool Vectors<coefficient>::ContainsARootNonPerpendicularTo(
+  const Vector<coefficient>& input, const Matrix<coefficient>& theBilinearForm
+) {
   for (int i = 0; i < this->size; i ++) {
     if (!Vector<coefficient>::ScalarProduct(this->TheObjects[i], input, theBilinearForm).IsEqualToZero()) {
       return true;
@@ -1174,8 +1228,9 @@ bool Vectors<coefficient>::ContainsARootNonPerpendicularTo(const Vector<coeffici
 
 template<class coefficient>
 int Vectors<coefficient>::ArrangeFirstVectorsBeOfMaxPossibleRank(Matrix<coefficient>& bufferMat, Selection& bufferSel) {
-  if (this->size == 0)
+  if (this->size == 0) {
     return 0;
+  }
   int theDimension = this->GetDimensionOfElements();
   Vectors<Rational> tempRoots;
   int oldRank = 0;
@@ -1186,8 +1241,9 @@ int Vectors<coefficient>::ArrangeFirstVectorsBeOfMaxPossibleRank(Matrix<coeffici
       tempRoots.RemoveIndexSwapWithLast(tempRoots.size - 1);
     } else {
       this->SwapTwoIndices(oldRank, i);
-      if (oldRank + 1 != newRank)
-        crash << "Old rank plus one must equal new rank." << crash;
+      if (oldRank + 1 != newRank) {
+        crash << "Old rank plus one must equal new rank. " << crash;
+      }
       oldRank = newRank;
     }
     if (oldRank == theDimension) {
@@ -1225,8 +1281,9 @@ bool affineHyperplane<coefficient>::operator==(const affineHyperplane& right) {
   tempRoot2 = right.normal;
   tempRoot1.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
   tempRoot2.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-  if (!(tempRoot1 == tempRoot2))
+  if (!(tempRoot1 == tempRoot2)) {
     return false;
+  }
   Rational tempRat1, tempRat2;
   tempRoot1.ScalarEuclidean(this->affinePoint, tempRat1);
   tempRoot1.ScalarEuclidean(right.affinePoint, tempRat2);
@@ -1246,10 +1303,12 @@ Vector<coefficient> affineHyperplane<coefficient>::ProjectOnMe(Vector<coefficien
 template <class coefficient>
 bool affineHyperplane<coefficient>::ProjectFromFacetNormal(Vector<coefficient>& input) {
   int tempI = input.GetIndexFirstNonZeroCoordinate();
-  if (tempI == - 1)
-    crash << crash;
-  if (tempI == input.size - 1)
+  if (tempI == - 1) {
+    crash << "No non-zero coordinate found. " << crash;
+  }
+  if (tempI == input.size - 1) {
     return false;
+  }
   this->affinePoint.MakeZero(input.size);
   this->affinePoint.SetSize(input.size - 1);
   this->affinePoint[tempI] = input[input.size - 1];
@@ -1272,14 +1331,17 @@ template <class coefficient>
 bool affineHyperplane<coefficient>::HasACommonPointWithPositiveTwoToTheNth_ant() {
   Rational tempRat;
   tempRat = this->normal.ScalarEuclidean(this->affinePoint);
-  if (tempRat.IsEqualToZero())
+  if (tempRat.IsEqualToZero()) {
     return true;
+  }
   for (int i = 0; i < this->normal.size; i ++) {
     Rational& tempRat2 = this->normal[i];
-    if (tempRat.IsNegative() && tempRat2.IsNegative())
+    if (tempRat.IsNegative() && tempRat2.IsNegative()) {
       return true;
-    if (tempRat.IsPositive() && tempRat2.IsPositive())
+    }
+    if (tempRat.IsPositive() && tempRat2.IsPositive()) {
       return true;
+    }
   }
   return false;
 }

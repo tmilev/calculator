@@ -60,8 +60,9 @@ public:
   void (*WebServerTimerPing)(int64_t pingTime);
   void (*PauseUponUserRequest)();
   void Pause() {
-    if (this->PauseUponUserRequest != 0)
+    if (this->PauseUponUserRequest != 0) {
       this->PauseUponUserRequest();
+    }
   }
   void FallAsleep(int microseconds);
   //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
@@ -337,7 +338,5 @@ class logger {
     return *this;
   }
 };
-
-
 #endif
 

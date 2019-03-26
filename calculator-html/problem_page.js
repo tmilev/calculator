@@ -803,7 +803,9 @@ Problem.prototype.getHTMLSection = function() {
     result += `<div class = "headSection">${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}</div>`;    
   }
   result += `<div class = "bodySection">`;
-  if (this.isProblemContainer()) {
+  if (this.type === "subSection") {
+    result += this.getHTMLSubSection();
+  } else if (this.isProblemContainer()) {
     result += this.getHTMLProblems();
   } else if (this.type === "section") {
     for (var counterSection = 0; counterSection < this.childrenIds.length; counterSection ++) {

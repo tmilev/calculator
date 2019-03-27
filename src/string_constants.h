@@ -37,6 +37,13 @@ public:
     static std::string status;
     static std::string crashReport;
   };
+  struct problem {
+    static std::string title;
+    static std::string fileName;
+    static std::string idProblem; //<- a little more specific than just id, easier to string-search
+    static std::string deadlineSingle;
+    static std::string failedToLoadProblem;
+  };
   struct databaseParameters {
     static std::string entryPoint;
     static std::string labels;
@@ -47,9 +54,6 @@ public:
   static std::string problemContent;
   static std::string commentsProblem;
   static std::string commentsServer;
-  static std::string problemFileName;
-  static std::string problemId;
-  static std::string problemSingleDeadline;
   struct UserInfo {
     static std::string processMonitoring;
   };

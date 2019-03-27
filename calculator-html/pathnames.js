@@ -27,6 +27,9 @@ var urlFields = {
     database: "database",
     serverStatusJSON: "serverStatusJSON",
   },
+  problem: {
+    failedToLoadProblem: "Failed to load problem. ",
+  },
   teachersAndSections: "teachersAndSections",
   fileName: "fileName",
   mainInput: "mainInput",

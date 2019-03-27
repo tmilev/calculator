@@ -561,6 +561,7 @@ function Page() {
   this.previousProblemId = null;
   this.problems = {};
   this.theChapterIds = {};
+  this.lastKnownGoodProblemFileName = "";
   this.user = new User();
   this.aceEditorAutoCompletionWordList = [];
   this.flagDoSubmitCalculatorComputation = true;

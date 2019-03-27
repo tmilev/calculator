@@ -5,7 +5,9 @@
 
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 
-static ProjectInformationInstance ProjectInfoVpfSSlieAlgRootSAs(__FILE__, "Header, root and sl2 subalgebras of semisimple Lie algebras. ");
+static ProjectInformationInstance ProjectInfoVpfSSlieAlgRootSAs(
+  __FILE__, "Header, root and sl2 subalgebras of semisimple Lie algebras. "
+);
 
 class coneRelation {
 public:
@@ -26,19 +28,44 @@ public:
   void ComputeTheDiagramAndDiagramRelAndK(rootSubalgebra& owner);
   void ComputeDiagramRelAndK(rootSubalgebra& owner);
   void FixRepeatingRoots(Vectors<Rational>& theRoots, List<Rational>& coeffs);
-  void RelationOneSideToString(std::string& output, const std::string& letterType, List<Rational>& coeffs, List<List<int> >& kComponents, Vectors<Rational>& theRoots, bool useLatex, rootSubalgebra& owner);
-  int ToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts);
-  int RootsToScalarProductString(Vectors<Rational>& inputLeft, Vectors<Rational>& inputRight, const std::string& letterTypeLeft, const std::string& letterTypeRight, std::string& output, rootSubalgebra& owner);
+  void RelationOneSideToString(
+    std::string& output,
+    const std::string& letterType,
+    List<Rational>& coeffs,
+    List<List<int> >& kComponents,
+    Vectors<Rational>& theRoots,
+    bool useLatex,
+    rootSubalgebra& owner
+  );
+  int ToString(
+    std::string& output,
+    rootSubalgebras& owners,
+    bool useLatex,
+    bool includeScalarsProductsEachSide,
+    bool includeMixedScalarProducts
+  );
+  int RootsToScalarProductString(
+    Vectors<Rational>& inputLeft,
+    Vectors<Rational>& inputRight,
+    const std::string& letterTypeLeft,
+    const std::string& letterTypeRight,
+    std::string& output,
+    rootSubalgebra& owner
+  );
   void ComputeConnectedComponents(Vectors<Rational>& input, rootSubalgebra& owner, List<List<int> >& output);
   void ComputeDebugString(rootSubalgebras& owner, bool includeScalarsProducts, bool includeMixedScalarProducts) {
     this->ToString(this->DebugString, owner, true, includeScalarsProducts, includeMixedScalarProducts);
   }
   void MakeLookCivilized(rootSubalgebra& owner);
-  bool IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots, rootSubalgebras& owners, int indexInOwner);
+  bool IsStrictlyWeaklyProhibiting(
+    rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots, rootSubalgebras& owners, int indexInOwner
+  );
   void FixRightHandSide(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
   bool leftSortedBiggerThanOrEqualToRight(List<int>& left, List<int>& right);
   void ComputeKComponents(Vectors<Rational>& input, List<List<int> >& output, rootSubalgebra& owner);
-  void RelationOneSideToStringCoordForm(std::string& output, List<Rational>& coeffs, Vectors<Rational>& theRoots, bool EpsilonForm);
+  void RelationOneSideToStringCoordForm(
+    std::string& output, List<Rational>& coeffs, Vectors<Rational>& theRoots, bool EpsilonForm
+  );
   void GetSumAlphas(Vector<Rational>& output, int theDimension);
   bool CheckForBugs(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
   void SortRelation(rootSubalgebra& owner);
@@ -160,7 +187,6 @@ public:
   List<List<int> > potentialExtensionRootPermutations;
   List<DynkinType> potentialExtensionDynkinTypes;
   VectorSparse<Rational> moduleDecompoAmbientAlgebraDimensionsOnly;
-//  int indexInOwners;
   rootSubalgebra();
   ~rootSubalgebra() {
     this->flagDeallocated = true;
@@ -191,15 +217,37 @@ public:
   bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, Vector<Rational>& input);
   void ComputeEpsCoordsWRTk();
   bool AttemptTheTripleTrick(coneRelation& theRel, Vectors<Rational>& NilradicalRoots);
-  bool AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, Vectors<Rational>& highestWeightsAllowed, Vectors<Rational>& NilradicalRoots);
-  void ExtractRelations(Matrix<Rational>& matA, Matrix<Rational>& matX, Vectors<Rational>& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, Vectors<Rational>& Ksingular);
+  bool AttemptTheTripleTrickWRTSubalgebra(
+    coneRelation& theRel, Vectors<Rational>& highestWeightsAllowed, Vectors<Rational>& NilradicalRoots
+  );
+  void ExtractRelations(
+    Matrix<Rational>& matA,
+    Matrix<Rational>& matX,
+    Vectors<Rational>& NilradicalRoots,
+    rootSubalgebras& owner,
+    int indexInOwner,
+    Vectors<Rational>& Ksingular
+  );
   bool GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, SubgroupWeylGroupOLD* outputAutomorphisms);
   void GenerateAutomorphismsPreservingBorel(SubgroupWeylGroupOLD& outputAutomorphisms);
   void MakeGeneratingSingularVectors(coneRelation& theRelation, Vectors<Rational>& nilradicalRoots);
-  bool attemptExtensionToIsomorphismNoCentralizer(Vectors<Rational>& Domain, Vectors<Rational>& Range, int RecursionDepth, SubgroupWeylGroupOLD* outputAutomorphisms, bool GenerateAllpossibleExtensions, bool* abortKmodule, Vectors<Rational>* additionalDomain, Vectors<Rational>* additionalRange);
-  static bool attemptExtensionToIsomorphism
-  (Vectors<Rational>& Domain, Vectors<Rational>& Range, SubgroupWeylGroupOLD* outputAutomorphisms,
-   rootSubalgebras& inputOwner, bool* DomainAndRangeGenerateNonIsoSAs);
+  bool attemptExtensionToIsomorphismNoCentralizer(
+    Vectors<Rational>& Domain,
+    Vectors<Rational>& Range,
+    int RecursionDepth,
+    SubgroupWeylGroupOLD* outputAutomorphisms,
+    bool GenerateAllpossibleExtensions,
+    bool* abortKmodule,
+    Vectors<Rational>* additionalDomain,
+    Vectors<Rational>* additionalRange
+  );
+  static bool attemptExtensionToIsomorphism(
+    Vectors<Rational>& Domain,
+    Vectors<Rational>& Range,
+    SubgroupWeylGroupOLD* outputAutomorphisms,
+    rootSubalgebras& inputOwner,
+    bool* DomainAndRangeGenerateNonIsoSAs
+  );
   bool CheckForSmallRelations(coneRelation& theRel, Vectors<Rational>& nilradicalRoots);
   int NumRootsInNilradical();
   void MakeSureAlphasDontSumToRoot(coneRelation& theRel, Vectors<Rational>& NilradicalRoots);
@@ -209,20 +257,55 @@ public:
   void DoKRootsEnumeration();
   void ComputeModuleDecompoAmbientAlgebraDimensionsOnly();
   void ComputeCentralizerFromKModulesAndSortKModules();
-  void MatrixToRelation(coneRelation& output, Matrix<Rational>& matA, Matrix<Rational>& matX, int theDimension, Vectors<Rational>& NilradicalRoots);
+  void MatrixToRelation(
+    coneRelation& output, Matrix<Rational>& matA, Matrix<Rational>& matX, int theDimension, Vectors<Rational>& NilradicalRoots
+  );
   void DoKRootsEnumerationRecursively(int indexEnumeration);
   void MakeProgressReportPossibleNilradicalComputation(rootSubalgebras& owner);
   void MakeProgressReportGenAutos(int progress, int outOf, int found);
-  bool IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth, List<List<List<int> > >& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner);
-  bool IsAnIsomorphism(Vectors<Rational>& domain, Vectors<Rational>& range, SubgroupWeylGroupOLD* outputAutomorphisms, Vectors<Rational>* additionalDomain, Vectors<Rational>* additionalRange);
+  bool IndexIsCompatibleWithPrevious(
+    int startIndex,
+    int RecursionDepth,
+    List<List<List<int> > >& multTable,
+    List<Selection>& impliedSelections,
+    List<int>& oppositeKmods,
+    rootSubalgebras& owner
+  );
+  bool IsAnIsomorphism(
+    Vectors<Rational>& domain,
+    Vectors<Rational>& range,
+    SubgroupWeylGroupOLD* outputAutomorphisms,
+    Vectors<Rational>* additionalDomain,
+    Vectors<Rational>* additionalRange
+  );
   bool ListHasNonSelectedIndexLowerThanGiven(int index, List<int>& tempList, Selection& tempSel);
-  void GeneratePossibleNilradicalsRecursive(PauseThread& PauseMutex, List<List<List<int> > >& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
-  void GeneratePossibleNilradicals(PauseThread& PauseMutex, List<Selection>& impliedSelections, int& parabolicsCounter, bool useParabolicsInNilradical, rootSubalgebras& owner, int indexInOwner);
+  void GeneratePossibleNilradicalsRecursive(
+    PauseThread& PauseMutex,
+    List<List<List<int> > >& multTable,
+    List<Selection>& impliedSelections,
+    List<int>& oppositeKmods,
+    rootSubalgebras& owner,
+    int indexInOwner
+  );
+  void GeneratePossibleNilradicals(
+    PauseThread& PauseMutex,
+    List<Selection>& impliedSelections,
+    int& parabolicsCounter,
+    bool useParabolicsInNilradical,
+    rootSubalgebras& owner,
+    int indexInOwner
+  );
   void GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, int& parabolicsCounter);
   void WriteToFileNilradicalGeneration(std::fstream& output);
   void ReadFromFileNilradicalGeneration(std::fstream& input, rootSubalgebras& owner);
   bool ConeConditionHolds(rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
-  bool ConeConditionHolds(rootSubalgebras& owner, int indexInOwner, Vectors<Rational>& NilradicalRoots, Vectors<Rational>& Ksingular, bool doExtractRelations);
+  bool ConeConditionHolds(
+    rootSubalgebras& owner,
+    int indexInOwner,
+    Vectors<Rational>& NilradicalRoots,
+    Vectors<Rational>& Ksingular,
+    bool doExtractRelations
+  );
   void PossibleNilradicalComputation(Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
   std::string ToString(FormatExpressions* theFormat = 0);
   void ToHTML(int index, FormatExpressions* theFormat);
@@ -251,9 +334,15 @@ public:
   void initNoOwnerReset();
   void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2();
   bool LinCombToString(const Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output);
-  bool LinCombToStringDistinguishedIndex(int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational> & linComb, std::string& output);
-  void WriteMultTableAndOppositeKmodsToFile(std::fstream& output, List<List<List<int> > >& inMultTable, List<int>& inOpposites);
-  void ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites);
+  bool LinCombToStringDistinguishedIndex(
+    int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational> & linComb, std::string& output
+  );
+  void WriteMultTableAndOppositeKmodsToFile(
+    std::fstream& output, List<List<List<int> > >& inMultTable, List<int>& inOpposites
+  );
+  void ReadMultTableAndOppositeKmodsFromFile(
+    std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites
+  );
   bool operator>(const rootSubalgebra& other) const;
 };
 
@@ -321,7 +410,9 @@ public:
   int GetIndexSubalgebraIsomorphicTo(rootSubalgebra& input);
   int GetIndexUpToEquivalenceByDiagramsAndDimensions(const rootSubalgebra& theSA);
   int IndexSubalgebra(rootSubalgebra& input);
-  void ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(List<rootSubalgebra>& bufferSAs, int RecursionDepth);
+  void ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
+    List<rootSubalgebra>& bufferSAs, int RecursionDepth
+  );
   void SortDescendingOrderBySSRank();
   void WriteToDefaultFileNilradicalGeneration();
   bool ReadFromDefaultFileNilradicalGeneration();
@@ -391,14 +482,18 @@ public:
   bool CheckConsistency() const;
 
   SltwoSubalgebras& GetContainerSl2s() {
-    if (this->container == 0)
-      crash << "This is a programming error: attempting to access the container list of a non-initialized sl(2)-subalgebra. " << crash;
+    if (this->container == 0) {
+      crash << "This is a programming error: attempting to "
+      << "access the container list of a non-initialized sl(2)-subalgebra. " << crash;
+    }
     return *this->container;
   }
   WeylGroupData& GetOwnerWeyl();
   SemisimpleLieAlgebra& GetOwnerSSAlgebra() {
-    if (this->owner == 0)
-      crash << "This is a programming error: attempting to access the ambient Lie algebra of a non-initialized sl(2)-subalgebra. " << crash;
+    if (this->owner == 0) {
+      crash << "This is a programming error: attempting to access "
+      << "the ambient Lie algebra of a non-initialized sl(2)-subalgebra. " << crash;
+    }
     return *this->owner;
   }
   std::string ToString(FormatExpressions* theFormat = 0) const;
@@ -474,16 +569,17 @@ public:
     this->flagDeallocated = true;
   }
   SltwoSubalgebras(): owner(0), flagDeallocated(false) {
-   
   }
   SltwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner), flagDeallocated(false) {
    
   }
   bool operator==(const SltwoSubalgebras& other) const {
-    if (this->owner == 0)
+    if (this->owner == 0) {
       return other.owner == 0;
-    if (other.owner == 0)
+    }
+    if (other.owner == 0) {
       return false;
+    }
     return this->GetOwner() == other.GetOwner();
   }
   bool CheckConsistency() const;

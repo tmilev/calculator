@@ -100,8 +100,7 @@ Vector<coefficient> branchingData::ProjectWeight(Vector<coefficient>& input) {
   return result;
 }
 
-class GeneralizedVermaModuleCharacters
-{
+class GeneralizedVermaModuleCharacters {
 public:
   inline static const std::string GetXMLClassName() {
     return "GeneralizedVermaCharacters";
@@ -166,11 +165,13 @@ public:
     Vector<Rational>  parSel;
     parSel = this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
     input >> tempS >> this->computationPhase;
-    if (tempS != "ComputationPhase:")
-      crash << crash;
+    if (tempS != "ComputationPhase:") {
+      crash << "Reading generalized characters from file failed. " << crash;
+    }
     bool result = true;
-    if (this->computationPhase != 0)
+    if (this->computationPhase != 0) {
       result = this->ReadFromFileNoComputationPhase(input);
+    }
     XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
     return result;
   }
@@ -247,8 +248,9 @@ public:
   }
   void GetDegree(Polynomial<Rational>& output) {
     output.MakeZero(this->Coefficient.NumVars);
-    for (int i = 0; i < this->generatorsIndices.size; i ++)
+    for (int i = 0; i < this->generatorsIndices.size; i ++) {
       output += this->Powers[i];
+    }
   }
   bool GetElementUniversalEnveloping(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebraOrdered& owner);
   bool IsEqualToZero() const {
@@ -296,8 +298,9 @@ public:
   }
   void SubstitutionCoefficients(PolynomialSubstitution<Rational>& theSub);
   bool operator==(const MonomialUniversalEnvelopingOrdered& other) const {
-    if (this->owner != other.owner)
+    if (this->owner != other.owner) {
       crash << "Attempt to compare universal enveloping algebra monomials with different owners. " << crash;
+    }
     return this->Powers == other.Powers && this->generatorsIndices == other.generatorsIndices;
   }
   void operator*=(const MonomialUniversalEnvelopingOrdered& other);
@@ -392,15 +395,20 @@ public:
   }
   void Simplify(const coefficient& theRingUnit = 1,  const coefficient& theRingZero = 0);
   int GetNumVars() const {
-    if (this->size == 0)
+    if (this->size == 0) {
       return 0;
-    else
+    } else {
       return this->TheObjects[0].Coefficient.NumVars;
+    }
   }
   inline void MultiplyBy(const ElementUniversalEnvelopingOrdered& other) {
     this->operator*=(other);
   }
-  void ModOutVermaRelations(const List<coefficient>* subHiGoesToIthElement = 0, const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0);
+  void ModOutVermaRelations(
+    const List<coefficient>* subHiGoesToIthElement = 0,
+    const coefficient& theRingUnit = 1,
+    const coefficient& theRingZero = 0
+  );
   void ModOutVermaRelationSOld(
     bool SubHighestWeightWithZeroes,
     const PolynomialSubstitution<Rational>& highestWeightSub,
@@ -437,19 +445,24 @@ public:
   );
   void RaiseToPower(int thePower, const coefficient& theRingUnit);
   bool IsAPowerOfASingleGenerator() {
-    if (this->size != 1)
+    if (this->size != 1) {
       return false;
+    }
     MonomialUniversalEnvelopingOrdered<coefficient>& tempMon = this->TheObjects[0];
-    if (!tempMon.Coefficient.IsEqualToOne())
+    if (!tempMon.Coefficient.IsEqualToOne()) {
       return false;
-    if (tempMon.generatorsIndices.size != 1)
+    }
+    if (tempMon.generatorsIndices.size != 1) {
       return false;
+    }
     return true;
   }
   void MakeCasimir(SemisimpleLieAlgebraOrdered& theOwner, int numVars);
   void ActOnMe(const ElementSemisimpleLieAlgebra<Rational>& theElt, ElementUniversalEnvelopingOrdered& output);
   void LieBracketOnTheRight(const ElementUniversalEnvelopingOrdered& right, ElementUniversalEnvelopingOrdered& output);
-  void LieBracketOnTheRight(const ElementSemisimpleLieAlgebra<Rational>& right, const coefficient& ringUnit, const coefficient& ringZero);
+  void LieBracketOnTheRight(
+    const ElementSemisimpleLieAlgebra<Rational>& right, const coefficient& ringUnit, const coefficient& ringZero
+  );
   void operator=(const ElementUniversalEnvelopingOrdered& other) {
     this->::HashedList<MonomialUniversalEnvelopingOrdered<coefficient> >::operator=(other);
     this->owner = other.owner;
@@ -476,7 +489,11 @@ public:
   ElementUniversalEnvelopingOrdered() {
     this->owner = 0;
   }
-  bool IsProportionalTo(const ElementUniversalEnvelopingOrdered<coefficient>& other, coefficient& outputTimesMeEqualsOther, const coefficient& theRingZero) const;
+  bool IsProportionalTo(
+    const ElementUniversalEnvelopingOrdered<coefficient>& other,
+    coefficient& outputTimesMeEqualsOther,
+    const coefficient& theRingZero
+  ) const;
   ElementUniversalEnvelopingOrdered(const ElementUniversalEnvelopingOrdered& other) {
     this->operator=(other);
   }
@@ -486,17 +503,18 @@ public:
     for (int i = 0; i < this->size; i ++) {
       MonomialUniversalEnvelopingOrdered<coefficient>& currentMon = this->TheObjects[i];
       currentMon.Coefficient.ClearDenominators(currentCoeff);
-      for (int j = 0; j < this->size; j ++)
-        if (j != i)
+      for (int j = 0; j < this->size; j ++) {
+        if (j != i) {
           this->TheObjects[j].Coefficient *= currentCoeff;
+        }
+      }
       outputWasMultipliedBy *= currentCoeff;
     }
   }
 };
 
 template <class coefficient>
-class ElementVermaModuleOrdered
-{
+class ElementVermaModuleOrdered {
 public:
   ElementUniversalEnvelopingOrdered<coefficient> theElT;
   std::string DebugString;

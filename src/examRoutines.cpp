@@ -458,7 +458,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
   double startTime = theGlobalVariables.GetElapsedSeconds();
   this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore, desiredRandomSeed, commentsOnFailure);
   if (!this->flagLoadedSuccessfully) {
-    return "Failed to load problem. ";
+    return WebAPI::problem::failedToLoadProblem;
   }
   std::stringstream out;
   if (!this->InterpretHtml(commentsOnFailure)) {
@@ -4720,15 +4720,14 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner) {
     output["queryHomework"] = this->queryHomework;
   }
   output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSectioN;
-  //stOutput << "DEBUG: deadlinesPerSection: " << this->deadlinesPerSectioN.ToStringCommaDelimited();
   if (!theGlobalVariables.UserDefaultHasProblemComposingRights()) {
     std::string theDeadline = owner.GetDeadlineNoInheritance(this->id);
-    output[WebAPI::problemSingleDeadline] = theDeadline;
+    output[WebAPI::problem::deadlineSingle] = theDeadline;
   }
   output["handwrittenSolution"] = this->handwrittenSolution;
 
-  output[WebAPI::problemFileName] = this->problemFileName;
-  output[WebAPI::problemId] = this->id;
+  output[WebAPI::problem::fileName] = this->problemFileName;
+  output[WebAPI::problem::idProblem] = this->id;
   if (theGlobalVariables.flagDatabaseCompiled) {
     if (owner.currentUseR.theProblemData.Contains(this->problemFileName)) {
       ProblemData& currentData = owner.currentUseR.theProblemData.GetValueCreate(this->problemFileName);

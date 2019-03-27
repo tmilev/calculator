@@ -63,6 +63,7 @@ Problem.prototype.initialize = function(problemData, inputParentIdURLed) {
     slides: "",
     homework: "",
   };
+  this.badProblemString = "";
   if (problemData.deadlines !== undefined) {
     this.deadlines = problemData.deadlines;
   } 
@@ -106,6 +107,20 @@ Problem.prototype.initialize = function(problemData, inputParentIdURLed) {
   this.initializePartTwo(problemData, inputParentIdURLed);
 }
 
+Problem.prototype.computeBadProblemString = function() {
+  var thePage = window.calculator.mainPage;
+  if (!this.decodedProblem.includes(pathnames.urlFields.problem.failedToLoadProblem)) {
+    thePage.lastKnownGoodProblemFileName = this.fileName;
+    this.badProblemString = "";
+    return;
+  }
+  this.badProblemString = "";
+  this.badProblemString += "It appears your problem failed to load. ";
+
+  this.badProblemString += "Perhaps you may like to clone the last good known problem. ";
+  this.badProblemString += editPage.getClonePanel(thePage.lastKnownGoodProblemFileName, this.fileName);
+}
+
 Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) {
   var thePage = window.calculator.mainPage;
   this.decodedProblem = decodeURIComponent(problemData["problemContent"]);
@@ -143,6 +158,7 @@ Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) 
       flagCalculatorPanel:  false,
     });
   }
+  this.computeBadProblemString();
   this.writeToHTML(ids.domElements.problemPageContentContainer);
   var problemLinkWithRandomSeed = document.getElementById(ids.domElements.spanProblemLinkWithRandomSeed);
   if (problemLinkWithRandomSeed !== null) {
@@ -442,7 +458,7 @@ Problem.prototype.writeToHTML = function(outputElement) {
   topPart += this.getEditPanel();
   topPart += "</div>";
   topPart += "<br>";
-  outputElement.innerHTML = topPart + this.decodedProblem + this.commentsProblem;
+  outputElement.innerHTML = topPart + this.badProblemString + this.decodedProblem + this.commentsProblem;
   for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++) {
     this.onePanel(this.answers[counterAnswers]);
   }
@@ -954,7 +970,9 @@ function updateProblemPage() {
       var courseBody = document.getElementById(ids.domElements.problemPageContentContainer); 
       var temporarySelectProblem = "buttonTemporarySelectProblem";
       var selectProblemHtml = "";
-      selectProblemHtml += `Problems are selected from the <button id = '${temporarySelectProblem}' class = "buttonSelectPage buttonSlowTransition buttonFlash" style = "width:150px" onclick = "window.calculator.mainPage.selectPage('currentCourse')">Current course</button>`;
+      selectProblemHtml += `Problems are selected from the <button id = '${temporarySelectProblem}'`;
+      selectProblemHtml += `class = "buttonSelectPage buttonSlowTransition buttonFlash" style = "width:150px"`; 
+      selectProblemHtml += `onclick = "window.calculator.mainPage.selectPage('currentCourse')">Current course</button>`;
       selectProblemHtml += "<br>To select a problem, click Practice or Quiz within the course page. ";
       courseBody.innerHTML = selectProblemHtml;
       setTimeout(() => {

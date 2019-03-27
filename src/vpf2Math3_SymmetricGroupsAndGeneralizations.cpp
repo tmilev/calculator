@@ -280,23 +280,25 @@ std::string Partition::ToStringForArticles
 
 List<int> Tableau::TurnIntoList() const {
   List<int> out;
-  for (int i = 0; i < this->t.size; i ++)
-    for (int j = 0; j < this->t[i].size; j ++)
+  for (int i = 0; i < this->t.size; i ++) {
+    for (int j = 0; j < this->t[i].size; j ++) {
       out.AddOnTop(this->t[i][j]);
-  return out;
-}
-
-List<List<int> > Tableau::GetColumns() const {
-  List<List<int> > out;
-  if (this->t.size == 0)
-    return out;
-  out.SetSize(this->t[0].size);
-  for (int i = 0; i < this->t[0].size; i ++) {
-    for (int j = 0; j < t.size && t[j].size > i; j ++) {
-      out[i].AddOnTop(t[j][i]);
     }
   }
   return out;
+}
+
+void Tableau::GetColumns(List<List<int> >& output) const {
+  output.SetSize(0);
+  if (this->t.size == 0) {
+    return;
+  }
+  output.SetSize(this->t[0].size);
+  for (int i = 0; i < this->t[0].size; i ++) {
+    for (int j = 0; j < t.size && t[j].size > i; j ++) {
+      output[i].AddOnTop(t[j][i]);
+    }
+  }
 }
 
 bool Tableau::IsStandard() const {

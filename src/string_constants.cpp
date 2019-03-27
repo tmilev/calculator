@@ -7,8 +7,6 @@ std::string WebAPI::app = "app";
 std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
 
 std::string WebAPI::problemContent = "problemContent";
-std::string WebAPI::problemFileName = "fileName";
-std::string WebAPI::problemId = "id";
 std::string WebAPI::commentsProblem = "commentsProblem";
 std::string WebAPI::commentsServer = "commentsServer";
 
@@ -19,8 +17,6 @@ std::string WebAPI::databaseParameters::entryPoint = "database";
 std::string WebAPI::databaseParameters::labels = "databaseLabels";
 std::string WebAPI::databaseParameters::operation = "databaseOperation";
 std::string WebAPI::databaseParameters::fetch = "databaseFetch";
-
-std::string WebAPI::problemSingleDeadline = "deadline";
 
 std::string WebAPI::result::error = "error";
 std::string WebAPI::result::status = "status";
@@ -34,6 +30,12 @@ std::string WebAPI::result::timeOut = "timeOut";
 std::string WebAPI::result::timeOutComments = "timeOutComments";
 std::string WebAPI::result::workerId = "workerId";
 std::string WebAPI::result::crashReport = "crashReport";
+
+std::string WebAPI::problem::title = "title";
+std::string WebAPI::problem::fileName = "fileName";
+std::string WebAPI::problem::idProblem = "id";
+std::string WebAPI::problem::deadlineSingle = "deadline";
+std::string WebAPI::problem::failedToLoadProblem = "Failed to load problem. ";
 
 std::string WebAPI::request::calculatorHTML = "/calculator-html";
 std::string WebAPI::request::onePageJS = "/calculator-html/javascript_all_in_one.js";

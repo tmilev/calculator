@@ -28,6 +28,27 @@ function ctrlSPressAceEditorHandler(event) {
   storeEditedPage();
 }
 
+/**@returns {string} */
+function getClonePanel(
+  /**@type{string} */
+  fileNameSource, 
+  /**@type{string} */
+  fileNameTarget
+) {
+  var result = "";
+  result += `<span class = "panelDeadlines">`;
+  var idCloneInput = encodeURIComponent(`cloneButton${fileNameSource}`);
+  var idSpanClonePageReport = encodeURIComponent(`cloneButtonReport${fileNameSource}`);
+  result += `<button class = 'buttonClone' style = 'width:50px' onclick = `;
+  result += `"window.calculator.editPage.handleClone('${fileNameSource}', '${idCloneInput}', '${idSpanClonePageReport}')">Clone</button>`;
+  var sizeFile = fileNameTarget.length;
+  result += `<input type = "text" value = '${fileNameTarget}' size = '${sizeFile}' id = '${idCloneInput}'></input>`;
+  result += `<div id = "${idSpanClonePageReport}"></div>`;
+  result += "</span>";
+  return result;
+}
+
+/**@returns {string} */
 function getEditPanel(fileName) {
   var thePage = window.calculator.mainPage;
   if (!thePage.user.hasProblemEditRights() || thePage.studentView()) {
@@ -40,15 +61,7 @@ function getEditPanel(fileName) {
   result += `<div class = 'spanFileInfo'>`;
   result += `<button class = "buttonSaveEdit" onclick = "window.calculator.editPage.selectEditPage('${fileName}');" style = 'width:50px'>Edit</button> ${fileName} `;
   result += `<button class = "accordionLike" onclick = "window.calculator.editPage.toggleClonePanel(this)">Clone panel &#9666;</button>`;
-  result += `<span class = "panelDeadlines">`;
-  var idCloneInput = encodeURIComponent(`cloneButton${fileName}`);
-  var idSpanClonePageReport = encodeURIComponent(`cloneButtonReport${fileName}`);
-  result += `<button class = 'buttonClone' style = 'width:50px' onclick = `;
-  result += `"window.calculator.editPage.handleClone('${fileName}', '${idCloneInput}', '${idSpanClonePageReport}')">Clone</button>`;
-  var sizeFile = fileName.length;
-  result += `<input type = "text" value = '${fileName}' size = '${sizeFile}' id = '${idCloneInput}'></input>`;
-  result += `<div id = "${idSpanClonePageReport}"></div>`;
-  result += "</span>";
+  result += getClonePanel(fileName, fileName);
   result += `</div>`;
   return result;
 }
@@ -162,6 +175,7 @@ module.exports = {
   toggleClonePanel,
   selectEditPage, 
   getEditPanel,
+  getClonePanel,
   handleClone,
   ctrlSPressAceEditorHandler
 };

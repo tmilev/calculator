@@ -5,11 +5,12 @@
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math1_LieTheoryExtras.h"
 
-static ProjectInformationInstance ProjectInfovpfHeader1_HeaderUniversalEnveloping(__FILE__, "Header, universal enveloping algebras. ");
+static ProjectInformationInstance ProjectInfovpfHeader1_HeaderUniversalEnveloping(
+  __FILE__, "Header, universal enveloping algebras. "
+);
 
 template <class coefficient>
-class MonomialUniversalEnveloping : public MonomialTensor<coefficient>
-{
+class MonomialUniversalEnveloping : public MonomialTensor<coefficient> {
 private:
 public:
   std::string ToString(FormatExpressions* theFormat = 0) const;
@@ -26,7 +27,9 @@ public:
   static bool IsMonEqualToZero() {
     return false;
   }
-  bool AdjointRepresentationAction(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output) const;
+  bool AdjointRepresentationAction(
+    const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output
+  ) const;
   template<class otherType>
   void operator=(const MonomialUniversalEnveloping<otherType>& other) {
     this->MonomialTensor<coefficient>::operator=(other);
@@ -78,8 +81,12 @@ public:
       output += (this->Powers[i]);
     }
   }
-  bool CommutingABntoBnAPlusLowerOrderAllowed(coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex);
-  bool CommutingAnBtoBAnPlusLowerOrderAllowed(coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex);
+  bool CommutingABntoBnAPlusLowerOrderAllowed(
+    coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex
+  );
+  bool CommutingAnBtoBAnPlusLowerOrderAllowed(
+    coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex
+  );
   bool SwitchConsecutiveIndicesIfTheyCommute(int theLeftIndex);
   void MakeOne(SemisimpleLieAlgebra& inputOwner) {
     this->generatorsIndices.size = 0;
@@ -97,8 +104,12 @@ public:
   // The "zero level roots" - i.e. the elements of the Cartan subalgebra lie in between
   // the negative and positive rootss.
   void Simplify(ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
-  void CommuteABntoBnAPlusLowerOrder(int theIndeX, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
-  void CommuteAnBtoBAnPlusLowerOrder(int indexA, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
+  void CommuteABntoBnAPlusLowerOrder(
+    int theIndeX, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1
+  );
+  void CommuteAnBtoBAnPlusLowerOrder(
+    int indexA, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1
+  );
   MonomialUniversalEnveloping(): owner(0) {}
   bool operator>(const MonomialUniversalEnveloping& other) {
     return this->::MonomialTensor<coefficient>::operator>(other);
@@ -122,7 +133,9 @@ private:
   friend class MonomialUniversalEnveloping<coefficient>;
 public:
   SemisimpleLieAlgebra* owner;
-  bool AdjointRepresentationAction(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output) const;
+  bool AdjointRepresentationAction(
+    const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output
+  ) const;
   bool ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output);
   bool IsEqualToZero() const {
     return this->size() == 0;
@@ -165,12 +178,16 @@ public:
   bool ApplyMinusTransposeAutoOnMe();
   bool ApplyTransposeAntiAutoOnMe();
   void MakeHgenerator(const Vector<Rational>& input, SemisimpleLieAlgebra& inputOwner);
-  void AssignElementLieAlgebra(const ElementSemisimpleLieAlgebra<Rational>& input, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit = 1);
+  void AssignElementLieAlgebra(
+    const ElementSemisimpleLieAlgebra<Rational>& input, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit = 1
+  );
   bool GetWithSimpleGeneratorsOnly(MonomialCollection<MonomialTensor<coefficient>, coefficient>& output);
   void MakeOneGenerator(int theIndex, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit);
   void MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& inputOwners, const coefficient& theRingUnit = 1);
   void MakeOneGeneratorCoeffOne(int theIndex, int numVars, SemisimpleLieAlgebra& inputOwner);
-  void MakeOneGeneratorCoeffOne(const Vector<Rational>& rootSpace, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit = 1) {
+  void MakeOneGeneratorCoeffOne(
+    const Vector<Rational>& rootSpace, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit = 1
+  ) {
     this->MakeOneGeneratorCoeffOne(inputOwner.GetGeneratorFromRoot(rootSpace), inputOwner, theRingUnit);
   }
   coefficient GetKillingFormProduct(const ElementUniversalEnveloping<coefficient>& right) const;
@@ -193,8 +210,12 @@ public:
     return result;
   }
   void MultiplyBy(const MonomialUniversalEnveloping<coefficient>& standsOnTheRight, const coefficient& theCoeff);
-  void ModToMinDegreeFormFDRels(const Vector<Rational> & theHWinSimpleCoords, const coefficient& theRingUnit, const coefficient& theRingZero);
-  void ModOutVermaRelations(const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0);
+  void ModToMinDegreeFormFDRels(
+    const Vector<Rational> & theHWinSimpleCoords, const coefficient& theRingUnit, const coefficient& theRingZero
+  );
+  void ModOutVermaRelations(
+    const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0
+  );
   static void GetCoordinateFormOfSpanOfElements(
     List<ElementUniversalEnveloping<coefficient> >& theElements,
     Vectors<coefficient>& outputCoordinates,
@@ -220,13 +241,17 @@ public:
     const CoefficientTypeQuotientField& theFieldUnit,
     const CoefficientTypeQuotientField& theFieldZero
   );
-  void AssignFromCoordinateFormWRTBasis(List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& input, SemisimpleLieAlgebra& owner);
+  void AssignFromCoordinateFormWRTBasis(
+    List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& input, SemisimpleLieAlgebra& owner
+  );
   void RaiseToPower(int thePower);
   bool IsAPowerOfASingleGenerator() const {
-    if (this->size() != 1)
+    if (this->size() != 1) {
       return false;
-    if (!this->theCoeffs[0].IsEqualToOne())
+    }
+    if (!this->theCoeffs[0].IsEqualToOne()) {
       return false;
+    }
     return (*this)[0].generatorsIndices.size == 1;
   }
   void SubstitutionCoefficients(
@@ -277,8 +302,7 @@ public:
     this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>
     ::operator/=(other);
   }
-  ElementUniversalEnveloping<coefficient>():owner(0) {
-   
+  ElementUniversalEnveloping<coefficient>(): owner(0) {
   }
   ElementUniversalEnveloping<coefficient>(const ElementUniversalEnveloping<coefficient>& other) {
     this->operator=(other);

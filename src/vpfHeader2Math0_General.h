@@ -1153,7 +1153,8 @@ public:
     tempPlus -= (tempMinus);
     output = tempPlus;
   }
-  //The Gaussian elimination below brings the matrix to a row-echelon form, that is, makes the matrix be something like (example is 4x5):
+  //The Gaussian elimination below brings the matrix to a row-echelon form,
+  //that is, makes the matrix be something like (example is 4x5):
   //1 0 3 0 0
   //0 1 0 0 0
   //0 0 0 1 0

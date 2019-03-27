@@ -1265,7 +1265,7 @@ public:
   static inline unsigned int HashFunction(const affineHyperplane& input) {
     return input.HashFunction();
   }
-//  bool ProjectFromFacet(Facet& input);
+  //  bool ProjectFromFacet(Facet& input);
   bool ProjectFromFacetNormal(Vector<coefficient>& input);
   Vector<coefficient> ProjectOnMe(Vector<coefficient>& input) const;
   bool ContainsPoint(Vector<coefficient> & thePoint);
@@ -1391,8 +1391,8 @@ public:
   bool WallIsInternalInCone(affineHyperplane<Rational>& theKillerCandidate);
   //The below function returns true if the system of homogeneous linear inequalities Ax<=b
   //has a solution, false otherwise, where A is a matrix and x and b are column vectors.
-//  bool SystemLinearInequalitiesHasSolution
-//    (Matrix<Rational> & matA, Matrix<Rational> & matb, Matrix<Rational> & outputPoint);
+  //  bool SystemLinearInequalitiesHasSolution
+  //    (Matrix<Rational> & matA, Matrix<Rational> & matb, Matrix<Rational> & outputPoint);
   bool SplitByAffineHyperplane(affineHyperplane<Rational>& theKillerPlane, affineCones& output);
 };
 

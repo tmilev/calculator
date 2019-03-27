@@ -6,8 +6,7 @@
 
 static ProjectInformationInstance ProjectInfovpfHeader_HeaderLaTeXRoutines(__FILE__, "Header, LaTeX routines. ");
 
-class LaTeXcrawler
-{
+class LaTeXcrawler {
   public:
   int recursionDepth;
   std::string theFileNameToCrawlPhysicalNoPathName;

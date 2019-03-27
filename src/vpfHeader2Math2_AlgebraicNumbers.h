@@ -7,8 +7,7 @@
 static ProjectInformationInstance ProjectInfoVpfHeader1_3(__FILE__, "Header, algebraic numbers. ");
 
 class AlgebraicClosureRationals;
-class AlgebraicNumber
-{
+class AlgebraicNumber {
   friend std::ostream& operator <<(std::ostream& output, const AlgebraicNumber& theNumber) {
     output << theNumber.ToString();
     return output;
@@ -18,7 +17,6 @@ class AlgebraicNumber
     AlgebraicNumber result = argument;
     result.CheckConsistency();
     result *= - 1;
-//    stOutput << "here be unary minus!";
     result.CheckConsistency();
     return result;
   }
@@ -61,15 +59,17 @@ class AlgebraicNumber
   }
   bool IsPositive() {
     Rational ratPart;
-    if (this->IsRational(&ratPart))
+    if (this->IsRational(&ratPart)) {
       return ratPart.IsPositive();
+    }
     return false;
   }
   bool IsRational(Rational* whichRational = 0) const;
   bool IsNegative() const {
     Rational theRationalValue;
-    if (this->IsRational(&theRationalValue))
+    if (this->IsRational(&theRationalValue)) {
       return theRationalValue.IsNegative();
+    }
     return false;
   }
   bool IsEqualToZero() const;
@@ -98,14 +98,16 @@ class AlgebraicNumber
   void SqrtMeDefault();
   bool IsSmallInteger(int* whichInteger) const {
     Rational theRat;
-    if (!this->IsRational(&theRat))
+    if (!this->IsRational(&theRat)) {
       return false;
+    }
     return theRat.IsSmallInteger(whichInteger);
   }
   bool IsInteger(LargeInt* whichInteger) const {
     Rational theRat;
-    if (!this->IsRational(&theRat))
+    if (!this->IsRational(&theRat)) {
       return false;
+    }
     return theRat.IsInteger(whichInteger);
   }
   void RadicalMeDefault(int theRad);
@@ -169,8 +171,7 @@ class AlgebraicNumber
   std::string ToString(FormatExpressions* theFormat = 0) const;
 };
 
-class AlgebraicClosureRationals
-{
+class AlgebraicClosureRationals {
 public:
   List<MatrixTensor<Rational> > theBasisMultiplicative;
   List<List<VectorSparse<Rational> > > theBasesAdditive;
@@ -201,19 +202,23 @@ public:
   void GetMultiplicativeOperatorFromRadicalSelection(const Selection& theSel, MatrixTensor<Rational>& outputOp);
   void GetMultiplicationBy(const AlgebraicNumber& input, MatrixTensor<Rational>& output);
   void GetAdditionTo(const AlgebraicNumber& input, VectorSparse<Rational>& output);
-  void ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail
-  (const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output);
+  void ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(
+    const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output
+  );
   bool AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot);
-  bool AdjoinRootQuadraticPolyToQuadraticRadicalExtension(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot);
+  bool AdjoinRootQuadraticPolyToQuadraticRadicalExtension(
+    const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot
+  );
   std::string ToString(FormatExpressions* theFormat = 0) const;
-  bool splitToPartialFractionsOverRealAlgebraicNumbers
-  (RationalFunctionOld& inputRF, List<Polynomial<AlgebraicNumber> >& outputNumerators,
-   List<Polynomial<AlgebraicNumber> >& outputDenominators,
-   std::stringstream* reportStream = 0);
+  bool splitToPartialFractionsOverRealAlgebraicNumbers(
+    RationalFunctionOld& inputRF,
+    List<Polynomial<AlgebraicNumber> >& outputNumerators,
+    List<Polynomial<AlgebraicNumber> >& outputDenominators,
+    std::stringstream* reportStream = 0
+  );
 };
 
-class ElementZmodP
-{
+class ElementZmodP {
 public:
   LargeIntUnsigned theModulo;
   LargeIntUnsigned theValue;
@@ -269,11 +274,14 @@ public:
   bool AssignRational(const Rational& other);
   void operator=(const Rational& other) {
     bool tempB = this->AssignRational(other);
-    if (!tempB)
+    if (!tempB) {
       crash << "This is a programming error: using ElementZmodP::operator= to assign a Rational number failed. "
       << " Operator = does not allow failure. " << crash;
+    }
   }
   bool operator/=(const ElementZmodP& den);
-  void ScaleToIntegralMinHeightAndGetPoly(const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntUnsigned& newModulo);
+  void ScaleToIntegralMinHeightAndGetPoly(
+    const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntUnsigned& newModulo
+  );
 };
 #endif

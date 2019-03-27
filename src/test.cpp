@@ -84,8 +84,8 @@ somestream AtomicString::IntoStream(somestream& out, GlobalVariables* unused) {
 //TODO: Semidirect product groups have a product of elements, whereas we only need a product of pointers and a sum of
 // elements in memory.  Fortunately HomoSemidirectElements only carry twice as much elements.
 template <typename kelt>
-class HomomorphismSemidirectElement: public GroupConjugacyImplementation<HomomorphismSemidirectElement<kelt> >
-{ bool h;
+class HomomorphismSemidirectElement: public GroupConjugacyImplementation<HomomorphismSemidirectElement<kelt> > {
+  bool h;
   kelt k;
   GroupHomomorphism<kelt, kelt>* oa;
 
@@ -115,18 +115,22 @@ class HomomorphismSemidirectElement: public GroupConjugacyImplementation<Homomor
   }
 
   bool operator==(const HomomorphismSemidirectElement& right) const {
-    if (!(this->h == right.h))
+    if (!(this->h == right.h)) {
       return false;
-    if (!(this->k == right.k))
+    }
+    if (!(this->k == right.k)) {
       return false;
+    }
     return true;
   }
 
   bool operator>(const HomomorphismSemidirectElement& right) const {
-    if (!this->h && right.h)
+    if (!this->h && right.h) {
       return false;
-    if (this->h && !right.h)
+    }
+    if (this->h && !right.h) {
       return true;
+    }
     return this->k > right.k;
   }
 };
@@ -219,8 +223,7 @@ class HomoSemidrectGroupData
 
 };*/
 
-class CharacterTable
-{
+class CharacterTable {
 public:
   List<List<int> > representatives;
   List<int> sizes;
@@ -276,25 +279,30 @@ public:
 }*/
 
 bool CharacterComparator(const Vector<Rational>& left, const Vector<Rational>& right) {
-  if (left[0] > right[0])
+  if (left[0] > right[0]) {
     return true;
-  if (left[0] < right[0])
+  }
+  if (left[0] < right[0]) {
     return false;
-  for (int i =1; i <left.size; i ++) {
-    if (left[i] > right[i])
+  }
+  for (int i = 1; i < left.size; i ++) {
+    if (left[i] > right[i]) {
       return false;
-    if (left[i] < right[i])
+    }
+    if (left[i] < right[i]) {
       return true;
+    }
   }
   return false;
-};
+}
 
 template <>
 unsigned int Vector<int>::HashFunction() const {
   unsigned int result = 0;
   int theSize = MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
-  for (int i = 0; i < theSize; i ++)
-    result +=  (unsigned int) this->TheObjects[i] *  SomeRandomPrimes[i];
+  for (int i = 0; i < theSize; i ++) {
+    result += (unsigned int) this->TheObjects[i] * SomeRandomPrimes[i];
+  }
   return result;
 }
 
@@ -304,8 +312,8 @@ unsigned int Vector<int>::HashFunction() const {
 // data structure List[List[int]] leads to lots and lots of memory accesses
 class SubListListInt;
 
-class ListListInt
-{ public:
+class ListListInt {
+public:
   int size;
   List<int> things;
 
@@ -313,8 +321,8 @@ class ListListInt
   void SetSize(int s);
 };
 
-class SubListListInt
-{ public:
+class SubListListInt {
+public:
   ListListInt* viewed;
   int sublist;
 
@@ -323,8 +331,9 @@ class SubListListInt
 };
 
 SubListListInt ListListInt::operator[](int in) {
-  if (in >= this->size)
+  if (in >= this->size) {
     crash << "Attempt to access invalid sublist " << in << " from list " << this->things << crash;
+  }
   SubListListInt out;
   out.viewed = this;
   out.sublist = in;
@@ -333,52 +342,59 @@ SubListListInt ListListInt::operator[](int in) {
 
 void ListListInt::SetSize(int newsz) {
   int deltas = newsz - size;
-  if (deltas == 0)
+  if (deltas == 0) {
     return;
+  }
   if (deltas < 0) {
-    this->things.SetSize(things[newsz+ 1]);
+    this->things.SetSize(things[newsz + 1]);
     size = newsz;
   } else {
     if (newsz < this->things[0]) {
-      for (int i =size; i <newsz; i ++)
+      for (int i = size; i < newsz; i ++) {
         this->things[i] = this->things.size;
+      }
     } else {
       int oldos = this->things.size;
       int newos = this->things.size + deltas;
-      this->things.SetSize(this->things.size +deltas);
-      memmove(this->things.TheObjects+newsz, this->things.TheObjects+size, oldos-size);
-      for (int i = 0; i <size; i ++)
+      this->things.SetSize(this->things.size + deltas);
+      memmove(this->things.TheObjects + newsz, this->things.TheObjects + size, oldos - size);
+      for (int i = 0; i < size; i ++) {
         this->things[i] += deltas;
-      for (int i =size; i <newsz; i ++)
+      }
+      for (int i = size; i < newsz; i ++) {
         this->things[i] = newos;
+      }
     }
   }
 }
 
 int& SubListListInt::operator[](int in) {
   int slp = viewed->things[sublist];
-  if ((viewed->size- 1) == sublist) {
-    if (slp+ in >= viewed->things.size)
+  if ((viewed->size - 1) == sublist) {
+    if (slp + in >= viewed->things.size) {
       crash << "Attempt to access out of bounds index " << in << " from sublist " << sublist << crash;
+    }
   } else {
     int nslp = viewed->things[sublist + 1];
-    if (slp+ in >= nslp)
+    if (slp + in >= nslp) {
       crash << "Attempt to access out of bounds index " << in << " from sublist " << sublist << crash;
+    }
   }
-  return viewed->things[slp+ in];
+  return viewed->things[slp + in];
 }
 
 void SubListListInt::SetSize(int newsz) {
   int slp = viewed->things[sublist];
-  if ((viewed->size- 1) == sublist) {
+  if ((viewed->size - 1) == sublist) {
     viewed->things.SetSize(slp+newsz);
     return;
   }
   int nslp = viewed->things[sublist + 1];
   int sz = (nslp - slp);
   int deltas = newsz - sz;
-  if (deltas == 0)
+  if (deltas == 0) {
     return;
+  }
   if (deltas < 0) {
     memmove(viewed->things.TheObjects + nslp + deltas, viewed->things.TheObjects + nslp, viewed->things.size - nslp);
     viewed->things.SetSize(viewed->things.size + deltas);
@@ -392,22 +408,24 @@ void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroupData>& g, Per
   int rss = g.owner->RootSystem.size;
   List<bool> accountedFor;
   accountedFor.SetSize(rss);
-  for (int i = 0; i <rss; i ++)
+  for (int i = 0; i < rss; i ++) {
     accountedFor[i] = false;
-  for (int i = 0; i <rss; i ++) {
-    if (accountedFor[i])
+  }
+  for (int i = 0; i < rss; i ++) {
+    if (accountedFor[i]) {
       continue;
-    p.cycles.SetSize(p.cycles.size + 1);
-    p.cycles[p.cycles.size- 1].size = 0;
-    int j = i;
-    do
-    { p.cycles[p.cycles.size- 1].AddOnTop(j);
-      accountedFor[j] = true;
-      j = g.owner->RootSystem.GetIndex(g*g.owner->RootSystem[j]);
     }
-    while (j != i);
-    if (p.cycles[p.cycles.size- 1].size == 1)
-      p.cycles.SetSize(p.cycles.size- 1);
+    p.cycles.SetSize(p.cycles.size + 1);
+    p.cycles[p.cycles.size - 1].size = 0;
+    int j = i;
+    do {
+      p.cycles[p.cycles.size- 1].AddOnTop(j);
+      accountedFor[j] = true;
+      j = g.owner->RootSystem.GetIndex(g * g.owner->RootSystem[j]);
+    } while (j != i);
+    if (p.cycles[p.cycles.size - 1].size == 1) {
+      p.cycles.SetSize(p.cycles.size - 1);
+    }
   }
 }
 
@@ -428,8 +446,6 @@ void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroupData>& g, Per
 
 
 //List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf= 0);
-
-
 
 template <typename somegroup>
 void PrintCharTable(const somegroup& G, const char* filename) {
@@ -458,15 +474,18 @@ void PrintCharTable(const somegroup& G, const char* filename) {
   }
   characters.type = JSData::JSarray;
   characters.list.SetSize(G.characterTable.size);
-  for (int i = 0; i < G.characterTable.size; i ++)
-    for (int j = 0; j < G.characterTable[i].size; j ++)
+  for (int i = 0; i < G.characterTable.size; i ++) {
+    for (int j = 0; j < G.characterTable[i].size; j ++) {
       characters[i][j] = G.characterTable[i][j].GetDoubleValue();
+    }
+  }
   if (filename) {
     std::ofstream out;
     out.open(filename);
     data.IntoStream(out, false);
-  } else
+  } else {
     data.IntoStream(stOutput, false);
+  }
 }
 
 template <typename somegroup>
@@ -474,56 +493,61 @@ void AddCharTable(JSData& chartable, somegroup& G) {
   std::string sizes = "sizes";
 
   // check sizes
-  for (int i = 0; i <G.conjugacyClasses.size; i ++)
-    if (chartable[sizes][i].number != G.conjugacyClasses[i].size)
+  for (int i = 0; i <G.conjugacyClasses.size; i ++) {
+    if (chartable[sizes][i].number != G.conjugacyClasses[i].size) {
       stOutput << "Size mismatch in conjugacy class " << i;
+    }
+  }
   // check representatives... well, not yet.
   // load characters
 
   G.characterTable.SetSize(chartable["characters"].list.size);
   for (int i = 0; i <chartable["characters"].list.size; i ++) {
     G.characterTable[i].SetSize(G.conjugacyClasses.size);
-    for (int j = 0; j<G.conjugacyClasses.size; j ++)
+    for (int j = 0; j<G.conjugacyClasses.size; j ++) {
       G.characterTable[i][j] = chartable["characters"][i][j].number;
+    }
   }
 }
 
 template <typename coefficient>
-List<VectorSpace<coefficient> > GetLeftEigenspaces(Matrix<coefficient> M) {
+List<VectorSpace<coefficient> > GetLeftEigenspaces(Matrix<coefficient>& M) {
   M.Transpose();
   return GetEigenspaces(M);
 }
 
 template <typename weylgroup>
-List<int> FindConjugacyClassRepresentatives(weylgroup &G, int ncc) {
-  if (G.theElements.size == 0)
+List<int> FindConjugacyClassRepresentatives(weylgroup& G, int ncc) {
+  if (G.theElements.size == 0) {
     G.ComputeAllElements();
+  }
   stOutput << "Computing conjugacy class representatives... ";
   // hashing these might be nice
   // need to figure out how to pass MathRoutines::IntUnsignIdentity in
   List<List<int> > cycleTypes;
   List<int> representatives;
-  for (int gi = 0; gi <G.theElements.size; gi ++) {
+  for (int gi = 0; gi < G.theElements.size; gi ++) {
     PermutationR2 pi;
-    WeylElementPermutesRootSystem(G.theElements[gi],pi);
+    WeylElementPermutesRootSystem(G.theElements[gi], pi);
     List<int> cycleType;
     pi.GetCycleStructure(cycleType);
     stOutput << pi;
-    for (int i =1; i <cycleType.size; i ++)
+    for (int i = 1; i < cycleType.size; i ++) {
       stOutput << ' ' << cycleType[i];
+    }
     stOutput << "\n";
     if (cycleTypes.GetIndex(cycleType) == - 1) {
       cycleTypes.AddOnTop(cycleType);
       representatives.AddOnTop(gi);
       //stOutput << representatives.size << ' ';
       stOutput << "^ New cycle type, now have " << representatives.size << "\n";
-      if (representatives.size == ncc)
+      if (representatives.size == ncc) {
         break;
+      }
     }
   }
   return representatives;
 }
-
 
 //template <typename somegroup>
 //template <typename grouprep>
@@ -531,25 +555,32 @@ template <typename elementSomeGroup>
 void ComputeIrreps(FiniteGroup<elementSomeGroup>& G) {
   List<int> charactersWithIrreps;
   List<int> charactersWithoutIrreps;
-  for (int i = 0; i <G.irreps.size; i ++) {
+  for (int i = 0; i < G.irreps.size; i ++) {
     charactersWithIrreps.AddOnTop(G.characterTable.BSGetIndex(G.irreps[i].GetCharacter()));
-    stOutput << G.irreps[i].GetCharacter() << ": " << G.characterTable.BSIndexFirstGreaterThan(G.irreps[i].GetCharacter()) << G.characterTable.BSGetIndex(G.irreps[i].GetCharacter()) << "\n";
+    stOutput << G.irreps[i].GetCharacter() << ": "
+    << G.characterTable.BSIndexFirstGreaterThan(G.irreps[i].GetCharacter())
+    << G.characterTable.BSGetIndex(G.irreps[i].GetCharacter()) << "\n";
   }
   stOutput << "characters with irreps " << charactersWithIrreps << "\n";
-  for (int i = 0; i <G.characterTable.size; i ++)
-    if (!charactersWithIrreps.BSContains(i))
+  for (int i = 0; i < G.characterTable.size; i ++) {
+    if (!charactersWithIrreps.BSContains(i)) {
       charactersWithoutIrreps.AddOnTop(i);
+    }
+  }
   stOutput << "need reps for chars" << charactersWithoutIrreps << "\n";
   Matrix<Rational> M;
   M.init(G.characterTable.size, G.characterTable.size);
   Rational SizeG = G.GetSize();
-  for (int i = 0; i <G.characterTable.size; i ++)
-    for (int j = 0; j<G.characterTable.size; j ++)
-      M(j, i) = G.characterTable[j][i]*G.conjugacyClasseS[i].size/SizeG;
-  for (int i = 0; i <G.characterTable.size; i ++)
-    for (int j = i; j<G.characterTable.size; j ++) {
-      stOutput << i << "⊗" << j << ": " << M*(G.characterTable[i]*G.characterTable[j]).data << "\n";
+  for (int i = 0; i < G.characterTable.size; i ++) {
+    for (int j = 0; j < G.characterTable.size; j ++) {
+      M(j, i) = G.characterTable[j][i] * G.conjugacyClasseS[i].size / SizeG;
     }
+  }
+  for (int i = 0; i < G.characterTable.size; i ++) {
+    for (int j = i; j < G.characterTable.size; j ++) {
+      stOutput << i << "⊗" << j << ": " << M * (G.characterTable[i] * G.characterTable[j]).data << "\n";
+    }
+  }
 }
 
 /*
@@ -585,8 +616,9 @@ void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, SubgroupRoo
 
 template <typename weylgroup>
 void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false) {
-  if (G.characterTable.size == 0)
+  if (G.characterTable.size == 0) {
     ComputeCharacterTable(G);
+  }
   /* this doesn't belong here
      Selection sel;
      sel.MakeFullSelection(G.CartanSymmetric.NumCols);
@@ -602,12 +634,12 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false) {
      stOutput << H.tauSignature << "\n";
   */
   List<List<bool> > ts;
-  AllTauSignatures(&G,ts,true);
-
-
-  for (int i = 0; i < ts.size; i ++)
-    for (int j = 0; j < ts[i].size; j ++)
+  AllTauSignatures(&G, ts, true);
+  for (int i = 0; i < ts.size; i ++) {
+    for (int j = 0; j < ts[i].size; j ++) {
       data[i][j] = ts[i][j];
+    }
+  }
   /* this prints out everything for some reason
   for (int i = 0; i <G.conjugacyClasses.size; i ++) {
    stOutput << "conjugacy class " << i << "\n";
@@ -622,27 +654,31 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false) {
 
 // lets print out the character table
   stOutput << "\\[ \\begin{array}{";
-  for (int i = 0; i <G.conjugacyClasses.size + 1; i ++)
+  for (int i = 0; i < G.conjugacyClasses.size + 1; i ++) {
     stOutput << 'c';
+  }
   stOutput << "}\n";
 
-  for (int i = 0; i <G.conjugacyClasses.size; i ++) {
+  for (int i = 0; i < G.conjugacyClasses.size; i ++) {
     List<int> g;
-    G.GetWord(G.conjugacyClasses[i][0],g);
+    G.GetWord(G.conjugacyClasses[i][0], g);
     stOutput << "&\\rotatebox{90}{";
-    for (int k = 0; k<g.size; k++)
+    for (int k = 0; k < g.size; k ++) {
       stOutput << g[k] << ' ';
+    }
     stOutput << "}\t";
   }
   stOutput << "\\\\" << "\n";
 
-  for (int i = 0; i <G.conjugacyClasses.size; i ++)
+  for (int i = 0; i < G.conjugacyClasses.size; i ++) {
     stOutput << '&' << G.conjugacyClasses[i].size << '\t';
+  }
   stOutput << "\\\\\n\\hline\n";
 
-  for (int i = 0; i <G.characterTable.size; i ++) {
-    for (int j = 0; j<G.conjugacyClasses.size; j ++)
+  for (int i = 0; i < G.characterTable.size; i ++) {
+    for (int j = 0; j < G.conjugacyClasses.size; j ++) {
       stOutput << '&' << G.characterTable[i][j] << '\t';
+    }
     stOutput << "\\\\\n";
   }
   stOutput << "\\end{array} \\]" << "\n";
@@ -652,15 +688,17 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false) {
   sel.init(G.CartanSymmetric.NumCols);
   int numCycles =MathRoutines::TwoToTheNth(sel.MaxSize);
   stOutput << "\\[ \\begin{array}{";
-  for (int i = 0; i <numCycles+ 1; i ++)
+  for (int i = 0; i < numCycles + 1; i ++) {
     stOutput << 'c';
+  }
   stOutput << "}\n";
   for (int i = 0; i <numCycles; i ++) {
     stOutput << "&\\rotatebox{90}{(";
-    for (int j = 0; j<sel.CardinalitySelection; j ++) {
+    for (int j = 0; j < sel.CardinalitySelection; j ++) {
       stOutput << sel.elements[j];
-      if (j+ 1<sel.elements.size)
+      if (j + 1 < sel.elements.size) {
         stOutput << ' ';
+      }
     }
     stOutput << ")}\t";
     sel.incrementSelection();
@@ -685,23 +723,26 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false) {
 // WeylGroup is alittle different from AnotherWeylGroup<derp>
 //    ElementWeylGroup<WeylGroup> hr = G.theElements[G.GetRootReflection(G.RootSystem.size- 1)];
       List<int> hr;
-      G.GetWord(G.GetRootReflection(G.RootSystem.size- 1), hr);
-      for (int i = 0; i <hr.size; i ++)
+      G.GetWord(G.GetRootReflection(G.RootSystem.size - 1), hr);
+      for (int i = 0; i < hr.size; i ++) {
         stOutput << hr[i] << ' ';
+      }
       stOutput << "\n";
 
       // make enough columns
       stOutput << "\\[ \\begin{array}{";
-      for (int i = 0; i <numCycles; i ++)
+      for (int i = 0; i < numCycles; i ++) {
         stOutput << 'c';
+      }
       stOutput << "}\n";
 
       // labels at the top
       sel.init(G.CartanSymmetric.NumCols);
-      for (int i = 0; i <numCycles- 1; i ++) {
+      for (int i = 0; i < numCycles - 1; i ++) {
         stOutput << "&\\rotatebox{90}{(";
-        for (int j = 0; j<sel.CardinalitySelection; j ++)
+        for (int j = 0; j<sel.CardinalitySelection; j ++) {
           stOutput << sel.elements[j] << ' ';
+        }
         stOutput << "hr";
         stOutput << ")}\t";
         sel.incrementSelection();
@@ -710,7 +751,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false) {
       // data goes out here
       stOutput << "\\\\" << "\n";
       for (int i = 0; i < ts.size; i ++) {
-        for (int j = numCycles; j<numCycles+numCycles- 1; j ++) {
+        for (int j = numCycles; j < numCycles + numCycles - 1; j ++) {
           stOutput << '&';
           stOutput << ts[i][j] << '\t';
         }
@@ -980,60 +1021,72 @@ std::ostream& operator<<(std::ostream& out, const polynom1al<coefficient>& p) {
 }
 */
 template <typename coefficient>
-bool space_contains(const List<Vector<coefficient> > &V, Vector<coefficient> v) {
+bool space_contains(const List<Vector<coefficient> >& V, Vector<coefficient>& v) {
   if (v.IsEqualToZero()) {
-    if (V.size == 0)
+    if (V.size == 0) {
       return false;
+    }
     return true;
   }
   int i = 0;
   while (true) {
     int vi = v.GetIndexFirstNonZeroCoordinate();
     while (true) {
-      if (i ==V.size)
+      if (i == V.size) {
         return false;
+      }
       int vii = V[i].GetIndexFirstNonZeroCoordinate();
-      if (vii > vi)
+      if (vii > vi) {
         return false;
-      if (vii == vi)
+      }
+      if (vii == vi) {
         break;
+      }
       i ++;
     }
-    v -= V[i] * v[vi]/V[i][vi];
-    if (v.IsEqualToZero())
+    v -= V[i] * v[vi] / V[i][vi];
+    if (v.IsEqualToZero()) {
       return true;
+    }
   }
 }
 
 template<typename coefficient>
-List<Vector<coefficient> > getunion(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W) {
-  if (V.size == 0)
+List<Vector<coefficient> > getunion(const List<Vector<coefficient> >& V, const List<Vector<coefficient> >& W) {
+  if (V.size == 0) {
     return W;
+  }
   int d = V[0].size;
   Matrix<coefficient> M;
-  M.init(V.size +W.size,d);
-  for (int i = 0; i <V.size; i ++)
-    for (int j = 0; j<d; j ++)
+  M.init(V.size + W.size,d);
+  for (int i = 0; i < V.size; i ++) {
+    for (int j = 0; j < d; j ++) {
       M.elements[i][j] = V[i][j];
-  for (int i = 0; i <W.size; i ++)
-    for (int j = 0; j<d; j ++)
+    }
+  }
+  for (int i = 0; i < W.size; i ++) {
+    for (int j = 0; j < d; j ++) {
       M.elements[V.size + i][j] = W[i][j];
+    }
+  }
   M.GaussianEliminationByRows();
   List<Vector<coefficient> > out;
-  for (int i = 0; i <M.NumRows; i ++) {
+  for (int i = 0; i < M.NumRows; i ++) {
     Vector<coefficient> v;
     v.SetSize(d);
-    for (int j = 0; j<d; j ++)
+    for (int j = 0; j < d; j ++) {
       v[j] = M.elements[i][j];
-    if (v.IsEqualToZero())
+    }
+    if (v.IsEqualToZero()) {
       break;
+    }
     out.AddOnTop(v);
   }
   return out;
 }
 
 template<typename coefficient>
-List<Vector<coefficient> > intersection(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W) {
+List<Vector<coefficient> > intersection(const List<Vector<coefficient> >& V, const List<Vector<coefficient> >& W) {
   if ((V.size == 0) or (W.size == 0)) {
     List<Vector<coefficient> > out;
     return out;
@@ -1042,67 +1095,82 @@ List<Vector<coefficient> > intersection(const List<Vector<coefficient> > &V, con
 
   Matrix<coefficient> MV;
   MV.init(V.size, d);
-  for (int i = 0; i <V.size; i ++)
-    for (int j = 0; j<d; j ++)
+  for (int i = 0; i < V.size; i ++) {
+    for (int j = 0; j < d; j ++) {
       MV.elements[i][j] = V[i][j];
+    }
+  }
   List<Vector<coefficient> > Vperp = DestructiveKernel(MV);
 
   Matrix<coefficient> MW;
   MW.init(W.size, d);
-  for (int i = 0; i <W.size; i ++)
-    for (int j = 0; j<d; j ++)
+  for (int i = 0; i < W.size; i ++) {
+    for (int j = 0; j < d; j ++) {
       MW.elements[i][j] = W[i][j];
+    }
+  }
   List<Vector<coefficient> > Wperp = DestructiveKernel(MW);
-
   Matrix<coefficient> M;
-  M.init(Vperp.size +Wperp.size,d);
+  M.init(Vperp.size + Wperp.size, d);
   int i = 0;
-  for (; i <Vperp.size; i ++)
-    for (int j = 0; j<d; j ++)
+  for (; i < Vperp.size; i ++) {
+    for (int j = 0; j < d; j ++) {
       M.elements[i][j] = Vperp[i][j];
-  for (; i <Vperp.size +Wperp.size; i ++)
-    for (int j = 0; j<d; j ++)
-      M.elements[i][j] = Wperp[i-Vperp.size][j];
+    }
+  }
+  for (; i < Vperp.size + Wperp.size; i ++) {
+    for (int j = 0; j < d; j ++) {
+      M.elements[i][j] = Wperp[i - Vperp.size][j];
+    }
+  }
   return DestructiveKernel(M);
 }
 
 template <typename coefficient>
-List<Vector<coefficient> > orthogonal_complement(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &WW) {
+List<Vector<coefficient> > orthogonal_complement(const List<Vector<coefficient> >& V, const List<Vector<coefficient> >& WW) {
   List<Vector<coefficient> > W = intersection(V,WW);
-  if (W.size == 0)
+  if (W.size == 0) {
     return V;
+  }
   int d = W[0].size;
   Matrix<coefficient> GM;
   GM.init(W.size, W.size);
-  for (int i = 0; i <W.size; i ++)
-    for (int j = 0; j<W.size; j ++)
+  for (int i = 0; i < W.size; i ++) {
+    for (int j = 0; j < W.size; j ++) {
       GM.elements[i][j] = W[i].ScalarEuclidean(W[j]);
+    }
+  }
   GM.Invert();
   Matrix<coefficient> VM;
-  VM.init(W.size,V.size);
-  for (int i = 0; i <W.size; i ++)
-    for (int j = 0; j<V.size; j ++)
+  VM.init(W.size, V.size);
+  for (int i = 0; i < W.size; i ++) {
+    for (int j = 0; j < V.size; j ++) {
       VM.elements[i][j] = W[i].ScalarEuclidean(V[j]);
+    }
+  }
   VM.MultiplyOnTheLeft(GM);
   Matrix<coefficient> outm;
   outm.init(V.size, d);
-  for (int i = 0; i <V.size; i ++) {
-    for (int j = 0; j<d; j ++) {
+  for (int i = 0; i < V.size; i ++) {
+    for (int j = 0; j < d; j ++) {
       coefficient r = V[i][j];
       outm.elements[i][j] = r;
-      for (int k = 0; k<W.size; k++)
+      for (int k = 0; k < W.size; k ++) {
         outm.elements[i][j] -= VM.elements[k][i] * W[k][j];
+      }
     }
   }
   outm.GaussianEliminationByRows();
   List<Vector<coefficient> > out;
-  for (int i = 0; i <outm.NumRows; i ++) {
+  for (int i = 0; i < outm.NumRows; i ++) {
     Vector<coefficient> v;
     v.SetSize(d);
-    for (int j = 0; j<d; j ++)
+    for (int j = 0; j < d; j ++) {
       v[j] = outm.elements[i][j];
-    if (v.IsEqualToZero())
+    }
+    if (v.IsEqualToZero()) {
       return out;
+    }
     out.AddOnTop(v);
   }
   return out;
@@ -1110,10 +1178,10 @@ List<Vector<coefficient> > orthogonal_complement(const List<Vector<coefficient> 
 
 // we're going to guess at integers
 template <typename coefficient>
-bool pdiv(List<coefficient> &p, int a) {
+bool pdiv(List<coefficient>& p, int a) {
   List<coefficient> q;
   coefficient lastround = p[0];
-  for (int i =1; i <p.size; i ++) {
+  for (int i = 1; i < p.size; i ++) {
     q.AddOnTop(lastround);
     lastround = p[i] - lastround*a;
   }
@@ -1127,15 +1195,16 @@ bool pdiv(List<coefficient> &p, int a) {
 template <typename coefficient>
 List<int> factorpoly(List<coefficient> p, int maxfac) {
   List<int> factors;
-  for (int i1= 0; i1<maxfac; i1++) {
-    for (int i2=1; i2>= - 1; i2-=2) {
-      int i = i1*i2;
-      while (pdiv(p,i)) {
+  for (int i1 = 0; i1 < maxfac; i1 ++) {
+    for (int i2 = 1; i2 >= - 1; i2 -= 2) {
+      int i = i1 * i2;
+      while (pdiv(p, i)) {
         if (!factors.Contains(i)) {
           factors.AddOnTop(i);
         }
-        if (p.size == 1)
+        if (p.size == 1) {
           return factors;
+        }
       }
     }
   }
@@ -1143,24 +1212,25 @@ List<int> factorpoly(List<coefficient> p, int maxfac) {
 }
 
 template <typename coefficient>
-List<Vector<coefficient> > DestructiveKernel(Matrix<coefficient> &M) {
-  Matrix<coefficient> MM; // idk what this does
+List<Vector<coefficient> > DestructiveKernel(Matrix<coefficient>& M) {
   Selection s;
 //  stOutput << "DestructiveKernel: GaussianEliminationByRows" << "\n";
-  M.GaussianEliminationByRows(0,0,s);
+  M.GaussianEliminationByRows(0, 0, s);
 //  stOutput << "DestructiveKernel: calculating kernel space" << "\n";
   List<Vector<coefficient> > V;
-  for (int i = 0; i <s.selected.size; i ++) {
-    if (!s.selected[i])
+  for (int i = 0; i < s.selected.size; i ++) {
+    if (!s.selected[i]) {
       continue;
+    }
     Vector<coefficient> v;
-    v.MakeEi(M.NumCols,i);
+    v.MakeEi(M.NumCols, i);
     int rowmap = 0;
-    for (int j = 0; j<M.NumCols; j ++)
+    for (int j = 0; j < M.NumCols; j ++) {
       if (!s.selected[j]) {
-        v[j] = -M.elements[rowmap][i];
-        rowmap++;
+        v[j] = - M.elements[rowmap][i];
+        rowmap ++;
       }
+    }
     V.AddOnTop(v);
   }
 //  stOutput << "DestructiveKernel: done" << "\n";
@@ -1168,9 +1238,10 @@ List<Vector<coefficient> > DestructiveKernel(Matrix<coefficient> &M) {
 }
 
 template <typename coefficient>
-List<Vector<coefficient> > DestructiveEigenspace(Matrix<coefficient> &M, const coefficient &l) {
-  for (int i = 0; i <M.NumCols; i ++)
+List<Vector<coefficient> > DestructiveEigenspace(Matrix<coefficient>& M, const coefficient& l) {
+  for (int i = 0; i < M.NumCols; i ++) {
     M.elements[i][i] -= l;
+  }
   return DestructiveKernel(M);
 }
 
@@ -1180,41 +1251,46 @@ List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M) {
   M.GaussianEliminationByRows();
   List<Vector<coefficient> > out;
   bool zerov;
-  for (int i = 0; i <M.NumRows; i ++) {
+  for (int i = 0; i < M.NumRows; i ++) {
     Vector<coefficient> v;
     v.MakeZero(M.NumCols); // initializing is not necessary
     zerov = true;
-    for (int j = 0; j<M.NumCols; j ++) {
+    for (int j = 0; j < M.NumCols; j ++) {
       v[j] = M.elements[i][j];
-      if (zerov && M.elements[i][j] != 0)
+      if (zerov && M.elements[i][j] != 0) {
         zerov = false;
+      }
     }
-    if (zerov)
+    if (zerov) {
       return out;
+    }
     out.AddOnTop(v);
   }
 }
 
-
 template <typename coefficient>
-Vector<coefficient> PutInBasis(const Vector<coefficient> &v, const List<Vector<coefficient> > &B) {
+Vector<coefficient> PutInBasis(const Vector<coefficient>& v, const List<Vector<coefficient> >& B) {
   Vector<coefficient> w;
   w.MakeZero(B.size);
   Matrix<coefficient> M;
   M.MakeZeroMatrix(B.size);
-  for (int i = 0; i <B.size; i ++) {
-    for (int j = 0; j<v.size; j ++)
-      w[i] += B[i][j]*v[j];
-    for (int j = 0; j<B.size; j ++)
-      for (int k = 0; k<v.size; k++)
+  for (int i = 0; i < B.size; i ++) {
+    for (int j = 0; j < v.size; j ++) {
+      w[i] += B[i][j] * v[j];
+    }
+    for (int j = 0; j < B.size; j ++) {
+      for (int k = 0; k < v.size; k ++) {
         M.elements[i][j] += B[i][k] * B[j][k];
+      }
+    }
   }
   M.Invert();
-  Vector<coefficient> v2 = M*w;
+  Vector<coefficient> v2 = M * w;
   Vector<coefficient> v3;
   v3.MakeZero(v.size);
-  for (int i = 0; i <B.size; i ++)
+  for (int i = 0; i < B.size; i ++) {
     v3 += B[i] * v2[i];
+  }
   if (!(v3 == v)) {
     Vector<coefficient> out;
     return out;
@@ -1223,52 +1299,59 @@ Vector<coefficient> PutInBasis(const Vector<coefficient> &v, const List<Vector<c
 }
 
 template <typename elementSomeGroup, typename coefficient>
-Vector<coefficient> ActOnGroupRing(const FiniteGroup<elementSomeGroup>& G, int g, const Vector<coefficient> &v) {
+Vector<coefficient> ActOnGroupRing(const FiniteGroup<elementSomeGroup>& G, int g, const Vector<coefficient>& v) {
   Vector<coefficient> out;
   out.MakeZero(G.theElements.size);
-  elementSomeGroup theProduct;
-  for (int i = 0; i <G.theElements.size; i ++)
-    if (v[i] != 0)
-      out[G.MultiplyElements(g,i)] =v[i];
+  for (int i = 0; i < G.theElements.size; i ++) {
+    if (v[i] != 0) {
+      out[G.MultiplyElements(g, i)] = v[i];
+    }
+  }
   return out;
 }
 
 // this function name is a lie
 template <typename elementSomeGroup, typename coefficient>
-bool is_isotypic_component(FiniteGroup<elementSomeGroup> &G, const List<Vector<coefficient> > &V) {
+bool is_isotypic_component(FiniteGroup<elementSomeGroup>& G, const List<Vector<coefficient> >& V) {
   // pre-initial test: V isn't empty
-  if (V.size == 0)
+  if (V.size == 0) {
     return false;
+  }
   // initial test: dimension of V is a square
   int n = sqrt(V.size);
-  if (n*n != V.size)
+  if (n * n != V.size) {
     return false;
+  }
   // more expensive test: character of V has unit norm
   ClassFunction<FiniteGroup<elementSomeGroup>, coefficient> X;
   X.G = &G;
   X.data.SetSize(G.conjugacyClasseS.size);
-  for (int i = 0; i <G.conjugacyClasseS.size; i ++) {
+  for (int i = 0; i < G.conjugacyClasseS.size; i ++) {
     int g = G.conjugacyClasseS[i].representative;
     coefficient tr = 0;
-    for (int j = 0; j<V.size; j ++) {
-      Vector<coefficient> v = ActOnGroupRing(G,g,V[j]);
-      v = PutInBasis(v,V);
+    for (int j = 0; j < V.size; j ++) {
+      Vector<coefficient> v = ActOnGroupRing(G, g, V[j]);
+      v = PutInBasis(v, V);
       tr += v[j];
     }
     X.data[i] = tr;
   }
   // (4, - 1, - 1/2, 1/2, - 1, 1/4, 1/4, 1, 1/2, -7/2)[1] haha yeah right
-  if (X.norm() != n)
+  if (X.norm() != n) {
     return false;
+  }
   // okay now do the really hard test
   Matrix<coefficient> M = GetMatrix(X);
   List<List<Vector<coefficient> > > spaces = eigenspaces(M);
-  if (spaces.size != 2)
+  if (spaces.size != 2) {
     return false;
-  if (spaces[1].size != V.size)
+  }
+  if (spaces[1].size != V.size) {
     return false;
-  if (intersection(spaces[1],V).size != V.size)
+  }
+  if (intersection(spaces[1],V).size != V.size) {
     return false;
+  }
   return true;
 }
 
@@ -1277,10 +1360,10 @@ template <typename elementSomeGroup, typename coefficient>
 Matrix<coefficient> GetMatrix(const ClassFunction<FiniteGroup<elementSomeGroup>, coefficient>& X) {
   Matrix<coefficient> M;
   M.MakeZeroMatrix(X.G->N);
-  for (int i1= 0; i1<X.G->ccCount; i1++) {
-    for (int i2= 0; i2<X.G->ccSizes[i1]; i2++) {
-      int i =X.G->conjugacyClasses[i1][i2];
-      for (int j = 0; j<X.G->N; j ++) {
+  for (int i1 = 0; i1 < X.G->ccCount; i1 ++) {
+    for (int i2 = 0; i2 < X.G->ccSizes[i1]; i2 ++) {
+      int i = X.G->conjugacyClasses[i1][i2];
+      for (int j = 0; j < X.G->N; j ++) {
         M.elements[X.G->MultiplyElements(i, j)][j] = X.data[i1];
       }
     }
@@ -1290,30 +1373,33 @@ Matrix<coefficient> GetMatrix(const ClassFunction<FiniteGroup<elementSomeGroup>,
 
 int skipcount(int n, const List<int>& l) {
   int o = 0;
-  for (int i = 0; i <l.size; i ++) {
-    if (l[i] == n)
+  for (int i = 0; i < l.size; i ++) {
+    if (l[i] == n) {
       return - 1;
-    if (l[i]<n) {
-      o++;
+    }
+    if (l[i] < n) {
+      o ++;
     }
   }
-  return n-o;
+  return n - o;
 }
 
-int popcnt(int i) // from the internet
-{ i = i - ((i >> 1) & 0x55555555);
+int popcnt(int i) {
+  // from the internet
+  i = i - ((i >> 1) & 0x55555555);
   i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
   return ((((i + (i >> 4)) & 0xF0F0F0F) * 0x1010101) & 0xffffffff) >> 24;
 }
 
 List<List<int> > powersetgrade(int G, const List<int>& l) {
   List<List<int> > out;
-  for (int i = 0; i <1<<l.size; i ++) {
+  for (int i = 0; i < 1 << l.size; i ++) {
     if (popcnt(i) == G) {
       List<int> outi;
-      for (int j = 0; j<l.size; j ++) {
-        if (i&(1<<j))
+      for (int j = 0; j < l.size; j ++) {
+        if (i & (1 << j)) {
           outi.AddOnTop(j);
+        }
       }
       out.AddOnTop(outi);
     }
@@ -1324,15 +1410,17 @@ List<List<int> > powersetgrade(int G, const List<int>& l) {
 template<typename Element>
 Element minor_det(const Matrix<Element>& M, const List<int>& l) {
   Matrix<Element> MM;
-  MM.init(M.NumRows-l.size,M.NumCols-l.size);
-  for (int i = 0; i <M.NumRows; i ++) {
-    int ii = skipcount(i,l);
-    if (ii == - 1)
+  MM.init(M.NumRows - l.size, M.NumCols - l.size);
+  for (int i = 0; i < M.NumRows; i ++) {
+    int ii = skipcount(i, l);
+    if (ii == - 1) {
       continue;
-    for (int j = 0; j<M.NumCols; j ++) {
-      int jj = skipcount(j,l);
-      if (jj == - 1)
+    }
+    for (int j = 0; j < M.NumCols; j ++) {
+      int jj = skipcount(j, l);
+      if (jj == - 1) {
         continue;
+      }
       MM.elements[ii][jj] = M.elements[i][j];
     }
   }
@@ -1345,21 +1433,23 @@ Element minor_det(const Matrix<Element>& M, const List<int>& l) {
 template<typename Element>
 List<Element> charpoly(const Matrix<Element>& M) {
   List<Element> p;
-  p.SetSize(M.NumRows+ 1);
+  p.SetSize(M.NumRows + 1);
   List<int> rowids;
-  for (int i = 0; i <M.NumRows; i ++)
+  for (int i = 0; i <M.NumRows; i ++) {
     rowids.AddOnTop(i);
+  }
   for (int i = 0; i <M.NumRows; i ++) {
     Element acc = 0;
-    List<List<int> > ps = powersetgrade(i,rowids);
-    for (int si = 0; si < ps.size; si ++)
-      acc += minor_det(M,ps[si]);
-    if (i%2== 0)
+    List<List<int> > ps = powersetgrade(i, rowids);
+    for (int si = 0; si < ps.size; si ++) {
+      acc += minor_det(M, ps[si]);
+    }
+    if (i % 2 == 0) {
       acc = -acc;
+    }
     p[M.NumRows-i] = acc;
   }
-  p[0] = ((M.NumRows%2) == 0)? - 1 : 1;
-
+  p[0] = ((M.NumRows % 2) == 0) ? - 1 : 1;
   return p;
 }
 
@@ -1380,20 +1470,24 @@ void BSTest() {
   stOutput << l.BSInsert(6) << ".\n";
   stOutput << "Now checking first not less than and first greater than:\n";
   stOutput << "list:                ";
-  for (int i = 0; i <l.size; i ++)
+  for (int i = 0; i < l.size; i ++) {
     stOutput << l[i] << " ";
+  }
   stOutput << "\n";
   stOutput << "items:               ";
-  for (int i = 0; i <7; i ++)
+  for (int i = 0; i < 7; i ++) {
     stOutput << i << " ";
+  }
   stOutput << "\n";
   stOutput << "first not less than: ";
-  for (int i = 0; i <7; i ++)
+  for (int i = 0; i < 7; i ++) {
     stOutput << l.BSIndexFirstNotLessThan(i) << " ";
+  }
   stOutput << "\n";
   stOutput << "first greater than:  ";
-  for (int i = 0; i <7; i ++)
+  for (int i = 0; i < 7; i ++) {
     stOutput << l.BSIndexFirstGreaterThan(i) << " ";
+  }
   stOutput << "\n";
 }
 
@@ -1410,19 +1504,19 @@ int chartable[10][10] =
   {3,  1, - 1,  1, - 1,  0,  0, - 1, - 1,  3}
 };
 
-
-
 void make_macdonald_polynomial(const WeylGroupData& G, const List<Vector<Rational> > roots, Polynomial<Rational>& macdonaldPoly) {
   List<MonomialP> vars;
   vars.SetSize(G.GetDim());
-  for (int i = 0; i <G.GetDim(); i ++)
+  for (int i = 0; i < G.GetDim(); i ++) {
     vars[i].MakeEi(i);
+  }
 
   macdonaldPoly.MakeOne();
   for (int i = 0; i <roots.size; i ++) {
     Polynomial<Rational> pj;
-    for (int j = 0; j<G.GetDim(); j ++)
+    for (int j = 0; j < G.GetDim(); j ++) {
       pj.AddMonomial(vars[j], roots[i][j]);
+    }
     macdonaldPoly *= pj;
   }
 }
@@ -1431,44 +1525,49 @@ void matrix_acts_on_polynomial(const Matrix<Rational>& m,const Polynomial<Ration
   q = q.GetZero();
   List<MonomialP> vars;
   vars.SetSize(m.NumCols);
-  for (int i = 0; i <m.NumCols; i ++)
+  for (int i = 0; i < m.NumCols; i ++) {
     vars[i].MakeEi(i);
-  for (int i = 0; i <p.theMonomials.size; i ++) {
+  }
+  for (int i = 0; i < p.theMonomials.size; i ++) {
     Polynomial<Rational> qi;
     qi = qi.GetOne();
-    for (int j = 0; j<p.theMonomials[i].GetMinNumVars(); j ++)
+    for (int j = 0; j < p.theMonomials[i].GetMinNumVars(); j ++) {
       if (p.theMonomials[i](j) != 0) {
         Polynomial<Rational> qj;
         qj = qj.GetZero();
-        for (int k = 0; k<m.NumCols; k++)
-          qj.AddMonomial(vars[k],m.elements[k][j]);
+        for (int k = 0; k < m.NumCols; k ++)
+          qj.AddMonomial(vars[k], m.elements[k][j]);
         qj.RaiseToPower((p.theMonomials[i](j)).floorIfSmall());
         qi *= qj;
       }
+    }
     qi *= p.theCoeffs[i];
     q += qi;
   }
 }
 
 template <class templateMonomial, class coefficient>
-bool GetCoordsInBasisInputIsGaussianEliminated
-(const List<MonomialCollection<templateMonomial, coefficient> > &inputReducedBasis,
- const MonomialCollection<templateMonomial, coefficient> & input,
- Vector<coefficient>* outputCoordinatesInBasis = 0) {
-  MacroRegisterFunctionWithName("GetCoordsInBasiS");
-  MonomialCollection<templateMonomial, coefficient>  summand, v= input;
+bool GetCoordsInBasisInputIsGaussianEliminated(
+  const List<MonomialCollection<templateMonomial, coefficient> > &inputReducedBasis,
+  const MonomialCollection<templateMonomial, coefficient> & input,
+  Vector<coefficient>* outputCoordinatesInBasis = 0
+) {
+  MacroRegisterFunctionWithName("GetCoordsInBasisInputIsGaussianEliminated");
+  MonomialCollection<templateMonomial, coefficient>  summand, v = input;
   coefficient currentCoeff;
-  if (outputCoordinatesInBasis != 0)
+  if (outputCoordinatesInBasis != 0) {
     outputCoordinatesInBasis->MakeZero(inputReducedBasis.size);
+  }
   for (int i = 0; i < inputReducedBasis.size; i ++) {
     currentCoeff=v.GetMonomialCoefficient(inputReducedBasis[i].GetMaxMonomial());
     if (!currentCoeff.IsEqualToZero()) {
       summand = inputReducedBasis[i];
-      if (outputCoordinatesInBasis != 0)
+      if (outputCoordinatesInBasis != 0) {
         (*outputCoordinatesInBasis)[i] = currentCoeff;
-      currentCoeff*= - 1;
-      summand*= currentCoeff;
-      v-=summand;
+      }
+      currentCoeff *= - 1;
+      summand *= currentCoeff;
+      v -= summand;
     }
   }
   return v.IsEqualToZero();
@@ -1480,19 +1579,21 @@ bool GetCoordsInBasisInputIsGaussianEliminated
  const Polynomial<coefficient> & input,
  Vector<coefficient>* outputCoordinatesInBasis = 0) {
   MacroRegisterFunctionWithName("GetCoordsInBasiS");
-  Polynomial<coefficient>  summand, v= input;
+  Polynomial<coefficient> summand, v = input;
   coefficient currentCoeff;
-  if (outputCoordinatesInBasis != 0)
+  if (outputCoordinatesInBasis != 0) {
     outputCoordinatesInBasis->MakeZero(inputReducedBasis.size);
+  }
   for (int i = 0; i < inputReducedBasis.size; i ++) {
-    currentCoeff=v.GetMonomialCoefficient(inputReducedBasis[i].GetMaxMonomial());
+    currentCoeff = v.GetMonomialCoefficient(inputReducedBasis[i].GetMaxMonomial());
     if (!currentCoeff.IsEqualToZero()) {
       summand = inputReducedBasis[i];
-      if (outputCoordinatesInBasis != 0)
+      if (outputCoordinatesInBasis != 0) {
         (*outputCoordinatesInBasis)[i] = currentCoeff;
-      currentCoeff*= - 1;
-      summand*= currentCoeff;
-      v-=summand;
+      }
+      currentCoeff *= - 1;
+      summand *= currentCoeff;
+      v -= summand;
     }
   }
   return v.IsEqualToZero();
@@ -1562,8 +1663,8 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
 }
 */
 
-class lennum
-{ public:
+class lennum {
+public:
   friend std::ostream& operator << (std::ostream& output, const lennum& input) {
     output << "num: " << input.num << " len: " << input.len.ToString();
     return output;
@@ -1585,13 +1686,14 @@ get_macdonald_representation(WeylGroupData& W, const List<Vector<Rational> >& ro
   List<Vector<Rational> > monomial;
   List<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;
-  for (int i = 0; (Rational)i <W.theGroup.GetSize(); i ++) {
+  for (int i = 0; (Rational) i < W.theGroup.GetSize(); i ++) {
     W.GetStandardRepresentationMatrix(i,m);
     monomial.SetSize(roots.size);
-    for (int j = 0; j<roots.size; j ++) {
-      monomial[j] = m*roots[j];
-      if (monomial[j].IsNegative())
-        monomial[j] = -monomial[j];
+    for (int j = 0; j < roots.size; j ++) {
+      monomial[j] = m * roots[j];
+      if (monomial[j].IsNegative()) {
+        monomial[j] = - monomial[j];
+      }
     }
     monomial.QuickSortAscending();
     monomials.BSInsertDontDup(monomial);
@@ -1602,19 +1704,19 @@ get_macdonald_representation(WeylGroupData& W, const List<Vector<Rational> >& ro
   List<Vector<Rational> > images;
   images.SetSize(monomials.size);
   lens.SetSize(monomials.size);
-  for (int i = 0; i <monomials.size; i ++) {
+  for (int i = 0; i < monomials.size; i ++) {
     images[i].SetSize(W.RootSystem.size);
     Rational l = 0;
-    for (int j = 0; j<W.RootSystem.size; j ++) {
-      Rational p =1;
-      for (int k1= 0; k1<monomials[i].size; k1++) {
+    for (int j = 0; j < W.RootSystem.size; j ++) {
+      Rational p = 1;
+      for (int k1= 0; k1 < monomials[i].size; k1 ++) {
         Rational s = 0;
-        for (int k2= 0; k2<monomials[i][k1].size; k2++)
+        for (int k2 = 0; k2 < monomials[i][k1].size; k2 ++)
           s += monomials[i][k1][k2] * W.RootSystem[j][k2];
         p *= s;
       }
       images[i][j] = p;
-      l += p*p;
+      l += p * p;
     }
     lens[i].len = l;
     lens[i].num = i;
@@ -1624,35 +1726,38 @@ get_macdonald_representation(WeylGroupData& W, const List<Vector<Rational> >& ro
 
   List<int> monomials_used;
   VectorSpace<Rational> vs;
-  for (int i = 0; i <monomials.size; i ++) {
-    if (vs.AddVector(images[lens[i].num]))
+  for (int i = 0; i < monomials.size; i ++) {
+    if (vs.AddVector(images[lens[i].num])) {
       monomials_used.AddOnTop(lens[i].num);
+    }
   }
   Basis<Rational> B;
-  for (int i = 0; i <monomials_used.size; i ++)
+  for (int i = 0; i < monomials_used.size; i ++) {
     B.AddVector(images[monomials_used[i]]);
+  }
 
   stOutput << "module rank is " << monomials_used.size << "\n";
 
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> rep;
   rep.init(W.theGroup);
-  for (int i =1; i <W.GetDim() + 1; i ++) {
+  for (int i = 1; i < W.GetDim() + 1; i ++) {
     Matrix<Rational> m;
     W.GetStandardRepresentationMatrix(i,m);
     Matrix<Rational> rm;
     rm.init(monomials_used.size, monomials_used.size);
-    for (int j = 0; j<monomials_used.size; j ++) {
+    for (int j = 0; j < monomials_used.size; j ++) {
       List<Vector<Rational> > monomial;
       monomial.SetSize(roots.size);
-      for (int k = 0; k<roots.size; k++)
+      for (int k = 0; k < roots.size; k ++) {
         monomial[k] = m*monomials[monomials_used[j]][k];
+      }
       Vector<Rational> evaluated;
       evaluated.SetSize(W.RootSystem.size);
-      for (int ei = 0; ei <W.RootSystem.size; ei ++) {
+      for (int ei = 0; ei < W.RootSystem.size; ei ++) {
         Rational p = 1;
-        for (int ej = 0; ej<monomial.size; ej ++) {
+        for (int ej = 0; ej < monomial.size; ej ++) {
           Rational s = 0;
-          for (int ek = 0; ek<monomial[ej].size; ek++) {
+          for (int ek = 0; ek < monomial[ej].size; ek ++) {
             s += monomial[ej][ek] * W.RootSystem[ei][ek];
           }
           p *= s;
@@ -1664,44 +1769,46 @@ get_macdonald_representation(WeylGroupData& W, const List<Vector<Rational> >& ro
     }
     rep.SetElementImage(i,rm);
     stOutput << rm.ToString(&consoleFormat) << "\n";
-    if (!(rm*rm).IsIdMatrix())
+    if (!(rm*rm).IsIdMatrix()) {
       stOutput << "Error: this matrix is not an involution" << "\n";
+    }
   }
   return rep;
 }
 
-
 int maxpoints;
-
 
 // balanced ternary
 Vector<int> pointi(int d, int i) {
   if (maxpoints == 0) {
     int tmp = 1;
-    for (int i = 0; i <d; i ++)
+    for (int i = 0; i < d; i ++) {
       tmp *= 3;
+    }
     int tmp2 = 1;
-    for (int i = 0; i <d; i ++)
+    for (int i = 0; i < d; i ++) {
       tmp2 *= 5;
+    }
     maxpoints = tmp + tmp2;
   }
   Vector<int> out;
   out.SetSize(d);
   int acc = 1;
-  for (int i = 0; i <d; i ++)
+  for (int i = 0; i < d; i ++) {
     acc *= 3;
-  if (i <acc) {
-    for (int ii = 0; ii <d; ii ++) {
-      int m = i%3;
-      out[ii] = (m!=2)?m:- 1;
+  }
+  if (i < acc) {
+    for (int ii = 0; ii < d; ii ++) {
+      int m = i % 3;
+      out[ii] = (m != 2) ? m : - 1;
       i /= 3;
     }
     return out;
   }
-  for (int ii = 0; ii <d; ii ++) {
-    int m= i%5;
-    out[ii] = m-2;
-    i/=5;
+  for (int ii = 0; ii < d; ii ++) {
+    int m = i % 5;
+    out[ii] = m - 2;
+    i /= 5;
   }
   return out;
 }
@@ -1711,69 +1818,80 @@ bool pointgt(const Vector<int>& pointi, const Vector<int>& pointj) {
   int im = 0;
   for (int i = 0; i <pointi.size; i ++) {
     is += pointi[i];
-    if (im < abs(pointi[i]))
+    if (im < abs(pointi[i])) {
       im = abs(pointi[i]);
+    }
   }
   int js = 0;
   int jm = 0;
   for (int j = 0; j<pointj.size; j ++) {
     js += pointj[j];
-    if (jm < abs(pointj[j]))
+    if (jm < abs(pointj[j])) {
       jm = abs(pointj[j]);
+    }
   }
-  if (abs(is) > abs(js))
+  if (abs(is) > abs(js)) {
     return true;
-  if (abs(js) < abs(is))
+  }
+  if (abs(js) < abs(is)) {
     return false;
-  if (im > jm)
+  }
+  if (im > jm) {
     return true;
-  if (im < jm)
+  }
+  if (im < jm) {
     return false;
+  }
   return im > jm;
 }
 
 bool pointlt(const Vector<int>& pointi, const Vector<int>& pointj) {
   int is = 0;
   int im = 0;
-  for (int i = 0; i <pointi.size; i ++) {
+  for (int i = 0; i < pointi.size; i ++) {
     is += pointi[i];
-    if (im < abs(pointi[i]))
+    if (im < abs(pointi[i])) {
       im = abs(pointi[i]);
+    }
   }
   int js = 0;
   int jm = 0;
-  for (int j = 0; j<pointj.size; j ++) {
+  for (int j = 0; j < pointj.size; j ++) {
     js += pointj[j];
-    if (jm < abs(pointj[j]))
+    if (jm < abs(pointj[j])) {
       jm = abs(pointj[j]);
+    }
   }
-  if (abs(is) > abs(js))
+  if (abs(is) > abs(js)) {
     return false;
-  if (abs(js) < abs(is))
+  }
+  if (abs(js) < abs(is)) {
     return true;
-  if (im > jm)
+  }
+  if (im > jm) {
     return false;
-  if (im < jm)
+  }
+  if (im < jm) {
     return true;
+  }
   return im < jm;
 }
 
 template<>
-  std::string Vector<int>::ToString(FormatExpressions* theFormat) const {
-    (void) theFormat;//avoid unused parameter warning, portable
-    std::stringstream out;
-    out.precision(5);
-    out << "(";
-    for (int i = 0; i < this->size; i ++) {
-      out << this->TheObjects[i];
-      if (i != this->size- 1)
-        out << ", ";
+std::string Vector<int>::ToString(FormatExpressions* theFormat) const {
+  (void) theFormat;//avoid unused parameter warning, portable
+  std::stringstream out;
+  out.precision(5);
+  out << "(";
+  for (int i = 0; i < this->size; i ++) {
+    out << this->TheObjects[i];
+    if (i != this->size - 1) {
+      out << ", ";
     }
-    out << ")";
-    return out.str();
   }
-
-
+  out << ")";
+  return out.str();
+}
 
 Vector<int> pointi_slow(int d, int i) {
   static List<Vector<int> > points;
@@ -1781,20 +1899,21 @@ Vector<int> pointi_slow(int d, int i) {
   if ((points.size == 0) || (old_d != d)) {
     stOutput << "generating points...";
     old_d = d;
-    int n = 10-d; // values of each coordinate range from -n to n
+    int n = 10 - d; // values of each coordinate range from -n to n
     Vector<int> point;
     point.SetSize(d);
-    for (int j = 0; j<d; j ++)
-      point[j] = -n;
+    for (int j = 0; j < d; j ++) {
+      point[j] = - n;
+    }
     while (true) {
-      for (int j = 0; j<d; j ++) {
+      for (int j = 0; j < d; j ++) {
         if (point[j] < n) {
           point[j] ++;
           points.AddOnTop(point);
           break;
         } else {
-          if (j<d- 1) {
-            point[j] = -n;
+          if (j < d - 1) {
+            point[j] = - n;
             continue;
           } else {
             goto done_generating_points;
@@ -1804,14 +1923,17 @@ Vector<int> pointi_slow(int d, int i) {
     }
     done_generating_points:
     //points.QuickSortAscending(&pointgt);
-    std::sort(points.TheObjects, points.TheObjects+points.size, pointlt);
-    for (int k = 0; k<points.size; k++)
+    std::sort(points.TheObjects, points.TheObjects + points.size, pointlt);
+    for (int k = 0; k < points.size; k ++) {
       stOutput << points[k] << "\n";
+    }
     stOutput << " " << points.size << " generated." << "\n";
     maxpoints = points.size;
   }
-  if (i>= points.size)
-    stOutput << "only " << points.size << " points in dimension " << d << " available so far (requested point " << i << ")" << "\n";
+  if (i >= points.size) {
+    stOutput << "only " << points.size << " points in dimension "
+    << d << " available so far (requested point " << i << ")" << "\n";
+  }
   return points[i];
 }
 /*Vector<int> pointi(int d, int i) {
@@ -2306,21 +2428,23 @@ int pointis(int d, int n) {
 void lie_bracket_relations(Vector<Polynomial<Rational> >& out, int N) {
   Matrix<Vector<Polynomial<Rational> > > brackets;
   brackets.init(N,N);
-  for (int i = 0; i <N; i ++)
-    for (int j = 0; j<N; j ++) {
+  for (int i = 0; i < N; i ++) {
+    for (int j = 0; j < N; j ++) {
       brackets.elements[i][j].SetSize(N);
-      for (int k = 0; k<N; k++)
-        brackets.elements[i][j][k].MakeMonomiaL(i*N*N+j*N+k,1);
+      for (int k = 0; k < N; k ++) {
+        brackets.elements[i][j][k].MakeMonomiaL(i * N * N + j * N + k, 1);
+      }
     }
+  }
   stOutput << brackets << '\n';
-  for (int i = 0; i <N; i ++)
+  for (int i = 0; i <N; i ++) {
     for (int j = 0; j < i; j ++) {
-      for (int k = 0; k<j; k++) {
+      for (int k = 0; k < j; k ++) {
         stOutput << i << j << k;
         Vector<Polynomial<Rational> > w;
         w.MakeZero(N);
-        for (int l = 0; l<N; l ++)
-          for (int m= 0; m<N; m ++) {
+        for (int l = 0; l < N; l ++) {
+          for (int m = 0; m < N; m ++) {
             Polynomial<Rational> p;
             p = brackets.elements[i][j][l];
             p *= brackets.elements[k][m][l];
@@ -2332,12 +2456,14 @@ void lie_bracket_relations(Vector<Polynomial<Rational> >& out, int N) {
             p *= brackets.elements[j][m][l];
             w[l] += p;
           }
+        }
         stOutput << w << '\n';
         out.AddListOnTop(w);
       }
     }
+  }
   stOutput << "done with Jacobi relations\n";
-  for (int i = 0; i <N; i ++)
+  for (int i = 0; i < N; i ++) {
     for (int j = 0; j < i; j ++) {
       Vector<Polynomial<Rational> > v;
       v = brackets.elements[i][j];
@@ -2345,6 +2471,7 @@ void lie_bracket_relations(Vector<Polynomial<Rational> >& out, int N) {
       stOutput << v << '\n';
       out.AddListOnTop(v);
     }
+  }
 }
 
 
@@ -2383,9 +2510,11 @@ void SparseTensor::Canonicalize() {
 
 void TestPermutationGenerators() {
   GeneratorPermutationsOfList<int> perms;
-  for (int i =1; i <8; i ++)
-    for (perms.Initialize(i); !perms.DoneIterating(); ++perms)
+  for (int i = 1; i < 8; i ++) {
+    for (perms.Initialize(i); !perms.DoneIterating(); ++ perms) {
       stOutput << (*perms).ToStringCommaDelimited() << '\n';
+    }
+  }
 
   GeneratorElementsSnxSnOnIndicesAndIndices permssxsxs;
   List<List<int> > indiceses;
@@ -2393,16 +2522,17 @@ void TestPermutationGenerators() {
   indiceses[0].AddOnTop(1); indiceses[0].AddOnTop(2); indiceses[0].AddOnTop(3); indiceses[0].AddOnTop(4);
   indiceses[1].AddOnTop(5); indiceses[1].AddOnTop(6); indiceses[1].AddOnTop(7);
   indiceses[2].AddOnTop(8); indiceses[2].AddOnTop(9);
-  for (permssxsxs.Initialize(indiceses); !permssxsxs.DoneIterating(); ++permssxsxs)
+  for (permssxsxs.Initialize(indiceses); !permssxsxs.DoneIterating(); ++ permssxsxs) {
     stOutput << *permssxsxs << '\n';
+  }
 }
 
 void TestCountPermutations(int N) {
   long long cnt = 0;
   GeneratorPermutationsOfList<int> perms;
-  for (perms.Initialize(N); !perms.DoneIterating(); ++perms)
-    //stOutput << (*perms).ToStringCommaDelimited() << '\n';
+  for (perms.Initialize(N); !perms.DoneIterating(); ++ perms) {
     cnt ++;
+  }
   stOutput << "Generated " << cnt << " permutations of " << N << " objects\n";
 }
 
@@ -2419,43 +2549,52 @@ void TestPermutationWords() {
     for (int wi = 0; wi <word.size; wi ++)
       p = p*G->generators[word[wi]];
     stOutput << ((p == G->theElements[i]) ? "☑ ":"☒ ");
-    stOutput << G->theElements[i] << " has word (" << word.ToStringCommaDelimited() << ") which multiplies out to " << p << "\n";
+    stOutput << G->theElements[i] << " has word ("
+    << word.ToStringCommaDelimited() << ") which multiplies out to " << p << "\n";
   }
 }
 
 void TestPartitionsTableaux() {
-   List<Partition> partitions;
+  List<Partition> partitions;
   Partition::GetPartitions(partitions, 3);
-  for (int i = 0; i <partitions.size; i ++)
+  for (int i = 0; i <partitions.size; i ++) {
     stOutput << partitions[i] << '\n';
+  }
   Partition::GetPartitions(partitions, 4);
-  for (int i = 0; i <partitions.size; i ++)
+  for (int i = 0; i <partitions.size; i ++) {
     stOutput << partitions[i] << '\n';
+  }
   Partition::GetPartitions(partitions, 8);
-  for (int i = 0; i <partitions.size; i ++)
+  for (int i = 0; i <partitions.size; i ++) {
     stOutput << partitions[i] << '\n';
+  }
 
   Partition D;
   List<int> Dl;
-  Dl.AddOnTop(5); Dl.AddOnTop(3); Dl.AddOnTop(2);
+  Dl.AddOnTop(5);
+  Dl.AddOnTop(3);
+  Dl.AddOnTop(2);
   D.FromListInt(Dl);
   Tableau T;
   D.FillTableauOrdered(T);
   stOutput << D << ".FillTableauOrdered -> " << T << '\n';
   stOutput << "T.GetColumns() -> [";
-  List<List<int> > columns = T.GetColumns();
-  for (int i = 0; i <columns.size; i ++) {
+  List<List<int> > columns;
+  T.GetColumns(columns);
+  for (int i = 0; i < columns.size; i ++) {
     stOutput << "[" << columns[i].ToStringCommaDelimited() << "]";
-    if (i != columns.size- 1)
+    if (i != columns.size - 1) {
       stOutput << ", ";
+    }
   }
   stOutput << "]\n";
   stOutput << "Is T standard? " << T.IsStandard() << '\n';
   List<Matrix<Rational> > Ms;
   stOutput << "D.SpechtModuleMatricesOfTranspositions1j\n";
   D.SpechtModuleMatricesOfTranspositions1j(Ms);
-  for (int i = 0; i <Ms.size; i ++)
+  for (int i = 0; i < Ms.size; i ++) {
     stOutput << Ms[i].ToStringPlainText() << "\n\n";
+  }
 }
 
 /*void TestHyperoctahedralStuff() {
@@ -2493,27 +2632,28 @@ void TestPartitionsTableaux() {
 }*/
 
 void TestHyperoctahedralStuff() {
-  ElementHyperoctahedralGroupR2 q1,q2;
-  q1.h.AddTransposition(0,2);
-  q1.h.AddTransposition(1,3);
+  ElementHyperoctahedralGroupR2 q1, q2;
+  q1.h.AddTransposition(0, 2);
+  q1.h.AddTransposition(1, 3);
   q2.k.ToggleBit(1);
   q2.k.ToggleBit(2);
-  ElementHyperoctahedralGroupR2 q3,q4;
+  ElementHyperoctahedralGroupR2 q3, q4;
   stOutput << "Q1=" << q1 << ", Q2=" << q2 << "\n";
-  stOutput << "Q1*Q2=" << q1*q2 << " Q2*Q1*Q2=" << q2*q1*q2;
+  stOutput << "Q1*Q2=" << q1 * q2 << " Q2*Q1*Q2=" << q2 * q1 * q2;
   q4 = q2;
   q4.Invert();
-  stOutput << " Q1^Q2=" << (q1^q2) << " Q2*Q1*Q4=" << q2*q1*q4;
+  stOutput << " Q1^Q2=" << (q1 ^ q2) << " Q2*Q1*Q4=" << q2 * q1 * q4;
 
-  for (int bni =1; bni <6;bni ++) {
+  for (int bni = 1; bni < 6; bni ++) {
     HyperoctahedralGroupData Bn;
     Bn.MakeHyperoctahedralGroup(bni);
     Bn.theGroup->ComputeAllElements(true, - 1);
     Bn.theGroup->ComputeCCSizesAndRepresentatives();
     stOutput << Bn << '\n';
     stOutput << Bn.theGroup->conjugacyClasseS.size << " conjugacy classes\n";
-    for (int i = 0; i <Bn.theGroup->conjugacyClasseS.size; i ++)
+    for (int i = 0; i < Bn.theGroup->conjugacyClasseS.size; i ++) {
       stOutput << Bn.theGroup->conjugacyClasseS[i] << ", ";
+    }
     stOutput << '\n';
     Bn.theGroup->VerifyCCSizesAndRepresentativesFormula();
     stOutput << "\n\n";
@@ -2530,16 +2670,18 @@ void TestSpechtModules(int N = 7) {
   stOutput << G.PrettyPrintGeneratorCommutationRelations();
   stOutput << "Testing Specht modules for S_" << N << '\n';
   //#pragma omp parallel for
-  for (int pi = 0; pi <parts.size; pi ++) {
+  for (int pi = 0; pi < parts.size; pi ++) {
     PD.SpechtModuleOfPartition(parts[pi], G.irreps[pi]);
-    for (int i = 0; i <G.irreps[pi].generatorS.size; i ++)
+    for (int i = 0; i < G.irreps[pi].generatorS.size; i ++) {
       stOutput << G.irreps[pi].generatorS[i].ToStringPlainText() << ",\n\n";
+    }
     stOutput << "\n";
     G.irreps[pi].VerifyRepresentation();
   }
   G.irreps.QuickSortAscending();
-  for (int i = 0; i <G.irreps.size; i ++)
+  for (int i = 0; i < G.irreps.size; i ++) {
     stOutput << G.irreps[i] << '\n';
+  }
   stOutput << G.PrettyPrintCharacterTable() << '\n';
 }
 
@@ -2581,15 +2723,16 @@ void TestInduction(int n =4, int m=3) {
 }
 */
 
-void TestInduction(int n =4, int m=3) {
+void TestInduction(int n = 4, int m = 3) {
   PermutationGroupData PD;
   PD.MakeSymmetricGroupGeneratorsjjPlus1(n);
   stOutput << "1\n";
   PD.ComputeSpechtModules();
   stOutput << "2\n";
   List<int> l;
-  for (int i = 0; i <m- 1; i ++)
+  for (int i = 0; i < m - 1; i ++) {
     l.AddOnTop(i);
+  }
   SubgroupData<FiniteGroup<PermutationR2>, PermutationR2> HD = PD.theGroup->ParabolicKindaSubgroupGeneratorSubset(l);
   stOutput << "3\n";
   PermutationGroupData HPD;
@@ -2598,13 +2741,15 @@ void TestInduction(int n =4, int m=3) {
   stOutput << "4\n";
   List<GroupRepresentation<FiniteGroup<PermutationR2>, Rational> > indreps;
   indreps.SetSize(HD.theSubgroup->irreps.size);
-  for (int i = 0; i <HD.theSubgroup->irreps.size; i ++)
+  for (int i = 0; i <HD.theSubgroup->irreps.size; i ++) {
     indreps[i] = HD.InduceRepresentation(HD.theSubgroup->irreps[i]);
+  }
   stOutput << "5\n";
   stOutput << HD.theGroup->PrettyPrintCharacterTable();
   stOutput << HD.theSubgroup->PrettyPrintCharacterTable();
-  for (int i = 0; i < indreps.size; i ++)
+  for (int i = 0; i < indreps.size; i ++) {
     stOutput << indreps[i].DescribeAsDirectSum() << '\n';
+  }
 }
 
 
@@ -3377,9 +3522,9 @@ void TestWeylIrrepsFormulas(char letter, int number) {
 }
 
 void LegacyTest() {
-  TestWeylIrrepsFormulas('A',4);
-  TestWeylIrrepsFormulas('B',4);
-  TestWeylIrrepsFormulas('D',4);
+  TestWeylIrrepsFormulas('A', 4);
+  TestWeylIrrepsFormulas('B', 4);
+  TestWeylIrrepsFormulas('D', 4);
 }
 
 void TestFiniteFields() {
@@ -3387,8 +3532,8 @@ void TestFiniteFields() {
   a.n = 2;
   f65521 b;
   b.n = 5;
-  stOutput << (a*b).n << "\n";
-  stOutput << (a/b).n << "\n";
+  stOutput << (a * b).n << "\n";
+  stOutput << (a / b).n << "\n";
 }
 
 //   std::string s;
@@ -3396,40 +3541,44 @@ void TestFiniteFields() {
 
 int mainTest(List<std::string>& inputArguments) {
   stOutput << inputArguments.ToStringCommaDelimited() << '\n';
-  if (inputArguments.size == 0)
+  if (inputArguments.size == 0) {
     LegacyTest();
-  else {
+  } else {
     if (inputArguments[0] == "count_permutations") {
       int N;
-      if (inputArguments.size == 2)
+      if (inputArguments.size == 2) {
         N = atoi(inputArguments[1].c_str());
-      else
+      } else {
         N = 10;
+      }
       TestCountPermutations(N);
     }
     if (inputArguments[0] == "specht_modules") {
       int N;
-      if (inputArguments.size == 2)
+      if (inputArguments.size == 2) {
         N = atoi(inputArguments[1].c_str());
-      else
+      } else {
         N = 6;
+      }
       TestSpechtModules(N);
     }
     if (inputArguments[0] == "test_induction") {
       if (inputArguments.size == 3) {
         int n = atoi(inputArguments[1].c_str());
         int m = atoi(inputArguments[2].c_str());
-        TestInduction(n,m);
-      } else
+        TestInduction(n, m);
+      } else {
         TestInduction();
+      }
     }
     if (inputArguments[0] == "TestWeylIrrepsFormulas") {
       if (inputArguments.size == 3) {
         char l = (inputArguments[1].c_str())[0];
         int n = atoi(inputArguments[2].c_str());
-        TestWeylIrrepsFormulas(l,n);
-      } else
-        TestWeylIrrepsFormulas('B',3);
+        TestWeylIrrepsFormulas(l, n);
+      } else {
+        TestWeylIrrepsFormulas('B', 3);
+      }
     }
   }
 

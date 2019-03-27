@@ -257,7 +257,7 @@ std::string HtmlInterpretation::submitAnswersPreview() {
     &errorStream
   );
   if (!theProblem.flagLoadedSuccessfully) {
-    out << "<br><b>Failed to load problem.</b> Comments: " << errorStream.str();
+    out << "<br><b>" << WebAPI::problem::failedToLoadProblem << "</b> Comments: " << errorStream.str();
   }
   std::stringstream comments;
   if (!theProblem.ParseHTMLPrepareCommands(&comments)) {
@@ -888,13 +888,13 @@ std::string HtmlInterpretation::GetExamPageJSON() {
   if (commentsProblem != "") {
     output[WebAPI::commentsProblem] = commentsProblem;
   }
+  output["deadline"] = theFile.outputDeadlineString;
+  output["problemLabel"] = theFile.outputProblemLabel;
+  output[WebAPI::problem::title] = theFile.outputProblemTitle;
+  output[WebAPI::problem::fileName] = theFile.fileName;
+  output[WebAPI::problem::idProblem] = theFile.fileName;
   if (theFile.flagLoadedSuccessfully) {
     output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
-    output["deadline"] = theFile.outputDeadlineString;
-    output["problemLabel"] = theFile.outputProblemLabel;
-    output["title"] = theFile.outputProblemTitle;  
-    output[WebAPI::problemFileName] = theFile.fileName;
-    output[WebAPI::problemId] = theFile.fileName;
     JSData theScripts(JSData::JSarray);
     theScripts.list.SetSize(theFile.theScripts.size());
     for (int i = 0; i < theFile.theScripts.size(); i ++) {
@@ -1979,7 +1979,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   CalculatorHTML problemParser;
   problemParser.fileName = problemName;
   if (!problemParser.LoadMe(false, "", &commentsOnFailure)) {
-    logWorker << logger::yellow << "Failed to load problem. "
+    logWorker << logger::yellow << WebAPI::problem::failedToLoadProblem
     << commentsOnFailure.str() << logger::endL;
     return 0;
   }

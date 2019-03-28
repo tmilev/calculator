@@ -888,8 +888,8 @@ std::string HtmlInterpretation::GetExamPageJSON() {
   if (commentsProblem != "") {
     output[WebAPI::commentsProblem] = commentsProblem;
   }
-  output["deadline"] = theFile.outputDeadlineString;
-  output["problemLabel"] = theFile.outputProblemLabel;
+  output[WebAPI::problem::deadlineSingle] = theFile.outputDeadlineString;
+  output[WebAPI::problem::problemLabel] = theFile.outputProblemLabel;
   output[WebAPI::problem::title] = theFile.outputProblemTitle;
   output[WebAPI::problem::fileName] = theFile.fileName;
   output[WebAPI::problem::idProblem] = theFile.fileName;

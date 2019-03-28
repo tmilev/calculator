@@ -35,8 +35,10 @@ function getClonePanel(
   /**@type{string} */
   fileNameTarget
 ) {
+  if (fileNameSource === "") {
+    return "";
+  }
   var result = "";
-  result += `<span class = "panelDeadlines">`;
   var idCloneInput = encodeURIComponent(`cloneButton${fileNameSource}`);
   var idSpanClonePageReport = encodeURIComponent(`cloneButtonReport${fileNameSource}`);
   result += `<button class = 'buttonClone' style = 'width:50px' onclick = `;
@@ -44,7 +46,6 @@ function getClonePanel(
   var sizeFile = fileNameTarget.length;
   result += `<input type = "text" value = '${fileNameTarget}' size = '${sizeFile}' id = '${idCloneInput}'></input>`;
   result += `<div id = "${idSpanClonePageReport}"></div>`;
-  result += "</span>";
   return result;
 }
 
@@ -61,7 +62,9 @@ function getEditPanel(fileName) {
   result += `<div class = 'spanFileInfo'>`;
   result += `<button class = "buttonSaveEdit" onclick = "window.calculator.editPage.selectEditPage('${fileName}');" style = 'width:50px'>Edit</button> ${fileName} `;
   result += `<button class = "accordionLike" onclick = "window.calculator.editPage.toggleClonePanel(this)">Clone panel &#9666;</button>`;
+  result += `<span class = "panelDeadlines">`;
   result += getClonePanel(fileName, fileName);
+  result += "</span>";
   result += `</div>`;
   return result;
 }

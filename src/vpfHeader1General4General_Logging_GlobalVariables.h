@@ -87,6 +87,7 @@ public:
   bool flagCachingInternalFilesOn;
   bool flagServerDetailedLog;
   bool flagIsChildProcess;
+  bool flagRestartNeeded;
   std::string processType;
 
   bool flagLoggedIn;
@@ -246,7 +247,9 @@ public:
   void ChDir(const std::string& systemCommand);
   std::string ToStringHTMLTopCommandLinuxSystem();
   std::string ToStringFolderInfo() const;
-  std::string ToStringProgressReportHtmL();
+  std::string ToStringHtmlThreadData();
+  std::string ToStringProgressReportHtmlNoThreadData();
+  std::string ToStringProgressReportHtmlWithThreadData();
   JSData ToStringProgressReportJSData();
   std::string ToStringProgressReportConsole();
   void MakeReport(const std::string& input) {

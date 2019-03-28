@@ -802,12 +802,14 @@ void SSLdata::ClearErrorQueue(
     }
     break;
   case SSL_ERROR_SSL:
-    if (outputError != 0)
+    if (outputError != 0) {
       *outputError = "SSL_ERROR_SSL";
+    }
     break;
   default:
-    if (outputError != 0)
+    if (outputError != 0) {
       *outputError = "SSL_ERROR_unknown";
+    }
     break;
   }
 #endif
@@ -946,8 +948,9 @@ bool WebWorker::ReceiveAllHttpSSL() {
 void WebWorker::SendAllBytesHttpSSL() {
   MacroRegisterFunctionWithName("WebWorker::SendAllBytesHttpSSL");
 #ifdef MACRO_use_open_ssl
-  if (this->remainingBytesToSenD.size == 0)
+  if (this->remainingBytesToSenD.size == 0) {
     return;
+  }
   this->CheckConsistency();
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     crash
@@ -2483,13 +2486,17 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension) {
 
 void WebWorker::WrapUpConnection() {
   MacroRegisterFunctionWithName("WebWorker::WrapUpConnection");
-  if (theGlobalVariables.flagServerDetailedLog)
+  if (theGlobalVariables.flagServerDetailedLog) {
     logIO << "Detail: wrapping up connection. " << logger::endL;
+  }
   this->resultWork["connectionsServed"] = this->numberOfReceivesCurrentConnection;
   if (this->flagToggleMonitoring) {
     this->resultWork["result"] = "toggleMonitoring";
   } else {
     this->resultWork["result"] = "close";
+  }
+  if (theGlobalVariables.flagRestartNeeded) {
+    this->resultWork["restartNeeded"] = "true";
   }
   this->pipeWorkerToServerControls.WriteOnceAfterEmptying(this->resultWork.ToString(false), false, false);
   if (theGlobalVariables.flagServerDetailedLog) {
@@ -2880,17 +2887,6 @@ int WebWorker::ProcessActivateAccount() {
   return 0;
 }
 
-int WebWorker::ProcessForgotLoginPage() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessForgotLoginPage");
-  this->SetHeaderOKNoContentLength("");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-    DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
-    theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
-  }
-  stOutput << this->GetForgotLoginPage();
-  return 0;
-}
-
 int WebWorker::ProcessLogout() {
   MacroRegisterFunctionWithName("WebWorker::ProcessLogout");
   this->SetHeaderOKNoContentLength("");
@@ -2926,7 +2922,9 @@ int WebWorker::ProcessCalculatorOnePageJS(bool appendBuildHash) {
 int WebWorker::ProcessApp(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebWorker::ProcessApp");
   this->SetHeaderOKNoContentLength("");
-  theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
+  if (theWebServer.RestartIsNeeded()) {
+    return 0;
+  }
   stOutput << HtmlInterpretation::GetApp(appendBuildHash);
   return 0;
 }
@@ -2948,7 +2946,9 @@ int WebWorker::ProcessTemplate() {
 int WebWorker::ProcessLoginUserInfo(const std::string& comments) {
   MacroRegisterFunctionWithName("WebWorker::ProcessUserInfoJSON");
   this->SetHeaderOKNoContentLength("");
-  theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
+  if (theWebServer.RestartIsNeeded()) {
+    return 0;
+  }
   stOutput << HtmlInterpretation::GetJSONUserInfo(comments);
   return 0;
 }
@@ -3227,10 +3227,12 @@ std::string WebWorker::GetAddUserEmails() {
 std::string HtmlInterpretation::ModifyProblemReport() {
   MacroRegisterFunctionWithName("WebWorker::ModifyProblemReport");
   bool shouldProceed = theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
-  if (shouldProceed)
+  if (shouldProceed) {
     shouldProceed = theGlobalVariables.flagUsingSSLinCurrentConnection;
-  if (!shouldProceed)
+  }
+  if (!shouldProceed) {
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
+  }
   std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   std::string fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
   std::stringstream commentsOnFailure;
@@ -3275,36 +3277,6 @@ std::string HtmlInterpretation::GetCaptchaDiv() {
   } else {
     out << "<div class =\"g-recaptcha\" data-sitekey =\"" << recaptchaPublic << "\"></div>";
   }
-  return out.str();
-}
-
-std::string WebWorker::GetForgotLoginPage() {
-  MacroRegisterFunctionWithName("WebWorker::GetForgotLoginPage");
-  std::stringstream out;
-  out << "<html>"
-  << HtmlRoutines::GetCSSLinkCalculator();
-  out << HtmlInterpretation::GetJavascriptCaptcha();
-  out << "<body>\n";
-  out << "<calculatorNavigation>"
-  << theGlobalVariables.ToStringNavigation()
-  << "</calculatorNavigation>\n";
-  theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
-  out << "<form name =\"forgotlogWorkerin\" id =\"login\">";
-  out << "<table>"
-  << "<tr>"
-  << "<td> Email:</td>"
-  << "<td> <input type =\"text\" id =\"email\" name =\"email\" placeholder =\"email\">\n</td>\n"
-  << "</tr>"
-  << "</table>";
-  out << HtmlInterpretation::GetCaptchaDiv();
-  out << "</form>";
-  out << "<button onclick=\"submitForgotLogin();\">Send recovery email</button>"
-  << "<span id =\"forgotLoginResultReport\"></span>"
-  << "\n<br>\n"
-  << "<span id =\"forgotLoginResult\"></span>";
-  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  out << "</body></html>";
-
   return out.str();
 }
 
@@ -3646,8 +3618,6 @@ int WebWorker::ServeClient() {
     return this->ProcessSignUP();
   } else if (theGlobalVariables.userCalculatorRequestType == "forgotLogin") {
     return this->ProcessForgotLogin();
-  } else if (theGlobalVariables.userCalculatorRequestType == "forgotLoginPage") {
-    return this->ProcessForgotLoginPage();
   } else if (theGlobalVariables.userCalculatorRequestType == "login") {
     return this->ProcessLoginUserInfo(comments.str());
   } else if (theGlobalVariables.userCalculatorRequestType == "logout") {
@@ -3791,8 +3761,9 @@ int WebWorker::ProcessFolderOrFile() {
     << "on file names added for security reasons.</body></html>";
     return 0;
   }
-  if (FileOperations::IsFolderUnsecure(this->RelativePhysicalFileNamE))
+  if (FileOperations::IsFolderUnsecure(this->RelativePhysicalFileNamE)) {
     return this->ProcessFolder();
+  }
   return this->ProcessFile();
 }
 
@@ -3904,24 +3875,29 @@ std::string WebWorker::ToStringStatus() const {
   } else {
     out << ", not in use";
   }
-  if (this->displayUserInput != "")
+  if (this->displayUserInput != "") {
     out << ", user input: <span style =\"color:blue\">" << this->displayUserInput << "</span>";
+  }
   out << ", connection " << this->connectionID << ", process ID: ";
-  if (this->ProcessPID != 0)
+  if (this->ProcessPID != 0) {
     out << this->ProcessPID;
-  else
+  } else {
     out << "(not accessible)";
+  }
   out << ", socketID: ";
-  if (this->connectedSocketID == - 1)
+  if (this->connectedSocketID == - 1) {
     out << "released in current process, value before release: " << this->connectedSocketIDLastValueBeforeRelease;
-  else
+  } else {
     out << this->connectedSocketID;
+  }
   out << ". ";
   out << " Server time at last ping: " << this->timeOfLastPingServerSideOnly << " seconds. ";
-  if (this->pingMessage != "")
+  if (this->pingMessage != "") {
     out << " Message at last ping: " << this->pingMessage;
-  if (this->status != "")
+  }
+  if (this->status != "") {
     out << "<br><span style =\"color:red\"><b> Status: " << this->status << "</b></span><br>";
+  }
   out << "Pipes: " << this->pipeWorkerToServerControls.ToString()
   << ", " << this->pipeWorkerToServerTimerPing.ToString()
   << ", " << this->pipeWorkerToWorkerRequestIndicator.ToString()
@@ -3947,15 +3923,17 @@ void WebServer::ReleaseEverything() {
 #endif
   logger& currentLog = theGlobalVariables.flagIsChildProcess ? logWorker : logServer;
   ProgressReportWebServer::flagServerExists = false;
-  for (int i = 0; i < this->theWorkers.size; i ++)
+  for (int i = 0; i < this->theWorkers.size; i ++) {
     this->theWorkers[i].Release();
+  }
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection = 0;
   theGlobalVariables.IndicatorStringOutputFunction = 0;
   theGlobalVariables.PauseUponUserRequest = 0;
   this->activeWorker = - 1;
-  if (theGlobalVariables.flagServerDetailedLog)
+  if (theGlobalVariables.flagServerDetailedLog) {
     currentLog << logger::red << "Detail: "
     << " About to close socket: " << this->listeningSocketHTTP << ". " << logger::endL;
+  }
   if (this->listeningSocketHTTP != - 1) {
     close(this->listeningSocketHTTP);
     if (theGlobalVariables.flagServerDetailedLog) {
@@ -4073,16 +4051,18 @@ WebWorker& WebServer::GetActiveWorker() {
 
 void WebServer::SignalActiveWorkerDoneReleaseEverything() {
   MacroRegisterFunctionWithName("WebServer::SignalActiveWorkerDoneReleaseEverything");
-  if (theWebServer.activeWorker == - 1)
+  if (theWebServer.activeWorker == - 1) {
     return;
+  }
   theWebServer.GetActiveWorker().SendAllAndWrapUp();
   theWebServer.activeWorker = - 1;
 }
 
 void WebServer::ReleaseActiveWorker() {
   MacroRegisterFunctionWithName("WebServer::ReleaseActiveWorker");
-  if (this->activeWorker == - 1)
+  if (this->activeWorker == - 1) {
     return;
+  }
   this->GetActiveWorker().Release();
   this->activeWorker = - 1;
 }
@@ -4216,39 +4196,45 @@ std::string WebServer::ToStringLastErrorDescription() {
 
 std::string WebServer::ToStringStatusActive() {
   MacroRegisterFunctionWithName("WebServer::ToStringStatusActive");
-  if (this->activeWorker == - 1)
+  if (this->activeWorker == - 1) {
     return "server.";
+  }
   std::stringstream out;
-  if (this->activeWorker != this->GetActiveWorker().indexInParent)
+  if (this->activeWorker != this->GetActiveWorker().indexInParent) {
     crash << "Bad index in parent!" << crash;
+  }
   out << this->GetActiveWorker().ToStringStatus();
   return out.str();
 }
 
 std::string WebServer::ToStringConnectionSummary() {
   MacroRegisterFunctionWithName("WebServer::ToStringConnectionSummary");
-  if (theGlobalVariables.flagRunningApache)
-     return "Running through standard Apache web server, no connection details to display. ";
+  if (theGlobalVariables.flagRunningApache) {
+    return "Running through standard Apache web server, no connection details to display. ";
+  }
   std::stringstream out;
   TimeWrapper now;
   now.AssignLocalTime();
   out << "<b>Server status.</b> Server time: local: " << now.ToStringLocal() << ", gm: " << now.ToStringGM() << ".<br>";
   double timeRunning = - 1;
-  if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size)
+  if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size) {
     timeRunning = theGlobalVariables.GetElapsedSeconds();
-  else
+  } else {
     timeRunning = this->GetActiveWorker().timeOfLastPingServerSideOnly;
+  }
   out
   << timeRunning
   << " seconds = "
   << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(timeRunning, false, false)
   << " web server uptime. ";
   int approxNumPings = timeRunning / this->WebServerPingIntervalInSeconds;
-  if (approxNumPings < 0)
+  if (approxNumPings < 0) {
     approxNumPings = 0;
+  }
   int numConnectionsSoFarApprox = this->NumConnectionsSoFar - approxNumPings;
-  if (numConnectionsSoFarApprox < 0)
+  if (numConnectionsSoFarApprox < 0) {
     numConnectionsSoFarApprox = 0;
+  }
   out << "~" << numConnectionsSoFarApprox << " actual connections "
   << "(with " << this->NumberOfServerRequestsWithinAllConnections << " server requests served)" << " + ~"
   << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total)"
@@ -4289,8 +4275,9 @@ std::string WebServer::ToStringStatusForLogFile() {
 
 std::string WebServer::ToStringStatusAll() {
   MacroRegisterFunctionWithName("WebServer::ToStringStatusAll");
-  if (theGlobalVariables.flagRunningApache)
+  if (theGlobalVariables.flagRunningApache) {
     return "Running through Apache. ";
+  }
   std::stringstream out;
 
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
@@ -4317,53 +4304,88 @@ std::string WebServer::ToStringStatusAll() {
   }
   out << "<hr>";
   out << "Connections: " << this->currentlyConnectedAddresses.ToString();
-  for (int i = 0; i < this->theWorkers.size; i ++)
+  for (int i = 0; i < this->theWorkers.size; i ++) {
     out << "<hr>" << this->theWorkers[i].ToStringStatus();
+  }
   return out.str();
 }
 
-void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload) {
+bool WebServer::RestartIsNeeded() {
+  MacroRegisterFunctionWithName("WebServer::RestartIsNeeded");
   struct stat theFileStat;
-  if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0)
-    return;
-  if (this->timeLastExecutableModification != - 1) {
-    if (this->timeLastExecutableModification != theFileStat.st_ctime) {
-      stOutput << "<b>The server executable was updated, but the server has not been restarted yet. "
-      << "Restarting in 0.5 seconds...</b>";
-      if (callReload) {
-        stOutput << "<script language =\"javascript\">setTimeout(resubmit, 500); "
-        << " function resubmit() { location.reload(true);}</script>";
-      } else {
-        stOutput << "<script language =\"javascript\">setTimeout(resubmit, 500); "
-        << " function resubmit() { document.getElementById('formCalculator').submit();}</script>";
-      }
-      if (this->activeWorker != - 1) {
-        this->GetActiveWorker().SendAllBytesWithHeaders();
-        this->ReleaseActiveWorker();
-      }
-      logWorker << "Current process spawned from file with time stamp: "
-      << this->timeLastExecutableModification
-      << "; latest executable has different time stamp: " << theFileStat.st_ctime
-      << ". " << logger::red << "RESTARTING." << logger::endL;
-      this->Restart();
-    }
+  if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0) {
+    return false;
   }
+  if (this->timeLastExecutableModification == - 1) {
+    return false;
+  }
+  if (this->timeLastExecutableModification == theFileStat.st_ctime) {
+    return false;
+  }
+  stOutput << "<html>";
+  stOutput << "<head><script language =\"javascript\">setTimeout(resubmit, 500); "
+  << " function resubmit() { location.reload(true);}</script></head>";
+  stOutput << "<body>";
+
+  stOutput << "<b>The server executable was updated, but the server has not been restarted yet. "
+  << "Restarting in 0.5 seconds...</b>";
+  stOutput << "</body></html>";
+  logWorker << "Current process spawned from file with time stamp: "
+  << this->timeLastExecutableModification
+  << "; latest executable has different time stamp: " << theFileStat.st_ctime
+  << ". " << logger::red << "RESTARTING." << logger::endL;
+  theGlobalVariables.flagRestartNeeded = true;
+  return true;
 }
 
-void WebServer::Restart() {
-  //logWorker << "Killing all copies of the calculator and restarting..." << logger::endL;
-  //logWorker << "Time limit after restart: " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;
-  if (this->listeningSocketHTTP != - 1)
-    this->Release(this->listeningSocketHTTP);
-  if (this->listeningSocketHttpSSL != - 1)
-    this->Release(this->listeningSocketHttpSSL);
-  std::stringstream theCommand;
+void WebServer::RestarT() {
+  if (
+    theGlobalVariables.processType != ProcessTypes::server &&
+    theGlobalVariables.processType != ProcessTypes::serverMonitor
+  ) {
+    crash << "Server restart is allowed only to the server process. " << crash;
+  }
   logger* currentLog = 0;
-  currentLog = &logWorker;
-  if (theGlobalVariables.processType == "serverMonitor")
+  if (theGlobalVariables.processType == "serverMonitor") {
     currentLog = &logServerMonitor;
-  if (theGlobalVariables.processType == "server")
+  }
+  if (theGlobalVariables.processType == "server") {
     currentLog = &logServer;
+  }
+
+  *currentLog << logger::red << "Server restart requested. " << logger::endL;
+  *currentLog << "Sending kill signal to all copies of the calculator. " << logger::endL;
+  for (int i = 0; i < this->theWorkers.size; i ++) {
+    this->TerminateChildSystemCall(i);
+  }
+  theSignals.unblockSignals();
+  *currentLog << "Waiting for child processes to exit. " << logger::endL;
+  int workersStillInUse = 0;
+  int waitAttempts = 0;
+  int maximumWaitAttempts = 30;
+  while (true) {
+    workersStillInUse = 0;
+    for (int i = 0 ; i < this->theWorkers.size; i ++) {
+      if (!this->theWorkers[i].flagExited && this->theWorkers[i].flagInUsE) {
+        workersStillInUse ++;
+        break;
+      }
+    }
+    if (workersStillInUse == 0) {
+      break;
+    }
+    waitAttempts ++;
+    if (waitAttempts > maximumWaitAttempts) {
+      *currentLog << logger::red << "Child exit timeout: made " << waitAttempts << " attempts to exit. " << logger::endL;
+      break;
+    }
+    *currentLog << logger::blue << "Still waiting on " << workersStillInUse << " workers to finish. " << logger::endL;
+    theGlobalVariables.FallAsleep(1000000);
+  }
+  this->ReleaseEverything();
+
+  *currentLog << logger::yellow << "Proceeding to restart server. " << logger::endL;
+  std::stringstream theCommand;
   int timeLimitSeconds = theGlobalVariables.MaxComputationMilliseconds / 1000;
 
   *currentLog << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
@@ -4377,6 +4399,10 @@ void WebServer::Restart() {
     theCommand << " server8080 " << " nokill " << timeLimitSeconds;
   }
   theGlobalVariables.CallSystemNoOutput(theCommand.str(), true); //kill any other running copies of the calculator.
+  while (true) {
+    theGlobalVariables.FallAsleep(1000000);
+    logServer << logger::red << "Waiting for killall command ... " << logger::endL;
+  }
 }
 
 void WebServer::initPortsITry() {
@@ -4420,31 +4446,38 @@ void WebServer::initListeningSockets() {
 void WebServer::initDates() {
   this->timeLastExecutableModification = - 1;
   struct stat theFileStat;
-  if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0)
+  if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0) {
     return;
+  }
   this->timeLastExecutableModification = theFileStat.st_ctime;
 }
 
 void WebServer::ReleaseWorkerSideResources() {
   MacroRegisterFunctionWithName("WebServer::ReleaseWorkerSideResources");
   logger& currentLog = theGlobalVariables.flagIsChildProcess ? logWorker : logProcessKills;
-  if (theGlobalVariables.flagServerDetailedLog)
+  if (theGlobalVariables.flagServerDetailedLog) {
     currentLog << logger::red << "Detail: server about to RELEASE active workder. " << logger::endL;
+  }
   this->Release(this->GetActiveWorker().connectedSocketID);
-  if (theGlobalVariables.flagServerDetailedLog)
+  if (theGlobalVariables.flagServerDetailedLog) {
     currentLog << logger::green << "Detail: server RELEASED active worker. " << logger::endL;
+  }
   //<-release socket- communication is handled by the worker.
   this->activeWorker = - 1; //<-The active worker is needed only in the child process.
 }
 
 bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string& inputAddress) {
   MacroRegisterFunctionWithName("WebServer::RequiresLogin");
-  if (inputAddress == theGlobalVariables.DisplayNameExecutable)
-    if (this->requestsNotNeedingLogin.Contains(inputRequest))
+  if (inputAddress == theGlobalVariables.DisplayNameExecutable) {
+    if (this->requestsNotNeedingLogin.Contains(inputRequest)) {
       return false;
-  for (int i = 0; i < this->addressStartsNotNeedingLogin.size; i ++)
-    if (MathRoutines::StringBeginsWith(inputAddress, this->addressStartsNotNeedingLogin[i]))
+    }
+  }
+  for (int i = 0; i < this->addressStartsNotNeedingLogin.size; i ++) {
+    if (MathRoutines::StringBeginsWith(inputAddress, this->addressStartsNotNeedingLogin[i])) {
       return false;
+    }
+  }
   return true;
 }
 
@@ -4557,10 +4590,14 @@ void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse) {
   }
   outputNumInUse --;
   this->NumWorkersNormallyExited ++;
-  if (workerMessage["result"].string == "toggleMonitoring")
+  if (workerMessage["result"].string == "toggleMonitoring") {
     this->ToggleProcessMonitoring();
+  }
   if (workerMessage["connectionsServed"].type == JSData::JSnumber) {
     this->NumberOfServerRequestsWithinAllConnections += (int) workerMessage["connectionsServed"].number;
+  }
+  if (workerMessage["restartNeeded"].isTrueRepresentationInJSON()) {
+    this->RestarT();
   }
 }
 
@@ -4588,7 +4625,8 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
     currentWorker.pingMessage = currentPingPipe.GetLastRead();
     currentWorker.timeOfLastPingServerSideOnly = theGlobalVariables.GetElapsedSeconds();
     if (currentWorker.pingMessage != "") {
-      logServer << logger::blue << "Worker " << childIndex + 1 << " ping: " << currentWorker.pingMessage << ". " << logger::endL;
+      logServer << logger::blue << "Worker " << childIndex + 1 << " ping: "
+      << currentWorker.pingMessage << ". " << logger::endL;
     }
     return;
   }
@@ -4678,7 +4716,7 @@ bool WebServer::initPrepareWebServerALL() {
   MacroRegisterFunctionWithName("WebServer::initPrepareWebServerALL");
   this->initPortsITry();
   if (this->flagTryToKillOlderProcesses) {
-    this->Restart();
+    this->RestarT();
   }
   usleep(10000);
   this->initDates();
@@ -4816,8 +4854,9 @@ void SignalsInfrastructure::initSignals() {
   } else {
     SignalChild.sa_handler = NULL;
   }
-  if (sigaction(SIGCHLD, &SignalChild, NULL) == - 1)
+  if (sigaction(SIGCHLD, &SignalChild, NULL) == - 1) {
     crash << "Was not able to register SIGCHLD handler (reaping child processes). Crashing to let you know." << crash;
+  }
 //  sigemptyset(&sa.sa_mask);
 //  sa.sa_flags = SA_RESTART;
 //  if (sigaction(SIGCHLD, &sa, NULL) == - 1)
@@ -5120,7 +5159,6 @@ int WebWorker::Run() {
     this->flagAllBytesSentUsingFile = false;
     this->flagEncounteredErrorWhileServingFile = false;
     if (!this->ReceiveAll()) {
-      this->WrapUpConnection();
       bool sslWasOK = true;
 #ifdef MACRO_use_open_ssl
       sslWasOK = (this->error == SSLdata::errors::errorWantRead);
@@ -5128,10 +5166,12 @@ int WebWorker::Run() {
       if (this->numberOfReceivesCurrentConnection > 0 && sslWasOK) {
         logIO << logger::green << "Connection timed out after successfully receiving "
         << this->numberOfReceivesCurrentConnection << " times. " << logger::endL;
-        return 0;
+        result = 0;
+        break;
       }
       logIO << logger::red << "Failed to receive all with error: " << this->error;
-      return - 1;
+      result = - 1;
+      break;
     }
     this->numberOfReceivesCurrentConnection ++;
     if (this->numberOfReceivesCurrentConnection > 1) {
@@ -5151,12 +5191,18 @@ int WebWorker::Run() {
       this->SendAllBytesWithHeaders();
     }
     // We break the connection if we need to turn on monitoring as that concerns other processes.
-    if (!this->flagKeepAlive || this->flagEncounteredErrorWhileServingFile || this->flagToggleMonitoring) {
+    if (
+      !this->flagKeepAlive ||
+      this->flagEncounteredErrorWhileServingFile ||
+      this->flagToggleMonitoring ||
+      theGlobalVariables.flagRestartNeeded
+    ) {
       break;
     }
     //The function call needs security audit.
     this->resetConnection();
-    logWorker << logger::blue << "Received " << this->numberOfReceivesCurrentConnection << " times on this connection, waiting for more. "
+    logWorker << logger::blue << "Received " << this->numberOfReceivesCurrentConnection
+    << " times on this connection, waiting for more. "
     << logger::endL;
     theGlobalVariables.millisecondOffset += theGlobalVariables.GetElapsedMilliseconds();
     this->parent->WorkerTimerPing(theGlobalVariables.millisecondOffset);

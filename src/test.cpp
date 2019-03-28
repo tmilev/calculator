@@ -136,8 +136,8 @@ class HomomorphismSemidirectElement: public GroupConjugacyImplementation<Homomor
 };
 
 template <typename kelt>
-class HomoSemidrectGroupData
-{ GroupHomomorphism<kelt, kelt>* oa;
+class HomomorphismSemidrectGroupData {
+  GroupHomomorphism<kelt, kelt>* oa;
   FiniteGroup<kelt>* theSubgroup;
   FiniteGroup<HomomorphismSemidirectElement<kelt> >* theGroup;
   FiniteGroup<HomomorphismSemidirectElement<kelt> > theGroupMayBeHereNameIsLongToDiscourageUse;
@@ -1435,10 +1435,10 @@ List<Element> charpoly(const Matrix<Element>& M) {
   List<Element> p;
   p.SetSize(M.NumRows + 1);
   List<int> rowids;
-  for (int i = 0; i <M.NumRows; i ++) {
+  for (int i = 0; i < M.NumRows; i ++) {
     rowids.AddOnTop(i);
   }
-  for (int i = 0; i <M.NumRows; i ++) {
+  for (int i = 0; i < M.NumRows; i ++) {
     Element acc = 0;
     List<List<int> > ps = powersetgrade(i, rowids);
     for (int si = 0; si < ps.size; si ++) {
@@ -1504,7 +1504,9 @@ int chartable[10][10] =
   {3,  1, - 1,  1, - 1,  0,  0, - 1, - 1,  3}
 };
 
-void make_macdonald_polynomial(const WeylGroupData& G, const List<Vector<Rational> > roots, Polynomial<Rational>& macdonaldPoly) {
+void make_macdonald_polynomial(
+  const WeylGroupData& G, const List<Vector<Rational> > roots, Polynomial<Rational>& macdonaldPoly
+) {
   List<MonomialP> vars;
   vars.SetSize(G.GetDim());
   for (int i = 0; i < G.GetDim(); i ++) {
@@ -1535,8 +1537,9 @@ void matrix_acts_on_polynomial(const Matrix<Rational>& m,const Polynomial<Ration
       if (p.theMonomials[i](j) != 0) {
         Polynomial<Rational> qj;
         qj = qj.GetZero();
-        for (int k = 0; k < m.NumCols; k ++)
+        for (int k = 0; k < m.NumCols; k ++) {
           qj.AddMonomial(vars[k], m.elements[k][j]);
+        }
         qj.RaiseToPower((p.theMonomials[i](j)).floorIfSmall());
         qi *= qj;
       }
@@ -1574,10 +1577,11 @@ bool GetCoordsInBasisInputIsGaussianEliminated(
 }
 
 template <class coefficient>
-bool GetCoordsInBasisInputIsGaussianEliminated
-(const List<Polynomial<coefficient> > &inputReducedBasis,
- const Polynomial<coefficient> & input,
- Vector<coefficient>* outputCoordinatesInBasis = 0) {
+bool GetCoordsInBasisInputIsGaussianEliminated(
+  const List<Polynomial<coefficient> > &inputReducedBasis,
+  const Polynomial<coefficient> & input,
+  Vector<coefficient>* outputCoordinatesInBasis = 0
+) {
   MacroRegisterFunctionWithName("GetCoordsInBasiS");
   Polynomial<coefficient> summand, v = input;
   coefficient currentCoeff;
@@ -1711,8 +1715,9 @@ get_macdonald_representation(WeylGroupData& W, const List<Vector<Rational> >& ro
       Rational p = 1;
       for (int k1= 0; k1 < monomials[i].size; k1 ++) {
         Rational s = 0;
-        for (int k2 = 0; k2 < monomials[i][k1].size; k2 ++)
+        for (int k2 = 0; k2 < monomials[i][k1].size; k2 ++) {
           s += monomials[i][k1][k2] * W.RootSystem[j][k2];
+        }
         p *= s;
       }
       images[i][j] = p;

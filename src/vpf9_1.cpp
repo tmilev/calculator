@@ -53,8 +53,10 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
   this->theCrashReport << Crasher::GetStackTraceEtcErrorMessage();
   if (!theGlobalVariables.flagNotAllocated) {
     if (theGlobalVariables.ProgressReportStringS.size > 0) {
-      this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>"
-      << theGlobalVariables.ToStringProgressReportHtmL();
+      this->theCrashReport
+      << "<hr>In addition, I have an account of the computation "
+      << "progress report strings, attached below.<hr>"
+      << theGlobalVariables.ToStringProgressReportHtmlNoThreadData();
     }
   }
   if (stOutput.theOutputFunction == 0) {
@@ -165,8 +167,9 @@ std::string Crasher::GetStackTraceShort() {
 
 std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem() {
   MacroRegisterFunctionWithName("GlobalVariables::ToStringHTMLTopCommandLinuxSystem");
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
     return "Login as admin for RAM memory statistics.";
+  }
   std::string topString = this->CallSystemWithOutput("top -b -n 1 -s");
   std::stringstream out;
   std::string lineString, wordString;
@@ -199,25 +202,40 @@ std::string GlobalVariables::ToStringFolderInfo() const {
 
 JSData GlobalVariables::ToStringProgressReportJSData() {
   JSData result;
-  result[WebAPI::result::resultHtml] = this->ToStringProgressReportHtmL();
+  result[WebAPI::result::resultHtml] = this->ToStringProgressReportHtmlNoThreadData();
   return result;
 }
 
-std::string GlobalVariables::ToStringProgressReportHtmL() {
-  MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtml");
+std::string GlobalVariables::ToStringHtmlThreadData() {
+  std::stringstream out;
+  for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++) {
+    out << "<hr><b>" << this->theThreadData[threadIndex].ToStringHtml()
+    << "</b><br>";
+  }
+  return out.str();
+}
+
+std::string GlobalVariables::ToStringProgressReportHtmlWithThreadData() {
+  MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtmlWithThreadData");
+  std::stringstream out;
+  out << theGlobalVariables.ToStringHtmlThreadData();
+  out << theGlobalVariables.ToStringProgressReportHtmlNoThreadData();
+  return out.str();
+}
+
+std::string GlobalVariables::ToStringProgressReportHtmlNoThreadData() {
+  MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtmlNoThreadData");
   std::stringstream reportStream;
   for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++) {
-    reportStream << "<hr><b>" << this->theThreadData[threadIndex].ToStringHtml()
-    << "</b><br>";
     int currentThreadID = ThreadData::getCurrentThreadId();
-    if (currentThreadID != threadIndex){
-      reportStream << "<b>Progress report available only "
-      << "for the current thread of index: "
-      << currentThreadID
-      << ". </b>";
+    if (currentThreadID != threadIndex) {
       //<-to avoid coordinating threads
       continue;
     }
+    reportStream << "<b>Current thread id: "
+    << currentThreadID
+    << ". </b>";
+
     for (int i = 0; i < this->ProgressReportStringS[threadIndex].size; i ++) {
       if (this->ProgressReportStringS[threadIndex][i] != "") {
         reportStream << "\n<div id =\"divProgressReport" << i << "\">"

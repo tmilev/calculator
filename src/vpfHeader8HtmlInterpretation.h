@@ -224,6 +224,7 @@ public:
   bool ExtractAnswerIds(std::stringstream* comments);
   bool InterpretHtml(std::stringstream* comments);
   bool InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
+  void ComputeProblemLabel();
   std::string ToStringInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements);
   void LogProblemGenerationObsolete(Calculator& theInterpreter);
   bool InterpretProcessExecutedCommands(

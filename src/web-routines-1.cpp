@@ -162,7 +162,7 @@ void WebServerMonitor::Monitor() {
       theFile << "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: local: "
       << now.ToStringLocal() << ", GM: " << now.ToStringGM() << "</b><br>\n";
       theFile.flush();
-      theWebServer.Restart();
+      theWebServer.RestarT();
     }
   }
 }

@@ -98,10 +98,11 @@ bool TimerThreadData::HandleMaxComputationTime() {
   std::stringstream out;
   out << "<b>This is a safety time-out crash. You may have requested a computation that takes too long."
   << "</b> Your computation ran for ";
-  if (this->elapsedComputationTimeInMilliseconds > 0)
+  if (this->elapsedComputationTimeInMilliseconds > 0) {
     out << this->elapsedComputationTimeInMilliseconds << " ms";
-  else
+  } else {
     out << " (unknown amount of time)";
+  }
   out << ". The allowed run time is "
   << theGlobalVariables.MaxComputationMilliseconds
   << " ms (twice the amount allowed for calculator interpretation). "
@@ -128,19 +129,25 @@ bool TimerThreadData::HandleMaxComputationTime() {
 }
 
 bool TimerThreadData::HandleComputationTimeout() {
-  if (!theGlobalVariables.flagRunningBuiltInWebServer)
+  if (!theGlobalVariables.flagRunningBuiltInWebServer) {
     return false;
-  if (theGlobalVariables.replyAfterComputationMilliseconds <= 0)
+  }
+  if (theGlobalVariables.replyAfterComputationMilliseconds <= 0) {
     return false;
-  if (this->elapsedComputationTimeInMilliseconds <= 0)
+  }
+  if (this->elapsedComputationTimeInMilliseconds <= 0) {
     return false;
-  if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.replyAfterComputationMilliseconds)
+  }
+  if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.replyAfterComputationMilliseconds) {
     return false;
+  }
   MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
-  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection == 0)
+  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection == 0) {
     return false;
-  if (theGlobalVariables.flagOutputTimedOut)
+  }
+  if (theGlobalVariables.flagOutputTimedOut) {
     return false;
+  }
   theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed = true;
   //theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
@@ -153,10 +160,12 @@ bool TimerThreadData::HandleEverythingIsDone() {
 }
 
 bool TimerThreadData::HandlePingServerIamAlive() {
-  if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing)
+  if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing) {
     return true;
-  if (theGlobalVariables.WebServerTimerPing == 0)
+  }
+  if (theGlobalVariables.WebServerTimerPing == 0) {
     return false;
+  }
   theGlobalVariables.WebServerTimerPing(this->elapsedTimeInMilliseconds);
   return false;
 }

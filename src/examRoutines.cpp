@@ -421,7 +421,7 @@ bool CalculatorHTML::LoadMe(
   (void) doLoadDatabase;
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(this->fileName, this->inputHtml, commentsOnFailure)) {
     if (commentsOnFailure != 0) {
-      *commentsOnFailure << "<br>Entered file name:<br><b>" << this->fileName << "</b>";
+      *commentsOnFailure << "<br>User-input file name: <b>" << this->fileName << "</b>";
     }
     return false;
   }
@@ -2935,6 +2935,26 @@ bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream* commentsOnFailure
   return true;
 }
 
+void CalculatorHTML::ComputeProblemLabel() {
+  if (this->outputProblemLabel != "") {
+    return;
+  }
+  if (
+    this->flagIsExamHome ||
+    theGlobalVariables.userCalculatorRequestType == "template" ||
+    theGlobalVariables.userCalculatorRequestType == "templateNoLogin"
+  ) {
+    return;
+  }
+  if (!this->theTopicS.Contains(this->fileName)) {
+    return;
+  }
+  TopicElement& current = this->theTopicS.GetValueCreate(this->fileName);
+  current.ComputeLinks(*this, true);
+  this->outputProblemLabel = current.problemNumberString;
+  this->outputProblemTitle = current.title;
+}
+
 bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtmlOneAttempt");
   double startTime = theGlobalVariables.GetElapsedSeconds();
@@ -2950,11 +2970,14 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   outHeadPt2 << HtmlRoutines::GetJavascriptMathjax();
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before execution");
-  if (!this->PrepareAndExecuteCommands(theInterpreter, &comments))
+  if (!this->PrepareAndExecuteCommands(theInterpreter, &comments)) {
     return false;
+  }
   //////////////////////////////interpretation takes place before javascript generation as the latter depends on the former.
-  if (this->flagIsExamProblem)
+  if (this->flagIsExamProblem) {
     outHeadPt2 << this->GetJavascriptSubmitAnswers();
+  }
+  this->ComputeProblemLabel();
   std::string problemLabel = "";
   if (
     !this->flagIsExamHome &&
@@ -2964,11 +2987,10 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (this->theTopicS.Contains(this->fileName)) {
       TopicElement& current = this->theTopicS.GetValueCreate(this->fileName);
       current.ComputeLinks(*this, true);
-      this->outputProblemLabel = current.problemNumberString;
-      this->outputProblemTitle = current.title;
       problemLabel = current.displayTitle + "&nbsp;&nbsp;";
-      if (this->flagDoPrependProblemNavigationBar)
+      if (this->flagDoPrependProblemNavigationBar) {
         problemLabel += current.displayResourcesLinks;
+      }
     }
   }
   if (

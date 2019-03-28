@@ -43,6 +43,7 @@ public:
     static std::string idProblem; //<- a little more specific than just id, easier to string-search
     static std::string deadlineSingle;
     static std::string failedToLoadProblem;
+    static std::string problemLabel;
   };
   struct databaseParameters {
     static std::string entryPoint;

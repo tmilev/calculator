@@ -197,7 +197,6 @@ public:
   int ProcessLogout();
   int ProcessSignUP();
   int ProcessForgotLogin();
-  int ProcessForgotLoginPage();
   int ProcessNavigation();
   int ProcessCompute();
   int ProcessCalculatorExamplesJSON();
@@ -253,7 +252,6 @@ public:
   std::string GetChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField);
   std::string GetClonePageResult(bool useJSON);
   std::string GetModifyProblemReport();
-  std::string GetForgotLoginPage();
   std::string GetSignUpRequestResult();
   std::string GetAuthenticationToken(const std::string& reasonForNoAuthentication = "");
   std::string GetBrowseProblems();
@@ -381,8 +379,8 @@ public:
   void RecycleOneChild(int childIndex, int& numberInUse);
   void HandleTooManyConnections(const std::string& incomingUserAddress);
   void HandleTooManyWorkers(int &numInUse);
-  void Restart();
-  void CheckExecutableVersionAndRestartIfNeeded(bool callReload);
+  void RestarT();
+  bool RestartIsNeeded();
   void initDates();
   std::string ToStringLastErrorDescription();
   std::string ToStringStatusActive();

@@ -115,9 +115,12 @@ Problem.prototype.computeBadProblemString = function() {
     return;
   }
   this.badProblemString = "";
-  this.badProblemString += "It appears your problem failed to load. ";
+  this.badProblemString += "It appears your problem failed to load.";
 
-  this.badProblemString += "Perhaps you may like to clone the last good known problem. ";
+  this.badProblemString += "Perhaps you may like to clone the last good known problem.<br>";
+  if (this.lastKnownGoodProblemFileName !== "") {
+    this.badProblemString += `Clone from: <b style = 'color: green'>${thePage.lastKnownGoodProblemFileName}</b><br>`;
+  }
   this.badProblemString += editPage.getClonePanel(thePage.lastKnownGoodProblemFileName, this.fileName);
 }
 
@@ -128,12 +131,13 @@ Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) 
   if (this.commentsProblem === undefined) {
     this.commentsProblem = "";
   }
+  this.problemLabel = problemData[pathnames.urlFields.problem.problemLabel];
+  this.computeBadProblemString();
   var answerVectors = problemData["answers"];
   if (answerVectors === undefined) {
     this.writeToHTML(ids.domElements.problemPageContentContainer);
     return;    
   }
-  this.problemLabel = problemData["problemLabel"];
   this.flagForReal = problemData["forReal"];
   this.randomSeed = problemData.randomSeed;
 
@@ -158,7 +162,6 @@ Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) 
       flagCalculatorPanel:  false,
     });
   }
-  this.computeBadProblemString();
   this.writeToHTML(ids.domElements.problemPageContentContainer);
   var problemLinkWithRandomSeed = document.getElementById(ids.domElements.spanProblemLinkWithRandomSeed);
   if (problemLinkWithRandomSeed !== null) {

@@ -91,7 +91,7 @@ void MutexRecursiveWrapper::LockMe() {
         << this->mutexName << "] thread: "
         << currentThreadId
         << "." << logger::endL
-        << theGlobalVariables.ToStringProgressReportHtmL() << logger::endL;
+        << theGlobalVariables.ToStringProgressReportHtmlWithThreadData() << logger::endL;
       }
     }
     ((std::mutex*)this->theMutexImplementation)->lock();
@@ -180,8 +180,7 @@ GlobalVariables::~GlobalVariables() {
 }
 
 void ThreadData::RegisterFirstThread(const std::string& inputName) {
-  ThreadData::RegisterNewThread(inputName).theId =
-  std::this_thread::get_id();
+  ThreadData::RegisterNewThread(inputName).theId = std::this_thread::get_id();
 }
 
 ThreadData& ThreadData::RegisterNewThread(const std::string& inputName) {
@@ -221,8 +220,9 @@ int ThreadData::getCurrentThreadId() {
 
 std::string ThreadData::ToStringHtml() const {
   std::stringstream out;
+  out << "Process type: <b>" << theGlobalVariables.processType << "</b>. ";
   if (this->getCurrentThreadId() == this->index) {
-    out << "<span style =\"color:green\"><b>Current thread </b></span> ";
+    out << "<b style = 'color:green'>Current thread</b> ";
   } else {
     out << "Thread ";
   }
@@ -240,19 +240,22 @@ std::string ThreadData::ToStringHtml() const {
 std::string ThreadData::ToStringConsole() const {
   std::stringstream out;
   out << "Thread ";
-  if (this->name == "")
+  if (this->name == "") {
     out << "(thread name not set)";
-  else
+  } else {
     out << this->name;
+  }
   out << ". Index: " << this->index << ", id: " << this->theId << ".";
   return out.str();
 }
 
 std::string ThreadData::ToStringAllThreadsHtml() {
   std::stringstream out;
-  out << theGlobalVariables.theThreadData.size << " threads registered. <br> " << theGlobalVariables.theThreads.size << " total threads.<br>";
-  for (int i = 0; i < theGlobalVariables.theThreadData.size; i ++)
+  out << theGlobalVariables.theThreadData.size << " threads registered. <br> "
+  << theGlobalVariables.theThreads.size << " total threads.<br>";
+  for (int i = 0; i < theGlobalVariables.theThreadData.size; i ++) {
     out << theGlobalVariables.theThreadData[i].ToStringHtml() << "<br>";
+  }
   return out.str();
 }
 
@@ -260,7 +263,8 @@ std::string ThreadData::ToStringAllThreadsConsole() {
   std::stringstream out;
   out << theGlobalVariables.theThreadData.size << " threads registered. "
   << theGlobalVariables.theThreads.size << " total threads.\n";
-  for (int i = 0; i < theGlobalVariables.theThreadData.size; i ++)
+  for (int i = 0; i < theGlobalVariables.theThreadData.size; i ++) {
     out << theGlobalVariables.theThreadData[i].ToStringConsole() << "\n";
+  }
   return out.str();
 }

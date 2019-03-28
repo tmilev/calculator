@@ -36,6 +36,7 @@ std::string WebAPI::problem::fileName = "fileName";
 std::string WebAPI::problem::idProblem = "id";
 std::string WebAPI::problem::deadlineSingle = "deadline";
 std::string WebAPI::problem::failedToLoadProblem = "Failed to load problem. ";
+std::string WebAPI::problem::problemLabel = "problemLabel";
 
 std::string WebAPI::request::calculatorHTML = "/calculator-html";
 std::string WebAPI::request::onePageJS = "/calculator-html/javascript_all_in_one.js";

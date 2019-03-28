@@ -25,7 +25,7 @@ function Problem() {
 
 }
 
-Problem.prototype.initialize = function(problemData, inputParentIdURLed) {
+Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
   var thePage = window.calculator.mainPage;
   this.problemId = encodeURIComponent(problemData.id);
   this.decodedProblem = "";
@@ -100,11 +100,10 @@ Problem.prototype.initialize = function(problemData, inputParentIdURLed) {
   if (Array.isArray(problemData.children)) {
     for (var counterChildren = 0; counterChildren < problemData.children.length; counterChildren ++) {
       var currentChild = new Problem();
-      currentChild.initialize(problemData.children[counterChildren], this.problemId);
+      currentChild.initializeInfo(problemData.children[counterChildren], this.problemId);
       this.childrenIds.push(currentChild.problemId);
     }
   }
-  this.initializePartTwo(problemData, inputParentIdURLed);
 }
 
 Problem.prototype.computeBadProblemString = function() {
@@ -115,23 +114,22 @@ Problem.prototype.computeBadProblemString = function() {
     return;
   }
   this.badProblemString = "";
-  this.badProblemString += "It appears your problem failed to load.";
+  this.badProblemString += "It appears your problem failed to load.<br>";
 
-  this.badProblemString += "Perhaps you may like to clone the last good known problem.<br>";
-  if (this.lastKnownGoodProblemFileName !== "") {
+  if (this.lastKnownGoodProblemFileName !== "" && thePage.user.hasInstructorRights()) {
+    this.badProblemString += "Perhaps you may like to clone the last good known problem.<br>";
     this.badProblemString += `Clone from: <b style = 'color: green'>${thePage.lastKnownGoodProblemFileName}</b><br>`;
   }
   this.badProblemString += editPage.getClonePanel(thePage.lastKnownGoodProblemFileName, this.fileName);
 }
 
-Problem.prototype.initializePartTwo = function(problemData, inputParentIdURLed) {
+Problem.prototype.initializeProblemContent = function(problemData, inputParentIdURLed) {
   var thePage = window.calculator.mainPage;
   this.decodedProblem = decodeURIComponent(problemData["problemContent"]);
   this.commentsProblem = problemData["commentsProblem"];
   if (this.commentsProblem === undefined) {
     this.commentsProblem = "";
   }
-  this.problemLabel = problemData[pathnames.urlFields.problem.problemLabel];
   this.computeBadProblemString();
   var answerVectors = problemData["answers"];
   if (answerVectors === undefined) {
@@ -253,7 +251,8 @@ Problem.prototype.getProblemNavigation = function() {
     linkType = "problemLinkQuiz"
   }
   if (this.previousProblemId !== null && this.previousProblemId !== "") {
-    var previousURL = thePage.problems[this.previousProblemId].getAppAnchorRequestFileCourseTopics();
+    var previousProblem = thePage.problems[this.previousProblemId]; 
+    var previousURL = previousProblem.getAppAnchorRequestFileCourseTopics();
     result += `<a class = '${linkType}' href = '#${previousURL}' `;
     result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.previousProblemId}', '${defaultRequest}')">&#8592;</a>`;
   }
@@ -271,7 +270,8 @@ Problem.prototype.getProblemNavigation = function() {
     }
   }
   if (this.nextProblemId !== null && this.nextProblemId !== "") {
-    var nextURL = thePage.problems[this.nextProblemId].getAppAnchorRequestFileCourseTopics();
+    var nextProblem = thePage.problems[this.nextProblemId]; 
+    var nextURL = nextProblem.getAppAnchorRequestFileCourseTopics();
     result += `<a class = '${linkType}' href = '#${nextURL}' onclick = "window.calculator.problemPage.selectCurrentProblem('${this.nextProblemId}', '${defaultRequest}')">&#8594;</a>`;
   }
   
@@ -914,7 +914,7 @@ function afterLoadTopics(incomingTopics, result) {
   for (var counterChapter = 0; counterChapter < thePage.theTopics["children"].length; counterChapter ++) {
     var currentChapter = thePage.theTopics["children"][counterChapter];
     var incomingProblem = new Problem();
-    incomingProblem.initialize(currentChapter, null);
+    incomingProblem.initializeInfo(currentChapter, null);
   }
   stringHTMLContent += getHTMLfromTopics();
   writeEditCoursePagePanel();
@@ -955,7 +955,8 @@ function updateProblemPageCallback(input, outputComponent) {
     thePage.problems[thePage.storage.variables.currentCourse.currentProblemId.getValue()] = new Problem();
     currentProblem = thePage.getCurrentProblem();
   }
-  currentProblem.initialize(theProblem, null);
+  currentProblem.initializeInfo(theProblem, null);
+  currentProblem.initializeProblemContent(theProblem, null);
 }
 
 function updateProblemPage() {

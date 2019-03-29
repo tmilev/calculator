@@ -32,8 +32,6 @@ Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
   this.commentsProblem = "";
   this.parentIdURLed = inputParentIdURLed;
   this.randomSeed = null;
-  /**@type {InputPanelData[]} */
-  this.answers = [];
   this.problemLabel = "";
   this.flagForReal = true;
   this.previousProblemId = null;
@@ -77,7 +75,8 @@ Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
       this.previousProblemId !== undefined && 
       this.previousProblemId !== ""
     ) {
-      thePage.problems[this.previousProblemId].nextProblemId = this.problemId;
+      var previousProblem = thePage.problems[this.previousProblemId]; 
+      previousProblem.nextProblemId = this.problemId;
     }
     thePage.previousProblemId = this.problemId;
   }
@@ -138,7 +137,8 @@ Problem.prototype.initializeProblemContent = function(problemData, inputParentId
   }
   this.flagForReal = problemData["forReal"];
   this.randomSeed = problemData.randomSeed;
-
+  /**@type {InputPanelData[]} */
+  this.answers = [];  
   for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++) {
     var currentVector = answerVectors[counterAnswers];
     this.answers[counterAnswers] = new InputPanelData({
@@ -250,7 +250,7 @@ Problem.prototype.getProblemNavigation = function() {
     defaultRequest = pathnames.urlFields.scoredQuizJSON;
     linkType = "problemLinkQuiz"
   }
-  if (this.previousProblemId !== null && this.previousProblemId !== "") {
+  if (this.previousProblemId !== null && this.previousProblemId !== "" && this.previousProblemId !== undefined) {
     var previousProblem = thePage.problems[this.previousProblemId]; 
     var previousURL = previousProblem.getAppAnchorRequestFileCourseTopics();
     result += `<a class = '${linkType}' href = '#${previousURL}' `;
@@ -269,7 +269,7 @@ Problem.prototype.getProblemNavigation = function() {
       result += "<span class = 'problemLinkSelectedQuiz' style='color:brown'>Quiz</span>";
     }
   }
-  if (this.nextProblemId !== null && this.nextProblemId !== "") {
+  if (this.nextProblemId !== null && this.nextProblemId !== "" && this.nextProblemId !== undefined) {
     var nextProblem = thePage.problems[this.nextProblemId]; 
     var nextURL = nextProblem.getAppAnchorRequestFileCourseTopics();
     result += `<a class = '${linkType}' href = '#${nextURL}' onclick = "window.calculator.problemPage.selectCurrentProblem('${this.nextProblemId}', '${defaultRequest}')">&#8594;</a>`;
@@ -455,8 +455,10 @@ Problem.prototype.writeToHTML = function(outputElement) {
   topPart += "<div class = 'problemInfoBar'>";
   topPart += this.getProblemNavigation();
   topPart += `<div class = "problemTitle"><div class = "problemTitleContainer">${this.problemLabel} ${this.title}</div></div>`;
-  topPart += this.links.slides;
-  topPart += this.links.video;
+  if (this.links !== undefined && this.links !== null) {
+    topPart += this.links.slides;
+    topPart += this.links.video;
+  }
   //topPart += "<br>"
   topPart += this.getEditPanel();
   topPart += "</div>";
@@ -955,7 +957,6 @@ function updateProblemPageCallback(input, outputComponent) {
     thePage.problems[thePage.storage.variables.currentCourse.currentProblemId.getValue()] = new Problem();
     currentProblem = thePage.getCurrentProblem();
   }
-  currentProblem.initializeInfo(theProblem, null);
   currentProblem.initializeProblemContent(theProblem, null);
 }
 

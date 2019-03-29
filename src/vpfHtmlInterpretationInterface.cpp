@@ -936,7 +936,7 @@ std::string HtmlInterpretation::GetEditPageJSON() {
     (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights()) &&
     !theGlobalVariables.flagRunningApache
   ) {
-    output["error"] ="Only logged-in admins are allowed to edit pages.";
+    output["error"] = "Only logged-in admins are allowed to edit pages.";
     return output.ToString(false);
   }
   CalculatorHTML theFile;

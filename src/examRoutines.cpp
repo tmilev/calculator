@@ -3946,8 +3946,9 @@ std::string CalculatorHTML::ToStringTopicListJSON() {
   }
   JSData output, topicBundles;
   topicBundles.type = JSData::JSarray;
-  for (int i = 0; i < this->loadedTopicBundles.size; i ++)
+  for (int i = 0; i < this->loadedTopicBundles.size; i ++) {
     topicBundles[i] = this->loadedTopicBundles[i];
+  }
   output["topicBundleFile"] = topicBundles;
   output["children"].type = JSData::JSarray;
   for (int i = 0; i < this->theTopicS.size(); i ++) {
@@ -4718,7 +4719,6 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner) {
       output["type"] = (std::string) "Not documented";
       break;
   }
-  //output["DEBUGindicesImmediateChildren"].type = JSData::JSarray;
   output["children"].type = JSData::JSarray;
   this->ComputeLinks(owner, true);
   if (this->type == TopicElement::tProblem && this->immediateChildren.size > 0) {
@@ -4727,9 +4727,6 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner) {
   }
   for (int i = 0; i < this->immediateChildren.size; i ++) {
     TopicElement& currentChild = owner.theTopicS[this->immediateChildren[i]];
-    //std::stringstream out;
-    //out << this->immediateChildren[i];
-    //output["DEBUGindicesImmediateChildren"][i] = out.str();
     output["children"].list.AddOnTop(currentChild.ToJSON(owner));
   }
   output["problemNumberString"] = this->problemNumberString;

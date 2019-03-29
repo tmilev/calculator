@@ -41,7 +41,7 @@ function getClonePanel(
   var result = "";
   var idCloneInput = encodeURIComponent(`cloneButton${fileNameSource}`);
   var idSpanClonePageReport = encodeURIComponent(`cloneButtonReport${fileNameSource}`);
-  result += "<table><tr><td>"
+  result += "<table><tr><td>";
   result += `<button class = 'buttonClone' style = 'width:50px' onclick = `;
   result += `"window.calculator.editPage.handleClone('${fileNameSource}', '${idCloneInput}', '${idSpanClonePageReport}')">Clone</button>`;
   result += "</td>";
@@ -82,6 +82,28 @@ function getEditPanel(fileName) {
   return result;
 }
 
+function callbackClone(input, output) {
+  if (typeof output === "string") {
+    output = document.getElementById(output);
+  }
+  var inputParsed = JSON.parse(input);
+  var errorFound = false;
+  var result = "";
+  if (inputParsed.error !== undefined && inputParsed.error !== "" && inputParsed !== null) {
+    errorFound = true;
+    result += `<b style = 'color:red'>Error.</b> ${inputParsed.error}`;
+  }
+  if (inputParsed.comments !== undefined && inputParsed.comments !== "") {
+    result += inputParsed.comments;
+  }
+  if (!errorFound) {
+    result += `<button class = 'buttonStandard' `;
+    result += `onclick = "window.calculator.mainPage.pages.problemPage.flagLoaded=false; window.calculator.mainPage.selectPage('problemPage')"`;
+    result += `>Force-reload problem</button>`;
+  }
+  output.innerHTML = result;
+}
+
 function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
   var newFileName = document.getElementById(idCloneInput).value;
   var theURL = "";
@@ -90,7 +112,8 @@ function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
   theURL += `${pathnames.urlFields.fileName}=${fileName}&`;
   submitRequests.submitGET({
     url: theURL,
-    result: idSpanClonePageReport
+    result: idSpanClonePageReport,
+    callback: callbackClone
   });
 }
 

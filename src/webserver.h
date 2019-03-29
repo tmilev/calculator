@@ -153,7 +153,7 @@ public:
   int ProcessSetProblemDatabaseInfo();
   int ProcessSlidesOrHomeworkFromSource();
   int ProcessSlidesSource();
-  int ProcessClonePage(bool useJSON);
+  int ProcessClonePage();
   int ProcessModifyPage();
   int ProcessAddUserEmails();
   int ProcessToggleMonitoring();
@@ -250,7 +250,7 @@ public:
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
 
   std::string GetChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField);
-  std::string GetClonePageResult(bool useJSON);
+  std::string GetClonePageResult();
   std::string GetModifyProblemReport();
   std::string GetSignUpRequestResult();
   std::string GetAuthenticationToken(const std::string& reasonForNoAuthentication = "");

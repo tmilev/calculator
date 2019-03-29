@@ -125,6 +125,7 @@ Problem.prototype.computeBadProblemString = function() {
     this.badProblemString += "Perhaps you may like to clone the last good known problem.<br>";
   }
   this.badProblemString += editPage.getClonePanel(thePage.lastKnownGoodProblemFileName, this.fileName);
+  this.badProblemString += "<hr>";
 }
 
 Problem.prototype.initializeProblemContent = function(problemData) {

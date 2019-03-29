@@ -21,6 +21,7 @@ public:
     static std::string editPage;
     static std::string selectCourseJSON;
     static std::string serverStatusJSON;
+    static std::string clonePage;
     static std::string indicator;
   };
   struct result {

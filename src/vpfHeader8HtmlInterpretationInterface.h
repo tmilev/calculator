@@ -21,7 +21,7 @@ public:
   void BuildHtmlJSpage(bool appendBuildHash);
   static std::string GetHtmlTagWithManifest();
   static std::string ModifyProblemReport();
-  static std::string ClonePageResult(bool useJSON);
+  static std::string ClonePageResult();
   static std::string AddTeachersSections();
   static std::string AddUserEmails(const std::string& hostWebAddressWithPort);
   static std::string SubmitAnswers(const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake);

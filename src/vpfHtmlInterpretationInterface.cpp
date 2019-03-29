@@ -394,7 +394,7 @@ std::string HtmlInterpretation::submitAnswersPreview() {
   return out.str();
 }
 
-std::string HtmlInterpretation::ClonePageResult(bool useJSON) {
+std::string HtmlInterpretation::ClonePageResult() {
   MacroRegisterFunctionWithName("HtmlInterpretation::ClonePageResult");
   if (
     !theGlobalVariables.flagLoggedIn ||
@@ -407,23 +407,25 @@ std::string HtmlInterpretation::ClonePageResult(bool useJSON) {
   std::string fileNameToBeCloned = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
   std::stringstream out;
   std::string startingFileString;
-  //out << "DEBUG: here be i.";
+  JSData result;
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileNameToBeCloned, startingFileString, &out)) {
-    out << "Could not find file: " << fileNameToBeCloned;
-    return out.str();
+    out << "Could not find input file: " << fileNameToBeCloned;
+    result[WebAPI::result::error] = out.str();
+    return result.ToString(false);
   }
   std::fstream theFile;
   if (FileOperations::FileExistsVirtualCustomizedReadOnly(fileNameResulT, 0)) {
-    out << "<b>File: " << fileNameResulT << " already exists. </b>";
+    out << "Output file: " << fileNameResulT << " already exists. ";
+    result[WebAPI::result::error] = out.str();
     return out.str();
   }
   if (!FileOperations::OpenFileVirtualCustomizedWriteOnlyCreateIfNeeded(
     theFile, fileNameResulT, false, false, false, &out
   )) {
-    out << "<b><span style =\"color:red\">Failed to open output file: " << fileNameResulT << ". </span></b>";
+    out << "Failed to open output file: " << fileNameResulT << ".";
+    result[WebAPI::result::error] = out.str();
     return out.str();
   }
-  //out << "DEBUG: here be i part2. So far output: " << out.str();
   theFile << startingFileString;
   theFile.close();
   std::string fileNameNonVirtual;
@@ -431,17 +433,12 @@ std::string HtmlInterpretation::ClonePageResult(bool useJSON) {
   if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
     fileNameResulT, fileNameNonVirtual, &comments
   )) {
-    comments << "Could not get physical file name from virtual. ";
-  }
-  if (!useJSON) {
-    CalculatorHTML linkInterpreter;
-    out << "<br>" << linkInterpreter.ToStringLinkFromFileName(fileNameResulT);
-    out << "<br><b><span style =\"color:green\">Written content to file: "
-    << fileNameResulT << ". </span></b>" << "<br> " << comments.str();
+    out << "Could not get physical file name from virtual. " << comments.str();
   } else {
-    out << "<br>Written content to file: " << fileNameResulT;
+    out << "Written content to file: " << fileNameResulT;
   }
-  return out.str();
+  result[WebAPI::result::resultHtml] = out.str();
+  return result.ToString(false);
 }
 
 std::string HtmlInterpretation::GetAboutPage() {

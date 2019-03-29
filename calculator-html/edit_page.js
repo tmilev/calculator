@@ -35,16 +35,29 @@ function getClonePanel(
   /**@type{string} */
   fileNameTarget
 ) {
-  if (fileNameSource === "") {
+  if (fileNameSource === "" || fileNameSource === undefined || fileNameSource === null) {
     return "";
   }
   var result = "";
   var idCloneInput = encodeURIComponent(`cloneButton${fileNameSource}`);
   var idSpanClonePageReport = encodeURIComponent(`cloneButtonReport${fileNameSource}`);
+  result += "<table><tr><td>"
   result += `<button class = 'buttonClone' style = 'width:50px' onclick = `;
   result += `"window.calculator.editPage.handleClone('${fileNameSource}', '${idCloneInput}', '${idSpanClonePageReport}')">Clone</button>`;
+  result += "</td>";
+  result += "<td>";
   var sizeFile = fileNameTarget.length;
-  result += `<input type = "text" value = '${fileNameTarget}' size = '${sizeFile}' id = '${idCloneInput}'></input>`;
+  result += "<table><tr>";
+  result += "<td>from:</td>";
+  result += `<td><b style = 'color: green'>${fileNameSource}</b></td>`;
+  result += "</tr>";
+  result += "<tr>";
+  result += "<td>to:</td>";
+  result += `<td><input type = "text" value = '${fileNameTarget}' size = '${sizeFile}' id = '${idCloneInput}'></input></td>`;
+  result += "</tr></table>";
+
+  result += "</td>";
+  result += "</tr></table>";
   result += `<div id = "${idSpanClonePageReport}"></div>`;
   return result;
 }

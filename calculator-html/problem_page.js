@@ -25,9 +25,20 @@ function Problem() {
 
 }
 
+Problem.prototype.initializeBasic = function(problemData) {
+  this.problemId = encodeURIComponent(problemData.id);
+  /**@type {InputPanelData[]} */
+  this.answers = [];  
+  this.fileName = problemData.fileName;
+  if (this.fileName === null || this.fileName === undefined) {
+    this.fileName = "";
+  }
+  this.title = problemData.title;
+}
+
 Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
   var thePage = window.calculator.mainPage;
-  this.problemId = encodeURIComponent(problemData.id);
+  this.initializeBasic(problemData);
   this.decodedProblem = "";
   this.commentsProblem = "";
   this.parentIdURLed = inputParentIdURLed;
@@ -38,11 +49,6 @@ Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
   this.nextProblemId = null;
   this.scriptIds = null;
   this.type = problemData.type;
-  this.fileName = problemData.fileName;
-  if (this.fileName === null || this.fileName === undefined) {
-    this.fileName = "";
-  }
-  this.title = problemData.title;
   this.problemNumberString = problemData.problemNumberString;
   this.idButtonPoints = `modifyPoints${this.problemId}`;
   this.idTextareaPoints = `points${this.problemId}`;
@@ -117,12 +123,12 @@ Problem.prototype.computeBadProblemString = function() {
 
   if (this.lastKnownGoodProblemFileName !== "" && thePage.user.hasInstructorRights()) {
     this.badProblemString += "Perhaps you may like to clone the last good known problem.<br>";
-    this.badProblemString += `Clone from: <b style = 'color: green'>${thePage.lastKnownGoodProblemFileName}</b><br>`;
   }
   this.badProblemString += editPage.getClonePanel(thePage.lastKnownGoodProblemFileName, this.fileName);
 }
 
-Problem.prototype.initializeProblemContent = function(problemData, inputParentIdURLed) {
+Problem.prototype.initializeProblemContent = function(problemData) {
+  this.initializeBasic(problemData)
   var thePage = window.calculator.mainPage;
   this.decodedProblem = decodeURIComponent(problemData["problemContent"]);
   this.commentsProblem = problemData["commentsProblem"];
@@ -137,8 +143,6 @@ Problem.prototype.initializeProblemContent = function(problemData, inputParentId
   }
   this.flagForReal = problemData["forReal"];
   this.randomSeed = problemData.randomSeed;
-  /**@type {InputPanelData[]} */
-  this.answers = [];  
   for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++) {
     var currentVector = answerVectors[counterAnswers];
     this.answers[counterAnswers] = new InputPanelData({
@@ -454,7 +458,11 @@ Problem.prototype.writeToHTML = function(outputElement) {
   var topPart = "";
   topPart += "<div class = 'problemInfoBar'>";
   topPart += this.getProblemNavigation();
-  topPart += `<div class = "problemTitle"><div class = "problemTitleContainer">${this.problemLabel} ${this.title}</div></div>`;
+  topPart += `<div class = "problemTitle"><div class = "problemTitleContainer">`;
+  if (this.problemLabel !== undefined && this.problemLabel !== "" && this.problemLabel !== null) {
+    topPart += `${this.problemLabel} `; 
+  }
+  topPart += `${this.title}</div></div>`;
   if (this.links !== undefined && this.links !== null) {
     topPart += this.links.slides;
     topPart += this.links.video;
@@ -957,7 +965,7 @@ function updateProblemPageCallback(input, outputComponent) {
     thePage.problems[thePage.storage.variables.currentCourse.currentProblemId.getValue()] = new Problem();
     currentProblem = thePage.getCurrentProblem();
   }
-  currentProblem.initializeProblemContent(theProblem, null);
+  currentProblem.initializeProblemContent(theProblem);
 }
 
 function updateProblemPage() {

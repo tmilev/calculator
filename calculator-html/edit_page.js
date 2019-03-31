@@ -125,6 +125,7 @@ function storeEditedPage() {
   var queryParameters = "";
   queryParameters += calculatorPage.calculator.getQueryStringSubmitStringAsMainInput(editor.getValue(), pathnames.urlFields.requests.modifyPage);
   queryParameters += `${pathnames.urlFields.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}&`;
+  thePage.pages.problemPage.flagLoaded = false;
   submitRequests.submitPOST({
     url: theURL,
     parameters: queryParameters,

@@ -154,6 +154,7 @@ Problem.prototype.initializeProblemContent = function(problemData) {
       answerPanelId:        currentVector.answerPanelId,
       MQpanelButtonOptions: currentVector.MQpanelButtonOptions,
       idMQSpan:             currentVector.idMQSpan,
+      idMQSpanLocation:     currentVector.idMQSpanLocation,
       idPureLatex:          currentVector.idPureLatex,
       idButtonContainer:    currentVector.idButtonContainer,
       idButtonSubmit:       currentVector.idButtonSubmit,

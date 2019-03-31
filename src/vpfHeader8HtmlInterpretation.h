@@ -156,6 +156,7 @@ public:
     static std::string idPanel;
     static std::string answerHighlight;
     static std::string idMQSpan;
+    static std::string idMQSpanLocation;
     static std::string idButtonContainer;
     static std::string MQpanelButtonOptions;
     static std::string idPureLatex;

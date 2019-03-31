@@ -1389,7 +1389,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   }
   int theIndex = this->GetAnswerIndex(desiredAnswerId);
   if (theIndex == - 1) {
-    crash  << "This is not supposed to happen: problem has syntactic element with answerId: "
+    crash << "This is not supposed to happen: problem has syntactic element with answerId: "
     << desiredAnswerId << " but the answerId is missing from the list of known answer ids. "
     << this->theProblemData.ToStringAvailableAnswerIds() << crash;
   }
@@ -1408,10 +1408,12 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.MQUpdateFunction = answerId + "MQFieldUpdate";
   currentA.idVerificationSpan = "verification" + answerId;
   currentA.idSpanSolution = "solution" + answerId;
-  if (currentA.idMQfield == "")
-    currentA.idMQfield = answerId + "MQspanId";
-  if (currentA.idMQButtonPanelLocation == "")
+  currentA.idMQfielD = answerId + "MQSpanId";
+  currentA.idMQFieldLocation = answerId + "MQSpanIdLocation";
+
+  if (currentA.idMQButtonPanelLocation == "") {
     currentA.idMQButtonPanelLocation = answerId + "MQbuttonPanel";
+  }
   std::stringstream previewAnswerStream;
 
   previewAnswerStream << "previewAnswers('" << answerId << "', '"
@@ -1445,8 +1447,9 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
     if (numCorrectSubmissions > 0) {
       verifyStream << "<b><span style =\"color:green\">Correctly answered: \\("
       << currentA.firstCorrectAnswerClean << "\\) </span></b> ";
-      if (numSubmissions > 0)
+      if (numSubmissions > 0) {
         verifyStream << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
+      }
     } else if (numSubmissions > 0) {
       verifyStream << numSubmissions << " attempt(s) so far. ";
     }
@@ -2794,6 +2797,7 @@ std::string CalculatorHTML::answerLabels::properties = "properties";
 std::string CalculatorHTML::answerLabels::idPanel = "answerPanelId";
 std::string CalculatorHTML::answerLabels::answerHighlight = "answerHighlight";
 std::string CalculatorHTML::answerLabels::idMQSpan = "idMQSpan";
+std::string CalculatorHTML::answerLabels::idMQSpanLocation = "idMQSpanLocation";
 std::string CalculatorHTML::answerLabels::idButtonContainer = "idButtonContainer";
 std::string CalculatorHTML::answerLabels::MQpanelButtonOptions = "MQpanelButtonOptions";
 std::string CalculatorHTML::answerLabels::idPureLatex = "idPureLatex";
@@ -2820,16 +2824,19 @@ JSData CalculatorHTML::GetJavascriptMathQuillBoxesForJSON() {
     }
     currentAnswerJS[answerLabels::idPanel] = currentAnswer.idAnswerPanel;
     currentAnswerJS[answerLabels::answerHighlight] = currentAnswer.htmlAnswerHighlight;
-    currentAnswerJS[answerLabels::idMQSpan] = currentAnswer.idMQfield;
+    currentAnswerJS[answerLabels::idMQSpan] = currentAnswer.idMQfielD;
+    currentAnswerJS[answerLabels::idMQSpanLocation] = currentAnswer.idMQFieldLocation;
     currentAnswerJS[answerLabels::idButtonContainer] = currentAnswer.idMQButtonPanelLocation;
     currentAnswerJS[answerLabels::MQpanelButtonOptions] = currentAnswer.MQpanelButtonOptions;
     currentAnswerJS[answerLabels::idPureLatex] = currentAnswer.answerId;
     currentAnswerJS[answerLabels::idButtonSubmit] = currentAnswer.idButtonSubmit;
     currentAnswerJS[answerLabels::idButtonInterpret] = currentAnswer.idButtonInterpret;
-    if (currentAnswer.commandsNoEnclosureAnswerOnGiveUpOnly != "")
+    if (currentAnswer.commandsNoEnclosureAnswerOnGiveUpOnly != "") {
       currentAnswerJS[answerLabels::idButtonAnswer] = currentAnswer.idButtonAnswer;
-    if (currentAnswer.flagSolutionFound)
+    }
+    if (currentAnswer.flagSolutionFound) {
       currentAnswerJS[answerLabels::idButtonSolution] = currentAnswer.idButtonSolution;
+    }
     currentAnswerJS[answerLabels::idVerificationSpan] = currentAnswer.idVerificationSpan;
     currentAnswerJS[answerLabels::previousAnswers] = currentAnswer.htmlSpanVerifyAnswer;
     ///////////////
@@ -2845,7 +2852,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes() {
   out << "<script type =\"text/javascript\">\n";
   out << "answerMQspanIds = [";
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
-    out << "\"" << this->theProblemData.theAnswers[i].idMQfield << "\"";
+    out << "\"" << this->theProblemData.theAnswers[i].idMQfielD << "\"";
     if (i != this->theProblemData.theAnswers.size() - 1) {
       out << ", ";
     }
@@ -2887,7 +2894,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes() {
   for (int answerCounter = 0; answerCounter < this->theProblemData.theAnswers.size(); answerCounter ++) {
     Answer& currentA = this->theProblemData.theAnswers[answerCounter];
     out << "////////////////////////\n";
-    out << currentA.varMQfield  << " = document.getElementById('" << currentA.idMQfield << "');\n"
+    out << currentA.varMQfield  << " = document.getElementById('" << currentA.idMQfielD << "');\n"
     << currentA.varAnswerId << " = document.getElementById('" << currentA.answerId << "');\n"
     << "globalMQ.config({\n"
     << "  autoFunctionize: 'sin cos tan sec csc cot log ln'\n"

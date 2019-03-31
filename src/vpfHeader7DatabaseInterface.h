@@ -128,7 +128,8 @@ struct Answer {
   std::string varMQfield;
   std::string MQobject;
   std::string idSpanSolution;
-  std::string idMQfield;
+  std::string idMQfielD;
+  std::string idMQFieldLocation;
   std::string idMQButtonPanelLocation;
   std::string MQUpdateFunction;
   std::string currentAnswerURLed;

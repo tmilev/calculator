@@ -320,9 +320,17 @@ Problem.prototype.onePanelComputeHtmlElements = function(/**@type {InputPanelDat
   thePanel.htmlPureLatex += `<textarea class = "calculatorAnswer" id = "${thePanel.idPureLatex}"></textarea>`;
   thePanel.htmlButtonContainer = `<div class = "mqButtonPanel" id = "${thePanel.idButtonContainer}" `;
   thePanel.htmlButtonContainer += `buttons = "${thePanel.MQpanelButtonOptions}"></div>`;
-  thePanel.htmlMQFieldEnclosure = `<div class = "calculatorMQfieldEnclosure"><span id ="${thePanel.idMQSpan}"></span></div>`;
+  thePanel.htmlMQFieldEnclosure = `<div class = "calculatorMQfieldEnclosure"><span id = "${thePanel.idMQSpan}"></span></div>`;
 
   thePanel.htmlVerificationSpan = `<span id = "${thePanel.idVerificationSpan}">`;
+
+  thePanel.flagGenerateQuestionAndAnswerField = true;
+  if (this.htmlAnswerHighlight === undefined || this.htmlAnswerHighlight === null || this.htmlAnswerHighlight === "") {
+    if (document.getElementById(thePanel.idMQSpanLocation) !== null) {
+      thePanel.flagGenerateQuestionAndAnswerField = false;
+    }
+  }
+
   if (thePanel.previousAnswers !== undefined && thePanel.previousAnswers !== "") {
     thePanel.htmlVerificationSpan += thePanel.previousAnswers;
   } else {
@@ -395,10 +403,16 @@ Problem.prototype.onePanel = function(/**@type {InputPanelData} */ thePanel) {
     }
   }
   this.onePanelComputeHtmlElements(thePanel);
+  if (!thePanel.flagGenerateQuestionAndAnswerField) {
+    var mqSpan = document.getElementById(thePanel.idMQSpanLocation); 
+    mqSpan.innerHTML = thePanel.htmlMQFieldEnclosure;
+  }
   var panelContent = "";
   if (thePanel.layoutVertical === true) { 
     panelContent += "<table><tr>";
-    panelContent += `<td>${this.onePanelQuestionAndAnswerField(thePanel)}</td>`;
+    if (thePanel.flagGenerateQuestionAndAnswerField) {
+      panelContent += `<td>${this.onePanelQuestionAndAnswerField(thePanel)}</td>`;
+    }
     panelContent += `<td>${thePanel.htmlButtonContainer}</td>`;
     panelContent += `<td>${this.onePanelButtonsVerticalLayout(thePanel)}</td>`;
     panelContent += `<td>${thePanel.htmlPureLatex}</td>`;
@@ -407,7 +421,9 @@ Problem.prototype.onePanel = function(/**@type {InputPanelData} */ thePanel) {
     panelContent += thePanel.htmlSolution;
   } else {
     panelContent += "<table><tr>";
-    panelContent += `<td>${this.onePanelQuestionAndAnswerField(thePanel)}</td>`;
+    if (thePanel.flagGenerateQuestionAndAnswerField) {
+      panelContent += `<td>${this.onePanelQuestionAndAnswerField(thePanel)}</td>`;
+    }
     panelContent += `<td>${this.onePanelButtonsHorizontalLayout(thePanel)}</td>`;
     panelContent += `<td>${thePanel.htmlButtonContainer}</td>`;
     panelContent += `<td>${thePanel.htmlPureLatex}</td>`;

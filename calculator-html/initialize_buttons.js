@@ -258,6 +258,7 @@ function initializeCalculatorPage() {
 function InputPanelData(input) {
   //to serve autocomplete:
   this.idMQSpan = input.idMQSpan;
+  this.idMQSpanLocation = input.idMQSpanLocation;
   this.idMQcomments = input.idMQcomments;
   this.problemId = input.problemId;
 
@@ -293,6 +294,7 @@ function InputPanelData(input) {
   this.flagInitialized = false;
   this.flagCalculatorPanel = input.flagCalculatorPanel;
   this.flagCalculatorMQStringIsOK = true;
+  this.flagGenerateQuestionAndAnswerField = true;
   this.calculatorLeftString = "";
   this.calculatorRightString = "";
   this.theLaTeXString = null;

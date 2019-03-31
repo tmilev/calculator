@@ -182,7 +182,7 @@ bool ProblemData::CheckConsistency() const {
 bool ProblemData::CheckConsistencyMQids() const {
   MacroRegisterFunctionWithName("ProblemData::CheckConsistencyMQids");
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield) == "") {
+    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfielD) == "") {
       std::stringstream errorStream;
       errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
       << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>Answer information: "

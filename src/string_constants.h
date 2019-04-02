@@ -23,6 +23,10 @@ public:
     static std::string serverStatusJSON;
     static std::string clonePage;
     static std::string indicator;
+    static std::string submitExerciseNoLogin;
+    static std::string submitExercisePreviewNoLogin;
+    static std::string submitExercise;
+    static std::string submitAnswers;
   };
   struct result {
     static std::string resultHtml;

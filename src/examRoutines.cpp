@@ -535,125 +535,6 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt) {
   return false;
 }
 
-std::string CalculatorHTML::GetJavascriptSubmitAnswers() {
-  std::stringstream out;
-  std::string requestTypeSubmit, requestTypePreview, requestGiveUp, requestSolution;
-  bool submitRandomSeed = false;
-  if (theGlobalVariables.UserRequestRequiresLoadingRealExamData()) {
-    requestTypeSubmit = "submitAnswers";
-    requestTypePreview = "submitAnswersPreview";
-  } else if (theGlobalVariables.UserGuestMode()) {
-    requestTypeSubmit = "submitExerciseNoLogin";
-    requestTypePreview = "submitExercisePreviewNoLogin";
-    submitRandomSeed = true;
-  } else {
-    requestTypeSubmit = "submitExercise";
-    requestTypePreview = "submitExercisePreview";
-    submitRandomSeed = true;
-  }
-  if (!theGlobalVariables.UserGuestMode()) {
-    requestGiveUp = "problemGiveUp";
-  } else {
-    requestGiveUp = "problemGiveUpNoLogin";
-  }
-  if (!theGlobalVariables.UserGuestMode()) {
-    requestSolution = "problemSolution";
-  } else {
-    requestSolution = "problemSolutionNoLogin";
-  }
-  out
-  << "<script type =\"text/javascript\"> \n"
-  << "var JavascriptInsertionAlreadyCalled;\n"
-  << "JavascriptInsertionAlreadyCalled = false;\n"
-  << "var numInsertedJavascriptChildren;\n"
-  << "var numInsertedJavascriptChildren = 0;\n"
-  << "var timerForPreviewAnswers;\n"
-  << "function previewAnswers(idAnswer, idVerification){\n"
-  << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  timerForPreviewAnswers =setTimeout(function(){\n"
-  << "    params =\"" << this->ToStringCalculatorArgumentsForProblem(requestTypePreview, "true", "", submitRandomSeed) << "\";\n"
-  << "    submitOrPreviewAnswers(idAnswer, idVerification, params,\"" << requestTypePreview
-  << "\");\n"
-  << "  }, 4000);"
-  << "}\n"
-  << "function previewAnswersNoTimeOut(idAnswer, idVerification){\n"
-  << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  params =\"" << this->ToStringCalculatorArgumentsForProblem(requestTypePreview, "true", "", submitRandomSeed) << "\";\n"
-  << "  submitOrPreviewAnswers(idAnswer, idVerification, params,\""
-  << requestTypePreview << "\");\n"
-  << "}\n"
-  << "function submitAnswers(idAnswer, idVerification){\n"
-  << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  params =\"" << this->ToStringCalculatorArgumentsForProblem(requestTypeSubmit, "true", "", submitRandomSeed) << "\";\n"
-  << "  submitOrPreviewAnswers(idAnswer, idVerification, params, \""
-  << requestTypeSubmit << "\");\n"
-  << "}\n"
-  << "function giveUp(idAnswer, idVerification){\n"
-  << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  params =\"" << this->ToStringCalculatorArgumentsForProblem(requestGiveUp, "true", "", submitRandomSeed) << "\";\n"
-  << "  submitOrPreviewAnswers(idAnswer, idVerification, params, \""
-  << requestGiveUp << "\");\n"
-  << "}\n"
-  << "function showSolution(idAnswer, idVerification){\n"
-  << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  params =\"" << this->ToStringCalculatorArgumentsForProblem(requestSolution, "true", "", submitRandomSeed) << "\";\n"
-  << "  submitOrPreviewAnswers(idAnswer, idVerification, params, \""
-  << requestSolution << "\");\n"
-  << "}\n"
-  << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams, requestType){\n";
-  out << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  spanVerification = document.getElementById(idVerification);\n"
-  << "  if (spanVerification == null){\n"
-  << "    spanVerification = document.createElement('span');\n"
-  << "    document.body.appendChild(spanVerification);\n"
-  << "    spanVerification.innerHTML= \"<span style ='color:red'> ERROR: span with id \" + idVerification + \"MISSING! </span>\";\n"
-  << "  }\n"
-  << "  spanStudentAnswer = document.getElementById(idAnswer);\n"
-  << "  inputParams+=\"&calculatorAnswer\" + idAnswer\n"
-  << "          + \"=\"+encodeURIComponent(spanStudentAnswer.value);\n";
-  for (int i = 0; i < this->theProblemData.inputNonAnswerIds.size; i ++) {
-    out << "  inputParams+=\"&userInputBox" << this->theProblemData.inputNonAnswerIds[i]
-    << "=\"+encodeURIComponent(document.getElementById(\""
-    << this->theProblemData.inputNonAnswerIds[i] << "\").value);\n";
-  }
-  out
-  << "  var https = new XMLHttpRequest();\n"
-  << "  https.open(\"GET\", ";
-  out << "\"" << theGlobalVariables.DisplayNameExecutable << "\"";
-  out << " + \"?\"+ inputParams, true);\n"
-  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n";
-  //Old code, submits all answers. May need to be used as an alternative
-  //submission option.
-  //  for (int i = 0; i < this->theContent.size; i ++)
-  //    if (this->IsStudentAnswer(this->theContent[i]))
-  //      out << "  inputParams+=\"&calculatorAnswer" << this->theContent[i].GetKeyValue("id") << "=\"+encodeURIComponent("
-  //      << "document.getElementById('" << this->theContent[i].GetKeyValue("id") << "').value);\n";
-  out
-  << "  https.onload = function() {\n"
-  << "    spanVerification.innerHTML=https.responseText;\n"
-  << "    var scripts = spanVerification.getElementsByTagName('script');\n"
-  << "    for (i = 0; i <numInsertedJavascriptChildren; i ++)\n"
-  << "    { document.getElementsByTagName( 'head' )[0].removeChild(document.getElementsByTagName( 'head' )[0].lastChild);\n"
-  << "      document.getElementsByTagName( 'head' )[0].appendChild(scriptChild);\n"
-  << "    }\n"
-  << "    numInsertedJavascriptChildren = 0;\n"
-  << "    for (i = 0; i <scripts.length; i ++){\n"
-  << "      scriptChild = document.createElement('script');\n"
-  << "      scriptChild.innerHTML=scripts[i].innerHTML;\n"
-  << "      scriptChild.type ='text/javascript';\n"
-  << "      document.getElementsByTagName( 'head' )[0].appendChild(scriptChild);\n"
-  << "      numInsertedJavascriptChildren ++;\n "
-  << "    }\n"
-  << "    JavascriptInsertionAlreadyCalled = true;\n"
-  << "    MathJax.Hub.Queue(['Typeset', MathJax.Hub, spanVerification]);\n"
-  << "  }\n"
-//  << "  https.send(inputParams);\n"
-  << "  https.send();\n"
-  << "}\n"
-  << "</script>";
-  return out.str();
-}
-
 std::string Answer::ToString() {
   MacroRegisterFunctionWithName("Answer::ToString");
   std::stringstream out;
@@ -2981,9 +2862,6 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     return false;
   }
   //////////////////////////////interpretation takes place before javascript generation as the latter depends on the former.
-  if (this->flagIsExamProblem) {
-    outHeadPt2 << this->GetJavascriptSubmitAnswers();
-  }
   this->ComputeProblemLabel();
   std::string problemLabel = "";
   if (

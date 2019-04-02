@@ -992,8 +992,9 @@ std::string HtmlInterpretation::SubmitAnswers(
   double startTime = theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
   std::stringstream errorStream;
-  theProblem.LoadCurrentProblemItem
-  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream);
+  theProblem.LoadCurrentProblemItem(
+    theGlobalVariables.UserRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream
+  );
   if (!theProblem.flagLoadedSuccessfully) {
     out << "Failed to load current problem. " << errorStream.str();
     return out.str();
@@ -1003,11 +1004,12 @@ std::string HtmlInterpretation::SubmitAnswers(
     out << "<b>Failed to parse problem. </b>Comments: " << comments.str();
     return out.str();
   }
-  if (!theProblem.theProblemData.flagRandomSeedGiven && !theProblem.flagIsForReal)
+  if (!theProblem.theProblemData.flagRandomSeedGiven && !theProblem.flagIsForReal) {
     out << "<b>Random seed not given.</b>";
-//  stOutput << "<b>DEBUG remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
-  if (theProblem.fileName == "")
+  }
+  if (theProblem.fileName == "") {
     crash << "This shouldn't happen: empty file name: theProblem.fileName." << crash;
+  }
   std::string studentAnswerNameReader;
   theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size());
   MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;

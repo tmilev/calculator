@@ -326,7 +326,8 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outpu
   if (typeof outputComponent === "string") {
     outputComponent = document.getElementById(outputComponent);
   }
-  outputComponent.innerHTML = input;
+  var inputParsed = JSON.parse(input);
+  outputComponent.innerHTML = inputParsed.resultHtml;
   var spanVerification = document.getElementById(this.idVerificationSpan);
   var scripts = spanVerification.getElementsByTagName('script');
   var theHead = document.getElementsByTagName('head')[0];
@@ -353,7 +354,7 @@ InputPanelData.prototype.submitOrPreviewAnswers = function(requestQuery) {
     url: theURL,
     progress: ids.domElements.spanProgressReportGeneral,
     callback: this.submitOrPreviewAnswersCallback.bind(this),
-    result: this.idVerificationSpan
+    //result: this.idVerificationSpan
   });
 }
 

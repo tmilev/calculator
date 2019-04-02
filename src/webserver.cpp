@@ -3635,8 +3635,8 @@ int WebWorker::ServeClient() {
   ) {
     return this->ProcessAssignTeacherToSection();
   } else if ((
-      theGlobalVariables.userCalculatorRequestType == "submitAnswers" ||
-      theGlobalVariables.userCalculatorRequestType == "submitExercise"
+      theGlobalVariables.userCalculatorRequestType == WebAPI::request::submitAnswers ||
+      theGlobalVariables.userCalculatorRequestType == WebAPI::request::submitExercise
     ) &&
     theGlobalVariables.flagLoggedIn
   ) {
@@ -3676,7 +3676,7 @@ int WebWorker::ServeClient() {
   ) {
     return this->ProcessSubmitAnswersPreview();
   } else if (
-    theGlobalVariables.userCalculatorRequestType == "submitExercisePreviewNoLogin" &&
+    theGlobalVariables.userCalculatorRequestType == WebAPI::request::submitExercisePreviewNoLogin &&
     theGlobalVariables.UserGuestMode()
   ) {
     return this->ProcessSubmitAnswersPreview();
@@ -5570,8 +5570,8 @@ void WebServer::InitializeGlobalVariables() {
   this->requestsNotNeedingLogin.AddOnTop("templateNoLogin");
   this->requestsNotNeedingLogin.AddOnTop("templateJSONNoLogin");
   this->requestsNotNeedingLogin.AddOnTop("topicListJSONNoLogin");
-  this->requestsNotNeedingLogin.AddOnTop("submitExerciseNoLogin");
-  this->requestsNotNeedingLogin.AddOnTop("submitExercisePreviewNoLogin");
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::submitExerciseNoLogin);
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::submitExercisePreviewNoLogin);
   this->requestsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");
   this->requestsNotNeedingLogin.AddOnTop("problemSolutionNoLogin");
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::selectCourseJSON);

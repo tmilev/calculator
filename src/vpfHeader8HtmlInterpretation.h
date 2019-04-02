@@ -307,7 +307,6 @@ public:
   void InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
   void InterpretJavascripts(SyntacticElementHTML& inputOutput);
   std::string GetEditPageButton(const std::string& desiredFileName, bool includeCloneButton = true);
-  std::string GetJavascriptSubmitAnswers();
   std::string GetJavascriptMathQuillBoxes();
   JSData GetJavascriptMathQuillBoxesForJSON();
   void LoadCurrentProblemItem(

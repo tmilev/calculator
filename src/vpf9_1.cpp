@@ -346,19 +346,21 @@ bool GlobalVariables::UserDefaultHasProblemComposingRights() {
 }
 
 bool GlobalVariables::UserGuestMode() {
-  if (!this->flagUsingSSLinCurrentConnection)
+  if (!this->flagUsingSSLinCurrentConnection) {
     return true;
+  }
   return
   this->userCalculatorRequestType == "exerciseNoLogin" ||
   this->userCalculatorRequestType == "problemGiveUpNoLogin" ||
-  this->userCalculatorRequestType == "submitExerciseNoLogin" ||
-  this->userCalculatorRequestType == "submitExercisePreviewNoLogin" ||
+  this->userCalculatorRequestType == WebAPI::request::submitExerciseNoLogin ||
+  this->userCalculatorRequestType == WebAPI::request::submitExercisePreviewNoLogin ||
   this->userCalculatorRequestType == "templateNoLogin";
 }
 
 bool GlobalVariables::UserRequestRequiresLoadingRealExamData() {
-  if (this->UserGuestMode())
+  if (this->UserGuestMode()) {
     return false;
+  }
   return this->flagLoggedIn && (
     this->userCalculatorRequestType == "scoredQuiz" ||
     this->userCalculatorRequestType == "scoredQuizJSON" ||
@@ -375,8 +377,9 @@ bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn() {
 
 std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude) {
   MacroRegisterFunctionWithName("GlobalVariables::ToStringCalcArgsNoNavigation");
-  if (!this->flagLoggedIn && !this->UserGuestMode())
+  if (!this->flagLoggedIn && !this->UserGuestMode()) {
     return "";
+  }
   std::stringstream out;
   for (int i = 0; i < this->webArguments.size(); i ++) {
     const std::string& currentName = this->webArguments.theKeys[i];

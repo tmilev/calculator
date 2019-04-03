@@ -147,7 +147,7 @@ void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString) {
 
 #endif // MACRO_use_open_ssl
 //http://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl
-//openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 3001
+//openssl req -x509 -keyalg RSA -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 3001
 //Alternatively:
 //certificate with certificate signing request:
 //openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout calculator-algebra.key
@@ -163,7 +163,7 @@ const std::string signedFileKey = "certificates/calculator-algebra.key";
 void WebServer::initSSL() {
   MacroRegisterFunctionWithName("WebServer::initSSL");
   if (!theGlobalVariables.flagSSLisAvailable) {
-    logWorker << logger::red << "SSL is DISABLED." << logger::endL;
+    logServer << logger::red << "SSL is DISABLED." << logger::endL;
     return;
   }
 #ifdef MACRO_use_open_ssl
@@ -5238,10 +5238,10 @@ void WebServer::FigureOutOperatingSystem() {
   if (theGlobalVariables.OperatingSystem != "") {
     return;
   }
-  logWorker << logger::red << "Your Linux flavor is not currently supported. " << logger::endL;
-  logWorker << "We support the following Linux distros: "
+  logServer << logger::red << "Your Linux flavor is not currently supported. " << logger::endL;
+  logServer << "We support the following Linux distros: "
   << logger::blue << supportedOSes.ToStringCommaDelimited() << logger::endL;
-  logWorker << "Please post a request for support of your Linux flavor on our bug tracker: " << logger::endL
+  logServer << "Please post a request for support of your Linux flavor on our bug tracker: " << logger::endL
   << logger::green << "https://github.com/tmilev/calculator"
   << logger::endL << "and we will add your Linux flavor to the list of supported distros. " << logger::endL;
 }
@@ -5261,14 +5261,22 @@ void WebServer::CheckSystemInstallationOpenSSL() {
   theGlobalVariables.StoreConfiguration();
   WebServer::FigureOutOperatingSystem();
   StateMaintainerCurrentFolder preserveFolder;
-  logServer << "You appear to be missing an openssl installation. Let me try to install that for you. "
-  << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
+  std::string sslInstallCommand = "CentOS";
   if (theGlobalVariables.OperatingSystem == "Ubuntu") {
-    theGlobalVariables.CallSystemNoOutput("sudo apt-get install libssl-dev", false);
-    theGlobalVariables.configuration["openSSL"] = "Attempted installation on Ubuntu";
+    sslInstallCommand = "sudo apt-get install libssl-dev";
   } else if (theGlobalVariables.OperatingSystem == "CentOS") {
-    theGlobalVariables.CallSystemNoOutput("sudo yum install openssl-devel", false);
-    theGlobalVariables.configuration["openSSL"] = "Attempted installation on CentOS";
+    sslInstallCommand = "sudo yum install openssl-devel";
+  } else {
+    logServer << "You appear to be missing an openssl installation. "
+    << "To support https, please install openssl. ";
+    return;
+  }
+  if (sslInstallCommand != "") {
+    logServer << "You appear to be missing an openssl installation. Let me try to install that for you. "
+    << logger::green << "About to request sudo password for: " << sslInstallCommand << logger::endL;
+    logServer << logger::red << "To refuse the command type CTRL+C. " << logger::endL;
+    theGlobalVariables.CallSystemNoOutput(sslInstallCommand, false);
+    theGlobalVariables.configuration["openSSL"] = "Attempted installation on Ubuntu";
   }
   theGlobalVariables.StoreConfiguration();
 }

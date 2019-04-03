@@ -1,1 +1,1 @@
-ab -n 500 -c 24 -p ./miscellaneous/sourceforge_index.php https://localhost:8166/
+ab -n 5000 -c 24 -s 3 -p ./miscellaneous/sourceforge_index.php https://localhost:8166/

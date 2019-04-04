@@ -3192,13 +3192,6 @@ int WebWorker::ProcessProblemGiveUp() {
   return 0;
 }
 
-int WebWorker::ProcessProblemGiveUpJSON() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessProblemGiveUpJSON");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetAnswerOnGiveUp();
-  return 0;
-}
-
 int WebWorker::ProcessProblemSolution() {
   MacroRegisterFunctionWithName("WebWorker::ProcessProblemSolution");
   this->SetHeaderOKNoContentLength("");
@@ -3648,19 +3641,12 @@ int WebWorker::ServeClient() {
   } else if (theGlobalVariables.UserGuestMode() && theGlobalVariables.userCalculatorRequestType == "submitExerciseNoLogin") {
     return this->ProcessSubmitAnswers();
   } else if ((
-      theGlobalVariables.userCalculatorRequestType == "problemGiveUp" &&
+      theGlobalVariables.userCalculatorRequestType == WebAPI::request::problemGiveUp &&
       theGlobalVariables.flagLoggedIn
     ) ||
-    theGlobalVariables.userCalculatorRequestType == "problemGiveUpNoLogin"
+    theGlobalVariables.userCalculatorRequestType == WebAPI::request::problemGiveUpNoLogin
   ) {
     return this->ProcessProblemGiveUp();
-  } else if ((
-      theGlobalVariables.userCalculatorRequestType == "problemGiveUpJSON" &&
-      theGlobalVariables.flagLoggedIn
-    ) ||
-    theGlobalVariables.userCalculatorRequestType == "problemGiveUpNoLoginJSON"
-  ) {
-    return this->ProcessProblemGiveUpJSON();
   } else if ((
       theGlobalVariables.userCalculatorRequestType == "problemSolution" &&
       theGlobalVariables.flagLoggedIn

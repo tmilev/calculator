@@ -322,12 +322,30 @@ InputPanelData.prototype.mQHelpCalculator = function() {
   this.ignoreNextMathQuillUpdateEvent = false;
 }
 
-InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outputComponent) {
+InputPanelData.prototype.submitOrPreviewAnswersCallback = function(outputComponent, input) {
   if (typeof outputComponent === "string") {
     outputComponent = document.getElementById(outputComponent);
   }
   var inputParsed = JSON.parse(input);
-  outputComponent.innerHTML = inputParsed.resultHtml;
+  
+  var resultHtml = "";
+  if (inputParsed.error !== undefined && inputParsed.error !== null && inputParsed.error !== "") {
+    resultHtml += `<b style = 'color:red'>Error.</b> ${inputParsed.error}`; 
+  }
+  if (inputParsed.resultHtml !== "" && inputParsed.resultHtml !== undefined && inputParsed.resultHtml !== null) {
+    if (resultHtml !== "") {
+      resultHtml += "<br>";
+    }
+    resultHtml += inputParsed.resultHtml;
+  }
+  var timeComputation = inputParsed.timeComputation;
+  if (timeComputation !== null && timeComputation !== undefined) {
+    if (resultHtml !== "") {
+      resultHtml += "<br>";
+    }
+    resultHtml += `<br><span style = 'font-size:x-small;float:right'>Response: ${timeComputation} ms</small>`;
+  }
+  outputComponent.innerHTML = resultHtml;
   var spanVerification = document.getElementById(this.idVerificationSpan);
   var scripts = spanVerification.getElementsByTagName('script');
   var theHead = document.getElementsByTagName('head')[0];
@@ -353,8 +371,7 @@ InputPanelData.prototype.submitOrPreviewAnswers = function(requestQuery) {
   submitRequests.submitGET({
     url: theURL,
     progress: ids.domElements.spanProgressReportGeneral,
-    callback: this.submitOrPreviewAnswersCallback.bind(this),
-    //result: this.idVerificationSpan
+    callback: this.submitOrPreviewAnswersCallback.bind(this, this.idVerificationSpan),
   });
 }
 

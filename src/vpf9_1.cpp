@@ -351,7 +351,7 @@ bool GlobalVariables::UserGuestMode() {
   }
   return
   this->userCalculatorRequestType == "exerciseNoLogin" ||
-  this->userCalculatorRequestType == "problemGiveUpNoLogin" ||
+  this->userCalculatorRequestType == WebAPI::request::problemGiveUpNoLogin ||
   this->userCalculatorRequestType == WebAPI::request::submitExerciseNoLogin ||
   this->userCalculatorRequestType == WebAPI::request::submitExercisePreviewNoLogin ||
   this->userCalculatorRequestType == "templateNoLogin";

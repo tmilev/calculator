@@ -2333,15 +2333,17 @@ bool Function::ShouldBeApplied(int parentOpIfAvailable) {
 
 JSData Function::ToJSON() const {
   MacroRegisterFunctionWithName("Function::ToJSON");
-  JSData result(JSData::JSObject);
+  JSData result;
+  result.type = JSData::JSObject;
   if (this->owner == 0) {
     result["error"] = "bad_owner";
     return result;
   }
-  if (this->flagIamVisible)
+  if (this->flagIamVisible) {
     result["visible"] = "true";
-  else
+  } else {
     result["visible"] = "false";
+  }
   if (this->flagIsCompositeHandler) {
     result["composite"] = "true";
     result["number"] = this->indexAmongOperationHandlers + 1;
@@ -2353,49 +2355,60 @@ JSData Function::ToJSON() const {
     result["total"] = this->owner->FunctionHandlers[this->indexOperation].size;
     result["atom"] = this->owner->theAtoms[this->indexOperation];
   }
-  if (this->flagIsExperimental)
+  if (this->flagIsExperimental) {
     result["experimental"] = "true";
-  else
+  } else {
     result["experimental"] = "false";
+  }
   result["description"] = this->theDescription;
-  if (this->calculatorIdentifier != "")
+  if (this->calculatorIdentifier != "") {
     result["ruleName"] = this->calculatorIdentifier;
-  if (this->additionalIdentifier != "")
+  }
+  if (this->additionalIdentifier != "") {
     result["additionalIdentifier"] = this->additionalIdentifier;
+  }
   std::stringstream functionAddress;
   functionAddress << std::hex << (unsigned long) this->theFunction;
   result["memoryAddress"] = functionAddress.str();
-  if (this->flagIsInner)
+  if (this->flagIsInner) {
     result["inner"] = "true";
-  else
+  } else {
     result["inner"] = "false";
-  if (this->theExample != "")
+  }
+  if (this->theExample != "") {
     result["example"] = this->theExample;
+  }
   return result;
 }
 
 std::string Function::ToStringFull() const {
-  if (!this->flagIamVisible)
+  if (!this->flagIamVisible) {
     return "";
-  if (this->owner == 0)
+  }
+  if (this->owner == 0) {
     return "(non-intialized)";
+  }
   std::stringstream out2;
   out2 << this->ToStringShort();
   if (!this->flagIsExperimental) {
     std::stringstream out;
     out << this->theDescription;
-    if (this->calculatorIdentifier != "")
+    if (this->calculatorIdentifier != "") {
       out << "Rule name: " << this->calculatorIdentifier << ". ";
-    if (this->additionalIdentifier != "")
+    }
+    if (this->additionalIdentifier != "") {
       out << "Handler: " << this->additionalIdentifier << ". ";
+    }
     // use of unsigned long is correct on i386 and amd64
     // uintptr_t is only available in c++ 0x
     // Please fix if the following code is not portable:
     out << "Function memory address: " << std::hex << (unsigned long) this->theFunction << ". ";
-    if (!this->flagIsInner)
+    if (!this->flagIsInner) {
       out << "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. ";
-    if (this->theExample != "")
+    }
+    if (this->theExample != "") {
       out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
+    }
     out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample != "") {
       out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
@@ -2438,8 +2451,9 @@ std::string ObjectContainer::ToString() {
 JSData Calculator::ToJSONOutputAndSpecials() {
   MacroRegisterFunctionWithName("Calculator::ToJSONOutputAndSpecials");
   JSData result = this->outputJS;
-  if (this->inputString == "")
+  if (this->inputString == "") {
     return result;
+  }
   result["performance"] = this->ToStringPerformance();
   result["parsingLog"] = this->parsingLog;
   return result;
@@ -2476,10 +2490,12 @@ void Calculator::WriteAutoCompleteKeyWordsToFile() {
 void Calculator::ComputeAutoCompleteKeyWords() {
   MacroRegisterFunctionWithName("Calculator::ComputeAutoCompleteKeyWords");
   this->autoCompleteKeyWords.SetExpectedSize(this->theAtoms.size * 2);
-  for (int i = 0; i < this->theAtoms.size; i ++)
+  for (int i = 0; i < this->theAtoms.size; i ++) {
     this->autoCompleteKeyWords.AddOnTopNoRepetition(this->theAtoms[i]);
-  for (int i = 0; i < this->namedRules.size; i ++)
+  }
+  for (int i = 0; i < this->namedRules.size; i ++) {
     this->autoCompleteKeyWords.AddOnTopNoRepetition(this->namedRules[i]);
+  }
   for (int i = 0; i < this->controlSequences.size; i ++) {
     if (this->controlSequences[i].size() > 0) {
       if (MathRoutines::isALatinLetter(this->controlSequences[i][0])) {
@@ -2521,8 +2537,9 @@ std::string Calculator::ToStringPerformance() {
   moreDetails << "<br>Total evaluations: " << this->NumCallsEvaluateExpression << ". ";
   moreDetails << "<br>Total number of pattern matches performed: "
   << this->TotalNumPatternMatchedPerformed << "";
-  if (this->DepthRecursionReached > 0)
+  if (this->DepthRecursionReached > 0) {
     moreDetails << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
+  }
   #ifdef MacroIncrementCounter
   moreDetails << "<br>Lists created: " << "computation: "
   << (ParallelComputing::NumListsCreated - this->NumListsStart)
@@ -2532,31 +2549,37 @@ std::string Calculator::ToStringPerformance() {
   << ", total: " << ParallelComputing::NumListResizesTotal
   << "<br> # hash resizing: computation: " << (ParallelComputing::NumHashResizes - this->NumHashResizesStart)
   << ", total: " << ParallelComputing::NumHashResizes;
-  if (Rational::TotalSmallAdditions > 0)
+  if (Rational::TotalSmallAdditions > 0) {
     moreDetails << "<br>Small rational additions: computation: "
     << Rational::TotalSmallAdditions - this->NumSmallAdditionsStart
     << ", total: " << Rational::TotalSmallAdditions;
-  if (Rational::TotalSmallMultiplications > 0)
+  }
+  if (Rational::TotalSmallMultiplications > 0) {
     moreDetails << "<br>Small rational multiplications: computation: "
     << Rational::TotalSmallMultiplications - this->NumSmallMultiplicationsStart
     << ", total: " << Rational::TotalSmallMultiplications;
-  if (Rational::TotalSmallGCDcalls > 0)
+  }
+  if (Rational::TotalSmallGCDcalls > 0) {
     moreDetails << "<br>Small gcd calls: computation: "
     << Rational::TotalSmallGCDcalls - this->NumSmallGCDcallsStart
     << ", total: " << Rational::TotalSmallGCDcalls;
-  if (Rational::TotalLargeAdditions > 0)
+  }
+  if (Rational::TotalLargeAdditions > 0) {
     moreDetails << "<br>Large integer additions: "
     << Rational::TotalLargeAdditions - this->NumLargeAdditionsStart
     << ", total: "
     << Rational::TotalLargeAdditions;
-  if (Rational::TotalLargeMultiplications > 0)
+  }
+  if (Rational::TotalLargeMultiplications > 0) {
     moreDetails << "<br>Large integer multiplications: computation: "
     << Rational::TotalLargeMultiplications - this->NumLargeMultiplicationsStart
     << ", total: " << Rational::TotalLargeMultiplications;
-  if (Rational::TotalLargeGCDcalls > 0)
+  }
+  if (Rational::TotalLargeGCDcalls > 0) {
     moreDetails << "<br>Large gcd calls: "
     << Rational::TotalLargeGCDcalls - this->NumLargeGCDcallsStart
     << ", total: " << Rational::TotalLargeGCDcalls;
+  }
   out << "<br>" << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(moreDetails.str(), "More details");
   #endif
   return out.str();
@@ -2567,12 +2590,13 @@ std::string Calculator::ToString() {
   std::stringstream out2;
   std::string openTag1 = "<span style =\"color:blue\">";
   std::string closeTag1 = "</span>";
-  if (theGlobalVariables.MaxComputationMilliseconds > 0)
+  if (theGlobalVariables.MaxComputationMilliseconds > 0) {
     out2 << "Computation time limit: "
     << theGlobalVariables.MaxComputationMilliseconds
     << " ms.<hr>";
-  else
+  } else {
     out2 << "No computation time limit.<hr> ";
+  }
   if (this->RuleStack.children.size > 1) {
     out2 << "<b>Predefined rules.</b><br>";
     for (int i = 1; i < this->RuleStack.children.size; i ++) {
@@ -2594,11 +2618,13 @@ std::string Calculator::ToString() {
     out2 << HtmlRoutines::GetHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Examples.");
     out2 << "<span id =\"calculatorExamples\"></span>";
   }
-  if (!theGlobalVariables.UserDebugFlagOn())
+  if (!theGlobalVariables.UserDebugFlagOn()) {
     return out2.str();
+  }
   std::stringstream out;
   out2 << "<hr><b>Further calculator details.</b>";
-  out << "<br><b>Object container information</b>.The object container is the data structure storing all c++ built-in data types "
+  out << "<br><b>Object container information</b>. "
+  << "The object container is the data structure storing all c++ built-in data types "
   << " requested by the user<br> " << this->theObjectContainer.ToString();
   out << "<hr>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
   for (int i = 0; i < this->controlSequences.size; i ++) {
@@ -2606,12 +2632,14 @@ std::string Calculator::ToString() {
     if (i != this->controlSequences.size)
       out << ", ";
   }
-  out << "<br>\n User or run-time defined atoms = " << this->theAtoms.size << " (= " << this->NumPredefinedAtoms << " predefined + "
+  out << "<br>\n User or run-time defined atoms = " << this->theAtoms.size << " (= "
+  << this->NumPredefinedAtoms << " predefined + "
   << this->theAtoms.size-this->NumPredefinedAtoms << " user-defined):<br>\n";
   for (int i = 0; i < this->theAtoms.size; i ++) {
     out << "\n" << i << ": " << openTag1 << this->theAtoms[i] << closeTag1;
-    if (i != this->theAtoms.size - 1)
+    if (i != this->theAtoms.size - 1) {
       out << ", ";
+    }
   }
   out << this->ElementToStringNonBoundVars();
   out << "<hr>";
@@ -2621,8 +2649,9 @@ std::string Calculator::ToString() {
     numExpressionsToDisplay = 1000;
     out << " <b>Displaying first " << numExpressionsToDisplay << " only </b><br>";
   }
-  for (int i = 0; i < numExpressionsToDisplay; i ++)
+  for (int i = 0; i < numExpressionsToDisplay; i ++) {
     out << this->theExpressionContainer[i].ToString() << ", ";
+  }
   out << "<hr>";
   out << "\n Cached expressions (" << this->cachedExpressions.size << " total):\n<br>\n";
   numExpressionsToDisplay = this->cachedExpressions.size;
@@ -2632,8 +2661,9 @@ std::string Calculator::ToString() {
   }
   for (int i = 0; i < numExpressionsToDisplay; i ++) {
     out << this->cachedExpressions[i].ToString() << " -> " << this->imagesCachedExpressions[i].ToString();
-    if (i != this->cachedExpressions.size - 1)
+    if (i != this->cachedExpressions.size - 1) {
       out << "<br>";
+    }
   }
   out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(out.str(), "info expand/collapse", "calculatorInternalDetails");
   return out2.str();
@@ -2644,8 +2674,9 @@ std::string Calculator::ToStringSyntacticStackHumanReadable(
 ) {
   MacroRegisterFunctionWithName("Calculator::ToStringSyntacticStackHumanReadable");
   std::stringstream out;
-  if ((*this->CurrentSyntacticStacK).size< this->numEmptyTokensStart)
+  if ((*this->CurrentSyntacticStacK).size< this->numEmptyTokensStart) {
     return "Error: this is a programming error: not enough empty tokens in the start of the syntactic stack.";
+  }
   bool isBad = ((*this->CurrentSyntacticStacK).size > this->numEmptyTokensStart + 1);
   SyntacticElement& lastSyntacticElt = *(*this->CurrentSyntacticStacK).LastObject();
   if ((*this->CurrentSyntacticStacK).size == this->numEmptyTokensStart + 1) {
@@ -2696,8 +2727,9 @@ std::string Calculator::ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclos
 SemisimpleSubalgebras& ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
   MacroRegisterFunctionWithName("ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent");
   bool needToHookUpPointers = false;
-  if (!this->theSSSubalgebraS.Contains(input))
+  if (!this->theSSSubalgebraS.Contains(input)) {
     needToHookUpPointers = true;
+  }
   SemisimpleSubalgebras& currentSAs = this->theSSSubalgebraS.GetValueCreateNoInit(input);
   if (needToHookUpPointers) {
     SemisimpleLieAlgebra& ownerSS = this->GetLieAlgebraCreateIfNotPresent(input);
@@ -2709,11 +2741,13 @@ SemisimpleSubalgebras& ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPrese
 SemisimpleLieAlgebra& ObjectContainer::GetLieAlgebraCreateIfNotPresent(const DynkinType& input) {
   MacroRegisterFunctionWithName("ObjectContainer::GetLieAlgebraCreateIfNotPresent");
   bool needToInit = false;
-  if (!this->theSSLieAlgebras.Contains(input))
+  if (!this->theSSLieAlgebras.Contains(input)) {
     needToInit = true;
+  }
   SemisimpleLieAlgebra& theLA = this->theSSLieAlgebras.GetValueCreateNoInit(input);
-  if (needToInit)
+  if (needToInit) {
     theLA.theWeyl.MakeFromDynkinType(input);
+  }
   return theLA;
 }
 
@@ -2729,8 +2763,9 @@ std::string ObjectContainer::ToStringJavascriptForUserInputBoxes() {
   for (int i = 0; i < this->theUserInputTextBoxesWithValues.size(); i ++) {
     InputBox& currentBox = this->theUserInputTextBoxesWithValues.theValues[i];
     out << "'" << currentBox.name << "'";
-    if (i != this->theUserInputTextBoxesWithValues.size() - 1)
+    if (i != this->theUserInputTextBoxesWithValues.size() - 1) {
       out << ", ";
+    }
   }
   out << "];\n";
   out << "window.calculator.calculator.inputBoxToSliderUpdaters = {};";
@@ -2816,8 +2851,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
   Expression truncatedInput = input;
   if (truncatedInput.children.size > 4) {
     int numEltsToCut = truncatedInput.children.size - 4;
-    for (int i = 0; i < numEltsToCut; i ++)
+    for (int i = 0; i < numEltsToCut; i ++) {
       truncatedInput.children.RemoveLastObject();
+    }
   }
   if (!theCommands.GetTypeHighestWeightParabolic<Polynomial<Rational> >(
     theCommands,
@@ -2831,17 +2867,21 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
   ) {
     return output.MakeError("Failed to extract type, highest weight, parabolic selection", theCommands);
   }
-  if (output.IsError())
+  if (output.IsError()) {
     return true;
+  }
   std::string letterString = "x";
   std::string partialString = "\\partial";
   std::string exponentLetterString = "a";
-  if (input.children.size > 4)
+  if (input.children.size > 4) {
     letterString = input[4].ToString();
-  if (input.children.size > 5)
+  }
+  if (input.children.size > 5) {
     partialString = input[5].ToString();
-  if (input.children.size > 6)
+  }
+  if (input.children.size > 6) {
     exponentLetterString = input[6].ToString();
+  }
   return theCommands.innerWriteGenVermaModAsDiffOperatorInner(
     theCommands,
     input,
@@ -2864,18 +2904,24 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
   Selection tempSel;
   SemisimpleLieAlgebra* theSSalg;
   Expression context;
-  if (!theCommands.GetTypeHighestWeightParabolic<Rational>(theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
+  if (!theCommands.GetTypeHighestWeightParabolic<Rational>(
+    theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0
+  )) {
     return output.MakeError("Failed to extract highest weight and algebra", theCommands);
-  if (output.IsError())
+  }
+  if (output.IsError()) {
     return true;
-  if (tempSel.CardinalitySelection > 0)
+  }
+  if (tempSel.CardinalitySelection > 0) {
     return output.MakeError("Failed to extract highest weight. ", theCommands);
+  }
   charSSAlgMod<Rational> startingChar, resultChar;
   hwSimple = theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg);
   std::string reportString;
-  if (!startingChar.FreudenthalEvalMeFullCharacter(resultChar, 10000, &reportString))
+  if (!startingChar.FreudenthalEvalMeFullCharacter(resultChar, 10000, &reportString)) {
     return output.MakeError(reportString, theCommands);
+  }
   std::stringstream out;
   out << resultChar.ToString();
   return output.AssignValue(out.str(), theCommands);
@@ -2886,25 +2932,32 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
   Selection tempSel;
   SemisimpleLieAlgebra* theSSalg = 0;
   Expression context;
-  if (!theCommands.GetTypeHighestWeightParabolic<Rational>(theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
+  if (!theCommands.GetTypeHighestWeightParabolic<Rational>(
+    theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0
+  )) {
     return output.MakeError("Failed to extract highest weight and algebra", theCommands);
-  if (output.IsError())
+  }
+  if (output.IsError()) {
     return true;
-  if (tempSel.CardinalitySelection > 0)
+  }
+  if (tempSel.CardinalitySelection > 0) {
     return output.MakeError("Failed to extract highest weight. ", theCommands);
+  }
   charSSAlgMod<Rational> startingChar, resultChar;
   hwSimple = theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg);
   std::string reportString;
-  if (!startingChar.FreudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString))
+  if (!startingChar.FreudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString)) {
     return output.MakeError(reportString, theCommands);
+  }
   return output.AssignValue(resultChar, theCommands);
 }
 
 bool Expression::IsMeltable(int* numResultingChildren) const {
   this->CheckInitialization();
-  if (!this->StartsWith(this->owner->opMelt(), 2))
+  if (!this->StartsWith(this->owner->opMelt(), 2)) {
     return false;
+  }
   if (numResultingChildren != 0) {
     if (!(*this)[1].StartsWith(this->owner->opEndStatement())) {
       *numResultingChildren = 1;
@@ -2917,11 +2970,10 @@ bool Expression::IsMeltable(int* numResultingChildren) const {
 
 bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* commentsOnFailure) const {
   MacroRegisterFunctionWithName("Expression::MergeContextsMyAruments");
-//  stOutput << "<hr>Merging contexts of expression " << this->ToString();
   this->CheckInitialization();
-  if (this->size() < 2)
+  if (this->size() < 2) {
     return false;
-//  stOutput << " ... continuing to merge..." ;
+  }
   for (int i = 1; i < this->size(); i ++) {
     if (!(*this)[i].IsBuiltInTypE()) {
       if (commentsOnFailure != 0) {
@@ -2980,7 +3032,8 @@ bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutput
   }
   for (int i = 0; i < inputOutputEs.size; i ++) {
     if (!inputOutputEs[i].IsBuiltInTypE()) {
-      return *this << "<hr>Possible programming error: calling ConvertExpressionsToCommonContext on expressions without context. "
+      return *this << "<hr>Possible programming error: calling ConvertExpressionsToCommonContext "
+      << "on expressions without context. "
       << Crasher::GetStackTraceEtcErrorMessage();
     }
     if (!commonContext.ContextMergeContexts(commonContext, inputOutputEs[i].GetContext(), commonContext)) {
@@ -2993,18 +3046,18 @@ bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutput
       return false;
     }
   }
-  if (inputOutputStartingContext != 0)
+  if (inputOutputStartingContext != 0) {
     *inputOutputStartingContext = commonContext;
+  }
   return true;
 }
 
 bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerMeltBrackets");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  //stOutput << "outerMeltBrackets meldet sich!";
-  if (!input.StartsWith(theCommands.opEndStatement()))
+  if (!input.StartsWith(theCommands.opEndStatement())) {
     return false;
-  //stOutput << "<br>outerMeltBrackets meldet sich!";
+  }
   int tempInt;
   int ChildIncrease = 0;
   bool found = false;
@@ -3015,8 +3068,9 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
       ChildIncrease += tempInt - 1;
     }
   }
-  if (!found)
+  if (!found) {
     return false;
+  }
   output.reset(theCommands, input.children.size + ChildIncrease);
   output.AddChildAtomOnTop(theCommands.opEndStatement());
   for (int i = 1; i < input.children.size; i ++) {

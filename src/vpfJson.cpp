@@ -94,6 +94,11 @@ void JSData::operator=(const Rational& other) {
   this->number = other.GetDoubleValue();
 }
 
+void JSData::operator =(int64_t input) {
+  this->type = this->JSnumber;
+  this->number = input;
+}
+
 bool JSData::isIntegerFittingInInt(int* whichInteger) {
   if (this->type != JSData::JSnumber) {
     return false;

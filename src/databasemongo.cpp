@@ -473,7 +473,8 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(
   long long* totalItems,
   std::stringstream* commentsOnFailure
 ) {
-  const JSData options(JSData::JSUndefined);
+  JSData options;
+  options.type = JSData::JSUndefined;
   return DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions(
     collectionName, findQuery, output, options, maxOutputItems, totalItems, commentsOnFailure
   );
@@ -633,7 +634,8 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString(
   const std::string& collectionName, const std::string& findQuery, JSData& output, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString");
-  JSData options(JSData::JSUndefined);
+  JSData options;
+  options.type = JSData::JSUndefined;
   return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions(
     collectionName, findQuery, options, output, commentsOnFailure
   );
@@ -688,8 +690,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions(
   query.maxOutputItems = 1;
   List<JSData> outputList;
   query.FindMultiple(outputList, options, commentsOnFailure, commentsGeneralNonSensitive);
-  if (outputList.size == 0)
+  if (outputList.size == 0) {
     return false;
+  }
   output = outputList[0];
   return true;
 #else
@@ -723,8 +726,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::matchesPattern(
   const List<std::string>& fieldLabel, const List<std::string>& pattern
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::matchesPattern");
-  if (fieldLabel.size != pattern.size)
+  if (fieldLabel.size != pattern.size) {
     return false;
+  }
   for (int i = 0; i < pattern.size; i ++) {
     if (pattern[i] == DatabaseStrings::anyFielD) {
       continue;
@@ -868,8 +872,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById(
 #else
   (void) tableName;
   (void) findQuery;
-  if (commentsOnFailure != 0)
+  if (commentsOnFailure != 0) {
     *commentsOnFailure << "Project compiled without mongoDB support. ";
+  }
   return false;
 #endif
 

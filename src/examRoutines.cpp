@@ -2692,7 +2692,8 @@ std::string CalculatorHTML::answerLabels::previousAnswers = "previousAnswers";
 JSData CalculatorHTML::GetJavascriptMathQuillBoxesForJSON() {
   MacroRegisterFunctionWithName("CalculatorHTML::GetJavascriptMathQuillBoxesForJSON");
   ////////////////////////////////////////////////////////////////////
-  JSData output(JSData::JSarray);
+  JSData output;
+  output.type = JSData::JSarray;
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
     JSData currentAnswerJS;
     Answer& currentAnswer = this->theProblemData.theAnswers[i];

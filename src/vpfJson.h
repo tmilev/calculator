@@ -7,26 +7,6 @@
 #include "vpfHeader1General6Maps.h"
 static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, work in progress.");
 
-
-/*The best kind of misleading documentation is aspirational
-  JSData data;
-  data["name"] = "JSLibrary";
-  data["version"] = 3.14;
-  data["types"][0] = "null";
-  data["types"][1] = "boolean";
-  data["types"][2] = "number";
-  data.writefile("jslib");
-  stOutput << data << "\n";
-  JSData data2;
-  data2.readfile("jslib");
-  stOutput << data2 << "\n";
-*/
-
-//enum JSType{null, boolean, number, string, list, hash};
-// error: 'JSData::number' cannot appear in a constant-expression
-// or
-// error: 'JSType' is not a cass or namespace
-
 //struct JSHashData;
 class Rational;
 template <typename coefficient>
@@ -60,6 +40,7 @@ public:
   MapReferenceS<std::string, JSData, MathRoutines::HashString> objects;
   void operator=(const bool other);
   void operator=(int other);
+  void operator=(int64_t other);
   void operator=(const double other);
   void operator=(const std::string& other);
   void operator=(const char* other);
@@ -79,9 +60,6 @@ public:
     this->reset();
     this->operator=(other);
   }
-  JSData(char other) {
-    this->reset(other);
-  }
   void operator=(const JSData& other) {
     this->type = other.type;
     this->boolean = other.boolean;
@@ -96,8 +74,9 @@ public:
     this->reset();
     this->type = this->JSarray;
     this->list.SetSize(other.size);
-    for (int i = 0; i < other.size; i ++)
+    for (int i = 0; i < other.size; i ++) {
       this->list[i] = other[i];
+    }
   }
   void operator=(const Rational& other);
 
@@ -129,15 +108,18 @@ std::ostream& operator<<(std::ostream& out, const JSData& data);
 
 template <typename coefficient>
 void JSData::operator=(const Vector<coefficient>& other) {
-  for (int i = 0; i < other.size; i ++)
+  for (int i = 0; i < other.size; i ++) {
     (*this)[i] = other[i];
+  }
 }
 
 template <typename coefficient>
 void JSData::operator=(const Matrix<coefficient>& other) {
-  for (int i = 0; i < other.NumRows; i ++)
-    for (int j = 0; j < other.NumCols; j ++)
+  for (int i = 0; i < other.NumRows; i ++) {
+    for (int j = 0; j < other.NumCols; j ++) {
       (*this)[i][j] = other(i, j);
+    }
+  }
 }
 
 #endif

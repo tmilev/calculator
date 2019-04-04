@@ -30,6 +30,7 @@ std::string WebAPI::result::timeOut = "timeOut";
 std::string WebAPI::result::timeOutComments = "timeOutComments";
 std::string WebAPI::result::workerId = "workerId";
 std::string WebAPI::result::crashReport = "crashReport";
+std::string WebAPI::result::timeComputationMilliseconds = "timeComputation";
 
 std::string WebAPI::problem::title = "title";
 std::string WebAPI::problem::fileName = "fileName";
@@ -54,6 +55,8 @@ std::string WebAPI::request::submitAnswers = "submitAnswers";
 std::string WebAPI::request::submitExercisePreviewNoLogin = "submitExercisePreviewNoLogin";
 std::string WebAPI::request::indicator = "indicator";
 std::string WebAPI::request::clonePage = "clonePageJSON";
+std::string WebAPI::request::problemGiveUp = "problemGiveUp";
+std::string WebAPI::request::problemGiveUpNoLogin = "problemGiveUpNoLogin";
 
 std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 

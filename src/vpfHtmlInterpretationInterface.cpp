@@ -892,7 +892,8 @@ std::string HtmlInterpretation::GetExamPageJSON() {
   output[WebAPI::problem::idProblem] = theFile.fileName;
   if (theFile.flagLoadedSuccessfully) {
     output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
-    JSData theScripts(JSData::JSarray);
+    JSData theScripts;
+    theScripts = JSData::JSarray;
     theScripts.list.SetSize(theFile.theScripts.size());
     for (int i = 0; i < theFile.theScripts.size(); i ++) {
       theScripts[theFile.theScripts.theKeys[i]] =
@@ -971,7 +972,8 @@ std::string HtmlInterpretation::GetEditPageJSON() {
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicElementNames);
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicBundles);
   }
-  JSData theAutoCompleteWordsJS(JSData::JSarray);
+  JSData theAutoCompleteWordsJS;
+  theAutoCompleteWordsJS.type = JSData::JSarray;
   for (int i = 0; i < theAutocompleteKeyWords.size; i ++) {
     theAutoCompleteWordsJS[i] = theAutocompleteKeyWords[i];
   }
@@ -1412,31 +1414,31 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
   if (outputDidSucceed != 0) {
     *outputDidSucceed = false;
   }
-  double startTime = theGlobalVariables.GetElapsedSeconds();
+  int startTimeInMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
   CalculatorHTML theProblem;
   std::stringstream errorStream;
   theProblem.LoadCurrentProblemItem(false, inputRandomSeed, &errorStream);
-  std::stringstream out;
+  JSData result;
   if (!theProblem.flagLoadedSuccessfully) {
-    out << "Problem name is: " << theProblem.fileName
+    errorStream << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
     << CalculatorHTML::BugsGenericMessage << "</b>";
-    if (errorStream.str() != "")
-      out << " Comments: " << errorStream.str();
-    return out.str();
+    result[WebAPI::result::error] = errorStream.str();
+    return result.ToString(false);
   }
   if (theProblem.flagIsForReal) {
-    out << " <b>Not allowed to show answer of a problem being tested for real. </b>";
-    return out.str();
+    errorStream << " <b>Not allowed to show answer of a problem being tested for real. </b>";
+    result[WebAPI::result::error] = errorStream.str();
+    return result.ToString(false);
   }
   if (inputRandomSeed == "") {
-    out << " <b>I could not figure out the exercise problem (missing random seed). </b>";
-    return out.str();
+    result[WebAPI::result::error] = " <b>I could not figure out the exercise problem (missing random seed). </b>";
+    return result.ToString(false);
   }
-  std::stringstream comments;
-  if (!theProblem.ParseHTMLPrepareCommands(&comments)) {
-    out << "<br><b>Problem preparation failed.</b><br>" << comments.str();
-    return out.str();
+  if (!theProblem.ParseHTMLPrepareCommands(&errorStream)) {
+    errorStream << "<br><b>Problem preparation failed.</b>";
+    result[WebAPI::result::error] = errorStream.str();
+    return result.ToString(false);
   }
   std::string lastStudentAnswerID;
   MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
@@ -1444,18 +1446,20 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   }
   int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
+  std::stringstream out;
   if (indexLastAnswerId == - 1) {
-    out << "File: "
+    errorStream << "File: "
     << theProblem.fileName
     << "<br><b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
-    << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
+    << "</b>";
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
-      out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
-      //out << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
-      out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+      errorStream << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
+      errorStream << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
     }
-    return out.str();
+    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
+    result[WebAPI::result::error] = errorStream.str();
+    return result.ToString(false);
   }
   Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
   if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly == "") {
@@ -1488,8 +1492,10 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     }
     out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
-    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
-    return out.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    int64_t ellapsedTime = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
+    result[WebAPI::result::timeComputationMilliseconds] = ellapsedTime;
+    return result.ToString(false);
   }
   if (theInterpreteR.flagAbortComputationASAP) {
     out << "<span style =\"color:red\"><b>Failed to evaluate the default answer. "
@@ -1505,8 +1511,10 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     << theInterpreteR.outputString
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;
-    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
-    return out.str();
+    int64_t ellapsedTime = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
+    result[WebAPI::result::timeComputationMilliseconds] = ellapsedTime;
+    result[WebAPI::result::resultHtml] = out.str();
+    return result.ToString(false);
   }
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal = true;
@@ -1561,7 +1569,8 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
       isFirst = false;
     }
   }
-  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
+  int64_t ellapsedTime = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
+  result[WebAPI::result::timeComputationMilliseconds] = ellapsedTime;
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
     out
     << "<hr><a href=\"" << theGlobalVariables.DisplayNameExecutable
@@ -1573,7 +1582,8 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     << theInterpreteR.outputCommentsString
     << "<hr>Raw input: <br>" << theInterpreteR.inputString;
   }
-  return out.str();
+  result[WebAPI::result::resultHtml] = out.str();
+  return result.ToString(false);
 }
 
 std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAddressWithPort) {
@@ -1581,11 +1591,15 @@ std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAd
   (void) hostWebAddressWithPort;
   JSData output;
   if (!theGlobalVariables.flagDatabaseCompiled) {
-    output["error"] = "Database not available (cannot get accounts). ";
+    output[WebAPI::result::error] = "Database not available (cannot get accounts). ";
     return output.ToString(false);
   }
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection) {
-    output["error"] = "Must be logged-in admin over ssl.";
+  if (
+    !theGlobalVariables.UserDefaultHasAdminRights() ||
+    !theGlobalVariables.flagLoggedIn ||
+    !theGlobalVariables.flagUsingSSLinCurrentConnection
+  ) {
+    output[WebAPI::result::error] = "Must be logged-in admin over ssl.";
     return output.ToString(false);
   }
   std::stringstream commentsOnFailure;

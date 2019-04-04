@@ -27,6 +27,8 @@ public:
     static std::string submitExercisePreviewNoLogin;
     static std::string submitExercise;
     static std::string submitAnswers;
+    static std::string problemGiveUp;
+    static std::string problemGiveUpNoLogin;
   };
   struct result {
     static std::string resultHtml;
@@ -41,6 +43,7 @@ public:
     static std::string error;
     static std::string status;
     static std::string crashReport;
+    static std::string timeComputationMilliseconds;
   };
   struct problem {
     static std::string title;

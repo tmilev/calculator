@@ -203,7 +203,6 @@ public:
   int ProcessSubmitAnswers();
   int ProcessSubmitAnswersPreview();
   int ProcessProblemGiveUp();
-  int ProcessProblemGiveUpJSON();
   int ProcessProblemSolution();
   int ProcessPauseWorker();
   int ProcessMonitor();

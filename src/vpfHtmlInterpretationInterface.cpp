@@ -982,32 +982,34 @@ std::string HtmlInterpretation::GetEditPageJSON() {
   return output.ToString(false);
 }
 
-std::string HtmlInterpretation::SubmitAnswers() {
+JSData HtmlInterpretation::SubmitAnswers() {
   return HtmlInterpretation::SubmitAnswers(theGlobalVariables.GetWebInput("randomSeed"), 0, true);
 }
 
-std::string HtmlInterpretation::SubmitAnswers(
+JSData HtmlInterpretation::SubmitAnswers(
   const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
 ) {
   MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswers");
-  std::stringstream out;
+  std::stringstream output, errorStream, comments;
+  JSData result;
   double startTime = theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
-  std::stringstream errorStream;
   theProblem.LoadCurrentProblemItem(
     theGlobalVariables.UserRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream
   );
   if (!theProblem.flagLoadedSuccessfully) {
-    out << "Failed to load current problem. " << errorStream.str();
-    return out.str();
+    errorStream << "Failed to load current problem. ";
+    result[WebAPI::result::error] = errorStream.str();
+    return result.ToString(false);
   }
-  std::stringstream comments;
   if (!theProblem.ParseHTMLPrepareCommands(&comments)) {
-    out << "<b>Failed to parse problem. </b>Comments: " << comments.str();
-    return out.str();
+    errorStream << "<b>Failed to parse problem. </b>";
+    result[WebAPI::result::error] = errorStream.str();
+    result[WebAPI::result::comments] = comments.str();
+    return result.ToString(false);
   }
   if (!theProblem.theProblemData.flagRandomSeedGiven && !theProblem.flagIsForReal) {
-    out << "<b>Random seed not given.</b>";
+    output << "<b>Random seed not given.</b>";
   }
   if (theProblem.fileName == "") {
     crash << "This shouldn't happen: empty file name: theProblem.fileName." << crash;
@@ -1022,30 +1024,34 @@ std::string HtmlInterpretation::SubmitAnswers(
       if (answerIdIndex == - 1) {
         answerIdIndex = newAnswerIndex;
       } else if (answerIdIndex != newAnswerIndex && answerIdIndex != - 1 && newAnswerIndex != - 1) {
-        out << "<b>You submitted two or more answers [answer tags: "
+        output << "<b>You submitted two or more answers [answer tags: "
         << theProblem.theProblemData.theAnswers[answerIdIndex].answerId
         << " and " << theProblem.theProblemData.theAnswers[newAnswerIndex].answerId
         << "].</b> At present, multiple answer submission is not supported. ";
-        return out.str();
+        result[WebAPI::result::resultHtml] = output.str();
+        return result.ToString(false);
       }
       if (answerIdIndex == - 1) {
-        out << "<b> You submitted an answer to tag with id "
+        output << "<b> You submitted an answer to tag with id "
         << studentAnswerNameReader
         << " which is not on my list of answerable tags. </b>";
-        return out.str();
+        result[WebAPI::result::resultHtml] = output.str();
+        return result.ToString(fase);
       }
       Answer& currentProblemData = theProblem.theProblemData.theAnswers[answerIdIndex];
       currentProblemData.currentAnswerURLed = theArgs.theValues[i];
       if (currentProblemData.currentAnswerURLed == "") {
-        out << "<b> Your answer to tag with id " << studentAnswerNameReader
+        output << "<b> Your answer to tag with id " << studentAnswerNameReader
         << " appears to be empty, please resubmit. </b>";
-        return out.str();
+        result[WebAPI::result::resultHtml] = output.str();
+        return result.ToString(fase);
       }
     }
   }
   if (answerIdIndex == - 1) {
-    out << "<b>Something is wrong: I found no submitted answers.</b>";
-    return out.str();
+    output << "<b>Something is wrong: I found no submitted answers.</b>";
+    result[WebAPI::result::resultHtml] = output.str();
+    return result.ToString(fase);
   }
   ProblemData& currentProblemData = theProblem.theProblemData;
   Answer& currentA = currentProblemData.theAnswers[answerIdIndex];
@@ -1089,7 +1095,6 @@ std::string HtmlInterpretation::SubmitAnswers(
     << HtmlRoutines::ConvertStringToURLString(completedProblemStreamNoEnclosures.str(), false)
     << "\">Input link</a>";
   }
-  //stOutput << "<br>DEBUG: input to the calculator: " << completedProblemStream.str() << "<hr>";
   if (timeSafetyBrake) {
     theGlobalVariables.MaxComputationMilliseconds = theGlobalVariables.GetElapsedMilliseconds() + 20000; // + 20 sec
   }
@@ -1101,17 +1106,17 @@ std::string HtmlInterpretation::SubmitAnswers(
   theInterpreter.Evaluate(completedProblemStream.str());
   if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors != "") {
     if (theInterpreter.errorsPublic.str() != "") {
-      out << "While checking your answer, got the error: "
+      output << "While checking your answer, got the error: "
       << "<br><b><span style =\"color:red\">"
       << theInterpreter.errorsPublic.str()
       << "</span></b> "
       << "<br><b>Most likely your answer is wrong. </b>";
     } else {
-      out << "<b>Error while processing your answer(s).</b> "
+      output << "<b>Error while processing your answer(s).</b> "
       << "<br>Perhaps your answer was wrong and "
       << "generated division by zero during checking. ";
     }
-    out << "<br>Here's what I understood. ";
+    output << "<br>Here's what I understood. ";
     Calculator isolatedInterpreter;
     isolatedInterpreter.initialize();
     isolatedInterpreter.flagWriteLatexPlots = false;
@@ -1121,12 +1126,12 @@ std::string HtmlInterpretation::SubmitAnswers(
     }
     isolatedInterpreter.Evaluate("(" + currentA.currentAnswerClean + ")");
     if (isolatedInterpreter.syntaxErrors != "") {
-      out << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false, true);
+      output << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false, true);
     } else {
-      out << isolatedInterpreter.outputString;
+      output << isolatedInterpreter.outputString;
     }
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
-      out << "<hr><b>Admin view internals.</b><hr>"
+      output << "<hr><b>Admin view internals.</b><hr>"
       << debugInputStream.str() << "<hr>"
       << theInterpreter.outputString
       << "<br>" << theInterpreter.outputCommentsString
@@ -1134,9 +1139,8 @@ std::string HtmlInterpretation::SubmitAnswers(
       << completedProblemStreamNoEnclosures.str()
       << "<br>";
     }
-//    stOutput << "yer input: " << completedProblemStream.str();
-//    stOutput << theInterpreter.outputString;
-    return out.str();
+    result[WebAPI::result::resultHtml] = output.str();
+    return result.ToString(fase);
   }
   bool tempIsCorrect = false;
   if (outputIsCorrect == 0) {
@@ -1150,9 +1154,9 @@ std::string HtmlInterpretation::SubmitAnswers(
     *outputIsCorrect = (mustBeOne == 1);
   }
   FormatExpressions theFormat;
-  out << "<table width =\"300\">";
+  out << "<table style = 'width:300px'>";
   if (!(*outputIsCorrect)) {
-    out << "<tr><td><span style =\"color:red\"><b>Your answer appears to be incorrect. </b></span></td></tr>";
+    out << "<tr><td><b style = 'color:red'><b>Your answer appears to be incorrect. </b></td></tr>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn()) {
       out << "<tr><td>Admin view internals. "
       << "<hr>" << debugInputStream.str()

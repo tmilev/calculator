@@ -1974,8 +1974,9 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
     out << "<br>v_{" << i + 1 << "}=" << coneStrictGens[i].ToString() << ";";
   }
   out << "<br>Input strict (i.e., over Z_{&gt;0}) cone: ";
-  for (int i = 0; i < coneNonStrictGens.size; i ++)
+  for (int i = 0; i < coneNonStrictGens.size; i ++) {
     out << "<br>v_{" << coneStrictGens.size + i + 1 << "}=" << coneNonStrictGens[i].ToString() << ";";
+  }
   Vector<Rational> outputIntersection, outputSeparatingNormal;
   bool conesDoIntersect = coneNonStrictGens.ConesIntersect(coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal);
   if (conesDoIntersect) {
@@ -2101,8 +2102,9 @@ coefficient SemisimpleLieAlgebra::GetKillingForm(
 
 bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerKillingForm");
-  if (!input.IsListNElements(3))
+  if (!input.IsListNElements(3)) {
     return false;
+  }
   Expression leftE = input[1];
   Expression rightE = input[2];
   if (!leftE.IsBuiltInTypE() || !rightE.IsBuiltInTypE()) {
@@ -2458,7 +2460,6 @@ Expression ExpressionHistoryEnumerator::GetExpression(
     currentNode.theData.lastActiveSubexpression >= 0
   ) {
     const Expression& currentRuleSequence =(*currentNode.theData.currentE)[currentNode.theData.lastActiveSubexpression];
-    //stOutput << " current sequence: " << currentRuleSequence.ToString() << "<br>";
     if (currentRuleSequence.size() > 3) {
       std::string ruleName = currentRuleSequence[3].ToString();
       if (ruleName != "" && ruleName != "Sub-expression simplification") {
@@ -2504,8 +2505,9 @@ void ExpressionHistoryEnumerator::ComputeAll() {
   }
 }
 
-bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast
-(TreeNode<HistorySubExpression>& currentNode) {
+bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast(
+  TreeNode<HistorySubExpression>& currentNode
+) {
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast");
   bool didWork = false;
   for (int i = 0; i < currentNode.children.size; i ++) {
@@ -2567,11 +2569,13 @@ bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast
 
 bool ExpressionHistoryEnumerator::IncrementReturnFalseIfPastLast() {
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::IncrementReturnFalseIfPastLast");
-  if (!this->initialized)
+  if (!this->initialized) {
     return this->initialize();
+  }
   this->CheckInitialization();
-  if (this->currentSubTree.theNodes.size < 1)
+  if (this->currentSubTree.theNodes.size < 1) {
     return false;
+  }
   bool result = this->IncrementRecursivelyReturnFalseIfPastLast(this->currentSubTree.theNodes[0]);
   return result;
 }
@@ -2592,42 +2596,48 @@ std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged() {
     prevEstring = currentEstring;
     currentRules.AddListOnTop(this->rulesDisplayNames[j]);
     if (j > 0) {
-      if (currentRules.size > 0)
+      if (currentRules.size > 0) {
         out << "&\\text{" << currentRules.ToStringCommaDelimited() << "}";
+      }
       currentRules.SetSize(0);
       out << "\\\\";
       out << "=";
     }
     out << "&\n" << currentEstring;
   }
-  if (currentRules.size > 0)
+  if (currentRules.size > 0) {
     out << "&\\text{apply: " << currentRules.ToStringCommaDelimited() << "}";
+  }
   out << "\\end{array}\\)";
   return out.str();
 }
 
-bool Calculator::innerLogEvaluationStepsHumanReadableMerged(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerLogEvaluationStepsHumanReadableMerged(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadableMerged");
   Expression inputCopy = input;
   Expression outputTransformation;
-  if (inputCopy.StartsWithGivenAtom("LogEvaluationStepsHumanReadableMerged"))
+  if (inputCopy.StartsWithGivenAtom("LogEvaluationStepsHumanReadableMerged")) {
     inputCopy.SetChildAtomValue(0, theCommands.opSequence());
+  }
   bool notUsed = false;
   theCommands.ExpressionHistoryStackAdd();
   theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed, - 1);
   std::stringstream out;
   ListReferences<Expression>& currentStack = theCommands.historyStack.LastObject();
   for (int i = 0; i < currentStack.size; i ++) {
-    if (currentStack.size > 1)
+    if (currentStack.size > 1) {
       out << "Stack " << i + 1 << ":<br>";
+    }
     ExpressionHistoryEnumerator theHistoryEnumerator;
     theHistoryEnumerator.theHistory = currentStack[i];
     theHistoryEnumerator.owner = &theCommands;
     theHistoryEnumerator.ComputeAll();
     out << theHistoryEnumerator.ToStringExpressionHistoryMerged();
-    //out << "DEBUG: " << theHistoryEnumerator.theHistory.ToString();
-    if (i != currentStack.size - 1)
+    if (i != currentStack.size - 1) {
       out << "<hr>";
+    }
   }
   theCommands.ExpressionHistoryStackPop();
   return output.AssignValue(out.str(), theCommands);

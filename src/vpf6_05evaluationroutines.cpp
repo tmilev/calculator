@@ -133,8 +133,9 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
       }
     }
   }
-  if (!functionNameNode.IsAtom())
+  if (!functionNameNode.IsAtom()) {
     return false;
+  }
   for (int i = 0; i < theCommands.FunctionHandlers[functionNameNode.theData].size; i ++) {
     if (!theCommands.FunctionHandlers[functionNameNode.theData][i].flagIsInner) {
       Function& outerFun = theCommands.FunctionHandlers[functionNameNode.theData][i];

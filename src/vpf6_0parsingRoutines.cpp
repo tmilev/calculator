@@ -12,10 +12,11 @@ SyntacticElement Calculator::GetEmptySyntacticElement() {
 
 std::string SyntacticElement::ToStringHumanReadable(Calculator& theBoss, bool includeLispifiedExpressions) const {
   std::string controlString;
-  if (this->controlIndex < 0)
+  if (this->controlIndex < 0) {
     controlString = "Error: control index is not initialized! This is likely a programming error.";
-  else
+  } else {
     controlString = theBoss.controlSequences[this->controlIndex];
+  }
   bool makeTable = this->controlIndex == theBoss.conExpression() ||
   this->controlIndex == theBoss.conError() || this->controlIndex == theBoss.conSequence() ||
   this->controlIndex == theBoss.conSequenceStatements()|| this->controlIndex == theBoss.conVariable();
@@ -25,10 +26,12 @@ std::string SyntacticElement::ToStringHumanReadable(Calculator& theBoss, bool in
   out << "<table style =\"vertical-align:top;border-spacing= 0px 0px\">";
   out << "<tr><td style =\"text-align:center\">" << this->theData.ToString(0) << "</td></tr>";
   out << "<tr><td style =\"color:#AAAAAA\">" << controlString << "</td></tr>";
-  if (includeLispifiedExpressions)
+  if (includeLispifiedExpressions) {
     out <<  "<tr><td style =\"color:#AAAAAA\">" << this->theData.ToStringFull() << "</td></tr>";
-  if (this->errorString != "")
+  }
+  if (this->errorString != "") {
     out << "<tr><td>" << this->errorString << "</td></tr>";
+  }
   out << "</table>";
   return out.str();
 }
@@ -428,35 +431,36 @@ bool Calculator::ReplaceOXEXEXXByEXX() {
 }
 
 void Calculator::LogPublicError(const std::string& theError) {
-  if (this->errorsPublic.str() != "")
+  if (this->errorsPublic.str() != "") {
     this->errorsPublic << theError;
+  }
 }
 
 bool Calculator::DecreaseStackExceptLast(int decrease) {
-  if (decrease <= 0)
+  if (decrease <= 0) {
     return true;
-  if ((*this->CurrentSyntacticStacK).size-decrease <= 0)
-    crash << crash;
-//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease - 2].IndexLastCharPlusOne =
-//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].IndexLastCharPlusOne;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease - 1] =
+  }
+  if ((*this->CurrentSyntacticStacK).size - decrease <= 0) {
+    crash << "Bad stack decrease amount. " << crash;
+  }
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - decrease - 1] =
   *this->CurrentSyntacticStacK->LastObject();
-  (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
+  (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - decrease);
   return true;
 }
 
 bool Calculator::DecreaseStackExceptLastTwo(int decrease) {
-  if (decrease <= 0)
+  if (decrease <= 0) {
     return true;
-  if ((*this->CurrentSyntacticStacK).size-decrease <= 0)
-    crash << crash;
-  //    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease - 2].IndexLastCharPlusOne =
-  //    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].IndexLastCharPlusOne;
+  }
+  if ((*this->CurrentSyntacticStacK).size - decrease <= 0) {
+    crash << "Bad stack decrease amount. " << crash;
+  }
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease - 2] =
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease - 1] =
   *this->CurrentSyntacticStacK->LastObject();
-  (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
+  (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - decrease);
   return true;
 }
 
@@ -487,7 +491,6 @@ bool Calculator::ReplaceOXXEXEXEXByE() {
   opElt.theData = newExpr;
   opElt.controlIndex = this->conExpression();
   this->DecreaseStackSetCharacterRangeS(8);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -501,7 +504,6 @@ bool Calculator::ReplaceOXEXByEX() {
   left.theData = newExpr;
   left.controlIndex = this->conExpression();
   return this->DecreaseStackExceptLast(2);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
 }
 
 bool Calculator::ReplaceOXEByE() {
@@ -514,7 +516,6 @@ bool Calculator::ReplaceOXEByE() {
   left.theData = newExpr;
   left.controlIndex = this->conExpression();
   return this->DecreaseStackSetCharacterRangeS(2);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
 }
 
 bool Calculator::ReplaceOEByE() {
@@ -527,14 +528,14 @@ bool Calculator::ReplaceOEByE() {
   left.theData = newExpr;
   left.controlIndex = this->conExpression();
   return this->DecreaseStackSetCharacterRangeS(1);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
 }
 
 bool Calculator::ReplaceOEXByEX() {
   SyntacticElement& middle = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceOEXByEX]";
+  }
   Expression newExpr;
   newExpr.reset(*this, 2);
   newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
@@ -542,7 +543,6 @@ bool Calculator::ReplaceOEXByEX() {
   middle.theData = newExpr;
   middle.controlIndex = this->conExpression();
   this->DecreaseStackExceptLast(1);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -562,8 +562,9 @@ bool Calculator::ReplaceXXXByConCon(int con1, int con2) {
 bool Calculator::ReplaceXXXXXByCon(int theCon) {
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 5].controlIndex = theCon;
   this->DecreaseStackSetCharacterRangeS(4);
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceXXXXXByCon]";
+  }
   return true;
 }
 
@@ -584,21 +585,20 @@ bool Calculator::ReplaceXXXXByConCon(int con1, int con2) {
 bool Calculator::ReplaceXXXXByCon(int con1) {
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4].controlIndex = con1;
   this->DecreaseStackSetCharacterRangeS(3);
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceXXXXByCon]";
+  }
   return true;
 }
 
 bool Calculator::ReplaceXByCon(int theCon) {
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1].controlIndex = theCon;
-  //    this->DecreaseStackSetCharacterRanges(2);
   return true;
 }
 
 bool Calculator::ReplaceXByEusingO(int theOperation) {
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1].controlIndex = this->conExpression();
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1].theData.MakeAtom(theOperation, *this);
-  //    this->DecreaseStackSetCharacterRanges(2);
   return true;
 }
 
@@ -607,15 +607,15 @@ bool Calculator::ReplaceXByConCon(int con1, int con2) {
   (*this->CurrentSyntacticStacK).LastObject()->theData.reset(*this);
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].controlIndex = con1;
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1].controlIndex = con2;
-  //    this->DecreaseStackSetCharacterRanges(2);
   return true;
 }
 
 bool Calculator::ReplaceOEXByE() {
   SyntacticElement& middle = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceOEXByE]";
+  }
   Expression newExpr;
   newExpr.reset(*this, 2);
   newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
@@ -623,7 +623,6 @@ bool Calculator::ReplaceOEXByE() {
   middle.theData = newExpr;
   middle.controlIndex = this->conExpression();
   return this->DecreaseStackSetCharacterRangeS(2);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
 }
 
 bool Calculator::ReplaceXXByEmptyString() {
@@ -739,8 +738,9 @@ bool Calculator::isLeftSeparator(unsigned char c) {
 }
 
 bool Calculator::isInterpretedAsEmptySpace(const std::string& input) {
-  if (input.size() != 1)
+  if (input.size() != 1) {
     return false;
+  }
   return this->isInterpretedAsEmptySpace(input[0]);
 }
 
@@ -780,58 +780,63 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
   bool escapingAllowed = true;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (escapedInQuotes) {
-      if (current.size() > 0)
+      if (current.size() > 0) {
         current.resize(current.size() - 1);
+      }
       escapedInQuotes = false;
       escapingAllowed = false;
     }
     current.push_back(input[i]);
-    if (i + 1<input.size())
+    if (i + 1 < input.size()) {
       LookAheadChar = input[i + 1];
-    else {
+    } else {
       LookAheadChar =' ';
-      if (inQuotes)
+      if (inQuotes) {
         LookAheadChar = '"';
+      }
     }
-    if (!inQuotes )
-      if (this->isInterpretedAsEmptySpace(current))
+    if (!inQuotes) {
+      if (this->isInterpretedAsEmptySpace(current)) {
         current = " ";
+      }
+    }
     bool shouldSplit = false;
     if (!inQuotes) {
-      shouldSplit =
-      (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current == " ");
+      shouldSplit =(
+        this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current == " "
+      );
       if (MathRoutines::isADigit(LookAheadChar)) {
-        //stOutput << "DEBUG: lookahead digit, current: " << current;
         if (current[current.size() - 1] == '\\' || this->stringsThatSplitIfFollowedByDigit.Contains(current)) {
           shouldSplit = true;
-          //stOutput << "DEBUG: shouldsplit true";
         }
       }
     }
     if (inQuotes) {
-      if (escapingAllowed)
-        if (current.size() >= 1)
-          if (current[current.size() - 1] == '\\')
+      if (escapingAllowed) {
+        if (current.size() >= 1) {
+          if (current[current.size() - 1] == '\\') {
             if (LookAheadChar == '\\' || LookAheadChar == '"') {
               escapedInQuotes = true;
               continue;
             }
+          }
+        }
+      }
       shouldSplit = (LookAheadChar == '"');
     }
     if (current == "\"" && escapingAllowed) {
       inQuotes =!inQuotes;
       shouldSplit = true;
     }
-    //stOutput << "<br>in quotes: " << inQuotes << " current: " << current << " shouldsplit: " << shouldSplit;
     if (!shouldSplit) {
       escapingAllowed = true;
       continue;
     }
     bool mustInterpretAsVariable = false;
-    if (inQuotes && (current != "\"" || !escapingAllowed))
+    if (inQuotes && (current != "\"" || !escapingAllowed)) {
       mustInterpretAsVariable = true;
+    }
     escapingAllowed = true;
-//    stOutput << "must interpret as var: " << mustInterpretAsVariable;
     if (this->controlSequences.Contains(current) && !mustInterpretAsVariable) {
       currentElement.controlIndex = this->controlSequences.GetIndex(current);
       currentElement.theData.reset(*this);
@@ -844,7 +849,6 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
       currentElement.controlIndex = this->controlSequences.GetIndex("Variable");
       currentElement.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
       output.AddOnTop(currentElement);
-    // stOutput << "<br>Adding syntactic element " << currentElement.ToString(*this);
     }
     current ="";
   }
@@ -884,16 +888,18 @@ bool Calculator::ReplaCeOXdotsXbyEXdotsX(int numXs) {
 bool Calculator::ReplaCeOXbyEX() {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   theElt.theData.MakeAtom(this->GetOperationIndexFromControlIndex(theElt.controlIndex), *this);
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceOXbyEX]";
+  }
   return this->ReplaceXXbyEX();
 }
 
 bool Calculator::ReplaCeObyE() {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   theElt.theData.MakeAtom(this->GetOperationIndexFromControlIndex(theElt.controlIndex), *this);
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceObyE]";
+  }
   theElt.controlIndex = this->conExpression();
   return true;
 }
@@ -901,8 +907,9 @@ bool Calculator::ReplaCeObyE() {
 bool Calculator::ReplaceXXbyEX() {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   theElt.controlIndex = this->conExpression();
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceXXbyEX]";
+  }
   return true;
 }
 
@@ -913,17 +920,20 @@ bool Calculator::ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence() {
   newExpr.reset(*this);
   newExpr.children.Reserve(theSequenceElt.theData.children.size);
   newExpr.AddChildOnTop(theFunctionElt.theData);
-  if (theSequenceElt.theData.IsAtom())
+  if (theSequenceElt.theData.IsAtom()) {
     newExpr.AddChildOnTop(theSequenceElt.theData);
-  else
-    for (int i = 1; i < theSequenceElt.theData.children.size; i ++)
+  } else {
+    for (int i = 1; i < theSequenceElt.theData.children.size; i ++) {
       newExpr.AddChildOnTop(theSequenceElt.theData[i]);
+    }
+  }
   theFunctionElt.theData = newExpr;
   return this->DecreaseStackSetCharacterRangeS(4);
 }
 
 bool Calculator::ReplaceXEXByE() {
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] =
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3].controlIndex = this->conExpression();
   return this->DecreaseStackSetCharacterRangeS(2);
 }
@@ -931,8 +941,9 @@ bool Calculator::ReplaceXEXByE() {
 bool Calculator::ReplaceXEXByEcontainingOE(int inputOpIndex) {
   SyntacticElement& outputElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& inputElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceXEXByEcontainingOE]";
+  }
   outputElt.theData.reset(*this, 2);
   outputElt.theData.AddChildAtomOnTop(inputOpIndex);
   outputElt.theData.AddChildOnTop(inputElt.theData);
@@ -959,7 +970,6 @@ bool Calculator::IsNonBoundVarInContext(int inputOp) {
 bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs) {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - numXs - 1];
   int theBoundVar = theElt.theData.theData;
-//  stOutput << "<br>Registering bound variable index: " << theBoundVar;
   if (this->IsNonBoundVarInContext(theBoundVar)) {
     std::stringstream out;
     out << "Syntax error. In the same syntactic scope, the string " << this->theAtoms[theBoundVar]
@@ -971,32 +981,30 @@ bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs) {
     this->ReplaceXXYByY();
     return true;
   }
-  if (!this->IsBoundVarInContext(theBoundVar))
+  if (!this->IsBoundVarInContext(theBoundVar)) {
     this->BoundVariablesInContext.AddOnTopNoRepetition(theBoundVar);
+  }
   theElt.theData.reset(*this, 2);
   theElt.theData.AddChildAtomOnTop(this->opBind());
   theElt.theData.AddChildAtomOnTop(theBoundVar);
   theElt.controlIndex = this->conExpression();
-//  stOutput << ", got to element: " << theElt.theData.ToString();
   this->DecreaseStackSetCharacterRangeS(numXs);
   this->ReplaceXXYByY();
-//  stOutput << ", finally got: "
-//  << (*this->CurrentSyntacticStacK).LastObject()->ToString(*this);
   return true;
 }
 
 bool Calculator::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs) {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1 - numXs];
   int theBoundVar = theElt.theData.theData;
-//  stOutput << "<br>index of variable: " << theElt.ToString(*this);
   if (this->IsBoundVarInContext(theBoundVar)) {
     theElt.theData.reset(*this, 2);
     theElt.theData.AddChildAtomOnTop(this->opBind());
     theElt.theData.AddChildAtomOnTop(theBoundVar);
   } else {
     theElt.theData.MakeAtom(theBoundVar, *this);
-    if (!this->IsNonBoundVarInContext(theBoundVar))
+    if (!this->IsNonBoundVarInContext(theBoundVar)) {
       this->NonBoundVariablesInContext.AddOnTop(theBoundVar);
+    }
   }
   theElt.controlIndex = this->conExpression();
   return true;
@@ -1023,14 +1031,12 @@ bool Calculator::ReplaceOOEEXbyEXpowerLike() {
 
 bool Calculator::ReplaceCXByE() {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-//  theElt.theData.IndexBoundVars = this->theExpressionContext.size - 1;
   theElt.controlIndex = this->conExpression();
   return this->PopTopSyntacticStack();
 }
 
 bool Calculator::ReplaceCXByEX() {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-//  theElt.theData.IndexBoundVars = this->theExpressionContext.size - 1;
   theElt.controlIndex = this->conExpression();
   return true;
 }
@@ -1041,25 +1047,23 @@ bool Calculator::ReplaceXdotsXByMatrixStart(int numXes) {
   currentElt.dataList.SetSize(1);
   currentElt.dataList.LastObject()->MakeSequence(*this);
   currentElt.controlIndex = this->conMatrixStart();
-  //stOutput << "DEBUG: calling: ReplaceXdotsXByMatrixStart. datalist last:"
-  //<< currentElt.dataList.LastObject()->ToString() << "<hr>";
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceXdotsXByMatrixStart]";
+  }
   return this->DecreaseStackSetCharacterRangeS(numXes - 1);
 }
 
 bool Calculator::ReplaceMatrixXByE() {
   SyntacticElement& theMatElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-  //stOutput << "<hr>DEBUG: START: Calculator::ReplaceMatrixXByE: "
-  //<< theMatElt.theData.ToString();
   Matrix<Expression> theMat;
   int numRows = theMatElt.dataList.size;
   int numCols = 0;
-  for (int i = 0; i < theMatElt.dataList.size; i ++)
+  for (int i = 0; i < theMatElt.dataList.size; i ++) {
     numCols = MathRoutines::Maximum(theMatElt.dataList[i].size() - 1, numCols);
+  }
   if (numCols > 0 && numRows > 0) {
     theMat.init(numRows, numCols);
-    for (int i = 0; i < numRows; i ++)
+    for (int i = 0; i < numRows; i ++) {
       for (int j = 0; j < numCols; j ++) {
         if (j + 1 >= theMatElt.dataList[i].size()) {
           theMat.elements[i][j].AssignValue(0, *this);
@@ -1067,14 +1071,16 @@ bool Calculator::ReplaceMatrixXByE() {
         }
         theMat.elements[i][j] = theMatElt.dataList[i][j + 1];
       }
-    //stOutput << "DEBUG GOT TO HERE!";
+    }
     theMatElt.theData.AssignMatrixExpressions(theMat, *this, true, true);
-  } else
+  } else {
     theMatElt.theData.MakeMatrix(*this);
+  }
   theMatElt.dataList.SetSize(0);
   theMatElt.controlIndex = this->conExpression();
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceMatrixXByE]";
+  }
   return this->DecreaseStackSetCharacterRangeS(1);
 }
 
@@ -1084,21 +1090,19 @@ bool Calculator::ReplaceMatrixEXByMatrixNewRow() {
   theMatElt.dataList.LastObject()->AddChildOnTop(theElt.theData);
   theMatElt.dataList.SetSize(theMatElt.dataList.size + 1);
   theMatElt.dataList.LastObject()->MakeSequence(*this);
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceMatrixEXByMatrixNewRow]";
+  }
   return this->DecreaseStackSetCharacterRangeS(2);
 }
 
 bool Calculator::ReplaceMatrixEXByMatrix() {
-  SyntacticElement& theMatElt =
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
-  SyntacticElement& theElt =
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
+  SyntacticElement& theMatElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
+  SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   theMatElt.dataList.LastObject()->AddChildOnTop(theElt.theData);
-  //stOutput << "<hr>DEBUG: Calculator::ReplaceMatrixEXByMatrix: "
-  //<< theElt.theData.ToString();
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceMatrixEXByMatrix]";
+  }
   return this->DecreaseStackSetCharacterRangeS(2);
 }
 
@@ -1108,29 +1112,26 @@ bool Calculator::ReplaceMatrixEXByMatrixX() {
   theMatElt.dataList.LastObject()->AddChildOnTop(theElt.theData);
   //stOutput << "<hr>DEBUG: Calculator::ReplaceMatrixEXByMatrixXXX: "
   //<< theElt.theData.ToString();
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceMatrixEXByMatrixX]";
+  }
   return this->DecreaseStackExceptLast(1);
 }
 
 bool Calculator::ReplaceAXbyEX() {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-//  theElt.theData.IndexBoundVars = this->theExpressionContext.size - 1;
   theElt.controlIndex = this->conExpression();
-//  stOutput << "replaceAbyE: " << theElt.theData.ToString();
   return true;
 }
 
 std::string Calculator::ToStringIsCorrectAsciiCalculatorString(const std::string& input) {
   std::stringstream out;
   HashedList<char, MathRoutines::HashChar> theBadChars;
-/*  List<int> charCodes;
-  for (unsigned i = 0; i < input.size(); i ++)
-    charCodes.AddOnTop(input[i]);
-  out << "DEBUG: char codes: " << charCodes.ToStringCommaDelimited();*/
-  for (unsigned i = 0; i < input.size(); i ++)
-    if (!this->isStandardCalculatorCharacter(input[i]))
+  for (unsigned i = 0; i < input.size(); i ++) {
+    if (!this->isStandardCalculatorCharacter(input[i])) {
       theBadChars.AddOnTopNoRepetition(input[i]);
+    }
+  }
   if (theBadChars.size > 0) {
     out << "Non-ascii characters detected in your input, namely: "
     << theBadChars.ToStringCommaDelimited() << ", ";
@@ -1143,10 +1144,12 @@ std::string Calculator::ToStringIsCorrectAsciiCalculatorString(const std::string
 }
 
 bool Calculator::isStandardCalculatorCharacter(unsigned char input) {
-  if (10 <= input && input <= 126)
+  if (10 <= input && input <= 126) {
     return true;
-  if (this->isInterpretedAsEmptySpace(input))
+  }
+  if (this->isInterpretedAsEmptySpace(input)) {
     return true;
+  }
   return false;
 }
 
@@ -1165,32 +1168,35 @@ bool Calculator::ReplaceSequenceUXEYBySequenceZY(int theControlIndex) {
   left.controlIndex = theControlIndex;
   afterleft = *this->CurrentSyntacticStacK->LastObject();
   this->DecreaseStackExceptLast(2);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
   return true;
 }
 
 bool Calculator::ReplaceYXBySequenceX(int theControlIndex) {
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceYXBySequenceX]";
+  }
   return this->ReplaceYXdotsXBySequenceYXdotsX(theControlIndex, 1);
 }
 
 bool Calculator::ReplaceYBySequenceY(int theControlIndex) {
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceYBySequenceY]";
+  }
   return this->ReplaceYXdotsXBySequenceYXdotsX(theControlIndex, 0);
 }
 
 bool Calculator::ReplaceXXYBySequenceY(int theControlIndex) {
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceXXYBySequenceY]";
+  }
   this->ReplaceYBySequenceY(theControlIndex);
   return this->ReplaceXXYByY();
 }
 
 bool Calculator::ReplaceXXYXBySequenceYX(int theControlIndex) {
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceXXYXBySequenceYX]";
+  }
   this->ReplaceYXdotsXBySequenceYXdotsX(theControlIndex, 1);
   return this->ReplaceXXYXByYX();
 }
@@ -1201,9 +1207,9 @@ bool Calculator::ReplaceSequenceXEBySequence(int theControlIndex) {
   left.theData.AddChildOnTop(right.theData);
   left.controlIndex = theControlIndex;
   this->DecreaseStackSetCharacterRangeS(2);
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceSequenceXEBySequence]";
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
+  }
   return true;
 }
 
@@ -1215,8 +1221,9 @@ bool Calculator::ReplaceYXdotsXBySequenceYXdotsX(int theControlIndex, int numXs)
   newExpr.AddChildOnTop(main.theData);
   main.theData = newExpr;
   main.controlIndex = theControlIndex;
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceYXdotsXBySequenceYXdotsX]";
+  }
   return true;
 }
 
@@ -1231,7 +1238,6 @@ bool Calculator::ReplaceEXEBySequence(int theControlIndex) {
   left.theData = newExpr;
   left.controlIndex = theControlIndex;
   this->DecreaseStackSetCharacterRangeS(2);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -1241,12 +1247,10 @@ bool Calculator::ReplaceEEByEusingO(int theControlIndex) {
   Expression newExpr;
   newExpr.reset(*this, 3);
   newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
-  //    newExpr.inputIndexBoundVars =
   newExpr.AddChildOnTop(left.theData);
   newExpr.AddChildOnTop(right.theData);
   left.theData = newExpr;
   this->DecreaseStackSetCharacterRangeS(1);
-  //    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -1260,7 +1264,6 @@ bool Calculator::ReplaceEOXbyEX() {
   newExpr.AddChildOnTop(left.theData);
   left.theData = newExpr;
   this->DecreaseStackExceptLast(1);
-  //    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -1268,9 +1271,10 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits() {
   MacroRegisterFunctionWithName("Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits");
   SyntacticElement& theE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   const std::string& currentVar = this->theAtoms[theE.theData.theData];
-  if (!this->predefinedWordSplits.Contains( currentVar))
+  if (!this->predefinedWordSplits.Contains(currentVar)) {
     crash << "Predefined word splits array does not contain the variable: " << theE.theData.ToString()
     << ". This should not happen in the body of this function. " << crash;
+  }
   List<std::string>& theSplit = this->predefinedWordSplits.GetValueCreate(currentVar);
   SyntacticElement newElt;
   this->PopTopSyntacticStack();
@@ -1284,8 +1288,9 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits() {
   for (int i = 0; i < theSplit.size; i ++) {
     newElt.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(theSplit[i]), *this);
     newElt.controlIndex = this->controlSequences.GetIndex(theSplit[i]);
-    if (newElt.controlIndex == - 1)
+    if (newElt.controlIndex == - 1) {
       newElt.controlIndex = this->conVariable();
+    }
     (*this->CurrentSyntacticStacK).AddOnTop(newElt);
   }
   return true;
@@ -1294,17 +1299,16 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits() {
 bool Calculator::ReplaceEEXByEXusingO(int theControlIndex) {
   SyntacticElement& left =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceEEXByEXusingO]";
+  }
   Expression newExpr;
   newExpr.reset(*this, 3);
   newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
-  //    newExpr.inputIndexBoundVars =
   newExpr.AddChildOnTop(left.theData);
   newExpr.AddChildOnTop(right.theData);
   left.theData = newExpr;
   this->DecreaseStackExceptLast(1);
-  //    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -1320,7 +1324,6 @@ bool Calculator::ReplaceEXXEXEByEusingO(int theControlIndex) {
   newExpr.AddChildOnTop(right.theData);
   left.theData = newExpr;
   this->DecreaseStackSetCharacterRangeS(5);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -1336,9 +1339,9 @@ bool Calculator::ReplaceEXXEXEXByEXusingO(int theControlIndex) {
   newExpr.AddChildOnTop(right.theData);
   left.theData = newExpr;
   this->DecreaseStackExceptLast(5);
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceEXXEXEXByEXusingO]";
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
+  }
   return true;
 }
 
@@ -1352,23 +1355,23 @@ bool Calculator::ReplaceUnderscoreEPowerEbyLimits() {
   newExpr.AddChildAtomOnTop(this->opLimitBoundary());
   newExpr.AddChildOnTop(bottom.theData);
   newExpr.AddChildOnTop(top.theData);
-  (*this->CurrentSyntacticStacK)
-  [(*this->CurrentSyntacticStacK).size - 4].theData = newExpr;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4]
-  .controlIndex = this->conExpression();
-  if (this->flagLogSyntaxRules)
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4].theData = newExpr;
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4].controlIndex = this->conExpression();
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceUnderscoreEPowerEbyLimits]";
+  }
   return this->DecreaseStackSetCharacterRangeS(3);
 }
 
 bool Calculator::ReplacePowerEUnderScoreEbyLimits() {
-  SyntacticElement& bottom=
+  SyntacticElement& bottom =
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& top =
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   MathRoutines::swap(bottom, top);
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplacePowerEUnderScoreEbyLimits]";
+  }
   return this->ReplaceUnderscoreEPowerEbyLimits();
 }
 
@@ -1381,15 +1384,17 @@ bool Calculator::ReplaceIntIntBy10IntPlusInt() {
     tempRat += right.theData.GetValue<Rational>();
   } else {
     Rational afterDecimal = right.theData.GetValue<Rational>();
-    for (int i = 0; i < this->registerPositionAfterDecimalPoint; i ++)
+    for (int i = 0; i < this->registerPositionAfterDecimalPoint; i ++) {
       afterDecimal /= 10;
+    }
     tempRat += afterDecimal;
     this->registerPositionAfterDecimalPoint ++;
   }
   left.theData.AssignValue(tempRat, *this);
   this->DecreaseStackSetCharacterRangeS(1);
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceIntIntBy10IntPlusInt]";
+  }
   return true;
 }
 
@@ -1405,8 +1410,9 @@ bool Calculator::ReplaceXEXEXByEusingO(int theControlIndex) {
   result.theData = newExpr;
   result.controlIndex = this->conExpression();
   this->DecreaseStackSetCharacterRangeS(4);
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceXEXEXByEusingO]";
+  }
   return true;
 }
 
@@ -1433,26 +1439,28 @@ bool Calculator::ReplaceEXdotsXbySsXdotsX(int numDots) {
   newExpr.AddChildOnTop(left.theData);
   left.theData = newExpr;
   left.controlIndex = this->conSequenceStatements();
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceEXdotsXbySsXdotsX]";
-
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
+  }
   return true;
 }
 
 bool Calculator::ReplaceSsSsXdotsXbySsXdotsX(int numDots) {
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - numDots - 2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - numDots - 1];
-  if (!left.theData.StartsWith(this->opEndStatement()))
-    crash << "This is a programming error: ReplaceSsSsXdotsXbySsXdotsX called but left expression is not EndStatement." << crash;
+  if (!left.theData.StartsWith(this->opEndStatement())) {
+    crash << "This is a programming error: ReplaceSsSsXdotsXbySsXdotsX "
+    << "called but left expression is not EndStatement." << crash;
+  }
   left.theData.children.Reserve(left.theData.children.size + right.theData.children.size - 1);
-  for (int i = 1; i < right.theData.children.size; i ++)
+  for (int i = 1; i < right.theData.children.size; i ++) {
     left.theData.AddChildOnTop(right.theData[i]);
+  }
   left.controlIndex = this->conSequenceStatements();
   (*this->CurrentSyntacticStacK).PopIndexShiftDown((*this->CurrentSyntacticStacK).size - numDots - 1);
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceSsSsXdotsXbySsXdotsX]";
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
+  }
   return true;
 }
 
@@ -1466,7 +1474,6 @@ bool Calculator::ReplaceEXEByEusingO(int theControlIndex) {
   newExpr.AddChildOnTop(right.theData);
   left.theData = newExpr;
   this->DecreaseStackSetCharacterRangeS(2);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -1479,7 +1486,6 @@ bool Calculator::ReplaceEXEXByEX() {
   newExpr.AddChildOnTop(right.theData);
   left.theData = newExpr;
   this->DecreaseStackExceptLast(2);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -1496,9 +1502,7 @@ bool Calculator::ReplaceEOEXByEX() {
   newExpr.AddChildOnTop(right.theData);
   left.theData = newExpr;
   middle = *(*this->CurrentSyntacticStacK).LastObject();
-//  left.IndexLastCharPlusOne = right.IndexLastCharPlusOne;
   this->DecreaseStackExceptLast(2);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -1506,8 +1510,9 @@ bool Calculator::ReplaceEXEXByEXUsingO(int theOp) {
   SyntacticElement& middle = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceEOEXByEX]";
+  }
   Expression newExpr;
   newExpr.reset(*this, 3);
   newExpr.AddChildAtomOnTop(theOp);
@@ -1515,8 +1520,9 @@ bool Calculator::ReplaceEXEXByEXUsingO(int theOp) {
   newExpr.AddChildOnTop(right.theData);
   left.theData = newExpr;
   middle = *(*this->CurrentSyntacticStacK).LastObject();
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceEXEXByEXUsingO]";
+  }
   return this->DecreaseStackExceptLast(2);
 }
 
@@ -1524,8 +1530,9 @@ bool Calculator::ReplaceO_2O_1E_3XbyEX() {
   SyntacticElement& middle = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceO_2O_1E_3XbyEX]";
+  }
   Expression newExpr;
   newExpr.reset(*this, 3);
   newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
@@ -1533,9 +1540,7 @@ bool Calculator::ReplaceO_2O_1E_3XbyEX() {
   newExpr.AddChildOnTop(right.theData);
   left.theData = newExpr;
   left.controlIndex = this->conExpression();
-//  left.IndexLastCharPlusOne = right.IndexLastCharPlusOne;
   this->DecreaseStackExceptLast(2);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -1552,8 +1557,9 @@ bool Calculator::ReplaceXEEXByEXusingO(int inputOperation) {
   left.theData = newExpr;
   left.controlIndex = this->conExpression();
   middle = *(*this->CurrentSyntacticStacK).LastObject();
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceXEEXByEXusingO]";
+  }
   return this->DecreaseStackExceptLast(2);
 }
 
@@ -1569,11 +1575,10 @@ bool Calculator::ReplaceXEEByEusingO(int inputOperation) {
   newExpr.AddChildOnTop(right.theData);
   left.theData = newExpr;
   left.controlIndex = this->conExpression();
-//  left.IndexLastCharPlusOne = right.IndexLastCharPlusOne;
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceXEEByEusingO]";
+  }
   return this->DecreaseStackSetCharacterRangeS(2);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 1].theData.ElementToStringPolishForm();
 }
 
 bool Calculator::isSeparatorFromTheLeftGeneral(const std::string& input) {
@@ -1626,18 +1631,17 @@ bool Calculator::AllowsTensorInPreceding(const std::string& lookAhead) {
 }
 
 bool Calculator::AllowsTimesInNext(const std::string& thePreceding) {
-  if (thePreceding == "{}" || thePreceding == "^" || thePreceding == "\\sqrt" ||
-      thePreceding == "_")
+  if (
+    thePreceding == "{}" || thePreceding == "^" || thePreceding == "\\sqrt" || thePreceding == "_"
+  ) {
     return false;
+  }
   return true;
 }
 
 bool Calculator::AllowsTimesInPreceding(const SyntacticElement& thePreceding, const std::string& lookAhead) {
-  //stOutput << "<hr><br><br>DEBUG: here i am0. Thepreceding: " << thePreceding.ToStringHumanReadable(*this, false)
-  //<< "<br>lookahead: " << lookAhead;
-  if (thePreceding.controlIndex == this->conExpression())
+  if (thePreceding.controlIndex == this->conExpression()) {
     if (thePreceding.theData.IsBuiltInAtom()) {
-      //stOutput << "DEBUG: here i am";
       return lookAhead == "+" || lookAhead == "-" || lookAhead == "*" || lookAhead == "/" ||
       lookAhead == "\\cup" ||
       lookAhead == ")" || lookAhead == "]" || lookAhead == "}" ||
@@ -1651,6 +1655,7 @@ bool Calculator::AllowsTimesInPreceding(const SyntacticElement& thePreceding, co
       lookAhead == "EndProgram"
       ;
     }
+  }
   return this->AllowsTimesInPreceding(lookAhead);
 }
 
@@ -1715,8 +1720,7 @@ bool Calculator::AllowsOrInPreceding(const std::string& lookAhead) {
 }
 
 bool Calculator::AllowsInInPreceding(const std::string& lookAhead) {
-  return this->AllowsIfInPreceding(lookAhead)
-  ;
+  return this->AllowsIfInPreceding(lookAhead);
 }
 
 bool Calculator::AllowsIfInPreceding(const std::string& lookAhead) {
@@ -1755,41 +1759,50 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
   (*this->CurrentSyntacticStacK).Reserve((*this->CurrrentSyntacticSouP).size +this->numEmptyTokensStart);
   (*this->CurrentSyntacticStacK).SetSize(this->numEmptyTokensStart);
   this->registerPositionAfterDecimalPoint = 0;
-  for (int i = 0; i < this->numEmptyTokensStart; i ++)
+  for (int i = 0; i < this->numEmptyTokensStart; i ++) {
     (*this->CurrentSyntacticStacK)[i] = this->GetEmptySyntacticElement();
+  }
   this->parsingLog = "";
   this->NonBoundVariablesInContext.Clear();
   this->BoundVariablesInContext.Clear();
   const int maxNumTimesOneRuleCanBeCalled = 1000;
-  for (this->counterInSyntacticSoup = 0; this->counterInSyntacticSoup<(*this->CurrrentSyntacticSouP).size; this->counterInSyntacticSoup++) {
+  for (
+    this->counterInSyntacticSoup = 0;
+    this->counterInSyntacticSoup < (*this->CurrrentSyntacticSouP).size;
+    this->counterInSyntacticSoup ++
+  ) {
     (*this->CurrentSyntacticStacK).AddOnTop((*this->CurrrentSyntacticSouP)[this->counterInSyntacticSoup]);
     int numTimesRulesCanBeAppliedWithoutStackDecrease = 0;
     int minStackSize = this->CurrentSyntacticStacK->size ;
     while (this->ApplyOneRule()) {
-      if (this->CurrentSyntacticStacK->size <minStackSize) {
+      if (this->CurrentSyntacticStacK->size < minStackSize) {
         numTimesRulesCanBeAppliedWithoutStackDecrease = 0;
         minStackSize = this->CurrentSyntacticStacK->size ;
-      } else
+      } else {
         numTimesRulesCanBeAppliedWithoutStackDecrease ++;
-      if (numTimesRulesCanBeAppliedWithoutStackDecrease>maxNumTimesOneRuleCanBeCalled)
-        crash << "This may be a programming error: Calculator::ApplyOneRule called more than " << maxNumTimesOneRuleCanBeCalled
-        << " times without advancing to the next syntactic element in the syntactic soup. If this is indeed an expression which requires that"
-        << " many application of a single parsing rule, then you should modify function Calculator::ExtractExpressions"
+      }
+      if (numTimesRulesCanBeAppliedWithoutStackDecrease > maxNumTimesOneRuleCanBeCalled) {
+        crash << "This may be a programming error: Calculator::ApplyOneRule called more than "
+        << maxNumTimesOneRuleCanBeCalled
+        << " times without advancing to the next syntactic element in the syntactic soup. "
+        << "If this is indeed an expression which requires that"
+        << " many application of a single parsing rule, "
+        << "then you should modify function Calculator::ExtractExpressions"
         << crash;
+      }
     }
   }
   bool success = false;
-  if ((*this->CurrentSyntacticStacK).size == this->numEmptyTokensStart)
+  if ((*this->CurrentSyntacticStacK).size == this->numEmptyTokensStart) {
     errorLog << "Non-meaningful/empty input detected (spacebar, enter characters only?).";
-  else if ((*this->CurrentSyntacticStacK).size == this->numEmptyTokensStart + 1) {
+  } else if ((*this->CurrentSyntacticStacK).size == this->numEmptyTokensStart + 1) {
     SyntacticElement& result = (*this->CurrentSyntacticStacK)[this->numEmptyTokensStart];
     if (result.errorString == "" && result.controlIndex == this->conExpression()) {
       outputExpression = result.theData;
       success = true;
-//      stOutput << "Success: " << result.theData.ToString();
-    } else if (result.errorString != "")
+    } else if (result.errorString != "") {
       errorLog << "Syntax error with message: " << result.errorString;
-    else {
+    } else {
       errorLog << "Syntax error: your command simplifies to a single syntactic element but it is not an expression. <br>";
       errorLog << "It simplifies to:<br> " << this->ToStringSyntacticStackHTMLTable(false);
     }
@@ -1797,36 +1810,43 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
     errorLog << "Syntax error: your command does not simplify to a single syntactic element. <br>";
     errorLog << "Instead it simplifies to:<br> " << this->ToStringSyntacticStackHTMLTable(false);
   }
-  if (outputErrors != 0)
+  if (outputErrors != 0) {
     *outputErrors = errorLog.str();
+  }
   return success;
 }
 
 bool Calculator::ApplyOneRule() {
-  //return false;
   MacroRegisterFunctionWithName("Calculator::ApplyOneRule");
-  if (this->CurrentSyntacticStacK->size <= this->numEmptyTokensStart)
+  if (this->CurrentSyntacticStacK->size <= this->numEmptyTokensStart) {
     return false;
+  }
   const SyntacticElement& lastE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   const std::string& lastS = this->controlSequences[lastE.controlIndex];
   const SyntacticElement& secondToLastE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   const std::string& secondToLastS = this->controlSequences[secondToLastE.controlIndex];
   if (secondToLastS == "Integer" && lastS != "Integer" && lastS != ".") {
     this->registerPositionAfterDecimalPoint = 0;
-    if (this->flagLogSyntaxRules)
+    if (this->flagLogSyntaxRules) {
       this->parsingLog += "[Rule: digit to number]";
+    }
     return this->ReplaceAXbyEX();
   }
-  if (lastS == " " && secondToLastS == "\\" &&
-      this->CurrentSyntacticStacK->size >= this->numEmptyTokensStart + 2) {
+  if (
+    lastS == " " &&
+    secondToLastS == "\\" &&
+    this->CurrentSyntacticStacK->size >= this->numEmptyTokensStart + 2
+  ) {
     this->PopTopSyntacticStack();
-    if (this->flagLogSyntaxRules)
+    if (this->flagLogSyntaxRules) {
       this->parsingLog += "[Rule: remove \\ ]";
+    }
     return this->PopTopSyntacticStack();
   }
   if (lastS == " ") {
-    if (this->flagLogSyntaxRules)
+    if (this->flagLogSyntaxRules) {
       this->parsingLog += "[Rule: remove white space]";
+    }
     return this->PopTopSyntacticStack();
   }
   if (lastS == "(" || lastS == "{") {
@@ -1845,10 +1865,9 @@ bool Calculator::ApplyOneRule() {
   const std::string& seventhToLastS = this->controlSequences[seventhToLastE.controlIndex];
   const SyntacticElement& eighthToLastE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 8];
   const std::string& eighthToLastS = this->controlSequences[eighthToLastE.controlIndex];
-//  const SyntacticElement& ninthToLastE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size() - 9];
-//  const std::string& ninthToLastS = this->theBoss->controlSequences[ninthToLastE.controlIndex];
-  if (this->flagLogSyntaxRules)
+  if (this->flagLogSyntaxRules) {
     this->parsingLog += "<hr>" + this->ToStringSyntacticStackHTMLTable(false);
+  }
   if (secondToLastS == "%" && lastS == "LogParsing") {
     this->parsingLog += "<hr>" + this->ToStringSyntacticStackHTMLTable(false);
     this->flagLogSyntaxRules = true;
@@ -1916,8 +1935,10 @@ bool Calculator::ApplyOneRule() {
   }
   if (secondToLastS == "%" && lastS == "NumberColors") {
     if (!this->flagUseNumberColors) {
-      *this << "<span style =\"color:blue\">Floating point numbers</span> are displayed in <span style =\"color:blue\">blue</span>."
-      << "<br><span style =\"color:red\">Algebraic numbers</span> are displayed in <span style =\"color:red\">red</span>. "
+      *this << "<span style =\"color:blue\">Floating point numbers</span> are displayed in "
+      << "<span style =\"color:blue\">blue</span>."
+      << "<br><span style =\"color:red\">Algebraic numbers</span> "
+      << "are displayed in <span style =\"color:red\">red</span>. "
       << "<br>Rational numbers are displayed in default color.";
     }
     this->flagUseNumberColors = true;
@@ -1960,42 +1981,57 @@ bool Calculator::ApplyOneRule() {
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
-  if (this->flagUsePredefinedWordSplits)
-    if (lastS == "Variable")
-      if (this->predefinedWordSplits.Contains(this->theAtoms[lastE.theData.theData]))
+  if (this->flagUsePredefinedWordSplits) {
+    if (lastS == "Variable") {
+      if (this->predefinedWordSplits.Contains(this->theAtoms[lastE.theData.theData])) {
         return this->ReplaceVbyVdotsVAccordingToPredefinedWordSplits();
-  if (secondToLastS == "=" && lastS == ":")
+      }
+    }
+  }
+  if (secondToLastS == "=" && lastS == ":") {
     return this->ReplaceXXByCon(this->conIsDenotedBy());
-  if (secondToLastS == "{" && lastS == "}")
+  }
+  if (secondToLastS == "{" && lastS == "}") {
     return this->ReplaceXXByCon(this->conApplyFunction());
-  if (lastS == "\\cdot")
+  }
+  if (lastS == "\\cdot") {
     return this->ReplaceXByCon(this->conTimes());
-  if (lastS == "\\varnothing")
+  }
+  if (lastS == "\\varnothing") {
     return this->ReplaceXByEusingO(this->opEmptySet());
+  }
   if (lastS == "\\circ" && secondToLastS != "{" && secondToLastS != "(" && secondToLastS != "^")
     return this->ReplaceXByCon(this->conApplyFunction());
-//  if ( thirdToLastS == "{" && secondToLastS == "{}" && lastS == "}")
-//    return this->ReplaceXXXByCon(this->conBindVariable());
-  if (fifthToLastS == "{" && fourthToLastS == "{" && thirdToLastS == "Variable" && secondToLastS == "}" && lastS == "}")
+  if (fifthToLastS == "{" && fourthToLastS == "{" && thirdToLastS == "Variable" && secondToLastS == "}" && lastS == "}") {
     return this->ReplaceXXVXdotsXbyE_BOUND_XdotsX(2);
-  if (secondToLastS == "Variable" && ((lastS != "}" && lastS != " ") || thirdToLastS != "{" || fourthToLastS != "{"))
+  }
+  if (secondToLastS == "Variable" && ((lastS != "}" && lastS != " ") || thirdToLastS != "{" || fourthToLastS != "{")) {
     return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(1);
-  if (thirdToLastS == "Variable" && ((secondToLastS != "}" && secondToLastS != " ") || fourthToLastS != "{" || fifthToLastS != "{"))
+  }
+  if (thirdToLastS == "Variable" && ((secondToLastS != "}" && secondToLastS != " ") || fourthToLastS != "{" || fifthToLastS != "{")) {
     return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(2);
-  if (fourthToLastS == "{" && thirdToLastS == "Variable" && secondToLastS == "}" && lastS != "}" && lastS != " ")
+  }
+  if (fourthToLastS == "{" && thirdToLastS == "Variable" && secondToLastS == "}" && lastS != "}" && lastS != " ") {
     return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(2);
-  if ((secondToLastS == "\\left" || secondToLastS == "\\right") && lastS == "|")
+  }
+  if ((secondToLastS == "\\left" || secondToLastS == "\\right") && lastS == "|") {
     return this->ReplaceXYByY();
-  if (secondToLastS == "\\left" && (lastS == "(" || lastS == "[" || lastS == "{"))
+  }
+  if (secondToLastS == "\\left" && (lastS == "(" || lastS == "[" || lastS == "{")) {
     return this->ReplaceXYByY();
-  if (secondToLastS == "\\right" && (lastS == ")" || lastS == "]" || lastS == "}"))
+  }
+  if (secondToLastS == "\\right" && (lastS == ")" || lastS == "]" || lastS == "}")) {
     return this->ReplaceXYByY();
-  if (lastS == "=" && secondToLastS == "=")
+  }
+  if (lastS == "=" && secondToLastS == "=") {
     return this->ReplaceXXByCon(this->conEqualEqual());
-  if (lastS == "Integer" && secondToLastS == "Integer")
+  }
+  if (lastS == "Integer" && secondToLastS == "Integer") {
     return this->ReplaceIntIntBy10IntPlusInt();
-  if (secondToLastS == "(" && lastS == ")")
+  }
+  if (secondToLastS == "(" && lastS == ")") {
     return this->ReplaceXXByEEmptySequence();
+  }
   if (thirdToLastS == "Integer" && secondToLastS == "." && lastS == "Integer" && this->registerPositionAfterDecimalPoint == 0) {
     this->registerPositionAfterDecimalPoint = 1;
     return this->ReplaceXYByY();
@@ -2007,160 +2043,315 @@ bool Calculator::ApplyOneRule() {
 //  if (fourthToLastS == "Expression" && thirdToLastS == "{}" && secondToLastS == "Expression"
 //      && this->AllowsApplyFunctionInPreceding(lastS) )
 //    return this->ReplaceEOEXByEX(secondToLastE.theData.format);
-  if (fourthToLastS == "Expression" && thirdToLastS == "{}" && secondToLastS == "Expression" &&
-      this->AllowsApplyFunctionInPreceding(lastS))
+  if (
+    fourthToLastS == "Expression" &&
+    thirdToLastS == "{}" &&
+    secondToLastS == "Expression" &&
+    this->AllowsApplyFunctionInPreceding(lastS)
+  ) {
     return this->ReplaceEXEXByEX();
+  }
   //end of ambiguity.
-  if (fifthToLastS == "\\lim" && fourthToLastS == "_" && thirdToLastS == "Expression" &&
-      secondToLastS == "Expression" && this->AllowsLimitProcessInPreceding(lastS))
+  if (
+    fifthToLastS == "\\lim" &&
+    fourthToLastS == "_" &&
+    thirdToLastS == "Expression" &&
+    secondToLastS == "Expression" &&
+    this->AllowsLimitProcessInPreceding(lastS)
+  ) {
     return this->ReplaceOXEEXByEX();
-  if (fourthToLastS == "Expression" && thirdToLastS == "_" &&
-      secondToLastS == "Expression" && lastS != "_")
+  }
+  if (
+    fourthToLastS == "Expression" &&
+    thirdToLastS == "_" &&
+    secondToLastS == "Expression" &&
+    lastS != "_"
+  ) {
     return this->ReplaceEOEXByEX();
-  if (fourthToLastS == "{"  && thirdToLastS == "{}" && secondToLastS == "Expression" && lastS == "}")
+  }
+  if (fourthToLastS == "{"  && thirdToLastS == "{}" && secondToLastS == "Expression" && lastS == "}") {
     return this->ReplaceXYYXByYY();
-  if (secondToLastS == "Expression" && lastS == "!")
+  }
+  if (secondToLastS == "Expression" && lastS == "!") {
     return this->ReplaceEOByE();
-  if (thirdToLastS == "\\binom" && secondToLastS == "Expression" &&
-      lastS == "Expression" )
+  }
+  if (
+    thirdToLastS == "\\binom" &&
+    secondToLastS == "Expression" &&
+    lastS == "Expression"
+  ) {
     return this->ReplaceXEEByEusingO(this->opBinom());
-
-  if (secondToLastS == "Expression" && thirdToLastS == "^" &&
-      fourthToLastS == "Expression" && this->AllowsPowerInPreceding(lastS) &&
-      this->AllowsPowerInNext(fifthToLastS)
-      )
+  }
+  if (
+    secondToLastS == "Expression" &&
+    thirdToLastS == "^" &&
+    fourthToLastS == "Expression" &&
+    this->AllowsPowerInPreceding(lastS) &&
+    this->AllowsPowerInNext(fifthToLastS)
+  ) {
     return this->ReplaceEOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "\\setminus" &&
-      fourthToLastS == "Expression" && this->AllowsPowerInPreceding(lastS))
+  }
+  if (
+    secondToLastS == "Expression" &&
+    thirdToLastS == "\\setminus" &&
+    fourthToLastS == "Expression" &&
+    this->AllowsPowerInPreceding(lastS)
+  ) {
     return this->ReplaceEOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "or" &&
-      fourthToLastS == "Expression" && this->AllowsOrInPreceding(lastS))
+  }
+  if (
+    secondToLastS == "Expression" &&
+    thirdToLastS == "or" &&
+    fourthToLastS == "Expression" &&
+    this->AllowsOrInPreceding(lastS)
+  ) {
     return this->ReplaceEOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "and" &&
-      fourthToLastS == "Expression" && this->AllowsAndInPreceding(lastS))
+  }
+  if (
+    secondToLastS == "Expression" &&
+    thirdToLastS == "and" &&
+    fourthToLastS == "Expression" &&
+    this->AllowsAndInPreceding(lastS)
+  ) {
     return this->ReplaceEOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "+" &&
-      fourthToLastS == "Expression" && this->AllowsPlusInPreceding(lastS))
+  }
+  if (
+    secondToLastS == "Expression" &&
+    thirdToLastS == "+" &&
+    fourthToLastS == "Expression" &&
+    this->AllowsPlusInPreceding(lastS)
+  ) {
     return this->ReplaceEOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "\\oplus" &&
-      fourthToLastS == "Expression" && this->AllowsPlusInPreceding(lastS))
+  }
+  if (
+    secondToLastS == "Expression" &&
+    thirdToLastS == "\\oplus" &&
+    fourthToLastS == "Expression" &&
+    this->AllowsPlusInPreceding(lastS)
+  ) {
     return this->ReplaceEOEXByEX();
-  if (fifthToLastS == "|" && secondToLastS == "Expression" &&
-      thirdToLastS == "+" && fourthToLastS == "Expression" && lastS == "|")
+  }
+  if (
+    fifthToLastS == "|" && secondToLastS == "Expression" &&
+    thirdToLastS == "+" && fourthToLastS == "Expression" && lastS == "|"
+  ) {
     return this->ReplaceEOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "-" &&
-      fourthToLastS == "Expression" && this->AllowsPlusInPreceding(lastS))
+  }
+  if (
+    secondToLastS == "Expression" && thirdToLastS == "-" &&
+    fourthToLastS == "Expression" && this->AllowsPlusInPreceding(lastS)
+  ) {
     return this->ReplaceEOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "-" &&
-      fourthToLastS == "Expression" && lastS == "|" && fifthToLastS == "|")
+  }
+  if (
+    secondToLastS == "Expression" && thirdToLastS == "-" &&
+    fourthToLastS == "Expression" && lastS == "|" && fifthToLastS == "|"
+  ) {
     return this->ReplaceEOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "-" &&
-      this->AllowsPlusInPreceding(lastS))
+  }
+  if (
+    secondToLastS == "Expression" && thirdToLastS == "-" && this->AllowsPlusInPreceding(lastS)
+  ) {
     return this->ReplaceOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "-" && lastS == "|" && fourthToLastS == "|" )
+  }
+  if (secondToLastS == "Expression" && thirdToLastS == "-" && lastS == "|" && fourthToLastS == "|") {
     return this->ReplaceOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "mod" && fourthToLastS == "Expression")
+  }
+  if (secondToLastS == "Expression" && thirdToLastS == "mod" && fourthToLastS == "Expression") {
     return this->ReplaceEOEXByEX();
-//  if (lastS == "Expression" && secondToLastS == "\\in" && thirdToLastS == "Expression")
-//    return this->ReplaceEOEByE();
-  if (secondToLastS == "Expression" && thirdToLastS == "\\in" && fourthToLastS == "Expression" && this->AllowsInInPreceding(lastS))
+  }
+  if (
+    secondToLastS == "Expression" &&
+    thirdToLastS == "\\in" &&
+    fourthToLastS == "Expression" &&
+    this->AllowsInInPreceding(lastS)
+  ) {
     return this->ReplaceEOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "\\choose" && fourthToLastS == "Expression")
+  }
+  if (secondToLastS == "Expression" && thirdToLastS == "\\choose" && fourthToLastS == "Expression") {
     return this->ReplaceEXEXByEXUsingO(this->opBinom());
-  if (secondToLastS == "Expression" && thirdToLastS == "\\otimes" && fourthToLastS == "Expression" && this->AllowsTensorInPreceding(lastS))
+  }
+  if (secondToLastS == "Expression" && thirdToLastS == "\\otimes" && fourthToLastS == "Expression" && this->AllowsTensorInPreceding(lastS)) {
     return this->ReplaceEOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "Expression" && fourthToLastS == "\\frac")
+  }
+  if (secondToLastS == "Expression" && thirdToLastS == "Expression" && fourthToLastS == "\\frac") {
     return this->ReplaceXEEXByEXusingO(this->opDivide());
-  if (secondToLastS == "Expression" && thirdToLastS == "\\times" && fourthToLastS == "Expression" && this->AllowsTimesInPreceding(lastS) )
+  }
+  if (
+    secondToLastS == "Expression" &&
+    thirdToLastS == "\\times" &&
+    fourthToLastS == "Expression" &&
+    this->AllowsTimesInPreceding(lastS)
+  ) {
     return this->ReplaceEOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "*" && fourthToLastS == "Expression" &&
-      this->AllowsTimesInPreceding(secondToLastE, lastS) )
+  }
+  if (
+    secondToLastS == "Expression" &&
+    thirdToLastS == "*" &&
+    fourthToLastS == "Expression" &&
+    this->AllowsTimesInPreceding(secondToLastE, lastS)) {
     return this->ReplaceEOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "/" && fourthToLastS == "Expression" && this->AllowsDivideInPreceding(lastS) )
+  }
+  if (
+    secondToLastS == "Expression" &&
+    thirdToLastS == "/" &&
+    fourthToLastS == "Expression" &&
+    this->AllowsDivideInPreceding(lastS)
+  ) {
     return this->ReplaceEOEXByEX();
-  if (secondToLastS == "Expression" && thirdToLastS == "\\to" && fourthToLastS == "Expression" &&
-      this->AllowsLimitProcessInPreceding(lastS) )
+  }
+  if (
+    secondToLastS == "Expression" &&
+    thirdToLastS == "\\to" &&
+    fourthToLastS == "Expression" &&
+    this->AllowsLimitProcessInPreceding(lastS)
+  ) {
     return this->ReplaceEOEXByEX();
-  if (this->atomsWhoseExponentsAreInterpretedAsFunctions.Contains(fifthToLastS) && fourthToLastS == "^" &&
-      thirdToLastS == "Expression" && secondToLastS == "Expression" &&
-      this->AllowsTimesInPreceding(lastS))
+  }
+  if (
+    this->atomsWhoseExponentsAreInterpretedAsFunctions.Contains(fifthToLastS) && fourthToLastS == "^" &&
+    thirdToLastS == "Expression" && secondToLastS == "Expression" &&
+    this->AllowsTimesInPreceding(lastS)
+  ) {
     return this->ReplaceOOEEXbyEXpowerLike();
-  if (secondToLastS == "\\int" && lastS != "_")
+  }
+  if (secondToLastS == "\\int" && lastS != "_") {
     return this->ReplaCeOXbyEX();
-  if (thirdToLastS == "\\int" && secondToLastS == "_" && lastS == "Expression")
+  }
+  if (thirdToLastS == "\\int" && secondToLastS == "_" && lastS == "Expression") {
     return this->ReplaCeOXdotsXbyEXdotsX(2);
-  if (fourthToLastS == "\\int" && thirdToLastS == "_" &&
-      secondToLastS == "Expression" && (lastS == "^" || lastS == "EndProgram"))
+  }
+  if (
+    fourthToLastS == "\\int" && thirdToLastS == "_" &&
+    secondToLastS == "Expression" && (lastS == "^" || lastS == "EndProgram")
+  ) {
     return this->ReplaCeOXdotsXbyEXdotsX(3);
-  if (fifthToLastS == "\\int" && fourthToLastS == "_" && thirdToLastS == "{}" &&
-      secondToLastS == "^" && lastS == "{}") {
+  }
+  if (
+    fifthToLastS == "\\int" && fourthToLastS == "_" && thirdToLastS == "{}" &&
+    secondToLastS == "^" && lastS == "{}"
+  ) {
     this->PopTopSyntacticStack();
     this->PopTopSyntacticStack();
     this->PopTopSyntacticStack();
     this->ReplaCeOXbyEX();
     return this->PopTopSyntacticStack();
   }
-  if (fifthToLastS == "LogBase" && fourthToLastS == "_" && thirdToLastS == "Expression" &&
-      secondToLastS == "Expression" && this->AllowsTimesInPreceding(lastS))
+  if (
+    fifthToLastS == "LogBase" && fourthToLastS == "_" && thirdToLastS == "Expression" &&
+    secondToLastS == "Expression" && this->AllowsTimesInPreceding(lastS)
+  ) {
     return this->ReplaceOXEEXByEX();
-  if (seventhToLastS == "\\sqrt" && sixthToLastS == "[" && fifthToLastS == "Expression" &&
-      fourthToLastS == "]" && thirdToLastS == "Expression")
+  }
+  if (
+    seventhToLastS == "\\sqrt" && sixthToLastS == "[" && fifthToLastS == "Expression" &&
+    fourthToLastS == "]" && thirdToLastS == "Expression"
+  ) {
     return this->ReplaceOXEXEXXByEXX();
-  if (this->AllowsTimesInNext(fourthToLastS) &&
-      thirdToLastS == "Expression" && secondToLastS == "Expression" &&
-      this->AllowsTimesInPreceding(secondToLastE, lastS)) {
+  }
+  if (
+    this->AllowsTimesInNext(fourthToLastS) &&
+    thirdToLastS == "Expression" &&
+    secondToLastS == "Expression" &&
+    this->AllowsTimesInPreceding(secondToLastE, lastS)
+  ) {
     this->ReplaceEEXByEXusingO(this->conTimes());
     Expression impliedFunApplication;
-    if (this->outerTimesToFunctionApplication
-        (*this, (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].theData, impliedFunApplication)) {
+    if (this->outerTimesToFunctionApplication(*this,
+      (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].theData, impliedFunApplication)
+    ) {
       (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].theData = impliedFunApplication;
-      if (this->flagLogSyntaxRules)
+      if (this->flagLogSyntaxRules) {
         this->parsingLog += "[Rule: implied function application]";
+      }
     }
     return true;
   }
-  if ((lastS == ">" && secondToLastS == "=") ||
-      (lastS == "=" && secondToLastS == ">"))
+  if (
+    (lastS == ">" && secondToLastS == "=") ||
+    (lastS == "=" && secondToLastS == ">")
+  ) {
     return this->ReplaceXXByCon(this->conGEQ());
-  if (thirdToLastS == "|" && secondToLastS == "Expression" && lastS == "|")
-    return this->ReplaceOEXByE();
-  if (thirdToLastS == "(" && secondToLastS == "Expression" && lastS == ")")
-    return this->ReplaceXEXByE();
-  if (thirdToLastS == "{" && secondToLastS == "Expression" && lastS == "}")
-    return this->ReplaceXEXByE();
-  if (thirdToLastS == "(" && secondToLastS == "\\circ" && lastS == ")")
-    return this->ReplaCeOXbyEX();
-  if (thirdToLastS == "{" && secondToLastS == "\\circ" && lastS == "}")
-    return this->ReplaCeOXbyEX();
-  if (secondToLastS == "^" && lastS == "\\circ")
-    return this->ReplaCeObyE();
-  if (this->flagUseBracketsForIntervals) {
-    if (thirdToLastS == "(" && secondToLastS == "Expression" && lastS == "]")
-      return this->ReplaceXEXByEcontainingOE(this->opIntervalRightClosed());
-    if (thirdToLastS == "[" && secondToLastS == "Expression" && lastS == ")")
-      return this->ReplaceXEXByEcontainingOE(this->opIntervalLeftClosed());
-    if (thirdToLastS == "[" && secondToLastS == "Expression" && lastS == "]")
-      return this->ReplaceXEXByEcontainingOE(this->opIntervalClosed());
-    if (this->flagUseBracketsForIntervals)
-      if (secondToLastE.theData.IsSequenceNElementS(2))
-        if (this->isSeparatorFromTheLeftForInterval(fourthToLastS) &&
-            thirdToLastS == "(" && secondToLastS == "Sequence" && lastS == ")")
-          return this->ReplaceXEXByEcontainingOE(this->opIntervalOpen());
   }
-  if (thirdToLastS == "\"" && secondToLastS == "Expression" && lastS == "\"")
+  if (thirdToLastS == "|" && secondToLastS == "Expression" && lastS == "|") {
+    return this->ReplaceOEXByE();
+  }
+  if (thirdToLastS == "(" && secondToLastS == "Expression" && lastS == ")") {
+    return this->ReplaceXEXByE();
+  }
+  if (thirdToLastS == "{" && secondToLastS == "Expression" && lastS == "}") {
+    return this->ReplaceXEXByE();
+  }
+  if (thirdToLastS == "(" && secondToLastS == "\\circ" && lastS == ")") {
+    return this->ReplaCeOXbyEX();
+  }
+  if (thirdToLastS == "{" && secondToLastS == "\\circ" && lastS == "}") {
+    return this->ReplaCeOXbyEX();
+  }
+  if (secondToLastS == "^" && lastS == "\\circ") {
+    return this->ReplaCeObyE();
+  }
+  if (this->flagUseBracketsForIntervals) {
+    if (thirdToLastS == "(" && secondToLastS == "Expression" && lastS == "]") {
+      return this->ReplaceXEXByEcontainingOE(this->opIntervalRightClosed());
+    }
+    if (thirdToLastS == "[" && secondToLastS == "Expression" && lastS == ")") {
+      return this->ReplaceXEXByEcontainingOE(this->opIntervalLeftClosed());
+    }
+    if (thirdToLastS == "[" && secondToLastS == "Expression" && lastS == "]") {
+      return this->ReplaceXEXByEcontainingOE(this->opIntervalClosed());
+    }
+    if (this->flagUseBracketsForIntervals) {
+      if (secondToLastE.theData.IsSequenceNElementS(2)) {
+        if (
+          this->isSeparatorFromTheLeftForInterval(fourthToLastS) &&
+          thirdToLastS == "(" &&
+          secondToLastS == "Sequence" &&
+          lastS == ")"
+        ) {
+          return this->ReplaceXEXByEcontainingOE(this->opIntervalOpen());
+        }
+      }
+    }
+  }
+  if (thirdToLastS == "\"" && secondToLastS == "Expression" && lastS == "\"") {
     return this->ReplaceXEXByEcontainingOE(this->opQuote());
-  if (secondToLastS == "\"" && lastS == "\"")
+  }
+  if (secondToLastS == "\"" && lastS == "\"") {
     return this->ReplaceXXByEmptyString();
-  if (lastS == "Expression" && secondToLastS == "~" && thirdToLastS == "Expression" )
+  }
+  if (lastS == "Expression" && secondToLastS == "~" && thirdToLastS == "Expression") {
     return this->ReplaceEOEByE();
-  if (secondToLastS == "==" && lastS == "=")
+  }
+  if (secondToLastS == "==" && lastS == "=") {
     this->ReplaceXXByCon(this->conEqualEqualEqual());
-  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS == "Expression" && thirdToLastS == "===" && fourthToLastS == "Expression")
+  }
+  if (
+    this->isSeparatorFromTheRightGeneral(lastS) &&
+    secondToLastS == "Expression" &&
+    thirdToLastS == "===" &&
+    fourthToLastS == "Expression"
+  ) {
     return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && this->isSeparatorFromTheRightForDefinition(lastS) && secondToLastS == "Expression" && thirdToLastS == "==" && fourthToLastS == "Expression")
+  }
+  if (
+    this->isSeparatorFromTheLeftForDefinition(fifthToLastS) &&
+    this->isSeparatorFromTheRightForDefinition(lastS) &&
+    secondToLastS == "Expression" &&
+    thirdToLastS == "==" &&
+    fourthToLastS == "Expression"
+  ) {
     return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && this->isSeparatorFromTheRightForDefinition(lastS) && secondToLastS == "Expression" && thirdToLastS == "\\geq" && fourthToLastS == "Expression")
+  }
+  if (
+    this->isSeparatorFromTheLeftForDefinition(fifthToLastS) &&
+    this->isSeparatorFromTheRightForDefinition(lastS) &&
+    secondToLastS == "Expression" &&
+    thirdToLastS == "\\geq" &&
+    fourthToLastS == "Expression"
+  ) {
     return this->ReplaceEOEXByEX();
+  }
   if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && this->isSeparatorFromTheRightForDefinition(lastS) && secondToLastS == "Expression" && thirdToLastS == "\\leq" && fourthToLastS == "Expression")
     return this->ReplaceEOEXByEX();
   if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && this->isSeparatorFromTheRightForDefinition(lastS) && secondToLastS == "Expression" && thirdToLastS == ">" && fourthToLastS == "Expression")

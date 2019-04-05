@@ -33,9 +33,11 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
   std::stringstream fileName;
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
   fileName << "defaultOutput" << MathRoutines::HashString(fileContent);
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtual
-       (theFile, theGlobalVariables.DisplayPathOutputFolder + fileName.str() + ".tex", false, true, false))
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
+    theFile, theGlobalVariables.DisplayPathOutputFolder + fileName.str() + ".tex", false, true, false
+  )) {
     return "failed to create file: " + fileName.str() + ".tex";
+  }
   std::string baseFolder;
   std::string fileNameWithPathPhysical;
   FileOperations::GetPhysicalFileNameFromVirtual("output/", baseFolder, false, false, 0);
@@ -61,8 +63,9 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
   << theGlobalVariables.DisplayPathOutputFolder
   << fileName.str() << ".tex\">" << theGlobalVariables.DisplayPathOutputFolder
   << fileName.str() << ".tex</a>";
-  if (outputFileNameNoExtension != 0)
+  if (outputFileNameNoExtension != 0) {
     *outputFileNameNoExtension = theGlobalVariables.DisplayPathOutputFolder + fileName.str();
+  }
   this->numOutputFileS ++;
   return out.str();
 }
@@ -94,8 +97,9 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
     }
   }
   targetDimNonMandatory = input.size() - 1;
-  for (int i = 0; i < targetDimNonMandatory; i ++)
+  for (int i = 0; i < targetDimNonMandatory; i ++) {
     output.AddOnTop(input[i + 1]);
+  }
   return true;
 }
 
@@ -113,9 +117,11 @@ bool ModuleSSalgebra<coefficient>::IsNotInParabolic(int theGeneratorIndex) {
 template <class coefficient>
 bool ModuleSSalgebra<coefficient>::IsNotInLevi(int theGeneratorIndex) {
   Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
-  for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j ++)
-    if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].IsEqualToZero())
+  for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j ++) {
+    if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].IsEqualToZero()) {
       return true;
+    }
+  }
   return false;
 }
 
@@ -160,8 +166,9 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
   MonomialUniversalEnveloping<Polynomial<Rational> > tempMon;
   tempMon.MakeOne(*this->owner);
   int varShift = 0;
-  if (shiftPowersByNumVarsBaseField)
+  if (shiftPowersByNumVarsBaseField) {
     varShift = this->GetMinNumVars();
+  }
   int numVars = varShift + eltsNilrad.size;
   for (int i = 0; i < eltsNilrad.size; i ++) {
     tempRF.MakeMonomiaL(i +varShift, 1, 1, numVars);
@@ -196,8 +203,9 @@ class quasiDiffMon {
     this->theMatMon = other.theMatMon;
   }
   bool operator>(const quasiDiffMon& other) const {
-    if (this->theMatMon == other.theMatMon)
+    if (this->theMatMon == other.theMatMon) {
       return this->theWeylMon>other.theWeylMon;
+    }
     return this->theMatMon>other.theMatMon;
   }
   std::string ToString(FormatExpressions* theFormat = 0) const;
@@ -253,8 +261,9 @@ void quasiDiffOp<coefficient>::FourierTransformDiffPartOnly(quasiDiffOp<coeffici
 template <class coefficient>
 void quasiDiffOp<coefficient>::GetEWAsetMatrixPartsToId(ElementWeylAlgebra<coefficient>& output) const {
   output.MakeZero();
-  for (int i = 0; i < this->size(); i ++)
+  for (int i = 0; i < this->size(); i ++) {
     output.AddMonomial((*this)[i].theWeylMon, this->theCoeffs[i]);
+  }
 }
 
 template<class Element>
@@ -266,24 +275,12 @@ void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& sta
     MathRoutines::LieBracket(standsOnTheLeftNew, standsOnTheRightNew, output);
     return;
   }
-//  FormatExpressions tempFormat;
-//  tempFormat.polyAlphabeT.SetSize(4);
-//  tempFormat.polyAlphabeT[0] ="x_1";
-//  tempFormat.polyAlphabeT[1] ="x_2";
-//  tempFormat.polyAlphabeT[2] ="\\partial_1";
-//  tempFormat.polyAlphabeT[3] ="\\partial_2";
-
   Element tempE;
-//  stOutput << "<hr>[ " << standsOnTheLeft.ToString(&tempFormat);
-//  stOutput << " , " << standsOnTheRight.ToString(&tempFormat) << " ] = ";
   output = standsOnTheLeft;
   output *= standsOnTheRight;
-//  stOutput << "<br>intermediate: " << output.ToString(&tempFormat);
   tempE = standsOnTheRight;
   tempE *= standsOnTheLeft;
-//  stOutput << "<br>intermediate2: " << tempE.ToString(&tempFormat);
   output -= tempE;
-//  stOutput << "<br>finally:" << output.ToString(&tempFormat) << "<hr>";
 }
 
 template <class coefficient>
@@ -305,8 +302,10 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(
       for (int j = i + 1; j < theEltsConverted.size; j ++) {
         tempQDO = theEltsConverted[i];
         std::stringstream report;
-        report << "Lie bracketing elements " << " of indices " << i + 1 << " and " << j + 1 << " out of " << theEltsConverted.size << "<br> "
-        << tempQDO.ToString(theFormat) << "<br> with element <br>" << theEltsConverted[j].ToString(theFormat) << " to get <br>";
+        report << "Lie bracketing elements " << " of indices " << i + 1
+        << " and " << j + 1 << " out of " << theEltsConverted.size << "<br> "
+        << tempQDO.ToString(theFormat) << "<br> with element <br>"
+        << theEltsConverted[j].ToString(theFormat) << " to get <br>";
         tempQDO.LieBracketMeOnTheRight(theEltsConverted[j]);
         theReport.Report(report.str());
         report << tempQDO.ToString(theFormat);
@@ -314,8 +313,9 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(
         theEltsConverted.AddOnTop(tempQDO);
         quasiDiffOp::GaussianEliminationByRows(theEltsConverted, 0, &bufferMons);
         numTimesEliminationWasExecuted ++;
-        if (!theEltsConverted.LastObject()->IsEqualToZero())
+        if (!theEltsConverted.LastObject()->IsEqualToZero()) {
           foundNew = true;
+        }
         for (int k = theEltsConverted.size - 1; k >= 0; k --) {
           if (theEltsConverted[k].IsEqualToZero()) {
             theEltsConverted.RemoveIndexSwapWithLast(k);
@@ -361,10 +361,12 @@ void quasiDiffOp<coefficient>::operator*=(const quasiDiffOp<coefficient>& stands
 template <class coefficient>
 std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat) const {
   bool combineWeylPart = true;
-  if (theFormat != 0)
+  if (theFormat != 0) {
     combineWeylPart = theFormat->flagQuasiDiffOpCombineWeylPart;
-  if (!combineWeylPart)
+  }
+  if (!combineWeylPart) {
     return this->MonomialCollection<quasiDiffMon, coefficient>::ToString(theFormat);
+  }
   MatrixTensor<ElementWeylAlgebra<Rational> > reordered;
   reordered.MakeZero();
   ElementWeylAlgebra<Rational> tempP;
@@ -375,13 +377,14 @@ std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat) con
     reordered.AddMonomial(currentMon.theMatMon, tempP);
   }
   std::string result = reordered.ToString(theFormat);
-  if (result == "0" && this->size() != 0)
+  if (result == "0" && this->size() != 0) {
     crash << "This is likely a programming error (crashing at any rate): "
     << "I have a non-zero quasidifferential operator "
     << " with non-properly formatted LaTeX string "
     << this->MonomialCollection<quasiDiffMon, coefficient>::ToString(theFormat)
     << ", however its properly formatted string is 0. "
     << "Probably there is something wrong with the initializations of the monomials of the qdo. " << crash;
+  }
   return result;
 }
 
@@ -390,14 +393,14 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(
   const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra::GetActionEulerOperatorPart");
-//  int varShift = this->GetMinNumVars();
-//  stOutput << "<br>varShift for Euler operator: " << varShift;
   int powerMonCoeff = 0;
   ElementWeylAlgebra<Rational> currentMonContribution;
   outputDO.MakeOne();
   for (int i = 0; i < theCoeff.GetMinNumVars(); i ++) {
     if (!theCoeff(i).IsSmallInteger(&powerMonCoeff)) {
-      crash << "This is a programming error. Getting euler operator part of action on generalized Verma module: I have an exponent with non-small integer entry. "
+      crash << "This is a programming error. "
+      << "Getting euler operator part of action on generalized Verma module: "
+      << "I have an exponent with non-small integer entry. "
       << crash;
     }
     currentMonContribution.Makexidj(i, i, 0);
@@ -409,8 +412,10 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(
 
 template <class coefficient>
 bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
-  ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output,
-  bool useNilWeight, bool ascending
+  ElementSemisimpleLieAlgebra<Rational>& inputElt,
+  quasiDiffOp<Rational>& output,
+  bool useNilWeight,
+  bool ascending
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::GetActionGenVermaModuleAsDiffOperator");
   List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
@@ -431,8 +436,6 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
   eulerOperatorContribution;
   Polynomial<Rational> tempP1, negativeExponentDenominatorContribution, theCoeff;
   quasiDiffMon monQDO, monQDO2;
-  //static int problemCounter = 0;
-  //problemCounter ++;
   Rational tempRat;
   output.MakeZero();
   Rational currentShift;
@@ -442,13 +445,15 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
     endoPart = idMT;
     for (int j = currentMon.Powers.size - 1; j >= indicesNilrad.size; j --) {
       int thePower = 0;
-      if (!currentMon.Powers[j].IsSmallInteger(&thePower))
+      if (!currentMon.Powers[j].IsSmallInteger(&thePower)) {
         return false;
+      }
       tempMat1 = this->GetActionGeneratorIndeX(currentMon.generatorsIndices[j]);
       tempMT.MakeZero();
       for (int k = 0; k < tempMat1.size(); k ++) {
-        if (tempMat1.theCoeffs[k].expressionType == RationalFunctionOld::typeRationalFunction)
+        if (tempMat1.theCoeffs[k].expressionType == RationalFunctionOld::typeRationalFunction) {
           return false;
+        }
         tempMat1.theCoeffs[k].GetNumerator(tempP1);
         tempMT.AddMonomial(tempMat1[k], tempP1);
       }
@@ -466,7 +471,8 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
       theCoeff.DivideBy(negativeExponentDenominatorContribution, theCoeff, tempP1);
       if (!tempP1.IsEqualToZero()) {
         crash << "This is a mathematical error! "
-        << "Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. " << crash;
+        << "Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. "
+        << crash;
       }
     }
     for (int l = 0; l < theCoeff.size(); l ++) {
@@ -492,7 +498,6 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
       }
     }
   }
-//  stOutput << "<br>result qdo: " << output.ToString();
   return true;
 }
 
@@ -514,8 +519,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   MacroRegisterFunctionWithName("Calculator::innerWriteGenVermaModAsDiffOperatorInner");
    /////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////
-  if (theHws.size == 0)
+  if (theHws.size == 0) {
     return false;
+  }
   SemisimpleLieAlgebra& theSSalgebra = *owner;
   List<ElementUniversalEnveloping<Polynomial<Rational> > > elementsNegativeNilrad;
   ElementSemisimpleLieAlgebra<Rational> theGenerator;
@@ -553,12 +559,6 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     }
   }
   theQDOs.SetSize(theGeneratorsItry.size);
-/*  if (false)
-    if (theSSalgebra.GetRank() ==3 && theSSalgebra.theWeyl.WeylLetter == 'B') {
-      theGenerator = theGeneratorsItry[0];
-      theGenerator+= theGeneratorsItry[2];
-      theGeneratorsItry.AddOnTop(theGenerator);
-    }*/
   out << "<table border =\"1\">";
   latexReport << "\\begin{longtable}{rll";
   for (int i = 0; i < theGeneratorsItry.size; i ++) {
@@ -709,11 +709,6 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       reportCalculatorCommands << ");";
       reportCalculatorCommands << "<hr>";
     }
-//    theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, &theGlobalVariables);
-//    stOutput << "<br><b>Dimension generated Lie algebra: " << theQDOs.size << "</b>";
-//    stOutput << "<br>The qdos: ";
-//    for (int j = 0; j < theQDOs.size; j ++)
- //     stOutput << "<br>" << theQDOs[j].ToString();
   }
   latexReport << "\\end{longtable}";
   out << "</table>";
@@ -734,8 +729,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
 template <class coefficient>
 std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("ModuleSSalgebra::ToString");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return "(Error: module not initialized)";
+  }
   SemisimpleLieAlgebra& theAlgebrA = *this->owner;
   WeylGroupData& theWeyl = theAlgebrA.theWeyl;
   std::stringstream out;
@@ -750,10 +746,11 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   FormatExpressions latexFormat;
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
-  if (this->theCharOverH.size() < 100)
+  if (this->theCharOverH.size() < 100) {
     out << HtmlRoutines::GetMathMouseHover(this->theCharOverH.ToString(&latexFormat));
-  else
+  } else {
     out << this->theCharOverH.ToString();
+  }
   out << "<br>Dimensionn of the finite dimensional part of the module: " << this->GetDim();
   out << "<br>A module basis follows.";
   out << "<table><tr><td>Monomial label</td><td>Definition</td><td>Littelmann path string</td></tr>";
@@ -770,7 +767,8 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
         aGen.MakeSimpleReflection(theWeyl.RootsOfBorel.size - 1 - currentListInt[j].generatorsIndices[k]);
         tempWelt.generatorsLastAppliedFirst[k] = aGen;
       }
-      out << "<tr><td>m_{ " << wordCounter << "} </td><td>" << currentList[j].ToString(&theGlobalVariables.theDefaultFormat.GetElement())
+      out << "<tr><td>m_{ " << wordCounter << "} </td><td>"
+      << currentList[j].ToString(&theGlobalVariables.theDefaultFormat.GetElement())
       << "  v_\\lambda</td><td>" << tempWelt.ToString() << "</td> </tr>";
     }
   }
@@ -778,7 +776,8 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
 
   out << "<br>Character: " << this->theChaR.ToString();
   out << "<br>Computed generator actions (" << this->ComputedGeneratorActions.CardinalitySelection << " out of "
-  << this->actionsGeneratorsMaT.size << " computed actions) follow. Note that generator actions are computed on demand, only the simple "
+  << this->actionsGeneratorsMaT.size << " computed actions) follow. "
+  << "Note that generator actions are computed on demand, only the simple "
   << " Chevalley generators are computed by default. ";
   out << "<table><tr><td>Generator </td><td>Action</td></tr>";
   ElementSemisimpleLieAlgebra<Rational> tempSSElt;
@@ -816,29 +815,32 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
       MonomialUniversalEnveloping<coefficient>& currentElt = currentList[i];
       out << "<br>monomial " << i + 1 << ": " << currentElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
     }
-    out << "; Matrix of Shapovalov form associated to current weight level: <br> " << theBF.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    out << "; Matrix of Shapovalov form associated to current weight level: <br> "
+    << theBF.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
 /*    if (!theBF.IsPositiveDefinite()) {
       monomialDetailStream << "<b>Is not positive definite!</b>";
       this->flagConjectureCholds = false;
     }
     else
       monomialDetailStream << " (positive definite)";*/
-    if (!theBF.IsNonNegativeAllEntries())
+    if (!theBF.IsNonNegativeAllEntries()) {
       out << "<b>Has negative entries</b>";
-    else
+    } else {
       out << " (positive entries only )";
+    }
     out << " corresonding inverted matrix:<br>";
-    if (theBFinverted.NumRows > 0)
+    if (theBFinverted.NumRows > 0) {
       out << theBFinverted.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
-    else {
+    } else {
       out << "<b>The matrix of the bilinear form is not invertible!</b>";
       isBad = true;
     }
   }
-  if (isBad)
+  if (isBad) {
     out << "<br>Error: the Littelmann-path induced monomials do not give a monomial basis. ";
-  out << "<br>Cached Shapovalov products before generator action computation: " << this->cachedPairs.size << ". Dimension : " << this->GetDim();
-  ElementSemisimpleLieAlgebra<Rational> tempSSelt;
+  }
+  out << "<br>Cached Shapovalov products before generator action computation: "
+  << this->cachedPairs.size << ". Dimension : " << this->GetDim();
   out << "<br>Cached Shapovalov products final: " << this->cachedPairs.size << "; dimension : " << this->GetDim();
   return out.str();
 }
@@ -865,7 +867,11 @@ bool Calculator::innerHWVCommon(
 
   for (int i = 0; i < theMods.size; i ++) {
     ModuleSSalgebra<RationalFunctionOld>& currentMod = theMods[i];
-    if (highestWeightFundCoords == currentMod.theHWFundamentalCoordsBaseField && selectionParSel == currentMod.parabolicSelectionNonSelectedAreElementsLevi && currentMod.owner == owner) {
+    if (
+      highestWeightFundCoords == currentMod.theHWFundamentalCoordsBaseField &&
+      selectionParSel == currentMod.parabolicSelectionNonSelectedAreElementsLevi &&
+      currentMod.owner == owner
+    ) {
       indexOfModule = i;
       break;
     }
@@ -878,25 +884,33 @@ bool Calculator::innerHWVCommon(
   ModuleSSalgebra<RationalFunctionOld>& theMod = theMods[indexOfModule];
   if (!theMod.flagIsInitialized) {
     bool isGood = theMod.MakeFromHW(*owner, highestWeightFundCoords, selectionParSel, RFOne, RFZero, &report);
-    if (Verbose)
+    if (Verbose) {
       theCommands << theMod.ToString();
-    if (!isGood)
+    }
+    if (!isGood) {
       return output.MakeError("Error while generating highest weight module. See comments for details. ", theCommands);
+    }
   }
-  if (&theMod.GetOwner() != owner)
+  if (&theMod.GetOwner() != owner) {
     crash << "This is a programming error: module has owner that is not what it should be. " << crash;
+  }
   theElt.MakeHWV(theMod, RFOne);
-  if (&theElt.GetOwnerSS() != owner)
-    crash << "This is a programming error: just created an ElementTensorsGeneralizedVermas whose owner is not what it should be. " << crash;
+  if (&theElt.GetOwnerSS() != owner) {
+    crash << "This is a programming error: just created an ElementTensorsGeneralizedVermas "
+    << "whose owner is not what it should be. " << crash;
+  }
   return output.AssignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(theElt, hwContext, theCommands);
 }
 
 bool Calculator::RecursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo) {
-  if (this->RecursionDeptH <= this->MaxRecursionDeptH)
+  if (this->RecursionDeptH <= this->MaxRecursionDeptH) {
     return false;
-  if (!this->flagMaxRecursionErrorEncountered)
-    *this << additionalErrorInfo << "<span style =\"color:#FF0000\"><b> Maximum recursion depth of " << this->MaxRecursionDeptH
+  }
+  if (!this->flagMaxRecursionErrorEncountered) {
+    *this << additionalErrorInfo
+    << "<span style =\"color:#FF0000\"><b> Maximum recursion depth of " << this->MaxRecursionDeptH
     << " exceeded. </b></span>" << "Aborting computation ASAP. ";
+  }
   this->flagAbortComputationASAP = true;
   this->flagMaxRecursionErrorEncountered = true;
   return true;
@@ -924,16 +938,19 @@ bool Calculator::CheckConsistencyAfterInitializationExpressionStackEmpty() {
 
 bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerFunctionToMatrix");
-  if (!input.IsListNElements(4))
+  if (!input.IsListNElements(4)) {
     return false;
+  }
   const Expression& leftE   = input[1];
   const Expression& middleE = input[2];
   const Expression& rightE  = input[3];
   int numRows, numCols;
-  if (!middleE.IsIntegerFittingInInt(&numRows) || !rightE.IsIntegerFittingInInt(&numCols))
+  if (!middleE.IsIntegerFittingInInt(&numRows) || !rightE.IsIntegerFittingInInt(&numCols)) {
     return false;
-  if (numRows <= 0 || numCols <= 0)
+  }
+  if (numRows <= 0 || numCols <= 0) {
     return false;
+  }
   LargeInt numRowsTimesCols = numRows;
   numRowsTimesCols *= numCols ;
   if (numRowsTimesCols > 10000) {
@@ -960,47 +977,59 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
 
 bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerGetChevGen");
-  if (!input.IsListNElements(3))
+  if (!input.IsListNElements(3)) {
     return false;
+  }
   SemisimpleLieAlgebra* theSSalg;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
+    CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg
+  )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
+  }
   int theIndex;
-  if (!input[2].IsSmallInteger(&theIndex))
+  if (!input[2].IsSmallInteger(&theIndex)) {
     return false;
-  if (theIndex>theSSalg->GetNumPosRoots() || theIndex == 0 || theIndex < - theSSalg->GetNumPosRoots())
+  }
+  if (theIndex>theSSalg->GetNumPosRoots() || theIndex == 0 || theIndex < - theSSalg->GetNumPosRoots()) {
     return output.MakeError("Bad Chevalley-Weyl generator index.", theCommands);
+  }
   ElementSemisimpleLieAlgebra<Rational> theElt;
-  if (theIndex > 0)
+  if (theIndex > 0) {
     theIndex += theSSalg->GetRank() - 1;
+  }
   theIndex += theSSalg->GetNumPosRoots();
   theElt.MakeGenerator(theIndex, *theSSalg);
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg);
   Expression theContext;
   int indexInOwner = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(theSSalg->theWeyl.theDynkinType);
-  //theCommands.ToString();
   theContext.ContextMakeContextSSLieAlgebrA(indexInOwner, theCommands);
-  //theCommands.ToString();
   output.AssignValueWithContext(theUE, theContext, theCommands);
-  //theCommands.ToString();
   return true;
 }
 
 bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.IsListNElements(3))
+  if (!input.IsListNElements(3)) {
     return false;
+  }
   SemisimpleLieAlgebra* theSSalg = 0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
+    CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg
+  )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
-  if (theSSalg == 0)
-    crash << "This is a programming error: called conversion function successfully, but the output is a zero pointer to a semisimple Lie algebra. "
+  }
+  if (theSSalg == 0) {
+    crash << "This is a programming error: called conversion function successfully, "
+    << "but the output is a zero pointer to a semisimple Lie algebra. "
     << crash;
+  }
   int theIndex;
-  if (!input[2].IsSmallInteger(&theIndex))
+  if (!input[2].IsSmallInteger(&theIndex)) {
     return false;
-  if (theIndex == 0 || theIndex > theSSalg->GetNumPosRoots() || theIndex < - theSSalg->GetNumPosRoots())
+  }
+  if (theIndex == 0 || theIndex > theSSalg->GetNumPosRoots() || theIndex < - theSSalg->GetNumPosRoots()) {
     return output.MakeError("Bad Cartan subalgebra generator index.", theCommands);
+  }
   ElementSemisimpleLieAlgebra<Rational> theElt;
   Vector<Rational> theH = theSSalg->theWeyl.RootSystem[theSSalg->GetRootIndexFromDisplayIndex(theIndex)];
   theElt.MakeHgenerator(theH, *theSSalg);
@@ -1016,8 +1045,11 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   MacroRegisterFunctionWithName("Calculator::innerKLcoeffs");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalgebra = 0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, theSSalgebra))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
+    CalculatorConversions::innerSSLieAlgebra, input, theSSalgebra
+  )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
+  }
   std::stringstream out;
   WeylGroupData& theWeyl = theSSalgebra->theWeyl;
   if (theWeyl.theGroup.GetSize() > 192) {
@@ -1029,7 +1061,8 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   FormatExpressions theFormat;
   theFormat.polyAlphabeT.SetSize(1);
   theFormat.polyAlphabeT[0] = "q";
-  out << "Our notation follows that of the original Kazhdan-Lusztig paper, Representations of Coxeter Groups and Hecke Algebras.<br>";
+  out << "Our notation follows that of the original Kazhdan-Lusztig paper, "
+  << "Representations of Coxeter Groups and Hecke Algebras.<br>";
   out << " The algebra: " << theSSalgebra->GetLieAlgebraName();
   KLpolys theKLpolys;
   theKLpolys.ComputeKLPolys(&theWeyl);
@@ -1147,7 +1180,9 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   }
   out << "</table>";
   DynkinSimpleType tempSimpleType;
-  if (theWeyl.theDynkinType.IsSimple(&tempSimpleType.theLetter, &tempSimpleType.theRank, &tempSimpleType.CartanSymmetricInverseScale)) {
+  if (theWeyl.theDynkinType.IsSimple(
+    &tempSimpleType.theLetter, &tempSimpleType.theRank, &tempSimpleType.CartanSymmetricInverseScale
+  )) {
     if (tempSimpleType.CartanSymmetricInverseScale == 1) {
       Matrix<Rational> tempM, tempM2;
       theWeyl.theDynkinType.GetEpsilonMatrix(tempM);
@@ -1169,8 +1204,9 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
 bool Expression::CheckInitializationRecursively() const {
   MacroRegisterFunctionWithName("Expression::CheckInitializationRecursively");
   this->CheckInitialization();
-  for (int i = 0; i < this->children.size; i ++)
+  for (int i = 0; i < this->children.size; i ++) {
     (*this)[i].CheckInitializationRecursively();
+  }
   return true;
 }
 
@@ -1184,19 +1220,21 @@ bool Expression::CheckInitialization() const {
 
 bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::HashString>* boxNames) const {
   MacroRegisterFunctionWithName("Expression::HasInputBoxVariables");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   RecursionDepthCounter recursionCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDeptH > this->owner->MaxRecursionDeptH)
+  if (this->owner->RecursionDeptH > this->owner->MaxRecursionDeptH) {
     crash << "This is a programming error: "
     << "function HasInputBoxVariables has exceeded "
     << "recursion depth limit. " << crash;
+  }
   bool result = false;
   InputBox tempBox;
   if (this->IsOfType<InputBox>(&tempBox)) {
-    if (boxNames == 0)
+    if (boxNames == 0) {
       return true;
-    else {
+    } else {
       result = true;
       boxNames->AddOnTopNoRepetition(tempBox.name);
     }
@@ -1214,9 +1252,10 @@ bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::Hash
 }
 
 bool Expression::HasBoundVariables() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     crash << "This is a programming error: calling function "
     << "HasBoundVariables on non-initialized expression. " << crash;
+  }
   RecursionDepthCounter recursionCounter(&this->owner->RecursionDeptH);
   MacroRegisterFunctionWithName("Expression::HasBoundVariables");
   if (this->owner->RecursionDeptH>this->owner->MaxRecursionDeptH) {
@@ -1235,37 +1274,44 @@ bool Expression::HasBoundVariables() const {
 
 bool Calculator::innerNot(Calculator& theCommands, const Expression& input, Expression& output) {
   int theInt;
-  if (!input.IsSmallInteger(&theInt))
+  if (!input.IsSmallInteger(&theInt)) {
     return false;
-  if (theInt == 0)
+  }
+  if (theInt == 0) {
     return output.AssignValue(1, theCommands);
+  }
   return output.AssignValue(0, theCommands);
 }
 
 bool Calculator::innerIsInteger(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (input.HasBoundVariables())
+  if (input.HasBoundVariables()) {
     return false;
-  if (input.IsInteger())
+  }
+  if (input.IsInteger()) {
     output.AssignValue(1, theCommands);
-  else
+  } else {
     output.AssignValue(0, theCommands);
+  }
   return true;
 }
 
 bool Calculator::innerIsRational(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (input.HasBoundVariables())
+  if (input.HasBoundVariables()) {
     return false;
-  if (input.IsRational())
+  }
+  if (input.IsRational()) {
     output.AssignValue(1, theCommands);
-  else
+  } else {
     output.AssignValue(0, theCommands);
+  }
   return true;
 }
 
 bool Calculator::AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp) {
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  if (this->RecursionDeptH>this->MaxRecursionDeptH)
+  if (this->RecursionDeptH>this->MaxRecursionDeptH) {
     return false;
+  }
   bool result = false;
   if (!input.IsListStartingWithAtom(theOp)) {
     output.AddOnTop(input);
@@ -1282,28 +1328,28 @@ bool Calculator::AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& inp
   return result;
 }
 
-//Expression::FunctionAddress Calculator::GetInnerFunctionFromOp(int theOp, const Expression& left, const Expression& right)
-//{ crash << "Function Calculator::GetfOp not implemented yet. " << crash;
-//  return 0;
-//}
-
 bool Calculator::outerTensor(Calculator& theCommands, const Expression& input, Expression& output) {
-  //stOutput << "<br>At start of evaluate standard times: " << theExpression.ToString();
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::StandardTensor");
-  if (theCommands.outerDistribute(theCommands, input, output, theCommands.opPlus(), theCommands.opTensor()))
+  if (theCommands.outerDistribute(theCommands, input, output, theCommands.opPlus(), theCommands.opTensor())) {
     return true;
-  if (theCommands.outerAssociate(theCommands, input, output))
+  }
+  if (theCommands.outerAssociate(theCommands, input, output)) {
     return true;
-  if (theCommands.outerExtractBaseMultiplication(theCommands, input, output))
+  }
+  if (theCommands.outerExtractBaseMultiplication(theCommands, input, output)) {
     return true;
+  }
   return false;
 }
 
-bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY");
-  if (!input.StartsWith(theCommands.opTimes(), 3))
+  if (!input.StartsWith(theCommands.opTimes(), 3)) {
     return false;
+  }
   Expression constPower, thePower;
   const Expression* left = &input[1];
   const Expression* right = &input[2];
@@ -1365,8 +1411,9 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(Calculator& theComman
 }
 
 bool Calculator::outerCombineFractions(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(theCommands.opPlus(), 3))
+  if (!input.StartsWith(theCommands.opPlus(), 3)) {
     return false;
+  }
   const Expression* quotientE = 0;
   const Expression* summandE = 0;
   if (input[1].StartsWith(theCommands.opDivide(), 3)) {
@@ -1375,8 +1422,9 @@ bool Calculator::outerCombineFractions(Calculator& theCommands, const Expression
   } else if (input[2].StartsWith(theCommands.opDivide(), 3)) {
     quotientE = &input[2];
     summandE = &input[1];
-  } else
+  } else {
     return false;
+  }
   const Expression& quotientNumeratorE = (*quotientE)[1];
   const Expression& quotientDenominatorE = (*quotientE)[2];
   Expression outputSummandE, outputNumE;
@@ -1386,29 +1434,37 @@ bool Calculator::outerCombineFractions(Calculator& theCommands, const Expression
 }
 
 bool Calculator::outerCheckRule(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(theCommands.opDefine(), 3))
+  if (!input.StartsWith(theCommands.opDefine(), 3)) {
     return false;
-  if (input[1] != input[2])
+  }
+  if (input[1] != input[2]) {
     return false;
+  }
   std::stringstream out;
-  out << "Bad rule: you are asking me to substitute " << input[1] << " by itself (" << input[2] << ")" << " which is an infinite substitution cycle. ";
+  out << "Bad rule: you are asking me to substitute " << input[1] << " by itself ("
+  << input[2] << ")" << " which is an infinite substitution cycle. ";
   return output.MakeError(out.str(), theCommands);
 }
 
 bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(theCommands.opDivide(), 3))
+  if (!input.StartsWith(theCommands.opDivide(), 3)) {
     return false;
-  if (input[1].IsEqualToZero())
-    if (!input[2].IsEqualToZero())
+  }
+  if (input[1].IsEqualToZero()) {
+    if (!input[2].IsEqualToZero()) {
       return output.AssignValue(0, theCommands);
+    }
+  }
   return false;
 }
 
 bool Calculator::innerCancelMultiplicativeInverse(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(theCommands.opTimes(), 3))
+  if (!input.StartsWith(theCommands.opTimes(), 3)) {
     return false;
-  if (!input[1].StartsWith(theCommands.opDivide(), 3))
+  }
+  if (!input[1].StartsWith(theCommands.opDivide(), 3)) {
     return false;
+  }
   if (input[1][2] == input[2]) {
     output = input[1][1];
     return true;
@@ -1417,10 +1473,12 @@ bool Calculator::innerCancelMultiplicativeInverse(Calculator& theCommands, const
 }
 
 bool Calculator::outerAssociateTimesDivision(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(theCommands.opTimes(), 3))
+  if (!input.StartsWith(theCommands.opTimes(), 3)) {
     return false;
-  if (!input[2].StartsWith(theCommands.opDivide(), 3))
+  }
+  if (!input[2].StartsWith(theCommands.opDivide(), 3)) {
     return false;
+  }
   Expression newLeftE;
   newLeftE.MakeXOX(theCommands, theCommands.opTimes(), input[1], input[2][1]);
   output.MakeXOX(theCommands, theCommands.opDivide(), newLeftE, input[2][2]);
@@ -1428,11 +1486,13 @@ bool Calculator::outerAssociateTimesDivision(Calculator& theCommands, const Expr
 }
 
 bool Calculator::outerAssociate(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(- 1, 3))
+  if (!input.StartsWith(- 1, 3)) {
     return false;
+  }
   int theOperation = input[0].theData;
-  if (!input[1].StartsWith(theOperation, 3))
+  if (!input[1].StartsWith(theOperation, 3)) {
     return false;
+  }
   Expression newRight;
   newRight.MakeXOX(theCommands, theOperation, input[1][2], input[2]);
   output.MakeXOX(theCommands, theOperation, input[1][1], newRight);
@@ -1442,8 +1502,9 @@ bool Calculator::outerAssociate(Calculator& theCommands, const Expression& input
 bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::StandardIsDenotedBy");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (!input.StartsWith(theCommands.opIsDenotedBy(), 3))
+  if (!input.StartsWith(theCommands.opIsDenotedBy(), 3)) {
     return false;
+  }
   const Expression& withNotation = input[2];
   const Expression& theNotation = input[1];
   theCommands << "<br>Registering notation: globally, " << withNotation.ToString() << " will be denoted by "
@@ -1465,10 +1526,12 @@ bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& 
 
 bool Calculator::innerMultiplyByOne(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerMultiplyByOne");
-  if (!input.IsListStartingWithAtom(theCommands.opTimes()) || input.size() != 3)
+  if (!input.IsListStartingWithAtom(theCommands.opTimes()) || input.size() != 3) {
     return false;
-  if (!input[1].IsEqualToOne())
+  }
+  if (!input[1].IsEqualToOne()) {
     return false;
+  }
   output = input[2];
   return true;
 }
@@ -1476,8 +1539,9 @@ bool Calculator::innerMultiplyByOne(Calculator& theCommands, const Expression& i
 bool Calculator::GetVectorLargeIntFromFunctionArguments(const Expression& input, List<LargeInt>& output) {
   MacroRegisterFunctionWithName("Calculator::GetVectorLargeIntFromFunctionArguments");
   Vector<Rational> theRats;
-  if (!this->GetVectorFromFunctionArguments(input, theRats))
+  if (!this->GetVectorFromFunctionArguments(input, theRats)) {
     return false;
+  }
   output.initializeFillInObject(theRats.size, 0);
   for (int i = 0; i < theRats.size; i ++) {
     if (!theRats[i].IsInteger(&output[i])) {
@@ -1491,32 +1555,39 @@ bool Calculator::GetVectorLargeIntFromFunctionArguments(const Expression& input,
 bool Calculator::GetVectoRInt(const Expression& input, List<int>& output) {
   MacroRegisterFunctionWithName("Calculator::GetVectoRInt");
   Vector<Rational> theRats;
-  if (!this->GetVectoR(input, theRats))
+  if (!this->GetVectoR(input, theRats)) {
     return false;
+  }
   output.initializeFillInObject(theRats.size,0);
-  for (int i = 0; i < theRats.size; i ++)
-    if (!theRats[i].IsSmallInteger(&output[i]))
+  for (int i = 0; i < theRats.size; i ++) {
+    if (!theRats[i].IsSmallInteger(&output[i])) {
       return *this << "<hr>Succeeded to convert " << input.ToString() << " to the vector of rationals: "
       << theRats.ToString() << " but failed to convert that to list of small integers. ";
+    }
+  }
   return true;
 }
 
 bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerTimesToFunctionApplication");
-  if (!input.StartsWith(theCommands.opTimes()))
+  if (!input.StartsWith(theCommands.opTimes())) {
     return false;
-  if (input.size() < 2)
-    return false;
-  const Expression& firstElt = input[1];
-//  stOutput << " <hr>outer times to function ";
-  if (!firstElt.IsBuiltInAtom()) {
-    if (!firstElt.StartsWith(theCommands.opThePower(), 3))
-      return false;
-    if (!firstElt[1].IsAtomWhoseExponentsAreInterpretedAsFunction())
-      return false;
   }
-  if (firstElt.IsAtomNotInterpretedAsFunction())
+  if (input.size() < 2) {
     return false;
+  }
+  const Expression& firstElt = input[1];
+  if (!firstElt.IsBuiltInAtom()) {
+    if (!firstElt.StartsWith(theCommands.opThePower(), 3)) {
+      return false;
+    }
+    if (!firstElt[1].IsAtomWhoseExponentsAreInterpretedAsFunction()) {
+      return false;
+    }
+  }
+  if (firstElt.IsAtomNotInterpretedAsFunction()) {
+    return false;
+  }
   const Expression& secondElt = input[2];
   if (secondElt.IsSequenceNElementS() || secondElt.StartsWith(theCommands.opIntervalOpen())) {
     output = secondElt;
@@ -1535,9 +1606,14 @@ bool Calculator::outerDistribute(
   int theMultiplicativeOp,
   bool constantsOnly
 ) {
-  if (theCommands.outerLeftDistributeBracketIsOnTheLeft(theCommands, input, output, theAdditiveOp, theMultiplicativeOp, constantsOnly))
+  if (theCommands.outerLeftDistributeBracketIsOnTheLeft(
+    theCommands, input, output, theAdditiveOp, theMultiplicativeOp, constantsOnly
+  )) {
     return true;
-  return theCommands.outerRightDistributeBracketIsOnTheRight(theCommands, input, output, theAdditiveOp, theMultiplicativeOp, constantsOnly);
+  }
+  return theCommands.outerRightDistributeBracketIsOnTheRight(
+    theCommands, input, output, theAdditiveOp, theMultiplicativeOp, constantsOnly
+  );
 }
 
 bool Calculator::outerDistributeTimes(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1557,18 +1633,23 @@ bool Calculator::outerLeftDistributeBracketIsOnTheLeft(
   bool constantsOnly
 ) {
   MacroRegisterFunctionWithName("Calculator::outerLeftDistributeBracketIsOnTheLeft");
-  if (theAdditiveOp == - 1)
+  if (theAdditiveOp == - 1) {
     theAdditiveOp = theCommands.opPlus();
-  if (theMultiplicativeOp == - 1)
+  }
+  if (theMultiplicativeOp == - 1) {
     theMultiplicativeOp = theCommands.opTimes();
-  if (!input.StartsWith(theMultiplicativeOp, 3))
+  }
+  if (!input.StartsWith(theMultiplicativeOp, 3)) {
     return false;
-  if (!input[1].StartsWith(theAdditiveOp, 3))
+  }
+  if (!input[1].StartsWith(theAdditiveOp, 3)) {
     return false;
-  if (constantsOnly)
-    if (!input[2].IsConstantNumber())
+  }
+  if (constantsOnly) {
+    if (!input[2].IsConstantNumber()) {
       return false;
-//  int theFormat = input.format;
+    }
+  }
   Expression leftE, rightE;
   leftE.MakeXOX(theCommands, theMultiplicativeOp, input[1][1], input[2]);
   rightE.MakeXOX(theCommands, theMultiplicativeOp, input[1][2], input[2]);
@@ -1584,17 +1665,23 @@ bool Calculator::outerRightDistributeBracketIsOnTheRight(
   bool constantsOnly
 ) {
   MacroRegisterFunctionWithName("Calculator::outerRightDistributeBracketIsOnTheRight");
-  if (theAdditiveOp == - 1)
+  if (theAdditiveOp == - 1) {
     theAdditiveOp = theCommands.opPlus();
-  if (theMultiplicativeOp == - 1)
+  }
+  if (theMultiplicativeOp == - 1) {
     theMultiplicativeOp = theCommands.opTimes();
-  if (!input.StartsWith(theMultiplicativeOp, 3))
+  }
+  if (!input.StartsWith(theMultiplicativeOp, 3)) {
     return false;
-  if (!input[2].StartsWith(theAdditiveOp, 3))
+  }
+  if (!input[2].StartsWith(theAdditiveOp, 3)) {
     return false;
-  if (constantsOnly)
-    if (!input[1].IsConstantNumber())
+  }
+  if (constantsOnly) {
+    if (!input[1].IsConstantNumber()) {
       return false;
+    }
+  }
 //  int theFormat = input.format;
   Expression leftE, rightE;
   leftE.MakeXOX(theCommands, theMultiplicativeOp, input[1], input[2][1]);
@@ -1618,10 +1705,11 @@ bool Calculator::CollectCoefficientsPowersVar(
       const Expression& currentE = currentMultiplicands[j];
       remainingMultiplicands = currentMultiplicands;
       remainingMultiplicands.RemoveIndexShiftDown(j);
-      if (remainingMultiplicands.size == 0)
+      if (remainingMultiplicands.size == 0) {
         currentCoeff.AssignValue(1, theCommands);
-      else
+      } else {
         currentCoeff.MakeProducT(theCommands, remainingMultiplicands);
+      }
       if (currentE == theVariable) {
         outputPositionIiscoeffXtoIth.AddMonomial(MonomialVector(1), currentCoeff);
         found = true;
@@ -1629,17 +1717,18 @@ bool Calculator::CollectCoefficientsPowersVar(
       }
       if (currentE.StartsWith(theCommands.opThePower(), 3)) {
         int thePower;
-        if (currentE[1] == theVariable)
+        if (currentE[1] == theVariable) {
           if (currentE[2].IsSmallInteger(&thePower)) {
             outputPositionIiscoeffXtoIth.AddMonomial(MonomialVector(thePower), currentCoeff);
             found = true;
             break;
           }
+        }
       }
     }
-    if (!found)
+    if (!found) {
       outputPositionIiscoeffXtoIth.AddMonomial(MonomialVector(0), theSummands[i]);
-//    stOutput << "<br>Summand : " << theSummands[i] << ", vector status: " << outputPositionIiscoeffXtoIth.ToString();
+    }
   }
   return true;
 }
@@ -1658,8 +1747,9 @@ bool Calculator::CollectOpandsAccumulate(
     outputOpands.AddOnTop(input);
     return true;
   }
-  for (int i = 1; i < input.size(); i ++)
+  for (int i = 1; i < input.size(); i ++) {
     this->CollectOpandsAccumulate(input[i], theOp, outputOpands);
+  }
   return true;
 }
 
@@ -1675,11 +1765,11 @@ bool Calculator::CollectSummands(
   Rational coeffRat = 1;
   AlgebraicNumber coeffAlg = 1;
   double coeffDouble = 1;
-  //stOutput << "DEBUG: The summands are: " << summands.ToStringCommaDelimited();
   bool hasNAN = false;
   for (int i = 0; i < summands.size; i ++) {
-    if (summands[i].IsEqualToZero())
+    if (summands[i].IsEqualToZero()) {
       continue;
+    }
     if (summands[i].StartsWith(theCommands.opTimes(), 3)) {
       if (summands[i][1].IsOfType<Rational>(&coeffRat)) {
         outputSum.AddMonomial(summands[i][2], coeffRat);
@@ -1693,63 +1783,61 @@ bool Calculator::CollectSummands(
         continue;
       } else if (summands[i][1].IsOfType<double>(&coeffDouble)) {
         sumOverDoubles.AddMonomial(summands[i][2], coeffDouble);
-        if (std::isnan(coeffDouble))
+        if (std::isnan(coeffDouble)) {
           hasNAN = true;
+        }
         continue;
       }
     }
-    if (summands[i].IsRational(&coeffRat))
+    if (summands[i].IsRational(&coeffRat)) {
       outputSum.AddMonomial(theCommands.EOne(), coeffRat);
-    else
+    } else {
       outputSum.AddMonomial(summands[i], 1);
+    }
   }
-  //stOutput << "DEBUG: GOT to here - 1 ";
   if (!sumOverDoubles.IsEqualToZero() && !hasNAN) {
-    //stOutput << "DEBUG: sorting sum over doubles... ";
     sumOverDoubles.QuickSortDescending();
     Expression doubleSum;
     doubleSum.MakeSum(theCommands, sumOverDoubles);
     outputSum.AddMonomial(doubleSum, 1);
   }
-  //stOutput << "DEBUG: GOT to here 2 ";
   if (!sumOverAlgNums.IsEqualToZero()) {
     sumOverAlgNums.QuickSortDescending();
     Expression algSum;
     algSum.MakeSum(theCommands, sumOverAlgNums);
     outputSum.AddMonomial(algSum, 1);
   }
-//  stOutput << "<hr> before mon sort, mon order: " << outputSum.theMonomials.ToString();
-//  if (outputSum.theMonomials[0] >outputSum.theMonomials[1])
-//    stOutput << outputSum.theMonomials[0].ToString() << " > " << outputSum.theMonomials[1].ToString();
-//  else
-//    stOutput << outputSum.theMonomials[0].ToString() << " < " << outputSum.theMonomials[1].ToString();
-  //stOutput << "DEBUG: GOT to here ";
   outputSum.QuickSortDescending();
- // stOutput << "DEBUG: GOT to here2 ";
-//  stOutput << " after mon sort: " << outputSum.theMonomials.ToString();
   return !hasNAN;
 }
 
 bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerAssociateExponentExponent");
   int opPower = theCommands.opThePower();
-  if (!input.StartsWith(opPower, 3))
+  if (!input.StartsWith(opPower, 3)) {
     return false;
-  if (!input[1].StartsWith(opPower, 3))
+  }
+  if (!input[1].StartsWith(opPower, 3)) {
     return false;
+  }
   bool isGood = false;
-  if (input[1][1].IsKnownToBeNonNegative())
+  if (input[1][1].IsKnownToBeNonNegative()) {
     isGood = true;
-  if (input[2].IsInteger())
+  }
+  if (input[2].IsInteger()) {
     isGood = true;
+  }
   if (!isGood) {
     Rational powerInner, powerOuter;
-    if (input[2].IsRational(&powerOuter) && input[1][2].IsRational(&powerInner))
-      if ((powerInner * powerOuter).IsEven())
+    if (input[2].IsRational(&powerOuter) && input[1][2].IsRational(&powerInner)) {
+      if ((powerInner * powerOuter).IsEven()) {
         isGood = true;
+      }
+    }
   }
-  if (!isGood)
+  if (!isGood) {
     return false;
+  }
   Expression tempE;
   tempE.MakeProducT(theCommands, input[1][2], input[2]);
   output.MakeXOX(theCommands, opPower, input[1][1], tempE);
@@ -1758,11 +1846,15 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
 
 bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerPowerRaiseToFirst");
-  if (!input.StartsWith(theCommands.opThePower(), 3))
+  if (!input.StartsWith(theCommands.opThePower(), 3)) {
     return false;
-  if (input[1].StartsWith(theCommands.opIntegral(), 2) ||
-      input[1].IsAtomGivenData(theCommands.opIntegral()))
+  }
+  if (
+    input[1].StartsWith(theCommands.opIntegral(), 2) ||
+    input[1].IsAtomGivenData(theCommands.opIntegral())
+  ) {
     return false;
+  }
   if (input[2].IsEqualToOne()) {
     output = input[1];
     return true;
@@ -1772,13 +1864,13 @@ bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expressio
 
 bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& input) {
   MacroRegisterFunctionWithName("Expression::MakeXOXOdotsOX");
-  if (input.size == 0)
+  if (input.size == 0) {
     crash << "This is a programming error: cannot create operation sequence from an empty list. " << crash;
+  }
   if (input.size == 1) {
     *this = input[0];
     return true;
   }
-  //stOutput << "DEBUG: Calling MakeXOXOdotsOX with theOp: " << theOp;
   this->MakeXOX(owner, theOp, input[input.size - 2], *input.LastObject());
   Expression result;
   for (int i = input.size - 3; i >= 0; i --) {
@@ -1800,11 +1892,13 @@ bool Expression::MakeIdMatrixExpressions(int theDim, Calculator& inputBoss) {
 bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerPlus");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.StartsWith(theCommands.opPlus()))
+  if (!input.StartsWith(theCommands.opPlus())) {
     return false;
+  }
   MonomialCollection<Expression, Rational> theSum;
-  if (!theCommands.CollectSummands(theCommands, input, theSum))
+  if (!theCommands.CollectSummands(theCommands, input, theSum)) {
     return false;
+  }
   theSum.QuickSortDescending();
   if (theSum.size() < 5) {
     for (int i = 0; i < theSum.size(); i ++) {
@@ -1817,17 +1911,20 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
     }
   }
   output.MakeSum(theCommands, theSum);
-  if (output == input)
+  if (output == input) {
     return false;
+  }
   return true;
 }
 
 bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(theCommands.opDefineConditional(), 4))
+  if (!input.StartsWith(theCommands.opDefineConditional(), 4)) {
     return output.MakeError("Error: operation :if = takes three arguments.", theCommands);
+  }
   Rational conditionRat;
-  if (!input[1].IsOfType<Rational>(&conditionRat))
+  if (!input[1].IsOfType<Rational>(&conditionRat)) {
     return false;
+  }
   if (conditionRat.IsEqualToOne()) {
     output = input[2];
     return true;
@@ -1840,8 +1937,9 @@ bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Ex
 }
 
 bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!(input.StartsWith(theCommands.opMinus(), 3) || input.StartsWith(theCommands.opMinus(), 2)))
+  if (!(input.StartsWith(theCommands.opMinus(), 3) || input.StartsWith(theCommands.opMinus(), 2))) {
     return false;
+  }
   Expression tempE, minusOne;
   minusOne.AssignValue(- 1, theCommands);
   if (input.size() == 2) {
@@ -1857,8 +1955,9 @@ void Expression::operator+=(const Expression& other) {
   MacroRegisterFunctionWithName("Expression::operator+=");
   if (this->owner == 0 && other.owner == 0) {
     this->theData += other.theData;
-    if (this->theData != 1 && this->theData != 0)
+    if (this->theData != 1 && this->theData != 0) {
       crash << "Attempting to add non-initialized expressions" << crash;
+    }
     return;
   }
   if (other.owner == 0) {
@@ -1867,10 +1966,12 @@ void Expression::operator+=(const Expression& other) {
     *this += otherCopy;
     return;
   }
-  if (this->owner == 0)
+  if (this->owner == 0) {
     this->AssignValue(this->theData, *other.owner);
-  if (this->owner != other.owner)
+  }
+  if (this->owner != other.owner) {
     crash << "Error: adding expressions with different owners. " << crash;
+  }
   Expression resultE;
   resultE.MakeXOX(*this->owner, this->owner->opPlus(), *this, other);
   *this = resultE;
@@ -1880,8 +1981,9 @@ void Expression::operator-=(const Expression& other) {
   MacroRegisterFunctionWithName("Expression::operator+=");
   if (this->owner == 0 && other.owner == 0) {
     this->theData -= other.theData;
-    if (this->theData != 1 && this->theData != 0)
+    if (this->theData != 1 && this->theData != 0) {
       crash << "Attempting to subtract non-initialized expressions" << crash;
+    }
     return;
   }
   if (other.owner == 0) {
@@ -1890,10 +1992,12 @@ void Expression::operator-=(const Expression& other) {
     (*this) -= otherCopy;
     return;
   }
-  if (this->owner == 0)
+  if (this->owner == 0) {
     this->AssignValue(this->theData, *other.owner);
-  if (this->owner != other.owner)
+  }
+  if (this->owner != other.owner) {
     crash << "Error: adding expressions with different owners. " << crash;
+  }
   Expression resultE;
   resultE.MakeXOX(*this->owner, this->owner->opMinus(), *this, other);
   *this = resultE;
@@ -1970,8 +2074,9 @@ void Expression::operator/=(const Expression& other) {
   MacroRegisterFunctionWithName("Expression::operator/=");
   if (this->owner == 0 && other.owner == 0) {
     this->theData /= other.theData;
-    if (this->theData != 1 && this->theData != 0)
+    if (this->theData != 1 && this->theData != 0) {
       crash << "Attempting to divide non-initialized expressions" << crash;
+    }
     return;
   }
   if (other.owner == 0) {
@@ -1980,10 +2085,12 @@ void Expression::operator/=(const Expression& other) {
     (*this) /= otherCopy;
     return;
   }
-  if (this->owner == 0)
+  if (this->owner == 0) {
     this->AssignValue(this->theData, *other.owner);
-  if (this->owner != other.owner)
+  }
+  if (this->owner != other.owner) {
     crash << "Error: dividing expressions with different owners. " << crash;
+  }
   Expression resultE;
   resultE.MakeXOX(*this->owner, this->owner->opDivide(), *this, other);
   *this = resultE;
@@ -1993,8 +2100,9 @@ void Expression::operator*=(const Expression& other) {
   MacroRegisterFunctionWithName("Expression::operator*=");
   if (this->owner == 0 && other.owner == 0) {
     this->theData *= other.theData;
-    if (this->theData != 1 && this->theData != 0)
+    if (this->theData != 1 && this->theData != 0) {
       crash << "Attempting to add non-initialized expressions" << crash;
+    }
     return;
   }
   if (other.owner == 0) {
@@ -2003,47 +2111,59 @@ void Expression::operator*=(const Expression& other) {
     (*this) *= otherCopy;
     return;
   }
-  if (this->owner == 0)
+  if (this->owner == 0) {
     this->AssignValue(this->theData, *other.owner);
-  if (this->owner != other.owner)
+  }
+  if (this->owner != other.owner) {
     crash << "Error: adding expressions with different owners. " << crash;
+  }
   Expression resultE;
   resultE.MakeXOX(*this->owner, this->owner->opTimes(), *this, other);
   *this = resultE;
 }
 
 bool Expression::operator==(const Expression& other) const {
-  if (this->owner != other.owner)
+  if (this->owner != other.owner) {
     return false;
+  }
   return this->theData == other.theData && this->children == other.children;
 }
 
 bool Expression::IsEqualToMathematically(const Expression& other) const {
   MacroRegisterFunctionWithName("Expression::IsEqualToMathematically");
-  if (this->owner == 0 && other.owner == 0)
+  if (this->owner == 0 && other.owner == 0) {
     return this->theData == other.theData;
-  if (this->owner == 0)
+  }
+  if (this->owner == 0) {
     return false;
-  if (*this == other)
+  }
+  if (*this == other) {
     return true;
+  }
   Rational theRat, theRatTwo;
   AlgebraicNumber theAlgebraic;
-  if (this->IsOfType(&theRat) && other.IsOfType(&theRatTwo))
+  if (this->IsOfType(&theRat) && other.IsOfType(&theRatTwo)) {
     return theRat == theRatTwo;
-  if (this->IsOfType(&theRat) && other.IsOfType(&theAlgebraic))
+  }
+  if (this->IsOfType(&theRat) && other.IsOfType(&theAlgebraic)) {
     return theAlgebraic == theRat;
-  if (other.IsOfType(&theRat) && this->IsOfType(&theAlgebraic))
+  }
+  if (other.IsOfType(&theRat) && this->IsOfType(&theAlgebraic)) {
     return theAlgebraic == theRat;
+  }
   double leftD = - 1, rightD = - 1;
-  if (this->EvaluatesToDouble(&leftD) && other.EvaluatesToDouble(&rightD))
+  if (this->EvaluatesToDouble(&leftD) && other.EvaluatesToDouble(&rightD)) {
     return leftD == rightD;
+  }
   Expression differenceE = *this;
   differenceE -= other;
   Expression differenceEsimplified;
-  if (!this->owner->EvaluateExpression(*this->owner, differenceE, differenceEsimplified))
+  if (!this->owner->EvaluateExpression(*this->owner, differenceE, differenceEsimplified)) {
     return false;
-  if (differenceEsimplified.IsEqualToZero())
+  }
+  if (differenceEsimplified.IsEqualToZero()) {
     return true;
+  }
   if (differenceEsimplified.IsSequenceNElementS()) {
     for (int i = 1; i < differenceEsimplified.size(); i ++) {
       if (!differenceEsimplified[i].IsEqualToZero()) {
@@ -2052,10 +2172,12 @@ bool Expression::IsEqualToMathematically(const Expression& other) const {
     }
     return true;
   }
-  if (this->size() != other.size())
+  if (this->size() != other.size()) {
     return false;
-  if (this->size() == 0)
+  }
+  if (this->size() == 0) {
     return this->theData == other.theData;
+  }
   for (int i = 0; i < this->size(); i ++) {
     if (!(*this)[i].IsEqualToMathematically(other[i])) {
       return false;
@@ -2068,17 +2190,20 @@ SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution() co
   this->CheckInitialization();
   Expression myContext = this->GetContext();
   int indexSSalg = myContext.ContextGetIndexAmbientSSalg();
-  if (indexSSalg == - 1)
+  if (indexSSalg == - 1) {
     return 0;
+  }
   return &this->owner->theObjectContainer.theSSLieAlgebras.theValues[indexSSalg];
 }
 
 Function& Calculator::GetFunctionHandlerFromNamedRule(const std::string& inputNamedRule) {
   int theIndex = this->namedRules.GetIndex(inputNamedRule);
-  if (theIndex == - 1)
+  if (theIndex == - 1) {
     crash << "Named rule " << inputNamedRule << " does not exist." << crash;
-  if (this->namedRulesLocations[theIndex][0] == 0)
+  }
+  if (this->namedRulesLocations[theIndex][0] == 0) {
     return this->FunctionHandlers[this->namedRulesLocations[theIndex][1]][this->namedRulesLocations[theIndex][2]];
+  }
   return this->operationsCompositeHandlers[this->namedRulesLocations[theIndex][1]][this->namedRulesLocations[theIndex][2]];
 }
 
@@ -2099,8 +2224,9 @@ void Calculator::AddOperationBuiltInType(const std::string& theOpName) {
 }
 
 void Calculator::AddOperationNoRepetitionAllowed(const std::string& theOpName) {
-  if (this->GetOperations().Contains(theOpName))
+  if (this->GetOperations().Contains(theOpName)) {
     crash << "This is a programming error: operation " << theOpName << " already created. " << crash;
+  }
   this->theAtoms.AddOnTop(theOpName);
   this->FunctionHandlers.SetSize(this->theAtoms.size);
   this->FunctionHandlers.LastObject()->SetSize(0);
@@ -2140,8 +2266,9 @@ void Calculator::RegisterCalculatorFunctionIdentifier(
   const Function& theFun, int indexOp, int functionType, int theFunIndex
 ) {
   MacroRegisterFunctionWithName("Calculator::RegisterCalculatorFunctionIdentifier");
-  if (theFun.calculatorIdentifier == "")
+  if (theFun.calculatorIdentifier == "") {
     return;
+  }
   int namedRuleIndex = this->namedRules.GetIndex(theFun.calculatorIdentifier);
   if (namedRuleIndex == - 1) {
     this->namedRules.AddOnTop(theFun.calculatorIdentifier);
@@ -2189,16 +2316,18 @@ void Calculator::AddOperationHandler(
 ) {
   int indexOp = this->theAtoms.GetIndex(theOpName);
   int indexParentOpThatBansHandler = - 1;
-  if (parentOpThatBansHandler != "")
+  if (parentOpThatBansHandler != "") {
     indexParentOpThatBansHandler = this->theAtoms.GetIndexIMustContainTheObject(parentOpThatBansHandler);
+  }
   if (indexOp == - 1) {
     this->theAtoms.AddOnTop(theOpName);
     indexOp = this->theAtoms.size - 1;
     this->FunctionHandlers.SetSize(this->theAtoms.size);
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
-  if (opArgumentListIgnoredForTheTimeBeing != "")
+  if (opArgumentListIgnoredForTheTimeBeing != "") {
     crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
+  }
   Function theFun(
     *this, indexOp, this->FunctionHandlers[indexOp].size, handler,
     0, opDescription, opExample,
@@ -2208,10 +2337,11 @@ void Calculator::AddOperationHandler(
   theFun.additionalIdentifier = inputAdditionalIdentifier;
   theFun.calculatorIdentifier = inputCalculatorIdentifier;
 
-  if (theOpName == "*" || theOpName == "+" || theOpName == "/" || theOpName == "\\otimes" || theOpName == "^")
+  if (theOpName == "*" || theOpName == "+" || theOpName == "/" || theOpName == "\\otimes" || theOpName == "^") {
     this->FunctionHandlers[indexOp].Reserve(100);
-  else
+  } else {
     this->FunctionHandlers[indexOp].Reserve(10);
+  }
   this->FunctionHandlers[indexOp].AddOnTop(theFun);
   this->RegisterCalculatorFunctionIdentifier(theFun, indexOp, 0, this->FunctionHandlers[indexOp].size - 1);
 }
@@ -2230,17 +2360,27 @@ void Calculator::AddOperationComposite(
 ) {
   MacroRegisterFunctionWithName("Calculator::AddOperationComposite");
   int theIndex = this->operationsComposite.GetIndex(theOpName);
-  if (opArgumentListIgnoredForTheTimeBeing != "")
+  if (opArgumentListIgnoredForTheTimeBeing != "") {
     crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
+  }
   if (theIndex == - 1) {
     theIndex = this->operationsComposite.size;
     this->operationsComposite.AddOnTop(theOpName);
     this->operationsCompositeHandlers.SetSize(this->operationsCompositeHandlers.size + 1);
     this->operationsCompositeHandlers.LastObject()->SetSize(0);
   }
-  Function theFun
-  (*this, theIndex, this->operationsCompositeHandlers[theIndex].size, handler, 0, opDescription,
-   opExample, isInner, visible, experimental);
+  Function theFun(
+    *this,
+    theIndex,
+    this->operationsCompositeHandlers[theIndex].size,
+    handler,
+    0,
+    opDescription,
+    opExample,
+    isInner,
+    visible,
+    experimental
+  );
   theFun.additionalIdentifier = inputAdditionalIdentifier;
   theFun.calculatorIdentifier = inputCalculatorIdentifier;
   theFun.flagIsCompositeHandler = true;
@@ -2284,50 +2424,60 @@ std::string Calculator::ElementToStringNonBoundVars() {
 }
 
 bool Function::inputFitsMyInnerType(const Expression& input) {
-  if (!this->flagIsInner)
+  if (!this->flagIsInner) {
     return false;
-  if (this->theArgumentTypes.children.size != 2)
+  }
+  if (this->theArgumentTypes.children.size != 2) {
     return true;
-  if (input.children.size != 3)
+  }
+  if (input.children.size != 3) {
     return false;
+  }
   bool argument1good = this->theArgumentTypes[0].theData == - 1 ? true : input[1].IsListStartingWithAtom(this->theArgumentTypes[0].theData);
   bool argument2good = this->theArgumentTypes[1].theData == - 1 ? true : input[2].IsListStartingWithAtom(this->theArgumentTypes[1].theData);
   return argument1good && argument2good;
 }
 
 std::string Function::ToStringShort() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return "(non-initialized)";
+  }
   std::stringstream out;
-  if (this->flagIsCompositeHandler)
+  if (this->flagIsCompositeHandler) {
     out << "<span style =\"color:#FF0000\">" << this->owner->operationsComposite[this->indexOperation]
     << " </span><span style =\"color:#00FF00\">(composite)</span> ("
     << this->indexAmongOperationHandlers + 1 << " out of "
     << this->owner->operationsCompositeHandlers[this->indexOperation].size << ") ";
-  else
+  } else {
     out << "<span style =\"color:#FF0000\">" << this->owner->theAtoms[this->indexOperation]
     << "</span> (" << this->indexAmongOperationHandlers + 1 << " out of "
     << this->owner->FunctionHandlers[this->indexOperation].size << "). ";
+  }
   return out.str();
 }
 
 std::string Function::ToStringSummary() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return "(non-initialized)";
+  }
   std::stringstream out;
   out << this->ToStringShort();
-  if (this->calculatorIdentifier != "")
+  if (this->calculatorIdentifier != "") {
     out << "Rule name: <span style ='color:blue'>" << this->calculatorIdentifier << "</span>. ";
-  if (this->additionalIdentifier != "")
+  }
+  if (this->additionalIdentifier != "") {
     out << "Handler: " << this->additionalIdentifier << ". ";
+  }
   return out.str();
 }
 
 bool Function::ShouldBeApplied(int parentOpIfAvailable) {
-  if (this->flagDisabledByUser)
+  if (this->flagDisabledByUser) {
     return false;
-  if (parentOpIfAvailable < 0 || this->indexOperationParentThatBansHandler < 0)
+  }
+  if (parentOpIfAvailable < 0 || this->indexOperationParentThatBansHandler < 0) {
     return true;
+  }
   return this->indexOperationParentThatBansHandler != parentOpIfAvailable;
 }
 
@@ -2629,8 +2779,9 @@ std::string Calculator::ToString() {
   out << "<hr>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
   for (int i = 0; i < this->controlSequences.size; i ++) {
     out << openTag1 << this->controlSequences[i] << closeTag1;
-    if (i != this->controlSequences.size)
+    if (i != this->controlSequences.size) {
       out << ", ";
+    }
   }
   out << "<br>\n User or run-time defined atoms = " << this->theAtoms.size << " (= "
   << this->NumPredefinedAtoms << " predefined + "
@@ -3003,7 +3154,8 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
       return false;
     }
     if (!commonContext.ContextMergeContexts(commonContext, (*this)[i].GetContext(), commonContext)) {
-      *this->owner << "<hr>Failed to merge context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();
+      *this->owner << "<hr>Failed to merge context " << commonContext.ToString()
+      << " with " << (*this)[i].GetContext().ToString();
       return false;
     }
   }

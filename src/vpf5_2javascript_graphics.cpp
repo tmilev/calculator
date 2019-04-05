@@ -7,12 +7,14 @@ ProjectInformationInstance ProjectInfoVpf5_2cpp(__FILE__, "Calculator javascript
 
 std::string CreateJavaScriptVectors(Vectors<double>& inputVectors, const std::string& arrayName, bool useVar) {
   MacroRegisterFunctionWithName("CreateStaticJavaScriptVectorsArrayWithProjection");
-  if (inputVectors.size == 0)
+  if (inputVectors.size == 0) {
     return "";
+  }
   std::stringstream out;
   out << "\n";
-  if (useVar)
+  if (useVar) {
     out << "var ";
+  }
   out << arrayName << "= new Array(" << inputVectors.size << ");\n";
   int theDimension = inputVectors[0].size;
   for (int i = 0; i < inputVectors.size; i ++) {
@@ -43,14 +45,14 @@ std::string CreateStaticJavaScriptVectorsArrayWithProjection(
     out << arrayName << "[" << i << "] =[";
     for (int j = 0; j < theDimension; j ++) {
       out << inputVectors[i][j];
-      if (j != theDimension - 1)
+      if (j != theDimension - 1) {
         out << ",";
+      }
      }
     out <<  "];\n";
   }
   for (int i = 0; i < inputVectors.size; i ++) {
     ////////////////////
-//    out << projectionsName << "[" << i << "] = new Array(2);\n";
     out << projectionsName << "[" << i << "] =[0,0];\n";
   }
   return out.str();
@@ -60,8 +62,9 @@ std::string CreateStaticJavaScriptListVectorsWithProjection(
   List<Vectors<double> >& inputVectors, const std::string& arrayName, const std::string& projectionsName
 ) {
   MacroRegisterFunctionWithName("CreateStaticJavaScriptListVectorsWithProjection");
-  if (inputVectors.size == 0)
+  if (inputVectors.size == 0) {
     return "";
+  }
   std::stringstream out;
   out << "\nvar " << arrayName << "= new Array(" << inputVectors.size << ");\n";
   out << "var " << projectionsName << "= new Array(" << inputVectors.size << ");\n";
@@ -76,8 +79,9 @@ std::string CreateStaticJavaScriptListVectorsWithProjection(
 
 std::string CreateJavaScriptListVectors(List<Vectors<double> >& inputVectors, const std::string& arrayName) {
   MacroRegisterFunctionWithName("CreateStaticJavaScriptListVectors");
-  if (inputVectors.size == 0)
+  if (inputVectors.size == 0) {
     return "";
+  }
   std::stringstream out;
   out << "\nvar " << arrayName << "= new Array(" << inputVectors.size << ");\n";
   for (int i = 0; i < inputVectors.size; i ++) {
@@ -90,12 +94,14 @@ std::string CreateJavaScriptListVectors(List<Vectors<double> >& inputVectors, co
 
 std::string CreateStaticJavaScriptTextArray(List<std::string>& theLabels, const std::string& arrayName) {
   MacroRegisterFunctionWithName("CreateStaticJavaScriptVectorsArrayWithProjection");
-  if (theLabels.size == 0)
+  if (theLabels.size == 0) {
     return "";
+  }
   std::stringstream out;
   out << "var " << arrayName << "= new Array(" << theLabels.size << ");\n";
-  for (int i = 0; i < theLabels.size; i ++)
+  for (int i = 0; i < theLabels.size; i ++) {
     out << arrayName << "[" << i << "] =\"" << theLabels[i] << "\";\n";
+  }
   return out.str();
 }
 

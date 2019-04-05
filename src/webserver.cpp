@@ -3195,14 +3195,14 @@ int WebWorker::ProcessProblemGiveUp() {
 int WebWorker::ProcessProblemSolution() {
   MacroRegisterFunctionWithName("WebWorker::ProcessProblemSolution");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetProblemSolution();
+  stOutput << HtmlInterpretation::GetProblemSolutionString();
   return 0;
 }
 
 int WebWorker::ProcessSubmitAnswersPreview() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSubmitAnswersPreview");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::submitAnswersPreview();
+  stOutput << HtmlInterpretation::submitAnswersPreviewString();
   return 0;
 }
 
@@ -3249,7 +3249,7 @@ std::string HtmlInterpretation::ModifyProblemReport() {
 int WebWorker::ProcessSubmitAnswers() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSubmitAnswers");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::SubmitAnswers();
+  stOutput << HtmlInterpretation::SubmitAnswersString();
   return 0;
 }
 

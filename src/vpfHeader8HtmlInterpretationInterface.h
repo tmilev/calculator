@@ -24,9 +24,11 @@ public:
   static std::string ClonePageResult();
   static std::string AddTeachersSections();
   static std::string AddUserEmails(const std::string& hostWebAddressWithPort);
-  static JSData SubmitAnswers(const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake);
-  static std::string SubmitAnswers();
-  static std::string GetProblemSolution();
+  static JSData SubmitAnswersJSON(const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake);
+  static std::string SubmitAnswersString(const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake);
+  static std::string SubmitAnswersString();
+  static std::string GetProblemSolutionString();
+  static JSData GetProblemSolutionJSON();
   static std::string GetEditPageJSON();
   static std::string GetBrowseProblems();
   static std::string GetJavascriptCaptcha();
@@ -48,7 +50,8 @@ public:
   std::string GetOnePageJSBrowserify();
   static std::string GetScoresInCoursePage();
   static std::string GetNavigationPanelWithGenerationTime();
-  static std::string submitAnswersPreview();
+  static JSData submitAnswersPreviewJSON();
+  static std::string submitAnswersPreviewString();
   static std::string GetSetProblemDatabaseInfoHtml();
   static std::string GetAccountsPage(const std::string& hostWebAddressWithPort);
   static std::string GetAccountsPageJSON(const std::string& hostWebAddressWithPort);

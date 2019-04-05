@@ -11,12 +11,18 @@ ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImpleme
   __FILE__, "Routines for calculus teaching: calculator exam mode."
 );
 
-std::string HtmlInterpretation::GetProblemSolution() {
+std::string HtmlInterpretation::GetProblemSolutionString() {
+  JSData result;
+  result = HtmlInterpretation::GetProblemSolutionJSON();
+  return result.ToString(false);
+}
+
+JSData HtmlInterpretation::GetProblemSolutionJSON() {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetProblemSolution");
-  double startTime = theGlobalVariables.GetElapsedSeconds();
+  int64_t startMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
   CalculatorHTML theProblem;
-  std::stringstream out;
-  std::stringstream errorStream;
+  std::stringstream out, errorStream;
+  JSData result;
   theProblem.LoadCurrentProblemItem(false, theGlobalVariables.GetWebInput("randomSeed"), &errorStream);
   if (!theProblem.flagLoadedSuccessfully) {
     out << "Problem name is: " << theProblem.fileName
@@ -25,20 +31,25 @@ std::string HtmlInterpretation::GetProblemSolution() {
     if (errorStream.str() != "") {
       out << " Comments: " << errorStream.str();
     }
-    return out.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    return result;
   }
   if (theProblem.flagIsForReal) {
     out << " <b>Not allowed to show answer of a problem being tested for real. </b>";
-    return out.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    return result;
   }
   if (theGlobalVariables.GetWebInput("randomSeed") == "") {
     out << " <b>I could not figure out the exercise problem (missing random seed). </b>";
-    return out.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    return result;
   }
   std::stringstream comments;
   if (!theProblem.ParseHTMLPrepareCommands(&comments)) {
-    stOutput << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
-    return out.str();
+    out << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    return result;
+
   }
   std::string lastStudentAnswerID;
   MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
@@ -49,13 +60,15 @@ std::string HtmlInterpretation::GetProblemSolution() {
   if (indexLastAnswerId == - 1) {
     out << "<b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
-    << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
+    << "</b>";
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
       out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
       //out << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
       out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
     }
-    return out.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+    return result;
   }
   Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
   Calculator theInterpreteR;
@@ -64,11 +77,13 @@ std::string HtmlInterpretation::GetProblemSolution() {
   theInterpreteR.flagWriteLatexPlots = false;
   if (!theProblem.PrepareCommands(&comments)) {
     out << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();
-    return out.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    return result;
   }
   if (currentA.solutionElements.size == 0) {
     out << "<b> Unfortunately there is no solution given for this question (answerID: " << lastStudentAnswerID << ").";
-    return out.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    return result;
   }
   std::stringstream answerCommands, answerCommandsNoEnclosures;
   answerCommands << "CommandEnclosure{}(" << currentA.commandsBeforeAnswer << "); "
@@ -82,8 +97,9 @@ std::string HtmlInterpretation::GetProblemSolution() {
     << "Likely there is a bug with the problem. </b></span>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
-    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
-    return out.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+    return result;
   }
   if (theInterpreteR.flagAbortComputationASAP) {
     out << "<span style =\"color:red\"><b>Failed to compose the solution. "
@@ -92,18 +108,20 @@ std::string HtmlInterpretation::GetProblemSolution() {
     << theInterpreteR.outputString
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;
-    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
-    return out.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+    return result;
   }
   if (!theProblem.InterpretProcessExecutedCommands(theInterpreteR, currentA.solutionElements, out)) {
-    return out.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+    return result;
   }
   for (int i = 0; i < currentA.solutionElements.size; i ++) {
     if (!currentA.solutionElements[i].IsHidden()) {
       out << currentA.solutionElements[i].ToStringInterpretedBody();
     }
   }
-  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
     out << "<hr>"
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
@@ -113,7 +131,9 @@ std::string HtmlInterpretation::GetProblemSolution() {
     <<  "<br>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
     << "<hr>Raw input: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   }
-  return out.str();
+  result[WebAPI::result::resultHtml] = out.str();
+  result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+  return result;
 }
 
 std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml() {
@@ -234,14 +254,20 @@ std::string HtmlInterpretation::GetCommentsInterpretation(
   return out.str();
 }
 
-std::string HtmlInterpretation::submitAnswersPreview() {
-  MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswersPreview");
+std::string HtmlInterpretation::submitAnswersPreviewString() {
+  JSData result = HtmlInterpretation::submitAnswersPreviewJSON();
+  return result.ToString(false);
+}
+
+JSData HtmlInterpretation::submitAnswersPreviewJSON() {
+  MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswersPreviewJSON");
   double startTime = theGlobalVariables.GetElapsedSeconds();
   std::string lastStudentAnswerID;
   std::string lastAnswer;
   std::stringstream out, studentAnswerSream;
   MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs =
   theGlobalVariables.webArguments;
+  JSData result;
   for (int i = 0; i < theArgs.size(); i ++) {
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID)) {
       lastAnswer = "(" + HtmlRoutines::ConvertURLStringToNormal(theArgs[i], false) + "); ";
@@ -250,36 +276,38 @@ std::string HtmlInterpretation::submitAnswersPreview() {
   studentAnswerSream << lastAnswer;
   out << "Your answer(s): \\(\\displaystyle " << lastAnswer << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
-  std::stringstream errorStream;
+  std::stringstream errorStream, comments;
   theProblem.LoadCurrentProblemItem(
     theGlobalVariables.UserRequestRequiresLoadingRealExamData(),
     theGlobalVariables.GetWebInput("randomSeed"),
     &errorStream
   );
   if (!theProblem.flagLoadedSuccessfully) {
-    out << "<br><b>" << WebAPI::problem::failedToLoadProblem << "</b> Comments: " << errorStream.str();
+    out << "<br><b>" << WebAPI::problem::failedToLoadProblem << "</b> ";
   }
-  std::stringstream comments;
   if (!theProblem.ParseHTMLPrepareCommands(&comments)) {
     out << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
   }
   int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId == - 1) {
-    out << "<br>Student submitted answerID: " << lastStudentAnswerID
+    errorStream << "<br>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime
-    << " second(s).";
-    return out.str();
+    << " second(s). ";
+    result[WebAPI::result::error] = errorStream.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    return result;
   }
   Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
   if (!theProblem.PrepareCommands(&comments)) {
-    out << "Something went wrong while interpreting the problem file. ";
+    errorStream << "Something went wrong while interpreting the problem file. ";
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
-      out << comments.str();
+      errorStream << comments.str();
     }
-    out << "<br>Response time: "
-    << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
-    return out.str();
+    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::error] = errorStream.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    return result;
   }
   Calculator theInterpreteR;
   theInterpreteR.flagUseLnInsteadOfLog = true;
@@ -295,15 +323,18 @@ std::string HtmlInterpretation::submitAnswersPreview() {
 
   theInterpreteR.Evaluate(studentAnswerWithComments.str());
   if (theInterpreteR.syntaxErrors != "") {
-    out << "<span style =\"color:red\"><b>Failed to parse your answer, got:</b></span><br>"
+    errorStream << "<b style ='color:red'>Failed to parse your answer, got:</b><br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, true);
-    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
-    return out.str();
+    result[WebAPI::result::error] = errorStream.str();
+    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::resultHtml] = out.str();
+    return result;
   } else if (theInterpreteR.flagAbortComputationASAP) {
-    out << "<span style =\"color:red\"><b>Failed to evaluate your answer, got:</b></span><br>"
+    out << "<b style = 'color:red'>Failed to evaluate your answer, got:</b><br>"
     << theInterpreteR.outputString;
-    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
-    return out.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    return result;
   }
   FormatExpressions theFormat;
   theFormat.flagUseLatex = true;
@@ -357,10 +388,11 @@ std::string HtmlInterpretation::submitAnswersPreview() {
       << theInterpreterWithAdvice.outputString << "<br>"
       << theInterpreterWithAdvice.outputCommentsString;
     }
-    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
-    return out.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    return result;
   }
-  if (theInterpreterWithAdvice.flagAbortComputationASAP ) {
+  if (theInterpreterWithAdvice.flagAbortComputationASAP) {
     out << "<br><span style =\"color:red\"><b>"
     << "Something went wrong when interpreting your answer "
     << "in the context of the current problem. "
@@ -373,15 +405,14 @@ std::string HtmlInterpretation::submitAnswersPreview() {
       << problemLinkStream.str() << "<br>"
       << calculatorInputStream.str();
     }
-    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
-    return out.str();
+    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    return result;
   }
   if (hasCommentsBeforeSubmission){
     out << HtmlInterpretation::GetCommentsInterpretation(theInterpreterWithAdvice, 3, theFormat);
   }
-  out << "<br>Response time: "
-  << theGlobalVariables.GetElapsedSeconds() - startTime
-  << " second(s).<hr>";
+  result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
   if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn()) {
     out << "<hr> " << problemLinkStream.str()
     << "<br>"
@@ -391,7 +422,8 @@ std::string HtmlInterpretation::submitAnswersPreview() {
     << theInterpreterWithAdvice.outputString
     << "<br>" << theInterpreterWithAdvice.outputCommentsString;
   }
-  return out.str();
+  result[WebAPI::result::resultHtml] = out.str();
+  return result;
 }
 
 std::string HtmlInterpretation::ClonePageResult() {
@@ -982,11 +1014,21 @@ std::string HtmlInterpretation::GetEditPageJSON() {
   return output.ToString(false);
 }
 
-JSData HtmlInterpretation::SubmitAnswers() {
-  return HtmlInterpretation::SubmitAnswers(theGlobalVariables.GetWebInput("randomSeed"), 0, true);
+std::string HtmlInterpretation::SubmitAnswersString() {
+  JSData result;
+  result = HtmlInterpretation::SubmitAnswersJSON(theGlobalVariables.GetWebInput("randomSeed"), 0, true);
+  return result.ToString(false);
 }
 
-JSData HtmlInterpretation::SubmitAnswers(
+std::string HtmlInterpretation::SubmitAnswersString(
+  const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
+) {
+  JSData result;
+  result = HtmlInterpretation::SubmitAnswersJSON(inputRandomSeed, outputIsCorrect, timeSafetyBrake);
+  return result.ToString(false);
+}
+
+JSData HtmlInterpretation::SubmitAnswersJSON(
   const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
 ) {
   MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswers");
@@ -1000,13 +1042,13 @@ JSData HtmlInterpretation::SubmitAnswers(
   if (!theProblem.flagLoadedSuccessfully) {
     errorStream << "Failed to load current problem. ";
     result[WebAPI::result::error] = errorStream.str();
-    return result.ToString(false);
+    return result;
   }
   if (!theProblem.ParseHTMLPrepareCommands(&comments)) {
     errorStream << "<b>Failed to parse problem. </b>";
     result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::comments] = comments.str();
-    return result.ToString(false);
+    return result;
   }
   if (!theProblem.theProblemData.flagRandomSeedGiven && !theProblem.flagIsForReal) {
     output << "<b>Random seed not given.</b>";
@@ -1029,14 +1071,14 @@ JSData HtmlInterpretation::SubmitAnswers(
         << " and " << theProblem.theProblemData.theAnswers[newAnswerIndex].answerId
         << "].</b> At present, multiple answer submission is not supported. ";
         result[WebAPI::result::resultHtml] = output.str();
-        return result.ToString(false);
+        return result;
       }
       if (answerIdIndex == - 1) {
         output << "<b> You submitted an answer to tag with id "
         << studentAnswerNameReader
         << " which is not on my list of answerable tags. </b>";
         result[WebAPI::result::resultHtml] = output.str();
-        return result.ToString(fase);
+        return result;
       }
       Answer& currentProblemData = theProblem.theProblemData.theAnswers[answerIdIndex];
       currentProblemData.currentAnswerURLed = theArgs.theValues[i];
@@ -1044,14 +1086,14 @@ JSData HtmlInterpretation::SubmitAnswers(
         output << "<b> Your answer to tag with id " << studentAnswerNameReader
         << " appears to be empty, please resubmit. </b>";
         result[WebAPI::result::resultHtml] = output.str();
-        return result.ToString(fase);
+        return result;
       }
     }
   }
   if (answerIdIndex == - 1) {
     output << "<b>Something is wrong: I found no submitted answers.</b>";
     result[WebAPI::result::resultHtml] = output.str();
-    return result.ToString(fase);
+    return result;
   }
   ProblemData& currentProblemData = theProblem.theProblemData;
   Answer& currentA = currentProblemData.theAnswers[answerIdIndex];
@@ -1140,7 +1182,7 @@ JSData HtmlInterpretation::SubmitAnswers(
       << "<br>";
     }
     result[WebAPI::result::resultHtml] = output.str();
-    return result.ToString(fase);
+    return result;
   }
   bool tempIsCorrect = false;
   if (outputIsCorrect == 0) {
@@ -1154,24 +1196,24 @@ JSData HtmlInterpretation::SubmitAnswers(
     *outputIsCorrect = (mustBeOne == 1);
   }
   FormatExpressions theFormat;
-  out << "<table style = 'width:300px'>";
+  output << "<table style = 'width:300px'>";
   if (!(*outputIsCorrect)) {
-    out << "<tr><td><b style = 'color:red'><b>Your answer appears to be incorrect. </b></td></tr>";
+    output << "<tr><td><b style = 'color:red'><b>Your answer appears to be incorrect. </b></td></tr>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn()) {
-      out << "<tr><td>Admin view internals. "
+      output << "<tr><td>Admin view internals. "
       << "<hr>" << debugInputStream.str()
       << "<br>The calculator output is: " << theInterpreter.outputString
       << "Comments: " << theInterpreter.Comments.str()
       << "<hr>Input, no enclosures: <hr>"
       << completedProblemStreamNoEnclosures.str();
-      out << "<hr>Input, full:<hr>"
+      output << "<hr>Input, full:<hr>"
       << theInterpreter.inputString << "<hr></td></tr>";
     }
   } else {
-    out << "<tr><td><span style =\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
+    output << "<tr><td><span style =\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
   }
   if (hasCommentsBeforeSubmission) {
-    out << "<tr><td>" << HtmlInterpretation::GetCommentsInterpretation(theInterpreter, 3, theFormat) << "</td></tr>\n";
+    output << "<tr><td>" << HtmlInterpretation::GetCommentsInterpretation(theInterpreter, 3, theFormat) << "</td></tr>\n";
   }
   if (theGlobalVariables.flagDatabaseCompiled) {
     UserCalculator& theUser = theProblem.currentUseR;
@@ -1180,7 +1222,7 @@ JSData HtmlInterpretation::SubmitAnswers(
     bool hasDeadline = true;
     double secondsTillDeadline = - 1;
     if (theProblem.flagIsForReal) {
-      if (!theProblem.LoadAndParseTopicList(out)) {
+      if (!theProblem.LoadAndParseTopicList(output)) {
         hasDeadline = false;
       }
       std::string theSQLstring;
@@ -1197,11 +1239,13 @@ JSData HtmlInterpretation::SubmitAnswers(
           //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
           std::stringstream badDateStream;
           if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream)) {
-            out << "<tr><td><b>Problem reading deadline. </b> The deadline string was: "
+            output << "<tr><td><b>Problem reading deadline. </b> The deadline string was: "
             << theDeadlineString << ". Comments: "
             << "<span style =\"color:red\">" << badDateStream.str() << "</span>"
             << "</td></tr><tr><td> This should not happen. " << CalculatorHTML::BugsGenericMessage << "</td></tr>";
-            return out.str();
+            output << "</table>";
+            result[WebAPI::result::resultHtml] = output.str();
+            return result;
           }
           now.AssignLocalTime();
           //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
@@ -1211,7 +1255,7 @@ JSData HtmlInterpretation::SubmitAnswers(
         }
       }
       if (deadLinePassed) {
-        out << "<tr><td><span style =\"color:red\"><b>Deadline passed, attempt not recorded.</b></span></td></tr>";
+        output << "<tr><td><span style =\"color:red\"><b>Deadline passed, attempt not recorded.</b></span></td></tr>";
       } else {
         currentA.numSubmissions ++;
         if ((*outputIsCorrect)) {
@@ -1219,7 +1263,7 @@ JSData HtmlInterpretation::SubmitAnswers(
           if (currentA.firstCorrectAnswerClean == "") {
             currentA.firstCorrectAnswerClean = currentA.currentAnswerClean;
           } else {
-            out << "<tr><td>[first correct answer: " << currentA.firstCorrectAnswerClean << "]</td></tr>";
+            output << "<tr><td>[first correct answer: " << currentA.firstCorrectAnswerClean << "]</td></tr>";
           }
         }
       }
@@ -1234,11 +1278,11 @@ JSData HtmlInterpretation::SubmitAnswers(
       //  << "<hr>";
       theUser.SetProblemData(theProblem.fileName, currentProblemData);
       if (!theUser.StoreProblemDataToDatabaseJSON(&comments)) {
-        out << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
+        output << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
         << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "
         << comments.str() << "</td></tr>";
       } else {
-        out << "<tr><td>So far " << currentA.numCorrectSubmissions << " correct and "
+        output << "<tr><td>So far " << currentA.numCorrectSubmissions << " correct and "
         << currentA.numSubmissions - currentA.numCorrectSubmissions
         << " incorrect submissions.</td></tr>";
       }
@@ -1247,37 +1291,38 @@ JSData HtmlInterpretation::SubmitAnswers(
           secondsTillDeadline *= - 1;
         }
         if (deadLinePassed) {
-          out << "<tr><td><span style =\"color:red\"><b>Submission "
+          output << "<tr><td><span style =\"color:red\"><b>Submission "
           << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, false)
           << " after deadline. </b></span></td></tr>";
         } else {
-          out << "<tr><td><span style =\"color:green\"><b>Submission "
+          output << "<tr><td><span style =\"color:green\"><b>Submission "
           << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, false)
           << " before deadline. </b></span></td></tr>";
         }
       } else {
-        out << "<tr><td><span style =\"color:green\"><b>No deadline yet.</b></span></td></tr>";
+        output << "<tr><td><span style =\"color:green\"><b>No deadline yet.</b></span></td></tr>";
       }
     }
   }
-  out << "<tr><td>Your answer was: ";
-  out << "\\(\\displaystyle ";
-  out << currentA.currentAnswerClean;
-  out << "\\)";
+  output << "<tr><td>Your answer was: ";
+  output << "\\(\\displaystyle ";
+  output << currentA.currentAnswerClean;
+  output << "\\)";
   std::string errorMessage;
   errorMessage = theInterpreter.ToStringIsCorrectAsciiCalculatorString(currentA.currentAnswerClean);
   if (errorMessage != "") {
-    out << "<br>" << errorMessage
+    output << "<br>" << errorMessage
     << "<hr><b>If you entered this expression through the keyboard (without copying + pasting) this is a bug: "
     << "please report it to the web site administrator. Don't forget to mention your keyboard/character setup. "
     << "Are you using the standard English keyboard? Cyrillic, Chinese, etc. characters are not accepted. </b> "
     << "<hr><span style =\"color:red\"><b>Copying and pasting an answer not computed by yourself "
     << " is considered cheating (example: answer from an online program for doing homework).</b> </span>";
   }
-  out << "</td></tr>";
-  out << "</table>";
-  out << "Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).<hr>";
-  return out.str();
+  output << "</td></tr>";
+  output << "</table>";
+  result[WebAPI::result::resultHtml] = output.str();
+  result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
+  return result;
 }
 
 std::string HtmlInterpretation::AddTeachersSections() {

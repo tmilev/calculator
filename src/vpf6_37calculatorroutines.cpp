@@ -149,7 +149,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
         break;
       theGlobalVariables.SetWebInpuT(currentKey, HtmlRoutines::ConvertStringToURLString(currentAnswer, false));
       solutionReport +=
-      HtmlInterpretation::SubmitAnswers(randomSeedCurrent, &answersWork, false) + "<hr>";
+      HtmlInterpretation::SubmitAnswersString(randomSeedCurrent, &answersWork, false) + "<hr>";
       if (!answersWork)
         break;
       globalKeys.RemoveKey(currentKey);

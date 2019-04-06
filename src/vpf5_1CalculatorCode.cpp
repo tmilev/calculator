@@ -63,7 +63,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   bool WeHaveNotEnteredACycle = true;
   while (EnteringVariable != - 1 && WeHaveNotEnteredACycle && GlobalGoal.IsPositive()) {
     EnteringVariable = - 1; ChangeGradient.MakeZero();
-    for (int i = 0; i < tempMatA.NumCols; i ++)
+    for (int i = 0; i < tempMatA.NumCols; i ++) {
       if (!BaseVariables.selected[i]) {
         Rational PotentialChangeGradient; bool hasAPotentialLeavingVariable;
         Matrix<Rational>::ComputePotentialChangeGradient(
@@ -74,10 +74,13 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
           ChangeGradient.Assign(PotentialChangeGradient);
         }
       }
+    }
     if (EnteringVariable != - 1) {
       int LeavingVariableRow;
       Rational MaxMovement;
-      Matrix<Rational>::GetMaxMovementAndLeavingVariableRow(MaxMovement, LeavingVariableRow, EnteringVariable, tempMatA, matX, BaseVariables);
+      Matrix<Rational>::GetMaxMovementAndLeavingVariableRow(
+        MaxMovement, LeavingVariableRow, EnteringVariable, tempMatA, matX, BaseVariables
+      );
       Rational tempRat, tempTotalChange;
       if (tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero()) {
         crash << "The leaving-entering coefficient is not allowed to be zero. " << crash;
@@ -105,8 +108,6 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
           WeHaveNotEnteredACycle = false;
         }
       }
-      //if (BaseVariables.elements[LeavingVariableRow] ==34)
-      //  tempMatA.ComputeDebugString();
       for (int i = 0; i < tempMatA.NumRows; i ++) {
         if (!tempMatA.elements[i][EnteringVariable].IsEqualToZero()&& i != LeavingVariableRow) {
           tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
@@ -184,7 +185,9 @@ bool Vectors<coefficient>::ConesIntersect(
     }
     matA.elements[theDimension][currentCol].MakeZero();
   }
-  if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA, matb, outputLinearCombo)) {
+  if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
+    matA, matb, outputLinearCombo
+  )) {
     if (outputSplittingNormal != 0) {
       bool tempBool = Vectors<coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal);
       if (!tempBool) {
@@ -210,7 +213,9 @@ bool Calculator::innerGCDOrLCMPoly(Calculator& theCommands, const Expression& in
   MacroRegisterFunctionWithName("Calculator::innerGCDOrLCMPoly");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, CalculatorConversions::innerPolynomial<Rational>)) {
+  if (!theCommands.GetVectorFromFunctionArguments(
+    input, thePolys, &theContext, 2, CalculatorConversions::innerPolynomial<Rational>
+  )) {
     return output.MakeError("Failed to extract a list of 2 polynomials. ", theCommands);
   }
   Polynomial<Rational> outputP;
@@ -222,10 +227,14 @@ bool Calculator::innerGCDOrLCMPoly(Calculator& theCommands, const Expression& in
   return output.AssignValueWithContext(outputP, theContext, theCommands);
 }
 
-bool Calculator::GetListPolysVariableLabelsInLex(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext) {
+bool Calculator::GetListPolysVariableLabelsInLex(
+  const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext
+) {
   MacroRegisterFunctionWithName("Calculator::GetListPolysVariableLabelsInLex");
   Expression theContextStart(*this);
-  if (!this->GetVectorFromFunctionArguments(input, output, &theContextStart, 0, CalculatorConversions::innerPolynomial<Rational>)) {
+  if (!this->GetVectorFromFunctionArguments(
+    input, output, &theContextStart, 0, CalculatorConversions::innerPolynomial<Rational>
+  )) {
     return false;
   }
   if (output.size < 2) {
@@ -335,14 +344,18 @@ std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType
     << "<a href=\"" <<  GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder
     << theType.ToString() << "/" << theTitlePageFileNameNoPathFastLoad << "\">"
     << theType[0].theLetter << theType[0].theRank << " semisipmles subalgebras, fast load</a></td>\n ";
-  } else
+  } else {
     out << "<td>Not available</td>\n";
+  }
   out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
   << "?request=calculator&mainInput=printSlTwoSubalgebras%7B%7D%28"
-  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
+  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">"
+  << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
   out << "<td><a href=\""
-  << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=calculator&mainInput=printRootSubalgebras%7B%7D%28"
-  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " root subalgebras</a></td>\n";
+  << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
+  << "?request=calculator&mainInput=printRootSubalgebras%7B%7D%28"
+  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter
+  << theType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
 }
 
@@ -351,7 +364,8 @@ std::string Calculator::ToStringLinksToCalculator(const DynkinType& theType, For
   std::stringstream out;
   out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
   << "?request=calculator&mainInput=PrintSemisimpleLieAlgebra%7B%7D"
-  << theType[0].theLetter << "_" << theType[0].theRank << "\">" << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
+  << theType[0].theLetter << "_" << theType[0].theRank << "\">"
+  << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras()) {
     out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
     << "?request=calculator&mainInput=printSemisimpleSubalgebras%7B%7D%28"
@@ -526,7 +540,9 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
     return output.MakeError("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
   }
   SemisimpleLieAlgebra* ownerSS = 0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS)) {
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
+    CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS
+  )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   ElementSemisimpleLieAlgebra<Rational> theErational;
@@ -556,7 +572,9 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
     );
   }
   SemisimpleLieAlgebra* ownerSS;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS)) {
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
+    CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS
+  )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
@@ -977,7 +995,6 @@ void Plot::ComputeAxesAndBoundingBox() {
       this->highBoundY = MathRoutines::Maximum (currentPoint[1], this->highBoundY);
     }
   }
-
 }
 
 void Plot::ComputeAxesAndBoundingBox3d() {
@@ -1486,7 +1503,6 @@ void Plot::ComputeCanvasNameIfNecessary() {
     return;
   }
   this->canvasCounteR ++;
-  //out << this->ToStringDebug();
   std::stringstream canvasNameStream;
   canvasNameStream << "theCanvas" << this->canvasCounteR;
   this->canvasName = canvasNameStream.str();
@@ -1558,9 +1574,6 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
       currentPlot.GetJavascriptPoints(theFnPlots[i], this->canvasName, funCounter);
     }
   }
-  //outScript << "console.log('window:' + window);";
-  //outScript << "console.log('calculator' + window.calculator);";
-  //outScript << "console.log('drawing' + window.calculator.drawing);";
   outScript << "var drawing = window.calculator.drawing;\n";
   outScript << "drawing.deleteCanvas('" << this->canvasName << "');\n";
   outScript << "var theCanvas = drawing.getCanvasTwoD('" << this->canvasName << "');\n"
@@ -1989,8 +2002,9 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
       checkVector += coneNonStrictGens[i] * outputIntersection[coneStrictGens.size + i];
     }
     if (!checkVector.IsEqualToZero()) {
-      crash << "<br>This is a programming error: the output linear combination" << outputIntersection.ToString()
-      << " corresponds to the cone intersection " << checkVector.ToString() << " and is not equal to zero! Here is the cone output so far: "
+      crash << "<br>This is a programming error: the output linear combination " << outputIntersection.ToString()
+      << " corresponds to the cone intersection " << checkVector.ToString()
+      << " and is not equal to zero! Here is the cone output so far: "
       << out.str() << crash;
     }
     out << "<br>Cones intersect, here is one intersection: 0= " << outputIntersection.ToStringLetterFormat("v");
@@ -1998,7 +2012,8 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
     out << "<br>Cones have empty intersection.";
     out << "<br> A normal separating the cones is: n =" << outputSeparatingNormal.ToString() << ". Indeed, ";
     for (int i = 0; i < coneStrictGens.size; i ++) {
-      out << "<br>\\langle v_{" << i + 1 << "}, n\\rangle = " << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).ToString();
+      out << "<br>\\langle v_{" << i + 1 << "}, n\\rangle = "
+      << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).ToString();
     }
     for (int i = 0; i < coneNonStrictGens.size; i ++) {
       out << "<br>\\langle v_{" << i + 1 + coneStrictGens.size << "}, n\\rangle = "
@@ -2071,11 +2086,14 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(
     adadAppliedToMon.AddMonomial(baseGen, 1);
     right.AdjointRepresentationAction(adadAppliedToMon, tempElt);
     tempElt.Simplify();
-    stOutput << "<br>acting by " << right.ToString() << " on " << adadAppliedToMon.ToString() << " to get " << tempElt.ToString();
+    stOutput << "<br>acting by " << right.ToString() << " on " << adadAppliedToMon.ToString()
+    << " to get " << tempElt.ToString();
     this->AdjointRepresentationAction(tempElt, adadAppliedToMon);
     adadAppliedToMon.Simplify();
-    stOutput << " acting by " << this->ToString() << " on " << tempElt.ToString() << " to get " << adadAppliedToMon.ToString();
-    stOutput << "; coeff of " << baseGen.ToString() << " = " << adadAppliedToMon.GetMonomialCoefficient(baseGen).ToString();
+    stOutput << " acting by " << this->ToString() << " on " << tempElt.ToString() << " to get "
+    << adadAppliedToMon.ToString();
+    stOutput << "; coeff of " << baseGen.ToString() << " = "
+    << adadAppliedToMon.GetMonomialCoefficient(baseGen).ToString();
     result += adadAppliedToMon.GetMonomialCoefficient(baseGen);
   }
   return result;
@@ -2140,7 +2158,9 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
     return false;
   }
   SemisimpleLieAlgebra* theSSlieAlg = 0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSlieAlg)) {
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
+    CalculatorConversions::innerSSLieAlgebra, input[1], theSSlieAlg
+  )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   int theRank = theSSlieAlg->GetRank();
@@ -2174,7 +2194,8 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
   MacroRegisterFunctionWithName("Calculator::innerPerturbSplittingNormal");
   std::stringstream out;
   if (input.size() != 4) {
-    out << "Perturbing splitting normal takes 3 arguments: normal, positive vectors, and vectors relative to which to perturb. "
+    out << "Perturbing splitting normal takes 3 arguments: normal, "
+    << "positive vectors, and vectors relative to which to perturb. "
     << "Instead I got " << input.size() - 1 << ". ";
     return output.MakeError(out.str(), theCommands);
   }
@@ -2588,7 +2609,6 @@ std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged() {
   List<std::string> currentRules;
   for (int j = 0; j < this->output.size; j ++) {
     std::string currentEstring = this->output[j].ToString();
-
     if (currentEstring == prevEstring) {
       currentRules.AddListOnTop(this->rulesDisplayNames[j]);
       continue;

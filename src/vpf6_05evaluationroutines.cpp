@@ -110,11 +110,11 @@ void Calculator::DoLogEvaluationIfNeedBe(Function& inputF) {
   this->LastLogEvaluationTime = theGlobalVariables.GetElapsedSeconds();
 }
 
-bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable) {
+bool Calculator::outerStandardFunction(
+  Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable
+) {
   MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  //if (theCommands.RecursionDepthExceededHandleRoughly("Evaluating built-in user functions. "))
-  //  return false;
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsLisT()) {
     return false;
@@ -240,7 +240,9 @@ bool Calculator::ExpressionMatchesPattern(
     matchedExpressions.theValues.SetSize(numMatchedExpressionsAtStart);
     matchedExpressions.theKeys.SetSize(numMatchedExpressionsAtStart);
     for (int i = 1; i < thePattern.size(); i ++) {
-      if (!(this->ExpressionMatchesPattern(thePattern[i], input[thePattern.size() - i], matchedExpressions, commentsGeneral))) {
+      if (!(this->ExpressionMatchesPattern(
+        thePattern[i], input[thePattern.size() - i], matchedExpressions, commentsGeneral
+      ))) {
         return false;
       }
     }
@@ -541,8 +543,9 @@ bool Calculator::EvaluateExpression(
     StateMaintainerCalculator theRuleStackMaintainer(theCommands);
     ReductionOcurred = false;
     counterNumTransformations ++;
-    if (doExpressionHistory)
+    if (doExpressionHistory) {
       theCommands.ExpressionHistoryAdd(output, - 1);
+    }
     if (output.IsAtom(&inputIfAtom)) {
       if (theCommands.atomsThatMustNotBeCached.Contains(inputIfAtom)) {
         outputIsNonCacheable = true;

@@ -386,11 +386,9 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   for (int i = 0; i < InvertedLeviInSmall.CardinalitySelection; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& currentElt =
     theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
-    //stOutput << "<br>current element is: " << currentElt.ToString();
     MatrixTensor<coefficient> currentOp, tempMat;
     currentOp.MakeZero();
     for (int j = 0; j < currentElt.size(); j ++) {
-      //stOutput << "<br>fetching action of generator of index " << currentElt[j].theGeneratorIndex;
       tempMat = this->GetActionGeneratorIndeX(currentElt[j].theGeneratorIndex);
       tempMat *= currentElt.theCoeffs[j];
       currentOp += tempMat;
@@ -418,7 +416,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
       theReport.Report(tempStream4.str());
     }
   }
-  out << "<br>Eigenvectors:<table> ";
+  out << "<br>Eigenvectors: <table>";
   std::stringstream readyForLatexComsumption;
   readyForLatexComsumption << "\\begin{tabular}{|lll|}\n <br>";
   readyForLatexComsumption << "\\hline\\multicolumn{3}{|c|}{Highest weight $"

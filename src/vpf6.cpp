@@ -564,7 +564,8 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   for (int i = 0; i < theGeneratorsItry.size; i ++) {
     latexReport << "l";
   }
-  latexReport << "}\\caption{\\label{tableDiffOps" << selInducing.ToString() << "} Differential operators corresponding to actions"
+  latexReport << "}\\caption{\\label{tableDiffOps" << selInducing.ToString()
+  << "} Differential operators corresponding to actions"
   << " of simple positive generators for the " << selInducing.ToString() << "-parabolic subalgebra.}\\\\<br>";
   List<ModuleSSalgebra<RationalFunctionOld > > theMods;
   theMods.SetSize(theHws.size);
@@ -618,7 +619,8 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
         theWeylFormat.polyAlphabeT[k] = tempstream2.str();
         theWeylFormat.weylAlgebraLetters[k] = tempStream4.str();
       }
-      out << "<tr><td>General monomial in U(n_-):</td><td>" << HtmlRoutines::GetMathMouseHover(genericElt.ToString(&theUEformat)) << "</td> </tr>";
+      out << "<tr><td>General monomial in U(n_-):</td><td>"
+      << HtmlRoutines::GetMathMouseHover(genericElt.ToString(&theUEformat)) << "</td> </tr>";
       latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
       latexReport << "Action on ";
       out << "<tr><td></td><td colspan =\"" << theGeneratorsItry.size << "\"> Element acting</td></td></tr>";
@@ -637,7 +639,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
         theSSalgebra.OrderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
         actionOnGenericElt.Simplify();
         theUEformat.NumAmpersandsPerNewLineForLaTeX = 2;
-        out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat) +"\\end{array}") << "</td>";
+        out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{rcl}&&" + actionOnGenericElt.ToString(&theUEformat) + "\\end{array}") << "</td>";
         theUEformat.NumAmpersandsPerNewLineForLaTeX = 0;
         latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.ToString(&theUEformat) << "\\end{array}$ ";
       }
@@ -667,8 +669,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 0;
       theWeylFormat.MaxLineLength = 300;
       latexReport << " & $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat) << "\\end{array}$";
-      if (j != 0)
+      if (j != 0) {
         latexReport2 << "&&";
+      }
       latexReport2 << " $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat) << "\\end{array}$\\\\ "
       << (j != theGeneratorsItry.size - 1 ? "\\cline{3-3}" : "\\hline" ) << "\n<br>";
       theWeylFormat.CustomCoeffMonSeparator = "";
@@ -738,7 +741,8 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   GlobalVariables theGlobalVariables;
   out << "<br>Semisimple Lie algebra acting on generalized Verma module: " << theAlgebrA.GetLieAlgebraName() << ".";
   out << "<br>Parabolic selection: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
-  out << "<br>Highest weight of Generalized Verma module in fundamental coordinates: " << this->theHWFundamentalCoordsBaseField.ToString();
+  out << "<br>Highest weight of Generalized Verma module in fundamental coordinates: "
+  << this->theHWFundamentalCoordsBaseField.ToString();
   out << "<br>In simple coordinates: " << this->theHWSimpleCoordSBaseField.ToString();
   out << "<br>Finite dimensional part h. w. fundamental coordinates: " << this->theHWFDpartFundamentalCoordS.ToString();
   out << "<br>Finite dimensinoal part h. w. simple coords: " << this->theHWFDpartSimpleCoordS.ToString();
@@ -1103,7 +1107,8 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
     << "<br>The grey lines are the edges of the Weyl chamber.<br>"
     << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
     out << theWeyl.ToStringRootsAndRootReflections();
-    out << " The resulting Lie bracket pairing table follows. <hr> " << theSSalgebra.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    out << " The resulting Lie bracket pairing table follows. <hr> "
+    << theSSalgebra.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
     if (theCommands.flagWriteLatexPlots) {
       out << "Ready for LaTeX consumption version of the first three columns: ";
       out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>%Add to body: <br>"
@@ -1124,8 +1129,10 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   out << "We define the symmetric Cartan matrix <br>by requesting that the entry in the i-th row and j-th column<br> "
   << " be the scalar product of the i^th and j^th roots. The symmetric Cartan matrix is:<br>"
   << HtmlRoutines::GetMathSpanPure(theWeyl.CartanSymmetric.ToString(&latexFormat));
-  out << "<br>Let the (i, j)^{th} entry of the symmetric Cartan matrix be a_{ij}. <br> Then we define the co-symmetric Cartan matrix as "
-  << " the matrix whose (i, j)^{th} entry equals 4*a_{ij}/(a_{ii}*a_{jj}). In other words, the co-symmetric Cartan matrix is the "
+  out << "<br>Let the (i, j)^{th} entry of the symmetric Cartan matrix be a_{ij}. "
+  << "<br> Then we define the co-symmetric Cartan matrix as "
+  << " the matrix whose (i, j)^{th} entry equals 4*a_{ij}/(a_{ii}*a_{jj}). "
+  << "In other words, the co-symmetric Cartan matrix is the "
   << "symmetric Cartan matrix of the dual root system. The co-symmetric Cartan matrix equals:<br>"
   << HtmlRoutines::GetMathSpanPure(theWeyl.CoCartanSymmetric.ToStringLatex());
   out << "<br>The determinant of the symmetric Cartan matrix is: " << theWeyl.CartanSymmetric.GetDeterminant().ToString();
@@ -1157,12 +1164,15 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   Vector<Rational> tempRoot;
   theWeyl.GetEpsilonCoords(theWeyl.rho, tempRoot);
   out << "= " << HtmlRoutines::GetMathSpanPure(tempRoot.ToStringLetterFormat("\\varepsilon"));
-  out << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br>with the j^th simple root times 2 divided by the root length squared,<br> "
+  out << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 "
+  << "<br>with the j^th simple root times 2 divided by the root length squared,<br> "
   << " and 0 with the remaining simple roots): ";
   theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm);
   out << "<table>";
   for (int i = 0; i < fundamentalWeights.size; i ++) {
-    out << "<tr><td style =\"white-space: nowrap\">" << fundamentalWeights[i].ToString() << "</td><td> =</td><td style =\"white-space: nowrap\"> " << HtmlRoutines::GetMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
+    out << "<tr><td style =\"white-space: nowrap\">" << fundamentalWeights[i].ToString()
+    << "</td><td> =</td><td style =\"white-space: nowrap\"> "
+    << HtmlRoutines::GetMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -1170,12 +1180,15 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   << "Please note that the epsilon coordinate realizations "
   << "do not have long roots of length of 2 in types G and C. "
   << "This means that gramm matrix (w.r.t. the standard scalar product)"
-  << " of the epsilon coordinate realizations in types G and C does not equal the  corresponding symmetric Cartan matrix."
+  << " of the epsilon coordinate realizations in types G and C "
+  << "does not equal the  corresponding symmetric Cartan matrix."
   << "  <table>";
   simpleBasis.MakeEiBasis(theWeyl.GetDim());
   theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
   for (int i = 0; i < simplebasisEpsCoords.size; i ++) {
-    out << "<tr><td style =\"white-space: nowrap\">" << simpleBasis[i].ToString() << " </td><td>=</td> <td style =\"white-space: nowrap\">" << HtmlRoutines::GetMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
+    out << "<tr><td style =\"white-space: nowrap\">" << simpleBasis[i].ToString()
+    << " </td><td>=</td> <td style =\"white-space: nowrap\">"
+    << HtmlRoutines::GetMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -2251,7 +2264,19 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes(
     this->FunctionHandlers.SetSize(this->theAtoms.size);
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
-  Function innerFunction(*this, indexOp, this->FunctionHandlers[indexOp].size, innerHandler, 0, opDescription, opExample, true, visible, experimental, true);
+  Function innerFunction(
+    *this,
+    indexOp,
+    this->FunctionHandlers[indexOp].size,
+    innerHandler,
+    0,
+    opDescription,
+    opExample,
+    true,
+    visible,
+    experimental,
+    true
+  );
   innerFunction.theArgumentTypes.reset(*this, 2);
   innerFunction.theArgumentTypes.AddChildAtomOnTop(leftType);
   innerFunction.theArgumentTypes.AddChildAtomOnTop(rightType);
@@ -2329,10 +2354,19 @@ void Calculator::AddOperationHandler(
     crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
   }
   Function theFun(
-    *this, indexOp, this->FunctionHandlers[indexOp].size, handler,
-    0, opDescription, opExample,
-    isInner, visible, experimental, false,
-    inputDisabledByDefault, indexParentOpThatBansHandler
+    *this,
+    indexOp,
+    this->FunctionHandlers[indexOp].size,
+    handler,
+    0,
+    opDescription,
+    opExample,
+    isInner,
+    visible,
+    experimental,
+    false,
+    inputDisabledByDefault,
+    indexParentOpThatBansHandler
   );
   theFun.additionalIdentifier = inputAdditionalIdentifier;
   theFun.calculatorIdentifier = inputCalculatorIdentifier;

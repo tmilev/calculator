@@ -15,10 +15,8 @@ ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp(__FILE_
 
 Expression operator*(const Expression& left, const Expression& right) {
   MacroRegisterFunctionWithName("operator*(Expression, Expression)");
-//  stOutput << "DEBUG: Multiplying: " << left.ToString() << " by " << right.ToString();
   left.CheckInitialization();
   Expression result;
-
   result.MakeXOX(*left.owner, left.owner->opTimes(), left, right);
   return result;
 }
@@ -254,16 +252,20 @@ bool Expression::ConvertsToType(
 ElementSemisimpleLieAlgebra<AlgebraicNumber>* whichElement
 ) const {
   MacroRegisterFunctionWithName("Expression::ConvertsToType");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   ElementUniversalEnveloping<RationalFunctionOld> theUEElt;
-  if (!this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&theUEElt))
+  if (!this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&theUEElt)) {
     return false;
+  }
   ElementSemisimpleLieAlgebra<Rational> theRatElt;
-  if (!theUEElt.GetLieAlgebraElementIfPossible(theRatElt))
+  if (!theUEElt.GetLieAlgebraElementIfPossible(theRatElt)) {
     return false;
-  if (whichElement != 0)
+  }
+  if (whichElement != 0) {
     *whichElement = theRatElt;
+  }
   return true;
 }
 
@@ -451,8 +453,9 @@ int Expression::AddObjectReturnIndex(const
 SemisimpleLieAlgebra
 & inputValue) const {
   this->CheckInitialization();
-  if (!this->owner->theObjectContainer.theSSLieAlgebras.Contains(inputValue.theWeyl.theDynkinType))
+  if (!this->owner->theObjectContainer.theSSLieAlgebras.Contains(inputValue.theWeyl.theDynkinType)) {
     crash << "Semisimple Lie algebra must be allocated directly in the object container. " << crash;
+  }
   return this->owner->theObjectContainer.theSSLieAlgebras.GetIndex(inputValue.theWeyl.theDynkinType);
 }
 
@@ -525,7 +528,6 @@ PlotObject
 & inputValue) const {
   this->CheckInitialization();
   Plot plotContainer;
-//  stOutput << "DEBUG: Calling addplot";
   plotContainer += inputValue;
   return this->owner->theObjectContainer.thePlots
   .AddNoRepetitionOrReturnIndexFirst(plotContainer);
@@ -572,212 +574,271 @@ ElementWeylGroup<WeylGroupData>
 //start Expression::GetValueNonConst specializations.
 template < >
 Rational& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<Rational>())
-    crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<Rational>()) {
+    crash << "This is a programming error: expression not of required type Rational. "
+    << "The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theRationals.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 ElementEllipticCurve<Rational>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<ElementEllipticCurve<Rational> >())
-    crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<ElementEllipticCurve<Rational> >()) {
+    crash << "This is a programming error: expression not of required type Rational. "
+    << "The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.EllipticCurveElementsRational.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 ElementEllipticCurve<ElementZmodP>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<ElementEllipticCurve<ElementZmodP> >())
-    crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<ElementEllipticCurve<ElementZmodP> >()) {
+    crash << "This is a programming error: expression not of required type Rational. The expression equals "
+    << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.EllipticCurveElementsZmodP.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 ElementHyperoctahedralGroupR2& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<ElementHyperoctahedralGroupR2>())
-    crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<ElementHyperoctahedralGroupR2>()) {
+    crash << "This is a programming error: expression not of required type Rational. "
+    << "The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theElementsHyperOctGroup.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 InputBox& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<InputBox>())
-    crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<InputBox>()) {
+    crash << "This is a programming error: expression not of required type Rational. "
+    << "The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theUserInputTextBoxesWithValues.theValues[this->GetLastChild().theData];
 }
 
 template < >
 GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> & Expression::GetValueNonConst() const {
-  if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >())
-    crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >()) {
+    crash << "This is a programming error: expression not of required type Rational. "
+    << "The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theHyperoctahedralReps[this->GetLastChild().theData];
 }
 
 template < >
 ElementZmodP& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementZmodP>())
-    crash << "This is a programming error: expression not of required type ElementZmodP. The expression equals " << this->ToString() << "." << crash;
+    crash << "This is a programming error: expression not of required type ElementZmodP. "
+    << "The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theEltsModP.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 AlgebraicNumber& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<AlgebraicNumber>())
-    crash << "This is a programming error: expression not of required type AlgebraicNumber. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<AlgebraicNumber>()) {
+    crash << "This is a programming error: expression not of required type AlgebraicNumber. "
+    << "The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theAlgebraicNumbers.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 double& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<double>())
-    crash << "This is a programming error: expression not of required type double. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<double>()) {
+    crash << "This is a programming error: expression not of required type double. "
+    << "The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theDoubles.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 std::string& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<std::string>())
-    crash << "This is a programming error: expression not of required type std::string. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<std::string>()) {
+    crash << "This is a programming error: expression not of required type std::string. "
+    << "The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theStrings.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 RationalFunctionOld& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<RationalFunctionOld>())
-    crash << "This is a programming error: expression not of required type RationalFunctionOld. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<RationalFunctionOld>()) {
+    crash << "This is a programming error: expression not of required type RationalFunctionOld. "
+    << "The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theRFs.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 ElementUniversalEnveloping<RationalFunctionOld>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
-    crash << "This is a programming error: expression not of required type ElementUniversalEnveloping_RationalFunctionOld. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >()) {
+    crash << "This is a programming error: expression not of required type "
+    << "ElementUniversalEnveloping_RationalFunctionOld. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theUEs.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 Polynomial<Rational>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<Polynomial<Rational> >())
-    crash << "This is a programming error: expression not of required type Polynomial_Rational. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<Polynomial<Rational> >()) {
+    crash << "This is a programming error: expression not of required type Polynomial_Rational. "
+    << "The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.thePolys.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 Polynomial<AlgebraicNumber>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<Polynomial<AlgebraicNumber> >())
-    crash << "This is a programming error: expression not of required type Polynomial_AlgebraicNumber. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<Polynomial<AlgebraicNumber> >()) {
+    crash << "This is a programming error: expression not of required type Polynomial_AlgebraicNumber. "
+    << "The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.thePolysOverANs.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 ElementWeylAlgebra<Rational>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<ElementWeylAlgebra<Rational> >())
-    crash << "This is a programming error: expression not of required type ElementWeylAlgebra_Rational. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<ElementWeylAlgebra<Rational> >()) {
+    crash << "This is a programming error: expression not of required type "
+    << "ElementWeylAlgebra_Rational. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theWeylAlgebraElements.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 LittelmannPath& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<LittelmannPath>())
-    crash << "This is a programming error: expression not of required type LittelmannPath. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<LittelmannPath>()) {
+    crash << "This is a programming error: expression not of required type "
+    << "LittelmannPath. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theLSpaths.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 Weight<Polynomial<Rational> >& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<Weight<Polynomial<Rational> > >())
-    crash << "This is a programming error: expression not of required type LittelmannPath. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<Weight<Polynomial<Rational> > >()) {
+    crash << "This is a programming error: expression not of required type "
+    << "LittelmannPath. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theWeightsPoly.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >())
-    crash << "This is a programming error: expression not of required type MonomialTensor. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >()) {
+    crash << "This is a programming error: expression not of required type "
+    << "MonomialTensor. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theLittelmannOperators.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 ElementTensorsGeneralizedVermas<RationalFunctionOld>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-    crash << "This is a programming error: expression not of required type ElementTGVM_RationalFunctionOld. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()) {
+    crash << "This is a programming error: expression not of "
+    << "required type ElementTGVM_RationalFunctionOld. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theTensorElts.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 charSSAlgMod<Rational>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<charSSAlgMod<Rational> >())
-    crash << "This is a programming error: expression not of required type charSSAlgMod_Rational. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<charSSAlgMod<Rational> >()) {
+    crash << "This is a programming error: expression not of required type "
+    << "charSSAlgMod_Rational. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theCharsSSLieAlgFD.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 SemisimpleLieAlgebra& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<SemisimpleLieAlgebra>())
-    crash << "This is a programming error: expression not of required type SemisimpleLieAlgebra. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<SemisimpleLieAlgebra>()) {
+    crash << "This is a programming error: expression not of required type "
+    << "SemisimpleLieAlgebra. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theSSLieAlgebras.theValues[this->GetLastChild().theData];
 }
 
 template < >
 MatrixTensor<Rational>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<MatrixTensor<Rational> >())
-    crash << "This is a programming error: expression not of required type MatrixTensorRational. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<MatrixTensor<Rational> >()) {
+    crash << "This is a programming error: expression not of required type "
+    << "MatrixTensorRational. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theMatTensorRats.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 SemisimpleSubalgebras& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<SemisimpleSubalgebras>())
-    crash << "This is a programming error: expression not of required type SemisimpleSubalgebras. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<SemisimpleSubalgebras>()) {
+    crash << "This is a programming error: expression not of required type "
+    << "SemisimpleSubalgebras. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theSSSubalgebraS.theValues[this->GetLastChild().theData];
 }
 
 template < >
 Plot& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<Plot>())
-    crash << "This is a programming error: expression not of required type Plot. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<Plot>()) {
+    crash << "This is a programming error: expression not of required type "
+    << "Plot. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.thePlots[this->GetLastChild().theData];
 }
 
 template < >
 WeylGroupData& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<WeylGroupData>())
-    crash << "This is a programming error: expression not of required type WeylGroupData. The expression equals "
+  if (!this->IsOfType<WeylGroupData>()) {
+    crash << "This is a programming error: expression not of required type "
+    << "WeylGroupData. The expression equals "
     << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theSSLieAlgebras.theValues[this->GetLastChild().theData].theWeyl;
 }
 
 template < >
 GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >())
-    crash << "This is a programming error: expression not of required type WeylGroupRepresentation_Rational. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()) {
+    crash << "This is a programming error: expression not of required type "
+    << "WeylGroupRepresentation_Rational. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theWeylGroupReps.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 ElementWeylGroup<WeylGroupData>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<ElementWeylGroup<WeylGroupData> >())
-    crash << "This is a programming error: expression not of required type ElementWeylGroup. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<ElementWeylGroup<WeylGroupData> >()) {
+    crash << "This is a programming error: expression not of required type "
+    << "ElementWeylGroup. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theWeylGroupElements.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >())
-    crash << "This is a programming error: expression not of required type WeylGroupVirtualRepresentation. The expression equals " << this->ToString() << "." << crash;
+  if (!this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()) {
+    crash << "This is a programming error: expression not of required type "
+    << "WeylGroupVirtualRepresentation. The expression equals " << this->ToString() << "." << crash;
+  }
   return this->owner->theObjectContainer.theWeylGroupVirtualReps.GetElement(this->GetLastChild().theData);
 }
 
 bool Expression::IsMatrix(int* outputNumRows, int* outputNumCols) const {
   MacroRegisterFunctionWithName("Expression::IsMatrix");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->size() < 1)
+  }
+  if (this->size() < 1) {
     return false;
+  }
   bool isGood = (*this)[0].StartsWith(this->owner->opMatriX());
-  if (!isGood)
+  if (!isGood) {
     return false;
-  if (outputNumRows != 0)
+  }
+  if (outputNumRows != 0) {
     *outputNumRows = this->size() - 1;
+  }
   if (outputNumCols != 0) {
     if (this->size() <= 1) {
       *outputNumCols = 0;
@@ -915,7 +976,8 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
     outputUE.MakeConst(this->GetValue<RationalFunctionOld>(), *theOwner);
     return output.AssignValueWithContext(outputUE, this->GetContext(), *this->owner);
   }
-  return *this->owner << "<hr>Failed to convert " << this->ToString() << " to element of universal enveloping -  I don't know how. ";
+  return *this->owner << "<hr>Failed to convert " << this->ToString()
+  << " to element of universal enveloping -  I don't know how. ";
 }
 
 template< >
@@ -949,8 +1011,9 @@ bool Expression::ConvertToType<AlgebraicNumber>(Expression& output) const {
     return true;
   }
   Rational theRat;
-  if (!this->IsOfType<Rational>(&theRat))
+  if (!this->IsOfType<Rational>(&theRat)) {
     return false;
+  }
   AlgebraicNumber outRat = theRat;
   return output.AssignValue(outRat, *this->owner);
 }
@@ -964,8 +1027,9 @@ bool Expression::ConvertToType<double>(Expression& output) const {
     return true;
   }
   double outputDouble = 0;
-  if (this->EvaluatesToDouble(&outputDouble))
+  if (this->EvaluatesToDouble(&outputDouble)) {
     return output.AssignValue(outputDouble, *this->owner);
+  }
   return false;
 }
 //end Expression::ConvertToType specializations.
@@ -973,20 +1037,23 @@ bool Expression::ConvertToType<double>(Expression& output) const {
 bool Expression::CheckConsistencyRecursively() const {
   MacroRegisterFunctionWithName("Expression::CheckConsistencyRecursively");
   this->CheckConsistency();
-  for (int i = 0; i < this->children.size; i ++)
+  for (int i = 0; i < this->children.size; i ++) {
     (*this)[i].CheckConsistency();
+  }
   return true;
 }
 
 bool Expression::CheckConsistency() const {
   MacroRegisterFunctionWithName("Expression::CheckConsistency");
-  //warning: do not use ToString method from here: ToString itself calls CheckConosistency, so that causes an "infinite" recursion call cycle,
-  //i.e., stack overflow.
+  // warning: do not use ToString method from here: ToString itself calls CheckConosistency,
+  // so that causes an "infinite" recursion call cycle,
+  // i.e., stack overflow.
   if (this->flagDeallocated)
     crash << "Use after free of Expression. " << crash;
   this->CheckInitialization();
-  if (this->children.size == 0)
+  if (this->children.size == 0) {
     return false;
+  }
   if (this->IsBuiltInTypE()) {
     if (this->children.size != 3) {
       crash << "This is a programming error. At the moment of writing, an expression of built-in type must have 3 "
@@ -995,7 +1062,8 @@ bool Expression::CheckConsistency() const {
     }
     const Expression& mustBeTheContext = (*this)[1];
     if (!mustBeTheContext.StartsWith(this->owner->opContexT())) {
-      crash << "This is a programming error. At the moment of writing, the second child of a built-in type must be a context. It is instead "
+      crash << "This is a programming error. At the moment of writing, "
+      << "the second child of a built-in type must be a context. It is instead "
       << mustBeTheContext.ToStringFull() << crash;
     }
     for (int i = 1; i < mustBeTheContext.children.size; i ++) {
@@ -1011,7 +1079,8 @@ bool Expression::CheckConsistency() const {
         isGood = true;
       }
       if (!isGood) {
-        crash << "This is a programming error. The context " << mustBeTheContext.ToStringFull() << " has an entry which I do not recognize, namely, "
+        crash << "This is a programming error. The context "
+        << mustBeTheContext.ToStringFull() << " has an entry which I do not recognize, namely, "
         << currentE.ToStringFull() << ". " << crash;
       }
     }
@@ -1023,7 +1092,8 @@ const Expression& Expression::operator[](int n) const {
   this->CheckInitialization();
   int childIndex = this->children[n];
   if (childIndex < 0) {
-    crash << "<hr>This is a programming error: the child of position " << n << " out of " << this->children.size - 1
+    crash << "<hr>This is a programming error: the child of position "
+    << n << " out of " << this->children.size - 1
     << " is not contained in the expression container. " << crash;
   }
   return this->owner->theExpressionContainer[childIndex];
@@ -1074,8 +1144,9 @@ bool Expression::SetChilD(int childIndexInMe, const Expression& inputChild) {
 bool Expression::SetChilD(int childIndexInMe, int childIndexInBoss) {
   this->CheckInitialization();
   this->children.SetObjectAtIndex(childIndexInMe, childIndexInBoss);
-  if (this->children[childIndexInMe] != childIndexInBoss)
+  if (this->children[childIndexInMe] != childIndexInBoss) {
     crash << "This shouldn't happen." << crash;
+  }
   return true;
 }
 
@@ -1087,37 +1158,46 @@ bool Expression::AddChildAtomOnTop(const std::string& theOperationString) {
 }
 
 bool Expression::StartsWithBuiltInAtom() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->IsAtom() || this->children.size < 1)
+  }
+  if (this->IsAtom() || this->children.size < 1) {
     return false;
+  }
   return (*this)[0].IsBuiltInAtom();
 }
 
 bool Expression::StartsWithArithmeticOperation() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->IsAtom() || this->children.size < 1)
+  }
+  if (this->IsAtom() || this->children.size < 1) {
     return false;
+  }
   return (*this)[0].IsArithmeticOperation();
 }
 
 bool Expression::StartsWithFunctionWithComplexRange() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->IsAtom() || this->children.size < 1)
+  }
+  if (this->IsAtom() || this->children.size < 1) {
     return false;
+  }
   return (*this)[0].IsKnownFunctionWithComplexRange();
 }
 
 bool Expression::StartsWithGivenAtom(const std::string& theAtom, int desiredChildren) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->size() == 0)
+  }
+  if (this->size() == 0) {
     return false;
+  }
   int theOpIndex = this->owner->theAtoms.GetIndex(theAtom);
-  if (theOpIndex == - 1)
+  if (theOpIndex == - 1) {
     return false;
+  }
   if (desiredChildren >= 0) {
     if (desiredChildren != this->size()) {
       return false;
@@ -1163,11 +1243,12 @@ int Expression::ContextGetNumContextVariables() const {
 bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
   MacroRegisterFunctionWithName("Expression::SetContextAtLeastEqualTo");
   this->CheckInitialization();
-  if (!this->IsBuiltInTypE())
+  if (!this->IsBuiltInTypE()) {
     crash << "This is a programming error: calling "
     << "Expression::SetContextAtLeastEqualTo on an expression "
     << "that is not of built-in type. "
     << "Contexts are Reserved for built-in data types. " << crash;
+  }
   if (!inputOutputMinContext.IsContext()) {
     this->owner->Comments << "<br>Warning: non-initialized input context in "
     << "Expression::SetContextAtLeastEqualTo. Stack trace: "
@@ -1176,19 +1257,25 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
   }
   Expression newContext;
   Expression myOldContext = this->GetContext();
-  if (!this->ContextMergeContexts(myOldContext, inputOutputMinContext, newContext))
+  if (!this->ContextMergeContexts(myOldContext, inputOutputMinContext, newContext)) {
     return false;
-  if (myOldContext == newContext)
+  }
+  if (myOldContext == newContext) {
     return true;
+  }
   inputOutputMinContext = newContext;
   if (this->IsOfType<Rational>()) {
     this->SetChilD(1, inputOutputMinContext);
     return true;
   }
-  if (this->IsOfType<ElementWeylGroup<WeylGroupData> >())
-    return this->AssignValueWithContext(this->GetValue<ElementWeylGroup<WeylGroupData> >(), inputOutputMinContext, *this->owner);
-  if (this->IsOfType<AlgebraicNumber>())
+  if (this->IsOfType<ElementWeylGroup<WeylGroupData> >()) {
+    return this->AssignValueWithContext(
+      this->GetValue<ElementWeylGroup<WeylGroupData> >(), inputOutputMinContext, *this->owner
+    );
+  }
+  if (this->IsOfType<AlgebraicNumber>()) {
     return this->SetChilD(1, inputOutputMinContext);
+  }
   if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> > ()) {
     ElementUniversalEnveloping<RationalFunctionOld> newUE = this->GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
     PolynomialSubstitution<Rational> subPolyPart;
@@ -1200,18 +1287,18 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
     Polynomial<Rational> newPoly = this->GetValue<Polynomial<Rational> >();
     PolynomialSubstitution<Rational> subPolyPart;
     myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
-    if (!newPoly.Substitution(subPolyPart))
+    if (!newPoly.Substitution(subPolyPart)) {
       return false;
+    }
     return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->owner);
   }
   if (this->IsOfType<Polynomial<AlgebraicNumber> >()) {
     Polynomial<AlgebraicNumber> newPoly = this->GetValue<Polynomial<AlgebraicNumber> >();
-    //stOutput << "<br>Subbing " << polySub.ToString() << " in "
     PolynomialSubstitution<AlgebraicNumber> subPolyPart;
-    //<< newPoly.ToString();
     myOldContext.ContextGetPolySubFromSuperContextNoFailure<AlgebraicNumber>(newContext, subPolyPart);
-    if (!newPoly.Substitution(subPolyPart))
+    if (!newPoly.Substitution(subPolyPart)) {
       return false;
+    }
     return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->owner);
   }
   if (this->IsOfType<ElementWeylAlgebra<Rational> >()) {
@@ -1234,7 +1321,8 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
     return this->AssignValueWithContext(newRF, inputOutputMinContext, *this->owner);
   }
   if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()) {
-    ElementTensorsGeneralizedVermas<RationalFunctionOld> newETGV = this->GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
+    ElementTensorsGeneralizedVermas<RationalFunctionOld> newETGV =
+    this->GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
     PolynomialSubstitution<Rational> subPolyPart;
     myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
     newETGV.Substitution(subPolyPart, this->owner->theObjectContainer.theCategoryOmodules);
@@ -1253,7 +1341,6 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
     Matrix<RationalFunctionOld> newMat;
     this->IsMatrixGivenType<RationalFunctionOld>(0, 0, &newMat);
     PolynomialSubstitution<Rational> subPolyPart;
-    //<< newPoly.ToString();
     myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
     for (int i = 0; i < newMat.NumRows; i ++) {
       for (int j = 0; j < newMat.NumCols; j ++) {
@@ -1278,10 +1365,12 @@ bool Expression::MergeContexts(Expression& leftE, Expression& rightE) {
   Expression leftC = leftE.GetContext();
   Expression rightC = rightE.GetContext();
   Expression outputC;
-  if (!leftC.ContextMergeContexts(leftC, rightC, outputC))
+  if (!leftC.ContextMergeContexts(leftC, rightC, outputC)) {
     return false;
-  if (!leftE.SetContextAtLeastEqualTo(outputC))
+  }
+  if (!leftE.SetContextAtLeastEqualTo(outputC)) {
     return false;
+  }
   return rightE.SetContextAtLeastEqualTo(outputC);
 }
 
@@ -1299,14 +1388,17 @@ Expression Expression::ContextGetContextVariable(int variableIndex) const {
 }
 
 bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, Calculator& owner) {
-  if (!this->IsContext())
+  if (!this->IsContext()) {
     crash << "This is a programming error: calling Expression::ContextSetSSLieAlgebrA "
     << "on a non-context expression. " << crash;
+  }
   int index = this->ContextGetIndexAmbientSSalg();
-  if (index != - 1 && index != indexInOwners)
+  if (index != - 1 && index != indexInOwners) {
     return false;
-  if (index == indexInOwners)
+  }
+  if (index == indexInOwners) {
     return true;
+  }
   Expression LieAlgContextE;
   Expression emptyContext;
   emptyContext.MakeEmptyContext(owner);
@@ -1318,9 +1410,10 @@ bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, Calculator& owner) {
 }
 
 bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar) {
-  if (!this->IsContext())
+  if (!this->IsContext()) {
     crash << "This is a programming error: calling "
     << "Expression::ContextSetDiffOperatorVar on a non-context expression. " << crash;
+  }
   Expression diffVarsE, polyVarsE;
   diffVarsE.reset(*this->owner, 2);
   diffVarsE.AddChildAtomOnTop(this->owner->opWeylAlgebraVariables());
@@ -1339,10 +1432,12 @@ bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const E
       foundPolyVarsE = true;
     }
   }
-  if (!foundPolyVarsE)
+  if (!foundPolyVarsE) {
     this->AddChildOnTop(polyVarsE);
-  if (!foundDiffVarsE)
+  }
+  if (!foundDiffVarsE) {
     this->AddChildOnTop(diffVarsE);
+  }
   return true;
 }
 
@@ -1384,20 +1479,25 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
   }
   int leftSSindex = leftContext.ContextGetIndexAmbientSSalg();
   int rightSSindex = rightContext.ContextGetIndexAmbientSSalg();
-  if (leftSSindex == - 1)
+  if (leftSSindex == - 1) {
     leftSSindex = rightSSindex;
-  if (rightSSindex == - 1)
+  }
+  if (rightSSindex == - 1) {
     rightSSindex = leftSSindex;
-  if (leftSSindex != rightSSindex)
+  }
+  if (leftSSindex != rightSSindex) {
     return false;
+  }
   Expression leftPolyV = leftContext.ContextGetPolynomialVariables();
   Expression rightPolyV = rightContext.ContextGetPolynomialVariables();
   HashedList<Expression> polyVarUnion;
   polyVarUnion.SetExpectedSize(leftPolyV.size() + rightPolyV.size() - 2);
-  for (int i = 1; i < leftPolyV.size(); i ++)
+  for (int i = 1; i < leftPolyV.size(); i ++) {
     polyVarUnion.AddOnTopNoRepetition(leftPolyV[i]);
-  for (int i = 1; i < rightPolyV.size(); i ++)
+  }
+  for (int i = 1; i < rightPolyV.size(); i ++) {
     polyVarUnion.AddOnTopNoRepetition(rightPolyV[i]);
+  }
   polyVarUnion.QuickSortAscending();
   Calculator& owner = *leftContext.owner;
   outputContext.reset(owner, 5 + polyVarUnion.size);
@@ -1428,7 +1528,8 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
           if ((*currentEWAV)[i] != EWAVars[theIndex]) {
             return owner << "<hr>Failed to merge contexts " << leftContext.ToString() << " and "
             << rightContext.ToString()
-            << " because " << (*currentPolyV)[i].ToString() << " has two different corresponding differential operator variables: "
+            << " because " << (*currentPolyV)[i].ToString()
+            << " has two different corresponding differential operator variables: "
             << EWAVars[theIndex].ToString() << " and " << (*currentEWAV)[i].ToString();
           }
         }
@@ -1446,7 +1547,8 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
         currentEWAVar.AddChildOnTop(indexE);
         if (EWAVars.Contains(currentEWAVar)) {
           return owner << "<hr>Failed to merge contexts " << leftContext.ToString() << " and " << rightContext.ToString()
-          << ": " << polyVarUnion[i].ToString() << " had no differential letter assigned to it. I tried to assign automatically  "
+          << ": " << polyVarUnion[i].ToString()
+          << " had no differential letter assigned to it. I tried to assign automatically  "
           << currentEWAVar.ToString() << " as differential operator letter, but it was already taken. ";
         }
       }
@@ -1454,8 +1556,9 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
     Expression diffVarsE;
     diffVarsE.reset(owner, polyVarUnion.size + 1);
     diffVarsE.AddChildAtomOnTop(owner.opWeylAlgebraVariables());
-    for (int i = 0; i < EWAVars.size; i ++)
+    for (int i = 0; i < EWAVars.size; i ++) {
       diffVarsE.AddChildOnTop(EWAVars[i]);
+    }
     outputContext.AddChildOnTop(diffVarsE);
   }
   if (leftSSindex != - 1) {
@@ -1474,15 +1577,17 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
 void Expression::ContextGetFormatExpressions(FormatExpressions& output) const {
   output.polyAlphabeT.SetSize(0);
   output.polyDefaultLetter = "x";
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return;
-  if (!this->StartsWith(this->owner->opContexT()))
+  }
+  if (!this->StartsWith(this->owner->opContexT())) {
     return;
+  }
   Expression thePolyE = this->ContextGetPolynomialVariables();
   output.polyAlphabeT.SetSize(thePolyE.children.size - 1);
-  for (int i = 1; i < thePolyE.children.size; i ++)
+  for (int i = 1; i < thePolyE.children.size; i ++) {
     output.polyAlphabeT[i - 1] = thePolyE[i].ToString();
-//    stOutput << "Drum roll: the poly alphabet: " << output.polyAlphabeT;
+  }
   Expression theEWAE = this->ContextGetDifferentialOperatorVariables();
   output.weylAlgebraLetters.SetSize(theEWAE.children.size - 1);
   for (int i = 1; i < theEWAE.size(); i ++) {
@@ -1492,11 +1597,13 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output) const {
 
 bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const {
   MacroRegisterFunctionWithName("Expression::GetExpressionLeafs");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return true;
+  }
   RecursionDepthCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetExpressionLeafs:"))
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetExpressionLeafs:")) {
     return false;
+  }
   if (this->IsBuiltInTypE() || this->IsAtom()) {
     outputAccumulateLeafs.AddOnTopNoRepetition(*this);
     return true;
@@ -1511,13 +1618,16 @@ bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeaf
 
 bool Expression::GetBoundVariables(HashedList<Expression>& outputAccumulateBoundVariables) const {
   MacroRegisterFunctionWithName("Expression::GetBoundVariables");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return true;
+  }
   RecursionDepthCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetFreeVariables:"))
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetFreeVariables:")) {
     return false;
-  if (this->IsBuiltInTypE()) //<- this may need to be rewritten as some built in types will store free variables in their context.
+  }
+  if (this->IsBuiltInTypE()) { //<- this may need to be rewritten as some built in types will store free variables in their context.
     return true;
+  }
   if (this->StartsWith(this->owner->opBind(), 2)) {
     outputAccumulateBoundVariables.AddOnTopNoRepetition((*this)[1]);
     return true;
@@ -1532,15 +1642,19 @@ bool Expression::GetBoundVariables(HashedList<Expression>& outputAccumulateBound
 
 bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants) const {
   MacroRegisterFunctionWithName("Expression::GetFreeVariables");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return true;
+  }
   RecursionDepthCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetFreeVariables:"))
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetFreeVariables:")) {
     return false;
-  if (this->IsBuiltInTypE()) //<- this may need to be rewritten as some built in types will store free variables in their context.
+  }
+  if (this->IsBuiltInTypE()) { //<- this may need to be rewritten as some built in types will store free variables in their context.
     return true;
-  if (this->IsOfType<InputBox>())
+  }
+  if (this->IsOfType<InputBox>()) {
     return true;
+  }
   std::string atomName;
   if (this->IsAtom(&atomName)) {
     bool doAddExpression =!this->IsKnownFunctionWithComplexRange();
@@ -1554,7 +1668,6 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
         atomName == "[)" || atomName == "(]" || atomName == "and" || atomName == "or" ||
         atomName == "not"
       ) {
-
         doAddExpression = false;
       }
     }
@@ -1580,14 +1693,18 @@ bool Expression::IsIntegraLfdx(
   Expression* differentialVariable, Expression* functionToIntegrate, Expression* integrationSet
 ) const {
   MacroRegisterFunctionWithName("Expression::IsIntegraLfdx");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (!this->StartsWith(this->owner->opIntegral(), 3))
+  }
+  if (!this->StartsWith(this->owner->opIntegral(), 3)) {
     return false;
-  if (!(*this)[2].IsDifferentialOneFormOneVariablE(differentialVariable, functionToIntegrate))
+  }
+  if (!(*this)[2].IsDifferentialOneFormOneVariablE(differentialVariable, functionToIntegrate)) {
     return false;
-  if (integrationSet != 0)
+  }
+  if (integrationSet != 0) {
     *integrationSet = (*this)[1];
+  }
   return true;
 }
 
@@ -1597,10 +1714,12 @@ bool Expression::IsIndefiniteIntegralfdx(
   MacroRegisterFunctionWithName("Expression::IsIndefiniteIntegralfdx");
   this->CheckConsistency();
   Expression tempE;
-  if (integrationSet == 0)
+  if (integrationSet == 0) {
     integrationSet = &tempE;
-  if (!this->IsIntegraLfdx(differentialVariable, functionToIntegrate, integrationSet))
+  }
+  if (!this->IsIntegraLfdx(differentialVariable, functionToIntegrate, integrationSet)) {
     return false;
+  }
   return integrationSet->IsAtomGivenData(this->owner->opIndefiniteIndicator());
 }
 
@@ -1610,10 +1729,12 @@ bool Expression::IsDefiniteIntegralOverIntervalfdx(
   MacroRegisterFunctionWithName("Expression::IsDefiniteIntegralOverIntervalfdx");
   this->CheckConsistency();
   Expression tempE;
-  if (integrationSet == 0)
+  if (integrationSet == 0) {
     integrationSet = &tempE;
-  if (!this->IsIntegraLfdx(differentialVariable, functionToIntegrate, integrationSet))
+  }
+  if (!this->IsIntegraLfdx(differentialVariable, functionToIntegrate, integrationSet)) {
     return false;
+  }
   return integrationSet->StartsWith(this->owner->opLimitBoundary(), 3);
 }
 
@@ -1621,27 +1742,35 @@ bool Expression::IsDifferentialOneFormOneVariablE(
   Expression* outputDifferentialOfWhat, Expression* outputCoeffInFrontOfDifferential
 ) const {
   MacroRegisterFunctionWithName("Expression::IsDifferentialOneFormOneVariablE");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (!this->StartsWith(this->owner->opDifferential()) || this->size() != 3)
+  }
+  if (!this->StartsWith(this->owner->opDifferential()) || this->size() != 3) {
     return false;
-  if (outputDifferentialOfWhat != 0)
+  }
+  if (outputDifferentialOfWhat != 0) {
     *outputDifferentialOfWhat = (*this)[1];
-  if (outputCoeffInFrontOfDifferential != 0)
+  }
+  if (outputCoeffInFrontOfDifferential != 0) {
     *outputCoeffInFrontOfDifferential = (*this)[2];
+  }
   return true;
 }
 
 bool Expression::ContainsAsSubExpressionNoBuiltInTypes(const Expression& input) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::ContainsAsSubExpression: "))
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::ContainsAsSubExpression: ")) {
     return false;
-  if (*this == input)
+  }
+  if (*this == input) {
     return true;
-  if (!this->IsSuitableForRecursion())
+  }
+  if (!this->IsSuitableForRecursion()) {
     return false;
+  }
   for (int i = 0; i < this->size(); i ++) {
     if ((*this)[i].ContainsAsSubExpressionNoBuiltInTypes(input)) {
       return true;
@@ -1651,32 +1780,38 @@ bool Expression::ContainsAsSubExpressionNoBuiltInTypes(const Expression& input) 
 }
 
 bool Expression::ContainsAsSubExpressionNoBuiltInTypes(int inputAtom) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   Expression theE;
   theE.MakeAtom(inputAtom, *this->owner);
   return this->ContainsAsSubExpressionNoBuiltInTypes(theE);
 }
 
 bool Expression::IsContext() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   return this->StartsWith(this->owner->opContexT());
 }
 
 bool Expression::IsError(std::string* outputErrorMessage) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (!this->StartsWith(this->owner->opError(), 2))
+  }
+  if (!this->StartsWith(this->owner->opError(), 2)) {
     return false;
+  }
   return (*this)[1].IsOfType<std::string>(outputErrorMessage);
 }
 
 bool Expression::IsSequenceDoubleButNotTripleNested() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (!this->IsSequenceNElementS())
+  }
+  if (!this->IsSequenceNElementS()) {
     return false;
+  }
   for (int i = 1; i < this->size(); i ++) {
     if (!((*this)[i].IsSequenceNElementS())) {
       return false;
@@ -1693,36 +1828,44 @@ bool Expression::IsSequenceDoubleButNotTripleNested() const {
 }
 
 bool Expression::IsSequenceNElementS(int N) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   return this->StartsWith(this->owner->opSequence(), N + 1);
 }
 
 bool Expression::IsIntervalRealLine() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->StartsWith(this->owner->opIntervalOpen()))
+  }
+  if (this->StartsWith(this->owner->opIntervalOpen())) {
     return true;
-  if (this->StartsWith(this->owner->opIntervalClosed(), 3))
+  }
+  if (this->StartsWith(this->owner->opIntervalClosed(), 3)) {
     return true;
-  if (this->StartsWith(this->owner->opIntervalLeftClosed(), 3))
+  }
+  if (this->StartsWith(this->owner->opIntervalLeftClosed(), 3)) {
     return true;
-  if (this->StartsWith(this->owner->opIntervalRightClosed(), 3))
+  }
+  if (this->StartsWith(this->owner->opIntervalRightClosed(), 3)) {
     return true;
+  }
   return false;
 }
 
 bool Expression::IsEqualToOne() const {
   int theInt;
-  if (this->IsSmallInteger(&theInt))
+  if (this->IsSmallInteger(&theInt)) {
     return theInt == 1;
+  }
   return false;
 }
 
 bool Expression::IsEqualToTwo() const {
   int theInt;
-  if (this->IsSmallInteger(&theInt))
+  if (this->IsSmallInteger(&theInt)) {
     return theInt == 2;
+  }
   return false;
 }
 
@@ -1738,16 +1881,20 @@ bool Expression::IsEqualToHalf() const {
 bool Expression::IsKnownToBeNonNegative() const {
   MacroRegisterFunctionWithName("Expression::IsKnownToBeNonNegative");
   double theDouble = 0;
-  if (this->EvaluatesToDouble(&theDouble))
+  if (this->EvaluatesToDouble(&theDouble)) {
     return theDouble >= 0;
-  if (this->owner == 0)
+  }
+  if (this->owner == 0) {
     return false;
+  }
   Expression testInequality, testResult;
   Calculator& theCommands = *(this->owner);
   testInequality.MakeXOX(theCommands, theCommands.opGreaterThan(), *this, theCommands.EZero());
-  if (this->owner->EvaluateExpression(theCommands, testInequality, testResult))
-    if (testResult.IsEqualToOne())
+  if (this->owner->EvaluateExpression(theCommands, testInequality, testResult)) {
+    if (testResult.IsEqualToOne()) {
       return true;
+    }
+  }
   testInequality.MakeXOX(theCommands, theCommands.opGreaterThanOrEqualTo(), *this, theCommands.EZero());
   if (theCommands.EvaluateExpression(theCommands, testInequality, testResult)) {
     if (testResult.IsEqualToOne()) {
@@ -1758,25 +1905,31 @@ bool Expression::IsKnownToBeNonNegative() const {
 }
 
 bool Expression::IsNegativeConstant() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   Rational theRat;
-  if (this->IsOfType<Rational>(&theRat))
+  if (this->IsOfType<Rational>(&theRat)) {
     return theRat.IsNegative();
-  if (!this->IsConstantNumber())
+  }
+  if (!this->IsConstantNumber()) {
     return false;
+  }
   double tempD = - 1;
-  if (!this->EvaluatesToDouble(&tempD))
+  if (!this->EvaluatesToDouble(&tempD)) {
     return false;
+  }
   return tempD < 0;
 }
 
 bool Expression::IsEqualToMOne() const {
   MacroRegisterFunctionWithName("Expression::IsEqualToMOne");
-  if (!this->IsConstantNumber())
+  if (!this->IsConstantNumber()) {
     return false;
-  if (this->IsOfType<Rational>())
+  }
+  if (this->IsOfType<Rational>()) {
     return this->GetValue<Rational>() == - 1;
+  }
   return false;
 }
 
@@ -1785,16 +1938,21 @@ bool Expression::IsMonEqualToZero() const {
 }
 
 bool Expression::IsEqualToZero() const {
-  if (this->IsOfType<Rational>())
+  if (this->IsOfType<Rational>()) {
     return this->GetValue<Rational>().IsEqualToZero();
-  if (this->IsOfType<double>())
+  }
+  if (this->IsOfType<double>()) {
     return this->GetValue<double>() == 0;
-  if (this->IsOfType<AlgebraicNumber>())
+  }
+  if (this->IsOfType<AlgebraicNumber>()) {
     return this->GetValue<AlgebraicNumber>().IsEqualToZero();
-  if (this->IsOfType<Polynomial<Rational> >())
+  }
+  if (this->IsOfType<Polynomial<Rational> >()) {
     return this->GetValue<Polynomial<Rational> >().IsEqualToZero();
-  if (this->IsOfType<RationalFunctionOld>())
+  }
+  if (this->IsOfType<RationalFunctionOld>()) {
     return this->GetValue<RationalFunctionOld>().IsEqualToZero();
+  }
   return false;
 }
 
@@ -1811,29 +1969,35 @@ bool Expression::MakeError(const std::string& theError, Calculator& owner, bool 
 
 bool Expression::IsSmallInteger(int* whichInteger) const {
   Rational theRat;
-  if (this->IsOfType<Rational>(&theRat))
+  if (this->IsOfType<Rational>(&theRat)) {
     return theRat.IsSmallInteger(whichInteger);
+  }
   AlgebraicNumber theAlgNum;
-  if (this->IsOfType<AlgebraicNumber>(&theAlgNum))
+  if (this->IsOfType<AlgebraicNumber>(&theAlgNum)) {
     return theAlgNum.IsSmallInteger(whichInteger);
+  }
   return false;
 }
 
 bool Expression::IsRational(Rational* whichRational) const {
-  if (this->IsOfType<Rational>(whichRational))
+  if (this->IsOfType<Rational>(whichRational)) {
     return true;
+  }
   AlgebraicNumber theAlgNum;
-  if (this->IsOfType<AlgebraicNumber>(&theAlgNum))
+  if (this->IsOfType<AlgebraicNumber>(&theAlgNum)) {
     return theAlgNum.IsRational(whichRational);
+  }
   return false;
 }
 
 bool Expression::DivisionByMeShouldBeWrittenInExponentForm() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly())
+  if (this->owner->RecursionDepthExceededHandleRoughly()) {
     return false;
+  }
   if (this->StartsWith(this->owner->opTimes())) {
     for (int i = 1; i < this->children.size; i ++) {
       if (!(*this)[i].DivisionByMeShouldBeWrittenInExponentForm()) {
@@ -1841,39 +2005,49 @@ bool Expression::DivisionByMeShouldBeWrittenInExponentForm() const {
       }
     }
   }
-  if (this->StartsWith(this->owner->opThePower(), 3))
+  if (this->StartsWith(this->owner->opThePower(), 3)) {
     return (*this)[1].DivisionByMeShouldBeWrittenInExponentForm();
-  if (this->StartsWith(this->owner->opPlus()))
+  }
+  if (this->StartsWith(this->owner->opPlus())) {
     return false;
+  }
   return true;
 }
 
 bool Expression::IsPositiveNumber() const {
   MacroRegisterFunctionWithName("Expression::IsPositiveNumber");
   Rational theRat;
-  if (this->IsOfType<Rational>(&theRat))
+  if (this->IsOfType<Rational>(&theRat)) {
     return theRat.IsPositive();
+  }
   double theDouble = - 1;
-  if (!this->EvaluatesToDouble(&theDouble))
+  if (!this->EvaluatesToDouble(&theDouble)) {
     return false;
-  if (std::isnan(theDouble))
+  }
+  if (std::isnan(theDouble)) {
     return false;
+  }
   return theDouble > 0;
 }
 
 bool Expression::IsConstantNumber() const {
   MacroRegisterFunctionWithName("Expression::IsConstantNumber");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   RecursionDepthCounter thecounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::IsConstantNumber: "))
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::IsConstantNumber: ")) {
     return false;
-  if (this->IsOfType<Rational>() || this->IsOfType<AlgebraicNumber>() || this->IsOfType<double>())
+  }
+  if (this->IsOfType<Rational>() || this->IsOfType<AlgebraicNumber>() || this->IsOfType<double>()) {
     return true;
-  if (this->IsAtomGivenData(this->owner->opPi()))
+  }
+  if (this->IsAtomGivenData(this->owner->opPi())) {
     return true;
-  if (this->IsAtomGivenData(this->owner->opE()))
+  }
+  if (this->IsAtomGivenData(this->owner->opE())) {
     return true;
+  }
   if (this->StartsWithFunctionWithComplexRange()) {
     for (int i = 1; i < this->size(); i ++) {
       if (!(*this)[i].IsConstantNumber()) {
@@ -1882,19 +2056,21 @@ bool Expression::IsConstantNumber() const {
     }
     return true;
   }
-//  stOutput << this->Lispify() << " is ... not a constant apparently!";
   return false;
 }
 
 bool Expression::IsAlgebraicRadical() const {
   MacroRegisterFunctionWithName("Expression::IsAlgebraicRadical");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   RecursionDepthCounter thecounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::IsAlgebraicRadical: "))
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::IsAlgebraicRadical: ")) {
     return false;
-  if (this->IsOfType<Rational>() || this->IsOfType<AlgebraicNumber>())
+  }
+  if (this->IsOfType<Rational>() || this->IsOfType<AlgebraicNumber>()) {
     return true;
+  }
   if (
     this->StartsWith(this->owner->opPlus()) ||
     this->StartsWith(this->owner->opMinus())||
@@ -1978,7 +2154,8 @@ bool Expression::ContextGetPolyAndEWASubFromSuperContextNoFailure(
 ) const {
   bool mustBeTrue = this->ContextGetPolyAndEWASubFromSuperContext(largerContext, outputPolyPart, outputEWApart);
   if (!mustBeTrue) {
-    crash << "This is a programming error: I was not able to extract a polynomial/differential operator substitution from smaller context "
+    crash << "This is a programming error: "
+    << "I was not able to extract a polynomial/differential operator substitution from smaller context "
     << this->ToString() << " relative to larger context " << largerContext.ToString() << crash;
   }
   return mustBeTrue;
@@ -2063,8 +2240,9 @@ int Expression::GetNumContextVariables() const {
 
 int Expression::GetNumCols() const {
   MacroRegisterFunctionWithName("Expression::GetNumCols");
-  if (!this->IsSequenceNElementS())
+  if (!this->IsSequenceNElementS()) {
     return - 1;
+  }
   int theMax = 1;
   for (int i = 1; i < this->size(); i ++) {
     if ((*this)[i].IsSequenceNElementS()) {
@@ -2077,8 +2255,9 @@ int Expression::GetNumCols() const {
 void Expression::GetMultiplicandsRecursive(List<Expression>& outputAppendList, int depth) const {
   MacroRegisterFunctionWithName("Expression::GetMultiplicandsRecursive");
   this->CheckInitialization();
-  if (depth == 0)
+  if (depth == 0) {
     outputAppendList.SetSize(0);
+  }
   if (!this->StartsWith(this->owner->opTimes())) {
     outputAppendList.AddOnTop(*this);
     return;
@@ -2091,14 +2270,16 @@ void Expression::GetMultiplicandsRecursive(List<Expression>& outputAppendList, i
 void Expression::GetMultiplicandsDivisorsRecursive(List<Expression>& outputAppendList, int depth) const {
   MacroRegisterFunctionWithName("Expression::GetMultiplicandsDivisorsRecursive");
   this->CheckInitialization();
-  if (depth == 0)
+  if (depth == 0) {
     outputAppendList.SetSize(0);
+  }
   if (!this->StartsWith(this->owner->opTimes()) && !this->StartsWith(this->owner->opDivide())) {
     outputAppendList.AddOnTop(*this);
     return;
   }
-  for (int i = 1; i < this->size(); i ++)
+  for (int i = 1; i < this->size(); i ++) {
     (*this)[i].GetMultiplicandsDivisorsRecursive(outputAppendList, depth + 1);
+  }
 }
 
 void Expression::GetCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff) const {
@@ -2117,34 +2298,38 @@ void Expression::GetCoefficientMultiplicandForm(Expression& outputCoeff, Express
 
 void Expression::GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff) const {
   this->CheckInitialization();
-  if (this->StartsWith(this->owner->opTimes(), 3))
+  if (this->StartsWith(this->owner->opTimes(), 3)) {
     if ((*this)[1].IsOfType(&outputCoeff)) {
       outputNoCoeff = (*this)[2];
       return;
     }
+  }
   outputCoeff = 1;
   outputNoCoeff = *this;
   return;
 }
 
 int Expression::GetExpressionTreeSize() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return 1;
+  }
   this->CheckInitialization();
   RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("While computing Expression::GetExpressionTreeSize: "))
+  if (this->owner->RecursionDepthExceededHandleRoughly("While computing Expression::GetExpressionTreeSize: ")) {
     return 1;
-  if (this->IsAtom())
+  }
+  if (this->IsAtom()) {
     return 1;
+  }
   int result = 0;
-  for (int i = 0; i < this->children.size; i ++)
+  for (int i = 0; i < this->children.size; i ++) {
     result += (*this)[i].GetExpressionTreeSize();
+  }
   return result;
 }
 
 bool Expression::operator>(const Expression& other) const {
   MacroRegisterFunctionWithName("Expression::operatorGreaterThan");
-  //stOutput << "<br>DEBUG: comparing " << this->ToString() << " &gt; " << other.ToString() << ": ";
   double left = 0, right = 0;
   bool leftEvalsToDouble = this->EvaluatesToDouble(&left);
   bool rightEvalsToDouble = other.EvaluatesToDouble(&right);
@@ -2166,11 +2351,12 @@ bool Expression::operator>(const Expression& other) const {
       }
     }
   }
-  if (leftEvalsToDouble && !rightEvalsToDouble)
+  if (leftEvalsToDouble && !rightEvalsToDouble) {
     return false;
-  if (!leftEvalsToDouble && rightEvalsToDouble)
+  }
+  if (!leftEvalsToDouble && rightEvalsToDouble) {
     return true;
-  //stOutput << "<br>DEBUG: got to here.";
+  }
   Rational leftCoeff, rightCoeff;
   Expression leftMon, rightMon;
   this->GetCoefficientMultiplicandForm(leftCoeff, leftMon);
@@ -2185,21 +2371,21 @@ bool Expression::operator>(const Expression& other) const {
 
 bool Expression::GreaterThanNoCoeff(const Expression& other) const {
   MacroRegisterFunctionWithName("Expression::GreaterThanNoCoeff");
-  if (this->IsOfType<Rational>() && other.IsOfType<Rational>())
+  if (this->IsOfType<Rational>() && other.IsOfType<Rational>()) {
     return this->GetValue<Rational>() > other.GetValue<Rational>();
-  if (this->IsBuiltInTypE() && !other.IsBuiltInTypE())
+  }
+  if (this->IsBuiltInTypE() && !other.IsBuiltInTypE()) {
     return false;
-  if (!this->IsBuiltInTypE() && other.IsBuiltInTypE())
+  }
+  if (!this->IsBuiltInTypE() && other.IsBuiltInTypE()) {
     return true;
-//  stOutput << "<br>Comparing: " << this->ToString() << " with " << other.ToString();
+  }
   int thisExpressionTreeSize = this->GetExpressionTreeSize();
   int otherExpressionTreeSize = other.GetExpressionTreeSize();
   if (thisExpressionTreeSize > otherExpressionTreeSize) {
-    //stOutput << "we have that thisExpressionTreeSize>otherExpressionTreeSize";
     return true;
   }
   if (otherExpressionTreeSize > thisExpressionTreeSize) {
-    //stOutput << "we have that otherExpressionTreeSize>thisExpressionTreeSize";
     return false;
   }
   if (this->children.size == 0 && other.children.size == 0) {
@@ -2229,8 +2415,9 @@ bool Expression::GreaterThanNoCoeff(const Expression& other) const {
 
 bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("Expression::ToStringData");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return "(non-initialized)";
+  }
   std::stringstream out;
   bool result = false;
   bool isFinal = theFormat == 0 ? true : theFormat->flagExpressionIsFinal;
@@ -2238,14 +2425,15 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   MemorySaving<FormatExpressions> contextFormat;
   bool showContext = this->owner == 0 ? false : owner->flagDisplayContext;
   if (this->IsAtom()) {
-    if (this->IsAtomGivenData(this->owner->opPhantom()))
+    if (this->IsAtomGivenData(this->owner->opPhantom())) {
       out << "\\phantom{}";
-    else if (this->owner->flagUseLnInsteadOfLog && this->IsAtomGivenData(this->owner->opLog()))
+    } else if (this->owner->flagUseLnInsteadOfLog && this->IsAtomGivenData(this->owner->opLog())) {
       out << "\\ln";
-    else if (this->theData < this->owner->GetOperations().size && this->theData >= 0)
+    } else if (this->theData < this->owner->GetOperations().size && this->theData >= 0) {
       out << this->owner->GetOperations()[this->theData];
-    else
+    } else {
       out << "(unknown~ atom~ of~ value~ " << this->theData << ")";
+    }
     result = true;
   } else if (this->IsOfType<std::string>()) {
     if (!useQuotes) {
@@ -2267,8 +2455,9 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     } else {
       out << this->GetValue<Rational>().ToStringFrac();
     }
-    if (this->HasNonEmptyContext())
+    if (this->HasNonEmptyContext()) {
       out << ")";
+    }
     result = true;
   } else if (this->IsOfType<ElementEllipticCurve<Rational> >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
@@ -2296,13 +2485,16 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<Polynomial<Rational> >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseFrac = true;
-    if (!this->owner->flagHidePolynomialBuiltInTypeIndicator)
+    if (!this->owner->flagHidePolynomialBuiltInTypeIndicator) {
       out << "Polynomial{}(";
+    }
     out << this->GetValue<Polynomial<Rational> >().ToString(&contextFormat.GetElement());
-    if (!this->owner->flagHidePolynomialBuiltInTypeIndicator)
+    if (!this->owner->flagHidePolynomialBuiltInTypeIndicator) {
       out << ")";
-    if (showContext)
+    }
+    if (showContext) {
       out << "[" << this->GetContext().ToString() << "]";
+    }
     result = true;
   } else if (this->IsOfType<Polynomial<AlgebraicNumber> >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
@@ -2315,22 +2507,26 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
         out << "-";
       }
     }
-    if (this->owner->flagUseNumberColors)
+    if (this->owner->flagUseNumberColors) {
       out << "\\color{red}{";
+    }
     out << currentString;
-    if (this->owner->flagUseNumberColors)
+    if (this->owner->flagUseNumberColors) {
       out << "}";
+    }
     out << ")";
-    if (showContext)
+    if (showContext) {
       out << "[" << this->GetContext().ToString() << "]";
+    }
     result = true;
   } else if (this->IsOfType<RationalFunctionOld>()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseFrac = true;
     out << "MakeRationalFunction{}("
     << this->GetValue<RationalFunctionOld>().ToString(&contextFormat.GetElement()) << ")";
-    if (showContext)
+    if (showContext) {
       out << "[" << this->GetContext().ToString() << "]";
+    }
     result = true;
   } else if (this->IsOfType<Weight<Polynomial<Rational> > >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
@@ -2391,13 +2587,8 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<Plot>()) {
     if (isFinal) {
       Plot& thePlot = this->GetValueNonConst<Plot>();
-      thePlot.flagIncludeExtraHtmlDescriptions =
-      (theFormat == 0) ? true : theFormat->flagIncludeExtraHtmlDescriptionsInPlots;
+      thePlot.flagIncludeExtraHtmlDescriptions = (theFormat == 0) ? true : theFormat->flagIncludeExtraHtmlDescriptionsInPlots;
       thePlot.flagPlotShowJavascriptOnly = this->owner->flagPlotShowJavascriptOnly;
-      //stOutput << "<br>DEBUG: Owner flagPlotnoctrls: "
-      //<< this->owner->flagPlotNoControls
-      //<< "<br>";
-
       out << thePlot.GetPlotHtml(*this->owner);
       if (this->owner->flagWriteLatexPlots) {
         out << this->owner->WriteDefaultLatexFileReturnHtmlLink(thePlot.GetPlotStringAddLatexCommands(false), 0, true);
@@ -2443,9 +2634,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << theElt.ToString();
     result = true;
   } else if (this->IsOfType<SemisimpleSubalgebras>()) {
-    //stOutput << "got to here";
     SemisimpleSubalgebras& theSubalgebras = this->GetValueNonConst<SemisimpleSubalgebras>();
-    //stOutput << "got to here pt 2";
     contextFormat.GetElement().flagUseLatex = true;
     contextFormat.GetElement().flagUseHTML = true;
     contextFormat.GetElement().flagCandidateSubalgebraShortReportOnly = false;
@@ -2465,13 +2654,14 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
       out << "\\color{blue}{";
     }
     out << currentString;
-    if (this->owner->flagUseNumberColors)
+    if (this->owner->flagUseNumberColors) {
       out << "}";
-    //stOutput << " converting to string : " << this->GetValue<double>();
+    }
     result = true;
   } else if (this->IsOfType<AlgebraicNumber>()) {
-    if (this->owner->flagUseFracInRationalLaTeX)
+    if (this->owner->flagUseFracInRationalLaTeX) {
       contextFormat.GetElement().flagUseFrac = true;
+    }
     std::string currentString = this->GetValue<AlgebraicNumber>().ToString(&contextFormat.GetElement());
     if (currentString.size() > 0) {
       if (currentString[0] == '-') {
@@ -2479,11 +2669,13 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
         out << "-";
       }
     }
-    if (this->owner->flagUseNumberColors)
+    if (this->owner->flagUseNumberColors) {
       out << "\\color{red}{";
+    }
     out << currentString;
-    if (this->owner->flagUseNumberColors)
+    if (this->owner->flagUseNumberColors) {
       out << "}";
+    }
     result = true;
   } else if (this->IsOfType<LittelmannPath>()) {
     out << this->GetValue<LittelmannPath>().ToString();
@@ -2551,19 +2743,21 @@ std::string Expression::ToStringFull() const {
 }
 
 bool Expression::NeedsParenthesisForBaseOfExponent() const {
-  //stOutput << "calling Expression::NeedsParenthesisForBaseOfExponent onto: " << this->ToStringSemiFull();
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   if (this->StartsWith(this->owner->opBind())) {
-    //stOutput << " to get:  " << (*this)[1].IsLisT() << "<hr>";
     return (*this)[1].IsLisT();
   }
-  if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()))
+  if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus())) {
     return true;
-  if (this->IsOfType<Rational>())
+  }
+  if (this->IsOfType<Rational>()) {
     return this->GetValue<Rational>() < 0 || !this->GetValue<Rational>().IsInteger();
-  if (this->IsOfType<double>())
+  }
+  if (this->IsOfType<double>()) {
     return this->GetValue<double>() < 0;
+  }
   if (this->IsOfType<AlgebraicNumber>()) {
     LargeInt tempI;
     if (!this->GetValue<AlgebraicNumber>().IsInteger(&tempI)) {
@@ -2571,14 +2765,16 @@ bool Expression::NeedsParenthesisForBaseOfExponent() const {
     }
     return tempI > 0;
   }
-  if (this->IsAtom() || this->children.size == 0)
+  if (this->IsAtom() || this->children.size == 0) {
     return false;
+  }
   return true;
 }
 
 bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(const Expression* leftNeighbor) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   if (leftNeighbor != 0) {
     if (leftNeighbor->StartsWith(this->owner->opDivide(), 3)) {
       if ((*leftNeighbor)[1] == "\\diff") {
@@ -2593,14 +2789,18 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(cons
   ) {
     return true;
   }
-  if (this->IsOfType<Rational>())
+  if (this->IsOfType<Rational>()) {
     return this->GetValue<Rational>().NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
-  if (this->IsOfType<AlgebraicNumber>())
+  }
+  if (this->IsOfType<AlgebraicNumber>()) {
     return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
-  if (this->IsAtom() || this->size() == 0)
+  }
+  if (this->IsAtom() || this->size() == 0) {
     return false;
-  if (this->StartsWith(this->owner->opUnderscore()))
+  }
+  if (this->StartsWith(this->owner->opUnderscore())) {
     return false;
+  }
   if (this->StartsWith(this->owner->opTimes(), 3)) {
     if ((*this)[1].IsOfType<Rational>()) {
       return (*this)[1].GetValue<Rational>().NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
@@ -2609,13 +2809,17 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(cons
   }
   if (this->size() > 1) {
     const Expression& firstE = (*this)[0];
-    //const Expression& secondE=(*this)[1];
-    if (firstE.IsAtomGivenData(this->owner->opTimes()))
-      return (*this)[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() || (*this)[1].NeedsParenthesisForMultiplication();
-    if (firstE.IsAtomGivenData(this->owner->opThePower()))
+    if (firstE.IsAtomGivenData(this->owner->opTimes())) {
+      return
+      (*this)[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
+      (*this)[1].NeedsParenthesisForMultiplication();
+    }
+    if (firstE.IsAtomGivenData(this->owner->opThePower())) {
       return false;
-    if (this->StartsWith(this->owner->opBind()))
+    }
+    if (this->StartsWith(this->owner->opBind())) {
       return (*this)[1].NeedsParenthesisForMultiplication();
+    }
     return false;
   }
   return false;
@@ -2623,23 +2827,28 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(cons
 
 bool Expression::NeedsParenthesisForAddition() const {
   MacroRegisterFunctionWithName("Expression::NeedsParenthesisForAddition");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->StartsWith(this->owner->opDefine()))
+  }
+  if (this->StartsWith(this->owner->opDefine())) {
     return true;
+  }
   return false;
 }
 
 bool Expression::NeedsParenthesisForMultiplication() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-//  stOutput << "DEBUG: Needsparen: " << this->ToString()  << ", Lispified: " << this->ToStringSemiFull() << "<hr>";
-  if (this->IsOfType<std::string>())
+  }
+  if (this->IsOfType<std::string>()) {
     return false;
-  if (this->StartsWith(this->owner->opAbsoluteValue()))
+  }
+  if (this->StartsWith(this->owner->opAbsoluteValue())) {
     return false;
-  if (this->IsMatrix())
+  }
+  if (this->IsMatrix()) {
     return false;
+  }
   if (
     this->StartsWith(this->owner->opPlus()) ||
     this->StartsWith(this->owner->opMinus()) ||
@@ -2658,19 +2867,23 @@ bool Expression::NeedsParenthesisForMultiplication() const {
       return false;
     }
   }
-  if (this->IsOfType<Rational>())
+  if (this->IsOfType<Rational>()) {
     return this->GetValue<Rational>().NeedsParenthesisForMultiplication();
-  if (this->IsOfType<AlgebraicNumber>())
+  }
+  if (this->IsOfType<AlgebraicNumber>()) {
     return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplication();
-  if (this->IsAtom() || this->children.size == 0)
+  }
+  if (this->IsAtom() || this->children.size == 0) {
     return false;
-  if (this->StartsWith(this->owner->opUnderscore()))
+  }
+  if (this->StartsWith(this->owner->opUnderscore())) {
     return false;
+  }
   if (this->size() > 1) {
     const Expression& firstE = (*this)[0];
-    //const Expression& secondE=(*this)[1];
-    if (firstE.IsAtomGivenData(this->owner->opTimes()))
+    if (firstE.IsAtomGivenData(this->owner->opTimes())) {
       return false;
+    }
     if (firstE.IsAtomGivenData(this->owner->opThePower())) {
       const Expression& base = (*this)[1];
       if (base.children.size > 0) {
@@ -2688,19 +2901,14 @@ bool Expression::NeedsParenthesisForMultiplication() const {
   return false;
 }
 
-bool Calculator::innerFlattenCommandEnclosuresOneLayer(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerFlattenCommandEnclosuresOneLayer(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFlattenCommandEnclosuresOneLayer");
-  //RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  //if (*theCounter.theCounter>theCommands.MaxRecursionDeptH)
-  //  return theCommands << "Max recursion depth exceeded. ";
-  //if (input.IsBuiltInType() || input.IsAtom())
-  //{ output = input;
-  //  return true;
-  //}
-//  stOutput << "<br>DEBUG: Flattening: " << input.ToString();
   if (input.StartsWith(theCommands.opCommandEnclosure())) {
-    if (input.size() <= 1)
+    if (input.size() <= 1) {
       return false;
+    }
     Expression result(theCommands);
     result.AddChildAtomOnTop(theCommands.opCommandEnclosureStart());
     if (input.size() == 2) {
@@ -2716,8 +2924,9 @@ bool Calculator::innerFlattenCommandEnclosuresOneLayer(Calculator& theCommands, 
     output = result;
     return true;
   }
-  if (!input.StartsWith(theCommands.opEndStatement()))
+  if (!input.StartsWith(theCommands.opEndStatement())) {
     return false;
+  }
   Expression result(theCommands);
   for (int i = 0; i < input.size(); i ++) {
     if (input[i].StartsWith(theCommands.opCommandEnclosure())) {
@@ -2769,8 +2978,9 @@ std::string Expression::ToStringAllSlidersInExpression() const {
       continue;
     }
     int theIndex = theSliders.GetIndex(boxNames[i]);
-    if (this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex])
+    if (this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex]) {
       continue;
+    }
     this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex] = true;
     InputBox& theBox = theSliders.theValues[theIndex];
     std::string theSliderName = theBox.GetSliderName();
@@ -2780,16 +2990,20 @@ std::string Expression::ToStringAllSlidersInExpression() const {
     double theReader = 0;
     out << std::fixed;
     out.precision(4);
-    if (theBox.min.EvaluatesToDouble(&theReader))
+    if (theBox.min.EvaluatesToDouble(&theReader)) {
       out << "min =\"" << theReader << "\" ";
-    if (theBox.max.EvaluatesToDouble(&theReader))
+    }
+    if (theBox.max.EvaluatesToDouble(&theReader)) {
       out << "max =\"" << theReader << "\" ";
-    if (theBox.step.EvaluatesToDouble(&theReader))
+    }
+    if (theBox.step.EvaluatesToDouble(&theReader)) {
       out << "step =\"" << theReader << "\" ";
-    if (theBox.value.EvaluatesToDouble(&theReader))
+    }
+    if (theBox.value.EvaluatesToDouble(&theReader)) {
       out << "value =\"" << theReader << "\" ";
-    else
+    } else {
       out << "value =\"1\" ";
+    }
     out << "oninput =\"window.calculator.calculator.updateSliderToInputBox('"
     << boxNames[i]
     << "','"
@@ -2848,7 +3062,9 @@ JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& star
   return result;
 }
 
-std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression, bool unfoldCommandEnclosures, JSData* outputJS) const {
+std::string Expression::ToString(
+  FormatExpressions* theFormat, Expression* startingExpression, bool unfoldCommandEnclosures, JSData* outputJS
+) const {
   MacroRegisterFunctionWithName("Expression::ToString");
   MemorySaving<FormatExpressions> tempFormat;
   if (theFormat == 0) {
@@ -2874,8 +3090,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     }
   }
   int notationIndex = owner->theObjectContainer.ExpressionWithNotation.GetIndex(*this);
-  if (notationIndex != - 1)
+  if (notationIndex != - 1) {
     return owner->theObjectContainer.ExpressionNotation[notationIndex];
+  }
   std::stringstream out;
   bool isFinal = theFormat->flagExpressionIsFinal;
   bool allowNewLine = theFormat->flagExpressionNewLineAllowed;
@@ -2894,11 +3111,12 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   int lineBreak = 50;
   int charCounter = 0;
   std::string tempS;
-  if (outputJS != 0)
+  if (outputJS != 0) {
     outputJS->reset();
-  if (this->ToStringData(tempS, theFormat))
+  }
+  if (this->ToStringData(tempS, theFormat)) {
     out << tempS;
-  else if (this->StartsWith(this->owner->opDefine(), 3)) {
+  } else if (this->StartsWith(this->owner->opDefine(), 3)) {
     std::string firstE  = (*this)[1].ToString(theFormat);
     std::string secondE = (*this)[2].ToString(theFormat);
     if (
@@ -2913,10 +3131,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << firstE;
     }
     out << "=";
-    if ((*this)[2].IsListStartingWithAtom(this->owner->opDefine()))
+    if ((*this)[2].IsListStartingWithAtom(this->owner->opDefine())) {
       out << "\\left(" << secondE << "\\right)";
-    else
+    } else {
       out << secondE;
+    }
   } else if (this->IsListStartingWithAtom(this->owner->opIsDenotedBy())) {
     out << (*this)[1].ToString(theFormat) << "=:" << (*this)[2].ToString(theFormat);
   } else if (
@@ -2924,16 +3143,18 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     this->StartsWith(this->owner->opLog(), 2)
   ) {
     std::string theArg = (*this)[1].ToString(theFormat);
-    if (!MathRoutines::StringBeginsWith(theArg, "\\left|"))
+    if (!MathRoutines::StringBeginsWith(theArg, "\\left|")) {
       out << "\\ln \\left|" << theArg << "\\right|";
-    else
+    } else {
       out << "\\ln " << theArg;
+    }
   } else if (this->StartsWith(this->owner->opLogBase(), 3)) {
     out << "\\log_{" << (*this)[1].ToString(theFormat) << "}"
     << "\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
   } else if (this->StartsWith(this->owner->opIntervalOpen(), 3)) {
-    if (!this->owner->flagUseBracketsForIntervals)
+    if (!this->owner->flagUseBracketsForIntervals) {
       out << "IntervalOpen{}";
+    }
     out << "\\left(" << (*this)[1].ToString(theFormat) << ", "
     << (*this)[2].ToString(theFormat) << "\\right)";
   } else if (this->StartsWith(this->owner->opIntervalClosed(), 3)) {
@@ -2946,61 +3167,74 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "\\left(" << (*this)[1].ToString(theFormat) << ", "
     << (*this)[2].ToString(theFormat) << "\\right]";
   } else if (this->StartsWith(this->owner->opIntervalLeftClosed(), 2)) {
-    if ((*this)[1].IsSequenceNElementS(2))
+    if ((*this)[1].IsSequenceNElementS(2)) {
       out << "\\left[" << (*this)[1][1] << ", " << (*this)[1][2] << "\\right)";
-    else
+    } else {
       out << (*this)[0].ToString(theFormat) << "{}" << (*this)[1].ToString(theFormat);
+    }
   } else if (this->StartsWith(this->owner->opIntervalClosed(), 2)) {
-    if ((*this)[1].IsSequenceNElementS(2))
+    if ((*this)[1].IsSequenceNElementS(2)) {
       out << "\\left[" << (*this)[1][1] << ", " << (*this)[1][2] << "\\right]";
-    else
+    } else {
       out << (*this)[0].ToString(theFormat) << "{}" << (*this)[1].ToString(theFormat);
+    }
   } else if (this->StartsWith(this->owner->opIntervalRightClosed(), 2)) {
-    if ((*this)[1].IsSequenceNElementS(2))
+    if ((*this)[1].IsSequenceNElementS(2)) {
       out << "\\left(" << (*this)[1][1] << ", " << (*this)[1][2] << "\\right]";
-    else
+    } else {
       out << (*this)[0].ToString(theFormat) << "{}" << (*this)[1].ToString(theFormat);
+    }
   } else if (this->StartsWith(this->owner->opQuote(),2)) {
-    if ((*this)[1].IsAtom(&tempS))
+    if ((*this)[1].IsAtom(&tempS)) {
       out << "\"" <<  tempS << "\"";
-    else
+    } else {
       out << "(Corrupt string)";
+    }
   } else if (this->StartsWith(this->owner->opDefineConditional(),4)) {
     out << (*this)[1].ToString(theFormat) << " :if \\left("
     << (*this)[2].ToString(theFormat) << "\\right)="
     << (*this)[3].ToString(theFormat);
   } else if (this->StartsWith(this->owner->opDivide(), 3)) {
     bool doUseFrac = this->owner->flagUseFracInRationalLaTeX;
-    if (doUseFrac && ((*this)[1].StartsWith(this->owner->opTimes()) ||
-                      (*this)[1].StartsWith(this->owner->opDivide()))) {
+    if (
+      doUseFrac &&
+      ((*this)[1].StartsWith(this->owner->opTimes()) || (*this)[1].StartsWith(this->owner->opDivide()))
+    ) {
       List<Expression> multiplicandsLeft;
       this->GetMultiplicandsDivisorsRecursive(multiplicandsLeft, 0);
-      for (int i = 0; i < multiplicandsLeft.size; i ++)
-        if (multiplicandsLeft[i].StartsWith(this->owner->opIntegral()) ||
-            multiplicandsLeft[i].IsAtomGivenData(this->owner->opIntegral())) {
+      for (int i = 0; i < multiplicandsLeft.size; i ++) {
+        if (
+          multiplicandsLeft[i].StartsWith(this->owner->opIntegral()) ||
+          multiplicandsLeft[i].IsAtomGivenData(this->owner->opIntegral())
+        ) {
           doUseFrac = false;
           break;
         }
+      }
     }
     if (!doUseFrac) {
       std::string firstE = (*this)[1].ToString(theFormat);
       std::string secondE = (*this)[2].ToString(theFormat);
-      bool firstNeedsBrackets = !((*this)[1].IsListStartingWithAtom(this->owner->opTimes()) || (*this)[1].IsListStartingWithAtom(this->owner->opDivide()));
+      bool firstNeedsBrackets =
+        !((*this)[1].IsListStartingWithAtom(this->owner->opTimes()) ||
+        (*this)[1].IsListStartingWithAtom(this->owner->opDivide()));
       bool secondNeedsBrackets = true;
       if ((*this)[2].IsOfType<Rational>()) {
         if ((*this)[2].GetValue<Rational>().IsInteger()) {
           secondNeedsBrackets = false;
         }
       }
-      if (firstNeedsBrackets)
+      if (firstNeedsBrackets) {
         out << "(" << firstE << ")";
-      else
+      } else {
         out << firstE;
+      }
       out << "/";
-      if (secondNeedsBrackets)
+      if (secondNeedsBrackets) {
         out << "(" << secondE << ")";
-      else
+      } else {
         out << secondE;
+      }
     } else {
       if (theFormat != 0) {
         theFormat->flagExpressionNewLineAllowed = false;
@@ -3019,15 +3253,17 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat) << "\\in "
     << (*this)[2].ToString(theFormat);
   } else if (this->StartsWith(this->owner->opOr(), 3)) {
-    if (!(*this)[1].IsSequenceNElementS())
+    if (!(*this)[1].IsSequenceNElementS()) {
       out << "\\left(" << (*this)[1] << "\\right)";
-    else
+    } else {
       out << (*this)[1];
+    }
     out << "\\ or\\ ";
-    if (!(*this)[2].IsSequenceNElementS())
+    if (!(*this)[2].IsSequenceNElementS()) {
       out << "\\left(" << (*this)[2] << "\\right)";
-    else
+    } else {
       out << (*this)[2];
+    }
   } else if (this->StartsWith(this->owner->opAnd(), 3)) {
     out << "\\left(" << (*this)[1] << "\\right)" << " and "
     << "\\left(" << (*this)[2] << "\\right)" ;
@@ -3063,8 +3299,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         firstE = "-";
         firstNeedsBrackets = false;
       }
-      if (firstE == "1")
+      if (firstE == "1") {
         firstE = "";
+      }
       if (firstNeedsBrackets) {
         out << "\\left(" << firstE << "\\right)";
       } else {
@@ -3081,15 +3318,17 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           }
         }
       }
-      if (firstNeedsBrackets || mustHaveTimes || firstE == "" || firstE == "-")
+      if (firstNeedsBrackets || mustHaveTimes || firstE == "" || firstE == "-") {
         mustHaveSpace = false;
-      if (mustHaveTimes)
+      }
+      if (mustHaveTimes) {
         out << "\\cdot ";
-      else if (mustHaveSpace)
+      } else if (mustHaveSpace) {
         out << " ";
-      if (secondNeedsBrackets)
+      }
+      if (secondNeedsBrackets) {
         out << "\\left(" << secondE << "\\right)";
-      else {
+      } else {
         out << secondE;
       }
     }
@@ -3102,36 +3341,41 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       firstE = "-";
       firstNeedsBrackets = false;
     }
-    if (firstE == "1")
+    if (firstE == "1") {
       firstE = "";
-    if (firstNeedsBrackets)
+    }
+    if (firstNeedsBrackets) {
       out << "\\left(" << firstE << "\\right)";
-    else
+    } else {
       out << firstE;
+    }
     out << "\\times ";
-    if (secondNeedsBrackets)
+    if (secondNeedsBrackets) {
       out << "\\left(" << secondE << "\\right)";
-    else {
+    } else {
       out << secondE;
     }
   } else if (this->StartsWith(this->owner->opSqrt(), 3)) {
     int thePower = 0;
     bool hasPowerTwo = (*this)[1].IsSmallInteger(&thePower);
-    if (hasPowerTwo)
+    if (hasPowerTwo) {
       hasPowerTwo = (thePower == 2);
-    if (hasPowerTwo)
+    }
+    if (hasPowerTwo) {
       out << "\\sqrt{" << (*this)[2].ToString(theFormat) << "}";
-    else
+    } else {
       out << "\\sqrt[" << (*this)[1].ToString(theFormat)
       << "]{" << (*this)[2].ToString(theFormat) << "}";
+    }
   } else if (this->StartsWith(this->owner->opFactorial(), 2)) {
-    if ((*this)[1].NeedsParenthesisForBaseOfExponent())
+    if ((*this)[1].NeedsParenthesisForBaseOfExponent()) {
       out << "\\left(" << (*this)[1].ToString(theFormat) << "\\right) !";
-    else
+    } else {
       out << (*this)[1].ToString(theFormat) << "!";
-  } else if (this->StartsWith(this->owner->opAbsoluteValue(), 2))
+    }
+  } else if (this->StartsWith(this->owner->opAbsoluteValue(), 2)) {
     out << "\\left|" << (*this)[1].ToString(theFormat) << "\\right|";
-  else if (this->StartsWith(this->owner->opThePower(), 3)) {
+  } else if (this->StartsWith(this->owner->opThePower(), 3)) {
     bool involvesExponentsInterpretedAsFunctions = false;
     const Expression& firstE = (*this)[1];
     const Expression& secondE = (*this)[2];
@@ -3149,7 +3393,6 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         Expression newFunE;
         newFunE.MakeXOX(*this->owner, this->owner->opThePower(), firstE[0], (*this)[2]);
         newFunE.CheckConsistency();
-        //stOutput << "<br> tostringing a very special case: " << newE.ToString(theFormat) << " lispified: " << this->ToStringFull();
         out << "{" << newFunE.ToString(theFormat) << "}{}";
         if (
           firstE[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
@@ -3203,13 +3446,15 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     const Expression& left = (*this)[1];
     const Expression& right = (*this)[2];
     std::string leftString;
-    if (left.NeedsParenthesisForAddition())
+    if (left.NeedsParenthesisForAddition()) {
       leftString = "\\left(" + left.ToString(theFormat) + "\\right)";
-    else
+    } else {
       leftString = left.ToString(theFormat);
+    }
     out << leftString;
-    if (allowNewLine && !useFrac && leftString.size() > (unsigned) lineBreak)
+    if (allowNewLine && !useFrac && leftString.size() > (unsigned) lineBreak) {
       out << "\\\\\n";
+    }
     std::string rightString = right.NeedsParenthesisForAddition() ?
     ("\\left(" + right.ToString(theFormat) + "\\right)") : right.ToString(theFormat);
     if (rightString.size() > 0) {
@@ -3232,8 +3477,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       leftString = left.ToString(theFormat);
     }
     out << leftString;
-    if (allowNewLine && !useFrac && leftString.size() > (unsigned)lineBreak)
+    if (allowNewLine && !useFrac && leftString.size() > (unsigned) lineBreak) {
       out << "\\\\\n";
+    }
     std::string rightString = right.NeedsParenthesisForAddition() ?
     ("\\left(" + right.ToString(theFormat) + "\\right)") : right.ToString(theFormat);
     if (rightString.size() > 0) {
@@ -3243,10 +3489,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     }
     out << rightString;
   } else if (this->StartsWith(this->owner->opMinus(), 2)) {
-    if ((*this)[1].StartsWith(this->owner->opPlus()) || (*this)[1].StartsWith(this->owner->opMinus()))
+    if ((*this)[1].StartsWith(this->owner->opPlus()) || (*this)[1].StartsWith(this->owner->opMinus())) {
       out << "-\\left(" << (*this)[1].ToString(theFormat) << "\\right)";
-    else
+    } else {
       out << "-" << (*this)[1].ToString(theFormat);
+    }
   } else if (this->StartsWith(this->owner->opSqrt(), 2)) {
     out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
   } else if (this->StartsWith(this->owner->opMinus(), 3)) {
@@ -3257,10 +3504,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       << ". " << crash;
     }
     out << (*this)[1].ToString(theFormat) << "-";
-    if ((*this)[2].StartsWith(this->owner->opPlus()) || (*this)[2].StartsWith(this->owner->opMinus()))
+    if ((*this)[2].StartsWith(this->owner->opPlus()) || (*this)[2].StartsWith(this->owner->opMinus())) {
       out << "\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
-    else
+    } else {
       out << (*this)[2].ToString(theFormat);
+    }
   } else if (this->StartsWith(this->owner->opBind(), 2)) {
     out << "{{" << (*this)[1].ToString(theFormat) << "}}";
   } else if (this->IsListStartingWithAtom(this->owner->opEqualEqual())) {
@@ -3289,9 +3537,6 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       needsParen = false;
       theCoeff = "";
     }
-//    if (theCoeff=="- 1" || theCoeff == "-1")
-//    { theCoeff="-";
-//    }
     if (needsParen) {
       out << "\\left(";
     }
@@ -3370,8 +3615,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->IsListStartingWithAtom(this->owner->opLessThan())) {
     out << (*this)[1].ToString(theFormat) << "&lt;" << (*this)[2].ToString(theFormat);
   } else if (this->IsMatrix()) {
-    if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix)
+    if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix) {
       out << "\\left(";
+    }
     if (!theFormat->flagUsePmatrix) {
       int numCols = this->GetNumCols();
       out << "\\begin{array}{";
@@ -3456,10 +3702,12 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       createSingleTable = theFormat->flagMakingExpressionTableWithLatex;
       theFormat->flagMakingExpressionTableWithLatex = false;
     }
-    if (!createSingleTable && !createTable && this->size() > 2)
+    if (!createSingleTable && !createTable && this->size() > 2) {
       out << "(";
-    if (createSingleTable)
+    }
+    if (createSingleTable) {
       out << "<table class =\"tableCalculatorOutput\">";
+    }
     std::string currentInput, currentOutput;
     if (outputJS != 0) {
       (*outputJS)["input"].type = JSData::JSarray;
@@ -3479,14 +3727,16 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           currentInput = "...";
         }
         out << currentInput;
-        if (outputJS != 0)
+        if (outputJS != 0) {
           (*outputJS)["input"][i - 1] = currentInput;
-        if (i != this->size() - 1)
+        }
+        if (i != this->size() - 1) {
           out << ";";
+        }
         out << "</td><td class =\"cellCalculatorResult\">";
-        if ((*this)[i].IsOfType<std::string>() && isFinal)
+        if ((*this)[i].IsOfType<std::string>() && isFinal) {
           currentOutput = currentE.GetValue<std::string>();
-        else if ((
+        } else if ((
             currentE.HasType<Plot> () ||
             currentE.IsOfType<SemisimpleSubalgebras>() ||
             currentE.IsOfType<WeylGroupData>() ||
@@ -3514,12 +3764,14 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           }
         }
         outWithDelimiter << currentE.ToString(theFormat);
-        if (createSingleTable && addLatexDelimiter)
+        if (createSingleTable && addLatexDelimiter) {
           outWithDelimiter << "\\)";
+        }
         outWithDelimiter << currentE.ToStringAllSlidersInExpression();
         out << outWithDelimiter.str();
-        if (outputJS != 0)
+        if (outputJS != 0) {
           (*outputJS)["output"][i] = outWithDelimiter.str();
+        }
         if (createSingleTable) {
           out << "</td><tr>\n";
         }
@@ -3531,10 +3783,12 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         theFormat->flagExpressionIsFinal = isFinal;
       }
     }
-    if (createSingleTable)
+    if (createSingleTable) {
       out << "</table>";
-    if (!createSingleTable && !createTable && this->size() > 2)
+    }
+    if (!createSingleTable && !createTable && this->size() > 2) {
       out << ")";
+    }
   } else if (this->StartsWith(this->owner->opError(), 2)) {
     this->owner->NumErrors ++;
     out << "(Error~ " << this->owner->NumErrors << ":~ see~ comments)";
@@ -3606,90 +3860,115 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
 }
 
 std::string Expression::Lispify() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return "Error: not initialized";
+  }
   RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDeptH > this->owner->MaxRecursionDeptH)
+  if (this->owner->RecursionDeptH > this->owner->MaxRecursionDeptH) {
     return "(error: max recursion depth ...)";
+  }
   std::string tempS;
-  if (this->ToStringData(tempS))
+  if (this->ToStringData(tempS)) {
     return tempS;
-  if (this->children.size == 0)
+  }
+  if (this->children.size == 0) {
     return this->ToString();
+  }
   std::stringstream out;
   out << "(";
-  for (int i = 0; i < this->children.size; i ++)
+  for (int i = 0; i < this->children.size; i ++) {
     out << " " << (*this)[i].Lispify();
+  }
   out << ")";
   return out.str();
 }
 
 bool Expression::IsLisT() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->children.size <= 0)
+  }
+  if (this->children.size <= 0) {
     return false;
-  if (this->theData != this->owner->opLisT())
-    crash << "This is a programming error. List expressions must have data valule equal to Calculator::opList(). " << crash;
+  }
+  if (this->theData != this->owner->opLisT()) {
+    crash << "This is a programming error. List expressions "
+    << "must have data valule equal to Calculator::opList(). " << crash;
+  }
   return true;
 }
 
 bool Expression::IsFrozen() const {
-  std::string atomName;
-  if (!this->StartsWith())
+  if (!this->StartsWith()) {
     return false;
+  }
   return (*this)[0].IsAtomThatFreezesArguments();
 }
 
 bool Expression::IsAtomThatFreezesArguments(std::string* outputWhichAtom) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->IsLisT())
+  }
+  if (this->IsLisT()) {
     return false;
-  if (this->theData < 0 || this->theData >= this->owner->GetOperations().size)
+  }
+  if (this->theData < 0 || this->theData >= this->owner->GetOperations().size) {
     return false;
-  if (outputWhichAtom != 0)
+  }
+  if (outputWhichAtom != 0) {
     *outputWhichAtom = this->owner->GetOperations()[this->theData];
+  }
   return this->owner->atomsThatFreezeArguments.Contains(this->owner->GetOperations()[this->theData]);
 }
 
 bool Expression::IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (!this->StartsWith(this->owner->opThePower(), 3))
+  }
+  if (!this->StartsWith(this->owner->opThePower(), 3)) {
     return false;
+  }
   return (*this)[1].IsAtomWhoseExponentsAreInterpretedAsFunction();
 }
 
 bool Expression::IsAtomWhoseExponentsAreInterpretedAsFunction(std::string* outputWhichAtom) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->IsLisT())
+  }
+  if (this->IsLisT()) {
     return false;
-  if (this->theData < 0 || this->theData >= this->owner->GetOperations().size)
+  }
+  if (this->theData < 0 || this->theData >= this->owner->GetOperations().size) {
     return false;
-  if (outputWhichAtom != 0)
+  }
+  if (outputWhichAtom != 0) {
     *outputWhichAtom = this->owner->GetOperations()[this->theData];
+  }
   return this->owner->atomsWhoseExponentsAreInterpretedAsFunctions.Contains(this->owner->GetOperations()[this->theData]);
 }
 
 bool Expression::IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->IsLisT())
+  }
+  if (this->IsLisT()) {
     return false;
-  if (this->theData < 0 || this->theData>= this->owner->GetOperations().size)
+  }
+  if (this->theData < 0 || this->theData>= this->owner->GetOperations().size) {
     return false;
-  if (outputWhichAtom != 0)
+  }
+  if (outputWhichAtom != 0) {
     *outputWhichAtom = this->owner->GetOperations()[this->theData];
+  }
   return this->owner->atomsNotInterpretedAsFunctions.Contains(this->owner->GetOperations()[this->theData]);
 }
 
 bool Expression::IsAtom(std::string* outputWhichOperation) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->IsLisT())
+  }
+  if (this->IsLisT()) {
     return false;
+  }
   if (outputWhichOperation != 0) {
     if (this->theData < 0 || this->theData>= this->owner->GetOperations().size) {
       std::stringstream out;
@@ -3703,35 +3982,43 @@ bool Expression::IsAtom(std::string* outputWhichOperation) const {
 }
 
 bool Expression::IsAtomGivenData(const std::string& desiredAtom) const {
-  if (this->IsLisT())
+  if (this->IsLisT()) {
     return false;
-  if (this->owner == 0)
+  }
+  if (this->owner == 0) {
     return false;
+  }
   return this->theData == this->owner->theAtoms.GetIndex(desiredAtom);
 }
 
 bool Expression::IsAtomGivenData(int desiredDataUseMinusOneForAny) const {
-  if (this->IsLisT())
+  if (this->IsLisT()) {
     return false;
-  if (desiredDataUseMinusOneForAny == - 1)
+  }
+  if (desiredDataUseMinusOneForAny == - 1) {
     return true;
+  }
   return this->theData == desiredDataUseMinusOneForAny;
 }
 
 bool Expression::IsKnownFunctionWithComplexRange(std::string* outputWhichOperation) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   std::string operationName;
-  if (outputWhichOperation == 0)
+  if (outputWhichOperation == 0) {
     outputWhichOperation = &operationName;
-  if (!this->IsBuiltInAtom(outputWhichOperation))
+  }
+  if (!this->IsBuiltInAtom(outputWhichOperation)) {
     return false;
+  }
   return this->owner->knownFunctionsWithComplexRange.Contains(operationName);
 }
 
 bool Expression::IsCalculatorStatusChanger() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   return
   this->StartsWith(this->owner->opDefine()) ||
   this->StartsWith(this->owner->opDefineConditional()) ||
@@ -3740,79 +4027,101 @@ bool Expression::IsCalculatorStatusChanger() const {
 }
 
 bool Expression::IsArithmeticOperation(std::string* outputWhichOperation) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   std::string operationName;
-  if (outputWhichOperation == 0)
+  if (outputWhichOperation == 0) {
     outputWhichOperation = &operationName;
-  if (!this->IsBuiltInAtom(outputWhichOperation))
+  }
+  if (!this->IsBuiltInAtom(outputWhichOperation)) {
     return false;
+  }
   return this->owner->arithmeticOperations.Contains(operationName);
 }
 
 bool Expression::IsBuiltInAtom(std::string* outputWhichOperation) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->IsLisT())
+  }
+  if (this->IsLisT()) {
     return false;
-  if (this->theData < 0 || this->theData >= this->owner->GetOperations().size)
+  }
+  if (this->theData < 0 || this->theData >= this->owner->GetOperations().size) {
     return false;
-  if (this->theData >= this->owner->NumPredefinedAtoms)
+  }
+  if (this->theData >= this->owner->NumPredefinedAtoms) {
     return false;
-  if (outputWhichOperation != 0)
+  }
+  if (outputWhichOperation != 0) {
     *outputWhichOperation = this->owner->GetOperations()[this->theData];
+  }
   return true;
 }
 
 bool Expression::IsGoodForChainRuleFunction(std::string* outputWhichOperation) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
-  if (this->IsLisT())
+  }
+  if (this->IsLisT()) {
     return false;
-  if (this->theData < 0 || this->theData >= this->owner->GetOperations().size)
+  }
+  if (this->theData < 0 || this->theData >= this->owner->GetOperations().size) {
     return false;
-  if (outputWhichOperation != 0)
+  }
+  if (outputWhichOperation != 0) {
     *outputWhichOperation = this->owner->GetOperations()[this->theData];
+  }
   return !this->owner->atomsNotAllowingChainRule.Contains(this->owner->GetOperations()[this->theData]);
 }
 
 bool Expression::RemoveContext() {
   this->CheckInitialization();
-  if (!this->HasContext())
+  if (!this->HasContext()) {
     return true;
+  }
   this->children.RemoveIndexShiftDown(1);
-  if (this->children.size == 1)
+  if (this->children.size == 1) {
     this->AssignMeMyChild(0);
+  }
   return true;
 }
 
 bool Expression::HasContext() const {
   this->CheckInitialization();
-  if (!this->IsBuiltInTypE() || !(this->size() == 3))
+  if (!this->IsBuiltInTypE() || !(this->size() == 3)) {
     return false;
+  }
   return (*this)[1].IsListStartingWithAtom(this->owner->opContexT());
 }
 
 bool Expression::HasNonEmptyContext() const {
-  if (!this->HasContext())
+  if (!this->HasContext()) {
     return false;
+  }
   return !this->GetContext().StartsWith(this->owner->opContexT(), 1);
 }
 
 bool Expression::IsCacheableExpression() const {
   MacroRegisterFunctionWithName("Expression::IsCacheableExpression");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return true;
-  if (this->IsBuiltInTypE())
+  }
+  if (this->IsBuiltInTypE()) {
     return true;
-  for (int i = 0; i < this->children.size; i ++)
-    if (!(*this)[i].IsCacheableExpression())
+  }
+  for (int i = 0; i < this->children.size; i ++) {
+    if (!(*this)[i].IsCacheableExpression()) {
       return false;
-  if (this->children.size > 0)
+    }
+  }
+  if (this->children.size > 0) {
     return true;
+  }
   Calculator& theBoss = *this->owner;
-  if (this->theData < 0 || this->theData >= theBoss.theAtoms.size)
+  if (this->theData < 0 || this->theData >= theBoss.theAtoms.size) {
     crash << "This is a programming error: corrupted atom in Expression::IsCacheableExpression. " << crash;
+  }
   return theBoss.atomsThatMustNotBeCached.Contains(theBoss.theAtoms[this->theData]);
 }
 
@@ -3822,23 +4131,29 @@ bool Expression::IsBuiltInScalar() const {
 }
 
 bool Expression::IsElementaryObject() const {
-  if (this->IsAtom())
+  if (this->IsAtom()) {
     return true;
-  if (this->IsBuiltInTypE())
+  }
+  if (this->IsBuiltInTypE()) {
     return true;
-  if (this->owner == 0)
+  }
+  if (this->owner == 0) {
     return true;
-  if (this->StartsWith(this->owner->opBind()))
+  }
+  if (this->StartsWith(this->owner->opBind())) {
     return true;
+  }
   return false;
 }
 
 bool Expression::IsBuiltInTypE(std::string* outputWhichOperation) const {
   std::string tempS;
-  if (!this->StartsWith())
+  if (!this->StartsWith()) {
     return false;
-  if (!(*this)[0].IsAtom(&tempS))
+  }
+  if (!(*this)[0].IsAtom(&tempS)) {
     return false;
+  }
   if (this->owner->GetBuiltInTypes().Contains(tempS)) {
     if (outputWhichOperation != 0) {
       *outputWhichOperation = tempS;
@@ -3850,10 +4165,12 @@ bool Expression::IsBuiltInTypE(std::string* outputWhichOperation) const {
 
 bool Expression::IsBuiltInTypE(int* outputWhichType) const {
   std::string theType;
-  if (!this->IsBuiltInTypE(&theType))
+  if (!this->IsBuiltInTypE(&theType)) {
     return false;
-  if (outputWhichType != 0)
+  }
+  if (outputWhichType != 0) {
     *outputWhichType = this->owner->GetOperations().GetIndex(theType);
+  }
   return true;
 }
 
@@ -3870,22 +4187,25 @@ bool Expression::MakeProducT(Calculator& owner, const List<Expression>& theMulti
 
 bool Expression::MakeSum(Calculator& owner, const List<Expression>& theSummands) {
   MacroRegisterFunctionWithName("Expression::MakeSum");
-  if (theSummands.size == 0)
+  if (theSummands.size == 0) {
     return this->AssignValue(0, owner);
+  }
   return this->MakeXOXOdotsOX(owner, owner.opPlus(), theSummands);
 }
 
 bool Expression::MakeOXdotsX(Calculator& owner, int theOp, const List<Expression>& theOpands) {
   MacroRegisterFunctionWithName("Expression::MakeOXdotsX");
-  if (theOpands.size == 0)
+  if (theOpands.size == 0) {
     crash << "Zero opands not allowed at this point. " << crash;
+  }
   if (theOpands.size == 1) {
     *this = theOpands[0];
     return true;
   }
   *this = *theOpands.LastObject();
-  for (int i = theOpands.size - 2; i >= 0; i --)
+  for (int i = theOpands.size - 2; i >= 0; i --) {
     this->MakeXOX(owner, theOp, theOpands[i], *this);
+  }
   this->CheckConsistencyRecursively();
   return true;
 }
@@ -3899,8 +4219,9 @@ bool Expression::ContextMakeContextWithPolyVars(Calculator& owner, const List<st
   MacroRegisterFunctionWithName("Expression::ContextMakeContextWithPolyVars");
   List<Expression> thePolyVars;
   thePolyVars.SetSize(inputPolyVarNames.size);
-  for (int i = 0; i < thePolyVars.size; i ++)
+  for (int i = 0; i < thePolyVars.size; i ++) {
     thePolyVars[i].MakeAtom(inputPolyVarNames[i], owner);
+  }
   return this->ContextMakeContextWithPolyVars(owner, thePolyVars);
 }
 
@@ -3909,8 +4230,9 @@ bool Expression::ContextMakeContextWithPolyVars(Calculator& owner, const List<Ex
   Expression thePolyVars;
   thePolyVars.reset(owner, 2);
   thePolyVars.AddChildAtomOnTop(owner.opPolynomialVariables());
-  for (int i = 0; i< inputPolyVarEs.size; i ++)
+  for (int i = 0; i< inputPolyVarEs.size; i ++) {
     thePolyVars.AddChildOnTop(inputPolyVarEs[i]);
+  }
   return this->AddChildOnTop(thePolyVars);
 }
 
@@ -3970,8 +4292,9 @@ bool Expression::MakeXOX(Calculator& owner, int theOp, const Expression& left, c
     Expression rightCopy = right;
     return this->MakeXOX(owner, theOp, leftCopy, rightCopy);
   }
-  if (right.owner == 0 && left.owner == 0)
+  if (right.owner == 0 && left.owner == 0) {
     crash << "Cannot build an expression from two non-initialized expressions. " << crash;
+  }
   if (right.owner == 0) {
     Expression rightCopy;
     rightCopy.AssignValue(right.theData, *left.owner);
@@ -4004,31 +4327,36 @@ bool Expression::MakeOX(Calculator& owner, int theOp, const Expression& opArgume
 
 bool Expression::Sequencefy() {
   this->CheckInitialization();
-  if (this->IsSequenceNElementS())
+  if (this->IsSequenceNElementS()) {
     return true;
+  }
   return this->MakeOX(*this->owner, this->owner->opSequence(), *this);
 }
 
 bool Expression::operator==(int other) const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   int theInt;
-  if (!this->IsSmallInteger(&theInt))
+  if (!this->IsSmallInteger(&theInt)) {
     return false;
+  }
   return theInt == other;
 }
 
 bool Expression::operator==(const std::string& other) const {
   std::string tempS;
-  if (!this->IsAtom(&tempS))
+  if (!this->IsAtom(&tempS)) {
     return false;
+  }
   return tempS == other;
 }
 
 std::string Expression::ToUTF8String(FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("Expression::ToUTF8String");
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return this->ToString(theFormat);
+  }
   std::stringstream out;
   Rational theRat;
   if (this->IsOfType<Rational>(&theRat)) {

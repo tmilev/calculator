@@ -2375,7 +2375,6 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(
   if (!leftE.IsOfType(&theElt)) {
     return false;
   }
-  //stOutput << "DEBUG: Got to here: raising " << theElt.ToString();
   LargeInt thePower = 0;
   if (!rightE.IsInteger(& thePower)) {
     return false;

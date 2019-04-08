@@ -7,41 +7,48 @@
 
 ProjectInformationInstance ProjectInfoVpf6_36pp(__FILE__, "Calculator html functions implementation. ");
 
-bool CalculatorHtmlFunctions::innerUserInputBox
-(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorHtmlFunctions::innerUserInputBox(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
   MapLisT<std::string, Expression, MathRoutines::HashString> theArguments;
-  if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theArguments, &theCommands.Comments))
+  if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theArguments, &theCommands.Comments)) {
     return false;
-  if (!theArguments.Contains("name"))
+  }
+  if (!theArguments.Contains("name")) {
     return theCommands << "User input name not specified in: " << input.ToString();
+  }
   std::string boxName = CalculatorHtmlFunctions::GetUserInputBoxName(input);
-  //stOutput << "DEBUG: box name first: " << boxName << "<br>input boxes: "
-  //<< theCommands.theObjectContainer.theUserInputTextBoxesWithValues.ToStringHtml() << "<hr>";
-  if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName))
+  if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName)) {
     return output.AssignValue(theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(boxName), theCommands);
+  }
   InputBox newBox;
   newBox.name = boxName;
-  //stOutput << "DEBUG: box name: " << newBox.name << "<br>";
   for (int i = 0; i < theArguments.theKeys.size; i ++) {
-    if (theArguments.theKeys[i] == "value")
+    if (theArguments.theKeys[i] == "value") {
       newBox.value = theArguments.theValues[i];
-    if (theArguments.theKeys[i] == "min")
+    }
+    if (theArguments.theKeys[i] == "min") {
       newBox.min = theArguments.theValues[i];
-    if (theArguments.theKeys[i] == "max")
+    }
+    if (theArguments.theKeys[i] == "max") {
       newBox.max = theArguments.theValues[i];
-    if (theArguments.theKeys[i] == "step")
+    }
+    if (theArguments.theKeys[i] == "step") {
       newBox.step = theArguments.theValues[i];
+    }
   }
   return output.AssignValue(newBox, theCommands);
 }
 
-bool CalculatorHtmlFunctions::innerEvaluateSymbols
-(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorHtmlFunctions::innerEvaluateSymbols(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerEvaluateSymbols");
   std::string theString;
-  if (!input.IsOfType(&theString))
+  if (!input.IsOfType(&theString)) {
     return false;
+  }
   List<SyntacticElement> theElts;
   theCommands.ParseFillDictionary(theString, theElts);
   Expression evaluatedE;
@@ -55,42 +62,46 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols
       continue;
     }
     if (currentElt.controlIndex == theCommands.conInteger()) {
-      if (!previousWasInteger)
+      if (!previousWasInteger) {
         out << "{";
+      }
       out << currentElt.theData.ToString();
       previousWasInteger = true;
       continue;
     }
-    if (previousWasInteger)
+    if (previousWasInteger) {
       out << "}";
+    }
     previousWasInteger = false;
     out << theCommands.controlSequences[currentElt.controlIndex];
   }
-  if (previousWasInteger)
+  if (previousWasInteger) {
     out << "}";
+  }
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorHtmlFunctions::innerSetInputBox
-(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorHtmlFunctions::innerSetInputBox(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
   MapLisT<std::string, Expression, MathRoutines::HashString> theArguments;
-  if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theArguments, &theCommands.Comments))
+  if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theArguments, &theCommands.Comments)) {
     return false;
-  if (!theArguments.Contains("name"))
+  }
+  if (!theArguments.Contains("name")) {
     return theCommands << "User input name not specified in: " << input.ToString();
-  if (!theArguments.Contains("value") )
+  }
+  if (!theArguments.Contains("value")) {
     return theCommands << "Input box value not specified in: " << input.ToString();
+  }
   std::string boxName = CalculatorHtmlFunctions::GetUserInputBoxName(input);
-  //stOutput << "DEBUG: box name before getvaluecreate: " << boxName << ", all boxes: "
-  //<< "<br>" << theCommands.theObjectContainer.theUserInputTextBoxesWithValues.ToStringHtml() << "<hr>";
-  if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName))
+  if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName)) {
     return theCommands << "Input box with name: " << boxName << " already has value.";
+  }
   InputBox& theBox =
   theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(boxName);
   theBox.name = boxName;
-  //stOutput << "DEBUG: box name AFTER getvaluecreate: " << boxName << ", all boxes: "
-  //<< "<br>" << theCommands.theObjectContainer.theUserInputTextBoxesWithValues.ToStringHtml() << "<hr>";
   theBox.value = theArguments.GetValueCreate("value");
   std::stringstream out;
   out << "Set value to input box name: " << boxName;
@@ -99,16 +110,20 @@ bool CalculatorHtmlFunctions::innerSetInputBox
 
 std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBox) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::GetUserInputBoxName");
-  if (theBox.owner == 0)
+  if (theBox.owner == 0) {
     return "non-initialized-expression";
+  }
   Calculator& theCommands = *theBox.owner;
   MapLisT<std::string, Expression, MathRoutines::HashString> theArguments;
-  if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, theBox, theArguments))
+  if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, theBox, theArguments)) {
     return "corrupt-box";
-  if (!theArguments.Contains("name"))
+  }
+  if (!theArguments.Contains("name")) {
     return "box-without-name";
+  }
   std::string theBoxName = "faultyBoxName";
-  if (!theArguments.GetValueCreate("name").IsOfType<std::string>(&theBoxName))
+  if (!theArguments.GetValueCreate("name").IsOfType<std::string>(&theBoxName)) {
     theBoxName = theArguments.GetValueCreate("name").ToString();
+  }
   return theBoxName;
 }

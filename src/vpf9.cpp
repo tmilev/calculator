@@ -8563,41 +8563,52 @@ void QuasiPolynomial::Substitution(
   for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++) {
     tempP = this->valueOnEachLatticeShift[i];
     bool tempB = tempP.Substitution(theSub);
-    if (!tempB)
-      crash << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial " << tempP.ToString()
+    if (!tempB) {
+      crash << "This is a programming error: substitution "
+      << theSub.ToString() << " into polynomial " << tempP.ToString()
       << " failed but the current function does not handle this properly. " << crash;
-    for (int j = 0; j < allRepresentatives.size; j ++)
-      if (imagesAllRepresentatives[j] == this->LatticeShifts[i])
+    }
+    for (int j = 0; j < allRepresentatives.size; j ++) {
+      if (imagesAllRepresentatives[j] == this->LatticeShifts[i]) {
         output.AddLatticeShift(tempP, allRepresentatives[j]);
+      }
+    }
   }
 }
 
-void QuasiPolynomial::Substitution
-(const Vector<Rational>& inputTranslationSubtractedFromArgument, QuasiPolynomial& output) {
+void QuasiPolynomial::Substitution(
+  const Vector<Rational>& inputTranslationSubtractedFromArgument, QuasiPolynomial& output
+) {
   MacroRegisterFunctionWithName("QuasiPolynomial::Substitution");
   //format of the translation. If the starting quasipolynomial was P(y_1, ..., y_n),
   //and the translation has coordinates (t_1, ..., t_n),
   //then the resulting quasipolynomial will be P(x_1-t_1, ..., x_n-t_n)
   PolynomialSubstitution<Rational> theSub;
   theSub.MakeIdSubstitution(this->GetNumVars(), (Rational) 1);
-  for (int i = 0; i < theSub.size; i ++)
+  for (int i = 0; i < theSub.size; i ++) {
     theSub[i].AddConstant(- inputTranslationSubtractedFromArgument[i]);
+  }
   Polynomial<Rational> tempP;
   output.MakeZeroLatTiceZn(this->GetNumVars());
   output.AmbientLatticeReduced = this->AmbientLatticeReduced;
   for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++) {
     tempP = this->valueOnEachLatticeShift[i];
     bool tempB = tempP.Substitution(theSub);
-    if (!tempB)
-      crash << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial " << tempP.ToString()
+    if (!tempB) {
+      crash << "This is a programming error: substitution "
+      << theSub.ToString() << " into polynomial " << tempP.ToString()
       << " failed but the current function does not handle this properly. " << crash;
+    }
     output.AddLatticeShift(tempP, this->LatticeShifts[i] + inputTranslationSubtractedFromArgument);
   }
 }
 
-void QuasiPolynomial::Substitution
-(const Matrix<Rational> & mapFromNewSpaceToOldSpace, const Vector<Rational>& inputTranslationSubtractedFromArgument,
- const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output) {
+void QuasiPolynomial::Substitution(
+  const Matrix<Rational>& mapFromNewSpaceToOldSpace,
+  const Vector<Rational>& inputTranslationSubtractedFromArgument,
+  const Lattice& ambientLatticeNewSpace,
+  QuasiPolynomial& output
+) {
   QuasiPolynomial tempQP;
   this->Substitution(inputTranslationSubtractedFromArgument, tempQP);
   tempQP.Substitution(mapFromNewSpaceToOldSpace, ambientLatticeNewSpace, output);
@@ -8605,15 +8616,18 @@ void QuasiPolynomial::Substitution
 
 bool QuasiPolynomial::SubstitutionLessVariables(const PolynomialSubstitution<Rational>& theSub, QuasiPolynomial& output) const {
   Matrix<Rational> theLatticeSub;
-  if (!this->AmbientLatticeReduced.GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub, theLatticeSub))
+  if (!this->AmbientLatticeReduced.GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub, theLatticeSub)) {
     return false;
+  }
   Matrix<Rational> theSubLatticeShift;
   output.AmbientLatticeReduced = this->AmbientLatticeReduced;
-  if (!output.AmbientLatticeReduced.SubstitutionHomogeneous(theLatticeSub))
+  if (!output.AmbientLatticeReduced.SubstitutionHomogeneous(theLatticeSub)) {
     return false;
+  }
   theSubLatticeShift.init(theLatticeSub.NumRows, 1);
-  for (int i = 0; i < theSubLatticeShift.NumRows; i ++)
+  for (int i = 0; i < theSubLatticeShift.NumRows; i ++) {
     theSub[i].GetConstantTerm(theSubLatticeShift.elements[i][0], (Rational) 0);
+  }
   Matrix<Rational> theShiftImage, shiftMatForm;
   output.LatticeShifts.size = 0;
   output.valueOnEachLatticeShift.size = 0;
@@ -8628,9 +8642,11 @@ bool QuasiPolynomial::SubstitutionLessVariables(const PolynomialSubstitution<Rat
       tempRoot.AssignMatDetectRowOrColumn(theShiftImage);
       tempP = this->valueOnEachLatticeShift[i];
       bool tempB = tempP.Substitution(theSub);
-      if (!tempB)
-        crash << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial " << tempP.ToString()
+      if (!tempB) {
+        crash << "This is a programming error: substitution "
+        << theSub.ToString() << " into polynomial " << tempP.ToString()
         << " failed but the current function does not handle this properly. " << crash;
+      }
       output.AddLatticeShift(tempP, tempRoot);
     }
   }
@@ -8639,83 +8655,83 @@ bool QuasiPolynomial::SubstitutionLessVariables(const PolynomialSubstitution<Rat
 
 bool Lattice::SubstitutionHomogeneous(const PolynomialSubstitution<Rational>& theSub) {
   Matrix<Rational> matSub;
-  if (!this->GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub, matSub))
+  if (!this->GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub, matSub)) {
     return false;
+  }
   return this->SubstitutionHomogeneous(matSub);
 }
 
-bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms
-(const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output) {
-  if (theSub.size < 1)
+bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms(
+  const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output
+) {
+  if (theSub.size < 1) {
     return false;
+  }
   int theTargetDim = 0;
-  for (int i = 0; i < theSub.size; i ++)
-   theTargetDim = MathRoutines::Maximum(theTargetDim, theSub[i].GetMinNumVars());
+  for (int i = 0; i < theSub.size; i ++) {
+    theTargetDim = MathRoutines::Maximum(theTargetDim, theSub[i].GetMinNumVars());
+  }
   output.init(theSub.size, theTargetDim);
   for (int i = 0; i < theSub.size; i ++) {
     Polynomial<Rational>& currentPoly = theSub[i];
-    if (!currentPoly.IsLinear())
+    if (!currentPoly.IsLinear()) {
       return false;
-    for (int j = 0; j < theTargetDim; j ++)
+    }
+    for (int j = 0; j < theTargetDim; j ++) {
       currentPoly.GetCoeffInFrontOfLinearTermVariableIndex(j, output.elements[i][j]);
+    }
   }
   return true;
 }
 
 void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& theNormal) {
-  //stOutput << "<br>Starting lattice: " << this->ToString(true, false) << "<br>";
   Vectors<Rational> startingBasis, resultBasis;
   startingBasis.AssignMatrixRows(this->basisRationalForm);
-  //stOutput << "Starting normal: " << theNormal.ToString();
   Vector<Rational> theScalarProducts;
   theScalarProducts.SetSize(startingBasis.size);
-  for (int i = 0; i < this->basisRationalForm.NumRows; i ++)
+  for (int i = 0; i < this->basisRationalForm.NumRows; i ++) {
     theScalarProducts[i] = theNormal.ScalarEuclidean(startingBasis[i]);
-  if (theScalarProducts.IsEqualToZero())
+  }
+  if (theScalarProducts.IsEqualToZero()) {
     return;
-  //stOutput << "<br>the scalar products: " << theScalarProducts.ToString();
+  }
   int pivotColumnIndex = theScalarProducts.getIndexLastNonZeroCoordinate();
   Rational pivotCoeff = theScalarProducts[pivotColumnIndex];
   theScalarProducts /= - pivotCoeff;
-  //stOutput << "<br>the scalar products after scaling: " << theScalarProducts.ToString();
   Vectors<Rational> eigenSpacePlusOrthogonalComponent;
   eigenSpacePlusOrthogonalComponent.SetSize(theScalarProducts.size);
-  for (int i = 0; i < theScalarProducts.size; i ++)
+  for (int i = 0; i < theScalarProducts.size; i ++) {
     if (i != pivotColumnIndex) {
       Vector<Rational>& currentRoot = eigenSpacePlusOrthogonalComponent[i];
       currentRoot.MakeZero(theScalarProducts.size);
       currentRoot[i] = 1;
       currentRoot[pivotColumnIndex] = theScalarProducts[i];
     }
+  }
   theScalarProducts.ScaleByPositiveRationalToIntegralMinHeight();
-  //stOutput << "<br>the scalar products after scaling to integral: " << theScalarProducts.ToString();
   eigenSpacePlusOrthogonalComponent[pivotColumnIndex] = theScalarProducts;
-  //stOutput << "<br>The eigenspace before intersection: " << eigenSpacePlusOrthogonalComponent.ToString();
   Lattice eigenLattice, theZnLattice;
   eigenLattice.MakeFromRoots(eigenSpacePlusOrthogonalComponent);
-  //stOutput << "<br>The eigen-Lattice: " << eigenLattice.ToString(true, false);
   theZnLattice.MakeZn(theScalarProducts.size);
-  //stOutput << "<br>The Zn-Lattice: " << theZnLattice.ToString(true, false);
   theZnLattice.IntersectWithBothOfMaxRank(eigenLattice);
-  //stOutput << "<br>Zn intersected with eigen-Lattice: " << theZnLattice.ToString(true, false);
   resultBasis.Reserve(theScalarProducts.size - 1);
   Vector<Rational> tempRoot, resultRoot; Rational orthogonalComponent;
   for (int i = 0; i < theZnLattice.basisRationalForm.NumRows; i ++) {
     theZnLattice.basisRationalForm.GetVectorFromRow(i, tempRoot);
     orthogonalComponent = tempRoot.ScalarEuclidean(theScalarProducts) / theScalarProducts.ScalarEuclidean(theScalarProducts);
     tempRoot -= theScalarProducts * orthogonalComponent;
-    if (!orthogonalComponent.IsInteger())
-      crash << crash;
+    if (!orthogonalComponent.IsInteger()) {
+      crash << "Orthogonal component is supposed to be an integer. " << crash;
+    }
     if (!tempRoot.IsEqualToZero()) {
       resultRoot.MakeZero(this->GetDim());
-      for (int j = 0; j < startingBasis.size; j ++)
+      for (int j = 0; j < startingBasis.size; j ++) {
         resultRoot += startingBasis[j] * tempRoot[j];
+      }
       resultBasis.AddOnTop(resultRoot);
     }
   }
-  //stOutput << "<br>Resulting basis: " << resultBasis.ToString();
   this->MakeFromRoots(resultBasis);
-  //stOutput << "<br>Final answer lattice form: " << this->ToString(true, false);
 }
 
 void Lattice::IntersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theSubspaceBasis) {
@@ -8727,14 +8743,12 @@ void Lattice::IntersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theS
 }
 
 void Lattice::IntersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& theSubspaceNormals) {
-  //stOutput << "<br>********************Debug info for IntersectWithLinearSubspaceGivenByNormals*******************";
-  for (int i = 0; i < theSubspaceNormals.size; i ++)
+  for (int i = 0; i < theSubspaceNormals.size; i ++) {
     this->IntersectWithLinearSubspaceGivenByNormal(theSubspaceNormals[i]);
-  //stOutput << "<br>********************End of debug info for IntersectWithLinearSubspaceGivenByNormals*******************";
+  }
 }
 
-bool Lattice::SubstitutionHomogeneous
- (const Matrix<Rational> & theSub, Lattice& resultIsSubsetOf) {
+bool Lattice::SubstitutionHomogeneous(const Matrix<Rational> & theSub, Lattice& resultIsSubsetOf) {
   (void) theSub;
   (void) resultIsSubsetOf;
   crash << "Not implemented yet. " << crash;
@@ -8752,44 +8766,43 @@ bool Lattice::SubstitutionHomogeneous
 return false;
 }
 
-bool Lattice::SubstitutionHomogeneous
-  (const Matrix<Rational>& theSub) {
+bool Lattice::SubstitutionHomogeneous(const Matrix<Rational>& theSub) {
   int targetDim = theSub.NumCols;
-  if (theSub.NumRows != this->GetDim())
+  if (theSub.NumRows != this->GetDim()) {
     return false;
-  //stOutput << "<br> the sub: " << theSub.ToString(true, false) << "<br>";
+  }
   int startingDim = this->GetDim();
   Matrix<Rational> theMat, oldBasisTransformed, matRelationBetweenStartingVariables;
   theMat = theSub;
   oldBasisTransformed = this->basisRationalForm;
   oldBasisTransformed.Transpose();
   Selection nonPivotPoints;
-  //stOutput << "<br>the matrices to be transformed: " << theMat.ToString(true, false) << "<br>" << oldBasisTransformed.ToString(true, false);
   theMat.GaussianEliminationByRows(&oldBasisTransformed, &nonPivotPoints);
-  //stOutput << "<br>afer transformation: " << theMat.ToString(true, false) << "<br>" << oldBasisTransformed.ToString(true, false);
-  if (nonPivotPoints.CardinalitySelection != 0)
+  if (nonPivotPoints.CardinalitySelection != 0) {
     return false;
+  }
   int numNonZeroRows = nonPivotPoints.MaxSize;
   int numZeroRows = theMat.NumRows-numNonZeroRows;
   matRelationBetweenStartingVariables.init(numZeroRows, startingDim);
-  for (int i = 0; i < numZeroRows; i ++)
-    for (int j = 0; j < startingDim; j ++)
+  for (int i = 0; i < numZeroRows; i ++) {
+    for (int j = 0; j < startingDim; j ++) {
       matRelationBetweenStartingVariables.elements[i][j] = oldBasisTransformed.elements[i + numNonZeroRows][j];
+    }
+  }
   Vectors<Rational> theEigenSpace;
   matRelationBetweenStartingVariables.GetZeroEigenSpaceModifyMe(theEigenSpace);
-  //stOutput << "<br>matRelationBetweenStartingVariables" <<  matRelationBetweenStartingVariables.ToString(true, false);
-  for (int i = 0; i < theEigenSpace.size; i ++)
+  for (int i = 0; i < theEigenSpace.size; i ++) {
     theEigenSpace[i].ScaleByPositiveRationalToIntegralMinHeight();
-  //stOutput << "the basis: " << theEigenSpace.ToString();
+  }
   oldBasisTransformed.ActOnVectorsColumn(theEigenSpace);
-  //stOutput << "<br>the basis transformed: " << theEigenSpace.ToString();
   this->basisRationalForm.init(targetDim, targetDim);
-  for (int i = 0; i < targetDim; i ++)
-    for (int j = 0; j < targetDim; j ++)
+  for (int i = 0; i < targetDim; i ++) {
+    for (int j = 0; j < targetDim; j ++) {
       this->basisRationalForm.elements[i][j] = theEigenSpace[i][j];
+    }
+  }
   this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
   this->Reduce();
-  //stOutput << "<br><br>and the sub result is: <br>" << this->ToString(true, false);
   return true;
 }
 
@@ -8799,8 +8812,9 @@ void QuasiPolynomial::operator*=(const Rational& theConst) {
     this->LatticeShifts.size = 0;
     return;
   }
-  for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++)
+  for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++) {
     this->valueOnEachLatticeShift[i] *= theConst;
+  }
 }
 
 void Cone::WriteToFile(std::fstream& output) {
@@ -8810,24 +8824,27 @@ void Cone::WriteToFile(std::fstream& output) {
     output << "(";
     for (int j = 0; j < this->Normals[i].size; j ++) {
       output << this->Normals[i][j].ToString();
-      if (j != this->Normals[i].size - 1)
+      if (j != this->Normals[i].size - 1) {
         output << ",";
+      }
     }
     output << ")";
-    if (i != this->Normals.size - 1)
+    if (i != this->Normals.size - 1) {
       output << ", ";
+    }
   }
   output << " ) ";
   output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
 bool Cone::ReadFromFile(std::fstream& input) {
-  std::string tempS, rootString;
+  std::string tempS;
   Vectors<Rational> buffer;
   int NumWordsRead;
   XML::ReadThroughFirstOpenTag(input, NumWordsRead, this->GetXMLClassName());
-  if (NumWordsRead != 0)
-    crash << crash;
+  if (NumWordsRead != 0) {
+    crash << "Reading code from file failed. " << crash;
+  }
   input >> tempS;
   buffer.size = 0;
   Vector<Rational> tempRoot;
@@ -8839,22 +8856,21 @@ bool Cone::ReadFromFile(std::fstream& input) {
   for (input >> tempS; tempS != ")" && tempS != ""; input >> tempS) {
     tempRoot.AssignString(tempS);
     buffer.AddOnTop(tempRoot);
-    //stOutput << "vector input " << tempS << " read as " << tempRoot.ToString();
   }
   if (buffer.size < 1) {
     XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
     return false;
   }
   int theDim=buffer[0].size;
-  for (int i = 1; i < buffer.size; i ++)
+  for (int i = 1; i < buffer.size; i ++) {
     if (buffer[i].size != theDim) {
       XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
       return false;
     }
+  }
   bool result;
   result = this->CreateFromNormals(buffer);
   result = XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName()) && result;
-//  if (!tempBool) crash << crash;
   return result;
 }
 
@@ -8938,8 +8954,7 @@ void ConeLatticeAndShiftMaxComputation::WriteToFile(std::fstream& output) {
   output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
 }
 
-bool ConeLatticeAndShiftMaxComputation::ReadFromFile
-(std::fstream& input, int UpperLimitDebugPurposes) {
+bool ConeLatticeAndShiftMaxComputation::ReadFromFile(std::fstream& input, int UpperLimitDebugPurposes) {
   ProgressReport theReport;
   int numReadWords;
   XML::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
@@ -9002,8 +9017,9 @@ bool ConeLatticeAndShiftMaxComputation::ReadFromFile
   this->LPtoMaximizeSmallerDim.ReadFromFile(input);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "LPtoMaximizeSmallerDim");
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
-  if (numReadWords != 0)
-    crash << crash;
+  if (numReadWords != 0) {
+    crash << "Failed to read conelattice and shift from file. " << crash;
+  }
   return true;
 }
 
@@ -9033,7 +9049,7 @@ bool Lattice::ReadFromFile(std::fstream& input) {
   this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
   if (numReadWords != 0)
-    crash << crash;
+    crash << "Failed to read rational form. " << crash;
   return result;
 }
 
@@ -9047,17 +9063,17 @@ void ConeComplex::WriteToFile(std::fstream& output, int UpperLimit) {
 
 bool ConeComplex::ReadFromFile(std::fstream& input, int UpperLimitDebugPurposes) {
   if (!this->List<Cone>::ReadFromFile(input, UpperLimitDebugPurposes)) {
-    crash << crash ;
+    crash << "Failed to read cone complex. " << crash ;
     return false;
   }
   std::string tempS;
   input >> tempS >> this->indexLowestNonRefinedChamber;
   if (tempS != "IndexLowestNonRefined:") {
-    crash << crash;
+    crash << "Failed to read from file" << crash;
     return false;
   }
   if (!this->splittingNormals.ReadFromFile(input)) {
-    crash << crash;
+    crash << "Failed to read splitting normals. " << crash;
     return false;
   }
   this->slicingDirections.ReadFromFile(input);
@@ -9066,15 +9082,17 @@ bool ConeComplex::ReadFromFile(std::fstream& input, int UpperLimitDebugPurposes)
 }
 
 void Cone::IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowerDim) {
-  if (theNormal.IsEqualToZero())
-    crash << crash;
+  if (theNormal.IsEqualToZero()) {
+    crash << "Zero normal not allowed. " << crash;
+  }
   int theDimension = theNormal.size;
   Matrix<Rational> tempMat, theEmbedding, theProjection;
   tempMat.AssignVectorRow(theNormal);
   Vectors<Rational> theBasis;
   tempMat.GetZeroEigenSpace(theBasis);
-  if (theBasis.size != theNormal.size - 1)
-    crash << crash;
+  if (theBasis.size != theNormal.size - 1) {
+    crash << "Plane intersection: normals don't match. " << crash;
+  }
   theEmbedding.AssignVectorsToRows(theBasis);
   theEmbedding.Transpose();
   theBasis.AddOnTop(theNormal);
@@ -9087,47 +9105,53 @@ void Cone::IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLow
   Vectors<Rational> newNormals = this->Normals;
   theProjection.ActOnVectorsColumn(newNormals);
   bool tempBool = outputConeLowerDim.CreateFromNormals(newNormals);
-  if (tempBool)
-    crash << crash;
+  if (tempBool) {
+    crash << "Create from normals failed. " << crash;
+  }
 }
 
 bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable(Polynomial<Rational>& inputLPoly, Vector<Rational>& output) {
-  if (!inputLPoly.IsLinear())
+  if (!inputLPoly.IsLinear()) {
     return false;
+  }
   output.MakeZero(inputLPoly.GetMinNumVars() + 1);
   for (int i = 0; i < inputLPoly.size(); i ++) {
     int theIndex;
-    if (inputLPoly[i].::MonomialP::IsOneLetterFirstDegree(&theIndex))
+    if (inputLPoly[i].::MonomialP::IsOneLetterFirstDegree(&theIndex)) {
       output[theIndex] = inputLPoly.theCoeffs[i];
-    else
+    } else {
       *output.LastObject() = inputLPoly.theCoeffs[i];
+    }
   }
   return true;
 }
 
-bool Cone::SolveLPolyEqualsZeroIAmProjective
-(Polynomial<Rational>& inputLPoly, Cone& outputCone) {
+bool Cone::SolveLPolyEqualsZeroIAmProjective(Polynomial<Rational>& inputLPoly, Cone& outputCone) {
   Vector<Rational> theNormal;
-  if (!this->GetRootFromLPolyConstantTermGoesToLastVariable(inputLPoly, theNormal))
+  if (!this->GetRootFromLPolyConstantTermGoesToLastVariable(inputLPoly, theNormal)) {
     return false;
+  }
   this->IntersectAHyperplane(theNormal, outputCone);
   return true;
 }
 
-bool Cone::SolveLQuasiPolyEqualsZeroIAmProjective
-(QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift) {
+bool Cone::SolveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift) {
   outputConesOverEachLatticeShift.SetSize(inputLQP.LatticeShifts.size);
   bool result = true;
-  for (int i = 0; i < inputLQP.LatticeShifts.size; i ++)
-    result = result && this->SolveLPolyEqualsZeroIAmProjective(inputLQP.valueOnEachLatticeShift[i], outputConesOverEachLatticeShift[i]);
+  for (int i = 0; i < inputLQP.LatticeShifts.size; i ++) {
+    result = result && this->SolveLPolyEqualsZeroIAmProjective(
+      inputLQP.valueOnEachLatticeShift[i], outputConesOverEachLatticeShift[i]
+    );
+  }
   return result;
 }
 
 std::string HtmlRoutines::ToHtmlTableRowsFromStringContainingJSON(const std::string& theJSON) {
   MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromStringContainingJSON");
   JSData parser;
-  if (!parser.readstring(theJSON, false))
+  if (!parser.readstring(theJSON, false)) {
     return MathRoutines::StringTrimToLengthForDisplay(theJSON, 1000);
+  }
   return HtmlRoutines::ToHtmlTableRowsFromJSON(parser);
 }
 
@@ -9136,18 +9160,20 @@ std::string HtmlRoutines::ToHtmlTableRowsFromJSON(const JSData& input) {
   if (input.type == JSData::JSObject) {
     std::stringstream out;
     out << "<table class = \"tableDatabaseItem\">";
-    for (int i = 0; i < input.objects.size(); i ++)
+    for (int i = 0; i < input.objects.size(); i ++) {
       out << "<tr><td>" << input.objects.theKeys[i] << "</td>" << "<td>"
       << HtmlRoutines::ToHtmlTableRowsFromJSON(input.objects.theValues[i]) << "</td>" << "</tr>";
+    }
     out << "</table>";
     return out.str();
   }
   if (input.type == JSData::JSarray) {
     std::stringstream out;
     out << "<table class = \"tableDatabaseItem\">";
-    for (int i = 0; i < input.objects.size(); i ++)
+    for (int i = 0; i < input.objects.size(); i ++) {
       out << "<tr>" << "<td>"
       << HtmlRoutines::ToHtmlTableRowsFromJSON(input.objects.theValues[i]) << "</td>" << "</tr>";
+    }
     out << "</table>";
     return out.str();
   }
@@ -9159,102 +9185,118 @@ std::string HtmlRoutines::ToHtmlTable(List<std::string>& labels, List<List<std::
   std::stringstream out;
   out << "<table class =\"tableDatabase\">";
   out << "<tr>";
-  for (int i = 0; i < labels.size; i ++)
+  for (int i = 0; i < labels.size; i ++) {
     out << "<th>" << MathRoutines::StringTrimToLengthForDisplay(labels[i], 1000) << "</th>";
+  }
   out << "</tr>";
   for (int i = 0; i < content.size; i ++) {
     out << "<tr>";
-    if (labels.size != content[i].size)
+    if (labels.size != content[i].size) {
       crash << "Error: while composing table, got " << labels.size << " labels but row index " << i
       << " has " << content[i].size << " elements. " << crash;
-    for (int j = 0; j < content[i].size; j ++)
-      if (! nestTables)
+    }
+    for (int j = 0; j < content[i].size; j ++) {
+      if (! nestTables) {
         out << "<td>" << MathRoutines::StringTrimToLengthForDisplay(content[i][j], 1000) << "</td>";
-      else
+      } else {
         out << "<td>" << HtmlRoutines::ToHtmlTableRowsFromStringContainingJSON(content[i][j]) << "</td>";
+      }
+    }
     out << "</tr>";
   }
   out << "</table>";
   return out.str();
 }
 
-bool HtmlRoutines::ConvertStringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output, bool doReplaceNewLineByBr) {
+bool HtmlRoutines::ConvertStringToHtmlStringReturnTrueIfModified(
+  const std::string& input, std::string& output, bool doReplaceNewLineByBr
+) {
   std::stringstream out;
   bool modified = false;
   for (unsigned int i = 0; i < input.size(); i ++) {
     bool currentlyModified = true;
     bool isReturnNewLine = false;
-    if (i + 1 < input.size())
+    if (i + 1 < input.size()) {
       isReturnNewLine = input[i] == '\r' && input[i + 1] == '\n';
+    }
     if (doReplaceNewLineByBr && isReturnNewLine) {
       out << "<br>\n";
       i ++;
-    } else if (input[i] == '<')
+    } else if (input[i] == '<') {
       out << "&lt;";
-    else if (input[i] == '>')
+    } else if (input[i] == '>') {
       out << "&gt;";
-    else if (input[i] == '&')
+    } else if (input[i] == '&') {
       out << "&amp;";
-    else {
+    } else {
       out << input[i];
       currentlyModified = false;
     }
-    if (currentlyModified)
+    if (currentlyModified) {
       modified = true;
+    }
   }
   output = out.str();
   return modified;
 }
 
 bool HtmlRoutines::IsRepresentedByItselfInURLs(char input) {
-  if (MathRoutines::isADigit(input))
+  if (MathRoutines::isADigit(input)) {
     return true;
-  if (MathRoutines::isALatinLetter(input))
+  }
+  if (MathRoutines::isALatinLetter(input)) {
     return true;
+  }
   return input == '.' || input == '-' || input == '_';
 }
 
 std::string HtmlRoutines::ConvertStringToURLStringExceptDashesAndSlashes(const std::string& input) {
   std::stringstream out;
-  for (unsigned int i = 0; i < input.size(); i ++)
-    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) || input[i] == '-' ||
-        input[i] == '/')
+  for (unsigned int i = 0; i < input.size(); i ++) {
+    if (
+      HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) ||
+      input[i] == '-' ||
+      input[i] == '/'
+    ) {
       out << input[i];
-    else {
+    } else {
       out << "%";
       int x = (char) input[i];
       out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
     }
+  }
   return out.str();
 }
 
 std::string HtmlRoutines::ConvertStringToURLString(const std::string& input, bool usePlusesForSpacebars) {
   std::stringstream out;
-  for (unsigned int i = 0; i < input.size(); i ++)
-    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]))
+  for (unsigned int i = 0; i < input.size(); i ++) {
+    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i])) {
       out << input[i];
-    else if (input[i] == ' ' && usePlusesForSpacebars)
+    } else if (input[i] == ' ' && usePlusesForSpacebars) {
       out << '+';
-    else {
+    } else {
       out << "%";
       int x = (char) input[i];
       out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
     }
+  }
   return out.str();
 }
 
 Vector<Rational> oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(int NumVars) {
   Vector<Rational> output;
   output.SetSize(NumVars);
-  for (int i = 0; i < NumVars; i ++)
+  for (int i = 0; i < NumVars; i ++) {
     output[i] = i + 2;
+  }
   return output;
 }
 
-bool PartFractions::RemoveRedundantShortRootsIndex
-(int theIndex, Vector<Rational>* Indicator) {
-   if (!(*this)[theIndex].rootIsInFractionCone(*this, Indicator))
+bool PartFractions::RemoveRedundantShortRootsIndex(int theIndex, Vector<Rational>* Indicator) {
+  if (!(*this)[theIndex].rootIsInFractionCone(*this, Indicator)) {
     return false;
+  }
   bool found = false;
   for (int k = 0; k < (*this)[theIndex].IndicesNonZeroMults.size; k ++) {
     int currentIndex = (*this)[theIndex].IndicesNonZeroMults[k];
@@ -9264,8 +9306,9 @@ bool PartFractions::RemoveRedundantShortRootsIndex
       break;
     }
   }
-  if (!found)
+  if (!found) {
     return false;
+  }
   PartFraction thePF;
   Rational localStartCheckSum, localEndCheckSum;
   std::string tempS;
@@ -9281,17 +9324,16 @@ bool PartFractions::RemoveRedundantShortRootsIndex
         int ElongationValue = currentFrac.Elongations[i];
         if (ElongationValue != LCMElongations) {
           int numSummands = LCMElongations / ElongationValue;
-          thePF.GetNElongationPoly(this->startingVectors, currentIndex, ElongationValue, numSummands, tempIP, this->AmbientDimension);
-          //tempIP.ComputeDebugString();
+          thePF.GetNElongationPoly(
+            this->startingVectors, currentIndex, ElongationValue, numSummands, tempIP, this->AmbientDimension
+          );
           tempIP.RaiseToPower(currentFrac.Multiplicities[i]);
-          //tempIP.ComputeDebugString();
           currentCoeff *= tempIP;
-//          ComputationalBufferCoefficientNonExpanded.ComputeDebugString();
           currentFrac.AddMultiplicity(currentFrac.Multiplicities[i], LCMElongations);
           currentFrac.AddMultiplicity(- currentFrac.Multiplicities[i], ElongationValue);
-//          thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension);
-          if (!localEndCheckSum.IsEqualTo(localStartCheckSum))
-            crash << crash;
+          if (!localEndCheckSum.IsEqualTo(localStartCheckSum)) {
+            crash << "Local end checksum must be zero. " << crash;
+          }
         }
       }
     }
@@ -9305,13 +9347,20 @@ bool PartFractions::RemoveRedundantShortRootsIndex
   return true;
 }
 
-void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
-(const Vector<Rational>& theDirection, Vector<Rational>& outputDirectionMultipleOnLattice, Vector<Rational>& theShift, Vector<Rational>& theAffineHyperplane,
- Vectors<Rational>& outputRepresentatives, Vectors<Rational>& movementInDirectionPerRepresentative, Lattice& outputRougherLattice) {
+void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice(
+  const Vector<Rational>& theDirection,
+  Vector<Rational>& outputDirectionMultipleOnLattice,
+  Vector<Rational>& theShift,
+  Vector<Rational>& theAffineHyperplane,
+  Vectors<Rational>& outputRepresentatives,
+  Vectors<Rational>& movementInDirectionPerRepresentative,
+  Lattice& outputRougherLattice
+) {
   Vector<Rational> theNormal = theAffineHyperplane;
   theNormal.SetSize(theNormal.size - 1);
-  if (theDirection.ScalarEuclidean(theNormal).IsEqualToZero())
+  if (theDirection.ScalarEuclidean(theNormal).IsEqualToZero()) {
     return;
+  }
   Rational theConstOnTheOtherSide = - *theAffineHyperplane.LastObject();
   Vectors<Rational> theBasis;
   theBasis.AssignMatrixRows(this->basisRationalForm);
@@ -9321,17 +9370,12 @@ void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
   theDirectionLattice = *this;
   theDirectionLattice.IntersectWithLinearSubspaceSpannedBy(tempRoots);
   theDirectionLattice.basisRationalForm.GetVectorFromRow(0, outputDirectionMultipleOnLattice);
-  //stOutput << "<br>the normal: " << theNormal.ToString();
-  //stOutput << "<br> the direction lattice: " << theDirectionLattice.ToString();
   theHyperplaneLatticeNoShift = *this;
   theHyperplaneLatticeNoShift.IntersectWithLinearSubspaceGivenByNormal(theNormal);
-  //stOutput << "<br>the non-affine hyperplane intersected with the lattice: " << theHyperplaneLatticeNoShift.ToString();
   tempRoots.AssignMatrixRows(theHyperplaneLatticeNoShift.basisRationalForm);
   tempRoots.AddOnTop(outputDirectionMultipleOnLattice);
   outputRougherLattice.MakeFromRoots(tempRoots);
   this->GetAllRepresentatives(outputRougherLattice, outputRepresentatives);
-  //stOutput << "<br>the rougher lattice: " << outputRougherLattice.ToString();
-  //stOutput << "<br>representatives of the quotient of the two lattices: " << outputRepresentatives.ToString();
   for (int i = 0; i < outputRepresentatives.size; i ++) {
     outputRepresentatives[i] += theShift;
     outputRougherLattice.ReduceVector(outputRepresentatives[i]);
@@ -9339,7 +9383,6 @@ void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
   Rational theShiftedConst, unitMovement, tempRat;
   unitMovement = theNormal.ScalarEuclidean(outputDirectionMultipleOnLattice);
   movementInDirectionPerRepresentative.SetSize(outputRepresentatives.size);
-  //stOutput << "<br>Affine hyperplane per representative: ";
   for (int i = 0; i < outputRepresentatives.size; i ++) {
     tempRat = (theNormal.ScalarEuclidean(outputRepresentatives[i]) - theConstOnTheOtherSide) / unitMovement;
     tempRat.AssignFracValue();
@@ -9347,13 +9390,12 @@ void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
     Vector<Rational>& currentMovement =movementInDirectionPerRepresentative[i];
     currentMovement = theAffineHyperplane;
     *currentMovement.LastObject() = theShiftedConst;
-    //stOutput << "<br>Representative: " << outputRepresentatives[i].ToString() << " and the hyperplane: " << currentMovement.ToString();
   }
-//  stOutput << "<hr>"
 }
 
-bool slTwoInSlN::ComputeInvariantsOfDegree
-(List<int>& decompositionDimensions, int theDegree, List<Polynomial<Rational> >& output, std::string& outputError) {
+bool slTwoInSlN::ComputeInvariantsOfDegree(
+  List<int>& decompositionDimensions, int theDegree, List<Polynomial<Rational> >& output, std::string& outputError
+) {
   this->initFromModuleDecomposition(decompositionDimensions, false, false);
   SelectionWithMaxMultiplicity theSel;
   theSel.initMaxMultiplicity(this->theDimension, theDegree);
@@ -9374,8 +9416,9 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
   Vector<Rational> theCartanAction;
   theCartanAction.SetSize(this->theDimension);
   theWeight.SetSize(this->theDimension);
-  for (int j = 0; j < this->theDimension; j ++)
+  for (int j = 0; j < this->theDimension; j ++) {
     theCartanAction[j] = this->theH.elements[j][j];
+  }
   theSel.IncrementSubsetFixedCardinality(theDegree);
   Rational theMonCoeff = 1;
   for (int i = 0; i < numCycles; i ++, theSel.IncrementSubsetFixedCardinality(theDegree)) {
@@ -9384,45 +9427,43 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
       theWeight[j] = theMon[j];
     }
     basisMonsAll.AddMonomial(theMon, theMonCoeff);
-    if (theWeight.ScalarEuclidean(theCartanAction).IsEqualToZero())
+    if (theWeight.ScalarEuclidean(theCartanAction).IsEqualToZero()) {
       basisMonsZeroWeight.AddMonomial(theMon, theMonCoeff);
+    }
   }
-//  stOutput << "<br>Num cycles:" << numCycles << "<br>The basis mons (there are " << basisMonsZeroWeight.size << " of them): "  << basisMonsZeroWeight.ToString(PolyFormatLocal);
   Matrix<Rational> tempMat;
   tempMat.init(basisMonsAll.size() * 2, basisMonsZeroWeight.size());
-//  tempMat.init(basisMonsAll.size*numGenerators, basisMonsZeroWeight.size);
   Polynomial<Rational>  tempP;
-  for (int l = 0; l < 2; l ++)
+  for (int l = 0; l < 2; l ++) {
     for (int k = 0; k < basisMonsZeroWeight.size(); k ++) {
-      if (l == 0)
+      if (l == 0) {
         this->theE.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight[k], tempP);
-      else
+      } else {
         this->theF.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight[k], tempP);
+      }
       for (int j = 0; j < basisMonsAll.size(); j ++) {
         int indexInResult = tempP.theMonomials.GetIndex(basisMonsAll[j]);
         int currentRow = l * basisMonsAll.size() + j;
-        if (indexInResult == - 1)
+        if (indexInResult == - 1) {
           tempMat.elements[currentRow][k] = 0;
-        else
+        } else {
           tempMat.elements[currentRow][k] = tempP.theCoeffs[indexInResult];
+        }
       }
     }
-//  if (tempMat.NumRows<120)
-//    stOutput << "<div class =\"math\" scale =\"50\">" << tempMat.ToString(false, true) << "</div>";
+  }
   Vectors<Rational> tempRoots;
   tempMat.GetZeroEigenSpaceModifyMe(tempRoots);
   output.SetSize(tempRoots.size);
-//  stOutput << "<br>invariants Vector<Rational> form: " << tempRoots.ToString();
-//  stOutput << "<br> .... and the invariants are: ";
   for (int i = 0; i < output.size; i ++) {
     Polynomial<Rational>& current = output[i];
     current.MakeZero();
-    for (int j = 0; j < basisMonsZeroWeight.size(); j ++)
+    for (int j = 0; j < basisMonsZeroWeight.size(); j ++) {
       if (!tempRoots[i][j].IsEqualToZero()) {
         theMon = basisMonsZeroWeight[j];
         current.AddMonomial(theMon, tempRoots[i][j]);
       }
- //   stOutput << "<br>Invariant " << i << ":<br>" << current.ToString(PolyFormatLocal);
+    }
   }
   return true;
 }
@@ -9432,7 +9473,8 @@ std::string DrawingVariables::GetColorPsTricksFromColorIndex(int colorIndex) {
   int r = (colorIndex / 65536) % 256;
   int g = (colorIndex / 256) % 256;
   int b = colorIndex % 256;
-  out << "\\\\newrgbcolor{currentColor}{" << ((double) r) / 255 << ", " << ((double) g) / 255 << ", " << ((double) b) / 255 << "}";
+  out << "\\\\newrgbcolor{currentColor}{" << ((double) r) / 255 << ", "
+  << ((double) g) / 255 << ", " << ((double) b) / 255 << "}";
   return out.str();
 }
 
@@ -9466,14 +9508,17 @@ std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex) {
   int g = (colorIndex / 256) % 256;
   int b = colorIndex % 256;
   out << "#";
-  if (r < 16)
+  if (r < 16) {
     out << 0;
+  }
   out << std::hex << r;
-  if (g < 16)
+  if (g < 16) {
     out << 0;
+  }
   out << std::hex << g;
-  if (b < 16)
+  if (b < 16) {
     out << 0;
+  }
   out << std::hex << b;
   return out.str();
 }
@@ -9486,8 +9531,9 @@ std::string ConeLatticeAndShift::ToString(FormatExpressions& theFormat) {
 }
 
 void DrawOperations::MakeMeAStandardBasis(int theDim) {
-  if (theDim < 1)
+  if (theDim < 1) {
     return;
+  }
   if (theDim > 3) {
     this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
     for (int i = 0; i < theDim; i ++) {

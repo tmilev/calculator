@@ -1428,7 +1428,6 @@ RationalFunctionOld RationalFunctionOld::GetOne() const {
   return tempRat;
 }
 
-
 std::string RationalFunctionOld::ToString(FormatExpressions* theFormat) const {
   if (this->expressionType == this->typeRational) {
     return this->ratValue.ToString();
@@ -1470,8 +1469,9 @@ std::string RationalFunctionOld::ToString(FormatExpressions* theFormat) const {
 void RationalFunctionOld::gcd(
   const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output
 ) {
-  if (RationalFunctionOld::gcdQuicK(left, right, output))
+  if (RationalFunctionOld::gcdQuicK(left, right, output)) {
     return;
+  }
   MacroRegisterFunctionWithName("RationalFunctionOld::gcd");
   Polynomial<Rational> lcmBuf, prodBuf, remBuf;
   RationalFunctionOld::lcm(left, right, lcmBuf);
@@ -1479,10 +1479,14 @@ void RationalFunctionOld::gcd(
   prodBuf *= right;
   prodBuf.DivideBy(lcmBuf, output, remBuf);
   if (!remBuf.IsEqualToZero() || output.IsEqualToZero()) {
-    crash << "This is a programming error. <br>While computing the gcd of left =" << left.ToString() << " <br>and right ="
-    << right.ToString() << " <br>I got that left*right = " << prodBuf.ToString() << "<br>, and that lcm(left,right)="
-    << lcmBuf.ToString() << " <br>but at the same time right*left divided by lcm (left, right) equals <br>" << output.ToString()
-    << "<br> with remainder " << remBuf.ToString() << ", which is imposible. <br>The Groebner basis follows. <br>" << crash;
+    crash << "This is a programming error. <br>While computing the gcd of left ="
+    << left.ToString() << " <br>and right ="
+    << right.ToString() << " <br>I got that left*right = " << prodBuf.ToString()
+    << "<br>, and that lcm(left,right)="
+    << lcmBuf.ToString() << " <br>but at the same time right*left divided by lcm (left, right) equals <br>"
+    << output.ToString()
+    << "<br> with remainder " << remBuf.ToString()
+    << ", which is imposible. <br>The Groebner basis follows. <br>" << crash;
   }
   output.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
 }

@@ -96,8 +96,9 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
   output[WebAPI::result::crashReport] = this->theCrashReport.str();
   stOutput << output.ToString(false);
   stOutput.Flush();
-  if (this->CleanUpFunction != 0)
+  if (this->CleanUpFunction != 0) {
     this->CleanUpFunction();
+  }
   assert(false);
   return *this;
 }
@@ -384,10 +385,16 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tag
   for (int i = 0; i < this->webArguments.size(); i ++) {
     const std::string& currentName = this->webArguments.theKeys[i];
     if (
-      currentName == "request" || currentName == "password" ||
-      currentName == "fileName" || currentName == "courseHome" || currentName == "topicList" ||
-      currentName == "currentDatabaseTable" || currentName == "mainInput" || currentName == "studentView" ||
-      currentName == "studentSection" || currentName == "error" ||
+      currentName == "request" ||
+      currentName == "password" ||
+      currentName == "fileName" ||
+      currentName == "courseHome" ||
+      currentName == "topicList" ||
+      currentName == "currentDatabaseTable" ||
+      currentName == "mainInput" ||
+      currentName == "studentView" ||
+      currentName == "studentSection" ||
+      currentName == "error" ||
       currentName == "navigationBar" ||
       currentName == "problemLinkStyle" ||
       currentName == "googleToken" ||
@@ -416,8 +423,9 @@ std::string GlobalVariables::GetWebInput(const std::string& inputName) {
 
 void GlobalVariables::MakeReport() {
   MacroRegisterFunctionWithName("GlobalVariables::MakeReport");
-  if (this->IndicatorStringOutputFunction == 0)
+  if (this->IndicatorStringOutputFunction == 0) {
     return;
+  }
   if (this->flagRunningCommandLine || this->flagRunningConsoleTest) {
     this->MakeReport(this->ToStringProgressReportConsole());
   } else {
@@ -505,8 +513,9 @@ void UserCalculatorData::clearPasswordFromMemory() {
 void UserCalculatorData::clearAuthenticationTokenAndPassword() {
   MacroRegisterFunctionWithName("UserCalculatorData::clearAuthenticationTokenAndPassword");
   this->clearPasswordFromMemory();
-  for (unsigned i = 0; i < this->actualAuthenticationToken.size(); i ++)
+  for (unsigned i = 0; i < this->actualAuthenticationToken.size(); i ++) {
     this->actualAuthenticationToken[i] = ' ';
+  }
   this->actualAuthenticationToken = "";
 }
 
@@ -620,7 +629,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDynkinString");
   this->CheckInitialization();
   if (indexComponent >= this->SimpleBasesConnectedComponents.size) {
-    crash << "Bad dynkin index. " << crash;
+    crash << "Bad Dynkin index. " << crash;
   }
   DynkinSimpleType& outputType = this->SimpleComponentTypes[indexComponent];
   Vectors<Rational>& currentComponent = this->SimpleBasesConnectedComponents[indexComponent];
@@ -669,7 +678,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
       //<- components are sorted by length, therefore the second and third component are of length 1,
       //therefore we have type D_n
       Rational theScale = DynkinSimpleType::GetDefaultLongRootLengthSquared('D') /
-        tripleNode.ScalarProduct(tripleNode, this->AmbientBilinearForm);
+      tripleNode.ScalarProduct(tripleNode, this->AmbientBilinearForm);
       currentComponent.AddListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0]);//<-first long component
       if (!tripleNode.ScalarProduct(currentComponent[0], this->AmbientBilinearForm).IsEqualToZero()) {
         currentComponent.ReverseOrderElements();
@@ -795,12 +804,16 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rati
   for (int i = 0; i < simpleBasisInput.size; i ++) {
     int indexFirstComponentConnectedToRoot = - 1;
     for (int j = 0; j < this->SimpleBasesConnectedComponents.size; j ++) {
-      if (this->SimpleBasesConnectedComponents[j].ContainsARootNonPerpendicularTo(simpleBasisInput[i], this->AmbientBilinearForm)) {
+      if (this->SimpleBasesConnectedComponents[j].ContainsARootNonPerpendicularTo(
+        simpleBasisInput[i], this->AmbientBilinearForm)
+      ) {
         if (indexFirstComponentConnectedToRoot == - 1) {
           indexFirstComponentConnectedToRoot = j;
           this->SimpleBasesConnectedComponents[j].AddOnTop(simpleBasisInput[i]);
         } else {
-          this->SimpleBasesConnectedComponents[indexFirstComponentConnectedToRoot].AddListOnTop(this->SimpleBasesConnectedComponents[j]);
+          this->SimpleBasesConnectedComponents[indexFirstComponentConnectedToRoot].AddListOnTop(
+            this->SimpleBasesConnectedComponents[j]
+          );
           this->SimpleBasesConnectedComponents.RemoveIndexSwapWithLast(j);
           j --;
         }
@@ -1265,7 +1278,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex() {
 //  this->theQPsNonSubstituted.SetSize(this->thePfs.theChambersOld.size);
 //  this->theQPsSubstituted.SetSize(this->thePfs.theChambersOld.size);
   out << "\n\nThe vector partition functions in each chamber follow.";
-  crash << crash;
+  crash << "Not implemented yet. " << crash;
 /*
   for (int i = 0; i < this->thePfs.theChambersOld.size; i ++)
     if (this->thePfs.theChambersOld.TheObjects[i] != 0) {
@@ -1603,7 +1616,9 @@ bool GeneralizedVermaModuleCharacters::CheckInitialization() const {
   return true;
 }
 
-void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input) {
+void GeneralizedVermaModuleCharacters::initFromHomomorphism(
+  Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input
+) {
   MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initFromHomomorphism");
   Vectors<Rational> tempRoots;
   this->WeylLarger = &input.theRange().theWeyl;
@@ -1691,7 +1706,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   this->theCoeffs.SetSize(theSubgroup.size);
   this->log << " \n******************\nthe subgroup: \n" << theSubgroup.ToString() << "\n\n\n\n\n\n";
   this->log << theSubgroup.ElementToStringBruhatGraph();
-  this->log << "\nMatrix form of the elements of Weyl group of the Levi part of the parabolic (" << theSubgroup.size << " elements):\n";
+  this->log << "\nMatrix form of the elements of Weyl group of the Levi part of the parabolic ("
+  << theSubgroup.size << " elements):\n";
   for (int i = 0; i < theSubgroup.size; i ++) {
     Matrix<Rational>& currentLinearOperator = this->theLinearOperators[i];
     theSubgroup.GetMatrixOfElement(theSubgroup[i], currentLinearOperator);
@@ -1709,7 +1725,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   }
   this->log << "\n\n\nMatrix of the projection operator (basis-changed):\n"
   << theProjectionBasisChanged.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
-  this->log << "\n\n\nMatrix form of the operators $u_w$, the translations $\tau_w$ and their projections (" << this->theLinearOperatorsExtended.size << "):";
+  this->log << "\n\n\nMatrix form of the operators $u_w$, "
+  << "the translations $\tau_w$ and their projections (" << this->theLinearOperatorsExtended.size << "):";
   //List<Matrix<Rational> > tempList;
   for (int k = 0; k < this->theLinearOperators.size; k ++) {
     Matrix<Rational>& currentLO = this->theLinearOperators[k];
@@ -1979,8 +1996,9 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation() {
       currentCLS.theShift.MakeZero(theAffineDim);
       currentCLS.theLattice = ZnLattice;
       bool tempBool = this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(theLPtoMax);
-      if (!tempBool)
-        crash << "This should not happen" << crash;
+      if (!tempBool) {
+        crash << "This should not happen. " << crash;
+      }
       this->theMaxComputation.theConesLargerDim.AddOnTop(currentCLS);
       this->theMaxComputation.LPtoMaximizeLargerDim.AddOnTop(theLPtoMax);
       this->numNonZeroMults ++;

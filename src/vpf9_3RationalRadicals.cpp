@@ -401,10 +401,12 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
     sign = - 1;
     halfFracPart = half - halfFracPart;
   }
-  if (halfIntegerPartTimesTwo == 2)
+  if (halfIntegerPartTimesTwo == 2) {
     sign = - 1;
-  if (halfIntegerPartTimesTwo == 3)
+  }
+  if (halfIntegerPartTimesTwo == 3) {
     halfFracPart = half - halfFracPart;
+  }
   if (halfFracPart == Rational(1, 12)) {
     AlgebraicNumber sqrt6, sqrt2;
     sqrt6.AssignRationalQuadraticRadical(6, inputOwner);
@@ -459,8 +461,9 @@ Rational AlgebraicNumber::GetNumeratorRationalPart() const {
   this->owner->GetAdditionTo(*this, theEltAdditive);
   LargeInt resultGCD = 1;
   LargeIntUnsigned tempR;
-  if (theEltAdditive.size() > 0)
+  if (theEltAdditive.size() > 0) {
     resultGCD = theEltAdditive.theCoeffs[0].GetNumerator();
+  }
   for (int i = 1; i < theEltAdditive.size(); i ++) {
     tempR = resultGCD.value;
     LargeIntUnsigned::gcd(tempR, theEltAdditive.theCoeffs[i].GetNumerator().value, resultGCD.value);
@@ -479,21 +482,24 @@ unsigned int AlgebraicNumber::HashFunction() const {
 }
 
 bool AlgebraicNumber::operator==(const Rational& other) const {
-  if (this->theElT.IsEqualToZero())
+  if (this->theElT.IsEqualToZero()) {
     return other == 0;
-  if (this->theElT.size() != 1)
+  }
+  if (this->theElT.size() != 1) {
     return false;
-  if (this->theElT[0].theIndex != 0)
+  }
+  if (this->theElT[0].theIndex != 0) {
     return false;
+  }
   return this->theElT.theCoeffs[0] == other;
 }
 
 bool AlgebraicNumber::NeedsParenthesisForMultiplication() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return false;
+  }
   VectorSparse<Rational> additiveForm;
   this->owner->GetAdditionTo(*this, additiveForm);
-//  stOutput << "additive form size: " << additiveForm.size();
   return (additiveForm.size() > 1);
 }
 
@@ -607,8 +613,9 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
 
 bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootMinPoly");
-  if (this->AdjoinRootQuadraticPolyToQuadraticRadicalExtension(thePoly, outputRoot))
+  if (this->AdjoinRootQuadraticPolyToQuadraticRadicalExtension(thePoly, outputRoot)) {
     return true;
+  }
   Polynomial<AlgebraicNumber> minPoly;
   this->ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, minPoly);
   int indexMaxMonMinPoly = minPoly.GetIndexMaxMonomial();
@@ -772,10 +779,13 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other) {
     return;
   }
   AlgebraicClosureRationals* theOwner = this->owner;
-  if (theOwner == 0)
+  if (theOwner == 0) {
     theOwner = other.owner;
-  if (theOwner == 0 && this->basisIndex != other.basisIndex)
-    crash << "This is a programming error: algebraic numbers with zero owners but different basis indices. " << crash;
+  }
+  if (theOwner == 0 && this->basisIndex != other.basisIndex) {
+    crash << "This is a programming error: algebraic numbers "
+    << "with zero owners but different basis indices. " << crash;
+  }
   VectorSparse<Rational> AdditiveFormOther;
   theOwner->GetAdditionTo(*this, this->theElT);
   theOwner->GetAdditionTo(other, AdditiveFormOther);
@@ -796,12 +806,14 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
   }
   this->CheckCommonOwner(other);
   AlgebraicClosureRationals* theOwner = this->owner;
-  if (theOwner == 0)
+  if (theOwner == 0) {
     theOwner = other.owner;
-  if (theOwner == 0 && this->basisIndex != other.basisIndex)
+  }
+  if (theOwner == 0 && this->basisIndex != other.basisIndex) {
     crash << "This is a programming error: algebraic numbers: "
     << this->ToString() << " and " << other.ToString()
     << " have with zero owners but different basis indices. " << crash;
+  }
   if (this->basisIndex == other.basisIndex) {
     this->owner = theOwner;
     this->CheckConsistency();
@@ -820,8 +832,9 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
 }
 
 bool AlgebraicNumber::CheckConsistency() const {
-  if (this->flagDeallocated)
+  if (this->flagDeallocated) {
     crash << "This is a programming error: use after free of AlgebraicNumber. " << crash;
+  }
   if (this->owner == 0) {
     if (!this->IsRational()) {
       for (int i = 0; i < this->theElT.size(); i ++) {
@@ -898,8 +911,9 @@ void AlgebraicNumber::SqrtMeDefault() {
 
 bool AlgebraicNumber::operator>(const AlgebraicNumber& other) const {
   Rational left, right;
-  if (this->IsRational(&left) && other.IsRational(&right))
+  if (this->IsRational(&left) && other.IsRational(&right)) {
     return left > right;
+  }
   this->CheckCommonOwner(other);
   return this->theElT > other.theElT;
 }
@@ -911,16 +925,19 @@ void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRati
 }
 
 bool AlgebraicNumber::IsExpressedViaLatestBasis() const {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return true;
+  }
   return this->basisIndex == this->owner->theBasesAdditive.size - 1;
 }
 
 void AlgebraicNumber::ExpressViaLatestBasis() {
-  if (this->owner == 0)
+  if (this->owner == 0) {
     return;
-  if (this->basisIndex == this->owner->theBasesAdditive.size - 1)
+  }
+  if (this->basisIndex == this->owner->theBasesAdditive.size - 1) {
     return;
+  }
   this->owner->GetAdditionTo(*this, this->theElT);
   this->basisIndex = this->owner->theBasesAdditive.size - 1;
 }
@@ -940,7 +957,7 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble) const {
     return true;
   }
   if (this->owner == 0) {
-    crash << "Owner is zero but algebraic number is not rational." << crash;
+    crash << "Owner is zero but algebraic number is not rational. " << crash;
   }
   if (!this->owner->flagIsQuadraticRadicalExtensionRationals) {
     return false;
@@ -960,7 +977,7 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble) const {
         return false;
       } else {
         if (outputWhichDouble != 0) {
-          currentMultiplicand *=  FloatingPoint::sqrt(
+          currentMultiplicand *= FloatingPoint::sqrt(
             this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]].GetDoubleValue()
           );
         }
@@ -975,10 +992,10 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble) const {
 
 bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, AlgebraicClosureRationals& inputOwner) {
   MacroRegisterFunctionWithName("AlgebraicNumber::AssignRationalRadical");
-//  stOutput << "<hr>Assigning rational radical of  " << inpuT.ToString();
   this->CheckConsistency();
-  if (inpuT == 0)
+  if (inpuT == 0) {
     return false;
+  }
   if (!inputOwner.flagIsQuadraticRadicalExtensionRationals) {
     Polynomial<AlgebraicNumber> minPoly;
     minPoly.MakeMonomiaL(0, 2);
@@ -1012,15 +1029,17 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
     primeFactors[i].RaiseToPower(theMults[i] / 2);
     squareRootRationalPart *= primeFactors[i];
   }
-  if (!squareFreeInput.IsEqualToOne())
+  if (!squareFreeInput.IsEqualToOne()) {
     theFactors.AddOnTop(squareFreeInput);
+  }
   if (theFactors.size == 0) {
     this->AssignRational(squareRootRationalPart, inputOwner);
     this->CheckConsistency();
     return true;
   }
-  if (!inputOwner.MergeRadicals(theFactors))
+  if (!inputOwner.MergeRadicals(theFactors)) {
     return false;
+  }
   Selection FactorSel;
   FactorSel.init(inputOwner.theQuadraticRadicals.size);
   for (int i = 0; i < theFactors.size; i ++) {
@@ -1100,10 +1119,11 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat) co
       out << ",  ";
     }
   }
-  if (this->flagIsQuadraticRadicalExtensionRationals)
+  if (this->flagIsQuadraticRadicalExtensionRationals) {
     out << "<br>Generating element not selected. ";
-  else
+  } else {
     out << "<br>Generating element: " << HtmlRoutines::GetMathSpanPure(this->GeneratingElementMatForm.ToString(&tempFormat));
+  }
   out << "<br>There are " << this->theBasesAdditive.size << " registered old bases. ";
   for (int i = 0; i < this->theBasesAdditive.size; i ++) {
     out << "<hr>Basis " << i + 1 << " has " << this->theBasesAdditive[i].size << " elements: ";
@@ -1161,20 +1181,24 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
   Rational ratValue;
   this->CheckConsistency();
   other.CheckConsistency();
-  if (this->IsRational(&ratValue))
+  if (this->IsRational(&ratValue)) {
     return other == ratValue;
-  if (other.IsRational(&ratValue))
+  }
+  if (other.IsRational(&ratValue)) {
     return *this == ratValue;
+  }
   if (this->owner != other.owner) {
-    crash.theCrashReport << "This might or might not be a programming error: comparing two algebraic number that do not have the same owner. "
+    crash.theCrashReport << "This might or might not be a programming error: "
+    << "comparing two algebraic number that do not have the same owner. "
     << "The numbers have owners of respective addresses "
     << this->owner << " and " << other.owner << ". The numbers are: "
     << this->ToString() << " and " << other.ToString() << ". Crashing to let you know. ";
     crash << crash;
   }
   this->CheckNonZeroOwner();
-  if (this->basisIndex == other.basisIndex)
+  if (this->basisIndex == other.basisIndex) {
     return this->theElT == other.theElT;
+  }
   VectorSparse<Rational> leftAdditive, rightAdditive;
   this->owner->GetAdditionTo(*this, leftAdditive);
   this->owner->GetAdditionTo(other, rightAdditive);
@@ -1211,8 +1235,9 @@ ElementZmodP ElementZmodP::operator*(const Rational& other) const {
 }
 
 unsigned int ElementZmodP::HashFunction() const {
-  if (this->theValue.IsEqualToZero())
+  if (this->theValue.IsEqualToZero()) {
     return 0;
+  }
   return this->theValue.HashFunction() * SomeRandomPrimes[0] + this->theModulo.HashFunction() * SomeRandomPrimes[1];
 }
 

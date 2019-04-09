@@ -260,11 +260,17 @@ public:
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
   void MakeCasimir(SemisimpleLieAlgebra& theOwner);
   void MakeCasimirWRTLeviParabolic(SemisimpleLieAlgebra& theOwner, const Selection& theLeviRoots);
-  static void LieBracket(const ElementUniversalEnveloping<coefficient>& left, const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output) {
+  static void LieBracket(
+    const ElementUniversalEnveloping<coefficient>& left,
+    const ElementUniversalEnveloping<coefficient>& right,
+    ElementUniversalEnveloping<coefficient>& output
+  ) {
     left.LieBracketOnTheRight(right, output);
     output.Simplify();
   }
-  void LieBracketOnTheRight(const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output) const;
+  void LieBracketOnTheRight(
+    const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output
+  ) const;
   void LieBracketOnTheLeft(const ElementSemisimpleLieAlgebra<Rational>& left);
   void AssignInt(int coeff, int numVars, SemisimpleLieAlgebra& theOwner) {
     Rational tempRat = coeff;

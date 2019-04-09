@@ -84,7 +84,7 @@ public:
   int GetDisplayIndexFromGeneratorIndex(int GeneratorIndex);
   void GetLinearCombinationFrom(ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& theCoeffs);
   void init(List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner);
- void initDefaultOrder(SemisimpleLieAlgebra& owner);
+  void initDefaultOrder(SemisimpleLieAlgebra& owner);
 };
 
 template <class coefficient>

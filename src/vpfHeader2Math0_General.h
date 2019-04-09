@@ -1108,7 +1108,8 @@ public:
   LargeIntUnsigned FindPositiveLCMCoefficientDenominators();
   void operator-=(const Matrix<coefficient>& right) {
     if (this->NumRows != right.NumRows || this->NumCols != right.NumCols) {
-      crash << "This is a programming error: attempting to subtract from matrix with " << this->NumRows << " rows and " << this->NumCols
+      crash << "This is a programming error: attempting to subtract from matrix with "
+      << this->NumRows << " rows and " << this->NumCols
       << " columns a matrix with " << right.NumRows << " rows and " << right.NumCols << " columns. " << crash;
     }
     for (int i = 0; i < this->NumRows; i ++) {
@@ -2098,7 +2099,9 @@ public:
     List<MonomialCollectionTemplate>& vectorSpace2,
     HashedList<templateMonomial>* seedMonomials = 0
   ) {
-    return 0 != MonomialCollection<templateMonomial, coefficient>::GetRankIntersectionVectorSpaces(vectorSpace1, vectorSpace2, seedMonomials);
+    return 0 != MonomialCollection<templateMonomial, coefficient>::GetRankIntersectionVectorSpaces(
+      vectorSpace1, vectorSpace2, seedMonomials
+    );
   }
   template <class MonomialCollectionTemplate>
   static bool LinSpanContains(
@@ -2307,7 +2310,9 @@ public:
     return result;
   }
 
-  static std::string GetBlendCoeffAndMon(const templateMonomial& inputMon, coefficient& inputCoeff, bool addPlusToFront, FormatExpressions* theFormat = 0);
+  static std::string GetBlendCoeffAndMon(
+    const templateMonomial& inputMon, coefficient& inputCoeff, bool addPlusToFront, FormatExpressions* theFormat = 0
+  );
   void CheckNumCoeffsConsistency() const {
     if (this->theCoeffs.size != this->theMonomials.size) {
       crash << "This is a programming error: a monomial collection has "
@@ -2418,11 +2423,12 @@ public:
   void operator-=(const MonomialCollection<templateMonomial, coefficient>& other) {
     this->SubtractOtherTimesCoeff(other);
   }
-  inline void SubtractOtherTimesCoeff(const MonomialCollection<templateMonomial, coefficient>& other, coefficient* inputcf= 0);
+  inline void SubtractOtherTimesCoeff(const MonomialCollection<templateMonomial, coefficient>& other, coefficient* inputcf = 0);
   template <class otherType>
   void operator/=(const otherType& other) {
     if (other == 0) {
-      crash << "This is a programming error. A MonomialCollection division by zero has been requested: division by zero error should"
+      crash << "This is a programming error. A MonomialCollection division "
+      << "by zero has been requested: division by zero error should"
       << " be handled before calling operator/=. " << crash;
       return;
     }
@@ -3090,8 +3096,9 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
     std::stringstream out;
     output.clear();
     FormatExpressions PolyFormatLocal;
-    if (numDisplayedEltsMinus1ForAll == - 1)
+    if (numDisplayedEltsMinus1ForAll == - 1) {
       numDisplayedEltsMinus1ForAll = this->size;
+    }
     for (int i = 0; i < this->size; i ++) {
       out << "x_{" << i + 1 << "} \\mapsto " << this->TheObjects[i].ToString(&PolyFormatLocal);
       if (i != this->size - 1) {
@@ -7021,8 +7028,9 @@ void MatrixTensor<coefficient>::GetVectorsSparseFromRowsIncludeZeroRows(
 ) {
   MinNumRows = MathRoutines::Maximum(MinNumRows, this->GetMinNumRows());
   output.SetSize(MinNumRows);
-  for (int i = 0; i < output.size; i ++)
+  for (int i = 0; i < output.size; i ++) {
     output[i].MakeZero();
+  }
   for (int i = 0; i < this->size(); i ++) {
     int rowIndex = (*this)[i].vIndex;
     int colIndex = (*this)[i].dualIndex;

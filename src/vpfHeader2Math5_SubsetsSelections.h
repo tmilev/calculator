@@ -34,11 +34,14 @@ public:
     this->CardinalitySelection = this->MaxSize;
   }
   bool IsSubset(const Selection& other) const {
-    if (this->MaxSize != other.MaxSize)
+    if (this->MaxSize != other.MaxSize) {
       return false;
-    for (int i = 0; i < this->CardinalitySelection; i ++)
-      if (!other.selected[this->elements[i]])
+    }
+    for (int i = 0; i < this->CardinalitySelection; i ++) {
+      if (!other.selected[this->elements[i]]) {
         return false;
+      }
+    }
     return true;
   }
   void init(int maxNumElements);
@@ -52,8 +55,9 @@ public:
   void incrementSelection();
   bool IncrementReturnFalseIfPastLast() {
     this->incrementSelection();
-    if (this->CardinalitySelection == 0)
+    if (this->CardinalitySelection == 0) {
       return false;
+    }
     return true;
   }
   int SelectionToIndex();
@@ -68,8 +72,9 @@ public:
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
   void InvertSelection() {
-    for (int i = 0; i < this->MaxSize; i ++)
+    for (int i = 0; i < this->MaxSize; i ++) {
       this->selected[i] = !this->selected[i];
+    }
     this->ComputeIndicesFromSelection();
   }
   void operator=(const Selection& right);
@@ -78,11 +83,14 @@ public:
   //warning: to call the comparison operator sucessfully, cardinalitySelection must
   //be properly computed!
   inline bool operator==(const Selection& right) const {
-    if (this->MaxSize != right.MaxSize || this->CardinalitySelection != right.CardinalitySelection)
+    if (this->MaxSize != right.MaxSize || this->CardinalitySelection != right.CardinalitySelection) {
       return false;
-    for (int i = 0; i < this->CardinalitySelection; i ++)
-      if (this->selected[this->elements[i]] != right.selected[this->elements[i]])
+    }
+    for (int i = 0; i < this->CardinalitySelection; i ++) {
+      if (this->selected[this->elements[i]] != right.selected[this->elements[i]]) {
         return false;
+      }
+    }
     return true;
   }
   Selection();
@@ -111,8 +119,9 @@ public:
   List<int> Multiplicities;
   static unsigned int HashFunction(const SelectionWithMultiplicities& input) {
     unsigned int result = 0;
-    for (int i = 0; i < input.elements.size; i ++)
+    for (int i = 0; i < input.elements.size; i ++) {
       result += input.Multiplicities[input.elements[i]] * SomeRandomPrimes[input.elements[i]];
+    }
     return result;
   }
   int CardinalitySelectionWithoutMultiplicities();
@@ -178,11 +187,13 @@ class SelectionOneItem {
    
   }
   bool IncrementReturnFalseIfPastLast() {
-    if (this->MaxMultiplicity == 0)
+    if (this->MaxMultiplicity == 0) {
       return false;
+    }
     this->SelectedMult ++;
-    if (this->SelectedMult > this->MaxMultiplicity)
+    if (this->SelectedMult > this->MaxMultiplicity) {
       this->SelectedMult = 0;
+    }
     return this->SelectedMult != 0;
   }
   void initFromMults(int theMult) {
@@ -205,37 +216,44 @@ public:
   }
   LargeInt GetNumTotalCombinations() {
     LargeInt result = 1;
-    for (int i = 0; i < this->theElements.size; i ++)
+    for (int i = 0; i < this->theElements.size; i ++) {
       result *= this->theElements[i].GetNumTotalCombinations();
+    }
     return result;
   }
   bool IncrementReturnFalseIfPastLast() {
-    for (int i = this->theElements.size - 1; i >= 0; i --)
-      if (this->theElements[i].IncrementReturnFalseIfPastLast())
+    for (int i = this->theElements.size - 1; i >= 0; i --) {
+      if (this->theElements[i].IncrementReturnFalseIfPastLast()) {
         return true;
+      }
+    }
     return false;
   }
   void initFromMults(int inputBase, int numElts) {
     this->theElements.SetSize(numElts);
-    for (int i = 0; i < this->theElements.size; i ++)
+    for (int i = 0; i < this->theElements.size; i ++) {
       this->theElements[i].initFromMults(inputBase);
+    }
   }
   template<class Element>
   void initFromMults(const List<Element>& input, int useOnlyNElementsOnly = 0) {
-    if (useOnlyNElementsOnly > 0 && useOnlyNElementsOnly <= input.size)
+    if (useOnlyNElementsOnly > 0 && useOnlyNElementsOnly <= input.size) {
       this->theElements.SetSize(useOnlyNElementsOnly);
-    else
+    } else {
       this->theElements.SetSize(input.size);
-    for (int i = 0; i < this->theElements.size; i ++)
+    }
+    for (int i = 0; i < this->theElements.size; i ++) {
       this->theElements[i].initFromMults(input[i]);
+    }
   }
   std::string ToString() const {
     std::stringstream out;
     out << "(";
     for (int i = 0; i < this->theElements.size; i ++) {
       out << this->theElements[i].ToString();
-      if (i != this->theElements.size - 1)
+      if (i != this->theElements.size - 1) {
         out << ", ";
+      }
     }
     out << ")";
     return out.str();
@@ -252,22 +270,27 @@ public:
     return result;
   }
   void SetNumItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumItems) {
-    if (inputDesiredSubsetSize < 0 || inputNumItems < 0)
-      crash << "This is a programming error: requesting to initialize a selection of size " << inputDesiredSubsetSize << " out of "
+    if (inputDesiredSubsetSize < 0 || inputNumItems < 0) {
+      crash << "This is a programming error: requesting to initialize a selection of size "
+      << inputDesiredSubsetSize << " out of "
       << inputNumItems << " elements, which does not make sense. " << crash;
+    }
     this->theSelection.init(inputNumItems);
     this->DesiredSubsetSize = inputDesiredSubsetSize;
-    if (this->DesiredSubsetSize > 0)
+    if (this->DesiredSubsetSize > 0) {
       this->theSelection.incrementSelectionFixedCardinality(this->DesiredSubsetSize);
+    }
   }
   std::string ToString() const {
     return this->theSelection.ToString();
   }
   bool IncrementReturnFalseIfPastLast() {
     this->theSelection.incrementSelectionFixedCardinality(this->DesiredSubsetSize);
-    for (int i = 0; i < this->DesiredSubsetSize; i ++)
-      if (!this->theSelection.selected[i])
+    for (int i = 0; i < this->DesiredSubsetSize; i ++) {
+      if (!this->theSelection.selected[i]) {
         return true;
+      }
+    }
     return false;
   }
 };
@@ -287,19 +310,22 @@ class SelectionPositiveIntegers {
   }
   void SetFirstInGradeLevel(const LargeIntUnsigned& inputGradingLevel) {
     this->theInts[0] = inputGradingLevel;
-    for (int i = 1; i < this->theInts.size; i ++)
+    for (int i = 1; i < this->theInts.size; i ++) {
       this->theInts[i] = 0;
+    }
   }
   bool IncrementReturnFalseIfPastLast() {
-    for (int i = this->theInts.size - 2; i >= 0; i --)
+    for (int i = this->theInts.size - 2; i >= 0; i --) {
       if (this->theInts[i] > 0) {
         this->theInts[i] --;
         this->theInts[i + 1] = *this->theInts.LastObject();
         this->theInts[i + 1] ++;
-        if (i != this->theInts.size - 2)
+        if (i != this->theInts.size - 2) {
           *this->theInts.LastObject() = 0;
+        }
         return true;
       }
+    }
     this->SetFirstInGradeLevel(this->GetGrading() + 1);
     return true;
   }
@@ -337,8 +363,9 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots(
   Selection& bufferSel
 ) {
   Selection& NonPivotPoints = bufferSel;
-  if (this->size == 0)
+  if (this->size == 0) {
     return false;
+  }
   int theDimension = this->TheObjects[0].size;
   output.SetSize(theDimension);
   bufferMat.init((int) theSelection.CardinalitySelection + 2, (int) theDimension);
@@ -350,8 +377,9 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots(
     bufferMat.elements[theSelection.CardinalitySelection + 1][j].Assign(ExtraRoot2.TheObjects[j]);
   }
   bufferMat.GaussianEliminationByRows(0, NonPivotPoints);
-  if (NonPivotPoints.CardinalitySelection != 1)
+  if (NonPivotPoints.CardinalitySelection != 1) {
     return false;
+  }
   bufferMat.NonPivotPointsToEigenVector(NonPivotPoints, output);
   return true;
 }
@@ -393,8 +421,9 @@ bool Vectors<coefficient>::ComputeNormalExcludingIndex(
   Vector<coefficient>& output, int index, Matrix<coefficient>& bufferMatrix
 ) {
   Selection NonPivotPoints;
-  if (this->size == 0)
+  if (this->size == 0) {
     return false;
+  }
   int theDimension = this->TheObjects[0].size;
   output.SetSize(theDimension);
   bufferMatrix.init((int) this->size - 1, (int) theDimension);
@@ -408,8 +437,9 @@ bool Vectors<coefficient>::ComputeNormalExcludingIndex(
     }
   }
   bufferMatrix.GaussianEliminationByRows(0, &NonPivotPoints);
-  if (NonPivotPoints.CardinalitySelection != 1)
+  if (NonPivotPoints.CardinalitySelection != 1) {
     return false;
+  }
   bufferMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
   return true;
 }
@@ -441,8 +471,9 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot(
   Matrix<coefficient>& bufferMatrix,
   Selection& bufferSel
 ) {
-  if (this->size == 0)
+  if (this->size == 0) {
     return false;
+  }
   int theDimension = this->TheObjects[0].size;
   output.SetSize(theDimension);
   Matrix<coefficient> matOutputEmpty;
@@ -450,13 +481,15 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot(
   bufferMatrix.init((int) theSelection.CardinalitySelection + 1, (int) theDimension);
   matOutputEmpty.init(- 1, - 1);
   for (int j = 0; j < theDimension; j ++) {
-    for (int i = 0; i < theSelection.CardinalitySelection; i ++)
+    for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
       bufferMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]][j]);
+    }
     bufferMatrix.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot[j]);
   }
   bufferMatrix.GaussianEliminationByRows(matOutputEmpty, NonPivotPoints);
-  if (NonPivotPoints.CardinalitySelection != 1)
+  if (NonPivotPoints.CardinalitySelection != 1) {
     return false;
+  }
   bufferMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
   return true;
 }
@@ -477,15 +510,18 @@ void Vectors<coefficient>::GaussianEliminationForNormalComputation(
 
 template <class coefficient>
 int Vectors<coefficient>::GetRankOfSpanOfElements(Matrix<coefficient>* buffer, Selection* bufferSelection) const {
-  if (this->size == 0)
+  if (this->size == 0) {
     return 0;
+  }
   int theDimension = this->TheObjects[0].size;
   MemorySaving<Matrix<coefficient> > emergencyMatBuf;
   MemorySaving<Selection> emergencySelBuf;
-  if (buffer == 0)
+  if (buffer == 0) {
     buffer = &emergencyMatBuf.GetElement();
-  if (bufferSelection == 0)
+  }
+  if (bufferSelection == 0) {
     bufferSelection = &emergencySelBuf.GetElement();
+  }
   this->GaussianEliminationForNormalComputation(*buffer, *bufferSelection, theDimension);
   return (theDimension - bufferSelection->CardinalitySelection);
 }
@@ -495,8 +531,9 @@ bool Vectors<coefficient>::GetLinearDependence(Matrix<coefficient>& outputTheLin
   Matrix<coefficient> tempMat;
   Selection nonPivotPoints;
   this->GetLinearDependenceRunTheLinearAlgebra(tempMat, nonPivotPoints);
-  if (nonPivotPoints.CardinalitySelection == 0)
+  if (nonPivotPoints.CardinalitySelection == 0) {
     return false;
+  }
   tempMat.NonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputTheLinearCombination);
   return true;
 }
@@ -520,22 +557,29 @@ void Vector<coefficient>::operator=(const Selection& other) {
 template <class coefficient>
 void Vector<coefficient>::operator=(const SelectionWithMultiplicities& other) {
   this->SetSize(other.Multiplicities.size);
-  for (int i = 0; i < other.Multiplicities.size; i ++)
+  for (int i = 0; i < other.Multiplicities.size; i ++) {
     this->TheObjects[i] = other.Multiplicities[i];
+  }
 }
 
 template <class coefficient>
-bool Vectors<coefficient>::LinearAlgebraForVertexComputation(Selection& theSelection, Vector<coefficient>& output, Matrix<coefficient>& buffer, Selection& NonPivotPointsBuffer) {
-  if (this->size == 0)
+bool Vectors<coefficient>::LinearAlgebraForVertexComputation(
+  Selection& theSelection, Vector<coefficient>& output, Matrix<coefficient>& buffer, Selection& NonPivotPointsBuffer
+) {
+  if (this->size == 0) {
     return false;
+  }
   int theDimension = this->TheObjects[0].size;
   output.SetSize(theDimension);
-  if (theDimension - 1 != theSelection.CardinalitySelection)
-    crash << crash;
+  if (theDimension - 1 != theSelection.CardinalitySelection) {
+    crash << "Dimensions don't match. " << crash;
+  }
   buffer.init((int) (theDimension - 1), (int) theDimension);
-  for (int i = 0; i < theDimension - 1; i ++)
-    for (int j = 0; j < theDimension; j ++)
+  for (int i = 0; i < theDimension - 1; i ++) {
+    for (int j = 0; j < theDimension; j ++) {
       buffer.elements[i][j] = (this->Externalwalls[theSelection.elements[i]].normal[j]);
+    }
+  }
   buffer.GaussianEliminationByRows(0, NonPivotPointsBuffer);
   if (NonPivotPointsBuffer.CardinalitySelection == 1) {
     buffer.NonPivotPointsToEigenVector(NonPivotPointsBuffer, output);

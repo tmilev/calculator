@@ -1,15 +1,15 @@
 #ifndef vpfTreeHeaderAlreadyDefined
 #define vpfTreeHeaderAlreadyDefined
 #include "vpfHeader2Math0_General.h"
-static ProjectInformationInstance ProjectInfoVpfTreesHeader
-(__FILE__, "Header file, trees.");
+static ProjectInformationInstance ProjectInfoVpfTreesHeader(
+  __FILE__, "Header file, trees."
+);
 
 template<typename data>
 class Tree;
 
 template<typename data>
-class TreeNode
-{
+class TreeNode {
 public:
   Tree<data>* owner;
   int parent;
@@ -20,8 +20,9 @@ public:
    
   }
   bool CheckInitialization() {
-    if (this->owner == 0)
+    if (this->owner == 0) {
       crash << "Tree node without parent. " << crash;
+    }
     return true;
   }
   void AddChild(const data& inputData);
@@ -31,7 +32,7 @@ public:
 };
 
 template <typename data>
-class Tree{
+class Tree {
 public:
   ListReferences<TreeNode<data> > theNodes;
   void ResetAddRoot(const data& inputData) {
@@ -65,8 +66,9 @@ template <typename data>
 void TreeNode<data>::RemoveAllChildren() {
   for (int i = 0; i < this->children.size; i ++) {
     TreeNode<data>& currentNode = this->owner->theNodes[this->children[i]];
-    if (currentNode.myIndex == - 1)
+    if (currentNode.myIndex == - 1) {
       crash << "Faulty index in tree node: " << this->children[i] << crash;
+    }
     currentNode.myIndex = - 1;
     currentNode.RemoveAllChildren();
   }
@@ -82,15 +84,18 @@ TreeNode<data>& TreeNode<data>::GetChild(int i) {
 template <typename data>
 std::string TreeNode<data>::ToStringTextFormat(int indentation) {
   std::stringstream out;
-  for (int i = 0; i < indentation; i ++)
+  for (int i = 0; i < indentation; i ++) {
     out << "&nbsp;";
+  }
   out << this->myIndex << ": ";
   out << this->theData;
-  if (this->children.size > 0)
+  if (this->children.size > 0) {
     out << "-> " << this->children.ToStringCommaDelimited();
+  }
   indentation += 2;
-  for (int i = 0; i < this->children.size; i ++)
+  for (int i = 0; i < this->children.size; i ++) {
     out << "<br>" << this->GetChild(i).ToStringTextFormat(indentation);
+  }
   return out.str();
 }
 

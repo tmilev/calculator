@@ -1155,7 +1155,11 @@ class GroupConjugacyImplementation{
     inv.Invert();
     return right * (*this) * inv;
   }
-  static void ConjugationAction(const GroupConjugacyImplementation<groupElement>& conjugateWith, const GroupConjugacyImplementation<groupElement>& conjugateOn, GroupConjugacyImplementation<groupElement>& out) {
+  static void ConjugationAction(
+    const GroupConjugacyImplementation<groupElement>& conjugateWith,
+    const GroupConjugacyImplementation<groupElement>& conjugateOn,
+    GroupConjugacyImplementation<groupElement>& out
+  ) {
     out = conjugateOn^conjugateWith;
   }
 };
@@ -2008,8 +2012,9 @@ std::string FiniteGroup<elementSomeGroup>::ToString() const {
 */
 
 template <typename coefficient>
-void PermutationGroupData::SpechtModuleOfPartition
-(const Partition& p, GroupRepresentation<FiniteGroup<PermutationR2>, coefficient>& rep) {
+void PermutationGroupData::SpechtModuleOfPartition(
+  const Partition& p, GroupRepresentation<FiniteGroup<PermutationR2>, coefficient>& rep
+) {
   p.SpechtModuleMatricesOfPermutations(rep.generatorS, this->theGroup->generators);
   rep.ownerGroup = this->theGroup;
 }

@@ -212,7 +212,12 @@ public:
       output += tempElt;
     }
   }
-  static void ProjectOntoHyperPlane(Vector<coefficient>& input, Vector<coefficient>& normal, Vector<coefficient>& ProjectionDirection, Vector<coefficient>& output) {
+  static void ProjectOntoHyperPlane(
+    Vector<coefficient>& input,
+    Vector<coefficient>& normal,
+    Vector<coefficient>& ProjectionDirection,
+    Vector<coefficient>& output
+  ) {
     coefficient t;
     coefficient tempRat;
     Vector<coefficient>::ScalarEuclidean(input, normal, t);
@@ -273,8 +278,9 @@ public:
   bool AssignMatDetectRowOrColumn(const Matrix<coefficient>& input) {
     if (input.NumCols == 1) {
       this->SetSize(input.NumRows);
-      for (int i = 0; i < this->size; i ++)
+      for (int i = 0; i < this->size; i ++) {
         this->TheObjects[i] = input.elements[i][0];
+      }
       return true;
     }
     if (input.NumRows == 1) {
@@ -352,7 +358,8 @@ public:
   Vector<coefficient> GetShiftToTheLeft(int numPositions) {
     Vector<coefficient> result;
     if (numPositions > this->size) {
-      crash << "You requested a shift of " << numPositions << " positions in a vector with "
+      crash << "You requested a shift of "
+      << numPositions << " positions in a vector with "
       << this->size << "elements" << crash;
     }
     result.SetSize(this->size - numPositions);
@@ -374,8 +381,9 @@ public:
     this->size -= numPositions;
   }
   void ShiftToTheRightInsertZeroes(int numPositions, const coefficient& theRingZero) {
-    if (numPositions < 0)
+    if (numPositions < 0) {
       crash << "Bad vector shift, cannot fill with zeroes. " << crash;
+    }
     this->SetSize(this->size + numPositions);
     for (int i = this->size - 1; i >= numPositions; i --) {
       this->TheObjects[i] = this->TheObjects[i - numPositions];

@@ -4,7 +4,9 @@
 #define vpfHeader2Math_01LargeIntegersInstance_already_included
 
 #include "vpfHeader1General0_General.h"
-static ProjectInformationInstance vpfHeader2Math_01LargeIntegersInstance(__FILE__, "Header, large integer/rational number arithmetic. ");
+static ProjectInformationInstance vpfHeader2Math_01LargeIntegersInstance(
+  __FILE__, "Header, large integer/rational number arithmetic. "
+);
 class LargeIntUnsigned {
   void AddNoFitSize(const LargeIntUnsigned& x);
 public:
@@ -314,8 +316,9 @@ public:
   LargeInt operator/(int x) const;
   LargeInt operator/(LargeInt& x) const;
   void operator/=(const LargeInt& other) {
-    if (this->IsEqualToZero())
+    if (this->IsEqualToZero()) {
       return;
+    }
     this->sign*= other.sign;
     LargeIntUnsigned quotient, remainder;
     this->value.DivPositive(other.value, quotient, remainder);
@@ -325,8 +328,9 @@ public:
     return other < *this;
   }
   void operator%=(const LargeInt& other) {
-    if (this->IsEqualToZero())
+    if (this->IsEqualToZero()) {
       return;
+    }
     LargeIntUnsigned quotient, remainder;
     this->value.DivPositive(other.value, quotient, remainder);
     this->value = remainder;

@@ -194,8 +194,9 @@ public:
         vD[i] = temp - q * vD[i];
       }
     }
-    if (!(p == 1))
+    if (!(p == 1)) {
       return false;//d and p were not relatively prime.
+    }
     p = vP[1] % N;
     if (p < 0) {
       p += N;
@@ -374,8 +375,9 @@ public:
         << carbonCopy->size << " elements. " << crash;
       }
     }
-    if (theList.size == 0)
+    if (theList.size == 0) {
       return;
+    }
     if (theOrder == 0) {
       MathRoutines::QuickSortAscendingNoOrder(theList, 0, theList.size - 1, carbonCopy);
     } else {
@@ -403,14 +405,16 @@ private:
     bool theOrder(const objectType& left, const objectType& right),
     otherList* carbonCopy
   ) {
-    if (TopIndex <= BottomIndex)
+    if (TopIndex <= BottomIndex) {
       return;
+    }
     int HighIndex = TopIndex;
     for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
       if (theOrder(theList[LowIndex],(theList[BottomIndex]))) {
         theList.SwapTwoIndices(LowIndex, HighIndex);
-        if (carbonCopy != 0)
+        if (carbonCopy != 0) {
           carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
+        }
         LowIndex --;
         HighIndex --;
       }
@@ -426,8 +430,9 @@ private:
       HighIndex --;
     }
     theList.SwapTwoIndices(BottomIndex, HighIndex);
-    if (carbonCopy != 0)
+    if (carbonCopy != 0) {
       carbonCopy->SwapTwoIndices(BottomIndex, HighIndex);
+    }
     MathRoutines::QuickSortAscendingOrder(theList, BottomIndex, HighIndex - 1, theOrder, carbonCopy);
     MathRoutines::QuickSortAscendingOrder(theList, HighIndex + 1, TopIndex, theOrder, carbonCopy);
   }
@@ -444,8 +449,9 @@ private:
     for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
       if (theList[LowIndex] > theList[BottomIndex]) {
         theList.SwapTwoIndices(LowIndex, HighIndex);
-        if (carbonCopy != 0)
+        if (carbonCopy != 0) {
           carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
+        }
         LowIndex --;
         HighIndex --;
       }
@@ -500,7 +506,9 @@ private:
     int tempInt;
     return XML::ReadThroughFirstOpenTag(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
   }
-  inline static bool ReadEverythingPassedTagOpenUntilTagClose(std::istream& streamToMoveIn, const std::string& tagNameNoSpacesNoForbiddenCharacters) {
+  inline static bool ReadEverythingPassedTagOpenUntilTagClose(
+    std::istream& streamToMoveIn, const std::string& tagNameNoSpacesNoForbiddenCharacters
+  ) {
     int tempInt;
     return XML::ReadEverythingPassedTagOpenUntilTagClose(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
   }
@@ -614,8 +622,9 @@ public:
     return this->GetElementConst() == other.GetElementConst();
   }
   int HashFunction() const {
-    if (this->IsZeroPointer())
+    if (this->IsZeroPointer()) {
       return 0;
+    }
     return this->GetElementConst().HashFunction();
   }
   static inline int HashFunction(const MemorySaving<Object>& input) {
@@ -1249,7 +1258,8 @@ public:
   Object& operator[](int i) const {
     this->CheckConsistency();
     if ( (i >= this->size) || i < 0) {
-      crash << "Programming error: attempting to access the entry of index " << i << " in an array of " << this->size << " elements. " << crash;
+      crash << "Programming error: attempting to access the entry of index "
+      << i << " in an array of " << this->size << " elements. " << crash;
     }
     return this->TheObjects[i];
   }
@@ -1283,7 +1293,8 @@ public:
       this->TheObjects[i] = input[i];
     }
   }
-  List();//<-newly constructed lists start with size = 0; This default is used in critical places in HashedList and other classes, do not change!
+  List();//<-newly constructed lists start with size = 0;
+  //This default is used in critical places in HashedList and other classes, do not change!
   ~List();
   void AssignListList(const List<List<Object> >& input) {
     int count = 0;
@@ -1302,7 +1313,9 @@ public:
 
 template <class ObjectType1, class ObjectType2, unsigned int hashFunction1(const ObjectType1&),unsigned int hashFunction2(const ObjectType2&)>
 class Pair {
-  friend std::ostream& operator << (std::ostream& output, const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& thePair) {
+  friend std::ostream& operator << (
+    std::ostream& output, const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& thePair
+  ) {
     output << "("  << thePair.Object1 << ", " <<  thePair.Object2 << ")";
     return output;
   }
@@ -1440,7 +1453,8 @@ public:
       for (int j = 0; j < current.size; j ++) {
         int theIndex = current[j];
         if (theIndex >= this->size) {
-          crash << "This is a programming error: hash lookup array of index " << i << ", entry of index " << j << " reports index "
+          crash << "This is a programming error: hash lookup array of index "
+          << i << ", entry of index " << j << " reports index "
           << theIndex << " but I have only " << this->size << " entries. " << crash;
         }
         if (this->GetHash((*this)[theIndex]) != (unsigned) i) {
@@ -1489,8 +1503,10 @@ public:
   bool AddOnTopNoRepetitionMustBeNewCrashIfNot(const Object& o) {
     if (this->GetIndex(o) != - 1) {
       std::stringstream crashStream;
-      crashStream << "This is a programming error: the programmer requested to add the object " << o << " without repetition "
-      << " to the hashed list with a function that does not allow repetition, but the hashed list already contains the object. ";
+      crashStream << "This is a programming error: the programmer requested to add the object "
+      << o << " without repetition "
+      << " to the hashed list with a function that does not allow repetition, "
+      << "but the hashed list already contains the object. ";
       crash << crashStream.str() << crash;
     }
     this->AddOnTop(o);
@@ -1517,7 +1533,8 @@ public:
   }
   void SetObjectAtIndex(int index, const Object& theObject) {
     if (index < 0 || index >= this->size) {
-      crash << "This is a programming error. You are attempting to pop out index " << index << " out of hashed array "
+      crash << "This is a programming error. You are attempting to pop out index "
+      << index << " out of hashed array "
       << " of size " << this->size << ". " << crash;
     }
     int hashIndexPop = this->GetHash(this->TheObjects[index]);
@@ -1528,7 +1545,8 @@ public:
   }
   void RemoveIndexSwapWithLast(int index) {
     if (index < 0 || index >= this->size) {
-      crash << "This is a programming error. You are attempting to pop out index " << index << " out of hashed array "
+      crash << "This is a programming error. You are attempting to pop out index "
+      << index << " out of hashed array "
       << " of size " << this->size << ". " << crash;
     }
     Object* oPop = &this->TheObjects[index];
@@ -1573,7 +1591,8 @@ public:
     for (int i = 0; i < this->TheHashedArrays[hashIndex].size; i ++) {
       int j = this->TheHashedArrays[hashIndex].TheObjects[i];
       if (j >= this->size) {
-        crash << "This is a programming error: corrupt hash table: at hashindex = " << hashIndex << " I get instructed to look up index " << j
+        crash << "This is a programming error: corrupt hash table: at hashindex = "
+        << hashIndex << " I get instructed to look up index " << j
         << " but I have only " << this->size << " elements. " << crash;
       }
       if ((*this)[j] == o) {
@@ -1585,8 +1604,10 @@ public:
   inline int GetIndexIMustContainTheObject(const Object& o) const {
     int result = this->GetIndex(o);
     if (result == - 1) {
-      crash.theCrashReport << "This is a programming error: the programmer has requested the index of object " << o
-      << " with a function that does not allow failure. However, the container array does not contain this object. ";
+      crash.theCrashReport << "This is a programming error: "
+      << "the programmer has requested the index of object " << o
+      << " with a function that does not allow failure. "
+      << "However, the container array does not contain this object. ";
       crash << crash;
     }
     return result;
@@ -2310,14 +2331,14 @@ inline void StackTraceOut() {
 template <class Object>
 void List<Object>::ExpandArrayOnTop(int increase) {
  // <-Registering stack trace forbidden! Multithreading deadlock alert.
-  if (increase <= 0)
+  if (increase <= 0) {
     return;
+  }
   MacroIncrementCounter(ParallelComputing::NumListResizesTotal);
   Object* newArray = 0;
   try {
     newArray = new Object[this->ActualSize + increase];
-  }
-  catch(std::bad_alloc& theBA) {
+  } catch (std::bad_alloc& theBA) {
     crash << "Memory allocation failure: failed to allocate " << this->ActualSize + increase << " objects. " << crash;
   }
 #ifdef AllocationLimitsSafeguard

@@ -20,11 +20,16 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat) {
     gLetter = theFormat->chevalleyGgeneratorLetter;
   }
   out << "Type " << this->theWeyl.theDynkinType.ToString() << ".";
-  out << "The letter " << HtmlRoutines::GetMathSpanPure(hLetter) << " stands for elements of the Cartan subalgebra, <br>"
-  << " the letter " << HtmlRoutines::GetMathSpanPure(gLetter) << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
-  << " The generator " << HtmlRoutines::GetMathSpanPure(hLetter + "_i") << " is the element of the Cartan subalgebra dual to the <br>"
-  << "i^th simple root, that is, " << HtmlRoutines::GetMathSpanPure("[" + hLetter + "_i, g] =\\langle \\alpha_i , \\gamma\\rangle g")
-  << ", <br> where g is a Chevalley generator, " << HtmlRoutines::GetMathSpanPure("\\gamma") << " is its weight, and <br>"
+  out << "The letter " << HtmlRoutines::GetMathSpanPure(hLetter)
+  << " stands for elements of the Cartan subalgebra, <br>"
+  << " the letter " << HtmlRoutines::GetMathSpanPure(gLetter)
+  << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
+  << " The generator " << HtmlRoutines::GetMathSpanPure(hLetter + "_i")
+  << " is the element of the Cartan subalgebra dual to the <br>"
+  << "i^th simple root, that is, "
+  << HtmlRoutines::GetMathSpanPure("[" + hLetter + "_i, g] =\\langle \\alpha_i , \\gamma\\rangle g")
+  << ", <br> where g is a Chevalley generator, " << HtmlRoutines::GetMathSpanPure("\\gamma")
+  << " is its weight, and <br>"
   << HtmlRoutines::GetMathSpanPure("\\alpha_i") << " is the i^th simple root. ";
   std::stringstream theTableLateXStream, theHtmlStream;
   theHtmlStream << "<table><tr><td> roots simple coords </td><td>epsilon coordinates</td>"
@@ -210,10 +215,10 @@ void SemisimpleLieAlgebra::ComputeMultTable() {
   int numRoots = numPosRoots * 2;
   int numGenerators = numRoots + theRank;
   this->theLiebrackets.init(numGenerators, numGenerators);
-//  this->theLiebracketPairingIndices.init(numGenerators, numGenerators);
+  //  this->theLiebracketPairingIndices.init(numGenerators, numGenerators);
   this->UEGeneratorOrderIncludingCartanElts.initializeFillInObject(numGenerators, - 1);
-//  this->theLiebracketPairingIndices.MakeZero(- 1);
-//  this->OppositeRootSpaces.initializeFillInObject(numRoots+theDimension, - 1);
+  //  this->theLiebracketPairingIndices.MakeZero(- 1);
+  //  this->OppositeRootSpaces.initializeFillInObject(numRoots+theDimension, - 1);
   Vector<Rational> leftWeight, rightWeight, hRoot;
   for (int i = 0; i < numGenerators; i ++) {
     leftWeight = this->GetWeightOfGenerator(i);
@@ -273,7 +278,7 @@ void SemisimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int ind
   const Vector<Rational>& rootI = this->theWeyl.RootSystem[indexI];
   const Vector<Rational>& rootJ = this->theWeyl.RootSystem[indexJ];
   if ((rootI + rootJ).IsEqualToZero())
-    crash << crash;
+    crash << "Sum or roots not allowed to be zero here. " << crash;
   //int indexMinusI = this->theWeyl.RootSystem.GetIndex(-rootI);
   //int indexMinusJ = this->theWeyl.RootSystem.GetIndex(-rootJ);
   //this->ComputeDebugString();
@@ -385,7 +390,9 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant(
     ) {
       crash << "Structure constants must be computed at this point. " << crash;
     }
-    FirstSummand = this->ChevalleyConstants.elements[indexGamma][indexDeltaMinusEpsilon] * this->ChevalleyConstants.elements[indexDelta][indexMinusEpsilon];
+    FirstSummand =
+    this->ChevalleyConstants.elements[indexGamma][indexDeltaMinusEpsilon] *
+    this->ChevalleyConstants.elements[indexDelta][indexMinusEpsilon];
   } else {
     FirstSummand.MakeZero();
   }
@@ -396,7 +403,8 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant(
     ) {
       crash << "Structure constants must be computed at this point. " << crash;
     }
-    SecondSummand = this->ChevalleyConstants.elements[indexDelta][indexGammaMinusEpsilon]*this->ChevalleyConstants.elements[indexMinusEpsilon][indexGamma];
+    SecondSummand = this->ChevalleyConstants.elements[indexDelta][indexGammaMinusEpsilon] *
+    this->ChevalleyConstants.elements[indexMinusEpsilon][indexGamma];
   } else {
     SecondSummand.MakeZero();
   }

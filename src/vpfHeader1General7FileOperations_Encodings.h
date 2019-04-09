@@ -6,7 +6,9 @@
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader1General1_ListReferences.h"
 #include "vpfHeader1General6Maps.h"
-static ProjectInformationInstance ProjectInfoVpfHeader1General7FileOperations_EncodingsHeader1instance(__FILE__, "Header, file routines, encodings and more. ");
+static ProjectInformationInstance ProjectInfoVpfHeader1General7FileOperations_EncodingsHeader1instance(
+  __FILE__, "Header, file routines, encodings and more. "
+);
 
 struct FileOperations {
 public:

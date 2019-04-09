@@ -96,9 +96,9 @@ public:
 };
 
 class ControllerStartsRunning: public PauseThread {
-  public:
-    ControllerStartsRunning() {
-      this->InitComputation();
-    }
+public:
+  ControllerStartsRunning() {
+    this->InitComputation();
+  }
 };
 #endif // header_vpfHeader1General2Mutexes_already_Defined

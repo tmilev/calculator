@@ -11,8 +11,8 @@ static ProjectInformationInstance vpfFiniteField(__FILE__, "Prime fields");
 */
 
 
-class f65521
-{ public:
+class f65521 {
+public:
   unsigned int n;
 
   f65521(){};
@@ -46,14 +46,13 @@ class f65521
   bool NeedsParenthesisForMultiplication() {
     return false;
   }
-
   std::string ToString(FormatExpressions* f = 0) const;
 };
 std::ostream& operator<<(std::ostream& out, const f65521& data);
 
 
-class f211
-{ public:
+class f211 {
+public:
   char n;
 
   f211(){};

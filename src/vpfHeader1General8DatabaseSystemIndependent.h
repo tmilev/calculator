@@ -4,7 +4,9 @@
 #define vpfHeader1General8DatabaseSystemIndependent_already_included
 
 #include "vpfHeader1General0_General.h"
-static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemIndependentinstance(__FILE__, "Header, system independent database data structures. ");
+static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemIndependentinstance(
+  __FILE__, "Header, system independent database data structures. "
+);
 #include "vpfJson.h"
 
 class UserCalculatorData {

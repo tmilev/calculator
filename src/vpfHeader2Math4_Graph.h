@@ -9,23 +9,21 @@ static ProjectInformationInstance ProjectInfoVpfGraphsHeader
 // point is up to max_edges vertices.  If the vertices aren't a dense collection of integers,
 // there will need to be a hashmap somewhere to get a dense collection of integers
 
-class GraphOLD
-{
+class GraphOLD {
 public:
-    GraphOLD(int max_vertices, int max_edges);
-    int vertices;
-    int edges;
-    int max_edges;
-    List<int> data;
-    void AddEdge(int v1, int v2);
-    void AddDiEdge(int v1, int v2);
-    List<List<int> > DestructivelyGetConnectedComponents();
+  GraphOLD(int max_vertices, int max_edges);
+  int vertices;
+  int edges;
+  int max_edges;
+  List<int> data;
+  void AddEdge(int v1, int v2);
+  void AddDiEdge(int v1, int v2);
+  List<List<int> > DestructivelyGetConnectedComponents();
 private:
-    void TreeRecurseCopyDelete(List<int> &l, int v, int m);
+  void TreeRecurseCopyDelete(List<int> &l, int v, int m);
 };
 
-struct GraphEdge
-{
+struct GraphEdge {
   friend std::ostream& operator << (std::ostream& output, const GraphEdge& theEdge) {
     output << theEdge.ToString();
     return output;
@@ -48,13 +46,12 @@ struct GraphEdge
     return false;
   }
   bool operator== (const GraphEdge& other) const {
-    return this->vStart == other.vStart && this->vEnd == other.vEnd
-    && this->label == other.label;
+    return this->vStart == other.vStart && this->vEnd == other.vEnd &&
+    this->label == other.label;
   }
 };
 
-class Graph
-{
+class Graph {
 public:
   int numNodes;
   int groupMaxSize;

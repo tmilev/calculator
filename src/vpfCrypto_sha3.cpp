@@ -225,8 +225,9 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len) {
 
     // now ready to add saved to the sponge
     ctx->s[ctx->wordIndex] ^= ctx->saved;
-    if (ctx->byteIndex != 8)
+    if (ctx->byteIndex != 8) {
       crash << "Internal sha3 computation error. " << crash;
+    }
     ctx->byteIndex = 0;
     ctx->saved = 0;
     if (++ ctx->wordIndex == (Sha3::numberOfSpongeWords - ctx->capacityWords)) {
@@ -235,8 +236,9 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len) {
     }
   }
   // now work in full words directly from input
-  if (ctx->byteIndex != 0)
+  if (ctx->byteIndex != 0) {
     crash << "Internal sha3 computation error. " << crash;
+  }
   words = len / sizeof(uint64_t);
   tail = len - words * sizeof(uint64_t);
   for (i = 0; i < words; i ++, buf += sizeof(uint64_t)) {

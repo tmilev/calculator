@@ -9048,8 +9048,9 @@ bool Lattice::ReadFromFile(std::fstream& input) {
   bool result = this->basisRationalForm.ReadFromFile(input);
   this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
-  if (numReadWords != 0)
+  if (numReadWords != 0) {
     crash << "Failed to read rational form. " << crash;
+  }
   return result;
 }
 
@@ -9337,11 +9338,6 @@ bool PartFractions::RemoveRedundantShortRootsIndex(int theIndex, Vector<Rational
         }
       }
     }
-    if (PartFraction::MakingConsistencyCheck || this->flagAnErrorHasOccurredTimeToPanic) {
-      //thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension);
-      //localEndCheckSum.ToString(tempS1);
-      //if (!localStartCheckSum.IsEqualTo(localEndCheckSum))crash << crash;
-    }
   }
   this->AddMonomial(thePF, currentCoeff);
   return true;
@@ -9560,12 +9556,14 @@ void DrawOperations::MakeMeAStandardBasis(int theDim) {
   this->BasisProjectionPlane.MakeEiBasis(theDim);
   this->BasisProjectionPlane.SetSize(2);
   if (theDim != 3) {
-    for (int i = 0; i < this->BasisProjectionPlane[1].size; i ++)
+    for (int i = 0; i < this->BasisProjectionPlane[1].size; i ++) {
       this->BasisProjectionPlane[1][i] = 2 * i + 1;
-    for (int i = 0; i < this->BasisProjectionPlane[0].size; i ++)
+    }
+    for (int i = 0; i < this->BasisProjectionPlane[0].size; i ++) {
       this->BasisProjectionPlane[0][i] = 3 * i + 2;
-  } else if (theDim == 3) //<-if not needed but good for documentation purposes
-  { this->BasisProjectionPlane[0][0] = 0.6;
+    }
+  } else if (theDim == 3) {//<-if not needed but good for documentation purposes
+    this->BasisProjectionPlane[0][0] = 0.6;
     this->BasisProjectionPlane[0][1] = 0.4;
     this->BasisProjectionPlane[0][2] = 0;
     this->BasisProjectionPlane[1][0] = - 0.4;
@@ -9573,8 +9571,9 @@ void DrawOperations::MakeMeAStandardBasis(int theDim) {
     this->BasisProjectionPlane[1][2] = 1;
   }
 
-  if (this->theBilinearForm.NumRows != theDim)
+  if (this->theBilinearForm.NumRows != theDim) {
     this->theBilinearForm.MakeIdMatrix(theDim, 1, 0);
+  }
 }
 
 std::string ConeComplex::DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) {
@@ -9582,41 +9581,35 @@ std::string ConeComplex::DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawin
   isBad = this->DrawMeLastCoordAffine(true, theDrawingVariables, theFormat);
   std::stringstream out;
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim() - 1);
-  if (isBad)
+  if (isBad) {
     out << "<hr>" << "found cones which I can't draw<hr>";
+  }
   out << this->ToString(true);
-/*  for (int i = 0; i < this->size; i ++) {
-    theDrawingVariables.theBuffer.init();
-    out << "<hr>" << this->TheObjects[i].DrawMeToHtmlLastCoordAffine(theDrawingVariables, theFormat);
-  }*/
   return out.str();
 }
 
-std::string ConeComplex::DrawMeToHtmlProjective
-(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) {
+std::string ConeComplex::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) {
   bool isGood = true;
   isGood = this->DrawMeProjective(0, true, theDrawingVariables, theFormat);
   std::stringstream out;
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
-  if (!isGood)
+  if (!isGood) {
     out << "<hr>" << "found cones which I can't draw<hr>";
+  }
   out << this->ToString(true);
-/*  for (int i = 0; i < this->size; i ++) {
-    theDrawingVariables.theBuffer.init();
-    out << "<hr>" << this->TheObjects[i].DrawMeToHtmlLastCoordAffine(theDrawingVariables, theFormat);
-  }*/
   return out.str();
 }
 
-bool ConeComplex::DrawMeLastCoordAffine
-(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) {
+bool ConeComplex::DrawMeLastCoordAffine(
+  bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat
+) {
   bool result = true;
-  if (InitDrawVars)
+  if (InitDrawVars) {
     theDrawingVariables.theBuffer.initDimensions(this->GetDim() - 1);
+  }
 
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim() - 1);
   for (int i = 0; i < this->size; i ++) {
-    //theDrawingVariables.theBuffer.init();
     result = this->TheObjects[i].DrawMeLastCoordAffine(InitDrawVars, theDrawingVariables, theFormat) && result;
     std::stringstream tempStream;
     tempStream << i + 1;
@@ -9627,14 +9620,16 @@ bool ConeComplex::DrawMeLastCoordAffine
   return result;
 }
 
-bool ConeComplex::DrawMeProjective
-(Vector<Rational>* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) {
+bool ConeComplex::DrawMeProjective(
+  Vector<Rational>* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat
+) {
   bool result = true;
   Vector<Rational> tempRoot;
   Vectors<Rational> tempRoots;
   Matrix<Rational> tempMat;
-  if (this->GetDim() <= 1)
+  if (this->GetDim() <= 1) {
     return false;
+  }
   if (InitDrawVars) {
     theDrawingVariables.theBuffer.init();
     theDrawingVariables.theBuffer.initDimensions(this->GetDim());
@@ -9644,26 +9639,26 @@ bool ConeComplex::DrawMeProjective
       this->ConvexHull.GetInternalPoint(tempRoot);
       tempMat.AssignVectorRow(tempRoot);
       tempMat.GetZeroEigenSpace(tempRoots);
-      for (int i = 0; i < 2; i ++)
-        for (int j = 0; j < this->GetDim(); j ++)
+      for (int i = 0; i < 2; i ++) {
+        for (int j = 0; j < this->GetDim(); j ++) {
           theDrawingVariables.theBuffer.BasisProjectionPlane[i][j] = tempRoots[i][j].GetDoubleValue();
+        }
+      }
     }
   }
   for (int i = 0; i < this->size; i ++) {
-    //theDrawingVariables.theBuffer.init();
     result = ((*this)[i].DrawMeProjective(coordCenterTranslation, false, theDrawingVariables, theFormat) && result);
-    //stOutput << "<hr> drawing number " << i + 1 << ": " << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()- 1);
   }
   return result;
 }
 
-bool Cone::DrawMeLastCoordAffine
-(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat, const std::string& ChamberWallColor) const {
+bool Cone::DrawMeLastCoordAffine(
+  bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat, const std::string& ChamberWallColor
+) const {
   (void) theFormat; //avoid unused parameter warning, portable.
   Vector<Rational> ZeroRoot;
   ZeroRoot.MakeZero(this->GetDim() - 1);
   Vectors<Rational> VerticesScaled;
-//  VerticesScaled.Reserve(this->Vertices.size * 2);
   VerticesScaled = this->Vertices;
   Rational tempRat;
   List<bool> DrawVertex;
@@ -9672,22 +9667,25 @@ bool Cone::DrawMeLastCoordAffine
   for (int i = 0; i < this->Vertices.size; i ++) {
     tempRat = *VerticesScaled[i].LastObject();
     VerticesScaled[i].SetSize(this->GetDim() - 1);
-    if (tempRat.IsPositive())
+    if (tempRat.IsPositive()) {
       VerticesScaled[i] /= tempRat;
-    if (tempRat.IsEqualToZero())
+    }
+    if (tempRat.IsEqualToZero()) {
       VerticesScaled[i] *= 10000;
+    }
     if (tempRat.IsNegative()) {
       DrawVertex[i] = false;
       foundBadVertex = true;
     }
   }
-  if (InitDrawVars)
+  if (InitDrawVars) {
     theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim() - 1);
-  for (int k = 0; k < this->Normals.size; k ++)
-    for (int i = 0; i < VerticesScaled.size; i ++)
-      if (DrawVertex[i] && this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
-        for (int j = i + 1; j < VerticesScaled.size; j ++)
-          if (DrawVertex[j] && this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
+  }
+  for (int k = 0; k < this->Normals.size; k ++) {
+    for (int i = 0; i < VerticesScaled.size; i ++) {
+      if (DrawVertex[i] && this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero()) {
+        for (int j = i + 1; j < VerticesScaled.size; j ++) {
+          if (DrawVertex[j] && this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero()) {
             if (this->IsAnHonest1DEdgeAffine(i, j)) {
               /*bool iVertexLiesAtInfinity = this->Vertices[i].LastObject()->IsEqualToZero();
               bool jVertexLiesAtInfinity = this->Vertices[j].LastObject()->IsEqualToZero();
@@ -9701,80 +9699,106 @@ bool Cone::DrawMeLastCoordAffine
                 theDrawingVariables.drawLineBetweenTwoVectorsBuffer
                 (iScaledVertex, jScaledVertex, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(200,200,200));
               }*/
-              theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-              (VerticesScaled[i], VerticesScaled[j], ChamberWallColor, 1);
+              theDrawingVariables.drawLineBetweenTwoVectorsBufferRational(
+                VerticesScaled[i], VerticesScaled[j], ChamberWallColor, 1
+              );
             }
+          }
+        }
+      }
+    }
+  }
   return foundBadVertex;
 }
 
 std::string Cone::DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) {
-  if (this->flagIsTheZeroCone)
-    return "The cone is empty.";
-  if (this->Normals.size < 1)
+  if (this->flagIsTheZeroCone) {
+    return "The cone is empty. ";
+  }
+  if (this->Normals.size < 1) {
     return "The cone is the entire space";
-  if (this->Vertices.size < 1)
+  }
+  if (this->Vertices.size < 1) {
     return "The cone is empty";
+  }
   std::stringstream out;
   theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim() - 1);
   bool foundBadVertex = this->DrawMeLastCoordAffine(false, theDrawingVariables, theFormat);
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim() - 1);
-  if (foundBadVertex)
+  if (foundBadVertex) {
     out << "<br>The cone does not lie in the upper half-space. ";
-  else
+  } else {
     out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim() - 1);
+  }
   out << "<br>" << this->ToString(&theFormat);
   return out.str();
 }
 
-bool Cone::DrawMeProjective
-(Vector<Rational>* coordCenterTranslation, bool initTheDrawVars,
- DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) const {
+bool Cone::DrawMeProjective(
+  Vector<Rational>* coordCenterTranslation,
+  bool initTheDrawVars,
+  DrawingVariables& theDrawingVariables,
+  FormatExpressions& theFormat
+) const {
   (void) theFormat;  //avoid unused parameter warning, portable.
   Vector<Rational> ZeroRoot, coordCenter;
   ZeroRoot.MakeZero(this->GetDim());
-  if (coordCenterTranslation == 0)
+  if (coordCenterTranslation == 0) {
     coordCenter = ZeroRoot;
-  else
+  } else {
     coordCenter = *coordCenterTranslation;
-//  theDrawingVariables.theBuffer.init();
+  }
   Vectors<Rational> VerticesScaled = this->Vertices;
   for (int i = 0; i < VerticesScaled.size; i ++) {
     Rational sumAbsValuesCoords = 0;
-    for (int j = 0; j < this->GetDim(); j ++)
+    for (int j = 0; j < this->GetDim(); j ++) {
       sumAbsValuesCoords += (VerticesScaled[i][j].IsPositive()) ? VerticesScaled[i][j] : - VerticesScaled[i][j];
-    if (sumAbsValuesCoords.IsEqualToZero())
-      crash << crash;
+    }
+    if (sumAbsValuesCoords.IsEqualToZero()) {
+      crash << "Zero vector not allowed. " << crash;
+    }
     VerticesScaled[i] /= sumAbsValuesCoords;
   }
-
   Vector<Rational> tempRoot;
   if (initTheDrawVars) {
     theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
     for (int i = 0; i < this->GetDim(); i ++) {
       tempRoot.MakeEi(this->GetDim(), i);
-      theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-      (ZeroRoot + coordCenter, tempRoot + coordCenter, "gray", 1);
+      theDrawingVariables.drawLineBetweenTwoVectorsBufferRational(
+        ZeroRoot + coordCenter, tempRoot + coordCenter, "gray", 1
+      );
     }
   }
-  for (int i = 0; i < this->Vertices.size; i ++)
-    theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-    (ZeroRoot + coordCenter, VerticesScaled[i] * 10000 + coordCenter, "gray", 1);
-  for (int k = 0; k < this->Normals.size; k ++)
-    for (int i = 0; i < this->Vertices.size; i ++)
-      if (this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
-        for (int j = i + 1; j < this->Vertices.size; j ++)
-          if (this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
-            if (this->IsAnHonest1DEdgeAffine(i, j))
-              theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-              (VerticesScaled[i] + coordCenter, VerticesScaled[j] + coordCenter, "black", 1);
+  for (int i = 0; i < this->Vertices.size; i ++) {
+    theDrawingVariables.drawLineBetweenTwoVectorsBufferRational(
+      ZeroRoot + coordCenter, VerticesScaled[i] * 10000 + coordCenter, "gray", 1
+    );
+  }
+  for (int k = 0; k < this->Normals.size; k ++) {
+    for (int i = 0; i < this->Vertices.size; i ++) {
+      if (this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero()) {
+        for (int j = i + 1; j < this->Vertices.size; j ++) {
+          if (this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero()) {
+            if (this->IsAnHonest1DEdgeAffine(i, j)) {
+              theDrawingVariables.drawLineBetweenTwoVectorsBufferRational(
+                VerticesScaled[i] + coordCenter, VerticesScaled[j] + coordCenter, "black", 1
+              );
+            }
+          }
+        }
+      }
+    }
+  }
   return true;
 }
 
 std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) {
-  if (this->flagIsTheZeroCone)
+  if (this->flagIsTheZeroCone) {
     return "The cone is the zero cone (i.e. contains only the origin).";
-  if (this->Normals.size <= 0)
+  }
+  if (this->Normals.size <= 0) {
     return "The cone is the entire space.";
+  }
   std::stringstream out;
   if (this->Vertices.size < 1) {
     out << "There has been a programming error. The cone is empty.<br>"
@@ -9791,19 +9815,22 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
 
 std::string HtmlRoutines::GetHtmlButton(const std::string& buttonID, const std::string& theScript, const std::string& buttonText) {
   std::stringstream out;
-  out << "\n<button id =\"" << buttonID << "\" " << HtmlRoutines::GetStyleButtonLikeHtml() << " onclick=\"" << theScript << "\">" << buttonText << "</button>";
+  out << "\n<button id =\"" << buttonID << "\" " << HtmlRoutines::GetStyleButtonLikeHtml()
+  << " onclick=\"" << theScript << "\">" << buttonText << "</button>";
   return out.str();
 }
 
-std::string HtmlRoutines::GetHtmlSpanHidableStartsHiddeN
-(const std::string& input, const std::string& labelExpandButton, const std::string& desiredIdStart) {
+std::string HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(
+  const std::string& input, const std::string& labelExpandButton, const std::string& desiredIdStart
+) {
   std::stringstream out;
   HtmlRoutines::GlobalGeneralPurposeID ++;
   std::stringstream buttonLabel;
   std::stringstream spanLabel;
   spanLabel << "hidableSpan" << desiredIdStart << HtmlRoutines::GlobalGeneralPurposeID;
   buttonLabel << "buttonHS" << HtmlRoutines::GlobalGeneralPurposeID;
-  out << HtmlRoutines::GetHtmlButton(buttonLabel.str(), "window.calculator.miscellaneousFrontend.switchMenu('" + spanLabel.str() + "');", labelExpandButton);
+  std::string switchMenu = "window.calculator.miscellaneousFrontend.switchMenu('" + spanLabel.str() + "');";
+  out << HtmlRoutines::GetHtmlButton(buttonLabel.str(), switchMenu, labelExpandButton);
   out << "<span";
   out << " id =\"" << spanLabel.str() << "\" class=\"hiddenClass\">";
   out << input << "</span>";
@@ -9815,8 +9842,9 @@ int DrawOperations::GetDimFromBilinearForm() {
 }
 
 void DrawOperations::initDimensions(int theDim) {
-  if (theDim < 2)
+  if (theDim < 2) {
     theDim = 2;
+  }
   this->theBilinearForm.MakeIdMatrix(theDim, 1, 0);
   this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
   this->BasisProjectionPlane.MakeEiBasis(theDim);
@@ -9835,22 +9863,28 @@ void DrawOperations::initDimensions(int theDim) {
 }
 
 int DrawOperations::GetDimFirstDimensionDependentOperation() {
-  for (int i = 0; i < this->theOperations.size; i ++)
-    if (this->theOperations[i][fieldOperation].string == DrawOperations::typeSegment)
-      if (this->theOperations[i][DrawOperations::fieldPoints].list.size > 0)
+  for (int i = 0; i < this->theOperations.size; i ++) {
+    if (this->theOperations[i][fieldOperation].string == DrawOperations::typeSegment) {
+      if (this->theOperations[i][DrawOperations::fieldPoints].list.size > 0) {
         return this->theOperations[i][DrawOperations::fieldPoints][0].list.size;
+      }
+    }
+  }
   return - 1;
 }
 
 void DrawOperations::EnsureProperInitialization() {
   int theDim = this->GetDimFirstDimensionDependentOperation();
   bool isGood = (this->ProjectionsEiVectors.size == theDim && this->theBilinearForm.NumRows == theDim);
-  if (isGood)
+  if (isGood) {
     isGood = this->BasisProjectionPlane.size == 2;
-  if (isGood)
+  }
+  if (isGood) {
     isGood = this->BasisProjectionPlane[0].size == theDim;
-  if (!isGood)
+  }
+  if (!isGood) {
     this->initDimensions(theDim);
+  }
 }
 
 template<class Base>
@@ -9861,17 +9895,22 @@ std::iostream& operator<< (std::iostream& output, const CompleX<Base>& input) {
   }
   if (input.Re != 0) {
     output << input.Re;
-    if (input.Im != 0)
+    if (input.Im != 0) {
       output << " + ";
+    }
   }
-  if (input.Im != 0)
+  if (input.Im != 0) {
     output << "i";
-  if (input.Im < 0)
+  }
+  if (input.Im < 0) {
     output << "(";
-  if (input.Im != 1)
+  }
+  if (input.Im != 1) {
     output << input.Im;
-  if (input.Im < 0)
+  }
+  if (input.Im < 0) {
     output << ")";
+  }
   return output;
 }
 
@@ -9890,21 +9929,24 @@ void DrawOperations::init() {
 
 double DrawOperations::getAngleFromXandY(double x, double y) {
   double result;
-  if (x != 0)
+  if (x != 0) {
     result = FloatingPoint::arctan(y / x);
-  else
-    if (y > 0)
+  } else {
+    if (y > 0) {
       result = MathRoutines::Pi() / 2;
-    else
+    } else {
       result = MathRoutines::Pi() / (- 2);
+    }
+  }
   return result;
 }
 
 void DrawOperations::click(double x , double y) {
   this->EnsureProperInitialization();
   this->SelectedCircleMinus2noneMinus1Center = - 2;
-  if (this->AreWithinClickTolerance(x, y, this->centerX, this->centerY))
+  if (this->AreWithinClickTolerance(x, y, this->centerX, this->centerY)) {
     this->SelectedCircleMinus2noneMinus1Center = - 1;
+  }
   int theDim = this->theBilinearForm.NumRows;
   for (int i = 0; i < theDim; i ++) {
     double Xbasis, Ybasis;
@@ -9916,8 +9958,15 @@ void DrawOperations::click(double x , double y) {
   }
 }
 
-void DrawOperations::RotateOutOfPlane
-(std::stringstream& logger, Vector<double>& input, Vector<double>& output, Vector<double>& orthoBasis1, Vector<double>& orthoBasis2, double oldTanSquared, double newTanSquared) {
+void DrawOperations::RotateOutOfPlane(
+  std::stringstream& logger,
+  Vector<double>& input,
+  Vector<double>& output,
+  Vector<double>& orthoBasis1,
+  Vector<double>& orthoBasis2,
+  double oldTanSquared,
+  double newTanSquared
+) {
   Vector<double> projection = orthoBasis1;
   Vector<double> vComponent = input;
   double scal1 = this->theBilinearForm.ScalarProduct(orthoBasis1, input);
@@ -9926,8 +9975,9 @@ void DrawOperations::RotateOutOfPlane
   projection += orthoBasis2 * scal2;
   vComponent -= projection;
   logger << "\ngetScalarProd =" << this->theBilinearForm.ScalarProduct(projection, vComponent);
-  if (oldTanSquared < 0 || newTanSquared < 0)
+  if (oldTanSquared < 0 || newTanSquared < 0) {
     return;
+  }
   double oldAngle = FloatingPoint::arctan(FloatingPoint::sqrt(oldTanSquared));
   double newAngle = FloatingPoint::arctan(FloatingPoint::sqrt(newTanSquared));
   double angleChange = - oldAngle + newAngle;
@@ -9964,8 +10014,9 @@ void DrawOperations::changeBasisPReserveAngles(double newX, double newY) {
   double bufferGraphicsUnit = this->GraphicsUnit;
   newX = (newX - bufferCenterX) / bufferGraphicsUnit;
   newY = (newY - bufferCenterY) / bufferGraphicsUnit;
-  if (newX == 0 && newY == 0)
+  if (newX == 0 && newY == 0) {
     return;
+  }
   std::stringstream out;
   Vector<double>& selectedRoot = this->BasisToDrawCirclesAt[this->SelectedCircleMinus2noneMinus1Center];
   double selectedRootLength = this->theBilinearForm.ScalarProduct(selectedRoot, selectedRoot);
@@ -10004,7 +10055,10 @@ void DrawOperations::changeBasisPReserveAngles(double newX, double newY) {
   double newRatioProjectionOverHeightSquared = (newX * newX + newY * newY) / (selectedRootLength - newX * newX - newY * newY);
   out << "\noldRatio: " << oldRatioProjectionOverHeightSquared;
   out << "\nnewRatio: " << newRatioProjectionOverHeightSquared;
-  if (this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal) > epsilon || this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal) < - epsilon) {
+  if (
+    this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal) > epsilon ||
+    this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal) < - epsilon
+  ) {
     this->ScaleToUnitLength(vProjection);
     this->ScaleToUnitLength(vOrthogonal);
     out << "\nscaled vOrthogonal =" << vOrthogonal << "->"
@@ -10012,25 +10066,37 @@ void DrawOperations::changeBasisPReserveAngles(double newX, double newY) {
     out << "\nscaled vProjection =" << vProjection << "->"
     << this->theBilinearForm.ScalarProduct(vProjection, vProjection);
     out << "\ntheScalarProd: " << this->theBilinearForm.ScalarProduct(vOrthogonal, vProjection);
-    this->RotateOutOfPlane(out, currentBasisPlane[0], currentBasisPlane[0], vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
-    this->RotateOutOfPlane(out, currentBasisPlane[1], currentBasisPlane[1], vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
+    this->RotateOutOfPlane(
+      out,
+      currentBasisPlane[0],
+      currentBasisPlane[0],
+      vProjection,
+      vOrthogonal,
+      oldRatioProjectionOverHeightSquared,
+      newRatioProjectionOverHeightSquared
+    );
+    this->RotateOutOfPlane(
+      out,
+      currentBasisPlane[1],
+      currentBasisPlane[1],
+      vProjection,
+      vOrthogonal,
+      oldRatioProjectionOverHeightSquared,
+      newRatioProjectionOverHeightSquared
+    );
   }
-//  this->e1.ComputeDebugString();
-//  this->e2.ComputeDebugString();
   this->ModifyToOrthonormalNoShiftSecond(currentBasisPlane[0], currentBasisPlane[1]);
-//  this->e1.ComputeDebugString();
-//  this->e2.ComputeDebugString();
   out << "\ne1=" << currentBasisPlane[0];
   out << "\ne2=" << currentBasisPlane[1];
   out << "\ne1*e2=" << this->theBilinearForm.ScalarProduct(currentBasisPlane[0], currentBasisPlane[1]);
-  if (this->specialOperationsOnBasisChange != 0)
+  if (this->specialOperationsOnBasisChange != 0) {
     this->specialOperationsOnBasisChange(*this);
+  }
   this->ComputeProjectionsEiVectors();
   this->DebugString = out.str();
 }
 
-class ImpreciseDouble
-{
+class ImpreciseDouble {
   private:
   double precision;
   double theValue;
@@ -10059,19 +10125,22 @@ class ImpreciseDouble
     this->operator=(other);
   }
   void operator+=(const ImpreciseDouble& other) {
-    if (!other.IsEqualToZero())
+    if (!other.IsEqualToZero()) {
       this->theValue += other.theValue;
+    }
   }
   void operator-=(const ImpreciseDouble& other) {
-    if (!other.IsEqualToZero())
+    if (!other.IsEqualToZero()) {
       this->theValue -= other.theValue;
+    }
   }
   void operator=(const Rational& other) {
     this->theValue = other.GetDoubleValue();
   }
   bool IsEqualToZero() const {
-    if (this->theValue < 0)
+    if (this->theValue < 0) {
       return (- theValue) < this->precision;
+    }
     return this->theValue < this->precision;
   }
   bool operator<=(const ImpreciseDouble& other) {
@@ -10109,15 +10178,17 @@ class ImpreciseDouble
     return result;
   }
   void operator*=(const ImpreciseDouble& other) {
-    if (!other.IsEqualToZero())
+    if (!other.IsEqualToZero()) {
       this->theValue *= other.theValue;
-    else
+    } else {
       this->theValue = 0;
+    }
   }
   bool operator==(const ImpreciseDouble& other) const {
     int diff = this->theValue - other.theValue;
-    if (diff < 0)
+    if (diff < 0) {
       diff = - diff;
+    }
     return diff < this->precision;
   }
   static ImpreciseDouble GetMinusOne() {
@@ -10137,9 +10208,11 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
   theMat.init(theDim, 2);
 //we assume that the ComputeProjectionsEiVectors has been called
 //  theOps.ComputeProjectionsEiVectors();
-  for (int i = 0; i < theOps.ProjectionsEiVectors.size; i ++)
-    for (int j = 0; j < 2; j ++)
+  for (int i = 0; i < theOps.ProjectionsEiVectors.size; i ++) {
+    for (int j = 0; j < 2; j ++) {
       theMat.elements[i][j] = theOps.ProjectionsEiVectors[i][j];
+    }
+  }
   ProgressReport theReport;
   std::stringstream out;
   out << "before elimination:\n" << theMat.ToString();
@@ -10149,8 +10222,9 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
 }
 
 void DrawOperations::operator+=(const DrawOperations& other) {
-  if (this->theBilinearForm.NumRows != other.theBilinearForm.NumRows)
+  if (this->theBilinearForm.NumRows != other.theBilinearForm.NumRows) {
     return;
+  }
   this->theOperations.AddListOnTop(other.theOperations);
   //this->BasisProjectionPlane.AddListOnTop(other.BasisProjectionPlane);
   //this->centerX.AddListOnTop(other.centerX);
@@ -10163,26 +10237,30 @@ void RationalFunctionOld::operator/=(const Polynomial<Rational>& other) {
   tempRF = other;
   tempRF.Invert();
   *this *= tempRF;
-  if (!this->checkConsistency())
+  if (!this->checkConsistency()) {
     crash << "Bad rational function." << crash;
+  }
 }
 
 void RationalFunctionOld::ReduceRFToPoly() {
-  if (this->expressionType != this->typeRationalFunction)
+  if (this->expressionType != this->typeRationalFunction) {
     return;
+  }
   if (this->Denominator.GetElement().IsConstant()) {
     this->Numerator.GetElement() /= this->Denominator.GetElement().theCoeffs[0];
     this->Denominator.FreeMemory();
     this->expressionType = this->typePoly;
   }
-  if (this->Numerator.GetElement().IsEqualToZero())
+  if (this->Numerator.GetElement().IsEqualToZero()) {
     this->MakeZero();
+  }
 }
 
 bool RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& theSub) {
   MacroRegisterFunctionWithName("RationalFunctionOld::Substitution");
-  if (theSub.size < 1)
+  if (theSub.size < 1) {
     return false;
+  }
 //  FormatExpressions tempFormat;
 //  int commentMEWhenDone;
   switch(this->expressionType) {
@@ -10192,25 +10270,28 @@ bool RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
     case RationalFunctionOld::typePoly:
 //      stOutput << "<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
 //      << " to get ";
-      if (!this->Numerator.GetElement().Substitution(theSub))
+      if (!this->Numerator.GetElement().Substitution(theSub)) {
         return false;
+      }
 //      stOutput << "<br>finally:<br>" << this->Numerator.GetElement().ToString();
       this->Simplify();
 //      stOutput << ", which, simplified, yields<br> " << this->ToString(tempFormat);
 //      if (!this->checkConsistency())crash << crash;
       return true;
     case RationalFunctionOld::typeRationalFunction:
-      if (!this->Numerator.GetElement().Substitution(theSub))
+      if (!this->Numerator.GetElement().Substitution(theSub)) {
         return false;
-      if (!this->Denominator.GetElement().Substitution(theSub))
+      }
+      if (!this->Denominator.GetElement().Substitution(theSub)) {
         return false;
-      if (this->Denominator.GetElement().IsEqualToZero())
+      }
+      if (this->Denominator.GetElement().IsEqualToZero()) {
         return false;
+      }
       this->Simplify();
-//      if (!this->checkConsistency())crash << crash;
       return true;
     default:
-      crash << crash;
+      crash << "Default case not allowed. " << crash;
       break;
   }
   return false;
@@ -10218,9 +10299,11 @@ bool RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
 
 void Selection::operator=(const Vector<Rational>& other) {
   this->init(other.size);
-  for (int i = 0; i <other.size; i ++)
-    if (!other[i].IsEqualToZero())
+  for (int i = 0; i <other.size; i ++) {
+    if (!other[i].IsEqualToZero()) {
       this->selected[i] = true;
+    }
+  }
   this->ComputeIndicesFromSelection();
 }
 

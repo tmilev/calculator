@@ -533,12 +533,15 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output) {
       }
       char currentChar = input[i + j];
       unsigned char theDigit = 255;
-      if (currentChar >= 'A' && currentChar <= 'F')
+      if (currentChar >= 'A' && currentChar <= 'F') {
         theDigit = 10 + currentChar - 'A';
-      if (currentChar >= 'a' && currentChar <= 'f')
+      }
+      if (currentChar >= 'a' && currentChar <= 'f') {
         theDigit = 10 + currentChar - 'a';
-      if (currentChar >= '0' && currentChar <= '9')
+      }
+      if (currentChar >= '0' && currentChar <= '9') {
         theDigit = currentChar - '0';
+      }
       if (theDigit != 255) {
         nextByte *= 16;
         nextByte += theDigit;
@@ -557,7 +560,6 @@ bool Crypto::ConvertHexToInteger(const std::string& input, LargeIntUnsigned& out
   outputNumLeadingZeroPairs = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
     int theDigit = - 1;
-    //stOutput << "DEBUG: Digit from: " << input[i];
     if (input[i] >= 'A' && input[i] <= 'F') {
       theDigit = 10 + input[i] - 'A';
     }
@@ -678,10 +680,10 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
   uint32_t h4 = 0xC3D2E1F0;
   uint64_t messageLength = inputString.size() * 8;//*sizeof(char);
   std::string inputStringPreprocessed = inputString;
-  //Wikipedia appears to claim that if the message
+  //My reading of Wikipedia appears to suggest that if the message
   //is a multiple of 8 bits, padding with the bit 1
   //is not necessary. This appears to be false:
-  //adding: if (messageLength%256== 0)
+  //adding: if (messageLength % 256 == 0)
   //appears to produce wrong results.
   inputStringPreprocessed.push_back(0x80);
   unsigned numbytesMod64 = inputStringPreprocessed.size() % 64;
@@ -1063,7 +1065,6 @@ void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& outpu
     convertorToUint32[3] = inputStringPreprocessed[i * 4 + 3];
     inputStringUint32.AddOnTop(Crypto::GetUInt32FromCharBigendian(convertorToUint32));
   }
-//  stOutput << "<hr>DEBUG inputStringUint32: " << inputStringUint32.ToStringCommaDelimited();
   List<uint32_t> currentChunk;
   currentChunk.SetSize(64);
   uint32_t a = 0, b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0, maj = 0, temp1 = 0, temp2 = 0;
@@ -1306,11 +1307,6 @@ bool JSONWebToken::VerifyRSA256(
   std::string payload = this->headerBase64 + '.' + this->claimsBase64;
   if (commentsGeneral != 0) {
     *commentsGeneral << "<br>Payload: " << payload;
-    //List<int> intValues;
-    //intValues.SetSize(payload.size());
-    //for (unsigned i = 0; i < payload.size(); i ++)
-    //  intValues[i] = payload[i];
-    //*commentsGeneral << "<br>Payload, json: " << intValues.ToStringCommaDelimited();
   }
   List<uint32_t> outputSha, RSAresultInts;
   Crypto::computeSha256(payload, outputSha);

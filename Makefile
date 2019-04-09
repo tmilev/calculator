@@ -81,7 +81,7 @@ endif
 endif
 
 ifeq ($(noMongo), 1)
-$(info [1;33mNo mongo requested.[0m) 
+$(info [1;31mNo mongo requested.[0m) 
 else
 mongoLocation =
 ifneq ($(wildcard /usr/local/lib/libmongoc-1.0.so),)#location of mongoC in Ubuntu

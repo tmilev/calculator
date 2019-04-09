@@ -7,7 +7,9 @@ unsigned int EllipticCurveWeierstrassNormalForm::HashFunction(const EllipticCurv
   input.constantTerm.HashFunction() * SomeRandomPrimes[1] ;
 }
 
-bool EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(const std::string& curveName, LargeIntUnsigned &output, std::stringstream* commentsOnFailure) {
+bool EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(
+  const std::string& curveName, LargeIntUnsigned &output, std::stringstream* commentsOnFailure
+) {
   if (curveName == "secp256k1") {
     output.AssignString("115792089237316195423570985008687907852837564279074904382605163141518161494337");
     return true;

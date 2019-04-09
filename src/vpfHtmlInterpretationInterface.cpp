@@ -171,13 +171,9 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml() {
   }
   if (theProblem.MergeProblemInfoInDatabaseJSON(inputProblemInfo, commentsOnFailure)) {
     out << "<span style =\"color:green\"><b>Modified. </b></span>";
-    //out << "<meta http-equiv=\"refresh\" content =\"0;\">";
   } else {
     out << "<span style =\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
   }
-  //out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
-  //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(inputProblemInfo)
-  //<< "<br>inputProblemHome: " << inputProblemHome;
   return out.str();
 }
 
@@ -187,10 +183,6 @@ std::string HtmlInterpretation::GetSanitizedComment(
   MacroRegisterFunctionWithName("HtmlInterpretation::GetSanitizedComment");
   theFormat.flagUseQuotes = false;
   resultIsPlot = false;
-  //if (input.IsOfType<std::string>(&theString))
-  //{ stOutput << "<br>DEBUG: string input: "
-  //  << theString;
-  //}
   std::string theString;
   if (input.IsOfType<std::string>(&theString)) {
     if (MathRoutines::StringBeginsWith(theString, "Approximations have been")) {
@@ -228,16 +220,11 @@ std::string HtmlInterpretation::GetCommentsInterpretation(
     return "";
   }
   const Expression& currentE = theInterpreterWithAdvice.theProgramExpression[indexShift][1];
-  //out << "<br>DEBUG: currentE: " << HtmlRoutines::ConvertStringToHtmlString(currentE.ToString(), true);
   bool resultIsPlot = false;
   if (!currentE.StartsWith(theInterpreterWithAdvice.opEndStatement())) {
-    //out << "<hr>DEBUG: currentE is not starting with commands!<hr>";
     out << HtmlInterpretation::GetSanitizedComment(currentE, theFormat, resultIsPlot);
     return out.str();
   }
-  //out << "<hr>DEBUG: case currentE is commandList!<hr>CurrentE: "
-  //<< HtmlRoutines::StringToHtmlString(currentE.ToString(), true)
-  //;
   std::string currentS;
   for (int i = 1; i < currentE.size(); i ++) {
     currentS = HtmlInterpretation::GetSanitizedComment(currentE[i], theFormat,resultIsPlot);
@@ -245,8 +232,6 @@ std::string HtmlInterpretation::GetCommentsInterpretation(
       continue;
     }
     out << currentS;
-    //out << "<br>DEBUG: Lispified: "
-    //<< HtmlRoutines::ConvertStringToHtmlString(currentE[i].ToString(), true);
     if (i != currentE.size() - 1 && !resultIsPlot) {
       out << "<br>";
     }
@@ -1114,7 +1099,6 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
   << ");";
   completedProblemStreamNoEnclosures << currentA.answerId << "= (" << currentA.currentAnswerClean << ");";
 
-  //stOutput << "DEBUG: " << "adding: commands: " << currentA.commandsCommentsBeforeSubmissionOnly;
   bool hasCommentsBeforeSubmission = (
     MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != ""
   );

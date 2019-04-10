@@ -21,8 +21,7 @@ static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-struct SSLdata
-{
+struct SSLdata {
 public:
   static bool flagSSLlibraryInitialized;
   int errorCode;
@@ -47,25 +46,50 @@ public:
   void SetSocketAddToStackClient(int theSocket);
   void RemoveLastSocketClient();
   void FreeClientSSL();
-  void ClearErrorQueue
-  (int errorCode, SSL* theSSL, std::string *outputError,
-   std::stringstream* commentsGeneral, bool includeNoErrorInComments);
+  void ClearErrorQueue(
+    int errorCode,
+    SSL* theSSL,
+    std::string *outputError,
+    std::stringstream* commentsGeneral,
+    bool includeNoErrorInComments
+  );
   static bool initSSLkeyFiles();
   void initSSLlibrary();
   void initSSLserver();
   void initSSLclient();
-  int SSLRead
-  (SSL* theSSL, void *buffer, int bufferSize, std::string *outputError,
-   std::stringstream *commentsGeneral, bool includeNoErrorInComments);
-  bool SSLReadLoop
-  (int numTries, SSL* theSSL, std::string& output, const LargeInt& expectedLength, std::string* commentsOnFailure,
-   std::stringstream* commentsGeneral, bool includeNoErrorInComments);
-  bool SSLWriteLoop
-  (int numTries, SSL* theSSL, const std::string& input, std::string *outputError,
-   std::stringstream *commentsGeneral, bool includeNoErrorInComments);
-  int SSLWrite
-  (SSL* theSSL, void* buffer, int bufferSize, std::string* outputError,
-   std::stringstream* commentsGeneral, bool includeNoErrorInComments);
+  int SSLRead(
+    SSL* theSSL,
+    void *buffer,
+    int bufferSize,
+    std::string *outputError,
+    std::stringstream *commentsGeneral,
+    bool includeNoErrorInComments
+  );
+  bool SSLReadLoop(
+    int numTries,
+    SSL* theSSL,
+    std::string& output,
+    const LargeInt& expectedLength,
+    std::string* commentsOnFailure,
+    std::stringstream* commentsGeneral,
+    bool includeNoErrorInComments
+  );
+  bool SSLWriteLoop(
+    int numTries,
+    SSL* theSSL,
+    const std::string& input,
+    std::string *outputError,
+    std::stringstream *commentsGeneral,
+    bool includeNoErrorInComments
+  );
+  int SSLWrite(
+    SSL* theSSL,
+    void* buffer,
+    int bufferSize,
+    std::string* outputError,
+    std::stringstream* commentsGeneral,
+    bool includeNoErrorInComments
+  );
   SSLdata();
   ~SSLdata();
   void FreeSSL();
@@ -80,8 +104,7 @@ public:
 
 class WebServer;
 
-class WebWorker
-{
+class WebWorker {
 public:
   WebServer* parent;
   int indexInParent;
@@ -395,8 +418,7 @@ public:
   static int mainCommandLine();
 };
 
-class ProgressReportWebServer
-{
+class ProgressReportWebServer {
   public:
   int indexProgressReport;
   bool flagDeallocated;

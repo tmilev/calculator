@@ -1,10 +1,14 @@
 #ifndef VPFIMPLEMENTATIONHEADER2MATH0_GENERAL_H
 #define VPFIMPLEMENTATIONHEADER2MATH0_GENERAL_H
 #include "vpfHeader2Math0_General.h"
-static ProjectInformationInstance ProjectInfoVPFIMPLEMENTATIONHEADER2MATH0_GENERAL_H(__FILE__, "Header implementation, math routines. ");
+static ProjectInformationInstance ProjectInfoVPFIMPLEMENTATIONHEADER2MATH0_GENERAL_H(
+  __FILE__, "Header implementation, math routines. "
+);
 
 template <class coefficient>
-void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(coefficient& output, const coefficient& theRingOne, const coefficient& theRingZero) {
+void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
+  coefficient& output, const coefficient& theRingOne, const coefficient& theRingZero
+) {
   MacroRegisterFunctionWithName("Matrix::ComputeDeterminantOverwriteMatrix");
   bool doReport = false;
   if (theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination) {
@@ -25,8 +29,9 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(coefficient& output,
       return;
     }
     this->SwitchTwoRows(i, tempI);
-    if (tempI != i)
+    if (tempI != i) {
       output *= - 1;
+    }
     tempRat = this->elements[i][i];
     output *= tempRat;
     tempRat.Invert();
@@ -203,7 +208,8 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
   }
   if (shouldReport) {
     std::stringstream reportStream;
-    reportStream << "Large polynomial computation: " << this->size() << " x " << other.size() << "=" << totalMonPairs << " monomials:\n<br>\n"
+    reportStream << "Large polynomial computation: " << this->size() << " x "
+    << other.size() << "=" << totalMonPairs << " monomials:\n<br>\n"
     << this->ToString() << " times " << other.ToString();
     theReport1.Report(reportStream.str());
   }
@@ -254,7 +260,6 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
   coefficient tempElt;
   int row = 0;
   while (row < this->NumRows && col < this->NumCols) {
-    //stOutput << "<br>****************row: " << row << " status: " << this->ToString(true, false);
     int foundPivotRow = - 1;
     for (int i = row; i < this->NumRows; i ++) {
       if (!this->elements[i][col].IsEqualToZero()) {
@@ -263,23 +268,11 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
       }
     }
     if (foundPivotRow != - 1) {
-      /*if (this->elements[foundPivotRow][col].IsEqualToZero()) {
-        crash << "This is a programming error. "
-        << "Something is very wrong: I am getting 0 for a pivot element in "
-        << "Gaussian elimination over Euclidean domains. "
-        << crash;
-      }*/
       this->SwitchTwoRowsWithCarbonCopy(row, foundPivotRow, otherMatrix);
-      /*if (this->elements[row][col].IsEqualToZero()) {
-        crash << "This is a programming error. "
-        << "Something is very wrong: I am getting 0 for a pivot element in "
-        << "Gaussian elimination over Euclidean domains. "
-        << crash;
-      }*/
-      if (this->elements[row][col].IsNegative())
+      if (this->elements[row][col].IsNegative()) {
         this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
+      }
       int ExploringRow = row + 1;
-//      stOutput << "<br>before second while: " << this->ToString(true, false);
       while (ExploringRow< this->NumRows) {
         if (theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination) {
           std::stringstream out;
@@ -289,12 +282,6 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
         }
         coefficient& PivotElt = this->elements[row][col];
         coefficient& otherElt = this->elements[ExploringRow][col];
-        /*if (PivotElt.IsEqualToZero()) {
-          crash << "This is a programming error. "
-          << "Something is very wrong: I am getting 0 for a pivot element in "
-          << "Gaussian elimination over Euclidean domains. "
-          << crash;
-        }*/
         if (otherElt.IsNegative()) {
           this->RowTimesScalarWithCarbonCopy(ExploringRow, theRingMinusUnit, otherMatrix);
         }
@@ -385,16 +372,20 @@ bool List<Object>::ReadFromFile(std::fstream& input, int UpperLimitForDebugPurpo
   std::string tempS;
   int ActualListSize; int NumWordsBeforeTag;
   XML::ReadThroughFirstOpenTag(input, NumWordsBeforeTag, this->GetXMLClassName());
-  if (NumWordsBeforeTag != 0)
+  if (NumWordsBeforeTag != 0) {
     crash << "Bad file input. " << crash;
+  }
   input >> tempS >> ActualListSize;
-  if (tempS != "size:")
-    crash << crash;
-  if (tempS != "size:")
+  if (tempS != "size:") {
+    crash << "Failed to read list. " << crash;
+  }
+  if (tempS != "size:") {
     return false;
+  }
   int CappedListSize = ActualListSize;
-  if (UpperLimitForDebugPurposes > 0 && UpperLimitForDebugPurposes < CappedListSize)
+  if (UpperLimitForDebugPurposes > 0 && UpperLimitForDebugPurposes < CappedListSize) {
     CappedListSize = UpperLimitForDebugPurposes;
+  }
   this->SetSize(CappedListSize);
   for (int i = 0; i < CappedListSize; i ++) {
     this->TheObjects[i].ReadFromFile(input);
@@ -462,10 +453,12 @@ void Matrix<coefficient>::GaussianEliminationByRows(
   int NumFoundPivots = 0;
   int MaxRankMat = MathRoutines::Minimum(this->NumRows, this->NumCols);
   coefficient tempElement;
-  if (outputNonPivotColumns != 0)
+  if (outputNonPivotColumns != 0) {
     outputNonPivotColumns->init(this->NumCols);
-  if (outputPivotColumns != 0)
+  }
+  if (outputPivotColumns != 0) {
     outputPivotColumns->init(this->NumCols);
+  }
   bool doProgressReport = theGlobalVariables.flagReportGaussianElimination || theGlobalVariables.flagReportEverything;
   bool formatAsLinearSystem = theFormat == 0 ? false : theFormat->flagFormatMatrixAsLinearSystem;
   bool useHtmlInReport = theFormat == 0 ? true : theFormat->flagUseHTML;

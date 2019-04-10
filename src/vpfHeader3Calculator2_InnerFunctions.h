@@ -7,49 +7,35 @@
 static ProjectInformationInstance ProjectInfoVpf6_2Header(__FILE__, "Header, calculator built-in functions. ");
 
 
-class CalculatorFunctionsCrypto
-{
+class CalculatorFunctionsCrypto {
 public:
   static bool innerAES_CBC_256_Encrypt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAES_CBC_256_Decrypt(Calculator& theCommands, const Expression& input, Expression& output);
 };
 
-class CalculatorFunctionsGeneral
-{
+class CalculatorFunctionsGeneral {
 public:
   static bool LeftIntervalGreaterThanRight(const Expression& left, const Expression& right);
   static bool innerPrintRuleStack(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrash(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerCrashByListOutOfBounds
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerCrashByVectorOutOfBounds
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAutomatedTestProblemInterpretation
-  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCrashByListOutOfBounds(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCrashByVectorOutOfBounds(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAutomatedTestProblemInterpretation(Calculator& theCommands, const Expression& input, Expression& output);
 
 
-  static bool innerTurnRulesOnOff
-  (Calculator& theCommands, const Expression& input, Expression& output, bool turnOff);
+  static bool innerTurnRulesOnOff(Calculator& theCommands, const Expression& input, Expression& output, bool turnOff);
 
-  static bool innerTurnOffRules
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerTurnOnRules
-  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTurnOffRules(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTurnOnRules(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerTurnOnApproximations
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerTurnOffApproximations
-  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTurnOnApproximations(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTurnOffApproximations(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerEqualityToArithmeticExpression
-  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEqualityToArithmeticExpression(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerRandomInteger
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSelectAtRandom
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSetRandomSeed
-  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerRandomInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSelectAtRandom(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSetRandomSeed(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerConvertElementZmodPToInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerUrlStringToNormalString(Calculator& theCommands, const Expression& input, Expression& output);
@@ -83,8 +69,9 @@ public:
   static bool innerKeccak256OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha256OfStringVerbose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha1OfString(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerHashString
-  (Calculator& theCommands, const Expression& input, Expression& output, const std::string& hashId, bool verbose);
+  static bool innerHashString(
+    Calculator& theCommands, const Expression& input, Expression& output, const std::string& hashId, bool verbose
+  );
   static bool innerTestJSON(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBase64ToHex(Calculator& theCommands, const Expression& input, Expression& output );
   static bool innerIntegerToHex(Calculator& theCommands, const Expression& input, Expression& output);
@@ -104,14 +91,15 @@ public:
 
   static bool innerChooseCartanSA(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerPolynomialDivisionSlidesGrLex
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionRemainder
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionQuotient
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionVerbose
-  (Calculator& theCommands, const Expression& input, Expression& output, List<MonomialP>::OrderLeftGreaterThanRight theMonOrder);
+  static bool innerPolynomialDivisionSlidesGrLex(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialDivisionRemainder(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialDivisionQuotient(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialDivisionVerbose(
+    Calculator& theCommands,
+    const Expression& input,
+    Expression& output,
+    List<MonomialP>::OrderLeftGreaterThanRight theMonOrder
+  );
   static bool innerPolynomialDivisionVerboseGrLex(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionVerboseGrLexRev(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionVerboseLexRev(Calculator& theCommands, const Expression& input, Expression& output);
@@ -151,7 +139,9 @@ public:
   static bool innerArcsin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerArccos(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerArctan(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerCompositeArithmeticOperationEvaluatedOnArgument(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCompositeArithmeticOperationEvaluatedOnArgument(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
 
   static bool innerMatchesPattern(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerThaw(Calculator& theCommands, const Expression& input, Expression& output);
@@ -161,16 +151,18 @@ public:
   static bool innerCompareExpressionsNumerically(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompareExpressionsNumericallyAtPoints(Calculator& theCommands, const Expression& input, Expression& output);
 
-//  static bool innerPowerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
-
   static bool innerPolynomialRelations(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariables(Calculator& theCommands, const Expression& input, Expression& output, bool excludeNamedConstants);
-  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariablesExcludeNamedConstants
-  (Calculator& theCommands, const Expression& input, Expression& output) {
+  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariables(
+    Calculator& theCommands, const Expression& input, Expression& output, bool excludeNamedConstants
+  );
+  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariablesExcludeNamedConstants(
+    Calculator& theCommands, const Expression& input, Expression& output
+  ) {
     return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables(theCommands, input, output, true);
   }
-  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariablesIncludeNamedConstants
-  (Calculator& theCommands, const Expression& input, Expression& output) {
+  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariablesIncludeNamedConstants(
+    Calculator& theCommands, const Expression& input, Expression& output
+  ) {
     return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables(theCommands, input, output, false);
   }
   static bool innerEnsureExpressionDependsOnlyOnStandard(Calculator& theCommands, const Expression& input, Expression& output);
@@ -181,7 +173,9 @@ public:
   static bool innerSumAsOperatorToSumInternalNotation(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerHandleUnderscorePowerLimits(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerApplyToSubexpressionsRecurseThroughCalculusFunctions(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerApplyToSubexpressionsRecurseThroughCalculusFunctions(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
   static bool innerSubList(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerApplyToList(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNumerator(Calculator& theCommands, const Expression& input, Expression& output);
@@ -299,16 +293,25 @@ public:
   static bool innerIntegrateRationalFunctionSplitToBuidingBlocks(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateRationalFunctionBuidingBlockIa(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateRationalFunctionBuidingBlockIb(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerIntegrateRationalFunctionBuidingBlockIIaandIIIa(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateRationalFunctionBuidingBlockIIaandIIIa(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
   static bool innerIntegrateRationalFunctionBuidingBlockIIb(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateRationalFunctionBuidingBlockIIIb(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool extractQuadraticCoeffsWRTvariable
-  (const Expression& theQuadratic, const Expression& theVariable,
-   Expression& outputCoeffVarSquared, Expression& outputCoeffLinTerm, Expression& outputConstTerm);
-  static bool extractLinearCoeffsWRTvariable
-  (const Expression& theLinearExpression, const Expression& theVariable,
-   Expression& outputCoeffLinTerm, Expression& outputConstTerm);
+  static bool extractQuadraticCoeffsWRTvariable(
+    const Expression& theQuadratic,
+    const Expression& theVariable,
+    Expression& outputCoeffVarSquared,
+    Expression& outputCoeffLinTerm,
+    Expression& outputConstTerm
+  );
+  static bool extractLinearCoeffsWRTvariable(
+    const Expression& theLinearExpression,
+    const Expression& theVariable,
+    Expression& outputCoeffLinTerm,
+    Expression& outputConstTerm
+  );
 
   static bool innerIntegrateDefiniteIntegral(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegratePowerByUncoveringParenthesisFirst(Calculator& theCommands, const Expression& input, Expression& output);
@@ -349,14 +352,13 @@ public:
   static bool innerDrawRootSystem(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDrawWeightSupportWithMults(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDrawWeightSupport(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerDrawExpressionGraphWithOptions
-  (Calculator& theCommands, const Expression& input, Expression& output, bool useFullTree);
-  static bool innerDrawExpressionGraph
-  (Calculator& theCommands, const Expression& input, Expression& output) {
+  static bool innerDrawExpressionGraphWithOptions(
+    Calculator& theCommands, const Expression& input, Expression& output, bool useFullTree
+  );
+  static bool innerDrawExpressionGraph(Calculator& theCommands, const Expression& input, Expression& output) {
     return innerDrawExpressionGraphWithOptions(theCommands, input, output, false);
   }
-  static bool innerDrawExpressionGraphFull
-  (Calculator& theCommands, const Expression& input, Expression& output) {
+  static bool innerDrawExpressionGraphFull(Calculator& theCommands, const Expression& input, Expression& output) {
     return innerDrawExpressionGraphWithOptions(theCommands, input, output, true);
   }
 
@@ -365,8 +367,9 @@ public:
   static bool innerOrIdentical(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAnd(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerSolveUnivariatePolynomialWithRadicalsWRT
-  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSolveUnivariatePolynomialWithRadicalsWRT(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
 
   static bool innerMakeJavascriptExpression(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotCoordinateSystem(Calculator& theCommands, const Expression& input, Expression& output);
@@ -382,7 +385,9 @@ public:
   static bool innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotDirectionField(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotVectorField(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPlotDirectionOrVectorField(Calculator& theCommands, const Expression& input, Expression& output, bool vectorsAreNormalized);
+  static bool innerPlotDirectionOrVectorField(
+    Calculator& theCommands, const Expression& input, Expression& output, bool vectorsAreNormalized
+  );
   static bool innerPlotPolarRfunctionThetaExtended(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsPlot(Calculator& theCommands, const Expression& input, Expression& output);
@@ -414,8 +419,12 @@ public:
   static bool innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylDimFormula(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDecomposeCharGenVerma(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2Init(Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data, Expression& outputContext);
-  static bool innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSplitFDpartB3overG2Init(
+    Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data, Expression& outputContext
+  );
+  static bool innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
   static bool innerParabolicWeylGroups(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerParabolicWeylGroupsBruhatGraph(Calculator& theCommands, const Expression& input, Expression& output);
 
@@ -427,9 +436,17 @@ public:
   static bool innerHWV(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitGenericGenVermaTensorFD(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerHWTAABF(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2CharsOutput(Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data);
-  static bool innerPrintB3G2branchingTableInit
-  (Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3data, int& desiredHeight, Expression& outputContext);
+  static bool innerSplitFDpartB3overG2CharsOutput(
+    Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data
+  );
+  static bool innerPrintB3G2branchingTableInit(
+    Calculator& theCommands,
+    const Expression& input,
+    Expression& output,
+    branchingData& theG2B3data,
+    int& desiredHeight,
+    Expression& outputContext
+  );
   static bool innerSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerCoefficientsPowersOf(Calculator& theCommands, const Expression& input, Expression& output);
@@ -448,12 +465,16 @@ public:
   static bool innerIsReal(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
   static bool innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestTopCommand(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestStandardOutput(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerRootSAsAndSltwos(Calculator& theCommands, const Expression& input, Expression& output, bool showSLtwos, bool MustRecompute);
+  static bool innerRootSAsAndSltwos(
+    Calculator& theCommands, const Expression& input, Expression& output, bool showSLtwos, bool MustRecompute
+  );
   static bool innerPrintRootSAs(Calculator& theCommands, const Expression& input, Expression& output) {
     return CalculatorFunctionsGeneral::innerRootSAsAndSltwos(theCommands, input, output, false, false);
   }
@@ -463,23 +484,25 @@ public:
   static bool innerPrintSltwos(Calculator& theCommands, const Expression& input, Expression& output) {
     return CalculatorFunctionsGeneral::innerRootSAsAndSltwos(theCommands, input, output, true, false);
   }
-  static bool innerFindProductDistanceModN
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSolveProductSumEquationOverSetModN
-  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerFindProductDistanceModN(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSolveProductSumEquationOverSetModN(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerSolveSerreLikeSystem
-  (Calculator& theCommands, const Expression& input, Expression& output, bool useUpperLimit, bool startWithAlgebraicClosure);
-  static bool innerSolveSerreLikeSystemNoUpperLimit
-  (Calculator& theCommands, const Expression& input, Expression& output) {
+  static bool innerSolveSerreLikeSystem(
+    Calculator& theCommands, const Expression& input, Expression& output, bool useUpperLimit, bool startWithAlgebraicClosure
+  );
+  static bool innerSolveSerreLikeSystemNoUpperLimit(
+    Calculator& theCommands, const Expression& input, Expression& output
+  ) {
     return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, false, false);
   }
-  static bool innerSolveSerreLikeSystemUpperLimit
-  (Calculator& theCommands, const Expression& input, Expression& output) {
+  static bool innerSolveSerreLikeSystemUpperLimit(
+    Calculator& theCommands, const Expression& input, Expression& output
+  ) {
     return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, true, false);
   }
-  static bool innerSolveSerreLikeSystemAlgebraic
-  (Calculator& theCommands, const Expression& input, Expression& output) {
+  static bool innerSolveSerreLikeSystemAlgebraic(
+    Calculator& theCommands, const Expression& input, Expression& output
+  ) {
     return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, false, true);
   }
   static bool innerSolveSerreLikeSystemAlgebraicUpperLimit(
@@ -487,14 +510,10 @@ public:
   ) {
     return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, true, true);
   }
-  static bool innerFetchWebPagePOST
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerFetchWebPageGET
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerFetchKnownPublicKeys
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSendEmailWithMailGun
-  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerFetchWebPagePOST(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerFetchWebPageGET(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerFetchKnownPublicKeys(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSendEmailWithMailGun(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerElementEllipticCurveNormalForm(
     Calculator& theCommands, const Expression& input, Expression& output

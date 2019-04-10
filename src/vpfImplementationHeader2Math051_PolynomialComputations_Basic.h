@@ -146,8 +146,10 @@ Rational Polynomial<coefficient>::TotalDegree() const {
 template <class coefficient>
 int Polynomial<coefficient>::TotalDegreeInt() const {
   int result = - 1;
-  if (!this->TotalDegree().IsSmallInteger(&result))
-    crash << "This is a programming error: requested total degree of a polynomial in int formal, but the degree of the polynomial is not a small integer. " << crash;
+  if (!this->TotalDegree().IsSmallInteger(&result)) {
+    crash << "This is a programming error: requested total degree of a "
+    << "polynomial in int formal, but the degree of the polynomial is not a small integer. " << crash;
+  }
   return result;
 }
 
@@ -182,7 +184,9 @@ void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex, const co
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex1, int NonZeroIndex2, const coefficient& coeff1, const coefficient& coeff2) {
+void Polynomial<coefficient>::MakeDegreeOne(
+  int NVar, int NonZeroIndex1, int NonZeroIndex2, const coefficient& coeff1, const coefficient& coeff2
+) {
   this->MakeZero();
   MonomialP tempM;
   tempM.MakeEi(NonZeroIndex1);
@@ -208,9 +212,11 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
     for (int j = 0; j < currentMon.GetMinNumVars(); j ++) {
       int numCycles = 0;
       if (!(*this)[i](j).IsSmallInteger(&numCycles)) {
-        crash << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i + 1 << "^{th} variable is raised to the power "
+        crash << "This is a programming error. Attempting to evaluate a polynomial whose "
+        <<  i + 1 << "^{th} variable is raised to the power "
         << (*this)[i](j).ToString() << ". Raising variables to power is allowed only if the power is a small integer. "
-        << "If the user has requested such an operation, it *must* be intercepted at an earlier level (and the user must be informed)." << crash;
+        << "If the user has requested such an operation, "
+        << "it *must* be intercepted at an earlier level (and the user must be informed)." << crash;
       }
       bool isPositive = numCycles > 0;
       if (numCycles < 0) {
@@ -231,10 +237,14 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
 template <class coefficient>
 void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars) {
   MacroRegisterFunctionWithName("Polynomial_CoefficientType::SetNumVariablesSubDeletedVarsByOne");
-  if (newNumVars >= this->GetMinNumVars())
+  if (newNumVars >= this->GetMinNumVars()) {
     return;
-  if (newNumVars < 0)
-    crash << "This is a programming error. Requesting negative number of variables (more precisely, " << newNumVars << ") is not allowed. " << crash;
+  }
+  if (newNumVars < 0) {
+    crash << "This is a programming error. "
+    << "Requesting negative number of variables (more precisely, "
+    << newNumVars << ") is not allowed. " << crash;
+  }
   Polynomial<coefficient> Accum;
   Accum.MakeZero();
   Accum.SetExpectedSize(this->size());
@@ -251,10 +261,13 @@ void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
 
 template <class coefficient>
 void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) {
-  if (VarIndexShift < 0)
-    crash << "This is a programming error. Requesting negative variable shift (more precisely, " << VarIndexShift << ") not allowed. " << crash;
-  if (VarIndexShift == 0)
+  if (VarIndexShift < 0) {
+    crash << "This is a programming error. Requesting negative variable shift (more precisely, "
+    << VarIndexShift << ") not allowed. " << crash;
+  }
+  if (VarIndexShift == 0) {
     return;
+  }
   int oldNumVars = this->GetMinNumVars();
   int newNumVars = oldNumVars + VarIndexShift;
   Polynomial<coefficient> Accum;
@@ -282,18 +295,23 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
     const MonomialP& currentMon = (*this)[i];
     int numCycles = 0;
     if (!currentMon(0).IsSmallInteger(&numCycles) ) {
-      crash << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i + 1 << "^{th} variable is raised to the power "
-      << currentMon(0).ToString() << ". Raising variables to power is allowed only if the power is a small integer. "
-      << "If the user has requested such an operation, it *must* be intercepted at an earlier level (and the user must be informed)."
+      crash << "This is a programming error. Attempting to evaluate a polynomial whose "
+      <<  i + 1 << "^{th} variable is raised to the power "
+      << currentMon(0).ToString()
+      << ". Raising variables to power is allowed only if the power is a small integer. "
+      << "If the user has requested such an operation, "
+      << "it *must* be intercepted at an earlier level (and the user must be informed)."
       << crash;
     }
     bool isPositive = (numCycles > 0);
-    if (numCycles < 0)
+    if (numCycles < 0) {
       numCycles = - numCycles;
+    }
     tempElt = input;
     MathRoutines::RaiseToPower(tempElt, numCycles, idMat);
-    if (!isPositive)
+    if (!isPositive) {
       tempElt.Invert();
+    }
     tempElt *= this->theCoeffs[i];
     output += tempElt;
   }
@@ -319,17 +337,21 @@ void Polynomial<coefficient>::ScaleToPositiveMonomials(MonomialP& outputScale) {
 }
 
 template <class coefficient>
-bool Polynomial<coefficient>::IsProportionalTo(const Polynomial<coefficient>& other, coefficient& TimesMeEqualsOther, const coefficient& theRingUnit) const {
-  if (this->size() != other.size())
+bool Polynomial<coefficient>::IsProportionalTo(
+  const Polynomial<coefficient>& other, coefficient& TimesMeEqualsOther, const coefficient& theRingUnit
+) const {
+  if (this->size() != other.size()) {
     return false;
+  }
   if (other.size() == 0) {
     TimesMeEqualsOther = theRingUnit;
     return true;
   }
   const MonomialP& firstMon = (*this)[0];
   int indexInOther = other.theMonomials.GetIndex(firstMon);
-  if (indexInOther == - 1)
+  if (indexInOther == - 1) {
     return false;
+  }
   TimesMeEqualsOther = other.theCoeffs[indexInOther];
   TimesMeEqualsOther /= this->theCoeffs[0];
   Polynomial<coefficient> tempP;
@@ -340,7 +362,11 @@ bool Polynomial<coefficient>::IsProportionalTo(const Polynomial<coefficient>& ot
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivisor, Polynomial<coefficient>& outputQuotient, Polynomial<coefficient>& outputRemainder) const {
+void Polynomial<coefficient>::DivideBy(
+  const Polynomial<coefficient>& inputDivisor,
+  Polynomial<coefficient>& outputQuotient,
+  Polynomial<coefficient>& outputRemainder
+) const {
   MacroRegisterFunctionWithName("Polynomial::DivideBy");
   if (
     &outputRemainder == this ||
@@ -364,8 +390,9 @@ void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivis
   int remainderMaxMonomial = outputRemainder.GetIndexMaxMonomialLexicographicLastVariableStrongest();
   int inputMaxMonomial = tempInput.GetIndexMaxMonomialLexicographicLastVariableStrongest();
   outputQuotient.MakeZero();
-  if (remainderMaxMonomial == - 1)
+  if (remainderMaxMonomial == - 1) {
     return;
+  }
   outputQuotient.SetExpectedSize(this->size());
   MonomialP tempMon;
   int numVars = MathRoutines::Maximum(this->GetMinNumVars(), inputDivisor.GetMinNumVars());
@@ -376,24 +403,24 @@ void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivis
   //{ this->ComputeDebugString();
    // tempInput.ComputeDebugString();
   //}
-  if (remainderMaxMonomial >= outputRemainder.size())
+  if (remainderMaxMonomial >= outputRemainder.size()) {
     crash << "Remainder max monomial too large. " << crash;
+  }
   if (inputMaxMonomial >= tempInput.size() || inputMaxMonomial < 0) {
     crash << "This is a programming error: the index of the maximal input monomial is "
     << inputMaxMonomial << " while the polynomial has "
     << tempInput.size() << "  monomials. I am attempting to divide "
     << this->ToString() << " by " << inputDivisor.ToString() << ". " << crash;
   }
-//  stOutput << "<hr>Dividing " << this->ToString() << " by " << inputDivisor.ToString();
-//  stOutput << " comparing " << outputRemainder[remainderMaxMonomial].ToString()
-//  << " and " << tempInput[inputMaxMonomial].ToString();
   while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest(tempInput[inputMaxMonomial])) {
-    if (remainderMaxMonomial >= outputRemainder.size())
+    if (remainderMaxMonomial >= outputRemainder.size()) {
       crash << "Remainder max monomial too large. " << crash;
+    }
     tempMon = outputRemainder[remainderMaxMonomial];
     tempMon /= tempInput[inputMaxMonomial];
-    if (!tempMon.HasPositiveOrZeroExponents())
+    if (!tempMon.HasPositiveOrZeroExponents()) {
       break;
+    }
     coefficient tempCoeff = outputRemainder.theCoeffs[remainderMaxMonomial];
     tempCoeff /= tempInput.theCoeffs[inputMaxMonomial] ;
     outputQuotient.AddMonomial(tempMon, tempCoeff);
@@ -428,12 +455,15 @@ void Polynomial<coefficient>::TimesInteger(int a) {
 template <class coefficient>
 void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input) {
   MacroRegisterFunctionWithName("Polynomial::AssignCharPoly");
-  if (input.NumCols != input.NumRows)
+  if (input.NumCols != input.NumRows) {
     crash << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << crash;
+  }
   int n = input.NumCols;
-  if (n == 0)
-    crash << "Why are you takig the characteristic polyomial of a 0x0 matrix? "
-    << "If you have a good reason, change " << __FILE__ << ":" << __LINE__ << crash;
+  if (n == 0) {
+    crash << "At present, the characteristic polyomial of a 0x0 matrix is not defined. "
+    << "Crashing to let you know. If you think this should be changed, document why and "
+    << "modify the present assertion. " << crash;
+  }
   this->MakeConst(1);
   Matrix<coefficient> acc = input;
   coefficient currenCF;
@@ -451,8 +481,9 @@ void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input) {
 template <class coefficient>
 void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
   MacroRegisterFunctionWithName("Polynomial::AssignMinPoly");
-  if (input.NumCols != input.NumRows)
+  if (input.NumCols != input.NumRows) {
     crash << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << crash;
+  }
   int theDim = input.NumCols;
   this->MakeOne(1);
   Vectors<coefficient> theBasis;
@@ -480,7 +511,6 @@ void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
     }
     tempM.MakeEi(0, theBasis.size, 1);
     currentFactor.AddMonomial(tempM, 1);
-//    stOutput << "current factor: " << currentFactor.ToString();
     *this = MathRoutines::lcm(*this, currentFactor);
   }
   this->ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
@@ -526,11 +556,13 @@ void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index
 template<class coefficient>
 bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
   MacroRegisterFunctionWithName("Polynomial::FindOneVarRatRoots");
-  if (this->GetMinNumVars() > 1)
+  if (this->GetMinNumVars() > 1) {
     return false;
+  }
   output.SetSize(0);
-  if (this->GetMinNumVars() == 0 || this->IsEqualToZero())
+  if (this->GetMinNumVars() == 0 || this->IsEqualToZero()) {
     return true;
+  }
   Polynomial<coefficient> myCopy;
   myCopy = *this;
   myCopy.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
@@ -546,12 +578,14 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
     output.AddListOnTop(tempList);
     return result;
   }
-  if (this->IsConstant())
+  if (this->IsConstant()) {
     return true;
+  }
   int indexHighest = this->GetIndexMaxMonomialLexicographicLastVariableStrongest();
   highestTerm = this->theCoeffs[indexHighest];
-  if (!highestTerm.IsSmallInteger() || !lowestTerm.IsSmallInteger())
+  if (!highestTerm.IsSmallInteger() || !lowestTerm.IsSmallInteger()) {
     return false;
+  }
   Vector<Rational> tempV;
   Rational val;
   tempV.SetSize(1);
@@ -559,14 +593,13 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
   LargeInt hT, lT;
   hT = highestTerm.GetNumerator();
   lT = lowestTerm.GetNumerator();
-  if (!hT.GetDivisors(divisorsH, false) || !lT.GetDivisors(divisorsS, true))
+  if (!hT.GetDivisors(divisorsH, false) || !lT.GetDivisors(divisorsS, true)) {
     return false;
+  }
   for (int i = 0; i < divisorsH.size; i ++) {
     for (int j = 0; j < divisorsS.size; j ++) {
       tempV[0].AssignNumeratorAndDenominator(divisorsS[j],divisorsH[i]);
       val = myCopy.Evaluate(tempV);
-//      stOutput << "<br>" << myCopy.ToString() << " eval at "
-//      << tempV.ToString() << " equals " << val.ToString();
       if (val == 0) {
         Polynomial<Rational> divisor, tempP;
         divisor.MakeDegreeOne(1, 0, 1, - tempV[0]);
@@ -589,10 +622,12 @@ bool PolynomialOrder<coefficient>::CompareLeftGreaterThanRight(
   MacroRegisterFunctionWithName("PolynomialOrder::CompareLeftGreaterThanRight");
   Polynomial<coefficient> difference = left;
   difference -= right;
-  if (difference.IsEqualToZero())
+  if (difference.IsEqualToZero()) {
     return false;
-  if (difference.theCoeffs[difference.GetIndexMaxMonomial(this->theMonOrder)] > 0)
+  }
+  if (difference.theCoeffs[difference.GetIndexMaxMonomial(this->theMonOrder)] > 0) {
     return true;
+  }
   return false;
 }
 #endif

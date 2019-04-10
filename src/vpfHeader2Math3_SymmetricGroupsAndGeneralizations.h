@@ -1100,21 +1100,21 @@ public:
           break;
         }
         { // permi is a block local variable, so no "jump to case label crosses initialization" error lol
-        PermutationR2 permi = *(generators[frame_pointer]);
-        if (frame_pointer == 0) {
-          stack[frame_pointer].subprod = permi;
-        } else {
-          stack[frame_pointer].subprod.MakeFromMul(stack[frame_pointer - 1].subprod, permi);
-        }
-        if (frame_pointer == generators.size - 1) {
-          stack[frame_pointer].program_counter = pcpositions::midloop;
-          return *this;
-        } else {
-          stack[frame_pointer].program_counter = pcpositions::midloop;
-          frame_pointer ++;
-          stack[frame_pointer].program_counter = pcpositions::beginning;
-          break;
-        }
+          PermutationR2 permi = *(generators[frame_pointer]);
+          if (frame_pointer == 0) {
+            stack[frame_pointer].subprod = permi;
+          } else {
+            stack[frame_pointer].subprod.MakeFromMul(stack[frame_pointer - 1].subprod, permi);
+          }
+          if (frame_pointer == generators.size - 1) {
+            stack[frame_pointer].program_counter = pcpositions::midloop;
+            return *this;
+          } else {
+            stack[frame_pointer].program_counter = pcpositions::midloop;
+            frame_pointer ++;
+            stack[frame_pointer].program_counter = pcpositions::beginning;
+            break;
+          }
         }
         case pcpositions::midloop:
           ++ generators[frame_pointer];
@@ -1160,7 +1160,7 @@ class GroupConjugacyImplementation{
     const GroupConjugacyImplementation<groupElement>& conjugateOn,
     GroupConjugacyImplementation<groupElement>& out
   ) {
-    out = conjugateOn^conjugateWith;
+    out = conjugateOn ^ conjugateWith;
   }
 };
 
@@ -1390,7 +1390,10 @@ void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
   initialTableau.YoungSymmetrizerAction(t2, t1);
   //stOutput << "Young symmetrizer: " << t1 << " projects to " << t2 << '\n';
   List<ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar> > basisvs;
-  SparseSubspaceBasis<ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar>, MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar> basis;
+  SparseSubspaceBasis<
+    ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar>,
+    MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar
+  > basis;
   List<Tableau> standardTableaux;
   this->GetAllStandardTableaux(standardTableaux);
   //stOutput << "Standard tableaux are " << standardTableaux.ToStringCommaDelimited() << '\n';

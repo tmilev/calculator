@@ -457,8 +457,9 @@ bool Vectors<coefficient>::ComputeNormalFromSelection(
     }
   }
   bufferMatrix.GaussianEliminationByRows(0, &NonPivotPoints);
-  if (NonPivotPoints.CardinalitySelection != 1)
+  if (NonPivotPoints.CardinalitySelection != 1) {
     return false;
+  }
   bufferMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
   return true;
 }

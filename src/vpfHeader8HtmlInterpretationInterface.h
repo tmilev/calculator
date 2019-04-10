@@ -40,8 +40,9 @@ public:
   static void GetJSDataUserInfo(JSData& outputAppend, const std::string &comments);
   static std::string GetTopicTableJSON();
   static std::string GetAnswerOnGiveUp();
-  static std::string GetAnswerOnGiveUp
-  (const std::string& inputRandomSeed, std::string* outputNakedAnswer = 0, bool* outputDidSucceed = 0);
+  static std::string GetAnswerOnGiveUp(
+    const std::string& inputRandomSeed, std::string* outputNakedAnswer = 0, bool* outputDidSucceed = 0
+  );
   static std::string GetSelectCourseJSON();
   static std::string GetScoresPage();
   static std::string GetAboutPage();

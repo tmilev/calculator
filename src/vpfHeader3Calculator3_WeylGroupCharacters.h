@@ -2,10 +2,11 @@
 #define vpfCharacterHeaderCalculatorInterface
 #include "vpf.h"
 
-static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceHeader(__FILE__, "Header, calculator built-in functions for Weyl groups.");
+static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceHeader(
+  __FILE__, "Header, calculator built-in functions for Weyl groups."
+);
 
-class CalculatorFunctionsWeylGroup
-{
+class CalculatorFunctionsWeylGroup {
 public:
   static bool innerWeylOrbit(Calculator& theCommands, const Expression& input, Expression& output, bool useFundCoords, bool useRho);
   static bool innerWeylRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output, bool useOuter);
@@ -34,9 +35,13 @@ public:
 
   static bool innerRepresentElementHyperOctahedral(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerHyperOctahedralAllModulesInducedFromSpechtModules(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerHyperOctahedralAllModulesInducedFromSpechtModules(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
   static bool innerHyperOctahedralGetOneRepresentation(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerHyperOctahedralPrintGeneratorCommutationRelations(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerHyperOctahedralPrintGeneratorCommutationRelations(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
 
   static bool innerWeylGroupElement(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLieAlgebraWeight(Calculator& theCommands, const Expression& input, Expression& output);

@@ -972,8 +972,13 @@ bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream* commentsO
 
 
 bool DatabaseRoutineS::AddUsersFromEmails(
-  const std::string& emailList, const std::string& userPasswords, std::string& userRole,
-  std::string& userGroup, std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers
+  const std::string& emailList,
+  const std::string& userPasswords,
+  std::string& userRole,
+  std::string& userGroup,
+  std::stringstream& comments,
+  int& outputNumNewUsers,
+  int& outputNumUpdatedUsers
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
   theGlobalVariables.MaxComputationMilliseconds = 100000; //100 seconds
@@ -1340,7 +1345,6 @@ List<bool>& EmailRoutines::GetRecognizedEmailChars() {
 
 bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("EmailRoutines::IsOKEmail");
-  //stOutput << "DEBUG: got to isokemail";
   if (input.size() == 0) {
     if (commentsOnError != 0) {
       *commentsOnError << "Empty email not allowed. ";

@@ -26,7 +26,9 @@ public:
   static bool innerAddMatrixToMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDirectSumMatrixWithMatrix(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
   static bool innerAddMatrixRFsToMatrixRFs(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddMatrixTensorToMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddRatToRat(Calculator& theCommands, const Expression& input, Expression& output);
@@ -51,7 +53,9 @@ public:
   static bool innerMultiplyMatrixByMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyMatrixRationalOrRationalByMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyMatrixRationalOrRationalByMatrixRational(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
   static bool innerMultiplyMatrixRFOrRFByMatrixRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyMatrixTensorOrRationalByMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyAlgebraicNumberByAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
@@ -76,7 +80,9 @@ public:
 
   static bool innerDivideRatByRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDivideDoubleByDouble(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
   static bool innerDivideRFOrPolyOrRatByRFOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDivideEltZmodPorRatByEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
 
@@ -110,12 +116,13 @@ public:
 template <class theType>
 bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyTypeByType");
-  if (input.size() != 3)
+  if (input.size() != 3) {
     return false;
+  }
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments))
+  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments)) {
     return false;
-//  stOutput << "Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
+  }
   theType result = inputContextsMerged[1].GetValue<theType>();
   result *= inputContextsMerged[2].GetValue<theType>();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
@@ -124,11 +131,13 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theComman
 template <class theType>
 bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
-  if (input.size() != 3)
+  if (input.size() != 3) {
     return false;
+  }
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments))
+  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments)) {
     return false;
+  }
   theType result = inputContextsMerged[1].GetValue<theType>();
   result += inputContextsMerged[2].GetValue<theType>();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
@@ -137,13 +146,16 @@ bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, c
 template <class theType>
 bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
-  if (input.size() != 3)
+  if (input.size() != 3) {
     return false;
+  }
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments))
+  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments)) {
     return false;
-  if (inputContextsMerged[2].GetValue<theType>().IsEqualToZero())
+  }
+  if (inputContextsMerged[2].GetValue<theType>().IsEqualToZero()) {
     return output.MakeError("Division by zero. ", theCommands, true);
+  }
   theType result = inputContextsMerged[1].GetValue<theType>();
   result /= inputContextsMerged[2].GetValue<theType>();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
@@ -153,35 +165,39 @@ template <class coefficient>
 bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerPolynomial");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
-  //stOutput << "DEBUG: Extracting poly from: " << input.ToString() << "<br>";
-  //if (input.size() > 0)
-  //  stOutput << "DEBUG: input starts with: " << input[0].ToString() << ", input size: " << input.size() << "\n<br>\n";
-  if (theCommands.RecursionDeptH > theCommands.MaxRecursionDeptH)
+  if (theCommands.RecursionDeptH > theCommands.MaxRecursionDeptH) {
     return theCommands << "Max recursion depth of " << theCommands.MaxRecursionDeptH
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
+  }
   if (input.IsOfType<Polynomial<coefficient> >()) {
     output = input;
     return true;
   }
   if (input.IsOfType<coefficient>() || input.IsOfType<Rational>()) {
-    if (!input.ConvertToType<Polynomial<coefficient> >(output))
+    if (!input.ConvertToType<Polynomial<coefficient> >(output)) {
       crash << "This is a programming error: failed to convert coefficient to polynomial. " << crash;
+    }
     return true;
   }
   Expression theConverted, theComputed;
-  if (input.IsListStartingWithAtom(theCommands.opTimes()) ||
-      input.IsListStartingWithAtom(theCommands.opPlus())) {
+  if (
+    input.IsListStartingWithAtom(theCommands.opTimes()) ||
+    input.IsListStartingWithAtom(theCommands.opPlus())
+  ) {
     theComputed.reset(theCommands, input.size());
     theComputed.AddChildOnTop(input[0]);
     for (int i = 1; i < input.size(); i ++) {
-      if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
+      if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[i], theConverted)) {
         return theCommands << "<hr>Failed to extract polynomial from " << input[i].ToString();
+      }
       theComputed.AddChildOnTop(theConverted);
     }
-    if (input.IsListStartingWithAtom(theCommands.opTimes()))
+    if (input.IsListStartingWithAtom(theCommands.opTimes())) {
       return CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly(theCommands, theComputed, output);
-    if (input.IsListStartingWithAtom(theCommands.opPlus()))
+    }
+    if (input.IsListStartingWithAtom(theCommands.opPlus())) {
       return CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(theCommands, theComputed, output);
+    }
     crash << "Error, this line of code should never be reached. " << crash;
   }
   if (input.StartsWith(theCommands.opMinus(), 3)) {
@@ -189,20 +205,23 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
     theComputed.AddChildOnTop(input[0]);
     for (int i = 1; i < 3; i ++) {
       Expression summand = input[i];
-      if (i == 2)
+      if (i == 2) {
         summand *= - 1;
-      if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, summand, theConverted))
+      }
+      if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, summand, theConverted)) {
         return theCommands << "<hr>Failed to extract polynomial from " << summand.ToString();
+      }
       theComputed.AddChildOnTop(theConverted);
     }
     return CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(theCommands, theComputed, output);
   }
 
   int thePower = - 1;
-  if (input.StartsWith(theCommands.opThePower(), 3))
+  if (input.StartsWith(theCommands.opThePower(), 3)) {
     if (input[2].IsSmallInteger(&thePower)) {
-      if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
+      if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[1], theConverted)) {
         return theCommands << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
+      }
       Polynomial<coefficient> resultP = theConverted.GetValue<Polynomial<coefficient> >();
       if (thePower < 0) {
         coefficient theConst;
@@ -221,12 +240,15 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
         thePower *= - 1;
         resultP = theConst;
       }
-      if (thePower == 0)
-        if (resultP.IsEqualToZero())
+      if (thePower == 0) {
+        if (resultP.IsEqualToZero()) {
           return output.MakeError("Error: 0^0 is undefined in the present version of the calculator. ", theCommands);
+        }
+      }
       resultP.RaiseToPower(thePower);
       return output.AssignValueWithContext(resultP, theConverted.GetContext(), theCommands);
     }
+  }
   Polynomial<coefficient> JustAmonomial;
   JustAmonomial.MakeMonomiaL(0, 1, 1);
   Expression theContext;

@@ -6,8 +6,9 @@
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 
-static ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsHeader
-(__FILE__, "Web server: inter-process communication/logistics.");
+static ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsHeader(
+  __FILE__, "Web server: inter-process communication/logistics."
+);
 
 //this class is similar to the controller class but coordinates across different processes,
 //rather than across different threads.

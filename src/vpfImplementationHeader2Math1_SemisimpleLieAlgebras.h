@@ -6,15 +6,18 @@
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfHeader2Math1_LieTheoryExtras.h" // error: invalid use of incomplete type ‘struct branchingData’
 #include "vpfHeader2Math9DrawingVariables.h"
-static ProjectInformationInstance ProjectInfovpfImplementationHeaderSemisimpleLieAlgebras(__FILE__, "Implementation header, semisimple Lie algebra routines. ");
+static ProjectInformationInstance ProjectInfovpfImplementationHeaderSemisimpleLieAlgebras(
+  __FILE__, "Implementation header, semisimple Lie algebra routines. "
+);
 
 template <class coefficient>
 std::string Weight<coefficient>::ToString(FormatExpressions* theFormat) const {
   std::stringstream out;
   bool formatWeightAsIndexVectorSpace = theFormat == 0 ? true : theFormat->flagFormatWeightAsVectorSpaceIndex;
   if (!formatWeightAsIndexVectorSpace) {
-    if (this->owner == 0)
+    if (this->owner == 0) {
       return this->weightFundamentalCoordS.ToStringLetterFormat("\\psi", theFormat);
+    }
     Vector<coefficient> weightEpsCoords, weightSimpleCoords;
     weightSimpleCoords = this->owner->theWeyl.GetSimpleCoordinatesFromFundamental(this->weightFundamentalCoordS);
     this->owner->theWeyl.GetEpsilonCoords(weightSimpleCoords, weightEpsCoords);
@@ -35,8 +38,9 @@ std::string Weight<coefficient>::ToString(FormatExpressions* theFormat) const {
     out << VectorSpaceLetter << "_{"
     << this->weightFundamentalCoordS.ToStringLetterFormat(theFormat->fundamentalWeightLetter, theFormat) << "}";
   }
-  if (theFormat != 0)
+  if (theFormat != 0) {
     theFormat->CustomPlusSign = oldCustomPlus;
+  }
   return out.str();
 }
 
@@ -135,8 +139,9 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeFullCharacter(
   MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::FreudenthalEvalMeFullCharacter");
   this->CheckNonZeroOwner();
   charSSAlgMod<coefficient> domChar;
-  if (!this->FreudenthalEvalMeDominantWeightsOnly(domChar, upperBoundNumDominantWeights, outputDetails))
+  if (!this->FreudenthalEvalMeDominantWeightsOnly(domChar, upperBoundNumDominantWeights, outputDetails)) {
     return false;
+  }
   outputCharOwnerSetToZero.MakeZero();
   Vectors<Rational> theVect;
   HashedList<Vector<Rational> > theOrbit;
@@ -182,7 +187,8 @@ void charSSAlgMod<coefficient>::MakeFromWeight(
   this->MakeZero();
   if (inputWeightSimpleCoords.size != inputOwner->GetRank()) {
     crash << "This is a programming error: attempting to create a character from highest weight in simple coords "
-    << inputWeightSimpleCoords.ToString() << "(" << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
+    << inputWeightSimpleCoords.ToString() << "("
+    << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
     << " Lie algebra is of rank " << (inputOwner->GetRank()) << crash;
   }
   Weight<coefficient> theMon;
@@ -213,8 +219,9 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeDominantWeightsOnly(
   coefficient bufferCoeff;
   for (int i = 0; i < this->size(); i ++) {
     currentWeightFundCoords = (*this)[i].weightFundamentalCoordS;
-    if (!this->GetOwner()->theWeyl.FreudenthalEval
-    (currentWeightFundCoords, currentWeights, currentMults, &localDetail, upperBoundNumDominantWeights)) {
+    if (!this->GetOwner()->theWeyl.FreudenthalEval(
+      currentWeightFundCoords, currentWeights, currentMults, &localDetail, upperBoundNumDominantWeights
+    )) {
       if (outputDetails != 0) {
         localErrors << "Encountered error while evaluating freudenthal formula. Error details: " << localDetail
         << "<br> Further computation detail: " << localDetails.str();
@@ -292,8 +299,9 @@ void SemisimpleLieAlgebra::LieBracket(
     return;
   }
   output.MakeZero();
-  if (g1.IsEqualToZero() || g2.IsEqualToZero())
+  if (g1.IsEqualToZero() || g2.IsEqualToZero()) {
     return;
+  }
   int maxNumMonsFinal = g1.size() * g2.size();
   output.SetExpectedSize(maxNumMonsFinal);
   coefficient theCoeff;
@@ -341,8 +349,10 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart() co
   int theRank = owner->GetRank();
   int numPosRoots = owner->GetNumPosRoots();
   result.MakeZero(theRank);
-  if (theRank <= 0 || owner == 0)
-    crash << "This is a programming error: the owner of a semisimple Lie algebra element is non-present or corrupted. " << crash;
+  if (theRank <= 0 || owner == 0) {
+    crash << "This is a programming error: the owner of "
+    << "a semisimple Lie algebra element is non-present or corrupted. " << crash;
+  }
   for (int i = 0; i < theRank; i ++) {
     tempGen.MakeGenerator(*owner, i + numPosRoots);
     int currentIndex = this->theMonomials.GetIndex(tempGen);
@@ -366,12 +376,16 @@ void ElementSemisimpleLieAlgebra<coefficient>::ElementToVectorNegativeRootSpaces
 }
 
 template <class coefficient>
-void ElementSemisimpleLieAlgebra<coefficient>::MakeGGenerator(const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner) {
+void ElementSemisimpleLieAlgebra<coefficient>::MakeGGenerator(
+  const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner
+) {
   this->MakeGenerator(inputOwner.GetGeneratorFromRoot(theRoot), inputOwner);
 }
 
 template <class coefficient>
-void ElementSemisimpleLieAlgebra<coefficient>::AssignVectorNegRootSpacesCartanPosRootSpaces(const Vector<coefficient>& input, SemisimpleLieAlgebra& owner) {
+void ElementSemisimpleLieAlgebra<coefficient>::AssignVectorNegRootSpacesCartanPosRootSpaces(
+  const Vector<coefficient>& input, SemisimpleLieAlgebra& owner
+) {
   //Changing RootSystem order invalidates this function!
   this->MakeZero();
   ChevalleyGenerator tempGenerator;
@@ -385,8 +399,9 @@ void ElementSemisimpleLieAlgebra<coefficient>::AssignVectorNegRootSpacesCartanPo
 
 template<class coefficient>
 bool ElementSemisimpleLieAlgebra<coefficient>::IsElementCartan() const {
-  if (this->size() == 0)
+  if (this->size() == 0) {
     return true;
+  }
   SemisimpleLieAlgebra* owner = (*this)[0].owner;
   for (int i = 0; i < this->size(); i ++) {
     if (!owner->IsGeneratorFromCartan((*this)[i].theGeneratorIndex)) {
@@ -435,15 +450,17 @@ bool charSSAlgMod<coefficient>::DrawMe(
     for (int j = 0; j < finalWeights.size; j ++) {
       convertor = finalWeights[j].GetVectorRational();
       theDrawingVars.drawCircleAtVectorBufferRational(convertor, "black", 3);
-      if (useMults)
+      if (useMults) {
         theDrawingVars.drawTextAtVectorBufferRational(convertor, CharCartan.theCoeffs[i].ToString(), "black");
+      }
     }
   }
   out << "<br>Number of computed weights: " << totalNumWeights << ". ";
-  if (result && totalNumWeights<upperBoundWeights)
+  if (result && totalNumWeights<upperBoundWeights) {
     out << "<br>All weights were computed and are drawn. <br>";
-  else
+  } else {
     out << "<br><b> Not all weights were computed. </b>";
+  }
   outputDetails = out.str();
   return result;
 }
@@ -452,8 +469,9 @@ template <class coefficient>
 void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(
   WeylGroupData& actualAmbientWeyl, DrawingVariables& theDrawingVars
 ) const {
-  if (actualAmbientWeyl.GetDim() < 2)
+  if (actualAmbientWeyl.GetDim() < 2) {
     return;
+  }
   Vector<coefficient> actualWeight;
   Vector<Rational> actualWeightRationalPart;
 
@@ -482,8 +500,10 @@ std::string charSSAlgMod<coefficient>::operator*=(const charSSAlgMod& other) {
 
 template <class coefficient>
 std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other) {
-  if (this->GetOwner() != other.GetOwner() || this->GetOwner() == 0)
-    crash << "This is a programming error: attempting to multiply characters of different or non-initialized semisimple Lie algebras." << crash;
+  if (this->GetOwner() != other.GetOwner() || this->GetOwner() == 0) {
+    crash << "This is a programming error: attempting to multiply characters of "
+    << "different or non-initialized semisimple Lie algebras." << crash;
+  }
   this->SetExpectedSize(other.size() + this->size());
   charSSAlgMod result, summand;
   result.MakeZero();
@@ -494,8 +514,9 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other) {
       const Weight<Rational>& left = (*this)[i];
       const Weight<Rational>& right = other[j];
       potentialError = left.TensorAndDecompose(right, summand);
-      if (potentialError != "")
+      if (potentialError != "") {
         return potentialError;
+      }
       theCF = this->theCoeffs[i];
       theCF *= other.theCoeffs[j];
       summand *= theCF;
@@ -508,8 +529,9 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other) {
 
 template <class coefficient>
 bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, charSSAlgMod& output, branchingData& inputData) {
-  if (this->IsEqualToZero())
+  if (this->IsEqualToZero()) {
     return false;
+  }
   this->CheckNonZeroOwner();
   WeylGroupData& theWeyL = this->GetOwner()->theWeyl;
   std::stringstream out;
@@ -528,7 +550,9 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   coefficient bufferCoeff, highestCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const Weight<coefficient>& currentMon = (*this)[i];
-    if (!inputData.WeylFD.FreudenthalEvalIrrepIsWRTLeviPart(currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000)) {
+    if (!inputData.WeylFD.FreudenthalEvalIrrepIsWRTLeviPart(
+      currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
+    )) {
       if (Report != 0) {
         *Report = tempS;
       }
@@ -567,7 +591,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   theFormat.flagUseLatex = true;
   theFormat.CustomPlusSign = "\\oplus ";
   theFormat.fundamentalWeightLetter = "\\omega";
-  out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: " << HtmlRoutines::GetMathSpanPure(remainingCharDominantLevI.ToString(&theFormat));
+  out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: "
+  << HtmlRoutines::GetMathSpanPure(remainingCharDominantLevI.ToString(&theFormat));
   remainingCharProjected.MakeZero();
   Vector<coefficient> fundCoordsSmaller, inSimpleCoords;
   fundCoordsSmaller.SetSize(WeylFDSmall.AmbientWeyl->GetDim());

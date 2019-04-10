@@ -11,8 +11,9 @@ static ProjectInformationInstance ProjectInfovpfImplementationHeaderWeylAlgebras
 
 template <class coefficient>
 bool ElementWeylAlgebra<coefficient>::IsPolynomial(Polynomial<coefficient>* whichPoly) const {
-  if (whichPoly != 0)
+  if (whichPoly != 0) {
     whichPoly->MakeZero();
+  }
   for (int i = 0; i < this->size(); i ++) {
     if (!(*this)[i].differentialPart.IsConstant()) {
       return false;
@@ -264,15 +265,17 @@ void ElementWeylAlgebra<coefficient>::Makexidj(int i, int j, int NumVars) {
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
-(const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO, Polynomial<Rational>& outputDenominator) {
+void ElementWeylAlgebra<coefficient>::GetStandardOrderDiffOperatorCorrespondingToNraisedTo(
+  const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO, Polynomial<Rational>& outputDenominator
+) {
   outputDenominator.MakeOne();
   MonomialWeylAlgebra tempMon;
   outputDO.MakeZero();
   int inputPower = 0;
-  if (!inputRationalPower.IsSmallInteger(&inputPower))
+  if (!inputRationalPower.IsSmallInteger(&inputPower)) {
     crash << "This is a programming error: "
     << " I can give you a differential operator only from integer exponent. " << crash;
+  }
   if (inputPower >= 0) {
     tempMon.polynomialPart.MakeEi(indexVar, inputPower);
   } else {
@@ -290,7 +293,9 @@ void ElementWeylAlgebra<coefficient>::GetStandardOrderDiffOperatorCorrespondingT
 }
 
 template <class coefficient>
-bool ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<Rational>& SubPolyPart, const PolynomialSubstitution<Rational>& SubDiffPArt) {
+bool ElementWeylAlgebra<coefficient>::Substitution(
+  const PolynomialSubstitution<Rational>& SubPolyPart, const PolynomialSubstitution<Rational>& SubDiffPArt
+) {
   MacroRegisterFunctionWithName("ElementWeylAlgebra::Substitution");
   Polynomial<Rational> DOpart, polyPart;
   MonomialWeylAlgebra theMon;
@@ -299,10 +304,12 @@ bool ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<
   coefficient theNewCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
-    if (!currentMon.polynomialPart.SubstitutioN(SubPolyPart, polyPart))
+    if (!currentMon.polynomialPart.SubstitutioN(SubPolyPart, polyPart)) {
       return false;
-    if (!currentMon.differentialPart.SubstitutioN(SubDiffPArt, DOpart))
+    }
+    if (!currentMon.differentialPart.SubstitutioN(SubDiffPArt, DOpart)) {
       return false;
+    }
     for (int j = 0; j < polyPart.size(); j ++) {
       for (int k = 0; k < DOpart.size(); k ++) {
         theMon.polynomialPart = polyPart[j];
@@ -332,13 +339,16 @@ void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coeffi
   MonomialWeylAlgebra theMon;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
-    if (!(currentMon.polynomialPart.TotalDegree() + currentMon.differentialPart.TotalDegree()).IsInteger(&totalDeg))
-      crash << "This is a programming error: calling Fourier transoform on differential operator with non-integral exponents. " << crash;
+    if (!(currentMon.polynomialPart.TotalDegree() + currentMon.differentialPart.TotalDegree()).IsInteger(&totalDeg)) {
+      crash << "This is a programming error: calling Fourier transoform "
+      << "on differential operator with non-integral exponents. " << crash;
+    }
     theMon.differentialPart = currentMon.polynomialPart;
     theMon.polynomialPart = currentMon.differentialPart;
     theCoeff = this->theCoeffs[i];
-    if (totalDeg.IsEven())
+    if (totalDeg.IsEven()) {
       theCoeff *= - 1;
+    }
     output.AddMonomial(theMon, theCoeff);
   }
 }

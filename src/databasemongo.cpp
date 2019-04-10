@@ -32,8 +32,9 @@ DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo() {
 bool DatabaseRoutinesGlobalFunctionsMongo::initialize(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::initialize");
 #ifdef MACRO_use_MongoDB
-  if (this->flagInitialized)
+  if (this->flagInitialized) {
     return true;
+  }
   logWorker << logger::blue << "Initializing database. " << logger::endL;
   if (!theGlobalVariables.flagServerForkedIntoWorker) {
     if (commentsOnFailure != 0) {
@@ -53,8 +54,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::initialize(std::stringstream* comment
   DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableDeleted, DatabaseStrings::labelUsername);
   return true;
 #else
-  if (commentsOnFailure != 0)
+  if (commentsOnFailure != 0) {
     *commentsOnFailure << "Calculator compiled without mongoDB support. ";
+  }
   return false;
 #endif
 
@@ -175,13 +177,13 @@ MongoQuery::~MongoQuery() {
 
 bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("MongoQuery::RemoveOne");
-  if (!databaseMongo.initialize(commentsOnFailure))
+  if (!databaseMongo.initialize(commentsOnFailure)) {
     return false;
+  }
   MongoCollection theCollection(this->collectionName);
-  //logWorker << "DEBUG: Update: " << this->findQuery << " to: "
-  //<< this->updateQuery << " inside: " << this->collectionName << logger::endL;
-  if (this->query != 0)
+  if (this->query != 0) {
     crash << "At this point of code, query is supposed to be 0. " << crash;
+  }
   this->query = bson_new_from_json
   ((const uint8_t*) this->findQuery.c_str(), this->findQuery.size(), &this->theError);
   bool result = mongoc_collection_remove(theCollection.collection, MONGOC_REMOVE_SINGLE_REMOVE, this->query, NULL, &this->theError);
@@ -205,13 +207,13 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
 
 bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("MongoQuery::InsertOne");
-  if (!databaseMongo.initialize(commentsOnFailure))
+  if (!databaseMongo.initialize(commentsOnFailure)) {
     return false;
+  }
   MongoCollection theCollection(this->collectionName);
-  //logWorker << "DEBUG: Update: " << this->findQuery << " to: "
-  //<< this->updateQuery << " inside: " << this->collectionName << logger::endL;
-  if (this->query != 0)
+  if (this->query != 0) {
     crash << "At this point of code, query is supposed to be 0. " << crash;
+  }
   std::string incomingJSONString = incoming.ToString(true, false);
   this->update = bson_new_from_json(
     (const uint8_t*) incomingJSONString.c_str(), incomingJSONString.size(), &this->theError
@@ -317,8 +319,9 @@ bool MongoQuery::FindMultiple(
     *commentsGeneralNonSensitive
     << "Query: " << this->findQuery << ". Options: " << inputOptions.ToString(false);
   }
-  if (this->query != 0)
+  if (this->query != 0) {
     crash << "At this point of code, query is supposed to be 0. " << crash;
+  }
   this->query = bson_new_from_json((const uint8_t*) this->findQuery.c_str(), this->findQuery.size(), &this->theError);
   if (this->query == NULL) {
     if (commentsOnFailure != 0) {
@@ -433,8 +436,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromString(
 
 }
 
-JSData DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames
-(const List<std::string>& fieldsToProjectTo, int offset) {
+JSData DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(
+  const List<std::string>& fieldsToProjectTo, int offset
+) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames");
   JSData result;
   JSData fields;
@@ -700,8 +704,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions(
   (void) findQuery;
   (void) output;
   (void) options;
-  if (commentsOnFailure != 0)
+  if (commentsOnFailure != 0) {
     *commentsOnFailure << "Project compiled without mongoDB support. ";
+  }
   return false;
 #endif
 }
@@ -935,8 +940,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(
   (void) tableName;
   (void) findQuery;
   (void) selector;
-  if (commentsOnFailure != 0)
+  if (commentsOnFailure != 0) {
     *commentsOnFailure << "Project compiled without mongoDB support. ";
+  }
   return false;
 #endif
 }
@@ -951,8 +957,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString(
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString");
   (void) fieldsToSetIfNullUseFirstFieldIfUpdateQuery;
 #ifdef MACRO_use_MongoDB
-  if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery(updateQuery, commentsOnFailure))
+  if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery(updateQuery, commentsOnFailure)) {
     return false;
+  }
   MongoQuery query;
   query.findQuery = findQuery;
   query.collectionName = collectionName;
@@ -981,8 +988,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString(
   (void) collectionName;
   (void) findQuery;
   (void) updateQuery;
-  if (commentsOnFailure != 0)
+  if (commentsOnFailure != 0) {
     *commentsOnFailure << "Project compiled without mongoDB support. ";
+  }
   return false;
 #endif
 }
@@ -1084,8 +1092,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames(
   return result;
 #else
   (void) output;
-  if (commentsOnFailure != 0)
+  if (commentsOnFailure != 0) {
     *commentsOnFailure << "MongoDB not installed";
+  }
   return false;
 #endif
 }

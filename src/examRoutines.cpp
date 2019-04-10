@@ -139,7 +139,9 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend(
     }
     //stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
     //<< currentKeyValues.ToStringHtml();
-    std::string deadlineString = HtmlRoutines::ConvertURLStringToNormal(currentKeyValues.GetValueCreate(DatabaseStrings::labelDeadlines), false);
+    std::string deadlineString = HtmlRoutines::ConvertURLStringToNormal(
+      currentKeyValues.GetValueCreate(DatabaseStrings::labelDeadlines), false
+    );
     std::string problemWeightsCollectionString = HtmlRoutines::ConvertURLStringToNormal(
       currentKeyValues.GetValueCreate(DatabaseStrings::labelProblemWeights), false
     );
@@ -268,9 +270,6 @@ bool DatabaseRoutineS::StoreProblemInfoToDatabase(
       }
     }
   }
-  //stOutput << "<br>DEBUG: deadline find query: " << findQueryDeadlines.ToString(false);
-  //stOutput << "<br>DEBUG: deadline update query: " << theUser.deadlines.ToString(false);
-
   if (theUser.deadlines.type != JSData::JSUndefined) {
     if (overwrite) {
       JSData setQueryDeadlines;
@@ -723,8 +722,9 @@ std::string CalculatorHTML::ToStringContent() {
   std::stringstream out;
 //  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.ToStringCommaDelimited();
   out << "<hr><b>The extracted commands follow.</b><br>";
-  for (int i = 0; i < this->theContent.size; i ++)
+  for (int i = 0; i < this->theContent.size; i ++) {
     out << this->theContent[i].ToStringTagAndContent();
+  }
   out << "<hr><b>The html read follows.</b><br>" << this->inputHtml << "<hr>";
   return out.str();
 }
@@ -738,31 +738,37 @@ void SyntacticElementHTML::resetAllExceptContent() {
 }
 
 std::string SyntacticElementHTML::ToStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose) {
-  if (this->tag == "" || this->flagUseMathSpan == false)
+  if (this->tag == "" || this->flagUseMathSpan == false) {
     return "";  
+  }
   std::stringstream out;
-  if (overrideTagIfNonEmpty == "")
+  if (overrideTagIfNonEmpty == "") {
     out << "<" << this->tag;
-  else
+  } else {
     out << "<" << overrideTagIfNonEmpty;
-  for (int i = 0; i < this->properties.size(); i ++)
+  }
+  for (int i = 0; i < this->properties.size(); i ++) {
     out << " " << this->properties.theKeys[i] << "=\"" << this->properties.theValues[i] << "\"";
+  }
   for (int i = 0; i < this->defaultKeysIfMissing.size; i ++) {
     if (!this->properties.Contains(this->defaultKeysIfMissing[i])) {
       out << " " << this->defaultKeysIfMissing[i] << "=\"" << this->defaultValuesIfMissing[i] << "\"";
     }
   }
-  if (this->tagKeysWithoutValue.size > 0)
+  if (this->tagKeysWithoutValue.size > 0) {
     out << " " << this->tagKeysWithoutValue[0];
-  if (immediatelyClose)
+  }
+  if (immediatelyClose) {
     out << "/";
+  }
   out << ">";
   return out.str();
 }
 
 std::string SyntacticElementHTML::ToStringCloseTag(const std::string& overrideTagIfNonEmpty) {
-  if (this->tag == "" || this->flagUseMathSpan == false)
+  if (this->tag == "" || this->flagUseMathSpan == false) {
     return "";
+  }
   if (overrideTagIfNonEmpty == "") {
     return "</" + this->tag + ">";
   } else {
@@ -772,8 +778,9 @@ std::string SyntacticElementHTML::ToStringCloseTag(const std::string& overrideTa
 
 std::string SyntacticElementHTML::ToStringTagAndContent() {
   MacroRegisterFunctionWithName("SyntacticElementHTML::ToStringTagAndContent");
-  if (this->syntacticRole == "")
+  if (this->syntacticRole == "") {
     return this->content;
+  }
   std::stringstream out;
   out << this->ToStringOpenTag("") + this->content + this->ToStringCloseTag("");
   if (this->children.size > 0) {
@@ -791,8 +798,9 @@ std::string SyntacticElementHTML::ToStringTagAndContent() {
 
 std::string SyntacticElementHTML::ToStringDebug() {
   MacroRegisterFunctionWithName("SyntacticElementHTML::ToString");
-  if (this->syntacticRole == "")
+  if (this->syntacticRole == "") {
     return HtmlRoutines::ConvertStringToHtmlString(this->ToStringTagAndContent(), false);
+  }
   std::stringstream out;
   out << "<span style =\"color:green\">";
   out << HtmlRoutines::ConvertStringToHtmlString(this->syntacticRole, false);
@@ -803,8 +811,9 @@ std::string SyntacticElementHTML::ToStringDebug() {
 
 std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey) const {
   MacroRegisterFunctionWithName("SyntacticElementHTML::GetKeyValue");
-  if (!this->properties.Contains(theKey))
+  if (!this->properties.Contains(theKey)) {
     return "";
+  }
   return this->properties.GetValueConstCrashIfNotPresent(theKey);
 }
 
@@ -814,10 +823,12 @@ void SyntacticElementHTML::SetKeyValue(const std::string& theKey, const std::str
 }
 
 std::string SyntacticElementHTML::ToStringInterpretedBody() {
-  if (this->syntacticRole == "")
+  if (this->syntacticRole == "") {
     return this->content;
-  if (this->IsInterpretedNotByCalculator())
+  }
+  if (this->IsInterpretedNotByCalculator()) {
     return this->interpretedCommand;
+  }
   std::stringstream out;
   out << this->ToStringOpenTag("");
   if (this->interpretedCommand != "") {
@@ -838,8 +849,9 @@ std::string SyntacticElementHTML::ToStringInterpretedBody() {
 
 bool SyntacticElementHTML::IsInterpretedNotByCalculator() {
   MacroRegisterFunctionWithName("SyntacticElementHTML::IsInterpretedNotByCalculator");
-  if (this->syntacticRole != "command")
+  if (this->syntacticRole != "command") {
     return false;
+  }
   if (
     this->tag == "answerCalculatorHighlightStart" ||
     this->tag == "answerCalculatorHighlightFinish"
@@ -862,76 +874,87 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator() {
 }
 
 bool SyntacticElementHTML::IsInterpretedByCalculatorDuringProblemGeneration() {
-  if (this->syntacticRole != "command")
+  if (this->syntacticRole != "command") {
     return false;
+  }
   std::string tagClass = this->GetKeyValue("class");
   return tagClass == "calculator" || tagClass == "calculatorHidden" ||
   tagClass == "calculatorShowToUserOnly" ;
 }
 
 bool SyntacticElementHTML::IsInterpretedByCalculatorDuringSubmission() {
-  if (this->syntacticRole != "command")
+  if (this->syntacticRole != "command") {
     return false;
+  }
   std::string tagClass = this->GetKeyValue("class");
   return tagClass == "calculator" || tagClass == "calculatorHidden";
 }
 
 bool SyntacticElementHTML::IsAnswer() {
-  if (this->syntacticRole != "command")
+  if (this->syntacticRole != "command") {
     return false;
+  }
   return this->GetKeyValue("class") == "calculatorAnswer";
 }
 
 bool SyntacticElementHTML::IsCalculatorCommand() {
-  if (this->syntacticRole != "command")
+  if (this->syntacticRole != "command") {
     return false;
+  }
   return this->GetKeyValue("class") == "calculator";
 }
 
 bool SyntacticElementHTML::IsCalculatorHidden() {
-  if (this->syntacticRole != "command")
+  if (this->syntacticRole != "command") {
     return false;
+  }
   return this->GetKeyValue("class") == "calculatorHidden";
 }
 
 bool SyntacticElementHTML::IsHidden() {
-  if (this->syntacticRole != "command")
+  if (this->syntacticRole != "command") {
     return false;
+  }
   std::string tagClass = this->GetKeyValue("class");
   return tagClass == "calculatorHidden" || tagClass == "calculatorCommentsBeforeInterpretation";
 }
 
 bool SyntacticElementHTML::IsSolution() {
-  if (this->syntacticRole != "command")
+  if (this->syntacticRole != "command") {
     return false;
+  }
   std::string tagClass = this->GetKeyValue("class");
   return tagClass == "calculatorSolution";
 }
 
 bool SyntacticElementHTML::IsAnswerOnGiveUp() {
-  if (this->syntacticRole != "command")
+  if (this->syntacticRole != "command") {
     return false;
+  }
   std::string tagClass = this->GetKeyValue("class");
   return tagClass == "calculatorAnswerOnGiveUp";
 }
 
 bool SyntacticElementHTML::IsCommentBeforeSubmission() {
-  if (this->syntacticRole != "command")
+  if (this->syntacticRole != "command") {
     return false;
+  }
   std::string tagClass = this->GetKeyValue("class");
   return tagClass == "calculatorCommentsBeforeSubmission";
 }
 
 bool SyntacticElementHTML::IsCommentBeforeInterpretation() {
-  if (this->syntacticRole != "command")
+  if (this->syntacticRole != "command") {
     return false;
+  }
   std::string tagClass = this->GetKeyValue("class");
   return tagClass == "calculatorCommentsBeforeInterpretation";
 }
 
 bool SyntacticElementHTML::IsAnswerElement(std::string* desiredAnswerId) {
-  if (this->syntacticRole != "command")
+  if (this->syntacticRole != "command") {
     return false;
+  }
   std::string tagClass = this->GetKeyValue("class");
   bool result = tagClass == "calculatorButtonSubmit" ||
   tagClass == "calculatorButtonInterpret" ||
@@ -941,15 +964,17 @@ bool SyntacticElementHTML::IsAnswerElement(std::string* desiredAnswerId) {
   tagClass == "calculatorMQButtonPanel" ||
   tagClass == "calculatorAnswerVerification" ||
   tagClass == "calculatorSolution";
-  if (result && desiredAnswerId != 0)
+  if (result && desiredAnswerId != 0) {
     *desiredAnswerId = this->GetKeyValue("name");
+  }
   return result;
 }
 
 std::string CalculatorHTML::PrepareUserInputBoxes() {
   MacroRegisterFunctionWithName("CalculatorHTML::PrepareInterpreter");
-  if (this->flagIsForReal)
+  if (this->flagIsForReal) {
     return "";
+  }
   std::stringstream out;
   MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   std::string inputNonAnswerReader;
@@ -1016,15 +1041,17 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream* comments)
 
 bool CalculatorHTML::ParseHTMLPrepareCommands(std::stringstream* comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::ParseHTMLPrepareCommands");
-  if (!this->ParseHTML(comments))
+  if (!this->ParseHTML(comments)) {
     return false;
+  }
   return this->PrepareCommands(comments);
 }
 
 bool CalculatorHTML::PrepareCommands(std::stringstream* comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommands");
-  if (!this->PrepareCommandsGenerateProblem(comments))
+  if (!this->PrepareCommandsGenerateProblem(comments)) {
     return false;
+  }
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
     if (!this->PrepareCommandsAnswer(this->theProblemData.theAnswers[i], comments)) {
       return false;
@@ -1068,9 +1095,6 @@ bool CalculatorHTML::PrepareCommentsBeforeSubmission(
   MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommentsBeforeSubmission");
   (void) comments;
   std::stringstream streamCommands;
-  //stOutput << "<hr>DEBUG: Preparing comment commands for: "
-  //<< theAnswer.answerId << "<hr>";
-//  stOutput << "<hr>DEBUG: Call stack: " << crash.GetStackTraceEtcErrorMessage();
   for (int i = 0; i < this->theContent.size; i ++) {
     SyntacticElementHTML& currentElt = this->theContent[i];
     if (!currentElt.IsCommentBeforeSubmission()) {
@@ -1111,10 +1135,12 @@ bool CalculatorHTML::PrepareCommandsSolution(Answer& theAnswer, std::stringstrea
   std::stringstream streamCommands;
   for (int i = 0; i < this->theContent.size; i ++) {
     SyntacticElementHTML& solutionElt = this->theContent[i];
-    if (!solutionElt.IsSolution())
+    if (!solutionElt.IsSolution()) {
       continue;
-    if (solutionElt.GetKeyValue("name") != theAnswer.answerId)
+    }
+    if (solutionElt.GetKeyValue("name") != theAnswer.answerId) {
       continue;
+    }
     int numCommandsSoFar = 2;
     theAnswer.solutionElements = solutionElt.children;
     for (int j = 0; j < theAnswer.solutionElements.size; j ++) {
@@ -1231,8 +1257,9 @@ bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure) {
     return false;
   }
   (void) commentsOnFailure;
-  if (this->flagSectionsPrepared)
+  if (this->flagSectionsPrepared) {
     return true;
+  }
   this->flagSectionsPrepared = true;
   if (
     this->currentUseR.sectionsTaught.size == 0 ||
@@ -1265,7 +1292,8 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   MacroRegisterFunctionWithName("CalculatorHTML::ComputeAnswerRelatedStrings");
   std::string desiredAnswerId = inputOutput.GetKeyValue("id");
   if (desiredAnswerId == "") {
-    inputOutput.interpretedCommand = "<b>Error: could not generate submit button: the answer tag does not have a valid id. Please fix the problem template.</b>";
+    inputOutput.interpretedCommand = "<b>Error: could not generate submit button: "
+    "the answer tag does not have a valid id. Please fix the problem template.</b>";
     return false;
   }
   int theIndex = this->GetAnswerIndex(desiredAnswerId);
@@ -1341,8 +1369,9 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
 
 void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateStudentAnswerButton");
-  if (!this->ComputeAnswerRelatedStrings(inputOutput))
+  if (!this->ComputeAnswerRelatedStrings(inputOutput)) {
     return;
+  }
   Answer& currentA = this->theProblemData.theAnswers[this->GetAnswerIndex(inputOutput.GetKeyValue("id"))];
   std::stringstream out;
   out << "<br><span class =\"panelAnswer\" id = \"" << currentA.idAnswerPanel << "\"></span>";
@@ -1352,8 +1381,9 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
 void CalculatorHTML::InterpretIfAnswer(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretIfAnswer");
   std::string tagClass = inputOutput.GetTagClass();
-  if (tagClass != "calculatorAnswer")
+  if (tagClass != "calculatorAnswer") {
     return;
+  }
   this->InterpretGenerateStudentAnswerButton(inputOutput);
 }
 
@@ -1361,30 +1391,32 @@ void CalculatorHTML::InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inp
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretNotByCalculatorNotAnswer");
   std::string tagClass = inputOutput.GetTagClass();
   //std::string tag= inputOutput.tag;
-  if (tagClass == "calculatorExamProblem" || tagClass == "calculatorExamIntermediate")
+  if (tagClass == "calculatorExamProblem" || tagClass == "calculatorExamIntermediate") {
     this->InterpretGenerateLink(inputOutput);
-  else if (tagClass == "calculatorManageClass")
+  } else if (tagClass == "calculatorManageClass") {
     this->InterpretManageClass(inputOutput);
-  else if (tagClass == "generateTopicTable")
+  } else if (tagClass == "generateTopicTable") {
     this->InterpretTopicList(inputOutput);
-  else if (tagClass == "generateLectureMaterials")
+  } else if (tagClass == "generateLectureMaterials") {
     this->InterpretLectureMaterials(inputOutput);
-  else if (tagClass == "generateTableOfContents")
+  } else if (tagClass == "generateTableOfContents") {
     this->InterpretTableOfContents(inputOutput);
-  else if (tagClass == "accountInformationLinks")
+  } else if (tagClass == "accountInformationLinks") {
     this->InterpretAccountInformationLinks(inputOutput);
-  else if (tagClass == "calculatorJavascript")
+  } else if (tagClass == "calculatorJavascript") {
     this->InterpretJavascripts(inputOutput);
-  else if (tagClass == "calculatorProblemNavigationHere")
+  } else if (tagClass == "calculatorProblemNavigationHere") {
     this->InterpretProblemNavigationBar(inputOutput);
-  else if (tagClass == "calculatorEditPageHere")
+  } else if (tagClass == "calculatorEditPageHere") {
     this->InterpretEditPagePanel(inputOutput);
+  }
 }
 
 std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink) {
   MacroRegisterFunctionWithName("CalculatorHTML::CleanUpFileName");
-  if (inputLink.size() == 0)
+  if (inputLink.size() == 0) {
     return inputLink;
+  }
   unsigned firstMeaningfulChar = 0;
   for (; firstMeaningfulChar < inputLink.size(); firstMeaningfulChar ++) {
     if (
@@ -1501,8 +1533,6 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted(
   std::stringstream hoursTillDeadlineStream;
   bool deadlineIsNear = secondsTillDeadline < 24 * 3600 && !problemAlreadySolved && !isSection;
   bool deadlineHasPassed = (secondsTillDeadline < 0);
-  //if (isSection)
-  //  out << "DEBUG: isSection = true";
   if (deadlineIsInherited && !theGlobalVariables.UserStudentVieWOn()) {
     out << "Inherited: ";
   } else if (deadlineIsInherited && isSection && returnEmptyStringIfNoDeadline) {
@@ -1727,7 +1757,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton(
   inputOutput.displayDeadlinE = out.str();
 }
 
-std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpreter, List<SyntacticElementHTML> &theElements) {
+std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpreter, List<SyntacticElementHTML>& theElements) {
   MacroRegisterFunctionWithName("CalculatorHTML::ToStringInterprettedCommands");
   std::stringstream out;
   out << "<table>";
@@ -1794,10 +1824,12 @@ bool CalculatorHTML::InterpretProcessExecutedCommands(
       << " is supposed to be a command enclosure but apparently isn't. " << crash;
     }
     Expression currentExpr = theInterpreter.theProgramExpression[currentElt.commandIndex][1];
-    if (currentExpr.StartsWith(theInterpreter.opEndStatement()) && currentExpr.size() == 2)
+    if (currentExpr.StartsWith(theInterpreter.opEndStatement()) && currentExpr.size() == 2) {
       currentExpr = currentExpr[1];
-    if (currentExpr.StartsWith(theInterpreter.opEndStatement()))
+    }
+    if (currentExpr.StartsWith(theInterpreter.opEndStatement())) {
       currentElt.flagUseMathMode = false;
+    }
     theFormat.flagUseQuotes = false;
     theFormat.flagMakingExpressionTableWithLatex = true;
     currentElt.interpretedCommand = currentExpr.ToString(&theFormat);
@@ -1816,8 +1848,9 @@ bool CalculatorHTML::InterpretProcessExecutedCommands(
 }
 
 void CalculatorHTML::LogProblemGenerationObsolete(Calculator &theInterpreter) {
-  if (!theGlobalVariables.UserDebugFlagOn() || !theGlobalVariables.UserDefaultHasProblemComposingRights())
+  if (!theGlobalVariables.UserDebugFlagOn() || !theGlobalVariables.UserDefaultHasProblemComposingRights()) {
     return;
+  }
   std::stringstream streamLog;
   streamLog << "<table border ='1'>";
   for (int i = 0; i < theInterpreter.theProgramExpression.size(); i ++) {
@@ -1836,8 +1869,9 @@ void CalculatorHTML::LogProblemGenerationObsolete(Calculator &theInterpreter) {
 
 void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::FigureOutCurrentProblemList");
-  if (this->flagParentInvestigated)
+  if (this->flagParentInvestigated) {
     return;
+  }
   this->flagParentInvestigated = true;
   this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
   this->LoadAndParseTopicList(comments);
@@ -1857,11 +1891,13 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
   if (!this->theProblemData.flagRandomSeedGiven) {
     srand(1003 + time(NULL));
     this->randomSeedsIfInterpretationFails[0] = (103 + rand()) % 100000000;
-  } else
+  } else {
     this->randomSeedsIfInterpretationFails[0] = this->theProblemData.randomSeed;
+  }
   srand(this->randomSeedsIfInterpretationFails[0]);
-  for (int i = 1; i < this->randomSeedsIfInterpretationFails.size; i ++)
+  for (int i = 1; i < this->randomSeedsIfInterpretationFails.size; i ++) {
     this->randomSeedsIfInterpretationFails[i] = (103 + rand()) % 100000000;
+  }
   this->timePerAttempt.SetSize(0);
   this->timeIntermediatePerAttempt.SetSize(0);
   this->timeIntermediateComments.SetSize(0);
@@ -1930,12 +1966,15 @@ int CalculatorHTML::GetAnswerIndex(const std::string& desiredAnswerId) {
 
 bool CalculatorHTML::CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right) {
   MacroRegisterFunctionWithName("SyntacticElementHTML::CanBeMerged");
-  if (left.syntacticRole != "" || right.syntacticRole != "")
+  if (left.syntacticRole != "" || right.syntacticRole != "") {
     return false;
-  if (this->IsSplittingChar(left.content) && left.content != " ")
+  }
+  if (this->IsSplittingChar(left.content) && left.content != " ") {
     return false;
-  if (this->IsSplittingChar(right.content) && right.content != " ")
+  }
+  if (this->IsSplittingChar(right.content) && right.content != " ") {
     return false;
+  }
   return true;
 }
 
@@ -2006,8 +2045,9 @@ void CalculatorHTML::initTopicElementNames() {
 
 void CalculatorHTML::initAutocompleteExtras() {
   MacroRegisterFunctionWithName("CalculatorHTML::initAutocompleteExtras");
-  if (this->autoCompleteExtras.size > 0)
+  if (this->autoCompleteExtras.size > 0) {
     return;
+  }
   this->autoCompleteExtras.AddOnTop("answerCalculatorHighlight");
   this->autoCompleteExtras.AddOnTop("algebra");
   this->autoCompleteExtras.AddOnTop("logarithms");
@@ -2083,8 +2123,9 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       word.push_back(currentChar);
     }
   }
-  if (word != "")
+  if (word != "") {
     theElements.AddOnTop(word);
+  }
   this->initBuiltInSpanClasses();
   this->eltsStack.SetSize(0);
   SyntacticElementHTML dummyElt, tempElt;
@@ -2422,8 +2463,9 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
 bool CalculatorHTML::InterpretOneAnswerElement(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretOneAnswerElement");
   std::string answerId;
-  if (!inputOutput.IsAnswerElement(&answerId))
+  if (!inputOutput.IsAnswerElement(&answerId)) {
     return true;
+  }
   int theIndex = this->GetAnswerIndex(answerId);
   std::string tagClass = inputOutput.GetTagClass();
   if (theIndex == - 1) {
@@ -2435,8 +2477,9 @@ bool CalculatorHTML::InterpretOneAnswerElement(SyntacticElementHTML& inputOutput
     return true;
   }
   Answer& currentA = this->theProblemData.theAnswers[theIndex];
-  if (tagClass == "calculatorAnswerVerification")
+  if (tagClass == "calculatorAnswerVerification") {
     inputOutput.interpretedCommand = currentA.htmlSpanVerifyAnswer;
+  }
   return true;
 }
 
@@ -2452,10 +2495,12 @@ bool CalculatorHTML::InterpretAnswerHighlights(std::stringstream& comments) {
       this->theContent[i].content = "";
       continue;
     }
-    if (!answerHighlightStarted)
+    if (!answerHighlightStarted) {
       continue;
-    if (this->theContent[i].IsAnswerElement(0))
+    }
+    if (this->theContent[i].IsAnswerElement(0)) {
       continue;
+    }
     if (this->theContent[i].tag == "answerCalculatorHighlightFinish") {
       answerHighlightStarted = false;
       this->theContent[i].content = "";
@@ -2471,8 +2516,9 @@ bool CalculatorHTML::InterpretAnswerHighlights(std::stringstream& comments) {
 bool CalculatorHTML::InterpretAnswerElements(std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretAnswerElements");
   (void) comments;
-  for (int i = 0; i < this->theContent.size; i ++)
+  for (int i = 0; i < this->theContent.size; i ++) {
     this->InterpretOneAnswerElement(this->theContent[i]);
+  }
   return true;
 }
 
@@ -2610,8 +2656,9 @@ bool CalculatorHTML::CheckContent(std::stringstream* comments) {
 
 std::string CalculatorHTML::CleanUpCommandString(const std::string& inputCommand) {
   MacroRegisterFunctionWithName("CalculatorHTML::CleanUpCommandString");
-  if (inputCommand == "")
+  if (inputCommand == "") {
     return "";
+  }
   int realStart = 0;
   int realEnd = inputCommand.size() - 1;
   for (; realStart < (signed) inputCommand.size(); realStart ++) {
@@ -2667,10 +2714,12 @@ bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml");
   CalculatorHTML theFile;
-  if (!input.IsOfType<std::string>(&theFile.inputHtml))
+  if (!input.IsOfType<std::string>(&theFile.inputHtml)) {
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
-  if (!theFile.ParseHTML(&theCommands.Comments))
+  }
+  if (!theFile.ParseHTML(&theCommands.Comments)) {
     return false;
+  }
   return output.AssignValue(theFile.ToStringExtractedCommands(), theCommands);
 }
 
@@ -2699,8 +2748,9 @@ JSData CalculatorHTML::GetJavascriptMathQuillBoxesForJSON() {
     Answer& currentAnswer = this->theProblemData.theAnswers[i];
     ///////////////
     JSData properties;
-    for (int j = 0; j < currentAnswer.properties.size(); j ++)
+    for (int j = 0; j < currentAnswer.properties.size(); j ++) {
       properties[currentAnswer.properties.theKeys[j]] = currentAnswer.properties.theValues[j];
+    }
     if (currentAnswer.properties.size() > 0) {
       currentAnswerJS[answerLabels::properties] = properties;
     }
@@ -3016,8 +3066,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       if (this->logCommandsProblemGeneratioN.str() != "") {
         outBody << "<br>" << this->logCommandsProblemGeneratioN.str() << "<hr>";
       }
-      if (this->flagIsExamProblem)
+      if (this->flagIsExamProblem) {
         outBody << "Exam problem here. ";
+      }
       outBody << "<br>Random seed: "
       << this->theProblemData.randomSeed
       << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
@@ -3031,8 +3082,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
   }
   std::stringstream navigationAndEditTagStream;
-  if (this->flagDoPrependProblemNavigationBar)
+  if (this->flagDoPrependProblemNavigationBar) {
     navigationAndEditTagStream << this->ToStringProblemNavigation();
+  }
   if (this->flagDoPrependEditPagePanel) {
     if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn()) {
       navigationAndEditTagStream << this->GetEditPagePanel();
@@ -3051,10 +3103,12 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
   std::string studentView = theGlobalVariables.UserStudentVieWOn() ? "true" : "false";
   std::string linkSeparator = " | ";
   std::string linkBigSeparator = " || ";
-  if (theGlobalVariables.UserGuestMode())
+  if (theGlobalVariables.UserGuestMode()) {
     exerciseRequest = "exerciseNoLogin";
-  if (theGlobalVariables.UserGuestMode())
+  }
+  if (theGlobalVariables.UserGuestMode()) {
     out << "<b>Guest mode</b>" << linkSeparator;
+  }
   if (!theGlobalVariables.flagLoggedIn) {
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=login\">Log in</a> " << linkSeparator;
@@ -3167,8 +3221,9 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
       }
     }
   }
-  if (out.str() == "")
+  if (out.str() == "") {
     return "";
+  }
   std::stringstream outFinal;
   outFinal << "<problemNavigation>" << out.str();
   outFinal << "</problemNavigation>";
@@ -3182,8 +3237,9 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(
   bool includeRandomSeedIfAppropriate
 ) const {
   MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsForProblem");
-  if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode())
+  if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode()) {
     return "";
+  }
   std::stringstream out;
   out << "request=" << requestType << "&";
   List<std::string> excludedTags;
@@ -3198,10 +3254,12 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(
   }
   out << "topicList=" << theGlobalVariables.GetWebInput("topicList") << "&";
   out << "studentView=" << studentView << "&";
-  if (studentSection != "")
+  if (studentSection != "") {
     out << "studentSection=" << HtmlRoutines::ConvertStringToURLString(studentSection, false) << "&";
-  if (includeRandomSeedIfAppropriate)
+  }
+  if (includeRandomSeedIfAppropriate) {
     out << "randomSeed=" << this->theProblemData.randomSeed << "&";
+  }
   return out.str();
 }
 
@@ -3372,8 +3430,9 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
     out << problemWeightAsGivenByInstructor;
   }
   out << "</textarea>";
-  if (!weightIsOK && problemWeightAsGivenByInstructor != "")
-    out << "<span style =\"color:red\"><b>Error</b></span>";
+  if (!weightIsOK && problemWeightAsGivenByInstructor != "") {
+    out << "<b style ='color:red'>Error</b>";
+  }
   out << "<button id =\"" << idButtonModifyPoints << "\" "
   << "onclick=\"" << "modifyWeight('" << urledProblem << "');\""
   << " disabled>";
@@ -3391,16 +3450,21 @@ void TopicElement::ComputeID() {
   } else {
     std::stringstream out;
     out << this->title;
-    if (this->type == this->tTexHeader)
+    if (this->type == this->tTexHeader) {
       out << "[sourceHeader]";
-    if (this->type == this->tChapter)
+    }
+    if (this->type == this->tChapter) {
       out << "[Chapter]";
-    if (this->type == this->tSection)
+    }
+    if (this->type == this->tSection) {
       out << "[Section]";
-    if (this->type == this->tSubSection)
+    }
+    if (this->type == this->tSubSection) {
       out << "[SubSection]";
-    if (this->type == this->tProblem)
+    }
+    if (this->type == this->tProblem) {
       out << "[TitledItem]";
+    }
     this->id = out.str();
   }
   this->idBase64 = Crypto::computeSha3_256OutputBase64URL(this->id);
@@ -3491,16 +3555,21 @@ void TopicElement::reset(int parentSize, MapLisT<std::string, TopicElement, Math
   this->pointsEarnedInProblemsThatAreImmediateChildren = 0;
   this->totalPointsEarned = 0;
   this->maxPointsInAllChildren = 0;
-  if (parentSize == 0)
+  if (parentSize == 0) {
     this->type = this->tChapter;
-  if (parentSize == 1)
+  }
+  if (parentSize == 1) {
     this->type = this->tSection;
-  if (parentSize == 2)
+  }
+  if (parentSize == 2) {
     this->type = this->tSubSection;
-  if (parentSize == 3)
+  }
+  if (parentSize == 3) {
     this->type = this->tProblem;
-  if (containerElements == 0)
+  }
+  if (containerElements == 0) {
     return;
+  }
   for (int i = 0; i < this->parentTopics.size; i ++) {
     if (containerElements->theValues[this->parentTopics[i]].type >= this->type) {
       this->parentTopics.PopIndexShiftDown(i);
@@ -3643,28 +3712,30 @@ void TopicElement::GetTopicList(
       currentElt.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.title;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Topic:", &currentArgument)) {
-      if (found)
+      if (found) {
         TopicElement::AddTopic(currentElt, output);
+      }
       found = true;
       currentElt.reset(2, &output);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.title;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument)) {
-      if (found)
+      if (found) {
         TopicElement::AddTopic(currentElt, output);
+      }
       found = true;
       currentElt.reset(3, &output);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.title;
-    } else if (MathRoutines::StringBeginsWith(currentLine, "Video:", &currentArgument))
+    } else if (MathRoutines::StringBeginsWith(currentLine, "Video:", &currentArgument)) {
       currentElt.video = MathRoutines::StringTrimWhiteSpace(currentArgument);
-    else if (MathRoutines::StringBeginsWith(currentLine, "VideoHandwritten:", &currentArgument))
+    } else if (MathRoutines::StringBeginsWith(currentLine, "VideoHandwritten:", &currentArgument)) {
       currentElt.videoHandwritten = MathRoutines::StringTrimWhiteSpace(currentArgument);
-    else if (MathRoutines::StringBeginsWith(currentLine, "SlidesSource:", &currentArgument))
+    } else if (MathRoutines::StringBeginsWith(currentLine, "SlidesSource:", &currentArgument)) {
       currentElt.sourceSlides.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
-    else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkSource:", &currentArgument)) {
+    } else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkSource:", &currentArgument)) {
       currentElt.sourceHomework.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
       currentElt.sourceHomeworkIsSolution.AddOnTop(false);
     } else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkSolutionSource:", &currentArgument)) {
@@ -3675,9 +3746,9 @@ void TopicElement::GetTopicList(
     else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkLatex:", &currentArgument)) {
       currentElt.sourceHomework.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
       currentElt.sourceHomeworkIsSolution.AddOnTop(false);
-    } else if (MathRoutines::StringBeginsWith(currentLine, "HandwrittenSolutions:", &currentArgument))
+    } else if (MathRoutines::StringBeginsWith(currentLine, "HandwrittenSolutions:", &currentArgument)) {
       currentElt.handwrittenSolution = MathRoutines::StringTrimWhiteSpace(currentArgument);
-    else if (MathRoutines::StringBeginsWith(currentLine, "Problem:", &currentArgument)) {
+    } else if (MathRoutines::StringBeginsWith(currentLine, "Problem:", &currentArgument)) {
       currentElt.problemFileName = MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.problemFileName;
       found = true;
@@ -3727,16 +3798,18 @@ void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inpu
     return;
   }
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage\">Change password</a>";
-  if (theGlobalVariables.UserDefaultHasAdminRights())
+  if (theGlobalVariables.UserDefaultHasAdminRights()) {
     out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\">Manage accounts</a>";
+  }
   inputOutput.interpretedCommand = out.str();
   return;
 }
 
 bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::LoadAndParseTopicList");
-  if (this->theTopicS.size() != 0)
+  if (this->theTopicS.size() != 0) {
     return true;
+  }
   if (this->topicListContent == "") {
     if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
       this->topicListFileName, this->topicListContent, &comments
@@ -3928,25 +4001,32 @@ void CalculatorHTML::InterpretJavascripts(SyntacticElementHTML& inputOutput) {
 std::string TopicElement::GetItemFinish(CalculatorHTML& owner) {
   std::stringstream out;
   if (this->type == this->tChapter) {
-    if (owner.flagTopicTableStarted)
+    if (owner.flagTopicTableStarted) {
       out << "\n</tbody>\n</table>\n</div><!--bodyItem-->";
-    if (owner.flagTopicSubSectionStarted)
+    }
+    if (owner.flagTopicSubSectionStarted) {
       out << "\n</div><!--bodySubsection-->";
-    if (owner.flagTopicSectionStarted)
+    }
+    if (owner.flagTopicSectionStarted) {
       out << "\n</div><!--bodySection-->";
-    if (owner.flagTopicChapterStarted)
+    }
+    if (owner.flagTopicChapterStarted) {
       out << "\n</div><!--bodyChapter-->";
+    }
     owner.flagTopicSectionStarted = false;
     owner.flagTopicSubSectionStarted = false;
     owner.flagTopicTableStarted = false;
   }
   if (this->type == this->tSection) {
-    if (owner.flagTopicTableStarted)
+    if (owner.flagTopicTableStarted) {
       out << "\n</tbody>\n</table>\n</div><!--bodyItem-->";
-    if (owner.flagTopicSubSectionStarted)
+    }
+    if (owner.flagTopicSubSectionStarted) {
       out << "\n</div><!--bodySubsection-->";
-    if (owner.flagTopicSectionStarted)
+    }
+    if (owner.flagTopicSectionStarted) {
       out << "\n</div><!--bodySection-->";
+    }
     owner.flagTopicSubSectionStarted = false;
     owner.flagTopicTableStarted = false;
   }
@@ -3972,30 +4052,36 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
     owner.flagTopicTableStarted = false;
   } else if (this->type == this->tSection) {
     theClass = "Section";
-    if (!owner.flagTopicChapterStarted)
+    if (!owner.flagTopicChapterStarted) {
       out << "\n<div class =\"bodyChapter\">";
+    }
     owner.flagTopicChapterStarted = true;
     owner.flagTopicSectionStarted = true;
     owner.flagTopicSubSectionStarted = false;
     owner.flagTopicTableStarted = false;
   } else if (this->type == this->tSubSection) {
     theClass = "Subsection";
-    if (!owner.flagTopicChapterStarted)
+    if (!owner.flagTopicChapterStarted) {
       out << "\n<div class =\"bodyChapter\">";
-    if (!owner.flagTopicSectionStarted)
+    }
+    if (!owner.flagTopicSectionStarted) {
       out << "\n<div class =\"bodySection\">";
+    }
     owner.flagTopicChapterStarted = true;
     owner.flagTopicSectionStarted = true;
     owner.flagTopicSubSectionStarted = true;
     owner.flagTopicTableStarted = false;
   } else {
     if (!owner.flagTopicTableStarted) {
-      if (!owner.flagTopicChapterStarted)
+      if (!owner.flagTopicChapterStarted) {
         out << "\n<div class =\"bodyChapter\">";
-      if (!owner.flagTopicSectionStarted)
+      }
+      if (!owner.flagTopicSectionStarted) {
         out << "\n<div class =\"bodySection\">";
-      if (!owner.flagTopicSubSectionStarted)
+      }
+      if (!owner.flagTopicSubSectionStarted) {
         out << "\n<div class =\"bodySubsection\">";
+      }
       owner.flagTopicChapterStarted = true;
       owner.flagTopicSectionStarted = true;
       owner.flagTopicSubSectionStarted = true;
@@ -4045,8 +4131,9 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
   << "<td>" << this->displayTitle;
   out << "<button id =\"buttonToggle" << this->idBase64
   << "\" class =\"buttonToggleTopics\" onclick=\"toggleHeight(this, 'body" << this->idBase64 << "');\">&#9650;</button>";
-  if (doIncludeScoreButton)
+  if (doIncludeScoreButton) {
     out << this->ToStringStudentScoreReportPanel();
+  }
   out  << "</td>";
   out << "<td>" << this->displayResourcesLinks << "</td>";
   out << "<td></td>";
@@ -4309,8 +4396,9 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
     << "'"
     << HtmlRoutines::ConvertStringToURLString(this->databaseStudentSections[i], false)
     << "'";
-    if (i != this->databaseStudentSections.size - 1)
+    if (i != this->databaseStudentSections.size - 1) {
       topicListJS << ", ";
+    }
   }
   topicListJS << "];\n";
   topicListJS << "var listTopics =[";
@@ -4321,16 +4409,17 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
     }
     topicListJS << "{id: '" << currentE.idBase64 << "', ";
     topicListJS << "type: '";
-    if (currentE.type == currentE.tChapter)
+    if (currentE.type == currentE.tChapter) {
       topicListJS << "chapter";
-    else if (currentE.type == currentE.tSection)
+    } else if (currentE.type == currentE.tSection) {
       topicListJS << "section";
-    else if (currentE.type == currentE.tSubSection)
+    } else if (currentE.type == currentE.tSubSection) {
       topicListJS << "subSection";
-    else if (currentE.type == currentE.tError)
+    } else if (currentE.type == currentE.tError) {
       topicListJS << "error";
-    else
+    } else {
       topicListJS << "problem";
+    }
     topicListJS << "', ";
     //////////////////////////////////////////////////
     topicListJS << "idButton: '" << currentE.idDeadlineButton << "', ";
@@ -4401,8 +4490,9 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
 
 void TopicElement::ComputeHomework(CalculatorHTML& owner) {
   MacroRegisterFunctionWithName("TopicElement::ComputeHomework");
-  if (this->sourceHomework.size == 0)
+  if (this->sourceHomework.size == 0) {
     return;
+  }
   std::stringstream homeworkStream;
   homeworkStream << "title=" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
   int sourceHomeworkCounter = 0;
@@ -4431,8 +4521,9 @@ void TopicElement::ComputeHomework(CalculatorHTML& owner) {
 
 void TopicElement::ComputeSlides(CalculatorHTML& owner) {
   MacroRegisterFunctionWithName("TopicElement::ComputeSlides");
-  if (this->sourceSlides.size == 0)
+  if (this->sourceSlides.size == 0) {
     return;
+  }
   std::stringstream sourcesStream;
   sourcesStream << "title=" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
 
@@ -4453,15 +4544,19 @@ void TopicElement::ComputeSlides(CalculatorHTML& owner) {
 void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle) {
   MacroRegisterFunctionWithName("TopicElement::ComputeLinks");
   (void) plainStyle;
-  if (this->displayProblemLink != "")
+  if (this->displayProblemLink != "") {
     return;
+  }
   int depth = 3;
-  if (this->type == this->tChapter)
+  if (this->type == this->tChapter) {
     depth = 0;
-  if (this->type == this->tSection)
+  }
+  if (this->type == this->tSection) {
     depth = 1;
-  if (this->type == this->tSubSection)
+  }
+  if (this->type == this->tSubSection) {
     depth = 2;
+  }
   std::stringstream problemLabel;
   for (int i = 0; i < depth + 1; i ++) {
     problemLabel << this->problemNumber[i];

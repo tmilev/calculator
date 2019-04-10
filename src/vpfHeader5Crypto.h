@@ -5,8 +5,7 @@
 #include "vpfJson.h"
 static ProjectInformationInstance projectInfoCryptoHeader(__FILE__, "Crypto class declaration.");
 
-class Certificate
-{
+class Certificate {
 public:
   std::string algorithm;
   std::string keyid;
@@ -18,8 +17,7 @@ public:
   std::string ToString();
 };
 
-class Crypto
-{
+class Crypto {
   //To do: make sure all crypto functions zero their buffers.
 public:
 
@@ -30,32 +28,47 @@ public:
   static List<Certificate> knownCertificates;
   static List<uint32_t> kArraySha2xx;
   static bool LoadKnownCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  static bool LoadOneKnownCertificate
-  (const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  static bool LoadOneKnownCertificate(
+    const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+  );
 
   static std::string ConvertStringToBase64(const List<unsigned char>& input, bool useBase64URL);
   static std::string ConvertStringToBase64Standard(const std::string& input);
   static std::string ConvertStringToBase64URL(const std::string& input);
   static uint32_t GetUInt32FromCharBigendian(const List<unsigned char>& input);
-  static void ConvertStringToListUInt32BigendianZeroPad
-  (const List<unsigned char>& input, List<uint32_t>& output);
-  static void ConvertStringToListUInt32BigendianZeroPad
-  (const std::string& input, List<uint32_t>& output);
+  static void ConvertStringToListUInt32BigendianZeroPad(
+    const List<unsigned char>& input, List<uint32_t>& output
+  );
+  static void ConvertStringToListUInt32BigendianZeroPad(const std::string& input, List<uint32_t>& output);
   static void ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output);
   static void ConvertUint32ToString(const List<uint32_t>& input, std::string& output);
-  static bool ConvertBase64ToBitStream
-  (const std::string& input, List<unsigned char>& output,
-   std::stringstream* commentsOnFailure = 0,
-   std::stringstream* commentsGeneral = 0);
-  static bool ConvertBase64ToString
-  (const std::string& input, std::string& output, std::stringstream* commentsOnFailure = 0,
-   std::stringstream* commentsGeneral = 0);
+  static bool ConvertBase64ToBitStream(
+    const std::string& input,
+    List<unsigned char>& output,
+    std::stringstream* commentsOnFailure = 0,
+    std::stringstream* commentsGeneral = 0
+  );
+  static bool ConvertBase64ToString(
+    const std::string& input,
+    std::string& output,
+    std::stringstream* commentsOnFailure = 0,
+    std::stringstream* commentsGeneral = 0
+  );
 
   static void ConvertStringToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output);
   static void ConvertLargeIntUnsignedToBase58SignificantDigitsLAST(const LargeIntUnsigned& input, std::string& output);
-  static void ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(const LargeIntUnsigned& input, std::string& output, int numberOfOnesToPrepend);
-  static bool ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(const std::string& inputSignificantDigitsFirst, LargeIntUnsigned& output, int &numberOfLeadingZeroes, std::stringstream *commentsOnFailure);
-  static bool ConvertBase58ToHexSignificantDigitsFirst(const std::string& input, std::string& output, std::stringstream* commentsOnFailure);
+  static void ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(
+    const LargeIntUnsigned& input, std::string& output, int numberOfOnesToPrepend
+  );
+  static bool ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
+    const std::string& inputSignificantDigitsFirst,
+    LargeIntUnsigned& output,
+    int &numberOfLeadingZeroes,
+    std::stringstream *commentsOnFailure
+  );
+  static bool ConvertBase58ToHexSignificantDigitsFirst(
+    const std::string& input, std::string& output, std::stringstream* commentsOnFailure
+  );
   static bool ConvertHexToString(const std::string& input, std::string& output);
   static bool ConvertHexToInteger(const std::string& input, LargeIntUnsigned &output, int &outputNumLeadingZeroPairs);
   static bool ConvertStringToHex(const std::string& input, std::string& output);
@@ -84,38 +97,52 @@ public:
   static void computeSha256(const std::string& inputString, std::string& output);
   static void ConvertListUintToLargeUInt(List<uint32_t>& input, LargeIntUnsigned& output);
   static LargeIntUnsigned RSAencrypt(const LargeIntUnsigned& theModulus, const LargeInt& theExponent, const LargeInt& theMessage);
-  static void ConvertBitStreamToLargeUnsignedInt
-  (const List<unsigned char>& input, LargeIntUnsigned& output);
-  static bool ConvertBase64ToLargeUnsignedInt
-  (const std::string& inputBase64, LargeIntUnsigned& output, std::stringstream* commentsOnFailure);
-  static bool ConvertLargeUnsignedIntToBase64SignificantDigitsFirst
-  (const LargeIntUnsigned& input, std::string& outputBase64);
-  static bool ConvertLargeUnsignedIntToHexSignificantDigitsFirst
-  (const LargeIntUnsigned& input, int numberOfLeadingZeroesToPadWith, std::string& outputHex);
-  static bool ConvertLargeUnsignedIntToStringSignificantDigitsLast
-  (const LargeIntUnsigned& input, std::string& output);
-  static bool ConvertLargeUnsignedIntToStringSignificantDigitsFirst
-  (const LargeIntUnsigned& input, int numberOfLeadingZeroesToPadWith, std::string& output);
-  static bool VerifyJWTagainstKnownKeys
-  (const std::string& inputToken, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  static void ConvertBitStreamToLargeUnsignedInt(const List<unsigned char>& input, LargeIntUnsigned& output);
+  static bool ConvertBase64ToLargeUnsignedInt(
+    const std::string& inputBase64, LargeIntUnsigned& output, std::stringstream* commentsOnFailure
+  );
+  static bool ConvertLargeUnsignedIntToBase64SignificantDigitsFirst(const LargeIntUnsigned& input, std::string& outputBase64);
+  static bool ConvertLargeUnsignedIntToHexSignificantDigitsFirst(
+    const LargeIntUnsigned& input, int numberOfLeadingZeroesToPadWith, std::string& outputHex
+  );
+  static bool ConvertLargeUnsignedIntToStringSignificantDigitsLast(const LargeIntUnsigned& input, std::string& output);
+  static bool ConvertLargeUnsignedIntToStringSignificantDigitsFirst(
+    const LargeIntUnsigned& input, int numberOfLeadingZeroesToPadWith, std::string& output
+  );
+  static bool VerifyJWTagainstKnownKeys(
+    const std::string& inputToken, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+  );
   static void computeRIPEMD160(const std::string& input, List<unsigned char>& output);
   static std::string computeSha3_256OutputBase64URL(const std::string& input);
   static void computeSha3_256(const std::string& input, List<unsigned char>& output);
   static void computeKeccak3_256(const std::string& input, List<unsigned char>& output);
-  static bool encryptAES_CBC_256
-  (const std::string& inputKey, const std::string& inputPlainText, List<unsigned char>& output, std::stringstream *commentsOnFailure);
-  static bool encryptAES_CBC_256
-  (const std::string& inputKey, const std::string& inputPlainText, std::string& output, std::stringstream *commentsOnFailure);
-  static bool decryptAES_CBC_256
-  (const std::string& inputKey, const std::string& inputCipherText, List<unsigned char>& output,
-   std::stringstream* commentsOnFailure);
-  static bool decryptAES_CBC_256
-  (const std::string& inputKey, const std::string& inputCipherText, std::string& output,
-   std::stringstream* commentsOnFailure);
+  static bool encryptAES_CBC_256(
+    const std::string& inputKey,
+    const std::string& inputPlainText,
+    List<unsigned char>& output,
+    std::stringstream *commentsOnFailure
+  );
+  static bool encryptAES_CBC_256(
+    const std::string& inputKey,
+    const std::string& inputPlainText,
+    std::string& output,
+    std::stringstream *commentsOnFailure
+  );
+  static bool decryptAES_CBC_256(
+    const std::string& inputKey,
+    const std::string& inputCipherText,
+    List<unsigned char>& output,
+    std::stringstream* commentsOnFailure
+  );
+  static bool decryptAES_CBC_256(
+    const std::string& inputKey,
+    const std::string& inputCipherText,
+    std::string& output,
+    std::stringstream* commentsOnFailure
+  );
 };
 
-class JSONWebToken
-{
+class JSONWebToken {
 public:
   std::string signatureScheme;
   std::string headerBase64;
@@ -127,8 +154,11 @@ public:
 
   bool AssignString(const std::string& other, std::stringstream* commentsOnFailure);
   std::string ToString();
-  bool VerifyRSA256
-  (const LargeIntUnsigned& theModulus, const LargeIntUnsigned& theExponent,
-   std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool VerifyRSA256(
+    const LargeIntUnsigned& theModulus,
+    const LargeIntUnsigned& theExponent,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral
+  );
 };
 #endif // header_crypto_was_already_defined

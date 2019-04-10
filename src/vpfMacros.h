@@ -91,14 +91,13 @@ class Crasher {
   }
 };
 
-class StdoutClass
-{
+class StdoutClass {
 public:
   template <typename anyType>
   StdoutClass& operator<<(const anyType& toBePiped) {
-    if (this->theOutputFunction == 0)
+    if (this->theOutputFunction == 0) {
       std::cout << toBePiped;
-    else {
+    } else {
       std::stringstream out;
       out << toBePiped;
       this->theOutputFunction(out.str());
@@ -107,9 +106,9 @@ public:
   }
   template <typename anyType>
   StdoutClass& operator<<(anyType& toBePiped) {
-    if (this->theOutputFunction == 0)
+    if (this->theOutputFunction == 0) {
       std::cout << toBePiped;
-    else {
+    } else {
       std::stringstream out;
       out << toBePiped;
       this->theOutputFunction(out.str());

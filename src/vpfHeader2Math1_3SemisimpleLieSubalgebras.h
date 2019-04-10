@@ -248,9 +248,12 @@ public:
   bool ComputeSltwoDynkinIndices(const DynkinType& input);
   bool GetCentralizerTypeIfComputableAndKnown(const DynkinType& input, DynkinType& output);
   void ComputeHsAndHsScaledToActByTwoFromComponents();
-  void SetUpInjectionHs
-  (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection,
-   Vector<Rational>* newHScaledToActByTwo = 0);
+  void SetUpInjectionHs(
+    const CandidateSSSubalgebra& baseSubalgebra,
+    const DynkinType& theNewType,
+    const List<int>& theRootInjection,
+    Vector<Rational>* newHScaledToActByTwo = 0
+  );
   void EnumerateAllNilradicals();
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
   void EnumerateNilradicalsRecursively(List<int>& theSelection, std::stringstream* logStream = 0);

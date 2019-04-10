@@ -5,12 +5,15 @@
 #include "vpfHeader2Math11_EllipticCurves.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
 
-static ProjectInformationInstance ProjectInfovpfImplementationHeader_HeaderEllipticCurves(__FILE__, "Implementation header, elliptic curves. ");
+static ProjectInformationInstance ProjectInfovpfImplementationHeader_HeaderEllipticCurves(
+  __FILE__, "Implementation header, elliptic curves. "
+);
 
 template <typename coefficient>
 unsigned int ElementEllipticCurve<coefficient>::HashFunction(const ElementEllipticCurve<coefficient>& input) {
-  if (input.flagInfinity)
+  if (input.flagInfinity) {
     return 0;
+  }
   return input.xCoordinate.HashFunction() * SomeRandomPrimes[0] +
   input.yCoordinate.HashFunction() * SomeRandomPrimes[1] +
   input.owner.HashFunction(input.owner) * SomeRandomPrimes[2];
@@ -18,10 +21,12 @@ unsigned int ElementEllipticCurve<coefficient>::HashFunction(const ElementEllipt
 
 template <typename coefficient>
 bool ElementEllipticCurve<coefficient>::operator==(const ElementEllipticCurve& other) const {
-  if (!(this->owner == other.owner))
+  if (!(this->owner == other.owner)) {
     return false;
-  if (this->flagInfinity == true && other.flagInfinity == true)
+  }
+  if (this->flagInfinity == true && other.flagInfinity == true) {
     return true;
+  }
   return this->xCoordinate == other.xCoordinate &&
   this->yCoordinate == other.yCoordinate &&
   this->flagInfinity == other.flagInfinity;
@@ -43,14 +48,16 @@ void ElementEllipticCurve<coefficient>::MakeOne(const EllipticCurveWeierstrassNo
 
 template <typename coefficient>
 bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& other) {
-  if (!(this->owner == other.owner))
+  if (!(this->owner == other.owner)) {
     return false;
+  }
   if (this->flagInfinity) {
     *this = other;
     return true;
   }
-  if (other.flagInfinity)
+  if (other.flagInfinity) {
     return true;
+  }
   //We use the formulas:
   //slope will be determined later (it is the slope of the line or tangent through the two points).
   //x_C = s^2 - x_A - x_B
@@ -96,8 +103,9 @@ std::string ElementEllipticCurve<coefficient>::ToString(FormatExpressions* theFo
   << MonomialP(0, 1).ToString(theFormat) << " = " << this->xCoordinate.ToString()
   << ", " << MonomialP(1, 1).ToString(theFormat) << " = " << this->yCoordinate.ToString()
   << ") ";
-  if (this->flagInfinity)
+  if (this->flagInfinity) {
     out << " Infinity. ";
+  }
   return out.str();
 }
 #endif

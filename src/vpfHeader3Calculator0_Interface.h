@@ -167,14 +167,19 @@ private:
     return this->children.size;
   }
   bool SetChilD(int childIndexInMe, const Expression& inputChild);
-  bool AssignMatrixExpressions
-  (const Matrix<Expression>& input, Calculator& owner,
-   bool reduceOneRowToSequenceAndOneByOneToNonMatrix, bool dontReduceTypes);
+  bool AssignMatrixExpressions(
+    const Matrix<Expression>& input,
+    Calculator& owner,
+    bool reduceOneRowToSequenceAndOneByOneToNonMatrix,
+    bool dontReduceTypes
+  );
   template<class coefficient>
-  bool AssignMatrix
-  (const Matrix<coefficient>& input, Calculator& owner,
-   Expression const * inputContext = 0,
-   bool reduceOneRowToSequenceAndOneByOneToNonMatrix = true);
+  bool AssignMatrix(
+    const Matrix<coefficient>& input,
+    Calculator& owner,
+    Expression const* inputContext = 0,
+    bool reduceOneRowToSequenceAndOneByOneToNonMatrix = true
+  );
   bool DivisionByMeShouldBeWrittenInExponentForm() const;
   bool IsCalculatorStatusChanger() const;
   bool AssignMeMyChild(int childIndex) {
@@ -184,10 +189,12 @@ private:
   }
   bool IsLisT() const;
   bool IsListNElements(int N = - 1) const {
-    if (!this->IsLisT())
+    if (!this->IsLisT()) {
       return false;
-    if (N == - 1)
+    }
+    if (N == - 1) {
       return true;
+    }
     return this->children.size == N;
   }
   bool StartsWithBuiltInAtom() const;
@@ -196,19 +203,24 @@ private:
   bool StartsWith(int theOp = - 1, int N = - 1) const;
   bool StartsWithGivenAtom(const std::string& theAtom, int desiredChildren = - 1) const;
   bool IsListStartingWithAtom(int theOp = - 1) const {
-    if (!this->IsLisT())
+    if (!this->IsLisT()) {
       return false;
-    if (!(*this)[0].IsAtom())
+    }
+    if (!(*this)[0].IsAtom()) {
       return false;
-    if (theOp == - 1)
+    }
+    if (theOp == - 1) {
       return true;
+    }
     return (*this)[0].theData == theOp;
   }
   bool IsListOfTwoAtomsStartingWith(int theOp) const {
-    if (!this->IsListStartingWithAtom(theOp))
+    if (!this->IsListStartingWithAtom(theOp)) {
       return false;
-    if (this->children.size != 2)
+    }
+    if (this->children.size != 2) {
       return false;
+    }
     return (*this)[1].IsAtom();
   }
   bool HasSameContextArgumentsNoLog() const;
@@ -225,10 +237,18 @@ private:
   bool IsAtomGivenData(int desiredDataUseMinusOneForAny = - 1) const;
   bool IsBuiltInAtom(std::string* outputWhichOperation = 0) const;
   bool IsGoodForChainRuleFunction(std::string* outputWhichOperation = 0) const;
-  bool IsIntegraLfdx(Expression* differentialVariable = 0, Expression* functionToIntegrate = 0, Expression* integrationSet = 0) const;
-  bool IsIndefiniteIntegralfdx(Expression* differentialVariable = 0, Expression* functionToIntegrate = 0, Expression* integrationSet = 0) const;
-  bool IsDefiniteIntegralOverIntervalfdx(Expression* differentialVariable = 0, Expression* functionToIntegrate = 0, Expression* integrationSet = 0) const;
-  bool IsDifferentialOneFormOneVariablE(Expression* outputDifferentialOfWhat = 0, Expression* outputCoeffInFrontOfDifferential = 0) const;
+  bool IsIntegraLfdx(
+    Expression* differentialVariable = 0, Expression* functionToIntegrate = 0, Expression* integrationSet = 0
+  ) const;
+  bool IsIndefiniteIntegralfdx(
+    Expression* differentialVariable = 0, Expression* functionToIntegrate = 0, Expression* integrationSet = 0
+  ) const;
+  bool IsDefiniteIntegralOverIntervalfdx(
+    Expression* differentialVariable = 0, Expression* functionToIntegrate = 0, Expression* integrationSet = 0
+  ) const;
+  bool IsDifferentialOneFormOneVariablE(
+    Expression* outputDifferentialOfWhat = 0, Expression* outputCoeffInFrontOfDifferential = 0
+  ) const;
   bool IsKnownFunctionWithComplexRange(std::string* outputWhichOperation = 0) const;
   bool IsArithmeticOperation(std::string* outputWhichOperation = 0) const;
   bool IsCacheableExpression() const;
@@ -255,36 +275,47 @@ private:
   template <class theType>
   bool IsOfType() const {
     MacroRegisterFunctionWithName("Expression::IsOfType");
-    if (this->owner == 0)
+    if (this->owner == 0) {
       return false;
-    if (!this->StartsWith(this->GetTypeOperation<theType>()))
+    }
+    if (!this->StartsWith(this->GetTypeOperation<theType>())) {
       return false;
-    if (this->children.size < 2 || !this->GetLastChild().IsAtom())
+    }
+    if (this->children.size < 2 || !this->GetLastChild().IsAtom()) {
       return false;
+    }
     return true;
   }
   template <class theType>
   bool HasType() const {
-    if (this->IsOfType<theType>())
+    if (this->IsOfType<theType>()) {
       return true;
-    if (this->IsElementaryObject())
+    }
+    if (this->IsElementaryObject()) {
       return false;
-    for (int i = 0; i < this->size(); i ++)
-      if ((*this)[i].HasType<theType>())
+    }
+    for (int i = 0; i < this->size(); i ++) {
+      if ((*this)[i].HasType<theType>()) {
         return true;
+      }
+    }
     return false;
   }
   template <class theType>
   bool IsOfType(theType* whichElement) const {
     MacroRegisterFunctionWithName("Expression::IsOfType");
-    if (this->owner == 0)
+    if (this->owner == 0) {
       return false;
-    if (!this->StartsWith(this->GetTypeOperation<theType>()))
+    }
+    if (!this->StartsWith(this->GetTypeOperation<theType>())) {
       return false;
-    if (this->children.size < 2 || !this->GetLastChild().IsAtom())
+    }
+    if (this->children.size < 2 || !this->GetLastChild().IsAtom()) {
       return false;
-    if (whichElement == 0)
+    }
+    if (whichElement == 0) {
       return true;
+    }
     *whichElement = this->GetValue<theType>();
     return true;
   }
@@ -384,9 +415,12 @@ private:
   bool MakeAtom(const std::string& atomName, Calculator& newBoss);
   bool EvaluatesToVariableNonBound() const;
   Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
-  bool MakeIntegral
-  (Calculator& theCommands, const Expression& integrationSet, const Expression& theFunction,
-  const Expression& theVariable);
+  bool MakeIntegral(
+    Calculator& theCommands,
+    const Expression& integrationSet,
+    const Expression& theFunction,
+    const Expression& theVariable
+  );
   template<class coefficient>
   bool MakeSum(Calculator& theCommands, const MonomialCollection<Expression, coefficient>& theSum);
   bool MakeSum(Calculator& theCommands, const List<Expression>& theSum);
@@ -454,12 +488,14 @@ private:
     return this->HashFunctionRecursive(0, 1000);
   }
   int HashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth) const {
-    if (RecursionDepth > MaxRecursionDepth)
+    if (RecursionDepth > MaxRecursionDepth) {
       return 0;
+    }
     int result = this->theData*SomeRandomPrimes[0];
     int numCycles = MathRoutines::Minimum(this->children.size, SomeRandomPrimesSize);
-    for (int i = 0; i < numCycles; i ++)
+    for (int i = 0; i < numCycles; i ++) {
       result += (*this)[i].HashFunctionRecursive(RecursionDepth + 1, MaxRecursionDepth) * SomeRandomPrimes[i];
+    }
     return result;
   }
   int GetIndexChild(const Expression& input) const {
@@ -502,15 +538,22 @@ private:
   bool IsAlgebraicRadical() const;
   bool IsConstantNumber() const;
   bool IsPositiveNumber() const;
-  bool EvaluatesToDoubleInRange
-  (const std::string& varName, double lowBound, double highBound, int numPoints,
-   double* outputYmin = 0, double* outputYmax = 0, Vectors<double>* outputPoints = 0) const;
+  bool EvaluatesToDoubleInRange(
+    const std::string& varName,
+    double lowBound,
+    double highBound,
+    int numPoints,
+    double* outputYmin = 0,
+    double* outputYmax = 0,
+    Vectors<double>* outputPoints = 0
+  ) const;
   bool EvaluatesToDouble(double* whichDouble = 0) const;
   bool GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const;
   bool GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants) const;
   bool GetBoundVariables(HashedList<Expression>& outputAccumulateBoundVariables) const;
-  bool EvaluatesToDoubleUnderSubstitutions
-  (const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble = 0) const;
+  bool EvaluatesToDoubleUnderSubstitutions(
+    const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble = 0
+  ) const;
   bool HasBoundVariables() const;
   bool HasInputBoxVariables(HashedList<std::string, MathRoutines::HashString>* boxNames = 0) const;
   bool IsMeltable(int* numResultingChildren = 0) const;
@@ -628,8 +671,9 @@ class Function {
     this->theFunction = functionPointer;
     this->theDescription = description;
     this->theExample = inputExample;
-    if (inputArgTypes != 0)
+    if (inputArgTypes != 0) {
       this->theArgumentTypes = *inputArgTypes;
+    }
     this->flagIsInner = inputflagIsInner;
     this->flagIamVisible = inputIsVisible;
     this->flagMayActOnBoundVars = inputflagMayActOnBoundVars;
@@ -1151,8 +1195,9 @@ public:
   }
   const List<Function>* GetOperationCompositeHandlers(int theOp) {
     int theIndex = this->operationsComposite.GetIndex(this->GetOperations()[theOp]);
-    if (theIndex == - 1)
+    if (theIndex == - 1) {
       return 0;
+    }
     return &this->operationsCompositeHandlers[theIndex];
   }
   SyntacticElement GetSyntacticElementEnd() {
@@ -1161,10 +1206,12 @@ public:
     return result;
   }
   bool DecreaseStackSetCharacterRangeS(int decrease) {
-    if (decrease <= 0)
+    if (decrease <= 0) {
       return true;
-    if ((*this->CurrentSyntacticStacK).size - decrease <= 0)
-      crash << crash;
+    }
+    if ((*this->CurrentSyntacticStacK).size - decrease <= 0) {
+      crash << "Bad stack decrease. " << crash;
+    }
 //    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease- 1].IndexLastCharPlusOne =
 //    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size- 1].IndexLastCharPlusOne;
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - decrease);
@@ -1187,8 +1234,9 @@ public:
   bool DecreaseStackExceptLastTwo(int decrease);
   std::string ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclosures);
   std::string ToStringSyntacticStackHumanReadable(bool includeLispifiedExpressions, bool ignoreCommandEnclosures);
-  std::string WriteDefaultLatexFileReturnHtmlLink
-  (const std::string& fileContent, std::string* outputFileNameNoExtension, bool useLatexDviPSpsToPNG = false);
+  std::string WriteDefaultLatexFileReturnHtmlLink(
+    const std::string& fileContent, std::string* outputFileNameNoExtension, bool useLatexDviPSpsToPNG = false
+  );
   std::string ToStringIsCorrectAsciiCalculatorString(const std::string& input);
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);
@@ -1308,7 +1356,7 @@ public:
   bool ReplaceXdotsXByMatrixStart(int numXes);
   bool ReplaceXXXXByCon(int con1);
   bool ReplaceXXYByY() {
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
+    (*this->CurrentSyntacticStacK)[this->CurrentSyntacticStacK->size - 3] = (*this->CurrentSyntacticStacK)[this->CurrentSyntacticStacK->size - 1];
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 2);
     return true;
   }
@@ -1348,7 +1396,9 @@ public:
   bool ReplaceXXbyE();
   bool ReplaceIntIntBy10IntPlusInt();
   bool GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows = - 1, int desiredNumCols = - 1);
-  bool GetMatrixExpressionsFromArguments(const Expression& input, Matrix<Expression>& output, int desiredNumRows = - 1, int desiredNumCols = - 1);
+  bool GetMatrixExpressionsFromArguments(
+    const Expression& input, Matrix<Expression>& output, int desiredNumRows = - 1, int desiredNumCols = - 1
+  );
   void MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
   bool ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs);
   bool ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs);
@@ -1812,7 +1862,8 @@ public:
   );
   static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output) {
     if (&input == &output) {
-      crash << "This is a programming error: the input expression, equal to " << input.ToString() << " has the same address as the output expression. "
+      crash << "This is a programming error: the input expression, equal to "
+      << input.ToString() << " has the same address as the output expression. "
       << crash;
     }
   }
@@ -1824,8 +1875,9 @@ public:
       output = input;
       return true;
     }
-    if (theFun == 0)
+    if (theFun == 0) {
       return false;
+    }
     if (!theFun(*this, input, output)) {
       this->Comments << "<hr>Conversion function failed on " << input.ToString() << ". ";
       return false;
@@ -1833,11 +1885,14 @@ public:
     return output.IsOfType<theType>();
   }
   template <class theType>
-  bool CallConversionFunctionReturnsNonConstUseCarefully(Expression::FunctionAddress theFun, const Expression& input, theType*& outputData) {
+  bool CallConversionFunctionReturnsNonConstUseCarefully(
+    Expression::FunctionAddress theFun, const Expression& input, theType*& outputData
+  ) {
     MacroRegisterFunctionWithName("Calculator::CallConversionFunctionReturnsNonConstUseCarefully");
     Expression tempE;
-    if (!this->ConvertToTypeUsingFunction<theType>(theFun, input, tempE))
+    if (!this->ConvertToTypeUsingFunction<theType>(theFun, input, tempE)) {
       return false;
+    }
     outputData = &tempE.GetValueNonConst<theType>();
     return true;
   }
@@ -1846,8 +1901,9 @@ public:
       Expression inputCopy = input;
       return this->CallCalculatorFunction(theFun, inputCopy, output);
     }
-    if (!theFun(*this, input, output))
+    if (!theFun(*this, input, output)) {
       return false;
+    }
     return !output.IsError();
   }
   bool ExpressionMatchesPattern(
@@ -1967,8 +2023,9 @@ public:
     Expression::FunctionAddress conversionFunction = 0
   ) {
     Expression tempE = theExpression;
-    if (tempE.IsLisT())
+    if (tempE.IsLisT()) {
       tempE.SetChildAtomValue(0, this->opSequence());
+    }
     return this->GetMatrix(tempE, outputMat, inputOutputStartingContext, targetNumColsNonMandatory, conversionFunction);
   }
   template<class theType>
@@ -2335,8 +2392,7 @@ public:
   void ParseFillDictionary(const std::string& input);
 };
 
-class CalculatorConversions
-{
+class CalculatorConversions {
 public:
   ////////////////////Conversion from expression tree/////////////////////////////////
   //conversions from expression tree to type
@@ -2391,7 +2447,9 @@ public:
     Expression& output,
     Expression* inputContext = 0
   );
-  static bool innerLoadKey(Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output);
+  static bool innerLoadKey(
+    Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output
+  );
   static bool innerLoadKeysFromStatementList(
     Calculator& theCommands,
     const Expression& input,
@@ -2475,21 +2533,28 @@ bool Calculator::GetVectoR(
 ) {
   MacroRegisterFunctionWithName("Calculator::GetVector");
   List<Expression> nonConvertedEs;
-  if (!this->GetVectorExpressions(input, nonConvertedEs, targetDimNonMandatory))
+  if (!this->GetVectorExpressions(input, nonConvertedEs, targetDimNonMandatory)) {
     return false;
+  }
   List<Expression> convertedEs;
   convertedEs.SetSize(nonConvertedEs.size);
-  for (int i = 0; i < nonConvertedEs.size; i ++)
-    if (!this->ConvertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs[i], convertedEs[i]))
+  for (int i = 0; i < nonConvertedEs.size; i ++) {
+    if (!this->ConvertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs[i], convertedEs[i])) {
       return false;
-  if (!this->ConvertExpressionsToCommonContext(convertedEs, inputOutputStartingContext))
+    }
+  }
+  if (!this->ConvertExpressionsToCommonContext(convertedEs, inputOutputStartingContext)) {
     return false;
-  if (targetDimNonMandatory > 0)
-    if (convertedEs.size != targetDimNonMandatory)
+  }
+  if (targetDimNonMandatory > 0) {
+    if (convertedEs.size != targetDimNonMandatory) {
       return false;
+    }
+  }
   output.SetSize(convertedEs.size);
-  for (int i = 0; i < convertedEs.size; i ++)
+  for (int i = 0; i < convertedEs.size; i ++) {
     output[i] = convertedEs[i].GetValue<theType>();
+  }
   return true;
 }
 
@@ -2503,17 +2568,18 @@ bool Calculator::GetMatrix(
 ) {
   MacroRegisterFunctionWithName("Calculator::GetMatrix");
   Matrix<Expression> nonConvertedEs;
-  //stOutput << " Getting matrix from: " << input.ToString();
-  if (!this->GetMatrixExpressions(input, nonConvertedEs, - 1, targetNumColsNonMandatory))
+  if (!this->GetMatrixExpressions(input, nonConvertedEs, - 1, targetNumColsNonMandatory)) {
     return *this << "Failed to extract matrix of expressions from " << input.ToString();
-  //stOutput << " extracted matrix expressions: " << nonConvertedEs.ToString();
+  }
   Matrix<Expression> convertedEs;
   convertedEs.init(nonConvertedEs.NumRows, nonConvertedEs.NumCols);
   Expression theContext;
   theContext.MakeEmptyContext(*this);
-  if (inputOutputStartingContext != 0)
-    if (inputOutputStartingContext->IsContext())
+  if (inputOutputStartingContext != 0) {
+    if (inputOutputStartingContext->IsContext()) {
       theContext =*inputOutputStartingContext;
+    }
+  }
   for (int i = 0; i <nonConvertedEs.NumRows; i ++) {
     for (int j = 0; j<nonConvertedEs.NumCols; j ++) {
       if (!this->ConvertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs(i, j), convertedEs(i, j))) {
@@ -2537,8 +2603,9 @@ bool Calculator::GetMatrix(
       outputMat(i, j) = convertedEs(i, j).GetValue<theType>();
     }
   }
-  if (inputOutputStartingContext != 0)
+  if (inputOutputStartingContext != 0) {
     *inputOutputStartingContext = theContext;
+  }
   return true;
 }
 
@@ -2547,15 +2614,16 @@ bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expre
   MacroRegisterFunctionWithName("Expression::MakeSum");
   Expression oneE; //used to record the constant term
   oneE.AssignValue<Rational>(1, theCommands);
-  if (theSum.IsEqualToZero())
+  if (theSum.IsEqualToZero()) {
     return this->AssignValue<Rational>(0, theCommands);
+  }
   List<Expression> summandsWithCoeff;
   summandsWithCoeff.SetSize(theSum.size());
   for (int i = 0; i < theSum.size(); i ++) {
     Expression& current = summandsWithCoeff[i];
-    if (theSum[i] == oneE)
+    if (theSum[i] == oneE) {
       current.AssignValue(theSum.theCoeffs[i], theCommands);
-    else if (!(theSum.theCoeffs[i] == 1)) {
+    } else if (!(theSum.theCoeffs[i] == 1)) {
       current.reset(theCommands, 3);
       current.AddChildAtomOnTop(theCommands.opTimes());
       current.AddChildValueOnTop(theSum.theCoeffs[i]);
@@ -2564,7 +2632,6 @@ bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expre
       current = theSum[i];
     }
   }
-//  stOutput << "<hr>Debug: theSum: " << theSum << "<br> summandswithcf: " << summandsWithCoeff;
   if (summandsWithCoeff.size < 5) {
     for (int i = 0; i < summandsWithCoeff.size; i ++) {
       for (int j = i; j < summandsWithCoeff.size; j ++) {
@@ -2601,7 +2668,8 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner) {
     curType == owner.opWeightLieAlgPoly()
   ) {
     crash << "This may or may not be a programming error. Assigning value WITHOUT CONTEXT to data type "
-    << this->owner->GetOperations()[curType] << " is discouraged, and most likely is an error. Crashing to let you know. "
+    << this->owner->GetOperations()[curType]
+    << " is discouraged, and most likely is an error. Crashing to let you know. "
     << crash;
   }
   Expression emptyContext;
@@ -2612,12 +2680,11 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner) {
 template <class theType>
 bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output, std::stringstream* commentsOnFailure) const {
   MacroRegisterFunctionWithName("Expression::MergeContextsMyArumentsAndConvertThem");
-//  stOutput << "<hr>Merging context arguments of " << this->ToString();
   this->CheckInitialization();
   Expression mergedContexts;
-  if (!this->MergeContextsMyAruments(mergedContexts, commentsOnFailure))
+  if (!this->MergeContextsMyAruments(mergedContexts, commentsOnFailure)) {
     return false;
-//  stOutput << "<br> continuing to merge " << mergedContexts.ToString();
+  }
   output.reset(*this->owner, this->children.size);
   output.AddChildOnTop((*this)[0]);
   Expression convertedE;
@@ -2687,14 +2754,18 @@ bool Calculator::GetTypeHighestWeightParabolic(
 ) {
   if (!input.IsListNElements(4) && !input.IsListNElements(3)) {
     return output.MakeError(
-      "Function TypeHighestWeightParabolic is expected to have two or three arguments: SS algebra type, highest weight, [optional] parabolic selection. ",
+      "Function TypeHighestWeightParabolic is expected to have two or three arguments: "
+      "SS algebra type, highest weight, [optional] parabolic selection. ",
       theCommands
     );
   }
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
-  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, leftE, ambientSSalgebra))
+  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(
+    CalculatorConversions::innerSSLieAlgebra, leftE, ambientSSalgebra
+  )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
+  }
   if (!theCommands.GetVectoR<coefficient>(
     middleE,
     outputWeightHWFundcoords,
@@ -2725,11 +2796,12 @@ bool Calculator::GetTypeHighestWeightParabolic(
       }
     }
   }
-  if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(ambientSSalgebra->theWeyl.theDynkinType))
-    crash << "This is a programming error: " << ambientSSalgebra->GetLieAlgebraName() << " contained object container more than once. " << crash;
+  if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(ambientSSalgebra->theWeyl.theDynkinType)) {
+    crash << "This is a programming error: " << ambientSSalgebra->GetLieAlgebraName()
+    << " contained object container more than once. " << crash;
+  }
   int algebraIndex = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(ambientSSalgebra->theWeyl.theDynkinType);
   outputHWContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
-//  stOutput << "final context of GetTypeHighestWeightParabolic: " << outputHWContext.ToString();
   return true;
 }
 
@@ -2761,18 +2833,24 @@ template <typename theType>
 bool Expression::IsMatrixGivenType(int* outputNumRows, int* outputNumCols, Matrix<theType>* outputMat) const {
   MacroRegisterFunctionWithName("Expression::IsMatrixGivenType");
   int numRows = - 1, numCols = - 1;
-  if (outputNumRows == 0)
+  if (outputNumRows == 0) {
     outputNumRows = &numRows;
-  if (outputNumCols == 0)
+  }
+  if (outputNumCols == 0) {
     outputNumCols = &numCols;
-  if (!this->IsMatrix(outputNumRows, outputNumCols))
+  }
+  if (!this->IsMatrix(outputNumRows, outputNumCols)) {
     return false;
-  if (!(*this)[0].StartsWith(this->owner->opMatriX(), 2))
+  }
+  if (!(*this)[0].StartsWith(this->owner->opMatriX(), 2)) {
     return false;
-  if (!(*this)[0][1].IsAtomGivenData(this->GetTypeOperation<theType>()))
+  }
+  if (!(*this)[0][1].IsAtomGivenData(this->GetTypeOperation<theType>())) {
     return false;
-  if (outputMat == 0)
+  }
+  if (outputMat == 0) {
     return true;
+  }
   this->owner->GetMatrix(*this, *outputMat);
   return true;
 }

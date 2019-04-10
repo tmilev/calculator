@@ -1,8 +1,9 @@
 #ifndef vpfGraphHeaderAlreadyDefined
 #define vpfGraphHeaderAlreadyDefined
 #include "vpfHeader2Math0_General.h"
-static ProjectInformationInstance ProjectInfoVpfGraphsHeader
-(__FILE__, "Header file, graphs (Thomas).");
+static ProjectInformationInstance ProjectInfoVpfGraphsHeader(
+  __FILE__, "Header file, graphs (Thomas)."
+);
 
 // a bit of graph theory
 // a graph is stored as a continuous block, indexed as *(data + v*max_edges), after which
@@ -31,10 +32,10 @@ struct GraphEdge {
   int vStart;
   int vEnd;
   std::string label;
-  GraphEdge():vStart(- 1), vEnd(- 1) {}
+  GraphEdge() : vStart(- 1), vEnd(- 1) {}
   GraphEdge(int inputStart, int inputEnd):vStart(inputStart), vEnd(inputEnd) {}
   GraphEdge(int inputStart, int inputEnd, const std::string& inputLabel)
-  :vStart(inputStart), vEnd(inputEnd), label(inputLabel) {}
+  : vStart(inputStart), vEnd(inputEnd), label(inputLabel) {}
   std::string ToString(FormatExpressions* theFormat = 0) const;
   static unsigned int HashFunction(const GraphEdge& input) {
     return input.HashFunction();
@@ -45,7 +46,7 @@ struct GraphEdge {
   inline static bool IsMonEqualToZero() {
     return false;
   }
-  bool operator== (const GraphEdge& other) const {
+  bool operator==(const GraphEdge& other) const {
     return this->vStart == other.vStart && this->vEnd == other.vEnd &&
     this->label == other.label;
   }

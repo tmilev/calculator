@@ -85,9 +85,11 @@ void PackedVector<scalar>::SetSize(int s) {
 
 template <typename scalar>
 bool PackedVector<scalar>::operator!=(const PackedVector<scalar>& w) const {
-  for (int i = 0; i < this->size; i ++)
-    if (w[i] != this->data[i])
+  for (int i = 0; i < this->size; i ++) {
+    if (w[i] != this->data[i]) {
       return true;
+    }
+  }
   return false;
 }
 

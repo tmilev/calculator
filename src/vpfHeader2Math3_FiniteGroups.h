@@ -1731,9 +1731,6 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
       elementSomeGroup cki = ck;
       cki.Invert();
       elementSomeGroup hk = cki * k;
-      //stOutput << "Multiplying cosets: " << ci << " represented by " << cosets[ci].representative
-      //         << " multiplied on the left by " << g << " returns " << k << "which belongs to coset "
-      //         << kcsi << " and is designated (" << ck << ", " << hk << ")\n";
       Matrix<coefficient> ikblock;
       in.GetMatrixOfElement(hk, ikblock);
       out.generatorS[i].AssignBlock(ikblock, kcsi * ikblock.NumRows, ci * ikblock.NumCols);

@@ -424,8 +424,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromString(
     collectionName, theData, output, maxOutputItems, totalItems, commentsOnFailure
   );
 #else
-  if (commentsOnFailure != 0)
+  if (commentsOnFailure != 0) {
     *commentsOnFailure << "Error: code compiled without DB support";
+  }
   (void) collectionName;
   (void) findQuery;
   (void) output;

@@ -165,9 +165,6 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend(
           HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theKeys[j], false),
           HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theValues[j], false)
         );
-        //stOutput << "<hr>DEBUG: Current key, value pair: "
-        //<< HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theKeys[j], false)
-        //<< ", " << HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theValues[j], false) << ". ";
       }
     }
     std::string problemWeightString = MathRoutines::StringTrimWhiteSpace(
@@ -360,8 +357,9 @@ bool CalculatorHTML::MergeProblemInfoInDatabaseJSON(
   }
   theGlobalVariables.userDefault.problemWeights = this->ToJSONProblemWeights(incomingProblems);
   theGlobalVariables.userDefault.deadlines = this->ToJSONDeadlines(incomingProblems);
-  if (!DatabaseRoutineS::StoreProblemInfoToDatabase(theGlobalVariables.userDefault, false, commentsOnFailure))
+  if (!DatabaseRoutineS::StoreProblemInfoToDatabase(theGlobalVariables.userDefault, false, commentsOnFailure)) {
     return false;
+  }
   return true;
 }
 
@@ -372,8 +370,9 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments) {
     return false;
   }
   this->currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  if (!this->PrepareSectionList(comments))
+  if (!this->PrepareSectionList(comments)) {
     return false;
+  }
   if (this->currentUseR.problemDataJSON.objects.size() != 0) {
     if (!this->currentUseR.InterpretDatabaseProblemDataJSON(this->currentUseR.problemDataJSON, comments)) {
       comments << "Failed to interpret user's problem saved data. ";
@@ -518,8 +517,9 @@ void CalculatorHTML::LoadCurrentProblemItem(
 
 bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt) {
   MacroRegisterFunctionWithName("CalculatorHTML::IsStateModifierApplyIfYes");
-  if (inputElt.syntacticRole != "command")
+  if (inputElt.syntacticRole != "command") {
     return false;
+  }
   std::string tagClass = inputElt.GetKeyValue("class");
   if (tagClass == "setCalculatorExamHome") {
     this->flagIsExamHome = true;
@@ -562,8 +562,9 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin(
   const std::string& displayString, bool setDebugFlag, bool includeRandomSeed
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkCurrentAdmin");
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
     return "";
+  }
   std::stringstream out;
   out << "<a class =\"linkStandardButtonLike\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
   << theGlobalVariables.userCalculatorRequestType << "&";
@@ -609,10 +610,12 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
       << theGlobalVariables.GetWebInput("studentSection") << "&";
     }
   }
-  if (this->topicListFileName != "")
+  if (this->topicListFileName != "") {
     refStreamNoRequest << "topicList=" << this->topicListFileName << "&";
-  if (this->courseHome != "")
+  }
+  if (this->courseHome != "") {
     refStreamNoRequest << "courseHome=" << this->courseHome << "&";
+  }
   if (
     theFileName == this->topicListFileName ||
     theFileName == this->courseHome ||
@@ -3039,8 +3042,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before database storage");
   if (theGlobalVariables.flagDatabaseCompiled) {
     bool shouldResetTheRandomSeed = false;
-    if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven)
+    if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven) {
       shouldResetTheRandomSeed = true;
+    }
     if (this->flagIsForReal && this->NumAttemptsToInterpret > 1) {
       shouldResetTheRandomSeed = true;
       outBody
@@ -3143,8 +3147,9 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
         << theGlobalVariables.userCalculatorRequestType;
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
-        if (theGlobalVariables.GetWebInput("studentSection") != "")
+        if (theGlobalVariables.GetWebInput("studentSection") != "") {
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+        }
         out << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
         out << "courseHome=" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
         out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent - 1], false)
@@ -3157,8 +3162,9 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
         << theGlobalVariables.userCalculatorRequestType;
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
-        if (theGlobalVariables.GetWebInput("studentSection") != "")
+        if (theGlobalVariables.GetWebInput("studentSection") != "") {
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+        }
         out << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
         out << "courseHome=" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
         out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent + 1], false)
@@ -3741,9 +3747,9 @@ void TopicElement::GetTopicList(
     } else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkSolutionSource:", &currentArgument)) {
       currentElt.sourceHomework.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
       currentElt.sourceHomeworkIsSolution.AddOnTop(true);
-    } else if (MathRoutines::StringBeginsWith(currentLine, "SlidesLatex:", &currentArgument))
+    } else if (MathRoutines::StringBeginsWith(currentLine, "SlidesLatex:", &currentArgument)) {
       currentElt.sourceSlides.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
-    else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkLatex:", &currentArgument)) {
+    } else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkLatex:", &currentArgument)) {
       currentElt.sourceHomework.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
       currentElt.sourceHomeworkIsSolution.AddOnTop(false);
     } else if (MathRoutines::StringBeginsWith(currentLine, "HandwrittenSolutions:", &currentArgument)) {
@@ -3773,12 +3779,8 @@ void TopicElement::GetTopicList(
       currentElt.type = currentElt.tError;
       found = true;
     }
-    //stOutput << "<br>DEBUG: Current elt: " << currentElt.ToString();
-    //int debugwarning;
-    //owner.CheckConsistencyTopics();
   }
   owner.calculatorTopicBundles.AddOnTopNoRepetition(topicBundles.GetElement().theKeys);
-  //stOutput << "DEBUG: topicBundles: " << topicBundles.GetElement().ToStringHtml();
   if (found) {
     TopicElement::AddTopic(currentElt, output);
   }
@@ -4031,10 +4033,12 @@ std::string TopicElement::GetItemFinish(CalculatorHTML& owner) {
     owner.flagTopicTableStarted = false;
   }
   if (this->type == this->tSubSection) {
-    if (owner.flagTopicTableStarted)
+    if (owner.flagTopicTableStarted) {
       out << "\n</tbody>\n</table>\n</div><!--bodyItem-->";
-    if (owner.flagTopicSubSectionStarted)
+    }
+    if (owner.flagTopicSubSectionStarted) {
       out << "\n</div><!--bodySubsection-->";
+    }
     owner.flagTopicTableStarted = false;
   }
   return out.str();
@@ -4322,9 +4326,6 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
     }
   }
   out << "<panelProblemLinkStyleSelection>Problem links open in: ";
-//  out << "<br>DEBUG: problinkstyle: "
-//  << theGlobalVariables.GetWebInput("problemLinkStyle")
-//  << "<br>";
   out << "<input type =\"radio\" name =\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('accordion');\" ";
   if (theGlobalVariables.GetWebInput("problemLinkStyle") == "accordion") {
     out << "checked";
@@ -4486,7 +4487,6 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
   topicListJS << "</script>";
   this->topicListJavascriptWithTag = topicListJS.str();
 }
-
 
 void TopicElement::ComputeHomework(CalculatorHTML& owner) {
   MacroRegisterFunctionWithName("TopicElement::ComputeHomework");

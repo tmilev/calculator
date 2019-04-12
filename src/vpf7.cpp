@@ -653,7 +653,8 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
           MathRoutines::swap(tempElt, intermediateAccum);
           if (logStream != 0) {
             *logStream << "tempElt before mult: " << tempElt.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
-            *logStream << "intermediate before mult: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+            *logStream << "intermediate before mult: "
+            << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum *= (tempElt);
           if (logStream != 0) {

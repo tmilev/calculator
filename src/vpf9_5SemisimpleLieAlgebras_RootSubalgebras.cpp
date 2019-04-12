@@ -432,8 +432,9 @@ void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int fou
 
 void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(rootSubalgebras& owner) {
   MacroRegisterFunctionWithName("rootSubalgebra::MakeProgressReportPossibleNilradicalComputation");
-  if (!theGlobalVariables.flagReportEverything)
+  if (!theGlobalVariables.flagReportEverything) {
     return;
+  }
   ProgressReport report1, report2, report3, report4, report5;
   if (this->flagMakingProgressReport) {
     std::stringstream out1, out2, out3, out4, out5;
@@ -483,8 +484,9 @@ void rootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List
 }
 
 bool rootSubalgebra::IsARoot(const Vector<Rational>& input) {
-  if (input.size != this->GetOwnerSSalg().GetRank())
+  if (input.size != this->GetOwnerSSalg().GetRank()) {
     return false;
+  }
   return this->GetAmbientWeyl().RootSystem.Contains(input);
 }
 
@@ -677,8 +679,9 @@ void rootSubalgebra::ComputeKModules() {
   MacroRegisterFunctionWithName("rootSubalgebra::ComputeKModules");
   this->ComputeRootsOfK();
   this->scalarProdInvertedMatrixOrdered = this->scalarProdMatrixOrdered;
-  if (this->scalarProdInvertedMatrixOrdered.NumRows > 0)
+  if (this->scalarProdInvertedMatrixOrdered.NumRows > 0) {
     this->scalarProdInvertedMatrixOrdered.Invert();
+  }
   this->ComputeHighestVectorsHighestWeights();
   this->ComputeModulesFromHighestVectors();
   this->ComputeModuleDecompo();
@@ -1298,8 +1301,9 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat) {
   out << "<br>\n";
   out << "\ng/k k-submodules<table border =\"1\">\n<tr><th>id</th><th>size</th>"
   << "<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>Module basis</th><th>Weights epsilon coords</th>";
-  if (includeKEpsCoords)
+  if (includeKEpsCoords) {
     out << "<th>epsilon coords wrt k</th>";
+  }
   out << "</tr>";
   this->kModulesgEpsCoords.SetSize(this->Modules.size);
   for (int i = 0; i < this->Modules.size; i ++) {

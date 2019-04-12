@@ -647,8 +647,6 @@ bool Calculator::innerGroebner(
   }
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
   theContext.ContextGetFormatExpressions(theGroebnerComputation.theFormat);
-//  stOutput << "context vars: " << theFormat.polyAlphabeT;
-
   theContext.ContextGetFormatExpressions(theGlobalVariables.theDefaultFormat.GetElement());
   if (useModZp) {
     ElementZmodP tempElt;

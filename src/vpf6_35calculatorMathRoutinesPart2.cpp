@@ -2410,8 +2410,9 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
       out << "& ";
     }
   }
-  if (countMons != thePoly.size())
+  if (countMons != thePoly.size()) {
     out << " Programming ERROR!";
+  }
   return out.str();
 }
 
@@ -2445,9 +2446,9 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX() {
   out << "&" <<  "\\multicolumn{" << this->allMonomials.size
   << "}{|c|}{\\textbf{Remainder}}" << "\\\\";
   out << "\\multicolumn{1}{|c|}{} & ";
-  out << this->GetPolynomialStringSpacedMonomialsLaTeX
-  (this->remainderDivision, &HighlightedColor, &this->remainderDivision.theMonomials)
-  << "\\\\\\hline";
+  out << this->GetPolynomialStringSpacedMonomialsLaTeX(
+    this->remainderDivision, &HighlightedColor, &this->remainderDivision.theMonomials
+  ) << "\\\\\\hline";
   out << "\\textbf{Divisor(s)} &" << "\\multicolumn{"
   << this->allMonomials.size << "}{|c|}{\\textbf{Quotient(s)}}"
   << "\\\\";

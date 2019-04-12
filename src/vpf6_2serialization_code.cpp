@@ -6,7 +6,9 @@
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'
 static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "C++ object <-> calculator expression conversions.");
 
-bool CalculatorConversions::innerExpressionFromChevalleyGenerator(Calculator& theCommands, const ChevalleyGenerator& input, Expression& output) {
+bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
+  Calculator& theCommands, const ChevalleyGenerator& input, Expression& output
+) {
   MacroRegisterFunctionWithName("innerExpressionFromChevalleyGenerator");
   input.CheckInitialization();
   output.reset(theCommands, 2);

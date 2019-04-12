@@ -247,7 +247,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEltHypOctByEltHypOct(
   }
   ElementHyperoctahedralGroupR2 outElt, left, right;
   if (
-    !input[1].IsOfType<ElementHyperoctahedralGroupR2>(& left) ||
+    !input[1].IsOfType<ElementHyperoctahedralGroupR2>(&left) ||
     !input[2].IsOfType<ElementHyperoctahedralGroupR2>(&right)
   ) {
     return false;
@@ -1415,8 +1415,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(
   double baseDouble, expDouble;
   if (input[1].IsRational(&base)) {
     baseDouble = base.GetDoubleValue();
-  } else if (!input[1].IsOfType(&baseDouble))
+  } else if (!input[1].IsOfType(&baseDouble)) {
     return false;
+  }
   if (input[2].IsRational(&exp)) {
     expDouble = exp.GetDoubleValue();
   } else if (!input[2].IsOfType(&expDouble)) {
@@ -2039,7 +2040,10 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(
     return output.AssignValue(0, theCommands);
   }
   Expression leftConverted, rightConverted;
-  if (!leftE.ConvertToType<ElementWeylAlgebra<Rational> >(leftConverted) || !rightE.ConvertToType<ElementWeylAlgebra<Rational> >(rightConverted)) {
+  if (
+    !leftE.ConvertToType<ElementWeylAlgebra<Rational> >(leftConverted) ||
+    !rightE.ConvertToType<ElementWeylAlgebra<Rational> >(rightConverted)
+  ) {
     theCommands << "<hr>Failed with conversion to Element weyl algebra - possible programming error?";
     return false;
   }
@@ -2364,7 +2368,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteg
   return output.AssignValueWithContext(theElt, input[1].GetContext(), theCommands);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger");
   if (!input.StartsWith(theCommands.opThePower(), 3)) {
     return false;

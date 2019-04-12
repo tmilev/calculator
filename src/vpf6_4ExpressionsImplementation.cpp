@@ -295,8 +295,9 @@ SemisimpleSubalgebras
 & inputValue) const {
   this->CheckInitialization();
   inputValue.CheckInitialization();
-  if (!this->owner->theObjectContainer.theSSSubalgebraS.Contains(inputValue.owner->theWeyl.theDynkinType))
+  if (!this->owner->theObjectContainer.theSSSubalgebraS.Contains(inputValue.owner->theWeyl.theDynkinType)) {
     crash << "Semisimple subalgebras must be allocated directly in the object container. " << crash;
+  }
   return this->owner->theObjectContainer.theSSSubalgebraS.GetIndex(inputValue.owner->theWeyl.theDynkinType);
 }
 
@@ -352,8 +353,9 @@ int Expression::AddObjectReturnIndex(const
 double
 & inputValue) const {
   this->CheckInitialization();
-  if (std::isnan( inputValue))
+  if (std::isnan(inputValue)) {
     return 0;
+  }
   return this->owner->theObjectContainer.theDoubles
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }

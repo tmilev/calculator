@@ -2667,7 +2667,9 @@ bool CalculatorFunctionsGeneral::innerPowerAnyToZero(Calculator& theCommands, co
   return output.AssignValue<Rational>(1, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative");
     //////////////////////
   if (input.size() != 3) {

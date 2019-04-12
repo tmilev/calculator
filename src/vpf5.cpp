@@ -1106,8 +1106,9 @@ void WeylGroupData::GetHighestWeightsAllRepsDimLessThanOrEqualTo(
     for (int k = 0; k < this->GetDim(); k ++) {
       current[k] += 1;
       theDim = this->WeylDimFormulaFundamentalCoords(current);
-      if (theDim < dimBound)
+      if (theDim < dimBound) {
         output.AddOnTopNoRepetition(current);
+      }
       current[k] -= 1;
     }
   }

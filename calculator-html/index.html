@@ -1,12 +1,17 @@
 <html lang = "en">
 <head>
+  <script type = "text/javascript">
+    "use strict"
+    var calculatorHtmlBaseFolder = "/calculator-html/";
+    window.onerror = function errorHandlerServerErrorWorkarround(e) {
+      console.log("DEBUG: Custom error handler here. ");
+      //console.log(e);  
+    }
+  </script> 
+  
 <link type = "text/css" rel = "stylesheet" href = "/calculator-html/styleCalculator.css"/>
 <link type = "text/css" rel = "stylesheet" href = "/html-common/mathquill.css"/>
 <link type = "text/css" rel = "stylesheet" href="/html-common/jquery-ui.css">
-<script type = "text/javascript">
-  "use strict"
-  var calculatorHtmlBaseFolder = "/calculator-html/";
-</script>
 
 <script src = "/html-common/jquery.min.js"></script>
 <script src = "/html-common/jquery-ui.min.js"></script>

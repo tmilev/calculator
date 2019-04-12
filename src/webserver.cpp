@@ -4832,7 +4832,7 @@ void SignalsInfrastructure::initSignals() {
   SignalChild.sa_flags = SA_NOCLDWAIT;
   bool handleChildExit = true;
   if (handleChildExit) {
-    logServer << logger::red << "Sected an unstable feature: signal child exit handler. "
+    logServer << logger::red << "Selected an unstable feature: signal child exit handler. "
     << " Please use with caution. " << logger::endL;
     SignalChild.sa_handler = &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
   } else {
@@ -4961,8 +4961,8 @@ int WebServer::Run() {
       previousReportedNumberOfSelects = this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar;
     }
     int reportCount =
-      this->NumProcessAssassinated + this->NumProcessesReaped +
-      this->NumWorkersNormallyExited + this->NumConnectionsSoFar;
+    this->NumProcessAssassinated + this->NumProcessesReaped +
+    this->NumWorkersNormallyExited + this->NumConnectionsSoFar;
     if (reportCount - previousServerStatReport > 99) {
       this->previousServerStatReport = reportCount;
       logProcessStats << "# kill commands: " << this->NumProcessAssassinated

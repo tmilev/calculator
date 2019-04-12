@@ -54,21 +54,25 @@ ElementWeylGroup<WeylGroupData> WeylGroupData::SimpleConjugation(int i, const El
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeSquaresCCReps() {
   MacroRegisterFunctionWithName("WeylGroup::ComputeSquares");
-  if (!this->flagCCsComputed)
+  if (!this->flagCCsComputed) {
     this->ComputeCCfromAllElements();
+  }
   this->squaresCCReps.SetExpectedSize(this->ConjugacyClassCount());
   this->squaresCCReps.SetSize(this->ConjugacyClassCount());
-  elementSomeGroup currentSquare;
-  for (int i = 0; i < this->ConjugacyClassCount(); i ++)
+  //elementSomeGroup currentSquare;
+  for (int i = 0; i < this->ConjugacyClassCount(); i ++) {
     this->squaresCCReps[i] = this->conjugacyClasseS[i].representative * this->conjugacyClasseS[i].representative;
+  }
 }
 
 void WeylGroupData::ComputeInitialIrreps() {
   MacroRegisterFunctionWithName("WeylGroup::ComputeInitialIrreps");
-  if (!this->theGroup.flagCCsComputed)
+  if (!this->theGroup.flagCCsComputed) {
     this->theGroup.ComputeCCfromAllElements();
-  if (this->theGroup.squaresCCReps.size == 0)
+  }
+  if (this->theGroup.squaresCCReps.size == 0) {
     this->theGroup.ComputeSquaresCCReps();
+  }
   this->theGroup.irreps.SetSize(0);
   this->theGroup.characterTable.SetSize(0);
   this->theGroup.irreps_grcam.SetSize(0);
@@ -94,7 +98,12 @@ unsigned int VectorSpace<Rational>::HashFunction(const VectorSpace<Rational>& in
 
 
 template <typename coefficient>
-void MatrixInBasis(Matrix<coefficient>& out, const Matrix<coefficient>& in, const List<Vector<coefficient> >& basis, const Matrix<coefficient>& gramMatrix) {
+void MatrixInBasis(
+  Matrix<coefficient>& out,
+  const Matrix<coefficient>& in,
+  const List<Vector<coefficient> >& basis,
+  const Matrix<coefficient>& gramMatrix
+) {
   int d = basis.size;
   out.init(d, d);
   for (int i = 0; i < d; i ++) {
@@ -255,12 +264,12 @@ GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Reduced() const {
   GM.Invert();
   GroupRepresentationCarriesAllMatrices<somegroup, coefficient> out;
   out.generatorS.SetSize(this->generatorS.size);
-  for (int i = 0; i < this->generatorS.size; i ++)
-//     MatrixInBasisFast(out.generatorS[i], this->generatorS[i], BM);
+  for (int i = 0; i < this->generatorS.size; i ++) {
+  //     MatrixInBasisFast(out.generatorS[i], this->generatorS[i], BM);
     MatrixInBasis(out.generatorS[i], this->generatorS[i], this->basis, GM);
-
-   out.ownerGroup = ownerGroup;
-   out.basis.MakeEiBasis(d);
+  }
+  out.ownerGroup = ownerGroup;
+  out.basis.MakeEiBasis(d);
 
 /*
    if (classFunctionMatrices.size > 0) {
@@ -340,8 +349,9 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
     stOutput << "Decomposing remaining subrep " << V.GetCharacter();
     return V.DecomposeThomasVersion();
   }
-  if (Vb.size == 0)
+  if (Vb.size == 0) {
     return out;
+  }
 /*  SpaceTree<Rational> st;
   st.space = basis;
   for (int cfi = 0; cfi <G->ccCount; cfi ++) {
@@ -381,8 +391,9 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
     es = eigenspaces(A);
     if (es.size > 1) {
       stOutput << "eigenspaces were ";
-      for (int i = 0; i < es.size; i ++)
+      for (int i = 0; i < es.size; i ++) {
         stOutput << es[i].size << " ";
+      }
       stOutput << "\n";
       break;
     }
@@ -412,8 +423,9 @@ template <typename coefficient>
 struct DivisionResult<UDPolynomial<coefficient> > UDPolynomial<coefficient>::DivideBy(const UDPolynomial<coefficient>& divisor) const {
   struct DivisionResult<UDPolynomial<coefficient> > out;
   out.remainder = *this;
-  if (data.size < divisor.data.size)
+  if (data.size < divisor.data.size) {
     return out;
+  }
   int r = data.size - divisor.data.size + 1;
   out.quotient.data.SetSize(r);
   for (int i = r- 1; i != - 1; i --) {
@@ -481,12 +493,15 @@ void UDPolynomial<coefficient>::FormalDerivative() {
 
 template <typename coefficient>
 bool UDPolynomial<coefficient>::operator<(const UDPolynomial<coefficient>& right) const {
-  if (data.size < right.data.size)
+  if (data.size < right.data.size) {
     return true;
-  if (data.size > right.data.size)
+  }
+  if (data.size > right.data.size) {
     return false;
-  if (data.size == 0)
+  }
+  if (data.size == 0) {
     return false;
+  }
   return data[data.size - 1] < right.data[data.size - 1];
 }
 
@@ -755,8 +770,9 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkD
       M2.GetEigenspaceModifyMe(r, V);
       found += V.size;
       spaces.AddOnTop(V);
-      if (found == M.NumCols)
+      if (found == M.NumCols) {
         break;
+      }
     }
   }
   return spaces;
@@ -783,7 +799,7 @@ Vector<coefficient> PutInBasis(const Vector<coefficient>& v, const List<Vector<c
   Vector<coefficient> v3;
   v3.MakeZero(v.size);
   for (int i = 0; i < B.size; i ++) {
-      v3 += B[i] * v2[i];
+    v3 += B[i] * v2[i];
   }
   if (!(v3 == v)) {
     Vector<coefficient> out;
@@ -808,12 +824,14 @@ ElementWeylGroupRing<coefficient> ActOnGroupRing(
 template <typename coefficient>
 bool is_isotypic_component(WeylGroupData& G, const List<Vector<coefficient> >& V) {
   // pre-initial test: V isn't empty
-  if (V.size == 0)
+  if (V.size == 0) {
     return false;
+  }
   // initial test: dimension of V is a square
   int n = sqrt(V.size);
-  if (n * n != V.size)
+  if (n * n != V.size) {
     return false;
+  }
   // more expensive test: character of V has unit Norm
   ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, coefficient> X;
   X.G = &G.theGroup;
@@ -829,21 +847,27 @@ bool is_isotypic_component(WeylGroupData& G, const List<Vector<coefficient> >& V
     X.data[i] = tr;
   }
   // (4, - 1, - 1/2, 1/2, - 1, 1/4, 1/4, 1, 1/2, -7/2)[1] haha yeah right
-  if (X.Norm() != n)
+  if (X.Norm() != n) {
     return false;
+  }
   // okay now do the really hard test
   Matrix<coefficient> M = GetMatrix(X);
   List<List<Vector<coefficient> > > spaces = eigenspaces(M);
-  if (spaces.size != 2)
+  if (spaces.size != 2) {
     return false;
-  if (spaces[1].size != V.size)
+  }
+  if (spaces[1].size != V.size) {
     return false;
-  if (intersection(spaces[1], V).size != V.size)
+  }
+  if (intersection(spaces[1], V).size != V.size) {
     return false;
+  }
   return true;
 }
 
-Matrix<Rational> MatrixInBasis(const ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& X, const List<Vector<Rational> >& B) {
+Matrix<Rational> MatrixInBasis(
+  const ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& X, const List<Vector<Rational> >& B
+) {
   List<Vector<Rational> > rows;
   for (int i = 0; i < B.size; i ++) {
     Vector<Rational> v;
@@ -939,8 +963,9 @@ SubgroupDataWeylGroup::SubgroupDataWeylGroup() {
 }
 
 bool SubgroupDataWeylGroup::CheckInitialization() {
-  if (this->theWeylData == 0)
+  if (this->theWeylData == 0) {
     crash << "SubgroupDataWeylGroup: non-initialized theWeylData pointer. " << crash;
+  }
   return true;
 }
 
@@ -948,10 +973,12 @@ template <class someGroup, class elementSomeGroup>
 std::string SubgroupData<someGroup, elementSomeGroup>::ToString(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("SubgroupData::ToString");
   (void) theFormat;//avoid unused parameter warning, portable.
-  if (this->theGroup == 0)
+  if (this->theGroup == 0) {
     return "(not initialized (no owner group))";
-  if (this->theSubgroup == 0)
+  }
+  if (this->theSubgroup == 0) {
     return "(not initialized (subgroup pointer is 0))";
+  }
   std::stringstream out;
   out << "<br>\nSubgroup: " << this->theSubgroup->ToString();
 
@@ -977,8 +1004,9 @@ std::string SubgroupDataWeylGroup::ToString(FormatExpressions* theFormat) {
 void SubgroupDataWeylGroup::ComputeTauSignature() {
   MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
   this->CheckInitialization();
-  if (!this->theSubgroupData.theGroup->flagCCRepresentativesComputed)
+  if (!this->theSubgroupData.theGroup->flagCCRepresentativesComputed) {
     this->theSubgroupData.theGroup->ComputeCCSizesAndRepresentatives();
+  }
   this->theSubgroupData.theGroup->CheckConjugacyClassRepsMatchCCsizes();
   this->theSubgroupData.theGroup->CheckOrthogonalityCharTable();
   Vector<Rational> Xs;
@@ -1114,17 +1142,20 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor
   const elementSomeGroup& left, const elementSomeGroup& right
 ) {
   MacroRegisterFunctionWithName("WeylGroup::AreConjugate_OLD_Deprecated_Version_By_Todor");
-  if (left.HasDifferentConjugacyInvariantsFrom(right))
+  if (left.HasDifferentConjugacyInvariantsFrom(right)) {
     return false;
+  }
   OrbitIteratorWeylGroup theIterator;
   theIterator.init(this->generators, left, ElementWeylGroup<WeylGroupData>::ConjugationAction);
-  if (this->generators.size == 0)
+  if (this->generators.size == 0) {
     crash << "generators not allowed to be 0. " << crash;
+  }
   do {
     //if (left.ToString() == "s_{4}")
     //  stOutput << "<br>" << theIterator.GetCurrentElement().ToString() << "=?=" << right.ToString();
-    if (theIterator.GetCurrentElement() == right)
+    if (theIterator.GetCurrentElement() == right) {
       return true;
+    }
   } while (theIterator.IncrementReturnFalseIfPastLast());
   return false;
 }

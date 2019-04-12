@@ -104,8 +104,9 @@ void MutexRecursiveWrapper::LockMe() {
 
 void MutexRecursiveWrapper::UnlockMe() {
   this->CheckConsistency();
-  if (!this->InitializeIfNeeded())
+  if (!this->InitializeIfNeeded()) {
     return;
+  }
   this->flagUnsafeFlagForDebuggingIsLocked = false;
   this->lastLockerThread = - 1;
   ((std::mutex*) this->theMutexImplementation)->unlock();

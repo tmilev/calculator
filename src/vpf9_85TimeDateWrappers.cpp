@@ -92,17 +92,22 @@ std::string TimeWrapper::ToStringSecondsToDaysHoursSecondsString(double input, b
     return out.str();
   }
   input -= days * 24 * 3600;
-  if (!isPositive)
+  if (!isPositive) {
     out << "-(";
+  }
   out << "~";
-  if (days > 0)
+  if (days > 0) {
     out << days << " day(s) ";
-  if (input > 0)
+  }
+  if (input > 0) {
     out << std::fixed << input / 3600 << " hour(s)";
-  if (includeSeconds && !beShort)
+  }
+  if (includeSeconds && !beShort) {
     out << std::fixed << (((int) input) / 60) << " minute(s) " << (((int) input) % 60) << " second(s).";
-  if (!isPositive)
+  }
+  if (!isPositive) {
     out << ")";
+  }
   return out.str();
 }
 

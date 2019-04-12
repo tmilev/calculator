@@ -15,7 +15,7 @@ timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
 int64_t GlobalVariables::GetElapsedMilliseconds() {
   gettimeofday(&LastMeasureOfCurrentTime, NULL);
   return (LastMeasureOfCurrentTime.tv_sec - ComputationStartGlobal.tv_sec) * 1000 +
-    (LastMeasureOfCurrentTime.tv_usec - ComputationStartGlobal.tv_usec) / 1000 - theGlobalVariables.millisecondOffset;
+  (LastMeasureOfCurrentTime.tv_usec - ComputationStartGlobal.tv_usec) / 1000 - theGlobalVariables.millisecondOffset;
 }
 
 void InitializeTimeR() {
@@ -79,22 +79,26 @@ bool TimerThreadData::HandleTimerSignalToServer() {
 }
 
 bool TimerThreadData::HandleMaxComputationTime() {
-  if (theGlobalVariables.MaxComputationMilliseconds <= 0)
+  if (theGlobalVariables.MaxComputationMilliseconds <= 0) {
     return false;
-  if (this->elapsedComputationTimeInMilliseconds <= 0)
+  }
+  if (this->elapsedComputationTimeInMilliseconds <= 0) {
     return false;
-  if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.MaxComputationMilliseconds)
+  }
+  if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.MaxComputationMilliseconds) {
     return false;
+  }
   if (theGlobalVariables.flagComputationCompletE) {
     //theReport2.SetStatus((std::string)"The allowed clock time has ran out, but it seems the computation is already done. "+
     //                     (std::string)"Continuing to run (in order to wrap it up)...");
     return false;
   }
   //theReport2.SetStatus("Starting timer cycle break: computation time too long.");
-  if (!theGlobalVariables.flagComputationStarted)
+  if (!theGlobalVariables.flagComputationStarted) {
     crash << "Something has gone wrong. Computation has not started, yet " << this->elapsedTimeInMilliseconds
     << " ms have already passed."
     << " This may be an error in the web-server routines of the calculator. " << crash;
+  }
   std::stringstream out;
   out << "<b>This is a safety time-out crash. You may have requested a computation that takes too long."
   << "</b> Your computation ran for ";

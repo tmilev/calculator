@@ -3,7 +3,7 @@
 
 f65521 f65521::operator+(const f65521 right) const {
   f65521 out;
-  out.n = (n +right.n)%65521;
+  out.n = (n +right.n) % 65521;
   return out;
 }
 
@@ -13,12 +13,12 @@ void f65521::operator+=(const f65521 right) {
 }
 
 void f65521::Minus() {
-  n = 65521-n;
+  n = 65521 - n;
 }
 
 f65521 f65521::operator-() const {
   f65521 out;
-  out.n = 65521-n;
+  out.n = 65521 - n;
   return out;
 }
 
@@ -33,7 +33,7 @@ void f65521::operator-=(const f65521 right) {
 
 f65521 f65521::operator*(const f65521 right) const {
   f65521 out;
-  out.n = (n*right.n)%65521;
+  out.n = (n * right.n) % 65521;
   return out;
 }
 
@@ -54,8 +54,8 @@ void f65521::Invert() {
     int r = a % b;
     a = b;
     b = r;
-    int s = l - q*x;
-    int t = m - q*y;
+    int s = l - q * x;
+    int t = m - q * y;
     l = x;
     m = y;
     x = s;
@@ -249,7 +249,7 @@ bool f211::operator<(int rhs) const {
   if (rhs != 0) {
     crash << "We have not fixed any (natural or arbitrary) order of finite fields. " << crash;
   }
-  if (n>104) {
+  if (n > 104) {
     return true;
   } else {
     return false;

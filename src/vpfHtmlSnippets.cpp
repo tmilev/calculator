@@ -32,11 +32,13 @@ std::string HtmlRoutines::GetHtmlLinkFromProjectFileName(
   std::stringstream out;
   out << " <a href=\"https://github.com/tmilev/calculator/blob/master/src/"
   << FileOperations::GetFileNameFromFileNameWithPath(fileName);
-  if (line > 0)
+  if (line > 0) {
     out << "#L" << line;
+  }
   out << "\">" << FileOperations::GetFileNameFromFileNameWithPath(fileName);
-  if (fileDesc != "")
+  if (fileDesc != "") {
     out << " (" << fileDesc << ")";
+  }
   out << "</a>\n";
   return out.str();
 }
@@ -232,7 +234,8 @@ std::string HtmlRoutines::GetMathSpanPure(const std::string& input, int upperNum
 //  int dirtylittleHAckHEre;
 //  upperNumChars =1;
   if (input.size() > (unsigned) upperNumChars && upperNumChars > 0) {
-    out << "<b>LaTeX output is longer than " << upperNumChars << " characters and I dare not use mathjax. Here is the output as plain LaTeX.</b> " << input;
+    out << "<b>LaTeX output is longer than " << upperNumChars
+    << " characters and I dare not use mathjax. Here is the output as plain LaTeX.</b> " << input;
     return out.str();
   }
   out << "\\(\\displaystyle " << input << "\\)";

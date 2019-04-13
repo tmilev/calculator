@@ -305,7 +305,6 @@ void SSLdata::initSSLserver() {
     ERR_print_errors_fp(stderr);
     crash << "openssl error: failed to create CTX object." << crash;
   }
-  //////////Safari web browser: no further use of foul language necessary
   if (SSL_CTX_use_certificate_chain_file(this->contextServer, signedFileCertificate3Physical.c_str()) <= 0) {
     logServer << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
     << logger::endL;

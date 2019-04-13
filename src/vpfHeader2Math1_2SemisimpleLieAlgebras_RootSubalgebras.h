@@ -335,7 +335,7 @@ public:
   void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2();
   bool LinCombToString(const Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output);
   bool LinCombToStringDistinguishedIndex(
-    int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational> & linComb, std::string& output
+    int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output
   );
   void WriteMultTableAndOppositeKmodsToFile(
     std::fstream& output, List<List<List<int> > >& inMultTable, List<int>& inOpposites

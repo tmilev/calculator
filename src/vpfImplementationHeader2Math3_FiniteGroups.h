@@ -1801,8 +1801,9 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ClassFunctio
 
 template <typename somegroup, typename coefficient>
 std::string GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ToString(FormatExpressions* theFormat) const {
-  if (this->ownerGroup == 0)
+  if (this->ownerGroup == 0) {
     return "non-initialized representation";
+  }
   std::stringstream out;
   if (this->flagCharacterIsComputed) {
     out << "Character: " << this->theCharacteR.ToString(theFormat) << " of norm " << this->theCharacteR.Norm();

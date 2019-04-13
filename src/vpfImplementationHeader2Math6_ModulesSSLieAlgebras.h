@@ -5,12 +5,14 @@
 #include "vpfHeader2Math6_ModulesSSLieAlgebras.h"
 #include "vpfHeader2Math9DrawingVariables.h"
 
-static ProjectInformationInstance ProjectInfoVpfImplementationHeaderModulesSSLielgebras(__FILE__, "Implementation header, generalized Verma modules. ");
+static ProjectInformationInstance ProjectInfoVpfImplementationHeaderModulesSSLielgebras(
+  __FILE__, "Implementation header, generalized Verma modules. "
+);
 
 template<class coefficient>
 Rational ModuleSSalgebra<coefficient>::hwTrace(
   const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> > &thePair,
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& thePair,
   ProgressReport* theProgressReport
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::hwTrace");
@@ -67,7 +69,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace(
     Accum.generatorsIndices.AddOnTop(oldRight.generatorsIndices[i]);
     Accum.Powers.AddOnTop(oldRight.Powers[i]);
   }
-  if (this->cachedPairs.size< this->MaxNumCachedPairs) {
+  if (this->cachedPairs.size < this->MaxNumCachedPairs) {
     this->cachedPairs.AddOnTop(thePair);
     this->cachedTraces.AddOnTop(result);
   }
@@ -909,8 +911,9 @@ void ModuleSSalgebra<coefficient>::CheckConsistency(GlobalVariables& theGlobalVa
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::GetFDchar(charSSAlgMod<coefficient>& output) {
   output.MakeZero();
-  if (this->theHWFundamentalCoordsBaseField.size <= 0)
+  if (this->theHWFundamentalCoordsBaseField.size <= 0) {
     return;
+  }
   Weight<coefficient> tempMon;
   tempMon.owner = &this->GetOwner();
   WeylGroupData& theWeyl = this->GetOwner().theWeyl;

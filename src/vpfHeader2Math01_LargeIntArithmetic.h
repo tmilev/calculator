@@ -7,6 +7,7 @@
 static ProjectInformationInstance vpfHeader2Math_01LargeIntegersInstance(
   __FILE__, "Header, large integer/rational number arithmetic. "
 );
+
 class LargeIntUnsigned {
   void AddNoFitSize(const LargeIntUnsigned& x);
 public:
@@ -362,8 +363,7 @@ Rational operator/(int left, const Rational& right);
 
 class Rational {
 private:
-//C++ official feature which is so bad I call it a bug:
-//the following doesn't compile, when it should. The standard is BAD.
+//The following doesn't compile, when it should.
 //  friend int operator=(int& left, const Rational& right)
 //  { if (!right.IsSmallInteger(&left))
 //      crash << "This is a programming error. I am asked to assign a rational number to a small integer, but the rational "
@@ -446,7 +446,8 @@ private:
       if (DenShort == 0 || OtherDen == 0) {
         crash << "This is a programming error: division by zero. ";
       } else {
-        crash << "This is a programming error during rational number multiplication: corrupt rational number denominator. ";
+        crash << "This is a programming error during rational number multiplication: "
+        << "corrupt rational number denominator. ";
       }
       crash << crash;
     }
@@ -1013,5 +1014,4 @@ public:
     return tempRat.IsGreaterThan(*this);
   }
 };
-Rational operator"" _R(const char *in, size_t insize);
 #endif

@@ -3,7 +3,7 @@
 
 f65521 f65521::operator+(const f65521 right) const {
   f65521 out;
-  out.n = (n +right.n) % 65521;
+  out.n = (n + right.n) % 65521;
   return out;
 }
 

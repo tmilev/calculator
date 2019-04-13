@@ -204,8 +204,9 @@ void SSLdata::FreeClientSSL() {
 }
 
 void SSLdata::FreeEverythingShutdownSSL() {
-  if (!theGlobalVariables.flagSSLisAvailable)
+  if (!theGlobalVariables.flagSSLisAvailable) {
     return;
+  }
   theGlobalVariables.flagSSLisAvailable = false;
   this->FreeSSL();
   this->FreeContext();
@@ -282,8 +283,9 @@ void SSLdata::initSSLlibrary() {
 
 void SSLdata::initSSLserver() {
   this->initSSLlibrary();
-  if (this->theSSLMethod != 0)
+  if (this->theSSLMethod != 0) {
     return;
+  }
   std::string fileCertificatePhysical, fileKeyPhysical,
   singedFileCertificate1Physical, signedFileCertificate3Physical,
   signedFileKeyPhysical;
@@ -293,8 +295,9 @@ void SSLdata::initSSLserver() {
   FileOperations::GetPhysicalFileNameFromVirtual(fileKey, fileKeyPhysical, true, true, 0);
   FileOperations::GetPhysicalFileNameFromVirtual(signedFileKey, signedFileKeyPhysical, true, true, 0);
   //////////////////////////////////////////////////////////
-  if (!this->initSSLkeyFiles())
+  if (!this->initSSLkeyFiles()) {
     return;
+  }
   logServer << logger::green << "SSL is available." << logger::endL;
   this->theSSLMethod = SSLv23_method();
   this->contextServer = SSL_CTX_new(this->theSSLMethod);
@@ -589,9 +592,9 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(
   //CHK_SSL(err);
   /* Get the cipher - opt */
   /* Get client's certificate (note: beware of dynamic allocation) - opt */
-  if (false)
+  if (false) {
     this->InspectCertificates(commentsOnFailure, commentsGeneral);
-
+  }
 #endif // MACRO_use_open_ssl
   return true;
 }
@@ -616,9 +619,10 @@ bool SSLdata::InspectCertificates(
     }
     this->otherCertificateSubjectName = tempCharPtr;
     OPENSSL_free(tempCharPtr);
-    if (commentsGeneral != 0)
+    if (commentsGeneral != 0) {
       *commentsGeneral << "Peer certificate: "
       << "subject: " << this->otherCertificateSubjectName << "<br>\n";
+    }
     tempCharPtr = X509_NAME_oneline(X509_get_issuer_name(this->peer_certificate), 0, 0);
     if (tempCharPtr == 0) {
       if (commentsOnFailure != 0) {
@@ -879,8 +883,9 @@ bool WebWorker::ReceiveAllHttpSSL() {
     //logIO << " exiting successfully" << logger::endL;
     return true;
   }
-  if (this->messageBody.size() == (unsigned) this->ContentLength)
+  if (this->messageBody.size() == (unsigned) this->ContentLength) {
     return true;
+  }
   this->messageBody.clear(); //<- needed else the length error check will pop.
   //logWorker << "Content-length parsed to be: " << this->ContentLength
   //<< "However the size of mainArgumentRAW is: " << this->mainArgumentRAW.size();
@@ -1022,23 +1027,27 @@ ProgressReportWebServer::ProgressReportWebServer() {
 }
 
 ProgressReportWebServer::~ProgressReportWebServer() {
-  if (!this->flagServerExists)
+  if (!this->flagServerExists) {
     return;
+  }
   theWebServer.theProgressReports.SetSize(this->indexProgressReport);
   this->flagDeallocated = true;
 }
 
 void ProgressReportWebServer::SetStatus(const std::string& inputStatus) {
   MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatus");
-  if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing || !this->flagServerExists)
+  if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing || !this->flagServerExists) {
     return;
-  if (!theGlobalVariables.flagRunningBuiltInWebServer)
+  }
+  if (!theGlobalVariables.flagRunningBuiltInWebServer) {
     return;
+  }
   theWebServer.CheckConsistency();
   MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerStaticFiasco;
   safetyFirst.LockMe();
-  if (this->indexProgressReport >= theWebServer.theProgressReports.size)
+  if (this->indexProgressReport >= theWebServer.theProgressReports.size) {
     theWebServer.theProgressReports.SetSize(this->indexProgressReport + 1);
+  }
   theWebServer.theProgressReports[this->indexProgressReport] = inputStatus;
   std::stringstream toBePiped;
   for (int i = 0; i < theWebServer.theProgressReports.size; i ++) {
@@ -1047,8 +1056,9 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus) {
     }
   }
   safetyFirst.UnlockMe();
-  if (!theGlobalVariables.flagRunningBuiltInWebServer)
+  if (!theGlobalVariables.flagRunningBuiltInWebServer) {
     return;
+  }
   theWebServer.GetActiveWorker().pipeWorkerToWorkerStatus.WriteOnceAfterEmptying(toBePiped.str(), false, false);
 }
 
@@ -1067,14 +1077,16 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat) 
   bool useHtml = theFormat == 0 ? false: theFormat->flagUseHTML;
   std::string lineBreak = useHtml ? "<br>\n" : "\r\n";
   out << lineBreak;
-  if (this->requestTypE == this->requestGet)
+  if (this->requestTypE == this->requestGet) {
     out << "GET ";
-  else if (this->requestTypE == this->requestPost)
+  }
+  else if (this->requestTypE == this->requestPost) {
     out << "POST ";
-  else if (this->requestTypE == this->requestChunked)
+  } else if (this->requestTypE == this->requestChunked) {
     out << "GET or POST **chunked** " ;
-  else
+  } else {
     out << "Request type undefined.";
+  }
   out << "<hr>Address get or post:\n" << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true);
   out << lineBreak << "\nAddress computed:\n" << HtmlRoutines::ConvertStringToHtmlString(this->addressComputed, true);
   out << lineBreak << "\nArgument computed:\n" << HtmlRoutines::ConvertStringToHtmlString(this->argumentComputed, true);
@@ -1757,8 +1769,9 @@ bool WebWorker::ReceiveAllHttp() {
     numBytesInBuffer = recv(this->connectedSocketID, &buffer, bufferSize - 1, 0);
   }
   this->messageHead.assign(buffer, numBytesInBuffer);
-  if (numBytesInBuffer == 0)
+  if (numBytesInBuffer == 0) {
     return true;
+  }
   this->ParseMessageHead();
   if (this->requestTypE == WebWorker::requestTypes::requestPost) {
     this->displayUserInput = "POST " + this->addressGetOrPost;
@@ -2312,7 +2325,8 @@ int WebWorker::ProcessFile() {
     << HtmlRoutines::GetCSSLinkCalculator()
     << "<body>";
     stOutput << "One page <a href = \"" << theGlobalVariables.DisplayNameExecutableApp << "\">app</a>. ";
-    stOutput << " Same app without browser cache: <a href = \"" << theGlobalVariables.DisplayNameExecutableAppNoCache << "\">app no cache</a>.<hr>";
+    stOutput << " Same app without browser cache: <a href = \""
+    << theGlobalVariables.DisplayNameExecutableAppNoCache << "\">app no cache</a>.<hr>";
     stOutput << "<b>File does not exist.</b>";
     if (this->flagFileNameSanitized) {
       stOutput << "<hr>You requested virtual file: " << this->VirtualFileName
@@ -3326,10 +3340,11 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
       << theGlobalVariables.webArguments.theValues[i] << "&";
     }
   }
-  if (argumentProcessingFailureComments.str() != "")
+  if (argumentProcessingFailureComments.str() != "") {
     redirectedAddress << "error="
     << HtmlRoutines::ConvertStringToURLString(argumentProcessingFailureComments.str(), false)
     << "&";
+  }
   std::stringstream headerStream;
   headerStream << "Location: " << redirectedAddress.str();
   this->SetHeadeR("HTTP/1.0 303 See other", headerStream.str());
@@ -3500,7 +3515,8 @@ int WebWorker::ServeClient() {
     std::string correctedRequest;
     if (MathRoutines::StringBeginsWith(theGlobalVariables.userCalculatorRequestType, "/", &correctedRequest)) {
       theGlobalVariables.userCalculatorRequestType = correctedRequest;
-      comments << "Address was interpretted as request, so your request was set to: " << theGlobalVariables.userCalculatorRequestType << ". ";
+      comments << "Address was interpretted as request, so your request was set to: "
+      << theGlobalVariables.userCalculatorRequestType << ". ";
     }
   }
   theUser.flagMustLogin = this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
@@ -4248,7 +4264,8 @@ std::string WebServer::ToStringStatusForLogFile() {
       numInUse ++;
     }
   }
-  out << "<hr>Currently, there are " << numInUse << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
+  out << "<hr>Currently, there are " << numInUse
+  << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
   out
   << "<br>kill commands: " << this->NumProcessAssassinated
   << ", processes reaped: " << this->NumProcessesReaped
@@ -5775,7 +5792,9 @@ void GlobalVariables::ComputeConfigurationFlags() {
     << logger::purple << "************************" << logger::endL
     << logger::purple << "************************" << logger::endL;
   }
-  theGlobalVariables.flagCachingInternalFilesOn = !theGlobalVariables.configuration["serverRAMCachingOff"].isTrueRepresentationInJSON();
+  theGlobalVariables.flagCachingInternalFilesOn = !theGlobalVariables.configuration[
+    "serverRAMCachingOff"
+  ].isTrueRepresentationInJSON();
   if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer) {
     logServer
     << logger::purple << "************************" << logger::endL
@@ -5784,7 +5803,9 @@ void GlobalVariables::ComputeConfigurationFlags() {
     << "To turn off/on modify variable serverRAMCachingOff in configuration/configuration.json." << logger::endL
     << logger::purple << "************************" << logger::endL;
   }
-  theGlobalVariables.flagRunServerOnEmptyCommandLine = theGlobalVariables.configuration["runServerOnEmptyCommandLine"].isTrueRepresentationInJSON();
+  theGlobalVariables.flagRunServerOnEmptyCommandLine = theGlobalVariables.configuration[
+    "runServerOnEmptyCommandLine"
+  ].isTrueRepresentationInJSON();
   if (
     theGlobalVariables.flagRunningCommandLine &&
     theGlobalVariables.programArguments.size == 1 &&

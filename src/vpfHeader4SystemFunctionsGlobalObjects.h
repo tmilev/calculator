@@ -9,7 +9,9 @@
 #define __DATE__ " unknown date "
 #endif
 
-static ProjectInformationInstance projectInfoInstanceCalculatorGlobalAndSystemHeader(__FILE__, "Global objects and system calls header");
+static ProjectInformationInstance projectInfoInstanceCalculatorGlobalAndSystemHeader(
+  __FILE__, "Global objects and system calls header"
+);
 
 class logger;
 class Calculator;

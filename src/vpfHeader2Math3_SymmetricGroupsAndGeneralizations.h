@@ -640,8 +640,6 @@ typedef SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAut
 template <>
 void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in);
 
-ElementHyperoctahedralGroupR2 operator"" _EHOG(const char *in, size_t insize);
-
 
 //class HyperoctahedralElementR2: public SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism>
 //{

@@ -372,8 +372,9 @@ void rootSubalgebra::PossibleNilradicalComputation(Selection& selKmods, rootSuba
     return;
   }
   //this->ComputeDebugString();
-  if (this->flagFirstRoundCounting)
+  if (this->flagFirstRoundCounting) {
     this->NumTotalSubalgebras = this->NumNilradicalsAllowed;
+  }
   if (!this->flagFirstRoundCounting) {
     this->NilradicalKmods = selKmods;
     if (!this->ConeConditionHolds(owner, indexInOwner, owner.flagComputingLprohibitingWeights)) {
@@ -1653,8 +1654,9 @@ std::string rootSubalgebra::ToStringMultTable(bool useLaTeX, bool useHtml, rootS
   if (useLaTeX) {
     out << "\n\\hline opposite & ";
   }
-  if (useHtml)
+  if (useHtml) {
     out << "<tr><td>opposite</td>";
+  }
   for (int i = 0; i <owner.theOppositeKmods.size; i ++) {
     if (useHtml) {
       out << "<td>";
@@ -3626,7 +3628,8 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
     << "as $\\left\\{\\left(\\begin{array}{c|c}A& C \\\\\\hline D& -A^T\\end{array}"
     << "\\right)| C=C^T, D= D^T\\right\\}.$";
   }
-  out << " In this realization, the Cartan subalgebra $\\mathfrak{h}$ can be chosen to consist of the diagonal matrices of the above form.\n\n";
+  out << " In this realization, the Cartan subalgebra $\\mathfrak{h}$ can "
+  << "be chosen to consist of the diagonal matrices of the above form.\n\n";
   if (!includeMatrixForm) {
     out << "\n\\begin{longtable}{r|l}\n\\multicolumn{2}{c}{";
     if (simpleType == 'B') {
@@ -4214,7 +4217,11 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(
   tempRoots = tempSubgroup.RootSubsystem;
   NilradicalRoots.IntersectWith(tempRoots, NilradicalIntersection);
   for (int i = 0; i < owner.HighestWeightsPrimalSimple.size; i ++) {
-    if (!owner.NilradicalKmods.selected[i] && tempRoots.Contains(owner.HighestWeightsPrimalSimple[i]) && owner.IsGeneratingSingularVectors(i, NilradicalIntersection)) {
+    if (
+      !owner.NilradicalKmods.selected[i] &&
+      tempRoots.Contains(owner.HighestWeightsPrimalSimple[i]) &&
+      owner.IsGeneratingSingularVectors(i, NilradicalIntersection)
+    ) {
       genSingHW.AddOnTop(owner.HighestWeightsPrimalSimple[i]);
     }
   }
@@ -4251,7 +4258,7 @@ void coneRelation::MakeLookCivilized(rootSubalgebra& owner) {
     this->theDiagram.SimpleComponentTypes[0].theRank == 1
   ) {
     this->ComputeDiagramRelAndK(owner);
-    crash << crash;
+    crash << "Failed to compute diagram relation and k. " << crash;
   }
   this->SortRelation(owner);
   this->FixRepeatingRoots(this->Alphas, this->AlphaCoeffs);

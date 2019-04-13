@@ -12,7 +12,8 @@
 
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 
-//we are wrapping the math.h c++ functions for portability reasons (if for some reason we want to change from math.h to a better floating point
+//we are wrapping the math.h c++ functions for portability reasons
+//(if for some reason we want to change from math.h to a better floating point
 //library, we only need to change the implementation of the Floatingpoint class.
 class FloatingPoint {
 public:
@@ -1268,8 +1269,8 @@ public:
   bool operator>(const Matrix<coefficient>& right) const {
     if (this->NumRows != right.NumRows || this->NumCols != right.NumCols) {
       crash << "An attempt was just made to compare two matrices of different dimensions; "
-      << "most likely something is wrong in some FiniteGroup, see the frames above "
-      << __FILE__ << ":" << __LINE__ << crash;
+      << "most likely something is wrong in some FiniteGroup, see the frames above. "
+      << crash;
     }
     for (int i = 0; i < this->NumRows; i ++) {
       for (int j = 0; j < this->NumCols; j ++) {
@@ -3636,7 +3637,9 @@ bool MonomialCollection<templateMonomial, coefficient>::operator==(int x) const 
 }
 
 template <class templateMonomial, class coefficient>
-bool MonomialCollection<templateMonomial, coefficient>::operator==(const MonomialCollection<templateMonomial, coefficient>& other) const {
+bool MonomialCollection<templateMonomial, coefficient>::operator==(
+  const MonomialCollection<templateMonomial, coefficient>& other
+) const {
   if (this->theCoeffs.size != other.theCoeffs.size) {
     return false;
   }
@@ -4224,7 +4227,6 @@ void Matrix<coefficient>::NonPivotPointsToEigenVector(
     }
   }
 }
-
 
 template <class Object>
 void List<Object>::WriteToFile(std::fstream& output, int UpperLimitForDebugPurposes) const {

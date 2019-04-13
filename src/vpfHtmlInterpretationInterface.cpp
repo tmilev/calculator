@@ -535,7 +535,7 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash) {
   std::string virtualOnePageJS = appendBuildHash ?
   FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS) :
   WebAPI::request::onePageJS;
-  outFirstPart << "<script src=\"" << virtualOnePageJS << "\"></script>\n"
+  outFirstPart << "<script src=\"" << virtualOnePageJS << "\" onerror = 'errorLoadingScript(this);'></script>\n"
   << outSecondPart.str();
   this->htmlJSbuild = outFirstPart.str();
 }

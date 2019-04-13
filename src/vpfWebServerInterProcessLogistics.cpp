@@ -8,14 +8,16 @@
 
 extern WebServer theWebServer;
 
-ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImplementation
-(__FILE__, "Web server interprocess communication implementation.");
+ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImplementation(
+  __FILE__, "Web server interprocess communication implementation."
+);
 
 std::string PauseProcess::currentProcessName = "S: ";
 
 void PauseProcess::Release(int& theDescriptor) {
-  if (theDescriptor == - 1)
+  if (theDescriptor == - 1) {
     return;
+  }
   close(theDescriptor);
   theDescriptor = - 1;
 }
@@ -29,10 +31,12 @@ PipePrimitive::PipePrimitive() {
 }
 
 std::string PipePrimitive::ToString() const {
-  if (this->pipeEnds.size == 0)
+  if (this->pipeEnds.size == 0) {
     return "pipe: non-initialized";
-  if (this->pipeEnds[0] == - 1)
+  }
+  if (this->pipeEnds[0] == - 1) {
     return "pipe: not created";
+  }
   std::stringstream out;
   out << "pipe: " << this->pipeEnds[1] << "->" << this->pipeEnds[0];
   return out.str();
@@ -57,8 +61,9 @@ void PauseProcess::Release() {
 }
 
 bool PauseProcess::CheckConsistency() {
-  if (this->flagDeallocated)
+  if (this->flagDeallocated) {
     crash << "Use after free of " << this->ToString() << crash;
+  }
   return true;
 }
 
@@ -97,28 +102,34 @@ bool PipePrimitive::CreateMe(
     theWebServer.RestarT();
     return false;
   }
-  if (!readEndBlocks)
+  if (!readEndBlocks) {
     if (!this->SetPipeReadNonBlockingIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
       this->Release();
       return false;
     }
-  if (!writeEndBlocks)
+  }
+  if (!writeEndBlocks) {
     if (!this->SetPipeWriteNonBlockingIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
       this->Release();
       return false;
     }
+  }
   return true;
 }
 
-bool PauseProcess::CreateMe
-(const std::string& inputName,
- bool restartServerOnFail, bool dontCrashOnFail) {
+bool PauseProcess::CreateMe(
+  const std::string& inputName,
+  bool restartServerOnFail,
+  bool dontCrashOnFail
+) {
   this->Release();
   this->name = inputName;
-  if (!this->thePausePipe.CreateMe(inputName + "pausePipe", false, false, restartServerOnFail, dontCrashOnFail))
+  if (!this->thePausePipe.CreateMe(inputName + "pausePipe", false, false, restartServerOnFail, dontCrashOnFail)) {
     return false;
-  if (!this->mutexPipe.CreateMe(inputName + "mutexPipe", true, true, restartServerOnFail, dontCrashOnFail))
+  }
+  if (!this->mutexPipe.CreateMe(inputName + "mutexPipe", true, true, restartServerOnFail, dontCrashOnFail)) {
     return false;
+  }
   this->ResetNoAllocation();
   return true;
 }
@@ -174,8 +185,9 @@ void PauseProcess::RequestPausePauseIfLocked(bool restartServerOnFail, bool dont
   this->CheckConsistency();
   this->mutexForProcessBlocking.GetElement().LockMe();//<- make sure the pause controller is not locking itself
   //through competing threads
-  if (this->CheckPauseIsRequested(restartServerOnFail, dontCrashOnFail, false))
+  if (this->CheckPauseIsRequested(restartServerOnFail, dontCrashOnFail, false)) {
     logBlock << logger::blue << this->currentProcessName << "Blocking on " << this->ToString() << logger::endL;
+  }
   this->thePausePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   this->mutexForProcessBlocking.GetElement().UnlockMe();
 }
@@ -260,8 +272,9 @@ int Pipe::ReadWithTimeOutViaSelect(
 ) {
   MacroRegisterFunctionWithName("Pipe::ReadWithTimeOutViaSelect");
   if (theFD < 0) {
-    if (commentsOnFailure != 0)
+    if (commentsOnFailure != 0) {
       *commentsOnFailure << "Attempting to read from a negative file descriptor: " << theFD;
+    }
     return - 1;
   }
   fd_set theFDcontainer;
@@ -326,24 +339,27 @@ bool PipePrimitive::SetPipeReadNonBlockingIfFailThenCrash(bool restartServerOnFa
 bool PipePrimitive::SetPipeReadBlockingModeIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("Pipe::SetPipeReadBlockingModeIfFailThenCrash");
   bool result = this->SetPipeFlagsIfFailThenCrash(0, 0, restartServerOnFail, dontCrashOnFail);
-  if (result)
+  if (result) {
     this->flagReadEndBlocks = true;
+  }
   return result;
 }
 
 bool PipePrimitive::SetPipeWriteNonBlockingIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("Pipe::SetPipeWriteNonBlockingIfFailThenCrash");
   bool result = this->SetPipeFlagsIfFailThenCrash(O_NONBLOCK, 1, restartServerOnFail, dontCrashOnFail);
-  if (result)
+  if (result) {
     this->flagWriteEndBlocks = false;
+  }
   return result;
 }
 
 bool PipePrimitive::SetPipeWriteBlockingIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("Pipe::SetPipeWriteBlockingIfFailThenCrash");
   bool result = this->SetPipeFlagsIfFailThenCrash(0, 1, restartServerOnFail, dontCrashOnFail);
-  if (result)
+  if (result) {
     this->flagWriteEndBlocks = true;
+  }
   return result;
 }
 
@@ -351,8 +367,9 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
   int numAttempts = 0;
   for (;;) {
     int result = write(theFD, input.c_str(), input.size());
-    if (result >= 0)
+    if (result >= 0) {
       return result;
+    }
     if (result < 0)
       if (errno == EINTR) {
         logBlock << logger::red << "Write operation interrupted, repeating. " << logger::endL;
@@ -383,8 +400,9 @@ bool PipePrimitive::ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontC
   if (this->flagReadEndBlocks || this->flagWriteEndBlocks) {
     crash << this->ToString() << ": read without emptying allowed only on fully non-blocking pipes. " << crash;
   }
-  if (!this->ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
+  if (!this->ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
     return false;
+  }
   return this->WriteOnceIfFailThenCrash(this->GetLastRead(), restartServerOnFail, dontCrashOnFail);
 }
 
@@ -428,8 +446,9 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(const std::string& toBeSent, bool r
     << " writing on non-initialized pipe. ";
     return false;
   }
-  if (toBeSent.size() == 0)
+  if (toBeSent.size() == 0) {
     return true;
+  }
   int maximumBadAttempts = 30;
   this->numberOfBytesLastWrite = 0;
   int numBadAttempts = 0;
@@ -466,8 +485,9 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(const std::string& toBeSent, bool r
 
 std::string Pipe::ToString() const {
   std::stringstream out;
-  if (this->name != "")
+  if (this->name != "") {
     out << this->name << ": information pipe: ";
+  }
   out << this->thePipe.ToString();
   out << " mutex data: " << this->theMutexPipe.ToString();
   return out.str();
@@ -498,8 +518,9 @@ bool Pipe::CreateMe(const std::string& inputPipeName) {
 
 bool Pipe::CheckConsistency() {
   MacroRegisterFunctionWithName("Pipe::CheckConsistency");
-  if (this->flagDeallocated)
+  if (this->flagDeallocated) {
     crash << "This is a programming error: use after free of pipe. " << crash;
+  }
   return true;
 }
 
@@ -533,8 +554,9 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
   for (;;) {
     //logWorker << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString() << " calling read." << logger::endL;
     numReadBytes = read(this->pipeEnds[0], this->buffer.TheObjects, bufferSize);
-    if (numReadBytes >= 0)
+    if (numReadBytes >= 0) {
       break;
+    }
     counter ++;
     if (counter > 100) {
       logIO << logger::red << this->ToString()
@@ -551,9 +573,10 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
       return true;
     }
   }
-  if (numReadBytes > 150000)
+  if (numReadBytes > 150000) {
     logIO << logger::red << this->ToString()
     << "This is not supposed to happen: pipe read more than 150000 bytes. " << logger::endL;
+  }
   if (numReadBytes > 0) {
     this->buffer.SetSize(numReadBytes);
     this->lastRead = this->buffer;
@@ -587,7 +610,9 @@ void Pipe::ReadOnce(bool restartServerOnFail, bool dontCrashOnFail) {
   safetyFirst.UnlockMe(); //preventing threads from locking one another
 }
 
-logger::logger(const std::string& logFileName, logger* inputCarbonCopy, bool inputResetLogWhenTooLarge, const std::string& inputProcessType) {
+logger::logger(
+  const std::string& logFileName, logger* inputCarbonCopy, bool inputResetLogWhenTooLarge, const std::string& inputProcessType
+) {
   this->flagInitialized = false;
   this->theFileName = logFileName;
   this->currentColor = logger::normalColor;
@@ -620,7 +645,9 @@ void logger::reset() {
   }
   if (this->theFile.is_open())
     this->theFile.close();
-  FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(this->theFile, this->theFileName, false, true, false, true);
+  FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
+    this->theFile, this->theFileName, false, true, false, true
+  );
   if (! this->theFile.is_open()) {
     this->currentColor = logger::red;
     std::string computedFileName;
@@ -639,10 +666,12 @@ void logger::CheckLogSize() {
   if (theFile.tellp() > this->MaxLogSize) {
     if (this->flagResetLogFileWhenTooLarge) {
       this->reset();
-      if (this->MaxLogSize > 1000)
+      if (this->MaxLogSize > 1000) {
         *this << logger::endL << "Log file reset. " << logger::endL;
-    } else
+      }
+    } else {
       this->flagStopWritingToFile = true;
+    }
   }
 }
 
@@ -674,15 +703,17 @@ std::string logger::normalConsole() {
 }
 
 std::string logger::closeTagConsole() {
-  if (!this->flagTagColorConsoleOpened)
+  if (!this->flagTagColorConsoleOpened) {
     return "";
+  }
   this->flagTagColorConsoleOpened = false;
   return "\e[0m";
 }
 
 std::string logger::closeTagHtml() {
-  if (!this->flagTagColorHtmlOpened)
+  if (!this->flagTagColorHtmlOpened) {
     return "";
+  }
   this->flagTagColorHtmlOpened = false;
   return "</span>";
 }
@@ -839,8 +870,9 @@ logger& logger::operator<<(const loggerSpecialSymbols& input) {
         }
       }
       this->currentColor = logger::normalColor;
-      if (this->flagStopWritingToFile)
+      if (this->flagStopWritingToFile) {
         return *this;
+      }
       theFile << this->closeTagHtml();
       return *this;
     default:

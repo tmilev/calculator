@@ -357,8 +357,9 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
       // IPv4
       struct sockaddr_in *ipv4 = (struct sockaddr_in *) p->ai_addr;
       theAddress = &(ipv4->sin_addr);
-      if (commentsGeneral != 0)
+      if (commentsGeneral != 0) {
         *commentsGeneral << "IPv4: ";
+      }
     } else {
       // IPv6
       struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *) p->ai_addr;

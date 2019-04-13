@@ -112,7 +112,8 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
   inputOutputH.SubstitutionCoefficients(theSolutionSub);
   inputOutputE.SubstitutionCoefficients(theSolutionSub);
   if (logStream != 0) {
-    *logStream << "<br>H = " << inputOutputH.ToString() << "<br>E=" << inputOutputE.ToString() << "<br>F=" << inputOutputF.ToString();
+    *logStream << "<br>H = " << inputOutputH.ToString() << "<br>E="
+    << inputOutputE.ToString() << "<br>F=" << inputOutputF.ToString();
   }
   return true;
 }
@@ -473,7 +474,8 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theF
     out << "<br>In " << numNoLinfRelFound << " cases, no L-infinite relation was found. <br>";
   }
   out << "}\\\\\n<br>\n";
-  out << "Type $\\mathfrak s$ & Centralizer &Decomp. $\\mathfrak g$ over $\\mathfrak s$ &Decomp. $\\mathfrak g$ over $\\mathfrak s\\oplus \\mathfrak h_c$"
+  out << "Type $\\mathfrak s$ & Centralizer &Decomp. $\\mathfrak g$ over "
+  << "$\\mathfrak s$ &Decomp. $\\mathfrak g$ over $\\mathfrak s\\oplus \\mathfrak h_c$"
   << "&\\#$\\mathfrak n_\\mathfrak l$& \\# cone failures\\\\\\hline\n<br>\n";
   DynkinType typeCentralizer;
   FormatExpressions tempCharFormat;
@@ -535,9 +537,12 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
       candidatesRealized ++;
     }
   }
-  out << "<b>Please note that the code generating the tables is experimental. While the code performs a number of self-test routines, "
-  << " it is possible that there still exist programming bugs. We will remove this message as soon as we are confident in the accuracy of all tables.  "
-  << " If you see any errors in the tables, we would be very grateful if you email us with a simple explanation of the issue!</b><br>";
+  out << "<b>Please note that the code generating the tables is experimental. "
+  << "While the code performs a number of self-test routines, "
+  << " it is possible that there still exist programming bugs. "
+  << "We will remove this message as soon as we are confident in the accuracy of all tables.  "
+  << " If you see any errors in the tables, we would be very grateful "
+  << "if you email us with a simple explanation of the issue!</b><br>";
   candidatesNotRealizedNotProvenImpossible = this->theSubalgebras.theValues.size - candidatesRealized - candidatesProvenImpossible;
   if (!writingToHD) {
     out << candidatesRealized << " subalgebras realized.";
@@ -647,12 +652,14 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
             << " and display index " << this->GetDisplayIndexFromActual(i) << ", I requested to create file "
             << this->GetRelativePhysicalFileNameFKFTNilradicals(i) << " for output. However, the file failed to create. "
             << " Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
-            << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
+            << " folder in which the file is located. "
+            << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
           }
           outputFileFKFTnilradicals << "<html>"
           << HtmlRoutines::GetJavascriptMathjax()
           << "<body>"
-          << this->ToStringAlgebraLink(i, &theFormatCopy) << this->theSubalgebras[i].ToStringNilradicals(&theFormatCopy) << "\n</body></html>";
+          << this->ToStringAlgebraLink(i, &theFormatCopy)
+          << this->theSubalgebras[i].ToStringNilradicals(&theFormatCopy) << "\n</body></html>";
         }
         outputFileSubalgebra << "\n</body></html>\n ";
       }
@@ -2131,7 +2138,8 @@ bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(
         crash << "This is a programming error. While trying to realize type " << this->theWeylNonEmbedded->theDynkinType.ToString()
         << ", the candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
         << "however the scalar product of the positive root " << currentPosRoot.ToString() << " with the subalgebra root "
-        << this->theHsScaledToActByTwoInOrderOfCreation[l].ToString() << " is negative, while the very same positive root has had zero scalar products with all "
+        << this->theHsScaledToActByTwoInOrderOfCreation[l].ToString()
+        << " is negative, while the very same positive root has had zero scalar products with all "
         << " preceding roots. Hnew equals: " << HNewActingByTwo.ToString() << " Here are all preceding roots: "
         << this->theHsScaledToActByTwoInOrderOfCreation.ToString() << crash;
       }
@@ -3096,7 +3104,9 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
     for (int j = 0; j < numcycles; j ++, this->theNilradSubsel.incrementSelectionFixedCardinality(i)) {
       if (this->IsCommutingSelectionNilradicalElements(this->theNilradSubsel)) {
         this->theNilradicalWeights.SubSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
-        if (this->theNilradicalSubsetWeights.ConesIntersect(this->theNilradicalSubsetWeights, this->theNonFKhwsStronglyTwoSided, &betterIntersection, 0)) {
+        if (this->theNilradicalSubsetWeights.ConesIntersect(
+          this->theNilradicalSubsetWeights, this->theNonFKhwsStronglyTwoSided, &betterIntersection, 0
+        )) {
           betterIntersection.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
           this->ConeStrongIntersection.MakeZero(this->theNilradicalWeights.size +this->theNonFKhwsStronglyTwoSided.size);
           this->ConeRelativelyStrongIntersection.SetSize(0);
@@ -3513,10 +3523,11 @@ void CandidateSSSubalgebra::ExtendNilradicalSelectionToMultFreeOverSSpartSubalge
 void CandidateSSSubalgebra::EnumerateNilradicalsRecursively(List<int>& theSelection, std::stringstream* logStream) {
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::EnumerateNilradicalsRecursively");
   RecursionDepthCounter theCounter(&this->RecursionDepthCounterForNilradicalGeneration);
-  if (this->RecursionDepthCounterForNilradicalGeneration>this->NilradicalPairingTable.size + 1)
+  if (this->RecursionDepthCounterForNilradicalGeneration>this->NilradicalPairingTable.size + 1) {
     crash << "<br>oh no... something went very wrong! The nilradical generation recursion "
     << "depth cannot exceed the number of nilradicals! "
     << crash;
+  }
   ProgressReport theReport;
   if (theGlobalVariables.flagReportEverything) {
     std::stringstream out;
@@ -3599,7 +3610,9 @@ bool CandidateSSSubalgebra::CompareLeftGreaterThanRight(const Vector<Rational>& 
   return leftCpart > rightCpart;
 }
 
-void CandidateSSSubalgebra::GetWeightProjectionFundCoords(const Vector<Rational>& inputAmbientweight, Vector<Rational>& output) const {
+void CandidateSSSubalgebra::GetWeightProjectionFundCoords(
+  const Vector<Rational>& inputAmbientweight, Vector<Rational>& output
+) const {
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetWeightProjectionFundCoords");
   this->CheckFullInitializatioN();
   output.SetSize(this->theHs.size);
@@ -3911,8 +3924,10 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem() {
       this->thePosGens[i] = currentPosElt;//<-implicit type conversion here, will crash if currentNegElt has non-const coefficients
     }
     if (!this->CheckGensBracketToHs()) {
-      crash << "This is a programming error: I just solved the Serre-Like system governing the subalgebra embedding, but the Lie brackets of the "
-      << "resulting positive and negative generators are not what they should be. Something has gone very wrong. " << crash;
+      crash << "This is a programming error: I just solved the "
+      << "Serre-Like system governing the subalgebra embedding, but the Lie brackets of the "
+      << "resulting positive and negative generators are not what they should be. "
+      << "Something has gone very wrong. " << crash;
     }
   } else {
     //if (this->flagSystemProvedToHaveNoSolution)
@@ -3931,10 +3946,14 @@ void CandidateSSSubalgebra::GetGenericNegGenLinearCombination(
   for (int i = 0; i < indexNegGens; i ++) {
     offsetIndex += this->theInvolvedNegGenerators[i].size;
   }
-  this->GetGenericLinearCombination(this->totalNumUnknownsWithCentralizer, offsetIndex, this->theInvolvedNegGenerators[indexNegGens], output);
+  this->GetGenericLinearCombination(
+    this->totalNumUnknownsWithCentralizer, offsetIndex, this->theInvolvedNegGenerators[indexNegGens], output
+  );
 }
 
-void CandidateSSSubalgebra::GetGenericCartanCentralizerLinearCombination(int indexCartanCentralizerGen, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output) {
+void CandidateSSSubalgebra::GetGenericCartanCentralizerLinearCombination(
+  int indexCartanCentralizerGen, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
+) {
   int offsetIndex = this->totalNumUnknownsNoCentralizer+ indexCartanCentralizerGen*this->GetAmbientWeyl().GetDim() ;
   List<ChevalleyGenerator> eltsCartan;
   eltsCartan.SetSize(this->GetAmbientWeyl().GetDim());
@@ -4944,7 +4963,8 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat) {
     << ", sl(2)-triples of "
     << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
     << " \">";
-    theFile << "<body>" << notation << "<a href=\"" << htmlPathServerSl2s << "sl2s_nopng.html\"> Plain html for your copy+paste convenience</a><br>\n"
+    theFile << "<body>" << notation << "<a href=\"" << htmlPathServerSl2s
+    << "sl2s_nopng.html\"> Plain html for your copy+paste convenience</a><br>\n"
     << tempS << "</html></body>";
     theFile.close();
   }
@@ -5202,7 +5222,8 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompoLaTeX(FormatExpressions*
   << this->owner->owner->theWeyl.theDynkinType.ToString() << "$ over $"
   << this->theWeylNonEmbedded->theDynkinType.ToString()
   << " \\oplus \\mathfrak h_c$\\label{tableModuleDecompo} }\\\\"
-  << "Component &Module & elements & elt. weights& $h$-element $\\mathfrak k-sl(2)$-triple& $f$-element $\\mathfrak k-sl(2)$-triple\\\\";
+  << "Component &Module & elements & elt. weights& $h$-element "
+  << "$\\mathfrak k-sl(2)$-triple& $f$-element $\\mathfrak k-sl(2)$-triple\\\\";
   ElementSemisimpleLieAlgebra<AlgebraicNumber> tempLieBracket;
   for (int i = 0; i < this->Modules.size; i ++) {
     int numRowsIsoCompo = this->Modules[i].size * this->Modules[i][0].size;
@@ -5491,7 +5512,7 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat) const {
       << "at weight " << this->GetConeStrongIntersectionWeight().ToString();
       out << "<br>" << this->ConeStrongIntersection.ToStringLetterFormat("w", &tempFormat);
       out << "<br>The involved nilradical elements: " << "<br><table><tr>";
-      for (int i = 0; i < this->theNilradicalWeights.size; i ++)
+      for (int i = 0; i < this->theNilradicalWeights.size; i ++) {
         if (this->ConeStrongIntersection[i] != 0) {
           Vector<Rational>& currentNilradWeight = this->theNilradicalWeights[i];
           out << "<td><table border =\"1\"><tr><td>" << currentNilradWeight.ToString() << "</td></tr>";
@@ -5507,14 +5528,18 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat) const {
           out << "</table>";
           out << "</td>";
         }
+      }
       out << "</tr></table>";
     }
     if (this->flagComputedRelativelyStrongIntersections && this->flagLinfiniteRelFound) {
       tempFormat.vectorSpaceEiBasisNames.SetSize(this->ConeRelativelyStrongIntersection.size);
-      for (int j = 0; j < this->theNilradicalSubset.size; j ++)
+      for (int j = 0; j < this->theNilradicalSubset.size; j ++) {
         tempFormat.vectorSpaceEiBasisNames[j] = this->theNilradicalSubsetWeights[j].ToString();
-      for (int j = 0; j < this->theNonFKhwVectorsStrongRelativeToSubset.size; j ++)
-        tempFormat.vectorSpaceEiBasisNames[j+this->theNilradicalSubset.size] = this->theNonFKhwVectorsStrongRelativeToSubsetWeights[j].ToString();
+      }
+      for (int j = 0; j < this->theNonFKhwVectorsStrongRelativeToSubset.size; j ++) {
+        tempFormat.vectorSpaceEiBasisNames[j + this->theNilradicalSubset.size] =
+        this->theNonFKhwVectorsStrongRelativeToSubsetWeights[j].ToString();
+      }
       out << "<br>In addition, strong nilradical cone intersections did not suffice, I needed to compute relatively strong intersections. ";
       out << "<br>The nilradical subset:" << this->ToStringTableElementWithWeights(this->theNilradicalSubset, this->theNilradicalSubsetWeights);
       out << "<br>The highest weight cone consisting of elements commuting with the nilradical subset: "
@@ -5663,7 +5688,8 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
         for (int j = 0; j < currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size; j ++) {
           Rational theCF = currentNilrad.ConeRelativelyStrongIntersection[currentNilrad.theNilradicalSubsetWeights.size + j];
           theCF.Minus();
-          out << "$" << (currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights[j] * theCF).ToStringLetterFormat("\\omega", &tempFormat)
+          out << "$"
+          << (currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights[j] * theCF).ToStringLetterFormat("\\omega", &tempFormat)
           << "$";
           out << " & ";
           if (j != currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size - 1) {
@@ -5787,8 +5813,9 @@ std::string CandidateSSSubalgebra::ToStringPairingTableLaTeX(FormatExpressions* 
     out << "&";
     for (int j = 0; j < this->OppositeModulesByChar[i].size; j ++) {
       out << "$W_{" << this->OppositeModulesByChar[i][j] + 1 << "} $";
-      if (j != this->OppositeModulesByChar[i].size - 1)
+      if (j != this->OppositeModulesByChar[i].size - 1) {
         out << ", ";
+      }
     }
   }
   out << "\\end{longtable}";
@@ -6195,7 +6222,8 @@ std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat) 
     out << " Positive roots that commute with the weight subsystem: "
     << this->PosRootsPerpendicularPrecedingWeights.ToString();
   }
-  out << "<br>Symmetric Cartan default scale: " << this->theSubalgebraNonEmbeddedDefaultScale->theWeyl.CartanSymmetric.ToString(theFormat);
+  out << "<br>Symmetric Cartan default scale: "
+  << this->theSubalgebraNonEmbeddedDefaultScale->theWeyl.CartanSymmetric.ToString(theFormat);
   out << "Character ambient Lie algebra: " << this->theCharFundamentalCoordsRelativeToCartan.ToString();
   out << "<br>A necessary system to realize the candidate subalgebra.  ";
 //  stOutput << "Got here no crash -5.";
@@ -6283,7 +6311,8 @@ std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theForm
   bool shortReportOnly = theFormat == 0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
   bool useMouseHover = theFormat == 0 ? true : ((shortReportOnly && !theFormat->flagUseMathSpanPureVsMouseHover) || !theFormat->flagUseHtmlAndStoreToHD);
   std::stringstream out;
-  out << "<br>Dimension of subalgebra generated by predefined or computed generators: " << this->theBasis.size << ". " << "<br>Negative simple generators: ";
+  out << "<br>Dimension of subalgebra generated by predefined or computed generators: "
+  << this->theBasis.size << ". " << "<br>Negative simple generators: ";
   for (int i = 0; i < this->theNegGens.size; i ++) {
     if (useHtml && useLaTeX) {
       if (useMouseHover) {

@@ -343,7 +343,6 @@ StorageCalculator.prototype.getCleanedUpURL = function(input) {
 }
 
 StorageCalculator.prototype.parseURL = function() {
-  //console.log(`DEBUG: current hash: ${window.location.hash}`);
   this.oldHash = this.currentHash;
   try {
     this.currentHash = decodeURIComponent(window.location.hash);

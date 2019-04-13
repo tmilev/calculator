@@ -1,36 +1,65 @@
 <html lang = "en">
 <head>
-  <script type = "text/javascript">
-    "use strict"
-    var calculatorHtmlBaseFolder = "/calculator-html/";
-    window.onerror = function errorHandlerServerErrorWorkarround(e) {
-      console.log("DEBUG: Custom error handler here. ");
-      //console.log(e);  
-    }
-  </script> 
-  
-<link type = "text/css" rel = "stylesheet" href = "/calculator-html/styleCalculator.css"/>
-<link type = "text/css" rel = "stylesheet" href = "/html-common/mathquill.css"/>
-<link type = "text/css" rel = "stylesheet" href="/html-common/jquery-ui.css">
-
-<script src = "/html-common/jquery.min.js"></script>
-<script src = "/html-common/jquery-ui.min.js"></script>
-
-
-
-<script type = "text/javascript" src = "/html-common/ace/src-min/ace.js" charset = "utf-8"></script>
-<script src ="/html-common/ace/src-min/ext-language_tools.js"></script>
-<!--script src = "/html-common/mathquill.min.js"></script-->
-<script src = "/html-common/mathquill.min.js"></script>
 <script type = "text/javascript">
-"use strict"
-  var globalMQ = MathQuill.getInterface(2);
-  var MathQuillHasMatrixSupport = true;
+"use strict";
+var calculatorHtmlBaseFolder = "/calculator-html/";
+function errorLoadingScript(e) {
+  var scriptSource = e.src;
+  if (scriptSource === undefined) {
+    scriptSource = e.href;
+  }
+  console.log("Error loading script: " + scriptSource);
+  console.log("This is most likely a server ssl configuration error, which we are currently working to resolve. ");
+  console.log("In the mean time, let me reload the page for you, this should fix the issue. ");
+  try {
+    var currentHash = decodeURIComponent(window.location.hash);
+    if (currentHash.startsWith('#')) {
+      currentHash = currentHash.slice(1);
+    }
+    
+    var urlObject = {};
+    if (currentHash !== "") { 
+      urlObject = JSON.parse(currentHash);
+    }
+    if (urlObject.errorLoadingScriptReloadAttempt === undefined) {
+      urlObject.errorLoadingScriptReloadAttempt = 0;
+    }
+    if (urlObject.errorLoadingScriptReloadAttempt < 4) {
+      urlObject.errorLoadingScriptReloadAttempt ++;
+      var newAddress = `${window.location.origin}${window.location.pathname}#${JSON.stringify(urlObject)}`;
+      window.location.assign(newAddress);
+      location.reload(true);
+    }
+  } catch (e) {
+    console.log(`Failed to parse your url hash ${currentHash} obtained from ${window.location.hash}. ${e}`);
+  }
+
+}
+
+</script> 
+  
+<link type = "text/css" rel = "stylesheet" href = "/calculator-html/styleCalculator.css" onerror = "errorLoadingScript(this);">
+<link type = "text/css" rel = "stylesheet" href = "/html-common/mathquill.css" onerror = "errorLoadingScript(this);">
+<link type = "text/css" rel = "stylesheet" href = "/html-common/jquery-ui.css" onerror = "errorLoadingScript(this);">
+
+<script src = "/html-common/jquery.min.js" onerror = "errorLoadingScript(this);"></script>
+<script src = "/html-common/jquery-ui.min.js" onerror = "errorLoadingScript(this);"></script>
+
+
+
+<script type = "text/javascript" src = "/html-common/ace/src-min/ace.js" charset = "utf-8" onerror = "errorLoadingScript(this);"></script>
+<script src = "/html-common/ace/src-min/ext-language_tools.js" onerror = "errorLoadingScript(this);"></script>
+<!--script src = "/html-common/mathquill.min.js"></script-->
+<script src = "/html-common/mathquill.min.js" onerror = "errorLoadingScript(this);"></script>
+<script type = "text/javascript">
+"use strict";
+var globalMQ = MathQuill.getInterface(2);
+var MathQuillHasMatrixSupport = true;
 </script>
   <!--script src ="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
 </script-->
 <script src = "https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
-<script type = "text/javascript" src = "/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full,/calculator-html/mathjax-calculator-setup.js"></script>
+<script type = "text/javascript" src = "/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full,/calculator-html/mathjax-calculator-setup.js" onerror = "errorLoadingScript(this);"></script>
 <script type = "text/javascript" src = "/calculator-html/pathnames.js"></script>
 <script type = "text/javascript" src = "/calculator-html/server_information.js"></script>
 <script type = "text/javascript" src = "/calculator-html/ids_dom_elements.js"></script>
@@ -88,7 +117,6 @@ Browserifier.prototype.require = function (inputFileName) {
 }
 
 Browserifier.prototype.browserify = function() {
-  //console.log(`Debug: js content keys: ` + Object.keys(theJSContent));
   var expectedStart = "/calculator" + "-html/"; 
   //<- please keep strings separated; the cpp builder auto-replaces the string /calculator-html
   //<- To do: fix this.
@@ -105,7 +133,9 @@ Browserifier.prototype.browserify = function() {
 }
 
 function browserify() {
-  window.browserifier = new Browserifier();
+  if (window.browserifier === undefined) {
+    window.browserifier = new Browserifier();
+  }
   window.browserifier.browserify();
 }
 </script>

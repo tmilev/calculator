@@ -5,7 +5,9 @@
 
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfHeader2Math15_UniversalEnveloping.h"
-static ProjectInformationInstance ProjectInfoVpfHeaderLieTheoryMiscellaneous(__FILE__, "Header, Lie theory, miscellaneous. ");
+static ProjectInformationInstance ProjectInfoVpfHeaderLieTheoryMiscellaneous(
+  __FILE__, "Header, Lie theory, miscellaneous. "
+);
 
 //the following data is isolated in a struct because it is
 //way too large a lump to pass separately

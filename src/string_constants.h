@@ -75,8 +75,7 @@ struct Configuration {
   static std::string replyAfterComputationMilliseconds;
 };
 
-struct DatabaseStrings
-{
+struct DatabaseStrings {
 public:
 ///credentials of calculator to use database
   static std::string theDatabaseUser;

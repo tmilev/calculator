@@ -26,7 +26,12 @@ function Problem() {
 }
 
 Problem.prototype.initializeBasic = function(problemData) {
+  /**ProblemId is percent encoded, safe to embed in html. */
   this.problemId = encodeURIComponent(problemData.id);
+  /**@type {string}  
+   * This id is for problem navigation only, does not include the entire panel. 
+  */
+  this.idNavigationProblemNotEntirePanel = `navigationPanel${this.problemId}`;
   /**@type {InputPanelData[]} */
   this.answers = [];  
   this.fileName = problemData.fileName;
@@ -246,10 +251,19 @@ Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQui
   return result;
 }
 
+/**@returns {string} */
 Problem.prototype.getProblemNavigation = function() {
+  var result = "";
+  result += `<div id = "${this.idNavigationProblemNotEntirePanel}" class = 'problemNavigation'>`;
+  result += this.getProblemNavigationContent();
+  result += "</div>";
+  return result;
+}
+
+/**@returns {string} */
+Problem.prototype.getProblemNavigationContent = function() {
   var thePage = window.calculator.mainPage;
   var result = "";
-  result += `<div class = 'problemNavigation'>`;
   var linkType = "problemLinkPractice";
   var defaultRequest = pathnames.urlFields.exerciseJSON;
   if (this.flagForReal && thePage.user.flagLoggedIn) {
@@ -286,7 +300,6 @@ Problem.prototype.getProblemNavigation = function() {
   } else {
     result += `<b style = 'color:brown'>Scores are recorded. </b>`;
   }
-  result += "</div>";
   return result;
 }
 
@@ -976,7 +989,6 @@ function updateProblemPageCallback(input, outputComponent) {
     outputComponent.innerHTML = theProblem.crashReport;
     return;
   }
-
   /**@type {Problem} */
   var currentProblem = thePage.getCurrentProblem();
   if (currentProblem === null || currentProblem === undefined) {
@@ -988,10 +1000,21 @@ function updateProblemPageCallback(input, outputComponent) {
 
 function updateProblemPage() {
   var thePage = window.calculator.mainPage;
+  //thePage.pages.problemPage.flagLoaded is modified by the following functions:
+  // selectCurrentProblem, logout, callbackClone, the present function updateProblemPage
+  /**@type {Problem} */
+  var theProblem = thePage.getCurrentProblem();
   if (thePage.pages.problemPage.flagLoaded) {
+    if (theProblem !== undefined && theProblem !== null) {
+      var problemNavigation = document.getElementById(theProblem.idNavigationProblemNotEntirePanel);
+      var oldHtml = problemNavigation.innerHTML;
+      var newHtml = theProblem.getProblemNavigationContent();
+      if (oldHtml != newHtml) {
+        problemNavigation.innerHTML = newHtml;
+      }
+    }
     return;
   }
-  var theProblem = thePage.getCurrentProblem();
   var theURL;
   if (theProblem !== undefined && theProblem !== null) { 
     theURL = `${pathnames.urls.calculatorAPI}?${theProblem.getCalculatorURLRequestFileCourseTopics()}`;

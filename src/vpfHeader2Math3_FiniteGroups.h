@@ -366,8 +366,9 @@ struct simpleReflectionOrOuterAuto {
     return this->flagIsOuter == other.flagIsOuter && this->index == other.index;
   }
   bool operator>(const simpleReflectionOrOuterAuto& right) const {
-    if (right.flagIsOuter != this->flagIsOuter)
+    if (right.flagIsOuter != this->flagIsOuter) {
       return this->flagIsOuter > right.flagIsOuter;
+    }
     return this->index>right.index;
   }
 };
@@ -408,8 +409,9 @@ public:
     this->owner->ActOn(*this, inputOutput, inputOutput);
   }
   bool CheckConsistency() const {
-    if (this->flagDeallocated)
+    if (this->flagDeallocated) {
       crash << "Programming error: use after free of class ElementWeylGroup" << crash;
+    }
     return true;
   }
   bool CheckInitialization() const {

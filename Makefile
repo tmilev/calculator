@@ -1,25 +1,18 @@
-# Pthreads are  being phased out in favor of std::mutex and similar.
-# Openmp was lightly used in some code by Thomas in late 2015.
-# Optimization flags have not actually been tested. 
-# 1. -Og is not used for
-# debug builds because building performance matters more than running
-# performance.  
-# 2. -O3 doesn't slow down non-debug builds too much, and it is
+# 1. The -O3 flag doesn't slow down builds too much, and it is
 # expected that this will be built on systems that use it, thus -march=native.
-# 3. -flto was experimented with, as it is the way to achieve the vaunted
-# benefits of seeing the program before running it, but was ultimately too
-# slow
-# The -MMD -Mp flags create files that notify make about 
+# 2. The -MMD -Mp flags create files that notify make about
 # header dependencies so sources can be correctly rebuilt.  
 # A 'make clean'
 # is of course suggested when changing compilation options, not that something
 # bad will happen, but something bad is not guaranteed not to happen.
-# AllocationStatistics is Thomas' feature to notify the user with a glibc
+# AllocationStatistics is a likely-to-be-deprecated
+# feature to notify the user with a glibc
 # prepared stack trace every time an object is allocated that crosses a
 # megabyte boundary, in order to find hot spots of massive memory allocation.
 # This needs -rdynamic due to implementation.
 # 
-FEATUREFLAGS= -std=c++0x -pthread -fopenmp
+
+FEATUREFLAGS= -std=c++0x -pthread
 CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
 LDFLAGS=$(FEATUREFLAGS)
 LIBRARIES_INCLUDED_AT_THE_END=
@@ -105,7 +98,7 @@ $(info [1;34mLinker flags part 1:  $(LDFLAGS))
 $(info [1;34mLinker flags part 2: $(LIBRARIES_INCLUDED_AT_THE_END)[0m)
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
-SOURCES_NO_PATH=\
+SOURCES_RELATIVE_PATH=\
 databasemongo.cpp \
 database_mongo_calculator.cpp \
 webserver.cpp \
@@ -160,13 +153,46 @@ vpf9_85TimeDateWrappers.cpp \
 string_constants.cpp \
 source_code_formatter.cpp
 
+# SOURCES_RELATIVE_PATH_C =\
+# openssl/ssl/bio_ssl.c \
+# openssl/ssl/pqueue.c \
+# openssl/ssl/packet.c \
+# openssl/ssl/statem/statem_srvr.c \
+# openssl/ssl/statem/statem_clnt.c \
+# openssl/ssl/s3_lib.c \
+# openssl/ssl/s3_enc.c \
+# record/rec_layer_s3.c \
+# statem/statem_lib.c \
+# statem/extensions.c \
+# statem/extensions_srvr.c \
+# statem/extensions_clnt.c \
+# statem/extensions_cust.c \
+# s3_cbc.c \
+# s3_msg.c \
+# methods.c \
+# t1_lib.c \
+# t1_enc.c \
+# tls13_enc.c \
+# d1_lib.c  record/rec_layer_d1.c d1_msg.c \
+# statem/statem_dtls.c d1_srtp.c \
+# ssl_lib.c ssl_cert.c ssl_sess.c \
+# ssl_ciph.c ssl_stat.c ssl_rsa.c \
+# ssl_asn1.c ssl_txt.c ssl_init.c ssl_conf.c  ssl_mcnf.c \
+# bio_ssl.c ssl_err.c tls_srp.c t1_trce.c ssl_utst.c \
+# record/ssl3_buffer.c record/ssl3_record.c record/dtls1_bitmap.c \
+# statem/statem.c record/ssl3_record_tls13.c
 
-OBJECTS=$(addprefix bin/, $(notdir $(SOURCES_NO_PATH:.cpp=.o)))
-DEPENDENCIES=$(addprefix bin/, $(notdir $(SOURCES_NO_PATH:.cpp=.d)))
-#$(info $(OBJECTS))
-#$(info )
-#$(info $(DEPENDENCIES))
-#$(info )
+
+OBJECTS=$(addprefix bin/, $(SOURCES_RELATIVE_PATH:.cpp=.o))
+# OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH_C:.c=.o))
+DEPENDENCIES=$(OBJECTS:.o=.d)
+
+# Uncomment the following lines to print
+# the objects/dependencies file names.
+# $(info $(OBJECTS))
+# $(info )
+# $(info $(DEPENDENCIES))
+# $(info )
 
 all: directories bin_calculator 
 directories: bin
@@ -180,6 +206,9 @@ testrun: bin/calculator
 	time ./bin/calculator test
 
 bin/%.o:src/%.cpp
+	$(CXX) $(CFLAGS) -MMD -MP $< -o $@
+
+bin/openssl/%.o:src/openssl/%.c
 	$(CXX) $(CFLAGS) -MMD -MP $< -o $@
 
 clean:

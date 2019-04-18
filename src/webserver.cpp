@@ -274,11 +274,13 @@ bool SSLdata::initSSLkeyFiles() {
 }
 
 void SSLdata::initSSLlibrary() {
-  if (this->flagSSLlibraryInitialized)
+  if (this->flagSSLlibraryInitialized) {
     return;
+  }
   this->flagSSLlibraryInitialized = true;
   SSL_load_error_strings();
   OpenSSL_add_ssl_algorithms();
+  SSL_library_init();
 }
 
 void SSLdata::initSSLserver() {
@@ -549,9 +551,10 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(
       //  << logger::endL;
       //  break;
       case SSL_ERROR_SYSCALL:
-        if (commentsOnFailure != 0)
+        if (commentsOnFailure != 0) {
           *commentsOnFailure << logger::red << "Error: some I/O error occurred. <br>"
           << logger::endL;
+        }
         maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_SSL:

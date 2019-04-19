@@ -153,38 +153,56 @@ vpf9_85TimeDateWrappers.cpp \
 string_constants.cpp \
 source_code_formatter.cpp
 
-# SOURCES_RELATIVE_PATH_C =\
-# openssl/ssl/bio_ssl.c \
-# openssl/ssl/pqueue.c \
-# openssl/ssl/packet.c \
-# openssl/ssl/statem/statem_srvr.c \
-# openssl/ssl/statem/statem_clnt.c \
-# openssl/ssl/s3_lib.c \
-# openssl/ssl/s3_enc.c \
-# record/rec_layer_s3.c \
-# statem/statem_lib.c \
-# statem/extensions.c \
-# statem/extensions_srvr.c \
-# statem/extensions_clnt.c \
-# statem/extensions_cust.c \
-# s3_cbc.c \
-# s3_msg.c \
-# methods.c \
-# t1_lib.c \
-# t1_enc.c \
-# tls13_enc.c \
-# d1_lib.c  record/rec_layer_d1.c d1_msg.c \
-# statem/statem_dtls.c d1_srtp.c \
-# ssl_lib.c ssl_cert.c ssl_sess.c \
-# ssl_ciph.c ssl_stat.c ssl_rsa.c \
-# ssl_asn1.c ssl_txt.c ssl_init.c ssl_conf.c  ssl_mcnf.c \
-# bio_ssl.c ssl_err.c tls_srp.c t1_trce.c ssl_utst.c \
-# record/ssl3_buffer.c record/ssl3_record.c record/dtls1_bitmap.c \
-# statem/statem.c record/ssl3_record_tls13.c
+SOURCES_RELATIVE_PATH_C =\
+openssl/ssl/bio_ssl.c \
+openssl/ssl/pqueue.c \
+openssl/ssl/packet.c \
+openssl/ssl/statem/statem_srvr.c \
+openssl/ssl/statem/statem_clnt.c \
+openssl/ssl/s3_lib.c \
+openssl/ssl/s3_enc.c \
+openssl/ssl/record/rec_layer_s3.c \
+openssl/ssl/statem/statem_lib.c \
+openssl/ssl/statem/extensions.c \
+openssl/ssl/statem/extensions_srvr.c \
+openssl/ssl/statem/extensions_clnt.c \
+openssl/ssl/statem/extensions_cust.c \
+openssl/ssl/s3_cbc.c \
+openssl/ssl/s3_msg.c \
+openssl/ssl/methods.c \
+openssl/ssl/t1_lib.c \
+openssl/ssl/t1_enc.c \
+openssl/ssl/tls13_enc.c \
+openssl/ssl/d1_lib.c \
+openssl/ssl/record/rec_layer_d1.c \
+openssl/ssl/d1_msg.c \
+openssl/ssl/statem/statem_dtls.c \
+openssl/ssl/d1_srtp.c \
+openssl/ssl/ssl_lib.c \
+openssl/ssl/ssl_cert.c \
+openssl/ssl/ssl_sess.c \
+openssl/ssl/ssl_ciph.c \
+openssl/ssl/ssl_stat.c \
+openssl/ssl/ssl_rsa.c \
+openssl/ssl/ssl_asn1.c \
+openssl/ssl/ssl_txt.c \
+openssl/ssl/ssl_init.c \
+openssl/ssl/ssl_conf.c \
+openssl/ssl/ssl_mcnf.c \
+openssl/ssl/bio_ssl.c \
+openssl/ssl/ssl_err.c \
+openssl/ssl/tls_srp.c \
+openssl/ssl/t1_trce.c \
+openssl/ssl/ssl_utst.c \
+openssl/ssl/record/ssl3_buffer.c \
+openssl/ssl/record/ssl3_record.c \
+openssl/ssl/record/dtls1_bitmap.c \
+openssl/ssl/statem/statem.c \
+openssl/ssl/record/ssl3_record_tls13.c
 
 
 OBJECTS=$(addprefix bin/, $(SOURCES_RELATIVE_PATH:.cpp=.o))
-# OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH_C:.c=.o))
+OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH_C:.c=.o))
 DEPENDENCIES=$(OBJECTS:.o=.d)
 
 # Uncomment the following lines to print

@@ -8,12 +8,12 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include <string.h>
 #include "ec_lcl.h"
-#include "internal/refcount.h"
-#include <openssl/err.h>
-#include <openssl/engine.h>
+#include "../../include/internal/refcount.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/engine.h"
 
 EC_KEY *EC_KEY_new(void)
 {

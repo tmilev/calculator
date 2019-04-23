@@ -12,11 +12,11 @@
 
 # include <stdarg.h>
 
-# include <openssl/opensslconf.h>
-# include <openssl/ossl_typ.h>
-# include <openssl/symhacks.h>
-# include <openssl/bio.h>
-# include <openssl/evperr.h>
+# include "../../include/openssl/opensslconf.h"
+# include "../../include/openssl/ossl_typ.h"
+# include "../../include/openssl/symhacks.h"
+# include "../../include/openssl/bio.h"
+# include "../../include/openssl/evperr.h"
 
 # define EVP_MAX_MD_SIZE                 64/* longest known is SHA512 */
 # define EVP_MAX_KEY_LENGTH              64

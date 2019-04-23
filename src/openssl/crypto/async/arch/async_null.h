@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/async.h>
+#include "../../include/openssl/async.h"
 
 /*
  * If we haven't managed to detect any other async architecture then we default

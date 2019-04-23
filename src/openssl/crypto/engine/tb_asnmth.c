@@ -7,10 +7,10 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
+#include "../../e_os.h"
 #include "eng_int.h"
-#include <openssl/evp.h>
-#include "internal/asn1_int.h"
+#include "../../include/openssl/evp.h"
+#include "../include/internal/asn1_int.h"
 
 /*
  * If this symbol is defined then ENGINE_get_pkey_asn1_meth_engine(), the

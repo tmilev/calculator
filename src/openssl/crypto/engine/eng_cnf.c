@@ -8,8 +8,8 @@
  */
 
 #include "eng_int.h"
-#include <openssl/conf.h>
-#include <openssl/trace.h>
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/trace.h"
 
 /* ENGINE config module */
 

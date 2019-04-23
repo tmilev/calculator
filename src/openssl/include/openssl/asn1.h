@@ -18,9 +18,9 @@
 # include "../../include/openssl/asn1err.h"
 # include "../../include/openssl/symhacks.h"
 
-# include <openssl/ossl_typ.h>
+# include "../../include/openssl/ossl_typ.h"
 # if !OPENSSL_API_1_1_0
-#  include <openssl/bn.h>
+#  include "../../include/openssl/bn.h"
 # endif
 
 # ifdef OPENSSL_BUILD_SHLIBCRYPTO

@@ -12,8 +12,8 @@
 #include <string.h>
 #include <setjmp.h>
 #include <signal.h>
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
+#include "../../include/openssl/crypto.h"
+#include "../include/internal/cryptlib.h"
 
 #include "arm_arch.h"
 

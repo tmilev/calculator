@@ -14,7 +14,7 @@
 # include <stdlib.h>
 # include <time.h>
 
-# include <openssl/e_os2.h>
+# include "../openssl/e_os2.h"
 
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>
@@ -26,18 +26,14 @@
 # include "opensslconf.h"
 # include "cryptoerr.h"
 
-# ifdef CHARSET_EBCDIC
-#  include <openssl/ebcdic.h>
-# endif
-
 /*
  * Resolve problems on some operating systems with symbol names that clash
  * one way or another
  */
-# include <openssl/symhacks.h>
+# include "../openssl/symhacks.h"
 
 # if !OPENSSL_API_1_1_0
-#  include <openssl/opensslv.h>
+#  include "../openssl/opensslv.h"
 # endif
 
 #ifdef  __cplusplus

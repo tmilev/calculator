@@ -14,9 +14,9 @@
  */
 
 #include <string.h>
-#include "internal/bio.h"
-#include <openssl/asn1.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/bio.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/internal/cryptlib.h"
 
 /* Must be large enough for biggest tag+length */
 #define DEFAULT_ASN1_BUF_SIZE 20

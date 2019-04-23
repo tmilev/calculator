@@ -9,15 +9,15 @@
 
 /* This file contains deprecated functions as wrappers to the new ones */
 
-#include <openssl/opensslconf.h>
+#include "../../include/openssl/opensslconf.h"
 #if OPENSSL_API_0_9_8
 NON_EMPTY_TRANSLATION_UNIT
 #else
 
 # include <stdio.h>
-# include "internal/cryptlib.h"
-# include <openssl/bn.h>
-# include <openssl/dh.h>
+# include "../../include/internal/cryptlib.h"
+# include "../../include/openssl/bn.h"
+# include "../../include/openssl/dh.h"
 
 DH *DH_generate_parameters(int prime_len, int generator,
                            void (*callback) (int, int, void *), void *cb_arg)

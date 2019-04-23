@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <openssl/evp.h>
-#include <openssl/objects.h>
-#include "internal/evp_int.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/objects.h"
+#include "../include/internal/evp_int.h"
 #include "evp_locl.h"
 
 size_t SHA3_absorb(uint64_t A[5][5], const unsigned char *inp, size_t len,

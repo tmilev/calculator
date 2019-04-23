@@ -12,13 +12,13 @@
 NON_EMPTY_TRANSLATION_UNIT
 #else
 
-# include "internal/cryptlib.h"
-# include <stdio.h>
-# include <openssl/rsa.h>
-# include <openssl/objects.h>
-# include <openssl/asn1t.h>
-# include <openssl/evp.h>
-# include <openssl/x509.h>
+# include "../../include/internal/cryptlib.h"
+# include "../../include/stdio.h"
+# include "../../include/openssl/rsa.h"
+# include "../../include/openssl/objects.h"
+# include "../../include/openssl/asn1t.h"
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/x509.h"
 
 # ifndef OPENSSL_NO_RC4
 

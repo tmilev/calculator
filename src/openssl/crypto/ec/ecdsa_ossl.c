@@ -8,10 +8,10 @@
  */
 
 #include <string.h>
-#include <openssl/err.h>
-#include <openssl/obj_mac.h>
-#include <openssl/rand.h>
-#include "internal/bn_int.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/obj_mac.h"
+#include "../../include/openssl/rand.h"
+#include "../include/internal/bn_int.h"
 #include "ec_lcl.h"
 
 int ossl_ecdsa_sign(int type, const unsigned char *dgst, int dlen,

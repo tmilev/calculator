@@ -7,13 +7,13 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 #if OPENSSL_API_3
 NON_EMPTY_TRANSLATION_UNIT
 #else
 
-#include <openssl/aes.h>
+#include "../../include/openssl/aes.h"
 #include "aes_locl.h"
 
 #define N_WORDS (AES_BLOCK_SIZE / sizeof(unsigned long))

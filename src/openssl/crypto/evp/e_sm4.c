@@ -9,12 +9,12 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #ifndef OPENSSL_NO_SM4
-# include <openssl/evp.h>
-# include <openssl/modes.h>
-# include "internal/sm4.h"
-# include "internal/evp_int.h"
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/modes.h"
+# include "../include/internal/sm4.h"
+# include "../include/internal/evp_int.h"
 
 typedef struct {
     SM4_KEY ks;

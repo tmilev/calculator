@@ -8,11 +8,11 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include "internal/numbers.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/numbers.h"
 #include <limits.h>
-#include <openssl/asn1.h>
-#include <openssl/bn.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/bn.h"
 #include "asn1_locl.h"
 
 ASN1_INTEGER *ASN1_INTEGER_dup(const ASN1_INTEGER *x)

@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/opensslconf.h>
-#include "internal/cryptlib.h"
+#include "../../include/openssl/opensslconf.h"
+#include "../../include/internal/cryptlib.h"
 #include "bn_lcl.h"
 
 #define BN_BLINDING_COUNTER     32

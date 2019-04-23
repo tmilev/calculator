@@ -8,9 +8,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
-#include "internal/cryptlib_int.h"
-#include <openssl/safestack.h>
+#include "../e_os.h"
+#include "include/internal/cryptlib_int.h"
+#include "../../include/openssl/safestack.h"
 
 #if     defined(__i386)   || defined(__i386__)   || defined(_M_IX86) || \
         defined(__x86_64) || defined(__x86_64__) || \

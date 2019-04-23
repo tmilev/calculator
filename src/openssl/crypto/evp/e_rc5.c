@@ -8,15 +8,15 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 #ifndef OPENSSL_NO_RC5
 
-# include <openssl/evp.h>
-# include "internal/evp_int.h"
-# include <openssl/objects.h>
+# include "../../include/openssl/evp.h"
+# include "../include/internal/evp_int.h"
+# include "../../include/openssl/objects.h"
 # include "evp_locl.h"
-# include <openssl/rc5.h>
+# include "../../include/openssl/rc5.h"
 
 static int r_32_12_16_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
                                const unsigned char *iv, int enc);

@@ -10,11 +10,11 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <openssl/evp.h>
-#include <openssl/kdf.h>
-#include "internal/cryptlib.h"
-#include "internal/numbers.h"
-#include "internal/evp_int.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/kdf.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/numbers.h"
+#include "../include/internal/evp_int.h"
 #include "kdf_local.h"
 
 /* See RFC 4253, Section 7.2 */

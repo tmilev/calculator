@@ -8,15 +8,15 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 #ifndef OPENSSL_NO_RC4
 
-# include <openssl/evp.h>
-# include <openssl/objects.h>
-# include <openssl/rc4.h>
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/objects.h"
+# include "../../include/openssl/rc4.h"
 
-# include "internal/evp_int.h"
+# include "../include/internal/evp_int.h"
 
 typedef struct {
     RC4_KEY ks;                 /* working key */

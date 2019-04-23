@@ -8,11 +8,11 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "dh_locl.h"
-#include <openssl/bn.h>
-#include <openssl/objects.h>
-#include "internal/bn_dh.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/objects.h"
+#include "../include/internal/bn_dh.h"
 
 static DH *dh_param_init(const BIGNUM *p, int32_t nbits)
 {

@@ -15,7 +15,7 @@
 #include "e_os.h"
 
 #include <openssl/crypto.h>
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 #include <openssl/store.h>
 #include "internal/thread_once.h"
 #include "internal/store_int.h"

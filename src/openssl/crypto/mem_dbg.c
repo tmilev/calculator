@@ -10,12 +10,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "internal/cryptlib.h"
-#include "internal/thread_once.h"
-#include <openssl/crypto.h>
-#include <openssl/buffer.h>
-#include "internal/bio.h"
-#include <openssl/lhash.h>
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/thread_once.h"
+#include "../include/openssl/crypto.h>
+#include "../include/openssl/buffer.h>
+#include "../include/internal/bio.h"
+#include "../include/openssl/lhash.h"
 
 #ifndef OPENSSL_NO_CRYPTO_MDEBUG_BACKTRACE
 # include <execinfo.h>

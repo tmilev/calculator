@@ -8,11 +8,11 @@
  */
 
 #include <string.h>
-#include <openssl/trace.h>
-#include <openssl/err.h>
-#include <openssl/conf.h>
-#include <openssl/safestack.h>
-#include "internal/provider.h"
+#include "../include/openssl/trace.h"
+#include "../include/openssl/err.h"
+#include "../include/openssl/conf.h"
+#include "../include/openssl/safestack.h"
+#include "../include/internal/provider.h"
 
 /* PROVIDER config module */
 

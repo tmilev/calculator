@@ -10,12 +10,12 @@
  * Originally written by Mike Hamburg
  */
 #include <string.h>
-#include <openssl/crypto.h>
-#include <openssl/evp.h>
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/evp.h"
 #include "curve448_lcl.h"
 #include "word.h"
 #include "ed448.h"
-#include "internal/numbers.h"
+#include "../../../include/internal/numbers.h"
 
 #define COFACTOR 4
 

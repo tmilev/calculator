@@ -11,14 +11,14 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <openssl/crypto.h>
-#include "internal/property.h"
-#include "internal/ctype.h"
-#include <openssl/lhash.h>
-#include <openssl/rand.h>
-#include "internal/thread_once.h"
-#include "internal/lhash.h"
-#include "internal/sparse_array.h"
+#include "../../include/openssl/crypto.h>
+#include "../../include/internal/property.h"
+#include "../include/internal/ctype.h"
+#include "../../include/openssl/lhash.h"
+#include "../../include/openssl/rand.h>
+#include "../../include/internal/thread_once.h"
+#include "../include/internal/lhash.h"
+#include "../include/internal/sparse_array.h"
 #include "property_lcl.h"
 
 /* The number of elements in the query cache before we initiate a flush */

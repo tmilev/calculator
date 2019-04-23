@@ -17,7 +17,7 @@
 
 #include "dsa_locl.h"
 #include <string.h>
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 
 DSA_METHOD *DSA_meth_new(const char *name, int flags)
 {

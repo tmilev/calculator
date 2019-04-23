@@ -9,10 +9,10 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/evp.h>
-#include <openssl/ec.h>
-#include <openssl/bn.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/ec.h"
+#include "../../include/openssl/bn.h"
 
 #ifndef OPENSSL_NO_STDIO
 int ECPKParameters_print_fp(FILE *fp, const EC_GROUP *x, int off)

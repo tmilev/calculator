@@ -12,13 +12,13 @@
  * and PRIVATEKEYBLOB).
  */
 
-#include "internal/cryptlib.h"
-#include <openssl/pem.h>
-#include <openssl/rand.h>
-#include <openssl/bn.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/bn.h"
 #if !defined(OPENSSL_NO_RSA) && !defined(OPENSSL_NO_DSA)
-# include <openssl/dsa.h>
-# include <openssl/rsa.h>
+# include "../../include/openssl/dsa.h"
+# include "../../include/openssl/rsa.h"
 
 /*
  * Utility function: read a DWORD (4 byte unsigned integer) in little endian

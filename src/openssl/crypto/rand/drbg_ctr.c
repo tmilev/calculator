@@ -9,10 +9,10 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/crypto.h>
-#include <openssl/err.h>
-#include <openssl/rand.h>
-#include "internal/thread_once.h"
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/internal/thread_once.h"
 #include "rand_lcl.h"
 
 /*

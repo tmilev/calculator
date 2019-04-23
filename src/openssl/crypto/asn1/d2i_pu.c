@@ -8,16 +8,16 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/bn.h>
-#include <openssl/evp.h>
-#include <openssl/objects.h>
-#include <openssl/asn1.h>
-#include <openssl/rsa.h>
-#include <openssl/dsa.h>
-#include <openssl/ec.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/openssl/ec.h"
 
-#include "internal/evp_int.h"
+#include "../include/internal/evp_int.h"
 
 EVP_PKEY *d2i_PublicKey(int type, EVP_PKEY **a, const unsigned char **pp,
                         long length)

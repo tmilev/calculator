@@ -9,11 +9,11 @@
 
 #include <stdio.h>
 #include <limits.h>
-#include "internal/cryptlib.h"
-#include "internal/numbers.h"
-#include <openssl/buffer.h>
-#include <openssl/asn1.h>
-#include "internal/asn1_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/numbers.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/asn1.h"
+#include "../../crypto/include/internal/asn1_int.h"
 
 #ifndef NO_OLD_ASN1
 # ifndef OPENSSL_NO_STDIO

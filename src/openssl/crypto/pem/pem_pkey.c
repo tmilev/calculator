@@ -8,17 +8,17 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/buffer.h>
-#include <openssl/objects.h>
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/pkcs12.h>
-#include <openssl/pem.h>
-#include <openssl/engine.h>
-#include <openssl/dh.h>
-#include "internal/asn1_int.h"
-#include "internal/evp_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/pkcs12.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/engine.h"
+#include "../../include/openssl/dh.h"
+#include "../include/internal/asn1_int.h"
+#include "../include/internal/evp_int.h"
 
 int pem_check_suffix(const char *pem_str, const char *suffix);
 

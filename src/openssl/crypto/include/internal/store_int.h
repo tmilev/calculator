@@ -10,9 +10,9 @@
 #ifndef HEADER_STORE_INT_H
 # define HEADER_STORE_INT_H
 
-# include <openssl/bio.h>
-# include <openssl/store.h>
-# include <openssl/ui.h>
+# include "../../../include/openssl/bio.h"
+# include "../../../include/openssl/store.h"
+# include "../../../include/openssl/ui.h"
 
 /*
  * Two functions to read PEM data off an already opened BIO.  To be used

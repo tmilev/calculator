@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/opensslv.h>
-#include <openssl/camellia.h>
+#include "../../include/openssl/opensslv.h"
+#include "../../include/openssl/camellia.h"
 #include "cmll_locl.h"
 
 int Camellia_set_key(const unsigned char *userKey, const int bits,

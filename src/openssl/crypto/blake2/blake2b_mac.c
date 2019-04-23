@@ -9,10 +9,10 @@
 
 #ifndef OPENSSL_NO_BLAKE2
 
-# include <openssl/evp.h>
+# include "../../include/openssl/evp.h"
 # include "blake2_locl.h"
-# include "internal/cryptlib.h"
-# include "internal/evp_int.h"
+# include "../../include/internal/cryptlib.h"
+# include "../include/internal/evp_int.h"
 
 /* typedef EVP_MAC_IMPL */
 struct evp_mac_impl_st {

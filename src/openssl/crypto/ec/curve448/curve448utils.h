@@ -13,7 +13,7 @@
 #ifndef HEADER_CURVE448UTILS_H
 # define HEADER_CURVE448UTILS_H
 
-# include <openssl/e_os2.h>
+# include "../../include/openssl/e_os2.h"
 
 /*
  * Internal word types. Somewhat tricky.  This could be decided separately per

@@ -8,13 +8,13 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 #ifndef OPENSSL_NO_IDEA
-# include <openssl/evp.h>
-# include <openssl/objects.h>
-# include "internal/evp_int.h"
-# include <openssl/idea.h>
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/objects.h"
+# include "../include/internal/evp_int.h"
+# include "../../include/openssl/idea.h"
 
 /* Can't use IMPLEMENT_BLOCK_CIPHER because IDEA_ecb_encrypt is different */
 

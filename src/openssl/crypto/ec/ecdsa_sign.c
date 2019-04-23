@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/ec.h>
+#include "../../include/openssl/ec.h"
 #include "ec_lcl.h"
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 
 ECDSA_SIG *ECDSA_do_sign(const unsigned char *dgst, int dlen, EC_KEY *eckey)
 {

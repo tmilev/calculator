@@ -9,7 +9,7 @@
 
 #include "dh_locl.h"
 #include <string.h>
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 
 DH_METHOD *DH_meth_new(const char *name, int flags)
 {

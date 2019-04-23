@@ -11,15 +11,15 @@
 #ifndef HEADER_EC_H
 # define HEADER_EC_H
 
-# include <openssl/opensslconf.h>
+# include "../../include/openssl/opensslconf.h"
 
 # ifndef OPENSSL_NO_EC
-# include <openssl/asn1.h>
-# include <openssl/symhacks.h>
+# include "../../include/openssl/asn1.h"
+# include "../../include/openssl/symhacks.h"
 # if !OPENSSL_API_1_1_0
-#  include <openssl/bn.h>
+#  include "../../include/openssl/bn.h"
 # endif
-# include <openssl/ecerr.h>
+# include "../../include/openssl/ecerr.h"
 # ifdef  __cplusplus
 extern "C" {
 # endif
@@ -1129,12 +1129,17 @@ int ECDH_compute_key(void *out, size_t outlen, const EC_POINT *pub_key,
                      void *(*KDF) (const void *in, size_t inlen,
                                    void *out, size_t *outlen));
 
+struct ECDSA_SIG_st {
+    BIGNUM *r;
+    BIGNUM *s;
+};
 typedef struct ECDSA_SIG_st ECDSA_SIG;
 
 /** Allocates and initialize a ECDSA_SIG structure
  *  \return pointer to a ECDSA_SIG structure or NULL if an error occurred
  */
 ECDSA_SIG *ECDSA_SIG_new(void);
+
 
 /** frees a ECDSA_SIG structure
  *  \param  sig  pointer to the ECDSA_SIG structure

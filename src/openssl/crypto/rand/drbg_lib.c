@@ -8,13 +8,13 @@
  */
 
 #include <string.h>
-#include <openssl/crypto.h>
-#include <openssl/err.h>
-#include <openssl/rand.h>
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/rand.h"
 #include "rand_lcl.h"
-#include "internal/thread_once.h"
-#include "internal/rand_int.h"
-#include "internal/cryptlib_int.h"
+#include "../../include/internal/thread_once.h"
+#include "../include/internal/rand_int.h"
+#include "../include/internal/cryptlib_int.h"
 
 /*
  * Support framework for NIST SP 800-90A DRBG

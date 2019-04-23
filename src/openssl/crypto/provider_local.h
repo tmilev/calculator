@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/core.h>
+#include "../include/openssl/core.h"
 
 struct predefined_providers_st {
     const char *name;

@@ -8,15 +8,15 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 #ifndef OPENSSL_NO_CHACHA
 
-# include <openssl/evp.h>
-# include <openssl/objects.h>
-# include "internal/evp_int.h"
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/objects.h"
+# include "../include/internal/evp_int.h"
 # include "evp_locl.h"
-# include "internal/chacha.h"
+# include "../include/internal/chacha.h"
 
 typedef struct {
     union {

@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "internal/cryptlib.h"
-#include <openssl/hmac.h>
-#include <openssl/opensslconf.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/hmac.h"
+#include "../../include/openssl/opensslconf.h"
 #include "hmac_lcl.h"
 
 int HMAC_Init_ex(HMAC_CTX *ctx, const void *key, int len,

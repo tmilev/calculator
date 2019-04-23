@@ -9,7 +9,7 @@
  *
  * Originally written by Mike Hamburg
  */
-#include <openssl/crypto.h>
+#include "../../include/openssl/crypto.h"
 #include "word.h"
 #include "field.h"
 

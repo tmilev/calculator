@@ -9,11 +9,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <openssl/md5.h>
-#include <openssl/crypto.h>
+#include "../../include/openssl/md5.h"
+#include "../../include/openssl/crypto.h"
 
 #ifdef CHARSET_EBCDIC
-# include <openssl/ebcdic.h>
+# include "../../include/openssl/ebcdic.h"
 #endif
 
 unsigned char *MD5(const unsigned char *d, size_t n, unsigned char *md)

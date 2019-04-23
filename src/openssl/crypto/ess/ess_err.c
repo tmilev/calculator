@@ -8,8 +8,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/err.h>
-#include <openssl/esserr.h>
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/esserr.h"
 
 #ifndef OPENSSL_NO_ERR
 

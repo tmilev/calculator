@@ -8,8 +8,8 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1t.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1t.h"
 
 #if OPENSSL_API_3
 NON_EMPTY_TRANSLATION_UNIT

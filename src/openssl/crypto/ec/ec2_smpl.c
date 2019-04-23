@@ -8,7 +8,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 
 #include "internal/bn_int.h"
 #include "ec_lcl.h"

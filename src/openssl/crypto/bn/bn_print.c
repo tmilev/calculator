@@ -8,10 +8,10 @@
  */
 
 #include <stdio.h>
-#include "internal/ctype.h"
+#include "../include/internal/ctype.h"
 #include <limits.h>
-#include "internal/cryptlib.h"
-#include <openssl/buffer.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/buffer.h"
 #include "bn_lcl.h"
 
 static const char Hex[] = "0123456789ABCDEF";

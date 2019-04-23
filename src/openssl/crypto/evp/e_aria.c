@@ -8,15 +8,15 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #ifndef OPENSSL_NO_ARIA
-# include <openssl/evp.h>
-# include <openssl/modes.h>
-# include <openssl/rand.h>
-# include <openssl/rand_drbg.h>
-# include "internal/aria.h"
-# include "internal/evp_int.h"
-# include "modes_lcl.h"
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/modes.h"
+# include "../../include/openssl/rand.h"
+# include "../../include/openssl/rand_drbg.h"
+# include "../include/internal/aria.h"
+# include "../include/internal/evp_int.h"
+# include "../modes/modes_lcl.h"
 # include "evp_locl.h"
 
 /* ARIA subkey Structure */

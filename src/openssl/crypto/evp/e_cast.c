@@ -8,13 +8,13 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 #ifndef OPENSSL_NO_CAST
-# include <openssl/evp.h>
-# include <openssl/objects.h>
-# include "internal/evp_int.h"
-# include <openssl/cast.h>
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/objects.h"
+# include "../include/internal/evp_int.h"
+# include "../../include/openssl/cast.h"
 
 static int cast_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
                          const unsigned char *iv, int enc);

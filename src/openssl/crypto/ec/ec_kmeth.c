@@ -8,9 +8,9 @@
  */
 
 #include <string.h>
-#include <openssl/ec.h>
-#include <openssl/engine.h>
-#include <openssl/err.h>
+#include "../../include/openssl/ec.h"
+#include "../../include/openssl/engine.h"
+#include "../../include/openssl/err.h"
 #include "ec_lcl.h"
 
 

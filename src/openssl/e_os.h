@@ -11,10 +11,10 @@
 # define HEADER_E_OS_H
 
 # include <limits.h>
-# include <openssl/opensslconf.h>
+# include "include/openssl/opensslconf.h"
 
-# include <openssl/e_os2.h>
-# include <openssl/crypto.h>
+# include "include/openssl/e_os2.h"
+# include "include/openssl/crypto.h"
 # include "include/internal/nelem.h"
 
 /*

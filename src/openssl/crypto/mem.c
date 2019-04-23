@@ -7,13 +7,13 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
-#include "internal/cryptlib.h"
-#include "internal/cryptlib_int.h"
+#include "../e_os.h"
+#include "../include/internal/cryptlib.h"
+#include "include/internal/cryptlib_int.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #if !defined(OPENSSL_NO_CRYPTO_MDEBUG_BACKTRACE) && !defined(FIPS_MODE)
 # include <execinfo.h>
 #endif
@@ -31,7 +31,7 @@ static void (*free_impl)(void *, const char *, int)
     = CRYPTO_free;
 
 #if !defined(OPENSSL_NO_CRYPTO_MDEBUG) && !defined(FIPS_MODE)
-# include "internal/tsan_assist.h"
+# include "../include/internal/tsan_assist.h"
 
 static TSAN_QUALIFIER int malloc_count;
 static TSAN_QUALIFIER int realloc_count;

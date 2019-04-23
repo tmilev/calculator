@@ -9,12 +9,12 @@
 
 #include <stddef.h>
 #include <string.h>
-#include <openssl/asn1.h>
-#include <openssl/asn1t.h>
-#include <openssl/objects.h>
-#include <openssl/buffer.h>
-#include <openssl/err.h>
-#include "internal/numbers.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/err.h"
+#include "../../include/internal/numbers.h"
 #include "asn1_locl.h"
 
 

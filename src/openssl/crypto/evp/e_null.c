@@ -8,10 +8,10 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/evp.h>
-#include <openssl/objects.h>
-#include "internal/evp_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/objects.h"
+#include "../include/internal/evp_int.h"
 
 static int null_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
                          const unsigned char *iv, int enc);

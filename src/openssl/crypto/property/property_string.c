@@ -9,9 +9,9 @@
  */
 
 #include <string.h>
-#include <openssl/crypto.h>
-#include <openssl/lhash.h>
-#include "internal/lhash.h"
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/lhash.h"
+#include "../include/internal/lhash.h"
 #include "property_lcl.h"
 
 /*

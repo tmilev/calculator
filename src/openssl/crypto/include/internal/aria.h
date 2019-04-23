@@ -13,7 +13,7 @@
 #ifndef HEADER_ARIA_H
 # define HEADER_ARIA_H
 
-# include <openssl/opensslconf.h>
+# include "../../../include/openssl/opensslconf.h"
 
 # ifdef OPENSSL_NO_ARIA
 #  error ARIA is disabled.

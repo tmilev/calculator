@@ -9,10 +9,10 @@
  */
 
 #include <string.h>
-#include <openssl/err.h>
-#include <openssl/lhash.h>
-#include "internal/propertyerr.h"
-#include "internal/property.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/lhash.h"
+#include "../../include/internal/propertyerr.h"
+#include "../../include/internal/property.h"
 #include "property_lcl.h"
 
 /*

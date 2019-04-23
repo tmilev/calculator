@@ -8,7 +8,7 @@
  */
 
 #include "eng_int.h"
-#include <openssl/evp.h>
+#include "../../include/openssl/evp.h"
 
 static ENGINE_TABLE *pkey_meth_table = NULL;
 

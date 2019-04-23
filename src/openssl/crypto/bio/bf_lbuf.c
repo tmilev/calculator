@@ -10,8 +10,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include "bio_lcl.h"
-#include "internal/cryptlib.h"
-#include <openssl/evp.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
 
 static int linebuffer_write(BIO *h, const char *buf, int num);
 static int linebuffer_read(BIO *h, char *buf, int size);

@@ -8,9 +8,9 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1t.h>
-#include <openssl/bn.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/bn.h"
 
 /*
  * Custom primitive type for BIGNUM handling. This reads in an ASN1_INTEGER

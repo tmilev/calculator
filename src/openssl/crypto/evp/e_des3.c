@@ -8,13 +8,13 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #ifndef OPENSSL_NO_DES
-# include <openssl/evp.h>
-# include <openssl/objects.h>
-# include "internal/evp_int.h"
-# include <openssl/des.h>
-# include <openssl/rand.h>
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/objects.h"
+# include "../include/internal/evp_int.h"
+# include "../../include/openssl/des.h"
+# include "../../include/openssl/rand.h"
 # include "evp_locl.h"
 
 typedef struct {
@@ -308,7 +308,7 @@ const EVP_CIPHER *EVP_des_ede3(void)
 }
 
 
-# include <openssl/sha.h>
+# include "../../include/openssl/sha.h"
 
 static const unsigned char wrap_iv[8] =
     { 0x4a, 0xdd, 0xa2, 0x2c, 0x79, 0xe8, 0x21, 0x05 };

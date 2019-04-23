@@ -11,11 +11,11 @@
 
 #ifndef HEADER_SM2_H
 # define HEADER_SM2_H
-# include <openssl/opensslconf.h>
+# include "../../../include/openssl/opensslconf.h"
 
 # ifndef OPENSSL_NO_SM2
 
-#  include <openssl/ec.h>
+#  include "../../../include/openssl/ec.h"
 
 /* The default user id as specified in GM/T 0009-2012 */
 #  define SM2_DEFAULT_USERID "1234567812345678"

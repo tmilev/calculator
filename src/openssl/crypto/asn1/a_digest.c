@@ -11,12 +11,12 @@
 #include <time.h>
 #include <sys/types.h>
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/buffer.h>
-#include <openssl/x509.h>
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/x509.h"
 
 #ifndef NO_ASN1_OLD
 

@@ -14,10 +14,10 @@
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/asn1.h>
-#include <openssl/buffer.h>
-#include <openssl/ct.h>
-#include <openssl/err.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/ct.h"
+#include "../../include/openssl/err.h"
 
 #include "ct_locl.h"
 

@@ -9,9 +9,9 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/crypto.h>
+#include "../../include/openssl/crypto.h"
 
-#include "internal/poly1305.h"
+#include "../include/internal/poly1305.h"
 #include "poly1305_local.h"
 
 size_t Poly1305_ctx_size(void)

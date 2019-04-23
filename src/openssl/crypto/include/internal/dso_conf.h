@@ -1,16 +1,6 @@
-{- join("\n",map { "/* $_ */" } @autowarntext) -}
-/*
- * Copyright 2016-2018 The OpenSSL Project Authors. All Rights Reserved.
- *
- * Licensed under the Apache License 2.0 (the "License").  You may not use
- * this file except in compliance with the License.  You can obtain a copy
- * in the file LICENSE in the source distribution or at
- * https://www.openssl.org/source/license.html
- */
-
 #ifndef HEADER_DSO_CONF_H
 # define HEADER_DSO_CONF_H
-{-  # The DSO code currently always implements all functions so that no
+/*{-  # The DSO code currently always implements all functions so that no
     # applications will have to worry about that from a compilation point
     # of view. However, the "method"s may return zero unless that platform
     # has support compiled in for them. Currently each method is enabled
@@ -26,6 +16,6 @@
     } elsif ($scheme eq "DLFCN_NO_H") {
         @macros = ( "DSO_DLFCN" );
     }
-    join("\n", map { "# define $_" } @macros); -}
-# define DSO_EXTENSION "{- platform->dsoext() -}"
+    join("\n", map { "# define $_" } @macros); -}*/
+# define DSO_EXTENSION
 #endif

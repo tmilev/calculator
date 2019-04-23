@@ -7,10 +7,10 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
-#include <openssl/evp.h>
-#include <openssl/lhash.h>
-#include <openssl/trace.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/lhash.h"
+#include "../../include/openssl/trace.h"
 #include "eng_int.h"
 
 /* The type of the items in the table */

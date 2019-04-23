@@ -8,11 +8,11 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "dsa_locl.h"
-#include <openssl/asn1.h>
-#include <openssl/asn1t.h>
-#include <openssl/rand.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/rand.h"
 
 ASN1_SEQUENCE(DSA_SIG) = {
         ASN1_SIMPLE(DSA_SIG, r, CBIGNUM),

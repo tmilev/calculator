@@ -9,8 +9,8 @@
  */
 
 #include <string.h>
-#include <openssl/params.h>
-#include "internal/thread_once.h"
+#include "../include/openssl/params.h"
+#include "../include/internal/thread_once.h"
 
 #define SET_RETURN_SIZE(p, sz) \
     if ((p)->return_size != NULL) \

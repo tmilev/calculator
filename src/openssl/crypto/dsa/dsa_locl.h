@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/dsa.h>
-#include "internal/refcount.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/internal/refcount.h"
 
 struct dsa_st {
     /*

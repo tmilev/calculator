@@ -7,10 +7,10 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
-#include <openssl/rand.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/rand.h"
 #include "rand_lcl.h"
-#include "internal/rand_int.h"
+#include "../include/internal/rand_int.h"
 #if defined(OPENSSL_SYS_WINDOWS) || defined(OPENSSL_SYS_WIN32)
 
 # ifndef OPENSSL_RAND_SEED_OS

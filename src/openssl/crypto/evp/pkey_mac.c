@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include "internal/evp_int.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../include/internal/evp_int.h"
 
 /* MAC PKEY context structure */
 

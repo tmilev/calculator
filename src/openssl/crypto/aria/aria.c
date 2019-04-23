@@ -18,8 +18,8 @@
  * Public domain version is distributed above.
  */
 
-#include <openssl/e_os2.h>
-#include "internal/aria.h"
+#include "../include/openssl/e_os2.h"
+#include "../include/internal/aria.h"
 
 #include <assert.h>
 #include <string.h>

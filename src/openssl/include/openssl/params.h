@@ -11,8 +11,8 @@
 #ifndef HEADER_PARAMS_H
 # define HEADER_PARAMS_H
 
-# include <openssl/core.h>
-# include <openssl/bn.h>
+# include "../../include/openssl/core.h"
+# include "../../include/openssl/bn.h"
 
 # ifdef  __cplusplus
 extern "C" {

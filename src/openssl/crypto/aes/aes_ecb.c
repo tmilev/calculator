@@ -9,7 +9,7 @@
 
 #include <assert.h>
 
-#include <openssl/aes.h>
+#include "../../include/openssl/aes.h"
 #include "aes_locl.h"
 
 void AES_ecb_encrypt(const unsigned char *in, unsigned char *out,

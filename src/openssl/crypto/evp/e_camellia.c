@@ -7,18 +7,18 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/opensslconf.h>
+#include "../../include/openssl/opensslconf.h"
 #ifdef OPENSSL_NO_CAMELLIA
 NON_EMPTY_TRANSLATION_UNIT
 #else
 
-# include <openssl/evp.h>
-# include <openssl/err.h>
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/err.h"
 # include <string.h>
 # include <assert.h>
-# include <openssl/camellia.h>
-# include "internal/evp_int.h"
-# include "modes_lcl.h"
+# include "../../include/openssl/camellia.h"
+# include "../include/internal/evp_int.h"
+# include "../modes/modes_lcl.h"
 
 static int camellia_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
                              const unsigned char *iv, int enc);

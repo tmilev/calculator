@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/e_os2.h>
+#include "../include/openssl/e_os2.h"
 #include <string.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 
 struct tm *OPENSSL_gmtime(const time_t *timer, struct tm *result)
 {

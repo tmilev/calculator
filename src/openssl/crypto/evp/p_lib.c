@@ -8,21 +8,21 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include "internal/refcount.h"
-#include <openssl/bn.h>
-#include <openssl/err.h>
-#include <openssl/objects.h>
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/rsa.h>
-#include <openssl/dsa.h>
-#include <openssl/dh.h>
-#include <openssl/cmac.h>
-#include <openssl/engine.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/refcount.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/openssl/dh.h"
+#include "../../include/openssl/cmac.h"
+#include "../../include/openssl/engine.h"
 
-#include "internal/asn1_int.h"
-#include "internal/evp_int.h"
+#include "../include/internal/asn1_int.h"
+#include "../include/internal/evp_int.h"
 
 static void EVP_PKEY_free_it(EVP_PKEY *x);
 

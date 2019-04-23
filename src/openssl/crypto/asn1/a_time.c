@@ -16,9 +16,9 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "internal/ctype.h"
-#include "internal/cryptlib.h"
-#include <openssl/asn1t.h>
+#include "../include/internal/ctype.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1t.h"
 #include "asn1_locl.h"
 
 IMPLEMENT_ASN1_MSTRING(ASN1_TIME, B_ASN1_TIME)

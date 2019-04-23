@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #ifndef OPENSSL_NO_BF
-# include <openssl/evp.h>
-# include "internal/evp_int.h"
-# include <openssl/objects.h>
-# include <openssl/blowfish.h>
+# include "../../include/openssl/evp.h"
+# include "../include/internal/evp_int.h"
+# include "../../include/openssl/objects.h"
+# include "../../include/openssl/blowfish.h"
 
 static int bf_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
                        const unsigned char *iv, int enc);

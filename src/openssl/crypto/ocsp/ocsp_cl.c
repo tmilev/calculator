@@ -9,13 +9,13 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1.h>
-#include <openssl/objects.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
-#include <openssl/x509v3.h>
-#include <openssl/ocsp.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/x509v3.h"
+#include "../../include/openssl/ocsp.h"
 #include "ocsp_lcl.h"
 
 /*

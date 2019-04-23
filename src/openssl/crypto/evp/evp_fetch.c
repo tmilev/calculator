@@ -8,15 +8,15 @@
  */
 
 #include <stddef.h>
-#include <openssl/ossl_typ.h>
-#include <openssl/evp.h>
-#include <openssl/core.h>
-#include "internal/cryptlib.h"
-#include "internal/thread_once.h"
-#include "internal/asn1_int.h"
-#include "internal/property.h"
-#include "internal/core.h"
-#include "internal/evp_int.h"    /* evp_locl.h needs it */
+#include "../../include/openssl/ossl_typ.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/core.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/thread_once.h"
+#include "../include/internal/asn1_int.h"
+#include "../../include/internal/property.h"
+#include "../../include/internal/core.h"
+#include "../include/internal/evp_int.h"    /* evp_locl.h needs it */
 #include "evp_locl.h"
 
 /* The OpenSSL library context index for the default method store */

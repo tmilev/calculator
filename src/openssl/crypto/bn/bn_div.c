@@ -8,8 +8,8 @@
  */
 
 #include <assert.h>
-#include <openssl/bn.h>
-#include "internal/cryptlib.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/internal/cryptlib.h"
 #include "bn_lcl.h"
 
 /* The old slow way */

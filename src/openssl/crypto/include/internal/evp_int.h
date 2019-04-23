@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/evp.h>
-#include <openssl/core_numbers.h>
-#include "internal/refcount.h"
+#include "../../../include/openssl/evp.h"
+#include "../../../include/openssl/core_numbers.h"
+#include "../../../include/internal/refcount.h"
 
 /*
  * Don't free up md_ctx->pctx in EVP_MD_CTX_reset, use the reserved flag

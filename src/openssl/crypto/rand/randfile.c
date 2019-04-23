@@ -7,17 +7,17 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <openssl/crypto.h>
-#include <openssl/rand.h>
-#include <openssl/rand_drbg.h>
-#include <openssl/buffer.h>
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/rand_drbg.h"
+#include "../../include/openssl/buffer.h"
 
 #ifdef OPENSSL_SYS_VMS
 # include <unixio.h>

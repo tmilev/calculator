@@ -8,12 +8,12 @@
  */
 
 #include "bn_lcl.h"
-#include "internal/nelem.h"
+#include "../../include/internal/nelem.h"
 
 #ifndef OPENSSL_NO_SRP
 
-#include <openssl/srp.h>
-#include "internal/bn_srp.h"
+#include "../../include/openssl/srp.h"
+#include "../include/internal/bn_srp.h"
 
 # if (BN_BYTES == 8)
 #  if (defined(_WIN32) || defined(_WIN64)) && !defined(__MINGW32__)

@@ -8,8 +8,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/crypto.h>
-#include "internal/property.h"
+#include "../../include/openssl/crypto.h"
+#include "../../include/internal/property.h"
 
 typedef struct ossl_property_list_st OSSL_PROPERTY_LIST;
 typedef int OSSL_PROPERTY_IDX;

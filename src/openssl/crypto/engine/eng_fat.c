@@ -9,7 +9,7 @@
  */
 
 #include "eng_int.h"
-#include <openssl/conf.h>
+#include "../../include/openssl/conf.h"
 
 int ENGINE_set_default(ENGINE *e, unsigned int flags)
 {

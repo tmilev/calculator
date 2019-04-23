@@ -8,9 +8,9 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/evp.h>
-#include <openssl/dsa.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/dsa.h"
 
 #ifndef OPENSSL_NO_STDIO
 int DSA_print_fp(FILE *fp, const DSA *x, int off)

@@ -11,12 +11,12 @@
  * CRMF implementation by Martin Peylo, Miikka Viljanen, and David von Oheimb.
  */
 
-#include <openssl/asn1t.h>
+#include "../../include/openssl/asn1t.h"
 
 #include "crmf_int.h"
 
 /* explicit #includes not strictly needed since implied by the above: */
-#include <openssl/crmf.h>
+#include "../../include/openssl/crmf.h"
 
 ASN1_SEQUENCE(OSSL_CRMF_PRIVATEKEYINFO) = {
     ASN1_SIMPLE(OSSL_CRMF_PRIVATEKEYINFO, version, ASN1_INTEGER),

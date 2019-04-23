@@ -10,9 +10,9 @@
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/ct.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
+#include "../../include/openssl/ct.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
 
 #include "ct_locl.h"
 

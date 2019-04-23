@@ -10,7 +10,7 @@
 #ifndef OSSL_PROVIDER_H
 # define OSSL_PROVIDER_H
 
-# include <openssl/core.h>
+# include "../../include/openssl/core.h"
 
 # ifdef __cplusplus
 extern "C" {

@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/rc5.h>
+#include "../../include/openssl/rc5.h"
 #include "rc5_locl.h"
-#include <openssl/opensslv.h>
+#include "../../include/openssl/opensslv.h"
 
 void RC5_32_ecb_encrypt(const unsigned char *in, unsigned char *out,
                         RC5_32_KEY *ks, int encrypt)

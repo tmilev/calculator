@@ -8,11 +8,11 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/evp.h>
-#include <openssl/pkcs12.h>
-#include <openssl/x509.h>
-#include "internal/evp_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/pkcs12.h"
+#include "../../include/openssl/x509.h"
+#include "../include/internal/evp_int.h"
 #include "evp_locl.h"
 
 /* Password based encryption (PBE) functions */

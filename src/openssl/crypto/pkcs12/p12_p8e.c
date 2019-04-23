@@ -8,9 +8,9 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/pkcs12.h>
-#include "internal/x509_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/pkcs12.h"
+#include "../include/internal/x509_int.h"
 
 X509_SIG *PKCS8_encrypt(int pbe_nid, const EVP_CIPHER *cipher,
                         const char *pass, int passlen,

@@ -9,7 +9,7 @@
  */
 
 #include <string.h>
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 
 #include "internal/cryptlib.h"
 #include "internal/bn_int.h"

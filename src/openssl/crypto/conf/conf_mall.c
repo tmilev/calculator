@@ -8,13 +8,13 @@
  */
 
 #include <stdio.h>
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
-#include <openssl/conf.h>
-#include <openssl/x509.h>
-#include <openssl/asn1.h>
-#include <openssl/engine.h>
-#include "internal/provider.h"
+#include "../../include/openssl/crypto.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/engine.h"
+#include "../../include/internal/provider.h"
 #include "conf_lcl.h"
 
 /* Load all OpenSSL builtin modules */

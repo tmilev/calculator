@@ -9,10 +9,10 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "internal/cryptlib.h"
-#include "internal/ctype.h"
-#include "internal/numbers.h"
-#include <openssl/bio.h>
+#include "../../include/internal/cryptlib.h"
+#include "../include/internal/ctype.h"
+#include "../../include/internal/numbers.h"
+#include "../../include/openssl/bio.h"
 
 /*
  * Copyright Patrick Powell 1995

@@ -9,10 +9,10 @@
 
 #include <assert.h>
 #include <limits.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "bn_lcl.h"
-#include <openssl/opensslconf.h>
-#include "internal/constant_time_locl.h"
+#include "../../include/openssl/opensslconf.h"
+#include "../../include/internal/constant_time_locl.h"
 
 /* This stuff appears to be completely unused, so is deprecated */
 #if !OPENSSL_API_0_9_8

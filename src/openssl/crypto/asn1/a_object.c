@@ -9,13 +9,13 @@
 
 #include <stdio.h>
 #include <limits.h>
-#include "internal/ctype.h"
-#include "internal/cryptlib.h"
-#include <openssl/buffer.h>
-#include <openssl/asn1.h>
-#include <openssl/objects.h>
-#include <openssl/bn.h>
-#include "internal/asn1_int.h"
+#include "../include/internal/ctype.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/bn.h"
+#include "../include/internal/asn1_int.h"
 #include "asn1_locl.h"
 
 int i2d_ASN1_OBJECT(const ASN1_OBJECT *a, unsigned char **pp)

@@ -8,13 +8,13 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include "internal/refcount.h"
-#include <openssl/bn.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/refcount.h"
+#include "../../include/openssl/bn.h"
 #include "dsa_locl.h"
-#include <openssl/asn1.h>
-#include <openssl/engine.h>
-#include <openssl/dh.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/engine.h"
+#include "../../include/openssl/dh.h"
 
 DSA *DSA_new(void)
 {

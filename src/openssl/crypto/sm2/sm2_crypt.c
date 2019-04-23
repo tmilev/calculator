@@ -12,7 +12,7 @@
 #include "internal/sm2.h"
 #include "internal/sm2err.h"
 #include "internal/ec_int.h" /* ecdh_KDF_X9_63() */
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 #include <openssl/evp.h>
 #include <openssl/bn.h>
 #include <openssl/asn1.h>

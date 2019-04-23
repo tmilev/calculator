@@ -8,7 +8,7 @@
  */
 
 #include "e_os.h"
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 
 /*
  * Perform any essential OpenSSL initialization operations. Currently does

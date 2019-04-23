@@ -8,14 +8,14 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 #ifndef OPENSSL_NO_RC2
 
-# include <openssl/evp.h>
-# include <openssl/objects.h>
-# include "internal/evp_int.h"
-# include <openssl/rc2.h>
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/objects.h"
+# include "../include/internal/evp_int.h"
+# include "../../include/openssl/rc2.h"
 
 static int rc2_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
                         const unsigned char *iv, int enc);

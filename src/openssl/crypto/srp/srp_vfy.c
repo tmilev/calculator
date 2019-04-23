@@ -20,7 +20,7 @@
 # include <openssl/buffer.h>
 # include <openssl/rand.h>
 # include <openssl/txt_db.h>
-# include <openssl/err.h>
+# include "../../include/openssl/err.h"
 
 # define SRP_RANDOM_SALT_LEN 20
 # define MAX_LEN 2500

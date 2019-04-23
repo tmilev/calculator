@@ -7,11 +7,11 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/err.h>
-#include <openssl/asn1t.h>
-#include <openssl/ess.h>
-#include <openssl/x509v3.h>
-#include "internal/ess_int.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/ess.h"
+#include "../../include/openssl/x509v3.h"
+#include "../include/internal/ess_int.h"
 
 /* ASN1 stuff for ESS Structure */
 

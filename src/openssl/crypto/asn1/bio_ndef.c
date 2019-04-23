@@ -7,10 +7,10 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/asn1.h>
-#include <openssl/asn1t.h>
-#include <openssl/bio.h>
-#include <openssl/err.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/err.h"
 
 #include <stdio.h>
 

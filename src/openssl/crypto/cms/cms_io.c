@@ -7,11 +7,11 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/asn1t.h>
-#include <openssl/x509.h>
-#include <openssl/err.h>
-#include <openssl/pem.h>
-#include <openssl/cms.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/cms.h"
 #include "cms_lcl.h"
 
 /* unfortunately cannot constify BIO_new_NDEF() due to this and PKCS7_stream() */

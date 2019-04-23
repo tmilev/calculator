@@ -8,11 +8,11 @@
  */
 
 #include <string.h>
-#include <openssl/err.h>
-#include <openssl/ossl_typ.h>
-#include <openssl/asn1.h>
-#include <openssl/hmac.h>
-#include "internal/evp_int.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/ossl_typ.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/hmac.h"
+#include "../include/internal/evp_int.h"
 
 /* local HMAC context structure */
 

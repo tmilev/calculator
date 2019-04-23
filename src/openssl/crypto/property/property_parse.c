@@ -11,7 +11,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 #include "internal/propertyerr.h"
 #include "internal/property.h"
 #include "internal/ctype.h"

@@ -9,9 +9,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <openssl/asn1t.h>
-#include <openssl/x509.h>
-#include <openssl/objects.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/objects.h"
 
 static int nsseq_cb(int operation, ASN1_VALUE **pval, const ASN1_ITEM *it,
                     void *exarg)

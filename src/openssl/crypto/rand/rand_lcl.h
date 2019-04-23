@@ -10,15 +10,15 @@
 #ifndef HEADER_RAND_LCL_H
 # define HEADER_RAND_LCL_H
 
-# include <openssl/aes.h>
-# include <openssl/evp.h>
-# include <openssl/sha.h>
-# include <openssl/hmac.h>
-# include <openssl/ec.h>
-# include <openssl/rand_drbg.h>
-# include "internal/tsan_assist.h"
+# include "../../include/openssl/aes.h"
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/sha.h"
+# include "../../include/openssl/hmac.h"
+# include "../../include/openssl/ec.h"
+# include "../../include/openssl/rand_drbg.h"
+# include "../../include/internal/tsan_assist.h"
 
-# include "internal/numbers.h"
+# include "../../include/internal/numbers.h"
 
 /* How many times to read the TSC as a randomness source. */
 # define TSC_READ_COUNT                 4

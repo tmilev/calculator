@@ -10,11 +10,11 @@
 
 #include <string.h>
 #include <stdarg.h>
-#include <openssl/kdf.h>
-#include <openssl/evp.h>
-#include "internal/cryptlib.h"
-#include "internal/evp_int.h"
-#include "internal/numbers.h"
+#include "../../include/openssl/kdf.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/internal/cryptlib.h"
+#include "../include/internal/evp_int.h"
+#include "../../include/internal/numbers.h"
 #include "kdf_local.h"
 
 int call_ctrl(int (*ctrl)(EVP_KDF_IMPL *impl, int cmd, va_list args),

@@ -9,13 +9,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <openssl/bio.h>
-#include <openssl/asn1.h>
-#include <openssl/asn1t.h>
-#include <openssl/pem.h>
-#include <openssl/pkcs7.h>
-#include <openssl/x509.h>
-#include <openssl/err.h>
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/pkcs7.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/err.h"
 
 int PKCS7_add_attrib_smimecap(PKCS7_SIGNER_INFO *si,
                               STACK_OF(X509_ALGOR) *cap)

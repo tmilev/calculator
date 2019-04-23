@@ -10,9 +10,9 @@
 #ifndef OSSL_INTERNAL_PROVIDER_H
 # define OSSL_INTERNAL_PROVIDER_H
 
-# include <openssl/core.h>
-# include "internal/dso.h"
-# include "internal/symhacks.h"
+# include "../../include/openssl/core.h"
+# include "../../include/internal/dso.h"
+# include "../../include/internal/symhacks.h"
 
 # ifdef __cplusplus
 extern "C" {

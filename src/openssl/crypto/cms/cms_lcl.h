@@ -10,7 +10,7 @@
 #ifndef HEADER_CMS_LCL_H
 # define HEADER_CMS_LCL_H
 
-# include <openssl/x509.h>
+# include "../../include/openssl/x509.h"
 
 /*
  * Cryptographic message syntax (CMS) structures: taken from RFC3852

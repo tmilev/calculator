@@ -7,15 +7,15 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
+#include "../../e_os.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "internal/ctype.h"
+#include "../include/internal/ctype.h"
 #include <string.h>
-#include <openssl/asn1.h>
-#include <openssl/ocsp.h>
-#include <openssl/err.h>
-#include <openssl/buffer.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/ocsp.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/buffer.h"
 
 /* Stateful OCSP request code, supporting non-blocking I/O */
 

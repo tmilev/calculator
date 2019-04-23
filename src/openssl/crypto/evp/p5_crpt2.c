@@ -9,13 +9,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "internal/cryptlib.h"
-#include <openssl/x509.h>
-#include <openssl/evp.h>
-#include <openssl/kdf.h>
-#include <openssl/hmac.h>
-#include <openssl/trace.h>
-#include "internal/evp_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/kdf.h"
+#include "../../include/openssl/hmac.h"
+#include "../../include/openssl/trace.h"
+#include "../include/internal/evp_int.h"
 #include "evp_locl.h"
 
 int PKCS5_PBKDF2_HMAC(const char *pass, int passlen,

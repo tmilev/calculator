@@ -8,8 +8,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/err.h>
-#include <openssl/symhacks.h>
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/symhacks.h"
 
 #include "ec_lcl.h"
 

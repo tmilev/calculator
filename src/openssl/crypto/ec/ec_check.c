@@ -8,7 +8,7 @@
  */
 
 #include "ec_lcl.h"
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 
 int EC_GROUP_check_named_curve(const EC_GROUP *group, int nist_only)
 {

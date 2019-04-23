@@ -6,9 +6,9 @@
  * in the file LICENSE in the source distribution or at
  * https://www.openssl.org/source/license.html
  */
-#include <openssl/crypto.h>
+#include "../../include/openssl/crypto.h"
 
-#include "internal/tsan_assist.h"
+#include "../../include/internal/tsan_assist.h"
 
 struct lhash_node_st {
     void *data;

@@ -15,7 +15,7 @@
  * 1.1 added norm_expand_bits
  * 1.0 First working version
  */
-#include <openssl/crypto.h>
+#include "../../include/openssl/crypto.h"
 #include "des_locl.h"
 
 /* defaults to false */

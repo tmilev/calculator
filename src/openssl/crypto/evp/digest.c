@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/objects.h>
-#include <openssl/evp.h>
-#include <openssl/engine.h>
-#include "internal/evp_int.h"
-#include "internal/provider.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/engine.h"
+#include "../include/internal/evp_int.h"
+#include "../../include/internal/provider.h"
 #include "evp_locl.h"
 
 /* This call frees resources associated with the context */

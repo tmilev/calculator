@@ -11,39 +11,21 @@
 #ifndef HEADER_BN_H
 # define HEADER_BN_H
 
-# include <openssl/e_os2.h>
+# include "../../include/openssl/e_os2.h"
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>
 # endif
-# include <openssl/opensslconf.h>
-# include <openssl/ossl_typ.h>
-# include <openssl/crypto.h>
-# include <openssl/bnerr.h>
+# include "../../include/openssl/opensslconf.h"
+# include "../../include/openssl/ossl_typ.h"
+# include "../../include/openssl/crypto.h"
+# include "../../include/openssl/bnerr.h"
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
-/*
- * 64-bit processor with LP64 ABI
- */
-# ifdef SIXTY_FOUR_BIT_LONG
-#  define BN_ULONG        unsigned long
-#  define BN_BYTES        8
-# endif
-
-/*
- * 64-bit processor other than LP64 ABI
- */
-# ifdef SIXTY_FOUR_BIT
-#  define BN_ULONG        unsigned long long
-#  define BN_BYTES        8
-# endif
-
-# ifdef THIRTY_TWO_BIT
-#  define BN_ULONG        unsigned int
-#  define BN_BYTES        4
-# endif
+#define BN_ULONG        unsigned long long
+#define BN_BYTES        8
 
 # define BN_BITS2       (BN_BYTES * 8)
 # define BN_BITS        (BN_BITS2 * 2)
@@ -330,16 +312,16 @@ DEPRECATEDIN_0_9_8(BIGNUM *BN_generate_prime(BIGNUM *ret, int bits, int safe,
                                              const BIGNUM *rem,
                                              void (*callback) (int, int,
                                                                void *),
-                                             void *cb_arg))
+                                             void *cb_arg));
 DEPRECATEDIN_0_9_8(int
                    BN_is_prime(const BIGNUM *p, int nchecks,
                                void (*callback) (int, int, void *),
-                               BN_CTX *ctx, void *cb_arg))
+                               BN_CTX *ctx, void *cb_arg));
 DEPRECATEDIN_0_9_8(int
                    BN_is_prime_fasttest(const BIGNUM *p, int nchecks,
                                         void (*callback) (int, int, void *),
                                         BN_CTX *ctx, void *cb_arg,
-                                        int do_trial_division))
+                                        int do_trial_division));
 
 /* Newer versions */
 int BN_generate_prime_ex(BIGNUM *ret, int bits, int safe, const BIGNUM *add,

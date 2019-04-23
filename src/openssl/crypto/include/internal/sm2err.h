@@ -11,7 +11,7 @@
 #ifndef HEADER_SM2ERR_H
 # define HEADER_SM2ERR_H
 
-# include <openssl/opensslconf.h>
+# include "../../../include/openssl/opensslconf.h"
 
 # ifndef OPENSSL_NO_SM2
 

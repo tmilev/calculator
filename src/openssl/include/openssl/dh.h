@@ -10,17 +10,17 @@
 #ifndef HEADER_DH_H
 # define HEADER_DH_H
 
-# include <openssl/opensslconf.h>
+# include "../../include/openssl/opensslconf.h"
 
 # ifndef OPENSSL_NO_DH
-# include <openssl/e_os2.h>
-# include <openssl/bio.h>
-# include <openssl/asn1.h>
-# include <openssl/ossl_typ.h>
+# include "../../include/openssl/e_os2.h"
+# include "../../include/openssl/bio.h"
+# include "../../include/openssl/asn1.h"
+# include "../../include/openssl/ossl_typ.h"
 # if !OPENSSL_API_1_1_0
-#  include <openssl/bn.h>
+#  include "../../include/openssl/bn.h"
 # endif
-# include <openssl/dherr.h>
+# include "../../include/openssl/dherr.h"
 
 # ifdef  __cplusplus
 extern "C" {

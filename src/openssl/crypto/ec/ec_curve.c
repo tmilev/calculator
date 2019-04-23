@@ -10,11 +10,11 @@
 
 #include <string.h>
 #include "ec_lcl.h"
-#include <openssl/err.h>
-#include <openssl/obj_mac.h>
-#include <openssl/opensslconf.h>
-#include "internal/nelem.h"
-#include "internal/o_str.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/obj_mac.h"
+#include "../../include/openssl/opensslconf.h"
+#include "../../include/internal/nelem.h"
+#include "../../include/internal/o_str.h"
 
 typedef struct {
     int field_type,             /* either NID_X9_62_prime_field or

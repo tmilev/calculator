@@ -9,11 +9,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "internal/cryptlib.h"
-#include "internal/asn1_int.h"
-#include <openssl/crypto.h>
-#include <openssl/x509.h>
-#include <openssl/asn1.h>
+#include "../../include/internal/cryptlib.h"
+#include "../include/internal/asn1_int.h"
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/asn1.h"
 
 #include "charmap.h"
 

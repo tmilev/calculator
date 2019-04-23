@@ -8,10 +8,10 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1t.h>
-#include <openssl/x509.h>
-#include <openssl/rand.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/rand.h"
 
 /* PKCS#5 v2.0 password based encryption structures */
 

@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/rand.h>
-#include <openssl/rsa.h>
-#include <openssl/evp.h>
-#include <openssl/objects.h>
-#include <openssl/x509.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/x509.h"
 
 int EVP_SealInit(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
                  unsigned char **ek, int *ekl, unsigned char *iv,

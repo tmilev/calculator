@@ -11,24 +11,24 @@
 #ifndef HEADER_X509_H
 # define HEADER_X509_H
 
-# include <openssl/e_os2.h>
-# include <openssl/ossl_typ.h>
-# include <openssl/symhacks.h>
-# include <openssl/buffer.h>
-# include <openssl/evp.h>
-# include <openssl/bio.h>
-# include <openssl/asn1.h>
-# include <openssl/safestack.h>
-# include <openssl/ec.h>
+# include "../../include/openssl/e_os2.h"
+# include "../../include/openssl/ossl_typ.h"
+# include "../../include/openssl/symhacks.h"
+# include "../../include/openssl/buffer.h"
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/bio.h"
+# include "../../include/openssl/asn1.h"
+# include "../../include/openssl/safestack.h"
+# include "../../include/openssl/ec.h"
 
 # if !OPENSSL_API_1_1_0
-#  include <openssl/rsa.h>
-#  include <openssl/dsa.h>
-#  include <openssl/dh.h>
+#  include "../../include/openssl/rsa.h"
+#  include "../../include/openssl/dsa.h"
+#  include "../../include/openssl/dh.h"
 # endif
 
-# include <openssl/sha.h>
-# include <openssl/x509err.h>
+# include "../../include/openssl/sha.h"
+# include "../../include/openssl/x509err.h"
 
 #ifdef  __cplusplus
 extern "C" {

@@ -9,7 +9,7 @@
 
 #include "e_os.h"
 #include <openssl/e_os2.h>
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 #include <openssl/ui.h>
 
 #ifndef OPENSSL_NO_UI_CONSOLE

@@ -10,13 +10,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <openssl/conf.h>
-#include <openssl/ct.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/safestack.h>
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/ct.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/safestack.h"
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 /*
  * Information about a CT log server.

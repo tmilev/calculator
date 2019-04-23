@@ -7,12 +7,12 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/bio.h>
-#include <openssl/err.h>
-#include <openssl/ocsp.h>
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/ocsp.h"
 #include "ocsp_lcl.h"
-#include "internal/cryptlib.h"
-#include <openssl/pem.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/pem.h"
 
 static int ocsp_certid_print(BIO *bp, OCSP_CERTID *a, int indent)
 {

@@ -9,8 +9,8 @@
 
 #include <stdio.h>
 #include <limits.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1.h"
 #include "asn1_locl.h"
 
 static int asn1_get_length(const unsigned char **pp, int *inf, long *rl,

@@ -7,10 +7,10 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
+#include "../../e_os.h"
 #include "eng_int.h"
-#include <openssl/rand.h>
-#include "internal/refcount.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/internal/refcount.h"
 
 CRYPTO_RWLOCK *global_engine_lock;
 

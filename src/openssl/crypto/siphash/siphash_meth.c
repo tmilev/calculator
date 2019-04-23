@@ -10,7 +10,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <openssl/evp.h>
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 #include "internal/siphash.h"
 #include "siphash_local.h"
 #include "internal/evp_int.h"

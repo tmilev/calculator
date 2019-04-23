@@ -7,14 +7,14 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include <stdio.h>
 #include <ctype.h>
-#include <openssl/crypto.h>
-#include "internal/conf.h"
-#include "internal/dso.h"
-#include <openssl/x509.h>
-#include <openssl/trace.h>
+#include "../../include/openssl/crypto.h"
+#include "../../include/internal/conf.h"
+#include "../../include/internal/dso.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/trace.h"
 
 #define DSO_mod_init_name "OPENSSL_init"
 #define DSO_mod_finish_name "OPENSSL_finish"

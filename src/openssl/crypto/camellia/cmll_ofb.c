@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/camellia.h>
-#include <openssl/modes.h>
+#include "../../include/openssl/camellia.h"
+#include "../../include/openssl/modes.h"
 
 /*
  * The input and output encrypted as though 128bit ofb mode is being used.

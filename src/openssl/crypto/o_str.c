@@ -7,11 +7,11 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
+#include "../e_os.h"
 #include <limits.h>
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
-#include "internal/o_str.h"
+#include "../include/openssl/crypto.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/o_str.h"
 
 int OPENSSL_memcmp(const void *v1, const void *v2, size_t n)
 {

@@ -7,14 +7,14 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
+#include "../../e_os.h"
 
 #ifndef OPENSSL_NO_CMS
 #include <string.h>
-#include <openssl/dh.h>
-#include <openssl/evp.h>
-#include <openssl/asn1.h>
-#include <openssl/cms.h>
+#include "../../include/openssl/dh.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/cms.h"
 
 
 /* Key derivation from X9.42/RFC2631 */

@@ -9,10 +9,10 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "bn_lcl.h"
-#include <openssl/rand.h>
-#include <openssl/sha.h>
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/sha.h"
 
 typedef enum bnrand_flag_e {
     NORMAL, TESTING, PRIVATE

@@ -10,12 +10,12 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <openssl/hmac.h>
-#include <openssl/evp.h>
-#include <openssl/kdf.h>
-#include "internal/cryptlib.h"
-#include "internal/numbers.h"
-#include "internal/evp_int.h"
+#include "../../include/openssl/hmac.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/kdf.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/numbers.h"
+#include "../include/internal/evp_int.h"
 #include "kdf_local.h"
 
 #define HKDF_MAXBUF 1024

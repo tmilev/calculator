@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
-#include "internal/conf.h"
-#include <openssl/x509.h>
-#include <openssl/asn1.h>
-#include <openssl/engine.h>
+#include "../../include/openssl/crypto.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/conf.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/engine.h"
 
 #ifdef _WIN32
 # define strdup _strdup

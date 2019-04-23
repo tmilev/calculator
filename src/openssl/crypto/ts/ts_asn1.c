@@ -8,7 +8,7 @@
  */
 
 #include <openssl/ts.h>
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 #include <openssl/asn1t.h>
 #include "ts_lcl.h"
 

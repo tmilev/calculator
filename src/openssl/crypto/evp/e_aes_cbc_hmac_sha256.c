@@ -7,20 +7,20 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/opensslconf.h>
+#include "../../include/openssl/opensslconf.h"
 
 #include <stdio.h>
 #include <string.h>
 
 
-#include <openssl/evp.h>
-#include <openssl/objects.h>
-#include <openssl/aes.h>
-#include <openssl/sha.h>
-#include <openssl/rand.h>
-#include "modes_lcl.h"
-#include "internal/constant_time_locl.h"
-#include "internal/evp_int.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/aes.h"
+#include "../../include/openssl/sha.h"
+#include "../../include/openssl/rand.h"
+#include "../modes/modes_lcl.h"
+#include "../../include/internal/constant_time_locl.h"
+#include "../include/internal/evp_int.h"
 
 typedef struct {
     AES_KEY ks;

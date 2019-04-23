@@ -7,14 +7,14 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"               /* for strncasecmp */
-#include "internal/cryptlib.h"
+#include "../../e_os.h"               /* for strncasecmp */
+#include "../../include/internal/cryptlib.h"
 #include <stdio.h>
-#include <openssl/asn1t.h>
-#include <openssl/x509.h>
-#include <openssl/engine.h>
-#include "internal/asn1_int.h"
-#include "internal/evp_int.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/engine.h"
+#include "../include/internal/asn1_int.h"
+#include "../include/internal/evp_int.h"
 
 #include "standard_methods.h"
 

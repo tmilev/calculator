@@ -8,9 +8,9 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1.h>
-#include <openssl/objects.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/objects.h"
 
 static STACK_OF(ASN1_STRING_TABLE) *stable = NULL;
 static void st_free(ASN1_STRING_TABLE *tbl);

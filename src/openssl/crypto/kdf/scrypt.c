@@ -10,11 +10,11 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <openssl/evp.h>
-#include <openssl/kdf.h>
-#include <openssl/err.h>
-#include "internal/evp_int.h"
-#include "internal/numbers.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/kdf.h"
+#include "../../include/openssl/err.h"
+#include "../include/internal/evp_int.h"
+#include "../../include/internal/numbers.h"
 #include "kdf_local.h"
 
 #ifndef OPENSSL_NO_SCRYPT

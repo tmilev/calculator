@@ -10,12 +10,12 @@
 #include <stdio.h>
 #include <errno.h>
 #include "bio_lcl.h"
-#include "internal/cryptlib.h"
-#include "internal/ktls.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/ktls.h"
 
 #ifndef OPENSSL_NO_SOCK
 
-# include <openssl/bio.h>
+# include "../../include/openssl/bio.h"
 
 # ifdef WATT32
 /* Watt-32 uses same names */

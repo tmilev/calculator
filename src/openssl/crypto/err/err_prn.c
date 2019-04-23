@@ -8,10 +8,10 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/crypto.h>
-#include <openssl/buffer.h>
-#include <openssl/err.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/err.h"
 
 void ERR_print_errors_cb(int (*cb) (const char *str, size_t len, void *u),
                          void *u)

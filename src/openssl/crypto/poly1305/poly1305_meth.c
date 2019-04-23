@@ -6,10 +6,10 @@
  * in the file LICENSE in the source distribution or at
  * https://www.openssl.org/source/license.html
  */
-#include <openssl/evp.h>
-#include "internal/evp_int.h"
-#include "internal/poly1305.h"
-#include "internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../include/internal/evp_int.h"
+#include "../include/internal/poly1305.h"
+#include "../../include/internal/cryptlib.h"
 #include "poly1305_local.h"
 
 /* typedef EVP_MAC_IMPL */

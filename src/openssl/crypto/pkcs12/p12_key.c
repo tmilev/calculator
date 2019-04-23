@@ -8,10 +8,10 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/pkcs12.h>
-#include <openssl/bn.h>
-#include <openssl/trace.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/pkcs12.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/trace.h"
 
 /* PKCS12 compatible key/IV generation */
 #ifndef min

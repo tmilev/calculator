@@ -7,13 +7,13 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
+#include "../../e_os.h"
 
 #if defined(OPENSSL_SYS_VMS)
 # define __NEW_STARLET 1         /* New starlet definitions since VMS 7.0 */
 # include <unistd.h>
 # include "internal/cryptlib.h"
-# include <openssl/rand.h>
+# include "../../include/openssl/rand.h"
 # include "internal/rand_int.h"
 # include "rand_lcl.h"
 # include <descrip.h>

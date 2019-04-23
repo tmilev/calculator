@@ -8,10 +8,10 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/evp.h>
-#include <openssl/asn1.h>
-#include <openssl/x509.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/x509.h"
 
 X509_INFO *X509_INFO_new(void)
 {

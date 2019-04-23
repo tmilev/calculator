@@ -8,14 +8,14 @@
  */
 
 #include <stdio.h>
-#include "internal/ctype.h"
+#include "../include/internal/ctype.h"
 #include <limits.h>
-#include "internal/cryptlib.h"
-#include <openssl/lhash.h>
-#include <openssl/asn1.h>
-#include "internal/objects.h"
-#include <openssl/bn.h>
-#include "internal/asn1_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/lhash.h"
+#include "../../include/openssl/asn1.h"
+#include "../include/internal/objects.h"
+#include "../../include/openssl/bn.h"
+#include "../include/internal/asn1_int.h"
 #include "obj_lcl.h"
 
 /* obj_dat.h is generated from objects.h by obj_dat.pl */

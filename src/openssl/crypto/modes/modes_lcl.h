@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/modes.h>
+#include "../../include/openssl/modes.h"
 
 #if (defined(_WIN32) || defined(_WIN64)) && !defined(__MINGW32__)
 typedef __int64 i64;
@@ -197,7 +197,7 @@ struct ocb128_context {
 
 #ifndef OPENSSL_NO_SIV
 
-#include <openssl/cmac.h>
+#include "../../include/openssl/cmac.h"
 
 #define SIV_LEN 16
 

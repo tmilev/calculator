@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/crypto.h>
-#include <openssl/err.h>
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/err.h"
 #include "ec_lcl.h"
 
 BIGNUM *EC_POINT_point2bn(const EC_GROUP *group,

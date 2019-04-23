@@ -9,11 +9,11 @@
 
 #include <string.h>
 #include <stdarg.h>
-#include <openssl/evp.h>
-#include <openssl/err.h>
-#include <openssl/ossl_typ.h>
-#include "internal/nelem.h"
-#include "internal/evp_int.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/ossl_typ.h"
+#include "../../include/internal/nelem.h"
+#include "../include/internal/evp_int.h"
 #include "evp_locl.h"
 
 EVP_MAC_CTX *EVP_MAC_CTX_new_id(int id)

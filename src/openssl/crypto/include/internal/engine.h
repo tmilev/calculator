@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/engine.h>
+#include "../../../include/openssl/engine.h"
 
 void engine_load_openssl_int(void);
 void engine_load_devcrypto_int(void);

@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/rc4.h>
+#include "../../include/openssl/rc4.h"
 #include "rc4_locl.h"
-#include <openssl/opensslv.h>
+#include "../../include/openssl/opensslv.h"
 
 const char *RC4_options(void)
 {

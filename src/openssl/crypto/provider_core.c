@@ -7,15 +7,15 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/core.h>
-#include <openssl/core_numbers.h>
-#include <openssl/params.h>
-#include <openssl/opensslv.h>
-#include "internal/cryptlib.h"
-#include "internal/nelem.h"
-#include "internal/thread_once.h"
-#include "internal/provider.h"
-#include "internal/refcount.h"
+#include "../include/openssl/core.h"
+#include "../include/openssl/core_numbers.h"
+#include "../include/openssl/params.h"
+#include "../include/openssl/opensslv.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/nelem.h"
+#include "../include/internal/thread_once.h"
+#include "../include/internal/provider.h"
+#include "../include/internal/refcount.h"
 #include "provider_local.h"
 
 static OSSL_PROVIDER *provider_new(const char *name,

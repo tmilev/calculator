@@ -12,16 +12,16 @@
  */
 
 
-#include <openssl/rand.h>
-#include <openssl/evp.h>
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/evp.h"
 
 #include "crmf_int.h"
 
 /* explicit #includes not strictly needed since implied by the above: */
-#include <openssl/asn1t.h>
-#include <openssl/crmf.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/crmf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
 
 /*-
  * creates and initializes OSSL_CRMF_PBMPARAMETER (section 4.4)

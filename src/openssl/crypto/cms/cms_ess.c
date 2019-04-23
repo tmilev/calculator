@@ -7,16 +7,16 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
-#include <openssl/asn1t.h>
-#include <openssl/pem.h>
-#include <openssl/rand.h>
-#include <openssl/x509v3.h>
-#include <openssl/err.h>
-#include <openssl/cms.h>
-#include <openssl/ess.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/x509v3.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/cms.h"
+#include "../../include/openssl/ess.h"
 #include "cms_lcl.h"
-#include "internal/ess_int.h"
+#include "../include/internal/ess_int.h"
 
 IMPLEMENT_ASN1_FUNCTIONS(CMS_ReceiptRequest)
 

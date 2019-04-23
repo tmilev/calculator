@@ -11,15 +11,15 @@
 #include <time.h>
 #include <sys/types.h>
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
-#include <openssl/bn.h>
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/objects.h>
-#include <openssl/buffer.h>
-#include "internal/asn1_int.h"
-#include "internal/evp_int.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/buffer.h"
+#include "../include/internal/asn1_int.h"
+#include "../include/internal/evp_int.h"
 
 #ifndef NO_ASN1_OLD
 

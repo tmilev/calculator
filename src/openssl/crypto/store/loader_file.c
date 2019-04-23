@@ -15,7 +15,7 @@
 
 #include <openssl/bio.h>
 #include <openssl/dsa.h>         /* For d2i_DSAPrivateKey */
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 #include <openssl/evp.h>
 #include <openssl/pem.h>
 #include <openssl/pkcs12.h>      /* For the PKCS8 stuff o.O */

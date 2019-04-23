@@ -12,14 +12,14 @@
  * slurp this code if applications are using them directly.
  */
 
-#include <openssl/opensslconf.h>
+#include "../../include/openssl/opensslconf.h"
 #if OPENSSL_API_0_9_8
 NON_EMPTY_TRANSLATION_UNIT
 #else
 
 # include <stdio.h>
 # include <time.h>
-# include "internal/cryptlib.h"
+# include "../../include/internal/cryptlib.h"
 # include "bn_lcl.h"
 
 BIGNUM *BN_generate_prime(BIGNUM *ret, int bits, int safe,

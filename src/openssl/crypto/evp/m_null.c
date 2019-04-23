@@ -8,11 +8,11 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/evp.h>
-#include <openssl/objects.h>
-#include <openssl/x509.h>
-#include "internal/evp_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/x509.h"
+#include "../include/internal/evp_int.h"
 
 static int init(EVP_MD_CTX *ctx)
 {

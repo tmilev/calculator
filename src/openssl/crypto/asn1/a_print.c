@@ -8,9 +8,9 @@
  */
 
 #include <stdio.h>
-#include "internal/ctype.h"
-#include "internal/cryptlib.h"
-#include <openssl/asn1.h>
+#include "../include/internal/ctype.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1.h"
 
 int ASN1_PRINTABLE_type(const unsigned char *s, int len)
 {

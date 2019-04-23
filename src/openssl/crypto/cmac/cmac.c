@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "internal/cryptlib.h"
-#include <openssl/cmac.h>
-#include <openssl/err.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/cmac.h"
+#include "../../include/openssl/err.h"
 
 struct CMAC_CTX_st {
     /* Cipher context to use */

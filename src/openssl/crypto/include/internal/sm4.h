@@ -11,8 +11,8 @@
 #ifndef HEADER_SM4_H
 # define HEADER_SM4_H
 
-# include <openssl/opensslconf.h>
-# include <openssl/e_os2.h>
+# include "../../../include/openssl/opensslconf.h"
+# include "../../../include/openssl/e_os2.h"
 
 # ifdef OPENSSL_NO_SM4
 #  error SM4 is disabled.

@@ -11,14 +11,14 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "internal/cryptlib.h"
-#include "internal/o_dir.h"
-#include <openssl/lhash.h>
-#include <openssl/conf.h>
-#include <openssl/conf_api.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/o_dir.h"
+#include "../../include/openssl/lhash.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/conf_api.h"
 #include "conf_def.h"
-#include <openssl/buffer.h>
-#include <openssl/err.h>
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/err.h"
 #ifndef OPENSSL_NO_POSIX_IO
 # include <sys/stat.h>
 # ifdef _WIN32

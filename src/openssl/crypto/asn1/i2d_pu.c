@@ -8,13 +8,13 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/bn.h>
-#include <openssl/evp.h>
-#include <openssl/objects.h>
-#include <openssl/rsa.h>
-#include <openssl/dsa.h>
-#include <openssl/ec.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/openssl/ec.h"
 
 int i2d_PublicKey(const EVP_PKEY *a, unsigned char **pp)
 {

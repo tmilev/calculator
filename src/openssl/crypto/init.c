@@ -7,27 +7,27 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
-#include "internal/cryptlib_int.h"
-#include <openssl/err.h>
-#include "internal/rand_int.h"
-#include "internal/bio.h"
-#include <openssl/evp.h>
-#include "internal/evp_int.h"
-#include "internal/conf.h"
-#include "internal/async.h"
-#include "internal/engine.h"
-#include "internal/comp.h"
-#include "internal/err.h"
-#include "internal/err_int.h"
-#include "internal/objects.h"
+#include "../e_os.h"
+#include "include/internal/cryptlib_int.h"
+#include "../include/openssl/err.h"
+#include "include/internal/rand_int.h"
+#include "../include/internal/bio.h"
+#include "../include/openssl/evp.h"
+#include "include/internal/evp_int.h"
+#include "../include/internal/conf.h"
+#include "include/internal/async.h"
+#include "include/internal/engine.h"
+#include "../include/internal/comp.h"
+#include "../include/internal/err.h"
+#include "include/internal/err_int.h"
+#include "include/internal/objects.h"
 #include <stdlib.h>
 #include <assert.h>
-#include "internal/thread_once.h"
-#include "internal/dso_conf.h"
-#include "internal/dso.h"
-#include "internal/store.h"
-#include <openssl/trace.h>
+#include "../include/internal/thread_once.h"
+#include "include/internal/dso_conf.h"
+#include "../include/internal/dso.h"
+#include "include/internal/store.h"
+#include "../include/openssl/trace.h"
 
 static int stopped = 0;
 

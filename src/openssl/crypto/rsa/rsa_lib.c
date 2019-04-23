@@ -8,13 +8,13 @@
  */
 
 #include <stdio.h>
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
-#include "internal/refcount.h"
-#include "internal/bn_int.h"
-#include <openssl/engine.h>
-#include <openssl/evp.h>
-#include "internal/evp_int.h"
+#include "../../include/openssl/crypto.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/refcount.h"
+#include "../include/internal/bn_int.h"
+#include "../../include/openssl/engine.h"
+#include "../../include/openssl/evp.h"
+#include "../include/internal/evp_int.h"
 #include "rsa_locl.h"
 
 RSA *RSA_new(void)

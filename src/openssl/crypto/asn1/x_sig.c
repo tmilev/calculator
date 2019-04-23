@@ -8,10 +8,10 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1t.h>
-#include <openssl/x509.h>
-#include "internal/x509_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/x509.h"
+#include "../include/internal/x509_int.h"
 
 ASN1_SEQUENCE(X509_SIG) = {
         ASN1_SIMPLE(X509_SIG, algor, X509_ALGOR),

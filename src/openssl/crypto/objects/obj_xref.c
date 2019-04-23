@@ -7,10 +7,10 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/objects.h>
+#include "../../include/openssl/objects.h"
 #include "obj_xref.h"
-#include "internal/nelem.h"
-#include <openssl/err.h>
+#include "../../include/internal/nelem.h"
+#include "../../include/openssl/err.h"
 
 static STACK_OF(nid_triple) *sig_app, *sigx_app;
 

@@ -10,8 +10,8 @@
 
 #include <limits.h>
 
-#include <openssl/err.h>
-#include <openssl/obj_mac.h>
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/obj_mac.h"
 #include "ec_lcl.h"
 
 const EC_METHOD *EC_GFp_nist_method(void)

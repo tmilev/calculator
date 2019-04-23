@@ -11,11 +11,11 @@
 #ifndef HEADER_ENGINE_INT_H
 # define HEADER_ENGINE_INT_H
 
-# include <openssl/trace.h>
-# include "internal/cryptlib.h"
-# include "internal/engine.h"
-# include "internal/thread_once.h"
-# include "internal/refcount.h"
+# include "../../include/openssl/trace.h"
+# include "../../include/internal/cryptlib.h"
+# include "../include/internal/engine.h"
+# include "../../include/internal/thread_once.h"
+# include "../../include/internal/refcount.h"
 
 extern CRYPTO_RWLOCK *global_engine_lock;
 

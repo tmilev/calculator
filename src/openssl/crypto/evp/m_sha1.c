@@ -8,14 +8,14 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
-#include <openssl/evp.h>
-#include <openssl/objects.h>
-#include <openssl/sha.h>
-#include <openssl/rsa.h>
-#include "internal/evp_int.h"
-#include "internal/sha.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/sha.h"
+#include "../../include/openssl/rsa.h"
+#include "../include/internal/evp_int.h"
+#include "../include/internal/sha.h"
 
 static int init(EVP_MD_CTX *ctx)
 {

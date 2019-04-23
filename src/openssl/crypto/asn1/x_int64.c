@@ -8,10 +8,10 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include "internal/numbers.h"
-#include <openssl/asn1t.h>
-#include <openssl/bn.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/numbers.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/bn.h"
 #include "asn1_locl.h"
 
 /*

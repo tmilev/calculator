@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1.h"
 
 #ifndef NO_OLD_ASN1
 
-void *ASN1_dup(i2d_of_void *i2d, d2i_of_void *d2i, const void *x)
+void* ASN1_dup(i2d_of_void *i2d, d2i_of_void *d2i, const void *x)
 {
     unsigned char *b, *p;
     const unsigned char *p2;

@@ -9,18 +9,18 @@
  */
 
 #include <stdio.h>
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
-#include "internal/engine.h"
-#include <openssl/pem.h>
-#include <openssl/evp.h>
-#include <openssl/rand.h>
-#include <openssl/rsa.h>
-#include <openssl/dsa.h>
-#include <openssl/dh.h>
+#include "../../include/openssl/crypto.h"
+#include "../../include/internal/cryptlib.h"
+#include "../include/internal/engine.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/openssl/dh.h"
 
-#include <openssl/hmac.h>
-#include <openssl/x509v3.h>
+#include "../../include/openssl/hmac.h"
+#include "../../include/openssl/x509v3.h"
 
 /*
  * This testing gunk is implemented (and explained) lower down. It also
@@ -179,7 +179,7 @@ IMPLEMENT_DYNAMIC_CHECK_FN()
  *        the "init_key" handler is called.
  *    TEST_ENG_OPENSSL_RC4_P_CIPHER - ditto for the "cipher" handler.
  */
-# include <openssl/rc4.h>
+# include "../../include/openssl/rc4.h"
 # define TEST_RC4_KEY_SIZE               16
 typedef struct {
     unsigned char key[TEST_RC4_KEY_SIZE];
@@ -302,7 +302,7 @@ static int openssl_ciphers(ENGINE *e, const EVP_CIPHER **cipher,
 
 #ifdef TEST_ENG_OPENSSL_SHA
 /* Much the same sort of comment as for TEST_ENG_OPENSSL_RC4 */
-# include <openssl/sha.h>
+# include "../../include/openssl/sha.h"
 
 static int test_sha1_init(EVP_MD_CTX *ctx)
 {

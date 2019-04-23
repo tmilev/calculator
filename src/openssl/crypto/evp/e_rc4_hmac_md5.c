@@ -7,19 +7,19 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/opensslconf.h>
+#include "../../include/openssl/opensslconf.h"
 
 #include <stdio.h>
 #include <string.h>
 
 #if !defined(OPENSSL_NO_RC4) && !defined(OPENSSL_NO_MD5)
 
-# include <openssl/crypto.h>
-# include <openssl/evp.h>
-# include <openssl/objects.h>
-# include <openssl/rc4.h>
-# include <openssl/md5.h>
-# include "internal/evp_int.h"
+# include "../../include/openssl/crypto.h"
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/objects.h"
+# include "../../include/openssl/rc4.h"
+# include "../../include/openssl/md5.h"
+# include "../include/internal/evp_int.h"
 
 typedef struct {
     RC4_KEY ks;

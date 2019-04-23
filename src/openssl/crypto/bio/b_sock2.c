@@ -13,7 +13,7 @@
 
 #include "bio_lcl.h"
 
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 
 #ifndef OPENSSL_NO_SOCK
 # ifdef SO_MAXCONN

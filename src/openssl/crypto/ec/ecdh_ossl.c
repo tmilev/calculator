@@ -11,12 +11,12 @@
 #include <string.h>
 #include <limits.h>
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
-#include <openssl/err.h>
-#include <openssl/bn.h>
-#include <openssl/objects.h>
-#include <openssl/ec.h>
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/ec.h"
 #include "ec_lcl.h"
 
 int ossl_ecdh_compute_key(unsigned char **psec, size_t *pseclen,

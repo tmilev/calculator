@@ -9,11 +9,11 @@
 
 #include <stddef.h>
 
-#include <openssl/core.h>
-#include "internal/cryptlib.h"
-#include "internal/core.h"
-#include "internal/property.h"
-#include "internal/provider.h"
+#include "../include/openssl/core.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/core.h"
+#include "../include/internal/property.h"
+#include "../include/internal/provider.h"
 
 struct construct_data_st {
     OPENSSL_CTX *libctx;

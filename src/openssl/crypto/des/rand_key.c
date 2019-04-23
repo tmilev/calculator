@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/des.h>
-#include <openssl/rand.h>
+#include "../../include/openssl/des.h"
+#include "../../include/openssl/rand.h"
 
 int DES_random_key(DES_cblock *ret)
 {

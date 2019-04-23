@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/pem.h>
-#include <openssl/err.h>
-#include <openssl/pkcs12.h>
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/pkcs12.h"
 #include "p12_lcl.h"
 
 /* PKCS#12 password change routine */

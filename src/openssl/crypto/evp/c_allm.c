@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/evp.h>
-#include "internal/evp_int.h"
+#include "../../include/openssl/evp.h"
+#include "../include/internal/evp_int.h"
 
 void openssl_add_all_macs_int(void)
 {

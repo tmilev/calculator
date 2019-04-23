@@ -26,14 +26,14 @@
  * cases increases its link count) in the parent and so both should be freed up.
  */
 
-#include <openssl/asn1t.h>
+#include "../../include/openssl/asn1t.h"
 
 #include "crmf_int.h"
 
 /* explicit #includes not strictly needed since implied by the above: */
-#include <openssl/crmf.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
+#include "../../include/openssl/crmf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
 
 /*-
  * atyp = Attribute Type

@@ -8,10 +8,10 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1t.h>
-#include <openssl/pkcs7.h>
-#include <openssl/x509.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/pkcs7.h"
+#include "../../include/openssl/x509.h"
 
 /* PKCS#7 ASN1 module */
 

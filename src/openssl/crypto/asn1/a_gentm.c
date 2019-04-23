@@ -13,8 +13,8 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1.h>
+#include "../../include/internal/cryptlib.h"
+#include "../openssl/asn1.h"
 #include "asn1_locl.h"
 
 /* This is the primary function used to parse ASN1_GENERALIZEDTIME */

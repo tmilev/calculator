@@ -9,12 +9,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "internal/cryptlib.h"
-#include <openssl/objects.h>
-#include <openssl/evp.h>
-#include "internal/bn_int.h"
-#include "internal/asn1_int.h"
-#include "internal/evp_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/evp.h"
+#include "../include/internal/bn_int.h"
+#include "../include/internal/asn1_int.h"
+#include "../include/internal/evp_int.h"
 
 int EVP_PKEY_paramgen_init(EVP_PKEY_CTX *ctx)
 {

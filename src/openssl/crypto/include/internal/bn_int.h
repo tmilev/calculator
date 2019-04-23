@@ -10,7 +10,7 @@
 #ifndef HEADER_BN_INT_H
 # define HEADER_BN_INT_H
 
-# include <openssl/bn.h>
+# include "../../../include/openssl/bn.h"
 # include <limits.h>
 
 BIGNUM *bn_wexpand(BIGNUM *a, int words);

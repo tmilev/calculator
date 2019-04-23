@@ -8,11 +8,11 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include "internal/refcount.h"
-#include <openssl/bn.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/refcount.h"
+#include "../../include/openssl/bn.h"
 #include "dh_locl.h"
-#include <openssl/engine.h>
+#include "../../include/openssl/engine.h"
 
 int DH_set_method(DH *dh, const DH_METHOD *meth)
 {

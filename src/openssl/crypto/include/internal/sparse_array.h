@@ -11,7 +11,7 @@
 #ifndef HEADER_SPARSE_ARRAY_H
 # define HEADER_SPARSE_ARRAY_H
 
-# include <openssl/e_os2.h>
+# include "../../../include/openssl/e_os2.h"
 
 # ifdef __cplusplus
 extern "C" {

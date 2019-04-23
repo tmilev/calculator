@@ -18,7 +18,7 @@
 #ifndef HEADER_RAND_INT_H
 # define HEADER_RAND_INT_H
 
-# include <openssl/rand.h>
+# include "../../../include/openssl/rand.h"
 
 /* forward declaration */
 typedef struct rand_pool_st RAND_POOL;

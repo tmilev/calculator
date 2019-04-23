@@ -11,15 +11,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <openssl/err.h>
-#include <openssl/lhash.h>
-#include <openssl/objects.h>
-#include <openssl/safestack.h>
-#include <openssl/e_os2.h>
-#include "internal/thread_once.h"
-#include "internal/lhash.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/lhash.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/safestack.h"
+#include "../../include/openssl/e_os2.h"
+#include "../../include/internal/thread_once.h"
+#include "../include/internal/lhash.h"
 #include "obj_lcl.h"
-#include "e_os.h"
+#include "../../e_os.h"
 
 /*
  * We define this wrapper for two reasons. Firstly, later versions of

@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/blowfish.h>
+#include "../../include/openssl/blowfish.h"
 #include "bf_locl.h"
-#include <openssl/opensslv.h>
+#include "../../include/openssl/opensslv.h"
 
 /*
  * Blowfish as implemented from 'Blowfish: Springer-Verlag paper' (From

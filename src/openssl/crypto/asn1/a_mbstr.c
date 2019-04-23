@@ -8,9 +8,9 @@
  */
 
 #include <stdio.h>
-#include "internal/ctype.h"
-#include "internal/cryptlib.h"
-#include <openssl/asn1.h>
+#include "../include/internal/ctype.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1.h"
 
 static int traverse_string(const unsigned char *p, int len, int inform,
                            int (*rfunc) (unsigned long value, void *in),

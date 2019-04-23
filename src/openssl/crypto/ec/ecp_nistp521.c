@@ -31,13 +31,13 @@
  * work which got its smarts from Daniel J. Bernstein's work on the same.
  */
 
-#include <openssl/e_os2.h>
+#include "../../include/openssl/e_os2.h"
 #ifdef OPENSSL_NO_EC_NISTP_64_GCC_128
 NON_EMPTY_TRANSLATION_UNIT
 #else
 
 # include <string.h>
-# include <openssl/err.h>
+# include "../../include/openssl/err.h"
 # include "ec_lcl.h"
 
 # if defined(__SIZEOF_INT128__) && __SIZEOF_INT128__==16

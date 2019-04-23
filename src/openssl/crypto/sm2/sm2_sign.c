@@ -13,9 +13,9 @@
 #include "internal/sm2err.h"
 #include "internal/ec_int.h" /* ec_group_do_inverse_ord() */
 #include "internal/numbers.h"
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 #include <openssl/evp.h>
-#include <openssl/err.h>
+#include "../../include/openssl/err.h"
 #include <openssl/bn.h>
 #include <string.h>
 

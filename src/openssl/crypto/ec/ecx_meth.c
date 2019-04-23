@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/x509.h>
-#include <openssl/ec.h>
-#include <openssl/rand.h>
-#include "internal/asn1_int.h"
-#include "internal/evp_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/ec.h"
+#include "../../include/openssl/rand.h"
+#include "../include/internal/asn1_int.h"
+#include "../include/internal/evp_int.h"
 #include "ec_lcl.h"
 #include "curve448/curve448_lcl.h"
 

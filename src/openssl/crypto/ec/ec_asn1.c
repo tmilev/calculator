@@ -9,10 +9,10 @@
 
 #include <string.h>
 #include "ec_lcl.h"
-#include <openssl/err.h>
-#include <openssl/asn1t.h>
-#include <openssl/objects.h>
-#include "internal/nelem.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/internal/nelem.h"
 
 int EC_GROUP_get_basis_type(const EC_GROUP *group)
 {

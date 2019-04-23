@@ -7,14 +7,14 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/opensslconf.h>
+#include "../../include/openssl/opensslconf.h"
 #ifdef OPENSSL_NO_EGD
 NON_EMPTY_TRANSLATION_UNIT
 #else
 
-# include <openssl/crypto.h>
-# include <openssl/e_os2.h>
-# include <openssl/rand.h>
+# include "../../include/openssl/crypto.h"
+# include "../../include/openssl/e_os2.h"
+# include "../../include/openssl/rand.h"
 
 /*
  * Query an EGD

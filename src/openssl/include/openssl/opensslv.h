@@ -121,7 +121,7 @@ const char *OPENSSL_version_build_metadata(void);
 /*
  * SECTION 3: BACKWARD COMPATIBILITY
  */
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
 # if !OPENSSL_API_4
 /* Synthesize OPENSSL_VERSION_NUMBER with the layout 0xMNN00PPSL */

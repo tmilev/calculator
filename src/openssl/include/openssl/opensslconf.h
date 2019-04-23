@@ -9,7 +9,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/opensslv.h>
+#include "opensslv.h"
 
 #ifndef HEADER_OPENSSLCONF_H
 # define HEADER_OPENSSLCONF_H

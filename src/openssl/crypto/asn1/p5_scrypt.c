@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1t.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/rand.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/rand.h"
 
 #ifndef OPENSSL_NO_SCRYPT
 /* PKCS#5 scrypt password based encryption structures */

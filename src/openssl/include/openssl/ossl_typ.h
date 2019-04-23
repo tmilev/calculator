@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-# include <openssl/e_os2.h>
+# include "../../include/openssl/e_os2.h"
 
 typedef struct ossl_provider_st OSSL_PROVIDER; /* Provider Object */
 

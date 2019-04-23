@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/asn1.h>
-#include <openssl/pkcs7.h>
-#include <openssl/bio.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/pkcs7.h"
+#include "../../include/openssl/bio.h"
 
 #if !defined(OPENSSL_SYS_VXWORKS)
 # include <memory.h>

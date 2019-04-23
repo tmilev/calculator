@@ -8,15 +8,15 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/bio.h>
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/pkcs7.h>
-#include <openssl/pem.h>
-#include <openssl/rsa.h>
-#include <openssl/dsa.h>
-#include <openssl/dh.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/pkcs7.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/openssl/dh.h"
 
 #ifndef OPENSSL_NO_RSA
 static RSA *pkey_get_rsa(EVP_PKEY *key, RSA **rsa);

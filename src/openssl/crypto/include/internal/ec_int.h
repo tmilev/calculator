@@ -11,11 +11,11 @@
 
 #ifndef HEADER_OSSL_EC_INTERNAL_H
 # define HEADER_OSSL_EC_INTERNAL_H
-# include <openssl/opensslconf.h>
+# include "../../../include/openssl/opensslconf.h"
 
 # ifndef OPENSSL_NO_EC
 
-#  include <openssl/ec.h>
+#  include "../../../include/openssl/ec.h"
 
 /*-
  * Computes the multiplicative inverse of x in the range

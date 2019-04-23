@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
-#include <openssl/conf.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <openssl/trace.h>
+#include "../../include/openssl/crypto.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
+#include "../../include/openssl/trace.h"
 
 /* Algorithm configuration module. */
 

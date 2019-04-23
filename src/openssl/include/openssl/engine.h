@@ -22,7 +22,7 @@
 #  include <openssl/ec.h>
 #  include <openssl/rand.h>
 #  include <openssl/ui.h>
-#  include <openssl/err.h>
+#  include "../../include/openssl/err.h"
 # endif
 # include <openssl/ossl_typ.h>
 # include <openssl/symhacks.h>

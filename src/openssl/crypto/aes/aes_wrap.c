@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
-#include <openssl/aes.h>
-#include <openssl/modes.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/aes.h"
+#include "../../include/openssl/modes.h"
 
 int AES_wrap_key(AES_KEY *key, const unsigned char *iv,
                  unsigned char *out,

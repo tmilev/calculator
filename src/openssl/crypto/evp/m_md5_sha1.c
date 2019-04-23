@@ -9,14 +9,14 @@
 
 #if !defined(OPENSSL_NO_MD5)
 
-# include <openssl/evp.h>
-# include <openssl/objects.h>
-# include <openssl/x509.h>
-# include <openssl/md5.h>
-# include <openssl/sha.h>
-# include "internal/cryptlib.h"
-# include "internal/evp_int.h"
-# include <openssl/rsa.h>
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/objects.h"
+# include "../../include/openssl/x509.h"
+# include "../../include/openssl/md5.h"
+# include "../../include/openssl/sha.h"
+# include "../../include/internal/cryptlib.h"
+# include "../include/internal/evp_int.h"
+# include "../../include/openssl/rsa.h"
 
 struct md5_sha1_ctx {
     MD5_CTX md5;

@@ -11,7 +11,7 @@
 #ifndef HEADER_SM3_H
 # define HEADER_SM3_H
 
-# include <openssl/opensslconf.h>
+# include "../../../include/openssl/opensslconf.h"
 
 # ifdef OPENSSL_NO_SM3
 #  error SM3 is disabled.

@@ -7,11 +7,11 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/asn1t.h>
-#include <openssl/pem.h>
-#include <openssl/x509v3.h>
-#include <openssl/err.h>
-#include <openssl/cms.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/x509v3.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/cms.h"
 #include "cms_lcl.h"
 
 /* CMS SignedData Attribute utilities */

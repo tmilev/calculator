@@ -10,14 +10,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "internal/cryptlib.h"
-#include <openssl/engine.h>
-#include <openssl/evp.h>
-#include <openssl/x509v3.h>
-#include <openssl/kdf.h>
-#include "internal/asn1_int.h"
-#include "internal/evp_int.h"
-#include "internal/numbers.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/engine.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/x509v3.h"
+#include "../../include/openssl/kdf.h"
+#include "../include/internal/asn1_int.h"
+#include "../include/internal/evp_int.h"
+#include "../../include/internal/numbers.h"
 #include "evp_locl.h"
 
 typedef int sk_cmp_fn_type(const char *const *a, const char *const *b);

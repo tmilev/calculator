@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "dsa_locl.h"
-#include <openssl/bn.h>
+#include "../../include/openssl/bn.h"
 
 DSA_SIG *DSA_do_sign(const unsigned char *dgst, int dlen, DSA *dsa)
 {

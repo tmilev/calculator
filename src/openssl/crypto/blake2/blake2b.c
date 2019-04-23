@@ -16,7 +16,7 @@
 
 #include <assert.h>
 #include <string.h>
-#include <openssl/crypto.h>
+#include "../../include/openssl/crypto.h"
 
 #include "blake2_locl.h"
 #include "blake2_impl.h"

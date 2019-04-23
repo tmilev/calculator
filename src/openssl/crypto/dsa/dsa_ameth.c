@@ -8,14 +8,14 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/x509.h>
-#include <openssl/asn1.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/asn1.h"
 #include "dsa_locl.h"
-#include <openssl/bn.h>
-#include <openssl/cms.h>
-#include "internal/asn1_int.h"
-#include "internal/evp_int.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/cms.h"
+#include "../include/internal/asn1_int.h"
+#include "../include/internal/evp_int.h"
 
 static int dsa_pub_decode(EVP_PKEY *pkey, X509_PUBKEY *pubkey)
 {

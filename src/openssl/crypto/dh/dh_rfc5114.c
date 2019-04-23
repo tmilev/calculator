@@ -8,10 +8,10 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "dh_locl.h"
-#include <openssl/bn.h>
-#include "internal/bn_dh.h"
+#include "../../include/openssl/bn.h"
+#include "../include/internal/bn_dh.h"
 
 /*
  * Macro to make a DH structure from BIGNUM data. NB: although just copying

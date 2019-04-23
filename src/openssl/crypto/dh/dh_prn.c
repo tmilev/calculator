@@ -8,9 +8,9 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/evp.h>
-#include <openssl/dh.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/dh.h"
 
 #ifndef OPENSSL_NO_STDIO
 int DHparams_print_fp(FILE *fp, const DH *x)

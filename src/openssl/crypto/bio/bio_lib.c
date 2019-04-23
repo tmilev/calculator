@@ -9,9 +9,9 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <openssl/crypto.h>
+#include "../../include/openssl/crypto.h"
 #include "bio_lcl.h"
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 
 /*

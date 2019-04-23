@@ -8,8 +8,8 @@
  */
 
 #include "eng_int.h"
-#include "internal/dso.h"
-#include <openssl/crypto.h>
+#include "../../include/internal/dso.h"
+#include "../../include/openssl/crypto.h"
 
 /*
  * Shared libraries implementing ENGINEs for use by the "dynamic" ENGINE

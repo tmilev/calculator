@@ -20,14 +20,14 @@
  * one-wayness.  For the RSA function, this is an equivalent notion.
  */
 
-#include "internal/constant_time_locl.h"
+#include "../../include/internal/constant_time_locl.h"
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/bn.h>
-#include <openssl/evp.h>
-#include <openssl/rand.h>
-#include <openssl/sha.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/sha.h"
 #include "rsa_locl.h"
 
 int RSA_padding_add_PKCS1_OAEP(unsigned char *to, int tlen,

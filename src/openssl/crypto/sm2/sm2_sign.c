@@ -9,14 +9,14 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/sm2.h"
-#include "internal/sm2err.h"
-#include "internal/ec_int.h" /* ec_group_do_inverse_ord() */
-#include "internal/numbers.h"
+#include "../include/internal/sm2.h"
+#include "../include/internal/sm2err.h"
+#include "../include/internal/ec_int.h" /* ec_group_do_inverse_ord() */
+#include "../../include/internal/numbers.h"
 #include "../../include/openssl/err.h"
-#include <openssl/evp.h>
+#include "../../include/openssl/evp.h"
 #include "../../include/openssl/err.h"
-#include <openssl/bn.h>
+#include "../../include/openssl/bn.h"
 #include <string.h>
 
 int sm2_compute_z_digest(uint8_t *out,

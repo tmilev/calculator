@@ -7,14 +7,14 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/opensslconf.h>
+#include "../../include/openssl/opensslconf.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-#include <openssl/crypto.h>
-#include <openssl/sha.h>
-#include <openssl/opensslv.h>
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/sha.h"
+#include "../../include/openssl/opensslv.h"
 
 int SHA224_Init(SHA256_CTX *c)
 {

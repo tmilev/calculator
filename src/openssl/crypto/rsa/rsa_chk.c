@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/bn.h>
+#include "../../include/openssl/bn.h"
 #include "../../include/openssl/err.h"
 #include "rsa_locl.h"
 

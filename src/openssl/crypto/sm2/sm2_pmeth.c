@@ -7,13 +7,13 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
-#include <openssl/asn1t.h>
-#include <openssl/ec.h>
-#include <openssl/evp.h>
-#include "internal/evp_int.h"
-#include "internal/sm2.h"
-#include "internal/sm2err.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/ec.h"
+#include "../../include/openssl/evp.h"
+#include "../include/internal/evp_int.h"
+#include "../include/internal/sm2.h"
+#include "../include/internal/sm2err.h"
 
 /* EC pkey context structure */
 

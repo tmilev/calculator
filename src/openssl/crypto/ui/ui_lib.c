@@ -8,10 +8,10 @@
  */
 
 #include <string.h>
-#include "internal/cryptlib.h"
-#include <openssl/e_os2.h>
-#include <openssl/buffer.h>
-#include <openssl/ui.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/e_os2.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/ui.h"
 #include "../../include/openssl/err.h"
 #include "ui_locl.h"
 

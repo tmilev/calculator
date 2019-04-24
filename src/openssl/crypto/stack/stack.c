@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include "internal/numbers.h"
-#include <openssl/stack.h>
-#include <openssl/objects.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/numbers.h"
+#include "../../include/openssl/stack.h"
+#include "../../include/openssl/objects.h"
 #include <errno.h>
-#include <openssl/e_os2.h>      /* For ossl_inline */
+#include "../../include/openssl/e_os2.h"      /* For ossl_inline */
 
 /*
  * The initial number of nodes in the array.

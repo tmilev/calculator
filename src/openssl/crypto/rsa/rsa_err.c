@@ -9,7 +9,7 @@
  */
 
 #include "../../include/openssl/err.h"
-#include <openssl/rsaerr.h>
+#include "../../include/openssl/rsaerr.h"
 
 #ifndef OPENSSL_NO_ERR
 

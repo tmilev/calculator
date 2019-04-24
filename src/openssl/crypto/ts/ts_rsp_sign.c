@@ -7,15 +7,15 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
-#include "internal/cryptlib.h"
+#include "../../e_os.h"
+#include "../../include/internal/cryptlib.h"
 
-#include <openssl/objects.h>
-#include <openssl/ts.h>
-#include <openssl/pkcs7.h>
-#include <openssl/crypto.h>
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/ts.h"
+#include "../../include/openssl/pkcs7.h"
+#include "../../include/openssl/crypto.h"
 #include "ts_lcl.h"
-#include "internal/ess_int.h"
+#include "../include/internal/ess_int.h"
 
 static ASN1_INTEGER *def_serial_cb(struct TS_resp_ctx *, void *);
 static int def_time_cb(struct TS_resp_ctx *, void *, long *sec, long *usec);

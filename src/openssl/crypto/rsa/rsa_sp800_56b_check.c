@@ -9,8 +9,8 @@
  */
 
 #include "../../include/openssl/err.h"
-#include <openssl/bn.h>
-#include "internal/bn_int.h"
+#include "../../include/openssl/bn.h"
+#include "../include/internal/bn_int.h"
 #include "rsa_locl.h"
 
 /*

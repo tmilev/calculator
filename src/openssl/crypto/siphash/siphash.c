@@ -25,9 +25,9 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/crypto.h>
+#include "../../include/openssl/crypto.h"
 
-#include "internal/siphash.h"
+#include "../include/internal/siphash.h"
 #include "siphash_local.h"
 
 /* default: SipHash-2-4 */

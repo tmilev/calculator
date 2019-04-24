@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/store.h>
+#include "../../include/openssl/store.h"
 
 static char *type_strings[] = {
     "Name",                      /* OSSL_STORE_INFO_NAME */

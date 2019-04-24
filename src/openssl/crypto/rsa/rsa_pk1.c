@@ -7,13 +7,13 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/constant_time_locl.h"
+#include "../../include/internal/constant_time_locl.h"
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/bn.h>
-#include <openssl/rsa.h>
-#include <openssl/rand.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/rand.h"
 
 int RSA_padding_add_PKCS1_type_1(unsigned char *to, int tlen,
                                  const unsigned char *from, int flen)

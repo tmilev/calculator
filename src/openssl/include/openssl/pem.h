@@ -10,12 +10,12 @@
 #ifndef HEADER_PEM_H
 # define HEADER_PEM_H
 
-# include <openssl/e_os2.h>
-# include <openssl/bio.h>
-# include <openssl/safestack.h>
-# include <openssl/evp.h>
-# include <openssl/x509.h>
-# include <openssl/pemerr.h>
+# include "../../include/openssl/e_os2.h"
+# include "../../include/openssl/bio.h"
+# include "../../include/openssl/safestack.h"
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/x509.h"
+# include "../../include/openssl/pemerr.h"
 
 #ifdef  __cplusplus
 extern "C" {

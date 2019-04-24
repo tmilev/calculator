@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/opensslconf.h>
+#include "../../include/openssl/opensslconf.h"
 /*-
  * IMPLEMENTATION NOTES.
  *
@@ -45,12 +45,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <openssl/crypto.h>
-#include <openssl/sha.h>
-#include <openssl/opensslv.h>
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/sha.h"
+#include "../../include/openssl/opensslv.h"
 
-#include "internal/cryptlib.h"
-#include "internal/sha.h"
+#include "../../include/internal/cryptlib.h"
+#include "../include/internal/sha.h"
 
 #if defined(__i386) || defined(__i386__) || defined(_M_IX86) || \
     defined(__x86_64) || defined(_M_AMD64) || defined(_M_X64) || \

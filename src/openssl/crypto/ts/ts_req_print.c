@@ -8,11 +8,11 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/objects.h>
-#include <openssl/bn.h>
-#include <openssl/x509v3.h>
-#include <openssl/ts.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/x509v3.h"
+#include "../../include/openssl/ts.h"
 #include "ts_lcl.h"
 
 int TS_REQ_print_bio(BIO *bio, TS_REQ *a)

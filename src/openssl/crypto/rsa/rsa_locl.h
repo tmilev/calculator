@@ -10,8 +10,8 @@
 #ifndef RSA_LOCAL_HEADER_H
 #define RSA_LOCAL_HEADER_H
 
-#include <openssl/rsa.h>
-#include "internal/refcount.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/internal/refcount.h"
 
 #define RSA_MAX_PRIME_NUM       5
 #define RSA_MIN_MODULUS_BITS    512

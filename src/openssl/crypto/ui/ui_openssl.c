@@ -7,10 +7,10 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
-#include <openssl/e_os2.h>
+#include "../../e_os.h"
+#include "../../include/openssl/e_os2.h"
 #include "../../include/openssl/err.h"
-#include <openssl/ui.h>
+#include "../../include/openssl/ui.h"
 
 #ifndef OPENSSL_NO_UI_CONSOLE
 /*
@@ -54,7 +54,7 @@
 # endif
 
 # include "ui_locl.h"
-# include "internal/cryptlib.h"
+# include "../../include/internal/cryptlib.h"
 
 # ifdef OPENSSL_SYS_VMS          /* prototypes for sys$whatever */
 #  include <starlet.h>

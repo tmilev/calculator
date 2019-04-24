@@ -9,11 +9,11 @@
 
 #include <stdarg.h>
 #include <string.h>
-#include <openssl/evp.h>
+#include "../../include/openssl/evp.h"
 #include "../../include/openssl/err.h"
-#include "internal/siphash.h"
+#include "../include/internal/siphash.h"
 #include "siphash_local.h"
-#include "internal/evp_int.h"
+#include "../include/internal/evp_int.h"
 
 /* local SIPHASH structure is actually a SIPHASH */
 

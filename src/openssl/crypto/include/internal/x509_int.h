@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/refcount.h"
+#include "../../../include/internal/refcount.h"
 
 /* Internal X509 structures and functions: not for application use */
 

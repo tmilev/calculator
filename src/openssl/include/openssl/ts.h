@@ -10,20 +10,20 @@
 #ifndef HEADER_TS_H
 # define HEADER_TS_H
 
-# include <openssl/opensslconf.h>
+# include "../../include/openssl/opensslconf.h"
 
 # ifndef OPENSSL_NO_TS
-# include <openssl/symhacks.h>
-# include <openssl/buffer.h>
-# include <openssl/evp.h>
-# include <openssl/bio.h>
-# include <openssl/asn1.h>
-# include <openssl/safestack.h>
-# include <openssl/rsa.h>
-# include <openssl/dsa.h>
-# include <openssl/dh.h>
-# include <openssl/tserr.h>
-# include <openssl/ess.h>
+# include "../../include/openssl/symhacks.h"
+# include "../../include/openssl/buffer.h"
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/bio.h"
+# include "../../include/openssl/asn1.h"
+# include "../../include/openssl/safestack.h"
+# include "../../include/openssl/rsa.h"
+# include "../../include/openssl/dsa.h"
+# include "../../include/openssl/dh.h>
+# include "../../include/openssl/tserr.h>
+# include "../../include/openssl/ess.h>
 # ifdef  __cplusplus
 extern "C" {
 # endif

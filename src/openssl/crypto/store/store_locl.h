@@ -7,13 +7,13 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/thread_once.h"
-#include <openssl/dsa.h>
-#include <openssl/engine.h>
-#include <openssl/evp.h>
-#include <openssl/lhash.h>
-#include <openssl/x509.h>
-#include <openssl/store.h>
+#include "../../include/internal/thread_once.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/openssl/engine.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/lhash.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/store.h"
 
 /*-
  *  OSSL_STORE_INFO stuff

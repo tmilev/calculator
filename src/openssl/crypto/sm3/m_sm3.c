@@ -8,12 +8,12 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 #ifndef OPENSSL_NO_SM3
-# include <openssl/evp.h>
-# include "internal/evp_int.h"
-# include "internal/sm3.h"
+# include "../../include/openssl/evp.h"
+# include "../include/internal/evp_int.h"
+# include "../include/internal/sm3.h"
 
 static int init(EVP_MD_CTX *ctx)
 {

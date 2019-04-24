@@ -12,14 +12,14 @@
  */
 
 #ifndef OPENSSL_NO_SRP
-# include "internal/cryptlib.h"
-# include "internal/evp_int.h"
-# include <openssl/sha.h>
-# include <openssl/srp.h>
-# include <openssl/evp.h>
-# include <openssl/buffer.h>
-# include <openssl/rand.h>
-# include <openssl/txt_db.h>
+# include "../../include/internal/cryptlib.h"
+# include "../include/internal/evp_int.h"
+# include "../../include/openssl/sha.h"
+# include "../../include/openssl/srp.h"
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/buffer.h"
+# include "../../include/openssl/rand.h"
+# include "../../include/openssl/txt_db.h"
 # include "../../include/openssl/err.h"
 
 # define SRP_RANDOM_SALT_LEN 20

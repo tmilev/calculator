@@ -8,10 +8,10 @@
  */
 
 #include <stdio.h>
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
-#include "internal/bn_int.h"
-#include <openssl/rand.h>
+#include "../../include/openssl/crypto.h"
+#include "../../include/internal/cryptlib.h"
+#include "../include/internal/bn_int.h"
+#include "../../include/openssl/rand.h"
 #include "rsa_locl.h"
 
 int RSA_bits(const RSA *r)

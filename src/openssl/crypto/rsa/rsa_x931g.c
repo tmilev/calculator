@@ -11,7 +11,7 @@
 #include <string.h>
 #include <time.h>
 #include "../../include/openssl/err.h"
-#include <openssl/bn.h>
+#include "../../include/openssl/bn.h"
 #include "rsa_locl.h"
 
 /* X9.31 RSA key derivation and generation */

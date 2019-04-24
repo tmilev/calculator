@@ -7,28 +7,28 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
+#include "../../e_os.h"
 #include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
 #include <assert.h>
 
-#include <openssl/bio.h>
-#include <openssl/dsa.h>         /* For d2i_DSAPrivateKey */
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/dsa.h"         /* For d2i_DSAPrivateKey */
 #include "../../include/openssl/err.h"
-#include <openssl/evp.h>
-#include <openssl/pem.h>
-#include <openssl/pkcs12.h>      /* For the PKCS8 stuff o.O */
-#include <openssl/rsa.h>         /* For d2i_RSAPrivateKey */
-#include <openssl/safestack.h>
-#include <openssl/store.h>
-#include <openssl/ui.h>
-#include <openssl/x509.h>        /* For the PKCS8 stuff o.O */
-#include "internal/asn1_int.h"
-#include "internal/ctype.h"
-#include "internal/o_dir.h"
-#include "internal/cryptlib.h"
-#include "internal/store_int.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/pkcs12.h"      /* For the PKCS8 stuff o.O */
+#include "../../include/openssl/rsa.h"         /* For d2i_RSAPrivateKey */
+#include "../../include/openssl/safestack.h"
+#include "../../include/openssl/store.h"
+#include "../../include/openssl/ui.h"
+#include "../../include/openssl/x509.h"        /* For the PKCS8 stuff o.O */
+#include "../include/internal/asn1_int.h"
+#include "../include/internal/ctype.h"
+#include "../../include/internal/o_dir.h"
+#include "../../include/internal/cryptlib.h"
+#include "../include/internal/store_int.h"
 #include "store_locl.h"
 
 #ifdef _WIN32

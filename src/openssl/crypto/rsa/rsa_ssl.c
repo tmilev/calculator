@@ -8,11 +8,11 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/bn.h>
-#include <openssl/rsa.h>
-#include <openssl/rand.h>
-#include "internal/constant_time_locl.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/internal/constant_time_locl.h"
 
 int RSA_padding_add_SSLv23(unsigned char *to, int tlen,
                            const unsigned char *from, int flen)

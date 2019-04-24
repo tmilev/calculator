@@ -14,8 +14,8 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <openssl/bn.h>
-#include "internal/cryptlib.h"
+#include "../include/openssl/bn.h"
+#include "../include/internal/cryptlib.h"
 
 #include "sparc_arch.h"
 

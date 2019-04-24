@@ -8,13 +8,13 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1t.h>
-#include <openssl/x509.h>
-#include <openssl/bn.h>
-#include <openssl/cms.h>
-#include "internal/asn1_int.h"
-#include "internal/evp_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/cms.h"
+#include "../include/internal/asn1_int.h"
+#include "../include/internal/evp_int.h"
 #include "rsa_locl.h"
 
 #ifndef OPENSSL_NO_CMS

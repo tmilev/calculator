@@ -7,18 +7,16 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
+#include "../../e_os.h"
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#include "e_os.h"
-
-#include <openssl/crypto.h>
+#include "../../include/openssl/crypto.h"
 #include "../../include/openssl/err.h"
-#include <openssl/store.h>
-#include "internal/thread_once.h"
-#include "internal/store_int.h"
+#include "../../include/openssl/store.h"
+#include "../../include/internal/thread_once.h"
+#include "../include/internal/store_int.h"
 #include "store_locl.h"
 
 struct ossl_store_ctx_st {

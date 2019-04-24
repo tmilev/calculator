@@ -8,9 +8,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/crypto.h>
-#include <openssl/bn.h>
-#include "internal/sparse_array.h"
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/bn.h"
+#include "include/internal/sparse_array.h"
 
 /*
  * How many bits are used to index each level in the tree structre?

@@ -8,11 +8,11 @@
  */
 
 #include <string.h>
-#include "internal/ctype.h"
+#include "../include/internal/ctype.h"
 #include <assert.h>
 
 #include "../../include/openssl/err.h"
-#include <openssl/lhash.h>
+#include "../../include/openssl/lhash.h"
 #include "store_locl.h"
 
 static CRYPTO_RWLOCK *registry_lock;

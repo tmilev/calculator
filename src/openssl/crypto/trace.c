@@ -10,14 +10,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <openssl/bio.h>
-#include <openssl/crypto.h>
-#include <openssl/trace.h>
-#include "internal/bio.h"
-#include "internal/nelem.h"
-#include "internal/cryptlib_int.h"
+#include "../include/openssl/bio.h"
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/trace.h"
+#include "../include/internal/bio.h"
+#include "../include/internal/nelem.h"
+#include "include/internal/cryptlib_int.h"
 
-#include "e_os.h"                /* strcasecmp for Windows */
+#include "../e_os.h"                /* strcasecmp for Windows */
 
 #ifndef OPENSSL_NO_TRACE
 

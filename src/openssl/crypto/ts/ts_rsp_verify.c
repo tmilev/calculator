@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/objects.h>
-#include <openssl/ts.h>
-#include <openssl/pkcs7.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/ts.h"
+#include "../../include/openssl/pkcs7.h"
 #include "ts_lcl.h"
-#include "internal/ess_int.h"
+#include "../include/internal/ess_int.h"
 
 static int ts_verify_cert(X509_STORE *store, STACK_OF(X509) *untrusted,
                           X509 *signer, STACK_OF(X509) **chain);

@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
-#include "internal/cryptlib.h"
+#include "../../e_os.h"
+#include "../../include/internal/cryptlib.h"
 #include <stdio.h>
 #include <time.h>
 #include <errno.h>
@@ -18,8 +18,8 @@
 # include <sys/stat.h>
 #endif
 
-#include <openssl/x509.h>
-#include "internal/x509_int.h"
+#include "../../include/openssl/x509.h"
+#include "../include/internal/x509_int.h"
 #include "x509_lcl.h"
 
 struct lookup_dir_hashes_st {

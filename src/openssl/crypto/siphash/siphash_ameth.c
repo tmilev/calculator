@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/evp.h>
-#include "internal/asn1_int.h"
-#include "internal/siphash.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../include/internal/asn1_int.h"
+#include "../include/internal/siphash.h"
 #include "siphash_local.h"
-#include "internal/evp_int.h"
+#include "../include/internal/evp_int.h"
 
 /*
  * SIPHASH "ASN1" method. This is just here to indicate the maximum

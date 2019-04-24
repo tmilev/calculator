@@ -12,11 +12,11 @@
  */
 
 #ifndef OPENSSL_NO_SRP
-# include "internal/cryptlib.h"
-# include <openssl/sha.h>
-# include <openssl/srp.h>
-# include <openssl/evp.h>
-# include "internal/bn_srp.h"
+# include "../../include/internal/cryptlib.h"
+# include "../../include/openssl/sha.h"
+# include "../../include/openssl/srp.h"
+# include "../../include/openssl/evp.h"
+# include "../include/internal/bn_srp.h"
 
 /* calculate = SHA1(PAD(x) || PAD(y)) */
 

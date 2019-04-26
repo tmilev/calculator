@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/crypto.h>
+#include "../../include/openssl/crypto.h"
 
 /*
  * DEFINE_RUN_ONCE: Define an initialiser function that should be run exactly

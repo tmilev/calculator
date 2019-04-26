@@ -12,7 +12,7 @@
 # define HEADER_ASN1ERR_H
 
 # ifndef HEADER_SYMHACKS_H
-#  include <openssl/symhacks.h>
+#  include "../../include/openssl/symhacks.h"
 # endif
 
 # ifdef  __cplusplus

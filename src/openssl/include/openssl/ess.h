@@ -10,14 +10,14 @@
 #ifndef HEADER_ESS_H
 # define HEADER_ESS_H
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
 # ifdef  __cplusplus
 extern "C" {
 # endif
-# include <openssl/safestack.h>
-# include <openssl/x509.h>
-# include <openssl/esserr.h>
+# include "safestack.h"
+# include "x509.h"
+# include "esserr.h"
 
 typedef struct ESS_issuer_serial ESS_ISSUER_SERIAL;
 typedef struct ESS_cert_id ESS_CERT_ID;

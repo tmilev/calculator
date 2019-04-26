@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include "internal/ctype.h"
-#include "internal/cryptlib.h"
-#include <openssl/asn1t.h>
-#include <openssl/x509.h>
-#include "internal/x509_int.h"
-#include "internal/asn1_int.h"
+#include "../include/internal/ctype.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/x509.h"
+#include "../include/internal/x509_int.h"
+#include "../include/internal/asn1_int.h"
 #include "x509_lcl.h"
 
 /*

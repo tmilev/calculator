@@ -14,13 +14,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "internal/cryptlib.h"
-#include <openssl/conf.h>
-#include <openssl/asn1.h>
-#include <openssl/asn1t.h>
-#include <openssl/buffer.h>
-#include <openssl/x509v3.h>
-#include "internal/x509_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/x509v3.h"
+#include "../include/internal/x509_int.h"
 #include "ext_dat.h"
 
 #ifndef OPENSSL_NO_RFC3779

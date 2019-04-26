@@ -7,6 +7,6 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/comp.h>
+#include "../../include/openssl/comp.h"
 
 void comp_zlib_cleanup_int(void);

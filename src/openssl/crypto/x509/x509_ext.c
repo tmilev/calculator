@@ -8,13 +8,13 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1.h>
-#include <openssl/objects.h>
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include "internal/x509_int.h"
-#include <openssl/x509v3.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/x509.h"
+#include "../include/internal/x509_int.h"
+#include "../../include/openssl/x509v3.h"
 
 int X509_CRL_get_ext_count(const X509_CRL *x)
 {

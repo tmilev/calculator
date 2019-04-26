@@ -12,10 +12,10 @@
 # define HEADER_DSOERR_H
 
 # ifndef HEADER_SYMHACKS_H
-#  include <openssl/symhacks.h>
+#  include "../../include/openssl/symhacks.h"
 # endif
 
-# include <openssl/opensslconf.h>
+# include "../../include/openssl/opensslconf.h"
 
 # ifdef  __cplusplus
 extern "C"

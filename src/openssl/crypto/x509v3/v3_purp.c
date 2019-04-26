@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include "internal/numbers.h"
-#include <openssl/x509v3.h>
-#include <openssl/x509_vfy.h>
-#include "internal/x509_int.h"
-#include "internal/tsan_assist.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/numbers.h"
+#include "../../include/openssl/x509v3.h"
+#include "../../include/openssl/x509_vfy.h"
+#include "../include/internal/x509_int.h"
+#include "../../include/internal/tsan_assist.h"
 
 static void x509v3_cache_extensions(X509 *x);
 

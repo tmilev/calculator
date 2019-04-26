@@ -8,11 +8,11 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/objects.h>
-#include <openssl/x509.h>
-#include <openssl/buffer.h>
-#include "internal/x509_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/buffer.h"
+#include "../include/internal/x509_int.h"
 
 /*
  * Limit to ensure we don't overflow: much greater than

@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/refcount.h"
+#include "../../include/internal/refcount.h"
 
 /*
  * This structure holds all parameters associated with a verify operation by

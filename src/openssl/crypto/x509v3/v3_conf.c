@@ -10,12 +10,12 @@
 /* extension creation utilities */
 
 #include <stdio.h>
-#include "internal/ctype.h"
-#include "internal/cryptlib.h"
-#include <openssl/conf.h>
-#include <openssl/x509.h>
-#include "internal/x509_int.h"
-#include <openssl/x509v3.h>
+#include "../include/internal/ctype.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/x509.h"
+#include "../include/internal/x509_int.h"
+#include "../../include/openssl/x509v3.h"
 
 static int v3_check_critical(const char **value);
 static int v3_check_generic(const char **value);

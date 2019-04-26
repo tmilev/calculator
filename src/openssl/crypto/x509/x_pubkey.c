@@ -8,14 +8,14 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/asn1t.h>
-#include <openssl/x509.h>
-#include "internal/asn1_int.h"
-#include "internal/evp_int.h"
-#include "internal/x509_int.h"
-#include <openssl/rsa.h>
-#include <openssl/dsa.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1t.h>
+#include "../../include/openssl/x509.h>
+#include "../include/internal/asn1_int.h"
+#include "../include/internal/evp_int.h"
+#include "../include/internal/x509_int.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/dsa.h"
 
 struct X509_pubkey_st {
     X509_ALGOR *algor;

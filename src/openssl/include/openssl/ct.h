@@ -10,13 +10,13 @@
 #ifndef HEADER_CT_H
 # define HEADER_CT_H
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
 # ifndef OPENSSL_NO_CT
-# include <openssl/ossl_typ.h>
-# include <openssl/safestack.h>
-# include <openssl/x509.h>
-# include <openssl/cterr.h>
+# include "ossl_typ.h"
+# include "safestack.h"
+# include "x509.h"
+# include "cterr.h"
 # ifdef  __cplusplus
 extern "C" {
 # endif

@@ -10,7 +10,7 @@
 #ifndef HEADER_INTERNAL_BIO_H
 # define HEADER_INTERNAL_BIO_H
 
-#include <openssl/bio.h>
+#include "../../include/openssl/bio.h"
 
 struct bio_method_st {
     int type;

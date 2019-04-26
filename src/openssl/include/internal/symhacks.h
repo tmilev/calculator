@@ -10,7 +10,7 @@
 #ifndef OSSL_INTERNAL_SYMHACKS_H
 # define OSSL_INTERNAL_SYMHACKS_H
 
-# include <openssl/e_os2.h>
+# include "../../include/openssl/e_os2.h"
 
 # if defined(OPENSSL_SYS_VMS)
 

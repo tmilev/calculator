@@ -8,9 +8,9 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/x509v3.h>
-#include "internal/x509_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/x509v3.h"
+#include "../include/internal/x509_int.h"
 #include "ext_dat.h"
 
 static ASN1_OCTET_STRING *s2i_skey_id(X509V3_EXT_METHOD *method,

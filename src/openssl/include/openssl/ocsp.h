@@ -10,7 +10,7 @@
 #ifndef HEADER_OCSP_H
 # define HEADER_OCSP_H
 
-#include <openssl/opensslconf.h>
+#include "opensslconf.h"
 
 /*
  * These definitions are outside the OPENSSL_NO_OCSP guard because although for

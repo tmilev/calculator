@@ -18,7 +18,7 @@
 # include "include/internal/nelem.h"
 
 /*
- * <openssl/e_os2.h> contains what we can justify to make visible to the
+ * "../../include/openssl/e_os2.h" contains what we can justify to make visible to the
  * outside; this file e_os.h is not part of the exported interface.
  */
 

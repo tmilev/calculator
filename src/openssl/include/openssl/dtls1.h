@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-#include <openssl/opensslconf.h>
+#include "opensslconf.h"
 
 # define DTLS1_VERSION                   0xFEFF
 # define DTLS1_2_VERSION                 0xFEFD

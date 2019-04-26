@@ -7,16 +7,16 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
-#include "internal/numbers.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/numbers.h"
 #include <stdio.h>
-#include "internal/asn1_int.h"
-#include <openssl/asn1t.h>
-#include <openssl/conf.h>
-#include <openssl/x509v3.h>
-#include <openssl/bn.h>
+#include "../include/internal/asn1_int.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/x509v3.h"
+#include "../../include/openssl/bn.h"
 
-#include "internal/x509_int.h"
+#include "../include/internal/x509_int.h"
 #include "ext_dat.h"
 
 static void *v2i_NAME_CONSTRAINTS(const X509V3_EXT_METHOD *method,

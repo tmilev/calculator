@@ -10,7 +10,7 @@
 #ifndef HEADER_INTERNAL_DANE_H
 #define HEADER_INTERNAL_DANE_H
 
-#include <openssl/safestack.h>
+#include "../../include/openssl/safestack.h"
 
 /*-
  * Certificate usages:

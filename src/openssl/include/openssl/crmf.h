@@ -14,17 +14,17 @@
 #ifndef OSSL_HEADER_CRMF_H
 # define OSSL_HEADER_CRMF_H
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
 # ifndef OPENSSL_NO_CMP
-#  include <openssl/opensslv.h>
-#  include <openssl/safestack.h>
-#  include <openssl/crmferr.h>
-#  include <openssl/x509v3.h> /* for GENERAL_NAME etc. */
+#  include "opensslv.h"
+#  include "safestack.h"
+#  include "crmferr.h"
+#  include "x509v3.h" /* for GENERAL_NAME etc. */
 
 /* explicit #includes not strictly needed since implied by the above: */
-#  include <openssl/ossl_typ.h>
-#  include <openssl/x509.h>
+#  include "openssl/ossl_typ.h"
+#  include "openssl/x509.h"
 
 #  ifdef  __cplusplus
 extern "C" {

@@ -11,7 +11,7 @@
 #ifndef HEADER_CRMFERR_H
 # define HEADER_CRMFERR_H
 
-# include <openssl/opensslconf.h>
+# include "../../include/openssl/opensslconf.h"
 
 # ifndef OPENSSL_NO_CMP
 

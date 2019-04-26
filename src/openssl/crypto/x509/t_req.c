@@ -8,14 +8,14 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/buffer.h>
-#include <openssl/bn.h>
-#include <openssl/objects.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <openssl/rsa.h>
-#include <openssl/dsa.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/dsa.h"
 
 #ifndef OPENSSL_NO_STDIO
 int X509_REQ_print_fp(FILE *fp, X509_REQ *x)

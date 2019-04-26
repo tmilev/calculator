@@ -12,10 +12,10 @@
 # define HEADER_ENGINEERR_H
 
 # ifndef HEADER_SYMHACKS_H
-#  include <openssl/symhacks.h>
+#  include "symhacks.h"
 # endif
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
 # ifndef OPENSSL_NO_ENGINE
 

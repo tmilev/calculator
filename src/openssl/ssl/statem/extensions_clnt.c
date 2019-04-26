@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/ocsp.h>
+#include "../../include/openssl/ocsp.h"
 #include "../ssl_locl.h"
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "statem_locl.h"
 
 EXT_RETURN tls_construct_ctos_renegotiate(SSL *s, WPACKET *pkt,

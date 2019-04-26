@@ -7,10 +7,10 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
-#include <openssl/trace.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/trace.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "pcy_int.h"
 

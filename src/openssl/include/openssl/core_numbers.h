@@ -10,7 +10,7 @@
 #ifndef OSSL_CORE_NUMBERS_H
 # define OSSL_CORE_NUMBERS_H
 
-# include <openssl/core.h>
+# include "../../include/openssl/core.h"
 
 # ifdef __cplusplus
 extern "C" {

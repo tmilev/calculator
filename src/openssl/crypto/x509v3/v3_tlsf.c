@@ -7,13 +7,13 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
-#include "internal/cryptlib.h"
+#include "../../e_os.h"
+#include "../../include/internal/cryptlib.h"
 #include <stdio.h>
-#include "internal/o_str.h"
-#include <openssl/asn1t.h>
-#include <openssl/conf.h>
-#include <openssl/x509v3.h>
+#include "../../include/internal/o_str.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/x509v3.h"
 #include "ext_dat.h"
 
 static STACK_OF(CONF_VALUE) *i2v_TLS_FEATURE(const X509V3_EXT_METHOD *method,

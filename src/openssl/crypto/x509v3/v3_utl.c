@@ -9,15 +9,15 @@
 
 /* X509 v3 extension utilities */
 
-#include "e_os.h"
-#include "internal/cryptlib.h"
+#include "../../e_os.h"
+#include "../../include/internal/cryptlib.h"
 #include <stdio.h>
-#include "internal/ctype.h"
-#include <openssl/conf.h>
-#include <openssl/crypto.h>
-#include <openssl/x509v3.h>
-#include "internal/x509_int.h"
-#include <openssl/bn.h>
+#include "../include/internal/ctype.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/x509v3.h"
+#include "../include/internal/x509_int.h"
+#include "../../include/openssl/bn.h"
 #include "ext_dat.h"
 
 static char *strip_spaces(char *name);

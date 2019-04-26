@@ -27,7 +27,7 @@
 /* Default PKCS#5 iteration count */
 # define PKCS5_DEFAULT_ITER              2048
 
-# include <openssl/objects.h>
+# include "objects.h"
 
 # define EVP_PK_RSA      0x0001
 # define EVP_PK_DSA      0x0002

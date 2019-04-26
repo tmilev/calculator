@@ -8,21 +8,21 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/buffer.h>
-#include <openssl/asn1.h>
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include "internal/x509_int.h"
-#include <openssl/ocsp.h>
-#include <openssl/rsa.h>
-#include <openssl/dsa.h>
-#include <openssl/x509v3.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/x509.h"
+#include "../include/internal/x509_int.h"
+#include "../../include/openssl/ocsp.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/openssl/x509v3.h"
 
 #ifndef OPENSSL_NO_SM2
 
-# include "internal/asn1_int.h"
-# include "internal/evp_int.h"
+# include "../include/internal/asn1_int.h"
+# include "../include/internal/evp_int.h"
 
 static int x509_verify_sm2(X509 *x, EVP_PKEY *pkey, int mdnid, int pknid)
 {

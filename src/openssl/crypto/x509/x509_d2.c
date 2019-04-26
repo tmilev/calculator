@@ -8,9 +8,9 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/crypto.h>
-#include <openssl/x509.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/x509.h"
 
 int X509_STORE_set_default_paths(X509_STORE *ctx)
 {

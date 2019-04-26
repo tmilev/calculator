@@ -21,7 +21,7 @@
 # include "../openssl/bioerr.h"
 
 # ifndef OPENSSL_NO_SCTP
-#  include <openssl/e_os2.h>
+#  include "../../include/openssl/e_os2.h"
 # endif
 
 #ifdef  __cplusplus

@@ -11,10 +11,10 @@
 #include <time.h>
 #include <errno.h>
 
-#include "internal/cryptlib.h"
-#include <openssl/buffer.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/pem.h"
 #include "x509_lcl.h"
 
 static int by_file_ctrl(X509_LOOKUP *ctx, int cmd, const char *argc,

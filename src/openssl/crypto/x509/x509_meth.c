@@ -11,10 +11,10 @@
 #include <time.h>
 #include <errno.h>
 
-#include "internal/cryptlib.h"
-#include <openssl/asn1.h>
-#include <openssl/x509.h>
-#include <openssl/ossl_typ.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/ossl_typ.h"
 #include "x509_lcl.h"
 
 X509_LOOKUP_METHOD *X509_LOOKUP_meth_new(const char *name)

@@ -11,10 +11,10 @@
 #include <string.h>
 #include "../../include/openssl/err.h"
 
-#include "internal/cryptlib.h"
-#include "internal/bn_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../include/internal/bn_int.h"
 #include "ec_lcl.h"
-#include "internal/refcount.h"
+#include "../../include/internal/refcount.h"
 
 /*
  * This file implements the wNAF-based interleaving multi-exponentiation method

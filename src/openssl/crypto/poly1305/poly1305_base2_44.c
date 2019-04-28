@@ -54,7 +54,7 @@ static void U64TO8(unsigned char *p, u64 v)
     p[7] = (unsigned char)((v >> 56) & 0xff);
 }
 
-int poly1305_init(void *ctx, const unsigned char key[16])
+int poly1305_init_base2_44(void *ctx, const unsigned char key[16])
 {
     poly1305_internal *st = (poly1305_internal *)ctx;
     u64 r0, r1;

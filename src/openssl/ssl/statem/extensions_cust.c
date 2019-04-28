@@ -9,9 +9,9 @@
 
 /* Custom extension utility functions */
 
-#include <openssl/ct.h>
+#include "../../include/openssl/ct.h"
 #include "../ssl_locl.h"
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "statem_locl.h"
 
 typedef struct {

@@ -11,11 +11,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include "../../include/openssl/crypto.h>
+#include "../../include/openssl/crypto.h"
 #include "../../include/internal/property.h"
 #include "../include/internal/ctype.h"
 #include "../../include/openssl/lhash.h"
-#include "../../include/openssl/rand.h>
+#include "../../include/openssl/rand.h"
 #include "../../include/internal/thread_once.h"
 #include "../include/internal/lhash.h"
 #include "../include/internal/sparse_array.h"

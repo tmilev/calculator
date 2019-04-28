@@ -11,7 +11,7 @@
 # define HEADER_MODES_H
 
 # include <stddef.h>
-# include <openssl/ossl_typ.h>
+# include "ossl_typ.h"
 
 # ifdef  __cplusplus
 extern "C" {

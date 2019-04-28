@@ -9,8 +9,8 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "internal/ctype.h"
-#include "openssl/ebcdic.h"
+#include "include/internal/ctype.h"
+#include "../include/openssl/ebcdic.h"
 
 /*
  * Define the character classes for each character in the seven bit ASCII

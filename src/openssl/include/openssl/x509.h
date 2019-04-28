@@ -317,8 +317,8 @@ typedef struct SCRYPT_PARAMS_st {
 }
 #endif
 
-# include <openssl/x509_vfy.h>
-# include <openssl/pkcs7.h>
+# include "x509_vfy.h"
+# include "pkcs7.h"
 
 #ifdef  __cplusplus
 extern "C" {

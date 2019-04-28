@@ -10,7 +10,7 @@
  */
 
 #include <stdio.h>
-#include <openssl/objects.h>
+#include "../include/openssl/objects.h"
 #include "../include/internal/nelem.h"
 #include "ssl_locl.h"
 #include "../include/openssl/md5.h"

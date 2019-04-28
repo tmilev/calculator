@@ -8,7 +8,7 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "bn_lcl.h"
 
 #define TABLE_SIZE      32

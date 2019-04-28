@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib_int.h"
-#include "internal/thread_once.h"
+#include "include/internal/cryptlib_int.h"
+#include "../include/internal/thread_once.h"
 
 /*
  * Each structure type (sometimes called a class), that supports

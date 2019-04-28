@@ -8,9 +8,9 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "dh_locl.h"
-#include "internal/bn_int.h"
+#include "../include/internal/bn_int.h"
 
 static int generate_key(DH *dh);
 static int compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh);

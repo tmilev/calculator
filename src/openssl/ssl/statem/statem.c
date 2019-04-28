@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
-#include <openssl/rand.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/rand.h"
 #include "../ssl_locl.h"
 #include "statem_locl.h"
 #include <assert.h>
@@ -322,16 +322,6 @@ static int state_machine(SSL *s, int server)
         if ((s->s3->flags & TLS1_FLAGS_STATELESS) == 0 && !SSL_clear(s))
             return -1;
     }
-#ifndef OPENSSL_NO_SCTP
-    if (SSL_IS_DTLS(s) && BIO_dgram_is_sctp(SSL_get_wbio(s))) {
-        /*
-         * Notify SCTP BIO socket to enter handshake mode and prevent stream
-         * identifier other than 0.
-         */
-        BIO_ctrl(SSL_get_wbio(s), BIO_CTRL_DGRAM_SCTP_SET_IN_HANDSHAKE,
-                 st->in_handshake, NULL);
-    }
-#endif
 
     /* Initialise state machine */
     if (st->state == MSG_FLOW_UNINITED

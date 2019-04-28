@@ -22,7 +22,6 @@ extern "C" {
 #  error OPENSSL_ALGORITHM_DEFINES no longer supported
 # endif
 
-
 /*
  * Sometimes OPENSSSL_NO_xxx ends up with an empty file and some compilers
  * don't like that.  This will hopefully silence them.
@@ -120,6 +119,14 @@ extern "C" {
 #  define OPENSSL_API_1_0_0 1
 # endif
 
+# if OPENSSL_API_LEVEL < 0
+#  define DEPRECATEDIN_0_9_8(f)   DECLARE_DEPRECATED(f)
+#  define OPENSSL_API_0_9_8 0
+# else
+#  define DEPRECATEDIN_0_9_8(f)
+#  define OPENSSL_API_0_9_8 1
+# endif
+
 # ifndef OPENSSL_FILE
 #  ifdef OPENSSL_NO_FILENAMES
 #   define OPENSSL_FILE ""
@@ -129,6 +136,19 @@ extern "C" {
 #   define OPENSSL_LINE __LINE__
 #  endif
 # endif
+
+# undef I386_ONLY
+
+# define OPENSSL_UNISTD <unistd.h>
+
+# define OPENSSL_EXPORT_VAR_AS_FUNCTION
+
+#  define BN_LLONG
+#  define SIXTY_FOUR_BIT_LONG
+
+# define RC4_INT int
+
+#define MODULESDIR "./"
 
 # ifdef  __cplusplus
 }

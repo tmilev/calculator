@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "dsa_locl.h"
 
 int DSA_do_verify(const unsigned char *dgst, int dgst_len, DSA_SIG *sig,

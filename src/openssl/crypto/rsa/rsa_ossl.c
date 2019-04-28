@@ -7,10 +7,10 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
-#include "internal/bn_int.h"
+#include "../../include/internal/cryptlib.h"
+#include "../include/internal/bn_int.h"
 #include "rsa_locl.h"
-#include "internal/constant_time_locl.h"
+#include "../../include/internal/constant_time_locl.h"
 
 static int rsa_ossl_public_encrypt(int flen, const unsigned char *from,
                                   unsigned char *to, RSA *rsa, int padding);

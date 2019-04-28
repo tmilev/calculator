@@ -17,6 +17,7 @@
 /* Max message length definitions */
 
 /* The spec allows for a longer length than this, but we limit it */
+#define OPENSSL_NO_SCTP
 #define HELLO_VERIFY_REQUEST_MAX_LENGTH 258
 #define END_OF_EARLY_DATA_MAX_LENGTH    0
 #define SERVER_HELLO_MAX_LENGTH         20000

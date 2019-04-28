@@ -8,7 +8,7 @@
  */
 
 #include "dso_locl.h"
-#include "internal/refcount.h"
+#include "../../include/internal/refcount.h"
 
 static DSO_METHOD *default_DSO_meth = NULL;
 

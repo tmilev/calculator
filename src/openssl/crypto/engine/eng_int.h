@@ -17,6 +17,8 @@
 # include "../../include/internal/thread_once.h"
 # include "../../include/internal/refcount.h"
 
+#define ENGINESDIR "."
+
 extern CRYPTO_RWLOCK *global_engine_lock;
 
 /*

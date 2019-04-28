@@ -11,19 +11,19 @@
 
 #include <stdio.h>
 #include "ssl_locl.h"
-#include <openssl/objects.h>
-#include <openssl/x509v3.h>
-#include <openssl/rand.h>
-#include <openssl/rand_drbg.h>
-#include <openssl/ocsp.h>
-#include <openssl/dh.h>
-#include <openssl/engine.h>
-#include <openssl/async.h>
-#include <openssl/ct.h>
-#include <openssl/trace.h>
-#include "internal/cryptlib.h"
-#include "internal/refcount.h"
-#include "internal/ktls.h"
+#include "../include/openssl/objects.h"
+#include "../include/openssl/x509v3.h"
+#include "../include/openssl/rand.h"
+#include "../include/openssl/rand_drbg.h"
+#include "../include/openssl/ocsp.h"
+#include "../include/openssl/dh.h"
+#include "../include/openssl/engine.h"
+#include "../include/openssl/async.h"
+#include "../include/openssl/ct.h"
+#include "../include/openssl/trace.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/refcount.h"
+#include "../include/internal/ktls.h"
 
 static int ssl_undefined_function_1(SSL *ssl, SSL3_RECORD *r, size_t s, int t)
 {

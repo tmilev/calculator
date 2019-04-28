@@ -8,7 +8,7 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "bn_lcl.h"
 
 int BN_bn2mpi(const BIGNUM *a, unsigned char *d)

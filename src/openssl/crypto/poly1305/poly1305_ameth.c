@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 #include "../../include/internal/cryptlib.h"
-#include "../../include/openssl/evp.h>
+#include "../../include/openssl/evp.h"
 #include "../include/internal/asn1_int.h"
 #include "../include/internal/poly1305.h"
 #include "poly1305_local.h"

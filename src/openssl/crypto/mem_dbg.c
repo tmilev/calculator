@@ -12,8 +12,8 @@
 #include <time.h>
 #include "../include/internal/cryptlib.h"
 #include "../include/internal/thread_once.h"
-#include "../include/openssl/crypto.h>
-#include "../include/openssl/buffer.h>
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/buffer.h"
 #include "../include/internal/bio.h"
 #include "../include/openssl/lhash.h"
 

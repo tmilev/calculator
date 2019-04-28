@@ -346,41 +346,8 @@ DEFINE_RUN_ONCE_STATIC(ossl_init_engine_dynamic)
     return 1;
 }
 # ifndef OPENSSL_NO_STATIC_ENGINE
-#  ifndef OPENSSL_NO_DEVCRYPTOENG
-static CRYPTO_ONCE engine_devcrypto = CRYPTO_ONCE_STATIC_INIT;
-DEFINE_RUN_ONCE_STATIC(ossl_init_engine_devcrypto)
-{
-    OSSL_TRACE(INIT, "engine_load_devcrypto_int()\n");
-    engine_load_devcrypto_int();
-    return 1;
-}
-#  endif
 #  if !defined(OPENSSL_NO_PADLOCKENG)
 static CRYPTO_ONCE engine_padlock = CRYPTO_ONCE_STATIC_INIT;
-DEFINE_RUN_ONCE_STATIC(ossl_init_engine_padlock)
-{
-    OSSL_TRACE(INIT, "engine_load_padlock_int()\n");
-    engine_load_padlock_int();
-    return 1;
-}
-#  endif
-#  if defined(OPENSSL_SYS_WIN32) && !defined(OPENSSL_NO_CAPIENG)
-static CRYPTO_ONCE engine_capi = CRYPTO_ONCE_STATIC_INIT;
-DEFINE_RUN_ONCE_STATIC(ossl_init_engine_capi)
-{
-    OSSL_TRACE(INIT, "engine_load_capi_int()\n");
-    engine_load_capi_int();
-    return 1;
-}
-#  endif
-#  if !defined(OPENSSL_NO_AFALGENG)
-static CRYPTO_ONCE engine_afalg = CRYPTO_ONCE_STATIC_INIT;
-DEFINE_RUN_ONCE_STATIC(ossl_init_engine_afalg)
-{
-    OSSL_TRACE(INIT, "engine_load_afalg_int()\n");
-    engine_load_afalg_int();
-    return 1;
-}
 #  endif
 # endif
 #endif
@@ -691,24 +658,9 @@ int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings)
             && !RUN_ONCE(&engine_dynamic, ossl_init_engine_dynamic))
         return 0;
 # ifndef OPENSSL_NO_STATIC_ENGINE
-#  ifndef OPENSSL_NO_DEVCRYPTOENG
-    if ((opts & OPENSSL_INIT_ENGINE_CRYPTODEV)
-            && !RUN_ONCE(&engine_devcrypto, ossl_init_engine_devcrypto))
-        return 0;
-#  endif
-#  if !defined(OPENSSL_NO_PADLOCKENG)
-    if ((opts & OPENSSL_INIT_ENGINE_PADLOCK)
-            && !RUN_ONCE(&engine_padlock, ossl_init_engine_padlock))
-        return 0;
-#  endif
 #  if defined(OPENSSL_SYS_WIN32) && !defined(OPENSSL_NO_CAPIENG)
     if ((opts & OPENSSL_INIT_ENGINE_CAPI)
             && !RUN_ONCE(&engine_capi, ossl_init_engine_capi))
-        return 0;
-#  endif
-#  if !defined(OPENSSL_NO_AFALGENG)
-    if ((opts & OPENSSL_INIT_ENGINE_AFALG)
-            && !RUN_ONCE(&engine_afalg, ossl_init_engine_afalg))
         return 0;
 #  endif
 # endif

@@ -7,10 +7,10 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
+#include "../e_os.h"
 #include <stdio.h>
-#include <openssl/objects.h>
-#include <openssl/rand.h>
+#include "../include/openssl/objects.h"
+#include "../include/openssl/rand.h"
 #include "ssl_locl.h"
 
 static void get_current_time(struct timeval *t);
@@ -242,14 +242,6 @@ long dtls1_ctrl(SSL *s, int cmd, long larg, void *parg)
 void dtls1_start_timer(SSL *s)
 {
     unsigned int sec, usec;
-
-#ifndef OPENSSL_NO_SCTP
-    /* Disable timer for SCTP */
-    if (BIO_dgram_is_sctp(SSL_get_wbio(s))) {
-        memset(&s->d1->next_timeout, 0, sizeof(s->d1->next_timeout));
-        return;
-    }
-#endif
 
     /*
      * If timer is not set, initialize duration with 1 second or
@@ -867,21 +859,6 @@ static int dtls1_handshake_write(SSL *s)
 int dtls1_shutdown(SSL *s)
 {
     int ret;
-#ifndef OPENSSL_NO_SCTP
-    BIO *wbio;
-
-    wbio = SSL_get_wbio(s);
-    if (wbio != NULL && BIO_dgram_is_sctp(wbio) &&
-        !(s->shutdown & SSL_SENT_SHUTDOWN)) {
-        ret = BIO_dgram_sctp_wait_for_dry(wbio);
-        if (ret < 0)
-            return -1;
-
-        if (ret == 0)
-            BIO_ctrl(SSL_get_wbio(s), BIO_CTRL_DGRAM_SCTP_SAVE_SHUTDOWN, 1,
-                     NULL);
-    }
-#endif
     ret = ssl3_shutdown(s);
 #ifndef OPENSSL_NO_SCTP
     BIO_ctrl(SSL_get_wbio(s), BIO_CTRL_DGRAM_SCTP_SAVE_SHUTDOWN, 0, NULL);

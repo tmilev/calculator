@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
-#include "internal/thread_once.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/thread_once.h"
 
 struct openssl_ctx_st {
     CRYPTO_RWLOCK *lock;

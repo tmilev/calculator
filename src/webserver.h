@@ -1,7 +1,7 @@
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
-#include "../../calculator/src/vpfHeader6WebServerInterprocessLogistics.h"
-#include "../../calculator/src/vpfHeader4SystemFunctionsGlobalObjects.h"
+#include "vpfHeader6WebServerInterprocessLogistics.h"
+#include "vpfHeader4SystemFunctionsGlobalObjects.h"
 
 static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "Web server classes declarations.");
 
@@ -14,12 +14,12 @@ static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "
 //Instructions: look at the examples folder in the openssl.
 //openssl tutorial (couldn't make it work myself):
 //http://www.ibm.com/developerworks/library/l-openssl/
-#include <openssl/rsa.h>
-#include <openssl/crypto.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
+#include "openssl/include/openssl/rsa.h"
+#include "openssl/include/openssl/crypto.h"
+#include "openssl/include/openssl/x509.h"
+#include "openssl/include/openssl/pem.h"
+#include "openssl/include/openssl/ssl.h"
+#include "openssl/include/openssl/err.h"
 
 struct SSLdata {
 public:

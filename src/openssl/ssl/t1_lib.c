@@ -9,17 +9,17 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <openssl/objects.h>
-#include <openssl/evp.h>
-#include <openssl/hmac.h>
-#include <openssl/ocsp.h>
-#include <openssl/conf.h>
-#include <openssl/x509v3.h>
-#include <openssl/dh.h>
-#include <openssl/bn.h>
-#include "internal/nelem.h"
+#include "../include/openssl/objects.h"
+#include "../include/openssl/evp.h"
+#include "../include/openssl/hmac.h"
+#include "../include/openssl/ocsp.h"
+#include "../include/openssl/conf.h"
+#include "../include/openssl/x509v3.h"
+#include "../include/openssl/dh.h"
+#include "../include/openssl/bn.h"
+#include "../include/internal/nelem.h"
 #include "ssl_locl.h"
-#include <openssl/ct.h>
+#include "../include/openssl/ct.h"
 
 SSL3_ENC_METHOD const TLSv1_enc_data = {
     tls1_enc,

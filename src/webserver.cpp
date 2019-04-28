@@ -274,8 +274,9 @@ bool SSLdata::initSSLkeyFiles() {
 }
 
 void SSLdata::initSSLlibrary() {
-  if (this->flagSSLlibraryInitialized)
+  if (this->flagSSLlibraryInitialized) {
     return;
+  }
   this->flagSSLlibraryInitialized = true;
   SSL_load_error_strings();
   OpenSSL_add_ssl_algorithms();

@@ -11,9 +11,9 @@
 #include <limits.h>
 #include <errno.h>
 #include "../ssl_locl.h"
-#include <openssl/evp.h>
-#include <openssl/buffer.h>
-#include <openssl/rand.h>
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/rand.h"
 #include "record_locl.h"
 #include "../packet_locl.h"
 

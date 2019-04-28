@@ -10,8 +10,8 @@
 
 #include <stdio.h>
 #include "ssl_locl.h"
-#include <openssl/evp.h>
-#include <openssl/md5.h>
+#include "../include/openssl/evp.h"
+#include "../include/openssl/md5.h"
 #include "../include/internal/cryptlib.h"
 
 static int ssl3_generate_key_block(SSL *s, unsigned char *km, int num)

@@ -12,12 +12,12 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "../../include/openssl/err.h"
-#include "internal/propertyerr.h"
-#include "internal/property.h"
-#include "internal/ctype.h"
-#include "internal/nelem.h"
+#include "../../include/internal/propertyerr.h"
+#include "../../include/internal/property.h"
+#include "../include/internal/ctype.h"
+#include "../../include/internal/nelem.h"
 #include "property_lcl.h"
-#include "e_os.h"
+#include "../../e_os.h"
 
 typedef enum {
     PROPERTY_TYPE_STRING, PROPERTY_TYPE_NUMBER,

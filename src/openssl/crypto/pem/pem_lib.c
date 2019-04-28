@@ -11,16 +11,16 @@
 #include "../include/internal/ctype.h"
 #include <string.h>
 #include "../../include/internal/cryptlib.h"
-#include "../../include/openssl/buffer.h>
-#include "../../include/openssl/objects.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/rand.h>
-#include "../../include/openssl/x509.h>
-#include "../../include/openssl/pem.h>
-#include "../../include/openssl/pkcs12.h>
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/pkcs12.h"
 #include "../include/internal/asn1_int.h"
-#include "../../include/openssl/des.h>
-#include "../../include/openssl/engine.h>
+#include "../../include/openssl/des.h"
+#include "../../include/openssl/engine.h"
 
 #define MIN_LENGTH      4
 

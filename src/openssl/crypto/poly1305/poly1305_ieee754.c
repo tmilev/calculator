@@ -107,7 +107,7 @@ static const u32 fcsr = 1;
 #error "unrecognized platform"
 #endif
 
-int poly1305_init(void *ctx, const unsigned char key[16])
+int poly1305_init_ieee754(void *ctx, const unsigned char key[16])
 {
     poly1305_internal *st = (poly1305_internal *) ctx;
     elem64 r0, r1, r2, r3;

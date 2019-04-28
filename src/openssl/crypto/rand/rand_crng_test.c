@@ -13,8 +13,8 @@
  */
 
 #include <string.h>
-#include "internal/rand_int.h"
-#include "internal/thread_once.h"
+#include "../include/internal/rand_int.h"
+#include "../../include/internal/thread_once.h"
 #include "rand_lcl.h"
 
 static RAND_POOL *crngt_pool;

@@ -11,14 +11,14 @@
 #include <stdio.h>
 #include "ssl_locl.h"
 #include "record/record_locl.h"
-#include "internal/ktls.h"
-#include "internal/cryptlib.h"
-#include <openssl/comp.h>
-#include <openssl/evp.h>
-#include <openssl/kdf.h>
-#include <openssl/rand.h>
-#include <openssl/obj_mac.h>
-#include <openssl/trace.h>
+#include "../include/internal/ktls.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/openssl/comp.h"
+#include "../include/openssl/evp.h"
+#include "../include/openssl/kdf.h"
+#include "../include/openssl/rand.h"
+#include "../include/openssl/obj_mac.h"
+#include "../include/openssl/trace.h"
 
 /* seed1 through seed5 are concatenated */
 static int tls1_PRF(SSL *s,

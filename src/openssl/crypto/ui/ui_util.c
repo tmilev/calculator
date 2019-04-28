@@ -8,7 +8,7 @@
  */
 
 #include <string.h>
-#include "internal/thread_once.h"
+#include "../../include/internal/thread_once.h"
 #include "ui_locl.h"
 
 #ifndef BUFSIZ

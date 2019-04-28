@@ -11,9 +11,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include "../include/internal/bio.h"
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "ssl_locl.h"
 
 static int ssl_write(BIO *h, const char *buf, size_t size, size_t *written);

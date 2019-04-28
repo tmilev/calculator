@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "../../include/internal/cryptlib.h"
-#include "../../include/openssl/opensslconf.h>
+#include "../../include/openssl/opensslconf.h"
 #include "../include/internal/rand_int.h"
 #include "../../include/openssl/engine.h"
 #include "../../include/internal/thread_once.h"

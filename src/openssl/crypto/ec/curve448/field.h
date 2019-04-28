@@ -13,7 +13,7 @@
 #ifndef HEADER_FIELD_H
 # define HEADER_FIELD_H
 
-# include "internal/constant_time_locl.h"
+# include "../../../include/internal/constant_time_locl.h"
 # include <string.h>
 # include <assert.h>
 # include "word.h"
@@ -66,7 +66,7 @@ void gf_serialize(uint8_t *serial, const gf x, int with_highbit);
 mask_t gf_deserialize(gf x, const uint8_t serial[SER_BYTES], int with_hibit,
                       uint8_t hi_nmask);
 
-# include "f_impl.h"            /* Bring in the inline implementations */
+# include "./arch_32/f_impl.h"            /* Bring in the inline implementations */
 
 # define LIMBPERM(i) (i)
 # define LIMB_MASK(i) (((1)<<LIMB_PLACE_VALUE(i))-1)

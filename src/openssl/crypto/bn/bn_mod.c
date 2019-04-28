@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "bn_lcl.h"
 
 int BN_nnmod(BIGNUM *r, const BIGNUM *m, const BIGNUM *d, BN_CTX *ctx)

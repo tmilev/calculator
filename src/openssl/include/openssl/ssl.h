@@ -12,24 +12,23 @@
 #ifndef HEADER_SSL_H
 # define HEADER_SSL_H
 
-# include <openssl/e_os2.h>
-# include <openssl/opensslconf.h>
-# include <openssl/comp.h>
-# include <openssl/bio.h>
+# include "e_os2.h"
+# include "opensslconf.h"
+# include "comp.h"
+# include "bio.h"
 # if !OPENSSL_API_1_1_0
-#  include <openssl/x509.h>
-#  include <openssl/crypto.h>
-#  include <openssl/buffer.h>
+#  include "x509.h"
+#  include "crypto.h"
+#  include "buffer.h"
 # endif
-# include <openssl/lhash.h>
-# include <openssl/pem.h>
-# include <openssl/hmac.h>
-# include <openssl/async.h>
-
-# include <openssl/safestack.h>
-# include <openssl/symhacks.h>
-# include <openssl/ct.h>
-# include <openssl/sslerr.h>
+# include "lhash.h"
+# include "pem.h"
+# include "hmac.h"
+# include "async.h"
+# include "safestack.h"
+# include "symhacks.h"
+# include "ct.h"
+# include "sslerr.h"
 
 #ifdef  __cplusplus
 extern "C" {
@@ -949,11 +948,11 @@ uint32_t SSL_get_recv_max_early_data(const SSL *s);
 }
 #endif
 
-# include <openssl/ssl2.h>
-# include <openssl/ssl3.h>
-# include <openssl/tls1.h>      /* This is mostly sslv3 with a few tweaks */
-# include <openssl/dtls1.h>     /* Datagram TLS */
-# include <openssl/srtp.h>      /* Support for the use_srtp extension */
+# include "ssl2.h"
+# include "ssl3.h"
+# include "tls1.h"      /* This is mostly sslv3 with a few tweaks */
+# include "dtls1.h"     /* Datagram TLS */
+# include "srtp.h"      /* Support for the use_srtp extension */
 
 #ifdef  __cplusplus
 extern "C" {

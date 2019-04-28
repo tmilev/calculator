@@ -19,7 +19,7 @@
 #include "async_locl.h"
 
 #include "../../include/openssl/err.h"
-#include "internal/cryptlib_int.h"
+#include "../include/internal/cryptlib_int.h"
 #include <string.h>
 
 #define ASYNC_JOB_RUNNING   0

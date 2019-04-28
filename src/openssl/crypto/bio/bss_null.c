@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include "bio_lcl.h"
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 static int null_write(BIO *h, const char *buf, int num);
 static int null_read(BIO *h, char *buf, int size);

@@ -8,11 +8,11 @@
  */
 
 #include "../ssl_locl.h"
-#include "internal/constant_time_locl.h"
-#include <openssl/trace.h>
-#include <openssl/rand.h>
+#include "../../include/internal/constant_time_locl.h"
+#include "../../include/openssl/trace.h"
+#include "../../include/openssl/rand.h"
 #include "record_locl.h"
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 static const unsigned char ssl3_pad_1[48] = {
     0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36,
@@ -1985,10 +1985,6 @@ int dtls1_get_record(SSL *s)
         RECORD_LAYER_reset_packet_length(&s->rlayer); /* dump this record */
         goto again;             /* get another record */
     }
-#ifndef OPENSSL_NO_SCTP
-    /* Only do replay check if no SCTP bio */
-    if (!BIO_dgram_is_sctp(SSL_get_rbio(s))) {
-#endif
         /* Check whether this is a repeat, or aged record. */
         /*
          * TODO: Does it make sense to have replay protection in epoch 0 where
@@ -2000,9 +1996,6 @@ int dtls1_get_record(SSL *s)
             RECORD_LAYER_reset_packet_length(&s->rlayer); /* dump this record */
             goto again;         /* get another record */
         }
-#ifndef OPENSSL_NO_SCTP
-    }
-#endif
 
     /* just read a 0 length packet */
     if (rr->length == 0) {

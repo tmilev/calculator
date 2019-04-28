@@ -9,7 +9,6 @@
 
 #include "dso_locl.h"
 
-#ifdef DSO_NONE
 
 static DSO_METHOD dso_meth_null = {
     "NULL shared library method"
@@ -19,4 +18,3 @@ DSO_METHOD *DSO_METHOD_openssl(void)
 {
     return &dso_meth_null;
 }
-#endif

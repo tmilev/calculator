@@ -11,12 +11,15 @@
 # ifndef HEADER_INTERNAL_KTLS
 #  define HEADER_INTERNAL_KTLS
 
-#  if defined(OPENSSL_SYS_LINUX)
+//#  if defined(OPENSSL_SYS_LINUX)
 #   include <linux/version.h>
 
 #   define K_MAJ   4
 #   define K_MIN1  13
 #   define K_MIN2  0
+#    define TLS_TX                  1
+#    define TLS_RX                  2
+
 #   if LINUX_VERSION_CODE < KERNEL_VERSION(K_MAJ, K_MIN1, K_MIN2)
 
 #    ifndef PEDANTIC
@@ -24,8 +27,6 @@
 #     warning "Skipping Compilation of KTLS"
 #    endif
 
-#    define TLS_TX                  1
-#    define TLS_RX                  2
 
 #    define TLS_CIPHER_AES_GCM_128                          51
 #    define TLS_CIPHER_AES_GCM_128_IV_SIZE                  8
@@ -224,6 +225,6 @@ static ossl_inline int ktls_read_record(int fd, void *data, size_t length)
 
 #    endif
 #   endif
-#  endif
+//#  endif
 # endif
 #endif

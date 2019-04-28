@@ -10,11 +10,11 @@
 #include <stdio.h>
 #include <errno.h>
 #include "../ssl_locl.h"
-#include <openssl/evp.h>
-#include <openssl/buffer.h>
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/buffer.h"
 #include "record_locl.h"
 #include "../packet_locl.h"
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 int DTLS_RECORD_LAYER_new(RECORD_LAYER *rl)
 {
@@ -162,16 +162,6 @@ int dtls1_buffer_record(SSL *s, record_pqueue *queue, unsigned char *priority)
 
     item->data = rdata;
 
-#ifndef OPENSSL_NO_SCTP
-    /* Store bio_dgram_sctp_rcvinfo struct */
-    if (BIO_dgram_is_sctp(SSL_get_rbio(s)) &&
-        (SSL_get_state(s) == TLS_ST_SR_FINISHED
-         || SSL_get_state(s) == TLS_ST_CR_FINISHED)) {
-        BIO_ctrl(SSL_get_rbio(s), BIO_CTRL_DGRAM_SCTP_GET_RCVINFO,
-                 sizeof(rdata->recordinfo), &rdata->recordinfo);
-    }
-#endif
-
     s->rlayer.packet = NULL;
     s->rlayer.packet_length = 0;
     memset(&s->rlayer.rbuf, 0, sizeof(s->rlayer.rbuf));
@@ -264,10 +254,6 @@ int dtls1_process_buffered_records(SSL *s)
                           ERR_R_INTERNAL_ERROR);
                  return 0;
             }
-#ifndef OPENSSL_NO_SCTP
-            /* Only do replay check if no SCTP bio */
-            if (!BIO_dgram_is_sctp(SSL_get_rbio(s)))
-#endif
             {
                 /*
                  * Check whether this is a repeat, or aged record. We did this
@@ -389,14 +375,6 @@ int dtls1_read_bytes(SSL *s, int type, int *recvd_type, unsigned char *buf,
         pitem *item;
         item = pqueue_pop(s->rlayer.d->buffered_app_data.q);
         if (item) {
-#ifndef OPENSSL_NO_SCTP
-            /* Restore bio_dgram_sctp_rcvinfo struct */
-            if (BIO_dgram_is_sctp(SSL_get_rbio(s))) {
-                DTLS1_RECORD_DATA *rdata = (DTLS1_RECORD_DATA *)item->data;
-                BIO_ctrl(SSL_get_rbio(s), BIO_CTRL_DGRAM_SCTP_SET_RCVINFO,
-                         sizeof(rdata->recordinfo), &rdata->recordinfo);
-            }
-#endif
 
             dtls1_copy_record(s, item);
 
@@ -522,19 +500,6 @@ int dtls1_read_bytes(SSL *s, int type, int *recvd_type, unsigned char *buf,
                 SSL3_RECORD_set_read(rr);
             }
         }
-#ifndef OPENSSL_NO_SCTP
-        /*
-         * We might had to delay a close_notify alert because of reordered
-         * app data. If there was an alert and there is no message to read
-         * anymore, finally set shutdown.
-         */
-        if (BIO_dgram_is_sctp(SSL_get_rbio(s)) &&
-            s->d1->shutdown_received
-            && !BIO_dgram_sctp_msg_waiting(SSL_get_rbio(s))) {
-            s->shutdown |= SSL_RECEIVED_SHUTDOWN;
-            return 0;
-        }
-#endif
         *readbytes = n;
         return 1;
     }
@@ -585,21 +550,6 @@ int dtls1_read_bytes(SSL *s, int type, int *recvd_type, unsigned char *buf,
             }
 
             if (alert_descr == SSL_AD_CLOSE_NOTIFY) {
-#ifndef OPENSSL_NO_SCTP
-                /*
-                 * With SCTP and streams the socket may deliver app data
-                 * after a close_notify alert. We have to check this first so
-                 * that nothing gets discarded.
-                 */
-                if (BIO_dgram_is_sctp(SSL_get_rbio(s)) &&
-                    BIO_dgram_sctp_msg_waiting(SSL_get_rbio(s))) {
-                    s->d1->shutdown_received = 1;
-                    s->rwstate = SSL_READING;
-                    BIO_clear_retry_flags(SSL_get_rbio(s));
-                    BIO_set_retry_read(SSL_get_rbio(s));
-                    return -1;
-                }
-#endif
                 s->shutdown |= SSL_RECEIVED_SHUTDOWN;
                 return 0;
             }

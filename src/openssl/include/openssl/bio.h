@@ -627,7 +627,6 @@ BIO *BIO_new_dgram(int fd, int close_flag);
 #  ifndef OPENSSL_NO_SCTP
 const BIO_METHOD *BIO_s_datagram_sctp(void);
 BIO *BIO_new_dgram_sctp(int fd, int close_flag);
-int BIO_dgram_is_sctp(BIO *bio);
 int BIO_dgram_sctp_notification_cb(BIO *b,
                                    void (*handle_notifications) (BIO *bio,
                                                                  void *context,

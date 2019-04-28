@@ -9,7 +9,7 @@
  */
 
 #include "../../include/openssl/err.h"
-#include "internal/propertyerr.h"
+#include "../../include/internal/propertyerr.h"
 
 #ifndef OPENSSL_NO_ERR
 

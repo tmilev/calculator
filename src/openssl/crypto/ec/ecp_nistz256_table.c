@@ -28,6 +28,24 @@ __declspec(align(4096))
 #elif defined(__SUNPRO_C)
 # pragma align 4096(ecp_nistz256_precomputed)
 #endif
+
+#include "../../include/openssl/bn.h"
+
+
+#include "../include/internal/bn_int.h"
+#if BN_BITS2 != 64
+# define TOBN(hi,lo)    lo,hi
+#else
+# define TOBN(hi,lo)    ((BN_ULONG)hi<<32|lo)
+#endif
+
+#define P256_LIMBS      (256/BN_BITS2)
+
+typedef struct {
+    BN_ULONG X[P256_LIMBS];
+    BN_ULONG Y[P256_LIMBS];
+} P256_POINT_AFFINE;
+
 static const BN_ULONG ecp_nistz256_precomputed[37][64 *
                                                    sizeof(P256_POINT_AFFINE) /
                                                    sizeof(BN_ULONG)] = {

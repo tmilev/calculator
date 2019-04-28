@@ -11,7 +11,7 @@
 
 #include <string.h>
 
-#include "internal/chacha.h"
+#include "../include/internal/chacha.h"
 
 typedef unsigned int u32;
 typedef unsigned char u8;

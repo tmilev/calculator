@@ -13,8 +13,6 @@ void engine_load_openssl_int(void);
 void engine_load_devcrypto_int(void);
 void engine_load_rdrand_int(void);
 void engine_load_dynamic_int(void);
-void engine_load_padlock_int(void);
-void engine_load_capi_int(void);
 void engine_load_dasync_int(void);
 void engine_load_afalg_int(void);
 void engine_cleanup_int(void);

@@ -7,11 +7,13 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
-#include "internal/sockets.h"
-#include "internal/refcount.h"
+#include "../../e_os.h"
+#include "../../include/internal/sockets.h"
+#include "../../include/internal/refcount.h"
 
 /* BEGIN BIO_ADDRINFO/BIO_ADDR stuff. */
+
+#define OPENSSL_NO_DGRAM
 
 #ifndef OPENSSL_NO_SOCK
 /*
@@ -86,8 +88,8 @@ union bio_addr_st {
 
 /* END BIO_ADDRINFO/BIO_ADDR stuff. */
 
-#include "internal/cryptlib.h"
-#include "internal/bio.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/bio.h"
 
 typedef struct bio_f_buffer_ctx_struct {
     /*-

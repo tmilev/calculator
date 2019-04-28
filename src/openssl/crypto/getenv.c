@@ -12,7 +12,7 @@
 #endif
 
 #include <stdlib.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 
 char *ossl_safe_getenv(const char *name)
 {

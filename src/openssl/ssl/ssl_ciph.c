@@ -11,16 +11,16 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <openssl/objects.h>
-#include <openssl/comp.h>
-#include <openssl/engine.h>
-#include <openssl/crypto.h>
-#include <openssl/conf.h>
-#include <openssl/trace.h>
-#include "internal/nelem.h"
+#include "../include/openssl/objects.h"
+#include "../include/openssl/comp.h"
+#include "../include/openssl/engine.h"
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/conf.h"
+#include "../include/openssl/trace.h"
+#include "../include/internal/nelem.h"
 #include "ssl_locl.h"
-#include "internal/thread_once.h"
-#include "internal/cryptlib.h"
+#include "../include/internal/thread_once.h"
+#include "../include/internal/cryptlib.h"
 
 #define SSL_ENC_DES_IDX         0
 #define SSL_ENC_3DES_IDX        1

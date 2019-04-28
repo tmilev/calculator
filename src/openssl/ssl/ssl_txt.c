@@ -9,7 +9,7 @@
  */
 
 #include <stdio.h>
-#include <openssl/buffer.h>
+#include "../include/openssl/buffer.h"
 #include "ssl_locl.h"
 
 #ifndef OPENSSL_NO_STDIO

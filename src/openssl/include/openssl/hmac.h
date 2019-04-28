@@ -10,9 +10,9 @@
 #ifndef HEADER_HMAC_H
 # define HEADER_HMAC_H
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
-# include <openssl/evp.h>
+# include "evp.h"
 
 # if !OPENSSL_API_3
 #  define HMAC_MAX_MD_CBLOCK      128    /* Deprecated */

@@ -10,11 +10,11 @@
 #include <stdio.h>
 #include "ssl_locl.h"
 #include "packet_locl.h"
-#include <openssl/bio.h>
-#include <openssl/objects.h>
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
+#include "../include/openssl/bio.h"
+#include "../include/openssl/objects.h"
+#include "../include/openssl/evp.h"
+#include "../include/openssl/x509.h"
+#include "../include/openssl/pem.h"
 
 static int ssl_set_cert(CERT *c, X509 *x509);
 static int ssl_set_pkey(CERT *c, EVP_PKEY *pkey);

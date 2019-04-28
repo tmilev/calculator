@@ -14,7 +14,7 @@
  * sections 3.8 and 4.2 in http://security.ece.orst.edu/koc/papers/r01rsasw.pdf
  */
 
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "bn_lcl.h"
 
 #define MONT_WORD               /* use the faster word-based algorithm */

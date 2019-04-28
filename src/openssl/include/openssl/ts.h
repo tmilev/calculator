@@ -21,15 +21,15 @@
 # include "../../include/openssl/safestack.h"
 # include "../../include/openssl/rsa.h"
 # include "../../include/openssl/dsa.h"
-# include "../../include/openssl/dh.h>
-# include "../../include/openssl/tserr.h>
-# include "../../include/openssl/ess.h>
+# include "../../include/openssl/dh.h"
+# include "../../include/openssl/tserr.h"
+# include "../../include/openssl/ess.h"
 # ifdef  __cplusplus
 extern "C" {
 # endif
 
-# include <openssl/x509.h>
-# include <openssl/x509v3.h>
+# include "x509.h"
+# include "x509v3.h"
 
 typedef struct TS_msg_imprint_st TS_MSG_IMPRINT;
 typedef struct TS_req_st TS_REQ;

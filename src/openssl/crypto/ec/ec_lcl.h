@@ -631,10 +631,10 @@ int ossl_ecdh_compute_key(unsigned char **pout, size_t *poutlen,
 int ecdh_simple_compute_key(unsigned char **pout, size_t *poutlen,
                             const EC_POINT *pub_key, const EC_KEY *ecdh);
 
-struct ECDSA_SIG_st {
-    BIGNUM *r;
-    BIGNUM *s;
-};
+//struct ECDSA_SIG_st {
+//    BIGNUM *r;
+//    BIGNUM *s;
+//};
 
 int ossl_ecdsa_sign_setup(EC_KEY *eckey, BN_CTX *ctx_in, BIGNUM **kinvp,
                           BIGNUM **rp);

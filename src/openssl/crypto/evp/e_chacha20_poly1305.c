@@ -146,7 +146,7 @@ const EVP_CIPHER *EVP_chacha20(void)
 }
 
 # ifndef OPENSSL_NO_POLY1305
-#  include "internal/poly1305.h"
+#  include "../include/internal/poly1305.h"
 
 typedef struct {
     EVP_CHACHA_KEY key;

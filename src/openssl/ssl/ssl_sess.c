@@ -9,10 +9,10 @@
  */
 
 #include <stdio.h>
-#include <openssl/rand.h>
-#include <openssl/engine.h>
-#include "internal/refcount.h"
-#include "internal/cryptlib.h"
+#include "../include/openssl/rand.h"
+#include "../include/openssl/engine.h"
+#include "../include/internal/refcount.h"
+#include "../include/internal/cryptlib.h"
 #include "ssl_locl.h"
 #include "statem/statem_locl.h"
 

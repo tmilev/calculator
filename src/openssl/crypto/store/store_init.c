@@ -8,7 +8,7 @@
  */
 
 #include "../../include/openssl/err.h"
-#include "internal/store.h"
+#include "../include/internal/store.h"
 #include "store_locl.h"
 
 static CRYPTO_ONCE store_init = CRYPTO_ONCE_STATIC_INIT;

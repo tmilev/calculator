@@ -8,7 +8,7 @@
  */
 
 #include <assert.h>
-#include "internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #include "bn_lcl.h"
 
 int BN_lshift1(BIGNUM *r, const BIGNUM *a)

@@ -7,14 +7,14 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "e_os.h"
+#include "../e_os.h"
 
-#include "internal/err.h"
-#include <openssl/crypto.h>
-#include <openssl/evp.h>
-#include <openssl/trace.h>
+#include "../include/internal/err.h"
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/evp.h"
+#include "../include/openssl/trace.h"
 #include "ssl_locl.h"
-#include "internal/thread_once.h"
+#include "../include/internal/thread_once.h"
 
 static int stopped;
 

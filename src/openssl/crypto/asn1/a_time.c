@@ -413,7 +413,7 @@ int ASN1_TIME_set_string_X509(ASN1_TIME *s, const char *str)
              * to a piece of memory allocated outside of this function.
              * new t.data would be freed after ASN1_STRING_copy is done.
              */
-            t.data = OPENSSL_zalloc(t.length + 1);
+            t.data = (unsigned char*) OPENSSL_zalloc(t.length + 1);
             if (t.data == NULL)
                 goto out;
             memcpy(t.data, str + 2, t.length);

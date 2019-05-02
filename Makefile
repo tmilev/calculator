@@ -901,6 +901,7 @@ openssl/ssl/tls_srp.c
 OBJECTS=$(addprefix bin/, $(SOURCES_RELATIVE_PATH:.cpp=.o))
 OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH_C:.c=.o))
 DEPENDENCIES=$(OBJECTS:.o=.d)
+DIRECTORIES=$(dir $(OBJECTS))
 
 # Uncomment the following lines to print
 # the objects/dependencies file names.
@@ -908,11 +909,11 @@ DEPENDENCIES=$(OBJECTS:.o=.d)
 # $(info )
 # $(info $(DEPENDENCIES))
 # $(info )
+# $(info Directories: $(DIRECTORIES))
+# $(info )
 
-all: directories bin_calculator 
-directories: bin
-bin:
-	mkdir ./bin
+
+all: bin_calculator 
 
 bin_calculator: $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) -o ./bin/calculator $(LIBRARIES_INCLUDED_AT_THE_END)
@@ -921,9 +922,11 @@ testrun: bin/calculator
 	time ./bin/calculator test
 
 bin/%.o:src/%.cpp
+	mkdir -p $(@D)
 	$(CXX) $(CFLAGS) -MMD -MP $< -o $@
 
 bin/openssl/%.o:src/openssl/%.c
+	mkdir -p $(@D)
 	$(CXX) $(CFLAGS) -MMD -MP $< -o $@
 
 clean:

@@ -66,7 +66,7 @@ void *ASN1_item_d2i_bio(const ASN1_ITEM *it, BIO *in, void *x)
         goto err;
 
     p = (const unsigned char *)b->data;
-    ret = ASN1_item_d2i(x, &p, len, it);
+    ret = (void *) ASN1_item_d2i((ASN1_VALUE **) x, &p, len, it);
  err:
     BUF_MEM_free(b);
     return ret;
@@ -76,7 +76,7 @@ void *ASN1_item_d2i_bio(const ASN1_ITEM *it, BIO *in, void *x)
 void *ASN1_item_d2i_fp(const ASN1_ITEM *it, FILE *in, void *x)
 {
     BIO *b;
-    char *ret;
+    void *ret;
 
     if ((b = BIO_new(BIO_s_file())) == NULL) {
         ASN1err(ASN1_F_ASN1_ITEM_D2I_FP, ERR_R_BUF_LIB);

@@ -271,7 +271,7 @@ ASN1_STRING *ASN1_STRING_dup(const ASN1_STRING *str)
 int ASN1_STRING_set(ASN1_STRING *str, const void *_data, int len)
 {
     unsigned char *c;
-    const char *data = _data;
+    const char *data = (const char *) _data;
 
     if (len < 0) {
         if (data == NULL)
@@ -281,7 +281,7 @@ int ASN1_STRING_set(ASN1_STRING *str, const void *_data, int len)
     }
     if ((str->length <= len) || (str->data == NULL)) {
         c = str->data;
-        str->data = OPENSSL_realloc(c, len + 1);
+        str->data = (unsigned char *) OPENSSL_realloc(c, len + 1);
         if (str->data == NULL) {
             ASN1err(ASN1_F_ASN1_STRING_SET, ERR_R_MALLOC_FAILURE);
             str->data = c;
@@ -300,7 +300,7 @@ int ASN1_STRING_set(ASN1_STRING *str, const void *_data, int len)
 void ASN1_STRING_set0(ASN1_STRING *str, void *data, int len)
 {
     OPENSSL_free(str->data);
-    str->data = data;
+    str->data = (unsigned char*) data;
     str->length = len;
 }
 
@@ -313,7 +313,7 @@ ASN1_STRING *ASN1_STRING_type_new(int type)
 {
     ASN1_STRING *ret;
 
-    ret = OPENSSL_zalloc(sizeof(*ret));
+    ret = (ASN1_STRING *) OPENSSL_zalloc(sizeof(*ret));
     if (ret == NULL) {
         ASN1err(ASN1_F_ASN1_STRING_TYPE_NEW, ERR_R_MALLOC_FAILURE);
         return NULL;

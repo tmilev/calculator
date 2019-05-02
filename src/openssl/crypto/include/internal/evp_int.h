@@ -117,7 +117,7 @@ extern const EVP_PKEY_METHOD siphash_pkey_meth;
 typedef struct evp_mac_impl_st EVP_MAC_IMPL;
 struct evp_mac_st {
     int type;
-    EVP_MAC_IMPL *(*new) (void);
+    EVP_MAC_IMPL *(*new_evp) (void);
     int (*copy) (EVP_MAC_IMPL *macdst, EVP_MAC_IMPL *macsrc);
     void (*free) (EVP_MAC_IMPL *macctx);
     size_t (*size) (EVP_MAC_IMPL *macctx);

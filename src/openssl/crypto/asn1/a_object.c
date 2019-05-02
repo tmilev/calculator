@@ -31,7 +31,7 @@ int i2d_ASN1_OBJECT(const ASN1_OBJECT *a, unsigned char **pp)
         return objsize;
 
     if (*pp == NULL) {
-        if ((p = allocated = OPENSSL_malloc(objsize)) == NULL) {
+        if ((p = allocated = (unsigned char*) OPENSSL_malloc(objsize)) == NULL) {
             ASN1err(ASN1_F_I2D_ASN1_OBJECT, ERR_R_MALLOC_FAILURE);
             return 0;
         }
@@ -135,7 +135,7 @@ int a2d_ASN1_OBJECT(unsigned char *out, int olen, const char *buf, int num)
                 if (tmp != ftmp)
                     OPENSSL_free(tmp);
                 tmpsize = blsize + 32;
-                tmp = OPENSSL_malloc(tmpsize);
+                tmp = (char *) OPENSSL_malloc(tmpsize);
                 if (tmp == NULL)
                     goto err;
             }
@@ -191,7 +191,7 @@ int i2a_ASN1_OBJECT(BIO *bp, const ASN1_OBJECT *a)
         return BIO_write(bp, "NULL", 4);
     i = i2t_ASN1_OBJECT(buf, sizeof(buf), a);
     if (i > (int)(sizeof(buf) - 1)) {
-        if ((p = OPENSSL_malloc(i + 1)) == NULL) {
+        if ((p = (char*) OPENSSL_malloc(i + 1)) == NULL) {
             ASN1err(ASN1_F_I2A_ASN1_OBJECT, ERR_R_MALLOC_FAILURE);
             return -1;
         }
@@ -299,13 +299,13 @@ ASN1_OBJECT *c2i_ASN1_OBJECT(ASN1_OBJECT **a, const unsigned char **pp,
 
     p = *pp;
     /* detach data from object */
-    data = (unsigned char *)ret->data;
+    data = (unsigned char *) ret->data;
     ret->data = NULL;
     /* once detached we can change it */
     if ((data == NULL) || (ret->length < length)) {
         ret->length = 0;
         OPENSSL_free(data);
-        data = OPENSSL_malloc(length);
+        data = (unsigned char *) OPENSSL_malloc(length);
         if (data == NULL) {
             i = ERR_R_MALLOC_FAILURE;
             goto err;
@@ -336,7 +336,7 @@ ASN1_OBJECT *ASN1_OBJECT_new(void)
 {
     ASN1_OBJECT *ret;
 
-    ret = OPENSSL_zalloc(sizeof(*ret));
+    ret = (ASN1_OBJECT *) OPENSSL_zalloc(sizeof(*ret));
     if (ret == NULL) {
         ASN1err(ASN1_F_ASN1_OBJECT_NEW, ERR_R_MALLOC_FAILURE);
         return NULL;

@@ -31,7 +31,7 @@ void ASN1_TYPE_set(ASN1_TYPE *a, int type, void *value)
     if (type == V_ASN1_BOOLEAN)
         a->value.boolean = value ? 0xff : 0;
     else
-        a->value.ptr = value;
+        a->value.ptr = (char*) value;
 }
 
 int ASN1_TYPE_set1(ASN1_TYPE *a, int type, const void *value)
@@ -41,13 +41,13 @@ int ASN1_TYPE_set1(ASN1_TYPE *a, int type, const void *value)
         ASN1_TYPE_set(a, type, p);
     } else if (type == V_ASN1_OBJECT) {
         ASN1_OBJECT *odup;
-        odup = OBJ_dup(value);
+        odup = OBJ_dup( (ASN1_OBJECT *) value);
         if (!odup)
             return 0;
         ASN1_TYPE_set(a, type, odup);
     } else {
         ASN1_STRING *sdup;
-        sdup = ASN1_STRING_dup(value);
+        sdup = ASN1_STRING_dup((ASN1_STRING *) value);
         if (!sdup)
             return 0;
         ASN1_TYPE_set(a, type, sdup);

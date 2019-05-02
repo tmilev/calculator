@@ -417,7 +417,7 @@ ASN1_INTEGER *d2i_ASN1_UINTEGER(ASN1_INTEGER **a, const unsigned char **pp,
      * We must OPENSSL_malloc stuff, even for 0 bytes otherwise it signifies
      * a missing NULL parameter.
      */
-    s = OPENSSL_malloc((int)len + 1);
+    s = (unsigned char*) OPENSSL_malloc((int)len + 1);
     if (s == NULL) {
         i = ERR_R_MALLOC_FAILURE;
         goto err;

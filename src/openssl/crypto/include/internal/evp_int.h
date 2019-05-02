@@ -156,7 +156,7 @@ int EVP_add_mac(const EVP_MAC *mac);
 typedef struct evp_kdf_impl_st EVP_KDF_IMPL;
 typedef struct {
     int type;
-    EVP_KDF_IMPL *(*new) (void);
+    EVP_KDF_IMPL *(*new_evp) (void);
     void (*free) (EVP_KDF_IMPL *impl);
     void (*reset) (EVP_KDF_IMPL *impl);
     int (*ctrl) (EVP_KDF_IMPL *impl, int cmd, va_list args);

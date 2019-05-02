@@ -43,7 +43,7 @@ int asn1_item_embed_new(ASN1_VALUE **pval, const ASN1_ITEM *it, int embed)
 {
     const ASN1_TEMPLATE *tt = NULL;
     const ASN1_EXTERN_FUNCS *ef;
-    const ASN1_AUX *aux = it->funcs;
+    const ASN1_AUX *aux = (const ASN1_AUX *) it->funcs;
     ASN1_aux_cb *asn1_cb;
     ASN1_VALUE **pseqval;
     int i;
@@ -59,7 +59,7 @@ int asn1_item_embed_new(ASN1_VALUE **pval, const ASN1_ITEM *it, int embed)
     switch (it->itype) {
 
     case ASN1_ITYPE_EXTERN:
-        ef = it->funcs;
+        ef = (const ASN1_EXTERN_FUNCS *) it->funcs;
         if (ef && ef->asn1_ex_new) {
             if (!ef->asn1_ex_new(pval, it))
                 goto memerr;
@@ -94,7 +94,7 @@ int asn1_item_embed_new(ASN1_VALUE **pval, const ASN1_ITEM *it, int embed)
         if (embed) {
             memset(*pval, 0, it->size);
         } else {
-            *pval = OPENSSL_zalloc(it->size);
+            *pval = (ASN1_VALUE *) OPENSSL_zalloc(it->size);
             if (*pval == NULL)
                 goto memerr;
         }
@@ -119,7 +119,7 @@ int asn1_item_embed_new(ASN1_VALUE **pval, const ASN1_ITEM *it, int embed)
         if (embed) {
             memset(*pval, 0, it->size);
         } else {
-            *pval = OPENSSL_zalloc(it->size);
+            *pval = (ASN1_VALUE *) OPENSSL_zalloc(it->size);
             if (*pval == NULL)
                 goto memerr;
         }
@@ -173,7 +173,7 @@ static void asn1_item_clear(ASN1_VALUE **pval, const ASN1_ITEM *it)
     switch (it->itype) {
 
     case ASN1_ITYPE_EXTERN:
-        ef = it->funcs;
+        ef = (const ASN1_EXTERN_FUNCS *) it->funcs;
         if (ef && ef->asn1_ex_clear)
             ef->asn1_ex_clear(pval, it);
         else
@@ -270,7 +270,7 @@ static int asn1_primitive_new(ASN1_VALUE **pval, const ASN1_ITEM *it,
         return 0;
 
     if (it->funcs) {
-        const ASN1_PRIMITIVE_FUNCS *pf = it->funcs;
+        const ASN1_PRIMITIVE_FUNCS *pf = (const ASN1_PRIMITIVE_FUNCS *) it->funcs;
         if (embed) {
             if (pf->prim_clear) {
                 pf->prim_clear(pval, it);
@@ -299,7 +299,7 @@ static int asn1_primitive_new(ASN1_VALUE **pval, const ASN1_ITEM *it,
         return 1;
 
     case V_ASN1_ANY:
-        if ((typ = OPENSSL_malloc(sizeof(*typ))) == NULL) {
+        if ((typ = (ASN1_TYPE *) OPENSSL_malloc(sizeof(*typ))) == NULL) {
             ASN1err(ASN1_F_ASN1_PRIMITIVE_NEW, ERR_R_MALLOC_FAILURE);
             return 0;
         }
@@ -331,7 +331,7 @@ static void asn1_primitive_clear(ASN1_VALUE **pval, const ASN1_ITEM *it)
 {
     int utype;
     if (it && it->funcs) {
-        const ASN1_PRIMITIVE_FUNCS *pf = it->funcs;
+        const ASN1_PRIMITIVE_FUNCS *pf = (const ASN1_PRIMITIVE_FUNCS *) it->funcs;
         if (pf->prim_clear)
             pf->prim_clear(pval, it);
         else

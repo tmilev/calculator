@@ -139,7 +139,7 @@ static ASN1_VALUE *b64_read_asn1(BIO *bio, const ASN1_ITEM *it)
         return 0;
     }
     bio = BIO_push(b64, bio);
-    val = ASN1_item_d2i_bio(it, bio, NULL);
+    val = (ASN1_VALUE *) ASN1_item_d2i_bio(it, bio, NULL);
     if (!val)
         ASN1err(ASN1_F_B64_READ_ASN1, ASN1_R_DECODE_ERROR);
     (void)BIO_flush(bio);
@@ -317,7 +317,7 @@ static int asn1_output_data(BIO *out, BIO *data, ASN1_VALUE *val, int flags,
                             const ASN1_ITEM *it)
 {
     BIO *tmpbio;
-    const ASN1_AUX *aux = it->funcs;
+    const ASN1_AUX *aux = (const ASN1_AUX *) it->funcs;
     ASN1_STREAM_ARG sarg;
     int rv = 1;
 
@@ -807,7 +807,7 @@ static MIME_HEADER *mime_hdr_new(const char *name, const char *value)
         for (p = tmpval; *p; p++)
             *p = ossl_tolower(*p);
     }
-    mhdr = OPENSSL_malloc(sizeof(*mhdr));
+    mhdr = (MIME_HEADER *) OPENSSL_malloc(sizeof(*mhdr));
     if (mhdr == NULL)
         goto err;
     mhdr->name = tmpname;
@@ -841,7 +841,7 @@ static int mime_hdr_addparam(MIME_HEADER *mhdr, const char *name, const char *va
             goto err;
     }
     /* Parameter values are case sensitive so leave as is */
-    mparam = OPENSSL_malloc(sizeof(*mparam));
+    mparam = (MIME_PARAM *) OPENSSL_malloc(sizeof(*mparam));
     if (mparam == NULL)
         goto err;
     mparam->param_name = tmpname;

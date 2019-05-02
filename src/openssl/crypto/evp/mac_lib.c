@@ -29,7 +29,7 @@ EVP_MAC_CTX *EVP_MAC_CTX_new(const EVP_MAC *mac)
 {
     EVP_MAC_CTX *ctx = OPENSSL_zalloc(sizeof(EVP_MAC_CTX));
 
-    if (ctx == NULL || (ctx->data = mac->new()) == NULL) {
+    if (ctx == NULL || (ctx->data = mac->new_evp()) == NULL) {
         EVPerr(EVP_F_EVP_MAC_CTX_NEW, ERR_R_MALLOC_FAILURE);
         OPENSSL_free(ctx);
         ctx = NULL;

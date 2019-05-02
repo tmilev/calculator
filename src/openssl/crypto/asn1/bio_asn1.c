@@ -134,7 +134,7 @@ static int asn1_bio_free(BIO *b)
     if (b == NULL)
         return 0;
 
-    ctx = BIO_get_data(b);
+    ctx = (BIO_ASN1_BUF_CTX *) BIO_get_data(b);
     if (ctx == NULL)
         return 0;
 
@@ -153,7 +153,7 @@ static int asn1_bio_write(BIO *b, const char *in, int inl)
     unsigned char *p;
     BIO *next;
 
-    ctx = BIO_get_data(b);
+    ctx = (BIO_ASN1_BUF_CTX *) BIO_get_data(b);
     next = BIO_next(b);
     if (in == NULL || inl < 0 || ctx == NULL || next == NULL)
         return 0;
@@ -323,32 +323,32 @@ static long asn1_bio_ctrl(BIO *b, int cmd, long arg1, void *arg2)
     long ret = 1;
     BIO *next;
 
-    ctx = BIO_get_data(b);
+    ctx = (BIO_ASN1_BUF_CTX *) BIO_get_data(b);
     if (ctx == NULL)
         return 0;
     next = BIO_next(b);
     switch (cmd) {
 
     case BIO_C_SET_PREFIX:
-        ex_func = arg2;
+        ex_func = (BIO_ASN1_EX_FUNCS*) arg2;
         ctx->prefix = ex_func->ex_func;
         ctx->prefix_free = ex_func->ex_free_func;
         break;
 
     case BIO_C_GET_PREFIX:
-        ex_func = arg2;
+        ex_func = (BIO_ASN1_EX_FUNCS*) arg2;
         ex_func->ex_func = ctx->prefix;
         ex_func->ex_free_func = ctx->prefix_free;
         break;
 
     case BIO_C_SET_SUFFIX:
-        ex_func = arg2;
+        ex_func = (BIO_ASN1_EX_FUNCS*) arg2;
         ctx->suffix = ex_func->ex_func;
         ctx->suffix_free = ex_func->ex_free_func;
         break;
 
     case BIO_C_GET_SUFFIX:
-        ex_func = arg2;
+        ex_func = (BIO_ASN1_EX_FUNCS*) arg2;
         ex_func->ex_func = ctx->suffix;
         ex_func->ex_free_func = ctx->suffix_free;
         break;

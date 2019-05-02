@@ -139,7 +139,7 @@ static int asn1_item_embed_d2i(ASN1_VALUE **pval, const unsigned char **in,
 {
     const ASN1_TEMPLATE *tt, *errtt = NULL;
     const ASN1_EXTERN_FUNCS *ef;
-    const ASN1_AUX *aux = it->funcs;
+    const ASN1_AUX *aux = (const ASN1_AUX *) it->funcs;
     ASN1_aux_cb *asn1_cb;
     const unsigned char *p = NULL, *q;
     unsigned char oclass;
@@ -211,7 +211,7 @@ static int asn1_item_embed_d2i(ASN1_VALUE **pval, const unsigned char **in,
 
     case ASN1_ITYPE_EXTERN:
         /* Use new style d2i */
-        ef = it->funcs;
+        ef = (const ASN1_EXTERN_FUNCS *) it->funcs;
         return ef->asn1_ex_d2i(pval, in, len, it, tag, aclass, opt, ctx);
 
     case ASN1_ITYPE_CHOICE:
@@ -780,7 +780,7 @@ static int asn1_ex_c2i(ASN1_VALUE **pval, const unsigned char *cont, int len,
     int ret = 0;
     const ASN1_PRIMITIVE_FUNCS *pf;
     ASN1_INTEGER **tint;
-    pf = it->funcs;
+    pf = (ASN1_PRIMITIVE_FUNCS *) it->funcs;
 
     if (pf && pf->prim_c2i)
         return pf->prim_c2i(pval, cont, len, utype, free_cont, it);

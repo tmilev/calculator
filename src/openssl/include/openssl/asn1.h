@@ -690,7 +690,7 @@ void *ASN1_item_dup(const ASN1_ITEM *it, const void *x);
 
 # define M_ASN1_new_of(type) (type *)ASN1_item_new(ASN1_ITEM_rptr(type))
 # define M_ASN1_free_of(x, type) \
-                ASN1_item_free(CHECKED_PTR_OF(type, x), ASN1_ITEM_rptr(type))
+                ASN1_item_free((ASN1_VALUE *) CHECKED_PTR_OF(type, x), ASN1_ITEM_rptr(type))
 
 # ifndef OPENSSL_NO_STDIO
 void *ASN1_d2i_fp(void *(*xnew) (void), d2i_of_void *d2i, FILE *in, void **x);

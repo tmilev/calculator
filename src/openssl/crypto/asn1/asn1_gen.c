@@ -192,7 +192,7 @@ static ASN1_TYPE *generate_v3(const char *str, X509V3_CTX *cnf, int depth,
 
     /* Allocate buffer for new encoding */
 
-    new_der = OPENSSL_malloc(len);
+    new_der = (unsigned char *) OPENSSL_malloc(len);
     if (new_der == NULL)
         goto err;
 
@@ -239,7 +239,7 @@ static ASN1_TYPE *generate_v3(const char *str, X509V3_CTX *cnf, int depth,
 
 static int asn1_cb(const char *elem, int len, void *bitstr)
 {
-    tag_exp_arg *arg = bitstr;
+    tag_exp_arg *arg = (tag_exp_arg *) bitstr;
     int i;
     int utype;
     int vlen = 0;
@@ -755,7 +755,7 @@ static int bitstr_cb(const char *elem, int len, void *bitstr)
         ASN1err(ASN1_F_BITSTR_CB, ASN1_R_INVALID_NUMBER);
         return 0;
     }
-    if (!ASN1_BIT_STRING_set_bit(bitstr, bitnum, 1)) {
+    if (!ASN1_BIT_STRING_set_bit((ASN1_BIT_STRING *) bitstr, bitnum, 1)) {
         ASN1err(ASN1_F_BITSTR_CB, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -764,7 +764,7 @@ static int bitstr_cb(const char *elem, int len, void *bitstr)
 
 static int mask_cb(const char *elem, int len, void *arg)
 {
-    unsigned long *pmask = arg, tmpmask;
+    unsigned long *pmask = (unsigned long *) arg, tmpmask;
     int tag;
     if (elem == NULL)
         return 0;

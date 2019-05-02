@@ -28,14 +28,14 @@
 
 int asn1_get_choice_selector(ASN1_VALUE **pval, const ASN1_ITEM *it)
 {
-    int *sel = offset2ptr(*pval, it->utype);
+    int *sel = (int*) (offset2ptr(*pval, it->utype));
 
     return *sel;
 }
 
 int asn1_get_choice_selector_const(const ASN1_VALUE **pval, const ASN1_ITEM *it)
 {
-    int *sel = offset2ptr(*pval, it->utype);
+    int *sel = (int *) offset2ptr(*pval, it->utype);
 
     return *sel;
 }
@@ -49,7 +49,7 @@ int asn1_set_choice_selector(ASN1_VALUE **pval, int value,
 {
     int *sel, ret;
 
-    sel = offset2ptr(*pval, it->utype);
+    sel = (int *) offset2ptr(*pval, it->utype);
     ret = *sel;
     *sel = value;
     return ret;
@@ -74,11 +74,11 @@ int asn1_do_lock(ASN1_VALUE **pval, int op, const ASN1_ITEM *it)
     if ((it->itype != ASN1_ITYPE_SEQUENCE)
         && (it->itype != ASN1_ITYPE_NDEF_SEQUENCE))
         return 0;
-    aux = it->funcs;
+    aux = (const ASN1_AUX *) it->funcs;
     if (aux == NULL || (aux->flags & ASN1_AFLG_REFCOUNT) == 0)
         return 0;
-    lck = offset2ptr(*pval, aux->ref_offset);
-    lock = offset2ptr(*pval, aux->ref_lock);
+    lck = (CRYPTO_REF_COUNT *) offset2ptr(*pval, aux->ref_offset);
+    lock = (CRYPTO_RWLOCK **) offset2ptr(*pval, aux->ref_lock);
 
     switch (op) {
     case 0:
@@ -116,10 +116,10 @@ static ASN1_ENCODING *asn1_get_enc_ptr(ASN1_VALUE **pval, const ASN1_ITEM *it)
 
     if (pval == NULL || *pval == NULL)
         return NULL;
-    aux = it->funcs;
+    aux = (const ASN1_AUX *) it->funcs;
     if (aux == NULL || (aux->flags & ASN1_AFLG_ENCODING) == 0)
         return NULL;
-    return offset2ptr(*pval, aux->enc_offset);
+    return (ASN1_ENCODING *) offset2ptr(*pval, aux->enc_offset);
 }
 
 static const ASN1_ENCODING *asn1_get_const_enc_ptr(const ASN1_VALUE **pval,
@@ -129,10 +129,10 @@ static const ASN1_ENCODING *asn1_get_const_enc_ptr(const ASN1_VALUE **pval,
 
     if (pval == NULL || *pval == NULL)
         return NULL;
-    aux = it->funcs;
+    aux = (const ASN1_AUX *) it->funcs;
     if (aux == NULL || (aux->flags & ASN1_AFLG_ENCODING) == 0)
         return NULL;
-    return offset2ptr(*pval, aux->enc_offset);
+    return (const ASN1_ENCODING *) offset2ptr(*pval, aux->enc_offset);
 }
 
 void asn1_enc_init(ASN1_VALUE **pval, const ASN1_ITEM *it)

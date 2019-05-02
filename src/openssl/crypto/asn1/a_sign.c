@@ -76,9 +76,9 @@ int ASN1_sign(i2d_of_void *i2d, X509_ALGOR *algor1, X509_ALGOR *algor2,
         goto err;
     }
     inll = (size_t)inl;
-    buf_in = OPENSSL_malloc(inll);
+    buf_in = (unsigned char *) OPENSSL_malloc(inll);
     outll = outl = EVP_PKEY_size(pkey);
-    buf_out = OPENSSL_malloc(outll);
+    buf_out = (unsigned char*) OPENSSL_malloc(outll);
     if (buf_in == NULL || buf_out == NULL) {
         outl = 0;
         ASN1err(ASN1_F_ASN1_SIGN, ERR_R_MALLOC_FAILURE);
@@ -204,7 +204,7 @@ int ASN1_item_sign_ctx(const ASN1_ITEM *it,
 
     }
 
-    buf_len = ASN1_item_i2d(asn, &buf_in, it);
+    buf_len = ASN1_item_i2d((const ASN1_VALUE *) asn, &buf_in, it);
     if (buf_len <= 0) {
         outl = 0;
         ASN1err(ASN1_F_ASN1_ITEM_SIGN_CTX, ERR_R_INTERNAL_ERROR);
@@ -212,7 +212,7 @@ int ASN1_item_sign_ctx(const ASN1_ITEM *it,
     }
     inl = buf_len;
     outll = outl = EVP_PKEY_size(pkey);
-    buf_out = OPENSSL_malloc(outll);
+    buf_out = (unsigned char *) OPENSSL_malloc(outll);
     if (buf_in == NULL || buf_out == NULL) {
         outl = 0;
         ASN1err(ASN1_F_ASN1_ITEM_SIGN_CTX, ERR_R_MALLOC_FAILURE);

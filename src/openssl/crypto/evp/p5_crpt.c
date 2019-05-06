@@ -42,7 +42,7 @@ int PKCS5_PBE_keyivgen(EVP_CIPHER_CTX *cctx, const char *pass, int passlen,
         return 0;
     }
 
-    pbe = ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(PBEPARAM), param);
+    pbe = (PBEPARAM*) ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(PBEPARAM), param);
     if (pbe == NULL) {
         EVPerr(EVP_F_PKCS5_PBE_KEYIVGEN, EVP_R_DECODE_ERROR);
         return 0;

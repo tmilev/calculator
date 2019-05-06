@@ -41,7 +41,7 @@ static EVP_KDF_IMPL *kdf_sshkdf_new(void)
 {
     EVP_KDF_IMPL *impl;
 
-    if ((impl = OPENSSL_zalloc(sizeof(*impl))) == NULL)
+    if ((impl = (EVP_KDF_IMPL *) OPENSSL_zalloc(sizeof(*impl))) == NULL)
         KDFerr(KDF_F_KDF_SSHKDF_NEW, ERR_R_MALLOC_FAILURE);
     return impl;
 }
@@ -69,7 +69,7 @@ static int kdf_sshkdf_parse_buffer_arg(unsigned char **dst, size_t *dst_len,
     p = va_arg(args, const unsigned char *);
     len = va_arg(args, size_t);
     OPENSSL_clear_free(*dst, *dst_len);
-    *dst = OPENSSL_memdup(p, len);
+    *dst = (unsigned char*) OPENSSL_memdup(p, len);
     if (*dst == NULL)
         return 0;
 

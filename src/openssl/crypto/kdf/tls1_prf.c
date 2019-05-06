@@ -41,7 +41,7 @@ static EVP_KDF_IMPL *kdf_tls1_prf_new(void)
 {
     EVP_KDF_IMPL *impl;
 
-    if ((impl = OPENSSL_zalloc(sizeof(*impl))) == NULL)
+    if ((impl = (EVP_KDF_IMPL *) OPENSSL_zalloc(sizeof(*impl))) == NULL)
         KDFerr(KDF_F_KDF_TLS1_PRF_NEW, ERR_R_MALLOC_FAILURE);
     return impl;
 }
@@ -78,7 +78,7 @@ static int kdf_tls1_prf_ctrl(EVP_KDF_IMPL *impl, int cmd, va_list args)
         p = va_arg(args, const unsigned char *);
         len = va_arg(args, size_t);
         OPENSSL_clear_free(impl->sec, impl->seclen);
-        impl->sec = OPENSSL_memdup(p, len);
+        impl->sec = (unsigned char*) OPENSSL_memdup(p, len);
         if (impl->sec == NULL)
             return 0;
 
@@ -252,7 +252,7 @@ static int tls1_prf_alg(const EVP_MD *md,
                              seed, seed_len, out, olen))
             return 0;
 
-        if ((tmp = OPENSSL_malloc(olen)) == NULL) {
+        if ((tmp = (unsigned char*) OPENSSL_malloc(olen)) == NULL) {
             KDFerr(KDF_F_TLS1_PRF_ALG, ERR_R_MALLOC_FAILURE);
             return 0;
         }

@@ -65,10 +65,10 @@ static int aria_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
 
     if (enc || (mode != EVP_CIPH_ECB_MODE && mode != EVP_CIPH_CBC_MODE))
         ret = aria_set_encrypt_key(key, EVP_CIPHER_CTX_key_length(ctx) * 8,
-                                        EVP_CIPHER_CTX_get_cipher_data(ctx));
+                                        (ARIA_KEY *) EVP_CIPHER_CTX_get_cipher_data(ctx));
     else
         ret = aria_set_decrypt_key(key, EVP_CIPHER_CTX_key_length(ctx) * 8,
-                                        EVP_CIPHER_CTX_get_cipher_data(ctx));
+                                        (ARIA_KEY *) EVP_CIPHER_CTX_get_cipher_data(ctx));
     if (ret < 0) {
         EVPerr(EVP_F_ARIA_INIT_KEY,EVP_R_ARIA_KEY_SETUP_FAILED);
         return 0;
@@ -266,7 +266,7 @@ static int aria_gcm_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr)
         if ((arg > EVP_MAX_IV_LENGTH) && (arg > gctx->ivlen)) {
             if (gctx->iv != EVP_CIPHER_CTX_iv_noconst(c))
                 OPENSSL_free(gctx->iv);
-            if ((gctx->iv = OPENSSL_malloc(arg)) == NULL) {
+            if ((gctx->iv = (unsigned char*) OPENSSL_malloc(arg)) == NULL) {
                 EVPerr(EVP_F_ARIA_GCM_CTRL, ERR_R_MALLOC_FAILURE);
                 return 0;
             }
@@ -361,7 +361,7 @@ static int aria_gcm_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr)
 
     case EVP_CTRL_COPY:
         {
-            EVP_CIPHER_CTX *out = ptr;
+            EVP_CIPHER_CTX *out = (EVP_CIPHER_CTX *) ptr;
             EVP_ARIA_GCM_CTX *gctx_out = EVP_C_DATA(EVP_ARIA_GCM_CTX,out);
             if (gctx->gcm.key) {
                 if (gctx->gcm.key != &gctx->ks)
@@ -371,7 +371,7 @@ static int aria_gcm_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr)
             if (gctx->iv == EVP_CIPHER_CTX_iv_noconst(c))
                 gctx_out->iv = EVP_CIPHER_CTX_iv_noconst(out);
             else {
-                if ((gctx_out->iv = OPENSSL_malloc(gctx->ivlen)) == NULL) {
+                if ((gctx_out->iv = (unsigned char*) OPENSSL_malloc(gctx->ivlen)) == NULL) {
                     EVPerr(EVP_F_ARIA_GCM_CTRL, ERR_R_MALLOC_FAILURE);
                     return 0;
                 }
@@ -596,7 +596,7 @@ static int aria_ccm_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr)
     case EVP_CTRL_AEAD_GET_TAG:
         if (!EVP_CIPHER_CTX_encrypting(c) || !cctx->tag_set)
             return 0;
-        if (!CRYPTO_ccm128_tag(&cctx->ccm, ptr, (size_t)arg))
+        if (!CRYPTO_ccm128_tag(&cctx->ccm, (unsigned char*) ptr, (size_t)arg))
             return 0;
         cctx->tag_set = 0;
         cctx->iv_set = 0;
@@ -605,7 +605,7 @@ static int aria_ccm_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr)
 
     case EVP_CTRL_COPY:
         {
-            EVP_CIPHER_CTX *out = ptr;
+            EVP_CIPHER_CTX *out = (EVP_CIPHER_CTX *) ptr;
             EVP_ARIA_CCM_CTX *cctx_out = EVP_C_DATA(EVP_ARIA_CCM_CTX,out);
             if (cctx->ccm.key) {
                 if (cctx->ccm.key != &cctx->ks)

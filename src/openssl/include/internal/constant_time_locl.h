@@ -271,11 +271,11 @@ static ossl_inline uint64_t constant_time_select_64(uint64_t mask, uint64_t a,
 static ossl_inline void constant_time_cond_swap_32(uint32_t mask, uint32_t *a,
                                                    uint32_t *b)
 {
-    uint32_t xor = *a ^ *b;
+    uint32_t abxor = *a ^ *b;
 
-    xor &= mask;
-    *a ^= xor;
-    *b ^= xor;
+    abxor &= mask;
+    *a ^= abxor;
+    *b ^= abxor;
 }
 
 /*
@@ -291,11 +291,11 @@ static ossl_inline void constant_time_cond_swap_32(uint32_t mask, uint32_t *a,
 static ossl_inline void constant_time_cond_swap_64(uint64_t mask, uint64_t *a,
                                                    uint64_t *b)
 {
-    uint64_t xor = *a ^ *b;
+    uint64_t abxor = *a ^ *b;
 
-    xor &= mask;
-    *a ^= xor;
-    *b ^= xor;
+    abxor &= mask;
+    *a ^= abxor;
+    *b ^= abxor;
 }
 
 /*

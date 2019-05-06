@@ -133,7 +133,7 @@ static int ok_new(BIO *bi)
 {
     BIO_OK_CTX *ctx;
 
-    if ((ctx = OPENSSL_zalloc(sizeof(*ctx))) == NULL) {
+    if ((ctx = (BIO_OK_CTX *) OPENSSL_zalloc(sizeof(*ctx))) == NULL) {
         EVPerr(EVP_F_OK_NEW, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -158,7 +158,7 @@ static int ok_free(BIO *a)
     if (a == NULL)
         return 0;
 
-    ctx = BIO_get_data(a);
+    ctx = (BIO_OK_CTX *) BIO_get_data(a);
 
     EVP_MD_CTX_free(ctx->md);
     OPENSSL_clear_free(ctx, sizeof(BIO_OK_CTX));
@@ -177,7 +177,7 @@ static int ok_read(BIO *b, char *out, int outl)
     if (out == NULL)
         return 0;
 
-    ctx = BIO_get_data(b);
+    ctx = (BIO_OK_CTX *) BIO_get_data(b);
     next = BIO_next(b);
 
     if ((ctx == NULL) || (next == NULL) || (BIO_get_init(b) == 0))
@@ -263,7 +263,7 @@ static int ok_write(BIO *b, const char *in, int inl)
     if (inl <= 0)
         return inl;
 
-    ctx = BIO_get_data(b);
+    ctx = (BIO_OK_CTX *) BIO_get_data(b);
     next = BIO_next(b);
     ret = inl;
 
@@ -328,7 +328,7 @@ static long ok_ctrl(BIO *b, int cmd, long num, void *ptr)
     int i;
     BIO *next;
 
-    ctx = BIO_get_data(b);
+    ctx = (BIO_OK_CTX *) BIO_get_data(b);
     next = BIO_next(b);
 
     switch (cmd) {
@@ -385,14 +385,14 @@ static long ok_ctrl(BIO *b, int cmd, long num, void *ptr)
         ret = (long)ctx->cont;
         break;
     case BIO_C_SET_MD:
-        md = ptr;
+        md = (EVP_MD*) ptr;
         if (!EVP_DigestInit_ex(ctx->md, md, NULL))
             return 0;
         BIO_set_init(b, 1);
         break;
     case BIO_C_GET_MD:
         if (BIO_get_init(b)) {
-            ppmd = ptr;
+            ppmd = (const EVP_MD **) ptr;
             *ppmd = EVP_MD_CTX_md(ctx->md);
         } else
             ret = 0;
@@ -434,7 +434,7 @@ static void longswap(void *_ptr, size_t len)
 
     if (is_endian.little) {
         size_t i;
-        unsigned char *p = _ptr, c;
+        unsigned char *p = (unsigned char *) _ptr, c;
 
         for (i = 0; i < len; i += 4) {
             c = p[0], p[0] = p[3], p[3] = c;
@@ -451,7 +451,7 @@ static int sig_out(BIO *b)
     int md_size;
     void *md_data;
 
-    ctx = BIO_get_data(b);
+    ctx = (BIO_OK_CTX *) BIO_get_data(b);
     md = ctx->md;
     digest = EVP_MD_CTX_md(md);
     md_size = EVP_MD_size(digest);
@@ -466,7 +466,7 @@ static int sig_out(BIO *b)
      * FIXME: there's absolutely no guarantee this makes any sense at all,
      * particularly now EVP_MD_CTX has been restructured.
      */
-    if (RAND_bytes(md_data, md_size) <= 0)
+    if (RAND_bytes((unsigned char*) md_data, md_size) <= 0)
         goto berr;
     memcpy(&(ctx->buf[ctx->buf_len]), md_data, md_size);
     longswap(&(ctx->buf[ctx->buf_len]), md_size);
@@ -495,7 +495,7 @@ static int sig_in(BIO *b)
     int md_size;
     void *md_data;
 
-    ctx = BIO_get_data(b);
+    ctx = (BIO_OK_CTX *) BIO_get_data(b);
     md = ctx->md;
     digest = EVP_MD_CTX_md(md);
     md_size = EVP_MD_size(digest);
@@ -541,7 +541,7 @@ static int block_out(BIO *b)
     const EVP_MD *digest;
     int md_size;
 
-    ctx = BIO_get_data(b);
+    ctx = (BIO_OK_CTX *) BIO_get_data(b);
     md = ctx->md;
     digest = EVP_MD_CTX_md(md);
     md_size = EVP_MD_size(digest);
@@ -572,7 +572,7 @@ static int block_in(BIO *b)
     unsigned char tmp[EVP_MAX_MD_SIZE];
     int md_size;
 
-    ctx = BIO_get_data(b);
+    ctx = (BIO_OK_CTX *) BIO_get_data(b);
     md = ctx->md;
     md_size = EVP_MD_size(EVP_MD_CTX_md(md));
 

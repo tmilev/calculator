@@ -705,7 +705,11 @@ static limb felem_is_zero(const felem in)
 
 static int felem_is_zero_int(const void *in)
 {
-    return (int)(felem_is_zero(in) & ((limb) 1));
+  felem inFelem;
+  for (int i = 0; i < 4; i ++) {
+    inFelem[i] = ((limb*) in)[i];
+  }
+  return (int)(felem_is_zero(inFelem) & ((limb) 1));
 }
 
 /* Invert a field element */
@@ -1220,7 +1224,7 @@ static void batch_mul(felem x_out, felem y_out, felem z_out,
 
 static NISTP224_PRE_COMP *nistp224_pre_comp_new(void)
 {
-    NISTP224_PRE_COMP *ret = OPENSSL_zalloc(sizeof(*ret));
+    NISTP224_PRE_COMP *ret = (NISTP224_PRE_COMP*) OPENSSL_zalloc(sizeof(*ret));
 
     if (!ret) {
         ECerr(EC_F_NISTP224_PRE_COMP_NEW, ERR_R_MALLOC_FAILURE);
@@ -1386,6 +1390,9 @@ static void make_points_affine(size_t num, felem points[ /* num */ ][3],
                                              felem_contract);
 }
 
+
+//typedef limb[17][3][4] precoputedBytes;
+
 /*
  * Computes scalar*generator + \sum scalars[i]*points[i], ignoring NULL
  * values Result is stored in r (r can equal one of the inputs).
@@ -1464,10 +1471,11 @@ int ec_GFp_nistp224_points_mul(const EC_GROUP *group, EC_POINT *r,
              */
             mixed = 1;
         }
-        secrets = OPENSSL_zalloc(sizeof(*secrets) * num_points);
-        pre_comp = OPENSSL_zalloc(sizeof(*pre_comp) * num_points);
+        secrets = (felem_bytearray *) OPENSSL_zalloc(sizeof(*secrets) * num_points);
+
+        pre_comp = (limb(*)[17][3][4]) OPENSSL_zalloc(sizeof(*pre_comp) * num_points);
         if (mixed)
-            tmp_felems =
+            tmp_felems = (felem *)
                 OPENSSL_malloc(sizeof(felem) * (num_points * 17 + 1));
         if ((secrets == NULL) || (pre_comp == NULL)
             || (mixed && (tmp_felems == NULL))) {

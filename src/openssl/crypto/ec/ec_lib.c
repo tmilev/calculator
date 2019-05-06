@@ -30,7 +30,7 @@ EC_GROUP *EC_GROUP_new(const EC_METHOD *meth)
         return NULL;
     }
 
-    ret = OPENSSL_zalloc(sizeof(*ret));
+    ret = (EC_GROUP *) OPENSSL_zalloc(sizeof(*ret));
     if (ret == NULL) {
         ECerr(EC_F_EC_GROUP_NEW, ERR_R_MALLOC_FAILURE);
         return NULL;
@@ -61,21 +61,21 @@ EC_GROUP *EC_GROUP_new(const EC_METHOD *meth)
 void EC_pre_comp_free(EC_GROUP *group)
 {
     switch (group->pre_comp_type) {
-    case PCT_none:
+    case ec_group_st::PCT_none:
         break;
-    case PCT_nistz256:
+    case ec_group_st::PCT_nistz256:
 #ifdef ECP_NISTZ256_ASM
         EC_nistz256_pre_comp_free(group->pre_comp.nistz256);
 #endif
         break;
 #ifndef OPENSSL_NO_EC_NISTP_64_GCC_128
-    case PCT_nistp224:
+    case ec_group_st::PCT_nistp224:
         EC_nistp224_pre_comp_free(group->pre_comp.nistp224);
         break;
-    case PCT_nistp256:
+    case ec_group_st::PCT_nistp256:
         EC_nistp256_pre_comp_free(group->pre_comp.nistp256);
         break;
-    case PCT_nistp521:
+    case ec_group_st::PCT_nistp521:
         EC_nistp521_pre_comp_free(group->pre_comp.nistp521);
         break;
 #else
@@ -84,7 +84,7 @@ void EC_pre_comp_free(EC_GROUP *group)
     case PCT_nistp521:
         break;
 #endif
-    case PCT_ec:
+    case ec_group_st::PCT_ec:
         EC_ec_pre_comp_free(group->pre_comp.ec);
         break;
     }
@@ -145,22 +145,22 @@ int EC_GROUP_copy(EC_GROUP *dest, const EC_GROUP *src)
     /* Copy precomputed */
     dest->pre_comp_type = src->pre_comp_type;
     switch (src->pre_comp_type) {
-    case PCT_none:
+    case ec_group_st::PCT_none:
         dest->pre_comp.ec = NULL;
         break;
-    case PCT_nistz256:
+    case ec_group_st::PCT_nistz256:
 #ifdef ECP_NISTZ256_ASM
         dest->pre_comp.nistz256 = EC_nistz256_pre_comp_dup(src->pre_comp.nistz256);
 #endif
         break;
 #ifndef OPENSSL_NO_EC_NISTP_64_GCC_128
-    case PCT_nistp224:
+    case ec_group_st::PCT_nistp224:
         dest->pre_comp.nistp224 = EC_nistp224_pre_comp_dup(src->pre_comp.nistp224);
         break;
-    case PCT_nistp256:
+    case ec_group_st::PCT_nistp256:
         dest->pre_comp.nistp256 = EC_nistp256_pre_comp_dup(src->pre_comp.nistp256);
         break;
-    case PCT_nistp521:
+    case ec_group_st::PCT_nistp521:
         dest->pre_comp.nistp521 = EC_nistp521_pre_comp_dup(src->pre_comp.nistp521);
         break;
 #else
@@ -169,7 +169,7 @@ int EC_GROUP_copy(EC_GROUP *dest, const EC_GROUP *src)
     case PCT_nistp521:
         break;
 #endif
-    case PCT_ec:
+    case ec_group_st::PCT_ec:
         dest->pre_comp.ec = EC_ec_pre_comp_dup(src->pre_comp.ec);
         break;
     }
@@ -214,7 +214,7 @@ int EC_GROUP_copy(EC_GROUP *dest, const EC_GROUP *src)
 
     if (src->seed) {
         OPENSSL_free(dest->seed);
-        if ((dest->seed = OPENSSL_malloc(src->seed_len)) == NULL) {
+        if ((dest->seed = (unsigned char*) OPENSSL_malloc(src->seed_len)) == NULL) {
             ECerr(EC_F_EC_GROUP_COPY, ERR_R_MALLOC_FAILURE);
             return 0;
         }
@@ -402,7 +402,7 @@ size_t EC_GROUP_set_seed(EC_GROUP *group, const unsigned char *p, size_t len)
     if (!len || !p)
         return 1;
 
-    if ((group->seed = OPENSSL_malloc(len)) == NULL) {
+    if ((group->seed = (unsigned char*) OPENSSL_malloc(len)) == NULL) {
         ECerr(EC_F_EC_GROUP_SET_SEED, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -590,7 +590,7 @@ EC_POINT *EC_POINT_new(const EC_GROUP *group)
         return NULL;
     }
 
-    ret = OPENSSL_zalloc(sizeof(*ret));
+    ret = (EC_POINT *) OPENSSL_zalloc(sizeof(*ret));
     if (ret == NULL) {
         ECerr(EC_F_EC_POINT_NEW, ERR_R_MALLOC_FAILURE);
         return NULL;

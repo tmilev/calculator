@@ -32,7 +32,7 @@ typedef struct {
 
 static int init(EVP_MD_CTX *evp_ctx, unsigned char pad)
 {
-    KECCAK1600_CTX *ctx = evp_ctx->md_data;
+    KECCAK1600_CTX *ctx = (KECCAK1600_CTX *) evp_ctx->md_data;
     size_t bsz = evp_ctx->digest->block_size;
 
     if (bsz <= sizeof(ctx->buf)) {
@@ -66,8 +66,8 @@ static int kmac_init(EVP_MD_CTX *evp_ctx)
 
 static int sha3_update(EVP_MD_CTX *evp_ctx, const void *_inp, size_t len)
 {
-    KECCAK1600_CTX *ctx = evp_ctx->md_data;
-    const unsigned char *inp = _inp;
+    KECCAK1600_CTX *ctx = (KECCAK1600_CTX *) evp_ctx->md_data;
+    const unsigned char *inp = (unsigned char *) _inp;
     size_t bsz = ctx->block_size;
     size_t num, rem;
 
@@ -109,7 +109,7 @@ static int sha3_update(EVP_MD_CTX *evp_ctx, const void *_inp, size_t len)
 
 static int sha3_final(EVP_MD_CTX *evp_ctx, unsigned char *md)
 {
-    KECCAK1600_CTX *ctx = evp_ctx->md_data;
+    KECCAK1600_CTX *ctx = (KECCAK1600_CTX *) evp_ctx->md_data;
     size_t bsz = ctx->block_size;
     size_t num = ctx->num;
 
@@ -131,7 +131,7 @@ static int sha3_final(EVP_MD_CTX *evp_ctx, unsigned char *md)
 
 static int shake_ctrl(EVP_MD_CTX *evp_ctx, int cmd, int p1, void *p2)
 {
-    KECCAK1600_CTX *ctx = evp_ctx->md_data;
+    KECCAK1600_CTX *ctx = (KECCAK1600_CTX *) evp_ctx->md_data;
 
     switch (cmd) {
     case EVP_MD_CTRL_XOF_LEN:

@@ -255,7 +255,7 @@ static void blake2b_compress(BLAKE2B_CTX *S,
 /* Absorb the input data into the hash state.  Always returns 1. */
 int BLAKE2b_Update(BLAKE2B_CTX *c, const void *data, size_t datalen)
 {
-    const uint8_t *in = data;
+    const uint8_t *in = (uint8_t*) data;
     size_t fill;
 
     /*

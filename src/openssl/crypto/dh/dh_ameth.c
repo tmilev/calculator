@@ -63,7 +63,7 @@ static int dh_pub_decode(EVP_PKEY *pkey, X509_PUBKEY *pubkey)
         goto err;
     }
 
-    pstr = pval;
+    pstr = (ASN1_STRING*) pval;
     pm = pstr->data;
     pmlen = pstr->length;
 
@@ -169,7 +169,7 @@ static int dh_priv_decode(EVP_PKEY *pkey, const PKCS8_PRIV_KEY_INFO *p8)
     if ((privkey = d2i_ASN1_INTEGER(NULL, &p, pklen)) == NULL)
         goto decerr;
 
-    pstr = pval;
+    pstr = (ASN1_STRING*) pval;
     pm = pstr->data;
     pmlen = pstr->length;
     if ((dh = d2i_dhp(pkey, &pm, pmlen)) == NULL)
@@ -408,7 +408,7 @@ static int int_dh_param_copy(DH *to, const DH *from, int is_x942)
         to->seed = NULL;
         to->seedlen = 0;
         if (from->seed) {
-            to->seed = OPENSSL_memdup(from->seed, from->seedlen);
+            to->seed = (unsigned char*) OPENSSL_memdup(from->seed, from->seedlen);
             if (!to->seed)
                 return 0;
             to->seedlen = from->seedlen;
@@ -494,9 +494,9 @@ static int dh_pkey_ctrl(EVP_PKEY *pkey, int op, long arg1, void *arg2)
 
     case ASN1_PKEY_CTRL_CMS_ENVELOPE:
         if (arg1 == 1)
-            return dh_cms_decrypt(arg2);
+            return dh_cms_decrypt((CMS_RecipientInfo *) arg2);
         else if (arg1 == 0)
-            return dh_cms_encrypt(arg2);
+            return dh_cms_encrypt((CMS_RecipientInfo *)arg2);
         return -2;
 
     case ASN1_PKEY_CTRL_CMS_RI_TYPE:
@@ -727,7 +727,7 @@ static int dh_cms_set_shared_info(EVP_PKEY_CTX *pctx, CMS_RecipientInfo *ri)
 
     if (ukm) {
         dukmlen = ASN1_STRING_length(ukm);
-        dukm = OPENSSL_memdup(ASN1_STRING_get0_data(ukm), dukmlen);
+        dukm = (unsigned char*) OPENSSL_memdup(ASN1_STRING_get0_data(ukm), dukmlen);
         if (!dukm)
             goto err;
     }
@@ -871,7 +871,7 @@ static int dh_cms_encrypt(CMS_RecipientInfo *ri)
 
     if (ukm) {
         dukmlen = ASN1_STRING_length(ukm);
-        dukm = OPENSSL_memdup(ASN1_STRING_get0_data(ukm), dukmlen);
+        dukm = (unsigned char*) OPENSSL_memdup(ASN1_STRING_get0_data(ukm), dukmlen);
         if (!dukm)
             goto err;
     }

@@ -2890,7 +2890,7 @@ static int aes_gcm_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr)
         if ((arg > EVP_MAX_IV_LENGTH) && (arg > gctx->ivlen)) {
             if (gctx->iv != c->iv)
                 OPENSSL_free(gctx->iv);
-            if ((gctx->iv = OPENSSL_malloc(arg)) == NULL) {
+            if ((gctx->iv = (unsigned char*) OPENSSL_malloc(arg)) == NULL) {
                 EVPerr(EVP_F_AES_GCM_CTRL, ERR_R_MALLOC_FAILURE);
                 return 0;
             }
@@ -2990,7 +2990,7 @@ static int aes_gcm_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr)
 
     case EVP_CTRL_COPY:
         {
-            EVP_CIPHER_CTX *out = ptr;
+            EVP_CIPHER_CTX *out = (EVP_CIPHER_CTX *) ptr;
             EVP_AES_GCM_CTX *gctx_out = EVP_C_DATA(EVP_AES_GCM_CTX,out);
             if (gctx->gcm.key) {
                 if (gctx->gcm.key != &gctx->ks)
@@ -3000,7 +3000,7 @@ static int aes_gcm_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr)
             if (gctx->iv == c->iv)
                 gctx_out->iv = out->iv;
             else {
-                if ((gctx_out->iv = OPENSSL_malloc(gctx->ivlen)) == NULL) {
+                if ((gctx_out->iv = (unsigned char*) OPENSSL_malloc(gctx->ivlen)) == NULL) {
                     EVPerr(EVP_F_AES_GCM_CTRL, ERR_R_MALLOC_FAILURE);
                     return 0;
                 }
@@ -3408,7 +3408,7 @@ static int aes_xts_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr)
 {
     EVP_AES_XTS_CTX *xctx = EVP_C_DATA(EVP_AES_XTS_CTX,c);
     if (type == EVP_CTRL_COPY) {
-        EVP_CIPHER_CTX *out = ptr;
+        EVP_CIPHER_CTX *out = (EVP_CIPHER_CTX *) ptr;
         EVP_AES_XTS_CTX *xctx_out = EVP_C_DATA(EVP_AES_XTS_CTX,out);
         if (xctx->xts.key1) {
             if (xctx->xts.key1 != &xctx->ks1)
@@ -3564,7 +3564,7 @@ static int aes_xts_cipher(EVP_CIPHER_CTX *ctx, unsigned char *out,
 
     if (xctx->stream)
         (*xctx->stream) (in, out, len,
-                         xctx->xts.key1, xctx->xts.key2,
+                         (const AES_KEY *) xctx->xts.key1, (const AES_KEY *) xctx->xts.key2,
                          EVP_CIPHER_CTX_iv_noconst(ctx));
     else if (CRYPTO_xts128_encrypt(&xctx->xts, EVP_CIPHER_CTX_iv_noconst(ctx),
                                    in, out, len,
@@ -3654,7 +3654,7 @@ static int aes_ccm_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr)
     case EVP_CTRL_AEAD_GET_TAG:
         if (!EVP_CIPHER_CTX_encrypting(c) || !cctx->tag_set)
             return 0;
-        if (!CRYPTO_ccm128_tag(&cctx->ccm, ptr, (size_t)arg))
+        if (!CRYPTO_ccm128_tag(&cctx->ccm, (unsigned char*) ptr, (size_t) arg))
             return 0;
         cctx->tag_set = 0;
         cctx->iv_set = 0;
@@ -3663,7 +3663,7 @@ static int aes_ccm_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr)
 
     case EVP_CTRL_COPY:
         {
-            EVP_CIPHER_CTX *out = ptr;
+            EVP_CIPHER_CTX *out = (EVP_CIPHER_CTX *) ptr;
             EVP_AES_CCM_CTX *cctx_out = EVP_C_DATA(EVP_AES_CCM_CTX,out);
             if (cctx->ccm.key) {
                 if (cctx->ccm.key != &cctx->ks)
@@ -4440,16 +4440,16 @@ static int aes_siv_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr)
 
     case EVP_CTRL_AEAD_SET_TAG:
         if (!EVP_CIPHER_CTX_encrypting(c))
-            return CRYPTO_siv128_set_tag(sctx, ptr, arg);
+            return CRYPTO_siv128_set_tag(sctx, (unsigned char*) ptr, arg);
         return 1;
 
     case EVP_CTRL_AEAD_GET_TAG:
         if (!EVP_CIPHER_CTX_encrypting(c))
             return 0;
-        return CRYPTO_siv128_get_tag(sctx, ptr, arg);
+        return CRYPTO_siv128_get_tag(sctx, (unsigned char*) ptr, arg);
 
     case EVP_CTRL_COPY:
-        sctx_out = EVP_C_DATA(SIV128_CONTEXT, (EVP_CIPHER_CTX*)ptr);
+        sctx_out = EVP_C_DATA(SIV128_CONTEXT, (EVP_CIPHER_CTX*) ptr);
         return CRYPTO_siv128_copy_ctx(sctx_out, sctx);
 
     default:

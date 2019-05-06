@@ -31,7 +31,7 @@ static EVP_MAC_IMPL *gmac_new(void)
 {
     EVP_MAC_IMPL *gctx;
 
-    if ((gctx = OPENSSL_zalloc(sizeof(*gctx))) == NULL
+    if ((gctx = (EVP_MAC_IMPL *) OPENSSL_zalloc(sizeof(*gctx))) == NULL
         || (gctx->ctx = EVP_CIPHER_CTX_new()) == NULL) {
         gmac_free(gctx);
         return NULL;
@@ -139,7 +139,7 @@ static int gmac_ctrl_int(EVP_MAC_IMPL *gctx, int cmd, ...)
 
 static int gmac_ctrl_str_cb(void *gctx, int cmd, void *buf, size_t buflen)
 {
-    return gmac_ctrl_int(gctx, cmd, buf, buflen);
+    return gmac_ctrl_int((EVP_MAC_IMPL *) gctx, cmd, buf, buflen);
 }
 
 static int gmac_ctrl_str(EVP_MAC_IMPL *gctx, const char *type,

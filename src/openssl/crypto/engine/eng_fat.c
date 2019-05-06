@@ -48,7 +48,7 @@ int ENGINE_set_default(ENGINE *e, unsigned int flags)
 
 static int int_def_cb(const char *alg, int len, void *arg)
 {
-    unsigned int *pflags = arg;
+    unsigned int *pflags = (unsigned int *) arg;
     if (alg == NULL)
         return 0;
     if (strncmp(alg, "ALL", len) == 0)

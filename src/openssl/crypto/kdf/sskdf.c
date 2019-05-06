@@ -161,7 +161,7 @@ static int kmac_init(EVP_MAC_CTX *ctx, const unsigned char *custom,
      * alloc a buffer for this case.
      */
     if (kmac_out_len > EVP_MAX_MD_SIZE) {
-        *out = OPENSSL_zalloc(kmac_out_len);
+        *out = (unsigned char*) OPENSSL_zalloc(kmac_out_len);
         if (*out == NULL)
             return 0;
     }
@@ -261,7 +261,7 @@ static EVP_KDF_IMPL *sskdf_new(void)
 {
     EVP_KDF_IMPL *impl;
 
-    if ((impl = OPENSSL_zalloc(sizeof(*impl))) == NULL)
+    if ((impl = (EVP_KDF_IMPL *) OPENSSL_zalloc(sizeof(*impl))) == NULL)
         KDFerr(KDF_F_SSKDF_NEW, ERR_R_MALLOC_FAILURE);
     return impl;
 }
@@ -291,7 +291,7 @@ static int sskdf_set_buffer(va_list args, unsigned char **out, size_t *out_len)
         return 1;
 
     OPENSSL_free(*out);
-    *out = OPENSSL_memdup(p, len);
+    *out = (unsigned char*) OPENSSL_memdup(p, len);
     if (*out == NULL)
         return 0;
 
@@ -448,7 +448,7 @@ static int sskdf_derive(EVP_KDF_IMPL *impl, unsigned char *key, size_t keylen)
         }
         /* If no salt is set then use a default_salt of zeros */
         if (impl->salt == NULL || impl->salt_len <= 0) {
-            impl->salt = OPENSSL_zalloc(default_salt_len);
+            impl->salt = (unsigned char*) OPENSSL_zalloc(default_salt_len);
             if (impl->salt == NULL) {
                 KDFerr(KDF_F_SSKDF_DERIVE, ERR_R_MALLOC_FAILURE);
                 return 0;

@@ -21,7 +21,7 @@
 
 SCT *SCT_new(void)
 {
-    SCT *sct = OPENSSL_zalloc(sizeof(*sct));
+    SCT *sct = (SCT *) OPENSSL_zalloc(sizeof(*sct));
 
     if (sct == NULL) {
         CTerr(CT_F_SCT_NEW, ERR_R_MALLOC_FAILURE);
@@ -104,7 +104,7 @@ int SCT_set1_log_id(SCT *sct, const unsigned char *log_id, size_t log_id_len)
     sct->validation_status = SCT_VALIDATION_STATUS_NOT_SET;
 
     if (log_id != NULL && log_id_len > 0) {
-        sct->log_id = OPENSSL_memdup(log_id, log_id_len);
+        sct->log_id = (unsigned char*) OPENSSL_memdup(log_id, log_id_len);
         if (sct->log_id == NULL) {
             CTerr(CT_F_SCT_SET1_LOG_ID, ERR_R_MALLOC_FAILURE);
             return 0;
@@ -156,7 +156,7 @@ int SCT_set1_extensions(SCT *sct, const unsigned char *ext, size_t ext_len)
     sct->validation_status = SCT_VALIDATION_STATUS_NOT_SET;
 
     if (ext != NULL && ext_len > 0) {
-        sct->ext = OPENSSL_memdup(ext, ext_len);
+        sct->ext = (unsigned char*) OPENSSL_memdup(ext, ext_len);
         if (sct->ext == NULL) {
             CTerr(CT_F_SCT_SET1_EXTENSIONS, ERR_R_MALLOC_FAILURE);
             return 0;
@@ -182,7 +182,7 @@ int SCT_set1_signature(SCT *sct, const unsigned char *sig, size_t sig_len)
     sct->validation_status = SCT_VALIDATION_STATUS_NOT_SET;
 
     if (sig != NULL && sig_len > 0) {
-        sct->sig = OPENSSL_memdup(sig, sig_len);
+        sct->sig = (unsigned char*) OPENSSL_memdup(sig, sig_len);
         if (sct->sig == NULL) {
             CTerr(CT_F_SCT_SET1_SIGNATURE, ERR_R_MALLOC_FAILURE);
             return 0;

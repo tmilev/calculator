@@ -22,7 +22,7 @@
 
 SCT_CTX *SCT_CTX_new(void)
 {
-    SCT_CTX *sctx = OPENSSL_zalloc(sizeof(*sctx));
+    SCT_CTX *sctx = (SCT_CTX *) OPENSSL_zalloc(sizeof(*sctx));
 
     if (sctx == NULL)
         CTerr(CT_F_SCT_CTX_NEW, ERR_R_MALLOC_FAILURE);
@@ -203,7 +203,7 @@ __owur static int ct_public_key_hash(X509_PUBKEY *pkey, unsigned char **hash,
     if (*hash != NULL && *hash_len >= SHA256_DIGEST_LENGTH) {
         md = *hash;
     } else {
-        md = OPENSSL_malloc(SHA256_DIGEST_LENGTH);
+        md = (unsigned char*) OPENSSL_malloc(SHA256_DIGEST_LENGTH);
         if (md == NULL)
             goto err;
     }

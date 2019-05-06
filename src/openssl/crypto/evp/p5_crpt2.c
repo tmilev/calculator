@@ -91,7 +91,7 @@ int PKCS5_v2_PBE_keyivgen(EVP_CIPHER_CTX *ctx, const char *pass, int passlen,
 
     int rv = 0;
 
-    pbe2 = ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(PBE2PARAM), param);
+    pbe2 = (PBE2PARAM *) ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(PBE2PARAM), param);
     if (pbe2 == NULL) {
         EVPerr(EVP_F_PKCS5_V2_PBE_KEYIVGEN, EVP_R_DECODE_ERROR);
         goto err;
@@ -150,7 +150,7 @@ int PKCS5_v2_PBKDF2_keyivgen(EVP_CIPHER_CTX *ctx, const char *pass,
 
     /* Decode parameter */
 
-    kdf = ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(PBKDF2PARAM), param);
+    kdf = (PBKDF2PARAM *) ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(PBKDF2PARAM), param);
 
     if (kdf == NULL) {
         EVPerr(EVP_F_PKCS5_V2_PBKDF2_KEYIVGEN, EVP_R_DECODE_ERROR);

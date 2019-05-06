@@ -390,8 +390,8 @@ static int ec_asn1_group2curve(const EC_GROUP *group, X9_62_CURVE *curve)
      * definition of how to encode the field elements.
      */
     len = ((size_t)EC_GROUP_get_degree(group) + 7) / 8;
-    if ((a_buf = OPENSSL_malloc(len)) == NULL
-        || (b_buf = OPENSSL_malloc(len)) == NULL) {
+    if ((a_buf = (unsigned char *) OPENSSL_malloc(len)) == NULL
+        || (b_buf = (unsigned char *) OPENSSL_malloc(len)) == NULL) {
         ECerr(EC_F_EC_ASN1_GROUP2CURVE, ERR_R_MALLOC_FAILURE);
         goto err;
     }
@@ -733,7 +733,7 @@ EC_GROUP *EC_GROUP_new_from_ecparameters(const ECPARAMETERS *params)
     /* extract seed (optional) */
     if (params->curve->seed != NULL) {
         OPENSSL_free(ret->seed);
-        if ((ret->seed = OPENSSL_malloc(params->curve->seed->length)) == NULL) {
+        if ((ret->seed = (unsigned char *) OPENSSL_malloc(params->curve->seed->length)) == NULL) {
             ECerr(EC_F_EC_GROUP_NEW_FROM_ECPARAMETERS, ERR_R_MALLOC_FAILURE);
             goto err;
         }
@@ -1117,7 +1117,7 @@ int i2o_ECPublicKey(const EC_KEY *a, unsigned char **out)
         return buf_len;
 
     if (*out == NULL) {
-        if ((*out = OPENSSL_malloc(buf_len)) == NULL) {
+        if ((*out = (unsigned char *) OPENSSL_malloc(buf_len)) == NULL) {
             ECerr(EC_F_I2O_ECPUBLICKEY, ERR_R_MALLOC_FAILURE);
             return 0;
         }
@@ -1148,7 +1148,7 @@ IMPLEMENT_ASN1_ENCODE_FUNCTIONS_fname(ECDSA_SIG, ECDSA_SIG, ECDSA_SIG)
 
 ECDSA_SIG *ECDSA_SIG_new(void)
 {
-    ECDSA_SIG *sig = OPENSSL_zalloc(sizeof(*sig));
+    ECDSA_SIG *sig = (ECDSA_SIG *) OPENSSL_zalloc(sizeof(*sig));
     if (sig == NULL)
         ECerr(EC_F_ECDSA_SIG_NEW, ERR_R_MALLOC_FAILURE);
     return sig;

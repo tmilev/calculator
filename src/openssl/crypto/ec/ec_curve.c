@@ -3252,7 +3252,7 @@ int ec_curve_nid_from_params(const EC_GROUP *group)
         param_len = len;
 
     /* Allocate space to store the padded data for (p, a, b, x, y, order)  */
-    param_bytes = OPENSSL_malloc(param_len * NUM_BN_FIELDS);
+    param_bytes = (unsigned char*) OPENSSL_malloc(param_len * NUM_BN_FIELDS);
     if (param_bytes == NULL)
         goto end;
 

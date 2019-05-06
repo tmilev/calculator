@@ -47,7 +47,7 @@ OSSL_CRMF_PBMPARAMETER *OSSL_CRMF_pbmp_new(size_t slen, int owfnid,
      * of the MAC process.  The salt SHOULD be at least 8 octets (64
      * bits) long.
      */
-    if ((salt = OPENSSL_malloc(slen)) == NULL) {
+    if ((salt = (unsigned char*) OPENSSL_malloc(slen)) == NULL) {
         CRMFerr(CRMF_F_OSSL_CRMF_PBMP_NEW, ERR_R_MALLOC_FAILURE);
         goto err;
     }
@@ -137,7 +137,7 @@ int OSSL_CRMF_pbm_new(const OSSL_CRMF_PBMPARAMETER *pbmp,
         CRMFerr(CRMF_F_OSSL_CRMF_PBM_NEW, CRMF_R_NULL_ARGUMENT);
         goto err;
     }
-    if ((mac_res = OPENSSL_malloc(EVP_MAX_MD_SIZE)) == NULL) {
+    if ((mac_res = (unsigned char*) OPENSSL_malloc(EVP_MAX_MD_SIZE)) == NULL) {
         CRMFerr(CRMF_F_OSSL_CRMF_PBM_NEW, ERR_R_MALLOC_FAILURE);
         goto err;
     }

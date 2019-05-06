@@ -188,7 +188,7 @@ static int kek_unwrap_key(unsigned char *out, size_t *outlen,
         /* Invalid size */
         return 0;
     }
-    if ((tmp = OPENSSL_malloc(inlen)) == NULL) {
+    if ((tmp = (unsigned char *) OPENSSL_malloc(inlen)) == NULL) {
         CMSerr(CMS_F_KEK_UNWRAP_KEY, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -301,7 +301,7 @@ int cms_RecipientInfo_pwri_crypt(const CMS_ContentInfo *cms, CMS_RecipientInfo *
         return 0;
     }
 
-    kekalg = ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(X509_ALGOR),
+    kekalg = (X509_ALGOR*) ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(X509_ALGOR),
                                        algtmp->parameter);
 
     if (kekalg == NULL) {
@@ -350,7 +350,7 @@ int cms_RecipientInfo_pwri_crypt(const CMS_ContentInfo *cms, CMS_RecipientInfo *
         if (!kek_wrap_key(NULL, &keylen, ec->key, ec->keylen, kekctx))
             goto err;
 
-        key = OPENSSL_malloc(keylen);
+        key = (unsigned char*) OPENSSL_malloc(keylen);
 
         if (key == NULL)
             goto err;
@@ -360,7 +360,7 @@ int cms_RecipientInfo_pwri_crypt(const CMS_ContentInfo *cms, CMS_RecipientInfo *
         pwri->encryptedKey->data = key;
         pwri->encryptedKey->length = keylen;
     } else {
-        key = OPENSSL_malloc(pwri->encryptedKey->length);
+        key = (unsigned char*) OPENSSL_malloc(pwri->encryptedKey->length);
 
         if (key == NULL) {
             CMSerr(CMS_F_CMS_RECIPIENTINFO_PWRI_CRYPT, ERR_R_MALLOC_FAILURE);

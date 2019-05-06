@@ -167,7 +167,7 @@ int asn1_enc_save(ASN1_VALUE **pval, const unsigned char *in, int inlen,
         return 1;
 
     OPENSSL_free(enc->enc);
-    if ((enc->enc = OPENSSL_malloc(inlen)) == NULL) {
+    if ((enc->enc = (unsigned char *) OPENSSL_malloc(inlen)) == NULL) {
         ASN1err(ASN1_F_ASN1_ENC_SAVE, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -197,7 +197,7 @@ int asn1_enc_restore(int *len, unsigned char **out, const ASN1_VALUE **pval,
 /* Given an ASN1_TEMPLATE get a pointer to a field */
 ASN1_VALUE **asn1_get_field_ptr(ASN1_VALUE **pval, const ASN1_TEMPLATE *tt)
 {
-    ASN1_VALUE **pvaltmp = offset2ptr(*pval, tt->offset);
+    ASN1_VALUE **pvaltmp = (ASN1_VALUE **) offset2ptr(*pval, tt->offset);
 
     /*
      * NOTE for BOOLEAN types the field is just a plain int so we can't
@@ -210,7 +210,7 @@ ASN1_VALUE **asn1_get_field_ptr(ASN1_VALUE **pval, const ASN1_TEMPLATE *tt)
 const ASN1_VALUE **asn1_get_const_field_ptr(const ASN1_VALUE **pval,
                                             const ASN1_TEMPLATE *tt)
 {
-    return offset2ptr(*pval, tt->offset);
+    return (const ASN1_VALUE **) offset2ptr(*pval, tt->offset);
 }
 
 /*
@@ -235,7 +235,7 @@ const ASN1_TEMPLATE *asn1_do_adb(const ASN1_VALUE *val,
     adb = ASN1_ADB_ptr(tt->item);
 
     /* Get the selector field */
-    sfld = offset2ptr(val, adb->offset);
+    sfld = (const ASN1_VALUE **) offset2ptr(val, adb->offset);
 
     /* Check if NULL */
     if (*sfld == NULL) {

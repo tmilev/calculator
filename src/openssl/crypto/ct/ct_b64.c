@@ -33,7 +33,7 @@ static int ct_base64_decode(const char *in, unsigned char **out)
     }
 
     outlen = (inlen / 4) * 3;
-    outbuf = OPENSSL_malloc(outlen);
+    outbuf = (unsigned char*) OPENSSL_malloc(outlen);
     if (outbuf == NULL) {
         CTerr(CT_F_CT_BASE64_DECODE, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -79,7 +79,7 @@ SCT *SCT_new_from_base64(unsigned char version, const char *logid_base64,
      * RFC6962 section 4.1 says we "MUST NOT expect this to be 0", but we
      * can only construct SCT versions that have been defined.
      */
-    if (!SCT_set_version(sct, version)) {
+    if (!SCT_set_version(sct, (sct_version_t) version)) {
         CTerr(CT_F_SCT_NEW_FROM_BASE64, CT_R_SCT_UNSUPPORTED_VERSION);
         goto err;
     }

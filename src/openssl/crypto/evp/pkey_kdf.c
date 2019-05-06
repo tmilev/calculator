@@ -29,14 +29,14 @@ static int pkey_kdf_init(EVP_PKEY_CTX *ctx)
 
 static void pkey_kdf_cleanup(EVP_PKEY_CTX *ctx)
 {
-    EVP_KDF_CTX *kctx = ctx->data;
+    EVP_KDF_CTX *kctx = (EVP_KDF_CTX *) ctx->data;
 
     EVP_KDF_CTX_free(kctx);
 }
 
 static int pkey_kdf_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
 {
-    EVP_KDF_CTX *kctx = ctx->data;
+    EVP_KDF_CTX *kctx = (EVP_KDF_CTX *) ctx->data;
     uint64_t u64_value;
     int cmd;
     int ret;
@@ -124,7 +124,7 @@ static int pkey_kdf_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
 static int pkey_kdf_ctrl_str(EVP_PKEY_CTX *ctx, const char *type,
                              const char *value)
 {
-    EVP_KDF_CTX *kctx = ctx->data;
+    EVP_KDF_CTX *kctx = (EVP_KDF_CTX *) ctx->data;
 
     if (strcmp(type, "md") == 0)
         return EVP_KDF_ctrl_str(kctx, "digest", value);
@@ -133,7 +133,7 @@ static int pkey_kdf_ctrl_str(EVP_PKEY_CTX *ctx, const char *type,
 
 static int pkey_kdf_derive_init(EVP_PKEY_CTX *ctx)
 {
-    EVP_KDF_CTX *kctx = ctx->data;
+    EVP_KDF_CTX *kctx = (EVP_KDF_CTX *) ctx->data;
 
     EVP_KDF_reset(kctx);
     return 1;
@@ -146,7 +146,7 @@ static int pkey_kdf_derive_init(EVP_PKEY_CTX *ctx)
 static int pkey_kdf_derive(EVP_PKEY_CTX *ctx, unsigned char *key,
                            size_t *keylen)
 {
-    EVP_KDF_CTX *kctx = ctx->data;
+    EVP_KDF_CTX *kctx = (EVP_KDF_CTX *) ctx->data;
     size_t outlen = EVP_KDF_size(kctx);
 
     if (outlen == 0 || outlen == SIZE_MAX) {

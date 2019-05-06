@@ -504,9 +504,10 @@ static int chacha20_poly1305_ctrl(EVP_CIPHER_CTX *ctx, int type, int arg,
 
     switch(type) {
     case EVP_CTRL_INIT:
-        if (actx == NULL)
-            actx = ctx->cipher_data
-                 = OPENSSL_zalloc(sizeof(*actx) + Poly1305_ctx_size());
+        if (actx == NULL) {
+          ctx->cipher_data = OPENSSL_zalloc(sizeof(*actx) + Poly1305_ctx_size());
+          actx = (EVP_CHACHA_AEAD_CTX *) ctx->cipher_data;
+        }
         if (actx == NULL) {
             EVPerr(EVP_F_CHACHA20_POLY1305_CTRL, EVP_R_INITIALIZATION_ERROR);
             return 0;
@@ -571,7 +572,7 @@ static int chacha20_poly1305_ctrl(EVP_CIPHER_CTX *ctx, int type, int arg,
             return 0;
         {
             unsigned int len;
-            unsigned char *aad = ptr;
+            unsigned char *aad = (unsigned char *) ptr;
 
             memcpy(actx->tls_aad, ptr, EVP_AEAD_TLS1_AAD_LEN);
             len = aad[EVP_AEAD_TLS1_AAD_LEN - 2] << 8 |

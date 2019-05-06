@@ -130,7 +130,7 @@ struct doall_cipher {
 
 static void do_all_cipher_fn(const OBJ_NAME *nm, void *arg)
 {
-    struct doall_cipher *dc = arg;
+    struct doall_cipher *dc = (doall_cipher *) arg;
     if (nm->alias)
         dc->fn(NULL, nm->name, nm->data, dc->arg);
     else
@@ -173,7 +173,7 @@ struct doall_md {
 
 static void do_all_md_fn(const OBJ_NAME *nm, void *arg)
 {
-    struct doall_md *dc = arg;
+    struct doall_md *dc = (doall_md *) arg;
     if (nm->alias)
         dc->fn(NULL, nm->name, nm->data, dc->arg);
     else
@@ -215,7 +215,7 @@ struct doall_mac {
 
 static void do_all_mac_fn(const OBJ_NAME *nm, void *arg)
 {
-    struct doall_mac *dc = arg;
+    struct doall_mac *dc = (doall_mac *) arg;
 
     if (nm->alias)
         dc->fn(NULL, nm->name, nm->data, dc->arg);

@@ -103,7 +103,7 @@ int OBJ_NAME_new_index(unsigned long (*hash_func) (const char *),
     names_type_num++;
     for (i = sk_NAME_FUNCS_num(name_funcs_stack); i < names_type_num; i++) {
         CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_DISABLE);
-        name_funcs = OPENSSL_zalloc(sizeof(*name_funcs));
+        name_funcs = (NAME_FUNCS *) OPENSSL_zalloc(sizeof(*name_funcs));
         CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ENABLE);
         if (name_funcs == NULL) {
             OBJerr(OBJ_F_OBJ_NAME_NEW_INDEX, ERR_R_MALLOC_FAILURE);
@@ -216,7 +216,7 @@ int OBJ_NAME_add(const char *name, int type, const char *data)
     alias = type & OBJ_NAME_ALIAS;
     type &= ~OBJ_NAME_ALIAS;
 
-    onp = OPENSSL_malloc(sizeof(*onp));
+    onp = (OBJ_NAME *) OPENSSL_malloc(sizeof(*onp));
     if (onp == NULL) {
         /* ERROR */
         goto unlock;
@@ -326,7 +326,7 @@ struct doall_sorted {
 
 static void do_all_sorted_fn(const OBJ_NAME *name, void *d_)
 {
-    struct doall_sorted *d = d_;
+    struct doall_sorted *d = (doall_sorted *) d_;
 
     if (name->type != d->type)
         return;
@@ -336,8 +336,8 @@ static void do_all_sorted_fn(const OBJ_NAME *name, void *d_)
 
 static int do_all_sorted_cmp(const void *n1_, const void *n2_)
 {
-    const OBJ_NAME *const *n1 = n1_;
-    const OBJ_NAME *const *n2 = n2_;
+    const OBJ_NAME *const *n1 = (OBJ_NAME *const*) n1_;
+    const OBJ_NAME *const *n2 = (OBJ_NAME *const*) n2_;
 
     return strcmp((*n1)->name, (*n2)->name);
 }
@@ -350,7 +350,7 @@ void OBJ_NAME_do_all_sorted(int type,
     int n;
 
     d.type = type;
-    d.names =
+    d.names = (const OBJ_NAME**)
         OPENSSL_malloc(sizeof(*d.names) * lh_OBJ_NAME_num_items(names_lh));
     /* Really should return an error if !d.names...but its a void function! */
     if (d.names != NULL) {

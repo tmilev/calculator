@@ -159,7 +159,7 @@ OCSP_BASICRESP *OCSP_response_get1_basic(OCSP_RESPONSE *resp)
         return NULL;
     }
 
-    return ASN1_item_unpack(rb->response, ASN1_ITEM_rptr(OCSP_BASICRESP));
+    return (OCSP_BASICRESP *) ASN1_item_unpack(rb->response, ASN1_ITEM_rptr(OCSP_BASICRESP));
 }
 
 const ASN1_OCTET_STRING *OCSP_resp_get0_signature(const OCSP_BASICRESP *bs)

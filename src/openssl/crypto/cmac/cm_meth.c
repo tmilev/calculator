@@ -29,7 +29,7 @@ static EVP_MAC_IMPL *cmac_new(void)
 {
     EVP_MAC_IMPL *cctx;
 
-    if ((cctx = OPENSSL_zalloc(sizeof(*cctx))) == NULL
+    if ((cctx = (EVP_MAC_IMPL*) OPENSSL_zalloc(sizeof(*cctx))) == NULL
         || (cctx->ctx = CMAC_CTX_new()) == NULL) {
         OPENSSL_free(cctx);
         cctx = NULL;
@@ -126,7 +126,7 @@ static int cmac_ctrl_int(EVP_MAC_IMPL *hctx, int cmd, ...)
 
 static int cmac_ctrl_str_cb(void *hctx, int cmd, void *buf, size_t buflen)
 {
-    return cmac_ctrl_int(hctx, cmd, buf, buflen);
+    return cmac_ctrl_int((EVP_MAC_IMPL*) hctx, cmd, buf, buflen);
 }
 
 static int cmac_ctrl_str(EVP_MAC_IMPL *cctx, const char *type,

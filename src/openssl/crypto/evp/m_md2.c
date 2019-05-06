@@ -22,17 +22,17 @@
 
 static int init(EVP_MD_CTX *ctx)
 {
-    return MD2_Init(EVP_MD_CTX_md_data(ctx));
+    return MD2_Init((MD2_CTX*) EVP_MD_CTX_md_data(ctx));
 }
 
 static int update(EVP_MD_CTX *ctx, const void *data, size_t count)
 {
-    return MD2_Update(EVP_MD_CTX_md_data(ctx), data, count);
+    return MD2_Update((MD2_CTX*) EVP_MD_CTX_md_data(ctx), (unsigned char*) data, count);
 }
 
 static int final(EVP_MD_CTX *ctx, unsigned char *md)
 {
-    return MD2_Final(md, EVP_MD_CTX_md_data(ctx));
+    return MD2_Final(md, (MD2_CTX*) EVP_MD_CTX_md_data(ctx));
 }
 
 static const EVP_MD md2_md = {

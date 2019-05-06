@@ -84,7 +84,7 @@ BIO *cms_EncryptedContent_init_bio(CMS_EncryptedContentInfo *ec)
     tkeylen = EVP_CIPHER_CTX_key_length(ctx);
     /* Generate random session key */
     if (!enc || !ec->key) {
-        tkey = OPENSSL_malloc(tkeylen);
+        tkey = (unsigned char*) OPENSSL_malloc(tkeylen);
         if (tkey == NULL) {
             CMSerr(CMS_F_CMS_ENCRYPTEDCONTENT_INIT_BIO, ERR_R_MALLOC_FAILURE);
             goto err;
@@ -168,7 +168,7 @@ int cms_EncryptedContent_init(CMS_EncryptedContentInfo *ec,
 {
     ec->cipher = cipher;
     if (key) {
-        if ((ec->key = OPENSSL_malloc(keylen)) == NULL) {
+        if ((ec->key = (unsigned char*) OPENSSL_malloc(keylen)) == NULL) {
             CMSerr(CMS_F_CMS_ENCRYPTEDCONTENT_INIT, ERR_R_MALLOC_FAILURE);
             return 0;
         }

@@ -19,17 +19,17 @@
 
 static int init(EVP_MD_CTX *ctx)
 {
-    return SHA1_Init(EVP_MD_CTX_md_data(ctx));
+    return SHA1_Init((SHA_CTX*) EVP_MD_CTX_md_data(ctx));
 }
 
 static int update(EVP_MD_CTX *ctx, const void *data, size_t count)
 {
-    return SHA1_Update(EVP_MD_CTX_md_data(ctx), data, count);
+    return SHA1_Update((SHA_CTX*) EVP_MD_CTX_md_data(ctx), data, count);
 }
 
 static int final(EVP_MD_CTX *ctx, unsigned char *md)
 {
-    return SHA1_Final(md, EVP_MD_CTX_md_data(ctx));
+    return SHA1_Final(md, (SHA_CTX*) EVP_MD_CTX_md_data(ctx));
 }
 
 static int ctrl(EVP_MD_CTX *ctx, int cmd, int mslen, void *ms)
@@ -45,7 +45,7 @@ static int ctrl(EVP_MD_CTX *ctx, int cmd, int mslen, void *ms)
     if (ctx == NULL)
         return 0;
 
-    sha1 = EVP_MD_CTX_md_data(ctx);
+    sha1 = (SHA_CTX*) EVP_MD_CTX_md_data(ctx);
 
     /* SSLv3 client auth handling: see RFC-6101 5.6.8 */
     if (mslen != 48)
@@ -113,32 +113,32 @@ const EVP_MD *EVP_sha1(void)
 
 static int init224(EVP_MD_CTX *ctx)
 {
-    return SHA224_Init(EVP_MD_CTX_md_data(ctx));
+    return SHA224_Init((SHA256_CTX *) EVP_MD_CTX_md_data(ctx));
 }
 
 static int update224(EVP_MD_CTX *ctx, const void *data, size_t count)
 {
-    return SHA224_Update(EVP_MD_CTX_md_data(ctx), data, count);
+    return SHA224_Update((SHA256_CTX *) EVP_MD_CTX_md_data(ctx), data, count);
 }
 
 static int final224(EVP_MD_CTX *ctx, unsigned char *md)
 {
-    return SHA224_Final(md, EVP_MD_CTX_md_data(ctx));
+    return SHA224_Final(md, (SHA256_CTX *) EVP_MD_CTX_md_data(ctx));
 }
 
 static int init256(EVP_MD_CTX *ctx)
 {
-    return SHA256_Init(EVP_MD_CTX_md_data(ctx));
+    return SHA256_Init((SHA256_CTX *) EVP_MD_CTX_md_data(ctx));
 }
 
 static int update256(EVP_MD_CTX *ctx, const void *data, size_t count)
 {
-    return SHA256_Update(EVP_MD_CTX_md_data(ctx), data, count);
+    return SHA256_Update((SHA256_CTX *) EVP_MD_CTX_md_data(ctx), data, count);
 }
 
 static int final256(EVP_MD_CTX *ctx, unsigned char *md)
 {
-    return SHA256_Final(md, EVP_MD_CTX_md_data(ctx));
+    return SHA256_Final(md, (SHA256_CTX *) EVP_MD_CTX_md_data(ctx));
 }
 
 static const EVP_MD sha224_md = {
@@ -181,43 +181,43 @@ const EVP_MD *EVP_sha256(void)
 
 static int init512_224(EVP_MD_CTX *ctx)
 {
-    return sha512_224_init(EVP_MD_CTX_md_data(ctx));
+    return sha512_224_init((SHA512_CTX*) EVP_MD_CTX_md_data(ctx));
 }
 
 static int init512_256(EVP_MD_CTX *ctx)
 {
-    return sha512_256_init(EVP_MD_CTX_md_data(ctx));
+    return sha512_256_init((SHA512_CTX*) EVP_MD_CTX_md_data(ctx));
 }
 
 static int init384(EVP_MD_CTX *ctx)
 {
-    return SHA384_Init(EVP_MD_CTX_md_data(ctx));
+    return SHA384_Init((SHA512_CTX*) EVP_MD_CTX_md_data(ctx));
 }
 
 static int update384(EVP_MD_CTX *ctx, const void *data, size_t count)
 {
-    return SHA384_Update(EVP_MD_CTX_md_data(ctx), data, count);
+    return SHA384_Update((SHA512_CTX*) EVP_MD_CTX_md_data(ctx), data, count);
 }
 
 static int final384(EVP_MD_CTX *ctx, unsigned char *md)
 {
-    return SHA384_Final(md, EVP_MD_CTX_md_data(ctx));
+    return SHA384_Final(md, (SHA512_CTX*) EVP_MD_CTX_md_data(ctx));
 }
 
 static int init512(EVP_MD_CTX *ctx)
 {
-    return SHA512_Init(EVP_MD_CTX_md_data(ctx));
+    return SHA512_Init((SHA512_CTX*) EVP_MD_CTX_md_data(ctx));
 }
 
 /* See comment in SHA224/256 section */
 static int update512(EVP_MD_CTX *ctx, const void *data, size_t count)
 {
-    return SHA512_Update(EVP_MD_CTX_md_data(ctx), data, count);
+    return SHA512_Update((SHA512_CTX*) EVP_MD_CTX_md_data(ctx), data, count);
 }
 
 static int final512(EVP_MD_CTX *ctx, unsigned char *md)
 {
-    return SHA512_Final(md, EVP_MD_CTX_md_data(ctx));
+    return SHA512_Final(md, (SHA512_CTX*) EVP_MD_CTX_md_data(ctx));
 }
 
 static const EVP_MD sha512_224_md = {

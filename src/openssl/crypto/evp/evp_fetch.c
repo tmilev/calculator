@@ -24,7 +24,7 @@ static int default_method_store_index = -1;
 
 static void default_method_store_free(void *vstore)
 {
-    ossl_method_store_free(vstore);
+    ossl_method_store_free((OSSL_METHOD_STORE *) vstore);
 }
 
 static void *default_method_store_new(void)
@@ -76,7 +76,7 @@ static void *alloc_tmp_method_store(void)
  static void dealloc_tmp_method_store(void *store)
 {
     if (store != NULL)
-        ossl_method_store_free(store);
+        ossl_method_store_free((OSSL_METHOD_STORE *) store);
 }
 
 static OSSL_METHOD_STORE *get_default_method_store(OPENSSL_CTX *libctx)
@@ -84,20 +84,20 @@ static OSSL_METHOD_STORE *get_default_method_store(OPENSSL_CTX *libctx)
     if (!RUN_ONCE(&default_method_store_init_flag,
                   do_default_method_store_init))
         return NULL;
-    return openssl_ctx_get_data(libctx, default_method_store_index);
+    return (OSSL_METHOD_STORE *) openssl_ctx_get_data(libctx, default_method_store_index);
 }
 
 static void *get_method_from_store(OPENSSL_CTX *libctx, void *store,
                                    const char *propquery, void *data)
 {
-    struct method_data_st *methdata = data;
+    struct method_data_st* methdata = (method_data_st*) data;
     void *method = NULL;
 
     if (store == NULL
         && (store = get_default_method_store(libctx)) == NULL)
         return NULL;
 
-    (void)ossl_method_store_fetch(store, methdata->nid, propquery, &method);
+    (void)ossl_method_store_fetch((OSSL_METHOD_STORE *) store, methdata->nid, propquery, &method);
 
     if (method != NULL
         && !methdata->refcnt_up_method(method)) {
@@ -110,7 +110,7 @@ static int put_method_in_store(OPENSSL_CTX *libctx, void *store,
                                const char *propdef,
                                void *method, void *data)
 {
-    struct method_data_st *methdata = data;
+    struct method_data_st *methdata = (method_data_st *) data;
     int nid = methdata->nid_method(method);
 
     if (nid == NID_undef)
@@ -121,7 +121,7 @@ static int put_method_in_store(OPENSSL_CTX *libctx, void *store,
         return 0;
 
     if (methdata->refcnt_up_method(method)
-        && ossl_method_store_add(store, nid, propdef, method,
+        && ossl_method_store_add((OSSL_METHOD_STORE*) store, nid, propdef, method,
                                  methdata->destruct_method))
         return 1;
     return 0;
@@ -131,7 +131,7 @@ static void *construct_method(const char *algorithm_name,
                               const OSSL_DISPATCH *fns, OSSL_PROVIDER *prov,
                               void *data)
 {
-    struct method_data_st *methdata = data;
+    struct method_data_st *methdata = (method_data_st *) data;
     void *method = NULL;
     int nid = OBJ_sn2nid(algorithm_name);
 
@@ -160,7 +160,7 @@ static void *construct_method(const char *algorithm_name,
 
 static void destruct_method(void *method, void *data)
 {
-    struct method_data_st *methdata = data;
+    struct method_data_st *methdata = (method_data_st *) data;
 
     methdata->destruct_method(method);
 }

@@ -40,7 +40,7 @@ int EVP_OpenInit(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
     }
 
     size = EVP_PKEY_size(priv);
-    key = OPENSSL_malloc(size);
+    key = (unsigned char*) OPENSSL_malloc(size);
     if (key == NULL) {
         /* ERROR */
         EVPerr(EVP_F_EVP_OPENINIT, ERR_R_MALLOC_FAILURE);

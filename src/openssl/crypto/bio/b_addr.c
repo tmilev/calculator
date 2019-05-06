@@ -37,7 +37,7 @@ static CRYPTO_ONCE bio_lookup_init = CRYPTO_ONCE_STATIC_INIT;
 
 BIO_ADDR *BIO_ADDR_new(void)
 {
-    BIO_ADDR *ret = OPENSSL_zalloc(sizeof(*ret));
+    BIO_ADDR *ret = (BIO_ADDR *) OPENSSL_zalloc(sizeof(*ret));
 
     if (ret == NULL) {
         BIOerr(BIO_F_BIO_ADDR_NEW, ERR_R_MALLOC_FAILURE);
@@ -95,7 +95,7 @@ int BIO_ADDR_rawmake(BIO_ADDR *ap, int family,
             return 0;
         memset(&ap->s_un, 0, sizeof(ap->s_un));
         ap->s_un.sun_family = family;
-        strncpy(ap->s_un.sun_path, where, sizeof(ap->s_un.sun_path) - 1);
+        strncpy(ap->s_un.sun_path, (const char*) where, sizeof(ap->s_un.sun_path) - 1);
         return 1;
     }
 #endif
@@ -565,7 +565,7 @@ static int addrinfo_wrap(int family, int socktype,
                          unsigned short port,
                          BIO_ADDRINFO **bai)
 {
-    if ((*bai = OPENSSL_zalloc(sizeof(**bai))) == NULL) {
+    if ((*bai = (BIO_ADDRINFO *) OPENSSL_zalloc(sizeof(**bai))) == NULL) {
         BIOerr(BIO_F_ADDRINFO_WRAP, ERR_R_MALLOC_FAILURE);
         return 0;
     }

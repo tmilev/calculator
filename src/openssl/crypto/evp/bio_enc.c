@@ -65,7 +65,7 @@ static int enc_new(BIO *bi)
 {
     BIO_ENC_CTX *ctx;
 
-    if ((ctx = OPENSSL_zalloc(sizeof(*ctx))) == NULL) {
+    if ((ctx = (BIO_ENC_CTX *) OPENSSL_zalloc(sizeof(*ctx))) == NULL) {
         EVPerr(EVP_F_ENC_NEW, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -91,7 +91,7 @@ static int enc_free(BIO *a)
     if (a == NULL)
         return 0;
 
-    b = BIO_get_data(a);
+    b = (BIO_ENC_CTX *) BIO_get_data(a);
     if (b == NULL)
         return 0;
 
@@ -111,7 +111,7 @@ static int enc_read(BIO *b, char *out, int outl)
 
     if (out == NULL)
         return 0;
-    ctx = BIO_get_data(b);
+    ctx = (BIO_ENC_CTX *) BIO_get_data(b);
 
     next = BIO_next(b);
     if ((ctx == NULL) || (next == NULL))
@@ -237,7 +237,7 @@ static int enc_write(BIO *b, const char *in, int inl)
     BIO_ENC_CTX *ctx;
     BIO *next;
 
-    ctx = BIO_get_data(b);
+    ctx = (BIO_ENC_CTX *) BIO_get_data(b);
     next = BIO_next(b);
     if ((ctx == NULL) || (next == NULL))
         return 0;
@@ -300,7 +300,7 @@ static long enc_ctrl(BIO *b, int cmd, long num, void *ptr)
     EVP_CIPHER_CTX **c_ctx;
     BIO *next;
 
-    ctx = BIO_get_data(b);
+    ctx = (BIO_ENC_CTX *) BIO_get_data(b);
     next = BIO_next(b);
     if (ctx == NULL)
         return 0;
@@ -370,8 +370,8 @@ static long enc_ctrl(BIO *b, int cmd, long num, void *ptr)
         BIO_set_init(b, 1);
         break;
     case BIO_CTRL_DUP:
-        dbio = (BIO *)ptr;
-        dctx = BIO_get_data(dbio);
+        dbio = (BIO *) ptr;
+        dctx = (BIO_ENC_CTX *) BIO_get_data(dbio);
         dctx->cipher = EVP_CIPHER_CTX_new();
         if (dctx->cipher == NULL)
             return 0;
@@ -407,7 +407,7 @@ int BIO_set_cipher(BIO *b, const EVP_CIPHER *c, const unsigned char *k,
     BIO_ENC_CTX *ctx;
     long (*callback) (struct bio_st *, int, const char *, int, long, long);
 
-    ctx = BIO_get_data(b);
+    ctx = (BIO_ENC_CTX *) BIO_get_data(b);
     if (ctx == NULL)
         return 0;
 

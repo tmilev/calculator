@@ -82,7 +82,7 @@ SCT *o2i_SCT(SCT **psct, const unsigned char **in, size_t len)
 
     p = *in;
 
-    sct->version = *p;
+    sct->version = (sct_version_t) *p;
     if (sct->version == SCT_VERSION_V1) {
         int sig_len;
         size_t len2;
@@ -101,7 +101,7 @@ SCT *o2i_SCT(SCT **psct, const unsigned char **in, size_t len)
         }
         len -= 43;
         p++;
-        sct->log_id = BUF_memdup(p, CT_V1_HASHLEN);
+        sct->log_id = (unsigned char*) BUF_memdup(p, CT_V1_HASHLEN);
         if (sct->log_id == NULL)
             goto err;
         sct->log_id_len = CT_V1_HASHLEN;
@@ -115,7 +115,7 @@ SCT *o2i_SCT(SCT **psct, const unsigned char **in, size_t len)
             goto err;
         }
         if (len2 > 0) {
-            sct->ext = BUF_memdup(p, len2);
+            sct->ext = (unsigned char*) BUF_memdup(p, len2);
             if (sct->ext == NULL)
                 goto err;
         }
@@ -132,7 +132,7 @@ SCT *o2i_SCT(SCT **psct, const unsigned char **in, size_t len)
         *in = p + len;
     } else {
         /* If not V1 just cache encoding */
-        sct->sct = BUF_memdup(p, len);
+        sct->sct = (unsigned char*) BUF_memdup(p, len);
         if (sct->sct == NULL)
             goto err;
         sct->sct_len = len;
@@ -177,7 +177,7 @@ int i2o_SCT_signature(const SCT *sct, unsigned char **out)
             p = *out;
             *out += len;
         } else {
-            pstart = p = OPENSSL_malloc(len);
+            pstart = p = (unsigned char*) OPENSSL_malloc(len);
             if (p == NULL) {
                 CTerr(CT_F_I2O_SCT_SIGNATURE, ERR_R_MALLOC_FAILURE);
                 goto err;
@@ -224,7 +224,7 @@ int i2o_SCT(const SCT *sct, unsigned char **out)
         p = *out;
         *out += len;
     } else {
-        pstart = p = OPENSSL_malloc(len);
+        pstart = p = (unsigned char*) OPENSSL_malloc(len);
         if (p == NULL) {
             CTerr(CT_F_I2O_SCT, ERR_R_MALLOC_FAILURE);
             goto err;
@@ -330,7 +330,7 @@ int i2o_SCT_LIST(const STACK_OF(SCT) *a, unsigned char **pp)
                 CTerr(CT_F_I2O_SCT_LIST, CT_R_SCT_LIST_INVALID);
                 return -1;
             }
-            if ((*pp = OPENSSL_malloc(len)) == NULL) {
+            if ((*pp = (unsigned char*) OPENSSL_malloc(len)) == NULL) {
                 CTerr(CT_F_I2O_SCT_LIST, ERR_R_MALLOC_FAILURE);
                 return -1;
             }

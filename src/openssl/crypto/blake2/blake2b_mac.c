@@ -23,7 +23,7 @@ struct evp_mac_impl_st {
 
 static EVP_MAC_IMPL *blake2b_mac_new(void)
 {
-    EVP_MAC_IMPL *macctx = OPENSSL_zalloc(sizeof(*macctx));
+    EVP_MAC_IMPL *macctx = (EVP_MAC_IMPL *) OPENSSL_zalloc(sizeof(*macctx));
     if (macctx != NULL) {
         blake2b_param_init(&macctx->params);
         /* ctx initialization is deferred to BLAKE2b_Init() */
@@ -137,7 +137,7 @@ static int blake2b_mac_ctrl_int(EVP_MAC_IMPL *macctx, int cmd, ...)
 
 static int blake2b_mac_ctrl_str_cb(void *macctx, int cmd, void *buf, size_t buflen)
 {
-    return blake2b_mac_ctrl_int(macctx, cmd, buf, buflen);
+    return blake2b_mac_ctrl_int((EVP_MAC_IMPL*) macctx, cmd, buf, buflen);
 }
 
 static int blake2b_mac_ctrl_str(EVP_MAC_IMPL *macctx, const char *type,

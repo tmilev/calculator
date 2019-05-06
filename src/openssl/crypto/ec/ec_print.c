@@ -40,7 +40,7 @@ EC_POINT *EC_POINT_bn2point(const EC_GROUP *group,
 
     if ((buf_len = BN_num_bytes(bn)) == 0)
         return NULL;
-    if ((buf = OPENSSL_malloc(buf_len)) == NULL) {
+    if ((buf = (unsigned char*) OPENSSL_malloc(buf_len)) == NULL) {
         ECerr(EC_F_EC_POINT_BN2POINT, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
@@ -85,7 +85,7 @@ char *EC_POINT_point2hex(const EC_GROUP *group,
     if (buf_len == 0)
         return NULL;
 
-    ret = OPENSSL_malloc(buf_len * 2 + 2);
+    ret = (char*) OPENSSL_malloc(buf_len * 2 + 2);
     if (ret == NULL) {
         OPENSSL_free(buf);
         return NULL;

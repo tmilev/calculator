@@ -94,13 +94,13 @@ BIO *BIO_new_mem_buf(const void *buf, int len)
         BIOerr(BIO_F_BIO_NEW_MEM_BUF, BIO_R_NULL_PARAMETER);
         return NULL;
     }
-    sz = (len < 0) ? strlen(buf) : (size_t)len;
+    sz = (len < 0) ? strlen((char*) buf) : (size_t)len;
     if ((ret = BIO_new(BIO_s_mem())) == NULL)
         return NULL;
     bb = (BIO_BUF_MEM *)ret->ptr;
     b = bb->buf;
     /* Cast away const and trust in the MEM_RDONLY flag. */
-    b->data = (void *)buf;
+    b->data = (char*) buf;
     b->length = sz;
     b->max = sz;
     *bb->readp = *bb->buf;
@@ -112,7 +112,7 @@ BIO *BIO_new_mem_buf(const void *buf, int len)
 
 static int mem_init(BIO *bi, unsigned long flags)
 {
-    BIO_BUF_MEM *bb = OPENSSL_zalloc(sizeof(*bb));
+    BIO_BUF_MEM *bb = (BIO_BUF_MEM *) OPENSSL_zalloc(sizeof(*bb));
 
     if (bb == NULL)
         return 0;
@@ -120,7 +120,7 @@ static int mem_init(BIO *bi, unsigned long flags)
         OPENSSL_free(bb);
         return 0;
     }
-    if ((bb->readp = OPENSSL_zalloc(sizeof(*bb->readp))) == NULL) {
+    if ((bb->readp = (buf_mem_st*) OPENSSL_zalloc(sizeof(*bb->readp))) == NULL) {
         BUF_MEM_free(bb->buf);
         OPENSSL_free(bb);
         return 0;
@@ -288,7 +288,7 @@ static long mem_ctrl(BIO *b, int cmd, long num, void *ptr)
     case BIO_C_SET_BUF_MEM:
         mem_buf_free(b);
         b->shutdown = (int)num;
-        bbm->buf = ptr;
+        bbm->buf = (buf_mem_st*) ptr;
         *bbm->readp = *bbm->buf;
         break;
     case BIO_C_GET_BUF_MEM_PTR:

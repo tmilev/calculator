@@ -692,7 +692,7 @@ size_t EC_KEY_priv2buf(const EC_KEY *eckey, unsigned char **pbuf)
     len = EC_KEY_priv2oct(eckey, NULL, 0);
     if (len == 0)
         return 0;
-    if ((buf = OPENSSL_malloc(len)) == NULL) {
+    if ((buf = (unsigned char *) OPENSSL_malloc(len)) == NULL) {
         ECerr(EC_F_EC_KEY_PRIV2BUF, ERR_R_MALLOC_FAILURE);
         return 0;
     }

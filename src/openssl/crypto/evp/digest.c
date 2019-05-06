@@ -67,7 +67,7 @@ int EVP_MD_CTX_reset(EVP_MD_CTX *ctx)
 
 EVP_MD_CTX *EVP_MD_CTX_new(void)
 {
-    return OPENSSL_zalloc(sizeof(EVP_MD_CTX));
+    return (EVP_MD_CTX *) OPENSSL_zalloc(sizeof(EVP_MD_CTX));
 }
 
 void EVP_MD_CTX_free(EVP_MD_CTX *ctx)
@@ -268,17 +268,13 @@ int EVP_DigestUpdate(EVP_MD_CTX *ctx, const void *data, size_t count)
         return 1;
 
     if (ctx->digest == NULL || ctx->digest->prov == NULL)
-        goto legacy;
+        return ctx->update(ctx, data, count);
 
     if (ctx->digest->dupdate == NULL) {
         EVPerr(EVP_F_EVP_DIGESTUPDATE, EVP_R_UPDATE_ERROR);
         return 0;
     }
-    return ctx->digest->dupdate(ctx->provctx, data, count);
-
-    /* TODO(3.0): Remove legacy code below */
- legacy:
-    return ctx->update(ctx, data, count);
+    return ctx->digest->dupdate(ctx->provctx, (unsigned char*) data, count);
 }
 
 /* The caller can assume that this removes any secret data from the context */
@@ -419,7 +415,7 @@ int EVP_MD_CTX_copy_ex(EVP_MD_CTX *out, const EVP_MD_CTX *in)
 #endif
 
     if (out->digest == in->digest) {
-        tmp_buf = out->md_data;
+        tmp_buf = (unsigned char*) out->md_data;
         EVP_MD_CTX_set_flags(out, EVP_MD_CTX_FLAG_REUSE);
     } else
         tmp_buf = NULL;
@@ -579,17 +575,17 @@ static void *evp_md_from_dispatch(int mdtype, const OSSL_DISPATCH *fns,
 
 static int evp_md_upref(void *md)
 {
-    return EVP_MD_upref(md);
+    return EVP_MD_upref((EVP_MD*) md);
 }
 
 static void evp_md_free(void *md)
 {
-    EVP_MD_meth_free(md);
+    EVP_MD_meth_free((EVP_MD*) md);
 }
 
 static int evp_md_nid(void *vmd)
 {
-    EVP_MD *md = vmd;
+    EVP_MD *md = (EVP_MD*) vmd;
 
     return md->type;
 }
@@ -597,7 +593,7 @@ static int evp_md_nid(void *vmd)
 EVP_MD *EVP_MD_fetch(OPENSSL_CTX *ctx, const char *algorithm,
                      const char *properties)
 {
-    return evp_generic_fetch(ctx, OSSL_OP_DIGEST, algorithm, properties,
+    return (EVP_MD *) evp_generic_fetch(ctx, OSSL_OP_DIGEST, algorithm, properties,
                              evp_md_from_dispatch, evp_md_upref,
                              evp_md_free, evp_md_nid);
 }

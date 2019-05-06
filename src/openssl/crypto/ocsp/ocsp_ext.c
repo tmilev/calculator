@@ -259,7 +259,7 @@ static int ocsp_add1_nonce(STACK_OF(X509_EXTENSION) **exts,
     if (os.length < 0)
         return 0;
 
-    os.data = OPENSSL_malloc(os.length);
+    os.data = (unsigned char*) OPENSSL_malloc(os.length);
     if (os.data == NULL)
         goto err;
     tmpval = os.data;

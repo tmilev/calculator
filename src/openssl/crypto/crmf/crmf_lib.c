@@ -71,7 +71,7 @@ int OSSL_CRMF_MSG_set1_##ctrlinf##_##atyp(OSSL_CRMF_MSG *msg,             \
 static int OSSL_CRMF_MSG_push0_regCtrl(OSSL_CRMF_MSG *crm,
                                        OSSL_CRMF_ATTRIBUTETYPEANDVALUE *ctrl)
 {
-    int new = 0;
+    int newInt = 0;
 
     if (crm == NULL || crm->certReq == NULL || ctrl == NULL) {
         CRMFerr(CRMF_F_OSSL_CRMF_MSG_PUSH0_REGCTRL, CRMF_R_NULL_ARGUMENT);
@@ -82,7 +82,7 @@ static int OSSL_CRMF_MSG_push0_regCtrl(OSSL_CRMF_MSG *crm,
         crm->certReq->controls = sk_OSSL_CRMF_ATTRIBUTETYPEANDVALUE_new_null();
         if (crm->certReq->controls == NULL)
             goto oom;
-        new = 1;
+        newInt = 1;
     }
     if (!sk_OSSL_CRMF_ATTRIBUTETYPEANDVALUE_push(crm->certReq->controls, ctrl))
         goto oom;
@@ -91,7 +91,7 @@ static int OSSL_CRMF_MSG_push0_regCtrl(OSSL_CRMF_MSG *crm,
  oom:
     CRMFerr(CRMF_F_OSSL_CRMF_MSG_PUSH0_REGCTRL, ERR_R_MALLOC_FAILURE);
 
-    if (new != 0) {
+    if (newInt != 0) {
         sk_OSSL_CRMF_ATTRIBUTETYPEANDVALUE_free(crm->certReq->controls);
         crm->certReq->controls = NULL;
     }
@@ -353,7 +353,7 @@ int OSSL_CRMF_MSG_set0_extensions(OSSL_CRMF_MSG *crm,
 int OSSL_CRMF_MSG_push0_extension(OSSL_CRMF_MSG *crm,
                                   const X509_EXTENSION *ext)
 {
-    int new = 0;
+    int newInt = 0;
     OSSL_CRMF_CERTTEMPLATE *tmpl = OSSL_CRMF_MSG_get0_tmpl(crm);
 
     if (tmpl == NULL || ext == NULL) { /* also crm == NULL implies this */
@@ -364,7 +364,7 @@ int OSSL_CRMF_MSG_push0_extension(OSSL_CRMF_MSG *crm,
     if (tmpl->extensions == NULL) {
         if ((tmpl->extensions = sk_X509_EXTENSION_new_null()) == NULL)
             goto oom;
-        new = 1;
+        newInt = 1;
     }
 
     if (!sk_X509_EXTENSION_push(tmpl->extensions, (X509_EXTENSION *)ext))
@@ -373,7 +373,7 @@ int OSSL_CRMF_MSG_push0_extension(OSSL_CRMF_MSG *crm,
  oom:
     CRMFerr(CRMF_F_OSSL_CRMF_MSG_PUSH0_EXTENSION, ERR_R_MALLOC_FAILURE);
 
-    if (new != 0) {
+    if (newInt != 0) {
         sk_X509_EXTENSION_free(tmpl->extensions);
         tmpl->extensions = NULL;
     }
@@ -431,7 +431,7 @@ static int CRMF_poposigningkey_init(OSSL_CRMF_POPOSIGNINGKEY *ps,
         CRMFerr(CRMF_F_CRMF_POPOSIGNINGKEY_INIT, CRMF_R_ERROR);
         goto err;
     }
-    if ((sig = OPENSSL_malloc(siglen)) == NULL) {
+    if ((sig = (unsigned char*) OPENSSL_malloc(siglen)) == NULL) {
         CRMFerr(CRMF_F_CRMF_POPOSIGNINGKEY_INIT, ERR_R_MALLOC_FAILURE);
         goto err;
     }
@@ -686,7 +686,7 @@ X509 *OSSL_CRMF_ENCRYPTEDVALUE_get1_encCert(OSSL_CRMF_ENCRYPTEDVALUE *ecert,
 
         if (EVP_PKEY_decrypt(pkctx, NULL, &eksize, encKey->data, encKey->length)
                 <= 0
-                || (ek = OPENSSL_malloc(eksize)) == NULL
+                || (ek = (unsigned char*) OPENSSL_malloc(eksize)) == NULL
                 || EVP_PKEY_decrypt(pkctx, ek, &eksize, encKey->data,
                                     encKey->length) <= 0) {
             CRMFerr(CRMF_F_OSSL_CRMF_ENCRYPTEDVALUE_GET1_ENCCERT,
@@ -703,7 +703,7 @@ X509 *OSSL_CRMF_ENCRYPTEDVALUE_get1_encCert(OSSL_CRMF_ENCRYPTEDVALUE *ecert,
                 CRMF_R_UNSUPPORTED_CIPHER);
         goto end;
     }
-    if ((iv = OPENSSL_malloc(EVP_CIPHER_iv_length(cipher))) == NULL)
+    if ((iv = (unsigned char*) OPENSSL_malloc(EVP_CIPHER_iv_length(cipher))) == NULL)
         goto oom;
     if (ASN1_TYPE_get_octetstring(ecert->symmAlg->parameter, iv,
                                    EVP_CIPHER_iv_length(cipher))
@@ -717,7 +717,7 @@ X509 *OSSL_CRMF_ENCRYPTEDVALUE_get1_encCert(OSSL_CRMF_ENCRYPTEDVALUE *ecert,
      * d2i_X509 changes the given pointer, so use p for decoding the message and
      * keep the original pointer in outbuf so the memory can be freed later
      */
-    if ((p = outbuf = OPENSSL_malloc(ecert->encValue->length +
+    if ((p = outbuf = (unsigned char*) OPENSSL_malloc(ecert->encValue->length +
                                      EVP_CIPHER_block_size(cipher))) == NULL
             || (evp_ctx = EVP_CIPHER_CTX_new()) == NULL)
         goto oom;

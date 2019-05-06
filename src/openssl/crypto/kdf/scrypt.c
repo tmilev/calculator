@@ -66,7 +66,7 @@ static EVP_KDF_IMPL *kdf_scrypt_new(void)
 {
     EVP_KDF_IMPL *impl;
 
-    impl = OPENSSL_zalloc(sizeof(*impl));
+    impl = (EVP_KDF_IMPL *) OPENSSL_zalloc(sizeof(*impl));
     if (impl == NULL) {
         KDFerr(KDF_F_KDF_SCRYPT_NEW, ERR_R_MALLOC_FAILURE);
         return NULL;
@@ -111,9 +111,9 @@ static int scrypt_set_membuf(unsigned char **buffer, size_t *buflen,
     OPENSSL_clear_free(*buffer, *buflen);
 
     if (new_buflen > 0) {
-        *buffer = OPENSSL_memdup(new_buffer, new_buflen);
+        *buffer = (unsigned char*) OPENSSL_memdup(new_buffer, new_buflen);
     } else {
-        *buffer = OPENSSL_malloc(1);
+        *buffer = (unsigned char*) OPENSSL_malloc(1);
     }
     if (*buffer == NULL) {
         KDFerr(KDF_F_SCRYPT_SET_MEMBUF, ERR_R_MALLOC_FAILURE);
@@ -476,7 +476,7 @@ static int scrypt_alg(const char *pass, size_t passlen,
     if (key == NULL)
         return 1;
 
-    B = OPENSSL_malloc((size_t)(Blen + Vlen));
+    B = (unsigned char*) OPENSSL_malloc((size_t)(Blen + Vlen));
     if (B == NULL) {
         EVPerr(EVP_F_SCRYPT_ALG, ERR_R_MALLOC_FAILURE);
         return 0;

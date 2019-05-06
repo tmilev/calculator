@@ -13,7 +13,7 @@
 
 DH_METHOD *DH_meth_new(const char *name, int flags)
 {
-    DH_METHOD *dhm = OPENSSL_zalloc(sizeof(*dhm));
+    DH_METHOD *dhm = (DH_METHOD *) OPENSSL_zalloc(sizeof(*dhm));
 
     if (dhm != NULL) {
         dhm->flags = flags;
@@ -39,7 +39,7 @@ void DH_meth_free(DH_METHOD *dhm)
 
 DH_METHOD *DH_meth_dup(const DH_METHOD *dhm)
 {
-    DH_METHOD *ret = OPENSSL_malloc(sizeof(*ret));
+    DH_METHOD *ret = (DH_METHOD *) OPENSSL_malloc(sizeof(*ret));
 
     if (ret != NULL) {
         memcpy(ret, dhm, sizeof(*dhm));
@@ -93,7 +93,7 @@ void *DH_meth_get0_app_data(const DH_METHOD *dhm)
 
 int DH_meth_set0_app_data(DH_METHOD *dhm, void *app_data)
 {
-    dhm->app_data = app_data;
+    dhm->app_data = (char*) app_data;
     return 1;
 }
 

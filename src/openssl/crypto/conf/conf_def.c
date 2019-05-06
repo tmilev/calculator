@@ -103,7 +103,7 @@ static CONF *def_create(CONF_METHOD *meth)
 {
     CONF *ret;
 
-    ret = OPENSSL_malloc(sizeof(*ret));
+    ret = (CONF *) OPENSSL_malloc(sizeof(*ret));
     if (ret != NULL)
         if (meth->init(ret) == 0) {
             OPENSSL_free(ret);
@@ -396,7 +396,7 @@ static int def_load_bio(CONF *conf, BIO *in, long *line)
             start = eat_ws(conf, p);
             trim_ws(conf, start);
 
-            if ((v = OPENSSL_malloc(sizeof(*v))) == NULL) {
+            if ((v =(CONF_VALUE*) OPENSSL_malloc(sizeof(*v))) == NULL) {
                 CONFerr(CONF_F_DEF_LOAD_BIO, ERR_R_MALLOC_FAILURE);
                 goto err;
             }
@@ -717,7 +717,7 @@ static BIO *get_next_file(const char *path, OPENSSL_DIR_CTX **dirctx)
             BIO *bio;
 
             newlen = strlen(path) + namelen + 2;
-            newpath = OPENSSL_zalloc(newlen);
+            newpath = (char*) OPENSSL_zalloc(newlen);
             if (newpath == NULL) {
                 CONFerr(CONF_F_GET_NEXT_FILE, ERR_R_MALLOC_FAILURE);
                 break;

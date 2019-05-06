@@ -72,7 +72,7 @@ int EC_KEY_set_method(EC_KEY *key, const EC_KEY_METHOD *meth)
 
 EC_KEY *EC_KEY_new_method(ENGINE *engine)
 {
-    EC_KEY *ret = OPENSSL_zalloc(sizeof(*ret));
+    EC_KEY *ret = (EC_KEY *) OPENSSL_zalloc(sizeof(*ret));
 
     if (ret == NULL) {
         ECerr(EC_F_EC_KEY_NEW_METHOD, ERR_R_MALLOC_FAILURE);
@@ -154,7 +154,7 @@ int ECDH_compute_key(void *out, size_t outlen, const EC_POINT *pub_key,
 
 EC_KEY_METHOD *EC_KEY_METHOD_new(const EC_KEY_METHOD *meth)
 {
-    EC_KEY_METHOD *ret = OPENSSL_zalloc(sizeof(*meth));
+    EC_KEY_METHOD *ret = (EC_KEY_METHOD *) OPENSSL_zalloc(sizeof(*meth));
 
     if (ret == NULL)
         return NULL;

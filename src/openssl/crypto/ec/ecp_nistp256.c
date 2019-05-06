@@ -982,7 +982,7 @@ static limb smallfelem_is_zero(const smallfelem small)
 
 static int smallfelem_is_zero_int(const void *small)
 {
-    return (int)(smallfelem_is_zero(small) & ((limb) 1));
+    return (int)(smallfelem_is_zero((u64*) small) & ((limb) 1));
 }
 
 /*-
@@ -1840,7 +1840,7 @@ const EC_METHOD *EC_GFp_nistp256_method(void)
 
 static NISTP256_PRE_COMP *nistp256_pre_comp_new(void)
 {
-    NISTP256_PRE_COMP *ret = OPENSSL_zalloc(sizeof(*ret));
+    NISTP256_PRE_COMP *ret = (NISTP256_PRE_COMP *) OPENSSL_zalloc(sizeof(*ret));
 
     if (ret == NULL) {
         ECerr(EC_F_NISTP256_PRE_COMP_NEW, ERR_R_MALLOC_FAILURE);
@@ -2084,10 +2084,10 @@ int ec_GFp_nistp256_points_mul(const EC_GROUP *group, EC_POINT *r,
              */
             mixed = 1;
         }
-        secrets = OPENSSL_malloc(sizeof(*secrets) * num_points);
-        pre_comp = OPENSSL_malloc(sizeof(*pre_comp) * num_points);
+        secrets = (u8(*)[32]) OPENSSL_malloc(sizeof(*secrets) * num_points);
+        pre_comp = (u64(*)[17][3][4]) OPENSSL_malloc(sizeof(*pre_comp) * num_points);
         if (mixed)
-            tmp_smallfelems =
+            tmp_smallfelems = (u64(*)[4])
               OPENSSL_malloc(sizeof(*tmp_smallfelems) * (num_points * 17 + 1));
         if ((secrets == NULL) || (pre_comp == NULL)
             || (mixed && (tmp_smallfelems == NULL))) {

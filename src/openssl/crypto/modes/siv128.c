@@ -138,7 +138,7 @@ SIV128_CONTEXT *CRYPTO_siv128_new(const unsigned char *key, int klen, EVP_CIPHER
     SIV128_CONTEXT *ctx;
     int ret;
 
-    if ((ctx = OPENSSL_malloc(sizeof(*ctx))) != NULL) {
+    if ((ctx = (SIV128_CONTEXT *) OPENSSL_malloc(sizeof(*ctx))) != NULL) {
         ret = CRYPTO_siv128_init(ctx, key, klen, cbc, ctr);
         if (ret)
             return ctx;

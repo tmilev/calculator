@@ -252,7 +252,7 @@ int BIO_accept(int sock, char **ip_port)
         char *host = BIO_ADDR_hostname_string(&res, 1);
         char *port = BIO_ADDR_service_string(&res, 1);
         if (host != NULL && port != NULL)
-            *ip_port = OPENSSL_zalloc(strlen(host) + strlen(port) + 2);
+            *ip_port = (char *) OPENSSL_zalloc(strlen(host) + strlen(port) + 2);
         else
             *ip_port = NULL;
 

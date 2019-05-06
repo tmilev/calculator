@@ -126,9 +126,9 @@ static int file_free(BIO *a)
     if (a->shutdown) {
         if ((a->init) && (a->ptr != NULL)) {
             if (a->flags & BIO_FLAGS_UPLINK)
-                UP_fclose(a->ptr);
+                UP_fclose((FILE*) a->ptr);
             else
-                fclose(a->ptr);
+                fclose((FILE*) a->ptr);
             a->ptr = NULL;
             a->flags = BIO_FLAGS_UPLINK;
         }
@@ -143,9 +143,9 @@ static int file_read(BIO *b, char *out, int outl)
 
     if (b->init && (out != NULL)) {
         if (b->flags & BIO_FLAGS_UPLINK)
-            ret = UP_fread(out, 1, (int)outl, b->ptr);
+            ret = UP_fread(out, 1, (int) outl, (FILE*) b->ptr);
         else
-            ret = fread(out, 1, (int)outl, (FILE *)b->ptr);
+            ret = fread(out, 1, (int) outl, (FILE *)b->ptr);
         if (ret == 0
             && (b->flags & BIO_FLAGS_UPLINK) ? UP_ferror((FILE *)b->ptr) :
                                                ferror((FILE *)b->ptr)) {
@@ -163,9 +163,9 @@ static int file_write(BIO *b, const char *in, int inl)
 
     if (b->init && (in != NULL)) {
         if (b->flags & BIO_FLAGS_UPLINK)
-            ret = UP_fwrite(in, (int)inl, 1, b->ptr);
+            ret = UP_fwrite(in, (int)inl, 1, (FILE*) b->ptr);
         else
-            ret = fwrite(in, (int)inl, 1, (FILE *)b->ptr);
+            ret = fwrite(in, (int)inl, 1, (FILE *) b->ptr);
         if (ret)
             ret = inl;
         /* ret=fwrite(in,1,(int)inl,(FILE *)b->ptr); */
@@ -190,7 +190,7 @@ static long file_ctrl(BIO *b, int cmd, long num, void *ptr)
     case BIO_C_FILE_SEEK:
     case BIO_CTRL_RESET:
         if (b->flags & BIO_FLAGS_UPLINK)
-            ret = (long)UP_fseek(b->ptr, num, 0);
+            ret = (long)UP_fseek((FILE*) b->ptr, num, 0);
         else
             ret = (long)fseek(fp, num, 0);
         break;
@@ -203,7 +203,7 @@ static long file_ctrl(BIO *b, int cmd, long num, void *ptr)
     case BIO_C_FILE_TELL:
     case BIO_CTRL_INFO:
         if (b->flags & BIO_FLAGS_UPLINK)
-            ret = UP_ftell(b->ptr);
+            ret = UP_ftell((FILE*) b->ptr);
         else
             ret = ftell(fp);
         break;
@@ -286,7 +286,7 @@ static long file_ctrl(BIO *b, int cmd, long num, void *ptr)
         if (!(num & BIO_FP_TEXT))
             OPENSSL_strlcat(p, "b", sizeof(p));
 #  endif
-        fp = openssl_fopen(ptr, p);
+        fp = openssl_fopen((char*) ptr, p);
         if (fp == NULL) {
             SYSerr(SYS_F_FOPEN, get_last_sys_error());
             ERR_add_error_data(5, "fopen('", ptr, "','", p, "')");
@@ -314,7 +314,7 @@ static long file_ctrl(BIO *b, int cmd, long num, void *ptr)
         break;
     case BIO_CTRL_FLUSH:
         st = b->flags & BIO_FLAGS_UPLINK
-                ? UP_fflush(b->ptr) : fflush((FILE *)b->ptr);
+                ? UP_fflush((FILE*) b->ptr) : fflush((FILE *)b->ptr);
         if (st == EOF) {
             SYSerr(SYS_F_FFLUSH, get_last_sys_error());
             ERR_add_error_data(1, "fflush()");
@@ -343,10 +343,10 @@ static int file_gets(BIO *bp, char *buf, int size)
 
     buf[0] = '\0';
     if (bp->flags & BIO_FLAGS_UPLINK) {
-        if (!UP_fgets(buf, size, bp->ptr))
+        if (!UP_fgets(buf, size, (FILE*) bp->ptr))
             goto err;
     } else {
-        if (!fgets(buf, size, (FILE *)bp->ptr))
+        if (!fgets(buf, size, (FILE*) bp->ptr))
             goto err;
     }
     if (buf[0] != '\0')

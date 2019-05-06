@@ -48,7 +48,7 @@ const DSA_METHOD *DSA_get_method(DSA *d)
 
 DSA *DSA_new_method(ENGINE *engine)
 {
-    DSA *ret = OPENSSL_zalloc(sizeof(*ret));
+    DSA *ret = (DSA *) OPENSSL_zalloc(sizeof(*ret));
 
     if (ret == NULL) {
         DSAerr(DSA_F_DSA_NEW_METHOD, ERR_R_MALLOC_FAILURE);

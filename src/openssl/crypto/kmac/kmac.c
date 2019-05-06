@@ -127,7 +127,7 @@ static EVP_MAC_IMPL *kmac_new(const EVP_MD *md)
 {
     EVP_MAC_IMPL *kctx = NULL;
 
-    if ((kctx = OPENSSL_zalloc(sizeof(*kctx))) == NULL
+    if ((kctx = (EVP_MAC_IMPL *) OPENSSL_zalloc(sizeof(*kctx))) == NULL
             || (kctx->ctx = EVP_MD_CTX_new()) == NULL) {
         kmac_free(kctx);
         return NULL;
@@ -279,7 +279,7 @@ static int kmac_ctrl_int(EVP_MAC_IMPL *kctx, int cmd, ...)
 
 static int kmac_ctrl_str_cb(void *kctx, int cmd, void *buf, size_t buflen)
 {
-    return kmac_ctrl_int(kctx, cmd, buf, buflen);
+    return kmac_ctrl_int((EVP_MAC_IMPL*) kctx, cmd, buf, buflen);
 }
 
 static int kmac_ctrl_str(EVP_MAC_IMPL *kctx, const char *type,

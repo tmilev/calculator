@@ -70,7 +70,7 @@ static int b64_new(BIO *bi)
 {
     BIO_B64_CTX *ctx;
 
-    if ((ctx = OPENSSL_zalloc(sizeof(*ctx))) == NULL) {
+    if ((ctx = (BIO_B64_CTX *) OPENSSL_zalloc(sizeof(*ctx))) == NULL) {
         EVPerr(EVP_F_B64_NEW, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -95,7 +95,7 @@ static int b64_free(BIO *a)
     if (a == NULL)
         return 0;
 
-    ctx = BIO_get_data(a);
+    ctx = (BIO_B64_CTX *) BIO_get_data(a);
     if (ctx == NULL)
         return 0;
 

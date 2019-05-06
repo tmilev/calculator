@@ -27,7 +27,7 @@ EVP_MAC_CTX *EVP_MAC_CTX_new_id(int id)
 
 EVP_MAC_CTX *EVP_MAC_CTX_new(const EVP_MAC *mac)
 {
-    EVP_MAC_CTX *ctx = OPENSSL_zalloc(sizeof(EVP_MAC_CTX));
+    EVP_MAC_CTX *ctx = (EVP_MAC_CTX *) OPENSSL_zalloc(sizeof(EVP_MAC_CTX));
 
     if (ctx == NULL || (ctx->data = mac->new_evp()) == NULL) {
         EVPerr(EVP_F_EVP_MAC_CTX_NEW, ERR_R_MALLOC_FAILURE);
@@ -42,7 +42,7 @@ EVP_MAC_CTX *EVP_MAC_CTX_new(const EVP_MAC *mac)
 void EVP_MAC_CTX_free(EVP_MAC_CTX *ctx)
 {
     if (ctx != NULL && ctx->data != NULL) {
-        ctx->meth->free(ctx->data);
+        ctx->meth->free((EVP_MAC_IMPL*) ctx->data);
         ctx->data = NULL;
     }
     OPENSSL_free(ctx);
@@ -52,10 +52,10 @@ int EVP_MAC_CTX_copy(EVP_MAC_CTX *dst, const EVP_MAC_CTX *src)
 {
     EVP_MAC_IMPL *macdata;
 
-    if (src->data != NULL && !dst->meth->copy(dst->data, src->data))
+    if (src->data != NULL && !dst->meth->copy((EVP_MAC_IMPL*) dst->data, (EVP_MAC_IMPL*) src->data))
         return 0;
 
-    macdata = dst->data;
+    macdata = (EVP_MAC_IMPL*) dst->data;
     *dst = *src;
     dst->data = macdata;
 
@@ -70,26 +70,26 @@ const EVP_MAC *EVP_MAC_CTX_mac(EVP_MAC_CTX *ctx)
 size_t EVP_MAC_size(EVP_MAC_CTX *ctx)
 {
     if (ctx->data != NULL)
-        return ctx->meth->size(ctx->data);
+        return ctx->meth->size((EVP_MAC_IMPL*) ctx->data);
     /* If the MAC hasn't been initialized yet, we return zero */
     return 0;
 }
 
 int EVP_MAC_init(EVP_MAC_CTX *ctx)
 {
-    return ctx->meth->init(ctx->data);
+    return ctx->meth->init((EVP_MAC_IMPL*) ctx->data);
 }
 
 int EVP_MAC_update(EVP_MAC_CTX *ctx, const unsigned char *data, size_t datalen)
 {
     if (datalen == 0)
         return 1;
-    return ctx->meth->update(ctx->data, data, datalen);
+    return ctx->meth->update((EVP_MAC_IMPL*) ctx->data, data, datalen);
 }
 
 int EVP_MAC_final(EVP_MAC_CTX *ctx, unsigned char *out, size_t *poutlen)
 {
-    int l = ctx->meth->size(ctx->data);
+    int l = ctx->meth->size((EVP_MAC_IMPL*) ctx->data);
 
     if (l < 0)
         return 0;
@@ -97,7 +97,7 @@ int EVP_MAC_final(EVP_MAC_CTX *ctx, unsigned char *out, size_t *poutlen)
         *poutlen = l;
     if (out == NULL)
         return 1;
-    return ctx->meth->final(ctx->data, out);
+    return ctx->meth->final((EVP_MAC_IMPL*) ctx->data, out);
 }
 
 int EVP_MAC_ctrl(EVP_MAC_CTX *ctx, int cmd, ...)
@@ -131,7 +131,7 @@ int EVP_MAC_vctrl(EVP_MAC_CTX *ctx, int cmd, va_list args)
 #endif
     default:
         if (ctx->meth->ctrl != NULL)
-            ok = ctx->meth->ctrl(ctx->data, cmd, args);
+            ok = ctx->meth->ctrl((EVP_MAC_IMPL*) ctx->data, cmd, args);
         else
             ok = -2;
         break;
@@ -149,7 +149,7 @@ int EVP_MAC_ctrl_str(EVP_MAC_CTX *ctx, const char *type, const char *value)
         return -2;
     }
 
-    ok = ctx->meth->ctrl_str(ctx->data, type, value);
+    ok = ctx->meth->ctrl_str((EVP_MAC_IMPL*) ctx->data, type, value);
 
     if (ok == -2)
         EVPerr(EVP_F_EVP_MAC_CTRL_STR, EVP_R_COMMAND_NOT_SUPPORTED);

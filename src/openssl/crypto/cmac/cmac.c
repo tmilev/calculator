@@ -47,7 +47,7 @@ CMAC_CTX *CMAC_CTX_new(void)
 {
     CMAC_CTX *ctx;
 
-    if ((ctx = OPENSSL_malloc(sizeof(*ctx))) == NULL) {
+    if ((ctx = (CMAC_CTX*) OPENSSL_malloc(sizeof(*ctx))) == NULL) {
         CRYPTOerr(CRYPTO_F_CMAC_CTX_NEW, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
@@ -125,7 +125,7 @@ int CMAC_Init(CMAC_CTX *ctx, const void *key, size_t keylen,
             return 0;
         if (!EVP_CIPHER_CTX_set_key_length(ctx->cctx, keylen))
             return 0;
-        if (!EVP_EncryptInit_ex(ctx->cctx, NULL, NULL, key, zero_iv))
+        if (!EVP_EncryptInit_ex(ctx->cctx, NULL, NULL, (unsigned char*) key, (unsigned char*) zero_iv))
             return 0;
         bl = EVP_CIPHER_CTX_block_size(ctx->cctx);
         if (!EVP_Cipher(ctx->cctx, ctx->tbl, zero_iv, bl))
@@ -145,7 +145,7 @@ int CMAC_Init(CMAC_CTX *ctx, const void *key, size_t keylen,
 
 int CMAC_Update(CMAC_CTX *ctx, const void *in, size_t dlen)
 {
-    const unsigned char *data = in;
+    const unsigned char *data = (unsigned char*) in;
     size_t bl;
     if (ctx->nlast_block == -1)
         return 0;

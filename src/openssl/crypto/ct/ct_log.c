@@ -56,7 +56,7 @@ static void ctlog_store_load_ctx_free(CTLOG_STORE_LOAD_CTX* ctx);
 
 static CTLOG_STORE_LOAD_CTX *ctlog_store_load_ctx_new(void)
 {
-    CTLOG_STORE_LOAD_CTX *ctx = OPENSSL_zalloc(sizeof(*ctx));
+    CTLOG_STORE_LOAD_CTX *ctx = (CTLOG_STORE_LOAD_CTX *) OPENSSL_zalloc(sizeof(*ctx));
 
     if (ctx == NULL)
         CTerr(CT_F_CTLOG_STORE_LOAD_CTX_NEW, ERR_R_MALLOC_FAILURE);
@@ -91,7 +91,7 @@ err:
 
 CTLOG_STORE *CTLOG_STORE_new(void)
 {
-    CTLOG_STORE *ret = OPENSSL_zalloc(sizeof(*ret));
+    CTLOG_STORE *ret = (CTLOG_STORE *) OPENSSL_zalloc(sizeof(*ret));
 
     if (ret == NULL) {
         CTerr(CT_F_CTLOG_STORE_NEW, ERR_R_MALLOC_FAILURE);
@@ -154,7 +154,7 @@ int CTLOG_STORE_load_default_file(CTLOG_STORE *store)
 static int ctlog_store_load_log(const char *log_name, int log_name_len,
                                 void *arg)
 {
-    CTLOG_STORE_LOAD_CTX *load_ctx = arg;
+    CTLOG_STORE_LOAD_CTX *load_ctx = (CTLOG_STORE_LOAD_CTX *) arg;
     CTLOG *ct_log = NULL;
     /* log_name may not be null-terminated, so fix that before using it */
     char *tmp;
@@ -236,7 +236,7 @@ end:
  */
 CTLOG *CTLOG_new(EVP_PKEY *public_key, const char *name)
 {
-    CTLOG *ret = OPENSSL_zalloc(sizeof(*ret));
+    CTLOG *ret = (CTLOG *) OPENSSL_zalloc(sizeof(*ret));
 
     if (ret == NULL) {
         CTerr(CT_F_CTLOG_NEW, ERR_R_MALLOC_FAILURE);

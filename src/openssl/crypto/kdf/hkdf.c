@@ -50,7 +50,7 @@ static EVP_KDF_IMPL *kdf_hkdf_new(void)
 {
     EVP_KDF_IMPL *impl;
 
-    if ((impl = OPENSSL_zalloc(sizeof(*impl))) == NULL)
+    if ((impl = (EVP_KDF_IMPL *) OPENSSL_zalloc(sizeof(*impl))) == NULL)
         KDFerr(KDF_F_KDF_HKDF_NEW, ERR_R_MALLOC_FAILURE);
     return impl;
 }
@@ -95,7 +95,7 @@ static int kdf_hkdf_ctrl(EVP_KDF_IMPL *impl, int cmd, va_list args)
             return 1;
 
         OPENSSL_free(impl->salt);
-        impl->salt = OPENSSL_memdup(p, len);
+        impl->salt = (unsigned char *) OPENSSL_memdup(p, len);
         if (impl->salt == NULL)
             return 0;
 
@@ -106,7 +106,7 @@ static int kdf_hkdf_ctrl(EVP_KDF_IMPL *impl, int cmd, va_list args)
         p = va_arg(args, const unsigned char *);
         len = va_arg(args, size_t);
         OPENSSL_clear_free(impl->key, impl->key_len);
-        impl->key = OPENSSL_memdup(p, len);
+        impl->key = (unsigned char*) OPENSSL_memdup(p, len);
         if (impl->key == NULL)
             return 0;
 

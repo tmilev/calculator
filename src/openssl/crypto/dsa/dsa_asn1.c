@@ -23,7 +23,7 @@ IMPLEMENT_ASN1_ENCODE_FUNCTIONS_fname(DSA_SIG, DSA_SIG, DSA_SIG)
 
 DSA_SIG *DSA_SIG_new(void)
 {
-    DSA_SIG *sig = OPENSSL_zalloc(sizeof(*sig));
+    DSA_SIG *sig = (DSA_SIG *) OPENSSL_zalloc(sizeof(*sig));
     if (sig == NULL)
         DSAerr(DSA_F_DSA_SIG_NEW, ERR_R_MALLOC_FAILURE);
     return sig;
@@ -104,7 +104,7 @@ IMPLEMENT_ASN1_ENCODE_FUNCTIONS_fname(DSA, DSAPublicKey, DSAPublicKey)
 
 DSA *DSAparams_dup(const DSA *dsa)
 {
-    return ASN1_item_dup(ASN1_ITEM_rptr(DSAparams), dsa);
+    return (DSA*) ASN1_item_dup(ASN1_ITEM_rptr(DSAparams), dsa);
 }
 
 int DSA_sign(int type, const unsigned char *dgst, int dlen,

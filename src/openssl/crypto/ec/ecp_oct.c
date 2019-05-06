@@ -280,9 +280,9 @@ int ec_GFp_simple_oct2point(const EC_GROUP *group, EC_POINT *point,
         ECerr(EC_F_EC_GFP_SIMPLE_OCT2POINT, EC_R_BUFFER_TOO_SMALL);
         return 0;
     }
-    form = buf[0];
+    form = (point_conversion_form_t) buf[0];
     y_bit = form & 1;
-    form = form & ~1U;
+    form = (point_conversion_form_t) (form & ~1U);
     if ((form != 0) && (form != POINT_CONVERSION_COMPRESSED)
         && (form != POINT_CONVERSION_UNCOMPRESSED)
         && (form != POINT_CONVERSION_HYBRID)) {

@@ -35,7 +35,7 @@ int CMS_stream(unsigned char ***boundary, CMS_ContentInfo *cms)
 
 CMS_ContentInfo *d2i_CMS_bio(BIO *bp, CMS_ContentInfo **cms)
 {
-    return ASN1_item_d2i_bio(ASN1_ITEM_rptr(CMS_ContentInfo), bp, cms);
+    return (CMS_ContentInfo *) ASN1_item_d2i_bio(ASN1_ITEM_rptr(CMS_ContentInfo), bp, cms);
 }
 
 int i2d_CMS_bio(BIO *bp, CMS_ContentInfo *cms)

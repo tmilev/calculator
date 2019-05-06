@@ -339,7 +339,7 @@ unsigned long EVP_MD_flags(const EVP_MD *md)
 
 EVP_MD *EVP_MD_meth_new(int md_type, int pkey_type)
 {
-    EVP_MD *md = OPENSSL_zalloc(sizeof(*md));
+    EVP_MD *md = (EVP_MD *) OPENSSL_zalloc(sizeof(*md));
 
     if (md != NULL) {
         md->type = md_type;

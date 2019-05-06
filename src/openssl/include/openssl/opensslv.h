@@ -10,10 +10,6 @@
 #ifndef HEADER_OPENSSLV_H
 # define HEADER_OPENSSLV_H
 
-# ifdef  __cplusplus
-extern "C" {
-# endif
-
 /*
  * SECTION 1: VERSION DATA.  These will change for each release
  */
@@ -137,7 +133,4 @@ const char *OPENSSL_version_build_metadata(void);
             |_OPENSSL_VERSION_PRE_RELEASE )
 # endif
 
-# ifdef  __cplusplus
-}
-# endif
 #endif                          /* HEADER_OPENSSLV_H */

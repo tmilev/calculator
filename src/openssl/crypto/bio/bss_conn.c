@@ -223,7 +223,7 @@ BIO_CONNECT *BIO_CONNECT_new(void)
 {
     BIO_CONNECT *ret;
 
-    if ((ret = OPENSSL_zalloc(sizeof(*ret))) == NULL) {
+    if ((ret = (BIO_CONNECT *) OPENSSL_zalloc(sizeof(*ret))) == NULL) {
         BIOerr(BIO_F_BIO_CONNECT_NEW, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
@@ -406,7 +406,7 @@ static long conn_ctrl(BIO *b, int cmd, long num, void *ptr)
                  */
                 OPENSSL_free(data->param_hostname);
                 data->param_hostname = NULL;
-                ret = BIO_parse_hostserv(ptr,
+                ret = BIO_parse_hostserv((char *) ptr,
                                          &data->param_hostname,
                                          &data->param_service,
                                          BIO_PARSE_PRIO_HOST);
@@ -414,7 +414,7 @@ static long conn_ctrl(BIO *b, int cmd, long num, void *ptr)
                     OPENSSL_free(hold_service);
             } else if (num == 1) {
                 OPENSSL_free(data->param_service);
-                data->param_service = BUF_strdup(ptr);
+                data->param_service = BUF_strdup((char *) ptr);
             } else if (num == 2) {
                 const BIO_ADDR *addr = (const BIO_ADDR *)ptr;
                 if (ret) {

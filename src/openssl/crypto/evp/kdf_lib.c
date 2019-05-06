@@ -71,13 +71,13 @@ EVP_KDF_CTX *EVP_KDF_CTX_new_id(int id)
         return NULL;
     }
 
-    ret = OPENSSL_zalloc(sizeof(*ret));
+    ret = (EVP_KDF_CTX *) OPENSSL_zalloc(sizeof(*ret));
     if (ret == NULL) {
         EVPerr(EVP_F_EVP_KDF_CTX_NEW_ID, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
 
-    if (kmeth->new != NULL && (ret->impl = kmeth->new()) == NULL) {
+    if (kmeth->new_evp != NULL && (ret->impl = kmeth->new_evp()) == NULL) {
         EVP_KDF_CTX_free(ret);
         return NULL;
     }

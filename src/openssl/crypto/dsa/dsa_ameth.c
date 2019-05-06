@@ -34,7 +34,7 @@ static int dsa_pub_decode(EVP_PKEY *pkey, X509_PUBKEY *pubkey)
     X509_ALGOR_get0(NULL, &ptype, &pval, palg);
 
     if (ptype == V_ASN1_SEQUENCE) {
-        pstr = pval;
+        pstr = (ASN1_STRING*) pval;
         pm = pstr->data;
         pmlen = pstr->length;
 
@@ -158,7 +158,7 @@ static int dsa_priv_decode(EVP_PKEY *pkey, const PKCS8_PRIV_KEY_INFO *p8)
     if (privkey->type == V_ASN1_NEG_INTEGER || ptype != V_ASN1_SEQUENCE)
         goto decerr;
 
-    pstr = pval;
+    pstr = (ASN1_STRING*) pval;
     pm = pstr->data;
     pmlen = pstr->length;
     if ((dsa = d2i_DSAparams(NULL, &pm, pmlen)) == NULL)
@@ -470,7 +470,7 @@ static int dsa_pkey_ctrl(EVP_PKEY *pkey, int op, long arg1, void *arg2)
         if (arg1 == 0) {
             int snid, hnid;
             X509_ALGOR *alg1, *alg2;
-            PKCS7_SIGNER_INFO_get0_algs(arg2, NULL, &alg1, &alg2);
+            PKCS7_SIGNER_INFO_get0_algs((PKCS7_SIGNER_INFO *) arg2, NULL, &alg1, &alg2);
             if (alg1 == NULL || alg1->algorithm == NULL)
                 return -1;
             hnid = OBJ_obj2nid(alg1->algorithm);
@@ -486,7 +486,7 @@ static int dsa_pkey_ctrl(EVP_PKEY *pkey, int op, long arg1, void *arg2)
         if (arg1 == 0) {
             int snid, hnid;
             X509_ALGOR *alg1, *alg2;
-            CMS_SignerInfo_get0_algs(arg2, NULL, NULL, &alg1, &alg2);
+            CMS_SignerInfo_get0_algs((CMS_SignerInfo *) arg2, NULL, NULL, &alg1, &alg2);
             if (alg1 == NULL || alg1->algorithm == NULL)
                 return -1;
             hnid = OBJ_obj2nid(alg1->algorithm);

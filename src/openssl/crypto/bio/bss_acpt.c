@@ -92,7 +92,7 @@ static BIO_ACCEPT *BIO_ACCEPT_new(void)
 {
     BIO_ACCEPT *ret;
 
-    if ((ret = OPENSSL_zalloc(sizeof(*ret))) == NULL) {
+    if ((ret = (BIO_ACCEPT *) OPENSSL_zalloc(sizeof(*ret))) == NULL) {
         BIOerr(BIO_F_BIO_ACCEPT_NEW, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
@@ -424,7 +424,7 @@ static long acpt_ctrl(BIO *b, int cmd, long num, void *ptr)
                  */
                 OPENSSL_free(data->param_addr);
                 data->param_addr = NULL;
-                ret = BIO_parse_hostserv(ptr,
+                ret = BIO_parse_hostserv((char *) ptr,
                                          &data->param_addr,
                                          &data->param_serv,
                                          BIO_PARSE_PRIO_SERV);
@@ -433,7 +433,7 @@ static long acpt_ctrl(BIO *b, int cmd, long num, void *ptr)
                 b->init = 1;
             } else if (num == 1) {
                 OPENSSL_free(data->param_serv);
-                data->param_serv = BUF_strdup(ptr);
+                data->param_serv = BUF_strdup((char*) ptr);
                 b->init = 1;
             } else if (num == 2) {
                 data->bind_mode |= BIO_SOCK_NONBLOCK;

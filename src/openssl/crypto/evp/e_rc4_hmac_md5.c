@@ -210,7 +210,7 @@ static int rc4_hmac_md5_ctrl(EVP_CIPHER_CTX *ctx, int type, int arg,
         }
     case EVP_CTRL_AEAD_TLS1_AAD:
         {
-            unsigned char *p = ptr;
+            unsigned char *p = (unsigned char *) ptr;
             unsigned int len;
 
             if (arg != EVP_AEAD_TLS1_AAD_LEN)

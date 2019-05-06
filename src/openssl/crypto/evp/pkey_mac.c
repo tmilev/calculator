@@ -44,7 +44,7 @@ static int pkey_mac_init(EVP_PKEY_CTX *ctx)
     MAC_PKEY_CTX *hctx;
     int nid = ctx->pmeth->pkey_id;
 
-    if ((hctx = OPENSSL_zalloc(sizeof(*hctx))) == NULL) {
+    if ((hctx = (MAC_PKEY_CTX *) OPENSSL_zalloc(sizeof(*hctx))) == NULL) {
         EVPerr(EVP_F_PKEY_MAC_INIT, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -78,8 +78,8 @@ static int pkey_mac_copy(EVP_PKEY_CTX *dst, const EVP_PKEY_CTX *src)
     if (!pkey_mac_init(dst))
         return 0;
 
-    sctx = EVP_PKEY_CTX_get_data(src);
-    dctx = EVP_PKEY_CTX_get_data(dst);
+    sctx = (MAC_PKEY_CTX *) EVP_PKEY_CTX_get_data(src);
+    dctx = (MAC_PKEY_CTX *) EVP_PKEY_CTX_get_data(dst);
 
     if (!EVP_MAC_CTX_copy(dctx->ctx, sctx->ctx))
         goto err;
@@ -106,7 +106,7 @@ static int pkey_mac_copy(EVP_PKEY_CTX *dst, const EVP_PKEY_CTX *src)
 
 static void pkey_mac_cleanup(EVP_PKEY_CTX *ctx)
 {
-    MAC_PKEY_CTX *hctx = EVP_PKEY_CTX_get_data(ctx);
+    MAC_PKEY_CTX *hctx = (MAC_PKEY_CTX *) EVP_PKEY_CTX_get_data(ctx);
 
     if (hctx != NULL) {
         switch (hctx->type) {
@@ -123,7 +123,7 @@ static void pkey_mac_cleanup(EVP_PKEY_CTX *ctx)
 
 static int pkey_mac_keygen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey)
 {
-    MAC_PKEY_CTX *hctx = EVP_PKEY_CTX_get_data(ctx);
+    MAC_PKEY_CTX *hctx = (MAC_PKEY_CTX *) EVP_PKEY_CTX_get_data(ctx);
     int nid = ctx->pmeth->pkey_id;
 
     switch (hctx->type) {
@@ -162,16 +162,16 @@ static int pkey_mac_keygen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey)
 
 static int int_update(EVP_MD_CTX *ctx, const void *data, size_t count)
 {
-    MAC_PKEY_CTX *hctx = EVP_PKEY_CTX_get_data(EVP_MD_CTX_pkey_ctx(ctx));
+    MAC_PKEY_CTX *hctx = (MAC_PKEY_CTX *) EVP_PKEY_CTX_get_data(EVP_MD_CTX_pkey_ctx(ctx));
 
-    if (!EVP_MAC_update(hctx->ctx, data, count))
+    if (!EVP_MAC_update(hctx->ctx, (unsigned char*) data, count))
         return 0;
     return 1;
 }
 
 static int pkey_mac_signctx_init(EVP_PKEY_CTX *ctx, EVP_MD_CTX *mctx)
 {
-    MAC_PKEY_CTX *hctx = EVP_PKEY_CTX_get_data(ctx);
+    MAC_PKEY_CTX *hctx = (MAC_PKEY_CTX *) EVP_PKEY_CTX_get_data(ctx);
     ASN1_OCTET_STRING *key = NULL;
     int rv = 1;
     /*
@@ -190,7 +190,7 @@ static int pkey_mac_signctx_init(EVP_PKEY_CTX *ctx, EVP_MD_CTX *mctx)
         if (EVP_PKEY_id(EVP_PKEY_CTX_get0_pkey(ctx))
             != EVP_MAC_nid(EVP_MAC_CTX_mac(hctx->ctx)))
             return 0;
-        key = EVP_PKEY_get0(EVP_PKEY_CTX_get0_pkey(ctx));
+        key = (ASN1_OCTET_STRING *) EVP_PKEY_get0(EVP_PKEY_CTX_get0_pkey(ctx));
         if (key == NULL)
             return 0;
     }
@@ -211,14 +211,14 @@ static int pkey_mac_signctx_init(EVP_PKEY_CTX *ctx, EVP_MD_CTX *mctx)
 static int pkey_mac_signctx(EVP_PKEY_CTX *ctx, unsigned char *sig,
                              size_t *siglen, EVP_MD_CTX *mctx)
 {
-    MAC_PKEY_CTX *hctx = EVP_PKEY_CTX_get_data(ctx);
+    MAC_PKEY_CTX *hctx = (MAC_PKEY_CTX *) EVP_PKEY_CTX_get_data(ctx);
 
     return EVP_MAC_final(hctx->ctx, sig, siglen);
 }
 
 static int pkey_mac_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
 {
-    MAC_PKEY_CTX *hctx = EVP_PKEY_CTX_get_data(ctx);
+    MAC_PKEY_CTX *hctx = (MAC_PKEY_CTX *) EVP_PKEY_CTX_get_data(ctx);
 
     switch (type) {
 
@@ -247,7 +247,7 @@ static int pkey_mac_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
     case EVP_PKEY_CTRL_MD:
         switch (hctx->type) {
         case MAC_TYPE_RAW:
-            hctx->raw_data.md = p2;
+            hctx->raw_data.md = (EVP_MD*) p2;
             break;
         case MAC_TYPE_MAC:
             if (ctx->pkey != NULL
@@ -271,7 +271,7 @@ static int pkey_mac_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
         case MAC_TYPE_RAW:
             if ((!p2 && p1 > 0) || (p1 < -1))
                 return 0;
-            if (!ASN1_OCTET_STRING_set(&hctx->raw_data.ktmp, p2, p1))
+            if (!ASN1_OCTET_STRING_set(&hctx->raw_data.ktmp, (unsigned char*) p2, p1))
                 return 0;
             break;
         case MAC_TYPE_MAC:
@@ -322,7 +322,7 @@ static int pkey_mac_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
 static int pkey_mac_ctrl_str(EVP_PKEY_CTX *ctx,
                               const char *type, const char *value)
 {
-    MAC_PKEY_CTX *hctx = EVP_PKEY_CTX_get_data(ctx);
+    MAC_PKEY_CTX *hctx = (MAC_PKEY_CTX *) EVP_PKEY_CTX_get_data(ctx);
 
     return EVP_MAC_ctrl_str(hctx->ctx, type, value);
 }

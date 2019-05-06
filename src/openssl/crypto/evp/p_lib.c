@@ -139,7 +139,7 @@ int EVP_PKEY_cmp(const EVP_PKEY *a, const EVP_PKEY *b)
 
 EVP_PKEY *EVP_PKEY_new(void)
 {
-    EVP_PKEY *ret = OPENSSL_zalloc(sizeof(*ret));
+    EVP_PKEY *ret = (EVP_PKEY *) OPENSSL_zalloc(sizeof(*ret));
 
     if (ret == NULL) {
         EVPerr(EVP_F_EVP_PKEY_NEW, ERR_R_MALLOC_FAILURE);
@@ -422,7 +422,7 @@ const unsigned char *EVP_PKEY_get0_hmac(const EVP_PKEY *pkey, size_t *len)
         EVPerr(EVP_F_EVP_PKEY_GET0_HMAC, EVP_R_EXPECTING_AN_HMAC_KEY);
         return NULL;
     }
-    os = EVP_PKEY_get0(pkey);
+    os = (ASN1_OCTET_STRING *) EVP_PKEY_get0(pkey);
     *len = os->length;
     return os->data;
 }
@@ -435,7 +435,7 @@ const unsigned char *EVP_PKEY_get0_poly1305(const EVP_PKEY *pkey, size_t *len)
         EVPerr(EVP_F_EVP_PKEY_GET0_POLY1305, EVP_R_EXPECTING_A_POLY1305_KEY);
         return NULL;
     }
-    os = EVP_PKEY_get0(pkey);
+    os = (ASN1_OCTET_STRING *) EVP_PKEY_get0(pkey);
     *len = os->length;
     return os->data;
 }
@@ -450,7 +450,7 @@ const unsigned char *EVP_PKEY_get0_siphash(const EVP_PKEY *pkey, size_t *len)
         EVPerr(EVP_F_EVP_PKEY_GET0_SIPHASH, EVP_R_EXPECTING_A_SIPHASH_KEY);
         return NULL;
     }
-    os = EVP_PKEY_get0(pkey);
+    os = (ASN1_OCTET_STRING *) EVP_PKEY_get0(pkey);
     *len = os->length;
     return os->data;
 }

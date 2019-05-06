@@ -27,17 +27,17 @@ static int init(EVP_MD_CTX *ctx)
 {
     BLAKE2S_PARAM P;
     blake2s_param_init(&P);
-    return BLAKE2s_Init(EVP_MD_CTX_md_data(ctx), &P);
+    return BLAKE2s_Init((BLAKE2S_CTX *) EVP_MD_CTX_md_data(ctx), &P);
 }
 
 static int update(EVP_MD_CTX *ctx, const void *data, size_t count)
 {
-    return BLAKE2s_Update(EVP_MD_CTX_md_data(ctx), data, count);
+    return BLAKE2s_Update((BLAKE2S_CTX *) EVP_MD_CTX_md_data(ctx), data, count);
 }
 
 static int final(EVP_MD_CTX *ctx, unsigned char *md)
 {
-    return BLAKE2s_Final(md, EVP_MD_CTX_md_data(ctx));
+    return BLAKE2s_Final(md, (BLAKE2S_CTX *) EVP_MD_CTX_md_data(ctx));
 }
 
 static const EVP_MD blake2s_md = {

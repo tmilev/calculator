@@ -67,7 +67,7 @@ static int ecx_key_op(EVP_PKEY *pkey, int id, const X509_ALGOR *palg,
         }
     }
 
-    key = OPENSSL_zalloc(sizeof(*key));
+    key = (ECX_KEY*) OPENSSL_zalloc(sizeof(*key));
     if (key == NULL) {
         ECerr(EC_F_ECX_KEY_OP, ERR_R_MALLOC_FAILURE);
         return 0;
@@ -77,7 +77,7 @@ static int ecx_key_op(EVP_PKEY *pkey, int id, const X509_ALGOR *palg,
     if (op == KEY_OP_PUBLIC) {
         memcpy(pubkey, p, plen);
     } else {
-        privkey = key->privkey = OPENSSL_secure_malloc(KEYLENID(id));
+        privkey = key->privkey = (unsigned char*) OPENSSL_secure_malloc(KEYLENID(id));
         if (privkey == NULL) {
             ECerr(EC_F_ECX_KEY_OP, ERR_R_MALLOC_FAILURE);
             goto err;
@@ -132,7 +132,7 @@ static int ecx_pub_encode(X509_PUBKEY *pk, const EVP_PKEY *pkey)
         return 0;
     }
 
-    penc = OPENSSL_memdup(ecxkey->pubkey, KEYLEN(pkey));
+    penc = (unsigned char*) OPENSSL_memdup(ecxkey->pubkey, KEYLEN(pkey));
     if (penc == NULL) {
         ECerr(EC_F_ECX_PUB_ENCODE, ERR_R_MALLOC_FAILURE);
         return 0;
@@ -319,14 +319,14 @@ static int ecx_ctrl(EVP_PKEY *pkey, int op, long arg1, void *arg2)
     switch (op) {
 
     case ASN1_PKEY_CTRL_SET1_TLS_ENCPT:
-        return ecx_key_op(pkey, pkey->ameth->pkey_id, NULL, arg2, arg1,
+        return ecx_key_op(pkey, pkey->ameth->pkey_id, NULL, (unsigned char*) arg2, arg1,
                           KEY_OP_PUBLIC);
 
     case ASN1_PKEY_CTRL_GET1_TLS_ENCPT:
         if (pkey->pkey.ecx != NULL) {
-            unsigned char **ppt = arg2;
+            unsigned char **ppt = (unsigned char **) arg2;
 
-            *ppt = OPENSSL_memdup(pkey->pkey.ecx->pubkey, KEYLEN(pkey));
+            *ppt = (unsigned char *) OPENSSL_memdup(pkey->pkey.ecx->pubkey, KEYLEN(pkey));
             if (*ppt != NULL)
                 return KEYLEN(pkey);
         }

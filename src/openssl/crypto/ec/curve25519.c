@@ -5471,7 +5471,7 @@ int ED25519_sign(uint8_t *out_sig, const uint8_t *message, size_t message_len,
     return 1;
 }
 
-static const char allzeroes[15];
+static const char allzeroes[15] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 int ED25519_verify(const uint8_t *message, size_t message_len,
                    const uint8_t signature[64], const uint8_t public_key[32])

@@ -14,10 +14,6 @@
 #ifndef HEADER_OPENSSLCONF_H
 # define HEADER_OPENSSLCONF_H
 
-# ifdef  __cplusplus
-extern "C" {
-# endif
-
 # ifdef OPENSSL_ALGORITHM_DEFINES
 #  error OPENSSL_ALGORITHM_DEFINES no longer supported
 # endif
@@ -150,7 +146,4 @@ extern "C" {
 
 #define MODULESDIR "./"
 
-# ifdef  __cplusplus
-}
-# endif
 #endif                          /* HEADER_OPENSSLCONF_H */

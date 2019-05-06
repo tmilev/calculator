@@ -77,7 +77,7 @@ struct bio_bio_st {
 
 static int bio_new(BIO *bio)
 {
-    struct bio_bio_st *b = OPENSSL_zalloc(sizeof(*b));
+    struct bio_bio_st *b = (bio_bio_st *) OPENSSL_zalloc(sizeof(*b));
 
     if (b == NULL)
         return 0;
@@ -95,7 +95,7 @@ static int bio_free(BIO *bio)
 
     if (bio == NULL)
         return 0;
-    b = bio->ptr;
+    b = (bio_bio_st *) bio->ptr;
 
     assert(b != NULL);
 
@@ -119,10 +119,10 @@ static int bio_read(BIO *bio, char *buf, int size_)
     if (!bio->init)
         return 0;
 
-    b = bio->ptr;
+    b = (bio_bio_st *) bio->ptr;
     assert(b != NULL);
     assert(b->peer != NULL);
-    peer_b = b->peer->ptr;
+    peer_b = (bio_bio_st *) b->peer->ptr;
     assert(peer_b != NULL);
     assert(peer_b->buf != NULL);
 
@@ -209,10 +209,10 @@ static ossl_ssize_t bio_nread0(BIO *bio, char **buf)
     if (!bio->init)
         return 0;
 
-    b = bio->ptr;
+    b = (bio_bio_st *) bio->ptr;
     assert(b != NULL);
     assert(b->peer != NULL);
-    peer_b = b->peer->ptr;
+    peer_b = (bio_bio_st *) b->peer->ptr;
     assert(peer_b != NULL);
     assert(peer_b->buf != NULL);
 
@@ -252,8 +252,8 @@ static ossl_ssize_t bio_nread(BIO *bio, char **buf, size_t num_)
     if (num <= 0)
         return num;
 
-    b = bio->ptr;
-    peer_b = b->peer->ptr;
+    b = (bio_bio_st *) bio->ptr;
+    peer_b = (bio_bio_st *) b->peer->ptr;
 
     peer_b->len -= num;
     if (peer_b->len) {
@@ -278,7 +278,7 @@ static int bio_write(BIO *bio, const char *buf, int num_)
     if (!bio->init || buf == NULL || num == 0)
         return 0;
 
-    b = bio->ptr;
+    b = (bio_bio_st *) bio->ptr;
     assert(b != NULL);
     assert(b->peer != NULL);
     assert(b->buf != NULL);
@@ -355,7 +355,7 @@ static ossl_ssize_t bio_nwrite0(BIO *bio, char **buf)
     if (!bio->init)
         return 0;
 
-    b = bio->ptr;
+    b = (bio_bio_st *) bio->ptr;
     assert(b != NULL);
     assert(b->peer != NULL);
     assert(b->buf != NULL);
@@ -407,7 +407,7 @@ static ossl_ssize_t bio_nwrite(BIO *bio, char **buf, size_t num_)
         num = space;
     if (num <= 0)
         return num;
-    b = bio->ptr;
+    b = (bio_bio_st *) bio->ptr;
     assert(b != NULL);
     b->len += num;
     assert(b->len <= b->size);
@@ -418,7 +418,7 @@ static ossl_ssize_t bio_nwrite(BIO *bio, char **buf, size_t num_)
 static long bio_ctrl(BIO *bio, int cmd, long num, void *ptr)
 {
     long ret;
-    struct bio_bio_st *b = bio->ptr;
+    struct bio_bio_st *b = (bio_bio_st *) bio->ptr;
 
     assert(b != NULL);
 
@@ -450,7 +450,7 @@ static long bio_ctrl(BIO *bio, int cmd, long num, void *ptr)
 
     case BIO_C_MAKE_BIO_PAIR:
         {
-            BIO *other_bio = ptr;
+            BIO *other_bio = (BIO*) ptr;
 
             if (bio_make_pair(bio, other_bio))
                 ret = 1;
@@ -506,22 +506,22 @@ static long bio_ctrl(BIO *bio, int cmd, long num, void *ptr)
 
     case BIO_C_NREAD0:
         /* prepare for non-copying read */
-        ret = (long)bio_nread0(bio, ptr);
+        ret = (long) bio_nread0(bio, (char**) ptr);
         break;
 
     case BIO_C_NREAD:
         /* non-copying read */
-        ret = (long)bio_nread(bio, ptr, (size_t)num);
+        ret = (long) bio_nread(bio, (char**) ptr, (size_t)num);
         break;
 
     case BIO_C_NWRITE0:
         /* prepare for non-copying write */
-        ret = (long)bio_nwrite0(bio, ptr);
+        ret = (long)bio_nwrite0(bio, (char**) ptr);
         break;
 
     case BIO_C_NWRITE:
         /* non-copying write */
-        ret = (long)bio_nwrite(bio, ptr, (size_t)num);
+        ret = (long)bio_nwrite(bio, (char**) ptr, (size_t)num);
         break;
 
         /* standard CTRL codes follow */
@@ -545,7 +545,7 @@ static long bio_ctrl(BIO *bio, int cmd, long num, void *ptr)
 
     case BIO_CTRL_PENDING:
         if (b->peer != NULL) {
-            struct bio_bio_st *peer_b = b->peer->ptr;
+            struct bio_bio_st *peer_b = (bio_bio_st *) b->peer->ptr;
 
             ret = (long)peer_b->len;
         } else
@@ -562,11 +562,11 @@ static long bio_ctrl(BIO *bio, int cmd, long num, void *ptr)
     case BIO_CTRL_DUP:
         /* See BIO_dup_chain for circumstances we have to expect. */
         {
-            BIO *other_bio = ptr;
+            BIO *other_bio = (BIO *) ptr;
             struct bio_bio_st *other_b;
 
             assert(other_bio != NULL);
-            other_b = other_bio->ptr;
+            other_b = (bio_bio_st*) other_bio->ptr;
             assert(other_b != NULL);
 
             assert(other_b->buf == NULL); /* other_bio is always fresh */
@@ -583,7 +583,7 @@ static long bio_ctrl(BIO *bio, int cmd, long num, void *ptr)
 
     case BIO_CTRL_EOF:
         if (b->peer != NULL) {
-            struct bio_bio_st *peer_b = b->peer->ptr;
+            struct bio_bio_st *peer_b = (bio_bio_st *) b->peer->ptr;
 
             if (peer_b->len == 0 && peer_b->closed)
                 ret = 1;
@@ -612,8 +612,8 @@ static int bio_make_pair(BIO *bio1, BIO *bio2)
     assert(bio1 != NULL);
     assert(bio2 != NULL);
 
-    b1 = bio1->ptr;
-    b2 = bio2->ptr;
+    b1 = (bio_bio_st *) bio1->ptr;
+    b2 = (bio_bio_st *) bio2->ptr;
 
     if (b1->peer != NULL || b2->peer != NULL) {
         BIOerr(BIO_F_BIO_MAKE_PAIR, BIO_R_IN_USE);
@@ -621,7 +621,7 @@ static int bio_make_pair(BIO *bio1, BIO *bio2)
     }
 
     if (b1->buf == NULL) {
-        b1->buf = OPENSSL_malloc(b1->size);
+        b1->buf = (char*) OPENSSL_malloc(b1->size);
         if (b1->buf == NULL) {
             BIOerr(BIO_F_BIO_MAKE_PAIR, ERR_R_MALLOC_FAILURE);
             return 0;
@@ -631,7 +631,7 @@ static int bio_make_pair(BIO *bio1, BIO *bio2)
     }
 
     if (b2->buf == NULL) {
-        b2->buf = OPENSSL_malloc(b2->size);
+        b2->buf = (char*) OPENSSL_malloc(b2->size);
         if (b2->buf == NULL) {
             BIOerr(BIO_F_BIO_MAKE_PAIR, ERR_R_MALLOC_FAILURE);
             return 0;
@@ -655,13 +655,13 @@ static int bio_make_pair(BIO *bio1, BIO *bio2)
 
 static void bio_destroy_pair(BIO *bio)
 {
-    struct bio_bio_st *b = bio->ptr;
+    struct bio_bio_st *b = (bio_bio_st *) bio->ptr;
 
     if (b != NULL) {
         BIO *peer_bio = b->peer;
 
         if (peer_bio != NULL) {
-            struct bio_bio_st *peer_b = peer_bio->ptr;
+            struct bio_bio_st *peer_b = (bio_bio_st *) peer_bio->ptr;
 
             assert(peer_b != NULL);
             assert(peer_b->peer == bio);

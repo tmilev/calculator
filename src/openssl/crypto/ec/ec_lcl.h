@@ -271,9 +271,9 @@ struct ec_group_st {
 };
 
 #define SETPRECOMP(g, type, pre) \
-    g->pre_comp_type = PCT_##type, g->pre_comp.type = pre
+    g->pre_comp_type = ec_group_st::PCT_##type, g->pre_comp.type = pre
 #define HAVEPRECOMP(g, type) \
-    g->pre_comp_type == PCT_##type && g->pre_comp.type != NULL
+    g->pre_comp_type == ec_group_st::PCT_##type && g->pre_comp.type != NULL
 
 struct ec_key_st {
     const EC_KEY_METHOD *meth;

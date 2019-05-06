@@ -50,7 +50,7 @@ static int pkey_dh_init(EVP_PKEY_CTX *ctx)
 {
     DH_PKEY_CTX *dctx;
 
-    if ((dctx = OPENSSL_zalloc(sizeof(*dctx))) == NULL) {
+    if ((dctx = (DH_PKEY_CTX *) OPENSSL_zalloc(sizeof(*dctx))) == NULL) {
         DHerr(DH_F_PKEY_DH_INIT, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -68,7 +68,7 @@ static int pkey_dh_init(EVP_PKEY_CTX *ctx)
 
 static void pkey_dh_cleanup(EVP_PKEY_CTX *ctx)
 {
-    DH_PKEY_CTX *dctx = ctx->data;
+    DH_PKEY_CTX *dctx = (DH_PKEY_CTX *) ctx->data;
     if (dctx != NULL) {
         OPENSSL_free(dctx->kdf_ukm);
         ASN1_OBJECT_free(dctx->kdf_oid);
@@ -82,8 +82,8 @@ static int pkey_dh_copy(EVP_PKEY_CTX *dst, const EVP_PKEY_CTX *src)
     DH_PKEY_CTX *dctx, *sctx;
     if (!pkey_dh_init(dst))
         return 0;
-    sctx = src->data;
-    dctx = dst->data;
+    sctx = (DH_PKEY_CTX *) src->data;
+    dctx = (DH_PKEY_CTX *) dst->data;
     dctx->prime_len = sctx->prime_len;
     dctx->subprime_len = sctx->subprime_len;
     dctx->generator = sctx->generator;
@@ -99,7 +99,7 @@ static int pkey_dh_copy(EVP_PKEY_CTX *dst, const EVP_PKEY_CTX *src)
         return 0;
     dctx->kdf_md = sctx->kdf_md;
     if (sctx->kdf_ukm != NULL) {
-        dctx->kdf_ukm = OPENSSL_memdup(sctx->kdf_ukm, sctx->kdf_ukmlen);
+        dctx->kdf_ukm = (unsigned char*) OPENSSL_memdup(sctx->kdf_ukm, sctx->kdf_ukmlen);
         if (dctx->kdf_ukm == NULL)
           return 0;
         dctx->kdf_ukmlen = sctx->kdf_ukmlen;
@@ -110,7 +110,7 @@ static int pkey_dh_copy(EVP_PKEY_CTX *dst, const EVP_PKEY_CTX *src)
 
 static int pkey_dh_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
 {
-    DH_PKEY_CTX *dctx = ctx->data;
+    DH_PKEY_CTX *dctx = (DH_PKEY_CTX *) ctx->data;
     switch (type) {
     case EVP_PKEY_CTRL_DH_PARAMGEN_PRIME_LEN:
         if (p1 < 256)
@@ -174,7 +174,7 @@ static int pkey_dh_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
         return 1;
 
     case EVP_PKEY_CTRL_DH_KDF_MD:
-        dctx->kdf_md = p2;
+        dctx->kdf_md = (EVP_MD *) p2;
         return 1;
 
     case EVP_PKEY_CTRL_GET_DH_KDF_MD:
@@ -193,7 +193,7 @@ static int pkey_dh_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
 
     case EVP_PKEY_CTRL_DH_KDF_UKM:
         OPENSSL_free(dctx->kdf_ukm);
-        dctx->kdf_ukm = p2;
+        dctx->kdf_ukm = (unsigned char*) p2;
         if (p2)
             dctx->kdf_ukmlen = p1;
         else
@@ -206,7 +206,7 @@ static int pkey_dh_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
 
     case EVP_PKEY_CTRL_DH_KDF_OID:
         ASN1_OBJECT_free(dctx->kdf_oid);
-        dctx->kdf_oid = p2;
+        dctx->kdf_oid = (ASN1_OBJECT*) p2;
         return 1;
 
     case EVP_PKEY_CTRL_GET_DH_KDF_OID:
@@ -228,7 +228,7 @@ static int pkey_dh_ctrl_str(EVP_PKEY_CTX *ctx,
         return EVP_PKEY_CTX_set_dh_paramgen_prime_len(ctx, len);
     }
     if (strcmp(type, "dh_rfc5114") == 0) {
-        DH_PKEY_CTX *dctx = ctx->data;
+        DH_PKEY_CTX *dctx = (DH_PKEY_CTX *) ctx->data;
         int len;
         len = atoi(value);
         if (len < 0 || len > 3)
@@ -237,7 +237,7 @@ static int pkey_dh_ctrl_str(EVP_PKEY_CTX *ctx,
         return 1;
     }
     if (strcmp(type, "dh_param") == 0) {
-        DH_PKEY_CTX *dctx = ctx->data;
+        DH_PKEY_CTX *dctx = (DH_PKEY_CTX *) ctx->data;
         int nid = OBJ_sn2nid(value);
 
         if (nid == NID_undef) {
@@ -327,7 +327,7 @@ static DSA *dsa_dh_generate(DH_PKEY_CTX *dctx, BN_GENCB *pcb)
 static int pkey_dh_paramgen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey)
 {
     DH *dh = NULL;
-    DH_PKEY_CTX *dctx = ctx->data;
+    DH_PKEY_CTX *dctx = (DH_PKEY_CTX *) ctx->data;
     BN_GENCB *pcb;
     int ret;
     if (dctx->rfc5114_param) {
@@ -397,7 +397,7 @@ static int pkey_dh_paramgen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey)
 
 static int pkey_dh_keygen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey)
 {
-    DH_PKEY_CTX *dctx = ctx->data;
+    DH_PKEY_CTX *dctx = (DH_PKEY_CTX *) ctx->data;
     DH *dh = NULL;
 
     if (ctx->pkey == NULL && dctx->param_nid == 0) {
@@ -422,7 +422,7 @@ static int pkey_dh_derive(EVP_PKEY_CTX *ctx, unsigned char *key,
 {
     int ret;
     DH *dh;
-    DH_PKEY_CTX *dctx = ctx->data;
+    DH_PKEY_CTX *dctx = (DH_PKEY_CTX *) ctx->data;
     BIGNUM *dhpub;
     if (!ctx->pkey || !ctx->peerkey) {
         DHerr(DH_F_PKEY_DH_DERIVE, DH_R_KEYS_NOT_SET);
@@ -459,7 +459,7 @@ static int pkey_dh_derive(EVP_PKEY_CTX *ctx, unsigned char *key,
             return 0;
         ret = 0;
         Zlen = DH_size(dh);
-        Z = OPENSSL_malloc(Zlen);
+        Z = (unsigned char*) OPENSSL_malloc(Zlen);
         if (Z == NULL) {
             goto err;
         }

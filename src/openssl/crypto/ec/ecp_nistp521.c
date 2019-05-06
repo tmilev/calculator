@@ -892,7 +892,7 @@ static limb felem_is_zero(const felem in)
 
 static int felem_is_zero_int(const void *in)
 {
-    return (int)(felem_is_zero(in) & ((limb) 1));
+    return (int)(felem_is_zero((limb*) in) & ((limb) 1));
 }
 
 /*-
@@ -1682,7 +1682,7 @@ const EC_METHOD *EC_GFp_nistp521_method(void)
 
 static NISTP521_PRE_COMP *nistp521_pre_comp_new(void)
 {
-    NISTP521_PRE_COMP *ret = OPENSSL_zalloc(sizeof(*ret));
+    NISTP521_PRE_COMP *ret = (NISTP521_PRE_COMP *) OPENSSL_zalloc(sizeof(*ret));
 
     if (ret == NULL) {
         ECerr(EC_F_NISTP521_PRE_COMP_NEW, ERR_R_MALLOC_FAILURE);
@@ -1926,10 +1926,10 @@ int ec_GFp_nistp521_points_mul(const EC_GROUP *group, EC_POINT *r,
              */
             mixed = 1;
         }
-        secrets = OPENSSL_zalloc(sizeof(*secrets) * num_points);
-        pre_comp = OPENSSL_zalloc(sizeof(*pre_comp) * num_points);
+        secrets = (felem_bytearray *) OPENSSL_zalloc(sizeof(*secrets) * num_points);
+        pre_comp = (limb(*)[17][3][9]) OPENSSL_zalloc(sizeof(*pre_comp) * num_points);
         if (mixed)
-            tmp_felems =
+            tmp_felems = (limb(*)[9])
                 OPENSSL_malloc(sizeof(*tmp_felems) * (num_points * 17 + 1));
         if ((secrets == NULL) || (pre_comp == NULL)
             || (mixed && (tmp_felems == NULL))) {

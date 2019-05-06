@@ -36,7 +36,7 @@ int MD4_Init(MD4_CTX *c)
 # endif
 void md4_block_data_order(MD4_CTX *c, const void *data_, size_t num)
 {
-    const unsigned char *data = data_;
+    const unsigned char *data = (unsigned char *) data_;
     register unsigned MD32_REG_T A, B, C, D, l;
 # ifndef MD32_XARRAY
     /* See comment in crypto/sha/sha_locl.h for details. */

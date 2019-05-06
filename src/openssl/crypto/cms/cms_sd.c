@@ -127,7 +127,7 @@ static int cms_copy_messageDigest(CMS_ContentInfo *cms, CMS_SignerInfo *si)
         if (OBJ_cmp(si->digestAlgorithm->algorithm,
                     sitmp->digestAlgorithm->algorithm))
             continue;
-        messageDigest = CMS_signed_get0_data_by_OBJ(sitmp,
+        messageDigest = (ASN1_OCTET_STRING *) CMS_signed_get0_data_by_OBJ(sitmp,
                                                     OBJ_nid2obj
                                                     (NID_pkcs9_messageDigest),
                                                     -3, V_ASN1_OCTET_STRING);
@@ -603,7 +603,7 @@ static int cms_SignerInfo_content_sign(CMS_ContentInfo *cms,
         if (!EVP_DigestFinal_ex(mctx, md, &mdlen))
             goto err;
         siglen = EVP_PKEY_size(si->pkey);
-        sig = OPENSSL_malloc(siglen);
+        sig = (unsigned char*) OPENSSL_malloc(siglen);
         if (sig == NULL) {
             CMSerr(CMS_F_CMS_SIGNERINFO_CONTENT_SIGN, ERR_R_MALLOC_FAILURE);
             goto err;
@@ -616,7 +616,7 @@ static int cms_SignerInfo_content_sign(CMS_ContentInfo *cms,
     } else {
         unsigned char *sig;
         unsigned int siglen;
-        sig = OPENSSL_malloc(EVP_PKEY_size(si->pkey));
+        sig = (unsigned char*) OPENSSL_malloc(EVP_PKEY_size(si->pkey));
         if (sig == NULL) {
             CMSerr(CMS_F_CMS_SIGNERINFO_CONTENT_SIGN, ERR_R_MALLOC_FAILURE);
             goto err;
@@ -695,7 +695,7 @@ int CMS_SignerInfo_sign(CMS_SignerInfo *si)
     if (EVP_DigestSignFinal(mctx, NULL, &siglen) <= 0)
         goto err;
     OPENSSL_free(abuf);
-    abuf = OPENSSL_malloc(siglen);
+    abuf = (unsigned char*) OPENSSL_malloc(siglen);
     if (abuf == NULL)
         goto err;
     if (EVP_DigestSignFinal(mctx, abuf, &siglen) <= 0)
@@ -810,7 +810,7 @@ int CMS_SignerInfo_verify_content(CMS_SignerInfo *si, BIO *chain)
     }
     /* If we have any signed attributes look for messageDigest value */
     if (CMS_signed_get_attr_count(si) >= 0) {
-        os = CMS_signed_get0_data_by_OBJ(si,
+        os = (ASN1_OCTET_STRING*) CMS_signed_get0_data_by_OBJ(si,
                                          OBJ_nid2obj(NID_pkcs9_messageDigest),
                                          -3, V_ASN1_OCTET_STRING);
         if (!os) {

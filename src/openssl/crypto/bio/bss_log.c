@@ -196,7 +196,7 @@ static int slg_write(BIO *b, const char *in, int inl)
         /* The default */
     };
 
-    if ((buf = OPENSSL_malloc(inl + 1)) == NULL) {
+    if ((buf = (char*) OPENSSL_malloc(inl + 1)) == NULL) {
         BIOerr(BIO_F_SLG_WRITE, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -220,7 +220,7 @@ static long slg_ctrl(BIO *b, int cmd, long num, void *ptr)
     switch (cmd) {
     case BIO_CTRL_SET:
         xcloselog(b);
-        xopenlog(b, ptr, num);
+        xopenlog(b, (char*) ptr, num);
         break;
     default:
         break;

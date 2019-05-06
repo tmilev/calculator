@@ -819,7 +819,7 @@ doapr_outch(char **sbuffer,
 
         *maxlen += BUFFER_INC;
         if (*buffer == NULL) {
-            if ((*buffer = OPENSSL_malloc(*maxlen)) == NULL) {
+            if ((*buffer = (char*) OPENSSL_malloc(*maxlen)) == NULL) {
                 BIOerr(BIO_F_DOAPR_OUTCH, ERR_R_MALLOC_FAILURE);
                 return 0;
             }
@@ -831,7 +831,7 @@ doapr_outch(char **sbuffer,
             *sbuffer = NULL;
         } else {
             char *tmpbuf;
-            tmpbuf = OPENSSL_realloc(*buffer, *maxlen);
+            tmpbuf = (char *) OPENSSL_realloc(*buffer, *maxlen);
             if (tmpbuf == NULL)
                 return 0;
             *buffer = tmpbuf;

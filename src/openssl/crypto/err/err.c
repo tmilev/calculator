@@ -686,7 +686,7 @@ const char *ERR_reason_error_string(unsigned long e)
 
 void err_delete_thread_state(void)
 {
-    ERR_STATE *state = CRYPTO_THREAD_get_local(&err_thread_local);
+    ERR_STATE *state = (ERR_STATE *) CRYPTO_THREAD_get_local(&err_thread_local);
     if (state == NULL)
         return;
 
@@ -723,15 +723,15 @@ ERR_STATE *ERR_get_state(void)
     if (!RUN_ONCE(&err_init, err_do_init))
         return NULL;
 
-    state = CRYPTO_THREAD_get_local(&err_thread_local);
-    if (state == (ERR_STATE*)-1)
+    state = (ERR_STATE *) CRYPTO_THREAD_get_local(&err_thread_local);
+    if (state == (ERR_STATE*) - 1)
         return NULL;
 
     if (state == NULL) {
         if (!CRYPTO_THREAD_set_local(&err_thread_local, (ERR_STATE*)-1))
             return NULL;
 
-        if ((state = OPENSSL_zalloc(sizeof(*state))) == NULL) {
+        if ((state = (ERR_STATE *) OPENSSL_zalloc(sizeof(*state))) == NULL) {
             CRYPTO_THREAD_set_local(&err_thread_local, NULL);
             return NULL;
         }
@@ -849,7 +849,7 @@ void ERR_add_error_vdata(int num, va_list args)
     char *str, *p, *a;
 
     s = 80;
-    if ((str = OPENSSL_malloc(s + 1)) == NULL) {
+    if ((str = (char*) OPENSSL_malloc(s + 1)) == NULL) {
         /* ERRerr(ERR_F_ERR_ADD_ERROR_VDATA, ERR_R_MALLOC_FAILURE); */
         return;
     }
@@ -863,7 +863,7 @@ void ERR_add_error_vdata(int num, va_list args)
         n += strlen(a);
         if (n > s) {
             s = n + 20;
-            p = OPENSSL_realloc(str, s + 1);
+            p = (char*) OPENSSL_realloc(str, s + 1);
             if (p == NULL) {
                 OPENSSL_free(str);
                 return;

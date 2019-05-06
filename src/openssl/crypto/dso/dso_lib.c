@@ -24,7 +24,7 @@ static DSO *DSO_new_method(DSO_METHOD *meth)
          */
         default_DSO_meth = DSO_METHOD_openssl();
     }
-    ret = OPENSSL_zalloc(sizeof(*ret));
+    ret = (DSO *) OPENSSL_zalloc(sizeof(*ret));
     if (ret == NULL) {
         DSOerr(DSO_F_DSO_NEW_METHOD, ERR_R_MALLOC_FAILURE);
         return NULL;
@@ -328,7 +328,7 @@ DSO *DSO_dsobyaddr(void *addr, int flags)
     if (len < 0)
         return NULL;
 
-    filename = OPENSSL_malloc(len);
+    filename = (char*) OPENSSL_malloc(len);
     if (filename != NULL
             && DSO_pathbyaddr(addr, filename, len) == len)
         ret = DSO_load(NULL, filename, NULL, flags);

@@ -209,7 +209,7 @@ static void *d2i_ocsp_nonce(void *a, const unsigned char **pp, long length)
 
 static void ocsp_nonce_free(void *a)
 {
-    ASN1_OCTET_STRING_free(a);
+    ASN1_OCTET_STRING_free((ASN1_OCTET_STRING*) a);
 }
 
 static int i2r_ocsp_nonce(const X509V3_EXT_METHOD *method, void *nonce,
@@ -217,7 +217,7 @@ static int i2r_ocsp_nonce(const X509V3_EXT_METHOD *method, void *nonce,
 {
     if (BIO_printf(out, "%*s", indent, "") <= 0)
         return 0;
-    if (i2a_ASN1_STRING(out, nonce, V_ASN1_OCTET_STRING) <= 0)
+    if (i2a_ASN1_STRING(out, (ASN1_STRING *) nonce, V_ASN1_OCTET_STRING) <= 0)
         return 0;
     return 1;
 }
@@ -240,7 +240,7 @@ static int i2r_ocsp_serviceloc(const X509V3_EXT_METHOD *method, void *in,
                                BIO *bp, int ind)
 {
     int i;
-    OCSP_SERVICELOC *a = in;
+    OCSP_SERVICELOC *a = (OCSP_SERVICELOC *) in;
     ACCESS_DESCRIPTION *ad;
 
     if (BIO_printf(bp, "%*sIssuer: ", ind, "") <= 0)

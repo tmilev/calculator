@@ -97,7 +97,7 @@ static int rsa_ossl_public_encrypt(int flen, const unsigned char *from,
     f = BN_CTX_get(ctx);
     ret = BN_CTX_get(ctx);
     num = BN_num_bytes(rsa->n);
-    buf = OPENSSL_malloc(num);
+    buf = (unsigned char*) OPENSSL_malloc(num);
     if (ret == NULL || buf == NULL) {
         RSAerr(RSA_F_RSA_OSSL_PUBLIC_ENCRYPT, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -252,7 +252,7 @@ static int rsa_ossl_private_encrypt(int flen, const unsigned char *from,
     f = BN_CTX_get(ctx);
     ret = BN_CTX_get(ctx);
     num = BN_num_bytes(rsa->n);
-    buf = OPENSSL_malloc(num);
+    buf = (unsigned char*) OPENSSL_malloc(num);
     if (ret == NULL || buf == NULL) {
         RSAerr(RSA_F_RSA_OSSL_PRIVATE_ENCRYPT, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -381,7 +381,7 @@ static int rsa_ossl_private_decrypt(int flen, const unsigned char *from,
     f = BN_CTX_get(ctx);
     ret = BN_CTX_get(ctx);
     num = BN_num_bytes(rsa->n);
-    buf = OPENSSL_malloc(num);
+    buf =(unsigned char*) OPENSSL_malloc(num);
     if (ret == NULL || buf == NULL) {
         RSAerr(RSA_F_RSA_OSSL_PRIVATE_DECRYPT, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -521,7 +521,7 @@ static int rsa_ossl_public_decrypt(int flen, const unsigned char *from,
     f = BN_CTX_get(ctx);
     ret = BN_CTX_get(ctx);
     num = BN_num_bytes(rsa->n);
-    buf = OPENSSL_malloc(num);
+    buf = (unsigned char*) OPENSSL_malloc(num);
     if (ret == NULL || buf == NULL) {
         RSAerr(RSA_F_RSA_OSSL_PUBLIC_DECRYPT, ERR_R_MALLOC_FAILURE);
         goto err;

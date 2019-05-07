@@ -13,7 +13,7 @@
 
 RSA_METHOD *RSA_meth_new(const char *name, int flags)
 {
-    RSA_METHOD *meth = OPENSSL_zalloc(sizeof(*meth));
+    RSA_METHOD *meth = (RSA_METHOD *) OPENSSL_zalloc(sizeof(*meth));
 
     if (meth != NULL) {
         meth->flags = flags;
@@ -39,7 +39,7 @@ void RSA_meth_free(RSA_METHOD *meth)
 
 RSA_METHOD *RSA_meth_dup(const RSA_METHOD *meth)
 {
-    RSA_METHOD *ret = OPENSSL_malloc(sizeof(*ret));
+    RSA_METHOD *ret = (RSA_METHOD *) OPENSSL_malloc(sizeof(*ret));
 
     if (ret != NULL) {
         memcpy(ret, meth, sizeof(*meth));
@@ -93,7 +93,7 @@ void *RSA_meth_get0_app_data(const RSA_METHOD *meth)
 
 int RSA_meth_set0_app_data(RSA_METHOD *meth, void *app_data)
 {
-    meth->app_data = app_data;
+    meth->app_data = (char*) app_data;
     return 1;
 }
 

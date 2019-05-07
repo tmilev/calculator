@@ -21,8 +21,8 @@ static EVP_MAC_IMPL *poly1305_new(void)
 {
     EVP_MAC_IMPL *ctx;
 
-    if ((ctx = OPENSSL_zalloc(sizeof(*ctx))) == NULL
-            || (ctx->ctx = OPENSSL_zalloc(sizeof(POLY1305))) == NULL) {
+    if ((ctx = (EVP_MAC_IMPL *) OPENSSL_zalloc(sizeof(*ctx))) == NULL
+            || (ctx->ctx = (POLY1305*) OPENSSL_zalloc(sizeof(POLY1305))) == NULL) {
         OPENSSL_free(ctx);
         return 0;
     }
@@ -110,7 +110,7 @@ static int poly1305_ctrl_int(EVP_MAC_IMPL *ctx, int cmd, ...)
 
 static int poly1305_ctrl_str_cb(void *ctx, int cmd, void *buf, size_t buflen)
 {
-    return poly1305_ctrl_int(ctx, cmd, buf, buflen);
+    return poly1305_ctrl_int((EVP_MAC_IMPL *) ctx, cmd, buf, buflen);
 }
 
 static int poly1305_ctrl_str(EVP_MAC_IMPL *ctx,

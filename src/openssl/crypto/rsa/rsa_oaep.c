@@ -95,7 +95,7 @@ int RSA_padding_add_PKCS1_OAEP_mgf1(unsigned char *to, int tlen,
         goto err;
 
     dbmask_len = emlen - mdlen;
-    dbmask = OPENSSL_malloc(dbmask_len);
+    dbmask = (unsigned char*) OPENSSL_malloc(dbmask_len);
     if (dbmask == NULL) {
         RSAerr(RSA_F_RSA_PADDING_ADD_PKCS1_OAEP_MGF1, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -171,13 +171,13 @@ int RSA_padding_check_PKCS1_OAEP_mgf1(unsigned char *to, int tlen,
     }
 
     dblen = num - mdlen - 1;
-    db = OPENSSL_malloc(dblen);
+    db = (unsigned char*) OPENSSL_malloc(dblen);
     if (db == NULL) {
         RSAerr(RSA_F_RSA_PADDING_CHECK_PKCS1_OAEP_MGF1, ERR_R_MALLOC_FAILURE);
         goto cleanup;
     }
 
-    em = OPENSSL_malloc(num);
+    em = (unsigned char*) OPENSSL_malloc(num);
     if (em == NULL) {
         RSAerr(RSA_F_RSA_PADDING_CHECK_PKCS1_OAEP_MGF1,
                ERR_R_MALLOC_FAILURE);

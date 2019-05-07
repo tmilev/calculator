@@ -69,7 +69,7 @@ static PROPERTY_STRING *new_property_string(const char *s,
                                             OSSL_PROPERTY_IDX *pidx)
 {
     const size_t l = strlen(s);
-    PROPERTY_STRING *ps = OPENSSL_malloc(sizeof(*ps) + l);
+    PROPERTY_STRING *ps = (PROPERTY_STRING *) OPENSSL_malloc(sizeof(*ps) + l);
 
     if (ps != NULL) {
         memcpy(ps->body, s, l + 1);

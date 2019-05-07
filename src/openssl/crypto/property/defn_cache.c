@@ -87,7 +87,7 @@ int ossl_prop_defn_set(const char *prop, OSSL_PROPERTY_LIST *pl)
         return 1;
     }
     len = strlen(prop);
-    p = OPENSSL_malloc(sizeof(*p) + len);
+    p = (PROPERTY_DEFN_ELEM*) OPENSSL_malloc(sizeof(*p) + len);
     if (p != NULL) {
         p->prop = p->body;
         p->defn = pl;

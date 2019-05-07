@@ -419,7 +419,7 @@ err:
 
 RAND_POOL *rand_pool_new(int entropy_requested, size_t min_len, size_t max_len)
 {
-    RAND_POOL *pool = OPENSSL_zalloc(sizeof(*pool));
+    RAND_POOL *pool = (RAND_POOL *) OPENSSL_zalloc(sizeof(*pool));
 
     if (pool == NULL) {
         RANDerr(RAND_F_RAND_POOL_NEW, ERR_R_MALLOC_FAILURE);
@@ -430,7 +430,7 @@ RAND_POOL *rand_pool_new(int entropy_requested, size_t min_len, size_t max_len)
     pool->max_len = (max_len > RAND_POOL_MAX_LENGTH) ?
         RAND_POOL_MAX_LENGTH : max_len;
 
-    pool->buffer = OPENSSL_secure_zalloc(pool->max_len);
+    pool->buffer = (unsigned char*) OPENSSL_secure_zalloc(pool->max_len);
     if (pool->buffer == NULL) {
         RANDerr(RAND_F_RAND_POOL_NEW, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -454,7 +454,7 @@ err:
 RAND_POOL *rand_pool_attach(const unsigned char *buffer, size_t len,
                             size_t entropy)
 {
-    RAND_POOL *pool = OPENSSL_zalloc(sizeof(*pool));
+    RAND_POOL *pool = (RAND_POOL *) OPENSSL_zalloc(sizeof(*pool));
 
     if (pool == NULL) {
         RANDerr(RAND_F_RAND_POOL_ATTACH, ERR_R_MALLOC_FAILURE);

@@ -168,8 +168,8 @@ int sm2_encrypt(const EC_KEY *key,
         goto done;
     }
 
-    x2y2 = OPENSSL_zalloc(2 * field_size);
-    C3 = OPENSSL_zalloc(C3_size);
+    x2y2 = (uint8_t*) OPENSSL_zalloc(2 * field_size);
+    C3 = (uint8_t*) OPENSSL_zalloc(C3_size);
 
     if (x2y2 == NULL || C3 == NULL) {
         SM2err(SM2_F_SM2_ENCRYPT, ERR_R_MALLOC_FAILURE);
@@ -197,7 +197,7 @@ int sm2_encrypt(const EC_KEY *key,
         goto done;
     }
 
-    msg_mask = OPENSSL_zalloc(msg_len);
+    msg_mask = (uint8_t*) OPENSSL_zalloc(msg_len);
     if (msg_mask == NULL) {
        SM2err(SM2_F_SM2_ENCRYPT, ERR_R_MALLOC_FAILURE);
        goto done;
@@ -319,9 +319,9 @@ int sm2_decrypt(const EC_KEY *key,
         goto done;
     }
 
-    msg_mask = OPENSSL_zalloc(msg_len);
-    x2y2 = OPENSSL_zalloc(2 * field_size);
-    computed_C3 = OPENSSL_zalloc(hash_size);
+    msg_mask = (uint8_t*) OPENSSL_zalloc(msg_len);
+    x2y2 = (uint8_t*) OPENSSL_zalloc(2 * field_size);
+    computed_C3 = (uint8_t*) OPENSSL_zalloc(hash_size);
 
     if (msg_mask == NULL || x2y2 == NULL || computed_C3 == NULL) {
         SM2err(SM2_F_SM2_DECRYPT, ERR_R_MALLOC_FAILURE);

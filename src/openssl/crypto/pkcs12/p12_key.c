@@ -93,16 +93,16 @@ int PKCS12_key_gen_uni(unsigned char *pass, int passlen, unsigned char *salt,
     u = EVP_MD_size(md_type);
     if (u < 0 || v <= 0)
         goto err;
-    D = OPENSSL_malloc(v);
-    Ai = OPENSSL_malloc(u);
-    B = OPENSSL_malloc(v + 1);
+    D = (unsigned char*) OPENSSL_malloc(v);
+    Ai = (unsigned char*) OPENSSL_malloc(u);
+    B = (unsigned char*) OPENSSL_malloc(v + 1);
     Slen = v * ((saltlen + v - 1) / v);
     if (passlen)
         Plen = v * ((passlen + v - 1) / v);
     else
         Plen = 0;
     Ilen = Slen + Plen;
-    I = OPENSSL_malloc(Ilen);
+    I = (unsigned char*) OPENSSL_malloc(Ilen);
     if (D == NULL || Ai == NULL || B == NULL || I == NULL)
         goto err;
     for (i = 0; i < v; i++)

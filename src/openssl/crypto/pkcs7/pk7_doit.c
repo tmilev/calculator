@@ -114,7 +114,7 @@ static int pkcs7_encode_rinfo(PKCS7_RECIP_INFO *ri,
     if (EVP_PKEY_encrypt(pctx, NULL, &eklen, key, keylen) <= 0)
         goto err;
 
-    ek = OPENSSL_malloc(eklen);
+    ek = (unsigned char*) OPENSSL_malloc(eklen);
 
     if (ek == NULL) {
         PKCS7err(PKCS7_F_PKCS7_ENCODE_RINFO, ERR_R_MALLOC_FAILURE);
@@ -162,7 +162,7 @@ static int pkcs7_decrypt_rinfo(unsigned char **pek, int *peklen,
                          ri->enc_key->data, ri->enc_key->length) <= 0)
         goto err;
 
-    ek = OPENSSL_malloc(eklen);
+    ek = (unsigned char*) OPENSSL_malloc(eklen);
 
     if (ek == NULL) {
         PKCS7err(PKCS7_F_PKCS7_DECRYPT_RINFO, ERR_R_MALLOC_FAILURE);
@@ -518,7 +518,7 @@ BIO *PKCS7_dataDecode(PKCS7 *p7, EVP_PKEY *pkey, BIO *in_bio, X509 *pcert)
             goto err;
         /* Generate random key as MMA defence */
         tkeylen = EVP_CIPHER_CTX_key_length(evp_ctx);
-        tkey = OPENSSL_malloc(tkeylen);
+        tkey = (unsigned char*) OPENSSL_malloc(tkeylen);
         if (tkey == NULL)
             goto err;
         if (EVP_CIPHER_CTX_rand_key(evp_ctx, tkey) <= 0)
@@ -757,7 +757,7 @@ int PKCS7_dataFinal(PKCS7 *p7, BIO *bio)
                 unsigned char *abuf = NULL;
                 unsigned int abuflen;
                 abuflen = EVP_PKEY_size(si->pkey);
-                abuf = OPENSSL_malloc(abuflen);
+                abuf = (unsigned char*) OPENSSL_malloc(abuflen);
                 if (abuf == NULL)
                     goto err;
 
@@ -850,7 +850,7 @@ int PKCS7_SIGNER_INFO_sign(PKCS7_SIGNER_INFO *si)
     abuf = NULL;
     if (EVP_DigestSignFinal(mctx, NULL, &siglen) <= 0)
         goto err;
-    abuf = OPENSSL_malloc(siglen);
+    abuf = (unsigned char*) OPENSSL_malloc(siglen);
     if (abuf == NULL)
         goto err;
     if (EVP_DigestSignFinal(mctx, abuf, &siglen) <= 0)

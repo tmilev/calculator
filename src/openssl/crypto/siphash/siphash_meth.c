@@ -23,7 +23,7 @@ struct evp_mac_impl_st {
 
 static EVP_MAC_IMPL *siphash_new(void)
 {
-    return OPENSSL_zalloc(sizeof(EVP_MAC_IMPL));
+    return (EVP_MAC_IMPL *) OPENSSL_zalloc(sizeof(EVP_MAC_IMPL));
 }
 
 static void siphash_free(EVP_MAC_IMPL *sctx)
@@ -103,7 +103,7 @@ static int siphash_ctrl_int(EVP_MAC_IMPL *sctx, int cmd, ...)
 
 static int siphash_ctrl_str_cb(void *ctx, int cmd, void *buf, size_t buflen)
 {
-    return siphash_ctrl_int(ctx, cmd, buf, buflen);
+    return siphash_ctrl_int((EVP_MAC_IMPL *) ctx, cmd, buf, buflen);
 }
 
 static int siphash_ctrl_str(EVP_MAC_IMPL *ctx,

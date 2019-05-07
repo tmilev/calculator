@@ -134,7 +134,7 @@ int int_rsa_verify(int type, const unsigned char *m, unsigned int m_len,
     }
 
     /* Recover the encoded digest. */
-    decrypt_buf = OPENSSL_malloc(siglen);
+    decrypt_buf = (unsigned char*) OPENSSL_malloc(siglen);
     if (decrypt_buf == NULL) {
         RSAerr(RSA_F_INT_RSA_VERIFY, ERR_R_MALLOC_FAILURE);
         goto err;

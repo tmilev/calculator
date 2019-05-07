@@ -215,7 +215,7 @@ static X509_ALGOR *rsa_mgf1_decode(X509_ALGOR *alg)
 {
     if (OBJ_obj2nid(alg->algorithm) != NID_mgf1)
         return NULL;
-    return ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(X509_ALGOR),
+    return (X509_ALGOR *) ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(X509_ALGOR),
                                      alg->parameter);
 }
 
@@ -419,7 +419,7 @@ static RSA_PSS_PARAMS *rsa_pss_decode(const X509_ALGOR *alg)
 {
     RSA_PSS_PARAMS *pss;
 
-    pss = ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(RSA_PSS_PARAMS),
+    pss = (RSA_PSS_PARAMS *) ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(RSA_PSS_PARAMS),
                                     alg->parameter);
 
     if (pss == NULL)
@@ -463,30 +463,30 @@ static int rsa_pkey_ctrl(EVP_PKEY *pkey, int op, long arg1, void *arg2)
 
     case ASN1_PKEY_CTRL_PKCS7_SIGN:
         if (arg1 == 0)
-            PKCS7_SIGNER_INFO_get0_algs(arg2, NULL, NULL, &alg);
+            PKCS7_SIGNER_INFO_get0_algs((PKCS7_SIGNER_INFO *) arg2, NULL, NULL, &alg);
         break;
 
     case ASN1_PKEY_CTRL_PKCS7_ENCRYPT:
         if (pkey_is_pss(pkey))
             return -2;
         if (arg1 == 0)
-            PKCS7_RECIP_INFO_get0_alg(arg2, &alg);
+            PKCS7_RECIP_INFO_get0_alg((PKCS7_RECIP_INFO *) arg2, &alg);
         break;
 #ifndef OPENSSL_NO_CMS
     case ASN1_PKEY_CTRL_CMS_SIGN:
         if (arg1 == 0)
-            return rsa_cms_sign(arg2);
+            return rsa_cms_sign((CMS_SignerInfo *) arg2);
         else if (arg1 == 1)
-            return rsa_cms_verify(arg2);
+            return rsa_cms_verify((CMS_SignerInfo *) arg2);
         break;
 
     case ASN1_PKEY_CTRL_CMS_ENVELOPE:
         if (pkey_is_pss(pkey))
             return -2;
         if (arg1 == 0)
-            return rsa_cms_encrypt(arg2);
+            return rsa_cms_encrypt((CMS_RecipientInfo *) arg2);
         else if (arg1 == 1)
-            return rsa_cms_decrypt(arg2);
+            return rsa_cms_decrypt((CMS_RecipientInfo *) arg2);
         break;
 
     case ASN1_PKEY_CTRL_CMS_RI_TYPE:
@@ -874,7 +874,7 @@ static RSA_OAEP_PARAMS *rsa_oaep_decode(const X509_ALGOR *alg)
 {
     RSA_OAEP_PARAMS *oaep;
 
-    oaep = ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(RSA_OAEP_PARAMS),
+    oaep = (RSA_OAEP_PARAMS *) ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(RSA_OAEP_PARAMS),
                                      alg->parameter);
 
     if (oaep == NULL)

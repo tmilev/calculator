@@ -241,8 +241,8 @@ static RAND_DRBG *rand_drbg_new(int secure,
                                 unsigned int flags,
                                 RAND_DRBG *parent)
 {
-    RAND_DRBG *drbg = secure ? OPENSSL_secure_zalloc(sizeof(*drbg))
-                             : OPENSSL_zalloc(sizeof(*drbg));
+    RAND_DRBG *drbg = (RAND_DRBG *)( secure ? OPENSSL_secure_zalloc(sizeof(*drbg))
+                             : OPENSSL_zalloc(sizeof(*drbg)));
 
     if (drbg == NULL) {
         RANDerr(RAND_F_RAND_DRBG_NEW, ERR_R_MALLOC_FAILURE);
@@ -1023,11 +1023,11 @@ void drbg_delete_thread_state(void)
 {
     RAND_DRBG *drbg;
 
-    drbg = CRYPTO_THREAD_get_local(&public_drbg);
+    drbg = (RAND_DRBG *) CRYPTO_THREAD_get_local(&public_drbg);
     CRYPTO_THREAD_set_local(&public_drbg, NULL);
     RAND_DRBG_free(drbg);
 
-    drbg = CRYPTO_THREAD_get_local(&private_drbg);
+    drbg = (RAND_DRBG *) CRYPTO_THREAD_get_local(&private_drbg);
     CRYPTO_THREAD_set_local(&private_drbg, NULL);
     RAND_DRBG_free(drbg);
 }
@@ -1138,7 +1138,7 @@ static int drbg_add(const void *buf, int num, double randomness)
         randomness = (double)seedlen;
     }
 
-    ret = rand_drbg_restart(drbg, buf, buflen, (size_t)(8 * randomness));
+    ret =  rand_drbg_restart(drbg, (unsigned char*) buf, buflen, (size_t)(8 * randomness));
     rand_drbg_unlock(drbg);
 
     return ret;
@@ -1189,7 +1189,7 @@ RAND_DRBG *RAND_DRBG_get0_public(void)
     if (!RUN_ONCE(&rand_drbg_init, do_rand_drbg_init))
         return NULL;
 
-    drbg = CRYPTO_THREAD_get_local(&public_drbg);
+    drbg = (RAND_DRBG *) CRYPTO_THREAD_get_local(&public_drbg);
     if (drbg == NULL) {
         if (!ossl_init_thread_start(OPENSSL_INIT_THREAD_RAND))
             return NULL;
@@ -1210,7 +1210,7 @@ RAND_DRBG *RAND_DRBG_get0_private(void)
     if (!RUN_ONCE(&rand_drbg_init, do_rand_drbg_init))
         return NULL;
 
-    drbg = CRYPTO_THREAD_get_local(&private_drbg);
+    drbg = (RAND_DRBG *) CRYPTO_THREAD_get_local(&private_drbg);
     if (drbg == NULL) {
         if (!ossl_init_thread_start(OPENSSL_INIT_THREAD_RAND))
             return NULL;

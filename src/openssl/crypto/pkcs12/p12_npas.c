@@ -173,7 +173,7 @@ static int alg_get(const X509_ALGOR *alg, int *pnid, int *piter,
                    int *psaltlen)
 {
     PBEPARAM *pbe;
-    pbe = ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(PBEPARAM), alg->parameter);
+    pbe = (PBEPARAM *) ASN1_TYPE_unpack_sequence(ASN1_ITEM_rptr(PBEPARAM), alg->parameter);
     if (!pbe)
         return 0;
     *pnid = OBJ_obj2nid(alg->algorithm);

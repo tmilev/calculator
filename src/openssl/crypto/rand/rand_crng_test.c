@@ -49,7 +49,7 @@ int rand_crngt_init(void)
 {
     if ((crngt_pool = rand_pool_new(0, CRNGT_BUFSIZ, CRNGT_BUFSIZ)) == NULL)
         return 0;
-    if ((crngt_prev = OPENSSL_secure_malloc(CRNGT_BUFSIZ)) != NULL
+    if ((crngt_prev = (unsigned char*) OPENSSL_secure_malloc(CRNGT_BUFSIZ)) != NULL
         && crngt_get_entropy(crngt_prev))
         return 1;
     rand_crngt_cleanup();

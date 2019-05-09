@@ -198,7 +198,7 @@ static int i2r_IPAddressOrRanges(BIO *out,
 static int i2r_IPAddrBlocks(const X509V3_EXT_METHOD *method,
                             void *ext, BIO *out, int indent)
 {
-    const IPAddrBlocks *addr = ext;
+    const IPAddrBlocks *addr = (IPAddrBlocks *) ext;
     int i;
     for (i = 0; i < sk_IPAddressFamily_num(addr); i++) {
         IPAddressFamily *f = sk_IPAddressFamily_value(addr, i);

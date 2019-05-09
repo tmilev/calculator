@@ -109,7 +109,7 @@ static int i2r_ASIdentifierChoice(BIO *out,
 static int i2r_ASIdentifiers(const X509V3_EXT_METHOD *method,
                              void *ext, BIO *out, int indent)
 {
-    ASIdentifiers *asid = ext;
+    ASIdentifiers *asid = (ASIdentifiers *) ext;
     return (i2r_ASIdentifierChoice(out, asid->asnum, indent,
                                    "Autonomous System Numbers") &&
             i2r_ASIdentifierChoice(out, asid->rdi, indent,
@@ -431,7 +431,7 @@ static int ASIdentifierChoice_canonize(ASIdentifierChoice *choice)
             ASRange *r;
             switch (a->type) {
             case ASIdOrRange_id:
-                if ((r = OPENSSL_malloc(sizeof(*r))) == NULL) {
+                if ((r = (ASRange *) OPENSSL_malloc(sizeof(*r))) == NULL) {
                     X509V3err(X509V3_F_ASIDENTIFIERCHOICE_CANONIZE,
                               ERR_R_MALLOC_FAILURE);
                     goto done;

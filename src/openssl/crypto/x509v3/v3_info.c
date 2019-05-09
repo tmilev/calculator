@@ -79,7 +79,7 @@ static STACK_OF(CONF_VALUE) *i2v_AUTHORITY_INFO_ACCESS(
         vtmp = sk_CONF_VALUE_value(tret, i);
         i2t_ASN1_OBJECT(objtmp, sizeof(objtmp), desc->method);
         nlen = strlen(objtmp) + 3 + strlen(vtmp->name) + 1;
-        ntmp = OPENSSL_malloc(nlen);
+        ntmp = (char*) OPENSSL_malloc(nlen);
         if (ntmp == NULL)
             goto err;
         BIO_snprintf(ntmp, nlen, "%s - %s", objtmp, vtmp->name);

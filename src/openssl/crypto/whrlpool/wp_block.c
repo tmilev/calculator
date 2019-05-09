@@ -478,11 +478,12 @@ static const
 void whirlpool_block(WHIRLPOOL_CTX *ctx, const void *inp, size_t n)
 {
     int r;
-    const u8 *p = inp;
-    union {
+    const u8 *p = (u8 *) inp;
+    typedef union {
         u64 q[8];
         u8 c[64];
-    } S, K, *H = (void *)ctx->H.q;
+    } unionType;
+    unionType S, K, *H = (unionType *)ctx->H.q;
 
 #ifdef GO_FOR_MMX
     GO_FOR_MMX(ctx, inp, n);

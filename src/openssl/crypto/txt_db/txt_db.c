@@ -34,16 +34,16 @@ TXT_DB *TXT_DB_read(BIO *in, int num)
     if (!BUF_MEM_grow(buf, size))
         goto err;
 
-    if ((ret = OPENSSL_malloc(sizeof(*ret))) == NULL)
+    if ((ret = (TXT_DB *) OPENSSL_malloc(sizeof(*ret))) == NULL)
         goto err;
     ret->num_fields = num;
     ret->index = NULL;
     ret->qual = NULL;
     if ((ret->data = sk_OPENSSL_PSTRING_new_null()) == NULL)
         goto err;
-    if ((ret->index = OPENSSL_malloc(sizeof(*ret->index) * num)) == NULL)
+    if ((ret->index = (LHASH_OF(OPENSSL_STRING) **) OPENSSL_malloc(sizeof(*ret->index) * num)) == NULL)
         goto err;
-    if ((ret->qual = OPENSSL_malloc(sizeof(*(ret->qual)) * num)) == NULL)
+    if ((ret->qual = (int(**)(char**)) OPENSSL_malloc(sizeof(*(ret->qual)) * num)) == NULL)
         goto err;
     for (i = 0; i < num; i++) {
         ret->index[i] = NULL;
@@ -72,7 +72,7 @@ TXT_DB *TXT_DB_read(BIO *in, int num)
             continue;
         else {
             buf->data[offset - 1] = '\0'; /* blat the '\n' */
-            if ((p = OPENSSL_malloc(add + offset)) == NULL)
+            if ((p = (char*) OPENSSL_malloc(add + offset)) == NULL)
                 goto err;
             offset = 0;
         }

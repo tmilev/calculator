@@ -162,7 +162,7 @@ int X509_PURPOSE_add(int id, int trust, int flags,
     idx = X509_PURPOSE_get_by_id(id);
     /* Need a new entry */
     if (idx == -1) {
-        if ((ptmp = OPENSSL_malloc(sizeof(*ptmp))) == NULL) {
+        if ((ptmp = (X509_PURPOSE *) OPENSSL_malloc(sizeof(*ptmp))) == NULL) {
             X509V3err(X509V3_F_X509_PURPOSE_ADD, ERR_R_MALLOC_FAILURE);
             return 0;
         }
@@ -331,7 +331,7 @@ static void setup_dp(X509 *x, DIST_POINT *dp)
 static void setup_crldp(X509 *x)
 {
     int i;
-    x->crldp = X509_get_ext_d2i(x, NID_crl_distribution_points, NULL, NULL);
+    x->crldp = (STACK_OF(DIST_POINT) *) X509_get_ext_d2i(x, NID_crl_distribution_points, NULL, NULL);
     for (i = 0; i < sk_DIST_POINT_num(x->crldp); i++)
         setup_dp(x, sk_DIST_POINT_value(x->crldp, i));
 }
@@ -371,7 +371,7 @@ static void x509v3_cache_extensions(X509 *x)
     if (!X509_get_version(x))
         x->ex_flags |= EXFLAG_V1;
     /* Handle basic constraints */
-    if ((bs = X509_get_ext_d2i(x, NID_basic_constraints, NULL, NULL))) {
+    if ((bs = (BASIC_CONSTRAINTS *) X509_get_ext_d2i(x, NID_basic_constraints, NULL, NULL))) {
         if (bs->ca)
             x->ex_flags |= EXFLAG_CA;
         if (bs->pathlen) {
@@ -387,7 +387,7 @@ static void x509v3_cache_extensions(X509 *x)
         x->ex_flags |= EXFLAG_BCONS;
     }
     /* Handle proxy certificates */
-    if ((pci = X509_get_ext_d2i(x, NID_proxyCertInfo, NULL, NULL))) {
+    if ((pci = (PROXY_CERT_INFO_EXTENSION *) X509_get_ext_d2i(x, NID_proxyCertInfo, NULL, NULL))) {
         if (x->ex_flags & EXFLAG_CA
             || X509_get_ext_by_NID(x, NID_subject_alt_name, -1) >= 0
             || X509_get_ext_by_NID(x, NID_issuer_alt_name, -1) >= 0) {
@@ -401,7 +401,7 @@ static void x509v3_cache_extensions(X509 *x)
         x->ex_flags |= EXFLAG_PROXY;
     }
     /* Handle key usage */
-    if ((usage = X509_get_ext_d2i(x, NID_key_usage, NULL, NULL))) {
+    if ((usage = (ASN1_BIT_STRING *) X509_get_ext_d2i(x, NID_key_usage, NULL, NULL))) {
         if (usage->length > 0) {
             x->ex_kusage = usage->data[0];
             if (usage->length > 1)
@@ -412,7 +412,7 @@ static void x509v3_cache_extensions(X509 *x)
         ASN1_BIT_STRING_free(usage);
     }
     x->ex_xkusage = 0;
-    if ((extusage = X509_get_ext_d2i(x, NID_ext_key_usage, NULL, NULL))) {
+    if ((extusage = (EXTENDED_KEY_USAGE *) X509_get_ext_d2i(x, NID_ext_key_usage, NULL, NULL))) {
         x->ex_flags |= EXFLAG_XKUSAGE;
         for (i = 0; i < sk_ASN1_OBJECT_num(extusage); i++) {
             switch (OBJ_obj2nid(sk_ASN1_OBJECT_value(extusage, i))) {
@@ -457,7 +457,7 @@ static void x509v3_cache_extensions(X509 *x)
         sk_ASN1_OBJECT_pop_free(extusage, ASN1_OBJECT_free);
     }
 
-    if ((ns = X509_get_ext_d2i(x, NID_netscape_cert_type, NULL, NULL))) {
+    if ((ns = (ASN1_BIT_STRING *) X509_get_ext_d2i(x, NID_netscape_cert_type, NULL, NULL))) {
         if (ns->length > 0)
             x->ex_nscert = ns->data[0];
         else
@@ -465,8 +465,8 @@ static void x509v3_cache_extensions(X509 *x)
         x->ex_flags |= EXFLAG_NSCERT;
         ASN1_BIT_STRING_free(ns);
     }
-    x->skid = X509_get_ext_d2i(x, NID_subject_key_identifier, NULL, NULL);
-    x->akid = X509_get_ext_d2i(x, NID_authority_key_identifier, NULL, NULL);
+    x->skid = (ASN1_OCTET_STRING *) X509_get_ext_d2i(x, NID_subject_key_identifier, NULL, NULL);
+    x->akid = (AUTHORITY_KEYID *) X509_get_ext_d2i(x, NID_authority_key_identifier, NULL, NULL);
     /* Does subject name match issuer ? */
     if (!X509_NAME_cmp(X509_get_subject_name(x), X509_get_issuer_name(x))) {
         x->ex_flags |= EXFLAG_SI;
@@ -475,15 +475,15 @@ static void x509v3_cache_extensions(X509 *x)
             !ku_reject(x, KU_KEY_CERT_SIGN))
             x->ex_flags |= EXFLAG_SS;
     }
-    x->altname = X509_get_ext_d2i(x, NID_subject_alt_name, NULL, NULL);
-    x->nc = X509_get_ext_d2i(x, NID_name_constraints, &i, NULL);
+    x->altname = (STACK_OF(GENERAL_NAME) *) X509_get_ext_d2i(x, NID_subject_alt_name, NULL, NULL);
+    x->nc = (NAME_CONSTRAINTS *) X509_get_ext_d2i(x, NID_name_constraints, &i, NULL);
     if (!x->nc && (i != -1))
         x->ex_flags |= EXFLAG_INVALID;
     setup_crldp(x);
 
 #ifndef OPENSSL_NO_RFC3779
-    x->rfc3779_addr = X509_get_ext_d2i(x, NID_sbgp_ipAddrBlock, NULL, NULL);
-    x->rfc3779_asid = X509_get_ext_d2i(x, NID_sbgp_autonomousSysNum,
+    x->rfc3779_addr = (STACK_OF(IPAddressFamily) *) X509_get_ext_d2i(x, NID_sbgp_ipAddrBlock, NULL, NULL);
+    x->rfc3779_asid = (ASIdentifiers_st *) X509_get_ext_d2i(x, NID_sbgp_autonomousSysNum,
                                        NULL, NULL);
 #endif
     for (i = 0; i < X509_get_ext_count(x); i++) {

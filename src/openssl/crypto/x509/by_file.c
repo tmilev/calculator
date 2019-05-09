@@ -87,7 +87,8 @@ int X509_load_cert_file(X509_LOOKUP *ctx, const char *file, int type)
 
     if (type == X509_FILETYPE_PEM) {
         for (;;) {
-            x = PEM_read_bio_X509_AUX(in, NULL, NULL, "");
+            const void* temp = "";
+            x = PEM_read_bio_X509_AUX(in, NULL, NULL, temp);
             if (x == NULL) {
                 if ((ERR_GET_REASON(ERR_peek_last_error()) ==
                      PEM_R_NO_START_LINE) && (count > 0)) {

@@ -70,7 +70,7 @@ extern "C" {
 # else
 
 #  define IMPLEMENT_PEM_read_fp(name, type, str, asn1) \
-type *PEM_read_##name(FILE *fp, type **x, pem_password_cb *cb, void *u)\
+type *PEM_read_##name(FILE *fp, type **x, pem_password_cb *cb, const void *u)\
 { \
 return (type*) PEM_ASN1_read((d2i_of_void *)d2i_##asn1, str,fp,(void **)x,cb,u); \
 }
@@ -106,7 +106,7 @@ int PEM_write_##name(FILE *fp, type *x, const EVP_CIPHER *enc, \
 # endif
 
 # define IMPLEMENT_PEM_read_bio(name, type, str, asn1) \
-type *PEM_read_bio_##name(BIO *bp, type **x, pem_password_cb *cb, void *u)\
+type *PEM_read_bio_##name(BIO *bp, type **x, pem_password_cb *cb, const void *u)\
 { \
 return (type *) PEM_ASN1_read_bio((d2i_of_void *)d2i_##asn1, str,bp,(void **)x,cb,u); \
 }
@@ -195,7 +195,7 @@ int PEM_write_bio_##name(BIO *bp, type *x, const EVP_CIPHER *enc, \
 # endif
 
 #  define DECLARE_PEM_read_bio(name, type) \
-        type *PEM_read_bio_##name(BIO *bp, type **x, pem_password_cb *cb, void *u);
+        type *PEM_read_bio_##name(BIO *bp, type **x, pem_password_cb *cb, const void *u);
 
 #  define DECLARE_PEM_write_bio(name, type) \
         int PEM_write_bio_##name(BIO *bp, type *x);
@@ -228,11 +228,11 @@ int PEM_write_bio_##name(BIO *bp, type *x, const EVP_CIPHER *enc, \
 # define DECLARE_PEM_rw_cb(name, type) \
         DECLARE_PEM_read(name, type) \
         DECLARE_PEM_write_cb(name, type)
-typedef int pem_password_cb (char *buf, int size, int rwflag, void *userdata);
+typedef int pem_password_cb (char *buf, int size, int rwflag, const void *userdata);
 
 int PEM_get_EVP_CIPHER_INFO(char *header, EVP_CIPHER_INFO *cipher);
 int PEM_do_header(EVP_CIPHER_INFO *cipher, unsigned char *data, long *len,
-                  pem_password_cb *callback, void *u);
+                  pem_password_cb *callback, const void *u);
 
 int PEM_read_bio(BIO *bp, char **name, char **header,
                  unsigned char **data, long *len);
@@ -248,15 +248,15 @@ int PEM_write_bio(BIO *bp, const char *name, const char *hdr,
                   const unsigned char *data, long len);
 int PEM_bytes_read_bio(unsigned char **pdata, long *plen, char **pnm,
                        const char *name, BIO *bp, pem_password_cb *cb,
-                       void *u);
+                       const void *u);
 void *PEM_ASN1_read_bio(d2i_of_void *d2i, const char *name, BIO *bp, void **x,
-                        pem_password_cb *cb, void *u);
+                        pem_password_cb *cb, const void *u);
 int PEM_ASN1_write_bio(i2d_of_void *i2d, const char *name, BIO *bp, void *x,
                        const EVP_CIPHER *enc, unsigned char *kstr, int klen,
                        pem_password_cb *cb, void *u);
 
 STACK_OF(X509_INFO) *PEM_X509_INFO_read_bio(BIO *bp, STACK_OF(X509_INFO) *sk,
-                                            pem_password_cb *cb, void *u);
+                                            pem_password_cb *cb, const void *u);
 int PEM_X509_INFO_write_bio(BIO *bp, X509_INFO *xi, EVP_CIPHER *enc,
                             unsigned char *kstr, int klen,
                             pem_password_cb *cd, void *u);
@@ -267,7 +267,7 @@ int PEM_read(FILE *fp, char **name, char **header,
 int PEM_write(FILE *fp, const char *name, const char *hdr,
               const unsigned char *data, long len);
 void *PEM_ASN1_read(d2i_of_void *d2i, const char *name, FILE *fp, void **x,
-                    pem_password_cb *cb, void *u);
+                    pem_password_cb *cb, const void *u);
 int PEM_ASN1_write(i2d_of_void *i2d, const char *name, FILE *fp,
                    void *x, const EVP_CIPHER *enc, unsigned char *kstr,
                    int klen, pem_password_cb *callback, void *u);
@@ -281,7 +281,7 @@ int PEM_SignFinal(EVP_MD_CTX *ctx, unsigned char *sigret,
                   unsigned int *siglen, EVP_PKEY *pkey);
 
 /* The default pem_password_cb that's used internally */
-int PEM_def_callback(char *buf, int num, int rwflag, void *userdata);
+int PEM_def_callback(char *buf, int num, int rwflag, const void *userdata);
 void PEM_proc_type(char *buf, int type);
 void PEM_dek_info(char *buf, const char *type, int len, char *str);
 

@@ -28,7 +28,7 @@ static int load_iv(char **fromp, unsigned char *to, int num);
 static int check_pem(const char *nm, const char *name);
 int pem_check_suffix(const char *pem_str, const char *suffix);
 
-int PEM_def_callback(char *buf, int num, int rwflag, void *userdata)
+int PEM_def_callback(char *buf, int num, int rwflag, const void *userdata)
 {
     int i, min_len;
     const char *prompt;
@@ -104,7 +104,7 @@ void PEM_dek_info(char *buf, const char *type, int len, char *str)
 
 #ifndef OPENSSL_NO_STDIO
 void *PEM_ASN1_read(d2i_of_void *d2i, const char *name, FILE *fp, void **x,
-                    pem_password_cb *cb, void *u)
+                    pem_password_cb *cb, const void *u)
 {
     BIO *b;
     void *ret;
@@ -231,7 +231,7 @@ static void *pem_malloc(int num, unsigned int flags)
 
 static int pem_bytes_read_bio_flags(unsigned char **pdata, long *plen,
                                     char **pnm, const char *name, BIO *bp,
-                                    pem_password_cb *cb, void *u,
+                                    pem_password_cb *cb, const void *u,
                                     unsigned int flags)
 {
     EVP_CIPHER_INFO cipher;
@@ -274,7 +274,7 @@ static int pem_bytes_read_bio_flags(unsigned char **pdata, long *plen,
 
 int PEM_bytes_read_bio(unsigned char **pdata, long *plen, char **pnm,
                        const char *name, BIO *bp, pem_password_cb *cb,
-                       void *u) {
+                       const void *u) {
     return pem_bytes_read_bio_flags(pdata, plen, pnm, name, bp, cb, u,
                                     PEM_FLAG_EAY_COMPATIBLE);
 }
@@ -406,7 +406,7 @@ int PEM_ASN1_write_bio(i2d_of_void *i2d, const char *name, BIO *bp,
 }
 
 int PEM_do_header(EVP_CIPHER_INFO *cipher, unsigned char *data, long *plen,
-                  pem_password_cb *callback, void *u)
+                  pem_password_cb *callback, const void *u)
 {
     int ok;
     int keylen;

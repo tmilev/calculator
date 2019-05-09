@@ -250,7 +250,7 @@ static int copy_issuer(X509V3_CTX *ctx, GENERAL_NAMES *gens)
     if (i < 0)
         return 1;
     if ((ext = X509_get_ext(ctx->issuer_cert, i)) == NULL
-        || (ialt = X509V3_EXT_d2i(ext)) == NULL) {
+        || (ialt =(GENERAL_NAMES *) X509V3_EXT_d2i(ext)) == NULL) {
         X509V3err(X509V3_F_COPY_ISSUER, X509V3_R_ISSUER_DECODE_ERROR);
         goto err;
     }
@@ -541,7 +541,7 @@ static int do_othername(GENERAL_NAME *gen, const char *value, X509V3_CTX *ctx)
     char *objtmp = NULL, *p;
     int objlen;
 
-    if ((p = strchr(value, ';')) == NULL)
+    if ((p = (char *) strchr(value, ';')) == NULL)
         return 0;
     if ((gen->d.otherName = OTHERNAME_new()) == NULL)
         return 0;

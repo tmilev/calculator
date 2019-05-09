@@ -155,7 +155,7 @@ static void *v2i_NAME_CONSTRAINTS(const X509V3_EXT_METHOD *method,
 static int i2r_NAME_CONSTRAINTS(const X509V3_EXT_METHOD *method, void *a,
                                 BIO *bp, int ind)
 {
-    NAME_CONSTRAINTS *ncons = a;
+    NAME_CONSTRAINTS *ncons = (NAME_CONSTRAINTS *) a;
     do_i2r_name_constraints(method, ncons->permittedSubtrees,
                             bp, ind, "Permitted");
     if (ncons->permittedSubtrees && ncons->excludedSubtrees)

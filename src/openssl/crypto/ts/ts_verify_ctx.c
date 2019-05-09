@@ -14,7 +14,7 @@
 
 TS_VERIFY_CTX *TS_VERIFY_CTX_new(void)
 {
-    TS_VERIFY_CTX *ctx = OPENSSL_zalloc(sizeof(*ctx));
+    TS_VERIFY_CTX *ctx = (TS_VERIFY_CTX *) OPENSSL_zalloc(sizeof(*ctx));
 
     if (ctx == NULL)
         TSerr(TS_F_TS_VERIFY_CTX_NEW, ERR_R_MALLOC_FAILURE);
@@ -126,7 +126,7 @@ TS_VERIFY_CTX *TS_REQ_to_TS_VERIFY_CTX(TS_REQ *req, TS_VERIFY_CTX *ctx)
         goto err;
     msg = imprint->hashed_msg;
     ret->imprint_len = ASN1_STRING_length(msg);
-    if ((ret->imprint = OPENSSL_malloc(ret->imprint_len)) == NULL)
+    if ((ret->imprint = (unsigned char*) OPENSSL_malloc(ret->imprint_len)) == NULL)
         goto err;
     memcpy(ret->imprint, ASN1_STRING_get0_data(msg), ret->imprint_len);
 

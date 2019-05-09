@@ -83,7 +83,7 @@ X509_VERIFY_PARAM *X509_VERIFY_PARAM_new(void)
 {
     X509_VERIFY_PARAM *param;
 
-    param = OPENSSL_zalloc(sizeof(*param));
+    param = (X509_VERIFY_PARAM *) OPENSSL_zalloc(sizeof(*param));
     if (param == NULL) {
         X509err(X509_F_X509_VERIFY_PARAM_NEW, ERR_R_MALLOC_FAILURE);
         return NULL;
@@ -252,7 +252,7 @@ static int int_x509_param_set1(char **pdest, size_t *pdestlen,
         srclen = 0;
     }
     OPENSSL_free(*pdest);
-    *pdest = tmp;
+    *pdest = (char*) tmp;
     if (pdestlen != NULL)
         *pdestlen = srclen;
     return 1;

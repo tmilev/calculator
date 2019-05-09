@@ -78,7 +78,7 @@ OSSL_STORE_CTX *OSSL_STORE_open(const char *uri, const UI_METHOD *ui_method,
     if (loader_ctx == NULL)
         goto err;
 
-    if ((ctx = OPENSSL_zalloc(sizeof(*ctx))) == NULL) {
+    if ((ctx = (OSSL_STORE_CTX *) OPENSSL_zalloc(sizeof(*ctx))) == NULL) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_OPEN, ERR_R_MALLOC_FAILURE);
         goto err;
     }
@@ -231,7 +231,7 @@ int OSSL_STORE_close(OSSL_STORE_CTX *ctx)
  */
 static OSSL_STORE_INFO *store_info_new(int type, void *data)
 {
-    OSSL_STORE_INFO *info = OPENSSL_zalloc(sizeof(*info));
+    OSSL_STORE_INFO *info = (OSSL_STORE_INFO *) OPENSSL_zalloc(sizeof(*info));
 
     if (info == NULL)
         return NULL;
@@ -479,7 +479,7 @@ int OSSL_STORE_supports_search(OSSL_STORE_CTX *ctx, int search_type)
 /* Search term constructors */
 OSSL_STORE_SEARCH *OSSL_STORE_SEARCH_by_name(X509_NAME *name)
 {
-    OSSL_STORE_SEARCH *search = OPENSSL_zalloc(sizeof(*search));
+    OSSL_STORE_SEARCH *search = (OSSL_STORE_SEARCH *) OPENSSL_zalloc(sizeof(*search));
 
     if (search == NULL) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_SEARCH_BY_NAME,
@@ -495,7 +495,7 @@ OSSL_STORE_SEARCH *OSSL_STORE_SEARCH_by_name(X509_NAME *name)
 OSSL_STORE_SEARCH *OSSL_STORE_SEARCH_by_issuer_serial(X509_NAME *name,
                                                     const ASN1_INTEGER *serial)
 {
-    OSSL_STORE_SEARCH *search = OPENSSL_zalloc(sizeof(*search));
+    OSSL_STORE_SEARCH *search = (OSSL_STORE_SEARCH *) OPENSSL_zalloc(sizeof(*search));
 
     if (search == NULL) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_SEARCH_BY_ISSUER_SERIAL,
@@ -513,7 +513,7 @@ OSSL_STORE_SEARCH *OSSL_STORE_SEARCH_by_key_fingerprint(const EVP_MD *digest,
                                                         const unsigned char
                                                         *bytes, size_t len)
 {
-    OSSL_STORE_SEARCH *search = OPENSSL_zalloc(sizeof(*search));
+    OSSL_STORE_SEARCH *search = (OSSL_STORE_SEARCH *) OPENSSL_zalloc(sizeof(*search));
 
     if (search == NULL) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_SEARCH_BY_KEY_FINGERPRINT,
@@ -541,7 +541,7 @@ OSSL_STORE_SEARCH *OSSL_STORE_SEARCH_by_key_fingerprint(const EVP_MD *digest,
 
 OSSL_STORE_SEARCH *OSSL_STORE_SEARCH_by_alias(const char *alias)
 {
-    OSSL_STORE_SEARCH *search = OPENSSL_zalloc(sizeof(*search));
+    OSSL_STORE_SEARCH *search = (OSSL_STORE_SEARCH *) OPENSSL_zalloc(sizeof(*search));
 
     if (search == NULL) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_SEARCH_BY_ALIAS,
@@ -645,7 +645,7 @@ OSSL_STORE_CTX *ossl_store_attach_pem_bio(BIO *bp, const UI_METHOD *ui_method,
     if ((loader = ossl_store_get0_loader_int("file")) == NULL
         || ((loader_ctx = ossl_store_file_attach_pem_bio_int(bp)) == NULL))
         goto done;
-    if ((ctx = OPENSSL_zalloc(sizeof(*ctx))) == NULL) {
+    if ((ctx = (OSSL_STORE_CTX *) OPENSSL_zalloc(sizeof(*ctx))) == NULL) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_ATTACH_PEM_BIO,
                      ERR_R_MALLOC_FAILURE);
         goto done;

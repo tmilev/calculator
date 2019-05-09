@@ -36,7 +36,7 @@ STACK_OF(X509_INFO) *PEM_X509_INFO_read(FILE *fp, STACK_OF(X509_INFO) *sk,
 #endif
 
 STACK_OF(X509_INFO) *PEM_X509_INFO_read_bio(BIO *bp, STACK_OF(X509_INFO) *sk,
-                                            pem_password_cb *cb, void *u)
+                                            pem_password_cb *cb, const void *u)
 {
     X509_INFO *xi = NULL;
     char *name = NULL, *header = NULL;

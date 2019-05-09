@@ -44,7 +44,7 @@ OSSL_STORE_LOADER *OSSL_STORE_LOADER_new(ENGINE *e, const char *scheme)
         return NULL;
     }
 
-    if ((res = OPENSSL_zalloc(sizeof(*res))) == NULL) {
+    if ((res = (OSSL_STORE_LOADER *) OPENSSL_zalloc(sizeof(*res))) == NULL) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_LOADER_NEW, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
@@ -205,14 +205,14 @@ int OSSL_STORE_register_loader(OSSL_STORE_LOADER *loader)
 
 const OSSL_STORE_LOADER *ossl_store_get0_loader_int(const char *scheme)
 {
-    OSSL_STORE_LOADER template;
+    OSSL_STORE_LOADER templateOSSL;
     OSSL_STORE_LOADER *loader = NULL;
 
-    template.scheme = scheme;
-    template.open = NULL;
-    template.load = NULL;
-    template.eof = NULL;
-    template.close = NULL;
+    templateOSSL.scheme = scheme;
+    templateOSSL.open = NULL;
+    templateOSSL.load = NULL;
+    templateOSSL.eof = NULL;
+    templateOSSL.close = NULL;
 
     if (!ossl_store_init_once())
         return NULL;
@@ -224,7 +224,7 @@ const OSSL_STORE_LOADER *ossl_store_get0_loader_int(const char *scheme)
     }
     CRYPTO_THREAD_write_lock(registry_lock);
 
-    loader = lh_OSSL_STORE_LOADER_retrieve(loader_register, &template);
+    loader = lh_OSSL_STORE_LOADER_retrieve(loader_register, &templateOSSL);
 
     if (loader == NULL) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_GET0_LOADER_INT,
@@ -239,14 +239,14 @@ const OSSL_STORE_LOADER *ossl_store_get0_loader_int(const char *scheme)
 
 OSSL_STORE_LOADER *ossl_store_unregister_loader_int(const char *scheme)
 {
-    OSSL_STORE_LOADER template;
+    OSSL_STORE_LOADER templateOSSL;
     OSSL_STORE_LOADER *loader = NULL;
 
-    template.scheme = scheme;
-    template.open = NULL;
-    template.load = NULL;
-    template.eof = NULL;
-    template.close = NULL;
+    templateOSSL.scheme = scheme;
+    templateOSSL.open = NULL;
+    templateOSSL.load = NULL;
+    templateOSSL.eof = NULL;
+    templateOSSL.close = NULL;
 
     if (!RUN_ONCE(&registry_init, do_registry_init)) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_UNREGISTER_LOADER_INT,
@@ -255,7 +255,7 @@ OSSL_STORE_LOADER *ossl_store_unregister_loader_int(const char *scheme)
     }
     CRYPTO_THREAD_write_lock(registry_lock);
 
-    loader = lh_OSSL_STORE_LOADER_delete(loader_register, &template);
+    loader = lh_OSSL_STORE_LOADER_delete(loader_register, &templateOSSL);
 
     if (loader == NULL) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_UNREGISTER_LOADER_INT,

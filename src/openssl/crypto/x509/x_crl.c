@@ -94,7 +94,7 @@ static int crl_set_issuers(X509_CRL *crl)
         STACK_OF(X509_EXTENSION) *exts;
         ASN1_ENUMERATED *reason;
         X509_EXTENSION *ext;
-        gtmp = X509_REVOKED_get_ext_d2i(rev,
+        gtmp = (GENERAL_NAMES *) X509_REVOKED_get_ext_d2i(rev,
                                         NID_certificate_issuer, &j, NULL);
         if (!gtmp && (j != -1)) {
             crl->flags |= EXFLAG_INVALID;
@@ -113,7 +113,7 @@ static int crl_set_issuers(X509_CRL *crl)
         }
         rev->issuer = gens;
 
-        reason = X509_REVOKED_get_ext_d2i(rev, NID_crl_reason, &j, NULL);
+        reason = (ASN1_ENUMERATED *) X509_REVOKED_get_ext_d2i(rev, NID_crl_reason, &j, NULL);
         if (!reason && (j != -1)) {
             crl->flags |= EXFLAG_INVALID;
             return 1;
@@ -185,20 +185,20 @@ static int crl_cb(int operation, ASN1_VALUE **pval, const ASN1_ITEM *it,
 
     case ASN1_OP_D2I_POST:
         X509_CRL_digest(crl, EVP_sha1(), crl->sha1_hash, NULL);
-        crl->idp = X509_CRL_get_ext_d2i(crl,
+        crl->idp = (ISSUING_DIST_POINT *) X509_CRL_get_ext_d2i(crl,
                                         NID_issuing_distribution_point, NULL,
                                         NULL);
         if (crl->idp)
             setup_idp(crl, crl->idp);
 
-        crl->akid = X509_CRL_get_ext_d2i(crl,
+        crl->akid = (AUTHORITY_KEYID *) X509_CRL_get_ext_d2i(crl,
                                          NID_authority_key_identifier, NULL,
                                          NULL);
 
-        crl->crl_number = X509_CRL_get_ext_d2i(crl,
+        crl->crl_number = (ASN1_INTEGER *) X509_CRL_get_ext_d2i(crl,
                                                NID_crl_number, NULL, NULL);
 
-        crl->base_crl_number = X509_CRL_get_ext_d2i(crl,
+        crl->base_crl_number = (ASN1_INTEGER *) X509_CRL_get_ext_d2i(crl,
                                                     NID_delta_crl, NULL,
                                                     NULL);
         /* Delta CRLs must have CRL number */
@@ -446,7 +446,7 @@ X509_CRL_METHOD *X509_CRL_METHOD_new(int (*crl_init) (X509_CRL *crl),
                                      int (*crl_verify) (X509_CRL *crl,
                                                         EVP_PKEY *pk))
 {
-    X509_CRL_METHOD *m = OPENSSL_malloc(sizeof(*m));
+    X509_CRL_METHOD *m = (X509_CRL_METHOD *) OPENSSL_malloc(sizeof(*m));
 
     if (m == NULL) {
         X509err(X509_F_X509_CRL_METHOD_NEW, ERR_R_MALLOC_FAILURE);

@@ -107,9 +107,9 @@ static int file_fill_pem_pass_data(struct pem_pass_data *pass_data,
 }
 
 /* This is used anywhere a pem_password_cb is needed */
-static int file_get_pem_pass(char *buf, int num, int w, void *data)
+static int file_get_pem_pass(char *buf, int num, int w, const void *data)
 {
-    struct pem_pass_data *pass_data = data;
+    struct pem_pass_data *pass_data = (pem_pass_data *) data;
     char *pass = file_get_pass(pass_data->ui_method, buf, num,
                                pass_data->prompt_info, pass_data->data);
 
@@ -201,7 +201,7 @@ static OSSL_STORE_INFO *try_decode_PKCS12(const char *pem_name,
                                           void *ui_data)
 {
     OSSL_STORE_INFO *store_info = NULL;
-    STACK_OF(OSSL_STORE_INFO) *ctx = *pctx;
+    STACK_OF(OSSL_STORE_INFO) *ctx = (STACK_OF(OSSL_STORE_INFO) *) *pctx;
 
     if (ctx == NULL) {
         /* Initial parsing */
@@ -294,14 +294,14 @@ static OSSL_STORE_INFO *try_decode_PKCS12(const char *pem_name,
 
 static int eof_PKCS12(void *ctx_)
 {
-    STACK_OF(OSSL_STORE_INFO) *ctx = ctx_;
+    STACK_OF(OSSL_STORE_INFO) *ctx = (STACK_OF(OSSL_STORE_INFO) *) ctx_;
 
     return ctx == NULL || sk_OSSL_STORE_INFO_num(ctx) == 0;
 }
 
 static void destroy_ctx_PKCS12(void **pctx)
 {
-    STACK_OF(OSSL_STORE_INFO) *ctx = *pctx;
+    STACK_OF(OSSL_STORE_INFO) *ctx = (STACK_OF(OSSL_STORE_INFO) *) *pctx;
 
     sk_OSSL_STORE_INFO_pop_free(ctx, OSSL_STORE_INFO_free);
     *pctx = NULL;
@@ -740,7 +740,7 @@ struct ossl_store_loader_ctx_st {
 
 static void OSSL_STORE_LOADER_CTX_free(OSSL_STORE_LOADER_CTX *ctx)
 {
-    if (ctx->type == is_dir) {
+    if (ctx->type == ossl_store_loader_ctx_st::is_dir) {
         OPENSSL_free(ctx->_.dir.uri);
     } else {
         if (ctx->_.file.last_handler != NULL) {
@@ -837,7 +837,7 @@ static OSSL_STORE_LOADER_CTX *file_open(const OSSL_STORE_LOADER *loader,
     /* Successfully found a working path, clear possible collected errors */
     ERR_clear_error();
 
-    ctx = OPENSSL_zalloc(sizeof(*ctx));
+    ctx = (OSSL_STORE_LOADER_CTX *) OPENSSL_zalloc(sizeof(*ctx));
     if (ctx == NULL) {
         OSSL_STOREerr(OSSL_STORE_F_FILE_OPEN, ERR_R_MALLOC_FAILURE);
         return NULL;
@@ -850,7 +850,7 @@ static OSSL_STORE_LOADER_CTX *file_open(const OSSL_STORE_LOADER *loader,
          * components may be used.
          */
         ctx->_.dir.uri = OPENSSL_strdup(uri);
-        ctx->type = is_dir;
+        ctx->type = ossl_store_loader_ctx_st::is_dir;
 
         if (ctx->_.dir.uri == NULL)
             goto err;
@@ -882,7 +882,7 @@ static OSSL_STORE_LOADER_CTX *file_open(const OSSL_STORE_LOADER *loader,
         if (BIO_buffer_peek(ctx->_.file.file, peekbuf, sizeof(peekbuf) - 1) > 0) {
             peekbuf[sizeof(peekbuf) - 1] = '\0';
             if (strstr(peekbuf, "-----BEGIN ") != NULL)
-                ctx->type = is_pem;
+                ctx->type = ossl_store_loader_ctx_st::is_pem;
         }
     }
 
@@ -942,7 +942,7 @@ static int file_find(OSSL_STORE_LOADER_CTX *ctx, OSSL_STORE_SEARCH *search)
         if (ctx == NULL)
             return 1;
 
-        if (ctx->type != is_dir) {
+        if (ctx->type != ossl_store_loader_ctx_st::is_dir) {
             OSSL_STOREerr(OSSL_STORE_F_FILE_FIND,
                           OSSL_STORE_R_SEARCH_ONLY_SUPPORTED_FOR_DIRECTORIES);
             return 0;
@@ -963,7 +963,7 @@ static int file_find(OSSL_STORE_LOADER_CTX *ctx, OSSL_STORE_SEARCH *search)
 /* Internal function to decode an already opened PEM file */
 OSSL_STORE_LOADER_CTX *ossl_store_file_attach_pem_bio_int(BIO *bp)
 {
-    OSSL_STORE_LOADER_CTX *ctx = OPENSSL_zalloc(sizeof(*ctx));
+    OSSL_STORE_LOADER_CTX *ctx = (OSSL_STORE_LOADER_CTX *) OPENSSL_zalloc(sizeof(*ctx));
 
     if (ctx == NULL) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_FILE_ATTACH_PEM_BIO_INT,
@@ -972,7 +972,7 @@ OSSL_STORE_LOADER_CTX *ossl_store_file_attach_pem_bio_int(BIO *bp)
     }
 
     ctx->_.file.file = bp;
-    ctx->type = is_pem;
+    ctx->type = ossl_store_loader_ctx_st::is_pem;
 
     return ctx;
 }
@@ -993,7 +993,7 @@ static OSSL_STORE_INFO *file_load_try_decode(OSSL_STORE_LOADER_CTX *ctx,
     {
         size_t i = 0;
         void *handler_ctx = NULL;
-        const FILE_HANDLER **matching_handlers =
+        const FILE_HANDLER **matching_handlers = (const FILE_HANDLER **)
             OPENSSL_zalloc(sizeof(*matching_handlers)
                            * OSSL_NELEM(file_handlers));
 
@@ -1167,7 +1167,7 @@ static int file_name_to_uri(OSSL_STORE_LOADER_CTX *ctx, const char *name,
         long calculated_length = strlen(ctx->_.dir.uri) + strlen(pathsep)
             + strlen(name) + 1 /* \0 */;
 
-        *data = OPENSSL_zalloc(calculated_length);
+        *data = (char*) OPENSSL_zalloc(calculated_length);
         if (*data == NULL) {
             OSSL_STOREerr(OSSL_STORE_F_FILE_NAME_TO_URI, ERR_R_MALLOC_FAILURE);
             return 0;
@@ -1252,7 +1252,7 @@ static OSSL_STORE_INFO *file_load(OSSL_STORE_LOADER_CTX *ctx,
     ctx->errcnt = 0;
     ERR_clear_error();
 
-    if (ctx->type == is_dir) {
+    if (ctx->type == ossl_store_loader_ctx_st::is_dir) {
         do {
             char *newname = NULL;
 
@@ -1311,7 +1311,7 @@ static OSSL_STORE_INFO *file_load(OSSL_STORE_LOADER_CTX *ctx,
             long len = 0;               /* DER encoded data length */
 
             matchcount = -1;
-            if (ctx->type == is_pem) {
+            if (ctx->type == ossl_store_loader_ctx_st::is_pem) {
                 if (!file_read_pem(ctx->_.file.file, &pem_name, &pem_header,
                                    &data, &len, ui_method, ui_data,
                                    (ctx->flags & FILE_FLAG_SECMEM) != 0)) {
@@ -1386,7 +1386,7 @@ static int file_error(OSSL_STORE_LOADER_CTX *ctx)
 
 static int file_eof(OSSL_STORE_LOADER_CTX *ctx)
 {
-    if (ctx->type == is_dir)
+    if (ctx->type == ossl_store_loader_ctx_st::is_dir)
         return ctx->_.dir.end_reached;
 
     if (ctx->_.file.last_handler != NULL
@@ -1397,7 +1397,7 @@ static int file_eof(OSSL_STORE_LOADER_CTX *ctx)
 
 static int file_close(OSSL_STORE_LOADER_CTX *ctx)
 {
-    if (ctx->type == is_dir) {
+    if (ctx->type == ossl_store_loader_ctx_st::is_dir) {
         OPENSSL_DIR_end(&ctx->_.dir.ctx);
     } else {
         BIO_free_all(ctx->_.file.file);

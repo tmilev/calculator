@@ -109,7 +109,7 @@ TS_RESP_CTX *TS_RESP_CTX_new(void)
 {
     TS_RESP_CTX *ctx;
 
-    if ((ctx = OPENSSL_zalloc(sizeof(*ctx))) == NULL) {
+    if ((ctx = (TS_RESP_CTX *) OPENSSL_zalloc(sizeof(*ctx))) == NULL) {
         TSerr(TS_F_TS_RESP_CTX_NEW, ERR_R_MALLOC_FAILURE);
         return NULL;
     }

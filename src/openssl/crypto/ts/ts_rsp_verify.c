@@ -507,7 +507,7 @@ static char *ts_get_status_text(STACK_OF(ASN1_UTF8STRING) *text)
         length += ASN1_STRING_length(current);
         length += 1;            /* separator character */
     }
-    if ((result = OPENSSL_malloc(length)) == NULL) {
+    if ((result = (char *) OPENSSL_malloc(length)) == NULL) {
         TSerr(TS_F_TS_GET_STATUS_TEXT, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
@@ -562,7 +562,7 @@ static int ts_compute_imprint(BIO *data, TS_TST_INFO *tst_info,
     if (length < 0)
         goto err;
     *imprint_len = length;
-    if ((*imprint = OPENSSL_malloc(*imprint_len)) == NULL) {
+    if ((*imprint = (unsigned char *) OPENSSL_malloc(*imprint_len)) == NULL) {
         TSerr(TS_F_TS_COMPUTE_IMPRINT, ERR_R_MALLOC_FAILURE);
         goto err;
     }
@@ -651,7 +651,7 @@ static int ts_check_signer_name(GENERAL_NAME *tsa_name, X509 *signer)
     if (tsa_name->type == GEN_DIRNAME
         && X509_name_cmp(tsa_name->d.dirn, X509_get_subject_name(signer)) == 0)
         return 1;
-    gen_names = X509_get_ext_d2i(signer, NID_subject_alt_name, NULL, &idx);
+    gen_names = (STACK_OF(GENERAL_NAME) *) X509_get_ext_d2i(signer, NID_subject_alt_name, NULL, &idx);
     while (gen_names != NULL) {
         found = ts_find_name(gen_names, tsa_name) >= 0;
         if (found)
@@ -661,7 +661,7 @@ static int ts_check_signer_name(GENERAL_NAME *tsa_name, X509 *signer)
          * more than one.
          */
         GENERAL_NAMES_free(gen_names);
-        gen_names = X509_get_ext_d2i(signer, NID_subject_alt_name, NULL, &idx);
+        gen_names = (STACK_OF(GENERAL_NAME) *) X509_get_ext_d2i((X509 *) signer, NID_subject_alt_name, NULL, &idx);
     }
     GENERAL_NAMES_free(gen_names);
 

@@ -332,7 +332,7 @@
      || (s)->early_data_state == SSL_EARLY_DATA_CONNECT_RETRY \
      || (s)->early_data_state == SSL_EARLY_DATA_WRITING \
      || (s)->early_data_state == SSL_EARLY_DATA_WRITE_RETRY \
-     || (s)->hello_retry_request == SSL_HRR_PENDING)
+     || (s)->hello_retry_request == ssl_st::SSL_HRR_PENDING)
 
 # define SSL_IS_FIRST_HANDSHAKE(S) ((s)->s3->tmp.finish_md_len == 0 \
                                     || (s)->s3->tmp.peer_finish_md_len == 0)

@@ -51,7 +51,7 @@ struct ossl_dispatch_st {
  */
 struct ossl_item_st {
     unsigned int id;
-    void *ptr;
+    const void *ptr;
 };
 
 /*

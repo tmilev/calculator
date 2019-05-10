@@ -823,12 +823,6 @@ openssl/crypto/ebcdic.c \
 openssl/crypto/ex_data.c \
 openssl/crypto/getenv.c \
 openssl/crypto/init.c \
-openssl/crypto/LPdir_nyi.c \
-openssl/crypto/LPdir_unix.c \
-openssl/crypto/LPdir_vms.c \
-openssl/crypto/LPdir_win.c \
-openssl/crypto/LPdir_win32.c \
-openssl/crypto/LPdir_wince.c \
 openssl/crypto/mem.c \
 openssl/crypto/mem_clr.c \
 openssl/crypto/mem_dbg.c \

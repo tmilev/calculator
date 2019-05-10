@@ -80,7 +80,7 @@ static int provider_store_index = -1;
 
 static void provider_store_free(void *vstore)
 {
-    struct provider_store_st *store = vstore;
+    struct provider_store_st *store = (provider_store_st *) vstore;
 
     if (store == NULL)
         return;
@@ -91,7 +91,7 @@ static void provider_store_free(void *vstore)
 
 static void *provider_store_new(void)
 {
-    struct provider_store_st *store = OPENSSL_zalloc(sizeof(*store));
+    struct provider_store_st *store = (provider_store_st *) OPENSSL_zalloc(sizeof(*store));
     const struct predefined_providers_st *p = NULL;
 
     if (store == NULL
@@ -147,7 +147,7 @@ static struct provider_store_st *get_provider_store(OPENSSL_CTX *libctx)
     if (!RUN_ONCE(&provider_store_init_flag, do_provider_store_init))
         return NULL;
 
-    store = openssl_ctx_get_data(libctx, provider_store_index);
+    store = (provider_store_st *) openssl_ctx_get_data(libctx, provider_store_index);
     if (store == NULL)
         CRYPTOerr(CRYPTO_F_GET_PROVIDER_STORE, ERR_R_INTERNAL_ERROR);
     return store;
@@ -184,7 +184,7 @@ static OSSL_PROVIDER *provider_new(const char *name,
 {
     OSSL_PROVIDER *prov = NULL;
 
-    if ((prov = OPENSSL_zalloc(sizeof(*prov))) == NULL
+    if ((prov = (OSSL_PROVIDER *) OPENSSL_zalloc(sizeof(*prov))) == NULL
 #ifndef HAVE_ATOMICS
         || (prov->refcnt_lock = CRYPTO_THREAD_lock_new()) == NULL
 #endif
@@ -313,7 +313,7 @@ int ossl_provider_add_parameter(OSSL_PROVIDER *prov,
 {
     INFOPAIR *pair = NULL;
 
-    if ((pair = OPENSSL_zalloc(sizeof(*pair))) != NULL
+    if ((pair = (INFOPAIR *) OPENSSL_zalloc(sizeof(*pair))) != NULL
         && (prov->parameters != NULL
             || (prov->parameters = sk_INFOPAIR_new_null()) != NULL)
         && (pair->name = OPENSSL_strdup(name)) != NULL
@@ -342,7 +342,48 @@ int ossl_provider_add_parameter(OSSL_PROVIDER *prov,
  * Built in modules are distinguished from dynamically loaded modules
  * with an already assigned init function.
  */
-static const OSSL_DISPATCH *core_dispatch; /* Define further down */
+static const OSSL_ITEM param_types[] = {
+    { OSSL_PARAM_UTF8_PTR,  "openssl-version" },
+    { OSSL_PARAM_UTF8_PTR, "provider-name" },
+    { 0, NULL }
+};
+
+static const OSSL_ITEM *core_get_param_types(const OSSL_PROVIDER *prov)
+{
+    return param_types;
+}
+
+static int core_get_params(const OSSL_PROVIDER *prov, const OSSL_PARAM params[])
+{
+    int i;
+    const OSSL_PARAM *p;
+
+    if ((p = OSSL_PARAM_locate(params, "openssl-version")) != NULL)
+        OSSL_PARAM_set_utf8_ptr(p, OPENSSL_VERSION_STR);
+    if ((p = OSSL_PARAM_locate(params, "provider-name")) != NULL)
+        OSSL_PARAM_set_utf8_ptr(p, prov->name);
+
+    if (prov->parameters == NULL)
+        return 1;
+
+    for (i = 0; i < sk_INFOPAIR_num(prov->parameters); i++) {
+        INFOPAIR *pair = sk_INFOPAIR_value(prov->parameters, i);
+
+        if ((p = OSSL_PARAM_locate(params, pair->name)) != NULL)
+            OSSL_PARAM_set_utf8_ptr(p, pair->value);
+    }
+
+    return 1;
+}
+
+static const OSSL_DISPATCH core_dispatch_[] = {
+    { OSSL_FUNC_CORE_GET_PARAM_TYPES, (void (*)(void))core_get_param_types },
+    { OSSL_FUNC_CORE_GET_PARAMS, (void (*)(void))core_get_params },
+    { 0, NULL }
+};
+
+static const OSSL_DISPATCH *core_dispatch = core_dispatch_;
+//static const OSSL_DISPATCH *core_dispatch; /* Define further down */
 
 /*
  * Internal version that doesn't affect the store flags, and thereby avoid
@@ -607,43 +648,7 @@ const OSSL_ALGORITHM *ossl_provider_query_operation(const OSSL_PROVIDER *prov,
  * discovery.  We do not expect that many providers will use this, but one
  * never knows.
  */
-static const OSSL_ITEM param_types[] = {
-    { OSSL_PARAM_UTF8_PTR, "openssl-version" },
-    { OSSL_PARAM_UTF8_PTR, "provider-name" },
-    { 0, NULL }
-};
 
-static const OSSL_ITEM *core_get_param_types(const OSSL_PROVIDER *prov)
-{
-    return param_types;
-}
 
-static int core_get_params(const OSSL_PROVIDER *prov, const OSSL_PARAM params[])
-{
-    int i;
-    const OSSL_PARAM *p;
 
-    if ((p = OSSL_PARAM_locate(params, "openssl-version")) != NULL)
-        OSSL_PARAM_set_utf8_ptr(p, OPENSSL_VERSION_STR);
-    if ((p = OSSL_PARAM_locate(params, "provider-name")) != NULL)
-        OSSL_PARAM_set_utf8_ptr(p, prov->name);
 
-    if (prov->parameters == NULL)
-        return 1;
-
-    for (i = 0; i < sk_INFOPAIR_num(prov->parameters); i++) {
-        INFOPAIR *pair = sk_INFOPAIR_value(prov->parameters, i);
-
-        if ((p = OSSL_PARAM_locate(params, pair->name)) != NULL)
-            OSSL_PARAM_set_utf8_ptr(p, pair->value);
-    }
-
-    return 1;
-}
-
-static const OSSL_DISPATCH core_dispatch_[] = {
-    { OSSL_FUNC_CORE_GET_PARAM_TYPES, (void (*)(void))core_get_param_types },
-    { OSSL_FUNC_CORE_GET_PARAMS, (void (*)(void))core_get_params },
-    { 0, NULL }
-};
-static const OSSL_DISPATCH *core_dispatch = core_dispatch_;

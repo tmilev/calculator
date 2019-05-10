@@ -341,7 +341,7 @@ int ssl3_read_n(SSL *s, size_t n, size_t max, int extend, int clearold,
 int ssl3_write_bytes(SSL *s, int type, const void *buf_, size_t len,
                      size_t *written)
 {
-    const unsigned char *buf = buf_;
+    const unsigned char *buf = (unsigned char *) buf_;
     size_t tot;
     size_t n, max_send_fragment, split_send_fragment, maxpipes;
 #if !defined(OPENSSL_NO_MULTIBLOCK) && EVP_CIPH_FLAG_TLS1_1_MULTIBLOCK
@@ -863,7 +863,7 @@ int do_ssl3_write(SSL *s, int type, const unsigned char *buf,
         if (SSL_get_state(s) == TLS_ST_CW_CLNT_HELLO
                 && !s->renegotiate
                 && TLS1_get_version(s) > TLS1_VERSION
-                && s->hello_retry_request == SSL_HRR_NONE)
+                && s->hello_retry_request == ssl_st::SSL_HRR_NONE)
             version = TLS1_VERSION;
         SSL3_RECORD_set_rec_version(thiswr, version);
 

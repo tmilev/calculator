@@ -60,7 +60,7 @@ int ssl3_setup_read_buffer(SSL *s)
 #endif
         if (b->default_len > len)
             len = b->default_len;
-        if ((p = OPENSSL_malloc(len)) == NULL) {
+        if ((p = (unsigned char*) OPENSSL_malloc(len)) == NULL) {
             /*
              * We've got a malloc failure, and we're still initialising buffers.
              * We assume we're so doomed that we won't even be able to send an
@@ -118,7 +118,7 @@ int ssl3_setup_write_buffer(SSL *s, size_t numwpipes, size_t len)
 
         if (thiswb->buf == NULL) {
             if (s->wbio == NULL || !BIO_get_ktls_send(s->wbio)) {
-                p = OPENSSL_malloc(len);
+                p = (unsigned char*) OPENSSL_malloc(len);
                 if (p == NULL) {
                     s->rlayer.numwpipes = currpipe;
                     /*

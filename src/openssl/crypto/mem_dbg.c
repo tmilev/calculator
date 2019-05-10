@@ -275,7 +275,7 @@ int CRYPTO_mem_debug_push(const char *info, const char *file, int line)
         CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_DISABLE);
 
         if (!RUN_ONCE(&memdbg_init, do_memdbg_init)
-            || (ami = OPENSSL_malloc(sizeof(*ami))) == NULL)
+            || (ami = (APP_INFO *) OPENSSL_malloc(sizeof(*ami))) == NULL)
             goto err;
 
         ami->threadid = CRYPTO_THREAD_get_current_id();
@@ -329,7 +329,7 @@ void CRYPTO_mem_debug_malloc(void *addr, size_t num, int before_p,
             CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_DISABLE);
 
             if (!RUN_ONCE(&memdbg_init, do_memdbg_init)
-                || (m = OPENSSL_malloc(sizeof(*m))) == NULL) {
+                || (m = (MEM *) OPENSSL_malloc(sizeof(*m))) == NULL) {
                 OPENSSL_free(addr);
                 CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ENABLE);
                 return;

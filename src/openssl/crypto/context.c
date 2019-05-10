@@ -45,7 +45,7 @@ DEFINE_RUN_ONCE_STATIC(do_default_context_init)
 
 OPENSSL_CTX *OPENSSL_CTX_new(void)
 {
-    OPENSSL_CTX *ctx = OPENSSL_zalloc(sizeof(*ctx));
+    OPENSSL_CTX *ctx = (OPENSSL_CTX *) OPENSSL_zalloc(sizeof(*ctx));
 
     if (ctx != NULL && !context_init(ctx)) {
         OPENSSL_CTX_free(ctx);
@@ -65,7 +65,7 @@ static void openssl_ctx_generic_new(void *parent_ign, void *ptr_ign,
                                     CRYPTO_EX_DATA *ad, int index,
                                     long argl_ign, void *argp)
 {
-    const OPENSSL_CTX_METHOD *meth = argp;
+    const OPENSSL_CTX_METHOD *meth = (OPENSSL_CTX_METHOD *) argp;
     void *ptr = meth->new_func();
 
     if (ptr != NULL)
@@ -75,7 +75,7 @@ static void openssl_ctx_generic_free(void *parent_ign, void *ptr,
                                      CRYPTO_EX_DATA *ad, int index,
                                      long argl_ign, void *argp)
 {
-    const OPENSSL_CTX_METHOD *meth = argp;
+    const OPENSSL_CTX_METHOD *meth = (OPENSSL_CTX_METHOD *) argp;
 
     meth->free_func(ptr);
 }

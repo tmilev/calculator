@@ -59,12 +59,12 @@ static void ossl_init_thread_destructor(void *local)
 
 static struct thread_local_inits_st *ossl_init_get_thread_local(int alloc)
 {
-    struct thread_local_inits_st *local =
+    struct thread_local_inits_st *local = (thread_local_inits_st *)
         CRYPTO_THREAD_get_local(&destructor_key.value);
 
     if (alloc) {
         if (local == NULL
-            && (local = OPENSSL_zalloc(sizeof(*local))) != NULL
+            && (local = (thread_local_inits_st *) OPENSSL_zalloc(sizeof(*local))) != NULL
             && !CRYPTO_THREAD_set_local(&destructor_key.value, local)) {
             OPENSSL_free(local);
             return NULL;
@@ -732,7 +732,7 @@ int OPENSSL_atexit(void (*handler)(void))
     }
 #endif
 
-    if ((newhand = OPENSSL_malloc(sizeof(*newhand))) == NULL) {
+    if ((newhand = (OPENSSL_INIT_STOP *) OPENSSL_malloc(sizeof(*newhand))) == NULL) {
         CRYPTOerr(CRYPTO_F_OPENSSL_ATEXIT, ERR_R_MALLOC_FAILURE);
         return 0;
     }

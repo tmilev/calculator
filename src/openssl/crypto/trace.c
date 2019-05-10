@@ -64,7 +64,7 @@ struct trace_data_st {
 static int trace_write(BIO *channel,
                        const char *buf, size_t num, size_t *written)
 {
-    struct trace_data_st *ctx = BIO_get_data(channel);
+    struct trace_data_st *ctx = (trace_data_st *) BIO_get_data(channel);
     size_t cnt = ctx->callback(buf, num, ctx->category, OSSL_TRACE_CTRL_WRITE,
                                ctx->data);
 
@@ -84,7 +84,7 @@ static int trace_puts(BIO *channel, const char *str)
 
 static long trace_ctrl(BIO *channel, int cmd, long argl, void *argp)
 {
-    struct trace_data_st *ctx = BIO_get_data(channel);
+    struct trace_data_st *ctx = (trace_data_st *) BIO_get_data(channel);
 
     switch (cmd) {
     case OSSL_TRACE_CTRL_BEGIN:
@@ -157,13 +157,16 @@ int OSSL_trace_get_category_num(const char *name)
 #ifndef OPENSSL_NO_TRACE
 
 /* We use one trace channel for each trace category */
-static struct {
-    enum { SIMPLE_CHANNEL, CALLBACK_CHANNEL } type;
+struct trace_channels_struct{
+    enum channelType { SIMPLE_CHANNEL = 0, CALLBACK_CHANNEL };
+    channelType type;
     BIO *bio;
     char *prefix;
     char *suffix;
-} trace_channels[OSSL_TRACE_CATEGORY_NUM] = {
-    { 0, NULL, NULL, NULL },
+};
+
+trace_channels_struct trace_channels[OSSL_TRACE_CATEGORY_NUM] = {
+    { trace_channels_struct::SIMPLE_CHANNEL, NULL, NULL, NULL },
 };
 
 #endif
@@ -253,13 +256,13 @@ static int set_trace_data(int category, int type, BIO **channel,
 
     if (channel != NULL && curr_channel != NULL) {
         BIO_free(curr_channel);
-        trace_channels[category].type = 0;
+        trace_channels[category].type = trace_channels_struct::SIMPLE_CHANNEL;
         trace_channels[category].bio = NULL;
     }
 
     /* Before running callbacks are done, set new data where appropriate */
     if (channel != NULL && *channel != NULL) {
-        trace_channels[category].type = type;
+        trace_channels[category].type = (trace_channels_struct::channelType) type;
         trace_channels[category].bio = *channel;
     }
 
@@ -329,7 +332,7 @@ int OSSL_trace_set_channel(int category, BIO *channel)
 {
 #ifndef OPENSSL_NO_TRACE
     if (category >= 0 && category < OSSL_TRACE_CATEGORY_NUM)
-        return set_trace_data(category, SIMPLE_CHANNEL, &channel, NULL, NULL,
+        return set_trace_data(category, trace_channels_struct::SIMPLE_CHANNEL, &channel, NULL, NULL,
                               trace_attach_cb, trace_detach_cb);
 #endif
     return 0;
@@ -371,7 +374,7 @@ int OSSL_trace_set_callback(int category, OSSL_trace_cb callback, void *data)
     if (callback != NULL) {
         if ((channel = BIO_new(&trace_method)) == NULL
             || (trace_data =
-                OPENSSL_zalloc(sizeof(struct trace_data_st))) == NULL)
+                (trace_data_st*) OPENSSL_zalloc(sizeof(struct trace_data_st))) == NULL)
             goto err;
 
         trace_data->callback = callback;
@@ -381,7 +384,7 @@ int OSSL_trace_set_callback(int category, OSSL_trace_cb callback, void *data)
         BIO_set_data(channel, trace_data);
     }
 
-    if (!set_trace_data(category, CALLBACK_CHANNEL, &channel, NULL, NULL,
+    if (!set_trace_data(category, trace_channels_struct::CALLBACK_CHANNEL, &channel, NULL, NULL,
                         trace_attach_w_callback_cb, trace_detach_cb))
         goto err;
 
@@ -454,13 +457,13 @@ BIO *OSSL_trace_begin(int category)
         CRYPTO_THREAD_write_lock(trace_lock);
         current_channel = channel;
         switch (trace_channels[category].type) {
-        case SIMPLE_CHANNEL:
+        case trace_channels_struct::SIMPLE_CHANNEL:
             if (prefix != NULL) {
                 (void)BIO_puts(channel, prefix);
                 (void)BIO_puts(channel, "\n");
             }
             break;
-        case CALLBACK_CHANNEL:
+        case trace_channels_struct::CALLBACK_CHANNEL:
             (void)BIO_ctrl(channel, OSSL_TRACE_CTRL_BEGIN,
                            prefix == NULL ? 0 : strlen(prefix), prefix);
             break;
@@ -481,13 +484,13 @@ void OSSL_trace_end(int category, BIO * channel)
         && ossl_assert(channel == current_channel)) {
         (void)BIO_flush(channel);
         switch (trace_channels[category].type) {
-        case SIMPLE_CHANNEL:
+        case trace_channels_struct::SIMPLE_CHANNEL:
             if (suffix != NULL) {
                 (void)BIO_puts(channel, suffix);
                 (void)BIO_puts(channel, "\n");
             }
             break;
-        case CALLBACK_CHANNEL:
+        case trace_channels_struct::CALLBACK_CHANNEL:
             (void)BIO_ctrl(channel, OSSL_TRACE_CTRL_END,
                            suffix == NULL ? 0 : strlen(suffix), suffix);
             break;

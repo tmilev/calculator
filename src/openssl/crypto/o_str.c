@@ -15,7 +15,7 @@
 
 int OPENSSL_memcmp(const void *v1, const void *v2, size_t n)
 {
-    const unsigned char *c1 = v1, *c2 = v2;
+    const unsigned char *c1 = (unsigned char *) v1, *c2 = (unsigned char *) v2;
     int ret = 0;
 
     while (n && (ret = *c1 - *c2) == 0)
@@ -30,7 +30,7 @@ char *CRYPTO_strdup(const char *str, const char* file, int line)
 
     if (str == NULL)
         return NULL;
-    ret = CRYPTO_malloc(strlen(str) + 1, file, line);
+    ret = (char*) CRYPTO_malloc(strlen(str) + 1, file, line);
     if (ret != NULL)
         strcpy(ret, str);
     return ret;
@@ -46,7 +46,7 @@ char *CRYPTO_strndup(const char *str, size_t s, const char* file, int line)
 
     maxlen = OPENSSL_strnlen(str, s);
 
-    ret = CRYPTO_malloc(maxlen + 1, file, line);
+    ret = (char*) CRYPTO_malloc(maxlen + 1, file, line);
     if (ret) {
         memcpy(ret, str, maxlen);
         ret[maxlen] = '\0';
@@ -153,7 +153,7 @@ unsigned char *OPENSSL_hexstr2buf(const char *str, long *len)
     size_t s;
 
     s = strlen(str);
-    if ((hexbuf = OPENSSL_malloc(s >> 1)) == NULL) {
+    if ((hexbuf = (unsigned char*) OPENSSL_malloc(s >> 1)) == NULL) {
         CRYPTOerr(CRYPTO_F_OPENSSL_HEXSTR2BUF, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
@@ -197,10 +197,10 @@ char *OPENSSL_buf2hexstr(const unsigned char *buffer, long len)
 
     if (len == 0)
     {
-        return OPENSSL_zalloc(1);
+        return (char*) OPENSSL_zalloc(1);
     }
 
-    if ((tmp = OPENSSL_malloc(len * 3)) == NULL) {
+    if ((tmp = (char*) OPENSSL_malloc(len * 3)) == NULL) {
         CRYPTOerr(CRYPTO_F_OPENSSL_BUF2HEXSTR, ERR_R_MALLOC_FAILURE);
         return NULL;
     }

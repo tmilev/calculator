@@ -570,7 +570,7 @@ int tls_collect_extensions(SSL *s, PACKET *packet, unsigned int context,
         custom_ext_init(&s->cert->custext);
 
     num_exts = OSSL_NELEM(ext_defs) + (exts != NULL ? exts->meths_count : 0);
-    raw_extensions = OPENSSL_zalloc(num_exts * sizeof(*raw_extensions));
+    raw_extensions = (RAW_EXTENSION *) OPENSSL_zalloc(num_exts * sizeof(*raw_extensions));
     if (raw_extensions == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_COLLECT_EXTENSIONS,
                  ERR_R_MALLOC_FAILURE);
@@ -745,7 +745,7 @@ int tls_parse_all_extensions(SSL *s, int context, RAW_EXTENSION *exts, X509 *x,
 
     /* Parse each extension in turn */
     for (i = 0; i < numexts; i++) {
-        if (!tls_parse_extension(s, i, context, exts, x, chainidx)) {
+        if (!tls_parse_extension(s, (TLSEXT_INDEX) i, context, exts, x, chainidx)) {
             /* SSLfatal() already called */
             return 0;
         }
@@ -1335,7 +1335,7 @@ static int final_key_share(SSL *s, unsigned int context, int sent)
             /* We have a suitable key_share */
             if ((s->s3->flags & TLS1_FLAGS_STATELESS) != 0
                     && !s->ext.cookieok) {
-                if (!ossl_assert(s->hello_retry_request == SSL_HRR_NONE)) {
+                if (!ossl_assert(s->hello_retry_request == ssl_st::SSL_HRR_NONE)) {
                     /*
                      * If we are stateless then we wouldn't know about any
                      * previously sent HRR - so how can this be anything other
@@ -1345,12 +1345,12 @@ static int final_key_share(SSL *s, unsigned int context, int sent)
                              ERR_R_INTERNAL_ERROR);
                     return 0;
                 }
-                s->hello_retry_request = SSL_HRR_PENDING;
+                s->hello_retry_request = ssl_st::SSL_HRR_PENDING;
                 return 1;
             }
         } else {
             /* No suitable key_share */
-            if (s->hello_retry_request == SSL_HRR_NONE && sent
+            if (s->hello_retry_request == ssl_st::SSL_HRR_NONE && sent
                     && (!s->hit
                         || (s->ext.psk_kex_mode & TLSEXT_KEX_MODE_FLAG_KE_DHE)
                            != 0)) {
@@ -1378,7 +1378,7 @@ static int final_key_share(SSL *s, unsigned int context, int sent)
                 if (i < num_groups) {
                     /* A shared group exists so send a HelloRetryRequest */
                     s->s3->group_id = group_id;
-                    s->hello_retry_request = SSL_HRR_PENDING;
+                    s->hello_retry_request = ssl_st::SSL_HRR_PENDING;
                     return 1;
                 }
             }
@@ -1393,7 +1393,7 @@ static int final_key_share(SSL *s, unsigned int context, int sent)
 
             if ((s->s3->flags & TLS1_FLAGS_STATELESS) != 0
                     && !s->ext.cookieok) {
-                if (!ossl_assert(s->hello_retry_request == SSL_HRR_NONE)) {
+                if (!ossl_assert(s->hello_retry_request == ssl_st::SSL_HRR_NONE)) {
                     /*
                      * If we are stateless then we wouldn't know about any
                      * previously sent HRR - so how can this be anything other
@@ -1403,7 +1403,7 @@ static int final_key_share(SSL *s, unsigned int context, int sent)
                              ERR_R_INTERNAL_ERROR);
                     return 0;
                 }
-                s->hello_retry_request = SSL_HRR_PENDING;
+                s->hello_retry_request = ssl_st::SSL_HRR_PENDING;
                 return 1;
             }
         }
@@ -1412,8 +1412,8 @@ static int final_key_share(SSL *s, unsigned int context, int sent)
          * We have a key_share so don't send any more HelloRetryRequest
          * messages
          */
-        if (s->hello_retry_request == SSL_HRR_PENDING)
-            s->hello_retry_request = SSL_HRR_COMPLETE;
+        if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING)
+            s->hello_retry_request = ssl_st::SSL_HRR_COMPLETE;
     } else {
         /*
          * For a client side resumption with no key_share we need to generate
@@ -1533,7 +1533,7 @@ int tls_psk_do_binder(SSL *s, const EVP_MD *md, const unsigned char *msgstart,
      * following a HelloRetryRequest then this includes the hash of the first
      * ClientHello and the HelloRetryRequest itself.
      */
-    if (s->hello_retry_request == SSL_HRR_PENDING) {
+    if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING) {
         size_t hdatalen;
         long hdatalen_l;
         void *hdata;
@@ -1554,7 +1554,7 @@ int tls_psk_do_binder(SSL *s, const EVP_MD *md, const unsigned char *msgstart,
             PACKET hashprefix, msg;
 
             /* Find how many bytes are left after the first two messages */
-            if (!PACKET_buf_init(&hashprefix, hdata, hdatalen)
+            if (!PACKET_buf_init(&hashprefix, (unsigned char *) hdata, hdatalen)
                     || !PACKET_forward(&hashprefix, 1)
                     || !PACKET_get_length_prefixed_3(&hashprefix, &msg)
                     || !PACKET_forward(&hashprefix, 1)
@@ -1646,7 +1646,7 @@ static int final_early_data(SSL *s, unsigned int context, int sent)
             || !s->hit
             || s->early_data_state != SSL_EARLY_DATA_ACCEPTING
             || !s->ext.early_data_ok
-            || s->hello_retry_request != SSL_HRR_NONE
+            || s->hello_retry_request != ssl_st::SSL_HRR_NONE
             || (s->ctx->allow_early_data_cb != NULL
                 && !s->ctx->allow_early_data_cb(s,
                                          s->ctx->allow_early_data_cb_data))) {

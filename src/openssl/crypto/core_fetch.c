@@ -26,7 +26,7 @@ struct construct_data_st {
 
 static int ossl_method_construct_this(OSSL_PROVIDER *provider, void *cbdata)
 {
-    struct construct_data_st *data = cbdata;
+    struct construct_data_st *data = (construct_data_st *) cbdata;
     int no_store = 0;    /* Assume caching is ok */
     const OSSL_ALGORITHM *map =
         ossl_provider_query_operation(provider, data->operation_id, &no_store);
@@ -86,7 +86,7 @@ void *ossl_method_construct(OPENSSL_CTX *libctx, int operation_id,
          * We have a temporary store to be able to easily search among new
          * items, or items that should find themselves in the global store.
          */
-        if ((cbdata.store = mcm->alloc_tmp_store()) == NULL)
+        if ((cbdata.store = (OSSL_METHOD_STORE *) mcm->alloc_tmp_store()) == NULL)
             goto fin;
 
         cbdata.libctx = libctx;

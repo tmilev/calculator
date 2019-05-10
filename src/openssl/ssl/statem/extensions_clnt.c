@@ -233,7 +233,7 @@ EXT_RETURN tls_construct_ctos_session_ticket(SSL *s, WPACKET *pkt,
     } else if (s->session && s->ext.session_ticket != NULL
                && s->ext.session_ticket->data != NULL) {
         ticklen = s->ext.session_ticket->length;
-        s->session->ext.tick = OPENSSL_malloc(ticklen);
+        s->session->ext.tick = (unsigned char *) OPENSSL_malloc(ticklen);
         if (s->session->ext.tick == NULL) {
             SSLfatal(s, SSL_AD_INTERNAL_ERROR,
                      SSL_F_TLS_CONSTRUCT_CTOS_SESSION_TICKET,
@@ -592,7 +592,7 @@ static int add_key_share(SSL *s, WPACKET *pkt, unsigned int curve_id)
     size_t encodedlen;
 
     if (s->s3->tmp.pkey != NULL) {
-        if (!ossl_assert(s->hello_retry_request == SSL_HRR_PENDING)) {
+        if (!ossl_assert(s->hello_retry_request == ssl_st::SSL_HRR_PENDING)) {
             SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_ADD_KEY_SHARE,
                      ERR_R_INTERNAL_ERROR);
             return 0;
@@ -746,7 +746,7 @@ EXT_RETURN tls_construct_ctos_early_data(SSL *s, WPACKET *pkt,
     SSL_SESSION *edsess = NULL;
     const EVP_MD *handmd = NULL;
 
-    if (s->hello_retry_request == SSL_HRR_PENDING)
+    if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING)
         handmd = ssl_handshake_md(s);
 
     if (s->psk_use_session_cb != NULL
@@ -817,7 +817,7 @@ EXT_RETURN tls_construct_ctos_early_data(SSL *s, WPACKET *pkt,
     s->psksession = psksess;
     if (psksess != NULL) {
         OPENSSL_free(s->psksession_id);
-        s->psksession_id = OPENSSL_memdup(id, idlen);
+        s->psksession_id = (unsigned char*) OPENSSL_memdup(id, idlen);
         if (s->psksession_id == NULL) {
             SSLfatal(s, SSL_AD_INTERNAL_ERROR,
                      SSL_F_TLS_CONSTRUCT_CTOS_EARLY_DATA, ERR_R_INTERNAL_ERROR);
@@ -1012,7 +1012,7 @@ EXT_RETURN tls_construct_ctos_psk(SSL *s, WPACKET *pkt, unsigned int context,
             || (s->session->ext.ticklen == 0 && s->psksession == NULL))
         return EXT_RETURN_NOT_SENT;
 
-    if (s->hello_retry_request == SSL_HRR_PENDING)
+    if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING)
         handmd = ssl_handshake_md(s);
 
     if (s->session->ext.ticklen != 0) {
@@ -1031,7 +1031,7 @@ EXT_RETURN tls_construct_ctos_psk(SSL *s, WPACKET *pkt, unsigned int context,
             goto dopsksess;
         }
 
-        if (s->hello_retry_request == SSL_HRR_PENDING && mdres != handmd) {
+        if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING && mdres != handmd) {
             /*
              * Selected ciphersuite hash does not match the hash for the session
              * so we can't use it.
@@ -1106,7 +1106,7 @@ EXT_RETURN tls_construct_ctos_psk(SSL *s, WPACKET *pkt, unsigned int context,
             return EXT_RETURN_FAIL;
         }
 
-        if (s->hello_retry_request == SSL_HRR_PENDING && mdpsk != handmd) {
+        if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING && mdpsk != handmd) {
             /*
              * Selected ciphersuite hash does not match the hash for the PSK
              * session. This is an application bug.
@@ -1376,7 +1376,7 @@ int tls_parse_stoc_ec_pt_formats(SSL *s, PACKET *pkt, unsigned int context,
 
         s->session->ext.ecpointformats_len = 0;
         OPENSSL_free(s->session->ext.ecpointformats);
-        s->session->ext.ecpointformats = OPENSSL_malloc(ecpointformats_len);
+        s->session->ext.ecpointformats = (unsigned char *) OPENSSL_malloc(ecpointformats_len);
         if (s->session->ext.ecpointformats == NULL) {
             SSLfatal(s, SSL_AD_INTERNAL_ERROR,
                      SSL_F_TLS_PARSE_STOC_EC_PT_FORMATS, ERR_R_INTERNAL_ERROR);
@@ -1494,7 +1494,7 @@ int tls_parse_stoc_sct(SSL *s, PACKET *pkt, unsigned int context, X509 *x,
 
         s->ext.scts_len = (uint16_t)size;
         if (size > 0) {
-            s->ext.scts = OPENSSL_malloc(size);
+            s->ext.scts = (unsigned char*) OPENSSL_malloc(size);
             if (s->ext.scts == NULL
                     || !PACKET_copy_bytes(pkt, s->ext.scts, size)) {
                 SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_SCT,

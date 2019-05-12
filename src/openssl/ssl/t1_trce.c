@@ -1494,8 +1494,8 @@ static int ssl_print_handshake(BIO *bio, const SSL *ssl, int server,
 void SSL_trace(int write_p, int version, int content_type,
                const void *buf, size_t msglen, SSL *ssl, void *arg)
 {
-    const unsigned char *msg = buf;
-    BIO *bio = arg;
+    const unsigned char *msg = (unsigned char *) buf;
+    BIO *bio = (BIO*) arg;
 
     switch (content_type) {
     case SSL3_RT_HEADER:

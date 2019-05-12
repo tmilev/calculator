@@ -443,7 +443,7 @@ static WRITE_TRAN ossl_statem_client13_write_transition(SSL *s)
                 || s->early_data_state == SSL_EARLY_DATA_FINISHED_WRITING)
             st->hand_state = TLS_ST_PENDING_EARLY_DATA_END;
         else if ((s->options & SSL_OP_ENABLE_MIDDLEBOX_COMPAT) != 0
-                 && s->hello_retry_request == SSL_HRR_NONE)
+                 && s->hello_retry_request == ssl_st::SSL_HRR_NONE)
             st->hand_state = TLS_ST_CW_CHANGE;
         else
             st->hand_state = (s->s3->tmp.cert_req != 0) ? TLS_ST_CW_CERT
@@ -610,7 +610,7 @@ WRITE_TRAN ossl_statem_client_write_transition(SSL *s)
         return WRITE_TRAN_CONTINUE;
 
     case TLS_ST_CW_CHANGE:
-        if (s->hello_retry_request == SSL_HRR_PENDING) {
+        if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING) {
             st->hand_state = TLS_ST_CW_CLNT_HELLO;
         } else if (s->early_data_state == SSL_EARLY_DATA_CONNECTING) {
             st->hand_state = TLS_ST_EARLY_DATA;
@@ -789,7 +789,7 @@ WORK_STATE ossl_statem_client_post_work(SSL *s, WORK_STATE wst)
         break;
 
     case TLS_ST_CW_CHANGE:
-        if (SSL_IS_TLS13(s) || s->hello_retry_request == SSL_HRR_PENDING)
+        if (SSL_IS_TLS13(s) || s->hello_retry_request == ssl_st::SSL_HRR_PENDING)
             break;
         if (s->early_data_state == SSL_EARLY_DATA_CONNECTING
                     && s->max_early_data > 0) {
@@ -1124,7 +1124,7 @@ int tls_construct_client_hello(SSL *s, WPACKET *pkt)
     if (sess == NULL
             || !ssl_version_supported(s, sess->ssl_version, NULL)
             || !SSL_SESSION_is_resumable(sess)) {
-        if (s->hello_retry_request == SSL_HRR_NONE
+        if (s->hello_retry_request == ssl_st::SSL_HRR_NONE
                 && !ssl_get_new_session(s, 0)) {
             /* SSLfatal() already called */
             return 0;
@@ -1148,7 +1148,7 @@ int tls_construct_client_hello(SSL *s, WPACKET *pkt)
             }
         }
     } else {
-        i = (s->hello_retry_request == SSL_HRR_NONE);
+        i = (s->hello_retry_request == ssl_st::SSL_HRR_NONE);
     }
 
     if (i && ssl_fill_hello_random(s, 0, p, sizeof(s->s3->client_random),
@@ -1206,7 +1206,7 @@ int tls_construct_client_hello(SSL *s, WPACKET *pkt)
             sess_id_len = sizeof(s->tmp_session_id);
             s->tmp_session_id_len = sess_id_len;
             session_id = s->tmp_session_id;
-            if (s->hello_retry_request == SSL_HRR_NONE
+            if (s->hello_retry_request == ssl_st::SSL_HRR_NONE
                     && RAND_bytes(s->tmp_session_id, sess_id_len) <= 0) {
                 SSLfatal(s, SSL_AD_INTERNAL_ERROR,
                          SSL_F_TLS_CONSTRUCT_CLIENT_HELLO,
@@ -1428,7 +1428,7 @@ MSG_PROCESS_RETURN tls_process_server_hello(SSL *s, PACKET *pkt)
             && sversion == TLS1_2_VERSION
             && PACKET_remaining(pkt) >= SSL3_RANDOM_SIZE
             && memcmp(hrrrandom, PACKET_data(pkt), SSL3_RANDOM_SIZE) == 0) {
-        s->hello_retry_request = SSL_HRR_PENDING;
+        s->hello_retry_request = ssl_st::SSL_HRR_PENDING;
         hrr = 1;
         if (!PACKET_forward(pkt, SSL3_RANDOM_SIZE)) {
             SSLfatal(s, SSL_AD_DECODE_ERROR, SSL_F_TLS_PROCESS_SERVER_HELLO,
@@ -2650,7 +2650,7 @@ MSG_PROCESS_RETURN tls_process_new_session_ticket(SSL *s, PACKET *pkt)
     s->session->ext.tick = NULL;
     s->session->ext.ticklen = 0;
 
-    s->session->ext.tick = OPENSSL_malloc(ticklen);
+    s->session->ext.tick = (unsigned char*) OPENSSL_malloc(ticklen);
     if (s->session->ext.tick == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PROCESS_NEW_SESSION_TICKET,
                  ERR_R_MALLOC_FAILURE);
@@ -2773,7 +2773,7 @@ int tls_process_cert_status_body(SSL *s, PACKET *pkt)
                  SSL_R_LENGTH_MISMATCH);
         return 0;
     }
-    s->ext.ocsp.resp = OPENSSL_malloc(resplen);
+    s->ext.ocsp.resp = (unsigned char *) OPENSSL_malloc(resplen);
     if (s->ext.ocsp.resp == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PROCESS_CERT_STATUS_BODY,
                  ERR_R_MALLOC_FAILURE);
@@ -2924,7 +2924,7 @@ static int tls_construct_cke_psk_preamble(SSL *s, WPACKET *pkt)
         goto err;
     }
 
-    tmppsk = OPENSSL_memdup(psk, psklen);
+    tmppsk = (unsigned char *) OPENSSL_memdup(psk, psklen);
     tmpidentity = OPENSSL_strdup(identity);
     if (tmppsk == NULL || tmpidentity == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_CKE_PSK_PREAMBLE,
@@ -2989,7 +2989,7 @@ static int tls_construct_cke_rsa(SSL *s, WPACKET *pkt)
     }
 
     pmslen = SSL_MAX_MASTER_KEY_LENGTH;
-    pms = OPENSSL_malloc(pmslen);
+    pms = (unsigned char *) OPENSSL_malloc(pmslen);
     if (pms == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_CKE_RSA,
                  ERR_R_MALLOC_FAILURE);
@@ -3209,7 +3209,7 @@ static int tls_construct_cke_gost(SSL *s, WPACKET *pkt)
 
     /* Otherwise, generate ephemeral key pair */
     pmslen = 32;
-    pms = OPENSSL_malloc(pmslen);
+    pms = (unsigned char *) OPENSSL_malloc(pmslen);
     if (pms == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_CKE_GOST,
                  ERR_R_MALLOC_FAILURE);

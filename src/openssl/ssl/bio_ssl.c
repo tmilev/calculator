@@ -55,7 +55,7 @@ const BIO_METHOD *BIO_f_ssl(void)
 
 static int ssl_new(BIO *bi)
 {
-    BIO_SSL *bs = OPENSSL_zalloc(sizeof(*bs));
+    BIO_SSL *bs = (BIO_SSL *) OPENSSL_zalloc(sizeof(*bs));
 
     if (bs == NULL) {
         BIOerr(BIO_F_SSL_NEW, ERR_R_MALLOC_FAILURE);
@@ -75,7 +75,7 @@ static int ssl_free(BIO *a)
 
     if (a == NULL)
         return 0;
-    bs = BIO_get_data(a);
+    bs = (BIO_SSL *) BIO_get_data(a);
     if (bs->ssl != NULL)
         SSL_shutdown(bs->ssl);
     if (BIO_get_shutdown(a)) {
@@ -99,7 +99,7 @@ static int ssl_read(BIO *b, char *buf, size_t size, size_t *readbytes)
 
     if (buf == NULL)
         return 0;
-    sb = BIO_get_data(b);
+    sb = (BIO_SSL *) BIO_get_data(b);
     ssl = sb->ssl;
 
     BIO_clear_retry_flags(b);
@@ -168,7 +168,7 @@ static int ssl_write(BIO *b, const char *buf, size_t size, size_t *written)
 
     if (buf == NULL)
         return 0;
-    bs = BIO_get_data(b);
+    bs = (BIO_SSL *) BIO_get_data(b);
     ssl = bs->ssl;
 
     BIO_clear_retry_flags(b);
@@ -229,7 +229,7 @@ static long ssl_ctrl(BIO *b, int cmd, long num, void *ptr)
     long ret = 1;
     BIO *next;
 
-    bs = BIO_get_data(b);
+    bs = (BIO_SSL *) BIO_get_data(b);
     next = BIO_next(b);
     ssl = bs->ssl;
     if ((ssl == NULL) && (cmd != BIO_C_SET_SSL))
@@ -367,7 +367,7 @@ static long ssl_ctrl(BIO *b, int cmd, long num, void *ptr)
         break;
     case BIO_CTRL_DUP:
         dbio = (BIO *)ptr;
-        dbs = BIO_get_data(dbio);
+        dbs = (BIO_SSL *) BIO_get_data(dbio);
         SSL_free(dbs->ssl);
         dbs->ssl = SSL_dup(ssl);
         dbs->num_renegotiates = bs->num_renegotiates;
@@ -396,7 +396,7 @@ static long ssl_callback_ctrl(BIO *b, int cmd, BIO_info_cb *fp)
     BIO_SSL *bs;
     long ret = 1;
 
-    bs = BIO_get_data(b);
+    bs = (BIO_SSL *) BIO_get_data(b);
     ssl = bs->ssl;
     switch (cmd) {
     case BIO_CTRL_SET_CALLBACK:
@@ -482,8 +482,8 @@ int BIO_ssl_copy_session_id(BIO *t, BIO *f)
     f = BIO_find_type(f, BIO_TYPE_SSL);
     if ((t == NULL) || (f == NULL))
         return 0;
-    tdata = BIO_get_data(t);
-    fdata = BIO_get_data(f);
+    tdata = (BIO_SSL *) BIO_get_data(t);
+    fdata = (BIO_SSL *) BIO_get_data(f);
     if ((tdata->ssl == NULL) || (fdata->ssl == NULL))
         return 0;
     if (!SSL_copy_session_id(tdata->ssl, (fdata->ssl)))
@@ -498,7 +498,7 @@ void BIO_ssl_shutdown(BIO *b)
     for (; b != NULL; b = BIO_next(b)) {
         if (BIO_method_type(b) != BIO_TYPE_SSL)
             continue;
-        bdata = BIO_get_data(b);
+        bdata = (BIO_SSL *) BIO_get_data(b);
         if (bdata != NULL && bdata->ssl != NULL)
             SSL_shutdown(bdata->ssl);
     }

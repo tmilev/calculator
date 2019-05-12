@@ -261,7 +261,7 @@ int srp_generate_server_master_secret(SSL *s)
         goto err;
 
     tmp_len = BN_num_bytes(K);
-    if ((tmp = OPENSSL_malloc(tmp_len)) == NULL) {
+    if ((tmp = (unsigned char*) OPENSSL_malloc(tmp_len)) == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR,
                  SSL_F_SRP_GENERATE_SERVER_MASTER_SECRET, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -312,7 +312,7 @@ int srp_generate_client_master_secret(SSL *s)
     }
 
     tmp_len = BN_num_bytes(K);
-    if ((tmp = OPENSSL_malloc(tmp_len)) == NULL) {
+    if ((tmp = (unsigned char*) OPENSSL_malloc(tmp_len)) == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR,
                  SSL_F_SRP_GENERATE_CLIENT_MASTER_SECRET, ERR_R_MALLOC_FAILURE);
         goto err;

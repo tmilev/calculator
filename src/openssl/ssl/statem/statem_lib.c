@@ -262,7 +262,7 @@ int tls_construct_cert_verify(SSL *s, WPACKET *pkt)
         goto err;
     }
     siglen = EVP_PKEY_size(pkey);
-    sig = OPENSSL_malloc(siglen);
+    sig = (unsigned char*) OPENSSL_malloc(siglen);
     if (sig == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_CERT_VERIFY,
                  ERR_R_MALLOC_FAILURE);
@@ -295,7 +295,7 @@ int tls_construct_cert_verify(SSL *s, WPACKET *pkt)
                      ERR_R_EVP_LIB);
             goto err;
         }
-    } else if (EVP_DigestSign(mctx, sig, &siglen, hdata, hdatalen) <= 0) {
+    } else if (EVP_DigestSign(mctx, sig, &siglen, (unsigned char*) hdata, hdatalen) <= 0) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_CERT_VERIFY,
                  ERR_R_EVP_LIB);
         goto err;
@@ -452,7 +452,7 @@ MSG_PROCESS_RETURN tls_process_cert_verify(SSL *s, PACKET *pkt)
         if (pktype == NID_id_GostR3410_2001
             || pktype == NID_id_GostR3410_2012_256
             || pktype == NID_id_GostR3410_2012_512) {
-            if ((gost_data = OPENSSL_malloc(len)) == NULL) {
+            if ((gost_data = (unsigned char*) OPENSSL_malloc(len)) == NULL) {
                 SSLfatal(s, SSL_AD_INTERNAL_ERROR,
                          SSL_F_TLS_PROCESS_CERT_VERIFY, ERR_R_MALLOC_FAILURE);
                 goto err;
@@ -487,7 +487,7 @@ MSG_PROCESS_RETURN tls_process_cert_verify(SSL *s, PACKET *pkt)
             goto err;
         }
     } else {
-        j = EVP_DigestVerify(mctx, data, len, hdata, hdatalen);
+        j = EVP_DigestVerify(mctx, data, len, (unsigned char*) hdata, hdatalen);
         if (j <= 0) {
             SSLfatal(s, SSL_AD_DECRYPT_ERROR, SSL_F_TLS_PROCESS_CERT_VERIFY,
                      SSL_R_BAD_SIGNATURE);
@@ -1247,7 +1247,7 @@ int tls_get_message_body(SSL *s, size_t *len)
         return 1;
     }
 
-    p = s->init_msg;
+    p = (unsigned char*) s->init_msg;
     n = s->s3->tmp.message_size - s->init_num;
     while (n > 0) {
         i = s->method->ssl_read_bytes(s, SSL3_RT_HANDSHAKE, NULL,
@@ -1758,7 +1758,7 @@ int ssl_choose_server_version(SSL *s, CLIENTHELLO_MSG *hello, DOWNGRADE *dgrd)
     suppversions = &hello->pre_proc_exts[TLSEXT_IDX_supported_versions];
 
     /* If we did an HRR then supported versions is mandatory */
-    if (!suppversions->present && s->hello_retry_request != SSL_HRR_NONE)
+    if (!suppversions->present && s->hello_retry_request != ssl_st::SSL_HRR_NONE)
         return SSL_R_UNSUPPORTED_PROTOCOL;
 
     if (suppversions->present && !SSL_IS_DTLS(s)) {
@@ -1798,7 +1798,7 @@ int ssl_choose_server_version(SSL *s, CLIENTHELLO_MSG *hello, DOWNGRADE *dgrd)
         }
 
         if (best_vers > 0) {
-            if (s->hello_retry_request != SSL_HRR_NONE) {
+            if (s->hello_retry_request != ssl_st::SSL_HRR_NONE) {
                 /*
                  * This is after a HelloRetryRequest so we better check that we
                  * negotiated TLSv1.3
@@ -1873,7 +1873,7 @@ int ssl_choose_client_version(SSL *s, int version, RAW_EXTENSION *extensions)
         return 0;
     }
 
-    if (s->hello_retry_request != SSL_HRR_NONE
+    if (s->hello_retry_request != ssl_st::SSL_HRR_NONE
             && s->version != TLS1_3_VERSION) {
         s->version = origv;
         SSLfatal(s, SSL_AD_PROTOCOL_VERSION, SSL_F_SSL_CHOOSE_CLIENT_VERSION,
@@ -2333,7 +2333,7 @@ size_t construct_key_exchange_tbs(SSL *s, unsigned char **ptbs,
                                   const void *param, size_t paramlen)
 {
     size_t tbslen = 2 * SSL3_RANDOM_SIZE + paramlen;
-    unsigned char *tbs = OPENSSL_malloc(tbslen);
+    unsigned char *tbs = (unsigned char*) OPENSSL_malloc(tbslen);
 
     if (tbs == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_CONSTRUCT_KEY_EXCHANGE_TBS,

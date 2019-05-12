@@ -52,7 +52,7 @@ static int ossl_statem_server13_read_transition(SSL *s, int mt)
         break;
 
     case TLS_ST_EARLY_DATA:
-        if (s->hello_retry_request == SSL_HRR_PENDING) {
+        if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING) {
             if (mt == SSL3_MT_CLIENT_HELLO) {
                 st->hand_state = TLS_ST_SR_CLNT_HELLO;
                 return 1;
@@ -431,16 +431,16 @@ static WRITE_TRAN ossl_statem_server13_write_transition(SSL *s)
 
     case TLS_ST_SW_SRVR_HELLO:
         if ((s->options & SSL_OP_ENABLE_MIDDLEBOX_COMPAT) != 0
-                && s->hello_retry_request != SSL_HRR_COMPLETE)
+                && s->hello_retry_request != ssl_st::SSL_HRR_COMPLETE)
             st->hand_state = TLS_ST_SW_CHANGE;
-        else if (s->hello_retry_request == SSL_HRR_PENDING)
+        else if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING)
             st->hand_state = TLS_ST_EARLY_DATA;
         else
             st->hand_state = TLS_ST_SW_ENCRYPTED_EXTENSIONS;
         return WRITE_TRAN_CONTINUE;
 
     case TLS_ST_SW_CHANGE:
-        if (s->hello_retry_request == SSL_HRR_PENDING)
+        if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING)
             st->hand_state = TLS_ST_EARLY_DATA;
         else
             st->hand_state = TLS_ST_SW_ENCRYPTED_EXTENSIONS;
@@ -825,7 +825,7 @@ WORK_STATE ossl_statem_server_post_work(SSL *s, WORK_STATE wst)
         break;
 
     case TLS_ST_SW_SRVR_HELLO:
-        if (SSL_IS_TLS13(s) && s->hello_retry_request == SSL_HRR_PENDING) {
+        if (SSL_IS_TLS13(s) && s->hello_retry_request == ssl_st::SSL_HRR_PENDING) {
             if ((s->options & SSL_OP_ENABLE_MIDDLEBOX_COMPAT) == 0
                     && statem_flush(s) != 1)
                 return WORK_MORE_A;
@@ -865,12 +865,12 @@ WORK_STATE ossl_statem_server_post_work(SSL *s, WORK_STATE wst)
 #endif
         if (!SSL_IS_TLS13(s)
                 || ((s->options & SSL_OP_ENABLE_MIDDLEBOX_COMPAT) != 0
-                    && s->hello_retry_request != SSL_HRR_COMPLETE))
+                    && s->hello_retry_request != ssl_st::SSL_HRR_COMPLETE))
             break;
         /* Fall through */
 
     case TLS_ST_SW_CHANGE:
-        if (s->hello_retry_request == SSL_HRR_PENDING) {
+        if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING) {
             if (!statem_flush(s))
                 return WORK_MORE_A;
             break;
@@ -1387,7 +1387,7 @@ MSG_PROCESS_RETURN tls_process_client_hello(SSL *s, PACKET *pkt)
         s->new_session = 1;
     }
 
-    clienthello = OPENSSL_zalloc(sizeof(*clienthello));
+    clienthello = (CLIENTHELLO_MSG *) OPENSSL_zalloc(sizeof(*clienthello));
     if (clienthello == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PROCESS_CLIENT_HELLO,
                  ERR_R_INTERNAL_ERROR);
@@ -1404,7 +1404,7 @@ MSG_PROCESS_RETURN tls_process_client_hello(SSL *s, PACKET *pkt)
         unsigned int mt;
 
         if (!SSL_IS_FIRST_HANDSHAKE(s)
-                || s->hello_retry_request != SSL_HRR_NONE) {
+                || s->hello_retry_request != ssl_st::SSL_HRR_NONE) {
             SSLfatal(s, SSL_AD_UNEXPECTED_MESSAGE,
                      SSL_F_TLS_PROCESS_CLIENT_HELLO, SSL_R_UNEXPECTED_MESSAGE);
             goto err;
@@ -1763,7 +1763,7 @@ static int tls_early_post_process_client_hello(SSL *s)
                      SSL_R_NO_SHARED_CIPHER);
             goto err;
         }
-        if (s->hello_retry_request == SSL_HRR_PENDING
+        if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING
                 && (s->s3->tmp.new_cipher == NULL
                     || s->s3->tmp.new_cipher->id != cipher->id)) {
             /*
@@ -2156,7 +2156,7 @@ int tls_handle_alpn(SSL *s)
 
         if (r == SSL_TLSEXT_ERR_OK) {
             OPENSSL_free(s->s3->alpn_selected);
-            s->s3->alpn_selected = OPENSSL_memdup(selected, selected_len);
+            s->s3->alpn_selected = (unsigned char*) OPENSSL_memdup(selected, selected_len);
             if (s->s3->alpn_selected == NULL) {
                 SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_HANDLE_ALPN,
                          ERR_R_INTERNAL_ERROR);
@@ -2188,7 +2188,7 @@ int tls_handle_alpn(SSL *s)
                                  ERR_R_INTERNAL_ERROR);
                         return 0;
                     }
-                    s->session->ext.alpn_selected = OPENSSL_memdup(selected,
+                    s->session->ext.alpn_selected = (unsigned char*) OPENSSL_memdup(selected,
                                                                    selected_len);
                     if (s->session->ext.alpn_selected == NULL) {
                         SSLfatal(s, SSL_AD_INTERNAL_ERROR,
@@ -2353,7 +2353,7 @@ int tls_construct_server_hello(SSL *s, WPACKET *pkt)
     size_t sl, len;
     int version;
     unsigned char *session_id;
-    int usetls13 = SSL_IS_TLS13(s) || s->hello_retry_request == SSL_HRR_PENDING;
+    int usetls13 = SSL_IS_TLS13(s) || s->hello_retry_request == ssl_st::SSL_HRR_PENDING;
 
     version = usetls13 ? TLS1_2_VERSION : s->version;
     if (!WPACKET_put_bytes_u16(pkt, version)
@@ -2362,7 +2362,7 @@ int tls_construct_server_hello(SSL *s, WPACKET *pkt)
                 * tls_process_client_hello()
                 */
             || !WPACKET_memcpy(pkt,
-                               s->hello_retry_request == SSL_HRR_PENDING
+                               s->hello_retry_request == ssl_st::SSL_HRR_PENDING
                                    ? hrrrandom : s->s3->server_random,
                                SSL3_RANDOM_SIZE)) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_SERVER_HELLO,
@@ -2426,7 +2426,7 @@ int tls_construct_server_hello(SSL *s, WPACKET *pkt)
     }
 
     if (!tls_construct_extensions(s, pkt,
-                                  s->hello_retry_request == SSL_HRR_PENDING
+                                  s->hello_retry_request == ssl_st::SSL_HRR_PENDING
                                       ? SSL_EXT_TLS1_3_HELLO_RETRY_REQUEST
                                       : (SSL_IS_TLS13(s)
                                           ? SSL_EXT_TLS1_3_SERVER_HELLO
@@ -2436,7 +2436,7 @@ int tls_construct_server_hello(SSL *s, WPACKET *pkt)
         return 0;
     }
 
-    if (s->hello_retry_request == SSL_HRR_PENDING) {
+    if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING) {
         /* Ditch the session. We'll create a new one next time around */
         SSL_SESSION_free(s->session);
         s->session = NULL;
@@ -2839,7 +2839,7 @@ int tls_construct_certificate_request(SSL *s, WPACKET *pkt)
         if (s->post_handshake_auth == SSL_PHA_REQUEST_PENDING) {
             OPENSSL_free(s->pha_context);
             s->pha_context_len = 32;
-            if ((s->pha_context = OPENSSL_malloc(s->pha_context_len)) == NULL
+            if ((s->pha_context = (uint8_t*) OPENSSL_malloc(s->pha_context_len)) == NULL
                     || RAND_bytes(s->pha_context, s->pha_context_len) <= 0
                     || !WPACKET_sub_memcpy_u8(pkt, s->pha_context, s->pha_context_len)) {
                 SSLfatal(s, SSL_AD_INTERNAL_ERROR,
@@ -2951,7 +2951,7 @@ static int tls_process_cke_psk_preamble(SSL *s, PACKET *pkt)
     }
 
     OPENSSL_free(s->s3->tmp.psk);
-    s->s3->tmp.psk = OPENSSL_memdup(psk, psklen);
+    s->s3->tmp.psk = (unsigned char*) OPENSSL_memdup(psk, psklen);
     OPENSSL_cleanse(psk, psklen);
 
     if (s->s3->tmp.psk == NULL) {
@@ -3014,7 +3014,7 @@ static int tls_process_cke_rsa(SSL *s, PACKET *pkt)
         return 0;
     }
 
-    rsa_decrypt = OPENSSL_malloc(RSA_size(rsa));
+    rsa_decrypt = (unsigned char*) OPENSSL_malloc(RSA_size(rsa));
     if (rsa_decrypt == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PROCESS_CKE_RSA,
                  ERR_R_MALLOC_FAILURE);
@@ -3865,7 +3865,7 @@ static int construct_stateless_ticket(SSL *s, WPACKET *pkt, uint32_t age_add,
                  ERR_R_INTERNAL_ERROR);
         goto err;
     }
-    senc = OPENSSL_malloc(slen_full);
+    senc = (unsigned char*) OPENSSL_malloc(slen_full);
     if (senc == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR,
                  SSL_F_CONSTRUCT_STATELESS_TICKET, ERR_R_MALLOC_FAILURE);
@@ -4108,7 +4108,7 @@ int tls_construct_new_session_ticket(SSL *s, WPACKET *pkt)
         s->session->time = (long)time(NULL);
         if (s->s3->alpn_selected != NULL) {
             OPENSSL_free(s->session->ext.alpn_selected);
-            s->session->ext.alpn_selected =
+            s->session->ext.alpn_selected = (unsigned char*)
                 OPENSSL_memdup(s->s3->alpn_selected, s->s3->alpn_selected_len);
             if (s->session->ext.alpn_selected == NULL) {
                 SSLfatal(s, SSL_AD_INTERNAL_ERROR,

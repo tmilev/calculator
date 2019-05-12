@@ -69,7 +69,7 @@ SSL_SESSION *SSL_SESSION_new(void)
     if (!OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS, NULL))
         return NULL;
 
-    ss = OPENSSL_zalloc(sizeof(*ss));
+    ss = (SSL_SESSION *) OPENSSL_zalloc(sizeof(*ss));
     if (ss == NULL) {
         SSLerr(SSL_F_SSL_SESSION_NEW, ERR_R_MALLOC_FAILURE);
         return NULL;
@@ -107,7 +107,7 @@ SSL_SESSION *ssl_session_dup(const SSL_SESSION *src, int ticket)
 {
     SSL_SESSION *dest;
 
-    dest = OPENSSL_malloc(sizeof(*src));
+    dest = (SSL_SESSION *) OPENSSL_malloc(sizeof(*src));
     if (dest == NULL) {
         goto err;
     }
@@ -195,14 +195,14 @@ SSL_SESSION *ssl_session_dup(const SSL_SESSION *src, int ticket)
     }
 #ifndef OPENSSL_NO_EC
     if (src->ext.ecpointformats) {
-        dest->ext.ecpointformats =
+        dest->ext.ecpointformats = (unsigned char*)
             OPENSSL_memdup(src->ext.ecpointformats,
                            src->ext.ecpointformats_len);
         if (dest->ext.ecpointformats == NULL)
             goto err;
     }
     if (src->ext.supportedgroups) {
-        dest->ext.supportedgroups =
+        dest->ext.supportedgroups = (uint16_t*)
             OPENSSL_memdup(src->ext.supportedgroups,
                            src->ext.supportedgroups_len
                                 * sizeof(*src->ext.supportedgroups));
@@ -212,7 +212,7 @@ SSL_SESSION *ssl_session_dup(const SSL_SESSION *src, int ticket)
 #endif
 
     if (ticket != 0 && src->ext.tick != NULL) {
-        dest->ext.tick =
+        dest->ext.tick = (unsigned char*)
             OPENSSL_memdup(src->ext.tick, src->ext.ticklen);
         if (dest->ext.tick == NULL)
             goto err;
@@ -222,7 +222,7 @@ SSL_SESSION *ssl_session_dup(const SSL_SESSION *src, int ticket)
     }
 
     if (src->ext.alpn_selected != NULL) {
-        dest->ext.alpn_selected = OPENSSL_memdup(src->ext.alpn_selected,
+        dest->ext.alpn_selected = (unsigned char*) OPENSSL_memdup(src->ext.alpn_selected,
                                                  src->ext.alpn_selected_len);
         if (dest->ext.alpn_selected == NULL)
             goto err;
@@ -238,7 +238,7 @@ SSL_SESSION *ssl_session_dup(const SSL_SESSION *src, int ticket)
 #endif
 
     if (src->ticket_appdata != NULL) {
-        dest->ticket_appdata =
+        dest->ticket_appdata = (unsigned char*)
             OPENSSL_memdup(src->ticket_appdata, src->ticket_appdata_len);
         if (dest->ticket_appdata == NULL)
             goto err;
@@ -974,7 +974,7 @@ int SSL_SESSION_set1_alpn_selected(SSL_SESSION *s, const unsigned char *alpn,
         s->ext.alpn_selected_len = 0;
         return 1;
     }
-    s->ext.alpn_selected = OPENSSL_memdup(alpn, len);
+    s->ext.alpn_selected = (unsigned char*) OPENSSL_memdup(alpn, len);
     if (s->ext.alpn_selected == NULL) {
         s->ext.alpn_selected_len = 0;
         return 0;
@@ -1057,7 +1057,7 @@ int SSL_set_session_ticket_ext(SSL *s, void *ext_data, int ext_len)
     if (s->version >= TLS1_VERSION) {
         OPENSSL_free(s->ext.session_ticket);
         s->ext.session_ticket = NULL;
-        s->ext.session_ticket =
+        s->ext.session_ticket = (TLS_SESSION_TICKET_EXT *)
             OPENSSL_malloc(sizeof(TLS_SESSION_TICKET_EXT) + ext_len);
         if (s->ext.session_ticket == NULL) {
             SSLerr(SSL_F_SSL_SET_SESSION_TICKET_EXT, ERR_R_MALLOC_FAILURE);
@@ -1281,7 +1281,7 @@ int SSL_SESSION_set1_ticket_appdata(SSL_SESSION *ss, const void *data, size_t le
         ss->ticket_appdata = NULL;
         return 1;
     }
-    ss->ticket_appdata = OPENSSL_memdup(data, len);
+    ss->ticket_appdata = (unsigned char*) OPENSSL_memdup(data, len);
     if (ss->ticket_appdata != NULL) {
         ss->ticket_appdata_len = len;
         return 1;

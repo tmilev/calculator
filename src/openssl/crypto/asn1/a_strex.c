@@ -439,32 +439,32 @@ static int do_name_ex(char_io *io_ch, void *arg, const X509_NAME *n,
         return -1;
     switch (flags & XN_FLAG_SEP_MASK) {
     case XN_FLAG_SEP_MULTILINE:
-        sep_dn = "\n";
+        sep_dn = (char*) "\n";
         sep_dn_len = 1;
-        sep_mv = " + ";
+        sep_mv = (char*) " + ";
         sep_mv_len = 3;
         break;
 
     case XN_FLAG_SEP_COMMA_PLUS:
-        sep_dn = ",";
+        sep_dn = (char*) ",";
         sep_dn_len = 1;
-        sep_mv = "+";
+        sep_mv = (char*) "+";
         sep_mv_len = 1;
         indent = 0;
         break;
 
     case XN_FLAG_SEP_CPLUS_SPC:
-        sep_dn = ", ";
+        sep_dn = (char*) ", ";
         sep_dn_len = 2;
-        sep_mv = " + ";
+        sep_mv = (char*) " + ";
         sep_mv_len = 3;
         indent = 0;
         break;
 
     case XN_FLAG_SEP_SPLUS_SPC:
-        sep_dn = "; ";
+        sep_dn = (char*) "; ";
         sep_dn_len = 2;
-        sep_mv = " + ";
+        sep_mv = (char*) " + ";
         sep_mv_len = 3;
         indent = 0;
         break;
@@ -474,10 +474,10 @@ static int do_name_ex(char_io *io_ch, void *arg, const X509_NAME *n,
     }
 
     if (flags & XN_FLAG_SPC_EQ) {
-        sep_eq = " = ";
+        sep_eq = (char*) " = ";
         sep_eq_len = 3;
     } else {
-        sep_eq = "=";
+        sep_eq = (char*) "=";
         sep_eq_len = 1;
     }
 

@@ -876,7 +876,7 @@ int SSL_CTX_use_serverinfo_ex(SSL_CTX *ctx, unsigned int version,
         SSLerr(SSL_F_SSL_CTX_USE_SERVERINFO_EX, ERR_R_INTERNAL_ERROR);
         return 0;
     }
-    new_serverinfo = OPENSSL_realloc(ctx->cert->key->serverinfo,
+    new_serverinfo = (unsigned char*) OPENSSL_realloc(ctx->cert->key->serverinfo,
                                      serverinfo_length);
     if (new_serverinfo == NULL) {
         SSLerr(SSL_F_SSL_CTX_USE_SERVERINFO_EX, ERR_R_MALLOC_FAILURE);
@@ -996,7 +996,7 @@ int SSL_CTX_use_serverinfo_file(SSL_CTX *ctx, const char *file)
             }
         }
         /* Append the decoded extension to the serverinfo buffer */
-        tmp = OPENSSL_realloc(serverinfo, serverinfo_length + extension_length
+        tmp = (unsigned char *) OPENSSL_realloc(serverinfo, serverinfo_length + extension_length
                                           + contextoff);
         if (tmp == NULL) {
             SSLerr(SSL_F_SSL_CTX_USE_SERVERINFO_FILE, ERR_R_MALLOC_FAILURE);

@@ -607,7 +607,6 @@ SOURCES += \
     openssl/crypto/ct/ct_vfy.c \
     openssl/crypto/ct/ct_x509v3.c \
     openssl/crypto/des/cbc_cksm.c \
-    openssl/crypto/des/cbc_enc.c \
     openssl/crypto/des/cfb64ede.c \
     openssl/crypto/des/cfb64enc.c \
     openssl/crypto/des/cfb_enc.c \
@@ -1140,5 +1139,6 @@ SOURCES += \
     openssl/ssl/t1_lib.c \
     openssl/ssl/t1_trce.c \
     openssl/ssl/tls13_enc.c \
-    openssl/ssl/tls_srp.c
+    openssl/ssl/tls_srp.c \
+    openssl/crypto/LPdir_unix.c
 

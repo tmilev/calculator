@@ -61,7 +61,7 @@ static RSA *pkey_get_rsa(EVP_PKEY *key, RSA **rsa)
 }
 
 RSA *PEM_read_bio_RSAPrivateKey(BIO *bp, RSA **rsa, pem_password_cb *cb,
-                                void *u)
+                                const void *u)
 {
     EVP_PKEY *pktmp;
     pktmp = PEM_read_bio_PrivateKey(bp, NULL, cb, u);

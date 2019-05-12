@@ -347,7 +347,7 @@ int tls1_set_groups(uint16_t **pext, size_t *pextlen,
         SSLerr(SSL_F_TLS1_SET_GROUPS, SSL_R_BAD_LENGTH);
         return 0;
     }
-    if ((glist = OPENSSL_malloc(ngroups * sizeof(*glist))) == NULL) {
+    if ((glist = (uint16_t*) OPENSSL_malloc(ngroups * sizeof(*glist))) == NULL) {
         SSLerr(SSL_F_TLS1_SET_GROUPS, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -379,7 +379,7 @@ typedef struct {
 
 static int nid_cb(const char *elem, int len, void *arg)
 {
-    nid_cb_st *narg = arg;
+    nid_cb_st *narg = (nid_cb_st *) arg;
     size_t i;
     int nid;
     char etmp[20];
@@ -1435,7 +1435,7 @@ SSL_TICKET_STATUS tls_decrypt_ticket(SSL *s, const unsigned char *etick,
     /* Move p after IV to start of encrypted ticket, update length */
     p = etick + TLSEXT_KEYNAME_LENGTH + EVP_CIPHER_CTX_iv_length(ctx);
     eticklen -= TLSEXT_KEYNAME_LENGTH + EVP_CIPHER_CTX_iv_length(ctx);
-    sdec = OPENSSL_malloc(eticklen);
+    sdec = (unsigned char*) OPENSSL_malloc(eticklen);
     if (sdec == NULL || EVP_DecryptUpdate(ctx, sdec, &slen, p,
                                           (int)eticklen) <= 0) {
         OPENSSL_free(sdec);
@@ -1749,7 +1749,7 @@ static int tls1_set_shared_sigalgs(SSL *s)
     }
     nmatch = tls12_shared_sigalgs(s, NULL, pref, preflen, allow, allowlen);
     if (nmatch) {
-        if ((salgs = OPENSSL_malloc(nmatch * sizeof(*salgs))) == NULL) {
+        if ((salgs = (const SIGALG_LOOKUP**) OPENSSL_malloc(nmatch * sizeof(*salgs))) == NULL) {
             SSLerr(SSL_F_TLS1_SET_SHARED_SIGALGS, ERR_R_MALLOC_FAILURE);
             return 0;
         }
@@ -1776,7 +1776,7 @@ int tls1_save_u16(PACKET *pkt, uint16_t **pdest, size_t *pdestlen)
 
     size >>= 1;
 
-    if ((buf = OPENSSL_malloc(size * sizeof(*buf))) == NULL)  {
+    if ((buf = (uint16_t*) OPENSSL_malloc(size * sizeof(*buf))) == NULL)  {
         SSLerr(SSL_F_TLS1_SAVE_U16, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -1924,7 +1924,7 @@ static void get_sigorhash(int *psig, int *phash, const char *str)
 
 static int sig_cb(const char *elem, int len, void *arg)
 {
-    sig_cb_st *sarg = arg;
+    sig_cb_st *sarg = (sig_cb_st *) arg;
     size_t i;
     const SIGALG_LOOKUP *s;
     char etmp[TLS_MAX_SIGSTRING_LEN], *p;
@@ -2007,7 +2007,7 @@ int tls1_set_raw_sigalgs(CERT *c, const uint16_t *psigs, size_t salglen,
 {
     uint16_t *sigalgs;
 
-    if ((sigalgs = OPENSSL_malloc(salglen * sizeof(*sigalgs))) == NULL) {
+    if ((sigalgs = (uint16_t *) OPENSSL_malloc(salglen * sizeof(*sigalgs))) == NULL) {
         SSLerr(SSL_F_TLS1_SET_RAW_SIGALGS, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -2033,7 +2033,7 @@ int tls1_set_sigalgs(CERT *c, const int *psig_nids, size_t salglen, int client)
 
     if (salglen & 1)
         return 0;
-    if ((sigalgs = OPENSSL_malloc((salglen / 2) * sizeof(*sigalgs))) == NULL) {
+    if ((sigalgs = (uint16_t *) OPENSSL_malloc((salglen / 2) * sizeof(*sigalgs))) == NULL) {
         SSLerr(SSL_F_TLS1_SET_SIGALGS, ERR_R_MALLOC_FAILURE);
         return 0;
     }
@@ -2642,7 +2642,7 @@ int tls_choose_sigalg(SSL *s, int fatalerrs)
                 EVP_PKEY *pkey;
 
                 pkey = s->cert->pkeys[lu->sig_idx].privatekey;
-                if (!rsa_pss_check_min_key_size(EVP_PKEY_get0(pkey), lu))
+                if (!rsa_pss_check_min_key_size((RSA*) EVP_PKEY_get0(pkey), lu))
                     continue;
             }
             break;
@@ -2700,7 +2700,7 @@ int tls_choose_sigalg(SSL *s, int fatalerrs)
                         /* validate that key is large enough for the signature algorithm */
                         EVP_PKEY *pkey = s->cert->pkeys[sig_idx].privatekey;
 
-                        if (!rsa_pss_check_min_key_size(EVP_PKEY_get0(pkey), lu))
+                        if (!rsa_pss_check_min_key_size((RSA*) EVP_PKEY_get0(pkey), lu))
                             continue;
                     }
 #ifndef OPENSSL_NO_EC

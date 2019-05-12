@@ -33,8 +33,9 @@ static volatile int ssl_x509_store_ctx_idx = -1;
 
 DEFINE_RUN_ONCE_STATIC(ssl_x509_store_ctx_init)
 {
+    char* sslString = (char*) "SSL for verify callback";
     ssl_x509_store_ctx_idx = X509_STORE_CTX_get_ex_new_index(0,
-                                                             "SSL for verify callback",
+                                                             (void*) sslString,
                                                              NULL, NULL, NULL);
     return ssl_x509_store_ctx_idx >= 0;
 }
@@ -49,7 +50,7 @@ int SSL_get_ex_data_X509_STORE_CTX_idx(void)
 
 CERT *ssl_cert_new(void)
 {
-    CERT *ret = OPENSSL_zalloc(sizeof(*ret));
+    CERT *ret = (CERT *) OPENSSL_zalloc(sizeof(*ret));
 
     if (ret == NULL) {
         SSLerr(SSL_F_SSL_CERT_NEW, ERR_R_MALLOC_FAILURE);
@@ -73,7 +74,7 @@ CERT *ssl_cert_new(void)
 
 CERT *ssl_cert_dup(CERT *cert)
 {
-    CERT *ret = OPENSSL_zalloc(sizeof(*ret));
+    CERT *ret = (CERT *) OPENSSL_zalloc(sizeof(*ret));
     int i;
 
     if (ret == NULL) {
@@ -120,7 +121,7 @@ CERT *ssl_cert_dup(CERT *cert)
         }
         if (cert->pkeys[i].serverinfo != NULL) {
             /* Just copy everything. */
-            ret->pkeys[i].serverinfo =
+            ret->pkeys[i].serverinfo = (unsigned char*)
                 OPENSSL_malloc(cert->pkeys[i].serverinfo_length);
             if (ret->pkeys[i].serverinfo == NULL) {
                 SSLerr(SSL_F_SSL_CERT_DUP, ERR_R_MALLOC_FAILURE);
@@ -134,7 +135,7 @@ CERT *ssl_cert_dup(CERT *cert)
 
     /* Configured sigalgs copied across */
     if (cert->conf_sigalgs) {
-        ret->conf_sigalgs = OPENSSL_malloc(cert->conf_sigalgslen
+        ret->conf_sigalgs = (uint16_t*) OPENSSL_malloc(cert->conf_sigalgslen
                                            * sizeof(*cert->conf_sigalgs));
         if (ret->conf_sigalgs == NULL)
             goto err;
@@ -145,7 +146,7 @@ CERT *ssl_cert_dup(CERT *cert)
         ret->conf_sigalgs = NULL;
 
     if (cert->client_sigalgs) {
-        ret->client_sigalgs = OPENSSL_malloc(cert->client_sigalgslen
+        ret->client_sigalgs = (uint16_t*) OPENSSL_malloc(cert->client_sigalgslen
                                              * sizeof(*cert->client_sigalgs));
         if (ret->client_sigalgs == NULL)
             goto err;
@@ -158,7 +159,7 @@ CERT *ssl_cert_dup(CERT *cert)
     ret->shared_sigalgs = NULL;
     /* Copy any custom client certificate types */
     if (cert->ctype) {
-        ret->ctype = OPENSSL_memdup(cert->ctype, cert->ctype_len);
+        ret->ctype = (uint8_t*) OPENSSL_memdup(cert->ctype, cert->ctype_len);
         if (ret->ctype == NULL)
             goto err;
         ret->ctype_len = cert->ctype_len;
@@ -935,7 +936,7 @@ static int ssl_security_default_callback(const SSL *s, const SSL_CTX *ctx,
     case SSL_SECOP_CIPHER_SHARED:
     case SSL_SECOP_CIPHER_CHECK:
         {
-            const SSL_CIPHER *c = other;
+            const SSL_CIPHER *c = (SSL_CIPHER *) other;
             /* No ciphers below security level */
             if (bits < minbits)
                 return 0;

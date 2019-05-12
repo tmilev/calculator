@@ -151,7 +151,7 @@ static int ssl_match_option(SSL_CONF_CTX *cctx, const ssl_flag_tbl *tbl,
 
 static int ssl_set_option_list(const char *elem, int len, void *usr)
 {
-    SSL_CONF_CTX *cctx = usr;
+    SSL_CONF_CTX *cctx = (SSL_CONF_CTX *) usr;
     size_t i;
     const ssl_flag_tbl *tbl;
     int onoff = 1;
@@ -872,7 +872,7 @@ int SSL_CONF_cmd_value_type(SSL_CONF_CTX *cctx, const char *cmd)
 
 SSL_CONF_CTX *SSL_CONF_CTX_new(void)
 {
-    SSL_CONF_CTX *ret = OPENSSL_zalloc(sizeof(*ret));
+    SSL_CONF_CTX *ret = (SSL_CONF_CTX *) OPENSSL_zalloc(sizeof(*ret));
 
     return ret;
 }

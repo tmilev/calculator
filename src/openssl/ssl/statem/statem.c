@@ -183,7 +183,7 @@ int ossl_statem_skip_early_data(SSL *s)
 
     if (!s->server
             || s->statem.hand_state != TLS_ST_EARLY_DATA
-            || s->hello_retry_request == SSL_HRR_COMPLETE)
+            || s->hello_retry_request == ssl_st::SSL_HRR_COMPLETE)
         return 0;
 
     return 1;
@@ -618,7 +618,7 @@ static SUB_STATE_RETURN read_state_machine(SSL *s)
             }
 
             s->first_packet = 0;
-            if (!PACKET_buf_init(&pkt, s->init_msg, len)) {
+            if (!PACKET_buf_init(&pkt, (unsigned char*) s->init_msg, len)) {
                 SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_READ_STATE_MACHINE,
                          ERR_R_INTERNAL_ERROR);
                 return SUB_STATE_ERROR;

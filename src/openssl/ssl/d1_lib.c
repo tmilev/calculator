@@ -74,7 +74,7 @@ int dtls1_new(SSL *s)
 
     if (!ssl3_new(s))
         return 0;
-    if ((d1 = OPENSSL_zalloc(sizeof(*d1))) == NULL) {
+    if ((d1 = (DTLS1_STATE *) OPENSSL_zalloc(sizeof(*d1))) == NULL) {
         ssl3_free(s);
         return 0;
     }

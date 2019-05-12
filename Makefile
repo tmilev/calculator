@@ -357,7 +357,6 @@ openssl/crypto/ct/ct_sct_ctx.c \
 openssl/crypto/ct/ct_vfy.c \
 openssl/crypto/ct/ct_x509v3.c \
 openssl/crypto/des/cbc_cksm.c \
-openssl/crypto/des/cbc_enc.c \
 openssl/crypto/des/cfb64ede.c \
 openssl/crypto/des/cfb64enc.c \
 openssl/crypto/des/cfb_enc.c \

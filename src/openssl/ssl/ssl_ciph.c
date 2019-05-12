@@ -465,7 +465,7 @@ DEFINE_RUN_ONCE_STATIC(do_load_builtin_compressions)
     ssl_comp_methods = sk_SSL_COMP_new(sk_comp_cmp);
 
     if (COMP_get_type(method) != NID_undef && ssl_comp_methods != NULL) {
-        comp = OPENSSL_malloc(sizeof(*comp));
+        comp = (SSL_COMP*) OPENSSL_malloc(sizeof(*comp));
         if (comp != NULL) {
             comp->method = method;
             comp->id = SSL_COMP_ZLIB_IDX;
@@ -929,7 +929,7 @@ static int ssl_cipher_strength_sort(CIPHER_ORDER **head_p,
         curr = curr->next;
     }
 
-    number_uses = OPENSSL_zalloc(sizeof(int) * (max_strength_bits + 1));
+    number_uses = (int*) OPENSSL_zalloc(sizeof(int) * (max_strength_bits + 1));
     if (number_uses == NULL) {
         SSLerr(SSL_F_SSL_CIPHER_STRENGTH_SORT, ERR_R_MALLOC_FAILURE);
         return 0;
@@ -1443,7 +1443,7 @@ STACK_OF(SSL_CIPHER) *ssl_create_cipher_list(const SSL_METHOD *ssl_method,
      */
     num_of_ciphers = ssl_method->num_ciphers();
 
-    co_list = OPENSSL_malloc(sizeof(*co_list) * num_of_ciphers);
+    co_list = (CIPHER_ORDER*) OPENSSL_malloc(sizeof(*co_list) * num_of_ciphers);
     if (co_list == NULL) {
         SSLerr(SSL_F_SSL_CREATE_CIPHER_LIST, ERR_R_MALLOC_FAILURE);
         return NULL;          /* Failure */
@@ -1556,7 +1556,7 @@ STACK_OF(SSL_CIPHER) *ssl_create_cipher_list(const SSL_METHOD *ssl_method,
      */
     num_of_group_aliases = OSSL_NELEM(cipher_aliases);
     num_of_alias_max = num_of_ciphers + num_of_group_aliases + 1;
-    ca_list = OPENSSL_malloc(sizeof(*ca_list) * num_of_alias_max);
+    ca_list = (const SSL_CIPHER**) OPENSSL_malloc(sizeof(*ca_list) * num_of_alias_max);
     if (ca_list == NULL) {
         OPENSSL_free(co_list);
         SSLerr(SSL_F_SSL_CREATE_CIPHER_LIST, ERR_R_MALLOC_FAILURE);
@@ -1649,7 +1649,7 @@ char *SSL_CIPHER_description(const SSL_CIPHER *cipher, char *buf, int len)
 
     if (buf == NULL) {
         len = 128;
-        if ((buf = OPENSSL_malloc(len)) == NULL) {
+        if ((buf = (char*) OPENSSL_malloc(len)) == NULL) {
             SSLerr(SSL_F_SSL_CIPHER_DESCRIPTION, ERR_R_MALLOC_FAILURE);
             return NULL;
         }
@@ -1986,7 +1986,7 @@ int SSL_COMP_add_compression_method(int id, COMP_METHOD *cm)
     }
 
     CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_DISABLE);
-    comp = OPENSSL_malloc(sizeof(*comp));
+    comp = (SSL_COMP*) OPENSSL_malloc(sizeof(*comp));
     if (comp == NULL) {
         CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ENABLE);
         SSLerr(SSL_F_SSL_COMP_ADD_COMPRESSION_METHOD, ERR_R_MALLOC_FAILURE);

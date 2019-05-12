@@ -16,7 +16,16 @@
 #define TLS13_MAX_LABEL_LEN     249
 
 /* Always filled with zeros */
-static const unsigned char default_zeros[EVP_MAX_MD_SIZE];
+static const unsigned char default_zeros[EVP_MAX_MD_SIZE] = {
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0
+};
 
 /*
  * Given a |secret|; a |label| of length |labellen|; and |data| of length

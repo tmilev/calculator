@@ -44,7 +44,7 @@
  */
 static void tls1_md5_final_raw(void *ctx, unsigned char *md_out)
 {
-    MD5_CTX *md5 = ctx;
+    MD5_CTX *md5 = (MD5_CTX *) ctx;
     u32toLE(md5->A, md_out);
     u32toLE(md5->B, md_out);
     u32toLE(md5->C, md_out);
@@ -53,7 +53,7 @@ static void tls1_md5_final_raw(void *ctx, unsigned char *md_out)
 
 static void tls1_sha1_final_raw(void *ctx, unsigned char *md_out)
 {
-    SHA_CTX *sha1 = ctx;
+    SHA_CTX *sha1 = (SHA_CTX *) ctx;
     l2n(sha1->h0, md_out);
     l2n(sha1->h1, md_out);
     l2n(sha1->h2, md_out);
@@ -63,7 +63,7 @@ static void tls1_sha1_final_raw(void *ctx, unsigned char *md_out)
 
 static void tls1_sha256_final_raw(void *ctx, unsigned char *md_out)
 {
-    SHA256_CTX *sha256 = ctx;
+    SHA256_CTX *sha256 = (SHA256_CTX *) ctx;
     unsigned i;
 
     for (i = 0; i < 8; i++) {
@@ -73,7 +73,7 @@ static void tls1_sha256_final_raw(void *ctx, unsigned char *md_out)
 
 static void tls1_sha512_final_raw(void *ctx, unsigned char *md_out)
 {
-    SHA512_CTX *sha512 = ctx;
+    SHA512_CTX *sha512 = (SHA512_CTX *) ctx;
     unsigned i;
 
     for (i = 0; i < 8; i++) {

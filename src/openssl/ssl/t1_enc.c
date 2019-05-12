@@ -490,7 +490,7 @@ int tls1_setup_key_block(SSL *s)
 
     ssl3_cleanup_key_block(s);
 
-    if ((p = OPENSSL_malloc(num)) == NULL) {
+    if ((p = (unsigned char*) OPENSSL_malloc(num)) == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS1_SETUP_KEY_BLOCK,
                  ERR_R_MALLOC_FAILURE);
         goto err;
@@ -652,7 +652,7 @@ int tls1_export_keying_material(SSL *s, unsigned char *out, size_t olen,
         vallen += 2 + contextlen;
     }
 
-    val = OPENSSL_malloc(vallen);
+    val = (unsigned char*) OPENSSL_malloc(vallen);
     if (val == NULL)
         goto err2;
     currentvalpos = 0;

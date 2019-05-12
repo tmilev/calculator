@@ -277,7 +277,7 @@ int ssl3_setup_key_block(SSL *s)
 
     ssl3_cleanup_key_block(s);
 
-    if ((p = OPENSSL_malloc(num)) == NULL) {
+    if ((p = (unsigned char *) OPENSSL_malloc(num)) == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_SSL3_SETUP_KEY_BLOCK,
                  ERR_R_MALLOC_FAILURE);
         return 0;

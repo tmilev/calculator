@@ -243,7 +243,7 @@ int PEM_read_bio_ex(BIO *bp, char **name, char **header,
                     unsigned char **data, long *len, unsigned int flags);
 int PEM_bytes_read_bio_secmem(unsigned char **pdata, long *plen, char **pnm,
                               const char *name, BIO *bp, pem_password_cb *cb,
-                              void *u);
+                              const void *u);
 int PEM_write_bio(BIO *bp, const char *name, const char *hdr,
                   const unsigned char *data, long len);
 int PEM_bytes_read_bio(unsigned char **pdata, long *plen, char **pnm,
@@ -347,6 +347,10 @@ int i2d_PKCS8PrivateKey_nid_fp(FILE *fp, const EVP_PKEY *x, int nid,
 int PEM_write_PKCS8PrivateKey_nid(FILE *fp, const EVP_PKEY *x, int nid,
                                   char *kstr, int klen,
                                   pem_password_cb *cb, void *u);
+EVP_PKEY *PEM_read_bio_PrivateKey(BIO *bp, EVP_PKEY **x, pem_password_cb *cb,
+                                  const void *u);
+
+DH *PEM_read_bio_DHparams(BIO *bp, DH **x, pem_password_cb *cb, const void *u);
 
 EVP_PKEY *d2i_PKCS8PrivateKey_fp(FILE *fp, EVP_PKEY **x, pem_password_cb *cb,
                                  void *u);

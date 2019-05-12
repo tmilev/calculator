@@ -16,7 +16,7 @@
 # include <stdlib.h>
 # include <string.h>
 
-# include "openssl/des.h"
+# include "../../../openssl/include/openssl/des.h"
 
 # ifdef OPENSSL_BUILD_SHLIBCRYPTO
 #  undef OPENSSL_EXTERN

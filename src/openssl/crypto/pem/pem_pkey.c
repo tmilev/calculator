@@ -23,7 +23,7 @@
 int pem_check_suffix(const char *pem_str, const char *suffix);
 
 EVP_PKEY *PEM_read_bio_PrivateKey(BIO *bp, EVP_PKEY **x, pem_password_cb *cb,
-                                  void *u)
+                                  const void *u)
 {
     char *nm = NULL;
     const unsigned char *p = NULL;
@@ -201,7 +201,7 @@ int PEM_write_PrivateKey(FILE *fp, EVP_PKEY *x, const EVP_CIPHER *enc,
 
 /* Transparently read in PKCS#3 or X9.42 DH parameters */
 
-DH *PEM_read_bio_DHparams(BIO *bp, DH **x, pem_password_cb *cb, void *u)
+DH *PEM_read_bio_DHparams(BIO *bp, DH **x, pem_password_cb *cb, const void *u)
 {
     char *nm = NULL;
     const unsigned char *p = NULL;

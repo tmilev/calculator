@@ -1593,7 +1593,7 @@ int tls_parse_stoc_npn(SSL *s, PACKET *pkt, unsigned int context, X509 *x,
      * a single Serverhello
      */
     OPENSSL_free(s->ext.npn);
-    s->ext.npn = OPENSSL_malloc(selected_len);
+    s->ext.npn = (unsigned char*) OPENSSL_malloc(selected_len);
     if (s->ext.npn == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_NPN,
                  ERR_R_INTERNAL_ERROR);
@@ -1633,7 +1633,7 @@ int tls_parse_stoc_alpn(SSL *s, PACKET *pkt, unsigned int context, X509 *x,
         return 0;
     }
     OPENSSL_free(s->s3->alpn_selected);
-    s->s3->alpn_selected = OPENSSL_malloc(len);
+    s->s3->alpn_selected = (unsigned char *) OPENSSL_malloc(len);
     if (s->s3->alpn_selected == NULL) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_ALPN,
                  ERR_R_INTERNAL_ERROR);
@@ -1663,7 +1663,7 @@ int tls_parse_stoc_alpn(SSL *s, PACKET *pkt, unsigned int context, X509 *x,
                      ERR_R_INTERNAL_ERROR);
             return 0;
         }
-        s->session->ext.alpn_selected =
+        s->session->ext.alpn_selected = (unsigned char *)
             OPENSSL_memdup(s->s3->alpn_selected, s->s3->alpn_selected_len);
         if (s->session->ext.alpn_selected == NULL) {
             SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_ALPN,

@@ -106,7 +106,7 @@ struct ssl_async_args {
     SSL *s;
     void *buf;
     size_t num;
-    enum { READFUNC, WRITEFUNC, OTHERFUNC } type;
+    enum asyncType { READFUNC, WRITEFUNC, OTHERFUNC } type;
     union {
         int (*func_read) (SSL *, void *, size_t, size_t *);
         int (*func_write) (SSL *, const void *, size_t, size_t *);
@@ -141,8 +141,8 @@ static int dane_ctx_enable(struct dane_ctx_st *dctx)
     if (dctx->mdevp != NULL)
         return 1;
 
-    mdevp = OPENSSL_zalloc(n * sizeof(*mdevp));
-    mdord = OPENSSL_zalloc(n * sizeof(*mdord));
+    mdevp = (const EVP_MD **) OPENSSL_zalloc(n * sizeof(*mdevp));
+    mdord = (uint8_t*) OPENSSL_zalloc(n * sizeof(*mdord));
 
     if (mdord == NULL || mdevp == NULL) {
         OPENSSL_free(mdord);
@@ -250,14 +250,14 @@ static int dane_mtype_set(struct dane_ctx_st *dctx,
         uint8_t *mdord;
         int n = ((int)mtype) + 1;
 
-        mdevp = OPENSSL_realloc(dctx->mdevp, n * sizeof(*mdevp));
+        mdevp = (const EVP_MD **) OPENSSL_realloc(dctx->mdevp, n * sizeof(*mdevp));
         if (mdevp == NULL) {
             SSLerr(SSL_F_DANE_MTYPE_SET, ERR_R_MALLOC_FAILURE);
             return -1;
         }
         dctx->mdevp = mdevp;
 
-        mdord = OPENSSL_realloc(dctx->mdord, n * sizeof(*mdord));
+        mdord = (uint8_t *) OPENSSL_realloc(dctx->mdord, n * sizeof(*mdord));
         if (mdord == NULL) {
             SSLerr(SSL_F_DANE_MTYPE_SET, ERR_R_MALLOC_FAILURE);
             return -1;
@@ -335,7 +335,7 @@ static int dane_tlsa_add(SSL_DANE *dane,
         return 0;
     }
 
-    if ((t = OPENSSL_zalloc(sizeof(*t))) == NULL) {
+    if ((t = (danetls_record *) OPENSSL_zalloc(sizeof(*t))) == NULL) {
         SSLerr(SSL_F_DANE_TLSA_ADD, ERR_R_MALLOC_FAILURE);
         return -1;
     }
@@ -343,7 +343,7 @@ static int dane_tlsa_add(SSL_DANE *dane,
     t->usage = usage;
     t->selector = selector;
     t->mtype = mtype;
-    t->data = OPENSSL_malloc(dlen);
+    t->data = (unsigned char *) OPENSSL_malloc(dlen);
     if (t->data == NULL) {
         tlsa_free(t);
         SSLerr(SSL_F_DANE_TLSA_ADD, ERR_R_MALLOC_FAILURE);
@@ -590,7 +590,7 @@ int SSL_clear(SSL *s)
     OPENSSL_free(s->psksession_id);
     s->psksession_id = NULL;
     s->psksession_id_len = 0;
-    s->hello_retry_request = 0;
+    s->hello_retry_request = (ssl_st::hrrEnum) 0;
     s->sent_tickets = 0;
 
     s->error = 0;
@@ -683,7 +683,7 @@ SSL *SSL_new(SSL_CTX *ctx)
         return NULL;
     }
 
-    s = OPENSSL_zalloc(sizeof(*s));
+    s = (SSL*) OPENSSL_zalloc(sizeof(*s));
     if (s == NULL)
         goto err;
 
@@ -771,7 +771,7 @@ SSL *SSL_new(SSL_CTX *ctx)
     s->session_ctx = ctx;
 #ifndef OPENSSL_NO_EC
     if (ctx->ext.ecpointformats) {
-        s->ext.ecpointformats =
+        s->ext.ecpointformats = (unsigned char*)
             OPENSSL_memdup(ctx->ext.ecpointformats,
                            ctx->ext.ecpointformats_len);
         if (!s->ext.ecpointformats)
@@ -780,7 +780,7 @@ SSL *SSL_new(SSL_CTX *ctx)
             ctx->ext.ecpointformats_len;
     }
     if (ctx->ext.supportedgroups) {
-        s->ext.supportedgroups =
+        s->ext.supportedgroups = (uint16_t*)
             OPENSSL_memdup(ctx->ext.supportedgroups,
                            ctx->ext.supportedgroups_len
                                 * sizeof(*ctx->ext.supportedgroups));
@@ -794,7 +794,7 @@ SSL *SSL_new(SSL_CTX *ctx)
 #endif
 
     if (s->ctx->ext.alpn) {
-        s->ext.alpn = OPENSSL_malloc(s->ctx->ext.alpn_len);
+        s->ext.alpn = (unsigned char *) OPENSSL_malloc(s->ctx->ext.alpn_len);
         if (s->ext.alpn == NULL)
             goto err;
         memcpy(s->ext.alpn, s->ctx->ext.alpn, s->ctx->ext.alpn_len);
@@ -1770,11 +1770,11 @@ static int ssl_io_intern(void *vargs)
     buf = args->buf;
     num = args->num;
     switch (args->type) {
-    case READFUNC:
+    case ssl_async_args::READFUNC:
         return args->f.func_read(s, buf, num, &s->asyncrw);
-    case WRITEFUNC:
+    case ssl_async_args::WRITEFUNC:
         return args->f.func_write(s, buf, num, &s->asyncrw);
-    case OTHERFUNC:
+    case ssl_async_args::OTHERFUNC:
         return args->f.func_other(s);
     }
     return -1;
@@ -1810,7 +1810,7 @@ int ssl_read_internal(SSL *s, void *buf, size_t num, size_t *readbytes)
         args.s = s;
         args.buf = buf;
         args.num = num;
-        args.type = READFUNC;
+        args.type = ssl_async_args::READFUNC;
         args.f.func_read = s->method->ssl_read;
 
         ret = ssl_start_async_job(s, &args, ssl_io_intern);
@@ -1929,7 +1929,7 @@ static int ssl_peek_internal(SSL *s, void *buf, size_t num, size_t *readbytes)
         args.s = s;
         args.buf = buf;
         args.num = num;
-        args.type = READFUNC;
+        args.type = ssl_async_args::READFUNC;
         args.f.func_read = s->method->ssl_peek;
 
         ret = ssl_start_async_job(s, &args, ssl_io_intern);
@@ -2001,7 +2001,7 @@ int ssl_write_internal(SSL *s, const void *buf, size_t num, size_t *written)
         args.s = s;
         args.buf = (void *)buf;
         args.num = num;
-        args.type = WRITEFUNC;
+        args.type = ssl_async_args::WRITEFUNC;
         args.f.func_write = s->method->ssl_write;
 
         ret = ssl_start_async_job(s, &args, ssl_io_intern);
@@ -2106,7 +2106,7 @@ int SSL_write_early_data(SSL *s, const void *buf, size_t num, size_t *written)
         /* The buffering BIO is still in place */
         if (ret)
             (void)BIO_flush(s->wbio);
-        s->early_data_state = early_data_state;
+        s->early_data_state = (SSL_EARLY_DATA_STATE) early_data_state;
         return ret;
 
     default:
@@ -2134,7 +2134,7 @@ int SSL_shutdown(SSL *s)
             struct ssl_async_args args;
 
             args.s = s;
-            args.type = OTHERFUNC;
+            args.type = ssl_async_args::OTHERFUNC;
             args.f.func_other = s->method->ssl_shutdown;
 
             return ssl_start_async_job(s, &args, ssl_io_intern);
@@ -2347,11 +2347,11 @@ long SSL_CTX_ctrl(SSL_CTX *ctx, int cmd, long larg, void *parg)
         switch (cmd) {
 #ifndef OPENSSL_NO_EC
         case SSL_CTRL_SET_GROUPS_LIST:
-            return tls1_set_groups_list(NULL, NULL, parg);
+            return tls1_set_groups_list(NULL, NULL, (const char*) parg);
 #endif
         case SSL_CTRL_SET_SIGALGS_LIST:
         case SSL_CTRL_SET_CLIENT_SIGALGS_LIST:
-            return tls1_set_sigalgs_list(NULL, parg, 0);
+            return tls1_set_sigalgs_list(NULL, (const char*) parg, 0);
         default:
             return 0;
         }
@@ -2840,7 +2840,7 @@ int SSL_CTX_set_alpn_protos(SSL_CTX *ctx, const unsigned char *protos,
                             unsigned int protos_len)
 {
     OPENSSL_free(ctx->ext.alpn);
-    ctx->ext.alpn = OPENSSL_memdup(protos, protos_len);
+    ctx->ext.alpn = (unsigned char *) OPENSSL_memdup((unsigned char *) protos, protos_len);
     if (ctx->ext.alpn == NULL) {
         SSLerr(SSL_F_SSL_CTX_SET_ALPN_PROTOS, ERR_R_MALLOC_FAILURE);
         return 1;
@@ -2859,7 +2859,7 @@ int SSL_set_alpn_protos(SSL *ssl, const unsigned char *protos,
                         unsigned int protos_len)
 {
     OPENSSL_free(ssl->ext.alpn);
-    ssl->ext.alpn = OPENSSL_memdup(protos, protos_len);
+    ssl->ext.alpn = (unsigned char*) OPENSSL_memdup(protos, protos_len);
     if (ssl->ext.alpn == NULL) {
         SSLerr(SSL_F_SSL_SET_ALPN_PROTOS, ERR_R_MALLOC_FAILURE);
         return 1;
@@ -2984,7 +2984,7 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth)
         SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_X509_VERIFICATION_SETUP_PROBLEMS);
         goto err;
     }
-    ret = OPENSSL_zalloc(sizeof(*ret));
+    ret = (SSL_CTX *) OPENSSL_zalloc(sizeof(*ret));
     if (ret == NULL)
         goto err;
 
@@ -3054,7 +3054,7 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth)
     if (!CRYPTO_new_ex_data(CRYPTO_EX_INDEX_SSL_CTX, ret, &ret->ex_data))
         goto err;
 
-    if ((ret->ext.secure = OPENSSL_secure_zalloc(sizeof(*ret->ext.secure))) == NULL)
+    if ((ret->ext.secure = (SSL_CTX_EXT_SECURE *) OPENSSL_secure_zalloc(sizeof(*ret->ext.secure))) == NULL)
         goto err;
 
     /* No compression for DTLS */
@@ -4776,7 +4776,7 @@ static int ct_extract_ocsp_response_scts(SSL *s)
         if (single == NULL)
             continue;
 
-        scts =
+        scts = (STACK_OF(SCT) *)
             OCSP_SINGLERESP_get1_ext_d2i(single, NID_ct_cert_scts, NULL, NULL);
         scts_extracted =
             ct_move_scts(&s->scts, scts, SCT_SOURCE_OCSP_STAPLED_RESPONSE);
@@ -4805,7 +4805,7 @@ static int ct_extract_x509v3_extension_scts(SSL *s)
     X509 *cert = s->session != NULL ? s->session->peer : NULL;
 
     if (cert != NULL) {
-        STACK_OF(SCT) *scts =
+        STACK_OF(SCT) *scts = (STACK_OF(SCT) *)
             X509_get_ext_d2i(cert, NID_ct_precert_scts, NULL, NULL);
 
         scts_extracted =
@@ -5140,7 +5140,7 @@ int SSL_client_hello_get1_extensions_present(SSL *s, int **out, size_t *outlen)
         if (ext->present)
             num++;
     }
-    if ((present = OPENSSL_malloc(sizeof(*present) * num)) == NULL) {
+    if ((present = (int*) OPENSSL_malloc(sizeof(*present) * num)) == NULL) {
         SSLerr(SSL_F_SSL_CLIENT_HELLO_GET1_EXTENSIONS_PRESENT,
                ERR_R_MALLOC_FAILURE);
         return 0;
@@ -5234,7 +5234,7 @@ static int nss_keylog_int(const char *prefix,
      */
     prefix_len = strlen(prefix);
     out_len = prefix_len + (2 * parameter_1_len) + (2 * parameter_2_len) + 3;
-    if ((out = cursor = OPENSSL_malloc(out_len)) == NULL) {
+    if ((out = cursor = (char*) OPENSSL_malloc(out_len)) == NULL) {
         SSLfatal(ssl, SSL_AD_INTERNAL_ERROR, SSL_F_NSS_KEYLOG_INT,
                  ERR_R_MALLOC_FAILURE);
         return 0;
@@ -5333,7 +5333,7 @@ int ssl_cache_cipherlist(SSL *s, PACKET *cipher_suites, int sslv2format)
          * slightly over allocate because we won't store those. But that isn't a
          * problem.
          */
-        raw = OPENSSL_malloc(numciphers * TLS_CIPHER_LEN);
+        raw = (unsigned char*) OPENSSL_malloc(numciphers * TLS_CIPHER_LEN);
         s->s3->tmp.ciphers_raw = raw;
         if (raw == NULL) {
             SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_SSL_CACHE_CIPHERLIST,
@@ -5560,7 +5560,7 @@ int SSL_stateless(SSL *s)
     if (ret > 0 && s->ext.cookieok)
         return 1;
 
-    if (s->hello_retry_request == SSL_HRR_PENDING && !ossl_statem_in_error(s))
+    if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING && !ossl_statem_in_error(s))
         return 0;
 
     return -1;

@@ -162,6 +162,8 @@ const std::string signedFileKey = "certificates/calculator-algebra.key";
 
 void WebServer::initSSL() {
   MacroRegisterFunctionWithName("WebServer::initSSL");
+  std::cout << "DEBUG: got to this point of code.\n";
+
   if (!theGlobalVariables.flagSSLisAvailable) {
     logServer << logger::red << "SSL is DISABLED." << logger::endL;
     return;

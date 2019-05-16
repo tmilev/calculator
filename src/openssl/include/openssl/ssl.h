@@ -1609,11 +1609,7 @@ __owur int SSL_add_file_cert_subjects_to_stack(STACK_OF(X509_NAME) *stackCAs,
 int SSL_add_dir_cert_subjects_to_stack(STACK_OF(X509_NAME) *stackCAs,
                                        const char *dir);
 
-# if !OPENSSL_API_1_1_0
-#  define SSL_load_error_strings() \
-    OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS \
-                     | OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL)
-# endif
+void SSL_load_error_strings();
 
 __owur const char *SSL_state_string(const SSL *s);
 __owur const char *SSL_rstate_string(const SSL *s);

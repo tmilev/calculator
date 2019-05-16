@@ -158,6 +158,11 @@ static void ssl_library_stop(void)
     }
 }
 
+void SSL_load_error_strings() {
+   OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
+}
+
+
 /*
  * If this function is called with a non NULL settings value then it must be
  * called prior to any threads making calls to any OpenSSL functions,

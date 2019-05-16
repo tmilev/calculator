@@ -8,6 +8,7 @@
  */
 
 #include <string.h>
+#include <iostream>
 #include "../../include/openssl/crypto.h"
 #include "../../include/openssl/err.h"
 #include "../../include/openssl/rand.h"
@@ -965,6 +966,7 @@ static RAND_DRBG *drbg_setup(RAND_DRBG *parent, int drbg_type)
      * The state of the drbg will be checked in RAND_DRBG_generate() and
      * an automatic recovery is attempted.
      */
+    std::cout << "About to instantiate rand drbg.\n";
     (void)RAND_DRBG_instantiate(drbg,
                                 (const unsigned char *) ossl_pers_string,
                                 sizeof(ossl_pers_string) - 1);

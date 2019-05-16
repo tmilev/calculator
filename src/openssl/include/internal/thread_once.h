@@ -8,7 +8,7 @@
  */
 
 #include "../../include/openssl/crypto.h"
-
+#include <iostream>
 /*
  * DEFINE_RUN_ONCE: Define an initialiser function that should be run exactly
  * once. It takes no arguments and returns and int result (1 for success or
@@ -56,13 +56,13 @@
  * }
  */
 #define DEFINE_RUN_ONCE_STATIC(init)            \
-    static int init(void);                     \
+    static int init(std::stringstream* commentsOnError);                     \
     static int init##_ossl_ret_ = 0;            \
-    static void init##_ossl_(void)              \
+    static void init##_ossl_(std::stringstream* commentsOnError)              \
     {                                           \
-        init##_ossl_ret_ = init();              \
+        init##_ossl_ret_ = init(commentsOnError);              \
     }                                           \
-    static int init(void)
+    static int init(void*, std::stringstream* commentsOnError)
 
 /*
  * DEFINE_RUN_ONCE_STATIC_ALT: Define an alternative initialiser function. This

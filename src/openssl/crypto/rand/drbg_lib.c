@@ -103,7 +103,7 @@ static const unsigned int rand_drbg_used_flags =
     RAND_DRBG_FLAG_CTR_NO_DF | RAND_DRBG_FLAG_HMAC | RAND_DRBG_TYPE_FLAGS;
 
 
-static RAND_DRBG *drbg_setup(RAND_DRBG *parent, int drbg_type);
+static RAND_DRBG *drbg_setup(RAND_DRBG *parent, int drbg_type, std::stringstream *commentsOnError);
 
 static RAND_DRBG *rand_drbg_new(int secure,
                                 int type,
@@ -344,9 +344,12 @@ void RAND_DRBG_free(RAND_DRBG *drbg)
  *
  * Returns 1 on success, 0 on failure.
  */
-int RAND_DRBG_instantiate(RAND_DRBG *drbg,
-                          const unsigned char *pers, size_t perslen)
-{
+int RAND_DRBG_instantiate(
+  RAND_DRBG *drbg,
+  const unsigned char *pers,
+  size_t perslen,
+  std::stringstream* commentsOnError
+) {
     unsigned char *nonce = NULL, *entropy = NULL;
     size_t noncelen = 0, entropylen = 0;
     size_t min_entropy = drbg->strength;
@@ -556,9 +559,13 @@ int RAND_DRBG_reseed(RAND_DRBG *drbg,
  *
  * This function is used internally only.
  */
-int rand_drbg_restart(RAND_DRBG *drbg,
-                      const unsigned char *buffer, size_t len, size_t entropy)
-{
+int rand_drbg_restart(
+  RAND_DRBG *drbg,
+  const unsigned char *buffer,
+  size_t len,
+  size_t entropy,
+  std::stringstream* commentsOnError
+) {
     int reseeded = 0;
     const unsigned char *adin = NULL;
     size_t adinlen = 0;
@@ -609,9 +616,12 @@ int rand_drbg_restart(RAND_DRBG *drbg,
     /* repair uninitialized state */
     if (drbg->state == DRBG_UNINITIALISED) {
         /* reinstantiate drbg */
-        RAND_DRBG_instantiate(drbg,
-                              (const unsigned char *) ossl_pers_string,
-                              sizeof(ossl_pers_string) - 1);
+        RAND_DRBG_instantiate(
+          drbg,
+          (const unsigned char *) ossl_pers_string,
+          sizeof(ossl_pers_string) - 1,
+          commentsOnError
+        );
         /* already reseeded. prevent second reseeding below */
         reseeded = (drbg->state == DRBG_READY);
     }
@@ -650,15 +660,20 @@ int rand_drbg_restart(RAND_DRBG *drbg,
  * Returns 1 on success, 0 on failure.
  *
  */
-int RAND_DRBG_generate(RAND_DRBG *drbg, unsigned char *out, size_t outlen,
-                       int prediction_resistance,
-                       const unsigned char *adin, size_t adinlen)
-{
+int RAND_DRBG_generate(
+  RAND_DRBG *drbg,
+  unsigned char *out,
+  size_t outlen,
+  int prediction_resistance,
+  const unsigned char *adin,
+  size_t adinlen,
+  std::stringstream* commentsOnError
+) {
     int reseed_required = 0;
 
     if (drbg->state != DRBG_READY) {
         /* try to recover from previous errors */
-        rand_drbg_restart(drbg, NULL, 0, 0);
+        rand_drbg_restart(drbg, NULL, 0, 0,commentsOnError);
 
         if (drbg->state == DRBG_ERROR) {
             RANDerr(RAND_F_RAND_DRBG_GENERATE, RAND_R_IN_ERROR_STATE);
@@ -944,7 +959,7 @@ void *RAND_DRBG_get_ex_data(const RAND_DRBG *drbg, int idx)
  *
  * Returns a pointer to the new DRBG instance on success, NULL on failure.
  */
-static RAND_DRBG *drbg_setup(RAND_DRBG *parent, int drbg_type)
+static RAND_DRBG *drbg_setup(RAND_DRBG *parent, int drbg_type, std::stringstream* commentsOnError)
 {
     RAND_DRBG *drbg;
 
@@ -967,9 +982,12 @@ static RAND_DRBG *drbg_setup(RAND_DRBG *parent, int drbg_type)
      * an automatic recovery is attempted.
      */
     std::cout << "About to instantiate rand drbg.\n";
-    (void)RAND_DRBG_instantiate(drbg,
-                                (const unsigned char *) ossl_pers_string,
-                                sizeof(ossl_pers_string) - 1);
+    (void) RAND_DRBG_instantiate(
+      drbg,
+      (const unsigned char *) ossl_pers_string,
+      sizeof(ossl_pers_string) - 1,
+      commentsOnError
+    );
     return drbg;
 
 err:
@@ -981,7 +999,7 @@ err:
  * Initialize the global DRBGs on first use.
  * Returns 1 on success, 0 on failure.
  */
-DEFINE_RUN_ONCE_STATIC(do_rand_drbg_init)
+DEFINE_RUN_ONCE_STATIC(do_rand_drbg_init, std::stringstream* commentsOnError)
 {
     /*
      * ensure that libcrypto is initialized, otherwise the

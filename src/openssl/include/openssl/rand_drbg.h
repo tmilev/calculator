@@ -10,9 +10,10 @@
 #ifndef HEADER_DRBG_RAND_H
 # define HEADER_DRBG_RAND_H
 
-# include <time.h>
-# include "ossl_typ.h"
-# include "obj_mac.h"
+#include <time.h>
+#include "ossl_typ.h"
+#include "obj_mac.h"
+#include <iostream>
 
 /*
  * RAND_DRBG  flags
@@ -76,8 +77,12 @@ RAND_DRBG *RAND_DRBG_new(int type, unsigned int flags, RAND_DRBG *parent);
 RAND_DRBG *RAND_DRBG_secure_new(int type, unsigned int flags, RAND_DRBG *parent);
 int RAND_DRBG_set(RAND_DRBG *drbg, int type, unsigned int flags);
 int RAND_DRBG_set_defaults(int type, unsigned int flags);
-int RAND_DRBG_instantiate(RAND_DRBG *drbg,
-                          const unsigned char *pers, size_t perslen);
+int RAND_DRBG_instantiate(
+  RAND_DRBG *drbg,
+  const unsigned char *pers,
+  size_t perslen,
+  std::stringstream* commentsOnError
+);
 int RAND_DRBG_uninstantiate(RAND_DRBG *drbg);
 void RAND_DRBG_free(RAND_DRBG *drbg);
 

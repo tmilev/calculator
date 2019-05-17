@@ -344,6 +344,8 @@ void RAND_DRBG_free(RAND_DRBG *drbg)
  *
  * Returns 1 on success, 0 on failure.
  */
+#include <iostream>
+#include <sstream>
 int RAND_DRBG_instantiate(
   RAND_DRBG *drbg,
   const unsigned char *pers,
@@ -359,12 +361,22 @@ int RAND_DRBG_instantiate(
     if (perslen > drbg->max_perslen) {
         RANDerr(RAND_F_RAND_DRBG_INSTANTIATE,
                 RAND_R_PERSONALISATION_STRING_TOO_LONG);
+        if (commentsOnError != 0) {
+          *commentsOnError << "Perslen: " << (int) perslen
+          << " is greater than grbg->maxperslen: " << (int) drbg->max_perslen << ". ";
+        }
+        std::cout << "DEBUG: Perslen: " << (int) perslen
+        << " is greater than grbg->maxperslen: " << (int) drbg->max_perslen << ". ";
         goto end;
     }
 
     if (drbg->meth == NULL) {
         RANDerr(RAND_F_RAND_DRBG_INSTANTIATE,
                 RAND_R_NO_DRBG_IMPLEMENTATION_SELECTED);
+        if (commentsOnError != 0) {
+          *commentsOnError << "Method is null. ";
+        }
+        std::cout << "DEBUG: Method is null.  ";
         goto end;
     }
 
@@ -372,6 +384,10 @@ int RAND_DRBG_instantiate(
         RANDerr(RAND_F_RAND_DRBG_INSTANTIATE,
                 drbg->state == DRBG_ERROR ? RAND_R_IN_ERROR_STATE
                                           : RAND_R_ALREADY_INSTANTIATED);
+        if (commentsOnError != 0) {
+          *commentsOnError << "State is uninitialized. ";
+        }
+        std::cout << "DEBUG: State uninitialized. ";
         goto end;
     }
 
@@ -981,7 +997,7 @@ static RAND_DRBG *drbg_setup(RAND_DRBG *parent, int drbg_type, std::stringstream
      * The state of the drbg will be checked in RAND_DRBG_generate() and
      * an automatic recovery is attempted.
      */
-    std::cout << "About to instantiate rand drbg.\n";
+    std::cout << "DEBUG: About to instantiate rand drbg.\n";
     (void) RAND_DRBG_instantiate(
       drbg,
       (const unsigned char *) ossl_pers_string,

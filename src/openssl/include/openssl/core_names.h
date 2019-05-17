@@ -10,10 +10,6 @@
 #ifndef OSSL_CORE_NAMES_H
 # define OSSL_CORE_NAMES_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif
-
 /*
  * Well known parameter names that Providers can define
  */
@@ -33,9 +29,5 @@ extern "C" {
  * Type: OSSL_PARAM_UTF8_STRING
  */
 #define OSSL_PROV_PARAM_BUILDINFO   "buildinfo"
-
-# ifdef __cplusplus
-}
-# endif
 
 #endif

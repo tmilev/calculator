@@ -10,10 +10,6 @@
 #ifndef HEADER_DTLS1_H
 # define HEADER_DTLS1_H
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 #include "opensslconf.h"
 
 # define DTLS1_VERSION                   0xFEFF
@@ -53,7 +49,4 @@ extern "C" {
 
 # define DTLS1_TMO_ALERT_COUNT                     12
 
-#ifdef  __cplusplus
-}
-#endif
 #endif

@@ -26,10 +26,6 @@
 #  include "openssl/ossl_typ.h"
 #  include "openssl/x509.h"
 
-#  ifdef  __cplusplus
-extern "C" {
-#  endif
-
 #  define OSSL_CRMF_POPOPRIVKEY_THISMESSAGE          0
 #  define OSSL_CRMF_POPOPRIVKEY_SUBSEQUENTMESSAGE    1
 #  define OSSL_CRMF_POPOPRIVKEY_DHMAC                2
@@ -130,8 +126,5 @@ int OSSL_CRMF_CERTTEMPLATE_fill(OSSL_CRMF_CERTTEMPLATE *tmpl,
 X509 *OSSL_CRMF_ENCRYPTEDVALUE_get1_encCert(OSSL_CRMF_ENCRYPTEDVALUE *ecert,
                                             EVP_PKEY *pkey);
 
-#  ifdef __cplusplus
-}
-#  endif
 # endif /* !defined OPENSSL_NO_CMP */
 #endif /* !defined OSSL_HEADER_CRMF_H */

@@ -13,9 +13,6 @@
 # include "opensslconf.h"
 
 # ifndef OPENSSL_NO_IDEA
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 typedef unsigned int IDEA_INT;
 
@@ -56,9 +53,6 @@ void IDEA_encrypt(unsigned long *in, IDEA_KEY_SCHEDULE *ks);
 #  define idea_encrypt          IDEA_encrypt
 # endif
 
-# ifdef  __cplusplus
-}
-# endif
 # endif
 
 #endif

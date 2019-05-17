@@ -15,9 +15,6 @@
 #ifndef OPENSSL_NO_RMD160
 # include "e_os2.h"
 # include <stddef.h>
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 # define RIPEMD160_LONG unsigned int
 
@@ -38,9 +35,6 @@ int RIPEMD160_Final(unsigned char *md, RIPEMD160_CTX *c);
 unsigned char *RIPEMD160(const unsigned char *d, size_t n, unsigned char *md);
 void RIPEMD160_Transform(RIPEMD160_CTX *c, const unsigned char *b);
 
-# ifdef  __cplusplus
-}
-# endif
 # endif
 
 

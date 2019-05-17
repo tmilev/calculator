@@ -27,9 +27,9 @@
 #  define sock_puts  SockPuts
 # endif
 
-static int sock_write(BIO *h, const char *buf, int num);
-static int sock_read(BIO *h, char *buf, int size);
-static int sock_puts(BIO *h, const char *str);
+static int sock_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int sock_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
+static int sock_puts(BIO *h, const char *str, std::stringstream *commentsOnFailure);
 static long sock_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int sock_new(BIO *h);
 static int sock_free(BIO *data);
@@ -102,7 +102,7 @@ static int sock_free(BIO *a)
     return 1;
 }
 
-static int sock_read(BIO *b, char *out, int outl)
+static int sock_read(BIO *b, char *out, int outl, std::stringstream* commentsOnFailure)
 {
     int ret = 0;
 
@@ -123,7 +123,7 @@ static int sock_read(BIO *b, char *out, int outl)
     return ret;
 }
 
-static int sock_write(BIO *b, const char *in, int inl)
+static int sock_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     int ret = 0;
 
@@ -209,12 +209,12 @@ static long sock_ctrl(BIO *b, int cmd, long num, void *ptr)
     return ret;
 }
 
-static int sock_puts(BIO *bp, const char *str)
+static int sock_puts(BIO *bp, const char *str, std::stringstream* commentsOnFailure)
 {
     int n, ret;
 
     n = strlen(str);
-    ret = sock_write(bp, str, n);
+    ret = sock_write(bp, str, n, commentsOnFailure);
     return ret;
 }
 

@@ -21,9 +21,6 @@
 
 /* ASN1 template defines, structures and functions */
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 # ifndef OPENSSL_EXPORT_VAR_AS_FUNCTION
 
@@ -935,7 +932,4 @@ int ASN1_item_ex_i2d(const ASN1_VALUE **pval, unsigned char **out,
 # define IMPLEMENT_ASN1_ENCODE_FUNCTIONS_const_fname(stname, itname, fname) \
          IMPLEMENT_ASN1_ENCODE_FUNCTIONS_fname(stname, itname, fname)
 
-#ifdef  __cplusplus
-}
-#endif
 #endif

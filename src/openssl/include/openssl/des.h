@@ -13,9 +13,6 @@
 # include "opensslconf.h"
 
 # ifndef OPENSSL_NO_DES
-# ifdef  __cplusplus
-extern "C" {
-# endif
 # include "e_os2.h"
 
 typedef unsigned int DES_LONG;
@@ -166,9 +163,6 @@ void DES_ofb64_encrypt(const unsigned char *in, unsigned char *out,
 
 # define DES_fixup_key_parity DES_set_odd_parity
 
-# ifdef  __cplusplus
-}
-# endif
 # endif
 
 #endif

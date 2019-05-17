@@ -15,9 +15,6 @@
 #  include "../../include/openssl/symhacks.h"
 # endif
 
-# ifdef  __cplusplus
-extern "C"
-# endif
 int ERR_load_BN_strings(void);
 
 /*

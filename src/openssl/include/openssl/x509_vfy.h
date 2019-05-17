@@ -23,10 +23,6 @@
 # include "crypto.h"
 # include "symhacks.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 /*-
 SSL_CTX -> X509_STORE
                 -> X509_LOOKUP
@@ -626,7 +622,4 @@ STACK_OF(POLICYQUALINFO) *X509_policy_node_get0_qualifiers(const
 const X509_POLICY_NODE *X509_policy_node_get0_parent(const X509_POLICY_NODE
                                                      *node);
 
-#ifdef  __cplusplus
-}
-#endif
 #endif

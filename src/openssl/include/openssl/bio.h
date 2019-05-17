@@ -24,9 +24,6 @@
 #  include "../../include/openssl/e_os2.h"
 # endif
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 /* There are the classes of BIOs */
 # define BIO_TYPE_DESCRIPTOR     0x0100 /* socket, fd, connect or accept */
@@ -777,25 +774,25 @@ ossl_bio__attr__((__format__(ossl_bio__printf__, 3, 0)));
 # undef ossl_bio__attr__
 # undef ossl_bio__printf__
 
-
+#include <iostream>
 BIO_METHOD *BIO_meth_new(int type, const char *name);
 void BIO_meth_free(BIO_METHOD *biom);
-int (*BIO_meth_get_write(const BIO_METHOD *biom)) (BIO *, const char *, int);
+int (*BIO_meth_get_write(const BIO_METHOD *biom)) (BIO *, const char *, int, std::stringstream* commentsOnFailure);
 int (*BIO_meth_get_write_ex(const BIO_METHOD *biom)) (BIO *, const char *, size_t,
-                                                size_t *);
+                                                size_t *, std::stringstream* commentsOnFailure);
 int BIO_meth_set_write(BIO_METHOD *biom,
                        int (*write) (BIO *, const char *, int));
 int BIO_meth_set_write_ex(BIO_METHOD *biom,
                        int (*bwrite) (BIO *, const char *, size_t, size_t *));
-int (*BIO_meth_get_read(const BIO_METHOD *biom)) (BIO *, char *, int);
-int (*BIO_meth_get_read_ex(const BIO_METHOD *biom)) (BIO *, char *, size_t, size_t *);
+int (*BIO_meth_get_read(const BIO_METHOD *biom)) (BIO *, char *, int, std::stringstream* commentsOnFailure);
+int (*BIO_meth_get_read_ex(const BIO_METHOD *biom)) (BIO *, char *, size_t, size_t *, std::stringstream*);
 int BIO_meth_set_read(BIO_METHOD *biom,
-                      int (*read) (BIO *, char *, int));
+                      int (*read) (BIO *, char *, int, std::stringstream*));
 int BIO_meth_set_read_ex(BIO_METHOD *biom,
-                         int (*bread) (BIO *, char *, size_t, size_t *));
-int (*BIO_meth_get_puts(const BIO_METHOD *biom)) (BIO *, const char *);
+                         int (*bread) (BIO *, char *, size_t, size_t *, std::stringstream*));
+int (*BIO_meth_get_puts(const BIO_METHOD *biom)) (BIO *, const char *, std::stringstream*);
 int BIO_meth_set_puts(BIO_METHOD *biom,
-                      int (*puts) (BIO *, const char *));
+                      int (*puts) (BIO *, const char *, std::stringstream*));
 int (*BIO_meth_get_gets(const BIO_METHOD *biom)) (BIO *, char *, int);
 int BIO_meth_set_gets(BIO_METHOD *biom,
                       int (*gets) (BIO *, char *, int));
@@ -812,7 +809,4 @@ int BIO_meth_set_callback_ctrl(BIO_METHOD *biom,
                                long (*callback_ctrl) (BIO *, int,
                                                       BIO_info_cb *));
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

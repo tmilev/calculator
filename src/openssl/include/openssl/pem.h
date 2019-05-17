@@ -17,10 +17,6 @@
 # include "../../include/openssl/x509.h"
 # include "../../include/openssl/pemerr.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 # define PEM_BUFSIZE             1024
 
 # define PEM_STRING_X509_OLD     "X509 CERTIFICATE"
@@ -376,7 +372,4 @@ int i2b_PVK_bio(BIO *out, EVP_PKEY *pk, int enclevel,
 #  endif
 # endif
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

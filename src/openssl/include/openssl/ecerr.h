@@ -19,9 +19,6 @@
 
 # ifndef OPENSSL_NO_EC
 
-#  ifdef  __cplusplus
-extern "C"
-#  endif
 int ERR_load_EC_strings(void);
 
 /*

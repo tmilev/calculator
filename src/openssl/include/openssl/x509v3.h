@@ -15,10 +15,6 @@
 # include "../../include/openssl/conf.h"
 # include "../../include/openssl/x509v3err.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* Forward reference */
 struct v3_ext_method;
 struct v3_ext_ctx;
@@ -929,7 +925,4 @@ const ASN1_PRINTABLESTRING *PROFESSION_INFO_get0_registrationNumber(
 void PROFESSION_INFO_set0_registrationNumber(
     PROFESSION_INFO *pi, ASN1_PRINTABLESTRING *rn);
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

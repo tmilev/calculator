@@ -14,8 +14,8 @@
 #include "../../include/openssl/evp.h"
 #include "../../include/internal/bio.h"
 
-static int enc_write(BIO *h, const char *buf, int num);
-static int enc_read(BIO *h, char *buf, int size);
+static int enc_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int enc_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
 static long enc_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int enc_new(BIO *h);
 static int enc_free(BIO *data);
@@ -103,7 +103,7 @@ static int enc_free(BIO *a)
     return 1;
 }
 
-static int enc_read(BIO *b, char *out, int outl)
+static int enc_read(BIO *b, char *out, int outl, std::stringstream* commentsOnFailure)
 {
     int ret = 0, i, blocksize;
     BIO_ENC_CTX *ctx;
@@ -231,7 +231,7 @@ static int enc_read(BIO *b, char *out, int outl)
     return ((ret == 0) ? ctx->cont : ret);
 }
 
-static int enc_write(BIO *b, const char *in, int inl)
+static int enc_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     int ret = 0, n, i;
     BIO_ENC_CTX *ctx;
@@ -334,7 +334,7 @@ static long enc_ctrl(BIO *b, int cmd, long num, void *ptr)
         /* do a final write */
  again:
         while (ctx->buf_len != ctx->buf_off) {
-            i = enc_write(b, NULL, 0);
+            i = enc_write(b, NULL, 0, 0);
             if (i < 0)
                 return i;
         }

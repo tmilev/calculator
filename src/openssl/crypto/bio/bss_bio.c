@@ -27,10 +27,10 @@
 
 static int bio_new(BIO *bio);
 static int bio_free(BIO *bio);
-static int bio_read(BIO *bio, char *buf, int size);
-static int bio_write(BIO *bio, const char *buf, int num);
+static int bio_read(BIO *bio, char *buf, int size, std::stringstream *commentsOnFailure);
+static int bio_write(BIO *bio, const char *buf, int num, std::stringstream *commentsOnFailure);
 static long bio_ctrl(BIO *bio, int cmd, long num, void *ptr);
-static int bio_puts(BIO *bio, const char *str);
+static int bio_puts(BIO *bio, const char *str, std::stringstream *commentsOnFailure);
 
 static int bio_make_pair(BIO *bio1, BIO *bio2);
 static void bio_destroy_pair(BIO *bio);
@@ -108,7 +108,7 @@ static int bio_free(BIO *bio)
     return 1;
 }
 
-static int bio_read(BIO *bio, char *buf, int size_)
+static int bio_read(BIO *bio, char *buf, int size_, std::stringstream* commentsOnFailure)
 {
     size_t size = size_;
     size_t rest;
@@ -222,7 +222,7 @@ static ossl_ssize_t bio_nread0(BIO *bio, char **buf)
         char dummy;
 
         /* avoid code duplication -- nothing available for reading */
-        return bio_read(bio, &dummy, 1); /* returns 0 or -1 */
+        return bio_read(bio, &dummy, 1, 0); /* returns 0 or -1 */
     }
 
     num = peer_b->len;
@@ -267,7 +267,7 @@ static ossl_ssize_t bio_nread(BIO *bio, char **buf, size_t num_)
     return num;
 }
 
-static int bio_write(BIO *bio, const char *buf, int num_)
+static int bio_write(BIO *bio, const char *buf, int num_, std::stringstream* commentsOnFailure)
 {
     size_t num = num_;
     size_t rest;
@@ -600,9 +600,9 @@ static long bio_ctrl(BIO *bio, int cmd, long num, void *ptr)
     return ret;
 }
 
-static int bio_puts(BIO *bio, const char *str)
+static int bio_puts(BIO *bio, const char *str, std::stringstream* commentsOnFailure)
 {
-    return bio_write(bio, str, strlen(str));
+    return bio_write(bio, str, strlen(str), commentsOnFailure);
 }
 
 static int bio_make_pair(BIO *bio1, BIO *bio2)

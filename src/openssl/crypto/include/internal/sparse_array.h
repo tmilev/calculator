@@ -13,10 +13,6 @@
 
 # include "../../../include/openssl/e_os2.h"
 
-# ifdef __cplusplus
-extern "C" {
-# endif
-
 # define SPARSE_ARRAY_OF(type) struct sparse_array_st_ ## type
 
 # define DEFINE_SPARSE_ARRAY_OF(type) \
@@ -77,7 +73,4 @@ void OPENSSL_SA_doall_arg(const OPENSSL_SA *sa,
 void *OPENSSL_SA_get(const OPENSSL_SA *sa, ossl_uintmax_t n);
 int OPENSSL_SA_set(OPENSSL_SA *sa, ossl_uintmax_t n, void *val);
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

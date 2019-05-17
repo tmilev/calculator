@@ -66,10 +66,6 @@
 # define RAND_DRBG_FLAGS                0
 
 
-# ifdef  __cplusplus
-extern "C" {
-# endif
-
 /*
  * Object lifetime functions.
  */
@@ -92,9 +88,12 @@ void RAND_DRBG_free(RAND_DRBG *drbg);
 int RAND_DRBG_reseed(RAND_DRBG *drbg,
                      const unsigned char *adin, size_t adinlen,
                      int prediction_resistance);
-int RAND_DRBG_generate(RAND_DRBG *drbg, unsigned char *out, size_t outlen,
-                       int prediction_resistance,
-                       const unsigned char *adin, size_t adinlen);
+int RAND_DRBG_generate(
+  RAND_DRBG *drbg, unsigned char *out, size_t outlen,
+  int prediction_resistance,
+  const unsigned char *adin, size_t adinlen,
+  std::stringstream* commentsOnError
+);
 int RAND_DRBG_bytes(RAND_DRBG *drbg, unsigned char *out, size_t outlen);
 
 int RAND_DRBG_set_reseed_interval(RAND_DRBG *drbg, unsigned int interval);
@@ -108,8 +107,8 @@ int RAND_DRBG_set_reseed_defaults(
                                   );
 
 RAND_DRBG *RAND_DRBG_get0_master(void);
-RAND_DRBG *RAND_DRBG_get0_public(void);
-RAND_DRBG *RAND_DRBG_get0_private(void);
+RAND_DRBG *RAND_DRBG_get0_public(std::stringstream *commentsOnFailure);
+RAND_DRBG *RAND_DRBG_get0_private(std::stringstream *commentsOnFailure);
 
 /*
  * EXDATA
@@ -142,8 +141,5 @@ int RAND_DRBG_set_callbacks(RAND_DRBG *drbg,
                             RAND_DRBG_cleanup_nonce_fn cleanup_nonce);
 
 
-# ifdef  __cplusplus
-}
-# endif
 
 #endif

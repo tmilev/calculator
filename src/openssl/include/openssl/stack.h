@@ -10,10 +10,6 @@
 #ifndef HEADER_STACK_H
 # define HEADER_STACK_H
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 typedef struct stack_st OPENSSL_STACK; /* Use STACK_OF(...) instead */
 
 typedef int (*OPENSSL_sk_compfunc)(const void *, const void *);
@@ -76,8 +72,5 @@ int OPENSSL_sk_is_sorted(const OPENSSL_STACK *st);
 #  define sk_is_sorted OPENSSL_sk_is_sorted
 # endif
 
-#ifdef  __cplusplus
-}
-#endif
 
 #endif

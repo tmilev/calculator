@@ -12,10 +12,6 @@
 
 # include <stdlib.h>
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 /* Avoid name clashes with other applications */
 # define os_toascii   _openssl_os_toascii
 # define os_toebcdic  _openssl_os_toebcdic
@@ -27,7 +23,4 @@ extern const unsigned char os_toebcdic[256];
 void *ebcdic2ascii(void *dest, const void *srce, size_t count);
 void *ascii2ebcdic(void *dest, const void *srce, size_t count);
 
-#ifdef  __cplusplus
-}
-#endif
 #endif

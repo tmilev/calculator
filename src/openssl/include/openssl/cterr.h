@@ -19,9 +19,6 @@
 
 # ifndef OPENSSL_NO_CT
 
-#  ifdef  __cplusplus
-extern "C"
-#  endif
 int ERR_load_CT_strings(void);
 
 /*

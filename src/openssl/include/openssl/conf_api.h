@@ -13,10 +13,6 @@
 # include "../../include/openssl/lhash.h"
 # include "../../include/openssl/conf.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 /* Up until OpenSSL 0.9.5a, this was new_section */
 CONF_VALUE *_CONF_new_section(CONF *conf, const char *section);
 /* Up until OpenSSL 0.9.5a, this was get_section */
@@ -34,7 +30,4 @@ long _CONF_get_number(const CONF *conf, const char *section,
 int _CONF_new_data(CONF *conf);
 void _CONF_free_data(CONF *conf);
 
-#ifdef  __cplusplus
-}
-#endif
 #endif

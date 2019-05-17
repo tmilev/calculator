@@ -18,10 +18,6 @@
 # include "../../include/openssl/ossl_typ.h"
 # include "../../include/openssl/pkcs7err.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 /*-
 Encryption_ID           DES-CBC
 Digest_ID               MD5
@@ -313,7 +309,4 @@ PKCS7 *SMIME_read_PKCS7(BIO *bio, BIO **bcont);
 
 BIO *BIO_new_PKCS7(BIO *out, PKCS7 *p7);
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

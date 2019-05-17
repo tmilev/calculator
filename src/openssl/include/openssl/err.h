@@ -21,10 +21,6 @@
 # include "../../include/openssl/bio.h"
 # include "../../include/openssl/lhash.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 # ifndef OPENSSL_NO_ERR
 #  define ERR_PUT_error(a,b,c,d,e)        ERR_put_error(a,b,c,d,e)
 # else
@@ -272,9 +268,5 @@ int ERR_get_next_error_library(void);
 int ERR_set_mark(void);
 int ERR_pop_to_mark(void);
 int ERR_clear_last_mark(void);
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif

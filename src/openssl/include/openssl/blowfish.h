@@ -14,9 +14,6 @@
 
 # ifndef OPENSSL_NO_BF
 # include "../../include/openssl/e_os2.h"
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 # define BF_ENCRYPT      1
 # define BF_DECRYPT      0
@@ -53,9 +50,6 @@ void BF_ofb64_encrypt(const unsigned char *in, unsigned char *out,
                       unsigned char *ivec, int *num);
 const char *BF_options(void);
 
-# ifdef  __cplusplus
-}
-# endif
 # endif
 
 #endif

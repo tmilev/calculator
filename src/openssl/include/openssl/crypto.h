@@ -10,7 +10,6 @@
 
 #ifndef HEADER_CRYPTO_H
 # define HEADER_CRYPTO_H
-
 # include <stdlib.h>
 # include <time.h>
 
@@ -35,10 +34,6 @@
 # if !OPENSSL_API_1_1_0
 #  include "../openssl/opensslv.h"
 # endif
-
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 # if !OPENSSL_API_1_1_0
 #  define SSLeay                  OpenSSL_version_num
@@ -437,7 +432,7 @@ typedef unsigned int CRYPTO_THREAD_ID;
 #  define CRYPTO_ONCE_STATIC_INIT 0
 # endif
 
-int CRYPTO_THREAD_run_once(CRYPTO_ONCE *once, void (*init)(void));
+int CRYPTO_THREAD_run_once(CRYPTO_ONCE *once, void (*init)(void*));
 
 int CRYPTO_THREAD_init_local(CRYPTO_THREAD_LOCAL *key, void (*cleanup)(void *));
 void *CRYPTO_THREAD_get_local(CRYPTO_THREAD_LOCAL *key);
@@ -450,7 +445,5 @@ int CRYPTO_THREAD_compare_id(CRYPTO_THREAD_ID a, CRYPTO_THREAD_ID b);
 OPENSSL_CTX *OPENSSL_CTX_new(void);
 void OPENSSL_CTX_free(OPENSSL_CTX *);
 
-# ifdef  __cplusplus
-}
-# endif
+
 #endif

@@ -13,9 +13,6 @@
 # include "../../include/openssl/stack.h"
 # include "../../include/openssl/e_os2.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 # define STACK_OF(type) struct stack_st_##type
 
@@ -201,7 +198,4 @@ DEFINE_SPECIAL_STACK_OF(OPENSSL_BLOCK, void)
 #  pragma weak OPENSSL_sk_set_cmp_func
 # endif /* __SUNPRO_C */
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

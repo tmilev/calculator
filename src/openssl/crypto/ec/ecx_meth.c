@@ -83,7 +83,7 @@ static int ecx_key_op(EVP_PKEY *pkey, int id, const X509_ALGOR *palg,
             goto err;
         }
         if (op == KEY_OP_KEYGEN) {
-            if (RAND_priv_bytes(privkey, KEYLENID(id)) <= 0) {
+            if (RAND_priv_bytes(privkey, KEYLENID(id), 0) <= 0) {
                 OPENSSL_secure_free(privkey);
                 key->privkey = NULL;
                 goto err;

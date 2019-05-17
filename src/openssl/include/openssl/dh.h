@@ -22,10 +22,6 @@
 # endif
 # include "../../include/openssl/dherr.h"
 
-# ifdef  __cplusplus
-extern "C" {
-# endif
-
 # ifndef OPENSSL_DH_MAX_MODULUS_BITS
 #  define OPENSSL_DH_MAX_MODULUS_BITS    10000
 # endif
@@ -331,8 +327,5 @@ int DH_meth_set_generate_params(DH_METHOD *dhm,
 # endif
 
 
-#  ifdef  __cplusplus
-}
-#  endif
 # endif
 #endif

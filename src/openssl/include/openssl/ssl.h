@@ -30,10 +30,6 @@
 # include "ct.h"
 # include "sslerr.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 /* OpenSSL version number for ASN.1 encoding of the session information */
 /*-
  * Version 0 - initial version
@@ -190,13 +186,6 @@ extern "C" {
 # define SSL_SENT_SHUTDOWN       1
 # define SSL_RECEIVED_SHUTDOWN   2
 
-#ifdef __cplusplus
-}
-#endif
-
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 # define SSL_FILETYPE_ASN1       X509_FILETYPE_ASN1
 # define SSL_FILETYPE_PEM        X509_FILETYPE_PEM
@@ -944,19 +933,11 @@ uint32_t SSL_CTX_get_recv_max_early_data(const SSL_CTX *ctx);
 int SSL_set_recv_max_early_data(SSL *s, uint32_t recv_max_early_data);
 uint32_t SSL_get_recv_max_early_data(const SSL *s);
 
-#ifdef __cplusplus
-}
-#endif
-
 # include "ssl2.h"
 # include "ssl3.h"
 # include "tls1.h"      /* This is mostly sslv3 with a few tweaks */
 # include "dtls1.h"     /* Datagram TLS */
 # include "srtp.h"      /* Support for the use_srtp extension */
-
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 /*
  * These need to be after the above set of includes due to a compiler bug
@@ -2436,7 +2417,4 @@ void SSL_set_allow_early_data_cb(SSL *s,
                                  SSL_allow_early_data_cb_fn cb,
                                  void *arg);
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

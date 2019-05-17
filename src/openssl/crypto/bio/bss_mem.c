@@ -12,9 +12,9 @@
 #include "bio_lcl.h"
 #include "../../include/internal/cryptlib.h"
 
-static int mem_write(BIO *h, const char *buf, int num);
-static int mem_read(BIO *h, char *buf, int size);
-static int mem_puts(BIO *h, const char *str);
+static int mem_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int mem_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
+static int mem_puts(BIO *h, const char *str, std::stringstream *commentsOnFailure);
 static int mem_gets(BIO *h, char *str, int size);
 static long mem_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int mem_new(BIO *h);
@@ -191,7 +191,7 @@ static int mem_buf_sync(BIO *b)
     return 0;
 }
 
-static int mem_read(BIO *b, char *out, int outl)
+static int mem_read(BIO *b, char *out, int outl, std::stringstream* commentsOnFailure)
 {
     int ret = -1;
     BIO_BUF_MEM *bbm = (BIO_BUF_MEM *)b->ptr;
@@ -214,7 +214,7 @@ static int mem_read(BIO *b, char *out, int outl)
     return ret;
 }
 
-static int mem_write(BIO *b, const char *in, int inl)
+static int mem_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     int ret = -1;
     int blen;
@@ -356,19 +356,19 @@ static int mem_gets(BIO *bp, char *buf, int size)
      * and including the first newline
      */
 
-    i = mem_read(bp, buf, i);
+    i = mem_read(bp, buf, i, 0);
     if (i > 0)
         buf[i] = '\0';
     ret = i;
     return ret;
 }
 
-static int mem_puts(BIO *bp, const char *str)
+static int mem_puts(BIO *bp, const char *str, std::stringstream* commentsOnFailure)
 {
     int n, ret;
 
     n = strlen(str);
-    ret = mem_write(bp, str, n);
+    ret = mem_write(bp, str, n, commentsOnFailure);
     /* memory semantics is that it will always work */
     return ret;
 }

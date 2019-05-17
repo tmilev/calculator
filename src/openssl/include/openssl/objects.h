@@ -29,10 +29,6 @@
 # define OBJ_BSEARCH_FIRST_VALUE_ON_MATCH        0x02
 
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 typedef struct obj_name_st {
     int type;
     int alias;
@@ -170,7 +166,4 @@ int OBJ_add_sigid(int signid, int dig_id, int pkey_id);
 void OBJ_sigid_free(void);
 
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

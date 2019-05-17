@@ -25,10 +25,6 @@
 # include "../../include/openssl/asyncerr.h"
 
 
-# ifdef  __cplusplus
-extern "C" {
-# endif
-
 typedef struct async_job_st ASYNC_JOB;
 typedef struct async_wait_ctx_st ASYNC_WAIT_CTX;
 typedef int (*ASYNC_callback_fn)(void *arg);
@@ -84,7 +80,4 @@ void ASYNC_block_pause(void);
 void ASYNC_unblock_pause(void);
 
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

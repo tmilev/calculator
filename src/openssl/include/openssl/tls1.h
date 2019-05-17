@@ -15,9 +15,6 @@
 # include "buffer.h"
 # include "x509.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 /* Default security level if not overridden at config time */
 # ifndef OPENSSL_TLS_SECURITY_LEVEL
@@ -1201,7 +1198,4 @@ struct tls_session_ticket_ext_st {
     void *data;
 };
 
-#ifdef  __cplusplus
-}
-#endif
 #endif

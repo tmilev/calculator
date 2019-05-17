@@ -19,9 +19,6 @@
 
 # ifndef OPENSSL_NO_OCSP
 
-#  ifdef  __cplusplus
-extern "C"
-#  endif
 int ERR_load_OCSP_strings(void);
 
 /*

@@ -17,9 +17,9 @@
  * BIO_put and BIO_get both add to the digest, BIO_gets returns the digest
  */
 
-static int nbiof_write(BIO *h, const char *buf, int num);
-static int nbiof_read(BIO *h, char *buf, int size);
-static int nbiof_puts(BIO *h, const char *str);
+static int nbiof_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int nbiof_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
+static int nbiof_puts(BIO *h, const char *str, std::stringstream *commentsOnFailure);
 static int nbiof_gets(BIO *h, char *str, int size);
 static long nbiof_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int nbiof_new(BIO *h);
@@ -79,7 +79,7 @@ static int nbiof_free(BIO *a)
     return 1;
 }
 
-static int nbiof_read(BIO *b, char *out, int outl)
+static int nbiof_read(BIO *b, char *out, int outl, std::stringstream* commentsOnFailure)
 {
     int ret = 0;
     int num;
@@ -91,7 +91,7 @@ static int nbiof_read(BIO *b, char *out, int outl)
         return 0;
 
     BIO_clear_retry_flags(b);
-    if (RAND_priv_bytes(&n, 1) <= 0)
+    if (RAND_priv_bytes(&n, 1, commentsOnFailure) <= 0)
         return -1;
     num = (n & 0x07);
 
@@ -109,7 +109,7 @@ static int nbiof_read(BIO *b, char *out, int outl)
     return ret;
 }
 
-static int nbiof_write(BIO *b, const char *in, int inl)
+static int nbiof_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     NBIO_TEST *nt;
     int ret = 0;
@@ -128,7 +128,7 @@ static int nbiof_write(BIO *b, const char *in, int inl)
         num = nt->lwn;
         nt->lwn = 0;
     } else {
-        if (RAND_priv_bytes(&n, 1) <= 0)
+        if (RAND_priv_bytes(&n, 1, commentsOnFailure) <= 0)
             return -1;
         num = (n & 7);
     }
@@ -192,7 +192,7 @@ static int nbiof_gets(BIO *bp, char *buf, int size)
     return BIO_gets(bp->next_bio, buf, size);
 }
 
-static int nbiof_puts(BIO *bp, const char *str)
+static int nbiof_puts(BIO *bp, const char *str, std::stringstream* commentsOnFailure)
 {
     if (bp->next_bio == NULL)
         return 0;

@@ -14,18 +14,15 @@
 # include "../../include/openssl/ossl_typ.h"
 # include "../../include/openssl/e_os2.h"
 # include "../../include/openssl/randerr.h"
-
-#ifdef  __cplusplus
-extern "C" {
-#endif
+#include <iostream>
 
 struct rand_meth_st {
-    int (*seed) (const void *buf, int num);
-    int (*bytes) (unsigned char *buf, int num);
+    int (*seed) (const void *buf, int num, std::stringstream* commentsOnFailure);
+    int (*bytes) (unsigned char *buf, int num, std::stringstream* commentsOnFailure);
     void (*cleanup) (void);
-    int (*add) (const void *buf, int num, double randomness);
-    int (*pseudorand) (unsigned char *buf, int num);
-    int (*status) (void);
+    int (*add) (const void *buf, int num, double randomness, std::stringstream* commentsOnFailure);
+    int (*pseudorand) (unsigned char *buf, int num, std::stringstream* commentsOnFailure);
+    int (*status) (std::stringstream* commentsOnFailure);
 };
 
 int RAND_set_rand_method(const RAND_METHOD *meth);
@@ -40,10 +37,10 @@ RAND_METHOD *RAND_OpenSSL(void);
 #   define RAND_cleanup() while(0) continue
 # endif
 int RAND_bytes(unsigned char *buf, int num);
-int RAND_priv_bytes(unsigned char *buf, int num);
+int RAND_priv_bytes(unsigned char *buf, int num, std::stringstream *commentsOnFailure);
 DEPRECATEDIN_1_1_0(int RAND_pseudo_bytes(unsigned char *buf, int num))
 
-void RAND_seed(const void *buf, int num);
+void RAND_seed(const void *buf, int num, std::stringstream *commentsOnFailure);
 void RAND_keep_random_devices_open(int keep);
 
 # if defined(__ANDROID__) && defined(__NDK_FPABI__)
@@ -61,7 +58,7 @@ int RAND_egd(const char *path);
 int RAND_egd_bytes(const char *path, int bytes);
 # endif
 
-int RAND_poll(void);
+int RAND_poll(std::stringstream *commentsOnFailure);
 
 # if defined(_WIN32) && (defined(BASETYPES) || defined(_WINDEF_H))
 /* application has to include <windows.h> in order to use these */
@@ -69,9 +66,5 @@ DEPRECATEDIN_1_1_0(void RAND_screen(void))
 DEPRECATEDIN_1_1_0(int RAND_event(UINT, WPARAM, LPARAM))
 # endif
 
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif

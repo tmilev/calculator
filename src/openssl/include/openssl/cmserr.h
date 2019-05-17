@@ -19,9 +19,6 @@
 
 # ifndef OPENSSL_NO_CMS
 
-#  ifdef  __cplusplus
-extern "C"
-#  endif
 int ERR_load_CMS_strings(void);
 
 /*

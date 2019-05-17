@@ -55,26 +55,26 @@ void BIO_meth_free(BIO_METHOD *biom)
     }
 }
 
-int (*BIO_meth_get_write(const BIO_METHOD *biom)) (BIO *, const char *, int)
+int (*BIO_meth_get_write(const BIO_METHOD *biom)) (BIO *, const char *, int, std::stringstream*)
 {
     return biom->bwrite_old;
 }
 
 int (*BIO_meth_get_write_ex(const BIO_METHOD *biom)) (BIO *, const char *, size_t,
-                                                size_t *)
+                                                size_t *, std::stringstream* commentsOnFailure)
 {
     return biom->bwrite;
 }
 
 /* Conversion for old style bwrite to new style */
-int bwrite_conv(BIO *bio, const char *data, size_t datal, size_t *written)
+int bwrite_conv(BIO *bio, const char *data, size_t datal, size_t *written, std::stringstream* commentsOnFailure)
 {
     int ret;
 
     if (datal > INT_MAX)
         datal = INT_MAX;
 
-    ret = bio->method->bwrite_old(bio, data, (int)datal);
+    ret = bio->method->bwrite_old(bio, data, (int)datal, commentsOnFailure);
 
     if (ret <= 0) {
         *written = 0;
@@ -87,7 +87,7 @@ int bwrite_conv(BIO *bio, const char *data, size_t datal, size_t *written)
 }
 
 int BIO_meth_set_write(BIO_METHOD *biom,
-                       int (*bwrite) (BIO *, const char *, int))
+                       int (*bwrite) (BIO *, const char *, int, std::stringstream*))
 {
     biom->bwrite_old = bwrite;
     biom->bwrite = bwrite_conv;
@@ -95,32 +95,32 @@ int BIO_meth_set_write(BIO_METHOD *biom,
 }
 
 int BIO_meth_set_write_ex(BIO_METHOD *biom,
-                       int (*bwrite) (BIO *, const char *, size_t, size_t *))
+                       int (*bwrite) (BIO *, const char *, size_t, size_t *, std::stringstream* ))
 {
     biom->bwrite_old = NULL;
     biom->bwrite = bwrite;
     return 1;
 }
 
-int (*BIO_meth_get_read(const BIO_METHOD *biom)) (BIO *, char *, int)
+int (*BIO_meth_get_read(const BIO_METHOD *biom)) (BIO *, char *, int, std::stringstream*)
 {
     return biom->bread_old;
 }
 
-int (*BIO_meth_get_read_ex(const BIO_METHOD *biom)) (BIO *, char *, size_t, size_t *)
+int (*BIO_meth_get_read_ex(const BIO_METHOD *biom)) (BIO *, char *, size_t, size_t *, std::stringstream*)
 {
     return biom->bread;
 }
 
 /* Conversion for old style bread to new style */
-int bread_conv(BIO *bio, char *data, size_t datal, size_t *readbytes)
+int bread_conv(BIO *bio, char *data, size_t datal, size_t *readbytes, std::stringstream* commentsOnFailure)
 {
     int ret;
 
     if (datal > INT_MAX)
         datal = INT_MAX;
 
-    ret = bio->method->bread_old(bio, data, (int)datal);
+    ret = bio->method->bread_old(bio, data, (int)datal, commentsOnFailure);
 
     if (ret <= 0) {
         *readbytes = 0;
@@ -133,7 +133,7 @@ int bread_conv(BIO *bio, char *data, size_t datal, size_t *readbytes)
 }
 
 int BIO_meth_set_read(BIO_METHOD *biom,
-                      int (*bread) (BIO *, char *, int))
+                      int (*bread) (BIO *, char *, int,std::stringstream*))
 {
     biom->bread_old = bread;
     biom->bread = bread_conv;
@@ -141,20 +141,20 @@ int BIO_meth_set_read(BIO_METHOD *biom,
 }
 
 int BIO_meth_set_read_ex(BIO_METHOD *biom,
-                         int (*bread) (BIO *, char *, size_t, size_t *))
+                         int (*bread) (BIO *, char *, size_t, size_t *, std::stringstream*))
 {
     biom->bread_old = NULL;
     biom->bread = bread;
     return 1;
 }
 
-int (*BIO_meth_get_puts(const BIO_METHOD *biom)) (BIO *, const char *)
+int (*BIO_meth_get_puts(const BIO_METHOD *biom)) (BIO *, const char *, std::stringstream*)
 {
     return biom->bputs;
 }
 
 int BIO_meth_set_puts(BIO_METHOD *biom,
-                      int (*bputs) (BIO *, const char *))
+                      int (*bputs) (BIO *, const char *, std::stringstream*))
 {
     biom->bputs = bputs;
     return 1;

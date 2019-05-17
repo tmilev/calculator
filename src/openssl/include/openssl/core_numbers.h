@@ -12,10 +12,6 @@
 
 # include "../../include/openssl/core.h"
 
-# ifdef __cplusplus
-extern "C" {
-# endif
-
 /*-
  * Identities
  * ----------
@@ -100,9 +96,5 @@ OSSL_CORE_MAKE_FUNC(void, OP_digest_freectx, (void *vctx))
 OSSL_CORE_MAKE_FUNC(void *, OP_digest_dupctx, (void *vctx))
 OSSL_CORE_MAKE_FUNC(size_t, OP_digest_size, (void))
 OSSL_CORE_MAKE_FUNC(size_t, OP_digest_block_size, (void))
-
-# ifdef __cplusplus
-}
-# endif
 
 #endif

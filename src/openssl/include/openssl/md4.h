@@ -15,9 +15,6 @@
 # ifndef OPENSSL_NO_MD4
 # include "e_os2.h"
 # include <stddef.h>
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 /*-
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -43,9 +40,6 @@ int MD4_Final(unsigned char *md, MD4_CTX *c);
 unsigned char *MD4(const unsigned char *d, size_t n, unsigned char *md);
 void MD4_Transform(MD4_CTX *c, const unsigned char *b);
 
-# ifdef  __cplusplus
-}
-# endif
 # endif
 
 #endif

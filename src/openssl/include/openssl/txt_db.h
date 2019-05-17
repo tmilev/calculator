@@ -23,9 +23,6 @@
 # define DB_ERROR_INSERT_INDEX_CLASH     5
 # define DB_ERROR_WRONG_NUM_FIELDS       6
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 typedef OPENSSL_STRING *OPENSSL_PSTRING;
 DEFINE_SPECIAL_STACK_OF(OPENSSL_PSTRING, OPENSSL_STRING)
@@ -50,8 +47,5 @@ OPENSSL_STRING *TXT_DB_get_by_index(TXT_DB *db, int idx,
                                     OPENSSL_STRING *value);
 int TXT_DB_insert(TXT_DB *db, OPENSSL_STRING *value);
 
-#ifdef  __cplusplus
-}
-#endif
 
 #endif

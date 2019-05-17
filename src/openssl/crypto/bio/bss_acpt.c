@@ -33,9 +33,9 @@ typedef struct bio_accept_st {
     BIO *bio_chain;
 } BIO_ACCEPT;
 
-static int acpt_write(BIO *h, const char *buf, int num);
-static int acpt_read(BIO *h, char *buf, int size);
-static int acpt_puts(BIO *h, const char *str);
+static int acpt_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int acpt_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
+static int acpt_puts(BIO *h, const char *str, std::stringstream *commentsOnFailure);
 static long acpt_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int acpt_new(BIO *h);
 static int acpt_free(BIO *data);
@@ -354,7 +354,7 @@ static int acpt_state(BIO *b, BIO_ACCEPT *c)
     return ret;
 }
 
-static int acpt_read(BIO *b, char *out, int outl)
+static int acpt_read(BIO *b, char *out, int outl, std::stringstream* commentsOnFailure)
 {
     int ret = 0;
     BIO_ACCEPT *data;
@@ -373,7 +373,7 @@ static int acpt_read(BIO *b, char *out, int outl)
     return ret;
 }
 
-static int acpt_write(BIO *b, const char *in, int inl)
+static int acpt_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     int ret;
     BIO_ACCEPT *data;
@@ -535,12 +535,12 @@ static long acpt_ctrl(BIO *b, int cmd, long num, void *ptr)
     return ret;
 }
 
-static int acpt_puts(BIO *bp, const char *str)
+static int acpt_puts(BIO *bp, const char *str, std::stringstream* commentsOnFailure)
 {
     int n, ret;
 
     n = strlen(str);
-    ret = acpt_write(bp, str, n);
+    ret = acpt_write(bp, str, n, commentsOnFailure);
     return ret;
 }
 

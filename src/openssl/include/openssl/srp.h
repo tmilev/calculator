@@ -23,9 +23,6 @@
 # include "bn.h"
 # include "crypto.h"
 
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 typedef struct SRP_gN_cache_st {
     char *b64_bn;
@@ -133,9 +130,6 @@ int SRP_Verify_B_mod_N(const BIGNUM *B, const BIGNUM *N);
 
 # define SRP_MINIMAL_N 1024
 
-# ifdef  __cplusplus
-}
-# endif
 # endif
 
 #endif

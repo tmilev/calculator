@@ -20,10 +20,6 @@
 # include "../../include/openssl/crypto.h"
 # include "../../include/openssl/bnerr.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 #define BN_ULONG        unsigned long long
 #define BN_BYTES        8
 
@@ -517,7 +513,4 @@ BIGNUM *BN_get_rfc3526_prime_8192(BIGNUM *bn);
 int BN_bntest_rand(BIGNUM *rnd, int bits, int top, int bottom);
 
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

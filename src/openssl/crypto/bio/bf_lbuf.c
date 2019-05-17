@@ -13,9 +13,9 @@
 #include "../../include/internal/cryptlib.h"
 #include "../../include/openssl/evp.h"
 
-static int linebuffer_write(BIO *h, const char *buf, int num);
-static int linebuffer_read(BIO *h, char *buf, int size);
-static int linebuffer_puts(BIO *h, const char *str);
+static int linebuffer_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int linebuffer_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
+static int linebuffer_puts(BIO *h, const char *str, std::stringstream *commentsOnFailure);
 static int linebuffer_gets(BIO *h, char *str, int size);
 static long linebuffer_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int linebuffer_new(BIO *h);
@@ -93,7 +93,7 @@ static int linebuffer_free(BIO *a)
     return 1;
 }
 
-static int linebuffer_read(BIO *b, char *out, int outl)
+static int linebuffer_read(BIO *b, char *out, int outl, std::stringstream* commentsOnFailure)
 {
     int ret = 0;
 
@@ -107,7 +107,7 @@ static int linebuffer_read(BIO *b, char *out, int outl)
     return ret;
 }
 
-static int linebuffer_write(BIO *b, const char *in, int inl)
+static int linebuffer_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     int i, num = 0, foundnl;
     BIO_LINEBUFFER_CTX *ctx;
@@ -320,7 +320,7 @@ static int linebuffer_gets(BIO *b, char *buf, int size)
     return BIO_gets(b->next_bio, buf, size);
 }
 
-static int linebuffer_puts(BIO *b, const char *str)
+static int linebuffer_puts(BIO *b, const char *str, std::stringstream* commentsOnFailure)
 {
-    return linebuffer_write(b, str, strlen(str));
+    return linebuffer_write(b, str, strlen(str), commentsOnFailure);
 }

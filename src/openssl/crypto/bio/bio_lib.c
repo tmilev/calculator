@@ -266,7 +266,7 @@ static int bio_read_intern(BIO *b, void *data, size_t dlen, size_t *readbytes)
         return -2;
     }
 
-    ret = b->method->bread(b, (char*) data, dlen, readbytes);
+    ret = b->method->bread(b, (char*) data, dlen, readbytes, 0);
 
     if (ret > 0)
         b->num_read += (uint64_t)*readbytes;
@@ -339,7 +339,7 @@ static int bio_write_intern(BIO *b, const void *data, size_t dlen,
         return -2;
     }
 
-    ret = b->method->bwrite(b, (char*) data, dlen, written);
+    ret = b->method->bwrite(b, (char*) data, dlen, written, 0);
 
     if (ret > 0)
         b->num_write += (uint64_t)*written;
@@ -404,7 +404,7 @@ int BIO_puts(BIO *b, const char *buf)
         return -2;
     }
 
-    ret = b->method->bputs(b, buf);
+    ret = b->method->bputs(b, buf, 0);
 
     if (ret > 0) {
         b->num_write += (uint64_t)ret;

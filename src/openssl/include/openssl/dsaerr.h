@@ -19,9 +19,6 @@
 
 # ifndef OPENSSL_NO_DSA
 
-#  ifdef  __cplusplus
-extern "C"
-#  endif
 int ERR_load_DSA_strings(void);
 
 /*

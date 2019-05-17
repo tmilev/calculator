@@ -20,9 +20,6 @@
 #  include "../../include/openssl/bn.h"
 # endif
 # include "../../include/openssl/ecerr.h"
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 # ifndef OPENSSL_ECC_MAX_FIELD_BITS
 #  define OPENSSL_ECC_MAX_FIELD_BITS 661
@@ -1376,14 +1373,6 @@ void EC_KEY_METHOD_get_verify(const EC_KEY_METHOD *meth,
 
 # define ECParameters_dup(x) ASN1_dup_of(EC_KEY,i2d_ECParameters,d2i_ECParameters,x)
 
-# ifndef __cplusplus
-#  if defined(__SUNPRO_C)
-#   if __SUNPRO_C >= 0x520
-#    pragma error_messages (default,E_ARRAY_OF_INCOMPLETE_NONAME,E_ARRAY_OF_INCOMPLETE)
-#   endif
-#  endif
-# endif
-
 # define EVP_PKEY_CTX_set_ec_paramgen_curve_nid(ctx, nid) \
         EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_EC, \
                                 EVP_PKEY_OP_PARAMGEN|EVP_PKEY_OP_KEYGEN, \
@@ -1482,8 +1471,5 @@ void EC_KEY_METHOD_get_verify(const EC_KEY_METHOD *meth,
 # define EVP_PKEY_ECDH_KDF_X9_62   EVP_PKEY_ECDH_KDF_X9_63
 
 
-#  ifdef  __cplusplus
-}
-#  endif
 # endif
 #endif

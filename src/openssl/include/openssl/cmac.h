@@ -12,10 +12,6 @@
 
 # ifndef OPENSSL_NO_CMAC
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 # include "../../include/openssl/evp.h"
 
 /* Opaque */
@@ -32,10 +28,6 @@ int CMAC_Init(CMAC_CTX *ctx, const void *key, size_t keylen,
 int CMAC_Update(CMAC_CTX *ctx, const void *data, size_t dlen);
 int CMAC_Final(CMAC_CTX *ctx, unsigned char *out, size_t *poutlen);
 int CMAC_resume(CMAC_CTX *ctx);
-
-#ifdef  __cplusplus
-}
-#endif
 
 # endif
 #endif

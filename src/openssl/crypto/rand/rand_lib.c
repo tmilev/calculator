@@ -16,6 +16,7 @@
 #include "../../include/internal/thread_once.h"
 #include "rand_lcl.h"
 #include "../../e_os.h"
+#include<iostream>
 
 #ifndef OPENSSL_NO_ENGINE
 /* non-NULL if default_RAND_meth is ENGINE-provided */
@@ -172,7 +173,7 @@ size_t rand_drbg_get_entropy(RAND_DRBG *drbg,
             if (RAND_DRBG_generate(drbg->parent,
                                    buffer, bytes_needed,
                                    prediction_resistance,
-                                   NULL, 0) != 0)
+                                   NULL, 0, 0) != 0)
                 bytes = bytes_needed;
             drbg->reseed_next_counter
                 = tsan_load(&drbg->parent->reseed_prop_counter);
@@ -367,7 +368,7 @@ void RAND_keep_random_devices_open(int keep)
  * sources which depend on the operating system and are
  * configurable via the --with-rand-seed configure option.
  */
-int RAND_poll(void)
+int RAND_poll(std::stringstream* commentsOnFailure)
 {
     int ret = 0;
 
@@ -383,7 +384,7 @@ int RAND_poll(void)
             return 0;
 
         rand_drbg_lock(drbg);
-        ret = rand_drbg_restart(drbg, NULL, 0, 0);
+        ret = rand_drbg_restart(drbg, NULL, 0, 0, commentsOnFailure);
         rand_drbg_unlock(drbg);
 
         return ret;
@@ -402,7 +403,7 @@ int RAND_poll(void)
         if (meth->add == NULL
             || meth->add(rand_pool_buffer(pool),
                          rand_pool_length(pool),
-                         (rand_pool_entropy(pool) / 8.0)) == 0)
+                         (rand_pool_entropy(pool) / 8.0), commentsOnFailure) == 0)
             goto err;
 
         ret = 1;
@@ -779,12 +780,12 @@ int RAND_set_rand_engine(ENGINE *engine)
 }
 #endif
 
-void RAND_seed(const void *buf, int num)
+void RAND_seed(const void *buf, int num, std::stringstream* commentsOnFailure)
 {
     const RAND_METHOD *meth = RAND_get_rand_method();
 
     if (meth->seed != NULL)
-        meth->seed(buf, num);
+        meth->seed(buf, num, commentsOnFailure);
 }
 
 void RAND_add(const void *buf, int num, double randomness)
@@ -792,7 +793,7 @@ void RAND_add(const void *buf, int num, double randomness)
     const RAND_METHOD *meth = RAND_get_rand_method();
 
     if (meth->add != NULL)
-        meth->add(buf, num, randomness);
+        meth->add(buf, num, randomness, 0);
 }
 
 /*
@@ -800,7 +801,7 @@ void RAND_add(const void *buf, int num, double randomness)
  * the default method, then just call RAND_bytes().  Otherwise make
  * sure we're instantiated and use the private DRBG.
  */
-int RAND_priv_bytes(unsigned char *buf, int num)
+int RAND_priv_bytes(unsigned char *buf, int num, std::stringstream* commentsOnFailure)
 {
     const RAND_METHOD *meth = RAND_get_rand_method();
     RAND_DRBG *drbg;
@@ -809,7 +810,7 @@ int RAND_priv_bytes(unsigned char *buf, int num)
     if (meth != RAND_OpenSSL())
         return RAND_bytes(buf, num);
 
-    drbg = RAND_DRBG_get0_private();
+    drbg = RAND_DRBG_get0_private(commentsOnFailure);
     if (drbg == NULL)
         return 0;
 
@@ -822,7 +823,7 @@ int RAND_bytes(unsigned char *buf, int num)
     const RAND_METHOD *meth = RAND_get_rand_method();
 
     if (meth->bytes != NULL)
-        return meth->bytes(buf, num);
+        return meth->bytes(buf, num, 0);
     RANDerr(RAND_F_RAND_BYTES, RAND_R_FUNC_NOT_IMPLEMENTED);
     return -1;
 }
@@ -833,7 +834,7 @@ int RAND_pseudo_bytes(unsigned char *buf, int num)
     const RAND_METHOD *meth = RAND_get_rand_method();
 
     if (meth->pseudorand != NULL)
-        return meth->pseudorand(buf, num);
+        return meth->pseudorand(buf, num, 0);
     return -1;
 }
 #endif
@@ -843,6 +844,6 @@ int RAND_status(void)
     const RAND_METHOD *meth = RAND_get_rand_method();
 
     if (meth->status != NULL)
-        return meth->status();
+        return meth->status(0);
     return 0;
 }

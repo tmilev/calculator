@@ -27,10 +27,6 @@
 #  endif
 # endif
 
-# ifdef  __cplusplus
-extern "C" {
-# endif
-
 /*
  * All the following functions return -1 or NULL on error and in some cases
  * (UI_process()) -2 if interrupted or in some other way cancelled. When
@@ -362,7 +358,4 @@ int UI_UTIL_read_pw(char *buf, char *buff, int size, const char *prompt,
 UI_METHOD *UI_UTIL_wrap_read_pem_callback(pem_password_cb *cb, int rwflag);
 
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

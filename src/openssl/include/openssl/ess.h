@@ -12,9 +12,6 @@
 
 # include "opensslconf.h"
 
-# ifdef  __cplusplus
-extern "C" {
-# endif
 # include "safestack.h"
 # include "x509.h"
 # include "esserr.h"
@@ -57,7 +54,4 @@ ESS_SIGNING_CERT_V2 *ESS_SIGNING_CERT_V2_new_init(const EVP_MD *hash_alg,
                                                   STACK_OF(X509) *certs,
                                                   int issuer_needed);
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

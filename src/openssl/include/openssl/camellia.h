@@ -14,9 +14,6 @@
 
 # ifndef OPENSSL_NO_CAMELLIA
 # include <stddef.h>
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 # define CAMELLIA_ENCRYPT        1
 # define CAMELLIA_DECRYPT        0
@@ -75,9 +72,6 @@ void Camellia_ctr128_encrypt(const unsigned char *in, unsigned char *out,
                              unsigned char ecount_buf[CAMELLIA_BLOCK_SIZE],
                              unsigned int *num);
 
-# ifdef  __cplusplus
-}
-# endif
 # endif
 
 #endif

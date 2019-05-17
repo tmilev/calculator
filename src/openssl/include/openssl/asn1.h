@@ -28,9 +28,6 @@
 #  define OPENSSL_EXTERN OPENSSL_EXPORT
 # endif
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 # define V_ASN1_UNIVERSAL                0x00
 # define V_ASN1_APPLICATION              0x40
@@ -871,7 +868,4 @@ const ASN1_ITEM *ASN1_ITEM_get(size_t i);
 # define ASN1_i2d_fp_of_const(type,i2d,out,x) ASN1_i2d_fp_of(type,i2d,out,x)
 # define ASN1_i2d_bio_of_const(type,i2d,out,x) ASN1_i2d_bio_of(type,i2d,out,x)
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

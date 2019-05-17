@@ -78,8 +78,8 @@
 #include "../../include/openssl/rand.h"
 #include "../include/internal/evp_int.h"
 
-static int ok_write(BIO *h, const char *buf, int num);
-static int ok_read(BIO *h, char *buf, int size);
+static int ok_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int ok_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
 static long ok_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int ok_new(BIO *h);
 static int ok_free(BIO *data);
@@ -168,7 +168,7 @@ static int ok_free(BIO *a)
     return 1;
 }
 
-static int ok_read(BIO *b, char *out, int outl)
+static int ok_read(BIO *b, char *out, int outl, std::stringstream* commentsOnFailure)
 {
     int ret = 0, i, n;
     BIO_OK_CTX *ctx;
@@ -254,7 +254,7 @@ static int ok_read(BIO *b, char *out, int outl)
     return ret;
 }
 
-static int ok_write(BIO *b, const char *in, int inl)
+static int ok_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     int ret = 0, n, i;
     BIO_OK_CTX *ctx;
@@ -362,7 +362,7 @@ static long ok_ctrl(BIO *b, int cmd, long num, void *ptr)
                 return 0;
 
         while (ctx->blockout) {
-            i = ok_write(b, NULL, 0);
+            i = ok_write(b, NULL, 0, 0);
             if (i < 0) {
                 ret = i;
                 break;

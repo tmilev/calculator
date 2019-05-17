@@ -12,10 +12,6 @@
 
 # include "opensslconf.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 /******************************************************************************
  * Detect operating systems.  This probably needs completing.
  * The result is that at least one OPENSSL_SYS_os macro should be defined.
@@ -259,25 +255,7 @@ typedef unsigned __int64 uint64_t;
 # endif
 
 /* ossl_inline: portable inline definition usable in public headers */
-# if !defined(inline) && !defined(__cplusplus)
-#  if defined(__STDC_VERSION__) && __STDC_VERSION__>=199901L
-   /* just use inline */
-#   define ossl_inline inline
-#  elif defined(__GNUC__) && __GNUC__>=2
-#   define ossl_inline __inline__
-#  elif defined(_MSC_VER)
-  /*
-   * Visual Studio: inline is available in C++ only, however
-   * __inline is available for C, see
-   * http://msdn.microsoft.com/en-us/library/z8y1yy88.aspx
-   */
-#   define ossl_inline __inline
-#  else
-#   define ossl_inline
-#  endif
-# else
-#  define ossl_inline inline
-# endif
+#define ossl_inline inline
 
 # if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
 #  define ossl_noreturn _Noreturn
@@ -294,7 +272,4 @@ typedef unsigned __int64 uint64_t;
 #  define ossl_unused
 # endif
 
-#ifdef  __cplusplus
-}
-#endif
 #endif

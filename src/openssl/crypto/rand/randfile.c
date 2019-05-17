@@ -187,7 +187,7 @@ int RAND_write_file(const char *file)
 #endif
 
     /* Collect enough random data. */
-    if (RAND_priv_bytes(buf, (int)sizeof(buf)) != 1)
+    if (RAND_priv_bytes(buf, (int)sizeof(buf), 0) != 1)
         return  -1;
 
 #if defined(O_CREAT) && !defined(OPENSSL_NO_POSIX_IO) && \

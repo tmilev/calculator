@@ -43,7 +43,7 @@ static int bnrand(BNRAND_FLAG flag, BIGNUM *rnd, int bits, int top, int bottom)
     }
 
     /* make a random number and set the top and bottom bits */
-    b = flag == NORMAL ? RAND_bytes(buf, bytes) : RAND_priv_bytes(buf, bytes);
+    b = flag == NORMAL ? RAND_bytes(buf, bytes) : RAND_priv_bytes(buf, bytes, 0);
     if (b <= 0)
         goto err;
 
@@ -239,7 +239,7 @@ int BN_generate_dsa_nonce(BIGNUM *out, const BIGNUM *range,
     memset(private_bytes + todo, 0, sizeof(private_bytes) - todo);
 
     for (done = 0; done < num_k_bytes;) {
-        if (RAND_priv_bytes(random_bytes, sizeof(random_bytes)) != 1)
+        if (RAND_priv_bytes(random_bytes, sizeof(random_bytes), 0) != 1)
             goto err;
         SHA512_Init(&sha);
         SHA512_Update(&sha, &done, sizeof(done));

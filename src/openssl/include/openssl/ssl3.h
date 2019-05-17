@@ -16,10 +16,6 @@
 # include "evp.h"
 # include "ssl.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 /*
  * Signalling cipher suite value from RFC 5746
  * (TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
@@ -332,7 +328,4 @@ extern "C" {
 # define SSL3_CHANGE_CIPHER_CLIENT_READ  (SSL3_CC_CLIENT|SSL3_CC_READ)
 # define SSL3_CHANGE_CIPHER_SERVER_WRITE (SSL3_CC_SERVER|SSL3_CC_WRITE)
 
-#ifdef  __cplusplus
-}
-#endif
 #endif

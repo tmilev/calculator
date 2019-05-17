@@ -15,9 +15,6 @@
 #ifndef OPENSSL_NO_MDC2
 # include <stdlib.h>
 # include "des.h"
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 # define MDC2_BLOCK              8
 # define MDC2_DIGEST_LENGTH      16
@@ -34,9 +31,6 @@ int MDC2_Update(MDC2_CTX *c, const unsigned char *data, size_t len);
 int MDC2_Final(unsigned char *md, MDC2_CTX *c);
 unsigned char *MDC2(const unsigned char *d, size_t n, unsigned char *md);
 
-# ifdef  __cplusplus
-}
-# endif
 # endif
 
 #endif

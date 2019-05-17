@@ -65,10 +65,6 @@
 # define EVP_PKEY_X448 NID_X448
 # define EVP_PKEY_ED448 NID_ED448
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 int EVP_set_default_properties(OPENSSL_CTX *libctx, const char *propq);
 
 # define EVP_PKEY_MO_SIGN        0x0001
@@ -1704,7 +1700,4 @@ int EVP_str2ctrl(int (*cb)(void *ctx, int cmd, void *buf, size_t buflen),
 int EVP_hex2ctrl(int (*cb)(void *ctx, int cmd, void *buf, size_t buflen),
                  void *ctx, int cmd, const char *hex);
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

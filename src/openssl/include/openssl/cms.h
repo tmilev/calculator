@@ -17,9 +17,6 @@
 # include "../../include/openssl/x509v3.h"
 # include "../../include/openssl/cmserr.h"
 # include "../../include/openssl/ess.h"
-# ifdef __cplusplus
-extern "C" {
-# endif
 
 typedef struct CMS_ContentInfo_st CMS_ContentInfo;
 typedef struct CMS_SignerInfo_st CMS_SignerInfo;
@@ -339,8 +336,5 @@ int CMS_SharedInfo_encode(unsigned char **pder, X509_ALGOR *kekalg,
 # define CMS_R_UNSUPPORTED_RECPIENTINFO_TYPE \
     CMS_R_UNSUPPORTED_RECIPIENTINFO_TYPE
 
-#  ifdef  __cplusplus
-}
-#  endif
 # endif
 #endif

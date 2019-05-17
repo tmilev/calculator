@@ -13,9 +13,6 @@
 # include "../../include/openssl/opensslconf.h"
 
 # include <stddef.h>
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 # define AES_ENCRYPT     1
 # define AES_DECRYPT     0
@@ -86,9 +83,5 @@ int AES_unwrap_key(AES_KEY *key, const unsigned char *iv,
                    unsigned char *out,
                    const unsigned char *in, unsigned int inlen);
 
-
-# ifdef  __cplusplus
-}
-# endif
 
 #endif

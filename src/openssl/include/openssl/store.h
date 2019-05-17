@@ -15,10 +15,6 @@
 # include "../../include/openssl/pem.h"
 # include "../../include/openssl/storeerr.h"
 
-# ifdef  __cplusplus
-extern "C" {
-# endif
-
 /*-
  *  The main OSSL_STORE functions.
  *  ------------------------------
@@ -260,7 +256,4 @@ int OSSL_STORE_do_all_loaders(void (*do_function) (const OSSL_STORE_LOADER
                                                    *loader, void *do_arg),
                               void *do_arg);
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

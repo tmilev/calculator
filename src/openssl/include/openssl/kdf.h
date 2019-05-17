@@ -14,9 +14,6 @@
 # include <stddef.h>
 # include "ossl_typ.h"
 # include "kdferr.h"
-# ifdef __cplusplus
-extern "C" {
-# endif
 
 # define EVP_KDF_PBKDF2     NID_id_pbkdf2
 # define EVP_KDF_SCRYPT     NID_id_scrypt
@@ -150,7 +147,4 @@ int EVP_KDF_derive(EVP_KDF_CTX *ctx, unsigned char *key, size_t keylen);
                             EVP_PKEY_CTRL_SCRYPT_MAXMEM_BYTES, maxmem_bytes)
 
 
-# ifdef __cplusplus
-}
-# endif
 #endif

@@ -15,9 +15,6 @@
 
 # ifndef OPENSSL_NO_CMP
 
-#  ifdef  __cplusplus
-extern "C"
-#  endif
 int ERR_load_CRMF_strings(void);
 
 /*

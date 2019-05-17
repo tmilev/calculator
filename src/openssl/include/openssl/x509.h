@@ -30,10 +30,6 @@
 # include "../../include/openssl/sha.h"
 # include "../../include/openssl/x509err.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 
 /* Flags for X509_get_signature_info() */
 /* Signature info is valid */
@@ -313,16 +309,8 @@ typedef struct SCRYPT_PARAMS_st {
 } SCRYPT_PARAMS;
 #endif
 
-#ifdef  __cplusplus
-}
-#endif
-
 # include "x509_vfy.h"
 # include "pkcs7.h"
-
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 # define X509_EXT_PACK_UNKNOWN   1
 # define X509_EXT_PACK_STRING    2
@@ -1040,7 +1028,4 @@ int X509_TRUST_get_flags(const X509_TRUST *xp);
 char *X509_TRUST_get0_name(const X509_TRUST *xp);
 int X509_TRUST_get_trust(const X509_TRUST *xp);
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

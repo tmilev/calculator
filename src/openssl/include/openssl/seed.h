@@ -41,10 +41,6 @@
 # include "e_os2.h"
 # include "crypto.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 /* look whether we need 'long' to get 32 bits */
 # ifdef AES_LONG
 #  ifndef SEED_LONG
@@ -88,9 +84,6 @@ void SEED_ofb128_encrypt(const unsigned char *in, unsigned char *out,
                          size_t len, const SEED_KEY_SCHEDULE *ks,
                          unsigned char ivec[SEED_BLOCK_SIZE], int *num);
 
-# ifdef  __cplusplus
-}
-# endif
 # endif
 
 #endif

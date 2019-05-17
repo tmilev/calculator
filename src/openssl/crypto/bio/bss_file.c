@@ -35,9 +35,9 @@
 
 # if !defined(OPENSSL_NO_STDIO)
 
-static int file_write(BIO *h, const char *buf, int num);
-static int file_read(BIO *h, char *buf, int size);
-static int file_puts(BIO *h, const char *str);
+static int file_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int file_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
+static int file_puts(BIO *h, const char *str, std::stringstream *commentsOnFailure);
 static int file_gets(BIO *h, char *str, int size);
 static long file_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int file_new(BIO *h);
@@ -137,7 +137,7 @@ static int file_free(BIO *a)
     return 1;
 }
 
-static int file_read(BIO *b, char *out, int outl)
+static int file_read(BIO *b, char *out, int outl, std::stringstream* commentsOnFailure)
 {
     int ret = 0;
 
@@ -157,7 +157,7 @@ static int file_read(BIO *b, char *out, int outl)
     return ret;
 }
 
-static int file_write(BIO *b, const char *in, int inl)
+static int file_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     int ret = 0;
 
@@ -355,12 +355,12 @@ static int file_gets(BIO *bp, char *buf, int size)
     return ret;
 }
 
-static int file_puts(BIO *bp, const char *str)
+static int file_puts(BIO *bp, const char *str, std::stringstream* commentsOnFailure)
 {
     int n, ret;
 
     n = strlen(str);
-    ret = file_write(bp, str, n);
+    ret = file_write(bp, str, n, commentsOnFailure);
     return ret;
 }
 

@@ -12,9 +12,9 @@
 #include "bio_lcl.h"
 #include "../../include/internal/cryptlib.h"
 
-static int buffer_write(BIO *h, const char *buf, int num);
+static int buffer_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
 static int buffer_read(BIO *h, char *buf, int size);
-static int buffer_puts(BIO *h, const char *str);
+static int buffer_puts(BIO *h, const char *str, std::stringstream *commentsOnFailure);
 static int buffer_gets(BIO *h, char *str, int size);
 static long buffer_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int buffer_new(BIO *h);
@@ -29,14 +29,14 @@ static const BIO_METHOD methods_buffer = {
     bwrite_conv,
     buffer_write,
     /* TODO: Convert to new style read function */
-    bread_conv,
-    buffer_read,
-    buffer_puts,
-    buffer_gets,
-    buffer_ctrl,
-    buffer_new,
-    buffer_free,
-    buffer_callback_ctrl,
+    //bread_conv,
+    //buffer_read,
+    //buffer_puts,
+    //buffer_gets,
+    //buffer_ctrl,
+    //buffer_new,
+    //buffer_free,
+    //buffer_callback_ctrl,
 };
 
 const BIO_METHOD *BIO_f_buffer(void)
@@ -157,7 +157,7 @@ static int buffer_read(BIO *b, char *out, int outl)
     goto start;
 }
 
-static int buffer_write(BIO *b, const char *in, int inl)
+static int buffer_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     int i, num = 0;
     BIO_F_BUFFER_CTX *ctx;
@@ -469,7 +469,7 @@ static int buffer_gets(BIO *b, char *buf, int size)
     }
 }
 
-static int buffer_puts(BIO *b, const char *str)
+static int buffer_puts(BIO *b, const char *str, std::stringstream* commentsOnFailure)
 {
-    return buffer_write(b, str, strlen(str));
+    return buffer_write(b, str, strlen(str), commentsOnFailure);
 }

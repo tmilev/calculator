@@ -13,9 +13,6 @@
 # include "../../include/openssl/opensslconf.h"
 
 # ifndef OPENSSL_NO_DSA
-# ifdef  __cplusplus
-extern "C" {
-# endif
 # include "../../include/openssl/e_os2.h"
 # include "../../include/openssl/asn1.h"
 # include "../../include/openssl/bio.h"
@@ -234,8 +231,5 @@ int (*DSA_meth_get_keygen(const DSA_METHOD *dsam)) (DSA *);
 int DSA_meth_set_keygen(DSA_METHOD *dsam, int (*keygen) (DSA *));
 
 
-#  ifdef  __cplusplus
-}
-#  endif
 # endif
 #endif

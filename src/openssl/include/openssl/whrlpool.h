@@ -15,9 +15,6 @@
 # ifndef OPENSSL_NO_WHIRLPOOL
 # include "../../include/openssl/e_os2.h"
 # include <stddef.h>
-# ifdef __cplusplus
-extern "C" {
-# endif
 
 # define WHIRLPOOL_DIGEST_LENGTH (512/8)
 # define WHIRLPOOL_BBLOCK        512
@@ -40,9 +37,6 @@ void WHIRLPOOL_BitUpdate(WHIRLPOOL_CTX *c, const void *inp, size_t bits);
 int WHIRLPOOL_Final(unsigned char *md, WHIRLPOOL_CTX *c);
 unsigned char *WHIRLPOOL(const void *inp, size_t bytes, unsigned char *md);
 
-# ifdef __cplusplus
-}
-# endif
 # endif
 
 #endif

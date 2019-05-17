@@ -24,9 +24,6 @@
 # include "../../include/openssl/dh.h"
 # include "../../include/openssl/tserr.h"
 # include "../../include/openssl/ess.h"
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 # include "x509.h"
 # include "x509v3.h"
@@ -488,8 +485,5 @@ int TS_CONF_set_ess_cert_id_chain(CONF *conf, const char *section,
 int TS_CONF_set_ess_cert_id_digest(CONF *conf, const char *section,
                                       TS_RESP_CTX *ctx);
 
-#  ifdef  __cplusplus
-}
-#  endif
 # endif
 #endif

@@ -19,9 +19,6 @@
 
 # ifndef OPENSSL_NO_ENGINE
 
-#  ifdef  __cplusplus
-extern "C"
-#  endif
 int ERR_load_ENGINE_strings(void);
 
 /*

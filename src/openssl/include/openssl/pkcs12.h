@@ -14,10 +14,6 @@
 # include "../../include/openssl/x509.h"
 # include "../../include/openssl/pkcs12err.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 # define PKCS12_KEY_ID   1
 # define PKCS12_IV_ID    2
 # define PKCS12_MAC_ID   3
@@ -217,7 +213,4 @@ PKCS12 *d2i_PKCS12_fp(FILE *fp, PKCS12 **p12);
 # endif
 int PKCS12_newpass(PKCS12 *p12, const char *oldpass, const char *newpass);
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

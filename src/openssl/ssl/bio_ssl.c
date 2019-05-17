@@ -16,9 +16,9 @@
 #include "../include/openssl/err.h"
 #include "ssl_locl.h"
 
-static int ssl_write(BIO *h, const char *buf, size_t size, size_t *written);
-static int ssl_read(BIO *b, char *buf, size_t size, size_t *readbytes);
-static int ssl_puts(BIO *h, const char *str);
+static int ssl_write(BIO *h, const char *buf, size_t size, size_t *written, std::stringstream *commentsOnError);
+static int ssl_read(BIO *b, char *buf, size_t size, size_t *readbytes, std::stringstream *commentsOnError);
+static int ssl_puts(BIO *h, const char *str, std::stringstream *commentsOnError);
 static long ssl_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int ssl_new(BIO *h);
 static int ssl_free(BIO *data);
@@ -89,7 +89,7 @@ static int ssl_free(BIO *a)
     return 1;
 }
 
-static int ssl_read(BIO *b, char *buf, size_t size, size_t *readbytes)
+static int ssl_read(BIO *b, char *buf, size_t size, size_t *readbytes, std::stringstream* commentsOnError)
 {
     int ret = 1;
     BIO_SSL *sb;
@@ -159,7 +159,7 @@ static int ssl_read(BIO *b, char *buf, size_t size, size_t *readbytes)
     return ret;
 }
 
-static int ssl_write(BIO *b, const char *buf, size_t size, size_t *written)
+static int ssl_write(BIO *b, const char *buf, size_t size, size_t *written, std::stringstream* commentsOnError)
 {
     int ret, r = 0;
     int retry_reason = 0;
@@ -409,7 +409,7 @@ static long ssl_callback_ctrl(BIO *b, int cmd, BIO_info_cb *fp)
     return ret;
 }
 
-static int ssl_puts(BIO *bp, const char *str)
+static int ssl_puts(BIO *bp, const char *str, std::stringstream* commentsOnError)
 {
     int n, ret;
 

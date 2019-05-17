@@ -15,9 +15,6 @@
 # ifndef OPENSSL_NO_COMP
 # include "../../include/openssl/crypto.h"
 # include "../../include/openssl/comperr.h"
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 
 
@@ -46,8 +43,5 @@ const BIO_METHOD *BIO_f_zlib(void);
 # endif
 
 
-#  ifdef  __cplusplus
-}
-#  endif
 # endif
 #endif

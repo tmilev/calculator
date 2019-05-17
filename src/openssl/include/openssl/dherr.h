@@ -19,9 +19,6 @@
 
 # ifndef OPENSSL_NO_DH
 
-#  ifdef  __cplusplus
-extern "C"
-#  endif
 int ERR_load_DH_strings(void);
 
 /*

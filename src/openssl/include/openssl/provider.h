@@ -12,9 +12,6 @@
 
 # include "../../include/openssl/core.h"
 
-# ifdef __cplusplus
-extern "C" {
-# endif
 
 /* Load and unload a provider */
 OSSL_PROVIDER *OSSL_PROVIDER_load(OPENSSL_CTX *, const char *name);
@@ -27,8 +24,5 @@ int OSSL_PROVIDER_get_params(OSSL_PROVIDER *prov, const OSSL_PARAM params[]);
 int OSSL_PROVIDER_add_builtin(OPENSSL_CTX *, const char *name,
                               OSSL_provider_init_fn *init_fn);
 
-# ifdef __cplusplus
-}
-# endif
 
 #endif

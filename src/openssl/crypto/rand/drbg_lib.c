@@ -767,7 +767,7 @@ int RAND_DRBG_bytes(RAND_DRBG *drbg, unsigned char *out, size_t outlen)
         chunk = outlen;
         if (chunk > drbg->max_request)
             chunk = drbg->max_request;
-        ret = RAND_DRBG_generate(drbg, out, chunk, 0, additional, additional_len);
+        ret = RAND_DRBG_generate(drbg, out, chunk, 0, additional, additional_len, 0);
         if (!ret)
             goto err;
     }
@@ -995,11 +995,12 @@ err:
     return NULL;
 }
 
+#include <iostream>
 /*
  * Initialize the global DRBGs on first use.
  * Returns 1 on success, 0 on failure.
  */
-DEFINE_RUN_ONCE_STATIC(do_rand_drbg_init, std::stringstream* commentsOnError)
+DEFINE_RUN_ONCE_STATIC(do_rand_drbg_init)
 {
     /*
      * ensure that libcrypto is initialized, otherwise the
@@ -1014,7 +1015,7 @@ DEFINE_RUN_ONCE_STATIC(do_rand_drbg_init, std::stringstream* commentsOnError)
     if (!CRYPTO_THREAD_init_local(&public_drbg, NULL))
         goto err1;
 
-    master_drbg = drbg_setup(NULL, RAND_DRBG_TYPE_MASTER);
+    master_drbg = drbg_setup(NULL, RAND_DRBG_TYPE_MASTER, (std::stringstream*) commentsOnError);
     if (master_drbg == NULL)
         goto err2;
 
@@ -1053,10 +1054,10 @@ void drbg_delete_thread_state(void)
 }
 
 /* Implements the default OpenSSL RAND_bytes() method */
-static int drbg_bytes(unsigned char *out, int count)
+static int drbg_bytes(unsigned char *out, int count, std::stringstream* commentsOnError)
 {
     int ret;
-    RAND_DRBG *drbg = RAND_DRBG_get0_public();
+    RAND_DRBG *drbg = RAND_DRBG_get0_public(commentsOnError);
 
     if (drbg == NULL)
         return 0;
@@ -1103,7 +1104,7 @@ size_t rand_drbg_seedlen(RAND_DRBG *drbg)
 }
 
 /* Implements the default OpenSSL RAND_add() method */
-static int drbg_add(const void *buf, int num, double randomness)
+static int drbg_add(const void *buf, int num, double randomness, std::stringstream* commentsOnError)
 {
     int ret = 0;
     RAND_DRBG *drbg = RAND_DRBG_get0_master();
@@ -1158,20 +1159,20 @@ static int drbg_add(const void *buf, int num, double randomness)
         randomness = (double)seedlen;
     }
 
-    ret =  rand_drbg_restart(drbg, (unsigned char*) buf, buflen, (size_t)(8 * randomness));
+    ret =  rand_drbg_restart(drbg, (unsigned char*) buf, buflen, (size_t)(8 * randomness), commentsOnError);
     rand_drbg_unlock(drbg);
 
     return ret;
 }
 
 /* Implements the default OpenSSL RAND_seed() method */
-static int drbg_seed(const void *buf, int num)
+static int drbg_seed(const void *buf, int num, std::stringstream* commentsOnError)
 {
-    return drbg_add(buf, num, num);
+    return drbg_add(buf, num, num, commentsOnError);
 }
 
 /* Implements the default OpenSSL RAND_status() method */
-static int drbg_status(void)
+static int drbg_status(std::stringstream* commentsOnError)
 {
     int ret;
     RAND_DRBG *drbg = RAND_DRBG_get0_master();
@@ -1202,7 +1203,7 @@ RAND_DRBG *RAND_DRBG_get0_master(void)
  * Get the public DRBG.
  * Returns pointer to the DRBG on success, NULL on failure.
  */
-RAND_DRBG *RAND_DRBG_get0_public(void)
+RAND_DRBG *RAND_DRBG_get0_public(std::stringstream* commentsOnFailure)
 {
     RAND_DRBG *drbg;
 
@@ -1213,7 +1214,7 @@ RAND_DRBG *RAND_DRBG_get0_public(void)
     if (drbg == NULL) {
         if (!ossl_init_thread_start(OPENSSL_INIT_THREAD_RAND))
             return NULL;
-        drbg = drbg_setup(master_drbg, RAND_DRBG_TYPE_PUBLIC);
+        drbg = drbg_setup(master_drbg, RAND_DRBG_TYPE_PUBLIC, commentsOnFailure);
         CRYPTO_THREAD_set_local(&public_drbg, drbg);
     }
     return drbg;
@@ -1223,7 +1224,7 @@ RAND_DRBG *RAND_DRBG_get0_public(void)
  * Get the private DRBG.
  * Returns pointer to the DRBG on success, NULL on failure.
  */
-RAND_DRBG *RAND_DRBG_get0_private(void)
+RAND_DRBG *RAND_DRBG_get0_private(std::stringstream* commentsOnFailure)
 {
     RAND_DRBG *drbg;
 
@@ -1234,7 +1235,7 @@ RAND_DRBG *RAND_DRBG_get0_private(void)
     if (drbg == NULL) {
         if (!ossl_init_thread_start(OPENSSL_INIT_THREAD_RAND))
             return NULL;
-        drbg = drbg_setup(master_drbg, RAND_DRBG_TYPE_PRIVATE);
+        drbg = drbg_setup(master_drbg, RAND_DRBG_TYPE_PRIVATE, commentsOnFailure);
         CRYPTO_THREAD_set_local(&private_drbg, drbg);
     }
     return drbg;

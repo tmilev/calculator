@@ -13,10 +13,6 @@
 # include <stddef.h>
 # include "../../include/openssl/ossl_typ.h"
 
-# ifdef __cplusplus
-extern "C" {
-# endif
-
 /*-
  * Base types
  * ----------
@@ -168,10 +164,6 @@ typedef int (OSSL_provider_init_fn)(const OSSL_PROVIDER *provider,
 extern OSSL_provider_init_fn OSSL_provider_init;
 # ifdef __VMS
 #  pragma names restore
-# endif
-
-# ifdef __cplusplus
-}
 # endif
 
 #endif

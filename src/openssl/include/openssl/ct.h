@@ -17,9 +17,6 @@
 # include "safestack.h"
 # include "x509.h"
 # include "cterr.h"
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 
 /* Minimum RSA key size, from RFC6962 */
@@ -469,8 +466,5 @@ __owur int CTLOG_STORE_load_file(CTLOG_STORE *store, const char *file);
  */
 __owur int CTLOG_STORE_load_default_file(CTLOG_STORE *store);
 
-#  ifdef  __cplusplus
-}
-#  endif
 # endif
 #endif

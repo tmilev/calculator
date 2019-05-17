@@ -14,9 +14,9 @@
 #include "../../include/openssl/evp.h"
 #include "../../include/internal/bio.h"
 
-static int b64_write(BIO *h, const char *buf, int num);
-static int b64_read(BIO *h, char *buf, int size);
-static int b64_puts(BIO *h, const char *str);
+static int b64_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int b64_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
+static int b64_puts(BIO *h, const char *str, std::stringstream *commentsOnFailure);
 static long b64_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int b64_new(BIO *h);
 static int b64_free(BIO *data);
@@ -107,7 +107,7 @@ static int b64_free(BIO *a)
     return 1;
 }
 
-static int b64_read(BIO *b, char *out, int outl)
+static int b64_read(BIO *b, char *out, int outl, std::stringstream* commentsOnFailure)
 {
     int ret = 0, i, ii, j, k, x, n, num, ret_code = 0;
     BIO_B64_CTX *ctx;
@@ -325,7 +325,7 @@ static int b64_read(BIO *b, char *out, int outl)
     return ((ret == 0) ? ret_code : ret);
 }
 
-static int b64_write(BIO *b, const char *in, int inl)
+static int b64_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     int ret = 0;
     int n;
@@ -489,7 +489,7 @@ static long b64_ctrl(BIO *b, int cmd, long num, void *ptr)
         /* do a final write */
  again:
         while (ctx->buf_len != ctx->buf_off) {
-            i = b64_write(b, NULL, 0);
+            i = b64_write(b, NULL, 0, 0);
             if (i < 0)
                 return i;
         }
@@ -547,7 +547,7 @@ static long b64_callback_ctrl(BIO *b, int cmd, BIO_info_cb *fp)
     return ret;
 }
 
-static int b64_puts(BIO *b, const char *str)
+static int b64_puts(BIO *b, const char *str, std::stringstream* commentsOnFailure)
 {
-    return b64_write(b, str, strlen(str));
+    return b64_write(b, str, strlen(str), commentsOnFailure);
 }

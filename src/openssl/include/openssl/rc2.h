@@ -13,9 +13,6 @@
 # include "opensslconf.h"
 
 # ifndef OPENSSL_NO_RC2
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 typedef unsigned int RC2_INT;
 
@@ -43,9 +40,6 @@ void RC2_ofb64_encrypt(const unsigned char *in, unsigned char *out,
                        long length, RC2_KEY *schedule, unsigned char *ivec,
                        int *num);
 
-# ifdef  __cplusplus
-}
-# endif
 # endif
 
 #endif

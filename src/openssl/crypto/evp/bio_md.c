@@ -20,8 +20,8 @@
  * BIO_put and BIO_get both add to the digest, BIO_gets returns the digest
  */
 
-static int md_write(BIO *h, char const *buf, int num);
-static int md_read(BIO *h, char *buf, int size);
+static int md_write(BIO *h, char const *buf, int num, std::stringstream *commentsOnFailure);
+static int md_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
 static int md_gets(BIO *h, char *str, int size);
 static long md_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int md_new(BIO *h);
@@ -75,7 +75,7 @@ static int md_free(BIO *a)
     return 1;
 }
 
-static int md_read(BIO *b, char *out, int outl)
+static int md_read(BIO *b, char *out, int outl, std::stringstream* commentsOnFailure)
 {
     int ret = 0;
     EVP_MD_CTX *ctx;
@@ -103,7 +103,7 @@ static int md_read(BIO *b, char *out, int outl)
     return ret;
 }
 
-static int md_write(BIO *b, const char *in, int inl)
+static int md_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     int ret = 0;
     EVP_MD_CTX *ctx;

@@ -14,9 +14,6 @@
 # include "../../include/openssl/core.h"
 # include "../../include/openssl/bn.h"
 
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 # define OSSL_PARAM_END \
     { NULL, 0, NULL, 0, NULL }
@@ -181,7 +178,4 @@ int OSSL_PARAM_get_octet_ptr(const OSSL_PARAM *p, const void **val,
 int OSSL_PARAM_set_octet_ptr(const OSSL_PARAM *p, const void *val,
                              size_t used_len);
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

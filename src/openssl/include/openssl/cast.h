@@ -13,9 +13,6 @@
 # include "../../include/openssl/opensslconf.h"
 
 # ifndef OPENSSL_NO_CAST
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 # define CAST_ENCRYPT    1
 # define CAST_DECRYPT    0
@@ -45,9 +42,6 @@ void CAST_ofb64_encrypt(const unsigned char *in, unsigned char *out,
                         long length, const CAST_KEY *schedule,
                         unsigned char *ivec, int *num);
 
-# ifdef  __cplusplus
-}
-# endif
 # endif
 
 #endif

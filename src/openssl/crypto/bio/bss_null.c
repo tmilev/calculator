@@ -12,9 +12,9 @@
 #include "bio_lcl.h"
 #include "../../include/internal/cryptlib.h"
 
-static int null_write(BIO *h, const char *buf, int num);
-static int null_read(BIO *h, char *buf, int size);
-static int null_puts(BIO *h, const char *str);
+static int null_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int null_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
+static int null_puts(BIO *h, const char *str, std::stringstream *commentsOnFailure);
 static int null_gets(BIO *h, char *str, int size);
 static long null_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static const BIO_METHOD null_method = {
@@ -39,12 +39,12 @@ const BIO_METHOD *BIO_s_null(void)
     return &null_method;
 }
 
-static int null_read(BIO *b, char *out, int outl)
+static int null_read(BIO *b, char *out, int outl, std::stringstream* commentsOnFailure)
 {
     return 0;
 }
 
-static int null_write(BIO *b, const char *in, int inl)
+static int null_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     return inl;
 }
@@ -79,7 +79,7 @@ static int null_gets(BIO *bp, char *buf, int size)
     return 0;
 }
 
-static int null_puts(BIO *bp, const char *str)
+static int null_puts(BIO *bp, const char *str, std::stringstream* commentsOnFailure)
 {
     if (str == NULL)
         return 0;

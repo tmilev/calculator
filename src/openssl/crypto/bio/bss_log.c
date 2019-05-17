@@ -75,8 +75,8 @@ void *_malloc32(__size_t);
 #  define LOG_DAEMON      OPC$M_NM_NTWORK
 # endif
 
-static int slg_write(BIO *h, const char *buf, int num);
-static int slg_puts(BIO *h, const char *str);
+static int slg_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int slg_puts(BIO *h, const char *str, std::stringstream *commentsOnFailure);
 static long slg_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int slg_new(BIO *h);
 static int slg_free(BIO *data);
@@ -122,7 +122,7 @@ static int slg_free(BIO *a)
     return 1;
 }
 
-static int slg_write(BIO *b, const char *in, int inl)
+static int slg_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     int ret = inl;
     char *buf;
@@ -228,12 +228,12 @@ static long slg_ctrl(BIO *b, int cmd, long num, void *ptr)
     return 0;
 }
 
-static int slg_puts(BIO *bp, const char *str)
+static int slg_puts(BIO *bp, const char *str, std::stringstream* commentsOnFailure)
 {
     int n, ret;
 
     n = strlen(str);
-    ret = slg_write(bp, str, n);
+    ret = slg_write(bp, str, n, commentsOnFailure);
     return ret;
 }
 

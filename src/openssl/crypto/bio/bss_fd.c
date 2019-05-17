@@ -48,9 +48,9 @@ const BIO_METHOD *BIO_s_fd(void)
  * file descriptors can only be provided by application. Therefore
  * "UPLINK" calls are due...
  */
-static int fd_write(BIO *h, const char *buf, int num);
-static int fd_read(BIO *h, char *buf, int size);
-static int fd_puts(BIO *h, const char *str);
+static int fd_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int fd_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
+static int fd_puts(BIO *h, const char *str, std::stringstream *commentsOnFailure);
 static int fd_gets(BIO *h, char *buf, int size);
 static long fd_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int fd_new(BIO *h);
@@ -112,7 +112,7 @@ static int fd_free(BIO *a)
     return 1;
 }
 
-static int fd_read(BIO *b, char *out, int outl)
+static int fd_read(BIO *b, char *out, int outl, std::stringstream* commentsOnFailure)
 {
     int ret = 0;
 
@@ -128,7 +128,7 @@ static int fd_read(BIO *b, char *out, int outl)
     return ret;
 }
 
-static int fd_write(BIO *b, const char *in, int inl)
+static int fd_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     int ret;
     clear_sys_error();
@@ -193,12 +193,12 @@ static long fd_ctrl(BIO *b, int cmd, long num, void *ptr)
     return ret;
 }
 
-static int fd_puts(BIO *bp, const char *str)
+static int fd_puts(BIO *bp, const char *str, std::stringstream* commentsOnFailure)
 {
     int n, ret;
 
     n = strlen(str);
-    ret = fd_write(bp, str, n);
+    ret = fd_write(bp, str, n, commentsOnFailure);
     return ret;
 }
 
@@ -208,7 +208,7 @@ static int fd_gets(BIO *bp, char *buf, int size)
     char *ptr = buf;
     char *end = buf + size - 1;
 
-    while (ptr < end && fd_read(bp, ptr, 1) > 0) {
+    while (ptr < end && fd_read(bp, ptr, 1, 0) > 0) {
         if (*ptr++ == '\n')
            break;
     }

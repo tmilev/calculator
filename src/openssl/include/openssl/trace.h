@@ -14,10 +14,6 @@
 
 # include "bio.h"
 
-# ifdef  __cplusplus
-extern "C" {
-# endif
-
 /*
  * TRACE CATEGORIES
  */
@@ -287,9 +283,5 @@ void OSSL_trace_end(int category, BIO *channel);
     OSSL_TRACEV(category, (trc_out, format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
 # define OSSL_TRACE9(category, format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) \
     OSSL_TRACEV(category, (trc_out, format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9))
-
-# ifdef  __cplusplus
-}
-# endif
 
 #endif

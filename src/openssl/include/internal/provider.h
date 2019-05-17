@@ -14,10 +14,6 @@
 # include "../../include/internal/dso.h"
 # include "../../include/internal/symhacks.h"
 
-# ifdef __cplusplus
-extern "C" {
-# endif
-
 /*
  * namespaces:
  *
@@ -68,9 +64,5 @@ const OSSL_ALGORITHM *ossl_provider_query_operation(const OSSL_PROVIDER *prov,
 
 /* Configuration */
 void ossl_provider_add_conf_module(void);
-
-# ifdef __cplusplus
-}
-# endif
 
 #endif

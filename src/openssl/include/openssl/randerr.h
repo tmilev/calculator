@@ -15,9 +15,6 @@
 #  include "symhacks.h"
 # endif
 
-# ifdef  __cplusplus
-extern "C"
-# endif
 int ERR_load_RAND_strings(void);
 
 /*

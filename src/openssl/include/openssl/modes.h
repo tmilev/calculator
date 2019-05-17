@@ -13,9 +13,6 @@
 # include <stddef.h>
 # include "ossl_typ.h"
 
-# ifdef  __cplusplus
-extern "C" {
-# endif
 typedef void (*block128_f) (const unsigned char in[16],
                             unsigned char out[16], const void *key);
 
@@ -227,9 +224,5 @@ int CRYPTO_siv128_cleanup(SIV128_CONTEXT *ctx);
 int CRYPTO_siv128_speed(SIV128_CONTEXT *ctx, int arg);
 
 # endif                          /* OPENSSL_NO_SIV */
-
-# ifdef  __cplusplus
-}
-# endif
 
 #endif

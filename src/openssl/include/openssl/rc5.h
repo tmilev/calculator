@@ -13,9 +13,6 @@
 # include "../../include/openssl/opensslconf.h"
 
 # ifndef OPENSSL_NO_RC5
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 # define RC5_ENCRYPT     1
 # define RC5_DECRYPT     0
@@ -55,9 +52,6 @@ void RC5_32_ofb64_encrypt(const unsigned char *in, unsigned char *out,
                           long length, RC5_32_KEY *schedule,
                           unsigned char *ivec, int *num);
 
-# ifdef  __cplusplus
-}
-# endif
 # endif
 
 #endif

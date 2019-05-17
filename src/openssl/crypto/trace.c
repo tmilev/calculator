@@ -35,8 +35,8 @@ static const BIO  *current_channel = NULL;
  * callback function.
  */
 static int trace_write(BIO *b, const char *buf,
-                               size_t num, size_t *written);
-static int trace_puts(BIO *b, const char *str);
+                               size_t num, size_t *written, std::stringstream *commentsOnError);
+static int trace_puts(BIO *b, const char *str, std::stringstream *commentsOnError);
 static long trace_ctrl(BIO *channel, int cmd, long argl, void *argp);
 static int trace_free(BIO *b);
 
@@ -62,7 +62,7 @@ struct trace_data_st {
 };
 
 static int trace_write(BIO *channel,
-                       const char *buf, size_t num, size_t *written)
+                       const char *buf, size_t num, size_t *written, std::stringstream* commentsOnError)
 {
     struct trace_data_st *ctx = (trace_data_st *) BIO_get_data(channel);
     size_t cnt = ctx->callback(buf, num, ctx->category, OSSL_TRACE_CTRL_WRITE,
@@ -72,11 +72,11 @@ static int trace_write(BIO *channel,
     return cnt != 0;
 }
 
-static int trace_puts(BIO *channel, const char *str)
+static int trace_puts(BIO *channel, const char *str, std::stringstream* commentsOnError)
 {
     size_t written;
 
-    if (trace_write(channel, str, strlen(str), &written))
+    if (trace_write(channel, str, strlen(str), &written, commentsOnError))
         return (int)written;
 
     return EOF;

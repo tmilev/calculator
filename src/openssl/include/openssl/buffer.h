@@ -17,10 +17,6 @@
 # include "../openssl/buffererr.h"
 
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 # include <stddef.h>
 # include <sys/types.h>
 
@@ -52,7 +48,4 @@ size_t BUF_MEM_grow_clean(BUF_MEM *str, size_t len);
 void BUF_reverse(unsigned char *out, const unsigned char *in, size_t siz);
 
 
-# ifdef  __cplusplus
-}
-# endif
 #endif

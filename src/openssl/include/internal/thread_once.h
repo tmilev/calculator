@@ -24,13 +24,13 @@
  * }
  */
 #define DEFINE_RUN_ONCE(init)                   \
-    static int init(void);                     \
+    static int init(void*);                     \
     int init##_ossl_ret_ = 0;                   \
-    void init##_ossl_(void)                     \
+    void init##_ossl_(void* input)                     \
     {                                           \
-        init##_ossl_ret_ = init();              \
+        init##_ossl_ret_ = init(input);              \
     }                                           \
-    static int init(void)
+    static int init(void*)
 
 /*
  * DECLARE_RUN_ONCE: Declare an initialiser function that should be run exactly
@@ -38,7 +38,7 @@
  */
 #define DECLARE_RUN_ONCE(init)                  \
     extern int init##_ossl_ret_;                \
-    void init##_ossl_(void);
+    void init##_ossl_(void*);
 
 /*
  * DEFINE_RUN_ONCE_STATIC: Define an initialiser function that should be run
@@ -56,13 +56,13 @@
  * }
  */
 #define DEFINE_RUN_ONCE_STATIC(init)            \
-    static int init(std::stringstream* commentsOnError);                     \
+    static int init(void* commentsOnError);                     \
     static int init##_ossl_ret_ = 0;            \
-    static void init##_ossl_(std::stringstream* commentsOnError)              \
+    static void init##_ossl_(void* commentsOnError)              \
     {                                           \
         init##_ossl_ret_ = init(commentsOnError);              \
     }                                           \
-    static int init(void*, std::stringstream* commentsOnError)
+    static int init(void* commentsOnError)
 
 /*
  * DEFINE_RUN_ONCE_STATIC_ALT: Define an alternative initialiser function. This
@@ -97,12 +97,12 @@
  * }
  */
 #define DEFINE_RUN_ONCE_STATIC_ALT(initalt, init) \
-    static int initalt(void);                     \
-    static void initalt##_ossl_(void)             \
+    static int initalt(void*);                     \
+    static void initalt##_ossl_(void* input)             \
     {                                             \
-        init##_ossl_ret_ = initalt();             \
+        init##_ossl_ret_ = initalt(input);             \
     }                                             \
-    static int initalt(void)
+    static int initalt(void*)
 
 /*
  * RUN_ONCE - use CRYPTO_THREAD_run_once, and check if the init succeeded

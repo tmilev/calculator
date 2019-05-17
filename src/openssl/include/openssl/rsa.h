@@ -19,9 +19,6 @@
 # include "../../include/openssl/ossl_typ.h"
 # include "../../include/openssl/bn.h"
 # include "../../include/openssl/rsaerr.h"
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 /* The types RSA and RSA_METHOD are defined in ossl_typ.h */
 
@@ -504,8 +501,5 @@ int RSA_meth_set_multi_prime_keygen(RSA_METHOD *meth,
                                                    int primes, BIGNUM *e,
                                                    BN_GENCB *cb));
 
-#  ifdef  __cplusplus
-}
-#  endif
 # endif
 #endif

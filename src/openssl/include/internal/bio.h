@@ -11,15 +11,16 @@
 # define HEADER_INTERNAL_BIO_H
 
 #include "../../include/openssl/bio.h"
+#include <iostream>
 
 struct bio_method_st {
     int type;
     char *name;
-    int (*bwrite) (BIO *, const char *, size_t, size_t *);
-    int (*bwrite_old) (BIO *, const char *, int);
-    int (*bread) (BIO *, char *, size_t, size_t *);
-    int (*bread_old) (BIO *, char *, int);
-    int (*bputs) (BIO *, const char *);
+    int (*bwrite) (BIO *, const char *, size_t, size_t *, std::stringstream* commentsOnFailure);
+    int (*bwrite_old) (BIO *, const char *, int, std::stringstream* commentsOnFailure);
+    int (*bread) (BIO *, char *, size_t, size_t *, std::stringstream* commentsOnFailure);
+    int (*bread_old) (BIO *, char *, int, std::stringstream* commentsOnFailure);
+    int (*bputs) (BIO *, const char *, std::stringstream* commentsOnFailure);
     int (*bgets) (BIO *, char *, int);
     long (*ctrl) (BIO *, int, long, void *);
     int (*create) (BIO *);
@@ -32,8 +33,8 @@ void bio_cleanup(void);
 
 
 /* Old style to new style BIO_METHOD conversion functions */
-int bwrite_conv(BIO *bio, const char *data, size_t datal, size_t *written);
-int bread_conv(BIO *bio, char *data, size_t datal, size_t *read);
+int bwrite_conv(BIO *bio, const char *data, size_t datal, size_t *written, std::stringstream *commentsOnFailure);
+int bread_conv(BIO *bio, char *data, size_t datal, size_t *read, std::stringstream *commentsOnFailure);
 
 /* Changes to these internal BIOs must also update include/openssl/bio.h */
 # define BIO_CTRL_SET_KTLS                      72

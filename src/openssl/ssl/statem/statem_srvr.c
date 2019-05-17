@@ -3030,7 +3030,7 @@ static int tls_process_cke_rsa(SSL *s, PACKET *pkt)
      */
 
     if (RAND_priv_bytes(rand_premaster_secret,
-                      sizeof(rand_premaster_secret)) <= 0) {
+                      sizeof(rand_premaster_secret), 0) <= 0) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PROCESS_CKE_RSA,
                  ERR_R_INTERNAL_ERROR);
         goto err;

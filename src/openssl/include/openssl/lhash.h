@@ -17,10 +17,6 @@
 # include "e_os2.h"
 # include "bio.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 typedef struct lhash_node_st OPENSSL_LH_NODE;
 typedef int (*OPENSSL_LH_COMPFUNC) (const void *, const void *);
 typedef unsigned long (*OPENSSL_LH_HASHFUNC) (const void *);
@@ -239,9 +235,5 @@ DEFINE_LHASH_OF(OPENSSL_CSTRING);
 #  pragma weak OPENSSL_LH_doall
 #  pragma weak OPENSSL_LH_doall_arg
 # endif /* __SUNPRO_C */
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif

@@ -17,10 +17,6 @@
 # include "../../include/openssl/ossl_typ.h"
 # include "../../include/openssl/conferr.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 typedef struct {
     char *section;
     char *name;
@@ -161,8 +157,4 @@ int CONF_parse_list(const char *list, int sep, int nospc,
 
 void OPENSSL_load_builtin_modules(void);
 
-
-# ifdef  __cplusplus
-}
-# endif
 #endif

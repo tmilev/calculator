@@ -28,9 +28,6 @@
 # include "symhacks.h"
 # include "x509.h"
 # include "engineerr.h"
-# ifdef  __cplusplus
-extern "C" {
-# endif
 
 /*
  * These flags are used to control combinations of algorithm (methods) by
@@ -727,8 +724,5 @@ DEPRECATEDIN_1_1_0(void ENGINE_setup_bsd_cryptodev(void))
 # endif
 
 
-#  ifdef  __cplusplus
-}
-#  endif
 # endif
 #endif

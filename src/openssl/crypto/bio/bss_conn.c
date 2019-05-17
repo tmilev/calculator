@@ -35,9 +35,9 @@ typedef struct bio_connect_st {
     BIO_info_cb *info_callback;
 } BIO_CONNECT;
 
-static int conn_write(BIO *h, const char *buf, int num);
-static int conn_read(BIO *h, char *buf, int size);
-static int conn_puts(BIO *h, const char *str);
+static int conn_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int conn_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
+static int conn_puts(BIO *h, const char *str, std::stringstream *commentsOnFailure);
 static long conn_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int conn_new(BIO *h);
 static int conn_free(BIO *data);
@@ -290,7 +290,7 @@ static int conn_free(BIO *a)
     return 1;
 }
 
-static int conn_read(BIO *b, char *out, int outl)
+static int conn_read(BIO *b, char *out, int outl, std::stringstream* commentsOnFailure)
 {
     int ret = 0;
     BIO_CONNECT *data;
@@ -314,7 +314,7 @@ static int conn_read(BIO *b, char *out, int outl)
     return ret;
 }
 
-static int conn_write(BIO *b, const char *in, int inl)
+static int conn_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     int ret;
     BIO_CONNECT *data;
@@ -515,12 +515,12 @@ static long conn_callback_ctrl(BIO *b, int cmd, BIO_info_cb *fp)
     return ret;
 }
 
-static int conn_puts(BIO *bp, const char *str)
+static int conn_puts(BIO *bp, const char *str, std::stringstream* commentsOnFailure)
 {
     int n, ret;
 
     n = strlen(str);
-    ret = conn_write(bp, str, n);
+    ret = conn_write(bp, str, n, commentsOnFailure);
     return ret;
 }
 

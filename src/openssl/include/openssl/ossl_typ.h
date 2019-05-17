@@ -12,10 +12,6 @@
 
 #include <limits.h>
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 # include "../../include/openssl/e_os2.h"
 
 typedef struct ossl_provider_st OSSL_PROVIDER; /* Provider Object */
@@ -203,7 +199,4 @@ typedef long ossl_intmax_t;
 typedef unsigned long ossl_uintmax_t;
 #endif
 
-#ifdef  __cplusplus
-}
-#endif
 #endif                          /* def HEADER_OPENSSL_TYPES_H */

@@ -59,9 +59,9 @@ typedef struct BIO_ASN1_BUF_CTX_t {
     void *ex_arg;
 } BIO_ASN1_BUF_CTX;
 
-static int asn1_bio_write(BIO *h, const char *buf, int num);
-static int asn1_bio_read(BIO *h, char *buf, int size);
-static int asn1_bio_puts(BIO *h, const char *str);
+static int asn1_bio_write(BIO *h, const char *buf, int num, std::stringstream *commentsOnFailure);
+static int asn1_bio_read(BIO *h, char *buf, int size, std::stringstream *commentsOnFailure);
+static int asn1_bio_puts(BIO *h, const char *str, std::stringstream *commentsOnFailure);
 static int asn1_bio_gets(BIO *h, char *str, int size);
 static long asn1_bio_ctrl(BIO *h, int cmd, long arg1, void *arg2);
 static int asn1_bio_new(BIO *h);
@@ -83,14 +83,14 @@ static const BIO_METHOD methods_asn1 = {
     bwrite_conv,
     asn1_bio_write,
     /* TODO: Convert to new style read function */
-    bread_conv,
-    asn1_bio_read,
-    asn1_bio_puts,
-    asn1_bio_gets,
-    asn1_bio_ctrl,
-    asn1_bio_new,
-    asn1_bio_free,
-    asn1_bio_callback_ctrl,
+//    bread_conv,
+//    asn1_bio_read,
+//    asn1_bio_puts,
+//    asn1_bio_gets,
+//    asn1_bio_ctrl,
+//    asn1_bio_new,
+//    asn1_bio_free,
+//    asn1_bio_callback_ctrl,
 };
 
 const BIO_METHOD *BIO_f_asn1(void)
@@ -146,7 +146,7 @@ static int asn1_bio_free(BIO *b)
     return 1;
 }
 
-static int asn1_bio_write(BIO *b, const char *in, int inl)
+static int asn1_bio_write(BIO *b, const char *in, int inl, std::stringstream* commentsOnFailure)
 {
     BIO_ASN1_BUF_CTX *ctx;
     int wrmax, wrlen, ret;
@@ -287,7 +287,7 @@ static int asn1_bio_setup_ex(BIO *b, BIO_ASN1_BUF_CTX *ctx,
     return 1;
 }
 
-static int asn1_bio_read(BIO *b, char *in, int inl)
+static int asn1_bio_read(BIO *b, char *in, int inl, std::stringstream* commentsOnFailure)
 {
     BIO *next = BIO_next(b);
     if (next == NULL)
@@ -295,9 +295,9 @@ static int asn1_bio_read(BIO *b, char *in, int inl)
     return BIO_read(next, in, inl);
 }
 
-static int asn1_bio_puts(BIO *b, const char *str)
+static int asn1_bio_puts(BIO *b, const char *str, std::stringstream* commentsOnFailure)
 {
-    return asn1_bio_write(b, str, strlen(str));
+    return asn1_bio_write(b, str, strlen(str), commentsOnFailure);
 }
 
 static int asn1_bio_gets(BIO *b, char *str, int size)

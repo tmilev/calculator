@@ -47,9 +47,6 @@
 #  include "safestack.h"
 #  include "ocsperr.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 /* Various flags and values */
 
@@ -345,8 +342,5 @@ int OCSP_basic_verify(OCSP_BASICRESP *bs, STACK_OF(X509) *certs,
                       X509_STORE *st, unsigned long flags);
 
 
-#  ifdef  __cplusplus
-}
-#  endif
 # endif
 #endif

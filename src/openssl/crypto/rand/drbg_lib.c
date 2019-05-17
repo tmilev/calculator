@@ -415,8 +415,11 @@ int RAND_DRBG_instantiate(
     if (drbg->get_entropy != NULL)
         entropylen = drbg->get_entropy(drbg, &entropy, min_entropy,
                                        min_entropylen, max_entropylen, 0);
-    if (entropylen < min_entropylen
-            || entropylen > max_entropylen) {
+    if (entropylen < min_entropylen || entropylen > max_entropylen) {
+        if (commentsOnError != 0) {
+          *commentsOnError << "Failed to get entropy: entropylen equals: " << entropylen << ". ";
+        }
+        std::cout << "DEBUG: failed to get entropy: entropylen equals: " << entropylen << ". ";
         RANDerr(RAND_F_RAND_DRBG_INSTANTIATE, RAND_R_ERROR_RETRIEVING_ENTROPY);
         goto end;
     }

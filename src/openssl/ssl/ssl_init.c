@@ -158,8 +158,8 @@ static void ssl_library_stop(void)
     }
 }
 
-void SSL_load_error_strings() {
-   OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
+int SSL_load_error_strings(std::stringstream* commentsOnError) {
+   return OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL, commentsOnError);
 }
 
 /*
@@ -167,7 +167,8 @@ void SSL_load_error_strings() {
  * called prior to any threads making calls to any OpenSSL functions,
  * i.e. passing a non-null settings value is assumed to be single-threaded.
  */
-int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS * settings) {
+#include <sstream>
+int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS * settings, std::stringstream *commentsOnError) {
     static int stoperrset = 0;
 
     if (stopped) {
@@ -180,6 +181,7 @@ int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS * settings) {
             stoperrset = 1;
             SSLerr(SSL_F_OPENSSL_INIT_SSL, ERR_R_INIT_FAIL);
         }
+        *commentsOnError << "Failed to initialize: stopped flag is set. ";
         return 0;
     }
 

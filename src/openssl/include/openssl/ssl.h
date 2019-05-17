@@ -1590,7 +1590,7 @@ __owur int SSL_add_file_cert_subjects_to_stack(STACK_OF(X509_NAME) *stackCAs,
 int SSL_add_dir_cert_subjects_to_stack(STACK_OF(X509_NAME) *stackCAs,
                                        const char *dir);
 
-void SSL_load_error_strings();
+int SSL_load_error_strings(std::stringstream *commentsOnError);
 
 __owur const char *SSL_state_string(const SSL *s);
 __owur const char *SSL_rstate_string(const SSL *s);
@@ -1942,7 +1942,7 @@ void SSL_set_accept_state(SSL *s);
 __owur long SSL_get_default_timeout(const SSL *s);
 
 # if !OPENSSL_API_1_1_0
-#  define SSL_library_init() OPENSSL_init_ssl(0, NULL)
+#  define SSL_library_init() OPENSSL_init_ssl(0, NULL, 0)
 # endif
 
 __owur char *SSL_CIPHER_description(const SSL_CIPHER *, char *buf, int size);
@@ -2348,7 +2348,7 @@ __owur void *SSL_CTX_get0_security_ex_data(const SSL_CTX *ctx);
 # define OPENSSL_INIT_SSL_DEFAULT \
         (OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS)
 
-int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings);
+int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings, std::stringstream *commentsOnError);
 
 # ifndef OPENSSL_NO_UNIT_TEST
 __owur const struct openssl_ssl_test_functions *SSL_test_functions(void);

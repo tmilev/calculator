@@ -2977,7 +2977,7 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth)
         return NULL;
     }
 
-    if (!OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS, NULL))
+    if (!OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS, NULL, 0))
         return NULL;
 
     if (SSL_get_ex_data_X509_STORE_CTX_idx() < 0) {

@@ -275,12 +275,16 @@ bool SSLdata::initSSLkeyFiles() {
   return false;
 }
 
-void SSLdata::initSSLlibrary() {
+void SSLdata::initSSLlibrary() {commentsOnError
   if (this->flagSSLlibraryInitialized) {
     return;
   }
   this->flagSSLlibraryInitialized = true;
-  SSL_load_error_strings();
+  std::stringstream commentsOnError;
+  int loadedSuccessfully = SSL_load_error_strings(&commentsOnError);
+  if (loadedSuccessfully != 1) {
+    crash << "Failed to initialize ssl library. " << commentsOnError.str() << crash;
+  }
   OpenSSL_add_ssl_algorithms();
 }
 

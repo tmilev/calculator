@@ -66,7 +66,7 @@ SSL_SESSION *SSL_SESSION_new(void)
 {
     SSL_SESSION *ss;
 
-    if (!OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS, NULL))
+    if (!OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS, NULL, 0))
         return NULL;
 
     ss = (SSL_SESSION *) OPENSSL_zalloc(sizeof(*ss));

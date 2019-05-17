@@ -186,7 +186,7 @@ static ossl_inline int ktls_read_record(int fd, void *data, size_t length)
     } cmsgbuf;
     struct iovec msg_iov;
     int ret;
-    unsigned char *p = data;
+    unsigned char *p = (unsigned char *) data;
     const size_t prepend_length = SSL3_RT_HEADER_LENGTH;
 
     if (length < prepend_length + EVP_GCM_TLS_TAG_LEN) {

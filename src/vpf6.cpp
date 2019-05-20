@@ -3220,7 +3220,7 @@ bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutput
     if (!inputOutputEs[i].IsBuiltInTypE()) {
       return *this << "<hr>Possible programming error: calling ConvertExpressionsToCommonContext "
       << "on expressions without context. "
-      << Crasher::GetStackTraceEtcErrorMessage();
+      << Crasher::GetStackTraceEtcErrorMessageHTML();
     }
     if (!commonContext.ContextMergeContexts(commonContext, inputOutputEs[i].GetContext(), commonContext)) {
       return *this << "<hr>Failed to merge context "

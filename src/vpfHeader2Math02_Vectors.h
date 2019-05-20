@@ -200,7 +200,7 @@ public:
   template <class otherType>
   void ScalarEuclidean(const Vector<otherType>& other, otherType& output) const {
     if (this->size != other.size) {
-      crash.theCrashReport << "This is a programming error: taking scalar product of elements of different dimensions: "
+      crash << "This is a programming error: taking scalar product of elements of different dimensions: "
       << *this << " and " << other << ". ";
       crash << crash;
     }

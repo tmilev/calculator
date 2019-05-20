@@ -365,8 +365,6 @@ int RAND_DRBG_instantiate(
           *commentsOnError << "Perslen: " << (int) perslen
           << " is greater than grbg->maxperslen: " << (int) drbg->max_perslen << ". ";
         }
-        std::cout << "DEBUG: Perslen: " << (int) perslen
-        << " is greater than grbg->maxperslen: " << (int) drbg->max_perslen << ". ";
         goto end;
     }
 
@@ -376,7 +374,6 @@ int RAND_DRBG_instantiate(
         if (commentsOnError != 0) {
           *commentsOnError << "Method is null. ";
         }
-        std::cout << "DEBUG: Method is null.  ";
         goto end;
     }
 
@@ -387,7 +384,6 @@ int RAND_DRBG_instantiate(
         if (commentsOnError != 0) {
           *commentsOnError << "State is uninitialized. ";
         }
-        std::cout << "DEBUG: State uninitialized. ";
         goto end;
     }
 
@@ -419,7 +415,6 @@ int RAND_DRBG_instantiate(
         if (commentsOnError != 0) {
           *commentsOnError << "Failed to get entropy: entropylen equals: " << entropylen << ". ";
         }
-        std::cout << "DEBUG: failed to get entropy: entropylen equals: " << entropylen << ". ";
         RANDerr(RAND_F_RAND_DRBG_INSTANTIATE, RAND_R_ERROR_RETRIEVING_ENTROPY);
         goto end;
     }
@@ -451,6 +446,9 @@ int RAND_DRBG_instantiate(
         drbg->cleanup_nonce(drbg, nonce, noncelen);
     if (drbg->state == DRBG_READY)
         return 1;
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to instantiate drbg. ";
+    }
     return 0;
 }
 
@@ -1000,7 +998,6 @@ static RAND_DRBG *drbg_setup(RAND_DRBG *parent, int drbg_type, std::stringstream
      * The state of the drbg will be checked in RAND_DRBG_generate() and
      * an automatic recovery is attempted.
      */
-    std::cout << "DEBUG: About to instantiate rand drbg.\n";
     (void) RAND_DRBG_instantiate(
       drbg,
       (const unsigned char *) ossl_pers_string,

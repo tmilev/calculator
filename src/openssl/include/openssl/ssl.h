@@ -1090,11 +1090,6 @@ size_t SSL_get_peer_finished(const SSL *s, void *buf, size_t count);
 # define SSL_VERIFY_CLIENT_ONCE          0x04
 # define SSL_VERIFY_POST_HANDSHAKE       0x08
 
-# if !OPENSSL_API_1_1_0
-#  define OpenSSL_add_ssl_algorithms()   SSL_library_init()
-#  define SSLeay_add_ssl_algorithms()    SSL_library_init()
-# endif
-
 /* More backward compatibility */
 # define SSL_get_cipher(s) \
                 SSL_CIPHER_get_name(SSL_get_current_cipher(s))
@@ -1485,7 +1480,7 @@ __owur int BIO_ssl_copy_session_id(BIO *to, BIO *from);
 void BIO_ssl_shutdown(BIO *ssl_bio);
 
 __owur int SSL_CTX_set_cipher_list(SSL_CTX *, const char *str);
-__owur SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth);
+__owur SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth, std::stringstream *commentsOnError);
 int SSL_CTX_up_ref(SSL_CTX *ctx);
 void SSL_CTX_free(SSL_CTX *);
 __owur long SSL_CTX_set_timeout(SSL_CTX *ctx, long t);
@@ -1940,10 +1935,6 @@ void SSL_set_connect_state(SSL *s);
 void SSL_set_accept_state(SSL *s);
 
 __owur long SSL_get_default_timeout(const SSL *s);
-
-# if !OPENSSL_API_1_1_0
-#  define SSL_library_init() OPENSSL_init_ssl(0, NULL, 0)
-# endif
 
 __owur char *SSL_CIPHER_description(const SSL_CIPHER *, char *buf, int size);
 __owur STACK_OF(X509_NAME) *SSL_dup_CA_list(const STACK_OF(X509_NAME) *sk);

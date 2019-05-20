@@ -4717,7 +4717,8 @@ void slTwoSubalgebra::ComputeModuleDecomposition(
           BufferHighestWeights[IndexZeroWeight * 2 - k] -= topMult;
         }
         if (BufferHighestWeights[k] < 0 || !(BufferHighestWeights[k] == BufferHighestWeights[IndexZeroWeight * 2 - k])) {
-          crash.theCrashReport << " This is a programming error: "
+          std::stringstream crashStream;
+          crashStream << " This is a programming error: "
           << "an error check has failed. While trying to decompose with respect to  h-characteristic <br> "
           << this->hCharacteristic.ToString()
           << ". The positive root system of the containing root subalgebra is <br>"
@@ -4727,7 +4728,7 @@ void slTwoSubalgebra::ComputeModuleDecomposition(
           << coordsInPreferredSimpleBasis.ToString() << " The starting weights list is <br>"
           << outputModuleDimensions << ". "
           << " I got that the root space of index  " <<  k + 1 << " has negative dimension. Something is wrong. ";
-          crash << crash;
+          crash << crashStream.str() << crash;
         }
       }
     }

@@ -611,7 +611,10 @@ void Pipe::ReadOnce(bool restartServerOnFail, bool dontCrashOnFail) {
 }
 
 logger::logger(
-  const std::string& logFileName, logger* inputCarbonCopy, bool inputResetLogWhenTooLarge, const std::string& inputProcessType
+  const std::string& logFileName,
+  logger* inputCarbonCopy,
+  bool inputResetLogWhenTooLarge,
+  const std::string& inputProcessType
 ) {
   this->flagInitialized = false;
   this->theFileName = logFileName;
@@ -643,8 +646,9 @@ void logger::reset() {
     this->flagStopWritingToFile = true;
     return;
   }
-  if (this->theFile.is_open())
+  if (this->theFile.is_open()) {
     this->theFile.close();
+  }
   FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
     this->theFile, this->theFileName, false, true, false, true
   );
@@ -682,23 +686,23 @@ void logger::flush() {
   theFile.clear();
 }
 
-std::string logger::blueConsole() {
+std::string logger::consoleBlue() {
   return "\e[1;34m";
 }
 
-std::string logger::yellowConsole() {
+std::string logger::consoleYellow() {
   return "\e[1;33m";
 }
 
-std::string logger::greenConsole() {
+std::string logger::consoleGreen() {
   return "\e[1;32m";
 }
 
-std::string logger::redConsole() {
+std::string logger::consoleRed() {
   return "\e[1;31m";
 }
 
-std::string logger::normalConsole() {
+std::string logger::consoleNormal() {
   return "\e[0m";
 }
 

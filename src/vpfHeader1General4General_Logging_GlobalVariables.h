@@ -247,9 +247,9 @@ public:
   void ChDir(const std::string& systemCommand);
   std::string ToStringHTMLTopCommandLinuxSystem();
   std::string ToStringFolderInfo() const;
-  std::string ToStringHtmlThreadData();
-  std::string ToStringProgressReportHtmlNoThreadData();
-  std::string ToStringProgressReportHtmlWithThreadData();
+  std::string ToStringThreadData(bool useHTML);
+  std::string ToStringProgressReportNoThreadData(bool useHTML);
+  std::string ToStringProgressReportWithThreadData(bool useHTML);
   JSData ToStringProgressReportJSData();
   std::string ToStringProgressReportConsole();
   void MakeReport(const std::string& input) {
@@ -286,14 +286,14 @@ class logger {
   );
   void CheckLogSize();
   enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
-  static std::string redConsole();
-  static std::string blueConsole();
-  static std::string yellowConsole();
-  static std::string greenConsole();
+  static std::string consoleRed();
+  static std::string consoleBlue();
+  static std::string consoleYellow();
+  static std::string consoleGreen();
   static std::string purpleConsole();
   static std::string cyanConsole();
   static std::string orangeConsole();
-  static std::string normalConsole();
+  static std::string consoleNormal();
   std::string getStamp();
   std::string getStampShort();
   std::string closeTagConsole();

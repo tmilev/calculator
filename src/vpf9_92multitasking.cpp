@@ -32,7 +32,7 @@ void ParallelComputing::CheckPointerCounters() {
 void MutexRecursiveWrapper::CheckConsistency() {
   if (this->flagDeallocated) {
     logBlock << logger::red << "Use after free of mutex. "
-    << crash.GetStackTraceShort() << logger::endL;
+    << crash.GetStackTraceEtcErrorMessageConsole() << logger::endL;
     assert(false);
   }
 }
@@ -91,7 +91,7 @@ void MutexRecursiveWrapper::LockMe() {
         << this->mutexName << "] thread: "
         << currentThreadId
         << "." << logger::endL
-        << theGlobalVariables.ToStringProgressReportHtmlWithThreadData() << logger::endL;
+        << theGlobalVariables.ToStringProgressReportConsole() << logger::endL;
       }
     }
     ((std::mutex*)this->theMutexImplementation)->lock();

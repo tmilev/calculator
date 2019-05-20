@@ -162,8 +162,6 @@ const std::string signedFileKey = "certificates/calculator-algebra.key";
 
 void WebServer::initSSL() {
   MacroRegisterFunctionWithName("WebServer::initSSL");
-  std::cout << "DEBUG: got to this point of code.\n";
-
   if (!theGlobalVariables.flagSSLisAvailable) {
     logServer << logger::red << "SSL is DISABLED." << logger::endL;
     return;
@@ -275,7 +273,7 @@ bool SSLdata::initSSLkeyFiles() {
   return false;
 }
 
-void SSLdata::initSSLlibrary() {commentsOnError
+void SSLdata::initSSLlibrary() {
   if (this->flagSSLlibraryInitialized) {
     return;
   }
@@ -283,9 +281,15 @@ void SSLdata::initSSLlibrary() {commentsOnError
   std::stringstream commentsOnError;
   int loadedSuccessfully = SSL_load_error_strings(&commentsOnError);
   if (loadedSuccessfully != 1) {
-    crash << "Failed to initialize ssl library. " << commentsOnError.str() << crash;
+    logServer << logger::red << commentsOnError.str() << logger::endL;
+    crash << "Failed to initialize ssl library. " << crash;
   }
-  OpenSSL_add_ssl_algorithms();
+  loadedSuccessfully = OPENSSL_init_ssl(0, NULL, &commentsOnError);
+  if (loadedSuccessfully != 1) {
+    logServer << logger::red << commentsOnError.str() << logger::endL;
+    crash << "Failed to initialize ssl library. " << crash;
+  }
+  logServer << logger::green << "DEBUG: Initialzation of ssl successfull." << logger::endL;
 }
 
 void SSLdata::initSSLserver() {
@@ -307,10 +311,14 @@ void SSLdata::initSSLserver() {
   }
   logServer << logger::green << "SSL is available." << logger::endL;
   this->theSSLMethod = SSLv23_method();
-  this->contextServer = SSL_CTX_new(this->theSSLMethod);
-  if (!this->contextServer) {
+  std::stringstream commentsOnError;
+
+  this->contextServer = SSL_CTX_new(this->theSSLMethod, &commentsOnError);
+  if (this->contextServer == 0) {
+    logServer << logger::red << "Failed to create ssl context. " << logger::endL;
+    logServer << commentsOnError.str();
     ERR_print_errors_fp(stderr);
-    crash << "openssl error: failed to create CTX object." << crash;
+    crash << "Openssl error: failed to create CTX object." << crash;
   }
   if (SSL_CTX_use_certificate_chain_file(this->contextServer, signedFileCertificate3Physical.c_str()) <= 0) {
     logServer << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "

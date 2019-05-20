@@ -151,7 +151,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals)
   if (radicalsNew.size > 16) {
     stOutput << "Computing with fields whose dimension over the rationals is greater than 2^16 is not allowed. "
     << "Such computations are too large for the current implementation of algberaic extensions of the rationals. "
-    << Crasher::GetStackTraceEtcErrorMessage();
+    << Crasher::GetStackTraceEtcErrorMessageHTML();
     return (false);
   }
   this->theBasisMultiplicative.SetSize(MathRoutines::TwoToTheNth(radicalsNew.size));
@@ -328,7 +328,7 @@ void AlgebraicClosureRationals::GetAdditionTo(const AlgebraicNumber& input, Vect
   }
   if (input.basisIndex < 0 || input.basisIndex >= this->theBasesAdditive.size) {
     stOutput << "This is a programming error: element has basis index " << input.basisIndex << ". "
-    << Crasher::GetStackTraceEtcErrorMessage();
+    << Crasher::GetStackTraceEtcErrorMessageHTML();
   }
   if (input.basisIndex == this->theBasesAdditive.size - 1) {
     output = input.theElT;
@@ -1188,7 +1188,7 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
     return *this == ratValue;
   }
   if (this->owner != other.owner) {
-    crash.theCrashReport << "This might or might not be a programming error: "
+    crash << "This might or might not be a programming error: "
     << "comparing two algebraic number that do not have the same owner. "
     << "The numbers have owners of respective addresses "
     << this->owner << " and " << other.owner << ". The numbers are: "

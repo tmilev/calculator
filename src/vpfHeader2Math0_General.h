@@ -4004,7 +4004,7 @@ int MonomialCollection<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
   this->flagDeallocated = true;
   int j = this->theMonomials.GetIndex(inputMon);
   if (j >= this->size()) {
-    crash.theCrashReport << "Error: function GetIndex evaluated on "
+    crash << "Error: function GetIndex evaluated on "
     << inputMon << " with hash function "
     << inputMon.HashFunction(inputMon)
     << " returns index " << j << " but I have only "

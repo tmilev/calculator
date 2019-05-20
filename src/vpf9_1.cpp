@@ -20,11 +20,17 @@ Crasher::Crasher() {
 }
 
 void Crasher::FirstRun() {
+  this->crashReportConsolE << this->crashReport.str();
+  this->crashReportHtml << this->crashReport.str();
+  this->crashReportFile << this->crashReport.str();
   if (!this->flagCrashInitiateD && (
     theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer
   )) {
-    this->theCrashReport << "\n<b style =\"color:red\">Crash</b> "
-    << theGlobalVariables.GetElapsedSeconds() << " second(s) from the start.<hr>";
+    double elapsedSeconds = theGlobalVariables.GetElapsedSeconds();
+    this->crashReportHtml << "\n<b style = 'color:red'>Crash</b> "
+    << elapsedSeconds << " second(s) from the start.<hr>";
+    this->crashReportConsolE << logger::consoleRed() << "Crash " << elapsedSeconds
+    << " second(s) " << logger::consoleNormal() << " from the start.\n";
   }
   this->flagCrashInitiateD = true;
 }
@@ -37,63 +43,78 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
   if (this->flagFinishingCrash) {
     std::cout << "Recursion within the crashing mechanism detected. "
     << "Something is very wrong. "
-    << "Crash report so far: " << this->theCrashReport.str() << std::endl;
+    << this->crashReportConsolE.str() << std::endl;
     assert(false);
   }
   this->flagFinishingCrash = true;
   if (!theGlobalVariables.flagNotAllocated) {
-    this->theCrashReport << " ";
+    this->crashReportConsolE << "\n";
   }
   if (!theGlobalVariables.flagNotAllocated) {
     if (theGlobalVariables.userInputStringIfAvailable != "") {
-      this->theCrashReport << "<hr>User input: <br> "
+      this->crashReportHtml << "<hr>User input: <br> "
       << theGlobalVariables.userInputStringIfAvailable << "<hr>";
+      this->crashReportConsolE << "User input: "
+      << logger::consoleBlue() << theGlobalVariables.userInputStringIfAvailable
+      << logger::consoleNormal() << "\n";
+      this->crashReportFile << "User input:\n" << theGlobalVariables.userInputStringIfAvailable << "\n";
     }
   }
-  this->theCrashReport << Crasher::GetStackTraceEtcErrorMessage();
+  this->crashReportConsolE << Crasher::GetStackTraceEtcErrorMessageConsole();
+  this->crashReportHtml << Crasher::GetStackTraceEtcErrorMessageHTML();
+  this->crashReportFile << Crasher::GetStackTraceEtcErrorMessageHTML();
   if (!theGlobalVariables.flagNotAllocated) {
     if (theGlobalVariables.ProgressReportStringS.size > 0) {
-      this->theCrashReport
-      << "<hr>In addition, I have an account of the computation "
-      << "progress report strings, attached below.<hr>"
-      << theGlobalVariables.ToStringProgressReportHtmlNoThreadData();
+      this->crashReportHtml
+      << "<hr><b>Computation progress report strings:</b><br>"
+      << theGlobalVariables.ToStringProgressReportNoThreadData(true);
+      this->crashReportFile
+      << "<hr><b>Computation progress report strings:</b><br>"
+      << theGlobalVariables.ToStringProgressReportNoThreadData(true);
+
+      this->crashReportConsolE << "Computation progress strings:\n";
+      this->crashReportConsolE << theGlobalVariables.ToStringProgressReportNoThreadData(false);
     }
   }
-  if (stOutput.theOutputFunction == 0) {
-    std::cout << this->theCrashReport.str() << std::endl;
-  }
   if (!theGlobalVariables.flagNotAllocated) {
+    if (theParser != 0) {
+      if (theParser->Comments.str() != "") {
+        this->crashReportHtml << "<hr>Additional comments follow. " << theParser->Comments.str();
+      }
+    }
     std::fstream theFile;
-    bool succeededToOpen = FileOperations::OpenFileCreateIfNotPresentVirtual(
+    bool openSuccess = FileOperations::OpenFileCreateIfNotPresentVirtual(
       theFile, "crashes/" + theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false, true
     );
-    if (succeededToOpen) {
-      this->theCrashReport << "<hr>Crash dumped in file "
+    if (openSuccess) {
+      this->crashReportHtml << "<hr>Crash dumped in file "
       << "<a href=\"/LogFiles/crashes/"
       << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.RelativePhysicalNameCrashLog, false)
       << "\" target=\"_blank\">"
       << theGlobalVariables.RelativePhysicalNameCrashLog
       << "</a>"
       << ". May require admin access to view online. ";
+      this->crashReportConsolE << "Crash dumped in file: " << logger::consoleGreen()
+      << theGlobalVariables.RelativePhysicalNameCrashLog << logger::consoleNormal() << "\n";
     } else {
-      this->theCrashReport << "<hr>Failed to create a crash report: check if folder exists and the "
-      << "executable has file permissions for file " << theGlobalVariables.RelativePhysicalNameCrashLog
-      << " located inside the output folder.";
+      this->crashReportHtml << "<hr>Failed to open crash report file: " << theGlobalVariables.RelativePhysicalNameCrashLog
+      << ". Check file permissions. ";
+      this->crashReportConsolE << "Failed to open crash report file: "
+      << logger::consoleRed()
+      << theGlobalVariables.RelativePhysicalNameCrashLog << logger::consoleNormal() << "\n";
     }
-    theFile << this->theCrashReport.str();
+    theFile << this->crashReportFile.str();
     theFile.flush();
-    if (theParser != 0) {
-      theFile << "<hr>Additional comments follow. " << theParser->Comments.str();
-    }
     theFile.close();
   } else {
-    this->theCrashReport << "GlobalVariables.flagNotAllocated is true. ";
+    this->crashReportHtml << "GlobalVariables.flagNotAllocated is true. ";
+    this->crashReportConsolE << "GlobalVariables.flagNotAllocated is true. ";
   }
-  if (theParser != 0) {
-    this->theCrashReport << "<hr>Additional comments follow. " << theParser->Comments.str();
+  if (stOutput.theOutputFunction == 0) {
+    std::cout << this->crashReportConsolE.str() << std::endl;
   }
   JSData output;
-  output[WebAPI::result::crashReport] = this->theCrashReport.str();
+  output[WebAPI::result::crashReport] = this->crashReportHtml.str();
   stOutput << output.ToString(false);
   stOutput.Flush();
   if (this->CleanUpFunction != 0) {
@@ -103,7 +124,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
   return *this;
 }
 
-std::string Crasher::GetStackTraceEtcErrorMessage() {
+std::string Crasher::GetStackTraceEtcErrorMessageHTML() {
   std::stringstream out;
   out << "A partial stack trace follows (function calls not explicitly logged not included).";
   out << "<table><tr>";
@@ -144,7 +165,7 @@ std::string Crasher::GetStackTraceEtcErrorMessage() {
   return out.str();
 }
 
-std::string Crasher::GetStackTraceShort() {
+std::string Crasher::GetStackTraceEtcErrorMessageConsole() {
   std::stringstream out;
   for (int threadCounter = 0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter ++) {
     if (threadCounter >= theGlobalVariables.theThreadData.size) {
@@ -203,28 +224,34 @@ std::string GlobalVariables::ToStringFolderInfo() const {
 
 JSData GlobalVariables::ToStringProgressReportJSData() {
   JSData result;
-  result[WebAPI::result::resultHtml] = this->ToStringProgressReportHtmlNoThreadData();
+  result[WebAPI::result::resultHtml] = this->ToStringProgressReportNoThreadData(true);
   return result;
 }
 
-std::string GlobalVariables::ToStringHtmlThreadData() {
+std::string GlobalVariables::ToStringThreadData(bool useHTML) {
   std::stringstream out;
   for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++) {
-    out << "<hr><b>" << this->theThreadData[threadIndex].ToStringHtml()
-    << "</b><br>";
+    if (useHTML) {
+      out << "<hr><b>";
+    }
+    out << this->theThreadData[threadIndex].ToStringHtml();
+    if (useHTML) {
+      out << "</b><br>";
+    }
+    out << "\n";
   }
   return out.str();
 }
 
-std::string GlobalVariables::ToStringProgressReportHtmlWithThreadData() {
+std::string GlobalVariables::ToStringProgressReportWithThreadData(bool useHTML) {
   MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtmlWithThreadData");
   std::stringstream out;
-  out << theGlobalVariables.ToStringHtmlThreadData();
-  out << theGlobalVariables.ToStringProgressReportHtmlNoThreadData();
+  out << theGlobalVariables.ToStringThreadData(useHTML);
+  out << theGlobalVariables.ToStringProgressReportNoThreadData(useHTML);
   return out.str();
 }
 
-std::string GlobalVariables::ToStringProgressReportHtmlNoThreadData() {
+std::string GlobalVariables::ToStringProgressReportNoThreadData(bool useHTML) {
   MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtmlNoThreadData");
   std::stringstream reportStream;
   for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++) {
@@ -233,26 +260,43 @@ std::string GlobalVariables::ToStringProgressReportHtmlNoThreadData() {
       //<-to avoid coordinating threads
       continue;
     }
-    reportStream << "<b>Current thread id: "
-    << currentThreadID
-    << ". </b>";
-
+    if (useHTML) {
+      reportStream << "<b>Current thread id: "
+      << currentThreadID
+      << ". </b>";
+    } else {
+      reportStream << "Thread id: " << logger::consoleBlue() << currentThreadID << logger::consoleNormal() << "\n";
+    }
     for (int i = 0; i < this->ProgressReportStringS[threadIndex].size; i ++) {
       if (this->ProgressReportStringS[threadIndex][i] != "") {
-        reportStream << "\n<div id =\"divProgressReport" << i << "\">"
-        << this->ProgressReportStringS[threadIndex][i] << "\n</div>\n<hr>";
+        if (useHTML) {
+          reportStream << "\n<div id =\"divProgressReport" << i << "\">"
+          << this->ProgressReportStringS[threadIndex][i] << "\n</div>\n<hr>";
+        } else {
+          reportStream << this->ProgressReportStringS[threadIndex][i] << "\n";
+        }
       }
     }
   }
   if (!crash.flagCrashInitiateD) {
-    reportStream << crash.GetStackTraceEtcErrorMessage();
+    if (useHTML) {
+      reportStream << crash.GetStackTraceEtcErrorMessageHTML();
+    } else {
+      reportStream << crash.GetStackTraceEtcErrorMessageConsole();
+    }
     reportStream << theGlobalVariables.GetElapsedMilliseconds()
     << " ms passed. ";
     if (theGlobalVariables.MaxComputationMilliseconds > 0) {
-      reportStream << "<br>Hard limit: "
+      if (useHTML) {
+        reportStream << "<br>";
+      }
+      reportStream << "\nHard limit: "
       << theGlobalVariables.MaxComputationMilliseconds
-      << " ms [system crash if limit exceeded]."
-      << "<br> Soft limit: "
+      << " ms [system crash if limit exceeded].";
+      if (useHTML) {
+        reportStream << "<br>";
+      }
+      reportStream << "\nSoft limit: "
       << theGlobalVariables.MaxComputationMilliseconds / 2
       << " ms [computation error if limit exceeded, triggered between calculator/atomic functions].";
     }

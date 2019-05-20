@@ -2968,52 +2968,78 @@ static int ssl_session_cmp(const SSL_SESSION *a, const SSL_SESSION *b)
  * via ssl.h.
  */
 
-SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth)
-{
-    SSL_CTX *ret = NULL;
-
-    if (meth == NULL) {
-        SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_NULL_SSL_METHOD_PASSED);
-        return NULL;
+#include <sstream>
+SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth, std::stringstream* commentsOnError) {
+  SSL_CTX *ret = NULL;
+  if (meth == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "No ssl method provided. ";
     }
-
-    if (!OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS, NULL, 0))
-        return NULL;
-
-    if (SSL_get_ex_data_X509_STORE_CTX_idx() < 0) {
-        SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_X509_VERIFICATION_SETUP_PROBLEMS);
-        goto err;
+    SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_NULL_SSL_METHOD_PASSED);
+    return NULL;
+  }
+  if (!OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS, NULL, commentsOnError)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "SSL initialization failed.\n";
     }
-    ret = (SSL_CTX *) OPENSSL_zalloc(sizeof(*ret));
-    if (ret == NULL)
-        goto err;
-
-    ret->method = meth;
-    ret->min_proto_version = 0;
-    ret->max_proto_version = 0;
-    ret->mode = SSL_MODE_AUTO_RETRY;
-    ret->session_cache_mode = SSL_SESS_CACHE_SERVER;
-    ret->session_cache_size = SSL_SESSION_CACHE_MAX_SIZE_DEFAULT;
-    /* We take the system default. */
-    ret->session_timeout = meth->get_timeout();
-    ret->references = 1;
-    ret->lock = CRYPTO_THREAD_lock_new();
-    if (ret->lock == NULL) {
-        SSLerr(SSL_F_SSL_CTX_NEW, ERR_R_MALLOC_FAILURE);
-        OPENSSL_free(ret);
-        return NULL;
+    return NULL;
+  }
+  if (SSL_get_ex_data_X509_STORE_CTX_idx() < 0) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "SSL x509 verification setup problems.\n";
     }
-    ret->max_cert_list = SSL_MAX_CERT_LIST_DEFAULT;
-    ret->verify_mode = SSL_VERIFY_NONE;
-    if ((ret->cert = ssl_cert_new()) == NULL)
-        goto err;
+    SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_X509_VERIFICATION_SETUP_PROBLEMS);
+    goto err;
+  }
+  ret = (SSL_CTX *) OPENSSL_zalloc(sizeof(*ret));
+  if (ret == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Memory allocation failure.\n";
+    }
+    goto err;
+  }
+  ret->method = meth;
+  ret->min_proto_version = 0;
+  ret->max_proto_version = 0;
+  ret->mode = SSL_MODE_AUTO_RETRY;
+  ret->session_cache_mode = SSL_SESS_CACHE_SERVER;
+  ret->session_cache_size = SSL_SESSION_CACHE_MAX_SIZE_DEFAULT;
+  /* We take the system default. */
+  ret->session_timeout = meth->get_timeout();
+  ret->references = 1;
+  ret->lock = CRYPTO_THREAD_lock_new();
+  if (ret->lock == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to lock crypto thread.\n";
+    }
+    SSLerr(SSL_F_SSL_CTX_NEW, ERR_R_MALLOC_FAILURE);
+    OPENSSL_free(ret);
+    return NULL;
+  }
+  ret->max_cert_list = SSL_MAX_CERT_LIST_DEFAULT;
+  ret->verify_mode = SSL_VERIFY_NONE;
+  if ((ret->cert = ssl_cert_new()) == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to create ssl certificate.\n";
+    }
+    goto err;
+  }
+  std::cout << "\n\nDEBUG: GOT TO HERE\n\n";
+  ret->sessions = lh_SSL_SESSION_new(ssl_session_hash, ssl_session_cmp);
+  if (ret->sessions == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to create ssl session. ";
+    }
+    goto err;
+  }
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: GOT to this point.\n";
 
-    ret->sessions = lh_SSL_SESSION_new(ssl_session_hash, ssl_session_cmp);
-    if (ret->sessions == NULL)
-        goto err;
-    ret->cert_store = X509_STORE_new();
-    if (ret->cert_store == NULL)
-        goto err;
+  }
+  ret->cert_store = X509_STORE_new();
+  if (ret->cert_store == NULL) {
+    goto err;
+  }
 #ifndef OPENSSL_NO_CT
     ret->ctlog_store = CTLOG_STORE_new();
     if (ret->ctlog_store == NULL)
@@ -3064,18 +3090,20 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth)
     ret->max_send_fragment = SSL3_RT_MAX_PLAIN_LENGTH;
     ret->split_send_fragment = SSL3_RT_MAX_PLAIN_LENGTH;
 
-    /* Setup RFC5077 ticket keys */
-    if ((RAND_bytes(ret->ext.tick_key_name,
-                    sizeof(ret->ext.tick_key_name)) <= 0)
-        || (RAND_priv_bytes(ret->ext.secure->tick_hmac_key,
-                       sizeof(ret->ext.secure->tick_hmac_key), 0) <= 0)
-        || (RAND_priv_bytes(ret->ext.secure->tick_aes_key,
-                       sizeof(ret->ext.secure->tick_aes_key), 0) <= 0))
-        ret->options |= SSL_OP_NO_TICKET;
-
-    if (RAND_priv_bytes(ret->ext.cookie_hmac_key,
-                   sizeof(ret->ext.cookie_hmac_key), 0) <= 0)
-        goto err;
+  /* Setup RFC5077 ticket keys */
+  if (
+    (RAND_bytes(ret->ext.tick_key_name, sizeof(ret->ext.tick_key_name)) <= 0) ||
+    (RAND_priv_bytes(ret->ext.secure->tick_hmac_key, sizeof(ret->ext.secure->tick_hmac_key), 0) <= 0) ||
+    (RAND_priv_bytes(ret->ext.secure->tick_aes_key, sizeof(ret->ext.secure->tick_aes_key), 0) <= 0)
+  ) {
+    ret->options |= SSL_OP_NO_TICKET;
+  }
+  if (RAND_priv_bytes(ret->ext.cookie_hmac_key, sizeof(ret->ext.cookie_hmac_key), 0) <= 0) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to fetch random bytes.\n";
+    }
+    goto err;
+  }
 
 #ifndef OPENSSL_NO_SRP
     if (!SSL_CTX_SRP_CTX_init(ret))
@@ -3150,11 +3178,14 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth)
     ssl_ctx_system_config(ret);
 
     return ret;
- err:
-    SSLerr(SSL_F_SSL_CTX_NEW, ERR_R_MALLOC_FAILURE);
- err2:
-    SSL_CTX_free(ret);
-    return NULL;
+err:
+  if (commentsOnError != 0) {
+    *commentsOnError << "Memory allocation failure, caught with a goto.\n";
+  }
+  SSLerr(SSL_F_SSL_CTX_NEW, ERR_R_MALLOC_FAILURE);
+err2:
+  SSL_CTX_free(ret);
+  return NULL;
 }
 
 int SSL_CTX_up_ref(SSL_CTX *ctx)

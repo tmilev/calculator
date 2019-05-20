@@ -32,8 +32,10 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
           output *= tempMon;
           continue;
         }
-        stOutput << "This may or may not be a programming error. I cannot carry out a substitution in a monomial that has exponent "
-        << "which is not a small integer: it is " << this->monBody[i] << " instead. " << Crasher::GetStackTraceEtcErrorMessage();
+        stOutput << "This may or may not be a programming error. "
+        << "I cannot carry out a substitution in a monomial that has exponent "
+        << "which is not a small integer: it is " << this->monBody[i]
+        << " instead. " << Crasher::GetStackTraceEtcErrorMessageHTML();
         return false;
       }
       tempPoly = TheSubstitution[i];
@@ -196,7 +198,9 @@ void Polynomial<coefficient>::MakeDegreeOne(
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff1, const coefficient& ConstantTerm) {
+void Polynomial<coefficient>::MakeDegreeOne(
+  int NVar, int NonZeroIndex, const coefficient& coeff1, const coefficient& ConstantTerm
+) {
   this->MakeDegreeOne(NVar, NonZeroIndex, coeff1);
   *this += ConstantTerm;
 }

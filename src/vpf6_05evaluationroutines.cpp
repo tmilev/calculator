@@ -876,7 +876,7 @@ void Calculator::EvaluateCommands() {
     if (!theGlobalVariables.flagRunningCommandLine) {
       out << "<hr><b>Syntax errors encountered</b><br>";
     } else {
-      out << logger::redConsole() << "Syntax errors encountered: " << logger::normalConsole();
+      out << logger::consoleRed() << "Syntax errors encountered: " << logger::consoleNormal();
     }
     this->outputJS[WebAPI::result::syntaxErrors] = this->syntaxErrors;
     out << this->syntaxErrors;
@@ -905,14 +905,14 @@ void Calculator::EvaluateCommands() {
     theGlobalVariables.theDefaultFormat.GetElement().flagUseQuotes = false;
     theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
     if (theGlobalVariables.programArguments.size > 1) {
-      out << "Input: " << logger::yellowConsole()
+      out << "Input: " << logger::consoleYellow()
       << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << std::endl;
     }
     theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
     this->theObjectContainer.resetSliders();
-    out << logger::normalConsole() << "Output: " << logger::greenConsole()
+    out << logger::consoleNormal() << "Output: " << logger::consoleGreen()
     << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement())
-    << logger::normalConsole() << std::endl;
+    << logger::consoleNormal() << std::endl;
   } else if (!this->flagDisplayFullExpressionTree) {
     std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharsString != "") {

@@ -4667,7 +4667,7 @@ int DynkinType::GetIndexPreimageFromRootInjection(int inputIndex, const List<int
       return i;
     }
   }
-  crash.theCrashReport << "This is a programming error: asking to find the preimage of root index "
+  crash << "This is a programming error: asking to find the preimage of root index "
   << inputIndex << " w.r.t. root injection "
   << inputRootInjection << " - the root index has no preimage. This function is not allowed to fail. ";
   crash << crash;

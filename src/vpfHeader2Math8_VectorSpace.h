@@ -56,7 +56,7 @@ void Basis<coefficient>::AddVector(const Vector<coefficient>& v) {
     basis.NumRows = 0;
   }
   if (basis.NumRows == basis.NumCols) {
-    crash.theCrashReport << "Programming error: attempting to add the " << basis.NumRows
+    crash << "Programming error: attempting to add the " << basis.NumRows
     << " vector to a Basis of degree " << basis.NumCols;
     crash << crash;
   }

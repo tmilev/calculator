@@ -168,7 +168,7 @@ int SSL_load_error_strings(std::stringstream* commentsOnError) {
  * i.e. passing a non-null settings value is assumed to be single-threaded.
  */
 #include <sstream>
-int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS * settings, std::stringstream *commentsOnError) {
+int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS * settings, std::stringstream* commentsOnError) {
     static int stoperrset = 0;
 
     if (stopped) {
@@ -193,20 +193,33 @@ int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS * settings, std:
         opts |= OPENSSL_INIT_LOAD_CONFIG;
 #endif
 
-    if (!OPENSSL_init_crypto(opts, settings))
-        return 0;
+  if (!OPENSSL_init_crypto(opts, settings)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to initialize crypto.\n";
+    }
+    return 0;
+  }
 
-    if (!RUN_ONCE(&ssl_base, ossl_init_ssl_base))
-        return 0;
-
-    if ((opts & OPENSSL_INIT_NO_LOAD_SSL_STRINGS)
-        && !RUN_ONCE_ALT(&ssl_strings, ossl_init_no_load_ssl_strings,
-                         ossl_init_load_ssl_strings))
-        return 0;
-
-    if ((opts & OPENSSL_INIT_LOAD_SSL_STRINGS)
-        && !RUN_ONCE(&ssl_strings, ossl_init_load_ssl_strings))
-        return 0;
-
-    return 1;
+  if (!RUN_ONCE(&ssl_base, ossl_init_ssl_base)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to run once, base initialization. ";
+    }
+    return 0;
+  }
+  if (
+    (opts & OPENSSL_INIT_NO_LOAD_SSL_STRINGS) &&
+    !RUN_ONCE_ALT(&ssl_strings, ossl_init_no_load_ssl_strings, ossl_init_load_ssl_strings)
+  ) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to run once, alternative, no string loading. ";
+    }
+    return 0;
+  }
+  if ((opts & OPENSSL_INIT_LOAD_SSL_STRINGS) && !RUN_ONCE(&ssl_strings, ossl_init_load_ssl_strings)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to run once, alternative. ";
+    }
+    return 0;
+  }
+  return 1;
 }

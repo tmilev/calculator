@@ -1373,7 +1373,7 @@ coefficient WeylGroupData::WeylDimFormulaFundamentalCoords(Vector<coefficient>& 
 template<class leftType, class rightType>
 void WeylGroupData::RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output) const {
   if (r1.size != r2.size || r1.size != this->GetDim()) {
-    crash.theCrashReport << "This is a programming error: attempting to get the scalar product of the weight "
+    crash << "This is a programming error: attempting to get the scalar product of the weight "
     << r1 << " (dimension " << r1.size
     << ") with the weight " << r2 << " (dimension " << r2.size
     << "), while the dimension of the ambient Weyl group is " << this->GetDim()

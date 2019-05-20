@@ -421,11 +421,14 @@ private:
     }
     if (theOrder(theList[HighIndex], theList[BottomIndex])) {
       if (HighIndex == BottomIndex) {
-        crash.theCrashReport << "This is a programming error. The programmer has given me a bad strict order: the order claims that object "
+        std::stringstream crashStream;
+        crashStream << "This is a programming error. "
+        << "The programmer has given me a bad strict order: the order claims that object "
         << theList[HighIndex] << " of index "
-        << HighIndex << " is strictly greater than itself which is not allowed for strict orders. Maybe the programmer has given a "
+        << HighIndex << " is strictly greater than itself which is not allowed for strict orders. "
+        << "Maybe the programmer has given a "
         << "non-strict order instead of strict one by mistake? ";
-        crash << crash;
+        crash << crashStream.str() << crash;
       }
       HighIndex --;
     }
@@ -443,8 +446,9 @@ private:
     int TopIndex,
     otherList* carbonCopy
   ) {
-    if (TopIndex <= BottomIndex)
+    if (TopIndex <= BottomIndex) {
       return;
+    }
     int HighIndex = TopIndex;
     for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
       if (theList[LowIndex] > theList[BottomIndex]) {
@@ -522,8 +526,9 @@ private:
     NumReadWordsExcludingTag = 0;
     while (!streamToMoveIn.eof()) {
       streamToMoveIn >> tempS;
-      if (tempS == tagOpen)
+      if (tempS == tagOpen) {
         return true;
+      }
       NumReadWordsExcludingTag ++;
     }
     return false;
@@ -644,14 +649,16 @@ class RecursionDepthCounter {
 public:
   int* theCounter;
   RecursionDepthCounter(int* inputCounter): theCounter(0) {
-    if (inputCounter == 0)
+    if (inputCounter == 0) {
       return;
+    }
     this->theCounter = inputCounter;
     (*this->theCounter) ++;
   }
   ~RecursionDepthCounter() {
-    if (this->theCounter != 0)
+    if (this->theCounter != 0) {
       (*this->theCounter) --;
+    }
     this->theCounter = 0;
   }
 };
@@ -919,8 +926,9 @@ public:
   void AssignLight(const ListLight<Object>& from);
   void ExpandOnTop(int theIncrease) {
     int newSize = this->size + theIncrease;
-    if (newSize < 0)
+    if (newSize < 0) {
       newSize = 0;
+    }
     this->SetSize(newSize);
   }
   void SetSize(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
@@ -1604,11 +1612,12 @@ public:
   inline int GetIndexIMustContainTheObject(const Object& o) const {
     int result = this->GetIndex(o);
     if (result == - 1) {
-      crash.theCrashReport << "This is a programming error: "
+      std::stringstream errorStream;
+      errorStream << "This is a programming error: "
       << "the programmer has requested the index of object " << o
       << " with a function that does not allow failure. "
       << "However, the container array does not contain this object. ";
-      crash << crash;
+      crash << errorStream.str() << crash;
     }
     return result;
   }

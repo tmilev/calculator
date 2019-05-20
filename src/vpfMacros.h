@@ -70,23 +70,28 @@ class ProjectInformationInstance {
 class GlobalVariables;
 extern GlobalVariables theGlobalVariables;
 
-static ProjectInformationInstance vpfMacrosHprojectInstance(__FILE__, "Header, External includes + macros. Macro/build configuration.");
+static ProjectInformationInstance vpfMacrosHprojectInstance(
+  __FILE__, "Header, External includes + macros. Macro/build configuration."
+);
 
 class Crasher {
   public:
-  std::stringstream theCrashReport;
+  std::stringstream crashReport;
+  std::stringstream crashReportHtml;
+  std::stringstream crashReportConsolE;
+  std::stringstream crashReportFile;
   void (*CleanUpFunction)();
   bool flagCrashInitiateD; //<-we crash only once, and we do not resume execution after a crash
   bool flagFinishingCrash; //<-we crash only once, and we do not resume execution after a crash
   Crasher();
   void FirstRun();
-  static std::string GetStackTraceEtcErrorMessage();
-  static std::string GetStackTraceShort();
+  static std::string GetStackTraceEtcErrorMessageHTML();
+  static std::string GetStackTraceEtcErrorMessageConsole();
   Crasher& operator<<(const Crasher& dummyCrasherSignalsActualCrash);
   template <class AnyObject>
   Crasher& operator<<(const AnyObject& input) {
     this->FirstRun();
-    this->theCrashReport << input;
+    this->crashReport << input;
     return *this;
   }
 };

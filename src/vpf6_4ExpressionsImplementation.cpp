@@ -1254,7 +1254,7 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
   if (!inputOutputMinContext.IsContext()) {
     this->owner->Comments << "<br>Warning: non-initialized input context in "
     << "Expression::SetContextAtLeastEqualTo. Stack trace: "
-    << Crasher::GetStackTraceEtcErrorMessage();
+    << Crasher::GetStackTraceEtcErrorMessageHTML();
     inputOutputMinContext.MakeEmptyContext(*this->owner);
   }
   Expression newContext;

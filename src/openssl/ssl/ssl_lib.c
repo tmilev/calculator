@@ -2973,7 +2973,7 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth, std::stringstream* commentsOnError)
   SSL_CTX *ret = NULL;
   if (meth == NULL) {
     if (commentsOnError != 0) {
-      *commentsOnError << "No ssl method provided. ";
+      *commentsOnError << "No ssl method provided.\n";
     }
     SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_NULL_SSL_METHOD_PASSED);
     return NULL;
@@ -3024,17 +3024,12 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth, std::stringstream* commentsOnError)
     }
     goto err;
   }
-  std::cout << "\n\nDEBUG: GOT TO HERE\n\n";
   ret->sessions = lh_SSL_SESSION_new(ssl_session_hash, ssl_session_cmp);
   if (ret->sessions == NULL) {
     if (commentsOnError != 0) {
-      *commentsOnError << "Failed to create ssl session. ";
+      *commentsOnError << "Failed to create ssl session.\n";
     }
     goto err;
-  }
-  if (commentsOnError != 0) {
-    *commentsOnError << "DEBUG: GOT to this point.\n";
-
   }
   ret->cert_store = X509_STORE_new();
   if (ret->cert_store == NULL) {
@@ -3098,7 +3093,7 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth, std::stringstream* commentsOnError)
   ) {
     ret->options |= SSL_OP_NO_TICKET;
   }
-  if (RAND_priv_bytes(ret->ext.cookie_hmac_key, sizeof(ret->ext.cookie_hmac_key), 0) <= 0) {
+  if (RAND_priv_bytes(ret->ext.cookie_hmac_key, sizeof(ret->ext.cookie_hmac_key), commentsOnError) <= 0) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to fetch random bytes.\n";
     }

@@ -316,9 +316,8 @@ void SSLdata::initSSLserver() {
   this->contextServer = SSL_CTX_new(this->theSSLMethod, &commentsOnError);
   if (this->contextServer == 0) {
     logServer << logger::red << "Failed to create ssl context. " << logger::endL;
-    logServer << commentsOnError.str();
     ERR_print_errors_fp(stderr);
-    crash << "Openssl error: failed to create CTX object." << crash;
+    crash << "Openssl context error.\n" << commentsOnError.str() << crash;
   }
   if (SSL_CTX_use_certificate_chain_file(this->contextServer, signedFileCertificate3Physical.c_str()) <= 0) {
     logServer << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
@@ -356,18 +355,6 @@ void SSLdata::initSSLserver() {
   ////////
 }
 #endif
-
-//void SSLdata::initSSLclient()
-//{ this->initSSLlibrary();
-//  if (this->theSSLClientMethod!= 0)
-//    return;
-//  this->theSSLClientMethod = SSLv23_client_method();
-//  this->contextClient = SSL_CTX_new(this->theSSLClientMethod);   /* Create new context */
-//  if (this->contextClient == 0)
-//  { ERR_print_errors_fp(stderr);
-//    crash << "openssl error: failed to create CTX object." << crash;
-//  }
-//}
 
 #ifdef MACRO_use_open_ssl
 void SSLdata::HandShakeIamServer(int inputSocketID) {

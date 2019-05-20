@@ -20,9 +20,6 @@ Crasher::Crasher() {
 }
 
 void Crasher::FirstRun() {
-  this->crashReportConsolE << this->crashReport.str();
-  this->crashReportHtml << this->crashReport.str();
-  this->crashReportFile << this->crashReport.str();
   if (!this->flagCrashInitiateD && (
     theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer
   )) {
@@ -30,7 +27,9 @@ void Crasher::FirstRun() {
     this->crashReportHtml << "\n<b style = 'color:red'>Crash</b> "
     << elapsedSeconds << " second(s) from the start.<hr>";
     this->crashReportConsolE << logger::consoleRed() << "Crash " << elapsedSeconds
-    << " second(s) " << logger::consoleNormal() << " from the start.\n";
+    << " second(s)" << logger::consoleNormal() << " from the start.\n";
+    this->crashReportFile << "Crash " << elapsedSeconds
+    << " second(s) from the start.\n";
   }
   this->flagCrashInitiateD = true;
 }
@@ -46,6 +45,10 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
     << this->crashReportConsolE.str() << std::endl;
     assert(false);
   }
+  this->crashReportConsolE << this->crashReport.str();
+  this->crashReportHtml << this->crashReport.str();
+  this->crashReportFile << this->crashReport.str();
+
   this->flagFinishingCrash = true;
   if (!theGlobalVariables.flagNotAllocated) {
     this->crashReportConsolE << "\n";
@@ -112,11 +115,12 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
   }
   if (stOutput.theOutputFunction == 0) {
     std::cout << this->crashReportConsolE.str() << std::endl;
+  } else {
+    JSData output;
+    output[WebAPI::result::crashReport] = this->crashReportHtml.str();
+    stOutput << output.ToString(false);
+    stOutput.Flush();
   }
-  JSData output;
-  output[WebAPI::result::crashReport] = this->crashReportHtml.str();
-  stOutput << output.ToString(false);
-  stOutput.Flush();
   if (this->CleanUpFunction != 0) {
     this->CleanUpFunction();
   }

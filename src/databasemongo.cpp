@@ -965,7 +965,6 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString(
   query.findQuery = findQuery;
   query.collectionName = collectionName;
   std::stringstream updateQueryStream;
-  //logWorker << logger::blue << "DEBUG: GOT to here: " << logger::endL;
   if (fieldsToSetIfNullUseFirstFieldIfUpdateQuery == 0) {
     updateQueryStream << "{\"$set\": " << updateQuery.ToString(true) << "}";
   } else {

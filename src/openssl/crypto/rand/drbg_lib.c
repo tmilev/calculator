@@ -105,10 +105,13 @@ static const unsigned int rand_drbg_used_flags =
 
 static RAND_DRBG *drbg_setup(RAND_DRBG *parent, int drbg_type, std::stringstream *commentsOnError);
 
-static RAND_DRBG *rand_drbg_new(int secure,
-                                int type,
-                                unsigned int flags,
-                                RAND_DRBG *parent);
+static RAND_DRBG *rand_drbg_new(
+  int secure,
+  int type,
+  unsigned int flags,
+  RAND_DRBG *parent,
+  std::stringstream *comments
+);
 
 static int is_ctr(int type)
 {
@@ -237,11 +240,14 @@ int RAND_DRBG_set_defaults(int type, unsigned int flags)
  *
  * Returns a pointer to the new DRBG instance on success, NULL on failure.
  */
-static RAND_DRBG *rand_drbg_new(int secure,
-                                int type,
-                                unsigned int flags,
-                                RAND_DRBG *parent)
-{
+#include <sstream>
+static RAND_DRBG *rand_drbg_new(
+  int secure,
+  int type,
+  unsigned int flags,
+  RAND_DRBG *parent,
+  std::stringstream* comments
+) {
     RAND_DRBG *drbg = (RAND_DRBG *)( secure ? OPENSSL_secure_zalloc(sizeof(*drbg))
                              : OPENSSL_zalloc(sizeof(*drbg)));
 
@@ -254,11 +260,15 @@ static RAND_DRBG *rand_drbg_new(int secure,
     drbg->fork_count = rand_fork_count;
     drbg->parent = parent;
 
-    if (parent == NULL) {
+  if (parent == NULL) {
+    if (comments != 0) {
+      *comments << "Initialization of DRBG without parent.\n";
+    }
 #ifdef FIPS_MODE
         drbg->get_entropy = rand_crngt_get_entropy;
         drbg->cleanup_entropy = rand_crngt_cleanup_entropy;
 #else
+
         drbg->get_entropy = rand_drbg_get_entropy;
         drbg->cleanup_entropy = rand_drbg_cleanup_entropy;
 #endif
@@ -306,14 +316,12 @@ static RAND_DRBG *rand_drbg_new(int secure,
     return NULL;
 }
 
-RAND_DRBG *RAND_DRBG_new(int type, unsigned int flags, RAND_DRBG *parent)
-{
-    return rand_drbg_new(0, type, flags, parent);
+RAND_DRBG *RAND_DRBG_new(int type, unsigned int flags, RAND_DRBG *parent, std::stringstream* comments) {
+  return rand_drbg_new(0, type, flags, parent, comments);
 }
 
-RAND_DRBG *RAND_DRBG_secure_new(int type, unsigned int flags, RAND_DRBG *parent)
-{
-    return rand_drbg_new(1, type, flags, parent);
+RAND_DRBG *RAND_DRBG_secure_new(int type, unsigned int flags, RAND_DRBG *parent, std::stringstream* comments) {
+  return rand_drbg_new(1, type, flags, parent, comments);
 }
 
 /*
@@ -408,12 +416,15 @@ int RAND_DRBG_instantiate(
             drbg->reseed_next_counter = 1;
     }
 
-    if (drbg->get_entropy != NULL)
-        entropylen = drbg->get_entropy(drbg, &entropy, min_entropy,
-                                       min_entropylen, max_entropylen, 0);
+    if (drbg->get_entropy != NULL) {
+      entropylen = drbg->get_entropy(drbg, &entropy, min_entropy, min_entropylen, max_entropylen, 0);
+    }
     if (entropylen < min_entropylen || entropylen > max_entropylen) {
         if (commentsOnError != 0) {
-          *commentsOnError << "Failed to get entropy: entropylen equals: " << entropylen << ". ";
+          *commentsOnError << "Failed to get entropy: entropylen equals: " << entropylen << ".\n";
+          if (drbg->get_entropy != 0) {
+            *commentsOnError << "NOT EXPECTED: get_entropy function is given, but the output was not successful.\n";
+          }
         }
         RANDerr(RAND_F_RAND_DRBG_INSTANTIATE, RAND_R_ERROR_RETRIEVING_ENTROPY);
         goto end;
@@ -976,14 +987,12 @@ void *RAND_DRBG_get_ex_data(const RAND_DRBG *drbg, int idx)
  *
  * Returns a pointer to the new DRBG instance on success, NULL on failure.
  */
-static RAND_DRBG *drbg_setup(RAND_DRBG *parent, int drbg_type, std::stringstream* commentsOnError)
-{
-    RAND_DRBG *drbg;
-
-    drbg = RAND_DRBG_secure_new(rand_drbg_type[drbg_type],
-                                rand_drbg_flags[drbg_type], parent);
-    if (drbg == NULL)
-        return NULL;
+static RAND_DRBG *drbg_setup(RAND_DRBG *parent, int drbg_type, std::stringstream* commentsOnError) {
+  RAND_DRBG *drbg;
+  drbg = RAND_DRBG_secure_new(rand_drbg_type[drbg_type], rand_drbg_flags[drbg_type], parent, commentsOnError);
+  if (drbg == NULL) {
+    return NULL;
+  }
 
     /* Only the master DRBG needs to have a lock */
     if (parent == NULL && rand_drbg_enable_locking(drbg) == 0)

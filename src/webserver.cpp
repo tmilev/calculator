@@ -5065,6 +5065,9 @@ int WebServer::Run() {
       << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
       << logger::endL;
     }
+    // acquire crypto entropy
+    int fixMeAcquireEntropy;
+
     int incomingPID = fork(); //creates an almost identical copy of this process.
     //<- Please don't assign directly to this->GetActiveWorker().ProcessPID.
     //<- There may be a race condition around this line of code and I

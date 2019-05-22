@@ -187,6 +187,9 @@ size_t rand_drbg_get_entropy(
        * if locking if drbg->parent->lock == NULL.)
        */
       rand_drbg_lock(drbg->parent);
+      if (commentsOnError != 0) {
+        *commentsOnError << "DEBUG: about to get random from parent.\n";
+      }
       if (RAND_DRBG_generate(
           drbg->parent,
           buffer,
@@ -194,7 +197,7 @@ size_t rand_drbg_get_entropy(
           prediction_resistance,
           NULL,
           0,
-          0
+          commentsOnError
         ) != 0
       ) {
         bytes = bytes_needed;
@@ -219,6 +222,8 @@ size_t rand_drbg_get_entropy(
   if (entropy_available > 0) {
     ret   = rand_pool_length(pool);
     *pout = rand_pool_detach(pool);
+  } else if (commentsOnError != 0) {
+    *commentsOnError << "No entropy available.\n";
   }
   if (drbg->seed_pool == NULL) {
     rand_pool_free(pool);
@@ -619,30 +624,24 @@ size_t rand_pool_entropy_needed(RAND_POOL *pool)
  * In case of an error, 0 is returned.
  */
 
-size_t rand_pool_bytes_needed(RAND_POOL *pool, unsigned int entropy_factor)
-{
-    size_t bytes_needed;
-    size_t entropy_needed = rand_pool_entropy_needed(pool);
-
-    if (entropy_factor < 1) {
-        RANDerr(RAND_F_RAND_POOL_BYTES_NEEDED, RAND_R_ARGUMENT_OUT_OF_RANGE);
-        return 0;
-    }
-
-    bytes_needed = ENTROPY_TO_BYTES(entropy_needed, entropy_factor);
-
-    if (bytes_needed > pool->max_len - pool->len) {
-        /* not enough space left */
-        RANDerr(RAND_F_RAND_POOL_BYTES_NEEDED, RAND_R_RANDOM_POOL_OVERFLOW);
-        return 0;
-    }
-
-    if (pool->len < pool->min_len &&
-        bytes_needed < pool->min_len - pool->len)
-        /* to meet the min_len requirement */
-        bytes_needed = pool->min_len - pool->len;
-
-    return bytes_needed;
+size_t rand_pool_bytes_needed(RAND_POOL *pool, unsigned int entropy_factor) {
+  size_t bytes_needed;
+  size_t entropy_needed = rand_pool_entropy_needed(pool);
+  if (entropy_factor < 1) {
+    RANDerr(RAND_F_RAND_POOL_BYTES_NEEDED, RAND_R_ARGUMENT_OUT_OF_RANGE);
+    return 0;
+  }
+  bytes_needed = ENTROPY_TO_BYTES(entropy_needed, entropy_factor);
+  if (bytes_needed > pool->max_len - pool->len) {
+    /* not enough space left */
+    RANDerr(RAND_F_RAND_POOL_BYTES_NEEDED, RAND_R_RANDOM_POOL_OVERFLOW);
+    return 0;
+  }
+  if (pool->len < pool->min_len && bytes_needed < pool->min_len - pool->len) {
+    /* to meet the min_len requirement */
+    bytes_needed = pool->min_len - pool->len;
+  }
+  return bytes_needed;
 }
 
 /* Returns the remaining number of bytes available */
@@ -694,22 +693,19 @@ int rand_pool_add(RAND_POOL *pool,
  * After updating the buffer, rand_pool_add_end() needs to be called
  * to finish the udpate operation (see next comment).
  */
-unsigned char *rand_pool_add_begin(RAND_POOL *pool, size_t len)
-{
-    if (len == 0)
-        return NULL;
-
-    if (len > pool->max_len - pool->len) {
-        RANDerr(RAND_F_RAND_POOL_ADD_BEGIN, RAND_R_RANDOM_POOL_OVERFLOW);
-        return NULL;
-    }
-
-    if (pool->buffer == NULL) {
-        RANDerr(RAND_F_RAND_POOL_ADD_BEGIN, ERR_R_INTERNAL_ERROR);
-        return NULL;
-    }
-
-    return pool->buffer + pool->len;
+unsigned char *rand_pool_add_begin(RAND_POOL *pool, size_t desiredLength) {
+  if (desiredLength == 0) {
+    return NULL;
+  }
+  if (desiredLength > pool->max_len - pool->len) {
+    RANDerr(RAND_F_RAND_POOL_ADD_BEGIN, RAND_R_RANDOM_POOL_OVERFLOW);
+    return NULL;
+  }
+  if (pool->buffer == NULL) {
+    RANDerr(RAND_F_RAND_POOL_ADD_BEGIN, ERR_R_INTERNAL_ERROR);
+    return NULL;
+  }
+  return pool->buffer + pool->len;
 }
 
 /*

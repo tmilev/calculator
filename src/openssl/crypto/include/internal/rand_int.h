@@ -85,7 +85,7 @@ size_t rand_pool_bytes_remaining(RAND_POOL *pool);
 
 int rand_pool_add(RAND_POOL *pool,
                   const unsigned char *buffer, size_t len, size_t entropy);
-unsigned char *rand_pool_add_begin(RAND_POOL *pool, size_t len);
+unsigned char *rand_pool_add_begin(RAND_POOL *pool, size_t desiredLength);
 int rand_pool_add_end(RAND_POOL *pool, size_t len, size_t entropy);
 
 

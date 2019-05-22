@@ -33,10 +33,15 @@ size_t rand_acquire_entropy_from_tsc(RAND_POOL *pool);
 size_t rand_acquire_entropy_from_cpu(RAND_POOL *pool);
 
 /* DRBG entropy callbacks. */
-size_t rand_drbg_get_entropy(RAND_DRBG *drbg,
-                             unsigned char **pout,
-                             int entropy, size_t min_len, size_t max_len,
-                             int prediction_resistance);
+size_t rand_drbg_get_entropy(
+  RAND_DRBG *drbg,
+  unsigned char **pout,
+  int entropy,
+  size_t min_len,
+  size_t max_len,
+  int prediction_resistance,
+  std::stringstream *commentsOnError
+);
 void rand_drbg_cleanup_entropy(RAND_DRBG *drbg,
                                unsigned char *out, size_t outlen);
 size_t rand_drbg_get_nonce(RAND_DRBG *drbg,
@@ -94,7 +99,7 @@ int rand_pool_add_end(RAND_POOL *pool, size_t len, size_t entropy);
  * of entropy, the total entropy count is returned. If it fails, it returns
  * an entropy count of 0.
  */
-size_t rand_pool_acquire_entropy(RAND_POOL *pool);
+size_t rand_pool_acquire_entropy(RAND_POOL *pool, std::stringstream *commentsOnError);
 
 /*
  * Add some application specific nonce data

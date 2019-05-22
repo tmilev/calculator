@@ -129,73 +129,101 @@ size_t rand_acquire_entropy_from_cpu(RAND_POOL *pool)
  * If a random pool has been added to the DRBG using RAND_add(), then
  * its entropy will be used up first.
  */
-size_t rand_drbg_get_entropy(RAND_DRBG *drbg,
-                             unsigned char **pout,
-                             int entropy, size_t min_len, size_t max_len,
-                             int prediction_resistance)
-{
-    size_t ret = 0;
-    size_t entropy_available = 0;
-    RAND_POOL *pool;
-
-    if (drbg->parent != NULL && drbg->strength > drbg->parent->strength) {
-        /*
-         * We currently don't support the algorithm from NIST SP 800-90C
-         * 10.1.2 to use a weaker DRBG as source
-         */
-        RANDerr(RAND_F_RAND_DRBG_GET_ENTROPY, RAND_R_PARENT_STRENGTH_TOO_WEAK);
-        return 0;
+#include <sstream>
+size_t rand_drbg_get_entropy(
+  RAND_DRBG *drbg,
+  unsigned char **pout,
+  int entropy,
+  size_t min_len,
+  size_t max_len,
+  int prediction_resistance,
+  std::stringstream* commentsOnError
+) {
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: got to here. ";
+  }
+  size_t ret = 0;
+  size_t entropy_available = 0;
+  RAND_POOL *pool;
+  if (drbg->parent != NULL) {
+    if (drbg->strength > drbg->parent->strength) {
+      /*
+       * We currently don't support the algorithm from NIST SP 800-90C
+       * 10.1.2 to use a weaker DRBG as source
+       */
+      if (commentsOnError != 0) {
+        *commentsOnError << "DRBG strength not allowed to increase: current strength equals: " << drbg->strength
+        << ", old strength equals: " << drbg->parent->strength << ". ";
+      }
+      RANDerr(RAND_F_RAND_DRBG_GET_ENTROPY, RAND_R_PARENT_STRENGTH_TOO_WEAK);
+      return 0;
+    }
+  }
+  if (drbg->seed_pool != NULL) {
+    pool = drbg->seed_pool;
+    pool->entropy_requested = entropy;
+  } else {
+    pool = rand_pool_new(entropy, min_len, max_len);
+    if (pool == NULL) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Random pool returned null. ";
+      }
+      return 0;
+    }
+  }
+  if (drbg->parent != NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "DEBUG: got to here, pt 1.5. ";
     }
 
-    if (drbg->seed_pool != NULL) {
-        pool = drbg->seed_pool;
-        pool->entropy_requested = entropy;
-    } else {
-        pool = rand_pool_new(entropy, min_len, max_len);
-        if (pool == NULL)
-            return 0;
+    size_t bytes_needed = rand_pool_bytes_needed(pool, 1 /*entropy_factor*/);
+    unsigned char *buffer = rand_pool_add_begin(pool, bytes_needed);
+    if (buffer != NULL) {
+      size_t bytes = 0;
+      /*
+       * Get random from parent, include our state as additional input.
+       * Our lock is already held, but we need to lock our parent before
+       * generating bits from it. (Note: taking the lock will be a no-op
+       * if locking if drbg->parent->lock == NULL.)
+       */
+      rand_drbg_lock(drbg->parent);
+      if (RAND_DRBG_generate(
+          drbg->parent,
+          buffer,
+          bytes_needed,
+          prediction_resistance,
+          NULL,
+          0,
+          0
+        ) != 0
+      ) {
+        bytes = bytes_needed;
+      }
+      drbg->reseed_next_counter = tsan_load(&drbg->parent->reseed_prop_counter);
+      rand_drbg_unlock(drbg->parent);
+      rand_pool_add_end(pool, bytes, 8 * bytes);
+      entropy_available = rand_pool_entropy_available(pool);
     }
-
-    if (drbg->parent != NULL) {
-        size_t bytes_needed = rand_pool_bytes_needed(pool, 1 /*entropy_factor*/);
-        unsigned char *buffer = rand_pool_add_begin(pool, bytes_needed);
-
-        if (buffer != NULL) {
-            size_t bytes = 0;
-
-            /*
-             * Get random from parent, include our state as additional input.
-             * Our lock is already held, but we need to lock our parent before
-             * generating bits from it. (Note: taking the lock will be a no-op
-             * if locking if drbg->parent->lock == NULL.)
-             */
-            rand_drbg_lock(drbg->parent);
-            if (RAND_DRBG_generate(drbg->parent,
-                                   buffer, bytes_needed,
-                                   prediction_resistance,
-                                   NULL, 0, 0) != 0)
-                bytes = bytes_needed;
-            drbg->reseed_next_counter
-                = tsan_load(&drbg->parent->reseed_prop_counter);
-            rand_drbg_unlock(drbg->parent);
-
-            rand_pool_add_end(pool, bytes, 8 * bytes);
-            entropy_available = rand_pool_entropy_available(pool);
-        }
-
-    } else {
-        /* Get entropy by polling system entropy sources. */
-        entropy_available = rand_pool_acquire_entropy(pool);
+  } else {
+    if (commentsOnError != 0) {
+      *commentsOnError << "DEBUG: got to here, pt 2. ";
     }
-
-    if (entropy_available > 0) {
-        ret   = rand_pool_length(pool);
-        *pout = rand_pool_detach(pool);
+    /* Get entropy by polling system entropy sources. */
+    entropy_available = rand_pool_acquire_entropy(pool, commentsOnError);
+    if (entropy_available == 0) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Got no available entropy.\n";
+      }
     }
-
-    if (drbg->seed_pool == NULL)
-        rand_pool_free(pool);
-    return ret;
+  }
+  if (entropy_available > 0) {
+    ret   = rand_pool_length(pool);
+    *pout = rand_pool_detach(pool);
+  }
+  if (drbg->seed_pool == NULL) {
+    rand_pool_free(pool);
+  }
+  return ret;
 }
 
 /*
@@ -397,7 +425,7 @@ int RAND_poll(std::stringstream* commentsOnFailure)
         if (pool == NULL)
             return 0;
 
-        if (rand_pool_acquire_entropy(pool) == 0)
+        if (rand_pool_acquire_entropy(pool, commentsOnFailure) == 0)
             goto err;
 
         if (meth->add == NULL
@@ -516,8 +544,7 @@ size_t rand_pool_entropy(RAND_POOL *pool)
 /*
  * Return the |pool|'s buffer length to the caller.
  */
-size_t rand_pool_length(RAND_POOL *pool)
-{
+size_t rand_pool_length(RAND_POOL* pool) {
     return pool->len;
 }
 

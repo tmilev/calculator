@@ -467,7 +467,7 @@ void rand_pool_keep_random_devices_open(int keep)
  * of input from the different entropy sources (trust, quality,
  * possibility of blocking).
  */
-size_t rand_pool_acquire_entropy(RAND_POOL *pool)
+size_t rand_pool_acquire_entropy(RAND_POOL *pool, std::stringstream* commentsOnError)
 {
 #  if defined(OPENSSL_RAND_SEED_NONE)
     return rand_pool_entropy_available(pool);

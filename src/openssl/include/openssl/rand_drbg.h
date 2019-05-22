@@ -121,11 +121,15 @@ void *RAND_DRBG_get_ex_data(const RAND_DRBG *drbg, int idx);
 /*
  * Callback function typedefs
  */
-typedef size_t (*RAND_DRBG_get_entropy_fn)(RAND_DRBG *drbg,
-                                           unsigned char **pout,
-                                           int entropy, size_t min_len,
-                                           size_t max_len,
-                                           int prediction_resistance);
+typedef size_t (*RAND_DRBG_get_entropy_fn)(
+  RAND_DRBG *drbg,
+  unsigned char **pout,
+  int entropy,
+  size_t min_len,
+  size_t max_len,
+  int prediction_resistance,
+  std::stringstream* commentsOnError
+);
 typedef void (*RAND_DRBG_cleanup_entropy_fn)(RAND_DRBG *ctx,
                                              unsigned char *out, size_t outlen);
 typedef size_t (*RAND_DRBG_get_nonce_fn)(RAND_DRBG *drbg, unsigned char **pout,

@@ -367,8 +367,7 @@ int RAND_DRBG_instantiate(
     size_t max_entropylen = drbg->max_entropylen;
 
     if (perslen > drbg->max_perslen) {
-        RANDerr(RAND_F_RAND_DRBG_INSTANTIATE,
-                RAND_R_PERSONALISATION_STRING_TOO_LONG);
+        RANDerr(RAND_F_RAND_DRBG_INSTANTIATE, RAND_R_PERSONALISATION_STRING_TOO_LONG);
         if (commentsOnError != 0) {
           *commentsOnError << "Perslen: " << (int) perslen
           << " is greater than grbg->maxperslen: " << (int) drbg->max_perslen << ". ";
@@ -377,8 +376,7 @@ int RAND_DRBG_instantiate(
     }
 
     if (drbg->meth == NULL) {
-        RANDerr(RAND_F_RAND_DRBG_INSTANTIATE,
-                RAND_R_NO_DRBG_IMPLEMENTATION_SELECTED);
+        RANDerr(RAND_F_RAND_DRBG_INSTANTIATE, RAND_R_NO_DRBG_IMPLEMENTATION_SELECTED);
         if (commentsOnError != 0) {
           *commentsOnError << "Method is null. ";
         }
@@ -410,25 +408,25 @@ int RAND_DRBG_instantiate(
     }
 
     drbg->reseed_next_counter = tsan_load(&drbg->reseed_prop_counter);
-    if (drbg->reseed_next_counter) {
-        drbg->reseed_next_counter++;
-        if(!drbg->reseed_next_counter)
-            drbg->reseed_next_counter = 1;
+  if (drbg->reseed_next_counter) {
+    drbg->reseed_next_counter ++;
+    if (!drbg->reseed_next_counter) {
+      drbg->reseed_next_counter = 1;
     }
-
-    if (drbg->get_entropy != NULL) {
-      entropylen = drbg->get_entropy(drbg, &entropy, min_entropy, min_entropylen, max_entropylen, 0);
+  }
+  if (drbg->get_entropy != NULL) {
+    entropylen = drbg->get_entropy(drbg, &entropy, min_entropy, min_entropylen, max_entropylen, 0, commentsOnError);
+  }
+  if (entropylen < min_entropylen || entropylen > max_entropylen) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to get entropy: entropylen equals: " << entropylen << ".\n";
+      if (drbg->get_entropy != 0) {
+        *commentsOnError << "NOT EXPECTED: get_entropy function is given, but the output was not successful.\n";
+      }
     }
-    if (entropylen < min_entropylen || entropylen > max_entropylen) {
-        if (commentsOnError != 0) {
-          *commentsOnError << "Failed to get entropy: entropylen equals: " << entropylen << ".\n";
-          if (drbg->get_entropy != 0) {
-            *commentsOnError << "NOT EXPECTED: get_entropy function is given, but the output was not successful.\n";
-          }
-        }
-        RANDerr(RAND_F_RAND_DRBG_INSTANTIATE, RAND_R_ERROR_RETRIEVING_ENTROPY);
-        goto end;
-    }
+    RANDerr(RAND_F_RAND_DRBG_INSTANTIATE, RAND_R_ERROR_RETRIEVING_ENTROPY);
+    goto end;
+  }
 
     if (drbg->min_noncelen > 0 && drbg->get_nonce != NULL) {
         noncelen = drbg->get_nonce(drbg, &nonce, drbg->strength / 2,
@@ -543,11 +541,17 @@ int RAND_DRBG_reseed(RAND_DRBG *drbg,
             drbg->reseed_next_counter = 1;
     }
 
-    if (drbg->get_entropy != NULL)
-        entropylen = drbg->get_entropy(drbg, &entropy, drbg->strength,
-                                       drbg->min_entropylen,
-                                       drbg->max_entropylen,
-                                       prediction_resistance);
+  if (drbg->get_entropy != NULL) {
+    entropylen = drbg->get_entropy(
+      drbg,
+      &entropy,
+      drbg->strength,
+      drbg->min_entropylen,
+      drbg->max_entropylen,
+      prediction_resistance,
+      0
+    );
+  }
     if (entropylen < drbg->min_entropylen
             || entropylen > drbg->max_entropylen) {
         RANDerr(RAND_F_RAND_DRBG_RESEED, RAND_R_ERROR_RETRIEVING_ENTROPY);

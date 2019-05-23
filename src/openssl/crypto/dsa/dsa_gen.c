@@ -124,7 +124,7 @@ int dsa_builtin_paramgen(DSA *ret, size_t bits, size_t qbits,
                 goto err;
 
             if (use_random_seed) {
-                if (RAND_bytes(seed, qsize) <= 0)
+                if (RAND_bytes(seed, qsize, 0) <= 0)
                     goto err;
             } else {
                 /* If we come back through, use random seed next time. */
@@ -402,7 +402,7 @@ int dsa_builtin_paramgen2(DSA *ret, size_t L, size_t N,
                 goto err;
 
             if (!seed_in) {
-                if (RAND_bytes(seed, seed_len) <= 0)
+                if (RAND_bytes(seed, seed_len, 0) <= 0)
                     goto err;
             }
             /* step 2 */

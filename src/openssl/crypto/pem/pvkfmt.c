@@ -814,7 +814,7 @@ static int i2b_PVK(unsigned char **out, EVP_PKEY *pk, int enclevel,
     write_ledword(&p, enclevel ? PVK_SALTLEN : 0);
     write_ledword(&p, pklen);
     if (enclevel) {
-        if (RAND_bytes(p, PVK_SALTLEN) <= 0)
+        if (RAND_bytes(p, PVK_SALTLEN, 0) <= 0)
             goto error;
         salt = p;
         p += PVK_SALTLEN;

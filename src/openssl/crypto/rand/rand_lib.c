@@ -17,6 +17,7 @@
 #include "rand_lcl.h"
 #include "../../e_os.h"
 #include<iostream>
+#include "../../../vpfMacros.h"
 
 #ifndef OPENSSL_NO_ENGINE
 /* non-NULL if default_RAND_meth is ENGINE-provided */
@@ -407,7 +408,7 @@ int RAND_poll(std::stringstream* commentsOnFailure)
 
     RAND_POOL *pool = NULL;
 
-    const RAND_METHOD *meth = RAND_get_rand_method();
+    const RAND_METHOD *meth = RAND_get_rand_method(commentsOnFailure);
 
     if (meth == RAND_OpenSSL()) {
         /* fill random pool and seed the master DRBG */
@@ -747,7 +748,7 @@ int RAND_set_rand_method(const RAND_METHOD *meth)
     return 1;
 }
 
-const RAND_METHOD *RAND_get_rand_method(void)
+const RAND_METHOD *RAND_get_rand_method(std::stringstream* comments)
 {
     const RAND_METHOD *tmp_meth = NULL;
 
@@ -803,20 +804,19 @@ int RAND_set_rand_engine(ENGINE *engine)
 }
 #endif
 
-void RAND_seed(const void *buf, int num, std::stringstream* commentsOnFailure)
-{
-    const RAND_METHOD *meth = RAND_get_rand_method();
-
-    if (meth->seed != NULL)
-        meth->seed(buf, num, commentsOnFailure);
+void RAND_seed(const void *buf, int num, std::stringstream* commentsOnFailure) {
+  const RAND_METHOD *meth = RAND_get_rand_method(commentsOnFailure);
+  if (meth->seed != NULL) {
+    meth->seed(buf, num, commentsOnFailure);
+  }
 }
 
-void RAND_add(const void *buf, int num, double randomness)
-{
-    const RAND_METHOD *meth = RAND_get_rand_method();
-
-    if (meth->add != NULL)
-        meth->add(buf, num, randomness, 0);
+void RAND_add(const void *buf, int num, double randomness, std::stringstream* comments) {
+  const RAND_METHOD *meth = RAND_get_rand_method(comments);
+  if (meth->add == NULL) {
+    crash << "Add random method not initialized. " << crash;
+  }
+  meth->add(buf, num, randomness, 0);
 }
 
 /*
@@ -826,12 +826,12 @@ void RAND_add(const void *buf, int num, double randomness)
  */
 int RAND_priv_bytes(unsigned char *buf, int num, std::stringstream* commentsOnFailure)
 {
-    const RAND_METHOD *meth = RAND_get_rand_method();
+    const RAND_METHOD *meth = RAND_get_rand_method(commentsOnFailure);
     RAND_DRBG *drbg;
     int ret;
 
     if (meth != RAND_OpenSSL())
-        return RAND_bytes(buf, num);
+        return RAND_bytes(buf, num, 0);
 
     drbg = RAND_DRBG_get0_private(commentsOnFailure);
     if (drbg == NULL)
@@ -841,9 +841,9 @@ int RAND_priv_bytes(unsigned char *buf, int num, std::stringstream* commentsOnFa
     return ret;
 }
 
-int RAND_bytes(unsigned char *buf, int num)
+int RAND_bytes(unsigned char *buf, int num, std::stringstream* commentsOnError)
 {
-    const RAND_METHOD *meth = RAND_get_rand_method();
+    const RAND_METHOD *meth = RAND_get_rand_method(commentsOnError);
 
     if (meth->bytes != NULL)
         return meth->bytes(buf, num, 0);
@@ -852,9 +852,9 @@ int RAND_bytes(unsigned char *buf, int num)
 }
 
 #if !OPENSSL_API_1_1_0
-int RAND_pseudo_bytes(unsigned char *buf, int num)
+int RAND_pseudo_bytes(unsigned char *buf, int num, std::stringstream* commentsOnError)
 {
-    const RAND_METHOD *meth = RAND_get_rand_method();
+    const RAND_METHOD *meth = RAND_get_rand_method(commentsOnError);
 
     if (meth->pseudorand != NULL)
         return meth->pseudorand(buf, num, 0);
@@ -864,7 +864,7 @@ int RAND_pseudo_bytes(unsigned char *buf, int num)
 
 int RAND_status(void)
 {
-    const RAND_METHOD *meth = RAND_get_rand_method();
+    const RAND_METHOD *meth = RAND_get_rand_method(0);
 
     if (meth->status != NULL)
         return meth->status(0);

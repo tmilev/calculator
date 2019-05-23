@@ -52,7 +52,7 @@ int PKCS5_pbe_set0_algor(X509_ALGOR *algor, int alg, int iter,
     }
     if (salt)
         memcpy(sstr, salt, saltlen);
-    else if (RAND_bytes(sstr, saltlen) <= 0)
+    else if (RAND_bytes(sstr, saltlen, 0) <= 0)
         goto err;
 
     ASN1_STRING_set0(pbe->salt, sstr, saltlen);

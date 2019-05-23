@@ -279,15 +279,19 @@ void SSLdata::initSSLlibrary() {
   }
   this->flagSSLlibraryInitialized = true;
   std::stringstream commentsOnError;
+  // this command loads error strings and initializes openSSL.
   int loadedSuccessfully = SSL_load_error_strings(&commentsOnError);
   if (loadedSuccessfully != 1) {
     logServer << logger::red << commentsOnError.str() << logger::endL;
     crash << "Failed to initialize ssl library. " << crash;
   }
-  loadedSuccessfully = OPENSSL_init_ssl(0, NULL, &commentsOnError);
-  if (loadedSuccessfully != 1) {
-    logServer << logger::red << commentsOnError.str() << logger::endL;
-    crash << "Failed to initialize ssl library. " << crash;
+  //loadedSuccessfully = OPENSSL_init_ssl(0, NULL, &commentsOnError);
+  //if (loadedSuccessfully != 1) {
+  //  logServer << logger::red << commentsOnError.str() << logger::endL;
+  //  crash << "Failed to initialize ssl library. " << crash;
+  //}
+  if (commentsOnError.str() != "") {
+    logServer << logger::red << "OpenSSL initialization comments: " << logger::blue << commentsOnError.str() << logger::endL;
   }
   logServer << logger::green << "DEBUG: Initialzation of ssl successfull." << logger::endL;
 }
@@ -318,6 +322,7 @@ void SSLdata::initSSLserver() {
   this->theSSLMethod = SSLv23_method();
   std::stringstream commentsOnError;
 
+  logServer << logger::blue << "DEBUG: about to init openssl. " << logger::endL;
   this->contextServer = SSL_CTX_new(this->theSSLMethod, &commentsOnError);
   logServer << logger::red << "DEBUG: Errors: " << commentsOnError.str() << logger::endL;
   if (this->contextServer == 0) {

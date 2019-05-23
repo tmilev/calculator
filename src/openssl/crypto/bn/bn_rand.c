@@ -43,7 +43,7 @@ static int bnrand(BNRAND_FLAG flag, BIGNUM *rnd, int bits, int top, int bottom)
     }
 
     /* make a random number and set the top and bottom bits */
-    b = flag == NORMAL ? RAND_bytes(buf, bytes) : RAND_priv_bytes(buf, bytes, 0);
+    b = flag == NORMAL ? RAND_bytes(buf, bytes, 0) : RAND_priv_bytes(buf, bytes, 0);
     if (b <= 0)
         goto err;
 
@@ -55,7 +55,7 @@ static int bnrand(BNRAND_FLAG flag, BIGNUM *rnd, int bits, int top, int bottom)
         unsigned char c;
 
         for (i = 0; i < bytes; i++) {
-            if (RAND_bytes(&c, 1) <= 0)
+            if (RAND_bytes(&c, 1, 0) <= 0)
                 goto err;
             if (c >= 128 && i > 0)
                 buf[i] = buf[i - 1];

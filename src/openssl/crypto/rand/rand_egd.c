@@ -57,7 +57,7 @@ struct sockaddr_un {
 #  include <string.h>
 #  include <errno.h>
 
-int RAND_query_egd_bytes(const char *path, unsigned char *buf, int bytes)
+int RAND_query_egd_bytes(const char *path, unsigned char *buf, int bytes, std::stringstream* commentsOnError)
 {
     FILE *fp = NULL;
     struct sockaddr_un addr;
@@ -128,7 +128,7 @@ int RAND_query_egd_bytes(const char *path, unsigned char *buf, int bytes)
         goto err;
     ret = numbytes;
     if (mybuffer)
-        RAND_add(tempbuf, i, i);
+        RAND_add(tempbuf, i, i, commentsOnError);
 
  err:
     if (fp != NULL)
@@ -136,11 +136,11 @@ int RAND_query_egd_bytes(const char *path, unsigned char *buf, int bytes)
     return ret;
 }
 
-int RAND_egd_bytes(const char *path, int bytes)
+int RAND_egd_bytes(const char *path, int bytes, std::stringstream* commentsOnError)
 {
     int num;
 
-    num = RAND_query_egd_bytes(path, NULL, bytes);
+    num = RAND_query_egd_bytes(path, NULL, bytes, commentsOnError);
     if (num < 0)
         return -1;
     if (RAND_status() != 1)
@@ -148,9 +148,9 @@ int RAND_egd_bytes(const char *path, int bytes)
     return num;
 }
 
-int RAND_egd(const char *path)
+int RAND_egd(const char *path, std::stringstream* commentsOnError)
 {
-    return RAND_egd_bytes(path, 255);
+    return RAND_egd_bytes(path, 255, commentsOnError);
 }
 
 # endif

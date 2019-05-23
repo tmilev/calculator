@@ -73,7 +73,7 @@ static __FILE_ptr32 (*const vms_fopen)(const char *, const char *, ...) =
  * devices and EGD sockets are handled in rand_unix.c  If |bytes| is
  * -1 read the complete file; otherwise read the specified amount.
  */
-int RAND_load_file(const char *file, long bytes)
+int RAND_load_file(const char *file, long bytes, std::stringstream* commentsOnError)
 {
     /*
      * The load buffer size exceeds the chunk size by the comfortable amount
@@ -152,7 +152,7 @@ int RAND_load_file(const char *file, long bytes)
         if (i == 0)
             break;
 
-        RAND_add(buf, i, (double)i);
+        RAND_add(buf, i, (double) i, commentsOnError);
         ret += i;
 
         /* If given a bytecount, and we did it, break. */

@@ -402,7 +402,7 @@ static void impl_cache_flush_cache(QUERY *c, IMPL_CACHE_FLUSH *state)
     unsigned int n;
 
     if (store->nbits == 0) {
-        if (!RAND_bytes(store->rand_bits, sizeof(store->rand_bits)))
+        if (!RAND_bytes(store->rand_bits, sizeof(store->rand_bits), 0))
             return;
         store->nbits = sizeof(store->rand_bits) * 8;
     }

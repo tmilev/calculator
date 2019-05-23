@@ -134,12 +134,12 @@ int RSA_padding_add_PKCS1_type_2(unsigned char *to, int tlen,
     /* pad out with non-zero random data */
     j = tlen - 3 - flen;
 
-    if (RAND_bytes(p, j) <= 0)
+    if (RAND_bytes(p, j, 0) <= 0)
         return 0;
     for (i = 0; i < j; i++) {
         if (*p == '\0')
             do {
-                if (RAND_bytes(p, 1) <= 0)
+                if (RAND_bytes(p, 1, 0) <= 0)
                     return 0;
             } while (*p == '\0');
         p++;

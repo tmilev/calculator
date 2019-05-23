@@ -2971,6 +2971,9 @@ static int ssl_session_cmp(const SSL_SESSION *a, const SSL_SESSION *b)
 #include <sstream>
 SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth, std::stringstream* commentsOnError) {
   SSL_CTX *ret = NULL;
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: here I am pt 1.\n";
+  }
   if (meth == NULL) {
     if (commentsOnError != 0) {
       *commentsOnError << "No ssl method provided.\n";
@@ -2998,6 +3001,9 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth, std::stringstream* commentsOnError)
     }
     goto err;
   }
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: here I am pt 2.\n";
+  }
   ret->method = meth;
   ret->min_proto_version = 0;
   ret->max_proto_version = 0;
@@ -3023,6 +3029,9 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth, std::stringstream* commentsOnError)
       *commentsOnError << "Failed to create ssl certificate.\n";
     }
     goto err;
+  }
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: got to here pt 6.\n";
   }
   ret->sessions = lh_SSL_SESSION_new(ssl_session_hash, ssl_session_cmp);
   if (ret->sessions == NULL) {
@@ -3087,17 +3096,23 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth, std::stringstream* commentsOnError)
 
   /* Setup RFC5077 ticket keys */
   if (
-    (RAND_bytes(ret->ext.tick_key_name, sizeof(ret->ext.tick_key_name)) <= 0) ||
-    (RAND_priv_bytes(ret->ext.secure->tick_hmac_key, sizeof(ret->ext.secure->tick_hmac_key), 0) <= 0) ||
-    (RAND_priv_bytes(ret->ext.secure->tick_aes_key, sizeof(ret->ext.secure->tick_aes_key), 0) <= 0)
+    (RAND_bytes(ret->ext.tick_key_name, sizeof(ret->ext.tick_key_name), commentsOnError) <= 0) ||
+    (RAND_priv_bytes(ret->ext.secure->tick_hmac_key, sizeof(ret->ext.secure->tick_hmac_key), commentsOnError) <= 0) ||
+    (RAND_priv_bytes(ret->ext.secure->tick_aes_key, sizeof(ret->ext.secure->tick_aes_key), commentsOnError) <= 0)
   ) {
     ret->options |= SSL_OP_NO_TICKET;
+  }
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: got to here pt 7.\n";
   }
   if (RAND_priv_bytes(ret->ext.cookie_hmac_key, sizeof(ret->ext.cookie_hmac_key), commentsOnError) <= 0) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to fetch random bytes.\n";
     }
     goto err;
+  }
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: got to here pt 8.\n";
   }
 
 #ifndef OPENSSL_NO_SRP

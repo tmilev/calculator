@@ -91,7 +91,7 @@ int RSA_padding_add_PKCS1_OAEP_mgf1(unsigned char *to, int tlen,
     db[emlen - flen - mdlen - 1] = 0x01;
     memcpy(db + emlen - flen - mdlen, from, (unsigned int)flen);
     /* step 3d: generate random byte string */
-    if (RAND_bytes(seed, mdlen) <= 0)
+    if (RAND_bytes(seed, mdlen, 0) <= 0)
         goto err;
 
     dbmask_len = emlen - mdlen;

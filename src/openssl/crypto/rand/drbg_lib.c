@@ -105,13 +105,11 @@ static const unsigned int rand_drbg_used_flags =
 
 static RAND_DRBG *drbg_setup(RAND_DRBG *parent, int drbg_type, std::stringstream *commentsOnError);
 
-static RAND_DRBG *rand_drbg_new(
-  int secure,
+static RAND_DRBG *rand_drbg_new(int secure,
   int type,
   unsigned int flags,
   RAND_DRBG *parent,
-  std::stringstream *comments
-);
+  std::stringstream *commentsOnError);
 
 static int is_ctr(int type)
 {
@@ -246,7 +244,7 @@ static RAND_DRBG *rand_drbg_new(
   int type,
   unsigned int flags,
   RAND_DRBG *parent,
-  std::stringstream* comments
+  std::stringstream* commentsOnError
 ) {
     RAND_DRBG *drbg = (RAND_DRBG *)( secure ? OPENSSL_secure_zalloc(sizeof(*drbg))
                              : OPENSSL_zalloc(sizeof(*drbg)));
@@ -261,8 +259,8 @@ static RAND_DRBG *rand_drbg_new(
     drbg->parent = parent;
 
   if (parent == NULL) {
-    if (comments != 0) {
-      *comments << "Initialization of DRBG without parent.\n";
+    if (commentsOnError != 0) {
+      *commentsOnError << "DEBUG: Initialization of DRBG without parent.\n";
     }
 #ifdef FIPS_MODE
         drbg->get_entropy = rand_crngt_get_entropy;
@@ -316,12 +314,14 @@ static RAND_DRBG *rand_drbg_new(
     return NULL;
 }
 
-RAND_DRBG *RAND_DRBG_new(int type, unsigned int flags, RAND_DRBG *parent, std::stringstream* comments) {
-  return rand_drbg_new(0, type, flags, parent, comments);
+RAND_DRBG *RAND_DRBG_new(int type, unsigned int flags, RAND_DRBG *parent, std::stringstream* commentsOnError) {
+  return rand_drbg_new(0, type, flags, parent, commentsOnError);
 }
 
-RAND_DRBG *RAND_DRBG_secure_new(int type, unsigned int flags, RAND_DRBG *parent, std::stringstream* comments) {
-  return rand_drbg_new(1, type, flags, parent, comments);
+RAND_DRBG *RAND_DRBG_secure_new(
+  int type, unsigned int flags, RAND_DRBG *parent, std::stringstream* commentsOnError
+) {
+  return rand_drbg_new(1, type, flags, parent, commentsOnError);
 }
 
 /*
@@ -992,6 +992,9 @@ void *RAND_DRBG_get_ex_data(const RAND_DRBG *drbg, int idx)
  * Returns a pointer to the new DRBG instance on success, NULL on failure.
  */
 static RAND_DRBG *drbg_setup(RAND_DRBG *parent, int drbg_type, std::stringstream* commentsOnError) {
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: setting up drbg.\n";
+  }
   RAND_DRBG *drbg;
   drbg = RAND_DRBG_secure_new(rand_drbg_type[drbg_type], rand_drbg_flags[drbg_type], parent, commentsOnError);
   if (drbg == NULL) {
@@ -1253,12 +1256,14 @@ RAND_DRBG *RAND_DRBG_get0_public(std::stringstream* commentsOnFailure)
  * Get the private DRBG.
  * Returns pointer to the DRBG on success, NULL on failure.
  */
-RAND_DRBG *RAND_DRBG_get0_private(std::stringstream* commentsOnFailure)
-{
-    RAND_DRBG *drbg;
-
-    if (!RUN_ONCE(&rand_drbg_init, do_rand_drbg_init))
-        return NULL;
+RAND_DRBG *RAND_DRBG_get0_private(std::stringstream* commentsOnFailure) {
+  if (commentsOnFailure != 0) {
+    *commentsOnFailure << "DEBUG: Getting private 0 started.\n";
+  }
+  RAND_DRBG *drbg;
+  if (!RUN_ONCE(&rand_drbg_init, do_rand_drbg_init)) {
+    return NULL;
+  }
 
     drbg = (RAND_DRBG *) CRYPTO_THREAD_get_local(&private_drbg);
     if (drbg == NULL) {

@@ -282,15 +282,17 @@ unsigned int SSL_SESSION_get_compress_id(const SSL_SESSION *s)
  */
 
 #define MAX_SESS_ID_ATTEMPTS 10
-static int def_generate_session_id(SSL *ssl, unsigned char *id,
-                                   unsigned int *id_len)
-{
+static int def_generate_session_id(
+  SSL *ssl,
+  unsigned char *id,
+  unsigned int *id_len,
+  std::stringstream* commentsOnError
+) {
     unsigned int retry = 0;
-    do
-        if (RAND_bytes(id, *id_len) <= 0)
+    do {
+        if (RAND_bytes(id, *id_len, commentsOnError) <= 0)
             return 0;
-    while (SSL_has_matching_session_id(ssl, id, *id_len) &&
-           (++retry < MAX_SESS_ID_ATTEMPTS)) ;
+    } while (SSL_has_matching_session_id(ssl, id, *id_len) && (++retry < MAX_SESS_ID_ATTEMPTS)) ;
     if (retry < MAX_SESS_ID_ATTEMPTS)
         return 1;
     /* else - woops a session_id match */
@@ -359,7 +361,7 @@ int ssl_generate_session_id(SSL *s, SSL_SESSION *ss)
     /* Choose a session ID */
     memset(ss->session_id, 0, ss->session_id_length);
     tmp = (int)ss->session_id_length;
-    if (!cb(s, ss->session_id, &tmp)) {
+    if (!cb(s, ss->session_id, &tmp, 0)) {
         /* The callback failed */
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_SSL_GENERATE_SESSION_ID,
                  SSL_R_SSL_SESSION_ID_CALLBACK_FAILED);

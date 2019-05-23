@@ -51,7 +51,7 @@ OSSL_CRMF_PBMPARAMETER *OSSL_CRMF_pbmp_new(size_t slen, int owfnid,
         CRMFerr(CRMF_F_OSSL_CRMF_PBMP_NEW, ERR_R_MALLOC_FAILURE);
         goto err;
     }
-    if (RAND_bytes(salt, (int)slen) <= 0) {
+    if (RAND_bytes(salt, (int) slen, 0) <= 0) {
         CRMFerr(CRMF_F_OSSL_CRMF_PBMP_NEW, CRMF_R_FAILURE_OBTAINING_RANDOM);
         goto err;
     }

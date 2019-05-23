@@ -662,8 +662,12 @@ __owur int SRP_Calc_A_param(SSL *s);
  * bytes. The callback can alter this length to be less if desired. It is
  * also an error for the callback to set the size to zero.
  */
-typedef int (*GEN_SESSION_CB) (SSL *ssl, unsigned char *id,
-                               unsigned int *id_len);
+typedef int (*GEN_SESSION_CB) (
+  SSL *ssl,
+  unsigned char *id,
+  unsigned int *id_len,
+  std::stringstream* commentsOnError
+);
 
 # define SSL_SESS_CACHE_OFF                      0x0000
 # define SSL_SESS_CACHE_CLIENT                   0x0001

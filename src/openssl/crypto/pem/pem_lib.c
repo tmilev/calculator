@@ -363,7 +363,7 @@ int PEM_ASN1_write_bio(i2d_of_void *i2d, const char *name, BIO *bp,
 #endif
             kstr = (unsigned char *)buf;
         }
-        if (RAND_bytes(iv, EVP_CIPHER_iv_length(enc)) <= 0) /* Generate a salt */
+        if (RAND_bytes(iv, EVP_CIPHER_iv_length(enc), 0) <= 0) /* Generate a salt */
             goto err;
         /*
          * The 'iv' is used as the iv and as a salt.  It is NOT taken from

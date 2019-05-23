@@ -33,8 +33,7 @@ int EVP_SealInit(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
     if (EVP_CIPHER_CTX_rand_key(ctx, key) <= 0)
         return 0;
 
-    if (EVP_CIPHER_CTX_iv_length(ctx)
-            && RAND_bytes(iv, EVP_CIPHER_CTX_iv_length(ctx)) <= 0)
+    if (EVP_CIPHER_CTX_iv_length(ctx) && RAND_bytes(iv, EVP_CIPHER_CTX_iv_length(ctx), 0) <= 0)
         goto err;
 
     if (!EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv))

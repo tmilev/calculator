@@ -82,7 +82,7 @@ X509_ALGOR *PKCS5_pbe2_set_scrypt(const EVP_CIPHER *cipher,
     if (EVP_CIPHER_iv_length(cipher)) {
         if (aiv)
             memcpy(iv, aiv, EVP_CIPHER_iv_length(cipher));
-        else if (RAND_bytes(iv, EVP_CIPHER_iv_length(cipher)) <= 0)
+        else if (RAND_bytes(iv, EVP_CIPHER_iv_length(cipher), 0) <= 0)
             goto err;
     }
 
@@ -162,7 +162,7 @@ static X509_ALGOR *pkcs5_scrypt_set(const unsigned char *salt, size_t saltlen,
     if (ASN1_STRING_set(sparam->salt, salt, saltlen) == 0)
         goto merr;
 
-    if (salt == NULL && RAND_bytes(sparam->salt->data, saltlen) <= 0)
+    if (salt == NULL && RAND_bytes(sparam->salt->data, saltlen, 0) <= 0)
         goto err;
 
     if (ASN1_INTEGER_set_uint64(sparam->costParameter, N) == 0)

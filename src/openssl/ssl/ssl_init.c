@@ -170,6 +170,10 @@ int SSL_load_error_strings(std::stringstream* commentsOnError) {
 #include <sstream>
 int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS * settings, std::stringstream* commentsOnError) {
   static int stoperrset = 0;
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: initializing openSSL....\n";
+  }
+
   if (stopped) {
     if (!stoperrset) {
       /*

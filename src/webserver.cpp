@@ -292,6 +292,11 @@ void SSLdata::initSSLlibrary() {
   logServer << logger::green << "DEBUG: Initialzation of ssl successfull." << logger::endL;
 }
 
+void SSLdata::AddMoreEntropyFromTimer() {
+  int fixMeAcquireEntropy;
+
+}
+
 void SSLdata::initSSLserver() {
   this->initSSLlibrary();
   if (this->theSSLMethod != 0) {
@@ -314,6 +319,7 @@ void SSLdata::initSSLserver() {
   std::stringstream commentsOnError;
 
   this->contextServer = SSL_CTX_new(this->theSSLMethod, &commentsOnError);
+  logServer << logger::red << "DEBUG: Errors: " << commentsOnError.str() << logger::endL;
   if (this->contextServer == 0) {
     logServer << logger::red << "Failed to create ssl context. " << logger::endL;
     ERR_print_errors_fp(stderr);
@@ -3413,7 +3419,6 @@ bool WebWorker::ProcessRedirectAwayFromWWW() {
     redirectHeaderStream << "Content-Type: text/html\r\n";
   }
   redirectHeaderStream << "Location: " << newAddressStream.str();
-  //double fixme;
   this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectHeaderStream.str());
   //this->SetHeaderOKNoContentLength();
   stOutput << "<html><body>Please remove the www. from the address, it creates issues with authentication services. "
@@ -5065,8 +5070,7 @@ int WebServer::Run() {
       << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
       << logger::endL;
     }
-    // acquire crypto entropy
-    int fixMeAcquireEntropy;
+    this->theSSLdata.AddMoreEntropyFromTimer();
 
     int incomingPID = fork(); //creates an almost identical copy of this process.
     //<- Please don't assign directly to this->GetActiveWorker().ProcessPID.

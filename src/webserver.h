@@ -94,6 +94,7 @@ public:
   ~SSLdata();
   void FreeSSL();
   void FreeContext();
+  void AddMoreEntropyFromTimer();
   void HandShakeIamServer(int inputSocketID);
   bool InspectCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);

@@ -748,34 +748,27 @@ int RAND_set_rand_method(const RAND_METHOD *meth)
     return 1;
 }
 
-const RAND_METHOD *RAND_get_rand_method(std::stringstream* comments)
-{
-    const RAND_METHOD *tmp_meth = NULL;
-
-    if (!RUN_ONCE(&rand_init, do_rand_init))
-        return NULL;
-
-    CRYPTO_THREAD_write_lock(rand_meth_lock);
-    if (default_RAND_meth == NULL) {
-#ifndef OPENSSL_NO_ENGINE
-        ENGINE *e;
-
-        /* If we have an engine that can do RAND, use it. */
-        if ((e = ENGINE_get_default_RAND()) != NULL
-                && (tmp_meth = ENGINE_get_RAND(e)) != NULL) {
-            funct_ref = e;
-            default_RAND_meth = tmp_meth;
-        } else {
-            ENGINE_finish(e);
-            default_RAND_meth = &rand_meth;
-        }
-#else
-        default_RAND_meth = &rand_meth;
-#endif
+const RAND_METHOD *RAND_get_rand_method(std::stringstream* comments) {
+  if (!RUN_ONCE(&rand_init, do_rand_init)) {
+    if (comments != 0) {
+      *comments << "Failed to run do_rand_init. ";
     }
-    tmp_meth = default_RAND_meth;
-    CRYPTO_THREAD_unlock(rand_meth_lock);
-    return tmp_meth;
+    return NULL;
+  }
+  if (default_RAND_meth != NULL) {
+    return default_RAND_meth;
+  }
+  ENGINE *e;
+  const RAND_METHOD* tmp_meth;
+  /* If we have an engine that can do RAND, use it. */
+  if ((e = ENGINE_get_default_RAND()) != NULL && (tmp_meth = ENGINE_get_RAND(e)) != NULL) {
+    funct_ref = e;
+    default_RAND_meth = tmp_meth;
+  } else {
+    ENGINE_finish(e);
+    default_RAND_meth = &rand_meth;
+  }
+  return default_RAND_meth;
 }
 
 #ifndef OPENSSL_NO_ENGINE
@@ -841,14 +834,15 @@ int RAND_priv_bytes(unsigned char *buf, int num, std::stringstream* commentsOnFa
     return ret;
 }
 
-int RAND_bytes(unsigned char *buf, int num, std::stringstream* commentsOnError)
-{
+int RAND_bytes(unsigned char *buf, int num, std::stringstream* commentsOnError) {
     const RAND_METHOD *meth = RAND_get_rand_method(commentsOnError);
-
-    if (meth->bytes != NULL)
-        return meth->bytes(buf, num, 0);
-    RANDerr(RAND_F_RAND_BYTES, RAND_R_FUNC_NOT_IMPLEMENTED);
-    return -1;
+    if (meth->bytes == NULL) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Random method missing.\n";
+      }
+      return - 1;
+    }
+    return meth->bytes(buf, num, 0);
 }
 
 #if !OPENSSL_API_1_1_0

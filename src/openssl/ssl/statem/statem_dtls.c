@@ -528,7 +528,7 @@ static int dtls1_retrieve_buffered_fragment(SSL *s, size_t *len)
 }
 
 static int
-dtls1_reassemble_fragment(SSL *s, const struct hm_header_st *msg_hdr)
+dtls1_reassemble_fragment(SSL *s, const struct hm_header_st *msg_hdr, std::stringstream* commentsOnError)
 {
     hm_fragment *frag = NULL;
     pitem *item = NULL;
@@ -572,15 +572,19 @@ dtls1_reassemble_fragment(SSL *s, const struct hm_header_st *msg_hdr)
      * be dropped. In this case item != NULL and so frag does not need to be
      * freed.
      */
-    if (frag->reassembly == NULL) {
-        unsigned char devnull[256];
-
-        while (frag_len) {
-            i = s->method->ssl_read_bytes(s, SSL3_RT_HANDSHAKE, NULL,
-                                          devnull,
-                                          frag_len >
-                                          sizeof(devnull) ? sizeof(devnull) :
-                                          frag_len, 0, &readbytes);
+  if (frag->reassembly == NULL) {
+    unsigned char devnull[256];
+    while (frag_len) {
+      i = s->method->ssl_read_bytes(
+        s,
+        SSL3_RT_HANDSHAKE,
+        NULL,
+        devnull,
+        frag_len > sizeof(devnull) ? sizeof(devnull) : frag_len,
+        0,
+        &readbytes,
+        commentsOnError
+      );
             if (i <= 0)
                 goto err;
             frag_len -= readbytes;
@@ -591,7 +595,7 @@ dtls1_reassemble_fragment(SSL *s, const struct hm_header_st *msg_hdr)
     /* read the body of the fragment (header has already been read */
     i = s->method->ssl_read_bytes(s, SSL3_RT_HANDSHAKE, NULL,
                                   frag->fragment + msg_hdr->frag_off,
-                                  frag_len, 0, &readbytes);
+                                  frag_len, 0, &readbytes, commentsOnError);
     if (i <= 0 || readbytes != frag_len)
         i = -1;
     if (i <= 0)
@@ -677,14 +681,14 @@ dtls1_process_out_of_seq_message(SSL *s, const struct hm_header_st *msg_hdr)
                                           devnull,
                                           frag_len >
                                           sizeof(devnull) ? sizeof(devnull) :
-                                          frag_len, 0, &readbytes);
+                                          frag_len, 0, &readbytes, 0);
             if (i <= 0)
                 goto err;
             frag_len -= readbytes;
         }
     } else {
         if (frag_len != msg_hdr->msg_len) {
-            return dtls1_reassemble_fragment(s, msg_hdr);
+            return dtls1_reassemble_fragment(s, msg_hdr, 0);
         }
 
         if (frag_len > dtls1_max_handshake_message_len(s))
@@ -702,7 +706,7 @@ dtls1_process_out_of_seq_message(SSL *s, const struct hm_header_st *msg_hdr)
              */
             i = s->method->ssl_read_bytes(s, SSL3_RT_HANDSHAKE, NULL,
                                           frag->fragment, frag_len, 0,
-                                          &readbytes);
+                                          &readbytes, 0);
             if (i<=0 || readbytes != frag_len)
                 i = -1;
             if (i <= 0)
@@ -759,7 +763,7 @@ static int dtls_get_reassembled_message(SSL *s, int *errtype, size_t *len)
 
     /* read handshake message header */
     i = s->method->ssl_read_bytes(s, SSL3_RT_HANDSHAKE, &recvd_type, wire,
-                                  DTLS1_HM_HEADER_LENGTH, 0, &readbytes);
+                                  DTLS1_HM_HEADER_LENGTH, 0, &readbytes, 0);
     if (i <= 0) {               /* nbio, or an error */
         s->rwstate = SSL_READING;
         *len = 0;
@@ -818,7 +822,7 @@ static int dtls_get_reassembled_message(SSL *s, int *errtype, size_t *len)
     }
 
     if (frag_len && frag_len < mlen) {
-        *errtype = dtls1_reassemble_fragment(s, &msg_hdr);
+        *errtype = dtls1_reassemble_fragment(s, &msg_hdr, 0);
         return 0;
     }
 
@@ -858,7 +862,7 @@ static int dtls_get_reassembled_message(SSL *s, int *errtype, size_t *len)
             (unsigned char *)s->init_buf->data + DTLS1_HM_HEADER_LENGTH;
 
         i = s->method->ssl_read_bytes(s, SSL3_RT_HANDSHAKE, NULL,
-                                      &p[frag_off], frag_len, 0, &readbytes);
+                                      &p[frag_off], frag_len, 0, &readbytes, 0);
 
         /*
          * This shouldn't ever fail due to NBIO because we already checked

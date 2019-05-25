@@ -670,7 +670,7 @@ WRITE_TRAN ossl_statem_server_write_transition(SSL *s)
  * Perform any pre work that needs to be done prior to sending a message from
  * the server to the client.
  */
-WORK_STATE ossl_statem_server_pre_work(SSL *s, WORK_STATE wst)
+WORK_STATE ossl_statem_server_pre_work(SSL *s, WORK_STATE wst, std::stringstream* commentsOnError)
 {
     OSSL_STATEM *st = &s->statem;
 
@@ -722,7 +722,7 @@ WORK_STATE ossl_statem_server_pre_work(SSL *s, WORK_STATE wst)
              *
              * Calls SSLfatal as required.
              */
-            return tls_finish_handshake(s, wst, 0, 0);
+            return tls_finish_handshake(s, wst, 0, 0, commentsOnError);
         } if (SSL_IS_DTLS(s)) {
             /*
              * We're into the last flight. We don't retransmit the last flight
@@ -759,7 +759,7 @@ WORK_STATE ossl_statem_server_pre_work(SSL *s, WORK_STATE wst)
 
     case TLS_ST_OK:
         /* Calls SSLfatal() as required */
-        return tls_finish_handshake(s, wst, 1, 1);
+        return tls_finish_handshake(s, wst, 1, 1, commentsOnError);
     }
 
     return WORK_FINISHED_CONTINUE;

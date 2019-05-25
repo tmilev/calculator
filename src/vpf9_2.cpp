@@ -430,8 +430,9 @@ void WeylGroupData::ReadFromFile(std::fstream& input) {
   stOutput << "This code is not implemented yet (due to a regression).";
   crash << crash;
   //input >> this->WeylLetter >> tempI >> tempS;
-  if (tempS != "Long_root_length:")
+  if (tempS != "Long_root_length:") {
     crash << "Failed to read weyl group data from file. " << crash;
+  }
 //  this->lengthLongestRootSquared.ReadFromFile(input);
   this->CartanSymmetric.ReadFromFile(input);
 }
@@ -1534,8 +1535,9 @@ void RationalFunctionOld::operator=(const RationalFunctionOld& other) {
       this->Numerator.GetElement() = other.Numerator.GetElementConst();
       break;
     case RationalFunctionOld::typeRationalFunction:
-      if (other.Numerator.IsZeroPointer() || other.Denominator.IsZeroPointer())
+      if (other.Numerator.IsZeroPointer() || other.Denominator.IsZeroPointer()) {
         crash << "Zero pointer in numerator or denominator of other. " << crash;
+      }
       this->Numerator.GetElement() = other.Numerator.GetElementConst();
       this->Denominator.GetElement() = other.Denominator.GetElementConst();
       break;
@@ -1742,8 +1744,9 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other) {
   }
   this->Denominator.GetElement() *= tempP1;
   this->Denominator.GetElement().DivideBy(theGCD2, tempP1, tempP2);
-  if (!tempP2.IsEqualToZero())
+  if (!tempP2.IsEqualToZero()) {
     crash << "Polynomial must not be zero here. " << crash;
+  }
   this->Denominator.GetElement() = tempP1;
   other.Numerator.GetElementConst().DivideBy(theGCD2, tempP1, tempP2);
   if (!tempP2.IsEqualToZero()) {
@@ -2119,8 +2122,9 @@ void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String(
   Rational currentWeight;
   Matrix<Rational>::LieBracket(this->theH, input, output);
   bool tempBool = input.IsProportionalTo(output, currentWeight);
-  if (!tempBool)
-    stOutput << "<br>oh no! climbing down is f***ed up!";
+  if (!tempBool) {
+    stOutput << "<br>Climbing down does not work as expected!";
+  }
   Rational RaiseCoeff;
   RaiseCoeff.MakeZero();
   outputCoeff.MakeOne();
@@ -2394,7 +2398,11 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
           this->theGmodKModules.ExpandOnTop(1);
           List<Matrix<Rational> >& currentMod = *this->theGmodKModules.LastObject();
           currentMod.size = 0;
-          for (tempMat = currentHighest; !tempMat.IsEqualToZero(); Matrix<Rational> ::LieBracket(this->theF, tempMat, tempMat)) {
+          for (
+            tempMat = currentHighest;
+            !tempMat.IsEqualToZero();
+            Matrix<Rational>::LieBracket(this->theF, tempMat, tempMat)
+          ) {
             currentMod.AddOnTop(tempMat);
           }
         }
@@ -2477,7 +2485,8 @@ std::string slTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
   if (output.size > 0) {
     out << "  hw vectors: ";
     for (int i = 0; i < output.size; i ++) {
-      out << beginMath << this->ElementMatrixToTensorString(this->theHighestWeightVectors[output[i]], useHtml) << endMath << ",";
+      out << beginMath << this->ElementMatrixToTensorString(this->theHighestWeightVectors[output[i]], useHtml)
+      << endMath << ",";
     }
   }
   return out.str();

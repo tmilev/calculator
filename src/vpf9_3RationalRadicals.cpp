@@ -55,8 +55,9 @@ void AlgebraicClosureRationals::GetMultiplicativeOperatorFromRadicalSelection(
 
 void AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals() {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals");
-  if (!this->flagIsQuadraticRadicalExtensionRationals)
+  if (!this->flagIsQuadraticRadicalExtensionRationals) {
     return;
+  }
   this->DisplayNamesBasisElements.SetSize(this->theBasisMultiplicative.size);
   Selection theSel;
   theSel.init(this->theQuadraticRadicals.size);

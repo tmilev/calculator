@@ -3229,7 +3229,7 @@ static int ssl_undefined_function_1(SSL *ssl, unsigned char *r, size_t s,
     (void)v;
     (void)w;
     (void)x;
-    return ssl_undefined_function(ssl);
+    return ssl_undefined_function(ssl, 0);
 }
 
 const SSL3_ENC_METHOD SSLv3_enc_data = {
@@ -3287,10 +3287,10 @@ int ssl3_set_handshake_header(SSL *s, WPACKET *pkt, int htype)
 
 int ssl3_handshake_write(SSL *s)
 {
-    return ssl3_do_write(s, SSL3_RT_HANDSHAKE);
+    return ssl3_do_write(s, SSL3_RT_HANDSHAKE, 0);
 }
 
-int ssl3_new(SSL *s)
+int ssl3_new(SSL *s, std::stringstream* commentsOnError)
 {
     SSL3_STATE *s3;
 
@@ -3303,7 +3303,7 @@ int ssl3_new(SSL *s)
         goto err;
 #endif
 
-    if (!s->method->ssl_clear(s))
+    if (!s->method->ssl_clear(s, 0))
         return 0;
 
     return 1;
@@ -3342,7 +3342,7 @@ void ssl3_free(SSL *s)
     s->s3 = NULL;
 }
 
-int ssl3_clear(SSL *s)
+int ssl3_clear(SSL *s, std::stringstream* commentsOnError)
 {
     ssl3_cleanup_key_block(s);
     OPENSSL_free(s->s3->tmp.ctype);
@@ -4393,7 +4393,7 @@ static int ssl3_set_req_cert_type(CERT *c, const unsigned char *p, size_t len)
     return 1;
 }
 
-int ssl3_shutdown(SSL *s)
+int ssl3_shutdown(SSL *s, std::stringstream* commentsOnError)
 {
     int ret;
 
@@ -4431,7 +4431,7 @@ int ssl3_shutdown(SSL *s)
         /*
          * If we are waiting for a close from our peer, we are closed
          */
-        s->method->ssl_read_bytes(s, 0, NULL, NULL, 0, 0, &readbytes);
+        s->method->ssl_read_bytes(s, 0, NULL, NULL, 0, 0, &readbytes, 0);
         if (!(s->shutdown & SSL_RECEIVED_SHUTDOWN)) {
             return -1;        /* return WANT_READ */
         }
@@ -4444,14 +4444,14 @@ int ssl3_shutdown(SSL *s)
         return 0;
 }
 
-int ssl3_write(SSL *s, const void *buf, size_t len, size_t *written)
+int ssl3_write(SSL *s, const void *buf, size_t len, size_t *written, std::stringstream* commentsOnError)
 {
     clear_sys_error();
     if (s->s3->renegotiate)
-        ssl3_renegotiate_check(s, 0);
+        ssl3_renegotiate_check(s, 0, commentsOnError);
 
     return s->method->ssl_write_bytes(s, SSL3_RT_APPLICATION_DATA, buf, len,
-                                      written);
+                                      written, 0);
 }
 
 static int ssl3_read_internal(SSL *s, void *buf, size_t len, int peek,
@@ -4461,11 +4461,11 @@ static int ssl3_read_internal(SSL *s, void *buf, size_t len, int peek,
 
     clear_sys_error();
     if (s->s3->renegotiate)
-        ssl3_renegotiate_check(s, 0);
+        ssl3_renegotiate_check(s, 0, 0);
     s->s3->in_read_app_data = 1;
     ret =
         s->method->ssl_read_bytes(s, SSL3_RT_APPLICATION_DATA, NULL, (unsigned char*) buf, len,
-                                  peek, readbytes);
+                                  peek, readbytes, 0);
     if ((ret == -1) && (s->s3->in_read_app_data == 2)) {
         /*
          * ssl3_read_bytes decided to call s->handshake_func, which called
@@ -4477,7 +4477,7 @@ static int ssl3_read_internal(SSL *s, void *buf, size_t len, int peek,
         ossl_statem_set_in_handshake(s, 1);
         ret =
             s->method->ssl_read_bytes(s, SSL3_RT_APPLICATION_DATA, NULL, (unsigned char*) buf,
-                                      len, peek, readbytes);
+                                      len, peek, readbytes, 0);
         ossl_statem_set_in_handshake(s, 0);
     } else
         s->s3->in_read_app_data = 0;
@@ -4485,17 +4485,15 @@ static int ssl3_read_internal(SSL *s, void *buf, size_t len, int peek,
     return ret;
 }
 
-int ssl3_read(SSL *s, void *buf, size_t len, size_t *readbytes)
-{
+int ssl3_read(SSL *s, void *buf, size_t len, size_t *readbytes, std::stringstream* commentsOnError) {
     return ssl3_read_internal(s, buf, len, 0, readbytes);
 }
 
-int ssl3_peek(SSL *s, void *buf, size_t len, size_t *readbytes)
-{
+int ssl3_peek(SSL *s, void *buf, size_t len, size_t *readbytes, std::stringstream* commentsOnError) {
     return ssl3_read_internal(s, buf, len, 1, readbytes);
 }
 
-int ssl3_renegotiate(SSL *s)
+int ssl3_renegotiate(SSL *s, std::stringstream* commentsOnError)
 {
     if (s->handshake_func == NULL)
         return 1;
@@ -4512,7 +4510,7 @@ int ssl3_renegotiate(SSL *s)
  * should do a renegotiation now and sets up the state machine for it. Otherwise
  * returns 0.
  */
-int ssl3_renegotiate_check(SSL *s, int initok)
+int ssl3_renegotiate_check(SSL *s, int initok, std::stringstream* commentsOnError)
 {
     int ret = 0;
 

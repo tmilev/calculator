@@ -64,7 +64,7 @@ long dtls1_default_timeout(void)
     return (60 * 60 * 2);
 }
 
-int dtls1_new(SSL *s)
+int dtls1_new(SSL *s, std::stringstream* commentsOnFailure)
 {
     DTLS1_STATE *d1;
 
@@ -72,7 +72,7 @@ int dtls1_new(SSL *s)
         return 0;
     }
 
-    if (!ssl3_new(s))
+    if (!ssl3_new(s, 0))
         return 0;
     if ((d1 = (DTLS1_STATE *) OPENSSL_zalloc(sizeof(*d1))) == NULL) {
         ssl3_free(s);
@@ -99,7 +99,7 @@ int dtls1_new(SSL *s)
 
     s->d1 = d1;
 
-    if (!s->method->ssl_clear(s))
+    if (!s->method->ssl_clear(s, 0))
         return 0;
 
     return 1;
@@ -151,8 +151,7 @@ void dtls1_free(SSL *s)
     s->d1 = NULL;
 }
 
-int dtls1_clear(SSL *s)
-{
+int dtls1_clear(SSL *s, std::stringstream* commentsOnFailure) {
     pqueue *buffered_messages;
     pqueue *sent_messages;
     size_t mtu;
@@ -188,7 +187,7 @@ int dtls1_clear(SSL *s)
         s->d1->sent_messages = sent_messages;
     }
 
-    if (!ssl3_clear(s))
+    if (!ssl3_clear(s, 0))
         return 0;
 
     if (s->method->version == DTLS_ANY_VERSION)
@@ -856,10 +855,10 @@ static int dtls1_handshake_write(SSL *s)
     return dtls1_do_write(s, SSL3_RT_HANDSHAKE);
 }
 
-int dtls1_shutdown(SSL *s)
+int dtls1_shutdown(SSL *s, std::stringstream* commentsOnFailure)
 {
     int ret;
-    ret = ssl3_shutdown(s);
+    ret = ssl3_shutdown(s, 0);
 #ifndef OPENSSL_NO_SCTP
     BIO_ctrl(SSL_get_wbio(s), BIO_CTRL_DGRAM_SCTP_SAVE_SHUTDOWN, 0, NULL);
 #endif

@@ -15,10 +15,42 @@
  * TLS/SSLv3 methods
  */
 
-IMPLEMENT_tls_meth_func(TLS_ANY_VERSION, 0, 0,
-                        TLS_method,
-                        ossl_statem_accept,
-                        ossl_statem_connect, TLSv1_2_enc_data)
+const SSL_METHOD *TLS_method(void) {
+  static const SSL_METHOD TLS_method_data= {
+    TLS_ANY_VERSION,
+    0,
+    0,
+    tls1_new,
+    tls1_clear,
+    tls1_free,
+    ossl_statem_accept,
+    ossl_statem_connect,
+    ssl3_read,
+    ssl3_peek,
+    ssl3_write,
+    ssl3_shutdown,
+    ssl3_renegotiate,
+    ssl3_renegotiate_check,
+    ssl3_read_bytes,
+    ssl3_write_bytes,
+    ssl3_dispatch_alert,
+    ssl3_ctrl,
+    ssl3_ctx_ctrl,
+    ssl3_get_cipher_by_char,
+    ssl3_put_cipher_by_char,
+    ssl3_pending,
+    ssl3_num_ciphers,
+    ssl3_get_cipher,
+    tls1_default_timeout,
+    &TLSv1_2_enc_data,
+    ssl_undefined_void_function,
+    ssl3_callback_ctrl,
+    ssl3_ctx_callback_ctrl
+  };
+  return &TLS_method_data;
+}
+
+
 IMPLEMENT_tls_meth_func(TLS1_3_VERSION, 0, SSL_OP_NO_TLSv1_3,
                         tlsv1_3_method,
                         ossl_statem_accept,

@@ -136,9 +136,9 @@ bool WebWorker::IsAllowedAsRequestCookie(const std::string& input) {
 }
 
 #ifdef MACRO_use_open_ssl
-void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString) {
+void SSL_write_Wrapper(SSL* inputSSL, const std::string& input, std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("SSL_write_Wrapper");
-  int err = SSL_write (inputSSL, theString.c_str(), theString.size());
+  int err = SSL_write (inputSSL, input.c_str(), input.size(), commentsOnError);
   if ((err) == - 1) {
     ERR_print_errors_fp(stderr);
     crash << "Errors while calling SSL_write. " << crash;
@@ -221,15 +221,15 @@ void SSLdata::FreeContext() {
 #endif // MACRO_use_open_ssl
 }
 
-void WebServer::SSLServerSideHandShake() {
+bool WebServer::SSLServerSideHandShake(std::stringstream* commentsOnError) {
   if (!theGlobalVariables.flagSSLisAvailable) {
-    return;
+    return false;
   }
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
-    return;
+    return false;
   }
 #ifdef MACRO_use_open_ssl
-  this->theSSLdata.HandShakeIamServer(this->GetActiveWorker().connectedSocketID);
+  return this->theSSLdata.HandShakeIamServer(this->GetActiveWorker().connectedSocketID, commentsOnError);
 #endif
 }
 
@@ -368,19 +368,20 @@ void SSLdata::initSSLserver() {
 #endif
 
 #ifdef MACRO_use_open_ssl
-void SSLdata::HandShakeIamServer(int inputSocketID) {
+bool SSLdata::HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamServer");
-  this->sslServeR = SSL_new(this->contextServer);
+  this->sslServeR = SSL_new(this->contextServer, commentsOnError);
   if (this->sslServeR == 0) {
     logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
   }
   this->SetSocketAddToStackServer(inputSocketID);
   int maxNumHandshakeTries = 3;
+  this->flagSSLHandshakeSuccessful = false;
   for (int i = 0; i < maxNumHandshakeTries; i ++) {
-    this->errorCode = SSL_accept(this->sslServeR);
-    this->flagSSLHandshakeSuccessful = false;
+    this->errorCode = SSL_accept(this->sslServeR, commentsOnError);
     if (this->errorCode != 1) {
+      this->flagSSLHandshakeSuccessful = false;
       if (this->errorCode == 0) {
         logOpenSSL << "OpenSSL handshake not successful in a controlled manner. ";
       } else {
@@ -439,6 +440,7 @@ void SSLdata::HandShakeIamServer(int inputSocketID) {
       break;
     }
   }
+  return this->flagSSLHandshakeSuccessful;
 }
 #endif // MACRO_use_open_ssl
 
@@ -495,21 +497,21 @@ void SSLdata::RemoveLastSocketClient() {
 bool SSLdata::HandShakeIamClientNoSocketCleanup(
   int inputSocketID,
   std::stringstream* commentsOnFailure,
-  std::stringstream*
-  commentsGeneral
+  std::stringstream* commentsGeneral
 ) {
 #ifdef MACRO_use_open_ssl
   MacroRegisterFunctionWithName("WebServer::HandShakeIamClientNoSocketCleanup");
   this->FreeClientSSL();
-  this->sslClient = SSL_new(this->contextServer);
+  this->sslClient = SSL_new(this->contextServer, commentsOnFailure);
   if (this->sslClient == 0) {
+    this->flagSSLHandshakeSuccessful = false;
     logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
   }
   this->SetSocketAddToStackClient(inputSocketID);
   int maxNumHandshakeTries = 4;
   for (int i = 0; i < maxNumHandshakeTries; i ++) {
-    this->errorCode = SSL_connect(this->sslClient);
+    this->errorCode = SSL_connect(this->sslClient, commentsOnFailure);
     this->flagSSLHandshakeSuccessful = false;
     if (this->errorCode != 1) {
       if (this->errorCode == 0) {
@@ -674,20 +676,31 @@ int SSLdata::SSLRead(
 }
 
 int SSLdata::SSLWrite(
-  SSL* theSSL, void* buffer, int bufferSize, std::string* outputError,
-  std::stringstream* commentsGeneral, bool includeNoErrorInComments
+  SSL* theSSL,
+  void* buffer,
+  int bufferSize,
+  std::string* outputError,
+  std::stringstream* commentsGeneral,
+  std::stringstream* commentsOnError,
+  bool includeNoErrorInComments
 ) {
+  (void) commentsGeneral;
   ERR_clear_error();
-  int result = SSL_write(theSSL, buffer, bufferSize);
+  int result = SSL_write(theSSL, buffer, bufferSize, commentsOnError);
   this->ClearErrorQueue(
-    result, theSSL, outputError, commentsGeneral, includeNoErrorInComments
+    result, theSSL, outputError, commentsOnError, includeNoErrorInComments
   );
   return result;
 }
 
 bool SSLdata::SSLReadLoop(
-  int numTries, SSL* theSSL, std::string& output, const LargeInt& expectedLength,
-  std::string* outputError, std::stringstream* commentsGeneral, bool includeNoErrorInComments
+  int numTries,
+  SSL* theSSL,
+  std::string& output,
+  const LargeInt& expectedLength,
+  std::string* outputError,
+  std::stringstream* commentsGeneral,
+  bool includeNoErrorInComments
 ) {
   MacroRegisterFunctionWithName("SSLdata::SSLreadLoop");
   this->buffer.SetSize(100000);
@@ -726,8 +739,12 @@ bool SSLdata::SSLReadLoop(
 
 #include "vpfHeader5Crypto.h"
 bool SSLdata::SSLWriteLoop(
-  int numTries, SSL* theSSL, const std::string& input, std::string* outputError,
-  std::stringstream* commentsGeneral, bool includeNoErrorInComments
+  int numTries,
+  SSL* theSSL,
+  const std::string& input,
+  std::string* outputError,
+  std::stringstream* commentsGeneral,
+  bool includeNoErrorInComments
 ) {
   MacroRegisterFunctionWithName("SSLdata::SSLwriteLoop");
   Crypto::ConvertStringToListBytesSigned(input, this->buffer);
@@ -735,8 +752,13 @@ bool SSLdata::SSLWriteLoop(
   int numBytes = - 1;
   for (i = 0; i < numTries; i ++) {
     numBytes = this->SSLWrite(
-      theSSL, this->buffer.TheObjects, this->buffer.size,
-      outputError, commentsGeneral, includeNoErrorInComments
+      theSSL,
+      this->buffer.TheObjects,
+      this->buffer.size,
+      outputError,
+      commentsGeneral,
+      commentsGeneral,
+      includeNoErrorInComments
     );
     if (numBytes == this->buffer.size) {
       break;
@@ -754,8 +776,11 @@ bool SSLdata::SSLWriteLoop(
 std::string SSLdata::errors::errorWantRead = "SSL_ERROR_WANT_READ";
 
 void SSLdata::ClearErrorQueue(
-  int errorCode, SSL* theSSL, std::string* outputError,
-  std::stringstream* commentsGeneral, bool includeNoErrorInComments
+  int errorCode,
+  SSL* theSSL,
+  std::string* outputError,
+  std::stringstream* commentsGeneral,
+  bool includeNoErrorInComments
 ) {
   MacroRegisterFunctionWithName("SSLdata::ToStringError");
 #ifdef MACRO_use_open_ssl
@@ -834,8 +859,9 @@ void SSLdata::ClearErrorQueue(
 
 bool WebWorker::ReceiveAllHttpSSL() {
   MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttpSSL");
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return true;
+  }
 #ifdef MACRO_use_open_ssl
   this->messageBody = "";
   this->messageHead = "";
@@ -964,7 +990,6 @@ bool WebWorker::ReceiveAllHttpSSL() {
 
 void WebWorker::SendAllBytesHttpSSL() {
   MacroRegisterFunctionWithName("WebWorker::SendAllBytesHttpSSL");
-#ifdef MACRO_use_open_ssl
   if (this->remainingBytesToSenD.size == 0) {
     return;
   }
@@ -988,6 +1013,7 @@ void WebWorker::SendAllBytesHttpSSL() {
   int timeOutInSeconds = 20;
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO, (void*)(&tv), sizeof(timeval));
   std::string errorString;
+  std::stringstream commentsOnError;
   while (this->remainingBytesToSenD.size > 0) {
     if (theGlobalVariables.GetElapsedSeconds() - startTime > timeOutInSeconds) {
       logWorker << "WebWorker::SendAllBytes failed: more than " << timeOutInSeconds << " seconds have elapsed. "
@@ -995,8 +1021,13 @@ void WebWorker::SendAllBytesHttpSSL() {
       return;
     }
     int numBytesSent = this->parent->theSSLdata.SSLWrite(
-      this->parent->theSSLdata.sslServeR, this->remainingBytesToSenD.TheObjects,
-      this->remainingBytesToSenD.size, &errorString, 0, true
+      this->parent->theSSLdata.sslServeR,
+      this->remainingBytesToSenD.TheObjects,
+      this->remainingBytesToSenD.size,
+      &errorString,
+      0,
+      &commentsOnError,
+      true
     );
     if (numBytesSent < 0) {
       logWorker << "WebWorker::SendAllBytes failed: SSL_write error. " << logger::endL;
@@ -1021,7 +1052,6 @@ void WebWorker::SendAllBytesHttpSSL() {
     logWorker.flush();
   }
   logWorker << "... done." << logger::endL;
-#endif
 }
 
 bool ProgressReportWebServer::flagServerExists = true;
@@ -1706,10 +1736,11 @@ void WebWorker::AttemptUnknownRequestErrorCorrection() {
   if (this->requestTypE != this->requestUnknown) {
     return;
   }
-  logIO << logger::red << "Unknown request." << logger::endL;
+  logIO << logger::red << "Unknown request. " << logger::endL;
   logIO << logger::blue << "Message head length: " << this->messageHead.size() << logger::endL;
-  logIO << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->messageHead, false, 300) << logger::endL;
-  logIO << logger::orange << "Message body length: " << this->messageBody.size() << logger::endL;
+  std::string messageHeadHexed = Crypto::ConvertStringToHex(this->messageHead);
+  logIO << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(messageHeadHexed, false, 300) << logger::endL;
+  logIO << logger::orange << "Message body length: " << this->messageBody.size() << ". " << logger::endL;
   logIO << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->messageBody, false, 300) << logger::endL;
   logIO << logger::green << "Attempting to correct unknown request.\n";
   if (this->messageBody.size() == 0) {
@@ -5149,15 +5180,13 @@ int WebWorker::Run() {
   crash.CleanUpFunction = WebServer::SignalActiveWorkerDoneReleaseEverything;
   CreateTimerThread();
 #ifdef MACRO_use_open_ssl
-  theWebServer.SSLServerSideHandShake();
-  if (
-    theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection &&
-    !this->parent->theSSLdata.flagSSLHandshakeSuccessful
-  ) {
+  std::stringstream handshakeError;
+  if (!theWebServer.SSLServerSideHandShake(&handshakeError)) {
     theGlobalVariables.flagUsingSSLinCurrentConnection = false;
     this->parent->SignalActiveWorkerDoneReleaseEverything();
     this->parent->ReleaseEverything();
-    logOpenSSL << logger::red << "ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
+    logOpenSSL << logger::red << handshakeError.str();
+    logOpenSSL << logger::red << "Ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
     return - 1;
   }
 #endif //Macro_use_open_ssl

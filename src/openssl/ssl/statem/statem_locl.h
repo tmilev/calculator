@@ -69,7 +69,7 @@ size_t construct_key_exchange_tbs(SSL *s, unsigned char **ptbs,
  */
 int ossl_statem_client_read_transition(SSL *s, int mt);
 WRITE_TRAN ossl_statem_client_write_transition(SSL *s);
-WORK_STATE ossl_statem_client_pre_work(SSL *s, WORK_STATE wst);
+WORK_STATE ossl_statem_client_pre_work(SSL *s, WORK_STATE wst, std::stringstream *commentsOnError);
 WORK_STATE ossl_statem_client_post_work(SSL *s, WORK_STATE wst);
 int ossl_statem_client_construct_message(SSL *s, WPACKET *pkt,
                                          confunc_f *confunc, int *mt);
@@ -82,7 +82,7 @@ WORK_STATE ossl_statem_client_post_process_message(SSL *s, WORK_STATE wst);
  */
 int ossl_statem_server_read_transition(SSL *s, int mt);
 WRITE_TRAN ossl_statem_server_write_transition(SSL *s);
-WORK_STATE ossl_statem_server_pre_work(SSL *s, WORK_STATE wst);
+WORK_STATE ossl_statem_server_pre_work(SSL *s, WORK_STATE wst, std::stringstream *commentsOnError);
 WORK_STATE ossl_statem_server_post_work(SSL *s, WORK_STATE wst);
 int ossl_statem_server_construct_message(SSL *s, WPACKET *pkt,
                                          confunc_f *confunc,int *mt);
@@ -105,8 +105,9 @@ __owur int dtls_construct_change_cipher_spec(SSL *s, WPACKET *pkt);
 __owur int tls_construct_finished(SSL *s, WPACKET *pkt);
 __owur int tls_construct_key_update(SSL *s, WPACKET *pkt);
 __owur MSG_PROCESS_RETURN tls_process_key_update(SSL *s, PACKET *pkt);
-__owur WORK_STATE tls_finish_handshake(SSL *s, WORK_STATE wst, int clearbufs,
-                                       int stop);
+__owur WORK_STATE tls_finish_handshake(
+  SSL *s, WORK_STATE wst, int clearbufs, int stop, std::stringstream *commentsOnError
+);
 __owur WORK_STATE dtls_wait_for_dry(SSL *s);
 
 /* some client-only functions */

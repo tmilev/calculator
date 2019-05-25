@@ -440,25 +440,38 @@ struct ssl_cipher_st {
 
 /* Used to hold SSL/TLS functions */
 struct ssl_method_st {
-    int version;
-    unsigned flags;
-    unsigned long mask;
-    int (*ssl_new) (SSL *s);
-    int (*ssl_clear) (SSL *s);
-    void (*ssl_free) (SSL *s);
-    int (*ssl_accept) (SSL *s);
-    int (*ssl_connect) (SSL *s);
-    int (*ssl_read) (SSL *s, void *buf, size_t len, size_t *readbytes);
-    int (*ssl_peek) (SSL *s, void *buf, size_t len, size_t *readbytes);
-    int (*ssl_write) (SSL *s, const void *buf, size_t len, size_t *written);
-    int (*ssl_shutdown) (SSL *s);
-    int (*ssl_renegotiate) (SSL *s);
-    int (*ssl_renegotiate_check) (SSL *s, int);
-    int (*ssl_read_bytes) (SSL *s, int type, int *recvd_type,
-                           unsigned char *buf, size_t len, int peek,
-                           size_t *readbytes);
-    int (*ssl_write_bytes) (SSL *s, int type, const void *buf_, size_t len,
-                            size_t *written);
+  int version;
+  unsigned flags;
+  unsigned long mask;
+  int (*ssl_new) (SSL *s, std::stringstream* commentsOnError);
+  int (*ssl_clear) (SSL *s, std::stringstream* commentsOnError);
+  void (*ssl_free) (SSL *s);
+  int (*ssl_accept) (SSL *s, std::stringstream* commentsOnError);
+  int (*ssl_connect) (SSL *s, std::stringstream* commentsOnError);
+  int (*ssl_read) (SSL *s, void *buf, size_t len, size_t *readbytes, std::stringstream* commentsOnError);
+  int (*ssl_peek) (SSL *s, void *buf, size_t len, size_t *readbytes, std::stringstream* commentsOnError);
+  int (*ssl_write) (SSL *s, const void *buf, size_t len, size_t *written, std::stringstream* commentsOnError);
+  int (*ssl_shutdown) (SSL *s, std::stringstream* commentsOnError);
+  int (*ssl_renegotiate) (SSL *s, std::stringstream* commentsOnError);
+  int (*ssl_renegotiate_check) (SSL *s, int, std::stringstream* commentsOnError);
+  int (*ssl_read_bytes) (
+    SSL *s,
+    int type,
+    int *recvd_type,
+    unsigned char *buf,
+    size_t len,
+    int peek,
+    size_t *readbytes,
+    std::stringstream* commentsOnError
+  );
+  int (*ssl_write_bytes) (
+    SSL *s,
+    int type,
+    const void *buf_,
+    size_t len,
+    size_t *written,
+    std::stringstream* commentsOnError
+  );
     int (*ssl_dispatch_alert) (SSL *s);
     long (*ssl_ctrl) (SSL *s, int cmd, long larg, void *parg);
     long (*ssl_ctx_ctrl) (SSL_CTX *ctx, int cmd, long larg, void *parg);
@@ -1105,7 +1118,7 @@ struct ssl_st {
      * request needs re-doing when in SSL_accept or SSL_connect
      */
     int rwstate;
-    int (*handshake_func) (SSL *);
+    int (*handshake_func) (SSL *, std::stringstream* commentsOnError);
     /*
      * Imagine that here's a boolean member "init" that is switched as soon
      * as SSL_set_{accept/connect}_state is called for the first time, so
@@ -2259,7 +2272,7 @@ static ossl_inline void tls1_get_peer_groups(SSL *s, const uint16_t **pgroups,
 # ifndef OPENSSL_UNIT_TEST
 
 __owur int ssl_read_internal(SSL *s, void *buf, size_t num, size_t *readbytes);
-__owur int ssl_write_internal(SSL *s, const void *buf, size_t num, size_t *written);
+__owur int ssl_write_internal(SSL *s, const void *buf, size_t num, size_t *written, std::stringstream *commentsOnError);
 void ssl_clear_cipher_ctx(SSL *s);
 int ssl_clear_bad_session(SSL *s);
 __owur CERT *ssl_cert_new(void);
@@ -2321,7 +2334,8 @@ __owur const SSL_CERT_LOOKUP *ssl_cert_lookup_by_pkey(const EVP_PKEY *pk,
                                                       size_t *pidx);
 __owur const SSL_CERT_LOOKUP *ssl_cert_lookup_by_idx(size_t idx);
 
-int ssl_undefined_function(SSL *s);
+int ssl_undefined_function_no_stream(SSL *s);
+int ssl_undefined_function(SSL *s, std::stringstream *commentsOnError);
 __owur int ssl_undefined_void_function(void);
 __owur int ssl_undefined_const_function(const SSL *s);
 __owur int ssl_get_server_cert_serverinfo(SSL *s,
@@ -2352,7 +2366,7 @@ int ssl3_init_finished_mac(SSL *s);
 __owur int ssl3_setup_key_block(SSL *s);
 __owur int ssl3_change_cipher_state(SSL *s, int which);
 void ssl3_cleanup_key_block(SSL *s);
-__owur int ssl3_do_write(SSL *s, int type);
+__owur int ssl3_do_write(SSL *s, int type, std::stringstream *commentsOnError);
 int ssl3_send_alert(SSL *s, int level, int desc);
 __owur int ssl3_generate_master_secret(SSL *s, unsigned char *out,
                                        unsigned char *p, size_t len,
@@ -2360,8 +2374,8 @@ __owur int ssl3_generate_master_secret(SSL *s, unsigned char *out,
 __owur int ssl3_get_req_cert_type(SSL *s, WPACKET *pkt);
 __owur int ssl3_num_ciphers(void);
 __owur const SSL_CIPHER *ssl3_get_cipher(unsigned int u);
-int ssl3_renegotiate(SSL *ssl);
-int ssl3_renegotiate_check(SSL *ssl, int initok);
+int ssl3_renegotiate(SSL *ssl, std::stringstream *commentsOnError);
+int ssl3_renegotiate_check(SSL *ssl, int initok, std::stringstream *commentsOnError);
 __owur int ssl3_dispatch_alert(SSL *s);
 __owur size_t ssl3_final_finish_mac(SSL *s, const char *sender, size_t slen,
                                     unsigned char *p);
@@ -2373,13 +2387,13 @@ __owur const SSL_CIPHER *ssl3_choose_cipher(SSL *ssl,
                                             STACK_OF(SSL_CIPHER) *clnt,
                                             STACK_OF(SSL_CIPHER) *srvr);
 __owur int ssl3_digest_cached_records(SSL *s, int keep);
-__owur int ssl3_new(SSL *s);
+__owur int ssl3_new(SSL *s, std::stringstream *commentsOnError);
 void ssl3_free(SSL *s);
-__owur int ssl3_read(SSL *s, void *buf, size_t len, size_t *readbytes);
-__owur int ssl3_peek(SSL *s, void *buf, size_t len, size_t *readbytes);
-__owur int ssl3_write(SSL *s, const void *buf, size_t len, size_t *written);
-__owur int ssl3_shutdown(SSL *s);
-int ssl3_clear(SSL *s);
+__owur int ssl3_read(SSL *s, void *buf, size_t len, size_t *readbytes, std::stringstream *commentsOnError);
+__owur int ssl3_peek(SSL *s, void *buf, size_t len, size_t *readbytes, std::stringstream *commentsOnError);
+__owur int ssl3_write(SSL *s, const void *buf, size_t len, size_t *written, std::stringstream *commentsOnError);
+__owur int ssl3_shutdown(SSL *s, std::stringstream *commentsOnError);
+int ssl3_clear(SSL *s, std::stringstream *commentsOnError);
 __owur long ssl3_ctrl(SSL *s, int cmd, long larg, void *parg);
 __owur long ssl3_ctx_ctrl(SSL_CTX *s, int cmd, long larg, void *parg);
 __owur long ssl3_callback_ctrl(SSL *s, int cmd, void (*fp) (void));
@@ -2418,7 +2432,7 @@ void dtls1_set_message_header(SSL *s,
                               size_t frag_off, size_t frag_len);
 
 int dtls1_write_app_data_bytes(SSL *s, int type, const void *buf_, size_t len,
-                               size_t *written);
+                               size_t *written, std::stringstream *commentsOnFailure);
 
 __owur int dtls1_read_failed(SSL *s, int code);
 __owur int dtls1_buffer_message(SSL *s, int ccs);
@@ -2443,15 +2457,15 @@ __owur size_t dtls1_min_mtu(SSL *s);
 void dtls1_hm_fragment_free(hm_fragment *frag);
 __owur int dtls1_query_mtu(SSL *s);
 
-__owur int tls1_new(SSL *s);
+__owur int tls1_new(SSL *s, std::stringstream *commentsOnFailure);
 void tls1_free(SSL *s);
-int tls1_clear(SSL *s);
+int tls1_clear(SSL *s, std::stringstream *commentsOnError);
 
-__owur int dtls1_new(SSL *s);
+__owur int dtls1_new(SSL *s, std::stringstream *commentsOnFailure);
 void dtls1_free(SSL *s);
-int dtls1_clear(SSL *s);
+int dtls1_clear(SSL *s, std::stringstream *commentsOnFailure);
 long dtls1_ctrl(SSL *s, int cmd, long larg, void *parg);
-__owur int dtls1_shutdown(SSL *s);
+__owur int dtls1_shutdown(SSL *s, std::stringstream *commentsOnFailure);
 
 __owur int dtls1_dispatch_alert(SSL *s);
 

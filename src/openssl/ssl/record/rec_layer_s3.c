@@ -338,9 +338,9 @@ int ssl3_read_n(SSL *s, size_t n, size_t max, int extend, int clearold,
  * Call this to write data in records of type 'type' It will return <= 0 if
  * not all data has been sent or non-blocking IO.
  */
-int ssl3_write_bytes(SSL *s, int type, const void *buf_, size_t len,
-                     size_t *written)
-{
+int ssl3_write_bytes(
+  SSL *s, int type, const void *buf_, size_t len, size_t *written, std::stringstream* commentsOnError
+) {
     const unsigned char *buf = (unsigned char *) buf_;
     size_t tot;
     size_t n, max_send_fragment, split_send_fragment, maxpipes;
@@ -382,16 +382,20 @@ int ssl3_write_bytes(SSL *s, int type, const void *buf_, size_t len,
      * between receiving the EoED and the CF - but we don't want to handle those
      * messages yet.
      */
-    if (SSL_in_init(s) && !ossl_statem_get_in_handshake(s)
-            && s->early_data_state != SSL_EARLY_DATA_UNAUTH_WRITING) {
-        i = s->handshake_func(s);
-        /* SSLfatal() already called */
-        if (i < 0)
-            return i;
-        if (i == 0) {
-            return -1;
-        }
+  if (
+    SSL_in_init(s) &&
+    !ossl_statem_get_in_handshake(s) &&
+    s->early_data_state != SSL_EARLY_DATA_UNAUTH_WRITING
+  ) {
+    i = s->handshake_func(s, commentsOnError);
+    /* SSLfatal() already called */
+    if (i < 0) {
+      return i;
     }
+    if (i == 0) {
+      return -1;
+    }
+  }
 
     /*
      * first check if there is a SSL3_BUFFER still being written out.  This
@@ -1258,9 +1262,16 @@ int ssl3_write_pending(SSL *s, int type, const unsigned char *buf, size_t len,
  *     Application data protocol
  *             none of our business
  */
-int ssl3_read_bytes(SSL *s, int type, int *recvd_type, unsigned char *buf,
-                    size_t len, int peek, size_t *readbytes)
-{
+int ssl3_read_bytes(
+  SSL *s,
+  int type,
+  int *recvd_type,
+  unsigned char *buf,
+  size_t len,
+  int peek,
+  size_t *readbytes,
+  std::stringstream* commentsOnError
+) {
     int i, j, ret;
     size_t n, curr_rec, num_recs, totalbytes;
     SSL3_RECORD *rr;
@@ -1317,15 +1328,17 @@ int ssl3_read_bytes(SSL *s, int type, int *recvd_type, unsigned char *buf,
      * Now s->rlayer.handshake_fragment_len == 0 if type == SSL3_RT_HANDSHAKE.
      */
 
-    if (!ossl_statem_get_in_handshake(s) && SSL_in_init(s)) {
-        /* type == SSL3_RT_APPLICATION_DATA */
-        i = s->handshake_func(s);
-        /* SSLfatal() already called */
-        if (i < 0)
-            return i;
-        if (i == 0)
-            return -1;
+  if (!ossl_statem_get_in_handshake(s) && SSL_in_init(s)) {
+    /* type == SSL3_RT_APPLICATION_DATA */
+    i = s->handshake_func(s, commentsOnError);
+    /* SSLfatal() already called */
+    if (i < 0) {
+      return i;
     }
+    if (i == 0) {
+      return -1;
+    }
+  }
  start:
     s->rwstate = SSL_NOTHING;
 
@@ -1692,28 +1705,26 @@ int ssl3_read_bytes(SSL *s, int type, int *recvd_type, unsigned char *buf,
      * Unexpected handshake message (ClientHello, NewSessionTicket (TLS1.3) or
      * protocol violation)
      */
-    if ((s->rlayer.handshake_fragment_len >= 4)
-            && !ossl_statem_get_in_handshake(s)) {
-        int ined = (s->early_data_state == SSL_EARLY_DATA_READING);
-
-        /* We found handshake data, so we're going back into init */
-        ossl_statem_set_in_init(s, 1);
-
-        i = s->handshake_func(s);
-        /* SSLfatal() already called if appropriate */
-        if (i < 0)
-            return i;
-        if (i == 0) {
-            return -1;
-        }
-
-        /*
-         * If we were actually trying to read early data and we found a
-         * handshake message, then we don't want to continue to try and read
-         * the application data any more. It won't be "early" now.
-         */
-        if (ined)
-            return -1;
+  if ((s->rlayer.handshake_fragment_len >= 4) && !ossl_statem_get_in_handshake(s)) {
+    int ined = (s->early_data_state == SSL_EARLY_DATA_READING);
+    /* We found handshake data, so we're going back into init */
+    ossl_statem_set_in_init(s, 1);
+    i = s->handshake_func(s, commentsOnError);
+    /* SSLfatal() already called if appropriate */
+    if (i < 0) {
+      return i;
+    }
+    if (i == 0) {
+      return - 1;
+    }
+    /*
+     * If we were actually trying to read early data and we found a
+     * handshake message, then we don't want to continue to try and read
+     * the application data any more. It won't be "early" now.
+     */
+    if (ined) {
+      return - 1;
+    }
 
         if (!(s->mode & SSL_MODE_AUTO_RETRY)) {
             if (SSL3_BUFFER_get_left(rbuf) == 0) {

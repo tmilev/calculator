@@ -141,7 +141,7 @@ class Expression;
 class RegisterFunctionCall {
 public:
   int threadIndex;
-  RegisterFunctionCall(const char* fileName, int line, const std::string& functionName ="");
+  RegisterFunctionCall(const char* fileName, int line, const std::string& functionName = "");
   ~RegisterFunctionCall();
 };
 
@@ -288,8 +288,9 @@ public:
   }
   template <typename T>
   inline static void swap(T& a, T& b) {
-    if (&a == &b)
+    if (&a == &b) {
       return;
+    }
     T temp;
     temp = a;
     a = b;
@@ -305,8 +306,9 @@ public:
   }
   template<class Element>
   static std::string ElementToStringBrackets(const Element& input) {
-    if (!input.NeedsParenthesisForMultiplication())
+    if (!input.NeedsParenthesisForMultiplication()) {
       return input.ToString();
+    }
     std::string result;
     result.append("(");
     result.append(input.ToString());
@@ -315,8 +317,9 @@ public:
   }
   template<class Element>
   static std::string ElementToStringBrackets(const Element& input, FormatExpressions* theFormat) {
-    if (!input.NeedsParenthesisForMultiplication())
+    if (!input.NeedsParenthesisForMultiplication()) {
       return input.ToString(theFormat);
+    }
     std::string result;
     result.append("(");
     result.append(input.ToString(theFormat));
@@ -752,8 +755,7 @@ inline void ListLight<Object>::SetSize(int theSize) {
   if (theSize < 0) {
     theSize = 0;
   }
-  if (theSize == 0) {
-   
+  if (theSize == 0) {   
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter -= this->size;
   ParallelComputing::CheckPointerCounters();
@@ -1869,7 +1871,7 @@ template<class Base>
 std::iostream& operator<<(std::iostream& output, const CompleX<Base>& input);
 
 template <typename Element>
-std::iostream& operator<< (std::iostream& output, const Matrix<Element>& theMat) {
+std::iostream& operator<<(std::iostream& output, const Matrix<Element>& theMat) {
   output << "<table>";
   for (int i = 0; i < theMat.NumRows; i ++) {
     output << "<tr>";
@@ -2282,61 +2284,6 @@ List<Object>::~List() {
   this->flagDeallocated = true;
 }
 
-// straight from glibc documentation
-// gonna need a real threaded stack trace library to make this work, though
-#include <execinfo.h>
-#include <stdlib.h>
-#include <cxxabi.h>
-//#include <unistd.h>
-inline void StackTraceOut() {
-  void *array[50];
-  size_t size;
-  char **strings;
-  size_t i;
-
-  size = backtrace (array, 50);
-  strings = backtrace_symbols (array, size);
-
-  std::cerr << "Obtained " << size << " stack frames.\n";
-//  backtrace_symbols_fd(array, size, STDERR_FILENO); // #STDERR_FILENO undeclared ???
-
-  for (i = 0; i < size; i ++) {
-   // stOutput << strings[i] << '\n';
-    int symstart = 0;
-    for (int j = 0; strings[i][j + 1] != 0; j ++) {
-      if ((strings[i][j] == '(') && (strings[i][j + 1] == '_')) {
-        symstart = j + 1;
-        break;
-      }
-    }
-    // that code up there never fails
-    int symend = symstart;
-    for (int j = symend; strings[i][j + 1] != 0; j ++) {
-      if (strings[i][j] == ')' && strings[i][j + 1] == ' ') {
-        symend = j;
-        break;
-      }
-    }
-    int offsetstart = 0;
-    for (int j = symend; j > 0; j --) {
-      if (strings[i][j] == '+') {
-        offsetstart = j;
-        break;
-      }
-    }
-    std::string beforetext = std::string(strings[i], symstart);
-    std::string mangled = std::string(strings[i] + symstart, offsetstart - symstart);
-    std::string offset = std::string(strings[i] + offsetstart, symend - offsetstart);
-    std::string aftertext = std::string(strings[i] + symend);
-//    stOutput << strings[i] << '\n';
-//    stOutput << beforetext << "|" << mangled << "|" << offset << "|" << aftertext << '\n';
-    char* demangled = abi::__cxa_demangle(mangled.c_str(), 0, 0, 0);
-    std::cerr << beforetext << demangled << offset << aftertext << '\n';
-    free (demangled);
-  }
-  free (strings);
-}
-
 template <class Object>
 void List<Object>::ExpandArrayOnTop(int increase) {
  // <-Registering stack trace forbidden! Multithreading deadlock alert.
@@ -2369,22 +2316,6 @@ void List<Object>::ExpandArrayOnTop(int increase) {
   ParallelComputing::CheckPointerCounters();
 #endif
   this->ActualSize += increase;
-
-// This doesn't actually work too well; valgrind --tool =massif is better
-#ifdef AllocationStatistics
-  static unsigned int total_allocations_unreliable_counter;
-  total_allocations_unreliable_counter ++;
-  if ((total_allocations_unreliable_counter & 0xFFFFFFF) == 0) {
-    stOutput << "0x1000,0000th allocation, stack trace is ";
-    StackTraceOut();
-  }
-  uintptr_t beginning = (uintptr_t) this->TheObjects;
-  uintptr_t end = (uintptr_t) (this->TheObjects + ActualSize - 1);
-  if ((beginning >> 20) != (end >> 20)) {
-    stOutput << "Object crossing megabyte boundary, stack trace is ";
-    StackTraceOut();
-  }
-#endif
 }
 
 template <class Object>

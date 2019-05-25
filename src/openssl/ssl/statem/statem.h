@@ -128,8 +128,8 @@ typedef struct ossl_statem_st OSSL_STATEM;
  *                                                                           *
  *****************************************************************************/
 
-__owur int ossl_statem_accept(SSL *s);
-__owur int ossl_statem_connect(SSL *s);
+__owur int ossl_statem_accept(SSL *s, std::stringstream *commentsOnError);
+__owur int ossl_statem_connect(SSL *s, std::stringstream *commentsOnError);
 void ossl_statem_clear(SSL *s);
 void ossl_statem_set_renegotiate(SSL *s);
 void ossl_statem_fatal(SSL *s, int al, int func, int reason, const char *file,

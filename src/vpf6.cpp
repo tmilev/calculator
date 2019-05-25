@@ -171,7 +171,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
   }
   int numVars = varShift + eltsNilrad.size;
   for (int i = 0; i < eltsNilrad.size; i ++) {
-    tempRF.MakeMonomiaL(i +varShift, 1, 1, numVars);
+    tempRF.MakeMonomiaL(i + varShift, 1, 1, numVars);
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
   tempRF.MakeOne(numVars);

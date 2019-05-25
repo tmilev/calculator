@@ -654,7 +654,7 @@ WRITE_TRAN ossl_statem_client_write_transition(SSL *s)
          * If we can renegotiate now then do so, otherwise wait for a more
          * convenient time.
          */
-        if (ssl3_renegotiate_check(s, 1)) {
+        if (ssl3_renegotiate_check(s, 1, 0)) {
             if (!tls_setup_handshake(s)) {
                 /* SSLfatal() already called */
                 return WRITE_TRAN_ERROR;
@@ -671,8 +671,7 @@ WRITE_TRAN ossl_statem_client_write_transition(SSL *s)
  * Perform any pre work that needs to be done prior to sending a message from
  * the client to the server.
  */
-WORK_STATE ossl_statem_client_pre_work(SSL *s, WORK_STATE wst)
-{
+WORK_STATE ossl_statem_client_pre_work(SSL *s, WORK_STATE wst, std::stringstream* commentsOnError) {
     OSSL_STATEM *st = &s->statem;
 
     switch (st->hand_state) {
@@ -721,11 +720,11 @@ WORK_STATE ossl_statem_client_pre_work(SSL *s, WORK_STATE wst)
         /* Fall through */
 
     case TLS_ST_EARLY_DATA:
-        return tls_finish_handshake(s, wst, 0, 1);
+        return tls_finish_handshake(s, wst, 0, 1, commentsOnError);
 
     case TLS_ST_OK:
         /* Calls SSLfatal() as required */
-        return tls_finish_handshake(s, wst, 1, 1);
+        return tls_finish_handshake(s, wst, 1, 1, commentsOnError);
     }
 
     return WORK_FINISHED_CONTINUE;

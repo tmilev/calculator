@@ -24,13 +24,20 @@
 #include "../include/internal/cryptlib.h"
 #include "../include/internal/refcount.h"
 #include "../include/internal/ktls.h"
+#include <sstream>
+#include "../../vpfHeader1General0_General.h"
+
+static ProjectInformationInstance sslLibraryInstance(
+  __FILE__, "ssl_lib library file. "
+);
+
 
 static int ssl_undefined_function_1(SSL *ssl, SSL3_RECORD *r, size_t s, int t)
 {
     (void)r;
     (void)s;
     (void)t;
-    return ssl_undefined_function(ssl);
+    return ssl_undefined_function(ssl, 0);
 }
 
 static int ssl_undefined_function_2(SSL *ssl, SSL3_RECORD *r, unsigned char *s,
@@ -39,7 +46,7 @@ static int ssl_undefined_function_2(SSL *ssl, SSL3_RECORD *r, unsigned char *s,
     (void)r;
     (void)s;
     (void)t;
-    return ssl_undefined_function(ssl);
+    return ssl_undefined_function(ssl, 0);
 }
 
 static int ssl_undefined_function_3(SSL *ssl, unsigned char *r,
@@ -49,13 +56,13 @@ static int ssl_undefined_function_3(SSL *ssl, unsigned char *r,
     (void)s;
     (void)t;
     (void)u;
-    return ssl_undefined_function(ssl);
+    return ssl_undefined_function(ssl, 0);
 }
 
 static int ssl_undefined_function_4(SSL *ssl, int r)
 {
     (void)r;
-    return ssl_undefined_function(ssl);
+    return ssl_undefined_function(ssl, 0);
 }
 
 static size_t ssl_undefined_function_5(SSL *ssl, const char *r, size_t s,
@@ -64,13 +71,13 @@ static size_t ssl_undefined_function_5(SSL *ssl, const char *r, size_t s,
     (void)r;
     (void)s;
     (void)t;
-    return ssl_undefined_function(ssl);
+    return ssl_undefined_function(ssl, 0);
 }
 
 static int ssl_undefined_function_6(int r)
 {
     (void)r;
-    return ssl_undefined_function(NULL);
+    return ssl_undefined_function(NULL, 0);
 }
 
 static int ssl_undefined_function_7(SSL *ssl, unsigned char *r, size_t s,
@@ -84,13 +91,13 @@ static int ssl_undefined_function_7(SSL *ssl, unsigned char *r, size_t s,
     (void)v;
     (void)w;
     (void)x;
-    return ssl_undefined_function(ssl);
+    return ssl_undefined_function(ssl, 0);
 }
 
 SSL3_ENC_METHOD ssl3_undef_enc_method = {
     ssl_undefined_function_1,
     ssl_undefined_function_2,
-    ssl_undefined_function,
+    ssl_undefined_function_no_stream,
     ssl_undefined_function_3,
     ssl_undefined_function_4,
     ssl_undefined_function_5,
@@ -108,9 +115,9 @@ struct ssl_async_args {
     size_t num;
     enum asyncType { READFUNC, WRITEFUNC, OTHERFUNC } type;
     union {
-        int (*func_read) (SSL *, void *, size_t, size_t *);
-        int (*func_write) (SSL *, const void *, size_t, size_t *);
-        int (*func_other) (SSL *);
+        int (*func_read) (SSL *, void *, size_t, size_t *, std::stringstream* commentsOnError);
+        int (*func_write) (SSL *, const void *, size_t, size_t *, std::stringstream* commentsOnError);
+        int (*func_other) (SSL *, std::stringstream* commentsOnError);
     } f;
 };
 
@@ -635,10 +642,10 @@ int SSL_clear(SSL *s)
     if (s->method != s->ctx->method) {
         s->method->ssl_free(s);
         s->method = s->ctx->method;
-        if (!s->method->ssl_new(s))
+        if (!s->method->ssl_new(s, 0))
             return 0;
     } else {
-        if (!s->method->ssl_clear(s))
+        if (!s->method->ssl_clear(s, 0))
             return 0;
     }
 
@@ -670,30 +677,31 @@ int SSL_CTX_set_ssl_version(SSL_CTX *ctx, const SSL_METHOD *meth)
     return 1;
 }
 
-SSL *SSL_new(SSL_CTX *ctx)
-{
-    SSL *s;
-
-    if (ctx == NULL) {
-        SSLerr(SSL_F_SSL_NEW, SSL_R_NULL_SSL_CTX);
-        return NULL;
+SSL *SSL_new(SSL_CTX *ctx, std::stringstream* commentsOnError) {
+  SSL *s;
+  if (ctx == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Context is null.\n";
     }
-    if (ctx->method == NULL) {
-        SSLerr(SSL_F_SSL_NEW, SSL_R_SSL_CTX_HAS_NO_DEFAULT_SSL_VERSION);
-        return NULL;
+    return NULL;
+  }
+  if (ctx->method == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Context method is 0.\n";
     }
-
-    s = (SSL*) OPENSSL_zalloc(sizeof(*s));
-    if (s == NULL)
-        goto err;
-
-    s->references = 1;
-    s->lock = CRYPTO_THREAD_lock_new();
-    if (s->lock == NULL) {
-        OPENSSL_free(s);
-        s = NULL;
-        goto err;
-    }
+    return NULL;
+  }
+  s = (SSL*) OPENSSL_zalloc(sizeof(*s));
+  if (s == NULL) {
+    goto err;
+  }
+  s->references = 1;
+  s->lock = CRYPTO_THREAD_lock_new();
+  if (s->lock == NULL) {
+    OPENSSL_free(s);
+    s = NULL;
+    goto err;
+  }
 
     RECORD_LAYER_init(&s->rlayer, s);
 
@@ -814,7 +822,7 @@ SSL *SSL_new(SSL_CTX *ctx)
     s->allow_early_data_cb = ctx->allow_early_data_cb;
     s->allow_early_data_cb_data = ctx->allow_early_data_cb_data;
 
-    if (!s->method->ssl_new(s))
+    if (!s->method->ssl_new(s, commentsOnError))
         goto err;
 
     s->server = (ctx->method->ssl_accept == ssl_undefined_function) ? 0 : 1;
@@ -846,7 +854,9 @@ SSL *SSL_new(SSL_CTX *ctx)
     return s;
  err:
     SSL_free(s);
-    SSLerr(SSL_F_SSL_NEW, ERR_R_MALLOC_FAILURE);
+    if (commentsOnError != 0) {
+      *commentsOnError << "OpenSSL: memory allocation error.\n";
+    }
     return NULL;
 }
 
@@ -1580,7 +1590,7 @@ int SSL_copy_session_id(SSL *t, const SSL *f)
     if (t->method != f->method) {
         t->method->ssl_free(t);
         t->method = f->method;
-        if (t->method->ssl_new(t) == 0)
+        if (t->method->ssl_new(t, 0) == 0)
             return 0;
     }
 
@@ -1690,24 +1700,21 @@ int SSL_get_async_status(SSL *s, int *status)
     return 1;
 }
 
-int SSL_accept(SSL *s)
-{
-    if (s->handshake_func == NULL) {
-        /* Not properly initialized yet */
-        SSL_set_accept_state(s);
-    }
-
-    return SSL_do_handshake(s);
+int SSL_accept(SSL *s, std::stringstream* commentsOnError) {
+  MacroRegisterFunctionWithName("SSL_accept");
+  if (s->handshake_func == NULL) {
+    /* Not properly initialized yet */
+    SSL_set_accept_state(s);
+  }
+  return SSL_do_handshake(s, commentsOnError);
 }
 
-int SSL_connect(SSL *s)
-{
-    if (s->handshake_func == NULL) {
-        /* Not properly initialized yet */
-        SSL_set_connect_state(s);
-    }
-
-    return SSL_do_handshake(s);
+int SSL_connect(SSL *s, std::stringstream *commentsOnError) {
+  if (s->handshake_func == NULL) {
+    /* Not properly initialized yet */
+    SSL_set_connect_state(s);
+  }
+  return SSL_do_handshake(s, commentsOnError);
 }
 
 long SSL_get_default_timeout(const SSL *s)
@@ -1771,11 +1778,11 @@ static int ssl_io_intern(void *vargs)
     num = args->num;
     switch (args->type) {
     case ssl_async_args::READFUNC:
-        return args->f.func_read(s, buf, num, &s->asyncrw);
+        return args->f.func_read(s, buf, num, &s->asyncrw, 0);
     case ssl_async_args::WRITEFUNC:
-        return args->f.func_write(s, buf, num, &s->asyncrw);
+        return args->f.func_write(s, buf, num, &s->asyncrw, 0);
     case ssl_async_args::OTHERFUNC:
-        return args->f.func_other(s);
+        return args->f.func_other(s, 0);
     }
     return -1;
 }
@@ -1817,7 +1824,7 @@ int ssl_read_internal(SSL *s, void *buf, size_t num, size_t *readbytes)
         *readbytes = s->asyncrw;
         return ret;
     } else {
-        return s->method->ssl_read(s, buf, num, readbytes);
+        return s->method->ssl_read(s, buf, num, readbytes, 0);
     }
 }
 
@@ -1852,8 +1859,9 @@ int SSL_read_ex(SSL *s, void *buf, size_t num, size_t *readbytes)
     return ret;
 }
 
-int SSL_read_early_data(SSL *s, void *buf, size_t num, size_t *readbytes)
-{
+int SSL_read_early_data(
+  SSL *s, void *buf, size_t num, size_t *readbytes, std::stringstream* commentsOnError
+) {
     int ret;
 
     if (!s->server) {
@@ -1872,7 +1880,7 @@ int SSL_read_early_data(SSL *s, void *buf, size_t num, size_t *readbytes)
 
     case SSL_EARLY_DATA_ACCEPT_RETRY:
         s->early_data_state = SSL_EARLY_DATA_ACCEPTING;
-        ret = SSL_accept(s);
+        ret = SSL_accept(s, commentsOnError);
         if (ret <= 0) {
             /* NBIO or error */
             s->early_data_state = SSL_EARLY_DATA_ACCEPT_RETRY;
@@ -1936,7 +1944,7 @@ static int ssl_peek_internal(SSL *s, void *buf, size_t num, size_t *readbytes)
         *readbytes = s->asyncrw;
         return ret;
     } else {
-        return s->method->ssl_peek(s, buf, num, readbytes);
+        return s->method->ssl_peek(s, buf, num, readbytes, 0);
     }
 }
 
@@ -1972,20 +1980,17 @@ int SSL_peek_ex(SSL *s, void *buf, size_t num, size_t *readbytes)
     return ret;
 }
 
-int ssl_write_internal(SSL *s, const void *buf, size_t num, size_t *written)
-{
-    if (s->handshake_func == NULL) {
-        SSLerr(SSL_F_SSL_WRITE_INTERNAL, SSL_R_UNINITIALIZED);
-        return -1;
-    }
-
-    if (s->shutdown & SSL_SENT_SHUTDOWN) {
-        s->rwstate = SSL_NOTHING;
-        SSLerr(SSL_F_SSL_WRITE_INTERNAL, SSL_R_PROTOCOL_IS_SHUTDOWN);
-        return -1;
-    }
-
-    if (s->early_data_state == SSL_EARLY_DATA_CONNECT_RETRY
+int ssl_write_internal(SSL *s, const void *buf, size_t num, size_t *written, std::stringstream* commentsOnError) {
+  if (s->handshake_func == NULL) {
+    SSLerr(SSL_F_SSL_WRITE_INTERNAL, SSL_R_UNINITIALIZED);
+    return - 1;
+  }
+  if (s->shutdown & SSL_SENT_SHUTDOWN) {
+    s->rwstate = SSL_NOTHING;
+    SSLerr(SSL_F_SSL_WRITE_INTERNAL, SSL_R_PROTOCOL_IS_SHUTDOWN);
+    return - 1;
+  }
+  if (s->early_data_state == SSL_EARLY_DATA_CONNECT_RETRY
                 || s->early_data_state == SSL_EARLY_DATA_ACCEPT_RETRY
                 || s->early_data_state == SSL_EARLY_DATA_READ_RETRY) {
         SSLerr(SSL_F_SSL_WRITE_INTERNAL, ERR_R_SHOULD_NOT_HAVE_BEEN_CALLED);
@@ -2008,21 +2013,18 @@ int ssl_write_internal(SSL *s, const void *buf, size_t num, size_t *written)
         *written = s->asyncrw;
         return ret;
     } else {
-        return s->method->ssl_write(s, buf, num, written);
+        return s->method->ssl_write(s, buf, num, written, commentsOnError);
     }
 }
 
-int SSL_write(SSL *s, const void *buf, int num)
-{
-    int ret;
-    size_t written;
-
-    if (num < 0) {
-        SSLerr(SSL_F_SSL_WRITE, SSL_R_BAD_LENGTH);
-        return -1;
-    }
-
-    ret = ssl_write_internal(s, buf, (size_t)num, &written);
+int SSL_write(SSL *s, const void *buf, int num, std::stringstream* commentsOnError) {
+  int ret;
+  size_t written;
+  if (num < 0) {
+    SSLerr(SSL_F_SSL_WRITE, SSL_R_BAD_LENGTH);
+    return - 1;
+  }
+  ret = ssl_write_internal(s, buf, (size_t)num, &written, commentsOnError);
 
     /*
      * The cast is safe here because ret should be <= INT_MAX because num is
@@ -2034,36 +2036,34 @@ int SSL_write(SSL *s, const void *buf, int num)
     return ret;
 }
 
-int SSL_write_ex(SSL *s, const void *buf, size_t num, size_t *written)
-{
-    int ret = ssl_write_internal(s, buf, num, written);
-
-    if (ret < 0)
-        ret = 0;
-    return ret;
+int SSL_write_ex(SSL *s, const void *buf, size_t num, size_t *written, std::stringstream *commentsOnError) {
+  int ret = ssl_write_internal(s, buf, num, written, commentsOnError);
+  if (ret < 0) {
+    ret = 0;
+  }
+  return ret;
 }
 
-int SSL_write_early_data(SSL *s, const void *buf, size_t num, size_t *written)
-{
-    int ret, early_data_state;
-    size_t writtmp;
-    uint32_t partialwrite;
-
-    switch (s->early_data_state) {
-    case SSL_EARLY_DATA_NONE:
-        if (s->server
-                || !SSL_in_before(s)
-                || ((s->session == NULL || s->session->ext.max_early_data == 0)
-                     && (s->psk_use_session_cb == NULL))) {
-            SSLerr(SSL_F_SSL_WRITE_EARLY_DATA,
-                   ERR_R_SHOULD_NOT_HAVE_BEEN_CALLED);
-            return 0;
-        }
-        /* fall through */
-
+int SSL_write_early_data(
+  SSL *s, const void *buf, size_t num, size_t *written, std::stringstream* commentsOnError
+) {
+  int ret, early_data_state;
+  size_t writtmp;
+  uint32_t partialwrite;
+  switch (s->early_data_state) {
+  case SSL_EARLY_DATA_NONE:
+    if (
+      s->server ||
+      !SSL_in_before(s) ||
+      ((s->session == NULL || s->session->ext.max_early_data == 0) && (s->psk_use_session_cb == NULL))
+    ) {
+      SSLerr(SSL_F_SSL_WRITE_EARLY_DATA, ERR_R_SHOULD_NOT_HAVE_BEEN_CALLED);
+      return 0;
+    }
+    /* fall through */
     case SSL_EARLY_DATA_CONNECT_RETRY:
         s->early_data_state = SSL_EARLY_DATA_CONNECTING;
-        ret = SSL_connect(s);
+        ret = SSL_connect(s, commentsOnError);
         if (ret <= 0) {
             /* NBIO or error */
             s->early_data_state = SSL_EARLY_DATA_CONNECT_RETRY;
@@ -2080,7 +2080,7 @@ int SSL_write_early_data(SSL *s, const void *buf, size_t num, size_t *written)
          */
         partialwrite = s->mode & SSL_MODE_ENABLE_PARTIAL_WRITE;
         s->mode &= ~SSL_MODE_ENABLE_PARTIAL_WRITE;
-        ret = SSL_write_ex(s, buf, num, &writtmp);
+        ret = SSL_write_ex(s, buf, num, &writtmp, commentsOnError);
         s->mode |= partialwrite;
         if (!ret) {
             s->early_data_state = SSL_EARLY_DATA_WRITE_RETRY;
@@ -2102,7 +2102,7 @@ int SSL_write_early_data(SSL *s, const void *buf, size_t num, size_t *written)
         early_data_state = s->early_data_state;
         /* We are a server writing to an unauthenticated client */
         s->early_data_state = SSL_EARLY_DATA_UNAUTH_WRITING;
-        ret = SSL_write_ex(s, buf, num, written);
+        ret = SSL_write_ex(s, buf, num, written, commentsOnError);
         /* The buffering BIO is still in place */
         if (ret)
             (void)BIO_flush(s->wbio);
@@ -2139,7 +2139,7 @@ int SSL_shutdown(SSL *s)
 
             return ssl_start_async_job(s, &args, ssl_io_intern);
         } else {
-            return s->method->ssl_shutdown(s);
+            return s->method->ssl_shutdown(s, 0);
         }
     } else {
         SSLerr(SSL_F_SSL_SHUTDOWN, SSL_R_SHUTDOWN_WHILE_IN_INIT);
@@ -2195,7 +2195,7 @@ int SSL_renegotiate(SSL *s)
     s->renegotiate = 1;
     s->new_session = 1;
 
-    return s->method->ssl_renegotiate(s);
+    return s->method->ssl_renegotiate(s, 0);
 }
 
 int SSL_renegotiate_abbreviated(SSL *s)
@@ -2213,7 +2213,7 @@ int SSL_renegotiate_abbreviated(SSL *s)
     s->renegotiate = 1;
     s->new_session = 0;
 
-    return s->method->ssl_renegotiate(s);
+    return s->method->ssl_renegotiate(s, 0);
 }
 
 int SSL_renegotiate_pending(const SSL *s)
@@ -3575,14 +3575,14 @@ int SSL_set_ssl_method(SSL *s, const SSL_METHOD *meth)
 
     if (s->method != meth) {
         const SSL_METHOD *sm = s->method;
-        int (*hf) (SSL *) = s->handshake_func;
+        int (*hf) (SSL *, std::stringstream* commentsOnError) = s->handshake_func;
 
         if (sm->version == meth->version)
             s->method = meth;
         else {
             sm->ssl_free(s);
             s->method = meth;
-            ret = s->method->ssl_new(s);
+            ret = s->method->ssl_new(s, 0);
         }
 
         if (hf == sm->ssl_connect)
@@ -3683,34 +3683,29 @@ static int ssl_do_handshake_intern(void *vargs)
     args = (struct ssl_async_args *)vargs;
     s = args->s;
 
-    return s->handshake_func(s);
+    return s->handshake_func(s, 0);
 }
 
-int SSL_do_handshake(SSL *s)
-{
-    int ret = 1;
-
-    if (s->handshake_func == NULL) {
-        SSLerr(SSL_F_SSL_DO_HANDSHAKE, SSL_R_CONNECTION_TYPE_NOT_SET);
-        return -1;
+int SSL_do_handshake(SSL *s, std::stringstream* commentsOnError) {
+  int ret = 1;
+  if (s->handshake_func == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Handshake function not initialized.\n";
     }
-
-    ossl_statem_check_finish_init(s, -1);
-
-    s->method->ssl_renegotiate_check(s, 0);
-
-    if (SSL_in_init(s) || SSL_in_before(s)) {
-        if ((s->mode & SSL_MODE_ASYNC) && ASYNC_get_current_job() == NULL) {
-            struct ssl_async_args args;
-
-            args.s = s;
-
-            ret = ssl_start_async_job(s, &args, ssl_do_handshake_intern);
-        } else {
-            ret = s->handshake_func(s);
-        }
+    return - 1;
+  }
+  ossl_statem_check_finish_init(s, -1);
+  s->method->ssl_renegotiate_check(s, 0, commentsOnError);
+  if (SSL_in_init(s) || SSL_in_before(s)) {
+    if ((s->mode & SSL_MODE_ASYNC) && ASYNC_get_current_job() == NULL) {
+      struct ssl_async_args args;
+      args.s = s;
+      ret = ssl_start_async_job(s, &args, ssl_do_handshake_intern);
+    } else {
+      ret = s->handshake_func(s, commentsOnError);
     }
-    return ret;
+  }
+  return ret;
 }
 
 void SSL_set_accept_state(SSL *s)
@@ -3731,10 +3726,17 @@ void SSL_set_connect_state(SSL *s)
     clear_ciphers(s);
 }
 
-int ssl_undefined_function(SSL *s)
-{
-    SSLerr(SSL_F_SSL_UNDEFINED_FUNCTION, ERR_R_SHOULD_NOT_HAVE_BEEN_CALLED);
-    return 0;
+#include <assert.h>
+int ssl_undefined_function_no_stream(SSL *s) {
+  assert(false);
+  return 0;
+}
+
+int ssl_undefined_function(SSL *s, std::stringstream *commentsOnError) {
+  if (commentsOnError != 0) {
+    *commentsOnError << "Attempt to call undefined ssl function. ";
+  }
+  return 0;
 }
 
 int ssl_undefined_void_function(void)
@@ -3823,21 +3825,19 @@ static int dup_ca_names(STACK_OF(X509_NAME) **dst, STACK_OF(X509_NAME) *src)
     return 1;
 }
 
-SSL *SSL_dup(SSL *s)
-{
-    SSL *ret;
-    int i;
-
-    /* If we're not quiescent, just up_ref! */
-    if (!SSL_in_init(s) || !SSL_in_before(s)) {
-        CRYPTO_UP_REF(&s->references, &i, s->lock);
-        return s;
-    }
+SSL* SSL_dup(SSL *s) {
+  SSL* ret;
+  int i;
+  /* If we're not quiescent, just up_ref! */
+  if (!SSL_in_init(s) || !SSL_in_before(s)) {
+    CRYPTO_UP_REF(&s->references, &i, s->lock);
+    return s;
+  }
 
     /*
      * Otherwise, copy configuration state, and session if set.
      */
-    if ((ret = SSL_new(SSL_get_SSL_CTX(s))) == NULL)
+    if ((ret = SSL_new(SSL_get_SSL_CTX(s), 0)) == NULL)
         return NULL;
 
     if (s->session != NULL) {
@@ -5584,27 +5584,23 @@ __owur unsigned int ssl_get_split_send_fragment(const SSL *ssl)
     return ssl->split_send_fragment;
 }
 
-int SSL_stateless(SSL *s)
-{
-    int ret;
-
-    /* Ensure there is no state left over from a previous invocation */
-    if (!SSL_clear(s))
-        return 0;
-
-    ERR_clear_error();
-
-    s->s3->flags |= TLS1_FLAGS_STATELESS;
-    ret = SSL_accept(s);
-    s->s3->flags &= ~TLS1_FLAGS_STATELESS;
-
-    if (ret > 0 && s->ext.cookieok)
-        return 1;
-
-    if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING && !ossl_statem_in_error(s))
-        return 0;
-
-    return -1;
+int SSL_stateless(SSL *s, std::stringstream* commentsOnError) {
+  int ret;
+  /* Ensure there is no state left over from a previous invocation */
+  if (!SSL_clear(s)) {
+    return 0;
+  }
+  ERR_clear_error();
+  s->s3->flags |= TLS1_FLAGS_STATELESS;
+  ret = SSL_accept(s, commentsOnError);
+  s->s3->flags &= ~TLS1_FLAGS_STATELESS;
+  if (ret > 0 && s->ext.cookieok) {
+    return 1;
+  }
+  if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING && !ossl_statem_in_error(s)) {
+    return 0;
+  }
+  return - 1;
 }
 
 void SSL_CTX_set_post_handshake_auth(SSL_CTX *ctx, int val)

@@ -61,7 +61,7 @@ static int state_machine(SSL *s, int server);
 static void init_read_state_machine(SSL *s);
 static SUB_STATE_RETURN read_state_machine(SSL *s);
 static void init_write_state_machine(SSL *s);
-static SUB_STATE_RETURN write_state_machine(SSL *s);
+static SUB_STATE_RETURN write_state_machine(SSL *s, std::stringstream *commentsOnError);
 
 OSSL_HANDSHAKE_STATE SSL_get_state(const SSL *ssl)
 {
@@ -245,12 +245,12 @@ void ossl_statem_set_hello_verify_done(SSL *s)
     s->statem.hand_state = TLS_ST_SR_CLNT_HELLO;
 }
 
-int ossl_statem_connect(SSL *s)
+int ossl_statem_connect(SSL *s, std::stringstream* commentsOnError)
 {
     return state_machine(s, 0);
 }
 
-int ossl_statem_accept(SSL *s)
+int ossl_statem_accept(SSL *s, std::stringstream* commentsOnError)
 {
     return state_machine(s, 1);
 }
@@ -430,7 +430,7 @@ static int state_machine(SSL *s, int server)
                 goto end;
             }
         } else if (st->state == MSG_FLOW_WRITING) {
-            ssret = write_state_machine(s);
+            ssret = write_state_machine(s, 0);
             if (ssret == SUB_STATE_FINISHED) {
                 st->state = MSG_FLOW_READING;
                 init_read_state_machine(s);
@@ -685,19 +685,17 @@ static SUB_STATE_RETURN read_state_machine(SSL *s)
 /*
  * Send a previously constructed message to the peer.
  */
-static int statem_do_write(SSL *s)
-{
-    OSSL_STATEM *st = &s->statem;
-
-    if (st->hand_state == TLS_ST_CW_CHANGE
-        || st->hand_state == TLS_ST_SW_CHANGE) {
-        if (SSL_IS_DTLS(s))
-            return dtls1_do_write(s, SSL3_RT_CHANGE_CIPHER_SPEC);
-        else
-            return ssl3_do_write(s, SSL3_RT_CHANGE_CIPHER_SPEC);
+int statem_do_write(SSL *s, std::stringstream* commentsOnError) {
+  OSSL_STATEM *st = &s->statem;
+  if (st->hand_state == TLS_ST_CW_CHANGE || st->hand_state == TLS_ST_SW_CHANGE) {
+    if (SSL_IS_DTLS(s)) {
+      return dtls1_do_write(s, SSL3_RT_CHANGE_CIPHER_SPEC);
     } else {
-        return ssl_do_write(s);
+      return ssl3_do_write(s, SSL3_RT_CHANGE_CIPHER_SPEC, commentsOnError);
     }
+  } else {
+    return ssl_do_write(s);
+  }
 }
 
 /*
@@ -741,12 +739,11 @@ static void init_write_state_machine(SSL *s)
  * message has been completed. As for WRITE_STATE_PRE_WORK this could also
  * result in an NBIO event.
  */
-static SUB_STATE_RETURN write_state_machine(SSL *s)
-{
+static SUB_STATE_RETURN write_state_machine(SSL *s, std::stringstream* commentsOnError) {
     OSSL_STATEM *st = &s->statem;
     int ret;
     WRITE_TRAN(*transition) (SSL *s);
-    WORK_STATE(*pre_work) (SSL *s, WORK_STATE wst);
+    WORK_STATE(*pre_work) (SSL *s, WORK_STATE wst, std::stringstream* commentsOnError);
     WORK_STATE(*post_work) (SSL *s, WORK_STATE wst);
     int (*get_construct_message_f) (SSL *s, WPACKET *pkt,
                                     int (**confunc) (SSL *s, WPACKET *pkt),
@@ -797,7 +794,7 @@ static SUB_STATE_RETURN write_state_machine(SSL *s)
             break;
 
         case WRITE_STATE_PRE_WORK:
-            switch (st->write_state_work = pre_work(s, st->write_state_work)) {
+            switch (st->write_state_work = pre_work(s, st->write_state_work, commentsOnError)) {
             case WORK_ERROR:
                 check_fatal(s, SSL_F_WRITE_STATE_MACHINE);
                 /* Fall through */
@@ -849,7 +846,7 @@ static SUB_STATE_RETURN write_state_machine(SSL *s)
             if (SSL_IS_DTLS(s) && st->use_timer) {
                 dtls1_start_timer(s);
             }
-            ret = statem_do_write(s);
+            ret = statem_do_write(s, 0);
             if (ret <= 0) {
                 return SUB_STATE_ERROR;
             }

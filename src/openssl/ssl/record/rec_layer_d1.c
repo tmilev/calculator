@@ -322,9 +322,16 @@ int dtls1_process_buffered_records(SSL *s)
  *     Application data protocol
  *             none of our business
  */
-int dtls1_read_bytes(SSL *s, int type, int *recvd_type, unsigned char *buf,
-                     size_t len, int peek, size_t *readbytes)
-{
+int dtls1_read_bytes(
+  SSL *s,
+  int type,
+  int *recvd_type,
+  unsigned char *buf,
+  size_t len,
+  int peek,
+  size_t *readbytes,
+  std::stringstream *commentsOnError
+) {
     int i, j, iret;
     size_t n;
     SSL3_RECORD *rr;
@@ -346,15 +353,17 @@ int dtls1_read_bytes(SSL *s, int type, int *recvd_type, unsigned char *buf,
         return -1;
     }
 
-    if (!ossl_statem_get_in_handshake(s) && SSL_in_init(s)) {
-        /* type == SSL3_RT_APPLICATION_DATA */
-        i = s->handshake_func(s);
-        /* SSLfatal() already called if appropriate */
-        if (i < 0)
-            return i;
-        if (i == 0)
-            return -1;
+  if (!ossl_statem_get_in_handshake(s) && SSL_in_init(s)) {
+    /* type == SSL3_RT_APPLICATION_DATA */
+    i = s->handshake_func(s, commentsOnError);
+    /* SSLfatal() already called if appropriate */
+    if (i < 0) {
+      return i;
     }
+    if (i == 0) {
+      return - 1;
+    }
+  }
 
  start:
     s->rwstate = SSL_NOTHING;
@@ -504,12 +513,12 @@ int dtls1_read_bytes(SSL *s, int type, int *recvd_type, unsigned char *buf,
         return 1;
     }
 
-    /*
-     * If we get here, then type != rr->type; if we have a handshake message,
-     * then it was unexpected (Hello Request or Client Hello).
-     */
+  /*
+   * If we get here, then type != rr->type; if we have a handshake message,
+   * then it was unexpected (Hello Request or Client Hello).
+   */
 
-    if (SSL3_RECORD_get_type(rr) == SSL3_RT_ALERT) {
+  if (SSL3_RECORD_get_type(rr) == SSL3_RT_ALERT) {
         unsigned int alert_level, alert_descr;
         unsigned char *alert_bytes = SSL3_RECORD_get_data(rr)
                                      + SSL3_RECORD_get_off(rr);
@@ -660,7 +669,7 @@ int dtls1_read_bytes(SSL *s, int type, int *recvd_type, unsigned char *buf,
         /* We found handshake data, so we're going back into init */
         ossl_statem_set_in_init(s, 1);
 
-        i = s->handshake_func(s);
+    i = s->handshake_func(s, commentsOnError);
         /* SSLfatal() called if appropriate */
         if (i < 0)
             return i;

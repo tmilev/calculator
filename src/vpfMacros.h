@@ -3,20 +3,10 @@
 #ifndef MacroVPFMacros_included
 #define MacroVPFMacros_included
 
-//External dependencies:
 #include <sstream>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
-
-#ifdef WIN32
-//have to disable C4100 in VS because it warns me on passing non-used parameters to my functions.
-//Those of course are passed to facilitate future extensions of functionality.
-#pragma warning(disable:4100)//warning C4100: non-referenced formal parameter
-//The below causes problems in VS with my debugging code (which I comment/uncomment often).
-#pragma warning(disable:4189)//warning 4189: variable initialized but never used
-#endif
-//External dependencies end.
 
 
 //-----------------------------------------------------------

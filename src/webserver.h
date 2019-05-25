@@ -82,12 +82,12 @@ public:
     std::stringstream *commentsGeneral,
     bool includeNoErrorInComments
   );
-  int SSLWrite(
-    SSL* theSSL,
+  int SSLWrite(SSL* theSSL,
     void* buffer,
     int bufferSize,
     std::string* outputError,
     std::stringstream* commentsGeneral,
+    std::stringstream *commentsOnError,
     bool includeNoErrorInComments
   );
   SSLdata();
@@ -95,9 +95,11 @@ public:
   void FreeSSL();
   void FreeContext();
   void AddMoreEntropyFromTimer();
-  void HandShakeIamServer(int inputSocketID);
+  bool HandShakeIamServer(int inputSocketID, std::stringstream *commentsOnError);
   bool InspectCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  bool HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool HandShakeIamClientNoSocketCleanup(
+    int inputSocketID, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+  );
   void FreeEverythingShutdownSSL();
 };
 #endif
@@ -395,7 +397,7 @@ public:
   void initPortsITry();
   void initListeningSockets();
   void initSSL();
-  void SSLServerSideHandShake();
+  bool SSLServerSideHandShake(std::stringstream* commentsOnError);
   void TerminateChildSystemCall(int i);
   void ProcessOneChildMessage(int childIndex, int& outputNumInUse);
   void RecycleChildrenIfPossible();

@@ -1700,7 +1700,7 @@ __owur int SSL_CTX_set_session_id_context(SSL_CTX *ctx,
                                           const unsigned char *sid_ctx,
                                           unsigned int sid_ctx_len);
 
-SSL *SSL_new(SSL_CTX *ctx);
+SSL *SSL_new(SSL_CTX *ctx, std::stringstream *commentsOnError);
 int SSL_up_ref(SSL *s);
 int SSL_is_dtls(const SSL *s);
 __owur int SSL_set_session_id_context(SSL *ssl, const unsigned char *sid_ctx,
@@ -1809,9 +1809,9 @@ __owur int SSL_set_async_callback_arg(SSL *s, void *arg);
 __owur int SSL_get_async_status(SSL *s, int *status);
 
 # endif
-__owur int SSL_accept(SSL *ssl);
-__owur int SSL_stateless(SSL *s);
-__owur int SSL_connect(SSL *ssl);
+__owur int SSL_accept(SSL *ssl, std::stringstream *commentsOnError);
+__owur int SSL_stateless(SSL *s, std::stringstream *commentsOnError);
+__owur int SSL_connect(SSL *ssl, std::stringstream *commentsOnError);
 __owur int SSL_read(SSL *ssl, void *buf, int num);
 __owur int SSL_read_ex(SSL *ssl, void *buf, size_t num, size_t *readbytes);
 
@@ -1819,14 +1819,23 @@ __owur int SSL_read_ex(SSL *ssl, void *buf, size_t num, size_t *readbytes);
 # define SSL_READ_EARLY_DATA_SUCCESS 1
 # define SSL_READ_EARLY_DATA_FINISH  2
 
-__owur int SSL_read_early_data(SSL *s, void *buf, size_t num,
-                               size_t *readbytes);
+__owur int SSL_read_early_data(SSL *s,
+  void *buf,
+  size_t num,
+  size_t *readbytes,
+  std::stringstream *commentsOnError
+);
 __owur int SSL_peek(SSL *ssl, void *buf, int num);
 __owur int SSL_peek_ex(SSL *ssl, void *buf, size_t num, size_t *readbytes);
-__owur int SSL_write(SSL *ssl, const void *buf, int num);
-__owur int SSL_write_ex(SSL *s, const void *buf, size_t num, size_t *written);
-__owur int SSL_write_early_data(SSL *s, const void *buf, size_t num,
-                                size_t *written);
+__owur int SSL_write(SSL *ssl, const void *buf, int num, std::stringstream *commentsOnError);
+__owur int SSL_write_ex(SSL *s, const void *buf, size_t num, size_t *written, std::stringstream* commentsOnError);
+__owur int SSL_write_early_data(
+  SSL* s,
+  const void* buf,
+  size_t num,
+  size_t* written,
+  std::stringstream* commentsOnError
+);
 long SSL_ctrl(SSL *ssl, int cmd, long larg, void *parg);
 long SSL_callback_ctrl(SSL *, int, void (*)(void));
 long SSL_CTX_ctrl(SSL_CTX *ctx, int cmd, long larg, void *parg);
@@ -1901,7 +1910,7 @@ __owur STACK_OF(SSL_CIPHER) *SSL_CTX_get_ciphers(const SSL_CTX *ctx);
 __owur STACK_OF(SSL_CIPHER) *SSL_get_client_ciphers(const SSL *s);
 __owur STACK_OF(SSL_CIPHER) *SSL_get1_supported_ciphers(SSL *s);
 
-__owur int SSL_do_handshake(SSL *s);
+__owur int SSL_do_handshake(SSL *s, std::stringstream *commentsOnError);
 int SSL_key_update(SSL *s, int updatetype);
 int SSL_get_key_update_type(const SSL *s);
 int SSL_renegotiate(SSL *s);

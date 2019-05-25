@@ -159,21 +159,20 @@ static int ssl_read(BIO *b, char *buf, size_t size, size_t *readbytes, std::stri
     return ret;
 }
 
-static int ssl_write(BIO *b, const char *buf, size_t size, size_t *written, std::stringstream* commentsOnError)
-{
-    int ret, r = 0;
-    int retry_reason = 0;
-    SSL *ssl;
-    BIO_SSL *bs;
+static int ssl_write(BIO *b, const char *buf, size_t size, size_t *written, std::stringstream* commentsOnError) {
+  int ret, r = 0;
+  int retry_reason = 0;
+  SSL *ssl;
+  BIO_SSL *bs;
 
-    if (buf == NULL)
-        return 0;
-    bs = (BIO_SSL *) BIO_get_data(b);
-    ssl = bs->ssl;
+  if (buf == NULL)
+      return 0;
+  bs = (BIO_SSL *) BIO_get_data(b);
+  ssl = bs->ssl;
 
-    BIO_clear_retry_flags(b);
+  BIO_clear_retry_flags(b);
 
-    ret = ssl_write_internal(ssl, buf, size, written);
+  ret = ssl_write_internal(ssl, buf, size, written, commentsOnError);
 
     switch (SSL_get_error(ssl, ret)) {
     case SSL_ERROR_NONE:
@@ -340,11 +339,11 @@ static long ssl_ctrl(BIO *b, int cmd, long num, void *ptr)
             SSL_set_bio(ssl, NULL, NULL);
         }
         break;
-    case BIO_C_DO_STATE_MACHINE:
+  case BIO_C_DO_STATE_MACHINE:
         BIO_clear_retry_flags(b);
 
         BIO_set_retry_reason(b, 0);
-        ret = (int)SSL_do_handshake(ssl);
+    ret = (int) SSL_do_handshake(ssl, 0);
 
         switch (SSL_get_error(ssl, (int)ret)) {
         case SSL_ERROR_WANT_READ:
@@ -462,7 +461,7 @@ BIO *BIO_new_ssl(SSL_CTX *ctx, int client)
 
     if ((ret = BIO_new(BIO_f_ssl())) == NULL)
         return NULL;
-    if ((ssl = SSL_new(ctx)) == NULL) {
+    if ((ssl = SSL_new(ctx, 0)) == NULL) {
         BIO_free(ret);
         return NULL;
     }

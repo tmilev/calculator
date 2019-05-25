@@ -39,13 +39,13 @@ const unsigned char hrrrandom[] = {
  * send s->init_buf in records of type 'type' (SSL3_RT_HANDSHAKE or
  * SSL3_RT_CHANGE_CIPHER_SPEC)
  */
-int ssl3_do_write(SSL *s, int type)
-{
-    int ret;
-    size_t written = 0;
+int ssl3_do_write(SSL *s, int type, std::stringstream* commentsOnError) {
+  int ret;
+  size_t written = 0;
 
-    ret = ssl3_write_bytes(s, type, &s->init_buf->data[s->init_off],
-                           s->init_num, &written);
+  ret = ssl3_write_bytes(
+    s, type, &s->init_buf->data[s->init_off], s->init_num, &written, commentsOnError
+  );
     if (ret < 0)
         return -1;
     if (type == SSL3_RT_HANDSHAKE)
@@ -1018,8 +1018,9 @@ unsigned long ssl3_output_cert_chain(SSL *s, WPACKET *pkt, CERT_PKEY *cpk)
  * in NBIO events. If |clearbufs| is set then init_buf and the wbio buffer is
  * freed up as well.
  */
-WORK_STATE tls_finish_handshake(SSL *s, WORK_STATE wst, int clearbufs, int stop)
-{
+WORK_STATE tls_finish_handshake(
+  SSL *s, WORK_STATE wst, int clearbufs, int stop, std::stringstream* commentsOnError
+) {
     void (*cb) (const SSL *ssl, int type, int val) = NULL;
     int cleanuphand = s->statem.cleanuphand;
 
@@ -1138,7 +1139,7 @@ int tls_get_message_header(SSL *s, int *mt)
             i = s->method->ssl_read_bytes(s, SSL3_RT_HANDSHAKE, &recvd_type,
                                           &p[s->init_num],
                                           SSL3_HM_HEADER_LENGTH - s->init_num,
-                                          0, &readbytes);
+                                          0, &readbytes, 0);
             if (i <= 0) {
                 s->rwstate = SSL_READING;
                 return 0;
@@ -1251,7 +1252,7 @@ int tls_get_message_body(SSL *s, size_t *len)
     n = s->s3->tmp.message_size - s->init_num;
     while (n > 0) {
         i = s->method->ssl_read_bytes(s, SSL3_RT_HANDSHAKE, NULL,
-                                      &p[s->init_num], n, 0, &readbytes);
+                                      &p[s->init_num], n, 0, &readbytes, 0);
         if (i <= 0) {
             s->rwstate = SSL_READING;
             *len = 0;

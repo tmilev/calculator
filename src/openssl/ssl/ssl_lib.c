@@ -3710,9 +3710,10 @@ int SSL_do_handshake(SSL *s, std::stringstream* commentsOnError) {
   stOutput << "DEBUG: renegotiate check done... ";
   if (SSL_in_init(s) || SSL_in_before(s)) {
     if (commentsOnError != 0) {
-      *commentsOnError << "DEBUG: ssl initialized previously.\n";
+      stOutput << "DEBUG: ssl initialized previously.\n";
     }
     if ((s->mode & SSL_MODE_ASYNC) && ASYNC_get_current_job() == NULL) {
+      stOutput << "DEBUG: YES to async.\n";
       struct ssl_async_args args;
       args.s = s;
       ret = ssl_start_async_job(s, &args, ssl_do_handshake_intern);

@@ -2135,12 +2135,12 @@ extern const SSL3_ENC_METHOD DTLSv1_2_enc_data;
 # define SSL_METHOD_NO_FIPS      (1U<<0)
 # define SSL_METHOD_NO_SUITEB    (1U<<1)
 
-# define IMPLEMENT_tls_meth_func(version, flags, mask, func_name, s_accept, \
+# define IMPLEMENT_tls_meth_func(name, version, flags, mask, func_name, s_accept, \
                                  s_connect, enc_data) \
 const SSL_METHOD *func_name(void)  \
         { \
         static const SSL_METHOD func_name##_data= { \
-                "func_name", \
+                name, \
                 version, \
                 flags, \
                 mask, \
@@ -2174,11 +2174,11 @@ const SSL_METHOD *func_name(void)  \
         return &func_name##_data; \
         }
 
-# define IMPLEMENT_ssl3_meth_func(func_name, s_accept, s_connect) \
+# define IMPLEMENT_ssl3_meth_func(name, func_name, s_accept, s_connect) \
 const SSL_METHOD *func_name(void)  \
         { \
         static const SSL_METHOD func_name##_data= { \
-                "func_name", \
+                name, \
                 SSL3_VERSION, \
                 SSL_METHOD_NO_FIPS | SSL_METHOD_NO_SUITEB, \
                 SSL_OP_NO_SSLv3, \
@@ -2212,12 +2212,12 @@ const SSL_METHOD *func_name(void)  \
         return &func_name##_data; \
         }
 
-# define IMPLEMENT_dtls1_meth_func(version, flags, mask, func_name, s_accept, \
+# define IMPLEMENT_dtls1_meth_func(name, version, flags, mask, func_name, s_accept, \
                                         s_connect, enc_data) \
 const SSL_METHOD *func_name(void)  \
         { \
         static const SSL_METHOD func_name##_data= { \
-                "func_name", \
+                name, \
                 version, \
                 flags, \
                 mask, \

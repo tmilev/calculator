@@ -58,7 +58,7 @@ typedef enum {
     SUB_STATE_END_HANDSHAKE
 } SUB_STATE_RETURN;
 
-static int state_machine(SSL *s, int server);
+static int state_machine(SSL *s, int server, std::stringstream *commentsOnError);
 static void init_read_state_machine(SSL *s);
 static SUB_STATE_RETURN read_state_machine(SSL *s);
 static void init_write_state_machine(SSL *s);
@@ -254,14 +254,14 @@ void ossl_statem_set_hello_verify_done(SSL *s)
     s->statem.hand_state = TLS_ST_SR_CLNT_HELLO;
 }
 
-int ossl_statem_connect(SSL *s, std::stringstream* commentsOnError)
-{
-    return state_machine(s, 0);
+int ossl_statem_connect(SSL *s, std::stringstream* commentsOnError) {
+  stOutput << "DEBUG: ossl_statem_connect is running.\n";
+    return state_machine(s, 0, commentsOnError);
 }
 
-int ossl_statem_accept(SSL *s, std::stringstream* commentsOnError)
-{
-    return state_machine(s, 1);
+int ossl_statem_accept(SSL *s, std::stringstream* commentsOnError) {
+  stOutput << "DEBUG: ossl_statem_accept is running.\n";
+  return state_machine(s, 1, commentsOnError);
 }
 
 typedef void (*info_cb) (const SSL *, int, int);
@@ -304,33 +304,35 @@ static info_cb get_callback(SSL *s)
  *   1: Success
  * <=0: NBIO or error
  */
-static int state_machine(SSL *s, int server)
-{
-    BUF_MEM *buf = NULL;
-    void (*cb) (const SSL *ssl, int type, int val) = NULL;
-    OSSL_STATEM *st = &s->statem;
-    int ret = -1;
-    int ssret;
-
-    if (st->state == MSG_FLOW_ERROR) {
-        /* Shouldn't have been called if we're already in the error state */
-        return -1;
+static int state_machine(SSL *s, int server, std::stringstream* commentsOnError) {
+  BUF_MEM *buf = NULL;
+  void (*cb) (const SSL *ssl, int type, int val) = NULL;
+  OSSL_STATEM *st = &s->statem;
+  int ret = - 1;
+  int ssret;
+  if (st->state == MSG_FLOW_ERROR) {
+    /* Shouldn't have been called if we're already in the error state */
+    if (commentsOnError != 0) {
+      *commentsOnError << "State machine is in error state, cannot process your request.\n";
     }
-
-    ERR_clear_error();
-    clear_sys_error();
-
-    cb = get_callback(s);
-
-    st->in_handshake++;
-    if (!SSL_in_init(s) || SSL_in_before(s)) {
-        /*
-         * If we are stateless then we already called SSL_clear() - don't do
-         * it again and clear the STATELESS flag itself.
-         */
-        if ((s->s3->flags & TLS1_FLAGS_STATELESS) == 0 && !SSL_clear(s))
-            return -1;
+    return - 1;
+  }
+  ERR_clear_error();
+  clear_sys_error();
+  cb = get_callback(s);
+  st->in_handshake ++;
+  if (!SSL_in_init(s) || SSL_in_before(s)) {
+    /*
+     * If we are stateless then we already called SSL_clear() - don't do
+     * it again and clear the STATELESS flag itself.
+     */
+    if ((s->s3->flags & TLS1_FLAGS_STATELESS) == 0 && !SSL_clear(s)) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "State machine has the STATELESS flag set.\n";
+      }
+      return - 1;
     }
+  }
 
     /* Initialise state machine */
     if (st->state == MSG_FLOW_UNINITED
@@ -427,8 +429,8 @@ static int state_machine(SSL *s, int server)
         st->state = MSG_FLOW_WRITING;
         init_write_state_machine(s);
     }
-
-    while (st->state != MSG_FLOW_FINISHED) {
+  stOutput << "DEBUG: Got to before state machine while loop.\n";
+  while (st->state != MSG_FLOW_FINISHED) {
         if (st->state == MSG_FLOW_READING) {
             ssret = read_state_machine(s);
             if (ssret == SUB_STATE_FINISHED) {

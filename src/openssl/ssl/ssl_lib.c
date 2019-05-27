@@ -3030,9 +3030,6 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth, std::stringstream* commentsOnError)
     }
     goto err;
   }
-  if (commentsOnError != 0) {
-    *commentsOnError << "DEBUG: got to here pt 6.\n";
-  }
   ret->sessions = lh_SSL_SESSION_new(ssl_session_hash, ssl_session_cmp);
   if (ret->sessions == NULL) {
     if (commentsOnError != 0) {
@@ -3102,17 +3099,11 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth, std::stringstream* commentsOnError)
   ) {
     ret->options |= SSL_OP_NO_TICKET;
   }
-  if (commentsOnError != 0) {
-    *commentsOnError << "DEBUG: got to here pt 7.\n";
-  }
   if (RAND_priv_bytes(ret->ext.cookie_hmac_key, sizeof(ret->ext.cookie_hmac_key), commentsOnError) <= 0) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to fetch random bytes.\n";
     }
     goto err;
-  }
-  if (commentsOnError != 0) {
-    *commentsOnError << "DEBUG: got to here pt 8.\n";
   }
 
 #ifndef OPENSSL_NO_SRP
@@ -3686,30 +3677,54 @@ static int ssl_do_handshake_intern(void *vargs)
     return s->handshake_func(s, 0);
 }
 
+bool SSL_check_initialization(SSL* s) {
+  if (s == 0) {
+    crash << "SSL pointer is zero. " << crash;
+    return false;
+  }
+  if (s->method == 0) {
+    crash << "SSL method pointer is zero. " << crash;
+    return false;
+  }
+  if (s->method->ssl_renegotiate_check == 0) {
+    crash << "Method ssl_renegotiate_check not initialized. " << crash;
+    return false;
+  }
+  return true;
+}
+
 int SSL_do_handshake(SSL *s, std::stringstream* commentsOnError) {
+  MacroRegisterFunctionWithName("SSL_do_handshake");
   int ret = 1;
+  SSL_check_initialization(s);
+  stOutput << "DEBUG: running do handshake with: " << s->method->name << ".\n";
   if (s->handshake_func == NULL) {
     if (commentsOnError != 0) {
       *commentsOnError << "Handshake function not initialized.\n";
     }
     return - 1;
   }
-  ossl_statem_check_finish_init(s, -1);
+  ossl_statem_check_finish_init(s, - 1);
+  stOutput << "DEBUG: renegotiate check ... ";
   s->method->ssl_renegotiate_check(s, 0, commentsOnError);
+  stOutput << "DEBUG: renegotiate check done... ";
   if (SSL_in_init(s) || SSL_in_before(s)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "DEBUG: ssl initialized previously.\n";
+    }
     if ((s->mode & SSL_MODE_ASYNC) && ASYNC_get_current_job() == NULL) {
       struct ssl_async_args args;
       args.s = s;
       ret = ssl_start_async_job(s, &args, ssl_do_handshake_intern);
     } else {
+      stOutput << "DEBUG: not RUNNING async.\n";
       ret = s->handshake_func(s, commentsOnError);
     }
   }
   return ret;
 }
 
-void SSL_set_accept_state(SSL *s)
-{
+void SSL_set_accept_state(SSL *s) {
     s->server = 1;
     s->shutdown = 0;
     ossl_statem_clear(s);
@@ -3726,9 +3741,9 @@ void SSL_set_connect_state(SSL *s)
     clear_ciphers(s);
 }
 
-#include <assert.h>
+#include "../../vpfMacros.h"
 int ssl_undefined_function_no_stream(SSL *s) {
-  assert(false);
+  crash << "Undefined ssl function. " << crash;
   return 0;
 }
 

@@ -12,6 +12,7 @@
 #include "../ssl_locl.h"
 #include "statem_locl.h"
 #include <assert.h>
+#include "../../../vpfHeader1General0_General.h"
 
 /*
  * This file implements the SSL/TLS/DTLS state machines.
@@ -105,10 +106,9 @@ void ossl_statem_clear(SSL *s)
 /*
  * Set the state machine up ready for a renegotiation handshake
  */
-void ossl_statem_set_renegotiate(SSL *s)
-{
-    s->statem.in_init = 1;
-    s->statem.request_state = TLS_ST_SW_HELLO_REQ;
+void ossl_statem_set_renegotiate(SSL *s) {
+  s->statem.in_init = 1;
+  s->statem.request_state = TLS_ST_SW_HELLO_REQ;
 }
 
 /*
@@ -157,9 +157,9 @@ int ossl_statem_in_error(const SSL *s)
     return 0;
 }
 
-void ossl_statem_set_in_init(SSL *s, int init)
-{
-    s->statem.in_init = init;
+void ossl_statem_set_in_init(SSL *s, int init) {
+  MacroRegisterFunctionWithName("ossl_statem_set_in_init");
+  s->statem.in_init = init;
 }
 
 int ossl_statem_get_in_handshake(SSL *s)
@@ -197,38 +197,47 @@ int ossl_statem_skip_early_data(SSL *s)
  * attempting to read data (SSL_read*()), or -1 if we are in SSL_do_handshake()
  * or similar.
  */
-void ossl_statem_check_finish_init(SSL *s, int sending)
-{
-    if (sending == -1) {
-        if (s->statem.hand_state == TLS_ST_PENDING_EARLY_DATA_END
-                || s->statem.hand_state == TLS_ST_EARLY_DATA) {
-            ossl_statem_set_in_init(s, 1);
-            if (s->early_data_state == SSL_EARLY_DATA_WRITE_RETRY) {
-                /*
-                 * SSL_connect() or SSL_do_handshake() has been called directly.
-                 * We don't allow any more writing of early data.
-                 */
-                s->early_data_state = SSL_EARLY_DATA_FINISHED_WRITING;
-            }
-        }
-    } else if (!s->server) {
-        if ((sending && (s->statem.hand_state == TLS_ST_PENDING_EARLY_DATA_END
-                      || s->statem.hand_state == TLS_ST_EARLY_DATA)
-                  && s->early_data_state != SSL_EARLY_DATA_WRITING)
-                || (!sending && s->statem.hand_state == TLS_ST_EARLY_DATA)) {
-            ossl_statem_set_in_init(s, 1);
-            /*
-             * SSL_write() has been called directly. We don't allow any more
-             * writing of early data.
-             */
-            if (sending && s->early_data_state == SSL_EARLY_DATA_WRITE_RETRY)
-                s->early_data_state = SSL_EARLY_DATA_FINISHED_WRITING;
-        }
-    } else {
-        if (s->early_data_state == SSL_EARLY_DATA_FINISHED_READING
-                && s->statem.hand_state == TLS_ST_EARLY_DATA)
-            ossl_statem_set_in_init(s, 1);
+#include "../../../vpfHeader1General0_General.h"
+void ossl_statem_check_finish_init(SSL *s, int sending) {
+  MacroRegisterFunctionWithName("ossl_statem_check_finish_init");
+  if (s == 0) {
+    crash << "Null ssl object not allowed. " << crash;
+  }
+  if (sending == - 1) {
+    stOutput << "DEBUG: got to here. at finish init!!! ... ";
+    if (s->statem.hand_state == TLS_ST_PENDING_EARLY_DATA_END || s->statem.hand_state == TLS_ST_EARLY_DATA) {
+      stOutput << "DEBUG: got to here at hand_state. ";
+      ossl_statem_set_in_init(s, 1);
+      if (s->early_data_state == SSL_EARLY_DATA_WRITE_RETRY) {
+        stOutput << "DEBUG: got to here. pt3 ";
+        /*
+         * SSL_connect() or SSL_do_handshake() has been called directly.
+         * We don't allow any more writing of early data.
+         */
+        s->early_data_state = SSL_EARLY_DATA_FINISHED_WRITING;
+      }
     }
+  } else if (!s->server) {
+    if ((
+        sending &&
+        (s->statem.hand_state == TLS_ST_PENDING_EARLY_DATA_END || s->statem.hand_state == TLS_ST_EARLY_DATA) &&
+        s->early_data_state != SSL_EARLY_DATA_WRITING
+      ) || (!sending && s->statem.hand_state == TLS_ST_EARLY_DATA)
+    ) {
+      ossl_statem_set_in_init(s, 1);
+      /*
+       * SSL_write() has been called directly. We don't allow any more
+       * writing of early data.
+       */
+      if (sending && s->early_data_state == SSL_EARLY_DATA_WRITE_RETRY) {
+        s->early_data_state = SSL_EARLY_DATA_FINISHED_WRITING;
+      }
+    }
+  } else {
+    if (s->early_data_state == SSL_EARLY_DATA_FINISHED_READING && s->statem.hand_state == TLS_ST_EARLY_DATA) {
+      ossl_statem_set_in_init(s, 1);
+    }
+  }
 }
 
 void ossl_statem_set_hello_verify_done(SSL *s)

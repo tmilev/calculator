@@ -16,37 +16,37 @@
  */
 
 const SSL_METHOD *TLS_method(void) {
-  static const SSL_METHOD TLS_method_data= {
-    TLS_ANY_VERSION,
-    0,
-    0,
-    tls1_new,
-    tls1_clear,
-    tls1_free,
-    ossl_statem_accept,
-    ossl_statem_connect,
-    ssl3_read,
-    ssl3_peek,
-    ssl3_write,
-    ssl3_shutdown,
-    ssl3_renegotiate,
-    ssl3_renegotiate_check,
-    ssl3_read_bytes,
-    ssl3_write_bytes,
-    ssl3_dispatch_alert,
-    ssl3_ctrl,
-    ssl3_ctx_ctrl,
-    ssl3_get_cipher_by_char,
-    ssl3_put_cipher_by_char,
-    ssl3_pending,
-    ssl3_num_ciphers,
-    ssl3_get_cipher,
-    tls1_default_timeout,
-    &TLSv1_2_enc_data,
-    ssl_undefined_void_function,
-    ssl3_callback_ctrl,
-    ssl3_ctx_callback_ctrl
-  };
+  static SSL_METHOD TLS_method_data;
+  TLS_method_data.name                  = "TLS method";
+  TLS_method_data.version               = TLS_ANY_VERSION;
+  TLS_method_data.flags                 = 0;
+  TLS_method_data.mask                  = 0;
+  TLS_method_data.ssl_new               = tls1_new;
+  TLS_method_data.ssl_clear             = tls1_clear;
+  TLS_method_data.ssl_free              = tls1_free;
+  TLS_method_data.ssl_accept            = ossl_statem_accept;
+  TLS_method_data.ssl_connect           = ossl_statem_connect;
+  TLS_method_data.ssl_read              = ssl3_read;
+  TLS_method_data.ssl_peek              = ssl3_peek;
+  TLS_method_data.ssl_write             = ssl3_write;
+  TLS_method_data.ssl_shutdown          = ssl3_shutdown;
+  TLS_method_data.ssl_renegotiate       = ssl3_renegotiate;
+  TLS_method_data.ssl_renegotiate_check = ssl3_renegotiate_check;
+  TLS_method_data.ssl_read_bytes        = ssl3_read_bytes;
+  TLS_method_data.ssl_write_bytes       = ssl3_write_bytes;
+  TLS_method_data.ssl_dispatch_alert    = ssl3_dispatch_alert;
+  TLS_method_data.ssl_ctrl              = ssl3_ctrl;
+  TLS_method_data.ssl_ctx_ctrl          = ssl3_ctx_ctrl;
+  TLS_method_data.get_cipher_by_char    = ssl3_get_cipher_by_char;
+  TLS_method_data.put_cipher_by_char    = ssl3_put_cipher_by_char;
+  TLS_method_data.ssl_pending           = ssl3_pending;
+  TLS_method_data.num_ciphers           = ssl3_num_ciphers;
+  TLS_method_data.get_cipher            = ssl3_get_cipher;
+  TLS_method_data.get_timeout           = tls1_default_timeout;
+  TLS_method_data.ssl3_enc              = &TLSv1_2_enc_data;
+  TLS_method_data.ssl_version           = ssl_undefined_void_function;
+  TLS_method_data.ssl_callback_ctrl     = ssl3_callback_ctrl;
+  TLS_method_data.ssl_ctx_callback_ctrl = ssl3_ctx_callback_ctrl;
   return &TLS_method_data;
 }
 

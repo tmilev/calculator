@@ -23,19 +23,20 @@ int dtls1_write_app_data_bytes(
     if (i < 0) {
       return i;
     }
-        if (i == 0) {
-            SSLerr(SSL_F_DTLS1_WRITE_APP_DATA_BYTES,
-                   SSL_R_SSL_HANDSHAKE_FAILURE);
-            return -1;
-        }
+    if (i == 0) {
+      if (commentsOnFailure != 0) {
+        *commentsOnFailure << "Handshake failure in dtls1_write_app_data_bytes.\n";
+      }
+      return - 1;
     }
-
-    if (len > SSL3_RT_MAX_PLAIN_LENGTH) {
-        SSLerr(SSL_F_DTLS1_WRITE_APP_DATA_BYTES, SSL_R_DTLS_MESSAGE_TOO_BIG);
-        return -1;
+  }
+  if (len > SSL3_RT_MAX_PLAIN_LENGTH) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Handshake failure: ssl3_rt_max_plain_length exceeded.\n";
     }
-
-    return dtls1_write_bytes(s, type, buf_, len, written);
+    return -1;
+  }
+  return dtls1_write_bytes(s, type, buf_, len, written);
 }
 
 int dtls1_dispatch_alert(SSL *s)

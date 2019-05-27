@@ -221,7 +221,7 @@ void SSLdata::FreeContext() {
 #endif // MACRO_use_open_ssl
 }
 
-bool WebServer::SSLServerSideHandShake(std::stringstream* commentsOnError) {
+bool WebServer::SSLServerSideHandShake() {
   if (!theGlobalVariables.flagSSLisAvailable) {
     return false;
   }
@@ -229,7 +229,7 @@ bool WebServer::SSLServerSideHandShake(std::stringstream* commentsOnError) {
     return false;
   }
 #ifdef MACRO_use_open_ssl
-  return this->theSSLdata.HandShakeIamServer(this->GetActiveWorker().connectedSocketID, commentsOnError);
+  return this->theSSLdata.HandShakeIamServer(this->GetActiveWorker().connectedSocketID);
 #endif
 }
 
@@ -368,18 +368,20 @@ void SSLdata::initSSLserver() {
 #endif
 
 #ifdef MACRO_use_open_ssl
-bool SSLdata::HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnError) {
+bool SSLdata::HandShakeIamServer(int inputSocketID) {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamServer");
-  this->sslServeR = SSL_new(this->contextServer, commentsOnError);
+  std::stringstream commentsOnSSLNew;
+  this->sslServeR = SSL_new(this->contextServer, &commentsOnSSLNew);
   if (this->sslServeR == 0) {
-    logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
+    logOpenSSL << logger::red << "Failed to allocate ssl: " << commentsOnSSLNew.str() << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
   }
   this->SetSocketAddToStackServer(inputSocketID);
   int maxNumHandshakeTries = 3;
   this->flagSSLHandshakeSuccessful = false;
   for (int i = 0; i < maxNumHandshakeTries; i ++) {
-    this->errorCode = SSL_accept(this->sslServeR, commentsOnError);
+    std::stringstream commentsOnError;
+    this->errorCode = SSL_accept(this->sslServeR, &commentsOnError);
     if (this->errorCode != 1) {
       this->flagSSLHandshakeSuccessful = false;
       if (this->errorCode == 0) {
@@ -387,6 +389,7 @@ bool SSLdata::HandShakeIamServer(int inputSocketID, std::stringstream* commentsO
       } else {
         logOpenSSL << "OpenSSL handshake not successful with a fatal error. ";
       }
+      logOpenSSL << commentsOnError.str() << logger::endL;
       logOpenSSL << "Attempt " << i + 1 << " out of " << maxNumHandshakeTries << " failed. ";
       switch(SSL_get_error(this->sslServeR, this->errorCode)) {
       case SSL_ERROR_NONE:
@@ -5180,12 +5183,10 @@ int WebWorker::Run() {
   crash.CleanUpFunction = WebServer::SignalActiveWorkerDoneReleaseEverything;
   CreateTimerThread();
 #ifdef MACRO_use_open_ssl
-  std::stringstream handshakeError;
-  if (!theWebServer.SSLServerSideHandShake(&handshakeError)) {
+  if (!theWebServer.SSLServerSideHandShake()) {
     theGlobalVariables.flagUsingSSLinCurrentConnection = false;
     this->parent->SignalActiveWorkerDoneReleaseEverything();
     this->parent->ReleaseEverything();
-    logOpenSSL << logger::red << handshakeError.str();
     logOpenSSL << logger::red << "Ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
     return - 1;
   }

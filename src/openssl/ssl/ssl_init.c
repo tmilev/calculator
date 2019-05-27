@@ -194,28 +194,17 @@ int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS* settings, std::
   if ((opts & OPENSSL_INIT_NO_LOAD_CONFIG) == 0) {
     opts |= OPENSSL_INIT_LOAD_CONFIG;
   }
-
-  if (commentsOnError != 0) {
-    *commentsOnError << "DEBUG: got to here pt 1.\n";
-  }
   if (!OPENSSL_init_crypto(opts, settings)) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to initialize crypto.\n";
     }
     return 0;
   }
-
-  if (commentsOnError != 0) {
-    *commentsOnError << "DEBUG: got to here pt 2.";
-  }
   if (!RUN_ONCE(&ssl_base, ossl_init_ssl_base)) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to run once, base initialization. ";
     }
     return 0;
-  }
-  if (commentsOnError != 0) {
-    *commentsOnError << "DEBUG: got to here pt 3.";
   }
   if (
     (opts & OPENSSL_INIT_NO_LOAD_SSL_STRINGS) &&
@@ -226,13 +215,11 @@ int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS* settings, std::
     }
     return 0;
   }
-  *commentsOnError << "DEBUG: got to here pt 4.\n";
   if ((opts & OPENSSL_INIT_LOAD_SSL_STRINGS) && !RUN_ONCE(&ssl_strings, ossl_init_load_ssl_strings)) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to run once, alternative. ";
     }
     return 0;
   }
-  *commentsOnError << "DEBUG: got to here pt 5.\n";
   return 1;
 }

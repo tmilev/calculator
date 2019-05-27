@@ -4510,27 +4510,46 @@ int ssl3_renegotiate(SSL *s, std::stringstream* commentsOnError)
  * should do a renegotiation now and sets up the state machine for it. Otherwise
  * returns 0.
  */
-int ssl3_renegotiate_check(SSL *s, int initok, std::stringstream* commentsOnError)
-{
-    int ret = 0;
-
-    if (s->s3->renegotiate) {
-        if (!RECORD_LAYER_read_pending(&s->rlayer)
-            && !RECORD_LAYER_write_pending(&s->rlayer)
-            && (initok || !SSL_in_init(s))) {
-            /*
-             * if we are the server, and we have sent a 'RENEGOTIATE'
-             * message, we need to set the state machine into the renegotiate
-             * state.
-             */
-            ossl_statem_set_renegotiate(s);
-            s->s3->renegotiate = 0;
-            s->s3->num_renegotiations++;
-            s->s3->total_renegotiations++;
-            ret = 1;
-        }
+int ssl3_renegotiate_check(SSL *s, int initok, std::stringstream* comments) {
+  if (!s->s3->renegotiate) {
+    if (comments != 0) {
+      *comments << "Renegotiation not needed.\n";
     }
-    return ret;
+    return 0;
+  }
+  if (RECORD_LAYER_read_pending(&s->rlayer)) {
+    if (comments != 0) {
+      *comments << "Read pending bytes, no need to renegotiate.\n";
+    }
+    return 0;
+  }
+  if (RECORD_LAYER_write_pending(&s->rlayer)) {
+    if (comments != 0) {
+      *comments << "Wrote pending bytes, no need to renegotiate.\n";
+    }
+    return 0;
+  }
+  if (!initok) {
+    if (SSL_in_init(s)) {
+      if (comments != 0) {
+        *comments << "SSL_in_init returned non-zero. ";
+      }
+      return 0;
+    }
+  }
+  /*
+   * if we are the server, and we have sent a 'RENEGOTIATE'
+   * message, we need to set the state machine into the renegotiate
+   * state.
+   */
+  if (comments != 0) {
+    *comments << "SSL must renegotiate.\n";
+  }
+  ossl_statem_set_renegotiate(s);
+  s->s3->renegotiate = 0;
+  s->s3->num_renegotiations ++;
+  s->s3->total_renegotiations ++;
+  return 1;
 }
 
 /*

@@ -35,6 +35,7 @@
 # include "../include/internal/refcount.h"
 # include "../include/internal/tsan_assist.h"
 # include "../include/internal/bio.h"
+#include <sstream>
 
 # ifdef OPENSSL_BUILD_SHLIBSSL
 #  undef OPENSSL_EXTERN
@@ -440,6 +441,7 @@ struct ssl_cipher_st {
 
 /* Used to hold SSL/TLS functions */
 struct ssl_method_st {
+  std::string name;
   int version;
   unsigned flags;
   unsigned long mask;
@@ -2138,6 +2140,7 @@ extern const SSL3_ENC_METHOD DTLSv1_2_enc_data;
 const SSL_METHOD *func_name(void)  \
         { \
         static const SSL_METHOD func_name##_data= { \
+                "func_name", \
                 version, \
                 flags, \
                 mask, \
@@ -2175,6 +2178,7 @@ const SSL_METHOD *func_name(void)  \
 const SSL_METHOD *func_name(void)  \
         { \
         static const SSL_METHOD func_name##_data= { \
+                "func_name", \
                 SSL3_VERSION, \
                 SSL_METHOD_NO_FIPS | SSL_METHOD_NO_SUITEB, \
                 SSL_OP_NO_SSLv3, \
@@ -2213,6 +2217,7 @@ const SSL_METHOD *func_name(void)  \
 const SSL_METHOD *func_name(void)  \
         { \
         static const SSL_METHOD func_name##_data= { \
+                "func_name", \
                 version, \
                 flags, \
                 mask, \
@@ -2375,7 +2380,7 @@ __owur int ssl3_get_req_cert_type(SSL *s, WPACKET *pkt);
 __owur int ssl3_num_ciphers(void);
 __owur const SSL_CIPHER *ssl3_get_cipher(unsigned int u);
 int ssl3_renegotiate(SSL *ssl, std::stringstream *commentsOnError);
-int ssl3_renegotiate_check(SSL *ssl, int initok, std::stringstream *commentsOnError);
+int ssl3_renegotiate_check(SSL *ssl, int initok, std::stringstream *comments);
 __owur int ssl3_dispatch_alert(SSL *s);
 __owur size_t ssl3_final_finish_mac(SSL *s, const char *sender, size_t slen,
                                     unsigned char *p);

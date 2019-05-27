@@ -140,9 +140,6 @@ size_t rand_drbg_get_entropy(
   int prediction_resistance,
   std::stringstream* commentsOnError
 ) {
-  if (commentsOnError != 0) {
-    *commentsOnError << "DEBUG: got to here. ";
-  }
   size_t ret = 0;
   size_t entropy_available = 0;
   RAND_POOL *pool;
@@ -173,10 +170,6 @@ size_t rand_drbg_get_entropy(
     }
   }
   if (drbg->parent != NULL) {
-    if (commentsOnError != 0) {
-      *commentsOnError << "DEBUG: got to here, pt 1.5. ";
-    }
-
     size_t bytes_needed = rand_pool_bytes_needed(pool, 1 /*entropy_factor*/);
     unsigned char *buffer = rand_pool_add_begin(pool, bytes_needed);
     if (buffer != NULL) {
@@ -209,9 +202,6 @@ size_t rand_drbg_get_entropy(
       entropy_available = rand_pool_entropy_available(pool);
     }
   } else {
-    if (commentsOnError != 0) {
-      *commentsOnError << "DEBUG: got to here, pt 2. ";
-    }
     /* Get entropy by polling system entropy sources. */
     entropy_available = rand_pool_acquire_entropy(pool, commentsOnError);
     if (entropy_available == 0) {

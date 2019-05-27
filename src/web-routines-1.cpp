@@ -144,8 +144,8 @@ void WebServerMonitor::Monitor() {
       logServerMonitor << logger::red << "Connection monitor: Ping of " << theCrawler.addressToConnectTo
       << " at port/service " << theCrawler.portOrService
       << " failed. GM time: " << now.ToStringGM() << ", local time: " << now.ToStringLocal()
-      << ". " << "Got the following errors/messages: "
-      << theCrawler.lastTransactionErrors << theCrawler.lastTransaction << ". "
+      << ". " << "Errors: "
+      << theCrawler.lastTransactionErrors << theCrawler.lastTransaction
       << numConsecutiveFailedPings << " consecutive fails so far, restarting on " << maxNumPingFailures
       << ". " << logger::endL;
     } else {

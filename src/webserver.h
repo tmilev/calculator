@@ -95,7 +95,7 @@ public:
   void FreeSSL();
   void FreeContext();
   void AddMoreEntropyFromTimer();
-  bool HandShakeIamServer(int inputSocketID, std::stringstream *commentsOnError);
+  bool HandShakeIamServer(int inputSocketID);
   bool InspectCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool HandShakeIamClientNoSocketCleanup(
     int inputSocketID, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
@@ -397,7 +397,7 @@ public:
   void initPortsITry();
   void initListeningSockets();
   void initSSL();
-  bool SSLServerSideHandShake(std::stringstream* commentsOnError);
+  bool SSLServerSideHandShake();
   void TerminateChildSystemCall(int i);
   void ProcessOneChildMessage(int childIndex, int& outputNumInUse);
   void RecycleChildrenIfPossible();

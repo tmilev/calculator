@@ -867,7 +867,7 @@ int do_ssl3_write(SSL *s, int type, const unsigned char *buf,
         if (SSL_get_state(s) == TLS_ST_CW_CLNT_HELLO
                 && !s->renegotiate
                 && TLS1_get_version(s) > TLS1_VERSION
-                && s->hello_retry_request == ssl_st::SSL_HRR_NONE)
+                && s->hello_retry_request == sslData::SSL_HRR_NONE)
             version = TLS1_VERSION;
         SSL3_RECORD_set_rec_version(thiswr, version);
 

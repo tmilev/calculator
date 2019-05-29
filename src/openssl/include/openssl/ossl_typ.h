@@ -146,7 +146,7 @@ typedef struct ui_st UI;
 typedef struct ui_method_st UI_METHOD;
 
 typedef struct engine_st ENGINE;
-typedef struct ssl_st SSL;
+typedef struct sslData SSL;
 typedef struct ssl_ctx_st SSL_CTX;
 
 typedef struct comp_ctx_st COMP_CTX;

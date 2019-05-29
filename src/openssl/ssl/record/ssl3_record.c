@@ -309,7 +309,7 @@ int ssl3_get_record(SSL *s)
                  * that explicitly
                  */
                 if (!s->first_packet && !SSL_IS_TLS13(s)
-                        && s->hello_retry_request != ssl_st::SSL_HRR_PENDING
+                        && s->hello_retry_request != sslData::SSL_HRR_PENDING
                         && version != (unsigned int)s->version) {
                     if ((s->version & 0xFF00) == (version & 0xFF00)
                         && !s->enc_write_ctx && !s->write_hash) {
@@ -369,7 +369,7 @@ int ssl3_get_record(SSL *s)
                 if (SSL_IS_TLS13(s) && s->enc_read_ctx != NULL) {
                     if (thisrr->type != SSL3_RT_APPLICATION_DATA
                             && (thisrr->type != SSL3_RT_CHANGE_CIPHER_SPEC
-                                || !SSL_IS_FIRST_HANDSHAKE(s))
+                                || !s->isFirstHandshake())
                             && (thisrr->type != SSL3_RT_ALERT
                                 || s->statem.enc_read_state
                                    != ENC_READ_STATE_ALLOW_PLAIN_ALERTS)) {
@@ -491,7 +491,7 @@ int ssl3_get_record(SSL *s)
 
     if (num_recs == 1
             && thisrr->type == SSL3_RT_CHANGE_CIPHER_SPEC
-            && (SSL_IS_TLS13(s) || s->hello_retry_request != ssl_st::SSL_HRR_NONE)
+            && (SSL_IS_TLS13(s) || s->hello_retry_request != sslData::SSL_HRR_NONE)
             && SSL_IS_FIRST_HANDSHAKE(s)) {
         /*
          * CCS messages must be exactly 1 byte long, containing the value 0x01

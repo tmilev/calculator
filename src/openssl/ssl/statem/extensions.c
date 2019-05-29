@@ -1335,7 +1335,7 @@ static int final_key_share(SSL *s, unsigned int context, int sent)
             /* We have a suitable key_share */
             if ((s->s3->flags & TLS1_FLAGS_STATELESS) != 0
                     && !s->ext.cookieok) {
-                if (!ossl_assert(s->hello_retry_request == ssl_st::SSL_HRR_NONE)) {
+                if (!ossl_assert(s->hello_retry_request == sslData::SSL_HRR_NONE)) {
                     /*
                      * If we are stateless then we wouldn't know about any
                      * previously sent HRR - so how can this be anything other
@@ -1345,12 +1345,12 @@ static int final_key_share(SSL *s, unsigned int context, int sent)
                              ERR_R_INTERNAL_ERROR);
                     return 0;
                 }
-                s->hello_retry_request = ssl_st::SSL_HRR_PENDING;
+                s->hello_retry_request = sslData::SSL_HRR_PENDING;
                 return 1;
             }
         } else {
             /* No suitable key_share */
-            if (s->hello_retry_request == ssl_st::SSL_HRR_NONE && sent
+            if (s->hello_retry_request == sslData::SSL_HRR_NONE && sent
                     && (!s->hit
                         || (s->ext.psk_kex_mode & TLSEXT_KEX_MODE_FLAG_KE_DHE)
                            != 0)) {
@@ -1378,7 +1378,7 @@ static int final_key_share(SSL *s, unsigned int context, int sent)
                 if (i < num_groups) {
                     /* A shared group exists so send a HelloRetryRequest */
                     s->s3->group_id = group_id;
-                    s->hello_retry_request = ssl_st::SSL_HRR_PENDING;
+                    s->hello_retry_request = sslData::SSL_HRR_PENDING;
                     return 1;
                 }
             }
@@ -1393,7 +1393,7 @@ static int final_key_share(SSL *s, unsigned int context, int sent)
 
             if ((s->s3->flags & TLS1_FLAGS_STATELESS) != 0
                     && !s->ext.cookieok) {
-                if (!ossl_assert(s->hello_retry_request == ssl_st::SSL_HRR_NONE)) {
+                if (!ossl_assert(s->hello_retry_request == sslData::SSL_HRR_NONE)) {
                     /*
                      * If we are stateless then we wouldn't know about any
                      * previously sent HRR - so how can this be anything other
@@ -1403,7 +1403,7 @@ static int final_key_share(SSL *s, unsigned int context, int sent)
                              ERR_R_INTERNAL_ERROR);
                     return 0;
                 }
-                s->hello_retry_request = ssl_st::SSL_HRR_PENDING;
+                s->hello_retry_request = sslData::SSL_HRR_PENDING;
                 return 1;
             }
         }
@@ -1412,8 +1412,8 @@ static int final_key_share(SSL *s, unsigned int context, int sent)
          * We have a key_share so don't send any more HelloRetryRequest
          * messages
          */
-        if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING)
-            s->hello_retry_request = ssl_st::SSL_HRR_COMPLETE;
+        if (s->hello_retry_request == sslData::SSL_HRR_PENDING)
+            s->hello_retry_request = sslData::SSL_HRR_COMPLETE;
     } else {
         /*
          * For a client side resumption with no key_share we need to generate
@@ -1533,7 +1533,7 @@ int tls_psk_do_binder(SSL *s, const EVP_MD *md, const unsigned char *msgstart,
      * following a HelloRetryRequest then this includes the hash of the first
      * ClientHello and the HelloRetryRequest itself.
      */
-    if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING) {
+    if (s->hello_retry_request == sslData::SSL_HRR_PENDING) {
         size_t hdatalen;
         long hdatalen_l;
         void *hdata;
@@ -1646,7 +1646,7 @@ static int final_early_data(SSL *s, unsigned int context, int sent)
             || !s->hit
             || s->early_data_state != SSL_EARLY_DATA_ACCEPTING
             || !s->ext.early_data_ok
-            || s->hello_retry_request != ssl_st::SSL_HRR_NONE
+            || s->hello_retry_request != sslData::SSL_HRR_NONE
             || (s->ctx->allow_early_data_cb != NULL
                 && !s->ctx->allow_early_data_cb(s,
                                          s->ctx->allow_early_data_cb_data))) {

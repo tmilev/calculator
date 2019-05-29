@@ -938,7 +938,7 @@ int tls_parse_ctos_cookie(SSL *s, PACKET *pkt, unsigned int context, X509 *x,
     }
 
     /* Act as if this ClientHello came after a HelloRetryRequest */
-    s->hello_retry_request = (ssl_st::hrrEnum) 1;
+    s->hello_retry_request = (sslData::hrrEnum) 1;
 
     s->ext.cookieok = 1;
 #endif
@@ -1007,7 +1007,7 @@ int tls_parse_ctos_early_data(SSL *s, PACKET *pkt, unsigned int context,
         return 0;
     }
 
-    if (s->hello_retry_request != ssl_st::SSL_HRR_NONE) {
+    if (s->hello_retry_request != sslData::SSL_HRR_NONE) {
         SSLfatal(s, SSL_AD_ILLEGAL_PARAMETER,
                  SSL_F_TLS_PARSE_CTOS_EARLY_DATA, SSL_R_BAD_EXTENSION);
         return 0;
@@ -1675,7 +1675,7 @@ EXT_RETURN tls_construct_stoc_key_share(SSL *s, WPACKET *pkt,
     size_t encoded_pt_len = 0;
     EVP_PKEY *ckey = s->s3->peer_tmp, *skey = NULL;
 
-    if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING) {
+    if (s->hello_retry_request == sslData::SSL_HRR_PENDING) {
         if (ckey != NULL) {
             /* Original key_share was acceptable so don't ask for another one */
             return EXT_RETURN_NOT_SENT;

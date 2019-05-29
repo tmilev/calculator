@@ -1183,7 +1183,7 @@ static void SSL_SESSION_list_add(SSL_CTX *ctx, SSL_SESSION *s)
 }
 
 void SSL_CTX_sess_set_new_cb(SSL_CTX *ctx,
-                             int (*cb) (struct ssl_st *ssl, SSL_SESSION *sess))
+                             int (*cb) (struct sslData *ssl, SSL_SESSION *sess))
 {
     ctx->new_session_cb = cb;
 }
@@ -1204,7 +1204,7 @@ void (*SSL_CTX_sess_get_remove_cb(SSL_CTX *ctx)) (SSL_CTX *ctx,
 }
 
 void SSL_CTX_sess_set_get_cb(SSL_CTX *ctx,
-                             SSL_SESSION *(*cb) (struct ssl_st *ssl,
+                             SSL_SESSION *(*cb) (struct sslData *ssl,
                                                  const unsigned char *data,
                                                  int len, int *copy))
 {

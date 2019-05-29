@@ -333,10 +333,9 @@
      || (s)->early_data_state == SSL_EARLY_DATA_CONNECT_RETRY \
      || (s)->early_data_state == SSL_EARLY_DATA_WRITING \
      || (s)->early_data_state == SSL_EARLY_DATA_WRITE_RETRY \
-     || (s)->hello_retry_request == ssl_st::SSL_HRR_PENDING)
+     || (s)->hello_retry_request == sslData::SSL_HRR_PENDING)
 
-# define SSL_IS_FIRST_HANDSHAKE(S) ((s)->s3->tmp.finish_md_len == 0 \
-                                    || (s)->s3->tmp.peer_finish_md_len == 0)
+bool SSL_IS_FIRST_HANDSHAKE(sslData* inputPointer);
 
 /* See if we need explicit IV */
 # define SSL_USE_EXPLICIT_IV(s)  \
@@ -796,9 +795,9 @@ struct ssl_ctx_st {
      * removed from the cache.  After the call, OpenSSL will
      * SSL_SESSION_free() it.
      */
-    int (*new_session_cb) (struct ssl_st *ssl, SSL_SESSION *sess);
+    int (*new_session_cb) (struct sslData *ssl, SSL_SESSION *sess);
     void (*remove_session_cb) (struct ssl_ctx_st *ctx, SSL_SESSION *sess);
-    SSL_SESSION *(*get_session_cb) (struct ssl_st *ssl,
+    SSL_SESSION *(*get_session_cb) (struct sslData *ssl,
                                     const unsigned char *data, int len,
                                     int *copy);
     struct {
@@ -1096,7 +1095,7 @@ struct ssl_ctx_st {
     void *async_cb_arg;
 };
 
-struct ssl_st {
+struct sslData {
     /*
      * protocol version (one of SSL2_VERSION, SSL3_VERSION, TLS1_VERSION,
      * DTLS1_VERSION)
@@ -1498,6 +1497,9 @@ struct ssl_st {
     /* Callback for SSL async handling */
     SSL_async_callback_fn async_cb;
     void *async_cb_arg;
+  int stateMachine(int server, std::stringstream *commentsOnError);
+  int stateMachineCleanUp(buf_mem_st *buf, int ret);
+  bool isFirstHandshake();
 };
 
 /*

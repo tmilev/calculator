@@ -58,7 +58,6 @@ typedef enum {
     SUB_STATE_END_HANDSHAKE
 } SUB_STATE_RETURN;
 
-static int state_machine(SSL *s, int server);
 static void init_read_state_machine(SSL *s);
 static SUB_STATE_RETURN read_state_machine(SSL *s);
 static void init_write_state_machine(SSL *s);
@@ -183,7 +182,7 @@ int ossl_statem_skip_early_data(SSL *s)
 
     if (!s->server
             || s->statem.hand_state != TLS_ST_EARLY_DATA
-            || s->hello_retry_request == ssl_st::SSL_HRR_COMPLETE)
+            || s->hello_retry_request == sslData::SSL_HRR_COMPLETE)
         return 0;
 
     return 1;
@@ -254,14 +253,12 @@ void ossl_statem_set_hello_verify_done(SSL *s)
     s->statem.hand_state = TLS_ST_SR_CLNT_HELLO;
 }
 
-int ossl_statem_connect(SSL *s, std::stringstream* commentsOnError)
-{
-    return state_machine(s, 0);
+int ossl_statem_connect(SSL *s, std::stringstream* commentsOnError) {
+  return s->stateMachine(0, commentsOnError);
 }
 
-int ossl_statem_accept(SSL *s, std::stringstream* commentsOnError)
-{
-    return state_machine(s, 1);
+int ossl_statem_accept(SSL *s, std::stringstream* commentsOnError) {
+  return s->stateMachine(1, commentsOnError);
 }
 
 typedef void (*info_cb) (const SSL *, int, int);
@@ -275,6 +272,15 @@ static info_cb get_callback(SSL *s)
 
     return NULL;
 }
+
+bool sslData::isFirstHandshake() {
+  return this->s3->tmp.finish_md_len == 0 || this->s3->tmp.peer_finish_md_len == 0;
+}
+
+bool SSL_IS_FIRST_HANDSHAKE(sslData* inputPointer) {
+  return inputPointer->isFirstHandshake();
+}
+
 
 /*
  * The main message flow state machine. We start in the MSG_FLOW_UNINITED or
@@ -304,183 +310,196 @@ static info_cb get_callback(SSL *s)
  *   1: Success
  * <=0: NBIO or error
  */
-static int state_machine(SSL *s, int server)
-{
-    BUF_MEM *buf = NULL;
-    void (*cb) (const SSL *ssl, int type, int val) = NULL;
-    OSSL_STATEM *st = &s->statem;
-    int ret = -1;
-    int ssret;
-
-    if (st->state == MSG_FLOW_ERROR) {
-        /* Shouldn't have been called if we're already in the error state */
-        return -1;
+int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
+  stOutput << "DEBUG: state_machine running ... ";
+  buf_mem_st* buf = NULL;
+  void (*callBack) (const SSL *ssl, int type, int val) = NULL;
+  OSSL_STATEM *st = &this->statem;
+  int ssret;
+  if (st->state == MSG_FLOW_ERROR) {
+    /* Shouldn't have been called if we're already in the error state */
+    if (commentsOnError != 0) {
+      *commentsOnError << "Shouldn't call state machine when in error state.\n";
     }
-
-    ERR_clear_error();
-    clear_sys_error();
-
-    cb = get_callback(s);
-
-    st->in_handshake++;
-    if (!SSL_in_init(s) || SSL_in_before(s)) {
-        /*
-         * If we are stateless then we already called SSL_clear() - don't do
-         * it again and clear the STATELESS flag itself.
-         */
-        if ((s->s3->flags & TLS1_FLAGS_STATELESS) == 0 && !SSL_clear(s))
-            return -1;
+    return - 1;
+  }
+  ERR_clear_error();
+  clear_sys_error();
+  callBack = get_callback(this);
+  st->in_handshake++;
+  if (!SSL_in_init(this) || SSL_in_before(this)) {
+    /*
+     * If we are stateless then we already called SSL_clear() - don't do
+     * it again and clear the STATELESS flag itself.
+     */
+    if ((this->s3->flags & TLS1_FLAGS_STATELESS) == 0 && !SSL_clear(this)) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "SSL clear failed. ";
+      }
+      stOutput << "DEBUG: ssl clear failed. ";
+      return - 1;
     }
-
-    /* Initialise state machine */
-    if (st->state == MSG_FLOW_UNINITED
-            || st->state == MSG_FLOW_FINISHED) {
-        if (st->state == MSG_FLOW_UNINITED) {
-            st->hand_state = TLS_ST_BEFORE;
-            st->request_state = TLS_ST_BEFORE;
+  }
+  stOutput << "DEBUG: state machine, here I am. ";
+  /* Initialise state machine */
+  if (st->state == MSG_FLOW_UNINITED || st->state == MSG_FLOW_FINISHED) {
+    if (st->state == MSG_FLOW_UNINITED) {
+      st->hand_state = TLS_ST_BEFORE;
+      st->request_state = TLS_ST_BEFORE;
+    }
+    this->server = server;
+    if (callBack != NULL) {
+      if (SSL_IS_FIRST_HANDSHAKE(this) || !SSL_IS_TLS13(this)) {
+        callBack(this, SSL_CB_HANDSHAKE_START, 1);
+      }
+    }
+    /*
+     * Fatal errors in this block don't send an alert because we have
+     * failed to even initialise properly. Sending an alert is probably
+     * doomed to failure.
+     */
+    if (SSL_IS_DTLS(this)) {
+      if (
+        (this->version & 0xff00) != (DTLS1_VERSION & 0xff00) &&
+        (server || (this->version & 0xff00) != (DTLS1_BAD_VER & 0xff00))
+      ) {
+        if (commentsOnError != 0) {
+          *commentsOnError << "State machine: version DTLS1 error.\n";
         }
-
-        s->server = server;
-        if (cb != NULL) {
-            if (SSL_IS_FIRST_HANDSHAKE(s) || !SSL_IS_TLS13(s))
-                cb(s, SSL_CB_HANDSHAKE_START, 1);
+        return this->stateMachineCleanUp(buf, - 1);
+      }
+    } else {
+      if ((this->version >> 8) != SSL3_VERSION_MAJOR) {
+        if (commentsOnError != 0) {
+          *commentsOnError << "Version major bit does not equal ssl3 version major.\n";
         }
-
-        /*
-         * Fatal errors in this block don't send an alert because we have
-         * failed to even initialise properly. Sending an alert is probably
-         * doomed to failure.
-         */
-
-        if (SSL_IS_DTLS(s)) {
-            if ((s->version & 0xff00) != (DTLS1_VERSION & 0xff00) &&
-                (server || (s->version & 0xff00) != (DTLS1_BAD_VER & 0xff00))) {
-                SSLfatal(s, SSL_AD_NO_ALERT, SSL_F_STATE_MACHINE,
-                         ERR_R_INTERNAL_ERROR);
-                goto end;
-            }
-        } else {
-            if ((s->version >> 8) != SSL3_VERSION_MAJOR) {
-                SSLfatal(s, SSL_AD_NO_ALERT, SSL_F_STATE_MACHINE,
-                         ERR_R_INTERNAL_ERROR);
-                goto end;
-            }
+        return this->stateMachineCleanUp(buf, - 1);
+      }
+    }
+    if (!ssl_security(this, SSL_SECOP_VERSION, 0, this->version, NULL)) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Function ssl_security returned false.\n";
+      }
+      return this->stateMachineCleanUp(buf, - 1);
+    }
+    if (this->init_buf == NULL) {
+      if ((buf = BUF_MEM_new()) == NULL) {
+        if (commentsOnError != 0) {
+          *commentsOnError << "Buffer allocation failed.\n";
         }
-
-        if (!ssl_security(s, SSL_SECOP_VERSION, 0, s->version, NULL)) {
-            SSLfatal(s, SSL_AD_NO_ALERT, SSL_F_STATE_MACHINE,
-                     ERR_R_INTERNAL_ERROR);
-            goto end;
+        return this->stateMachineCleanUp(buf, - 1);
+      }
+      if (!BUF_MEM_grow(buf, SSL3_RT_MAX_PLAIN_LENGTH)) {
+        if (commentsOnError != 0) {
+          *commentsOnError << "Failed to grow buffer.\n";
         }
-
-        if (s->init_buf == NULL) {
-            if ((buf = BUF_MEM_new()) == NULL) {
-                SSLfatal(s, SSL_AD_NO_ALERT, SSL_F_STATE_MACHINE,
-                         ERR_R_INTERNAL_ERROR);
-                goto end;
-            }
-            if (!BUF_MEM_grow(buf, SSL3_RT_MAX_PLAIN_LENGTH)) {
-                SSLfatal(s, SSL_AD_NO_ALERT, SSL_F_STATE_MACHINE,
-                         ERR_R_INTERNAL_ERROR);
-                goto end;
-            }
-            s->init_buf = buf;
-            buf = NULL;
-        }
-
-        if (!ssl3_setup_buffers(s)) {
-            SSLfatal(s, SSL_AD_NO_ALERT, SSL_F_STATE_MACHINE,
-                     ERR_R_INTERNAL_ERROR);
-            goto end;
-        }
-        s->init_num = 0;
-
-        /*
-         * Should have been reset by tls_process_finished, too.
-         */
-        s->s3->change_cipher_spec = 0;
-
-        /*
-         * Ok, we now need to push on a buffering BIO ...but not with
-         * SCTP
-         */
+        return this->stateMachineCleanUp(buf, - 1);
+      }
+      this->init_buf = buf;
+      buf = NULL;
+    }
+    if (!ssl3_setup_buffers(this)) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Failed to setup buffers.\n";
+      }
+      return this->stateMachineCleanUp(buf, - 1);
+    }
+    this->init_num = 0;
+    /*
+     * Should have been reset by tls_process_finished, too.
+     */
+    this->s3->change_cipher_spec = 0;
+    /*
+     * Ok, we now need to push on a buffering BIO ...but not with
+     * SCTP
+     */
 #ifndef OPENSSL_NO_SCTP
-        if (!SSL_IS_DTLS(s) || !BIO_dgram_is_sctp(SSL_get_wbio(s)))
+    if (!SSL_IS_DTLS(s) || !BIO_dgram_is_sctp(SSL_get_wbio(s)))
 #endif
-            if (!ssl_init_wbio_buffer(s)) {
-                SSLfatal(s, SSL_AD_NO_ALERT, SSL_F_STATE_MACHINE,
-                         ERR_R_INTERNAL_ERROR);
-                goto end;
-            }
-
-        if ((SSL_in_before(s))
-                || s->renegotiate) {
-            if (!tls_setup_handshake(s)) {
-                /* SSLfatal() already called */
-                goto end;
-            }
-
-            if (SSL_IS_FIRST_HANDSHAKE(s))
-                st->read_state_first_init = 1;
+    if (!ssl_init_wbio_buffer(this)) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Initialization of wbio buffer failed.\n";
+      }
+      return this->stateMachineCleanUp(buf, - 1);
+    }
+    if ((SSL_in_before(this)) || this->renegotiate) {
+      if (!tls_setup_handshake(this)) {
+        if (commentsOnError != 0) {
+          *commentsOnError << "Failed to setup tls handshake.\n";
         }
-
+        return this->stateMachineCleanUp(buf, - 1);
+      }
+      if (SSL_IS_FIRST_HANDSHAKE(this)) {
+        st->read_state_first_init = 1;
+      }
+    }
+    st->state = MSG_FLOW_WRITING;
+    init_write_state_machine(this);
+  }
+  while (st->state != MSG_FLOW_FINISHED) {
+    if (st->state == MSG_FLOW_READING) {
+      ssret = read_state_machine(this);
+      if (ssret == SUB_STATE_FINISHED) {
         st->state = MSG_FLOW_WRITING;
-        init_write_state_machine(s);
-    }
-
-    while (st->state != MSG_FLOW_FINISHED) {
-        if (st->state == MSG_FLOW_READING) {
-            ssret = read_state_machine(s);
-            if (ssret == SUB_STATE_FINISHED) {
-                st->state = MSG_FLOW_WRITING;
-                init_write_state_machine(s);
-            } else {
-                /* NBIO or error */
-                goto end;
-            }
-        } else if (st->state == MSG_FLOW_WRITING) {
-            ssret = write_state_machine(s, 0);
-            if (ssret == SUB_STATE_FINISHED) {
-                st->state = MSG_FLOW_READING;
-                init_read_state_machine(s);
-            } else if (ssret == SUB_STATE_END_HANDSHAKE) {
-                st->state = MSG_FLOW_FINISHED;
-            } else {
-                /* NBIO or error */
-                goto end;
-            }
-        } else {
-            /* Error */
-            check_fatal(s, SSL_F_STATE_MACHINE);
-            SSLerr(SSL_F_STATE_MACHINE, ERR_R_SHOULD_NOT_HAVE_BEEN_CALLED);
-            goto end;
+        init_write_state_machine(this);
+      } else {
+        /* NBIO or error */
+        if (commentsOnError != 0) {
+          *commentsOnError << "Error or NBIO while reading data.\n";
         }
+        return this->stateMachineCleanUp(buf, - 1);
+      }
+    } else if (st->state == MSG_FLOW_WRITING) {
+      ssret = write_state_machine(this, 0);
+      if (ssret == SUB_STATE_FINISHED) {
+        st->state = MSG_FLOW_READING;
+        init_read_state_machine(this);
+      } else if (ssret == SUB_STATE_END_HANDSHAKE) {
+        st->state = MSG_FLOW_FINISHED;
+      } else {
+        /* NBIO or error */
+        if (commentsOnError != 0) {
+          *commentsOnError << "Error or NBIO while reading data.\n";
+        }
+        return this->stateMachineCleanUp(buf, - 1);
+      }
+    } else {
+      /* Error */
+      check_fatal(this, SSL_F_STATE_MACHINE);
+      if (commentsOnError != 0) {
+        *commentsOnError << "Message flow fatal error: state machine should not have been called.\n";
+      }
+      return this->stateMachineCleanUp(buf, - 1);
     }
+  }
+  return this->stateMachineCleanUp(buf, 1);
+}
 
-    ret = 1;
-
- end:
-    st->in_handshake--;
-
+int sslData::stateMachineCleanUp(buf_mem_st* buf, int ret) {
+  OSSL_STATEM *st = &this->statem;
+  st->in_handshake --;
+  void (*callBack) (const SSL *ssl, int type, int val) = NULL;
+  callBack = get_callback(this);
 #ifndef OPENSSL_NO_SCTP
-    if (SSL_IS_DTLS(s) && BIO_dgram_is_sctp(SSL_get_wbio(s))) {
-        /*
-         * Notify SCTP BIO socket to leave handshake mode and allow stream
-         * identifier other than 0.
-         */
-        BIO_ctrl(SSL_get_wbio(s), BIO_CTRL_DGRAM_SCTP_SET_IN_HANDSHAKE,
-                 st->in_handshake, NULL);
-    }
+  if (SSL_IS_DTLS(s) && BIO_dgram_is_sctp(SSL_get_wbio(s))) {
+      /*
+       * Notify SCTP BIO socket to leave handshake mode and allow stream
+       * identifier other than 0.
+       */
+      BIO_ctrl(SSL_get_wbio(s), BIO_CTRL_DGRAM_SCTP_SET_IN_HANDSHAKE,
+               st->in_handshake, NULL);
+  }
 #endif
+  BUF_MEM_free(buf);
 
-    BUF_MEM_free(buf);
-    if (cb != NULL) {
-        if (server)
-            cb(s, SSL_CB_ACCEPT_EXIT, ret);
-        else
-            cb(s, SSL_CB_CONNECT_EXIT, ret);
+  if (callBack != NULL) {
+    if (server) {
+      callBack(this, SSL_CB_ACCEPT_EXIT, ret);
+    } else {
+      callBack(this, SSL_CB_CONNECT_EXIT, ret);
     }
-    return ret;
+  }
+  return ret;
 }
 
 /*

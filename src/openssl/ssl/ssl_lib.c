@@ -597,7 +597,7 @@ int SSL_clear(SSL *s)
     OPENSSL_free(s->psksession_id);
     s->psksession_id = NULL;
     s->psksession_id_len = 0;
-    s->hello_retry_request = (ssl_st::hrrEnum) 0;
+    s->hello_retry_request = (sslData::hrrEnum) 0;
     s->sent_tickets = 0;
 
     s->error = 0;
@@ -5613,7 +5613,7 @@ int SSL_stateless(SSL *s, std::stringstream* commentsOnError) {
   if (ret > 0 && s->ext.cookieok) {
     return 1;
   }
-  if (s->hello_retry_request == ssl_st::SSL_HRR_PENDING && !ossl_statem_in_error(s)) {
+  if (s->hello_retry_request == sslData::SSL_HRR_PENDING && !ossl_statem_in_error(s)) {
     return 0;
   }
   return - 1;

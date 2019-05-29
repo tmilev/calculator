@@ -38,7 +38,7 @@ int SSL_CTX_SRP_CTX_free(struct ssl_ctx_st *ctx)
     return 1;
 }
 
-int SSL_SRP_CTX_free(struct ssl_st *s)
+int SSL_SRP_CTX_free(struct sslData *s)
 {
     if (s == NULL)
         return 0;
@@ -57,7 +57,7 @@ int SSL_SRP_CTX_free(struct ssl_st *s)
     return 1;
 }
 
-int SSL_SRP_CTX_init(struct ssl_st *s)
+int SSL_SRP_CTX_init(struct sslData *s)
 {
     SSL_CTX *ctx;
 

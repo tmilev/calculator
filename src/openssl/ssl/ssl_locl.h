@@ -1500,6 +1500,7 @@ struct sslData {
   int stateMachine(int server, std::stringstream *commentsOnError);
   int stateMachineCleanUp(buf_mem_st *buf, int ret);
   bool isFirstHandshake();
+  bool isDTLS();
 };
 
 /*

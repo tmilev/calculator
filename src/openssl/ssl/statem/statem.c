@@ -459,7 +459,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
       } else {
         /* NBIO or error */
         if (commentsOnError != 0) {
-          *commentsOnError << "Error or NBIO while reading data.\n";
+          *commentsOnError << "Error or NBIO while writing data.\n";
         }
         return this->stateMachineCleanUp(buf, - 1);
       }
@@ -481,23 +481,25 @@ int sslData::stateMachineCleanUp(buf_mem_st* buf, int ret) {
   void (*callBack) (const SSL *ssl, int type, int val) = NULL;
   callBack = get_callback(this);
 #ifndef OPENSSL_NO_SCTP
-  if (SSL_IS_DTLS(s) && BIO_dgram_is_sctp(SSL_get_wbio(s))) {
-      /*
-       * Notify SCTP BIO socket to leave handshake mode and allow stream
-       * identifier other than 0.
-       */
-      BIO_ctrl(SSL_get_wbio(s), BIO_CTRL_DGRAM_SCTP_SET_IN_HANDSHAKE,
-               st->in_handshake, NULL);
+  if (this->isDTLS() && BIO_dgram_is_sctp(SSL_get_wbio(this))) {
+    stOutput << "DEBUG: DTLS communication";
+    /*
+     * Notify SCTP BIO socket to leave handshake mode and allow stream
+     * identifier other than 0.
+     */
+    BIO_ctrl(SSL_get_wbio(s), BIO_CTRL_DGRAM_SCTP_SET_IN_HANDSHAKE,
+             st->in_handshake, NULL);
   }
 #endif
   BUF_MEM_free(buf);
 
-  if (callBack != NULL) {
-    if (server) {
-      callBack(this, SSL_CB_ACCEPT_EXIT, ret);
-    } else {
-      callBack(this, SSL_CB_CONNECT_EXIT, ret);
-    }
+  if (callBack == NULL) {
+    return ret;
+  }
+  if (this->server) {
+    callBack(this, SSL_CB_ACCEPT_EXIT, ret);
+  } else {
+    callBack(this, SSL_CB_CONNECT_EXIT, ret);
   }
   return ret;
 }

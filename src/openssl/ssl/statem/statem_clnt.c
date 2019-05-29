@@ -888,9 +888,9 @@ WORK_STATE ossl_statem_client_post_work(SSL *s, WORK_STATE wst)
  *   1: Success
  *   0: Error
  */
-int ossl_statem_client_construct_message(SSL *s, WPACKET *pkt,
-                                         confunc_f *confunc, int *mt)
-{
+int ossl_statem_client_construct_message(
+  SSL *s, WPACKET *pkt, confunc_f *confunc, int *mt, std::stringstream* commentsOnError
+) {
     OSSL_STATEM *st = &s->statem;
 
     switch (st->hand_state) {

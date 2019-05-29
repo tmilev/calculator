@@ -348,7 +348,8 @@ HEADERS += \
     openssl/ssl/packet_locl.h \
     openssl/ssl/ssl_cert_table.h \
     openssl/ssl/ssl_locl.h \
-    openssl/e_os.h
+    openssl/e_os.h \
+    transport_security_layer.h
 
 SOURCES += \
     database.cpp \
@@ -1140,5 +1141,6 @@ SOURCES += \
     openssl/ssl/t1_trce.c \
     openssl/ssl/tls13_enc.c \
     openssl/ssl/tls_srp.c \
-    openssl/crypto/LPdir_unix.c
+    openssl/crypto/LPdir_unix.c \
+    transport_security_layer.cpp
 

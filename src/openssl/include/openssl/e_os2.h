@@ -10,7 +10,7 @@
 #ifndef HEADER_E_OS2_H
 # define HEADER_E_OS2_H
 
-# include "opensslconf.h"
+#include "opensslconf.h"
 
 /******************************************************************************
  * Detect operating systems.  This probably needs completing.

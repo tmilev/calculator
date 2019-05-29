@@ -48,20 +48,9 @@
  *
  */
 
-/* Sub state machine return values */
-typedef enum {
-    /* Something bad happened or NBIO */
-    SUB_STATE_ERROR,
-    /* Sub state finished go to the next sub state */
-    SUB_STATE_FINISHED,
-    /* Sub state finished and handshake was completed */
-    SUB_STATE_END_HANDSHAKE
-} SUB_STATE_RETURN;
-
 static void init_read_state_machine(SSL *s);
 static SUB_STATE_RETURN read_state_machine(SSL *s);
-static void init_write_state_machine(SSL *s);
-static SUB_STATE_RETURN write_state_machine(SSL *s, std::stringstream *commentsOnError);
+void init_write_state_machine(SSL *s);
 
 OSSL_HANDSHAKE_STATE SSL_get_state(const SSL *ssl)
 {
@@ -114,6 +103,11 @@ void ossl_statem_set_renegotiate(SSL *s) {
  * Put the state machine into an error state and send an alert if appropriate.
  * This is a permanent error for the current connection.
  */
+void sslData::SetError() {
+  this->statem.in_init = 1;
+  this->statem.state = MSG_FLOW_ERROR;
+}
+
 void ossl_statem_fatal(SSL *s, int al, int func, int reason, const char *file,
                        int line)
 {
@@ -450,7 +444,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
         return this->stateMachineCleanUp(buf, - 1);
       }
     } else if (st->state == MSG_FLOW_WRITING) {
-      ssret = write_state_machine(this, 0);
+      ssret = this->write_state_machine(0);
       if (ssret == SUB_STATE_FINISHED) {
         st->state = MSG_FLOW_READING;
         init_read_state_machine(this);
@@ -461,6 +455,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
         if (commentsOnError != 0) {
           *commentsOnError << "Error or NBIO while writing data.\n";
         }
+        this->SetError();
         return this->stateMachineCleanUp(buf, - 1);
       }
     } else {
@@ -731,7 +726,7 @@ int statem_do_write(SSL *s, std::stringstream* commentsOnError) {
 /*
  * Initialise the MSG_FLOW_WRITING sub-state machine
  */
-static void init_write_state_machine(SSL *s)
+void init_write_state_machine(SSL *s)
 {
     OSSL_STATEM *st = &s->statem;
 
@@ -769,146 +764,170 @@ static void init_write_state_machine(SSL *s)
  * message has been completed. As for WRITE_STATE_PRE_WORK this could also
  * result in an NBIO event.
  */
-static SUB_STATE_RETURN write_state_machine(SSL *s, std::stringstream* commentsOnError) {
-    OSSL_STATEM *st = &s->statem;
-    int ret;
-    WRITE_TRAN(*transition) (SSL *s);
-    WORK_STATE(*pre_work) (SSL *s, WORK_STATE wst, std::stringstream* commentsOnError);
-    WORK_STATE(*post_work) (SSL *s, WORK_STATE wst);
-    int (*get_construct_message_f) (SSL *s, WPACKET *pkt,
-                                    int (**confunc) (SSL *s, WPACKET *pkt),
-                                    int *mt);
-    void (*cb) (const SSL *ssl, int type, int val) = NULL;
-    int (*confunc) (SSL *s, WPACKET *pkt);
-    int mt;
-    WPACKET pkt;
-
-    cb = get_callback(s);
-
-    if (s->server) {
-        transition = ossl_statem_server_write_transition;
-        pre_work = ossl_statem_server_pre_work;
-        post_work = ossl_statem_server_post_work;
-        get_construct_message_f = ossl_statem_server_construct_message;
-    } else {
-        transition = ossl_statem_client_write_transition;
-        pre_work = ossl_statem_client_pre_work;
-        post_work = ossl_statem_client_post_work;
-        get_construct_message_f = ossl_statem_client_construct_message;
-    }
-
-    while (1) {
-        switch (st->write_state) {
-        case WRITE_STATE_TRANSITION:
-            if (cb != NULL) {
-                /* Notify callback of an impending state change */
-                if (s->server)
-                    cb(s, SSL_CB_ACCEPT_LOOP, 1);
-                else
-                    cb(s, SSL_CB_CONNECT_LOOP, 1);
-            }
-            switch (transition(s)) {
-            case WRITE_TRAN_CONTINUE:
-                st->write_state = WRITE_STATE_PRE_WORK;
-                st->write_state_work = WORK_MORE_A;
-                break;
-
-            case WRITE_TRAN_FINISHED:
-                return SUB_STATE_FINISHED;
-                break;
-
-            case WRITE_TRAN_ERROR:
-                check_fatal(s, SSL_F_WRITE_STATE_MACHINE);
-                return SUB_STATE_ERROR;
-            }
-            break;
-
-        case WRITE_STATE_PRE_WORK:
-            switch (st->write_state_work = pre_work(s, st->write_state_work, commentsOnError)) {
-            case WORK_ERROR:
-                check_fatal(s, SSL_F_WRITE_STATE_MACHINE);
-                /* Fall through */
-            case WORK_MORE_A:
-            case WORK_MORE_B:
-            case WORK_MORE_C:
-                return SUB_STATE_ERROR;
-
-            case WORK_FINISHED_CONTINUE:
-                st->write_state = WRITE_STATE_SEND;
-                break;
-
-            case WORK_FINISHED_STOP:
-                return SUB_STATE_END_HANDSHAKE;
-            }
-            if (!get_construct_message_f(s, &pkt, &confunc, &mt)) {
-                /* SSLfatal() already called */
-                return SUB_STATE_ERROR;
-            }
-            if (mt == SSL3_MT_DUMMY) {
-                /* Skip construction and sending. This isn't a "real" state */
-                st->write_state = WRITE_STATE_POST_WORK;
-                st->write_state_work = WORK_MORE_A;
-                break;
-            }
-            if (!WPACKET_init(&pkt, s->init_buf)
-                    || !ssl_set_handshake_header(s, &pkt, mt)) {
-                WPACKET_cleanup(&pkt);
-                SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_WRITE_STATE_MACHINE,
-                         ERR_R_INTERNAL_ERROR);
-                return SUB_STATE_ERROR;
-            }
-            if (confunc != NULL && !confunc(s, &pkt)) {
-                WPACKET_cleanup(&pkt);
-                check_fatal(s, SSL_F_WRITE_STATE_MACHINE);
-                return SUB_STATE_ERROR;
-            }
-            if (!ssl_close_construct_packet(s, &pkt, mt)
-                    || !WPACKET_finish(&pkt)) {
-                WPACKET_cleanup(&pkt);
-                SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_WRITE_STATE_MACHINE,
-                         ERR_R_INTERNAL_ERROR);
-                return SUB_STATE_ERROR;
-            }
-
-            /* Fall through */
-
-        case WRITE_STATE_SEND:
-            if (SSL_IS_DTLS(s) && st->use_timer) {
-                dtls1_start_timer(s);
-            }
-            ret = statem_do_write(s, 0);
-            if (ret <= 0) {
-                return SUB_STATE_ERROR;
-            }
-            st->write_state = WRITE_STATE_POST_WORK;
-            st->write_state_work = WORK_MORE_A;
-            /* Fall through */
-
-        case WRITE_STATE_POST_WORK:
-            switch (st->write_state_work = post_work(s, st->write_state_work)) {
-            case WORK_ERROR:
-                check_fatal(s, SSL_F_WRITE_STATE_MACHINE);
-                /* Fall through */
-            case WORK_MORE_A:
-            case WORK_MORE_B:
-            case WORK_MORE_C:
-                return SUB_STATE_ERROR;
-
-            case WORK_FINISHED_CONTINUE:
-                st->write_state = WRITE_STATE_TRANSITION;
-                break;
-
-            case WORK_FINISHED_STOP:
-                return SUB_STATE_END_HANDSHAKE;
-            }
-            break;
-
-        default:
-            SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_WRITE_STATE_MACHINE,
-                     ERR_R_INTERNAL_ERROR);
-            return SUB_STATE_ERROR;
+SUB_STATE_RETURN sslData::write_state_machine(std::stringstream* commentsOnError) {
+  OSSL_STATEM *st = &this->statem;
+  int ret;
+  WRITE_TRAN(*transition) (SSL *s);
+  WORK_STATE(*pre_work) (SSL *s, WORK_STATE wst, std::stringstream* commentsOnError);
+  WORK_STATE(*post_work) (SSL *s, WORK_STATE wst);
+  int (*get_construct_message_f) (
+    SSL *s,
+    WPACKET *pkt,
+    int (**confunc) (SSL *s, WPACKET *pkt),
+    int *mt,
+    std::stringstream* _commentsOnError
+  );
+  void (*callBack) (const SSL *ssl, int type, int val) = NULL;
+  int (*confunc) (SSL *s, WPACKET *pkt);
+  int mt;
+  WPACKET pkt;
+  callBack = get_callback(this);
+  if (this->server) {
+    transition = ossl_statem_server_write_transition;
+    pre_work = ossl_statem_server_pre_work;
+    post_work = ossl_statem_server_post_work;
+    get_construct_message_f = ossl_statem_server_construct_message;
+  } else {
+    transition = ossl_statem_client_write_transition;
+    pre_work = ossl_statem_client_pre_work;
+    post_work = ossl_statem_client_post_work;
+    get_construct_message_f = ossl_statem_client_construct_message;
+  }
+  while (true) {
+    switch (st->write_state) {
+      case WRITE_STATE_TRANSITION:
+        if (callBack != NULL) {
+          /* Notify callback of an impending state change */
+          if (this->server) {
+            callBack(this, SSL_CB_ACCEPT_LOOP, 1);
+          } else {
+            callBack(this, SSL_CB_CONNECT_LOOP, 1);
+          }
         }
+      switch (transition(this)) {
+        case WRITE_TRAN_CONTINUE:
+          st->write_state = WRITE_STATE_PRE_WORK;
+          st->write_state_work = WORK_MORE_A;
+          break;
+
+        case WRITE_TRAN_FINISHED:
+          this->SetError();
+          return SUB_STATE_FINISHED;
+          break;
+        case WRITE_TRAN_ERROR:
+          if (commentsOnError != 0) {
+            *commentsOnError << "Write transition error in write_state_machine.\n";
+          }
+          this->SetError();
+        return SUB_STATE_ERROR;
+      }
+      break;
+    case WRITE_STATE_PRE_WORK:
+      switch (st->write_state_work = pre_work(this, st->write_state_work, commentsOnError)) {
+        case WORK_ERROR:
+          if (commentsOnError != 0) {
+            *commentsOnError << "Write machine: pre_work returned work error.\n";
+          }
+          this->SetError();
+          return SUB_STATE_ERROR;
+        case WORK_MORE_A:
+        case WORK_MORE_B:
+        case WORK_MORE_C:
+          if (commentsOnError != 0) {
+            *commentsOnError << "Write machine: pre_work work_more_a/b/c.\n";
+          }
+          return SUB_STATE_ERROR;
+        case WORK_FINISHED_CONTINUE:
+          st->write_state = WRITE_STATE_SEND;
+          break;
+        case WORK_FINISHED_STOP:
+          return SUB_STATE_END_HANDSHAKE;
+      }
+      if (!get_construct_message_f(this, &pkt, &confunc, &mt, commentsOnError)) {
+        /* SSLfatal() already called */
+        if (commentsOnError != 0) {
+          *commentsOnError << "Get construct message failed.\n";
+        }
+        this->SetError();
+        return SUB_STATE_ERROR;
+      }
+      if (mt == SSL3_MT_DUMMY) {
+        /* Skip construction and sending. This isn't a "real" state */
+        st->write_state = WRITE_STATE_POST_WORK;
+        st->write_state_work = WORK_MORE_A;
+        break;
+      }
+      if (!WPACKET_init(&pkt, this->init_buf) || !ssl_set_handshake_header(this, &pkt, mt)) {
+        WPACKET_cleanup(&pkt);
+        if (commentsOnError != 0) {
+          *commentsOnError << "Failed to initialize packet.\n";
+        }
+        this->SetError();
+        return SUB_STATE_ERROR;
+      }
+      if (confunc != NULL) {
+        if (!confunc(this, &pkt)) {
+          WPACKET_cleanup(&pkt);
+          if (commentsOnError != 0) {
+            *commentsOnError << "Error: confunc failed.\n";
+          }
+          this->SetError();
+          return SUB_STATE_ERROR;
+        }
+      }
+      if (!ssl_close_construct_packet(this, &pkt, mt) || !WPACKET_finish(&pkt)) {
+        WPACKET_cleanup(&pkt);
+        if (commentsOnError != 0) {
+          *commentsOnError << "Failed to close construct packet.\n";
+        }
+        this->SetError();
+        return SUB_STATE_ERROR;
+      }
+      /* Fall through */
+    case WRITE_STATE_SEND:
+      if (SSL_IS_DTLS(this) && st->use_timer) {
+        dtls1_start_timer(this);
+      }
+      ret = statem_do_write(this, 0);
+      if (ret <= 0) {
+        if (commentsOnError != 0) {
+          *commentsOnError << "Failed to carry out statem_do_write.\n";
+        }
+        return SUB_STATE_ERROR;
+      }
+      st->write_state = WRITE_STATE_POST_WORK;
+      st->write_state_work = WORK_MORE_A;
+      /* Fall through */
+    case WRITE_STATE_POST_WORK:
+      switch (st->write_state_work = post_work(this, st->write_state_work)) {
+        case WORK_ERROR:
+          if (commentsOnError != 0) {
+            *commentsOnError << "Post work is work_error.\n";
+          }
+          this->SetError();
+          /* Fall through */
+        case WORK_MORE_A:
+        case WORK_MORE_B:
+        case WORK_MORE_C:
+          if (commentsOnError != 0) {
+            *commentsOnError << "More work needed.\n";
+          }
+          return SUB_STATE_ERROR;
+        case WORK_FINISHED_CONTINUE:
+          st->write_state = WRITE_STATE_TRANSITION;
+          break;
+        case WORK_FINISHED_STOP:
+          return SUB_STATE_END_HANDSHAKE;
+      }
+      break;
+    default:
+      if (commentsOnError != 0) {
+        *commentsOnError << "Uknown write state.\n";
+      }
+      this->SetError();
+      return SUB_STATE_ERROR;
     }
+  }
 }
 
 /*

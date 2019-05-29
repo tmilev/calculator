@@ -144,8 +144,7 @@ int WPACKET_init_len(WPACKET *pkt, BUF_MEM *buf, size_t lenbytes)
     return wpacket_intern_init_len(pkt, lenbytes);
 }
 
-int WPACKET_init(WPACKET *pkt, BUF_MEM *buf)
-{
+int WPACKET_init(WPACKET *pkt, BUF_MEM *buf) {
     return WPACKET_init_len(pkt, buf, 0);
 }
 

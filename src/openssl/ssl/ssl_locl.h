@@ -1095,6 +1095,16 @@ struct ssl_ctx_st {
     void *async_cb_arg;
 };
 
+/* Sub state machine return values */
+typedef enum {
+    /* Something bad happened or NBIO */
+    SUB_STATE_ERROR,
+    /* Sub state finished go to the next sub state */
+    SUB_STATE_FINISHED,
+    /* Sub state finished and handshake was completed */
+    SUB_STATE_END_HANDSHAKE
+} SUB_STATE_RETURN;
+
 struct sslData {
     /*
      * protocol version (one of SSL2_VERSION, SSL3_VERSION, TLS1_VERSION,
@@ -1497,10 +1507,13 @@ struct sslData {
     /* Callback for SSL async handling */
     SSL_async_callback_fn async_cb;
     void *async_cb_arg;
+
+  SUB_STATE_RETURN write_state_machine(std::stringstream *commentsOnError);
   int stateMachine(int server, std::stringstream *commentsOnError);
   int stateMachineCleanUp(buf_mem_st *buf, int ret);
   bool isFirstHandshake();
   bool isDTLS();
+  void SetError();
 };
 
 /*

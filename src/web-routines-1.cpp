@@ -22,7 +22,7 @@ ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Cal
 
 class WebCrawler {
 public:
-//  SSLdata theSSlData;
+//  TransportSecurityLayer theSSlData;
   int theSocket;
   std::string portOrService;
   std::string addressToConnectTo;

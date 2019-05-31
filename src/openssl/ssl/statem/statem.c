@@ -746,11 +746,9 @@ int statem_do_write(SSL *s, std::stringstream* commentsOnError) {
 /*
  * Initialise the MSG_FLOW_WRITING sub-state machine
  */
-void init_write_state_machine(SSL *s)
-{
-    OSSL_STATEM *st = &s->statem;
-
-    st->write_state = WRITE_STATE_TRANSITION;
+void init_write_state_machine(SSL *s) {
+  OSSL_STATEM *st = &s->statem;
+  st->write_state = WRITE_STATE_TRANSITION;
 }
 
 /*
@@ -785,37 +783,40 @@ void init_write_state_machine(SSL *s)
  * result in an NBIO event.
  */
 
+WORK_STATE sslData::PostWriteWork(WORK_STATE wst, std::stringstream* commentsOnError) {
+  (void) commentsOnError;
+  if (this->server) {
+    return ossl_statem_server_post_work(this, wst);
+  } else {
+    return ossl_statem_client_post_work(this, wst);
+  }
+}
+
 WORK_STATE sslData::PreWriteWork(WORK_STATE wst, std::stringstream *commentsOnError) {
   if (this->server) {
     return ossl_statem_server_pre_work(this, wst, commentsOnError);
   } else {
     return ossl_statem_client_pre_work(this, wst, commentsOnError);
   }
+}
 
+int sslData::getConstructMessageFunction(
+  WPACKET* pkt, int (**confunc)(SSL *, WPACKET *), int* mt, std::stringstream* _commentsOnError
+) {
+  if (this->server) {
+    return ossl_statem_server_construct_message(this, pkt, confunc, mt, _commentsOnError);
+  } else {
+    return ossl_statem_client_construct_message(this, pkt, confunc, mt, _commentsOnError);
+  }
 }
 
 SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) {
   OSSL_STATEM *st = &this->statem;
   int ret;
-  WORK_STATE(*post_work) (SSL *s, WORK_STATE wst);
-  int (*get_construct_message_f) (
-    SSL *s,
-    WPACKET *pkt,
-    int (**confunc) (SSL *s, WPACKET *pkt),
-    int *mt,
-    std::stringstream* _commentsOnError
-  );
   int (*confunc) (SSL *s, WPACKET *pkt);
   int mt;
   WPACKET pkt;
 
-  if (this->server) {
-    post_work = ossl_statem_server_post_work;
-    get_construct_message_f = ossl_statem_server_construct_message;
-  } else {
-    post_work = ossl_statem_client_post_work;
-    get_construct_message_f = ossl_statem_client_construct_message;
-  }
   while (true) {
     switch (st->write_state) {
       case WRITE_STATE_TRANSITION:
@@ -830,7 +831,6 @@ SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) 
           st->write_state = WRITE_STATE_PRE_WORK;
           st->write_state_work = WORK_MORE_A;
           break;
-
         case WRITE_TRAN_FINISHED:
           return SUB_STATE_FINISHED;
           break;
@@ -870,7 +870,7 @@ SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) 
         case WORK_FINISHED_STOP:
           return SUB_STATE_END_HANDSHAKE;
       }
-      if (!get_construct_message_f(this, &pkt, &confunc, &mt, commentsOnError)) {
+      if (!this->getConstructMessageFunction(&pkt, &confunc, &mt, commentsOnError)) {
         /* SSLfatal() already called */
         if (commentsOnError != 0) {
           *commentsOnError << "Get construct message failed.\n";
@@ -926,7 +926,8 @@ SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) 
       st->write_state_work = WORK_MORE_A;
       /* Fall through */
     case WRITE_STATE_POST_WORK:
-      switch (st->write_state_work = post_work(this, st->write_state_work)) {
+      st->write_state_work = this->PostWriteWork(st->write_state_work, commentsOnError);
+      switch (st->write_state_work) {
         case WORK_ERROR:
           if (commentsOnError != 0) {
             *commentsOnError << "Post work is work_error.\n";

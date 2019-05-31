@@ -1513,6 +1513,7 @@ struct sslData {
   SUB_STATE_RETURN readStateMachine(std::stringstream* commentsOnError);
   SUB_STATE_RETURN writeStateMachine(std::stringstream* commentsOnError);
 
+  WORK_STATE PostWriteWork(WORK_STATE wst, std::stringstream* commentsOnError);
   WORK_STATE PreWriteWork(WORK_STATE wst, std::stringstream* commentsOnError);
 
 
@@ -1527,6 +1528,13 @@ struct sslData {
   bool isFirstHandshake();
   bool isDTLS();
   void SetError();
+
+  int getConstructMessageFunction(
+    WPACKET *pkt,
+    int (**confunc) (SSL *s, WPACKET *pkt),
+    int *mt,
+    std::stringstream* _commentsOnError
+  );
 };
 
 /*

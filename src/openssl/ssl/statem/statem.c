@@ -49,7 +49,6 @@
  */
 
 static void init_read_state_machine(SSL *s);
-static SUB_STATE_RETURN read_state_machine(SSL *s);
 void init_write_state_machine(SSL *s);
 
 OSSL_HANDSHAKE_STATE SSL_get_state(const SSL *ssl)
@@ -255,18 +254,6 @@ int ossl_statem_accept(SSL *s, std::stringstream* commentsOnError) {
   return s->stateMachine(1, commentsOnError);
 }
 
-typedef void (*info_cb) (const SSL *, int, int);
-
-static info_cb get_callback(SSL *s)
-{
-    if (s->info_callback != NULL)
-        return s->info_callback;
-    else if (s->ctx->info_callback != NULL)
-        return s->ctx->info_callback;
-
-    return NULL;
-}
-
 bool sslData::isFirstHandshake() {
   return this->s3->tmp.finish_md_len == 0 || this->s3->tmp.peer_finish_md_len == 0;
 }
@@ -307,7 +294,6 @@ bool SSL_IS_FIRST_HANDSHAKE(sslData* inputPointer) {
 int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
   stOutput << "DEBUG: state_machine running ... ";
   buf_mem_st* buf = NULL;
-  void (*callBack) (const SSL *ssl, int type, int val) = NULL;
   OSSL_STATEM *st = &this->statem;
   int ssret;
   if (st->state == MSG_FLOW_ERROR) {
@@ -319,8 +305,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
   }
   ERR_clear_error();
   clear_sys_error();
-  callBack = get_callback(this);
-  st->in_handshake++;
+  st->in_handshake ++;
   if (!SSL_in_init(this) || SSL_in_before(this)) {
     /*
      * If we are stateless then we already called SSL_clear() - don't do
@@ -342,10 +327,8 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
       st->request_state = TLS_ST_BEFORE;
     }
     this->server = server;
-    if (callBack != NULL) {
-      if (SSL_IS_FIRST_HANDSHAKE(this) || !SSL_IS_TLS13(this)) {
-        callBack(this, SSL_CB_HANDSHAKE_START, 1);
-      }
+    if (SSL_IS_FIRST_HANDSHAKE(this) || !SSL_IS_TLS13(this)) {
+      this->callBackStandard(SSL_CB_HANDSHAKE_START, 1);
     }
     /*
      * Fatal errors in this block don't send an alert because we have
@@ -360,6 +343,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
         if (commentsOnError != 0) {
           *commentsOnError << "State machine: version DTLS1 error.\n";
         }
+        this->SetError();
         return this->stateMachineCleanUp(buf, - 1);
       }
     } else {
@@ -367,6 +351,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
         if (commentsOnError != 0) {
           *commentsOnError << "Version major bit does not equal ssl3 version major.\n";
         }
+        this->SetError();
         return this->stateMachineCleanUp(buf, - 1);
       }
     }
@@ -374,6 +359,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
       if (commentsOnError != 0) {
         *commentsOnError << "Function ssl_security returned false.\n";
       }
+      this->SetError();
       return this->stateMachineCleanUp(buf, - 1);
     }
     if (this->init_buf == NULL) {
@@ -381,12 +367,14 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
         if (commentsOnError != 0) {
           *commentsOnError << "Buffer allocation failed.\n";
         }
+        this->SetError();
         return this->stateMachineCleanUp(buf, - 1);
       }
       if (!BUF_MEM_grow(buf, SSL3_RT_MAX_PLAIN_LENGTH)) {
         if (commentsOnError != 0) {
           *commentsOnError << "Failed to grow buffer.\n";
         }
+        this->SetError();
         return this->stateMachineCleanUp(buf, - 1);
       }
       this->init_buf = buf;
@@ -396,6 +384,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
       if (commentsOnError != 0) {
         *commentsOnError << "Failed to setup buffers.\n";
       }
+	this->SetError();
       return this->stateMachineCleanUp(buf, - 1);
     }
     this->init_num = 0;
@@ -414,6 +403,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
       if (commentsOnError != 0) {
         *commentsOnError << "Initialization of wbio buffer failed.\n";
       }
+      this->SetError();
       return this->stateMachineCleanUp(buf, - 1);
     }
     if ((SSL_in_before(this)) || this->renegotiate) {
@@ -432,7 +422,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
   }
   while (st->state != MSG_FLOW_FINISHED) {
     if (st->state == MSG_FLOW_READING) {
-      ssret = read_state_machine(this);
+      ssret = this->readStateMachine(commentsOnError);
       if (ssret == SUB_STATE_FINISHED) {
         st->state = MSG_FLOW_WRITING;
         init_write_state_machine(this);
@@ -444,7 +434,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
         return this->stateMachineCleanUp(buf, - 1);
       }
     } else if (st->state == MSG_FLOW_WRITING) {
-      ssret = this->write_state_machine(0);
+      ssret = this->writeStateMachine(commentsOnError);
       if (ssret == SUB_STATE_FINISHED) {
         st->state = MSG_FLOW_READING;
         init_read_state_machine(this);
@@ -464,6 +454,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
       if (commentsOnError != 0) {
         *commentsOnError << "Message flow fatal error: state machine should not have been called.\n";
       }
+      this->SetError();
       return this->stateMachineCleanUp(buf, - 1);
     }
   }
@@ -473,8 +464,6 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
 int sslData::stateMachineCleanUp(buf_mem_st* buf, int ret) {
   OSSL_STATEM *st = &this->statem;
   st->in_handshake --;
-  void (*callBack) (const SSL *ssl, int type, int val) = NULL;
-  callBack = get_callback(this);
 #ifndef OPENSSL_NO_SCTP
   if (this->isDTLS() && BIO_dgram_is_sctp(SSL_get_wbio(this))) {
     stOutput << "DEBUG: DTLS communication";
@@ -488,13 +477,10 @@ int sslData::stateMachineCleanUp(buf_mem_st* buf, int ret) {
 #endif
   BUF_MEM_free(buf);
 
-  if (callBack == NULL) {
-    return ret;
-  }
   if (this->server) {
-    callBack(this, SSL_CB_ACCEPT_EXIT, ret);
+    this->callBackStandard(SSL_CB_ACCEPT_EXIT, ret);
   } else {
-    callBack(this, SSL_CB_CONNECT_EXIT, ret);
+    this->callBackStandard(SSL_CB_CONNECT_EXIT, ret);
   }
   return ret;
 }
@@ -510,18 +496,15 @@ static void init_read_state_machine(SSL *s)
 }
 
 static int grow_init_buf(SSL *s, size_t size) {
-
-    size_t msg_offset = (char *)s->init_msg - s->init_buf->data;
-
-    if (!BUF_MEM_grow_clean(s->init_buf, (int)size))
-        return 0;
-
-    if (size < msg_offset)
-        return 0;
-
-    s->init_msg = s->init_buf->data + msg_offset;
-
-    return 1;
+  size_t msg_offset = (char *)s->init_msg - s->init_buf->data;
+  if (!BUF_MEM_grow_clean(s->init_buf, (int)size)) {
+    return 0;
+  }
+  if (size < msg_offset) {
+    return 0;
+  }
+  s->init_msg = s->init_buf->data + msg_offset;
+  return 1;
 }
 
 /*
@@ -550,161 +533,198 @@ static int grow_init_buf(SSL *s, size_t size) {
  * control returns to the calling application. When this function is recalled we
  * will resume in the same state where we left off.
  */
-static SUB_STATE_RETURN read_state_machine(SSL *s)
-{
-    OSSL_STATEM *st = &s->statem;
-    int ret, mt;
-    size_t len = 0;
-    int (*transition) (SSL *s, int mt);
-    PACKET pkt;
-    MSG_PROCESS_RETURN(*process_message) (SSL *s, PACKET *pkt);
-    WORK_STATE(*post_process_message) (SSL *s, WORK_STATE wst);
-    size_t (*max_message_size) (SSL *s);
-    void (*cb) (const SSL *ssl, int type, int val) = NULL;
-
-    cb = get_callback(s);
-
-    if (s->server) {
-        transition = ossl_statem_server_read_transition;
-        process_message = ossl_statem_server_process_message;
-        max_message_size = ossl_statem_server_max_message_size;
-        post_process_message = ossl_statem_server_post_process_message;
-    } else {
-        transition = ossl_statem_client_read_transition;
-        process_message = ossl_statem_client_process_message;
-        max_message_size = ossl_statem_client_max_message_size;
-        post_process_message = ossl_statem_client_post_process_message;
+SUB_STATE_RETURN sslData::processReadStateHeader(std::stringstream *commentsOnError) {
+  /* Get the state the peer wants to move to */
+  int ret, mt;
+  size_t len = 0;
+  if (SSL_IS_DTLS(this)) {
+    /*
+     * In DTLS we get the whole message in one go - header and body
+     */
+    ret = dtls_get_message(this, &mt, &len);
+  } else {
+    ret = tls_get_message_header(this, &mt);
+  }
+  if (ret == 0) {
+    /* Could be non-blocking IO */
+    return SUB_STATE_ERROR;
+  }
+  /* Notify callback of an impending state change */
+  if (this->server) {
+    this->callBackStandard(SSL_CB_ACCEPT_LOOP, 1);
+  } else {
+    this->callBackStandard(SSL_CB_CONNECT_LOOP, 1);
+  }
+  /*
+   * Validate that we are allowed to move to the new state and move
+   * to that state if so
+   */
+  if (!this->ReadTransition(mt)) {
+    return SUB_STATE_ERROR;
+  }
+  if (this->s3->tmp.message_size > this->MaxReadMessageSize()) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Message size exceeds maximum.\n";
     }
-
-    if (st->read_state_first_init) {
-        s->first_packet = 1;
-        st->read_state_first_init = 0;
+    this->SetError();
+    return SUB_STATE_ERROR;
+  }
+  /* dtls_get_message already did this */
+  if (
+    !SSL_IS_DTLS(this) &&
+    this->s3->tmp.message_size > 0 &&
+    !grow_init_buf(this, this->s3->tmp.message_size + SSL3_HM_HEADER_LENGTH)
+  ) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Fatal memory error: failed to grow buffer.\n";
     }
+    this->SetError();
+    return SUB_STATE_ERROR;
+  }
+  return SUB_STATE_FALL_THROUGH;
+}
 
-    while (1) {
-        switch (st->read_state) {
-        case READ_STATE_HEADER:
-            /* Get the state the peer wants to move to */
-            if (SSL_IS_DTLS(s)) {
-                /*
-                 * In DTLS we get the whole message in one go - header and body
-                 */
-                ret = dtls_get_message(s, &mt, &len);
-            } else {
-                ret = tls_get_message_header(s, &mt);
-            }
+void sslData::callBackStandard(int argument1, int argument2) {
+  if (this->info_callback != NULL) {
+    this->info_callback(this, argument1, argument2);
+    return;
+  }
+  if (this->ctx != 0) {
+    if (this->ctx->info_callback != NULL) {
+      this->ctx->info_callback(this, argument1, argument2);
+      return;
+    }
+  }
+}
 
-            if (ret == 0) {
-                /* Could be non-blocking IO */
-                return SUB_STATE_ERROR;
-            }
+WRITE_TRAN sslData::WriteTransition() {
+  if (this->server) {
+    return ossl_statem_server_write_transition(this);
+  } else {
+    return ossl_statem_client_write_transition(this);
+  }
+}
 
-            if (cb != NULL) {
-                /* Notify callback of an impending state change */
-                if (s->server)
-                    cb(s, SSL_CB_ACCEPT_LOOP, 1);
-                else
-                    cb(s, SSL_CB_CONNECT_LOOP, 1);
-            }
-            /*
-             * Validate that we are allowed to move to the new state and move
-             * to that state if so
-             */
-            if (!transition(s, mt))
-                return SUB_STATE_ERROR;
+int sslData::ReadTransition(int mt) {
+  if (this->server) {
+    return ossl_statem_server_read_transition(this, mt);
+  } else {
+    return ossl_statem_client_read_transition(this, mt);
+  }
+}
 
-            if (s->s3->tmp.message_size > max_message_size(s)) {
-                SSLfatal(s, SSL_AD_ILLEGAL_PARAMETER, SSL_F_READ_STATE_MACHINE,
-                         SSL_R_EXCESSIVE_MESSAGE_SIZE);
-                return SUB_STATE_ERROR;
-            }
+size_t sslData::MaxReadMessageSize() {
+  if (this->server) {
+    return ossl_statem_server_max_message_size(this);
+  } else {
+    return ossl_statem_client_max_message_size(this);
+  }
+}
 
-            /* dtls_get_message already did this */
-            if (!SSL_IS_DTLS(s)
-                    && s->s3->tmp.message_size > 0
-                    && !grow_init_buf(s, s->s3->tmp.message_size
-                                         + SSL3_HM_HEADER_LENGTH)) {
-                SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_READ_STATE_MACHINE,
-                         ERR_R_BUF_LIB);
-                return SUB_STATE_ERROR;
-            }
+SUB_STATE_RETURN sslData::readStateMachine(std::stringstream* commentsOnError) {
+  OSSL_STATEM *st = &this->statem;
+  int ret;
+  size_t len = 0;
+  PACKET pkt;
+  MSG_PROCESS_RETURN(*process_message) (SSL *s, PACKET *pkt);
+  WORK_STATE(*post_process_message) (SSL *s, WORK_STATE wst);
 
-            st->read_state = READ_STATE_BODY;
-            /* Fall through */
+  if (this->server) {
+    process_message = ossl_statem_server_process_message;
+    post_process_message = ossl_statem_server_post_process_message;
+  } else {
+    process_message = ossl_statem_client_process_message;
+    post_process_message = ossl_statem_client_post_process_message;
+  }
 
+  if (st->read_state_first_init) {
+    this->first_packet = 1;
+    st->read_state_first_init = 0;
+  }
+  SUB_STATE_RETURN intermediateState = SUB_STATE_FALL_THROUGH;
+  while (true) {
+    switch (st->read_state) {
+      case READ_STATE_HEADER:
+        intermediateState = this->processReadStateHeader(commentsOnError);
+        if (intermediateState != SUB_STATE_FALL_THROUGH) {
+          return intermediateState;
+        }
+        st->read_state = READ_STATE_BODY;
+        /* Fall through */
         case READ_STATE_BODY:
-            if (!SSL_IS_DTLS(s)) {
-                /* We already got this above for DTLS */
-                ret = tls_get_message_body(s, &len);
-                if (ret == 0) {
-                    /* Could be non-blocking IO */
-                    return SUB_STATE_ERROR;
-                }
+          if (!SSL_IS_DTLS(this)) {
+            /* We already got this above for DTLS */
+            ret = tls_get_message_body(this, &len);
+            if (ret == 0) {
+              /* Could be non-blocking IO */
+              return SUB_STATE_ERROR;
             }
-
-            s->first_packet = 0;
-            if (!PACKET_buf_init(&pkt, (unsigned char*) s->init_msg, len)) {
-                SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_READ_STATE_MACHINE,
-                         ERR_R_INTERNAL_ERROR);
-                return SUB_STATE_ERROR;
+          }
+          this->first_packet = 0;
+          if (!PACKET_buf_init(&pkt, (unsigned char*) this->init_msg, len)) {
+            if (commentsOnError != 0) {
+              *commentsOnError << "Failed to initialize packet buffer.\n";
             }
-            ret = process_message(s, &pkt);
-
-            /* Discard the packet data */
-            s->init_num = 0;
-
-            switch (ret) {
+            this->SetError();
+            return SUB_STATE_ERROR;
+          }
+          ret = process_message(this, &pkt);
+          /* Discard the packet data */
+          this->init_num = 0;
+          switch (ret) {
             case MSG_PROCESS_ERROR:
-                check_fatal(s, SSL_F_READ_STATE_MACHINE);
-                return SUB_STATE_ERROR;
+              if (commentsOnError != 0) {
+                *commentsOnError << "Failed to process message.\n";
+              }
+              this->SetError();
+              return SUB_STATE_ERROR;
 
             case MSG_PROCESS_FINISHED_READING:
-                if (SSL_IS_DTLS(s)) {
-                    dtls1_stop_timer(s);
-                }
-                return SUB_STATE_FINISHED;
-
+              if (SSL_IS_DTLS(this)) {
+                dtls1_stop_timer(this);
+              }
+              return SUB_STATE_FINISHED;
             case MSG_PROCESS_CONTINUE_PROCESSING:
-                st->read_state = READ_STATE_POST_PROCESS;
-                st->read_state_work = WORK_MORE_A;
-                break;
-
+              st->read_state = READ_STATE_POST_PROCESS;
+              st->read_state_work = WORK_MORE_A;
+              break;
             default:
-                st->read_state = READ_STATE_HEADER;
-                break;
-            }
-            break;
-
+              st->read_state = READ_STATE_HEADER;
+              break;
+          }
+          break;
         case READ_STATE_POST_PROCESS:
-            st->read_state_work = post_process_message(s, st->read_state_work);
+          st->read_state_work = post_process_message(this, st->read_state_work);
             switch (st->read_state_work) {
             case WORK_ERROR:
-                check_fatal(s, SSL_F_READ_STATE_MACHINE);
-                /* Fall through */
+              if (commentsOnError != 0) {
+                *commentsOnError << "Error during read state work.\n";
+              }
+              this->SetError();
+              /* Fall through */
             case WORK_MORE_A:
             case WORK_MORE_B:
             case WORK_MORE_C:
-                return SUB_STATE_ERROR;
-
+              return SUB_STATE_ERROR;
             case WORK_FINISHED_CONTINUE:
-                st->read_state = READ_STATE_HEADER;
-                break;
-
+              st->read_state = READ_STATE_HEADER;
+              break;
             case WORK_FINISHED_STOP:
-                if (SSL_IS_DTLS(s)) {
-                    dtls1_stop_timer(s);
-                }
-                return SUB_STATE_FINISHED;
+              if (SSL_IS_DTLS(this)) {
+                dtls1_stop_timer(this);
+              }
+              return SUB_STATE_FINISHED;
             }
             break;
-
         default:
-            /* Shouldn't happen */
-            SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_READ_STATE_MACHINE,
-                     ERR_R_INTERNAL_ERROR);
-            return SUB_STATE_ERROR;
-        }
+          if (commentsOnError != 0) {
+            *commentsOnError << "Undocumented ssl error, this is probably a programming bug.\n";
+          }
+          this->SetError();
+          /* Shouldn't happen */
+          return SUB_STATE_ERROR;
     }
+  }
 }
 
 /*
@@ -764,11 +784,19 @@ void init_write_state_machine(SSL *s)
  * message has been completed. As for WRITE_STATE_PRE_WORK this could also
  * result in an NBIO event.
  */
-SUB_STATE_RETURN sslData::write_state_machine(std::stringstream* commentsOnError) {
+
+WORK_STATE sslData::PreWriteWork(WORK_STATE wst, std::stringstream *commentsOnError) {
+  if (this->server) {
+    return ossl_statem_server_pre_work(this, wst, commentsOnError);
+  } else {
+    return ossl_statem_client_pre_work(this, wst, commentsOnError);
+  }
+
+}
+
+SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) {
   OSSL_STATEM *st = &this->statem;
   int ret;
-  WRITE_TRAN(*transition) (SSL *s);
-  WORK_STATE(*pre_work) (SSL *s, WORK_STATE wst, std::stringstream* commentsOnError);
   WORK_STATE(*post_work) (SSL *s, WORK_STATE wst);
   int (*get_construct_message_f) (
     SSL *s,
@@ -777,41 +805,33 @@ SUB_STATE_RETURN sslData::write_state_machine(std::stringstream* commentsOnError
     int *mt,
     std::stringstream* _commentsOnError
   );
-  void (*callBack) (const SSL *ssl, int type, int val) = NULL;
   int (*confunc) (SSL *s, WPACKET *pkt);
   int mt;
   WPACKET pkt;
-  callBack = get_callback(this);
+
   if (this->server) {
-    transition = ossl_statem_server_write_transition;
-    pre_work = ossl_statem_server_pre_work;
     post_work = ossl_statem_server_post_work;
     get_construct_message_f = ossl_statem_server_construct_message;
   } else {
-    transition = ossl_statem_client_write_transition;
-    pre_work = ossl_statem_client_pre_work;
     post_work = ossl_statem_client_post_work;
     get_construct_message_f = ossl_statem_client_construct_message;
   }
   while (true) {
     switch (st->write_state) {
       case WRITE_STATE_TRANSITION:
-        if (callBack != NULL) {
-          /* Notify callback of an impending state change */
-          if (this->server) {
-            callBack(this, SSL_CB_ACCEPT_LOOP, 1);
-          } else {
-            callBack(this, SSL_CB_CONNECT_LOOP, 1);
-          }
+        /* Notify callback of an impending state change */
+        if (this->server) {
+          this->callBackStandard(SSL_CB_ACCEPT_LOOP, 1);
+        } else {
+          this->callBackStandard(SSL_CB_CONNECT_LOOP, 1);
         }
-      switch (transition(this)) {
+      switch (this->WriteTransition()) {
         case WRITE_TRAN_CONTINUE:
           st->write_state = WRITE_STATE_PRE_WORK;
           st->write_state_work = WORK_MORE_A;
           break;
 
         case WRITE_TRAN_FINISHED:
-          this->SetError();
           return SUB_STATE_FINISHED;
           break;
         case WRITE_TRAN_ERROR:
@@ -819,11 +839,18 @@ SUB_STATE_RETURN sslData::write_state_machine(std::stringstream* commentsOnError
             *commentsOnError << "Write transition error in write_state_machine.\n";
           }
           this->SetError();
-        return SUB_STATE_ERROR;
+          return SUB_STATE_ERROR;
+        default:
+          if (commentsOnError != 0) {
+            *commentsOnError << "Unexpected write transition value.\n";
+          }
+          this->SetError();
+          return SUB_STATE_ERROR;
       }
       break;
     case WRITE_STATE_PRE_WORK:
-      switch (st->write_state_work = pre_work(this, st->write_state_work, commentsOnError)) {
+      st->write_state_work = this->PreWriteWork(st->write_state_work, commentsOnError);
+      switch (st->write_state_work) {
         case WORK_ERROR:
           if (commentsOnError != 0) {
             *commentsOnError << "Write machine: pre_work returned work error.\n";
@@ -933,15 +960,14 @@ SUB_STATE_RETURN sslData::write_state_machine(std::stringstream* commentsOnError
 /*
  * Flush the write BIO
  */
-int statem_flush(SSL *s)
-{
-    s->rwstate = SSL_WRITING;
-    if (BIO_flush(s->wbio) <= 0) {
-        return 0;
-    }
-    s->rwstate = SSL_NOTHING;
+int statem_flush(SSL *s) {
+  s->rwstate = SSL_WRITING;
+  if (BIO_flush(s->wbio) <= 0) {
+    return 0;
+  }
+  s->rwstate = SSL_NOTHING;
 
-    return 1;
+  return 1;
 }
 
 /*

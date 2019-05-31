@@ -1097,12 +1097,14 @@ struct ssl_ctx_st {
 
 /* Sub state machine return values */
 typedef enum {
-    /* Something bad happened or NBIO */
-    SUB_STATE_ERROR,
-    /* Sub state finished go to the next sub state */
-    SUB_STATE_FINISHED,
-    /* Sub state finished and handshake was completed */
-    SUB_STATE_END_HANDSHAKE
+  /* Something bad happened or NBIO */
+  SUB_STATE_ERROR,
+  /* Sub state finished go to the next sub state */
+  SUB_STATE_FINISHED,
+  /* Sub state finished and handshake was completed */
+  SUB_STATE_END_HANDSHAKE,
+  /* Internal state used to fall through swith cases */
+  SUB_STATE_FALL_THROUGH,
 } SUB_STATE_RETURN;
 
 struct sslData {
@@ -1508,7 +1510,18 @@ struct sslData {
     SSL_async_callback_fn async_cb;
     void *async_cb_arg;
 
-  SUB_STATE_RETURN write_state_machine(std::stringstream *commentsOnError);
+  SUB_STATE_RETURN readStateMachine(std::stringstream* commentsOnError);
+  SUB_STATE_RETURN writeStateMachine(std::stringstream* commentsOnError);
+
+  WORK_STATE PreWriteWork(WORK_STATE wst, std::stringstream* commentsOnError);
+
+
+  void callBackStandard(int argument1, int argument2);
+  int ReadTransition(int mt);
+  WRITE_TRAN WriteTransition();
+  size_t MaxReadMessageSize();
+
+  SUB_STATE_RETURN processReadStateHeader(std::stringstream* commentsOnError);
   int stateMachine(int server, std::stringstream *commentsOnError);
   int stateMachineCleanUp(buf_mem_st *buf, int ret);
   bool isFirstHandshake();

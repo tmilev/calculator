@@ -196,12 +196,12 @@ void ossl_statem_check_finish_init(SSL *s, int sending) {
     crash << "Null ssl object not allowed. " << crash;
   }
   if (sending == - 1) {
-    stOutput << "DEBUG: got to here. at finish init!!! ... ";
+    //stOutput << "DEBUG: got to here. at finish init!!! ... ";
     if (s->statem.hand_state == TLS_ST_PENDING_EARLY_DATA_END || s->statem.hand_state == TLS_ST_EARLY_DATA) {
-      stOutput << "DEBUG: got to here at hand_state. ";
+      //stOutput << "DEBUG: got to here at hand_state. ";
       ossl_statem_set_in_init(s, 1);
       if (s->early_data_state == SSL_EARLY_DATA_WRITE_RETRY) {
-        stOutput << "DEBUG: got to here. pt3 ";
+        //stOutput << "DEBUG: got to here. pt3 ";
         /*
          * SSL_connect() or SSL_do_handshake() has been called directly.
          * We don't allow any more writing of early data.
@@ -292,7 +292,7 @@ bool SSL_IS_FIRST_HANDSHAKE(sslData* inputPointer) {
  * <=0: NBIO or error
  */
 int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
-  stOutput << "DEBUG: state_machine running ... ";
+  //stOutput << "DEBUG: state_machine running ... ";
   buf_mem_st* buf = NULL;
   OSSL_STATEM *st = &this->statem;
   int ssret;
@@ -315,11 +315,11 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
       if (commentsOnError != 0) {
         *commentsOnError << "SSL clear failed. ";
       }
-      stOutput << "DEBUG: ssl clear failed. ";
+      //stOutput << "DEBUG: ssl clear failed. ";
       return - 1;
     }
   }
-  stOutput << "DEBUG: state machine, here I am. ";
+  //stOutput << "DEBUG: state machine, here I am. ";
   /* Initialise state machine */
   if (st->state == MSG_FLOW_UNINITED || st->state == MSG_FLOW_FINISHED) {
     if (st->state == MSG_FLOW_UNINITED) {
@@ -801,19 +801,20 @@ WORK_STATE sslData::PreWriteWork(WORK_STATE wst, std::stringstream *commentsOnEr
 }
 
 int sslData::getConstructMessageFunction(
-  WPACKET* pkt, int (**confunc)(SSL *, WPACKET *), int* mt, std::stringstream* _commentsOnError
+  WPACKET* pkt,
+  ConstructMessageFunction& outputFunction, int* mt, std::stringstream* commentsOnError
 ) {
   if (this->server) {
-    return ossl_statem_server_construct_message(this, pkt, confunc, mt, _commentsOnError);
+    return this->ossl_statem_server_construct_message(pkt, outputFunction, mt, commentsOnError);
   } else {
-    return ossl_statem_client_construct_message(this, pkt, confunc, mt, _commentsOnError);
+    return ossl_statem_client_construct_message(this, pkt, outputFunction, mt, commentsOnError);
   }
 }
 
 SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) {
   OSSL_STATEM *st = &this->statem;
   int ret;
-  int (*confunc) (SSL *s, WPACKET *pkt);
+  ConstructMessageFunction messageConstructor;
   int mt;
   WPACKET pkt;
 
@@ -870,7 +871,7 @@ SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) 
         case WORK_FINISHED_STOP:
           return SUB_STATE_END_HANDSHAKE;
       }
-      if (!this->getConstructMessageFunction(&pkt, &confunc, &mt, commentsOnError)) {
+      if (!this->getConstructMessageFunction(&pkt, messageConstructor, &mt, commentsOnError)) {
         /* SSLfatal() already called */
         if (commentsOnError != 0) {
           *commentsOnError << "Get construct message failed.\n";
@@ -892,11 +893,11 @@ SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) 
         this->SetError();
         return SUB_STATE_ERROR;
       }
-      if (confunc != NULL) {
-        if (!confunc(this, &pkt)) {
+      if (messageConstructor.theFunction != NULL) {
+        if (!messageConstructor.theFunction(this, &pkt, commentsOnError)) {
           WPACKET_cleanup(&pkt);
           if (commentsOnError != 0) {
-            *commentsOnError << "Error: confunc failed.\n";
+            *commentsOnError << "Error: message constructor: " << messageConstructor.name << " failed.\n";
           }
           this->SetError();
           return SUB_STATE_ERROR;

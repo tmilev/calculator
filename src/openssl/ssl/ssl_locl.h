@@ -1107,6 +1107,8 @@ typedef enum {
   SUB_STATE_FALL_THROUGH,
 } SUB_STATE_RETURN;
 
+
+struct ConstructMessageFunction;
 struct sslData {
     /*
      * protocol version (one of SSL2_VERSION, SSL3_VERSION, TLS1_VERSION,
@@ -1529,11 +1531,16 @@ struct sslData {
   bool isDTLS();
   void SetError();
 
-  int getConstructMessageFunction(
-    WPACKET *pkt,
-    int (**confunc) (SSL *s, WPACKET *pkt),
+  int getConstructMessageFunction(WPACKET *pkt,
+    ConstructMessageFunction &outputFunction,
     int *mt,
-    std::stringstream* _commentsOnError
+    std::stringstream* commentsOnError
+  );
+  int ossl_statem_server_construct_message(
+    WPACKET *pkt,
+    ConstructMessageFunction& confunc,
+    int *mt,
+    std::stringstream* commentsOnError
   );
 };
 

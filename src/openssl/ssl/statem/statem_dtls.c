@@ -911,7 +911,7 @@ static int dtls_get_reassembled_message(SSL *s, int *errtype, size_t *len)
  * ssl->session->read_compression       assign
  * ssl->session->read_hash              assign
  */
-int dtls_construct_change_cipher_spec(SSL *s, WPACKET *pkt)
+int dtls_construct_change_cipher_spec(SSL *s, WPACKET *pkt, std::stringstream* commentsOnFailure)
 {
     if (s->version == DTLS1_BAD_VER) {
         s->d1->next_handshake_write_seq++;

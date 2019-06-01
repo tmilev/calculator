@@ -50,7 +50,11 @@ typedef enum {
     MSG_PROCESS_CONTINUE_READING
 } MSG_PROCESS_RETURN;
 
-typedef int (*confunc_f) (SSL *s, WPACKET *pkt);
+struct ConstructMessageFunction {
+  std::string name;
+  int (*theFunction) (sslData *s, WPACKET *pkt, std::stringstream* commentsOnError);
+  ConstructMessageFunction();
+};
 
 int ssl3_take_mac(SSL *s);
 int check_in_list(SSL *s, uint16_t group_id, const uint16_t *groups,
@@ -74,7 +78,7 @@ WORK_STATE ossl_statem_client_post_work(SSL *s, WORK_STATE wst);
 int ossl_statem_client_construct_message(
   SSL *s,
   WPACKET *pkt,
-  confunc_f *confunc,
+  ConstructMessageFunction& outputFunction,
   int *mt,
   std::stringstream* commentsOnError
 );
@@ -89,8 +93,10 @@ int ossl_statem_server_read_transition(SSL *s, int mt);
 WRITE_TRAN ossl_statem_server_write_transition(SSL *s);
 WORK_STATE ossl_statem_server_pre_work(SSL *s, WORK_STATE wst, std::stringstream *commentsOnError);
 WORK_STATE ossl_statem_server_post_work(SSL *s, WORK_STATE wst);
-int ossl_statem_server_construct_message(SSL *s, WPACKET *pkt,
-                                         confunc_f *confunc, int *mt, std::stringstream *commentsOnError);
+int ossl_statem_server_construct_message(
+  SSL *s, WPACKET *pkt,
+  ConstructMessageFunction& confunc, int *mt, std::stringstream *commentsOnError
+);
 size_t ossl_statem_server_max_message_size(SSL *s);
 MSG_PROCESS_RETURN ossl_statem_server_process_message(SSL *s, PACKET *pkt);
 WORK_STATE ossl_statem_server_post_process_message(SSL *s, WORK_STATE wst);
@@ -104,11 +110,11 @@ __owur int dtls_get_message(SSL *s, int *mt, size_t *len);
 __owur int tls_process_initial_server_flight(SSL *s);
 __owur MSG_PROCESS_RETURN tls_process_change_cipher_spec(SSL *s, PACKET *pkt);
 __owur MSG_PROCESS_RETURN tls_process_finished(SSL *s, PACKET *pkt);
-__owur int tls_construct_change_cipher_spec(SSL *s, WPACKET *pkt);
-__owur int dtls_construct_change_cipher_spec(SSL *s, WPACKET *pkt);
+__owur int tls_construct_change_cipher_spec(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
+__owur int dtls_construct_change_cipher_spec(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
 
-__owur int tls_construct_finished(SSL *s, WPACKET *pkt);
-__owur int tls_construct_key_update(SSL *s, WPACKET *pkt);
+__owur int tls_construct_finished(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
+__owur int tls_construct_key_update(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
 __owur MSG_PROCESS_RETURN tls_process_key_update(SSL *s, PACKET *pkt);
 __owur WORK_STATE tls_finish_handshake(
   SSL *s, WORK_STATE wst, int clearbufs, int stop, std::stringstream *commentsOnError
@@ -116,40 +122,40 @@ __owur WORK_STATE tls_finish_handshake(
 __owur WORK_STATE dtls_wait_for_dry(SSL *s);
 
 /* some client-only functions */
-__owur int tls_construct_client_hello(SSL *s, WPACKET *pkt);
+__owur int tls_construct_client_hello(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
 __owur MSG_PROCESS_RETURN tls_process_server_hello(SSL *s, PACKET *pkt);
 __owur MSG_PROCESS_RETURN tls_process_certificate_request(SSL *s, PACKET *pkt);
 __owur MSG_PROCESS_RETURN tls_process_new_session_ticket(SSL *s, PACKET *pkt);
 __owur int tls_process_cert_status_body(SSL *s, PACKET *pkt);
 __owur MSG_PROCESS_RETURN tls_process_cert_status(SSL *s, PACKET *pkt);
 __owur MSG_PROCESS_RETURN tls_process_server_done(SSL *s, PACKET *pkt);
-__owur int tls_construct_cert_verify(SSL *s, WPACKET *pkt);
+__owur int tls_construct_cert_verify(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
 __owur WORK_STATE tls_prepare_client_certificate(SSL *s, WORK_STATE wst);
-__owur int tls_construct_client_certificate(SSL *s, WPACKET *pkt);
+__owur int tls_construct_client_certificate(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
 __owur int ssl_do_client_cert_cb(SSL *s, X509 **px509, EVP_PKEY **ppkey);
-__owur int tls_construct_client_key_exchange(SSL *s, WPACKET *pkt);
+__owur int tls_construct_client_key_exchange(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
 __owur int tls_client_key_exchange_post_work(SSL *s);
 __owur int tls_construct_cert_status_body(SSL *s, WPACKET *pkt);
-__owur int tls_construct_cert_status(SSL *s, WPACKET *pkt);
+__owur int tls_construct_cert_status(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
 __owur MSG_PROCESS_RETURN tls_process_key_exchange(SSL *s, PACKET *pkt);
 __owur MSG_PROCESS_RETURN tls_process_server_certificate(SSL *s, PACKET *pkt);
 __owur int ssl3_check_cert_and_algorithm(SSL *s);
 #ifndef OPENSSL_NO_NEXTPROTONEG
-__owur int tls_construct_next_proto(SSL *s, WPACKET *pkt);
+__owur int tls_construct_next_proto(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
 #endif
 __owur MSG_PROCESS_RETURN tls_process_hello_req(SSL *s, PACKET *pkt);
 __owur MSG_PROCESS_RETURN dtls_process_hello_verify(SSL *s, PACKET *pkt);
-__owur int tls_construct_end_of_early_data(SSL *s, WPACKET *pkt);
+__owur int tls_construct_end_of_early_data(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
 
 /* some server-only functions */
 __owur MSG_PROCESS_RETURN tls_process_client_hello(SSL *s, PACKET *pkt);
 __owur WORK_STATE tls_post_process_client_hello(SSL *s, WORK_STATE wst);
-__owur int tls_construct_server_hello(SSL *s, WPACKET *pkt);
-__owur int dtls_construct_hello_verify_request(SSL *s, WPACKET *pkt);
-__owur int tls_construct_server_certificate(SSL *s, WPACKET *pkt);
-__owur int tls_construct_server_key_exchange(SSL *s, WPACKET *pkt);
-__owur int tls_construct_certificate_request(SSL *s, WPACKET *pkt);
-__owur int tls_construct_server_done(SSL *s, WPACKET *pkt);
+__owur int tls_construct_server_hello(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
+__owur int dtls_construct_hello_verify_request(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
+__owur int tls_construct_server_certificate(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
+__owur int tls_construct_server_key_exchange(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
+__owur int tls_construct_certificate_request(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
+__owur int tls_construct_server_done(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
 __owur MSG_PROCESS_RETURN tls_process_client_certificate(SSL *s, PACKET *pkt);
 __owur MSG_PROCESS_RETURN tls_process_client_key_exchange(SSL *s, PACKET *pkt);
 __owur WORK_STATE tls_post_process_client_key_exchange(SSL *s, WORK_STATE wst);
@@ -157,7 +163,7 @@ __owur MSG_PROCESS_RETURN tls_process_cert_verify(SSL *s, PACKET *pkt);
 #ifndef OPENSSL_NO_NEXTPROTONEG
 __owur MSG_PROCESS_RETURN tls_process_next_proto(SSL *s, PACKET *pkt);
 #endif
-__owur int tls_construct_new_session_ticket(SSL *s, WPACKET *pkt);
+__owur int tls_construct_new_session_ticket(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure);
 MSG_PROCESS_RETURN tls_process_end_of_early_data(SSL *s, PACKET *pkt);
 
 

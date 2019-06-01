@@ -27,7 +27,7 @@
 
 #define TICKET_NONCE_SIZE       8
 
-static int tls_construct_encrypted_extensions(SSL *s, WPACKET *pkt);
+static int tls_construct_encrypted_extensions(SSL *s, WPACKET *pkt, std::stringstream* commentsOnFailure);
 
 /*
  * ossl_statem_server13_read_transition() encapsulates the logic for the allowed
@@ -997,104 +997,103 @@ WORK_STATE ossl_statem_server_post_work(SSL *s, WORK_STATE wst)
  *   1: Success
  *   0: Error
  */
-int ossl_statem_server_construct_message(
-  SSL *s,
+int sslData::ossl_statem_server_construct_message(
   WPACKET *pkt,
-  confunc_f *confunc,
+  ConstructMessageFunction& outputFunction,
   int *mt,
   std::stringstream* commentsOnError
 ) {
-    OSSL_STATEM *st = &s->statem;
-
-    switch (st->hand_state) {
+  OSSL_STATEM *st = &this->statem;
+  switch (st->hand_state) {
     default:
         /* Shouldn't happen */
-        SSLfatal(s, SSL_AD_INTERNAL_ERROR,
-                 SSL_F_OSSL_STATEM_SERVER_CONSTRUCT_MESSAGE,
-                 SSL_R_BAD_HANDSHAKE_STATE);
-        return 0;
-
+      if (commentsOnError != 0) {
+        *commentsOnError << "Uknown handshake state.\n";
+      }
+      this->SetError();
+      return 0;
     case TLS_ST_SW_CHANGE:
-        if (SSL_IS_DTLS(s))
-            *confunc = dtls_construct_change_cipher_spec;
-        else
-            *confunc = tls_construct_change_cipher_spec;
-        *mt = SSL3_MT_CHANGE_CIPHER_SPEC;
-        break;
-
+      if (SSL_IS_DTLS(this)) {
+        outputFunction.name = "DTLS construct change cipher";
+        outputFunction.theFunction = dtls_construct_change_cipher_spec;
+      } else {
+        outputFunction.name = "TLS construct change cipher";
+        outputFunction.theFunction = tls_construct_change_cipher_spec;
+      }
+      *mt = SSL3_MT_CHANGE_CIPHER_SPEC;
+      break;
     case DTLS_ST_SW_HELLO_VERIFY_REQUEST:
-        *confunc = dtls_construct_hello_verify_request;
-        *mt = DTLS1_MT_HELLO_VERIFY_REQUEST;
-        break;
-
+      outputFunction.name = "Construct hello verify request";
+      outputFunction.theFunction = dtls_construct_hello_verify_request;
+      *mt = DTLS1_MT_HELLO_VERIFY_REQUEST;
+      break;
     case TLS_ST_SW_HELLO_REQ:
-        /* No construction function needed */
-        *confunc = NULL;
-        *mt = SSL3_MT_HELLO_REQUEST;
-        break;
-
+      /* No construction function needed */
+      outputFunction.name = "";
+      outputFunction.theFunction = 0;
+      *mt = SSL3_MT_HELLO_REQUEST;
+      break;
     case TLS_ST_SW_SRVR_HELLO:
-        *confunc = tls_construct_server_hello;
-        *mt = SSL3_MT_SERVER_HELLO;
-        break;
-
+      outputFunction.name = "Construct server hello";
+      outputFunction.theFunction = tls_construct_server_hello;
+      *mt = SSL3_MT_SERVER_HELLO;
+      break;
     case TLS_ST_SW_CERT:
-        *confunc = tls_construct_server_certificate;
-        *mt = SSL3_MT_CERTIFICATE;
-        break;
-
+      outputFunction.name = "Construct server certificate";
+      outputFunction.theFunction = tls_construct_server_certificate;
+      *mt = SSL3_MT_CERTIFICATE;
+      break;
     case TLS_ST_SW_CERT_VRFY:
-        *confunc = tls_construct_cert_verify;
-        *mt = SSL3_MT_CERTIFICATE_VERIFY;
-        break;
-
-
+      outputFunction.name = "Construct certificate verify";
+      outputFunction.theFunction = tls_construct_cert_verify;
+      *mt = SSL3_MT_CERTIFICATE_VERIFY;
+      break;
     case TLS_ST_SW_KEY_EXCH:
-        *confunc = tls_construct_server_key_exchange;
-        *mt = SSL3_MT_SERVER_KEY_EXCHANGE;
-        break;
-
+      outputFunction.name = "Construct server key exchange";
+      outputFunction.theFunction = tls_construct_server_key_exchange;
+      *mt = SSL3_MT_SERVER_KEY_EXCHANGE;
+      break;
     case TLS_ST_SW_CERT_REQ:
-        *confunc = tls_construct_certificate_request;
-        *mt = SSL3_MT_CERTIFICATE_REQUEST;
-        break;
-
+      outputFunction.name = "Construct certificate request";
+      outputFunction.theFunction = tls_construct_certificate_request;
+      *mt = SSL3_MT_CERTIFICATE_REQUEST;
+      break;
     case TLS_ST_SW_SRVR_DONE:
-        *confunc = tls_construct_server_done;
-        *mt = SSL3_MT_SERVER_DONE;
-        break;
-
+      outputFunction.name = "Construct server done";
+      outputFunction.theFunction = tls_construct_server_done;
+      *mt = SSL3_MT_SERVER_DONE;
+      break;
     case TLS_ST_SW_SESSION_TICKET:
-        *confunc = tls_construct_new_session_ticket;
-        *mt = SSL3_MT_NEWSESSION_TICKET;
-        break;
-
+      outputFunction.name = "Construct new session ticket";
+      outputFunction.theFunction = tls_construct_new_session_ticket;
+      *mt = SSL3_MT_NEWSESSION_TICKET;
+      break;
     case TLS_ST_SW_CERT_STATUS:
-        *confunc = tls_construct_cert_status;
-        *mt = SSL3_MT_CERTIFICATE_STATUS;
-        break;
-
+      outputFunction.name = "Construct certificate status";
+      outputFunction.theFunction = tls_construct_cert_status;
+      *mt = SSL3_MT_CERTIFICATE_STATUS;
+      break;
     case TLS_ST_SW_FINISHED:
-        *confunc = tls_construct_finished;
-        *mt = SSL3_MT_FINISHED;
-        break;
-
+      outputFunction.name = "Construct finished";
+      outputFunction.theFunction = tls_construct_finished;
+      *mt = SSL3_MT_FINISHED;
+      break;
     case TLS_ST_EARLY_DATA:
-        *confunc = NULL;
-        *mt = SSL3_MT_DUMMY;
-        break;
-
+      outputFunction.name = "Construct early data";
+      outputFunction.theFunction = NULL;
+      *mt = SSL3_MT_DUMMY;
+      break;
     case TLS_ST_SW_ENCRYPTED_EXTENSIONS:
-        *confunc = tls_construct_encrypted_extensions;
-        *mt = SSL3_MT_ENCRYPTED_EXTENSIONS;
-        break;
-
+      outputFunction.name = "Construct encrypted extensions";
+      outputFunction.theFunction = tls_construct_encrypted_extensions;
+      *mt = SSL3_MT_ENCRYPTED_EXTENSIONS;
+      break;
     case TLS_ST_SW_KEY_UPDATE:
-        *confunc = tls_construct_key_update;
-        *mt = SSL3_MT_KEY_UPDATE;
-        break;
+      outputFunction.name = "Construct key update";
+      outputFunction.theFunction = tls_construct_key_update;
+      *mt = SSL3_MT_KEY_UPDATE;
+      break;
     }
-
     return 1;
 }
 
@@ -1279,7 +1278,7 @@ int dtls_raw_hello_verify_request(WPACKET *pkt, unsigned char *cookie,
     return 1;
 }
 
-int dtls_construct_hello_verify_request(SSL *s, WPACKET *pkt)
+int dtls_construct_hello_verify_request(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     unsigned int cookie_leni;
     if (s->ctx->app_gen_cookie_cb == NULL ||
@@ -2351,86 +2350,105 @@ WORK_STATE tls_post_process_client_hello(SSL *s, WORK_STATE wst)
     return WORK_ERROR;
 }
 
-int tls_construct_server_hello(SSL *s, WPACKET *pkt)
-{
-    int compm;
-    size_t sl, len;
-    int version;
-    unsigned char *session_id;
-    int usetls13 = SSL_IS_TLS13(s) || s->hello_retry_request == sslData::SSL_HRR_PENDING;
-
-    version = usetls13 ? TLS1_2_VERSION : s->version;
-    if (!WPACKET_put_bytes_u16(pkt, version)
-               /*
-                * Random stuff. Filling of the server_random takes place in
-                * tls_process_client_hello()
-                */
-            || !WPACKET_memcpy(pkt,
-                               s->hello_retry_request == sslData::SSL_HRR_PENDING
-                                   ? hrrrandom : s->s3->server_random,
-                               SSL3_RANDOM_SIZE)) {
-        SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_SERVER_HELLO,
-                 ERR_R_INTERNAL_ERROR);
-        return 0;
+int tls_construct_server_hello(SSL* s, WPACKET* pkt, std::stringstream* commentsOnFailure) {
+  int compm;
+  size_t sLength = 0;
+  size_t len = 0;
+  int version;
+  unsigned char *session_id;
+  int usetls13 = SSL_IS_TLS13(s) || s->hello_retry_request == sslData::SSL_HRR_PENDING;
+  version = usetls13 ? TLS1_2_VERSION : s->version;
+  std::string versionString = "TLS, unspecified version";
+  if (usetls13) {
+    versionString = "TLS 1.3";
+  }
+  if (!WPACKET_put_bytes_u16(pkt, version)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << versionString << " failed to put bytes.\n";
     }
+    s->SetError();
+    return 0;
+  }
+  /*
+   * Random stuff. Filling of the server_random takes place in
+   * tls_process_client_hello()
+   */
 
-    /*-
-     * There are several cases for the session ID to send
-     * back in the server hello:
-     * - For session reuse from the session cache,
-     *   we send back the old session ID.
-     * - If stateless session reuse (using a session ticket)
-     *   is successful, we send back the client's "session ID"
-     *   (which doesn't actually identify the session).
-     * - If it is a new session, we send back the new
-     *   session ID.
-     * - However, if we want the new session to be single-use,
-     *   we send back a 0-length session ID.
-     * - In TLSv1.3 we echo back the session id sent to us by the client
-     *   regardless
-     * s->hit is non-zero in either case of session reuse,
-     * so the following won't overwrite an ID that we're supposed
-     * to send back.
-     */
-    if (s->session->not_resumable ||
-        (!(s->ctx->session_cache_mode & SSL_SESS_CACHE_SERVER)
-         && !s->hit))
-        s->session->session_id_length = 0;
-
-    if (usetls13) {
-        sl = s->tmp_session_id_len;
-        session_id = s->tmp_session_id;
-    } else {
-        sl = s->session->session_id_length;
-        session_id = s->session->session_id;
+  int memcpyPacketSuccess = WPACKET_memcpy(
+    pkt,
+    s->hello_retry_request == sslData::SSL_HRR_PENDING ? hrrrandom : s->s3->server_random,
+    SSL3_RANDOM_SIZE
+  );
+  if (!memcpyPacketSuccess) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to copy server random bytes.\n";
     }
-
-    if (sl > sizeof(s->session->session_id)) {
-        SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_SERVER_HELLO,
-                 ERR_R_INTERNAL_ERROR);
-        return 0;
+    s->SetError();
+    return 0;
+  }
+  /*-
+   * There are several cases for the session ID to send
+   * back in the server hello:
+   * - For session reuse from the session cache,
+   *   we send back the old session ID.
+   * - If stateless session reuse (using a session ticket)
+   *   is successful, we send back the client's "session ID"
+   *   (which doesn't actually identify the session).
+   * - If it is a new session, we send back the new
+   *   session ID.
+   * - However, if we want the new session to be single-use,
+   *   we send back a 0-length session ID.
+   * - In TLSv1.3 we echo back the session id sent to us by the client
+   *   regardless
+   * s->hit is non-zero in either case of session reuse,
+   * so the following won't overwrite an ID that we're supposed
+   * to send back.
+   */
+  if (s->session->not_resumable || (!(s->ctx->session_cache_mode & SSL_SESS_CACHE_SERVER) && !s->hit)) {
+    s->session->session_id_length = 0;
+  }
+  if (usetls13) {
+    sLength = s->tmp_session_id_len;
+    session_id = s->tmp_session_id;
+  } else {
+    sLength = s->session->session_id_length;
+    session_id = s->session->session_id;
+  }
+  if (sLength > sizeof(s->session->session_id)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Length is greater than size of session id.\n";
     }
-
-    /* set up the compression method */
-#ifdef OPENSSL_NO_COMP
+    s->SetError();
+    return 0;
+  }
+  /* set up the compression method */
+  if (usetls13 || s->s3->tmp.new_compression == NULL) {
     compm = 0;
-#else
-    if (usetls13 || s->s3->tmp.new_compression == NULL)
-        compm = 0;
-    else
-        compm = s->s3->tmp.new_compression->id;
-#endif
-
-    if (!WPACKET_sub_memcpy_u8(pkt, session_id, sl)
-            || !s->method->put_cipher_by_char(s->s3->tmp.new_cipher, pkt, &len)
-            || !WPACKET_put_bytes_u8(pkt, compm)) {
-        SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_SERVER_HELLO,
-                 ERR_R_INTERNAL_ERROR);
-        return 0;
+  } else {
+    compm = s->s3->tmp.new_compression->id;
+  }
+  if (!WPACKET_sub_memcpy_u8(pkt, session_id, sLength)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to copy session id into packet.\n";
     }
-
-    if (!tls_construct_extensions(s, pkt,
-                                  s->hello_retry_request == sslData::SSL_HRR_PENDING
+    s->SetError();
+    return 0;
+  }
+  if (!s->method->put_cipher_by_char(s->s3->tmp.new_cipher, pkt, &len)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to put cipher by char into packet.\n";
+    }
+    s->SetError();
+    return 0;
+  }
+  if (!WPACKET_put_bytes_u8(pkt, compm)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to put bytes u8 into packet.\n";
+    }
+    s->SetError();
+    return 0;
+  }
+  if (!tls_construct_extensions(s, pkt, s->hello_retry_request == sslData::SSL_HRR_PENDING
                                       ? SSL_EXT_TLS1_3_HELLO_RETRY_REQUEST
                                       : (SSL_IS_TLS13(s)
                                           ? SSL_EXT_TLS1_3_SERVER_HELLO
@@ -2463,7 +2481,7 @@ int tls_construct_server_hello(SSL *s, WPACKET *pkt)
     return 1;
 }
 
-int tls_construct_server_done(SSL *s, WPACKET *pkt)
+int tls_construct_server_done(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     if (!s->s3->tmp.cert_request) {
         if (!ssl3_digest_cached_records(s, 0)) {
@@ -2474,7 +2492,7 @@ int tls_construct_server_done(SSL *s, WPACKET *pkt)
     return 1;
 }
 
-int tls_construct_server_key_exchange(SSL *s, WPACKET *pkt)
+int tls_construct_server_key_exchange(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
 #ifndef OPENSSL_NO_DH
     EVP_PKEY *pkdh = NULL;
@@ -2836,7 +2854,7 @@ int tls_construct_server_key_exchange(SSL *s, WPACKET *pkt)
     return 0;
 }
 
-int tls_construct_certificate_request(SSL *s, WPACKET *pkt)
+int tls_construct_certificate_request(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     if (SSL_IS_TLS13(s)) {
         /* Send random context when doing post-handshake auth */
@@ -3778,7 +3796,7 @@ MSG_PROCESS_RETURN tls_process_client_certificate(SSL *s, PACKET *pkt)
     return ret;
 }
 
-int tls_construct_server_certificate(SSL *s, WPACKET *pkt)
+int tls_construct_server_certificate(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     CERT_PKEY *cpk = s->s3->tmp.cert;
 
@@ -4035,7 +4053,7 @@ static int construct_stateful_ticket(SSL *s, WPACKET *pkt, uint32_t age_add,
     return 1;
 }
 
-int tls_construct_new_session_ticket(SSL *s, WPACKET *pkt)
+int tls_construct_new_session_ticket(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     SSL_CTX *tctx = s->session_ctx;
     unsigned char tick_nonce[TICKET_NONCE_SIZE];
@@ -4187,7 +4205,7 @@ int tls_construct_cert_status_body(SSL *s, WPACKET *pkt)
     return 1;
 }
 
-int tls_construct_cert_status(SSL *s, WPACKET *pkt)
+int tls_construct_cert_status(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     if (!tls_construct_cert_status_body(s, pkt)) {
         /* SSLfatal() already called */
@@ -4235,7 +4253,7 @@ MSG_PROCESS_RETURN tls_process_next_proto(SSL *s, PACKET *pkt)
 }
 #endif
 
-static int tls_construct_encrypted_extensions(SSL *s, WPACKET *pkt)
+static int tls_construct_encrypted_extensions(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     if (!tls_construct_extensions(s, pkt, SSL_EXT_TLS1_3_ENCRYPTED_EXTENSIONS,
                                   NULL, 0)) {

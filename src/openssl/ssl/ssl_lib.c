@@ -3697,7 +3697,7 @@ int SSL_do_handshake(SSL *s, std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("SSL_do_handshake");
   int ret = 1;
   SSL_check_initialization(s);
-  stOutput << "DEBUG: running do handshake with: " << s->method->name << ".\n";
+  //stOutput << "DEBUG: running do handshake with: " << s->method->name << ".\n";
   if (s->handshake_func == NULL) {
     if (commentsOnError != 0) {
       *commentsOnError << "Handshake function not initialized.\n";
@@ -3705,20 +3705,20 @@ int SSL_do_handshake(SSL *s, std::stringstream* commentsOnError) {
     return - 1;
   }
   ossl_statem_check_finish_init(s, - 1);
-  stOutput << "DEBUG: renegotiate check ... ";
+  //stOutput << "DEBUG: renegotiate check ... ";
   s->method->ssl_renegotiate_check(s, 0, commentsOnError);
-  stOutput << "DEBUG: renegotiate check done... ";
+  //stOutput << "DEBUG: renegotiate check done... ";
   if (SSL_in_init(s) || SSL_in_before(s)) {
-    if (commentsOnError != 0) {
-      stOutput << "DEBUG: ssl initialized previously.\n";
-    }
+    //if (commentsOnError != 0) {
+    //  stOutput << "DEBUG: ssl initialized previously.\n";
+    //}
     if ((s->mode & SSL_MODE_ASYNC) && ASYNC_get_current_job() == NULL) {
-      stOutput << "DEBUG: YES to async.\n";
+      //stOutput << "DEBUG: YES to async.\n";
       struct ssl_async_args args;
       args.s = s;
       ret = ssl_start_async_job(s, &args, ssl_do_handshake_intern);
     } else {
-      stOutput << "DEBUG: not RUNNING async.\n";
+      //stOutput << "DEBUG: not RUNNING async.\n";
       ret = s->handshake_func(s, commentsOnError);
     }
   }

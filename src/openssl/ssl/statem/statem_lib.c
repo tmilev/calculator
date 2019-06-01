@@ -218,7 +218,7 @@ static int get_cert_verify_tbs_data(SSL *s, unsigned char *tls13tbs,
     return 1;
 }
 
-int tls_construct_cert_verify(SSL *s, WPACKET *pkt)
+int tls_construct_cert_verify(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     EVP_PKEY *pkey = NULL;
     const EVP_MD *md = NULL;
@@ -517,7 +517,7 @@ MSG_PROCESS_RETURN tls_process_cert_verify(SSL *s, PACKET *pkt)
     return ret;
 }
 
-int tls_construct_finished(SSL *s, WPACKET *pkt)
+int tls_construct_finished(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     size_t finish_md_len;
     const char *sender;
@@ -596,7 +596,7 @@ int tls_construct_finished(SSL *s, WPACKET *pkt)
     return 1;
 }
 
-int tls_construct_key_update(SSL *s, WPACKET *pkt)
+int tls_construct_key_update(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     if (!WPACKET_put_bytes_u8(pkt, s->key_update)) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_KEY_UPDATE,
@@ -856,8 +856,7 @@ MSG_PROCESS_RETURN tls_process_finished(SSL *s, PACKET *pkt)
     return MSG_PROCESS_FINISHED_READING;
 }
 
-int tls_construct_change_cipher_spec(SSL *s, WPACKET *pkt)
-{
+int tls_construct_change_cipher_spec(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure) {
     if (!WPACKET_put_bytes_u8(pkt, SSL3_MT_CCS)) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR,
                  SSL_F_TLS_CONSTRUCT_CHANGE_CIPHER_SPEC, ERR_R_INTERNAL_ERROR);

@@ -33,6 +33,10 @@ static int key_exchange_expected(SSL *s);
 static int ssl_cipher_list_to_bytes(SSL *s, STACK_OF(SSL_CIPHER) *sk,
                                     WPACKET *pkt);
 
+ConstructMessageFunction::ConstructMessageFunction() {
+  this->theFunction = 0;
+}
+
 /*
  * Is a CertificateRequest message allowed at the moment or not?
  *
@@ -889,11 +893,10 @@ WORK_STATE ossl_statem_client_post_work(SSL *s, WORK_STATE wst)
  *   0: Error
  */
 int ossl_statem_client_construct_message(
-  SSL *s, WPACKET *pkt, confunc_f *confunc, int *mt, std::stringstream* commentsOnError
+  SSL *s, WPACKET *pkt, ConstructMessageFunction& outputFunction, int *mt, std::stringstream* commentsOnError
 ) {
-    OSSL_STATEM *st = &s->statem;
-
-    switch (st->hand_state) {
+  OSSL_STATEM *st = &s->statem;
+  switch (st->hand_state) {
     default:
         /* Shouldn't happen */
         SSLfatal(s, SSL_AD_INTERNAL_ERROR,
@@ -902,61 +905,66 @@ int ossl_statem_client_construct_message(
         return 0;
 
     case TLS_ST_CW_CHANGE:
-        if (SSL_IS_DTLS(s))
-            *confunc = dtls_construct_change_cipher_spec;
-        else
-            *confunc = tls_construct_change_cipher_spec;
-        *mt = SSL3_MT_CHANGE_CIPHER_SPEC;
-        break;
-
+      if (SSL_IS_DTLS(s)) {
+        outputFunction.name = "DTLS construct change cipher";
+        outputFunction.theFunction = dtls_construct_change_cipher_spec;
+      } else {
+        outputFunction.name = "TLS construct change cipher";
+        outputFunction.theFunction = tls_construct_change_cipher_spec;
+      }
+      *mt = SSL3_MT_CHANGE_CIPHER_SPEC;
+      break;
     case TLS_ST_CW_CLNT_HELLO:
-        *confunc = tls_construct_client_hello;
-        *mt = SSL3_MT_CLIENT_HELLO;
-        break;
+      outputFunction.name = "Construct client hello";
+      outputFunction.theFunction = tls_construct_client_hello;
+      *mt = SSL3_MT_CLIENT_HELLO;
+      break;
 
     case TLS_ST_CW_END_OF_EARLY_DATA:
-        *confunc = tls_construct_end_of_early_data;
-        *mt = SSL3_MT_END_OF_EARLY_DATA;
-        break;
-
+      outputFunction.name = "Construct end of early data";
+      outputFunction.theFunction = tls_construct_end_of_early_data;
+      *mt = SSL3_MT_END_OF_EARLY_DATA;
+      break;
     case TLS_ST_PENDING_EARLY_DATA_END:
-        *confunc = NULL;
-        *mt = SSL3_MT_DUMMY;
-        break;
+      outputFunction.theFunction = NULL;
+      outputFunction.name = "";
+      *mt = SSL3_MT_DUMMY;
+      break;
 
     case TLS_ST_CW_CERT:
-        *confunc = tls_construct_client_certificate;
-        *mt = SSL3_MT_CERTIFICATE;
-        break;
+      outputFunction.name = "Construct client certificate";
+      outputFunction.theFunction = tls_construct_client_certificate;
+      *mt = SSL3_MT_CERTIFICATE;
+      break;
 
     case TLS_ST_CW_KEY_EXCH:
-        *confunc = tls_construct_client_key_exchange;
-        *mt = SSL3_MT_CLIENT_KEY_EXCHANGE;
-        break;
+      outputFunction.name = "Construct client key exchange";
+      outputFunction.theFunction = tls_construct_client_key_exchange;
+      *mt = SSL3_MT_CLIENT_KEY_EXCHANGE;
+      break;
 
     case TLS_ST_CW_CERT_VRFY:
-        *confunc = tls_construct_cert_verify;
-        *mt = SSL3_MT_CERTIFICATE_VERIFY;
-        break;
-
-#if !defined(OPENSSL_NO_NEXTPROTONEG)
+      outputFunction.name = "Construct certificate verification";
+      outputFunction.theFunction = tls_construct_cert_verify;
+      *mt = SSL3_MT_CERTIFICATE_VERIFY;
+      break;
     case TLS_ST_CW_NEXT_PROTO:
-        *confunc = tls_construct_next_proto;
-        *mt = SSL3_MT_NEXT_PROTO;
-        break;
-#endif
+      outputFunction.name = "Construct next proto";
+      outputFunction.theFunction = tls_construct_next_proto;
+      *mt = SSL3_MT_NEXT_PROTO;
+      break;
     case TLS_ST_CW_FINISHED:
-        *confunc = tls_construct_finished;
-        *mt = SSL3_MT_FINISHED;
-        break;
-
+      outputFunction.name = "Construct finished";
+      outputFunction.theFunction = tls_construct_finished;
+      *mt = SSL3_MT_FINISHED;
+      break;
     case TLS_ST_CW_KEY_UPDATE:
-        *confunc = tls_construct_key_update;
-        *mt = SSL3_MT_KEY_UPDATE;
-        break;
-    }
-
-    return 1;
+      outputFunction.name = "Construct key update";
+      outputFunction.theFunction = tls_construct_key_update;
+      *mt = SSL3_MT_KEY_UPDATE;
+      break;
+  }
+  return 1;
 }
 
 /*
@@ -1101,7 +1109,7 @@ WORK_STATE ossl_statem_client_post_process_message(SSL *s, WORK_STATE wst)
     }
 }
 
-int tls_construct_client_hello(SSL *s, WPACKET *pkt)
+int tls_construct_client_hello(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     unsigned char *p;
     size_t sess_id_len;
@@ -3313,7 +3321,7 @@ static int tls_construct_cke_srp(SSL *s, WPACKET *pkt)
 #endif
 }
 
-int tls_construct_client_key_exchange(SSL *s, WPACKET *pkt)
+int tls_construct_client_key_exchange(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     unsigned long alg_k;
 
@@ -3535,7 +3543,7 @@ WORK_STATE tls_prepare_client_certificate(SSL *s, WORK_STATE wst)
     return WORK_ERROR;
 }
 
-int tls_construct_client_certificate(SSL *s, WPACKET *pkt)
+int tls_construct_client_certificate(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     if (SSL_IS_TLS13(s)) {
         if (s->pha_context == NULL) {
@@ -3627,24 +3635,19 @@ int ssl3_check_cert_and_algorithm(SSL *s)
 }
 
 #ifndef OPENSSL_NO_NEXTPROTONEG
-int tls_construct_next_proto(SSL *s, WPACKET *pkt)
-{
-    size_t len, padding_len;
-    unsigned char *padding = NULL;
+int tls_construct_next_proto(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure) {
+  size_t len, padding_len;
+  unsigned char *padding = NULL;
 
-    len = s->ext.npn_len;
-    padding_len = 32 - ((len + 2) % 32);
+  len = s->ext.npn_len;
+  padding_len = 32 - ((len + 2) % 32);
 
-    if (!WPACKET_sub_memcpy_u8(pkt, s->ext.npn, len)
-            || !WPACKET_sub_allocate_bytes_u8(pkt, padding_len, &padding)) {
-        SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_NEXT_PROTO,
-                 ERR_R_INTERNAL_ERROR);
-        return 0;
-    }
-
-    memset(padding, 0, padding_len);
-
-    return 1;
+  if (!WPACKET_sub_memcpy_u8(pkt, s->ext.npn, len) || !WPACKET_sub_allocate_bytes_u8(pkt, padding_len, &padding)) {
+    SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_NEXT_PROTO, ERR_R_INTERNAL_ERROR);
+    return 0;
+  }
+  memset(padding, 0, padding_len);
+  return 1;
 }
 #endif
 
@@ -3830,7 +3833,7 @@ int ssl_cipher_list_to_bytes(SSL *s, STACK_OF(SSL_CIPHER) *sk, WPACKET *pkt)
     return 1;
 }
 
-int tls_construct_end_of_early_data(SSL *s, WPACKET *pkt)
+int tls_construct_end_of_early_data(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
     if (s->early_data_state != SSL_EARLY_DATA_WRITE_RETRY
             && s->early_data_state != SSL_EARLY_DATA_FINISHED_WRITING) {

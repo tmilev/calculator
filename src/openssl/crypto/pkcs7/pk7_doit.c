@@ -1009,7 +1009,7 @@ int PKCS7_signatureVerify(BIO *bio, PKCS7 *p7, PKCS7_SIGNER_INFO *si,
             goto err;
         }
 
-        if (!EVP_VerifyInit_ex(mdc_tmp, EVP_get_digestbynid(md_type), NULL))
+        if (!EVP_DigestInit_ex(mdc_tmp, EVP_get_digestbynid(md_type), NULL, 0))
             goto err;
 
         alen = ASN1_item_i2d((ASN1_VALUE *)sk, &abuf,

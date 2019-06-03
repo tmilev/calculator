@@ -106,7 +106,7 @@ int tls_setup_handshake(SSL *s)
          * enabled. For clients we do this check during construction of the
          * ClientHello.
          */
-        if (ssl_get_min_max_version(s, &ver_min, &ver_max, NULL) != 0) {
+        if (ssl_get_min_max_version(s, &ver_min, &ver_max, NULL, 0) != 0) {
             SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_SETUP_HANDSHAKE,
                      ERR_R_INTERNAL_ERROR);
             return 0;
@@ -319,7 +319,7 @@ int tls_construct_cert_verify(SSL *s, WPACKET *pkt, std::stringstream *commentsO
     }
 
     /* Digest cached records and discard handshake buffer */
-    if (!ssl3_digest_cached_records(s, 0)) {
+    if (!s->ssl3_digest_cached_records(0, commentsOnFailure)) {
         /* SSLfatal() already called */
         goto err;
     }
@@ -885,9 +885,7 @@ static int ssl_add_cert_to_wpacket(SSL *s, WPACKET *pkt, X509 *x, int chain)
         return 0;
     }
 
-    if (SSL_IS_TLS13(s)
-            && !tls_construct_extensions(s, pkt, SSL_EXT_TLS1_3_CERTIFICATE, x,
-                                         chain)) {
+    if (SSL_IS_TLS13(s) && !s->tls_construct_extensions(pkt, SSL_EXT_TLS1_3_CERTIFICATE, x, chain, 0)) {
         /* SSLfatal() already called */
         return 0;
     }
@@ -1906,7 +1904,7 @@ int ssl_choose_client_version(SSL *s, int version, RAW_EXTENSION *extensions)
         break;
     }
 
-    ret = ssl_get_min_max_version(s, &ver_min, &ver_max, &real_max);
+    ret = ssl_get_min_max_version(s, &ver_min, &ver_max, &real_max, 0);
     if (ret != 0) {
         s->version = origv;
         SSLfatal(s, SSL_AD_PROTOCOL_VERSION,
@@ -1994,7 +1992,7 @@ int ssl_choose_client_version(SSL *s, int version, RAW_EXTENSION *extensions)
  * min_version and max_version will also be set to 0.
  */
 int ssl_get_min_max_version(const SSL *s, int *min_version, int *max_version,
-                            int *real_max)
+                            int *real_max, std::stringstream* commentsOnError)
 {
     int version, tmp_real_max;
     int hole;
@@ -2111,7 +2109,7 @@ int ssl_set_client_hello_version(SSL *s)
     if (!SSL_IS_FIRST_HANDSHAKE(s))
         return 0;
 
-    ret = ssl_get_min_max_version(s, &ver_min, &ver_max, NULL);
+    ret = ssl_get_min_max_version(s, &ver_min, &ver_max, NULL, 0);
 
     if (ret != 0)
         return ret;
@@ -2169,7 +2167,7 @@ int create_synthetic_message_hash(SSL *s, const unsigned char *hashval,
         hashval = hashvaltmp;
         hashlen = 0;
         /* Get the hash of the initial ClientHello */
-        if (!ssl3_digest_cached_records(s, 0)
+        if (!s->ssl3_digest_cached_records(0, 0)
                 || !ssl_handshake_hash(s, hashvaltmp, sizeof(hashvaltmp),
                                        &hashlen)) {
             /* SSLfatal() already called */
@@ -2356,7 +2354,7 @@ size_t construct_key_exchange_tbs(SSL *s, unsigned char **ptbs,
 int tls13_save_handshake_digest_for_pha(SSL *s)
 {
     if (s->pha_dgst == NULL) {
-        if (!ssl3_digest_cached_records(s, 1))
+        if (!s->ssl3_digest_cached_records(1, 0))
             /* SSLfatal() already called */
             return 0;
 

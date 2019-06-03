@@ -550,7 +550,7 @@ size_t tls1_final_finish_mac(SSL *s, const char *str, size_t slen,
     size_t hashlen;
     unsigned char hash[EVP_MAX_MD_SIZE];
 
-    if (!ssl3_digest_cached_records(s, 0)) {
+    if (!s->ssl3_digest_cached_records(0, 0)) {
         /* SSLfatal() already called */
         return 0;
     }
@@ -581,7 +581,7 @@ int tls1_generate_master_secret(SSL *s, unsigned char *out, unsigned char *p,
          * affect client auth because we're freezing the buffer at the same
          * point (after client key exchange and before certificate verify)
          */
-        if (!ssl3_digest_cached_records(s, 1)
+        if (!s->ssl3_digest_cached_records(1, 0)
                 || !ssl_handshake_hash(s, hash, sizeof(hash), &hashlen)) {
             /* SSLfatal() already called */
             return 0;

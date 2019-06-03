@@ -2448,48 +2448,62 @@ int tls_construct_server_hello(SSL* s, WPACKET* pkt, std::stringstream* comments
     s->SetError();
     return 0;
   }
-  if (!tls_construct_extensions(s, pkt, s->hello_retry_request == sslData::SSL_HRR_PENDING
-                                      ? SSL_EXT_TLS1_3_HELLO_RETRY_REQUEST
-                                      : (SSL_IS_TLS13(s)
-                                          ? SSL_EXT_TLS1_3_SERVER_HELLO
-                                          : SSL_EXT_TLS1_2_SERVER_HELLO),
-                                  NULL, 0)) {
-        /* SSLfatal() already called */
-        return 0;
+  unsigned int context = SSL_EXT_TLS1_3_HELLO_RETRY_REQUEST;
+  if (s->hello_retry_request != sslData::SSL_HRR_PENDING) {
+    if (SSL_IS_TLS13(s)) {
+      context = SSL_EXT_TLS1_3_SERVER_HELLO;
+    } else {
+      context = SSL_EXT_TLS1_2_SERVER_HELLO;
     }
+  }
 
-    if (s->hello_retry_request == sslData::SSL_HRR_PENDING) {
-        /* Ditch the session. We'll create a new one next time around */
-        SSL_SESSION_free(s->session);
-        s->session = NULL;
-        s->hit = 0;
-
-        /*
-         * Re-initialise the Transcript Hash. We're going to prepopulate it with
-         * a synthetic message_hash in place of ClientHello1.
-         */
-        if (!create_synthetic_message_hash(s, NULL, 0, NULL, 0)) {
-            /* SSLfatal() already called */
-            return 0;
-        }
-    } else if (!(s->verify_mode & SSL_VERIFY_PEER)
-                && !ssl3_digest_cached_records(s, 0)) {
-        /* SSLfatal() already called */;
-        return 0;
+  if (
+    !s->tls_construct_extensions(pkt, context, NULL, 0, commentsOnFailure)
+  ) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "TLS Construct extensions failed. ";
     }
-
-    return 1;
+    s->SetError();
+    return 0;
+  }
+  if (s->hello_retry_request == sslData::SSL_HRR_PENDING) {
+    /* Ditch the session. We'll create a new one next time around */
+    SSL_SESSION_free(s->session);
+    s->session = NULL;
+    s->hit = 0;
+    /*
+     * Re-initialise the Transcript Hash. We're going to prepopulate it with
+     * a synthetic message_hash in place of ClientHello1.
+     */
+    if (!create_synthetic_message_hash(s, NULL, 0, NULL, 0)) {
+      if (commentsOnFailure != 0) {
+        *commentsOnFailure << "Create synthetic message hash failed.\n";
+      }
+      s->SetError();
+      /* SSLfatal() already called */
+      return 0;
+    }
+  } else if (!(s->verify_mode & SSL_VERIFY_PEER)) {
+    if (!s->ssl3_digest_cached_records(0, commentsOnFailure)) {
+      if (commentsOnFailure != 0) {
+        *commentsOnFailure << "Failed verify peer and failed to find cached record.\n";
+      }
+      /* SSLfatal() already called */;
+      s->SetError();
+      return 0;
+    }
+  }
+  return 1;
 }
 
-int tls_construct_server_done(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
-{
-    if (!s->s3->tmp.cert_request) {
-        if (!ssl3_digest_cached_records(s, 0)) {
-            /* SSLfatal() already called */
-            return 0;
-        }
-    }
-    return 1;
+int tls_construct_server_done(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure) {
+  if (!s->s3->tmp.cert_request) {
+      if (!s->ssl3_digest_cached_records(0, commentsOnFailure)) {
+          /* SSLfatal() already called */
+          return 0;
+      }
+  }
+  return 1;
 }
 
 int tls_construct_server_key_exchange(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
@@ -2883,9 +2897,9 @@ int tls_construct_certificate_request(SSL *s, WPACKET *pkt, std::stringstream *c
             }
         }
 
-        if (!tls_construct_extensions(s, pkt,
-                                      SSL_EXT_TLS1_3_CERTIFICATE_REQUEST, NULL,
-                                      0)) {
+        if (!s->tls_construct_extensions(
+          pkt,SSL_EXT_TLS1_3_CERTIFICATE_REQUEST, NULL, 0, commentsOnFailure
+        )) {
             /* SSLfatal() already called */
             return 0;
         }
@@ -3569,7 +3583,7 @@ WORK_STATE tls_post_process_client_key_exchange(SSL *s, WORK_STATE wst)
          * No certificate verify or no peer certificate so we no longer need
          * the handshake_buffer
          */
-        if (!ssl3_digest_cached_records(s, 0)) {
+        if (!s->ssl3_digest_cached_records(0, 0)) {
             /* SSLfatal() already called */
             return WORK_ERROR;
         }
@@ -3585,7 +3599,7 @@ WORK_STATE tls_post_process_client_key_exchange(SSL *s, WORK_STATE wst)
          * For sigalgs freeze the handshake buffer. If we support
          * extms we've done this already so this is a no-op
          */
-        if (!ssl3_digest_cached_records(s, 1)) {
+        if (!s->ssl3_digest_cached_records(1, 0)) {
             /* SSLfatal() already called */
             return WORK_ERROR;
         }
@@ -3706,7 +3720,7 @@ MSG_PROCESS_RETURN tls_process_client_certificate(SSL *s, PACKET *pkt)
             goto err;
         }
         /* No client certificate so digest cached records */
-        if (s->s3->handshake_buffer && !ssl3_digest_cached_records(s, 0)) {
+        if (s->s3->handshake_buffer && !s->ssl3_digest_cached_records(0, 0)) {
             /* SSLfatal() already called */
             goto err;
         }
@@ -3764,7 +3778,7 @@ MSG_PROCESS_RETURN tls_process_client_certificate(SSL *s, PACKET *pkt)
      * Freeze the handshake buffer. For <TLS1.3 we do this after the CKE
      * message
      */
-    if (SSL_IS_TLS13(s) && !ssl3_digest_cached_records(s, 1)) {
+    if (SSL_IS_TLS13(s) && !s->ssl3_digest_cached_records(1, 0)) {
         /* SSLfatal() already called */
         goto err;
     }
@@ -4167,9 +4181,9 @@ int tls_construct_new_session_ticket(SSL *s, WPACKET *pkt, std::stringstream *co
     }
 
     if (SSL_IS_TLS13(s)) {
-        if (!tls_construct_extensions(s, pkt,
+        if (!s->tls_construct_extensions(pkt,
                                       SSL_EXT_TLS1_3_NEW_SESSION_TICKET,
-                                      NULL, 0)) {
+                                      NULL, 0, 0)) {
             /* SSLfatal() already called */
             goto err;
         }
@@ -4255,8 +4269,8 @@ MSG_PROCESS_RETURN tls_process_next_proto(SSL *s, PACKET *pkt)
 
 static int tls_construct_encrypted_extensions(SSL *s, WPACKET *pkt, std::stringstream *commentsOnFailure)
 {
-    if (!tls_construct_extensions(s, pkt, SSL_EXT_TLS1_3_ENCRYPTED_EXTENSIONS,
-                                  NULL, 0)) {
+    if (!s->tls_construct_extensions(pkt, SSL_EXT_TLS1_3_ENCRYPTED_EXTENSIONS,
+                                  NULL, 0, commentsOnFailure)) {
         /* SSLfatal() already called */
         return 0;
     }

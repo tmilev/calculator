@@ -101,10 +101,12 @@ void ossl_statem_set_renegotiate(SSL *s) {
 /*
  * Put the state machine into an error state and send an alert if appropriate.
  * This is a permanent error for the current connection.
+ * Return 0.
  */
-void sslData::SetError() {
+int sslData::SetError() {
   this->statem.in_init = 1;
   this->statem.state = MSG_FLOW_ERROR;
+  return 0;
 }
 
 void ossl_statem_fatal(SSL *s, int al, int func, int reason, const char *file,

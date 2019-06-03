@@ -133,12 +133,12 @@ BIGNUM *SRP_Calc_x(const BIGNUM *s, const char *user, const char *pass)
     if ((cs = (unsigned char*) OPENSSL_malloc(BN_num_bytes(s))) == NULL)
         goto err;
 
-    if (!EVP_DigestInit_ex(ctxt, EVP_sha1(), NULL)
+    if (!EVP_DigestInit_ex(ctxt, EVP_sha1(), NULL, 0)
         || !EVP_DigestUpdate(ctxt, user, strlen(user))
         || !EVP_DigestUpdate(ctxt, ":", 1)
         || !EVP_DigestUpdate(ctxt, pass, strlen(pass))
         || !EVP_DigestFinal_ex(ctxt, dig, NULL)
-        || !EVP_DigestInit_ex(ctxt, EVP_sha1(), NULL))
+        || !EVP_DigestInit_ex(ctxt, EVP_sha1(), NULL, 0))
         goto err;
     if (BN_bn2bin(s, cs) < 0)
         goto err;

@@ -227,7 +227,7 @@ static int SSHKDF(const EVP_MD *evp_md,
     if (md == NULL)
         return 0;
 
-    if (!EVP_DigestInit_ex(md, evp_md, NULL))
+    if (!EVP_DigestInit_ex(md, evp_md, NULL, 0))
         goto out;
 
     if (!EVP_DigestUpdate(md, key, key_len))
@@ -255,7 +255,7 @@ static int SSHKDF(const EVP_MD *evp_md,
 
     for (cursize = dsize; cursize < okey_len; cursize += dsize) {
 
-        if (!EVP_DigestInit_ex(md, evp_md, NULL))
+        if (!EVP_DigestInit_ex(md, evp_md, NULL, 0))
             goto out;
 
         if (!EVP_DigestUpdate(md, key, key_len))

@@ -1529,18 +1529,22 @@ struct sslData {
   int stateMachineCleanUp(buf_mem_st *buf, int ret);
   bool isFirstHandshake();
   bool isDTLS();
-  void SetError();
+  int SetError();
 
   int getConstructMessageFunction(WPACKET *pkt,
     ConstructMessageFunction &outputFunction,
     int *mt,
     std::stringstream* commentsOnError
   );
+  int ssl3_digest_cached_records(int keep, std::stringstream *commentsOnFailure);
   int ossl_statem_server_construct_message(
     WPACKET *pkt,
     ConstructMessageFunction& confunc,
     int *mt,
     std::stringstream* commentsOnError
+  );
+  int tls_construct_extensions(
+    WPACKET *pkt, unsigned int context, X509 *x, size_t chainidx, std::stringstream* commentsOnFailure
   );
 };
 
@@ -2435,7 +2439,6 @@ __owur unsigned long ssl3_output_cert_chain(SSL *s, WPACKET *pkt,
 __owur const SSL_CIPHER *ssl3_choose_cipher(SSL *ssl,
                                             STACK_OF(SSL_CIPHER) *clnt,
                                             STACK_OF(SSL_CIPHER) *srvr);
-__owur int ssl3_digest_cached_records(SSL *s, int keep);
 __owur int ssl3_new(SSL *s, std::stringstream *commentsOnError);
 void ssl3_free(SSL *s);
 __owur int ssl3_read(SSL *s, void *buf, size_t len, size_t *readbytes, std::stringstream *commentsOnError);
@@ -2471,7 +2474,7 @@ __owur int ssl_choose_server_version(SSL *s, CLIENTHELLO_MSG *hello,
 __owur int ssl_choose_client_version(SSL *s, int version,
                                      RAW_EXTENSION *extensions);
 __owur int ssl_get_min_max_version(const SSL *s, int *min_version,
-                                   int *max_version, int *real_max);
+                                   int *max_version, int *real_max, std::stringstream *commentsOnError);
 
 __owur long tls1_default_timeout(void);
 __owur int dtls1_do_write(SSL *s, int type);

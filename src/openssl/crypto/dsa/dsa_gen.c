@@ -553,7 +553,7 @@ int dsa_builtin_paramgen2(DSA *ret, size_t L, size_t N,
             md[0] = idx & 0xff;
             md[1] = (h >> 8) & 0xff;
             md[2] = h & 0xff;
-            if (!EVP_DigestInit_ex(mctx, evpmd, NULL))
+            if (!EVP_DigestInit_ex(mctx, evpmd, NULL, 0))
                 goto err;
             if (!EVP_DigestUpdate(mctx, seed_tmp, seed_len))
                 goto err;

@@ -1298,7 +1298,7 @@ int tls_construct_client_hello(SSL *s, WPACKET *pkt, std::stringstream *comments
     }
 
     /* TLS extensions */
-    if (!tls_construct_extensions(s, pkt, SSL_EXT_CLIENT_HELLO, NULL, 0)) {
+    if (!s->tls_construct_extensions(pkt, SSL_EXT_CLIENT_HELLO, NULL, 0, commentsOnFailure)) {
         /* SSLfatal() already called */
         return 0;
     }
@@ -3525,7 +3525,7 @@ WORK_STATE tls_prepare_client_certificate(SSL *s, WORK_STATE wst)
                 return WORK_FINISHED_CONTINUE;
             } else {
                 s->s3->tmp.cert_req = 2;
-                if (!ssl3_digest_cached_records(s, 0)) {
+                if (!s->ssl3_digest_cached_records(0, 0)) {
                     /* SSLfatal() already called */
                     return WORK_ERROR;
                 }

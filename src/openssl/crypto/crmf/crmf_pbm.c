@@ -158,7 +158,7 @@ int OSSL_CRMF_pbm_new(const OSSL_CRMF_PBMPARAMETER *pbmp,
     }
 
     /* compute the basekey of the salted secret */
-    if (!EVP_DigestInit_ex(ctx, m, NULL))
+    if (!EVP_DigestInit_ex(ctx, m, NULL, 0))
         goto err;
     /* first the secret */
     if (!EVP_DigestUpdate(ctx, sec, seclen))
@@ -177,7 +177,7 @@ int OSSL_CRMF_pbm_new(const OSSL_CRMF_PBMPARAMETER *pbmp,
 
     /* the first iteration was already done above */
     while (--iterations > 0) {
-        if (!EVP_DigestInit_ex(ctx, m, NULL))
+        if (!EVP_DigestInit_ex(ctx, m, NULL, 0))
             goto err;
         if (!EVP_DigestUpdate(ctx, basekey, bklen))
             goto err;

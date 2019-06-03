@@ -19,7 +19,7 @@ void ERR_print_errors_cb(int (*cb) (const char *str, size_t len, void *u),
     unsigned long l;
     char buf[256];
     char buf2[4096];
-    const char *file, *data;
+    std::string file, data;
     int line, flags;
     /*
      * We don't know what kind of thing CRYPTO_THREAD_ID is. Here is our best

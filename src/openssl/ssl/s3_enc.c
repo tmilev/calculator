@@ -47,14 +47,14 @@ static int ssl3_generate_key_block(SSL *s, unsigned char *km, int num)
         for (j = 0; j < k; j++)
             buf[j] = c;
         c++;
-        if (!EVP_DigestInit_ex(s1, EVP_sha1(), NULL)
+        if (!EVP_DigestInit_ex(s1, EVP_sha1(), NULL, 0)
             || !EVP_DigestUpdate(s1, buf, k)
             || !EVP_DigestUpdate(s1, s->session->master_key,
                                  s->session->master_key_length)
             || !EVP_DigestUpdate(s1, s->s3->server_random, SSL3_RANDOM_SIZE)
             || !EVP_DigestUpdate(s1, s->s3->client_random, SSL3_RANDOM_SIZE)
             || !EVP_DigestFinal_ex(s1, smd, NULL)
-            || !EVP_DigestInit_ex(m5, EVP_md5(), NULL)
+            || !EVP_DigestInit_ex(m5, EVP_md5(), NULL, 0)
             || !EVP_DigestUpdate(m5, s->session->master_key,
                                  s->session->master_key_length)
             || !EVP_DigestUpdate(m5, smd, SHA_DIGEST_LENGTH)) {
@@ -373,41 +373,54 @@ int ssl3_finish_mac(SSL *s, const unsigned char *buf, size_t len)
     return 1;
 }
 
-int ssl3_digest_cached_records(SSL *s, int keep)
-{
-    const EVP_MD *md;
-    long hdatalen;
-    void *hdata;
-
-    if (s->s3->handshake_dgst == NULL) {
-        hdatalen = BIO_get_mem_data(s->s3->handshake_buffer, &hdata);
-        if (hdatalen <= 0) {
-            SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_SSL3_DIGEST_CACHED_RECORDS,
-                     SSL_R_BAD_HANDSHAKE_LENGTH);
-            return 0;
-        }
-
-        s->s3->handshake_dgst = EVP_MD_CTX_new();
-        if (s->s3->handshake_dgst == NULL) {
-            SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_SSL3_DIGEST_CACHED_RECORDS,
-                     ERR_R_MALLOC_FAILURE);
-            return 0;
-        }
-
-        md = ssl_handshake_md(s);
-        if (md == NULL || !EVP_DigestInit_ex(s->s3->handshake_dgst, md, NULL)
-            || !EVP_DigestUpdate(s->s3->handshake_dgst, hdata, hdatalen)) {
-            SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_SSL3_DIGEST_CACHED_RECORDS,
-                     ERR_R_INTERNAL_ERROR);
-            return 0;
-        }
+int sslData::ssl3_digest_cached_records(int keep, std::stringstream* commentsOnFailure) {
+  const EVP_MD *md;
+  long hdatalen;
+  void *hdata;
+  if (this->s3->handshake_dgst == NULL) {
+    hdatalen = BIO_get_mem_data(this->s3->handshake_buffer, &hdata);
+    if (hdatalen <= 0) {
+      if (commentsOnFailure != 0) {
+        *commentsOnFailure << "Cached records digestion: failed to get data length.\n";
+      }
+      this->SetError();
+      return 0;
     }
-    if (keep == 0) {
-        BIO_free(s->s3->handshake_buffer);
-        s->s3->handshake_buffer = NULL;
+    this->s3->handshake_dgst = EVP_MD_CTX_new();
+    if (this->s3->handshake_dgst == NULL) {
+      if (commentsOnFailure != 0) {
+        *commentsOnFailure << "Memory error allocating handshake digest.\n";
+      }
+      this->SetError();
+      return 0;
     }
-
-    return 1;
+    md = ssl_handshake_md(this);
+    if (md == NULL) {
+      if (commentsOnFailure != 0) {
+        *commentsOnFailure << "Md pointer not allowed to be null.\n";
+      }
+      this->SetError();
+      return 0;
+    }
+    if (!EVP_DigestInit_ex(this->s3->handshake_dgst, md, NULL, commentsOnFailure)) {
+      if (commentsOnFailure != 0) {
+        *commentsOnFailure << "Failed to run DigestInit.\n";
+      }
+      return 0;
+    }
+    if (!EVP_DigestUpdate(this->s3->handshake_dgst, hdata, hdatalen)) {
+      if (commentsOnFailure != 0) {
+        *commentsOnFailure << "Faild to run DigestUpdate.\n";
+      }
+      this->SetError();
+      return 0;
+    }
+  }
+  if (keep == 0) {
+    BIO_free(this->s3->handshake_buffer);
+    this->s3->handshake_buffer = NULL;
+  }
+  return 1;
 }
 
 size_t ssl3_final_finish_mac(SSL *s, const char *sender, size_t len,
@@ -416,7 +429,7 @@ size_t ssl3_final_finish_mac(SSL *s, const char *sender, size_t len,
     int ret;
     EVP_MD_CTX *ctx = NULL;
 
-    if (!ssl3_digest_cached_records(s, 0)) {
+    if (!s->ssl3_digest_cached_records(0, 0)) {
         /* SSLfatal() already called */
         return 0;
     }
@@ -490,7 +503,7 @@ int ssl3_generate_master_secret(SSL *s, unsigned char *out, unsigned char *p,
         return 0;
     }
     for (i = 0; i < 3; i++) {
-        if (EVP_DigestInit_ex(ctx, s->ctx->sha1, NULL) <= 0
+        if (EVP_DigestInit_ex(ctx, s->ctx->sha1, NULL, 0) <= 0
             || EVP_DigestUpdate(ctx, salt[i],
                                 strlen((const char *)salt[i])) <= 0
             || EVP_DigestUpdate(ctx, p, len) <= 0
@@ -500,7 +513,7 @@ int ssl3_generate_master_secret(SSL *s, unsigned char *out, unsigned char *p,
                                 SSL3_RANDOM_SIZE) <= 0
                /* TODO(size_t) : convert me */
             || EVP_DigestFinal_ex(ctx, buf, &n) <= 0
-            || EVP_DigestInit_ex(ctx, s->ctx->md5, NULL) <= 0
+            || EVP_DigestInit_ex(ctx, s->ctx->md5, NULL, 0) <= 0
             || EVP_DigestUpdate(ctx, p, len) <= 0
             || EVP_DigestUpdate(ctx, buf, n) <= 0
             || EVP_DigestFinal_ex(ctx, out, &n) <= 0) {

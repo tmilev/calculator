@@ -187,9 +187,6 @@ __owur int tls_parse_all_extensions(SSL *s, int context, RAW_EXTENSION *exts,
                                     X509 *x, size_t chainidx, int fin);
 __owur int should_add_extension(SSL *s, unsigned int extctx,
                                 unsigned int thisctx, int max_version);
-__owur int tls_construct_extensions(SSL *s, WPACKET *pkt, unsigned int context,
-                                    X509 *x, size_t chainidx);
-
 __owur int tls_psk_do_binder(SSL *s, const EVP_MD *md,
                              const unsigned char *msgstart,
                              size_t binderoffset, const unsigned char *binderin,

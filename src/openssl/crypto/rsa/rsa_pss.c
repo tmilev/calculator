@@ -110,7 +110,7 @@ int RSA_verify_PKCS1_PSS_mgf1(RSA *rsa, const unsigned char *mHash,
         RSAerr(RSA_F_RSA_VERIFY_PKCS1_PSS_MGF1, RSA_R_SLEN_CHECK_FAILED);
         goto err;
     }
-    if (!EVP_DigestInit_ex(ctx, Hash, NULL)
+    if (!EVP_DigestInit_ex(ctx, Hash, NULL, 0)
         || !EVP_DigestUpdate(ctx, zeroes, sizeof(zeroes))
         || !EVP_DigestUpdate(ctx, mHash, hLen))
         goto err;
@@ -208,7 +208,7 @@ int RSA_padding_add_PKCS1_PSS_mgf1(RSA *rsa, unsigned char *EM,
     ctx = EVP_MD_CTX_new();
     if (ctx == NULL)
         goto err;
-    if (!EVP_DigestInit_ex(ctx, Hash, NULL)
+    if (!EVP_DigestInit_ex(ctx, Hash, NULL, 0)
         || !EVP_DigestUpdate(ctx, zeroes, sizeof(zeroes))
         || !EVP_DigestUpdate(ctx, mHash, hLen))
         goto err;

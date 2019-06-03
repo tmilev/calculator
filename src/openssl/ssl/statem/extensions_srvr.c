@@ -1794,7 +1794,7 @@ EXT_RETURN tls_construct_stoc_cookie(SSL *s, WPACKET *pkt, unsigned int context,
      * on raw buffers, so we first reserve sufficient bytes (above) and then
      * subsequently allocate them (below)
      */
-    if (!ssl3_digest_cached_records(s, 0)
+    if (!s->ssl3_digest_cached_records(0, 0)
             || !ssl_handshake_hash(s, hashval1, EVP_MAX_MD_SIZE, &hashlen)) {
         /* SSLfatal() already called */
         return EXT_RETURN_FAIL;

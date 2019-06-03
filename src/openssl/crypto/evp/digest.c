@@ -97,111 +97,31 @@ void EVP_MD_CTX_free(EVP_MD_CTX *ctx)
 int EVP_DigestInit(EVP_MD_CTX *ctx, const EVP_MD *type)
 {
     EVP_MD_CTX_reset(ctx);
-    return EVP_DigestInit_ex(ctx, type, NULL);
+    return EVP_DigestInit_ex(ctx, type, NULL, 0);
 }
 
-int EVP_DigestInit_ex(EVP_MD_CTX *ctx, const EVP_MD *type, ENGINE *impl)
-{
-    EVP_MD *provmd;
-    ENGINE *tmpimpl = NULL;
+int EVP_DigestInit_ex(
+  evp_md_ctx_st* ctx, const EVP_MD *type, ENGINE *impl, std::stringstream* commentsOnError
+) {
+  return ctx->digestInit_ex(type, impl, commentsOnError);
+}
 
-    EVP_MD_CTX_clear_flags(ctx, EVP_MD_CTX_FLAG_CLEANED);
-
-    if (type != NULL)
-        ctx->reqdigest = type;
-
-    /* TODO(3.0): Legacy work around code below. Remove this */
-#ifndef OPENSSL_NO_ENGINE
+int evp_md_ctx_st::digestInitLegacy(
+  const EVP_MD *type, ENGINE *impl, ENGINE *tmpimpl, std::stringstream* commentsOnError
+) {
+  if (type) {
     /*
-     * Whether it's nice or not, "Inits" can be used on "Final"'d contexts so
-     * this context may already have an ENGINE! Try to avoid releasing the
-     * previous handle, re-querying for an ENGINE, and having a
-     * reinitialisation, when it may all be unnecessary.
+     * Ensure an ENGINE left lying around from last time is cleared (the
+     * previous check attempted to avoid this if the same ENGINE and
+     * EVP_MD could be used).
      */
-    if (ctx->engine && ctx->digest &&
-        (type == NULL || (type->type == ctx->digest->type)))
-        goto skip_to_init;
+    ENGINE_finish(this->engine);
+    if (impl != NULL) {
+      if (!ENGINE_init(impl)) {
 
-    if (type != NULL && impl == NULL)
-        tmpimpl = ENGINE_get_digest_engine(type->type);
-#endif
-
-    /*
-     * If there are engines involved or if we're being used as part of
-     * EVP_DigestSignInit then we should use legacy handling for now.
-     */
-    if (ctx->engine != NULL
-            || impl != NULL
-            || tmpimpl != NULL
-            || ctx->pctx != NULL
-            || (ctx->flags & EVP_MD_CTX_FLAG_NO_INIT) != 0) {
-        if (ctx->digest == ctx->fetched_digest)
-            ctx->digest = NULL;
-        EVP_MD_meth_free(ctx->fetched_digest);
-        ctx->fetched_digest = NULL;
-        goto legacy;
-    }
-
-    if (type->prov == NULL) {
-        switch(type->type) {
-        case NID_sha256:
-        case NID_md2:
-            break;
-        default:
-            goto legacy;
-        }
-    }
-
-    if (ctx->digest != NULL && ctx->digest->ctx_size > 0) {
-        OPENSSL_clear_free(ctx->md_data, ctx->digest->ctx_size);
-        ctx->md_data = NULL;
-    }
-
-    /* TODO(3.0): Start of non-legacy code below */
-
-    if (type->prov == NULL) {
-        provmd = EVP_MD_fetch(NULL, OBJ_nid2sn(type->type), "");
-        if (provmd == NULL) {
-            EVPerr(EVP_F_EVP_DIGESTINIT_EX, EVP_R_INITIALIZATION_ERROR);
-            return 0;
-        }
-        type = provmd;
-        EVP_MD_meth_free(ctx->fetched_digest);
-        ctx->fetched_digest = provmd;
-    }
-
-    ctx->digest = type;
-    if (ctx->provctx == NULL) {
-        ctx->provctx = ctx->digest->newctx();
-        if (ctx->provctx == NULL) {
-            EVPerr(EVP_F_EVP_DIGESTINIT_EX, EVP_R_INITIALIZATION_ERROR);
-            return 0;
-        }
-    }
-
-    if (ctx->digest->dinit == NULL) {
         EVPerr(EVP_F_EVP_DIGESTINIT_EX, EVP_R_INITIALIZATION_ERROR);
-        return 0;
-    }
-
-    return ctx->digest->dinit(ctx->provctx);
-
-    /* TODO(3.0): Remove legacy code below */
- legacy:
-
-#ifndef OPENSSL_NO_ENGINE
-    if (type) {
-        /*
-         * Ensure an ENGINE left lying around from last time is cleared (the
-         * previous check attempted to avoid this if the same ENGINE and
-         * EVP_MD could be used).
-         */
-        ENGINE_finish(ctx->engine);
-        if (impl != NULL) {
-            if (!ENGINE_init(impl)) {
-                EVPerr(EVP_F_EVP_DIGESTINIT_EX, EVP_R_INITIALIZATION_ERROR);
                 return 0;
-            }
+      }
         } else {
             /* Ask if an ENGINE is reserved for this job */
             impl = tmpimpl;
@@ -221,45 +141,133 @@ int EVP_DigestInit_ex(EVP_MD_CTX *ctx, const EVP_MD *type, ENGINE *impl)
              * Store the ENGINE functional reference so we know 'type' came
              * from an ENGINE and we need to release it when done.
              */
-            ctx->engine = impl;
+            this->engine = impl;
         } else
-            ctx->engine = NULL;
+            this->engine = NULL;
     } else {
-        if (!ctx->digest) {
+        if (!this->digest) {
             EVPerr(EVP_F_EVP_DIGESTINIT_EX, EVP_R_NO_DIGEST_SET);
             return 0;
         }
-        type = ctx->digest;
+        type = this->digest;
     }
-#endif
-    if (ctx->digest != type) {
-        if (ctx->digest && ctx->digest->ctx_size) {
-            OPENSSL_clear_free(ctx->md_data, ctx->digest->ctx_size);
-            ctx->md_data = NULL;
+    if (this->digest != type) {
+        if (this->digest && this->digest->ctx_size) {
+            OPENSSL_clear_free(this->md_data, this->digest->ctx_size);
+            this->md_data = NULL;
         }
-        ctx->digest = type;
-        if (!(ctx->flags & EVP_MD_CTX_FLAG_NO_INIT) && type->ctx_size) {
-            ctx->update = type->update;
-            ctx->md_data = OPENSSL_zalloc(type->ctx_size);
-            if (ctx->md_data == NULL) {
+        this->digest = type;
+        if (!(this->flags & EVP_MD_CTX_FLAG_NO_INIT) && type->ctx_size) {
+            this->update = type->update;
+            this->md_data = OPENSSL_zalloc(type->ctx_size);
+            if (this->md_data == NULL) {
                 EVPerr(EVP_F_EVP_DIGESTINIT_EX, ERR_R_MALLOC_FAILURE);
                 return 0;
             }
         }
     }
-#ifndef OPENSSL_NO_ENGINE
- skip_to_init:
-#endif
-    if (ctx->pctx) {
-        int r;
-        r = EVP_PKEY_CTX_ctrl(ctx->pctx, -1, EVP_PKEY_OP_TYPE_SIG,
-                              EVP_PKEY_CTRL_DIGESTINIT, 0, ctx);
-        if (r <= 0 && (r != -2))
-            return 0;
+  return this->digestInitEnd();
+}
+
+int evp_md_ctx_st::digestInitEnd() {
+  if (this->pctx) {
+    int r;
+    r = EVP_PKEY_CTX_ctrl(this->pctx, -1, EVP_PKEY_OP_TYPE_SIG, EVP_PKEY_CTRL_DIGESTINIT, 0, this);
+    if (r <= 0 && (r != -2)) {
+      return 0;
     }
-    if (ctx->flags & EVP_MD_CTX_FLAG_NO_INIT)
-        return 1;
-    return ctx->digest->init(ctx);
+  }
+  if (this->flags & EVP_MD_CTX_FLAG_NO_INIT) {
+    return 1;
+  }
+  return this->digest->init(this);
+}
+
+int evp_md_ctx_st::digestInit_ex(
+  const EVP_MD *type, ENGINE *impl, std::stringstream* commentsOnError
+) {
+  EVP_MD *provmd;
+  ENGINE *tmpimpl = NULL;
+
+  EVP_MD_CTX_clear_flags(this, EVP_MD_CTX_FLAG_CLEANED);
+
+  if (type != NULL) {
+    this->reqdigest = type;
+  }
+  /* TODO(3.0): Legacy work around code below. Remove this */
+  /*
+   * Whether it's nice or not, "Inits" can be used on "Final"'d contexts so
+   * this context may already have an ENGINE! Try to avoid releasing the
+   * previous handle, re-querying for an ENGINE, and having a
+   * reinitialisation, when it may all be unnecessary.
+   */
+  if (this->engine && this->digest && (type == NULL || (type->type == this->digest->type))) {
+    return this->digestInitEnd();
+  }
+
+  if (type != NULL && impl == NULL) {
+    tmpimpl = ENGINE_get_digest_engine(type->type);
+  }
+
+    /*
+     * If there are engines involved or if we're being used as part of
+     * EVP_DigestSignInit then we should use legacy handling for now.
+     */
+    if (this->engine != NULL
+            || impl != NULL
+            || tmpimpl != NULL
+            || this->pctx != NULL
+            || (this->flags & EVP_MD_CTX_FLAG_NO_INIT) != 0) {
+        if (this->digest == this->fetched_digest)
+            this->digest = NULL;
+        EVP_MD_meth_free(this->fetched_digest);
+        this->fetched_digest = NULL;
+        return this->digestInitLegacy(type, impl, tmpimpl, commentsOnError);
+    }
+
+    if (type->prov == NULL) {
+        switch(type->type) {
+        case NID_sha256:
+        case NID_md2:
+            break;
+        default:
+          return this->digestInitLegacy(type, impl, tmpimpl, commentsOnError);
+        }
+    }
+
+    if (this->digest != NULL && this->digest->ctx_size > 0) {
+        OPENSSL_clear_free(this->md_data, this->digest->ctx_size);
+        this->md_data = NULL;
+    }
+
+    /* TODO(3.0): Start of non-legacy code below */
+
+    if (type->prov == NULL) {
+        provmd = EVP_MD_fetch(NULL, OBJ_nid2sn(type->type), "");
+        if (provmd == NULL) {
+            EVPerr(EVP_F_EVP_DIGESTINIT_EX, EVP_R_INITIALIZATION_ERROR);
+            return 0;
+        }
+        type = provmd;
+        EVP_MD_meth_free(this->fetched_digest);
+        this->fetched_digest = provmd;
+    }
+
+    this->digest = type;
+    if (this->provctx == NULL) {
+        this->provctx = this->digest->newctx();
+        if (this->provctx == NULL) {
+            EVPerr(EVP_F_EVP_DIGESTINIT_EX, EVP_R_INITIALIZATION_ERROR);
+            return 0;
+        }
+    }
+
+    if (this->digest->dinit == NULL) {
+        EVPerr(EVP_F_EVP_DIGESTINIT_EX, EVP_R_INITIALIZATION_ERROR);
+        return 0;
+    }
+
+    return this->digest->dinit(this->provctx);
 }
 
 int EVP_DigestUpdate(EVP_MD_CTX *ctx, const void *data, size_t count)
@@ -471,7 +479,7 @@ int EVP_Digest(const void *data, size_t count,
     if (ctx == NULL)
         return 0;
     EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_ONESHOT);
-    ret = EVP_DigestInit_ex(ctx, type, impl)
+    ret = EVP_DigestInit_ex(ctx, type, impl, 0)
         && EVP_DigestUpdate(ctx, data, count)
         && EVP_DigestFinal_ex(ctx, md, size);
     EVP_MD_CTX_free(ctx);

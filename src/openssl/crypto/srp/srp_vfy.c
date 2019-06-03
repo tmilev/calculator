@@ -573,7 +573,7 @@ SRP_user_pwd *SRP_VBASE_get1_by_user(SRP_VBASE *vb, char *username)
         goto err;
     ctxt = EVP_MD_CTX_new();
     if (ctxt == NULL
-        || !EVP_DigestInit_ex(ctxt, EVP_sha1(), NULL)
+        || !EVP_DigestInit_ex(ctxt, EVP_sha1(), NULL, 0)
         || !EVP_DigestUpdate(ctxt, vb->seed_key, strlen(vb->seed_key))
         || !EVP_DigestUpdate(ctxt, username, strlen(username))
         || !EVP_DigestFinal_ex(ctxt, digs, NULL))

@@ -794,43 +794,48 @@ int should_add_extension(SSL *s, unsigned int extctx, unsigned int thisctx,
  * 0 being the first in the chain). Returns 1 on success or 0 on failure. On a
  * failure construction stops at the first extension to fail to construct.
  */
-int tls_construct_extensions(SSL *s, WPACKET *pkt, unsigned int context,
-                             X509 *x, size_t chainidx)
-{
-    size_t i;
-    int min_version, max_version = 0, reason;
-    const EXTENSION_DEFINITION *thisexd;
-
-    if (!WPACKET_start_sub_packet_u16(pkt)
-               /*
-                * If extensions are of zero length then we don't even add the
-                * extensions length bytes to a ClientHello/ServerHello
-                * (for non-TLSv1.3).
-                */
-            || ((context &
-                 (SSL_EXT_CLIENT_HELLO | SSL_EXT_TLS1_2_SERVER_HELLO)) != 0
-                && !WPACKET_set_flags(pkt,
-                                     WPACKET_FLAGS_ABANDON_ON_ZERO_LENGTH))) {
-        SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_EXTENSIONS,
-                 ERR_R_INTERNAL_ERROR);
-        return 0;
+int sslData::tls_construct_extensions(
+  WPACKET *pkt, unsigned int context, X509 *x, size_t chainidx, std::stringstream* commentsOnError
+) {
+  size_t i;
+  int min_version, max_version = 0, reason;
+  const EXTENSION_DEFINITION *thisexd;
+  if (!WPACKET_start_sub_packet_u16(pkt)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to start sub-packet.\n";
     }
+    return this->SetError();
+  }
 
-    if ((context & SSL_EXT_CLIENT_HELLO) != 0) {
-        reason = ssl_get_min_max_version(s, &min_version, &max_version, NULL);
-        if (reason != 0) {
-            SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_EXTENSIONS,
-                     reason);
-            return 0;
-        }
+  /*
+   * If extensions are of zero length then we don't even add the
+   * extensions length bytes to a ClientHello/ServerHello
+   * (for non-TLSv1.3).
+   */
+  if ((context & (SSL_EXT_CLIENT_HELLO | SSL_EXT_TLS1_2_SERVER_HELLO)) != 0) {
+    if (!WPACKET_set_flags(pkt, WPACKET_FLAGS_ABANDON_ON_ZERO_LENGTH)) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Failed to set packet flags.\n";
+      }
+      return this->SetError();
     }
+  }
+  if ((context & SSL_EXT_CLIENT_HELLO) != 0) {
+    reason = ssl_get_min_max_version(this, &min_version, &max_version, NULL, commentsOnError);
+    if (reason != 0) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Error in ssl version.\n";
+      }
+      return this->SetError();
+    }
+  }
 
     /* Add custom extensions first */
     if ((context & SSL_EXT_CLIENT_HELLO) != 0) {
         /* On the server side with initialise during ClientHello parsing */
-        custom_ext_init(&s->cert->custext);
+        custom_ext_init(&this->cert->custext);
     }
-    if (!custom_ext_add(s, context, pkt, x, chainidx, max_version)) {
+    if (!custom_ext_add(this, context, pkt, x, chainidx, max_version)) {
         /* SSLfatal() already called */
         return 0;
     }
@@ -841,16 +846,16 @@ int tls_construct_extensions(SSL *s, WPACKET *pkt, unsigned int context,
         EXT_RETURN ret;
 
         /* Skip if not relevant for our context */
-        if (!should_add_extension(s, thisexd->context, context, max_version))
+        if (!should_add_extension(this, thisexd->context, context, max_version))
             continue;
 
-        construct = s->server ? thisexd->construct_stoc
+        construct = this->server ? thisexd->construct_stoc
                               : thisexd->construct_ctos;
 
         if (construct == NULL)
             continue;
 
-        ret = construct(s, pkt, context, x, chainidx);
+        ret = construct(this, pkt, context, x, chainidx);
         if (ret == EXT_RETURN_FAIL) {
             /* SSLfatal() already called */
             return 0;
@@ -859,11 +864,11 @@ int tls_construct_extensions(SSL *s, WPACKET *pkt, unsigned int context,
                 && (context & (SSL_EXT_CLIENT_HELLO
                                | SSL_EXT_TLS1_3_CERTIFICATE_REQUEST
                                | SSL_EXT_TLS1_3_NEW_SESSION_TICKET)) != 0)
-            s->ext.extflags[i] |= SSL_EXT_FLAG_SENT;
+            this->ext.extflags[i] |= SSL_EXT_FLAG_SENT;
     }
 
     if (!WPACKET_close(pkt)) {
-        SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_EXTENSIONS,
+        SSLfatal(this, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_EXTENSIONS,
                  ERR_R_INTERNAL_ERROR);
         return 0;
     }
@@ -1502,7 +1507,7 @@ int tls_psk_do_binder(SSL *s, const EVP_MD *md, const unsigned char *msgstart,
      */
     mctx = EVP_MD_CTX_new();
     if (mctx == NULL
-            || EVP_DigestInit_ex(mctx, md, NULL) <= 0
+            || EVP_DigestInit_ex(mctx, md, NULL, 0) <= 0
             || EVP_DigestFinal_ex(mctx, hash, NULL) <= 0) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PSK_DO_BINDER,
                  ERR_R_INTERNAL_ERROR);
@@ -1522,7 +1527,7 @@ int tls_psk_do_binder(SSL *s, const EVP_MD *md, const unsigned char *msgstart,
         goto err;
     }
 
-    if (EVP_DigestInit_ex(mctx, md, NULL) <= 0) {
+    if (EVP_DigestInit_ex(mctx, md, NULL, 0) <= 0) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PSK_DO_BINDER,
                  ERR_R_INTERNAL_ERROR);
         goto err;

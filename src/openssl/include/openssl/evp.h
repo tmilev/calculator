@@ -497,10 +497,8 @@ void *EVP_CIPHER_CTX_set_cipher_data(EVP_CIPHER_CTX *ctx, void *cipher_data);
 # define EVP_ENCODE_LENGTH(l)    ((((l)+2)/3*4)+((l)/48+1)*2+80)
 # define EVP_DECODE_LENGTH(l)    (((l)+3)/4*3+80)
 
-# define EVP_SignInit_ex(a,b,c)          EVP_DigestInit_ex(a,b,c)
 # define EVP_SignInit(a,b)               EVP_DigestInit(a,b)
 # define EVP_SignUpdate(a,b,c)           EVP_DigestUpdate(a,b,c)
-# define EVP_VerifyInit_ex(a,b,c)        EVP_DigestInit_ex(a,b,c)
 # define EVP_VerifyInit(a,b)             EVP_DigestInit(a,b)
 # define EVP_VerifyUpdate(a,b,c)         EVP_DigestUpdate(a,b,c)
 # define EVP_OpenUpdate(a,b,c,d,e)       EVP_DecryptUpdate(a,b,c,d,e)
@@ -543,8 +541,8 @@ __owur int EVP_MD_CTX_copy_ex(EVP_MD_CTX *out, const EVP_MD_CTX *in);
 void EVP_MD_CTX_set_flags(EVP_MD_CTX *ctx, int flags);
 void EVP_MD_CTX_clear_flags(EVP_MD_CTX *ctx, int flags);
 int EVP_MD_CTX_test_flags(const EVP_MD_CTX *ctx, int flags);
-__owur int EVP_DigestInit_ex(EVP_MD_CTX *ctx, const EVP_MD *type,
-                                 ENGINE *impl);
+int EVP_DigestInit_ex(evp_md_ctx_st *ctx, const EVP_MD *type,
+                             ENGINE *impl, std::stringstream *commentsOnError);
 __owur int EVP_DigestUpdate(EVP_MD_CTX *ctx, const void *d,
                                 size_t cnt);
 __owur int EVP_DigestFinal_ex(EVP_MD_CTX *ctx, unsigned char *md,

@@ -307,7 +307,6 @@ void TransportSecurityLayer::ClearErrorQueue(
   MacroRegisterFunctionWithName("TransportSecurityLayer::ToStringError");
   int numErrors = 0;
   int theCode = SSL_get_error(theSSL, errorCode);
-  ERR_clear_error();
   if (theCode == SSL_ERROR_NONE) {
     if (commentsGeneral != 0 && includeNoErrorInComments) {
       *commentsGeneral << "\n<br>\nNo error.\n";

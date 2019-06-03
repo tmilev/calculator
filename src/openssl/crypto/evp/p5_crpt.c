@@ -66,7 +66,7 @@ int PKCS5_PBE_keyivgen(EVP_CIPHER_CTX *cctx, const char *pass, int passlen,
         goto err;
     }
 
-    if (!EVP_DigestInit_ex(ctx, md, NULL))
+    if (!EVP_DigestInit_ex(ctx, md, NULL, 0))
         goto err;
     if (!EVP_DigestUpdate(ctx, pass, passlen))
         goto err;
@@ -79,7 +79,7 @@ int PKCS5_PBE_keyivgen(EVP_CIPHER_CTX *cctx, const char *pass, int passlen,
     if (mdsize < 0)
         return 0;
     for (i = 1; i < iter; i++) {
-        if (!EVP_DigestInit_ex(ctx, md, NULL))
+        if (!EVP_DigestInit_ex(ctx, md, NULL, 0))
             goto err;
         if (!EVP_DigestUpdate(ctx, md_tmp, mdsize))
             goto err;

@@ -27,7 +27,7 @@ static c448_error_t oneshot_hash(uint8_t *out, size_t outlen,
     if (hashctx == NULL)
         return C448_FAILURE;
 
-    if (!EVP_DigestInit_ex(hashctx, EVP_shake256(), NULL)
+    if (!EVP_DigestInit_ex(hashctx, EVP_shake256(), NULL, 0)
             || !EVP_DigestUpdate(hashctx, in, inlen)
             || !EVP_DigestFinalXOF(hashctx, out, outlen)) {
         EVP_MD_CTX_free(hashctx);
@@ -60,7 +60,7 @@ static c448_error_t hash_init_with_dom(EVP_MD_CTX *hashctx, uint8_t prehashed,
                        - (for_prehash == 0 ? 1 : 0));
     dom[1] = (uint8_t)context_len;
 
-    if (!EVP_DigestInit_ex(hashctx, EVP_shake256(), NULL)
+    if (!EVP_DigestInit_ex(hashctx, EVP_shake256(), NULL, 0)
             || !EVP_DigestUpdate(hashctx, dom_s, strlen(dom_s))
             || !EVP_DigestUpdate(hashctx, dom, sizeof(dom))
             || !EVP_DigestUpdate(hashctx, context, context_len))

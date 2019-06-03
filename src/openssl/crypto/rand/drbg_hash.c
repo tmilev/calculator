@@ -68,7 +68,7 @@ static int hash_df(RAND_DRBG *drbg, unsigned char *out,
          * (Step 4.1) out = out || Hash(tmp || in || [in2] || [in3])
          *            (where tmp = counter || num_bits_returned || [inbyte])
          */
-        if (!(EVP_DigestInit_ex(ctx, hash->md, NULL)
+        if (!(EVP_DigestInit_ex(ctx, hash->md, NULL, 0)
                 && EVP_DigestUpdate(ctx, tmp, tmp_sz)
                 && EVP_DigestUpdate(ctx, in, inlen)
                 && (in2 == NULL || EVP_DigestUpdate(ctx, in2, in2len))
@@ -146,7 +146,7 @@ static int add_hash_to_v(RAND_DRBG *drbg, unsigned char inbyte,
     RAND_DRBG_HASH *hash = &drbg->data.hash;
     EVP_MD_CTX *ctx = hash->ctx;
 
-    return EVP_DigestInit_ex(ctx, hash->md, NULL)
+    return EVP_DigestInit_ex(ctx, hash->md, NULL, 0)
            && EVP_DigestUpdate(ctx, &inbyte, 1)
            && EVP_DigestUpdate(ctx, hash->V, drbg->seedlen)
            && (adin == NULL || EVP_DigestUpdate(ctx, adin, adinlen))
@@ -181,7 +181,7 @@ static int hash_gen(RAND_DRBG *drbg, unsigned char *out, size_t outlen)
         return 1;
     memcpy(hash->vtmp, hash->V, drbg->seedlen);
     for(;;) {
-        if (!EVP_DigestInit_ex(hash->ctx, hash->md, NULL)
+        if (!EVP_DigestInit_ex(hash->ctx, hash->md, NULL, 0)
                 || !EVP_DigestUpdate(hash->ctx, hash->vtmp, drbg->seedlen))
             return 0;
 

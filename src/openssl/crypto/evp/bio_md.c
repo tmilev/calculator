@@ -148,7 +148,7 @@ static long md_ctrl(BIO *b, int cmd, long num, void *ptr)
     switch (cmd) {
     case BIO_CTRL_RESET:
         if (BIO_get_init(b))
-            ret = EVP_DigestInit_ex(ctx, ctx->digest, NULL);
+            ret = EVP_DigestInit_ex(ctx, ctx->digest, NULL, 0);
         else
             ret = 0;
         if (ret > 0)
@@ -180,7 +180,7 @@ static long md_ctrl(BIO *b, int cmd, long num, void *ptr)
 
     case BIO_C_SET_MD:
         md = (EVP_MD *) ptr;
-        ret = EVP_DigestInit_ex(ctx, md, NULL);
+        ret = EVP_DigestInit_ex(ctx, md, NULL, 0);
         if (ret > 0)
             BIO_set_init(b, 1);
         break;

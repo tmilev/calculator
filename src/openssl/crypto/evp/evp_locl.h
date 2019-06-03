@@ -24,6 +24,9 @@ struct evp_md_ctx_st {
     /* Provider ctx */
     void *provctx;
     EVP_MD *fetched_digest;
+  int digestInit_ex(const EVP_MD *type, ENGINE *impl, std::stringstream* commentsOnError);
+  int digestInitEnd();
+  int digestInitLegacy(const EVP_MD *type, ENGINE *impl, ENGINE *tmpimpl, std::stringstream* commentsOnError);
 } /* EVP_MD_CTX */ ;
 
 struct evp_cipher_ctx_st {

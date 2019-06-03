@@ -386,7 +386,7 @@ static long ok_ctrl(BIO *b, int cmd, long num, void *ptr)
         break;
     case BIO_C_SET_MD:
         md = (EVP_MD*) ptr;
-        if (!EVP_DigestInit_ex(ctx->md, md, NULL))
+        if (!EVP_DigestInit_ex(ctx->md, md, NULL, 0))
             return 0;
         BIO_set_init(b, 1);
         break;
@@ -460,7 +460,7 @@ static int sig_out(BIO *b)
     if (ctx->buf_len + 2 * md_size > OK_BLOCK_SIZE)
         return 1;
 
-    if (!EVP_DigestInit_ex(md, digest, NULL))
+    if (!EVP_DigestInit_ex(md, digest, NULL, 0))
         goto berr;
     /*
      * FIXME: there's absolutely no guarantee this makes any sense at all,
@@ -504,7 +504,7 @@ static int sig_in(BIO *b)
     if ((int)(ctx->buf_len - ctx->buf_off) < 2 * md_size)
         return 1;
 
-    if (!EVP_DigestInit_ex(md, digest, NULL))
+    if (!EVP_DigestInit_ex(md, digest, NULL, 0))
         goto berr;
     memcpy(md_data, &(ctx->buf[ctx->buf_off]), md_size);
     longswap(md_data, md_size);

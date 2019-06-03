@@ -93,7 +93,7 @@ int EVP_BytesToKey(const EVP_CIPHER *type, const EVP_MD *md,
     if (c == NULL)
         goto err;
     for (;;) {
-        if (!EVP_DigestInit_ex(c, md, NULL))
+        if (!EVP_DigestInit_ex(c, md, NULL, 0))
             goto err;
         if (addmd++)
             if (!EVP_DigestUpdate(c, &(md_buf[0]), mds))
@@ -107,7 +107,7 @@ int EVP_BytesToKey(const EVP_CIPHER *type, const EVP_MD *md,
             goto err;
 
         for (i = 1; i < (unsigned int)count; i++) {
-            if (!EVP_DigestInit_ex(c, md, NULL))
+            if (!EVP_DigestInit_ex(c, md, NULL, 0))
                 goto err;
             if (!EVP_DigestUpdate(c, &(md_buf[0]), mds))
                 goto err;

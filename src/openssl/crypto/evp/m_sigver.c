@@ -73,7 +73,7 @@ static int do_sigver_init(EVP_MD_CTX *ctx, EVP_PKEY_CTX **pctx,
         *pctx = ctx->pctx;
     if (ctx->pctx->pmeth->flags & EVP_PKEY_FLAG_SIGCTX_CUSTOM)
         return 1;
-    if (!EVP_DigestInit_ex(ctx, type, e))
+    if (!EVP_DigestInit_ex(ctx, type, e, 0))
         return 0;
     /*
      * This indicates the current algorithm requires

@@ -658,7 +658,7 @@ static int derive_pvk_key(unsigned char *key,
     EVP_MD_CTX *mctx = EVP_MD_CTX_new();
     int rv = 1;
     if (mctx == NULL
-        || !EVP_DigestInit_ex(mctx, EVP_sha1(), NULL)
+        || !EVP_DigestInit_ex(mctx, EVP_sha1(), NULL, 0)
         || !EVP_DigestUpdate(mctx, salt, saltlen)
         || !EVP_DigestUpdate(mctx, pass, passlen)
         || !EVP_DigestFinal_ex(mctx, key, NULL))

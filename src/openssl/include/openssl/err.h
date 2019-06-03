@@ -35,16 +35,26 @@
 # define ERR_FLAG_MARK           0x01
 # define ERR_FLAG_CLEAR          0x02
 
-# define ERR_NUM_ERRORS  16
-typedef struct err_state_st {
-    int err_flags[ERR_NUM_ERRORS];
-    unsigned long err_buffer[ERR_NUM_ERRORS];
-    char *err_data[ERR_NUM_ERRORS];
-    int err_data_flags[ERR_NUM_ERRORS];
-    const char *err_file[ERR_NUM_ERRORS];
-    int err_line[ERR_NUM_ERRORS];
-    int top, bottom;
-} ERR_STATE;
+struct err_state_st {
+  int err_flags;
+  unsigned long err_buffer;
+  std::string err_data;
+  int err_data_flags;
+  std::string err_file;
+  int err_line;
+  void Free();
+  err_state_st();
+  ~err_state_st();
+  static err_state_st& GetLastError();
+  void SetError(int lib, int func, int reason, const char *file, int line);
+  unsigned long getErrorValues(
+    int inc,
+    std::string* outputFile,
+    int* outputLine,
+    std::string* outputData,
+    int* outputFlags
+  );
+};
 
 /* library */
 # define ERR_LIB_NONE            1
@@ -97,6 +107,7 @@ typedef struct err_state_st {
 
 # define ERR_LIB_USER            128
 
+int SetError(int lib, int func);
 # define SYSerr(f,r)  ERR_PUT_error(ERR_LIB_SYS,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
 # define BNerr(f,r)   ERR_PUT_error(ERR_LIB_BN,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
 # define RSAerr(f,r)  ERR_PUT_error(ERR_LIB_RSA,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
@@ -221,20 +232,23 @@ DEFINE_LHASH_OF(ERR_STRING_DATA);
 
 void ERR_put_error(int lib, int func, int reason, const char *file, int line);
 void ERR_set_error_data(char *data, int flags);
+void ERR_clear_error();
 
 unsigned long ERR_get_error(void);
-unsigned long ERR_get_error_line(const char **file, int *line);
-unsigned long ERR_get_error_line_data(const char **file, int *line,
-                                      const char **data, int *flags);
+unsigned long ERR_get_error_line(std::string* outputFile, int* outputLine);
+unsigned long ERR_get_error_line_data(std::string *outputFile, int *line, std::string *outputData, int *flags);
 unsigned long ERR_peek_error(void);
-unsigned long ERR_peek_error_line(const char **file, int *line);
-unsigned long ERR_peek_error_line_data(const char **file, int *line,
-                                       const char **data, int *flags);
+unsigned long ERR_peek_error_line(std::string* outputFile, int* outputLine);
+unsigned long ERR_peek_error_line_data(std::string *outputFile, int *line,
+                                       std::string *outputData, int *flags);
 unsigned long ERR_peek_last_error(void);
-unsigned long ERR_peek_last_error_line(const char **file, int *line);
-unsigned long ERR_peek_last_error_line_data(const char **file, int *line,
-                                            const char **data, int *flags);
-void ERR_clear_error(void);
+unsigned long ERR_peek_last_error_line(std::string *outputFile, int *outputLine);
+unsigned long ERR_peek_last_error_line_data(
+  std::string *outputFile,
+  int *line,
+  std::string *outputData,
+  int *flags
+);
 char *ERR_error_string(unsigned long e, char *buf);
 void ERR_error_string_n(unsigned long e, char *buf, size_t len);
 const char *ERR_lib_error_string(unsigned long e);
@@ -261,7 +275,7 @@ int ERR_load_ERR_strings(void);
 
 DEPRECATEDIN_1_1_0(void ERR_remove_thread_state(void *))
 DEPRECATEDIN_1_0_0(void ERR_remove_state(unsigned long pid))
-ERR_STATE *ERR_get_state(void);
+err_state_st* ERR_get_state();
 
 int ERR_get_next_error_library(void);
 

@@ -196,7 +196,7 @@ int tls13_generate_secret(SSL *s, const EVP_MD *md,
 
         /* The pre-extract derive step uses a hash of no messages */
         if (mctx == NULL
-                || EVP_DigestInit_ex(mctx, md, NULL) <= 0
+                || EVP_DigestInit_ex(mctx, md, NULL, 0) <= 0
                 || EVP_DigestFinal_ex(mctx, hash, NULL) <= 0) {
             SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS13_GENERATE_SECRET,
                      ERR_R_INTERNAL_ERROR);
@@ -533,7 +533,7 @@ int tls13_change_cipher_state(SSL *s, int which)
             }
             cipher = EVP_get_cipherbynid(SSL_CIPHER_get_cipher_nid(sslcipher));
             md = ssl_md(sslcipher->algorithm2);
-            if (md == NULL || !EVP_DigestInit_ex(mdctx, md, NULL)
+            if (md == NULL || !EVP_DigestInit_ex(mdctx, md, NULL, 0)
                     || !EVP_DigestUpdate(mdctx, hdata, handlen)
                     || !EVP_DigestFinal_ex(mdctx, hashval, &hashlenui)) {
                 SSLfatal(s, SSL_AD_INTERNAL_ERROR,
@@ -610,7 +610,7 @@ int tls13_change_cipher_state(SSL *s, int which)
     if (!(which & SSL3_CC_EARLY)) {
         md = ssl_handshake_md(s);
         cipher = s->s3->tmp.new_sym_enc;
-        if (!ssl3_digest_cached_records(s, 1)
+        if (!s->ssl3_digest_cached_records(1, 0)
                 || !ssl_handshake_hash(s, hashval, sizeof(hashval), &hashlen)) {
             /* SSLfatal() already called */;
             goto err;
@@ -763,10 +763,10 @@ int tls13_export_keying_material(SSL *s, unsigned char *out, size_t olen,
     if (!use_context)
         contextlen = 0;
 
-    if (EVP_DigestInit_ex(ctx, md, NULL) <= 0
+    if (EVP_DigestInit_ex(ctx, md, NULL, 0) <= 0
             || EVP_DigestUpdate(ctx, context, contextlen) <= 0
             || EVP_DigestFinal_ex(ctx, hash, &hashsize) <= 0
-            || EVP_DigestInit_ex(ctx, md, NULL) <= 0
+            || EVP_DigestInit_ex(ctx, md, NULL, 0) <= 0
             || EVP_DigestFinal_ex(ctx, data, &datalen) <= 0
             || !tls13_hkdf_expand(s, md, s->exporter_master_secret,
                                   (const unsigned char *)label, llen,
@@ -822,10 +822,10 @@ int tls13_export_keying_material_early(SSL *s, unsigned char *out, size_t olen,
      *
      * Here Transcript-Hash is the cipher suite hash algorithm.
      */
-    if (EVP_DigestInit_ex(ctx, md, NULL) <= 0
+    if (EVP_DigestInit_ex(ctx, md, NULL, 0) <= 0
             || EVP_DigestUpdate(ctx, context, contextlen) <= 0
             || EVP_DigestFinal_ex(ctx, hash, &hashsize) <= 0
-            || EVP_DigestInit_ex(ctx, md, NULL) <= 0
+            || EVP_DigestInit_ex(ctx, md, NULL, 0) <= 0
             || EVP_DigestFinal_ex(ctx, data, &datalen) <= 0
             || !tls13_hkdf_expand(s, md, s->early_exporter_master_secret,
                                   (const unsigned char *)label, llen,

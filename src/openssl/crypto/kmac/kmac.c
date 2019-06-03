@@ -176,7 +176,7 @@ static int kmac_init(EVP_MAC_IMPL *kctx)
         EVPerr(EVP_F_KMAC_INIT, EVP_R_NO_KEY_SET);
         return 0;
     }
-    if (!EVP_DigestInit_ex(kctx->ctx, kctx->md, NULL))
+    if (!EVP_DigestInit_ex(kctx->ctx, kctx->md, NULL, 0))
         return 0;
 
     block_len = EVP_MD_block_size(kctx->md);

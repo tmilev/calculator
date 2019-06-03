@@ -317,7 +317,7 @@ int PKCS1_MGF1(unsigned char *mask, long len,
         cnt[2] = (unsigned char)((i >> 8)) & 255;
         cnt[3] = (unsigned char)(i & 255);
         /* step 4b: T =T || hash(mgfSeed || D) */
-        if (!EVP_DigestInit_ex(c, dgst, NULL)
+        if (!EVP_DigestInit_ex(c, dgst, NULL, 0)
             || !EVP_DigestUpdate(c, seed, seedlen)
             || !EVP_DigestUpdate(c, cnt, 4))
             goto err;

@@ -18,6 +18,7 @@
 #include "../../include/internal/core.h"
 #include "../include/internal/evp_int.h"    /* evp_locl.h needs it */
 #include "evp_locl.h"
+#include <sstream>
 
 /* The OpenSSL library context index for the default method store */
 static int default_method_store_index = -1;
@@ -165,43 +166,40 @@ static void destruct_method(void *method, void *data)
     methdata->destruct_method(method);
 }
 
-void *evp_generic_fetch(OPENSSL_CTX *libctx, int operation_id,
-                        const char *algorithm, const char *properties,
-                        void *(*new_method)(int nid, const OSSL_DISPATCH *fns,
-                                            OSSL_PROVIDER *prov),
-                        int (*upref_method)(void *),
-                        void (*free_method)(void *),
-                        int (*nid_method)(void *))
-{
-    int nid = OBJ_sn2nid(algorithm);
-    void *method = NULL;
-
-    if (nid == NID_undef
-        || !ossl_method_store_cache_get(NULL, nid, properties, &method)) {
-        OSSL_METHOD_CONSTRUCT_METHOD mcm = {
-            alloc_tmp_method_store,
-            dealloc_tmp_method_store,
-            get_method_from_store,
-            put_method_in_store,
-            construct_method,
-            destruct_method
-        };
-        struct method_data_st mcmdata;
-
-        mcmdata.nid = nid;
-        mcmdata.mcm = &mcm;
-        mcmdata.method_from_dispatch = new_method;
-        mcmdata.destruct_method = free_method;
-        mcmdata.refcnt_up_method = upref_method;
-        mcmdata.destruct_method = free_method;
-        mcmdata.nid_method = nid_method;
-        method = ossl_method_construct(libctx, operation_id, algorithm,
-                                       properties, 0 /* !force_cache */,
-                                       &mcm, &mcmdata);
-        ossl_method_store_cache_set(NULL, nid, properties, method);
-    }
-
-    return method;
+void *evp_generic_fetch(
+  OPENSSL_CTX *libctx,
+  int operation_id,
+  const char *algorithm,
+  const char *properties,
+  void *(*new_method)(int nid, const OSSL_DISPATCH *fns, OSSL_PROVIDER *prov),
+  int (*upref_method)(void *),
+  void (*free_method)(void *),
+  int (*nid_method)(void *),
+  std::stringstream* commentsOnError
+) {
+  int nid = OBJ_sn2nid(algorithm);
+  void *method = NULL;
+  if (nid == NID_undef || !ossl_method_store_cache_get(NULL, nid, properties, &method)) {
+    OSSL_METHOD_CONSTRUCT_METHOD mcm = {
+      alloc_tmp_method_store,
+      dealloc_tmp_method_store,
+      get_method_from_store,
+      put_method_in_store,
+      construct_method,
+      destruct_method
+    };
+    struct method_data_st mcmdata;
+    mcmdata.nid = nid;
+    mcmdata.mcm = &mcm;
+    mcmdata.method_from_dispatch = new_method;
+    mcmdata.destruct_method = free_method;
+    mcmdata.refcnt_up_method = upref_method;
+    mcmdata.destruct_method = free_method;
+    mcmdata.nid_method = nid_method;
+    method = ossl_method_construct(libctx, operation_id, algorithm, properties, 0 /* !force_cache */, &mcm, &mcmdata, commentsOnError);
+    ossl_method_store_cache_set(NULL, nid, properties, method);
+  }
+  return method;
 }
 
 int EVP_set_default_properties(OPENSSL_CTX *libctx, const char *propq)

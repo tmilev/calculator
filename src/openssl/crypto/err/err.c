@@ -280,6 +280,10 @@ err_state_st::err_state_st() {
   this->err_line = 0;
 }
 
+err_state_st::~err_state_st() {
+  this->Free();
+}
+
 void err_state_st::Free() {
   this->err_data = "";
   this->err_data_flags = 0;
@@ -513,6 +517,7 @@ unsigned long err_state_st::getErrorValues(
   if (inc != 0) {
     this->Free();
   }
+  return result;
 }
 
 void ERR_error_string_n(unsigned long e, char *buf, size_t len)
@@ -769,77 +774,29 @@ void ERR_add_error_vdata(int num, va_list args)
         OPENSSL_free(str);
 }
 
-int ERR_set_mark(void)
-{
-    ERR_STATE *es;
-
-    es = ERR_get_state();
-    if (es == NULL)
-        return 0;
-
-    if (es->bottom == es->top)
-        return 0;
-    es->err_flags[es->top] |= ERR_FLAG_MARK;
-    return 1;
+int ERR_set_mark() {
+  err_state_st *es = ERR_get_state();
+  es->err_flags |= ERR_FLAG_MARK;
+  return 1;
 }
 
-int ERR_pop_to_mark(void)
-{
-    ERR_STATE *es;
-
-    es = ERR_get_state();
-    if (es == NULL)
-        return 0;
-
-    while (es->bottom != es->top
-           && (es->err_flags[es->top] & ERR_FLAG_MARK) == 0) {
-        err_clear(es, es->top);
-        es->top = es->top > 0 ? es->top - 1 : ERR_NUM_ERRORS - 1;
-    }
-
-    if (es->bottom == es->top)
-        return 0;
-    es->err_flags[es->top] &= ~ERR_FLAG_MARK;
-    return 1;
+int ERR_pop_to_mark() {
+  err_state_st *es = ERR_get_state();
+  es->err_flags &= ~ERR_FLAG_MARK;
+  return 1;
 }
 
-int ERR_clear_last_mark(void)
-{
-    ERR_STATE *es;
-    int top;
-
-    es = ERR_get_state();
-    if (es == NULL)
-        return 0;
-
-    top = es->top;
-    while (es->bottom != top
-           && (es->err_flags[top] & ERR_FLAG_MARK) == 0) {
-        top = top > 0 ? top - 1 : ERR_NUM_ERRORS - 1;
-    }
-
-    if (es->bottom == top)
-        return 0;
-    es->err_flags[top] &= ~ERR_FLAG_MARK;
-    return 1;
+int ERR_clear_last_mark(void) {
+  err_state_st *es = ERR_get_state();
+  es->err_flags &= ~ERR_FLAG_MARK;
+  return 1;
 }
 
-void err_clear_last_constant_time(int clear)
-{
-    ERR_STATE *es;
-    int top;
-
-    es = ERR_get_state();
-    if (es == NULL)
-        return;
-
-    top = es->top;
-
-    /*
-     * Flag error as cleared but remove it elsewhere to avoid two errors
-     * accessing the same error stack location, revealing timing information.
-     */
-    clear = constant_time_select_int(constant_time_eq_int(clear, 0),
-                                     0, ERR_FLAG_CLEAR);
-    es->err_flags[top] |= clear;
+void err_clear_last_constant_time(int clear) {
+  err_state_st *es = ERR_get_state();
+  /*
+   * Flag error as cleared but remove it elsewhere to avoid two errors
+   * accessing the same error stack location, revealing timing information.
+   */
+  es->err_flags |= clear;
 }

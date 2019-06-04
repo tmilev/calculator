@@ -14,6 +14,7 @@
 #include "../include/internal/core.h"
 #include "../include/internal/property.h"
 #include "../include/internal/provider.h"
+#include <sstream>
 
 struct construct_data_st {
     OPENSSL_CTX *libctx;
@@ -72,35 +73,40 @@ static int ossl_method_construct_this(OSSL_PROVIDER *provider, void *cbdata)
     return 1;
 }
 
-void *ossl_method_construct(OPENSSL_CTX *libctx, int operation_id,
-                            const char *name, const char *propquery,
-                            int force_store,
-                            OSSL_METHOD_CONSTRUCT_METHOD *mcm, void *mcm_data)
-{
-    void *method = NULL;
-
-    if ((method = mcm->get(libctx, NULL, propquery, mcm_data)) == NULL) {
-        struct construct_data_st cbdata;
-
-        /*
-         * We have a temporary store to be able to easily search among new
-         * items, or items that should find themselves in the global store.
-         */
-        if ((cbdata.store = (OSSL_METHOD_STORE *) mcm->alloc_tmp_store()) == NULL)
-            goto fin;
-
-        cbdata.libctx = libctx;
-        cbdata.operation_id = operation_id;
-        cbdata.force_store = force_store;
-        cbdata.mcm = mcm;
-        cbdata.mcm_data = mcm_data;
-        ossl_provider_forall_loaded(libctx, ossl_method_construct_this,
-                                    &cbdata);
-
-        method = mcm->get(libctx, cbdata.store, propquery, mcm_data);
-        mcm->dealloc_tmp_store(cbdata.store);
-    }
-
- fin:
+void *ossl_method_construct(
+  OPENSSL_CTX *libctx,
+  int operation_id,
+  const char *name,
+  const char *propquery,
+  int force_store,
+  OSSL_METHOD_CONSTRUCT_METHOD *mcm,
+  void *mcm_data,
+  std::stringstream* commentsOnError
+) {
+  void *method = mcm->get(libctx, NULL, propquery, mcm_data);
+  if (method != NULL) {
     return method;
+  }
+  struct construct_data_st cbdata;
+  /*
+   * We have a temporary store to be able to easily search among new
+   * items, or items that should find themselves in the global store.
+   */
+  cbdata.store = (OSSL_METHOD_STORE *) mcm->alloc_tmp_store();
+  if (cbdata.store == NULL) {
+    return method;
+  }
+
+  cbdata.libctx = libctx;
+  cbdata.operation_id = operation_id;
+  cbdata.force_store = force_store;
+  cbdata.mcm = mcm;
+  cbdata.mcm_data = mcm_data;
+  ossl_provider_forall_loaded(libctx, ossl_method_construct_this, &cbdata);
+  method = mcm->get(libctx, cbdata.store, propquery, mcm_data);
+  if (commentsOnError != 0) {
+    *commentsOnError << "Executed final mcm get.\n";
+  }
+  mcm->dealloc_tmp_store(cbdata.store);
+  return method;
 }

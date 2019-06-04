@@ -25,7 +25,7 @@ struct evp_md_ctx_st {
     void *provctx;
     EVP_MD *fetched_digest;
   int digestInit_ex(const EVP_MD *type, ENGINE *impl, std::stringstream* commentsOnError);
-  int digestInitEnd();
+  int digestInitEnd(std::stringstream *commentsOnError);
   int digestInitLegacy(const EVP_MD *type, ENGINE *impl, ENGINE *tmpimpl, std::stringstream* commentsOnError);
 } /* EVP_MD_CTX */ ;
 
@@ -88,10 +88,14 @@ int is_partially_overlapping(const void *ptr1, const void *ptr2, int len);
 #include "../../include/openssl/ossl_typ.h"
 #include "../../include/openssl/core.h"
 
-void *evp_generic_fetch(OPENSSL_CTX *ctx, int operation_id,
-                        const char *algorithm, const char *properties,
-                        void *(*new_method)(int nid, const OSSL_DISPATCH *fns,
-                                            OSSL_PROVIDER *prov),
-                        int (*upref_method)(void *),
-                        void (*free_method)(void *),
-                        int (*nid_method)(void *));
+void *evp_generic_fetch(
+  OPENSSL_CTX *ctx,
+  int operation_id,
+  const char *algorithm,
+  const char *properties,
+  void *(*new_method)(int nid, const OSSL_DISPATCH *fns, OSSL_PROVIDER *prov),
+  int (*upref_method)(void *),
+  void (*free_method)(void *),
+  int (*nid_method)(void *),
+  std::stringstream *commentsOnError
+);

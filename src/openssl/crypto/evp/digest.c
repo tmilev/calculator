@@ -15,6 +15,8 @@
 #include "../include/internal/evp_int.h"
 #include "../../include/internal/provider.h"
 #include "evp_locl.h"
+#include <sstream>
+
 
 /* This call frees resources associated with the context */
 int EVP_MD_CTX_reset(EVP_MD_CTX *ctx)
@@ -166,14 +168,17 @@ int evp_md_ctx_st::digestInitLegacy(
             }
         }
     }
-  return this->digestInitEnd();
+  return this->digestInitEnd(commentsOnError);
 }
 
-int evp_md_ctx_st::digestInitEnd() {
+int evp_md_ctx_st::digestInitEnd(std::stringstream* commentsOnError) {
   if (this->pctx) {
     int r;
     r = EVP_PKEY_CTX_ctrl(this->pctx, -1, EVP_PKEY_OP_TYPE_SIG, EVP_PKEY_CTRL_DIGESTINIT, 0, this);
     if (r <= 0 && (r != -2)) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "EVP_PKEY_CTX_ctrl returned: " << r << ".\n";
+      }
       return 0;
     }
   }
@@ -202,72 +207,73 @@ int evp_md_ctx_st::digestInit_ex(
    * reinitialisation, when it may all be unnecessary.
    */
   if (this->engine && this->digest && (type == NULL || (type->type == this->digest->type))) {
-    return this->digestInitEnd();
+    return this->digestInitEnd(commentsOnError);
   }
 
   if (type != NULL && impl == NULL) {
     tmpimpl = ENGINE_get_digest_engine(type->type);
   }
-
-    /*
-     * If there are engines involved or if we're being used as part of
-     * EVP_DigestSignInit then we should use legacy handling for now.
-     */
-    if (this->engine != NULL
-            || impl != NULL
-            || tmpimpl != NULL
-            || this->pctx != NULL
-            || (this->flags & EVP_MD_CTX_FLAG_NO_INIT) != 0) {
-        if (this->digest == this->fetched_digest)
-            this->digest = NULL;
-        EVP_MD_meth_free(this->fetched_digest);
-        this->fetched_digest = NULL;
+  /*
+   * If there are engines involved or if we're being used as part of
+   * EVP_DigestSignInit then we should use legacy handling for now.
+   */
+  if (
+    this->engine != NULL ||
+    impl != NULL ||
+    tmpimpl != NULL ||
+    this->pctx != NULL ||
+    (this->flags & EVP_MD_CTX_FLAG_NO_INIT) != 0
+  ) {
+    if (this->digest == this->fetched_digest) {
+      this->digest = NULL;
+    }
+    EVP_MD_meth_free(this->fetched_digest);
+    this->fetched_digest = NULL;
+    return this->digestInitLegacy(type, impl, tmpimpl, commentsOnError);
+  }
+  if (type->prov == NULL) {
+    switch(type->type) {
+      case NID_sha256:
+      case NID_md2:
+        break;
+      default:
         return this->digestInitLegacy(type, impl, tmpimpl, commentsOnError);
     }
-
-    if (type->prov == NULL) {
-        switch(type->type) {
-        case NID_sha256:
-        case NID_md2:
-            break;
-        default:
-          return this->digestInitLegacy(type, impl, tmpimpl, commentsOnError);
-        }
+  }
+  if (this->digest != NULL && this->digest->ctx_size > 0) {
+    OPENSSL_clear_free(this->md_data, this->digest->ctx_size);
+    this->md_data = NULL;
+  }
+  /* TODO(3.0): Start of non-legacy code below */
+  if (type->prov == NULL) {
+    provmd = EVP_MD_fetch(NULL, OBJ_nid2sn(type->type), "", commentsOnError);
+    if (provmd == NULL) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Function EVP_MD_fetch failed.\n";
+      }
+      return 0;
     }
-
-    if (this->digest != NULL && this->digest->ctx_size > 0) {
-        OPENSSL_clear_free(this->md_data, this->digest->ctx_size);
-        this->md_data = NULL;
-    }
-
-    /* TODO(3.0): Start of non-legacy code below */
-
-    if (type->prov == NULL) {
-        provmd = EVP_MD_fetch(NULL, OBJ_nid2sn(type->type), "");
-        if (provmd == NULL) {
-            EVPerr(EVP_F_EVP_DIGESTINIT_EX, EVP_R_INITIALIZATION_ERROR);
-            return 0;
-        }
-        type = provmd;
-        EVP_MD_meth_free(this->fetched_digest);
-        this->fetched_digest = provmd;
-    }
-
-    this->digest = type;
+    type = provmd;
+    EVP_MD_meth_free(this->fetched_digest);
+    this->fetched_digest = provmd;
+  }
+  this->digest = type;
+  if (this->provctx == NULL) {
+    this->provctx = this->digest->newctx();
     if (this->provctx == NULL) {
-        this->provctx = this->digest->newctx();
-        if (this->provctx == NULL) {
-            EVPerr(EVP_F_EVP_DIGESTINIT_EX, EVP_R_INITIALIZATION_ERROR);
-            return 0;
-        }
+      if (commentsOnError != 0) {
+        *commentsOnError << "Failed to create new context in digestInit.\n";
+      }
+      return 0;
     }
-
-    if (this->digest->dinit == NULL) {
-        EVPerr(EVP_F_EVP_DIGESTINIT_EX, EVP_R_INITIALIZATION_ERROR);
-        return 0;
+  }
+  if (this->digest->dinit == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Digest->dinit equals null.\n";
     }
-
-    return this->digest->dinit(this->provctx);
+    return 0;
+  }
+  return this->digest->dinit(this->provctx);
 }
 
 int EVP_DigestUpdate(EVP_MD_CTX *ctx, const void *data, size_t count)
@@ -598,10 +604,10 @@ static int evp_md_nid(void *vmd)
     return md->type;
 }
 
-EVP_MD *EVP_MD_fetch(OPENSSL_CTX *ctx, const char *algorithm,
-                     const char *properties)
-{
-    return (EVP_MD *) evp_generic_fetch(ctx, OSSL_OP_DIGEST, algorithm, properties,
-                             evp_md_from_dispatch, evp_md_upref,
-                             evp_md_free, evp_md_nid);
+EVP_MD *EVP_MD_fetch(
+  OPENSSL_CTX *ctx, const char *algorithm, const char *properties, std::stringstream* commentsOnError
+) {
+  return (EVP_MD *) evp_generic_fetch(
+    ctx, OSSL_OP_DIGEST, algorithm, properties, evp_md_from_dispatch, evp_md_upref, evp_md_free, evp_md_nid, commentsOnError
+  );
 }

@@ -2493,6 +2493,9 @@ int tls_construct_server_hello(SSL* s, WPACKET* pkt, std::stringstream* comments
       return 0;
     }
   }
+  if (commentsOnFailure != 0) {
+    *commentsOnFailure << "DEBUG: Got to here, success!!!\n";
+  }
   return 1;
 }
 

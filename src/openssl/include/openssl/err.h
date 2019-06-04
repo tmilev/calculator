@@ -279,8 +279,8 @@ err_state_st* ERR_get_state();
 
 int ERR_get_next_error_library(void);
 
-int ERR_set_mark(void);
-int ERR_pop_to_mark(void);
+int ERR_set_mark();
+int ERR_pop_to_mark();
 int ERR_clear_last_mark(void);
 
 #endif

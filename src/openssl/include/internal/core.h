@@ -44,9 +44,15 @@ typedef struct ossl_method_construct_method_st {
     void (*destruct)(void *method, void *data);
 } OSSL_METHOD_CONSTRUCT_METHOD;
 
-void *ossl_method_construct(OPENSSL_CTX *ctx, int operation_id,
-                            const char *name, const char *properties,
-                            int force_cache,
-                            OSSL_METHOD_CONSTRUCT_METHOD *mcm, void *mcm_data);
+void* ossl_method_construct(
+  OPENSSL_CTX *ctx,
+  int operation_id,
+  const char *name,
+  const char *properties,
+  int force_cache,
+  OSSL_METHOD_CONSTRUCT_METHOD *mcm,
+  void *mcm_data,
+  std::stringstream *commentsOnError
+);
 
 #endif

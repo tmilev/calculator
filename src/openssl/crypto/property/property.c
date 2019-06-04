@@ -62,14 +62,50 @@ typedef struct {
     size_t nelem;
 } IMPL_CACHE_FLUSH;
 
-DEFINE_SPARSE_ARRAY_OF(ALGORITHM);
+//# define SPARSE_ARRAY_OF(type) struct sparse_array_st_ ## type
+
+struct sparse_array_st_ALGORITHM;
+
+static ossl_unused ossl_inline sparse_array_st_ALGORITHM* ossl_sa_ALGORITHM_new(void) {
+  return (sparse_array_st_ALGORITHM*) OPENSSL_SA_new();
+}
+
+static ossl_unused ossl_inline void ossl_sa_ALGORITHM_free(sparse_array_st_ALGORITHM* sa) {
+  OPENSSL_SA_free((OPENSSL_SA*) sa);
+}
+
+static ossl_unused ossl_inline void ossl_sa_ALGORITHM_free_leaves(sparse_array_st_ALGORITHM* sa) {
+  OPENSSL_SA_free_leaves((OPENSSL_SA *)sa);
+}
+
+static ossl_unused ossl_inline size_t ossl_sa_ALGORITHM_num(sparse_array_st_ALGORITHM* sa) {
+  return OPENSSL_SA_num((OPENSSL_SA *)sa);
+}
+
+static ossl_unused ossl_inline void ossl_sa_ALGORITHM_doall(
+  const sparse_array_st_ALGORITHM* sa,
+  void (*leaf)(ossl_uintmax_t, ALGORITHM*)
+) {
+  OPENSSL_SA_doall((OPENSSL_SA *)sa, (void (*)(ossl_uintmax_t, void *))leaf);
+}
+
+static ossl_unused ossl_inline void ossl_sa_ALGORITHM_doall_arg(
+  const sparse_array_st_ALGORITHM* sa,
+  void (*leaf)(ossl_uintmax_t, ALGORITHM*, void *),
+  void *arg
+) {
+  OPENSSL_SA_doall_arg((OPENSSL_SA *)sa, (void (*)(ossl_uintmax_t, void *, void *))leaf, arg);
+}
+
+static ossl_unused ossl_inline int ossl_sa_ALGORITHM_set(sparse_array_st_ALGORITHM* sa, ossl_uintmax_t n, ALGORITHM* val) {
+  return OPENSSL_SA_set((OPENSSL_SA *)sa, n, (void *)val);
+}
 
 static void ossl_method_cache_flush(OSSL_METHOD_STORE *store, int nid);
 static void ossl_method_cache_flush_all(OSSL_METHOD_STORE *c);
 
-int ossl_property_read_lock(OSSL_METHOD_STORE *p)
-{
-    return p != NULL ? CRYPTO_THREAD_read_lock(p->lock) : 0;
+int ossl_property_read_lock(OSSL_METHOD_STORE *p) {
+  return p != NULL ? CRYPTO_THREAD_read_lock(p->lock) : 0;
 }
 
 int ossl_property_write_lock(OSSL_METHOD_STORE *p)
@@ -174,9 +210,8 @@ void ossl_method_store_free(OSSL_METHOD_STORE *store)
     }
 }
 
-static ALGORITHM *ossl_method_store_retrieve(OSSL_METHOD_STORE *store, int nid)
-{
-    return ossl_sa_ALGORITHM_get(store->algs, nid);
+ALGORITHM* ossl_method_store_retrieve(OSSL_METHOD_STORE *store, int nid, std::stringstream* commentsOnError) {
+  return (ALGORITHM*) OPENSSL_SA_get((OPENSSL_SA *)store, nid, commentsOnError);
 }
 
 static int ossl_method_store_insert(OSSL_METHOD_STORE *store, ALGORITHM *alg)
@@ -184,10 +219,11 @@ static int ossl_method_store_insert(OSSL_METHOD_STORE *store, ALGORITHM *alg)
         return ossl_sa_ALGORITHM_set(store->algs, alg->nid, alg);
 }
 
-int ossl_method_store_add(OSSL_METHOD_STORE *store,
-                          int nid, const char *properties,
-                          void *method, void (*method_destruct)(void *))
-{
+int ossl_method_store_add(
+  OSSL_METHOD_STORE *store,
+  int nid, const char *properties,
+  void *method, void (*method_destruct)(void *)
+) {
     ALGORITHM *alg = NULL;
     IMPLEMENTATION *impl;
     int ret = 0;
@@ -218,7 +254,7 @@ int ossl_method_store_add(OSSL_METHOD_STORE *store,
         ossl_prop_defn_set(properties, impl->properties);
     }
 
-    alg = ossl_method_store_retrieve(store, nid);
+    alg = ossl_method_store_retrieve(store, nid, 0);
     if (alg == NULL) {
         if ((alg = (ALGORITHM *) OPENSSL_zalloc(sizeof(*alg))) == NULL
                 || (alg->impls = sk_IMPLEMENTATION_new_null()) == NULL
@@ -255,7 +291,7 @@ int ossl_method_store_remove(OSSL_METHOD_STORE *store, int nid,
 
     ossl_property_write_lock(store);
     ossl_method_cache_flush(store, nid);
-    alg = ossl_method_store_retrieve(store, nid);
+    alg = ossl_method_store_retrieve(store, nid, 0);
     if (alg == NULL) {
         ossl_property_unlock(store);
         return 0;
@@ -280,59 +316,96 @@ int ossl_method_store_remove(OSSL_METHOD_STORE *store, int nid,
     return 0;
 }
 
-int ossl_method_store_fetch(OSSL_METHOD_STORE *store, int nid,
-                            const char *prop_query, void **method)
-{
-    ALGORITHM *alg;
-    IMPLEMENTATION *impl;
-    OSSL_PROPERTY_LIST *pq = NULL, *p2;
-    int ret = 0;
-    int j;
-
-    if (nid <= 0 || method == NULL || store == NULL)
-        return 0;
-
-    /*
-     * This only needs to be a read lock, because queries never create property
-     * names or value and thus don't modify any of the property string layer.
-     */
-    ossl_property_read_lock(store);
-    alg = ossl_method_store_retrieve(store, nid);
-    if (alg == NULL) {
-        ossl_property_unlock(store);
-        return 0;
+int ossl_method_store_fetch(
+  OSSL_METHOD_STORE *store, int nid, const char *prop_query, void **method, std::stringstream* commentsOnError
+) {
+  ALGORITHM *alg;
+  IMPLEMENTATION *impl;
+  OSSL_PROPERTY_LIST *pq = NULL, *p2;
+  int j;
+  if (nid <= 0) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Method fetch failed: nid not positive.\n";
     }
-
-    if (prop_query == NULL) {
-        if ((impl = sk_IMPLEMENTATION_value(alg->impls, 0)) != NULL) {
-            *method = impl->method;
-            ret = 1;
-        }
-        goto fin;
+    return 0;
+  }
+  if (method == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Null method pointer not allowed.\n";
     }
-    pq = ossl_parse_query(prop_query);
-    if (pq == NULL)
-        goto fin;
-    if (store->global_properties != NULL) {
-        p2 = ossl_property_merge(pq, store->global_properties);
-        if (p2 == NULL)
-            goto fin;
-        ossl_property_free(pq);
-        pq = p2;
+    return 0;
+  }
+  if (store == NULL) {
+    if (store != 0) {
+      *commentsOnError << "Null store not allowed.\n";
     }
-    for (j = 0; j < sk_IMPLEMENTATION_num(alg->impls); j++) {
-        impl = sk_IMPLEMENTATION_value(alg->impls, j);
-
-        if (ossl_property_match(pq, impl->properties)) {
-            *method = impl->method;
-            ret = 1;
-            goto fin;
-        }
+    return 0;
+  }
+  /*
+   * This only needs to be a read lock, because queries never create property
+   * names or value and thus don't modify any of the property string layer.
+   */
+  ossl_property_read_lock(store);
+  alg = ossl_method_store_retrieve(store, nid, commentsOnError);
+  if (alg == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to retrieve method with nid: " << nid << ".\n";
     }
-fin:
+    ossl_property_unlock(store);
+    return 0;
+  }
+  if (prop_query == NULL) {
+    int result = 0;
+    impl = sk_IMPLEMENTATION_value(alg->impls, 0);
+    if (impl != NULL) {
+      *method = impl->method;
+      result = 1;
+    } else {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Property query was non-null but implementation was not found.\n";
+      }
+    }
     ossl_property_unlock(store);
     ossl_property_free(pq);
-    return ret;
+    return result;
+  }
+  pq = ossl_parse_query(prop_query);
+  if (pq == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Parse query failed.\n";
+    }
+    ossl_property_unlock(store);
+    ossl_property_free(pq);
+    return 0;
+  }
+  if (store->global_properties != NULL) {
+    p2 = ossl_property_merge(pq, store->global_properties);
+    if (p2 == NULL){
+      if (commentsOnError != 0) {
+        *commentsOnError << "Property merge failed.\n";
+      }
+      ossl_property_unlock(store);
+      ossl_property_free(pq);
+      return 0;
+    }
+    ossl_property_free(pq);
+    pq = p2;
+  }
+  int result = 0;
+  for (j = 0; j < sk_IMPLEMENTATION_num(alg->impls); j++) {
+    impl = sk_IMPLEMENTATION_value(alg->impls, j);
+    if (ossl_property_match(pq, impl->properties)) {
+      *method = impl->method;
+      result = 1;
+      break;
+    }
+  }
+  if (result == 0 && commentsOnError != 0) {
+    *commentsOnError << "Could not find algorithm implementation.\n";
+  }
+  ossl_property_unlock(store);
+  ossl_property_free(pq);
+  return result;
 }
 
 int ossl_method_store_set_global_properties(OSSL_METHOD_STORE *store,
@@ -364,7 +437,7 @@ static void impl_cache_flush_alg(ossl_uintmax_t idx, ALGORITHM *alg)
 
 static void ossl_method_cache_flush(OSSL_METHOD_STORE *store, int nid)
 {
-    ALGORITHM *alg = ossl_method_store_retrieve(store, nid);
+    ALGORITHM *alg = ossl_method_store_retrieve(store, nid, 0);
 
     if (alg != NULL) {
         store->nelem -= lh_QUERY_num_items(alg->cache);
@@ -444,7 +517,7 @@ int ossl_method_store_cache_get(OSSL_METHOD_STORE *store, int nid,
         return 0;
 
     ossl_property_read_lock(store);
-    alg = ossl_method_store_retrieve(store, nid);
+    alg = ossl_method_store_retrieve(store, nid, 0);
     if (alg == NULL) {
         ossl_property_unlock(store);
         return 0;
@@ -461,9 +534,9 @@ int ossl_method_store_cache_get(OSSL_METHOD_STORE *store, int nid,
     return 1;
 }
 
-int ossl_method_store_cache_set(OSSL_METHOD_STORE *store, int nid,
-                                const char *prop_query, void *method)
-{
+int ossl_method_store_cache_set(
+  OSSL_METHOD_STORE *store, int nid, const char *prop_query, void *method
+) {
     QUERY elem, *old, *p = NULL;
     ALGORITHM *alg;
     size_t len;
@@ -476,7 +549,7 @@ int ossl_method_store_cache_set(OSSL_METHOD_STORE *store, int nid,
     ossl_property_write_lock(store);
     if (store->need_flush)
         ossl_method_cache_flush_some(store);
-    alg = ossl_method_store_retrieve(store, nid);
+    alg = ossl_method_store_retrieve(store, nid, 0);
     if (alg == NULL) {
         ossl_property_unlock(store);
         return 0;

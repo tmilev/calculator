@@ -604,8 +604,7 @@ static int evp_md_nid(void *vmd)
     return md->type;
 }
 
-EVP_MD *EVP_MD_fetch(
-  OPENSSL_CTX *ctx, const char *algorithm, const char *properties, std::stringstream* commentsOnError
+EVP_MD *EVP_MD_fetch(openssl_ctx_st *ctx, const char *algorithm, const char *properties, std::stringstream* commentsOnError
 ) {
   return (EVP_MD *) evp_generic_fetch(
     ctx, OSSL_OP_DIGEST, algorithm, properties, evp_md_from_dispatch, evp_md_upref, evp_md_free, evp_md_nid, commentsOnError

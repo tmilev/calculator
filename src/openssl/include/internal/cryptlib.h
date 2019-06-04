@@ -105,6 +105,6 @@ typedef struct openssl_ctx_method {
 /* For each type of data to store in the context, an index must be created */
 int openssl_ctx_new_index(const OPENSSL_CTX_METHOD *);
 /* Functions to retrieve pointers to data by index */
-void *openssl_ctx_get_data(OPENSSL_CTX *, int /* index */);
+void *openssl_ctx_get_data(openssl_ctx_st*, int /* index */);
 
 #endif

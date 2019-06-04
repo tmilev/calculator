@@ -65,7 +65,7 @@
 # define EVP_PKEY_X448 NID_X448
 # define EVP_PKEY_ED448 NID_ED448
 
-int EVP_set_default_properties(OPENSSL_CTX *libctx, const char *propq);
+int EVP_set_default_properties(openssl_ctx_st *libctx, const char *propq);
 
 # define EVP_PKEY_MO_SIGN        0x0001
 # define EVP_PKEY_MO_VERIFY      0x0002
@@ -559,7 +559,7 @@ __owur int EVP_DigestFinalXOF(EVP_MD_CTX *ctx, unsigned char *md,
                               size_t len);
 
 __owur EVP_MD *EVP_MD_fetch(
-  OPENSSL_CTX *ctx, const char *algorithm, const char *properties, std::stringstream *commentsOnError
+  openssl_ctx_st *ctx, const char *algorithm, const char *properties, std::stringstream *commentsOnError
 );
 
 int EVP_read_pw_string(char *buf, int length, const char *prompt, int verify);

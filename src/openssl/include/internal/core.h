@@ -26,31 +26,30 @@
  * However, force_cache can be used to force caching whatever the provider
  * says (for example, because the application knows better).
  */
-typedef struct ossl_method_construct_method_st {
+struct ossl_method_construct_method_st {
     /* Create store */
     void *(*alloc_tmp_store)(void);
     /* Remove a store */
     void (*dealloc_tmp_store)(void *store);
     /* Get an already existing method from a store */
-    void* (*geT)(OPENSSL_CTX *libctx, void *store, const char *propquery,
-                 void *data);
+    void* (*get)(openssl_ctx_st *libctx, void *store, const char *propquery, void *data, std::stringstream* commentsOnError);
     /* Store a method in a store */
-    int (*put)(OPENSSL_CTX *libctx, void *store, const char *propdef,
+    int (*put)(openssl_ctx_st *libctx, void *store, const char *propdef,
                void *method, void *data);
     /* Construct a new method */
     void *(*construct)(const char *algorithm_name, const OSSL_DISPATCH *fns,
                        OSSL_PROVIDER *prov, void *data);
     /* Destruct a method */
     void (*destruct)(void *method, void *data);
-} OSSL_METHOD_CONSTRUCT_METHOD;
+};
 
 void* ossl_method_construct(
-  OPENSSL_CTX *ctx,
+  openssl_ctx_st *ctx,
   int operation_id,
   const char *name,
   const char *properties,
   int force_cache,
-  OSSL_METHOD_CONSTRUCT_METHOD *mcm,
+  ossl_method_construct_method_st *mcm,
   void *mcm_data,
   std::stringstream *commentsOnError
 );

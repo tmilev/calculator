@@ -15,16 +15,16 @@ struct openssl_ctx_st {
     CRYPTO_EX_DATA data;
 };
 
-static OPENSSL_CTX default_context;
+static openssl_ctx_st default_context;
 
-static int context_init(OPENSSL_CTX *ctx)
+static int context_init(openssl_ctx_st *ctx)
 {
     return (ctx->lock = CRYPTO_THREAD_lock_new()) != NULL
         && CRYPTO_new_ex_data(CRYPTO_EX_INDEX_OPENSSL_CTX, NULL,
                               &ctx->data);
 }
 
-static int context_deinit(OPENSSL_CTX *ctx)
+static int context_deinit(openssl_ctx_st *ctx)
 {
     CRYPTO_free_ex_data(CRYPTO_EX_INDEX_OPENSSL_CTX, NULL, &ctx->data);
     CRYPTO_THREAD_lock_free(ctx->lock);
@@ -43,9 +43,9 @@ DEFINE_RUN_ONCE_STATIC(do_default_context_init)
         && OPENSSL_atexit(do_default_context_deinit);
 }
 
-OPENSSL_CTX *OPENSSL_CTX_new(void)
+openssl_ctx_st *OPENSSL_CTX_new()
 {
-    OPENSSL_CTX *ctx = (OPENSSL_CTX *) OPENSSL_zalloc(sizeof(*ctx));
+    openssl_ctx_st *ctx = (openssl_ctx_st *) OPENSSL_zalloc(sizeof(*ctx));
 
     if (ctx != NULL && !context_init(ctx)) {
         OPENSSL_CTX_free(ctx);
@@ -54,7 +54,7 @@ OPENSSL_CTX *OPENSSL_CTX_new(void)
     return ctx;
 }
 
-void OPENSSL_CTX_free(OPENSSL_CTX *ctx)
+void OPENSSL_CTX_free(openssl_ctx_st *ctx)
 {
     if (ctx != NULL)
         context_deinit(ctx);
@@ -86,7 +86,7 @@ int openssl_ctx_new_index(const OPENSSL_CTX_METHOD *meth)
                                    openssl_ctx_generic_free);
 }
 
-void *openssl_ctx_get_data(OPENSSL_CTX *ctx, int index)
+void *openssl_ctx_get_data(openssl_ctx_st *ctx, int index)
 {
     void *data = NULL;
 

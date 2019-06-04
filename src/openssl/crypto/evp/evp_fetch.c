@@ -58,7 +58,7 @@ DEFINE_RUN_ONCE_STATIC(do_default_method_store_init)
 struct method_data_st {
     const char *name;
     int nid;
-    OSSL_METHOD_CONSTRUCT_METHOD *mcm;
+    ossl_method_construct_method_st *mcm;
     void *(*method_from_dispatch)(int nid, const OSSL_DISPATCH *,
                                   OSSL_PROVIDER *);
     int (*refcnt_up_method)(void *method);
@@ -80,7 +80,7 @@ static void *alloc_tmp_method_store(void)
         ossl_method_store_free((OSSL_METHOD_STORE *) store);
 }
 
-static OSSL_METHOD_STORE *get_default_method_store(OPENSSL_CTX *libctx)
+static OSSL_METHOD_STORE *get_default_method_store(openssl_ctx_st *libctx)
 {
     if (!RUN_ONCE(&default_method_store_init_flag,
                   do_default_method_store_init))
@@ -88,26 +88,38 @@ static OSSL_METHOD_STORE *get_default_method_store(OPENSSL_CTX *libctx)
     return (OSSL_METHOD_STORE *) openssl_ctx_get_data(libctx, default_method_store_index);
 }
 
-static void *get_method_from_store(OPENSSL_CTX *libctx, void *store,
-                                   const char *propquery, void *data)
-{
-    struct method_data_st* methdata = (method_data_st*) data;
-    void *method = NULL;
-
-    if (store == NULL
-        && (store = get_default_method_store(libctx)) == NULL)
-        return NULL;
-
-    (void)ossl_method_store_fetch((OSSL_METHOD_STORE *) store, methdata->nid, propquery, &method);
-
-    if (method != NULL
-        && !methdata->refcnt_up_method(method)) {
-        method = NULL;
+static void *get_method_from_store(
+  openssl_ctx_st *libctx, void *store, const char *propquery, void *data, std::stringstream* commentsOnError
+) {
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: Here I am in get_method_from_store.\n";
+  }
+  struct method_data_st* methdata = (method_data_st*) data;
+  void *method = NULL;
+  if (store == NULL) {
+    store = get_default_method_store(libctx);
+    if (store == NULL) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Failed to get default method store.\n";
+      }
+      return 0;
     }
-    return method;
+  }
+  ossl_method_store_fetch((OSSL_METHOD_STORE *) store, methdata->nid, propquery, &method, commentsOnError);
+  if (method != NULL) {
+    if (!methdata->refcnt_up_method(method)) {
+      method = NULL;
+      if (commentsOnError != 0) {
+        *commentsOnError << "Failed call to refcnt_up_method.\n";
+      }
+    }
+  } else if (commentsOnError != 0){
+    *commentsOnError << "Failed to fetch method.\n";
+  }
+  return method;
 }
 
-static int put_method_in_store(OPENSSL_CTX *libctx, void *store,
+static int put_method_in_store(openssl_ctx_st *libctx, void *store,
                                const char *propdef,
                                void *method, void *data)
 {
@@ -166,8 +178,7 @@ static void destruct_method(void *method, void *data)
     methdata->destruct_method(method);
 }
 
-void *evp_generic_fetch(
-  OPENSSL_CTX *libctx,
+void *evp_generic_fetch(openssl_ctx_st *libctx,
   int operation_id,
   const char *algorithm,
   const char *properties,
@@ -180,14 +191,14 @@ void *evp_generic_fetch(
   int nid = OBJ_sn2nid(algorithm);
   void *method = NULL;
   if (nid == NID_undef || !ossl_method_store_cache_get(NULL, nid, properties, &method)) {
-    OSSL_METHOD_CONSTRUCT_METHOD mcm = {
-      alloc_tmp_method_store,
-      dealloc_tmp_method_store,
-      get_method_from_store,
-      put_method_in_store,
-      construct_method,
-      destruct_method
-    };
+    ossl_method_construct_method_st mcm;
+    // use of struct allocation makes tracing origins very difficult.
+    mcm.alloc_tmp_store = alloc_tmp_method_store;
+    mcm.dealloc_tmp_store = dealloc_tmp_method_store;
+    mcm.construct = construct_method;
+    mcm.destruct = destruct_method;
+    mcm.get = get_method_from_store;
+    mcm.put = put_method_in_store;
     struct method_data_st mcmdata;
     mcmdata.nid = nid;
     mcmdata.mcm = &mcm;
@@ -207,7 +218,7 @@ void *evp_generic_fetch(
   return method;
 }
 
-int EVP_set_default_properties(OPENSSL_CTX *libctx, const char *propq)
+int EVP_set_default_properties(openssl_ctx_st *libctx, const char *propq)
 {
     OSSL_METHOD_STORE *store = get_default_method_store(libctx);
 

@@ -12,7 +12,7 @@
 #include "../include/openssl/provider.h"
 #include "../include/internal/provider.h"
 
-OSSL_PROVIDER *OSSL_PROVIDER_load(OPENSSL_CTX *libctx, const char *name)
+OSSL_PROVIDER *OSSL_PROVIDER_load(openssl_ctx_st *libctx, const char *name)
 {
     OSSL_PROVIDER *prov = NULL;
 
@@ -45,7 +45,7 @@ int OSSL_PROVIDER_get_params(OSSL_PROVIDER *prov, const OSSL_PARAM params[])
     return ossl_provider_get_params(prov, params);
 }
 
-int OSSL_PROVIDER_add_builtin(OPENSSL_CTX *libctx, const char *name,
+int OSSL_PROVIDER_add_builtin(openssl_ctx_st *libctx, const char *name,
                               OSSL_provider_init_fn *init_fn)
 {
     OSSL_PROVIDER *prov = NULL;

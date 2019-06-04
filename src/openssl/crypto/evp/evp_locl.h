@@ -89,7 +89,7 @@ int is_partially_overlapping(const void *ptr1, const void *ptr2, int len);
 #include "../../include/openssl/core.h"
 
 void* evp_generic_fetch(
-  OPENSSL_CTX *ctx,
+  openssl_ctx_st *ctx,
   int operation_id,
   const char *algorithm,
   const char *properties,

@@ -22,8 +22,8 @@
  */
 
 /* Provider Object finder, constructor and destructor */
-OSSL_PROVIDER *ossl_provider_find(OPENSSL_CTX *libctx, const char *name);
-OSSL_PROVIDER *ossl_provider_new(OPENSSL_CTX *libctx, const char *name,
+OSSL_PROVIDER *ossl_provider_find(openssl_ctx_st *libctx, const char *name);
+OSSL_PROVIDER *ossl_provider_new(openssl_ctx_st *libctx, const char *name,
                                  OSSL_provider_init_fn *init_function);
 int ossl_provider_upref(OSSL_PROVIDER *prov);
 void ossl_provider_free(OSSL_PROVIDER *prov);
@@ -42,7 +42,7 @@ int ossl_provider_add_parameter(OSSL_PROVIDER *prov, const char *name,
 int ossl_provider_activate(OSSL_PROVIDER *prov);
 
 /* Iterate over all loaded providers */
-int ossl_provider_forall_loaded(OPENSSL_CTX *,
+int ossl_provider_forall_loaded(openssl_ctx_st *,
                                 int (*cb)(OSSL_PROVIDER *provider,
                                           void *cbdata),
                                 void *cbdata);

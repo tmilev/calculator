@@ -17,11 +17,11 @@
 #include <sstream>
 
 struct construct_data_st {
-    OPENSSL_CTX *libctx;
+    openssl_ctx_st *libctx;
     OSSL_METHOD_STORE *store;
     int operation_id;
     int force_store;
-    OSSL_METHOD_CONSTRUCT_METHOD *mcm;
+    ossl_method_construct_method_st *mcm;
     void *mcm_data;
 };
 
@@ -73,17 +73,19 @@ static int ossl_method_construct_this(OSSL_PROVIDER *provider, void *cbdata)
     return 1;
 }
 
-void *ossl_method_construct(
-  OPENSSL_CTX *libctx,
+void *ossl_method_construct(openssl_ctx_st *libctx,
   int operation_id,
   const char *name,
   const char *propquery,
   int force_store,
-  OSSL_METHOD_CONSTRUCT_METHOD *mcm,
+  ossl_method_construct_method_st *mcm,
   void *mcm_data,
   std::stringstream* commentsOnError
 ) {
-  void *method = mcm->geT(libctx, NULL, propquery, mcm_data);
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: got to method construct.\n";
+  }
+  void *method = mcm->get(libctx, NULL, propquery, mcm_data, commentsOnError);
   if (method != NULL) {
     return method;
   }
@@ -103,7 +105,7 @@ void *ossl_method_construct(
   cbdata.mcm = mcm;
   cbdata.mcm_data = mcm_data;
   ossl_provider_forall_loaded(libctx, ossl_method_construct_this, &cbdata);
-  method = mcm->geT(libctx, cbdata.store, propquery, mcm_data);
+  method = mcm->get(libctx, cbdata.store, propquery, mcm_data, commentsOnError);
   if (commentsOnError != 0) {
     *commentsOnError << "DEBUG: Executed final mcm get.\n";
     if (method == 0) {

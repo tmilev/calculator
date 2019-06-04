@@ -140,7 +140,7 @@ DEFINE_RUN_ONCE_STATIC(do_provider_store_init)
 }
 
 
-static struct provider_store_st *get_provider_store(OPENSSL_CTX *libctx)
+static struct provider_store_st *get_provider_store(openssl_ctx_st *libctx)
 {
     struct provider_store_st *store = NULL;
 
@@ -153,7 +153,7 @@ static struct provider_store_st *get_provider_store(OPENSSL_CTX *libctx)
     return store;
 }
 
-OSSL_PROVIDER *ossl_provider_find(OPENSSL_CTX *libctx, const char *name)
+OSSL_PROVIDER *ossl_provider_find(openssl_ctx_st *libctx, const char *name)
 {
     struct provider_store_st *store = NULL;
     OSSL_PROVIDER *prov = NULL;
@@ -207,7 +207,7 @@ int ossl_provider_upref(OSSL_PROVIDER *prov)
     return ref;
 }
 
-OSSL_PROVIDER *ossl_provider_new(OPENSSL_CTX *libctx, const char *name,
+OSSL_PROVIDER *ossl_provider_new(openssl_ctx_st *libctx, const char *name,
                                  OSSL_provider_init_fn *init_function)
 {
     struct provider_store_st *store = NULL;
@@ -517,7 +517,7 @@ static int provider_forall_loaded(struct provider_store_st *store,
     return ret;
 }
 
-int ossl_provider_forall_loaded(OPENSSL_CTX *ctx,
+int ossl_provider_forall_loaded(openssl_ctx_st *ctx,
                                 int (*cb)(OSSL_PROVIDER *provider,
                                           void *cbdata),
                                 void *cbdata)

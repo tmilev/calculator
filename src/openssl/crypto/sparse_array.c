@@ -60,7 +60,7 @@ struct sparse_array_st {
     void **nodes;
 };
 
-OPENSSL_SA *OPENSSL_SA_new(void)
+OPENSSL_SA *OPENSSL_SA_new()
 {
     OPENSSL_SA *res = (OPENSSL_SA *) OPENSSL_zalloc(sizeof(*res));
 
@@ -157,22 +157,31 @@ size_t OPENSSL_SA_num(const OPENSSL_SA *sa)
     return sa == NULL ? 0 : sa->nelem;
 }
 
-void *OPENSSL_SA_get(const OPENSSL_SA *sa, ossl_uintmax_t n)
-{
-    int level;
-    void **p, *r = NULL;
-
-    if (sa == NULL)
-        return NULL;
-
-    if (n <= sa->top) {
-        p = sa->nodes;
-        for (level = sa->levels - 1; p != NULL && level > 0; level--)
-            p = (void **)p[(n >> (OPENSSL_SA_BLOCK_BITS * level))
-                           & SA_BLOCK_MASK];
-        r = p == NULL ? NULL : p[n & SA_BLOCK_MASK];
+void *OPENSSL_SA_get(const OPENSSL_SA *sa, ossl_uintmax_t n, std::stringstream* commentsOnError) {
+  int level;
+  if (sa == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Calling openssl getter with empty openssl object is forbidden.\n";
     }
-    return r;
+    return NULL;
+  }
+  if (n > sa->top) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Algorithm id is too large.\n";
+    }
+    return NULL;
+  }
+  void **p, *r = NULL;
+  p = sa->nodes;
+  for (level = sa->levels - 1; p != NULL && level > 0; level--) {
+    int indexNonMasked = (n >> (OPENSSL_SA_BLOCK_BITS * level));
+    int index = indexNonMasked & SA_BLOCK_MASK;
+    p = (void **) p[index];
+  }
+  if (p != NULL) {
+    r = p[n & SA_BLOCK_MASK];
+  }
+  return r;
 }
 
 static ossl_inline void **alloc_node(void)

@@ -442,8 +442,9 @@ int CRYPTO_THREAD_cleanup_local(CRYPTO_THREAD_LOCAL *key);
 CRYPTO_THREAD_ID CRYPTO_THREAD_get_current_id(void);
 int CRYPTO_THREAD_compare_id(CRYPTO_THREAD_ID a, CRYPTO_THREAD_ID b);
 
-OPENSSL_CTX *OPENSSL_CTX_new(void);
-void OPENSSL_CTX_free(OPENSSL_CTX *);
+struct openssl_ctx_st;
+openssl_ctx_st* OPENSSL_CTX_new();
+void OPENSSL_CTX_free(openssl_ctx_st *);
 
 
 #endif

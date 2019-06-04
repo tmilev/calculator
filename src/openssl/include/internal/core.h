@@ -32,7 +32,7 @@ typedef struct ossl_method_construct_method_st {
     /* Remove a store */
     void (*dealloc_tmp_store)(void *store);
     /* Get an already existing method from a store */
-    void *(*get)(OPENSSL_CTX *libctx, void *store, const char *propquery,
+    void* (*geT)(OPENSSL_CTX *libctx, void *store, const char *propquery,
                  void *data);
     /* Store a method in a store */
     int (*put)(OPENSSL_CTX *libctx, void *store, const char *propdef,

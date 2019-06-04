@@ -196,8 +196,13 @@ void *evp_generic_fetch(
     mcmdata.refcnt_up_method = upref_method;
     mcmdata.destruct_method = free_method;
     mcmdata.nid_method = nid_method;
-    method = ossl_method_construct(libctx, operation_id, algorithm, properties, 0 /* !force_cache */, &mcm, &mcmdata, commentsOnError);
+    method = ossl_method_construct(
+      libctx, operation_id, algorithm, properties, 0 /* !force_cache */, &mcm, &mcmdata, commentsOnError
+    );
     ossl_method_store_cache_set(NULL, nid, properties, method);
+    if (commentsOnError != 0) {
+      *commentsOnError << "DEBUG: ossl method store cache set executed.\n";
+    }
   }
   return method;
 }

@@ -83,7 +83,7 @@ void *ossl_method_construct(
   void *mcm_data,
   std::stringstream* commentsOnError
 ) {
-  void *method = mcm->get(libctx, NULL, propquery, mcm_data);
+  void *method = mcm->geT(libctx, NULL, propquery, mcm_data);
   if (method != NULL) {
     return method;
   }
@@ -103,9 +103,12 @@ void *ossl_method_construct(
   cbdata.mcm = mcm;
   cbdata.mcm_data = mcm_data;
   ossl_provider_forall_loaded(libctx, ossl_method_construct_this, &cbdata);
-  method = mcm->get(libctx, cbdata.store, propquery, mcm_data);
+  method = mcm->geT(libctx, cbdata.store, propquery, mcm_data);
   if (commentsOnError != 0) {
-    *commentsOnError << "Executed final mcm get.\n";
+    *commentsOnError << "DEBUG: Executed final mcm get.\n";
+    if (method == 0) {
+      *commentsOnError << "DEBUG: method is ZERO!!!\n";
+    }
   }
   mcm->dealloc_tmp_store(cbdata.store);
   return method;

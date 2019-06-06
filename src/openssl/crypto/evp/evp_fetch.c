@@ -25,16 +25,16 @@ static int default_method_store_index = -1;
 
 static void default_method_store_free(void *vstore)
 {
-    ossl_method_store_free((OSSL_METHOD_STORE *) vstore);
+    ossl_method_store_free((ossl_method_store_st *) vstore);
 }
 
-static void *default_method_store_new(void)
+void* default_method_store_new(std::stringstream* commentsOnError)
 {
-    return ossl_method_store_new();
+    return ossl_method_store_new(commentsOnError);
 }
 
 
-static const OPENSSL_CTX_METHOD default_method_store_method = {
+static const openssl_ctx_method default_method_store_method = {
     default_method_store_new,
     default_method_store_free,
 };
@@ -59,8 +59,7 @@ struct method_data_st {
     const char *name;
     int nid;
     ossl_method_construct_method_st *mcm;
-    void *(*method_from_dispatch)(int nid, const OSSL_DISPATCH *,
-                                  OSSL_PROVIDER *);
+    void *(*method_from_dispatch)(int nid, const OSSL_DISPATCH *, ossl_provider_st* );
     int (*refcnt_up_method)(void *method);
     void (*destruct_method)(void *method);
     int (*nid_method)(void *method);
@@ -69,23 +68,21 @@ struct method_data_st {
 /*
  * Generic routines to fetch / create EVP methods with ossl_method_construct()
  */
-static void *alloc_tmp_method_store(void)
-{
-    return ossl_method_store_new();
+static void *alloc_tmp_method_store(std::stringstream* commentsOnError) {
+  return ossl_method_store_new(commentsOnError);
 }
 
  static void dealloc_tmp_method_store(void *store)
 {
     if (store != NULL)
-        ossl_method_store_free((OSSL_METHOD_STORE *) store);
+        ossl_method_store_free((ossl_method_store_st *) store);
 }
 
-static OSSL_METHOD_STORE *get_default_method_store(openssl_ctx_st *libctx)
+static ossl_method_store_st *get_default_method_store(openssl_ctx_st *libctx)
 {
-    if (!RUN_ONCE(&default_method_store_init_flag,
-                  do_default_method_store_init))
+    if (!RUN_ONCE(&default_method_store_init_flag, do_default_method_store_init, 0))
         return NULL;
-    return (OSSL_METHOD_STORE *) openssl_ctx_get_data(libctx, default_method_store_index);
+    return (ossl_method_store_st *) openssl_ctx_get_data(libctx, default_method_store_index);
 }
 
 static void *get_method_from_store(
@@ -105,7 +102,7 @@ static void *get_method_from_store(
       return 0;
     }
   }
-  ossl_method_store_fetch((OSSL_METHOD_STORE *) store, methdata->nid, propquery, &method, commentsOnError);
+  ossl_method_store_fetch((ossl_method_store_st *) store, methdata->nid, propquery, &method, commentsOnError);
   if (method != NULL) {
     if (!methdata->refcnt_up_method(method)) {
       method = NULL;
@@ -134,16 +131,15 @@ static int put_method_in_store(openssl_ctx_st *libctx, void *store,
         return 0;
 
     if (methdata->refcnt_up_method(method)
-        && ossl_method_store_add((OSSL_METHOD_STORE*) store, nid, propdef, method,
+        && ossl_method_store_add((ossl_method_store_st*) store, nid, propdef, method,
                                  methdata->destruct_method))
         return 1;
     return 0;
 }
 
-static void *construct_method(const char *algorithm_name,
-                              const OSSL_DISPATCH *fns, OSSL_PROVIDER *prov,
-                              void *data)
-{
+static void *construct_method(
+  const char *algorithm_name, const OSSL_DISPATCH *fns, ossl_provider_st *prov, void *data
+) {
     struct method_data_st *methdata = (method_data_st *) data;
     void *method = NULL;
     int nid = OBJ_sn2nid(algorithm_name);
@@ -182,7 +178,7 @@ void *evp_generic_fetch(openssl_ctx_st *libctx,
   int operation_id,
   const char *algorithm,
   const char *properties,
-  void *(*new_method)(int nid, const OSSL_DISPATCH *fns, OSSL_PROVIDER *prov),
+  void *(*new_method)(int nid, const OSSL_DISPATCH *fns, ossl_provider_st* prov),
   int (*upref_method)(void *),
   void (*free_method)(void *),
   int (*nid_method)(void *),
@@ -220,7 +216,7 @@ void *evp_generic_fetch(openssl_ctx_st *libctx,
 
 int EVP_set_default_properties(openssl_ctx_st *libctx, const char *propq)
 {
-    OSSL_METHOD_STORE *store = get_default_method_store(libctx);
+    ossl_method_store_st *store = get_default_method_store(libctx);
 
     if (store != NULL)
         return ossl_method_store_set_global_properties(store, propq);

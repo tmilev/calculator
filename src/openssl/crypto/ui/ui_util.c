@@ -149,7 +149,7 @@ UI_METHOD *UI_UTIL_wrap_read_pem_callback(pem_password_cb *cb, int rwflag)
         || UI_method_set_reader(ui_method, ui_read) < 0
         || UI_method_set_writer(ui_method, ui_write) < 0
         || UI_method_set_closer(ui_method, ui_close) < 0
-        || !RUN_ONCE(&get_index_once, ui_method_data_index_init)
+        || !RUN_ONCE(&get_index_once, ui_method_data_index_init, 0)
         || UI_method_set_ex_data(ui_method, ui_method_data_index, data) < 0) {
         UI_destroy_method(ui_method);
         OPENSSL_free(data);

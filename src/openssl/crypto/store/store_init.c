@@ -20,7 +20,7 @@ DEFINE_RUN_ONCE_STATIC(do_store_init)
 
 int ossl_store_init_once(void)
 {
-    if (!RUN_ONCE(&store_init, do_store_init)) {
+    if (!RUN_ONCE(&store_init, do_store_init, 0)) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_INIT_ONCE, ERR_R_MALLOC_FAILURE);
         return 0;
     }

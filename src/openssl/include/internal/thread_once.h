@@ -115,8 +115,8 @@
  *
  * (*) by convention, since the init function must return 1 on success.
  */
-#define RUN_ONCE(once, init)                                            \
-    (CRYPTO_THREAD_run_once(once, init##_ossl_) ? init##_ossl_ret_ : 0)
+#define RUN_ONCE(once, init, commentsOnError)                                            \
+    (CRYPTO_THREAD_run_once(once, init##_ossl_, commentsOnError) ? init##_ossl_ret_ : 0)
 
 /*
  * RUN_ONCE_ALT - use CRYPTO_THREAD_run_once, to run an alternative initialiser
@@ -134,4 +134,4 @@
  * (*) by convention, since the init function must return 1 on success.
  */
 #define RUN_ONCE_ALT(once, initalt, init)                               \
-    (CRYPTO_THREAD_run_once(once, initalt##_ossl_) ? init##_ossl_ret_ : 0)
+    (CRYPTO_THREAD_run_once(once, initalt##_ossl_, 0) ? init##_ossl_ret_ : 0)

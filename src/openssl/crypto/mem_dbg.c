@@ -124,7 +124,7 @@ int CRYPTO_mem_ctrl(int mode)
 #else
     int ret = mh_mode;
 
-    if (!RUN_ONCE(&memdbg_init, do_memdbg_init))
+    if (!RUN_ONCE(&memdbg_init, do_memdbg_init, 0))
         return -1;
 
     CRYPTO_THREAD_write_lock(memdbg_lock);
@@ -198,7 +198,7 @@ static int mem_check_on(void)
     CRYPTO_THREAD_ID cur;
 
     if (mh_mode & CRYPTO_MEM_CHECK_ON) {
-        if (!RUN_ONCE(&memdbg_init, do_memdbg_init))
+        if (!RUN_ONCE(&memdbg_init, do_memdbg_init, 0))
             return 0;
 
         cur = CRYPTO_THREAD_get_current_id();
@@ -242,7 +242,7 @@ static int pop_info(void)
 {
     APP_INFO *current = NULL;
 
-    if (!RUN_ONCE(&memdbg_init, do_memdbg_init))
+    if (!RUN_ONCE(&memdbg_init, do_memdbg_init, 0))
         return 0;
 
     current = (APP_INFO *)CRYPTO_THREAD_get_local(&appinfokey);
@@ -274,7 +274,7 @@ int CRYPTO_mem_debug_push(const char *info, const char *file, int line)
     if (mem_check_on()) {
         CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_DISABLE);
 
-        if (!RUN_ONCE(&memdbg_init, do_memdbg_init)
+        if (!RUN_ONCE(&memdbg_init, do_memdbg_init, 0)
             || (ami = (APP_INFO *) OPENSSL_malloc(sizeof(*ami))) == NULL)
             goto err;
 
@@ -328,7 +328,7 @@ void CRYPTO_mem_debug_malloc(void *addr, size_t num, int before_p,
         if (mem_check_on()) {
             CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_DISABLE);
 
-            if (!RUN_ONCE(&memdbg_init, do_memdbg_init)
+            if (!RUN_ONCE(&memdbg_init, do_memdbg_init, 0)
                 || (m = (MEM *) OPENSSL_malloc(sizeof(*m))) == NULL) {
                 OPENSSL_free(addr);
                 CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ENABLE);
@@ -574,7 +574,7 @@ int CRYPTO_mem_leaks_cb(int (*cb) (const char *str, size_t len, void *u),
     /* Ensure all resources are released */
     OPENSSL_cleanup();
 
-    if (!RUN_ONCE(&memdbg_init, do_memdbg_init))
+    if (!RUN_ONCE(&memdbg_init, do_memdbg_init, 0))
         return -1;
 
     CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_DISABLE);

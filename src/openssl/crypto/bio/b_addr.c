@@ -748,7 +748,7 @@ int BIO_lookup_ex(const char *host, const char *service, int lookup_type,
         struct servent se_fallback = { NULL, NULL, 0, NULL };
 #endif
 
-        if (!RUN_ONCE(&bio_lookup_init, do_bio_lookup_init)) {
+        if (!RUN_ONCE(&bio_lookup_init, do_bio_lookup_init, 0)) {
             BIOerr(BIO_F_BIO_LOOKUP_EX, ERR_R_MALLOC_FAILURE);
             ret = 0;
             goto err;

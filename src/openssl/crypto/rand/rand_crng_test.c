@@ -66,7 +66,7 @@ DEFINE_RUN_ONCE_STATIC(do_rand_crngt_init)
 
 int rand_crngt_single_init(void)
 {
-    return RUN_ONCE(&rand_crngt_init_flag, do_rand_crngt_init);
+    return RUN_ONCE(&rand_crngt_init_flag, do_rand_crngt_init, 0);
 }
 
 size_t rand_crngt_get_entropy(RAND_DRBG *drbg,
@@ -79,7 +79,7 @@ size_t rand_crngt_get_entropy(RAND_DRBG *drbg,
     size_t q, r = 0, s, t = 0;
     int attempts = 3;
 
-    if (!RUN_ONCE(&rand_crngt_init_flag, do_rand_crngt_init))
+    if (!RUN_ONCE(&rand_crngt_init_flag, do_rand_crngt_init, 0))
         return 0;
 
     if ((pool = rand_pool_new(entropy, min_len, max_len)) == NULL)

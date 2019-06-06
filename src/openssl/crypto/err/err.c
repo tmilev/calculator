@@ -348,24 +348,22 @@ static int err_load_strings(const ERR_STRING_DATA *str)
     return 1;
 }
 
-int ERR_load_ERR_strings(void)
-{
-#ifndef OPENSSL_NO_ERR
-    if (!RUN_ONCE(&err_string_init, do_err_strings_init))
+int ERR_load_ERR_strings(std::stringstream *commentsOnError) {
+    if (!RUN_ONCE(&err_string_init, do_err_strings_init, commentsOnError)) {
         return 0;
+    }
 
     err_load_strings(ERR_str_libraries);
     err_load_strings(ERR_str_reasons);
     err_patch(ERR_LIB_SYS, ERR_str_functs);
     err_load_strings(ERR_str_functs);
     build_SYS_str_reasons();
-#endif
     return 1;
 }
 
 int ERR_load_strings(int lib, ERR_STRING_DATA *str)
 {
-    if (ERR_load_ERR_strings() == 0)
+    if (ERR_load_ERR_strings(0) == 0)
         return 0;
 
     err_patch(lib, str);
@@ -375,7 +373,7 @@ int ERR_load_strings(int lib, ERR_STRING_DATA *str)
 
 int ERR_load_strings_const(const ERR_STRING_DATA *str)
 {
-    if (ERR_load_ERR_strings() == 0)
+    if (ERR_load_ERR_strings(0) == 0)
         return 0;
     err_load_strings(str);
     return 1;
@@ -383,7 +381,7 @@ int ERR_load_strings_const(const ERR_STRING_DATA *str)
 
 int ERR_unload_strings(int lib, ERR_STRING_DATA *str)
 {
-    if (!RUN_ONCE(&err_string_init, do_err_strings_init))
+    if (!RUN_ONCE(&err_string_init, do_err_strings_init, 0))
         return 0;
 
     CRYPTO_THREAD_write_lock(err_string_lock);
@@ -400,7 +398,7 @@ int ERR_unload_strings(int lib, ERR_STRING_DATA *str)
 
 void err_free_strings_int(void)
 {
-    if (!RUN_ONCE(&err_string_init, do_err_strings_init))
+    if (!RUN_ONCE(&err_string_init, do_err_strings_init, 0))
         return;
 }
 
@@ -576,7 +574,7 @@ const char *ERR_lib_error_string(unsigned long e)
     ERR_STRING_DATA d, *p;
     unsigned long l;
 
-    if (!RUN_ONCE(&err_string_init, do_err_strings_init)) {
+    if (!RUN_ONCE(&err_string_init, do_err_strings_init, 0)) {
         return NULL;
     }
 
@@ -591,7 +589,7 @@ const char *ERR_func_error_string(unsigned long e)
     ERR_STRING_DATA d, *p;
     unsigned long l, f;
 
-    if (!RUN_ONCE(&err_string_init, do_err_strings_init)) {
+    if (!RUN_ONCE(&err_string_init, do_err_strings_init, 0)) {
         return NULL;
     }
 
@@ -607,7 +605,7 @@ const char *ERR_reason_error_string(unsigned long e)
     ERR_STRING_DATA d, *p = NULL;
     unsigned long l, r;
 
-    if (!RUN_ONCE(&err_string_init, do_err_strings_init)) {
+    if (!RUN_ONCE(&err_string_init, do_err_strings_init, 0)) {
         return NULL;
     }
 
@@ -677,7 +675,7 @@ int err_shelve_state(void **state)
     if (!OPENSSL_init_crypto(OPENSSL_INIT_BASE_ONLY, NULL))
         return 0;
 
-    if (!RUN_ONCE(&err_init, err_do_init))
+    if (!RUN_ONCE(&err_init, err_do_init, 0))
         return 0;
 
     *state = CRYPTO_THREAD_get_local(&err_thread_local);
@@ -699,11 +697,11 @@ void err_unshelve_state(void* state) {
   }
 }
 
-int ERR_get_next_error_library(void)
+int ERR_get_next_error_library()
 {
     int ret;
 
-    if (!RUN_ONCE(&err_string_init, do_err_strings_init))
+    if (!RUN_ONCE(&err_string_init, do_err_strings_init, 0))
         return 0;
 
     CRYPTO_THREAD_write_lock(err_string_lock);

@@ -45,7 +45,7 @@ OSSL_PROPERTY_LIST *ossl_prop_defn_get(const char *prop);
 int ossl_prop_defn_set(const char *prop, OSSL_PROPERTY_LIST *pl);
 
 /* Property cache lock / unlock */
-int ossl_property_write_lock(OSSL_METHOD_STORE *);
-int ossl_property_read_lock(OSSL_METHOD_STORE *);
-int ossl_property_unlock(OSSL_METHOD_STORE *);
+int ossl_property_write_lock(ossl_method_store_st *);
+int ossl_property_read_lock(ossl_method_store_st *);
+int ossl_property_unlock(ossl_method_store_st *);
 

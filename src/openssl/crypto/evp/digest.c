@@ -504,8 +504,7 @@ int EVP_MD_CTX_ctrl(EVP_MD_CTX *ctx, int cmd, int p1, void *p2)
     return 0;
 }
 
-static void *evp_md_from_dispatch(int mdtype, const OSSL_DISPATCH *fns,
-                                    OSSL_PROVIDER *prov)
+static void *evp_md_from_dispatch(int mdtype, const OSSL_DISPATCH *fns, ossl_provider_st *prov)
 {
     EVP_MD *md = NULL;
     int fncnt = 0;

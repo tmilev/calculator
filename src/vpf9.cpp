@@ -138,9 +138,7 @@ GlobalVariables::GlobalVariables() {
   this->flagRunServerOnEmptyCommandLine = false;
   this->flagRequestComingLocally = false;
   this->flagDatabaseCompiled = false;
-#ifdef MACRO_use_MongoDB
-  this->flagDatabaseCompiled = true;
-#endif
+  this->flagServerAutoMonitor = true;
 }
 
 void GlobalVariables::WriteSourceCodeFilesJS() {

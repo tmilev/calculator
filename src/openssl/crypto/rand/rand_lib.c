@@ -381,7 +381,7 @@ void rand_cleanup_int(void)
  */
 void RAND_keep_random_devices_open(int keep)
 {
-    if (RUN_ONCE(&rand_init, do_rand_init))
+    if (RUN_ONCE(&rand_init, do_rand_init, 0))
         rand_pool_keep_random_devices_open(keep);
 }
 
@@ -725,7 +725,7 @@ int rand_pool_add_end(RAND_POOL *pool, size_t len, size_t entropy)
 
 int RAND_set_rand_method(const RAND_METHOD *meth)
 {
-    if (!RUN_ONCE(&rand_init, do_rand_init))
+    if (!RUN_ONCE(&rand_init, do_rand_init, 0))
         return 0;
 
     CRYPTO_THREAD_write_lock(rand_meth_lock);
@@ -739,7 +739,7 @@ int RAND_set_rand_method(const RAND_METHOD *meth)
 }
 
 const RAND_METHOD *RAND_get_rand_method(std::stringstream* comments) {
-  if (!RUN_ONCE(&rand_init, do_rand_init)) {
+  if (!RUN_ONCE(&rand_init, do_rand_init, comments)) {
     if (comments != 0) {
       *comments << "Failed to run do_rand_init. ";
     }
@@ -766,7 +766,7 @@ int RAND_set_rand_engine(ENGINE *engine)
 {
     const RAND_METHOD *tmp_meth = NULL;
 
-    if (!RUN_ONCE(&rand_init, do_rand_init))
+    if (!RUN_ONCE(&rand_init, do_rand_init, 0))
         return 0;
 
     if (engine != NULL) {

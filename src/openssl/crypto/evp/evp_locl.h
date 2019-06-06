@@ -93,7 +93,7 @@ void* evp_generic_fetch(
   int operation_id,
   const char *algorithm,
   const char *properties,
-  void *(*new_method)(int nid, const OSSL_DISPATCH *fns, OSSL_PROVIDER *prov),
+  void *(*new_method)(int nid, const OSSL_DISPATCH *fns, ossl_provider_st* prov),
   int (*upref_method)(void *),
   void (*free_method)(void *),
   int (*nid_method)(void *),

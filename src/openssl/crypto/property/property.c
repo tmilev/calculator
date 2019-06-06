@@ -57,12 +57,10 @@ struct ossl_method_store_st {
 };
 
 typedef struct {
-    OSSL_METHOD_STORE *store;
+    ossl_method_store_st *store;
     LHASH_OF(QUERY) *cache;
     size_t nelem;
 } IMPL_CACHE_FLUSH;
-
-//# define SPARSE_ARRAY_OF(type) struct sparse_array_st_ ## type
 
 struct sparse_array_st_ALGORITHM;
 
@@ -70,19 +68,19 @@ static ossl_unused ossl_inline sparse_array_st_ALGORITHM* ossl_sa_ALGORITHM_new(
   return (sparse_array_st_ALGORITHM*) OPENSSL_SA_new();
 }
 
-static ossl_unused ossl_inline void ossl_sa_ALGORITHM_free(sparse_array_st_ALGORITHM* sa) {
+void ossl_sa_ALGORITHM_free(sparse_array_st_ALGORITHM* sa) {
   OPENSSL_SA_free((OPENSSL_SA*) sa);
 }
 
-static ossl_unused ossl_inline void ossl_sa_ALGORITHM_free_leaves(sparse_array_st_ALGORITHM* sa) {
+void ossl_sa_ALGORITHM_free_leaves(sparse_array_st_ALGORITHM* sa) {
   OPENSSL_SA_free_leaves((OPENSSL_SA *)sa);
 }
 
-static ossl_unused ossl_inline size_t ossl_sa_ALGORITHM_num(sparse_array_st_ALGORITHM* sa) {
+size_t ossl_sa_ALGORITHM_num(sparse_array_st_ALGORITHM* sa) {
   return OPENSSL_SA_num((OPENSSL_SA *)sa);
 }
 
-static ossl_unused ossl_inline void ossl_sa_ALGORITHM_doall(
+void ossl_sa_ALGORITHM_doall(
   const sparse_array_st_ALGORITHM* sa,
   void (*leaf)(ossl_uintmax_t, ALGORITHM*)
 ) {
@@ -101,19 +99,19 @@ static ossl_unused ossl_inline int ossl_sa_ALGORITHM_set(sparse_array_st_ALGORIT
   return OPENSSL_SA_set((OPENSSL_SA *)sa, n, (void *)val);
 }
 
-static void ossl_method_cache_flush(OSSL_METHOD_STORE *store, int nid);
-static void ossl_method_cache_flush_all(OSSL_METHOD_STORE *c);
+static void ossl_method_cache_flush(ossl_method_store_st *store, int nid);
+static void ossl_method_cache_flush_all(ossl_method_store_st *c);
 
-int ossl_property_read_lock(OSSL_METHOD_STORE *p) {
+int ossl_property_read_lock(ossl_method_store_st *p) {
   return p != NULL ? CRYPTO_THREAD_read_lock(p->lock) : 0;
 }
 
-int ossl_property_write_lock(OSSL_METHOD_STORE *p)
+int ossl_property_write_lock(ossl_method_store_st *p)
 {
     return p != NULL ? CRYPTO_THREAD_write_lock(p->lock) : 0;
 }
 
-int ossl_property_unlock(OSSL_METHOD_STORE *p)
+int ossl_property_unlock(ossl_method_store_st *p)
 {
     return p != 0 ? CRYPTO_THREAD_unlock(p->lock) : 0;
 }
@@ -177,14 +175,14 @@ static void alg_cleanup(ossl_uintmax_t idx, ALGORITHM *a)
     }
 }
 
-OSSL_METHOD_STORE *ossl_method_store_new(void)
+ossl_method_store_st *ossl_method_store_new(std::stringstream* commentsOnError)
 {
-    OSSL_METHOD_STORE *res;
+    ossl_method_store_st *res;
 
-    if (!RUN_ONCE(&method_store_init_flag, do_method_store_init))
+    if (!RUN_ONCE(&method_store_init_flag, do_method_store_init, commentsOnError))
         return 0;
 
-    res = (OSSL_METHOD_STORE *) OPENSSL_zalloc(sizeof(*res));
+    res = (ossl_method_store_st *) OPENSSL_zalloc(sizeof(*res));
     if (res != NULL) {
         if ((res->algs = ossl_sa_ALGORITHM_new()) == NULL) {
             OPENSSL_free(res);
@@ -199,7 +197,7 @@ OSSL_METHOD_STORE *ossl_method_store_new(void)
     return res;
 }
 
-void ossl_method_store_free(OSSL_METHOD_STORE *store)
+void ossl_method_store_free(ossl_method_store_st *store)
 {
     if (store != NULL) {
         ossl_sa_ALGORITHM_doall(store->algs, &alg_cleanup);
@@ -210,17 +208,15 @@ void ossl_method_store_free(OSSL_METHOD_STORE *store)
     }
 }
 
-ALGORITHM* ossl_method_store_retrieve(OSSL_METHOD_STORE *store, int nid, std::stringstream* commentsOnError) {
+ALGORITHM* ossl_method_store_retrieve(ossl_method_store_st *store, int nid, std::stringstream* commentsOnError) {
   return (ALGORITHM*) OPENSSL_SA_get((OPENSSL_SA *)store, nid, commentsOnError);
 }
 
-static int ossl_method_store_insert(OSSL_METHOD_STORE *store, ALGORITHM *alg)
-{
-        return ossl_sa_ALGORITHM_set(store->algs, alg->nid, alg);
+static int ossl_method_store_insert(ossl_method_store_st *store, ALGORITHM *alg) {
+  return ossl_sa_ALGORITHM_set(store->algs, alg->nid, alg);
 }
 
-int ossl_method_store_add(
-  OSSL_METHOD_STORE *store,
+int ossl_method_store_add(ossl_method_store_st *store,
   int nid, const char *properties,
   void *method, void (*method_destruct)(void *)
 ) {
@@ -280,7 +276,7 @@ err:
     return 0;
 }
 
-int ossl_method_store_remove(OSSL_METHOD_STORE *store, int nid,
+int ossl_method_store_remove(ossl_method_store_st *store, int nid,
                              const void *method)
 {
     ALGORITHM *alg = NULL;
@@ -317,7 +313,7 @@ int ossl_method_store_remove(OSSL_METHOD_STORE *store, int nid,
 }
 
 int ossl_method_store_fetch(
-  OSSL_METHOD_STORE *store, int nid, const char *prop_query, void **method, std::stringstream* commentsOnError
+  ossl_method_store_st *store, int nid, const char *prop_query, void **method, std::stringstream* commentsOnError
 ) {
   ALGORITHM *alg;
   IMPLEMENTATION *impl;
@@ -408,7 +404,7 @@ int ossl_method_store_fetch(
   return result;
 }
 
-int ossl_method_store_set_global_properties(OSSL_METHOD_STORE *store,
+int ossl_method_store_set_global_properties(ossl_method_store_st *store,
                                             const char *prop_query) {
     int ret = 0;
 
@@ -435,7 +431,7 @@ static void impl_cache_flush_alg(ossl_uintmax_t idx, ALGORITHM *alg)
     lh_QUERY_flush(alg->cache);
 }
 
-static void ossl_method_cache_flush(OSSL_METHOD_STORE *store, int nid)
+static void ossl_method_cache_flush(ossl_method_store_st *store, int nid)
 {
     ALGORITHM *alg = ossl_method_store_retrieve(store, nid, 0);
 
@@ -445,7 +441,7 @@ static void ossl_method_cache_flush(OSSL_METHOD_STORE *store, int nid)
     }
 }
 
-static void ossl_method_cache_flush_all(OSSL_METHOD_STORE *store)
+static void ossl_method_cache_flush_all(ossl_method_store_st *store)
 {
     ossl_sa_ALGORITHM_doall(store->algs, &impl_cache_flush_alg);
     store->nelem = 0;
@@ -471,7 +467,7 @@ IMPLEMENT_LHASH_DOALL_ARG(QUERY, IMPL_CACHE_FLUSH);
  */
 static void impl_cache_flush_cache(QUERY *c, IMPL_CACHE_FLUSH *state)
 {
-    OSSL_METHOD_STORE *store = state->store;
+    ossl_method_store_st *store = state->store;
     unsigned int n;
 
     if (store->nbits == 0) {
@@ -496,7 +492,7 @@ static void impl_cache_flush_one_alg(ossl_uintmax_t idx, ALGORITHM *alg,
                                     state);
 }
 
-static void ossl_method_cache_flush_some(OSSL_METHOD_STORE *store)
+static void ossl_method_cache_flush_some(ossl_method_store_st *store)
 {
     IMPL_CACHE_FLUSH state;
 
@@ -507,7 +503,7 @@ static void ossl_method_cache_flush_some(OSSL_METHOD_STORE *store)
     store->nelem = state.nelem;
 }
 
-int ossl_method_store_cache_get(OSSL_METHOD_STORE *store, int nid,
+int ossl_method_store_cache_get(ossl_method_store_st *store, int nid,
                                 const char *prop_query, void **method)
 {
     ALGORITHM *alg;
@@ -534,8 +530,7 @@ int ossl_method_store_cache_get(OSSL_METHOD_STORE *store, int nid,
     return 1;
 }
 
-int ossl_method_store_cache_set(
-  OSSL_METHOD_STORE *store, int nid, const char *prop_query, void *method
+int ossl_method_store_cache_set(ossl_method_store_st *store, int nid, const char *prop_query, void *method
 ) {
     QUERY elem, *old, *p = NULL;
     ALGORITHM *alg;

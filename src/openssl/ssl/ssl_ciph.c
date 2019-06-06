@@ -480,7 +480,7 @@ DEFINE_RUN_ONCE_STATIC(do_load_builtin_compressions)
 
 static int load_builtin_compressions(void)
 {
-    return RUN_ONCE(&ssl_load_builtin_comp_once, do_load_builtin_compressions);
+    return RUN_ONCE(&ssl_load_builtin_comp_once, do_load_builtin_compressions, 0);
 }
 #endif
 

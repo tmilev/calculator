@@ -14,11 +14,11 @@
 
 
 /* Load and unload a provider */
-OSSL_PROVIDER *OSSL_PROVIDER_load(openssl_ctx_st *, const char *name);
-int OSSL_PROVIDER_unload(OSSL_PROVIDER *prov);
+ossl_provider_st *OSSL_PROVIDER_load(openssl_ctx_st *, const char *name);
+int OSSL_PROVIDER_unload(ossl_provider_st *prov);
 
-const OSSL_ITEM *OSSL_PROVIDER_get_param_types(OSSL_PROVIDER *prov);
-int OSSL_PROVIDER_get_params(OSSL_PROVIDER *prov, const OSSL_PARAM params[]);
+const OSSL_ITEM *OSSL_PROVIDER_get_param_types(ossl_provider_st *prov);
+int OSSL_PROVIDER_get_params(ossl_provider_st *prov, const OSSL_PARAM params[]);
 
 /* Add a built in providers */
 int OSSL_PROVIDER_add_builtin(openssl_ctx_st*, const char *name,

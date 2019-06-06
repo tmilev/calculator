@@ -24,7 +24,7 @@ int BIO_get_new_index(void)
     static CRYPTO_REF_COUNT bio_count = BIO_TYPE_START;
     int newval;
 
-    if (!RUN_ONCE(&bio_type_init, do_bio_type_init)) {
+    if (!RUN_ONCE(&bio_type_init, do_bio_type_init, 0)) {
         BIOerr(BIO_F_BIO_GET_NEW_INDEX, ERR_R_MALLOC_FAILURE);
         return -1;
     }

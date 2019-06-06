@@ -1225,7 +1225,7 @@ static int drbg_status(std::stringstream* commentsOnError)
  */
 RAND_DRBG *RAND_DRBG_get0_master(void)
 {
-    if (!RUN_ONCE(&rand_drbg_init, do_rand_drbg_init))
+    if (!RUN_ONCE(&rand_drbg_init, do_rand_drbg_init, 0))
         return NULL;
 
     return master_drbg;
@@ -1239,7 +1239,7 @@ RAND_DRBG *RAND_DRBG_get0_public(std::stringstream* commentsOnFailure)
 {
     RAND_DRBG *drbg;
 
-    if (!RUN_ONCE(&rand_drbg_init, do_rand_drbg_init))
+    if (!RUN_ONCE(&rand_drbg_init, do_rand_drbg_init, commentsOnFailure))
         return NULL;
 
     drbg = (RAND_DRBG *) CRYPTO_THREAD_get_local(&public_drbg);
@@ -1261,7 +1261,7 @@ RAND_DRBG *RAND_DRBG_get0_private(std::stringstream* commentsOnFailure) {
     *commentsOnFailure << "DEBUG: Getting private 0 started.\n";
   }
   RAND_DRBG *drbg;
-  if (!RUN_ONCE(&rand_drbg_init, do_rand_drbg_init)) {
+  if (!RUN_ONCE(&rand_drbg_init, do_rand_drbg_init, commentsOnFailure)) {
     return NULL;
   }
 

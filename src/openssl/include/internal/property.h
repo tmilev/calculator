@@ -12,30 +12,36 @@
 # define HEADER_PROPERTY_H
 #include <sstream>
 
-typedef struct ossl_method_store_st OSSL_METHOD_STORE;
-
 /* Implementation store functions */
-OSSL_METHOD_STORE *ossl_method_store_new(void);
-void ossl_method_store_free(OSSL_METHOD_STORE *store);
-int ossl_method_store_add(OSSL_METHOD_STORE *store, int nid,
-                          const char *properties, void *implementation,
-                          void (*implementation_destruct)(void *));
-int ossl_method_store_remove(OSSL_METHOD_STORE *store,
-                             int nid, const void *implementation);
+struct ossl_method_store_st;
+ossl_method_store_st *ossl_method_store_new(std::stringstream *commentsOnError);
+void ossl_method_store_free(ossl_method_store_st *store);
+int ossl_method_store_add(
+  ossl_method_store_st *store,
+  int nid,
+  const char *properties,
+  void *implementation,
+  void (*implementation_destruct)(void *)
+);
+int ossl_method_store_remove(
+  ossl_method_store_st *store,
+  int nid,
+  const void *implementation
+);
 int ossl_method_store_fetch(
-  OSSL_METHOD_STORE *store,
+  ossl_method_store_st *store,
   int nid,
   const char *prop_query,
   void **result,
   std::stringstream *commentsOnError
 );
-int ossl_method_store_set_global_properties(OSSL_METHOD_STORE *store,
+int ossl_method_store_set_global_properties(ossl_method_store_st *store,
                                             const char *prop_query);
 
 /* proeprty query cache functions */
-int ossl_method_store_cache_get(OSSL_METHOD_STORE *store, int nid,
+int ossl_method_store_cache_get(ossl_method_store_st *store, int nid,
                                 const char *prop_query, void **result);
-int ossl_method_store_cache_set(OSSL_METHOD_STORE *store, int nid,
+int ossl_method_store_cache_set(ossl_method_store_st *store, int nid,
                                 const char *prop_query, void *result);
 
 #endif

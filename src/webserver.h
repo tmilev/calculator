@@ -233,10 +233,7 @@ public:
   long long NumSuccessfulSelectsSoFar;
   bool flagTryToKillOlderProcesses;
   bool flagReapingChildren;
-  bool flagNoMonitor;
-#ifdef MACRO_use_open_ssl
   TransportSecurityLayer theSSLdata;
-#endif
   PointerObjectDestroyer<Calculator> theCalculator;
   MonomialCollection<MonomialWrapper<std::string, MathRoutines::HashString>, LargeInt> currentlyConnectedAddresses;
   List<std::string> PortsITryHttp;

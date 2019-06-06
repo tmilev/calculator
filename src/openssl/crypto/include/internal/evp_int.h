@@ -193,7 +193,7 @@ struct evp_md_st {
 
     /* New structure members */
     /* TODO(3.0): Remove above comment when legacy has gone */
-    OSSL_PROVIDER *prov;
+    ossl_provider_st *prov;
     CRYPTO_REF_COUNT refcnt;
     CRYPTO_RWLOCK *lock;
     OSSL_OP_digest_newctx_fn *newctx;

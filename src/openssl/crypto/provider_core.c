@@ -18,7 +18,7 @@
 #include "../include/internal/refcount.h"
 #include "provider_local.h"
 
-static OSSL_PROVIDER *provider_new(const char *name,
+static ossl_provider_st* provider_new(const char *name,
                                    OSSL_provider_init_fn *init_function);
 
 /*-
@@ -55,12 +55,118 @@ struct ossl_provider_st {
     OSSL_provider_get_params_fn *get_params;
     OSSL_provider_query_operation_fn *query_operation;
 };
-DEFINE_STACK_OF(OSSL_PROVIDER)
 
-static int ossl_provider_cmp(const OSSL_PROVIDER * const *a,
-                             const OSSL_PROVIDER * const *b)
-{
-    return strcmp((*a)->name, (*b)->name);
+
+struct stack_st_ossl_provider_st;
+
+//t1,t2,t3=ossl_provider_st
+typedef int (*sk_ossl_provider_st_compfunc)(const ossl_provider_st * const *a, const ossl_provider_st *const *b);
+typedef void (*sk_ossl_provider_st_freefunc)(ossl_provider_st *a);
+typedef ossl_provider_st * (*sk_ossl_provider_st_copyfunc)(const ossl_provider_st *a);
+
+int sk_ossl_provider_st_num(const stack_st_ossl_provider_st *sk) {
+  return OPENSSL_sk_num((const OPENSSL_STACK *)sk);
+}
+
+ossl_provider_st *sk_ossl_provider_st_value(const stack_st_ossl_provider_st *sk, int idx) {
+  return (ossl_provider_st *)OPENSSL_sk_value((const OPENSSL_STACK *)sk, idx);
+}
+
+stack_st_ossl_provider_st *sk_ossl_provider_st_new(sk_ossl_provider_st_compfunc compare) {
+  return (stack_st_ossl_provider_st *)OPENSSL_sk_new((OPENSSL_sk_compfunc)compare);
+}
+
+stack_st_ossl_provider_st *sk_ossl_provider_st_new_null(void) {
+  return (stack_st_ossl_provider_st *)OPENSSL_sk_new_null();
+}
+
+stack_st_ossl_provider_st *sk_ossl_provider_st_new_reserve(sk_ossl_provider_st_compfunc compare, int n) {
+  return (stack_st_ossl_provider_st *)OPENSSL_sk_new_reserve((OPENSSL_sk_compfunc)compare, n);
+}
+
+int sk_ossl_provider_st_reserve(stack_st_ossl_provider_st *sk, int n) {
+  return OPENSSL_sk_reserve((OPENSSL_STACK *)sk, n);
+}
+
+void sk_ossl_provider_st_free(stack_st_ossl_provider_st *sk) {
+  OPENSSL_sk_free((OPENSSL_STACK *)sk);
+}
+
+static ossl_unused ossl_inline void sk_ossl_provider_st_zero(stack_st_ossl_provider_st *sk) {
+  OPENSSL_sk_zero((OPENSSL_STACK *)sk);
+}
+
+ossl_provider_st *sk_ossl_provider_st_delete(stack_st_ossl_provider_st *sk, int i) {
+  return (ossl_provider_st *)OPENSSL_sk_delete((OPENSSL_STACK *)sk, i);
+}
+
+ossl_provider_st *sk_ossl_provider_st_delete_ptr(stack_st_ossl_provider_st *sk, ossl_provider_st *ptr) {
+  return (ossl_provider_st *)OPENSSL_sk_delete_ptr((OPENSSL_STACK *)sk, (const void *)ptr);
+}
+
+int sk_ossl_provider_st_push(stack_st_ossl_provider_st *sk, ossl_provider_st *ptr) {
+  return OPENSSL_sk_push((OPENSSL_STACK *)sk, (const void *)ptr);
+}
+
+int sk_ossl_provider_st_unshift(stack_st_ossl_provider_st *sk, ossl_provider_st *ptr) {
+  return OPENSSL_sk_unshift((OPENSSL_STACK *)sk, (const void *)ptr);
+}
+
+ossl_provider_st *sk_ossl_provider_st_pop(stack_st_ossl_provider_st *sk) {
+  return (ossl_provider_st *)OPENSSL_sk_pop((OPENSSL_STACK *)sk);
+}
+
+ossl_provider_st *sk_ossl_provider_st_shift(stack_st_ossl_provider_st *sk) {
+  return (ossl_provider_st *)OPENSSL_sk_shift((OPENSSL_STACK *)sk);
+}
+
+void sk_ossl_provider_st_pop_free(stack_st_ossl_provider_st *sk, sk_ossl_provider_st_freefunc freefunc) {
+  OPENSSL_sk_pop_free((OPENSSL_STACK *)sk, (OPENSSL_sk_freefunc)freefunc);
+}
+
+int sk_ossl_provider_st_insert(stack_st_ossl_provider_st *sk, ossl_provider_st *ptr, int idx) {
+  return OPENSSL_sk_insert((OPENSSL_STACK *)sk, (const void *)ptr, idx);
+}
+
+ossl_provider_st *sk_ossl_provider_st_set(stack_st_ossl_provider_st *sk, int idx, ossl_provider_st *ptr) {
+  return (ossl_provider_st *)OPENSSL_sk_set((OPENSSL_STACK *)sk, idx, (const void *)ptr);
+}
+
+int sk_ossl_provider_st_find(stack_st_ossl_provider_st *sk, ossl_provider_st *ptr) {
+  return OPENSSL_sk_find((OPENSSL_STACK *)sk, (const void *)ptr);
+}
+
+int sk_ossl_provider_st_find_ex(stack_st_ossl_provider_st *sk, ossl_provider_st *ptr) {
+  return OPENSSL_sk_find_ex((OPENSSL_STACK *)sk, (const void *)ptr);
+}
+
+void sk_ossl_provider_st_sort(stack_st_ossl_provider_st *sk) {
+  OPENSSL_sk_sort((OPENSSL_STACK *)sk);
+}
+
+int sk_ossl_provider_st_is_sorted(const stack_st_ossl_provider_st *sk) {
+  return OPENSSL_sk_is_sorted((const OPENSSL_STACK *)sk);
+}
+
+stack_st_ossl_provider_st * sk_ossl_provider_st_dup(const stack_st_ossl_provider_st *sk) {
+  return (stack_st_ossl_provider_st *)OPENSSL_sk_dup((const OPENSSL_STACK *)sk);
+}
+
+stack_st_ossl_provider_st *sk_ossl_provider_st_deep_copy(
+  const stack_st_ossl_provider_st *sk, sk_ossl_provider_st_copyfunc copyfunc, sk_ossl_provider_st_freefunc freefunc
+) {
+  return (stack_st_ossl_provider_st *) OPENSSL_sk_deep_copy(
+    (const OPENSSL_STACK *)sk, (OPENSSL_sk_copyfunc)copyfunc, (OPENSSL_sk_freefunc)freefunc);
+}
+
+sk_ossl_provider_st_compfunc sk_ossl_provider_st_set_cmp_func(stack_st_ossl_provider_st *sk, sk_ossl_provider_st_compfunc compare) {
+  return (sk_ossl_provider_st_compfunc)OPENSSL_sk_set_cmp_func((OPENSSL_STACK *)sk, (OPENSSL_sk_compfunc) compare);
+}
+
+static int ossl_provider_cmp(
+  const ossl_provider_st* const *a, const ossl_provider_st* const *b
+) {
+  return strcmp((*a)->name, (*b)->name);
 }
 
 /*-
@@ -72,7 +178,7 @@ static int ossl_provider_cmp(const OSSL_PROVIDER * const *a,
  */
 
 struct provider_store_st {
-    STACK_OF(OSSL_PROVIDER) *providers;
+    stack_st_ossl_provider_st *providers;
     CRYPTO_RWLOCK *lock;
     unsigned int use_fallbacks:1;
 };
@@ -84,18 +190,17 @@ static void provider_store_free(void *vstore)
 
     if (store == NULL)
         return;
-    sk_OSSL_PROVIDER_pop_free(store->providers, ossl_provider_free);
+    sk_ossl_provider_st_pop_free(store->providers, ossl_provider_free);
     CRYPTO_THREAD_lock_free(store->lock);
     OPENSSL_free(store);
 }
 
-static void *provider_store_new(void)
-{
+void *provider_store_new(std::stringstream* commentsOnError) {
     struct provider_store_st *store = (provider_store_st *) OPENSSL_zalloc(sizeof(*store));
     const struct predefined_providers_st *p = NULL;
 
     if (store == NULL
-        || (store->providers = sk_OSSL_PROVIDER_new(ossl_provider_cmp)) == NULL
+        || (store->providers = sk_ossl_provider_st_new(ossl_provider_cmp)) == NULL
         || (store->lock = CRYPTO_THREAD_lock_new()) == NULL) {
         provider_store_free(store);
         return NULL;
@@ -103,7 +208,7 @@ static void *provider_store_new(void)
     store->use_fallbacks = 1;
 
     for (p = predefined_providers; p->name != NULL; p++) {
-        OSSL_PROVIDER *prov = NULL;
+        ossl_provider_st *prov = NULL;
 
         /*
          * We use the internal constructor directly here,
@@ -112,7 +217,7 @@ static void *provider_store_new(void)
         prov = provider_new(p->name, p->init);
 
         if (prov == NULL
-            || sk_OSSL_PROVIDER_push(store->providers, prov) == 0) {
+            || sk_ossl_provider_st_push(store->providers, prov) == 0) {
             ossl_provider_free(prov);
             provider_store_free(store);
             CRYPTOerr(CRYPTO_F_PROVIDER_STORE_NEW, ERR_R_INTERNAL_ERROR);
@@ -126,46 +231,63 @@ static void *provider_store_new(void)
     return store;
 }
 
-static const OPENSSL_CTX_METHOD provider_store_method = {
+static const openssl_ctx_method provider_store_method = {
     provider_store_new,
     provider_store_free,
 };
 
 static CRYPTO_ONCE provider_store_init_flag = CRYPTO_ONCE_STATIC_INIT;
-DEFINE_RUN_ONCE_STATIC(do_provider_store_init)
-{
-    return OPENSSL_init_crypto(0, NULL)
-        && (provider_store_index =
-            openssl_ctx_new_index(&provider_store_method)) != -1;
+
+int do_provider_store_init(void* commentsOnErroR) {
+  std::stringstream* commentsOnError = (std::stringstream*) commentsOnErroR;
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: running do provider store init!!!!\n";
+  }
+  if (OPENSSL_init_crypto(0, NULL) == 0) {
+    return 0;
+  }
+  provider_store_index = openssl_ctx_new_index(&provider_store_method);
+  return provider_store_index != -1;
 }
 
+int do_provider_store_init_ossl_ret_ = 0;
 
-static struct provider_store_st *get_provider_store(openssl_ctx_st *libctx)
-{
-    struct provider_store_st *store = NULL;
-
-    if (!RUN_ONCE(&provider_store_init_flag, do_provider_store_init))
-        return NULL;
-
-    store = (provider_store_st *) openssl_ctx_get_data(libctx, provider_store_index);
-    if (store == NULL)
-        CRYPTOerr(CRYPTO_F_GET_PROVIDER_STORE, ERR_R_INTERNAL_ERROR);
-    return store;
+void do_provider_store_init_ossl_(void* commentsOnError) {
+  do_provider_store_init_ossl_ret_ = do_provider_store_init(commentsOnError);
 }
 
-OSSL_PROVIDER *ossl_provider_find(openssl_ctx_st *libctx, const char *name)
+provider_store_st* get_provider_store(openssl_ctx_st *libctx, std::stringstream* commentsOnError) {
+  static provider_store_st *store = NULL;
+  int ran = CRYPTO_THREAD_run_once(&provider_store_init_flag, do_provider_store_init_ossl_, commentsOnError);
+  int success = 0;
+  if (ran) {
+    success = do_provider_store_init_ossl_ret_;
+  }
+  if (!success) {
+    return NULL;
+  }
+  store = (provider_store_st *) openssl_ctx_get_data(libctx, provider_store_index);
+  if (store == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to get context data.\n";
+    }
+  }
+  return store;
+}
+
+ossl_provider_st* ossl_provider_find(openssl_ctx_st *libctx, const char *name)
 {
     struct provider_store_st *store = NULL;
-    OSSL_PROVIDER *prov = NULL;
+    ossl_provider_st* prov = NULL;
 
-    if ((store = get_provider_store(libctx)) != NULL) {
-        OSSL_PROVIDER tmpl = { 0, };
+    if ((store = get_provider_store(libctx, 0)) != NULL) {
+        ossl_provider_st tmpl = { 0, };
         int i;
 
         tmpl.name = (char *)name;
         CRYPTO_THREAD_write_lock(store->lock);
-        if ((i = sk_OSSL_PROVIDER_find(store->providers, &tmpl)) == -1
-            || (prov = sk_OSSL_PROVIDER_value(store->providers, i)) == NULL
+        if ((i = sk_ossl_provider_st_find(store->providers, &tmpl)) == -1
+            || (prov = sk_ossl_provider_st_value(store->providers, i)) == NULL
             || !ossl_provider_upref(prov))
             prov = NULL;
         CRYPTO_THREAD_unlock(store->lock);
@@ -179,12 +301,12 @@ OSSL_PROVIDER *ossl_provider_find(openssl_ctx_st *libctx, const char *name)
  * =======================
  */
 
-static OSSL_PROVIDER *provider_new(const char *name,
+static ossl_provider_st *provider_new(const char *name,
                                    OSSL_provider_init_fn *init_function)
 {
-    OSSL_PROVIDER *prov = NULL;
+    ossl_provider_st *prov = NULL;
 
-    if ((prov = (OSSL_PROVIDER *) OPENSSL_zalloc(sizeof(*prov))) == NULL
+    if ((prov = (ossl_provider_st *) OPENSSL_zalloc(sizeof(*prov))) == NULL
 #ifndef HAVE_ATOMICS
         || (prov->refcnt_lock = CRYPTO_THREAD_lock_new()) == NULL
 #endif
@@ -199,7 +321,7 @@ static OSSL_PROVIDER *provider_new(const char *name,
     return prov;
 }
 
-int ossl_provider_upref(OSSL_PROVIDER *prov)
+int ossl_provider_upref(ossl_provider_st *prov)
 {
     int ref = 0;
 
@@ -207,13 +329,13 @@ int ossl_provider_upref(OSSL_PROVIDER *prov)
     return ref;
 }
 
-OSSL_PROVIDER *ossl_provider_new(openssl_ctx_st *libctx, const char *name,
+ossl_provider_st *ossl_provider_new(openssl_ctx_st *libctx, const char *name,
                                  OSSL_provider_init_fn *init_function)
 {
     struct provider_store_st *store = NULL;
-    OSSL_PROVIDER *prov = NULL;
+    ossl_provider_st *prov = NULL;
 
-    if ((store = get_provider_store(libctx)) == NULL)
+    if ((store = get_provider_store(libctx, 0)) == NULL)
         return NULL;
 
     if ((prov = ossl_provider_find(libctx, name)) != NULL) { /* refcount +1 */
@@ -232,7 +354,7 @@ OSSL_PROVIDER *ossl_provider_new(openssl_ctx_st *libctx, const char *name,
     if (!ossl_provider_upref(prov)) { /* +1 One reference for the store */
         ossl_provider_free(prov); /* -1 Reference that was to be returned */
         prov = NULL;
-    } else if (sk_OSSL_PROVIDER_push(store->providers, prov) == 0) {
+    } else if (sk_ossl_provider_st_push(store->providers, prov) == 0) {
         ossl_provider_free(prov); /* -1 Store reference */
         ossl_provider_free(prov); /* -1 Reference that was to be returned */
         prov = NULL;
@@ -259,7 +381,7 @@ static void free_infopair(INFOPAIR *pair)
     OPENSSL_free(pair);
 }
 
-void ossl_provider_free(OSSL_PROVIDER *prov)
+void ossl_provider_free(ossl_provider_st *prov)
 {
     if (prov != NULL) {
         int ref = 0;
@@ -297,7 +419,7 @@ void ossl_provider_free(OSSL_PROVIDER *prov)
 }
 
 /* Setters */
-int ossl_provider_set_module_path(OSSL_PROVIDER *prov, const char *module_path)
+int ossl_provider_set_module_path(ossl_provider_st *prov, const char *module_path)
 {
     OPENSSL_free(prov->path);
     if (module_path == NULL)
@@ -308,7 +430,7 @@ int ossl_provider_set_module_path(OSSL_PROVIDER *prov, const char *module_path)
     return 0;
 }
 
-int ossl_provider_add_parameter(OSSL_PROVIDER *prov,
+int ossl_provider_add_parameter(ossl_provider_st *prov,
                                 const char *name, const char *value)
 {
     INFOPAIR *pair = NULL;
@@ -348,12 +470,12 @@ static const OSSL_ITEM param_types[] = {
     { 0, NULL }
 };
 
-static const OSSL_ITEM *core_get_param_types(const OSSL_PROVIDER *prov)
+static const OSSL_ITEM *core_get_param_types(const ossl_provider_st *prov)
 {
     return param_types;
 }
 
-static int core_get_params(const OSSL_PROVIDER *prov, const OSSL_PARAM params[])
+static int core_get_params(const ossl_provider_st *prov, const OSSL_PARAM params[])
 {
     int i;
     const OSSL_PARAM *p;
@@ -390,7 +512,7 @@ static const OSSL_DISPATCH *core_dispatch = core_dispatch_;
  * locking.  Direct callers must remember to set the store flags when
  * appropriate
  */
-static int provider_activate(OSSL_PROVIDER *prov)
+static int provider_activate(ossl_provider_st* prov)
 {
     const OSSL_DISPATCH *provider_dispatch = NULL;
 
@@ -477,7 +599,7 @@ static int provider_activate(OSSL_PROVIDER *prov)
     return 1;
 }
 
-int ossl_provider_activate(OSSL_PROVIDER *prov)
+int ossl_provider_activate(ossl_provider_st *prov)
 {
     if (provider_activate(prov)) {
         CRYPTO_THREAD_write_lock(prov->store->lock);
@@ -490,96 +612,105 @@ int ossl_provider_activate(OSSL_PROVIDER *prov)
 }
 
 
-static int provider_forall_loaded(struct provider_store_st *store,
-                                  int *found_activated,
-                                  int (*cb)(OSSL_PROVIDER *provider,
-                                            void *cbdata),
-                                  void *cbdata)
-{
-    int i;
-    int ret = 1;
-    int num_provs = sk_OSSL_PROVIDER_num(store->providers);
-
-    if (found_activated != NULL)
-        *found_activated = 0;
-    for (i = 0; i < num_provs; i++) {
-        OSSL_PROVIDER *prov =
-            sk_OSSL_PROVIDER_value(store->providers, i);
-
-        if (prov->flag_initialized) {
-            if (found_activated != NULL)
-                *found_activated = 1;
-            if (!(ret = cb(prov, cbdata)))
-                break;
-        }
+int provider_forall_loaded(
+  struct provider_store_st *store,
+  int *found_activated,
+  int (*cb)(ossl_provider_st* provider, void *cbdata),
+  void *cbdata
+) {
+  int i;
+  int ret = 1;
+  int num_provs = sk_ossl_provider_st_num(store->providers);
+  if (found_activated != NULL) {
+    *found_activated = 0;
+  }
+  for (i = 0; i < num_provs; i++) {
+    ossl_provider_st *prov = sk_ossl_provider_st_value(store->providers, i);
+    if (prov->flag_initialized) {
+      if (found_activated != NULL) {
+        *found_activated = 1;
+      }
+      if (!(ret = cb(prov, cbdata))) {
+        break;
+      }
     }
-
-    return ret;
+  }
+  return ret;
 }
 
-int ossl_provider_forall_loaded(openssl_ctx_st *ctx,
-                                int (*cb)(OSSL_PROVIDER *provider,
-                                          void *cbdata),
-                                void *cbdata)
-{
-    int ret = 1;
-    int i;
-    struct provider_store_st *store = get_provider_store(ctx);
-
-    if (store != NULL) {
-        int found_activated = 0;
-
-        CRYPTO_THREAD_read_lock(store->lock);
-        ret = provider_forall_loaded(store, &found_activated, cb, cbdata);
-
-        /*
-         * If there's nothing activated ever in this store, try to activate
-         * all fallbacks.
-         */
-        if (!found_activated && store->use_fallbacks) {
-            int num_provs = sk_OSSL_PROVIDER_num(store->providers);
-            int activated_fallback_count = 0;
-
-            for (i = 0; i < num_provs; i++) {
-                OSSL_PROVIDER *prov =
-                    sk_OSSL_PROVIDER_value(store->providers, i);
-
-                /*
-                 * Note that we don't care if the activation succeeds or
-                 * not.  If it doesn't succeed, then the next loop will
-                 * fail anyway.
-                 */
-                if (prov->flag_fallback) {
-                    activated_fallback_count++;
-                    provider_activate(prov);
-                }
-            }
-
-            if (activated_fallback_count > 0) {
-                /*
-                 * We assume that all fallbacks have been added to the store
-                 * before any fallback is activated.
-                 * TODO: We may have to reconsider this, IF we find ourselves
-                 * adding fallbacks after any previous fallback has been
-                 * activated.
-                 */
-                store->use_fallbacks = 0;
-
-                /*
-                 * Now that we've activated available fallbacks, try a
-                 * second sweep
-                 */
-                ret = provider_forall_loaded(store, NULL, cb, cbdata);
-            }
-        }
-        CRYPTO_THREAD_unlock(store->lock);
+int ossl_provider_forall_loaded(
+  openssl_ctx_st *ctx,
+  int (*cb)(ossl_provider_st *provider, void *cbdata),
+  void *cbdata,
+  std::stringstream *commentsOnError
+) {
+  struct provider_store_st *store = get_provider_store(ctx, commentsOnError);
+  if (store == NULL && commentsOnError != 0) {
+    *commentsOnError << "Unexpected null store.\n";
+  }
+  if (store == NULL) {
+    return 1;
+  }
+  int ret = 1;
+  int i;
+  int found_activated = 0;
+  CRYPTO_THREAD_read_lock(store->lock);
+  ret = provider_forall_loaded(store, &found_activated, cb, cbdata);
+  /*
+   * If there's nothing activated ever in this store, try to activate
+   * all fallbacks.
+   */
+  int activated_fallback_count = 0;
+  if (!found_activated && store->use_fallbacks) {
+    if (store->providers == 0) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Store providers is null.\n";
+      }
+      return 0;
     }
+    int num_provs = sk_ossl_provider_st_num(store->providers);
 
-    return ret;
+    if (commentsOnError != 0) {
+      *commentsOnError << "DEBUG: did not find activated and using fallbacks.\n";
+      *commentsOnError << "DEBUG: num_provs: " << num_provs << "\n";
+    }
+    for (i = 0; i < num_provs; i++) {
+      ossl_provider_st* prov = sk_ossl_provider_st_value(store->providers, i);
+      /*
+       * Note that we don't care if the activation succeeds or
+       * not.  If it doesn't succeed, then the next loop will
+       * fail anyway.
+       */
+      if (prov->flag_fallback) {
+        activated_fallback_count ++;
+        provider_activate(prov);
+      }
+    }
+    if (activated_fallback_count > 0) {
+      /*
+       * We assume that all fallbacks have been added to the store
+       * before any fallback is activated.
+       * TODO: We may have to reconsider this, IF we find ourselves
+       * adding fallbacks after any previous fallback has been
+       * activated.
+       */
+      store->use_fallbacks = 0;
+      /*
+       * Now that we've activated available fallbacks, try a
+       * second sweep
+       */
+      ret = provider_forall_loaded(store, NULL, cb, cbdata);
+    }
+  }
+  CRYPTO_THREAD_unlock(store->lock);
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: activated fallback count: " << activated_fallback_count << ".\n";
+  }
+  return ret;
 }
 
 /* Setters of Provider Object data */
-int ossl_provider_set_fallback(OSSL_PROVIDER *prov)
+int ossl_provider_set_fallback(ossl_provider_st *prov)
 {
     if (prov == NULL)
         return 0;
@@ -589,47 +720,47 @@ int ossl_provider_set_fallback(OSSL_PROVIDER *prov)
 }
 
 /* Getters of Provider Object data */
-const char *ossl_provider_name(OSSL_PROVIDER *prov)
+const char *ossl_provider_name(ossl_provider_st *prov)
 {
     return prov->name;
 }
 
-const DSO *ossl_provider_dso(OSSL_PROVIDER *prov)
+const DSO *ossl_provider_dso(ossl_provider_st *prov)
 {
     return prov->module;
 }
 
-const char *ossl_provider_module_name(OSSL_PROVIDER *prov)
+const char *ossl_provider_module_name(ossl_provider_st *prov)
 {
     return DSO_get_filename(prov->module);
 }
 
-const char *ossl_provider_module_path(OSSL_PROVIDER *prov)
+const char *ossl_provider_module_path(ossl_provider_st *prov)
 {
     /* FIXME: Ensure it's a full path */
     return DSO_get_filename(prov->module);
 }
 
 /* Wrappers around calls to the provider */
-void ossl_provider_teardown(const OSSL_PROVIDER *prov)
+void ossl_provider_teardown(const ossl_provider_st *prov)
 {
     if (prov->teardown != NULL)
         prov->teardown();
 }
 
-const OSSL_ITEM *ossl_provider_get_param_types(const OSSL_PROVIDER *prov)
+const OSSL_ITEM *ossl_provider_get_param_types(const ossl_provider_st* prov)
 {
     return prov->get_param_types == NULL ? NULL : prov->get_param_types(prov);
 }
 
-int ossl_provider_get_params(const OSSL_PROVIDER *prov,
+int ossl_provider_get_params(const ossl_provider_st* prov,
                              const OSSL_PARAM params[])
 {
     return prov->get_params == NULL ? 0 : prov->get_params(prov, params);
 }
 
 
-const OSSL_ALGORITHM *ossl_provider_query_operation(const OSSL_PROVIDER *prov,
+const OSSL_ALGORITHM *ossl_provider_query_operation(const ossl_provider_st *prov,
                                                     int operation_id,
                                                     int *no_cache)
 {

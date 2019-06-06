@@ -213,9 +213,6 @@ void TransportSecurityLayer::initSSLserver() {
     logServer << "Private key does not match the certificate public key.";
     crash << "Private key does not match the certificate public key." << crash;
   }
-  ////////Safari web browser: no further use of foul language necessary.
-  //  SSL_CTX_set_options(theSSLdata.ctx, SSL_OP_SAFARI_ECDHE_ECDSA_BUG);
-  ////////
 }
 
 bool TransportSecurityLayer::SSLReadLoop(

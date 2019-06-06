@@ -75,7 +75,7 @@ DEFINE_RUN_ONCE_STATIC(o_names_init)
 
 int OBJ_NAME_init(void)
 {
-    return RUN_ONCE(&init, o_names_init);
+    return RUN_ONCE(&init, o_names_init, 0);
 }
 
 int OBJ_NAME_new_index(unsigned long (*hash_func) (const char *),

@@ -12,9 +12,9 @@
 #include "../include/openssl/provider.h"
 #include "../include/internal/provider.h"
 
-OSSL_PROVIDER *OSSL_PROVIDER_load(openssl_ctx_st *libctx, const char *name)
+ossl_provider_st *OSSL_PROVIDER_load(openssl_ctx_st *libctx, const char *name)
 {
-    OSSL_PROVIDER *prov = NULL;
+    ossl_provider_st *prov = NULL;
 
     /* Find it or create it */
     if ((prov = ossl_provider_find(libctx, name)) == NULL
@@ -29,18 +29,18 @@ OSSL_PROVIDER *OSSL_PROVIDER_load(openssl_ctx_st *libctx, const char *name)
     return prov;
 }
 
-int OSSL_PROVIDER_unload(OSSL_PROVIDER *prov)
+int OSSL_PROVIDER_unload(ossl_provider_st *prov)
 {
     ossl_provider_free(prov);
     return 1;
 }
 
-const OSSL_ITEM *OSSL_PROVIDER_get_param_types(OSSL_PROVIDER *prov)
+const OSSL_ITEM *OSSL_PROVIDER_get_param_types(ossl_provider_st *prov)
 {
     return ossl_provider_get_param_types(prov);
 }
 
-int OSSL_PROVIDER_get_params(OSSL_PROVIDER *prov, const OSSL_PARAM params[])
+int OSSL_PROVIDER_get_params(ossl_provider_st *prov, const OSSL_PARAM params[])
 {
     return ossl_provider_get_params(prov, params);
 }
@@ -48,7 +48,7 @@ int OSSL_PROVIDER_get_params(OSSL_PROVIDER *prov, const OSSL_PARAM params[])
 int OSSL_PROVIDER_add_builtin(openssl_ctx_st *libctx, const char *name,
                               OSSL_provider_init_fn *init_fn)
 {
-    OSSL_PROVIDER *prov = NULL;
+    ossl_provider_st *prov = NULL;
 
     if (name == NULL || init_fn == NULL) {
         CRYPTOerr(CRYPTO_F_OSSL_PROVIDER_ADD_BUILTIN,

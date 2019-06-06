@@ -3359,7 +3359,6 @@ WebServer::WebServer() {
   this->NumWorkersNormallyExited = 0;
   this->WebServerPingIntervalInSeconds = 10;
   this->NumberOfServerRequestsWithinAllConnections = 0;
-  this->flagNoMonitor = false;
   this->previousServerStatReport = 0;
   this->previousServerStatDetailedReport = 0;
 }
@@ -3755,9 +3754,7 @@ void WebServer::RestarT() {
   *currentLog << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
   theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath << " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
-  if (theWebServer.flagNoMonitor) {
-    theCommand << " serverNoMonitor " << " nokill " << timeLimitSeconds;
-  } else if (theWebServer.flagPort8155) {
+  if (theWebServer.flagPort8155) {
     theCommand << " server " << " nokill " << timeLimitSeconds;
   } else {
     theCommand << " server8080 " << " nokill " << timeLimitSeconds;
@@ -4247,9 +4244,9 @@ void WebServer::WriteVersionJSFile() {
 int WebServer::Run() {
   MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog = "crash_WebServerRun.html";
-#ifdef MACRO_use_open_ssl
-  TransportSecurityLayer::initSSLkeyFiles();
-#endif
+  if (theGlobalVariables.flagSSLisAvailable) {
+    TransportSecurityLayer::initSSLkeyFiles();
+  }
   if (!this->flagTryToKillOlderProcesses) {
     //<-worker log resets are needed, else forked processes reset their common log.
     //<-resets of the server logs are not needed, but I put them here nonetheless.
@@ -4268,7 +4265,7 @@ int WebServer::Run() {
     logSuccessfulForks.reset();
     logSuccessfulForks.flagWriteImmediately = true;
   }
-  if (!this->flagNoMonitor) {
+  if (theGlobalVariables.flagServerAutoMonitor) {
     int pidMonitor = fork();
     if (pidMonitor < 0) {
       crash << "Failed to create server process. " << crash;
@@ -4480,9 +4477,7 @@ int WebServer::Run() {
     this->ReleaseWorkerSideResources();
   }
   this->ReleaseEverything();
-#ifdef MACRO_use_open_ssl
   this->theSSLdata.FreeEverythingShutdownSSL();
-#endif //MACRO_use_open_ssl
   return 0;
 }
 
@@ -4500,15 +4495,15 @@ int WebWorker::Run() {
   theGlobalVariables.flagServerForkedIntoWorker = true;
   crash.CleanUpFunction = WebServer::SignalActiveWorkerDoneReleaseEverything;
   CreateTimerThread();
-#ifdef MACRO_use_open_ssl
-  if (!theWebServer.SSLServerSideHandShake()) {
-    theGlobalVariables.flagUsingSSLinCurrentConnection = false;
-    this->parent->SignalActiveWorkerDoneReleaseEverything();
-    this->parent->ReleaseEverything();
-    logOpenSSL << logger::red << "Ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
-    return - 1;
+  if (theGlobalVariables.flagSSLisAvailable) {
+    if (!theWebServer.SSLServerSideHandShake()) {
+      theGlobalVariables.flagUsingSSLinCurrentConnection = false;
+      this->parent->SignalActiveWorkerDoneReleaseEverything();
+      this->parent->ReleaseEverything();
+      logOpenSSL << logger::red << "Ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
+      return - 1;
+    }
   }
-#endif //Macro_use_open_ssl
   if (theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection) {
     logOpenSSL << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
   }
@@ -4821,7 +4816,10 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   theGlobalVariables.flagRunningConsoleTest = false;
   theGlobalVariables.flagRunningApache = false;
   #ifdef MACRO_use_open_ssl
-  theGlobalVariables.flagSSLisAvailable = true;
+  theGlobalVariables.flagSSLisAvailable = true;  
+  #endif
+  #ifdef MACRO_use_MongoDB
+  theGlobalVariables.flagDatabaseCompiled = true;
   #endif
   theGlobalVariables.flagRunningBuiltInWebServer = false;
   ////////////////////////////////////////////////////
@@ -4842,18 +4840,16 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
     return;
   }
   std::string& secondArgument = theGlobalVariables.programArguments[1];
-  if (secondArgument == "server" || secondArgument == "server8080" || secondArgument == "serverNoMonitor") {
+  if (secondArgument == "server" || secondArgument == "server8080") {
     if (secondArgument == "server8080") {
       theWebServer.flagPort8155 = false;
-    }
-    if (secondArgument == "serverNoMonitor") {
-      theWebServer.flagNoMonitor = true;
     }
     theGlobalVariables.flagRunningBuiltInWebServer = true;
     theGlobalVariables.flagRunningAce = false;
     theWebServer.flagTryToKillOlderProcesses = true;
-    if (argC == 2)
+    if (argC == 2) {
       return;
+    }
     std::string& thirdArgument = theGlobalVariables.programArguments[2];
     std::string timeLimitString = "100";
     std::string killOrder = "";
@@ -5141,6 +5137,17 @@ bool GlobalVariables::StoreConfiguration() {
 void GlobalVariables::ComputeConfigurationFlags() {
   MacroRegisterFunctionWithName("GlobalVariables::ComputeConfigurationFlags");
   theGlobalVariables.flagServerDetailedLog = theGlobalVariables.configuration["serverDetailedLog"].isTrueRepresentationInJSON();
+  if (theGlobalVariables.configuration["serverAutoMonitor"].isTrueRepresentationInJSON()) {
+    theGlobalVariables.flagServerAutoMonitor = true;
+  } else {
+    theGlobalVariables.flagServerAutoMonitor = false;
+    if (!theGlobalVariables.flagRunningCommandLine) {
+      logServer
+      << logger::purple << "************************" << logger::endL
+      << logger::red << "WARNING: server auto-monitoring is off. " << logger::endL
+      << logger::purple << "************************" << logger::endL;
+    }
+  }
   if (theGlobalVariables.flagServerDetailedLog) {
     logServer
     << logger::purple << "************************" << logger::endL

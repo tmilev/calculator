@@ -16,8 +16,8 @@
 
 /* PROVIDER config module */
 
-DEFINE_STACK_OF(OSSL_PROVIDER)
-static STACK_OF(OSSL_PROVIDER) *activated_providers = NULL;
+DEFINE_STACK_OF(ossl_provider_st)
+static STACK_OF(ossl_provider_st) *activated_providers = NULL;
 
 static const char *skip_dot(const char *name)
 {
@@ -28,7 +28,7 @@ static const char *skip_dot(const char *name)
     return name;
 }
 
-static int provider_conf_params(OSSL_PROVIDER *prov,
+static int provider_conf_params(ossl_provider_st *prov,
                                 const char *name, const char *value,
                                 const CONF *cnf)
 {
@@ -75,7 +75,7 @@ static int provider_conf_load(openssl_ctx_st *libctx, const char *name,
     int i;
     STACK_OF(CONF_VALUE) *ecmds;
     int soft = 0;
-    OSSL_PROVIDER *prov = NULL;
+    ossl_provider_st *prov = NULL;
     const char *path = NULL;
     long activate = 0;
     int ok = 0;
@@ -130,8 +130,8 @@ static int provider_conf_load(openssl_ctx_st *libctx, const char *name,
             ok = 0;
         } else {
             if (activated_providers == NULL)
-                activated_providers = sk_OSSL_PROVIDER_new_null();
-            sk_OSSL_PROVIDER_push(activated_providers, prov);
+                activated_providers = sk_ossl_provider_st_new_null();
+            sk_ossl_provider_st_push(activated_providers, prov);
             ok = 1;
         }
     }
@@ -172,7 +172,7 @@ static int provider_conf_init(CONF_IMODULE *md, const CONF *cnf)
 
 static void provider_conf_deinit(CONF_IMODULE *md)
 {
-    sk_OSSL_PROVIDER_pop_free(activated_providers, ossl_provider_free);
+    sk_ossl_provider_st_pop_free(activated_providers, ossl_provider_free);
     activated_providers = NULL;
     OSSL_TRACE(CONF, "Cleaned up providers\n");
 }

@@ -65,8 +65,8 @@ static void openssl_ctx_generic_new(void *parent_ign, void *ptr_ign,
                                     CRYPTO_EX_DATA *ad, int index,
                                     long argl_ign, void *argp)
 {
-    const OPENSSL_CTX_METHOD *meth = (OPENSSL_CTX_METHOD *) argp;
-    void *ptr = meth->new_func();
+    const openssl_ctx_method *meth = (openssl_ctx_method *) argp;
+    void *ptr = meth->new_func(NULL);
 
     if (ptr != NULL)
         CRYPTO_set_ex_data(ad, index, ptr);
@@ -75,11 +75,11 @@ static void openssl_ctx_generic_free(void *parent_ign, void *ptr,
                                      CRYPTO_EX_DATA *ad, int index,
                                      long argl_ign, void *argp)
 {
-    const OPENSSL_CTX_METHOD *meth = (OPENSSL_CTX_METHOD *) argp;
+    const openssl_ctx_method *meth = (openssl_ctx_method *) argp;
 
     meth->free_func(ptr);
 }
-int openssl_ctx_new_index(const OPENSSL_CTX_METHOD *meth)
+int openssl_ctx_new_index(const openssl_ctx_method *meth)
 {
     return CRYPTO_get_ex_new_index(CRYPTO_EX_INDEX_OPENSSL_CTX, 0, (void *)meth,
                                    openssl_ctx_generic_new, NULL,
@@ -91,7 +91,7 @@ void *openssl_ctx_get_data(openssl_ctx_st *ctx, int index)
     void *data = NULL;
 
     if (ctx == NULL) {
-        if (!RUN_ONCE(&default_context_init, do_default_context_init))
+        if (!RUN_ONCE(&default_context_init, do_default_context_init, 0))
             return 0;
         ctx = &default_context;
     }

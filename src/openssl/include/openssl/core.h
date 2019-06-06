@@ -154,7 +154,8 @@ struct ossl_param_st {
  * |out|        will be the array of base functions that the provider passes
  *              back to the Core.
  */
-typedef int (OSSL_provider_init_fn)(const OSSL_PROVIDER *provider,
+struct ossl_provider_st;
+typedef int (OSSL_provider_init_fn)(const ossl_provider_st *provider,
                                     const OSSL_DISPATCH *in,
                                     const OSSL_DISPATCH **out);
 # ifdef __VMS

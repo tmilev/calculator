@@ -49,9 +49,9 @@
 /* Functions provided by the Core to the provider, reserved numbers 1-1023 */
 # define OSSL_FUNC_CORE_GET_PARAM_TYPES        1
 OSSL_CORE_MAKE_FUNC(const OSSL_ITEM *,
-                    core_get_param_types,(const OSSL_PROVIDER *prov))
+                    core_get_param_types,(const ossl_provider_st* prov))
 # define OSSL_FUNC_CORE_GET_PARAMS             2
-OSSL_CORE_MAKE_FUNC(int,core_get_params,(const OSSL_PROVIDER *prov,
+OSSL_CORE_MAKE_FUNC(int,core_get_params,(const ossl_provider_st* prov,
                                          const OSSL_PARAM params[]))
 
 /* Functions provided by the provider to the Core, reserved numbers 1024-1535 */
@@ -59,13 +59,13 @@ OSSL_CORE_MAKE_FUNC(int,core_get_params,(const OSSL_PROVIDER *prov,
 OSSL_CORE_MAKE_FUNC(void,provider_teardown,(void))
 # define OSSL_FUNC_PROVIDER_GET_PARAM_TYPES  1025
 OSSL_CORE_MAKE_FUNC(const OSSL_ITEM *,
-                    provider_get_param_types,(const OSSL_PROVIDER *prov))
+                    provider_get_param_types,(const ossl_provider_st* prov))
 # define OSSL_FUNC_PROVIDER_GET_PARAMS       1026
-OSSL_CORE_MAKE_FUNC(int,provider_get_params,(const OSSL_PROVIDER *prov,
+OSSL_CORE_MAKE_FUNC(int,provider_get_params,(const ossl_provider_st* prov,
                                              const OSSL_PARAM params[]))
 # define OSSL_FUNC_PROVIDER_QUERY_OPERATION  1027
 OSSL_CORE_MAKE_FUNC(const OSSL_ALGORITHM *,provider_query_operation,
-                    (const OSSL_PROVIDER *, int operation_id,
+                    (const ossl_provider_st*, int operation_id,
                      const int *no_store))
 
 /* Digests */

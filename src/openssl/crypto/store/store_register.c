@@ -175,7 +175,7 @@ int ossl_store_register_loader_int(OSSL_STORE_LOADER *loader)
         return 0;
     }
 
-    if (!RUN_ONCE(&registry_init, do_registry_init)) {
+    if (!RUN_ONCE(&registry_init, do_registry_init, 0)) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_REGISTER_LOADER_INT,
                       ERR_R_MALLOC_FAILURE);
         return 0;
@@ -217,7 +217,7 @@ const OSSL_STORE_LOADER *ossl_store_get0_loader_int(const char *scheme)
     if (!ossl_store_init_once())
         return NULL;
 
-    if (!RUN_ONCE(&registry_init, do_registry_init)) {
+    if (!RUN_ONCE(&registry_init, do_registry_init, 0)) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_GET0_LOADER_INT,
                       ERR_R_MALLOC_FAILURE);
         return NULL;
@@ -248,7 +248,7 @@ OSSL_STORE_LOADER *ossl_store_unregister_loader_int(const char *scheme)
     templateOSSL.eof = NULL;
     templateOSSL.close = NULL;
 
-    if (!RUN_ONCE(&registry_init, do_registry_init)) {
+    if (!RUN_ONCE(&registry_init, do_registry_init, 0)) {
         OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_UNREGISTER_LOADER_INT,
                       ERR_R_MALLOC_FAILURE);
         return NULL;

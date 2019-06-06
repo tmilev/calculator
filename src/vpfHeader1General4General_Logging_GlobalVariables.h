@@ -98,7 +98,7 @@ public:
   bool flagCrashInitiated;
 
   bool flagDatabaseCompiled;
-
+  bool flagServerAutoMonitor;
 
   std::string buildVersionSimple;
   std::string buildHeadHashWithServerTime;

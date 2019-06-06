@@ -28,7 +28,7 @@
  */
 struct ossl_method_construct_method_st {
     /* Create store */
-    void *(*alloc_tmp_store)(void);
+    void *(*alloc_tmp_store)(std::stringstream* commentsOnError);
     /* Remove a store */
     void (*dealloc_tmp_store)(void *store);
     /* Get an already existing method from a store */
@@ -38,7 +38,7 @@ struct ossl_method_construct_method_st {
                void *method, void *data);
     /* Construct a new method */
     void *(*construct)(const char *algorithm_name, const OSSL_DISPATCH *fns,
-                       OSSL_PROVIDER *prov, void *data);
+                       ossl_provider_st* prov, void *data);
     /* Destruct a method */
     void (*destruct)(void *method, void *data);
 };

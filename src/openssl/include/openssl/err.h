@@ -265,7 +265,7 @@ void ERR_add_error_vdata(int num, va_list args);
 int ERR_load_strings(int lib, ERR_STRING_DATA *str);
 int ERR_load_strings_const(const ERR_STRING_DATA *str);
 int ERR_unload_strings(int lib, ERR_STRING_DATA *str);
-int ERR_load_ERR_strings(void);
+int ERR_load_ERR_strings(std::stringstream* commentsOnError);
 
 #if !OPENSSL_API_1_1_0
 # define ERR_load_crypto_strings() \

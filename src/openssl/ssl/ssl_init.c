@@ -200,7 +200,7 @@ int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS* settings, std::
     }
     return 0;
   }
-  if (!RUN_ONCE(&ssl_base, ossl_init_ssl_base)) {
+  if (!RUN_ONCE(&ssl_base, ossl_init_ssl_base, 0)) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to run once, base initialization. ";
     }
@@ -215,7 +215,7 @@ int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS* settings, std::
     }
     return 0;
   }
-  if ((opts & OPENSSL_INIT_LOAD_SSL_STRINGS) && !RUN_ONCE(&ssl_strings, ossl_init_load_ssl_strings)) {
+  if ((opts & OPENSSL_INIT_LOAD_SSL_STRINGS) && !RUN_ONCE(&ssl_strings, ossl_init_load_ssl_strings, 0 )) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to run once, alternative. ";
     }

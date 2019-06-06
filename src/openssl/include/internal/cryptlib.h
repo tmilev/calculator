@@ -98,12 +98,12 @@ uint32_t OPENSSL_rdtsc(void);
 size_t OPENSSL_instrument_bus(unsigned int *, size_t);
 size_t OPENSSL_instrument_bus2(unsigned int *, size_t, size_t);
 
-typedef struct openssl_ctx_method {
-    void *(*new_func)(void);
+struct openssl_ctx_method {
+    void *(*new_func)(std::stringstream* commentsOnError);
     void (*free_func)(void *);
-} OPENSSL_CTX_METHOD;
+};
 /* For each type of data to store in the context, an index must be created */
-int openssl_ctx_new_index(const OPENSSL_CTX_METHOD *);
+int openssl_ctx_new_index(const openssl_ctx_method*);
 /* Functions to retrieve pointers to data by index */
 void *openssl_ctx_get_data(openssl_ctx_st*, int /* index */);
 

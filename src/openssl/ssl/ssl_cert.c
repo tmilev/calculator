@@ -43,7 +43,7 @@ DEFINE_RUN_ONCE_STATIC(ssl_x509_store_ctx_init)
 int SSL_get_ex_data_X509_STORE_CTX_idx(void)
 {
 
-    if (!RUN_ONCE(&ssl_x509_store_ctx_once, ssl_x509_store_ctx_init))
+    if (!RUN_ONCE(&ssl_x509_store_ctx_once, ssl_x509_store_ctx_init, 0))
         return -1;
     return ssl_x509_store_ctx_idx;
 }

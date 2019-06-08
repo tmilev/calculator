@@ -18,7 +18,7 @@
 /* Algorithm configuration module. */
 
 /* TODO(3.0): the config module functions should be passed a library context */
-static int alg_module_init(CONF_IMODULE *md, const CONF *cnf)
+static int alg_module_init(CONF_IMODULE *md, const CONF *cnf, std::stringstream* commentsOnError)
 {
     int i;
     const char *oid_section;
@@ -63,8 +63,7 @@ static int alg_module_init(CONF_IMODULE *md, const CONF *cnf)
     return 1;
 }
 
-void EVP_add_alg_module(void)
-{
-    OSSL_TRACE(CONF, "Adding config module 'alg_section'\n");
-    CONF_module_add("alg_section", alg_module_init, 0);
+void EVP_add_alg_module(std::stringstream* commentsOnError) {
+  OSSL_TRACE(CONF, "Adding config module 'alg_section'\n");
+  CONF_module_add("alg_section", alg_module_init, 0, commentsOnError);
 }

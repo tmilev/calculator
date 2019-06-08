@@ -12,6 +12,7 @@
 
 # include <stddef.h>
 # include "../../include/openssl/ossl_typ.h"
+#include <sstream>
 
 /*-
  * Base types
@@ -155,16 +156,12 @@ struct ossl_param_st {
  *              back to the Core.
  */
 struct ossl_provider_st;
-typedef int (OSSL_provider_init_fn)(const ossl_provider_st *provider,
-                                    const OSSL_DISPATCH *in,
-                                    const OSSL_DISPATCH **out);
-# ifdef __VMS
-#  pragma names save
-#  pragma names uppercase,truncated
-# endif
+typedef int (OSSL_provider_init_fn)(
+  const ossl_provider_st *provider,
+  const OSSL_DISPATCH *in,
+  const OSSL_DISPATCH **out,
+  std::stringstream* commentsOnError
+);
 extern OSSL_provider_init_fn OSSL_provider_init;
-# ifdef __VMS
-#  pragma names restore
-# endif
 
 #endif

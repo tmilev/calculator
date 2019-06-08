@@ -141,7 +141,7 @@ static int blake2b_mac_ctrl_str_cb(void *macctx, int cmd, void *buf, size_t bufl
 }
 
 static int blake2b_mac_ctrl_str(EVP_MAC_IMPL *macctx, const char *type,
-                                const char *value)
+                                const char *value, std::stringstream* commentsOnError)
 {
     if (value == NULL)
         return 0;
@@ -174,7 +174,7 @@ static size_t blake2b_mac_size(EVP_MAC_IMPL *macctx)
     return macctx->params.digest_length;
 }
 
-const EVP_MAC blake2b_mac_meth = {
+const evp_mac_st blake2b_mac_meth = {
     EVP_MAC_BLAKE2B,
     blake2b_mac_new,
     blake2b_mac_copy,

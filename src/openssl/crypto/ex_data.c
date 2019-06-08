@@ -10,25 +10,6 @@
 #include "include/internal/cryptlib_int.h"
 #include "../include/internal/thread_once.h"
 
-/*
- * Each structure type (sometimes called a class), that supports
- * exdata has a stack of callbacks for each instance.
- */
-struct ex_callback_st {
-    long argl;                  /* Arbitrary long */
-    void *argp;                 /* Arbitrary void * */
-    CRYPTO_EX_new *new_func;
-    CRYPTO_EX_free *free_func;
-    CRYPTO_EX_dup *dup_func;
-};
-
-/*
- * The state for each class.  This could just be a typedef, but
- * a structure allows future changes.
- */
-typedef struct ex_callbacks_st {
-    STACK_OF(EX_CALLBACK) *meth;
-} EX_CALLBACKS;
 
 static EX_CALLBACKS ex_data[CRYPTO_EX_INDEX__COUNT];
 

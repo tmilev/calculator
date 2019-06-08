@@ -58,7 +58,7 @@ static void ssl_module_free(CONF_IMODULE *md)
     ssl_names_count = 0;
 }
 
-static int ssl_module_init(CONF_IMODULE *md, const CONF *cnf)
+static int ssl_module_init(CONF_IMODULE *md, const CONF *cnf, std::stringstream* commentsOnError)
 {
     size_t i, j, cnt;
     int rv = 0;
@@ -175,7 +175,6 @@ void conf_ssl_get_cmd(const SSL_CONF_CMD *cmd, size_t idx, char **cmdstr,
     *arg = cmd[idx].arg;
 }
 
-void conf_add_ssl_module(void)
-{
-    CONF_module_add("ssl_conf", ssl_module_init, ssl_module_free);
+void conf_add_ssl_module(std::stringstream* commentsOnError) {
+  CONF_module_add("ssl_conf", ssl_module_init, ssl_module_free, commentsOnError);
 }

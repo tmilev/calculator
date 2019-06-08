@@ -52,7 +52,7 @@ BIO *cms_EncryptedContent_init_bio(CMS_EncryptedContentInfo *ec)
         if (ec->key)
             ec->cipher = NULL;
     } else {
-        ciph = EVP_get_cipherbyobj(calg->algorithm);
+        ciph = EVP_get_cipherbyobj(calg->algorithm, 0);
 
         if (!ciph) {
             CMSerr(CMS_F_CMS_ENCRYPTEDCONTENT_INIT_BIO, CMS_R_UNKNOWN_CIPHER);

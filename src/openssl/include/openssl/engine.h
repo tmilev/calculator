@@ -335,7 +335,7 @@ ENGINE *ENGINE_by_id(const char *id);
 # define ENGINE_load_rdrand() \
     OPENSSL_init_crypto(OPENSSL_INIT_ENGINE_RDRAND, NULL)
 #endif
-void ENGINE_load_builtin_engines(void);
+void ENGINE_load_builtin_engines(std::stringstream* commentsOnError);
 
 /*
  * Get and set global flags (ENGINE_TABLE_FLAG_***) for the implementation
@@ -625,7 +625,7 @@ int ENGINE_set_default_pkey_asn1_meths(ENGINE *e);
  */
 int ENGINE_set_default(ENGINE *e, unsigned int flags);
 
-void ENGINE_add_conf_module(void);
+void ENGINE_add_conf_module(std::stringstream *commentsOnError);
 
 /* Deprecated functions ... */
 /* int ENGINE_clear_defaults(void); */

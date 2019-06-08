@@ -39,7 +39,9 @@ static const openssl_ctx_method default_method_store_method = {
     default_method_store_free,
 };
 
-static int default_method_store_init(void)
+int openssl_ctx_new_index(const openssl_ctx_method *meth);
+
+int default_method_store_init(void)
 {
     default_method_store_index =
         openssl_ctx_new_index(&default_method_store_method);
@@ -50,7 +52,7 @@ static int default_method_store_init(void)
 static CRYPTO_ONCE default_method_store_init_flag = CRYPTO_ONCE_STATIC_INIT;
 DEFINE_RUN_ONCE_STATIC(do_default_method_store_init)
 {
-    return OPENSSL_init_crypto(0, NULL)
+    return OPENSSL_init_crypto(0, NULL, (std::stringstream*) commentsOnError)
         && default_method_store_init();
 }
 

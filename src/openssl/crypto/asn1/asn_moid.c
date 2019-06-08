@@ -20,7 +20,7 @@
 
 static int do_create(const char *value, const char *name);
 
-static int oid_module_init(CONF_IMODULE *md, const CONF *cnf)
+static int oid_module_init(CONF_IMODULE *md, const CONF *cnf, std::stringstream* commentsOnError)
 {
     int i;
     const char *oid_section;
@@ -46,9 +46,8 @@ static void oid_module_finish(CONF_IMODULE *md)
 {
 }
 
-void ASN1_add_oid_module(void)
-{
-    CONF_module_add("oid_section", oid_module_init, oid_module_finish);
+void ASN1_add_oid_module(std::stringstream* commentsOnError) {
+  CONF_module_add("oid_section", oid_module_init, oid_module_finish, commentsOnError);
 }
 
 /*-

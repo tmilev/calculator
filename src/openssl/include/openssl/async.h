@@ -23,6 +23,7 @@
 #define OSSL_BAD_ASYNC_FD   -1
 #endif
 # include "../../include/openssl/asyncerr.h"
+#include <sstream>
 
 
 typedef struct async_job_st ASYNC_JOB;
@@ -39,8 +40,8 @@ typedef int (*ASYNC_callback_fn)(void *arg);
 #define ASYNC_STATUS_OK             2
 #define ASYNC_STATUS_EAGAIN         3
 
-int ASYNC_init_thread(size_t max_size, size_t init_size);
-void ASYNC_cleanup_thread(void);
+int ASYNC_init_thread(size_t max_size, size_t init_size, std::stringstream *commentsOnError);
+void ASYNC_cleanup_thread();
 
 #ifdef OSSL_ASYNC_FD
 ASYNC_WAIT_CTX *ASYNC_WAIT_CTX_new(void);
@@ -71,7 +72,7 @@ int ASYNC_WAIT_CTX_clear_fd(ASYNC_WAIT_CTX *ctx, const void *key);
 int ASYNC_is_capable(void);
 
 int ASYNC_start_job(ASYNC_JOB **job, ASYNC_WAIT_CTX *ctx, int *ret,
-                    int (*func)(void *), void *args, size_t size);
+                    int (*func)(void *), void *args, size_t size, std::stringstream *commentsOnError);
 int ASYNC_pause_job(void);
 
 ASYNC_JOB *ASYNC_get_current_job(void);

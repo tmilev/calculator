@@ -83,7 +83,7 @@ static const EVP_PBE_CTL builtin_pbe[] = {
 };
 
 int EVP_PBE_CipherInit(ASN1_OBJECT *pbe_obj, const char *pass, int passlen,
-                       ASN1_TYPE *param, EVP_CIPHER_CTX *ctx, int en_de)
+                       ASN1_TYPE *param, EVP_CIPHER_CTX *ctx, int en_de, std::stringstream* commentsOnError)
 {
     const EVP_CIPHER *cipher;
     const EVP_MD *md;
@@ -110,7 +110,7 @@ int EVP_PBE_CipherInit(ASN1_OBJECT *pbe_obj, const char *pass, int passlen,
     if (cipher_nid == -1)
         cipher = NULL;
     else {
-        cipher = EVP_get_cipherbynid(cipher_nid);
+        cipher = EVP_get_cipherbynid(cipher_nid, commentsOnError);
         if (!cipher) {
             EVPerr(EVP_F_EVP_PBE_CIPHERINIT, EVP_R_UNKNOWN_CIPHER);
             return 0;

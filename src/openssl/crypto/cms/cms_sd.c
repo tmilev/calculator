@@ -916,7 +916,7 @@ int CMS_add_simple_smimecap(STACK_OF(X509_ALGOR) **algs,
 
 static int cms_add_cipher_smcap(STACK_OF(X509_ALGOR) **sk, int nid, int arg)
 {
-    if (EVP_get_cipherbynid(nid))
+    if (EVP_get_cipherbynid(nid, 0))
         return CMS_add_simple_smimecap(sk, nid, arg);
     return 1;
 }

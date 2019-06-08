@@ -189,6 +189,10 @@ void ossl_malloc_setup_failures(void)
 }
 #endif
 
+void* OPENSSL_malloc(size_t num) {
+  return CRYPTO_malloc(num, 0, 0);
+}
+
 void *CRYPTO_malloc(size_t num, const char *file, int line)
 {
     void *ret = NULL;
@@ -209,19 +213,9 @@ void *CRYPTO_malloc(size_t num, const char *file, int line)
          */
         allow_customize = 0;
     }
-#if !defined(OPENSSL_NO_CRYPTO_MDEBUG) && !defined(FIPS_MODE)
-    if (call_malloc_debug) {
-        CRYPTO_mem_debug_malloc(NULL, num, 0, file, line);
-        ret = malloc(num);
-        CRYPTO_mem_debug_malloc(ret, num, 1, file, line);
-    } else {
-        ret = malloc(num);
-    }
-#else
-    (void)(file); (void)(line);
+    (void)(file);
+    (void)(line);
     ret = malloc(num);
-#endif
-
     return ret;
 }
 

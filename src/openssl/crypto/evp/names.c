@@ -71,11 +71,17 @@ int EVP_add_mac(const EVP_MAC *m)
     return r;
 }
 
-const EVP_CIPHER *EVP_get_cipherbyname(const char *name)
-{
-    const EVP_CIPHER *cp;
+const EVP_CIPHER* EVP_get_cipherbyobj(ASN1_OBJECT * obj, std::stringstream* commentsOnError) {
+  return EVP_get_cipherbynid(OBJ_nid2sn(a), commentsOnError);
+}
 
-    if (!OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_CIPHERS, NULL))
+const EVP_CIPHER* EVP_get_cipherbynid(int nid, std::stringstream* commentsOnError) {
+  return EVP_get_cipherbyname(OBJ_obj2nid(nid), commentsOnError);
+}
+
+const EVP_CIPHER *EVP_get_cipherbyname(const char *name, std::stringstream* commentsOnError) {
+  const EVP_CIPHER *cp;
+  if (!OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_CIPHERS, NULL, commentsOnError))
         return NULL;
 
     cp = (const EVP_CIPHER *)OBJ_NAME_get(name, OBJ_NAME_TYPE_CIPHER_METH);
@@ -93,7 +99,7 @@ const EVP_MD *EVP_get_digestbyname(const char *name)
     return cp;
 }
 
-const EVP_MAC *EVP_get_macbyname(const char *name)
+const evp_mac_st *EVP_get_macbyname(const char *name)
 {
     const EVP_MAC *mp;
 
@@ -223,9 +229,7 @@ static void do_all_mac_fn(const OBJ_NAME *nm, void *arg)
         dc->fn((const EVP_MAC *)nm->data, nm->name, NULL, dc->arg);
 }
 
-void EVP_MAC_do_all(void (*fn)
-                    (const EVP_MAC *ciph, const char *from, const char *to,
-                     void *x), void *arg)
+void EVP_MAC_do_all((*fn)(const evp_mac_st *, const char *, const char *, void *), void *arg)
 {
     struct doall_mac dc;
 
@@ -237,9 +241,7 @@ void EVP_MAC_do_all(void (*fn)
     OBJ_NAME_do_all(OBJ_NAME_TYPE_MAC_METH, do_all_mac_fn, &dc);
 }
 
-void EVP_MAC_do_all_sorted(void (*fn)
-                           (const EVP_MAC *ciph, const char *from,
-                            const char *to, void *x), void *arg)
+void EVP_MAC_do_all_sorted((*fn)(const evp_mac_st *, const char *, const char *, void *), void *arg)
 {
     struct doall_mac dc;
 

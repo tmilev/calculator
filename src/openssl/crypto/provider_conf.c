@@ -69,9 +69,13 @@ static int provider_conf_params(ossl_provider_st *prov,
     return ok;
 }
 
-static int provider_conf_load(openssl_ctx_st *libctx, const char *name,
-                              const char *value, const CONF *cnf)
-{
+static int provider_conf_load(
+  openssl_ctx_st *libctx,
+  const char *name,
+  const char *value,
+  const CONF *cnf,
+  std::stringstream* commentsOnError
+) {
     int i;
     STACK_OF(CONF_VALUE) *ecmds;
     int soft = 0;
@@ -126,7 +130,7 @@ static int provider_conf_load(openssl_ctx_st *libctx, const char *name,
     ok = provider_conf_params(prov, NULL, value, cnf);
 
     if (ok && activate) {
-        if (!ossl_provider_activate(prov)) {
+        if (!ossl_provider_activate(prov, commentsOnError)) {
             ok = 0;
         } else {
             if (activated_providers == NULL)
@@ -142,7 +146,7 @@ static int provider_conf_load(openssl_ctx_st *libctx, const char *name,
     return ok;
 }
 
-static int provider_conf_init(CONF_IMODULE *md, const CONF *cnf)
+static int provider_conf_init(CONF_IMODULE *md, const CONF *cnf, std::stringstream* commentsOnError)
 {
     STACK_OF(CONF_VALUE) *elist;
     CONF_VALUE *cval;
@@ -162,7 +166,7 @@ static int provider_conf_init(CONF_IMODULE *md, const CONF *cnf)
 
     for (i = 0; i < sk_CONF_VALUE_num(elist); i++) {
         cval = sk_CONF_VALUE_value(elist, i);
-        if (!provider_conf_load(NULL, cval->name, cval->value, cnf))
+        if (!provider_conf_load(NULL, cval->name, cval->value, cnf, commentsOnError))
             return 0;
     }
 
@@ -177,8 +181,7 @@ static void provider_conf_deinit(CONF_IMODULE *md)
     OSSL_TRACE(CONF, "Cleaned up providers\n");
 }
 
-void ossl_provider_add_conf_module(void)
-{
-    OSSL_TRACE(CONF, "Adding config module 'providers'\n");
-    CONF_module_add("providers", provider_conf_init, provider_conf_deinit);
+void ossl_provider_add_conf_module(std::stringstream* commentsOnError) {
+  OSSL_TRACE(CONF, "Adding config module 'providers'\n");
+  CONF_module_add("providers", provider_conf_init, provider_conf_deinit, commentsOnError);
 }

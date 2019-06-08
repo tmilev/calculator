@@ -58,20 +58,20 @@ static STACK_OF(CONF_IMODULE) *initialized_modules = NULL;
 static void module_free(CONF_MODULE *md);
 static void module_finish(CONF_IMODULE *imod);
 static int module_run(const CONF *cnf, const char *name, const char *value,
-                      unsigned long flags);
+                      unsigned long flags, std::stringstream *commentsOnError);
 static CONF_MODULE *module_add(DSO *dso, const char *name,
                                conf_init_func *ifunc,
                                conf_finish_func *ffunc);
 static CONF_MODULE *module_find(const char *name);
 static int module_init(CONF_MODULE *pmod, const char *name, const char *value,
-                       const CONF *cnf);
+                       const CONF *cnf, std::stringstream *commentsOnError);
 static CONF_MODULE *module_load_dso(const CONF *cnf, const char *name,
                                     const char *value);
 
 /* Main function: load modules from a CONF structure */
 
 int CONF_modules_load(const CONF *cnf, const char *appname,
-                      unsigned long flags)
+                      unsigned long flags, std::stringstream* commentsOnError)
 {
     STACK_OF(CONF_VALUE) *values;
     CONF_VALUE *vl;
@@ -101,7 +101,7 @@ int CONF_modules_load(const CONF *cnf, const char *appname,
 
     for (i = 0; i < sk_CONF_VALUE_num(values); i++) {
         vl = sk_CONF_VALUE_value(values, i);
-        ret = module_run(cnf, vl->name, vl->value, flags);
+        ret = module_run(cnf, vl->name, vl->value, flags, commentsOnError);
         OSSL_TRACE3(CONF, "Running module %s (%s) returned %d\n",
                     vl->name, vl->value, ret);
         if (ret <= 0)
@@ -114,7 +114,7 @@ int CONF_modules_load(const CONF *cnf, const char *appname,
 }
 
 int CONF_modules_load_file(const char *filename, const char *appname,
-                           unsigned long flags)
+                           unsigned long flags, std::stringstream* commentsOnError)
 {
     char *file = NULL;
     CONF *conf = NULL;
@@ -139,7 +139,7 @@ int CONF_modules_load_file(const char *filename, const char *appname,
         goto err;
     }
 
-    ret = CONF_modules_load(conf, appname, flags);
+    ret = CONF_modules_load(conf, appname, flags, commentsOnError);
 
  err:
     if (filename == NULL)
@@ -153,7 +153,7 @@ int CONF_modules_load_file(const char *filename, const char *appname,
 }
 
 static int module_run(const CONF *cnf, const char *name, const char *value,
-                      unsigned long flags)
+                      unsigned long flags, std::stringstream* commentsOnError)
 {
     CONF_MODULE *md;
     int ret;
@@ -172,7 +172,7 @@ static int module_run(const CONF *cnf, const char *name, const char *value,
         return -1;
     }
 
-    ret = module_init(md, name, value, cnf);
+    ret = module_init(md, name, value, cnf, commentsOnError);
 
     if (ret <= 0) {
         if (!(flags & CONF_MFLAGS_SILENT)) {
@@ -292,7 +292,7 @@ static CONF_MODULE *module_find(const char *name)
 
 /* initialize a module */
 static int module_init(CONF_MODULE *pmod, const char *name, const char *value,
-                       const CONF *cnf)
+                       const CONF *cnf, std::stringstream* commentsOnError)
 {
     int ret = 1;
     int init_called = 0;
@@ -313,7 +313,7 @@ static int module_init(CONF_MODULE *pmod, const char *name, const char *value,
 
     /* Try to initialize module */
     if (pmod->init) {
-        ret = pmod->init(imod, cnf);
+        ret = pmod->init(imod, cnf, commentsOnError);
         init_called = 1;
         /* Error occurred, exit */
         if (ret <= 0)
@@ -418,13 +418,17 @@ static void module_finish(CONF_IMODULE *imod)
 
 /* Add a static module to OpenSSL */
 
-int CONF_module_add(const char *name, conf_init_func *ifunc,
-                    conf_finish_func *ffunc)
-{
-    if (module_add(NULL, name, ifunc, ffunc))
-        return 1;
-    else
-        return 0;
+int CONF_module_add(
+  const char *name,
+  conf_init_func *ifunc,
+  conf_finish_func *ffunc,
+  std::stringstream* commentsOnError
+) {
+  if (module_add(NULL, name, ifunc, ffunc)) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 void conf_modules_free_int(void)

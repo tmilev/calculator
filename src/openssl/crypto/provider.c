@@ -12,8 +12,7 @@
 #include "../include/openssl/provider.h"
 #include "../include/internal/provider.h"
 
-ossl_provider_st *OSSL_PROVIDER_load(openssl_ctx_st *libctx, const char *name)
-{
+ossl_provider_st *OSSL_PROVIDER_load(openssl_ctx_st *libctx, const char *name, std::stringstream* commentsOnError) {
     ossl_provider_st *prov = NULL;
 
     /* Find it or create it */
@@ -21,7 +20,7 @@ ossl_provider_st *OSSL_PROVIDER_load(openssl_ctx_st *libctx, const char *name)
         && (prov = ossl_provider_new(libctx, name, NULL)) == NULL)
         return NULL;
 
-    if (!ossl_provider_activate(prov)) {
+    if (!ossl_provider_activate(prov, commentsOnError)) {
         ossl_provider_free(prov);
         return NULL;
     }

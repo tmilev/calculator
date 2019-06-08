@@ -708,7 +708,7 @@ static int dh_cms_set_shared_info(EVP_PKEY_CTX *pctx, CMS_RecipientInfo *ri)
     kekctx = CMS_RecipientInfo_kari_get0_ctx(ri);
     if (!kekctx)
         goto err;
-    kekcipher = EVP_get_cipherbyobj(kekalg->algorithm);
+    kekcipher = EVP_get_cipherbyobj(kekalg->algorithm, 0);
     if (!kekcipher || EVP_CIPHER_mode(kekcipher) != EVP_CIPH_WRAP_MODE)
         goto err;
     if (!EVP_EncryptInit_ex(kekctx, kekcipher, NULL, NULL, NULL))

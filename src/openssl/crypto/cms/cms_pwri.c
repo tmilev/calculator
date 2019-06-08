@@ -309,7 +309,7 @@ int cms_RecipientInfo_pwri_crypt(const CMS_ContentInfo *cms, CMS_RecipientInfo *
         return 0;
     }
 
-    kekcipher = EVP_get_cipherbyobj(kekalg->algorithm);
+    kekcipher = EVP_get_cipherbyobj(kekalg->algorithm, 0);
 
     if (!kekcipher) {
         CMSerr(CMS_F_CMS_RECIPIENTINFO_PWRI_CRYPT, CMS_R_UNKNOWN_CIPHER);

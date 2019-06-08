@@ -12,7 +12,7 @@
 # define HEADER_INTERNAL_SHA_H
 
 # include "../../../include/openssl/opensslconf.h"
-
+#include "../../../include/openssl/sha.h"
 int sha512_224_init(SHA512_CTX *);
 int sha512_256_init(SHA512_CTX *);
 

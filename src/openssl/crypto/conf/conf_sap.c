@@ -27,20 +27,17 @@
 
 static int openssl_configured = 0;
 
-#if !OPENSSL_API_1_1_0
-void OPENSSL_config(const char *appname)
-{
-    OPENSSL_INIT_SETTINGS settings;
-
-    memset(&settings, 0, sizeof(settings));
-    if (appname != NULL)
-        settings.appname = strdup(appname);
-    settings.flags = DEFAULT_CONF_MFLAGS;
-    OPENSSL_init_crypto(OPENSSL_INIT_LOAD_CONFIG, &settings);
+void OPENSSL_config(const char *appname, std::stringstream* commentsOnError) {
+  OPENSSL_INIT_SETTINGS settings;
+  memset(&settings, 0, sizeof(settings));
+  if (appname != NULL) {
+    settings.appname = strdup(appname);
+  }
+  settings.flags = DEFAULT_CONF_MFLAGS;
+  OPENSSL_init_crypto(OPENSSL_INIT_LOAD_CONFIG, &settings, commentsOnError);
 }
-#endif
 
-int openssl_config_int(const OPENSSL_INIT_SETTINGS *settings)
+int openssl_config_int(const OPENSSL_INIT_SETTINGS *settings, std::stringstream* commentsOnError)
 {
     int ret;
     const char *filename;
@@ -59,14 +56,14 @@ int openssl_config_int(const OPENSSL_INIT_SETTINGS *settings)
             filename, appname, flags);
 #endif
 
-    OPENSSL_load_builtin_modules();
+    OPENSSL_load_builtin_modules(commentsOnError);
 #ifndef OPENSSL_NO_ENGINE
     /* Need to load ENGINEs */
-    ENGINE_load_builtin_engines();
+    ENGINE_load_builtin_engines(commentsOnError);
 #endif
     ERR_clear_error();
 #ifndef OPENSSL_SYS_UEFI
-    ret = CONF_modules_load_file(filename, appname, flags);
+    ret = CONF_modules_load_file(filename, appname, flags, commentsOnError);
 #endif
     openssl_configured = 1;
     return ret;

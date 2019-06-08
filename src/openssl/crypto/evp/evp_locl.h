@@ -50,7 +50,7 @@ struct evp_cipher_ctx_st {
 } /* EVP_CIPHER_CTX */ ;
 
 struct evp_mac_ctx_st {
-    const EVP_MAC *meth;         /* Method structure */
+    const evp_mac_st *meth;         /* Method structure */
     void *data;                  /* Individual method data */
 } /* EVP_MAC_CTX */;
 

@@ -349,7 +349,11 @@ HEADERS += \
     openssl/ssl/ssl_cert_table.h \
     openssl/ssl/ssl_locl.h \
     openssl/e_os.h \
-    transport_security_layer.h
+    transport_security_layer.h \
+    openssl/providers/common/ciphers/ciphers_locl.h \
+    openssl/providers/common/include/internal/provider_algs.h \
+    openssl/providers/common/include/internal/providercommon.h \
+    openssl/providers/common/include/internal/providercommonerr.h
 
 SOURCES += \
     database.cpp \
@@ -1142,5 +1146,14 @@ SOURCES += \
     openssl/ssl/tls13_enc.c \
     openssl/ssl/tls_srp.c \
     openssl/crypto/LPdir_unix.c \
-    transport_security_layer.cpp
+    transport_security_layer.cpp \
+    openssl/providers/common/ciphers/aes.c \
+    openssl/providers/common/ciphers/aes_basic.c \
+    openssl/providers/common/ciphers/block.c \
+    openssl/providers/common/digests/sha2.c \
+    openssl/providers/common/provider_err.c \
+    openssl/providers/default/defltprov.c \
+    openssl/providers/fips/fipsprov.c \
+    openssl/providers/legacy/digests/md2.c \
+    openssl/providers/legacy/legacyprov.c
 

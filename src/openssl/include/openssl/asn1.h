@@ -785,8 +785,8 @@ int ASN1_item_i2d(const ASN1_VALUE *val, unsigned char **out, const ASN1_ITEM *i
 int ASN1_item_ndef_i2d(const ASN1_VALUE *val, unsigned char **out,
                        const ASN1_ITEM *it);
 
-void ASN1_add_oid_module(void);
-void ASN1_add_stable_module(void);
+void ASN1_add_oid_module(std::stringstream *commentsOnError);
+void ASN1_add_stable_module(std::stringstream *commentsOnError);
 
 ASN1_TYPE *ASN1_generate_nconf(const char *str, CONF *nconf);
 ASN1_TYPE *ASN1_generate_v3(const char *str, X509V3_CTX *cnf);

@@ -25,7 +25,7 @@ EVP_MAC_CTX *EVP_MAC_CTX_new_id(int id)
     return EVP_MAC_CTX_new(mac);
 }
 
-EVP_MAC_CTX *EVP_MAC_CTX_new(const EVP_MAC *mac)
+EVP_MAC_CTX *EVP_MAC_CTX_new(const evp_mac_st *mac)
 {
     EVP_MAC_CTX *ctx = (EVP_MAC_CTX *) OPENSSL_zalloc(sizeof(EVP_MAC_CTX));
 
@@ -181,7 +181,7 @@ int EVP_MAC_hex2ctrl(EVP_MAC_CTX *ctx, int cmd, const char *hex)
     return rv;
 }
 
-int EVP_MAC_nid(const EVP_MAC *mac)
+int EVP_MAC_nid(const evp_mac_st *mac)
 {
     return mac->type;
 }

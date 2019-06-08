@@ -39,7 +39,7 @@ int ossl_provider_add_parameter(ossl_provider_st *prov, const char *name, const 
  * If the Provider is a module, the module will be loaded
  * Inactivation is done by freeing the Provider
  */
-int ossl_provider_activate(ossl_provider_st *prov);
+int ossl_provider_activate(ossl_provider_st *prov, std::stringstream *commentsOnError);
 
 /* Iterate over all loaded providers */
 int ossl_provider_forall_loaded(
@@ -65,6 +65,6 @@ const OSSL_ALGORITHM *ossl_provider_query_operation(const ossl_provider_st *prov
                                                     int *no_cache);
 
 /* Configuration */
-void ossl_provider_add_conf_module(void);
+void ossl_provider_add_conf_module(std::stringstream *commentsOnError);
 
 #endif

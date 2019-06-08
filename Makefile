@@ -890,7 +890,17 @@ openssl/ssl/t1_enc.c \
 openssl/ssl/t1_lib.c \
 openssl/ssl/t1_trce.c \
 openssl/ssl/tls13_enc.c \
-openssl/ssl/tls_srp.c
+openssl/ssl/tls_srp.c \
+openssl/providers/common/ciphers/aes.c \
+openssl/providers/common/ciphers/aes_basic.c \
+openssl/providers/common/ciphers/block.c \
+openssl/providers/common/digests/sha2.c \
+openssl/providers/common/provider_err.c \
+openssl/providers/default/defltprov.c \
+openssl/providers/fips/fipsprov.c \
+openssl/providers/legacy/digests/md2.c \
+openssl/providers/legacy/legacyprov.c
+
 
 OBJECTS=$(addprefix bin/, $(SOURCES_RELATIVE_PATH:.cpp=.o))
 OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH_C:.c=.o))

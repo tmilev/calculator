@@ -52,7 +52,7 @@ DEFINE_STACK_OF(CONF_MODULE)
 DEFINE_STACK_OF(CONF_IMODULE)
 
 /* DSO module function typedefs */
-typedef int conf_init_func (CONF_IMODULE *md, const CONF *cnf);
+typedef int conf_init_func (CONF_IMODULE *md, const CONF *cnf, std::stringstream* commentsOnError);
 typedef void conf_finish_func (CONF_IMODULE *md);
 
 # define CONF_MFLAGS_IGNORE_ERRORS       0x1
@@ -128,16 +128,16 @@ int NCONF_dump_bio(const CONF *conf, BIO *out);
 /* Module functions */
 
 int CONF_modules_load(const CONF *cnf, const char *appname,
-                      unsigned long flags);
+                      unsigned long flags, std::stringstream *commentsOnError);
 int CONF_modules_load_file(const char *filename, const char *appname,
-                           unsigned long flags);
+                           unsigned long flags, std::stringstream *commentsOnError);
 void CONF_modules_unload(int all);
 void CONF_modules_finish(void);
 #if !OPENSSL_API_1_1_0
 # define CONF_modules_free() while(0) continue
 #endif
 int CONF_module_add(const char *name, conf_init_func *ifunc,
-                    conf_finish_func *ffunc);
+                    conf_finish_func *ffunc, std::stringstream *commentsOnError);
 
 const char *CONF_imodule_get_name(const CONF_IMODULE *md);
 const char *CONF_imodule_get_value(const CONF_IMODULE *md);
@@ -155,6 +155,6 @@ int CONF_parse_list(const char *list, int sep, int nospc,
                     int (*list_cb) (const char *elem, int len, void *usr),
                     void *arg);
 
-void OPENSSL_load_builtin_modules(void);
+void OPENSSL_load_builtin_modules(std::stringstream *commentsOnError);
 
 #endif

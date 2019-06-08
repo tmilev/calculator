@@ -438,8 +438,9 @@ typedef int (EVP_PBE_KEYGEN) (EVP_CIPHER_CTX *ctx, const char *pass,
 /* Add some extra combinations */
 # define EVP_get_digestbynid(a) EVP_get_digestbyname(OBJ_nid2sn(a))
 # define EVP_get_digestbyobj(a) EVP_get_digestbynid(OBJ_obj2nid(a))
-# define EVP_get_cipherbynid(a) EVP_get_cipherbyname(OBJ_nid2sn(a))
-# define EVP_get_cipherbyobj(a) EVP_get_cipherbynid(OBJ_obj2nid(a))
+const EVP_CIPHER* EVP_get_cipherbynid(int nid, std::stringstream *commentsOnError);
+const EVP_CIPHER* EVP_get_cipherbyobj(ASN1_OBJECT * obj, std::stringstream *commentsOnError);
+
 
 int EVP_MD_type(const EVP_MD *md);
 # define EVP_MD_nid(e)                   EVP_MD_type(e)
@@ -971,7 +972,7 @@ const EVP_CIPHER *EVP_sm4_ctr(void);
 int EVP_add_cipher(const EVP_CIPHER *cipher);
 int EVP_add_digest(const EVP_MD *digest);
 
-const EVP_CIPHER *EVP_get_cipherbyname(const char *name);
+const EVP_CIPHER *EVP_get_cipherbyname(const char *name, std::stringstream *commentsOnError);
 const EVP_MD *EVP_get_digestbyname(const char *name);
 
 void EVP_CIPHER_do_all(void (*fn) (const EVP_CIPHER *ciph,
@@ -1000,11 +1001,11 @@ void EVP_MD_do_all_sorted(void (*fn)
 # define EVP_MAC_SIPHASH        NID_siphash
 # define EVP_MAC_POLY1305       NID_poly1305
 
-EVP_MAC_CTX *EVP_MAC_CTX_new(const EVP_MAC *mac);
+EVP_MAC_CTX *EVP_MAC_CTX_new(const evp_mac_st *mac);
 EVP_MAC_CTX *EVP_MAC_CTX_new_id(int nid);
 void EVP_MAC_CTX_free(EVP_MAC_CTX *ctx);
 int EVP_MAC_CTX_copy(EVP_MAC_CTX *dest, const EVP_MAC_CTX *src);
-const EVP_MAC *EVP_MAC_CTX_mac(EVP_MAC_CTX *ctx);
+const evp_mac_st* EVP_MAC_CTX_mac(EVP_MAC_CTX *ctx);
 size_t EVP_MAC_size(EVP_MAC_CTX *ctx);
 int EVP_MAC_init(EVP_MAC_CTX *ctx);
 int EVP_MAC_update(EVP_MAC_CTX *ctx, const unsigned char *data, size_t datalen);
@@ -1014,17 +1015,17 @@ int EVP_MAC_vctrl(EVP_MAC_CTX *ctx, int cmd, va_list args);
 int EVP_MAC_ctrl_str(EVP_MAC_CTX *ctx, const char *type, const char *value);
 int EVP_MAC_str2ctrl(EVP_MAC_CTX *ctx, int cmd, const char *value);
 int EVP_MAC_hex2ctrl(EVP_MAC_CTX *ctx, int cmd, const char *value);
-int EVP_MAC_nid(const EVP_MAC *mac);
+int EVP_MAC_nid(const evp_mac_st *mac);
 
 # define EVP_get_macbynid(a)    EVP_get_macbyname(OBJ_nid2sn(a))
 # define EVP_get_macbyobj(a)    EVP_get_macbynid(OBJ_obj2nid(a))
 # define EVP_MAC_name(o)        OBJ_nid2sn(EVP_MAC_nid(o))
-const EVP_MAC *EVP_get_macbyname(const char *name);
+const evp_mac_st *EVP_get_macbyname(const char *name);
 void EVP_MAC_do_all(void (*fn)
-                    (const EVP_MAC *ciph, const char *from, const char *to,
+                    (const evp_mac_st *ciph, const char *from, const char *to,
                      void *x), void *arg);
 void EVP_MAC_do_all_sorted(void (*fn)
-                           (const EVP_MAC *ciph, const char *from,
+                           (const evp_mac_st *ciph, const char *from,
                             const char *to, void *x), void *arg);
 
 # define EVP_MAC_CTRL_SET_KEY           0x01 /* unsigned char *, size_t */
@@ -1166,7 +1167,7 @@ int PKCS5_v2_scrypt_keyivgen(EVP_CIPHER_CTX *ctx, const char *pass,
 void PKCS5_PBE_add(void);
 
 int EVP_PBE_CipherInit(ASN1_OBJECT *pbe_obj, const char *pass, int passlen,
-                       ASN1_TYPE *param, EVP_CIPHER_CTX *ctx, int en_de);
+                       ASN1_TYPE *param, EVP_CIPHER_CTX *ctx, int en_de, std::stringstream *commentsOnError);
 
 /* PBE type */
 
@@ -1688,7 +1689,7 @@ void EVP_PKEY_meth_get_param_check(const EVP_PKEY_METHOD *pmeth,
 void EVP_PKEY_meth_get_digest_custom(EVP_PKEY_METHOD *pmeth,
                                      int (**pdigest_custom) (EVP_PKEY_CTX *ctx,
                                                              EVP_MD_CTX *mctx));
-void EVP_add_alg_module(void);
+void EVP_add_alg_module(std::stringstream *commentsOnError);
 
 /*
  * Convenient helper functions to transfer string based controls.

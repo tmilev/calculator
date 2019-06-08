@@ -299,7 +299,7 @@ void ERR_STATE_free(err_state_st *s) {
 
 DEFINE_RUN_ONCE_STATIC(do_err_strings_init)
 {
-    if (!OPENSSL_init_crypto(0, NULL))
+    if (!OPENSSL_init_crypto(0, NULL, (std::stringstream*) commentsOnError))
         return 0;
     err_string_lock = CRYPTO_THREAD_lock_new();
     if (err_string_lock == NULL)
@@ -672,7 +672,7 @@ int err_shelve_state(void **state)
      * call is needed, but some care is required to make sure that the re-entry
      * remains a NOOP.
      */
-    if (!OPENSSL_init_crypto(OPENSSL_INIT_BASE_ONLY, NULL))
+    if (!OPENSSL_init_crypto(OPENSSL_INIT_BASE_ONLY, NULL, 0))
         return 0;
 
     if (!RUN_ONCE(&err_init, err_do_init, 0))

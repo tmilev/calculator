@@ -143,7 +143,7 @@ static int int_engine_configure(const char *name, const char *value, const CONF 
     return ret;
 }
 
-static int int_engine_module_init(CONF_IMODULE *md, const CONF *cnf)
+static int int_engine_module_init(CONF_IMODULE *md, const CONF *cnf, std::stringstream* commentsOnError)
 {
     STACK_OF(CONF_VALUE) *elist;
     CONF_VALUE *cval;
@@ -178,8 +178,11 @@ static void int_engine_module_finish(CONF_IMODULE *md)
     initialized_engines = NULL;
 }
 
-void ENGINE_add_conf_module(void)
-{
-    CONF_module_add("engines",
-                    int_engine_module_init, int_engine_module_finish);
+void ENGINE_add_conf_module(std::stringstream* commentsOnError) {
+  CONF_module_add(
+    "engines",
+    int_engine_module_init,
+    int_engine_module_finish,
+    commentsOnError
+  );
 }

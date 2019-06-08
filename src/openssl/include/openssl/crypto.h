@@ -107,8 +107,9 @@ DEFINE_STACK_OF(void)
 
 int CRYPTO_mem_ctrl(int mode);
 
-# define OPENSSL_malloc(num) \
-        CRYPTO_malloc(num, OPENSSL_FILE, OPENSSL_LINE)
+//# define OPENSSL_malloc(num)
+//        CRYPTO_malloc(num, OPENSSL_FILE, OPENSSL_LINE)
+
 # define OPENSSL_zalloc(num) \
         CRYPTO_zalloc(num, (const char *) OPENSSL_FILE, OPENSSL_LINE)
 # define OPENSSL_realloc(addr, num) \
@@ -263,6 +264,8 @@ void CRYPTO_get_mem_functions(
         void (**f) (void *, const char *, int));
 
 void *CRYPTO_malloc(size_t num, const char *file, int line);
+void* OPENSSL_malloc(size_t num);
+
 void *CRYPTO_zalloc(size_t num, const char *file, int line);
 void *CRYPTO_memdup(const void *str, size_t siz, const char *file, int line);
 char *CRYPTO_strdup(const char *str, const char *file, int line);
@@ -390,7 +393,7 @@ int CRYPTO_memcmp(const void * in_a, const void * in_b, size_t len);
 
 /* Library initialisation functions */
 void OPENSSL_cleanup(void);
-int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings);
+int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings, std::stringstream *commentsOnError);
 int OPENSSL_atexit(void (*handler)(void));
 void OPENSSL_thread_stop(void);
 

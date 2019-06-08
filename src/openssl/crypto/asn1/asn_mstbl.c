@@ -17,7 +17,7 @@
 
 static int do_tcreate(const char *value, const char *name);
 
-static int stbl_module_init(CONF_IMODULE *md, const CONF *cnf)
+static int stbl_module_init(CONF_IMODULE *md, const CONF *cnf, std::stringstream* commentsOnError)
 {
     int i;
     const char *stbl_section;
@@ -44,9 +44,8 @@ static void stbl_module_finish(CONF_IMODULE *md)
     ASN1_STRING_TABLE_cleanup();
 }
 
-void ASN1_add_stable_module(void)
-{
-    CONF_module_add("stbl_section", stbl_module_init, stbl_module_finish);
+void ASN1_add_stable_module(std::stringstream* commentsOnError) {
+  CONF_module_add("stbl_section", stbl_module_init, stbl_module_finish, commentsOnError);
 }
 
 /*

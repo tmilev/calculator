@@ -129,13 +129,16 @@ static int cmac_ctrl_str_cb(void *hctx, int cmd, void *buf, size_t buflen)
     return cmac_ctrl_int((EVP_MAC_IMPL*) hctx, cmd, buf, buflen);
 }
 
-static int cmac_ctrl_str(EVP_MAC_IMPL *cctx, const char *type,
-                         const char *value)
-{
+int cmac_ctrl_str(
+  EVP_MAC_IMPL *cctx,
+  const char *type,
+  const char *value,
+  std::stringstream* commentsOnError
+) {
     if (!value)
         return 0;
     if (strcmp(type, "cipher") == 0) {
-        const EVP_CIPHER *c = EVP_get_cipherbyname(value);
+        const EVP_CIPHER *c = EVP_get_cipherbyname(value, commentsOnError);
 
         if (c == NULL)
             return 0;
@@ -150,7 +153,7 @@ static int cmac_ctrl_str(EVP_MAC_IMPL *cctx, const char *type,
     return -2;
 }
 
-const EVP_MAC cmac_meth = {
+const evp_mac_st cmac_meth = {
     EVP_MAC_CMAC,
     cmac_new,
     cmac_copy,

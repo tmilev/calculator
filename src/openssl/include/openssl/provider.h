@@ -14,7 +14,7 @@
 
 
 /* Load and unload a provider */
-ossl_provider_st *OSSL_PROVIDER_load(openssl_ctx_st *, const char *name);
+ossl_provider_st *OSSL_PROVIDER_load(openssl_ctx_st *, const char *name, std::stringstream *commentsOnError);
 int OSSL_PROVIDER_unload(ossl_provider_st *prov);
 
 const OSSL_ITEM *OSSL_PROVIDER_get_param_types(ossl_provider_st *prov);

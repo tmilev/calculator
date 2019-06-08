@@ -296,12 +296,20 @@ DEFINE_RUN_ONCE_STATIC_ALT(ossl_init_no_add_all_macs, ossl_init_add_all_macs)
 static CRYPTO_ONCE config = CRYPTO_ONCE_STATIC_INIT;
 static int config_inited = 0;
 static const OPENSSL_INIT_SETTINGS *conf_settings = NULL;
-DEFINE_RUN_ONCE_STATIC(ossl_init_config)
-{
-    int ret = openssl_config_int(conf_settings);
+
+//DEFINE_RUN_ONCE_STATIC(init = ossl_init_config
+static int ossl_init_config(std::stringstream *commentsOnError);
+static int ossl_init_config_ossl_ret_ = 0;
+static void ossl_init_config_ossl_(std::stringstream* commentsOnError) {
+  ossl_init_config_ossl_ret_ = ossl_init_config(commentsOnError);
+}
+static int ossl_init_config(std::stringstream* commentsOnError) {
+    std::cout << "DEBUG: OH no this piece of code is being called!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+    int ret = openssl_config_int(conf_settings, commentsOnError);
     config_inited = 1;
     return ret;
 }
+
 DEFINE_RUN_ONCE_STATIC_ALT(ossl_init_no_config, ossl_init_config)
 {
     OSSL_TRACE(INIT, "openssl_no_config_int()\n");
@@ -543,13 +551,15 @@ void OPENSSL_cleanup(void)
  * called prior to any threads making calls to any OpenSSL functions,
  * i.e. passing a non-null settings value is assumed to be single-threaded.
  */
-int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings)
-{
-    if (stopped) {
-        if (!(opts & OPENSSL_INIT_BASE_ONLY))
-            CRYPTOerr(CRYPTO_F_OPENSSL_INIT_CRYPTO, ERR_R_INIT_FAIL);
-        return 0;
+int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings, std::stringstream* commentsOnError) {
+  if (stopped) {
+    if (!(opts & OPENSSL_INIT_BASE_ONLY)) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Cryptography is marked as stopped.\n";
+      }
     }
+    return 0;
+  }
 
     /*
      * When the caller specifies OPENSSL_INIT_BASE_ONLY, that should be the
@@ -634,7 +644,7 @@ int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings)
         int ret;
         CRYPTO_THREAD_write_lock(init_lock);
         conf_settings = settings;
-        ret = RUN_ONCE(&config, ossl_init_config, 0);
+        ret = CRYPTO_THREAD_run_once(&config, ossl_init_config_ossl_, commentsOnError) ? ossl_init_config_ossl_ret_ : 0;
         conf_settings = NULL;
         CRYPTO_THREAD_unlock(init_lock);
         if (ret <= 0)

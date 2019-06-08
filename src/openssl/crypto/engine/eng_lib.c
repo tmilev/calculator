@@ -18,9 +18,9 @@ CRYPTO_ONCE engine_lock_init = CRYPTO_ONCE_STATIC_INIT;
 
 /* The "new"/"free" stuff first */
 
-DEFINE_RUN_ONCE(do_engine_lock_init)
-{
-    if (!OPENSSL_init_crypto(0, NULL))
+DEFINE_RUN_ONCE(do_engine_lock_init) {
+  std::cout << "DEBUG: running unexpected piece of code!!!!!!!!!!!!!!!!!!";
+    if (!OPENSSL_init_crypto(0, NULL, 0))
         return 0;
     global_engine_lock = CRYPTO_THREAD_lock_new();
     return global_engine_lock != NULL;

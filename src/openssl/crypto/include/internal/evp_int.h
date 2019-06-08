@@ -126,18 +126,18 @@ struct evp_mac_st {
                    size_t datalen);
     int (*final) (EVP_MAC_IMPL *macctx, unsigned char *out);
     int (*ctrl) (EVP_MAC_IMPL *macctx, int cmd, va_list args);
-    int (*ctrl_str) (EVP_MAC_IMPL *macctx, const char *type, const char *value);
+    int (*ctrl_str) (EVP_MAC_IMPL *macctx, const char *type, const char *value, std::stringstream* commentsOnError);
 };
 
-extern const EVP_MAC blake2b_mac_meth;
-extern const EVP_MAC blake2s_mac_meth;
-extern const EVP_MAC cmac_meth;
-extern const EVP_MAC gmac_meth;
-extern const EVP_MAC hmac_meth;
-extern const EVP_MAC kmac128_meth;
-extern const EVP_MAC kmac256_meth;
-extern const EVP_MAC siphash_meth;
-extern const EVP_MAC poly1305_meth;
+extern const evp_mac_st blake2b_mac_meth;
+extern const evp_mac_st blake2s_mac_meth;
+extern const evp_mac_st cmac_meth;
+extern const evp_mac_st gmac_meth;
+extern const evp_mac_st hmac_meth;
+extern const evp_mac_st kmac128_meth;
+extern const evp_mac_st kmac256_meth;
+extern const evp_mac_st siphash_meth;
+extern const evp_mac_st poly1305_meth;
 
 /* Internal keccak algorithms used for KMAC */
 const EVP_MD *evp_keccak_kmac128(void);
@@ -150,7 +150,7 @@ const EVP_MD *evp_keccak_kmac256(void);
  * EVP_add_mac() adds the MAC implementation C<mac> to the internal
  * object database.
  */
-int EVP_add_mac(const EVP_MAC *mac);
+int EVP_add_mac(const evp_mac_st *mac);
 
 /* struct evp_kdf_impl_st is defined by the implementation */
 typedef struct evp_kdf_impl_st EVP_KDF_IMPL;

@@ -104,6 +104,8 @@ struct err_state_st {
 # define ERR_LIB_ESS             54
 # define ERR_LIB_PROP            55
 # define ERR_LIB_CRMF            56
+# define ERR_LIB_PROV            57
+# define ERR_LIB_CMP             58
 
 # define ERR_LIB_USER            128
 
@@ -139,6 +141,7 @@ int SetError(int lib, int func);
 # define FIPSerr(f,r) ERR_PUT_error(ERR_LIB_FIPS,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
 # define CMSerr(f,r) ERR_PUT_error(ERR_LIB_CMS,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
 # define CRMFerr(f,r) ERR_PUT_error(ERR_LIB_CRMF,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
+# define CMPerr(f,r) ERR_PUT_error(ERR_LIB_CMP,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
 # define TSerr(f,r) ERR_PUT_error(ERR_LIB_TS,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
 # define HMACerr(f,r) ERR_PUT_error(ERR_LIB_HMAC,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
 # define CTerr(f,r) ERR_PUT_error(ERR_LIB_CT,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
@@ -147,6 +150,7 @@ int SetError(int lib, int func);
 # define SM2err(f,r) ERR_PUT_error(ERR_LIB_SM2,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
 # define ESSerr(f,r) ERR_PUT_error(ERR_LIB_ESS,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
 # define PROPerr(f,r) ERR_PUT_error(ERR_LIB_PROP,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
+# define PROVerr(f,r) ERR_PUT_error(ERR_LIB_PROV,(f),(r),OPENSSL_FILE,OPENSSL_LINE)
 
 # define ERR_PACK(l,f,r) ( \
         (((unsigned int)(l) & 0x0FF) << 24L) | \
@@ -182,6 +186,7 @@ int SetError(int lib, int func);
 # define SYS_F_STAT              22
 # define SYS_F_FCNTL             23
 # define SYS_F_FSTAT             24
+# define SYS_F_SENDFILE          25
 
 /* reasons */
 # define ERR_R_SYS_LIB   ERR_LIB_SYS/* 2 */

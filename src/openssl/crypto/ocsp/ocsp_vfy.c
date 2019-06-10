@@ -27,6 +27,33 @@ static int ocsp_req_find_signer(X509 **psigner, OCSP_REQUEST *req,
 
 /* Verify a basic response message */
 
+
+//#  define OCSP_REQUEST_verify(a,r) ASN1_item_verify(ASN1_ITEM_rptr(OCSP_REQINFO), &(a)->optionalSignature->signatureAlgorithm, (a)->optionalSignature->signature,&(a)->tbsRequest,r)
+//#  define OCSP_BASICRESP_verify(a,r,d) ASN1_item_verify(ASN1_ITEM_rptr(OCSP_RESPDATA), &(a)->signatureAlgorithm,(a)->signature,&(a)->tbsResponseData,r)
+
+
+int OCSP_REQUEST_verify(ocsp_request_st* theResponse, EVP_PKEY* thePublicKey, std::stringstream* commentsOnError) {
+  return ASN1_item_verify(
+    OCSP_REQINFO_it(),
+    &(theResponse)->optionalSignature->signatureAlgorithm,
+    (theResponse)->optionalSignature->signature,
+    &(theResponse)->tbsRequest,
+    thePublicKey,
+    commentsOnError
+  );
+}
+
+int OCSP_BASICRESP_verify(ocsp_basic_response_st* theResponse, EVP_PKEY* thePublicKey, std::stringstream* commentsOnError) {
+  return ASN1_item_verify(
+    OCSP_RESPDATA_it(),
+    &(theResponse)->signatureAlgorithm,
+    (theResponse)->signature,
+    &(theResponse)->tbsResponseData,
+    thePublicKey,
+    commentsOnError
+  );
+}
+
 int OCSP_basic_verify(OCSP_BASICRESP *bs, STACK_OF(X509) *certs,
                       X509_STORE *st, unsigned long flags)
 {
@@ -282,7 +309,7 @@ static int ocsp_match_issuerid(X509 *cert, OCSP_CERTID *cid,
         X509_NAME *iname;
         int mdlen;
         unsigned char md[EVP_MAX_MD_SIZE];
-        if ((dgst = EVP_get_digestbyobj(cid->hashAlgorithm.algorithm))
+        if ((dgst = EVP_get_digestbyobj(cid->hashAlgorithm.algorithm, 0))
                 == NULL) {
             OCSPerr(OCSP_F_OCSP_MATCH_ISSUERID,
                     OCSP_R_UNKNOWN_MESSAGE_DIGEST);
@@ -372,7 +399,7 @@ int OCSP_request_verify(OCSP_REQUEST *req, STACK_OF(X509) *certs,
     if (!(flags & OCSP_NOSIGS)) {
         EVP_PKEY *skey;
         skey = X509_get0_pubkey(signer);
-        ret = OCSP_REQUEST_verify(req, skey);
+        ret = OCSP_REQUEST_verify(req, skey, 0);
         if (ret <= 0) {
             OCSPerr(OCSP_F_OCSP_REQUEST_VERIFY, OCSP_R_SIGNATURE_FAILURE);
             goto err;

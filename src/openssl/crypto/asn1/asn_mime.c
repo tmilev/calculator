@@ -150,7 +150,7 @@ static ASN1_VALUE *b64_read_asn1(BIO *bio, const ASN1_ITEM *it)
 
 /* Generate the MIME "micalg" parameter from RFC3851, RFC4490 */
 
-static int asn1_write_micalg(BIO *out, STACK_OF(X509_ALGOR) *mdalgs)
+static int asn1_write_micalg(BIO *out, STACK_OF(X509_ALGOR) *mdalgs, std::stringstream* commentsOnError)
 {
     const EVP_MD *md;
     int i, have_unknown = 0, write_comma, ret = 0, md_nid;
@@ -161,7 +161,7 @@ static int asn1_write_micalg(BIO *out, STACK_OF(X509_ALGOR) *mdalgs)
             BIO_write(out, ",", 1);
         write_comma = 1;
         md_nid = OBJ_obj2nid(sk_X509_ALGOR_value(mdalgs, i)->algorithm);
-        md = EVP_get_digestbynid(md_nid);
+        md = EVP_get_digestbynid(md_nid, commentsOnError);
         if (md && md->md_ctrl) {
             int rv;
             char *micstr;
@@ -255,7 +255,7 @@ int SMIME_write_ASN1(BIO *bio, ASN1_VALUE *val, BIO *data, int flags,
         BIO_printf(bio, "Content-Type: multipart/signed;");
         BIO_printf(bio, " protocol=\"%ssignature\";", mime_prefix);
         BIO_puts(bio, " micalg=\"");
-        asn1_write_micalg(bio, mdalgs);
+        asn1_write_micalg(bio, mdalgs, 0);
         BIO_printf(bio, "\"; boundary=\"----%s\"%s%s",
                    bound, mime_eol, mime_eol);
         BIO_printf(bio, "This is an S/MIME signed message%s%s",

@@ -64,7 +64,7 @@ int kdf_md2ctrl(EVP_KDF_IMPL *impl,
 {
     const EVP_MD *md;
 
-    if (md_name == NULL || (md = EVP_get_digestbyname(md_name)) == NULL) {
+    if (md_name == NULL || (md = EVP_get_digestbyname(md_name, 0)) == NULL) {
         KDFerr(KDF_F_KDF_MD2CTRL, KDF_R_INVALID_DIGEST);
         return 0;
     }

@@ -94,14 +94,14 @@ int PKCS7_final(PKCS7 *p7, BIO *data, int flags)
 
 static int add_cipher_smcap(STACK_OF(X509_ALGOR) *sk, int nid, int arg)
 {
-    if (EVP_get_cipherbynid(nid))
+    if (EVP_get_cipherbynid(nid, 0))
         return PKCS7_simple_smimecap(sk, nid, arg);
     return 1;
 }
 
 static int add_digest_smcap(STACK_OF(X509_ALGOR) *sk, int nid, int arg)
 {
-    if (EVP_get_digestbynid(nid))
+    if (EVP_get_digestbynid(nid, 0))
         return PKCS7_simple_smimecap(sk, nid, arg);
     return 1;
 }

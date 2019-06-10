@@ -106,9 +106,9 @@ static int siphash_ctrl_str_cb(void *ctx, int cmd, void *buf, size_t buflen)
     return siphash_ctrl_int((EVP_MAC_IMPL *) ctx, cmd, buf, buflen);
 }
 
-static int siphash_ctrl_str(EVP_MAC_IMPL *ctx,
-                            const char *type, const char *value)
-{
+static int siphash_ctrl_str(
+  EVP_MAC_IMPL *ctx, const char *type, const char *value, std::stringstream* commentsOnError
+) {
     if (value == NULL)
         return 0;
     if (strcmp(type, "digestsize") == 0) {
@@ -125,7 +125,7 @@ static int siphash_ctrl_str(EVP_MAC_IMPL *ctx,
     return -2;
 }
 
-const EVP_MAC siphash_meth = {
+const evp_mac_st siphash_meth = {
     EVP_MAC_SIPHASH,
     siphash_new,
     siphash_copy,

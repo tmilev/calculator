@@ -531,7 +531,7 @@ int tls13_change_cipher_state(SSL *s, int which)
                          SSL_F_TLS13_CHANGE_CIPHER_STATE, ERR_R_MALLOC_FAILURE);
                 goto err;
             }
-            cipher = EVP_get_cipherbynid(SSL_CIPHER_get_cipher_nid(sslcipher));
+            cipher = EVP_get_cipherbynid(SSL_CIPHER_get_cipher_nid(sslcipher), 0);
             md = ssl_md(sslcipher->algorithm2);
             if (md == NULL || !EVP_DigestInit_ex(mdctx, md, NULL, 0)
                     || !EVP_DigestUpdate(mdctx, hdata, handlen)

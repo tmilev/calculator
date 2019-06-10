@@ -1038,7 +1038,7 @@ DEFINE_RUN_ONCE_STATIC(do_rand_drbg_init)
      * ensure that libcrypto is initialized, otherwise the
      * DRBG locks are not cleaned up properly
      */
-    if (!OPENSSL_init_crypto(0, NULL))
+    if (!OPENSSL_init_crypto(0, NULL, (std::stringstream*) commentsOnError))
         return 0;
 
     if (!CRYPTO_THREAD_init_local(&private_drbg, NULL))

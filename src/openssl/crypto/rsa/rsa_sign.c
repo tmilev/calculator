@@ -197,7 +197,7 @@ int int_rsa_verify(int type, const unsigned char *m, unsigned int m_len,
          * output as in a standard verification.
          */
         if (rm != NULL) {
-            const EVP_MD *md = EVP_get_digestbynid(type);
+            const EVP_MD *md = EVP_get_digestbynid(type, 0);
             if (md == NULL) {
                 RSAerr(RSA_F_INT_RSA_VERIFY, RSA_R_UNKNOWN_ALGORITHM_TYPE);
                 goto err;

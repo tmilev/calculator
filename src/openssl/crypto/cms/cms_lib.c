@@ -284,13 +284,12 @@ int CMS_set_detached(CMS_ContentInfo *cms, int detached)
 
 /* Create a digest BIO from an X509_ALGOR structure */
 
-BIO *cms_DigestAlgorithm_init_bio(X509_ALGOR *digestAlgorithm)
-{
+BIO *cms_DigestAlgorithm_init_bio(X509_ALGOR *digestAlgorithm) {
     BIO *mdbio = NULL;
     const ASN1_OBJECT *digestoid;
     const EVP_MD *digest;
     X509_ALGOR_get0(&digestoid, NULL, NULL, digestAlgorithm);
-    digest = EVP_get_digestbyobj(digestoid);
+    digest = EVP_get_digestbyobj(digestoid, 0);
     if (!digest) {
         CMSerr(CMS_F_CMS_DIGESTALGORITHM_INIT_BIO,
                CMS_R_UNKNOWN_DIGEST_ALGORITHM);

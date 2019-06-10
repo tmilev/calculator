@@ -177,7 +177,7 @@ static int pkey_dsa_ctrl_str(EVP_PKEY_CTX *ctx,
         return EVP_PKEY_CTX_set_dsa_paramgen_q_bits(ctx, qbits);
     }
     if (strcmp(type, "dsa_paramgen_md") == 0) {
-        const EVP_MD *md = EVP_get_digestbyname(value);
+        const EVP_MD *md = EVP_get_digestbyname(value, 0);
 
         if (md == NULL) {
             DSAerr(DSA_F_PKEY_DSA_CTRL_STR, DSA_R_INVALID_DIGEST_TYPE);

@@ -16,13 +16,12 @@
 #include "../include/internal/evp_int.h"
 #include "evp_locl.h"
 
-EVP_MAC_CTX *EVP_MAC_CTX_new_id(int id)
-{
-    const EVP_MAC *mac = EVP_get_macbynid(id);
-
-    if (mac == NULL)
-        return NULL;
-    return EVP_MAC_CTX_new(mac);
+EVP_MAC_CTX *EVP_MAC_CTX_new_id(int id) {
+  const evp_mac_st *mac = EVP_get_macbynid(id);
+  if (mac == NULL) {
+    return NULL;
+  }
+  return EVP_MAC_CTX_new(mac);
 }
 
 EVP_MAC_CTX *EVP_MAC_CTX_new(const evp_mac_st *mac)
@@ -62,9 +61,8 @@ int EVP_MAC_CTX_copy(EVP_MAC_CTX *dst, const EVP_MAC_CTX *src)
     return 1;
 }
 
-const EVP_MAC *EVP_MAC_CTX_mac(EVP_MAC_CTX *ctx)
-{
-    return ctx->meth;
+const evp_mac_st *EVP_MAC_CTX_mac(EVP_MAC_CTX *ctx) {
+  return ctx->meth;
 }
 
 size_t EVP_MAC_size(EVP_MAC_CTX *ctx)
@@ -149,7 +147,7 @@ int EVP_MAC_ctrl_str(EVP_MAC_CTX *ctx, const char *type, const char *value)
         return -2;
     }
 
-    ok = ctx->meth->ctrl_str((EVP_MAC_IMPL*) ctx->data, type, value);
+    ok = ctx->meth->ctrl_str((EVP_MAC_IMPL*) ctx->data, type, value, 0);
 
     if (ok == -2)
         EVPerr(EVP_F_EVP_MAC_CTRL_STR, EVP_R_COMMAND_NOT_SUPPORTED);

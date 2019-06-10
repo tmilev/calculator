@@ -109,7 +109,7 @@ int PKCS5_v2_PBE_keyivgen(EVP_CIPHER_CTX *ctx, const char *pass, int passlen,
      * lets see if we recognise the encryption algorithm.
      */
 
-    cipher = EVP_get_cipherbyobj(pbe2->encryption->algorithm);
+    cipher = EVP_get_cipherbyobj(pbe2->encryption->algorithm, 0);
 
     if (!cipher) {
         EVPerr(EVP_F_PKCS5_V2_PBE_KEYIVGEN, EVP_R_UNSUPPORTED_CIPHER);
@@ -176,7 +176,7 @@ int PKCS5_v2_PBKDF2_keyivgen(EVP_CIPHER_CTX *ctx, const char *pass,
         goto err;
     }
 
-    prfmd = EVP_get_digestbynid(hmac_md_nid);
+    prfmd = EVP_get_digestbynid(hmac_md_nid, 0);
     if (prfmd == NULL) {
         EVPerr(EVP_F_PKCS5_V2_PBKDF2_KEYIVGEN, EVP_R_UNSUPPORTED_PRF);
         goto err;

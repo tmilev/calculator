@@ -211,17 +211,11 @@ static CRYPTO_ONCE load_crypto_strings = CRYPTO_ONCE_STATIC_INIT;
 static int load_crypto_strings_inited = 0;
 DEFINE_RUN_ONCE_STATIC(ossl_init_load_crypto_strings)
 {
-    int ret = 1;
     /*
      * OPENSSL_NO_AUTOERRINIT is provided here to prevent at compile time
      * pulling in all the error strings during static linking
      */
-#if !defined(OPENSSL_NO_ERR) && !defined(OPENSSL_NO_AUTOERRINIT)
-    OSSL_TRACE(INIT, "err_load_crypto_strings_int()\n");
-    ret = err_load_crypto_strings_int();
-    load_crypto_strings_inited = 1;
-#endif
-    return ret;
+    return err_load_crypto_strings_int();
 }
 
 DEFINE_RUN_ONCE_STATIC_ALT(ossl_init_no_load_crypto_strings,
@@ -232,17 +226,18 @@ DEFINE_RUN_ONCE_STATIC_ALT(ossl_init_no_load_crypto_strings,
 }
 
 static CRYPTO_ONCE add_all_ciphers = CRYPTO_ONCE_STATIC_INIT;
-DEFINE_RUN_ONCE_STATIC(ossl_init_add_all_ciphers)
-{
-    /*
-     * OPENSSL_NO_AUTOALGINIT is provided here to prevent at compile time
-     * pulling in all the ciphers during static linking
-     */
-#ifndef OPENSSL_NO_AUTOALGINIT
-    OSSL_TRACE(INIT, "openssl_add_all_ciphers_int()\n");
-    openssl_add_all_ciphers_int();
-#endif
-    return 1;
+
+int ossl_init_add_all_ciphers(void* commentsOnError);
+
+static int ossl_init_add_all_ciphers_ossl_ret_ = 0;
+
+void ossl_init_add_all_ciphers_ossl_(void* commentsOnError) {
+  ossl_init_add_all_ciphers_ossl_ret_ = ossl_init_add_all_ciphers(commentsOnError);
+}
+
+int ossl_init_add_all_ciphers(void* commentsOnError) {
+  openssl_add_all_ciphers_int((std::stringstream*) commentsOnError);
+  return 1;
 }
 
 DEFINE_RUN_ONCE_STATIC_ALT(ossl_init_no_add_all_ciphers,
@@ -300,9 +295,15 @@ static const OPENSSL_INIT_SETTINGS *conf_settings = NULL;
 //DEFINE_RUN_ONCE_STATIC(init = ossl_init_config
 static int ossl_init_config(std::stringstream *commentsOnError);
 static int ossl_init_config_ossl_ret_ = 0;
+
 static void ossl_init_config_ossl_(std::stringstream* commentsOnError) {
   ossl_init_config_ossl_ret_ = ossl_init_config(commentsOnError);
 }
+
+void ossl_init_config_ossl_void(void* commentsOnError) {
+  ossl_init_config_ossl_((std::stringstream*) commentsOnError);
+}
+
 static int ossl_init_config(std::stringstream* commentsOnError) {
     std::cout << "DEBUG: OH no this piece of code is being called!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
     int ret = openssl_config_int(conf_settings, commentsOnError);
@@ -406,7 +407,7 @@ int ossl_init_thread_start(uint64_t opts)
 {
     struct thread_local_inits_st *locals;
 
-    if (!OPENSSL_init_crypto(0, NULL))
+    if (!OPENSSL_init_crypto(0, NULL, 0))
         return 0;
 
     locals = ossl_init_get_thread_local(1);
@@ -560,6 +561,9 @@ int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings, st
     }
     return 0;
   }
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: initializing crypto.\n";
+  }
 
     /*
      * When the caller specifies OPENSSL_INIT_BASE_ONLY, that should be the
@@ -575,44 +579,39 @@ int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings, st
     if (!RUN_ONCE(&base, ossl_init_base, 0))
         return 0;
 
-    if (opts & OPENSSL_INIT_BASE_ONLY)
-        return 1;
-
+  if (opts & OPENSSL_INIT_BASE_ONLY) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "DEBUG: Initializing base only, the rest is postponed.\n";
+    }
+    return 1;
+  }
+  if(commentsOnError != 0) {
+    *commentsOnError << "DEBUG: Initializing crypto fully.\n";
+  }
     /*
      * Now we don't always set up exit handlers, the INIT_BASE_ONLY calls
      * should not have the side-effect of setting up exit handlers, and
      * therefore, this code block is below the INIT_BASE_ONLY-conditioned early
      * return above.
      */
-    if ((opts & OPENSSL_INIT_NO_ATEXIT) != 0) {
-        if (!RUN_ONCE_ALT(&register_atexit, ossl_init_no_register_atexit,
-                          ossl_init_register_atexit))
-            return 0;
-    } else if (!RUN_ONCE(&register_atexit, ossl_init_register_atexit, 0)) {
-        return 0;
+  if ((opts & OPENSSL_INIT_NO_ATEXIT) != 0) {
+    if (!RUN_ONCE_ALT(&register_atexit, ossl_init_no_register_atexit, ossl_init_register_atexit)) {
+      return 0;
     }
+  } else if (!RUN_ONCE(&register_atexit, ossl_init_register_atexit, 0)) {
+    return 0;
+  }
 
-    if (!RUN_ONCE(&load_crypto_nodelete, ossl_init_load_crypto_nodelete, 0))
-        return 0;
+  if (!RUN_ONCE(&load_crypto_nodelete, ossl_init_load_crypto_nodelete, 0)) {
+    return 0;
+  }
 
-    if ((opts & OPENSSL_INIT_NO_LOAD_CRYPTO_STRINGS)
-            && !RUN_ONCE_ALT(&load_crypto_strings,
-                             ossl_init_no_load_crypto_strings,
-                             ossl_init_load_crypto_strings))
-        return 0;
-
-    if ((opts & OPENSSL_INIT_LOAD_CRYPTO_STRINGS)
-            && !RUN_ONCE(&load_crypto_strings, ossl_init_load_crypto_strings, 0))
-        return 0;
-
-    if ((opts & OPENSSL_INIT_NO_ADD_ALL_CIPHERS)
-            && !RUN_ONCE_ALT(&add_all_ciphers, ossl_init_no_add_all_ciphers,
-                             ossl_init_add_all_ciphers))
-        return 0;
-
-    if ((opts & OPENSSL_INIT_ADD_ALL_CIPHERS)
-            && !RUN_ONCE(&add_all_ciphers, ossl_init_add_all_ciphers, 0))
-        return 0;
+  if (!RUN_ONCE(&load_crypto_strings, ossl_init_load_crypto_strings, commentsOnError)) {
+    return 0;
+  }
+  if (!RUN_ONCE(&add_all_ciphers, ossl_init_add_all_ciphers, commentsOnError)) {
+    return 0;
+  }
 
     if ((opts & OPENSSL_INIT_NO_ADD_ALL_DIGESTS)
             && !RUN_ONCE_ALT(&add_all_digests, ossl_init_no_add_all_digests,
@@ -632,10 +631,6 @@ int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings, st
             && !RUN_ONCE(&add_all_macs, ossl_init_add_all_macs, 0))
         return 0;
 
-    if ((opts & OPENSSL_INIT_ATFORK)
-            && !openssl_init_fork_handlers())
-        return 0;
-
     if ((opts & OPENSSL_INIT_NO_LOAD_CONFIG)
             && !RUN_ONCE_ALT(&config, ossl_init_no_config, ossl_init_config))
         return 0;
@@ -644,7 +639,7 @@ int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings, st
         int ret;
         CRYPTO_THREAD_write_lock(init_lock);
         conf_settings = settings;
-        ret = CRYPTO_THREAD_run_once(&config, ossl_init_config_ossl_, commentsOnError) ? ossl_init_config_ossl_ret_ : 0;
+        ret = CRYPTO_THREAD_run_once(&config, ossl_init_config_ossl_void, commentsOnError) ? ossl_init_config_ossl_ret_ : 0;
         conf_settings = NULL;
         CRYPTO_THREAD_unlock(init_lock);
         if (ret <= 0)
@@ -686,7 +681,9 @@ int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings, st
             && !RUN_ONCE(&zlib, ossl_init_zlib, 0))
         return 0;
 #endif
-
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: crypto initialization went till the end.\n";
+  }
     return 1;
 }
 

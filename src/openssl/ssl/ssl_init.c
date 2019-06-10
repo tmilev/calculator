@@ -194,7 +194,7 @@ int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS* settings, std::
   if ((opts & OPENSSL_INIT_NO_LOAD_CONFIG) == 0) {
     opts |= OPENSSL_INIT_LOAD_CONFIG;
   }
-  if (!OPENSSL_init_crypto(opts, settings)) {
+  if (!OPENSSL_init_crypto(opts, settings, commentsOnError)) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to initialize crypto.\n";
     }

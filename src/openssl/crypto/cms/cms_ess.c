@@ -137,11 +137,11 @@ void CMS_ReceiptRequest_get0_values(CMS_ReceiptRequest *rr,
 
 /* Digest a SignerInfo structure for msgSigDigest attribute processing */
 
-static int cms_msgSigDigest(CMS_SignerInfo *si,
-                            unsigned char *dig, unsigned int *diglen)
-{
+static int cms_msgSigDigest(
+  CMS_SignerInfo *si, unsigned char *dig, unsigned int *diglen
+) {
     const EVP_MD *md;
-    md = EVP_get_digestbyobj(si->digestAlgorithm->algorithm);
+    md = EVP_get_digestbyobj(si->digestAlgorithm->algorithm, 0);
     if (md == NULL)
         return 0;
     if (!ASN1_item_digest(ASN1_ITEM_rptr(CMS_Attributes_Verify), md,

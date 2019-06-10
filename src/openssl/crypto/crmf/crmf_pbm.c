@@ -147,7 +147,7 @@ int OSSL_CRMF_pbm_new(const OSSL_CRMF_PBMPARAMETER *pbmp,
      * compute the key used in the MAC process.  All implementations MUST
      * support SHA-1.
      */
-    if ((m = EVP_get_digestbyobj(pbmp->owf->algorithm)) == NULL) {
+    if ((m = EVP_get_digestbyobj(pbmp->owf->algorithm, 0)) == NULL) {
         CRMFerr(CRMF_F_OSSL_CRMF_PBM_NEW, CRMF_R_UNSUPPORTED_ALGORITHM);
         goto err;
     }
@@ -193,7 +193,7 @@ int OSSL_CRMF_pbm_new(const OSSL_CRMF_PBMPARAMETER *pbmp,
     mac_nid = OBJ_obj2nid(pbmp->mac->algorithm);
 
     if (!EVP_PBE_find(EVP_PBE_TYPE_PRF, mac_nid, NULL, &hmac_md_nid, NULL)
-            || ((m = EVP_get_digestbynid(hmac_md_nid)) == NULL)) {
+            || ((m = EVP_get_digestbynid(hmac_md_nid, 0)) == NULL)) {
         CRMFerr(CRMF_F_OSSL_CRMF_PBM_NEW, CRMF_R_UNSUPPORTED_ALGORITHM);
         goto err;
     }

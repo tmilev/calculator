@@ -101,7 +101,7 @@ static int pkcs12_gen_mac(PKCS12 *p12, const char *pass, int passlen,
         iter = ASN1_INTEGER_get(p12->mac->iter);
     X509_SIG_get0(p12->mac->dinfo, &macalg, NULL);
     X509_ALGOR_get0(&macoid, NULL, NULL, macalg);
-    if ((md_type = EVP_get_digestbyobj(macoid)) == NULL) {
+    if ((md_type = EVP_get_digestbyobj(macoid, 0)) == NULL) {
         PKCS12err(PKCS12_F_PKCS12_GEN_MAC, PKCS12_R_UNKNOWN_DIGEST_ALGORITHM);
         return 0;
     }

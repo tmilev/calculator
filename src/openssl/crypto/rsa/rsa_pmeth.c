@@ -658,17 +658,17 @@ static int pkey_rsa_ctrl_str(EVP_PKEY_CTX *ctx,
     if (strcmp(type, "rsa_mgf1_md") == 0)
         return EVP_PKEY_CTX_md(ctx,
                                EVP_PKEY_OP_TYPE_SIG | EVP_PKEY_OP_TYPE_CRYPT,
-                               EVP_PKEY_CTRL_RSA_MGF1_MD, value);
+                               EVP_PKEY_CTRL_RSA_MGF1_MD, value, 0);
 
     if (pkey_ctx_is_pss(ctx)) {
 
         if (strcmp(type, "rsa_pss_keygen_mgf1_md") == 0)
             return EVP_PKEY_CTX_md(ctx, EVP_PKEY_OP_KEYGEN,
-                                   EVP_PKEY_CTRL_RSA_MGF1_MD, value);
+                                   EVP_PKEY_CTRL_RSA_MGF1_MD, value, 0);
 
         if (strcmp(type, "rsa_pss_keygen_md") == 0)
             return EVP_PKEY_CTX_md(ctx, EVP_PKEY_OP_KEYGEN,
-                                   EVP_PKEY_CTRL_MD, value);
+                                   EVP_PKEY_CTRL_MD, value, 0);
 
         if (strcmp(type, "rsa_pss_keygen_saltlen") == 0) {
             int saltlen = atoi(value);
@@ -679,7 +679,7 @@ static int pkey_rsa_ctrl_str(EVP_PKEY_CTX *ctx,
 
     if (strcmp(type, "rsa_oaep_md") == 0)
         return EVP_PKEY_CTX_md(ctx, EVP_PKEY_OP_TYPE_CRYPT,
-                               EVP_PKEY_CTRL_RSA_OAEP_MD, value);
+                               EVP_PKEY_CTRL_RSA_OAEP_MD, value, 0);
 
     if (strcmp(type, "rsa_oaep_label") == 0) {
         unsigned char *lab;

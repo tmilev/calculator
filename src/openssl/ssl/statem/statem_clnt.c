@@ -3237,7 +3237,7 @@ static int tls_construct_cke_gost(SSL *s, WPACKET *pkt)
      */
     ukm_hash = EVP_MD_CTX_new();
     if (ukm_hash == NULL
-        || EVP_DigestInit(ukm_hash, EVP_get_digestbynid(dgst_nid)) <= 0
+        || EVP_DigestInit(ukm_hash, EVP_get_digestbynid(dgst_nid, 0)) <= 0
         || EVP_DigestUpdate(ukm_hash, s->s3->client_random,
                             SSL3_RANDOM_SIZE) <= 0
         || EVP_DigestUpdate(ukm_hash, s->s3->server_random,

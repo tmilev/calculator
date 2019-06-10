@@ -110,7 +110,7 @@ static int kmac_bytepad_encode_key(unsigned char *out, int *out_len,
                                    const unsigned char *in, int in_len,
                                    int w);
 static int kmac_ctrl_str(EVP_MAC_IMPL *kctx, const char *type,
-                         const char *value);
+                         const char *value, std::stringstream *commentsOnError);
 
 
 static void kmac_free(EVP_MAC_IMPL *kctx)
@@ -183,7 +183,7 @@ static int kmac_init(EVP_MAC_IMPL *kctx)
 
     /* Set default custom string if it is not already set */
     if (kctx->custom_len == 0)
-        (void)kmac_ctrl_str(kctx, "custom", "");
+        (void)kmac_ctrl_str(kctx, "custom", "", 0);
 
     return bytepad(out, &out_len, kmac_string, sizeof(kmac_string),
                    kctx->custom, kctx->custom_len, block_len)
@@ -283,7 +283,7 @@ static int kmac_ctrl_str_cb(void *kctx, int cmd, void *buf, size_t buflen)
 }
 
 static int kmac_ctrl_str(EVP_MAC_IMPL *kctx, const char *type,
-                         const char *value)
+                         const char *value, std::stringstream* commentsOnError)
 {
     if (value == NULL)
         return 0;
@@ -441,7 +441,7 @@ static int kmac_bytepad_encode_key(unsigned char *out, int *out_len,
     return bytepad(out, out_len, tmp, tmp_len, NULL, 0, w);
 }
 
-const EVP_MAC kmac128_meth = {
+const evp_mac_st kmac128_meth = {
     EVP_MAC_KMAC128,
     kmac128_new,
     kmac_copy,
@@ -454,7 +454,7 @@ const EVP_MAC kmac128_meth = {
     kmac_ctrl_str
 };
 
-const EVP_MAC kmac256_meth = {
+const evp_mac_st kmac256_meth = {
     EVP_MAC_KMAC256,
     kmac256_new,
     kmac_copy,

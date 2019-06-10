@@ -59,7 +59,7 @@ int rand_crngt_init(void)
 static CRYPTO_ONCE rand_crngt_init_flag = CRYPTO_ONCE_STATIC_INIT;
 DEFINE_RUN_ONCE_STATIC(do_rand_crngt_init)
 {
-    return OPENSSL_init_crypto(0, NULL)
+    return OPENSSL_init_crypto(0, NULL, (std::stringstream*) commentsOnError)
         && rand_crngt_init()
         && OPENSSL_atexit(&rand_crngt_cleanup);
 }

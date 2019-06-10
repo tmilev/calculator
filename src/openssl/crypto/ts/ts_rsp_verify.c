@@ -298,7 +298,7 @@ static int ts_find_cert_v2(STACK_OF(ESS_CERT_ID_V2) *cert_ids, X509 *cert)
         const EVP_MD *md;
 
         if (cid->hash_alg != NULL)
-            md = EVP_get_digestbyobj(cid->hash_alg->algorithm);
+            md = EVP_get_digestbyobj(cid->hash_alg->algorithm, 0);
         else
             md = EVP_sha256();
 
@@ -554,7 +554,8 @@ static int ts_compute_imprint(BIO *data, TS_TST_INFO *tst_info,
 
     if ((*md_alg = X509_ALGOR_dup(md_alg_resp)) == NULL)
         goto err;
-    if ((md = EVP_get_digestbyobj((*md_alg)->algorithm)) == NULL) {
+    md = EVP_get_digestbyobj((*md_alg)->algorithm, 0);
+    if (md == NULL) {
         TSerr(TS_F_TS_COMPUTE_IMPRINT, TS_R_UNSUPPORTED_MD_ALGORITHM);
         goto err;
     }

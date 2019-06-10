@@ -171,9 +171,13 @@ void *OPENSSL_SA_get(const OPENSSL_SA *sa, ossl_uintmax_t n, std::stringstream* 
     }
     return NULL;
   }
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: sa->levels is: " << sa->levels << ".\n";
+  }
   void **p, *r = NULL;
   p = sa->nodes;
   for (level = sa->levels - 1; p != NULL && level > 0; level--) {
+    *commentsOnError << "DEBUG: pointer p is: " << (long long) p << ".\n";
     int indexNonMasked = (n >> (OPENSSL_SA_BLOCK_BITS * level));
     int index = indexNonMasked & SA_BLOCK_MASK;
     p = (void **) p[index];

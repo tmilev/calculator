@@ -249,7 +249,7 @@ int do_provider_store_init(void* commentsOnErroR) {
   if (commentsOnError != 0) {
     *commentsOnError << "DEBUG: running do provider store init!!!!\n";
   }
-  if (OPENSSL_init_crypto(0, NULL) == 0) {
+  if (OPENSSL_init_crypto(0, NULL, commentsOnError) == 0) {
     return 0;
   }
   provider_store_index = openssl_ctx_new_index(&provider_store_method);

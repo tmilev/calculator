@@ -142,13 +142,13 @@ static int gmac_ctrl_str_cb(void *gctx, int cmd, void *buf, size_t buflen)
     return gmac_ctrl_int((EVP_MAC_IMPL *) gctx, cmd, buf, buflen);
 }
 
-static int gmac_ctrl_str(EVP_MAC_IMPL *gctx, const char *type,
-                         const char *value)
-{
+static int gmac_ctrl_str(
+  EVP_MAC_IMPL *gctx, const char *type, const char *value, std::stringstream *commentsOnError
+) {
     if (!value)
         return 0;
     if (strcmp(type, "cipher") == 0) {
-        const EVP_CIPHER *c = EVP_get_cipherbyname(value);
+        const EVP_CIPHER *c = EVP_get_cipherbyname(value, commentsOnError);
 
         if (c == NULL)
             return 0;
@@ -169,7 +169,7 @@ static int gmac_ctrl_str(EVP_MAC_IMPL *gctx, const char *type,
     return -2;
 }
 
-const EVP_MAC gmac_meth = {
+const evp_mac_st gmac_meth = {
     EVP_MAC_GMAC,
     gmac_new,
     gmac_copy,

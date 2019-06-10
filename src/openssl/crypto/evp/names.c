@@ -55,7 +55,7 @@ int EVP_add_digest(const EVP_MD *md)
     return r;
 }
 
-int EVP_add_mac(const EVP_MAC *m)
+int EVP_add_mac(const evp_mac_st *m)
 {
     int r;
 
@@ -71,12 +71,20 @@ int EVP_add_mac(const EVP_MAC *m)
     return r;
 }
 
+const EVP_MD* EVP_get_digestbynid(int nid, std::stringstream* commentsOnError) {
+  return EVP_get_digestbyname(OBJ_nid2sn(nid), commentsOnError);
+}
+
+const EVP_MD* EVP_get_digestbyobj(const ASN1_OBJECT* obj, std::stringstream *commentsOnError) {
+  return EVP_get_digestbynid(OBJ_obj2nid(obj), commentsOnError);
+}
+
 const EVP_CIPHER* EVP_get_cipherbyobj(ASN1_OBJECT * obj, std::stringstream* commentsOnError) {
-  return EVP_get_cipherbynid(OBJ_nid2sn(a), commentsOnError);
+  return EVP_get_cipherbynid(OBJ_obj2nid(obj), commentsOnError);
 }
 
 const EVP_CIPHER* EVP_get_cipherbynid(int nid, std::stringstream* commentsOnError) {
-  return EVP_get_cipherbyname(OBJ_obj2nid(nid), commentsOnError);
+  return EVP_get_cipherbyname(OBJ_nid2sn(nid), commentsOnError);
 }
 
 const EVP_CIPHER *EVP_get_cipherbyname(const char *name, std::stringstream* commentsOnError) {
@@ -88,11 +96,10 @@ const EVP_CIPHER *EVP_get_cipherbyname(const char *name, std::stringstream* comm
     return cp;
 }
 
-const EVP_MD *EVP_get_digestbyname(const char *name)
-{
+const EVP_MD *EVP_get_digestbyname(const char *name, std::stringstream* commentsOnError) {
     const EVP_MD *cp;
 
-    if (!OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_DIGESTS, NULL))
+    if (!OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_DIGESTS, NULL, commentsOnError))
         return NULL;
 
     cp = (const EVP_MD *)OBJ_NAME_get(name, OBJ_NAME_TYPE_MD_METH);
@@ -101,12 +108,12 @@ const EVP_MD *EVP_get_digestbyname(const char *name)
 
 const evp_mac_st *EVP_get_macbyname(const char *name)
 {
-    const EVP_MAC *mp;
+    const evp_mac_st *mp;
 
-    if (!OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_MACS, NULL))
+    if (!OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_MACS, NULL, 0))
         return NULL;
 
-    mp = (const EVP_MAC *)OBJ_NAME_get(name, OBJ_NAME_TYPE_MAC_METH);
+    mp = (const evp_mac_st *) OBJ_NAME_get(name, OBJ_NAME_TYPE_MAC_METH);
     return mp;
 }
 
@@ -150,7 +157,7 @@ void EVP_CIPHER_do_all(void (*fn) (const EVP_CIPHER *ciph,
     struct doall_cipher dc;
 
     /* Ignore errors */
-    OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_CIPHERS, NULL);
+    OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_CIPHERS, NULL, 0);
 
     dc.fn = fn;
     dc.arg = arg;
@@ -164,7 +171,7 @@ void EVP_CIPHER_do_all_sorted(void (*fn) (const EVP_CIPHER *ciph,
     struct doall_cipher dc;
 
     /* Ignore errors */
-    OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_CIPHERS, NULL);
+    OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_CIPHERS, NULL, 0);
 
     dc.fn = fn;
     dc.arg = arg;
@@ -193,7 +200,7 @@ void EVP_MD_do_all(void (*fn) (const EVP_MD *md,
     struct doall_md dc;
 
     /* Ignore errors */
-    OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_DIGESTS, NULL);
+    OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_DIGESTS, NULL, 0);
 
     dc.fn = fn;
     dc.arg = arg;
@@ -206,7 +213,7 @@ void EVP_MD_do_all_sorted(void (*fn) (const EVP_MD *md,
 {
     struct doall_md dc;
 
-    OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_DIGESTS, NULL);
+    OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_DIGESTS, NULL, 0);
 
     dc.fn = fn;
     dc.arg = arg;
@@ -215,38 +222,38 @@ void EVP_MD_do_all_sorted(void (*fn) (const EVP_MD *md,
 
 struct doall_mac {
     void *arg;
-    void (*fn) (const EVP_MAC *ciph,
+    void (*fn) (const evp_mac_st *ciph,
                 const char *from, const char *to, void *arg);
 };
 
-static void do_all_mac_fn(const OBJ_NAME *nm, void *arg)
+void do_all_mac_fn(const OBJ_NAME *nm, void *arg)
 {
     struct doall_mac *dc = (doall_mac *) arg;
 
     if (nm->alias)
         dc->fn(NULL, nm->name, nm->data, dc->arg);
     else
-        dc->fn((const EVP_MAC *)nm->data, nm->name, NULL, dc->arg);
+        dc->fn((const evp_mac_st *)nm->data, nm->name, NULL, dc->arg);
 }
 
-void EVP_MAC_do_all((*fn)(const evp_mac_st *, const char *, const char *, void *), void *arg)
+void EVP_MAC_do_all(void (*fn)(const evp_mac_st*, const char *, const char *, void *), void *arg)
 {
     struct doall_mac dc;
 
     /* Ignore errors */
-    OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_MACS, NULL);
+    OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_MACS, NULL, 0);
 
     dc.fn = fn;
     dc.arg = arg;
     OBJ_NAME_do_all(OBJ_NAME_TYPE_MAC_METH, do_all_mac_fn, &dc);
 }
 
-void EVP_MAC_do_all_sorted((*fn)(const evp_mac_st *, const char *, const char *, void *), void *arg)
+void EVP_MAC_do_all_sorted(void (*fn)(const evp_mac_st *, const char *, const char *, void *), void *arg)
 {
     struct doall_mac dc;
 
     /* Ignore errors */
-    OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_MACS, NULL);
+    OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_MACS, NULL, 0);
 
     dc.fn = fn;
     dc.arg = arg;

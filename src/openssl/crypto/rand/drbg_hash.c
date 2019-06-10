@@ -307,7 +307,7 @@ int drbg_hash_init(RAND_DRBG *drbg)
     RAND_DRBG_HASH *hash = &drbg->data.hash;
 
     /* Any approved digest is allowed */
-    md = EVP_get_digestbynid(drbg->type);
+    md = EVP_get_digestbynid(drbg->type, 0);
     if (md == NULL)
         return 0;
 

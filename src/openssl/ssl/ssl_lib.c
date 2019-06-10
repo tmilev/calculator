@@ -163,7 +163,7 @@ static int dane_ctx_enable(struct dane_ctx_st *dctx)
         const EVP_MD *md;
 
         if (dane_mds[i].nid == NID_undef ||
-            (md = EVP_get_digestbynid(dane_mds[i].nid)) == NULL)
+            (md = EVP_get_digestbynid(dane_mds[i].nid, 0)) == NULL)
             continue;
         mdevp[dane_mds[i].mtype] = md;
         mdord[dane_mds[i].mtype] = dane_mds[i].ord;
@@ -1743,7 +1743,7 @@ static int ssl_start_async_job(SSL *s, struct ssl_async_args *args,
             return -1;
     }
     switch (ASYNC_start_job(&s->job, s->waitctx, &ret, func, args,
-                            sizeof(struct ssl_async_args))) {
+                            sizeof(struct ssl_async_args), 0)) {
     case ASYNC_ERR:
         s->rwstate = SSL_NOTHING;
         SSLerr(SSL_F_SSL_START_ASYNC_JOB, SSL_R_FAILED_TO_INIT_ASYNC);
@@ -3063,11 +3063,11 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth, std::stringstream* commentsOnError)
     if (ret->param == NULL)
         goto err;
 
-    if ((ret->md5 = EVP_get_digestbyname("ssl3-md5")) == NULL) {
+    if ((ret->md5 = EVP_get_digestbyname("ssl3-md5", commentsOnError)) == NULL) {
         SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_UNABLE_TO_LOAD_SSL3_MD5_ROUTINES);
         goto err2;
     }
-    if ((ret->sha1 = EVP_get_digestbyname("ssl3-sha1")) == NULL) {
+    if ((ret->sha1 = EVP_get_digestbyname("ssl3-sha1", commentsOnError)) == NULL) {
         SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_UNABLE_TO_LOAD_SSL3_SHA1_ROUTINES);
         goto err2;
     }

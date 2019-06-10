@@ -269,7 +269,7 @@ CMS_SignerInfo *CMS_add1_signer(CMS_ContentInfo *cms,
         int def_nid;
         if (EVP_PKEY_get_default_digest_nid(pk, &def_nid) <= 0)
             goto err;
-        md = EVP_get_digestbynid(def_nid);
+        md = EVP_get_digestbynid(def_nid, 0);
         if (md == NULL) {
             CMSerr(CMS_F_CMS_ADD1_SIGNER, CMS_R_NO_DEFAULT_DIGEST);
             goto err;
@@ -662,7 +662,7 @@ int CMS_SignerInfo_sign(CMS_SignerInfo *si)
     size_t siglen;
     const EVP_MD *md = NULL;
 
-    md = EVP_get_digestbyobj(si->digestAlgorithm->algorithm);
+    md = EVP_get_digestbyobj(si->digestAlgorithm->algorithm, 0);
     if (md == NULL)
         return 0;
 
@@ -732,7 +732,7 @@ int CMS_SignerInfo_verify(CMS_SignerInfo *si)
         return -1;
     }
 
-    md = EVP_get_digestbyobj(si->digestAlgorithm->algorithm);
+    md = EVP_get_digestbyobj(si->digestAlgorithm->algorithm, 0);
     if (md == NULL)
         return -1;
     if (si->mctx == NULL && (si->mctx = EVP_MD_CTX_new()) == NULL) {
@@ -923,7 +923,7 @@ static int cms_add_cipher_smcap(STACK_OF(X509_ALGOR) **sk, int nid, int arg)
 
 static int cms_add_digest_smcap(STACK_OF(X509_ALGOR) **sk, int nid, int arg)
 {
-    if (EVP_get_digestbynid(nid))
+    if (EVP_get_digestbynid(nid, 0))
         return CMS_add_simple_smimecap(sk, nid, arg);
     return 1;
 }

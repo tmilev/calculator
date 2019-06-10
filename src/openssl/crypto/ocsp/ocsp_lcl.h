@@ -228,9 +228,9 @@ struct ocsp_service_locator_st {
         ASN1_item_sign_ctx(ASN1_ITEM_rptr(OCSP_RESPDATA),&(o)->signatureAlgorithm,\
                 NULL,(o)->signature,&(o)->tbsResponseData,ctx)
 
-#  define OCSP_REQUEST_verify(a,r) ASN1_item_verify(ASN1_ITEM_rptr(OCSP_REQINFO),\
-        &(a)->optionalSignature->signatureAlgorithm,\
-        (a)->optionalSignature->signature,&(a)->tbsRequest,r)
 
-#  define OCSP_BASICRESP_verify(a,r,d) ASN1_item_verify(ASN1_ITEM_rptr(OCSP_RESPDATA),\
-        &(a)->signatureAlgorithm,(a)->signature,&(a)->tbsResponseData,r)
+//int OCSP_REQUEST_verify(void* a, void* b, std::stringstream *commentsOnError);
+//
+//
+//int OCSP_BASICRESP_verify(void*, void*, void*);
+

@@ -535,7 +535,7 @@ int PEM_get_EVP_CIPHER_INFO(char *header, EVP_CIPHER_INFO *cipher)
     header += strcspn(header, " \t,");
     c = *header;
     *header = '\0';
-    cipher->cipher = enc = EVP_get_cipherbyname(dekinfostart);
+    cipher->cipher = enc = EVP_get_cipherbyname(dekinfostart, 0);
     *header = c;
     header += strspn(header, " \t");
 

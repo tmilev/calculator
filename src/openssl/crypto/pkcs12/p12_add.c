@@ -99,7 +99,7 @@ PKCS7 *PKCS12_pack_p7encdata(int pbe_nid, const char *pass, int passlen,
         goto err;
     }
 
-    pbe_ciph = EVP_get_cipherbynid(pbe_nid);
+    pbe_ciph = EVP_get_cipherbynid(pbe_nid, 0);
 
     if (pbe_ciph)
         pbe = PKCS5_pbe2_set(pbe_ciph, iter, salt, saltlen);

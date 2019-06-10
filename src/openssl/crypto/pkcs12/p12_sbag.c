@@ -145,7 +145,7 @@ PKCS12_SAFEBAG *PKCS12_SAFEBAG_create_pkcs8_encrypt(int pbe_nid,
     const EVP_CIPHER *pbe_ciph;
     X509_SIG *p8;
 
-    pbe_ciph = EVP_get_cipherbynid(pbe_nid);
+    pbe_ciph = EVP_get_cipherbynid(pbe_nid, 0);
     if (pbe_ciph)
         pbe_nid = -1;
 

@@ -136,7 +136,7 @@ void ossl_method_store_cleanup(void)
 static CRYPTO_ONCE method_store_init_flag = CRYPTO_ONCE_STATIC_INIT;
 DEFINE_RUN_ONCE_STATIC(do_method_store_init)
 {
-    return OPENSSL_init_crypto(0, NULL)
+    return OPENSSL_init_crypto(0, NULL, (std::stringstream*) commentsOnError)
         && ossl_method_store_init()
         && OPENSSL_atexit(&ossl_method_store_cleanup);
 }

@@ -139,12 +139,12 @@ static int hmac_ctrl_str_cb(void *hctx, int cmd, void *buf, size_t buflen)
 }
 
 static int hmac_ctrl_str(EVP_MAC_IMPL *hctx, const char *type,
-                         const char *value)
+                         const char *value, std::stringstream *commentsOnError)
 {
     if (!value)
         return 0;
     if (strcmp(type, "digest") == 0) {
-        const EVP_MD *d = EVP_get_digestbyname(value);
+        const EVP_MD *d = EVP_get_digestbyname(value, commentsOnError);
 
         if (d == NULL)
             return 0;
@@ -159,7 +159,7 @@ static int hmac_ctrl_str(EVP_MAC_IMPL *hctx, const char *type,
     return -2;
 }
 
-const EVP_MAC hmac_meth = {
+const evp_mac_st hmac_meth = {
     EVP_MAC_HMAC,
     hmac_new,
     hmac_copy,

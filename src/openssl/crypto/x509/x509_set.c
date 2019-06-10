@@ -217,7 +217,7 @@ static void x509_sig_info_init(X509_SIG_INFO *siginf, const X509_ALGOR *alg,
     }
     siginf->flags |= X509_SIG_INFO_VALID;
     siginf->mdnid = mdnid;
-    md = EVP_get_digestbynid(mdnid);
+    md = EVP_get_digestbynid(mdnid, 0);
     if (md == NULL)
         return;
     /* Security bits: half number of bits in digest */

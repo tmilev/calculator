@@ -335,9 +335,15 @@ int cms_RecipientInfo_pwri_crypt(const CMS_ContentInfo *cms, CMS_RecipientInfo *
 
     /* Finish password based key derivation to setup key in "ctx" */
 
-    if (EVP_PBE_CipherInit(algtmp->algorithm,
-                           (char *)pwri->pass, pwri->passlen,
-                           algtmp->parameter, kekctx, en_de) < 0) {
+    if (EVP_PBE_CipherInit(
+      algtmp->algorithm,
+      (char *) pwri->pass,
+      pwri->passlen,
+      algtmp->parameter,
+      kekctx,
+      en_de,
+      0
+    ) < 0) {
         CMSerr(CMS_F_CMS_RECIPIENTINFO_PWRI_CRYPT, ERR_R_EVP_LIB);
         goto err;
     }

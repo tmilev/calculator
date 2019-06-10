@@ -413,7 +413,7 @@ int EVP_PKEY_CTX_ctrl_str(EVP_PKEY_CTX *ctx,
     }
     if (strcmp(name, "digest") == 0)
         return EVP_PKEY_CTX_md(ctx, EVP_PKEY_OP_TYPE_SIG, EVP_PKEY_CTRL_MD,
-                               value);
+                               value, 0);
     return ctx->pmeth->ctrl_str(ctx, name, value);
 }
 
@@ -445,15 +445,22 @@ int EVP_PKEY_CTX_hex2ctrl(EVP_PKEY_CTX *ctx, int cmd, const char *hex)
 }
 
 /* Pass a message digest to a ctrl */
-int EVP_PKEY_CTX_md(EVP_PKEY_CTX *ctx, int optype, int cmd, const char *md)
-{
-    const EVP_MD *m;
-
-    if (md == NULL || (m = EVP_get_digestbyname(md)) == NULL) {
-        EVPerr(EVP_F_EVP_PKEY_CTX_MD, EVP_R_INVALID_DIGEST);
-        return 0;
+int EVP_PKEY_CTX_md(EVP_PKEY_CTX *ctx, int optype, int cmd, const char *md, std::stringstream* commentsOnError) {
+  const EVP_MD *m;
+  if (md == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Input md pointer is null.\n";
     }
-    return EVP_PKEY_CTX_ctrl(ctx, -1, optype, cmd, 0, (void *)m);
+    return 0;
+  }
+  m = EVP_get_digestbyname(md, commentsOnError);
+  if (m == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to find digest by name.\n";
+    }
+    return 0;
+  }
+  return EVP_PKEY_CTX_ctrl(ctx, -1, optype, cmd, 0, (void *)m);
 }
 
 int EVP_PKEY_CTX_get_operation(EVP_PKEY_CTX *ctx)

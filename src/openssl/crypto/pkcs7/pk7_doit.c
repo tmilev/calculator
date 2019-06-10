@@ -61,7 +61,7 @@ static int PKCS7_bio_add_digest(BIO **pbio, X509_ALGOR *alg)
         goto err;
     }
 
-    md = EVP_get_digestbyobj(alg->algorithm);
+    md = EVP_get_digestbyobj(alg->algorithm, 0);
     if (md == NULL) {
         PKCS7err(PKCS7_F_PKCS7_BIO_ADD_DIGEST, PKCS7_R_UNKNOWN_DIGEST_TYPE);
         goto err;
@@ -404,7 +404,7 @@ BIO *PKCS7_dataDecode(PKCS7 *p7, EVP_PKEY *pkey, BIO *in_bio, X509 *pcert)
         /* data_body is NULL if the optional EncryptedContent is missing. */
         data_body = p7->d.signed_and_enveloped->enc_data->enc_data;
         enc_alg = p7->d.signed_and_enveloped->enc_data->algorithm;
-        evp_cipher = EVP_get_cipherbyobj(enc_alg->algorithm);
+        evp_cipher = EVP_get_cipherbyobj(enc_alg->algorithm, 0);
         if (evp_cipher == NULL) {
             PKCS7err(PKCS7_F_PKCS7_DATADECODE,
                      PKCS7_R_UNSUPPORTED_CIPHER_TYPE);
@@ -416,7 +416,7 @@ BIO *PKCS7_dataDecode(PKCS7 *p7, EVP_PKEY *pkey, BIO *in_bio, X509 *pcert)
         enc_alg = p7->d.enveloped->enc_data->algorithm;
         /* data_body is NULL if the optional EncryptedContent is missing. */
         data_body = p7->d.enveloped->enc_data->enc_data;
-        evp_cipher = EVP_get_cipherbyobj(enc_alg->algorithm);
+        evp_cipher = EVP_get_cipherbyobj(enc_alg->algorithm, 0);
         if (evp_cipher == NULL) {
             PKCS7err(PKCS7_F_PKCS7_DATADECODE,
                      PKCS7_R_UNSUPPORTED_CIPHER_TYPE);
@@ -444,7 +444,7 @@ BIO *PKCS7_dataDecode(PKCS7 *p7, EVP_PKEY *pkey, BIO *in_bio, X509 *pcert)
             }
 
             j = OBJ_obj2nid(xa->algorithm);
-            evp_md = EVP_get_digestbynid(j);
+            evp_md = EVP_get_digestbynid(j, 0);
             if (evp_md == NULL) {
                 PKCS7err(PKCS7_F_PKCS7_DATADECODE,
                          PKCS7_R_UNKNOWN_DIGEST_TYPE);
@@ -821,7 +821,7 @@ int PKCS7_SIGNER_INFO_sign(PKCS7_SIGNER_INFO *si)
     size_t siglen;
     const EVP_MD *md = NULL;
 
-    md = EVP_get_digestbyobj(si->digest_alg->algorithm);
+    md = EVP_get_digestbyobj(si->digest_alg->algorithm, 0);
     if (md == NULL)
         return 0;
 
@@ -1009,7 +1009,7 @@ int PKCS7_signatureVerify(BIO *bio, PKCS7 *p7, PKCS7_SIGNER_INFO *si,
             goto err;
         }
 
-        if (!EVP_DigestInit_ex(mdc_tmp, EVP_get_digestbynid(md_type), NULL, 0))
+        if (!EVP_DigestInit_ex(mdc_tmp, EVP_get_digestbynid(md_type, 0), NULL, 0))
             goto err;
 
         alen = ASN1_item_i2d((ASN1_VALUE *)sk, &abuf,

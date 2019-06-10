@@ -417,7 +417,7 @@ static int CRMF_poposigningkey_init(OSSL_CRMF_POPOSIGNINGKEY *ps,
         goto err;
     }
     if (!OBJ_find_sigid_algs(alg_nid, &md_nid, NULL)
-            || (alg = EVP_get_digestbynid(md_nid)) == NULL) {
+            || (alg = EVP_get_digestbynid(md_nid, 0)) == NULL) {
         CRMFerr(CRMF_F_CRMF_POPOSIGNINGKEY_INIT,
                 CRMF_R_UNSUPPORTED_ALG_FOR_POPSIGNINGKEY);
         goto err;
@@ -570,7 +570,7 @@ int OSSL_CRMF_MSGS_verify_popo(const OSSL_CRMF_MSGS *reqs,
                     || ASN1_item_verify(
                            ASN1_ITEM_rptr(OSSL_CRMF_POPOSIGNINGKEYINPUT),
                            sig->algorithmIdentifier, sig->signature,
-                           sig->poposkInput, X509_PUBKEY_get0(pubkey)) < 1)
+                           sig->poposkInput, X509_PUBKEY_get0(pubkey), 0) < 1)
                 break;
         } else {
             if (pubkey == NULL
@@ -578,7 +578,7 @@ int OSSL_CRMF_MSGS_verify_popo(const OSSL_CRMF_MSGS *reqs,
                     || ASN1_item_verify(ASN1_ITEM_rptr(OSSL_CRMF_CERTREQUEST),
                                     sig->algorithmIdentifier, sig->signature,
                                     req->certReq,
-                                    X509_PUBKEY_get0(pubkey)) < 1)
+                                    X509_PUBKEY_get0(pubkey), 0) < 1)
                 break;
         }
         return 1;

@@ -31,7 +31,7 @@ static int x509_verify_sm2(X509 *x, EVP_PKEY *pkey, int mdnid, int pknid)
     int ret = -1, inl = 0;
     size_t inll = 0;
     EVP_PKEY_CTX *pctx = NULL;
-    const EVP_MD *type = EVP_get_digestbynid(mdnid);
+    const EVP_MD *type = EVP_get_digestbynid(mdnid, 0);
 
     if (type == NULL) {
         X509err(X509_F_X509_VERIFY_SM2,
@@ -137,19 +137,19 @@ int X509_verify(X509 *a, EVP_PKEY *r)
 #endif
 
     return (ASN1_item_verify(ASN1_ITEM_rptr(X509_CINF), &a->sig_alg,
-                             &a->signature, &a->cert_info, r));
+                             &a->signature, &a->cert_info, r, 0));
 }
 
 int X509_REQ_verify(X509_REQ *a, EVP_PKEY *r)
 {
     return (ASN1_item_verify(ASN1_ITEM_rptr(X509_REQ_INFO),
-                             &a->sig_alg, a->signature, &a->req_info, r));
+                             &a->sig_alg, a->signature, &a->req_info, r, 0));
 }
 
 int NETSCAPE_SPKI_verify(NETSCAPE_SPKI *a, EVP_PKEY *r)
 {
     return (ASN1_item_verify(ASN1_ITEM_rptr(NETSCAPE_SPKAC),
-                             &a->sig_algor, a->signature, a->spkac, r));
+                             &a->sig_algor, a->signature, a->spkac, r, 0));
 }
 
 int X509_sign(X509 *x, EVP_PKEY *pkey, const EVP_MD *md)

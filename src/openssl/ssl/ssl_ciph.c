@@ -366,7 +366,7 @@ int ssl_load_ciphers(void)
         if (t->nid == NID_undef) {
             ssl_cipher_methods[i] = NULL;
         } else {
-            const EVP_CIPHER *cipher = EVP_get_cipherbynid(t->nid);
+            const EVP_CIPHER *cipher = EVP_get_cipherbynid(t->nid, 0);
             ssl_cipher_methods[i] = cipher;
             if (cipher == NULL)
                 disabled_enc_mask |= t->mask;
@@ -374,7 +374,7 @@ int ssl_load_ciphers(void)
     }
     disabled_mac_mask = 0;
     for (i = 0, t = ssl_cipher_table_mac; i < SSL_MD_NUM_IDX; i++, t++) {
-        const EVP_MD *md = EVP_get_digestbynid(t->nid);
+        const EVP_MD *md = EVP_get_digestbynid(t->nid, 0);
         ssl_digest_methods[i] = md;
         if (md == NULL) {
             disabled_mac_mask |= t->mask;
@@ -560,23 +560,23 @@ int ssl_cipher_get_evp(const SSL_SESSION *s, const EVP_CIPHER **enc,
 
         if (c->algorithm_enc == SSL_RC4 &&
             c->algorithm_mac == SSL_MD5 &&
-            (evp = EVP_get_cipherbyname("RC4-HMAC-MD5")))
+            (evp = EVP_get_cipherbyname("RC4-HMAC-MD5", 0)))
             *enc = evp, *md = NULL;
         else if (c->algorithm_enc == SSL_AES128 &&
                  c->algorithm_mac == SSL_SHA1 &&
-                 (evp = EVP_get_cipherbyname("AES-128-CBC-HMAC-SHA1")))
+                 (evp = EVP_get_cipherbyname("AES-128-CBC-HMAC-SHA1", 0)))
             *enc = evp, *md = NULL;
         else if (c->algorithm_enc == SSL_AES256 &&
                  c->algorithm_mac == SSL_SHA1 &&
-                 (evp = EVP_get_cipherbyname("AES-256-CBC-HMAC-SHA1")))
+                 (evp = EVP_get_cipherbyname("AES-256-CBC-HMAC-SHA1", 0)))
             *enc = evp, *md = NULL;
         else if (c->algorithm_enc == SSL_AES128 &&
                  c->algorithm_mac == SSL_SHA256 &&
-                 (evp = EVP_get_cipherbyname("AES-128-CBC-HMAC-SHA256")))
+                 (evp = EVP_get_cipherbyname("AES-128-CBC-HMAC-SHA256", 0)))
             *enc = evp, *md = NULL;
         else if (c->algorithm_enc == SSL_AES256 &&
                  c->algorithm_mac == SSL_SHA256 &&
-                 (evp = EVP_get_cipherbyname("AES-256-CBC-HMAC-SHA256")))
+                 (evp = EVP_get_cipherbyname("AES-256-CBC-HMAC-SHA256", 0)))
             *enc = evp, *md = NULL;
         return 1;
     } else {
@@ -2130,7 +2130,7 @@ int ssl_cipher_get_overhead(const SSL_CIPHER *c, size_t *mac_overhead,
     } else {
         /* Non-AEAD modes. Calculate MAC/cipher overhead separately */
         int digest_nid = SSL_CIPHER_get_digest_nid(c);
-        const EVP_MD *e_md = EVP_get_digestbynid(digest_nid);
+        const EVP_MD *e_md = EVP_get_digestbynid(digest_nid, 0);
 
         if (e_md == NULL)
             return 0;
@@ -2138,7 +2138,7 @@ int ssl_cipher_get_overhead(const SSL_CIPHER *c, size_t *mac_overhead,
         mac = EVP_MD_size(e_md);
         if (c->algorithm_enc != SSL_eNULL) {
             int cipher_nid = SSL_CIPHER_get_cipher_nid(c);
-            const EVP_CIPHER *e_ciph = EVP_get_cipherbynid(cipher_nid);
+            const EVP_CIPHER *e_ciph = EVP_get_cipherbynid(cipher_nid, 0);
 
             /* If it wasn't AEAD or SSL_eNULL, we expect it to be a
                known CBC cipher. */

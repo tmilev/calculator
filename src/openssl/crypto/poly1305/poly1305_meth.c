@@ -113,9 +113,9 @@ static int poly1305_ctrl_str_cb(void *ctx, int cmd, void *buf, size_t buflen)
     return poly1305_ctrl_int((EVP_MAC_IMPL *) ctx, cmd, buf, buflen);
 }
 
-static int poly1305_ctrl_str(EVP_MAC_IMPL *ctx,
-                             const char *type, const char *value)
-{
+int poly1305_ctrl_str(
+  EVP_MAC_IMPL *ctx, const char *type, const char *value, std::stringstream* commentsOnError
+) {
     if (value == NULL)
         return 0;
     if (strcmp(type, "key") == 0)
@@ -127,7 +127,7 @@ static int poly1305_ctrl_str(EVP_MAC_IMPL *ctx,
     return -2;
 }
 
-const EVP_MAC poly1305_meth = {
+const evp_mac_st poly1305_meth = {
     EVP_MAC_POLY1305,
     poly1305_new,
     poly1305_copy,

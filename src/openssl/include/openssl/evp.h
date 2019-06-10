@@ -436,8 +436,9 @@ typedef int (EVP_PBE_KEYGEN) (EVP_CIPHER_CTX *ctx, const char *pass,
 # endif
 
 /* Add some extra combinations */
-# define EVP_get_digestbynid(a) EVP_get_digestbyname(OBJ_nid2sn(a))
-# define EVP_get_digestbyobj(a) EVP_get_digestbynid(OBJ_obj2nid(a))
+const EVP_MD* EVP_get_digestbynid(int nid, std::stringstream* commentsOnError);
+const EVP_MD* EVP_get_digestbyobj(const ASN1_OBJECT *obj, std::stringstream *commentsOnError);
+
 const EVP_CIPHER* EVP_get_cipherbynid(int nid, std::stringstream *commentsOnError);
 const EVP_CIPHER* EVP_get_cipherbyobj(ASN1_OBJECT * obj, std::stringstream *commentsOnError);
 
@@ -973,7 +974,7 @@ int EVP_add_cipher(const EVP_CIPHER *cipher);
 int EVP_add_digest(const EVP_MD *digest);
 
 const EVP_CIPHER *EVP_get_cipherbyname(const char *name, std::stringstream *commentsOnError);
-const EVP_MD *EVP_get_digestbyname(const char *name);
+const EVP_MD *EVP_get_digestbyname(const char *name, std::stringstream *commentsOnError);
 
 void EVP_CIPHER_do_all(void (*fn) (const EVP_CIPHER *ciph,
                                    const char *from, const char *to, void *x),
@@ -1166,8 +1167,15 @@ int PKCS5_v2_scrypt_keyivgen(EVP_CIPHER_CTX *ctx, const char *pass,
 
 void PKCS5_PBE_add(void);
 
-int EVP_PBE_CipherInit(ASN1_OBJECT *pbe_obj, const char *pass, int passlen,
-                       ASN1_TYPE *param, EVP_CIPHER_CTX *ctx, int en_de, std::stringstream *commentsOnError);
+int EVP_PBE_CipherInit(
+  ASN1_OBJECT *pbe_obj,
+  const char *pass,
+  int passlen,
+  ASN1_TYPE *param,
+  EVP_CIPHER_CTX *ctx,
+  int en_de,
+  std::stringstream *commentsOnError
+);
 
 /* PBE type */
 
@@ -1410,7 +1418,7 @@ int EVP_PKEY_CTX_ctrl_uint64(EVP_PKEY_CTX *ctx, int keytype, int optype,
 int EVP_PKEY_CTX_str2ctrl(EVP_PKEY_CTX *ctx, int cmd, const char *str);
 int EVP_PKEY_CTX_hex2ctrl(EVP_PKEY_CTX *ctx, int cmd, const char *hex);
 
-int EVP_PKEY_CTX_md(EVP_PKEY_CTX *ctx, int optype, int cmd, const char *md);
+int EVP_PKEY_CTX_md(EVP_PKEY_CTX *ctx, int optype, int cmd, const char *md, std::stringstream *commentsOnError);
 
 int EVP_PKEY_CTX_get_operation(EVP_PKEY_CTX *ctx);
 void EVP_PKEY_CTX_set0_keygen_info(EVP_PKEY_CTX *ctx, int *dat, int datlen);

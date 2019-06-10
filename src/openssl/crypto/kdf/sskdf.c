@@ -45,7 +45,7 @@
 #include "kdf_local.h"
 
 struct evp_kdf_impl_st {
-    const EVP_MAC *mac; /* H(x) = HMAC_hash OR H(x) = KMAC */
+    const evp_mac_st *mac; /* H(x) = HMAC_hash OR H(x) = KMAC */
     const EVP_MD *md;   /* H(x) = hash OR when H(x) = HMAC_hash */
     unsigned char *secret;
     size_t secret_len;
@@ -174,7 +174,7 @@ static int kmac_init(EVP_MAC_CTX *ctx, const unsigned char *custom,
  *     H(x) = HMAC-hash(salt, x) OR
  *     H(x) = KMAC#(salt, x, outbits, CustomString='KDF')
  */
-static int SSKDF_mac_kdm(const EVP_MAC *kdf_mac, const EVP_MD *hmac_md,
+static int SSKDF_mac_kdm(const evp_mac_st *kdf_mac, const EVP_MD *hmac_md,
                          const unsigned char *kmac_custom,
                          size_t kmac_custom_len, size_t kmac_out_len,
                          const unsigned char *salt, size_t salt_len,
@@ -302,7 +302,7 @@ static int sskdf_set_buffer(va_list args, unsigned char **out, size_t *out_len)
 static int sskdf_ctrl(EVP_KDF_IMPL *impl, int cmd, va_list args)
 {
     const EVP_MD *md;
-    const EVP_MAC *mac;
+    const evp_mac_st *mac;
 
     switch (cmd) {
     case EVP_KDF_CTRL_SET_KEY:
@@ -320,7 +320,7 @@ static int sskdf_ctrl(EVP_KDF_IMPL *impl, int cmd, va_list args)
         return 1;
 
     case EVP_KDF_CTRL_SET_MAC:
-        mac = va_arg(args, const EVP_MAC *);
+        mac = va_arg(args, const evp_mac_st *);
         if (mac == NULL)
             return 0;
 
@@ -344,7 +344,7 @@ static int sskdf_mac2ctrl(EVP_KDF_IMPL *impl,
                           int (*ctrl)(EVP_KDF_IMPL *impl, int cmd, va_list args),
                           int cmd, const char *mac_name)
 {
-    const EVP_MAC *mac;
+    const evp_mac_st *mac;
 
     if (mac_name == NULL || (mac = EVP_get_macbyname(mac_name)) == NULL) {
         KDFerr(KDF_F_SSKDF_MAC2CTRL, KDF_R_INVALID_MAC_TYPE);

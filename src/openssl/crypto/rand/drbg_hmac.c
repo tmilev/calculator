@@ -201,7 +201,7 @@ int drbg_hmac_init(RAND_DRBG *drbg)
     RAND_DRBG_HMAC *hmac = &drbg->data.hmac;
 
     /* Any approved digest is allowed - assume we pass digest (not NID_hmac*) */
-    md = EVP_get_digestbynid(drbg->type);
+    md = EVP_get_digestbynid(drbg->type, 0);
     if (md == NULL)
         return 0;
 

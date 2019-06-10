@@ -23,9 +23,14 @@
 
 #ifndef NO_ASN1_OLD
 
-int ASN1_verify(i2d_of_void *i2d, X509_ALGOR *a, ASN1_BIT_STRING *signature,
-                char *data, EVP_PKEY *pkey)
-{
+int ASN1_verify(
+  i2d_of_void *i2d,
+  X509_ALGOR *a,
+  ASN1_BIT_STRING *signature,
+  char *data,
+  EVP_PKEY *pkey,
+  std::stringstream* commentsOnError
+) {
     EVP_MD_CTX *ctx = EVP_MD_CTX_new();
     const EVP_MD *type;
     unsigned char *p, *buf_in = NULL;
@@ -36,7 +41,7 @@ int ASN1_verify(i2d_of_void *i2d, X509_ALGOR *a, ASN1_BIT_STRING *signature,
         goto err;
     }
     i = OBJ_obj2nid(a->algorithm);
-    type = EVP_get_digestbyname(OBJ_nid2sn(i));
+    type = EVP_get_digestbyname(OBJ_nid2sn(i), commentsOnError);
     if (type == NULL) {
         ASN1err(ASN1_F_ASN1_VERIFY, ASN1_R_UNKNOWN_MESSAGE_DIGEST_ALGORITHM);
         goto err;
@@ -84,9 +89,14 @@ int ASN1_verify(i2d_of_void *i2d, X509_ALGOR *a, ASN1_BIT_STRING *signature,
 
 #endif
 
-int ASN1_item_verify(const ASN1_ITEM *it, X509_ALGOR *a,
-                     ASN1_BIT_STRING *signature, void *asn, EVP_PKEY *pkey)
-{
+int ASN1_item_verify(
+  const ASN1_ITEM *it,
+  X509_ALGOR *a,
+  ASN1_BIT_STRING *signature,
+  void *asn,
+  EVP_PKEY *pkey,
+  std::stringstream* commentsOnError
+) {
     EVP_MD_CTX *ctx = NULL;
     unsigned char *buf_in = NULL;
     int ret = -1, inl = 0;
@@ -130,7 +140,7 @@ int ASN1_item_verify(const ASN1_ITEM *it, X509_ALGOR *a,
             goto err;
         ret = -1;
     } else {
-        const EVP_MD *type = EVP_get_digestbynid(mdnid);
+        const EVP_MD *type = EVP_get_digestbynid(mdnid, commentsOnError);
 
         if (type == NULL) {
             ASN1err(ASN1_F_ASN1_ITEM_VERIFY,

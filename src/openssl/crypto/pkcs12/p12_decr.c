@@ -32,7 +32,7 @@ unsigned char *PKCS12_pbe_crypt(const X509_ALGOR *algor,
 
     /* Decrypt data */
     if (!EVP_PBE_CipherInit(algor->algorithm, pass, passlen,
-                            algor->parameter, ctx, en_de)) {
+                            algor->parameter, ctx, en_de, 0)) {
         PKCS12err(PKCS12_F_PKCS12_PBE_CRYPT,
                   PKCS12_R_PKCS12_ALGOR_CIPHERINIT_ERROR);
         goto err;

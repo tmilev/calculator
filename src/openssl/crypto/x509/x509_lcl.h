@@ -133,7 +133,7 @@ struct x509_store_st {
     int (*cleanup) (X509_STORE_CTX *ctx);
     CRYPTO_EX_DATA ex_data;
     CRYPTO_REF_COUNT references;
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
 };
 
 typedef struct lookup_dir_hashes_st BY_DIR_HASH;

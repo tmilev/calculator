@@ -62,7 +62,6 @@ void EC_KEY_free(EC_KEY *r)
         r->group->meth->keyfinish(r);
 
     CRYPTO_free_ex_data(CRYPTO_EX_INDEX_EC_KEY, r, &r->ex_data);
-    CRYPTO_THREAD_lock_free(r->lock);
     EC_GROUP_free(r->group);
     EC_POINT_free(r->pub_key);
     BN_clear_free(r->priv_key);
@@ -165,7 +164,7 @@ int EC_KEY_up_ref(EC_KEY *r)
 {
     int i;
 
-    if (CRYPTO_UP_REF(&r->references, &i, r->lock) <= 0)
+    if (CRYPTO_UP_REF(&r->references, &i, 0) <= 0)
         return 0;
 
     REF_PRINT_COUNT("EC_KEY", r);

@@ -195,7 +195,7 @@ struct evp_md_st {
     /* TODO(3.0): Remove above comment when legacy has gone */
     ossl_provider_st *prov;
     CRYPTO_REF_COUNT refcnt;
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
     OSSL_OP_digest_newctx_fn *newctx;
     OSSL_OP_digest_init_fn *dinit;
     OSSL_OP_digest_update_fn *dupdate;
@@ -497,7 +497,7 @@ struct evp_pkey_st {
     } pkey;
     int save_parameters;
     STACK_OF(X509_ATTRIBUTE) *attributes; /* [ 0 ] */
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
 } /* EVP_PKEY */ ;
 
 

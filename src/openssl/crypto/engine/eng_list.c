@@ -127,7 +127,7 @@ static int engine_list_remove(ENGINE *e)
 }
 
 /* Get the first/last "ENGINE" type available. */
-ENGINE *ENGINE_get_first(void)
+ENGINE *ENGINE_get_first(std::stringstream* commentsOnError)
 {
     ENGINE *ret;
 
@@ -136,13 +136,11 @@ ENGINE *ENGINE_get_first(void)
         return NULL;
     }
 
-    CRYPTO_THREAD_write_lock(global_engine_lock);
     ret = engine_list_head;
     if (ret) {
         ret->struct_ref++;
         engine_ref_debug(ret, 0, 1);
     }
-    CRYPTO_THREAD_unlock(global_engine_lock);
     return ret;
 }
 
@@ -155,13 +153,11 @@ ENGINE *ENGINE_get_last(void)
         return NULL;
     }
 
-    CRYPTO_THREAD_write_lock(global_engine_lock);
     ret = engine_list_tail;
     if (ret) {
         ret->struct_ref++;
         engine_ref_debug(ret, 0, 1);
     }
-    CRYPTO_THREAD_unlock(global_engine_lock);
     return ret;
 }
 
@@ -173,14 +169,12 @@ ENGINE *ENGINE_get_next(ENGINE *e)
         ENGINEerr(ENGINE_F_ENGINE_GET_NEXT, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
-    CRYPTO_THREAD_write_lock(global_engine_lock);
     ret = e->next;
     if (ret) {
         /* Return a valid structural reference to the next ENGINE */
         ret->struct_ref++;
         engine_ref_debug(ret, 0, 1);
     }
-    CRYPTO_THREAD_unlock(global_engine_lock);
     /* Release the structural reference to the previous ENGINE */
     ENGINE_free(e);
     return ret;
@@ -193,14 +187,12 @@ ENGINE *ENGINE_get_prev(ENGINE *e)
         ENGINEerr(ENGINE_F_ENGINE_GET_PREV, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
-    CRYPTO_THREAD_write_lock(global_engine_lock);
     ret = e->prev;
     if (ret) {
         /* Return a valid structural reference to the next ENGINE */
         ret->struct_ref++;
         engine_ref_debug(ret, 0, 1);
     }
-    CRYPTO_THREAD_unlock(global_engine_lock);
     /* Release the structural reference to the previous ENGINE */
     ENGINE_free(e);
     return ret;
@@ -218,12 +210,10 @@ int ENGINE_add(ENGINE *e)
         ENGINEerr(ENGINE_F_ENGINE_ADD, ENGINE_R_ID_OR_NAME_MISSING);
         return 0;
     }
-    CRYPTO_THREAD_write_lock(global_engine_lock);
     if (!engine_list_add(e)) {
         ENGINEerr(ENGINE_F_ENGINE_ADD, ENGINE_R_INTERNAL_LIST_ERROR);
         to_return = 0;
     }
-    CRYPTO_THREAD_unlock(global_engine_lock);
     return to_return;
 }
 
@@ -235,12 +225,10 @@ int ENGINE_remove(ENGINE *e)
         ENGINEerr(ENGINE_F_ENGINE_REMOVE, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
-    CRYPTO_THREAD_write_lock(global_engine_lock);
     if (!engine_list_remove(e)) {
         ENGINEerr(ENGINE_F_ENGINE_REMOVE, ENGINE_R_INTERNAL_LIST_ERROR);
         to_return = 0;
     }
-    CRYPTO_THREAD_unlock(global_engine_lock);
     return to_return;
 }
 
@@ -287,7 +275,6 @@ ENGINE *ENGINE_by_id(const char *id)
         return NULL;
     }
 
-    CRYPTO_THREAD_write_lock(global_engine_lock);
     iterator = engine_list_head;
     while (iterator && (strcmp(id, iterator->id) != 0))
         iterator = iterator->next;
@@ -310,7 +297,6 @@ ENGINE *ENGINE_by_id(const char *id)
             engine_ref_debug(iterator, 0, 1);
         }
     }
-    CRYPTO_THREAD_unlock(global_engine_lock);
     if (iterator != NULL)
         return iterator;
     /*
@@ -344,6 +330,6 @@ int ENGINE_up_ref(ENGINE *e)
         ENGINEerr(ENGINE_F_ENGINE_UP_REF, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
-    CRYPTO_UP_REF(&e->struct_ref, &i, global_engine_lock);
+    CRYPTO_UP_REF(&e->struct_ref, &i, 0);
     return 1;
 }

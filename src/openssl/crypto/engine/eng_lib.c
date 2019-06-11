@@ -22,8 +22,7 @@ DEFINE_RUN_ONCE(do_engine_lock_init) {
   std::cout << "DEBUG: running unexpected piece of code!!!!!!!!!!!!!!!!!!";
     if (!OPENSSL_init_crypto(0, NULL, 0))
         return 0;
-    global_engine_lock = CRYPTO_THREAD_lock_new();
-    return global_engine_lock != NULL;
+    return 1;
 }
 
 ENGINE *ENGINE_new(void)
@@ -170,7 +169,6 @@ void engine_cleanup_int(void)
                                         engine_cleanup_cb_free);
         cleanup_stack = NULL;
     }
-    CRYPTO_THREAD_lock_free(global_engine_lock);
 }
 
 /* Now the "ex_data" support */

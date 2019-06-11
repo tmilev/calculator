@@ -112,11 +112,11 @@ int ENGINE_register_complete(ENGINE *e)
     return 1;
 }
 
-int ENGINE_register_all_complete(void)
+int ENGINE_register_all_complete(std::stringstream* commentsOnError)
 {
     ENGINE *e;
 
-    for (e = ENGINE_get_first(); e; e = ENGINE_get_next(e))
+    for (e = ENGINE_get_first(commentsOnError); e; e = ENGINE_get_next(e))
         if (!(e->flags & ENGINE_FLAGS_NO_REGISTER_ALL))
             ENGINE_register_complete(e);
     return 1;

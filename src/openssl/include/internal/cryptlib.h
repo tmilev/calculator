@@ -97,7 +97,6 @@ int openssl_init_fork_handlers(void);
 
 char *ossl_safe_getenv(const char *name);
 
-extern CRYPTO_RWLOCK *memdbg_lock;
 int openssl_strerror_r(int errnum, char *buf, size_t buflen);
 # if !defined(OPENSSL_NO_STDIO)
 FILE *openssl_fopen(const char *filename, const char *mode);

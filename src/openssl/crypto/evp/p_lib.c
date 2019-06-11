@@ -149,12 +149,7 @@ EVP_PKEY *EVP_PKEY_new(void)
     ret->save_type = EVP_PKEY_NONE;
     ret->references = 1;
     ret->save_parameters = 1;
-    ret->lock = CRYPTO_THREAD_lock_new();
-    if (ret->lock == NULL) {
-        EVPerr(EVP_F_EVP_PKEY_NEW, ERR_R_MALLOC_FAILURE);
-        OPENSSL_free(ret);
-        return NULL;
-    }
+    ret->unused = 0;
     return ret;
 }
 
@@ -162,7 +157,7 @@ int EVP_PKEY_up_ref(EVP_PKEY *pkey)
 {
     int i;
 
-    if (CRYPTO_UP_REF(&pkey->references, &i, pkey->lock) <= 0)
+    if (CRYPTO_UP_REF(&pkey->references, &i, 0) <= 0)
         return 0;
 
     REF_PRINT_COUNT("EVP_PKEY", pkey);
@@ -599,13 +594,12 @@ void EVP_PKEY_free(EVP_PKEY *x)
     if (x == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&x->references, &i, x->lock);
+    CRYPTO_DOWN_REF(&x->references, &i, 0);
     REF_PRINT_COUNT("EVP_PKEY", x);
     if (i > 0)
         return;
     REF_ASSERT_ISNT(i < 0);
     EVP_PKEY_free_it(x);
-    CRYPTO_THREAD_lock_free(x->lock);
     sk_X509_ATTRIBUTE_pop_free(x->attributes, X509_ATTRIBUTE_free);
     OPENSSL_free(x);
 }

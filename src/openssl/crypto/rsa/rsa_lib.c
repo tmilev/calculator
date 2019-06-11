@@ -57,12 +57,7 @@ RSA *RSA_new_method(ENGINE *engine)
     }
 
     ret->references = 1;
-    ret->lock = CRYPTO_THREAD_lock_new();
-    if (ret->lock == NULL) {
-        RSAerr(RSA_F_RSA_NEW_METHOD, ERR_R_MALLOC_FAILURE);
-        OPENSSL_free(ret);
-        return NULL;
-    }
+    ret->unused = 0;
 
     ret->meth = RSA_get_default_method();
 #ifndef OPENSSL_NO_ENGINE
@@ -109,7 +104,7 @@ void RSA_free(RSA *r)
     if (r == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&r->references, &i, r->lock);
+    CRYPTO_DOWN_REF(&r->references, &i, 0);
     REF_PRINT_COUNT("RSA", r);
     if (i > 0)
         return;
@@ -122,8 +117,6 @@ void RSA_free(RSA *r)
 #endif
 
     CRYPTO_free_ex_data(CRYPTO_EX_INDEX_RSA, r, &r->ex_data);
-
-    CRYPTO_THREAD_lock_free(r->lock);
 
     BN_free(r->n);
     BN_free(r->e);
@@ -145,7 +138,7 @@ int RSA_up_ref(RSA *r)
 {
     int i;
 
-    if (CRYPTO_UP_REF(&r->references, &i, r->lock) <= 0)
+    if (CRYPTO_UP_REF(&r->references, &i, 0) <= 0)
         return 0;
 
     REF_PRINT_COUNT("RSA", r);

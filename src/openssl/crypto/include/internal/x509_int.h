@@ -108,7 +108,7 @@ struct X509_crl_st {
     /* alternative method to handle this CRL */
     const X509_CRL_METHOD *meth;
     void *meth_data;
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
 };
 
 struct x509_revoked_st {
@@ -181,7 +181,7 @@ struct x509_st {
 # endif
     unsigned char sha1_hash[SHA_DIGEST_LENGTH];
     X509_CERT_AUX *aux;
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
     volatile int ex_cached;
 # ifndef OPENSSL_NO_SM2
     ASN1_OCTET_STRING *sm2_id;

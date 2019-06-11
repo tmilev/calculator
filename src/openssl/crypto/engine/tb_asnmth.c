@@ -45,11 +45,11 @@ int ENGINE_register_pkey_asn1_meths(ENGINE *e)
     return 1;
 }
 
-void ENGINE_register_all_pkey_asn1_meths(void)
+void ENGINE_register_all_pkey_asn1_meths(std::stringstream* commentsOnError)
 {
     ENGINE *e;
 
-    for (e = ENGINE_get_first(); e; e = ENGINE_get_next(e))
+    for (e = ENGINE_get_first(commentsOnError); e; e = ENGINE_get_next(e))
         ENGINE_register_pkey_asn1_meths(e);
 }
 
@@ -196,7 +196,6 @@ const EVP_PKEY_ASN1_METHOD *ENGINE_pkey_asn1_find_str(ENGINE **pe,
         return NULL;
     }
 
-    CRYPTO_THREAD_write_lock(global_engine_lock);
     engine_table_doall(pkey_asn1_meth_table, look_str_cb, &fstr);
     /* If found obtain a structural reference to engine */
     if (fstr.e) {
@@ -204,6 +203,5 @@ const EVP_PKEY_ASN1_METHOD *ENGINE_pkey_asn1_find_str(ENGINE **pe,
         engine_ref_debug(fstr.e, 0, 1);
     }
     *pe = fstr.e;
-    CRYPTO_THREAD_unlock(global_engine_lock);
     return fstr.ameth;
 }

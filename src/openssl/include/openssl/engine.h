@@ -305,7 +305,7 @@ typedef int (*ENGINE_PKEY_ASN1_METHS_PTR) (ENGINE *, EVP_PKEY_ASN1_METHOD **,
  */
 
 /* Get the first/last "ENGINE" type available. */
-ENGINE *ENGINE_get_first(void);
+ENGINE *ENGINE_get_first(std::stringstream *commentsOnError);
 ENGINE *ENGINE_get_last(void);
 /* Iterate to the next/previous "ENGINE" type (NULL = end of the list). */
 ENGINE *ENGINE_get_next(ENGINE *e);
@@ -354,39 +354,39 @@ void ENGINE_set_table_flags(unsigned int flags);
 
 int ENGINE_register_RSA(ENGINE *e);
 void ENGINE_unregister_RSA(ENGINE *e);
-void ENGINE_register_all_RSA(void);
+void ENGINE_register_all_RSA(std::stringstream *commentsOnError);
 
 int ENGINE_register_DSA(ENGINE *e);
 void ENGINE_unregister_DSA(ENGINE *e);
-void ENGINE_register_all_DSA(void);
+void ENGINE_register_all_DSA(std::stringstream *commentsOnError);
 
 int ENGINE_register_EC(ENGINE *e);
 void ENGINE_unregister_EC(ENGINE *e);
-void ENGINE_register_all_EC(void);
+void ENGINE_register_all_EC(std::stringstream *commentsOnError);
 
 int ENGINE_register_DH(ENGINE *e);
 void ENGINE_unregister_DH(ENGINE *e);
-void ENGINE_register_all_DH(void);
+void ENGINE_register_all_DH(std::stringstream *commentsOnError);
 
 int ENGINE_register_RAND(ENGINE *e);
 void ENGINE_unregister_RAND(ENGINE *e);
-void ENGINE_register_all_RAND(void);
+void ENGINE_register_all_RAND(std::stringstream *commentsOnError);
 
 int ENGINE_register_ciphers(ENGINE *e);
 void ENGINE_unregister_ciphers(ENGINE *e);
-void ENGINE_register_all_ciphers(void);
+void ENGINE_register_all_ciphers(std::stringstream *commentsOnError);
 
 int ENGINE_register_digests(ENGINE *e);
 void ENGINE_unregister_digests(ENGINE *e);
-void ENGINE_register_all_digests(void);
+void ENGINE_register_all_digests(std::stringstream *commentsOnError);
 
 int ENGINE_register_pkey_meths(ENGINE *e);
 void ENGINE_unregister_pkey_meths(ENGINE *e);
-void ENGINE_register_all_pkey_meths(void);
+void ENGINE_register_all_pkey_meths(std::stringstream *commentsOnError);
 
 int ENGINE_register_pkey_asn1_meths(ENGINE *e);
 void ENGINE_unregister_pkey_asn1_meths(ENGINE *e);
-void ENGINE_register_all_pkey_asn1_meths(void);
+void ENGINE_register_all_pkey_asn1_meths(std::stringstream *commentsOnError);
 
 /*
  * These functions register all support from the above categories. Note, use
@@ -395,7 +395,7 @@ void ENGINE_register_all_pkey_asn1_meths(void);
  * more selective initialisation.
  */
 int ENGINE_register_complete(ENGINE *e);
-int ENGINE_register_all_complete(void);
+int ENGINE_register_all_complete(std::stringstream *commentsOnError);
 
 /*
  * Send parameterised control commands to the engine. The possibilities to
@@ -571,7 +571,7 @@ int ENGINE_finish(ENGINE *e);
 EVP_PKEY *ENGINE_load_private_key(ENGINE *e, const char *key_id,
                                   UI_METHOD *ui_method, void *callback_data);
 EVP_PKEY *ENGINE_load_public_key(ENGINE *e, const char *key_id,
-                                 UI_METHOD *ui_method, void *callback_data);
+                                 UI_METHOD *ui_method, void *callback_data, std::stringstream *commentsOnError);
 int ENGINE_load_ssl_client_cert(ENGINE *e, SSL *s,
                                 STACK_OF(X509_NAME) *ca_dn, X509 **pcert,
                                 EVP_PKEY **ppkey, STACK_OF(X509) **pother,

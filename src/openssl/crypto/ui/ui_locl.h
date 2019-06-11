@@ -103,7 +103,7 @@ struct ui_st {
 # define UI_FLAG_PRINT_ERRORS    0x0100
     int flags;
 
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
 };
 
 #endif

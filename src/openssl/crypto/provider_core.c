@@ -178,7 +178,7 @@ static int ossl_provider_cmp(
 
 struct provider_store_st {
   stack_st_ossl_provider_st *providers;
-  CRYPTO_RWLOCK *lock;
+  CRYPTO_RWLOCK *unused;
   unsigned int use_fallbacks:1;
 };
 static int provider_store_index = -1;
@@ -190,7 +190,6 @@ static void provider_store_free(void *vstore) {
     return;
   }
   sk_ossl_provider_st_pop_free(store->providers, ossl_provider_free);
-  CRYPTO_THREAD_lock_free(store->lock);
   OPENSSL_free(store);
 }
 
@@ -205,8 +204,8 @@ void *provider_store_new(std::stringstream* commentsOnError) {
     return 0;
   }
   store->providers = sk_ossl_provider_st_new(ossl_provider_cmp);
-  store->lock = CRYPTO_THREAD_lock_new();
-  if (store->providers == NULL|| store->lock == NULL) {
+  store->unused = 0;
+  if (store->providers == NULL) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to allocate providers or store.\n";
     }
@@ -291,12 +290,10 @@ ossl_provider_st* ossl_provider_find(openssl_ctx_st *libctx, const char *name)
         int i;
 
         tmpl.name = (char *)name;
-        CRYPTO_THREAD_write_lock(store->lock);
         if ((i = sk_ossl_provider_st_find(store->providers, &tmpl)) == -1
             || (prov = sk_ossl_provider_st_value(store->providers, i)) == NULL
             || !ossl_provider_upref(prov))
             prov = NULL;
-        CRYPTO_THREAD_unlock(store->lock);
     }
 
     return prov;
@@ -352,7 +349,6 @@ ossl_provider_st *ossl_provider_new(openssl_ctx_st *libctx, const char *name,
     if ((prov = provider_new(name, init_function)) == NULL)
         return NULL;
 
-    CRYPTO_THREAD_write_lock(store->lock);
     if (!ossl_provider_upref(prov)) { /* +1 One reference for the store */
         ossl_provider_free(prov); /* -1 Reference that was to be returned */
         prov = NULL;
@@ -363,7 +359,6 @@ ossl_provider_st *ossl_provider_new(openssl_ctx_st *libctx, const char *name,
     } else {
         prov->store = store;
     }
-    CRYPTO_THREAD_unlock(store->lock);
 
     if (prov == NULL)
         CRYPTOerr(CRYPTO_F_OSSL_PROVIDER_NEW, ERR_R_MALLOC_FAILURE);
@@ -602,9 +597,7 @@ static int provider_activate(ossl_provider_st* prov, std::stringstream* comments
 
 int ossl_provider_activate(ossl_provider_st *prov, std::stringstream* commentsOnError) {
   if (provider_activate(prov, commentsOnError)) {
-    CRYPTO_THREAD_write_lock(prov->store->lock);
     prov->store->use_fallbacks = 0;
-    CRYPTO_THREAD_unlock(prov->store->lock);
     return 1;
   }
   return 0;
@@ -658,7 +651,6 @@ int ossl_provider_forall_loaded(
   int ret = 1;
   int i;
   int found_activated = 0;
-  CRYPTO_THREAD_read_lock(store->lock);
   ret = provider_forall_loaded(store, &found_activated, cb, cbdata, commentsOnError);
   /*
    * If there's nothing activated ever in this store, try to activate
@@ -706,7 +698,6 @@ int ossl_provider_forall_loaded(
       ret = provider_forall_loaded(store, NULL, cb, cbdata, commentsOnError);
     }
   }
-  CRYPTO_THREAD_unlock(store->lock);
   if (commentsOnError != 0) {
     *commentsOnError << "DEBUG: activated fallback count: " << activated_fallback_count << ".\n";
   }

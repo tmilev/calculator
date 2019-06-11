@@ -22,15 +22,12 @@
 #ifndef OPENSSL_NO_ENGINE
 /* non-NULL if default_RAND_meth is ENGINE-provided */
 static ENGINE *funct_ref;
-static CRYPTO_RWLOCK *rand_engine_lock;
 #endif
-static CRYPTO_RWLOCK *rand_meth_lock;
 static const RAND_METHOD *default_RAND_meth;
 static CRYPTO_ONCE rand_init = CRYPTO_ONCE_STATIC_INIT;
 
 int rand_fork_count;
 
-static CRYPTO_RWLOCK *rand_nonce_lock;
 static int rand_nonce_count;
 
 static int rand_inited = 0;
@@ -259,7 +256,7 @@ size_t rand_drbg_get_nonce(RAND_DRBG *drbg,
         goto err;
 
     data.instance = drbg;
-    CRYPTO_atomic_add(&rand_nonce_count, 1, &data.count, rand_nonce_lock);
+    CRYPTO_atomic_add(&rand_nonce_count, 1, &data.count, 0);
 
     if (rand_pool_add(pool, (unsigned char *)&data, sizeof(data), 0) == 0)
         goto err;
@@ -319,38 +316,12 @@ void rand_fork(void)
 
 DEFINE_RUN_ONCE_STATIC(do_rand_init)
 {
-#ifndef OPENSSL_NO_ENGINE
-    rand_engine_lock = CRYPTO_THREAD_lock_new();
-    if (rand_engine_lock == NULL)
-        return 0;
-#endif
-
-    rand_meth_lock = CRYPTO_THREAD_lock_new();
-    if (rand_meth_lock == NULL)
-        goto err1;
-
-    rand_nonce_lock = CRYPTO_THREAD_lock_new();
-    if (rand_nonce_lock == NULL)
-        goto err2;
-
-    if (!rand_pool_init())
-        goto err3;
-
+  if (!rand_pool_init()) {
+    return 0;
+  } else {
     rand_inited = 1;
     return 1;
-
-err3:
-    CRYPTO_THREAD_lock_free(rand_nonce_lock);
-    rand_nonce_lock = NULL;
-err2:
-    CRYPTO_THREAD_lock_free(rand_meth_lock);
-    rand_meth_lock = NULL;
-err1:
-#ifndef OPENSSL_NO_ENGINE
-    CRYPTO_THREAD_lock_free(rand_engine_lock);
-    rand_engine_lock = NULL;
-#endif
-    return 0;
+  }
 }
 
 void rand_cleanup_int(void)
@@ -364,14 +335,6 @@ void rand_cleanup_int(void)
         meth->cleanup();
     RAND_set_rand_method(NULL);
     rand_pool_cleanup();
-#ifndef OPENSSL_NO_ENGINE
-    CRYPTO_THREAD_lock_free(rand_engine_lock);
-    rand_engine_lock = NULL;
-#endif
-    CRYPTO_THREAD_lock_free(rand_meth_lock);
-    rand_meth_lock = NULL;
-    CRYPTO_THREAD_lock_free(rand_nonce_lock);
-    rand_nonce_lock = NULL;
     rand_inited = 0;
 }
 
@@ -728,13 +691,11 @@ int RAND_set_rand_method(const RAND_METHOD *meth)
     if (!RUN_ONCE(&rand_init, do_rand_init, 0))
         return 0;
 
-    CRYPTO_THREAD_write_lock(rand_meth_lock);
 #ifndef OPENSSL_NO_ENGINE
     ENGINE_finish(funct_ref);
     funct_ref = NULL;
 #endif
     default_RAND_meth = meth;
-    CRYPTO_THREAD_unlock(rand_meth_lock);
     return 1;
 }
 
@@ -778,11 +739,9 @@ int RAND_set_rand_engine(ENGINE *engine)
             return 0;
         }
     }
-    CRYPTO_THREAD_write_lock(rand_engine_lock);
     /* This function releases any prior ENGINE so call it first */
     RAND_set_rand_method(tmp_meth);
     funct_ref = engine;
-    CRYPTO_THREAD_unlock(rand_engine_lock);
     return 1;
 }
 #endif

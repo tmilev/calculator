@@ -611,7 +611,7 @@ struct ssl_session_st {
     unsigned char *ticket_appdata;
     size_t ticket_appdata_len;
     uint32_t flags;
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
 };
 
 /* Extended master secret support */
@@ -1050,7 +1050,7 @@ struct ssl_ctx_st {
      */
     int (*not_resumable_session_cb) (SSL *ssl, int is_forward_secure);
 
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
 
     /*
      * Callback for logging key material for use with debugging tools like
@@ -1494,7 +1494,7 @@ struct sslData {
     void *record_padding_arg;
     size_t block_padding;
 
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
     RAND_DRBG *drbg;
 
     /* The number of TLS1.3 tickets to automatically send */
@@ -2013,7 +2013,7 @@ typedef struct cert_st {
     char *psk_identity_hint;
 # endif
     CRYPTO_REF_COUNT references;             /* >1 only if SSL_copy_session_id is used */
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
 } CERT;
 
 # define FP_ICC  (int (*)(const void *,const void *))

@@ -344,11 +344,7 @@ EVP_MD *EVP_MD_meth_new(int md_type, int pkey_type)
     if (md != NULL) {
         md->type = md_type;
         md->pkey_type = pkey_type;
-        md->lock = CRYPTO_THREAD_lock_new();
-        if (md->lock == NULL) {
-            OPENSSL_free(md);
-            return NULL;
-        }
+        md->unused = 0;
         md->refcnt = 1;
     }
     return md;
@@ -366,7 +362,7 @@ int EVP_MD_upref(EVP_MD *md)
 {
     int ref = 0;
 
-    CRYPTO_UP_REF(&md->refcnt, &ref, md->lock);
+    CRYPTO_UP_REF(&md->refcnt, &ref, 0);
     return 1;
 }
 
@@ -375,11 +371,10 @@ void EVP_MD_meth_free(EVP_MD *md)
     if (md != NULL) {
         int i;
 
-        CRYPTO_DOWN_REF(&md->refcnt, &i, md->lock);
+        CRYPTO_DOWN_REF(&md->refcnt, &i, 0);
         if (i > 0)
             return;
         ossl_provider_free(md->prov);
-        CRYPTO_THREAD_lock_free(md->lock);
         OPENSSL_free(md);
     }
 }

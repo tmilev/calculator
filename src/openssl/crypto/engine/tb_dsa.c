@@ -31,11 +31,11 @@ int ENGINE_register_DSA(ENGINE *e)
     return 1;
 }
 
-void ENGINE_register_all_DSA(void)
+void ENGINE_register_all_DSA(std::stringstream* commentsOnError)
 {
     ENGINE *e;
 
-    for (e = ENGINE_get_first(); e; e = ENGINE_get_next(e))
+    for (e = ENGINE_get_first(commentsOnError); e; e = ENGINE_get_next(e))
         ENGINE_register_DSA(e);
 }
 

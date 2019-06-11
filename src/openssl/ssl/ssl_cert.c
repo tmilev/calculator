@@ -62,12 +62,7 @@ CERT *ssl_cert_new(void)
     ret->sec_cb = ssl_security_default_callback;
     ret->sec_level = OPENSSL_TLS_SECURITY_LEVEL;
     ret->sec_ex = NULL;
-    ret->lock = CRYPTO_THREAD_lock_new();
-    if (ret->lock == NULL) {
-        SSLerr(SSL_F_SSL_CERT_NEW, ERR_R_MALLOC_FAILURE);
-        OPENSSL_free(ret);
-        return NULL;
-    }
+    ret->unused = 0;
 
     return ret;
 }
@@ -84,12 +79,7 @@ CERT *ssl_cert_dup(CERT *cert)
 
     ret->references = 1;
     ret->key = &ret->pkeys[cert->key - cert->pkeys];
-    ret->lock = CRYPTO_THREAD_lock_new();
-    if (ret->lock == NULL) {
-        SSLerr(SSL_F_SSL_CERT_DUP, ERR_R_MALLOC_FAILURE);
-        OPENSSL_free(ret);
-        return NULL;
-    }
+    ret->unused = 0;
 #ifndef OPENSSL_NO_DH
     if (cert->dh_tmp != NULL) {
         ret->dh_tmp = cert->dh_tmp;
@@ -228,7 +218,7 @@ void ssl_cert_free(CERT *c)
 
     if (c == NULL)
         return;
-    CRYPTO_DOWN_REF(&c->references, &i, c->lock);
+    CRYPTO_DOWN_REF(&c->references, &i, 0);
     REF_PRINT_COUNT("CERT", c);
     if (i > 0)
         return;
@@ -249,7 +239,6 @@ void ssl_cert_free(CERT *c)
 #ifndef OPENSSL_NO_PSK
     OPENSSL_free(c->psk_identity_hint);
 #endif
-    CRYPTO_THREAD_lock_free(c->lock);
     OPENSSL_free(c);
 }
 

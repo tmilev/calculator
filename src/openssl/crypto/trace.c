@@ -21,8 +21,6 @@
 
 #ifndef OPENSSL_NO_TRACE
 
-static CRYPTO_RWLOCK *trace_lock = NULL;
-
 static const BIO  *current_channel = NULL;
 
 /*-
@@ -313,7 +311,6 @@ void ossl_trace_cleanup(void)
     set_trace_data(OSSL_TRACE_CATEGORY_TRACE, 0, &channel,
                    &prefix, &suffix,
                    trace_attach_cb, trace_detach_cb);
-    CRYPTO_THREAD_lock_free(trace_lock);
 #endif
 }
 
@@ -443,7 +440,6 @@ BIO *OSSL_trace_begin(int category)
     prefix = trace_channels[category].prefix;
 
     if (channel != NULL) {
-        CRYPTO_THREAD_write_lock(trace_lock);
         current_channel = channel;
         switch (trace_channels[category].type) {
         case trace_channels_struct::SIMPLE_CHANNEL:
@@ -485,7 +481,6 @@ void OSSL_trace_end(int category, BIO * channel)
             break;
         }
         current_channel = NULL;
-        CRYPTO_THREAD_unlock(trace_lock);
     }
 #endif
 }

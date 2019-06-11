@@ -15,15 +15,6 @@
 #include "../../include/openssl/lhash.h"
 #include "store_locl.h"
 
-static CRYPTO_RWLOCK *registry_lock;
-static CRYPTO_ONCE registry_init = CRYPTO_ONCE_STATIC_INIT;
-
-DEFINE_RUN_ONCE_STATIC(do_registry_init)
-{
-    registry_lock = CRYPTO_THREAD_lock_new();
-    return registry_lock != NULL;
-}
-
 /*
  *  Functions for manipulating OSSL_STORE_LOADERs
  */
@@ -175,12 +166,6 @@ int ossl_store_register_loader_int(OSSL_STORE_LOADER *loader)
         return 0;
     }
 
-    if (!RUN_ONCE(&registry_init, do_registry_init, 0)) {
-        OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_REGISTER_LOADER_INT,
-                      ERR_R_MALLOC_FAILURE);
-        return 0;
-    }
-    CRYPTO_THREAD_write_lock(registry_lock);
 
     if (loader_register == NULL) {
         loader_register = lh_OSSL_STORE_LOADER_new(store_loader_hash,
@@ -192,7 +177,6 @@ int ossl_store_register_loader_int(OSSL_STORE_LOADER *loader)
             || lh_OSSL_STORE_LOADER_error(loader_register) == 0))
         ok = 1;
 
-    CRYPTO_THREAD_unlock(registry_lock);
 
     return ok;
 }
@@ -217,13 +201,6 @@ const OSSL_STORE_LOADER *ossl_store_get0_loader_int(const char *scheme)
     if (!ossl_store_init_once())
         return NULL;
 
-    if (!RUN_ONCE(&registry_init, do_registry_init, 0)) {
-        OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_GET0_LOADER_INT,
-                      ERR_R_MALLOC_FAILURE);
-        return NULL;
-    }
-    CRYPTO_THREAD_write_lock(registry_lock);
-
     loader = lh_OSSL_STORE_LOADER_retrieve(loader_register, &templateOSSL);
 
     if (loader == NULL) {
@@ -231,8 +208,6 @@ const OSSL_STORE_LOADER *ossl_store_get0_loader_int(const char *scheme)
                       OSSL_STORE_R_UNREGISTERED_SCHEME);
         ERR_add_error_data(2, "scheme=", scheme);
     }
-
-    CRYPTO_THREAD_unlock(registry_lock);
 
     return loader;
 }
@@ -248,13 +223,6 @@ OSSL_STORE_LOADER *ossl_store_unregister_loader_int(const char *scheme)
     templateOSSL.eof = NULL;
     templateOSSL.close = NULL;
 
-    if (!RUN_ONCE(&registry_init, do_registry_init, 0)) {
-        OSSL_STOREerr(OSSL_STORE_F_OSSL_STORE_UNREGISTER_LOADER_INT,
-                      ERR_R_MALLOC_FAILURE);
-        return NULL;
-    }
-    CRYPTO_THREAD_write_lock(registry_lock);
-
     loader = lh_OSSL_STORE_LOADER_delete(loader_register, &templateOSSL);
 
     if (loader == NULL) {
@@ -262,8 +230,6 @@ OSSL_STORE_LOADER *ossl_store_unregister_loader_int(const char *scheme)
                       OSSL_STORE_R_UNREGISTERED_SCHEME);
         ERR_add_error_data(2, "scheme=", scheme);
     }
-
-    CRYPTO_THREAD_unlock(registry_lock);
 
     return loader;
 }
@@ -279,8 +245,6 @@ void ossl_store_destroy_loaders_int(void)
     assert(lh_OSSL_STORE_LOADER_num_items(loader_register) == 0);
     lh_OSSL_STORE_LOADER_free(loader_register);
     loader_register = NULL;
-    CRYPTO_THREAD_lock_free(registry_lock);
-    registry_lock = NULL;
 }
 
 /*

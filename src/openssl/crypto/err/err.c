@@ -144,7 +144,6 @@ static int set_err_thread_local;
 static CRYPTO_THREAD_LOCAL err_thread_local;
 
 static CRYPTO_ONCE err_string_init = CRYPTO_ONCE_STATIC_INIT;
-static CRYPTO_RWLOCK *err_string_lock;
 
 static ERR_STRING_DATA *int_err_get_item(const ERR_STRING_DATA *);
 
@@ -257,7 +256,6 @@ static void build_SYS_str_reasons(void)
 
     init = 0;
 
-    CRYPTO_THREAD_unlock(err_string_lock);
     /* openssl_strerror_r could change errno, but we want to preserve it */
     set_sys_error(saveerrno);
     err_load_strings(SYS_str_reasons);
@@ -299,14 +297,9 @@ DEFINE_RUN_ONCE_STATIC(do_err_strings_init)
 {
     if (!OPENSSL_init_crypto(0, NULL, (std::stringstream*) commentsOnError))
         return 0;
-    err_string_lock = CRYPTO_THREAD_lock_new();
-    if (err_string_lock == NULL)
-        return 0;
     int_error_hash = lh_ERR_STRING_DATA_new(err_string_data_hash,
                                             err_string_data_cmp);
     if (int_error_hash == NULL) {
-        CRYPTO_THREAD_lock_free(err_string_lock);
-        err_string_lock = NULL;
         return 0;
     }
     return 1;
@@ -316,8 +309,6 @@ void err_cleanup(void)
 {
     if (set_err_thread_local != 0)
         CRYPTO_THREAD_cleanup_local(&err_thread_local);
-    CRYPTO_THREAD_lock_free(err_string_lock);
-    err_string_lock = NULL;
     lh_ERR_STRING_DATA_free(int_error_hash);
     int_error_hash = NULL;
 }
@@ -338,11 +329,9 @@ static void err_patch(int lib, ERR_STRING_DATA *str)
  */
 static int err_load_strings(const ERR_STRING_DATA *str)
 {
-    CRYPTO_THREAD_write_lock(err_string_lock);
     for (; str->error; str++)
         (void)lh_ERR_STRING_DATA_insert(int_error_hash,
                                        (ERR_STRING_DATA *)str);
-    CRYPTO_THREAD_unlock(err_string_lock);
     return 1;
 }
 
@@ -382,14 +371,12 @@ int ERR_unload_strings(int lib, ERR_STRING_DATA *str)
     if (!RUN_ONCE(&err_string_init, do_err_strings_init, 0))
         return 0;
 
-    CRYPTO_THREAD_write_lock(err_string_lock);
     /*
      * We don't need to ERR_PACK the lib, since that was done (to
      * the table) when it was loaded.
      */
     for (; str->error; str++)
         (void)lh_ERR_STRING_DATA_delete(int_error_hash, str);
-    CRYPTO_THREAD_unlock(err_string_lock);
 
     return 1;
 }
@@ -691,9 +678,7 @@ int ERR_get_next_error_library()
     if (!RUN_ONCE(&err_string_init, do_err_strings_init, 0))
         return 0;
 
-    CRYPTO_THREAD_write_lock(err_string_lock);
     ret = int_err_library_number++;
-    CRYPTO_THREAD_unlock(err_string_lock);
     return ret;
 }
 

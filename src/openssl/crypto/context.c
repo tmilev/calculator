@@ -11,24 +11,20 @@
 #include "../include/internal/thread_once.h"
 
 struct openssl_ctx_st {
-    CRYPTO_RWLOCK *lock;
-    CRYPTO_EX_DATA data;
+  CRYPTO_RWLOCK *unused;
+  CRYPTO_EX_DATA data;
 };
 
 static openssl_ctx_st default_context;
 
-static int context_init(openssl_ctx_st *ctx)
-{
-    return (ctx->lock = CRYPTO_THREAD_lock_new()) != NULL
-        && CRYPTO_new_ex_data(CRYPTO_EX_INDEX_OPENSSL_CTX, NULL,
-                              &ctx->data);
+static int context_init(openssl_ctx_st *ctx) {
+  ctx->unused = 0;
+  return CRYPTO_new_ex_data(CRYPTO_EX_INDEX_OPENSSL_CTX, NULL, &ctx->data);
 }
 
-static int context_deinit(openssl_ctx_st *ctx)
-{
-    CRYPTO_free_ex_data(CRYPTO_EX_INDEX_OPENSSL_CTX, NULL, &ctx->data);
-    CRYPTO_THREAD_lock_free(ctx->lock);
-    return 1;
+static int context_deinit(openssl_ctx_st *ctx) {
+  CRYPTO_free_ex_data(CRYPTO_EX_INDEX_OPENSSL_CTX, NULL, &ctx->data);
+  return 1;
 }
 
 static CRYPTO_ONCE default_context_init = CRYPTO_ONCE_STATIC_INIT;
@@ -86,25 +82,18 @@ int openssl_ctx_new_index(const openssl_ctx_method *meth)
                                    openssl_ctx_generic_free);
 }
 
-void *openssl_ctx_get_data(openssl_ctx_st *ctx, int index)
-{
-    void *data = NULL;
-
-    if (ctx == NULL) {
-        if (!RUN_ONCE(&default_context_init, do_default_context_init, 0))
-            return 0;
-        ctx = &default_context;
+void *openssl_ctx_get_data(openssl_ctx_st *ctx, int index) {
+  void *data = NULL;
+  if (ctx == NULL) {
+    if (!RUN_ONCE(&default_context_init, do_default_context_init, 0)) {
+      return 0;
     }
-
-    CRYPTO_THREAD_read_lock(ctx->lock);
-
-    /* The alloc call ensures there's a value there */
-    if (CRYPTO_alloc_ex_data(CRYPTO_EX_INDEX_OPENSSL_CTX, NULL,
-                             &ctx->data, index))
-        data = CRYPTO_get_ex_data(&ctx->data, index);
-
-    CRYPTO_THREAD_unlock(ctx->lock);
-
-    return data;
+    ctx = &default_context;
+  }
+  /* The alloc call ensures there's a value there */
+  if (CRYPTO_alloc_ex_data(CRYPTO_EX_INDEX_OPENSSL_CTX, NULL, &ctx->data, index)) {
+    data = CRYPTO_get_ex_data(&ctx->data, index);
+  }
+  return data;
 }
 

@@ -191,7 +191,7 @@ struct rand_pool_st {
  * right now.
  */
 struct rand_drbg_st {
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
     RAND_DRBG *parent;
     int secure; /* 1: allocated on the secure heap, 0: otherwise */
     int type; /* the nid of the underlying algorithm */

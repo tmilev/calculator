@@ -166,6 +166,11 @@
         static const ASN1_AUX tname##_aux = {NULL, ASN1_AFLG_REFCOUNT, offsetof(tname, references), offsetof(tname, lock), cb, 0, NULL}; \
         ASN1_SEQUENCE(tname)
 
+# define ASN1_SEQUENCE_ref_lock_unused(tname, cb) \
+static const ASN1_AUX tname##_aux = {NULL, ASN1_AFLG_REFCOUNT, offsetof(tname, references), offsetof(tname, unused), cb, 0, NULL}; \
+ASN1_SEQUENCE(tname)
+
+
 # define ASN1_SEQUENCE_enc(tname, enc, cb) \
         static const ASN1_AUX tname##_aux = {NULL, ASN1_AFLG_ENCODING, 0, 0, cb, offsetof(tname, enc), NULL}; \
         ASN1_SEQUENCE(tname)

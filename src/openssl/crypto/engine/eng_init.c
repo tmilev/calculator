@@ -81,9 +81,7 @@ int ENGINE_init(ENGINE *e)
         ENGINEerr(ENGINE_F_ENGINE_INIT, ERR_R_MALLOC_FAILURE);
         return 0;
     }
-    CRYPTO_THREAD_write_lock(global_engine_lock);
     ret = engine_unlocked_init(e);
-    CRYPTO_THREAD_unlock(global_engine_lock);
     return ret;
 }
 
@@ -94,9 +92,7 @@ int ENGINE_finish(ENGINE *e)
 
     if (e == NULL)
         return 1;
-    CRYPTO_THREAD_write_lock(global_engine_lock);
     to_return = engine_unlocked_finish(e, 1);
-    CRYPTO_THREAD_unlock(global_engine_lock);
     if (!to_return) {
         ENGINEerr(ENGINE_F_ENGINE_FINISH, ENGINE_R_FINISH_FAILED);
         return 0;

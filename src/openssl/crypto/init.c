@@ -518,7 +518,7 @@ int OPENSSL_init_crypto(uint64_t opts, const ossl_init_settings_st *settings, st
   if (!RUN_ONCE(&engine_dynamic, ossl_init_engine_dynamic, commentsOnError)) {
     return 0;
   }
-  ENGINE_register_all_complete();
+  ENGINE_register_all_complete(commentsOnError);
   std::cout << "DEBUG: about to no comp. " << std::endl;
   if (!RUN_ONCE(&zlib, ossl_init_zlib, commentsOnError)) {
     return 0;

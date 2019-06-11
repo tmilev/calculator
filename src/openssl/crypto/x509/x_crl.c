@@ -295,7 +295,7 @@ static void setup_idp(X509_CRL *crl, ISSUING_DIST_POINT *idp)
     DIST_POINT_set_dpname(idp->distpoint, X509_CRL_get_issuer(crl));
 }
 
-ASN1_SEQUENCE_ref(X509_CRL, crl_cb) = {
+ASN1_SEQUENCE_ref_lock_unused(X509_CRL, crl_cb) = {
         ASN1_EMBED(X509_CRL, crl, X509_CRL_INFO),
         ASN1_EMBED(X509_CRL, sig_alg, X509_ALGOR),
         ASN1_EMBED(X509_CRL, signature, ASN1_BIT_STRING)
@@ -405,9 +405,7 @@ static int def_crl_lookup(X509_CRL *crl,
      * under a lock to avoid race condition.
      */
     if (!sk_X509_REVOKED_is_sorted(crl->crl.revoked)) {
-        CRYPTO_THREAD_write_lock(crl->lock);
         sk_X509_REVOKED_sort(crl->crl.revoked);
-        CRYPTO_THREAD_unlock(crl->lock);
     }
     rtmp.serialNumber = *serial;
     idx = sk_X509_REVOKED_find(crl->crl.revoked, &rtmp);

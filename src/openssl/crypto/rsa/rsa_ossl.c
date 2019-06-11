@@ -134,8 +134,7 @@ static int rsa_ossl_public_encrypt(int flen, const unsigned char *from,
     }
 
     if (rsa->flags & RSA_FLAG_CACHE_PUBLIC)
-        if (!BN_MONT_CTX_set_locked(&rsa->_method_mod_n, rsa->lock,
-                                    rsa->n, ctx))
+        if (!BN_MONT_CTX_set_locked(&rsa->_method_mod_n, 0, rsa->n, ctx))
             goto err;
 
     if (!rsa->meth->bn_mod_exp(ret, f, rsa->e, rsa->n, ctx,
@@ -158,7 +157,6 @@ static BN_BLINDING *rsa_get_blinding(RSA *rsa, int *local, BN_CTX *ctx)
 {
     BN_BLINDING *ret;
 
-    CRYPTO_THREAD_write_lock(rsa->lock);
 
     if (rsa->blinding == NULL) {
         rsa->blinding = RSA_setup_blinding(rsa, ctx);
@@ -189,7 +187,6 @@ static BN_BLINDING *rsa_get_blinding(RSA *rsa, int *local, BN_CTX *ctx)
     }
 
  err:
-    CRYPTO_THREAD_unlock(rsa->lock);
     return ret;
 }
 
@@ -207,9 +204,7 @@ static int rsa_blinding_convert(BN_BLINDING *b, BIGNUM *f, BIGNUM *unblind,
          */
         int ret;
 
-        BN_BLINDING_lock(b);
         ret = BN_BLINDING_convert_ex(f, unblind, b, ctx);
-        BN_BLINDING_unlock(b);
 
         return ret;
     }
@@ -287,8 +282,7 @@ static int rsa_ossl_private_encrypt(int flen, const unsigned char *from,
     }
 
     if (rsa->flags & RSA_FLAG_CACHE_PUBLIC)
-        if (!BN_MONT_CTX_set_locked(&rsa->_method_mod_n, rsa->lock,
-                                    rsa->n, ctx))
+        if (!BN_MONT_CTX_set_locked(&rsa->_method_mod_n, 0, rsa->n, ctx))
             goto err;
 
     if (!(rsa->flags & RSA_FLAG_NO_BLINDING)) {
@@ -441,8 +435,7 @@ static int rsa_ossl_private_decrypt(int flen, const unsigned char *from,
         BN_with_flags(d, rsa->d, BN_FLG_CONSTTIME);
 
         if (rsa->flags & RSA_FLAG_CACHE_PUBLIC)
-            if (!BN_MONT_CTX_set_locked(&rsa->_method_mod_n, rsa->lock,
-                                        rsa->n, ctx)) {
+            if (!BN_MONT_CTX_set_locked(&rsa->_method_mod_n, 0, rsa->n, ctx)) {
                 BN_free(d);
                 goto err;
             }
@@ -546,8 +539,7 @@ static int rsa_ossl_public_decrypt(int flen, const unsigned char *from,
     }
 
     if (rsa->flags & RSA_FLAG_CACHE_PUBLIC)
-        if (!BN_MONT_CTX_set_locked(&rsa->_method_mod_n, rsa->lock,
-                                    rsa->n, ctx))
+        if (!BN_MONT_CTX_set_locked(&rsa->_method_mod_n, 0, rsa->n, ctx))
             goto err;
 
     if (!rsa->meth->bn_mod_exp(ret, f, rsa->e, rsa->n, ctx,
@@ -615,18 +607,16 @@ static int rsa_ossl_mod_exp(BIGNUM *r0, const BIGNUM *I, RSA *rsa, BN_CTX *ctx)
          * BN_FLG_CONSTTIME flag
          */
         if (!(BN_with_flags(factor, rsa->p, BN_FLG_CONSTTIME),
-              BN_MONT_CTX_set_locked(&rsa->_method_mod_p, rsa->lock,
-                                     factor, ctx))
+              BN_MONT_CTX_set_locked(&rsa->_method_mod_p, 0, factor, ctx))
             || !(BN_with_flags(factor, rsa->q, BN_FLG_CONSTTIME),
-                 BN_MONT_CTX_set_locked(&rsa->_method_mod_q, rsa->lock,
-                                        factor, ctx))) {
+                 BN_MONT_CTX_set_locked(&rsa->_method_mod_q, 0, factor, ctx))) {
             BN_free(factor);
             goto err;
         }
         for (i = 0; i < ex_primes; i++) {
             pinfo = sk_RSA_PRIME_INFO_value(rsa->prime_infos, i);
             BN_with_flags(factor, pinfo->r, BN_FLG_CONSTTIME);
-            if (!BN_MONT_CTX_set_locked(&pinfo->m, rsa->lock, factor, ctx)) {
+            if (!BN_MONT_CTX_set_locked(&pinfo->m, 0, factor, ctx)) {
                 BN_free(factor);
                 goto err;
             }
@@ -642,8 +632,7 @@ static int rsa_ossl_mod_exp(BIGNUM *r0, const BIGNUM *I, RSA *rsa, BN_CTX *ctx)
     }
 
     if (rsa->flags & RSA_FLAG_CACHE_PUBLIC)
-        if (!BN_MONT_CTX_set_locked(&rsa->_method_mod_n, rsa->lock,
-                                    rsa->n, ctx))
+        if (!BN_MONT_CTX_set_locked(&rsa->_method_mod_n, 0, rsa->n, ctx))
             goto err;
 
     if (smooth) {

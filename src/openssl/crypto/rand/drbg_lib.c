@@ -335,7 +335,6 @@ void RAND_DRBG_free(RAND_DRBG *drbg)
     if (drbg->meth != NULL)
         drbg->meth->uninstantiate(drbg);
     rand_pool_free(drbg->adin_pool);
-    CRYPTO_THREAD_lock_free(drbg->lock);
     CRYPTO_free_ex_data(CRYPTO_EX_INDEX_DRBG, drbg, &drbg->ex_data);
 
     if (drbg->secure)
@@ -912,8 +911,6 @@ int RAND_DRBG_set_reseed_defaults(
  */
 int rand_drbg_lock(RAND_DRBG *drbg)
 {
-    if (drbg->lock != NULL)
-        return CRYPTO_THREAD_write_lock(drbg->lock);
 
     return 1;
 }
@@ -926,8 +923,6 @@ int rand_drbg_lock(RAND_DRBG *drbg)
  */
 int rand_drbg_unlock(RAND_DRBG *drbg)
 {
-    if (drbg->lock != NULL)
-        return CRYPTO_THREAD_unlock(drbg->lock);
 
     return 1;
 }
@@ -947,22 +942,6 @@ int rand_drbg_enable_locking(RAND_DRBG *drbg)
                 RAND_R_DRBG_ALREADY_INITIALIZED);
         return 0;
     }
-
-    if (drbg->lock == NULL) {
-        if (drbg->parent != NULL && drbg->parent->lock == NULL) {
-            RANDerr(RAND_F_RAND_DRBG_ENABLE_LOCKING,
-                    RAND_R_PARENT_LOCKING_NOT_ENABLED);
-            return 0;
-        }
-
-        drbg->lock = CRYPTO_THREAD_lock_new();
-        if (drbg->lock == NULL) {
-            RANDerr(RAND_F_RAND_DRBG_ENABLE_LOCKING,
-                    RAND_R_FAILED_TO_CREATE_LOCK);
-            return 0;
-        }
-    }
-
     return 1;
 }
 

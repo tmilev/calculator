@@ -56,12 +56,7 @@ DSA *DSA_new_method(ENGINE *engine)
     }
 
     ret->references = 1;
-    ret->lock = CRYPTO_THREAD_lock_new();
-    if (ret->lock == NULL) {
-        DSAerr(DSA_F_DSA_NEW_METHOD, ERR_R_MALLOC_FAILURE);
-        OPENSSL_free(ret);
-        return NULL;
-    }
+    ret->unused = 0;
 
     ret->meth = DSA_get_default_method();
 #ifndef OPENSSL_NO_ENGINE
@@ -107,7 +102,7 @@ void DSA_free(DSA *r)
     if (r == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&r->references, &i, r->lock);
+    CRYPTO_DOWN_REF(&r->references, &i, 0);
     REF_PRINT_COUNT("DSA", r);
     if (i > 0)
         return;
@@ -121,8 +116,6 @@ void DSA_free(DSA *r)
 
     CRYPTO_free_ex_data(CRYPTO_EX_INDEX_DSA, r, &r->ex_data);
 
-    CRYPTO_THREAD_lock_free(r->lock);
-
     BN_clear_free(r->p);
     BN_clear_free(r->q);
     BN_clear_free(r->g);
@@ -135,7 +128,7 @@ int DSA_up_ref(DSA *r)
 {
     int i;
 
-    if (CRYPTO_UP_REF(&r->references, &i, r->lock) <= 0)
+    if (CRYPTO_UP_REF(&r->references, &i, 0) <= 0)
         return 0;
 
     REF_PRINT_COUNT("DSA", r);

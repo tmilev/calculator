@@ -605,7 +605,6 @@ DEFINE_RUN_ONCE_STATIC(do_bio_lookup_init)
 {
     if (!OPENSSL_init_crypto(0, NULL, (std::stringstream*) commentsOnError))
         return 0;
-    bio_lookup_lock = CRYPTO_THREAD_lock_new();
     return bio_lookup_lock != NULL;
 }
 
@@ -750,11 +749,9 @@ int BIO_lookup_ex(const char *host, const char *service, int lookup_type,
 
         if (!RUN_ONCE(&bio_lookup_init, do_bio_lookup_init, 0)) {
             BIOerr(BIO_F_BIO_LOOKUP_EX, ERR_R_MALLOC_FAILURE);
-            ret = 0;
-            goto err;
+            return 0;
         }
 
-        CRYPTO_THREAD_write_lock(bio_lookup_lock);
         he_fallback_address = INADDR_ANY;
         if (host == NULL) {
             he = &he_fallback;
@@ -770,7 +767,7 @@ int BIO_lookup_ex(const char *host, const char *service, int lookup_type,
                 assert("We forgot to handle a lookup type!" == NULL);
                 BIOerr(BIO_F_BIO_LOOKUP_EX, ERR_R_INTERNAL_ERROR);
                 ret = 0;
-                goto err;
+                return 0;
             }
         } else {
             he = gethostbyname(host);
@@ -798,7 +795,7 @@ int BIO_lookup_ex(const char *host, const char *service, int lookup_type,
                 SYSerr(SYS_F_GETHOSTBYNAME, WSAGetLastError());
 #endif
                 ret = 0;
-                goto err;
+                return 0;
             }
         }
 
@@ -841,16 +838,11 @@ int BIO_lookup_ex(const char *host, const char *service, int lookup_type,
                 se = getservbyname(service, proto);
 
                 if (se == NULL) {
-#ifndef OPENSSL_SYS_WINDOWS
                     SYSerr(SYS_F_GETSERVBYNAME, errno);
-#else
-                    SYSerr(SYS_F_GETSERVBYNAME, WSAGetLastError());
-#endif
-                    goto err;
+                    return 0;
                 }
             } else {
-                BIOerr(BIO_F_BIO_LOOKUP_EX, BIO_R_MALFORMED_HOST_OR_SERVICE);
-                goto err;
+                return 0;
             }
         }
 
@@ -892,14 +884,12 @@ int BIO_lookup_ex(const char *host, const char *service, int lookup_type,
                 BIO_ADDRINFO_free(*res);
                 *res = NULL;
                 BIOerr(BIO_F_BIO_LOOKUP_EX, ERR_R_MALLOC_FAILURE);
-                ret = 0;
-                goto err;
+                return 0;
+
             }
 
             ret = 1;
         }
-     err:
-        CRYPTO_THREAD_unlock(bio_lookup_lock);
     }
 
     return ret;

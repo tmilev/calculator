@@ -34,7 +34,7 @@ struct dh_st {
     CRYPTO_EX_DATA ex_data;
     const DH_METHOD *meth;
     ENGINE *engine;
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
 };
 
 struct dh_method {

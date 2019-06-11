@@ -132,7 +132,7 @@ struct bio_st {
     uint64_t num_read;
     uint64_t num_write;
     CRYPTO_EX_DATA ex_data;
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
 };
 
 #ifndef OPENSSL_NO_SOCK
@@ -140,7 +140,7 @@ struct bio_st {
 typedef unsigned int socklen_t;
 # endif
 
-extern CRYPTO_RWLOCK *bio_lookup_lock;
+extern CRYPTO_RWLOCK *bio_lookup_locK;
 
 int BIO_ADDR_make(BIO_ADDR *ap, const struct sockaddr *sa);
 const struct sockaddr *BIO_ADDR_sockaddr(const BIO_ADDR *ap);
@@ -149,8 +149,6 @@ socklen_t BIO_ADDR_sockaddr_size(const BIO_ADDR *ap);
 socklen_t BIO_ADDRINFO_sockaddr_size(const BIO_ADDRINFO *bai);
 const struct sockaddr *BIO_ADDRINFO_sockaddr(const BIO_ADDRINFO *bai);
 #endif
-
-extern CRYPTO_RWLOCK *bio_type_lock;
 
 void bio_sock_cleanup_int(void);
 

@@ -19,7 +19,7 @@
 
 # ifndef OPENSSL_NO_DH
 
-int ERR_load_DH_strings(void);
+int ERR_load_DH_strings();
 
 /*
  * DH function codes.

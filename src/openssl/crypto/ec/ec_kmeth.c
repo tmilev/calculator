@@ -80,12 +80,7 @@ EC_KEY *EC_KEY_new_method(ENGINE *engine)
     }
 
     ret->references = 1;
-    ret->lock = CRYPTO_THREAD_lock_new();
-    if (ret->lock == NULL) {
-        ECerr(EC_F_EC_KEY_NEW_METHOD, ERR_R_MALLOC_FAILURE);
-        OPENSSL_free(ret);
-        return NULL;
-    }
+    ret->unused = 0;
 
     ret->meth = EC_KEY_get_default_method();
 #ifndef OPENSSL_NO_ENGINE

@@ -30,6 +30,7 @@
 #include "../include/openssl/trace.h"
 
 static int stopped = 0;
+extern int load_crypto_strings_inited;
 
 /*
  * Since per-thread-specific-data destructors are not universally
@@ -83,38 +84,19 @@ struct ossl_init_stop_st {
 };
 
 static OPENSSL_INIT_STOP *stop_handlers = NULL;
-static CRYPTO_RWLOCK *init_lock = NULL;
 
-static CRYPTO_ONCE base = CRYPTO_ONCE_STATIC_INIT;
-static int base_inited = 0;
-DEFINE_RUN_ONCE_STATIC(ossl_init_base)
-{
-    CRYPTO_THREAD_LOCAL key;
-
-    if (ossl_trace_init() == 0)
-        return 0;
-
-    OSSL_TRACE(INIT, "ossl_init_base: setting up stop handlers\n");
-#ifndef OPENSSL_NO_CRYPTO_MDEBUG
-    ossl_malloc_setup_failures();
-#endif
-    if (!CRYPTO_THREAD_init_local(&key, ossl_init_thread_destructor))
-        return 0;
-    if ((init_lock = CRYPTO_THREAD_lock_new()) == NULL)
-        goto err;
-    OPENSSL_cpuid_setup();
-
-    destructor_key.value = key;
-    base_inited = 1;
-    return 1;
-
-err:
-    OSSL_TRACE(INIT, "ossl_init_base failed!\n");
-    CRYPTO_THREAD_lock_free(init_lock);
-    init_lock = NULL;
-
-    CRYPTO_THREAD_cleanup_local(&key);
-    return 0;
+int ossl_init_base(std::stringstream* commentsOnError) {
+  static bool alreadyRan = false;
+  static int resultFirstRun = 0;
+  if (alreadyRan) {
+    return resultFirstRun;
+  }
+  alreadyRan = true;
+  CRYPTO_THREAD_LOCAL key;
+  ossl_malloc_setup_failures();
+  destructor_key.value = key;
+  resultFirstRun = 1;
+  return 1;
 }
 
 static CRYPTO_ONCE register_atexit = CRYPTO_ONCE_STATIC_INIT;
@@ -155,76 +137,6 @@ DEFINE_RUN_ONCE_STATIC_ALT(ossl_init_no_register_atexit,
     return 1;
 }
 
-static CRYPTO_ONCE load_crypto_nodelete = CRYPTO_ONCE_STATIC_INIT;
-DEFINE_RUN_ONCE_STATIC(ossl_init_load_crypto_nodelete)
-{
-    OSSL_TRACE(INIT, "ossl_init_load_crypto_nodelete()\n");
-
-#if !defined(OPENSSL_USE_NODELETE) \
-    && !defined(OPENSSL_NO_PINSHARED)
-# if defined(DSO_WIN32) && !defined(_WIN32_WCE)
-    {
-        HMODULE handle = NULL;
-        BOOL ret;
-
-        /* We don't use the DSO route for WIN32 because there is a better way */
-        ret = GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
-                                | GET_MODULE_HANDLE_EX_FLAG_PIN,
-                                (void *)&base_inited, &handle);
-
-        OSSL_TRACE1(INIT,
-                    "ossl_init_load_crypto_nodelete: "
-                    "obtained DSO reference? %s\n",
-                    (ret == TRUE ? "No!" : "Yes."));
-        return (ret == TRUE) ? 1 : 0;
-    }
-# elif !defined(DSO_NONE)
-    /*
-     * Deliberately leak a reference to ourselves. This will force the library
-     * to remain loaded until the atexit() handler is run at process exit.
-     */
-    {
-        DSO *dso;
-        void *err;
-
-        if (!err_shelve_state(&err))
-            return 0;
-
-        dso = DSO_dsobyaddr(&base_inited, DSO_FLAG_NO_UNLOAD_ON_FREE);
-        /*
-         * In case of No!, it is uncertain our exit()-handlers can still be
-         * called. After dlclose() the whole library might have been unloaded
-         * already.
-         */
-        OSSL_TRACE1(INIT, "obtained DSO reference? %s\n",
-                    (dso == NULL ? "No!" : "Yes."));
-        DSO_free(dso);
-        err_unshelve_state(err);
-    }
-# endif
-#endif
-
-    return 1;
-}
-
-static CRYPTO_ONCE load_crypto_strings = CRYPTO_ONCE_STATIC_INIT;
-static int load_crypto_strings_inited = 0;
-DEFINE_RUN_ONCE_STATIC(ossl_init_load_crypto_strings)
-{
-    /*
-     * OPENSSL_NO_AUTOERRINIT is provided here to prevent at compile time
-     * pulling in all the error strings during static linking
-     */
-    return err_load_crypto_strings_int();
-}
-
-DEFINE_RUN_ONCE_STATIC_ALT(ossl_init_no_load_crypto_strings,
-                           ossl_init_load_crypto_strings)
-{
-    /* Do nothing in this case */
-    return 1;
-}
-
 static CRYPTO_ONCE add_all_ciphers = CRYPTO_ONCE_STATIC_INIT;
 
 int ossl_init_add_all_ciphers(void* commentsOnError);
@@ -240,13 +152,6 @@ int ossl_init_add_all_ciphers(void* commentsOnError) {
   return 1;
 }
 
-DEFINE_RUN_ONCE_STATIC_ALT(ossl_init_no_add_all_ciphers,
-                           ossl_init_add_all_ciphers)
-{
-    /* Do nothing */
-    return 1;
-}
-
 static CRYPTO_ONCE add_all_digests = CRYPTO_ONCE_STATIC_INIT;
 DEFINE_RUN_ONCE_STATIC(ossl_init_add_all_digests)
 {
@@ -258,13 +163,6 @@ DEFINE_RUN_ONCE_STATIC(ossl_init_add_all_digests)
     OSSL_TRACE(INIT, "openssl_add_all_digests()\n");
     openssl_add_all_digests_int();
 #endif
-    return 1;
-}
-
-DEFINE_RUN_ONCE_STATIC_ALT(ossl_init_no_add_all_digests,
-                           ossl_init_add_all_digests)
-{
-    /* Do nothing */
     return 1;
 }
 
@@ -282,52 +180,19 @@ DEFINE_RUN_ONCE_STATIC(ossl_init_add_all_macs)
     return 1;
 }
 
-DEFINE_RUN_ONCE_STATIC_ALT(ossl_init_no_add_all_macs, ossl_init_add_all_macs)
-{
-    /* Do nothing */
-    return 1;
-}
-
-static CRYPTO_ONCE config = CRYPTO_ONCE_STATIC_INIT;
 static int config_inited = 0;
 static const OPENSSL_INIT_SETTINGS *conf_settings = NULL;
 
 //DEFINE_RUN_ONCE_STATIC(init = ossl_init_config
 static int ossl_init_config(std::stringstream *commentsOnError);
-static int ossl_init_config_ossl_ret_ = 0;
 
-static void ossl_init_config_ossl_(std::stringstream* commentsOnError) {
-  ossl_init_config_ossl_ret_ = ossl_init_config(commentsOnError);
-}
 
-void ossl_init_config_ossl_void(void* commentsOnError) {
-  ossl_init_config_ossl_((std::stringstream*) commentsOnError);
-}
 
 static int ossl_init_config(std::stringstream* commentsOnError) {
     std::cout << "DEBUG: OH no this piece of code is being called!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
     int ret = openssl_config_int(conf_settings, commentsOnError);
     config_inited = 1;
     return ret;
-}
-
-DEFINE_RUN_ONCE_STATIC_ALT(ossl_init_no_config, ossl_init_config)
-{
-    OSSL_TRACE(INIT, "openssl_no_config_int()\n");
-    openssl_no_config_int();
-    config_inited = 1;
-    return 1;
-}
-
-static CRYPTO_ONCE async = CRYPTO_ONCE_STATIC_INIT;
-static int async_inited = 0;
-DEFINE_RUN_ONCE_STATIC(ossl_init_async)
-{
-    OSSL_TRACE(INIT, "async_init()\n");
-    if (!async_init())
-        return 0;
-    async_inited = 1;
-    return 1;
 }
 
 #ifndef OPENSSL_NO_ENGINE
@@ -354,11 +219,6 @@ DEFINE_RUN_ONCE_STATIC(ossl_init_engine_dynamic)
     engine_load_dynamic_int();
     return 1;
 }
-# ifndef OPENSSL_NO_STATIC_ENGINE
-#  if !defined(OPENSSL_NO_PADLOCKENG)
-static CRYPTO_ONCE engine_padlock = CRYPTO_ONCE_STATIC_INIT;
-#  endif
-# endif
 #endif
 
 #ifndef OPENSSL_NO_COMP
@@ -445,8 +305,6 @@ void OPENSSL_cleanup(void)
     CRYPTO_THREAD_LOCAL key;
 
     /* If we've not been inited then no need to deinit */
-    if (!base_inited)
-        return;
 
     /* Might be explicitly called and also by atexit */
     if (stopped)
@@ -468,8 +326,6 @@ void OPENSSL_cleanup(void)
     }
     stop_handlers = NULL;
 
-    CRYPTO_THREAD_lock_free(init_lock);
-    init_lock = NULL;
 
     /*
      * We assume we are single-threaded for this function, i.e. no race
@@ -483,10 +339,10 @@ void OPENSSL_cleanup(void)
     }
 #endif
 
-    if (async_inited) {
-        OSSL_TRACE(INIT, "OPENSSL_cleanup: async_deinit()\n");
-        async_deinit();
-    }
+    //if (async_initialiazed) {
+    //    OSSL_TRACE(INIT, "OPENSSL_cleanup: async_deinit()\n");
+    //    async_deinit();
+    //}
 
     if (load_crypto_strings_inited) {
         OSSL_TRACE(INIT, "OPENSSL_cleanup: err_free_strings_int()\n");
@@ -544,7 +400,6 @@ void OPENSSL_cleanup(void)
     OSSL_TRACE(INIT, "OPENSSL_cleanup: ossl_trace_cleanup()\n");
     ossl_trace_cleanup();
 
-    base_inited = 0;
 }
 
 /*
@@ -552,7 +407,7 @@ void OPENSSL_cleanup(void)
  * called prior to any threads making calls to any OpenSSL functions,
  * i.e. passing a non-null settings value is assumed to be single-threaded.
  */
-int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings, std::stringstream* commentsOnError) {
+int OPENSSL_init_crypto(uint64_t opts, const ossl_init_settings_st *settings, std::stringstream* commentsOnError) {
   if (stopped) {
     if (!(opts & OPENSSL_INIT_BASE_ONLY)) {
       if (commentsOnError != 0) {
@@ -565,19 +420,21 @@ int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings, st
     *commentsOnError << "DEBUG: initializing crypto.\n";
   }
 
-    /*
-     * When the caller specifies OPENSSL_INIT_BASE_ONLY, that should be the
-     * *only* option specified.  With that option we return immediately after
-     * doing the requested limited initialization.  Note that
-     * err_shelve_state() called by us via ossl_init_load_crypto_nodelete()
-     * re-enters OPENSSL_init_crypto() with OPENSSL_INIT_BASE_ONLY, but with
-     * base already initialized this is a harmless NOOP.
-     *
-     * If we remain the only caller of err_shelve_state() the recursion should
-     * perhaps be removed, but if in doubt, it can be left in place.
-     */
-    if (!RUN_ONCE(&base, ossl_init_base, 0))
-        return 0;
+  /*
+   * When the caller specifies OPENSSL_INIT_BASE_ONLY, that should be the
+   * *only* option specified.  With that option we return immediately after
+   * doing the requested limited initialization.  Note that
+   * err_shelve_state() called by us via ossl_init_load_crypto_nodelete()
+   * re-enters OPENSSL_init_crypto() with OPENSSL_INIT_BASE_ONLY, but with
+   * base already initialized this is a harmless NOOP.
+   *
+   * If we remain the only caller of err_shelve_state() the recursion should
+   * perhaps be removed, but if in doubt, it can be left in place.
+   */
+  if (!ossl_init_base(commentsOnError)) {
+    std::cout << "DEBUG: Initializing base. " << std::endl;
+    return 0;
+  }
 
   if (opts & OPENSSL_INIT_BASE_ONLY) {
     if (commentsOnError != 0) {
@@ -585,7 +442,13 @@ int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings, st
     }
     return 1;
   }
-  if(commentsOnError != 0) {
+  static bool alreadyRan = false;
+  if (alreadyRan) {
+    return 1;
+  }
+  alreadyRan = true;
+
+  if (commentsOnError != 0) {
     *commentsOnError << "DEBUG: Initializing crypto fully.\n";
   }
     /*
@@ -595,96 +458,76 @@ int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings, st
      * return above.
      */
   if ((opts & OPENSSL_INIT_NO_ATEXIT) != 0) {
+    std::cout << "DEBUG: Initializing once alt. " << std::endl;
     if (!RUN_ONCE_ALT(&register_atexit, ossl_init_no_register_atexit, ossl_init_register_atexit)) {
       return 0;
     }
   } else if (!RUN_ONCE(&register_atexit, ossl_init_register_atexit, 0)) {
     return 0;
   }
-
-  if (!RUN_ONCE(&load_crypto_nodelete, ossl_init_load_crypto_nodelete, 0)) {
+  if (!err_load_crypto_strings_int(commentsOnError)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to load crypto error strings.\n";
+    }
     return 0;
   }
-
-  if (!RUN_ONCE(&load_crypto_strings, ossl_init_load_crypto_strings, commentsOnError)) {
-    return 0;
-  }
+  std::cout << "DEBUG: about to load ciphers. " << std::endl;
   if (!RUN_ONCE(&add_all_ciphers, ossl_init_add_all_ciphers, commentsOnError)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to add all ciphers.\n";
+    }
+    std::cout << "DEBUG: failed to add all ciphers!!!!!\n";
     return 0;
   }
-
-    if ((opts & OPENSSL_INIT_NO_ADD_ALL_DIGESTS)
-            && !RUN_ONCE_ALT(&add_all_digests, ossl_init_no_add_all_digests,
-                             ossl_init_add_all_digests))
-        return 0;
-
-    if ((opts & OPENSSL_INIT_ADD_ALL_DIGESTS)
-            && !RUN_ONCE(&add_all_digests, ossl_init_add_all_digests, 0))
-        return 0;
-
-    if ((opts & OPENSSL_INIT_NO_ADD_ALL_MACS)
-            && !RUN_ONCE_ALT(&add_all_macs, ossl_init_no_add_all_macs,
-                             ossl_init_add_all_macs))
-        return 0;
-
-    if ((opts & OPENSSL_INIT_ADD_ALL_MACS)
-            && !RUN_ONCE(&add_all_macs, ossl_init_add_all_macs, 0))
-        return 0;
-
-    if ((opts & OPENSSL_INIT_NO_LOAD_CONFIG)
-            && !RUN_ONCE_ALT(&config, ossl_init_no_config, ossl_init_config))
-        return 0;
-
-    if (opts & OPENSSL_INIT_LOAD_CONFIG) {
-        int ret;
-        CRYPTO_THREAD_write_lock(init_lock);
-        conf_settings = settings;
-        ret = CRYPTO_THREAD_run_once(&config, ossl_init_config_ossl_void, commentsOnError) ? ossl_init_config_ossl_ret_ : 0;
-        conf_settings = NULL;
-        CRYPTO_THREAD_unlock(init_lock);
-        if (ret <= 0)
-            return 0;
+  std::cout << "DEBUG: Ciphers loaded. " << std::endl;
+  if (!RUN_ONCE(&add_all_digests, ossl_init_add_all_digests, commentsOnError)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to add all digests.\n";
     }
-
-    if ((opts & OPENSSL_INIT_ASYNC)
-            && !RUN_ONCE(&async, ossl_init_async, 0))
-        return 0;
-
-#ifndef OPENSSL_NO_ENGINE
-    if ((opts & OPENSSL_INIT_ENGINE_OPENSSL)
-            && !RUN_ONCE(&engine_openssl, ossl_init_engine_openssl, 0))
-        return 0;
-# ifndef OPENSSL_NO_RDRAND
-    if ((opts & OPENSSL_INIT_ENGINE_RDRAND)
-            && !RUN_ONCE(&engine_rdrand, ossl_init_engine_rdrand, 0))
-        return 0;
-# endif
-    if ((opts & OPENSSL_INIT_ENGINE_DYNAMIC)
-            && !RUN_ONCE(&engine_dynamic, ossl_init_engine_dynamic, 0))
-        return 0;
-# ifndef OPENSSL_NO_STATIC_ENGINE
-#  if defined(OPENSSL_SYS_WIN32) && !defined(OPENSSL_NO_CAPIENG)
-    if ((opts & OPENSSL_INIT_ENGINE_CAPI)
-            && !RUN_ONCE(&engine_capi, ossl_init_engine_capi))
-        return 0;
-#  endif
-# endif
-    if (opts & (OPENSSL_INIT_ENGINE_ALL_BUILTIN
-                | OPENSSL_INIT_ENGINE_OPENSSL
-                | OPENSSL_INIT_ENGINE_AFALG)) {
-        ENGINE_register_all_complete();
+    return 0;
+  }
+  if (!RUN_ONCE(&add_all_macs, ossl_init_add_all_macs, 0)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to add all macs.\n";
     }
-#endif
+    return 0;
+  }
+  std::cout << "DEBUG: about to init config. " << std::endl;
+  conf_settings = settings;
+  if (ossl_init_config(commentsOnError) <= 0) {
+    conf_settings = NULL;
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to initialize configuration.\n";
+    }
+    return 0;
+  }
+  conf_settings = NULL;
+  //if (!async_init()) {
+  //  if (commentsOnError != 0) {
+  //    *commentsOnError << "Failed to initialize async.\n";
+  //  }
+  //  return 0;
+  //}
 
-#ifndef OPENSSL_NO_COMP
-    if ((opts & OPENSSL_INIT_ZLIB)
-            && !RUN_ONCE(&zlib, ossl_init_zlib, 0))
-        return 0;
-#endif
+  if (!RUN_ONCE(&engine_openssl, ossl_init_engine_openssl, commentsOnError)) {
+    return 0;
+  }
+  if (!RUN_ONCE(&engine_rdrand, ossl_init_engine_rdrand, commentsOnError)) {
+    return 0;
+  }
+  if (!RUN_ONCE(&engine_dynamic, ossl_init_engine_dynamic, commentsOnError)) {
+    return 0;
+  }
+  ENGINE_register_all_complete();
+  std::cout << "DEBUG: about to no comp. " << std::endl;
+  if (!RUN_ONCE(&zlib, ossl_init_zlib, commentsOnError)) {
+    return 0;
+  }
+  std::cout << "DEBUG: no comp done!!!!. " << std::endl;
   if (commentsOnError != 0) {
     *commentsOnError << "DEBUG: crypto initialization went till the end.\n";
   }
-    return 1;
+  return 1;
 }
 
 int OPENSSL_atexit(void (*handler)(void))

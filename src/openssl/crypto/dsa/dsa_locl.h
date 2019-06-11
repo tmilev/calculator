@@ -30,7 +30,7 @@ struct dsa_st {
     const DSA_METHOD *meth;
     /* functional reference if 'meth' is ENGINE-provided */
     ENGINE *engine;
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
 };
 
 struct DSA_SIG_st {

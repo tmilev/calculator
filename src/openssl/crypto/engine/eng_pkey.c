@@ -60,13 +60,10 @@ EVP_PKEY *ENGINE_load_private_key(ENGINE *e, const char *key_id,
                   ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
-    CRYPTO_THREAD_write_lock(global_engine_lock);
     if (e->funct_ref == 0) {
-        CRYPTO_THREAD_unlock(global_engine_lock);
         ENGINEerr(ENGINE_F_ENGINE_LOAD_PRIVATE_KEY, ENGINE_R_NOT_INITIALISED);
         return 0;
     }
-    CRYPTO_THREAD_unlock(global_engine_lock);
     if (!e->load_privkey) {
         ENGINEerr(ENGINE_F_ENGINE_LOAD_PRIVATE_KEY,
                   ENGINE_R_NO_LOAD_FUNCTION);

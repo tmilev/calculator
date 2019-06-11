@@ -56,11 +56,7 @@ int engine_unlocked_finish(ENGINE *e, int unlock_for_handlers)
     e->funct_ref--;
     engine_ref_debug(e, 1, -1);
     if ((e->funct_ref == 0) && e->finish) {
-        if (unlock_for_handlers)
-            CRYPTO_THREAD_unlock(global_engine_lock);
         to_return = e->finish(e);
-        if (unlock_for_handlers)
-            CRYPTO_THREAD_write_lock(global_engine_lock);
         if (!to_return)
             return 0;
     }

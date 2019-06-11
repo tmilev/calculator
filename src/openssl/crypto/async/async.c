@@ -294,10 +294,9 @@ static void async_empty_pool(async_pool *pool)
     } while (job);
 }
 
-int async_init(void)
-{
-    if (!CRYPTO_THREAD_init_local(&ctxkey, NULL))
-        return 0;
+int async_init(void) {
+  if (!CRYPTO_THREAD_init_local(&ctxkey, NULL))
+    return 0;
 
     if (!CRYPTO_THREAD_init_local(&poolkey, NULL)) {
         CRYPTO_THREAD_cleanup_local(&ctxkey);

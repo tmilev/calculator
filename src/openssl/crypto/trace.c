@@ -295,17 +295,6 @@ static int set_trace_data(int category, int type, BIO **channel,
 }
 #endif
 
-int ossl_trace_init(void)
-{
-#ifndef OPENSSL_NO_TRACE
-    trace_lock = CRYPTO_THREAD_lock_new();
-    if (trace_lock == NULL)
-        return 0;
-#endif
-
-    return 1;
-}
-
 void ossl_trace_cleanup(void)
 {
 #ifndef OPENSSL_NO_TRACE

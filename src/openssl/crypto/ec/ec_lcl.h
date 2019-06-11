@@ -287,7 +287,7 @@ struct ec_key_st {
     CRYPTO_REF_COUNT references;
     int flags;
     CRYPTO_EX_DATA ex_data;
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
 };
 
 struct ec_point_st {

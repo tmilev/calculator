@@ -84,17 +84,9 @@ BIO *BIO_new(const BIO_METHOD *method)
     if (!CRYPTO_new_ex_data(CRYPTO_EX_INDEX_BIO, bio, &bio->ex_data))
         goto err;
 
-    bio->lock = CRYPTO_THREAD_lock_new();
-    if (bio->lock == NULL) {
-        BIOerr(BIO_F_BIO_NEW, ERR_R_MALLOC_FAILURE);
-        CRYPTO_free_ex_data(CRYPTO_EX_INDEX_BIO, bio, &bio->ex_data);
-        goto err;
-    }
-
     if (method->create != NULL && !method->create(bio)) {
         BIOerr(BIO_F_BIO_NEW, ERR_R_INIT_FAIL);
         CRYPTO_free_ex_data(CRYPTO_EX_INDEX_BIO, bio, &bio->ex_data);
-        CRYPTO_THREAD_lock_free(bio->lock);
         goto err;
     }
     if (method->create == NULL)
@@ -114,7 +106,7 @@ int BIO_free(BIO *a)
     if (a == NULL)
         return 0;
 
-    if (CRYPTO_DOWN_REF(&a->references, &ret, a->lock) <= 0)
+    if (CRYPTO_DOWN_REF(&a->references, &ret, 0) <= 0)
         return 0;
 
     REF_PRINT_COUNT("BIO", a);
@@ -133,7 +125,6 @@ int BIO_free(BIO *a)
 
     CRYPTO_free_ex_data(CRYPTO_EX_INDEX_BIO, a, &a->ex_data);
 
-    CRYPTO_THREAD_lock_free(a->lock);
 
     OPENSSL_free(a);
 
@@ -179,7 +170,7 @@ int BIO_up_ref(BIO *a)
 {
     int i;
 
-    if (CRYPTO_UP_REF(&a->references, &i, a->lock) <= 0)
+    if (CRYPTO_UP_REF(&a->references, &i, 0) <= 0)
         return 0;
 
     REF_PRINT_COUNT("BIO", a);
@@ -773,13 +764,6 @@ void bio_free_ex_data(BIO *bio)
     CRYPTO_free_ex_data(CRYPTO_EX_INDEX_BIO, bio, &bio->ex_data);
 }
 
-void bio_cleanup(void)
-{
-#ifndef OPENSSL_NO_SOCK
-    bio_sock_cleanup_int();
-    CRYPTO_THREAD_lock_free(bio_lookup_lock);
-    bio_lookup_lock = NULL;
-#endif
-    CRYPTO_THREAD_lock_free(bio_type_lock);
-    bio_type_lock = NULL;
+void bio_cleanup(void) {
+  bio_sock_cleanup_int();
 }

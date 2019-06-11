@@ -19,7 +19,6 @@
 
 #define ENGINESDIR "."
 
-extern CRYPTO_RWLOCK *global_engine_lock;
 
 /*
  * This prints the engine's pointer address (truncated to unsigned int),

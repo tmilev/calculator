@@ -346,7 +346,7 @@ int BN_from_montgomery(BIGNUM *r, const BIGNUM *a, BN_MONT_CTX *mont,
 void BN_MONT_CTX_free(BN_MONT_CTX *mont);
 int BN_MONT_CTX_set(BN_MONT_CTX *mont, const BIGNUM *mod, BN_CTX *ctx);
 BN_MONT_CTX *BN_MONT_CTX_copy(BN_MONT_CTX *to, BN_MONT_CTX *from);
-BN_MONT_CTX *BN_MONT_CTX_set_locked(BN_MONT_CTX **pmont, CRYPTO_RWLOCK *lock,
+BN_MONT_CTX *BN_MONT_CTX_set_locked(BN_MONT_CTX **pmont, CRYPTO_RWLOCK *unused,
                                     const BIGNUM *mod, BN_CTX *ctx);
 
 /* BN_BLINDING flags */
@@ -364,8 +364,6 @@ int BN_BLINDING_invert_ex(BIGNUM *n, const BIGNUM *r, BN_BLINDING *b,
 
 int BN_BLINDING_is_current_thread(BN_BLINDING *b);
 void BN_BLINDING_set_current_thread(BN_BLINDING *b);
-int BN_BLINDING_lock(BN_BLINDING *b);
-int BN_BLINDING_unlock(BN_BLINDING *b);
 
 unsigned long BN_BLINDING_get_flags(const BN_BLINDING *);
 void BN_BLINDING_set_flags(BN_BLINDING *, unsigned long);

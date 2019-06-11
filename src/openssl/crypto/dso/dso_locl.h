@@ -61,7 +61,7 @@ struct dso_st {
      * loaded.
      */
     char *loaded_filename;
-    CRYPTO_RWLOCK *lock;
+    CRYPTO_RWLOCK *unused;
 };
 
 struct dso_meth_st {

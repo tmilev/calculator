@@ -58,11 +58,11 @@ typedef struct {
 
 typedef void CRYPTO_RWLOCK;
 
-CRYPTO_RWLOCK *CRYPTO_THREAD_lock_new(void);
-int CRYPTO_THREAD_read_lock(CRYPTO_RWLOCK *lock);
-int CRYPTO_THREAD_write_lock(CRYPTO_RWLOCK *lock);
-int CRYPTO_THREAD_unlock(CRYPTO_RWLOCK *lock);
-void CRYPTO_THREAD_lock_free(CRYPTO_RWLOCK *lock);
+//CRYPTO_RWLOCK *CRYPTO_THREAD_lock_new(void);
+//int CRYPTO_THREAD_read_lock(CRYPTO_RWLOCK *lock);
+//int CRYPTO_THREAD_write_lock(CRYPTO_RWLOCK *lock);
+//int CRYPTO_THREAD_unlock(CRYPTO_RWLOCK *lock);
+//void CRYPTO_THREAD_lock_free(CRYPTO_RWLOCK *lock);
 
 int CRYPTO_atomic_add(int *val, int amount, int *ret, CRYPTO_RWLOCK *lock);
 
@@ -393,7 +393,7 @@ int CRYPTO_memcmp(const void * in_a, const void * in_b, size_t len);
 
 /* Library initialisation functions */
 void OPENSSL_cleanup(void);
-int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings, std::stringstream *commentsOnError);
+int OPENSSL_init_crypto(uint64_t opts, const ossl_init_settings_st *settings, std::stringstream *commentsOnError);
 int OPENSSL_atexit(void (*handler)(void));
 void OPENSSL_thread_stop(void);
 

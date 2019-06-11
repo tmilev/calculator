@@ -290,7 +290,7 @@ public:
   void ReapChildren();
   static void Signal_SIGCHLD_handler(int s);
   bool initPrepareWebServerALL();
-  void initSignals();
+  void initializeSignals();
   bool initBindToPorts();
   void initPortsITry();
   void initListeningSockets();

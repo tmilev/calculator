@@ -28,14 +28,18 @@ struct SignalsInfrastructure {
   sigset_t oldSignals;
   bool flagSignalsAreBlocked;
   bool flagSignalsAreStored;
-  SignalsInfrastructure() {
-    this->flagSignalsAreBlocked = false;
-    this->flagSignalsAreStored = false;
-  }
+  bool flagInitialized;
+  SignalsInfrastructure();
   void blockSignals();
   void unblockSignals();
-  void initSignals();
+  void initializeSignals();
 };
+
+SignalsInfrastructure::SignalsInfrastructure() {
+  this->flagSignalsAreBlocked = false;
+  this->flagSignalsAreStored = false;
+  this->flagInitialized = false;
+}
 
 SignalsInfrastructure theSignals;
 //sigset_t SignalSetToBlockWhileHandlingSIGCHLD;
@@ -154,11 +158,9 @@ void WebServer::initSSL() {
     logServer << logger::red << "SSL is DISABLED." << logger::endL;
     return;
   }
-#ifdef MACRO_use_open_ssl
+  logServer << "DEBUG: got to here!" << logger::endL;
   //////////////////////////////////////////////////////////////////////////
   this->theSSLdata.initSSLserver();
-
-#endif // MACRO_use_open_ssl
 }
 
 #ifdef MACRO_use_open_ssl
@@ -4084,7 +4086,7 @@ bool WebServer::initPrepareWebServerALL() {
   if (!this->initBindToPorts()) {
     return false;
   }
-  this->initSignals();
+  this->initializeSignals();
   this->initListeningSockets();
   return true;
 }
@@ -4156,12 +4158,15 @@ bool WebServer::initBindToPorts() {
   return true;
 }
 
-void WebServer::initSignals() {
-  theSignals.initSignals();
+void WebServer::initializeSignals() {
+  theSignals.initializeSignals();
 }
 
-void SignalsInfrastructure::initSignals() {
-  MacroRegisterFunctionWithName("SignalsInfrastructure::initSignals");
+void SignalsInfrastructure::initializeSignals() {
+  MacroRegisterFunctionWithName("SignalsInfrastructure::initializeSignals");
+  if (this->flagInitialized) {
+    return;
+  }
   sigfillset(&this->allSignals);
   if (sigemptyset(&this->SignalSEGV.sa_mask) == - 1) {
     crash << "Failed to initialize SignalSEGV mask. Crashing to let you know. " << crash;
@@ -4183,7 +4188,7 @@ void SignalsInfrastructure::initSignals() {
     crash << "Failed to register SIGFPE handler (fatal arithmetic error). Crashing to let you know. " << crash;
   }
   ////////////////////
-  //ignore interrupts
+  //ignore interruptsflagSignalsInitialized
   //if (sigemptyset(&SignalINT.sa_mask) == - 1)
   //  crash << "Failed to initialize SignalINT mask. Crashing to let you know. " << crash;
   //SignalINT.sa_sigaction = 0;
@@ -4222,6 +4227,7 @@ void SignalsInfrastructure::initSignals() {
 //  sa.sa_flags = SA_RESTART;
 //  if (sigaction(SIGCHLD, &sa, NULL) == - 1)
 //    logWorker << "sigaction returned - 1" << logger::endL;
+  this->flagInitialized = true;
 }
 
 extern void MonitorWebServer();
@@ -4277,7 +4283,7 @@ int WebServer::Run() {
       return 0;
     }
   }
-  this->initSignals();
+  this->initializeSignals();
   // This object will delete theParser when out of scope:
   this->theCalculator.theObjectPointer = &theParser;
   this->theCalculator.RenewObject();
@@ -5331,7 +5337,7 @@ int WebServer::mainApache() {
   theGlobalVariables.flagServerForkedIntoWorker = true;
   theGlobalVariables.flagComputationStarted = true;
   theGlobalVariables.MaxComputationMilliseconds = 30000; //<-30 second computation time restriction!
-  theWebServer.initSignals();
+  theWebServer.initializeSignals();
   CreateTimerThread();
   theWebServer.CreateNewActiveWorker();
   WebWorker& theWorker = theWebServer.GetActiveWorker();

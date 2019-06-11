@@ -49,12 +49,6 @@ DH *DH_new_method(ENGINE *engine)
     }
 
     ret->references = 1;
-    ret->lock = CRYPTO_THREAD_lock_new();
-    if (ret->lock == NULL) {
-        DHerr(DH_F_DH_NEW_METHOD, ERR_R_MALLOC_FAILURE);
-        OPENSSL_free(ret);
-        return NULL;
-    }
 
     ret->meth = DH_get_default_method();
 #ifndef OPENSSL_NO_ENGINE
@@ -100,7 +94,7 @@ void DH_free(DH *r)
     if (r == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&r->references, &i, r->lock);
+    CRYPTO_DOWN_REF(&r->references, &i, 0);
     REF_PRINT_COUNT("DH", r);
     if (i > 0)
         return;
@@ -114,7 +108,6 @@ void DH_free(DH *r)
 
     CRYPTO_free_ex_data(CRYPTO_EX_INDEX_DH, r, &r->ex_data);
 
-    CRYPTO_THREAD_lock_free(r->lock);
 
     BN_clear_free(r->p);
     BN_clear_free(r->g);
@@ -131,7 +124,7 @@ int DH_up_ref(DH *r)
 {
     int i;
 
-    if (CRYPTO_UP_REF(&r->references, &i, r->lock) <= 0)
+    if (CRYPTO_UP_REF(&r->references, &i, 0) <= 0)
         return 0;
 
     REF_PRINT_COUNT("DH", r);

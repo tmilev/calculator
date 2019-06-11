@@ -226,8 +226,7 @@ static int dsa_sign_setup(DSA *dsa, BN_CTX *ctx_in,
     BN_set_flags(l, BN_FLG_CONSTTIME);
 
     if (dsa->flags & DSA_FLAG_CACHE_MONT_P) {
-        if (!BN_MONT_CTX_set_locked(&dsa->method_mont_p,
-                                    dsa->lock, dsa->p, ctx))
+        if (!BN_MONT_CTX_set_locked(&dsa->method_mont_p, 0, dsa->p, ctx))
             goto err;
     }
 
@@ -352,8 +351,7 @@ static int dsa_do_verify(const unsigned char *dgst, int dgst_len,
         goto err;
 
     if (dsa->flags & DSA_FLAG_CACHE_MONT_P) {
-        mont = BN_MONT_CTX_set_locked(&dsa->method_mont_p,
-                                      dsa->lock, dsa->p, ctx);
+        mont = BN_MONT_CTX_set_locked(&dsa->method_mont_p, 0, dsa->p, ctx);
         if (!mont)
             goto err;
     }

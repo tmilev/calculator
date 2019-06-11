@@ -23,6 +23,8 @@
 #include "../../include/internal/constant_time_locl.h"
 #include "../../e_os.h"
 
+int load_crypto_strings_inited = 0;
+
 static int err_load_strings(const ERR_STRING_DATA *str);
 
 void ERR_STATE_free(err_state_st *s);
@@ -183,9 +185,7 @@ static ERR_STRING_DATA *int_err_get_item(const ERR_STRING_DATA *d)
 {
     ERR_STRING_DATA *p = NULL;
 
-    CRYPTO_THREAD_read_lock(err_string_lock);
     p = lh_ERR_STRING_DATA_retrieve(int_error_hash, d);
-    CRYPTO_THREAD_unlock(err_string_lock);
 
     return p;
 }
@@ -216,9 +216,7 @@ static void build_SYS_str_reasons(void)
     int i;
     int saveerrno = get_last_sys_error();
 
-    CRYPTO_THREAD_write_lock(err_string_lock);
     if (!init) {
-        CRYPTO_THREAD_unlock(err_string_lock);
         return;
     }
 
@@ -398,6 +396,9 @@ int ERR_unload_strings(int lib, ERR_STRING_DATA *str)
 
 void err_free_strings_int(void)
 {
+  if (load_crypto_strings_inited) {
+    load_crypto_strings_inited = 0;
+  }
     if (!RUN_ONCE(&err_string_init, do_err_strings_init, 0))
         return;
 }
@@ -660,20 +661,6 @@ int err_shelve_state(void **state)
 {
     int saveerrno = get_last_sys_error();
 
-    /*
-     * Note, at present our only caller is OPENSSL_init_crypto(), indirectly
-     * via ossl_init_load_crypto_nodelete(), by which point the requested
-     * "base" initialization has already been performed, so the below call is a
-     * NOOP, that re-enters OPENSSL_init_crypto() only to quickly return.
-     *
-     * If are no other valid callers of this function, the call below can be
-     * removed, avoiding the re-entry into OPENSSL_init_crypto().  If there are
-     * potential uses that are not from inside OPENSSL_init_crypto(), then this
-     * call is needed, but some care is required to make sure that the re-entry
-     * remains a NOOP.
-     */
-    if (!OPENSSL_init_crypto(OPENSSL_INIT_BASE_ONLY, NULL, 0))
-        return 0;
 
     if (!RUN_ONCE(&err_init, err_do_init, 0))
         return 0;

@@ -457,6 +457,17 @@ struct ssl3_enc_method;
 struct ssl_method_st {
   std::string name;
   int version;
+  ssl_method_st* initializeCommon(
+    const std::string& inputName,
+    int inputVersion,
+    unsigned inputFlags,
+    unsigned inputMask,
+    const std::string& acceptName,
+    int (s_accept)(SSL *s, std::stringstream* commentsOnError),
+    const std::string& connectName,
+    int (s_connect)(SSL *s, std::stringstream* commentsOnError),
+    const ssl3_enc_method* enc_data
+  );
   ssl_method_st* initializeTLS(
     const std::string& inputName,
     int inputVersion,
@@ -468,7 +479,19 @@ struct ssl_method_st {
     int (s_connect)(SSL *s, std::stringstream* commentsOnError),
     const ssl3_enc_method* enc_data
   );
+  ssl_method_st* initializeSSL(
+    const std::string& inputName,
+    int inputVersion,
+    unsigned inputFlags,
+    unsigned inputMask,
+    const std::string& acceptName,
+    int (s_accept)(SSL *s, std::stringstream* commentsOnError),
+    const std::string& connectName,
+    int (s_connect)(SSL *s, std::stringstream* commentsOnError),
+    const ssl3_enc_method* enc_data
+  );
   void initializeTLSCommon();
+  void initializeSSLCommon();
   unsigned flags;
   unsigned long mask;
   int (*ssl_new) (SSL *s, std::stringstream* commentsOnError);

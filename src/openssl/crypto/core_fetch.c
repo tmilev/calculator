@@ -25,7 +25,7 @@ struct construct_data_st {
     void *mcm_data;
 };
 
-static int ossl_method_construct_this(ossl_provider_st* provider, void *cbdata)
+static int ossl_method_construct_this(ossl_provider_st* provider, void *cbdata, std::stringstream* commentsOnError)
 {
     struct construct_data_st *data = (construct_data_st *) cbdata;
     int no_store = 0;    /* Assume caching is ok */
@@ -59,12 +59,12 @@ static int ossl_method_construct_this(ossl_provider_st* provider, void *cbdata)
              */
             data->mcm->put(data->libctx, NULL,
                            thismap->property_definition,
-                           method, data->mcm_data);
+                           method, data->mcm_data, commentsOnError);
         }
 
         data->mcm->put(data->libctx, data->store,
                        thismap->property_definition,
-                       method, data->mcm_data);
+                       method, data->mcm_data, commentsOnError);
 
         /* refcnt-- because we're dropping the reference */
         data->mcm->destruct(method, data->mcm_data);

@@ -120,7 +120,7 @@ static void *get_method_from_store(
 
 static int put_method_in_store(openssl_ctx_st *libctx, void *store,
                                const char *propdef,
-                               void *method, void *data)
+                               void *method, void *data, std::stringstream* commentsOnError)
 {
     struct method_data_st *methdata = (method_data_st *) data;
     int nid = methdata->nid_method(method);
@@ -134,7 +134,7 @@ static int put_method_in_store(openssl_ctx_st *libctx, void *store,
 
     if (methdata->refcnt_up_method(method)
         && ossl_method_store_add((ossl_method_store_st*) store, nid, propdef, method,
-                                 methdata->destruct_method))
+                                 methdata->destruct_method, commentsOnError))
         return 1;
     return 0;
 }

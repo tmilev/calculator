@@ -315,7 +315,7 @@ int ENGINE_add(ENGINE *e);
 /* Remove an existing "ENGINE" type from the array. */
 int ENGINE_remove(ENGINE *e);
 /* Retrieve an engine from the list by its unique "id" value. */
-ENGINE *ENGINE_by_id(const char *id);
+ENGINE *ENGINE_by_id(const char *id, std::stringstream *commentsOnError);
 
 #if !OPENSSL_API_1_1_0
 # define ENGINE_load_openssl() \
@@ -459,7 +459,7 @@ int ENGINE_ctrl_cmd_string(ENGINE *e, const char *cmd_name, const char *arg,
  * These are also here so that the ENGINE structure doesn't have to be
  * exposed and break binary compatibility!
  */
-ENGINE *ENGINE_new(void);
+ENGINE *ENGINE_new(std::stringstream *commentsOnError);
 int ENGINE_free(ENGINE *e);
 int ENGINE_up_ref(ENGINE *e);
 int ENGINE_set_id(ENGINE *e, const char *id);

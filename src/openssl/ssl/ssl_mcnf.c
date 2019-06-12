@@ -57,9 +57,9 @@ static int ssl_do_config(SSL *s, SSL_CTX *ctx, const char *name, int system)
         meth = ctx->method;
         SSL_CONF_CTX_set_ssl_ctx(cctx, ctx);
     }
-    if (meth->ssl_accept != ssl_undefined_function)
+    if (meth->sslAccept.theFunction != ssl_undefined_function)
         flags |= SSL_CONF_FLAG_SERVER;
-    if (meth->ssl_connect != ssl_undefined_function)
+    if (meth->sslConnect.theFunction != ssl_undefined_function)
         flags |= SSL_CONF_FLAG_CLIENT;
     SSL_CONF_CTX_set_flags(cctx, flags);
     for (i = 0; i < cmd_count; i++) {

@@ -124,9 +124,8 @@ static int bind_helper(ENGINE *e)
     return 1;
 }
 
-static ENGINE *engine_openssl(void)
-{
-    ENGINE *ret = ENGINE_new();
+static ENGINE *engine_openssl(std::stringstream* commentsOnError) {
+    ENGINE *ret = ENGINE_new(commentsOnError);
     if (ret == NULL)
         return NULL;
     if (!bind_helper(ret)) {
@@ -136,9 +135,9 @@ static ENGINE *engine_openssl(void)
     return ret;
 }
 
-void engine_load_openssl_int(void)
+void engine_load_openssl_int(std::stringstream* commentsOnError)
 {
-    ENGINE *toadd = engine_openssl();
+    ENGINE *toadd = engine_openssl(commentsOnError);
     if (!toadd)
         return;
     ENGINE_add(toadd);

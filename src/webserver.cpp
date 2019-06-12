@@ -158,7 +158,6 @@ void WebServer::initSSL() {
     logServer << logger::red << "SSL is DISABLED." << logger::endL;
     return;
   }
-  logServer << "DEBUG: got to here!" << logger::endL;
   //////////////////////////////////////////////////////////////////////////
   this->theSSLdata.initSSLserver();
 }

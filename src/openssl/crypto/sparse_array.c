@@ -54,20 +54,27 @@
                                  / OPENSSL_SA_BLOCK_BITS)
 
 struct sparse_array_st {
-    int levels;
-    ossl_uintmax_t top;
-    size_t nelem;
-    void **nodes;
+  std::string name;
+  int levelS;
+  ossl_uintmax_t top;
+  size_t nelem;
+  void **nodes;
+  std::string ToStringSummary() const;
 };
 
-OPENSSL_SA *OPENSSL_SA_new()
-{
-    OPENSSL_SA *res = (OPENSSL_SA *) OPENSSL_zalloc(sizeof(*res));
-
-    return res;
+std::string sparse_array_st::ToStringSummary() const {
+  std::stringstream out;
+  out << "Array: " << name << ", levels: " << this->levelS;
+  return out.str();
 }
 
-static void sa_doall(const OPENSSL_SA *sa, void (*node)(void **),
+sparse_array_st *OPENSSL_SA_new(const std::string& name) {
+  OPENSSL_SA *res = (OPENSSL_SA *) OPENSSL_zalloc(sizeof(*res));
+  res->name = name;
+  return res;
+}
+
+static void sa_doall(const sparse_array_st *sa, void (*node)(void **),
                      void (*leaf)(ossl_uintmax_t, void *, void *), void *arg)
 {
     int i[SA_BLOCK_MAX_LEVELS];
@@ -90,7 +97,7 @@ static void sa_doall(const OPENSSL_SA *sa, void (*node)(void **),
             i[l] = n + 1;
             if (p != NULL && p[n] != NULL) {
                 idx = (idx & ~SA_BLOCK_MASK) | n;
-                if (l < sa->levels - 1) {
+                if (l < sa->levelS - 1) {
                     i[++l] = 0;
                     nodes[l] = p[n];
                     idx <<= OPENSSL_SA_BLOCK_BITS;
@@ -157,7 +164,7 @@ size_t OPENSSL_SA_num(const OPENSSL_SA *sa)
     return sa == NULL ? 0 : sa->nelem;
 }
 
-void *OPENSSL_SA_get(const OPENSSL_SA *sa, ossl_uintmax_t n, std::stringstream* commentsOnError) {
+void *OPENSSL_SA_get(const sparse_array_st *sa, ossl_uintmax_t n, std::stringstream* commentsOnError) {
   int level;
   if (sa == NULL) {
     if (commentsOnError != 0) {
@@ -172,11 +179,11 @@ void *OPENSSL_SA_get(const OPENSSL_SA *sa, ossl_uintmax_t n, std::stringstream* 
     return NULL;
   }
   if (commentsOnError != 0) {
-    *commentsOnError << "DEBUG: sa->levels is: " << sa->levels << ".\n";
+    *commentsOnError << "DEBUG: sa->levels is: " << sa->levelS << ".\n";
   }
   void **p, *r = NULL;
   p = sa->nodes;
-  for (level = sa->levels - 1; p != NULL && level > 0; level--) {
+  for (level = sa->levelS - 1; p != NULL && level > 0; level--) {
     *commentsOnError << "DEBUG: pointer p is: " << (long long) p << ".\n";
     int indexNonMasked = (n >> (OPENSSL_SA_BLOCK_BITS * level));
     int index = indexNonMasked & SA_BLOCK_MASK;
@@ -193,20 +200,25 @@ static ossl_inline void **alloc_node(void)
     return (void **) OPENSSL_zalloc(SA_BLOCK_MAX * sizeof(void *));
 }
 
-int OPENSSL_SA_set(OPENSSL_SA *sa, ossl_uintmax_t posn, void *val)
-{
-    int i, level = 1;
-    ossl_uintmax_t n = posn;
-    void **p;
-
-    if (sa == NULL)
-        return 0;
+int OPENSSL_SA_set(sparse_array_st *sa, ossl_uintmax_t posn, void *val, std::stringstream *commentsOnError) {
+  int i, level = 1;
+  ossl_uintmax_t n = posn;
+  void **p;
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: Setting array: " << sa->name;
+  }
+  if (sa == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Null sparse array cannot be set.\n";
+    }
+    return 0;
+  }
 
     for (level = 1; level < SA_BLOCK_MAX_LEVELS; level++)
         if ((n >>= OPENSSL_SA_BLOCK_BITS) == 0)
             break;
 
-    for (;sa->levels < level; sa->levels++) {
+    for (;sa->levelS < level; sa->levelS ++) {
         p = alloc_node();
         if (p == NULL)
             return 0;
@@ -217,7 +229,7 @@ int OPENSSL_SA_set(OPENSSL_SA *sa, ossl_uintmax_t posn, void *val)
         sa->top = posn;
 
     p = sa->nodes;
-    for (level = sa->levels - 1; level > 0; level--) {
+    for (level = sa->levelS - 1; level > 0; level--) {
         i = (posn >> (OPENSSL_SA_BLOCK_BITS * level)) & SA_BLOCK_MASK;
         if (p[i] == NULL && (p[i] = alloc_node()) == NULL)
             return 0;

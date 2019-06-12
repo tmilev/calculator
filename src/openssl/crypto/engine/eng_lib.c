@@ -16,31 +16,22 @@ CRYPTO_RWLOCK *global_engine_lock;
 
 CRYPTO_ONCE engine_lock_init = CRYPTO_ONCE_STATIC_INIT;
 
-/* The "new"/"free" stuff first */
-
-DEFINE_RUN_ONCE(do_engine_lock_init) {
-  std::cout << "DEBUG: running unexpected piece of code!!!!!!!!!!!!!!!!!!";
-    if (!OPENSSL_init_crypto(0, NULL, 0))
-        return 0;
-    return 1;
-}
-
-ENGINE *ENGINE_new(void)
-{
-    ENGINE *ret;
-
-    if (!RUN_ONCE(&engine_lock_init, do_engine_lock_init, 0)
-        || (ret = (ENGINE *) OPENSSL_zalloc(sizeof(*ret))) == NULL) {
-        ENGINEerr(ENGINE_F_ENGINE_NEW, ERR_R_MALLOC_FAILURE);
-        return NULL;
+ENGINE *ENGINE_new(std::stringstream* commentsOnError) {
+  ENGINE *ret;
+  ret = (ENGINE *) OPENSSL_zalloc(sizeof(*ret));
+  if (ret == NULL) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "New engine failure.\n";
     }
-    ret->struct_ref = 1;
-    engine_ref_debug(ret, 0, 1);
-    if (!CRYPTO_new_ex_data(CRYPTO_EX_INDEX_ENGINE, ret, &ret->ex_data)) {
-        OPENSSL_free(ret);
-        return NULL;
-    }
-    return ret;
+    return NULL;
+  }
+  ret->struct_ref = 1;
+  engine_ref_debug(ret, 0, 1);
+  if (!CRYPTO_new_ex_data(CRYPTO_EX_INDEX_ENGINE, ret, &ret->ex_data)) {
+    OPENSSL_free(ret);
+    return NULL;
+  }
+  return ret;
 }
 
 /*

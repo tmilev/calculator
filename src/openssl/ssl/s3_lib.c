@@ -4495,7 +4495,7 @@ int ssl3_peek(SSL *s, void *buf, size_t len, size_t *readbytes, std::stringstrea
 
 int ssl3_renegotiate(SSL *s, std::stringstream* commentsOnError)
 {
-    if (s->handshake_func == NULL)
+    if (s->handshakeFunction.theFunction == 0)
         return 1;
 
     s->s3->renegotiate = 1;

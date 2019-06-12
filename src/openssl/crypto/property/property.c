@@ -64,8 +64,8 @@ typedef struct {
 
 struct sparse_array_st_ALGORITHM;
 
-static ossl_unused ossl_inline sparse_array_st_ALGORITHM* ossl_sa_ALGORITHM_new(void) {
-  return (sparse_array_st_ALGORITHM*) OPENSSL_SA_new();
+sparse_array_st_ALGORITHM* ossl_sa_ALGORITHM_new(void) {
+  return (sparse_array_st_ALGORITHM*) OPENSSL_SA_new("Algorithm array");
 }
 
 void ossl_sa_ALGORITHM_free(sparse_array_st_ALGORITHM* sa) {
@@ -95,8 +95,8 @@ static ossl_unused ossl_inline void ossl_sa_ALGORITHM_doall_arg(
   OPENSSL_SA_doall_arg((OPENSSL_SA *)sa, (void (*)(ossl_uintmax_t, void *, void *))leaf, arg);
 }
 
-static ossl_unused ossl_inline int ossl_sa_ALGORITHM_set(sparse_array_st_ALGORITHM* sa, ossl_uintmax_t n, ALGORITHM* val) {
-  return OPENSSL_SA_set((OPENSSL_SA *)sa, n, (void *)val);
+int ossl_sa_ALGORITHM_set(sparse_array_st_ALGORITHM* sa, ossl_uintmax_t n, ALGORITHM* val, std::stringstream* commentsOnError) {
+  return OPENSSL_SA_set((OPENSSL_SA *)sa, n, (void *)val, commentsOnError);
 }
 
 static void ossl_method_cache_flush(ossl_method_store_st *store, int nid);
@@ -193,13 +193,16 @@ ALGORITHM* ossl_method_store_retrieve(ossl_method_store_st *store, int nid, std:
   return (ALGORITHM*) OPENSSL_SA_get((OPENSSL_SA *)store, nid, commentsOnError);
 }
 
-static int ossl_method_store_insert(ossl_method_store_st *store, ALGORITHM *alg) {
-  return ossl_sa_ALGORITHM_set(store->algs, alg->nid, alg);
+int ossl_method_store_insert(ossl_method_store_st *store, ALGORITHM *alg, std::stringstream* commentsOnError) {
+  return ossl_sa_ALGORITHM_set(store->algs, alg->nid, alg, commentsOnError);
 }
 
-int ossl_method_store_add(ossl_method_store_st *store,
+int ossl_method_store_add(
+  ossl_method_store_st *store,
   int nid, const char *properties,
-  void *method, void (*method_destruct)(void *)
+  void *method,
+  void (*method_destruct)(void *),
+  std::stringstream* commentsOnError
 ) {
     ALGORITHM *alg = NULL;
     IMPLEMENTATION *impl;
@@ -237,7 +240,7 @@ int ossl_method_store_add(ossl_method_store_st *store,
                 || (alg->cache = lh_QUERY_new(&query_hash, &query_cmp)) == NULL)
             goto err;
         alg->nid = nid;
-        if (!ossl_method_store_insert(store, alg))
+        if (!ossl_method_store_insert(store, alg, commentsOnError))
             goto err;
     }
 

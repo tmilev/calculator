@@ -237,9 +237,9 @@ static long ssl_ctrl(BIO *b, int cmd, long num, void *ptr)
     case BIO_CTRL_RESET:
         SSL_shutdown(ssl);
 
-        if (ssl->handshake_func == ssl->method->ssl_connect)
+        if (ssl->handshakeFunction == ssl->method->sslConnect)
             SSL_set_connect_state(ssl);
-        else if (ssl->handshake_func == ssl->method->ssl_accept)
+        else if (ssl->handshakeFunction == ssl->method->sslAccept)
             SSL_set_accept_state(ssl);
 
         if (!SSL_clear(ssl)) {

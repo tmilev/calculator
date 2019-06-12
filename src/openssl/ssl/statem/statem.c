@@ -56,7 +56,7 @@ OSSL_HANDSHAKE_STATE SSL_get_state(const SSL *ssl)
     return ssl->statem.hand_state;
 }
 
-int SSL_in_init(const SSL *s)
+int SSL_in_init(const sslData *s)
 {
     return s->statem.in_init;
 }
@@ -198,12 +198,9 @@ void ossl_statem_check_finish_init(SSL *s, int sending) {
     crash << "Null ssl object not allowed. " << crash;
   }
   if (sending == - 1) {
-    //stOutput << "DEBUG: got to here. at finish init!!! ... ";
     if (s->statem.hand_state == TLS_ST_PENDING_EARLY_DATA_END || s->statem.hand_state == TLS_ST_EARLY_DATA) {
-      //stOutput << "DEBUG: got to here at hand_state. ";
       ossl_statem_set_in_init(s, 1);
       if (s->early_data_state == SSL_EARLY_DATA_WRITE_RETRY) {
-        //stOutput << "DEBUG: got to here. pt3 ";
         /*
          * SSL_connect() or SSL_do_handshake() has been called directly.
          * We don't allow any more writing of early data.
@@ -254,6 +251,50 @@ int ossl_statem_connect(SSL *s, std::stringstream* commentsOnError) {
 
 int ossl_statem_accept(SSL *s, std::stringstream* commentsOnError) {
   return s->stateMachine(1, commentsOnError);
+}
+
+bool sslFunction::operator==(const sslFunction& other) const {
+  if (this->theFunction == other.theFunction) {
+    if (this->name != other.name) {
+      crash << "Functions have same pointers but different names." << crash;
+    }
+    return true;
+  }
+  return false;
+}
+
+bool sslFunction::isNull() {
+  return this->theFunction == 0;
+}
+
+sslFunction::sslFunction() {
+  this->theFunction = 0;
+}
+
+void sslFunction::initialize(
+  const std::string& inputName,
+  int (*inputFunction) (SSL *, std::stringstream* commentsOnError)
+) {
+  this->name = inputName;
+  this->theFunction = inputFunction;
+}
+
+int sslFunction::call(SSL *owner, std::stringstream *commentsOnError) {
+  if (this->theFunction == 0) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Attempt to call uninitialized function";
+      if (this->name != "") {
+        *commentsOnError << " " << this->name;
+      }
+      *commentsOnError << ".\n";
+    }
+    return 0;
+  }
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: calling: " << this->name << ".\n";
+    std::cout << "DEBUG: calling: " << this->name << ".\n";
+  }
+  return this->theFunction(owner, commentsOnError);
 }
 
 bool sslData::isFirstHandshake() {

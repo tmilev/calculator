@@ -180,27 +180,14 @@ DEFINE_RUN_ONCE_STATIC(ossl_init_add_all_macs)
     return 1;
 }
 
-static int config_inited = 0;
 static const OPENSSL_INIT_SETTINGS *conf_settings = NULL;
-
-//DEFINE_RUN_ONCE_STATIC(init = ossl_init_config
-static int ossl_init_config(std::stringstream *commentsOnError);
-
-
-
-static int ossl_init_config(std::stringstream* commentsOnError) {
-    std::cout << "DEBUG: OH no this piece of code is being called!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-    int ret = openssl_config_int(conf_settings, commentsOnError);
-    config_inited = 1;
-    return ret;
-}
 
 #ifndef OPENSSL_NO_ENGINE
 static CRYPTO_ONCE engine_openssl = CRYPTO_ONCE_STATIC_INIT;
 DEFINE_RUN_ONCE_STATIC(ossl_init_engine_openssl)
 {
     OSSL_TRACE(INIT, "engine_load_openssl_int()\n");
-    engine_load_openssl_int();
+    engine_load_openssl_int((std::stringstream*) commentsOnError);
     return 1;
 }
 # ifndef OPENSSL_NO_RDRAND
@@ -216,7 +203,7 @@ static CRYPTO_ONCE engine_dynamic = CRYPTO_ONCE_STATIC_INIT;
 DEFINE_RUN_ONCE_STATIC(ossl_init_engine_dynamic)
 {
     OSSL_TRACE(INIT, "engine_load_dynamic_int()\n");
-    engine_load_dynamic_int();
+    engine_load_dynamic_int((std::stringstream*) commentsOnError);
     return 1;
 }
 #endif
@@ -471,15 +458,12 @@ int OPENSSL_init_crypto(uint64_t opts, const ossl_init_settings_st *settings, st
     }
     return 0;
   }
-  std::cout << "DEBUG: about to load ciphers. " << std::endl;
   if (!RUN_ONCE(&add_all_ciphers, ossl_init_add_all_ciphers, commentsOnError)) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to add all ciphers.\n";
     }
-    std::cout << "DEBUG: failed to add all ciphers!!!!!\n";
     return 0;
   }
-  std::cout << "DEBUG: Ciphers loaded. " << std::endl;
   if (!RUN_ONCE(&add_all_digests, ossl_init_add_all_digests, commentsOnError)) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to add all digests.\n";
@@ -492,9 +476,8 @@ int OPENSSL_init_crypto(uint64_t opts, const ossl_init_settings_st *settings, st
     }
     return 0;
   }
-  std::cout << "DEBUG: about to init config. " << std::endl;
   conf_settings = settings;
-  if (ossl_init_config(commentsOnError) <= 0) {
+  if (openssl_config_int(settings, commentsOnError) <= 0) {
     conf_settings = NULL;
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to initialize configuration.\n";
@@ -519,11 +502,9 @@ int OPENSSL_init_crypto(uint64_t opts, const ossl_init_settings_st *settings, st
     return 0;
   }
   ENGINE_register_all_complete(commentsOnError);
-  std::cout << "DEBUG: about to no comp. " << std::endl;
   if (!RUN_ONCE(&zlib, ossl_init_zlib, commentsOnError)) {
     return 0;
   }
-  std::cout << "DEBUG: no comp done!!!!. " << std::endl;
   if (commentsOnError != 0) {
     *commentsOnError << "DEBUG: crypto initialization went till the end.\n";
   }

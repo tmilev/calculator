@@ -1684,15 +1684,17 @@ int SSL_get_async_status(SSL *s, int *status)
 
 int SSL_accept(SSL *s, std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("SSL_accept");
-  if (s->handshake_func == NULL) {
+  if (s->handshakeFunction.isNull()) {
+    std::cout << "DEBUG: ssl_accept not properly initialized yet.\n";
     /* Not properly initialized yet */
     SSL_set_accept_state(s);
   }
+  std::cout << "DEBUG: about to do handshake.\n";
   return SSL_do_handshake(s, commentsOnError);
 }
 
-int SSL_connect(SSL *s, std::stringstream *commentsOnError) {
-  if (s->handshake_func == NULL) {
+int SSL_connect(sslData *s, std::stringstream *commentsOnError) {
+  if (s->handshakeFunction.isNull()) {
     /* Not properly initialized yet */
     SSL_set_connect_state(s);
   }
@@ -1771,7 +1773,7 @@ static int ssl_io_intern(void *vargs)
 
 int ssl_read_internal(SSL *s, void *buf, size_t num, size_t *readbytes)
 {
-    if (s->handshake_func == NULL) {
+    if (s->handshakeFunction.isNull()) {
         SSLerr(SSL_F_SSL_READ_INTERNAL, SSL_R_UNINITIALIZED);
         return -1;
     }
@@ -1904,7 +1906,7 @@ int SSL_get_early_data_status(const SSL *s)
 
 static int ssl_peek_internal(SSL *s, void *buf, size_t num, size_t *readbytes)
 {
-    if (s->handshake_func == NULL) {
+    if (s->handshakeFunction.isNull()) {
         SSLerr(SSL_F_SSL_PEEK_INTERNAL, SSL_R_UNINITIALIZED);
         return -1;
     }
@@ -1963,7 +1965,7 @@ int SSL_peek_ex(SSL *s, void *buf, size_t num, size_t *readbytes)
 }
 
 int ssl_write_internal(SSL *s, const void *buf, size_t num, size_t *written, std::stringstream* commentsOnError) {
-  if (s->handshake_func == NULL) {
+  if (s->handshakeFunction.isNull()) {
     SSLerr(SSL_F_SSL_WRITE_INTERNAL, SSL_R_UNINITIALIZED);
     return - 1;
   }
@@ -2106,7 +2108,7 @@ int SSL_shutdown(SSL *s)
      * (see ssl3_shutdown).
      */
 
-    if (s->handshake_func == NULL) {
+    if (s->handshakeFunction.isNull()) {
         SSLerr(SSL_F_SSL_SHUTDOWN, SSL_R_UNINITIALIZED);
         return -1;
     }
@@ -3538,7 +3540,7 @@ int SSL_set_ssl_method(SSL *s, const SSL_METHOD *meth)
 
     if (s->method != meth) {
         const SSL_METHOD *sm = s->method;
-        int (*hf) (SSL *, std::stringstream* commentsOnError) = s->handshake_func;
+        int (*hf) (SSL *, std::stringstream* commentsOnError) = s->handshakeFunction.theFunction;
 
         if (sm->version == meth->version)
             s->method = meth;
@@ -3548,10 +3550,11 @@ int SSL_set_ssl_method(SSL *s, const SSL_METHOD *meth)
             ret = s->method->ssl_new(s, 0);
         }
 
-        if (hf == sm->ssl_connect)
-            s->handshake_func = meth->ssl_connect;
-        else if (hf == sm->ssl_accept)
-            s->handshake_func = meth->ssl_accept;
+        if (hf == sm->ssl_connect) {
+            s->handshakeFunction.initialize("ssl_connect", meth->ssl_connect);
+        } else if (hf == sm->ssl_accept) {
+            s->handshakeFunction.initialize("ssl_accept", meth->ssl_accept);
+        }
     }
     return ret;
 }
@@ -3646,7 +3649,7 @@ static int ssl_do_handshake_intern(void *vargs)
     args = (struct ssl_async_args *)vargs;
     s = args->s;
 
-    return s->handshake_func(s, 0);
+    return s->handshakeFunction.call(s, 0);
 }
 
 bool SSL_check_initialization(SSL* s) {
@@ -3669,48 +3672,45 @@ int SSL_do_handshake(SSL *s, std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("SSL_do_handshake");
   int ret = 1;
   SSL_check_initialization(s);
-  //stOutput << "DEBUG: running do handshake with: " << s->method->name << ".\n";
-  if (s->handshake_func == NULL) {
+  if (s->handshakeFunction.isNull()) {
     if (commentsOnError != 0) {
       *commentsOnError << "Handshake function not initialized.\n";
     }
     return - 1;
   }
   ossl_statem_check_finish_init(s, - 1);
-  //stOutput << "DEBUG: renegotiate check ... ";
   s->method->ssl_renegotiate_check(s, 0, commentsOnError);
-  //stOutput << "DEBUG: renegotiate check done... ";
   if (SSL_in_init(s) || SSL_in_before(s)) {
-    //if (commentsOnError != 0) {
-    //  stOutput << "DEBUG: ssl initialized previously.\n";
-    //}
-    if ((s->mode & SSL_MODE_ASYNC) && ASYNC_get_current_job() == NULL) {
-      //stOutput << "DEBUG: YES to async.\n";
-      struct ssl_async_args args;
-      args.s = s;
-      ret = ssl_start_async_job(s, &args, ssl_do_handshake_intern);
-    } else {
-      //stOutput << "DEBUG: not RUNNING async.\n";
-      ret = s->handshake_func(s, commentsOnError);
-    }
+    std::cout << "DEBUG: not RUNNING async.\n";
+    ret = s->handshakeFunction.call(s, commentsOnError);
   }
   return ret;
+}
+
+void SSL_set_connect_or_accept_state(SSL *s) {
+  if (s->handshakeFunction.isNull()) {
+    return;
+  }
+  if (s->server) {
+    SSL_set_accept_state(s);
+  } else {
+    SSL_set_connect_state(s);
+  }
 }
 
 void SSL_set_accept_state(SSL *s) {
     s->server = 1;
     s->shutdown = 0;
     ossl_statem_clear(s);
-    s->handshake_func = s->method->ssl_accept;
+    s->handshakeFunction.initialize("ssl_accept", s->method->ssl_accept);
     clear_ciphers(s);
 }
 
-void SSL_set_connect_state(SSL *s)
-{
+void SSL_set_connect_state(SSL *s) {
     s->server = 0;
     s->shutdown = 0;
     ossl_statem_clear(s);
-    s->handshake_func = s->method->ssl_connect;
+    s->handshakeFunction.initialize("ssl_connect", s->method->ssl_connect);
     clear_ciphers(s);
 }
 
@@ -3892,12 +3892,7 @@ SSL* SSL_dup(SSL *s) {
     }
 
     ret->server = s->server;
-    if (s->handshake_func) {
-        if (s->server)
-            SSL_set_accept_state(ret);
-        else
-            SSL_set_connect_state(ret);
-    }
+    SSL_set_connect_or_accept_state(ret);
     ret->shutdown = s->shutdown;
     ret->hit = s->hit;
 

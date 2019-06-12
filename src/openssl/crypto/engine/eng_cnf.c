@@ -75,7 +75,7 @@ static int int_engine_configure(const char *name, const char *value, const CONF 
             soft = 1;
         /* Load a dynamic ENGINE */
         else if (strcmp(ctrlname, "dynamic_path") == 0) {
-            e = ENGINE_by_id("dynamic");
+            e = ENGINE_by_id("dynamic", 0);
             if (!e)
                 goto err;
             if (!ENGINE_ctrl_cmd_string(e, "SO_PATH", ctrlvalue, 0))
@@ -92,7 +92,7 @@ static int int_engine_configure(const char *name, const char *value, const CONF 
              * don't already have one.
              */
             if (!e) {
-                e = ENGINE_by_id(name);
+                e = ENGINE_by_id(name, 0);
                 if (!e && soft) {
                     ERR_clear_error();
                     return 1;

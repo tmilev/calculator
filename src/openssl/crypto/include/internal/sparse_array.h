@@ -16,7 +16,7 @@
 # define SPARSE_ARRAY_OF(type) struct sparse_array_st_ ## type
 
 typedef struct sparse_array_st OPENSSL_SA;
-OPENSSL_SA *OPENSSL_SA_new();
+sparse_array_st *OPENSSL_SA_new(const std::string& name);
 void OPENSSL_SA_free(OPENSSL_SA *sa);
 void OPENSSL_SA_free_leaves(OPENSSL_SA *sa);
 size_t OPENSSL_SA_num(const OPENSSL_SA *sa);
@@ -24,7 +24,7 @@ void OPENSSL_SA_doall(const OPENSSL_SA *sa,
                       void (*leaf)(ossl_uintmax_t, void *));
 void OPENSSL_SA_doall_arg(const OPENSSL_SA *sa,
                           void (*leaf)(ossl_uintmax_t, void *, void *), void *);
-void *OPENSSL_SA_get(const OPENSSL_SA *sa, ossl_uintmax_t n, std::stringstream *commentsOnError);
-int OPENSSL_SA_set(OPENSSL_SA *sa, ossl_uintmax_t n, void *val);
+void *OPENSSL_SA_get(const sparse_array_st *sa, ossl_uintmax_t n, std::stringstream *commentsOnError);
+int OPENSSL_SA_set(sparse_array_st *sa, ossl_uintmax_t n, void *val, std::stringstream* commentsOnError);
 
 #endif

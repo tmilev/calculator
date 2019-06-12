@@ -19,7 +19,7 @@ int dtls1_write_app_data_bytes(
 ) {
   int i;
   if (SSL_in_init(s) && !ossl_statem_get_in_handshake(s)) {
-    i = s->handshake_func(s, 0);
+    i = s->handshakeFunction.call(s, commentsOnFailure);
     if (i < 0) {
       return i;
     }

@@ -130,12 +130,6 @@ static int engine_list_remove(ENGINE *e)
 ENGINE *ENGINE_get_first(std::stringstream* commentsOnError)
 {
     ENGINE *ret;
-
-    if (!RUN_ONCE(&engine_lock_init, do_engine_lock_init, 0)) {
-        ENGINEerr(ENGINE_F_ENGINE_GET_FIRST, ERR_R_MALLOC_FAILURE);
-        return NULL;
-    }
-
     ret = engine_list_head;
     if (ret) {
         ret->struct_ref++;
@@ -144,15 +138,8 @@ ENGINE *ENGINE_get_first(std::stringstream* commentsOnError)
     return ret;
 }
 
-ENGINE *ENGINE_get_last(void)
-{
+ENGINE *ENGINE_get_last(void) {
     ENGINE *ret;
-
-    if (!RUN_ONCE(&engine_lock_init, do_engine_lock_init, 0)) {
-        ENGINEerr(ENGINE_F_ENGINE_GET_LAST, ERR_R_MALLOC_FAILURE);
-        return NULL;
-    }
-
     ret = engine_list_tail;
     if (ret) {
         ret->struct_ref++;
@@ -262,16 +249,12 @@ static void engine_cpy(ENGINE *dest, const ENGINE *src)
     dest->flags = src->flags;
 }
 
-ENGINE *ENGINE_by_id(const char *id)
+ENGINE *ENGINE_by_id(const char *id, std::stringstream* commentsOnError)
 {
     ENGINE *iterator;
     char *load_dir = NULL;
     if (id == NULL) {
         ENGINEerr(ENGINE_F_ENGINE_BY_ID, ERR_R_PASSED_NULL_PARAMETER);
-        return NULL;
-    }
-    if (!RUN_ONCE(&engine_lock_init, do_engine_lock_init, 0)) {
-        ENGINEerr(ENGINE_F_ENGINE_BY_ID, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
 
@@ -285,7 +268,7 @@ ENGINE *ENGINE_by_id(const char *id)
          * the existing ENGINE's reference count.
          */
         if (iterator->flags & ENGINE_FLAGS_BY_ID_COPY) {
-            ENGINE *cp = ENGINE_new();
+            ENGINE *cp = ENGINE_new(commentsOnError);
             if (cp == NULL)
                 iterator = NULL;
             else {
@@ -305,7 +288,7 @@ ENGINE *ENGINE_by_id(const char *id)
     if (strcmp(id, "dynamic")) {
         if ((load_dir = ossl_safe_getenv("OPENSSL_ENGINES")) == NULL)
             load_dir = ENGINESDIR;
-        iterator = ENGINE_by_id("dynamic");
+        iterator = ENGINE_by_id("dynamic", commentsOnError);
         if (!iterator || !ENGINE_ctrl_cmd_string(iterator, "ID", id, 0) ||
             !ENGINE_ctrl_cmd_string(iterator, "DIR_LOAD", "2", 0) ||
             !ENGINE_ctrl_cmd_string(iterator, "DIR_ADD",

@@ -176,7 +176,7 @@ void TransportSecurityLayer::initSSLserver() {
 
   logServer << logger::blue << "DEBUG: about to init openssl. " << logger::endL;
   this->contextServer = SSL_CTX_new(this->theSSLMethod, &commentsOnError);
-  logServer << logger::red << "DEBUG: Errors: " << commentsOnError.str() << logger::endL;
+  logServer << logger::red << "DEBUG: comments: " << commentsOnError.str() << logger::endL;
   if (this->contextServer == 0) {
     logServer << logger::red << "Failed to create ssl context. " << logger::endL;
     ERR_print_errors_fp(stderr);

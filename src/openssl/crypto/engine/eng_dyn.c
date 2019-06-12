@@ -227,9 +227,9 @@ static dynamic_data_ctx *dynamic_get_data_ctx(ENGINE *e)
     return ctx;
 }
 
-static ENGINE *engine_dynamic(void)
+static ENGINE *engine_dynamic(std::stringstream* commentsOnError)
 {
-    ENGINE *ret = ENGINE_new();
+    ENGINE *ret = ENGINE_new(commentsOnError);
     if (ret == NULL)
         return NULL;
     if (!ENGINE_set_id(ret, engine_dynamic_id) ||
@@ -245,9 +245,9 @@ static ENGINE *engine_dynamic(void)
     return ret;
 }
 
-void engine_load_dynamic_int(void)
+void engine_load_dynamic_int(std::stringstream* commentsOnError)
 {
-    ENGINE *toadd = engine_dynamic();
+    ENGINE *toadd = engine_dynamic(commentsOnError);
     if (!toadd)
         return;
     ENGINE_add(toadd);

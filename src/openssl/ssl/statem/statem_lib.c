@@ -1065,7 +1065,7 @@ WORK_STATE tls_finish_handshake(
 
             /* N.B. s->ctx may not equal s->session_ctx */
             tsan_counter(&s->ctx->stats.sess_accept_good);
-            s->handshake_func = ossl_statem_accept;
+            s->handshakeFunction.initialize("state machine accept", ossl_statem_accept);
         } else {
             if (SSL_IS_TLS13(s)) {
                 /*
@@ -1085,7 +1085,7 @@ WORK_STATE tls_finish_handshake(
             if (s->hit)
                 tsan_counter(&s->session_ctx->stats.sess_hit);
 
-            s->handshake_func = ossl_statem_connect;
+            s->handshakeFunction.initialize("state machine connect", ossl_statem_connect);
             tsan_counter(&s->session_ctx->stats.sess_connect_good);
         }
 

@@ -1063,7 +1063,7 @@ typedef enum {
 /* Is the SSL_connection established? */
 # define SSL_in_connect_init(a)          (SSL_in_init(a) && !SSL_is_server(a))
 # define SSL_in_accept_init(a)           (SSL_in_init(a) && SSL_is_server(a))
-int SSL_in_init(const SSL *s);
+int SSL_in_init(const sslData *s);
 int SSL_in_before(const SSL *s);
 int SSL_is_init_finished(const SSL *s);
 
@@ -1811,7 +1811,7 @@ __owur int SSL_get_async_status(SSL *s, int *status);
 # endif
 __owur int SSL_accept(SSL *ssl, std::stringstream *commentsOnError);
 __owur int SSL_stateless(SSL *s, std::stringstream *commentsOnError);
-__owur int SSL_connect(SSL *ssl, std::stringstream *commentsOnError);
+__owur int SSL_connect(sslData *ssl, std::stringstream *commentsOnError);
 __owur int SSL_read(SSL *ssl, void *buf, int num);
 __owur int SSL_read_ex(SSL *ssl, void *buf, size_t num, size_t *readbytes);
 
@@ -1864,7 +1864,7 @@ DEPRECATEDIN_1_1_0(__owur const SSL_METHOD *SSLv3_client_method(void))
 #define SSLv23_client_method    TLS_client_method
 
 /* Negotiate highest available SSL/TLS version */
-__owur const SSL_METHOD *TLS_method(void);
+__owur const SSL_METHOD *TLS_method();
 __owur const SSL_METHOD *TLS_server_method(void);
 __owur const SSL_METHOD *TLS_client_method(void);
 
@@ -1910,7 +1910,7 @@ __owur STACK_OF(SSL_CIPHER) *SSL_CTX_get_ciphers(const SSL_CTX *ctx);
 __owur STACK_OF(SSL_CIPHER) *SSL_get_client_ciphers(const SSL *s);
 __owur STACK_OF(SSL_CIPHER) *SSL_get1_supported_ciphers(SSL *s);
 
-__owur int SSL_do_handshake(SSL *s, std::stringstream *commentsOnError);
+int SSL_do_handshake(SSL *s, std::stringstream *commentsOnError);
 int SSL_key_update(SSL *s, int updatetype);
 int SSL_get_key_update_type(const SSL *s);
 int SSL_renegotiate(SSL *s);

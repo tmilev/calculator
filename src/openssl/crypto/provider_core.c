@@ -606,7 +606,7 @@ int ossl_provider_activate(ossl_provider_st *prov, std::stringstream* commentsOn
 int provider_forall_loaded(
   provider_store_st *store,
   int *found_activated,
-  int (*cb)(ossl_provider_st* provider, void *cbdata),
+  int (*cb)(ossl_provider_st* provider, void *cbdata, std::stringstream* commentsOnError),
   void *cbdata,
   std::stringstream* commentsOnError
 ) {
@@ -621,7 +621,7 @@ int provider_forall_loaded(
       if (found_activated != NULL) {
         *found_activated = 1;
       }
-      if (!cb(prov, cbdata)) {
+      if (!cb(prov, cbdata, commentsOnError)) {
         if (commentsOnError != 0) {
           *commentsOnError << "Provider for all loaded failed at: " << prov->name << ".\n";
         }
@@ -637,7 +637,7 @@ int provider_forall_loaded(
 
 int ossl_provider_forall_loaded(
   openssl_ctx_st *ctx,
-  int (*cb)(ossl_provider_st *provider, void *cbdata),
+  int (*cb)(ossl_provider_st *provider, void *cbdata, std::stringstream* commentsOnError),
   void *cbdata,
   std::stringstream *commentsOnError
 ) {
@@ -705,13 +705,12 @@ int ossl_provider_forall_loaded(
 }
 
 /* Setters of Provider Object data */
-int ossl_provider_set_fallback(ossl_provider_st *prov)
-{
-    if (prov == NULL)
-        return 0;
-
-    prov->flag_fallback = 1;
-    return 1;
+int ossl_provider_set_fallback(ossl_provider_st *prov) {
+  if (prov == NULL) {
+    return 0;
+  }
+  prov->flag_fallback = 1;
+  return 1;
 }
 
 /* Getters of Provider Object data */

@@ -21,7 +21,8 @@ int ossl_method_store_add(
   int nid,
   const char *properties,
   void *implementation,
-  void (*implementation_destruct)(void *)
+  void (*implementation_destruct)(void *),
+  std::stringstream *commentsOnError
 );
 int ossl_method_store_remove(
   ossl_method_store_st *store,

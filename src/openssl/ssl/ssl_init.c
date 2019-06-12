@@ -173,7 +173,6 @@ int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS* settings, std::
   if (commentsOnError != 0) {
     *commentsOnError << "DEBUG: initializing openSSL....\n";
   }
-  std::cout << "DEBUG: got to here in initssl!!!!" << std::endl;
   if (stopped) {
     if (!stoperrset) {
       /*
@@ -191,18 +190,15 @@ int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS* settings, std::
   opts |= OPENSSL_INIT_ADD_ALL_CIPHERS
        |  OPENSSL_INIT_ADD_ALL_DIGESTS
        |  OPENSSL_INIT_ADD_ALL_MACS;
-  std::cout << "DEBUG: got to this point!!!!" << std::endl;
   if ((opts & OPENSSL_INIT_NO_LOAD_CONFIG) == 0) {
     opts |= OPENSSL_INIT_LOAD_CONFIG;
   }
   if (!OPENSSL_init_crypto(opts, settings, commentsOnError)) {
-    std::cout << "DEBUG: Failed to initialize cryptography ... " << std::endl;
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to initialize cryptography.\n";
     }
     return 0;
   }
-  std::cout << "DEBUG: got to here pt 2!!!!" << std::endl;
   if (!RUN_ONCE(&ssl_base, ossl_init_ssl_base, 0)) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to run once, base initialization. ";

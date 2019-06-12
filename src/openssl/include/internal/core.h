@@ -35,7 +35,7 @@ struct ossl_method_construct_method_st {
     void* (*get)(openssl_ctx_st *libctx, void *store, const char *propquery, void *data, std::stringstream* commentsOnError);
     /* Store a method in a store */
     int (*put)(openssl_ctx_st *libctx, void *store, const char *propdef,
-               void *method, void *data);
+               void *method, void *data, std::stringstream* commentsOnError);
     /* Construct a new method */
     void *(*construct)(const char *algorithm_name, const OSSL_DISPATCH *fns,
                        ossl_provider_st* prov, void *data);

@@ -21,11 +21,12 @@
 
 void OPENSSL_load_builtin_modules(std::stringstream* commentsOnError) {
   /* Add builtin modules here */
+  if (commentsOnError != 0) {
+    *commentsOnError << "DEBUG: Adding built-in modules here.\n";
+  }
   ASN1_add_oid_module(commentsOnError);
   ASN1_add_stable_module(commentsOnError);
-#ifndef OPENSSL_NO_ENGINE
   ENGINE_add_conf_module(commentsOnError);
-#endif
   EVP_add_alg_module(commentsOnError);
   conf_add_ssl_module(commentsOnError);
   ossl_provider_add_conf_module(commentsOnError);

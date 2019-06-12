@@ -438,17 +438,44 @@ struct ssl_cipher_st {
     uint32_t alg_bits;          /* Number of bits for algorithm */
 };
 
+struct sslFunction {
+  std::string name;
+
+  int (*theFunction) (SSL *, std::stringstream* commentsOnError);
+  int call(SSL* owner, std::stringstream* commentsOnError);
+  void initialize(
+    const std::string& inputName,
+    int (*inputFunction) (SSL *, std::stringstream* commentsOnError)
+  );
+  bool isNull();
+  sslFunction();
+  bool operator==(const sslFunction& other) const;
+};
+
+struct ssl3_enc_method;
 /* Used to hold SSL/TLS functions */
 struct ssl_method_st {
   std::string name;
   int version;
+  ssl_method_st* initializeTLS(
+    const std::string& inputName,
+    int inputVersion,
+    unsigned inputFlags,
+    unsigned inputMask,
+    const std::string& acceptName,
+    int (s_accept)(SSL *s, std::stringstream* commentsOnError),
+    const std::string& connectName,
+    int (s_connect)(SSL *s, std::stringstream* commentsOnError),
+    const ssl3_enc_method* enc_data
+  );
+  void initializeTLSCommon();
   unsigned flags;
   unsigned long mask;
   int (*ssl_new) (SSL *s, std::stringstream* commentsOnError);
   int (*ssl_clear) (SSL *s, std::stringstream* commentsOnError);
   void (*ssl_free) (SSL *s);
-  int (*ssl_accept) (SSL *s, std::stringstream* commentsOnError);
-  int (*ssl_connect) (SSL *s, std::stringstream* commentsOnError);
+  sslFunction sslAccept;
+  sslFunction sslConnect;
   int (*ssl_read) (SSL *s, void *buf, size_t len, size_t *readbytes, std::stringstream* commentsOnError);
   int (*ssl_peek) (SSL *s, void *buf, size_t len, size_t *readbytes, std::stringstream* commentsOnError);
   int (*ssl_write) (SSL *s, const void *buf, size_t len, size_t *written, std::stringstream* commentsOnError);
@@ -1109,6 +1136,7 @@ typedef enum {
 
 
 struct ConstructMessageFunction;
+
 struct sslData {
     /*
      * protocol version (one of SSL2_VERSION, SSL3_VERSION, TLS1_VERSION,
@@ -1133,7 +1161,7 @@ struct sslData {
      * request needs re-doing when in SSL_accept or SSL_connect
      */
     int rwstate;
-    int (*handshake_func) (SSL *, std::stringstream* commentsOnError);
+    sslFunction handshakeFunction;
     /*
      * Imagine that here's a boolean member "init" that is switched as soon
      * as SSL_set_{accept/connect}_state is called for the first time, so
@@ -2158,7 +2186,7 @@ __owur const SSL_METHOD *tlsv1_1_client_method(void);
 __owur const SSL_METHOD *tlsv1_2_method(void);
 __owur const SSL_METHOD *tlsv1_2_server_method(void);
 __owur const SSL_METHOD *tlsv1_2_client_method(void);
-__owur const SSL_METHOD *tlsv1_3_method(void);
+__owur const ssl_method_st *tlsv1_3_method();
 __owur const SSL_METHOD *tlsv1_3_server_method(void);
 __owur const SSL_METHOD *tlsv1_3_client_method(void);
 __owur const SSL_METHOD *dtlsv1_method(void);

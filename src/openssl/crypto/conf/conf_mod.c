@@ -425,8 +425,14 @@ int CONF_module_add(
   std::stringstream* commentsOnError
 ) {
   if (module_add(NULL, name, ifunc, ffunc)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "DEBUG: module: " << name << " added successfully.\n";
+    }
     return 1;
   } else {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Failed to add module: " << name << "\n";
+    }
     return 0;
   }
 }

@@ -387,7 +387,7 @@ int ssl3_write_bytes(
     !ossl_statem_get_in_handshake(s) &&
     s->early_data_state != SSL_EARLY_DATA_UNAUTH_WRITING
   ) {
-    i = s->handshake_func(s, commentsOnError);
+    i = s->handshakeFunction.call(s, commentsOnError);
     /* SSLfatal() already called */
     if (i < 0) {
       return i;
@@ -1330,7 +1330,7 @@ int ssl3_read_bytes(
 
   if (!ossl_statem_get_in_handshake(s) && SSL_in_init(s)) {
     /* type == SSL3_RT_APPLICATION_DATA */
-    i = s->handshake_func(s, commentsOnError);
+    i = s->handshakeFunction.call(s, commentsOnError);
     /* SSLfatal() already called */
     if (i < 0) {
       return i;
@@ -1709,7 +1709,7 @@ int ssl3_read_bytes(
     int ined = (s->early_data_state == SSL_EARLY_DATA_READING);
     /* We found handshake data, so we're going back into init */
     ossl_statem_set_in_init(s, 1);
-    i = s->handshake_func(s, commentsOnError);
+    i = s->handshakeFunction.call(s, commentsOnError);
     /* SSLfatal() already called if appropriate */
     if (i < 0) {
       return i;

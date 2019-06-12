@@ -44,7 +44,7 @@ int ossl_provider_activate(ossl_provider_st *prov, std::stringstream *commentsOn
 /* Iterate over all loaded providers */
 int ossl_provider_forall_loaded(
   openssl_ctx_st *,
-  int (*cb)(ossl_provider_st* provider, void *cbdata),
+  int (*cb)(ossl_provider_st* provider, void *cbdata, std::stringstream* commentsOnError),
   void *cbdata,
   std::stringstream* commentsOnError
 );

@@ -17,6 +17,7 @@
 #include "../include/internal/provider.h"
 #include "../include/internal/refcount.h"
 #include "provider_local.h"
+#include "../../vpfHeader1General0_General.h"
 
 static ossl_provider_st* provider_new(const std::string &name,
                                    OSSL_provider_init_fn *init_function);
@@ -181,7 +182,6 @@ struct provider_store_st {
   CRYPTO_RWLOCK *unused;
   unsigned int use_fallbacks:1;
 };
-static int provider_store_index = -1;
 
 static void provider_store_free(void *vstore) {
   struct provider_store_st *store = (provider_store_st *) vstore;
@@ -243,41 +243,36 @@ static CRYPTO_ONCE provider_store_init_flag = CRYPTO_ONCE_STATIC_INIT;
 
 int openssl_ctx_new_index(const openssl_ctx_method *meth);
 
-int do_provider_store_init(void* commentsOnErroR) {
-  std::stringstream* commentsOnError = (std::stringstream*) commentsOnErroR;
-  if (commentsOnError != 0) {
-    *commentsOnError << "DEBUG: running do provider store init!!!!\n";
+int get_provider_store_index(std::stringstream* commentsOnError) {
+  //Not thread safe.
+  static int provider_store_index = - 1;
+  if (provider_store_index != - 1) {
+    return provider_store_index;
   }
-  if (OPENSSL_init_crypto(0, NULL, commentsOnError) == 0) {
-    return 0;
+  if (!OPENSSL_init_crypto(0, NULL, commentsOnError)) {
+    return - 1;
   }
   provider_store_index = openssl_ctx_new_index(&provider_store_method);
-  return provider_store_index != -1;
+  return provider_store_index;
 }
 
 int do_provider_store_init_ossl_ret_ = 0;
 
-void do_provider_store_init_ossl_(void* commentsOnError) {
-  do_provider_store_init_ossl_ret_ = do_provider_store_init(commentsOnError);
-}
-
 provider_store_st* get_provider_store(openssl_ctx_st *libctx, std::stringstream* commentsOnError) {
-  static provider_store_st *store = NULL;
-  int ran = CRYPTO_THREAD_run_once(&provider_store_init_flag, do_provider_store_init_ossl_, commentsOnError);
-  int success = 0;
-  if (ran) {
-    success = do_provider_store_init_ossl_ret_;
-  }
-  if (!success) {
+  int providerIndex = get_provider_store_index(commentsOnError);
+  if (providerIndex < 0) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Could not obtain store index.\n";
+    }
     return NULL;
   }
-  store = (provider_store_st *) openssl_ctx_get_data(libctx, provider_store_index);
-  if (store == NULL) {
+  provider_store_st* result = (provider_store_st *) openssl_ctx_get_data(libctx, providerIndex);
+  if (result == NULL) {
     if (commentsOnError != 0) {
       *commentsOnError << "Failed to get context data.\n";
     }
   }
-  return store;
+  return result;
 }
 
 ossl_provider_st* ossl_provider_find(openssl_ctx_st *libctx, const char *name)
@@ -610,23 +605,28 @@ int provider_forall_loaded(
   void *cbdata,
   std::stringstream* commentsOnError
 ) {
+  MacroRegisterFunctionWithName("provider_forall_loaded");
   int i;
+  std::cout << "DEBUG: before numprov comput. \n";
   int num_provs = sk_ossl_provider_st_num(store->providers);
   if (found_activated != NULL) {
     *found_activated = 0;
   }
+  std::cout << "DEBUG: before for loop. \n";
   for (i = 0; i < num_provs; i++) {
     ossl_provider_st *prov = sk_ossl_provider_st_value(store->providers, i);
     if (prov->flag_initialized) {
       if (found_activated != NULL) {
         *found_activated = 1;
       }
+      std::cout << "DEBUG: Got to before callback\n";
       if (!cb(prov, cbdata, commentsOnError)) {
         if (commentsOnError != 0) {
           *commentsOnError << "Provider for all loaded failed at: " << prov->name << ".\n";
         }
         return 0;
       }
+      std::cout << "DEBUG: Got to after callback\n";
       if (commentsOnError != 0) {
         *commentsOnError << "DEBUG: successfully loaded: " << prov->name << ".\n";
       }
@@ -641,7 +641,11 @@ int ossl_provider_forall_loaded(
   void *cbdata,
   std::stringstream *commentsOnError
 ) {
+  MacroRegisterFunctionWithName("ossl_provider_forall_loaded");
+  std::cout << "DEBUG: inside forallloaded...\n";
+
   struct provider_store_st *store = get_provider_store(ctx, commentsOnError);
+  std::cout << "DEBUG: got store...\n";
   if (store == NULL && commentsOnError != 0) {
     *commentsOnError << "Unexpected null store.\n";
   }
@@ -657,7 +661,9 @@ int ossl_provider_forall_loaded(
    * all fallbacks.
    */
   int activated_fallback_count = 0;
+
   if (!found_activated && store->use_fallbacks) {
+    std::cout << "DEBUG: inside found activated ...\n";
     if (store->providers == 0) {
       if (commentsOnError != 0) {
         *commentsOnError << "Store providers is null.\n";

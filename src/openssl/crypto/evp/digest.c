@@ -191,6 +191,7 @@ int evp_md_ctx_st::digestInitEnd(std::stringstream* commentsOnError) {
 int evp_md_ctx_st::digestInit_ex(
   const EVP_MD *type, ENGINE *impl, std::stringstream* commentsOnError
 ) {
+  std::cout << "DEBUG: got to digest init ex.\n";
   EVP_MD *provmd;
   ENGINE *tmpimpl = NULL;
 
@@ -209,6 +210,7 @@ int evp_md_ctx_st::digestInit_ex(
   if (this->engine && this->digest && (type == NULL || (type->type == this->digest->type))) {
     return this->digestInitEnd(commentsOnError);
   }
+  std::cout << "DEBUG: got to impl checks.\n";
 
   if (type != NULL && impl == NULL) {
     tmpimpl = ENGINE_get_digest_engine(type->type);
@@ -231,6 +233,7 @@ int evp_md_ctx_st::digestInit_ex(
     this->fetched_digest = NULL;
     return this->digestInitLegacy(type, impl, tmpimpl, commentsOnError);
   }
+  std::cout << "DEBUG: got to prov == null check.\n";
   if (type->prov == NULL) {
     switch(type->type) {
       case NID_sha256:
@@ -245,6 +248,7 @@ int evp_md_ctx_st::digestInit_ex(
     this->md_data = NULL;
   }
   /* TODO(3.0): Start of non-legacy code below */
+  std::cout << "DEBUG: got to non-legacy start.\n";
   if (type->prov == NULL) {
     provmd = EVP_MD_fetch(NULL, OBJ_nid2sn(type->type), "", commentsOnError);
     if (provmd == NULL) {
@@ -254,10 +258,12 @@ int evp_md_ctx_st::digestInit_ex(
       return 0;
     }
     type = provmd;
+    std::cout << "DEBUG: About to evp md meth free.\n";
     EVP_MD_meth_free(this->fetched_digest);
     this->fetched_digest = provmd;
   }
   this->digest = type;
+  std::cout << "DEBUG: got to provctx check.\n";
   if (this->provctx == NULL) {
     this->provctx = this->digest->newctx();
     if (this->provctx == NULL) {
@@ -267,12 +273,14 @@ int evp_md_ctx_st::digestInit_ex(
       return 0;
     }
   }
+  std::cout << "DEBUG: got to dinit.\n";
   if (this->digest->dinit == NULL) {
     if (commentsOnError != 0) {
       *commentsOnError << "Digest->dinit equals null.\n";
     }
     return 0;
   }
+  std::cout << "DEBUG: got to the end!";
   return this->digest->dinit(this->provctx);
 }
 

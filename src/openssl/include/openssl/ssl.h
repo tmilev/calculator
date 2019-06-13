@@ -1923,7 +1923,7 @@ void SSL_set_post_handshake_auth(SSL *s, int val);
 
 __owur const SSL_METHOD *SSL_CTX_get_ssl_method(const SSL_CTX *ctx);
 __owur const SSL_METHOD *SSL_get_ssl_method(const SSL *s);
-__owur int SSL_set_ssl_method(SSL *s, const SSL_METHOD *method);
+int SSL_set_ssl_method(SSL *s, const ssl_method_st *method);
 __owur const char *SSL_alert_type_string_long(int value);
 __owur const char *SSL_alert_type_string(int value);
 __owur const char *SSL_alert_desc_string_long(int value);

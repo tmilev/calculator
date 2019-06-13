@@ -15,6 +15,7 @@
 #include "../include/internal/property.h"
 #include "../include/internal/provider.h"
 #include <sstream>
+#include "../../vpfHeader1General0_General.h"
 
 struct construct_data_st {
     openssl_ctx_st *libctx;
@@ -82,9 +83,11 @@ void *ossl_method_construct(openssl_ctx_st *libctx,
   void *mcm_data,
   std::stringstream* commentsOnError
 ) {
+  MacroRegisterFunctionWithName("ossl_method_construct");
   if (commentsOnError != 0) {
     *commentsOnError << "DEBUG: got to method construct.\n";
   }
+
   void *method = mcm->get(libctx, NULL, propquery, mcm_data, commentsOnError);
   if (method != NULL) {
     return method;
@@ -94,7 +97,9 @@ void *ossl_method_construct(openssl_ctx_st *libctx,
    * We have a temporary store to be able to easily search among new
    * items, or items that should find themselves in the global store.
    */
+  std::cout << "DEBUG: got to before alloc_tmp_store\n";
   cbdata.store = (ossl_method_store_st*) mcm->alloc_tmp_store(commentsOnError);
+  std::cout << "DEBUG: got to AFTER alloc_tmp_store\n";
   if (cbdata.store == NULL) {
     return method;
   }
@@ -104,7 +109,9 @@ void *ossl_method_construct(openssl_ctx_st *libctx,
   cbdata.force_store = force_store;
   cbdata.mcm = mcm;
   cbdata.mcm_data = mcm_data;
+  std::cout << "DEBUG: got to before forallloaded\n";
   ossl_provider_forall_loaded(libctx, ossl_method_construct_this, &cbdata, commentsOnError);
+  std::cout << "DEBUG: got to after forallloaded\n";
   method = mcm->get(libctx, cbdata.store, propquery, mcm_data, commentsOnError);
   if (commentsOnError != 0) {
     *commentsOnError << "DEBUG: Executed final mcm get.\n";

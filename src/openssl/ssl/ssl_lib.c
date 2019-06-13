@@ -820,7 +820,7 @@ SSL *SSL_new(SSL_CTX *ctx, std::stringstream* commentsOnError) {
     if (!s->method->ssl_new(s, commentsOnError))
         goto err;
 
-    s->server = (ctx->method->ssl_accept == ssl_undefined_function) ? 0 : 1;
+    s->server = (ctx->method->sslAccept.isUndefinedFunction()) ? 0 : 1;
 
     if (!SSL_clear(s))
         goto err;
@@ -3534,13 +3534,13 @@ const SSL_METHOD *SSL_get_ssl_method(const SSL *s)
     return s->method;
 }
 
-int SSL_set_ssl_method(SSL *s, const SSL_METHOD *meth)
+int SSL_set_ssl_method(SSL *s, const ssl_method_st *meth)
 {
     int ret = 1;
 
     if (s->method != meth) {
         const SSL_METHOD *sm = s->method;
-        int (*hf) (SSL *, std::stringstream* commentsOnError) = s->handshakeFunction.theFunction;
+        int (*handshakeFunction) (SSL *, std::stringstream* commentsOnError) = s->handshakeFunction.theFunction;
 
         if (sm->version == meth->version)
             s->method = meth;
@@ -3550,10 +3550,10 @@ int SSL_set_ssl_method(SSL *s, const SSL_METHOD *meth)
             ret = s->method->ssl_new(s, 0);
         }
 
-        if (hf == sm->ssl_connect) {
-            s->handshakeFunction.initialize("ssl_connect", meth->ssl_connect);
-        } else if (hf == sm->ssl_accept) {
-            s->handshakeFunction.initialize("ssl_accept", meth->ssl_accept);
+        if (handshakeFunction == sm->sslConnect.theFunction) {
+            s->handshakeFunction = meth->sslConnect;
+        } else if (handshakeFunction == sm->sslAccept.theFunction) {
+            s->handshakeFunction = meth->sslAccept;
         }
     }
     return ret;
@@ -3699,18 +3699,18 @@ void SSL_set_connect_or_accept_state(SSL *s) {
 }
 
 void SSL_set_accept_state(SSL *s) {
-    s->server = 1;
-    s->shutdown = 0;
-    ossl_statem_clear(s);
-    s->handshakeFunction.initialize("ssl_accept", s->method->ssl_accept);
-    clear_ciphers(s);
+  s->server = 1;
+  s->shutdown = 0;
+  ossl_statem_clear(s);
+  s->handshakeFunction = s->method->sslAccept;
+  clear_ciphers(s);
 }
 
 void SSL_set_connect_state(SSL *s) {
     s->server = 0;
     s->shutdown = 0;
     ossl_statem_clear(s);
-    s->handshakeFunction.initialize("ssl_connect", s->method->ssl_connect);
+    s->handshakeFunction = s->method->sslConnect;
     clear_ciphers(s);
 }
 

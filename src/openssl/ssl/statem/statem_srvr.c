@@ -24,6 +24,7 @@
 #include "../../include/openssl/bn.h"
 #include "../../include/openssl/md5.h"
 #include "../../include/openssl/trace.h"
+#include "../../../vpfHeader1General0_General.h"
 
 #define TICKET_NONCE_SIZE       8
 
@@ -1014,16 +1015,16 @@ int sslData::ossl_statem_server_construct_message(
       return 0;
     case TLS_ST_SW_CHANGE:
       if (SSL_IS_DTLS(this)) {
-        outputFunction.name = "DTLS construct change cipher";
+        outputFunction.name = "dtls_construct_change_cipher_spec";
         outputFunction.theFunction = dtls_construct_change_cipher_spec;
       } else {
-        outputFunction.name = "TLS construct change cipher";
+        outputFunction.name = "tls_construct_change_cipher_spec";
         outputFunction.theFunction = tls_construct_change_cipher_spec;
       }
       *mt = SSL3_MT_CHANGE_CIPHER_SPEC;
       break;
     case DTLS_ST_SW_HELLO_VERIFY_REQUEST:
-      outputFunction.name = "Construct hello verify request";
+      outputFunction.name = "dtls_construct_hello_verify_request";
       outputFunction.theFunction = dtls_construct_hello_verify_request;
       *mt = DTLS1_MT_HELLO_VERIFY_REQUEST;
       break;
@@ -1034,37 +1035,37 @@ int sslData::ossl_statem_server_construct_message(
       *mt = SSL3_MT_HELLO_REQUEST;
       break;
     case TLS_ST_SW_SRVR_HELLO:
-      outputFunction.name = "Construct server hello";
+      outputFunction.name = "tls_construct_server_hello";
       outputFunction.theFunction = tls_construct_server_hello;
       *mt = SSL3_MT_SERVER_HELLO;
       break;
     case TLS_ST_SW_CERT:
-      outputFunction.name = "Construct server certificate";
+      outputFunction.name = "tls_construct_server_certificate";
       outputFunction.theFunction = tls_construct_server_certificate;
       *mt = SSL3_MT_CERTIFICATE;
       break;
     case TLS_ST_SW_CERT_VRFY:
-      outputFunction.name = "Construct certificate verify";
+      outputFunction.name = "tls_construct_cert_verify";
       outputFunction.theFunction = tls_construct_cert_verify;
       *mt = SSL3_MT_CERTIFICATE_VERIFY;
       break;
     case TLS_ST_SW_KEY_EXCH:
-      outputFunction.name = "Construct server key exchange";
+      outputFunction.name = "tls_construct_server_key_exchange";
       outputFunction.theFunction = tls_construct_server_key_exchange;
       *mt = SSL3_MT_SERVER_KEY_EXCHANGE;
       break;
     case TLS_ST_SW_CERT_REQ:
-      outputFunction.name = "Construct certificate request";
+      outputFunction.name = "tls_construct_certificate_request";
       outputFunction.theFunction = tls_construct_certificate_request;
       *mt = SSL3_MT_CERTIFICATE_REQUEST;
       break;
     case TLS_ST_SW_SRVR_DONE:
-      outputFunction.name = "Construct server done";
+      outputFunction.name = "tls_construct_server_done";
       outputFunction.theFunction = tls_construct_server_done;
       *mt = SSL3_MT_SERVER_DONE;
       break;
     case TLS_ST_SW_SESSION_TICKET:
-      outputFunction.name = "Construct new session ticket";
+      outputFunction.name = "tls_construct_new_session_ticket";
       outputFunction.theFunction = tls_construct_new_session_ticket;
       *mt = SSL3_MT_NEWSESSION_TICKET;
       break;
@@ -1074,7 +1075,7 @@ int sslData::ossl_statem_server_construct_message(
       *mt = SSL3_MT_CERTIFICATE_STATUS;
       break;
     case TLS_ST_SW_FINISHED:
-      outputFunction.name = "Construct finished";
+      outputFunction.name = "tls_construct_finished";
       outputFunction.theFunction = tls_construct_finished;
       *mt = SSL3_MT_FINISHED;
       break;
@@ -1084,12 +1085,12 @@ int sslData::ossl_statem_server_construct_message(
       *mt = SSL3_MT_DUMMY;
       break;
     case TLS_ST_SW_ENCRYPTED_EXTENSIONS:
-      outputFunction.name = "Construct encrypted extensions";
+      outputFunction.name = "tls_construct_encrypted_extensions";
       outputFunction.theFunction = tls_construct_encrypted_extensions;
       *mt = SSL3_MT_ENCRYPTED_EXTENSIONS;
       break;
     case TLS_ST_SW_KEY_UPDATE:
-      outputFunction.name = "Construct key update";
+      outputFunction.name = "tls_construct_key_update";
       outputFunction.theFunction = tls_construct_key_update;
       *mt = SSL3_MT_KEY_UPDATE;
       break;
@@ -2351,6 +2352,7 @@ WORK_STATE tls_post_process_client_hello(SSL *s, WORK_STATE wst)
 }
 
 int tls_construct_server_hello(SSL* s, WPACKET* pkt, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("tls_construct_server_hello");
   int compm;
   size_t sLength = 0;
   size_t len = 0;
@@ -2362,6 +2364,7 @@ int tls_construct_server_hello(SSL* s, WPACKET* pkt, std::stringstream* comments
   if (usetls13) {
     versionString = "TLS 1.3";
   }
+  std::cout << "DEBUG: got to here pt 0\n";
   if (!WPACKET_put_bytes_u16(pkt, version)) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << versionString << " failed to put bytes.\n";
@@ -2374,6 +2377,7 @@ int tls_construct_server_hello(SSL* s, WPACKET* pkt, std::stringstream* comments
    * tls_process_client_hello()
    */
 
+  std::cout << "DEBUG: got to here pt 1\n";
   int memcpyPacketSuccess = WPACKET_memcpy(
     pkt,
     s->hello_retry_request == sslData::SSL_HRR_PENDING ? hrrrandom : s->s3->server_random,
@@ -2404,6 +2408,7 @@ int tls_construct_server_hello(SSL* s, WPACKET* pkt, std::stringstream* comments
    * so the following won't overwrite an ID that we're supposed
    * to send back.
    */
+  std::cout << "DEBUG: got to here pt 3\n";
   if (s->session->not_resumable || (!(s->ctx->session_cache_mode & SSL_SESS_CACHE_SERVER) && !s->hit)) {
     s->session->session_id_length = 0;
   }
@@ -2427,6 +2432,7 @@ int tls_construct_server_hello(SSL* s, WPACKET* pkt, std::stringstream* comments
   } else {
     compm = s->s3->tmp.new_compression->id;
   }
+  std::cout << "DEBUG: got to here pt 4\n";
   if (!WPACKET_sub_memcpy_u8(pkt, session_id, sLength)) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "Failed to copy session id into packet.\n";
@@ -2448,6 +2454,7 @@ int tls_construct_server_hello(SSL* s, WPACKET* pkt, std::stringstream* comments
     s->SetError();
     return 0;
   }
+  std::cout << "DEBUG: got to here pt 5\n";
   unsigned int context = SSL_EXT_TLS1_3_HELLO_RETRY_REQUEST;
   if (s->hello_retry_request != sslData::SSL_HRR_PENDING) {
     if (SSL_IS_TLS13(s)) {
@@ -2456,6 +2463,7 @@ int tls_construct_server_hello(SSL* s, WPACKET* pkt, std::stringstream* comments
       context = SSL_EXT_TLS1_2_SERVER_HELLO;
     }
   }
+  std::cout << "DEBUG: got to here pt 5.5\n";
 
   if (
     !s->tls_construct_extensions(pkt, context, NULL, 0, commentsOnFailure)
@@ -2466,7 +2474,9 @@ int tls_construct_server_hello(SSL* s, WPACKET* pkt, std::stringstream* comments
     s->SetError();
     return 0;
   }
+  std::cout << "DEBUG: got to here pt 6\n";
   if (s->hello_retry_request == sslData::SSL_HRR_PENDING) {
+    std::cout << "DEBUG: hello retry request is hrr pending 7.\n";
     /* Ditch the session. We'll create a new one next time around */
     SSL_SESSION_free(s->session);
     s->session = NULL;
@@ -2484,6 +2494,7 @@ int tls_construct_server_hello(SSL* s, WPACKET* pkt, std::stringstream* comments
       return 0;
     }
   } else if (!(s->verify_mode & SSL_VERIFY_PEER)) {
+    std::cout << "DEBUG: ssl verify peer.\n";
     if (!s->ssl3_digest_cached_records(0, commentsOnFailure)) {
       if (commentsOnFailure != 0) {
         *commentsOnFailure << "Failed verify peer and failed to find cached record.\n";
@@ -2493,6 +2504,7 @@ int tls_construct_server_hello(SSL* s, WPACKET* pkt, std::stringstream* comments
       return 0;
     }
   }
+  std::cout << "DEBUG: close to the end.\n";
   if (commentsOnFailure != 0) {
     *commentsOnFailure << "DEBUG: Got to end of server hello, success!!!\n";
   }

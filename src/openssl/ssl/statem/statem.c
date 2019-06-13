@@ -250,6 +250,7 @@ int ossl_statem_connect(SSL *s, std::stringstream* commentsOnError) {
 }
 
 int ossl_statem_accept(SSL *s, std::stringstream* commentsOnError) {
+  std::cout << "DEBUG: calling ossl_statem_accept.\n";
   return s->stateMachine(1, commentsOnError);
 }
 
@@ -263,8 +264,12 @@ bool sslFunction::operator==(const sslFunction& other) const {
   return false;
 }
 
-bool sslFunction::isNull() {
+bool sslFunction::isNull() const {
   return this->theFunction == 0;
+}
+
+bool sslFunction::isUndefinedFunction() const {
+  return this->theFunction == ssl_undefined_function;
 }
 
 sslFunction::sslFunction() {
@@ -335,7 +340,7 @@ bool SSL_IS_FIRST_HANDSHAKE(sslData* inputPointer) {
  * <=0: NBIO or error
  */
 int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
-  //stOutput << "DEBUG: state_machine running ... ";
+  std::cout << "DEBUG: state_machine running ...\n";
   buf_mem_st* buf = NULL;
   OSSL_STATEM *st = &this->statem;
   int ssret;
@@ -346,6 +351,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
     }
     return - 1;
   }
+  std::cout << "DEBUG: state_machine running, got to here 1.\n";
   ERR_clear_error();
   clear_sys_error();
   st->in_handshake ++;
@@ -362,7 +368,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
       return - 1;
     }
   }
-  //stOutput << "DEBUG: state machine, here I am. ";
+  std::cout << "DEBUG: state_machine running, got to here 2.\n";
   /* Initialise state machine */
   if (st->state == MSG_FLOW_UNINITED || st->state == MSG_FLOW_FINISHED) {
     if (st->state == MSG_FLOW_UNINITED) {
@@ -373,6 +379,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
     if (SSL_IS_FIRST_HANDSHAKE(this) || !SSL_IS_TLS13(this)) {
       this->callBackStandard(SSL_CB_HANDSHAKE_START, 1);
     }
+    std::cout << "DEBUG: state_machine running, got to here 3.\n";
     /*
      * Fatal errors in this block don't send an alert because we have
      * failed to even initialise properly. Sending an alert is probably
@@ -427,7 +434,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
       if (commentsOnError != 0) {
         *commentsOnError << "Failed to setup buffers.\n";
       }
-	this->SetError();
+      this->SetError();
       return this->stateMachineCleanUp(buf, - 1);
     }
     this->init_num = 0;
@@ -463,8 +470,11 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
     st->state = MSG_FLOW_WRITING;
     init_write_state_machine(this);
   }
+  std::cout << "DEBUG: state_machine running, got to here 4.\n";
+
   while (st->state != MSG_FLOW_FINISHED) {
     if (st->state == MSG_FLOW_READING) {
+      std::cout << "DEBUG: got to read state machine.\n";
       ssret = this->readStateMachine(commentsOnError);
       if (ssret == SUB_STATE_FINISHED) {
         st->state = MSG_FLOW_WRITING;
@@ -477,6 +487,7 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
         return this->stateMachineCleanUp(buf, - 1);
       }
     } else if (st->state == MSG_FLOW_WRITING) {
+      std::cout << "DEBUG: got to write state machine.\n";
       ssret = this->writeStateMachine(commentsOnError);
       if (ssret == SUB_STATE_FINISHED) {
         st->state = MSG_FLOW_READING;
@@ -505,19 +516,10 @@ int sslData::stateMachine(int server, std::stringstream* commentsOnError) {
 }
 
 int sslData::stateMachineCleanUp(buf_mem_st* buf, int ret) {
+  std::cout << "DEBUG: got to state machine cleanup.\n";
+
   OSSL_STATEM *st = &this->statem;
   st->in_handshake --;
-#ifndef OPENSSL_NO_SCTP
-  if (this->isDTLS() && BIO_dgram_is_sctp(SSL_get_wbio(this))) {
-    stOutput << "DEBUG: DTLS communication";
-    /*
-     * Notify SCTP BIO socket to leave handshake mode and allow stream
-     * identifier other than 0.
-     */
-    BIO_ctrl(SSL_get_wbio(s), BIO_CTRL_DGRAM_SCTP_SET_IN_HANDSHAKE,
-             st->in_handshake, NULL);
-  }
-#endif
   BUF_MEM_free(buf);
 
   if (this->server) {
@@ -855,6 +857,8 @@ int sslData::getConstructMessageFunction(
 }
 
 SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) {
+  MacroRegisterFunctionWithName("sslData::writeStateMachine");
+  std::cout << "DEBUG: Inside write state machine.\n";
   OSSL_STATEM *st = &this->statem;
   int ret;
   ConstructMessageFunction messageConstructor;
@@ -862,8 +866,10 @@ SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) 
   WPACKET pkt;
 
   while (true) {
+    std::cout << "DEBUG: inside write state machine while loop.\n";
     switch (st->write_state) {
       case WRITE_STATE_TRANSITION:
+        std::cout << "DEBUG: inside write transition.\n";
         /* Notify callback of an impending state change */
         if (this->server) {
           this->callBackStandard(SSL_CB_ACCEPT_LOOP, 1);
@@ -893,17 +899,21 @@ SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) 
       }
       break;
     case WRITE_STATE_PRE_WORK:
+      std::cout << "DEBUG: inside write prework.\n";
       st->write_state_work = this->PreWriteWork(st->write_state_work, commentsOnError);
+      std::cout << "DEBUG: write_state_work initialized.\n";
       switch (st->write_state_work) {
         case WORK_ERROR:
           if (commentsOnError != 0) {
             *commentsOnError << "Write machine: pre_work returned work error.\n";
           }
+          std::cout << "DEBUG: work error here.\n";
           this->SetError();
           return SUB_STATE_ERROR;
         case WORK_MORE_A:
         case WORK_MORE_B:
         case WORK_MORE_C:
+          std::cout << "DEBUG: work more here.\n";
           if (commentsOnError != 0) {
             *commentsOnError << "Write machine: pre_work work_more_a/b/c.\n";
           }
@@ -914,6 +924,8 @@ SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) 
         case WORK_FINISHED_STOP:
           return SUB_STATE_END_HANDSHAKE;
       }
+      std::cout << "DEBUG: not finished or in error.\n";
+
       if (!this->getConstructMessageFunction(&pkt, messageConstructor, &mt, commentsOnError)) {
         /* SSLfatal() already called */
         if (commentsOnError != 0) {
@@ -922,12 +934,14 @@ SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) 
         this->SetError();
         return SUB_STATE_ERROR;
       }
+      std::cout << "DEBUG: check for dummy...\n";
       if (mt == SSL3_MT_DUMMY) {
         /* Skip construction and sending. This isn't a "real" state */
         st->write_state = WRITE_STATE_POST_WORK;
         st->write_state_work = WORK_MORE_A;
         break;
       }
+      std::cout << "DEBUG: about to packet init...\n";
       if (!WPACKET_init(&pkt, this->init_buf) || !ssl_set_handshake_header(this, &pkt, mt)) {
         WPACKET_cleanup(&pkt);
         if (commentsOnError != 0) {
@@ -936,6 +950,7 @@ SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) 
         this->SetError();
         return SUB_STATE_ERROR;
       }
+      std::cout << "DEBUG: about to message-construct using: " << messageConstructor.name << "\n";
       if (messageConstructor.theFunction != NULL) {
         if (!messageConstructor.theFunction(this, &pkt, commentsOnError)) {
           WPACKET_cleanup(&pkt);
@@ -946,6 +961,7 @@ SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) 
           return SUB_STATE_ERROR;
         }
       }
+      std::cout << "DEBUG: check for ssl_close_construct_packet...\n";
       if (!ssl_close_construct_packet(this, &pkt, mt) || !WPACKET_finish(&pkt)) {
         WPACKET_cleanup(&pkt);
         if (commentsOnError != 0) {
@@ -956,6 +972,7 @@ SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) 
       }
       /* Fall through */
     case WRITE_STATE_SEND:
+      std::cout << "DEBUG: inside write state send.\n";
       if (SSL_IS_DTLS(this) && st->use_timer) {
         dtls1_start_timer(this);
       }
@@ -1000,6 +1017,7 @@ SUB_STATE_RETURN sslData::writeStateMachine(std::stringstream* commentsOnError) 
       return SUB_STATE_ERROR;
     }
   }
+
 }
 
 /*

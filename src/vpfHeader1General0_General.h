@@ -174,9 +174,9 @@ public:
     coefficient q, r, p, d; // d - divisor, q - quotient, r - remainder, p is the number to be divided
     coefficient vD[2], vP[2], temp;
     vP[0] = 1;
-    vP[1] = 0; // at any given moment, p =vP[0]*N+vP[1]*X
+    vP[1] = 0; // at any given moment, p = vP[0] * N + vP[1] * X
     vD[0] = 0;
-    vD[1] = 1;   // at any given moment, d =vD[0]*N+vD[1]*X
+    vD[1] = 1; // at any given moment, d = vD[0] * N + vD[1] * X
     p = N;
     d = X;
     d %= N;
@@ -268,8 +268,8 @@ public:
   static inline double Pi() {
     return 3.141592653589793238462643383279;
   }
-  // the MS compiler refuses to compile the following (WTF?), hence the above line.
-  //  static const double Pi =(double)3.141592653589793238462643383279;
+  // the MS compiler refuses to compile the following, hence the above line.
+  //static const double Pi =(double)3.141592653589793238462643383279;
   static int KToTheNth(int k, int n);
   static void KToTheNth(int k, int n, LargeInt& output);
   inline static int parity(int n);
@@ -477,90 +477,32 @@ private:
 
 class XML {
 private:
-  static std::string GetOpenTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters) {
-    std::string result = "<";
-    result.append(tagNameNoSpacesNoForbiddenCharacters);
-    result.append(">");
-    return result;
-  }
-  static std::string GetCloseTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters) {
-    std::string result = "</";
-    result.append(tagNameNoSpacesNoForbiddenCharacters);
-    result.append(">");
-    return result;
-  }
-  public:
+  static std::string GetOpenTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters);
+  static std::string GetCloseTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters);
+public:
   std::string theString;
   int positionInString;
   XML();
   bool ReadFromFile(std::fstream& inputFile);
-  static std::string GetOpenTagNoInputCheckAppendSpacE(const std::string& tagNameNoSpacesNoForbiddenCharacters) {
-    std::string result = " <";
-    result.append(tagNameNoSpacesNoForbiddenCharacters);
-    result.append("> ");
-    return result;
-  }
-  static std::string GetCloseTagNoInputCheckAppendSpacE(const std::string& tagNameNoSpacesNoForbiddenCharacters) {
-    std::string result = " </";
-    result.append(tagNameNoSpacesNoForbiddenCharacters);
-    result.append("> ");
-    return result;
-  }
-  inline static bool ReadThroughFirstOpenTag(
+  static std::string GetOpenTagNoInputCheckAppendSpacE(const std::string& tagNameNoSpacesNoForbiddenCharacters);
+  static std::string GetCloseTagNoInputCheckAppendSpacE(const std::string& tagNameNoSpacesNoForbiddenCharacters);
+  static bool ReadThroughFirstOpenTag(
     std::istream& streamToMoveIn,
     const std::string& tagNameNoSpacesNoForbiddenCharacters
-  ) {
-    int tempInt;
-    return XML::ReadThroughFirstOpenTag(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
-  }
-  inline static bool ReadEverythingPassedTagOpenUntilTagClose(
+  );
+  static bool ReadEverythingPassedTagOpenUntilTagClose(
     std::istream& streamToMoveIn, const std::string& tagNameNoSpacesNoForbiddenCharacters
-  ) {
-    int tempInt;
-    return XML::ReadEverythingPassedTagOpenUntilTagClose(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
-  }
+  );
   static bool ReadThroughFirstOpenTag(
     std::istream& streamToMoveIn,
     int& NumReadWordsExcludingTag,
     const std::string& tagNameNoSpacesNoForbiddenCharacters
-  ) {
-    std::string tagOpen = XML::GetOpenTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
-    std::string tempS;
-    NumReadWordsExcludingTag = 0;
-    while (!streamToMoveIn.eof()) {
-      streamToMoveIn >> tempS;
-      if (tempS == tagOpen) {
-        return true;
-      }
-      NumReadWordsExcludingTag ++;
-    }
-    return false;
-  }
+  );
   static bool ReadEverythingPassedTagOpenUntilTagClose(
     std::istream& streamToMoveIn,
     int& NumReadWordsExcludingTag,
     const std::string& tagNameNoSpacesNoForbiddenCharacters
-  ) {
-    std::string tagClose = XML::GetCloseTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
-    std::string tagOpen = XML::GetOpenTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
-    int TagDepth = 1;
-    std::string tempS;
-    NumReadWordsExcludingTag = 0;
-    while (!streamToMoveIn.eof()) {
-      streamToMoveIn >> tempS;
-      if (tempS == tagClose) {
-        TagDepth --;
-      }
-      if (tempS == tagOpen) {
-        TagDepth ++;
-      }
-      if (TagDepth == 0) {
-        return true;
-      }
-      NumReadWordsExcludingTag ++;
-    }
-    return false;
-  }
+  );
   bool GetStringEnclosedIn(const std::string& theTagName, std::string& outputString);
 };
 
@@ -947,16 +889,6 @@ public:
     this->BSInsert(o); //fixed :) now all this function does is throw away the return value
   }
   void InsertAtIndexShiftElementsUp(const Object& o, int desiredIndex) {
-    // is this not a nice thing to do to c++ objects?
-    // What if the assignment operator as a side effect
-    // informed some other object of the object's address, then moving an object
-    // without using assignment operator would cause trouble
-    // this->SetSize(this->size + 1);
-    // memmove(this->TheObjects+desiredIndex + 1, this->TheObjects+desiredIndex, num_to_move * sizeof(o));
-    // std::copy_backward(this->TheObjects+desiredIndex, this->TheObjects+this->size- 1, this->TheObjects+this->size);
-    // std::move_backward(this->TheObjects+desiredIndex, this->TheObjects+this->size- 1, this->TheObjects+this->size);
-    // this->TheObjects[desiredIndex] = o;
-    // ok whatever if this program was supposed to be fast it would be optimizable
     this->ShiftUpExpandOnTop(desiredIndex);
     (*this)[desiredIndex] = o;
   }
@@ -1001,8 +933,9 @@ public:
     }
     this->SetSize(currentIndex);
   }
-  // the below function is named a bit awkwardly because otherwise there is a risk of confusion
-  // with the RemoveIndexSwapWithLast when selecting from autocomplete list. This cost me already 2 hours of lost time,
+  // The below function is named a bit awkwardly because otherwise there is a risk of confusion
+  // with the RemoveIndexSwapWithLast when selecting from autocomplete list.
+  // This cost me already 2 hours of lost time,
   // so the awkward name is necessary.
   void RemoveFirstOccurenceSwapWithLast(const Object& o);
   Object PopLastObject();
@@ -1034,7 +967,7 @@ public:
   }
   //The below function is required to pReserve the order of elements given by theSelection.elements.
   void SubSelection(const Selection& theSelection, List<Object>& output);
-  //If comparison function is not specified, QuickSortAscending usese operator>, else it uses the given
+  //If comparison function is not specified, QuickSortAscending uses operator>, else it uses the given
   //comparison function
   template <class otherType = Object>
   void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder = 0, List<otherType>* carbonCopy = 0) {
@@ -1150,8 +1083,6 @@ public:
   bool BSContains(const Object& o) const {
     return this->BSGetIndex(o) != - 1;
   }
-  // indexing is O(n log n) and insertion is O(n), whereas hash table insertion and indexing
-  // are both O(1)
   int BSInsert(const Object& o) {
     int n = BSIndexFirstGreaterThan(o);
     if (n == this->size) {
@@ -1654,7 +1585,6 @@ public:
     }
     this->TemplateList::SetExpectedSize(expectedSize);
     if (!this->IsSparseRelativeToExpectedSize(expectedSize)) {
-      //Not allowed, causes stack mess: MacroRegisterFunctionWithName("HashTemplate::SetExpectedSize");
       this->SetHashSizE(expectedSize * 5);
     }
   }
@@ -1735,8 +1665,6 @@ public:
     for (int i = 0; i < other.size; i ++) {
       this->AddOnTop(other.TheObjects[i]);
     }
-//    int commentmewhendone;
-//    this->GrandMasterConsistencyCheck();
   }
 };
 
@@ -2161,7 +2089,7 @@ void List<Object>::RemoveFirstOccurenceSwapWithLast(const Object& o) {
 
 template <class Object>
 void List<Object>::SetSize(int theSize) {
- // <-Registering stack trace forbidden! Multithreading deadlock alert.
+  // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (theSize < 0) {
     theSize = 0;
   }
@@ -2286,7 +2214,7 @@ List<Object>::~List() {
 
 template <class Object>
 void List<Object>::ExpandArrayOnTop(int increase) {
- // <-Registering stack trace forbidden! Multithreading deadlock alert.
+  // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (increase <= 0) {
     return;
   }
@@ -2328,8 +2256,6 @@ void List<Object>::ReverseOrderElements() {
 
 template <class Object>
 void List<Object>::ReverseRange(int rangeBegin, int rangeEnd) {
-  //std::reverse(this->TheObjects+rangeBegin, this->TheObjects+rangeEnd);
-  // the compiler can optimize this, right?
   for (int i = rangeBegin, j = rangeEnd - 1; i < j; i ++, j --) {
     Object oi = this->TheObjects[i];
     this->TheObjects[i] = this->TheObjects[j];
@@ -2339,7 +2265,7 @@ void List<Object>::ReverseRange(int rangeBegin, int rangeEnd) {
 
 template <class Object>
 void List<Object>::AddOnTop(const Object& o) {
- // <-Registering stack trace forbidden! Multithreading deadlock alert.
+  // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->size > this->ActualSize) {
     crash << "This is a programming error: the actual size of the list is "
     << this->ActualSize << " but this->size equals " << this->size

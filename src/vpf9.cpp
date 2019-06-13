@@ -1282,6 +1282,93 @@ XML::XML() {
   this->positionInString = - 1;
 }
 
+std::string XML::GetOpenTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters) {
+  std::string result = "<";
+  result.append(tagNameNoSpacesNoForbiddenCharacters);
+  result.append(">");
+  return result;
+}
+
+std::string XML::GetCloseTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters) {
+  std::string result = "</";
+  result.append(tagNameNoSpacesNoForbiddenCharacters);
+  result.append(">");
+  return result;
+}
+
+std::string XML::GetOpenTagNoInputCheckAppendSpacE(const std::string& tagNameNoSpacesNoForbiddenCharacters) {
+  std::string result = " <";
+  result.append(tagNameNoSpacesNoForbiddenCharacters);
+  result.append("> ");
+  return result;
+}
+
+std::string XML::GetCloseTagNoInputCheckAppendSpacE(const std::string& tagNameNoSpacesNoForbiddenCharacters) {
+  std::string result = " </";
+  result.append(tagNameNoSpacesNoForbiddenCharacters);
+  result.append("> ");
+  return result;
+}
+
+bool XML::ReadThroughFirstOpenTag(
+  std::istream& streamToMoveIn,
+  const std::string& tagNameNoSpacesNoForbiddenCharacters
+) {
+  int tempInt;
+  return XML::ReadThroughFirstOpenTag(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
+}
+
+bool XML::ReadEverythingPassedTagOpenUntilTagClose(
+  std::istream& streamToMoveIn, const std::string& tagNameNoSpacesNoForbiddenCharacters
+) {
+  int tempInt;
+  return XML::ReadEverythingPassedTagOpenUntilTagClose(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
+}
+
+bool XML::ReadThroughFirstOpenTag(
+  std::istream& streamToMoveIn,
+  int& NumReadWordsExcludingTag,
+  const std::string& tagNameNoSpacesNoForbiddenCharacters
+) {
+  std::string tagOpen = XML::GetOpenTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
+  std::string tempS;
+  NumReadWordsExcludingTag = 0;
+  while (!streamToMoveIn.eof()) {
+    streamToMoveIn >> tempS;
+    if (tempS == tagOpen) {
+      return true;
+    }
+    NumReadWordsExcludingTag ++;
+  }
+  return false;
+}
+
+bool XML::ReadEverythingPassedTagOpenUntilTagClose(
+  std::istream& streamToMoveIn,
+  int& NumReadWordsExcludingTag,
+  const std::string& tagNameNoSpacesNoForbiddenCharacters
+) {
+  std::string tagClose = XML::GetCloseTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
+  std::string tagOpen = XML::GetOpenTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
+  int TagDepth = 1;
+  std::string tempS;
+  NumReadWordsExcludingTag = 0;
+  while (!streamToMoveIn.eof()) {
+    streamToMoveIn >> tempS;
+    if (tempS == tagClose) {
+      TagDepth --;
+    }
+    if (tempS == tagOpen) {
+      TagDepth ++;
+    }
+    if (TagDepth == 0) {
+      return true;
+    }
+    NumReadWordsExcludingTag ++;
+  }
+  return false;
+}
+
 bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& outputString) {
   MacroRegisterFunctionWithName("XML::GetStringEnclosedIn");
   std::string charReader = "";

@@ -447,7 +447,8 @@ struct sslFunction {
     const std::string& inputName,
     int (*inputFunction) (SSL *, std::stringstream* commentsOnError)
   );
-  bool isNull();
+  bool isNull() const;
+  bool isUndefinedFunction() const;
   sslFunction();
   bool operator==(const sslFunction& other) const;
 };
@@ -479,7 +480,7 @@ struct ssl_method_st {
     int (s_connect)(SSL *s, std::stringstream* commentsOnError),
     const ssl3_enc_method* enc_data
   );
-  ssl_method_st* initializeSSL(
+  ssl_method_st* initialize_D_TLS(
     const std::string& inputName,
     int inputVersion,
     unsigned inputFlags,
@@ -490,7 +491,16 @@ struct ssl_method_st {
     int (s_connect)(SSL *s, std::stringstream* commentsOnError),
     const ssl3_enc_method* enc_data
   );
+
+  ssl_method_st* initializeSSL(
+    const std::string& inputName,
+    const std::string& acceptName,
+    int (s_accept)(SSL *s, std::stringstream* commentsOnError),
+    const std::string& connectName,
+    int (s_connect)(SSL *s, std::stringstream* commentsOnError)
+  );
   void initializeTLSCommon();
+  void initialize_D_TLSCommon();
   void initializeSSLCommon();
   unsigned flags;
   unsigned long mask;
@@ -2233,122 +2243,6 @@ extern const SSL3_ENC_METHOD DTLSv1_2_enc_data;
  */
 # define SSL_METHOD_NO_FIPS      (1U<<0)
 # define SSL_METHOD_NO_SUITEB    (1U<<1)
-
-# define IMPLEMENT_tls_meth_func(name, version, flags, mask, func_name, s_accept, \
-                                 s_connect, enc_data) \
-const SSL_METHOD *func_name(void)  \
-        { \
-        static const SSL_METHOD func_name##_data= { \
-                name, \
-                version, \
-                flags, \
-                mask, \
-                tls1_new, \
-                tls1_clear, \
-                tls1_free, \
-                s_accept, \
-                s_connect, \
-                ssl3_read, \
-                ssl3_peek, \
-                ssl3_write, \
-                ssl3_shutdown, \
-                ssl3_renegotiate, \
-                ssl3_renegotiate_check, \
-                ssl3_read_bytes, \
-                ssl3_write_bytes, \
-                ssl3_dispatch_alert, \
-                ssl3_ctrl, \
-                ssl3_ctx_ctrl, \
-                ssl3_get_cipher_by_char, \
-                ssl3_put_cipher_by_char, \
-                ssl3_pending, \
-                ssl3_num_ciphers, \
-                ssl3_get_cipher, \
-                tls1_default_timeout, \
-                &enc_data, \
-                ssl_undefined_void_function, \
-                ssl3_callback_ctrl, \
-                ssl3_ctx_callback_ctrl, \
-        }; \
-        return &func_name##_data; \
-        }
-
-# define IMPLEMENT_ssl3_meth_func(name, func_name, s_accept, s_connect) \
-const SSL_METHOD *func_name(void)  \
-        { \
-        static const SSL_METHOD func_name##_data= { \
-                name, \
-                SSL3_VERSION, \
-                SSL_METHOD_NO_FIPS | SSL_METHOD_NO_SUITEB, \
-                SSL_OP_NO_SSLv3, \
-                ssl3_new, \
-                ssl3_clear, \
-                ssl3_free, \
-                s_accept, \
-                s_connect, \
-                ssl3_read, \
-                ssl3_peek, \
-                ssl3_write, \
-                ssl3_shutdown, \
-                ssl3_renegotiate, \
-                ssl3_renegotiate_check, \
-                ssl3_read_bytes, \
-                ssl3_write_bytes, \
-                ssl3_dispatch_alert, \
-                ssl3_ctrl, \
-                ssl3_ctx_ctrl, \
-                ssl3_get_cipher_by_char, \
-                ssl3_put_cipher_by_char, \
-                ssl3_pending, \
-                ssl3_num_ciphers, \
-                ssl3_get_cipher, \
-                ssl3_default_timeout, \
-                &SSLv3_enc_data, \
-                ssl_undefined_void_function, \
-                ssl3_callback_ctrl, \
-                ssl3_ctx_callback_ctrl, \
-        }; \
-        return &func_name##_data; \
-        }
-
-# define IMPLEMENT_dtls1_meth_func(name, version, flags, mask, func_name, s_accept, \
-                                        s_connect, enc_data) \
-const SSL_METHOD *func_name(void)  \
-        { \
-        static const SSL_METHOD func_name##_data= { \
-                name, \
-                version, \
-                flags, \
-                mask, \
-                dtls1_new, \
-                dtls1_clear, \
-                dtls1_free, \
-                s_accept, \
-                s_connect, \
-                ssl3_read, \
-                ssl3_peek, \
-                ssl3_write, \
-                dtls1_shutdown, \
-                ssl3_renegotiate, \
-                ssl3_renegotiate_check, \
-                dtls1_read_bytes, \
-                dtls1_write_app_data_bytes, \
-                dtls1_dispatch_alert, \
-                dtls1_ctrl, \
-                ssl3_ctx_ctrl, \
-                ssl3_get_cipher_by_char, \
-                ssl3_put_cipher_by_char, \
-                ssl3_pending, \
-                ssl3_num_ciphers, \
-                ssl3_get_cipher, \
-                dtls1_default_timeout, \
-                &enc_data, \
-                ssl_undefined_void_function, \
-                ssl3_callback_ctrl, \
-                ssl3_ctx_callback_ctrl, \
-        }; \
-        return &func_name##_data; \
-        }
 
 struct openssl_ssl_test_functions {
     int (*p_ssl_init_wbio_buffer) (SSL *s);

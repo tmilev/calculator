@@ -13,6 +13,7 @@
 #include "../include/openssl/evp.h"
 #include "../include/openssl/md5.h"
 #include "../include/internal/cryptlib.h"
+#include "../../vpfHeader1General0_General.h"
 
 static int ssl3_generate_key_block(SSL *s, unsigned char *km, int num)
 {
@@ -374,7 +375,8 @@ int ssl3_finish_mac(SSL *s, const unsigned char *buf, size_t len)
 }
 
 int sslData::ssl3_digest_cached_records(int keep, std::stringstream* commentsOnFailure) {
-  const EVP_MD *md;
+  MacroRegisterFunctionWithName("sslData::ssl3_digest_cached_records");
+  const EVP_MD *md = 0;
   long hdatalen;
   void *hdata;
   if (this->s3->handshake_dgst == NULL) {
@@ -394,7 +396,10 @@ int sslData::ssl3_digest_cached_records(int keep, std::stringstream* commentsOnF
       this->SetError();
       return 0;
     }
+    std::cout << "DEBUG: About to ssl handshake md(this)\n";
     md = ssl_handshake_md(this);
+    std::cout << "DEBUG: did handshake md(this)\n";
+
     if (md == NULL) {
       if (commentsOnFailure != 0) {
         *commentsOnFailure << "Md pointer not allowed to be null.\n";
@@ -402,12 +407,14 @@ int sslData::ssl3_digest_cached_records(int keep, std::stringstream* commentsOnF
       this->SetError();
       return 0;
     }
+    std::cout << "DEBUG: about to digest init\n";
     if (!EVP_DigestInit_ex(this->s3->handshake_dgst, md, NULL, commentsOnFailure)) {
       if (commentsOnFailure != 0) {
         *commentsOnFailure << "Failed to run DigestInit.\n";
       }
       return 0;
     }
+    std::cout << "DEBUG: about to digest update\n";
     if (!EVP_DigestUpdate(this->s3->handshake_dgst, hdata, hdatalen)) {
       if (commentsOnFailure != 0) {
         *commentsOnFailure << "Faild to run DigestUpdate.\n";
@@ -416,6 +423,7 @@ int sslData::ssl3_digest_cached_records(int keep, std::stringstream* commentsOnF
       return 0;
     }
   }
+  std::cout << "DEBUG: About to bio free";
   if (keep == 0) {
     BIO_free(this->s3->handshake_buffer);
     this->s3->handshake_buffer = NULL;

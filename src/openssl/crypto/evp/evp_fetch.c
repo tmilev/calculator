@@ -205,9 +205,11 @@ void *evp_generic_fetch(openssl_ctx_st *libctx,
     mcmdata.refcnt_up_method = upref_method;
     mcmdata.destruct_method = free_method;
     mcmdata.nid_method = nid_method;
+    std::cout << "DEBUG: about to ossl_method_construct\n";
     method = ossl_method_construct(
       libctx, operation_id, algorithm, properties, 0 /* !force_cache */, &mcm, &mcmdata, commentsOnError
     );
+    std::cout << "DEBUG: about to store cache set\n";
     ossl_method_store_cache_set(NULL, nid, properties, method);
     if (commentsOnError != 0) {
       *commentsOnError << "DEBUG: ossl method store cache set executed.\n";

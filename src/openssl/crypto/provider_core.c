@@ -239,8 +239,6 @@ static const openssl_ctx_method provider_store_method = {
     provider_store_free,
 };
 
-static CRYPTO_ONCE provider_store_init_flag = CRYPTO_ONCE_STATIC_INIT;
-
 int openssl_ctx_new_index(const openssl_ctx_method *meth);
 
 int get_provider_store_index(std::stringstream* commentsOnError) {
@@ -253,6 +251,10 @@ int get_provider_store_index(std::stringstream* commentsOnError) {
     return - 1;
   }
   provider_store_index = openssl_ctx_new_index(&provider_store_method);
+  std::cout << "DEBUG: Resulting store index: " << provider_store_index << "\n";
+  if (provider_store_index == - 1) {
+    crash << "Unexpected failure to get openssl context.\n" << crash;
+  }
   return provider_store_index;
 }
 
@@ -644,7 +646,7 @@ int ossl_provider_forall_loaded(
   MacroRegisterFunctionWithName("ossl_provider_forall_loaded");
   std::cout << "DEBUG: inside forallloaded...\n";
 
-  struct provider_store_st *store = get_provider_store(ctx, commentsOnError);
+  provider_store_st *store = get_provider_store(ctx, commentsOnError);
   std::cout << "DEBUG: got store...\n";
   if (store == NULL && commentsOnError != 0) {
     *commentsOnError << "Unexpected null store.\n";

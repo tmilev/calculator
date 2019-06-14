@@ -132,11 +132,7 @@ void TransportSecurityLayer::initSSLlibrary() {
   this->flagSSLlibraryInitialized = true;
   std::stringstream commentsOnError;
   // this command loads error strings and initializes openSSL.
-  int loadedSuccessfully = SSL_load_error_strings(&commentsOnError);
-  if (loadedSuccessfully != 1) {
-    logServer << logger::red << commentsOnError.str() << logger::endL;
-    crash << "Failed to initialize ssl library. " << crash;
-  }
+  SSL_load_error_strings();
   //loadedSuccessfully = OPENSSL_init_ssl(0, NULL, &commentsOnError);
   //if (loadedSuccessfully != 1) {
   //  logServer << logger::red << commentsOnError.str() << logger::endL;
@@ -175,7 +171,7 @@ void TransportSecurityLayer::initSSLserver() {
   std::stringstream commentsOnError;
 
   logServer << logger::blue << "DEBUG: about to init openssl. " << logger::endL;
-  this->contextServer = SSL_CTX_new(this->theSSLMethod, &commentsOnError);
+  this->contextServer = SSL_CTX_new(this->theSSLMethod);
   logServer << logger::red << "DEBUG: comments: " << commentsOnError.str() << logger::endL;
   if (this->contextServer == 0) {
     logServer << logger::red << "Failed to create ssl context. " << logger::endL;
@@ -428,7 +424,7 @@ bool TransportSecurityLayer::HandShakeIamClientNoSocketCleanup(
 ) {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamClientNoSocketCleanup");
   this->FreeClientSSL();
-  this->sslClient = SSL_new(this->contextServer, commentsOnFailure);
+  this->sslClient = SSL_new(this->contextServer);
   if (this->sslClient == 0) {
     this->flagSSLHandshakeSuccessful = false;
     logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
@@ -437,7 +433,7 @@ bool TransportSecurityLayer::HandShakeIamClientNoSocketCleanup(
   this->SetSocketAddToStackClient(inputSocketID);
   int maxNumHandshakeTries = 4;
   for (int i = 0; i < maxNumHandshakeTries; i ++) {
-    this->errorCode = SSL_connect(this->sslClient, commentsOnFailure);
+    this->errorCode = SSL_connect(this->sslClient);
     this->flagSSLHandshakeSuccessful = false;
     if (this->errorCode != 1) {
       if (this->errorCode == 0) {
@@ -611,7 +607,7 @@ int TransportSecurityLayer::SSLWrite(
 ) {
   (void) commentsGeneral;
   ERR_clear_error();
-  int result = SSL_write(theSSL, buffer, bufferSize, commentsOnError);
+  int result = SSL_write(theSSL, buffer, bufferSize);
   this->ClearErrorQueue(
     result, theSSL, outputError, commentsOnError, includeNoErrorInComments
   );
@@ -621,7 +617,7 @@ int TransportSecurityLayer::SSLWrite(
 bool TransportSecurityLayer::HandShakeIamServer(int inputSocketID) {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamServer");
   std::stringstream commentsOnSSLNew;
-  this->sslServeR.theData = SSL_new(this->contextServer, &commentsOnSSLNew);
+  this->sslServeR.theData = SSL_new(this->contextServer);
   if (this->sslServeR.theData == 0) {
     logOpenSSL << logger::red << "Failed to allocate ssl: " << commentsOnSSLNew.str() << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
@@ -631,7 +627,7 @@ bool TransportSecurityLayer::HandShakeIamServer(int inputSocketID) {
   this->flagSSLHandshakeSuccessful = false;
   for (int i = 0; i < maxNumHandshakeTries; i ++) {
     std::stringstream commentsOnError;
-    this->errorCode = SSL_accept(this->sslServeR.theData, &commentsOnError);
+    this->errorCode = SSL_accept(this->sslServeR.theData);
     if (this->errorCode != 1) {
       this->flagSSLHandshakeSuccessful = false;
       if (this->errorCode == 0) {

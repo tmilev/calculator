@@ -143,7 +143,7 @@ bool WebWorker::IsAllowedAsRequestCookie(const std::string& input) {
 #ifdef MACRO_use_open_ssl
 void SSL_write_Wrapper(SSL* inputSSL, const std::string& input, std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("SSL_write_Wrapper");
-  int err = SSL_write (inputSSL, input.c_str(), input.size(), commentsOnError);
+  int err = SSL_write (inputSSL, input.c_str(), input.size());
   if ((err) == - 1) {
     ERR_print_errors_fp(stderr);
     crash << "Errors while calling SSL_write. " << crash;

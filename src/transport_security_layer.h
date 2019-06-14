@@ -12,16 +12,16 @@ static ProjectInformationInstance projectInfoInstanceTransportSecurityLayerHeade
 //Instructions: look at the examples folder in the openssl.
 //openssl tutorial (couldn't make it work myself):
 //http://www.ibm.com/developerworks/library/l-openssl/
-#include "openssl/include/openssl/rsa.h"
-#include "openssl/include/openssl/crypto.h"
-#include "openssl/include/openssl/x509.h"
-#include "openssl/include/openssl/pem.h"
-#include "openssl/include/openssl/ssl.h"
-#include "openssl/include/openssl/err.h"
+#include "boringssl/include/openssl/rsa.h"
+#include "boringssl/include/openssl/crypto.h"
+#include "boringssl/include/openssl/x509.h"
+#include "boringssl/include/openssl/pem.h"
+#include "boringssl/include/openssl/ssl.h"
+#include "boringssl/include/openssl/err.h"
 
 class SSLServer {
 public:
-  sslData* theData;
+  ssl_st* theData;
   SSLServer();
   void Free();
 };
@@ -30,7 +30,7 @@ struct TransportSecurityLayer {
 public:
   static bool flagSSLlibraryInitialized;
   int errorCode;
-  sslData* sslClient;
+  ssl_st* sslClient;
   SSLServer sslServeR;
   X509* my_certificate;
   X509* peer_certificate;

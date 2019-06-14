@@ -54,9 +54,8 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
-
-#include <openssl/bio.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/bio.h"
 
 int i2a_ASN1_STRING(BIO *bp, ASN1_STRING *a, int type)
 {

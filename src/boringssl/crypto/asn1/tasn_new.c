@@ -54,14 +54,14 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
+#include "../../include/openssl/asn1.h"
 
 #include <string.h>
 
-#include <openssl/asn1t.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/obj.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
 
 #include "asn1_locl.h"
 #include "../internal.h"
@@ -94,7 +94,7 @@ static int asn1_item_ex_combine_new(ASN1_VALUE **pval, const ASN1_ITEM *it,
     const ASN1_TEMPLATE *tt = NULL;
     const ASN1_COMPAT_FUNCS *cf;
     const ASN1_EXTERN_FUNCS *ef;
-    const ASN1_AUX *aux = it->funcs;
+    const ASN1_AUX *aux = (const ASN1_AUX *) it->funcs;
     ASN1_aux_cb *asn1_cb;
     ASN1_VALUE **pseqval;
     int i;

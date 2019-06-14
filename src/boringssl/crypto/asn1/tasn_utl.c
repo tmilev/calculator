@@ -54,16 +54,16 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
+#include "../../include/openssl/asn1.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include <openssl/asn1t.h>
-#include <openssl/mem.h>
-#include <openssl/obj.h>
-#include <openssl/err.h>
-#include <openssl/thread.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/thread.h"
 
 #include "../internal.h"
 

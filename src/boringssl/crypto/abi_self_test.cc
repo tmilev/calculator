@@ -15,7 +15,7 @@
 #include <gtest/gtest.h>
 #include <gtest/gtest-spi.h>
 
-#include <openssl/rand.h>
+#include "../../include/openssl/rand.h"
 
 #include "test/abi_test.h"
 

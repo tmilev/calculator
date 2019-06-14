@@ -54,7 +54,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
+#include "../../include/openssl/asn1.h"
 
 #include <limits.h>
 #include <string.h>
@@ -86,6 +86,13 @@ int ASN1_mbstring_copy(ASN1_STRING **out, const unsigned char *in, int len,
 OPENSSL_DECLARE_ERROR_REASON(ASN1, INVALID_BMPSTRING)
 OPENSSL_DECLARE_ERROR_REASON(ASN1, INVALID_UNIVERSALSTRING)
 OPENSSL_DECLARE_ERROR_REASON(ASN1, INVALID_UTF8STRING)
+
+int ASN1_ncopy_cleanup(char free_out, ASN1_STRING * dest, CBB& cbb) {
+  if (free_out)
+      ASN1_STRING_free(dest);
+  CBB_cleanup(&cbb);
+  return - 1;
+}
 
 int ASN1_mbstring_ncopy(ASN1_STRING **out, const unsigned char *in, int len,
                         int inform, unsigned long mask,
@@ -248,15 +255,14 @@ int ASN1_mbstring_ncopy(ASN1_STRING **out, const unsigned char *in, int len,
     CBB cbb;
     if (!CBB_init(&cbb, size_estimate + 1)) {
         OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
-        goto err;
+        return ASN1_ncopy_cleanup(free_out, dest, cbb);
     }
     CBS_init(&cbs, in, len);
     while (CBS_len(&cbs) != 0) {
         uint32_t c;
-        if (!decode_func(&cbs, &c) ||
-            !encode_func(&cbb, c)) {
+        if (!decode_func(&cbs, &c) || !encode_func(&cbb, c)) {
             OPENSSL_PUT_ERROR(ASN1, ERR_R_INTERNAL_ERROR);
-            goto err;
+            return ASN1_ncopy_cleanup(free_out, dest, cbb);
         }
     }
     uint8_t *data = NULL;
@@ -269,17 +275,11 @@ int ASN1_mbstring_ncopy(ASN1_STRING **out, const unsigned char *in, int len,
         data_len > INT_MAX) {
         OPENSSL_PUT_ERROR(ASN1, ERR_R_INTERNAL_ERROR);
         OPENSSL_free(data);
-        goto err;
+        return ASN1_ncopy_cleanup(free_out, dest, cbb);
     }
     dest->length = (int)(data_len - 1);
     dest->data = data;
     return str_type;
-
- err:
-    if (free_out)
-        ASN1_STRING_free(dest);
-    CBB_cleanup(&cbb);
-    return -1;
 }
 
 /* Return 1 if the character is permitted in a PrintableString */

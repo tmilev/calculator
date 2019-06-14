@@ -54,23 +54,23 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/bio.h>
+#include "../../include/openssl/bio.h"
 
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/asn1.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/thread.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/thread.h"
 
 #include "../internal.h"
 
 
 BIO *BIO_new(const BIO_METHOD *method) {
-  BIO *ret = OPENSSL_malloc(sizeof(BIO));
+  BIO *ret = (BIO *) OPENSSL_malloc(sizeof(BIO));
   if (ret == NULL) {
     OPENSSL_PUT_ERROR(BIO, ERR_R_MALLOC_FAILURE);
     return NULL;
@@ -133,7 +133,7 @@ int BIO_read(BIO *bio, void *buf, int len) {
   if (len <= 0) {
     return 0;
   }
-  int ret = bio->method->bread(bio, buf, len);
+  int ret = bio->method->bread(bio, (char*) buf, len);
   if (ret > 0) {
     bio->num_read += ret;
   }
@@ -171,7 +171,7 @@ int BIO_write(BIO *bio, const void *in, int inl) {
   if (inl <= 0) {
     return 0;
   }
-  int ret = bio->method->bwrite(bio, in, inl);
+  int ret = bio->method->bwrite(bio, (const char*) in, inl);
   if (ret > 0) {
     bio->num_write += ret;
   }
@@ -179,7 +179,7 @@ int BIO_write(BIO *bio, const void *in, int inl) {
 }
 
 int BIO_write_all(BIO *bio, const void *data, size_t len) {
-  const uint8_t *data_u8 = data;
+  const uint8_t *data_u8 = (const uint8_t *) data;
   while (len > 0) {
     int ret = BIO_write(bio, data_u8, len > INT_MAX ? INT_MAX : (int)len);
     if (ret <= 0) {
@@ -443,7 +443,7 @@ static int bio_read_all(BIO *bio, uint8_t **out, size_t *out_len,
   if (len < prefix_len) {
     return 0;
   }
-  *out = OPENSSL_malloc(len);
+  *out = (uint8_t*) OPENSSL_malloc(len);
   if (*out == NULL) {
     return 0;
   }
@@ -472,7 +472,7 @@ static int bio_read_all(BIO *bio, uint8_t **out, size_t *out_len,
       if (len < kChunkSize || len > max_len) {
         len = max_len;
       }
-      uint8_t *new_buf = OPENSSL_realloc(*out, len);
+      uint8_t *new_buf = (uint8_t *) OPENSSL_realloc(*out, len);
       if (new_buf == NULL) {
         OPENSSL_free(*out);
         return 0;
@@ -599,7 +599,7 @@ int BIO_read_asn1(BIO *bio, uint8_t **out, size_t *out_len, size_t max_len) {
   len += header_len;
   *out_len = len;
 
-  *out = OPENSSL_malloc(len);
+  *out = (uint8_t*) OPENSSL_malloc(len);
   if (*out == NULL) {
     OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
     return 0;
@@ -632,7 +632,7 @@ int BIO_get_new_index(void) {
 }
 
 BIO_METHOD *BIO_meth_new(int type, const char *name) {
-  BIO_METHOD *method = OPENSSL_malloc(sizeof(BIO_METHOD));
+  BIO_METHOD *method = (BIO_METHOD *) OPENSSL_malloc(sizeof(BIO_METHOD));
   if (method == NULL) {
     return NULL;
   }

@@ -54,14 +54,14 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
+#include "../../include/openssl/asn1.h"
 
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/asn1_mac.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/asn1_mac.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
 
 #include "../internal.h"
 
@@ -336,7 +336,7 @@ ASN1_STRING *ASN1_STRING_dup(const ASN1_STRING *str)
 int ASN1_STRING_set(ASN1_STRING *str, const void *_data, int len)
 {
     unsigned char *c;
-    const char *data = _data;
+    const char *data = (const char *) _data;
 
     if (len < 0) {
         if (data == NULL)
@@ -347,9 +347,9 @@ int ASN1_STRING_set(ASN1_STRING *str, const void *_data, int len)
     if ((str->length <= len) || (str->data == NULL)) {
         c = str->data;
         if (c == NULL)
-            str->data = OPENSSL_malloc(len + 1);
+            str->data = (unsigned char*) OPENSSL_malloc(len + 1);
         else
-            str->data = OPENSSL_realloc(c, len + 1);
+            str->data = (unsigned char*) OPENSSL_realloc(c, len + 1);
 
         if (str->data == NULL) {
             OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
@@ -370,7 +370,7 @@ void ASN1_STRING_set0(ASN1_STRING *str, void *data, int len)
 {
     if (str->data)
         OPENSSL_free(str->data);
-    str->data = data;
+    str->data = (unsigned char *) data;
     str->length = len;
 }
 

@@ -54,7 +54,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/bio.h>
+#include "../../include/openssl/bio.h"
 
 #if !defined(OPENSSL_TRUSTY)
 
@@ -74,9 +74,9 @@ OPENSSL_MSVC_PRAGMA(warning(push, 3))
 OPENSSL_MSVC_PRAGMA(warning(pop))
 #endif
 
-#include <openssl/buf.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
 
 #include "internal.h"
 #include "../internal.h"
@@ -296,7 +296,7 @@ end:
 }
 
 static BIO_CONNECT *BIO_CONNECT_new(void) {
-  BIO_CONNECT *ret = OPENSSL_malloc(sizeof(BIO_CONNECT));
+  BIO_CONNECT *ret = (BIO_CONNECT *) OPENSSL_malloc(sizeof(BIO_CONNECT));
 
   if (ret == NULL) {
     return NULL;
@@ -429,13 +429,13 @@ static long conn_ctrl(BIO *bio, int cmd, long num, void *ptr) {
         bio->init = 1;
         if (num == 0) {
           OPENSSL_free(data->param_hostname);
-          data->param_hostname = BUF_strdup(ptr);
+          data->param_hostname = BUF_strdup((const char*) ptr);
           if (data->param_hostname == NULL) {
             ret = 0;
           }
         } else if (num == 1) {
           OPENSSL_free(data->param_port);
-          data->param_port = BUF_strdup(ptr);
+          data->param_port = BUF_strdup((const char*) ptr);
           if (data->param_port == NULL) {
             ret = 0;
           }

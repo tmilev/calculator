@@ -167,7 +167,7 @@ ASN1_ENUMERATED *BN_to_ASN1_ENUMERATED(BIGNUM *bn, ASN1_ENUMERATED *ai)
     j = BN_num_bits(bn);
     len = ((j == 0) ? 0 : ((j / 8) + 1));
     if (ret->length < len + 4) {
-        unsigned char *new_data = OPENSSL_realloc(ret->data, len + 4);
+        unsigned char *new_data = (unsigned char *) OPENSSL_realloc(ret->data, len + 4);
         if (!new_data) {
             OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
             goto err;

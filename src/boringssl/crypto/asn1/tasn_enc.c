@@ -54,13 +54,13 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
+#include "../../include/openssl/asn1.h"
 
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/asn1t.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/mem.h"
 
 #include "../internal.h"
 
@@ -107,7 +107,7 @@ static int asn1_item_flags_i2d(ASN1_VALUE *val, unsigned char **out,
         len = ASN1_item_ex_i2d(&val, NULL, it, -1, flags);
         if (len <= 0)
             return len;
-        buf = OPENSSL_malloc(len);
+        buf = (unsigned char *) OPENSSL_malloc(len);
         if (!buf)
             return -1;
         p = buf;
@@ -124,15 +124,19 @@ static int asn1_item_flags_i2d(ASN1_VALUE *val, unsigned char **out,
  * performs the normal item handling: it can be used in external types.
  */
 
-int ASN1_item_ex_i2d(ASN1_VALUE **pval, unsigned char **out,
-                     const ASN1_ITEM *it, int tag, int aclass)
-{
+int ASN1_item_ex_i2d(
+  ASN1_VALUE **pval,
+  unsigned char **out,
+  const ASN1_ITEM *it,
+  int tag,
+  int aclass
+) {
     const ASN1_TEMPLATE *tt = NULL;
     unsigned char *p = NULL;
     int i, seqcontlen, seqlen, ndef = 1;
     const ASN1_COMPAT_FUNCS *cf;
     const ASN1_EXTERN_FUNCS *ef;
-    const ASN1_AUX *aux = it->funcs;
+    const ASN1_AUX *aux = (const ASN1_AUX *) it->funcs;
     ASN1_aux_cb *asn1_cb = 0;
 
     if ((it->itype != ASN1_ITYPE_PRIMITIVE) && !*pval)
@@ -171,12 +175,12 @@ int ASN1_item_ex_i2d(ASN1_VALUE **pval, unsigned char **out,
 
     case ASN1_ITYPE_EXTERN:
         /* If new style i2d it does all the work */
-        ef = it->funcs;
+        ef = (const ASN1_EXTERN_FUNCS *) it->funcs;
         return ef->asn1_ex_i2d(pval, out, it, tag, aclass);
 
     case ASN1_ITYPE_COMPAT:
         /* old style hackery... */
-        cf = it->funcs;
+        cf = (const ASN1_COMPAT_FUNCS *) it->funcs;
         if (out)
             p = *out;
         i = cf->asn1_i2d(*pval, out);
@@ -409,7 +413,8 @@ typedef struct {
 
 static int der_cmp(const void *a, const void *b)
 {
-    const DER_ENC *d1 = a, *d2 = b;
+    const DER_ENC *d1 = (const DER_ENC *) a;
+    const DER_ENC *d2 = (const DER_ENC *) b;
     int cmplen, i;
     cmplen = (d1->length < d2->length) ? d1->length : d2->length;
     i = OPENSSL_memcmp(d1->data, d2->data, cmplen);
@@ -433,11 +438,11 @@ static int asn1_set_seq_out(STACK_OF(ASN1_VALUE) *sk, unsigned char **out,
         if (sk_ASN1_VALUE_num(sk) < 2)
             do_sort = 0;
         else {
-            derlst = OPENSSL_malloc(sk_ASN1_VALUE_num(sk)
+            derlst = (DER_ENC *) OPENSSL_malloc(sk_ASN1_VALUE_num(sk)
                                     * sizeof(*derlst));
             if (!derlst)
                 return 0;
-            tmpdat = OPENSSL_malloc(skcontlen);
+            tmpdat = (unsigned char*) OPENSSL_malloc(skcontlen);
             if (!tmpdat) {
                 OPENSSL_free(derlst);
                 return 0;
@@ -552,7 +557,7 @@ int asn1_ex_i2c(ASN1_VALUE **pval, unsigned char *cout, int *putype,
     unsigned char c;
     int len;
     const ASN1_PRIMITIVE_FUNCS *pf;
-    pf = it->funcs;
+    pf = (const ASN1_PRIMITIVE_FUNCS *) it->funcs;
     if (pf && pf->prim_i2c)
         return pf->prim_i2c(pval, cout, putype, it);
 

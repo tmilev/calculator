@@ -54,7 +54,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
+#include "../../include/openssl/asn1.h"
 
 #include <string.h>
 #include <time.h>
@@ -239,7 +239,7 @@ ASN1_GENERALIZEDTIME *ASN1_GENERALIZEDTIME_adj(ASN1_GENERALIZEDTIME *s,
 
     p = (char *)tmps->data;
     if ((p == NULL) || ((size_t)tmps->length < len)) {
-        p = OPENSSL_malloc(len);
+        p = (char*) OPENSSL_malloc(len);
         if (p == NULL) {
             OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
             goto err;

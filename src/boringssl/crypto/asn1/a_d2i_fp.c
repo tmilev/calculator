@@ -73,7 +73,7 @@ void *ASN1_item_d2i_bio(const ASN1_ITEM *it, BIO *in, void *x)
         return NULL;
     }
     const uint8_t *ptr = data;
-    void *ret = ASN1_item_d2i(x, &ptr, len, it);
+    void *ret = ASN1_item_d2i((ASN1_VALUE **) x, &ptr, len, it);
     OPENSSL_free(data);
     return ret;
 }

@@ -54,10 +54,9 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
-
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
 
 int ASN1_PRINTABLE_type(const unsigned char *s, int len)
 {

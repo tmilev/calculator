@@ -71,7 +71,7 @@
 #endif
 #endif
 
-#include <openssl/bio.h>
+#include "../../include/openssl/bio.h"
 
 #if !defined(OPENSSL_TRUSTY)
 
@@ -79,9 +79,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <openssl/buf.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
 
 #include "../internal.h"
 
@@ -139,7 +139,7 @@ static int file_free(BIO *bio) {
   }
 
   if (bio->init && bio->ptr != NULL) {
-    fclose(bio->ptr);
+    fclose((FILE*) bio->ptr);
     bio->ptr = NULL;
   }
   bio->init = 0;
@@ -223,7 +223,7 @@ static long file_ctrl(BIO *b, int cmd, long num, void *ptr) {
         ret = 0;
         break;
       }
-      fp = fopen(ptr, p);
+      fp = fopen((const char*) ptr, p);
       if (fp == NULL) {
         OPENSSL_PUT_SYSTEM_ERROR();
         ERR_add_error_data(5, "fopen('", ptr, "','", p, "')");

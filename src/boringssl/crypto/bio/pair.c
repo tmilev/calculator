@@ -50,14 +50,14 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/bio.h>
+#include "../../include/openssl/bio.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include <openssl/buf.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
 
 #include "../internal.h"
 
@@ -84,7 +84,7 @@ struct bio_bio_st {
 static int bio_new(BIO *bio) {
   struct bio_bio_st *b;
 
-  b = OPENSSL_malloc(sizeof *b);
+  b = (bio_bio_st *) OPENSSL_malloc(sizeof *b);
   if (b == NULL) {
     return 0;
   }
@@ -96,7 +96,7 @@ static int bio_new(BIO *bio) {
 }
 
 static void bio_destroy_pair(BIO *bio) {
-  struct bio_bio_st *b = bio->ptr;
+  struct bio_bio_st *b = (bio_bio_st *) bio->ptr;
   BIO *peer_bio;
   struct bio_bio_st *peer_b;
 
@@ -109,7 +109,7 @@ static void bio_destroy_pair(BIO *bio) {
     return;
   }
 
-  peer_b = peer_bio->ptr;
+  peer_b = (bio_bio_st *) peer_bio->ptr;
 
   assert(peer_b != NULL);
   assert(peer_b->peer == bio);
@@ -133,7 +133,7 @@ static int bio_free(BIO *bio) {
   if (bio == NULL) {
     return 0;
   }
-  b = bio->ptr;
+  b = (bio_bio_st *) bio->ptr;
 
   assert(b != NULL);
 
@@ -158,10 +158,10 @@ static int bio_read(BIO *bio, char *buf, int size_) {
     return 0;
   }
 
-  b = bio->ptr;
+  b = (bio_bio_st *) bio->ptr;
   assert(b != NULL);
   assert(b->peer != NULL);
-  peer_b = b->peer->ptr;
+  peer_b = (bio_bio_st *) b->peer->ptr;
   assert(peer_b != NULL);
   assert(peer_b->buf != NULL);
 
@@ -241,7 +241,7 @@ static int bio_write(BIO *bio, const char *buf, int num_) {
     return 0;
   }
 
-  b = bio->ptr;
+  b = (bio_bio_st *) bio->ptr;
   assert(b != NULL);
   assert(b->peer != NULL);
   assert(b->buf != NULL);
@@ -309,8 +309,8 @@ static int bio_make_pair(BIO *bio1, BIO *bio2, size_t writebuf1_len,
   assert(bio1 != NULL);
   assert(bio2 != NULL);
 
-  b1 = bio1->ptr;
-  b2 = bio2->ptr;
+  b1 = (bio_bio_st *) bio1->ptr;
+  b2 = (bio_bio_st *) bio2->ptr;
 
   if (b1->peer != NULL || b2->peer != NULL) {
     OPENSSL_PUT_ERROR(BIO, BIO_R_IN_USE);
@@ -321,7 +321,7 @@ static int bio_make_pair(BIO *bio1, BIO *bio2, size_t writebuf1_len,
     if (writebuf1_len) {
       b1->size = writebuf1_len;
     }
-    b1->buf = OPENSSL_malloc(b1->size);
+    b1->buf = (uint8_t*) OPENSSL_malloc(b1->size);
     if (b1->buf == NULL) {
       OPENSSL_PUT_ERROR(BIO, ERR_R_MALLOC_FAILURE);
       return 0;
@@ -334,7 +334,7 @@ static int bio_make_pair(BIO *bio1, BIO *bio2, size_t writebuf1_len,
     if (writebuf2_len) {
       b2->size = writebuf2_len;
     }
-    b2->buf = OPENSSL_malloc(b2->size);
+    b2->buf = (uint8_t*) OPENSSL_malloc(b2->size);
     if (b2->buf == NULL) {
       OPENSSL_PUT_ERROR(BIO, ERR_R_MALLOC_FAILURE);
       return 0;

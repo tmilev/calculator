@@ -54,10 +54,9 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
-
-#include <openssl/asn1t.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/mem.h"
 
 #include "asn1_locl.h"
 
@@ -78,7 +77,7 @@ void asn1_item_combine_free(ASN1_VALUE **pval, const ASN1_ITEM *it, int combine)
     const ASN1_TEMPLATE *tt = NULL, *seqtt;
     const ASN1_EXTERN_FUNCS *ef;
     const ASN1_COMPAT_FUNCS *cf;
-    const ASN1_AUX *aux = it->funcs;
+    const ASN1_AUX *aux = (const ASN1_AUX *) it->funcs;
     ASN1_aux_cb *asn1_cb;
     int i;
     if (!pval)
@@ -125,13 +124,13 @@ void asn1_item_combine_free(ASN1_VALUE **pval, const ASN1_ITEM *it, int combine)
         break;
 
     case ASN1_ITYPE_COMPAT:
-        cf = it->funcs;
+        cf = (const ASN1_COMPAT_FUNCS *) it->funcs;
         if (cf && cf->asn1_free)
             cf->asn1_free(*pval);
         break;
 
     case ASN1_ITYPE_EXTERN:
-        ef = it->funcs;
+        ef = (ASN1_EXTERN_FUNCS *) it->funcs;
         if (ef && ef->asn1_ex_free)
             ef->asn1_ex_free(pval, it);
         break;
@@ -192,7 +191,7 @@ void ASN1_primitive_free(ASN1_VALUE **pval, const ASN1_ITEM *it)
     int utype;
     if (it) {
         const ASN1_PRIMITIVE_FUNCS *pf;
-        pf = it->funcs;
+        pf = (const ASN1_PRIMITIVE_FUNCS *) it->funcs;
         if (pf && pf->prim_free) {
             pf->prim_free(pval, it);
             return;

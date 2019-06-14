@@ -54,13 +54,13 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
+#include "../../include/openssl/asn1.h"
 
 #include <string.h>
 #include <time.h>
 
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
 
 #include "asn1_locl.h"
 
@@ -216,7 +216,7 @@ ASN1_UTCTIME *ASN1_UTCTIME_adj(ASN1_UTCTIME *s, time_t t,
 
     p = (char *)s->data;
     if ((p == NULL) || ((size_t)s->length < len)) {
-        p = OPENSSL_malloc(len);
+        p = (char*) OPENSSL_malloc(len);
         if (p == NULL) {
             OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
             goto err;

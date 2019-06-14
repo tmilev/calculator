@@ -59,23 +59,23 @@
 #include "../../include/openssl/err.h"
 #include "../../include/openssl/mem.h"
 
-int i2d_ASN1_BOOLEAN(int a, unsigned char **pp)
-{
-    int r;
-    unsigned char *p, *allocated = NULL;
-
-    r = ASN1_object_size(0, 1, V_ASN1_BOOLEAN);
-    if (pp == NULL)
-        return (r);
-
-    if (*pp == NULL) {
-        if ((p = allocated = OPENSSL_malloc(r)) == NULL) {
-            OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
-            return 0;
-        }
-    } else {
-        p = *pp;
+int i2d_ASN1_BOOLEAN(int a, unsigned char **pp) {
+  int r;
+  unsigned char *p, *allocated = NULL;
+  r = ASN1_object_size(0, 1, V_ASN1_BOOLEAN);
+  if (pp == NULL) {
+    return (r);
+  }
+  if (*pp == NULL) {
+    allocated = (unsigned char*) OPENSSL_malloc(r);
+    p = allocated;
+    if (p == NULL) {
+      OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
+      return 0;
     }
+  } else {
+    p = *pp;
+  }
 
     ASN1_put_object(&p, 0, 1, V_ASN1_BOOLEAN, V_ASN1_UNIVERSAL);
     *p = (unsigned char)a;

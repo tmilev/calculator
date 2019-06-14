@@ -54,14 +54,14 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/bio.h>
+#include "../../include/openssl/bio.h"
 
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/buf.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
 
 #include "../internal.h"
 
@@ -83,7 +83,7 @@ BIO *BIO_new_mem_buf(const void *buf, int len) {
 
   b = (BUF_MEM *)ret->ptr;
   // BIO_FLAGS_MEM_RDONLY ensures |b->data| is not written to.
-  b->data = (void *)buf;
+  b->data = (char *)buf;
   b->length = size;
   b->max = size;
 

@@ -76,7 +76,7 @@ int ASN1_item_i2d_fp(const ASN1_ITEM *it, FILE *out, void *x)
 int ASN1_item_i2d_bio(const ASN1_ITEM *it, BIO *out, void *x)
 {
     unsigned char *b = NULL;
-    int n = ASN1_item_i2d(x, &b, it);
+    int n = ASN1_item_i2d((ASN1_VALUE *) x, &b, it);
     if (b == NULL) {
         OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
         return 0;

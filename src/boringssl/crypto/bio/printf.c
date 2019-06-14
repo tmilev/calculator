@@ -54,14 +54,14 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/bio.h>
+#include "../../include/openssl/bio.h"
 
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
 
 int BIO_printf(BIO *bio, const char *format, ...) {
   va_list args;
@@ -92,7 +92,7 @@ int BIO_printf(BIO *bio, const char *format, ...) {
     // The output was truncated. Note that vsnprintf's return value
     // does not include a trailing NUL, but the buffer must be sized
     // for it.
-    out = OPENSSL_malloc(requested_len + 1);
+    out = (char*) OPENSSL_malloc(requested_len + 1);
     out_malloced = 1;
     if (out == NULL) {
       OPENSSL_PUT_ERROR(BIO, ERR_R_MALLOC_FAILURE);

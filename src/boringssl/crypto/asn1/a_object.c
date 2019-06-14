@@ -54,14 +54,14 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
+#include "../../include/openssl/asn1.h"
 
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/obj.h>
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
 
 #include "../internal.h"
 
@@ -77,9 +77,9 @@ int i2d_ASN1_OBJECT(ASN1_OBJECT *a, unsigned char **pp)
     objsize = ASN1_object_size(0, a->length, V_ASN1_OBJECT);
     if (pp == NULL || objsize == -1)
         return objsize;
-
     if (*pp == NULL) {
-        if ((p = allocated = OPENSSL_malloc(objsize)) == NULL) {
+        p = allocated = OPENSSL_malloc(objsize);
+        if (p == NULL) {
             OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
             return 0;
         }

@@ -54,12 +54,12 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/buf.h>
+#include "../../include/openssl/buf.h"
 
 #include <string.h>
 
-#include <openssl/mem.h>
-#include <openssl/err.h>
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/err.h"
 
 #include "../internal.h"
 
@@ -67,7 +67,7 @@
 BUF_MEM *BUF_MEM_new(void) {
   BUF_MEM *ret;
 
-  ret = OPENSSL_malloc(sizeof(BUF_MEM));
+  ret = (BUF_MEM *) OPENSSL_malloc(sizeof(BUF_MEM));
   if (ret == NULL) {
     OPENSSL_PUT_ERROR(BUF, ERR_R_MALLOC_FAILURE);
     return NULL;
@@ -105,7 +105,7 @@ int BUF_MEM_reserve(BUF_MEM *buf, size_t cap) {
     return 0;
   }
 
-  char *new_buf = OPENSSL_realloc(buf->data, alloc_size);
+  char *new_buf = (char *) OPENSSL_realloc(buf->data, alloc_size);
   if (new_buf == NULL) {
     OPENSSL_PUT_ERROR(BUF, ERR_R_MALLOC_FAILURE);
     return 0;
@@ -181,7 +181,7 @@ char *BUF_strndup(const char *str, size_t size) {
     OPENSSL_PUT_ERROR(BUF, ERR_R_MALLOC_FAILURE);
     return NULL;
   }
-  ret = OPENSSL_malloc(alloc_size);
+  ret = (char*) OPENSSL_malloc(alloc_size);
   if (ret == NULL) {
     OPENSSL_PUT_ERROR(BUF, ERR_R_MALLOC_FAILURE);
     return NULL;

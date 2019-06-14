@@ -57,8 +57,8 @@
 #ifndef HEADER_ASN1T_H
 #define HEADER_ASN1T_H
 
-#include <openssl/base.h>
-#include <openssl/asn1.h>
+#include "../../include/openssl/base.h"
+#include "../../include/openssl/asn1.h"
 
 #ifdef  __cplusplus
 extern "C" {

@@ -54,7 +54,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
+#include "../../include/openssl/asn1.h"
 
 #include <string.h>
 #include <limits.h>
@@ -302,7 +302,7 @@ int ASN1_INTEGER_set(ASN1_INTEGER *a, long v)
 
 int ASN1_INTEGER_set_uint64(ASN1_INTEGER *out, uint64_t v)
 {
-    uint8_t *const newdata = OPENSSL_malloc(sizeof(uint64_t));
+    uint8_t *const newdata = (uint8_t *) OPENSSL_malloc(sizeof(uint64_t));
     if (newdata == NULL) {
         OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
         return 0;
@@ -388,7 +388,7 @@ ASN1_INTEGER *BN_to_ASN1_INTEGER(const BIGNUM *bn, ASN1_INTEGER *ai)
     j = BN_num_bits(bn);
     len = ((j == 0) ? 0 : ((j / 8) + 1));
     if (ret->length < len + 4) {
-        unsigned char *new_data = OPENSSL_realloc(ret->data, len + 4);
+        unsigned char *new_data = (unsigned char *) OPENSSL_realloc(ret->data, len + 4);
         if (!new_data) {
             OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
             goto err;

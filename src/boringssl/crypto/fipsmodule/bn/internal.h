@@ -123,14 +123,7 @@
 #ifndef OPENSSL_HEADER_BN_INTERNAL_H
 #define OPENSSL_HEADER_BN_INTERNAL_H
 
-#include <openssl/base.h>
-
-#if defined(OPENSSL_X86_64) && defined(_MSC_VER)
-OPENSSL_MSVC_PRAGMA(warning(push, 3))
-#include <intrin.h>
-OPENSSL_MSVC_PRAGMA(warning(pop))
-#pragma intrinsic(__umulh, _umul128)
-#endif
+#include "../../../include/openssl/base.h"
 
 #include "../../internal.h"
 
@@ -160,29 +153,6 @@ extern "C" {
 #define BN_DEC_NUM 19
 #define TOBN(hi, lo) ((BN_ULONG)(hi) << 32 | (lo))
 
-#elif defined(OPENSSL_32_BIT)
-
-#define BN_ULLONG uint64_t
-#define BN_CAN_DIVIDE_ULLONG
-#define BN_BITS2 32
-#define BN_BYTES 4
-#define BN_BITS4 16
-#define BN_MASK2 (0xffffffffUL)
-#define BN_MASK2l (0xffffUL)
-#define BN_MASK2h1 (0xffff8000UL)
-#define BN_MASK2h (0xffff0000UL)
-// On some 32-bit platforms, Montgomery multiplication is done using 64-bit
-// arithmetic with SIMD instructions. On such platforms, |BN_MONT_CTX::n0|
-// needs to be two words long. Only certain 32-bit platforms actually make use
-// of n0[1] and shorter R value would suffice for the others. However,
-// currently only the assembly files know which is which.
-#define BN_MONT_CTX_N0_LIMBS 2
-#define BN_DEC_CONV (1000000000UL)
-#define BN_DEC_NUM 9
-#define TOBN(hi, lo) (lo), (hi)
-
-#else
-#error "Must define either OPENSSL_32_BIT or OPENSSL_64_BIT"
 #endif
 
 #if !defined(OPENSSL_NO_ASM) && (defined(__GNUC__) || defined(__clang__))

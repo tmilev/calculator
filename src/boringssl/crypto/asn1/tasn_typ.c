@@ -54,9 +54,8 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
-
-#include <openssl/asn1t.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
 
 /* Declarations for string types */
 

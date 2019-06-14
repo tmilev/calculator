@@ -54,10 +54,10 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
+#include "../../include/openssl/asn1.h"
 
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
 
 /* ASN1_ITEM versions of the above */
 
@@ -79,8 +79,8 @@ ASN1_STRING *ASN1_item_pack(void *obj, const ASN1_ITEM *it, ASN1_STRING **oct)
         OPENSSL_free(octmp->data);
         octmp->data = NULL;
     }
-
-    if (!(octmp->length = ASN1_item_i2d(obj, &octmp->data, it))) {
+    octmp->length = ASN1_item_i2d((ASN1_VALUE *) obj, &octmp->data, it);
+    if (!octmp->length) {
         OPENSSL_PUT_ERROR(ASN1, ASN1_R_ENCODE_ERROR);
         return NULL;
     }

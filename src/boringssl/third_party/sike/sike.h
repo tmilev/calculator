@@ -8,7 +8,7 @@
 #define SIKE_H_
 
 #include <stdint.h>
-#include <openssl/base.h>
+#include "../../include/openssl/base.h>
 
 #ifdef __cplusplus
 extern "C" {

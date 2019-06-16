@@ -57,20 +57,20 @@
  * The DSS routines are based on patches supplied by
  * Steven Schoch <schoch@sheba.arc.nasa.gov>. */
 
-#include <openssl/dsa.h>
+#include "../../include/openssl/dsa.h"
 
 #include <string.h>
 
-#include <openssl/bn.h>
-#include <openssl/dh.h>
-#include <openssl/digest.h>
-#include <openssl/engine.h>
-#include <openssl/err.h>
-#include <openssl/ex_data.h>
-#include <openssl/mem.h>
-#include <openssl/rand.h>
-#include <openssl/sha.h>
-#include <openssl/thread.h>
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/dh.h"
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/engine.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/ex_data.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/sha.h"
+#include "../../include/openssl/thread.h"
 
 #include "../fipsmodule/bn/internal.h"
 #include "../internal.h"
@@ -88,7 +88,7 @@ static int dsa_sign_setup(const DSA *dsa, BN_CTX *ctx_in, BIGNUM **out_kinv,
 static CRYPTO_EX_DATA_CLASS g_ex_data_class = CRYPTO_EX_DATA_CLASS_INIT;
 
 DSA *DSA_new(void) {
-  DSA *dsa = OPENSSL_malloc(sizeof(DSA));
+  DSA *dsa = (DSA *) OPENSSL_malloc(sizeof(DSA));
   if (dsa == NULL) {
     OPENSSL_PUT_ERROR(DSA, ERR_R_MALLOC_FAILURE);
     return NULL;
@@ -443,7 +443,7 @@ err:
   }
 
   if (ctx) {
-    BN_CTX_end(ctx);
+    BN_CTX_end(0, ctx);
     BN_CTX_free(ctx);
   }
 
@@ -522,7 +522,7 @@ err:
 
 DSA_SIG *DSA_SIG_new(void) {
   DSA_SIG *sig;
-  sig = OPENSSL_malloc(sizeof(DSA_SIG));
+  sig = (DSA_SIG *) OPENSSL_malloc(sizeof(DSA_SIG));
   if (!sig) {
     return NULL;
   }
@@ -553,8 +553,22 @@ static int mod_mul_consttime(BIGNUM *r, const BIGNUM *a, const BIGNUM *b,
   int ok = tmp != NULL &&
            BN_to_montgomery(tmp, a, mont, ctx) &&
            BN_mod_mul_montgomery(r, tmp, b, mont, ctx);
-  BN_CTX_end(ctx);
-  return ok;
+  return BN_CTX_end(ok, ctx);
+}
+
+DSA_SIG* DSA_BN_cleanup(DSA_SIG* result, BIGNUM *r, BIGNUM *s, BN_CTX *ctx, BIGNUM* m, BIGNUM* xr, BIGNUM* kinv) {
+
+  if (result == NULL) {
+    OPENSSL_PUT_ERROR(DSA, ERR_R_BN_LIB);
+    BN_free(r);
+    BN_free(s);
+  }
+  BN_CTX_free(ctx);
+  BN_clear_free(m);
+  BN_clear_free(xr);
+  BN_clear_free(kinv);
+
+  return result;
 }
 
 DSA_SIG *DSA_do_sign(const uint8_t *digest, size_t digest_len, const DSA *dsa) {
@@ -588,16 +602,16 @@ DSA_SIG *DSA_do_sign(const uint8_t *digest, size_t digest_len, const DSA *dsa) {
   BN_init(&xr);
   s = BN_new();
   if (s == NULL) {
-    goto err;
+    return DSA_BN_cleanup(ret, r, s, ctx, &m, &xr, kinv);
   }
   ctx = BN_CTX_new();
   if (ctx == NULL) {
-    goto err;
+    return DSA_BN_cleanup(ret, r, s, ctx, &m, &xr, kinv);
   }
 
 redo:
   if (!dsa_sign_setup(dsa, ctx, &kinv, &r)) {
-    goto err;
+    return DSA_BN_cleanup(ret, r, s, ctx, &m, &xr, kinv);
   }
 
   if (digest_len > BN_num_bytes(dsa->q)) {
@@ -608,7 +622,7 @@ redo:
   }
 
   if (BN_bin2bn(digest, digest_len, &m) == NULL) {
-    goto err;
+    return DSA_BN_cleanup(ret, r, s, ctx, &m, &xr, kinv);
   }
 
   // |m| is bounded by 2^(num_bits(q)), which is slightly looser than q. This
@@ -618,7 +632,7 @@ redo:
   size_t q_width = bn_minimal_width(dsa->q);
   if (!bn_resize_words(&m, q_width) ||
       !bn_resize_words(&xr, q_width)) {
-    goto err;
+    return DSA_BN_cleanup(ret, r, s, ctx, &m, &xr, kinv);
   }
   bn_reduce_once_in_place(m.d, 0 /* no carry word */, dsa->q->d,
                           xr.d /* scratch space */, q_width);
@@ -628,7 +642,7 @@ redo:
   if (!mod_mul_consttime(&xr, dsa->priv_key, r, dsa->method_mont_q, ctx) ||
       !bn_mod_add_consttime(s, &xr, &m, dsa->q, ctx) ||
       !mod_mul_consttime(s, s, kinv, dsa->method_mont_q, ctx)) {
-    goto err;
+    return DSA_BN_cleanup(ret, r, s, ctx, &m, &xr, kinv);
   }
 
   // Redo if r or s is zero as required by FIPS 186-3: this is
@@ -638,23 +652,13 @@ redo:
   }
   ret = DSA_SIG_new();
   if (ret == NULL) {
-    goto err;
+    return DSA_BN_cleanup(ret, r, s, ctx, &m, &xr, kinv);
   }
   ret->r = r;
   ret->s = s;
 
-err:
-  if (ret == NULL) {
-    OPENSSL_PUT_ERROR(DSA, ERR_R_BN_LIB);
-    BN_free(r);
-    BN_free(s);
-  }
-  BN_CTX_free(ctx);
-  BN_clear_free(&m);
-  BN_clear_free(&xr);
-  BN_clear_free(kinv);
-
-  return ret;
+//err:
+  return DSA_BN_cleanup(ret, r, s, ctx, &m, &xr, kinv);
 }
 
 int DSA_do_verify(const uint8_t *digest, size_t digest_len, DSA_SIG *sig,
@@ -798,6 +802,12 @@ int DSA_verify(int type, const uint8_t *digest, size_t digest_len,
   return valid;
 }
 
+int DSA_check_signature_cleanup(int result, uint8_t *der, DSA_SIG *s) {
+  OPENSSL_free(der);
+  DSA_SIG_free(s);
+  return result;
+}
+
 int DSA_check_signature(int *out_valid, const uint8_t *digest,
                         size_t digest_len, const uint8_t *sig, size_t sig_len,
                         const DSA *dsa) {
@@ -807,27 +817,24 @@ int DSA_check_signature(int *out_valid, const uint8_t *digest,
 
   s = DSA_SIG_new();
   if (s == NULL) {
-    goto err;
+    return DSA_check_signature_cleanup(ret, der, s);
   }
 
   const uint8_t *sigp = sig;
   if (d2i_DSA_SIG(&s, &sigp, sig_len) == NULL || sigp != sig + sig_len) {
-    goto err;
+    return DSA_check_signature_cleanup(ret, der, s);
   }
 
   // Ensure that the signature uses DER and doesn't have trailing garbage.
   int der_len = i2d_DSA_SIG(s, &der);
   if (der_len < 0 || (size_t)der_len != sig_len ||
       OPENSSL_memcmp(sig, der, sig_len)) {
-    goto err;
+    return DSA_check_signature_cleanup(ret, der, s);
   }
 
   ret = DSA_do_check_signature(out_valid, digest, digest_len, s, dsa);
 
-err:
-  OPENSSL_free(der);
-  DSA_SIG_free(s);
-  return ret;
+  return DSA_check_signature_cleanup(ret, der, s);
 }
 
 // der_len_len returns the number of bytes needed to represent a length of |len|

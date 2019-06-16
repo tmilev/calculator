@@ -68,12 +68,12 @@
 #ifndef OPENSSL_HEADER_EC_INTERNAL_H
 #define OPENSSL_HEADER_EC_INTERNAL_H
 
-#include <openssl/base.h>
+#include "../../../include/openssl/base.h"
 
-#include <openssl/bn.h>
-#include <openssl/ex_data.h>
-#include <openssl/thread.h>
-#include <openssl/type_check.h>
+#include "../../../include/openssl/bn.h"
+#include "../../../include/openssl/ex_data.h"
+#include "../../../include/openssl/thread.h"
+#include "../../../include/openssl/type_check.h"
 
 #include "../bn/internal.h"
 

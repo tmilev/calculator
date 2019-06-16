@@ -12,17 +12,17 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include <openssl/hrss.h>
+#include "../../include/openssl/hrss.h>
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <openssl/bn.h>
-#include <openssl/cpu.h>
-#include <openssl/hmac.h>
-#include <openssl/mem.h>
-#include <openssl/sha.h>
+#include "../../include/openssl/bn.h>
+#include "../../include/openssl/cpu.h>
+#include "../../include/openssl/hmac.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/sha.h>
 
 #if defined(OPENSSL_X86) || defined(OPENSSL_X86_64)
 #include <emmintrin.h>

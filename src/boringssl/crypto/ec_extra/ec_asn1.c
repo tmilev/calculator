@@ -51,16 +51,16 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/ec.h>
+#include "../../include/openssl/ec.h"
 
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/bytestring.h>
-#include <openssl/bn.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/nid.h>
+#include "../../include/openssl/bytestring.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/nid.h"
 
 #include "../fipsmodule/ec/internal.h"
 #include "../bytestring/internal.h"
@@ -538,7 +538,7 @@ int i2o_ECPublicKey(const EC_KEY *key, uint8_t **outp) {
   }
 
   if (*outp == NULL) {
-    *outp = OPENSSL_malloc(buf_len);
+    *outp = (uint8_t *) OPENSSL_malloc(buf_len);
     if (*outp == NULL) {
       OPENSSL_PUT_ERROR(EC, ERR_R_MALLOC_FAILURE);
       return 0;

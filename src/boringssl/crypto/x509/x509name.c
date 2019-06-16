@@ -56,12 +56,12 @@
 
 #include <string.h>
 
-#include <openssl/asn1.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/obj.h>
-#include <openssl/stack.h>
-#include <openssl/x509.h>
+#include "../../include/openssl/asn1.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/evp.h>
+#include "../../include/openssl/obj.h>
+#include "../../include/openssl/stack.h>
+#include "../../include/openssl/x509.h>
 
 #include "../internal.h"
 

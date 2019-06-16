@@ -55,12 +55,12 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
-#include <openssl/ec_key.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/rsa.h>
-#include <openssl/dsa.h>
+#include "../../include/openssl/asn1.h>
+#include "../../include/openssl/ec_key.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/evp.h>
+#include "../../include/openssl/rsa.h>
+#include "../../include/openssl/dsa.h>
 
 
 int i2d_PrivateKey(const EVP_PKEY *a, uint8_t **pp)

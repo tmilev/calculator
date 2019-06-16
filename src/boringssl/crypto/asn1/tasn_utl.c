@@ -75,7 +75,7 @@
 
 /* Given an ASN1_ITEM CHOICE type return the selector value */
 int asn1_get_choice_selector(ASN1_VALUE **pval, const ASN1_ITEM *it) {
-  int *sel = offset2ptr(*pval, it->utype);
+  int *sel = (int*) offset2ptr(*pval, it->utype);
   return *sel;
 }
 
@@ -83,23 +83,24 @@ int asn1_get_choice_selector(ASN1_VALUE **pval, const ASN1_ITEM *it) {
 int asn1_set_choice_selector(ASN1_VALUE **pval, int value,
                              const ASN1_ITEM *it) {
   int *sel, ret;
-  sel = offset2ptr(*pval, it->utype);
+  sel = (int*) offset2ptr(*pval, it->utype);
   ret = *sel;
   *sel = value;
   return ret;
 }
 
-static CRYPTO_refcount_t *asn1_get_references(ASN1_VALUE **pval,
-                                              const ASN1_ITEM *it) {
+static CRYPTO_refcount_t *asn1_get_references(
+  ASN1_VALUE **pval, const ASN1_ITEM *it
+) {
   if (it->itype != ASN1_ITYPE_SEQUENCE &&
       it->itype != ASN1_ITYPE_NDEF_SEQUENCE) {
     return NULL;
   }
-  const ASN1_AUX *aux = it->funcs;
+  const ASN1_AUX *aux = (const ASN1_AUX *) it->funcs;
   if (!aux || !(aux->flags & ASN1_AFLG_REFCOUNT)) {
     return NULL;
   }
-  return offset2ptr(*pval, aux->ref_offset);
+  return (CRYPTO_refcount_t *) offset2ptr(*pval, aux->ref_offset);
 }
 
 void asn1_refcount_set_one(ASN1_VALUE **pval, const ASN1_ITEM *it) {
@@ -122,7 +123,7 @@ static ASN1_ENCODING *asn1_get_enc_ptr(ASN1_VALUE **pval, const ASN1_ITEM *it) {
   if (!pval || !*pval) {
     return NULL;
   }
-  aux = it->funcs;
+  aux = (const ASN1_AUX *) it->funcs;
   if (!aux || !(aux->flags & ASN1_AFLG_ENCODING)) {
     return NULL;
   }

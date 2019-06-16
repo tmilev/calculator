@@ -358,7 +358,7 @@ static int bio_make_pair(BIO *bio1, BIO *bio2, size_t writebuf1_len,
 
 static long bio_ctrl(BIO *bio, int cmd, long num, void *ptr) {
   long ret;
-  struct bio_bio_st *b = bio->ptr;
+  struct bio_bio_st *b = (bio_bio_st *) bio->ptr;
 
   assert(b != NULL);
 
@@ -414,7 +414,7 @@ static long bio_ctrl(BIO *bio, int cmd, long num, void *ptr) {
 
     case BIO_CTRL_PENDING:
       if (b->peer != NULL) {
-        struct bio_bio_st *peer_b = b->peer->ptr;
+        struct bio_bio_st *peer_b = (bio_bio_st *) b->peer->ptr;
         ret = (long)peer_b->len;
       } else {
         ret = 0;
@@ -433,10 +433,10 @@ static long bio_ctrl(BIO *bio, int cmd, long num, void *ptr) {
       break;
 
     case BIO_CTRL_EOF: {
-      BIO *other_bio = ptr;
+      BIO *other_bio = (BIO*) ptr;
 
       if (other_bio) {
-        struct bio_bio_st *other_b = other_bio->ptr;
+        struct bio_bio_st *other_b = (bio_bio_st *) other_bio->ptr;
         assert(other_b != NULL);
         ret = other_b->len == 0 && other_b->closed;
       } else {

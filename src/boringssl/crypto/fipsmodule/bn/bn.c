@@ -54,20 +54,20 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/bn.h>
+#include "../../../include/openssl/bn.h"
 
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/mem.h"
 
 #include "internal.h"
 #include "../delocate.h"
 
 
 BIGNUM *BN_new(void) {
-  BIGNUM *bn = OPENSSL_malloc(sizeof(BIGNUM));
+  BIGNUM *bn = (BIGNUM *) OPENSSL_malloc(sizeof(BIGNUM));
 
   if (bn == NULL) {
     OPENSSL_PUT_ERROR(BN, ERR_R_MALLOC_FAILURE);
@@ -360,7 +360,7 @@ int bn_wexpand(BIGNUM *bn, size_t words) {
     return 0;
   }
 
-  a = OPENSSL_malloc(sizeof(BN_ULONG) * words);
+  a = (uint64_t*) OPENSSL_malloc(sizeof(BN_ULONG) * words);
   if (a == NULL) {
     OPENSSL_PUT_ERROR(BN, ERR_R_MALLOC_FAILURE);
     return 0;

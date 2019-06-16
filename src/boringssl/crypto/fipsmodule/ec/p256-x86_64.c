@@ -16,16 +16,16 @@
  *                          256 Bit Primes"
  */
 
-#include <openssl/ec.h>
+#include "../../include/openssl/ec.h>
 
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
 
-#include <openssl/bn.h>
-#include <openssl/cpu.h>
-#include <openssl/crypto.h>
-#include <openssl/err.h>
+#include "../../include/openssl/bn.h>
+#include "../../include/openssl/cpu.h>
+#include "../../include/openssl/crypto.h>
+#include "../../include/openssl/err.h>
 
 #include "../bn/internal.h"
 #include "../delocate.h"

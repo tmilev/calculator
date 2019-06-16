@@ -19,7 +19,7 @@
 #include <cstdio>
 #include <string>
 
-#include <openssl/crypto.h>
+#include "../../include/openssl/crypto.h>
 
 #include "cavp_test_util.h"
 

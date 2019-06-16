@@ -59,14 +59,14 @@
 #include <limits.h>
 #include <stdio.h>
 
-#include <openssl/asn1t.h>
-#include <openssl/evp.h>
-#include <openssl/mem.h>
-#include <openssl/obj.h>
-#include <openssl/pool.h>
-#include <openssl/thread.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
+#include "../../include/openssl/asn1t.h>
+#include "../../include/openssl/evp.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/obj.h>
+#include "../../include/openssl/pool.h>
+#include "../../include/openssl/thread.h>
+#include "../../include/openssl/x509.h>
+#include "../../include/openssl/x509v3.h>
 
 #include "../internal.h"
 

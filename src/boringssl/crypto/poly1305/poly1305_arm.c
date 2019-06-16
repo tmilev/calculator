@@ -15,7 +15,7 @@
 // This implementation was taken from the public domain, neon2 version in
 // SUPERCOP by D. J. Bernstein and Peter Schwabe.
 
-#include <openssl/poly1305.h>
+#include "../../include/openssl/poly1305.h>
 
 #include <string.h>
 

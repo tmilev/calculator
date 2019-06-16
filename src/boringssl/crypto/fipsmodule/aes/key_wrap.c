@@ -46,12 +46,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * ==================================================================== */
 
-#include <openssl/aes.h>
+#include "../../../include/openssl/aes.h"
 
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/mem.h>
+#include "../../../include/openssl/mem.h"
 
 #include "../../internal.h"
 

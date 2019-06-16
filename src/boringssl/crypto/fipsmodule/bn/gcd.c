@@ -106,12 +106,11 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/bn.h>
+#include "../../../include/openssl/bn.h"
 
-#include <openssl/err.h>
+#include "../../../include/openssl/err.h"
 
 #include "internal.h"
-
 
 int BN_mod_inverse_odd(BIGNUM *out, int *out_no_inverse, const BIGNUM *a,
                        const BIGNUM *n, BN_CTX *ctx) {
@@ -137,7 +136,7 @@ int BN_mod_inverse_odd(BIGNUM *out, int *out_no_inverse, const BIGNUM *a,
   X = BN_CTX_get(ctx);
   Y = BN_CTX_get(ctx);
   if (Y == NULL) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   BIGNUM *R = out;
@@ -276,8 +275,7 @@ int BN_mod_inverse_odd(BIGNUM *out, int *out_no_inverse, const BIGNUM *a,
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 BIGNUM *BN_mod_inverse(BIGNUM *out, const BIGNUM *a, const BIGNUM *n,
@@ -361,8 +359,7 @@ int bn_mod_inverse_prime(BIGNUM *out, const BIGNUM *a, const BIGNUM *p,
            BN_copy(p_minus_2, p) &&
            BN_sub_word(p_minus_2, 2) &&
            BN_mod_exp_mont(out, a, p_minus_2, p, ctx, mont_p);
-  BN_CTX_end(ctx);
-  return ok;
+  return BN_CTX_end(ok, ctx);
 }
 
 int bn_mod_inverse_secret_prime(BIGNUM *out, const BIGNUM *a, const BIGNUM *p,
@@ -373,6 +370,5 @@ int bn_mod_inverse_secret_prime(BIGNUM *out, const BIGNUM *a, const BIGNUM *p,
            BN_copy(p_minus_2, p) &&
            BN_sub_word(p_minus_2, 2) &&
            BN_mod_exp_mont_consttime(out, a, p_minus_2, p, ctx, mont_p);
-  BN_CTX_end(ctx);
-  return ok;
+  return BN_CTX_end(ok, ctx);
 }

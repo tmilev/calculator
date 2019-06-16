@@ -54,11 +54,11 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/rsa.h>
+#include "../../include/openssl/rsa.h>
 
 #include <assert.h>
 
-#include <openssl/bn.h>
+#include "../../include/openssl/bn.h>
 
 
 RSA *RSA_generate_key(int bits, unsigned long e_value, void *callback,

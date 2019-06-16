@@ -88,9 +88,11 @@ int ASN1_item_ex_new(ASN1_VALUE **pval, const ASN1_ITEM *it)
     return asn1_item_ex_combine_new(pval, it, 0);
 }
 
-static int asn1_item_ex_combine_new(ASN1_VALUE **pval, const ASN1_ITEM *it,
-                                    int combine)
-{
+static int asn1_item_ex_combine_new(
+  ASN1_VALUE **pval,
+  const ASN1_ITEM *it,
+  int combine
+) {
     const ASN1_TEMPLATE *tt = NULL;
     const ASN1_COMPAT_FUNCS *cf;
     const ASN1_EXTERN_FUNCS *ef;
@@ -111,7 +113,7 @@ static int asn1_item_ex_combine_new(ASN1_VALUE **pval, const ASN1_ITEM *it,
     switch (it->itype) {
 
     case ASN1_ITYPE_EXTERN:
-        ef = it->funcs;
+        ef = (const ASN1_EXTERN_FUNCS *) it->funcs;
         if (ef && ef->asn1_ex_new) {
             if (!ef->asn1_ex_new(pval, it))
                 goto memerr;
@@ -119,7 +121,7 @@ static int asn1_item_ex_combine_new(ASN1_VALUE **pval, const ASN1_ITEM *it,
         break;
 
     case ASN1_ITYPE_COMPAT:
-        cf = it->funcs;
+        cf = (ASN1_COMPAT_FUNCS *) it->funcs;
         if (cf && cf->asn1_new) {
             *pval = cf->asn1_new();
             if (!*pval)
@@ -154,7 +156,7 @@ static int asn1_item_ex_combine_new(ASN1_VALUE **pval, const ASN1_ITEM *it,
             }
         }
         if (!combine) {
-            *pval = OPENSSL_malloc(it->size);
+            *pval = (ASN1_VALUE *) OPENSSL_malloc(it->size);
             if (!*pval)
                 goto memerr;
             OPENSSL_memset(*pval, 0, it->size);
@@ -179,7 +181,7 @@ static int asn1_item_ex_combine_new(ASN1_VALUE **pval, const ASN1_ITEM *it,
             }
         }
         if (!combine) {
-            *pval = OPENSSL_malloc(it->size);
+            *pval = (ASN1_VALUE*) OPENSSL_malloc(it->size);
             if (!*pval)
                 goto memerr;
             OPENSSL_memset(*pval, 0, it->size);
@@ -230,7 +232,7 @@ static void asn1_item_clear(ASN1_VALUE **pval, const ASN1_ITEM *it)
     switch (it->itype) {
 
     case ASN1_ITYPE_EXTERN:
-        ef = it->funcs;
+        ef = (const ASN1_EXTERN_FUNCS *) it->funcs;
         if (ef && ef->asn1_ex_clear)
             ef->asn1_ex_clear(pval, it);
         else
@@ -322,7 +324,7 @@ int ASN1_primitive_new(ASN1_VALUE **pval, const ASN1_ITEM *it)
         return 0;
 
     if (it->funcs) {
-        const ASN1_PRIMITIVE_FUNCS *pf = it->funcs;
+        const ASN1_PRIMITIVE_FUNCS *pf = (const ASN1_PRIMITIVE_FUNCS *) it->funcs;
         if (pf->prim_new)
             return pf->prim_new(pval, it);
     }
@@ -345,7 +347,7 @@ int ASN1_primitive_new(ASN1_VALUE **pval, const ASN1_ITEM *it)
         return 1;
 
     case V_ASN1_ANY:
-        typ = OPENSSL_malloc(sizeof(ASN1_TYPE));
+        typ = (ASN1_TYPE*) OPENSSL_malloc(sizeof(ASN1_TYPE));
         if (!typ)
             return 0;
         typ->value.ptr = NULL;
@@ -369,7 +371,7 @@ static void asn1_primitive_clear(ASN1_VALUE **pval, const ASN1_ITEM *it)
 {
     int utype;
     if (it && it->funcs) {
-        const ASN1_PRIMITIVE_FUNCS *pf = it->funcs;
+        const ASN1_PRIMITIVE_FUNCS *pf = (const ASN1_PRIMITIVE_FUNCS *) it->funcs;
         if (pf->prim_clear)
             pf->prim_clear(pval, it);
         else

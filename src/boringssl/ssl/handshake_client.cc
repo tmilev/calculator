@@ -147,7 +147,7 @@
  * OTHERWISE.
  */
 
-#include <openssl/ssl.h>
+#include "../../include/openssl/ssl.h>
 
 #include <assert.h>
 #include <limits.h>
@@ -155,18 +155,18 @@
 
 #include <utility>
 
-#include <openssl/aead.h>
-#include <openssl/bn.h>
-#include <openssl/buf.h>
-#include <openssl/bytestring.h>
-#include <openssl/ec_key.h>
-#include <openssl/ecdsa.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/md5.h>
-#include <openssl/mem.h>
-#include <openssl/rand.h>
-#include <openssl/sha.h>
+#include "../../include/openssl/aead.h>
+#include "../../include/openssl/bn.h>
+#include "../../include/openssl/buf.h>
+#include "../../include/openssl/bytestring.h>
+#include "../../include/openssl/ec_key.h>
+#include "../../include/openssl/ecdsa.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/evp.h>
+#include "../../include/openssl/md5.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/rand.h>
+#include "../../include/openssl/sha.h>
 
 #include "../crypto/internal.h"
 #include "internal.h"

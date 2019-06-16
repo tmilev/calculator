@@ -50,9 +50,9 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/bn.h>
+#include "../../../include/openssl/bn.h"
 
-#include <openssl/err.h>
+#include "../../../include/openssl/err.h"
 
 #include "internal.h"
 
@@ -141,6 +141,5 @@ int bn_jacobi(const BIGNUM *a, const BIGNUM *b, BN_CTX *ctx) {
   }
 
 end:
-  BN_CTX_end(ctx);
-  return ret;
+  BN_CTX_end(ret, ctx);
 }

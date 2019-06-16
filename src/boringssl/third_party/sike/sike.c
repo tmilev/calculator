@@ -7,12 +7,12 @@
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
-#include <openssl/bn.h>
-#include <openssl/base.h>
-#include <openssl/rand.h>
-#include <openssl/mem.h>
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
+#include "../../include/openssl/bn.h>
+#include "../../include/openssl/base.h>
+#include "../../include/openssl/rand.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/hmac.h>
+#include "../../include/openssl/sha.h>
 
 #include "utils.h"
 #include "isogeny.h"

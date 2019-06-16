@@ -46,13 +46,13 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * ==================================================================== */
 
-#include <openssl/base.h>
+#include "../../include/openssl/base.h>
 
 #include <assert.h>
 #include <string.h>
 
-#include <openssl/mem.h>
-#include <openssl/cpu.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/cpu.h>
 
 #include "internal.h"
 #include "../../internal.h"

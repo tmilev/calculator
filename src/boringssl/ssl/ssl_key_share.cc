@@ -12,22 +12,22 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include <openssl/ssl.h>
+#include "../../include/openssl/ssl.h>
 
 #include <assert.h>
 #include <string.h>
 
 #include <utility>
 
-#include <openssl/bn.h>
-#include <openssl/bytestring.h>
-#include <openssl/curve25519.h>
-#include <openssl/ec.h>
-#include <openssl/err.h>
-#include <openssl/hrss.h>
-#include <openssl/mem.h>
-#include <openssl/nid.h>
-#include <openssl/rand.h>
+#include "../../include/openssl/bn.h>
+#include "../../include/openssl/bytestring.h>
+#include "../../include/openssl/curve25519.h>
+#include "../../include/openssl/ec.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/hrss.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/nid.h>
+#include "../../include/openssl/rand.h>
 
 #include "internal.h"
 #include "../crypto/internal.h"

@@ -14,10 +14,10 @@
 
 #include "./wycheproof_util.h"
 
-#include <openssl/bn.h>
-#include <openssl/digest.h>
-#include <openssl/ec.h>
-#include <openssl/nid.h>
+#include "../../include/openssl/bn.h>
+#include "../../include/openssl/digest.h>
+#include "../../include/openssl/ec.h>
+#include "../../include/openssl/nid.h>
 
 #include "./file_test.h"
 

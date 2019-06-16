@@ -16,14 +16,14 @@
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/aead.h>
-#include <openssl/cipher.h>
-#include <openssl/err.h>
-#include <openssl/hmac.h>
-#include <openssl/md5.h>
-#include <openssl/mem.h>
-#include <openssl/sha.h>
-#include <openssl/type_check.h>
+#include "../../include/openssl/aead.h"
+#include "../../include/openssl/cipher.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/hmac.h"
+#include "../../include/openssl/md5.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/sha.h"
+#include "../../include/openssl/type_check.h"
 
 #include "../fipsmodule/cipher/internal.h"
 #include "../internal.h"

@@ -76,7 +76,7 @@ extern "C" {
  *
  * This header is part of OpenSSL's ASN.1 implementation. It is retained for
  * compatibility but otherwise underdocumented and not actively maintained. Use
- * the new |CBS| and |CBB| library in <openssl/bytestring.h> instead. */
+ * the new |CBS| and |CBB| library in "../../include/openssl/bytestring.h> instead. */
 
 
 #define V_ASN1_UNIVERSAL		0x00

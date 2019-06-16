@@ -17,8 +17,8 @@
 
 #include <gtest/gtest.h>
 
-#include <openssl/cpu.h>
-#include <openssl/rand.h>
+#include "../../include/openssl/cpu.h>
+#include "../../include/openssl/rand.h>
 
 #include "abi_test.h"
 #include "gtest_main.h"
@@ -26,7 +26,7 @@
 
 #if (defined(OPENSSL_ARM) || defined(OPENSSL_AARCH64)) &&       \
     !defined(OPENSSL_STATIC_ARMCAP)
-#include <openssl/arm_arch.h>
+#include "../../include/openssl/arm_arch.h>
 #define TEST_ARM_CPUS
 #endif
 

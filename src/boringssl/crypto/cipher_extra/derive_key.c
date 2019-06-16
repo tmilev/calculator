@@ -54,12 +54,12 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/cipher.h>
+#include "../../include/openssl/cipher.h"
 
 #include <assert.h>
 
-#include <openssl/digest.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/mem.h"
 
 
 #define PKCS5_SALT_LEN 8

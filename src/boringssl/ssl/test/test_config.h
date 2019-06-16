@@ -18,8 +18,8 @@
 #include <string>
 #include <vector>
 
-#include <openssl/base.h>
-#include <openssl/x509.h>
+#include "../../include/openssl/base.h>
+#include "../../include/openssl/x509.h>
 
 #include "test_state.h"
 

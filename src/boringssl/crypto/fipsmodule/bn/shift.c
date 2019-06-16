@@ -54,12 +54,12 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/bn.h>
+#include "../../../include/openssl/bn.h"
 
 #include <string.h>
 
-#include <openssl/err.h>
-#include <openssl/type_check.h>
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/type_check.h"
 
 #include "internal.h"
 
@@ -177,7 +177,7 @@ int bn_rshift_secret_shift(BIGNUM *r, const BIGNUM *a, unsigned n,
   if (tmp == NULL ||
       !BN_copy(r, a) ||
       !bn_wexpand(tmp, r->width)) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   // Shift conditionally by powers of two.
@@ -193,8 +193,7 @@ int bn_rshift_secret_shift(BIGNUM *r, const BIGNUM *a, unsigned n,
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 void bn_rshift1_words(BN_ULONG *r, const BN_ULONG *a, size_t num) {

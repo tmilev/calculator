@@ -78,7 +78,8 @@ int i2d_ASN1_OBJECT(ASN1_OBJECT *a, unsigned char **pp)
     if (pp == NULL || objsize == -1)
         return objsize;
     if (*pp == NULL) {
-        p = allocated = OPENSSL_malloc(objsize);
+        allocated = (unsigned char*) OPENSSL_malloc(objsize);
+        p = allocated;
         if (p == NULL) {
             OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
             return 0;
@@ -112,7 +113,7 @@ int i2a_ASN1_OBJECT(BIO *bp, ASN1_OBJECT *a)
         return (BIO_write(bp, "NULL", 4));
     i = i2t_ASN1_OBJECT(buf, sizeof buf, a);
     if (i > (int)(sizeof(buf) - 1)) {
-        p = OPENSSL_malloc(i + 1);
+        p = (char*) OPENSSL_malloc(i + 1);
         if (!p)
             return -1;
         i2t_ASN1_OBJECT(p, i + 1, a);

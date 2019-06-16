@@ -55,11 +55,11 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/asn1.h>
-#include <openssl/mem.h>
-#include <openssl/obj.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
+#include "../../include/openssl/asn1.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/obj.h>
+#include "../../include/openssl/x509.h>
+#include "../../include/openssl/x509v3.h>
 
 #include "pcy_int.h"
 

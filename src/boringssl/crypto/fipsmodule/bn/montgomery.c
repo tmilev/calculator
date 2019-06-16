@@ -106,24 +106,24 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/bn.h>
+#include "../../../include/openssl/bn.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/thread.h>
-#include <openssl/type_check.h>
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/mem.h"
+#include "../../../include/openssl/thread.h"
+#include "../../../include/openssl/type_check.h"
 
 #include "internal.h"
 #include "../../internal.h"
 
 
 BN_MONT_CTX *BN_MONT_CTX_new(void) {
-  BN_MONT_CTX *ret = OPENSSL_malloc(sizeof(BN_MONT_CTX));
+  BN_MONT_CTX *ret = (BN_MONT_CTX *) OPENSSL_malloc(sizeof(BN_MONT_CTX));
 
   if (ret == NULL) {
     return NULL;
@@ -134,6 +134,11 @@ BN_MONT_CTX *BN_MONT_CTX_new(void) {
   BN_init(&ret->N);
 
   return ret;
+}
+
+BN_MONT_CTX* BN_MONT_CTX_free_return(BN_MONT_CTX *toBeFreed, BN_MONT_CTX* result) {
+  BN_MONT_CTX_free(toBeFreed);
+  return result;
 }
 
 void BN_MONT_CTX_free(BN_MONT_CTX *mont) {
@@ -247,7 +252,7 @@ BN_MONT_CTX *BN_MONT_CTX_new_consttime(const BIGNUM *mod, BN_CTX *ctx) {
   BN_MONT_CTX *mont = BN_MONT_CTX_new();
   if (mont == NULL ||
       !bn_mont_ctx_set_N_and_n0(mont, mod)) {
-    goto err;
+    return BN_MONT_CTX_free_return(mont, NULL);
   }
   unsigned lgBigR = mont->N.width * BN_BITS2;
   if (!bn_mod_exp_base_2_consttime(&mont->RR, lgBigR * 2, &mont->N, ctx) ||
@@ -257,8 +262,7 @@ BN_MONT_CTX *BN_MONT_CTX_new_consttime(const BIGNUM *mod, BN_CTX *ctx) {
   return mont;
 
 err:
-  BN_MONT_CTX_free(mont);
-  return NULL;
+  return BN_MONT_CTX_free_return(mont, NULL);
 }
 
 int BN_MONT_CTX_set_locked(BN_MONT_CTX **pmont, CRYPTO_MUTEX *lock,
@@ -355,9 +359,7 @@ int BN_from_montgomery(BIGNUM *r, const BIGNUM *a, const BN_MONT_CTX *mont,
   ret = BN_from_montgomery_word(r, t, mont);
 
 err:
-  BN_CTX_end(ctx);
-
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 int bn_one_to_montgomery(BIGNUM *r, const BN_MONT_CTX *mont, BN_CTX *ctx) {
@@ -410,8 +412,7 @@ static int bn_mod_mul_montgomery_fallback(BIGNUM *r, const BIGNUM *a,
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 int BN_mod_mul_montgomery(BIGNUM *r, const BIGNUM *a, const BIGNUM *b,

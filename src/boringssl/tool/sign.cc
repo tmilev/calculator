@@ -15,9 +15,9 @@
 #include <map>
 #include <vector>
 
-#include <openssl/bio.h>
-#include <openssl/evp.h>
-#include <openssl/pem.h>
+#include "../../include/openssl/bio.h>
+#include "../../include/openssl/evp.h>
+#include "../../include/openssl/pem.h>
 
 #include "internal.h"
 

@@ -12,18 +12,18 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include <openssl/pkcs7.h>
+#include "../../include/openssl/pkcs7.h>
 
 #include <assert.h>
 #include <limits.h>
 
-#include <openssl/bytestring.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/pem.h>
-#include <openssl/pool.h>
-#include <openssl/stack.h>
-#include <openssl/x509.h>
+#include "../../include/openssl/bytestring.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/pem.h>
+#include "../../include/openssl/pool.h>
+#include "../../include/openssl/stack.h>
+#include "../../include/openssl/x509.h>
 
 #include "internal.h"
 #include "../internal.h"

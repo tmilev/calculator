@@ -57,8 +57,8 @@
 #ifndef OPENSSL_HEADER_PKCS8_H
 #define OPENSSL_HEADER_PKCS8_H
 
-#include <openssl/base.h>
-#include <openssl/x509.h>
+#include "../../include/openssl/base.h>
+#include "../../include/openssl/x509.h>
 
 
 #if defined(__cplusplus)

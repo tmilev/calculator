@@ -54,12 +54,12 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/x509.h>
+#include "../../include/openssl/x509.h>
 
-#include <openssl/asn1.h>
-#include <openssl/asn1t.h>
-#include <openssl/digest.h>
-#include <openssl/obj.h>
+#include "../../include/openssl/asn1.h>
+#include "../../include/openssl/asn1t.h>
+#include "../../include/openssl/digest.h>
+#include "../../include/openssl/obj.h>
 
 
 ASN1_SEQUENCE(X509_ALGOR) = {

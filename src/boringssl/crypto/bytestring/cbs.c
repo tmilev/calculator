@@ -61,7 +61,7 @@ int CBS_stow(const CBS *cbs, uint8_t **out_ptr, size_t *out_len) {
   if (cbs->len == 0) {
     return 1;
   }
-  *out_ptr = BUF_memdup(cbs->data, cbs->len);
+  *out_ptr = (uint8_t *) BUF_memdup(cbs->data, cbs->len);
   if (*out_ptr == NULL) {
     return 0;
   }
@@ -587,32 +587,32 @@ static int add_decimal(CBB *out, uint64_t v) {
 char *CBS_asn1_oid_to_text(const CBS *cbs) {
   CBB cbb;
   if (!CBB_init(&cbb, 32)) {
-    goto err;
+    return CBB_cleanup_return_NULL(&cbb);
   }
 
   CBS copy = *cbs;
   // The first component is 40 * value1 + value2, where value1 is 0, 1, or 2.
   uint64_t v;
   if (!parse_base128_integer(&copy, &v)) {
-    goto err;
+    return CBB_cleanup_return_NULL(&cbb);
   }
 
   if (v >= 80) {
     if (!CBB_add_bytes(&cbb, (const uint8_t *)"2.", 2) ||
         !add_decimal(&cbb, v - 80)) {
-      goto err;
+      return CBB_cleanup_return_NULL(&cbb);
     }
   } else if (!add_decimal(&cbb, v / 40) ||
              !CBB_add_u8(&cbb, '.') ||
              !add_decimal(&cbb, v % 40)) {
-    goto err;
+    return CBB_cleanup_return_NULL(&cbb);
   }
 
   while (CBS_len(&copy) != 0) {
     if (!parse_base128_integer(&copy, &v) ||
         !CBB_add_u8(&cbb, '.') ||
         !add_decimal(&cbb, v)) {
-      goto err;
+      return CBB_cleanup_return_NULL(&cbb);
     }
   }
 
@@ -620,12 +620,8 @@ char *CBS_asn1_oid_to_text(const CBS *cbs) {
   size_t txt_len;
   if (!CBB_add_u8(&cbb, '\0') ||
       !CBB_finish(&cbb, &txt, &txt_len)) {
-    goto err;
+    return CBB_cleanup_return_NULL(&cbb);
   }
 
   return (char *)txt;
-
-err:
-  CBB_cleanup(&cbb);
-  return NULL;
 }

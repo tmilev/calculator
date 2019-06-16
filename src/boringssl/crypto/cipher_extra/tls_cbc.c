@@ -53,9 +53,9 @@
 #include <assert.h>
 #include <string.h>
 
-#include <openssl/digest.h>
-#include <openssl/nid.h>
-#include <openssl/sha.h>
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/nid.h"
+#include "../../include/openssl/sha.h"
 
 #include "../internal.h"
 #include "internal.h"

@@ -56,7 +56,7 @@
 
 #include <string.h>
 
-#include <openssl/des.h>
+#include "../../include/openssl/des.h>
 
 #include "../../crypto/fipsmodule/des/internal.h"
 #include "../../crypto/internal.h"

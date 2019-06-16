@@ -18,7 +18,7 @@
 // the STL itself, so suppressing at the |std::copy| call does not work.
 #define _SCL_SECURE_NO_WARNINGS
 
-#include <openssl/base.h>
+#include "../../include/openssl/base.h>
 
 #include <string>
 #include <vector>
@@ -57,9 +57,9 @@ typedef int ssize_t;
 OPENSSL_MSVC_PRAGMA(comment(lib, "Ws2_32.lib"))
 #endif
 
-#include <openssl/err.h>
-#include <openssl/ssl.h>
-#include <openssl/x509.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/ssl.h>
+#include "../../include/openssl/x509.h>
 
 #include "../crypto/internal.h"
 #include "internal.h"

@@ -17,17 +17,17 @@
 
 #include <stdio.h>
 
-#include <openssl/aead.h>
-#include <openssl/aes.h>
-#include <openssl/bn.h>
-#include <openssl/crypto.h>
-#include <openssl/des.h>
-#include <openssl/ecdsa.h>
-#include <openssl/ec_key.h>
-#include <openssl/hmac.h>
-#include <openssl/nid.h>
-#include <openssl/rsa.h>
-#include <openssl/sha.h>
+#include "../../include/openssl/aead.h>
+#include "../../include/openssl/aes.h>
+#include "../../include/openssl/bn.h>
+#include "../../include/openssl/crypto.h>
+#include "../../include/openssl/des.h>
+#include "../../include/openssl/ecdsa.h>
+#include "../../include/openssl/ec_key.h>
+#include "../../include/openssl/hmac.h>
+#include "../../include/openssl/nid.h>
+#include "../../include/openssl/rsa.h>
+#include "../../include/openssl/sha.h>
 
 #include "../crypto/fipsmodule/rand/internal.h"
 #include "../crypto/internal.h"

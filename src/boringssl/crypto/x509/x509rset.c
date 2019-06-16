@@ -54,10 +54,10 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
-#include <openssl/evp.h>
-#include <openssl/obj.h>
-#include <openssl/x509.h>
+#include "../../include/openssl/asn1.h>
+#include "../../include/openssl/evp.h>
+#include "../../include/openssl/obj.h>
+#include "../../include/openssl/x509.h>
 
 int X509_REQ_set_version(X509_REQ *x, long version)
 {

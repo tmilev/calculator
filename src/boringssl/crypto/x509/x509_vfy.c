@@ -58,15 +58,15 @@
 #include <string.h>
 #include <time.h>
 
-#include <openssl/asn1.h>
-#include <openssl/buf.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/mem.h>
-#include <openssl/obj.h>
-#include <openssl/thread.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
+#include "../../include/openssl/asn1.h>
+#include "../../include/openssl/buf.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/evp.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/obj.h>
+#include "../../include/openssl/thread.h>
+#include "../../include/openssl/x509.h>
+#include "../../include/openssl/x509v3.h>
 
 #include "vpm_int.h"
 #include "../internal.h"

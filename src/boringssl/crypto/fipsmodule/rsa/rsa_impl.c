@@ -54,17 +54,17 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/rsa.h>
+#include "../../include/openssl/rsa.h>
 
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/bn.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/thread.h>
-#include <openssl/type_check.h>
+#include "../../include/openssl/bn.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/thread.h>
+#include "../../include/openssl/type_check.h>
 
 #include "internal.h"
 #include "../bn/internal.h"

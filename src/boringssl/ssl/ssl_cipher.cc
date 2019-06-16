@@ -138,17 +138,17 @@
  * OTHER ENTITY BASED ON INFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS OR
  * OTHERWISE. */
 
-#include <openssl/ssl.h>
+#include "../../include/openssl/ssl.h>
 
 #include <assert.h>
 #include <string.h>
 
-#include <openssl/buf.h>
-#include <openssl/err.h>
-#include <openssl/md5.h>
-#include <openssl/mem.h>
-#include <openssl/sha.h>
-#include <openssl/stack.h>
+#include "../../include/openssl/buf.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/md5.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/sha.h>
+#include "../../include/openssl/stack.h>
 
 #include "internal.h"
 #include "../crypto/internal.h"

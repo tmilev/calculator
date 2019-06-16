@@ -52,13 +52,13 @@
  * Hudson (tjh@cryptsoft.com). */
 
 
-#include <openssl/bn.h>
+#include "../../../include/openssl/bn.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/mem.h"
 
 #include "../../internal.h"
 
@@ -106,7 +106,7 @@ struct bignum_ctx {
 };
 
 BN_CTX *BN_CTX_new(void) {
-  BN_CTX *ret = OPENSSL_malloc(sizeof(BN_CTX));
+  BN_CTX *ret = (BN_CTX *) OPENSSL_malloc(sizeof(BN_CTX));
   if (!ret) {
     OPENSSL_PUT_ERROR(BN, ERR_R_MALLOC_FAILURE);
     return NULL;
@@ -181,14 +181,15 @@ BIGNUM *BN_CTX_get(BN_CTX *ctx) {
   return ret;
 }
 
-void BN_CTX_end(BN_CTX *ctx) {
+int BN_CTX_end(int ret, BN_CTX *ctx) {
   if (ctx->error) {
     // Once an operation has failed, |ctx->stack| no longer matches the number
     // of |BN_CTX_end| calls to come. Do nothing.
-    return;
+    return ret;
   }
 
   ctx->used = BN_STACK_pop(&ctx->stack);
+  return ret;
 }
 
 
@@ -211,8 +212,7 @@ static int BN_STACK_push(BN_STACK *st, size_t idx) {
     if (new_size <= st->size || new_size > ((size_t)-1) / sizeof(size_t)) {
       return 0;
     }
-    size_t *new_indexes =
-        OPENSSL_realloc(st->indexes, new_size * sizeof(size_t));
+    size_t *new_indexes = (size_t *) OPENSSL_realloc(st->indexes, new_size * sizeof(size_t));
     if (new_indexes == NULL) {
       return 0;
     }

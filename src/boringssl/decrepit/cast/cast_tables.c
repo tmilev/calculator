@@ -54,7 +54,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/base.h>
+#include "../../include/openssl/base.h>
 
 #include "internal.h"
 

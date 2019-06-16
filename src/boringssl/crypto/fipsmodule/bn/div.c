@@ -54,12 +54,12 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/bn.h>
+#include "../../../include/openssl/bn.h"
 
 #include <assert.h>
 #include <limits.h>
 
-#include <openssl/err.h>
+#include "../../../include/openssl/err.h"
 
 #include "internal.h"
 
@@ -392,12 +392,10 @@ int BN_div(BIGNUM *quotient, BIGNUM *rem, const BIGNUM *numerator,
   }
 
   bn_set_minimal_width(res);
-  BN_CTX_end(ctx);
-  return 1;
+  return BN_CTX_end(1, ctx);
 
 err:
-  BN_CTX_end(ctx);
-  return 0;
+  return BN_CTX_end(0, ctx);
 }
 
 int BN_nnmod(BIGNUM *r, const BIGNUM *m, const BIGNUM *d, BN_CTX *ctx) {
@@ -525,8 +523,7 @@ int bn_div_consttime(BIGNUM *quotient, BIGNUM *remainder,
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 static BIGNUM *bn_scratch_space_from_ctx(size_t width, BN_CTX *ctx) {
@@ -591,8 +588,7 @@ int bn_mod_add_consttime(BIGNUM *r, const BIGNUM *a, const BIGNUM *b,
     r->width = m->width;
     r->neg = 0;
   }
-  BN_CTX_end(ctx);
-  return ok;
+  return BN_CTX_end(ok, ctx);
 }
 
 int BN_mod_sub(BIGNUM *r, const BIGNUM *a, const BIGNUM *b, const BIGNUM *m,
@@ -616,8 +612,7 @@ int bn_mod_sub_consttime(BIGNUM *r, const BIGNUM *a, const BIGNUM *b,
     r->width = m->width;
     r->neg = 0;
   }
-  BN_CTX_end(ctx);
-  return ok;
+  return BN_CTX_end(ok, ctx);
 }
 
 int BN_mod_sub_quick(BIGNUM *r, const BIGNUM *a, const BIGNUM *b,
@@ -657,8 +652,7 @@ int BN_mod_mul(BIGNUM *r, const BIGNUM *a, const BIGNUM *b, const BIGNUM *m,
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 int BN_mod_sqr(BIGNUM *r, const BIGNUM *a, const BIGNUM *m, BN_CTX *ctx) {

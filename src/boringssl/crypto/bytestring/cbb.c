@@ -32,7 +32,7 @@ static int cbb_init(CBB *cbb, uint8_t *buf, size_t cap) {
   // This assumes that |cbb| has already been zeroed.
   struct cbb_buffer_st *base;
 
-  base = OPENSSL_malloc(sizeof(struct cbb_buffer_st));
+  base = (cbb_buffer_st *) OPENSSL_malloc(sizeof(struct cbb_buffer_st));
   if (base == NULL) {
     return 0;
   }
@@ -51,7 +51,7 @@ static int cbb_init(CBB *cbb, uint8_t *buf, size_t cap) {
 int CBB_init(CBB *cbb, size_t initial_capacity) {
   CBB_zero(cbb);
 
-  uint8_t *buf = OPENSSL_malloc(initial_capacity);
+  uint8_t *buf = (uint8_t *) OPENSSL_malloc(initial_capacity);
   if (initial_capacity > 0 && buf == NULL) {
     return 0;
   }
@@ -73,6 +73,11 @@ int CBB_init_fixed(CBB *cbb, uint8_t *buf, size_t len) {
 
   cbb->base->can_resize = 0;
   return 1;
+}
+
+char* CBB_cleanup_return_NULL(CBB *cbb) {
+  CBB_cleanup(cbb);
+  return NULL;
 }
 
 void CBB_cleanup(CBB *cbb) {
@@ -117,7 +122,7 @@ static int cbb_buffer_reserve(struct cbb_buffer_st *base, uint8_t **out,
     if (newcap < base->cap || newcap < newlen) {
       newcap = newlen;
     }
-    newbuf = OPENSSL_realloc(base->buf, newcap);
+    newbuf = (uint8_t*) OPENSSL_realloc(base->buf, newcap);
     if (newbuf == NULL) {
       goto err;
     }
@@ -608,7 +613,8 @@ int CBB_add_asn1_oid_from_text(CBB *cbb, const char *text, size_t len) {
 static int compare_set_of_element(const void *a_ptr, const void *b_ptr) {
   // See X.690, section 11.6 for the ordering. They are sorted in ascending
   // order by their DER encoding.
-  const CBS *a = a_ptr, *b = b_ptr;
+  const CBS *a = (const CBS*) a_ptr;
+  const CBS *b = (const CBS*) b_ptr;
   size_t a_len = CBS_len(a), b_len = CBS_len(b);
   size_t min_len = a_len < b_len ? a_len : b_len;
   int ret = OPENSSL_memcmp(CBS_data(a), CBS_data(b), min_len);
@@ -649,8 +655,8 @@ int CBB_flush_asn1_set_of(CBB *cbb) {
   // remain valid as we rewrite |cbb|.
   int ret = 0;
   size_t buf_len = CBB_len(cbb);
-  uint8_t *buf = BUF_memdup(CBB_data(cbb), buf_len);
-  CBS *children = OPENSSL_malloc(num_children * sizeof(CBS));
+  uint8_t *buf = (uint8_t *) BUF_memdup(CBB_data(cbb), buf_len);
+  CBS *children = (CBS *) OPENSSL_malloc(num_children * sizeof(CBS));
   if (buf == NULL || children == NULL) {
     goto err;
   }

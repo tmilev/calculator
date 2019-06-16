@@ -12,11 +12,11 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include <openssl/bn.h>
+#include "../../../include/openssl/bn.h"
 
 #include <assert.h>
 
-#include <openssl/err.h>
+#include "../../../include/openssl/err.h"
 
 #include "internal.h"
 
@@ -67,7 +67,7 @@ static int bn_gcd_consttime(BIGNUM *r, unsigned *out_shift, const BIGNUM *x,
       !bn_resize_words(u, width) ||
       !bn_resize_words(v, width) ||
       !bn_resize_words(tmp, width)) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   // Each loop iteration halves at least one of |u| and |v|. Thus we need at
@@ -76,7 +76,7 @@ static int bn_gcd_consttime(BIGNUM *r, unsigned *out_shift, const BIGNUM *x,
   unsigned num_iters = x_bits + y_bits;
   if (num_iters < x_bits) {
     OPENSSL_PUT_ERROR(BN, BN_R_BIGNUM_TOO_LONG);
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   unsigned shift = 0;
@@ -113,10 +113,7 @@ static int bn_gcd_consttime(BIGNUM *r, unsigned *out_shift, const BIGNUM *x,
 
   *out_shift = shift;
   ret = bn_set_words(r, v->d, width);
-
-err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 int BN_gcd(BIGNUM *r, const BIGNUM *x, const BIGNUM *y, BN_CTX *ctx) {
@@ -149,8 +146,7 @@ int bn_is_relatively_prime(int *out_relatively_prime, const BIGNUM *x,
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 int bn_lcm_consttime(BIGNUM *r, const BIGNUM *a, const BIGNUM *b, BN_CTX *ctx) {
@@ -162,8 +158,7 @@ int bn_lcm_consttime(BIGNUM *r, const BIGNUM *a, const BIGNUM *b, BN_CTX *ctx) {
             bn_gcd_consttime(gcd, &shift, a, b, ctx) &&
             bn_div_consttime(r, NULL, r, gcd, ctx) &&
             bn_rshift_secret_shift(r, r, shift, ctx);
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 int bn_mod_inverse_consttime(BIGNUM *r, int *out_no_inverse, const BIGNUM *a,
@@ -234,7 +229,7 @@ int bn_mod_inverse_consttime(BIGNUM *r, int *out_no_inverse, const BIGNUM *a,
       // |tmp| and |tmp2| may be used at either size.
       !bn_resize_words(tmp, n_width) ||
       !bn_resize_words(tmp2, n_width)) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   // Each loop iteration halves at least one of |u| and |v|. Thus we need at
@@ -314,12 +309,11 @@ int bn_mod_inverse_consttime(BIGNUM *r, int *out_no_inverse, const BIGNUM *a,
   if (!BN_is_one(u)) {
     *out_no_inverse = 1;
     OPENSSL_PUT_ERROR(BN, BN_R_NO_INVERSE);
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   ret = BN_copy(r, A) != NULL;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }

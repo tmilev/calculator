@@ -54,15 +54,15 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/bn.h>
+#include "../../../include/openssl/bn.h"
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/type_check.h>
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/mem.h"
+#include "../../../include/openssl/type_check.h"
 
 #include "internal.h"
 #include "../../internal.h"
@@ -321,8 +321,7 @@ int bn_abs_sub_consttime(BIGNUM *r, const BIGNUM *a, const BIGNUM *b,
     bn_abs_sub_part_words(r->d, a->d, b->d, cl, dl, tmp->d);
     r->width = r_len;
   }
-  BN_CTX_end(ctx);
-  return ok;
+  return BN_CTX_end(ok, ctx);
 }
 
 // Karatsuba recursive multiplication algorithm
@@ -633,8 +632,7 @@ end:
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 int BN_mul(BIGNUM *r, const BIGNUM *a, const BIGNUM *b, BN_CTX *ctx) {

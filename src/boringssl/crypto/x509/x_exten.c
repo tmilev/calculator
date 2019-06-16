@@ -54,10 +54,10 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/asn1.h>
-#include <openssl/asn1t.h>
-#include <openssl/cipher.h>
-#include <openssl/x509.h>
+#include "../../include/openssl/asn1.h>
+#include "../../include/openssl/asn1t.h>
+#include "../../include/openssl/cipher.h>
+#include "../../include/openssl/x509.h>
 
 
 ASN1_SEQUENCE(X509_EXTENSION) = {

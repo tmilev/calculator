@@ -52,9 +52,9 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/bn.h>
+#include "../../../include/openssl/bn.h"
 
-#include <openssl/err.h>
+#include "../../../include/openssl/err.h"
 
 #include "internal.h"
 
@@ -420,8 +420,7 @@ end:
     }
     ret = NULL;
   }
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 int BN_sqrt(BIGNUM *out_sqrt, const BIGNUM *in, BN_CTX *ctx) {

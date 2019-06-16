@@ -12,15 +12,15 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include <openssl/curve25519.h>
+#include "../../include/openssl/curve25519.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include <openssl/bytestring.h>
-#include <openssl/mem.h>
-#include <openssl/rand.h>
-#include <openssl/sha.h>
+#include "../../include/openssl/bytestring.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/sha.h"
 
 #include "../internal.h"
 #include "../../third_party/fiat/internal.h"
@@ -271,7 +271,7 @@ static const uint8_t kSpakeMSmallPrecomp[15 * 2 * 32] = {
 SPAKE2_CTX *SPAKE2_CTX_new(enum spake2_role_t my_role,
                            const uint8_t *my_name, size_t my_name_len,
                            const uint8_t *their_name, size_t their_name_len) {
-  SPAKE2_CTX *ctx = OPENSSL_malloc(sizeof(SPAKE2_CTX));
+  SPAKE2_CTX *ctx = (SPAKE2_CTX *) OPENSSL_malloc(sizeof(SPAKE2_CTX));
   if (ctx == NULL) {
     return NULL;
   }

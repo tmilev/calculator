@@ -106,15 +106,15 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/bn.h>
+#include "../../../include/openssl/bn.h"
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <openssl/cpu.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../../include/openssl/cpu.h"
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/mem.h"
 
 #include "internal.h"
 #include "rsaz_exp.h"
@@ -168,8 +168,7 @@ int BN_exp(BIGNUM *r, const BIGNUM *a, const BIGNUM *p, BN_CTX *ctx) {
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 typedef struct bn_recp_ctx_st {
@@ -233,8 +232,7 @@ static int BN_reciprocal(BIGNUM *r, const BIGNUM *m, int len, BN_CTX *ctx) {
   ret = len;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 static int BN_div_recp(BIGNUM *dv, BIGNUM *rem, const BIGNUM *m,
@@ -266,8 +264,7 @@ static int BN_div_recp(BIGNUM *dv, BIGNUM *rem, const BIGNUM *m,
     if (!BN_copy(r, m)) {
       goto err;
     }
-    BN_CTX_end(ctx);
-    return 1;
+    return BN_CTX_end(1, ctx);
   }
 
   // We want the remainder
@@ -336,8 +333,7 @@ static int BN_div_recp(BIGNUM *dv, BIGNUM *rem, const BIGNUM *m,
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 static int BN_mod_mul_reciprocal(BIGNUM *r, const BIGNUM *x, const BIGNUM *y,
@@ -370,8 +366,7 @@ static int BN_mod_mul_reciprocal(BIGNUM *r, const BIGNUM *x, const BIGNUM *y,
   ret = BN_div_recp(NULL, r, ca, recp, ctx);
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 // BN_window_bits_for_exponent_size returns sliding window size for mod_exp with
@@ -559,7 +554,7 @@ static int mod_exp_recp(BIGNUM *r, const BIGNUM *a, const BIGNUM *p,
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
+  BN_CTX_end(0, ctx);
   BN_RECP_CTX_free(&recp);
   return ret;
 }
@@ -582,6 +577,11 @@ int BN_mod_exp(BIGNUM *r, const BIGNUM *a, const BIGNUM *p, const BIGNUM *m,
   }
 
   return mod_exp_recp(r, a, p, m, ctx);
+}
+
+int BN_mod_exp_mont_cleanup_return(int result, BN_MONT_CTX *new_mont, BN_CTX * ctx) {
+  BN_MONT_CTX_free(new_mont);
+  return BN_CTX_end(result, ctx);
 }
 
 int BN_mod_exp_mont(BIGNUM *rr, const BIGNUM *a, const BIGNUM *p,
@@ -617,14 +617,14 @@ int BN_mod_exp_mont(BIGNUM *rr, const BIGNUM *a, const BIGNUM *p,
   BIGNUM *r = BN_CTX_get(ctx);
   val[0] = BN_CTX_get(ctx);
   if (r == NULL || val[0] == NULL) {
-    goto err;
+    return BN_mod_exp_mont_cleanup_return(ret, new_mont, ctx);
   }
 
   // Allocate a montgomery context if it was not supplied by the caller.
   if (mont == NULL) {
     new_mont = BN_MONT_CTX_new_consttime(m, ctx);
     if (new_mont == NULL) {
-      goto err;
+      return BN_mod_exp_mont_cleanup_return(ret, new_mont, ctx);
     }
     mont = new_mont;
   }
@@ -635,19 +635,18 @@ int BN_mod_exp_mont(BIGNUM *rr, const BIGNUM *a, const BIGNUM *p,
   // for i = 0 to 2^(window-1), all in Montgomery form.
   int window = BN_window_bits_for_exponent_size(bits);
   if (!BN_to_montgomery(val[0], a, mont, ctx)) {
-    goto err;
+    return BN_mod_exp_mont_cleanup_return(ret, new_mont, ctx);
   }
   if (window > 1) {
     BIGNUM *d = BN_CTX_get(ctx);
     if (d == NULL ||
         !BN_mod_mul_montgomery(d, val[0], val[0], mont, ctx)) {
-      goto err;
+      return BN_mod_exp_mont_cleanup_return(ret, new_mont, ctx);
     }
     for (int i = 1; i < 1 << (window - 1); i++) {
       val[i] = BN_CTX_get(ctx);
-      if (val[i] == NULL ||
-          !BN_mod_mul_montgomery(val[i], val[i - 1], d, mont, ctx)) {
-        goto err;
+      if (val[i] == NULL || !BN_mod_mul_montgomery(val[i], val[i - 1], d, mont, ctx)) {
+        return BN_mod_exp_mont_cleanup_return(ret, new_mont, ctx);
       }
     }
   }
@@ -714,9 +713,7 @@ int BN_mod_exp_mont(BIGNUM *rr, const BIGNUM *a, const BIGNUM *p,
   ret = 1;
 
 err:
-  BN_MONT_CTX_free(new_mont);
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_mod_exp_mont_cleanup_return(ret, new_mont, ctx);
 }
 
 void bn_mod_exp_mont_small(BN_ULONG *r, const BN_ULONG *a, size_t num,
@@ -1000,8 +997,7 @@ int BN_mod_exp_mont_consttime(BIGNUM *rr, const BIGNUM *a, const BIGNUM *p,
   assert(powerbuf != NULL || top * BN_BITS2 > 1024);
 #endif
   if (powerbuf == NULL) {
-    powerbufFree =
-        OPENSSL_malloc(powerbufLen + MOD_EXP_CTIME_MIN_CACHE_LINE_WIDTH);
+    powerbufFree = (unsigned char *) OPENSSL_malloc(powerbufLen + MOD_EXP_CTIME_MIN_CACHE_LINE_WIDTH);
     if (powerbufFree == NULL) {
       goto err;
     }

@@ -12,7 +12,7 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include <openssl/base.h>
+#include "../../include/openssl/base.h>
 
 #include <memory>
 #include <string>
@@ -30,11 +30,11 @@
 #include <unistd.h>
 #endif
 
-#include <openssl/bytestring.h>
-#include <openssl/err.h>
-#include <openssl/pem.h>
-#include <openssl/pkcs8.h>
-#include <openssl/stack.h>
+#include "../../include/openssl/bytestring.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/pem.h>
+#include "../../include/openssl/pkcs8.h>
+#include "../../include/openssl/stack.h>
 
 #include "../crypto/internal.h"
 #include "internal.h"

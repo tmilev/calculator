@@ -54,8 +54,8 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/cipher.h>
-#include <openssl/nid.h>
+#include "../../include/openssl/cipher.h"
+#include "../../include/openssl/nid.h"
 
 #include "../internal.h"
 

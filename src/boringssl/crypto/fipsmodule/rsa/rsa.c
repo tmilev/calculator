@@ -54,21 +54,21 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/rsa.h>
+#include "../../include/openssl/rsa.h>
 
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/bn.h>
-#include <openssl/digest.h>
-#include <openssl/engine.h>
-#include <openssl/err.h>
-#include <openssl/ex_data.h>
-#include <openssl/md5.h>
-#include <openssl/mem.h>
-#include <openssl/nid.h>
-#include <openssl/sha.h>
-#include <openssl/thread.h>
+#include "../../include/openssl/bn.h>
+#include "../../include/openssl/digest.h>
+#include "../../include/openssl/engine.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/ex_data.h>
+#include "../../include/openssl/md5.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/nid.h>
+#include "../../include/openssl/sha.h>
+#include "../../include/openssl/thread.h>
 
 #include "../bn/internal.h"
 #include "../delocate.h"

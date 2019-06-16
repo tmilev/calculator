@@ -16,7 +16,7 @@
 #define _GNU_SOURCE  // needed for syscall() on Linux.
 #endif
 
-#include <openssl/rand.h>
+#include "../../include/openssl/rand.h>
 
 #if !defined(OPENSSL_WINDOWS) && !defined(OPENSSL_FUCHSIA) && \
     !defined(BORINGSSL_UNSAFE_DETERMINISTIC_MODE) && !defined(OPENSSL_TRUSTY)
@@ -53,8 +53,8 @@
 #endif
 #endif  // OPENSSL_LINUX
 
-#include <openssl/thread.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/thread.h>
+#include "../../include/openssl/mem.h>
 
 #include "internal.h"
 #include "../delocate.h"

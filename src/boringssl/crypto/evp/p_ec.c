@@ -53,20 +53,20 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/evp.h>
+#include "../../include/openssl/evp.h"
 
 #include <string.h>
 
-#include <openssl/bn.h>
-#include <openssl/buf.h>
-#include <openssl/digest.h>
-#include <openssl/ec.h>
-#include <openssl/ec_key.h>
-#include <openssl/ecdh.h>
-#include <openssl/ecdsa.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/nid.h>
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/ec.h"
+#include "../../include/openssl/ec_key.h"
+#include "../../include/openssl/ecdh.h"
+#include "../../include/openssl/ecdsa.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/nid.h"
 
 #include "internal.h"
 #include "../fipsmodule/ec/internal.h"
@@ -82,7 +82,7 @@ typedef struct {
 
 static int pkey_ec_init(EVP_PKEY_CTX *ctx) {
   EC_PKEY_CTX *dctx;
-  dctx = OPENSSL_malloc(sizeof(EC_PKEY_CTX));
+  dctx = (EC_PKEY_CTX *) OPENSSL_malloc(sizeof(EC_PKEY_CTX));
   if (!dctx) {
     return 0;
   }
@@ -98,8 +98,8 @@ static int pkey_ec_copy(EVP_PKEY_CTX *dst, EVP_PKEY_CTX *src) {
   if (!pkey_ec_init(dst)) {
     return 0;
   }
-  sctx = src->data;
-  dctx = dst->data;
+  sctx = (EC_PKEY_CTX *) src->data;
+  dctx = (EC_PKEY_CTX *) dst->data;
 
   dctx->md = sctx->md;
 
@@ -107,7 +107,7 @@ static int pkey_ec_copy(EVP_PKEY_CTX *dst, EVP_PKEY_CTX *src) {
 }
 
 static void pkey_ec_cleanup(EVP_PKEY_CTX *ctx) {
-  EC_PKEY_CTX *dctx = ctx->data;
+  EC_PKEY_CTX *dctx = (EC_PKEY_CTX *) ctx->data;
   if (!dctx) {
     return;
   }
@@ -177,7 +177,7 @@ static int pkey_ec_derive(EVP_PKEY_CTX *ctx, uint8_t *key,
 }
 
 static int pkey_ec_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2) {
-  EC_PKEY_CTX *dctx = ctx->data;
+  EC_PKEY_CTX *dctx = (EC_PKEY_CTX *) ctx->data;
 
   switch (type) {
     case EVP_PKEY_CTRL_MD:

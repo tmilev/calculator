@@ -54,19 +54,19 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/obj.h>
+#include "../../include/openssl/obj.h>
 
 #include <inttypes.h>
 #include <limits.h>
 #include <string.h>
 
-#include <openssl/asn1.h>
-#include <openssl/buf.h>
-#include <openssl/bytestring.h>
-#include <openssl/err.h>
-#include <openssl/lhash.h>
-#include <openssl/mem.h>
-#include <openssl/thread.h>
+#include "../../include/openssl/asn1.h>
+#include "../../include/openssl/buf.h>
+#include "../../include/openssl/bytestring.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/lhash.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/thread.h>
 
 #include "obj_dat.h"
 #include "../internal.h"

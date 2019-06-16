@@ -17,8 +17,8 @@
 
 #include <string>
 
-#include <openssl/bytestring.h>
-#include <openssl/ssl.h>
+#include "../../include/openssl/bytestring.h>
+#include "../../include/openssl/ssl.h>
 
 #include "../internal.h"
 #include "test_config.h"

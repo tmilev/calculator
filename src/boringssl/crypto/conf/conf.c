@@ -54,16 +54,16 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/conf.h>
+#include "../../include/openssl/conf.h"
 
 #include <string.h>
 #include <ctype.h>
 
-#include <openssl/bio.h>
-#include <openssl/buf.h>
-#include <openssl/err.h>
-#include <openssl/lhash.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/lhash.h"
+#include "../../include/openssl/mem.h"
 
 #include "conf_def.h"
 #include "internal.h"
@@ -110,7 +110,7 @@ CONF *NCONF_new(void *method) {
     return NULL;
   }
 
-  conf = OPENSSL_malloc(sizeof(CONF));
+  conf = (CONF*) OPENSSL_malloc(sizeof(CONF));
   if (conf == NULL) {
     return NULL;
   }
@@ -125,7 +125,7 @@ CONF *NCONF_new(void *method) {
 }
 
 CONF_VALUE *CONF_VALUE_new(void) {
-  CONF_VALUE *v = OPENSSL_malloc(sizeof(CONF_VALUE));
+  CONF_VALUE *v = (CONF_VALUE *) OPENSSL_malloc(sizeof(CONF_VALUE));
   if (!v) {
     OPENSSL_PUT_ERROR(CONF, ERR_R_MALLOC_FAILURE);
     return NULL;
@@ -371,11 +371,11 @@ err:
 }
 
 static CONF_VALUE *get_section(const CONF *conf, const char *section) {
-  CONF_VALUE template;
+  CONF_VALUE template_conf;
 
-  OPENSSL_memset(&template, 0, sizeof(template));
-  template.section = (char *) section;
-  return lh_CONF_VALUE_retrieve(conf->data, &template);
+  OPENSSL_memset(&template_conf, 0, sizeof(template_conf));
+  template_conf.section = (char *) section;
+  return lh_CONF_VALUE_retrieve(conf->data, &template_conf);
 }
 
 STACK_OF(CONF_VALUE) *NCONF_get_section(const CONF *conf, const char *section) {
@@ -388,12 +388,12 @@ STACK_OF(CONF_VALUE) *NCONF_get_section(const CONF *conf, const char *section) {
 
 const char *NCONF_get_string(const CONF *conf, const char *section,
                              const char *name) {
-  CONF_VALUE template, *value;
+  CONF_VALUE template_conf, *value;
 
-  OPENSSL_memset(&template, 0, sizeof(template));
-  template.section = (char *) section;
-  template.name = (char *) name;
-  value = lh_CONF_VALUE_retrieve(conf->data, &template);
+  OPENSSL_memset(&template_conf, 0, sizeof(template_conf));
+  template_conf.section = (char *) section;
+  template_conf.name = (char *) name;
+  value = lh_CONF_VALUE_retrieve(conf->data, &template_conf);
   if (value == NULL) {
     return NULL;
   }

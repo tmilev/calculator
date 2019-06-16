@@ -55,17 +55,17 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/pem.h>
+#include "../../include/openssl/pem.h>
 
 #include <stdio.h>
 
-#include <openssl/buf.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/evp.h>
-#include <openssl/obj.h>
-#include <openssl/rand.h>
-#include <openssl/x509.h>
+#include "../../include/openssl/buf.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/evp.h>
+#include "../../include/openssl/obj.h>
+#include "../../include/openssl/rand.h>
+#include "../../include/openssl/x509.h>
 
 /* Handle 'other' PEMs: not private keys */
 

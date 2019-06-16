@@ -54,9 +54,9 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.]. */
 
-#include <openssl/cast.h>
-#include <openssl/cipher.h>
-#include <openssl/obj.h>
+#include "../../include/openssl/cast.h>
+#include "../../include/openssl/cipher.h>
+#include "../../include/openssl/obj.h>
 
 #if defined(OPENSSL_WINDOWS)
 OPENSSL_MSVC_PRAGMA(warning(push, 3))

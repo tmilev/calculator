@@ -53,16 +53,16 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/x509.h>
+#include "../../include/openssl/x509.h>
 
 #include <assert.h>
 
-#include <openssl/asn1.h>
-#include <openssl/asn1t.h>
-#include <openssl/bio.h>
-#include <openssl/evp.h>
-#include <openssl/err.h>
-#include <openssl/obj.h>
+#include "../../include/openssl/asn1.h>
+#include "../../include/openssl/asn1t.h>
+#include "../../include/openssl/bio.h>
+#include "../../include/openssl/evp.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/obj.h>
 
 #include "internal.h"
 

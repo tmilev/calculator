@@ -46,12 +46,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * ==================================================================== */
 
-#include <openssl/evp.h>
+#include "../../include/openssl/evp.h>
 
 #include <string.h>
 
-#include <openssl/aes.h>
-#include <openssl/cipher.h>
+#include "../../include/openssl/aes.h>
+#include "../../include/openssl/cipher.h>
 
 #include "../crypto/fipsmodule/modes/internal.h"
 

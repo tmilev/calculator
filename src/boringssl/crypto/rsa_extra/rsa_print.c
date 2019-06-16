@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/rsa.h>
+#include "../../include/openssl/rsa.h>
 
-#include <openssl/evp.h>
+#include "../../include/openssl/evp.h>
 
 
 int RSA_print(BIO *bio, const RSA *rsa, int indent) {

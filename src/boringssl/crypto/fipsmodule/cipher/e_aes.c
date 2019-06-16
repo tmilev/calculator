@@ -49,14 +49,14 @@
 #include <assert.h>
 #include <string.h>
 
-#include <openssl/aead.h>
-#include <openssl/aes.h>
-#include <openssl/cipher.h>
-#include <openssl/cpu.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/nid.h>
-#include <openssl/rand.h>
+#include "../../include/openssl/aead.h>
+#include "../../include/openssl/aes.h>
+#include "../../include/openssl/cipher.h>
+#include "../../include/openssl/cpu.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/nid.h>
+#include "../../include/openssl/rand.h>
 
 #include "internal.h"
 #include "../../internal.h"

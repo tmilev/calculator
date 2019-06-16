@@ -50,15 +50,15 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/evp.h>
+#include "../../include/openssl/evp.h"
 
-#include <openssl/bio.h>
-#include <openssl/bn.h>
-#include <openssl/dsa.h>
-#include <openssl/ec.h>
-#include <openssl/ec_key.h>
-#include <openssl/mem.h>
-#include <openssl/rsa.h>
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/openssl/ec.h"
+#include "../../include/openssl/ec_key.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/rsa.h"
 
 #include "../internal.h"
 #include "../fipsmodule/rsa/internal.h"
@@ -323,7 +323,7 @@ static int do_EC_KEY_print(BIO *bp, const EC_KEY *x, int off, int ktype) {
         reason = ERR_R_MALLOC_FAILURE;
         goto err;
       }
-      pub_key_bytes = OPENSSL_malloc(pub_key_bytes_len);
+      pub_key_bytes = (uint8_t *) OPENSSL_malloc(pub_key_bytes_len);
       if (pub_key_bytes == NULL) {
         reason = ERR_R_MALLOC_FAILURE;
         goto err;

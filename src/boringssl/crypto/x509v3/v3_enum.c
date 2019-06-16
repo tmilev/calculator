@@ -57,9 +57,9 @@
 
 #include <stdio.h>
 
-#include <openssl/buf.h>
-#include <openssl/obj.h>
-#include <openssl/x509v3.h>
+#include "../../include/openssl/buf.h>
+#include "../../include/openssl/obj.h>
+#include "../../include/openssl/x509v3.h>
 
 static const ENUMERATED_NAMES crl_reasons[] = {
     {CRL_REASON_UNSPECIFIED, "Unspecified", "unspecified"},

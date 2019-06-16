@@ -202,8 +202,8 @@ static int sk_table_cmp(const ASN1_STRING_TABLE **a,
 
 static int table_cmp(const void *in_a, const void *in_b)
 {
-    const ASN1_STRING_TABLE *a = in_a;
-    const ASN1_STRING_TABLE *b = in_b;
+    const ASN1_STRING_TABLE *a = (const ASN1_STRING_TABLE *) in_a;
+    const ASN1_STRING_TABLE *b = (const ASN1_STRING_TABLE *) in_b;
     return a->nid - b->nid;
 }
 
@@ -215,7 +215,7 @@ ASN1_STRING_TABLE *ASN1_STRING_TABLE_get(int nid)
     ASN1_STRING_TABLE fnd;
     fnd.nid = nid;
 
-    ttmp =
+    ttmp = (ASN1_STRING_TABLE *)
         bsearch(&fnd, tbl_standard,
                 sizeof(tbl_standard) / sizeof(ASN1_STRING_TABLE),
                 sizeof(ASN1_STRING_TABLE), table_cmp);
@@ -244,7 +244,7 @@ int ASN1_STRING_TABLE_add(int nid,
         return 0;
     }
     if (!(tmp = ASN1_STRING_TABLE_get(nid))) {
-        tmp = OPENSSL_malloc(sizeof(ASN1_STRING_TABLE));
+        tmp = (ASN1_STRING_TABLE *) OPENSSL_malloc(sizeof(ASN1_STRING_TABLE));
         if (!tmp) {
             OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
             return 0;

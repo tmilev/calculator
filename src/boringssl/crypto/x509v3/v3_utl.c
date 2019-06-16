@@ -62,13 +62,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <openssl/bn.h>
-#include <openssl/buf.h>
-#include <openssl/conf.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/obj.h>
-#include <openssl/x509v3.h>
+#include "../../include/openssl/bn.h>
+#include "../../include/openssl/buf.h>
+#include "../../include/openssl/conf.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/obj.h>
+#include "../../include/openssl/x509v3.h>
 
 #include "../conf/internal.h"
 #include "../internal.h"

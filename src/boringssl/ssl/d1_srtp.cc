@@ -114,12 +114,12 @@
   Copyright (C) 2011, RTFM, Inc.
 */
 
-#include <openssl/ssl.h>
+#include "../../include/openssl/ssl.h>
 
 #include <string.h>
 
-#include <openssl/bytestring.h>
-#include <openssl/err.h>
+#include "../../include/openssl/bytestring.h>
+#include "../../include/openssl/err.h>
 
 #include "internal.h"
 

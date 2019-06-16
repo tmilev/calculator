@@ -54,10 +54,10 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/bn.h>
+#include "../../../include/openssl/bn.h"
 
-#include <openssl/mem.h>
-#include <openssl/type_check.h>
+#include "../../../include/openssl/mem.h"
+#include "../../../include/openssl/type_check.h"
 
 #include "internal.h"
 #include "../../internal.h"

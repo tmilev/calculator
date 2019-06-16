@@ -15,8 +15,8 @@
 #ifndef HEADER_PACKETED_BIO
 #define HEADER_PACKETED_BIO
 
-#include <openssl/base.h>
-#include <openssl/bio.h>
+#include "../../include/openssl/base.h>
+#include "../../include/openssl/bio.h>
 
 #if defined(OPENSSL_WINDOWS)
 OPENSSL_MSVC_PRAGMA(warning(push, 3))

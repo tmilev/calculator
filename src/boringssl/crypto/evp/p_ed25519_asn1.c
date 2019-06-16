@@ -12,12 +12,12 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include <openssl/evp.h>
+#include "../../include/openssl/evp.h"
 
-#include <openssl/bytestring.h>
-#include <openssl/curve25519.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/bytestring.h"
+#include "../../include/openssl/curve25519.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
 
 #include "internal.h"
 #include "../internal.h"
@@ -34,7 +34,7 @@ static int ed25519_set_priv_raw(EVP_PKEY *pkey, const uint8_t *in, size_t len) {
     return 0;
   }
 
-  ED25519_KEY *key = OPENSSL_malloc(sizeof(ED25519_KEY));
+  ED25519_KEY *key = (ED25519_KEY *) OPENSSL_malloc(sizeof(ED25519_KEY));
   if (key == NULL) {
     OPENSSL_PUT_ERROR(EVP, ERR_R_MALLOC_FAILURE);
     return 0;
@@ -57,7 +57,7 @@ static int ed25519_set_pub_raw(EVP_PKEY *pkey, const uint8_t *in, size_t len) {
     return 0;
   }
 
-  ED25519_KEY *key = OPENSSL_malloc(sizeof(ED25519_KEY));
+  ED25519_KEY *key = (ED25519_KEY *) OPENSSL_malloc(sizeof(ED25519_KEY));
   if (key == NULL) {
     OPENSSL_PUT_ERROR(EVP, ERR_R_MALLOC_FAILURE);
     return 0;
@@ -73,7 +73,7 @@ static int ed25519_set_pub_raw(EVP_PKEY *pkey, const uint8_t *in, size_t len) {
 
 static int ed25519_get_priv_raw(const EVP_PKEY *pkey, uint8_t *out,
                                 size_t *out_len) {
-  const ED25519_KEY *key = pkey->pkey.ptr;
+  const ED25519_KEY *key = (const ED25519_KEY *) pkey->pkey.ptr;
   if (!key->has_private) {
     OPENSSL_PUT_ERROR(EVP, EVP_R_NOT_A_PRIVATE_KEY);
     return 0;
@@ -97,7 +97,7 @@ static int ed25519_get_priv_raw(const EVP_PKEY *pkey, uint8_t *out,
 
 static int ed25519_get_pub_raw(const EVP_PKEY *pkey, uint8_t *out,
                                size_t *out_len) {
-  const ED25519_KEY *key = pkey->pkey.ptr;
+  const ED25519_KEY *key =(const ED25519_KEY *) pkey->pkey.ptr;
   if (out == NULL) {
     *out_len = 32;
     return 1;
@@ -126,7 +126,7 @@ static int ed25519_pub_decode(EVP_PKEY *out, CBS *params, CBS *key) {
 }
 
 static int ed25519_pub_encode(CBB *out, const EVP_PKEY *pkey) {
-  const ED25519_KEY *key = pkey->pkey.ptr;
+  const ED25519_KEY *key = (const ED25519_KEY *) pkey->pkey.ptr;
 
   // See RFC 8410, section 4.
   CBB spki, algorithm, oid, key_bitstring;

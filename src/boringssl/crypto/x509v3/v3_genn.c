@@ -57,10 +57,10 @@
 
 #include <stdio.h>
 
-#include <openssl/asn1t.h>
-#include <openssl/conf.h>
-#include <openssl/obj.h>
-#include <openssl/x509v3.h>
+#include "../../include/openssl/asn1t.h>
+#include "../../include/openssl/conf.h>
+#include "../../include/openssl/obj.h>
+#include "../../include/openssl/x509v3.h>
 
 
 ASN1_SEQUENCE(OTHERNAME) = {

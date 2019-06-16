@@ -23,7 +23,7 @@
 
 #include <gtest/gtest.h>
 
-#include <openssl/err.h>
+#include "../../include/openssl/err.h>
 
 
 std::string GetTestData(const char *path);

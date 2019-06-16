@@ -179,7 +179,7 @@ static struct CRYPTO_STATIC_MUTEX global_next_library_mutex =
     CRYPTO_STATIC_MUTEX_INIT;
 
 static void err_state_free(void *statep) {
-  ERR_STATE *state = statep;
+  ERR_STATE *state = (ERR_STATE *) statep;
 
   if (state == NULL) {
     return;
@@ -194,9 +194,9 @@ static void err_state_free(void *statep) {
 
 // err_get_state gets the ERR_STATE object for the current thread.
 static ERR_STATE *err_get_state(void) {
-  ERR_STATE *state = CRYPTO_get_thread_local(OPENSSL_THREAD_LOCAL_ERR);
+  ERR_STATE *state = (ERR_STATE *) CRYPTO_get_thread_local(OPENSSL_THREAD_LOCAL_ERR);
   if (state == NULL) {
-    state = OPENSSL_malloc(sizeof(ERR_STATE));
+    state = (ERR_STATE *) OPENSSL_malloc(sizeof(ERR_STATE));
     if (state == NULL) {
       return NULL;
     }
@@ -478,8 +478,9 @@ static const char *err_string_lookup(uint32_t lib, uint32_t key,
     return NULL;
   }
   uint32_t search_key = lib << 26 | key << 15;
-  const uint32_t *result = bsearch(&search_key, values, num_values,
-                                   sizeof(uint32_t), err_string_cmp);
+  const uint32_t *result = (const uint32_t *) bsearch(
+    &search_key, values, num_values, sizeof(uint32_t), err_string_cmp
+  );
   if (result == NULL) {
     return NULL;
   }
@@ -600,7 +601,7 @@ void ERR_print_errors_cb(ERR_print_errors_callback_t callback, void *ctx) {
 
 static int print_errors_to_file(const char* msg, size_t msg_len, void* ctx) {
   assert(msg[msg_len] == '\0');
-  FILE* fp = ctx;
+  FILE* fp = (FILE*) ctx;
   int res = fputs(msg, fp);
   return res < 0 ? 0 : 1;
 }
@@ -664,7 +665,7 @@ static void err_add_error_vdata(unsigned num, va_list args) {
   unsigned i;
 
   alloced = 80;
-  buf = OPENSSL_malloc(alloced + 1);
+  buf = (char *) OPENSSL_malloc(alloced + 1);
   if (buf == NULL) {
     return;
   }
@@ -687,7 +688,7 @@ static void err_add_error_vdata(unsigned num, va_list args) {
       }
 
       alloced = new_len + 20;
-      new_buf = OPENSSL_realloc(buf, alloced + 1);
+      new_buf = (char*) OPENSSL_realloc(buf, alloced + 1);
       if (new_buf == NULL) {
         OPENSSL_free(buf);
         return;
@@ -718,7 +719,7 @@ void ERR_add_error_dataf(const char *format, ...) {
   // A fixed-size buffer is used because va_copy (which would be needed in
   // order to call vsnprintf twice and measure the buffer) wasn't defined until
   // C99.
-  buf = OPENSSL_malloc(buf_len + 1);
+  buf = (char*) OPENSSL_malloc(buf_len + 1);
   if (buf == NULL) {
     return;
   }
@@ -799,7 +800,7 @@ ERR_SAVE_STATE *ERR_save_state(void) {
     return NULL;
   }
 
-  ERR_SAVE_STATE *ret = OPENSSL_malloc(sizeof(ERR_SAVE_STATE));
+  ERR_SAVE_STATE *ret = (ERR_SAVE_STATE *) OPENSSL_malloc(sizeof(ERR_SAVE_STATE));
   if (ret == NULL) {
     return NULL;
   }
@@ -809,7 +810,7 @@ ERR_SAVE_STATE *ERR_save_state(void) {
                           ? state->top - state->bottom
                           : ERR_NUM_ERRORS + state->top - state->bottom;
   assert(num_errors < ERR_NUM_ERRORS);
-  ret->errors = OPENSSL_malloc(num_errors * sizeof(struct err_error_st));
+  ret->errors = (err_error_st *) OPENSSL_malloc(num_errors * sizeof(struct err_error_st));
   if (ret->errors == NULL) {
     OPENSSL_free(ret);
     return NULL;

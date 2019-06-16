@@ -374,6 +374,7 @@ OPENSSL_EXPORT int CBB_init_fixed(CBB *cbb, uint8_t *buf, size_t len);
 // with |CBB_init| or |CBB_init_fixed|, or a |CBB| set to the zero state with
 // |CBB_zero|.
 OPENSSL_EXPORT void CBB_cleanup(CBB *cbb);
+OPENSSL_EXPORT char* CBB_cleanup_return_NULL(CBB *cbb);
 
 // CBB_finish completes any pending length prefix and sets |*out_data| to a
 // malloced buffer and |*out_len| to the length of that buffer. The caller

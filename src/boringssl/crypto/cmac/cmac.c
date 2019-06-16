@@ -46,14 +46,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * ==================================================================== */
 
-#include <openssl/cmac.h>
+#include "../../include/openssl/cmac.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include <openssl/aes.h>
-#include <openssl/cipher.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/aes.h"
+#include "../../include/openssl/cipher.h"
+#include "../../include/openssl/mem.h"
 
 #include "../internal.h"
 
@@ -108,7 +108,7 @@ int AES_CMAC(uint8_t out[16], const uint8_t *key, size_t key_len,
 }
 
 CMAC_CTX *CMAC_CTX_new(void) {
-  CMAC_CTX *ctx = OPENSSL_malloc(sizeof(*ctx));
+  CMAC_CTX *ctx = (CMAC_CTX *) OPENSSL_malloc(sizeof(*ctx));
   if (ctx != NULL) {
     CMAC_CTX_init(ctx);
   }
@@ -178,7 +178,7 @@ int CMAC_Init(CMAC_CTX *ctx, const void *key, size_t key_len,
   size_t block_size = EVP_CIPHER_block_size(cipher);
   if ((block_size != AES_BLOCK_SIZE && block_size != 8 /* 3-DES */) ||
       EVP_CIPHER_key_length(cipher) != key_len ||
-      !EVP_EncryptInit_ex(&ctx->cipher_ctx, cipher, NULL, key, kZeroIV) ||
+      !EVP_EncryptInit_ex(&ctx->cipher_ctx, cipher, NULL, (const uint8_t*) key, kZeroIV) ||
       !EVP_Cipher(&ctx->cipher_ctx, scratch, kZeroIV, block_size) ||
       // Reset context again ready for first data.
       !EVP_EncryptInit_ex(&ctx->cipher_ctx, NULL, NULL, NULL, kZeroIV)) {

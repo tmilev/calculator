@@ -20,8 +20,8 @@
 
 #include <gtest/gtest.h>
 
-#include <openssl/crypto.h>
-#include <openssl/err.h>
+#include "../../include/openssl/crypto.h>
+#include "../../include/openssl/err.h>
 
 #if defined(OPENSSL_WINDOWS)
 OPENSSL_MSVC_PRAGMA(warning(push, 3))

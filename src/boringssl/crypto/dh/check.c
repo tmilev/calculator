@@ -54,9 +54,9 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/dh.h>
+#include "../../include/openssl/dh.h"
 
-#include <openssl/bn.h>
+#include "../../include/openssl/bn.h"
 
 
 int DH_check_pub_key(const DH *dh, const BIGNUM *pub_key, int *out_flags) {
@@ -81,8 +81,7 @@ int DH_check_pub_key(const DH *dh, const BIGNUM *pub_key, int *out_flags) {
   }
 
   // Check |pub_key| is less than |dh->p| - 1.
-  if (!BN_copy(tmp, dh->p) ||
-      !BN_sub_word(tmp, 1)) {
+  if (!BN_copy(tmp, dh->p) || !BN_sub_word(tmp, 1)) {
     goto err;
   }
   if (BN_cmp(pub_key, tmp) >= 0) {
@@ -104,7 +103,7 @@ int DH_check_pub_key(const DH *dh, const BIGNUM *pub_key, int *out_flags) {
   ok = 1;
 
 err:
-  BN_CTX_end(ctx);
+  BN_CTX_end(0, ctx);
   BN_CTX_free(ctx);
   return ok;
 }
@@ -210,7 +209,7 @@ int DH_check(const DH *dh, int *out_flags) {
 
 err:
   if (ctx != NULL) {
-    BN_CTX_end(ctx);
+    BN_CTX_end(ok, ctx);
     BN_CTX_free(ctx);
   }
   return ok;

@@ -106,10 +106,10 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/bn.h>
+#include "../../../include/openssl/bn.h"
 
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/mem.h"
 
 #include "internal.h"
 #include "../../internal.h"
@@ -571,7 +571,7 @@ loop:
 
 err:
   if (ctx != NULL) {
-    BN_CTX_end(ctx);
+    BN_CTX_end(0, ctx);
     BN_CTX_free(ctx);
   }
 
@@ -592,6 +592,13 @@ static int bn_trial_division(uint16_t *out, const BIGNUM *bn) {
 int bn_odd_number_is_obviously_composite(const BIGNUM *bn) {
   uint16_t prime;
   return bn_trial_division(&prime, bn) && !BN_is_word(bn, prime);
+}
+
+int BN_primality_test_cleanup(int ret, BN_MONT_CTX *mont , BN_CTX *ctx, BN_CTX *new_ctx) {
+  BN_MONT_CTX_free(mont);
+  BN_CTX_end(0, ctx);
+  BN_CTX_free(new_ctx);
+  return ret;
 }
 
 int BN_primality_test(int *is_probably_prime, const BIGNUM *w,
@@ -787,10 +794,7 @@ int BN_primality_test(int *is_probably_prime, const BIGNUM *w,
   ret = 1;
 
 err:
-  BN_MONT_CTX_free(mont);
-  BN_CTX_end(ctx);
-  BN_CTX_free(new_ctx);
-  return ret;
+  return BN_primality_test_cleanup(ret, mon, ctx, new_ctx);
 }
 
 int BN_is_prime_ex(const BIGNUM *candidate, int checks, BN_CTX *ctx,

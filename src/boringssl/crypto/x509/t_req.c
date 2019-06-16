@@ -56,12 +56,12 @@
 
 #include <stdio.h>
 
-#include <openssl/bn.h>
-#include <openssl/buffer.h>
-#include <openssl/err.h>
-#include <openssl/objects.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
+#include "../../include/openssl/bn.h>
+#include "../../include/openssl/buffer.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/objects.h>
+#include "../../include/openssl/x509.h>
+#include "../../include/openssl/x509v3.h>
 
 
 int X509_REQ_print_fp(FILE *fp, X509_REQ *x) {

@@ -12,16 +12,16 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include <openssl/engine.h>
+#include "../../include/openssl/engine.h"
 
 #include <string.h>
 #include <assert.h>
 
-#include <openssl/ec_key.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/rsa.h>
-#include <openssl/thread.h>
+#include "../../include/openssl/ec_key.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/thread.h"
 
 #include "../internal.h"
 
@@ -32,7 +32,7 @@ struct engine_st {
 };
 
 ENGINE *ENGINE_new(void) {
-  ENGINE *engine = OPENSSL_malloc(sizeof(ENGINE));
+  ENGINE *engine = (ENGINE *) OPENSSL_malloc(sizeof(ENGINE));
   if (engine == NULL) {
     return NULL;
   }
@@ -54,7 +54,7 @@ int ENGINE_free(ENGINE *engine) {
 // static.
 static int set_method(void **out_member, const void *method, size_t method_size,
                       size_t compiled_size) {
-  const struct openssl_method_common_st *common = method;
+  const struct openssl_method_common_st *common = (const openssl_method_common_st *) method;
   if (method_size != compiled_size || !common->is_static) {
     return 0;
   }
@@ -88,7 +88,7 @@ void METHOD_ref(void *method_in) {
 }
 
 void METHOD_unref(void *method_in) {
-  struct openssl_method_common_st *method = method_in;
+  struct openssl_method_common_st *method = (openssl_method_common_st *) method_in;
 
   if (method == NULL) {
     return;

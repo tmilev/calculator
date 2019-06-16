@@ -54,16 +54,16 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/dh.h>
+#include "../../include/openssl/dh.h"
 
 #include <string.h>
 
-#include <openssl/bn.h>
-#include <openssl/buf.h>
-#include <openssl/err.h>
-#include <openssl/ex_data.h>
-#include <openssl/mem.h>
-#include <openssl/thread.h>
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/ex_data.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/thread.h"
 
 #include "../internal.h"
 
@@ -73,7 +73,7 @@
 static CRYPTO_EX_DATA_CLASS g_ex_data_class = CRYPTO_EX_DATA_CLASS_INIT;
 
 DH *DH_new(void) {
-  DH *dh = OPENSSL_malloc(sizeof(DH));
+  DH *dh = (DH *) OPENSSL_malloc(sizeof(DH));
   if (dh == NULL) {
     OPENSSL_PUT_ERROR(DH, ERR_R_MALLOC_FAILURE);
     return NULL;
@@ -283,7 +283,7 @@ err:
   }
 
   if (ctx != NULL) {
-    BN_CTX_end(ctx);
+    BN_CTX_end(0, ctx);
     BN_CTX_free(ctx);
   }
   return ok;
@@ -422,7 +422,7 @@ int DH_compute_key(unsigned char *out, const BIGNUM *peers_key, DH *dh) {
 
 err:
   if (ctx != NULL) {
-    BN_CTX_end(ctx);
+    BN_CTX_end(0, ctx);
     BN_CTX_free(ctx);
   }
 
@@ -476,7 +476,7 @@ static int int_dh_param_copy(DH *to, const DH *from, int is_x942) {
   to->seedlen = 0;
 
   if (from->seed) {
-    to->seed = BUF_memdup(from->seed, from->seedlen);
+    to->seed = (unsigned char*) BUF_memdup(from->seed, from->seedlen);
     if (!to->seed) {
       return 0;
     }

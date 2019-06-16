@@ -59,11 +59,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <openssl/buf.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/thread.h>
-#include <openssl/x509.h>
+#include "../../include/openssl/buf.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/thread.h>
+#include "../../include/openssl/x509.h>
 
 #if !defined(OPENSSL_TRUSTY)
 

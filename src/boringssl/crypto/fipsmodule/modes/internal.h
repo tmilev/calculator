@@ -49,10 +49,10 @@
 #ifndef OPENSSL_HEADER_MODES_INTERNAL_H
 #define OPENSSL_HEADER_MODES_INTERNAL_H
 
-#include <openssl/base.h>
+#include "../../../include/openssl/base.h"
 
-#include <openssl/aes.h>
-#include <openssl/cpu.h>
+#include "../../../include/openssl/aes.h"
+#include "../../../include/openssl/cpu.h"
 
 #include <stdlib.h>
 #include <string.h>

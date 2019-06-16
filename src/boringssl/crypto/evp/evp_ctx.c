@@ -54,13 +54,13 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/evp.h>
+#include "../../include/openssl/evp.h"
 
 #include <string.h>
 
-#include <openssl/digest.h>
-#include <openssl/err.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
 
 #include "../internal.h"
 #include "internal.h"
@@ -103,7 +103,7 @@ static EVP_PKEY_CTX *evp_pkey_ctx_new(EVP_PKEY *pkey, ENGINE *e, int id) {
     return NULL;
   }
 
-  ret = OPENSSL_malloc(sizeof(EVP_PKEY_CTX));
+  ret = (EVP_PKEY_CTX*) OPENSSL_malloc(sizeof(EVP_PKEY_CTX));
   if (!ret) {
     OPENSSL_PUT_ERROR(EVP, ERR_R_MALLOC_FAILURE);
     return NULL;
@@ -155,7 +155,7 @@ EVP_PKEY_CTX *EVP_PKEY_CTX_dup(EVP_PKEY_CTX *ctx) {
     return NULL;
   }
 
-  EVP_PKEY_CTX *ret = OPENSSL_malloc(sizeof(EVP_PKEY_CTX));
+  EVP_PKEY_CTX *ret = (EVP_PKEY_CTX *) OPENSSL_malloc(sizeof(EVP_PKEY_CTX));
   if (!ret) {
     return NULL;
   }

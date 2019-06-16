@@ -52,9 +52,9 @@
 
 #include <assert.h>
 
-#include <openssl/digest.h>
-#include <openssl/hmac.h>
-#include <openssl/mem.h>
+#include "../../include/openssl/digest.h>
+#include "../../include/openssl/hmac.h>
+#include "../../include/openssl/mem.h>
 
 #include "internal.h"
 #include "../../internal.h"

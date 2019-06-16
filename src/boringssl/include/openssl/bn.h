@@ -359,7 +359,7 @@ OPENSSL_EXPORT BIGNUM *BN_CTX_get(BN_CTX *ctx);
 
 // BN_CTX_end invalidates all |BIGNUM|s returned from |BN_CTX_get| since the
 // matching |BN_CTX_start| call.
-OPENSSL_EXPORT void BN_CTX_end(BN_CTX *ctx);
+OPENSSL_EXPORT int BN_CTX_end(int ret, BN_CTX *ctx);
 
 
 // Simple arithmetic
@@ -824,6 +824,7 @@ OPENSSL_EXPORT BN_MONT_CTX *BN_MONT_CTX_new_consttime(const BIGNUM *mod,
 
 // BN_MONT_CTX_free frees memory associated with |mont|.
 OPENSSL_EXPORT void BN_MONT_CTX_free(BN_MONT_CTX *mont);
+OPENSSL_EXPORT BN_MONT_CTX* BN_MONT_CTX_free_return_NULL(BN_MONT_CTX *mont);
 
 // BN_MONT_CTX_copy sets |to| equal to |from|. It returns |to| on success or
 // NULL on error.
@@ -1004,7 +1005,7 @@ BORINGSSL_MAKE_DELETER(BN_MONT_CTX, BN_MONT_CTX_free)
 class BN_CTXScope {
  public:
   BN_CTXScope(BN_CTX *ctx) : ctx_(ctx) { BN_CTX_start(ctx_); }
-  ~BN_CTXScope() { BN_CTX_end(ctx_); }
+  ~BN_CTXScope() { BN_CTX_end(0, ctx_); }
 
  private:
   BN_CTX *ctx_;

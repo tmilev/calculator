@@ -53,22 +53,22 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/pkcs8.h>
+#include "../../include/openssl/pkcs8.h>
 
 #include <limits.h>
 
-#include <openssl/asn1t.h>
-#include <openssl/asn1.h>
-#include <openssl/bio.h>
-#include <openssl/buf.h>
-#include <openssl/bytestring.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/digest.h>
-#include <openssl/hmac.h>
-#include <openssl/mem.h>
-#include <openssl/rand.h>
-#include <openssl/x509.h>
+#include "../../include/openssl/asn1t.h>
+#include "../../include/openssl/asn1.h>
+#include "../../include/openssl/bio.h>
+#include "../../include/openssl/buf.h>
+#include "../../include/openssl/bytestring.h>
+#include "../../include/openssl/err.h>
+#include "../../include/openssl/evp.h>
+#include "../../include/openssl/digest.h>
+#include "../../include/openssl/hmac.h>
+#include "../../include/openssl/mem.h>
+#include "../../include/openssl/rand.h>
+#include "../../include/openssl/x509.h>
 
 #include "internal.h"
 #include "../bytestring/internal.h"

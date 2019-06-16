@@ -69,7 +69,7 @@ extern "C" {
  *
  * This header is used to define new types in OpenSSL's ASN.1 implementation. It
  * is deprecated and will be unexported from the library. Use the new |CBS| and
- * |CBB| library in <openssl/bytestring.h> instead. */
+ * |CBB| library in "../../include/openssl/bytestring.h> instead. */
 
 
 /* Macro to obtain ASN1_ADB pointer from a type (only used internally) */

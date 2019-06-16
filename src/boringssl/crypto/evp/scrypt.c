@@ -7,13 +7,13 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/evp.h>
+#include "../../include/openssl/evp.h"
 
 #include <assert.h>
 
-#include <openssl/err.h>
-#include <openssl/mem.h>
-#include <openssl/type_check.h>
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/type_check.h"
 
 #include "../internal.h"
 
@@ -178,7 +178,7 @@ int EVP_PBE_scrypt(const char *password, size_t password_len,
   size_t B_bytes = B_blocks * sizeof(block_t);
   size_t T_blocks = 2 * r;
   size_t V_blocks = N * 2 * r;
-  block_t *B = OPENSSL_malloc((B_blocks + T_blocks + V_blocks) * sizeof(block_t));
+  block_t *B = (block_t *) OPENSSL_malloc((B_blocks + T_blocks + V_blocks) * sizeof(block_t));
   if (B == NULL) {
     OPENSSL_PUT_ERROR(EVP, ERR_R_MALLOC_FAILURE);
     return 0;

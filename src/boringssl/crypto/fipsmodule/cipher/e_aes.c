@@ -49,14 +49,14 @@
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/aead.h>
-#include "../../include/openssl/aes.h>
-#include "../../include/openssl/cipher.h>
-#include "../../include/openssl/cpu.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/nid.h>
-#include "../../include/openssl/rand.h>
+#include "../../../include/openssl/aead.h"
+#include "../../../include/openssl/aes.h"
+#include "../../../include/openssl/cipher.h"
+#include "../../../include/openssl/cpu.h"
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/mem.h"
+#include "../../../include/openssl/nid.h"
+#include "../../../include/openssl/rand.h"
 
 #include "internal.h"
 #include "../../internal.h"
@@ -296,7 +296,7 @@ static EVP_AES_GCM_CTX *aes_gcm_from_cipher_ctx(EVP_CIPHER_CTX *ctx) {
   assert(ctx->cipher->ctx_size ==
          sizeof(EVP_AES_GCM_CTX) + EVP_AES_GCM_CTX_PADDING);
 
-  char *ptr = ctx->cipher_data;
+  char *ptr = (char *) ctx->cipher_data;
 #if defined(OPENSSL_32_BIT)
   assert((uintptr_t)ptr % 4 == 0);
   ptr += (uintptr_t)ptr & 4;
@@ -384,7 +384,7 @@ static int aes_gcm_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr) {
         if (gctx->iv != c->iv) {
           OPENSSL_free(gctx->iv);
         }
-        gctx->iv = OPENSSL_malloc(arg);
+        gctx->iv = (uint8_t *) OPENSSL_malloc(arg);
         if (!gctx->iv) {
           return 0;
         }
@@ -454,7 +454,7 @@ static int aes_gcm_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr) {
       return 1;
 
     case EVP_CTRL_COPY: {
-      EVP_CIPHER_CTX *out = ptr;
+      EVP_CIPHER_CTX *out = (EVP_CIPHER_CTX *) ptr;
       EVP_AES_GCM_CTX *gctx_out = aes_gcm_from_cipher_ctx(out);
       // |EVP_CIPHER_CTX_copy| copies this generically, but we must redo it in
       // case |out->cipher_data| and |in->cipher_data| are differently aligned.
@@ -462,7 +462,7 @@ static int aes_gcm_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr) {
       if (gctx->iv == c->iv) {
         gctx_out->iv = out->iv;
       } else {
-        gctx_out->iv = OPENSSL_malloc(gctx->ivlen);
+        gctx_out->iv = (uint8_t *) OPENSSL_malloc(gctx->ivlen);
         if (!gctx_out->iv) {
           return 0;
         }
@@ -748,7 +748,7 @@ static int aes_hw_ecb_cipher(EVP_CIPHER_CTX *ctx, uint8_t *out,
     return 1;
   }
 
-  aes_hw_ecb_encrypt(in, out, len, ctx->cipher_data, ctx->encrypt);
+  aes_hw_ecb_encrypt(in, out, len, (const AES_KEY *) ctx->cipher_data, ctx->encrypt);
 
   return 1;
 }

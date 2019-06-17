@@ -350,7 +350,8 @@ static int do_EC_KEY_print(BIO *bp, const EC_KEY *x, int off, int ktype) {
 
   if (ktype > 0) {
     buf_len += 10;
-    if ((buffer = OPENSSL_malloc(buf_len)) == NULL) {
+    buffer = (uint8_t *) OPENSSL_malloc(buf_len);
+    if (buffer == NULL) {
       reason = ERR_R_MALLOC_FAILURE;
       goto err;
     }

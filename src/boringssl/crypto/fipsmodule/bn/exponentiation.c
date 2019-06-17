@@ -891,6 +891,19 @@ static int copy_from_prebuf(BIGNUM *b, int top, const BN_ULONG *table, int idx,
    (MOD_EXP_CTIME_MIN_CACHE_LINE_WIDTH - \
     (((size_t)(x_)) & (MOD_EXP_CTIME_MIN_CACHE_LINE_MASK))))
 
+
+int BN_mod_exp_mont_consttime_cleanup(
+  int ret, BN_MONT_CTX* new_mont, BN_ULONG * powerbuf, int powerbufLen, unsigned char * powerbufFree
+) {
+  BN_MONT_CTX_free(new_mont);
+  if (powerbuf != NULL && powerbufFree == NULL) {
+    OPENSSL_cleanse(powerbuf, powerbufLen);
+  }
+  OPENSSL_free(powerbufFree);
+  return (ret);
+
+}
+
 // This variant of |BN_mod_exp_mont| uses fixed windows and fixed memory access
 // patterns to protect secret exponents (cf. the hyper-threading timing attacks
 // pointed out by Colin Percival,
@@ -937,7 +950,7 @@ int BN_mod_exp_mont_consttime(BIGNUM *rr, const BIGNUM *a, const BIGNUM *p,
   if (mont == NULL) {
     new_mont = BN_MONT_CTX_new_consttime(m, ctx);
     if (new_mont == NULL) {
-      goto err;
+      return BN_mod_exp_mont_consttime_cleanup(ret, new_mont, powerbuf, powerbufLen, powerbufFree);
     }
     mont = new_mont;
   }
@@ -1210,12 +1223,7 @@ int BN_mod_exp_mont_consttime(BIGNUM *rr, const BIGNUM *a, const BIGNUM *p,
   ret = 1;
 
 err:
-  BN_MONT_CTX_free(new_mont);
-  if (powerbuf != NULL && powerbufFree == NULL) {
-    OPENSSL_cleanse(powerbuf, powerbufLen);
-  }
-  OPENSSL_free(powerbufFree);
-  return (ret);
+  return BN_mod_exp_mont_consttime_cleanup(ret, new_mont, powerbuf, powerbufLen, powerbufFree);
 }
 
 int BN_mod_exp_mont_word(BIGNUM *rr, BN_ULONG a, const BIGNUM *p,

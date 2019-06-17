@@ -57,7 +57,7 @@
 #ifndef OPENSSL_HEADER_DES_H
 #define OPENSSL_HEADER_DES_H
 
-#include "../../include/openssl/base.h>
+#include "../../include/openssl/base.h"
 
 #if defined(__cplusplus)
 extern "C" {

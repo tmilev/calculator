@@ -65,15 +65,15 @@
  * Sheueling Chang Shantz and Douglas Stebila of Sun Microsystems
  * Laboratories. */
 
-#include "../../include/openssl/ec.h>
+#include "../../../include/openssl/ec.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/nid.h>
+#include "../../../include/openssl/bn.h"
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/mem.h"
+#include "../../../include/openssl/nid.h"
 
 #include "internal.h"
 #include "../../internal.h"
@@ -282,7 +282,7 @@ EC_GROUP *ec_group_new(const EC_METHOD *meth) {
     return NULL;
   }
 
-  ret = OPENSSL_malloc(sizeof(EC_GROUP));
+  ret = (EC_GROUP *) OPENSSL_malloc(sizeof(EC_GROUP));
   if (ret == NULL) {
     OPENSSL_PUT_ERROR(EC, ERR_R_MALLOC_FAILURE);
     return NULL;

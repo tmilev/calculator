@@ -541,6 +541,14 @@ static void bn_mul_part_recursive(BN_ULONG *r, const BN_ULONG *a,
   assert(c == 0);
 }
 
+int bn_mul_impl_end(int ret, BN_CTX *ctx, BIGNUM *r, BIGNUM *rr) {
+  if (r != rr && !BN_copy(r, rr)) {
+    return BN_CTX_end(ret, ctx);
+  }
+  ret = 1;
+  return BN_CTX_end(ret, ctx);
+}
+
 // bn_mul_impl implements |BN_mul| and |bn_mul_consttime|. Note this function
 // breaks |BIGNUM| invariants and may return a negative zero. This is handled by
 // the callers.
@@ -559,7 +567,7 @@ static int bn_mul_impl(BIGNUM *r, const BIGNUM *a, const BIGNUM *b,
   if (r == a || r == b) {
     rr = BN_CTX_get(ctx);
     if (rr == NULL) {
-      goto err;
+      return BN_CTX_end(ret, ctx);
     }
   } else {
     rr = r;
@@ -570,11 +578,11 @@ static int bn_mul_impl(BIGNUM *r, const BIGNUM *a, const BIGNUM *b,
   if (i == 0) {
     if (al == 8) {
       if (!bn_wexpand(rr, 16)) {
-        goto err;
+        return BN_CTX_end(ret, ctx);
       }
       rr->width = 16;
       bn_mul_comba8(rr->d, a->d, b->d);
-      goto end;
+      return bn_mul_impl_end(ret, ctx, r, rr);
     }
   }
 
@@ -626,11 +634,7 @@ static int bn_mul_impl(BIGNUM *r, const BIGNUM *a, const BIGNUM *b,
   bn_mul_normal(rr->d, a->d, al, b->d, bl);
 
 end:
-  if (r != rr && !BN_copy(r, rr)) {
-    goto err;
-  }
-  ret = 1;
-
+  return bn_mul_impl_end(ret, ctx, r, rr);
 err:
   return BN_CTX_end(ret, ctx);
 }
@@ -801,7 +805,7 @@ int bn_sqr_consttime(BIGNUM *r, const BIGNUM *a, BN_CTX *ctx) {
   BIGNUM *rr = (a != r) ? r : BN_CTX_get(ctx);
   BIGNUM *tmp = BN_CTX_get(ctx);
   if (!rr || !tmp) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   int max = 2 * al;  // Non-zero (from above)
@@ -842,8 +846,7 @@ int bn_sqr_consttime(BIGNUM *r, const BIGNUM *a, BN_CTX *ctx) {
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 int BN_sqr(BIGNUM *r, const BIGNUM *a, BN_CTX *ctx) {

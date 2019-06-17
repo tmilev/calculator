@@ -54,15 +54,15 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/digest.h>
+#include "../../../include/openssl/digest.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/md4.h>
-#include "../../include/openssl/md5.h>
-#include "../../include/openssl/nid.h>
-#include "../../include/openssl/sha.h>
+#include "../../../include/openssl/md4.h"
+#include "../../../include/openssl/md5.h"
+#include "../../../include/openssl/nid.h"
+#include "../../../include/openssl/sha.h"
 
 #include "internal.h"
 #include "../delocate.h"
@@ -76,15 +76,15 @@
 
 
 static void md4_init(EVP_MD_CTX *ctx) {
-  CHECK(MD4_Init(ctx->md_data));
+  CHECK(MD4_Init((MD4_CTX*) ctx->md_data));
 }
 
 static void md4_update(EVP_MD_CTX *ctx, const void *data, size_t count) {
-  CHECK(MD4_Update(ctx->md_data, data, count));
+  CHECK(MD4_Update((MD4_CTX*) ctx->md_data, data, count));
 }
 
 static void md4_final(EVP_MD_CTX *ctx, uint8_t *out) {
-  CHECK(MD4_Final(out, ctx->md_data));
+  CHECK(MD4_Final(out, (MD4_CTX*) ctx->md_data));
 }
 
 DEFINE_METHOD_FUNCTION(EVP_MD, EVP_md4) {
@@ -100,15 +100,15 @@ DEFINE_METHOD_FUNCTION(EVP_MD, EVP_md4) {
 
 
 static void md5_init(EVP_MD_CTX *ctx) {
-  CHECK(MD5_Init(ctx->md_data));
+  CHECK(MD5_Init((MD5_CTX*) ctx->md_data));
 }
 
 static void md5_update(EVP_MD_CTX *ctx, const void *data, size_t count) {
-  CHECK(MD5_Update(ctx->md_data, data, count));
+  CHECK(MD5_Update((MD5_CTX*) ctx->md_data, data, count));
 }
 
 static void md5_final(EVP_MD_CTX *ctx, uint8_t *out) {
-  CHECK(MD5_Final(out, ctx->md_data));
+  CHECK(MD5_Final(out, (MD5_CTX*) ctx->md_data));
 }
 
 DEFINE_METHOD_FUNCTION(EVP_MD, EVP_md5) {
@@ -124,15 +124,15 @@ DEFINE_METHOD_FUNCTION(EVP_MD, EVP_md5) {
 
 
 static void sha1_init(EVP_MD_CTX *ctx) {
-  CHECK(SHA1_Init(ctx->md_data));
+  CHECK(SHA1_Init((SHA_CTX *) ctx->md_data));
 }
 
 static void sha1_update(EVP_MD_CTX *ctx, const void *data, size_t count) {
-  CHECK(SHA1_Update(ctx->md_data, data, count));
+  CHECK(SHA1_Update((SHA_CTX *) ctx->md_data, data, count));
 }
 
 static void sha1_final(EVP_MD_CTX *ctx, uint8_t *md) {
-  CHECK(SHA1_Final(md, ctx->md_data));
+  CHECK(SHA1_Final(md, (SHA_CTX *) ctx->md_data));
 }
 
 DEFINE_METHOD_FUNCTION(EVP_MD, EVP_sha1) {
@@ -148,15 +148,15 @@ DEFINE_METHOD_FUNCTION(EVP_MD, EVP_sha1) {
 
 
 static void sha224_init(EVP_MD_CTX *ctx) {
-  CHECK(SHA224_Init(ctx->md_data));
+  CHECK(SHA224_Init((SHA256_CTX *) ctx->md_data));
 }
 
 static void sha224_update(EVP_MD_CTX *ctx, const void *data, size_t count) {
-  CHECK(SHA224_Update(ctx->md_data, data, count));
+  CHECK(SHA224_Update((SHA256_CTX *) ctx->md_data, data, count));
 }
 
 static void sha224_final(EVP_MD_CTX *ctx, uint8_t *md) {
-  CHECK(SHA224_Final(md, ctx->md_data));
+  CHECK(SHA224_Final(md, (SHA256_CTX *) ctx->md_data));
 }
 
 DEFINE_METHOD_FUNCTION(EVP_MD, EVP_sha224) {
@@ -172,15 +172,15 @@ DEFINE_METHOD_FUNCTION(EVP_MD, EVP_sha224) {
 
 
 static void sha256_init(EVP_MD_CTX *ctx) {
-  CHECK(SHA256_Init(ctx->md_data));
+  CHECK(SHA256_Init((SHA256_CTX *) ctx->md_data));
 }
 
 static void sha256_update(EVP_MD_CTX *ctx, const void *data, size_t count) {
-  CHECK(SHA256_Update(ctx->md_data, data, count));
+  CHECK(SHA256_Update((SHA256_CTX *) ctx->md_data, data, count));
 }
 
 static void sha256_final(EVP_MD_CTX *ctx, uint8_t *md) {
-  CHECK(SHA256_Final(md, ctx->md_data));
+  CHECK(SHA256_Final(md, (SHA256_CTX *) ctx->md_data));
 }
 
 DEFINE_METHOD_FUNCTION(EVP_MD, EVP_sha256) {
@@ -196,15 +196,15 @@ DEFINE_METHOD_FUNCTION(EVP_MD, EVP_sha256) {
 
 
 static void sha384_init(EVP_MD_CTX *ctx) {
-  CHECK(SHA384_Init(ctx->md_data));
+  CHECK(SHA384_Init((SHA512_CTX *) ctx->md_data));
 }
 
 static void sha384_update(EVP_MD_CTX *ctx, const void *data, size_t count) {
-  CHECK(SHA384_Update(ctx->md_data, data, count));
+  CHECK(SHA384_Update((SHA512_CTX *) ctx->md_data, data, count));
 }
 
 static void sha384_final(EVP_MD_CTX *ctx, uint8_t *md) {
-  CHECK(SHA384_Final(md, ctx->md_data));
+  CHECK(SHA384_Final(md, (SHA512_CTX *) ctx->md_data));
 }
 
 DEFINE_METHOD_FUNCTION(EVP_MD, EVP_sha384) {
@@ -220,15 +220,15 @@ DEFINE_METHOD_FUNCTION(EVP_MD, EVP_sha384) {
 
 
 static void sha512_init(EVP_MD_CTX *ctx) {
-  CHECK(SHA512_Init(ctx->md_data));
+  CHECK(SHA512_Init((SHA512_CTX *) ctx->md_data));
 }
 
 static void sha512_update(EVP_MD_CTX *ctx, const void *data, size_t count) {
-  CHECK(SHA512_Update(ctx->md_data, data, count));
+  CHECK(SHA512_Update((SHA512_CTX *) ctx->md_data, data, count));
 }
 
 static void sha512_final(EVP_MD_CTX *ctx, uint8_t *md) {
-  CHECK(SHA512_Final(md, ctx->md_data));
+  CHECK(SHA512_Final(md, (SHA512_CTX *) ctx->md_data));
 }
 
 DEFINE_METHOD_FUNCTION(EVP_MD, EVP_sha512) {
@@ -249,19 +249,19 @@ typedef struct {
 } MD5_SHA1_CTX;
 
 static void md5_sha1_init(EVP_MD_CTX *md_ctx) {
-  MD5_SHA1_CTX *ctx = md_ctx->md_data;
+  MD5_SHA1_CTX *ctx = (MD5_SHA1_CTX *) md_ctx->md_data;
   CHECK(MD5_Init(&ctx->md5) && SHA1_Init(&ctx->sha1));
 }
 
 static void md5_sha1_update(EVP_MD_CTX *md_ctx, const void *data,
                             size_t count) {
-  MD5_SHA1_CTX *ctx = md_ctx->md_data;
+  MD5_SHA1_CTX *ctx = (MD5_SHA1_CTX *) md_ctx->md_data;
   CHECK(MD5_Update(&ctx->md5, data, count) &&
         SHA1_Update(&ctx->sha1, data, count));
 }
 
 static void md5_sha1_final(EVP_MD_CTX *md_ctx, uint8_t *out) {
-  MD5_SHA1_CTX *ctx = md_ctx->md_data;
+  MD5_SHA1_CTX *ctx = (MD5_SHA1_CTX *) md_ctx->md_data;
   CHECK(MD5_Final(out, &ctx->md5) &&
         SHA1_Final(out + MD5_DIGEST_LENGTH, &ctx->sha1));
 }

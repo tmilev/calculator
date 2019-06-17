@@ -54,13 +54,13 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/digest.h>
+#include "../../../include/openssl/digest.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/mem.h"
 
 #include "internal.h"
 #include "../../internal.h"
@@ -80,7 +80,7 @@ void EVP_MD_CTX_init(EVP_MD_CTX *ctx) {
 }
 
 EVP_MD_CTX *EVP_MD_CTX_new(void) {
-  EVP_MD_CTX *ctx = OPENSSL_malloc(sizeof(EVP_MD_CTX));
+  EVP_MD_CTX *ctx = (EVP_MD_CTX *) OPENSSL_malloc(sizeof(EVP_MD_CTX));
 
   if (ctx) {
     EVP_MD_CTX_init(ctx);
@@ -142,7 +142,7 @@ int EVP_MD_CTX_copy_ex(EVP_MD_CTX *out, const EVP_MD_CTX *in) {
   if (in->digest != NULL) {
     if (out->digest != in->digest) {
       assert(in->digest->ctx_size != 0);
-      tmp_buf = OPENSSL_malloc(in->digest->ctx_size);
+      tmp_buf = (uint8_t *) OPENSSL_malloc(in->digest->ctx_size);
       if (tmp_buf == NULL) {
         if (pctx) {
           in->pctx_ops->free(pctx);
@@ -154,7 +154,7 @@ int EVP_MD_CTX_copy_ex(EVP_MD_CTX *out, const EVP_MD_CTX *in) {
       // |md_data| will be the correct size in this case. It's removed from
       // |out| so that |EVP_MD_CTX_cleanup| doesn't free it, and then it's
       // reused.
-      tmp_buf = out->md_data;
+      tmp_buf = (uint8_t *) out->md_data;
       out->md_data = NULL;
     }
   }
@@ -187,7 +187,7 @@ int EVP_MD_CTX_reset(EVP_MD_CTX *ctx) {
 int EVP_DigestInit_ex(EVP_MD_CTX *ctx, const EVP_MD *type, ENGINE *engine) {
   if (ctx->digest != type) {
     assert(type->ctx_size != 0);
-    uint8_t *md_data = OPENSSL_malloc(type->ctx_size);
+    uint8_t *md_data = (uint8_t *) OPENSSL_malloc(type->ctx_size);
     if (md_data == NULL) {
       OPENSSL_PUT_ERROR(DIGEST, ERR_R_MALLOC_FAILURE);
       return 0;

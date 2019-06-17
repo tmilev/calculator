@@ -54,7 +54,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/des.h>
+#include "../../../include/openssl/des.h"
 
 #include <stdlib.h>
 

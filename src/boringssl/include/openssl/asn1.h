@@ -207,8 +207,7 @@ struct asn1_string_st
  * problems with invalid encodings which can break signatures.
  */
 
-typedef struct ASN1_ENCODING_st
-	{
+typedef struct ASN1_ENCODING_st {
 	unsigned char *enc;	/* DER encoding */
 	long len;		/* Length of encoding */
 	int modified;		/* set to 1 if 'enc' is invalid */

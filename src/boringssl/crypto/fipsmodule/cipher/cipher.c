@@ -54,14 +54,14 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/cipher.h>
+#include "../../../include/openssl/cipher.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/nid.h>
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/mem.h"
+#include "../../../include/openssl/nid.h"
 
 #include "internal.h"
 #include "../../internal.h"
@@ -72,7 +72,7 @@ void EVP_CIPHER_CTX_init(EVP_CIPHER_CTX *ctx) {
 }
 
 EVP_CIPHER_CTX *EVP_CIPHER_CTX_new(void) {
-  EVP_CIPHER_CTX *ctx = OPENSSL_malloc(sizeof(EVP_CIPHER_CTX));
+  EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *) OPENSSL_malloc(sizeof(EVP_CIPHER_CTX));
   if (ctx) {
     EVP_CIPHER_CTX_init(ctx);
   }

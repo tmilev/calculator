@@ -65,17 +65,17 @@
  * Sheueling Chang Shantz and Douglas Stebila of Sun Microsystems
  * Laboratories. */
 
-#include "../../include/openssl/ec_key.h>
+#include "../../../include/openssl/ec_key.h"
 
 #include <string.h>
 
-#include "../../include/openssl/ec.h>
-#include "../../include/openssl/ecdsa.h>
-#include "../../include/openssl/engine.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/ex_data.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/thread.h>
+#include "../../../include/openssl/ec.h"
+#include "../../../include/openssl/ecdsa.h"
+#include "../../../include/openssl/engine.h"
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/ex_data.h"
+#include "../../../include/openssl/mem.h"
+#include "../../../include/openssl/thread.h"
 
 #include "internal.h"
 #include "../delocate.h"
@@ -85,7 +85,7 @@
 DEFINE_STATIC_EX_DATA_CLASS(g_ec_ex_data_class)
 
 static EC_WRAPPED_SCALAR *ec_wrapped_scalar_new(const EC_GROUP *group) {
-  EC_WRAPPED_SCALAR *wrapped = OPENSSL_malloc(sizeof(EC_WRAPPED_SCALAR));
+  EC_WRAPPED_SCALAR *wrapped = (EC_WRAPPED_SCALAR *) OPENSSL_malloc(sizeof(EC_WRAPPED_SCALAR));
   if (wrapped == NULL) {
     OPENSSL_PUT_ERROR(EC, ERR_R_MALLOC_FAILURE);
     return NULL;
@@ -106,7 +106,7 @@ static void ec_wrapped_scalar_free(EC_WRAPPED_SCALAR *scalar) {
 EC_KEY *EC_KEY_new(void) { return EC_KEY_new_method(NULL); }
 
 EC_KEY *EC_KEY_new_method(const ENGINE *engine) {
-  EC_KEY *ret = OPENSSL_malloc(sizeof(EC_KEY));
+  EC_KEY *ret = (EC_KEY *) OPENSSL_malloc(sizeof(EC_KEY));
   if (ret == NULL) {
     OPENSSL_PUT_ERROR(EC, ERR_R_MALLOC_FAILURE);
     return NULL;

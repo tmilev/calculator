@@ -360,7 +360,7 @@ OPENSSL_EXPORT BIGNUM *BN_CTX_get(BN_CTX *ctx);
 // BN_CTX_end invalidates all |BIGNUM|s returned from |BN_CTX_get| since the
 // matching |BN_CTX_start| call.
 OPENSSL_EXPORT int BN_CTX_end(int ret, BN_CTX *ctx);
-
+OPENSSL_EXPORT BIGNUM* BN_CTX_end_BIGNUM(BIGNUM* ret, BN_CTX *ctx);
 
 // Simple arithmetic
 

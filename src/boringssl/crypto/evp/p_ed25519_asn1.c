@@ -146,8 +146,8 @@ static int ed25519_pub_encode(CBB *out, const EVP_PKEY *pkey) {
 }
 
 static int ed25519_pub_cmp(const EVP_PKEY *a, const EVP_PKEY *b) {
-  const ED25519_KEY *a_key = a->pkey.ptr;
-  const ED25519_KEY *b_key = b->pkey.ptr;
+  const ED25519_KEY *a_key = (const ED25519_KEY *) a->pkey.ptr;
+  const ED25519_KEY *b_key = (const ED25519_KEY *) b->pkey.ptr;
   return OPENSSL_memcmp(a_key->key.pub.value, b_key->key.pub.value, 32) == 0;
 }
 

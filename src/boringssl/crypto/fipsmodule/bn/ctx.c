@@ -181,6 +181,11 @@ BIGNUM *BN_CTX_get(BN_CTX *ctx) {
   return ret;
 }
 
+BIGNUM* BN_CTX_end_BIGNUM(BIGNUM* ret, BN_CTX *ctx) {
+  BN_CTX_end(0, ctx);
+  return ret;
+}
+
 int BN_CTX_end(int ret, BN_CTX *ctx) {
   if (ctx->error) {
     // Once an operation has failed, |ctx->stack| no longer matches the number

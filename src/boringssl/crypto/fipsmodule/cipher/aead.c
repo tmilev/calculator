@@ -39,7 +39,7 @@ void EVP_AEAD_CTX_zero(EVP_AEAD_CTX *ctx) {
 
 EVP_AEAD_CTX *EVP_AEAD_CTX_new(const EVP_AEAD *aead, const uint8_t *key,
                                size_t key_len, size_t tag_len) {
-  EVP_AEAD_CTX *ctx = OPENSSL_malloc(sizeof(EVP_AEAD_CTX));
+  EVP_AEAD_CTX *ctx = (EVP_AEAD_CTX *) OPENSSL_malloc(sizeof(EVP_AEAD_CTX));
   EVP_AEAD_CTX_zero(ctx);
 
   if (EVP_AEAD_CTX_init(ctx, aead, key, key_len, tag_len, NULL)) {
@@ -180,19 +180,28 @@ error:
   return 0;
 }
 
+int EVP_AEAD_CTX_open_cleanup_return_0(uint8_t *out, size_t max_out_len, size_t *out_len) {
+  // In the event of an error, clear the output buffer so that a caller
+  // that doesn't check the return value doesn't try and process bad
+  // data.
+  OPENSSL_memset(out, 0, max_out_len);
+  *out_len = 0;
+  return 0;
+}
+
 int EVP_AEAD_CTX_open(const EVP_AEAD_CTX *ctx, uint8_t *out, size_t *out_len,
                       size_t max_out_len, const uint8_t *nonce,
                       size_t nonce_len, const uint8_t *in, size_t in_len,
                       const uint8_t *ad, size_t ad_len) {
   if (!check_alias(in, in_len, out, max_out_len)) {
     OPENSSL_PUT_ERROR(CIPHER, CIPHER_R_OUTPUT_ALIASES_INPUT);
-    goto error;
+    return EVP_AEAD_CTX_open_cleanup_return_0(out, max_out_len, out_len);
   }
 
   if (ctx->aead->open) {
     if (!ctx->aead->open(ctx, out, out_len, max_out_len, nonce, nonce_len, in,
                         in_len, ad, ad_len)) {
-      goto error;
+      return EVP_AEAD_CTX_open_cleanup_return_0(out, max_out_len, out_len);
     }
     return 1;
   }
@@ -203,7 +212,7 @@ int EVP_AEAD_CTX_open(const EVP_AEAD_CTX *ctx, uint8_t *out, size_t *out_len,
 
   if (in_len < ctx->tag_len) {
     OPENSSL_PUT_ERROR(CIPHER, CIPHER_R_BAD_DECRYPT);
-    goto error;
+    return EVP_AEAD_CTX_open_cleanup_return_0(out, max_out_len, out_len);
   }
 
   size_t plaintext_len = in_len - ctx->tag_len;
@@ -218,12 +227,7 @@ int EVP_AEAD_CTX_open(const EVP_AEAD_CTX *ctx, uint8_t *out, size_t *out_len,
   }
 
 error:
-  // In the event of an error, clear the output buffer so that a caller
-  // that doesn't check the return value doesn't try and process bad
-  // data.
-  OPENSSL_memset(out, 0, max_out_len);
-  *out_len = 0;
-  return 0;
+  return EVP_AEAD_CTX_open_cleanup_return_0(out, max_out_len, out_len);
 }
 
 int EVP_AEAD_CTX_open_gather(const EVP_AEAD_CTX *ctx, uint8_t *out,

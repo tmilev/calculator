@@ -658,7 +658,7 @@ int BN_primality_test(int *is_probably_prime, const BIGNUM *w,
   BIGNUM *w1 = BN_CTX_get(ctx);
   if (w1 == NULL ||
       !bn_usub_consttime(w1, w, BN_value_one())) {
-    goto err;
+    return BN_primality_test_cleanup(ret, mont, ctx, new_ctx);
   }
 
   // Write w1 as m * 2^a (Steps 1 and 2).
@@ -667,7 +667,7 @@ int BN_primality_test(int *is_probably_prime, const BIGNUM *w,
   BIGNUM *m = BN_CTX_get(ctx);
   if (m == NULL ||
       !bn_rshift_secret_shift(m, w1, a, ctx)) {
-    goto err;
+    return BN_primality_test_cleanup(ret, mont, ctx, new_ctx);
   }
 
   // Montgomery setup for computations mod w. Additionally, compute 1 and w - 1
@@ -683,7 +683,7 @@ int BN_primality_test(int *is_probably_prime, const BIGNUM *w,
       // w - 1 is -1 mod w, so we can compute it in the Montgomery domain, -R,
       // with a subtraction. (|one_mont| cannot be zero.)
       !bn_usub_consttime(w1_mont, w, one_mont)) {
-    goto err;
+    return BN_primality_test_cleanup(ret, mont, ctx, new_ctx);
   }
 
   // The following loop performs in inner iteration of the Miller-Rabin
@@ -794,7 +794,7 @@ int BN_primality_test(int *is_probably_prime, const BIGNUM *w,
   ret = 1;
 
 err:
-  return BN_primality_test_cleanup(ret, mon, ctx, new_ctx);
+  return BN_primality_test_cleanup(ret, mont, ctx, new_ctx);
 }
 
 int BN_is_prime_ex(const BIGNUM *candidate, int checks, BN_CTX *ctx,
@@ -810,6 +810,11 @@ int BN_is_prime_fasttest_ex(const BIGNUM *a, int checks, BN_CTX *ctx,
     return -1;
   }
   return is_probably_prime;
+}
+
+int BN_enhanced_miller_rabin_primality_test_cleanup(int ret, BN_CTX *ctx, BN_MONT_CTX *mont) {
+  BN_MONT_CTX_free(mont);
+  return BN_CTX_end(ret, ctx);
 }
 
 int BN_enhanced_miller_rabin_primality_test(
@@ -834,7 +839,7 @@ int BN_enhanced_miller_rabin_primality_test(
   if (w1 == NULL ||
       !BN_copy(w1, w) ||
       !BN_sub_word(w1, 1)) {
-    goto err;
+    return BN_enhanced_miller_rabin_primality_test_cleanup(ret, ctx, mont);
   }
 
   // Write w1 as m*2^a (Steps 1 and 2).
@@ -843,9 +848,8 @@ int BN_enhanced_miller_rabin_primality_test(
     a++;
   }
   BIGNUM *m = BN_CTX_get(ctx);
-  if (m == NULL ||
-      !BN_rshift(m, w1, a)) {
-    goto err;
+  if (m == NULL || !BN_rshift(m, w1, a)) {
+    return BN_enhanced_miller_rabin_primality_test_cleanup(ret, ctx, mont);
   }
 
   BIGNUM *b = BN_CTX_get(ctx);
@@ -945,10 +949,7 @@ int BN_enhanced_miller_rabin_primality_test(
   ret = 1;
 
 err:
-  BN_MONT_CTX_free(mont);
-  BN_CTX_end(ctx);
-
-  return ret;
+  return BN_enhanced_miller_rabin_primality_test_cleanup(ret, ctx, mont);
 }
 
 static int probable_prime(BIGNUM *rnd, int bits) {
@@ -1036,28 +1037,28 @@ static int probable_prime_dh(BIGNUM *rnd, int bits, const BIGNUM *add,
 
   BN_CTX_start(ctx);
   if ((t1 = BN_CTX_get(ctx)) == NULL) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   if (!BN_rand(rnd, bits, BN_RAND_TOP_ONE, BN_RAND_BOTTOM_ODD)) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   // we need ((rnd-rem) % add) == 0
 
   if (!BN_mod(t1, rnd, add, ctx)) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
   if (!BN_sub(rnd, rnd, t1)) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
   if (rem == NULL) {
     if (!BN_add_word(rnd, 1)) {
-      goto err;
+      return BN_CTX_end(ret, ctx);
     }
   } else {
     if (!BN_add(rnd, rnd, rem)) {
-      goto err;
+      return BN_CTX_end(ret, ctx);
     }
   }
   // we now have a random number 'rand' to test.
@@ -1077,8 +1078,7 @@ loop:
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 static int probable_prime_dh_safe(BIGNUM *p, int bits, const BIGNUM *padd,
@@ -1100,37 +1100,37 @@ static int probable_prime_dh_safe(BIGNUM *p, int bits, const BIGNUM *padd,
   }
 
   if (!BN_rand(q, bits, BN_RAND_TOP_ONE, BN_RAND_BOTTOM_ODD)) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   // we need ((rnd-rem) % add) == 0
   if (!BN_mod(t1, q, qadd, ctx)) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   if (!BN_sub(q, q, t1)) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   if (rem == NULL) {
     if (!BN_add_word(q, 1)) {
-      goto err;
+      return BN_CTX_end(ret, ctx);
     }
   } else {
     if (!BN_rshift1(t1, rem)) {
-      goto err;
+      return BN_CTX_end(ret, ctx);
     }
     if (!BN_add(q, q, t1)) {
-      goto err;
+      return BN_CTX_end(ret, ctx);
     }
   }
 
   // we now have a random number 'rand' to test.
   if (!BN_lshift1(p, q)) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
   if (!BN_add_word(p, 1)) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   const size_t num_primes = num_trial_division_primes(p);
@@ -1154,6 +1154,5 @@ loop:
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }

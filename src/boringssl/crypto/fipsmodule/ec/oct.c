@@ -65,10 +65,10 @@
  * Sheueling Chang Shantz and Douglas Stebila of Sun Microsystems
  * Laboratories. */
 
-#include "../../include/openssl/ec.h>
+#include "../../../include/openssl/ec.h"
 
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/err.h>
+#include "../../../include/openssl/bn.h"
+#include "../../../include/openssl/err.h"
 
 #include "internal.h"
 

@@ -420,7 +420,7 @@ end:
     }
     ret = NULL;
   }
-  return BN_CTX_end(ret, ctx);
+  return BN_CTX_end_BIGNUM(ret, ctx);
 }
 
 int BN_sqrt(BIGNUM *out_sqrt, const BIGNUM *in, BN_CTX *ctx) {
@@ -496,6 +496,5 @@ err:
   if (ok && out_sqrt == in && !BN_copy(out_sqrt, estimate)) {
     ok = 0;
   }
-  BN_CTX_end(ctx);
-  return ok;
+  return BN_CTX_end(ok, ctx);
 }

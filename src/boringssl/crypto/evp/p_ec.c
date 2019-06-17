@@ -190,7 +190,7 @@ static int pkey_ec_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2) {
         OPENSSL_PUT_ERROR(EVP, EVP_R_INVALID_DIGEST_TYPE);
         return 0;
       }
-      dctx->md = p2;
+      dctx->md = (const EVP_MD *) p2;
       return 1;
 
     case EVP_PKEY_CTRL_GET_MD:
@@ -218,7 +218,7 @@ static int pkey_ec_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2) {
 }
 
 static int pkey_ec_keygen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey) {
-  EC_PKEY_CTX *dctx = ctx->data;
+  EC_PKEY_CTX *dctx = (EC_PKEY_CTX *) ctx->data;
   const EC_GROUP *group = dctx->gen_group;
   if (group == NULL) {
     if (ctx->pkey == NULL) {
@@ -239,7 +239,7 @@ static int pkey_ec_keygen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey) {
 }
 
 static int pkey_ec_paramgen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey) {
-  EC_PKEY_CTX *dctx = ctx->data;
+  EC_PKEY_CTX *dctx = (EC_PKEY_CTX *) ctx->data;
   if (dctx->gen_group == NULL) {
     OPENSSL_PUT_ERROR(EVP, EVP_R_NO_PARAMETERS_SET);
     return 0;

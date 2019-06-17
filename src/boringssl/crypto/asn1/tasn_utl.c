@@ -127,7 +127,7 @@ static ASN1_ENCODING *asn1_get_enc_ptr(ASN1_VALUE **pval, const ASN1_ITEM *it) {
   if (!aux || !(aux->flags & ASN1_AFLG_ENCODING)) {
     return NULL;
   }
-  return offset2ptr(*pval, aux->enc_offset);
+  return (ASN1_ENCODING *) offset2ptr(*pval, aux->enc_offset);
 }
 
 void asn1_enc_init(ASN1_VALUE **pval, const ASN1_ITEM *it) {
@@ -157,8 +157,9 @@ void asn1_enc_free(ASN1_VALUE **pval, const ASN1_ITEM *it) {
   }
 }
 
-int asn1_enc_save(ASN1_VALUE **pval, const unsigned char *in, int inlen,
-                  const ASN1_ITEM *it) {
+int asn1_enc_save(
+  ASN1_VALUE **pval, const unsigned char *in, int inlen, const ASN1_ITEM* it
+) {
   ASN1_ENCODING *enc;
   enc = asn1_get_enc_ptr(pval, it);
   if (!enc) {
@@ -175,7 +176,7 @@ int asn1_enc_save(ASN1_VALUE **pval, const unsigned char *in, int inlen,
   if (enc->alias_only) {
     enc->enc = (uint8_t *) in;
   } else {
-    enc->enc = OPENSSL_malloc(inlen);
+    enc->enc = (unsigned char *) OPENSSL_malloc(inlen);
     if (!enc->enc) {
       return 0;
     }
@@ -211,7 +212,7 @@ ASN1_VALUE **asn1_get_field_ptr(ASN1_VALUE **pval, const ASN1_TEMPLATE *tt) {
   if (tt->flags & ASN1_TFLG_COMBINE) {
     return pval;
   }
-  pvaltmp = offset2ptr(*pval, tt->offset);
+  pvaltmp = (ASN1_VALUE **) offset2ptr(*pval, tt->offset);
   /* NOTE for BOOLEAN types the field is just a plain int so we can't return
    * int **, so settle for (int *). */
   return pvaltmp;
@@ -219,8 +220,9 @@ ASN1_VALUE **asn1_get_field_ptr(ASN1_VALUE **pval, const ASN1_TEMPLATE *tt) {
 
 /* Handle ANY DEFINED BY template, find the selector, look up the relevant
  * ASN1_TEMPLATE in the table and return it. */
-const ASN1_TEMPLATE *asn1_do_adb(ASN1_VALUE **pval, const ASN1_TEMPLATE *tt,
-                                 int nullerr) {
+const ASN1_TEMPLATE *asn1_do_adb(
+  ASN1_VALUE **pval, const ASN1_TEMPLATE *tt, int nullerr
+) {
   const ASN1_ADB *adb;
   const ASN1_ADB_TABLE *atbl;
   long selector;
@@ -231,10 +233,10 @@ const ASN1_TEMPLATE *asn1_do_adb(ASN1_VALUE **pval, const ASN1_TEMPLATE *tt,
   }
 
   /* Else ANY DEFINED BY ... get the table */
-  adb = ASN1_ADB_ptr(tt->item);
+  adb = (const ASN1_ADB *) ASN1_ADB_ptr(tt->item);
 
   /* Get the selector field */
-  sfld = offset2ptr(*pval, adb->offset);
+  sfld = (ASN1_VALUE **) offset2ptr(*pval, adb->offset);
 
   /* Check if NULL */
   if (*sfld == NULL) {

@@ -46,7 +46,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * ==================================================================== */
 
-#include "../../include/openssl/base.h>
+#include "../../../include/openssl/base.h"
 
 #include <assert.h>
 
@@ -175,7 +175,7 @@ extern "C" {
 #endif  // DATA_ORDER
 
 int HASH_UPDATE(HASH_CTX *c, const void *data_, size_t len) {
-  const uint8_t *data = data_;
+  const uint8_t *data = (const uint8_t *) data_;
 
   if (len == 0) {
     return 1;

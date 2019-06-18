@@ -412,6 +412,23 @@ err:
   return ret;
 }
 
+EC_GROUP *ec_group_new_from_data_cleanup(
+  int ok, EC_GROUP *group, EC_POINT *P, BN_CTX *ctx, BIGNUM *p, BIGNUM *a, BIGNUM *b, BIGNUM *x, BIGNUM *y
+) {
+  if (!ok) {
+    EC_GROUP_free(group);
+    group = NULL;
+  }
+  EC_POINT_free(P);
+  BN_CTX_free(ctx);
+  BN_free(p);
+  BN_free(a);
+  BN_free(b);
+  BN_free(x);
+  BN_free(y);
+  return group;
+}
+
 static EC_GROUP *ec_group_new_from_data(const struct built_in_curve *curve) {
   EC_GROUP *group = NULL;
   EC_POINT *P = NULL;
@@ -480,18 +497,7 @@ static EC_GROUP *ec_group_new_from_data(const struct built_in_curve *curve) {
   ok = 1;
 
 err:
-  if (!ok) {
-    EC_GROUP_free(group);
-    group = NULL;
-  }
-  EC_POINT_free(P);
-  BN_CTX_free(ctx);
-  BN_free(p);
-  BN_free(a);
-  BN_free(b);
-  BN_free(x);
-  BN_free(y);
-  return group;
+  return ec_group_new_from_data_cleanup(ok, group, P, ctx, p, a, b, x, y);
 }
 
 // Built-in groups are allocated lazily and static once allocated.

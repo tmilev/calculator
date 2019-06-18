@@ -49,7 +49,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/type_check.h>
+#include "../../../include/openssl/type_check.h"
 
 #include "internal.h"
 

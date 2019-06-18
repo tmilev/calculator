@@ -50,16 +50,16 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include "../../include/openssl/ecdsa.h>
+#include "../../../include/openssl/ecdsa.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/sha.h>
-#include "../../include/openssl/type_check.h>
+#include "../../../include/openssl/bn.h"
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/mem.h"
+#include "../../../include/openssl/sha.h"
+#include "../../../include/openssl/type_check.h"
 
 #include "../bn/internal.h"
 #include "../ec/internal.h"

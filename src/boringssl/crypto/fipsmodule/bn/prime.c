@@ -1092,11 +1092,11 @@ static int probable_prime_dh_safe(BIGNUM *p, int bits, const BIGNUM *padd,
   q = BN_CTX_get(ctx);
   qadd = BN_CTX_get(ctx);
   if (qadd == NULL) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   if (!BN_rshift1(qadd, padd)) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   if (!BN_rand(q, bits, BN_RAND_TOP_ONE, BN_RAND_BOTTOM_ODD)) {

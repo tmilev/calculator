@@ -54,7 +54,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/md4.h>
+#include "../../../include/openssl/md4.h"
 
 #include <stdlib.h>
 #include <string.h>

@@ -54,11 +54,11 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/md5.h>
+#include "../../../include/openssl/md5.h"
 
 #include <string.h>
 
-#include "../../include/openssl/mem.h>
+#include "../../../include/openssl/mem.h"
 
 #include "internal.h"
 #include "../../internal.h"

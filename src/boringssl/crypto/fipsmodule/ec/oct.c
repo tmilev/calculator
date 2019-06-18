@@ -126,6 +126,14 @@ static size_t ec_GFp_simple_point2oct(const EC_GROUP *group,
   return output_len;
 }
 
+int ec_GFp_simple_oct2point_cleanup(int ret, BN_CTX * used_ctx, BN_CTX * ctx, BN_CTX * new_ctx) {
+  if (used_ctx) {
+    BN_CTX_end(0, ctx);
+  }
+  BN_CTX_free(new_ctx);
+  return ret;
+}
+
 static int ec_GFp_simple_oct2point(const EC_GROUP *group, EC_POINT *point,
                                    const uint8_t *buf, size_t len,
                                    BN_CTX *ctx) {
@@ -137,9 +145,9 @@ static int ec_GFp_simple_oct2point(const EC_GROUP *group, EC_POINT *point,
     goto err;
   }
 
-  point_conversion_form_t form = buf[0];
+  point_conversion_form_t form = (point_conversion_form_t) buf[0];
   const int y_bit = form & 1;
-  form = form & ~1U;
+  form = (point_conversion_form_t) (form & ~1U);
   if ((form != POINT_CONVERSION_COMPRESSED &&
        form != POINT_CONVERSION_UNCOMPRESSED) ||
       (form == POINT_CONVERSION_UNCOMPRESSED && y_bit)) {
@@ -203,11 +211,7 @@ static int ec_GFp_simple_oct2point(const EC_GROUP *group, EC_POINT *point,
   ret = 1;
 
 err:
-  if (used_ctx) {
-    BN_CTX_end(ctx);
-  }
-  BN_CTX_free(new_ctx);
-  return ret;
+ return ec_GFp_simple_oct2point_cleanup(ret, used_ctx, ctx, new_ctx);
 }
 
 int EC_POINT_oct2point(const EC_GROUP *group, EC_POINT *point,

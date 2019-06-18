@@ -406,7 +406,7 @@ size_t EC_KEY_key2buf(EC_KEY *key, point_conversion_form_t form,
     return 0;
   }
 
-  uint8_t *buf = OPENSSL_malloc(len);
+  uint8_t *buf = (uint8_t *) OPENSSL_malloc(len);
   if (buf == NULL) {
     return 0;
   }

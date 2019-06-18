@@ -54,13 +54,13 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/hmac.h>
+#include "../../../include/openssl/hmac.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/digest.h>
-#include "../../include/openssl/mem.h>
+#include "../../../include/openssl/digest.h"
+#include "../../../include/openssl/mem.h"
 
 #include "../../internal.h"
 
@@ -88,7 +88,7 @@ void HMAC_CTX_init(HMAC_CTX *ctx) {
 }
 
 HMAC_CTX *HMAC_CTX_new(void) {
-  HMAC_CTX *ctx = OPENSSL_malloc(sizeof(HMAC_CTX));
+  HMAC_CTX *ctx = (HMAC_CTX *) OPENSSL_malloc(sizeof(HMAC_CTX));
   if (ctx != NULL) {
     HMAC_CTX_init(ctx);
   }

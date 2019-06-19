@@ -58,15 +58,15 @@
 #include <string.h>
 #include <time.h>
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/thread.h>
-#include "../../include/openssl/x509.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/thread.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "vpm_int.h"
 #include "../internal.h"
@@ -180,6 +180,18 @@ static X509 *lookup_cert_match(X509_STORE_CTX *ctx, X509 *x)
         xtmp = NULL;
     sk_X509_pop_free(certs, X509_free);
     return xtmp;
+}
+
+int X509_verify_cert_cleanup(int ok, STACK_OF(X509) *sktmp, X509 *chain_ss, X509_STORE_CTX *ctx) {
+  if (sktmp != NULL)
+      sk_X509_free(sktmp);
+  if (chain_ss != NULL)
+      X509_free(chain_ss);
+
+  /* Safety net, error returns must set ctx->error */
+  if (ok <= 0 && ctx->error == X509_V_OK)
+      ctx->error = X509_V_ERR_UNSPECIFIED;
+  return ok;
 }
 
 int X509_verify_cert(X509_STORE_CTX *ctx)
@@ -464,19 +476,19 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
         bad_chain = 1;
         ok = cb(0, ctx);
         if (!ok)
-            goto end;
+          return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
     }
 
     /* We have the chain complete: now we need to check its purpose */
     ok = check_chain_extensions(ctx);
 
     if (!ok)
-        goto end;
+      return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
 
     ok = check_id(ctx);
 
     if (!ok)
-        goto end;
+      return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
 
     /*
      * Check revocation status: we do this after copying parameters because
@@ -485,7 +497,7 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
 
     ok = ctx->check_revocation(ctx);
     if (!ok)
-        goto end;
+      return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
 
     int err = X509_chain_check_suiteb(&ctx->error_depth, NULL, ctx->chain,
                                       ctx->param->flags);
@@ -509,22 +521,14 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
 
     ok = check_name_constraints(ctx);
     if (!ok)
-        goto end;
+      return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
 
     /* If we get this far evaluate policies */
     if (!bad_chain && (ctx->param->flags & X509_V_FLAG_POLICY_CHECK))
         ok = ctx->check_policy(ctx);
 
  end:
-    if (sktmp != NULL)
-        sk_X509_free(sktmp);
-    if (chain_ss != NULL)
-        X509_free(chain_ss);
-
-    /* Safety net, error returns must set ctx->error */
-    if (ok <= 0 && ctx->error == X509_V_OK)
-        ctx->error = X509_V_ERR_UNSPECIFIED;
-    return ok;
+    return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
 }
 
 /*

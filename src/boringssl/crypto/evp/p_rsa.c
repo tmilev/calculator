@@ -99,7 +99,7 @@ typedef struct {
 
 static int pkey_rsa_init(EVP_PKEY_CTX *ctx) {
   RSA_PKEY_CTX *rctx;
-  rctx = OPENSSL_malloc(sizeof(RSA_PKEY_CTX));
+  rctx = (RSA_PKEY_CTX *) OPENSSL_malloc(sizeof(RSA_PKEY_CTX));
   if (!rctx) {
     return 0;
   }
@@ -119,8 +119,8 @@ static int pkey_rsa_copy(EVP_PKEY_CTX *dst, EVP_PKEY_CTX *src) {
   if (!pkey_rsa_init(dst)) {
     return 0;
   }
-  sctx = src->data;
-  dctx = dst->data;
+  sctx = (RSA_PKEY_CTX *) src->data;
+  dctx = (RSA_PKEY_CTX *) dst->data;
   dctx->nbits = sctx->nbits;
   if (sctx->pub_exp) {
     dctx->pub_exp = BN_dup(sctx->pub_exp);
@@ -135,7 +135,7 @@ static int pkey_rsa_copy(EVP_PKEY_CTX *dst, EVP_PKEY_CTX *src) {
   dctx->saltlen = sctx->saltlen;
   if (sctx->oaep_label) {
     OPENSSL_free(dctx->oaep_label);
-    dctx->oaep_label = BUF_memdup(sctx->oaep_label, sctx->oaep_labellen);
+    dctx->oaep_label = (uint8_t*) BUF_memdup(sctx->oaep_label, sctx->oaep_labellen);
     if (!dctx->oaep_label) {
       return 0;
     }
@@ -146,7 +146,7 @@ static int pkey_rsa_copy(EVP_PKEY_CTX *dst, EVP_PKEY_CTX *src) {
 }
 
 static void pkey_rsa_cleanup(EVP_PKEY_CTX *ctx) {
-  RSA_PKEY_CTX *rctx = ctx->data;
+  RSA_PKEY_CTX *rctx = (RSA_PKEY_CTX *) ctx->data;
 
   if (rctx == NULL) {
     return;
@@ -162,7 +162,7 @@ static int setup_tbuf(RSA_PKEY_CTX *ctx, EVP_PKEY_CTX *pk) {
   if (ctx->tbuf) {
     return 1;
   }
-  ctx->tbuf = OPENSSL_malloc(EVP_PKEY_size(pk->pkey));
+  ctx->tbuf = (uint8_t*) OPENSSL_malloc(EVP_PKEY_size(pk->pkey));
   if (!ctx->tbuf) {
     return 0;
   }
@@ -171,7 +171,7 @@ static int setup_tbuf(RSA_PKEY_CTX *ctx, EVP_PKEY_CTX *pk) {
 
 static int pkey_rsa_sign(EVP_PKEY_CTX *ctx, uint8_t *sig, size_t *siglen,
                          const uint8_t *tbs, size_t tbslen) {
-  RSA_PKEY_CTX *rctx = ctx->data;
+  RSA_PKEY_CTX *rctx = (RSA_PKEY_CTX *) ctx->data;
   RSA *rsa = ctx->pkey->pkey.rsa;
   const size_t key_len = EVP_PKEY_size(ctx->pkey);
 
@@ -210,7 +210,7 @@ static int pkey_rsa_sign(EVP_PKEY_CTX *ctx, uint8_t *sig, size_t *siglen,
 static int pkey_rsa_verify(EVP_PKEY_CTX *ctx, const uint8_t *sig,
                            size_t siglen, const uint8_t *tbs,
                            size_t tbslen) {
-  RSA_PKEY_CTX *rctx = ctx->data;
+  RSA_PKEY_CTX *rctx = (RSA_PKEY_CTX *) ctx->data;
   RSA *rsa = ctx->pkey->pkey.rsa;
 
   if (rctx->md) {
@@ -243,7 +243,7 @@ static int pkey_rsa_verify(EVP_PKEY_CTX *ctx, const uint8_t *sig,
 static int pkey_rsa_verify_recover(EVP_PKEY_CTX *ctx, uint8_t *out,
                                    size_t *out_len, const uint8_t *sig,
                                    size_t sig_len) {
-  RSA_PKEY_CTX *rctx = ctx->data;
+  RSA_PKEY_CTX *rctx = (RSA_PKEY_CTX *) ctx->data;
   RSA *rsa = ctx->pkey->pkey.rsa;
   const size_t key_len = EVP_PKEY_size(ctx->pkey);
 
@@ -307,7 +307,7 @@ static int pkey_rsa_verify_recover(EVP_PKEY_CTX *ctx, uint8_t *out,
 
 static int pkey_rsa_encrypt(EVP_PKEY_CTX *ctx, uint8_t *out, size_t *outlen,
                             const uint8_t *in, size_t inlen) {
-  RSA_PKEY_CTX *rctx = ctx->data;
+  RSA_PKEY_CTX *rctx = (RSA_PKEY_CTX *) ctx->data;
   RSA *rsa = ctx->pkey->pkey.rsa;
   const size_t key_len = EVP_PKEY_size(ctx->pkey);
 
@@ -339,7 +339,7 @@ static int pkey_rsa_encrypt(EVP_PKEY_CTX *ctx, uint8_t *out, size_t *outlen,
 static int pkey_rsa_decrypt(EVP_PKEY_CTX *ctx, uint8_t *out,
                             size_t *outlen, const uint8_t *in,
                             size_t inlen) {
-  RSA_PKEY_CTX *rctx = ctx->data;
+  RSA_PKEY_CTX *rctx = (RSA_PKEY_CTX *) ctx->data;
   RSA *rsa = ctx->pkey->pkey.rsa;
   const size_t key_len = EVP_PKEY_size(ctx->pkey);
 
@@ -395,7 +395,7 @@ static int is_known_padding(int padding_mode) {
 }
 
 static int pkey_rsa_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2) {
-  RSA_PKEY_CTX *rctx = ctx->data;
+  RSA_PKEY_CTX *rctx = (RSA_PKEY_CTX *) ctx->data;
   switch (type) {
     case EVP_PKEY_CTRL_RSA_PADDING:
       if (!is_known_padding(p1) || !check_padding_md(rctx->md, p1) ||
@@ -446,7 +446,7 @@ static int pkey_rsa_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2) {
         return 0;
       }
       BN_free(rctx->pub_exp);
-      rctx->pub_exp = p2;
+      rctx->pub_exp = (BIGNUM *) p2;
       return 1;
 
     case EVP_PKEY_CTRL_RSA_OAEP_MD:
@@ -458,15 +458,15 @@ static int pkey_rsa_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2) {
       if (type == EVP_PKEY_CTRL_GET_RSA_OAEP_MD) {
         *(const EVP_MD **)p2 = rctx->md;
       } else {
-        rctx->md = p2;
+        rctx->md = (const EVP_MD *) p2;
       }
       return 1;
 
     case EVP_PKEY_CTRL_MD:
-      if (!check_padding_md(p2, rctx->pad_mode)) {
+      if (!check_padding_md((const EVP_MD *) p2, rctx->pad_mode)) {
         return 0;
       }
-      rctx->md = p2;
+      rctx->md = (const EVP_MD *) p2;
       return 1;
 
     case EVP_PKEY_CTRL_GET_MD:
@@ -487,7 +487,7 @@ static int pkey_rsa_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2) {
           *(const EVP_MD **)p2 = rctx->md;
         }
       } else {
-        rctx->mgf1md = p2;
+        rctx->mgf1md = (const EVP_MD *) p2;
       }
       return 1;
 
@@ -497,7 +497,7 @@ static int pkey_rsa_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2) {
         return 0;
       }
       OPENSSL_free(rctx->oaep_label);
-      RSA_OAEP_LABEL_PARAMS *params = p2;
+      RSA_OAEP_LABEL_PARAMS *params = (RSA_OAEP_LABEL_PARAMS *) p2;
       rctx->oaep_label = params->data;
       rctx->oaep_labellen = params->len;
       return 1;
@@ -519,7 +519,7 @@ static int pkey_rsa_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2) {
 
 static int pkey_rsa_keygen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey) {
   RSA *rsa = NULL;
-  RSA_PKEY_CTX *rctx = ctx->data;
+  RSA_PKEY_CTX *rctx = (RSA_PKEY_CTX *) ctx->data;
 
   if (!rctx->pub_exp) {
     rctx->pub_exp = BN_new();

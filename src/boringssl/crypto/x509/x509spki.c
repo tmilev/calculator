@@ -56,10 +56,10 @@
 
 #include <string.h>
 
-#include "../../include/openssl/base64.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/base64.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/x509.h"
 
 int NETSCAPE_SPKI_set_pubkey(NETSCAPE_SPKI *x, EVP_PKEY *pkey)
 {
@@ -89,7 +89,8 @@ NETSCAPE_SPKI *NETSCAPE_SPKI_b64_decode(const char *str, int len)
         OPENSSL_PUT_ERROR(X509, X509_R_BASE64_DECODE_ERROR);
         return NULL;
     }
-    if (!(spki_der = OPENSSL_malloc(spki_len))) {
+    spki_der = (unsigned char *) OPENSSL_malloc(spki_len);
+    if (!spki_der) {
         OPENSSL_PUT_ERROR(X509, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
@@ -118,12 +119,12 @@ char *NETSCAPE_SPKI_b64_encode(NETSCAPE_SPKI *spki)
         OPENSSL_PUT_ERROR(X509, ERR_R_OVERFLOW);
         return NULL;
     }
-    der_spki = OPENSSL_malloc(der_len);
+    der_spki = (unsigned char *) OPENSSL_malloc(der_len);
     if (der_spki == NULL) {
         OPENSSL_PUT_ERROR(X509, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
-    b64_str = OPENSSL_malloc(b64_len);
+    b64_str = (char*) OPENSSL_malloc(b64_len);
     if (b64_str == NULL) {
         OPENSSL_free(der_spki);
         OPENSSL_PUT_ERROR(X509, ERR_R_MALLOC_FAILURE);

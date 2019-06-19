@@ -60,11 +60,11 @@
 
 #include <stdio.h>
 
-#include "../../include/openssl/conf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "ext_dat.h"
 static STACK_OF(X509V3_EXT_METHOD) *ext_list = NULL;
@@ -108,7 +108,7 @@ const X509V3_EXT_METHOD *X509V3_EXT_get_nid(int nid)
     if (nid < 0)
         return NULL;
     tmp.ext_nid = nid;
-    ret =
+    ret = (const X509V3_EXT_METHOD *const)
         bsearch(&t, standard_exts, STANDARD_EXTENSION_COUNT,
                 sizeof(X509V3_EXT_METHOD *), ext_cmp);
     if (ret)

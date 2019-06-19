@@ -58,13 +58,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/conf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "internal.h"
 
@@ -163,7 +163,7 @@ static AUTHORITY_KEYID *v2i_AUTHORITY_KEYID(X509V3_EXT_METHOD *method,
     if (keyid) {
         j = X509_get_ext_by_NID(cert, NID_subject_key_identifier, -1);
         if ((j >= 0) && (ext = X509_get_ext(cert, j)))
-            ikeyid = X509V3_EXT_d2i(ext);
+            ikeyid = (ASN1_OCTET_STRING *) X509V3_EXT_d2i(ext);
         if (keyid == 2 && !ikeyid) {
             OPENSSL_PUT_ERROR(X509V3, X509V3_R_UNABLE_TO_GET_ISSUER_KEYID);
             return NULL;

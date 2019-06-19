@@ -61,12 +61,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../include/openssl/conf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "../internal.h"
 #include "internal.h"
@@ -170,7 +170,7 @@ static X509_EXTENSION *do_ext_nconf(CONF *conf, X509V3_CTX *ctx, int ext_nid,
 
     ext = do_ext_i2d(method, ext_nid, crit, ext_struc);
     if (method->it)
-        ASN1_item_free(ext_struc, ASN1_ITEM_ptr(method->it));
+        ASN1_item_free((ASN1_VALUE *) ext_struc, ASN1_ITEM_ptr(method->it));
     else
         method->ext_free(ext_struc);
     return ext;
@@ -188,13 +188,14 @@ static X509_EXTENSION *do_ext_i2d(const X509V3_EXT_METHOD *method,
     if (method->it) {
         ext_der = NULL;
         ext_len =
-            ASN1_item_i2d(ext_struc, &ext_der, ASN1_ITEM_ptr(method->it));
+            ASN1_item_i2d((ASN1_VALUE *) ext_struc, &ext_der, ASN1_ITEM_ptr(method->it));
         if (ext_len < 0)
             goto merr;
     } else {
         unsigned char *p;
         ext_len = method->i2d(ext_struc, NULL);
-        if (!(ext_der = OPENSSL_malloc(ext_len)))
+        ext_der = (unsigned char *) OPENSSL_malloc(ext_len);
+        if (!ext_der)
             goto merr;
         p = ext_der;
         method->i2d(ext_struc, &p);
@@ -431,7 +432,7 @@ void X509V3_section_free(X509V3_CTX *ctx, STACK_OF(CONF_VALUE) *section)
 static char *nconf_get_string(void *db, char *section, char *value)
 {
     /* TODO(fork): this should return a const value. */
-    return (char *)NCONF_get_string(db, section, value);
+    return (char *) NCONF_get_string(db, section, value);
 }
 
 static STACK_OF(CONF_VALUE) *nconf_get_section(void *db, char *section)

@@ -54,18 +54,18 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/x509.h"
 
 #include <limits.h>
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/bytestring.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/thread.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/bytestring.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/thread.h"
 
 #include "../internal.h"
 
@@ -87,6 +87,12 @@ ASN1_SEQUENCE_cb(X509_PUBKEY, pubkey_cb) = {
 
 IMPLEMENT_ASN1_FUNCTIONS(X509_PUBKEY)
 
+int X509_PUBKEY_set_cleanup_on_error(X509_PUBKEY *pk, uint8_t *spki) {
+  X509_PUBKEY_free(pk);
+  OPENSSL_free(spki);
+  return 0;
+}
+
 int X509_PUBKEY_set(X509_PUBKEY **x, EVP_PKEY *pkey)
 {
     X509_PUBKEY *pk = NULL;
@@ -103,7 +109,7 @@ int X509_PUBKEY_set(X509_PUBKEY **x, EVP_PKEY *pkey)
         spki_len > LONG_MAX) {
         CBB_cleanup(&cbb);
         OPENSSL_PUT_ERROR(X509, X509_R_PUBLIC_KEY_ENCODE_ERROR);
-        goto error;
+        return X509_PUBKEY_set_cleanup_on_error(pk, spki);
     }
 
     const uint8_t *p = spki;
@@ -119,9 +125,7 @@ int X509_PUBKEY_set(X509_PUBKEY **x, EVP_PKEY *pkey)
 
     return 1;
  error:
-    X509_PUBKEY_free(pk);
-    OPENSSL_free(spki);
-    return 0;
+  return X509_PUBKEY_set_cleanup_on_error(pk, spki);
 }
 
 /* g_pubkey_lock is used to protect the initialisation of the |pkey| member of
@@ -130,13 +134,19 @@ int X509_PUBKEY_set(X509_PUBKEY **x, EVP_PKEY *pkey)
  * not. */
 static struct CRYPTO_STATIC_MUTEX g_pubkey_lock = CRYPTO_STATIC_MUTEX_INIT;
 
+EVP_PKEY *X509_PUBKEY_get_cleanup(EVP_PKEY *ret, uint8_t *spki) {
+  OPENSSL_free(spki);
+  EVP_PKEY_free(ret);
+  return NULL;
+}
+
 EVP_PKEY *X509_PUBKEY_get(X509_PUBKEY *key)
 {
     EVP_PKEY *ret = NULL;
     uint8_t *spki = NULL;
 
     if (key == NULL)
-        goto error;
+      return X509_PUBKEY_get_cleanup(ret, spki);
 
     CRYPTO_STATIC_MUTEX_lock_read(&g_pubkey_lock);
     if (key->pkey != NULL) {
@@ -175,9 +185,7 @@ EVP_PKEY *X509_PUBKEY_get(X509_PUBKEY *key)
     return ret;
 
  error:
-    OPENSSL_free(spki);
-    EVP_PKEY_free(ret);
-    return NULL;
+    return X509_PUBKEY_get_cleanup(ret, spki);
 }
 
 /*

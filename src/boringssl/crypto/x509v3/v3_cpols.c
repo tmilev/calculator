@@ -60,14 +60,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/conf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/stack.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/stack.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "internal.h"
 #include "pcy_int.h"
@@ -303,7 +303,7 @@ static POLICYQUALINFO *notice_section(X509V3_CTX *ctx,
     size_t i;
     int ret;
     CONF_VALUE *cnf;
-    USERNOTICE *not;
+    USERNOTICE *notice;
     POLICYQUALINFO *qual;
     if (!(qual = POLICYQUALINFO_new()))
         goto merr;
@@ -313,26 +313,26 @@ static POLICYQUALINFO *notice_section(X509V3_CTX *ctx,
         OPENSSL_PUT_ERROR(X509V3, ERR_R_INTERNAL_ERROR);
         goto err;
     }
-    if (!(not = USERNOTICE_new()))
+    if (!(notice = USERNOTICE_new()))
         goto merr;
-    qual->d.usernotice = not;
+    qual->d.usernotice = notice;
     for (i = 0; i < sk_CONF_VALUE_num(unot); i++) {
         cnf = sk_CONF_VALUE_value(unot, i);
         if (!strcmp(cnf->name, "explicitText")) {
-            not->exptext = M_ASN1_VISIBLESTRING_new();
-            if (not->exptext == NULL)
+            notice->exptext = M_ASN1_VISIBLESTRING_new();
+            if (notice->exptext == NULL)
                 goto merr;
-            if (!ASN1_STRING_set(not->exptext, cnf->value,
+            if (!ASN1_STRING_set(notice->exptext, cnf->value,
                                  strlen(cnf->value)))
                 goto merr;
         } else if (!strcmp(cnf->name, "organization")) {
             NOTICEREF *nref;
-            if (!not->noticeref) {
+            if (!notice->noticeref) {
                 if (!(nref = NOTICEREF_new()))
                     goto merr;
-                not->noticeref = nref;
+                notice->noticeref = nref;
             } else
-                nref = not->noticeref;
+                nref = notice->noticeref;
             if (ia5org)
                 nref->organization->type = V_ASN1_IA5STRING;
             else
@@ -343,12 +343,12 @@ static POLICYQUALINFO *notice_section(X509V3_CTX *ctx,
         } else if (!strcmp(cnf->name, "noticeNumbers")) {
             NOTICEREF *nref;
             STACK_OF(CONF_VALUE) *nos;
-            if (!not->noticeref) {
+            if (!notice->noticeref) {
                 if (!(nref = NOTICEREF_new()))
                     goto merr;
-                not->noticeref = nref;
+                notice->noticeref = nref;
             } else
-                nref = not->noticeref;
+                nref = notice->noticeref;
             nos = X509V3_parse_list(cnf->value);
             if (!nos || !sk_CONF_VALUE_num(nos)) {
                 OPENSSL_PUT_ERROR(X509V3, X509V3_R_INVALID_NUMBERS);
@@ -366,8 +366,8 @@ static POLICYQUALINFO *notice_section(X509V3_CTX *ctx,
         }
     }
 
-    if (not->noticeref &&
-        (!not->noticeref->noticenos || !not->noticeref->organization)) {
+    if (notice->noticeref &&
+        (!notice->noticeref->noticenos || !notice->noticeref->organization)) {
         OPENSSL_PUT_ERROR(X509V3, X509V3_R_NEED_ORGANIZATION_AND_NUMBERS);
         goto err;
     }

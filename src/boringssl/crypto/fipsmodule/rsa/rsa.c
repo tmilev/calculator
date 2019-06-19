@@ -54,21 +54,21 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/rsa.h>
+#include "../../../include/openssl/rsa.h"
 
 #include <limits.h>
 #include <string.h>
 
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/digest.h>
-#include "../../include/openssl/engine.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/ex_data.h>
-#include "../../include/openssl/md5.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/nid.h>
-#include "../../include/openssl/sha.h>
-#include "../../include/openssl/thread.h>
+#include "../../../include/openssl/bn.h"
+#include "../../../include/openssl/digest.h"
+#include "../../../include/openssl/engine.h"
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/ex_data.h"
+#include "../../../include/openssl/md5.h"
+#include "../../../include/openssl/mem.h"
+#include "../../../include/openssl/nid.h"
+#include "../../../include/openssl/sha.h"
+#include "../../../include/openssl/thread.h"
 
 #include "../bn/internal.h"
 #include "../delocate.h"
@@ -85,7 +85,7 @@ DEFINE_STATIC_EX_DATA_CLASS(g_rsa_ex_data_class)
 RSA *RSA_new(void) { return RSA_new_method(NULL); }
 
 RSA *RSA_new_method(const ENGINE *engine) {
-  RSA *rsa = OPENSSL_malloc(sizeof(RSA));
+  RSA *rsa = (RSA *) OPENSSL_malloc(sizeof(RSA));
   if (rsa == NULL) {
     OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
     return NULL;
@@ -481,7 +481,7 @@ int RSA_add_pkcs1_prefix(uint8_t **out_msg, size_t *out_msg_len,
       return 0;
     }
 
-    signed_msg = OPENSSL_malloc(signed_msg_len);
+    signed_msg = (uint8_t *) OPENSSL_malloc(signed_msg_len);
     if (!signed_msg) {
       OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
       return 0;
@@ -540,7 +540,7 @@ int RSA_sign_pss_mgf1(RSA *rsa, size_t *out_len, uint8_t *out, size_t max_out,
   }
 
   size_t padded_len = RSA_size(rsa);
-  uint8_t *padded = OPENSSL_malloc(padded_len);
+  uint8_t *padded = (uint8_t *) OPENSSL_malloc(padded_len);
   if (padded == NULL) {
     OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
     return 0;
@@ -573,7 +573,7 @@ int RSA_verify(int hash_nid, const uint8_t *msg, size_t msg_len,
     return 0;
   }
 
-  buf = OPENSSL_malloc(rsa_size);
+  buf = (uint8_t *) OPENSSL_malloc(rsa_size);
   if (!buf) {
     OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
     return 0;
@@ -615,7 +615,7 @@ int RSA_verify_pss_mgf1(RSA *rsa, const uint8_t *msg, size_t msg_len,
   }
 
   size_t em_len = RSA_size(rsa);
-  uint8_t *em = OPENSSL_malloc(em_len);
+  uint8_t *em = (uint8_t *) OPENSSL_malloc(em_len);
   if (em == NULL) {
     OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
     return 0;
@@ -651,8 +651,7 @@ static int check_mod_inverse(int *out_ok, const BIGNUM *a, const BIGNUM *ainv,
       *out_ok = 0;
     }
   }
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 int RSA_check_key(const RSA *key) {
@@ -838,7 +837,7 @@ int RSA_check_fips(RSA *key) {
   // perform a signing test.
   uint8_t data[32] = {0};
   unsigned sig_len = RSA_size(key);
-  uint8_t *sig = OPENSSL_malloc(sig_len);
+  uint8_t *sig = (uint8_t *) OPENSSL_malloc(sig_len);
   if (sig == NULL) {
     OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
     return 0;

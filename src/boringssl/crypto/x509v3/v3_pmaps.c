@@ -57,11 +57,11 @@
 
 #include <stdio.h>
 
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/conf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509v3.h"
 
 static void *v2i_POLICY_MAPPINGS(const X509V3_EXT_METHOD *method,
                                  X509V3_CTX *ctx, STACK_OF(CONF_VALUE) *nval);
@@ -96,7 +96,7 @@ static STACK_OF(CONF_VALUE) *i2v_POLICY_MAPPINGS(const X509V3_EXT_METHOD
                                                  *method, void *a, STACK_OF(CONF_VALUE)
                                                  *ext_list)
 {
-    POLICY_MAPPINGS *pmaps = a;
+    POLICY_MAPPINGS *pmaps = (POLICY_MAPPINGS *) a;
     POLICY_MAPPING *pmap;
     size_t i;
     char obj_tmp1[80];

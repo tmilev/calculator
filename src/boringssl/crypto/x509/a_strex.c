@@ -54,14 +54,14 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/x509.h"
 
 #include <inttypes.h>
 #include <string.h>
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
 
 #include "charmap.h"
 #include "../asn1/asn1_locl.h"
@@ -83,7 +83,8 @@ static int send_bio_chars(void *arg, const void *buf, int len)
 {
     if (!arg)
         return 1;
-    if (BIO_write(arg, buf, len) != len)
+    int bytesWritten = BIO_write((BIO*) arg, buf, len);
+    if (bytesWritten != len)
         return 0;
     return 1;
 }
@@ -92,7 +93,8 @@ static int send_fp_chars(void *arg, const void *buf, int len)
 {
     if (!arg)
         return 1;
-    if (fwrite(buf, 1, len, arg) != (unsigned int)len)
+    size_t written = fwrite(buf, 1, len, (FILE*) arg);
+    if (written != (unsigned int)len)
         return 0;
     return 1;
 }
@@ -318,7 +320,7 @@ static int do_dump(unsigned long lflags, char_io *io_ch, void *arg,
     t.type = str->type;
     t.value.ptr = (char *)str;
     der_len = i2d_ASN1_TYPE(&t, NULL);
-    der_buf = OPENSSL_malloc(der_len);
+    der_buf = (unsigned char*) OPENSSL_malloc(der_len);
     if (!der_buf)
         return -1;
     p = der_buf;

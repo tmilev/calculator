@@ -55,16 +55,16 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/pem.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/x509.h"
 
 X509_REQ *X509_to_X509_REQ(X509 *x, EVP_PKEY *pkey, const EVP_MD *md)
 {

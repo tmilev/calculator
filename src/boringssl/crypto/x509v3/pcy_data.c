@@ -57,10 +57,10 @@
  *
  */
 
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "pcy_int.h"
 
@@ -97,7 +97,7 @@ X509_POLICY_DATA *policy_data_new(POLICYINFO *policy,
             return NULL;
     } else
         id = NULL;
-    ret = OPENSSL_malloc(sizeof(X509_POLICY_DATA));
+    ret = (X509_POLICY_DATA *) OPENSSL_malloc(sizeof(X509_POLICY_DATA));
     if (!ret)
         return NULL;
     ret->expected_policy_set = sk_ASN1_OBJECT_new_null();

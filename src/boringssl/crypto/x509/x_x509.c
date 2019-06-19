@@ -59,14 +59,14 @@
 #include <limits.h>
 #include <stdio.h>
 
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/pool.h>
-#include "../../include/openssl/thread.h>
-#include "../../include/openssl/x509.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/pool.h"
+#include "../../include/openssl/thread.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "../internal.h"
 
@@ -300,7 +300,8 @@ int i2d_X509_AUX(X509 *a, unsigned char **pp)
         return length;
 
     /* Allocate requisite combined storage */
-    *pp = tmp = OPENSSL_malloc(length);
+    tmp = (unsigned char *) OPENSSL_malloc(length);
+    *pp = tmp;
     if (tmp == NULL)
         return -1; /* Push error onto error stack? */
 

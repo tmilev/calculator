@@ -54,19 +54,19 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/x509.h"
 
 #include <stdio.h>
 #include <time.h>
 #include <sys/types.h>
 
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/digest.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
 
 #include "internal.h"
 
@@ -93,7 +93,7 @@ int ASN1_item_verify(const ASN1_ITEM *it, X509_ALGOR *a,
         goto err;
     }
 
-    inl = ASN1_item_i2d(asn, &buf_in, it);
+    inl = ASN1_item_i2d((ASN1_VALUE *) asn, &buf_in, it);
 
     if (buf_in == NULL) {
         OPENSSL_PUT_ERROR(X509, ERR_R_MALLOC_FAILURE);

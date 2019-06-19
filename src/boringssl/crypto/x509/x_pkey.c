@@ -54,21 +54,21 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/x509.h"
 
 #include <string.h>
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/thread.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/thread.h"
 
 #include "../internal.h"
 
 
 X509_PKEY *X509_PKEY_new(void)
 {
-    X509_PKEY *ret = OPENSSL_malloc(sizeof(X509_PKEY));
+    X509_PKEY *ret = (X509_PKEY *) OPENSSL_malloc(sizeof(X509_PKEY));
     if (ret == NULL) {
         OPENSSL_PUT_ERROR(X509, ERR_R_MALLOC_FAILURE);
         goto err;

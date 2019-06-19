@@ -57,15 +57,15 @@
 
 #include <string.h>
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/digest.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/stack.h>
-#include "../../include/openssl/x509.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/stack.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "../internal.h"
 

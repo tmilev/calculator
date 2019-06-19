@@ -56,20 +56,20 @@
  * [including the GNU Public Licence.]
  */
 
-#include "../../include/openssl/pem.h>
+#include "../../include/openssl/pem.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/dsa.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/rsa.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/x509.h"
 
 #ifndef OPENSSL_NO_FP_API
 STACK_OF(X509_INFO) *PEM_X509_INFO_read(FILE *fp, STACK_OF(X509_INFO) *sk,

@@ -60,16 +60,16 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../include/openssl/base64.h>
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/des.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/pem.h>
-#include "../../include/openssl/rand.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/base64.h"
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/des.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/x509.h"
 
 #include "../internal.h"
 
@@ -544,7 +544,7 @@ int PEM_write_bio(BIO *bp, const char *name, const char *header,
             goto err;
     }
 
-    buf = OPENSSL_malloc(PEM_BUFSIZE * 8);
+    buf = (unsigned char *) OPENSSL_malloc(PEM_BUFSIZE * 8);
     if (buf == NULL) {
         reason = ERR_R_MALLOC_FAILURE;
         goto err;
@@ -772,6 +772,6 @@ int PEM_def_callback(char *buf, int size, int rwflag, void *userdata)
     if (len >= (size_t)size) {
         return 0;
     }
-    BUF_strlcpy(buf, userdata, (size_t)size);
+    BUF_strlcpy(buf, (const char*) userdata, (size_t)size);
     return len;
 }

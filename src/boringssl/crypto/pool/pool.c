@@ -12,15 +12,15 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include "../../include/openssl/pool.h>
+#include "../../include/openssl/pool.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/bytestring.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/thread.h>
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/bytestring.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/thread.h"
 
 #include "../internal.h"
 #include "internal.h"
@@ -40,7 +40,7 @@ static int CRYPTO_BUFFER_cmp(const CRYPTO_BUFFER *a, const CRYPTO_BUFFER *b) {
 }
 
 CRYPTO_BUFFER_POOL* CRYPTO_BUFFER_POOL_new(void) {
-  CRYPTO_BUFFER_POOL *pool = OPENSSL_malloc(sizeof(CRYPTO_BUFFER_POOL));
+  CRYPTO_BUFFER_POOL *pool = (CRYPTO_BUFFER_POOL *) OPENSSL_malloc(sizeof(CRYPTO_BUFFER_POOL));
   if (pool == NULL) {
     return NULL;
   }
@@ -93,13 +93,13 @@ CRYPTO_BUFFER *CRYPTO_BUFFER_new(const uint8_t *data, size_t len,
     }
   }
 
-  CRYPTO_BUFFER *const buf = OPENSSL_malloc(sizeof(CRYPTO_BUFFER));
+  CRYPTO_BUFFER *const buf = (CRYPTO_BUFFER *const) OPENSSL_malloc(sizeof(CRYPTO_BUFFER));
   if (buf == NULL) {
     return NULL;
   }
   OPENSSL_memset(buf, 0, sizeof(CRYPTO_BUFFER));
 
-  buf->data = BUF_memdup(data, len);
+  buf->data = (uint8_t*) BUF_memdup(data, len);
   if (len != 0 && buf->data == NULL) {
     OPENSSL_free(buf);
     return NULL;
@@ -138,13 +138,13 @@ CRYPTO_BUFFER *CRYPTO_BUFFER_new(const uint8_t *data, size_t len,
 }
 
 CRYPTO_BUFFER *CRYPTO_BUFFER_alloc(uint8_t **out_data, size_t len) {
-  CRYPTO_BUFFER *const buf = OPENSSL_malloc(sizeof(CRYPTO_BUFFER));
+  CRYPTO_BUFFER *const buf = (CRYPTO_BUFFER *const) OPENSSL_malloc(sizeof(CRYPTO_BUFFER));
   if (buf == NULL) {
     return NULL;
   }
   OPENSSL_memset(buf, 0, sizeof(CRYPTO_BUFFER));
 
-  buf->data = OPENSSL_malloc(len);
+  buf->data = (uint8_t*) OPENSSL_malloc(len);
   if (len != 0 && buf->data == NULL) {
     OPENSSL_free(buf);
     return NULL;

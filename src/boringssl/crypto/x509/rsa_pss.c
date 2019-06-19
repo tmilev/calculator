@@ -53,16 +53,16 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/x509.h"
 
 #include <assert.h>
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/bio.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/obj.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/obj.h"
 
 #include "internal.h"
 
@@ -242,6 +242,12 @@ err:
   return ret;
 }
 
+int x509_rsa_pss_to_ctx_cleanup(int ret, RSA_PSS_PARAMS *pss, X509_ALGOR* maskHash) {
+  RSA_PSS_PARAMS_free(pss);
+  X509_ALGOR_free(maskHash);
+  return ret;
+}
+
 int x509_rsa_pss_to_ctx(EVP_MD_CTX *ctx, X509_ALGOR *sigalg, EVP_PKEY *pkey) {
   assert(OBJ_obj2nid(sigalg->algorithm) == NID_rsassaPss);
 
@@ -251,13 +257,13 @@ int x509_rsa_pss_to_ctx(EVP_MD_CTX *ctx, X509_ALGOR *sigalg, EVP_PKEY *pkey) {
   RSA_PSS_PARAMS *pss = rsa_pss_decode(sigalg, &maskHash);
   if (pss == NULL) {
     OPENSSL_PUT_ERROR(X509, X509_R_INVALID_PSS_PARAMETERS);
-    goto err;
+    return x509_rsa_pss_to_ctx_cleanup(ret, pss, maskHash);
   }
 
   const EVP_MD *mgf1md = rsa_mgf1_to_md(pss->maskGenAlgorithm, maskHash);
   const EVP_MD *md = rsa_algor_to_md(pss->hashAlgorithm);
   if (mgf1md == NULL || md == NULL) {
-    goto err;
+    return x509_rsa_pss_to_ctx_cleanup(ret, pss, maskHash);
   }
 
   int saltlen = 20;
@@ -290,9 +296,7 @@ int x509_rsa_pss_to_ctx(EVP_MD_CTX *ctx, X509_ALGOR *sigalg, EVP_PKEY *pkey) {
   ret = 1;
 
 err:
-  RSA_PSS_PARAMS_free(pss);
-  X509_ALGOR_free(maskHash);
-  return ret;
+  return x509_rsa_pss_to_ctx_cleanup(ret, pss, maskHash);
 }
 
 int x509_print_rsa_pss_params(BIO *bp, const X509_ALGOR *sigalg, int indent,

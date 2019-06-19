@@ -54,11 +54,11 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/sha.h>
+#include "../../../include/openssl/sha.h"
 
 #include <string.h>
 
-#include "../../include/openssl/mem.h>
+#include "../../../include/openssl/mem.h"
 
 #include "internal.h"
 #include "../../internal.h"
@@ -148,7 +148,7 @@ void SHA512_Transform(SHA512_CTX *c, const uint8_t block[SHA512_CBLOCK]) {
 int SHA512_Update(SHA512_CTX *c, const void *in_data, size_t len) {
   uint64_t l;
   uint8_t *p = c->p;
-  const uint8_t *data = in_data;
+  const uint8_t *data = (const uint8_t *) in_data;
 
   if (len == 0) {
     return 1;

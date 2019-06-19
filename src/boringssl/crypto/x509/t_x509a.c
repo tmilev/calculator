@@ -54,11 +54,11 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/bio.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509.h"
 
 /* X509_CERT_AUX and string set routines */
 

@@ -54,20 +54,20 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/pem.h>
+#include "../../include/openssl/pem.h"
 
 #include <stdio.h>
 #include <string.h>
 
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/dh.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/pkcs8.h>
-#include "../../include/openssl/rand.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/dh.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/pkcs8.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/x509.h"
 
 EVP_PKEY *PEM_read_bio_PrivateKey(BIO *bp, EVP_PKEY **x, pem_password_cb *cb,
                                   void *u)

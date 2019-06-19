@@ -56,12 +56,12 @@
 
 #include <string.h>
 
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/stack.h>
-#include "../../include/openssl/x509.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/stack.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "vpm_int.h"
 #include "../internal.h"
@@ -172,10 +172,10 @@ X509_VERIFY_PARAM *X509_VERIFY_PARAM_new(void)
 {
     X509_VERIFY_PARAM *param;
     X509_VERIFY_PARAM_ID *paramid;
-    param = OPENSSL_malloc(sizeof(X509_VERIFY_PARAM));
+    param = (X509_VERIFY_PARAM *) OPENSSL_malloc(sizeof(X509_VERIFY_PARAM));
     if (!param)
         return NULL;
-    paramid = OPENSSL_malloc(sizeof(X509_VERIFY_PARAM_ID));
+    paramid = (X509_VERIFY_PARAM_ID *) OPENSSL_malloc(sizeof(X509_VERIFY_PARAM_ID));
     if (!paramid) {
         OPENSSL_free(param);
         return NULL;
@@ -352,7 +352,7 @@ static int int_x509_param_set1(char **pdest, size_t *pdestlen,
 
     if (*pdest)
         OPENSSL_free(*pdest);
-    *pdest = tmp;
+    *pdest = (char*) tmp;
     if (pdestlen)
         *pdestlen = srclen;
     return 1;

@@ -126,7 +126,7 @@ static size_t ec_GFp_simple_point2oct(const EC_GROUP *group,
   return output_len;
 }
 
-int ec_GFp_simple_oct2point_cleanup(int ret, BN_CTX * used_ctx, BN_CTX * ctx, BN_CTX * new_ctx) {
+int ec_GFp_simple_oct2point_cleanup(int ret, int used_ctx, BN_CTX * ctx, BN_CTX * new_ctx) {
   if (used_ctx) {
     BN_CTX_end(0, ctx);
   }
@@ -142,7 +142,7 @@ static int ec_GFp_simple_oct2point(const EC_GROUP *group, EC_POINT *point,
 
   if (len == 0) {
     OPENSSL_PUT_ERROR(EC, EC_R_BUFFER_TOO_SMALL);
-    goto err;
+    return ec_GFp_simple_oct2point_cleanup(ret, used_ctx, ctx, new_ctx);
   }
 
   point_conversion_form_t form = (point_conversion_form_t) buf[0];
@@ -152,7 +152,7 @@ static int ec_GFp_simple_oct2point(const EC_GROUP *group, EC_POINT *point,
        form != POINT_CONVERSION_UNCOMPRESSED) ||
       (form == POINT_CONVERSION_UNCOMPRESSED && y_bit)) {
     OPENSSL_PUT_ERROR(EC, EC_R_INVALID_ENCODING);
-    goto err;
+    return ec_GFp_simple_oct2point_cleanup(ret, used_ctx, ctx, new_ctx);
   }
 
   const size_t field_len = BN_num_bytes(&group->field);
@@ -164,13 +164,13 @@ static int ec_GFp_simple_oct2point(const EC_GROUP *group, EC_POINT *point,
 
   if (len != enc_len) {
     OPENSSL_PUT_ERROR(EC, EC_R_INVALID_ENCODING);
-    goto err;
+    return ec_GFp_simple_oct2point_cleanup(ret, used_ctx, ctx, new_ctx);
   }
 
   if (ctx == NULL) {
     ctx = new_ctx = BN_CTX_new();
     if (ctx == NULL) {
-      goto err;
+      return ec_GFp_simple_oct2point_cleanup(ret, used_ctx, ctx, new_ctx);
     }
   }
 
@@ -211,7 +211,7 @@ static int ec_GFp_simple_oct2point(const EC_GROUP *group, EC_POINT *point,
   ret = 1;
 
 err:
- return ec_GFp_simple_oct2point_cleanup(ret, used_ctx, ctx, new_ctx);
+  return ec_GFp_simple_oct2point_cleanup(ret, used_ctx, ctx, new_ctx);
 }
 
 int EC_POINT_oct2point(const EC_GROUP *group, EC_POINT *point,
@@ -334,7 +334,7 @@ int EC_POINT_set_compressed_coordinates_GFp(const EC_GROUP *group,
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
+  BN_CTX_end(0, ctx);
   BN_CTX_free(new_ctx);
   return ret;
 }

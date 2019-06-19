@@ -7,11 +7,11 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/x509v3.h"
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/bio.h>
-#include "../../include/openssl/nid.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/nid.h"
 
 /*
  * OCSP extensions and a couple of CRL entry extensions
@@ -48,7 +48,7 @@ static int i2r_ocsp_acutoff(const X509V3_EXT_METHOD *method, void *cutoff,
 {
     if (BIO_printf(bp, "%*s", ind, "") <= 0)
         return 0;
-    if (!ASN1_GENERALIZEDTIME_print(bp, cutoff))
+    if (!ASN1_GENERALIZEDTIME_print(bp, (const ASN1_GENERALIZEDTIME *) cutoff))
         return 0;
     return 1;
 }

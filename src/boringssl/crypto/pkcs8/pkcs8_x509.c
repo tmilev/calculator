@@ -53,22 +53,22 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include "../../include/openssl/pkcs8.h>
+#include "../../include/openssl/pkcs8.h"
 
 #include <limits.h>
 
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/bio.h>
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/bytestring.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/digest.h>
-#include "../../include/openssl/hmac.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/rand.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/bytestring.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/hmac.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/x509.h"
 
 #include "internal.h"
 #include "../bytestring/internal.h"
@@ -135,6 +135,11 @@ EVP_PKEY *EVP_PKCS82PKEY(PKCS8_PRIV_KEY_INFO *p8) {
   return ret;
 }
 
+PKCS8_PRIV_KEY_INFO *EVP_PKEY2PKCS8_cleanup(uint8_t *der) {
+  OPENSSL_free(der);
+  return NULL;
+}
+
 PKCS8_PRIV_KEY_INFO *EVP_PKEY2PKCS8(EVP_PKEY *pkey) {
   CBB cbb;
   uint8_t *der = NULL;
@@ -145,7 +150,7 @@ PKCS8_PRIV_KEY_INFO *EVP_PKEY2PKCS8(EVP_PKEY *pkey) {
       der_len > LONG_MAX) {
     CBB_cleanup(&cbb);
     OPENSSL_PUT_ERROR(PKCS8, PKCS8_R_ENCODE_ERROR);
-    goto err;
+    return EVP_PKEY2PKCS8_cleanup(der);
   }
 
   const uint8_t *p = der;
@@ -153,15 +158,11 @@ PKCS8_PRIV_KEY_INFO *EVP_PKEY2PKCS8(EVP_PKEY *pkey) {
   if (p8 == NULL || p != der + der_len) {
     PKCS8_PRIV_KEY_INFO_free(p8);
     OPENSSL_PUT_ERROR(PKCS8, PKCS8_R_DECODE_ERROR);
-    goto err;
+    return EVP_PKEY2PKCS8_cleanup(der);
   }
 
   OPENSSL_free(der);
   return p8;
-
-err:
-  OPENSSL_free(der);
-  return NULL;
 }
 
 PKCS8_PRIV_KEY_INFO *PKCS8_decrypt(X509_SIG *pkcs8, const char *pass,
@@ -198,6 +199,12 @@ err:
   return ret;
 }
 
+X509_SIG *PKCS8_encrypt_cleanup(X509_SIG* ret, EVP_PKEY *pkey, uint8_t *der) {
+  OPENSSL_free(der);
+  EVP_PKEY_free(pkey);
+  return ret;
+}
+
 X509_SIG *PKCS8_encrypt(int pbe_nid, const EVP_CIPHER *cipher, const char *pass,
                         int pass_len_in, const uint8_t *salt, size_t salt_len,
                         int iterations, PKCS8_PRIV_KEY_INFO *p8inf) {
@@ -224,7 +231,7 @@ X509_SIG *PKCS8_encrypt(int pbe_nid, const EVP_CIPHER *cipher, const char *pass,
                                            pkey) ||
       !CBB_finish(&cbb, &der, &der_len)) {
     CBB_cleanup(&cbb);
-    goto err;
+    return PKCS8_encrypt_cleanup(ret, pkey, der);
   }
 
   // Convert back to legacy ASN.1 objects.
@@ -235,11 +242,7 @@ X509_SIG *PKCS8_encrypt(int pbe_nid, const EVP_CIPHER *cipher, const char *pass,
     X509_SIG_free(ret);
     ret = NULL;
   }
-
-err:
-  OPENSSL_free(der);
-  EVP_PKEY_free(pkey);
-  return ret;
+  return PKCS8_encrypt_cleanup(ret, pkey, der);
 }
 
 struct pkcs12_context {
@@ -757,12 +760,12 @@ PKCS12 *d2i_PKCS12(PKCS12 **out_p12, const uint8_t **ber_bytes,
                    size_t ber_len) {
   PKCS12 *p12;
 
-  p12 = OPENSSL_malloc(sizeof(PKCS12));
+  p12 = (PKCS12 *) OPENSSL_malloc(sizeof(PKCS12));
   if (!p12) {
     return NULL;
   }
 
-  p12->ber_bytes = OPENSSL_malloc(ber_len);
+  p12->ber_bytes = (uint8_t *) OPENSSL_malloc(ber_len);
   if (!p12->ber_bytes) {
     OPENSSL_free(p12);
     return NULL;
@@ -855,7 +858,7 @@ int i2d_PKCS12(const PKCS12 *p12, uint8_t **out) {
   }
 
   if (*out == NULL) {
-    *out = OPENSSL_malloc(p12->ber_len);
+    *out = (uint8_t *) OPENSSL_malloc(p12->ber_len);
     if (*out == NULL) {
       OPENSSL_PUT_ERROR(PKCS8, ERR_R_MALLOC_FAILURE);
       return -1;
@@ -1070,6 +1073,11 @@ err:
   return ret;
 }
 
+int add_encrypted_data_cleanup(int ret, EVP_CIPHER_CTX *ctx) {
+  EVP_CIPHER_CTX_cleanup(ctx);
+  return ret;
+}
+
 static int add_encrypted_data(CBB *out, int pbe_nid, const char *password,
                               size_t password_len, unsigned iterations,
                               const uint8_t *in, size_t in_len) {
@@ -1105,7 +1113,7 @@ static int add_encrypted_data(CBB *out, int pbe_nid, const char *password,
       // it inherits the inner tag's constructed bit.
       !CBB_add_asn1(&encrypted_content_info, &encrypted_content,
                     CBS_ASN1_CONTEXT_SPECIFIC | 0)) {
-    goto err;
+    return add_encrypted_data_cleanup(ret, &ctx);
   }
 
   size_t max_out = in_len + EVP_CIPHER_CTX_block_size(&ctx);
@@ -1127,8 +1135,14 @@ static int add_encrypted_data(CBB *out, int pbe_nid, const char *password,
   ret = 1;
 
 err:
-  EVP_CIPHER_CTX_cleanup(&ctx);
+  return add_encrypted_data_cleanup(ret, &ctx);
+}
+
+PKCS12 * PKCS12_cleanup(PKCS12* ret, uint8_t * mac_key,CBB* cbb) {
+  OPENSSL_cleanse(mac_key, sizeof(mac_key) * EVP_MAX_MD_SIZE);
+  CBB_cleanup(cbb);
   return ret;
+
 }
 
 PKCS12 *PKCS12_create(const char *password, const char *name,
@@ -1247,7 +1261,7 @@ PKCS12 *PKCS12_create(const char *password, const char *name,
             iterations, pkey) ||
         !add_bag_attributes(&bag, name, key_id, key_id_len) ||
         !CBB_flush(&content_infos)) {
-      goto err;
+      return PKCS12_cleanup(ret, mac_key, &cbb);
     }
   }
 
@@ -1282,7 +1296,7 @@ PKCS12 *PKCS12_create(const char *password, const char *name,
     goto err;
   }
 
-  ret = OPENSSL_malloc(sizeof(PKCS12));
+  ret = (PKCS12 *) OPENSSL_malloc(sizeof(PKCS12));
   if (ret == NULL ||
       !CBB_finish(&cbb, &ret->ber_bytes, &ret->ber_len)) {
     OPENSSL_free(ret);
@@ -1291,9 +1305,7 @@ PKCS12 *PKCS12_create(const char *password, const char *name,
   }
 
 err:
-  OPENSSL_cleanse(mac_key, sizeof(mac_key));
-  CBB_cleanup(&cbb);
-  return ret;
+  return PKCS12_cleanup(ret, mac_key, &cbb);
 }
 
 void PKCS12_free(PKCS12 *p12) {

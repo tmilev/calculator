@@ -99,7 +99,7 @@ static void digest_to_scalar(const EC_GROUP *group, EC_SCALAR *out,
 }
 
 ECDSA_SIG *ECDSA_SIG_new(void) {
-  ECDSA_SIG *sig = OPENSSL_malloc(sizeof(ECDSA_SIG));
+  ECDSA_SIG *sig = (ECDSA_SIG *) OPENSSL_malloc(sizeof(ECDSA_SIG));
   if (sig == NULL) {
     return NULL;
   }

@@ -16,13 +16,13 @@
 #define _GNU_SOURCE  // needed for syscall() on Linux.
 #endif
 
-#include "../../include/openssl/crypto.h>
+#include "../../include/openssl/crypto.h"
 
 #include <stdlib.h>
 
-#include "../../include/openssl/digest.h>
-#include "../../include/openssl/hmac.h>
-#include "../../include/openssl/sha.h>
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/hmac.h"
+#include "../../include/openssl/sha.h"
 
 #include "../internal.h"
 

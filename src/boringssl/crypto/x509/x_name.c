@@ -57,14 +57,14 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/stack.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/stack.h"
+#include "../../include/openssl/x509.h"
 
 #include "../asn1/asn1_locl.h"
 #include "../internal.h"
@@ -143,7 +143,7 @@ IMPLEMENT_ASN1_DUP_FUNCTION(X509_NAME)
 static int x509_name_ex_new(ASN1_VALUE **val, const ASN1_ITEM *it)
 {
     X509_NAME *ret = NULL;
-    ret = OPENSSL_malloc(sizeof(X509_NAME));
+    ret = (X509_NAME *) OPENSSL_malloc(sizeof(X509_NAME));
     if (!ret)
         goto memerr;
     if ((ret->entries = sk_X509_NAME_ENTRY_new_null()) == NULL)
@@ -398,7 +398,7 @@ static int x509_name_canon(X509_NAME *a)
     }
     a->canon_enclen = len;
 
-    p = OPENSSL_malloc(a->canon_enclen);
+    p = (unsigned char*) OPENSSL_malloc(a->canon_enclen);
 
     if (!p)
         goto err;

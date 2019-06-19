@@ -58,12 +58,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/conf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "../internal.h"
 
@@ -162,7 +162,7 @@ static void *v2i_NAME_CONSTRAINTS(const X509V3_EXT_METHOD *method,
 static int i2r_NAME_CONSTRAINTS(const X509V3_EXT_METHOD *method, void *a,
                                 BIO *bp, int ind)
 {
-    NAME_CONSTRAINTS *ncons = a;
+    NAME_CONSTRAINTS *ncons = (NAME_CONSTRAINTS *) a;
     do_i2r_name_constraints(method, ncons->permittedSubtrees,
                             bp, ind, "Permitted");
     do_i2r_name_constraints(method, ncons->excludedSubtrees,

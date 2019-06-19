@@ -58,12 +58,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/conf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509v3.h"
 
 static STACK_OF(CONF_VALUE) *i2v_POLICY_CONSTRAINTS(const X509V3_EXT_METHOD
                                                     *method, void *bcons, STACK_OF(CONF_VALUE)
@@ -94,7 +94,7 @@ static STACK_OF(CONF_VALUE) *i2v_POLICY_CONSTRAINTS(const X509V3_EXT_METHOD
                                                     *method, void *a, STACK_OF(CONF_VALUE)
                                                     *extlist)
 {
-    POLICY_CONSTRAINTS *pcons = a;
+    POLICY_CONSTRAINTS *pcons = (POLICY_CONSTRAINTS *)a;
     X509V3_add_value_int("Require Explicit Policy",
                          pcons->requireExplicitPolicy, &extlist);
     X509V3_add_value_int("Inhibit Policy Mapping",

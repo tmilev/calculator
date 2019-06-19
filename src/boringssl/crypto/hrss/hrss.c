@@ -12,17 +12,17 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include "../../include/openssl/hrss.h>
+#include "../../include/openssl/hrss.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/cpu.h>
-#include "../../include/openssl/hmac.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/sha.h>
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/cpu.h"
+#include "../../include/openssl/hmac.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/sha.h"
 
 #if defined(OPENSSL_X86) || defined(OPENSSL_X86_64)
 #include <emmintrin.h>
@@ -33,11 +33,7 @@
 #include <arm_neon.h>
 #endif
 
-#if defined(_MSC_VER)
 #define RESTRICT
-#else
-#define RESTRICT restrict
-#endif
 
 #include "../internal.h"
 #include "internal.h"
@@ -1045,8 +1041,8 @@ OPENSSL_UNUSED static void poly_print(const struct poly *p) {
 // of |scratch| and the function recurses, except if |n| < 3, when |scratch|
 // isn't used and the recursion stops. If |n| == |VECS_PER_POLY| then |scratch|
 // needs 172 elements.
-static void poly_mul_vec_aux(vec_t *restrict out, vec_t *restrict scratch,
-                             const vec_t *restrict a, const vec_t *restrict b,
+static void poly_mul_vec_aux(vec_t * out, vec_t * scratch,
+                             const vec_t * a, const vec_t * b,
                              const size_t n) {
   // In [HRSS], the technique they used for polynomial multiplication is
   // described: they start with Toom-4 at the top level and then two layers of
@@ -1305,8 +1301,8 @@ static void poly_mul_vec(struct poly *out, const struct poly *x,
 
   for (size_t i = 0; i < VECS_PER_POLY; i++) {
     const vec_t prev = prod[VECS_PER_POLY - 1 + i];
-    const vec_t this = prod[VECS_PER_POLY + i];
-    out_vecs[i] = vec_add(prod[i], vec_merge_3_5(prev, this));
+    const vec_t thisPointer = prod[VECS_PER_POLY + i];
+    out_vecs[i] = vec_add(prod[i], vec_merge_3_5(prev, thisPointer));
   }
 
   OPENSSL_memset(&out->v[N], 0, 3 * sizeof(uint16_t));

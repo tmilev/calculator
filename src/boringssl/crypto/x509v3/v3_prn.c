@@ -59,10 +59,10 @@
 
 #include <stdio.h>
 
-#include "../../include/openssl/bio.h>
-#include "../../include/openssl/conf.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/x509v3.h"
 
 /* Extension printing routines */
 

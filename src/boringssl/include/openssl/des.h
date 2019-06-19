@@ -69,6 +69,7 @@ extern "C" {
 
 typedef struct DES_cblock_st {
   uint8_t bytes[8];
+  void fromString(const std::string& input);
 } DES_cblock;
 
 typedef struct DES_ks {

@@ -54,12 +54,12 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/stack.h>
+#include "../../include/openssl/stack.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/mem.h>
+#include "../../include/openssl/mem.h"
 
 #include "../internal.h"
 
@@ -71,13 +71,13 @@ static const size_t kMinSize = 4;
 _STACK *sk_new(stack_cmp_func comp) {
   _STACK *ret;
 
-  ret = OPENSSL_malloc(sizeof(_STACK));
+  ret = (_STACK *) OPENSSL_malloc(sizeof(_STACK));
   if (ret == NULL) {
     goto err;
   }
   OPENSSL_memset(ret, 0, sizeof(_STACK));
 
-  ret->data = OPENSSL_malloc(sizeof(void *) * kMinSize);
+  ret->data = (void **) OPENSSL_malloc(sizeof(void *) * kMinSize);
   if (ret->data == NULL) {
     goto err;
   }
@@ -181,7 +181,7 @@ size_t sk_insert(_STACK *sk, void *p, size_t where) {
       return 0;
     }
 
-    data = OPENSSL_realloc(sk->data, alloc_size);
+    data = (void**) OPENSSL_realloc(sk->data, alloc_size);
     if (data == NULL) {
       return 0;
     }

@@ -168,7 +168,7 @@ static int ed25519_priv_decode(EVP_PKEY *out, CBS *params, CBS *key) {
 }
 
 static int ed25519_priv_encode(CBB *out, const EVP_PKEY *pkey) {
-  ED25519_KEY *key = pkey->pkey.ptr;
+  ED25519_KEY *key = (ED25519_KEY *) pkey->pkey.ptr;
   if (!key->has_private) {
     OPENSSL_PUT_ERROR(EVP, EVP_R_NOT_A_PRIVATE_KEY);
     return 0;

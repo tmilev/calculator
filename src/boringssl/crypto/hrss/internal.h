@@ -15,7 +15,7 @@
 #ifndef OPENSSL_HEADER_HRSS_INTERNAL_H
 #define OPENSSL_HEADER_HRSS_INTERNAL_H
 
-#include "../../include/openssl/base.h>
+#include "../../include/openssl/base.h"
 #include "../internal.h"
 
 #if defined(__cplusplus)

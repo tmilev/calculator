@@ -55,15 +55,15 @@
  * [including the GNU Public Licence.] */
 
 #include <ctype.h>
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/bio.h>
-#include "../../include/openssl/digest.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "internal.h"
 
@@ -441,6 +441,11 @@ static int consume_zulu_timezone(const char **v, int *len) {
   return 1;
 }
 
+int ASN1_UTCTIME_print_cleanup_on_error(BIO *bp) {
+  BIO_write(bp, "Bad time value", 14);
+  return 0;
+}
+
 int ASN1_UTCTIME_print(BIO *bp, const ASN1_UTCTIME *tm) {
   const char *v = (const char *)tm->data;
   int len = tm->length;
@@ -452,7 +457,7 @@ int ASN1_UTCTIME_print(BIO *bp, const ASN1_UTCTIME *tm) {
       !consume_two_digits(&D, &v, &len) ||
       !consume_two_digits(&h, &v, &len) ||
       !consume_two_digits(&m, &v, &len)) {
-    goto err;
+    return ASN1_UTCTIME_print_cleanup_on_error(bp);
   }
   // https://tools.ietf.org/html/rfc5280, section 4.1.2.5.1, requires seconds
   // to be present, but historically this code has forgiven its absence.
@@ -466,13 +471,13 @@ int ASN1_UTCTIME_print(BIO *bp, const ASN1_UTCTIME *tm) {
     Y += 1900;
   }
   if (M > 12 || M == 0) {
-    goto err;
+    return ASN1_UTCTIME_print_cleanup_on_error(bp);
   }
   if (D > 31 || D == 0) {
-    goto err;
+    return ASN1_UTCTIME_print_cleanup_on_error(bp);
   }
   if (h > 23 || m > 59 || s > 60) {
-    goto err;
+    return ASN1_UTCTIME_print_cleanup_on_error(bp);
   }
 
   // https://tools.ietf.org/html/rfc5280, section 4.1.2.5.1, requires the "Z"
@@ -490,8 +495,7 @@ int ASN1_UTCTIME_print(BIO *bp, const ASN1_UTCTIME *tm) {
                     is_gmt ? " GMT" : "") > 0;
 
 err:
-  BIO_write(bp, "Bad time value", 14);
-  return 0;
+  return ASN1_UTCTIME_print_cleanup_on_error(bp);
 }
 
 int X509_NAME_print(BIO *bp, X509_NAME *name, int obase)

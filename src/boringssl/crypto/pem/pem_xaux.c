@@ -57,9 +57,9 @@
 
 #include <stdio.h>
 
-#include "../../include/openssl/bio.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/pem.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/x509.h"
 
 IMPLEMENT_PEM_rw(X509_AUX, X509, PEM_STRING_X509_TRUSTED, X509_AUX)

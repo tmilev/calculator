@@ -54,13 +54,13 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/lhash.h>
+#include "../../include/openssl/lhash.h"
 
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
 
-#include "../../include/openssl/mem.h>
+#include "../../include/openssl/mem.h"
 
 #include "../internal.h"
 
@@ -93,14 +93,14 @@ struct lhash_st {
 };
 
 _LHASH *lh_new(lhash_hash_func hash, lhash_cmp_func comp) {
-  _LHASH *ret = OPENSSL_malloc(sizeof(_LHASH));
+  _LHASH *ret = (_LHASH *) OPENSSL_malloc(sizeof(_LHASH));
   if (ret == NULL) {
     return NULL;
   }
   OPENSSL_memset(ret, 0, sizeof(_LHASH));
 
   ret->num_buckets = kMinNumBuckets;
-  ret->buckets = OPENSSL_malloc(sizeof(LHASH_ITEM *) * ret->num_buckets);
+  ret->buckets = (LHASH_ITEM**) OPENSSL_malloc(sizeof(LHASH_ITEM *) * ret->num_buckets);
   if (ret->buckets == NULL) {
     OPENSSL_free(ret);
     return NULL;
@@ -201,7 +201,7 @@ static void lh_rebucket(_LHASH *lh, const size_t new_num_buckets) {
     return;
   }
 
-  new_buckets = OPENSSL_malloc(alloc_size);
+  new_buckets = (LHASH_ITEM **) OPENSSL_malloc(alloc_size);
   if (new_buckets == NULL) {
     return;
   }
@@ -272,7 +272,7 @@ int lh_insert(_LHASH *lh, void **old_data, void *data,
   }
 
   // An element equal to |data| doesn't exist in the hash table yet.
-  item = OPENSSL_malloc(sizeof(LHASH_ITEM));
+  item = (LHASH_ITEM *) OPENSSL_malloc(sizeof(LHASH_ITEM));
   if (item == NULL) {
     return 0;
   }
@@ -302,7 +302,7 @@ void *lh_delete(_LHASH *lh, const void *data,
 
   item = *next_ptr;
   *next_ptr = item->next;
-  ret = item->data;
+  ret = (LHASH_ITEM *) item->data;
   OPENSSL_free(item);
 
   lh->num_items--;

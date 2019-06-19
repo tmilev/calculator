@@ -54,15 +54,15 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/x509.h"
 
 #include <string.h>
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "../internal.h"
 #include "../x509v3/internal.h"
@@ -253,7 +253,7 @@ static ASN1_TYPE *generate_v3(char *str, X509V3_CTX *cnf, int depth,
 
     /* Allocate buffer for new encoding */
 
-    new_der = OPENSSL_malloc(len);
+    new_der = (unsigned char*) OPENSSL_malloc(len);
     if (!new_der)
         goto err;
 
@@ -302,7 +302,7 @@ static ASN1_TYPE *generate_v3(char *str, X509V3_CTX *cnf, int depth,
 
 static int asn1_cb(const char *elem, int len, void *bitstr)
 {
-    tag_exp_arg *arg = bitstr;
+    tag_exp_arg *arg = (tag_exp_arg *) bitstr;
     int i;
     int utype;
     int vlen = 0;
@@ -834,7 +834,7 @@ static int bitstr_cb(const char *elem, int len, void *bitstr)
         OPENSSL_PUT_ERROR(ASN1, ASN1_R_INVALID_NUMBER);
         return 0;
     }
-    if (!ASN1_BIT_STRING_set_bit(bitstr, bitnum, 1)) {
+    if (!ASN1_BIT_STRING_set_bit((ASN1_BIT_STRING *) bitstr, bitnum, 1)) {
         OPENSSL_PUT_ERROR(ASN1, ERR_R_MALLOC_FAILURE);
         return 0;
     }

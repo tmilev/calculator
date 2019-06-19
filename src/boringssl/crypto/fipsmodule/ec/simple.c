@@ -156,7 +156,7 @@ int ec_GFp_simple_group_set_curve(EC_GROUP *group, const BIGNUM *p,
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
+  BN_CTX_end(0, ctx);
   BN_CTX_free(new_ctx);
   return ret;
 }

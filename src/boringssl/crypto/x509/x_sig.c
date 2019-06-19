@@ -57,8 +57,8 @@
 
 #include <stdio.h>
 
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/x509.h"
 
 
 ASN1_SEQUENCE(X509_SIG) = {

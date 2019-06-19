@@ -59,11 +59,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/thread.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/thread.h"
+#include "../../include/openssl/x509.h"
 
 #if !defined(OPENSSL_TRUSTY)
 
@@ -226,12 +226,12 @@ static int add_cert_dir(BY_DIR *ctx, const char *dir, int type)
                     return 0;
                 }
             }
-            ent = OPENSSL_malloc(sizeof(BY_DIR_ENTRY));
+            ent = (BY_DIR_ENTRY *) OPENSSL_malloc(sizeof(BY_DIR_ENTRY));
             if (!ent)
                 return 0;
             ent->dir_type = type;
             ent->hashes = sk_BY_DIR_HASH_new(by_dir_hash_cmp);
-            ent->dir = OPENSSL_malloc(len + 1);
+            ent->dir = (char*) OPENSSL_malloc(len + 1);
             if (!ent->dir || !ent->hashes) {
                 by_dir_entry_free(ent);
                 return 0;
@@ -412,7 +412,7 @@ static int get_cert_by_subject(X509_LOOKUP *xl, int type, X509_NAME *name,
                         hent = sk_BY_DIR_HASH_value(ent->hashes, idx);
                 }
                 if (!hent) {
-                    hent = OPENSSL_malloc(sizeof(BY_DIR_HASH));
+                    hent = (BY_DIR_HASH*) OPENSSL_malloc(sizeof(BY_DIR_HASH));
                     if (hent == NULL) {
                         CRYPTO_STATIC_MUTEX_unlock_write(&g_ent_hashes_lock);
                         ok = 0;

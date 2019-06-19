@@ -96,7 +96,7 @@ static void rand_thread_state_clear_all(void) {
 // rand_thread_state_free frees a |rand_thread_state|. This is called when a
 // thread exits.
 static void rand_thread_state_free(void *state_in) {
-  struct rand_thread_state *state = state_in;
+  struct rand_thread_state *state = (rand_thread_state *) state_in;
 
   if (state_in == NULL) {
     return;
@@ -251,11 +251,11 @@ void RAND_bytes_with_additional_data(uint8_t *out, size_t out_len,
   }
 
   struct rand_thread_state stack_state;
-  struct rand_thread_state *state =
+  struct rand_thread_state *state = (rand_thread_state *)
       CRYPTO_get_thread_local(OPENSSL_THREAD_LOCAL_RAND);
 
   if (state == NULL) {
-    state = OPENSSL_malloc(sizeof(struct rand_thread_state));
+    state = (rand_thread_state *) OPENSSL_malloc(sizeof(struct rand_thread_state));
     if (state == NULL ||
         !CRYPTO_set_thread_local(OPENSSL_THREAD_LOCAL_RAND, state,
                                  rand_thread_state_free)) {

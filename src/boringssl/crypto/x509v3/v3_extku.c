@@ -57,11 +57,11 @@
 
 #include <stdio.h>
 
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/conf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509v3.h"
 
 static void *v2i_EXTENDED_KEY_USAGE(const X509V3_EXT_METHOD *method,
                                     X509V3_CTX *ctx,
@@ -103,7 +103,7 @@ static STACK_OF(CONF_VALUE) *i2v_EXTENDED_KEY_USAGE(const X509V3_EXT_METHOD
                                                     *method, void *a, STACK_OF(CONF_VALUE)
                                                     *ext_list)
 {
-    EXTENDED_KEY_USAGE *eku = a;
+    EXTENDED_KEY_USAGE *eku = (EXTENDED_KEY_USAGE *) a;
     size_t i;
     ASN1_OBJECT *obj;
     char obj_tmp[80];

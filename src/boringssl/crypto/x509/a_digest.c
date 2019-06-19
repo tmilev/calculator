@@ -54,12 +54,12 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/x509.h"
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/digest.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
 
 int ASN1_digest(i2d_of_void *i2d, const EVP_MD *type, char *data,
                 unsigned char *md, unsigned int *len)
@@ -86,7 +86,7 @@ int ASN1_item_digest(const ASN1_ITEM *it, const EVP_MD *type, void *asn,
     int i, ret;
     unsigned char *str = NULL;
 
-    i = ASN1_item_i2d(asn, &str, it);
+    i = ASN1_item_i2d((ASN1_VALUE*) asn, &str, it);
     if (!str)
         return (0);
 

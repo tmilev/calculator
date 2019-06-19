@@ -54,13 +54,13 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/digest.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509.h"
 
 #include "internal.h"
 
@@ -95,9 +95,9 @@ int ASN1_item_sign_ctx(const ASN1_ITEM *it,
         goto err;
     }
 
-    inl = ASN1_item_i2d(asn, &buf_in, it);
+    inl = ASN1_item_i2d((ASN1_VALUE *) asn, &buf_in, it);
     outl = EVP_PKEY_size(pkey);
-    buf_out = OPENSSL_malloc((unsigned int)outl);
+    buf_out = (unsigned char *) OPENSSL_malloc((unsigned int)outl);
     if ((buf_in == NULL) || (buf_out == NULL)) {
         outl = 0;
         OPENSSL_PUT_ERROR(X509, ERR_R_MALLOC_FAILURE);

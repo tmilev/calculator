@@ -55,17 +55,17 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/pem.h>
+#include "../../include/openssl/pem.h"
 
 #include <stdio.h>
 
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/rand.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/x509.h"
 
 /* Handle 'other' PEMs: not private keys */
 
@@ -80,7 +80,7 @@ void *PEM_ASN1_read_bio(d2i_of_void *d2i, const char *name, BIO *bp, void **x,
     if (!PEM_bytes_read_bio(&data, &len, NULL, name, bp, cb, u))
         return NULL;
     p = data;
-    ret = d2i(x, &p, len);
+    ret = (char *) d2i(x, &p, len);
     if (ret == NULL)
         OPENSSL_PUT_ERROR(PEM, ERR_R_ASN1_LIB);
     OPENSSL_free(data);

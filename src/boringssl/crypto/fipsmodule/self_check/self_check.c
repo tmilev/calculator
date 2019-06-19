@@ -12,19 +12,19 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include "../../include/openssl/crypto.h>
+#include "../../../include/openssl/crypto.h"
 
 #include <stdio.h>
 
-#include "../../include/openssl/aead.h>
-#include "../../include/openssl/aes.h>
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/des.h>
-#include "../../include/openssl/ecdsa.h>
-#include "../../include/openssl/ec_key.h>
-#include "../../include/openssl/nid.h>
-#include "../../include/openssl/rsa.h>
-#include "../../include/openssl/sha.h>
+#include "../../../include/openssl/aead.h"
+#include "../../../include/openssl/aes.h"
+#include "../../../include/openssl/bn.h"
+#include "../../../include/openssl/des.h"
+#include "../../../include/openssl/ecdsa.h"
+#include "../../../include/openssl/ec_key.h"
+#include "../../../include/openssl/nid.h"
+#include "../../../include/openssl/rsa.h"
+#include "../../../include/openssl/sha.h"
 
 #include "../../internal.h"
 #include "../ec/internal.h"
@@ -45,9 +45,9 @@ static int check_test(const void *expected, const void *actual,
                       size_t expected_len, const char *name) {
   if (OPENSSL_memcmp(actual, expected, expected_len) != 0) {
     fprintf(stderr, "%s failed.\nExpected: ", name);
-    hexdump(expected, expected_len);
+    hexdump((const uint8_t *) expected, expected_len);
     fprintf(stderr, "\nCalculated: ");
-    hexdump(actual, expected_len);
+    hexdump((const uint8_t *) actual, expected_len);
     fprintf(stderr, "\n");
     fflush(stderr);
     return 0;
@@ -227,10 +227,16 @@ static EC_KEY *self_test_ecdsa_key(void) {
   return ec_key;
 }
 
+void DES_cblock::fromString(const std::string &input) {
+  for (unsigned i = 0; i < input.size(); i ++) {
+    this->bytes[i] = input[i];
+  }
+}
+
 int BORINGSSL_self_test(void) {
-  static const uint8_t kAESKey[16] = "BoringCrypto Key";
+  static const uint8_t kAESKey[17] = "BoringCrypto Key";
   static const uint8_t kAESIV[16] = {0};
-  static const uint8_t kPlaintext[64] =
+  static const uint8_t kPlaintext[65] =
       "BoringCryptoModule FIPS KAT Encryption and Decryption Plaintext!";
   static const uint8_t kAESCBCCiphertext[64] = {
       0x87, 0x2d, 0x98, 0xc2, 0xcc, 0x31, 0x5b, 0x41, 0xe0, 0xfa, 0x7b,
@@ -259,10 +265,10 @@ int BORINGSSL_self_test(void) {
       0x00
 #endif
   };
-  static const DES_cblock kDESKey1 = {"BCMDESK1"};
-  static const DES_cblock kDESKey2 = {"BCMDESK2"};
-  static const DES_cblock kDESKey3 = {"BCMDESK3"};
-  static const DES_cblock kDESIV = {"BCMDESIV"};
+  static DES_cblock kDESKey1; kDESKey1.fromString("BCMDESK1");
+  static DES_cblock kDESKey2; kDESKey2.fromString("BCMDESK2");
+  static DES_cblock kDESKey3; kDESKey3.fromString("BCMDESK3");
+  static DES_cblock kDESIV;   kDESIV  .fromString("BCMDESIV");
   static const uint8_t kDESCiphertext[64] = {
       0xa4, 0x30, 0x7a, 0x4c, 0x1f, 0x60, 0x16, 0xd7, 0x4f, 0x41, 0xe1,
       0xbb, 0x27, 0xc4, 0x27, 0x37, 0xd4, 0x7f, 0xb9, 0x10, 0xf8, 0xbc,
@@ -337,10 +343,10 @@ int BORINGSSL_self_test(void) {
       0x00
 #endif
   };
-  const uint8_t kDRBGEntropy[48] =
+  const uint8_t kDRBGEntropy[49] =
       "BCM Known Answer Test DBRG Initial Entropy      ";
-  const uint8_t kDRBGPersonalization[18] = "BCMPersonalization";
-  const uint8_t kDRBGAD[16] = "BCM DRBG KAT AD ";
+  const uint8_t kDRBGPersonalization[19] = "BCMPersonalization";
+  const uint8_t kDRBGAD[17] = "BCM DRBG KAT AD ";
   const uint8_t kDRBGOutput[64] = {
       0x1d, 0x63, 0xdf, 0x05, 0x51, 0x49, 0x22, 0x46, 0xcd, 0x9b, 0xc5,
       0xbb, 0xf1, 0x5d, 0x44, 0xae, 0x13, 0x78, 0xb1, 0xe4, 0x7c, 0xf1,
@@ -354,7 +360,7 @@ int BORINGSSL_self_test(void) {
       0x00
 #endif
   };
-  const uint8_t kDRBGEntropy2[48] =
+  const uint8_t kDRBGEntropy2[49] =
       "BCM Known Answer Test DBRG Reseed Entropy       ";
   const uint8_t kDRBGReseedOutput[64] = {
       0xa4, 0x77, 0x05, 0xdb, 0x14, 0x11, 0x76, 0x71, 0x42, 0x5b, 0xd8,

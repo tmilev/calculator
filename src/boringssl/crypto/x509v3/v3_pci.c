@@ -37,11 +37,11 @@
 
 #include <string.h>
 
-#include "../../include/openssl/conf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "../internal.h"
 #include "internal.h"
@@ -132,7 +132,7 @@ static int process_pci_value(CONF_VALUE *val,
                 goto err;
             }
 
-            tmp_data = OPENSSL_realloc((*policy)->data,
+            tmp_data = (unsigned char *) OPENSSL_realloc((*policy)->data,
                                        (*policy)->length + val_len + 1);
             if (tmp_data) {
                 (*policy)->data = tmp_data;
@@ -155,7 +155,7 @@ static int process_pci_value(CONF_VALUE *val,
             OPENSSL_free(tmp_data2);
         } else if (strncmp(val->value, "text:", 5) == 0) {
             val_len = strlen(val->value + 5);
-            tmp_data = OPENSSL_realloc((*policy)->data,
+            tmp_data = (unsigned char *) OPENSSL_realloc((*policy)->data,
                                        (*policy)->length + val_len + 1);
             if (tmp_data) {
                 (*policy)->data = tmp_data;

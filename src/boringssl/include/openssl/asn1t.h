@@ -835,7 +835,7 @@ typedef struct ASN1_STREAM_ARG_st {
 #define IMPLEMENT_ASN1_DUP_FUNCTION(stname) \
 	stname * stname##_dup(stname *x) \
         { \
-        return ASN1_item_dup(ASN1_ITEM_rptr(stname), x); \
+        return (stname *) ASN1_item_dup(ASN1_ITEM_rptr(stname), x); \
         }
 
 #define IMPLEMENT_ASN1_FUNCTIONS_const(name) \

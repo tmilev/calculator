@@ -55,11 +55,11 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "pcy_int.h"
 
@@ -113,7 +113,7 @@ X509_POLICY_NODE *level_add_node(X509_POLICY_LEVEL *level,
                                  X509_POLICY_TREE *tree)
 {
     X509_POLICY_NODE *node;
-    node = OPENSSL_malloc(sizeof(X509_POLICY_NODE));
+    node = (X509_POLICY_NODE *) OPENSSL_malloc(sizeof(X509_POLICY_NODE));
     if (!node)
         return NULL;
     node->data = data;

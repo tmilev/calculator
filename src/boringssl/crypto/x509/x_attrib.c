@@ -54,10 +54,10 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/x509.h>
-#include "../../include/openssl/obj.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/obj.h"
 
 /*
  * X509_ATTRIBUTE: this has the following form: typedef struct
@@ -81,7 +81,13 @@ ASN1_SEQUENCE(X509_ATTRIBUTE) = {
 } ASN1_SEQUENCE_END(X509_ATTRIBUTE)
 
 IMPLEMENT_ASN1_FUNCTIONS(X509_ATTRIBUTE)
-IMPLEMENT_ASN1_DUP_FUNCTION(X509_ATTRIBUTE)
+
+
+// IMPLEMENT_ASN1_DUP_FUNCTION(X509_ATTRIBUTE) <-???????
+//#define ASN1_ITEM_rptr(ref) (&(ref##_it)) ????
+X509_ATTRIBUTE * X509_ATTRIBUTE_dup(X509_ATTRIBUTE *x) {
+  return (X509_ATTRIBUTE *) ASN1_item_dup(&X509_ATTRIBUTE_it, (void*) x);
+}
 
 X509_ATTRIBUTE *X509_ATTRIBUTE_create(int nid, int atrtype, void *value)
 {

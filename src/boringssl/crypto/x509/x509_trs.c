@@ -54,11 +54,11 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509v3.h"
 
 static int tr_cmp(const X509_TRUST **a, const X509_TRUST **b);
 static void trtable_free(X509_TRUST *p);
@@ -192,7 +192,8 @@ int X509_TRUST_add(int id, int flags, int (*ck) (X509_TRUST *, X509 *, int),
     idx = X509_TRUST_get_by_id(id);
     /* Need a new entry */
     if (idx == -1) {
-        if (!(trtmp = OPENSSL_malloc(sizeof(X509_TRUST)))) {
+        trtmp = (X509_TRUST*) OPENSSL_malloc(sizeof(X509_TRUST));
+        if (!trtmp) {
             OPENSSL_PUT_ERROR(X509, ERR_R_MALLOC_FAILURE);
             return 0;
         }

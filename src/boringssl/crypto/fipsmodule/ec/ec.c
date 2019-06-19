@@ -438,7 +438,7 @@ static EC_GROUP *ec_group_new_from_data(const struct built_in_curve *curve) {
   BN_CTX *ctx = BN_CTX_new();
   if (ctx == NULL) {
     OPENSSL_PUT_ERROR(EC, ERR_R_MALLOC_FAILURE);
-    goto err;
+    return ec_group_new_from_data_cleanup(ok, group, P, ctx, p, a, b, x, y);
   }
 
   const unsigned param_len = curve->param_len;
@@ -688,7 +688,7 @@ EC_POINT *EC_POINT_new(const EC_GROUP *group) {
     return NULL;
   }
 
-  EC_POINT *ret = OPENSSL_malloc(sizeof *ret);
+  EC_POINT *ret = (EC_POINT *) OPENSSL_malloc(sizeof *ret);
   if (ret == NULL) {
     OPENSSL_PUT_ERROR(EC, ERR_R_MALLOC_FAILURE);
     return NULL;
@@ -876,8 +876,7 @@ static int arbitrary_bignum_to_scalar(const EC_GROUP *group, EC_SCALAR *out,
   int ok = tmp != NULL &&
            BN_nnmod(tmp, in, order, ctx) &&
            ec_bignum_to_scalar(group, out, tmp);
-  BN_CTX_end(ctx);
-  return ok;
+  return BN_CTX_end(ok, ctx);
 }
 
 int EC_POINT_mul(const EC_GROUP *group, EC_POINT *r, const BIGNUM *g_scalar,

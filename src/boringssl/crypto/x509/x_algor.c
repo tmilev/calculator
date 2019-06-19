@@ -54,12 +54,12 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/x509.h"
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/digest.h>
-#include "../../include/openssl/obj.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/obj.h"
 
 
 ASN1_SEQUENCE(X509_ALGOR) = {
@@ -73,7 +73,12 @@ ASN1_ITEM_TEMPLATE_END(X509_ALGORS)
 
 IMPLEMENT_ASN1_FUNCTIONS(X509_ALGOR)
 IMPLEMENT_ASN1_ENCODE_FUNCTIONS_fname(X509_ALGORS, X509_ALGORS, X509_ALGORS)
-IMPLEMENT_ASN1_DUP_FUNCTION(X509_ALGOR)
+//IMPLEMENT_ASN1_DUP_FUNCTION(X509_ALGOR)
+
+X509_ALGOR * X509_ALGOR_dup(X509_ALGOR *x) {
+  return (X509_ALGOR *) ASN1_item_dup(&X509_ALGOR_it, (void*) x);
+}
+
 
 IMPLEMENT_ASN1_SET_OF(X509_ALGOR)
 

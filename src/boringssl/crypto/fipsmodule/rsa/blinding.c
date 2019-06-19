@@ -106,13 +106,13 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/rsa.h>
+#include "../../../include/openssl/rsa.h"
 
 #include <string.h>
 
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/err.h>
+#include "../../../include/openssl/bn.h"
+#include "../../../include/openssl/mem.h"
+#include "../../../include/openssl/err.h"
 
 #include "internal.h"
 #include "../../internal.h"
@@ -130,7 +130,7 @@ static int bn_blinding_create_param(BN_BLINDING *b, const BIGNUM *e,
                                     const BN_MONT_CTX *mont, BN_CTX *ctx);
 
 BN_BLINDING *BN_BLINDING_new(void) {
-  BN_BLINDING *ret = OPENSSL_malloc(sizeof(BN_BLINDING));
+  BN_BLINDING *ret = (BN_BLINDING *) OPENSSL_malloc(sizeof(BN_BLINDING));
   if (ret == NULL) {
     OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
     return NULL;

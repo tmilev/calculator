@@ -56,10 +56,10 @@
 
 #include <stdio.h>
 
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509.h"
 
 /*
  * X509_CERT_AUX routines. These are used to encode additional user
@@ -141,44 +141,42 @@ unsigned char *X509_keyid_get0(X509 *x, int *len)
     return x->aux->keyid->data;
 }
 
-int X509_add1_trust_object(X509 *x, ASN1_OBJECT *obj)
-{
-    ASN1_OBJECT *objtmp = OBJ_dup(obj);
-    if (objtmp == NULL)
-        goto err;
-    X509_CERT_AUX *aux = aux_get(x);
-    if (aux->trust == NULL) {
-        aux->trust = sk_ASN1_OBJECT_new_null();
-        if (aux->trust == NULL)
-            goto err;
-    }
-    if (!sk_ASN1_OBJECT_push(aux->trust, objtmp))
-        goto err;
-    return 1;
+int ASN1_OBJECT_free_return0(ASN1_OBJECT *objtmp) {
+  ASN1_OBJECT_free(objtmp);
+  return 0;
+}
 
- err:
-    ASN1_OBJECT_free(objtmp);
-    return 0;
+int X509_add1_trust_object(X509 *x, ASN1_OBJECT *obj) {
+  ASN1_OBJECT *objtmp = OBJ_dup(obj);
+  if (objtmp == NULL) {
+    return ASN1_OBJECT_free_return0(objtmp);
+  }
+  X509_CERT_AUX *aux = aux_get(x);
+  if (aux->trust == NULL) {
+    aux->trust = sk_ASN1_OBJECT_new_null();
+    if (aux->trust == NULL) {
+      return ASN1_OBJECT_free_return0(objtmp);
+    }
+  }
+  if (!sk_ASN1_OBJECT_push(aux->trust, objtmp))
+    return ASN1_OBJECT_free_return0(objtmp);
+  return 1;
 }
 
 int X509_add1_reject_object(X509 *x, ASN1_OBJECT *obj)
 {
     ASN1_OBJECT *objtmp = OBJ_dup(obj);
     if (objtmp == NULL)
-        goto err;
+      return ASN1_OBJECT_free_return0(objtmp);
     X509_CERT_AUX *aux = aux_get(x);
     if (aux->reject == NULL) {
         aux->reject = sk_ASN1_OBJECT_new_null();
         if (aux->reject == NULL)
-            goto err;
+          return ASN1_OBJECT_free_return0(objtmp);
     }
     if (!sk_ASN1_OBJECT_push(aux->reject, objtmp))
-        goto err;
+      return ASN1_OBJECT_free_return0(objtmp);
     return 1;
-
- err:
-    ASN1_OBJECT_free(objtmp);
-    return 0;
 }
 
 void X509_trust_clear(X509 *x)

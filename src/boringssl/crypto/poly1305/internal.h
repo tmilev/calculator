@@ -15,8 +15,8 @@
 #ifndef OPENSSL_HEADER_POLY1305_INTERNAL_H
 #define OPENSSL_HEADER_POLY1305_INTERNAL_H
 
-#include "../../include/openssl/base.h>
-#include "../../include/openssl/poly1305.h>
+#include "../../include/openssl/base.h"
+#include "../../include/openssl/poly1305.h"
 
 #if defined(__cplusplus)
 extern "C" {

@@ -54,17 +54,17 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/rsa.h>
+#include "../../../include/openssl/rsa.h"
 
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
 
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/thread.h>
-#include "../../include/openssl/type_check.h>
+#include "../../../include/openssl/bn.h"
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/mem.h"
+#include "../../../include/openssl/thread.h"
+#include "../../../include/openssl/type_check.h"
 
 #include "internal.h"
 #include "../bn/internal.h"
@@ -125,6 +125,11 @@ static int ensure_fixed_copy(BIGNUM **out, const BIGNUM *in, int width) {
   return 1;
 }
 
+int freeze_private_key_cleanup(int ret, RSA* rsa) {
+  CRYPTO_MUTEX_unlock_write(&rsa->lock);
+  return ret;
+}
+
 // freeze_private_key finishes initializing |rsa|'s private key components.
 // After this function has returned, |rsa| may not be changed. This is needed
 // because |RSA| is a public struct and, additionally, OpenSSL 1.1.0 opaquified
@@ -141,7 +146,7 @@ static int freeze_private_key(RSA *rsa, BN_CTX *ctx) {
   CRYPTO_MUTEX_lock_write(&rsa->lock);
   if (rsa->private_key_frozen) {
     ret = 1;
-    goto err;
+    return freeze_private_key_cleanup(ret, rsa);
   }
 
   // Pre-compute various intermediate values, as well as copies of private
@@ -153,7 +158,7 @@ static int freeze_private_key(RSA *rsa, BN_CTX *ctx) {
   if (rsa->mont_n == NULL) {
     rsa->mont_n = BN_MONT_CTX_new_for_modulus(rsa->n, ctx);
     if (rsa->mont_n == NULL) {
-      goto err;
+      return freeze_private_key_cleanup(ret, rsa);
     }
   }
   const BIGNUM *n_fixed = &rsa->mont_n->N;
@@ -242,8 +247,7 @@ static int freeze_private_key(RSA *rsa, BN_CTX *ctx) {
   ret = 1;
 
 err:
-  CRYPTO_MUTEX_unlock_write(&rsa->lock);
-  return ret;
+  return freeze_private_key_cleanup(ret, rsa);
 }
 
 size_t rsa_default_size(const RSA *rsa) {
@@ -280,7 +284,7 @@ int RSA_encrypt(RSA *rsa, size_t *out_len, uint8_t *out, size_t max_out,
   BN_CTX_start(ctx);
   f = BN_CTX_get(ctx);
   result = BN_CTX_get(ctx);
-  buf = OPENSSL_malloc(rsa_size);
+  buf = (uint8_t *) OPENSSL_malloc(rsa_size);
   if (!f || !result || !buf) {
     OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
     goto err;
@@ -334,7 +338,7 @@ int RSA_encrypt(RSA *rsa, size_t *out_len, uint8_t *out, size_t max_out,
 
 err:
   if (ctx != NULL) {
-    BN_CTX_end(ctx);
+    BN_CTX_end(0, ctx);
     BN_CTX_free(ctx);
   }
   OPENSSL_free(buf);
@@ -401,8 +405,7 @@ static BN_BLINDING *rsa_blinding_get(RSA *rsa, unsigned *index_used,
 
   CRYPTO_MUTEX_lock_write(&rsa->lock);
 
-  new_blindings =
-      OPENSSL_malloc(sizeof(BN_BLINDING *) * (rsa->num_blindings + 1));
+  new_blindings = (BN_BLINDING **) OPENSSL_malloc(sizeof(BN_BLINDING *) * (rsa->num_blindings + 1));
   if (new_blindings == NULL) {
     goto err1;
   }
@@ -410,7 +413,7 @@ static BN_BLINDING *rsa_blinding_get(RSA *rsa, unsigned *index_used,
          sizeof(BN_BLINDING *) * rsa->num_blindings);
   new_blindings[rsa->num_blindings] = ret;
 
-  new_blindings_inuse = OPENSSL_malloc(rsa->num_blindings + 1);
+  new_blindings_inuse = (uint8_t *) OPENSSL_malloc(rsa->num_blindings + 1);
   if (new_blindings_inuse == NULL) {
     goto err2;
   }
@@ -464,7 +467,7 @@ int rsa_default_sign_raw(RSA *rsa, size_t *out_len, uint8_t *out,
     return 0;
   }
 
-  buf = OPENSSL_malloc(rsa_size);
+  buf = (uint8_t *) OPENSSL_malloc(rsa_size);
   if (buf == NULL) {
     OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
     goto err;
@@ -515,7 +518,7 @@ int rsa_default_decrypt(RSA *rsa, size_t *out_len, uint8_t *out, size_t max_out,
     buf = out;
   } else {
     // Allocate a temporary buffer to hold the padded plaintext.
-    buf = OPENSSL_malloc(rsa_size);
+    buf = (uint8_t *) OPENSSL_malloc(rsa_size);
     if (buf == NULL) {
       OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
       goto err;
@@ -611,7 +614,7 @@ int RSA_verify_raw(RSA *rsa, size_t *out_len, uint8_t *out, size_t max_out,
     buf = out;
   } else {
     // Allocate a temporary buffer to hold the padded plaintext.
-    buf = OPENSSL_malloc(rsa_size);
+    buf = (uint8_t *) OPENSSL_malloc(rsa_size);
     if (buf == NULL) {
       OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
       goto err;
@@ -657,10 +660,21 @@ int RSA_verify_raw(RSA *rsa, size_t *out_len, uint8_t *out, size_t max_out,
   }
 
 err:
-  BN_CTX_end(ctx);
+  BN_CTX_end(0, ctx);
   BN_CTX_free(ctx);
   if (buf != out) {
     OPENSSL_free(buf);
+  }
+  return ret;
+}
+
+int rsa_default_private_transform_cleanup(int ret, BN_CTX *ctx, RSA *rsa, BN_BLINDING *blinding, unsigned blinding_index) {
+  if (ctx != NULL) {
+    BN_CTX_end(0, ctx);
+    BN_CTX_free(ctx);
+  }
+  if (blinding != NULL) {
+    rsa_blinding_release(rsa, blinding, blinding_index);
   }
   return ret;
 }
@@ -680,7 +694,7 @@ int rsa_default_private_transform(RSA *rsa, uint8_t *out, const uint8_t *in,
 
   ctx = BN_CTX_new();
   if (ctx == NULL) {
-    goto err;
+    return rsa_default_private_transform_cleanup(ret, ctx, rsa, blinding, blinding_index);
   }
   BN_CTX_start(ctx);
   f = BN_CTX_get(ctx);
@@ -688,22 +702,22 @@ int rsa_default_private_transform(RSA *rsa, uint8_t *out, const uint8_t *in,
 
   if (f == NULL || result == NULL) {
     OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
-    goto err;
+    return rsa_default_private_transform_cleanup(ret, ctx, rsa, blinding, blinding_index);
   }
 
   if (BN_bin2bn(in, len, f) == NULL) {
-    goto err;
+    return rsa_default_private_transform_cleanup(ret, ctx, rsa, blinding, blinding_index);
   }
 
   if (BN_ucmp(f, rsa->n) >= 0) {
     // Usually the padding functions would catch this.
     OPENSSL_PUT_ERROR(RSA, RSA_R_DATA_TOO_LARGE_FOR_MODULUS);
-    goto err;
+    return rsa_default_private_transform_cleanup(ret, ctx, rsa, blinding, blinding_index);
   }
 
   if (!freeze_private_key(rsa, ctx)) {
     OPENSSL_PUT_ERROR(RSA, ERR_R_INTERNAL_ERROR);
-    goto err;
+    return rsa_default_private_transform_cleanup(ret, ctx, rsa, blinding, blinding_index);
   }
 
   const int do_blinding = (rsa->flags & RSA_FLAG_NO_BLINDING) == 0;
@@ -783,15 +797,7 @@ int rsa_default_private_transform(RSA *rsa, uint8_t *out, const uint8_t *in,
   ret = 1;
 
 err:
-  if (ctx != NULL) {
-    BN_CTX_end(ctx);
-    BN_CTX_free(ctx);
-  }
-  if (blinding != NULL) {
-    rsa_blinding_release(rsa, blinding, blinding_index);
-  }
-
-  return ret;
+  return rsa_default_private_transform_cleanup(ret, ctx, rsa, blinding, blinding_index);
 }
 
 // mod_montgomery sets |r| to |I| mod |p|. |I| must already be fully reduced
@@ -845,11 +851,11 @@ static int mod_exp(BIGNUM *r0, const BIGNUM *I, RSA *rsa, BN_CTX *ctx) {
   m1 = BN_CTX_get(ctx);
   if (r1 == NULL ||
       m1 == NULL) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   if (!freeze_private_key(rsa, ctx)) {
-    goto err;
+    return BN_CTX_end(ret, ctx);
   }
 
   // Implementing RSA with CRT in constant-time is sensitive to which prime is
@@ -904,8 +910,7 @@ static int mod_exp(BIGNUM *r0, const BIGNUM *I, RSA *rsa, BN_CTX *ctx) {
   ret = 1;
 
 err:
-  BN_CTX_end(ctx);
-  return ret;
+  return BN_CTX_end(ret, ctx);
 }
 
 static int ensure_bignum(BIGNUM **out) {
@@ -1070,8 +1075,22 @@ static int generate_prime(BIGNUM *out, int bits, const BIGNUM *e,
   }
 
 err:
-  BN_CTX_end(ctx);
+  return BN_CTX_end(ret, ctx);
+}
+
+int rsa_generate_key_impl_cleanup_part2(int ret, BN_CTX* ctx) {
+  if (ctx != NULL) {
+    BN_CTX_end(0, ctx);
+    BN_CTX_free(ctx);
+  }
   return ret;
+}
+
+int rsa_generate_key_impl_cleanup_part1(int ret, BN_CTX* ctx) {
+  if (!ret) {
+    OPENSSL_PUT_ERROR(RSA, ERR_LIB_BN);
+  }
+  return rsa_generate_key_impl_cleanup_part2(ret, ctx);
 }
 
 // rsa_generate_key_impl generates an RSA key using a generalized version of
@@ -1111,7 +1130,7 @@ static int rsa_generate_key_impl(RSA *rsa, int bits, const BIGNUM *e_value,
   int prime_bits = bits / 2;
   BN_CTX *ctx = BN_CTX_new();
   if (ctx == NULL) {
-    goto bn_err;
+    return rsa_generate_key_impl_cleanup_part1(ret, ctx);
   }
   BN_CTX_start(ctx);
   BIGNUM *totient = BN_CTX_get(ctx);
@@ -1124,7 +1143,7 @@ static int rsa_generate_key_impl(RSA *rsa, int bits, const BIGNUM *e_value,
       pow2_prime_bits_100 == NULL || pow2_prime_bits == NULL ||
       !BN_set_bit(pow2_prime_bits_100, prime_bits - 100) ||
       !BN_set_bit(pow2_prime_bits, prime_bits)) {
-    goto bn_err;
+    return rsa_generate_key_impl_cleanup_part1(ret, ctx);
   }
 
   // We need the RSA components non-NULL.
@@ -1135,16 +1154,16 @@ static int rsa_generate_key_impl(RSA *rsa, int bits, const BIGNUM *e_value,
       !ensure_bignum(&rsa->q) ||
       !ensure_bignum(&rsa->dmp1) ||
       !ensure_bignum(&rsa->dmq1)) {
-    goto bn_err;
+    return rsa_generate_key_impl_cleanup_part1(ret, ctx);
   }
 
   if (!BN_copy(rsa->e, e_value)) {
-    goto bn_err;
+    return rsa_generate_key_impl_cleanup_part1(ret, ctx);
   }
 
   // Compute sqrt2 >= ⌊2^(prime_bits-1)×√2⌋.
   if (!bn_set_words(sqrt2, kBoringSSLRSASqrtTwo, kBoringSSLRSASqrtTwoLen)) {
-    goto bn_err;
+    return rsa_generate_key_impl_cleanup_part1(ret, ctx);
   }
   int sqrt2_bits = kBoringSSLRSASqrtTwoLen * BN_BITS2;
   assert(sqrt2_bits == (int)BN_num_bits(sqrt2));
@@ -1238,15 +1257,9 @@ static int rsa_generate_key_impl(RSA *rsa, int bits, const BIGNUM *e_value,
   ret = 1;
 
 bn_err:
-  if (!ret) {
-    OPENSSL_PUT_ERROR(RSA, ERR_LIB_BN);
-  }
+  return rsa_generate_key_impl_cleanup_part1(ret, ctx);
 err:
-  if (ctx != NULL) {
-    BN_CTX_end(ctx);
-    BN_CTX_free(ctx);
-  }
-  return ret;
+  return rsa_generate_key_impl_cleanup_part2(ret, ctx);
 }
 
 static void replace_bignum(BIGNUM **out, BIGNUM **in) {

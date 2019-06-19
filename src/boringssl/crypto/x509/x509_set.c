@@ -54,11 +54,11 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/cipher.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/cipher.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509.h"
 
 int X509_set_version(X509 *x, long version)
 {

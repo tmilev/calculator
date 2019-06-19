@@ -58,11 +58,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../include/openssl/conf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "internal.h"
 
@@ -300,7 +300,7 @@ static int copy_issuer(X509V3_CTX *ctx, GENERAL_NAMES *gens)
     if (i < 0)
         return 1;
     if (!(ext = X509_get_ext(ctx->issuer_cert, i)) ||
-        !(ialt = X509V3_EXT_d2i(ext))) {
+        !(ialt = (GENERAL_NAMES *) X509V3_EXT_d2i(ext))) {
         OPENSSL_PUT_ERROR(X509V3, X509V3_R_ISSUER_DECODE_ERROR);
         goto err;
     }
@@ -588,7 +588,7 @@ static int do_othername(GENERAL_NAME *gen, char *value, X509V3_CTX *ctx)
     if (!(gen->d.otherName->value = ASN1_generate_v3(p + 1, ctx)))
         return 0;
     objlen = p - value;
-    objtmp = OPENSSL_malloc(objlen + 1);
+    objtmp = (char*) OPENSSL_malloc(objlen + 1);
     if (objtmp == NULL)
         return 0;
     BUF_strlcpy(objtmp, value, objlen + 1);

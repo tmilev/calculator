@@ -58,13 +58,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/asn1t.h>
-#include "../../include/openssl/conf.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/x509v3.h"
 
 static void *v2i_crld(const X509V3_EXT_METHOD *method,
                       X509V3_CTX *ctx, STACK_OF(CONF_VALUE) *nval);
@@ -490,7 +490,7 @@ static int print_distpoint(BIO *out, DIST_POINT_NAME *dpn, int indent)
 static int i2r_idp(const X509V3_EXT_METHOD *method, void *pidp, BIO *out,
                    int indent)
 {
-    ISSUING_DIST_POINT *idp = pidp;
+    ISSUING_DIST_POINT *idp = (ISSUING_DIST_POINT *) pidp;
     if (idp->distpoint)
         print_distpoint(out, idp->distpoint, indent);
     if (idp->onlyuser > 0)
@@ -514,7 +514,7 @@ static int i2r_idp(const X509V3_EXT_METHOD *method, void *pidp, BIO *out,
 static int i2r_crldp(const X509V3_EXT_METHOD *method, void *pcrldp, BIO *out,
                      int indent)
 {
-    STACK_OF(DIST_POINT) *crld = pcrldp;
+    STACK_OF(DIST_POINT) *crld = (STACK_OF(DIST_POINT) *) pcrldp;
     DIST_POINT *point;
     size_t i;
     for (i = 0; i < sk_DIST_POINT_num(crld); i++) {

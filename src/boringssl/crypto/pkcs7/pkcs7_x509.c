@@ -12,18 +12,18 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include "../../include/openssl/pkcs7.h>
+#include "../../include/openssl/pkcs7.h"
 
 #include <assert.h>
 #include <limits.h>
 
-#include "../../include/openssl/bytestring.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/pem.h>
-#include "../../include/openssl/pool.h>
-#include "../../include/openssl/stack.h>
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/bytestring.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/pool.h"
+#include "../../include/openssl/stack.h"
+#include "../../include/openssl/x509.h"
 
 #include "internal.h"
 #include "../internal.h"
@@ -170,7 +170,7 @@ int PKCS7_get_PEM_CRLs(STACK_OF(X509_CRL) *out_crls, BIO *pem_bio) {
 }
 
 static int pkcs7_bundle_certificates_cb(CBB *out, const void *arg) {
-  const STACK_OF(X509) *certs = arg;
+  const STACK_OF(X509) *certs = (const STACK_OF(X509) *) arg;
   size_t i;
   CBB certificates;
 
@@ -200,7 +200,7 @@ int PKCS7_bundle_certificates(CBB *out, const STACK_OF(X509) *certs) {
 }
 
 static int pkcs7_bundle_crls_cb(CBB *out, const void *arg) {
-  const STACK_OF(X509_CRL) *crls = arg;
+  const STACK_OF(X509_CRL) *crls = (const STACK_OF(X509_CRL) *) arg;
   size_t i;
   CBB crl_data;
 
@@ -229,16 +229,22 @@ int PKCS7_bundle_CRLs(CBB *out, const STACK_OF(X509_CRL) *crls) {
   return pkcs7_bundle(out, pkcs7_bundle_crls_cb, crls);
 }
 
+
+PKCS7* pkcs7_new_cleanup(PKCS7* badReturn) {
+  PKCS7_free(badReturn);
+  return NULL;
+}
+
 static PKCS7 *pkcs7_new(CBS *cbs) {
-  PKCS7 *ret = OPENSSL_malloc(sizeof(PKCS7));
+  PKCS7 *ret = (PKCS7 *) OPENSSL_malloc(sizeof(PKCS7));
   if (ret == NULL) {
     return NULL;
   }
   OPENSSL_memset(ret, 0, sizeof(PKCS7));
   ret->type = (ASN1_OBJECT *)OBJ_nid2obj(NID_pkcs7_signed);
-  ret->d.sign = OPENSSL_malloc(sizeof(PKCS7_SIGNED));
+  ret->d.sign = (PKCS7_SIGNED *) OPENSSL_malloc(sizeof(PKCS7_SIGNED));
   if (ret->d.sign == NULL) {
-    goto err;
+    return pkcs7_new_cleanup(ret);
   }
   ret->d.sign->cert = sk_X509_new_null();
   ret->d.sign->crl = sk_X509_CRL_new_null();
@@ -260,7 +266,7 @@ static PKCS7 *pkcs7_new(CBS *cbs) {
   }
 
   ret->ber_len = CBS_len(&copy2) - CBS_len(cbs);
-  ret->ber_bytes = BUF_memdup(CBS_data(&copy2), ret->ber_len);
+  ret->ber_bytes = (uint8_t *) BUF_memdup(CBS_data(&copy2), ret->ber_len);
   if (ret->ber_bytes == NULL) {
     goto err;
   }
@@ -268,8 +274,7 @@ static PKCS7 *pkcs7_new(CBS *cbs) {
   return ret;
 
 err:
-  PKCS7_free(ret);
-  return NULL;
+  pkcs7_new_cleanup(ret);
 }
 
 PKCS7 *d2i_PKCS7(PKCS7 **out, const uint8_t **inp,
@@ -319,7 +324,7 @@ int i2d_PKCS7(const PKCS7 *p7, uint8_t **out) {
   }
 
   if (*out == NULL) {
-    *out = OPENSSL_malloc(p7->ber_len);
+    *out = (uint8_t*) OPENSSL_malloc(p7->ber_len);
     if (*out == NULL) {
       OPENSSL_PUT_ERROR(PKCS8, ERR_R_MALLOC_FAILURE);
       return -1;

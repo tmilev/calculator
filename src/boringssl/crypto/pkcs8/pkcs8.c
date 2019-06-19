@@ -53,19 +53,19 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include "../../include/openssl/pkcs8.h>
+#include "../../include/openssl/pkcs8.h"
 
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
 
-#include "../../include/openssl/bytestring.h>
-#include "../../include/openssl/cipher.h>
-#include "../../include/openssl/digest.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/nid.h>
-#include "../../include/openssl/rand.h>
+#include "../../include/openssl/bytestring.h"
+#include "../../include/openssl/cipher.h"
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/nid.h"
+#include "../../include/openssl/rand.h"
 
 #include "internal.h"
 #include "../bytestring/internal.h"
@@ -106,6 +106,13 @@ err:
   return 0;
 }
 
+int pkcs12_key_gen_cleanup(int ret, EVP_MD_CTX* ctx, uint8_t *I, uint8_t *pass_raw) {
+  OPENSSL_free(I);
+  OPENSSL_free(pass_raw);
+  EVP_MD_CTX_cleanup(ctx);
+  return ret;
+}
+
 int pkcs12_key_gen(const char *pass, size_t pass_len, const uint8_t *salt,
                    size_t salt_len, uint8_t id, unsigned iterations,
                    size_t out_len, uint8_t *out, const EVP_MD *md) {
@@ -126,7 +133,7 @@ int pkcs12_key_gen(const char *pass, size_t pass_len, const uint8_t *salt,
   // password.
   if (pass != NULL &&
       !pkcs12_encode_password(pass, pass_len, &pass_raw, &pass_raw_len)) {
-    goto err;
+    return pkcs12_key_gen_cleanup(ret, &ctx, I, pass_raw);
   }
 
   // In the spec, |block_size| is called "v", but measured in bits.
@@ -150,7 +157,7 @@ int pkcs12_key_gen(const char *pass, size_t pass_len, const uint8_t *salt,
   if (salt_len + block_size - 1 < salt_len ||
       pass_raw_len + block_size - 1 < pass_raw_len) {
     OPENSSL_PUT_ERROR(PKCS8, ERR_R_OVERFLOW);
-    goto err;
+    return pkcs12_key_gen_cleanup(ret, &ctx, I, pass_raw);
   }
   size_t S_len = block_size * ((salt_len + block_size - 1) / block_size);
   size_t P_len = block_size * ((pass_raw_len + block_size - 1) / block_size);
@@ -160,7 +167,7 @@ int pkcs12_key_gen(const char *pass, size_t pass_len, const uint8_t *salt,
     goto err;
   }
 
-  I = OPENSSL_malloc(I_len);
+  I = (uint8_t *) OPENSSL_malloc(I_len);
   if (I_len != 0 && I == NULL) {
     OPENSSL_PUT_ERROR(PKCS8, ERR_R_MALLOC_FAILURE);
     goto err;
@@ -224,10 +231,7 @@ int pkcs12_key_gen(const char *pass, size_t pass_len, const uint8_t *salt,
   ret = 1;
 
 err:
-  OPENSSL_free(I);
-  OPENSSL_free(pass_raw);
-  EVP_MD_CTX_cleanup(&ctx);
-  return ret;
+  return pkcs12_key_gen_cleanup(ret, &ctx, I, pass_raw);
 }
 
 static int pkcs12_pbe_cipher_init(const struct pbe_suite *suite,
@@ -357,6 +361,12 @@ int pkcs12_pbe_encrypt_init(CBB *out, EVP_CIPHER_CTX *ctx, int alg,
                                 salt_len, 1 /* encrypt */);
 }
 
+int pkcs8_pbe_decrypt_cleanup(int ret, uint8_t *buf, EVP_CIPHER_CTX* ctx) {
+  OPENSSL_free(buf);
+  EVP_CIPHER_CTX_cleanup(ctx);
+  return ret;
+}
+
 int pkcs8_pbe_decrypt(uint8_t **out, size_t *out_len, CBS *algorithm,
                       const char *pass, size_t pass_len, const uint8_t *in,
                       size_t in_len) {
@@ -368,7 +378,7 @@ int pkcs8_pbe_decrypt(uint8_t **out, size_t *out_len, CBS *algorithm,
   CBS obj;
   if (!CBS_get_asn1(algorithm, &obj, CBS_ASN1_OBJECT)) {
     OPENSSL_PUT_ERROR(PKCS8, PKCS8_R_DECODE_ERROR);
-    goto err;
+    return pkcs8_pbe_decrypt_cleanup(ret, buf, &ctx);
   }
 
   const struct pbe_suite *suite = NULL;
@@ -388,7 +398,7 @@ int pkcs8_pbe_decrypt(uint8_t **out, size_t *out_len, CBS *algorithm,
     goto err;
   }
 
-  buf = OPENSSL_malloc(in_len);
+  buf = (uint8_t*) OPENSSL_malloc(in_len);
   if (buf == NULL) {
     OPENSSL_PUT_ERROR(PKCS8, ERR_R_MALLOC_FAILURE);
     goto err;
@@ -411,9 +421,7 @@ int pkcs8_pbe_decrypt(uint8_t **out, size_t *out_len, CBS *algorithm,
   buf = NULL;
 
 err:
-  OPENSSL_free(buf);
-  EVP_CIPHER_CTX_cleanup(&ctx);
-  return ret;
+  return pkcs8_pbe_decrypt_cleanup(ret, buf, &ctx);
 }
 
 EVP_PKEY *PKCS8_parse_encrypted_private_key(CBS *cbs, const char *pass,
@@ -442,6 +450,13 @@ EVP_PKEY *PKCS8_parse_encrypted_private_key(CBS *cbs, const char *pass,
   return ret;
 }
 
+int PKCS8_marshal_encrypted_private_key_cleanup(int ret, uint8_t *plaintext, uint8_t* salt_buf, EVP_CIPHER_CTX *ctx) {
+  OPENSSL_free(plaintext);
+  OPENSSL_free(salt_buf);
+  EVP_CIPHER_CTX_cleanup(ctx);
+  return ret;
+}
+
 int PKCS8_marshal_encrypted_private_key(CBB *out, int pbe_nid,
                                         const EVP_CIPHER *cipher,
                                         const char *pass, size_t pass_len,
@@ -459,10 +474,10 @@ int PKCS8_marshal_encrypted_private_key(CBB *out, int pbe_nid,
       salt_len = PKCS5_SALT_LEN;
     }
 
-    salt_buf = OPENSSL_malloc(salt_len);
+    salt_buf = (uint8_t *) OPENSSL_malloc(salt_len);
     if (salt_buf == NULL ||
         !RAND_bytes(salt_buf, salt_len)) {
-      goto err;
+      return PKCS8_marshal_encrypted_private_key_cleanup(ret, plaintext, salt_buf, &ctx);
     }
 
     salt = salt_buf;
@@ -478,12 +493,12 @@ int PKCS8_marshal_encrypted_private_key(CBB *out, int pbe_nid,
       !EVP_marshal_private_key(&plaintext_cbb, pkey) ||
       !CBB_finish(&plaintext_cbb, &plaintext, &plaintext_len)) {
     CBB_cleanup(&plaintext_cbb);
-    goto err;
+    return PKCS8_marshal_encrypted_private_key_cleanup(ret, plaintext, salt_buf, &ctx);
   }
 
   CBB epki;
   if (!CBB_add_asn1(out, &epki, CBS_ASN1_SEQUENCE)) {
-    goto err;
+    return PKCS8_marshal_encrypted_private_key_cleanup(ret, plaintext, salt_buf, &ctx);
   }
 
   // TODO(davidben): OpenSSL has since extended |pbe_nid| to control either the
@@ -499,7 +514,7 @@ int PKCS8_marshal_encrypted_private_key(CBB *out, int pbe_nid,
                                      pass, pass_len, salt, salt_len);
   }
   if (!alg_ok) {
-    goto err;
+    return PKCS8_marshal_encrypted_private_key_cleanup(ret, plaintext, salt_buf, &ctx);
   }
 
   size_t max_out = plaintext_len + EVP_CIPHER_CTX_block_size(&ctx);
@@ -523,8 +538,5 @@ int PKCS8_marshal_encrypted_private_key(CBB *out, int pbe_nid,
   ret = 1;
 
 err:
-  OPENSSL_free(plaintext);
-  OPENSSL_free(salt_buf);
-  EVP_CIPHER_CTX_cleanup(&ctx);
-  return ret;
+  return PKCS8_marshal_encrypted_private_key_cleanup(ret, plaintext, salt_buf, &ctx);
 }

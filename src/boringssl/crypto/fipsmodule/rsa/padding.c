@@ -53,18 +53,18 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include "../../include/openssl/rsa.h>
+#include "../../../include/openssl/rsa.h"
 
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
 
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/digest.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/rand.h>
-#include "../../include/openssl/sha.h>
+#include "../../../include/openssl/bn.h"
+#include "../../../include/openssl/digest.h"
+#include "../../../include/openssl/err.h"
+#include "../../../include/openssl/mem.h"
+#include "../../../include/openssl/rand.h"
+#include "../../../include/openssl/sha.h"
 
 #include "internal.h"
 #include "../../internal.h"
@@ -356,7 +356,7 @@ int RSA_padding_add_PKCS1_OAEP_mgf1(uint8_t *to, size_t to_len,
     return 0;
   }
 
-  uint8_t *dbmask = OPENSSL_malloc(emlen - mdlen);
+  uint8_t *dbmask = (uint8_t *) OPENSSL_malloc(emlen - mdlen);
   if (dbmask == NULL) {
     OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
     return 0;
@@ -384,6 +384,19 @@ out:
   return ret;
 }
 
+int RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part2(uint8_t * db) {
+  OPENSSL_free(db);
+  return 0;
+
+}
+
+int RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part1(uint8_t * db) {
+  // to avoid chosen ciphertext attacks, the error message should not reveal
+  // which kind of decoding error happened
+  OPENSSL_PUT_ERROR(RSA, RSA_R_OAEP_DECODING_ERROR);
+  return RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part2(db);
+}
+
 int RSA_padding_check_PKCS1_OAEP_mgf1(uint8_t *out, size_t *out_len,
                                       size_t max_out, const uint8_t *from,
                                       size_t from_len, const uint8_t *param,
@@ -406,14 +419,14 @@ int RSA_padding_check_PKCS1_OAEP_mgf1(uint8_t *out, size_t *out_len,
   if (from_len < 1 + 2*mdlen + 1) {
     // 'from_len' is the length of the modulus, i.e. does not depend on the
     // particular ciphertext.
-    goto decoding_err;
+    return RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part1(db);
   }
 
   size_t dblen = from_len - mdlen - 1;
-  db = OPENSSL_malloc(dblen);
+  db = (uint8_t *) OPENSSL_malloc(dblen);
   if (db == NULL) {
     OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
-    goto err;
+    return RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part2(db);
   }
 
   const uint8_t *maskedseed = from + 1;
@@ -421,14 +434,14 @@ int RSA_padding_check_PKCS1_OAEP_mgf1(uint8_t *out, size_t *out_len,
 
   uint8_t seed[EVP_MAX_MD_SIZE];
   if (!PKCS1_MGF1(seed, mdlen, maskeddb, dblen, mgf1md)) {
-    goto err;
+    return RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part2(db);
   }
   for (size_t i = 0; i < mdlen; i++) {
     seed[i] ^= maskedseed[i];
   }
 
   if (!PKCS1_MGF1(db, dblen, seed, mdlen, mgf1md)) {
-    goto err;
+    return RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part2(db);
   }
   for (size_t i = 0; i < dblen; i++) {
     db[i] ^= maskeddb[i];
@@ -436,7 +449,7 @@ int RSA_padding_check_PKCS1_OAEP_mgf1(uint8_t *out, size_t *out_len,
 
   uint8_t phash[EVP_MAX_MD_SIZE];
   if (!EVP_Digest(param, param_len, phash, NULL, md, NULL)) {
-    goto err;
+    return RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part2(db);
   }
 
   crypto_word_t bad = ~constant_time_is_zero_w(CRYPTO_memcmp(db, phash, mdlen));
@@ -457,7 +470,7 @@ int RSA_padding_check_PKCS1_OAEP_mgf1(uint8_t *out, size_t *out_len,
   bad |= looking_for_one_byte;
 
   if (bad) {
-    goto decoding_err;
+    return RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part1(db);
   }
 
   one_index++;
@@ -473,12 +486,9 @@ int RSA_padding_check_PKCS1_OAEP_mgf1(uint8_t *out, size_t *out_len,
   return 1;
 
 decoding_err:
-  // to avoid chosen ciphertext attacks, the error message should not reveal
-  // which kind of decoding error happened
-  OPENSSL_PUT_ERROR(RSA, RSA_R_OAEP_DECODING_ERROR);
- err:
-  OPENSSL_free(db);
-  return 0;
+  return RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part1(db);
+err:
+  return RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part2(db);
 }
 
 static const uint8_t kPSSZeroes[] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -536,7 +546,7 @@ int RSA_verify_PKCS1_PSS_mgf1(const RSA *rsa, const uint8_t *mHash,
   }
   maskedDBLen = emLen - hLen - 1;
   H = EM + maskedDBLen;
-  DB = OPENSSL_malloc(maskedDBLen);
+  DB = (uint8_t*) OPENSSL_malloc(maskedDBLen);
   if (!DB) {
     OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
     goto err;
@@ -582,6 +592,11 @@ err:
   return ret;
 }
 
+int RSA_padding_add_PKCS1_PSS_mgf1_cleanup(int ret, unsigned char * salt) {
+  OPENSSL_free(salt);
+  return ret;
+}
+
 int RSA_padding_add_PKCS1_PSS_mgf1(const RSA *rsa, unsigned char *EM,
                                    const unsigned char *mHash,
                                    const EVP_MD *Hash, const EVP_MD *mgf1Hash,
@@ -599,7 +614,7 @@ int RSA_padding_add_PKCS1_PSS_mgf1(const RSA *rsa, unsigned char *EM,
 
   if (BN_is_zero(rsa->n)) {
     OPENSSL_PUT_ERROR(RSA, RSA_R_EMPTY_PUBLIC_KEY);
-    goto err;
+    return RSA_padding_add_PKCS1_PSS_mgf1_cleanup(ret, salt);
   }
 
   MSBits = (BN_num_bits(rsa->n) - 1) & 0x7;
@@ -612,7 +627,7 @@ int RSA_padding_add_PKCS1_PSS_mgf1(const RSA *rsa, unsigned char *EM,
 
   if (emLen < hLen + 2) {
     OPENSSL_PUT_ERROR(RSA, RSA_R_DATA_TOO_LARGE_FOR_KEY_SIZE);
-    goto err;
+    return RSA_padding_add_PKCS1_PSS_mgf1_cleanup(ret, salt);
   }
 
   // Negative sLenRequested has special meanings:
@@ -626,24 +641,24 @@ int RSA_padding_add_PKCS1_PSS_mgf1(const RSA *rsa, unsigned char *EM,
     sLen = emLen - hLen - 2;
   } else if (sLenRequested < 0) {
     OPENSSL_PUT_ERROR(RSA, RSA_R_SLEN_CHECK_FAILED);
-    goto err;
+    return RSA_padding_add_PKCS1_PSS_mgf1_cleanup(ret, salt);
   } else {
     sLen = (size_t)sLenRequested;
   }
 
   if (emLen - hLen - 2 < sLen) {
     OPENSSL_PUT_ERROR(RSA, RSA_R_DATA_TOO_LARGE_FOR_KEY_SIZE);
-    goto err;
+    return RSA_padding_add_PKCS1_PSS_mgf1_cleanup(ret, salt);
   }
 
   if (sLen > 0) {
-    salt = OPENSSL_malloc(sLen);
+    salt = (unsigned char*) OPENSSL_malloc(sLen);
     if (!salt) {
       OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
-      goto err;
+      return RSA_padding_add_PKCS1_PSS_mgf1_cleanup(ret, salt);
     }
     if (!RAND_bytes(salt, sLen)) {
-      goto err;
+      return RSA_padding_add_PKCS1_PSS_mgf1_cleanup(ret, salt);
     }
   }
   maskedDBLen = emLen - hLen - 1;
@@ -689,7 +704,5 @@ int RSA_padding_add_PKCS1_PSS_mgf1(const RSA *rsa, unsigned char *EM,
   ret = 1;
 
 err:
-  OPENSSL_free(salt);
-
-  return ret;
+  return RSA_padding_add_PKCS1_PSS_mgf1_cleanup(ret, salt);
 }

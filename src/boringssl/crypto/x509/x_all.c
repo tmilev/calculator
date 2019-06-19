@@ -54,18 +54,18 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/x509.h>
+#include "../../include/openssl/x509.h"
 
 #include <limits.h>
 
-#include "../../include/openssl/asn1.h>
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/digest.h>
-#include "../../include/openssl/dsa.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/rsa.h>
-#include "../../include/openssl/stack.h>
+#include "../../include/openssl/asn1.h"
+#include "../../include/openssl/buf.h"
+#include "../../include/openssl/digest.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/stack.h"
 
 int X509_verify(X509 *a, EVP_PKEY *r)
 {
@@ -141,7 +141,7 @@ int NETSCAPE_SPKI_verify(NETSCAPE_SPKI *x, EVP_PKEY *pkey)
 #ifndef OPENSSL_NO_FP_API
 X509 *d2i_X509_fp(FILE *fp, X509 **x509)
 {
-    return ASN1_item_d2i_fp(ASN1_ITEM_rptr(X509), fp, x509);
+    return (X509 *) ASN1_item_d2i_fp((const ASN1_ITEM *) ASN1_ITEM_rptr(X509), fp, x509);
 }
 
 int i2d_X509_fp(FILE *fp, X509 *x509)
@@ -152,7 +152,7 @@ int i2d_X509_fp(FILE *fp, X509 *x509)
 
 X509 *d2i_X509_bio(BIO *bp, X509 **x509)
 {
-    return ASN1_item_d2i_bio(ASN1_ITEM_rptr(X509), bp, x509);
+    return (X509 *) ASN1_item_d2i_bio(ASN1_ITEM_rptr(X509), bp, x509);
 }
 
 int i2d_X509_bio(BIO *bp, X509 *x509)
@@ -163,7 +163,7 @@ int i2d_X509_bio(BIO *bp, X509 *x509)
 #ifndef OPENSSL_NO_FP_API
 X509_CRL *d2i_X509_CRL_fp(FILE *fp, X509_CRL **crl)
 {
-    return ASN1_item_d2i_fp(ASN1_ITEM_rptr(X509_CRL), fp, crl);
+    return (X509_CRL *) ASN1_item_d2i_fp(ASN1_ITEM_rptr(X509_CRL), fp, crl);
 }
 
 int i2d_X509_CRL_fp(FILE *fp, X509_CRL *crl)
@@ -174,7 +174,7 @@ int i2d_X509_CRL_fp(FILE *fp, X509_CRL *crl)
 
 X509_CRL *d2i_X509_CRL_bio(BIO *bp, X509_CRL **crl)
 {
-    return ASN1_item_d2i_bio(ASN1_ITEM_rptr(X509_CRL), bp, crl);
+    return (X509_CRL *) ASN1_item_d2i_bio(ASN1_ITEM_rptr(X509_CRL), bp, crl);
 }
 
 int i2d_X509_CRL_bio(BIO *bp, X509_CRL *crl)
@@ -185,7 +185,7 @@ int i2d_X509_CRL_bio(BIO *bp, X509_CRL *crl)
 #ifndef OPENSSL_NO_FP_API
 X509_REQ *d2i_X509_REQ_fp(FILE *fp, X509_REQ **req)
 {
-    return ASN1_item_d2i_fp(ASN1_ITEM_rptr(X509_REQ), fp, req);
+    return (X509_REQ *) ASN1_item_d2i_fp(ASN1_ITEM_rptr(X509_REQ), fp, req);
 }
 
 int i2d_X509_REQ_fp(FILE *fp, X509_REQ *req)
@@ -196,7 +196,7 @@ int i2d_X509_REQ_fp(FILE *fp, X509_REQ *req)
 
 X509_REQ *d2i_X509_REQ_bio(BIO *bp, X509_REQ **req)
 {
-    return ASN1_item_d2i_bio(ASN1_ITEM_rptr(X509_REQ), bp, req);
+    return (X509_REQ *) ASN1_item_d2i_bio(ASN1_ITEM_rptr(X509_REQ), bp, req);
 }
 
 int i2d_X509_REQ_bio(BIO *bp, X509_REQ *req)

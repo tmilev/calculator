@@ -58,12 +58,12 @@
 
 #include <string.h>
 
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/obj.h>
-#include "../../include/openssl/stack.h>
-#include "../../include/openssl/thread.h>
-#include "../../include/openssl/x509.h>
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/obj.h"
+#include "../../include/openssl/stack.h"
+#include "../../include/openssl/thread.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
 
 #include "pcy_int.h"
 #include "../internal.h"
@@ -225,13 +225,13 @@ static int tree_init(X509_POLICY_TREE **ptree, STACK_OF(X509) *certs,
 
     /* If we get this far initialize the tree */
 
-    tree = OPENSSL_malloc(sizeof(X509_POLICY_TREE));
+    tree = (X509_POLICY_TREE*) OPENSSL_malloc(sizeof(X509_POLICY_TREE));
 
     if (!tree)
         return 0;
 
     tree->flags = 0;
-    tree->levels = OPENSSL_malloc(sizeof(X509_POLICY_LEVEL) * n);
+    tree->levels = (X509_POLICY_LEVEL *) OPENSSL_malloc(sizeof(X509_POLICY_LEVEL) * n);
     tree->nlevel = 0;
     tree->extra_data = NULL;
     tree->auth_policies = NULL;

@@ -28,7 +28,8 @@ public:
   void Release();
   bool CreateMe(
     const std::string& inputPipeName,
-    bool readEndBlocks, bool writeEndBlocks,
+    bool readEndBlocks,
+    bool writeEndBlocks,
     bool restartServerOnFail,
     bool dontCrashOnFail
   );

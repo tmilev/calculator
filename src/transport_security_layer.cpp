@@ -141,7 +141,7 @@ void TransportSecurityLayer::initSSLlibrary() {
   if (commentsOnError.str() != "") {
     logServer << logger::red << "OpenSSL initialization comments: " << logger::blue << commentsOnError.str() << logger::endL;
   }
-  logServer << logger::green << "DEBUG: Initialzation of ssl successfull." << logger::endL;
+  logServer << logger::green << "DEBUG: InitialIzation of ssl successfull." << logger::endL;
 }
 
 void TransportSecurityLayer::AddMoreEntropyFromTimer() {

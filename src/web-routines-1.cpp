@@ -63,17 +63,19 @@ class WebServerMonitor {
 public:
   void BackupDatabaseIfNeeded();
   double timeAtLastBackup;
-  void Monitor();
+  int pidServer;
+  void Monitor(int pidServer);
   WebServerMonitor();
 };
 
-void MonitorWebServer() {
+void MonitorWebServer(int pidServer) {
   WebServerMonitor theMonitor;
-  theMonitor.Monitor();
+  theMonitor.Monitor(pidServer);
 }
 
 WebServerMonitor::WebServerMonitor() {
   this->timeAtLastBackup = - 1;
+  this->pidServer = - 1;
 }
 
 void WebServerMonitor::BackupDatabaseIfNeeded() {
@@ -96,18 +98,17 @@ void WebServerMonitor::BackupDatabaseIfNeeded() {
   this->timeAtLastBackup = theGlobalVariables.GetElapsedSeconds();
 }
 
-void WebServerMonitor::Monitor() {
+void WebServerMonitor::Monitor(int pidServer) {
+  if (!theGlobalVariables.flagAllowProcessMonitoring) {
+    return;
+  }
+  this->pidServer = pidServer;
   MacroRegisterFunctionWithName("Monitor");
   int maxNumPingFailures = 3;
   //warning: setting theWebServer.WebServerPingIntervalInSeconds to more than 1000
   //may overflow the variable int microsecondsToSleep.
   //theWebServer.WebServerPingIntervalInSeconds=1000;
   int microsecondsToSleep = 1000000 * theWebServer.WebServerPingIntervalInSeconds;//
-  if (theWebServer.flagTryToKillOlderProcesses) {
-    for (;;) {
-      theGlobalVariables.FallAsleep(microsecondsToSleep);
-    }
-  }
   if (theWebServer.WebServerPingIntervalInSeconds > 30) {
     logServerMonitor << logger::red << "**********WARNING**************"
     << logger::endL
@@ -189,13 +190,8 @@ void WebCrawler::init() {
   MacroRegisterFunctionWithName("WebCrawler::init");
   this->flagDoUseGET = true;
   buffer.initializeFillInObject(50000, 0);
-  if (!theWebServer.flagPort8155) {
-    this->portOrService = "8080";
-    this->addressToConnectTo = "127.0.0.1";
-  } else {
-    this->portOrService = "8155";
-    this->addressToConnectTo = "127.0.0.1";
-  }
+  this->portOrService = "8155";
+  this->addressToConnectTo = "127.0.0.1";
 }
 
 WebCrawler::~WebCrawler() {

@@ -231,7 +231,6 @@ public:
   int previousServerStatDetailedReport;
   long long NumFailedSelectsSoFar;
   long long NumSuccessfulSelectsSoFar;
-  bool flagTryToKillOlderProcesses;
   bool flagReapingChildren;
   TransportSecurityLayer theSSLdata;
   PointerObjectDestroyer<Calculator> theCalculator;
@@ -253,7 +252,6 @@ public:
   int timeLastExecutableModification;
   ListReferences<std::string> theProgressReports;
   bool flagDeallocated;
-  bool flagPort8155;
   WebServer();
   ~WebServer();
   static void FigureOutOperatingSystem();
@@ -264,6 +262,7 @@ public:
   static void CheckFreecalcSetup();
   static void CheckSVNSetup();
   static void AnalyzeMainArguments(int argC, char** argv);
+  static void AnalyzeMainArgumentsTimeString(const std::string& timeLimitString);
   void InitializeGlobalVariables();
   void InitializeGlobalVariablesHashes();
   bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);

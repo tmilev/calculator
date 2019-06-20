@@ -102,7 +102,7 @@ GlobalVariables::GlobalVariables() {
   this->IndicatorStringOutputFunction = 0;
   this->WebServerReturnDisplayIndicatorCloseConnection = 0;
   this->WebServerTimerPing = 0;
-  this->MaxComputationMilliseconds = 1000000; //1000 seconds
+  this->MaxComputationMilliseconds = 100000; //100 seconds
   this->millisecondOffset = 0;
   this->timeServeClientStart = 0;
   this->replyAfterComputationMilliseconds = 0;

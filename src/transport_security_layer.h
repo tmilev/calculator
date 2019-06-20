@@ -9,15 +9,13 @@ static ProjectInformationInstance projectInfoInstanceTransportSecurityLayerHeade
 //sudo apt-get install libssl-dev
 //on opensuse:
 //sudo yast -i libopenssl-devel
-//Instructions: look at the examples folder in the openssl.
-//openssl tutorial (couldn't make it work myself):
-//http://www.ibm.com/developerworks/library/l-openssl/
-#include "boringssl/include/openssl/rsa.h"
-#include "boringssl/include/openssl/crypto.h"
-#include "boringssl/include/openssl/x509.h"
-#include "boringssl/include/openssl/pem.h"
-#include "boringssl/include/openssl/ssl.h"
-#include "boringssl/include/openssl/err.h"
+
+#include <openssl/rsa.h>
+#include <openssl/crypto.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 class SSLServer {
 public:

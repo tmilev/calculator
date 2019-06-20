@@ -201,13 +201,11 @@ bool WebWorker::ReceiveAllHttpSSL() {
   double numSecondsAtStart = theGlobalVariables.GetElapsedSeconds();
   int numBytesInBuffer = - 1;
   while (true) {
-    int64_t msBeforesslread = theGlobalVariables.GetElapsedMilliseconds();
-    logWorker << "DEBUG: about to execute ssl read ...";
+    //int64_t msBeforesslread = theGlobalVariables.GetElapsedMilliseconds();
     numBytesInBuffer = this->parent->theSSLdata.SSLRead(
       this->parent->theSSLdata.sslServeR.theData, &buffer, bufferSize - 1, &errorString, 0, true
     );
-    int64_t readTime = theGlobalVariables.GetElapsedMilliseconds() - msBeforesslread;
-    logWorker << "DEBUG: ssl read done in " << readTime << " ms. ";
+    //int64_t readTime = theGlobalVariables.GetElapsedMilliseconds() - msBeforesslread;
     if (numBytesInBuffer >= 0 && numBytesInBuffer <= (signed) bufferSize) {
       break;
     }
@@ -2823,8 +2821,6 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection() {
 }
 
 bool WebWorker::RequireSSL() {
-  return false;
-  int fixMe;
   return theGlobalVariables.flagSSLisAvailable;
 }
 
@@ -3341,9 +3337,7 @@ void WebServer::PipeProgressReport(const std::string& theString) {
 }
 
 WebServer::WebServer() {
-  this->flagPort8155 = true;
   this->flagDeallocated = false;
-  this->flagTryToKillOlderProcesses = true;
   this->activeWorker = - 1;
   this->timeLastExecutableModification = - 1;
   this->listeningSocketHTTP = - 1;
@@ -3707,7 +3701,7 @@ void WebServer::RestarT() {
     theGlobalVariables.processType != ProcessTypes::server &&
     theGlobalVariables.processType != ProcessTypes::serverMonitor
   ) {
-    crash << "Server restart is allowed only to the server process. " << crash;
+    crash << "Server restart is allowed only to the server/monitor processes. " << crash;
   }
   logger* currentLog = 0;
   if (theGlobalVariables.processType == "serverMonitor") {
@@ -3755,11 +3749,7 @@ void WebServer::RestarT() {
   *currentLog << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
   theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath << " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
-  if (theWebServer.flagPort8155) {
-    theCommand << " server " << " nokill " << timeLimitSeconds;
-  } else {
-    theCommand << " server8080 " << " nokill " << timeLimitSeconds;
-  }
+  theCommand << " server " << timeLimitSeconds;
   theGlobalVariables.CallSystemNoOutput(theCommand.str(), true); //kill any other running copies of the calculator.
   while (true) {
     theGlobalVariables.FallAsleep(1000000);
@@ -3768,20 +3758,18 @@ void WebServer::RestarT() {
 }
 
 void WebServer::initPortsITry() {
-  if (this->flagPort8155) {
-    this->PortsITryHttp.AddOnTop("8155");
-  }
-  this->PortsITryHttp.AddOnTop("8080");
-  this->PortsITryHttp.AddOnTop("8081");
-  this->PortsITryHttp.AddOnTop("8082");
   this->PortsITryHttp.AddOnTop("8155");
+  this->PortsITryHttp.AddOnTop("8156");
+  this->PortsITryHttp.AddOnTop("8157");
+  this->PortsITryHttp.AddOnTop("8158");
+  this->PortsITryHttp.AddOnTop("8159");
   if (!theGlobalVariables.flagSSLisAvailable) {
     return;
   }
   this->PortsITryHttpSSL.AddOnTop("8166");
-  this->PortsITryHttpSSL.AddOnTop("8083");
-  this->PortsITryHttpSSL.AddOnTop("8084");
-  this->PortsITryHttpSSL.AddOnTop("8085");
+  this->PortsITryHttpSSL.AddOnTop("8167");
+  this->PortsITryHttpSSL.AddOnTop("8168");
+  this->PortsITryHttpSSL.AddOnTop("8169");
 }
 
 void WebServer::initListeningSockets() {
@@ -4077,10 +4065,6 @@ void WebServer::RecycleChildrenIfPossible() {
 bool WebServer::initPrepareWebServerALL() {
   MacroRegisterFunctionWithName("WebServer::initPrepareWebServerALL");
   this->initPortsITry();
-  if (this->flagTryToKillOlderProcesses) {
-    this->RestarT();
-  }
-  usleep(10000);
   this->initDates();
   if (!this->initBindToPorts()) {
     return false;
@@ -4229,7 +4213,7 @@ void SignalsInfrastructure::initializeSignals() {
   this->flagInitialized = true;
 }
 
-extern void MonitorWebServer();
+extern void MonitorWebServer(int pidServer);
 
 void WebServer::WriteVersionJSFile() {
   MacroRegisterFunctionWithName("WebServer::WriteVersionJSFile");
@@ -4252,33 +4236,31 @@ int WebServer::Run() {
   if (theGlobalVariables.flagSSLisAvailable) {
     TransportSecurityLayer::initSSLkeyFiles();
   }
-  if (!this->flagTryToKillOlderProcesses) {
-    //<-worker log resets are needed, else forked processes reset their common log.
-    //<-resets of the server logs are not needed, but I put them here nonetheless.
-    logWorker         .reset();
-    logServerMonitor  .reset();
-    logHttpErrors     .reset();
-    logBlock          .reset();
-    logIO             .reset();
-    logOpenSSL        .reset();
-    logProcessKills   .reset();
-    logSocketAccept   .reset();
-    logProcessStats   .reset();
-    logPlumbing       .reset();
-    logEmail          .reset();
-    logServer         .reset();
-    logSuccessfulForks.reset();
-    logSuccessfulForks.flagWriteImmediately = true;
-  }
+  //<-worker log resets are needed, else forked processes reset their common log.
+  //<-resets of the server logs are not needed, but I put them here nonetheless.
+  logWorker         .reset();
+  logServerMonitor  .reset();
+  logHttpErrors     .reset();
+  logBlock          .reset();
+  logIO             .reset();
+  logOpenSSL        .reset();
+  logProcessKills   .reset();
+  logSocketAccept   .reset();
+  logProcessStats   .reset();
+  logPlumbing       .reset();
+  logEmail          .reset();
+  logServer         .reset();
+  logSuccessfulForks.reset();
+  logSuccessfulForks.flagWriteImmediately = true;
   if (theGlobalVariables.flagServerAutoMonitor) {
-    int pidMonitor = fork();
-    if (pidMonitor < 0) {
+    int pidServer = fork();
+    if (pidServer < 0) {
       crash << "Failed to create server process. " << crash;
     }
-    if (pidMonitor == 0) {
+    if (pidServer > 0) {
       theGlobalVariables.processType = "serverMonitor";
       theGlobalVariables.flagIsChildProcess = true;
-      MonitorWebServer();//<-this attempts to connect to the server over the internet and restarts if it can't.
+      MonitorWebServer(pidServer);//<-this attempts to connect to the server over the internet and restarts if it can't.
       return 0;
     }
   }
@@ -4803,14 +4785,31 @@ void WebServer::CheckMathJaxSetup() {
   theGlobalVariables.StoreConfiguration();
 }
 
+void WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitString) {
+  if (timeLimitString == "") {
+    return;
+  }
+  Rational timeLimit;
+  timeLimit.AssignString(timeLimitString);
+  int timeLimitInt = 0;
+  if (timeLimit.IsIntegerFittingInInt(&timeLimitInt)) {
+    theGlobalVariables.MaxComputationMilliseconds = timeLimitInt;
+    if (theGlobalVariables.MaxComputationMilliseconds <= 0) {
+      theGlobalVariables.MaxComputationMilliseconds = 0;
+    } else {
+      theGlobalVariables.MaxComputationMilliseconds *= 1000;
+    }
+    std::cout << "Max computation time: " << theGlobalVariables.MaxComputationMilliseconds << " ms." << std::endl;
+  }
+
+}
+
 void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
   if (argC < 0) {
     argC = 0;
   }
   theGlobalVariables.programArguments.SetSize(argC);
-  //std::cout << "RAND_MAX: " << RAND_MAX;
-  //std::cout << "Program arguments: \n";
   for (int i = 0; i < argC; i ++) {
     theGlobalVariables.programArguments[i] = argv[i];
     //std::cout << "Argument " << i + 1 << ": " << theGlobalVariables.programArguments[i] << "\n";
@@ -4845,39 +4844,26 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
     return;
   }
   std::string& secondArgument = theGlobalVariables.programArguments[1];
-  if (secondArgument == "server" || secondArgument == "server8080") {
-    if (secondArgument == "server8080") {
-      theWebServer.flagPort8155 = false;
-    }
+  if (secondArgument == "server") {
     theGlobalVariables.flagRunningBuiltInWebServer = true;
     theGlobalVariables.flagRunningAce = false;
-    theWebServer.flagTryToKillOlderProcesses = true;
     if (argC == 2) {
       return;
     }
+    bool doRestart = false;
+    std::string timeLimitString = "";
     std::string& thirdArgument = theGlobalVariables.programArguments[2];
-    std::string timeLimitString = "100";
-    std::string killOrder = "";
-    if (thirdArgument == "nokill") {
-      killOrder = "nokill";
+    if (thirdArgument == "restart") {
+      doRestart = true;
+      if (argC > 3) {
+        timeLimitString = theGlobalVariables.problemExpectedNumberOfAnswers[3];
+      }
     } else {
       timeLimitString = thirdArgument;
     }
-    if (argC >= 4 && killOrder == "nokill") {
-      timeLimitString = theGlobalVariables.programArguments[3];
-    }
-    theWebServer.flagTryToKillOlderProcesses = !(killOrder == "nokill");
-    Rational timeLimit;
-    timeLimit.AssignString(timeLimitString);
-    int timeLimitInt = 0;
-    if (timeLimit.IsIntegerFittingInInt(&timeLimitInt)) {
-      theGlobalVariables.MaxComputationMilliseconds = timeLimitInt;
-      if (theGlobalVariables.MaxComputationMilliseconds <= 0) {
-        theGlobalVariables.MaxComputationMilliseconds = 0;
-      } else {
-        theGlobalVariables.MaxComputationMilliseconds *= 1000;
-      }
-      std::cout << "Max computation time: " << theGlobalVariables.MaxComputationMilliseconds << " ms." << std::endl;
+    WebServer::AnalyzeMainArgumentsTimeString(timeLimitString);
+    if (doRestart) {
+      theWebServer.RestarT();
     }
     return;
   }
@@ -5191,8 +5177,6 @@ void GlobalVariables::ComputeConfigurationFlags() {
     theGlobalVariables.flagRunningCommandLine = false;
     theGlobalVariables.flagRunningApache = false;
     theGlobalVariables.MaxComputationMilliseconds = 30000; // 30 seconds, default
-    theWebServer.flagTryToKillOlderProcesses = false;
-    theWebServer.flagPort8155 = true;
   }
   int reader = 0;
   if (theGlobalVariables.configuration[

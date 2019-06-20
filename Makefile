@@ -220,6 +220,7 @@ boringssl/crypto/ecdh_extra/ecdh_extra.c \
 boringssl/crypto/ecdsa_extra/ecdsa_asn1.c \
 boringssl/crypto/engine/engine.c \
 boringssl/crypto/err/err.c \
+boringssl/crypto/err/err_data.c \
 boringssl/crypto/evp/digestsign.c \
 boringssl/crypto/evp/evp.c \
 boringssl/crypto/evp/evp_asn1.c \

@@ -1443,7 +1443,7 @@ OPENSSL_EXPORT int SSL_set_cipher_list(SSL *ssl, const char *str);
 OPENSSL_EXPORT STACK_OF(SSL_CIPHER) *SSL_CTX_get_ciphers(const SSL_CTX *ctx);
 
 // SSL_CTX_cipher_in_group returns one if the |i|th cipher (see
-// |SSL_CTX_get_ciphers|) is in the same equipreference group as the one
+// |SSL_CTX_get_ciphers|) is in the same equipreference group as the ones
 // following it and zero otherwise.
 OPENSSL_EXPORT int SSL_CTX_cipher_in_group(const SSL_CTX *ctx, size_t i);
 

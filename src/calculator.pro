@@ -918,4 +918,6 @@ SOURCES += \
     boringssl/third_party/sike/fpx.c \
     boringssl/third_party/sike/isogeny.c \
     boringssl/third_party/sike/P503.c \
-    boringssl/third_party/sike/sike.c
+    boringssl/third_party/sike/sike.c \
+    boringssl/crypto/err/err_data.c \
+    boringssl/crypto/err/err_data.c

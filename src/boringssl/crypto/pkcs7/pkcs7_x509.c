@@ -274,7 +274,7 @@ static PKCS7 *pkcs7_new(CBS *cbs) {
   return ret;
 
 err:
-  pkcs7_new_cleanup(ret);
+  return pkcs7_new_cleanup(ret);
 }
 
 PKCS7 *d2i_PKCS7(PKCS7 **out, const uint8_t **inp,

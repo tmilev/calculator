@@ -150,9 +150,9 @@ typedef struct err_state_st {
   void *to_free;
 } ERR_STATE;
 
-extern const uint32_t kOpenSSLReasonValues[];
-extern const size_t kOpenSSLReasonValuesLen;
-extern const char kOpenSSLReasonStringData[];
+extern uint32_t kOpenSSLReasonValues[];
+extern size_t kOpenSSLReasonValuesLen;
+extern char kOpenSSLReasonStringData[];
 
 // err_clear clears the given queued error.
 static void err_clear(struct err_error_st *error) {

@@ -12,14 +12,14 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include "../../include/openssl/cpu.h>
+#include "../include/openssl/cpu.h"
 
 #if defined(OPENSSL_AARCH64) && defined(OPENSSL_LINUX) && \
     !defined(OPENSSL_STATIC_ARMCAP)
 
 #include <sys/auxv.h>
 
-#include "../../include/openssl/arm_arch.h>
+#include "../../include/openssl/arm_arch.h"
 
 #include "internal.h"
 

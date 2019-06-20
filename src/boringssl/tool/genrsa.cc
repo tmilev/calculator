@@ -12,11 +12,11 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include "../../include/openssl/bio.h>
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/pem.h>
-#include "../../include/openssl/rsa.h>
+#include "../include/openssl/bio.h"
+#include "../include/openssl/bn.h"
+#include "../include/openssl/err.h"
+#include "../include/openssl/pem.h"
+#include "../include/openssl/rsa.h"
 
 #include "internal.h"
 

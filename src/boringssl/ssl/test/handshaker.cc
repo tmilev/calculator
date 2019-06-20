@@ -17,9 +17,9 @@
 #include <signal.h>
 #include <unistd.h>
 
-#include "../../include/openssl/bytestring.h>
-#include "../../include/openssl/rand.h>
-#include "../../include/openssl/ssl.h>
+#include "../../include/openssl/bytestring.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/ssl.h"
 
 #include "../internal.h"
 #include "handshake_util.h"

@@ -54,9 +54,9 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/blowfish.h>
-#include "../../include/openssl/cipher.h>
-#include "../../include/openssl/obj.h>
+#include "../../include/openssl/blowfish.h"
+#include "../../include/openssl/cipher.h"
+#include "../../include/openssl/obj.h"
 
 #include <assert.h>
 #include <string.h>
@@ -556,14 +556,14 @@ static void BF_cfb64_encrypt(const uint8_t *in, uint8_t *out, size_t length,
 
 static int bf_init_key(EVP_CIPHER_CTX *ctx, const uint8_t *key,
                             const uint8_t *iv, int enc) {
-  BF_KEY *bf_key = ctx->cipher_data;
+  BF_KEY *bf_key = (BF_KEY *) ctx->cipher_data;
   BF_set_key(bf_key, ctx->key_len, key);
   return 1;
 }
 
 static int bf_ecb_cipher(EVP_CIPHER_CTX *ctx, uint8_t *out, const uint8_t *in,
                          size_t len) {
-  BF_KEY *bf_key = ctx->cipher_data;
+  BF_KEY *bf_key = (BF_KEY *) ctx->cipher_data;
 
   while (len >= BF_BLOCK) {
     BF_ecb_encrypt(in, out, bf_key, ctx->encrypt);
@@ -578,14 +578,14 @@ static int bf_ecb_cipher(EVP_CIPHER_CTX *ctx, uint8_t *out, const uint8_t *in,
 
 static int bf_cbc_cipher(EVP_CIPHER_CTX *ctx, uint8_t *out, const uint8_t *in,
                          size_t len) {
-  BF_KEY *bf_key = ctx->cipher_data;
+  BF_KEY *bf_key = (BF_KEY *) ctx->cipher_data;
   BF_cbc_encrypt(in, out, len, bf_key, ctx->iv, ctx->encrypt);
   return 1;
 }
 
 static int bf_cfb_cipher(EVP_CIPHER_CTX *ctx, uint8_t *out, const uint8_t *in,
                          size_t len) {
-  BF_KEY *bf_key = ctx->cipher_data;
+  BF_KEY *bf_key = (BF_KEY *) ctx->cipher_data;
   int num = ctx->num;
   BF_cfb64_encrypt(in, out, len, bf_key, ctx->iv, &num, ctx->encrypt);
   ctx->num = num;

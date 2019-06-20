@@ -33,7 +33,7 @@
 #include "test_config.h"
 #include "test_state.h"
 
-#include "../../include/openssl/ssl.h>
+#include "../../include/openssl/ssl.h"
 
 using namespace bssl;
 

@@ -106,16 +106,16 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include "../../include/openssl/ex_data.h>
+#include "../include/openssl/ex_data.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/crypto.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/stack.h>
-#include "../../include/openssl/thread.h>
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/err.h"
+#include "../include/openssl/mem.h"
+#include "../include/openssl/stack.h"
+#include "../include/openssl/thread.h"
 
 #include "internal.h"
 
@@ -133,7 +133,7 @@ int CRYPTO_get_ex_new_index(CRYPTO_EX_DATA_CLASS *ex_data_class, int *out_index,
   CRYPTO_EX_DATA_FUNCS *funcs;
   int ret = 0;
 
-  funcs = OPENSSL_malloc(sizeof(CRYPTO_EX_DATA_FUNCS));
+  funcs = (CRYPTO_EX_DATA_FUNCS *) OPENSSL_malloc(sizeof(CRYPTO_EX_DATA_FUNCS));
   if (funcs == NULL) {
     OPENSSL_PUT_ERROR(CRYPTO, ERR_R_MALLOC_FAILURE);
     return 0;

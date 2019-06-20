@@ -19,8 +19,8 @@
 #include <string>
 #include <vector>
 
-#include "../../include/openssl/aead.h>
-#include "../../include/openssl/cipher.h>
+#include "../include/openssl/aead.h"
+#include "../include/openssl/cipher.h"
 
 #include "../crypto/test/file_test.h"
 

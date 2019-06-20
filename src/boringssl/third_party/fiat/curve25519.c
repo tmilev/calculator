@@ -27,16 +27,16 @@
 //
 // The field functions are shared by Ed25519 and X25519 where possible.
 
-#include "../../include/openssl/curve25519.h>
+#include "../../include/openssl/curve25519.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/cpu.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/rand.h>
-#include "../../include/openssl/sha.h>
-#include "../../include/openssl/type_check.h>
+#include "../../include/openssl/cpu.h"
+#include "../../include/openssl/mem.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/sha.h"
+#include "../../include/openssl/type_check.h"
 
 #include "internal.h"
 #include "../../crypto/internal.h"

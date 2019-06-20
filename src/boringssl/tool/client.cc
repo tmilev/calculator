@@ -12,7 +12,7 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include "../../include/openssl/base.h>
+#include "../include/openssl/base.h"
 
 #include <stdio.h>
 
@@ -24,9 +24,9 @@ OPENSSL_MSVC_PRAGMA(warning(push, 3))
 OPENSSL_MSVC_PRAGMA(warning(pop))
 #endif
 
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/pem.h>
-#include "../../include/openssl/ssl.h>
+#include "../include/openssl/err.h"
+#include "../include/openssl/pem.h"
+#include "../include/openssl/ssl.h"
 
 #include "../crypto/internal.h"
 #include "internal.h"

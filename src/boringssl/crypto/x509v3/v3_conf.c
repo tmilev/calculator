@@ -432,12 +432,12 @@ void X509V3_section_free(X509V3_CTX *ctx, STACK_OF(CONF_VALUE) *section)
 static char *nconf_get_string(void *db, char *section, char *value)
 {
     /* TODO(fork): this should return a const value. */
-    return (char *) NCONF_get_string(db, section, value);
+    return (char *) NCONF_get_string((const CONF *) db, section, value);
 }
 
 static STACK_OF(CONF_VALUE) *nconf_get_section(void *db, char *section)
 {
-    return NCONF_get_section(db, section);
+    return NCONF_get_section((const CONF *) db, section);
 }
 
 static const X509V3_CONF_METHOD nconf_method = {

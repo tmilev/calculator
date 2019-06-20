@@ -273,8 +273,8 @@
 #include <utility>
 #include <vector>  // NOLINT
 
-#include "gtest/internal/gtest-port-arch.h"
-#include "gtest/internal/custom/gtest-port.h"
+#include "../../gtest/internal/gtest-port-arch.h"
+#include "../../gtest/internal/custom/gtest-port.h"
 
 #if !defined(GTEST_DEV_EMAIL_)
 # define GTEST_DEV_EMAIL_ "googletestframework@@googlegroups.com"

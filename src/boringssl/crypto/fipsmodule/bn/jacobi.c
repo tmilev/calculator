@@ -141,5 +141,5 @@ int bn_jacobi(const BIGNUM *a, const BIGNUM *b, BN_CTX *ctx) {
   }
 
 end:
-  BN_CTX_end(ret, ctx);
+  return BN_CTX_end(ret, ctx);
 }

@@ -54,13 +54,13 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include "../../include/openssl/ssl.h>
+#include "../include/openssl/ssl.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/err.h>
+#include "../include/openssl/buf.h"
+#include "../include/openssl/err.h"
 
 #include "../crypto/internal.h"
 #include "internal.h"

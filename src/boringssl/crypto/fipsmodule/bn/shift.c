@@ -192,7 +192,6 @@ int bn_rshift_secret_shift(BIGNUM *r, const BIGNUM *a, unsigned n,
 
   ret = 1;
 
-err:
   return BN_CTX_end(ret, ctx);
 }
 

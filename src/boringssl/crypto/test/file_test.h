@@ -15,7 +15,7 @@
 #ifndef OPENSSL_HEADER_CRYPTO_TEST_FILE_TEST_H
 #define OPENSSL_HEADER_CRYPTO_TEST_FILE_TEST_H
 
-#include <openssl/base.h>
+#include "../../include/openssl/base.h"
 
 #include <stdint.h>
 

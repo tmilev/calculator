@@ -108,7 +108,7 @@ const X509V3_EXT_METHOD *X509V3_EXT_get_nid(int nid)
     if (nid < 0)
         return NULL;
     tmp.ext_nid = nid;
-    ret = (const X509V3_EXT_METHOD *const)
+    ret = (const X509V3_EXT_METHOD *const*)
         bsearch(&t, standard_exts, STANDARD_EXTENSION_COUNT,
                 sizeof(X509V3_EXT_METHOD *), ext_cmp);
     if (ret)
@@ -139,7 +139,7 @@ int X509V3_EXT_free(int nid, void *ext_data)
     }
 
     if (ext_method->it != NULL)
-        ASN1_item_free(ext_data, ASN1_ITEM_ptr(ext_method->it));
+        ASN1_item_free((ASN1_VALUE *) ext_data, ASN1_ITEM_ptr(ext_method->it));
     else if (ext_method->ext_free != NULL)
         ext_method->ext_free(ext_data);
     else {

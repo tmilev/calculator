@@ -59,11 +59,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../include/openssl/base64.h>
-#include "../../include/openssl/bio.h>
-#include "../../include/openssl/buffer.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/mem.h>
+#include "../../include/openssl/base64.h"
+#include "../../include/openssl/bio.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/mem.h"
 
 #include "../../crypto/internal.h"
 
@@ -91,7 +91,7 @@ typedef struct b64_struct {
 static int b64_new(BIO *bio) {
   BIO_B64_CTX *ctx;
 
-  ctx = OPENSSL_malloc(sizeof(*ctx));
+  ctx = (BIO_B64_CTX *) OPENSSL_malloc(sizeof(*ctx));
   if (ctx == NULL) {
     return 0;
   }

@@ -54,9 +54,9 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.]. */
 
-#include "../../include/openssl/cast.h>
-#include "../../include/openssl/cipher.h>
-#include "../../include/openssl/obj.h>
+#include "../../include/openssl/cast.h"
+#include "../../include/openssl/cipher.h"
+#include "../../include/openssl/obj.h"
 
 #if defined(OPENSSL_WINDOWS)
 OPENSSL_MSVC_PRAGMA(warning(push, 3))
@@ -414,14 +414,14 @@ void CAST_cfb64_encrypt(const uint8_t *in, uint8_t *out, size_t length,
 
 static int cast_init_key(EVP_CIPHER_CTX *ctx, const uint8_t *key,
                          const uint8_t *iv, int enc) {
-  CAST_KEY *cast_key = ctx->cipher_data;
+  CAST_KEY *cast_key = (CAST_KEY *) ctx->cipher_data;
   CAST_set_key(cast_key, ctx->key_len, key);
   return 1;
 }
 
 static int cast_ecb_cipher(EVP_CIPHER_CTX *ctx, uint8_t *out, const uint8_t *in,
                            size_t len) {
-  CAST_KEY *cast_key = ctx->cipher_data;
+  CAST_KEY *cast_key = (CAST_KEY *) ctx->cipher_data;
 
   while (len >= CAST_BLOCK) {
     CAST_ecb_encrypt(in, out, cast_key, ctx->encrypt);
@@ -436,7 +436,7 @@ static int cast_ecb_cipher(EVP_CIPHER_CTX *ctx, uint8_t *out, const uint8_t *in,
 
 static int cast_cbc_cipher(EVP_CIPHER_CTX *ctx, uint8_t *out, const uint8_t *in,
                            size_t len) {
-  CAST_KEY *cast_key = ctx->cipher_data;
+  CAST_KEY *cast_key = (CAST_KEY *) ctx->cipher_data;
   CAST_cbc_encrypt(in, out, len, cast_key, ctx->iv, ctx->encrypt);
   return 1;
 }

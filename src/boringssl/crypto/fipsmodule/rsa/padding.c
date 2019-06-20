@@ -477,18 +477,13 @@ int RSA_padding_check_PKCS1_OAEP_mgf1(uint8_t *out, size_t *out_len,
   size_t mlen = dblen - one_index;
   if (max_out < mlen) {
     OPENSSL_PUT_ERROR(RSA, RSA_R_DATA_TOO_LARGE);
-    goto err;
+    return RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part2(db);
   }
 
   OPENSSL_memcpy(out, db + one_index, mlen);
   *out_len = mlen;
   OPENSSL_free(db);
   return 1;
-
-decoding_err:
-  return RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part1(db);
-err:
-  return RSA_padding_check_PKCS1_OAEP_mgf1_cleanup_part2(db);
 }
 
 static const uint8_t kPSSZeroes[] = {0, 0, 0, 0, 0, 0, 0, 0};

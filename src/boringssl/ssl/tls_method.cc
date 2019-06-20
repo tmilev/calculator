@@ -54,12 +54,12 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/ssl.h>
+#include "../include/openssl/ssl.h"
 
 #include <assert.h>
 #include <string.h>
 
-#include "../../include/openssl/buf.h>
+#include "../include/openssl/buf.h"
 
 #include "../crypto/internal.h"
 #include "internal.h"

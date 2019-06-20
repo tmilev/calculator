@@ -20,8 +20,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/type_check.h>
+#include "../include/openssl/mem.h"
+#include "../include/openssl/type_check.h"
 
 
 OPENSSL_STATIC_ASSERT(sizeof(CRYPTO_MUTEX) >= sizeof(pthread_rwlock_t),
@@ -109,7 +109,7 @@ static void thread_local_destructor(void *arg) {
   pthread_mutex_unlock(&g_destructors_lock);
 
   unsigned i;
-  void **pointers = arg;
+  void **pointers = (void **) arg;
   for (i = 0; i < NUM_OPENSSL_THREAD_LOCALS; i++) {
     if (destructors[i] != NULL) {
       destructors[i](pointers[i]);
@@ -162,7 +162,7 @@ void *CRYPTO_get_thread_local(thread_local_data_t index) {
     return NULL;
   }
 
-  void **pointers = pthread_getspecific(g_thread_local_key);
+  void **pointers = (void **) pthread_getspecific(g_thread_local_key);
   if (pointers == NULL) {
     return NULL;
   }
@@ -177,9 +177,9 @@ int CRYPTO_set_thread_local(thread_local_data_t index, void *value,
     return 0;
   }
 
-  void **pointers = pthread_getspecific(g_thread_local_key);
+  void **pointers = (void **) pthread_getspecific(g_thread_local_key);
   if (pointers == NULL) {
-    pointers = OPENSSL_malloc(sizeof(void *) * NUM_OPENSSL_THREAD_LOCALS);
+    pointers = (void **) OPENSSL_malloc(sizeof(void *) * NUM_OPENSSL_THREAD_LOCALS);
     if (pointers == NULL) {
       destructor(value);
       return 0;

@@ -50,8 +50,8 @@
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com). */
 
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/dh.h>
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/dh.h"
 
 
 struct wrapped_callback {

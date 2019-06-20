@@ -133,20 +133,20 @@
  * OTHER ENTITY BASED ON INFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS OR
  * OTHERWISE. */
 
-#include "../../include/openssl/ssl.h>
+#include "../include/openssl/ssl.h"
 
 #include <assert.h>
 #include <string.h>
 
 #include <utility>
 
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/evp.h>
-#include "../../include/openssl/hmac.h>
-#include "../../include/openssl/md5.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/nid.h>
-#include "../../include/openssl/rand.h>
+#include "../include/openssl/err.h"
+#include "../include/openssl/evp.h"
+#include "../include/openssl/hmac.h"
+#include "../include/openssl/md5.h"
+#include "../include/openssl/mem.h"
+#include "../include/openssl/nid.h"
+#include "../include/openssl/rand.h"
 
 #include "../crypto/fipsmodule/tls/internal.h"
 #include "../crypto/internal.h"

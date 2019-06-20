@@ -15,7 +15,7 @@
 #ifndef OPENSSL_HEADER_TOOL_INTERNAL_H
 #define OPENSSL_HEADER_TOOL_INTERNAL_H
 
-#include "../../include/openssl/base.h>
+#include "../include/openssl/base.h"
 
 #include <string>
 #include <vector>

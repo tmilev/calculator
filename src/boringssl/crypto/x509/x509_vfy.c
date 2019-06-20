@@ -228,7 +228,7 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
     if (ctx->chain == NULL || !sk_X509_push(ctx->chain, ctx->cert)) {
         OPENSSL_PUT_ERROR(X509, ERR_R_MALLOC_FAILURE);
         ctx->error = X509_V_ERR_OUT_OF_MEM;
-        goto end;
+        return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
     }
     X509_up_ref(ctx->cert);
     ctx->last_untrusted = 1;
@@ -239,7 +239,7 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
         && (sktmp = sk_X509_dup(ctx->untrusted)) == NULL) {
         OPENSSL_PUT_ERROR(X509, ERR_R_MALLOC_FAILURE);
         ctx->error = X509_V_ERR_OUT_OF_MEM;
-        goto end;
+        return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
     }
 
     if (ctx->ctx->additional_untrusted != NULL) {
@@ -248,7 +248,7 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
             if (sktmp == NULL) {
                 OPENSSL_PUT_ERROR(X509, ERR_R_MALLOC_FAILURE);
                 ctx->error = X509_V_ERR_OUT_OF_MEM;
-                goto end;
+                return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
             }
         }
 
@@ -259,7 +259,7 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
                               k))) {
                 OPENSSL_PUT_ERROR(X509, ERR_R_MALLOC_FAILURE);
                 ctx->error = X509_V_ERR_OUT_OF_MEM;
-                goto end;
+                return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
             }
         }
     }
@@ -286,7 +286,7 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
             ok = ctx->get_issuer(&xtmp, ctx, x);
             if (ok < 0) {
                 ctx->error = X509_V_ERR_STORE_LOOKUP;
-                goto end;
+                return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
             }
             /*
              * If successful for now free up cert so it will be picked up
@@ -306,7 +306,7 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
                     OPENSSL_PUT_ERROR(X509, ERR_R_MALLOC_FAILURE);
                     ctx->error = X509_V_ERR_OUT_OF_MEM;
                     ok = 0;
-                    goto end;
+                    return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
                 }
                 X509_up_ref(xtmp);
                 (void)sk_X509_delete_ptr(sktmp, xtmp);
@@ -354,7 +354,7 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
                     bad_chain = 1;
                     ok = cb(0, ctx);
                     if (!ok)
-                        goto end;
+                      return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
                 } else {
                     /*
                      * We have a match: replace certificate with store
@@ -388,7 +388,7 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
 
             if (ok < 0) {
                 ctx->error = X509_V_ERR_STORE_LOOKUP;
-                goto end;
+                return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
             }
             if (ok == 0)
                 break;
@@ -398,7 +398,7 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
                 OPENSSL_PUT_ERROR(X509, ERR_R_MALLOC_FAILURE);
                 ctx->error = X509_V_ERR_OUT_OF_MEM;
                 ok = 0;
-                goto end;
+                return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
             }
             num++;
         }
@@ -409,7 +409,7 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
         /* If explicitly rejected error */
         if (trust == X509_TRUST_REJECTED) {
             ok = 0;
-            goto end;
+            return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
         }
         /*
          * If it's not explicitly trusted then check if there is an alternative
@@ -425,7 +425,7 @@ int X509_verify_cert(X509_STORE_CTX *ctx)
                 xtmp2 = sk_X509_value(ctx->chain, j - 1);
                 ok = ctx->get_issuer(&xtmp, ctx, xtmp2);
                 if (ok < 0)
-                    goto end;
+                  return X509_verify_cert_cleanup(ok, sktmp, chain_ss, ctx);
                 /* Check if we found an alternate chain */
                 if (ok > 0) {
                     /*
@@ -569,7 +569,7 @@ static int check_issued(X509_STORE_CTX *ctx, X509 *x, X509 *issuer)
 
 static int get_issuer_sk(X509 **issuer, X509_STORE_CTX *ctx, X509 *x)
 {
-    *issuer = find_issuer(ctx, ctx->other_ctx, x);
+    *issuer = find_issuer(ctx, (STACK_OF(X509) *) ctx->other_ctx, x);
     if (*issuer) {
         X509_up_ref(*issuer);
         return 1;

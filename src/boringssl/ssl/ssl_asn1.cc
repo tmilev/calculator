@@ -80,18 +80,18 @@
  * OTHER ENTITY BASED ON INFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS OR
  * OTHERWISE. */
 
-#include "../../include/openssl/ssl.h>
+#include "../include/openssl/ssl.h"
 
 #include <limits.h>
 #include <string.h>
 
 #include <utility>
 
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/bytestring.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/x509.h>
+#include "../include/openssl/buf.h"
+#include "../include/openssl/bytestring.h"
+#include "../include/openssl/err.h"
+#include "../include/openssl/mem.h"
+#include "../include/openssl/x509.h"
 
 #include "../crypto/internal.h"
 #include "internal.h"

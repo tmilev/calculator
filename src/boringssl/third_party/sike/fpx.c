@@ -3,7 +3,7 @@
 *
 * Abstract: core functions over GF(p) and GF(p^2)
 *********************************************************************************************/
-#include "../../include/openssl/base.h>
+#include "../../include/openssl/base.h"
 
 #include "utils.h"
 #include "fpx.h"

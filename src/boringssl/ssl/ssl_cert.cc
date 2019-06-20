@@ -112,7 +112,7 @@
  * ECC cipher suite support in OpenSSL originally developed by
  * SUN MICROSYSTEMS, INC., and contributed to the OpenSSL project. */
 
-#include "../../include/openssl/ssl.h>
+#include "../include/openssl/ssl.h"
 
 #include <assert.h>
 #include <limits.h>
@@ -120,14 +120,14 @@
 
 #include <utility>
 
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/bytestring.h>
-#include "../../include/openssl/ec_key.h>
-#include "../../include/openssl/err.h>
-#include "../../include/openssl/mem.h>
-#include "../../include/openssl/sha.h>
-#include "../../include/openssl/x509.h>
+#include "../include/openssl/bn.h"
+#include "../include/openssl/buf.h"
+#include "../include/openssl/bytestring.h"
+#include "../include/openssl/ec_key.h"
+#include "../include/openssl/err.h"
+#include "../include/openssl/mem.h"
+#include "../include/openssl/sha.h"
+#include "../include/openssl/x509.h"
 
 #include "../crypto/internal.h"
 #include "internal.h"

@@ -15,10 +15,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <gtest/gtest.h>
+#include "../../third_party/googletest/include/gtest/gtest.h"
 
-#include "../../include/openssl/cpu.h>
-#include "../../include/openssl/rand.h>
+#include "../../include/openssl/cpu.h"
+#include "../../include/openssl/rand.h"
 
 #include "abi_test.h"
 #include "gtest_main.h"

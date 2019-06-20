@@ -54,7 +54,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include "../../include/openssl/mem.h>
+#include "../include/openssl/mem.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -173,8 +173,8 @@ void OPENSSL_clear_free(void *ptr, size_t unused) {
 }
 
 int CRYPTO_memcmp(const void *in_a, const void *in_b, size_t len) {
-  const uint8_t *a = in_a;
-  const uint8_t *b = in_b;
+  const uint8_t *a =(const uint8_t *) in_a;
+  const uint8_t *b =(const uint8_t *) in_b;
   uint8_t x = 0;
 
   for (size_t i = 0; i < len; i++) {
@@ -189,7 +189,7 @@ uint32_t OPENSSL_hash32(const void *ptr, size_t len) {
   static const uint32_t kPrime = 16777619u;
   static const uint32_t kOffsetBasis = 2166136261u;
 
-  const uint8_t *in = ptr;
+  const uint8_t *in = (const uint8_t *) ptr;
   uint32_t h = kOffsetBasis;
 
   for (size_t i = 0; i < len; i++) {
@@ -212,7 +212,7 @@ size_t OPENSSL_strnlen(const char *s, size_t len) {
 
 char *OPENSSL_strdup(const char *s) {
   const size_t len = strlen(s) + 1;
-  char *ret = OPENSSL_malloc(len);
+  char *ret = (char *) OPENSSL_malloc(len);
   if (ret == NULL) {
     return NULL;
   }

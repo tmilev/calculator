@@ -1213,7 +1213,7 @@ PKCS12 *PKCS12_create(const char *password, const char *name,
       // See https://tools.ietf.org/html/rfc7292#section-4.1. |auth_safe|'s
       // contains a SEQUENCE of ContentInfos.
       !CBB_add_asn1(&auth_safe_data, &content_infos, CBS_ASN1_SEQUENCE)) {
-    goto err;
+    return PKCS12_cleanup(ret, mac_key, &cbb);
   }
 
   // If there are any certificates, place them in CertBags wrapped in a single
@@ -1223,13 +1223,13 @@ PKCS12 *PKCS12_create(const char *password, const char *name,
     size_t len;
     if (!make_cert_safe_contents(&data, &len, cert, chain, name, key_id,
                                  key_id_len)) {
-      goto err;
+      return PKCS12_cleanup(ret, mac_key, &cbb);
     }
     int ok = add_encrypted_data(&content_infos, cert_nid, password,
                                 password_len, iterations, data, len);
     OPENSSL_free(data);
     if (!ok) {
-      goto err;
+      return PKCS12_cleanup(ret, mac_key, &cbb);
     }
   }
 

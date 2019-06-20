@@ -12,7 +12,7 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include "../../include/openssl/base.h>
+#include "../../include/openssl/base.h"
 
 #if defined(__GLIBC__) && !defined(__UCLIBC__)
 #define OPENSSL_GLIBC

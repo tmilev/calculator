@@ -12,12 +12,12 @@
 // OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 // CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include "../../include/openssl/cipher.h>
+#include "../../include/openssl/cipher.h"
 
 #include <string.h>
 
-#include "../../include/openssl/aes.h>
-#include "../../include/openssl/obj.h>
+#include "../../include/openssl/aes.h"
+#include "../../include/openssl/obj.h"
 
 #include "../../crypto/internal.h"
 
@@ -28,7 +28,7 @@ typedef struct {
 static int aes_cfb_init_key(EVP_CIPHER_CTX *ctx, const uint8_t *key,
                             const uint8_t *iv, int enc) {
   if (key) {
-    EVP_CFB_CTX *cfb_ctx = ctx->cipher_data;
+    EVP_CFB_CTX *cfb_ctx = (EVP_CFB_CTX *) ctx->cipher_data;
     AES_set_encrypt_key(key, ctx->key_len * 8, &cfb_ctx->ks);
   }
 
@@ -41,7 +41,7 @@ static int aes_cfb128_cipher(EVP_CIPHER_CTX *ctx, uint8_t *out,
     return 0;
   }
 
-  EVP_CFB_CTX *cfb_ctx = ctx->cipher_data;
+  EVP_CFB_CTX *cfb_ctx = (EVP_CFB_CTX *) ctx->cipher_data;
   int num = ctx->num;
   AES_cfb128_encrypt(in, out, len, &cfb_ctx->ks, ctx->iv, &num,
                      ctx->encrypt ? AES_ENCRYPT : AES_DECRYPT);

@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "../../include/openssl/base.h>
+#include "../../include/openssl/base.h"
 
 struct TestState {
   // Serialize writes |pending_session| and |msg_callback_text| to |out|, for

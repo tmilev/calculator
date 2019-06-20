@@ -15,7 +15,7 @@
 #ifndef OPENSSL_HEADER_TOOL_TRANSPORT_COMMON_H
 #define OPENSSL_HEADER_TOOL_TRANSPORT_COMMON_H
 
-#include "../../include/openssl/ssl.h>
+#include "../include/openssl/ssl.h"
 #include <string.h>
 
 #include <string>

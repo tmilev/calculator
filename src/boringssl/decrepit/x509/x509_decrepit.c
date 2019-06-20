@@ -12,11 +12,11 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include "../../include/openssl/x509v3.h>
+#include "../../include/openssl/x509v3.h"
 
 #include <assert.h>
 
-#include "../../include/openssl/conf.h>
+#include "../../include/openssl/conf.h"
 
 
 X509_EXTENSION *X509V3_EXT_conf_nid(LHASH_OF(CONF_VALUE) *conf, X509V3_CTX *ctx,

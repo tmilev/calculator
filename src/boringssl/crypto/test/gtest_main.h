@@ -18,10 +18,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <gtest/gtest.h>
+#include "../../third_party/googletest/include/gtest/gtest.h"
 
-#include "../../include/openssl/crypto.h>
-#include "../../include/openssl/err.h>
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/err.h"
 
 #if defined(OPENSSL_WINDOWS)
 OPENSSL_MSVC_PRAGMA(warning(push, 3))

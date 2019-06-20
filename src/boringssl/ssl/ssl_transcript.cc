@@ -133,10 +133,10 @@
  * OTHER ENTITY BASED ON INFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS OR
  * OTHERWISE. */
 
-#include "../../include/openssl/ssl.h>
+#include "../include/openssl/ssl.h"
 
-#include "../../include/openssl/buf.h>
-#include "../../include/openssl/digest.h>
+#include "../include/openssl/buf.h"
+#include "../include/openssl/digest.h"
 
 #include "internal.h"
 

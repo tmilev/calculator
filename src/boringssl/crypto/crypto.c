@@ -12,9 +12,9 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include "../../include/openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 
-#include "../../include/openssl/cpu.h>
+#include "../include/openssl/cpu.h"
 
 #include "internal.h"
 

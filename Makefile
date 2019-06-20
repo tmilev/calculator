@@ -65,8 +65,8 @@ ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubun
   sslLocation=found
 endif
 ifneq ($(sslLocation),)
-	CFLAGS+= -DMACRO_use_open_ssl 
-  LIBRARIES_INCLUDED_AT_THE_END+= -lssl -lcrypto  #WARNING believe it or not, the libraries must come AFTER the executable name
+  CFLAGS+= -DMACRO_use_open_ssl 
+#  LIBRARIES_INCLUDED_AT_THE_END+= -lssl -lcrypto  #WARNING believe it or not, the libraries must come AFTER the executable name
 $(info [1;32mOpenssl found.[0m) 
 else
 $(info [1;31mNOT FOUND: Openssl.[0m I will attempt to install it once the calculator is compiled.) 
@@ -154,393 +154,352 @@ vpf9_85TimeDateWrappers.cpp \
 string_constants.cpp \
 source_code_formatter.cpp
 
-# SOURCES_RELATIVE_PATH_C=\
-# boringssl/crypto/asn1/a_bitstr.c \
-# boringssl/crypto/asn1/a_bool.c \
-# boringssl/crypto/asn1/a_d2i_fp.c \
-# boringssl/crypto/asn1/a_dup.c \
-# boringssl/crypto/asn1/a_enum.c \
-# boringssl/crypto/asn1/a_gentm.c \
-# boringssl/crypto/asn1/a_i2d_fp.c \
-# boringssl/crypto/asn1/a_int.c \
-# boringssl/crypto/asn1/a_mbstr.c \
-# boringssl/crypto/asn1/a_object.c \
-# boringssl/crypto/asn1/a_octet.c \
-# boringssl/crypto/asn1/a_print.c \
-# boringssl/crypto/asn1/a_strnid.c \
-# boringssl/crypto/asn1/a_time.c \
-# boringssl/crypto/asn1/a_type.c \
-# boringssl/crypto/asn1/a_utctm.c \
-# boringssl/crypto/asn1/a_utf8.c \
-# boringssl/crypto/asn1/asn1_lib.c \
-# boringssl/crypto/asn1/asn1_par.c \
-# boringssl/crypto/asn1/asn_pack.c \
-# boringssl/crypto/asn1/f_enum.c \
-# boringssl/crypto/asn1/f_int.c \
-# boringssl/crypto/asn1/f_string.c \
-# boringssl/crypto/asn1/tasn_dec.c \
-# boringssl/crypto/asn1/tasn_enc.c \
-# boringssl/crypto/asn1/tasn_fre.c \
-# boringssl/crypto/asn1/tasn_new.c \
-# boringssl/crypto/asn1/tasn_typ.c \
-# boringssl/crypto/asn1/tasn_utl.c \
-# boringssl/crypto/asn1/time_support.c \
-# boringssl/crypto/base64/base64.c \
-# boringssl/crypto/bio/bio.c \
-# boringssl/crypto/bio/bio_mem.c \
-# boringssl/crypto/bio/connect.c \
-# boringssl/crypto/bio/fd.c \
-# boringssl/crypto/bio/file.c \
-# boringssl/crypto/bio/hexdump.c \
-# boringssl/crypto/bio/pair.c \
-# boringssl/crypto/bio/printf.c \
-# boringssl/crypto/bio/socket.c \
-# boringssl/crypto/bio/socket_helper.c \
-# boringssl/crypto/bn_extra/bn_asn1.c \
-# boringssl/crypto/bn_extra/convert.c \
-# boringssl/crypto/buf/buf.c \
-# boringssl/crypto/bytestring/asn1_compat.c \
-# boringssl/crypto/bytestring/ber.c \
-# boringssl/crypto/bytestring/cbb.c \
-# boringssl/crypto/bytestring/cbs.c \
-# boringssl/crypto/bytestring/unicode.c \
-# boringssl/crypto/chacha/chacha.c \
-# boringssl/crypto/cipher_extra/cipher_extra.c \
-# boringssl/crypto/cipher_extra/derive_key.c \
-# boringssl/crypto/cipher_extra/e_aesccm.c \
-# boringssl/crypto/cipher_extra/e_aesctrhmac.c \
-# boringssl/crypto/cipher_extra/e_aesgcmsiv.c \
-# boringssl/crypto/cipher_extra/e_chacha20poly1305.c \
-# boringssl/crypto/cipher_extra/e_null.c \
-# boringssl/crypto/cipher_extra/e_rc2.c \
-# boringssl/crypto/cipher_extra/e_rc4.c \
-# boringssl/crypto/cipher_extra/e_tls.c \
-# boringssl/crypto/cipher_extra/tls_cbc.c \
-# boringssl/crypto/cmac/cmac.c \
-# boringssl/crypto/conf/conf.c \
-# boringssl/crypto/curve25519/spake25519.c \
-# boringssl/crypto/dh/check.c \
-# boringssl/crypto/dh/dh.c \
-# boringssl/crypto/dh/dh_asn1.c \
-# boringssl/crypto/dh/params.c \
-# boringssl/crypto/digest_extra/digest_extra.c \
-# boringssl/crypto/dsa/dsa.c \
-# boringssl/crypto/dsa/dsa_asn1.c \
-# boringssl/crypto/ec_extra/ec_asn1.c \
-# boringssl/crypto/ecdh_extra/ecdh_extra.c \
-# boringssl/crypto/ecdsa_extra/ecdsa_asn1.c \
-# boringssl/crypto/engine/engine.c \
-# boringssl/crypto/err/err.c \
-# boringssl/crypto/evp/digestsign.c \
-# boringssl/crypto/evp/evp.c \
-# boringssl/crypto/evp/evp_asn1.c \
-# boringssl/crypto/evp/evp_ctx.c \
-# boringssl/crypto/evp/p_dsa_asn1.c \
-# boringssl/crypto/evp/p_ec.c \
-# boringssl/crypto/evp/p_ec_asn1.c \
-# boringssl/crypto/evp/p_ed25519.c \
-# boringssl/crypto/evp/p_ed25519_asn1.c \
-# boringssl/crypto/evp/p_rsa.c \
-# boringssl/crypto/evp/p_rsa_asn1.c \
-# boringssl/crypto/evp/pbkdf.c \
-# boringssl/crypto/evp/print.c \
-# boringssl/crypto/evp/scrypt.c \
-# boringssl/crypto/evp/sign.c \
-# boringssl/crypto/fipsmodule/aes/aes.c \
-# boringssl/crypto/fipsmodule/aes/key_wrap.c \
-# boringssl/crypto/fipsmodule/aes/mode_wrappers.c \
-# boringssl/crypto/fipsmodule/bn/asm/x86_64-gcc.c \
-# boringssl/crypto/fipsmodule/bn/add.c \
-# boringssl/crypto/fipsmodule/bn/bn.c \
-# boringssl/crypto/fipsmodule/bn/bytes.c \
-# boringssl/crypto/fipsmodule/bn/cmp.c \
-# boringssl/crypto/fipsmodule/bn/ctx.c \
-# boringssl/crypto/fipsmodule/bn/div.c \
-# boringssl/crypto/fipsmodule/bn/div_extra.c \
-# boringssl/crypto/fipsmodule/bn/exponentiation.c \
-# boringssl/crypto/fipsmodule/bn/gcd.c \
-# boringssl/crypto/fipsmodule/bn/gcd_extra.c \
-# boringssl/crypto/fipsmodule/bn/generic.c \
-# boringssl/crypto/fipsmodule/bn/jacobi.c \
-# boringssl/crypto/fipsmodule/bn/montgomery.c \
-# boringssl/crypto/fipsmodule/bn/montgomery_inv.c \
-# boringssl/crypto/fipsmodule/bn/mul.c \
-# boringssl/crypto/fipsmodule/bn/prime.c \
-# boringssl/crypto/fipsmodule/bn/random.c \
-# boringssl/crypto/fipsmodule/bn/rsaz_exp.c \
-# boringssl/crypto/fipsmodule/bn/shift.c \
-# boringssl/crypto/fipsmodule/bn/sqrt.c \
-# boringssl/crypto/fipsmodule/cipher/aead.c \
-# boringssl/crypto/fipsmodule/cipher/cipher.c \
-# boringssl/crypto/fipsmodule/cipher/e_aes.c \
-# boringssl/crypto/fipsmodule/cipher/e_des.c \
-# boringssl/crypto/fipsmodule/des/des.c \
-# boringssl/crypto/fipsmodule/digest/digest.c \
-# boringssl/crypto/fipsmodule/digest/digests.c \
-# boringssl/crypto/fipsmodule/ec/ec.c \
-# boringssl/crypto/fipsmodule/ec/ec_key.c \
-# boringssl/crypto/fipsmodule/ec/ec_montgomery.c \
-# boringssl/crypto/fipsmodule/ec/felem.c \
-# boringssl/crypto/fipsmodule/ec/oct.c \
-# boringssl/crypto/fipsmodule/ec/p224-64.c \
-# boringssl/crypto/fipsmodule/ec/p256-x86_64.c \
-# boringssl/crypto/fipsmodule/ec/scalar.c \
-# boringssl/crypto/fipsmodule/ec/simple.c \
-# boringssl/crypto/fipsmodule/ec/simple_mul.c \
-# boringssl/crypto/fipsmodule/ec/util.c \
-# boringssl/crypto/fipsmodule/ec/wnaf.c \
-# boringssl/crypto/fipsmodule/ecdh/ecdh.c \
-# boringssl/crypto/fipsmodule/ecdsa/ecdsa.c \
-# boringssl/crypto/fipsmodule/hmac/hmac.c \
-# boringssl/crypto/fipsmodule/md4/md4.c \
-# boringssl/crypto/fipsmodule/md5/md5.c \
-# boringssl/crypto/fipsmodule/modes/cbc.c \
-# boringssl/crypto/fipsmodule/modes/ccm.c \
-# boringssl/crypto/fipsmodule/modes/cfb.c \
-# boringssl/crypto/fipsmodule/modes/ctr.c \
-# boringssl/crypto/fipsmodule/modes/gcm.c \
-# boringssl/crypto/fipsmodule/modes/ofb.c \
-# boringssl/crypto/fipsmodule/modes/polyval.c \
-# boringssl/crypto/fipsmodule/rand/ctrdrbg.c \
-# boringssl/crypto/fipsmodule/rand/rand.c \
-# boringssl/crypto/fipsmodule/rand/urandom.c \
-# boringssl/crypto/fipsmodule/rsa/blinding.c \
-# boringssl/crypto/fipsmodule/rsa/padding.c \
-# boringssl/crypto/fipsmodule/rsa/rsa.c \
-# boringssl/crypto/fipsmodule/rsa/rsa_impl.c \
-# boringssl/crypto/fipsmodule/self_check/self_check.c \
-# boringssl/crypto/fipsmodule/sha/sha1-altivec.c \
-# boringssl/crypto/fipsmodule/sha/sha1.c \
-# boringssl/crypto/fipsmodule/sha/sha256.c \
-# boringssl/crypto/fipsmodule/sha/sha512.c \
-# boringssl/crypto/fipsmodule/tls/kdf.c \
-# boringssl/crypto/fipsmodule/bcm.c \
-# boringssl/crypto/fipsmodule/fips_shared_support.c \
-# boringssl/crypto/fipsmodule/is_fips.c \
-# boringssl/crypto/hkdf/hkdf.c \
-# boringssl/crypto/hrss/hrss.c \
-# boringssl/crypto/lhash/lhash.c \
-# boringssl/crypto/obj/obj.c \
-# boringssl/crypto/obj/obj_xref.c \
-# boringssl/crypto/pem/pem_all.c \
-# boringssl/crypto/pem/pem_info.c \
-# boringssl/crypto/pem/pem_lib.c \
-# boringssl/crypto/pem/pem_oth.c \
-# boringssl/crypto/pem/pem_pk8.c \
-# boringssl/crypto/pem/pem_pkey.c \
-# boringssl/crypto/pem/pem_x509.c \
-# boringssl/crypto/pem/pem_xaux.c \
-# boringssl/crypto/pkcs7/pkcs7.c \
-# boringssl/crypto/pkcs7/pkcs7_x509.c \
-# boringssl/crypto/pkcs8/p5_pbev2.c \
-# boringssl/crypto/pkcs8/pkcs8.c \
-# boringssl/crypto/pkcs8/pkcs8_x509.c \
-# boringssl/crypto/poly1305/poly1305.c \
-# boringssl/crypto/poly1305/poly1305_arm.c \
-# boringssl/crypto/poly1305/poly1305_vec.c \
-# boringssl/crypto/pool/pool.c \
-# boringssl/crypto/rand_extra/deterministic.c \
-# boringssl/crypto/rand_extra/forkunsafe.c \
-# boringssl/crypto/rand_extra/fuchsia.c \
-# boringssl/crypto/rand_extra/rand_extra.c \
-# boringssl/crypto/rand_extra/windows.c \
-# boringssl/crypto/rc4/rc4.c \
-# boringssl/crypto/rsa_extra/rsa_asn1.c \
-# boringssl/crypto/rsa_extra/rsa_print.c \
-# boringssl/crypto/stack/stack.c \
-# boringssl/crypto/x509/a_digest.c \
-# boringssl/crypto/x509/a_sign.c \
-# boringssl/crypto/x509/a_strex.c \
-# boringssl/crypto/x509/a_verify.c \
-# boringssl/crypto/x509/algorithm.c \
-# boringssl/crypto/x509/asn1_gen.c \
-# boringssl/crypto/x509/by_dir.c \
-# boringssl/crypto/x509/by_file.c \
-# boringssl/crypto/x509/i2d_pr.c \
-# boringssl/crypto/x509/rsa_pss.c \
-# boringssl/crypto/x509/t_crl.c \
-# boringssl/crypto/x509/t_req.c \
-# boringssl/crypto/x509/t_x509.c \
-# boringssl/crypto/x509/t_x509a.c \
-# boringssl/crypto/x509/x509.c \
-# boringssl/crypto/x509/x509_att.c \
-# boringssl/crypto/x509/x509_cmp.c \
-# boringssl/crypto/x509/x509_d2.c \
-# boringssl/crypto/x509/x509_def.c \
-# boringssl/crypto/x509/x509_ext.c \
-# boringssl/crypto/x509/x509_lu.c \
-# boringssl/crypto/x509/x509_obj.c \
-# boringssl/crypto/x509/x509_r2x.c \
-# boringssl/crypto/x509/x509_req.c \
-# boringssl/crypto/x509/x509_set.c \
-# boringssl/crypto/x509/x509_trs.c \
-# boringssl/crypto/x509/x509_txt.c \
-# boringssl/crypto/x509/x509_v3.c \
-# boringssl/crypto/x509/x509_vfy.c \
-# boringssl/crypto/x509/x509_vpm.c \
-# boringssl/crypto/x509/x509cset.c \
-# boringssl/crypto/x509/x509name.c \
-# boringssl/crypto/x509/x509rset.c \
-# boringssl/crypto/x509/x509spki.c \
-# boringssl/crypto/x509/x_algor.c \
-# boringssl/crypto/x509/x_all.c \
-# boringssl/crypto/x509/x_attrib.c \
-# boringssl/crypto/x509/x_crl.c \
-# boringssl/crypto/x509/x_exten.c \
-# boringssl/crypto/x509/x_info.c \
-# boringssl/crypto/x509/x_name.c \
-# boringssl/crypto/x509/x_pkey.c \
-# boringssl/crypto/x509/x_pubkey.c \
-# boringssl/crypto/x509/x_req.c \
-# boringssl/crypto/x509/x_sig.c \
-# boringssl/crypto/x509/x_spki.c \
-# boringssl/crypto/x509/x_val.c \
-# boringssl/crypto/x509/x_x509.c \
-# boringssl/crypto/x509/x_x509a.c \
-# boringssl/crypto/x509v3/pcy_cache.c \
-# boringssl/crypto/x509v3/pcy_data.c \
-# boringssl/crypto/x509v3/pcy_lib.c \
-# boringssl/crypto/x509v3/pcy_map.c \
-# boringssl/crypto/x509v3/pcy_node.c \
-# boringssl/crypto/x509v3/pcy_tree.c \
-# boringssl/crypto/x509v3/v3_akey.c \
-# boringssl/crypto/x509v3/v3_akeya.c \
-# boringssl/crypto/x509v3/v3_alt.c \
-# boringssl/crypto/x509v3/v3_bcons.c \
-# boringssl/crypto/x509v3/v3_bitst.c \
-# boringssl/crypto/x509v3/v3_conf.c \
-# boringssl/crypto/x509v3/v3_cpols.c \
-# boringssl/crypto/x509v3/v3_crld.c \
-# boringssl/crypto/x509v3/v3_enum.c \
-# boringssl/crypto/x509v3/v3_extku.c \
-# boringssl/crypto/x509v3/v3_genn.c \
-# boringssl/crypto/x509v3/v3_ia5.c \
-# boringssl/crypto/x509v3/v3_info.c \
-# boringssl/crypto/x509v3/v3_int.c \
-# boringssl/crypto/x509v3/v3_lib.c \
-# boringssl/crypto/x509v3/v3_ncons.c \
-# boringssl/crypto/x509v3/v3_ocsp.c \
-# boringssl/crypto/x509v3/v3_pci.c \
-# boringssl/crypto/x509v3/v3_pcia.c \
-# boringssl/crypto/x509v3/v3_pcons.c \
-# boringssl/crypto/x509v3/v3_pku.c \
-# boringssl/crypto/x509v3/v3_pmaps.c \
-# boringssl/crypto/x509v3/v3_prn.c \
-# boringssl/crypto/x509v3/v3_purp.c \
-# boringssl/crypto/x509v3/v3_skey.c \
-# boringssl/crypto/x509v3/v3_sxnet.c \
-# boringssl/crypto/x509v3/v3_utl.c \
-# boringssl/crypto/cpu-aarch64-fuchsia.c \
-# boringssl/crypto/cpu-aarch64-linux.c \
-# boringssl/crypto/cpu-arm-linux.c \
-# boringssl/crypto/cpu-arm.c \
-# boringssl/crypto/cpu-intel.c \
-# boringssl/crypto/cpu-ppc64le.c \
-# boringssl/crypto/crypto.c \
-# boringssl/crypto/ex_data.c \
-# boringssl/crypto/mem.c \
-# boringssl/crypto/refcount_c11.c \
-# boringssl/crypto/refcount_lock.c \
-# boringssl/crypto/thread.c \
-# boringssl/crypto/thread_none.c \
-# boringssl/crypto/thread_pthread.c \
-# boringssl/crypto/thread_win.c \
-# boringssl/decrepit/bio/base64_bio.c \
-# boringssl/decrepit/blowfish/blowfish.c \
-# boringssl/decrepit/cast/cast.c \
-# boringssl/decrepit/cast/cast_tables.c \
-# boringssl/decrepit/cfb/cfb.c \
-# boringssl/decrepit/des/cfb64ede.c \
-# boringssl/decrepit/dh/dh_decrepit.c \
-# boringssl/decrepit/dsa/dsa_decrepit.c \
-# boringssl/decrepit/evp/dss1.c \
-# boringssl/decrepit/evp/evp_do_all.c \
-# boringssl/decrepit/obj/obj_decrepit.c \
-# boringssl/decrepit/rc4/rc4_decrepit.c \
-# boringssl/decrepit/ripemd/ripemd.c \
-# boringssl/decrepit/rsa/rsa_decrepit.c \
-# boringssl/decrepit/ssl/ssl_decrepit.c \
-# boringssl/decrepit/x509/x509_decrepit.c \
-# boringssl/decrepit/xts/xts.c \
-# boringssl/fipstools/test_fips.c \
-# boringssl/third_party/fiat/curve25519.c \
-# boringssl/third_party/fiat/p256.c \
-# boringssl/third_party/sike/asm/fp_generic.c \
-# boringssl/third_party/sike/fpx.c \
-# boringssl/third_party/sike/isogeny.c \
-# boringssl/third_party/sike/P503.c \
-# boringssl/third_party/sike/sike.c
+SOURCES_RELATIVE_PATH_C=\
+boringssl/crypto/asn1/a_bitstr.c \
+boringssl/crypto/asn1/a_bool.c \
+boringssl/crypto/asn1/a_d2i_fp.c \
+boringssl/crypto/asn1/a_dup.c \
+boringssl/crypto/asn1/a_enum.c \
+boringssl/crypto/asn1/a_gentm.c \
+boringssl/crypto/asn1/a_i2d_fp.c \
+boringssl/crypto/asn1/a_int.c \
+boringssl/crypto/asn1/a_mbstr.c \
+boringssl/crypto/asn1/a_object.c \
+boringssl/crypto/asn1/a_octet.c \
+boringssl/crypto/asn1/a_print.c \
+boringssl/crypto/asn1/a_strnid.c \
+boringssl/crypto/asn1/a_time.c \
+boringssl/crypto/asn1/a_type.c \
+boringssl/crypto/asn1/a_utctm.c \
+boringssl/crypto/asn1/a_utf8.c \
+boringssl/crypto/asn1/asn1_lib.c \
+boringssl/crypto/asn1/asn1_par.c \
+boringssl/crypto/asn1/asn_pack.c \
+boringssl/crypto/asn1/f_enum.c \
+boringssl/crypto/asn1/f_int.c \
+boringssl/crypto/asn1/f_string.c \
+boringssl/crypto/asn1/tasn_dec.c \
+boringssl/crypto/asn1/tasn_enc.c \
+boringssl/crypto/asn1/tasn_fre.c \
+boringssl/crypto/asn1/tasn_new.c \
+boringssl/crypto/asn1/tasn_typ.c \
+boringssl/crypto/asn1/tasn_utl.c \
+boringssl/crypto/asn1/time_support.c \
+boringssl/crypto/base64/base64.c \
+boringssl/crypto/bio/bio.c \
+boringssl/crypto/bio/bio_mem.c \
+boringssl/crypto/bio/connect.c \
+boringssl/crypto/bio/fd.c \
+boringssl/crypto/bio/file.c \
+boringssl/crypto/bio/hexdump.c \
+boringssl/crypto/bio/pair.c \
+boringssl/crypto/bio/printf.c \
+boringssl/crypto/bio/socket.c \
+boringssl/crypto/bio/socket_helper.c \
+boringssl/crypto/bn_extra/bn_asn1.c \
+boringssl/crypto/bn_extra/convert.c \
+boringssl/crypto/buf/buf.c \
+boringssl/crypto/bytestring/asn1_compat.c \
+boringssl/crypto/bytestring/ber.c \
+boringssl/crypto/bytestring/cbb.c \
+boringssl/crypto/bytestring/cbs.c \
+boringssl/crypto/bytestring/unicode.c \
+boringssl/crypto/chacha/chacha.c \
+boringssl/crypto/cmac/cmac.c \
+boringssl/crypto/conf/conf.c \
+boringssl/crypto/curve25519/spake25519.c \
+boringssl/crypto/dh/check.c \
+boringssl/crypto/dh/dh.c \
+boringssl/crypto/dh/dh_asn1.c \
+boringssl/crypto/dh/params.c \
+boringssl/crypto/digest_extra/digest_extra.c \
+boringssl/crypto/dsa/dsa.c \
+boringssl/crypto/dsa/dsa_asn1.c \
+boringssl/crypto/ec_extra/ec_asn1.c \
+boringssl/crypto/ecdh_extra/ecdh_extra.c \
+boringssl/crypto/ecdsa_extra/ecdsa_asn1.c \
+boringssl/crypto/engine/engine.c \
+boringssl/crypto/err/err.c \
+boringssl/crypto/evp/digestsign.c \
+boringssl/crypto/evp/evp.c \
+boringssl/crypto/evp/evp_asn1.c \
+boringssl/crypto/evp/evp_ctx.c \
+boringssl/crypto/evp/p_dsa_asn1.c \
+boringssl/crypto/evp/p_ec.c \
+boringssl/crypto/evp/p_ec_asn1.c \
+boringssl/crypto/evp/p_ed25519.c \
+boringssl/crypto/evp/p_ed25519_asn1.c \
+boringssl/crypto/evp/p_rsa.c \
+boringssl/crypto/evp/p_rsa_asn1.c \
+boringssl/crypto/evp/pbkdf.c \
+boringssl/crypto/evp/print.c \
+boringssl/crypto/evp/scrypt.c \
+boringssl/crypto/evp/sign.c \
+boringssl/crypto/hkdf/hkdf.c \
+boringssl/crypto/hrss/hrss.c \
+boringssl/crypto/lhash/lhash.c \
+boringssl/crypto/obj/obj.c \
+boringssl/crypto/obj/obj_xref.c \
+boringssl/crypto/pem/pem_all.c \
+boringssl/crypto/pem/pem_info.c \
+boringssl/crypto/pem/pem_lib.c \
+boringssl/crypto/pem/pem_oth.c \
+boringssl/crypto/pem/pem_pk8.c \
+boringssl/crypto/pem/pem_pkey.c \
+boringssl/crypto/pem/pem_x509.c \
+boringssl/crypto/pem/pem_xaux.c \
+boringssl/crypto/pkcs7/pkcs7.c \
+boringssl/crypto/pkcs7/pkcs7_x509.c \
+boringssl/crypto/pkcs8/p5_pbev2.c \
+boringssl/crypto/pkcs8/pkcs8.c \
+boringssl/crypto/pkcs8/pkcs8_x509.c \
+boringssl/crypto/poly1305/poly1305.c \
+boringssl/crypto/poly1305/poly1305_arm.c \
+boringssl/crypto/poly1305/poly1305_vec.c \
+boringssl/crypto/pool/pool.c \
+boringssl/crypto/rand_extra/deterministic.c \
+boringssl/crypto/rand_extra/forkunsafe.c \
+boringssl/crypto/rand_extra/fuchsia.c \
+boringssl/crypto/rand_extra/rand_extra.c \
+boringssl/crypto/rand_extra/windows.c \
+boringssl/crypto/rc4/rc4.c \
+boringssl/crypto/rsa_extra/rsa_asn1.c \
+boringssl/crypto/rsa_extra/rsa_print.c \
+boringssl/crypto/stack/stack.c \
+boringssl/crypto/x509/a_digest.c \
+boringssl/crypto/x509/a_sign.c \
+boringssl/crypto/x509/a_strex.c \
+boringssl/crypto/x509/a_verify.c \
+boringssl/crypto/x509/algorithm.c \
+boringssl/crypto/x509/asn1_gen.c \
+boringssl/crypto/x509/by_dir.c \
+boringssl/crypto/x509/by_file.c \
+boringssl/crypto/x509/i2d_pr.c \
+boringssl/crypto/x509/rsa_pss.c \
+boringssl/crypto/x509/t_crl.c \
+boringssl/crypto/x509/t_req.c \
+boringssl/crypto/x509/t_x509.c \
+boringssl/crypto/x509/t_x509a.c \
+boringssl/crypto/x509/x509.c \
+boringssl/crypto/x509/x509_att.c \
+boringssl/crypto/x509/x509_cmp.c \
+boringssl/crypto/x509/x509_d2.c \
+boringssl/crypto/x509/x509_def.c \
+boringssl/crypto/x509/x509_ext.c \
+boringssl/crypto/x509/x509_lu.c \
+boringssl/crypto/x509/x509_obj.c \
+boringssl/crypto/x509/x509_r2x.c \
+boringssl/crypto/x509/x509_req.c \
+boringssl/crypto/x509/x509_set.c \
+boringssl/crypto/x509/x509_trs.c \
+boringssl/crypto/x509/x509_txt.c \
+boringssl/crypto/x509/x509_v3.c \
+boringssl/crypto/x509/x509_vfy.c \
+boringssl/crypto/x509/x509_vpm.c \
+boringssl/crypto/x509/x509cset.c \
+boringssl/crypto/x509/x509name.c \
+boringssl/crypto/x509/x509rset.c \
+boringssl/crypto/x509/x509spki.c \
+boringssl/crypto/x509/x_algor.c \
+boringssl/crypto/x509/x_all.c \
+boringssl/crypto/x509/x_attrib.c \
+boringssl/crypto/x509/x_crl.c \
+boringssl/crypto/x509/x_exten.c \
+boringssl/crypto/x509/x_info.c \
+boringssl/crypto/x509/x_name.c \
+boringssl/crypto/x509/x_pkey.c \
+boringssl/crypto/x509/x_pubkey.c \
+boringssl/crypto/x509/x_req.c \
+boringssl/crypto/x509/x_sig.c \
+boringssl/crypto/x509/x_spki.c \
+boringssl/crypto/x509/x_val.c \
+boringssl/crypto/x509/x_x509.c \
+boringssl/crypto/x509/x_x509a.c \
+boringssl/crypto/x509v3/pcy_cache.c \
+boringssl/crypto/x509v3/pcy_data.c \
+boringssl/crypto/x509v3/pcy_lib.c \
+boringssl/crypto/x509v3/pcy_map.c \
+boringssl/crypto/x509v3/pcy_node.c \
+boringssl/crypto/x509v3/pcy_tree.c \
+boringssl/crypto/x509v3/v3_akey.c \
+boringssl/crypto/x509v3/v3_akeya.c \
+boringssl/crypto/x509v3/v3_alt.c \
+boringssl/crypto/x509v3/v3_bcons.c \
+boringssl/crypto/x509v3/v3_bitst.c \
+boringssl/crypto/x509v3/v3_conf.c \
+boringssl/crypto/x509v3/v3_cpols.c \
+boringssl/crypto/x509v3/v3_crld.c \
+boringssl/crypto/x509v3/v3_enum.c \
+boringssl/crypto/x509v3/v3_extku.c \
+boringssl/crypto/x509v3/v3_genn.c \
+boringssl/crypto/x509v3/v3_ia5.c \
+boringssl/crypto/x509v3/v3_info.c \
+boringssl/crypto/x509v3/v3_int.c \
+boringssl/crypto/x509v3/v3_lib.c \
+boringssl/crypto/x509v3/v3_ncons.c \
+boringssl/crypto/x509v3/v3_ocsp.c \
+boringssl/crypto/x509v3/v3_pci.c \
+boringssl/crypto/x509v3/v3_pcia.c \
+boringssl/crypto/x509v3/v3_pcons.c \
+boringssl/crypto/x509v3/v3_pku.c \
+boringssl/crypto/x509v3/v3_pmaps.c \
+boringssl/crypto/x509v3/v3_prn.c \
+boringssl/crypto/x509v3/v3_purp.c \
+boringssl/crypto/x509v3/v3_skey.c \
+boringssl/crypto/x509v3/v3_sxnet.c \
+boringssl/crypto/x509v3/v3_utl.c \
+boringssl/crypto/cpu-aarch64-fuchsia.c \
+boringssl/crypto/cpu-aarch64-linux.c \
+boringssl/crypto/cpu-arm-linux.c \
+boringssl/crypto/cpu-arm.c \
+boringssl/crypto/cpu-intel.c \
+boringssl/crypto/cpu-ppc64le.c \
+boringssl/crypto/crypto.c \
+boringssl/crypto/ex_data.c \
+boringssl/crypto/mem.c \
+boringssl/crypto/refcount_c11.c \
+boringssl/crypto/refcount_lock.c \
+boringssl/crypto/thread.c \
+boringssl/crypto/thread_none.c \
+boringssl/crypto/thread_pthread.c \
+boringssl/crypto/thread_win.c \
+boringssl/crypto/fipsmodule/aes/aes.c \
+boringssl/crypto/fipsmodule/aes/key_wrap.c \
+boringssl/crypto/fipsmodule/aes/mode_wrappers.c \
+boringssl/crypto/fipsmodule/bn/asm/x86_64-gcc.c \
+boringssl/crypto/fipsmodule/bn/add.c \
+boringssl/crypto/fipsmodule/bn/bn.c \
+boringssl/crypto/fipsmodule/bn/bytes.c \
+boringssl/crypto/fipsmodule/bn/cmp.c \
+boringssl/crypto/fipsmodule/bn/ctx.c \
+boringssl/crypto/fipsmodule/bn/div.c \
+boringssl/crypto/fipsmodule/bn/div_extra.c \
+boringssl/crypto/fipsmodule/bn/exponentiation.c \
+boringssl/crypto/fipsmodule/bn/gcd.c \
+boringssl/crypto/fipsmodule/bn/gcd_extra.c \
+boringssl/crypto/fipsmodule/bn/generic.c \
+boringssl/crypto/fipsmodule/bn/jacobi.c \
+boringssl/crypto/fipsmodule/bn/montgomery.c \
+boringssl/crypto/fipsmodule/bn/montgomery_inv.c \
+boringssl/crypto/fipsmodule/bn/mul.c \
+boringssl/crypto/fipsmodule/bn/prime.c \
+boringssl/crypto/fipsmodule/bn/random.c \
+boringssl/crypto/fipsmodule/bn/rsaz_exp.c \
+boringssl/crypto/fipsmodule/bn/shift.c \
+boringssl/crypto/fipsmodule/bn/sqrt.c \
+boringssl/crypto/fipsmodule/cipher/aead.c \
+boringssl/crypto/fipsmodule/cipher/cipher.c \
+boringssl/crypto/fipsmodule/cipher/e_aes.c \
+boringssl/crypto/fipsmodule/cipher/e_des.c \
+boringssl/crypto/fipsmodule/des/des.c \
+boringssl/crypto/fipsmodule/digest/digest.c \
+boringssl/crypto/fipsmodule/digest/digests.c \
+boringssl/crypto/fipsmodule/ec/ec.c \
+boringssl/crypto/fipsmodule/ec/ec_key.c \
+boringssl/crypto/fipsmodule/ec/ec_montgomery.c \
+boringssl/crypto/fipsmodule/ec/felem.c \
+boringssl/crypto/fipsmodule/ec/oct.c \
+boringssl/crypto/fipsmodule/ec/p224-64.c \
+boringssl/crypto/fipsmodule/ec/p256-x86_64.c \
+boringssl/crypto/fipsmodule/ec/scalar.c \
+boringssl/crypto/fipsmodule/ec/simple.c \
+boringssl/crypto/fipsmodule/ec/simple_mul.c \
+boringssl/crypto/fipsmodule/ec/util.c \
+boringssl/crypto/fipsmodule/ec/wnaf.c \
+boringssl/crypto/fipsmodule/ecdh/ecdh.c \
+boringssl/crypto/fipsmodule/ecdsa/ecdsa.c \
+boringssl/crypto/fipsmodule/hmac/hmac.c \
+boringssl/crypto/fipsmodule/md4/md4.c \
+boringssl/crypto/fipsmodule/md5/md5.c \
+boringssl/crypto/fipsmodule/modes/cbc.c \
+boringssl/crypto/fipsmodule/modes/ccm.c \
+boringssl/crypto/fipsmodule/modes/cfb.c \
+boringssl/crypto/fipsmodule/modes/ctr.c \
+boringssl/crypto/fipsmodule/modes/gcm.c \
+boringssl/crypto/fipsmodule/modes/ofb.c \
+boringssl/crypto/fipsmodule/modes/polyval.c \
+boringssl/crypto/fipsmodule/rand/ctrdrbg.c \
+boringssl/crypto/fipsmodule/rand/rand.c \
+boringssl/crypto/fipsmodule/rand/urandom.c \
+boringssl/crypto/fipsmodule/rsa/blinding.c \
+boringssl/crypto/fipsmodule/rsa/padding.c \
+boringssl/crypto/fipsmodule/rsa/rsa.c \
+boringssl/crypto/fipsmodule/rsa/rsa_impl.c \
+boringssl/crypto/fipsmodule/self_check/self_check.c \
+boringssl/crypto/fipsmodule/sha/sha1-altivec.c \
+boringssl/crypto/fipsmodule/sha/sha1.c \
+boringssl/crypto/fipsmodule/sha/sha256.c \
+boringssl/crypto/fipsmodule/sha/sha512.c \
+boringssl/crypto/fipsmodule/tls/kdf.c \
+boringssl/crypto/fipsmodule/fips_shared_support.c \
+boringssl/crypto/fipsmodule/is_fips.c \
+boringssl/decrepit/bio/base64_bio.c \
+boringssl/decrepit/blowfish/blowfish.c \
+boringssl/decrepit/cast/cast.c \
+boringssl/decrepit/cast/cast_tables.c \
+boringssl/decrepit/cfb/cfb.c \
+boringssl/decrepit/des/cfb64ede.c \
+boringssl/decrepit/dh/dh_decrepit.c \
+boringssl/decrepit/dsa/dsa_decrepit.c \
+boringssl/decrepit/evp/dss1.c \
+boringssl/decrepit/evp/evp_do_all.c \
+boringssl/decrepit/obj/obj_decrepit.c \
+boringssl/decrepit/rc4/rc4_decrepit.c \
+boringssl/decrepit/ripemd/ripemd.c \
+boringssl/decrepit/rsa/rsa_decrepit.c \
+boringssl/decrepit/ssl/ssl_decrepit.c \
+boringssl/decrepit/x509/x509_decrepit.c \
+boringssl/decrepit/xts/xts.c \
+boringssl/third_party/fiat/curve25519.c \
+boringssl/third_party/fiat/p256.c \
+boringssl/third_party/sike/asm/fp_generic.c \
+boringssl/third_party/sike/fpx.c \
+boringssl/third_party/sike/isogeny.c \
+boringssl/third_party/sike/P503.c \
+boringssl/third_party/sike/sike.c \
 
-# SOURCES_RELATIVE_PATH_CC=\
-# boringssl/crypto/test/gtest_main.cc \
-# boringssl/crypto/test/malloc.cc \
-# boringssl/crypto/test/test_util.cc \
-# boringssl/crypto/test/wycheproof_util.cc \
-# boringssl/fipstools/cavp_main.cc \
-# boringssl/ssl/test/async_bio.cc \
-# boringssl/ssl/test/bssl_shim.cc \
-# boringssl/ssl/test/handshake_util.cc \
-# boringssl/ssl/test/handshaker.cc \
-# boringssl/ssl/test/packeted_bio.cc \
-# boringssl/ssl/test/settings_writer.cc \
-# boringssl/ssl/test/test_config.cc \
-# boringssl/ssl/test/test_state.cc \
-# boringssl/ssl/bio_ssl.cc \
-# boringssl/ssl/d1_both.cc \
-# boringssl/ssl/d1_lib.cc \
-# boringssl/ssl/d1_pkt.cc \
-# boringssl/ssl/d1_srtp.cc \
-# boringssl/ssl/dtls_method.cc \
-# boringssl/ssl/dtls_record.cc \
-# boringssl/ssl/handoff.cc \
-# boringssl/ssl/handshake.cc \
-# boringssl/ssl/handshake_client.cc \
-# boringssl/ssl/handshake_server.cc \
-# boringssl/ssl/s3_both.cc \
-# boringssl/ssl/s3_lib.cc \
-# boringssl/ssl/s3_pkt.cc \
-# boringssl/ssl/ssl_aead_ctx.cc \
-# boringssl/ssl/ssl_asn1.cc \
-# boringssl/ssl/ssl_buffer.cc \
-# boringssl/ssl/ssl_cert.cc \
-# boringssl/ssl/ssl_cipher.cc \
-# boringssl/ssl/ssl_file.cc \
-# boringssl/ssl/ssl_key_share.cc \
-# boringssl/ssl/ssl_lib.cc \
-# boringssl/ssl/ssl_privkey.cc \
-# boringssl/ssl/ssl_session.cc \
-# boringssl/ssl/ssl_stat.cc \
-# boringssl/ssl/ssl_transcript.cc \
-# boringssl/ssl/ssl_versions.cc \
-# boringssl/ssl/ssl_x509.cc \
-# boringssl/ssl/t1_enc.cc \
-# boringssl/ssl/t1_lib.cc \
-# boringssl/ssl/tls13_both.cc \
-# boringssl/ssl/tls13_client.cc \
-# boringssl/ssl/tls13_enc.cc \
-# boringssl/ssl/tls13_server.cc \
-# boringssl/ssl/tls_method.cc \
-# boringssl/ssl/tls_record.cc \
-# boringssl/tool/args.cc \
-# boringssl/tool/ciphers.cc \
-# boringssl/tool/client.cc \
-# boringssl/tool/const.cc \
-# boringssl/tool/digest.cc \
-# boringssl/tool/file.cc \
-# boringssl/tool/generate_ed25519.cc \
-# boringssl/tool/genrsa.cc \
-# boringssl/tool/pkcs12.cc \
-# boringssl/tool/rand.cc \
-# boringssl/tool/server.cc \
-# boringssl/tool/sign.cc \
-# boringssl/tool/speed.cc \
-# boringssl/tool/tool.cc \
-# boringssl/tool/transport_common.cc
+SOURCES_RELATIVE_PATH_CC=\
+boringssl/ssl/bio_ssl.cc \
+boringssl/ssl/d1_both.cc \
+boringssl/ssl/d1_lib.cc \
+boringssl/ssl/d1_pkt.cc \
+boringssl/ssl/d1_srtp.cc \
+boringssl/ssl/dtls_method.cc \
+boringssl/ssl/dtls_record.cc \
+boringssl/ssl/handoff.cc \
+boringssl/ssl/handshake.cc \
+boringssl/ssl/handshake_client.cc \
+boringssl/ssl/handshake_server.cc \
+boringssl/ssl/s3_both.cc \
+boringssl/ssl/s3_lib.cc \
+boringssl/ssl/s3_pkt.cc \
+boringssl/ssl/ssl_aead_ctx.cc \
+boringssl/ssl/ssl_asn1.cc \
+boringssl/ssl/ssl_buffer.cc \
+boringssl/ssl/ssl_cert.cc \
+boringssl/ssl/ssl_cipher.cc \
+boringssl/ssl/ssl_file.cc \
+boringssl/ssl/ssl_key_share.cc \
+boringssl/ssl/ssl_lib.cc \
+boringssl/ssl/ssl_privkey.cc \
+boringssl/ssl/ssl_session.cc \
+boringssl/ssl/ssl_stat.cc \
+boringssl/ssl/ssl_transcript.cc \
+boringssl/ssl/ssl_versions.cc \
+boringssl/ssl/ssl_x509.cc \
+boringssl/ssl/t1_enc.cc \
+boringssl/ssl/t1_lib.cc \
+boringssl/ssl/tls13_both.cc \
+boringssl/ssl/tls13_client.cc \
+boringssl/ssl/tls13_enc.cc \
+boringssl/ssl/tls13_server.cc \
+boringssl/ssl/tls_method.cc \
+boringssl/ssl/tls_record.cc
 
 
 OBJECTS=$(addprefix bin/, $(SOURCES_RELATIVE_PATH:.cpp=.o))
-# OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH_C:.c=.o))
-# OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH_CC:.cc=.o))
+OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH_C:.c=.o))
+OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH_CC:.cc=.o))
 DEPENDENCIES=$(OBJECTS:.o=.d)
 DIRECTORIES=$(dir $(OBJECTS))
 

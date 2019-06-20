@@ -15,7 +15,7 @@
 #ifndef OPENSSL_HEADER_CRYPTO_TEST_WYCHEPROOF_UTIL_H
 #define OPENSSL_HEADER_CRYPTO_TEST_WYCHEPROOF_UTIL_H
 
-#include "../../include/openssl/base.h>
+#include "../../include/openssl/base.h"
 
 
 // This header contains convenience functions for Wycheproof tests.

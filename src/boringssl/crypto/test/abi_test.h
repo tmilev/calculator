@@ -15,13 +15,13 @@
 #ifndef OPENSSL_HEADER_ABI_TEST_H
 #define OPENSSL_HEADER_ABI_TEST_H
 
-#include <gtest/gtest.h>
+#include "../../third_party/googletest/include/gtest/gtest.h"
 
 #include <string>
 #include <type_traits>
 #include <vector>
 
-#include <openssl/base.h>
+#include "../../include/openssl/base.h"
 
 #include "../internal.h"
 

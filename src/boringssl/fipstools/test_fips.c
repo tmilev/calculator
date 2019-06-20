@@ -17,17 +17,17 @@
 
 #include <stdio.h>
 
-#include "../../include/openssl/aead.h>
-#include "../../include/openssl/aes.h>
-#include "../../include/openssl/bn.h>
-#include "../../include/openssl/crypto.h>
-#include "../../include/openssl/des.h>
-#include "../../include/openssl/ecdsa.h>
-#include "../../include/openssl/ec_key.h>
-#include "../../include/openssl/hmac.h>
-#include "../../include/openssl/nid.h>
-#include "../../include/openssl/rsa.h>
-#include "../../include/openssl/sha.h>
+#include "../include/openssl/aead.h"
+#include "../include/openssl/aes.h"
+#include "../include/openssl/bn.h"
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/des.h"
+#include "../include/openssl/ecdsa.h"
+#include "../include/openssl/ec_key.h"
+#include "../include/openssl/hmac.h"
+#include "../include/openssl/nid.h"
+#include "../include/openssl/rsa.h"
+#include "../include/openssl/sha.h"
 
 #include "../crypto/fipsmodule/rand/internal.h"
 #include "../crypto/internal.h"
@@ -42,25 +42,31 @@ static void hexdump(const void *a, size_t len) {
   printf("\n");
 }
 
+int main_cleanup() {
+  printf("FAIL\n");
+  abort();
+  return -1;
+}
+
 int main(int argc, char **argv) {
   CRYPTO_library_init();
 
-  static const uint8_t kAESKey[16] = "BoringCrypto Key";
-  static const uint8_t kPlaintext[64] =
+  static const uint8_t kAESKey[17] = "BoringCrypto Key";
+  static const uint8_t kPlaintext[65] =
       "BoringCryptoModule FIPS KAT Encryption and Decryption Plaintext!";
-  static const DES_cblock kDESKey1 = {"BCMDESK1"};
-  static const DES_cblock kDESKey2 = {"BCMDESK2"};
-  static const DES_cblock kDESKey3 = {"BCMDESK3"};
-  static const DES_cblock kDESIV = {"BCMDESIV"};
+  static DES_cblock kDESKey1; kDESKey1.fromString("BCMDESK1");
+  static DES_cblock kDESKey2; kDESKey2.fromString("BCMDESK2");
+  static DES_cblock kDESKey3; kDESKey3.fromString("BCMDESK3");
+  static DES_cblock kDESIV  ; kDESIV  .fromString("BCMDESIV");
   static const uint8_t kPlaintextSHA256[32] = {
       0x37, 0xbd, 0x70, 0x53, 0x72, 0xfc, 0xd4, 0x03, 0x79, 0x70, 0xfb,
       0x06, 0x95, 0xb1, 0x2a, 0x82, 0x48, 0xe1, 0x3e, 0xf2, 0x33, 0xfb,
       0xef, 0x29, 0x81, 0x22, 0x45, 0x40, 0x43, 0x70, 0xce, 0x0f};
-  const uint8_t kDRBGEntropy[48] =
+  const uint8_t kDRBGEntropy[49] =
       "DBRG Initial Entropy                            ";
-  const uint8_t kDRBGPersonalization[18] = "BCMPersonalization";
-  const uint8_t kDRBGAD[16] = "BCM DRBG AD     ";
-  const uint8_t kDRBGEntropy2[48] =
+  const uint8_t kDRBGPersonalization[19] = "BCMPersonalization";
+  const uint8_t kDRBGAD[17] = "BCM DRBG AD     ";
+  const uint8_t kDRBGEntropy2[49] =
       "DBRG Reseed Entropy                             ";
 
   AES_KEY aes_key;
@@ -71,7 +77,7 @@ int main(int argc, char **argv) {
   memset(aes_iv, 0, sizeof(aes_iv));
   if (AES_set_encrypt_key(kAESKey, 8 * sizeof(kAESKey), &aes_key) != 0) {
     printf("AES_set_encrypt_key failed\n");
-    goto err;
+    return main_cleanup();
   }
 
   printf("About to AES-CBC encrypt ");
@@ -85,7 +91,7 @@ int main(int argc, char **argv) {
   memset(aes_iv, 0, sizeof(aes_iv));
   if (AES_set_decrypt_key(kAESKey, 8 * sizeof(kAESKey), &aes_key) != 0) {
     printf("AES decrypt failed\n");
-    goto err;
+    return main_cleanup();
   }
   printf("About to AES-CBC decrypt ");
   hexdump(output, sizeof(kPlaintext));
@@ -101,7 +107,7 @@ int main(int argc, char **argv) {
   if (!EVP_AEAD_CTX_init(&aead_ctx, EVP_aead_aes_128_gcm(), kAESKey,
                          sizeof(kAESKey), 0, NULL)) {
     printf("EVP_AEAD_CTX_init failed\n");
-    goto err;
+    return main_cleanup();
   }
 
   /* AES-GCM Encryption */
@@ -111,7 +117,7 @@ int main(int argc, char **argv) {
                          EVP_AEAD_nonce_length(EVP_aead_aes_128_gcm()),
                          kPlaintext, sizeof(kPlaintext), NULL, 0)) {
     printf("AES-GCM encrypt failed\n");
-    goto err;
+    return main_cleanup();
   }
   printf("  got ");
   hexdump(output, out_len);
@@ -123,7 +129,7 @@ int main(int argc, char **argv) {
                          EVP_AEAD_nonce_length(EVP_aead_aes_128_gcm()),
                          output, out_len, NULL, 0)) {
     printf("AES-GCM decrypt failed\n");
-    goto err;
+    return main_cleanup();
   }
   printf("  got ");
   hexdump(output, out_len);
@@ -179,7 +185,7 @@ int main(int argc, char **argv) {
   printf("About to generate RSA key\n");
   if (!RSA_generate_key_fips(rsa_key, 2048, NULL)) {
     printf("RSA_generate_key_fips failed\n");
-    goto err;
+    return main_cleanup();
   }
 
   /* RSA Sign */
@@ -189,7 +195,7 @@ int main(int argc, char **argv) {
   if (!RSA_sign(NID_sha256, kPlaintextSHA256, sizeof(kPlaintextSHA256), output,
                 &sig_len, rsa_key)) {
     printf("RSA Sign failed\n");
-    goto err;
+    return main_cleanup();
   }
   printf("  got ");
   hexdump(output, sig_len);
@@ -200,7 +206,7 @@ int main(int argc, char **argv) {
   if (!RSA_verify(NID_sha256, kPlaintextSHA256, sizeof(kPlaintextSHA256),
                   output, sig_len, rsa_key)) {
     printf("RSA Verify failed.\n");
-    goto err;
+    return main_cleanup();
   }
 
   RSA_free(rsa_key);
@@ -208,13 +214,13 @@ int main(int argc, char **argv) {
   EC_KEY *ec_key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
   if (ec_key == NULL) {
     printf("invalid ECDSA key\n");
-    goto err;
+    return main_cleanup();
   }
 
   printf("About to generate P-256 key\n");
   if (!EC_KEY_generate_key_fips(ec_key)) {
     printf("EC_KEY_generate_key_fips failed\n");
-    goto err;
+    return main_cleanup();
   }
 
   /* ECDSA Sign/Verify PWCT */
@@ -254,6 +260,6 @@ int main(int argc, char **argv) {
   return 0;
 
 err:
-  printf("FAIL\n");
-  abort();
+  return main_cleanup();
+
 }

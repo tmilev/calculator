@@ -46,14 +46,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * ==================================================================== */
 
-#include "../../include/openssl/evp.h>
+#include "../../include/openssl/evp.h"
 
 #include <string.h>
 
-#include "../../include/openssl/aes.h>
-#include "../../include/openssl/cipher.h>
+#include "../../include/openssl/aes.h"
+#include "../../include/openssl/cipher.h"
 
-#include "../crypto/fipsmodule/modes/internal.h"
+#include "../../crypto/fipsmodule/modes/internal.h"
 
 
 typedef struct xts128_context {
@@ -157,7 +157,7 @@ typedef struct {
 
 static int aes_xts_init_key(EVP_CIPHER_CTX *ctx, const uint8_t *key,
                             const uint8_t *iv, int enc) {
-  EVP_AES_XTS_CTX *xctx = ctx->cipher_data;
+  EVP_AES_XTS_CTX *xctx = (EVP_AES_XTS_CTX *) ctx->cipher_data;
   if (!iv && !key) {
     return 1;
   }
@@ -188,7 +188,7 @@ static int aes_xts_init_key(EVP_CIPHER_CTX *ctx, const uint8_t *key,
 
 static int aes_xts_cipher(EVP_CIPHER_CTX *ctx, uint8_t *out,
                           const uint8_t *in, size_t len) {
-  EVP_AES_XTS_CTX *xctx = ctx->cipher_data;
+  EVP_AES_XTS_CTX *xctx =(EVP_AES_XTS_CTX *) ctx->cipher_data;
   if (!xctx->xts.key1 ||
       !xctx->xts.key2 ||
       !out ||
@@ -201,10 +201,10 @@ static int aes_xts_cipher(EVP_CIPHER_CTX *ctx, uint8_t *out,
 }
 
 static int aes_xts_ctrl(EVP_CIPHER_CTX *c, int type, int arg, void *ptr) {
-  EVP_AES_XTS_CTX *xctx = c->cipher_data;
+  EVP_AES_XTS_CTX *xctx = (EVP_AES_XTS_CTX *) c->cipher_data;
   if (type == EVP_CTRL_COPY) {
-    EVP_CIPHER_CTX *out = ptr;
-    EVP_AES_XTS_CTX *xctx_out = out->cipher_data;
+    EVP_CIPHER_CTX *out = (EVP_CIPHER_CTX *) ptr;
+    EVP_AES_XTS_CTX *xctx_out = (EVP_AES_XTS_CTX *) out->cipher_data;
     if (xctx->xts.key1) {
       if (xctx->xts.key1 != &xctx->ks1.ks) {
         return 0;

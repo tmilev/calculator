@@ -12,7 +12,7 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include "../../include/openssl/base.h>
+#include "../include/openssl/base.h"
 
 #include <memory>
 #include <string>
@@ -40,7 +40,7 @@ OPENSSL_MSVC_PRAGMA(warning(pop))
 typedef int ssize_t;
 #endif
 
-#include "../../include/openssl/digest.h>
+#include "../include/openssl/digest.h"
 
 #include "internal.h"
 

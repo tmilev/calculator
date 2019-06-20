@@ -431,7 +431,6 @@ boringssl/crypto/fipsmodule/sha/sha1.c \
 boringssl/crypto/fipsmodule/sha/sha256.c \
 boringssl/crypto/fipsmodule/sha/sha512.c \
 boringssl/crypto/fipsmodule/tls/kdf.c \
-boringssl/crypto/fipsmodule/bcm.c \
 boringssl/crypto/fipsmodule/fips_shared_support.c \
 boringssl/crypto/fipsmodule/is_fips.c \
 boringssl/decrepit/bio/base64_bio.c \

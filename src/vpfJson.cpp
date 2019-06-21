@@ -70,19 +70,6 @@ JSData& JSData::operator[](const std::string& key) {
   return this->objects.GetValueCreate(key);
 }
 
-void JSData::readfile(const char* filename) {
-  std::ifstream ifp(filename);
-  if (!ifp.is_open()) {
-    return;
-  }
-  struct stat f;
-  stat(filename, &f);
-  std::string json;
-  json.resize(f.st_size);
-  ifp.read(&json[0], json.size());
-  this->readstring(json, false);
-}
-
 void JSData::operator=(const List<JSData>& other) {
   this->type = this->JSarray;
   this->list = other;
@@ -387,18 +374,28 @@ std::string JSData::EncodeKeyForMongo(const std::string& input) {
 }
 
 template <typename somestream>
-somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int indentation, bool useHTML) const {
+somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int indentation, bool useNewLine, bool useHTML) const {
   //MacroRegisterFunctionWithName("JSData::IntoStream");
-  std::string theIndentation = "";
+  std::string whiteSpaceOuter = "";
+  std::string whiteSpaceInner = "";
   for (int i = 0; i < indentation; i ++) {
-    if (!useHTML) {
-      theIndentation += "";
-    } else {
-      theIndentation += "&nbsp;";
+    if (useHTML) {
+      whiteSpaceOuter += "&nbsp;";
+    } else if (useNewLine) {
+      whiteSpaceOuter += "  ";
     }
   }
-  out << theIndentation;
-  std::string newLine = useHTML ? "\n<br>\n" : "";
+  if (useHTML) {
+    whiteSpaceInner = "&nbsp;";
+  } else if (useNewLine){
+    whiteSpaceInner = "  ";
+  }
+  std::string newLine = "";
+  if (useHTML) {
+    newLine = "\n<br>\n";
+  } else if (useNewLine) {
+    newLine = "\n";
+  }
   indentation ++;
   switch (this->type) {
     case JSnull:
@@ -422,27 +419,37 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
       }
       return out;
     case JSarray:
+      if (this->list.size == 0) {
+        out << "[]";
+        return out;
+      }
       out << "[" << newLine;
       for (int i = 0; i < this->list.size; i ++) {
-        this->list[i].IntoStream(out, percentEncodeStrings, indentation, useHTML);
+        out << whiteSpaceInner << whiteSpaceOuter;
+        this->list[i].IntoStream(out, percentEncodeStrings, indentation, useNewLine, useHTML);
         if (i != this->list.size - 1) {
-          out << ", ";
+          out << "," << newLine;
         }
       }
-      out << newLine << ']';
+      out << newLine << whiteSpaceOuter << ']';
       return out;
     case JSObject:
+      if (this->objects.size() == 0) {
+        out << "{}";
+        return out;
+      }
       out << "{" << newLine;
       for (int i = 0; i < this->objects.size(); i ++) {
+        out << whiteSpaceInner;
         if (!percentEncodeStrings) {
           out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->objects.theKeys[i]) << '"';
         } else {
           out << '"' << JSData::EncodeKeyForMongo(this->objects.theKeys[i]) << '"';
         }
         out << ':';
-        this->objects.theValues[i].IntoStream(out, percentEncodeStrings, indentation, useHTML);
+        this->objects.theValues[i].IntoStream(out, percentEncodeStrings, indentation, useNewLine, useHTML);
         if (i != this->objects.size() - 1) {
-          out << ", ";
+          out << "," << newLine;
         }
       }
       out << newLine << '}';
@@ -505,7 +512,7 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
       if (useHTML) {
         out << "<b>";
       }
-      out << "undefined";
+      out << "null";
       if (useHTML) {
         out << "</b>";
       }
@@ -523,14 +530,8 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
       break;
   }
   //supposed to be unreachable
-  assert(false);
+  crash << "Unhandled JSData case. " << crash;
   return out;
-}
-
-void JSData::writefile(const char* filename) const {
-  std::ofstream out;
-  out.open(filename);
-  this->IntoStream(out, false);
 }
 
 void JSData::reset(char inputType) {
@@ -542,13 +543,13 @@ void JSData::reset(char inputType) {
   this->objects.Clear();
 }
 
-std::string JSData::ToString(bool percentEncodeKeysIncludingDotsExcludingDollarSigns, bool useHTML) const {
+std::string JSData::ToString(bool percentEncodeKeysIncludingDotsExcludingDollarSigns, bool useNewLine, bool useHTML) const {
   std::stringstream out;
-  this->IntoStream(out, percentEncodeKeysIncludingDotsExcludingDollarSigns, 2, useHTML);
+  this->IntoStream(out, percentEncodeKeysIncludingDotsExcludingDollarSigns, 0, useNewLine, useHTML);
   return out.str();
 }
 
 std::ostream& operator<<(std::ostream& out, const JSData& data) {
-  return data.IntoStream(out, false);
+  return data.IntoStream(out, false, false);
 }
 

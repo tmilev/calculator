@@ -75,6 +75,7 @@ struct Configuration {
   static std::string replyAfterComputationMilliseconds;
   static std::string useBuiltInTLS;
   static std::string serverAutoMonitor;
+  static std::string monitorPingTime;
 };
 
 struct DatabaseStrings {

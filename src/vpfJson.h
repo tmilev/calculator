@@ -92,15 +92,15 @@ public:
   void ExtractScalar(const std::string& json, int begin, int end);
   bool IsValidElement();
   void reset(char inputType = JSData::JSUndefined);
-  std::string ToString(bool percentEncodeKeysIncludingDotsExcludingDollarSigns, bool useHTML = false) const;
+  std::string ToString(bool percentEncodeKeysIncludingDotsExcludingDollarSigns, bool useNewLine = false, bool useHTML = false) const;
   static std::string EncodeKeyForMongo(const std::string& input);
   template <typename somestream>
-  somestream& IntoStream(somestream& out, bool percentEncodeStrings, int indentation = 0, bool useHTML = false) const;
-  void readfile(const char* filename);
+  somestream& IntoStream(
+    somestream& out, bool percentEncodeStrings, int indentation = 0, bool useNewLine = false, bool useHTML = false
+  ) const;
   bool readstring(const std::string& json, bool stringsWerePercentEncoded, std::stringstream* commentsOnFailure = 0);
   void TryToComputeType();
   static bool Tokenize(const std::string& input, List<JSData>& output);
-  void writefile(const char* filename) const;
   static void FilterColumnsJSDataObjectList(List<JSData>& inputOutput, const List<std::string>& columnsToPreserve);
 };
 

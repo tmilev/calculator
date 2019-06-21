@@ -22,7 +22,7 @@ ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Cal
 
 class WebCrawler {
 public:
-//  TransportSecurityLayer theSSlData;
+  TransportSecurityLayer theTSL;
   int theSocket;
   std::string portOrService;
   std::string addressToConnectTo;
@@ -152,7 +152,6 @@ void WebServerMonitor::Monitor(int pidServer) {
       << ". " << logger::endL;
     } else {
       std::cout << "Connection monitor: Ping success #" << numPings << std::endl;
-      std::cout << "DEBUG: last transaction: " << theCrawler.lastTransaction << std::endl;
       numConsecutiveFailedPings = 0;
     }
     if (numConsecutiveFailedPings >= maxNumPingFailures) {
@@ -266,7 +265,7 @@ void WebCrawler::PingCalculatorStatus() {
     this->theSocket = socket(this->serverInfo->ai_family, this->serverInfo->ai_socktype, this->serverInfo->ai_protocol);
     int connectionResult = - 1;
     if (this->theSocket < 0) {
-      this->lastTransactionErrors = "failed to create socket ";
+      this->lastTransactionErrors = "Failed to create socket ";
       continue;
     } else {
       fd_set fdConnectSockets;
@@ -307,7 +306,7 @@ void WebCrawler::PingCalculatorStatus() {
     }
     std::string getMessage = "GET /cgi-bin/calculator?request=statusPublic";
     std::stringstream errorStream1;
-    numBytesWritten = Pipe::WriteWithTimeoutViaSelect(this->theSocket,getMessage, 1, 10, &errorStream1);
+    numBytesWritten = Pipe::WriteWithTimeoutViaSelect(this->theSocket, getMessage, 1, 10, &errorStream1);
     if ((unsigned) numBytesWritten != getMessage.size()) {
       this->lastTransactionErrors += "\nERROR writing to socket. " + errorStream1.str();
       close(this->theSocket);
@@ -331,7 +330,9 @@ void WebCrawler::PingCalculatorStatus() {
 
 void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("WebCrawler::FetchWebPage");
-  (void) commentsOnFailure; (void) commentsGeneral;
+  (void) commentsOnFailure;
+  (void) commentsGeneral;
+  this->theTSL.initSSLClient();
 #ifdef MACRO_use_open_ssl
   //logOpenSSL << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
   this->lastTransaction = "";
@@ -441,7 +442,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
       }
     }
     this->FetchWebPagePart2(commentsOnFailure, commentsGeneral);
-    theWebServer.theSSLdata.RemoveLastSocketClient();
+    theWebServer.theTSL.RemoveLastSocketClient();
     close(this->theSocket);
     break;
   }
@@ -468,7 +469,7 @@ void WebCrawler::FetchWebPagePart2(
     theMessageHeader << this->postMessageToSend;
   }
 
-  if (!theWebServer.theSSLdata.HandShakeIamClientNoSocketCleanup(
+  if (!theWebServer.theTSL.HandShakeIamClientNoSocketCleanup(
     this->theSocket, commentsOnFailure, commentsGeneral
   )) {
     if (commentsOnFailure != 0) {
@@ -483,16 +484,16 @@ void WebCrawler::FetchWebPagePart2(
     *commentsGeneral << "<hr>";
   }
   std::string errorSSL;
-  if (!theWebServer.theSSLdata.SSLWriteLoop(
-    10, theWebServer.theSSLdata.sslClient, theMessageHeader.str(), &errorSSL, commentsGeneral, true
+  if (!this->theTSL.SSLWriteLoop(
+    10, theMessageHeader.str(), &errorSSL, commentsGeneral, true
   )) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;
     }
     return;
   }
-  if (!theWebServer.theSSLdata.SSLReadLoop(
-    10, theWebServer.theSSLdata.sslClient, this->headerReceived, 0, &errorSSL, commentsGeneral, true
+  if (!this->theTSL.SSLReadLoop(
+    10, this->headerReceived, 0, &errorSSL, commentsGeneral, true
   )) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;
@@ -556,8 +557,8 @@ void WebCrawler::FetchWebPagePart2(
   //{
   theContinueHeader << "HTTP/1.0 100 Continue\r\n\r\n";
   //theContinueHeader << "\r\n\r\n";
-  if (!theWebServer.theSSLdata.SSLWriteLoop(
-    10, theWebServer.theSSLdata.sslClient, theContinueHeader.str(), &errorSSL, commentsGeneral, true
+  if (!this->theTSL.SSLWriteLoop(
+    10, theContinueHeader.str(), &errorSSL, commentsGeneral, true
   )) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;
@@ -565,8 +566,8 @@ void WebCrawler::FetchWebPagePart2(
     return;
   }
   std::string secondPart;
-  if (!theWebServer.theSSLdata.SSLReadLoop(
-    10, theWebServer.theSSLdata.sslClient, secondPart, expectedLength, &errorSSL, commentsGeneral, true
+  if (!this->theTSL.SSLReadLoop(
+    10, secondPart, expectedLength, &errorSSL, commentsGeneral, true
   )) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;

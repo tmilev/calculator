@@ -482,9 +482,9 @@ void PrintCharTable(const somegroup& G, const char* filename) {
   if (filename) {
     std::ofstream out;
     out.open(filename);
-    data.IntoStream(out, false);
+    data.IntoStream(out, false, true);
   } else {
-    data.IntoStream(stOutput, false);
+    data.IntoStream(stOutput, false, true);
   }
 }
 
@@ -3449,7 +3449,6 @@ void TestInduction(int n = 4, int m = 3) {
 //  char letter = 'F';
 //  int number = 4;
 
-  //LoadAndPrintTauSignatures(letter, number);
 
   //theGlobalVariables.SetStandardStringOutput(HtmlRoutines::MakeStdCoutReport);
   //SemisimpleLieAlgebra theSSlieAlg;

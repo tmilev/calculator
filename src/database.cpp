@@ -116,7 +116,7 @@ void GlobalVariables::initModifiableDatabaseFields() {
   toWrite["modifiableFields"] = modifiableDataJSON;
   outputFile << "//File automatically generated. Please do not modify.\n";
   outputFile << "\"use strict\";\n";
-  outputFile << "var modifiableDatabaseData = " << toWrite.ToString(false) << ";\n";
+  outputFile << "var modifiableDatabaseData = " << toWrite.ToString(false, true) << ";\n";
   outputFile << "module.exports = {modifiableDatabaseData};";
 }
 

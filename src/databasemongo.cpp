@@ -317,7 +317,7 @@ bool MongoQuery::FindMultiple(
   MongoCollection theCollection(this->collectionName);
   if (commentsGeneralNonSensitive != 0 && theGlobalVariables.UserDefaultHasAdminRights()) {
     *commentsGeneralNonSensitive
-    << "Query: " << this->findQuery << ". Options: " << inputOptions.ToString(false);
+    << "Query: " << this->findQuery << ". Options: " << inputOptions.ToString(false, false);
   }
   if (this->query != 0) {
     crash << "At this point of code, query is supposed to be 0. " << crash;
@@ -338,7 +338,7 @@ bool MongoQuery::FindMultiple(
     this->options = 0;
   }
   if (inputOptions.type != JSData::JSUndefined) {
-    std::string optionsString = inputOptions.ToString(false);
+    std::string optionsString = inputOptions.ToString(false, false);
     this->options = bson_new_from_json((const uint8_t*) optionsString.c_str(), optionsString.size(), &this->theError);
     if (this->options == NULL) {
       if (commentsOnFailure != 0) {

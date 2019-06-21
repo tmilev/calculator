@@ -102,7 +102,6 @@ bool WebWorker::CheckConsistency() {
 
 bool WebWorker::ReceiveAll() {
   MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
-  logWorker << "DEBUG: here I got." << logger::endL;
   if (this->connectedSocketID == - 1) {
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   }
@@ -155,28 +154,23 @@ void SSL_write_Wrapper(SSL* inputSSL, const std::string& input, std::stringstrea
 
 void WebServer::initSSL() {
   MacroRegisterFunctionWithName("WebServer::initSSL");
-  if (!theGlobalVariables.flagSSLisAvailable) {
+  if (!theGlobalVariables.flagSSLIsAvailable) {
     logServer << logger::red << "SSL is DISABLED." << logger::endL;
     return;
   }
   //////////////////////////////////////////////////////////////////////////
-  this->theSSLdata.initSSLserver();
+  this->theTSL.initSSLserver();
 }
 
-#ifdef MACRO_use_open_ssl
-
 bool WebServer::SSLServerSideHandShake() {
-  if (!theGlobalVariables.flagSSLisAvailable) {
+  if (!theGlobalVariables.flagSSLIsAvailable) {
     return false;
   }
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return false;
   }
-#ifdef MACRO_use_open_ssl
-  return this->theSSLdata.HandShakeIamServer(this->GetActiveWorker().connectedSocketID);
-#endif
+  return this->theTSL.HandShakeIamServer(this->GetActiveWorker().connectedSocketID);
 }
-#endif //MACRO_use_open_ssl
 
 bool WebWorker::ReceiveAllHttpSSL() {
   MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttpSSL");
@@ -203,8 +197,8 @@ bool WebWorker::ReceiveAllHttpSSL() {
   int numBytesInBuffer = - 1;
   while (true) {
     //int64_t msBeforesslread = theGlobalVariables.GetElapsedMilliseconds();
-    numBytesInBuffer = this->parent->theSSLdata.SSLRead(
-      this->parent->theSSLdata.sslServeR.theData, &buffer, bufferSize - 1, &errorString, 0, true
+    numBytesInBuffer = this->parent->theTSL.SSLRead(
+      &buffer, bufferSize - 1, &errorString, 0, true
     );
     //int64_t readTime = theGlobalVariables.GetElapsedMilliseconds() - msBeforesslread;
     if (numBytesInBuffer >= 0 && numBytesInBuffer <= (signed) bufferSize) {
@@ -264,8 +258,8 @@ bool WebWorker::ReceiveAllHttpSSL() {
       this->displayUserInput = this->error;
       return false;
     }
-    numBytesInBuffer = this->parent->theSSLdata.SSLRead(
-      this->parent->theSSLdata.sslServeR.theData, &buffer, bufferSize - 1, &errorString, 0, true
+    numBytesInBuffer = this->parent->theTSL.SSLRead(
+      &buffer, bufferSize - 1, &errorString, 0, true
     );
     if (numBytesInBuffer == 0) {
       this->error = "While trying to fetch message-body, received 0 bytes. " +
@@ -339,8 +333,7 @@ void WebWorker::SendAllBytesHttpSSL() {
       << logger::endL;
       return;
     }
-    int numBytesSent = this->parent->theSSLdata.SSLWrite(
-      this->parent->theSSLdata.sslServeR.theData,
+    int numBytesSent = this->parent->theTSL.SSLWrite(
       this->remainingBytesToSenD.TheObjects,
       this->remainingBytesToSenD.size,
       &errorString,
@@ -1096,7 +1089,6 @@ bool WebWorker::ReceiveAllHttp() {
   if (this->connectedSocketID == - 1) {
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   }
-  logWorker << "DEBUG: Receiving all on http ... " << logger::endL;
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
@@ -1875,7 +1867,7 @@ void WebWorker::WrapUpConnection() {
   if (theGlobalVariables.flagRestartNeeded) {
     this->resultWork["restartNeeded"] = "true";
   }
-  this->pipeWorkerToServerControls.WriteOnceAfterEmptying(this->resultWork.ToString(false), false, false);
+  this->pipeWorkerToServerControls.WriteOnceAfterEmptying(this->resultWork.ToString(false, false), false, false);
   if (theGlobalVariables.flagServerDetailedLog) {
     logIO << "Detail: done with pipes, releasing resources. " << logger::endL;
   }
@@ -2653,7 +2645,7 @@ std::string HtmlInterpretation::GetCaptchaDiv() {
 bool WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified() {
   MacroRegisterFunctionWithName("WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified");
   bool stateNotModified = true;
-  if (!theGlobalVariables.flagSSLisAvailable) {
+  if (!theGlobalVariables.flagSSLIsAvailable) {
     if (
       this->addressComputed == theGlobalVariables.DisplayNameExecutable &&
       theGlobalVariables.userCalculatorRequestType == ""
@@ -2728,7 +2720,7 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified() {
   if (this->addressComputed == "/" || this->addressComputed == "") {
     shouldFallBackToDefaultPage = true;
   }
-  if (!theGlobalVariables.flagSSLisAvailable) {
+  if (!theGlobalVariables.flagSSLIsAvailable) {
     if (
       this->addressComputed == theGlobalVariables.DisplayNameExecutable &&
       theGlobalVariables.userCalculatorRequestType == ""
@@ -2823,7 +2815,7 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection() {
 }
 
 bool WebWorker::RequireSSL() {
-  return theGlobalVariables.flagSSLisAvailable;
+  return theGlobalVariables.flagSSLIsAvailable;
 }
 
 int WebWorker::ServeClient() {
@@ -3280,9 +3272,7 @@ bool WebServer::CheckConsistency() {
 }
 
 void WebServer::ReleaseEverything() {
-#ifdef MACRO_use_open_ssl
-  this->theSSLdata.FreeSSL();
-#endif
+  this->theTSL.FreeSSL();
   logger& currentLog = theGlobalVariables.flagIsChildProcess ? logWorker : logServer;
   ProgressReportWebServer::flagServerExists = false;
   for (int i = 0; i < this->theWorkers.size; i ++) {
@@ -3766,7 +3756,7 @@ void WebServer::initPortsITry() {
   this->PortsITryHttp.AddOnTop("8157");
   this->PortsITryHttp.AddOnTop("8158");
   this->PortsITryHttp.AddOnTop("8159");
-  if (!theGlobalVariables.flagSSLisAvailable) {
+  if (!theGlobalVariables.flagSSLIsAvailable) {
     return;
   }
   this->PortsITryHttpSSL.AddOnTop("8166");
@@ -3780,7 +3770,7 @@ void WebServer::initListeningSockets() {
   if (listen(this->listeningSocketHTTP, WebServer::maxNumPendingConnections) == - 1) {
     crash << "Listen function failed on http port." << crash;
   }
-  if (theGlobalVariables.flagSSLisAvailable) {
+  if (theGlobalVariables.flagSSLIsAvailable) {
     if (listen(this->listeningSocketHttpSSL, WebServer::maxNumPendingConnections) == - 1) {
       crash << "Listen function failed on https port." << crash;
     }
@@ -3911,7 +3901,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     // any children that have exited properly are still not reaped
     // at this point in code.
     // In particular, it should not be possible to terminate by accident
-    // a pid that does not owned by the server.
+    // a pid that is not owned by the server.
     this->TerminateChildSystemCall(theIndices[j]);
     this->NumProcessAssassinated ++;
     std::stringstream errorStream;
@@ -4142,7 +4132,7 @@ bool WebServer::initBindToPorts() {
   if (this->listeningSocketHTTP == - 1) {
     crash << "Failed to bind to any of the ports " << this->PortsITryHttp.ToStringCommaDelimited() << "\n" << crash;
   }
-  if (theGlobalVariables.flagSSLisAvailable && this->listeningSocketHttpSSL == - 1) {
+  if (theGlobalVariables.flagSSLIsAvailable && this->listeningSocketHttpSSL == - 1) {
     crash << "Failed to bind to any of the ports " << this->PortsITryHttpSSL.ToStringCommaDelimited() << "\n" << crash;
   }
   return true;
@@ -4205,7 +4195,7 @@ void SignalsInfrastructure::initializeSignals() {
   bool handleChildExit = true;
   if (handleChildExit) {
     logServer << logger::red << "Selected an unstable feature: signal child exit handler. "
-    << " Please use with caution. " << logger::endL;
+    << "Please use with caution. " << logger::endL;
     SignalChild.sa_handler = &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
   } else {
     SignalChild.sa_handler = NULL;
@@ -4240,7 +4230,7 @@ void WebServer::WriteVersionJSFile() {
 int WebServer::Run() {
   MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog = "crash_WebServerRun.html";
-  if (theGlobalVariables.flagSSLisAvailable) {
+  if (theGlobalVariables.flagSSLIsAvailable) {
     TransportSecurityLayer::initSSLkeyFiles();
   }
   //<-worker log resets are needed, else forked processes reset their common log.
@@ -4418,7 +4408,7 @@ int WebServer::Run() {
       << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
       << logger::endL;
     }
-    this->theSSLdata.AddMoreEntropyFromTimer();
+    this->theTSL.AddMoreEntropyFromTimer();
 
     int incomingPID = fork(); //creates an almost identical copy of this process.
     //<- Please don't assign directly to this->GetActiveWorker().ProcessPID.
@@ -4471,7 +4461,7 @@ int WebServer::Run() {
     this->ReleaseWorkerSideResources();
   }
   this->ReleaseEverything();
-  this->theSSLdata.FreeEverythingShutdownSSL();
+  this->theTSL.FreeEverythingShutdownSSL();
   return 0;
 }
 
@@ -4489,7 +4479,7 @@ int WebWorker::Run() {
   theGlobalVariables.flagServerForkedIntoWorker = true;
   crash.CleanUpFunction = WebServer::SignalActiveWorkerDoneReleaseEverything;
   CreateTimerThread();
-  if (theGlobalVariables.flagSSLisAvailable) {
+  if (theGlobalVariables.flagUsingSSLinCurrentConnection) {
     if (!theWebServer.SSLServerSideHandShake()) {
       theGlobalVariables.flagUsingSSLinCurrentConnection = false;
       this->parent->SignalActiveWorkerDoneReleaseEverything();
@@ -4498,7 +4488,7 @@ int WebWorker::Run() {
       return - 1;
     }
   }
-  if (theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (theGlobalVariables.flagSSLIsAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection) {
     logOpenSSL << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
   }
   /////////////////////////////////////////////////////////////////////////
@@ -4611,7 +4601,7 @@ void WebServer::CheckSystemInstallationOpenSSL() {
     return;
   }
   theGlobalVariables.configuration["openSSL"] = "Attempted installation";
-  theGlobalVariables.StoreConfiguration();
+  theGlobalVariables.ConfigurationStore();
   WebServer::FigureOutOperatingSystem();
   StateMaintainerCurrentFolder preserveFolder;
   std::string sslInstallCommand = "CentOS";
@@ -4631,7 +4621,7 @@ void WebServer::CheckSystemInstallationOpenSSL() {
     theGlobalVariables.CallSystemNoOutput(sslInstallCommand, &logServer);
     theGlobalVariables.configuration["openSSL"] = "Attempted installation on Ubuntu";
   }
-  theGlobalVariables.StoreConfiguration();
+  theGlobalVariables.ConfigurationStore();
 }
 
 void WebServer::CheckSystemInstallationMongoDB() {
@@ -4654,7 +4644,7 @@ void WebServer::CheckSystemInstallationMongoDB() {
     return;
   }
   theGlobalVariables.configuration["mongoDB"] = "Attempted installation";
-  theGlobalVariables.StoreConfiguration();
+  theGlobalVariables.ConfigurationStore();
 
   StateMaintainerCurrentFolder preserveFolder;
   logServer << "You appear to be missing an mongoDB installation. Let me try to install that for you. "
@@ -4671,7 +4661,7 @@ void WebServer::CheckSystemInstallationMongoDB() {
   logServer << "Proceeding to rebuild the calculator. " << logger::red
   << "This is expected to take 10+ minutes. " << logger::endL;
   theGlobalVariables.CallSystemNoOutput("make -j8", &logServer);
-  theGlobalVariables.StoreConfiguration();
+  theGlobalVariables.ConfigurationStore();
 }
 
 void WebServer::CheckMongoDBSetup() {
@@ -4686,7 +4676,7 @@ void WebServer::CheckMongoDBSetup() {
   }
   logServer << logger::yellow << "configuration so far: " << theGlobalVariables.configuration.ToString(false);
   theGlobalVariables.configuration["mongoDBSetup"] = "Attempting";
-  theGlobalVariables.StoreConfiguration();
+  theGlobalVariables.ConfigurationStore();
   WebServer::FigureOutOperatingSystem();
   logServer << logger::yellow << "Mongo setup file missing, proceeding with setup. " << logger::endL;
   logServer << logger::green << "Enter the sudo password as prompted please. " << logger::endL;
@@ -4721,7 +4711,7 @@ void WebServer::CheckMongoDBSetup() {
   logServer  << "Need sudo access for command: " << logger::red << "sudo ldconfig" << logger::endL;
   theGlobalVariables.CallSystemNoOutput("sudo ldconfig", &logServer);
   theGlobalVariables.configuration["mongoDBSetup"] = "Setup complete";
-  theGlobalVariables.StoreConfiguration();
+  theGlobalVariables.ConfigurationStore();
 }
 
 void WebServer::CheckFreecalcSetup() {
@@ -4730,7 +4720,7 @@ void WebServer::CheckFreecalcSetup() {
     return;
   }
   theGlobalVariables.configuration["freecalcSetup"] = "Setup started";
-  theGlobalVariables.StoreConfiguration();
+  theGlobalVariables.ConfigurationStore();
   WebServer::FigureOutOperatingSystem();
   logServer << logger::yellow << "Freelcalc setup file missing, proceeding to set it up. " << logger::endL;
   StateMaintainerCurrentFolder preserveFolder;
@@ -4740,7 +4730,7 @@ void WebServer::CheckFreecalcSetup() {
   logServer << logger::green << "git clone https://github.com/tmilev/freecalc.git" << logger::endL;
   theGlobalVariables.CallSystemNoOutput("git clone https://github.com/tmilev/freecalc.git", &logServer);
   theGlobalVariables.configuration["freecalcSetup"] = "Setup complete";
-  theGlobalVariables.StoreConfiguration();
+  theGlobalVariables.ConfigurationStore();
 }
 
 void WebServer::CheckMathJaxSetup() {
@@ -4749,7 +4739,7 @@ void WebServer::CheckMathJaxSetup() {
     return;
   }
   theGlobalVariables.configuration["MathJax"] = "Attempting to install";
-  theGlobalVariables.StoreConfiguration();
+  theGlobalVariables.ConfigurationStore();
   WebServer::FigureOutOperatingSystem();
   logServer << logger::yellow << "MathJax setup file missing, proceeding to set it up. " << logger::endL
   << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
@@ -4767,7 +4757,7 @@ void WebServer::CheckMathJaxSetup() {
   theGlobalVariables.CallSystemNoOutput("unzip ./../html-common/MathJax-2.7-latest.zip -d ./../../public_html/", &logServer);
   theGlobalVariables.CallSystemNoOutput("mv ./../../public_html/MathJax-2.7.2 ./../../public_html/MathJax-2.7-latest", &logServer);
   theGlobalVariables.configuration["MathJax"] = "Unzipped";
-  theGlobalVariables.StoreConfiguration();
+  theGlobalVariables.ConfigurationStore();
 }
 
 void WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitString) {
@@ -4805,7 +4795,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   theGlobalVariables.flagRunningConsoleTest = false;
   theGlobalVariables.flagRunningApache = false;
   #ifdef MACRO_use_open_ssl
-  theGlobalVariables.flagSSLisAvailable = true;  
+  theGlobalVariables.flagSSLIsAvailable = true;
   #endif
   #ifdef MACRO_use_MongoDB
   theGlobalVariables.flagDatabaseCompiled = true;
@@ -5058,7 +5048,7 @@ void WebServer::TurnProcessMonitoringOn() {
   theGlobalVariables.replyAfterComputationMilliseconds = theGlobalVariables.replyAfterComputationMillisecondsDefault;
   theGlobalVariables.configuration[Configuration::processMonitoringAllowedByDefault] = true;
 
-  theGlobalVariables.StoreConfiguration();
+  theGlobalVariables.ConfigurationStore();
 }
 
 void WebServer::TurnProcessMonitoringOff() {
@@ -5070,35 +5060,31 @@ void WebServer::TurnProcessMonitoringOff() {
   theGlobalVariables.flagAllowProcessMonitoring = false;
   theGlobalVariables.replyAfterComputationMilliseconds = 0;
   theGlobalVariables.configuration[Configuration::processMonitoringAllowedByDefault] = false;
-  theGlobalVariables.StoreConfiguration();
+  theGlobalVariables.ConfigurationStore();
 }
 
-bool GlobalVariables::LoadConfiguration() {
-  MacroRegisterFunctionWithName("GlobalVariables::LoadConfiguration");
-  std::string configuration;
+bool GlobalVariables::ConfigurationLoad() {
+  MacroRegisterFunctionWithName("GlobalVariables::ConfigurationLoad");
   std::stringstream out;
-  bool createConfiguration = false;
-  if (FileOperations::LoadFileToStringVirtual(
-    "/configuration/configuration.json", configuration, true, false, &out
+  if (!FileOperations::LoadFileToStringVirtual(
+    "/configuration/configuration.json", theGlobalVariables.configurationFileContent, true, false, &out
   )) {
-    if (!theGlobalVariables.configuration.readstring(configuration, false, &out)) {
-      logServer << logger::red << out.str() << logger::endL;
-      createConfiguration = true;
-    }
-  } else {
-    createConfiguration = true;
-    logServer << logger::yellow << out.str() << logger::endL;
+    logServer << logger::yellow << "Failed to read configuration file. " << out.str() << logger::endL;
+    return false;
   }
-  if (createConfiguration) {
-    logServer << logger::yellow << "Did not find configuration file." << logger::endL;
-    this->StoreConfiguration();
+  if (!theGlobalVariables.configuration.readstring(theGlobalVariables.configurationFileContent, false, &out)) {
+    logServer << logger::red << "Failed to read configuration. " << out.str() << logger::endL;
     return false;
   }
   return true;
 }
 
-bool GlobalVariables::StoreConfiguration() {
-  MacroRegisterFunctionWithName("GlobalVariables::StoreConfiguration");
+bool GlobalVariables::ConfigurationStore() {
+  MacroRegisterFunctionWithName("GlobalVariables::ConfigurationStore");
+  std::string correctedConfiguration = theGlobalVariables.configuration.ToString(false, true);
+  if (correctedConfiguration == theGlobalVariables.configurationFileContent) {
+    return true;
+  }
   std::fstream configurationFile;
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
     configurationFile, "configuration/configuration.json", false, true, false, true
@@ -5106,12 +5092,14 @@ bool GlobalVariables::StoreConfiguration() {
     logServer << logger::red << "Could not open file: /configuration/configuration.json" << logger::endL;
     return false;
   }
-  configurationFile << theGlobalVariables.configuration.ToString(false);
+  logServer << logger::blue
+  << "Configuration has been reformatted/recomputed, overwriting previous configuration file." << logger::endL;
+  configurationFile << correctedConfiguration;
   return true;
 }
 
-void GlobalVariables::ComputeConfigurationFlags() {
-  MacroRegisterFunctionWithName("GlobalVariables::ComputeConfigurationFlags");
+void GlobalVariables::ConfigurationProcess() {
+  MacroRegisterFunctionWithName("GlobalVariables::ConfigurationProcess");
   theGlobalVariables.flagServerDetailedLog = theGlobalVariables.configuration["serverDetailedLog"].isTrueRepresentationInJSON();
   if (theGlobalVariables.configuration[Configuration::serverAutoMonitor].isTrueRepresentationInJSON()) {
     theGlobalVariables.flagServerAutoMonitor = true;
@@ -5181,7 +5169,15 @@ void GlobalVariables::ComputeConfigurationFlags() {
     logServer << logger::red << "Experimental: " << logger::blue << "using built-in TLS library." << logger::endL;
     TransportSecurityLayer::flagDontUseOpenSSL = true;
   }
-
+  if (theGlobalVariables.configuration[Configuration::monitorPingTime].isIntegerFittingInInt(
+    &theWebServer.WebServerPingIntervalInSeconds
+  )) {
+    if (theWebServer.WebServerPingIntervalInSeconds < 0) {
+      theWebServer.WebServerPingIntervalInSeconds = 10;
+    }
+  } else {
+    theGlobalVariables.configuration[Configuration::monitorPingTime] = theWebServer.WebServerPingIntervalInSeconds;
+  }
 }
 
 int WebServer::main(int argc, char **argv) {
@@ -5192,7 +5188,8 @@ int WebServer::main(int argc, char **argv) {
   try {
     InitializeGlobalObjects();
     theWebServer.AnalyzeMainArguments(argc, argv);
-    theGlobalVariables.LoadConfiguration();
+    // load and parse configuration json
+    theGlobalVariables.ConfigurationLoad();
     if (theGlobalVariables.MaxComputationMilliseconds > 0) {
       theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead =
       theGlobalVariables.MaxComputationMilliseconds + 20000; // + 20 seconds
@@ -5200,8 +5197,11 @@ int WebServer::main(int argc, char **argv) {
       theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead = - 1;
     }
     theWebServer.InitializeGlobalVariables();
-    theGlobalVariables.ComputeConfigurationFlags();
-
+    // Compute various flags and settings from the desired configuration.
+    // Correct bad configuration settings if any.
+    theGlobalVariables.ConfigurationProcess();
+    // Store back the config file if it changed.
+    theGlobalVariables.ConfigurationStore();
 
     theWebServer.CheckSystemInstallationOpenSSL();
     theWebServer.CheckSystemInstallationMongoDB();
@@ -5337,7 +5337,7 @@ int WebServer::mainApache() {
   "?" + WebServer::GetEnvironment("QUERY_STRING");
   if (thePort == "443") {
     theGlobalVariables.flagUsingSSLinCurrentConnection = true;
-    theGlobalVariables.flagSSLisAvailable = true;
+    theGlobalVariables.flagSSLIsAvailable = true;
   }
   if (theRequestMethod == "GET") {
     theWorker.requestTypE = theWorker.requestGet;

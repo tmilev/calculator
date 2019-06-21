@@ -304,6 +304,8 @@ int Pipe::ReadWithTimeOutViaSelect(
     return - 1;
   }
   int bytesRead = - 1;
+
+  failStream << "DEBUG: select-readings successful so far, numSelected = " << numSelected << ". ";
   do {
     bytesRead = read(theFD, output.TheObjects, output.size - 1);
     if (bytesRead > 0) {
@@ -312,14 +314,15 @@ int Pipe::ReadWithTimeOutViaSelect(
     numFails ++;
 
     if (numFails > maxNumTries) {
-      failStream << "Too many failed attempts at reading from file descriptor: " << theFD << ". Error message: "
+      failStream << "Too many failed attempts: " << maxNumTries
+      << " at reading from file descriptor: " << theFD << ". Error message: "
       << strerror(errno) << ".\n";
-      break;
+      if (commentsOnFailure != 0) {
+        *commentsOnFailure << failStream.str();
+      }
+      return - 1;
     }
-  } while (bytesRead < 0);
-  if (commentsOnFailure != 0) {
-    *commentsOnFailure << failStream.str();
-  }
+  } while (bytesRead <= 0);
   return bytesRead;
 }
 

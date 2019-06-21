@@ -17,33 +17,40 @@ static ProjectInformationInstance projectInfoInstanceTransportSecurityLayerHeade
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-class SSLServer {
-public:
-  ssl_st* theData;
-  SSLServer();
-  void Free();
-};
-
-struct TransportSecurityLayer {
-public:
-  static bool flagSSLlibraryInitialized;
-  static bool flagDontUseOpenSSL;
+class TransportSecurityLayer;
+struct TransportSecurityLayerOpenSSL {
+  TransportSecurityLayer* owner;
   int errorCode;
-  ssl_st* sslClient;
-  SSLServer sslServeR;
-  //X509* my_certificate;
+  static bool flagSSLlibraryInitialized;
+  ssl_st* sslData;
   X509* peer_certificate;
   SSL_CTX* contextServer;
-  //SSL_CTX* contextClient;
+  bool flagSSLHandshakeSuccessful;
   const SSL_METHOD* theSSLMethod;
-  List<int> socketStackServer;
-  List<int> socketStackClient;
   List<char> buffer;
   struct errors {
     static std::string errorWantRead;
   };
   std::string otherCertificateIssuerName, otherCertificateSubjectName;
-  bool flagSSLHandshakeSuccessful;
+  TransportSecurityLayerOpenSSL();
+  void FreeSSL();
+  void FreeContext();
+  void FreeEverythingShutdownSSL();
+  void initSSLlibrary();
+  void initSSLserver();
+  void initSSLClient();
+  void initSSLCommon();
+};
+
+class TransportSecurityLayer {
+public:
+  static bool flagDontUseOpenSSL;
+  bool flagInitializedPrivateKey;
+  bool flagIsServer;
+  TransportSecurityLayerOpenSSL openSSLData;
+
+  List<int> socketStackServer;
+  List<int> socketStackClient;
 
   static const std::string fileCertificate;
   static const std::string fileCertificateConfiguration;
@@ -51,25 +58,19 @@ public:
   static const std::string signedFileCertificate1;
   static const std::string signedFileCertificate3;
   static const std::string signedFileKey;
-  void DoSetSocket(int theSocket, SSL *theSSL);
-  void SetSocketAddToStackServer(int theSocket);
+  void DoSetSocket(int theSocket);
+  void SetSocketAddToStack(int theSocket);
   void RemoveLastSocketServer();
-  void SetSocketAddToStackClient(int theSocket);
   void RemoveLastSocketClient();
-  void FreeClientSSL();
   void ClearErrorQueue(
     int errorCode,
-    SSL* theSSL,
     std::string *outputError,
     std::stringstream* commentsGeneral,
     bool includeNoErrorInComments
   );
   static bool initSSLkeyFiles();
-  void initSSLlibrary();
-  void initSSLserver();
-  void initSSLclient();
+  void initialize(bool IamServer);
   int SSLRead(
-    SSL* theSSL,
     void *buffer,
     int bufferSize,
     std::string *outputError,
@@ -78,7 +79,6 @@ public:
   );
   bool SSLReadLoop(
     int numTries,
-    SSL* theSSL,
     std::string& output,
     const LargeInt& expectedLength,
     std::string* commentsOnFailure,
@@ -87,13 +87,12 @@ public:
   );
   bool SSLWriteLoop(
     int numTries,
-    SSL* theSSL,
     const std::string& input,
     std::string *outputError,
     std::stringstream *commentsGeneral,
     bool includeNoErrorInComments
   );
-  int SSLWrite(SSL* theSSL,
+  int SSLWrite(
     void* buffer,
     int bufferSize,
     std::string* outputError,
@@ -103,15 +102,12 @@ public:
   );
   TransportSecurityLayer();
   ~TransportSecurityLayer();
-  void FreeSSL();
-  void FreeContext();
   void AddMoreEntropyFromTimer();
   bool HandShakeIamServer(int inputSocketID);
   bool InspectCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool HandShakeIamClientNoSocketCleanup(
     int inputSocketID, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
-  void FreeEverythingShutdownSSL();
 };
 
 #endif

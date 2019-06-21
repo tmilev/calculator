@@ -135,7 +135,7 @@ GlobalVariables::GlobalVariables() {
   this->flagLogInAttempted = false;
   this->flagServerDetailedLog = false;
   this->flagUsingSSLinCurrentConnection = false;
-  this->flagSSLisAvailable = false;
+  this->flagSSLIsAvailable = false;
   this->MaxTimeNoPingBeforeChildIsPresumedDead = 10;
   this->flagAceIsAvailable = false;
   this->MutexProgressReportinG.mutexName = "ProgressReport";

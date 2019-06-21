@@ -99,7 +99,7 @@ public:
   bool flagLoggedIn;
   bool flagLogInAttempted;
   bool flagUsingSSLinCurrentConnection;
-  bool flagSSLisAvailable;
+  bool flagSSLIsAvailable;
   bool flagCertificatesAreOfficiallySigned;
   bool flagCrashInitiated;
 
@@ -151,6 +151,7 @@ public:
 
   std::string userCalculatorRequestType;
 
+  std::string configurationFileContent;
   JSData configuration;
   JSData timeStats;
   List<List<std::string> > databaseModifiableFields;
@@ -207,9 +208,9 @@ public:
   MemorySaving<DynkinDiagramRootSubalgebra > dynGetEpsCoords;
   MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;
 
-  bool StoreConfiguration();
-  bool LoadConfiguration();
-  void ComputeConfigurationFlags();
+  bool ConfigurationStore();
+  bool ConfigurationLoad();
+  void ConfigurationProcess();
   GlobalVariables();
   ~GlobalVariables();
   static HashedList<FileInformation>& theSourceCodeFiles();

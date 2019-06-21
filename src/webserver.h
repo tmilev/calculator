@@ -260,7 +260,6 @@ public:
   static void CheckMongoDBSetup();
   static void CheckMathJaxSetup();
   static void CheckFreecalcSetup();
-  static void CheckSVNSetup();
   static void AnalyzeMainArguments(int argC, char** argv);
   static void AnalyzeMainArgumentsTimeString(const std::string& timeLimitString);
   void InitializeGlobalVariables();
@@ -295,6 +294,7 @@ public:
   void initListeningSockets();
   void initSSL();
   bool SSLServerSideHandShake();
+  static void TerminateProcessId(int processId);
   void TerminateChildSystemCall(int i);
   void ProcessOneChildMessage(int childIndex, int& outputNumInUse);
   void RecycleChildrenIfPossible();

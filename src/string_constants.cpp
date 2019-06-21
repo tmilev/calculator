@@ -118,3 +118,5 @@ std::string DatabaseStrings::labelPageActivateAccount = "activateAccount";
 std::string Configuration::processMonitoringAllowedByDefault = "processMonitoringAllowedByDefault";
 std::string Configuration::replyAfterComputationMillisecondsDefault = "replyAfterComputationMillisecondsDefault";
 std::string Configuration::replyAfterComputationMilliseconds = "replyAfterComputationMilliseconds";
+std::string Configuration::useBuiltInTLS = "useBuiltInTLS";
+std::string Configuration::serverAutoMonitor = "serverAutoMonitor";

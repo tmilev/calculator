@@ -32,7 +32,7 @@ extern FormatExpressions consoleFormat;
 extern Calculator* theParser;
 
 extern int GetElapsedMilliseconds();
-extern void CallSystemWrapperNoOutput(const std::string& theCommand, bool ignoreNonZeroReturn);
+extern int CallSystemWrapperNoOutput(const std::string& theCommand);
 extern std::string CallSystemWrapperReturnStandardOutput(const std::string& theCommand);
 extern void CallChDirWrapper(const std::string& theCommand);
 extern void ignoreUserAbortSignal();

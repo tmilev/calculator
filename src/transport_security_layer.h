@@ -27,10 +27,11 @@ public:
 struct TransportSecurityLayer {
 public:
   static bool flagSSLlibraryInitialized;
+  static bool flagDontUseOpenSSL;
   int errorCode;
   ssl_st* sslClient;
   SSLServer sslServeR;
-  X509* my_certificate;
+  //X509* my_certificate;
   X509* peer_certificate;
   SSL_CTX* contextServer;
   //SSL_CTX* contextClient;

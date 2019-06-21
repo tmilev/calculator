@@ -102,6 +102,7 @@ bool WebWorker::CheckConsistency() {
 
 bool WebWorker::ReceiveAll() {
   MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
+  logWorker << "DEBUG: here I got." << logger::endL;
   if (this->connectedSocketID == - 1) {
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   }
@@ -1095,6 +1096,7 @@ bool WebWorker::ReceiveAllHttp() {
   if (this->connectedSocketID == - 1) {
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   }
+  logWorker << "DEBUG: Receiving all on http ... " << logger::endL;
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
@@ -3747,10 +3749,11 @@ void WebServer::RestarT() {
   int timeLimitSeconds = theGlobalVariables.MaxComputationMilliseconds / 1000;
 
   *currentLog << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
-  theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath << " \r\n./";
+
+  theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath << " && ./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
   theCommand << " server " << timeLimitSeconds;
-  theGlobalVariables.CallSystemNoOutput(theCommand.str(), true); //kill any other running copies of the calculator.
+  theGlobalVariables.CallSystemNoOutput(theCommand.str(), currentLog); //kill any other running copies of the calculator.
   while (true) {
     theGlobalVariables.FallAsleep(1000000);
     logServer << logger::red << "Waiting for killall command ... " << logger::endL;
@@ -3847,6 +3850,10 @@ void WebServer::fperror_sigaction(int signal) {
   exit(0);
 }
 
+void WebServer::TerminateProcessId(int processId) {
+  kill(processId, SIGKILL);
+}
+
 void WebServer::TerminateChildSystemCall(int i) {
   // Signal lock not needed: signals are unlocked outside of the select loop.
   if (!this->theWorkers[i].flagInUsE || this->theWorkers[i].flagExited) {
@@ -3858,7 +3865,7 @@ void WebServer::TerminateChildSystemCall(int i) {
     if (theGlobalVariables.flagServerDetailedLog) {
       logProcessKills << "Detail: " << " killing child index: " << i << "." << logger::endL;
     }
-    kill(this->theWorkers[i].ProcessPID, SIGKILL);
+    this->TerminateProcessId(this->theWorkers[i].ProcessPID);
     this->theWorkers[i].ProcessPID = - 1;
   }
   this->theWorkers[i].ResetPipesNoAllocation();
@@ -4621,7 +4628,7 @@ void WebServer::CheckSystemInstallationOpenSSL() {
     logServer << "You appear to be missing an openssl installation. Let me try to install that for you. "
     << logger::green << "About to request sudo password for: " << sslInstallCommand << logger::endL;
     logServer << logger::red << "To refuse the command type CTRL+C. " << logger::endL;
-    theGlobalVariables.CallSystemNoOutput(sslInstallCommand, false);
+    theGlobalVariables.CallSystemNoOutput(sslInstallCommand, &logServer);
     theGlobalVariables.configuration["openSSL"] = "Attempted installation on Ubuntu";
   }
   theGlobalVariables.StoreConfiguration();
@@ -4633,7 +4640,7 @@ void WebServer::CheckSystemInstallationMongoDB() {
     return;
   }
   bool doInstallMongo = false;
-#ifndef MACRO_use_open_ssl
+#ifndef MACRO_use_MongoDB
   doInstallMongo = true;
 #endif
   if (!doInstallMongo) {
@@ -4650,20 +4657,20 @@ void WebServer::CheckSystemInstallationMongoDB() {
   theGlobalVariables.StoreConfiguration();
 
   StateMaintainerCurrentFolder preserveFolder;
-  logServer << "You appear to be missing an openssl installation. Let me try to install that for you. "
+  logServer << "You appear to be missing an mongoDB installation. Let me try to install that for you. "
   << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
   if (theGlobalVariables.OperatingSystem == "Ubuntu") {
-    theGlobalVariables.CallSystemNoOutput("sudo apt-get install mongodb", false);
+    theGlobalVariables.CallSystemNoOutput("sudo apt-get install mongodb", &logServer);
     theGlobalVariables.configuration["mongoDB"] = "Attempted installation on Ubuntu";
   } else if (theGlobalVariables.OperatingSystem == "CentOS") {
-    theGlobalVariables.CallSystemNoOutput("sudo yum install mongodb", false);
+    theGlobalVariables.CallSystemNoOutput("sudo yum install mongodb", &logServer);
     theGlobalVariables.configuration["mongoDB"] = "Attempted installation on CentOS";
   }
   theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
-  theGlobalVariables.CallSystemNoOutput("make clean", false);
+  theGlobalVariables.CallSystemNoOutput("make clean", &logServer);
   logServer << "Proceeding to rebuild the calculator. " << logger::red
   << "This is expected to take 10+ minutes. " << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("make -j8", false);
+  theGlobalVariables.CallSystemNoOutput("make -j8", &logServer);
   theGlobalVariables.StoreConfiguration();
 }
 
@@ -4696,23 +4703,23 @@ void WebServer::CheckMongoDBSetup() {
   logServer << theGlobalVariables.CallSystemWithOutput(commandUnzipLibbson.str());
 
   theGlobalVariables.ChDir("./mongo-c-driver-1.9.3");
-  theGlobalVariables.CallSystemNoOutput("./configure", true);
-  theGlobalVariables.CallSystemNoOutput("make -j8", true);
+  theGlobalVariables.CallSystemNoOutput("./configure", &logServer);
+  theGlobalVariables.CallSystemNoOutput("make -j8", &logServer);
   logServer << "Need sudo access for command: "
   << logger::red << "sudo make install" << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("sudo make install", true);
+  theGlobalVariables.CallSystemNoOutput("sudo make install", &logServer);
   theGlobalVariables.ChDir("../libbson-1.9.3");
-  theGlobalVariables.CallSystemNoOutput("./configure", true);
-  theGlobalVariables.CallSystemNoOutput("make -j8", true);
+  theGlobalVariables.CallSystemNoOutput("./configure", &logServer);
+  theGlobalVariables.CallSystemNoOutput("make -j8", &logServer);
   logServer  << "Need sudo access for command: "
   << logger::red << "sudo make install" << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("sudo make install", true);
+  theGlobalVariables.CallSystemNoOutput("sudo make install", &logServer);
   theGlobalVariables.ChDir("../../bin");
   logServer  << "Need sudo access for command to configure linker to use local usr/local/lib path (needed by mongo): "
   << logger::red << "sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/" << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/", true);
+  theGlobalVariables.CallSystemNoOutput("sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/", &logServer);
   logServer  << "Need sudo access for command: " << logger::red << "sudo ldconfig" << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("sudo ldconfig", true);
+  theGlobalVariables.CallSystemNoOutput("sudo ldconfig", &logServer);
   theGlobalVariables.configuration["mongoDBSetup"] = "Setup complete";
   theGlobalVariables.StoreConfiguration();
 }
@@ -4731,30 +4738,8 @@ void WebServer::CheckFreecalcSetup() {
   theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase + "../");
   logServer << logger::green << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
   logServer << logger::green << "git clone https://github.com/tmilev/freecalc.git" << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("git clone https://github.com/tmilev/freecalc.git", true);
+  theGlobalVariables.CallSystemNoOutput("git clone https://github.com/tmilev/freecalc.git", &logServer);
   theGlobalVariables.configuration["freecalcSetup"] = "Setup complete";
-  theGlobalVariables.StoreConfiguration();
-}
-
-void WebServer::CheckSVNSetup() {
-  MacroRegisterFunctionWithName("WebServer::CheckSVNSetup");
-  if (theGlobalVariables.configuration["attemptedSVNSetup"].type != JSData::JSUndefined) {
-    return;
-  }
-  theGlobalVariables.configuration["attemptedSVNSetup"] = "Attempted to install";
-  theGlobalVariables.StoreConfiguration();
-  WebServer::FigureOutOperatingSystem();
-  logServer << logger::yellow << "SVN setup file missing, proceeding to set it up. " << logger::endL
-  << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
-  if (theGlobalVariables.OperatingSystem == "Ubuntu") {
-    logServer << logger::yellow << "sudo apt-get install subversion" << logger::endL;
-    theGlobalVariables.CallSystemNoOutput("sudo apt-get install subversion", false);
-    theGlobalVariables.configuration["attemptedSVNSetup"] = "Attempted to install on Ubuntu. ";
-  } else if (theGlobalVariables.OperatingSystem == "CentOS") {
-    logServer << logger::yellow << "sudo yum install subversion" << logger::endL;
-    theGlobalVariables.CallSystemNoOutput("sudo yum install subversion", false);
-    theGlobalVariables.configuration["attemptedSVNSetup"] = "Attempted to install on CentOS. ";
-  }
   theGlobalVariables.StoreConfiguration();
 }
 
@@ -4769,18 +4754,18 @@ void WebServer::CheckMathJaxSetup() {
   logServer << logger::yellow << "MathJax setup file missing, proceeding to set it up. " << logger::endL
   << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
   if (theGlobalVariables.OperatingSystem == "Ubuntu") {
-    theGlobalVariables.CallSystemNoOutput("sudo apt-get install unzip", false);
+    theGlobalVariables.CallSystemNoOutput("sudo apt-get install unzip", &logServer);
   } else if (theGlobalVariables.OperatingSystem == "CentOS") {
-    theGlobalVariables.CallSystemNoOutput("sudo yum install unzip", false);
+    theGlobalVariables.CallSystemNoOutput("sudo yum install unzip", &logServer);
   }
   logServer << "Proceeding to unzip MathJax. ";
   //std::string currentFolder =FileOperations::GetCurrentFolder();
   //result << "Changing folder to: " << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
   //theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
   logServer << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("mkdir -p ../../public_html", false);
-  theGlobalVariables.CallSystemNoOutput("unzip ./../html-common/MathJax-2.7-latest.zip -d ./../../public_html/", false);
-  theGlobalVariables.CallSystemNoOutput("mv ./../../public_html/MathJax-2.7.2 ./../../public_html/MathJax-2.7-latest", false);
+  theGlobalVariables.CallSystemNoOutput("mkdir -p ../../public_html", &logServer);
+  theGlobalVariables.CallSystemNoOutput("unzip ./../html-common/MathJax-2.7-latest.zip -d ./../../public_html/", &logServer);
+  theGlobalVariables.CallSystemNoOutput("mv ./../../public_html/MathJax-2.7.2 ./../../public_html/MathJax-2.7-latest", &logServer);
   theGlobalVariables.configuration["MathJax"] = "Unzipped";
   theGlobalVariables.StoreConfiguration();
 }
@@ -5128,7 +5113,7 @@ bool GlobalVariables::StoreConfiguration() {
 void GlobalVariables::ComputeConfigurationFlags() {
   MacroRegisterFunctionWithName("GlobalVariables::ComputeConfigurationFlags");
   theGlobalVariables.flagServerDetailedLog = theGlobalVariables.configuration["serverDetailedLog"].isTrueRepresentationInJSON();
-  if (theGlobalVariables.configuration["serverAutoMonitor"].isTrueRepresentationInJSON()) {
+  if (theGlobalVariables.configuration[Configuration::serverAutoMonitor].isTrueRepresentationInJSON()) {
     theGlobalVariables.flagServerAutoMonitor = true;
   } else {
     theGlobalVariables.flagServerAutoMonitor = false;
@@ -5189,9 +5174,14 @@ void GlobalVariables::ComputeConfigurationFlags() {
       Configuration::processMonitoringAllowedByDefault
     ].isTrueRepresentationInJSON()
   ) {
-    logServer << logger::blue << "Process monitoring turned on from configuration.json. " << logger::endL;
+    logServer << logger::blue << "Process monitoring turned on from configuration.json." << logger::endL;
     WebServer::TurnProcessMonitoringOn();
   }
+  if (theGlobalVariables.configuration[Configuration::useBuiltInTLS].isTrueRepresentationInJSON()) {
+    logServer << logger::red << "Experimental: " << logger::blue << "using built-in TLS library." << logger::endL;
+    TransportSecurityLayer::flagDontUseOpenSSL = true;
+  }
+
 }
 
 int WebServer::main(int argc, char **argv) {
@@ -5209,7 +5199,6 @@ int WebServer::main(int argc, char **argv) {
     } else {
       theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead = - 1;
     }
-    //using loggers allowed from now on.
     theWebServer.InitializeGlobalVariables();
     theGlobalVariables.ComputeConfigurationFlags();
 
@@ -5218,7 +5207,6 @@ int WebServer::main(int argc, char **argv) {
     theWebServer.CheckSystemInstallationMongoDB();
     theWebServer.CheckMongoDBSetup();
     theWebServer.CheckMathJaxSetup();
-    theWebServer.CheckSVNSetup();
     theWebServer.CheckFreecalcSetup();
 
     theGlobalVariables.flagAceIsAvailable = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);

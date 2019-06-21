@@ -12,6 +12,7 @@
 #include <cmath>
 #include <cfloat>
 
+extern logger logWorker;
 ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Calculator parser, implementation. ");
 
 Calculator::Calculator() {
@@ -48,14 +49,14 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
   theFile.flush();
   theFile.close();
   systemCommand1 << " latex -output-directory=" << baseFolder << " " << fileName.str() << ".tex";
-  theGlobalVariables.CallSystemNoOutput(systemCommand1.str(), false);
+  theGlobalVariables.CallSystemNoOutput(systemCommand1.str(), &logWorker);
   if (useLatexDviPSpsToPNG) {
     systemCommand2 << " dvips -o " << fileNameWithPathPhysical << ".ps "
     << fileNameWithPathPhysical << ".dvi";
-    theGlobalVariables.CallSystemNoOutput(systemCommand2.str(), false);
+    theGlobalVariables.CallSystemNoOutput(systemCommand2.str(), &logWorker);
     systemCommand3 << " convert " << fileNameWithPathPhysical
     << ".ps " << fileNameWithPathPhysical << ".png";
-    theGlobalVariables.CallSystemNoOutput(systemCommand3.str(), false);
+    theGlobalVariables.CallSystemNoOutput(systemCommand3.str(), &logWorker);
   }
   std::stringstream out;
   out << "<img src =\"" << theGlobalVariables.DisplayPathOutputFolder

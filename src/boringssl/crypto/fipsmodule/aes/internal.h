@@ -112,12 +112,12 @@ int aes_nohw_set_encrypt_key(const uint8_t *key, unsigned bits,
 int aes_nohw_set_decrypt_key(const uint8_t *key, unsigned bits,
                              AES_KEY *aeskey);
 
-#if !defined(OPENSSL_NO_ASM) && \
-    (defined(OPENSSL_X86_64) || defined(OPENSSL_X86))
-#define AES_NOHW_CBC
-void aes_nohw_cbc_encrypt(const uint8_t *in, uint8_t *out, size_t len,
-                          const AES_KEY *key, uint8_t *ivec, const int enc);
-#endif
+//#if !defined(OPENSSL_NO_ASM) &&
+//    (defined(OPENSSL_X86_64) || defined(OPENSSL_X86))
+//#define AES_NOHW_CBC
+//void aes_nohw_cbc_encrypt(const uint8_t *in, uint8_t *out, size_t len,
+//                          const AES_KEY *key, uint8_t *ivec, const int enc);
+//#endif
 
 
 #if defined(__cplusplus)

@@ -56,8 +56,6 @@
 #include "../modes/internal.h"
 
 
-#if defined(OPENSSL_NO_ASM) || \
-    (!defined(OPENSSL_X86) && !defined(OPENSSL_X86_64) && !defined(OPENSSL_ARM))
 
 // Te0[x] = S [x].[02, 01, 01, 03];
 // Te1[x] = S [x].[03, 02, 01, 01];
@@ -806,7 +804,6 @@ void aes_nohw_decrypt(const uint8_t *in, uint8_t *out, const AES_KEY *key) {
   PUTU32(out + 12, s3);
 }
 
-#endif  // NO_ASM || (!X86 && !X86_64 && !ARM)
 
 // Be aware that different sets of AES functions use incompatible key
 // representations, varying in format of the key schedule, the |AES_KEY.rounds|

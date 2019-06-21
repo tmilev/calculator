@@ -18,6 +18,8 @@
 
 ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");
 
+extern logger logWorker;
+
 template <class theType>
 bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
   List<theType>& inputOutputElts,
@@ -8086,8 +8088,8 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos(
     FileOperations::GetPhysicalFileNameFromVirtual(outSltwoPath.str(), outSl2Folder, false, false, 0);
     outMkDirCommand1 << "mkdir " << baseFolder;
     outMkDirCommand2 << "mkdir " << outSl2Folder;
-    theGlobalVariables.CallSystemNoOutput(outMkDirCommand1.str(), false);
-    theGlobalVariables.CallSystemNoOutput(outMkDirCommand2.str(), false);
+    theGlobalVariables.CallSystemNoOutput(outMkDirCommand1.str(), &logWorker);
+    theGlobalVariables.CallSystemNoOutput(outMkDirCommand2.str(), &logWorker);
   }
   if (
     !FileOperations::FileExistsVirtual(outSltwoMainFile.str()) ||

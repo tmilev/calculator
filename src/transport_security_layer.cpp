@@ -43,7 +43,7 @@ SSLServer::SSLServer(){
 TransportSecurityLayer::TransportSecurityLayer() {
   this->errorCode = - 1;
   this->sslClient = 0;
-  this->my_certificate = 0;
+  //this->my_certificate = 0;
   this->peer_certificate = 0;
   this->theSSLMethod = 0;
   this->contextServer = 0;
@@ -89,6 +89,7 @@ void TransportSecurityLayer::FreeContext() {
 }
 
 bool TransportSecurityLayer::flagSSLlibraryInitialized = false;
+bool TransportSecurityLayer::flagDontUseOpenSSL = false;
 
 bool TransportSecurityLayer::initSSLkeyFiles() {
   if (
@@ -111,7 +112,7 @@ bool TransportSecurityLayer::initSSLkeyFiles() {
     ) {
       theCommand << "-subj " << theGlobalVariables.configuration["openSSLSubject"].string;
     }
-    theGlobalVariables.CallSystemNoOutput(theCommand.str(), false);
+    theGlobalVariables.CallSystemNoOutput(theCommand.str(), &logServer);
   }
   if (
     !FileOperations::FileExistsVirtual(fileCertificate, true, true) ||
@@ -141,7 +142,7 @@ void TransportSecurityLayer::initSSLlibrary() {
   if (commentsOnError.str() != "") {
     logServer << logger::red << "OpenSSL initialization comments: " << logger::blue << commentsOnError.str() << logger::endL;
   }
-  logServer << logger::green << "DEBUG: InitialIzation of ssl successfull." << logger::endL;
+  //logServer << logger::green << "DEBUG: InitialIzation of ssl successfull." << logger::endL;
 }
 
 void TransportSecurityLayer::AddMoreEntropyFromTimer() {
@@ -170,9 +171,9 @@ void TransportSecurityLayer::initSSLserver() {
   this->theSSLMethod = SSLv23_method();
   std::stringstream commentsOnError;
 
-  logServer << logger::blue << "DEBUG: about to init openssl. " << logger::endL;
+  //logServer << logger::blue << "DEBUG: about to init openssl. " << logger::endL;
   this->contextServer = SSL_CTX_new(this->theSSLMethod);
-  logServer << logger::red << "DEBUG: comments: " << commentsOnError.str() << logger::endL;
+  //logServer << logger::red << "DEBUG: comments: " << commentsOnError.str() << logger::endL;
   if (this->contextServer == 0) {
     logServer << logger::red << "Failed to create ssl context. " << logger::endL;
     ERR_print_errors_fp(stderr);
@@ -553,7 +554,8 @@ bool TransportSecurityLayer::InspectCertificates(
       return false;
     }
     this->otherCertificateSubjectName = tempCharPtr;
-    OPENSSL_free(tempCharPtr);
+    free(tempCharPtr);
+    tempCharPtr = 0;
     if (commentsGeneral != 0) {
       *commentsGeneral << "Peer certificate: "
       << "subject: " << this->otherCertificateSubjectName << "<br>\n";
@@ -566,7 +568,8 @@ bool TransportSecurityLayer::InspectCertificates(
       return false;
     }
     this->otherCertificateIssuerName = tempCharPtr;
-    OPENSSL_free(tempCharPtr);
+    free(tempCharPtr);
+    tempCharPtr = 0;
     if (commentsGeneral != 0) {
       *commentsGeneral << "Issuer name: "
       << this->otherCertificateIssuerName << "<br>\n";

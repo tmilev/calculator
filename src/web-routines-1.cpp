@@ -65,6 +65,7 @@ public:
   double timeAtLastBackup;
   int pidServer;
   void Monitor(int pidServer);
+  void Restart();
   WebServerMonitor();
 };
 
@@ -99,7 +100,7 @@ void WebServerMonitor::BackupDatabaseIfNeeded() {
 }
 
 void WebServerMonitor::Monitor(int pidServer) {
-  if (!theGlobalVariables.flagAllowProcessMonitoring) {
+  if (!theGlobalVariables.flagServerAutoMonitor) {
     return;
   }
   this->pidServer = pidServer;
@@ -142,7 +143,7 @@ void WebServerMonitor::Monitor(int pidServer) {
     if (theCrawler.lastTransactionErrors != "") {
       now.AssignLocalTime();
       numConsecutiveFailedPings ++;
-      logServerMonitor << logger::red << "Connection monitor: Ping of " << theCrawler.addressToConnectTo
+      logServerMonitor << logger::red << "Connection monitor: ping of " << theCrawler.addressToConnectTo
       << " at port/service " << theCrawler.portOrService
       << " failed. GM time: " << now.ToStringGM() << ", local time: " << now.ToStringLocal()
       << ". " << "Errors: "
@@ -151,21 +152,35 @@ void WebServerMonitor::Monitor(int pidServer) {
       << ". " << logger::endL;
     } else {
       std::cout << "Connection monitor: Ping success #" << numPings << std::endl;
+      std::cout << "DEBUG: last transaction: " << theCrawler.lastTransaction << std::endl;
       numConsecutiveFailedPings = 0;
     }
     if (numConsecutiveFailedPings >= maxNumPingFailures) {
-      now.AssignLocalTime();
-      logServerMonitor << logger::red << "Server stopped responding (probably locked pipe?)"
-      << ", restarting. " << logger::endL;
-      FileOperations::OpenFileCreateIfNotPresentVirtual(
-        theFile, "LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true
-      );
-      theFile << "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: local: "
-      << now.ToStringLocal() << ", GM: " << now.ToStringGM() << "</b><br>\n";
-      theFile.flush();
-      theWebServer.RestarT();
+      this->Restart();
     }
   }
+}
+
+void WebServerMonitor::Restart() {
+  TimeWrapper now;
+  now.AssignLocalTime();
+  logServerMonitor << logger::red << "Server stopped responding (probably locked pipe?)"
+  << ", restarting. " << logger::endL;
+  std::fstream theFile;
+  FileOperations::OpenFileCreateIfNotPresentVirtual(
+    theFile, "LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true
+  );
+  theFile << "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: local: "
+  << now.ToStringLocal() << ", GM: " << now.ToStringGM() << "</b><br>\n";
+  theFile.flush();
+  std::stringstream killServerChildrenCommand;
+  killServerChildrenCommand << "pkill -9 -P " << this->pidServer;
+  logServerMonitor  << "Terminating server children with command: " << killServerChildrenCommand.str() << logger::endL;
+  theGlobalVariables.CallSystemNoOutput(killServerChildrenCommand.str(), &logServerMonitor);
+  logServerMonitor << logger::red << "Terminating server with pid: " << this->pidServer << logger::endL;
+  WebServer::TerminateProcessId(this->pidServer);
+  logServerMonitor << logger::red << "Restarting monitor. " << this->pidServer << logger::endL;
+  theWebServer.RestarT();
 }
 
 WebCrawler::WebCrawler() {
@@ -216,7 +231,7 @@ void WebCrawler::PingCalculatorStatus() {
   this->serverInfo = 0;
   int status = getaddrinfo(this->addressToConnectTo.c_str(), this->portOrService.c_str(), &hints, &this->serverInfo);
   if (status != 0) {
-    this->lastTransactionErrors =  "Could not find address: getaddrinfo error: ";
+    this->lastTransactionErrors = "Could not find address: getaddrinfo error: ";
     this->lastTransactionErrors += gai_strerror(status);
     this->FreeAddressInfo();
     return;
@@ -228,6 +243,7 @@ void WebCrawler::PingCalculatorStatus() {
   struct addrinfo *p = 0;  // will point to the results
   this->theSocket = - 1;
   char ipString[INET6_ADDRSTRLEN];
+  int numBytesWritten = - 1;
   for (p = this->serverInfo; p != 0; p = p->ai_next, close(this->theSocket)) {
     void *theAddress = 0;
     this->theSocket = - 1;
@@ -291,22 +307,22 @@ void WebCrawler::PingCalculatorStatus() {
     }
     std::string getMessage = "GET /cgi-bin/calculator?request=statusPublic";
     std::stringstream errorStream1;
-    int numBytes = Pipe::WriteWithTimeoutViaSelect(this->theSocket,getMessage, 1, 10, &errorStream1);
-    if ((unsigned) numBytes != getMessage.size()) {
-      this->lastTransactionErrors += "\nERROR writing to socket. "+ errorStream1.str();
+    numBytesWritten = Pipe::WriteWithTimeoutViaSelect(this->theSocket,getMessage, 1, 10, &errorStream1);
+    if ((unsigned) numBytesWritten != getMessage.size()) {
+      this->lastTransactionErrors += "\nERROR writing to socket. " + errorStream1.str();
       close(this->theSocket);
       continue;
     }
     std::stringstream errorStream2;
-    numBytes = Pipe::ReadWithTimeOutViaSelect(this->theSocket, this->buffer, 1, 10, &errorStream2);
-    if (numBytes < 0) {
-      this->lastTransactionErrors += "\nERROR reading from socket. " + errorStream2.str();
+    int numBytesRead = Pipe::ReadWithTimeOutViaSelect(this->theSocket, this->buffer, 1, 10, &errorStream2);
+    if (numBytesRead < 0) {
+      this->lastTransactionErrors += "ERROR reading from socket. " + errorStream2.str();
       close(this->theSocket);
       continue;
     }
     std::string readString;
-    readString.assign(buffer.TheObjects, numBytes);
-    reportStream << "<br>Read: " << readString;
+    readString.assign(buffer.TheObjects, numBytesRead);
+    reportStream << "Wrote " << numBytesWritten  << ", read " << numBytesRead << " bytes: " << readString;
     this->lastTransaction = reportStream.str();
     close(this->theSocket);
   }

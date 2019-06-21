@@ -215,18 +215,16 @@ void CreateTimerThread() {
   ThreadData::CreateThread(RunTimerThread, "timer");
 }
 
-void CallSystemWrapperNoOutput(const std::string& theCommand, bool ignoreNonZeroReturn) {
-  int systemOutput = system(theCommand.c_str());
-  if (systemOutput != 0 && !ignoreNonZeroReturn) {
-    logWorker << logger::red << "System command: " << theCommand << " exited with " << systemOutput << ". " << logger::endL;
-  }
+int CallSystemWrapperNoOutput(const std::string& theCommand) {
+  return system(theCommand.c_str());
 }
 
 std::string CallSystemWrapperReturnStandardOutput(const std::string& inputCommand) {
   std::string inputCommandWithRedirection = inputCommand + " 2>&1";
   std::shared_ptr<FILE> pipe(popen(inputCommandWithRedirection.c_str(), "r"), pclose);
-  if (!pipe)
+  if (!pipe) {
     return "ERROR";
+  }
   const int bufferSize = 20000;
   char buffer[bufferSize];
   std::string result = "";

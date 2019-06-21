@@ -8,6 +8,7 @@
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 ProjectInformationInstance ProjectInfoVpfSemisimpleSubalgebras(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
 
+extern logger logWorker;
 template<>
 List<DynkinSimpleType>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<DynkinSimpleType>() {
@@ -324,7 +325,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
   FileOperations::GetPhysicalFileNameFromVirtual(
     this->owner->VirtualNameSSAlgOutputFolder, testFileFolderPhysical, false, false, 0
   );
-  theGlobalVariables.CallSystemNoOutput("mkdir " + testFileFolderPhysical, false);
+  theGlobalVariables.CallSystemNoOutput("mkdir " + testFileFolderPhysical, &logWorker);
 
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, testFileNameRelative, false, true, false)) {
     crash << "<br>This may or may not be a programming error. I requested to create file "

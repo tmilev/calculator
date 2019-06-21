@@ -73,6 +73,8 @@ struct Configuration {
   static std::string processMonitoringTriggerTime;
   static std::string replyAfterComputationMillisecondsDefault;
   static std::string replyAfterComputationMilliseconds;
+  static std::string useBuiltInTLS;
+  static std::string serverAutoMonitor;
 };
 
 struct DatabaseStrings {

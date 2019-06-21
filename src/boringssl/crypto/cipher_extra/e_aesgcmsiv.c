@@ -69,7 +69,7 @@ extern void aes128gcmsiv_aes_ks(
 extern void aes256gcmsiv_aes_ks(
     const uint8_t key[32], uint8_t out_expanded_key[16*15]);
 
-static int aead_aes_gcm_siv_asm_init(EVP_AEAD_CTX *ctx, const uint8_t *key,
+int aead_aes_gcm_siv_asm_init(EVP_AEAD_CTX *ctx, const uint8_t *key,
                                      size_t key_len, size_t tag_len) {
   const size_t key_bits = key_len * 8;
 

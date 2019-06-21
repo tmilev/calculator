@@ -253,7 +253,7 @@ int Pipe::WriteWithTimeoutViaSelect(
       failStream << maxNumTries << " failed or timed-out select attempts on file descriptor: " << theFD;
       break;
     }
-    numSelected = select(theFD + 1,0, &theFDcontainer, 0, &timeOut);
+    numSelected = select(theFD + 1, 0, &theFDcontainer, 0, &timeOut);
     failStream << "While select-writing on file descriptor: " << theFD << ", select failed. Error message: "
     << strerror(errno) << ". \n";
     numFails ++;
@@ -303,7 +303,24 @@ int Pipe::ReadWithTimeOutViaSelect(
     }
     return - 1;
   }
-  return read(theFD, output.TheObjects, output.size - 1);
+  int bytesRead = - 1;
+  do {
+    bytesRead = read(theFD, output.TheObjects, output.size - 1);
+    if (bytesRead > 0) {
+      return bytesRead;
+    }
+    numFails ++;
+
+    if (numFails > maxNumTries) {
+      failStream << "Too many failed attempts at reading from file descriptor: " << theFD << ". Error message: "
+      << strerror(errno) << ".\n";
+      break;
+    }
+  } while (bytesRead < 0);
+  if (commentsOnFailure != 0) {
+    *commentsOnFailure << failStream.str();
+  }
+  return bytesRead;
 }
 
 bool PipePrimitive::SetPipeFlagsIfFailThenCrash(int inputFlags, int whichEnd, bool restartServerOnFail, bool dontCrashOnFail) {
@@ -370,7 +387,7 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
     if (result >= 0) {
       return result;
     }
-    if (result < 0)
+    if (result < 0) {
       if (errno == EINTR) {
         logBlock << logger::red << "Write operation interrupted, repeating. " << logger::endL;
         numAttempts ++;
@@ -381,6 +398,7 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
         }
         continue;
       }
+    }
     return result;
   }
   return - 1;

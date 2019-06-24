@@ -38,7 +38,7 @@ struct TransportSecurityLayerOpenSSL {
   void FreeContext();
   void FreeEverythingShutdownSSL();
   void initSSLlibrary();
-  void initSSLserver();
+  void initSSLServer();
   void initSSLClient();
   void initSSLCommon();
   void Reset();

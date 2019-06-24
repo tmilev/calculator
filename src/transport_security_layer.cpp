@@ -38,6 +38,7 @@ TransportSecurityLayer::TransportSecurityLayer() {
   this->flagIsServer = true;
   this->flagInitializedPrivateKey = false;
   this->standardBufferSize = 10000;
+  this->openSSLData.owner = this;
 }
 
 TransportSecurityLayer::~TransportSecurityLayer() {
@@ -46,9 +47,10 @@ TransportSecurityLayer::~TransportSecurityLayer() {
 bool TransportSecurityLayer::flagDontUseOpenSSL = false;
 
 void TransportSecurityLayer::initialize(bool IamServer) {
+  MacroRegisterFunctionWithName("TransportSecurityLayer::initialize");
   if (!this->flagDontUseOpenSSL) {
     if (IamServer) {
-      this->openSSLData.initSSLserver();
+      this->openSSLData.initSSLServer();
     } else {
       this->openSSLData.initSSLClient();
     }
@@ -58,14 +60,16 @@ void TransportSecurityLayer::initialize(bool IamServer) {
 }
 
 void TransportSecurityLayer::FreeEverythingShutdown() {
+  MacroRegisterFunctionWithName("TransportSecurityLayer::FreeEverythingShutdown");
   if (!this->flagDontUseOpenSSL) {
     return this->openSSLData.FreeEverythingShutdownSSL();
   } else {
-    crash << "not implemented yet. " << crash;
+    crash << "Not implemented yet. " << crash;
   }
 }
 
 bool TransportSecurityLayer::initSSLKeyFiles() {
+  MacroRegisterFunctionWithName("TransportSecurityLayer::initSSLKeyFiles");
   if (!this->flagDontUseOpenSSL) {
     return this->openSSLData.initSSLkeyFiles();
   } else {
@@ -75,6 +79,7 @@ bool TransportSecurityLayer::initSSLKeyFiles() {
 }
 
 bool TransportSecurityLayerOpenSSL::initSSLkeyFiles() {
+  MacroRegisterFunctionWithName("TransportSecurityLayerOpenSSL::initSSLkeyFiles");
   if (
     !FileOperations::FileExistsVirtual(TransportSecurityLayer::fileCertificate, true, true) ||
     !FileOperations::FileExistsVirtual(TransportSecurityLayer::fileKey, true, true)
@@ -127,23 +132,30 @@ void TransportSecurityLayerOpenSSL::initSSLClient() {
 }
 
 void TransportSecurityLayerOpenSSL::initSSLCommon() {
+  MacroRegisterFunctionWithName("TransportSecurityLayerOpenSSL::initSSLCommon");
   this->initSSLlibrary();
   std::stringstream commentsOnError;
   this->theSSLMethod = SSLv23_method();
   this->contextServer = SSL_CTX_new(this->theSSLMethod);
+  std::cout << "DEBUG: Got to here pt -XXX " << std::endl;
+
   if (this->contextServer == 0) {
     logServer << logger::red << "Failed to create ssl context. " << logger::endL;
     ERR_print_errors_fp(stderr);
     crash << "Openssl context error.\n" << commentsOnError.str() << crash;
   }
+  std::cout << "DEBUG: Got to the end of init ssl common. " << std::endl;
 
 }
 
-void TransportSecurityLayerOpenSSL::initSSLserver() {
+void TransportSecurityLayerOpenSSL::initSSLServer() {
+  MacroRegisterFunctionWithName("TransportSecurityLayerOpenSSL::initSSLServer");
+  std::cout << "DEBUG: Got to here pt -1.b " << std::endl;
   this->initSSLCommon();
   if (this->owner->flagInitializedPrivateKey) {
     return;
   }
+  std::cout << "DEBUG: Got to here. " << std::endl;
   this->owner->flagInitializedPrivateKey = true;
   std::string fileCertificatePhysical, fileKeyPhysical,
   singedFileCertificate1Physical, signedFileCertificate3Physical,
@@ -163,6 +175,7 @@ void TransportSecurityLayerOpenSSL::initSSLserver() {
   FileOperations::GetPhysicalFileNameFromVirtual(
     TransportSecurityLayer::signedFileKey, signedFileKeyPhysical, true, true, 0
   );
+  std::cout << "DEBUG: Got to here pt2. " << std::endl;
   //////////////////////////////////////////////////////////
   if (!this->initSSLkeyFiles()) {
     return;

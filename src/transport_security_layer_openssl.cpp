@@ -39,6 +39,7 @@ void TransportSecurityLayerOpenSSL::FreeContext() {
 }
 
 void TransportSecurityLayerOpenSSL::initSSLlibrary() {
+  MacroRegisterFunctionWithName("TransportSecurityLayerOpenSSL::initSSLlibrary");
   if (this->flagSSLlibraryInitialized) {
     return;
   }

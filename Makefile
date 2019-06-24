@@ -100,6 +100,7 @@ $(info [1;34mLinker flags part 2: $(LIBRARIES_INCLUDED_AT_THE_END)[0m)
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
 SOURCES_RELATIVE_PATH=\
 transport_security_layer.cpp \
+transport_security_layer_openssl.cpp \
 databasemongo.cpp \
 database_mongo_calculator.cpp \
 webserver.cpp \

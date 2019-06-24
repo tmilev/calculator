@@ -37,22 +37,61 @@ extern logger logServer  ;
 TransportSecurityLayer::TransportSecurityLayer() {
   this->flagIsServer = true;
   this->flagInitializedPrivateKey = false;
+  this->standardBufferSize = 10000;
+}
+
+TransportSecurityLayer::~TransportSecurityLayer() {
 }
 
 bool TransportSecurityLayer::flagDontUseOpenSSL = false;
 
-bool TransportSecurityLayer::initSSLkeyFiles() {
+void TransportSecurityLayer::initialize(bool IamServer) {
+  if (!this->flagDontUseOpenSSL) {
+    if (IamServer) {
+      this->openSSLData.initSSLserver();
+    } else {
+      this->openSSLData.initSSLClient();
+    }
+  } else {
+    crash << "Not implemented yet. " << crash;
+  }
+}
+
+void TransportSecurityLayer::FreeEverythingShutdown() {
+  if (!this->flagDontUseOpenSSL) {
+    return this->openSSLData.FreeEverythingShutdownSSL();
+  } else {
+    crash << "not implemented yet. " << crash;
+  }
+}
+
+bool TransportSecurityLayer::initSSLKeyFiles() {
+  if (!this->flagDontUseOpenSSL) {
+    return this->openSSLData.initSSLkeyFiles();
+  } else {
+    crash << "not implemented yet. " << crash;
+    return false;
+  }
+}
+
+bool TransportSecurityLayerOpenSSL::initSSLkeyFiles() {
   if (
-    !FileOperations::FileExistsVirtual(fileCertificate, true, true) ||
-    !FileOperations::FileExistsVirtual(fileKey, true, true)
+    !FileOperations::FileExistsVirtual(TransportSecurityLayer::fileCertificate, true, true) ||
+    !FileOperations::FileExistsVirtual(TransportSecurityLayer::fileKey, true, true)
   ) {
     logWorker << logger::red << "SSL is available but CERTIFICATE files are missing." << logger::endL;
     logWorker << logger::green << "Let me try to create those files for you." << logger::endL;
     std::stringstream theCommand;
     std::string certificatePhysicalName, keyPhysicalName, certificateConfiguration;
-    FileOperations::GetPhysicalFileNameFromVirtual(fileCertificate, certificatePhysicalName, true, true, 0);
-    FileOperations::GetPhysicalFileNameFromVirtual(fileKey, keyPhysicalName, true, true, 0);
-    FileOperations::GetPhysicalFileNameFromVirtual(fileCertificateConfiguration, certificateConfiguration, true, true, 0);
+    FileOperations::GetPhysicalFileNameFromVirtual(
+      TransportSecurityLayer::fileCertificate, certificatePhysicalName, true, true, 0
+    );
+    FileOperations::GetPhysicalFileNameFromVirtual(
+      TransportSecurityLayer::fileKey, keyPhysicalName, true, true, 0
+    );
+    FileOperations::GetPhysicalFileNameFromVirtual(
+      TransportSecurityLayer::fileCertificateConfiguration, certificateConfiguration, true, true, 0
+    );
     theCommand <<  "openssl req -x509 -newkey rsa:2048 -nodes -keyout " << keyPhysicalName
     << " -out " << certificatePhysicalName
     << " -days 3001 ";
@@ -65,8 +104,8 @@ bool TransportSecurityLayer::initSSLkeyFiles() {
     theGlobalVariables.CallSystemNoOutput(theCommand.str(), &logServer);
   }
   if (
-    !FileOperations::FileExistsVirtual(fileCertificate, true, true) ||
-    !FileOperations::FileExistsVirtual(fileKey, true, true)
+    !FileOperations::FileExistsVirtual(TransportSecurityLayer::fileCertificate, true, true) ||
+    !FileOperations::FileExistsVirtual(TransportSecurityLayer::fileKey, true, true)
   ) {
     theGlobalVariables.flagSSLIsAvailable = false;
     return false;
@@ -100,20 +139,30 @@ void TransportSecurityLayerOpenSSL::initSSLCommon() {
 
 }
 
-void TransportSecurityLayer::initSSLserver() {
+void TransportSecurityLayerOpenSSL::initSSLserver() {
   this->initSSLCommon();
-  if (this->flagInitializedPrivateKey) {
+  if (this->owner->flagInitializedPrivateKey) {
     return;
   }
-  this->flagInitializedPrivateKey = true;
+  this->owner->flagInitializedPrivateKey = true;
   std::string fileCertificatePhysical, fileKeyPhysical,
   singedFileCertificate1Physical, signedFileCertificate3Physical,
   signedFileKeyPhysical;
-  FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate1, singedFileCertificate1Physical, true, true, 0);
-  FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate3, signedFileCertificate3Physical, true, true, 0);
-  FileOperations::GetPhysicalFileNameFromVirtual(fileCertificate, fileCertificatePhysical, true, true, 0);
-  FileOperations::GetPhysicalFileNameFromVirtual(fileKey, fileKeyPhysical, true, true, 0);
-  FileOperations::GetPhysicalFileNameFromVirtual(signedFileKey, signedFileKeyPhysical, true, true, 0);
+  FileOperations::GetPhysicalFileNameFromVirtual(
+    TransportSecurityLayer::signedFileCertificate1, singedFileCertificate1Physical, true, true, 0
+  );
+  FileOperations::GetPhysicalFileNameFromVirtual(
+    TransportSecurityLayer::signedFileCertificate3, signedFileCertificate3Physical, true, true, 0
+  );
+  FileOperations::GetPhysicalFileNameFromVirtual(
+    TransportSecurityLayer::fileCertificate, fileCertificatePhysical, true, true, 0
+  );
+  FileOperations::GetPhysicalFileNameFromVirtual(
+    TransportSecurityLayer::fileKey, fileKeyPhysical, true, true, 0
+  );
+  FileOperations::GetPhysicalFileNameFromVirtual(
+    TransportSecurityLayer::signedFileKey, signedFileKeyPhysical, true, true, 0
+  );
   //////////////////////////////////////////////////////////
   if (!this->initSSLkeyFiles()) {
     return;
@@ -159,16 +208,14 @@ bool TransportSecurityLayer::SSLReadLoop(int numTries,
   std::stringstream* commentsGeneral,
   bool includeNoErrorInComments
 ) {
-  MacroRegisterFunctionWithName("TransportSecurityLayer::SSLreadLoop");
-  this->buffer.SetSize(100000);
+  MacroRegisterFunctionWithName("TransportSecurityLayer::SSLReadLoop");
   output = "";
   int i = 0;
   std::string next;
   int numBytes = - 1;
   for (i = 0; i < numTries; i ++) {
     numBytes = this->SSLRead(
-      this->buffer.TheObjects,
-      this->buffer.size,
+      this->buffer,
       outputError,
       commentsGeneral,
       includeNoErrorInComments
@@ -210,8 +257,7 @@ bool TransportSecurityLayer::SSLWriteLoop(
   int numBytes = - 1;
   for (i = 0; i < numTries; i ++) {
     numBytes = this->SSLWrite(
-      this->buffer.TheObjects,
-      this->buffer.size,
+      this->buffer,
       outputError,
       commentsGeneral,
       commentsGeneral,
@@ -230,7 +276,7 @@ bool TransportSecurityLayer::SSLWriteLoop(
   return true;
 }
 
-void TransportSecurityLayer::ClearErrorQueue(
+void TransportSecurityLayerOpenSSL::ClearErrorQueue(
   int errorCode,
   std::string* outputError,
   std::stringstream* commentsGeneral,
@@ -255,7 +301,7 @@ void TransportSecurityLayer::ClearErrorQueue(
     break;
   case SSL_ERROR_WANT_READ:
     if (outputError != 0) {
-      *outputError = TransportSecurityLayer::errors::errorWantRead;
+      *outputError = TransportSecurityLayerOpenSSL::errors::errorWantRead;
     }
     break;
   case SSL_ERROR_WANT_WRITE:
@@ -306,7 +352,7 @@ void TransportSecurityLayer::ClearErrorQueue(
   }
 }
 
-void TransportSecurityLayer::DoSetSocket(int theSocket) {
+void TransportSecurityLayerOpenSSL::DoSetSocket(int theSocket) {
   MacroRegisterFunctionWithName("TransportSecurityLayer::DoSetSocket");
   int result = 0;
   for (int i = 0; i < 10; i ++) {
@@ -320,42 +366,45 @@ void TransportSecurityLayer::DoSetSocket(int theSocket) {
   }
 }
 
-void TransportSecurityLayer::SetSocketAddToStack(int theSocket) {
-  MacroRegisterFunctionWithName("TransportSecurityLayer::SetSocketAddToStackServer");
-  this->socketStackServer.AddOnTop(theSocket);
+void TransportSecurityLayerOpenSSL::SetSocketAddToStack(int theSocket) {
+  MacroRegisterFunctionWithName("TransportSecurityLayer::SetSocketAddToStack");
+  this->socketStack.AddOnTop(theSocket);
   this->DoSetSocket(theSocket);
 }
 
-void TransportSecurityLayer::RemoveLastSocketServer() {
-  MacroRegisterFunctionWithName("TransportSecurityLayer::RemoveLastSocketServer");
-  if (this->socketStackServer.size > 0) {
-    int lastSocket = this->socketStackServer.PopLastObject();
-    close(lastSocket);
+void TransportSecurityLayer::Free() {
+  if (!this->flagDontUseOpenSSL) {
+    this->openSSLData.FreeSSL();
+  } else {
+    crash << "Remove last socket not implemented yet. " << crash;
   }
-  if (this->socketStackServer.size <= 0) {
-    return;
-  }
-  this->DoSetSocket(*this->socketStackServer.LastObject());
 }
 
-void TransportSecurityLayer::RemoveLastSocketClient() {
-  MacroRegisterFunctionWithName("TransportSecurityLayer::RemoveLastSocketClient");
-  if (this->socketStackClient.size > 0) {
-    int lastSocket = this->socketStackClient.PopLastObject();
-    close(lastSocket);
+void TransportSecurityLayer::RemoveLastSocket() {
+  if (!this->flagDontUseOpenSSL) {
+    this->openSSLData.RemoveLastSocket();
+  } else {
+    crash << "Remove last socket not implemented yet. " << crash;
   }
-  if (this->socketStackClient.size <= 0) {
-    return;
-  }
-  this->DoSetSocket(*this->socketStackClient.LastObject());
 }
 
-bool TransportSecurityLayer::HandShakeIamClientNoSocketCleanup(
+void TransportSecurityLayerOpenSSL::RemoveLastSocket() {
+  MacroRegisterFunctionWithName("TransportSecurityLayer::RemoveLastSocket");
+  if (this->socketStack.size > 0) {
+    int lastSocket = this->socketStack.PopLastObject();
+    close(lastSocket);
+  }
+  if (this->socketStack.size <= 0) {
+    return;
+  }
+  this->DoSetSocket(*this->socketStack.LastObject());
+}
+
+bool TransportSecurityLayerOpenSSL::HandShakeIamClientNoSocketCleanup(
   int inputSocketID,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("WebServer::HandShakeIamClientNoSocketCleanup");
   this->FreeSSL();
   this->sslData = SSL_new(this->contextServer);
   if (this->sslData == 0) {
@@ -467,7 +516,30 @@ bool TransportSecurityLayer::HandShakeIamClientNoSocketCleanup(
   return true;
 }
 
-bool TransportSecurityLayer::InspectCertificates(
+bool TransportSecurityLayer::HandShakeIamServer(int inputSocketID) {
+  if (!this->flagDontUseOpenSSL) {
+    return this->openSSLData.HandShakeIamServer(inputSocketID);
+  } else {
+    crash << "Not implemented yet. " << crash;
+    return false;
+  }
+}
+
+bool TransportSecurityLayer::HandShakeIamClientNoSocketCleanup(
+  int inputSocketID,
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneral
+) {
+  MacroRegisterFunctionWithName("WebServer::HandShakeIamClientNoSocketCleanup");
+  if (!this->flagDontUseOpenSSL) {
+    return this->HandShakeIamClientNoSocketCleanup(inputSocketID, commentsOnFailure, commentsGeneral);
+  } else {
+    crash << "Handshake not implemented yet. " << crash;
+    return false;
+  }
+}
+
+bool TransportSecurityLayerOpenSSL::InspectCertificates(
   std::stringstream *commentsOnFailure, std::stringstream *commentsGeneral
 ) {
   MacroRegisterFunctionWithName("TransportSecurityLayer::InspectCertificates");
@@ -519,23 +591,35 @@ bool TransportSecurityLayer::InspectCertificates(
   }
 }
 
-int TransportSecurityLayer::SSLRead(
-  void* buffer,
-  int bufferSize,
-  std::string* outputError,
-  std::stringstream* commentsGeneral,
-  bool includeNoErrorInComments
+int TransportSecurityLayerOpenSSL::SSLRead(
+  List<char> &readBuffer, std::string *outputError, std::stringstream *commentsGeneral, bool includeNoErrorInComments
 ) {
   ERR_clear_error();
-  int result = SSL_read(this->sslData, buffer, bufferSize);
+  int result = SSL_read(this->sslData, readBuffer.TheObjects, readBuffer.size);
   this->ClearErrorQueue(
     result, outputError, commentsGeneral, includeNoErrorInComments
   );
   return result;
+
 }
 
-int TransportSecurityLayer::SSLWrite(void* buffer,
-  int bufferSize,
+int TransportSecurityLayer::SSLRead(
+  List<char>& readBuffer,
+  std::string* outputError,
+  std::stringstream* commentsGeneral,
+  bool includeNoErrorInComments
+) {
+  this->buffer.SetSize(100000);
+  if (!this->flagDontUseOpenSSL) {
+    return this->openSSLData.SSLRead(readBuffer, outputError, commentsGeneral, includeNoErrorInComments);
+  } else {
+    crash << "SSL read not implemented yet. " << crash;
+    return - 1;
+  }
+}
+
+int TransportSecurityLayerOpenSSL::SSLWrite(
+  List<char>& writeBuffer,
   std::string* outputError,
   std::stringstream* commentsGeneral,
   std::stringstream* commentsOnError,
@@ -543,14 +627,32 @@ int TransportSecurityLayer::SSLWrite(void* buffer,
 ) {
   (void) commentsGeneral;
   ERR_clear_error();
-  int result = SSL_write(this->sslData, buffer, bufferSize);
+  if (this->owner->standardBufferSize > 0 && writeBuffer.size < this->owner->standardBufferSize) {
+    writeBuffer.SetSize(this->owner->standardBufferSize);
+  }
+  int result = SSL_write(this->sslData, writeBuffer.TheObjects, writeBuffer.size);
   this->ClearErrorQueue(
     result, outputError, commentsOnError, includeNoErrorInComments
   );
   return result;
 }
 
-bool TransportSecurityLayer::HandShakeIamServer(int inputSocketID) {
+int TransportSecurityLayer::SSLWrite(
+  List<char>& writeBuffer,
+  std::string* outputError,
+  std::stringstream* commentsGeneral,
+  std::stringstream* commentsOnError,
+  bool includeNoErrorInComments
+) {
+  if (!this->flagDontUseOpenSSL) {
+    return this->SSLWrite(writeBuffer, outputError, commentsGeneral, commentsOnError, includeNoErrorInComments);
+  } else {
+    crash << "Not imeplemented yet. " << crash;
+    return - 1;
+  }
+}
+
+bool TransportSecurityLayerOpenSSL::HandShakeIamServer(int inputSocketID) {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamServer");
   std::stringstream commentsOnSSLNew;
   this->sslData = SSL_new(this->contextServer);

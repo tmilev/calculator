@@ -27,12 +27,13 @@ struct TransportSecurityLayerOpenSSL {
   SSL_CTX* contextServer;
   bool flagSSLHandshakeSuccessful;
   const SSL_METHOD* theSSLMethod;
-  List<char> buffer;
+  List<int> socketStack;
   struct errors {
     static std::string errorWantRead;
   };
   std::string otherCertificateIssuerName, otherCertificateSubjectName;
   TransportSecurityLayerOpenSSL();
+  ~TransportSecurityLayerOpenSSL();
   void FreeSSL();
   void FreeContext();
   void FreeEverythingShutdownSSL();
@@ -40,6 +41,37 @@ struct TransportSecurityLayerOpenSSL {
   void initSSLserver();
   void initSSLClient();
   void initSSLCommon();
+  void Reset();
+  void ClearErrorQueue(
+    int errorCode,
+    std::string *outputError,
+    std::stringstream* commentsGeneral,
+    bool includeNoErrorInComments
+  );
+  bool HandShakeIamClientNoSocketCleanup(
+    int inputSocketID,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral
+  );
+  int SSLRead(
+    List<char>& readBuffer,
+    std::string *outputError,
+    std::stringstream *commentsGeneral,
+    bool includeNoErrorInComments
+  );
+  int SSLWrite(
+    List<char>& writeBuffer,
+    std::string* outputError,
+    std::stringstream* commentsGeneral,
+    std::stringstream *commentsOnError,
+    bool includeNoErrorInComments
+  );
+  void DoSetSocket(int theSocket);
+  void SetSocketAddToStack(int theSocket);
+  void RemoveLastSocket();
+  bool HandShakeIamServer(int inputSocketID);
+  bool InspectCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  static bool initSSLkeyFiles();
 };
 
 class TransportSecurityLayer {
@@ -47,10 +79,10 @@ public:
   static bool flagDontUseOpenSSL;
   bool flagInitializedPrivateKey;
   bool flagIsServer;
+  List<char> buffer;
   TransportSecurityLayerOpenSSL openSSLData;
 
-  List<int> socketStackServer;
-  List<int> socketStackClient;
+  int standardBufferSize;
 
   static const std::string fileCertificate;
   static const std::string fileCertificateConfiguration;
@@ -58,21 +90,9 @@ public:
   static const std::string signedFileCertificate1;
   static const std::string signedFileCertificate3;
   static const std::string signedFileKey;
-  void DoSetSocket(int theSocket);
-  void SetSocketAddToStack(int theSocket);
-  void RemoveLastSocketServer();
-  void RemoveLastSocketClient();
-  void ClearErrorQueue(
-    int errorCode,
-    std::string *outputError,
-    std::stringstream* commentsGeneral,
-    bool includeNoErrorInComments
-  );
-  static bool initSSLkeyFiles();
   void initialize(bool IamServer);
   int SSLRead(
-    void *buffer,
-    int bufferSize,
+    List<char>& readBuffer,
     std::string *outputError,
     std::stringstream *commentsGeneral,
     bool includeNoErrorInComments
@@ -93,8 +113,7 @@ public:
     bool includeNoErrorInComments
   );
   int SSLWrite(
-    void* buffer,
-    int bufferSize,
+    List<char>& writeBuffer,
     std::string* outputError,
     std::stringstream* commentsGeneral,
     std::stringstream *commentsOnError,
@@ -102,12 +121,15 @@ public:
   );
   TransportSecurityLayer();
   ~TransportSecurityLayer();
+  void RemoveLastSocket();
   void AddMoreEntropyFromTimer();
   bool HandShakeIamServer(int inputSocketID);
-  bool InspectCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool HandShakeIamClientNoSocketCleanup(
     int inputSocketID, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
+  bool initSSLKeyFiles();
+  void Free();
+  void FreeEverythingShutdown();
 };
 
 #endif

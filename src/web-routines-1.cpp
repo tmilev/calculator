@@ -332,7 +332,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
   MacroRegisterFunctionWithName("WebCrawler::FetchWebPage");
   (void) commentsOnFailure;
   (void) commentsGeneral;
-  this->theTSL.initSSLClient();
+  this->theTSL.initialize(false);
 #ifdef MACRO_use_open_ssl
   //logOpenSSL << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
   this->lastTransaction = "";
@@ -442,7 +442,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
       }
     }
     this->FetchWebPagePart2(commentsOnFailure, commentsGeneral);
-    theWebServer.theTSL.RemoveLastSocketClient();
+    theWebServer.theTSL.RemoveLastSocket();
     close(this->theSocket);
     break;
   }

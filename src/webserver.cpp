@@ -159,7 +159,7 @@ void WebServer::initSSL() {
     return;
   }
   //////////////////////////////////////////////////////////////////////////
-  this->theTSL.initSSLserver();
+  this->theTSL.initialize(true);
 }
 
 bool WebServer::SSLServerSideHandShake() {
@@ -181,8 +181,8 @@ bool WebWorker::ReceiveAllHttpSSL() {
   this->messageBody = "";
   this->messageHead = "";
   this->requestTypE = this->requestUnknown;
-  unsigned const int bufferSize = 60000;
-  char buffer[bufferSize];
+  List<char> reader;
+  reader.SetSize(60000);
   if (this->connectedSocketID == - 1) {
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   }
@@ -198,15 +198,15 @@ bool WebWorker::ReceiveAllHttpSSL() {
   while (true) {
     //int64_t msBeforesslread = theGlobalVariables.GetElapsedMilliseconds();
     numBytesInBuffer = this->parent->theTSL.SSLRead(
-      &buffer, bufferSize - 1, &errorString, 0, true
+      reader, &errorString, 0, true
     );
     //int64_t readTime = theGlobalVariables.GetElapsedMilliseconds() - msBeforesslread;
-    if (numBytesInBuffer >= 0 && numBytesInBuffer <= (signed) bufferSize) {
+    if (numBytesInBuffer >= 0 && numBytesInBuffer <= (signed) reader.size) {
       break;
     }
     numFailedReceives ++;
     if (numFailedReceives > maxNumFailedReceives) {
-      if (errorString == TransportSecurityLayer::errors::errorWantRead) {
+      if (errorString == TransportSecurityLayerOpenSSL::errors::errorWantRead) {
         this->error = errorString;
       } else {
         std::stringstream out;
@@ -223,7 +223,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
       return false;
     }
   }
-  this->messageHead.assign(buffer, numBytesInBuffer);
+  this->messageHead.assign(reader.TheObjects, numBytesInBuffer);
   this->ParseMessageHead();
   if (this->requestTypE == WebWorker::requestTypes::requestPost) {
     this->displayUserInput = "POST " + this->addressGetOrPost;
@@ -259,7 +259,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
       return false;
     }
     numBytesInBuffer = this->parent->theTSL.SSLRead(
-      &buffer, bufferSize - 1, &errorString, 0, true
+      reader, &errorString, 0, true
     );
     if (numBytesInBuffer == 0) {
       this->error = "While trying to fetch message-body, received 0 bytes. " +
@@ -281,7 +281,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
       this->displayUserInput = this->error;
       return false;
     }
-    bufferString.assign(buffer, numBytesInBuffer);
+    bufferString.assign(reader.TheObjects, numBytesInBuffer);
     this->messageBody += bufferString;
   }
   if ((signed) this->messageBody.size() != this->ContentLength) {
@@ -334,8 +334,7 @@ void WebWorker::SendAllBytesHttpSSL() {
       return;
     }
     int numBytesSent = this->parent->theTSL.SSLWrite(
-      this->remainingBytesToSenD.TheObjects,
-      this->remainingBytesToSenD.size,
+      this->remainingBytesToSenD,
       &errorString,
       0,
       &commentsOnError,
@@ -3272,7 +3271,7 @@ bool WebServer::CheckConsistency() {
 }
 
 void WebServer::ReleaseEverything() {
-  this->theTSL.FreeSSL();
+  this->theTSL.Free();
   logger& currentLog = theGlobalVariables.flagIsChildProcess ? logWorker : logServer;
   ProgressReportWebServer::flagServerExists = false;
   for (int i = 0; i < this->theWorkers.size; i ++) {
@@ -4230,9 +4229,6 @@ void WebServer::WriteVersionJSFile() {
 int WebServer::Run() {
   MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog = "crash_WebServerRun.html";
-  if (theGlobalVariables.flagSSLIsAvailable) {
-    TransportSecurityLayer::initSSLkeyFiles();
-  }
   //<-worker log resets are needed, else forked processes reset their common log.
   //<-resets of the server logs are not needed, but I put them here nonetheless.
   logWorker         .reset();
@@ -4281,6 +4277,9 @@ int WebServer::Run() {
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size = sizeof their_addr;
   char userAddressBuffer[INET6_ADDRSTRLEN];
+  if (theGlobalVariables.flagSSLIsAvailable) {
+    this->theTSL.initSSLKeyFiles();
+  }
   this->initSSL();
   fd_set FDListenSockets;
   this->NumSuccessfulSelectsSoFar = 0;
@@ -4461,7 +4460,7 @@ int WebServer::Run() {
     this->ReleaseWorkerSideResources();
   }
   this->ReleaseEverything();
-  this->theTSL.FreeEverythingShutdownSSL();
+  this->theTSL.FreeEverythingShutdown();
   return 0;
 }
 
@@ -4502,7 +4501,7 @@ int WebWorker::Run() {
     if (!this->ReceiveAll()) {
       bool sslWasOK = true;
 #ifdef MACRO_use_open_ssl
-      sslWasOK = (this->error == TransportSecurityLayer::errors::errorWantRead);
+      sslWasOK = (this->error == TransportSecurityLayerOpenSSL::errors::errorWantRead);
 #endif
       if (this->numberOfReceivesCurrentConnection > 0 && sslWasOK) {
         logIO << logger::green << "Connection timed out after successfully receiving "

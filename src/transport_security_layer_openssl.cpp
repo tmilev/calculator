@@ -5,17 +5,19 @@
 
 #include <unistd.h> //<- close, open defined here
 
-ProjectInformationInstance projectInfoInstanceTransportSecurityLayerImplementation(__FILE__, "Contains all openSSL-related implementation.");
+ProjectInformationInstance projectInfoInstanceTransportSecurityLayerOpenSSLImplementation(__FILE__, "Contains all openSSL-related implementation.");
 
 std::string TransportSecurityLayerOpenSSL::errors::errorWantRead = "SSL_ERROR_WANT_READ";
 bool TransportSecurityLayerOpenSSL::flagSSLlibraryInitialized = false;
 
-TransportSecurityLayer::~TransportSecurityLayer() {
+extern logger logServer;
+
+TransportSecurityLayerOpenSSL::~TransportSecurityLayerOpenSSL() {
   this->FreeSSL();
   this->FreeContext();
 }
 
-void TransportSecurityLayer::FreeSSL() {
+void TransportSecurityLayerOpenSSL::FreeSSL() {
   SSL_free(this->sslData);
   this->sslData = 0;
 }

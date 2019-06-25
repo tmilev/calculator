@@ -22,7 +22,7 @@ struct TransportSecurityLayerOpenSSL {
   TransportSecurityLayer* owner;
   int errorCode;
   static bool flagSSLlibraryInitialized;
-  ssl_st* sslData;
+  SSL* sslData;
   X509* peer_certificate;
   SSL_CTX* contextServer;
   bool flagSSLHandshakeSuccessful;
@@ -37,7 +37,7 @@ struct TransportSecurityLayerOpenSSL {
   void FreeSSL();
   void FreeContext();
   void FreeEverythingShutdownSSL();
-  void initSSLlibrary();
+  void initSSLLibrary();
   void initSSLServer();
   void initSSLClient();
   void initSSLCommon();

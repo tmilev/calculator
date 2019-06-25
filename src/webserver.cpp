@@ -4231,6 +4231,10 @@ int WebServer::Run() {
   theGlobalVariables.RelativePhysicalNameCrashLog = "crash_WebServerRun.html";
   //<-worker log resets are needed, else forked processes reset their common log.
   //<-resets of the server logs are not needed, but I put them here nonetheless.
+  if (theGlobalVariables.flagSSLIsAvailable) {
+    // creates key files if absent. Does not call any openssl functions.
+    this->theTSL.initSSLKeyFiles();
+  }
   logWorker         .reset();
   logServerMonitor  .reset();
   logHttpErrors     .reset();
@@ -4277,9 +4281,6 @@ int WebServer::Run() {
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size = sizeof their_addr;
   char userAddressBuffer[INET6_ADDRSTRLEN];
-  if (theGlobalVariables.flagSSLIsAvailable) {
-    this->theTSL.initSSLKeyFiles();
-  }
   this->initSSL();
   fd_set FDListenSockets;
   this->NumSuccessfulSelectsSoFar = 0;

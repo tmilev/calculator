@@ -131,7 +131,7 @@ void TransportSecurityLayerOpenSSL::initSSLClient() {
 
 void TransportSecurityLayerOpenSSL::initSSLCommon() {
   MacroRegisterFunctionWithName("TransportSecurityLayerOpenSSL::initSSLCommon");
-  this->initSSLlibrary();
+  this->initSSLLibrary();
   std::stringstream commentsOnError;
   this->theSSLMethod = SSLv23_method();
   this->contextServer = SSL_CTX_new(this->theSSLMethod);
@@ -149,7 +149,6 @@ void TransportSecurityLayerOpenSSL::initSSLCommon() {
 
 void TransportSecurityLayerOpenSSL::initSSLServer() {
   MacroRegisterFunctionWithName("TransportSecurityLayerOpenSSL::initSSLServer");
-  std::cout << "DEBUG: Got to here pt -1.b " << std::endl;
   this->initSSLCommon();
   if (this->owner->flagInitializedPrivateKey) {
     return;
@@ -179,6 +178,7 @@ void TransportSecurityLayerOpenSSL::initSSLServer() {
     return;
   }
   logServer << logger::green << "SSL is available." << logger::endL;
+
   if (SSL_CTX_use_certificate_chain_file(this->contextServer, signedFileCertificate3Physical.c_str()) <= 0) {
     logServer << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
     << logger::endL;
@@ -223,6 +223,7 @@ bool TransportSecurityLayer::SSLReadLoop(int numTries,
   bool includeNoErrorInComments
 ) {
   MacroRegisterFunctionWithName("TransportSecurityLayer::SSLReadLoop");
+  this->buffer.SetSize(100000);
   output = "";
   int i = 0;
   std::string next;
@@ -669,7 +670,9 @@ int TransportSecurityLayer::SSLWrite(
 bool TransportSecurityLayerOpenSSL::HandShakeIamServer(int inputSocketID) {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamServer");
   std::stringstream commentsOnSSLNew;
-  this->sslData = SSL_new(this->contextServer);
+  if (this->sslData == 0) {
+    this->sslData = SSL_new(this->contextServer);
+  }
   if (this->sslData == 0) {
     logOpenSSL << logger::red << "Failed to allocate ssl: " << commentsOnSSLNew.str() << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
@@ -679,6 +682,7 @@ bool TransportSecurityLayerOpenSSL::HandShakeIamServer(int inputSocketID) {
   this->flagSSLHandshakeSuccessful = false;
   for (int i = 0; i < maxNumHandshakeTries; i ++) {
     std::stringstream commentsOnError;
+    std::cout << "DEBUG: ssl data is: " << this->sslData;
     this->errorCode = SSL_accept(this->sslData);
     if (this->errorCode != 1) {
       this->flagSSLHandshakeSuccessful = false;

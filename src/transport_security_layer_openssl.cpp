@@ -38,7 +38,7 @@ void TransportSecurityLayerOpenSSL::FreeContext() {
   this->contextServer = 0;
 }
 
-void TransportSecurityLayerOpenSSL::initSSLlibrary() {
+void TransportSecurityLayerOpenSSL::initSSLLibrary() {
   MacroRegisterFunctionWithName("TransportSecurityLayerOpenSSL::initSSLlibrary");
   if (this->flagSSLlibraryInitialized) {
     return;
@@ -46,15 +46,14 @@ void TransportSecurityLayerOpenSSL::initSSLlibrary() {
   this->flagSSLlibraryInitialized = true;
   std::stringstream commentsOnError;
   // this command loads error strings and initializes openSSL.
-  SSL_load_error_strings();
-  //loadedSuccessfully = OPENSSL_init_ssl(0, NULL, &commentsOnError);
-  //if (loadedSuccessfully != 1) {
-  //  logServer << logger::red << commentsOnError.str() << logger::endL;
-  //  crash << "Failed to initialize ssl library. " << crash;
-  //}
+  int loadedSuccessfully = SSL_load_error_strings();
+  if (loadedSuccessfully != 1) {
+    logServer << logger::red << commentsOnError.str() << logger::endL;
+    crash << "Failed to initialize ssl library. " << crash;
+  }
   if (commentsOnError.str() != "") {
     logServer << logger::red << "OpenSSL initialization comments: " << logger::blue << commentsOnError.str() << logger::endL;
   }
-  //logServer << logger::green << "DEBUG: InitialIzation of ssl successfull." << logger::endL;
+  logServer << logger::green << "DEBUG: InitialIzation of ssl successfull." << logger::endL;
 }
 

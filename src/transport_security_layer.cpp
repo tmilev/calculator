@@ -120,8 +120,6 @@ bool TransportSecurityLayerOpenSSL::initSSLkeyFiles() {
   return false;
 }
 
-
-
 void TransportSecurityLayer::AddMoreEntropyFromTimer() {
   int fixMeAcquireEntropy;
 
@@ -137,7 +135,8 @@ void TransportSecurityLayerOpenSSL::initSSLCommon() {
   std::stringstream commentsOnError;
   this->theSSLMethod = SSLv23_method();
   this->contextServer = SSL_CTX_new(this->theSSLMethod);
-  std::cout << "DEBUG: Got to here pt -XXX " << std::endl;
+  std::cout << "DEBUG: Got to here pt -XXX. Context server: " << this->contextServer << std::endl;
+  std::cout << "DEBUG: Got to here pt -XXX. Context method: " << this->theSSLMethod << std::endl;
 
   if (this->contextServer == 0) {
     logServer << logger::red << "Failed to create ssl context. " << logger::endL;
@@ -155,7 +154,7 @@ void TransportSecurityLayerOpenSSL::initSSLServer() {
   if (this->owner->flagInitializedPrivateKey) {
     return;
   }
-  std::cout << "DEBUG: Got to here. " << std::endl;
+  std::cout << "DEBUG: PRIVATE KEY is here. " << std::endl;
   this->owner->flagInitializedPrivateKey = true;
   std::string fileCertificatePhysical, fileKeyPhysical,
   singedFileCertificate1Physical, signedFileCertificate3Physical,
@@ -175,7 +174,6 @@ void TransportSecurityLayerOpenSSL::initSSLServer() {
   FileOperations::GetPhysicalFileNameFromVirtual(
     TransportSecurityLayer::signedFileKey, signedFileKeyPhysical, true, true, 0
   );
-  std::cout << "DEBUG: Got to here pt2. " << std::endl;
   //////////////////////////////////////////////////////////
   if (!this->initSSLkeyFiles()) {
     return;
@@ -192,6 +190,9 @@ void TransportSecurityLayerOpenSSL::initSSLServer() {
       ERR_print_errors_fp(stderr);
       exit(4);
     }
+    std::cout << "DEBUG: Got to here pt2. File key: " << fileKeyPhysical << std::endl;
+    std::cout << "DEBUG: Got to here pt2. signed file key: " << fileCertificatePhysical << std::endl;
+
   } else {
     logServer << logger::green << "Found officially signed certificate... " << logger::endL;
     //if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate2.c_str()) <= 0)

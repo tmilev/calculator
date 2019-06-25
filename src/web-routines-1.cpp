@@ -40,6 +40,7 @@ public:
   bool flagDoUseGET;
   LargeInt expectedLength;
   List<char> buffer;
+  int lastNumBytesRead;
   struct sockaddr_in serverAddress;
   struct hostent *serverOtherSide;
   struct addrinfo hints;
@@ -151,7 +152,7 @@ void WebServerMonitor::Monitor(int pidServer) {
       << numConsecutiveFailedPings << " consecutive fails so far, restarting on " << maxNumPingFailures
       << ". " << logger::endL;
     } else {
-      std::cout << "Connection monitor: Ping success #" << numPings << std::endl;
+      std::cout << "Connection monitor: ping #" << numPings << ": received " << theCrawler.lastNumBytesRead << " bytes. " << std::endl;
       numConsecutiveFailedPings = 0;
     }
     if (numConsecutiveFailedPings >= maxNumPingFailures) {
@@ -187,6 +188,7 @@ WebCrawler::WebCrawler() {
   this->theSocket = - 1;
   this->serverOtherSide = 0;
   this->serverInfo = 0;
+  this->lastNumBytesRead = 0;
 }
 
 void WebCrawler::FreeAddressInfo() {
@@ -313,15 +315,16 @@ void WebCrawler::PingCalculatorStatus() {
       continue;
     }
     std::stringstream errorStream2;
-    int numBytesRead = Pipe::ReadWithTimeOutViaSelect(this->theSocket, this->buffer, 1, 10, &errorStream2);
-    if (numBytesRead < 0) {
+    this->lastNumBytesRead = Pipe::ReadWithTimeOutViaSelect(this->theSocket, this->buffer, 1, 10, &errorStream2);
+    if (this->lastNumBytesRead < 0) {
       this->lastTransactionErrors += "ERROR reading from socket. " + errorStream2.str();
       close(this->theSocket);
       continue;
     }
     std::string readString;
-    readString.assign(buffer.TheObjects, numBytesRead);
-    reportStream << "Wrote " << numBytesWritten  << ", read " << numBytesRead << " bytes: " << readString;
+    readString.assign(buffer.TheObjects, this->lastNumBytesRead);
+    reportStream << "Wrote " << numBytesWritten  << ", read "
+    << this->lastNumBytesRead << " bytes: " << readString << ". ";
     this->lastTransaction = reportStream.str();
     close(this->theSocket);
   }

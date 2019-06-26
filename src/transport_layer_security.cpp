@@ -105,8 +105,10 @@ bool TransportLayerSecurityOpenSSL::initSSLkeyFiles() {
       theGlobalVariables.configuration["openSSLSubject"].type == JSData::JSstring
     ) {
       theCommand << "-subj " << theGlobalVariables.configuration["openSSLSubject"].string;
-      // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/CN=localhost/OU=none/E=myemail@gmail.com"
+      // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"
     }
+    logServer << "About to generate key files with the following command. " << logger::endL;
+    logServer << logger::green << theCommand.str() << logger::endL;
     theGlobalVariables.CallSystemNoOutput(theCommand.str(), &logServer);
   }
   if (
@@ -136,9 +138,9 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
   std::stringstream commentsOnError;
   if (isServer) {
     std::cout << "DEBUG: setting up server. " << std::endl;
-    this->theSSLMethod = TLS_server_method();
+    this->theSSLMethod = SSLv23_server_method();
   } else {
-    this->theSSLMethod = TLS_client_method();
+    this->theSSLMethod = SSLv23_client_method();
   }
   this->contextServer = SSL_CTX_new(this->theSSLMethod);
   std::cout << "DEBUG: Got to here pt -XXX. Context server: " << this->contextServer << std::endl;
@@ -188,7 +190,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     return;
   }
   logServer << logger::green << "SSL is available." << logger::endL;
-
+  SSL_CTX_set_ecdh_auto(this->contextServer, 1);
   if (SSL_CTX_use_certificate_chain_file(this->contextServer, signedFileCertificate3Physical.c_str()) <= 0) {
     logServer << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
     << logger::endL;
@@ -308,7 +310,9 @@ void TransportLayerSecurityOpenSSL::ClearErrorQueue(
   bool includeNoErrorInComments
 ) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::ToStringError");
+
   int numErrors = 0;
+  ERR_print_errors_fp(stderr);
   int theCode = SSL_get_error(this->sslData, errorCode);
   if (theCode == SSL_ERROR_NONE) {
     if (commentsGeneral != 0 && includeNoErrorInComments) {
@@ -557,7 +561,7 @@ bool TransportLayerSecurity::HandShakeIamClientNoSocketCleanup(
 ) {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamClientNoSocketCleanup");
   if (!this->flagDontUseOpenSSL) {
-    return this->HandShakeIamClientNoSocketCleanup(inputSocketID, commentsOnFailure, commentsGeneral);
+    return this->openSSLData.HandShakeIamClientNoSocketCleanup(inputSocketID, commentsOnFailure, commentsGeneral);
   } else {
     crash << "Handshake not implemented yet. " << crash;
     return false;
@@ -617,10 +621,12 @@ bool TransportLayerSecurityOpenSSL::InspectCertificates(
 }
 
 int TransportLayerSecurityOpenSSL::SSLRead(
-  List<char> &readBuffer, std::string *outputError, std::stringstream *commentsGeneral, bool includeNoErrorInComments
+  List<char>& readBuffer, std::string *outputError, std::stringstream *commentsGeneral, bool includeNoErrorInComments
 ) {
   ERR_clear_error();
+  logWorker << "DEBUG: About to ssl read... " << logger::endL;
   int result = SSL_read(this->sslData, readBuffer.TheObjects, readBuffer.size);
+  logWorker << "DEBUG: ssl read done with result: " << result << logger::endL;
   this->ClearErrorQueue(
     result, outputError, commentsGeneral, includeNoErrorInComments
   );
@@ -636,6 +642,7 @@ int TransportLayerSecurity::SSLRead(
 ) {
   this->buffer.SetSize(100000);
   if (!this->flagDontUseOpenSSL) {
+    logWorker << "DEBUG: About to ssl read ..." << logger::endL;
     return this->openSSLData.SSLRead(readBuffer, outputError, commentsGeneral, includeNoErrorInComments);
   } else {
     crash << "SSL read not implemented yet. " << crash;
@@ -670,7 +677,7 @@ int TransportLayerSecurity::SSLWrite(
   bool includeNoErrorInComments
 ) {
   if (!this->flagDontUseOpenSSL) {
-    return this->SSLWrite(writeBuffer, outputError, commentsGeneral, commentsOnError, includeNoErrorInComments);
+    return this->openSSLData.SSLWrite(writeBuffer, outputError, commentsGeneral, commentsOnError, includeNoErrorInComments);
   } else {
     crash << "Not imeplemented yet. " << crash;
     return - 1;
@@ -755,6 +762,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamServer(int inputSocketID) {
       theGlobalVariables.FallAsleep(500000);
     } else {
       this->flagSSLHandshakeSuccessful = true;
+      logWorker << "DEBUG: HANDSHake OK!!!!!" << logger::endL;
       break;
     }
   }

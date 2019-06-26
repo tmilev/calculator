@@ -2,7 +2,7 @@
 #define WEBSERVER_H
 #include "vpfHeader6WebServerInterprocessLogistics.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
-#include "transport_security_layer.h"
+#include "transport_layer_security.h"
 
 static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "Web server classes declarations.");
 
@@ -232,7 +232,7 @@ public:
   long long NumFailedSelectsSoFar;
   long long NumSuccessfulSelectsSoFar;
   bool flagReapingChildren;
-  TransportSecurityLayer theTSL;
+  TransportLayerSecurity theTSL;
   PointerObjectDestroyer<Calculator> theCalculator;
   MonomialCollection<MonomialWrapper<std::string, MathRoutines::HashString>, LargeInt> currentlyConnectedAddresses;
   List<std::string> PortsITryHttp;

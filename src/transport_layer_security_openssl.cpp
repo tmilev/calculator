@@ -1,28 +1,28 @@
-#include "transport_security_layer.h"
+#include "transport_layer_security.h"
 #include "vpfHeader1General4General_Logging_GlobalVariables.h"
 #include "vpfHeader1General7FileOperations_Encodings.h"
 #include "vpfHeader5Crypto.h"
 
 #include <unistd.h> //<- close, open defined here
 
-ProjectInformationInstance projectInfoInstanceTransportSecurityLayerOpenSSLImplementation(__FILE__, "Contains all openSSL-related implementation.");
+ProjectInformationInstance projectInfoInstanceTransportLayerSecurityOpenSSLImplementation(__FILE__, "Contains all openSSL-related implementation.");
 
-std::string TransportSecurityLayerOpenSSL::errors::errorWantRead = "SSL_ERROR_WANT_READ";
-bool TransportSecurityLayerOpenSSL::flagSSLlibraryInitialized = false;
+std::string TransportLayerSecurityOpenSSL::errors::errorWantRead = "SSL_ERROR_WANT_READ";
+bool TransportLayerSecurityOpenSSL::flagSSLlibraryInitialized = false;
 
 extern logger logServer;
 
-TransportSecurityLayerOpenSSL::~TransportSecurityLayerOpenSSL() {
+TransportLayerSecurityOpenSSL::~TransportLayerSecurityOpenSSL() {
   this->FreeSSL();
   this->FreeContext();
 }
 
-void TransportSecurityLayerOpenSSL::FreeSSL() {
+void TransportLayerSecurityOpenSSL::FreeSSL() {
   SSL_free(this->sslData);
   this->sslData = 0;
 }
 
-void TransportSecurityLayerOpenSSL::FreeEverythingShutdownSSL() {
+void TransportLayerSecurityOpenSSL::FreeEverythingShutdownSSL() {
   if (!theGlobalVariables.flagSSLIsAvailable) {
     return;
   }
@@ -31,15 +31,15 @@ void TransportSecurityLayerOpenSSL::FreeEverythingShutdownSSL() {
   this->FreeContext();
 }
 
-void TransportSecurityLayerOpenSSL::FreeContext() {
+void TransportLayerSecurityOpenSSL::FreeContext() {
   //SSL_CTX_free (this->contextClient);
   SSL_CTX_free (this->contextServer);
   //this->contextClient = 0;
   this->contextServer = 0;
 }
 
-void TransportSecurityLayerOpenSSL::initSSLLibrary() {
-  MacroRegisterFunctionWithName("TransportSecurityLayerOpenSSL::initSSLlibrary");
+void TransportLayerSecurityOpenSSL::initSSLLibrary() {
+  MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLlibrary");
   if (this->flagSSLlibraryInitialized) {
     return;
   }
@@ -50,6 +50,11 @@ void TransportSecurityLayerOpenSSL::initSSLLibrary() {
   if (loadedSuccessfully != 1) {
     logServer << logger::red << commentsOnError.str() << logger::endL;
     crash << "Failed to initialize ssl library. " << crash;
+  }
+  loadedSuccessfully = OpenSSL_add_ssl_algorithms();
+  if (!loadedSuccessfully) {
+    logServer << logger::red << commentsOnError.str() << logger::endL;
+    crash << "Failed to add ssl algorithms. " << crash;
   }
   if (commentsOnError.str() != "") {
     logServer << logger::red << "OpenSSL initialization comments: " << logger::blue << commentsOnError.str() << logger::endL;

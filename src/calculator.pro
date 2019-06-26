@@ -82,7 +82,6 @@ HEADERS += \
     vpfMacros.h \
     vpfPackedVector.h \
     webserver.h \
-    transport_security_layer.h \
     boringssl/crypto/asn1/asn1_locl.h \
     boringssl/crypto/bio/internal.h \
     boringssl/crypto/bytestring/internal.h \
@@ -262,7 +261,6 @@ HEADERS += \
     boringssl/tool/transport_common.h \
     source_code_formatter.h \
     string_constants.h \
-    transport_security_layer.h \
     vpf.h \
     vpfFiniteFields.h \
     vpfHeader1General0_General.h \
@@ -321,7 +319,8 @@ HEADERS += \
     vpfJson.h \
     vpfMacros.h \
     vpfPackedVector.h \
-    webserver.h
+    webserver.h \
+    transport_layer_security.h
 
 SOURCES += \
     database.cpp \
@@ -377,7 +376,6 @@ SOURCES += \
     vpfWebServerInterProcessLogistics.cpp \
     web-routines-1.cpp \
     webserver.cpp \
-    transport_security_layer.cpp \
     boringssl/crypto/asn1/asn1_test.cc \
     boringssl/crypto/base64/base64_test.cc \
     boringssl/crypto/bio/bio_test.cc \
@@ -921,4 +919,5 @@ SOURCES += \
     boringssl/third_party/sike/sike.c \
     boringssl/crypto/err/err_data.c \
     boringssl/crypto/err/err_data.c \
-    transport_security_layer_openssl.cpp
+    transport_layer_security.cpp \
+    transport_layer_security_openssl.cpp

@@ -169,6 +169,7 @@ bool WebServer::SSLServerSideHandShake() {
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return false;
   }
+  std::cout << "DEBUG: Got to server handshake." << std::endl;
   return this->theTSL.HandShakeIamServer(this->GetActiveWorker().connectedSocketID);
 }
 
@@ -206,7 +207,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
     }
     numFailedReceives ++;
     if (numFailedReceives > maxNumFailedReceives) {
-      if (errorString == TransportSecurityLayerOpenSSL::errors::errorWantRead) {
+      if (errorString == TransportLayerSecurityOpenSSL::errors::errorWantRead) {
         this->error = errorString;
       } else {
         std::stringstream out;
@@ -4502,7 +4503,7 @@ int WebWorker::Run() {
     if (!this->ReceiveAll()) {
       bool sslWasOK = true;
 #ifdef MACRO_use_open_ssl
-      sslWasOK = (this->error == TransportSecurityLayerOpenSSL::errors::errorWantRead);
+      sslWasOK = (this->error == TransportLayerSecurityOpenSSL::errors::errorWantRead);
 #endif
       if (this->numberOfReceivesCurrentConnection > 0 && sslWasOK) {
         logIO << logger::green << "Connection timed out after successfully receiving "
@@ -5167,7 +5168,7 @@ void GlobalVariables::ConfigurationProcess() {
   }
   if (theGlobalVariables.configuration[Configuration::useBuiltInTLS].isTrueRepresentationInJSON()) {
     logServer << logger::red << "Experimental: " << logger::blue << "using built-in TLS library." << logger::endL;
-    TransportSecurityLayer::flagDontUseOpenSSL = true;
+    TransportLayerSecurity::flagDontUseOpenSSL = true;
   }
   if (theGlobalVariables.configuration[Configuration::monitorPingTime].isIntegerFittingInInt(
     &theWebServer.WebServerPingIntervalInSeconds

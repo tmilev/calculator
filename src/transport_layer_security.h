@@ -1,9 +1,9 @@
-#ifndef vpfHeaderTransportSecurityLayer_already_included
-#define vpfHeaderTransportSecurityLayer_already_included
+#ifndef vpfHeaderTransportLayerSecurity_already_included
+#define vpfHeaderTransportLayerSecurity_already_included
 
 #include "vpfHeader1General0_General.h"
 
-static ProjectInformationInstance projectInfoInstanceTransportSecurityLayerHeader(__FILE__, "TLS/ssl header.");
+static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeader(__FILE__, "TLS/ssl header.");
 
 //installation of these headers in ubuntu:
 //sudo apt-get install libssl-dev
@@ -17,9 +17,9 @@ static ProjectInformationInstance projectInfoInstanceTransportSecurityLayerHeade
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-class TransportSecurityLayer;
-struct TransportSecurityLayerOpenSSL {
-  TransportSecurityLayer* owner;
+class TransportLayerSecurity;
+struct TransportLayerSecurityOpenSSL {
+  TransportLayerSecurity* owner;
   int errorCode;
   static bool flagSSLlibraryInitialized;
   SSL* sslData;
@@ -32,15 +32,15 @@ struct TransportSecurityLayerOpenSSL {
     static std::string errorWantRead;
   };
   std::string otherCertificateIssuerName, otherCertificateSubjectName;
-  TransportSecurityLayerOpenSSL();
-  ~TransportSecurityLayerOpenSSL();
+  TransportLayerSecurityOpenSSL();
+  ~TransportLayerSecurityOpenSSL();
   void FreeSSL();
   void FreeContext();
   void FreeEverythingShutdownSSL();
   void initSSLLibrary();
   void initSSLServer();
   void initSSLClient();
-  void initSSLCommon();
+  void initSSLCommon(bool isServer);
   void Reset();
   void ClearErrorQueue(
     int errorCode,
@@ -74,13 +74,13 @@ struct TransportSecurityLayerOpenSSL {
   static bool initSSLkeyFiles();
 };
 
-class TransportSecurityLayer {
+class TransportLayerSecurity {
 public:
   static bool flagDontUseOpenSSL;
   bool flagInitializedPrivateKey;
   bool flagIsServer;
   List<char> buffer;
-  TransportSecurityLayerOpenSSL openSSLData;
+  TransportLayerSecurityOpenSSL openSSLData;
 
   int standardBufferSize;
 
@@ -119,8 +119,8 @@ public:
     std::stringstream *commentsOnError,
     bool includeNoErrorInComments
   );
-  TransportSecurityLayer();
-  ~TransportSecurityLayer();
+  TransportLayerSecurity();
+  ~TransportLayerSecurity();
   void RemoveLastSocket();
   void AddMoreEntropyFromTimer();
   bool HandShakeIamServer(int inputSocketID);

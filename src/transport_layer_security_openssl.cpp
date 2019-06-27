@@ -59,6 +59,5 @@ void TransportLayerSecurityOpenSSL::initSSLLibrary() {
   if (commentsOnError.str() != "") {
     logServer << logger::red << "OpenSSL initialization comments: " << logger::blue << commentsOnError.str() << logger::endL;
   }
-  logServer << logger::green << "DEBUG: InitialIzation of ssl successfull." << logger::endL;
 }
 

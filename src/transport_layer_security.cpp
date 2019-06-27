@@ -125,7 +125,6 @@ bool TransportLayerSecurityOpenSSL::initSSLkeyFiles() {
 
 void TransportLayerSecurity::AddMoreEntropyFromTimer() {
   int fixMeAcquireEntropy;
-
 }
 
 void TransportLayerSecurityOpenSSL::initSSLClient() {
@@ -137,14 +136,11 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
   this->initSSLLibrary();
   std::stringstream commentsOnError;
   if (isServer) {
-    std::cout << "DEBUG: setting up server. " << std::endl;
     this->theSSLMethod = SSLv23_server_method();
   } else {
     this->theSSLMethod = SSLv23_client_method();
   }
   this->contextServer = SSL_CTX_new(this->theSSLMethod);
-  std::cout << "DEBUG: Got to here pt -XXX. Context server: " << this->contextServer << std::endl;
-  std::cout << "DEBUG: Got to here pt -XXX. Context method: " << this->theSSLMethod << std::endl;
 
   if (this->contextServer == 0) {
     logServer << logger::red << "Failed to create ssl context. " << logger::endL;
@@ -153,10 +149,6 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
   }
   // Server does not verify client certificate:
   SSL_CTX_set_verify(this->contextServer, SSL_VERIFY_NONE, 0);
-  std::cout << "DEBUG: NO context VERIFY. " << std::endl;
-
-  std::cout << "DEBUG: Got to the end of init ssl common. " << std::endl;
-
 }
 
 void TransportLayerSecurityOpenSSL::initSSLServer() {
@@ -165,7 +157,6 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
   if (this->owner->flagInitializedPrivateKey) {
     return;
   }
-  std::cout << "DEBUG: PRIVATE KEY is here. " << std::endl;
   this->owner->flagInitializedPrivateKey = true;
   std::string fileCertificatePhysical, fileKeyPhysical,
   singedFileCertificate1Physical, signedFileCertificate3Physical,
@@ -202,9 +193,6 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
       ERR_print_errors_fp(stderr);
       exit(4);
     }
-    std::cout << "DEBUG: Got to here pt2. File key: " << fileKeyPhysical << std::endl;
-    std::cout << "DEBUG: Got to here pt2. signed file key: " << fileCertificatePhysical << std::endl;
-
   } else {
     logServer << logger::green << "Found officially signed certificate... " << logger::endL;
     //if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate2.c_str()) <= 0)
@@ -624,9 +612,7 @@ int TransportLayerSecurityOpenSSL::SSLRead(
   List<char>& readBuffer, std::string *outputError, std::stringstream *commentsGeneral, bool includeNoErrorInComments
 ) {
   ERR_clear_error();
-  logWorker << "DEBUG: About to ssl read... " << logger::endL;
   int result = SSL_read(this->sslData, readBuffer.TheObjects, readBuffer.size);
-  logWorker << "DEBUG: ssl read done with result: " << result << logger::endL;
   this->ClearErrorQueue(
     result, outputError, commentsGeneral, includeNoErrorInComments
   );
@@ -642,7 +628,6 @@ int TransportLayerSecurity::SSLRead(
 ) {
   this->buffer.SetSize(100000);
   if (!this->flagDontUseOpenSSL) {
-    logWorker << "DEBUG: About to ssl read ..." << logger::endL;
     return this->openSSLData.SSLRead(readBuffer, outputError, commentsGeneral, includeNoErrorInComments);
   } else {
     crash << "SSL read not implemented yet. " << crash;
@@ -701,10 +686,9 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamServer(int inputSocketID) {
   this->flagSSLHandshakeSuccessful = false;
   for (int i = 0; i < maxNumHandshakeTries; i ++) {
     std::stringstream commentsOnError;
-    std::cout << "DEBUG: ssl data is: " << this->sslData << std::endl;
     this->errorCode = SSL_accept(this->sslData);
     if (this->errorCode <= 0) {
-      ERR_print_errors_fp(stderr);
+
       this->flagSSLHandshakeSuccessful = false;
       if (this->errorCode == 0) {
         logOpenSSL << "OpenSSL handshake not successful in a controlled manner. ";
@@ -712,57 +696,58 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamServer(int inputSocketID) {
         logOpenSSL << "OpenSSL handshake not successful with a fatal error. ";
       }
       logOpenSSL << commentsOnError.str() << logger::endL;
-      logOpenSSL << "Attempt " << i + 1 << " out of " << maxNumHandshakeTries << " failed. ";
+      logOpenSSL << "Attempt " << i + 1 << " out of " << maxNumHandshakeTries << " failed. Details (not logged in a file): ";
+      ERR_print_errors_fp(stderr);
+
       switch(SSL_get_error(this->sslData, this->errorCode)) {
-      case SSL_ERROR_NONE:
-        logOpenSSL << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
-        maxNumHandshakeTries = 1;
-        break;
-      case SSL_ERROR_ZERO_RETURN:
-        logOpenSSL << logger::red << "The TLS/SSL connection has been closed (possibly cleanly). " << logger::endL;
-        maxNumHandshakeTries = 1;
-        break;
-      case SSL_ERROR_WANT_READ:
-      case SSL_ERROR_WANT_WRITE:
-        logOpenSSL << logger::red << " During regular I/O: repeat needed (not implemented). " << logger::endL;
-        break;
-      case SSL_ERROR_WANT_CONNECT:
-      case SSL_ERROR_WANT_ACCEPT:
-        logOpenSSL << logger::red << " During handshake negotiations: repeat needed (not implemented). "
-        << logger::endL;
-        break;
-      case SSL_ERROR_WANT_X509_LOOKUP:
-        logOpenSSL << logger::red << " Application callback set by SSL_CTX_set_client_cert_cb(): "
-        << "repeat needed (not implemented). "
-        << logger::endL;
-        maxNumHandshakeTries = 1;
-        break;
-      //case SSL_ERROR_WANT_ASYNC:
-      //  logOpenSSL << logger::red << "Asynchronous engine is still processing data. "
-      //  << logger::endL;
-      //  break;
-      case SSL_ERROR_SYSCALL:
-        logOpenSSL << logger::red << "Error: some I/O error occurred. "
-        << logger::endL;
-        maxNumHandshakeTries = 1;
-        break;
-      case SSL_ERROR_SSL:
-        logOpenSSL << logger::red << "A failure in the SSL library occurred. "
-        << logger::endL;
-      //theError = ERR_get_error(3ssl);
-      //if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
-      //  maxNumHandshakeTries =1;
-        break;
-      default:
-        logOpenSSL << logger::red << "Unknown error. " << logger::endL;
-        maxNumHandshakeTries = 1;
-        break;
+        case SSL_ERROR_NONE:
+          logOpenSSL << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
+          maxNumHandshakeTries = 1;
+          break;
+        case SSL_ERROR_ZERO_RETURN:
+          logOpenSSL << logger::red << "The TLS/SSL connection has been closed (possibly cleanly). " << logger::endL;
+          maxNumHandshakeTries = 1;
+          break;
+        case SSL_ERROR_WANT_READ:
+        case SSL_ERROR_WANT_WRITE:
+          logOpenSSL << logger::red << " During regular I/O: repeat needed (not implemented). " << logger::endL;
+          break;
+        case SSL_ERROR_WANT_CONNECT:
+        case SSL_ERROR_WANT_ACCEPT:
+          logOpenSSL << logger::red << " During handshake negotiations: repeat needed (not implemented). "
+          << logger::endL;
+          break;
+        case SSL_ERROR_WANT_X509_LOOKUP:
+          logOpenSSL << logger::red << " Application callback set by SSL_CTX_set_client_cert_cb(): "
+          << "repeat needed (not implemented). "
+          << logger::endL;
+          maxNumHandshakeTries = 1;
+          break;
+        //case SSL_ERROR_WANT_ASYNC:
+        //  logOpenSSL << logger::red << "Asynchronous engine is still processing data. "
+        //  << logger::endL;
+        //  break;
+        case SSL_ERROR_SYSCALL:
+          logOpenSSL << logger::red << "Error: some I/O error occurred. "
+          << logger::endL;
+          maxNumHandshakeTries = 1;
+          break;
+        case SSL_ERROR_SSL:
+          logOpenSSL << logger::red << "A failure in the SSL library occurred. "
+          << logger::endL;
+        //theError = ERR_get_error(3ssl);
+        //if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
+        //  maxNumHandshakeTries =1;
+          break;
+        default:
+          logOpenSSL << logger::red << "Unknown error. " << logger::endL;
+          maxNumHandshakeTries = 1;
+          break;
       }
       logOpenSSL << "Retrying connection in 0.5 seconds... ";
       theGlobalVariables.FallAsleep(500000);
     } else {
       this->flagSSLHandshakeSuccessful = true;
-      logWorker << "DEBUG: HANDSHake OK!!!!!" << logger::endL;
       break;
     }
   }

@@ -2245,7 +2245,7 @@ public:
   static bool innerCasimir(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCharacterSSLieAlgFD(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebras(
+  static bool innerPrintSSSubalgebras(
     Calculator& theCommands,
     const Expression& input,
     Expression& output,

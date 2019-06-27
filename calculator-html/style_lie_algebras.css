@@ -1,0 +1,26 @@
+span.spanExperimentalWarning {
+  width: 50%;
+  font-weight: bold;
+}
+
+table.tableStandard {
+  border-collapse: collapse;
+  border: 1px solid;
+}
+
+table.tableStandard td {
+  border: 1px solid;
+}
+
+table.tableModuleDecomposition {
+  border-collapse: collapse;
+  border: 1px solid;
+}
+
+span.hElement {
+  color: red;
+}
+
+span.fElement {
+  color: blue;
+}

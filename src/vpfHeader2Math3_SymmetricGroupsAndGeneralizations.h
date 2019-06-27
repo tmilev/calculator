@@ -916,7 +916,7 @@ public:
     return *this; // what the f*** does this even mean how the hell
   }
 
-  // this method name is such bullshit lol
+  // this method name needs improvement
   PermutationR2 operator*() {
     List<int> l = *pads; // for this line, it can't be const, since the other method can't return
     PermutationR2 out;    // a const list& or even verify that the list isn't being modified

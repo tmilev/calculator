@@ -335,10 +335,11 @@ const std::string& HtmlRoutines::GetJavascriptMathjax() {
   }
   std::stringstream out;
   std::string mathjaxSetupScript = FileOperations::GetVirtualNameWithHash(
-    "/calculator-html/mathjax-calculator-setup.js"
+    "../../calculator-html/mathjax-calculator-setup.js"
   );
+  out << "<link rel=\"stylesheet\" href=\"../../calculator-html/style_lie_algebras.css\">";
   out << "<script type =\"text/javascript\">MathJaxSetupScriptURL=\"" << mathjaxSetupScript << "\"</script>";
-  out << "<script type =\"text/javascript\" src =\"/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full"
+  out << "<script type =\"text/javascript\" src =\"../../MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full"
 //  << ","
 //  << mathjaxSetupScript
   << "\"></script>\n";

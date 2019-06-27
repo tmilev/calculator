@@ -169,17 +169,17 @@ bool WebServer::SSLServerSideHandShake() {
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return false;
   }
-  std::cout << "DEBUG: Got to server handshake." << std::endl;
   return this->theTSL.HandShakeIamServer(this->GetActiveWorker().connectedSocketID);
 }
 
 bool WebWorker::ReceiveAllHttpSSL() {
   MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttpSSL");
-  logWorker << "DEBUG: about to receive all on http ssl..." << logger::endL;
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return true;
   }
-#ifdef MACRO_use_open_ssl
+  if (!theGlobalVariables.flagSSLIsAvailable) {
+    return false;
+  }
   this->messageBody = "";
   this->messageHead = "";
   this->requestTypE = this->requestUnknown;
@@ -191,7 +191,6 @@ bool WebWorker::ReceiveAllHttpSSL() {
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
-  logWorker << "DEBUG: about to receive all on http ssl, part 2..." << logger::endL;
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO, (void*)(&tv), sizeof(timeval));
   std::string errorString;
   int numFailedReceives = 0;
@@ -228,8 +227,6 @@ bool WebWorker::ReceiveAllHttpSSL() {
     }
   }
   this->messageHead.assign(reader.TheObjects, numBytesInBuffer);
-  logWorker << "DEBUG: read message head: " << this->messageHead << "; reader.size: " << reader.size << "; numbytes in buff: "
-  << numBytesInBuffer << logger::endL;
   this->ParseMessageHead();
   if (this->requestTypE == WebWorker::requestTypes::requestPost) {
     this->displayUserInput = "POST " + this->addressGetOrPost;
@@ -253,7 +250,6 @@ bool WebWorker::ReceiveAllHttpSSL() {
     this->displayUserInput = this->error;
     return false;
   }
-  logWorker << "DEBUG: About to send http continue. " << logger::endL;
   this->remainingBytesToSenD = (std::string) "HTTP/1.0 100 Continue\r\n\r\n";
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
@@ -303,9 +299,6 @@ bool WebWorker::ReceiveAllHttpSSL() {
     logIO << out.str() << logger::endL;
   }
   return true;
-  #else
-  return false;
-  #endif
 }
 
 void WebWorker::SendAllBytesHttpSSL() {
@@ -4495,7 +4488,6 @@ int WebWorker::Run() {
       return - 1;
     }
   }
-  logOpenSSL << "DEBUG: openssl success!!!!!" << logger::endL;
   if (theGlobalVariables.flagSSLIsAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection) {
     logOpenSSL << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
   }
@@ -4931,6 +4923,7 @@ void WebServer::InitializeGlobalVariables() {
   this->addressStartsNotNeedingLogin.AddOnTop("/html-common/");
   this->addressStartsNotNeedingLogin.AddOnTop("/calculator-html/");
   this->addressStartsNotNeedingLogin.AddOnTop("/src/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/output/");
   this->addressStartsNotNeedingLogin.AddOnTop("/css/");
   this->addressStartsNotNeedingLogin.AddOnTop("/javascriptlibs/");
   this->addressStartsNotNeedingLogin.AddOnTop("/MathJax-2.7-latest/");

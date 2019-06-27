@@ -432,26 +432,26 @@ bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const
 }
 
 bool Calculator::innerPrintSSsubalgebrasNilradicals(Calculator& theCommands, const Expression& input, Expression& output) {
-  return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, true, true, true, true);
+  return theCommands.innerPrintSSSubalgebras(theCommands, input, output, true, true, true, true, true, true);
 }
 
 bool Calculator::innerPrintSSsubalgebrasRecompute(Calculator& theCommands, const Expression& input, Expression& output) {
-  return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, false, true, false, true);
+  return theCommands.innerPrintSSSubalgebras(theCommands, input, output, true, true, false, true, false, true);
 }
 
 bool Calculator::innerPrintSSsubalgebrasNoSolutions(Calculator& theCommands, const Expression& input, Expression& output) {
-  return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, false, false, false, false, false);
+  return theCommands.innerPrintSSSubalgebras(theCommands, input, output, true, false, false, false, false, false);
 }
 
 bool Calculator::innerPrintSSsubalgebrasNoCentralizers(Calculator& theCommands, const Expression& input, Expression& output) {
-  return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, false, true, false, false);
+  return theCommands.innerPrintSSSubalgebras(theCommands, input, output, true, true, false, true, false, false);
 }
 
 bool Calculator::innerPrintSSsubalgebrasRegular(Calculator& theCommands, const Expression& input, Expression& output) {
-  return theCommands.innerPrintSSsubalgebras(theCommands, input, output, false, true, false, true, false, true);
+  return theCommands.innerPrintSSSubalgebras(theCommands, input, output, false, true, false, true, false, true);
 }
 
-bool Calculator::innerPrintSSsubalgebras(
+bool Calculator::innerPrintSSSubalgebras(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,

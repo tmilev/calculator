@@ -538,12 +538,12 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
       candidatesRealized ++;
     }
   }
-  out << "<b>Please note that the code generating the tables is experimental. "
+  out << "<span class = 'spanExperimentalWarning'> Please note that the code generating the tables is experimental. "
   << "While the code performs a number of self-test routines, "
   << " it is possible that there still exist programming bugs. "
   << "We will remove this message as soon as we are confident in the accuracy of all tables.  "
-  << " If you see any errors in the tables, we would be very grateful "
-  << "if you email us with a simple explanation of the issue!</b><br>";
+  << " If you see any errors, please "
+  << "email us with a simple explanation of the issue.</span><br>\n";
   candidatesNotRealizedNotProvenImpossible = this->theSubalgebras.theValues.size - candidatesRealized - candidatesProvenImpossible;
   if (!writingToHD) {
     out << candidatesRealized << " subalgebras realized.";
@@ -5287,7 +5287,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   bool useMouseHover = theFormat == 0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
   std::stringstream out;
   out << "Isotypic module decomposition over primal subalgebra (total " << this->Modules.size << " isotypic components). ";
-  out << "<table border =\"1\">";
+  out << "<table class = 'tableStandard'>";
   FormatExpressions tempCharFormat;
   if (!this->charFormaT.IsZeroPointer()) {
     tempCharFormat = this->charFormaT.GetElementConst();
@@ -5328,8 +5328,8 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
     out << "<td>" << "W_{" << i + 1 << "}" << "</td>";
   }
   out << "</tr>";
-  out << "<tr><td>Module elements (weight vectors). <span style =\"color:#0000FF\">In blue - corresp. F element</span>. "
-  << "<span style =\"color:#FF0000\">In red -corresp. H element</span>. </td>";
+  out << "<tr><td>Module elements (weight vectors). <span class = 'fElement'>In blue - corresp. F element</span>. "
+  << "<span class = 'hElement'>In red -corresp. H element</span>. </td>";
   ElementSemisimpleLieAlgebra<AlgebraicNumber> tempLieBracket;
   for (int i = 0; i < this->Modules.size; i ++) {
     out << "<td>";
@@ -5340,11 +5340,11 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
         out << "Cartan of centralizer component. ";
       }
     }
-    out << "<table border =\"1\"><tr>";
+    out << "<table class = 'tableModuleDecomposition'><tr>";
     for (int j = 0; j < this->Modules[i].size; j ++) {
       List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& currentModule = this->Modules[i][j];
       out << "<td>";
-      out << "<table>";
+      out << "<table class = 'tableModuleDecomposition'>";
       for (int k = 0; k < currentModule.size; k ++) {
         out << "<tr><td>" << currentModule[k].ToString() << "</td>";
         bool OpsAreGood = false;
@@ -6359,7 +6359,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat) const 
   std::stringstream out;
   bool useLaTeX = theFormat == 0 ? true : theFormat->flagUseLatex;
   bool useHtml = theFormat == 0 ? true : theFormat->flagUseHTML;
-  bool writingToHD= theFormat == 0 ? false : theFormat->flagUseHtmlAndStoreToHD;
+  bool writingToHD = theFormat == 0 ? false : theFormat->flagUseHtmlAndStoreToHD;
   bool shortReportOnly = theFormat == 0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
   bool useMouseHover = theFormat == 0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
   out << "Subalgebra type: " << this->owner->ToStringAlgebraLink(this->indexInOwner, theFormat)
@@ -6484,7 +6484,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat) const 
       out << "As the centralizer is well-chosen and the centralizer of our subalgebra is "
       << "non-trivial, we may in addition split highest weight vectors"
       << " with the same weight over the semisimple part over the centralizer "
-      << "(recall that the centralizer pReserves the weights over the subalgebra "
+      << "(recall that the centralizer preserves the weights over the subalgebra "
       << " and in particular acts on the highest weight vectors). "
       << "Therefore we have chosen our highest weight vectors to be, in addition, weight vectors"
       << " over the Cartan of the centralizer of the  starting subalgebra. "
@@ -6498,9 +6498,9 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat) const 
       << "our centralizer weights are simply given by the constant by which the "
       << " k^th basis element of the Cartan of the centralizer acts on the "
       << "highest weight vector. Here, we use the choice for basis of the Cartan "
-      << "of the centralizer given at the start of the page. ";
+      << "of the centralizer given at the start of the page.<br><br>";
     }
-    out << "<table border =\"1px solid black\"><tr><td>Highest vectors of representations (total "
+    out << "<table class = 'tableStandard'><tr><td>Highest vectors of representations (total "
     << this->HighestVectorsNonSorted.size << ") ";
     if (this->flagCentralizerIsWellChosen) {
       out << "; the vectors are over the primal subalgebra.";

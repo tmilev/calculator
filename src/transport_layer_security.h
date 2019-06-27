@@ -24,7 +24,7 @@ struct TransportLayerSecurityOpenSSL {
   static bool flagSSLlibraryInitialized;
   SSL* sslData;
   X509* peer_certificate;
-  SSL_CTX* contextServer;
+  SSL_CTX* context;
   bool flagSSLHandshakeSuccessful;
   const SSL_METHOD* theSSLMethod;
   List<int> socketStack;
@@ -79,6 +79,7 @@ public:
   static bool flagDontUseOpenSSL;
   bool flagInitializedPrivateKey;
   bool flagIsServer;
+  bool flagInitialized;
   List<char> buffer;
   TransportLayerSecurityOpenSSL openSSLData;
 

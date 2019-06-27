@@ -17,6 +17,20 @@ table.tableModuleDecomposition {
   border: 1px solid;
 }
 
+table.tableModuleDecomposition td {
+  border-collapse: collapse;
+  border: none;
+}
+
+table.tableNone {
+  border-collapse: collapse;
+  border: none;
+}
+
+table.tableNone td{
+  border: none;
+}
+
 span.hElement {
   color: red;
 }

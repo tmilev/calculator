@@ -471,6 +471,7 @@ void WebCrawler::FetchWebPagePart2(
     theMessageHeader << "\r\n\r\n";
     theMessageHeader << this->postMessageToSend;
   }
+  logWorker << "DEBUG: before shaking hands ...." << logger::endL;
 
   if (!theWebServer.theTSL.HandShakeIamClientNoSocketCleanup(
     this->theSocket, commentsOnFailure, commentsGeneral
@@ -495,6 +496,7 @@ void WebCrawler::FetchWebPagePart2(
     }
     return;
   }
+  logWorker << "DEBUG:: Got to here! aaaaaaaaa" << logger::endL;
   if (!this->theTSL.SSLReadLoop(
     10, this->headerReceived, 0, &errorSSL, commentsGeneral, true
   )) {
@@ -503,6 +505,7 @@ void WebCrawler::FetchWebPagePart2(
     }
     return;
   }
+  logWorker << "DEBUG: got to before bodystart set." << logger::endL;
   unsigned bodyStart = 0;
   int numcrlfs = 0;
   //std::stringstream tempStream;

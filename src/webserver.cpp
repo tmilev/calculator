@@ -1787,6 +1787,7 @@ int WebWorker::ProcessFile() {
     numBytesRead = theFile.gcount();
   }
   stOutput << debugBytesStream.str();
+  logWorker << "DEBUG: about to send all bytes, no headers. " << logger::endL;
   this->SendAllBytesNoHeaders();
   this->flagAllBytesSentUsingFile = true;
   this->flagEncounteredErrorWhileServingFile = false;

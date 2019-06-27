@@ -33,9 +33,9 @@ void TransportLayerSecurityOpenSSL::FreeEverythingShutdownSSL() {
 
 void TransportLayerSecurityOpenSSL::FreeContext() {
   //SSL_CTX_free (this->contextClient);
-  SSL_CTX_free (this->contextServer);
+  SSL_CTX_free (this->context);
   //this->contextClient = 0;
-  this->contextServer = 0;
+  this->context = 0;
 }
 
 void TransportLayerSecurityOpenSSL::initSSLLibrary() {

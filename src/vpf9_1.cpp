@@ -120,6 +120,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
     output[WebAPI::result::crashReport] = this->crashReportHtml.str();
     stOutput << output.ToString(false);
     stOutput.Flush();
+    std::cout << this->crashReportConsolE.str() << std::endl;
   }
   if (this->CleanUpFunction != 0) {
     this->CleanUpFunction();

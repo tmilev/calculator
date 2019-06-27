@@ -5340,7 +5340,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
         out << "Cartan of centralizer component. ";
       }
     }
-    out << "<table class = 'tableModuleDecomposition'><tr>";
+    out << "<table class = 'tableNone'><tr>";
     for (int j = 0; j < this->Modules[i].size; j ++) {
       List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& currentModule = this->Modules[i][j];
       out << "<td>";

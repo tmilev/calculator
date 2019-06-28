@@ -1007,10 +1007,12 @@ function updateProblemPage() {
   if (thePage.pages.problemPage.flagLoaded) {
     if (theProblem !== undefined && theProblem !== null) {
       var problemNavigation = document.getElementById(theProblem.idNavigationProblemNotEntirePanel);
-      var oldHtml = problemNavigation.innerHTML;
-      var newHtml = theProblem.getProblemNavigationContent();
-      if (oldHtml != newHtml) {
-        problemNavigation.innerHTML = newHtml;
+      if (problemNavigation !== null) {
+        var oldHtml = problemNavigation.innerHTML;
+        var newHtml = theProblem.getProblemNavigationContent();
+        if (oldHtml != newHtml) {
+          problemNavigation.innerHTML = newHtml;
+        }
       }
     }
     return;

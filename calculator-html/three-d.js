@@ -903,7 +903,7 @@ PlotFillTwoD.prototype.draw = function(inputCanvas) {
   }
 }
 
-function CanvasTwoD(inputCanvas) { 
+function CanvasTwoD(inputCanvas) {
   this.canvasResetFunction = null;
   this.theObjects = [];
   this.surface = null;
@@ -2639,6 +2639,9 @@ Drawing.prototype.getCanvas = function(/**@type {string}}*/ canvasId) {
   var theCanvas = null;
   if (typeof canvasId === "string") {
     theCanvas = document.getElementById(canvasId);
+    if (theCanvas === null) {
+      throw (`Canvas with id ${canvasId} missing. `);
+    }
   } else {
     theCanvas = canvasId;
     canvasId = theCanvas.id;
@@ -2657,6 +2660,9 @@ Drawing.prototype.getCanvasTwoD = function(canvasId) {
   var theCanvas = null;
   if (typeof canvasId === "string") {
     theCanvas = document.getElementById(canvasId);
+    if (theCanvas === null) {
+      throw (`Canvas with id ${canvasId} missing. `);
+    }
   } else {
     theCanvas = canvasId;
     canvasId = theCanvas.id;

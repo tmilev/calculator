@@ -180,7 +180,8 @@ Problem.prototype.initializeProblemContent = function(problemData) {
   for (var scriptLabel in problemData.scripts) {
     var newLabel = encodeURIComponent(this.problemId + scriptLabel);
     this.scriptIds.push(newLabel); 
-    thePage.injectScript(newLabel, decodeURIComponent(problemData.scripts[scriptLabel]));
+    var scriptContent = decodeURIComponent(problemData.scripts[scriptLabel]);
+    thePage.injectScript(newLabel, scriptContent);
   }
 }
 

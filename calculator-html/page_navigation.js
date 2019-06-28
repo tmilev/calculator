@@ -578,8 +578,8 @@ function Page() {
   if (this.storage.variables.currentPage.getValue() != this.pages.activateAccount.name) {
     login.loginTry();
   }
-  document.getElementById("divPage").style.display = "";
-  document.getElementById("divPage").className = "divPage";
+  document.getElementById("divOnePageApp").style.display = "";
+  document.getElementById("divOnePageApp").className = "divOnePageApp";
 }
 
 Page.prototype.isLoggedIn = function() {

@@ -164,8 +164,8 @@ function selectEditPageCallback(input, outputComponent) {
       enableLiveAutocompletion: true,
     });
     editor.completers = [staticWordCompleter];
-    if (input)
     editor.$blockScrolling = Infinity;
+    editor.resize();
   } catch (e) {
     console.log(`Error: ${e}`);
   }

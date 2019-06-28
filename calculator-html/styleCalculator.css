@@ -635,16 +635,18 @@ textarea.currentFileNameArea {
   height: 25px;
   margin-bottom: -8px;
   overflow-x: hidden;
-}
+} 
 
-div.divPage {
+div.divOnePageApp {
+  /* class assigned to main one page container at run time. */
   display: flex;
   flex-direction: row;
   width: 100%;
+  height: 100%;
   visibility: visible;
 }
 
-div.divMainPage {
+div.divPage {
   width: 90%;
   height: 100%;
   overflow: auto;

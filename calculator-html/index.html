@@ -146,9 +146,9 @@ function browserify() {
 <title>Calculator</title>
 </head>
 <body onload = "browserify();">
-<div id = "divPage"> 
+<div id = "divOnePageApp"> 
 
-<div id = "divLoginPage" class = "divMainPage">
+<div id = "divLoginPage" class = "divPage">
 <div class = "centerHorizontallyInPageContainer">
   <div class = "centerVerticallyInPageContainer">
   <div class = "divCenteredItem divVisible" id = "divLoginCalculatorPanel">
@@ -180,7 +180,7 @@ function browserify() {
   </div><!--centerVerticallyInPageContainer-->
 </div><!--centerHorizontallyInPageContainer-->
 </div><!--divLoginPage-->
-<div id = "divSignUpPage" class = "divMainPage">
+<div id = "divSignUpPage" class = "divPage">
   <table>
     <tr>
     <td>Desired user name:</td>
@@ -199,7 +199,7 @@ function browserify() {
   <br>
   <span id = "signUpResult"></span>
 </div><!--divSignUpPage-->
-<div id = "divForgotLogin" class = "divMainPage">
+<div id = "divForgotLogin" class = "divPage">
   <table>
   <tr><td> Email:</td><td><input type = "text" id = "emailForForgotLogin" placeholder = "email"></td></tr>
   </table>
@@ -209,29 +209,27 @@ function browserify() {
   <span id = "forgotLoginResult"></span>
 </div><!--divForgotLogin-->
   
-<div id = "divProblemPage" class = "divMainPage">
+<div id = "divProblemPage" class = "divPage">
   <div id = "divProblemPageContentContainer">
   </div><!--divProblemPageContentContainer-->
 </div><!--divProblemPage-->
-<div id = "divEditPage" class = "divMainPage">
-  <div id = "divEditPageContainer">
+<div id = "divEditPage" class = "divPage">
   <button class = "buttonSaveEdit" onclick = "window.calculator.editPage.storeEditedPage();">Save</button> 
   <span id = "spanSubmitEditPageReport"></span><br>
   <textarea id = "textareaTopicListEntry"></textarea>
   <span id = "spanErrorEditPage"></span>
   <div id = "divEditorAce" onkeydown = "window.calculator.editPage.ctrlSPressAceEditorHandler(event);" name = "divEditorAce">
-  </div>
-  </div>
+  </div><!--divEditorAce-->
 </div>
-<div id = "divCurrentCourse" class = "divMainPage">
+<div id = "divCurrentCourse" class = "divPage">
   <div id = "divCurrentCourseEditPanel"></div>
   <div id = "divCurrentCourseBody"></div>
 </div> <!--divCurrentCourse-->
   
-<div id = "divSelectCourse" class = "divMainPage">
+<div id = "divSelectCourse" class = "divPage">
 </div> <!--divSelectCourse-->
 
-<div id = "divCalculatorPage" class = "divMainPage">
+<div id = "divCalculatorPage" class = "divPage">
 
 <table id = "tableCalculatorExamples" class = "tableCalculatorInputs">
 <tr><td>
@@ -309,7 +307,7 @@ function browserify() {
 </td></tr>
 </table><!--tableCalculatorExamples-->
 </div><!--divCalculatorPage-->
-<div id = "divAboutPage" class = "divMainPage">
+<div id = "divAboutPage" class = "divPage">
   <h2> Project mission</h2>
   The mission of the calculator project is, to the extent possible,
   <blockquote>
@@ -357,7 +355,7 @@ function browserify() {
   If you have any questions [proposals, feature requests, ...] about this project, write me an email (todor.milev at google's email).
 </div><!--divAboutPage-->
 
-<div id = "divPrivacyPolicy" class = "divMainPage">
+<div id = "divPrivacyPolicy" class = "divPage">
   <h1>Privacy Policy</h1>
 
 
@@ -474,11 +472,11 @@ function browserify() {
 
 </div>
 
-<div id = "divDatabase" class = "divMainPage">
+<div id = "divDatabase" class = "divPage">
   <button class = "buttonStandard" onclick = "window.calculator.database.updateDatabasePageResetCurrentTable();">Tables</button><span id = "spanDatabaseComments"></span>
 <div id = "divDatabaseOutput"> </div>
 </div>
-<div id = "divAccount" class = "divMainPage">
+<div id = "divAccount" class = "divPage">
   <table>
   <tr><td>User:</td><td> <span id = "spanUserIdInAccountsPage"></span></td></tr>
   <tr>
@@ -517,7 +515,7 @@ function browserify() {
   <span id = "spanUserExtraInfo"></span>
 </div>
 
-<div id = "divActivateAccount" class = "divMainPage">
+<div id = "divActivateAccount" class = "divPage">
   <table>
   <tr><td>User:</td><td><span id = "spanUserIdInActivateAccountPage"></span></td></tr>
   <tr><td>Current email:</td><td><span id = "spanCurrentActivationEmail"></span></td></tr>
@@ -539,7 +537,7 @@ function browserify() {
   <span id = "spanVerificationActivation"></span>
 </div>
 
-<div id = "divAccounts" class = "divMainPage">
+<div id = "divAccounts" class = "divPage">
   <div id = "idAccountsOutput">
     Assign section(s) to teacher(s).
     <br>
@@ -588,7 +586,7 @@ function browserify() {
   </div>
 </div>
 
-<div id = "divServer" class = "divMainPage">
+<div id = "divServer" class = "divPage">
   <div id = "idServerStatus">
   </div>
 </div>
@@ -660,7 +658,7 @@ function browserify() {
 </div> <!--divTheMainMenuPanel-->
   
 
-</div><!--divMainPage-->
+</div><!--divPage-->
 
 </body>
 </html>

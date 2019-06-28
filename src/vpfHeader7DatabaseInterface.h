@@ -18,7 +18,10 @@ public:
   );
   static bool LoginNoDatabaseSupport(UserCalculatorData &theUser, std::stringstream *commentsGeneral);
   static bool LoginViaGoogleTokenCreateNewAccountIfNeeded(
-    UserCalculatorData& theUseR, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+    UserCalculatorData& theUseR,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral,
+    bool& tokenIsGood
   );
   static bool SetPassword(
     const std::string& inputUsername,

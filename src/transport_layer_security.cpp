@@ -136,8 +136,31 @@ void TransportLayerSecurityOpenSSL::initSSLClient() {
   this->initSSLCommon(false);
 }
 
+bool TransportLayerSecurityOpenSSL::CheckCanInitializeToClient() {
+  return this->CheckCanInitialize(false);
+}
+
+bool TransportLayerSecurityOpenSSL::CheckCanInitializeToServer() {
+  return this->CheckCanInitialize(true);
+}
+
+bool TransportLayerSecurityOpenSSL::CheckCanInitialize(bool toServer) {
+  if (this->flagContextInitialized) {
+    if (this->flagIsServer != toServer) {
+      crash << "Attempt to initialize TLS as both server and client. " << crash;
+      return false;
+    }
+  }
+  return true;
+}
+
 void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
   MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLCommon");
+  this->CheckCanInitialize(isServer);
+  if (this->flagContextInitialized) {
+    return;
+  }
+  this->flagIsServer = isServer;
   this->initSSLLibrary();
   std::stringstream commentsOnError;
   if (isServer) {
@@ -145,7 +168,6 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
   } else {
     this->theSSLMethod = SSLv23_client_method();
   }
-  logWorker << "DEBUG: got to init ssl!" << logger::endL;
   this->context = SSL_CTX_new(this->theSSLMethod);
 
   if (this->context == 0) {
@@ -153,7 +175,7 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
     ERR_print_errors_fp(stderr);
     crash << "Openssl context error.\n" << commentsOnError.str() << crash;
   }
-  logWorker << "DEBUG: context created and non-zero" << logger::endL;
+  this->flagContextInitialized = true;
   // Server does not verify client certificate:
   //SSL_CTX_set_verify(this->context, SSL_VERIFY_NONE, 0);
 }
@@ -434,20 +456,22 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   std::stringstream* commentsGeneral
 ) {
   this->FreeSSL();
+  logWorker << "DEBUG: About to init ssl client. " << logger::endL;
   this->initSSLClient();
+  logWorker << "DEBUG: init ssl client SUCCESS!. " << logger::endL;
   this->sslData = SSL_new(this->context);
   if (this->sslData == 0) {
     this->flagSSLHandshakeSuccessful = false;
-    logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
-    crash << "Failed to allocate ssl: not supposed to happen" << crash;
+    logOpenSSL << logger::red << "Failed to allocate ssl. " << logger::endL;
+    crash << "Failed to allocate ssl: not supposed to happen. " << crash;
   }
-  logOpenSSL << logger::red << "DEBUG: here i am at handshake no socket cleanup!" << logger::endL;
+  logOpenSSL << logger::red << "DEBUG: here i am at handshake no socket cleanup!\nWhy no new line?" << logger::endL;
   this->SetSocketAddToStack(inputSocketID);
   int maxNumHandshakeTries = 4;
   for (int i = 0; i < maxNumHandshakeTries; i ++) {
-    logOpenSSL << logger::red << "DEBUG: before ssl connect" << logger::endL;
+    logOpenSSL << logger::red << "DEBUG: before ssl connect.\n" << logger::endL;
     this->errorCode = SSL_connect(this->sslData);
-    logOpenSSL << logger::red << "DEBUG: AFTER ssl connect" << logger::endL;
+    logOpenSSL << logger::red << "DEBUG: AFTER ssl connect.\n" << logger::endL;
     this->flagSSLHandshakeSuccessful = false;
     if (this->errorCode != 1) {
       if (this->errorCode == 0) {
@@ -564,8 +588,12 @@ bool TransportLayerSecurity::HandShakeIamClientNoSocketCleanup(
 ) {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamClientNoSocketCleanup");
   logWorker << "DEBUG: about to handshake ..." << logger::endL;
+  this->openSSLData.CheckCanInitializeToClient();
+  this->openSSLData.CheckCanInitializeToClient();
   this->initialize(false);
+  logWorker << "DEBUG: initialized as client..." << logger::endL;
   if (!this->flagDontUseOpenSSL) {
+    this->openSSLData.CheckCanInitializeToClient();
     return this->openSSLData.HandShakeIamClientNoSocketCleanup(inputSocketID, commentsOnFailure, commentsGeneral);
   } else {
     crash << "Handshake not implemented yet. " << crash;
@@ -664,18 +692,13 @@ int TransportLayerSecurityOpenSSL::SSLWrite(
   if (this->owner->standardBufferSize > 0 && writeBuffer.size < this->owner->standardBufferSize) {
     writeBuffer.SetSize(this->owner->standardBufferSize);
   }
-  logWorker << "DEBUG: About to ssl_write ... " << logger::endL;
   if (this->sslData == 0) {
     crash << "Uninitialized ssl not allowed here. " << crash;
   }
-
   int result = SSL_write(this->sslData, writeBuffer.TheObjects, writeBuffer.size);
-  logWorker << "DEBUG: ssl_write DONE... " << logger::endL;
-
   this->ClearErrorQueue(
     result, outputError, commentsOnError, includeNoErrorInComments
   );
-  logWorker << "DEBUG: err queue cleared ASFD... " << logger::endL;
   return result;
 }
 
@@ -787,4 +810,6 @@ TransportLayerSecurityOpenSSL::TransportLayerSecurityOpenSSL() {
   this->context = 0;
   this->owner = 0;
   this->flagSSLHandshakeSuccessful = false;
+  this->flagContextInitialized = false;
+  this->flagIsServer = true;
 }

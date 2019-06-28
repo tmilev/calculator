@@ -3028,7 +3028,7 @@ void rootSubalgebras::SortDescendingOrderBySSRank() {
 void rootSubalgebras::ToHTML(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("rootSubalgebras::ToHTML");
   this->CheckInitialization();
-  std::string MyPathPhysical = this->owner->VirtualNameSSAlgOutputFolder+"rootSubalgebras.html";
+  std::string MyPathPhysical = this->owner->VirtualNameSSAlgOutputFolder + "rootSubalgebras.html";
   std::fstream output;
   FileOperations::OpenFileCreateIfNotPresentVirtual(output, MyPathPhysical, false, true, false);
   if (!FileOperations::FileExistsVirtual(MyPathPhysical)) {
@@ -3047,7 +3047,9 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
+  output << "<link rel= 'stylesheet' href = '../../calculator-html/style_lie_algebras.css'>";
   output << HtmlRoutines::GetJavascriptMathjax();
+  output << "<script src = '../../calculator-html/graphics_n_dimensions.js'></script>";
   output << "<body>" << this->ToString(theFormat)
   << "<hr>LaTeX table with root subalgebra details.<br>"
   << this->ToStringDynkinTableFormat2LaTeX(theFormat)

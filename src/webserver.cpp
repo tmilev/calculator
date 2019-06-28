@@ -791,9 +791,13 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments, std:
     theUser.enteredAuthenticationToken = "";
   }
   if (doAttemptGoogleTokenLogin) {
+    bool tokenIsGood = false;
     theGlobalVariables.flagLoggedIn = DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded(
-      theUser, &argumentProcessingFailureComments, 0
+      theUser, &argumentProcessingFailureComments, 0, tokenIsGood
     );
+    if (tokenIsGood && !theGlobalVariables.flagLoggedIn && comments != 0) {
+      *comments << "Your authentication is valid but I have problems with my database records. ";
+    }
   } else if (
     theUser.enteredAuthenticationToken != "" || theUser.enteredPassword != "" ||
     theUser.enteredActivationToken != ""
@@ -1787,7 +1791,6 @@ int WebWorker::ProcessFile() {
     numBytesRead = theFile.gcount();
   }
   stOutput << debugBytesStream.str();
-  logWorker << "DEBUG: about to send all bytes, no headers. " << logger::endL;
   this->SendAllBytesNoHeaders();
   this->flagAllBytesSentUsingFile = true;
   this->flagEncounteredErrorWhileServingFile = false;
@@ -4278,7 +4281,7 @@ int WebServer::Run() {
   if (!this->initPrepareWebServerALL()) {
     return 1;
   }
-  logServer << logger::purple << "server: waiting for connections...\r\n" << logger::endL;
+  logServer << logger::purple << "waiting for connections..." << logger::endL;
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size = sizeof their_addr;
   char userAddressBuffer[INET6_ADDRSTRLEN];

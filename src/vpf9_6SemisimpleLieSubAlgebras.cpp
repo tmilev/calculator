@@ -356,17 +356,18 @@ void SemisimpleSubalgebras::WriteReportToFiles() {
   FileOperations::OpenFileCreateIfNotPresentVirtual(
     fileFastLoad, this->VirtualNameMainFile1, false, true, false
   );
-  fileSlowLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
+  std::stringstream commonHead;
+  commonHead << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owner->theWeyl.theDynkinType.ToString()
-  << "</title>"
-  << HtmlRoutines::GetJavascriptMathjax()
-  << "<body>" << this->ToString(&this->currentFormat);
+  << "</title>";
+  commonHead << "<link rel= 'stylesheet' href = '../../calculator-html/style_lie_algebras.css'>";
+  commonHead << "<script src ='../../calculator-html/graphics_n_dimensions.js'></script>";
+  commonHead << HtmlRoutines::GetJavascriptMathjax();
+  commonHead << "<body>";
+
+  fileSlowLoad << commonHead.str() << this->ToString(&this->currentFormat);
   this->currentFormat.flagUseMathSpanPureVsMouseHover = false;
-  fileFastLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
-  << this->owner->theWeyl.theDynkinType.ToString()
-  << "</title>"
-  << HtmlRoutines::GetJavascriptMathjax()
-  << "<body>" << this->ToString(&this->currentFormat);
+  fileFastLoad << commonHead.str() << this->ToString(&this->currentFormat);
   fileFastLoad << "</body></html>";
   fileSlowLoad << "</body></html>";
 }
@@ -574,6 +575,14 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
     << this->numAdditions << " additions and "
     << this->numMultiplications << " multiplications. ";
   }
+  out << this->ToStringPart2(theFormat);
+  return out.str();
+}
+
+std::string SemisimpleSubalgebras::ToStringPart2(FormatExpressions *theFormat) {
+  MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringPart2");
+  std::stringstream out;
+  bool writingToHD = theFormat == 0 ? false : theFormat->flagUseHtmlAndStoreToHD;
   out << "<hr>";
   out << "The base field over which the subalgebras were realized is: ";
   if (this->ownerField == 0) {
@@ -641,7 +650,8 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
           << "2. The calculator has no write permission to the folder in which the file is located. "
           << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
         }
-        outputFileSubalgebra << "<html>" << HtmlRoutines::GetJavascriptMathjax()
+        outputFileSubalgebra << "<html>\n" << HtmlRoutines::GetJavascriptMathjax()
+        << "\n<script src ='../../calculator-html/graphics_n_dimensions.js'></script>"
         << "\n<body>Subalgebra number "
         << this->GetDisplayIndexFromActual(i) << ".<br>" << this->theSubalgebras[i].ToString(&theFormatCopy);
         if (this->flagComputeNilradicals) {
@@ -666,31 +676,44 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
       }
     }
   }
-  if (this->theSl2s.size != 0) {
-    int numComputedOrbits = 0;
-    for (int i = 0; i < this->theOrbiTs.size; i ++) {
-      if (this->theOrbiTs[i].flagOrbitIsBuffered) {
-        numComputedOrbits ++;
-      }
-    }
-    out << "<hr>Of the " << this->theOrbiTs.size << " h element conjugacy classes " << numComputedOrbits
-    << " had their Weyl group orbits computed and buffered. The h elements and their computed orbit sizes follow. ";
-    out << "<table><tr><td>h element</td><td>orbit size</td></tr>";
-    for (int i = 0; i < this->theOrbiTs.size; i ++) {
-      out << "<tr><td>" << this->theSl2s[i].theH.GetCartanPart().ToString() << "</td>";
-      if (this->theOrbiTs[i].orbitSize != - 1) {
-        out << "<td>" << this->theOrbiTs[i].orbitSize;
-        if (this->theOrbiTs[i].flagOrbitIsBuffered == 0)
-          out << "<b>(orbit enumerated but not stored)</b>";
-        out << "</td>";
-      } else {
-        out << "<td>size not computed</td>";
-      }
-      out << "</tr>";
-    }
-    out << "</table>";
-    out << this->theSl2s.ToString(theFormat);
+  out << this->ToStringPart3(theFormat);
+  return out.str();
+}
+
+std::string SemisimpleSubalgebras::ToStringSl2s(FormatExpressions *theFormat) {
+  if (this->theSl2s.size == 0) {
+    return "";
   }
+  std::stringstream out;
+  int numComputedOrbits = 0;
+  for (int i = 0; i < this->theOrbiTs.size; i ++) {
+    if (this->theOrbiTs[i].flagOrbitIsBuffered) {
+      numComputedOrbits ++;
+    }
+  }
+  out << "<hr>Of the " << this->theOrbiTs.size << " h element conjugacy classes " << numComputedOrbits
+  << " had their Weyl group orbits computed and buffered. The h elements and their computed orbit sizes follow. ";
+  out << "<table><tr><td>h element</td><td>orbit size</td></tr>";
+  for (int i = 0; i < this->theOrbiTs.size; i ++) {
+    out << "<tr><td>" << this->theSl2s[i].theH.GetCartanPart().ToString() << "</td>";
+    if (this->theOrbiTs[i].orbitSize != - 1) {
+      out << "<td>" << this->theOrbiTs[i].orbitSize;
+      if (this->theOrbiTs[i].flagOrbitIsBuffered == 0)
+        out << "<b>(orbit enumerated but not stored)</b>";
+      out << "</td>";
+    } else {
+      out << "<td>size not computed</td>";
+    }
+    out << "</tr>";
+  }
+  out << "</table>";
+  out << this->theSl2s.ToString(theFormat);
+  return out.str();
+}
+
+std::string SemisimpleSubalgebras::ToStringPart3(FormatExpressions *theFormat) {
+  std::stringstream out;
+  out << this->ToStringSl2s(theFormat);
   out << "<hr>Calculator input for loading subalgebras directly without recomputation. "
   << this->ToStringProgressReport(theFormat);
   return out.str();
@@ -5200,11 +5223,11 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   return out.str();
 }
 
-std::string CandidateSSSubalgebra::ToStringModuleDecompoLaTeX(FormatExpressions* theFormat) const {
+std::string CandidateSSSubalgebra::ToStringModuleDecompositionLaTeX(FormatExpressions* theFormat) const {
+  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringModuleDecompositionLaTeX");
   if (this->Modules.size <= 0) {
     return "";
   }
-  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringModuleDecompoLaTeX");
   if (!this->owner->flagComputeModuleDecomposition) {
     return "";
   }
@@ -5279,11 +5302,11 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompoLaTeX(FormatExpressions*
 }
 
 
-std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theFormat) const {
+std::string CandidateSSSubalgebra::ToStringModuleDecomposition(FormatExpressions* theFormat) const {
+  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringModuleDecomposition");
   if (this->Modules.size <= 0) {
     return "";
   }
-  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringModuleDecompo");
   bool useMouseHover = theFormat == 0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
   std::stringstream out;
   out << "Isotypic module decomposition over primal subalgebra (total " << this->Modules.size << " isotypic components). ";
@@ -5315,9 +5338,9 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
       std::stringstream tempStream;
       tempStream << "V_{" << this->HighestWeightsPrimal[i].ToStringLetterFormat("\\omega", &tempCharFormat) << "} ";
       if (useMouseHover) {
-        out << HtmlRoutines::GetMathMouseHover(tempStream.str()) << "-> " << this->HighestWeightsPrimal[i].ToString();
+        out << HtmlRoutines::GetMathMouseHover(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].ToString();
       } else {
-        out << HtmlRoutines::GetMathSpanPure(tempStream.str()) << "-> " << this->HighestWeightsPrimal[i].ToString();
+        out << HtmlRoutines::GetMathSpanPure(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].ToString();
       }
       out << "</td>";
     }
@@ -6524,9 +6547,9 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat) const 
     out << "</table>";
   }
   if (!shortReportOnly) {
-    out << this->ToStringModuleDecompo(theFormat);
+    out << this->ToStringModuleDecomposition(theFormat);
     if (this->owner->flagProduceLaTeXtables) {
-      out << "LaTeX version of module decomposition: <br><br>" << this->ToStringModuleDecompoLaTeX(theFormat) << "<br><br>";
+      out << "LaTeX version of module decomposition: <br><br>" << this->ToStringModuleDecompositionLaTeX(theFormat) << "<br><br>";
     }
     out << this->ToStringPairingTable(theFormat);
     if (this->owner->flagProduceLaTeXtables) {

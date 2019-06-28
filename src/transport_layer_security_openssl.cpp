@@ -11,6 +11,7 @@ std::string TransportLayerSecurityOpenSSL::errors::errorWantRead = "SSL_ERROR_WA
 bool TransportLayerSecurityOpenSSL::flagSSLlibraryInitialized = false;
 
 extern logger logServer;
+extern logger logOpenSSL;
 
 TransportLayerSecurityOpenSSL::~TransportLayerSecurityOpenSSL() {
   this->FreeSSL();
@@ -33,6 +34,9 @@ void TransportLayerSecurityOpenSSL::FreeEverythingShutdownSSL() {
 
 void TransportLayerSecurityOpenSSL::FreeContext() {
   //SSL_CTX_free (this->contextClient);
+  if (this->context != 0 && this->name != "") {
+    logOpenSSL << logger::blue << "DEBUG: Freeing openSSL context: " << this->name << ". " << logger::endL;
+  }
   SSL_CTX_free (this->context);
   //this->contextClient = 0;
   this->context = 0;

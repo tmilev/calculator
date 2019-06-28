@@ -322,8 +322,8 @@ public:
   std::string ToStringPairingTableLaTeX(FormatExpressions* theFormat = 0) const;
   std::string ToStringNilradicals(FormatExpressions* theFormat = 0) const;
   std::string ToStringNilradicalsSummary(FormatExpressions* theFormat = 0) const;
-  std::string ToStringModuleDecompo(FormatExpressions* theFormat = 0) const;
-  std::string ToStringModuleDecompoLaTeX(FormatExpressions* theFormat = 0) const;
+  std::string ToStringModuleDecomposition(FormatExpressions* theFormat = 0) const;
+  std::string ToStringModuleDecompositionLaTeX(FormatExpressions* theFormat = 0) const;
   std::string ToStringDrawWeights(FormatExpressions* theFormat = 0) const;
   std::string ToStringDrawWeightsHelper(int indexModule, const Vector<Rational>& theWeight) const;
   //std::string ToStringDrawWeightsVersion2(FormatExpressions* theFormat = 0) const;
@@ -453,6 +453,9 @@ public:
   std::string ToStringCurrentChain(FormatExpressions* theFormat = 0);
   std::string ToStringProgressReport(FormatExpressions* theFormat = 0);
   std::string ToString(FormatExpressions* theFormat = 0);
+  std::string ToStringPart2(FormatExpressions* theFormat = 0);
+  std::string ToStringPart3(FormatExpressions* theFormat = 0);
+  std::string ToStringSl2s(FormatExpressions* theFormat = 0);
   std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat = 0) const;
   std::string ToStringSSsumaryHTML(FormatExpressions* theFormat = 0) const;
   void ComputePairingTablesAndFKFTtypes();

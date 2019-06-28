@@ -1254,6 +1254,9 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
     if (MathRoutines::StringEndsWith(theFileNames[i], "readme.md")) {
       continue;
     }
+    if (MathRoutines::StringEndsWith(theFileNames[i], "README.md")) {
+      continue;
+    }
     std::string currentCert;
     if (!FileOperations::LoadFileToStringVirtual(
       "certificates-public/" + theFileNames[i], currentCert, false, false, commentsOnFailure

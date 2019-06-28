@@ -1379,7 +1379,10 @@ EmailRoutines::EmailRoutines() {
 }
 
 bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded(
-  UserCalculatorData& theUseR, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+  UserCalculatorData& theUseR,
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneral,
+  bool& tokenIsGood
 ) {
   (void) commentsOnFailure;
   (void) theUseR;
@@ -1396,6 +1399,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   if (!Crypto::VerifyJWTagainstKnownKeys(userWrapper.enteredGoogleToken, commentsOnFailure, commentsGeneral)) {
     return false;
   }
+  tokenIsGood = true;
   JSONWebToken theToken;
   if (!theToken.AssignString(userWrapper.enteredGoogleToken, commentsOnFailure)) {
     return false;

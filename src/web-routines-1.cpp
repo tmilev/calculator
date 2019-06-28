@@ -335,6 +335,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
   MacroRegisterFunctionWithName("WebCrawler::FetchWebPage");
   (void) commentsOnFailure;
   (void) commentsGeneral;
+  this->theTSL.openSSLData.CheckCanInitializeToClient();
   this->theTSL.initialize(false);
 #ifdef MACRO_use_open_ssl
   //logOpenSSL << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
@@ -472,8 +473,8 @@ void WebCrawler::FetchWebPagePart2(
     theMessageHeader << this->postMessageToSend;
   }
   logWorker << "DEBUG: before shaking hands ...." << logger::endL;
-
-  if (!theWebServer.theTSL.HandShakeIamClientNoSocketCleanup(
+  this->theTSL.openSSLData.CheckCanInitializeToClient();
+  if (!this->theTSL.HandShakeIamClientNoSocketCleanup(
     this->theSocket, commentsOnFailure, commentsGeneral
   )) {
     if (commentsOnFailure != 0) {
@@ -563,6 +564,7 @@ void WebCrawler::FetchWebPagePart2(
   //{
   theContinueHeader << "HTTP/1.0 100 Continue\r\n\r\n";
   //theContinueHeader << "\r\n\r\n";
+  logWorker << "DEBUG: got to before write loop. " << logger::endL;
   if (!this->theTSL.SSLWriteLoop(
     10, theContinueHeader.str(), &errorSSL, commentsGeneral, true
   )) {
@@ -607,6 +609,8 @@ void WebCrawler::FetchWebPagePart2(
       << "<br>" << this->bodyReceivedOutsideOfExpectedLength;
     }
   }
+  logWorker << logger::green << "DEBUG: it seems all went well .... " << logger::endL;
+  this->theTSL.Free();
 #endif
 }
 
@@ -684,12 +688,14 @@ bool CalculatorFunctionsGeneral::innerFetchKnownPublicKeys(
     return output.AssignValue(out.str(), theCommands);
   }
   WebCrawler theCrawler;
+  theCrawler.theTSL.openSSLData.name = "crawler";
   theCrawler.UpdatePublicKeys(&out, &out);
   return output.AssignValue(out.str(), theCommands);
 }
 
 void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("WebCrawler::UpdatePublicKeys");
+  logWorker << logger::blue << "DEBUG: About to update public keys ..." << logger::endL;
   this->serverToConnectTo  = "www.googleapis.com";
   this->portOrService      = "https";
   this->addressToConnectTo = "https://www.googleapis.com/oauth2/v3/certs";
@@ -697,13 +703,16 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   if (commentsGeneral != 0) {
     *commentsGeneral << "<hr>" << "Updating public keys <hr>";
   }
+  logWorker << logger::blue << "DEBUG: about to fetch google public keys ..." << logger::endL;
   this->FetchWebPage(commentsOnFailure, commentsGeneral);
   if (this->bodyReceiveD == "") {
+    logOpenSSL << logger::red << "Could not fetch the google public keys ..." << logger::endL;
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "Could not fetch google certificate list. ";
     }
     return;
   }
+  logWorker << logger::blue << "DEBUG: GOT keys!!!..." << logger::endL;
   std::string googleKeysFileName = "certificates-public/google.txt";
   std::string googleKeysDebugFileName = "certificates-public/debug-google.txt";
   std::fstream googleKeysFile, googleKeysDebugFile;
@@ -713,13 +722,16 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "<br>Failed to open: " << googleKeysFileName;
     }
+    logOpenSSL << logger::red << "Failed to create google keys file name. " << logger::endL;
     return;
   }
   FileOperations::OpenFileCreateIfNotPresentVirtual(googleKeysDebugFile, googleKeysDebugFileName, false, true, false);
   if (commentsGeneral != 0) {
     *commentsGeneral << "<br>Updated file: " << googleKeysFileName;
   }
+  logOpenSSL << logger::green << "Updated public key file: " << googleKeysFileName << logger::endL;
   googleKeysFile << this->bodyReceiveD;
+  logOpenSSL << "DEBUG: Received public key: " << this->bodyReceiveD << logger::endL;
   googleKeysDebugFile
   << "Expected body length: " << this->expectedLength.ToString() << "\n";
   if (this->flagContinueWasNeeded) {
@@ -810,7 +822,9 @@ bool Crypto::VerifyJWTagainstKnownKeys(
       *commentsGeneral << "<br>Reloading google public keys. ";
     }
     WebCrawler theCrawler;
+    theCrawler.theTSL.openSSLData.name = "public key fetcher";
     theCrawler.UpdatePublicKeys(commentsOnFailure, commentsGeneral);
+    logOpenSSL << "DEBUG: Updated public keys!";
   }
   if (theIndex == - 1) {
     if (commentsOnFailure != 0) {

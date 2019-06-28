@@ -19,6 +19,7 @@ static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeade
 
 class TransportLayerSecurity;
 struct TransportLayerSecurityOpenSSL {
+  std::string name;
   TransportLayerSecurity* owner;
   int errorCode;
   static bool flagSSLlibraryInitialized;
@@ -27,6 +28,8 @@ struct TransportLayerSecurityOpenSSL {
   SSL_CTX* context;
   bool flagSSLHandshakeSuccessful;
   const SSL_METHOD* theSSLMethod;
+  bool flagContextInitialized;
+  bool flagIsServer;
   List<int> socketStack;
   struct errors {
     static std::string errorWantRead;
@@ -66,6 +69,9 @@ struct TransportLayerSecurityOpenSSL {
     std::stringstream *commentsOnError,
     bool includeNoErrorInComments
   );
+  bool CheckCanInitializeToClient();
+  bool CheckCanInitialize(bool toServer);
+  bool CheckCanInitializeToServer();
   void DoSetSocket(int theSocket);
   void SetSocketAddToStack(int theSocket);
   void RemoveLastSocket();

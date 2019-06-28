@@ -426,7 +426,7 @@ InputPanelData.prototype.submitGiveUp = function() {
   } else {
     theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUpNoLogin}&`;
   }
-  theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`; //"submitAnswersPreview"
+  theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
   this.submitOrPreviewAnswers(theRequest);
 }
 
@@ -439,9 +439,11 @@ InputPanelData.prototype.submitPreview = function() {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswersPreview}&`;
     } else {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreview}&`;
+      theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`; 
     }
   } else {
     theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreviewNoLogin}&`;
+    theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
   }
   this.submitOrPreviewAnswers(theRequest);
 }

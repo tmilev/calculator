@@ -337,9 +337,8 @@ const std::string& HtmlRoutines::GetJavascriptMathjax() {
   std::string mathjaxSetupScript = FileOperations::GetVirtualNameWithHash(
     "calculator-html/mathjax-calculator-setup.js"
   );
-  out << "<link rel=\"stylesheet\" href=\"../../calculator-html/style_lie_algebras.css\">";
   out << "<script type = 'text/javascript'>"
-  << "var MathJaxSetupScriptURL = '../../" << mathjaxSetupScript << ";\n"
+  << "var MathJaxSetupScriptURL = '../../" << mathjaxSetupScript << "';\n"
   << "var calculatorHtmlBaseFolder = '../../calculator-html/'; </script>";
   out << "<script type =\"text/javascript\" src ='../../MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full'>"
   << "</script>\n";

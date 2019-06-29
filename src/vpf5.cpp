@@ -1983,7 +1983,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
     << " results coincide with previously recorded values.</span> ";
   }
   out << "<br>The command for updating the test file is "
-  << HtmlRoutines::GetCalculatorComputationLink("AutomatedTestSetKnownGoodCopy 0");
+  << HtmlRoutines::GetCalculatorComputationAnchor("AutomatedTestSetKnownGoodCopy 0");
   out << "<br>Total time for the test: " << theGlobalVariables.GetElapsedMilliseconds() - startTime << " ms. ";
   return output.AssignValue(out.str(), theCommands);
 }

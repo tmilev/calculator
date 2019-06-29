@@ -30,6 +30,8 @@ var urlFields = {
   problem: {
     failedToLoadProblem: "Failed to load problem.",
     problemLabel: "problemLabel",
+    content: "content",
+    debugInformation: "debugInformation",
   },
   teachersAndSections: "teachersAndSections",
   fileName: "fileName",

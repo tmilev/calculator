@@ -689,8 +689,9 @@ int TransportLayerSecurityOpenSSL::SSLWrite(
 ) {
   (void) commentsGeneral;
   ERR_clear_error();
-  if (this->owner->standardBufferSize > 0 && writeBuffer.size < this->owner->standardBufferSize) {
-    writeBuffer.SetSize(this->owner->standardBufferSize);
+  if (writeBuffer.size <= 0) {
+    crash << "Write buffer size: " << writeBuffer.size
+    << " must be positive." << crash;
   }
   if (this->sslData == 0) {
     crash << "Uninitialized ssl not allowed here. " << crash;

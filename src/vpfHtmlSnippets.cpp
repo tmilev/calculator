@@ -198,14 +198,20 @@ std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull() {
   return out.str();
 }
 
-std::string HtmlRoutines::GetCalculatorComputationLink(const std::string& input) {
+std::string HtmlRoutines::GetCalculatorComputationURL(const std::string& inputNoEncoding) {
   std::stringstream out;
   JSData theRequest;
-  theRequest[DatabaseStrings::labelCalculatorInput] = input;
+  theRequest[DatabaseStrings::labelCalculatorInput] = inputNoEncoding;
   theRequest[DatabaseStrings::labelCurrentPage] = WebAPI::request::calculatorPage;
-  out << "<a href = \"#" << HtmlRoutines::ConvertStringToURLString(theRequest.ToString(false), false)
+  out << "#" << HtmlRoutines::ConvertStringToURLString(theRequest.ToString(false), false);
+  return out.str();
+}
+
+std::string HtmlRoutines::GetCalculatorComputationAnchor(const std::string& inputNoEncoding) {
+  std::stringstream out;
+  out << "<a href = \"#" << HtmlRoutines::GetCalculatorComputationURL(inputNoEncoding)
   << "\" onclick = \"window.calculator.calculator.calculatorLinkClickHandler(this);\">"
-  << HtmlRoutines::ConvertStringToHtmlString(input, false) << "</a>";
+  << HtmlRoutines::ConvertStringToHtmlString(inputNoEncoding, false) << "</a>";
   return out.str();
 }
 

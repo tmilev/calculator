@@ -1033,10 +1033,7 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream* comments)
   this->theProblemData.commandsGenerateProblem = streamCommands.str();
   this->theProblemData.commandsGenerateProblemNoEnclosures = streamCommandsNoEnclosures.str();
   std::stringstream debugStream;
-  debugStream << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-  << "?request=calculator&mainInput="
-  << HtmlRoutines::ConvertStringToURLString(this->theProblemData.commandsGenerateProblemNoEnclosures, false)
-  << "\"> "
+  debugStream << "<a href='" << HtmlRoutines::GetCalculatorComputationURL(this->theProblemData.commandsGenerateProblemNoEnclosures) << "'>"
   << "Input link </a>";
   this->theProblemData.commandsGenerateProblemLink = debugStream.str();
   return true;
@@ -2897,6 +2894,33 @@ void CalculatorHTML::ComputeProblemLabel() {
   this->outputProblemTitle = current.title;
 }
 
+void CalculatorHTML::ComputeBodyDebugString() {
+  MacroRegisterFunctionWithName("CalculatorHTML::ComputeBodyDebugString");
+  this->outputDebugInformationBody = "";
+  if (!theGlobalVariables.UserDebugFlagOn() || !theGlobalVariables.UserDefaultHasAdminRights()) {
+    return;
+  }
+  std::stringstream out;
+  out << "<hr>Debug information follows. ";
+  if (this->logCommandsProblemGeneratioN.str() != "") {
+    out << "<br>" << this->logCommandsProblemGeneratioN.str() << "<hr>";
+  }
+  if (this->flagIsExamProblem) {
+    out << "Exam problem here. ";
+  }
+  out << "<br>Random seed: "
+  << this->theProblemData.randomSeed
+  << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
+  << this->theProblemData.flagRandomSeedGiven
+  << "<br>flagRandomSeedGiven: "
+  << this->theProblemData.flagRandomSeedGiven
+  << "\n<br>\n"
+  << "<hr>"
+  << "<hr>"
+  << HtmlRoutines::ConvertStringToHtmlString(this->ToStringCalculatorArgumentsForProblem("exercise", "false"), true);
+  this->outputDebugInformationBody = out.str();
+}
+
 bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtmlOneAttempt");
   double startTime = theGlobalVariables.GetElapsedSeconds();
@@ -3065,25 +3089,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
         << logger::yellow << comments.str() << logger::endL;
       }
     }
-    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
-      outBody << "<hr>Debug information follows. ";
-      if (this->logCommandsProblemGeneratioN.str() != "") {
-        outBody << "<br>" << this->logCommandsProblemGeneratioN.str() << "<hr>";
-      }
-      if (this->flagIsExamProblem) {
-        outBody << "Exam problem here. ";
-      }
-      outBody << "<br>Random seed: "
-      << this->theProblemData.randomSeed
-      << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
-      << this->theProblemData.flagRandomSeedGiven
-      << "<br>flagRandomSeedGiven: "
-      << this->theProblemData.flagRandomSeedGiven
-      << "\n<br>\n"
-      << "<hr>"
-      << "<hr>"
-      << HtmlRoutines::ConvertStringToHtmlString(this->ToStringCalculatorArgumentsForProblem("exercise", "false"), true);
-    }
+    this->ComputeBodyDebugString();
+
   }
   std::stringstream navigationAndEditTagStream;
   if (this->flagDoPrependProblemNavigationBar) {

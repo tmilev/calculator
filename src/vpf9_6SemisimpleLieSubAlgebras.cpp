@@ -4966,7 +4966,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat) {
   outNotationCommand << "PrintSemisimpleLieAlgebra{}("
   << this->GetOwnerWeyl().theDynkinType.ToString() << ")" ;
   outNotation << "Notation, structure constants and Weyl group info: "
-  << HtmlRoutines::GetCalculatorComputationLink(outNotationCommand.str())
+  << HtmlRoutines::GetCalculatorComputationAnchor(outNotationCommand.str())
   << "<br> <a href=\"" << theGlobalVariables.DisplayNameExecutable
   << "?request=calculator"
   << "\"> Calculator main page</a><br><a href=\"../rootSubalgebras.html\">Root subsystem table</a><br>";

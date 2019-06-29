@@ -50,7 +50,8 @@ public:
   static bool URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out, bool replacePlusBySpace);
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
-  static std::string GetCalculatorComputationLink(const std::string& input);
+  static std::string GetCalculatorComputationURL(const std::string& inputNoEncoding);
+  static std::string GetCalculatorComputationAnchor(const std::string& inputNoEncoding);
   static std::string GetSliderSpanStartsHidden(
     const std::string& content, const std::string& label = "Expand/collapse", const std::string& desiredID = ""
   );

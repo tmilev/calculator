@@ -136,7 +136,7 @@ Problem.prototype.computeBadProblemString = function() {
 Problem.prototype.initializeProblemContent = function(problemData) {
   this.initializeBasic(problemData)
   var thePage = window.calculator.mainPage;
-  this.decodedProblem = decodeURIComponent(problemData["problemContent"]);
+  this.decodedProblem = decodeURIComponent(problemData[pathnames.urlFields.problem.content]);
   this.commentsProblem = problemData["commentsProblem"];
   if (this.commentsProblem === undefined) {
     this.commentsProblem = "";

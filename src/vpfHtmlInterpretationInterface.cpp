@@ -884,23 +884,24 @@ std::string HtmlInterpretation::GetExamPageJSON() {
   CalculatorHTML theFile;
   theFile.flagDoPrependProblemNavigationBar = false;
   theFile.flagUseJSON = true;
-  std::stringstream errorStream;
+  std::stringstream errorAndDebugStream;
   std::string problemBody = theFile.LoadAndInterpretCurrentProblemItemJSON(
     theGlobalVariables.UserRequestRequiresLoadingRealExamData(),
     theGlobalVariables.GetWebInput("randomSeed"),
-    &errorStream
+    &errorAndDebugStream
   );
   //<-must come after theFile.outputHtmlHeadNoTag
+  errorAndDebugStream << theFile.outputDebugInformationBody;
   out << problemBody;
   std::string commentsWebserver = HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  std::string commentsProblem = errorStream.str();
+  std::string commentsProblem = errorAndDebugStream.str();
   JSData output;
-  output[WebAPI::problemContent] = HtmlRoutines::ConvertStringToURLString(out.str(), false);
+  output[WebAPI::problem::content] = HtmlRoutines::ConvertStringToURLString(out.str(), false);
   if (commentsWebserver != "") {
     output[WebAPI::commentsServer] = commentsWebserver;
   }
   if (commentsProblem != "") {
-    output[WebAPI::commentsProblem] = commentsProblem;
+    output[WebAPI::problem::commentsProblem] = commentsProblem;
   }
   output[WebAPI::problem::deadlineSingle] = theFile.outputDeadlineString;
   output[WebAPI::problem::problemLabel] = theFile.outputProblemLabel;

@@ -52,6 +52,8 @@ public:
     static std::string deadlineSingle;
     static std::string failedToLoadProblem;
     static std::string problemLabel;
+    static std::string content;
+    static std::string commentsProblem;
   };
   struct databaseParameters {
     static std::string entryPoint;
@@ -60,8 +62,6 @@ public:
     static std::string fetch;
   };
   static std::string HeaderCacheControl;
-  static std::string problemContent;
-  static std::string commentsProblem;
   static std::string commentsServer;
   struct UserInfo {
     static std::string processMonitoring;

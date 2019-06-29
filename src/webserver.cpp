@@ -102,6 +102,8 @@ bool WebWorker::CheckConsistency() {
 
 bool WebWorker::ReceiveAll() {
   MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
+  logWorker << "DEBUG: inside receive all ... " << logger::endL;
+
   if (this->connectedSocketID == - 1) {
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   }
@@ -139,18 +141,6 @@ bool WebWorker::IsAllowedAsRequestCookie(const std::string& input) {
   input != "changePasswordPage" &&
   input != WebAPI::request::activateAccountJSON;
 }
-
-#ifdef MACRO_use_open_ssl
-void SSL_write_Wrapper(SSL* inputSSL, const std::string& input, std::stringstream* commentsOnError) {
-  MacroRegisterFunctionWithName("SSL_write_Wrapper");
-  int err = SSL_write (inputSSL, input.c_str(), input.size());
-  if ((err) == - 1) {
-    ERR_print_errors_fp(stderr);
-    crash << "Errors while calling SSL_write. " << crash;
-  }
-}
-
-#endif // MACRO_use_open_ssl
 
 void WebServer::initSSL() {
   MacroRegisterFunctionWithName("WebServer::initSSL");
@@ -194,9 +184,10 @@ bool WebWorker::ReceiveAllHttpSSL() {
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO, (void*)(&tv), sizeof(timeval));
   std::string errorString;
   int numFailedReceives = 0;
-  int maxNumFailedReceives = 1;
+  int maxNumFailedReceives = 3;
   double numSecondsAtStart = theGlobalVariables.GetElapsedSeconds();
   int numBytesInBuffer = - 1;
+  logWorker << "DEBUG: about to enter receice loop. " << logger::endL;
   while (true) {
     //int64_t msBeforesslread = theGlobalVariables.GetElapsedMilliseconds();
     numBytesInBuffer = this->parent->theTSL.SSLRead(
@@ -204,9 +195,9 @@ bool WebWorker::ReceiveAllHttpSSL() {
     );
     //int64_t readTime = theGlobalVariables.GetElapsedMilliseconds() - msBeforesslread;
     if (numBytesInBuffer >= 0 && numBytesInBuffer <= (signed) reader.size) {
+    //if (numBytesInBuffer > 0 && numBytesInBuffer <= (signed) reader.size) {
       break;
     }
-    logWorker << "DEBUG: openssl read error: " << errorString << logger::endL;
     numFailedReceives ++;
     if (numFailedReceives > maxNumFailedReceives) {
       if (errorString == TransportLayerSecurityOpenSSL::errors::errorWantRead) {
@@ -226,20 +217,26 @@ bool WebWorker::ReceiveAllHttpSSL() {
       return false;
     }
   }
+  logWorker << "DEBUG: got to before message head assign with numBytes: " << numBytesInBuffer << logger::endL;
   this->messageHead.assign(reader.TheObjects, numBytesInBuffer);
+  logWorker << "DEBUG: about to parse message head: " << this->messageHead << ". " << logger::endL;
   this->ParseMessageHead();
+  logWorker << "DEBUG: got to here after parse message head. " << logger::endL;
+
   if (this->requestTypE == WebWorker::requestTypes::requestPost) {
     this->displayUserInput = "POST " + this->addressGetOrPost;
   } else {
     this->displayUserInput = "GET " + this->addressGetOrPost;
   }
   if (this->ContentLength <= 0) {
+    logIO << "DEBUG: content length is: " << this->ContentLength << ". " << logger::endL;
     //logIO << " exiting successfully" << logger::endL;
     return true;
   }
   if (this->messageBody.size() == (unsigned) this->ContentLength) {
     return true;
   }
+  logWorker << "DEBUG: about to clear message body. " << logger::endL;
   this->messageBody.clear(); //<- needed else the length error check will pop.
   //logWorker << "Content-length parsed to be: " << this->ContentLength
   //<< "However the size of mainArgumentRAW is: " << this->mainArgumentRAW.size();
@@ -250,6 +247,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
     this->displayUserInput = this->error;
     return false;
   }
+  logWorker << "DEBUG: got to here. " << logger::endL;
   this->remainingBytesToSenD = (std::string) "HTTP/1.0 100 Continue\r\n\r\n";
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
@@ -272,9 +270,12 @@ bool WebWorker::ReceiveAllHttpSSL() {
     }
     if (numBytesInBuffer < 0) {
       if (
-        errno == EAGAIN  || errno == EWOULDBLOCK ||
-        errno == EINTR   || errno == EIO ||
-        errno == ENOBUFS || errno == ENOMEM
+        errno == EAGAIN  ||
+        errno == EWOULDBLOCK ||
+        errno == EINTR   ||
+        errno == EIO ||
+        errno == ENOBUFS ||
+        errno == ENOMEM
       ) {
         continue;
       }
@@ -306,14 +307,20 @@ void WebWorker::SendAllBytesHttpSSL() {
   if (this->remainingBytesToSenD.size == 0) {
     return;
   }
+  logWorker << logger::red << "DEBUG: sending bytes: " << this->remainingBytesToSenD.size << " on http ssl. " << logger::endL;
+  //std::string debugRemainingBytesString(
+  logWorker << logger::red << "DEBUG: bytes to be sent:" << logger::endL
+  << MathRoutines::StringShortenInsertDots(std::string(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size), 15000)
+  << logger::endL;
   this->CheckConsistency();
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     crash
     << "Error: WebWorker::SendAllBytesHttpSSL called "
-    << "while flagUsingSSLinCurrentConnection is set to false. " << crash;
+    << "while flagUsingSSLinCurrentConnection is set to false. "
+    << crash;
   }
   if (this->connectedSocketID == - 1) {
-    logWorker << logger::red << "Socket::SendAllBytes failed: connectedSocketID= - 1." << logger::endL;
+    logWorker << logger::red << "Socket::SendAllBytes failed: connectedSocketID = - 1." << logger::endL;
     return;
   }
   logWorker << "SSL Worker " << this->indexInParent + 1
@@ -1002,6 +1009,7 @@ void WebWorker::ParseMessageHead() {
         if (theLI.AssignStringFailureAllowed(this->theMessageHeaderStrings[i + 1], true)) {
           if (!theLI.IsIntegerFittingInInt(&this->ContentLength)) {
             this->ContentLength = - 1;
+            logWorker << "DEBUG: content length is minus 1. " << logger::endL;
           }
         }
       }
@@ -1043,6 +1051,10 @@ void WebWorker::ParseMessageHead() {
       }
     }
   }
+  if (this->messageBody.size() > 0 && this->ContentLength < 0) {
+    this->ContentLength = this->messageBody.size();
+  }
+  logWorker << "DEBUG: content length: " << this->ContentLength << logger::endL;
   theGlobalVariables.hostWithPort = this->hostWithPort;
 }
 
@@ -2228,6 +2240,7 @@ int WebWorker::ProcessCompute() {
   theGlobalVariables.initOutputReportAndCrashFileNames(
     HtmlRoutines::ConvertStringToURLString(theParser->inputString, false), theParser->inputString
   );
+  logWorker << logger::blue << "DEBUG: process compute. " << logger::endL;
   ////////////////////////////////////////////////
   //  the initialization below moved to the start of the web server!
   //  theParser.init();
@@ -2248,6 +2261,7 @@ int WebWorker::ProcessCompute() {
   }
   stOutput << result.ToString(false);
   theGlobalVariables.flagComputationCompletE = true;
+  logWorker << logger::blue << "DEBUG: process compute. " << logger::endL;
   return 0;
 }
 
@@ -2756,8 +2770,9 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified() {
 
 bool WebWorker::ProcessRedirectAwayFromWWW() {
   std::string addressNoWWW;
-  if (!MathRoutines::StringBeginsWith(theGlobalVariables.hostWithPort, "www.", &addressNoWWW))
+  if (!MathRoutines::StringBeginsWith(theGlobalVariables.hostWithPort, "www.", &addressNoWWW)) {
     return false;
+  }
   std::stringstream newAddressStream, redirectHeaderStream;
   newAddressStream << "https://" << addressNoWWW;
   if (this->addressGetOrPost.size() != 0) {
@@ -2825,6 +2840,7 @@ int WebWorker::ServeClient() {
   MacroRegisterFunctionWithName("WebWorker::ServeClient");
   theGlobalVariables.timeServeClientStart = theGlobalVariables.GetElapsedMilliseconds();
   theGlobalVariables.flagComputationStarted = true;
+  theGlobalVariables.flagComputationCompletE = false;
   theGlobalVariables.userDefault.flagMustLogin = true;
   theGlobalVariables.userDefault.flagStopIfNoLogin = true;
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
@@ -2934,6 +2950,8 @@ int WebWorker::ServeClient() {
       theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", theGlobalVariables.hostNoPort);
     }
   }
+  logWorker << "DEBUG: about to process request type: " << theGlobalVariables.userCalculatorRequestType << logger::endL;
+
   if (
     theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
     theGlobalVariables.userCalculatorRequestType == WebAPI::databaseParameters::entryPoint
@@ -3095,6 +3113,7 @@ int WebWorker::ServeClient() {
   } else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::request::onePageJSWithHash) {
     return this->ProcessCalculatorOnePageJS(true);
   }
+  logWorker << "DEBUG: about to process folder or file. " << logger::endL;
   return this->ProcessFolderOrFile();
 }
 
@@ -3201,10 +3220,11 @@ void WebWorker::OutputShowIndicatorOnTimeout() {
 std::string WebWorker::ToStringAddressRequest() const {
   std::stringstream out;
   out << "Address = ";
-  if (this->addressComputed == "")
+  if (this->addressComputed == "") {
     out << "[empty]";
-  else
+  } else {
     out << this->addressComputed;
+  }
   out << "; ";
   out << " request = ";
   if (theGlobalVariables.userCalculatorRequestType == "") {
@@ -4505,9 +4525,9 @@ int WebWorker::Run() {
     this->flagEncounteredErrorWhileServingFile = false;
     if (!this->ReceiveAll()) {
       bool sslWasOK = true;
-#ifdef MACRO_use_open_ssl
-      sslWasOK = (this->error == TransportLayerSecurityOpenSSL::errors::errorWantRead);
-#endif
+      if (theGlobalVariables.flagSSLIsAvailable) {
+        sslWasOK = (this->error == TransportLayerSecurityOpenSSL::errors::errorWantRead);
+      }
       if (this->numberOfReceivesCurrentConnection > 0 && sslWasOK) {
         logIO << logger::green << "Connection timed out after successfully receiving "
         << this->numberOfReceivesCurrentConnection << " times. " << logger::endL;
@@ -4518,8 +4538,7 @@ int WebWorker::Run() {
       result = - 1;
       break;
     }
-    this->numberOfReceivesCurrentConnection ++;
-    if (this->numberOfReceivesCurrentConnection > 1) {
+    if (this->numberOfReceivesCurrentConnection > 0) {
       this->parent->theCalculator.RenewObject();
       theParser->initialize();
       logWorker << logger::blue << "Created new calculator for connection: "
@@ -4529,12 +4548,14 @@ int WebWorker::Run() {
       break;
     }
     result = this->ServeClient();
+    logWorker << "DEBUG: Got result from serve client. " << logger::endL;
     if (this->connectedSocketID == - 1) {
       break;
     }
     if (!this->flagAllBytesSentUsingFile) {
       this->SendAllBytesWithHeaders();
     }
+    this->numberOfReceivesCurrentConnection ++;
     // We break the connection if we need to turn on monitoring as that concerns other processes.
     if (
       !this->flagKeepAlive ||
@@ -4544,6 +4565,8 @@ int WebWorker::Run() {
     ) {
       break;
     }
+    logWorker << "DEBUG: closing connection " << logger::endL;
+    break;
     //The function call needs security audit.
     this->resetConnection();
     logWorker << logger::blue << "Received " << this->numberOfReceivesCurrentConnection
@@ -5416,7 +5439,7 @@ void WebWorker::PrepareFullMessageHeaderAndFooter() {
   this->remainingHeaderToSend.SetSize(0);
   std::stringstream contentLengthStream;
   if (this->flagDoAddContentLength) {
-    contentLengthStream << "Content-Length: " << this->remainingBodyToSend.size << "\r\n";
+    contentLengthStream << "Content-length: " << this->remainingBodyToSend.size << "\r\n";
   }
   contentLengthStream << "\r\n";
   std::string contentLengthString = contentLengthStream.str();

@@ -6,8 +6,6 @@ std::string WebAPI::appNoCache = "appNoCache";
 std::string WebAPI::app = "app";
 std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
 
-std::string WebAPI::problemContent = "problemContent";
-std::string WebAPI::commentsProblem = "commentsProblem";
 std::string WebAPI::commentsServer = "commentsServer";
 
 std::string WebAPI::request::userInfoJSON = "userInfoJSON";
@@ -38,6 +36,9 @@ std::string WebAPI::problem::idProblem = "id";
 std::string WebAPI::problem::deadlineSingle = "deadline";
 std::string WebAPI::problem::failedToLoadProblem = "Failed to load problem. ";
 std::string WebAPI::problem::problemLabel = "problemLabel";
+std::string WebAPI::problem::content = "content";
+std::string WebAPI::problem::commentsProblem = "commentsProblem";
+
 
 std::string WebAPI::request::calculatorHTML = "/calculator-html";
 std::string WebAPI::request::onePageJS = "/calculator-html/javascript_all_in_one.js";

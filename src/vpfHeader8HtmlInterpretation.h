@@ -174,6 +174,7 @@ public:
   std::string outputDeadlineString;
   std::string outputProblemLabel;
   std::string outputProblemTitle;
+  std::string outputDebugInformationBody;
   MapLisT<std::string, std::string, MathRoutines::HashString> outputScripts;
 
   std::stringstream logCommandsProblemGeneratioN;
@@ -226,6 +227,7 @@ public:
   bool InterpretHtml(std::stringstream* comments);
   bool InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
   void ComputeProblemLabel();
+  void ComputeBodyDebugString();
   std::string ToStringInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements);
   void LogProblemGenerationObsolete(Calculator& theInterpreter);
   bool InterpretProcessExecutedCommands(

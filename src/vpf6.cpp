@@ -1098,7 +1098,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   out << "<br>Weyl group size: " << theWeyl.theGroup.GetSize().ToString() << "." << "<br>To get extra details: ";
   std::stringstream tempStream;
   tempStream << "PrintSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
-  out << HtmlRoutines::GetCalculatorComputationLink(tempStream.str()) << "<br>";
+  out << HtmlRoutines::GetCalculatorComputationAnchor(tempStream.str()) << "<br>";
   if (Verbose) {
     DrawingVariables theDV;
     theWeyl.DrawRootSystem(theDV, true, true, 0, true, 0);

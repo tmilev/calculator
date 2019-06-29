@@ -1672,10 +1672,13 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
   outScript
   << "theCanvas.redraw();\n"
   << "}\n"
-  << "window.calculator.drawing.getCanvasTwoD('" << this->canvasName << "').canvasResetFunction = "
+  << " var currentCanvas = window.calculator.drawing.getCanvasTwoDNullOnFailure('" << this->canvasName << "');\n"
+  << "if (currentCanvas !== null) {\n"
+  << "currentCanvas.canvasResetFunction = "
   << canvasFunctionName << ";\n"
+  << canvasFunctionName << "();\n"
+  << "}\n";
   //<< "console.log(\"DEBUG: Set canvas reset function to \" + "<< canvasFunctionName << ");\n"
-  << canvasFunctionName << "();\n";
   owner.theObjectContainer.graphicsScripts.SetKeyValue(this->canvasName, outScript.str());
   out << "<script language =\"javascript\">\n" << outScript.str() << "</script>";
   return out.str();

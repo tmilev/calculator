@@ -2635,7 +2635,7 @@ Canvas.prototype.drawSurface = function(theSurface) {
 }
 
 /**@returns {Canvas} */
-Drawing.prototype.getCanvas = function(/**@type {string}}*/ canvasId) { 
+Drawing.prototype.getCanvas = function(/**@type {string}*/ canvasId) { 
   var theCanvas = null;
   if (typeof canvasId === "string") {
     theCanvas = document.getElementById(canvasId);
@@ -2654,14 +2654,27 @@ Drawing.prototype.getCanvas = function(/**@type {string}}*/ canvasId) {
   }
   return this.canvases[canvasId];
 }
+/**@returns {CanvasTwoD} */
+Drawing.prototype.getCanvasTwoDNullOnFailure = function(canvasId) { 
+  return this.getCanvasTwoDInternal(canvasId, false);
+}
 
 /**@returns {CanvasTwoD} */
-Drawing.prototype.getCanvasTwoD = function(canvasId) { 
+Drawing.prototype.getCanvasTwoD = function(canvasId) {
+  return this.getCanvasTwoDInternal(canvasId, true);
+}
+
+/**@returns {CanvasTwoD} */
+Drawing.prototype.getCanvasTwoDInternal = function(canvasId, /**@type {boolean} */ throwOnFailure) { 
   var theCanvas = null;
   if (typeof canvasId === "string") {
     theCanvas = document.getElementById(canvasId);
     if (theCanvas === null) {
-      throw (`Canvas with id ${canvasId} missing. `);
+      if (throwOnFailure) {
+        throw (`Canvas with id ${canvasId} missing. `);
+      } else {
+        return null;
+      }
     }
   } else {
     theCanvas = canvasId;

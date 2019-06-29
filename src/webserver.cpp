@@ -102,8 +102,6 @@ bool WebWorker::CheckConsistency() {
 
 bool WebWorker::ReceiveAll() {
   MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
-  logWorker << "DEBUG: inside receive all ... " << logger::endL;
-
   if (this->connectedSocketID == - 1) {
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   }
@@ -185,16 +183,14 @@ bool WebWorker::ReceiveAllHttpSSL() {
   int maxNumFailedReceives = 3;
   double numSecondsAtStart = theGlobalVariables.GetElapsedSeconds();
   int numBytesInBuffer = - 1;
-  logWorker << "DEBUG: about to enter receice loop. " << logger::endL;
   List<char>& readBuffer = this->parent->theTLS.readBuffer;
   while (true) {
-    //int64_t msBeforesslread = theGlobalVariables.GetElapsedMilliseconds();
     numBytesInBuffer = this->parent->theTLS.SSLRead(
       &errorString, 0, true
     );
     //int64_t readTime = theGlobalVariables.GetElapsedMilliseconds() - msBeforesslread;
     if (numBytesInBuffer >= 0) {
-    //if (numBytesInBuffer > 0 && numBytesInBuffer <= (signed) reader.size) {
+      //if (numBytesInBuffer > 0 && numBytesInBuffer <= (signed) reader.size) {
       break;
     }
     numFailedReceives ++;
@@ -216,11 +212,8 @@ bool WebWorker::ReceiveAllHttpSSL() {
       return false;
     }
   }
-  logWorker << "DEBUG: got to before message head assign with numBytes: " << numBytesInBuffer << logger::endL;
   this->messageHead.assign(readBuffer.TheObjects, numBytesInBuffer);
-  logWorker << "DEBUG: about to parse message head: " << this->messageHead << ". " << logger::endL;
   this->ParseMessageHead();
-  logWorker << "DEBUG: got to here after parse message head. " << logger::endL;
 
   if (this->requestTypE == WebWorker::requestTypes::requestPost) {
     this->displayUserInput = "POST " + this->addressGetOrPost;
@@ -228,17 +221,13 @@ bool WebWorker::ReceiveAllHttpSSL() {
     this->displayUserInput = "GET " + this->addressGetOrPost;
   }
   if (this->ContentLength <= 0) {
-    logIO << "DEBUG: content length is: " << this->ContentLength << ". " << logger::endL;
     //logIO << " exiting successfully" << logger::endL;
     return true;
   }
   if (this->messageBody.size() == (unsigned) this->ContentLength) {
     return true;
   }
-  logWorker << "DEBUG: about to clear message body. " << logger::endL;
   this->messageBody.clear(); //<- needed else the length error check will pop.
-  //logWorker << "Content-length parsed to be: " << this->ContentLength
-  //<< "However the size of mainArgumentRAW is: " << this->mainArgumentRAW.size();
   if (this->ContentLength > 10000000) {
     this->CheckConsistency();
     error = "Content-length parsed to be more than 10 million bytes, aborting.";
@@ -306,11 +295,6 @@ void WebWorker::SendAllBytesHttpSSL() {
   if (this->remainingBytesToSenD.size == 0) {
     return;
   }
-  logWorker << logger::red << "DEBUG: sending bytes: " << this->remainingBytesToSenD.size << " on http ssl. " << logger::endL;
-  //std::string debugRemainingBytesString(
-  logWorker << logger::red << "DEBUG: bytes to be sent:" << logger::endL
-  << MathRoutines::StringShortenInsertDots(std::string(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size), 15000)
-  << logger::endL;
   this->CheckConsistency();
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     crash
@@ -1008,7 +992,6 @@ void WebWorker::ParseMessageHead() {
         if (theLI.AssignStringFailureAllowed(this->theMessageHeaderStrings[i + 1], true)) {
           if (!theLI.IsIntegerFittingInInt(&this->ContentLength)) {
             this->ContentLength = - 1;
-            logWorker << "DEBUG: content length is minus 1. " << logger::endL;
           }
         }
       }
@@ -1053,7 +1036,6 @@ void WebWorker::ParseMessageHead() {
   if (this->messageBody.size() > 0 && this->ContentLength < 0) {
     this->ContentLength = this->messageBody.size();
   }
-  logWorker << "DEBUG: content length: " << this->ContentLength << logger::endL;
   theGlobalVariables.hostWithPort = this->hostWithPort;
 }
 
@@ -2949,8 +2931,6 @@ int WebWorker::ServeClient() {
       theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", theGlobalVariables.hostNoPort);
     }
   }
-  logWorker << "DEBUG: about to process request type: " << theGlobalVariables.userCalculatorRequestType << logger::endL;
-
   if (
     theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
     theGlobalVariables.userCalculatorRequestType == WebAPI::databaseParameters::entryPoint
@@ -3112,7 +3092,6 @@ int WebWorker::ServeClient() {
   } else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::request::onePageJSWithHash) {
     return this->ProcessCalculatorOnePageJS(true);
   }
-  logWorker << "DEBUG: about to process folder or file. " << logger::endL;
   return this->ProcessFolderOrFile();
 }
 
@@ -4547,7 +4526,6 @@ int WebWorker::Run() {
       break;
     }
     result = this->ServeClient();
-    logWorker << "DEBUG: Got result from serve client. " << logger::endL;
     if (this->connectedSocketID == - 1) {
       break;
     }
@@ -4564,8 +4542,6 @@ int WebWorker::Run() {
     ) {
       break;
     }
-    logWorker << "DEBUG: closing connection " << logger::endL;
-    break;
     //The function call needs security audit.
     this->resetConnection();
     logWorker << logger::blue << "Received " << this->numberOfReceivesCurrentConnection

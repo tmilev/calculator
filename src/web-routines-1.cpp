@@ -472,7 +472,6 @@ void WebCrawler::FetchWebPagePart2(
     theMessageHeader << "\r\n\r\n";
     theMessageHeader << this->postMessageToSend;
   }
-  logWorker << "DEBUG: before shaking hands ...." << logger::endL;
   this->theTSL.openSSLData.CheckCanInitializeToClient();
   if (!this->theTSL.HandShakeIamClientNoSocketCleanup(
     this->theSocket, commentsOnFailure, commentsGeneral
@@ -497,7 +496,6 @@ void WebCrawler::FetchWebPagePart2(
     }
     return;
   }
-  logWorker << "DEBUG:: Got to here! aaaaaaaaa" << logger::endL;
   if (!this->theTSL.SSLReadLoop(
     10, this->headerReceived, 0, &errorSSL, commentsGeneral, true
   )) {
@@ -506,7 +504,6 @@ void WebCrawler::FetchWebPagePart2(
     }
     return;
   }
-  logWorker << "DEBUG: got to before bodystart set." << logger::endL;
   unsigned bodyStart = 0;
   int numcrlfs = 0;
   //std::stringstream tempStream;
@@ -560,11 +557,7 @@ void WebCrawler::FetchWebPagePart2(
     return;
   }
   this->flagContinueWasNeeded = true;
-  //if (this->bodyReceivedWithHeader == "")
-  //{
   theContinueHeader << "HTTP/1.0 100 Continue\r\n\r\n";
-  //theContinueHeader << "\r\n\r\n";
-  logWorker << "DEBUG: got to before write loop. " << logger::endL;
   if (!this->theTSL.SSLWriteLoop(
     10, theContinueHeader.str(), &errorSSL, commentsGeneral, true
   )) {
@@ -609,7 +602,6 @@ void WebCrawler::FetchWebPagePart2(
       << "<br>" << this->bodyReceivedOutsideOfExpectedLength;
     }
   }
-  logWorker << logger::green << "DEBUG: it seems all went well .... " << logger::endL;
   this->theTSL.Free();
 #endif
 }

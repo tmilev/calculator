@@ -153,8 +153,10 @@ function browserify() {
   <div class = "centerVerticallyInPageContainer">
   <div class = "divCenteredItem divVisible" id = "divLoginCalculatorPanel">
     <b>Local account:</b><br><br>
+    <form><!--pasword input form, avoid password not in form warning-->
     <input class = "textInputUsername" type = "text" id = "inputUsername" name = "username" placeholder = "username" required><br>
     <input class = "textInputUsername" type = "password" id = "inputPassword" name = "password" placeholder = "password" onkeypress = "if (event.keyCode === 13) window.calculator.login.loginCalculator();" autocomplete = "on"><br>
+    </form> <!--pasword input form-->
     <button class = "buttonSelectPage" onclick = "window.calculator.login.loginCalculator();">Login</button><br>
     <button class = "buttonSignUp"     onclick = "window.calculator.mainPage.selectPage('signUp');">Sign up</button><br>
     <button class = "buttonSignUp"     onclick = "window.calculator.forgotLogin.forgotLoginPage();">Forgot login</button><br>
@@ -477,7 +479,8 @@ function browserify() {
 <div id = "divDatabaseOutput"> </div>
 </div>
 <div id = "divAccount" class = "divPage">
-  <table>
+  <form>
+  <table> <!--Password change table, to avoid password not in a form warning-->
   <tr><td>User:</td><td> <span id = "spanUserIdInAccountsPage"></span></td></tr>
   <tr>
   <td>Current password:</td>
@@ -497,7 +500,8 @@ function browserify() {
       <input class = "textInputUsername" type = "password" id = "inputReenteredPasswordInAccount" name = "password" placeholder = "password" autocomplete = "on">
     </td>
   </tr>
-  </table>
+  </table><!--Password change table-->
+  </form>
   <button class = "buttonStandard" onclick = "window.calculator.account.submitChangePassRequest()">Change password</button>
   <table>
   <tr><td>Current email:</td><td><span id = 'spanOldEmail'></span></td></tr>
@@ -516,6 +520,7 @@ function browserify() {
 </div>
 
 <div id = "divActivateAccount" class = "divPage">
+  <form>  <!--Activate account form, avoid password field not in a form warning. -->
   <table>
   <tr><td>User:</td><td><span id = "spanUserIdInActivateAccountPage"></span></td></tr>
   <tr><td>Current email:</td><td><span id = "spanCurrentActivationEmail"></span></td></tr>
@@ -533,6 +538,7 @@ function browserify() {
   </td>
   </tr>
   </table>
+  </form> <!--Activate account form-->
   <button class = "buttonStandard" onclick = "window.calculator.accountActivation.submitActivateAccountRequest()">Change password</button>
   <span id = "spanVerificationActivation"></span>
 </div>

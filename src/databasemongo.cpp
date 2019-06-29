@@ -1138,7 +1138,7 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseFetch(const std::stri
   JSData labels;
   std::stringstream commentsOnFailure;
   if (!labels.readstring(incomingLabels, false, &commentsOnFailure)) {
-    commentsOnFailure << "Failed to parse labels. ";
+    commentsOnFailure << "Failed to parse labels from: " << MathRoutines::StringTrimToLengthForDisplay(incomingLabels, 100);
     result["error"] = commentsOnFailure.str();
     return result;
   }

@@ -182,8 +182,7 @@ Calculator.prototype.toggleExamples = function(theButton) {
 Calculator.prototype.submitComputation = function() {
   var thePage = window.calculator.mainPage;
   var calculatorInput = document.getElementById(ids.domElements.inputMain).value;
-  console.log("DEBUG: Temporary disabled computation caching. ");
-  if (calculatorInput === this.lastSubmittedInput && false) {
+  if (calculatorInput === this.lastSubmittedInput) {
     return;
   }
   this.lastSubmittedInput = calculatorInput;

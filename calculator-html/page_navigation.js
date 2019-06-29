@@ -179,10 +179,6 @@ StorageVariable.prototype.setAndStore = function(
   var changed = (this.value !== newValue);
   this.value = newValue;
   this.storeMe(updateURL, updateAssociatedInput);
-  if (this.name === "calculatorInput") {
-    console.log("DEBUG: Temporarily disabled calculator caching. ");
-    changed = true;
-  }
   if (changed) {
     if (this.callbackOnValueChange !== null && this.callbackOnValueChange !== undefined) {
       //calling function with timeout ensures the current function sequence is finished first.

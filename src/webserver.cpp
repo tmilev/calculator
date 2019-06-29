@@ -149,7 +149,7 @@ void WebServer::initSSL() {
     return;
   }
   //////////////////////////////////////////////////////////////////////////
-  this->theTSL.initialize(true);
+  this->theTLS.initialize(true);
 }
 
 bool WebServer::SSLServerSideHandShake() {
@@ -159,7 +159,7 @@ bool WebServer::SSLServerSideHandShake() {
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return false;
   }
-  return this->theTSL.HandShakeIamServer(this->GetActiveWorker().connectedSocketID);
+  return this->theTLS.HandShakeIamServer(this->GetActiveWorker().connectedSocketID);
 }
 
 bool WebWorker::ReceiveAllHttpSSL() {
@@ -173,8 +173,6 @@ bool WebWorker::ReceiveAllHttpSSL() {
   this->messageBody = "";
   this->messageHead = "";
   this->requestTypE = this->requestUnknown;
-  List<char> reader;
-  reader.SetSize(60000);
   if (this->connectedSocketID == - 1) {
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   }
@@ -188,13 +186,14 @@ bool WebWorker::ReceiveAllHttpSSL() {
   double numSecondsAtStart = theGlobalVariables.GetElapsedSeconds();
   int numBytesInBuffer = - 1;
   logWorker << "DEBUG: about to enter receice loop. " << logger::endL;
+  List<char>& readBuffer = this->parent->theTLS.readBuffer;
   while (true) {
     //int64_t msBeforesslread = theGlobalVariables.GetElapsedMilliseconds();
-    numBytesInBuffer = this->parent->theTSL.SSLRead(
-      reader, &errorString, 0, true
+    numBytesInBuffer = this->parent->theTLS.SSLRead(
+      &errorString, 0, true
     );
     //int64_t readTime = theGlobalVariables.GetElapsedMilliseconds() - msBeforesslread;
-    if (numBytesInBuffer >= 0 && numBytesInBuffer <= (signed) reader.size) {
+    if (numBytesInBuffer >= 0) {
     //if (numBytesInBuffer > 0 && numBytesInBuffer <= (signed) reader.size) {
       break;
     }
@@ -218,7 +217,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
     }
   }
   logWorker << "DEBUG: got to before message head assign with numBytes: " << numBytesInBuffer << logger::endL;
-  this->messageHead.assign(reader.TheObjects, numBytesInBuffer);
+  this->messageHead.assign(readBuffer.TheObjects, numBytesInBuffer);
   logWorker << "DEBUG: about to parse message head: " << this->messageHead << ". " << logger::endL;
   this->ParseMessageHead();
   logWorker << "DEBUG: got to here after parse message head. " << logger::endL;
@@ -259,8 +258,8 @@ bool WebWorker::ReceiveAllHttpSSL() {
       this->displayUserInput = this->error;
       return false;
     }
-    numBytesInBuffer = this->parent->theTSL.SSLRead(
-      reader, &errorString, 0, true
+    numBytesInBuffer = this->parent->theTLS.SSLRead(
+      &errorString, 0, true
     );
     if (numBytesInBuffer == 0) {
       this->error = "While trying to fetch message-body, received 0 bytes. " +
@@ -285,7 +284,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
       this->displayUserInput = this->error;
       return false;
     }
-    bufferString.assign(reader.TheObjects, numBytesInBuffer);
+    bufferString.assign(readBuffer.TheObjects, numBytesInBuffer);
     this->messageBody += bufferString;
   }
   if ((signed) this->messageBody.size() != this->ContentLength) {
@@ -340,7 +339,7 @@ void WebWorker::SendAllBytesHttpSSL() {
       << logger::endL;
       return;
     }
-    int numBytesSent = this->parent->theTSL.SSLWrite(
+    int numBytesSent = this->parent->theTLS.SSLWrite(
       this->remainingBytesToSenD,
       &errorString,
       0,
@@ -3295,7 +3294,7 @@ bool WebServer::CheckConsistency() {
 }
 
 void WebServer::ReleaseEverything() {
-  this->theTSL.Free();
+  this->theTLS.Free();
   logger& currentLog = theGlobalVariables.flagIsChildProcess ? logWorker : logServer;
   ProgressReportWebServer::flagServerExists = false;
   for (int i = 0; i < this->theWorkers.size; i ++) {
@@ -4257,7 +4256,7 @@ int WebServer::Run() {
   //<-resets of the server logs are not needed, but I put them here nonetheless.
   if (theGlobalVariables.flagSSLIsAvailable) {
     // creates key files if absent. Does not call any openssl functions.
-    this->theTSL.initSSLKeyFiles();
+    this->theTLS.initSSLKeyFiles();
   }
   logWorker         .reset();
   logServerMonitor  .reset();
@@ -4432,7 +4431,7 @@ int WebServer::Run() {
       << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
       << logger::endL;
     }
-    this->theTSL.AddMoreEntropyFromTimer();
+    this->theTLS.AddMoreEntropyFromTimer();
 
     int incomingPID = fork(); //creates an almost identical copy of this process.
     //<- Please don't assign directly to this->GetActiveWorker().ProcessPID.
@@ -4485,7 +4484,7 @@ int WebServer::Run() {
     this->ReleaseWorkerSideResources();
   }
   this->ReleaseEverything();
-  this->theTSL.FreeEverythingShutdown();
+  this->theTLS.FreeEverythingShutdown();
   return 0;
 }
 

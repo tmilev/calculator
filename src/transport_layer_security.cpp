@@ -38,8 +38,8 @@ TransportLayerSecurity::TransportLayerSecurity() {
   this->flagIsServer = true;
   this->flagInitializedPrivateKey = false;
   this->flagInitialized = false;
-  this->standardBufferSize = 10000;
   this->openSSLData.owner = this;
+  this->readBufferStandardSize = 100000;
 }
 
 TransportLayerSecurity::~TransportLayerSecurity() {
@@ -252,20 +252,19 @@ bool TransportLayerSecurity::SSLReadLoop(int numTries,
   bool includeNoErrorInComments
 ) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::SSLReadLoop");
-  this->buffer.SetSize(100000);
+  this->readBuffer.SetSize(this->readBufferStandardSize);
   output = "";
   int i = 0;
   std::string next;
   int numBytes = - 1;
   for (i = 0; i < numTries; i ++) {
     numBytes = this->SSLRead(
-      this->buffer,
       outputError,
       commentsGeneral,
       includeNoErrorInComments
     );
     if (numBytes > 0) {
-      next.assign(this->buffer.TheObjects, numBytes);
+      next.assign(this->readBuffer.TheObjects, numBytes);
       output += next;
       if (expectedLength <= 0) {
         break;
@@ -296,25 +295,24 @@ bool TransportLayerSecurity::SSLWriteLoop(
   bool includeNoErrorInComments
 ) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::SSLWriteLoop");
-  Crypto::ConvertStringToListBytesSigned(input, this->buffer);
+  Crypto::ConvertStringToListBytesSigned(input, this->writeBuffer);
   int i = 0;
   int numBytes = - 1;
-  this->buffer.SetSize(100000);
   for (i = 0; i < numTries; i ++) {
     logWorker << "DEBUG: about to ssl write!!!\n" << logger::endL;
     numBytes = this->SSLWrite(
-      this->buffer,
+      this->writeBuffer,
       outputError,
       commentsGeneral,
       commentsGeneral,
       includeNoErrorInComments
     );
     logWorker << "DEBUG: ssl write done, numbytes: " << numBytes << "!!!" << logger::endL;
-    if (numBytes == this->buffer.size) {
+    if (numBytes == this->writeBuffer.size) {
       break;
     }
   }
-  if (numBytes != this->buffer.size) {
+  if (numBytes != this->writeBuffer.size) {
     if (commentsGeneral != 0) {
       *commentsGeneral  << i << " errors writing to socket.\n NumBytes: " << numBytes << ". ";
     }
@@ -666,12 +664,11 @@ int TransportLayerSecurityOpenSSL::SSLRead(
 }
 
 int TransportLayerSecurity::SSLRead(
-  List<char>& readBuffer,
   std::string* outputError,
   std::stringstream* commentsGeneral,
   bool includeNoErrorInComments
 ) {
-  this->buffer.SetSize(100000);
+  this->readBuffer.SetSize(this->readBufferStandardSize);
   if (!this->flagDontUseOpenSSL) {
     return this->openSSLData.SSLRead(readBuffer, outputError, commentsGeneral, includeNoErrorInComments);
   } else {
@@ -681,7 +678,7 @@ int TransportLayerSecurity::SSLRead(
 }
 
 int TransportLayerSecurityOpenSSL::SSLWrite(
-  List<char>& writeBuffer,
+  const List<char>& writeBuffer,
   std::string* outputError,
   std::stringstream* commentsGeneral,
   std::stringstream* commentsOnError,

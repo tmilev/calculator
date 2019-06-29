@@ -62,8 +62,7 @@ struct TransportLayerSecurityOpenSSL {
     std::stringstream *commentsGeneral,
     bool includeNoErrorInComments
   );
-  int SSLWrite(
-    List<char>& writeBuffer,
+  int SSLWrite(const List<char> &writeBuffer,
     std::string* outputError,
     std::stringstream* commentsGeneral,
     std::stringstream *commentsOnError,
@@ -86,10 +85,10 @@ public:
   bool flagInitializedPrivateKey;
   bool flagIsServer;
   bool flagInitialized;
-  List<char> buffer;
   TransportLayerSecurityOpenSSL openSSLData;
-
-  int standardBufferSize;
+  List<char> readBuffer;
+  List<char> writeBuffer;
+  int readBufferStandardSize;
 
   static const std::string fileCertificate;
   static const std::string fileCertificateConfiguration;
@@ -98,9 +97,7 @@ public:
   static const std::string signedFileCertificate3;
   static const std::string signedFileKey;
   void initialize(bool IamServer);
-  int SSLRead(
-    List<char>& readBuffer,
-    std::string *outputError,
+  int SSLRead(std::string *outputError,
     std::stringstream *commentsGeneral,
     bool includeNoErrorInComments
   );

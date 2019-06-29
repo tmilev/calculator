@@ -446,7 +446,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
       }
     }
     this->FetchWebPagePart2(commentsOnFailure, commentsGeneral);
-    theWebServer.theTSL.RemoveLastSocket();
+    theWebServer.theTLS.RemoveLastSocket();
     close(this->theSocket);
     break;
   }

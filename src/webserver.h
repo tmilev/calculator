@@ -232,7 +232,7 @@ public:
   long long NumFailedSelectsSoFar;
   long long NumSuccessfulSelectsSoFar;
   bool flagReapingChildren;
-  TransportLayerSecurity theTSL;
+  TransportLayerSecurity theTLS;
   PointerObjectDestroyer<Calculator> theCalculator;
   MonomialCollection<MonomialWrapper<std::string, MathRoutines::HashString>, LargeInt> currentlyConnectedAddresses;
   List<std::string> PortsITryHttp;

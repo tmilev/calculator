@@ -38,3 +38,15 @@ span.hElement {
 span.fElement {
   color: blue;
 }
+
+div.divSubalgebraInformation{
+  position: absolute;
+  width: 10%;
+  right: 0;
+}
+
+div.divSemisimpleSubalgebrasInformation{
+  position: absolute;
+  width: 10%;
+  right: 0;
+}

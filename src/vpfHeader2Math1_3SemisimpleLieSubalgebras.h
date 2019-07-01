@@ -392,6 +392,9 @@ public:
   );
   int GetNumPossibleSAs() const;
   int GetDisplayIndexFromActual(int ActualIndexSubalgebra) const;
+  std::string ToStringSubalgebraNumberWithAmbientLink(
+    int actualIndexSubalgebra, FormatExpressions* theFormat
+  ) const;
   void ComputeFolderNames(FormatExpressions& outputFormat);
   void CheckFileWritePermissions();
   void WriteReportToFiles();
@@ -454,6 +457,9 @@ public:
   std::string ToStringProgressReport(FormatExpressions* theFormat = 0);
   std::string ToString(FormatExpressions* theFormat = 0);
   std::string ToStringPart2(FormatExpressions* theFormat = 0);
+  std::string ToStringSubalgebrasNoHDWrite(FormatExpressions* theFormat = 0);
+  std::string ToStringSubalgebrasWithHDWrite(FormatExpressions* theFormat = 0);
+  void WriteSubalgebraToFile(FormatExpressions* theFormat, int subalgebraIndex);
   std::string ToStringPart3(FormatExpressions* theFormat = 0);
   std::string ToStringSl2s(FormatExpressions* theFormat = 0);
   std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat = 0) const;

@@ -464,7 +464,7 @@ std::string HtmlInterpretation::GetAboutPage() {
   out << "<!DOCTYPE html>";
   out << "<html>";
   out << "<head>"
-  << HtmlRoutines::GetCSSLinkCalculator()
+  << HtmlRoutines::GetCSSLinkCalculator("/")
   << "</head>";
   out << "<body>";
   out << "<calculatorNavigation>"
@@ -734,7 +734,7 @@ std::string HtmlInterpretation::GetPageFromTemplate() {
   thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments)) {
     out << "<html>"
-    << "<head>" << HtmlRoutines::GetCSSLinkCalculator() << "</head>"
+    << "<head>" << HtmlRoutines::GetCSSLinkCalculator("/") << "</head>"
     << "<body>";
     out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
     << "<b>Failed to load file: "
@@ -746,7 +746,7 @@ std::string HtmlInterpretation::GetPageFromTemplate() {
   if (!thePage.InterpretHtml(&comments)) {
     out << "<html>"
     << "<head>"
-    << HtmlRoutines::GetCSSLinkCalculator()
+    << HtmlRoutines::GetCSSLinkCalculator("/")
     << "</head>"
     << "<body>";
     out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
@@ -934,13 +934,13 @@ std::string HtmlInterpretation::GetBrowseProblems() {
   out << "<!DOCTYPE html>";
   out << "<html>";
   out << "<head>"
-  << HtmlRoutines::GetCSSLinkCalculator()
+  << HtmlRoutines::GetCSSLinkCalculator("/")
   << "</head>";
   out << "<body>";
   out << "<calculatorNavigation>"
   << HtmlInterpretation::ToStringNavigation()
   << "</calculatorNavigation>";
-  out << "Not implmented yet.";
+  out << "Not implemented yet.";
   out << "</body></html>";
   return out.str();
 }
@@ -1728,7 +1728,7 @@ std::string HtmlInterpretation::GetScoresPage() {
   std::stringstream out;
   out << "<html>"
   << "<head>"
-  << HtmlRoutines::GetCSSLinkCalculator()
+  << HtmlRoutines::GetCSSLinkCalculator("/")
   << "<link rel =\"stylesheet\" href=\"/calculator-html/styleScorePage.css\">"
   << "</head>"
   << "<body onload =\"loadSettings();\">\n";
@@ -1749,7 +1749,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   std::stringstream out;
   out << "<html>"
   << "<head>"
-  << HtmlRoutines::GetCSSLinkCalculator()
+  << HtmlRoutines::GetCSSLinkCalculator("/")
   //<< HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "</head>"
   << "<body onload =\"loadSettings();\">\n";
@@ -2553,7 +2553,7 @@ std::string HtmlInterpretation::ToStringNavigation() {
   } else {
     out << "<b>About</b> " << linkBigSeparator;
   }
-  out << "<a href=\"https://github.com/tmilev/calculator/issues\" target =\"_blank\">Feedback, bugs</a>"
+  out << "<a href=\"" << HtmlRoutines::githubRepository << "/issues\" target =\"_blank\">Feedback, bugs</a>"
   << linkBigSeparator;
 
   if (!theGlobalVariables.flagRunningApache) {

@@ -1673,7 +1673,7 @@ int WebWorker::ProcessFile() {
   if (!FileOperations::FileExistsUnsecure(this->RelativePhysicalFileNamE)) {
     this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
     stOutput << "<html>"
-    << HtmlRoutines::GetCSSLinkCalculator()
+    << HtmlRoutines::GetCSSLinkCalculator("/")
     << "<body>";
     stOutput << "One page <a href = \"" << theGlobalVariables.DisplayNameExecutableApp << "\">app</a>. ";
     stOutput << " Same app without browser cache: <a href = \""
@@ -1933,7 +1933,7 @@ int WebWorker::ProcessUnknown() {
   MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
   this->SetHeadeR("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
   stOutput << "<html><head>"
-  << HtmlRoutines::GetCSSLinkCalculator()
+  << HtmlRoutines::GetCSSLinkCalculator("/")
   << "</head>";
   stOutput << "<body>";
   stOutput << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
@@ -2529,7 +2529,7 @@ int WebWorker::ProcessSlidesSource() {
     stOutput << "<!DOCTYPE html>"
     << "<html>"
     << "<head>"
-    << HtmlRoutines::GetCSSLinkCalculator()
+    << HtmlRoutines::GetCSSLinkCalculator("/")
     << "</head>"
     << "<body>"
     << "<calculatorNavigation>"

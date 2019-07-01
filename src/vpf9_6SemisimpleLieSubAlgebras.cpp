@@ -256,6 +256,17 @@ int SemisimpleSubalgebras::GetIndexFullSubalgebra() const {
   return - 1;
 }
 
+std::string SemisimpleSubalgebras::ToStringSubalgebraNumberWithAmbientLink(
+  int actualIndexSubalgebra, FormatExpressions* theFormat
+) const {
+  std::stringstream out;
+  out << "Subalgebra number " << this->GetDisplayIndexFromActual(actualIndexSubalgebra)
+  << " of ambient Lie algebra "
+  << "\\(" << this->owner->theWeyl.theDynkinType.ToString(theFormat) << "\\)" << "."
+  << "\n";
+  return out.str();
+}
+
 int SemisimpleSubalgebras::GetDisplayIndexFromActual(int ActualIndexSubalgebra) const {
   int result = 0;
   for (int i = 0; i <= ActualIndexSubalgebra; i ++) {
@@ -360,8 +371,8 @@ void SemisimpleSubalgebras::WriteReportToFiles() {
   commonHead << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owner->theWeyl.theDynkinType.ToString()
   << "</title>";
-  commonHead << "<link rel= 'stylesheet' href = '../../calculator-html/style_lie_algebras.css'>";
-  commonHead << "<script src ='../../calculator-html/graphics_n_dimensions.js'></script>";
+  commonHead << HtmlRoutines::GetCSSLinkLieAlgebras("../../");
+  commonHead << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../");
   commonHead << HtmlRoutines::GetJavascriptMathjax();
   commonHead << "<body>";
 
@@ -579,6 +590,88 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
   return out.str();
 }
 
+std::string SemisimpleSubalgebras::ToStringSubalgebrasNoHDWrite(FormatExpressions* theFormat) {
+  std::stringstream out;
+  for (int i = 0; i < this->theSubalgebras.theValues.size; i ++) {
+    if (!this->theSubalgebras[i].flagSystemProvedToHaveNoSolution) {
+      out << this->ToStringSubalgebraNumberWithAmbientLink(i, theFormat) << "\n<br>\n";
+    }
+    out << this->theSubalgebras[i].ToString(theFormat) << "\n<hr>\n ";
+  }
+  return out.str();
+}
+
+void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, int subalgebraIndex) {
+  CandidateSSSubalgebra& currentSubalgebra = this->theSubalgebras[subalgebraIndex];
+  if (currentSubalgebra.flagSystemProvedToHaveNoSolution) {
+    return;
+  }
+  std::fstream outputFileSubalgebra;
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
+    outputFileSubalgebra, this->GetRelativePhysicalFileNameSubalgebra(subalgebraIndex), false, true, false
+  )) {
+    crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index "
+    << subalgebraIndex << " and display index "
+    << this->GetDisplayIndexFromActual(subalgebraIndex) << ", I requested to create file "
+    << this->GetRelativePhysicalFileNameSubalgebra(subalgebraIndex)
+    << " for output. However, the file failed to create. Possible explanations: 1. Programming error. "
+    << "2. The calculator has no write permission to the folder in which the file is located. "
+    << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
+  }
+  outputFileSubalgebra << "<html>\n" << HtmlRoutines::GetJavascriptMathjax()
+  << "\n" << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../")
+  << "\n" << HtmlRoutines::GetCSSLinkLieAlgebras("../../")
+  << "\n<body>"
+  << this->ToStringSubalgebraNumberWithAmbientLink(subalgebraIndex, theFormat);
+  outputFileSubalgebra << "<div class = \"spanSubalgebraInformation\">";
+  outputFileSubalgebra << "Computations done by the " << HtmlRoutines::GetHtmlLinkToGithubRepo("calculator project");
+  outputFileSubalgebra << ".</div>";
+  outputFileSubalgebra
+  << "<br>" <<  currentSubalgebra.ToString(theFormat);
+  if (this->flagComputeNilradicals) {
+    std::fstream outputFileFKFTnilradicals;
+    if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
+      outputFileFKFTnilradicals, "output/" + this->GetRelativePhysicalFileNameFKFTNilradicals(subalgebraIndex), false, true, false
+    )) {
+      crash << "<br>This may or may not be a programming error. "
+      << "While processing subalgebra of actual index " << subalgebraIndex
+      << " and display index " << this->GetDisplayIndexFromActual(subalgebraIndex)
+      << ", I requested to create file "
+      << this->GetRelativePhysicalFileNameFKFTNilradicals(subalgebraIndex)
+      << " for output. However, the file failed to create. "
+      << " Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
+      << " folder in which the file is located. "
+      << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
+    }
+    outputFileFKFTnilradicals << "<html>"
+    << HtmlRoutines::GetJavascriptMathjax()
+    << HtmlRoutines::GetCSSLinkLieAlgebras("../../")
+    << "<body>"
+    << this->ToStringAlgebraLink(subalgebraIndex, theFormat)
+    << currentSubalgebra.ToStringNilradicals(theFormat) << "\n</body></html>";
+  }
+  outputFileSubalgebra << "\n</body></html>\n ";
+}
+
+std::string SemisimpleSubalgebras::ToStringSubalgebrasWithHDWrite(FormatExpressions *theFormat) {
+  std::stringstream out;
+  if (theFormat != 0) {
+    theFormat->flagCandidateSubalgebraShortReportOnly = true;
+    theFormat->flagUseHtmlAndStoreToHD = true;
+  }
+  out << this->ToStringSubalgebrasNoHDWrite(theFormat);
+  FormatExpressions theFormatCopy;
+  if (theFormat != 0) {
+    theFormatCopy = *theFormat;
+  }
+  theFormatCopy.flagUseMathSpanPureVsMouseHover = true;
+  theFormatCopy.flagCandidateSubalgebraShortReportOnly = false;
+  for (int i = 0; i < this->theSubalgebras.theValues.size; i ++) {
+    this->WriteSubalgebraToFile(&theFormatCopy, i);
+  }
+  return out.str();
+}
+
 std::string SemisimpleSubalgebras::ToStringPart2(FormatExpressions *theFormat) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringPart2");
   std::stringstream out;
@@ -607,74 +700,13 @@ std::string SemisimpleSubalgebras::ToStringPart2(FormatExpressions *theFormat) {
   if (summaryString != "") {
     out << "Summary:" << summaryString << "<hr>";
     if (this->flagProduceLaTeXtables) {
-      out << "Summary in LaTeX<br><br>" << this->ToStringSSsumaryLaTeX(theFormat) << "<br><br><hr>";
+      out << "Summary in LaTeX\n<br><br>" << this->ToStringSSsumaryLaTeX(theFormat) << "\n<br><br><hr>";
     }
   }
   if (!writingToHD) {
-    for (int i = 0; i < this->theSubalgebras.theValues.size; i ++) {
-      if (!this->theSubalgebras[i].flagSystemProvedToHaveNoSolution) {
-        out << "Subalgebra number " << this->GetDisplayIndexFromActual(i) << ".<br>";
-      }
-      out << this->theSubalgebras[i].ToString(theFormat) << "\n<hr>\n ";
-    }
+    out << this->ToStringSubalgebrasNoHDWrite(theFormat);
   } else {
-    if (theFormat != 0) {
-      theFormat->flagCandidateSubalgebraShortReportOnly = true;
-      theFormat->flagUseHtmlAndStoreToHD = true;
-    }
-    for (int i = 0; i < this->theSubalgebras.theValues.size; i ++) {
-      if (!this->theSubalgebras[i].flagSystemProvedToHaveNoSolution) {
-        if (!this->theSubalgebras[i].flagSystemProvedToHaveNoSolution) {
-          out << "Subalgebra number " << this->GetDisplayIndexFromActual(i) << ".<br>";
-        }
-        out << this->theSubalgebras[i].ToString(theFormat) << "\n<hr>\n ";
-      }
-    }
-    FormatExpressions theFormatCopy;
-    if (theFormat != 0) {
-      theFormatCopy = *theFormat;
-    }
-    theFormatCopy.flagUseMathSpanPureVsMouseHover = true;
-    theFormatCopy.flagCandidateSubalgebraShortReportOnly = false;
-    for (int i = 0; i < this->theSubalgebras.theValues.size; i ++) {
-      if (!this->theSubalgebras[i].flagSystemProvedToHaveNoSolution) {
-        std::fstream outputFileSubalgebra;
-        if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
-          outputFileSubalgebra, this->GetRelativePhysicalFileNameSubalgebra(i), false, true, false
-        )) {
-          crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index "
-          << i << " and display index "
-          << this->GetDisplayIndexFromActual(i) << ", I requested to create file "
-          << this->GetRelativePhysicalFileNameSubalgebra(i)
-          << " for output. However, the file failed to create. Possible explanations: 1. Programming error. "
-          << "2. The calculator has no write permission to the folder in which the file is located. "
-          << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
-        }
-        outputFileSubalgebra << "<html>\n" << HtmlRoutines::GetJavascriptMathjax()
-        << "\n<script src ='../../calculator-html/graphics_n_dimensions.js'></script>"
-        << "\n<body>Subalgebra number "
-        << this->GetDisplayIndexFromActual(i) << ".<br>" << this->theSubalgebras[i].ToString(&theFormatCopy);
-        if (this->flagComputeNilradicals) {
-          std::fstream outputFileFKFTnilradicals;
-          if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
-            outputFileFKFTnilradicals, "output/" + this->GetRelativePhysicalFileNameFKFTNilradicals(i), false, true, false
-          )) {
-            crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i
-            << " and display index " << this->GetDisplayIndexFromActual(i) << ", I requested to create file "
-            << this->GetRelativePhysicalFileNameFKFTNilradicals(i) << " for output. However, the file failed to create. "
-            << " Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
-            << " folder in which the file is located. "
-            << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
-          }
-          outputFileFKFTnilradicals << "<html>"
-          << HtmlRoutines::GetJavascriptMathjax()
-          << "<body>"
-          << this->ToStringAlgebraLink(i, &theFormatCopy)
-          << this->theSubalgebras[i].ToStringNilradicals(&theFormatCopy) << "\n</body></html>";
-        }
-        outputFileSubalgebra << "\n</body></html>\n ";
-      }
-    }
+    out << this->ToStringSubalgebrasWithHDWrite(theFormat);
   }
   out << this->ToStringPart3(theFormat);
   return out.str();
@@ -5091,10 +5123,10 @@ std::string CandidateSSSubalgebra::ToStringDrawWeightsHelper(int indexModule, co
 }
 
 std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFormat) const {
+  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringDrawWeights");
   if (!this->flagCentralizerIsWellChosen) {
     return "";
   }
-  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringDrawWeights");
   if (theFormat != 0) {
     if (!theFormat->flagIncludeMutableInformation) {
       return "<br>Weight diagram not drawn to avoid javascript problems "
@@ -5219,6 +5251,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
     }
     theDV.drawCircleAtVectorBufferRational(BasisToDrawCirclesAt[i], "red", 4);
   }
+  theDV.theBuffer.BasisProjectionPlane.MakeEiBasis(thePrimalRank);
   out << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(thePrimalRank);
   return out.str();
 }
@@ -5403,11 +5436,13 @@ std::string CandidateSSSubalgebra::ToStringModuleDecomposition(FormatExpressions
   }
   out << "</tr>";
   out << "<tr>";
-  out << "<td>weights of elements in fundamental coords w.r.t. Cartan of subalgebra in same order as above</td>";
+  out << "<td>Weights of elements in fundamental coords w.r.t. Cartan of subalgebra in same order as above</td>";
   for (int i = 0; i < this->WeightsModulesNONprimal.size; i ++) {
     out << "<td>";
     for (int j = 0; j < this->WeightsModulesNONprimal[i].size; j ++) {
-      out << this->WeightsModulesNONprimal[i][j].ToStringLetterFormat("\\omega", &tempCharFormat);
+      out << "\\("
+      << this->WeightsModulesNONprimal[i][j].ToStringLetterFormat("\\omega", &tempCharFormat)
+      << "\\)";
       if (j != this->WeightsModulesNONprimal[i].size - 1) {
         out << "<br>";
       }
@@ -5416,11 +5451,13 @@ std::string CandidateSSSubalgebra::ToStringModuleDecomposition(FormatExpressions
   }
   out << "</tr>";
   out << "<tr>";
-  out << "<td>weights of elements in (fundamental coords w.r.t. Cartan of subalgebra) + Cartan centralizer</td>";
+  out << "<td>Weights of elements in (fundamental coords w.r.t. Cartan of subalgebra) + Cartan centralizer</td>";
   for (int i = 0; i < this->WeightsModulesPrimal.size; i ++) {
     out << "<td>";
     for (int j = 0; j < this->WeightsModulesPrimal[i].size; j ++) {
-      out << this->WeightsModulesPrimal[i][j].ToStringLetterFormat("\\omega", &tempCharFormat);
+      out << "\\("
+      << this->WeightsModulesPrimal[i][j].ToStringLetterFormat("\\omega", &tempCharFormat)
+      << "\\)";
       if (j != this->WeightsModulesPrimal[i].size - 1) {
         out << "<br>";
       }
@@ -6386,7 +6423,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat) const 
   bool shortReportOnly = theFormat == 0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
   bool useMouseHover = theFormat == 0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
   out << "Subalgebra type: " << this->owner->ToStringAlgebraLink(this->indexInOwner, theFormat)
-  << " (click on type for detailed printout).";
+  << " (click on type for detailed printout).\n";
   out << this->comments;
   if (this->AmRegularSA()) {
     out << "<br>The subalgebra is regular (= the semisimple part of a root subalgebra). ";
@@ -6473,8 +6510,8 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat) const 
     out << this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst);
   }
   if (this->CartanOfCentralizer.size > 0) {
-    out << "<br>Primal decomposition of the ambient Lie algebra "
-    << "(refining the above decomposition; the order from the above decomposition is not preserved): ";
+    out << "<br>Primal decomposition of the ambient Lie algebra. "
+    << "This decomposition refines the above decomposition (please note the order is not the same as above). ";
     if (useLaTeX) {
       if (useMouseHover) {
         out << HtmlRoutines::GetMathMouseHover(this->thePrimalChaR.ToString(&charFormatNonConst), 20000);
@@ -6530,17 +6567,17 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat) const 
     }
     out << "</td>";
     for (int i = 0; i < this->HighestVectorsNonSorted.size; i ++) {
-      out << "<td>" << this->HighestVectorsNonSorted[i].ToString() << "</td>";
+      out << "<td>\\(" << this->HighestVectorsNonSorted[i].ToString() << "\\)</td>";
     }
     out << "</tr><tr><td>weight</td>";
     for (int i = 0; i < this->HighestWeightsNONprimalNonSorted.size; i ++) {
-      out << "<td>" << this->HighestWeightsNONprimalNonSorted[i].ToStringLetterFormat("\\omega", &charFormatNonConst) << "</td>";
+      out << "<td>\\(" << this->HighestWeightsNONprimalNonSorted[i].ToStringLetterFormat("\\omega", &charFormatNonConst) << "\\)</td>";
     }
     out << "</tr>";
     if (this->flagCentralizerIsWellChosen && this->CartanOfCentralizer.size > 0) {
       out << "<tr><td>weights rel. to Cartan of (centralizer+semisimple s.a.). </td>";
       for (int i = 0; i < this->HighestWeightsPrimalNonSorted.size; i ++) {
-        out << "<td>" << this->HighestWeightsPrimalNonSorted[i].ToStringLetterFormat("\\omega", &charFormatNonConst) << "</td>";
+        out << "<td>\\(" << this->HighestWeightsPrimalNonSorted[i].ToStringLetterFormat("\\omega", &charFormatNonConst) << "\\)</td>";
       }
       out << "</tr>";
     }

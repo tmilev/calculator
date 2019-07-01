@@ -23,7 +23,7 @@
 //TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var collectionGraphicsNDimension = {};
+var collectionGraphicsNDimensions = {};
 
 function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.vectors = [];
@@ -85,7 +85,7 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.mousePositionScreenClicked = [0, 0];
   this.shiftScreenCoordinatesClicked = [0, 0];
   
-  collectionGraphicsNDimension[this.idCanvas] = this;
+  collectionGraphicsNDimensions[this.idCanvas] = this;
   this.clickTolerance = 5;
   this.textShift = [- 3, - 4];
 }
@@ -99,7 +99,7 @@ GraphicsNDimensions.prototype.initVectors = function(inputVectors) {
 }
 
 function startProjectionPlaneUser(canvasId) {
-  collectionGraphicsNDimension[canvasId].startProjectionPlaneUser();
+  collectionGraphicsNDimensions[canvasId].startProjectionPlaneUser();
 }
 
 function toStringVector(vector) {
@@ -343,7 +343,7 @@ GraphicsNDimensions.prototype.animateChangeProjectionPlaneUser = function() {
 function DrawHighlights(inputOwnerId, inputData) {
   this.ownerId = inputOwnerId;
   this.indexInOperations = inputData.indexInOperations;
-  var owner = collectionGraphicsNDimension[this.ownerId];
+  var owner = collectionGraphicsNDimensions[this.ownerId];
   owner.indicesHighlightOperations.push(this.indexInOperations);
   this.vectors = inputData.vectors;
   this.vectorProjections = [];
@@ -353,7 +353,7 @@ function DrawHighlights(inputOwnerId, inputData) {
 }
 
 DrawHighlights.prototype.computeProjections = function () {
-  var owner = collectionGraphicsNDimension[this.ownerId];
+  var owner = collectionGraphicsNDimensions[this.ownerId];
   if (this.vectorProjections.length !== this.vectors.length) {
     this.vectorProjecions = new Array (this.vectors.length);
   }
@@ -366,7 +366,7 @@ DrawHighlights.prototype.computeProjections = function () {
 }
 
 DrawHighlights.prototype.drawNoFinish = function () {
-  var owner = collectionGraphicsNDimension[this.ownerId];
+  var owner = collectionGraphicsNDimensions[this.ownerId];
   if (this.indexInOperations != owner.selectedHighlightIndex) {
     return;
   }
@@ -393,12 +393,12 @@ function DrawPath(inputOwnerId, inputData) {
   if (inputData.frameId !== "" && inputData.frameId !== null && inputData.frameId !== undefined) {
     this.frameId = inputData.frameId;
     this.frameIndex = inputData.frameIndex;
-    collectionGraphicsNDimension[this.ownerId].registerFrameIndex(this.frameIndex);
+    collectionGraphicsNDimensions[this.ownerId].registerFrameIndex(this.frameIndex);
   }
 }
 
 DrawPath.prototype.drawNoFinish = function() {
-  var owner = collectionGraphicsNDimension[this.ownerId];
+  var owner = collectionGraphicsNDimensions[this.ownerId];
   var canvas = owner.canvas;
   canvas.beginPath();
   canvas.strokeStyle = this.colorLine;
@@ -422,7 +422,7 @@ function DrawSegmentBetweenTwoVectors(inputOwnerId, inputData) {
 }
 
 DrawSegmentBetweenTwoVectors.prototype.drawNoFinish = function() {
-  var owner = collectionGraphicsNDimension[this.ownerId];
+  var owner = collectionGraphicsNDimensions[this.ownerId];
   var canvas = owner.canvas;
   canvas.beginPath();
   canvas.strokeStyle = this.colorLine;
@@ -444,7 +444,7 @@ function DrawFilledShape(inputOwnerId, inputData) {
 }
 
 DrawFilledShape.prototype.drawNoFinish = function () {
-  var owner = collectionGraphicsNDimension[this.ownerId];
+  var owner = collectionGraphicsNDimensions[this.ownerId];
   var canvas = owner.canvas;
   canvas.beginPath();
   canvas.fillStyle = this.colorFill;
@@ -470,12 +470,12 @@ function DrawCircleAtVector(inputOwnerId, inputData) {
   if (inputData.frameId !== undefined && inputData.frameId !== null) {
     this.frameId = inputData.frameId;
     this.frameIndex = inputData.frameIndex;
-    collectionGraphicsNDimension[this.ownerId].registerFrameIndex(this.frameIndex);
+    collectionGraphicsNDimensions[this.ownerId].registerFrameIndex(this.frameIndex);
   }
 }
 
 DrawCircleAtVector.prototype.drawNoFinish = function() {
-  var owner = collectionGraphicsNDimension[this.ownerId];
+  var owner = collectionGraphicsNDimensions[this.ownerId];
   var canvas = owner.canvas;
   canvas.strokeStyle = this.colorFill;
   canvas.fillStyle = this.colorFill;
@@ -499,7 +499,7 @@ function DrawTextAtVector(inputOwnerId, inputData) {
 }
 
 DrawTextAtVector.prototype.drawNoFinish = function() {
-  var owner = collectionGraphicsNDimension[this.ownerId];
+  var owner = collectionGraphicsNDimensions[this.ownerId];
   var canvas = owner.canvas;
   canvas.strokeStyle = this.colorFill;
   owner.computeScreenCoordinates(this.location, this.locationScreen);
@@ -1153,7 +1153,9 @@ if (window.calculator === undefined) {
 
 if (window.calculator.graphicsNDimensions === undefined) {
   window.calculator.graphicsNDimensions = {
-    startProjectionPlaneUser: startProjectionPlaneUser
+    startProjectionPlaneUser: startProjectionPlaneUser,
+    createGraphicsFromObject: createGraphicsFromObject,
+    GraphicsNDimensions: GraphicsNDimensions,
   };
 }
 

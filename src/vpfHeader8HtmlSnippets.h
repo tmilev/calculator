@@ -26,6 +26,7 @@ public:
   static int shiftY;
   static int scale;
   static void LoadStrings();
+  static std::string githubRepository;
 
   static void outputLineJavaScriptSpecific(
     const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter
@@ -55,6 +56,7 @@ public:
   static std::string GetSliderSpanStartsHidden(
     const std::string& content, const std::string& label = "Expand/collapse", const std::string& desiredID = ""
   );
+  static std::string GetHtmlLinkToGithubRepo(const std::string& displayString);
   static std::string GetHtmlLinkFromProjectFileName(
     const std::string& fileName, const std::string& fileDesc = "", int line = - 1
   );
@@ -76,9 +78,10 @@ public:
 
   static const std::string& GetJavascriptAceEditorScriptWithTags();
 
+  static const std::string GetCSSLinkCalculator(const std::string& relativeTo);
+  static const std::string GetCSSLinkLieAlgebras(const std::string& relativeTo);
 
-  static const std::string& GetStyleSheetCalculatorWithTags();
-  static const std::string GetCSSLinkCalculator();
+  static const std::string GetJavascriptLinkGraphicsNDimensions(const std::string& relativeto);
 
   static const std::string& GetJavascriptMathjax();
   static const std::string& GetJavascriptMathQuillDefaulTWithTags();
@@ -89,7 +92,6 @@ public:
   static std::string GetJavascriptMathQuillDefaultFull();
   static std::string GetJavascriptMathQuillMatrixSupportFull();
   static std::string GetJavascriptVariable(const std::string& theVar);
-
 
   static std::string GetMathSpanPure(const std::string& input, int upperNumChars = 10000);
   static std::string GetMathSpanBeginArrayL(const std::string& input, int upperNumChars = 10000);

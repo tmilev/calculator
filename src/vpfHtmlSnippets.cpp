@@ -11,6 +11,8 @@ ProjectInformationInstance projectInfoInstanceHtmlSnippets(__FILE__, "Html Snipp
 
 MapLisT<std::string, std::string, MathRoutines::HashString> HtmlRoutines::preLoadedFiles;
 
+std::string HtmlRoutines::githubRepository = "https://github.com/tmilev/calculator";
+
 std::string HtmlRoutines::GetJavascriptVariable(const std::string& theVar) {
   std::stringstream sanitizer;
   for (unsigned i = 0; i < theVar.size(); i ++) {
@@ -26,11 +28,17 @@ std::string HtmlRoutines::GetJavascriptVariable(const std::string& theVar) {
   return sanitizer.str();
 }
 
+std::string HtmlRoutines::GetHtmlLinkToGithubRepo(const std::string& displayString) {
+  std::stringstream out;
+  out << "<a href=\"" << HtmlRoutines::githubRepository << "\">" << displayString << "</a>";
+  return out.str();
+}
+
 std::string HtmlRoutines::GetHtmlLinkFromProjectFileName(
   const std::string& fileName, const std::string& fileDesc, int line
 ) {
   std::stringstream out;
-  out << " <a href=\"https://github.com/tmilev/calculator/blob/master/src/"
+  out << " <a href=\"" << HtmlRoutines::githubRepository << "/blob/master/src/"
   << FileOperations::GetFileNameFromFileNameWithPath(fileName);
   if (line > 0) {
     out << "#L" << line;
@@ -69,7 +77,6 @@ void HtmlRoutines::LoadStrings() {
   }
   HtmlRoutines::GetMathQuillStyleSheeTWithTags();
   HtmlRoutines::GetJavascriptAceEditorScriptWithTags();
-  HtmlRoutines::GetCSSLinkCalculator();
   HtmlRoutines::GetJavascriptMathjax();
   HtmlRoutines::GetJavascriptMathQuillDefaulTWithTags();
   HtmlRoutines::GetJavascriptMathQuillMatrixSupporTWithTags();
@@ -155,8 +162,16 @@ const std::string HtmlRoutines::GetMathQuillStyleSheetLink() {
   return HtmlRoutines::GetCSSLink("/html-common/mathquill.css");
 }
 
-const std::string HtmlRoutines::GetCSSLinkCalculator() {
-  return HtmlRoutines::GetCSSLink("/calculator-html/styleCalculator.css");
+const std::string HtmlRoutines::GetCSSLinkCalculator(const std::string& relativeTo) {
+  return HtmlRoutines::GetCSSLink(relativeTo + "calculator-html/styleCalculator.css");
+}
+
+const std::string HtmlRoutines::GetCSSLinkLieAlgebras(const std::string& relativeTo) {
+  return HtmlRoutines::GetCSSLink(relativeTo + "calculator-html/style_lie_algebras.css");
+}
+
+const std::string HtmlRoutines::GetJavascriptLinkGraphicsNDimensions(const std::string& relativeto) {
+  return HtmlRoutines::GetJavascriptLink(relativeto + "calculator-html/graphics_n_dimensions.js");
 }
 
 const std::string& HtmlRoutines::GetJavascriptMathQuillDefaulTWithTags() {

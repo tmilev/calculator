@@ -338,8 +338,9 @@ std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType
   << theType[0].theLetter << "_" << theType[0].theRank << "\">"
   << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras()) {
-    out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder
-    << theType.ToString() << "/" << theTitlePageFileNameNoPathSlowLoad << "\">"
+    out << "<td><a href=\""
+    << "output/" << theType.ToString() << "/" << theTitlePageFileNameNoPathSlowLoad
+    << "\">"
     << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a><br>"
     << "<a href=\"" <<  GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder
     << theType.ToString() << "/" << theTitlePageFileNameNoPathFastLoad << "\">"
@@ -387,48 +388,57 @@ std::string Calculator::ToStringLinksToCalculator(const DynkinType& theType, For
 
 bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const Expression& input, Expression& output) {
   (void) input;//avoid unused parameter warning, portable
-  std::stringstream out, out2;
+  std::stringstream out, outFromHD;
   out << "\n\n<p>\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
   << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
-  out2 << "\n\n<p>\n\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
+  outFromHD << "\n\n<p>\n\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
   << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
   DynkinType theType;
   theType.MakeSimpleType('F', 4);
   out << theCommands.ToStringLinksToCalculator(theType);
-  out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+  outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   for (int i = 6; i <= 8; i ++) {
     theType.MakeSimpleType('E', i);
     out << theCommands.ToStringLinksToCalculator(theType);
-    out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+    outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   }
   theType.MakeSimpleType('G', 2);
   out << theCommands.ToStringLinksToCalculator(theType);
-  out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+  outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   for (int i = 1; i <= 8; i ++) {
     theType.MakeSimpleType('A', i);
     out << theCommands.ToStringLinksToCalculator(theType);
-    out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+    outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   }
   for (int i = 4; i <= 8; i ++) {
     theType.MakeSimpleType('D', i);
     out << theCommands.ToStringLinksToCalculator(theType);
-    out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+    outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   }
   for (int i = 2; i <= 8; i ++) {
     theType.MakeSimpleType('B', i);
     out << theCommands.ToStringLinksToCalculator(theType);
-    out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+    outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   }
   for (int i = 3; i <= 8; i ++) {
     theType.MakeSimpleType('C', i);
     out << theCommands.ToStringLinksToCalculator(theType);
-    out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+    outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   }
   out << "</table></p>" ;
-  out2 << "</table></p>\n\n\n<br><br><p>Below are some links that cause conditional re-computation of some of the tables. "
-  << "Please do not use these links; they are meant for computer debugging purposes only. </p><br>\n" << out.str()
-  << "\n\n\n\n\n\n\n\n";
-  return output.AssignValue(out2.str(), theCommands);
+  outFromHD << "</table></p>";
+  std::string fileName = "semisimple_subalgebras/semisimple_subalgebras.php";
+  std::stringstream outputFinal;
+  outputFinal
+  << theCommands.WriteFileToOutputFolderReturnLink(outFromHD.str(), fileName, "Links file");
+
+  outputFinal << outFromHD.str() << "\n\n\n<br><br>";
+  outputFinal << "<p>"
+  << "Below are some links that cause conditional re-computation of some of the tables. "
+  << "Please do not use these links; they are meant for computer debugging purposes only. "
+  << "</p><br>\n" << out.str()
+  ;
+  return output.AssignValue(outputFinal.str(), theCommands);
 }
 
 bool Calculator::innerPrintSSsubalgebrasNilradicals(Calculator& theCommands, const Expression& input, Expression& output) {

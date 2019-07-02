@@ -41,6 +41,11 @@ public:
     std::string& output,
     std::stringstream* commentsOnFailure
   );
+  static bool WriteFileVirual(
+    const std::string& fileNameVirtual,
+    const std::string& fileContent,
+    std::stringstream *commentsOnError
+  );
   static bool LoadFileToStringVirtual(
     const std::string& fileName,
     std::string& output,

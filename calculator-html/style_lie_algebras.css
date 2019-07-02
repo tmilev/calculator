@@ -46,7 +46,7 @@ div.divSubalgebraInformation{
 }
 
 div.divSemisimpleSubalgebrasInformation{
-  position: absolute;
+  position: fixed;
   width: 10%;
   right: 0;
 }

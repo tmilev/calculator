@@ -261,8 +261,8 @@ std::string SemisimpleSubalgebras::ToStringSubalgebraNumberWithAmbientLink(
 ) const {
   std::stringstream out;
   out << "Subalgebra number " << this->GetDisplayIndexFromActual(actualIndexSubalgebra)
-  << " of ambient Lie algebra "
-  << "\\(" << this->owner->theWeyl.theDynkinType.ToString(theFormat) << "\\)" << "."
+  << " of ambient Lie algebra " << "<a href=\"./" << this->DisplayNameMainFile1NoPath << "\">"
+  << "\\(" << this->owner->theWeyl.theDynkinType.ToString(theFormat) << "\\)" << "</a>."
   << "\n";
   return out.str();
 }
@@ -550,11 +550,8 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
       candidatesRealized ++;
     }
   }
-  out << "<span class = 'spanExperimentalWarning'> Please note that the code generating the tables is experimental. "
-  << "While the code performs a number of self-test routines, "
-  << " it is possible that there still exist programming bugs. "
-  << "We will remove this message as soon as we are confident in the accuracy of all tables.  "
-  << " If you see any errors, please "
+  out << "<span class = 'spanExperimentalWarning'>"
+  << "If you see any errors, please "
   << "email us with a simple explanation of the issue.</span><br>\n";
   candidatesNotRealizedNotProvenImpossible = this->theSubalgebras.theValues.size - candidatesRealized - candidatesProvenImpossible;
   if (!writingToHD) {
@@ -564,6 +561,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
     << candidatesProvenImpossible << " proven impossible + " << candidatesNotRealizedNotProvenImpossible
     << " neither realized nor proven impossible. \n<hr>\n ";
   } else {
+    out << "<div class = 'divSemisimpleSubalgebrasInformation'>";
     out << "Up to linear equivalence, there are total " << candidatesRealized
     << " semisimple subalgebras (including the full subalgebra)";
     if (candidatesNotRealizedNotProvenImpossible != 0) {
@@ -571,6 +569,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
       << " semisimple subalgebra candidate(s) which were not realized (but not proven impossible)";
     }
     out << ". ";
+    out << "</div><!--divSemisimpleSubalgebrasInformation-->";
   }
   out << "The subalgebras are ordered by rank, Dynkin indices of simple constituents and dimensions of simple constituents. "
   << "The upper index indicates the Dynkin index, the lower index indicates the rank of the subalgebra. ";
@@ -623,7 +622,7 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
   << "\n" << HtmlRoutines::GetCSSLinkLieAlgebras("../../")
   << "\n<body>"
   << this->ToStringSubalgebraNumberWithAmbientLink(subalgebraIndex, theFormat);
-  outputFileSubalgebra << "<div class = \"spanSubalgebraInformation\">";
+  outputFileSubalgebra << "<div class = \"divSubalgebraInformation\">";
   outputFileSubalgebra << "Computations done by the " << HtmlRoutines::GetHtmlLinkToGithubRepo("calculator project");
   outputFileSubalgebra << ".</div>";
   outputFileSubalgebra
@@ -5381,7 +5380,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecomposition(FormatExpressions
   out << "</tr>";
   out << "<tr><td>Module label </td>";
   for (int i = 0; i < this->HighestWeightsPrimal.size; i ++) {
-    out << "<td>" << "W_{" << i + 1 << "}" << "</td>";
+    out << "<td>\\(" << "W_{" << i + 1 << "}" << "\\)</td>";
   }
   out << "</tr>";
   out << "<tr><td>Module elements (weight vectors). <span class = 'fElement'>In blue - corresp. F element</span>. "
@@ -5402,7 +5401,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecomposition(FormatExpressions
       out << "<td>";
       out << "<table class = 'tableModuleDecomposition'>";
       for (int k = 0; k < currentModule.size; k ++) {
-        out << "<tr><td>" << currentModule[k].ToString() << "</td>";
+        out << "<tr><td>\\(" << currentModule[k].ToString() << "\\)</td>";
         bool OpsAreGood = false;
         if (i < this->ModulesSl2opposite.size) {
           if (j < this->ModulesSl2opposite[i].size) {

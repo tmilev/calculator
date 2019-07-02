@@ -1881,6 +1881,21 @@ bool Calculator::ReadTestStrings(
   return true;
 }
 
+std::string Calculator::WriteFileToOutputFolderReturnLink(
+  const std::string& fileContent, const std::string& fileName, const std::string& linkText
+) {
+  MacroRegisterFunctionWithName("Calculator::WriteFileToOutputFolderReturnLink");
+  std::string fileNameVirtual = "output/" + fileName;
+  std::stringstream commentsOnError;
+  bool success = FileOperations::WriteFileVirual(fileNameVirtual, fileContent, &commentsOnError);
+  if (!success) {
+    crash << "Failed to write file. " << commentsOnError.str() << crash;
+  }
+  std::stringstream out;
+  out << "<a href=\"" << fileNameVirtual << "\">" << linkText << "</a>";
+  return out.str();
+}
+
 bool Calculator::WriteTestStrings(List<std::string>& inputCommands, List<std::string>& inputResults) {
   MacroRegisterFunctionWithName("Calculator::WriteTestStrings");
   for (int i = 0; i < inputCommands.size; i ++) {

@@ -1936,6 +1936,7 @@ public:
   bool ReadTestStrings(
     HashedList<std::string, MathRoutines::HashString>& outputCommands, List<std::string>& outputResults
   );
+  std::string WriteFileToOutputFolderReturnLink(const std::string& fileContent, const std::string& fileName, const std::string &linkText);
   bool WriteTestStrings(List<std::string>& inputCommands, List<std::string>& inputResults);
   static bool innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, const Expression& input, Expression& output);

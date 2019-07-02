@@ -742,6 +742,21 @@ bool FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
   return FileOperations::LoadFileToStringUnsecure(computedFileName, output, commentsOnFailure);
 }
 
+bool FileOperations::WriteFileVirual(
+  const std::string& fileNameVirtual, const std::string& fileContent, std::stringstream* commentsOnError
+) {
+  std::fstream theFile;
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(theFile, fileNameVirtual, false, true, false)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Filed to open file. ";
+    }
+    return false;
+  }
+  theFile << fileContent;
+  return true;
+}
+
+
 bool FileOperations::LoadFileToStringVirtual(
   const std::string& theFileName,
   std::string& output,

@@ -1574,8 +1574,11 @@ void WebWorker::WriteProgressReportToFile(const std::string& input) {
     theFile, "output/" + theGlobalVariables.RelativePhysicalNameProgressReport, false, true, false
   )) {
     FileOperations::OpenFileCreateIfNotPresentVirtual(
-      theFile, "output/progressReport_failed_to_create_file.html",
-      false, true, false
+      theFile,
+      "output/progressReport_failed_to_create_file.html",
+      false,
+      true,
+      false
     );
   }
   theFile << standardOutputStreamAfterTimeout.str() << "<hr>" << input;
@@ -1894,6 +1897,9 @@ WebWorker::~WebWorker() {
 std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExtension) {
   MacroRegisterFunctionWithName("WebWorker::GetMIMEtypeFromFileExtension");
   if (fileExtension == ".html") {
+    return "Content-Type: text/html\r\n";
+  }
+  if (fileExtension == ".php") {
     return "Content-Type: text/html\r\n";
   }
   if (fileExtension == ".txt") {

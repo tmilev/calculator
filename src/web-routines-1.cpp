@@ -723,7 +723,6 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   }
   logOpenSSL << logger::green << "Updated public key file: " << googleKeysFileName << logger::endL;
   googleKeysFile << this->bodyReceiveD;
-  logOpenSSL << "DEBUG: Received public key: " << this->bodyReceiveD << logger::endL;
   googleKeysDebugFile
   << "Expected body length: " << this->expectedLength.ToString() << "\n";
   if (this->flagContinueWasNeeded) {

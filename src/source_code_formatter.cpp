@@ -432,7 +432,7 @@ bool CodeFormatter::ApplyFormattingRules(std::stringstream* comments) {
 
 CodeFormatter::CodeFormatter() {
   this->flagInQuotes = false;
-  this->flagPreviousIsStandaloneBackSlash= false;
+  this->flagPreviousIsStandaloneBackSlash = false;
   this->currentChar = 0;
   this->separatorCharacters = "(){} \t\n\r,:;.*&+-/[]";
   this->separatorCharactersMap.initializeFillInObject(256, false);

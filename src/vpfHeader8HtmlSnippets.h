@@ -28,10 +28,6 @@ public:
   static void LoadStrings();
   static std::string githubRepository;
 
-  static void outputLineJavaScriptSpecific(
-    const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter
-  );
-  static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
   static std::string URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth = 0);
 
   static void ConvertURLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace);

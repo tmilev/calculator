@@ -2122,7 +2122,11 @@ public:
   static bool innerPrintSSLieAlgebraVerbose(Calculator& theCommands, const Expression& input, Expression& output) {
     return theCommands.innerPrintSSLieAlgebra(theCommands, input, output, true);
   }
+  static bool innerWriteSSLieAlgebraToHD(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output, bool Verbose);
+  static bool innerWriteToHDOrPrintSSLieAlgebra(
+    Calculator& theCommands, const Expression& input, Expression& output, bool Verbose, bool writeToHD
+  );
   static bool innerRootSubsystem(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConesIntersect(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPerturbSplittingNormal(Calculator& theCommands, const Expression& input, Expression& output);

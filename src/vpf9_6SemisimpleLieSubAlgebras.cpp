@@ -338,7 +338,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
   );
   theGlobalVariables.CallSystemNoOutput("mkdir " + testFileFolderPhysical, &logWorker);
 
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, testFileNameRelative, false, true, false)) {
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(testFile, testFileNameRelative, false, true, false)) {
     crash << "<br>This may or may not be a programming error. I requested to create file "
     << this->VirtualNameMainFile1
     << " for output. However, the file failed to create. "

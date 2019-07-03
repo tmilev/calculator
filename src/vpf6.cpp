@@ -1077,6 +1077,19 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
 }
 
 bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output, bool Verbose) {
+  return Calculator::innerWriteToHDOrPrintSSLieAlgebra(theCommands, input, output, Verbose, false);
+}
+
+bool Calculator::innerWriteSSLieAlgebraToHD(Calculator& theCommands, const Expression& input, Expression& output) {
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+    return output.MakeError((std::string) "Caching structure constants to HD available to logged-in admins only. ", theCommands);
+  }
+  return Calculator::innerWriteToHDOrPrintSSLieAlgebra(theCommands, input, output, true, true);
+}
+
+bool Calculator::innerWriteToHDOrPrintSSLieAlgebra(
+  Calculator& theCommands, const Expression& input, Expression& output, bool Verbose, bool writeToHD
+) {
   MacroRegisterFunctionWithName("Calculator::innerPrintSSLieAlgebra");
 //  double startTimeDebug= theGlobalVariables.GetElapsedSeconds();
   SemisimpleLieAlgebra *tempSSpointer = 0;
@@ -1211,6 +1224,13 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
         << "transpose of the epsilon matrix times the epsilon matrix:  " << tempM2.ToString() << ". " << crash;
       }
     }
+  }
+  if (writeToHD) {
+    std::string theFileName = theWeyl.theDynkinType.ToStringFolderName() + "notation_structure_constants.html";
+    std::stringstream outWithLinks;
+    outWithLinks << theCommands.WriteFileToOutputFolderReturnLink(out.str(), theFileName, "hard drive output")
+    << "<br>" << out.str();
+    return output.AssignValue(outWithLinks.str(), theCommands);
   }
   return output.AssignValue<std::string>(out.str(), theCommands);
 }

@@ -3003,7 +3003,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintNonNegativeVectorsLevel"
   );
   this->AddOperationInnerHandler(
-    "SemisimpleLieAlgebra", CalculatorConversions::innerSSLieAlgebra, "",
+    "SemisimpleLieAlgebra",
+    CalculatorConversions::innerSSLieAlgebra,
+    "",
     "Creates a semisimple Lie algebra. The semisimple Lie algebra "
     "is given via its Dynkin type. A simple Dynkin type is given by "
     "type letter with upper index equal to the "
@@ -3040,19 +3042,35 @@ void Calculator::initPredefinedInnerFunctions() {
     "g_{{i}}= GetChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
     "h_{{i}}= GetCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
     "[g_1,g_{- 1}]; \n[g_2, g_{-2}]; \n[h_{1}, g_6]; \n[h_2, g_{-6}]",
-    true, false,
+    true,
+    false,
     "CalculatorConversions::innerSSLieAlgebra",
     "SemisimpleLieAlgebra"
   );
   this->AddOperationInnerHandler(
-    "PrintSemisimpleLieAlgebra", Calculator::innerPrintSSLieAlgebraVerbose, "",
+    "WriteSemisimpleLieAlgebra",
+    Calculator::innerWriteSSLieAlgebraToHD,
+    "",
+    "Writes semisimple Lie algebra structure constants to "
+    "the output folder of the calculator. Available to logged-in admins only. ",
+    "WriteSemisimpleLieAlgebra F_4",
+    true,
+    false,
+    "Calculator::innerWriteToHDOrPrintSSLieAlgebra",
+    "WriteSemisimpleLieAlgebra"
+  );
+  this->AddOperationInnerHandler(
+    "PrintSemisimpleLieAlgebra",
+    Calculator::innerPrintSSLieAlgebraVerbose,
+    "",
     "Creates a printout with information about the "
     "semisimple Lie algebra, including "
     "the Lie bracket pairing table. "
     "In addition, this function creates "
     "a graphics of the root system. ",
     "PrintSemisimpleLieAlgebra{}(F_4);\nPrintSemisimpleLieAlgebra{}(2G^5_2+B_3);",
-    true, false,
+    true,
+    false,
     "Calculator::innerPrintSSLieAlgebraVerbose",
     "PrintSemisimpleLieAlgebra"
   );

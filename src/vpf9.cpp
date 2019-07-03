@@ -381,31 +381,6 @@ void HtmlRoutines::subEqualitiesWithSimeq(std::string& theString, std::string& o
   output = out.str();
 }
 
-void HtmlRoutines::PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines) {
-  stOutput << "\n\tvar num" << lineTypeName << "Lines =" << numberLines << "; ";
-  stOutput << "\n\tvar " << lineTypeName << "1= new Array(" << numberLines << "); "
-  << "  \tvar " << lineTypeName << "2= new Array("
-  << numberLines << "); " << "  \tvar clr" << lineTypeName << "= new Array("  << numberLines << "); ";
-}
-
-void HtmlRoutines::outputLineJavaScriptSpecific(
-  const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter
-) {
-  std::string tempS;
-  stOutput  << "\n\t" << lineTypeName << "1["  << lineCounter << "] = new Array(" << theDimension << "); "
-  << "\t" << lineTypeName << "2["
-  << lineCounter << "] = new Array(" << theDimension << "); " << "\tclr" << lineTypeName << "["
-  << lineCounter << "] = new Array(" << 3 << "); \n";
-  for (int j = 0; j < theDimension; j ++) {
-    HtmlRoutines::outputStream >> tempS;
-    stOutput << "\t" << lineTypeName << "1[" << lineCounter << "][" << j << "] =" << tempS << "; ";
-    HtmlRoutines::outputStream >> tempS;
-    stOutput << "\t" << lineTypeName << "2[" << lineCounter << "][" << j << "] =" << tempS << "; ";
-  }
-  stOutput << "\tclr" << lineTypeName << "[" << lineCounter << "] =" << stringColor << "; ";
-  lineCounter ++;
-}
-
 void HtmlRoutines::ElementToStringTooltip(
   const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml
 ) {
@@ -1042,8 +1017,9 @@ std::string FileOperations::GetVirtualNameWithHash(const std::string& inputFileN
   return result;
 }
 
-bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly
-(const std::string& inputFileName, std::string& output, std::stringstream* commentsOnFailure) {
+bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(
+  const std::string& inputFileName, std::string& output, std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly");
   std::string fileEnd = "";
   std::string inputStart = "";
@@ -1241,7 +1217,9 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtual(
   );
 }
 
-bool FileOperations::OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary) {
+bool FileOperations::OpenFileCreateIfNotPresentUnsecure(
+  std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary
+) {
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (OpenInAppendMode) {
     if (openAsBinary) {
@@ -1930,10 +1908,12 @@ bool MathRoutines::StringBeginsWith(
 }
 
 bool MathRoutines::isALatinLetter(char input) {
-  if (input >= 'a' && input <= 'z')
+  if (input >= 'a' && input <= 'z') {
     return true;
-  if (input >= 'A' && input <= 'Z')
+  }
+  if (input >= 'A' && input <= 'Z') {
     return true;
+  }
   return false;
 }
 
@@ -1978,8 +1958,9 @@ int MathRoutines::lcm(int a, int b) {
 
 int MathRoutines::TwoToTheNth(int n) {
   int result = 1;
-  for (int i = 0; i < n; i ++)
+  for (int i = 0; i < n; i ++) {
     result *= 2;
+  }
   return result;
 }
 
@@ -2208,8 +2189,9 @@ void Selection::initNoMemoryAllocation() {
 
 void Selection::MakeSubSelection(Selection &theSelection, Selection &theSubSelection) {
   this->init(theSelection.MaxSize);
-  for (int i = 0; i < theSubSelection.CardinalitySelection; i ++)
+  for (int i = 0; i < theSubSelection.CardinalitySelection; i ++) {
     this->AddSelectionAppendNewIndex(theSelection.elements[theSubSelection.elements[i]]);
+  }
 }
 
 void Selection::operator=(const Selection& right) {
@@ -2571,9 +2553,6 @@ std::string PartFraction::ToString(
   }
   return out.str();
 }
-#ifdef WIN32
-#pragma warning(default:4018)//grrrrr
-#endif
 
 bool PartFraction::rootIsInFractionCone(PartFractions& owner, Vector<Rational>* theRoot) const {
   if (theRoot == 0) {
@@ -2845,7 +2824,9 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA(
           multiplicityChange = oldMaxMultiplicity + 1;
         }
         tempFrac[theSelectedIndices[k]].AddMultiplicity(- multiplicityChange, theGreatestElongations[k]);
-        this->GetNElongationPolyWithMonomialContribution(startingVectors, theSelectedIndices, theCoefficients, theGreatestElongations, k, tempP, theDim);
+        this->GetNElongationPolyWithMonomialContribution(
+          startingVectors, theSelectedIndices, theCoefficients, theGreatestElongations, k, tempP, theDim
+        );
         tempP.RaiseToPower(multiplicityChange);
         ComputationalBufferCoefficient *= (tempP);
         LargeInt tempInt;
@@ -3650,9 +3631,6 @@ int PartFractions::ElementToStringBasisChangeOutputToFile(std::fstream& output, 
   return TotalLines;
 }
 
-#ifdef WIN32
-#pragma warning(disable:4018)//grrrrr
-#endif
 int PartFraction::ControlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal) {
   int numCutOffs = output.size() % PolyFormatLocal.MaxLineLength;
   int LastCutOffIndex = 0;
@@ -3687,9 +3665,6 @@ int PartFraction::ControlLineSizeStringPolys(std::string& output, FormatExpressi
   return NumLinesAdded;
 }
 
-#ifdef WIN32
-#pragma warning(default:4018)//grrrrr
-#endif
 void PartFractions::MakeProgressReportSplittingMainPart() {
   if (theGlobalVariables.IndicatorStringOutputFunction == 0) {
     return;
@@ -5002,7 +4977,7 @@ Rational DynkinSimpleType::GetEpsilonRealizationLongRootLengthSquared() const {
   //Dynkin's convention says that the default long root length is 2.
   //However, the accepted epsilon coordinate realizations of the root systems
   //of G_2 and C_n do not have long root length of 2.
-   switch (this->theLetter) {
+  switch (this->theLetter) {
     case 'A':
     case 'B':
     case 'D':

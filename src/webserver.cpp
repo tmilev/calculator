@@ -4637,11 +4637,7 @@ void WebServer::CheckSystemInstallationMongoDB() {
   if (theGlobalVariables.flagRunningApache) {
     return;
   }
-  bool doInstallMongo = false;
-#ifndef MACRO_use_MongoDB
-  doInstallMongo = true;
-#endif
-  if (!doInstallMongo) {
+  if (theGlobalVariables.flagDatabaseCompiled) {
     return;
   }
   WebServer::FigureOutOperatingSystem();
@@ -4709,14 +4705,14 @@ void WebServer::CheckMongoDBSetup() {
   theGlobalVariables.ChDir("../libbson-1.9.3");
   theGlobalVariables.CallSystemNoOutput("./configure", &logServer);
   theGlobalVariables.CallSystemNoOutput("make -j8", &logServer);
-  logServer  << "Need sudo access for command: "
+  logServer << "Need sudo access for command: "
   << logger::red << "sudo make install" << logger::endL;
   theGlobalVariables.CallSystemNoOutput("sudo make install", &logServer);
   theGlobalVariables.ChDir("../../bin");
   logServer  << "Need sudo access for command to configure linker to use local usr/local/lib path (needed by mongo): "
   << logger::red << "sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/" << logger::endL;
   theGlobalVariables.CallSystemNoOutput("sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/", &logServer);
-  logServer  << "Need sudo access for command: " << logger::red << "sudo ldconfig" << logger::endL;
+  logServer << "Need sudo access for command: " << logger::red << "sudo ldconfig" << logger::endL;
   theGlobalVariables.CallSystemNoOutput("sudo ldconfig", &logServer);
   theGlobalVariables.configuration["mongoDBSetup"] = "Setup complete";
   theGlobalVariables.ConfigurationStore();

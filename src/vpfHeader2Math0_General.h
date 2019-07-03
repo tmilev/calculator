@@ -6276,6 +6276,7 @@ public:
     List<DynkinType>& output,
     List<List<int> >* outputPermutationRoots
   ) const;
+  std::string ToStringFolderName() const;
   bool ContainsType(char theTypeLetter) const;
   void GetDynkinTypeWithDefaultScales(DynkinType& output) const;
   DynkinSimpleType GetGreatestSimpleType() const;

@@ -181,7 +181,7 @@ public:
     out << "v_{" << this->theHWFundamentalCoordsBaseField.ToString(theFormat)
     << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString() << "}";
     return out.str();
-//    return "hwv{}("+ this->GetOwner().GetLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.ToString(theFormat) + ","
+//    return "hwv{}("+ this->GetOwner().ToStringLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.ToString(theFormat) + ","
 //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).ToString(theFormat) + ")";
   }
   void SplitOverLevi(

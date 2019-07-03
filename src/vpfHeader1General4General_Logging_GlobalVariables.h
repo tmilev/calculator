@@ -104,6 +104,7 @@ public:
   bool flagCrashInitiated;
 
   bool flagDatabaseCompiled;
+  bool flagDisableDatabaseLogEveryoneAsAdmin;
   bool flagServerAutoMonitor;
 
   std::string buildVersionSimple;

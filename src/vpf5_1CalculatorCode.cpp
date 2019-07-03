@@ -328,11 +328,11 @@ std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder =
 std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressJavascriptFolder =
 "https://calculator-algebra.org/";
 
-std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat) {
+std::string Calculator::ToStringSemismipleLieAlgebraLinksFromHD(const DynkinType& theType, FormatExpressions* theFormat) {
   (void) theFormat;
   std::stringstream out;
   std::string theTitlePageFileNameNoPathSlowLoad = "SemisimpleSubalgebras_" + theType.ToString() + ".html";
-  std::string theTitlePageFileNameNoPathFastLoad = "SemisimpleSubalgebras_FastLoad_" + theType.ToString() + ".html";
+  // std::string theTitlePageFileNameNoPathFastLoad = "SemisimpleSubalgebras_FastLoad_" + theType.ToString() + ".html";
   out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
   << "?request=calculator&mainInput=PrintSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">"
@@ -341,10 +341,12 @@ std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType
     out << "<td><a href=\""
     << "output/" << theType.ToString() << "/" << theTitlePageFileNameNoPathSlowLoad
     << "\">"
-    << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a><br>"
-    << "<a href=\"" <<  GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder
-    << theType.ToString() << "/" << theTitlePageFileNameNoPathFastLoad << "\">"
-    << theType[0].theLetter << theType[0].theRank << " semisipmles subalgebras, fast load</a></td>\n ";
+    << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a>";
+    // out << "<br>"
+    // << "<a href=\"" <<  GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder
+    // << theType.ToString() << "/" << theTitlePageFileNameNoPathFastLoad << "\">"
+    // << theType[0].theLetter << theType[0].theRank << " semisipmles subalgebras, fast load</a>"
+    out << "</td>\n ";
   } else {
     out << "<td>Not available</td>\n";
   }
@@ -360,85 +362,44 @@ std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType
   return out.str();
 }
 
-std::string Calculator::ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat) {
-  (void) theFormat;//avoid unused parameter warning, portable
-  std::stringstream out;
-  out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=calculator&mainInput=PrintSemisimpleLieAlgebra%7B%7D"
-  << theType[0].theLetter << "_" << theType[0].theRank << "\">"
-  << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
-  if (theType[0].HasEasySubalgebras()) {
-    out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-    << "?request=calculator&mainInput=printSemisimpleSubalgebras%7B%7D%28"
-    << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter
-    << theType[0].theRank << " semisimple subalgebras</a></td>\n ";
-  } else {
-    out << "<td>Not available</td>\n";
-  }
-  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=calculator&mainInput=printSlTwoSubalgebras%7B%7D%28"
-  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter
-  << theType[0].theRank << " sl(2) triples</a></td>\n";
-  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=calculator&mainInput=printRootSubalgebras%7B%7D%28"
-  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter
-  << theType[0].theRank << " root subalgebras</a></td>\n";
-  return out.str();
-}
 
 bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const Expression& input, Expression& output) {
   (void) input;//avoid unused parameter warning, portable
-  std::stringstream out, outFromHD;
-  out << "\n\n<p>\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
-  << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
+  std::stringstream outFromHD;
   outFromHD << "\n\n<p>\n\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
   << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
   DynkinType theType;
   theType.MakeSimpleType('F', 4);
-  out << theCommands.ToStringLinksToCalculator(theType);
-  outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+  outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
   for (int i = 6; i <= 8; i ++) {
     theType.MakeSimpleType('E', i);
-    out << theCommands.ToStringLinksToCalculator(theType);
-    outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+    outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
   }
   theType.MakeSimpleType('G', 2);
-  out << theCommands.ToStringLinksToCalculator(theType);
-  outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+  outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
   for (int i = 1; i <= 8; i ++) {
     theType.MakeSimpleType('A', i);
-    out << theCommands.ToStringLinksToCalculator(theType);
-    outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+    outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
   }
   for (int i = 4; i <= 8; i ++) {
     theType.MakeSimpleType('D', i);
-    out << theCommands.ToStringLinksToCalculator(theType);
-    outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+    outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
   }
   for (int i = 2; i <= 8; i ++) {
     theType.MakeSimpleType('B', i);
-    out << theCommands.ToStringLinksToCalculator(theType);
-    outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+    outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
   }
   for (int i = 3; i <= 8; i ++) {
     theType.MakeSimpleType('C', i);
-    out << theCommands.ToStringLinksToCalculator(theType);
-    outFromHD << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
+    outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
   }
-  out << "</table></p>" ;
   outFromHD << "</table></p>";
-  std::string fileName = "semisimple_subalgebras/semisimple_subalgebras.php";
-  std::stringstream outputFinal;
-  outputFinal
+  std::string fileName = "semisimple_lie_algebras/semisimple_subalgebras.php";
+  std::stringstream out;
+  out
   << theCommands.WriteFileToOutputFolderReturnLink(outFromHD.str(), fileName, "Links file");
-
-  outputFinal << outFromHD.str() << "\n\n\n<br><br>";
-  outputFinal << "<p>"
-  << "Below are some links that cause conditional re-computation of some of the tables. "
-  << "Please do not use these links; they are meant for computer debugging purposes only. "
-  << "</p><br>\n" << out.str()
-  ;
-  return output.AssignValue(outputFinal.str(), theCommands);
+  out << outFromHD.str();
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool Calculator::innerPrintSSsubalgebrasNilradicals(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -524,11 +485,13 @@ bool Calculator::innerPrintSSSubalgebras(
     out << "Files precomputed, serving from HD. ";
   }
   out << "<br>Output file: <a href = \""
-  << theSSsubalgebras.DisplayNameMainFile1WithPath << "\"> " << theSSsubalgebras.DisplayNameMainFile1NoPath << "</a>";
-  out << "<br>Output file, fast load, hover mouse over math expressions to get formulas: <a href= \""
-  << theSSsubalgebras.DisplayNameMainFile2FastLoadWithPath << "\"> "
-  << theSSsubalgebras.DisplayNameMainFile2FastLoadNoPath << "</a>";
-
+  << theSSsubalgebras.DisplayNameMainFile1WithPath << "\" target=\"_blank\">"
+  << theSSsubalgebras.DisplayNameMainFile1NoPath << "</a>";
+  if (false) {
+    out << "<br>Output file, fast load, hover mouse over math expressions to get formulas: <a href= \""
+    << theSSsubalgebras.DisplayNameMainFile2FastLoadWithPath << "\"> "
+    << theSSsubalgebras.DisplayNameMainFile2FastLoadNoPath << "</a>";
+  }
   return output.AssignValue(out.str(), theCommands);
 }
 

@@ -76,6 +76,8 @@ struct Configuration {
   static std::string useBuiltInTLS;
   static std::string serverAutoMonitor;
   static std::string monitorPingTime;
+  static std::string disableDatabaseLogEveryoneAsAdmin;
+  static std::string serverDetailedLog;
 };
 
 struct DatabaseStrings {

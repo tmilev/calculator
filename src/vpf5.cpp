@@ -367,7 +367,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   }
   out << "<br>Parabolic selection: " << LeviInSmall.ToString();
   std::stringstream tempStream1;
-  tempStream1 << "Started splitting the f.d. part of the " << theHmm.theRange().GetLieAlgebraName() << "-module with highest weight in fund coords "
+  tempStream1 << "Started splitting the f.d. part of the " << theHmm.theRange().ToStringLieAlgebraName() << "-module with highest weight in fund coords "
   << this->theChaR[0].weightFundamentalCoordS.ToString();
   ProgressReport theReport;
   theReport.Report(tempStream1.str());
@@ -1183,7 +1183,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
     theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(currentType);
     currentAlg.ComputeChevalleyConstants();
     currentAlg.theWeyl.GetHighestWeightsAllRepsDimLessThanOrEqualTo(theHighestWeights[i], dimBound);
-    latexReport << "\\hline\\multicolumn{5}{c}{" << "$" << currentAlg.GetLieAlgebraName() << "$}\\\\\\hline\n\n"
+    latexReport << "\\hline\\multicolumn{5}{c}{" << "$" << currentAlg.ToStringLieAlgebraName() << "$}\\\\\\hline\n\n"
     << "$\\lambda$ & dim &\\# pairs 1& \\# pairs total  & \\# Arithmetic op.  \\\\\\hline";
     out << "<br>" << " <table><tr><td  border =\"1\" colspan =\"3\">"
     << theWeylLetters[i] << "_{" << theRanks[i] << "}" << "</td></tr> <tr><td>highest weight</td><td>dim</td></tr>";
@@ -1194,7 +1194,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       Vector<Rational>& currentHW = theHws[j];
       out << "<tr><td> " << currentHW.ToString() << "</td><td>"
       << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << "</td>";
-      reportStream << "Processing " << currentAlg.GetLieAlgebraName() << ", index  "
+      reportStream << "Processing " << currentAlg.ToStringLieAlgebraName() << ", index  "
       << i + 1 << " out of " << theRanks.size << ",  highest weight "
       << currentHW.ToString() << ", dim: " << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW)
       << ", index " << j + 1 << " out of " << theHws.size;
@@ -1892,7 +1892,7 @@ std::string Calculator::WriteFileToOutputFolderReturnLink(
     crash << "Failed to write file. " << commentsOnError.str() << crash;
   }
   std::stringstream out;
-  out << "<a href=\"" << fileNameVirtual << "\">" << linkText << "</a>";
+  out << "<a href=\"" << fileNameVirtual << "\" target = \"_blank\">" << linkText << "</a>";
   return out.str();
 }
 

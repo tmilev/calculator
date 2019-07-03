@@ -390,7 +390,6 @@ public:
     List<int>& numExploredHs,
     std::stringstream& reportStream
   );
-  int GetNumPossibleSAs() const;
   int GetDisplayIndexFromActual(int ActualIndexSubalgebra) const;
   std::string ToStringSubalgebraNumberWithAmbientLink(
     int actualIndexSubalgebra, FormatExpressions* theFormat

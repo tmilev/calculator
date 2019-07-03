@@ -65,9 +65,9 @@ bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights() {
     return false;
   }
   return
-    theGlobalVariables.userDefault.userRole == "admin" ||
-    theGlobalVariables.userDefault.userRole == "instructor" ||
-    theGlobalVariables.userDefault.userRole == "teacher";
+    theGlobalVariables.userDefault.userRole == UserCalculatorData::Roles::admin ||
+    theGlobalVariables.userDefault.userRole == UserCalculator::Roles::instructor ||
+    theGlobalVariables.userDefault.userRole == UserCalculator::Roles::teacher;
 }
 
 bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase() {
@@ -411,7 +411,7 @@ JSData UserCalculatorData::ToJSON() {
 
 bool UserCalculatorData::ComputeCourseInfo() {
   MacroRegisterFunctionWithName("UserCalculator::ComputeCourseInfo");
-  bool isAdmin = (this->userRole == "admin" && this->username == theGlobalVariables.userDefault.username);
+  bool isAdmin = (this->userRole == UserCalculatorData::Roles::admin && this->username == theGlobalVariables.userDefault.username);
   if (
     theGlobalVariables.UserStudentVieWOn() &&
     isAdmin &&
@@ -1450,11 +1450,16 @@ bool DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(
   if (theGlobalVariables.flagDatabaseCompiled) {
     return false;
   }
-  //When compiled without database, we assume the user is an admin.
-  //In this way, users who do not have a mongoDB installed
+  if (!theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+    return false;
+  }
+  //When the database is disabled, we assume the user is an admin.
+  //The purpose of this is that
+  //users who do not have a mongoDB installed
+  //(or have troubles accessing it for some reason)
   //can still use the admin functions of the calculator, for example,
   //modify problem files from the one-page app.
-  theUser.userRole = "admin";
+  theUser.userRole = UserCalculatorData::Roles::admin;
   theUser.actualAuthenticationToken = "compiledWithoutDatabaseSupport";
   if (commentsGeneral != 0) {
     *commentsGeneral << "Automatic login as admin: calculator compiled without DB. ";

@@ -1255,9 +1255,9 @@ void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat) {
   myPath << this->ownEr->owner->VirtualNameSSAlgOutputFolder;
   myPath << "rootSubalgebra_" << index + 1 << ".html";
   FileOperations::OpenFileCreateIfNotPresentVirtual(output, myPath.str(), false, true, false);
-  output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName() << " root subalgebra of type "
+  output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.ToString() << " root subalgebra of type "
   << this->theDynkinDiagram.ToString() << "</title>";
-  output << "<meta name =\"keywords\" content =\"" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName()
+  output << "<meta name =\"keywords\" content =\"" << this->GetAmbientWeyl().theDynkinType.ToString()
   << " root subsystems, root subsystems, root systems";
   if (this->GetAmbientWeyl().theDynkinType.HasExceptionalComponent()) {
     output << ", exceptional Lie algebra";

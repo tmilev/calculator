@@ -5105,7 +5105,22 @@ bool GlobalVariables::ConfigurationStore() {
 
 void GlobalVariables::ConfigurationProcess() {
   MacroRegisterFunctionWithName("GlobalVariables::ConfigurationProcess");
-  theGlobalVariables.flagServerDetailedLog = theGlobalVariables.configuration["serverDetailedLog"].isTrueRepresentationInJSON();
+  theGlobalVariables.flagServerDetailedLog = theGlobalVariables.configuration[
+    Configuration::serverDetailedLog
+  ].isTrueRepresentationInJSON();
+  theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin = theGlobalVariables.configuration[
+    Configuration::disableDatabaseLogEveryoneAsAdmin
+  ].isTrueRepresentationInJSON();
+  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+    theGlobalVariables.flagDatabaseCompiled = false;
+    logServer
+    << logger::purple << "************************" << logger::endL
+    << logger::red << "WARNING: database disabled, " << logger::green
+    << "no database operations permitted." << logger::endL
+    << logger::red
+    << " Everyone logged-in as admin. " << logger::endL
+    << logger::purple << "************************" << logger::endL;
+  }
   if (theGlobalVariables.configuration[Configuration::serverAutoMonitor].isTrueRepresentationInJSON()) {
     theGlobalVariables.flagServerAutoMonitor = true;
   } else {
@@ -5182,7 +5197,7 @@ void GlobalVariables::ConfigurationProcess() {
     }
   } else {
     theGlobalVariables.configuration[Configuration::monitorPingTime] = theWebServer.WebServerPingIntervalInSeconds;
-  }
+  }  
 }
 
 int WebServer::main(int argc, char **argv) {

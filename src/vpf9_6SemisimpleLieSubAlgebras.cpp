@@ -48,6 +48,44 @@ void SemisimpleLieAlgebra::GenerateLieSubalgebra(
   }
 }
 
+std::string SemisimpleLieAlgebra::ToStringLieAlgebraNameFullHTML() const {
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ToStringLieAlgebraNameFullHTML");
+  std::stringstream out;
+  if (this->theWeyl.theDynkinType.HasExceptionalComponent()) {
+    out << "\\(" << this->theWeyl.theDynkinType.ToString() << "\\)";
+    return out.str();
+  }
+  out << this->ToStringLieAlgebraNameNonTechnicalHTML()
+  << ", type \\(" << this->theWeyl.theDynkinType.ToString() << "\\)";
+  return out.str();
+}
+
+std::string SemisimpleLieAlgebra::ToStringLieAlgebraName() const {
+  return this->theWeyl.theDynkinType.ToString();
+}
+
+std::string SemisimpleLieAlgebra::ToStringLieAlgebraNameNonTechnicalHTML() const {
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ToStringLieAlgebraNameNonTechnicalHTML");
+  std::stringstream out;
+  const DynkinType& theType = this->theWeyl.theDynkinType;
+  for (int indexType = 0; indexType < theType.size(); indexType ++) {
+    if (!(theType.theCoeffs[indexType] > 0)) {
+      crash << "Simple constituents must appear with positive coefficient. " << crash;
+    }
+    const DynkinSimpleType& currentSimpleType = theType[indexType];
+    for (int indexIsotypic = 0; indexIsotypic < theType.theCoeffs[indexType]; indexIsotypic ++) {
+      out << currentSimpleType.ToStringNonTechnicalName(0);
+      if (indexIsotypic + 1 < theType.theCoeffs[indexType]) {
+        out << "\\oplus";
+      }
+    }
+    if (indexType != theType.size() - 1) {
+      out << "\\oplus";
+    }
+  }
+  return out.str();
+}
+
 bool SemisimpleLieAlgebra::CheckConsistency() const {
   if (this->flagDeallocated) {
     crash << "This is a programming error: use after free of SemisimpleLieAlgebra. " << crash;
@@ -113,8 +151,8 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
   inputOutputH.SubstitutionCoefficients(theSolutionSub);
   inputOutputE.SubstitutionCoefficients(theSolutionSub);
   if (logStream != 0) {
-    *logStream << "<br>H = " << inputOutputH.ToString() << "<br>E="
-    << inputOutputE.ToString() << "<br>F=" << inputOutputF.ToString();
+    *logStream << "<br>H = " << inputOutputH.ToString() << "<br>E = "
+    << inputOutputE.ToString() << "<br>F = " << inputOutputF.ToString();
   }
   return true;
 }
@@ -260,10 +298,13 @@ std::string SemisimpleSubalgebras::ToStringSubalgebraNumberWithAmbientLink(
   int actualIndexSubalgebra, FormatExpressions* theFormat
 ) const {
   std::stringstream out;
-  out << "Subalgebra number " << this->GetDisplayIndexFromActual(actualIndexSubalgebra)
-  << " of ambient Lie algebra " << "<a href=\"./" << this->DisplayNameMainFile1NoPath << "\">"
-  << "\\(" << this->owner->theWeyl.theDynkinType.ToString(theFormat) << "\\)" << "</a>."
-  << "\n";
+  CandidateSSSubalgebra& theCandidate = this->theSubalgebras[actualIndexSubalgebra];
+  out << "Subalgebra "
+  << "\\(" << theCandidate.theWeylNonEmbedded->theDynkinType.ToString() << "\\)"
+  << " &#8618; " << "<a href=\"./" << this->DisplayNameMainFile1NoPath << "\">"
+  << "\\(" << this->owner->theWeyl.theDynkinType.ToString(theFormat) << "\\)" << "</a>";
+  int displayIndex = this->GetDisplayIndexFromActual(actualIndexSubalgebra);
+  out << "<br>" << displayIndex << " out of " << this->theSubalgebras.size() << "\n";
   return out.str();
 }
 
@@ -365,7 +406,7 @@ void SemisimpleSubalgebras::WriteReportToFiles() {
     fileSlowLoad, this->VirtualNameMainFile1, false, true, false
   );
   FileOperations::OpenFileCreateIfNotPresentVirtual(
-    fileFastLoad, this->VirtualNameMainFile1, false, true, false
+    fileFastLoad, this->VirtualNameMainFile2FastLoad, false, true, false
   );
   std::stringstream commonHead;
   commonHead << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
@@ -550,13 +591,12 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
       candidatesRealized ++;
     }
   }
-  out << "<span class = 'spanExperimentalWarning'>"
-  << "If you see any errors, please "
-  << "email us with a simple explanation of the issue.</span><br>\n";
-  candidatesNotRealizedNotProvenImpossible = this->theSubalgebras.theValues.size - candidatesRealized - candidatesProvenImpossible;
+  out << "<h1>Lie algebra " << this->owner->ToStringLieAlgebraNameFullHTML()
+  << "<br>Semisimple complex Lie subalgebras</h1>";
+  candidatesNotRealizedNotProvenImpossible = this->theSubalgebras.size() - candidatesRealized - candidatesProvenImpossible;
   if (!writingToHD) {
     out << candidatesRealized << " subalgebras realized.";
-    out << "<br>Up to linear equivalence, there are " << this->theSubalgebras.theValues.size
+    out << "<br>Up to linear equivalence, there are " << this->theSubalgebras.size()
     << " = " << candidatesRealized << " realized + "
     << candidatesProvenImpossible << " proven impossible + " << candidatesNotRealizedNotProvenImpossible
     << " neither realized nor proven impossible. \n<hr>\n ";
@@ -571,6 +611,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
     out << ". ";
     out << "</div><!--divSemisimpleSubalgebrasInformation-->";
   }
+  out << "Structure constants.";
   out << "The subalgebras are ordered by rank, "
   << "Dynkin indices of simple constituents and dimensions of simple constituents. "
   << "The upper index indicates the Dynkin index, "
@@ -622,8 +663,8 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
   outputFileSubalgebra << "<html>\n" << HtmlRoutines::GetJavascriptMathjax("../../../../")
   << "\n" << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../../../")
   << "\n" << HtmlRoutines::GetCSSLinkLieAlgebras("../../../../")
-  << "\n<body>"
-  << this->ToStringSubalgebraNumberWithAmbientLink(subalgebraIndex, theFormat);
+  << "\n<body>";
+  outputFileSubalgebra << this->ToStringSubalgebraNumberWithAmbientLink(subalgebraIndex, theFormat);
   outputFileSubalgebra << "<div class = \"divSubalgebraInformation\">";
   outputFileSubalgebra << "Computations done by the " << HtmlRoutines::GetHtmlLinkToGithubRepo("calculator project");
   outputFileSubalgebra << ".</div>";
@@ -4872,7 +4913,7 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat) {
       out << "<b>found bad characteristics!</b>";
     }
   } else {
-    out2 << "It turns out by direct computation that, in the current case of " << this->GetOwner().GetLieAlgebraName()
+    out2 << "It turns out by direct computation that, in the current case of " << this->GetOwner().ToStringLieAlgebraName()
     << ",  e(P,P_0)= 0 implies that an S-sl(2) subalgebra "
     << "of the root subalgebra generated by P with characteristic with 2's in the simple roots of P_0 "
     << " always exists. Note that Theorem 10.3 is stated in one direction only.";

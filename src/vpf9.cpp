@@ -144,6 +144,7 @@ GlobalVariables::GlobalVariables() {
   this->flagRequestComingLocally = false;
   this->flagDatabaseCompiled = false;
   this->flagServerAutoMonitor = true;
+  this->flagDisableDatabaseLogEveryoneAsAdmin = false;
 }
 
 void GlobalVariables::WriteSourceCodeFilesJS() {
@@ -2324,7 +2325,6 @@ FormatExpressions::FormatExpressions() {
   this->thePolyMonOrder = 0;
   this->flagExpressionIsFinal = true;
   this->flagExpressionNewLineAllowed = false;
-  this->flagIncludeLieAlgebraNonTechnicalNames = false;
   this->flagIncludeLieAlgebraTypes = true;
   this->flagUseReflectionNotation = false;
   this->flagUseHtmlAndStoreToHD = false;
@@ -4615,9 +4615,6 @@ void DynkinType::GetLettersTypesMults(
   }
 }
 
-std::string DynkinType::GetLieAlgebraName(FormatExpressions* theFormat) const {
-  return this->ToString(theFormat);
-}
 
 std::string DynkinType::GetWeylGroupName(FormatExpressions* theFormat) const {
   return this->ToString(theFormat);
@@ -4996,15 +4993,33 @@ Rational DynkinSimpleType::GetEpsilonRealizationLongRootLengthSquared() const {
   return - 1;
 }
 
+std::string DynkinSimpleType::ToStringNonTechnicalName(FormatExpressions* theFormat) const {
+  (void) theFormat;
+  std::stringstream out;
+  switch (this->theLetter) {
+    case 'A':
+      out << "sl(" << this->theRank + 1 << ")";
+      break;
+    case 'B':
+      out << "so(" << 2 * this->theRank + 1 << ")";
+      break;
+    case 'C':
+      out << "sp(" << 2 * this->theRank << ")";
+      break;
+    case 'D':
+      out << "so(" << 2 * this->theRank << ")";
+      break;
+    default :
+      break;
+  }
+  return out.str();
+}
+
 std::string DynkinSimpleType::ToString(FormatExpressions* theFormat) const {
   std::stringstream out;
   bool includeTechnicalNames = theFormat == 0 ? true : theFormat->flagIncludeLieAlgebraTypes;
-  bool includeNonTechnicalNames = theFormat == 0 ? false : theFormat->flagIncludeLieAlgebraNonTechnicalNames;
   bool usePlusesAndExponents = theFormat == 0 ? true: !theFormat->flagDynkinTypeDontUsePlusAndExponent;
   bool supressDynkinIndexOne = theFormat == 0 ? false : theFormat->flagSupressDynkinIndexOne;
-  if (!includeNonTechnicalNames && !includeTechnicalNames) {
-    includeTechnicalNames = true;
-  }
   bool hasAmbient = false;
   if (theFormat != 0) {
     hasAmbient = (theFormat->AmbientWeylLetter != 'X');
@@ -5052,17 +5067,6 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat) const {
       out << "_" << this->theRank;
     }
     //out << "[" << this->theLetter << "^{" << this->CartanSymmetricInverseScale << "}_" << this->theRank << "]";
-  }
-  if (includeNonTechnicalNames) {
-    if (this->theLetter != 'E' && this->theLetter != 'F' && this->theLetter != 'G') {
-      switch (this->theLetter) {
-        case 'A':  out << "(sl(" <<   this->theRank+ 1 << "))"; break;
-        case 'B':  out << "(so(" << 2*this->theRank+ 1 << "))"; break;
-        case 'C':  out << "(sp(" << 2*this->theRank   << "))"; break;
-        case 'D':  out << "(so(" << 2*this->theRank   << "))"; break;
-        default : break;
-      }
-    }
   }
   return out.str();
 }

@@ -93,19 +93,17 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat) {
 
 std::string DynkinType::ToStringFolderName() const {
   std::stringstream out;
-  out << "output/semisimple_lie_algebras/"
+  out << "semisimple_lie_algebras/"
   << HtmlRoutines::CleanUpForFileNameUse(this->ToString()) << "/";
   return out.str();
 }
 
 void SemisimpleLieAlgebra::ComputeFolderNames() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
-  std::stringstream outMainDisplayPath;
   this->CheckConsistency();
   DynkinType& theType = this->theWeyl.theDynkinType;
-  this->VirtualNameSSAlgOutputFolder = theType.ToStringFolderName();
-  outMainDisplayPath << "/" << this->VirtualNameSSAlgOutputFolder;
-  this->DisplayNameSSalgOutputFolder = outMainDisplayPath.str();
+  this->VirtualNameSSAlgOutputFolder = "output/" + theType.ToStringFolderName();
+  this->DisplayNameSSalgOutputFolder = this->VirtualNameSSAlgOutputFolder;
 }
 
 void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
@@ -123,7 +121,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
   ProgressReport theReport;
   double startTimer = - 1;
   if (theGlobalVariables.flagReportEverything) {
-    out << "Initializing matrix for structure constant computation of " << this->GetLieAlgebraName() << "... ";
+    out << "Initializing matrix for structure constant computation of " << this->ToStringLieAlgebraName() << "... ";
     startTimer = theGlobalVariables.GetElapsedSeconds();
     theReport.Report(out.str());
   }

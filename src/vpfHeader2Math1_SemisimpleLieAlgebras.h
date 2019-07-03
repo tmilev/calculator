@@ -106,9 +106,9 @@ public:
   bool CommutatorIsNonZero(int leftIndex, int rightIndex) {
     return !this->theLiebrackets.elements[leftIndex][rightIndex].IsEqualToZero();
   }
-  std::string GetLieAlgebraName() const {
-    return this->theWeyl.theDynkinType.GetLieAlgebraName();
-  }
+  std::string ToStringLieAlgebraNameFullHTML() const;
+  std::string ToStringLieAlgebraName() const;
+  std::string ToStringLieAlgebraNameNonTechnicalHTML() const;
   void GetMinusTransposeAuto(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
   void GenerateWeightSupportMethod2(Vector<Rational>& theHighestWeight, Vectors<Rational>& output);
   inline int GetNumGenerators() const {

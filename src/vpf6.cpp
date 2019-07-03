@@ -650,7 +650,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     out << "<tr><td>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.ToString()) << "</td>";
     latexReport2 << "\\begin{longtable}{rll}";
     latexReport2 << "$\\gog$& $n$& element of $\\mathbb W_n$ \\\\\\hline" << "\\multirow{" << theGeneratorsItry.size
-    << "}{*}{$" << theSSalgebra.GetLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
+    << "}{*}{$" << theSSalgebra.ToStringLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
     << elementsNegativeNilrad.size << "}&";
 
     latexReport << "$\\begin{array}{r}" << theMod.theChaR.ToString() << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.GetDim() << " \\end{array}$";
@@ -740,7 +740,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   WeylGroupData& theWeyl = theAlgebrA.theWeyl;
   std::stringstream out;
   GlobalVariables theGlobalVariables;
-  out << "<br>Semisimple Lie algebra acting on generalized Verma module: " << theAlgebrA.GetLieAlgebraName() << ".";
+  out << "<br>Semisimple Lie algebra acting on generalized Verma module: " << theAlgebrA.ToStringLieAlgebraName() << ".";
   out << "<br>Parabolic selection: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
   out << "<br>Highest weight of Generalized Verma module in fundamental coordinates: "
   << this->theHWFundamentalCoordsBaseField.ToString();
@@ -1060,7 +1060,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   if (theWeyl.theGroup.GetSize() > 192) {
     out << "I have been instructed to run only for Weyl groups that"
     << " have at most 192 elements (i.e. no larger than D_4). "
-    << theSSalgebra->GetLieAlgebraName() << " has " << theWeyl.theGroup.GetSize().ToString() << ".";
+    << theSSalgebra->ToStringLieAlgebraName() << " has " << theWeyl.theGroup.GetSize().ToString() << ".";
     return output.AssignValue(out.str(), theCommands);
   }
   FormatExpressions theFormat;
@@ -1068,7 +1068,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   theFormat.polyAlphabeT[0] = "q";
   out << "Our notation follows that of the original Kazhdan-Lusztig paper, "
   << "Representations of Coxeter Groups and Hecke Algebras.<br>";
-  out << " The algebra: " << theSSalgebra->GetLieAlgebraName();
+  out << " The algebra: " << theSSalgebra->ToStringLieAlgebraName();
   KLpolys theKLpolys;
   theKLpolys.ComputeKLPolys(&theWeyl);
   theFormat.flagUseHTML = true;
@@ -1108,15 +1108,17 @@ bool Calculator::innerWriteToHDOrPrintSSLieAlgebra(
 //      theFormat.chevalleyHgeneratorLetter ="\\bar{h}";
 //      theFormat.chevalleyGgeneratorLetter ="\\bar{g}";
   out << "<hr>Lie algebra type: " << theWeyl.theDynkinType << ". ";
-  out << "<br>Weyl group size: " << theWeyl.theGroup.GetSize().ToString() << "." << "<br>To get extra details: ";
-  std::stringstream tempStream;
-  tempStream << "PrintSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
-  out << HtmlRoutines::GetCalculatorComputationAnchor(tempStream.str()) << "<br>";
-  if (Verbose) {
+  out << "<br>Weyl group size: " << theWeyl.theGroup.GetSize().ToString() << ".";
+  if (!Verbose) {
+    out << "<br>To get extra details: ";
+    std::stringstream tempStream;
+    tempStream << "PrintSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
+    out << HtmlRoutines::GetCalculatorComputationAnchor(tempStream.str()) << "<br>";
+  } else {
     DrawingVariables theDV;
     theWeyl.DrawRootSystem(theDV, true, true, 0, true, 0);
-    out << "<hr>Below is a drawing of the root system in its corresponding Coxeter plane "
-    << "(computed as explained on John Stembridge's website). "
+    out << "<hr>A drawing of the root system in its corresponding Coxeter plane. "
+    << "Computations were carried out as explained by John Stembridge. "
     << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
     << "<br>The grey lines are the edges of the Weyl chamber.<br>"
     << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
@@ -1226,9 +1228,14 @@ bool Calculator::innerWriteToHDOrPrintSSLieAlgebra(
     }
   }
   if (writeToHD) {
-    std::string theFileName = theWeyl.theDynkinType.ToStringFolderName() + "notation_structure_constants.html";
+    std::stringstream theFileName;
+    theFileName
+    << theWeyl.theDynkinType.ToStringFolderName()
+    << "structure_constants_notation"
+    << HtmlRoutines::CleanUpForFileNameUse(theWeyl.theDynkinType.ToString())
+    << ".html";
     std::stringstream outWithLinks;
-    outWithLinks << theCommands.WriteFileToOutputFolderReturnLink(out.str(), theFileName, "hard drive output")
+    outWithLinks << theCommands.WriteFileToOutputFolderReturnLink(out.str(), theFileName.str(), "hard drive output")
     << "<br>" << out.str();
     return output.AssignValue(outWithLinks.str(), theCommands);
   }
@@ -2633,7 +2640,7 @@ std::string ObjectContainer::ToString() {
   if (this->theSSLieAlgebras.theValues.size > 0) {
     out << "Lie algebras created (" << this->theSSLieAlgebras.theValues.size << " total): ";
     for (int i = 0; i < this->theSSLieAlgebras.theValues.size; i ++) {
-      out << this->theSSLieAlgebras.theValues[i].GetLieAlgebraName();
+      out << this->theSSLieAlgebras.theValues[i].ToStringLieAlgebraName();
       if (i != this->theSSLieAlgebras.theValues.size - 1) {
         out << ", ";
       }
@@ -2643,7 +2650,7 @@ std::string ObjectContainer::ToString() {
     out << "<br>Lie semisimple subalgebras computation data structures ("
     << this->theSSSubalgebraS.theValues.size << " total): ";
     for (int i = 0; i < this->theSSSubalgebraS.theValues.size; i ++) {
-      out << " Type " << this->theSSSubalgebraS.theValues[i].owner->GetLieAlgebraName() << " with "
+      out << " Type " << this->theSSSubalgebraS.theValues[i].owner->ToStringLieAlgebraName() << " with "
       << this->theSSSubalgebraS.theValues[i].theSubalgebras.theValues.size << " candidates";
       if (i != this->theSSSubalgebraS.theValues.size - 1) {
         out << ", ";

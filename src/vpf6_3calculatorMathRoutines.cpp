@@ -6565,7 +6565,7 @@ bool CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg(Calculator& theCommands,
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
   theSSsubalgebras.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 
-  out << "Attempting to embed " << theSmallSapointer->theWeyl.theDynkinType.ToString() << " in " << ownerSS.GetLieAlgebraName();
+  out << "Attempting to embed " << theSmallSapointer->theWeyl.theDynkinType.ToString() << " in " << ownerSS.ToStringLieAlgebraName();
   theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS, &theSmallSapointer->theWeyl.theDynkinType);
   return output.AssignValue(theSSsubalgebras, theCommands);
 }

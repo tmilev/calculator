@@ -11,6 +11,13 @@ static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemInd
 
 class UserCalculatorData {
   public:
+  struct Roles {
+    static std::string admin;
+    static std::string student;
+    static std::string instructor;
+    static std::string teacher;
+  };
+
   double approximateHoursSinceLastTokenWasIssued;
   std::string usernameHashedPlusPassWordHashed;
   std::string userId;

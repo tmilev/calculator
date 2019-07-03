@@ -818,7 +818,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
     ) {
       return theCommands << "<hr>Failed to convert summand "
       << singleChevGenE.ToString() << " to Chevalley generator of "
-      << owner.GetLieAlgebraName();
+      << owner.ToStringLieAlgebraName();
     }
     bool isGood = true;
     if (theLetter == "g") {
@@ -842,7 +842,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
     if (!isGood) {
       return theCommands << "<hr>Failed to convert summand "
       << singleChevGenE.ToString() << " to Chevalley generator of "
-      << owner.GetLieAlgebraName();
+      << owner.ToStringLieAlgebraName();
     }
   }
   return true;
@@ -894,7 +894,7 @@ bool CalculatorConversions::innerElementUE(
       if (!singleChevGenE[0].IsAtom(&theLetter) || !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex)) {
         return theCommands << "<hr>Failed to convert summand "
         << singleChevGenE.ToString() << " to Chevalley generator of "
-        << owner.GetLieAlgebraName();
+        << owner.ToStringLieAlgebraName();
       }
       bool isGood = true;
       bool isHonestElementUE = true;
@@ -915,7 +915,7 @@ bool CalculatorConversions::innerElementUE(
       if (!isGood) {
         return theCommands << "<hr>Failed to convert summand "
         << singleChevGenE.ToString() << " to Chevalley generator of "
-        << owner.GetLieAlgebraName();
+        << owner.ToStringLieAlgebraName();
       }
       if (isHonestElementUE) {
         currentMultiplicand.MakeOneGenerator(theChevGen.theGeneratorIndex, owner, 1);

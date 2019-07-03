@@ -1179,8 +1179,7 @@ public:
   void ExpressionHistoryStackAdd();
   void ExpressionHistoryStackPop();
   void RegisterCalculatorFunctionIdentifier(const Function& theFun, int indexOp, int functionType, int theFunIndex);
-  std::string ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat = 0);
-  std::string ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat = 0);
+  std::string ToStringSemismipleLieAlgebraLinksFromHD(const DynkinType& theType, FormatExpressions* theFormat = 0);
   //void GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat);
   bool IsBoundVarInContext(int inputOp);
   bool IsNonBoundVarInContext(int inputOp);
@@ -2738,7 +2737,7 @@ bool Calculator::GetTypeWeight(
     return false;
   }
   if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(ambientSSalgebra->theWeyl.theDynkinType)) {
-    crash << "This is a programming error: " << ambientSSalgebra->GetLieAlgebraName()
+    crash << "This is a programming error: " << ambientSSalgebra->ToStringLieAlgebraName()
     << " contained object container more than once. " << crash;
   }
   int algebraIndex = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(ambientSSalgebra->theWeyl.theDynkinType);
@@ -2802,7 +2801,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
     }
   }
   if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(ambientSSalgebra->theWeyl.theDynkinType)) {
-    crash << "This is a programming error: " << ambientSSalgebra->GetLieAlgebraName()
+    crash << "This is a programming error: " << ambientSSalgebra->ToStringLieAlgebraName()
     << " contained object container more than once. " << crash;
   }
   int algebraIndex = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(ambientSSalgebra->theWeyl.theDynkinType);

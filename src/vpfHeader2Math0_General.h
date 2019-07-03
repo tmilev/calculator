@@ -1851,7 +1851,6 @@ public:
   bool flagIncludeMutableInformation;
   bool flagExpressionNewLineAllowed;
   bool flagIncludeExtraHtmlDescriptionsInPlots;
-  bool flagIncludeLieAlgebraNonTechnicalNames;
   bool flagIncludeLieAlgebraTypes;
   bool flagUseReflectionNotation;
   bool flagCandidateSubalgebraShortReportOnly;
@@ -6228,6 +6227,7 @@ class DynkinSimpleType {
     return this->GetRatioLongRootToFirst(this->theLetter, this->theRank);
   }
   std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToStringNonTechnicalName(FormatExpressions* theFormat = 0) const;
   void operator++(int);
   bool operator>(const DynkinSimpleType& other) const;
   static void GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output);
@@ -6327,7 +6327,6 @@ public:
   void GetCartanSymmetric(Matrix<Rational>& output) const;
   void GetCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Rational>& output) const;
   int GetCoxeterEdgeWeight(int v, int w);
-  std::string GetLieAlgebraName(FormatExpressions* theFormat = 0) const;
   std::string GetWeylGroupName(FormatExpressions* theFormat = 0) const;
   static void GetDynkinIndicesSl2SubalgebrasSimpleType(
     const DynkinSimpleType& theType,

@@ -223,7 +223,7 @@ std::string HtmlRoutines::GetCalculatorComputationURL(const std::string& inputNo
 
 std::string HtmlRoutines::GetCalculatorComputationAnchor(const std::string& inputNoEncoding) {
   std::stringstream out;
-  out << "<a href = \"#" << HtmlRoutines::GetCalculatorComputationURL(inputNoEncoding)
+  out << "<a href = \"" << HtmlRoutines::GetCalculatorComputationURL(inputNoEncoding)
   << "\" onclick = \"window.calculator.calculator.calculatorLinkClickHandler(this);\">"
   << HtmlRoutines::ConvertStringToHtmlString(inputNoEncoding, false) << "</a>";
   return out.str();

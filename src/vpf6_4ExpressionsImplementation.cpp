@@ -2537,7 +2537,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     result = true;
   } else if (this->IsOfType<SemisimpleLieAlgebra>()) {
     out << "SSLieAlg{}("
-    << this->GetValue<SemisimpleLieAlgebra>().GetLieAlgebraName()
+    << this->GetValue<SemisimpleLieAlgebra>().ToStringLieAlgebraName()
     << ")";
     result = true;
   } else if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >()) {

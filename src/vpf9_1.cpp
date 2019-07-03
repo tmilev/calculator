@@ -13,6 +13,11 @@
 
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
 
+std::string UserCalculatorData::Roles::admin = "admin";
+std::string UserCalculatorData::Roles::student = "student";
+std::string UserCalculatorData::Roles::instructor = "instructor";
+std::string UserCalculatorData::Roles::teacher = "teacher";
+
 Crasher::Crasher() {
   this->flagCrashInitiateD = false;
   this->flagFinishingCrash = false;
@@ -388,6 +393,9 @@ bool GlobalVariables::UserDefaultIsDebuggingAdmin() {
 }
 
 bool GlobalVariables::UserDefaultHasAdminRights() {
+  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+    return true;
+  }
   return this->flagLoggedIn && (this->userDefault.userRole == "admin");
 }
 

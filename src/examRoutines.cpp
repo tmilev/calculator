@@ -2933,7 +2933,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before after loading problem list");
-  outHeadPt2 << HtmlRoutines::GetJavascriptMathjax();
+  outHeadPt2 << HtmlRoutines::GetJavascriptMathjax("");
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before execution");
   if (!this->PrepareAndExecuteCommands(theInterpreter, &comments)) {
@@ -4003,7 +4003,7 @@ void CalculatorHTML::InterpretJavascripts(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretJavascripts");
   std::string javascriptName = MathRoutines::StringTrimWhiteSpace(inputOutput.content);
   if (javascriptName == "MathJax") {
-    inputOutput.interpretedCommand = HtmlRoutines::GetJavascriptMathjax();
+    inputOutput.interpretedCommand = HtmlRoutines::GetJavascriptMathjax("");
   }
 }
 

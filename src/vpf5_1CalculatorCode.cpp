@@ -523,7 +523,7 @@ bool Calculator::innerPrintSSSubalgebras(
   } else {
     out << "Files precomputed, serving from HD. ";
   }
-  out << "<br>Output file: <a href= \""
+  out << "<br>Output file: <a href = \""
   << theSSsubalgebras.DisplayNameMainFile1WithPath << "\"> " << theSSsubalgebras.DisplayNameMainFile1NoPath << "</a>";
   out << "<br>Output file, fast load, hover mouse over math expressions to get formulas: <a href= \""
   << theSSsubalgebras.DisplayNameMainFile2FastLoadWithPath << "\"> "

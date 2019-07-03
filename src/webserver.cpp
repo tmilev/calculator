@@ -2629,7 +2629,7 @@ int WebWorker::ProcessSubmitAnswers() {
 std::string HtmlInterpretation::GetJavascriptCaptcha() {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetCaptchaJavascript");
   std::stringstream out;
-  out << "<script src ='https://www.google.com/recaptcha/api.js'></script>";
+  out << "<script src = 'https://www.google.com/recaptcha/api.js'></script>";
   return out.str();
 }
 

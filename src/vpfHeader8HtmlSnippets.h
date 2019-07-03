@@ -79,7 +79,7 @@ public:
 
   static const std::string GetJavascriptLinkGraphicsNDimensions(const std::string& relativeto);
 
-  static const std::string& GetJavascriptMathjax();
+  static std::string GetJavascriptMathjax(const std::string& baseFolder);
   static const std::string& GetJavascriptMathQuillDefaulTWithTags();
   static const std::string GetJavascriptMathQuillDefaultLink();
   static const std::string& GetJavascriptMathQuillMatrixSupporTWithTags();

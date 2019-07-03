@@ -371,9 +371,9 @@ void SemisimpleSubalgebras::WriteReportToFiles() {
   commonHead << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owner->theWeyl.theDynkinType.ToString()
   << "</title>";
-  commonHead << HtmlRoutines::GetCSSLinkLieAlgebras("../../");
-  commonHead << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../");
-  commonHead << HtmlRoutines::GetJavascriptMathjax();
+  commonHead << HtmlRoutines::GetCSSLinkLieAlgebras("../../../../");
+  commonHead << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../../../");
+  commonHead << HtmlRoutines::GetJavascriptMathjax("../../../../");
   commonHead << "<body>";
 
   fileSlowLoad << commonHead.str() << this->ToString(&this->currentFormat);
@@ -571,8 +571,10 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
     out << ". ";
     out << "</div><!--divSemisimpleSubalgebrasInformation-->";
   }
-  out << "The subalgebras are ordered by rank, Dynkin indices of simple constituents and dimensions of simple constituents. "
-  << "The upper index indicates the Dynkin index, the lower index indicates the rank of the subalgebra. ";
+  out << "The subalgebras are ordered by rank, "
+  << "Dynkin indices of simple constituents and dimensions of simple constituents. "
+  << "The upper index indicates the Dynkin index, "
+  << "the lower index indicates the rank of the subalgebra. ";
   bool showTime = theFormat == 0 ? true : theFormat->flagIncludeMutableInformation;
   if (showTime) {
     if (this->timeComputationStartInSeconds != - 1 && this->timeComputationEndInSeconds != - 1) {
@@ -617,9 +619,9 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
     << "2. The calculator has no write permission to the folder in which the file is located. "
     << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
   }
-  outputFileSubalgebra << "<html>\n" << HtmlRoutines::GetJavascriptMathjax()
-  << "\n" << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../")
-  << "\n" << HtmlRoutines::GetCSSLinkLieAlgebras("../../")
+  outputFileSubalgebra << "<html>\n" << HtmlRoutines::GetJavascriptMathjax("../../../../")
+  << "\n" << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../../../")
+  << "\n" << HtmlRoutines::GetCSSLinkLieAlgebras("../../../../")
   << "\n<body>"
   << this->ToStringSubalgebraNumberWithAmbientLink(subalgebraIndex, theFormat);
   outputFileSubalgebra << "<div class = \"divSubalgebraInformation\">";
@@ -643,8 +645,8 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
       << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
     }
     outputFileFKFTnilradicals << "<html>"
-    << HtmlRoutines::GetJavascriptMathjax()
-    << HtmlRoutines::GetCSSLinkLieAlgebras("../../")
+    << HtmlRoutines::GetJavascriptMathjax("../../../")
+    << HtmlRoutines::GetCSSLinkLieAlgebras("../../../")
     << "<body>"
     << this->ToStringAlgebraLink(subalgebraIndex, theFormat)
     << currentSubalgebra.ToStringNilradicals(theFormat) << "\n</body></html>";
@@ -5011,7 +5013,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat) {
     tempS = out.str();
     theFile << "<html><title>sl(2)-subalgebras of "
     << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString() << "</title>";
-    theFile << HtmlRoutines::GetJavascriptMathjax();
+    theFile << HtmlRoutines::GetJavascriptMathjax("../../../../");
     theFile << "<meta name =\"keywords\" content =\""
     <<  this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
     << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras, nilpotent orbits of "

@@ -104,8 +104,7 @@ void SemisimpleLieAlgebra::ComputeFolderNames() {
   this->CheckConsistency();
   DynkinType& theType = this->theWeyl.theDynkinType;
   this->VirtualNameSSAlgOutputFolder = theType.ToStringFolderName();
-  outMainDisplayPath << theGlobalVariables.DisplayPathOutputFolder
-  << this->VirtualNameSSAlgOutputFolder << "/";
+  outMainDisplayPath << "/" << this->VirtualNameSSAlgOutputFolder;
   this->DisplayNameSSalgOutputFolder = outMainDisplayPath.str();
 }
 

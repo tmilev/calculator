@@ -77,7 +77,6 @@ void HtmlRoutines::LoadStrings() {
   }
   HtmlRoutines::GetMathQuillStyleSheeTWithTags();
   HtmlRoutines::GetJavascriptAceEditorScriptWithTags();
-  HtmlRoutines::GetJavascriptMathjax();
   HtmlRoutines::GetJavascriptMathQuillDefaulTWithTags();
   HtmlRoutines::GetJavascriptMathQuillMatrixSupporTWithTags();
 }
@@ -349,21 +348,18 @@ void HtmlRoutines::ConvertURLStringToNormal(const std::string& input, std::strin
   output = out.str();
 }
 
-const std::string& HtmlRoutines::GetJavascriptMathjax() {
+std::string HtmlRoutines::GetJavascriptMathjax(const std::string& baseFolder) {
   MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptMathjax");
-  if (HtmlRoutines::preLoadedFiles.Contains("MathJax")) {
-    return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("MathJax");
-  }
   std::stringstream out;
   std::string mathjaxSetupScript = FileOperations::GetVirtualNameWithHash(
     "calculator-html/mathjax-calculator-setup.js"
   );
   out << "<script type = 'text/javascript'>"
-  << "var MathJaxSetupScriptURL = '../../" << mathjaxSetupScript << "';\n"
-  << "var calculatorHtmlBaseFolder = '../../calculator-html/'; </script>";
-  out << "<script type =\"text/javascript\" src ='../../MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full'>"
+  << "var MathJaxSetupScriptURL = '" << baseFolder << mathjaxSetupScript << "';\n"
+  << "var calculatorHtmlBaseFolder = '" << baseFolder << "calculator-html/'; </script>";
+  out << "<script type =\"text/javascript\" src = '" << baseFolder << "MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full'>"
   << "</script>\n";
-  out << "<script src =\"../../" << mathjaxSetupScript << "\"></script>";
+  out << "<script src =\"" << baseFolder << mathjaxSetupScript << "\"></script>";
   HtmlRoutines::preLoadedFiles.SetKeyValue("MathJax", out.str());
   return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("MathJax");
 }

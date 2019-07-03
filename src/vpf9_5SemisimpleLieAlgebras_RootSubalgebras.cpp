@@ -1263,7 +1263,7 @@ void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
-  output << HtmlRoutines::GetJavascriptMathjax();
+  output << HtmlRoutines::GetJavascriptMathjax("../../../");
   output << "<body>" << this->ToString(theFormat) << "</body></html>";
   output.close();
 }
@@ -3047,9 +3047,9 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
-  output << "<link rel= 'stylesheet' href = '../../calculator-html/style_lie_algebras.css'>";
-  output << HtmlRoutines::GetJavascriptMathjax();
-  output << "<script src = '../../calculator-html/graphics_n_dimensions.js'></script>";
+  output << "<link rel= 'stylesheet' href = '../../../calculator-html/style_lie_algebras.css'>";
+  output << HtmlRoutines::GetJavascriptMathjax("../../../");
+  output << "<script src = '../../../calculator-html/graphics_n_dimensions.js'></script>";
   output << "<body>" << this->ToString(theFormat)
   << "<hr>LaTeX table with root subalgebra details.<br>"
   << this->ToStringDynkinTableFormat2LaTeX(theFormat)

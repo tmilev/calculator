@@ -428,7 +428,7 @@ void SemisimpleSubalgebras::ComputeFolderNames(FormatExpressions& inputFormat) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
   (void) inputFormat;//avoid unused parameter warning in a portable way
   this->CheckConsistency();
-  this->owner->ComputeFolderNames();
+  this->owner->ToStringFolderName();
   this->currentFormat.flagUseHTML = true;
   this->currentFormat.flagUseLatex = false;
   this->currentFormat.flagUsePNG = true;
@@ -611,7 +611,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
     out << ". ";
     out << "</div><!--divSemisimpleSubalgebrasInformation-->";
   }
-  out << "Structure constants.";
+  out << "<a href = '" << this->owner->ToStringStructureConstantsFileName() << "'>Structure constants</a>\n<br>\n";
   out << "The subalgebras are ordered by rank, "
   << "Dynkin indices of simple constituents and dimensions of simple constituents. "
   << "The upper index indicates the Dynkin index, "

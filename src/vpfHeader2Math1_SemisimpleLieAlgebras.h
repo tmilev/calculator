@@ -44,7 +44,8 @@ public:
   static unsigned int HashFunction(const SemisimpleLieAlgebra& input) {
     return input.theWeyl.HashFunction();
   }
-  void ComputeFolderNames();
+  std::string ToStringFolderName();
+  std::string ToStringFileNameStructureConstants();
   template <class coefficient>
   void GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar = 0) {
     output.MakeZero();
@@ -102,6 +103,7 @@ public:
     int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc, Rational& outputMultiplyLieBracketsToGetGenerator
   );
   std::string ToString(FormatExpressions* inputFormat = 0);
+  std::string ToStringStructureConstantsFileName();
   std::string GetStringFromChevalleyGenerator(int theIndex, FormatExpressions* thePolynomialFormat) const;
   bool CommutatorIsNonZero(int leftIndex, int rightIndex) {
     return !this->theLiebrackets.elements[leftIndex][rightIndex].IsEqualToZero();

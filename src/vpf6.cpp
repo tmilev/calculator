@@ -1228,14 +1228,9 @@ bool Calculator::innerWriteToHDOrPrintSSLieAlgebra(
     }
   }
   if (writeToHD) {
-    std::stringstream theFileName;
-    theFileName
-    << theWeyl.theDynkinType.ToStringFolderName()
-    << "structure_constants_notation"
-    << HtmlRoutines::CleanUpForFileNameUse(theWeyl.theDynkinType.ToString())
-    << ".html";
     std::stringstream outWithLinks;
-    outWithLinks << theCommands.WriteFileToOutputFolderReturnLink(out.str(), theFileName.str(), "hard drive output")
+    outWithLinks
+    << theCommands.WriteFileToOutputFolderReturnLink(out.str(), theSSalgebra.ToStringStructureConstantsFileName(), "hard drive output")
     << "<br>" << out.str();
     return output.AssignValue(outWithLinks.str(), theCommands);
   }

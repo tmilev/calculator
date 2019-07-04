@@ -8064,7 +8064,7 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos(
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, ownerSS)) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  ownerSS->ComputeFolderNames();
+  ownerSS->ToStringFolderName();
   FormatExpressions theFormat;
   theFormat.flagUseHTML = true;
   theFormat.flagUseLatex = false;

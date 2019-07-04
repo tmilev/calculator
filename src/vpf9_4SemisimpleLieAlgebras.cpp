@@ -98,12 +98,23 @@ std::string DynkinType::ToStringFolderName() const {
   return out.str();
 }
 
-void SemisimpleLieAlgebra::ComputeFolderNames() {
+std::string SemisimpleLieAlgebra::ToStringFileNameStructureConstants() {
+  std::stringstream theFileName;
+  theFileName
+  << this->ToStringFolderName()
+  << "structure_constants_notation"
+  << HtmlRoutines::CleanUpForFileNameUse(theWeyl.theDynkinType.ToString())
+  << ".html";
+  return theFileName.str();
+}
+
+std::string SemisimpleLieAlgebra::ToStringFolderName() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
   this->CheckConsistency();
   DynkinType& theType = this->theWeyl.theDynkinType;
   this->VirtualNameSSAlgOutputFolder = "output/" + theType.ToStringFolderName();
   this->DisplayNameSSalgOutputFolder = this->VirtualNameSSAlgOutputFolder;
+  return this->DisplayNameSSalgOutputFolder;
 }
 
 void SemisimpleLieAlgebra::ComputeChevalleyConstants() {

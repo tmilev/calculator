@@ -163,7 +163,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
     }
     if (!answerGenerated) {
       if (theProblem.theProblemData.theAnswers.size() > 0) {
-        out << "<td><span style =\"color:red\"><b>Failure.</b></span>";
+        out << "<td><b style =\"color:red\">Failure.</b>";
         out << "</td>"
         << "<td>"
         << answerGeneration
@@ -2123,5 +2123,10 @@ bool CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm(
   if (isElementZmodP) {
     return output.AssignValueWithContext(eltZmodP, theContext, theCommands);
   }
+  return false;
+}
+
+bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(Calculator &theCommands, const Expression &input, Expression &output) {
+  crash << "not implemented yet. " << crash;
   return false;
 }

@@ -3059,6 +3059,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Calculator::innerWriteToHDOrPrintSSLieAlgebra",
     "WriteSemisimpleLieAlgebra"
   );
+
   this->AddOperationInnerHandler(
     "PrintSemisimpleLieAlgebra",
     Calculator::innerPrintSSLieAlgebraVerbose,
@@ -3068,14 +3069,30 @@ void Calculator::initPredefinedInnerFunctions() {
     "the Lie bracket pairing table. "
     "In addition, this function creates "
     "a graphics of the root system. ",
-    "PrintSemisimpleLieAlgebra{}(F_4);\nPrintSemisimpleLieAlgebra{}(2G^5_2+B_3);",
+    "PrintSemisimpleLieAlgebra{}(F_4);\n"
+    "PrintSemisimpleLieAlgebra{}(2G^5_2+B_3);",
     true,
     false,
     "Calculator::innerPrintSSLieAlgebraVerbose",
     "PrintSemisimpleLieAlgebra"
   );
   this->AddOperationInnerHandler(
-    "GetChevalleyGenerator", Calculator::innerGetChevGen, "",
+    "PrecomputeSemisimpleLieAlgebraStructure",
+    CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure,
+    "",
+    "Function available to logged-in admins only. "
+    "Precomputes all built-in semisimple Lie algebra information. "
+    "Argument gives a starting point (0 or negative to start at the beginning). "
+    "Turn process monitoring on when using this function. ",
+    "PrecomputeSemisimpleLieAlgebraStructure 0",
+    true,
+    false,
+    "CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure",
+    "PrecomputeSemisimpleLieAlgebraStructure"
+  );
+  this->AddOperationInnerHandler(
+    "GetChevalleyGenerator",
+    Calculator::innerGetChevGen, "",
     "First argument must be a semisimple "
     "Lie algebra, second argument must "
     "be an integer from -N to N, "
@@ -3848,7 +3865,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "whose product equals X mod N, where "
     "the elements are taken from the predefined "
     "list of positive integers given by the second argument.",
-    "PrintProductDistancesModN( 65537, (97,98,99,100,101,102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) ",
+    "PrintProductDistancesModN( 65537, "
+    "(97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) ",
     false, true,
     "CalculatorFunctionsGeneral::innerFindProductDistanceModN",
     "PrintProductDistancesModN"
@@ -3859,7 +3877,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "Tries to find one solution of the system a_1*a_2* ...= X mod N a_1+a_2+...=Y "
     "where the a_i's belong to a "
     "predefined set of positive numbers. ",
-    "SolveProductSumEquationOverSetModN(theMod =65537; theProduct =16628; theSum=1286; theSet = (97,98,99,100,101,102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) ",
+    "SolveProductSumEquationOverSetModN(theMod =65537; theProduct =16628; theSum=1286; "
+    "theSet = (97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) ",
     true, false,
     "CalculatorFunctionsGeneral::innerFindProductDistanceModN",
     "SolveProductSumEquationOverSetModN"
@@ -3888,7 +3907,7 @@ void Calculator::initPredefinedInnerFunctions() {
   this->AddOperationInnerHandler(
     "InvertMatrix", CalculatorFunctionsGeneral::innerInvertMatrix, "",
     "Inverts a matrix of rationals or algebraic numbers if invertible. ",
-    "X =MakeMatrix((1,2,1), (1,0,1), (- 1,1,0)); InvertMatrix X- X^{- 1}",
+    "X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0)); InvertMatrix X- X^{- 1}",
     true, false,
     "CalculatorFunctionsGeneral::innerInvertMatrix",
     "InvertMatrix"
@@ -3922,7 +3941,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "More precisely, the command leaves the fist child in "
     "the internal representation of the object in place "
     "and flips the order of all other children.",
-    "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)",
+    "Reverse{}(s_1 s_2 s_3 s_4 s_2 s_3 s_1 s_2 s_3 s_4 s_1 s_2 s_3 s_2 s_1)",
     true, false,
     "Calculator::innerReverseOrdeR", "Reverse"
   );
@@ -4001,7 +4020,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "FindOneSolutionSerreLikePolynomialSystem"
   );
   this->AddOperationInnerHandler(
-    "FindOneSolutionSerreLikePolynomialSystemUpperLimit", CalculatorFunctionsGeneral::innerSolveSerreLikeSystemUpperLimit, "",
+    "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
+    CalculatorFunctionsGeneral::innerSolveSerreLikeSystemUpperLimit, "",
     "Same as FindOneSolutionSerreLikePolynomialSystem "
     "but the first argument gives upper limits "
     "to the number of polynomial computations that can be carried out. ",
@@ -4031,7 +4051,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "FindOneSolutionSerreLikePolynomialSystemUpperLimit"
   );
   this->AddOperationInnerHandler(
-    "FindOneSolutionSerreLikePolynomialSystemAlgebraic", CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraic, "",
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
+    CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraic, "",
     "Same as FindOneSolutionSerreLikePolynomialSystem "
     "but starts directly over algebraic closure. ",
     "FindOneSolutionSerreLikePolynomialSystemAlgebraic{}"
@@ -4169,7 +4190,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "GroebnerGrLexUpperLimit"
   );
   this->AddOperationInnerHandler(
-    "ComputeFKFT", CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras, "",
+    "ComputeFKFT",
+    CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras, "",
     "Attempts to compute all Fernando-Kac subalgebras according "
     "to the most experimental, latest and greatest algorithm. "
     "Argument must be of type semisimple Lie subalgebras. ",
@@ -4179,7 +4201,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "ComputeFKFT"
   );
   this->AddOperationInnerHandler(
-    "ComputeSemisimpleSubalgebras", CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras, "",
+    "ComputeSemisimpleSubalgebras",
+    CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras, "",
     "Computes the semisimple subalgebras of a semisimple "
     "Lie algebra and creates a data structure containing them. ",
     "ComputeSemisimpleSubalgebras(A_2)",
@@ -4240,7 +4263,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintSemisimpleSubalgebrasFull"
   );
   this->AddOperationInnerHandler(
-    "CanBeExtendedParabolicallyTo", CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo, "",
+    "CanBeExtendedParabolicallyTo",
+    CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo, "",
     "Finds whether a Dynkin type extends via the standard parabolic extension to another. ",
     "CanBeExtendedParabolicallyTo(A^3_1, A_5);"
     "CanBeExtendedParabolicallyTo(a_2, b_3);"
@@ -4256,7 +4280,8 @@ void Calculator::initPredefinedInnerFunctions() {
   this->AddOperationInnerHandler(
     "EmbedSemisimpleInSemisimple",
     CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg, "",
-    " Tries to find all embeddings of the first semisimple type into the second. Records all intermediate subalgebras. ",
+    "Tries to find all embeddings of the first semisimple type into the second. "
+    "Records all intermediate subalgebras. ",
     "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);"
     "EmbedSemisimpleInSemisimple{}(G_2, B_3)",
     true, false,
@@ -4266,7 +4291,7 @@ void Calculator::initPredefinedInnerFunctions() {
   this->AddOperationInnerHandler(
     "LoadSemisimpleSubalgebras",
     CalculatorConversions::innerLoadSemisimpleSubalgebras, "",
-    " <b>This function is being developed and is not implemented fully yet.</b>"
+    "<b>This function is being developed and is not implemented fully yet.</b>"
     "Loads a semisimpleSubalgebra from expression. ",
     "LoadSemisimpleSubalgebras {}(EmbedSemisimpleInSemisimple{}(G_2, B_3))",
     true, false,
@@ -4289,7 +4314,8 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationInnerHandler(
     "\\sqrt", CalculatorFunctionsGeneral::innerSqrt, "",
-    "Square root of a rational, implemented as algebraic extension of the rationals. ",
+    "Square root of a rational, "
+    "implemented as algebraic extension of the rationals. ",
     "\\sqrt 2+\\sqrt 3;(\\sqrt{}2+\\sqrt{}3+\\sqrt{}6)^2",
     true, false,
     "Calculator::innerSqrt",

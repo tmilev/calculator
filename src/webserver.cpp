@@ -235,7 +235,6 @@ bool WebWorker::ReceiveAllHttpSSL() {
     this->displayUserInput = this->error;
     return false;
   }
-  logWorker << "DEBUG: got to here. " << logger::endL;
   this->remainingBytesToSenD = (std::string) "HTTP/1.0 100 Continue\r\n\r\n";
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
@@ -484,7 +483,7 @@ std::string WebWorker::ToStringMessageUnsafe(bool useHTML) const {
     out << "<br>" << this->cookies[i];
   }
   if (useHTML) {
-    out << "\n<hr>\nHost with port:<br>\n" << theGlobalVariables.hostWithPort;
+    out << "\n<hr>\nHost with port:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.hostWithPort, false);
     out << "\n<hr>\nFull message head:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageHead, true);
     out << "\n<hr>\nFull message body:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageBody, true);
   } else {
@@ -682,7 +681,7 @@ bool WebWorker::ExtractArgumentsFromMessage(
 //Returns false if something unexpected happens during the login procedure.
 //Returning true does not necessarily mean the login information was accepted.
 //Returning false guarantees the login information was not accepted.
-bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments, std::stringstream* comments) {
+bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComments, std::stringstream* comments) {
   MacroRegisterFunctionWithName("WebWorker::Login");
   theGlobalVariables.flagLoggedIn = false;
   MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
@@ -1340,7 +1339,7 @@ void WebWorker::SetHeaderOKNoContentLength(const std::string& extraHeader, const
 }
 
 void WebWorker::SanitizeVirtualFileName() {
-  MacroRegisterFunctionWithName("WebWorker::SanitizePhysicalFileName");
+  MacroRegisterFunctionWithName("WebWorker::SanitizeVirtualFileName");
   std::string resultName;
   resultName.reserve(this->VirtualFileName.size());
   bool foundslash = false;
@@ -1683,12 +1682,18 @@ int WebWorker::ProcessFile() {
     << theGlobalVariables.DisplayNameExecutableAppNoCache << "\">app no cache</a>.<hr>";
     stOutput << "<b>File does not exist.</b>";
     if (this->flagFileNameSanitized) {
-      stOutput << "<hr>You requested virtual file: " << this->VirtualFileName
-      << "<br>However, I do not allow addresses that contain dots (to avoid access to folders below the server). "
-      << " Therefore I have sanitized the address to a relative physical address: " << this->RelativePhysicalFileNamE;
+      stOutput
+      << "<hr>You requested virtual file: "
+      << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false)
+      << "<br>However, I do not allow addresses that contain dots "
+      << "(to avoid access to folders below the server). "
+      << "Therefore I have sanitized the address to a relative physical address: "
+      << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, false)
+      << ".";
     }
-    stOutput << "<br><b> Address:</b> "
-    << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true) << "<br><b>Virtual file name:</b> "
+    stOutput << "<br><b>Address:</b> "
+    << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true)
+    << "<br><b>Virtual file name:</b> "
     << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, true)
     << "<br><b>Computed relative physical file name:</b> "
     << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
@@ -2889,7 +2894,7 @@ int WebWorker::ServeClient() {
   if (this->ProcessRedirectAwayFromWWW()) {
     return 0;
   }
-  this->flagArgumentsAreOK = this->Login(argumentProcessingFailureComments, &comments);
+  this->flagArgumentsAreOK = this->LoginProcedure(argumentProcessingFailureComments, &comments);
   isNotModified = this->CorrectRequestsAFTERLoginReturnFalseIfModified();
   if (!isNotModified) {
     comments << this->ToStringAddressRequest() << ": modified after login. ";
@@ -3115,9 +3120,11 @@ int WebWorker::ProcessFolderOrFile() {
       &commentsOnFailure
   )) {
     this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
-    stOutput << "<html><body><b>File name deemed unsafe. "
+    stOutput << "<html><body>File name: "
+    << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->VirtualFileName, false, 1000)
+    << " <b style = 'color:red'>deemed unsafe</b>. "
     << "Please note that folder names are not allowed to contain dots and file names "
-    << "are not allowed to start with dots.</b> There may be additional restrictions "
+    << "are not allowed to start with dots. There may be additional restrictions "
     << "on file names added for security reasons.</body></html>";
     return 0;
   }
@@ -3223,11 +3230,11 @@ std::string WebWorker::ToStringStatus() const {
   std::stringstream out;
   out << "<br>Worker " << this->indexInParent + 1;
   if (this->flagExited) {
-    out << ", <span style = 'color:red'><b>exited</b></span>";
+    out << ", <b style = 'color:red'>exited</b>";
   }
   if (this->flagInUsE) {
     if (this->parent->activeWorker == this->indexInParent) {
-      out << ", <span style =\"color:green\"><b>current process</b></span>";
+      out << ", <b style =\"color:green\">current process</b>";
     } else {
       out << ", <b>in use</b>";
     }
@@ -3257,7 +3264,7 @@ std::string WebWorker::ToStringStatus() const {
     out << " Message at last ping: " << this->pingMessage;
   }
   if (this->status != "") {
-    out << "<br><span style =\"color:red\"><b> Status: " << this->status << "</b></span><br>";
+    out << "<br><b style =\"color:red\">Status: " << this->status << "</b><br>";
   }
   out << "Pipes: " << this->pipeWorkerToServerControls.ToString()
   << ", " << this->pipeWorkerToServerTimerPing.ToString()
@@ -4362,7 +4369,8 @@ int WebServer::Run() {
           }
           break;
         } else {
-          logSocketAccept << logger::red << "This is not supposed to happen: accept failed. Error: "
+          logSocketAccept << logger::red
+          << "This is not supposed to happen: accept failed. Error: "
           << this->ToStringLastErrorDescription() << logger::endL;
           found = true;
         }
@@ -4374,7 +4382,8 @@ int WebServer::Run() {
     }
     if (newConnectedSocket < 0) {
       if (theGlobalVariables.flagServerDetailedLog) {
-        logServer << "Detail: newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. " << logger::endL;
+        logServer << "Detail: newConnectedSocket is negative: "
+        << newConnectedSocket << ". Not accepting. " << logger::endL;
       }
       continue;
     }
@@ -4593,7 +4602,7 @@ void WebServer::FigureOutOperatingSystem() {
   logServer << "We support the following Linux distros: "
   << logger::blue << supportedOSes.ToStringCommaDelimited() << logger::endL;
   logServer << "Please post a request for support of your Linux flavor on our bug tracker: " << logger::endL
-  << logger::green << "https://github.com/tmilev/calculator"
+  << logger::green << HtmlRoutines::githubRepository
   << logger::endL << "and we will add your Linux flavor to the list of supported distros. " << logger::endL;
 }
 
@@ -4966,7 +4975,8 @@ void WebServer::InitializeGlobalVariables() {
       theGlobalVariables.buildHeadHashWithServerTime
     );
   }
-  //Warning: order of substitutions is important. Only the first rule that applies is applied, only once.
+  //Warning: order of substitutions is important.
+  //Only the first rule that applies is applied, once.
   //No further rules are applied after that.
   folderSubstitutionsNonSensitive.SetKeyValue("/output/", "output/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("output/", "output/");//<-internal use
@@ -5118,7 +5128,7 @@ void GlobalVariables::ConfigurationProcess() {
     << logger::red << "WARNING: database disabled, " << logger::green
     << "no database operations permitted." << logger::endL
     << logger::red
-    << " Everyone logged-in as admin. " << logger::endL
+    << "Everyone gets logged-in as admin. " << logger::endL
     << logger::purple << "************************" << logger::endL;
   }
   if (theGlobalVariables.configuration[Configuration::serverAutoMonitor].isTrueRepresentationInJSON()) {
@@ -5138,8 +5148,10 @@ void GlobalVariables::ConfigurationProcess() {
     << logger::purple << "************************" << logger::endL
     << logger::purple << "************************" << logger::endL
     << logger::red << "WARNING: DETAILED server logging is on. " << logger::endL
-    << "This is strictly for development purposes, please do not deploy on live systems. " << logger::endL
-    << "To turn off/on server logging: set serverDetailedLog to false in the file configuration/configuration.json." << logger::endL
+    << "This is strictly for development purposes, "
+    << "please do not deploy on live systems. " << logger::endL
+    << "To turn off/on server logging: set serverDetailedLog "
+    << "to false in the file configuration/configuration.json." << logger::endL
     << logger::purple << "************************" << logger::endL
     << logger::purple << "************************" << logger::endL
     << logger::purple << "************************" << logger::endL;
@@ -5151,8 +5163,10 @@ void GlobalVariables::ConfigurationProcess() {
     logServer
     << logger::purple << "************************" << logger::endL
     << logger::red << "WARNING: caching files is off. " << logger::endL
-    << "This is for development purposes only, please do not deploy on live systems. " << logger::endL
-    << "To turn off/on modify variable serverRAMCachingOff in configuration/configuration.json." << logger::endL
+    << "This is for development purposes only, "
+    << "please do not deploy on live systems. " << logger::endL
+    << "To turn off/on modify variable serverRAMCachingOff "
+    << "in configuration/configuration.json." << logger::endL
     << logger::purple << "************************" << logger::endL;
   }
   theGlobalVariables.flagRunServerOnEmptyCommandLine = theGlobalVariables.configuration[

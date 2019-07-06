@@ -1886,14 +1886,7 @@ std::string Calculator::WriteFileToOutputFolderReturnLink(
 ) {
   MacroRegisterFunctionWithName("Calculator::WriteFileToOutputFolderReturnLink");
   std::string fileNameVirtual = "output/" + fileName;
-  std::stringstream commentsOnError;
-  bool success = FileOperations::WriteFileVirual(fileNameVirtual, fileContent, &commentsOnError);
-  if (!success) {
-    crash << "Failed to write file. " << commentsOnError.str() << crash;
-  }
-  std::stringstream out;
-  out << "<a href=\"" << fileNameVirtual << "\" target = \"_blank\">" << linkText << "</a>";
-  return out.str();
+  return FileOperations::WriteFileReturnHTMLLink(fileContent, fileNameVirtual, linkText);
 }
 
 bool Calculator::WriteTestStrings(List<std::string>& inputCommands, List<std::string>& inputResults) {

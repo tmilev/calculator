@@ -316,9 +316,8 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
     var currentOutput = inputParsed.result.output[i];
     var inputPanelId = panelIdPairs[i][0];
     var outputPanelId = panelIdPairs[i][1];
-    var inputPanel = new PanelExpandable(inputPanelId, true);
-    var outputPanel = new PanelExpandable(outputPanelId, true);
     if (currentInput.length > 200) {
+      var inputPanel = new PanelExpandable(inputPanelId, true);
       inputPanel.setPanelContent(currentInput);
       inputPanel.doToggleContent();
       inputPanel.matchPanelStatus();
@@ -326,6 +325,7 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
       document.getElementById(inputPanelId).innerHTML = currentInput;
     }
     if (currentOutput.length > 150) {
+      var outputPanel = new PanelExpandable(outputPanelId, true);
       outputPanel.setPanelContent(currentOutput);
       outputPanel.doToggleContent();
       outputPanel.matchPanelStatus();

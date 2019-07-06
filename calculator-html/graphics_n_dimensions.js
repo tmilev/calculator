@@ -32,6 +32,7 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.idCanvas = inputIdCanvas;
   this.idsBasis = [];
   this.idInfo = inputIdInfo;
+  this.panelInfo = null;
   this.idPlaneInfo = `${inputIdInfo}projectionPlane`;
   this.idHighlightInfo = `${this.idCanvas}HighlightInfo`;
   this.basisCircles = [];
@@ -115,7 +116,8 @@ function toStringVector(vector) {
   return result;
 }
 
-GraphicsNDimensions.prototype.writeInfo = function() {
+/** @returns {string} */
+GraphicsNDimensions.prototype.getInfoHTML = function() {
   var result = "";
   result += `<br>Mouse position: ${toStringVector(this.mousePositionScreen)}`;
   result += `<br>Selected index: ${this.selectedBasisIndex}`;
@@ -136,7 +138,12 @@ GraphicsNDimensions.prototype.writeInfo = function() {
   for (var i = 0; i < this.basisCircles.length; i ++) {
     result += `<br>${i}: ${toStringVector(this.basisCircles[i])}: ${toStringVector(this.projectionsBasisCircles[i])}`;
   }
-  document.getElementById(this.idPlaneInfo).innerHTML = result;
+  return result;
+}
+
+GraphicsNDimensions.prototype.writeInfo = function() {
+  var info = this.getInfoHTML();
+  document.getElementById(this.idPlaneInfo).innerHTML = info;
 }
 
 GraphicsNDimensions.prototype.initInfo = function () {
@@ -155,7 +162,7 @@ GraphicsNDimensions.prototype.initInfo = function () {
   result += `Change to basis</button><br>`;
   //result += `<button onclick = "snapShotLaTeX('${this.idCanvas}')>LaTeX snapshot</button>`;
   result += `<span id = "${this.idCanvas}snapShotLateXspan"> </span>\n`;
-  result += `<span id = '${this.idPlaneInfo}'></span><br>`;
+  result += `<div id = '${this.idPlaneInfo}'></div><br>`;
   document.getElementById(this.idInfo).innerHTML = result;
 }
   

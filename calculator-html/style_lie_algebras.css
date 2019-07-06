@@ -45,10 +45,13 @@ div.divSubalgebraInformation{
   right: 0;
 }
 
-div.divSemisimpleSubalgebrasInformation{
+div.divPanelSemisimpleLieAlgebraStructure{
   position: fixed;
   width: 10%;
   right: 0;
+  top: 0;
+  background-color: white;
+  padding: 10px;
 }
 
 h1 {

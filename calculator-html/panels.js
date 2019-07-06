@@ -1,3 +1,11 @@
+/**
+ * File needs to function as a stand-alone javascript 
+ * as well be used as a commonJS module included via
+ * require('panels.js')).
+ * Please don't require(...) any modules from this file.
+ **/
+
+
 "use strict";
 
 function modifyHeightForTimeout(currentButtonPanel, newHeight) { 
@@ -232,6 +240,23 @@ PanelExpandable.prototype.initializeProgressPanel = function() {
     this.container.removeChild(this.container.firstChild);
   }
   this.container.appendChild(spanContainer);
+}
+
+var module;
+if (module === undefined) {
+  module = {};
+}
+
+if (window.calculator === undefined) {
+  window.calculator = {};
+}
+
+if (window.calculator.panels === undefined) {
+  window.calculator.panels = {};
+}
+
+if (window.calculator.panels.doToggleContent === undefined) {
+  window.calculator.panels.doToggleContent = doToggleContent;
 }
 
 module.exports = {

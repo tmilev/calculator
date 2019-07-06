@@ -77,7 +77,8 @@ public:
   static const std::string GetCSSLinkCalculator(const std::string& relativeTo);
   static const std::string GetCSSLinkLieAlgebras(const std::string& relativeTo);
 
-  static const std::string GetJavascriptLinkGraphicsNDimensions(const std::string& relativeto);
+  static const std::string GetJavascriptLinkGraphicsNDimensions(const std::string& relativeTo);
+  static const std::string GetJavascriptLinkPanels(const std::string& relativeTo);
 
   static std::string GetJavascriptMathjax(const std::string& baseFolder);
   static const std::string& GetJavascriptMathQuillDefaulTWithTags();

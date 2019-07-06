@@ -629,7 +629,7 @@ public:
   void GetHighestWeightsAllRepsDimLessThanOrEqualTo(
     List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound
   );
-  Rational GetLongestRootLengthSquared();
+  Rational GetLongestRootLengthSquared() const;
   static unsigned int HashFunction(const WeylGroupData& input) {
     return input.CartanSymmetric.HashFunction();
   }

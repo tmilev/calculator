@@ -144,7 +144,7 @@ public:
   bool IsFileServedRaw();
 
   static bool IsAllowedAsRequestCookie(const std::string& input);
-  bool Login(std::stringstream& argumentProcessingFailureComments, std::stringstream *comments);
+  bool LoginProcedure(std::stringstream& argumentProcessingFailureComments, std::stringstream *comments);
   bool CorrectRequestsBEFORELoginReturnFalseIfModified();
   bool CorrectRequestsAFTERLoginReturnFalseIfModified();
   bool RedirectIfNeeded(std::stringstream& argumentProcessingFailureComments);

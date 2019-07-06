@@ -192,7 +192,7 @@ public:
     return result;
   }
   template <class otherType>
-  inline otherType ScalarEuclidean(const Vector<otherType>& other) const {
+  otherType ScalarEuclidean(const Vector<otherType>& other) const {
     otherType output;
     this->ScalarEuclidean(other, output);
     return output;
@@ -220,8 +220,8 @@ public:
   ) {
     coefficient t;
     coefficient tempRat;
-    Vector<coefficient>::ScalarEuclidean(input, normal, t);
-    Vector<coefficient>::ScalarEuclidean(ProjectionDirection, normal, tempRat);
+    input.ScalarEuclidean(normal, t);
+    ProjectionDirection.ScalarEuclidean(normal, tempRat);
     t /= tempRat;
     t.Minus();
     Vector<coefficient>::VectorPlusVectorTimesScalar(input, ProjectionDirection, t, output);
@@ -413,14 +413,14 @@ public:
   ) {
     int Pivot = - 1;
     if (!this->FindIndexFirstNonZeroCoordinateFromTheLeft(Pivot)) {
-      output.MakeEiBasis(this->size, theRingUnit, theRingZero);
+      output.MakeEiBasis(this->size);
       return;
     }
     output.SetSize(this->size - 1);
     for (int i = 0; i < this->size; i ++) {
       if (i != Pivot) {
         Vector<coefficient>& current = output.TheObjects[i];
-        current.MakeEi(this->size, i, theRingUnit, theRingZero);
+        current.MakeEi(this->size, i);
         current.TheObjects[Pivot] -= this->TheObjects[i];
       }
     }
@@ -857,7 +857,7 @@ class Vectors: public List<Vector<coefficient> > {
   }
   bool GetCoordsInBasis(
     const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords
-  );
+  ) const;
   bool GetIntegralCoordsInBasisIfTheyExist(
     const Vectors<coefficient>& inputBasis,
     Vectors<coefficient>& output,
@@ -1141,7 +1141,7 @@ bool Vectors<coefficient>::LinSpanContainsVector(
 template <class coefficient>
 bool Vectors<coefficient>::GetCoordsInBasis(
   const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords
-) {
+) const {
   MacroRegisterFunctionWithName("Vectors::GetCoordsInBasis");
   //if (this == 0 || &outputCoords == 0 || this == &outputCoords)
   //  crash << "This is a programming error: input and output addresses are zero or coincide. this address: "

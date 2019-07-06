@@ -33,8 +33,8 @@ public:
   Matrix<ElementSemisimpleLieAlgebra<Rational> > theLiebrackets;
   //  List<int> OppositeRootSpaces;
   List<int> UEGeneratorOrderIncludingCartanElts;
-  std::string VirtualNameSSAlgOutputFolder;
-  std::string DisplayNameSSalgOutputFolder;
+  // std::string pathVirtualNameOutput;
+  // std::string pathRelativePhysicalOutput;
 
   bool flagHasNilradicalOrder;
   bool flagDeallocated;
@@ -44,8 +44,14 @@ public:
   static unsigned int HashFunction(const SemisimpleLieAlgebra& input) {
     return input.theWeyl.HashFunction();
   }
-  std::string ToStringFolderName();
-  std::string ToStringFileNameStructureConstants();
+  std::string ToStringDisplayFolderName(const std::string& baseFolder) const;
+  std::string ToStringDisplayFileNameWithPathStructureConstants(const std::string& baseFolder) const;
+  std::string ToStringVirtualFolderName() const;
+  std::string ToStringVirtualFileNameWithPathStructureConstants() const;
+  std::string ToStringFileNameNoPathStructureConstants() const;
+  std::string ToStringFileNameNoPathSemisimpleSubalgebras() const;
+  std::string ToStringFileNameNoPathRootSubalgebras() const;
+  std::string ToStringFileNameRelativePathSlTwoSubalgebras() const;
   template <class coefficient>
   void GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar = 0) {
     output.MakeZero();
@@ -103,7 +109,22 @@ public:
     int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc, Rational& outputMultiplyLieBracketsToGetGenerator
   );
   std::string ToString(FormatExpressions* inputFormat = 0);
-  std::string ToStringStructureConstantsFileName();
+  std::string ToStringHTMLMenuStructureSummary(
+    const std::string& relativeTo,
+    bool includeStructureConstants,
+    bool includeRootSubalgebras,
+    bool includeSl2Subalgebras,
+    bool includeSemisimpleSubalgebras
+  );
+
+  std::string ToStringMenuStructurePages(
+    const std::string& relativeTo,
+    bool includeStructureConstants,
+    bool includeRootSubalgebras,
+    bool includeSl2Subalgebras,
+    bool includeSemisimpleSubalgebras
+  ) const;
+  std::string ToHTMLCalculator(bool Verbose, bool writeToHD, bool flagWriteLatexPlots);
   std::string GetStringFromChevalleyGenerator(int theIndex, FormatExpressions* thePolynomialFormat) const;
   bool CommutatorIsNonZero(int leftIndex, int rightIndex) {
     return !this->theLiebrackets.elements[leftIndex][rightIndex].IsEqualToZero();

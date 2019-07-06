@@ -6222,7 +6222,7 @@ class DynkinSimpleType {
     }
     return this->CanBeExtendedParabolicallyTo(otherType);
   }
-  bool HasEasySubalgebras() const;
+  bool HasPrecomputedSubalgebras() const;
   Rational GetRatioLongRootToFirst() const {
     return this->GetRatioLongRootToFirst(this->theLetter, this->theRank);
   }
@@ -6276,7 +6276,8 @@ public:
     List<DynkinType>& output,
     List<List<int> >* outputPermutationRoots
   ) const;
-  std::string ToStringFolderName() const;
+  bool HasPrecomputedSubalgebras() const;
+  std::string ToStringVirtualNameFolder() const;
   bool ContainsType(char theTypeLetter) const;
   void GetDynkinTypeWithDefaultScales(DynkinType& output) const;
   DynkinSimpleType GetGreatestSimpleType() const;

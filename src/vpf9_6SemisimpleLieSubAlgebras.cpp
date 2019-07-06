@@ -320,7 +320,7 @@ int SemisimpleSubalgebras::GetDisplayIndexFromActual(int ActualIndexSubalgebra) 
 
 std::string SemisimpleSubalgebras::GetRelativePhysicalFileNameSubalgebra(int ActualIndexSubalgebra) const {
   std::stringstream out;
-  out << this->owner->VirtualNameSSAlgOutputFolder;
+  out << this->owner->ToStringVirtualFolderName();
   out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString())
   << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
@@ -328,7 +328,7 @@ std::string SemisimpleSubalgebras::GetRelativePhysicalFileNameSubalgebra(int Act
 
 std::string SemisimpleSubalgebras::GetRelativePhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra) const {
   std::stringstream out;
-  out << this->owner->VirtualNameSSAlgOutputFolder;
+  out << this->owner->ToStringVirtualFolderName();
   out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString())
   << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
@@ -337,7 +337,7 @@ std::string SemisimpleSubalgebras::GetRelativePhysicalFileNameFKFTNilradicals(in
 std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraAbsolute(int ActualIndexSubalgebra, FormatExpressions* theFormat) const {
   std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
-  out << this->owner->DisplayNameSSalgOutputFolder;
+  out << this->owner->ToStringVirtualFolderName();
   out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString())
   << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
@@ -346,7 +346,7 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraAbsolute(int Actu
 std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraRelative(int ActualIndexSubalgebra, FormatExpressions* theFormat) const {
   std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
-  out << "./";
+  //out << "./";
   out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString())
   << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
@@ -355,7 +355,7 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraRelative(int Actu
 std::string SemisimpleSubalgebras::GetDisplayFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat) const {
   std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
-  out << this->owner->DisplayNameSSalgOutputFolder;
+  //out << this->owner->ToStringVirtualFolderName();
   out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_"
   << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
@@ -372,10 +372,10 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
   this->ComputeFolderNames(this->currentFormat);
   std::fstream testFile;
   std::string testFileNameRelative =
-  this->owner->VirtualNameSSAlgOutputFolder + "testFileWritePermissionsSSsas.txt";
+  this->owner->ToStringVirtualFolderName() + "testFileWritePermissionsSSsas.txt";
   std::string testFileFolderPhysical;
   FileOperations::GetPhysicalFileNameFromVirtual(
-    this->owner->VirtualNameSSAlgOutputFolder, testFileFolderPhysical, false, false, 0
+    this->owner->ToStringVirtualFolderName(), testFileFolderPhysical, false, false, 0
   );
   theGlobalVariables.CallSystemNoOutput("mkdir " + testFileFolderPhysical, &logWorker);
 
@@ -389,7 +389,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
     << " folder in which the file is located. "
     << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
   }
-  FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, "output/" + testFileNameRelative, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, testFileNameRelative, false, true, false);
   testFile << "Write permissions test file.";
 }
 
@@ -401,12 +401,9 @@ void SemisimpleSubalgebras::WriteReportToFiles() {
   this->currentFormat.flagUseHtmlAndStoreToHD = true;
   this->currentFormat.flagUseLatex = true;
   this->currentFormat.flagUseMathSpanPureVsMouseHover = true;
-  std::fstream fileSlowLoad, fileFastLoad;
+  std::fstream fileSlowLoad;
   FileOperations::OpenFileCreateIfNotPresentVirtual(
     fileSlowLoad, this->VirtualNameMainFile1, false, true, false
-  );
-  FileOperations::OpenFileCreateIfNotPresentVirtual(
-    fileFastLoad, this->VirtualNameMainFile2FastLoad, false, true, false
   );
   std::stringstream commonHead;
   commonHead << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
@@ -418,9 +415,6 @@ void SemisimpleSubalgebras::WriteReportToFiles() {
   commonHead << "<body>";
 
   fileSlowLoad << commonHead.str() << this->ToString(&this->currentFormat);
-  this->currentFormat.flagUseMathSpanPureVsMouseHover = false;
-  fileFastLoad << commonHead.str() << this->ToString(&this->currentFormat);
-  fileFastLoad << "</body></html>";
   fileSlowLoad << "</body></html>";
 }
 
@@ -428,20 +422,16 @@ void SemisimpleSubalgebras::ComputeFolderNames(FormatExpressions& inputFormat) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
   (void) inputFormat;//avoid unused parameter warning in a portable way
   this->CheckConsistency();
-  this->owner->ToStringFolderName();
   this->currentFormat.flagUseHTML = true;
   this->currentFormat.flagUseLatex = false;
   this->currentFormat.flagUsePNG = true;
 
-  this->DisplayNameMainFile1NoPath = "SemisimpleSubalgebras_" + HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
-  this->DisplayNameMainFile2FastLoadNoPath = "SemisimpleSubalgebras_FastLoad_" + HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
-  this->DisplayNameMainFile1WithPath = this->owner->DisplayNameSSalgOutputFolder + this->DisplayNameMainFile1NoPath;
-  this->DisplayNameMainFile2FastLoadWithPath = this->owner->DisplayNameSSalgOutputFolder + this->DisplayNameMainFile2FastLoadNoPath;
+  this->DisplayNameMainFile1NoPath = this->owner->ToStringFileNameNoPathSemisimpleSubalgebras();
+  //"SemisimpleSubalgebras_" + HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
+  this->DisplayNameMainFile1WithPath = this->owner->ToStringDisplayFolderName("../../../") + this->DisplayNameMainFile1NoPath;
 
   this->VirtualNameMainFile1 =
-  this->owner->VirtualNameSSAlgOutputFolder + this->DisplayNameMainFile1NoPath;
-  this->VirtualNameMainFile2FastLoad =
-  this->owner->VirtualNameSSAlgOutputFolder + this->DisplayNameMainFile2FastLoadNoPath;
+  this->owner->ToStringVirtualFolderName() + this->DisplayNameMainFile1NoPath;
 }
 
 std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFormat) const {
@@ -593,6 +583,8 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
   }
   out << "<h1>Lie algebra " << this->owner->ToStringLieAlgebraNameFullHTML()
   << "<br>Semisimple complex Lie subalgebras</h1>";
+  out << this->owner->ToStringHTMLMenuStructureSummary("", true, true, true, false);
+
   candidatesNotRealizedNotProvenImpossible = this->theSubalgebras.size() - candidatesRealized - candidatesProvenImpossible;
   if (!writingToHD) {
     out << candidatesRealized << " subalgebras realized.";
@@ -601,7 +593,6 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
     << candidatesProvenImpossible << " proven impossible + " << candidatesNotRealizedNotProvenImpossible
     << " neither realized nor proven impossible. \n<hr>\n ";
   } else {
-    out << "<div class = 'divSemisimpleSubalgebrasInformation'>";
     out << "Up to linear equivalence, there are total " << candidatesRealized
     << " semisimple subalgebras (including the full subalgebra)";
     if (candidatesNotRealizedNotProvenImpossible != 0) {
@@ -609,11 +600,9 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
       << " semisimple subalgebra candidate(s) which were not realized (but not proven impossible)";
     }
     out << ". ";
-    out << "</div><!--divSemisimpleSubalgebrasInformation-->";
   }
-  out << "<a href = '" << this->owner->ToStringStructureConstantsFileName() << "'>Structure constants</a>\n<br>\n";
   out << "The subalgebras are ordered by rank, "
-  << "Dynkin indices of simple constituents and dimensions of simple constituents. "
+  << "Dynkin indices of simple constituents and dimensions of simple constituents. <br>"
   << "The upper index indicates the Dynkin index, "
   << "the lower index indicates the rank of the subalgebra. ";
   bool showTime = theFormat == 0 ? true : theFormat->flagIncludeMutableInformation;
@@ -1128,8 +1117,9 @@ void CandidateSSSubalgebra::ComputeHsAndHsScaledToActByTwoFromComponents() {
   this->theWeylNonEmbedded->theDynkinType.GetCartanSymmetricDefaultLengthKeepComponentOrder(cartanInComponentOrder);
   this->theSubalgebraNonEmbeddedDefaultScale =
   &this->owner->theSubalgebrasNonDefaultCartanAndScale.GetValueCreateNoInit(cartanInComponentOrder);
-  this->theSubalgebraNonEmbeddedDefaultScale->theWeyl.MakeFromDynkinTypeDefaultLengthKeepComponentOrder
-  (this->theWeylNonEmbedded->theDynkinType);
+  this->theSubalgebraNonEmbeddedDefaultScale->theWeyl.MakeFromDynkinTypeDefaultLengthKeepComponentOrder(
+    this->theWeylNonEmbedded->theDynkinType
+  );
   this->theSubalgebraNonEmbeddedDefaultScale->theWeyl.ComputeRho(true);
   this->theSubalgebraNonEmbeddedDefaultScale->ComputeChevalleyConstants();
   this->indexNonEmbeddedMeNonStandardCartan =
@@ -4249,8 +4239,11 @@ void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegular
   output = out.str();
 }
 
-WeylGroupData& slTwoSubalgebra::GetOwnerWeyl() {
-  return this->GetOwnerSSAlgebra().theWeyl;
+const WeylGroupData& slTwoSubalgebra::GetOwnerWeyl() const {
+  if (this->owner == 0) {
+    crash << "Weyl group with non-initialized owner. " << crash;
+  }
+  return this->owner->theWeyl;
 }
 
 bool slTwoSubalgebra::operator>(const slTwoSubalgebra& right) const {
@@ -4285,14 +4278,14 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat) const {
   out << "<a name =\"sl2index" << indexInContainer << "\">h-characteristic: " << this->hCharacteristic.ToString() << "</a>";
   out << "<br>Length of the weight dual to h: " << this->LengthHsquared;
   tempS = this->preferredAmbientSimpleBasis.ToString();
-  std::string physicalPath = "";
+  std::string virtualPath = "";
   std::string htmlPathServer = "";
   //bool usePNG = false;
   bool useHtml = true;
   bool useLatex = false;
-  physicalPath = this->owner->VirtualNameSSAlgOutputFolder + "sl2s/";
-  htmlPathServer = this->owner->DisplayNameSSalgOutputFolder + "sl2s/";
-  if (physicalPath == "" || htmlPathServer == "") {
+  virtualPath = this->owner->ToStringVirtualFolderName() + "sl2s/";
+  htmlPathServer = this->owner->ToStringDisplayFolderName("../../../") + "sl2s/";
+  if (virtualPath == "" || htmlPathServer == "") {
     //usePNG = false;
     useHtml = false;
   }
@@ -4754,7 +4747,7 @@ void slTwoSubalgebra::MakeReportPrecomputations(
 
 //The below code is related to sl(2) subalgebras of simple Lie algebras
 void slTwoSubalgebra::ComputeModuleDecomposition(
-  Vectors<Rational>& positiveRootsContainingRegularSA,
+  const Vectors<Rational>& positiveRootsContainingRegularSA,
   int dimensionContainingRegularSA,
   charSSAlgMod<Rational>& outputHWs,
   List<int>& outputModuleDimensions
@@ -4849,31 +4842,42 @@ void SltwoSubalgebras::ElementToStringModuleDecompositionMinimalContainingRegula
   output = out.str();
 }
 
+Rational slTwoSubalgebra::GetDynkinIndex() const {
+  return this->LengthHsquared * this->GetOwnerWeyl().GetLongestRootLengthSquared() / 4;
+}
+
+std::string SltwoSubalgebras::descriptionHCharacteristic =
+"Let h be in the Cartan subalgebra. Let \\(\\alpha_1, ..., \\alpha_n\\) "
+"be simple roots with respect to h. Then the h-characteristic, as defined by E. Dynkin, "
+"is the n-tuple \\((\\alpha_1(h), ..., \\alpha_n(h))\\).";
+
+std::string SltwoSubalgebras::descriptionHRealization =
+"The actual realization of h. "
+"The coordinates of h are given with respect to the fixed original simple basis. "
+"Note that the h-characteristic is computed using <b>a possibly different simple basis</b>, "
+"more precisely, with respect to any h-positive simple basis. ";
+
+std::string SltwoSubalgebras::descriptionMinimalContainingRegularSubalgebras =
+"A regular semisimple subalgebra might contain an sl(2) such that the sl(2) "
+"has no centralizer in the regular semisimple subalgebra, "
+"but the regular semisimple subalgebra might fail to be minimal containing. "
+"This happens when another minimal containing regular semisimple subalgebra "
+"of equal rank nests as a root subalgebra in the containing SA. "
+"See Dynkin, Semisimple Lie subalgebras of semisimple "
+"Lie algebras, remark before Theorem 10.4.";
+
+std::string SltwoSubalgebras::descriptionModuleDecompositionOverSl2 =
+"The \\(sl(2)\\) submodules of the ambient Lie algebra are parametrized by their "
+"highest weight with respect to the Cartan element h of \\(sl(2)\\). "
+"In turn, the highest weight is a positive integer multiple of the fundamental highest weight \\(\\psi\\). "
+"\\(V_{l\\psi}\\) is \\(l + 1\\)-dimensional. ";
+
 std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("SltwoSubalgebras::ToStringSummary");
   std::stringstream out;
-  std::string tooltipHchar = "Let h be in the Cartan s.a. Let \\alpha_1, ..., \\alpha_n "
-  "be simple root w.r.t. h. Then the h-characteristic is the n-tuple (\\alpha_1(h), ..., \\alpha_n(h))";
-  std::string tooltipVDecomposition = "The sl(2) submodules of g are parametrized by their "
-  "highest weight w.r.t. h. V_l is l+ 1 dimensional";
-  std::string tooltipContainingRegular =
-  "A regular semisimple subalgebra might contain an sl(2) such that the sl(2) "
-  "has no centralizer in the regular semisimple subalgebra, "
-  "but the regular semisimple subalgebra might fail to be minimal containing. "
-  "This happens when another minimal containing regular semisimple subalgebra "
-  "of equal rank nests as a root subalgebra in the containing SA. "
-  "See Dynkin, Semisimple Lie subalgebras of semisimple "
-  "Lie algebras, remark before Theorem 10.4.";
-  std::string tooltipHvalue =
-  "The actual realization of h. "
-  "The coordinates of h are given with respect to the fixed original simple basis. "
-  "Note that the characteristic of h is given *with respect to another basis*, "
-  "namely, with respect to an h-positive simple basis. "
-  "I will fix this in the future (email me if you want that done sooner).";
   bool useHtml = theFormat == 0 ? true : theFormat->flagUseHTML;
-  std::string physicalPath, displayPath;
-  physicalPath = this->owner->VirtualNameSSAlgOutputFolder;
-  displayPath = this->owner->DisplayNameSSalgOutputFolder;
+  std::string displayPathAlgebra;
+  displayPathAlgebra = "../";
   out << "Number of sl(2) subalgebras: " << this->size << ".\n";
   std::stringstream out2;
   out2 << "<br>Length longest root ambient algebra squared/4= "
@@ -4913,32 +4917,51 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat) {
       out << "<b>found bad characteristics!</b>";
     }
   } else {
-    out2 << "It turns out by direct computation that, in the current case of " << this->GetOwner().ToStringLieAlgebraName()
+    out2 << "It turns out by direct computation that, in the current case of "
+    << this->GetOwner().ToStringLieAlgebraName()
     << ",  e(P,P_0)= 0 implies that an S-sl(2) subalgebra "
     << "of the root subalgebra generated by P with characteristic with 2's in the simple roots of P_0 "
     << " always exists. Note that Theorem 10.3 is stated in one direction only.";
   }
   if (useHtml) {
-    out << "<br><br><table><tr><td style =\"padding-right:20px\">"
-    << HtmlRoutines::ElementToStringTooltip("Characteristic", tooltipHchar)
-    << "</td><td align =\"center\" style =\"white-space: nowrap\" title =\""
-    << tooltipHvalue << "\"> h</td><td style =\"padding-left:20px\" title =\""
-    << tooltipVDecomposition << "\"> Decomposition of ambient Lie algebra: \\psi stands for the fundamental sl(2)-weight. </td>"
+    std::string idSpanHCharacteristicDescription = "spanDynkinHCharacteristicDescription";
+    out << "<div id = '" << idSpanHCharacteristicDescription << "'>" << this->descriptionHCharacteristic << "</div><br>";
+    out << "<div id = 'idCartanElementRealization'>" << this->descriptionHRealization << "</div>";
+    out << "<div id = 'idMinimalContainingRegularSA'>" << this->descriptionMinimalContainingRegularSubalgebras << "</div>";
+    out << "<div id = 'idModuleDecomposition'>" << this->descriptionModuleDecompositionOverSl2 << "</div>";
+    out
+    << "<br><br><table><tr><td>Type + realization link</td><td style =\"padding-right:20px\">"
+    "<a href=\"#"
+    << idSpanHCharacteristicDescription
+    << "\">h-Characteristic</a>"
+    << "</td>";
+    out << "<td align =\"center\" style =\"white-space: nowrap\">"
+    << "<a href = '#idCartanElementRealization'>Realization of h</a>"
+    << "</td>"
+    << "<td style =\"padding-left:20px\">"
+    << "<a href=\"#idModuleDecomposition\">"
+    << "sl(2)-module decomposition of the ambient Lie algebra</a> <br> "
+    << "\\(\\psi=\\) the fundamental \\(sl(2)\\)-weight. "
+    << "</a></td>"
     << "<td>Centralizer dimension</td>"
-    << "<td>Centralizer type if known</td>"
+    << "<td>Type of semisimple part of centralizer, if known</td>"
     << "<td>The square of the length of the weight dual to h.</td>"
-    << "<td>Dynkin index </td><td>Minimal containing regular semisimple SAs</td><td title =\""
-    << tooltipContainingRegular << "\">Containing regular semisimple SAs in which the sl(2) has no centralizer</td> </tr>";
+    << "<td>Dynkin index </td><td>Minimal containing regular semisimple SAs</td><td>"
+    << "<a href = '#idMinimalContainingRegularSA'>Containing regular semisimple SAs in which the sl(2) has no centralizer</a>"
+    << "</td></tr>";
   }
   for (int i = 0; i < this->size; i ++) {
     const slTwoSubalgebra& theSl2 = (*this)[i];
     if (useHtml) {
-      out << "<tr><td style =\"padding-right:20px\"><a href=\"./sl2s.html#sl2index"
-      << i << "\"title =\"" << tooltipHchar << "\" >";
+      out << "<tr>"
+      << "<td style =\"padding-right:20px\"><a href=\"#sl2index"
+      << i << "\" >\\(A^{" << theSl2.GetDynkinIndex() << "}_1" << "\\)</a></td>";
+      out << "<td>";
     }
     out << theSl2.hCharacteristic.ToString();
     if (useHtml) {
-      out << "</a></td><td style =\"white-space: nowrap\" title =\"" << tooltipHvalue << "\">";
+      out << "</td>";
+      out << "<td style =\"white-space: nowrap\">";
     }
     out << theSl2.theH.GetCartanPart().ToString();
     if (!this->GetOwnerWeyl().IsDominantWeight(theSl2.theH.GetCartanPart())) {
@@ -4946,7 +4969,7 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat) {
       << "this is either a programming or mathematical error. </b>";
     }
     if (useHtml) {
-      out << "</td><td style =\"padding-left:20px\" title =\"" << tooltipVDecomposition << "\">";
+      out << "</td><td style =\"padding-left:20px\">";
     }
     FormatExpressions formatCharacter;
     formatCharacter.vectorSpaceEiBasisNames.AddOnTop("\\psi");
@@ -4968,22 +4991,22 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat) {
     if (useHtml) {
       out << "</td><td>";
     }
-    out << theSl2.LengthHsquared * this->GetOwnerWeyl().GetLongestRootLengthSquared() / 4;
+    out << theSl2.GetDynkinIndex();
     if (useHtml) {
       out << "</td><td>";
     }
     for (int j = 0; j < theSl2.IndicesMinimalContainingRootSAs.size; j ++) {
       rootSubalgebra& currentSA = this->theRootSAs.theSubalgebras[theSl2.IndicesMinimalContainingRootSAs[j]];
-      out << "<a href=\"" << displayPath << "rootSubalgebra_"
+      out << "<a href=\"" << displayPathAlgebra << "rootSubalgebra_"
       << theSl2.IndicesMinimalContainingRootSAs[j] + 1 << ".html\">"
       << currentSA.theDynkinDiagram.ToString() << "</a>" << ";  ";
     }
     if (useHtml) {
-      out << "</td><td title =\"" << tooltipContainingRegular << "\">";
+      out << "</td><td>";
     }
     for (int j = 0; j < theSl2.IndicesContainingRootSAs.size; j ++) {
       rootSubalgebra& currentSA = this->theRootSAs.theSubalgebras[theSl2.IndicesContainingRootSAs[j]];
-      out << "<a href=\"" <<  displayPath << "rootSubalgebra_" << theSl2.IndicesContainingRootSAs[j] + 1 << ".html\">"
+      out << "<a href=\"" <<  displayPathAlgebra << "rootSubalgebra_" << theSl2.IndicesContainingRootSAs[j] + 1 << ".html\">"
       << currentSA.theDynkinDiagram.ToString() << "</a>" << ";  ";
     }
     if (useHtml) {
@@ -5023,61 +5046,31 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat) {
 
 void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("SltwoSubalgebras::ToHTML");
-  std::string physicalPathSAs = this->owner->VirtualNameSSAlgOutputFolder;
-  //std::string htmlPathServerSAs = this->owner->DisplayNameSSalgOutputFolder;
-  std::string RelativePhysicalPathSl2s = this->owner->VirtualNameSSAlgOutputFolder + "sl2s/";
-  std::string htmlPathServerSl2s = this->owner->DisplayNameSSalgOutputFolder + "sl2s/";
+  std::string virtualFileName = this->owner->ToStringVirtualFolderName() + this->owner->ToStringFileNameRelativePathSlTwoSubalgebras();
   ProgressReport theReport;
   theReport.Report("Preparing html pages for sl(2) subalgebras. This might take a while.");
   this->theRootSAs.ToHTML(theFormat);
-  bool usePNG = true;
-  if (physicalPathSAs == "") {
-    usePNG = false;
-  }
-  std::stringstream out, outNotation, outNotationCommand;
-  std::string fileName;
-  std::fstream theFile;
-  outNotationCommand << "PrintSemisimpleLieAlgebra{}("
-  << this->GetOwnerWeyl().theDynkinType.ToString() << ")" ;
-  outNotation << "Notation, structure constants and Weyl group info: "
-  << HtmlRoutines::GetCalculatorComputationAnchor(outNotationCommand.str())
-  << "<br> <a href=\"" << theGlobalVariables.DisplayNameExecutable
-  << "?request=calculator"
-  << "\"> Calculator main page</a><br><a href=\"../rootSubalgebras.html\">Root subsystem table</a><br>";
-  std::string notation = outNotation.str();
+  std::stringstream out;
+  out << "<html><title>sl(2)-subalgebras of "
+  << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString() << "</title>";
+  out << HtmlRoutines::GetJavascriptMathjax("../../../../");
+  out << HtmlRoutines::GetCSSLinkLieAlgebras("../../../../");
+  out << "<meta name =\"keywords\" content =\""
+  <<  this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
+  << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras, nilpotent orbits of "
+  <<  this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
+  << ", sl(2)-triples of "
+  << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
+  << " \">";
+  out << "<body>";
+  out << "<h1> \\(sl(2)\\)-subalgebras of " << this->owner->ToStringLieAlgebraNameFullHTML() << "</h1>";
+  out << this->owner->ToStringHTMLMenuStructureSummary("../", true, true, false, true);
   out << this->ToString(theFormat);
-  std::string tempS;
-  if (usePNG) {
-    fileName = RelativePhysicalPathSl2s;
-    fileName.append("sl2s.html");
-    FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, fileName, false, true, false);
-    tempS = out.str();
-    theFile << "<html><title>sl(2)-subalgebras of "
-    << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString() << "</title>";
-    theFile << HtmlRoutines::GetJavascriptMathjax("../../../../");
-    theFile << "<meta name =\"keywords\" content =\""
-    <<  this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
-    << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras, nilpotent orbits of "
-    <<  this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
-    << ", sl(2)-triples of "
-    << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
-    << " \">";
-    theFile << "<body>" << notation << "<a href=\"" << htmlPathServerSl2s
-    << "sl2s_nopng.html\"> Plain html for your copy+paste convenience</a><br>\n"
-    << tempS << "</html></body>";
-    theFile.close();
+  out << "</body></html>";
+  std::stringstream commentsOnError;
+  if (!FileOperations::WriteFileVirual(virtualFileName, out.str(), &commentsOnError)) {
+    crash << "Failed to write sl(2)-subalgebras. " << commentsOnError.str() << crash;
   }
-  fileName = RelativePhysicalPathSl2s;
-  fileName.append("sl2s_nopng.html");
-  bool tempB= theFormat->flagUsePNG;
-  theFormat->flagUsePNG = false;
-  tempS = this->ToString(theFormat);
-  theFormat->flagUsePNG = tempB;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, fileName, false, true, false);
-  theFile << "<html><body>" << notation << "<a href=\"" << htmlPathServerSl2s
-  << "sl2s.html\"> Math formulas rendered via javascript.</a><br>\n"
-  << tempS << "</html></body>";
-  theFile.close();
 }
 
 bool CandidateSSSubalgebra::IsExtremeWeight(int moduleIndex, int indexInIsoComponent) const {

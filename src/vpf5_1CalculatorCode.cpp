@@ -268,7 +268,7 @@ bool Calculator::GetListPolysVariableLabelsInLex(
   return outputContext.AddChildOnTop(PolyVarsE);
 }
 
-bool DynkinSimpleType::HasEasySubalgebras() const {
+bool DynkinSimpleType::HasPrecomputedSubalgebras() const {
   if (this->theLetter == 'F') {
     return true;
   }
@@ -332,20 +332,15 @@ std::string Calculator::ToStringSemismipleLieAlgebraLinksFromHD(const DynkinType
   (void) theFormat;
   std::stringstream out;
   std::string theTitlePageFileNameNoPathSlowLoad = "SemisimpleSubalgebras_" + theType.ToString() + ".html";
-  // std::string theTitlePageFileNameNoPathFastLoad = "SemisimpleSubalgebras_FastLoad_" + theType.ToString() + ".html";
   out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
   << "?request=calculator&mainInput=PrintSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">"
   << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
-  if (theType[0].HasEasySubalgebras()) {
+  if (theType[0].HasPrecomputedSubalgebras()) {
     out << "<td><a href=\""
     << "output/" << theType.ToString() << "/" << theTitlePageFileNameNoPathSlowLoad
     << "\">"
     << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a>";
-    // out << "<br>"
-    // << "<a href=\"" <<  GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder
-    // << theType.ToString() << "/" << theTitlePageFileNameNoPathFastLoad << "\">"
-    // << theType[0].theLetter << theType[0].theRank << " semisipmles subalgebras, fast load</a>"
     out << "</td>\n ";
   } else {
     out << "<td>Not available</td>\n";
@@ -434,6 +429,12 @@ bool Calculator::innerPrintSSSubalgebras(
   bool doAdjustCentralizers
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
+  if (doForceRecompute) {
+    if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+      return theCommands << "Only logged-in admins allowed to force-recompute semisimple subalgebras. ";
+    }
+  }
+
   if (theGlobalVariables.flagAllowProcessMonitoring) {
     if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != 0) {
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
@@ -487,11 +488,6 @@ bool Calculator::innerPrintSSSubalgebras(
   out << "<br>Output file: <a href = \""
   << theSSsubalgebras.DisplayNameMainFile1WithPath << "\" target=\"_blank\">"
   << theSSsubalgebras.DisplayNameMainFile1NoPath << "</a>";
-  if (false) {
-    out << "<br>Output file, fast load, hover mouse over math expressions to get formulas: <a href= \""
-    << theSSsubalgebras.DisplayNameMainFile2FastLoadWithPath << "\"> "
-    << theSSsubalgebras.DisplayNameMainFile2FastLoadNoPath << "</a>";
-  }
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -817,8 +813,9 @@ void Plot::operator+=(const PlotObject& other) {
     << this->dimension << " to a plot of dimension: "
     << other.dimension << ". " << crash;
   }
-  if (this->dimension == - 1)
+  if (this->dimension == - 1) {
     this->dimension = other.dimension;
+  }
   this->thePlots.AddOnTop(other);
   this->canvasName = "";
 }

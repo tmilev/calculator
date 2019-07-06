@@ -1252,7 +1252,7 @@ void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat) {
   this->CheckInitialization();
   std::fstream output;
   std::stringstream myPath;
-  myPath << this->ownEr->owner->VirtualNameSSAlgOutputFolder;
+  myPath << this->ownEr->owner->ToStringVirtualFolderName();
   myPath << "rootSubalgebra_" << index + 1 << ".html";
   FileOperations::OpenFileCreateIfNotPresentVirtual(output, myPath.str(), false, true, false);
   output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.ToString() << " root subalgebra of type "
@@ -3028,11 +3028,11 @@ void rootSubalgebras::SortDescendingOrderBySSRank() {
 void rootSubalgebras::ToHTML(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("rootSubalgebras::ToHTML");
   this->CheckInitialization();
-  std::string MyPathPhysical = this->owner->VirtualNameSSAlgOutputFolder + "rootSubalgebras.html";
+  std::string myPathVirtual = this->owner->ToStringVirtualFolderName() + this->owner->ToStringFileNameNoPathRootSubalgebras();
   std::fstream output;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(output, MyPathPhysical, false, true, false);
-  if (!FileOperations::FileExistsVirtual(MyPathPhysical)) {
-    crash << "This may or may not be a programming error. Failed to create file " << MyPathPhysical
+  FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(output, myPathVirtual, false, true, false);
+  if (!FileOperations::FileExistsVirtual(myPathVirtual)) {
+    crash << "This may or may not be a programming error. Failed to create virtual file " << myPathVirtual
     << ". Possible explanations. 1. File permissions - can I write in that folder? "
     << "2. Programming error (less likely). "
     << crash;
@@ -3047,10 +3047,12 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
-  output << "<link rel= 'stylesheet' href = '../../../calculator-html/style_lie_algebras.css'>";
+  output << HtmlRoutines::GetCSSLinkLieAlgebras("../../../");
   output << HtmlRoutines::GetJavascriptMathjax("../../../");
-  output << "<script src = '../../../calculator-html/graphics_n_dimensions.js'></script>";
-  output << "<body>" << this->ToString(theFormat)
+  output << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../../");
+  output << "<body>"
+  << this->owner->ToStringHTMLMenuStructureSummary("", true, false, true, true)
+  << this->ToString(theFormat)
   << "<hr>LaTeX table with root subalgebra details.<br>"
   << this->ToStringDynkinTableFormat2LaTeX(theFormat)
   << "</body></html>";

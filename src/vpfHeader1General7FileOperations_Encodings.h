@@ -46,6 +46,9 @@ public:
     const std::string& fileContent,
     std::stringstream *commentsOnError
   );
+  static std::string WriteFileReturnHTMLLink(
+    const std::string& fileContent, const std::string& fileNameVirtual, const std::string& linkText
+  );
   static bool LoadFileToStringVirtual(
     const std::string& fileName,
     std::string& output,

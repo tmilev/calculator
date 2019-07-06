@@ -488,7 +488,7 @@ public:
     }
     return *this->container;
   }
-  WeylGroupData& GetOwnerWeyl();
+  const WeylGroupData& GetOwnerWeyl() const;
   SemisimpleLieAlgebra& GetOwnerSSAlgebra() {
     if (this->owner == 0) {
       crash << "This is a programming error: attempting to access "
@@ -503,11 +503,12 @@ public:
     bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output
   ) const;
   void ComputeModuleDecomposition(
-    Vectors<Rational>& positiveRootsContainingRegularSA,
+    const Vectors<Rational>& positiveRootsContainingRegularSA,
     int dimensionContainingRegularSA,
     charSSAlgMod<Rational>& outputHWs,
     List<int>& outputModuleDimensions
   );
+  Rational GetDynkinIndex() const;
   void ComputeModuleDecompositionAmbientLieAlgebra();
   bool AttemptToComputeCentralizer();
   bool AttemptExtendingHFtoHEFWRTSubalgebra(
@@ -559,6 +560,11 @@ class SltwoSubalgebras : public HashedList<slTwoSubalgebra> {
   friend class SemisimpleSubalgebras;
   SemisimpleLieAlgebra* owner;
 public:
+  static std::string descriptionHCharacteristic;
+  static std::string descriptionModuleDecompositionOverSl2;
+  static std::string descriptionHRealization;
+  static std::string descriptionMinimalContainingRegularSubalgebras;
+
   List<List<int> > IndicesSl2sContainedInRootSA;
   List<int> IndicesSl2decompositionFlas;
   Vectors<Rational> BadHCharacteristics;

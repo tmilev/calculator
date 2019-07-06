@@ -732,6 +732,21 @@ bool FileOperations::WriteFileVirual(
   return true;
 }
 
+std::string FileOperations::WriteFileReturnHTMLLink(
+  const std::string& fileContent, const std::string& fileNameVirtual, const std::string& linkText
+) {
+  MacroRegisterFunctionWithName("Calculator::WriteFileReturnHTMLLink");
+  std::stringstream commentsOnError;
+  bool success = FileOperations::WriteFileVirual(fileNameVirtual, fileContent, &commentsOnError);
+  if (!success) {
+    crash << "Failed to write file. " << commentsOnError.str() << crash;
+  }
+  std::stringstream out;
+  out << "<a href=\"" << fileNameVirtual << "\" target = \"_blank\">" << linkText << "</a>";
+  return out.str();
+}
+
+
 
 bool FileOperations::LoadFileToStringVirtual(
   const std::string& theFileName,
@@ -6788,7 +6803,7 @@ bool WeylGroupData::IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input)
   return tempRoot == input;
 }
 
-Rational WeylGroupData::GetLongestRootLengthSquared() {
+Rational WeylGroupData::GetLongestRootLengthSquared() const {
   Rational result;
   result = this->CartanSymmetric(0, 0);
   for (int i = 1; i < this->CartanSymmetric.NumRows; i ++) {

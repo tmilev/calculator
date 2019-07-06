@@ -3738,20 +3738,26 @@ void Calculator::initPredefinedInnerFunctions() {
     "RootSubsystem"
   );
   this->AddOperationInnerHandler(
-    "PrintRootSubalgebras", CalculatorFunctionsGeneral::innerPrintRootSAs, "",
+    "PrintRootSubalgebras",
+    CalculatorFunctionsGeneral::innerPrintRootSAs,
+    "",
     "Prints sl(2) subalgebras and root subalgebras. "
     "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
     "PrintRootSubalgebras(E_6)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerPrintRootSAs",
     "PrintRootSubalgebras"
   );
   this->AddOperationInnerHandler(
-    "PrintRootSubalgebrasRecompute", CalculatorFunctionsGeneral::innerPrintRootSAsForceRecompute, "",
+    "PrintRootSubalgebrasRecompute",
+    CalculatorFunctionsGeneral::innerPrintRootSAsForceRecompute,
+    "",
     "Same as printRootSubalgebras but forces recomputation. "
     "Use to recompute obsolete or interrupted output files.",
     "PrintRootSubalgebrasRecompute(b_3)",
-    false, false,
+    false,
+    false,
     "CalculatorFunctionsGeneral::innerPrintRootSAsForceRecompute",
     "PrintRootSubalgebrasRecompute"
   );

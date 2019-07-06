@@ -8064,33 +8064,18 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos(
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, ownerSS)) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  ownerSS->ToStringFolderName();
   FormatExpressions theFormat;
   theFormat.flagUseHTML = true;
   theFormat.flagUseLatex = false;
   theFormat.flagUsePNG = true;
 
-  std::stringstream outSltwoPath, outSltwoDisplayPath;
   std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
-  outSltwoPath << ownerSS->VirtualNameSSAlgOutputFolder << "sl2s/";
-  outSltwoDisplayPath << ownerSS->VirtualNameSSAlgOutputFolder << "sl2s/";
-  outSltwoMainFile << outSltwoPath.str() << "sl2s.html";
-  outSltwoFileDisplayName << "/" << outSltwoDisplayPath.str() << "sl2s.html";
-  outRootHtmlFileName << ownerSS->VirtualNameSSAlgOutputFolder << "rootSubalgebras.html";
-  outRootHtmlDisplayName << ownerSS->DisplayNameSSalgOutputFolder << "rootSubalgebras.html";
-  bool NeedToCreateFolders = !FileOperations::FileExistsVirtual(outSltwoMainFile.str());
-  if (NeedToCreateFolders) {
-    std::stringstream outMkDirCommand1, outMkDirCommand2;
-    std::string baseFolder, outSl2Folder;
-    FileOperations::GetPhysicalFileNameFromVirtual(
-      ownerSS->VirtualNameSSAlgOutputFolder, baseFolder, false, false, 0
-    );
-    FileOperations::GetPhysicalFileNameFromVirtual(outSltwoPath.str(), outSl2Folder, false, false, 0);
-    outMkDirCommand1 << "mkdir " << baseFolder;
-    outMkDirCommand2 << "mkdir " << outSl2Folder;
-    theGlobalVariables.CallSystemNoOutput(outMkDirCommand1.str(), &logWorker);
-    theGlobalVariables.CallSystemNoOutput(outMkDirCommand2.str(), &logWorker);
-  }
+
+  std::string displayFolder = ownerSS->ToStringDisplayFolderName("");
+
+  outSltwoMainFile << displayFolder << ownerSS->ToStringFileNameRelativePathSlTwoSubalgebras();
+  outRootHtmlFileName << displayFolder << ownerSS->ToStringFileNameNoPathRootSubalgebras();
+  outRootHtmlDisplayName << displayFolder << ownerSS->ToStringFileNameNoPathRootSubalgebras();
   if (
     !FileOperations::FileExistsVirtual(outSltwoMainFile.str()) ||
     !FileOperations::FileExistsVirtual(outRootHtmlFileName.str())
@@ -8106,7 +8091,9 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos(
   } else {
     out << "The table is precomputed and served from the hard disk. <br>";
   }
-  out << "<a href=\"" << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << "\">"
+  out << "<a href=\""
+  << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str())
+  << "\" target = \"_blank\">"
   << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << " </a>";
   return output.AssignValue(out.str(), theCommands);
 }

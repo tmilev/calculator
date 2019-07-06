@@ -376,12 +376,9 @@ public:
   signed long long int numMultiplications;
   bool flagDeallocated;
   std::string DisplayNameMainFile1NoPath;
-  std::string DisplayNameMainFile2FastLoadNoPath;
   std::string DisplayNameMainFile1WithPath;
-  std::string DisplayNameMainFile2FastLoadWithPath;
 
   std::string VirtualNameMainFile1;
-  std::string VirtualNameMainFile2FastLoad;
 
   std::string (*ToStringExpressionString)(SemisimpleSubalgebras& input);
   bool LoadState(

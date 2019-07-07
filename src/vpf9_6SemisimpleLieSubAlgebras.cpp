@@ -3951,7 +3951,7 @@ void SemisimpleSubalgebras::initHookUpPointers(
 }
 
 void SemisimpleSubalgebras::reset() {
-  this->ToStringExpressionString= 0;
+  this->ToStringExpressionString = 0;
   this->owner = 0;
   this->ownerField = 0;
   this->theSl2s.owner = 0;

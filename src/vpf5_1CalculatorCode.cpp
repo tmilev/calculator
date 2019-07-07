@@ -471,33 +471,61 @@ bool Calculator::innerPrintSSSubalgebras(
   if (ownerSSPointer == 0) {
     crash << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << crash;
   }
-  SemisimpleLieAlgebra& ownerSS = *ownerSSPointer;
-  SemisimpleSubalgebras& theSSsubalgebras =
-  theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
-
-  theSSsubalgebras.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
-  theSSsubalgebras.ComputeFolderNames(theSSsubalgebras.currentFormat);
-  if (!FileOperations::FileExistsVirtual(theSSsubalgebras.VirtualNameMainFile1) || doForceRecompute) {
-    if (!isAlreadySubalgebrasObject) {
-      theSSsubalgebras.timeComputationStartInSeconds = theGlobalVariables.GetElapsedSeconds();
-    }
-    theSSsubalgebras.flagComputeNilradicals = doComputeNilradicals;
-    theSSsubalgebras.flagComputeModuleDecomposition = doComputeModuleDecomposition;
-    theSSsubalgebras.flagAttemptToSolveSystems = doAttemptToSolveSystems;
-    theSSsubalgebras.flagComputePairingTable = doComputePairingTable;
-    theSSsubalgebras.flagAttemptToAdjustCentralizers = doAdjustCentralizers;
-    theSSsubalgebras.CheckFileWritePermissions();
-    if (!isAlreadySubalgebrasObject) {
-      theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS);
-    }
-    theSSsubalgebras.WriteReportToFiles();
-  } else {
-    out << "Files precomputed, serving from HD. ";
-  }
-  out << "<br>Output file: <a href = \""
-  << theSSsubalgebras.DisplayNameMainFile1WithPath << "\" target=\"_blank\">"
-  << theSSsubalgebras.DisplayNameMainFile1NoPath << "</a>";
+  SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
+  SemisimpleSubalgebras& theSubalgebras =
+  theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
+  theSubalgebras.ComputeStructureWriteFiles(
+    ownerLieAlgebra,
+    &out,
+    doForceRecompute,
+    !isAlreadySubalgebrasObject,
+    doComputeNilradicals,
+    doComputeModuleDecomposition,
+    doAttemptToSolveSystems,
+    doComputePairingTable,
+    doAdjustCentralizers
+  );
   return output.AssignValue(out.str(), theCommands);
+}
+
+bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
+  SemisimpleLieAlgebra& newOwner,
+  std::stringstream* outputStream,
+  bool forceRecompute,
+  bool doFullInit,
+  bool computeNilradicals,
+  bool computeModuleDecomposition,
+  bool attemptToSolveSystems,
+  bool computePairingTable,
+  bool adjustCentralizers
+) {
+  this->ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
+  this->ComputeFolderNames(this->currentFormat);
+  if (!FileOperations::FileExistsVirtual(this->VirtualNameMainFile1) || forceRecompute) {
+    if (doFullInit) {
+      this->timeComputationStartInSeconds = theGlobalVariables.GetElapsedSeconds();
+    }
+    this->flagComputeNilradicals = computeNilradicals;
+    this->flagComputeModuleDecomposition = computeModuleDecomposition;
+    this->flagAttemptToSolveSystems = attemptToSolveSystems;
+    this->flagComputePairingTable = computePairingTable;
+    this->flagAttemptToAdjustCentralizers = adjustCentralizers;
+    this->CheckFileWritePermissions();
+    if (doFullInit) {
+      this->FindTheSSSubalgebrasFromScratch(newOwner);
+    }
+    this->WriteReportToFiles();
+  } else {
+    if (outputStream != 0) {
+      *outputStream << "Files precomputed, serving from HD. ";
+    }
+  }
+  if (outputStream != 0) {
+    *outputStream << "<br>Output file: <a href = \""
+    << this->DisplayNameMainFile1WithPath << "\" target=\"_blank\">"
+    << this->DisplayNameMainFile1NoPath << "</a>";
+  }
+  return true;
 }
 
 bool MathRoutines::IsPrime(int theInt) {

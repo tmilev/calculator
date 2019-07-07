@@ -476,6 +476,17 @@ public:
   void ComputeSl2sInitOrbitsForComputationOnDemand();
   void FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner);
   bool FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType = 0);
+  bool ComputeStructureWriteFiles(
+    SemisimpleLieAlgebra& newOwner,
+    std::stringstream* outputStream,
+    bool forceRecompute,
+    bool doFullInit,
+    bool computeNilradicals,
+    bool computeModuleDecomposition,
+    bool attemptToSolveSystems,
+    bool computePairingTable,
+    bool adjustCentralizers
+  );
   void FindTheSSSubalgebrasInit();
   bool FindTheSSSubalgebrasContinue();
 

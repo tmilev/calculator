@@ -61,7 +61,7 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
   }
   var indicatorButton = document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest);
   this.ownerCalculator.parsedComputation = JSON.parse(input);
-  var status = this.ownerCalculator.parsedComputation;
+  var status = this.ownerCalculator.parsedComputation.status;
   if (status === "finished") {
     this.isFinished = true;
     this.isPaused = false;

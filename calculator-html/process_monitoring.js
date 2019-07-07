@@ -60,9 +60,8 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
     return;
   }
   var indicatorButton = document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest);
-  var resultComponent = document.getElementById(ids.domElements.spanCalculatorMainOutput);
-  var resultJSON = JSON.parse(input);
-  var status = resultJSON.status;
+  this.ownerCalculator.parsedComputation = JSON.parse(input);
+  var status = this.ownerCalculator.parsedComputation;
   if (status === "finished") {
     this.isFinished = true;
     this.isPaused = false;
@@ -74,10 +73,12 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
     if (status === "noReport") {
       progReportTimer.innerHTML += "No report on last ping."; 
     } else {
-      var panelIdPairs = [];
+      this.ownerCalculator.panelIdPairs = [];
       var buffer = new BufferCalculator();
-      this.ownerCalculator.writeResult(buffer, resultJSON, panelIdPairs);
+      this.ownerCalculator.writeResult(buffer, this.ownerCalculator.parsedComputation, this.ownerCalculator.panelIdPairs);
+      var resultComponent = document.getElementById(ids.domElements.spanCalculatorMainOutput);
       resultComponent.innerHTML = buffer.toString();
+      this.ownerCalculator.afterWriteOutput();
     }  
     this.isPaused = false;
     indicatorButton.innerHTML = "Pause";

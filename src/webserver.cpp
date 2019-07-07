@@ -1530,7 +1530,8 @@ int WebWorker::ProcessComputationIndicator() {
   WebWorker& otherWorker = this->parent->theWorkers[inputWebWorkerIndex];
   if (otherWorker.userAddress.theObject != this->userAddress.theObject) {
     out << "User ip address: " << this->userAddress.theObject
-    << " does not coincide with address that initiated the process. This is not allowed. ";
+    << " does not coincide with address that "
+    << "initiated the process. This is not allowed. ";
     result[WebAPI::result::error] = out.str();
     stOutput << result.ToString(false);
     return 0;
@@ -2198,7 +2199,7 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
     newAuthenticationToken,
     commentsOnFailure
   )) {
-    stOutput << "<span style =\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
+    stOutput << "<b style =\"color:red\">" << commentsOnFailure.str() << "</b>";
     return 0;
   }
   JSData findQuery, setQuery;
@@ -2207,10 +2208,10 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findQuery, setQuery, 0, &commentsOnFailure
   )) {
-    stOutput << "<span style =\"color:red\"><b>Failed to set activationToken: "
-    << commentsOnFailure.str() << "</b></span>";
+    stOutput << "<b style = \"color:red\">Failed to set activationToken: "
+    << commentsOnFailure.str() << "</b>";
   }
-  stOutput << "<span style =\"color:green\"> <b>Password change successful. </b></span>";
+  stOutput << "<b style = \"color:green\">Password change successful. </b>";
   if (theGlobalVariables.GetWebInput("doReload") != "false") {
     stOutput
     << "<meta http-equiv=\"refresh\" content =\"0; url ='"
@@ -2226,13 +2227,12 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
 int WebWorker::ProcessCompute() {
   MacroRegisterFunctionWithName("WebWorker::ProcessCompute");
   this->SetHeaderOKNoContentLength("");
-//  theParser.initComputationStats();
+  //theParser.initComputationStats();
   theParser->inputString = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection = WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone;
   theGlobalVariables.initOutputReportAndCrashFileNames(
     HtmlRoutines::ConvertStringToURLString(theParser->inputString, false), theParser->inputString
   );
-  logWorker << logger::blue << "DEBUG: process compute. " << logger::endL;
   ////////////////////////////////////////////////
   //  the initialization below moved to the start of the web server!
   //  theParser.init();
@@ -2253,7 +2253,6 @@ int WebWorker::ProcessCompute() {
   }
   stOutput << result.ToString(false);
   theGlobalVariables.flagComputationCompletE = true;
-  logWorker << logger::blue << "DEBUG: process compute. " << logger::endL;
   return 0;
 }
 

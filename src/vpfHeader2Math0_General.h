@@ -6280,6 +6280,7 @@ public:
   std::string ToStringVirtualNameFolder() const;
   bool ContainsType(char theTypeLetter) const;
   void GetDynkinTypeWithDefaultScales(DynkinType& output) const;
+  static void GetPrecomputedDynkinTypes(List<DynkinType>& output);
   DynkinSimpleType GetGreatestSimpleType() const;
   DynkinSimpleType GetSmallestSimpleType() const;
   LargeInt GetWeylGroupSizeByFormula() const;

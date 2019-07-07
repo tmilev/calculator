@@ -2126,7 +2126,17 @@ bool CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm(
   return false;
 }
 
-bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(Calculator &theCommands, const Expression &input, Expression &output) {
+bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  List<DynkinType> theTypes;
+  DynkinType::GetPrecomputedDynkinTypes(theTypes);
+  for (int i = 0; i < theTypes.size; i ++) {
+    SemisimpleLieAlgebra theAlgebra;
+    theAlgebra.theWeyl.theDynkinType = theTypes[i];
+    SemisimpleSubalgebras theSubalgebras;
+
+  }
   crash << "not implemented yet. " << crash;
   return false;
 }

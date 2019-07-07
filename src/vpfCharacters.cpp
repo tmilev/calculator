@@ -335,7 +335,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
       this->ClassFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
       splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
       intersection(Vb, splittingMatrixKernel, tempVectors);
-      Vb= tempVectors;
+      Vb = tempVectors;
     }
   }
   if ((Vb.size < this->basis.size) && (Vb.size > 0)) {
@@ -762,7 +762,7 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkD
   p.AssignMinPoly(M);
   for (int ii = 0; ii < 2 * n + 2; ii ++) {
     // lol, this did end up working though
-    int i = ((ii + 1) / 2) * (2 * (ii % 2)- 1); // 0,1,- 1,2,-2,3,-3,...
+    int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0,1,- 1,2,-2,3,-3,...
     Rational r = i;
     if (p(r) == 0) {
       Matrix<Rational> M2 = M;
@@ -939,7 +939,7 @@ bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable() {
       ClassFunction<FiniteGroup, Rational>& rightChar = this->characterTable[j];
       Rational theScalarProd = this->GetHermitianProduct(leftChar.data, rightChar.data);
       if (j != i) {
-        if (theScalarProd!= 0) {
+        if (theScalarProd != 0) {
           crash << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
           << leftChar.ToString() << " is not orthogonal to char number "
           << j+ 1 << " = " << rightChar.ToString() << ". <br>The entire char table is: "

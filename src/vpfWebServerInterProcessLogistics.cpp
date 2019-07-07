@@ -395,7 +395,8 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
         logBlock << logger::red << "Write operation interrupted, repeating. " << logger::endL;
         numAttempts ++;
         if (numAttempts > 100) {
-          logBlock << logger::red << "Write operation interrupted, more than 100 times, this is not supposed to happen. "
+          logBlock << logger::red
+          << "Write operation interrupted, more than 100 times, this is not supposed to happen. "
           << logger::endL;
           return - 1;
         }

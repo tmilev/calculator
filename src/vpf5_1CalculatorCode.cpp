@@ -357,36 +357,45 @@ std::string Calculator::ToStringSemismipleLieAlgebraLinksFromHD(const DynkinType
   return out.str();
 }
 
+void DynkinType::GetPrecomputedDynkinTypes(List<DynkinType>& output) {
+  MacroRegisterFunctionWithName("DynkinType::GetPrecomputedDynkinTypes");
+  output.SetSize(0);
+  DynkinType theType;
+  theType.MakeSimpleType('F', 4);
+  output.AddOnTop(theType);
+  for (int i = 6; i <= 8; i ++) {
+    theType.MakeSimpleType('E', i);
+    output.AddOnTop(theType);
+  }
+  theType.MakeSimpleType('G', 2);
+  output.AddOnTop(theType);
+  for (int i = 1; i <= 8; i ++) {
+    theType.MakeSimpleType('A', i);
+    output.AddOnTop(theType);
+  }
+  for (int i = 4; i <= 8; i ++) {
+    theType.MakeSimpleType('D', i);
+    output.AddOnTop(theType);
+  }
+  for (int i = 2; i <= 8; i ++) {
+    theType.MakeSimpleType('B', i);
+    output.AddOnTop(theType);
+  }
+  for (int i = 3; i <= 8; i ++) {
+    theType.MakeSimpleType('C', i);
+    output.AddOnTop(theType);
+  }
+}
 
 bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const Expression& input, Expression& output) {
   (void) input;//avoid unused parameter warning, portable
   std::stringstream outFromHD;
   outFromHD << "\n\n<p>\n\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
   << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
-  DynkinType theType;
-  theType.MakeSimpleType('F', 4);
-  outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
-  for (int i = 6; i <= 8; i ++) {
-    theType.MakeSimpleType('E', i);
-    outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
-  }
-  theType.MakeSimpleType('G', 2);
-  outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
-  for (int i = 1; i <= 8; i ++) {
-    theType.MakeSimpleType('A', i);
-    outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
-  }
-  for (int i = 4; i <= 8; i ++) {
-    theType.MakeSimpleType('D', i);
-    outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
-  }
-  for (int i = 2; i <= 8; i ++) {
-    theType.MakeSimpleType('B', i);
-    outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
-  }
-  for (int i = 3; i <= 8; i ++) {
-    theType.MakeSimpleType('C', i);
-    outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(theType);
+  List<DynkinType> precomputedTypes;
+  DynkinType::GetPrecomputedDynkinTypes(precomputedTypes);
+  for (int i = 0; i <= precomputedTypes.size; i ++) {
+    outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(precomputedTypes[i]);
   }
   outFromHD << "</table></p>";
   std::string fileName = "semisimple_lie_algebras/semisimple_subalgebras.php";

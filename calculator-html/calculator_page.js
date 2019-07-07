@@ -11,7 +11,8 @@ const mathjax = require('./mathjax-calculator-setup');
 const processMonitoring = require('./process_monitoring');
 
 function Calculator() {
-
+  this.parsedComputation = {};
+  this.panelIdPairs = [];
   this.inputBoxNames = [];
   this.inputBoxToSliderUpdaters = {};
   this.canvases = null;
@@ -213,10 +214,9 @@ Calculator.prototype.writeResultUndefined = function(
   }
   if (inputParsed.resultStringified !== undefined) {
     try {
-      var resultNonStringified;
-      resultNonStringified = JSON.parse(inputParsed.resultStringified);
+      this.parsedComputation = JSON.parse(inputParsed.resultStringified);
       //warning: this is a recursive call:
-      this.writeResult(buffer, resultNonStringified, panelIdPairs);
+      this.writeResult(buffer, this.parsedComputation, panelIdPairs);
     } catch (e) {
       buffer.write(`Failed to parse result. ${e}. The raw result was: <br>${inputParsed.resultStringified}`);
     }
@@ -292,30 +292,12 @@ Calculator.prototype.writeResult = function(
   }
 }
 
-Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input, output) { 
-  var inputParsed = null;
-  var inputHtml = null;
-  var panelIdPairs = [];
-  try {
-    inputParsed = JSON.parse(input);
-    //console.log("DEBUG: result: " + JSON.stringify(inputParsed));
-    inputHtml = inputParsed.resultHtml;
-    var buffer = new BufferCalculator();
-    var progReportTimer = document.getElementById(ids.domElements.monitoring.progressTimer);
-    progReportTimer.innerHTML = "";
-    this.writeResult(buffer, inputParsed, panelIdPairs);
-    inputHtml = buffer.toString();
-  } catch (e) {
-    inputHtml = input + "<br>" + e;
-    console.log("Error processing calculator output: " + e);
-  }
-  var spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
-  spanVerification.innerHTML = inputHtml;
-  for (var i = 0; i < panelIdPairs.length; i ++) {
-    var currentInput = inputParsed.result.input[i];
-    var currentOutput = inputParsed.result.output[i];
-    var inputPanelId = panelIdPairs[i][0];
-    var outputPanelId = panelIdPairs[i][1];
+Calculator.prototype.afterWriteOutput = function() {
+  for (var i = 0; i < this.panelIdPairs.length; i ++) {
+    var currentInput = this.parsedComputation.result.input[i];
+    var currentOutput = this.parsedComputation.result.output[i];
+    var inputPanelId = this.panelIdPairs[i][0];
+    var outputPanelId = this.panelIdPairs[i][1];
     if (currentInput.length > 200) {
       var inputPanel = new PanelExpandable(inputPanelId, true);
       inputPanel.setPanelContent(currentInput);
@@ -333,6 +315,7 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
       document.getElementById(outputPanelId).innerHTML = currentOutput;
     }
   }
+  var spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
   var incomingScripts = spanVerification.getElementsByTagName('script');
   var thePage = window.calculator.mainPage;
   var oldScripts = thePage.pages.calculator.scriptIds;
@@ -348,6 +331,26 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
   }
   this.addListenersToInputBoxes();
   mathjax.typeSetSoft(ids.domElements.spanCalculatorMainOutput);
+}
+
+Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input, output) { 
+  this.parsedComputation = null;
+  var inputHtml = null;
+  this.panelIdPairs = [];
+  try {
+    this.parsedComputation = JSON.parse(input);
+    var buffer = new BufferCalculator();
+    var progReportTimer = document.getElementById(ids.domElements.monitoring.progressTimer);
+    progReportTimer.innerHTML = "";
+    this.writeResult(buffer, this.parsedComputation, this.panelIdPairs);
+    inputHtml = buffer.toString();
+  } catch (e) {
+    inputHtml = input + "<br>" + e;
+    console.log("Error processing calculator output: " + e);
+  }
+  var spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
+  spanVerification.innerHTML = inputHtml;
+  this.afterWriteOutput();  
 }
 
 Calculator.prototype.submitComputationPartTwo = function(input) {

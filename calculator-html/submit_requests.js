@@ -12,7 +12,7 @@ function recordProgressDone(progress, timeFinished) {
     progress = document.getElementById(progress);
   }
   var timeTotal = timeFinished - progress.getAttribute("timeStarted");
-  var panelLabel = `<b style ='color:green'>Received</b> ${timeTotal} ms`;
+  var panelLabel = `<b style = 'color:green'>Received</b> ${timeTotal} ms`;
   var panel = new panels.PanelExpandable(progress, false);
   panel.setPanelLabel(panelLabel);
 }
@@ -75,7 +75,7 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   }
   var panelWithButton = new panels.PanelExpandable(progress, true);
   progress.setAttribute("timeStarted", timeStarted);
-  panelWithButton.setPanelLabel(`<b style ="color:orange">Sent</b>`)
+  panelWithButton.setPanelLabel(`<b style = "color:orange">Sent</b>`)
 
   var addressSpreadOut = address.split("&").join(" &");
   addressSpreadOut = addressSpreadOut.split("=").join("= ");
@@ -223,18 +223,18 @@ function progressReport() {
     newReportString = https.responseText;
     if (https.responseText === "finished") { 
       isFinished = true;
-      requestStatus.innerHTML = "<span style ='color:green'><b>Computation finished.</b></span>";
+      requestStatus.innerHTML = "<b style ='color:green'>Computation finished.</b>";
       return;
     }
     if (https.responseText !== "") { 
       progReport.innerHTML = `${newReportString}<hr>`;
       requestStatus.innerHTML = '';
     } else {
-      requestStatus.innerHTML = "<span style ='color:red'><b>Empty response</b></span>";
+      requestStatus.innerHTML = "<b style ='color:red'>Empty response</b>";
     }
   }
   ////////////////////////////////////////////
-  requestStatus.innerHTML = "<span style ='color:orange'><b>Request sent</b></span>";
+  requestStatus.innerHTML = "<b style ='color:orange'>Request sent</b>";
   https.send(null);
   this.timeoutID = window.setTimeout("progressReport()", timeIncrementInTenthsOfSecond * 100);
 }

@@ -4225,7 +4225,8 @@ void Calculator::initPredefinedInnerFunctions() {
     true
   );
   this->AddOperationInnerHandler(
-    "PrintSemisimpleSubalgebras", Calculator::innerPrintSSsubalgebrasRegular, "",
+    "PrintSemisimpleSubalgebras",
+    Calculator::innerPrintSSsubalgebrasRegular, "",
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebras(B_3)",
@@ -4234,7 +4235,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintSemisimpleSubalgebras"
   );
   this->AddOperationInnerHandler(
-    "PrintSemisimpleSubalgebrasRecompute", Calculator::innerPrintSSsubalgebrasRecompute, "",
+    "PrintSemisimpleSubalgebrasRecompute",
+    Calculator::innerPrintSSsubalgebrasRecompute, "",
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebrasRecompute(C_3)",

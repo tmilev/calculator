@@ -268,7 +268,7 @@ bool Calculator::GetListPolysVariableLabelsInLex(
   return outputContext.AddChildOnTop(PolyVarsE);
 }
 
-bool DynkinSimpleType::HasPrecomputedSubalgebras() const {
+bool DynkinSimpleType:: HasPrecomputedSubalgebras() const {
   if (this->theLetter == 'F') {
     return true;
   }
@@ -443,7 +443,6 @@ bool Calculator::innerPrintSSSubalgebras(
       return theCommands << "Only logged-in admins allowed to force-recompute semisimple subalgebras. ";
     }
   }
-
   if (theGlobalVariables.flagAllowProcessMonitoring) {
     if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != 0) {
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
@@ -463,7 +462,8 @@ bool Calculator::innerPrintSSSubalgebras(
       << "As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
       return output.AssignValue(out.str(), theCommands);
     } else {
-      out << "<b>This code is completely experimental. Use the following printouts on your own risk.</b><br>";
+      out << "<b>This code is completely experimental. "
+      << "Use the following printouts on your own risk.</b><br>";
     }
   } else {
     ownerSSPointer = input.GetValue<SemisimpleSubalgebras>().owner;
@@ -476,6 +476,9 @@ bool Calculator::innerPrintSSSubalgebras(
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
   theSubalgebras.ComputeStructureWriteFiles(
     ownerLieAlgebra,
+    theCommands.theObjectContainer.theAlgebraicClosure,
+    theCommands.theObjectContainer.theSSLieAlgebras,
+    theCommands.theObjectContainer.theSltwoSAs,
     &out,
     doForceRecompute,
     !isAlreadySubalgebrasObject,
@@ -490,6 +493,9 @@ bool Calculator::innerPrintSSSubalgebras(
 
 bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
   SemisimpleLieAlgebra& newOwner,
+  AlgebraicClosureRationals& ownerField,
+  MapReferenceS<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+  ListReferences<SltwoSubalgebras>& containerSl2Subalgebras,
   std::stringstream* outputStream,
   bool forceRecompute,
   bool doFullInit,
@@ -499,7 +505,9 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
   bool computePairingTable,
   bool adjustCentralizers
 ) {
+  MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeStructureWriteFiles");
   this->ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
+  this->owner = &newOwner;
   this->ComputeFolderNames(this->currentFormat);
   if (!FileOperations::FileExistsVirtual(this->VirtualNameMainFile1) || forceRecompute) {
     if (doFullInit) {
@@ -512,7 +520,7 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
     this->flagAttemptToAdjustCentralizers = adjustCentralizers;
     this->CheckFileWritePermissions();
     if (doFullInit) {
-      this->FindTheSSSubalgebrasFromScratch(newOwner);
+      this->FindTheSSSubalgebrasFromScratch(newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, 0);
     }
     this->WriteReportToFiles();
   } else {

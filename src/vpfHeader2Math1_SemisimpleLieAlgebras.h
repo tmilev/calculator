@@ -13,22 +13,37 @@ private:
 public:
   bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroupData theWeyl;
-  //format:
-  //the Chevalley constants are listed in the same order as the root system of the Weyl group
-  // i.e. if \alpha is the root at the i^th position in this->theWyl.RootSystem and \beta -
+  //We fix the usual linear space basis for our Lie algebra.
+  //The basis consists of Chevalley generators (weight elements),
+  //indexed by elements of the root system denoted by greek letters:
+  //g_{\alpha}, g_{\beta}, ....
+  //In addition to the Chevalley generators,
+  //the basis includes of a (vector space) basis of the
+  //Cartan subalgebra,
+  //indexed by a set of roots forming a simple basis:
+  //h_\alpha, h_\beta, ...
+  //
+  //The Chevalley constants are listed in the same order
+  //as the root system of the Weyl group.
+  //If \alpha is the root at the i^th position in
+  // this->theWyl.RootSystem and \beta -
   //the root  at the j^th position, then
-  //the chevalley constant N_{\alpha\beta} given by [g^\alpha, g^\beta] =N_{\alpha\beta}g^{\alpha +\beta}
-  //will be located at the ij^{th} entry in the below matrix.
-  //Let $\alpha$ be a root . Then our choice of the elements of the Cartan subalgebra is such that
-  //1.   [g^{\alpha}, g^{-\alpha}] =h_\alpha * (2/ \langle\alpha,\alpha\rangle)
-  //2.   [h_{\alpha},g^\beta] =\langle\alpha,\beta\rangle g^\beta
+  //the Chevalley constant N_{\alpha, \beta}
+  //given by [g_\alpha, g_\beta] = N_{\alpha, \beta}g_{\alpha +\beta}
+  //will be located at the ij^{th} entry in the ChevalleyConstants matrix.
+  //Let $\alpha$ be a root.
+  //Then our choice of elements h_\alpha
+  //of the Cartan subalgebra is such that
+  //1. [g_{\alpha}, g_{-\alpha}] = h_\alpha * (2 / \langle\alpha, \alpha\rangle)
+  //2. [h_{\alpha}, g_\beta] = \langle \alpha, \beta \rangle g^\beta
   //Reference: Samelson, Notes on Lie algebras, pages 46-51
-  Matrix<Rational> ChevalleyConstants;
-  Matrix<bool> Computed;
-  //The below gives a total ordering to all generators, including the elements of the Cartan
-  //the order is:  We put first the generators corresponding to the negative roots in ascending order,
+  //We fix a total order to all generators (i.e., linear space basis vectors).
+  //We put first the generators corresponding to the negative roots in ascending order,
   //we put second the elements of the Cartan
   //we put last the positive roots in ascending order.
+  Matrix<Rational> ChevalleyConstants;
+  Matrix<bool> Computed;
+  //
   //  Matrix<int> theLiebracketPairingIndices;
   Matrix<ElementSemisimpleLieAlgebra<Rational> > theLiebrackets;
   //  List<int> OppositeRootSpaces;
@@ -38,6 +53,7 @@ public:
 
   bool flagHasNilradicalOrder;
   bool flagDeallocated;
+  bool HasComputedStructureConstants();
   unsigned int HashFunction() const {
     return this->HashFunction(*this);
   }

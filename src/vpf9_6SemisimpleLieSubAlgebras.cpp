@@ -422,14 +422,13 @@ void SemisimpleSubalgebras::ComputeFolderNames(FormatExpressions& inputFormat) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
   (void) inputFormat;//avoid unused parameter warning in a portable way
   this->CheckConsistency();
-  this->currentFormat.flagUseHTML = true;
-  this->currentFormat.flagUseLatex = false;
-  this->currentFormat.flagUsePNG = true;
+  if (this->owner == 0) {
+    crash << "To compute semisimple subalgebra folders, "
+    << "you need to specify the ambient Lie algebra. " << crash;
+  }
 
   this->DisplayNameMainFile1NoPath = this->owner->ToStringFileNameNoPathSemisimpleSubalgebras();
-  //"SemisimpleSubalgebras_" + HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
   this->DisplayNameMainFile1WithPath = this->owner->ToStringDisplayFolderName("../../../") + this->DisplayNameMainFile1NoPath;
-
   this->VirtualNameMainFile1 =
   this->owner->ToStringVirtualFolderName() + this->DisplayNameMainFile1NoPath;
 }
@@ -980,10 +979,19 @@ void SemisimpleSubalgebras::MakeCandidateSA(const DynkinType& input, CandidateSS
 }
 
 bool SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(
-  SemisimpleLieAlgebra& newOwner, const DynkinType* targetType
+  SemisimpleLieAlgebra& newOwner,
+  AlgebraicClosureRationals& ownerField,
+  MapReferenceS<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+  ListReferences<SltwoSubalgebras>& containerSl2Subalgebras,
+  const DynkinType* targetType
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch");
-  this->owner = &newOwner;
+  if (this->theSubalgebrasNonEmbedded == 0 || this->owner == 0) {
+    this->initHookUpPointers(newOwner, &ownerField, &containerSubalgebras, &containerSl2Subalgebras);
+  }
+
+  this->CheckInitialization();
+  this->owner->ComputeChevalleyConstants();
   this->targetDynkinType.MakeZero();
   if (targetType != 0) {
     this->targetDynkinType = *targetType;

@@ -2802,15 +2802,7 @@ std::string Calculator::ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclos
 
 SemisimpleSubalgebras& ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
   MacroRegisterFunctionWithName("ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent");
-  bool needToHookUpPointers = false;
-  if (!this->theSSSubalgebraS.Contains(input)) {
-    needToHookUpPointers = true;
-  }
   SemisimpleSubalgebras& currentSAs = this->theSSSubalgebraS.GetValueCreateNoInit(input);
-  if (needToHookUpPointers) {
-    SemisimpleLieAlgebra& ownerSS = this->GetLieAlgebraCreateIfNotPresent(input);
-    currentSAs.initHookUpPointers(ownerSS, &this->theAlgebraicClosure, &this->theSSLieAlgebras, &this->theSltwoSAs);
-  }
   return currentSAs;
 }
 

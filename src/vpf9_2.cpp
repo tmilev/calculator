@@ -996,6 +996,10 @@ void SemisimpleLieAlgebra::OrderNilradical(const Selection& parSelZeroMeansLeviP
   }
 }
 
+bool SemisimpleLieAlgebra::HasComputedStructureConstants() {
+  return this->ChevalleyConstants.NumRows == this->theWeyl.theDynkinType.GetRootSystemSize();
+}
+
 void SemisimpleLieAlgebra::OrderSSalgebraForHWbfComputation() {
   int numPosRoots = this->GetNumPosRoots();
   for (int i = 0; i < numPosRoots; i ++) {

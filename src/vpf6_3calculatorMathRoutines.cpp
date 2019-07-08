@@ -5037,7 +5037,13 @@ bool CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras(
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
   theSSsubalgebras.flagComputePairingTable = false;
   theSSsubalgebras.flagComputeNilradicals = false;
-  theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS);
+  theSSsubalgebras.FindTheSSSubalgebrasFromScratch(
+    ownerSS,
+    theCommands.theObjectContainer.theAlgebraicClosure,
+    theCommands.theObjectContainer.theSSLieAlgebras,
+    theCommands.theObjectContainer.theSltwoSAs,
+    0
+  );
   return output.AssignValue(theSSsubalgebras, theCommands);
 }
 
@@ -6566,7 +6572,13 @@ bool CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg(Calculator& theCommands,
   theSSsubalgebras.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 
   out << "Attempting to embed " << theSmallSapointer->theWeyl.theDynkinType.ToString() << " in " << ownerSS.ToStringLieAlgebraName();
-  theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS, &theSmallSapointer->theWeyl.theDynkinType);
+  theSSsubalgebras.FindTheSSSubalgebrasFromScratch(
+    ownerSS,
+    theCommands.theObjectContainer.theAlgebraicClosure,
+    theCommands.theObjectContainer.theSSLieAlgebras,
+    theCommands.theObjectContainer.theSltwoSAs,
+    &theSmallSapointer->theWeyl.theDynkinType
+  );
   return output.AssignValue(theSSsubalgebras, theCommands);
 }
 

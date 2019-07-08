@@ -280,7 +280,7 @@ std::string GlobalVariables::ToStringProgressReportNoThreadData(bool useHTML) {
     for (int i = 0; i < this->ProgressReportStringS[threadIndex].size; i ++) {
       if (this->ProgressReportStringS[threadIndex][i] != "") {
         if (useHTML) {
-          reportStream << "\n<div id =\"divProgressReport" << i << "\">"
+          reportStream << "\n<div id = \"divProgressReport" << i << "\">"
           << this->ProgressReportStringS[threadIndex][i] << "\n</div>\n<hr>";
         } else {
           reportStream << this->ProgressReportStringS[threadIndex][i] << "\n";
@@ -295,7 +295,7 @@ std::string GlobalVariables::ToStringProgressReportNoThreadData(bool useHTML) {
       reportStream << crash.GetStackTraceEtcErrorMessageConsole();
     }
     reportStream << theGlobalVariables.GetElapsedMilliseconds()
-    << " ms passed. ";
+    << " ms elapsed. ";
     if (theGlobalVariables.MaxComputationMilliseconds > 0) {
       if (useHTML) {
         reportStream << "<br>";

@@ -475,9 +475,18 @@ public:
   void HookUpCentralizers(bool allowNonPolynomialSystemFailure);
   void ComputeSl2sInitOrbitsForComputationOnDemand();
   void FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner);
-  bool FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType = 0);
+  bool FindTheSSSubalgebrasFromScratch(
+    SemisimpleLieAlgebra& newOwner,
+    AlgebraicClosureRationals& ownerField,
+    MapReferenceS<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+    ListReferences<SltwoSubalgebras>& containerSl2Subalgebras,
+    const DynkinType* targetType
+  );
   bool ComputeStructureWriteFiles(
     SemisimpleLieAlgebra& newOwner,
+    AlgebraicClosureRationals& ownerField,
+    MapReferenceS<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+    ListReferences<SltwoSubalgebras>& containerSl2Subalgebras,
     std::stringstream* outputStream,
     bool forceRecompute,
     bool doFullInit,

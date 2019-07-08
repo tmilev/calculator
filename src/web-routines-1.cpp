@@ -767,7 +767,6 @@ bool Crypto::VerifyJWTagainstKnownKeys(
   JSONWebToken theToken;
   //if (commentsGeneral!= 0)
   //  *commentsGeneral << "DEBUG: inputToken: " << inputToken;
-  //stOutput << "DEBUG:Got to here, part - 1";
   if (!theToken.AssignString(inputToken, commentsOnFailure)) {
     return false;
   }

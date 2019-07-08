@@ -2129,14 +2129,54 @@ bool CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm(
 bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure");
+  if (theGlobalVariables.flagAllowProcessMonitoring) {
+    if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != 0) {
+      theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
+    }
+  }
   List<DynkinType> theTypes;
   DynkinType::GetPrecomputedDynkinTypes(theTypes);
-  for (int i = 0; i < theTypes.size; i ++) {
+  ProgressReport theReport;
+  std::stringstream out;
+  int lastIndexPlusOne = theTypes.size;
+  //lastIndexPlusOne = 1;
+  for (int i = 0; i < lastIndexPlusOne; i ++) {
+    std::stringstream reportStream;
+    reportStream << "Computing structure of subalgebra "
+    << theTypes[i].ToString() << " (" << i + 1 << " out of " << theTypes.size << ").";
+    theReport.Report(reportStream.str());
     SemisimpleLieAlgebra theAlgebra;
-    theAlgebra.theWeyl.theDynkinType = theTypes[i];
-    SemisimpleSubalgebras theSubalgebras;
+    theAlgebra.theWeyl.MakeFromDynkinType(theTypes[i]);
+    theAlgebra.ComputeChevalleyConstants();
+    theAlgebra.ToHTMLCalculator(true, true, false);
+    SltwoSubalgebras theSl2s(theAlgebra);
+    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo = true;
+    theAlgebra.FindSl2Subalgebras(theAlgebra, theSl2s);
+    theSl2s.ToHTML();
 
+    if (theTypes[i].HasPrecomputedSubalgebras()) {
+      SemisimpleSubalgebras theSubalgebras;
+      MapReferenceS<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
+      ListReferences<SltwoSubalgebras> sl2Conainer;
+      if (!theSubalgebras.ComputeStructureWriteFiles(
+        theAlgebra,
+        theCommands.theObjectContainer.theAlgebraicClosure,
+        subalgebrasContainer,
+        sl2Conainer,
+        0,
+        false,
+        true,
+        false,
+        true,
+        true,
+        false,
+        true
+      )) {
+        out << "Failed to compute " << theTypes[i].ToString();
+      }
+    }
   }
-  crash << "not implemented yet. " << crash;
+  //crash << "not implemented yet. " << crash;
   return false;
 }

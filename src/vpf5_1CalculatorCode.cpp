@@ -522,7 +522,7 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
   }
   if (outputStream != 0) {
     *outputStream << "<br>Output file: <a href = \""
-    << this->DisplayNameMainFile1WithPath << "\" target=\"_blank\">"
+    << this->DisplayNameMainFile1WithPath << "\" target = \"_blank\">"
     << this->DisplayNameMainFile1NoPath << "</a>";
   }
   return true;

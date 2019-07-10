@@ -2020,8 +2020,8 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     << claimedEmail << " </b></span>";
     return out.str();
   }
-  usernameAssociatedWithToken = emailInfo[DatabaseStrings::labelUsernameAssociatedWithToken].string;
-  actualEmailActivationToken = emailInfo[DatabaseStrings::labelActivationToken].string;
+  usernameAssociatedWithToken = emailInfo[DatabaseStrings::labelUsernameAssociatedWithToken].theString;
+  actualEmailActivationToken = emailInfo[DatabaseStrings::labelActivationToken].theString;
   if (actualEmailActivationToken != claimedActivationToken) {
     out << "\n<span style =\"color:red\"><b>Bad activation token. Could not activate your email. </b></span>";
     return out.str();
@@ -3950,10 +3950,10 @@ void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse) {
   }
   outputNumInUse --;
   this->NumWorkersNormallyExited ++;
-  if (workerMessage["result"].string == "toggleMonitoring") {
+  if (workerMessage["result"].theString == "toggleMonitoring") {
     this->ToggleProcessMonitoring();
   }
-  if (workerMessage["connectionsServed"].type == JSData::JSnumber) {
+  if (workerMessage["connectionsServed"].theType == JSData::JSnumber) {
     this->NumberOfServerRequestsWithinAllConnections += (int) workerMessage["connectionsServed"].number;
   }
   if (workerMessage["restartNeeded"].isTrueRepresentationInJSON()) {
@@ -4601,7 +4601,7 @@ void WebServer::FigureOutOperatingSystem() {
   logServer << "We support the following Linux distros: "
   << logger::blue << supportedOSes.ToStringCommaDelimited() << logger::endL;
   logServer << "Please post a request for support of your Linux flavor on our bug tracker: " << logger::endL
-  << logger::green << HtmlRoutines::githubRepository
+  << logger::green << HtmlRoutines::gitRepository
   << logger::endL << "and we will add your Linux flavor to the list of supported distros. " << logger::endL;
 }
 
@@ -4613,7 +4613,7 @@ void WebServer::CheckSystemInstallationOpenSSL() {
   if (!theGlobalVariables.flagDatabaseCompiled) {
     return;
   }
-  if (theGlobalVariables.configuration["openSSL"].type != JSData::JSUndefined) {
+  if (theGlobalVariables.configuration["openSSL"].theType != JSData::JSUndefined) {
     return;
   }
   theGlobalVariables.configuration["openSSL"] = "Attempted installation";
@@ -4652,7 +4652,7 @@ void WebServer::CheckSystemInstallationMongoDB() {
   if (theGlobalVariables.OperatingSystem == "") {
     return;
   }
-  if (theGlobalVariables.configuration["mongoDB"].type != JSData::JSUndefined) {
+  if (theGlobalVariables.configuration["mongoDB"].theType != JSData::JSUndefined) {
     return;
   }
   theGlobalVariables.configuration["mongoDB"] = "Attempted installation";
@@ -4683,7 +4683,7 @@ void WebServer::CheckMongoDBSetup() {
   } else {
     logServer << logger::red << "Compiled without mongo DB support. " << logger::endL;
   }
-  if (theGlobalVariables.configuration["mongoDBSetup"].type != JSData::JSUndefined) {
+  if (theGlobalVariables.configuration["mongoDBSetup"].theType != JSData::JSUndefined) {
     return;
   }
   logServer << logger::yellow << "configuration so far: " << theGlobalVariables.configuration.ToString(false);
@@ -4728,7 +4728,7 @@ void WebServer::CheckMongoDBSetup() {
 
 void WebServer::CheckFreecalcSetup() {
   MacroRegisterFunctionWithName("WebServer::CheckFreecalcSetup");
-  if (theGlobalVariables.configuration["freecalcSetup"].type != JSData::JSUndefined) {
+  if (theGlobalVariables.configuration["freecalcSetup"].theType != JSData::JSUndefined) {
     return;
   }
   theGlobalVariables.configuration["freecalcSetup"] = "Setup started";
@@ -4747,7 +4747,7 @@ void WebServer::CheckFreecalcSetup() {
 
 void WebServer::CheckMathJaxSetup() {
   MacroRegisterFunctionWithName("WebServer::CheckMathJaxSetup");
-  if (theGlobalVariables.configuration["MathJax"].type != JSData::JSUndefined) {
+  if (theGlobalVariables.configuration["MathJax"].theType != JSData::JSUndefined) {
     return;
   }
   theGlobalVariables.configuration["MathJax"] = "Attempting to install";
@@ -5210,7 +5210,12 @@ void GlobalVariables::ConfigurationProcess() {
     }
   } else {
     theGlobalVariables.configuration[Configuration::monitorPingTime] = theWebServer.WebServerPingIntervalInSeconds;
-  }  
+  }
+  if (theGlobalVariables.configuration[Configuration::gitRepository].theType == JSData::JSstring) {
+    HtmlRoutines::gitRepository = theGlobalVariables.configuration[Configuration::gitRepository].theString;
+  } else {
+    theGlobalVariables.configuration[Configuration::gitRepository] = HtmlRoutines::gitRepository;
+  }
 }
 
 int WebServer::main(int argc, char **argv) {

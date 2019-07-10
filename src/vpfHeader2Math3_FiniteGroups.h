@@ -1262,7 +1262,7 @@ JSData GroupRepresentation<someGroup, coefficient>::JSOut() {
   if (this->flagCharacterIsComputed) {
     out["character"] = this->theCharacteR.data;
   } else {
-    out["character"].type = JSData::JSnull;
+    out["character"].theType = JSData::JSnull;
   }
   for (int i = 0; i < generatorS.size; i ++) {
     out["generators"][i] = generatorS[i];

@@ -778,9 +778,9 @@ bool Crypto::VerifyJWTagainstKnownKeys(
     }
     return false;
   }
-  if (header.type == header.JSObject) {
+  if (header.theType == header.JSObject) {
     if (header.HasKey("kid")) {
-      keyIDstring = header.GetValue("kid").string;
+      keyIDstring = header.GetValue("kid").theString;
     }
   }
   if (keyIDstring == "") {
@@ -902,14 +902,14 @@ bool WebCrawler::VerifyRecaptcha(
   }
   JSData theSuccess;
   theSuccess = theJSparser.GetValue("success");
-  if (theSuccess.type != theJSparser.JSbool || theSuccess.boolean != true) {
+  if (theSuccess.theType != theJSparser.JSbool || theSuccess.theBoolean != true) {
     if (commentsOnFailure != 0) {
-      *commentsOnFailure << "<br><span style =\"color:red\">"
-      << "<b>" << "Could not verify your captcha solution. "
+      *commentsOnFailure << "<br><b style =\"color:red\">"
+      << "Could not verify your captcha solution. "
       << "</b>"
       << "The response from google was: "
       << response
-      << "</span>";
+      ;
     }
     return false;
   } else {

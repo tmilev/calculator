@@ -126,8 +126,8 @@ std::string DrawingVariables::GetHtmlDiv(int theDimension) {
   theData["graphicsUnit"] = this->theBuffer.GraphicsUnit;
   theData["frameLength"] = this->theBuffer.frameLengthInMilliseconds;
   std::string drawObjects = "drawObjects";
-  theData[drawObjects].type = JSData::JSarray;
-  theData[drawObjects].list = this->theBuffer.theOperations;
+  theData[drawObjects].theType = JSData::JSarray;
+  theData[drawObjects].theList = this->theBuffer.theOperations;
   theData["dimension"] = theDimension;
   out << "<script>\n";
   out << "var " << graphicsVar << " = " << theData.ToString(false, false) << ";\n";

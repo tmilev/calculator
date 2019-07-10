@@ -64,7 +64,7 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemInfoFromJSONAppend");
   (void) commentsOnFailure;
-  if (inputJSON.type == inputJSON.JSUndefined) {
+  if (inputJSON.theType == inputJSON.JSUndefined) {
     return true;
   }
   outputProblemInfo.SetExpectedSize(inputJSON.objects.size());
@@ -82,27 +82,27 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend(
     ProblemData& currentProblemValue = outputProblemInfo.GetValueCreate(currentProbName);
     JSData& currentDeadlines = currentProblem[DatabaseStrings::labelDeadlines];
     JSData& currentWeight = currentProblem[DatabaseStrings::labelProblemWeights];
-    if (currentWeight.type == JSData::JSObject) {
+    if (currentWeight.theType == JSData::JSObject) {
       for (int j = 0; j < currentWeight.objects.size(); j ++) {
         JSData& currentWeightValue = currentWeight.objects.theValues[j];
-        if (currentWeightValue.type != JSData::JSstring) {
+        if (currentWeightValue.theType != JSData::JSstring) {
           continue;
         }
         currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue(
-          currentWeight.objects.theKeys[j], currentWeightValue.string
+          currentWeight.objects.theKeys[j], currentWeightValue.theString
         );
       }
-    } else if (currentWeight.type == JSData::JSstring) {
-      currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue(currentCourse, currentWeight.string);
-    } else if (currentWeight.type != JSData::JSUndefined) {
+    } else if (currentWeight.theType == JSData::JSstring) {
+      currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue(currentCourse, currentWeight.theString);
+    } else if (currentWeight.theType != JSData::JSUndefined) {
       commentsOnFailure << "Could extract neither weight nor weights-per course from "
       << currentWeight.ToString(false) << ". Your input was: " << inputJSON.ToString(false);
       return false;
     }
-    if (currentDeadlines.type != JSData::JSUndefined) {
+    if (currentDeadlines.theType != JSData::JSUndefined) {
       for (int j = 0; j < currentDeadlines.objects.size(); j ++) {
         currentProblemValue.adminData.deadlinesPerSection.SetKeyValue(
-          currentDeadlines.objects.theKeys[j], currentDeadlines.objects.theValues[j].string
+          currentDeadlines.objects.theKeys[j], currentDeadlines.objects.theValues[j].theString
         );
       }
     }
@@ -185,7 +185,7 @@ JSData CalculatorHTML::ToJSONDeadlines(
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::ToJSONDeadlines");
   JSData output;
-  output.type = output.JSObject;
+  output.theType = output.JSObject;
 
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
     ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
@@ -241,7 +241,7 @@ bool DatabaseRoutineS::StoreProblemInfoToDatabase(
   JSData findQueryWeights, findQueryDeadlines;
   findQueryWeights[DatabaseStrings::labelProblemWeightsSchema] = theUser.problemWeightSchema;
   findQueryDeadlines[DatabaseStrings::labelDeadlinesSchema] = theUser.deadlineSchema;
-  if (theUser.problemWeights.type != JSData::JSUndefined) {
+  if (theUser.problemWeights.theType != JSData::JSUndefined) {
     if (overwrite) {
       JSData setQueryWeights;
       setQueryWeights[DatabaseStrings::labelProblemWeights] = theUser.problemWeights;
@@ -267,7 +267,7 @@ bool DatabaseRoutineS::StoreProblemInfoToDatabase(
       }
     }
   }
-  if (theUser.deadlines.type != JSData::JSUndefined) {
+  if (theUser.deadlines.theType != JSData::JSUndefined) {
     if (overwrite) {
       JSData setQueryDeadlines;
       setQueryDeadlines[DatabaseStrings::labelDeadlines] = theUser.deadlines;
@@ -2742,7 +2742,7 @@ JSData CalculatorHTML::GetJavascriptMathQuillBoxesForJSON() {
   MacroRegisterFunctionWithName("CalculatorHTML::GetJavascriptMathQuillBoxesForJSON");
   ////////////////////////////////////////////////////////////////////
   JSData output;
-  output.type = JSData::JSarray;
+  output.theType = JSData::JSarray;
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
     JSData currentAnswerJS;
     Answer& currentAnswer = this->theProblemData.theAnswers[i];
@@ -3913,16 +3913,16 @@ std::string CalculatorHTML::ToStringTopicListJSON() {
     return "\"" + out.str() + "\"";
   }
   JSData output, topicBundles;
-  topicBundles.type = JSData::JSarray;
+  topicBundles.theType = JSData::JSarray;
   for (int i = 0; i < this->loadedTopicBundles.size; i ++) {
     topicBundles[i] = this->loadedTopicBundles[i];
   }
   output["topicBundleFile"] = topicBundles;
-  output["children"].type = JSData::JSarray;
+  output["children"].theType = JSData::JSarray;
   for (int i = 0; i < this->theTopicS.size(); i ++) {
     TopicElement& currentElt = this->theTopicS.theValues[i];
     if (currentElt.type == currentElt.tChapter) {
-      output["children"].list.AddOnTop(currentElt.ToJSON(*this));
+      output["children"].theList.AddOnTop(currentElt.ToJSON(*this));
     }
   }
   return output.ToString(false);
@@ -4707,7 +4707,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner) {
       output["type"] = (std::string) "Not documented";
       break;
   }
-  output["children"].type = JSData::JSarray;
+  output["children"].theType = JSData::JSarray;
   this->ComputeLinks(owner, true);
   if (this->type == TopicElement::tProblem && this->immediateChildren.size > 0) {
     crash << "Error: Problem " << this->ToString() << " reported to have children topic elements: "
@@ -4715,7 +4715,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner) {
   }
   for (int i = 0; i < this->immediateChildren.size; i ++) {
     TopicElement& currentChild = owner.theTopicS[this->immediateChildren[i]];
-    output["children"].list.AddOnTop(currentChild.ToJSON(owner));
+    output["children"].theList.AddOnTop(currentChild.ToJSON(owner));
   }
   output["problemNumberString"] = this->problemNumberString;
   output["video"] = this->video;

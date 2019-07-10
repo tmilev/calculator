@@ -568,9 +568,6 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
   int candidatesRealized = 0;
   int candidatesNotRealizedNotProvenImpossible = 0;
   int candidatesProvenImpossible = 0;
-  if (this->comments != "") {
-    out << "<b>Comments.</b>" << this->comments;
-  }
   for (int i = 0; i < this->theSubalgebras.theValues.size; i ++) {
     CandidateSSSubalgebra& currentSA = this->theSubalgebras[i];
     if (currentSA.flagSystemProvedToHaveNoSolution) {
@@ -604,6 +601,9 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
   << "Dynkin indices of simple constituents and dimensions of simple constituents. <br>"
   << "The upper index indicates the Dynkin index, "
   << "the lower index indicates the rank of the subalgebra. ";
+  if (this->comments != "") {
+    out << "<a href = '" << this->fileNameToLogComments << "'>Generation comments.</a>";
+  }
   bool showTime = theFormat == 0 ? true : theFormat->flagIncludeMutableInformation;
   if (showTime) {
     if (this->timeComputationStartInSeconds != - 1 && this->timeComputationEndInSeconds != - 1) {
@@ -941,7 +941,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit() {
     ".html";
     std::fstream LogFile;
     if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
-      LogFile, "output/" + this->fileNameToLogComments, true, false, false
+      LogFile, this->owner->ToStringVirtualFolderName() + this->fileNameToLogComments, true, false, false
     )) {
       crash << "Failed to open/create log file " << this->fileNameToLogComments
       << ". This is not fatal but I am crashing to let you know. ";
@@ -1633,7 +1633,7 @@ bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits(
         this->comments += reportStream.str();
         std::fstream theLogFile;
         if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
-          theLogFile, "output/" + this->fileNameToLogComments, true, false, false
+          theLogFile, this->owner->ToStringVirtualFolderName() + this->fileNameToLogComments, true, false, false
         )) {
           crash << "Failed to open log file: " << this->fileNameToLogComments << ". This is not fatal but "
           << " I am crashing to let you know. " << crash;
@@ -1674,7 +1674,7 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   if (!this->baseSubalgebra().flagCentralizerTypeIsComputed) {
     return false;
   }
-  int stackIndex = this->currentSubalgebraChain.size- 1;
+  int stackIndex = this->currentSubalgebraChain.size - 1;
   int typeIndex = this->currentNumLargerTypesExplored[stackIndex];
   DynkinType& currentType = this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
   DynkinType complementNewSummandType = this->baseSubalgebra().theWeylNonEmbedded->theDynkinType;
@@ -1699,7 +1699,7 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   }
   std::fstream theLogFile;
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
-    theLogFile, "output/" + this->fileNameToLogComments, true, false, false
+    theLogFile, this->owner->ToStringVirtualFolderName() + this->fileNameToLogComments, true, false, false
   )) {
     crash << "Failed to open log file: " << this->fileNameToLogComments << ". This is not fatal but "
     << " I am crashing to let you know. " << crash;

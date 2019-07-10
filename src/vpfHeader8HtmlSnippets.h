@@ -26,7 +26,7 @@ public:
   static int shiftY;
   static int scale;
   static void LoadStrings();
-  static std::string githubRepository;
+  static std::string gitRepository;
 
   static std::string URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth = 0);
 

@@ -78,6 +78,7 @@ struct Configuration {
   static std::string monitorPingTime;
   static std::string disableDatabaseLogEveryoneAsAdmin;
   static std::string serverDetailedLog;
+  static std::string gitRepository;
 };
 
 struct DatabaseStrings {

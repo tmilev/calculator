@@ -1139,26 +1139,26 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     return false;
   }
   SubgroupDataRootReflections readerSubgroup;
-  for (int i = 0; i < input.list.size; i ++) {
-    JSData& currentSGdata = input.list[i];
-    if (currentSGdata.list[0].list[0].string == "parabolic") {
+  for (int i = 0; i < input.theList.size; i ++) {
+    JSData& currentSGdata = input.theList[i];
+    if (currentSGdata.theList[0].theList[0].theString == "parabolic") {
       readerSubgroup.flagIsParabolic = true;
       readerSubgroup.flagIsExtendedParabolic = true;
-    } else if (currentSGdata.list[0].list[0].string == "pseudoParabolicNonParabolic") {
+    } else if (currentSGdata.theList[0].theList[0].theString == "pseudoParabolicNonParabolic") {
       readerSubgroup.flagIsExtendedParabolic = true;
       readerSubgroup.flagIsParabolic = false;
-    } else if (currentSGdata.list[0].list[0].string == "nonPseudoParabolic") {
+    } else if (currentSGdata.theList[0].theList[0].theString == "nonPseudoParabolic") {
       readerSubgroup.flagIsExtendedParabolic = false;
       readerSubgroup.flagIsParabolic = false;
     } else {
       crash << "Corrupt JSon data, entry number " << i + 1 << ": the group labels are: "
-      << currentSGdata.list[0].ToString(false) << crash;
+      << currentSGdata.theList[0].ToString(false) << crash;
     }
-    std::string sgString = currentSGdata.list[0].list[1].string;
+    std::string sgString = currentSGdata.theList[0].theList[1].theString;
     readerSubgroup.generatingSimpleRoots.SetSize(0);
-    for (int j = 0; j < currentSGdata.list[0].list[2].list.size; j ++) {
+    for (int j = 0; j < currentSGdata.theList[0].theList[2].theList.size; j ++) {
       readerSubgroup.generatingSimpleRoots.AddOnTop(
-        gapRootSystem[- 1 + (int) currentSGdata.list[0].list[2].list[j].number]
+        gapRootSystem[- 1 + (int) currentSGdata.theList[0].theList[2].theList[j].number]
       );
     }
     DynkinDiagramRootSubalgebra theSAdiagram;
@@ -1169,8 +1169,8 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
       << sgString << " but dynkin type is computed to be: "
       << readerSubgroup.theDynkinType.ToString() << crash;
     }
-    if (currentSGdata.list[1].list.size != inputGroup.theGroup.characterTable.size) {
-      crash << "Corrupt JSon or non-initialized Weyl group: tau signature has " << currentSGdata.list[1].list.size
+    if (currentSGdata.theList[1].theList.size != inputGroup.theGroup.characterTable.size) {
+      crash << "Corrupt JSon or non-initialized Weyl group: tau signature has " << currentSGdata.theList[1].theList.size
       << " entries "
       << " but Weyl group has " << inputGroup.theGroup.characterTable.size << " irreps. " << crash;
     }
@@ -1187,7 +1187,7 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     }
     readerSubgroup.tauSignature.SetSize(inputGroup.theGroup.characterTable.size);
     for (int j = 0; j<readerSubgroup.tauSignature.size; j ++) {
-      readerSubgroup.tauSignature[j] = (int) currentSGdata.list[1].list[j].number;
+      readerSubgroup.tauSignature[j] = (int) currentSGdata.theList[1].theList[j].number;
     }
     outputSubgroups.AddOnTop(readerSubgroup);
   }

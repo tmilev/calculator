@@ -689,31 +689,31 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
 
 template <typename elementSomeGroup>
 void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData &data) {
-  data.type = JSData::JSObject;
+  data.theType = JSData::JSObject;
   JSData& representatives = data.objects.GetValueCreate("representatives");
   JSData& sizes = data.objects.GetValueCreate("sizes");
   JSData& characters = data.objects.GetValueCreate("characters");
-  representatives.type = JSData::JSarray;
-  representatives.list.SetSize(G.ConjugacyClassCount());
+  representatives.theType = JSData::JSarray;
+  representatives.theList.SetSize(G.ConjugacyClassCount());
 
   for (int i = 0; i < G.ConjugacyClassCount(); i ++) {
     List<int> reprefs;
     G.GetWord(G.conjugacyClasseS[i].representative, reprefs);
-    representatives.list[i].type = JSData::JSarray;
-    representatives.list[i].list.SetSize(reprefs.size);
+    representatives.theList[i].theType = JSData::JSarray;
+    representatives.theList[i].theList.SetSize(reprefs.size);
     for (int j = 0; j < reprefs.size; j ++) {
-      representatives.list[i].list[j].type = JSData::JSnumber;
-      representatives.list[i].list[j].number = reprefs[j];
+      representatives.theList[i].theList[j].theType = JSData::JSnumber;
+      representatives.theList[i].theList[j].number = reprefs[j];
     }
   }
-  sizes.type = JSData::JSarray;
-  sizes.list.SetSize(G.ConjugacyClassCount());
+  sizes.theType = JSData::JSarray;
+  sizes.theList.SetSize(G.ConjugacyClassCount());
   for (int i = 0; i < G.ConjugacyClassCount(); i ++) {
-    sizes.list[i].type = JSData::JSnumber;
-    sizes.list[i].number = ((Rational) G.conjugacyClasseS[i].size).GetDoubleValue();
+    sizes.theList[i].theType = JSData::JSnumber;
+    sizes.theList[i].number = ((Rational) G.conjugacyClasseS[i].size).GetDoubleValue();
   }
-  characters.type = JSData::JSarray;
-  characters.list.SetSize(G.characterTable.size);
+  characters.theType = JSData::JSarray;
+  characters.theList.SetSize(G.characterTable.size);
   for (int i = 0; i < G.characterTable.size; i ++) {
     for (int j = 0; j < G.characterTable[i].data.size; j ++) {
       characters[i][j] = G.characterTable[i][j].GetDoubleValue();

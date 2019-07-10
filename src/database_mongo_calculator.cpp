@@ -31,7 +31,7 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
     return output.AssignValue(commentsOnFailure.str(), theCommands);
   }
   JSData finalOutput;
-  finalOutput.type = JSData::JSarray;
-  finalOutput.list = outputList;
+  finalOutput.theType = JSData::JSarray;
+  finalOutput.theList = outputList;
   return output.AssignValue(HtmlRoutines::ToHtmlTableRowsFromJSON(finalOutput), theCommands);
 }

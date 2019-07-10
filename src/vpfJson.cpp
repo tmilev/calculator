@@ -8,19 +8,19 @@ static ProjectInformationInstance ProjectInfoVpfJSON(__FILE__, "Implementation J
 
 void JSData::operator=(int other) {
   this->reset();
-  this->type = this->JSnumber;
+  this->theType = this->JSnumber;
   this->number = other;
 }
 
 void JSData::operator=(const bool other) {
   this->reset();
-  this->type = this->JSbool;
-  this->boolean = other;
+  this->theType = this->JSbool;
+  this->theBoolean = other;
 }
 
 void JSData::operator=(const double other) {
   this->reset();
-  this->type = this->JSnumber;
+  this->theType = this->JSnumber;
   this->number = other;
 }
 
@@ -31,16 +31,16 @@ void JSData::operator=(const char* other) {
 
 void JSData::operator=(const std::string& other) {
   this->reset();
-  this->type = this->JSstring;
-  this->string = other;
+  this->theType = this->JSstring;
+  this->theString = other;
 }
 
 JSData& JSData::operator[](int i) {
-  this->type = this->JSarray;
-  if (this->list.size < i + 1) {
-    this->list.SetSize(i + 1);
+  this->theType = this->JSarray;
+  if (this->theList.size < i + 1) {
+    this->theList.SetSize(i + 1);
   }
-  return this->list[i];
+  return this->theList[i];
 }
 
 JSData JSData::GetValue(const std::string& key) {
@@ -49,7 +49,7 @@ JSData JSData::GetValue(const std::string& key) {
     return this->objects.theValues[theIndex];
   }
   JSData result;
-  result.type = JSData::JSUndefined;
+  result.theType = JSData::JSUndefined;
   return result;
 }
 
@@ -66,28 +66,28 @@ void JSData::SetKeyValue(const std::string& key, const JSData& value) {
 }
 
 JSData& JSData::operator[](const std::string& key) {
-  this->type = this->JSObject;
+  this->theType = this->JSObject;
   return this->objects.GetValueCreate(key);
 }
 
 void JSData::operator=(const List<JSData>& other) {
-  this->type = this->JSarray;
-  this->list = other;
+  this->theType = this->JSarray;
+  this->theList = other;
   this->objects.Clear();
 }
 
 void JSData::operator=(const Rational& other) {
-  this->type = this->JSnumber;
+  this->theType = this->JSnumber;
   this->number = other.GetDoubleValue();
 }
 
 void JSData::operator =(int64_t input) {
-  this->type = this->JSnumber;
+  this->theType = this->JSnumber;
   this->number = input;
 }
 
 bool JSData::isIntegerFittingInInt(int* whichInteger) {
-  if (this->type != JSData::JSnumber) {
+  if (this->theType != JSData::JSnumber) {
     return false;
   }
   if (whichInteger != 0) {
@@ -97,28 +97,28 @@ bool JSData::isIntegerFittingInInt(int* whichInteger) {
 }
 
 bool JSData::isTrueRepresentationInJSON() {
-  if (this->type == JSData::JSbool) {
-    return this->boolean;
+  if (this->theType == JSData::JSbool) {
+    return this->theBoolean;
   }
-  if (this->type != JSData::JSstring) {
+  if (this->theType != JSData::JSstring) {
     return false;
   }
-  return this->string == "true";
+  return this->theString == "true";
 }
 
 bool JSData::isListOfStrings(List<std::string>* whichStrings) {
-  if (this->type != this->JSarray) {
+  if (this->theType != this->JSarray) {
     return false;
   }
-  for (int i = 0; i < this->list.size; i ++) {
-    if (this->list[i].type != this->JSstring) {
+  for (int i = 0; i < this->theList.size; i ++) {
+    if (this->theList[i].theType != this->JSstring) {
       return false;
     }
   }
   if (whichStrings != 0) {
-    whichStrings->SetSize(this->list.size);
-    for (int i = 0; i < this->list.size; i ++) {
-      (*whichStrings)[i] = this->list[i].string;
+    whichStrings->SetSize(this->theList.size);
+    for (int i = 0; i < this->theList.size; i ++) {
+      (*whichStrings)[i] = this->theList[i].theString;
     }
   }
   return true;
@@ -126,47 +126,47 @@ bool JSData::isListOfStrings(List<std::string>* whichStrings) {
 
 bool JSData::IsValidElement() {
   return
-  this->type == this->JSnull   ||
-  this->type == this->JSbool   ||
-  this->type == this->JSnumber ||
-  this->type == this->JSstring ||
-  this->type == this->JSarray  ||
-  this->type == this->JSObject;
+  this->theType == this->JSnull   ||
+  this->theType == this->JSbool   ||
+  this->theType == this->JSnumber ||
+  this->theType == this->JSstring ||
+  this->theType == this->JSarray  ||
+  this->theType == this->JSObject;
 }
 
 void JSData::TryToComputeType() {
-  if (this->type != this->JSUndefined) {
+  if (this->theType != this->JSUndefined) {
     return;
   }
-  if (this->string == "") {
+  if (this->theString == "") {
     return;
   }
-  if (this->string == "null") {
+  if (this->theString == "null") {
     this->reset();
-    this->type = this->JSnull;
+    this->theType = this->JSnull;
     return;
   }
-  if (this->string == "true") {
+  if (this->theString == "true") {
     this->reset();
-    this->type = this->JSbool;
-    this->boolean = true;
+    this->theType = this->JSbool;
+    this->theBoolean = true;
     return;
   }
-  if (this->string == "false") {
+  if (this->theString == "false") {
     this->reset();
-    this->type = this->JSbool;
-    this->boolean = false;
+    this->theType = this->JSbool;
+    this->theBoolean = false;
     return;
   }
-  if (this->string.size() > 0) {
-    if (this->string[0] == '-' || MathRoutines::isADigit(this->string[0])) {
-      this->number = std::stod(this->string);
-      this->string = "";
-      this->type = JSData::JSnumber;
+  if (this->theString.size() > 0) {
+    if (this->theString[0] == '-' || MathRoutines::isADigit(this->theString[0])) {
+      this->number = std::stod(this->theString);
+      this->theString = "";
+      this->theType = JSData::JSnumber;
       return;
     }
   }
-  this->type = JSData::JSstring;
+  this->theType = JSData::JSstring;
 }
 
 bool JSData::Tokenize(const std::string& input, List<JSData>& output) {
@@ -177,9 +177,9 @@ bool JSData::Tokenize(const std::string& input, List<JSData>& output) {
   bool previousIsBackSlash = false;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == '"') {
-      if (currentElt.type == currentElt.JSstring) {
+      if (currentElt.theType == currentElt.JSstring) {
         if (previousIsBackSlash) {
-          currentElt.string[currentElt.string.size() - 1] = '\"';
+          currentElt.theString[currentElt.theString.size() - 1] = '\"';
           previousIsBackSlash = false;
         } else {
           output.AddOnTop(currentElt);
@@ -188,35 +188,35 @@ bool JSData::Tokenize(const std::string& input, List<JSData>& output) {
         }
       } else {
         currentElt.TryToComputeType();
-        if (currentElt.type != currentElt.JSUndefined) {
+        if (currentElt.theType != currentElt.JSUndefined) {
           output.AddOnTop(currentElt);
         }
         currentElt.reset();
-        currentElt.type = currentElt.JSstring;
+        currentElt.theType = currentElt.JSstring;
         inQuotes = true;
         previousIsBackSlash = false;
       }
       continue;
     }
-    if (inQuotes && currentElt.type == currentElt.JSstring) {
+    if (inQuotes && currentElt.theType == currentElt.JSstring) {
       if (input[i] == '\\') {
         if (previousIsBackSlash) {
           previousIsBackSlash = false;
         } else {
           previousIsBackSlash = true;
-          currentElt.string += '\\';
+          currentElt.theString += '\\';
         }
         continue;
       }
     }
     previousIsBackSlash = false;
-    if (inQuotes && currentElt.type == currentElt.JSstring) {
-      currentElt.string += input[i];
+    if (inQuotes && currentElt.theType == currentElt.JSstring) {
+      currentElt.theString += input[i];
       continue;
     }
     if (input[i] == ' ' || input[i] == '\r' || input[i] == '\n') {
       currentElt.TryToComputeType();
-      if (currentElt.type != currentElt.JSUndefined) {
+      if (currentElt.theType != currentElt.JSUndefined) {
         output.AddOnTop(currentElt);
         currentElt.reset();
       }
@@ -228,33 +228,33 @@ bool JSData::Tokenize(const std::string& input, List<JSData>& output) {
       input[i] == ':' || input[i] ==  ','
     ) {
       currentElt.TryToComputeType();
-      if (currentElt.type != JSData::JSUndefined) {
+      if (currentElt.theType != JSData::JSUndefined) {
         output.AddOnTop(currentElt);
       }
       currentElt.reset();
       if (input[i] == '{') {
-        currentElt.type = currentElt.JSopenBrace;
+        currentElt.theType = currentElt.JSopenBrace;
       }
       if (input[i] == '[') {
-        currentElt.type = currentElt.JSopenBracket;
+        currentElt.theType = currentElt.JSopenBracket;
       }
       if (input[i] == '}') {
-        currentElt.type = currentElt.JScloseBrace;
+        currentElt.theType = currentElt.JScloseBrace;
       }
       if (input[i] == ']') {
-        currentElt.type = currentElt.JScloseBracket;
+        currentElt.theType = currentElt.JScloseBracket;
       }
       if (input[i] == ':') {
-        currentElt.type = currentElt.JScolon;
+        currentElt.theType = currentElt.JScolon;
       }
       if (input[i] == ',') {
-        currentElt.type = currentElt.JScomma;
+        currentElt.theType = currentElt.JScomma;
       }
       output.AddOnTop(currentElt);
       currentElt.reset();
       continue;
     }
-    currentElt.string += input[i];
+    currentElt.theString += input[i];
   }
   return true;
 }
@@ -271,8 +271,8 @@ bool JSData::readstring(
   }
   if (stringsWerePercentEncoded) {
     for (int i = 0; i < theTokenS.size; i ++) {
-      if (theTokenS[i].type == JSData::JSstring) {
-        theTokenS[i].string = HtmlRoutines::ConvertURLStringToNormal(theTokenS[i].string, false);
+      if (theTokenS[i].theType == JSData::JSstring) {
+        theTokenS[i].theString = HtmlRoutines::ConvertURLStringToNormal(theTokenS[i].theString, false);
       }
     }
   }
@@ -290,36 +290,36 @@ bool JSData::readstring(
     JSData& fourthToLast = readingStack[fourthToLastIndex];
     //JSData& fifthToLast = theTokenS[i - 4];
     if (
-      fourthToLast.type == JSData::JSopenBrace && thirdToLast.type == JSData::JSstring &&
-      secondToLast.type == JSData::JScolon && last.IsValidElement()
+      fourthToLast.theType == JSData::JSopenBrace && thirdToLast.theType == JSData::JSstring &&
+      secondToLast.theType == JSData::JScolon && last.IsValidElement()
     ) {
-      fourthToLast.objects.SetKeyValue(thirdToLast.string, last);
+      fourthToLast.objects.SetKeyValue(thirdToLast.theString, last);
       readingStack.SetSize(readingStack.size - 3);
       continue;
     }
-    if (secondToLast.type == JSData::JSopenBracket && last.IsValidElement()) {
-      secondToLast.list.AddOnTop(last);
+    if (secondToLast.theType == JSData::JSopenBracket && last.IsValidElement()) {
+      secondToLast.theList.AddOnTop(last);
       readingStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.type == JSData::JSopenBracket && last.type == JSData::JScomma) {
+    if (secondToLast.theType == JSData::JSopenBracket && last.theType == JSData::JScomma) {
       readingStack.RemoveLastObject();
       continue;
     }
     if (
-      (secondToLast.type == JSData::JSopenBrace || secondToLast.type == JSData::JSopenBracket) &&
-      last.type == JSData::JScomma
+      (secondToLast.theType == JSData::JSopenBrace || secondToLast.theType == JSData::JSopenBracket) &&
+      last.theType == JSData::JScomma
     ) {
       readingStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.type == JSData::JSopenBrace && last.type == JSData::JScloseBrace) {
-      secondToLast.type = JSData::JSObject;
+    if (secondToLast.theType == JSData::JSopenBrace && last.theType == JSData::JScloseBrace) {
+      secondToLast.theType = JSData::JSObject;
       readingStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.type == JSData::JSopenBracket && last.type == JSData::JScloseBracket) {
-      secondToLast.type = JSData::JSarray;
+    if (secondToLast.theType == JSData::JSopenBracket && last.theType == JSData::JScloseBracket) {
+      secondToLast.theType = JSData::JSarray;
       readingStack.RemoveLastObject();
       continue;
     }
@@ -397,7 +397,7 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
     newLine = "\n";
   }
   indentation ++;
-  switch (this->type) {
+  switch (this->theType) {
     case JSnull:
       out << "null";
       return out;
@@ -405,7 +405,7 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
       out << this->number;
       return out;
     case JSbool:
-      if (this->boolean == true) {
+      if (this->theBoolean == true) {
         out << "true";
       } else {
         out << "false";
@@ -413,21 +413,21 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
       return out;
     case JSstring:
       if (!percentEncodeStrings) {
-        out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->string) << '"';
+        out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->theString) << '"';
       } else {
-        out << '"' << HtmlRoutines::ConvertStringToURLString(this->string, false) << '"';
+        out << '"' << HtmlRoutines::ConvertStringToURLString(this->theString, false) << '"';
       }
       return out;
     case JSarray:
-      if (this->list.size == 0) {
+      if (this->theList.size == 0) {
         out << "[]";
         return out;
       }
       out << "[" << newLine;
-      for (int i = 0; i < this->list.size; i ++) {
+      for (int i = 0; i < this->theList.size; i ++) {
         out << whiteSpaceInner << whiteSpaceOuter;
-        this->list[i].IntoStream(out, percentEncodeStrings, indentation, useNewLine, useHTML);
-        if (i != this->list.size - 1) {
+        this->theList[i].IntoStream(out, percentEncodeStrings, indentation, useNewLine, useHTML);
+        if (i != this->theList.size - 1) {
           out << "," << newLine;
         }
       }
@@ -535,11 +535,11 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
 }
 
 void JSData::reset(char inputType) {
-  this->type = inputType;
-  this->boolean = false;
+  this->theType = inputType;
+  this->theBoolean = false;
   this->number = 0;
-  this->string = "";
-  this->list.SetSize(0);
+  this->theString = "";
+  this->theList.SetSize(0);
   this->objects.Clear();
 }
 

@@ -2409,7 +2409,7 @@ bool Function::ShouldBeApplied(int parentOpIfAvailable) {
 JSData Function::ToJSON() const {
   MacroRegisterFunctionWithName("Function::ToJSON");
   JSData result;
-  result.type = JSData::JSObject;
+  result.theType = JSData::JSObject;
   if (this->owner == 0) {
     result["error"] = "bad_owner";
     return result;

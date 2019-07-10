@@ -710,10 +710,10 @@ std::string HtmlInterpretation::GetSelectCourseJSON() {
   }
   CourseList theCourses;
   theCourses.LoadFromString(theTopicFile, &comments);
-  output["courses"].type = JSData::JSarray;
+  output["courses"].theType = JSData::JSarray;
   for (int i = 0; i < theCourses.theCourses.size; i ++) {
     Course& currentCourse = theCourses.theCourses[i];
-    output["courses"].list.AddOnTop(currentCourse.ToJSON());
+    output["courses"].theList.AddOnTop(currentCourse.ToJSON());
   }
   return output.ToString(false);
 }
@@ -912,7 +912,7 @@ std::string HtmlInterpretation::GetExamPageJSON() {
     output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
     JSData theScripts;
     theScripts = JSData::JSarray;
-    theScripts.list.SetSize(theFile.theScripts.size());
+    theScripts.theList.SetSize(theFile.theScripts.size());
     for (int i = 0; i < theFile.theScripts.size(); i ++) {
       theScripts[theFile.theScripts.theKeys[i]] =
       HtmlRoutines::ConvertStringToURLString(theFile.theScripts.theValues[i], false);
@@ -991,7 +991,7 @@ std::string HtmlInterpretation::GetEditPageJSON() {
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicBundles);
   }
   JSData theAutoCompleteWordsJS;
-  theAutoCompleteWordsJS.type = JSData::JSarray;
+  theAutoCompleteWordsJS.theType = JSData::JSarray;
   for (int i = 0; i < theAutocompleteKeyWords.size; i ++) {
     theAutoCompleteWordsJS[i] = theAutocompleteKeyWords[i];
   }
@@ -1323,11 +1323,11 @@ std::string HtmlInterpretation::AddTeachersSections() {
     out << "<b style='color:red'>Failed to interpret your input. </b>";
     return out.str();
   }
-  if (inputParsed["teachers"].type != JSData::JSstring) {
+  if (inputParsed["teachers"].theType != JSData::JSstring) {
     out << "<b style='color:red'>Failed to extract key 'teachers' from your input. </b>";
     return out.str();
   }
-  if (inputParsed["students"].type != JSData::JSstring) {
+  if (inputParsed["students"].theType != JSData::JSstring) {
     out << "<b style='color:red'>Failed to find key 'students' in your input. </b>";
     return out.str();
   }
@@ -1335,9 +1335,9 @@ std::string HtmlInterpretation::AddTeachersSections() {
     return "<b>no database present.</b>";
   }
   std::string desiredUsers =
-  HtmlRoutines::ConvertURLStringToNormal(inputParsed["teachers"].string, false);
+  HtmlRoutines::ConvertURLStringToNormal(inputParsed["teachers"].theString, false);
   std::string desiredSectionsOneString =
-  HtmlRoutines::ConvertURLStringToNormal(inputParsed["students"].string, false);
+  HtmlRoutines::ConvertURLStringToNormal(inputParsed["students"].theString, false);
   List<std::string> desiredSectionsList;
 
   List<std::string> theTeachers;
@@ -1988,7 +1988,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   }
   if (theGlobalVariables.problemExpectedNumberOfAnswers.size() == 0) {
     JSData findProblemInfo;
-    findProblemInfo.type = JSData::JSarray;
+    findProblemInfo.theType = JSData::JSarray;
     List<JSData> result;
     List<std::string> fields;
     fields.AddOnTop(DatabaseStrings::labelProblemName);
@@ -1998,11 +1998,11 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
       DatabaseStrings::tableProblemInformation, findProblemInfo, result, fields, - 1, 0, &commentsOnFailure
     )) {
       for (int i = 0; i < result.size; i ++) {
-        const std::string& currentProblemName = result[i][DatabaseStrings::labelProblemName].string;
+        const std::string& currentProblemName = result[i][DatabaseStrings::labelProblemName].theString;
         if (currentProblemName == "") {
           continue;
         }
-        const std::string& expectedNumberOfAnswersString = result[i][DatabaseStrings::labelProblemTotalQuestions].string;
+        const std::string& expectedNumberOfAnswersString = result[i][DatabaseStrings::labelProblemTotalQuestions].theString;
         if (expectedNumberOfAnswersString == "") {
           continue;
         }
@@ -2198,10 +2198,10 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
       }
     }
     this->userScores.AddOnTop(- 1);
-    this->userNames.AddOnTop(this->userProblemData[i][DatabaseStrings::labelUsername].string);
+    this->userNames.AddOnTop(this->userProblemData[i][DatabaseStrings::labelUsername].theString);
     this->userInfos.AddOnTop(currentUserRecord.currentUseR.sectionInDB);
     this->scoresBreakdown.SetSize(this->scoresBreakdown.size + 1);
-    currentUserRecord.currentUseR.username = this->userProblemData[i][DatabaseStrings::labelUsername].string;
+    currentUserRecord.currentUseR.username = this->userProblemData[i][DatabaseStrings::labelUsername].theString;
     if (!currentUserRecord.currentUseR.InterpretDatabaseProblemDataJSON(
       this->userProblemData[i][DatabaseStrings::labelProblemDataJSON],
       comments
@@ -2553,7 +2553,7 @@ std::string HtmlInterpretation::ToStringNavigation() {
   } else {
     out << "<b>About</b> " << linkBigSeparator;
   }
-  out << "<a href=\"" << HtmlRoutines::githubRepository << "/issues\" target =\"_blank\">Feedback, bugs</a>"
+  out << "<a href=\"" << HtmlRoutines::gitRepository << "/issues\" target =\"_blank\">Feedback, bugs</a>"
   << linkBigSeparator;
 
   if (!theGlobalVariables.flagRunningApache) {

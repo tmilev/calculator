@@ -9257,7 +9257,7 @@ std::string HtmlRoutines::ToHtmlTableRowsFromStringContainingJSON(const std::str
 
 std::string HtmlRoutines::ToHtmlTableRowsFromJSON(const JSData& input) {
   MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromJSON");
-  if (input.type == JSData::JSObject) {
+  if (input.theType == JSData::JSObject) {
     std::stringstream out;
     out << "<table class = \"tableDatabaseItem\">";
     for (int i = 0; i < input.objects.size(); i ++) {
@@ -9267,7 +9267,7 @@ std::string HtmlRoutines::ToHtmlTableRowsFromJSON(const JSData& input) {
     out << "</table>";
     return out.str();
   }
-  if (input.type == JSData::JSarray) {
+  if (input.theType == JSData::JSarray) {
     std::stringstream out;
     out << "<table class = \"tableDatabaseItem\">";
     for (int i = 0; i < input.objects.size(); i ++) {
@@ -9963,9 +9963,9 @@ void DrawOperations::initDimensions(int theDim) {
 
 int DrawOperations::GetDimFirstDimensionDependentOperation() {
   for (int i = 0; i < this->theOperations.size; i ++) {
-    if (this->theOperations[i][fieldOperation].string == DrawOperations::typeSegment) {
-      if (this->theOperations[i][DrawOperations::fieldPoints].list.size > 0) {
-        return this->theOperations[i][DrawOperations::fieldPoints][0].list.size;
+    if (this->theOperations[i][fieldOperation].theString == DrawOperations::typeSegment) {
+      if (this->theOperations[i][DrawOperations::fieldPoints].theList.size > 0) {
+        return this->theOperations[i][DrawOperations::fieldPoints][0].theList.size;
       }
     }
   }

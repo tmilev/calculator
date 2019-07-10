@@ -11,7 +11,7 @@ ProjectInformationInstance projectInfoInstanceHtmlSnippets(__FILE__, "Html Snipp
 
 MapLisT<std::string, std::string, MathRoutines::HashString> HtmlRoutines::preLoadedFiles;
 
-std::string HtmlRoutines::githubRepository = "https://github.com/tmilev/calculator";
+std::string HtmlRoutines::gitRepository = "https://github.com/tmilev/calculator";
 
 std::string HtmlRoutines::GetJavascriptVariable(const std::string& theVar) {
   std::stringstream sanitizer;
@@ -30,7 +30,7 @@ std::string HtmlRoutines::GetJavascriptVariable(const std::string& theVar) {
 
 std::string HtmlRoutines::GetHtmlLinkToGithubRepo(const std::string& displayString) {
   std::stringstream out;
-  out << "<a href=\"" << HtmlRoutines::githubRepository << "\">" << displayString << "</a>";
+  out << "<a href=\"" << HtmlRoutines::gitRepository << "\">" << displayString << "</a>";
   return out.str();
 }
 
@@ -38,7 +38,7 @@ std::string HtmlRoutines::GetHtmlLinkFromProjectFileName(
   const std::string& fileName, const std::string& fileDesc, int line
 ) {
   std::stringstream out;
-  out << " <a href=\"" << HtmlRoutines::githubRepository << "/blob/master/src/"
+  out << " <a href=\"" << HtmlRoutines::gitRepository << "/blob/master/src/"
   << FileOperations::GetFileNameFromFileNameWithPath(fileName);
   if (line > 0) {
     out << "#L" << line;

@@ -106,10 +106,10 @@ bool TransportLayerSecurityOpenSSL::initSSLkeyFiles() {
     << " -out " << certificatePhysicalName
     << " -days 3001 ";
     if (
-      theGlobalVariables.configuration["openSSLSubject"].type != JSData::JSUndefined &&
-      theGlobalVariables.configuration["openSSLSubject"].type == JSData::JSstring
+      theGlobalVariables.configuration["openSSLSubject"].theType != JSData::JSUndefined &&
+      theGlobalVariables.configuration["openSSLSubject"].theType == JSData::JSstring
     ) {
-      theCommand << "-subj " << theGlobalVariables.configuration["openSSLSubject"].string;
+      theCommand << "-subj " << theGlobalVariables.configuration["openSSLSubject"].theString;
       // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"
     }
     logServer << "About to generate key files with the following command. " << logger::endL;

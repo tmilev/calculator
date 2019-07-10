@@ -1147,7 +1147,7 @@ bool Certificate::LoadFromJSON(JSData& input, std::stringstream* commentsOnFailu
     *commentsGeneral << "<hr>Loading certificate from: "
     << input.ToString(true);
   }
-  if (input.type != JSData::JSObject) {
+  if (input.theType != JSData::JSObject) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "Can't load certificate: JSON not of type object. ";
     }
@@ -1158,19 +1158,19 @@ bool Certificate::LoadFromJSON(JSData& input, std::stringstream* commentsOnFailu
   this->theModulusString = "";
   this->theExponentString = "";
   if (input.HasKey("alg")) {
-    this->algorithm = input.GetValue("alg").string;
+    this->algorithm = input.GetValue("alg").theString;
   }
   if (input.HasKey("kid")) {
-    this->keyid = input.GetValue("kid").string;
+    this->keyid = input.GetValue("kid").theString;
   }
   if (input.HasKey("n")) {
-    this->theModulusString = input.GetValue("n").string;
+    this->theModulusString = input.GetValue("n").theString;
     if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theModulusString, this->theModuluS, commentsOnFailure)) {
       return false;
     }
   }
   if (input.HasKey("e")) {
-    this->theExponentString = input.GetValue("e").string;
+    this->theExponentString = input.GetValue("e").theString;
     if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theExponentString, this->theExponenT, commentsOnFailure)) {
       return false;
     }
@@ -1193,13 +1193,13 @@ bool Crypto::LoadOneKnownCertificate(
   }
   Certificate currentCert;
   bool isGood = false;
-  if (certificateJSON.type == JSData::JSObject) {
+  if (certificateJSON.theType == JSData::JSObject) {
     if (certificateJSON.HasKey("keys")) {
       JSData theKeys = certificateJSON.GetValue("keys");
-      if (theKeys.type == JSData::JSarray) {
+      if (theKeys.theType == JSData::JSarray) {
         isGood = true;
-        for (int i = 0; i < theKeys.list.size; i ++) {
-          if (!currentCert.LoadFromJSON(theKeys.list[i], commentsOnFailure, commentsGeneral)) {
+        for (int i = 0; i < theKeys.theList.size; i ++) {
+          if (!currentCert.LoadFromJSON(theKeys.theList[i], commentsOnFailure, commentsGeneral)) {
             return false;
           }
           Crypto::knownCertificates.AddOnTop(currentCert);

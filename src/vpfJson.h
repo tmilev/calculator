@@ -32,11 +32,11 @@ public:
   static const char JScomma        = 12;
   static const char JSerror        = 13;
 
-  char type;
-  bool boolean;
+  char theType;
+  bool theBoolean;
   double number;
-  std::string string;
-  List<JSData> list;
+  std::string theString;
+  List<JSData> theList;
   MapReferenceS<std::string, JSData, MathRoutines::HashString> objects;
   void operator=(const bool other);
   void operator=(int other);
@@ -61,21 +61,21 @@ public:
     this->operator=(other);
   }
   void operator=(const JSData& other) {
-    this->type = other.type;
-    this->boolean = other.boolean;
+    this->theType = other.theType;
+    this->theBoolean = other.theBoolean;
     this->number = other.number;
-    this->string = other.string;
-    this->list = other.list;
+    this->theString = other.theString;
+    this->theList = other.theList;
     this->objects = other.objects;
   }
   void operator=(const List<JSData>& other);
   template <typename any>
   void operator=(const List<any>& other) {
     this->reset();
-    this->type = this->JSarray;
-    this->list.SetSize(other.size);
+    this->theType = this->JSarray;
+    this->theList.SetSize(other.size);
     for (int i = 0; i < other.size; i ++) {
-      this->list[i] = other[i];
+      this->theList[i] = other[i];
     }
   }
   void operator=(const Rational& other);

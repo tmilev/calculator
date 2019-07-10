@@ -450,30 +450,30 @@ void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroupData>& g, Per
 template <typename somegroup>
 void PrintCharTable(const somegroup& G, const char* filename) {
   JSData data;
-  data.type = JSData::JSObject;
+  data.theType = JSData::JSObject;
   JSData& representatives = data.objects.GetValueCreate("representatives");
   JSData& sizes = data.objects.GetValueCreate("sizes");
   JSData& characters = data.objects.GetValueCreate("characters");
-  representatives.type = JSData::JSarray;
-  representatives.list.SetSize(G.conjugacyClasses.size);
+  representatives.theType = JSData::JSarray;
+  representatives.theList.SetSize(G.conjugacyClasses.size);
   for (int i = 0; i < G.conjugacyClasses.size; i ++) {
     List<int> reprefs;
     G.GetWord(G.conjugacyClasses[i][0], reprefs);
-    representatives.list[i].type = JSData::JSarray;
-    representatives.list[i].list.SetSize(reprefs.size);
+    representatives.theList[i].theType = JSData::JSarray;
+    representatives.theList[i].theList.SetSize(reprefs.size);
     for (int j = 0; j < reprefs.size; j ++) {
-      representatives.list[i].list[j].type = JSData::JSnumber;
-      representatives.list[i].list[j].number = reprefs[j];
+      representatives.theList[i].theList[j].theType = JSData::JSnumber;
+      representatives.theList[i].theList[j].number = reprefs[j];
     }
   }
-  sizes.type = JSData::JSarray;
-  sizes.list.SetSize(G.conjugacyClasses.size);
+  sizes.theType = JSData::JSarray;
+  sizes.theList.SetSize(G.conjugacyClasses.size);
   for (int i = 0; i < G.conjugacyClasses.size; i ++) {
-    sizes.list[i].type = JSData::JSnumber;
-    sizes.list[i].number = G.conjugacyClasses[i].size;
+    sizes.theList[i].theType = JSData::JSnumber;
+    sizes.theList[i].number = G.conjugacyClasses[i].size;
   }
-  characters.type = JSData::JSarray;
-  characters.list.SetSize(G.characterTable.size);
+  characters.theType = JSData::JSarray;
+  characters.theList.SetSize(G.characterTable.size);
   for (int i = 0; i < G.characterTable.size; i ++) {
     for (int j = 0; j < G.characterTable[i].size; j ++) {
       characters[i][j] = G.characterTable[i][j].GetDoubleValue();
@@ -501,8 +501,8 @@ void AddCharTable(JSData& chartable, somegroup& G) {
   // check representatives... well, not yet.
   // load characters
 
-  G.characterTable.SetSize(chartable["characters"].list.size);
-  for (int i = 0; i <chartable["characters"].list.size; i ++) {
+  G.characterTable.SetSize(chartable["characters"].theList.size);
+  for (int i = 0; i <chartable["characters"].theList.size; i ++) {
     G.characterTable[i].SetSize(G.conjugacyClasses.size);
     for (int j = 0; j<G.conjugacyClasses.size; j ++) {
       G.characterTable[i][j] = chartable["characters"][i][j].number;
@@ -3477,7 +3477,7 @@ void TestInduction(int n = 4, int m = 3) {
   /*
      JSData data;
      data.readfile("c7ct");
-     if (data.type != JSNULL) {
+     if (data.theType != JSNULL) {
        stOutput << data << "\n";
        AddCharTable(data,G);
      } else {

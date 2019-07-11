@@ -331,28 +331,30 @@ std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressJavascriptFolder 
 std::string Calculator::ToStringSemismipleLieAlgebraLinksFromHD(const DynkinType& theType, FormatExpressions* theFormat) {
   (void) theFormat;
   std::stringstream out;
-  std::string theTitlePageFileNameNoPathSlowLoad = "SemisimpleSubalgebras_" + theType.ToString() + ".html";
-  out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=calculator&mainInput=PrintSemisimpleLieAlgebra%7B%7D"
-  << theType[0].theLetter << "_" << theType[0].theRank << "\">"
-  << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
+  SemisimpleLieAlgebra folderComputer;
+  folderComputer.theWeyl.theDynkinType = theType;
+  out << "<tr><td><a href=\""
+  << folderComputer.ToStringDisplayFolderName("")
+  << folderComputer.ToStringFileNameNoPathStructureConstants()
+  << "\">"
+  << theType[0].theLetter << theType[0].theRank << " structure constants</a></td>\n ";
   if (theType[0].HasPrecomputedSubalgebras()) {
     out << "<td><a href=\""
-    << "output/" << theType.ToString() << "/" << theTitlePageFileNameNoPathSlowLoad
+    << folderComputer.ToStringDisplayFolderName("") << folderComputer.ToStringFileNameNoPathSemisimpleSubalgebras()
     << "\">"
     << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a>";
     out << "</td>\n ";
   } else {
     out << "<td>Not available</td>\n";
   }
-  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=calculator&mainInput=printSlTwoSubalgebras%7B%7D%28"
-  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">"
+  out << "<td><a href=\""
+  << folderComputer.ToStringDisplayFolderName("")
+  << folderComputer.ToStringFileNameRelativePathSlTwoSubalgebras() << "\">"
   << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
   out << "<td><a href=\""
-  << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=calculator&mainInput=printRootSubalgebras%7B%7D%28"
-  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter
+  << folderComputer.ToStringDisplayFolderName("")
+  << folderComputer.ToStringFileNameNoPathRootSubalgebras()
+  << "\">" << theType[0].theLetter
   << theType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
 }

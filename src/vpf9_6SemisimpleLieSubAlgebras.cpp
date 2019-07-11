@@ -1616,8 +1616,9 @@ bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits(
       );
       if (!theDynkinIndicesCentralizerComplementCurrentSummand.Contains(theDynkinIndicesCurrentSummand)) {
         std::stringstream reportStream;
-        reportStream << "<hr>Attention: using non-tested optimization, please double-check by hand. "
-        << "I have just rejected type " << currentType.ToString() << " as non-realizable for the following reasons. "
+        reportStream << "<hr>"
+        << "I have rejected type "
+        << currentType.ToString() << " as non-realizable for the following reasons. "
         << "I computed that the type's summand " << currentSummand.ToString()
         << " has complement summand " << currentComplementSummand.ToString() << ". "
         << " Then I computed the latter complement summand has centralizer "
@@ -1705,8 +1706,8 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
     << " I am crashing to let you know. " << crash;
   }
   std::stringstream reportStream;
-  reportStream << "<hr>Attention: using non-tested optimization, please double-check by hand. "
-  << "I have just rejected type " << currentType.ToString() << " as non-realizable for the following reasons. "
+  reportStream << "<hr>"
+  << "I have rejected type " << currentType.ToString() << " as non-realizable for the following reasons. "
   << "The type's summand " << newSummandType.ToString()
   << " has complement summand " << complementNewSummandType.ToString() << ". "
   << " I computed the latter complement summand has centralizer "

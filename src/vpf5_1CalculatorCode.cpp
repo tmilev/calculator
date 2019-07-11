@@ -394,7 +394,7 @@ bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const
   << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
   List<DynkinType> precomputedTypes;
   DynkinType::GetPrecomputedDynkinTypes(precomputedTypes);
-  for (int i = 0; i <= precomputedTypes.size; i ++) {
+  for (int i = 0; i < precomputedTypes.size; i ++) {
     outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(precomputedTypes[i]);
   }
   outFromHD << "</table></p>";

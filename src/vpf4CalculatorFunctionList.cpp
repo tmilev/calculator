@@ -5597,7 +5597,8 @@ void Calculator::initPredefinedStandardOperations() {
     "^", CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic,
     this->opRational(), this->opRational(),
     "If the rational power is small enough, converts to an algebraic number. "
-    "At the moment works with rational powers whose denominator is 2, may be extended to larger powers in the future. ",
+    "At the moment works with rational powers whose denominator is 2, "
+    "may be extended to larger powers in the future. ",
     "\n%",
     true, false,
     "CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic",
@@ -5687,7 +5688,9 @@ void Calculator::initPredefinedStandardOperations() {
     "CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "^", CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger, this->opPolyOverANs(), this->opRational(),
+    "^", CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger,
+    this->opPolyOverANs(),
+    this->opRational(),
     "Raises poly over algebraic numbers to small integer power. ",
     " x = Polynomial{}x; y = Polynomial{}y;(x +\\sqrt{2}y+x y+x^2+\\sqrt{3}y^2)^3",
     true, false,
@@ -5729,7 +5732,9 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerAlgebraicNumberBySmallInteger"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "^", CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger, this->opElementWeylAlgebra(), this->opRational(),
+    "^", CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger,
+    this->opElementWeylAlgebra(),
+    this->opRational(),
     "Raises element of Weyl algebra to integer power. ",
     "\\partial = ElementWeylAlgebraDO{}(\\partial, x);\n"
     "x = ElementWeylAlgebraPoly{}(\\partial, x); \n"
@@ -5742,7 +5747,10 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerElementWeylAlgebraBySmallInteger"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "^", CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF, this->opElementUEoverRF(), this->opRational(),
+    "^",
+    CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
+    this->opElementUEoverRF(),
+    this->opRational(),
     "Raises element of universal enveloping to integer power. "
     "If the exponent is non-positive integer but the element of the UE is "
     "a single generator with coefficient 1, the exponent will be carried out formally. ",
@@ -5843,7 +5851,8 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->AddOperationInnerHandler(
     "_", CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix, "",
-    "Dereferences a sequence or a mtrix. The syntax is as illustrated by the example. ",
+    "Dereferences a sequence or a matrix. "
+    "The syntax is as illustrated by the example. ",
     "X = (a,b,c); X_1; X_2; X_3; X_4; X_j; j =3; X_j;\n"
     "Denominations = (1, 5, 10, 25,50, 100,200, 500, 1000, 2000, 5000);\n"
     "p(0, 0 )=1;\n"
@@ -5884,7 +5893,10 @@ void Calculator::initPredefinedStandardOperations() {
     "MatrixTensorMatrix"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "\\otimes", CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
+    "\\otimes",
+    CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor,
+    this->opElementTensorGVM(),
+    this->opElementTensorGVM(),
     "Tensor product of two generalized Verma modules. "
     "Not fully tested and documented at the moment. "
     "Will get more documented in the future. ",
@@ -5988,30 +6000,35 @@ void Calculator::initPredefinedStandardOperations() {
   );
   std::stringstream StandardPowerStreamInfo, moreInfoOnIntegers;
   moreInfoOnIntegers
-  << " LargeIntUnsigned::SquareRootOfCarryOverBound is "
-  << " restricted to be smaller than the square root of a positive signed int on the system: in this way, multiplying two small integers and "
-  << " storing the result in a signed int is guaranteed to produce the correct result. "
-  << " Rationals are stored in the computer as 8 bytes+ one pointer (which is another 4 bytes on a 32 bit system). "
-  << " The pointer either equals zero, or points to a dynamically resizable structure able to hold "
-  << " arbitrary integer sizes (within the system's address space limits). If the pointer is zero, we call  "
-  << " such a rational number small. In this case its denominator and numerator are stored in "
-  << " the other 8 bytes, and should both be smaller than LargeIntUnsigned::CarryOverBound ="
+  << "LargeIntUnsigned::SquareRootOfCarryOverBound is "
+  << "restricted to be smaller than the square root of a "
+  << "positive signed int on the system: in this way, multiplying two small integers and "
+  << "storing the result in a signed int is guaranteed to produce the correct result. "
+  << "Rationals are stored in the computer as 8 bytes+ one pointer (which is another 4 bytes on a 32 bit system). "
+  << "The pointer either equals zero, or points to a dynamically resizable structure able to hold "
+  << "arbitrary integer sizes (within the system's address space limits). If the pointer is zero, we call  "
+  << "such a rational number small. In this case its denominator and numerator are stored in "
+  << "the other 8 bytes, and should both be smaller than LargeIntUnsigned::CarryOverBound = "
   << LargeIntUnsigned::CarryOverBound
-  << " . When requesting an arithmetic operation, if both rationals are small, (i.e. their pointer zero)"
+  << ". When requesting an arithmetic operation, if both rationals are small, (i.e. their pointer zero)"
   << " a check is performed whether the denominator and numerator are smaller in absolute value than "
-  << " LargeIntUnsigned::SquareRootOfCarryOverBound ="
+  << "LargeIntUnsigned::SquareRootOfCarryOverBound = "
   << LargeIntUnsigned::SquareRootOfCarryOverBound
   << ". If that check passes, the two rationals are multiplied using the "
-  << " built-in processor instructions for operations with integers. If any of the check fails, both rationals are converted to the larger dynamically "
-  << " resizeable structure, sufficient memory is allocated, and multiplication/addition is carried using algorithms located in class "
-  << " LargeIntUnsigned. The algorithms are O(log(n)^2) (the number of digits squared), "
-  << " slower than the ones in the standard numerical computation libraries (such as GMP). However, the algorithms "
-  << " provide the essential convenience of having a self-contained mathematical library. An implementation of "
-  << " discrete Fourier transform multiplication algorithm (O(log(n)(log(log n))) is considered, and will be made if need arises. ";
+  << "built-in processor instructions for operations with integers. "
+  << "If any of the check fails, both rationals are converted to the larger dynamically "
+  << "resizeable structure, sufficient memory is allocated, "
+  << "and multiplication/addition is carried using algorithms located in class "
+  << "LargeIntUnsigned. The algorithms are O(log(n)^2) (the number of digits squared). "
+  << "If the need arises, we may implement "
+  << "discrete Fourier transform multiplication algorithm (O(log(n)(log(log n))). ";
   StandardPowerStreamInfo
-  << "If the left argument evaluates to atom, and if the right argument is a small integer atom, "
-  << " tries to carry out the raise-to-power operation. If successful, substitutes the expression with the obtained atom. "
-  << " A small integer is defined at compile time in the variable LargeIntUnsigned::SquareRootOfCarryOverBound (currently equal to "
+  << "If the left argument evaluates to atom, "
+  << "and if the right argument is a small integer atom, "
+  << "tries to carry out the raise-to-power operation. "
+  << "If successful, substitutes the expression with the obtained atom. "
+  << "A small integer is defined at compile time in the "
+  << "variable LargeIntUnsigned::SquareRootOfCarryOverBound (currently equal to "
   << LargeIntUnsigned::SquareRootOfCarryOverBound << "). "
   << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
 
@@ -6185,7 +6202,8 @@ void Calculator::initPredefinedOperationsComposite() {
   );
   this->AddOperationComposite(
     "Matrix", CalculatorConversions::outerMatrixExpressionsToMatrixOfType, "",
-    "If A is a non-typed matrix of expressions that can be converted to a typed matrix, carries out the type specialization. ",
+    "If A is a non-typed matrix of expressions that can "
+    "be converted to a typed matrix, carries out the type specialization. ",
     "%LogEvaluation\n"
     "A= \\begin{pmatrix}\n"
     "1 & 2\\\\\n"

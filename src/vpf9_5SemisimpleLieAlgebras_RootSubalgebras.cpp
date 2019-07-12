@@ -1349,7 +1349,7 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat) {
   << "of list dictated by parabolic heirs: " << this->numHeirsRejectedBadAngleS
   << "<br>Heirs rejected due to not being maximally dominant: " << this->numHeirsRejectedNotMaximallyDominant
   << "<br>Heirs rejected due to not being maximal with respect to small Dynkin diagram automorphism that extends to "
-  << " ambient automorphism: " << this->numHeirsRejectedNotMaximallyDominant
+  << "ambient automorphism: " << this->numHeirsRejectedNotMaximallyDominant
   << "<br>Heirs rejected due to having ambient Lie algebra "
   << "decomposition iso to an already found subalgebra: " << this->numHeirsRejectedSameModuleDecompo;
   if (this->indexInducingSubalgebra == - 1) {
@@ -2374,7 +2374,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew() {
   if (theGlobalVariables.flagReportEverything) {
     reportStream << "...module decomposition computed, subalgebra type: " << this->theDynkinType.ToString()
     << ", centralizer type: " << this->theCentralizerDynkinType.ToString() << ". Computing outer automorphisms that "
-    << " have zero action on centralizer and extend to ambient automorphisms... ";
+    << "have zero action on centralizer and extend to ambient automorphisms... ";
     theReport.Report(reportStream.str());
   }
   return true;
@@ -2587,7 +2587,7 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
       Rational& currentCoeff = currentPoly.theCoeffs[j];
       for (int k = 0; k < numberVariables; k ++) {
         if (currentPoly[j](k) == 1) {
-          if (k<halfNumberVariables) {
+          if (k < halfNumberVariables) {
             lowerIndex = k;
           } else {
             higherIndex = k;
@@ -2691,7 +2691,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
     }
     this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
     reflectedSimpleBasisK = this->SimpleBasisK;
-    for (int k = 0; k<reflectedSimpleBasisK.size; k++) {
+    for (int k = 0; k < reflectedSimpleBasisK.size; k ++) {
       this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
     }
     theSl2.RootsWithScalar2WithH = rootsScalarProduct2HnonRaised;
@@ -3372,11 +3372,11 @@ std::string rootSubalgebras::ToStringDynkinTableFormat2LaTeX(FormatExpressions* 
   out << "Lie algebra type: $" << this->theSubalgebras[0].theDynkinType.ToString(theFormat)
   << "$. There are " << this->theSubalgebras.size << " table entries (= " << this->theSubalgebras.size - 2
   << " larger than the Cartan subalgebra + the Cartan subalgebra + the full subalgebra)." << endline
-  << "Let $\\mathfrak g$ stand for the type of the regular subalgebra and $C(\\mathfrak g)$ for the type of the centralizer."
-  << " Let $r$ stand for the rank of $\\mathfrak g$, let $r_c$ stand for the rank of the semisimple part of the centralizer,"
-  << " let $p$ stand for the number of positive roots of $\\mathfrak g$, "
+  << "Let $\\mathfrak g$ stand for the type of the regular subalgebra and $C(\\mathfrak g)$ for the type of the centralizer. "
+  << "Let $r$ stand for the rank of $\\mathfrak g$, let $r_c$ stand for the rank of the semisimple part of the centralizer, "
+  << "let $p$ stand for the number of positive roots of $\\mathfrak g$, "
   << "let $q$ stand for the number of positive roots of the centralizer, and let $m$ stand for the number of "
-  << " $A_1$ components (of all root lengths) of $\\mathfrak g$. ";
+  << "$A_1$ components (of all root lengths) of $\\mathfrak g$. ";
   out << "\\begin{longtable}{cccccccc}" << endline;
   out << "$\\mathfrak g$ & $C(\\mathfrak g)$& $p$ & $q$&  $m$& $r$ & $c_r$ \\\\\\endhead" << endline;
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
@@ -3825,7 +3825,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
           int positiveIndex = - 1, negativeIndex = - 1;
           if (firstSignIsPositive) {
             positiveIndex = firstIndex;
-            negativeIndex =secondIndex;
+            negativeIndex = secondIndex;
           } else {
             positiveIndex = secondIndex;
             negativeIndex = firstIndex;
@@ -3932,8 +3932,10 @@ bool rootSubalgebras::ApproveSelAgainstOneGenerator(List<int>& generator, Select
 int rootSubalgebras::IndexSubalgebra(rootSubalgebra& input) {
   for (int j = 0; j < this->theSubalgebras.size; j ++) {
     rootSubalgebra& right = this->theSubalgebras[j];
-    if (input.theDynkinDiagram.ToString() == right.theDynkinDiagram.ToString() &&
-        input.theCentralizerDiagram.ToString() == right.theCentralizerDiagram.ToString()) {
+    if (
+      input.theDynkinDiagram.ToString() == right.theDynkinDiagram.ToString() &&
+      input.theCentralizerDiagram.ToString() == right.theCentralizerDiagram.ToString()
+    ) {
       if (!this->GetOwnerWeyl().IsOfSimpleType('E', 7)) {
         return j;
       } else {

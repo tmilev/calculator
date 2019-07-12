@@ -17,33 +17,43 @@ ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Calculator built-in fun
 //- Try moving template generics into .h files.
 
 template <>
-bool SubgroupWeylGroupOLD::IsDominantWRTgenerator<RationalFunctionOld>(
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::IsDominantWRTgenerator<RationalFunctionOld>(
   const Vector<RationalFunctionOld>& theWeight, int generatorIndex
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::IsDominantWRTgenerator");
   this->CheckInitialization();
   Vector<RationalFunctionOld> tempVect;
   RationalFunctionOld tempRF;
-  tempVect = this->simpleGenerators[generatorIndex].GetVectorRational();
+  tempVect = this->simpleRootsInner[generatorIndex].GetVectorRational();
   tempRF = this->AmbientWeyl->RootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType != tempRF.typeRational) {
-    crash << "This might or might not be a programming mistake: I am being asked whether a weight"
-    << " with rational function coefficients is dominant. I took the scalar products with the positive simple roots "
-    << " whose reflections generate the ambient group, however one of the scalar products in question was non-constant. "
-    << " More precisely, the scalar product of " << theWeight.ToString() << " and " << tempVect.ToString()
-    << " equals " << tempRF.ToString() << ". I cannot decide (more precisely, do not want to *silently* decide for you) "
-    << " whether a non-constant function is positive or not. If this is not a programming mistake, you might want to consider introducing a substitution "
-    << " evaluating the rational function, some sort of a monomial order, or some other method of deciding the \"sign\" of a rational function."
-    << " Whether or not this is a mistake, I am crashing. " << crash;
+    crash << "This might or might not be a programming mistake: "
+    << "I am being asked whether a weight "
+    << "with rational function coefficients is dominant. "
+    << "I took the scalar products with the positive simple roots "
+    << "whose reflections generate the ambient group, "
+    << "however one of the scalar products in question was non-constant. "
+    << "More precisely, the scalar product of "
+    << theWeight.ToString() << " and " << tempVect.ToString() << " "
+    << "equals " << tempRF.ToString() << ". "
+    << "I cannot decide (more precisely, do not want to *silently* decide for you) "
+    << "whether a non-constant function is to be declared positive or not. "
+    << "If this is not a programming mistake, "
+    << "you might want to consider introducing a substitution "
+    << "evaluating the rational function, some sort of a monomial order, "
+    << "or some other method of deciding the \"sign\" of a rational function. "
+    << "Whether or not this is a mistake, I am crashing. " << crash;
     return false;
   }
   return !tempRF.ratValue.IsNegative();
 }
 
 template <>
-bool SubgroupWeylGroupOLD::IsDominantWRTgenerator<Rational>(const Vector<Rational>& theWeight, int generatorIndex) {
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::IsDominantWRTgenerator<Rational>(
+  const Vector<Rational>& theWeight, int generatorIndex
+) {
   this->CheckInitialization();
-  return !this->AmbientWeyl->RootScalarCartanRoot(theWeight, this->simpleGenerators[generatorIndex]).IsNegative();
+  return !this->AmbientWeyl->RootScalarCartanRoot(theWeight, this->simpleRootsInner[generatorIndex]).IsNegative();
 }
 
 template <>
@@ -55,15 +65,22 @@ bool WeylGroupData::IsDominantWRTgenerator<RationalFunctionOld>(
   tempVect.MakeEi(this->GetDim(), generatorIndex);
   tempRF = this->RootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType != tempRF.typeRational) {
-    crash << "This might or might not be a programming mistake: I am being asked whether a weight"
-    << " with rational function coefficients is dominant. I took the scalar products with the positive simple roots "
-    << " whose reflections generate the ambient group, however one of the scalar products in question was non-constant. "
-    << " More precisely, the scalar product of " << theWeight.ToString() << " and " << tempVect.ToString()
-    << " equals " << tempRF.ToString() << ". I cannot decide (more precisely, do not want to *silently* decide for you) "
-    << " whether a non-constant function is positive or not. "
-    << " If this is not a programming mistake, you might want to consider introducing a substitution "
-    << " evaluating the rational function, some sort of a monomial order, or some other method of deciding the \"sign\" of a rational function."
-    << " Whether or not this is a mistake, I am crashing.  "
+    crash << "This might or might not be a programming mistake: "
+    << "I am being asked whether a weight "
+    << "with rational function coefficients is dominant. "
+    << "I took the scalar products with the positive simple roots "
+    << "whose reflections generate the ambient group, "
+    << "however one of the scalar products in question was non-constant. "
+    << "More precisely, the scalar product of "
+    << theWeight.ToString() << " and " << tempVect.ToString() << " "
+    << "equals " << tempRF.ToString() << ". "
+    << "I cannot decide (more precisely, do not want to *silently* decide for you) "
+    << "whether a non-constant function is positive or not. "
+    << "If this is not a programming mistake, "
+    << "you might want to consider introducing a substitution "
+    << "evaluating the rational function, some sort of a monomial order, "
+    << "or some other method of deciding the \"sign\" of a rational function. "
+    << "Whether or not this is a mistake, I am crashing.  "
     << crash;
     return false;
   }
@@ -75,7 +92,7 @@ bool WeylGroupData::IsDominantWRTgenerator<Rational>(const Vector<Rational>& the
   return !this->GetScalarProdSimpleRoot(theWeight, generatorIndex).IsNegative();
 }
 
-void SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots(
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::MakeParabolicFromSelectionSimpleRoots(
   WeylGroupData& inputWeyl, const Vector<Rational>& ZeroesMeanSimpleRootSpaceIsInParabolic, int UpperLimitNumElements
 ) {
   Selection tempSel;
@@ -83,20 +100,20 @@ void SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots(
   this->MakeParabolicFromSelectionSimpleRoots(inputWeyl, tempSel, UpperLimitNumElements);
 }
 
-bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
   Vector<Rational>& highestWeightSimpleCoords,
   HashedList<Vector<Rational> >& outputWeightsSimpleCoords,
   int upperBoundDominantWeights,
   std::string& outputDetails
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra");
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra");
   this->CheckInitialization();
   std::stringstream out;
   Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
   int theDim= this->AmbientWeyl->GetDim();
   basisEi.MakeEiBasis(theDim);
-  this->RaiseToDominantWeight(highestWeightTrue);
+  this->RaiseToDominantWeightInner(highestWeightTrue);
   Vector<Rational> highestWeightFundCoords = this->AmbientWeyl->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.SumCoords().IsSmallInteger()) {
     return false;
@@ -604,7 +621,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             theG2B3Data.theAmbientChar[0].weightFundamentalCoordS
           );
           RationalFunctionOld theWeylSize;
-          theWeylSize = theG2B3Data.WeylFD.WeylDimFormulaSimpleCoords(theSimpleCoordinates);
+          theWeylSize = theG2B3Data.WeylFD.WeylDimFormulaInnerSimpleCoords(theSimpleCoordinates);
           latexTable << "& \\multirow{" << theG2B3Data.theEigenVectorS.size  << "}{*}{$"
           << theWeylSize.ToString(&theG2B3Data.theFormat)
           << "$}";
@@ -627,7 +644,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             tempChar[0].weightFundamentalCoordS
           );
           RationalFunctionOld dimension;
-          dimension = theG2B3Data.WeylFDSmall.WeylDimFormulaSimpleCoords(theSimpleCoordinates, rfOne);
+          dimension = theG2B3Data.WeylFDSmall.WeylDimFormulaInnerSimpleCoords(theSimpleCoordinates, rfOne);
           latexTable << dimension.ToString(&theG2B3Data.theFormat) << "$}";
         } else {
           latexTable << "&";
@@ -777,7 +794,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
       theCharacter[0].weightFundamentalCoordS
     );
     RationalFunctionOld dimension;
-    dimension = theg2b3data.WeylFD.WeylDimFormulaSimpleCoords(simpleCoordinates);
+    dimension = theg2b3data.WeylFD.WeylDimFormulaInnerSimpleCoords(simpleCoordinates);
     out << "<td>" << dimension.ToString() << "</td>";
     latexTable << " $ " << theCharacter.ToString(&theg2b3data.theFormat) << " $ ";
     theg2b3data.theFormat.fundamentalWeightLetter = "\\psi";
@@ -793,7 +810,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
       simpleCoordinates = theg2b3data.WeylFDSmall.AmbientWeyl->GetSimpleCoordinatesFromFundamental(
         outputChar[i].weightFundamentalCoordS
       );
-      dimension = theg2b3data.WeylFDSmall.WeylDimFormulaSimpleCoords(simpleCoordinates);
+      dimension = theg2b3data.WeylFDSmall.WeylDimFormulaInnerSimpleCoords(simpleCoordinates);
       out << dimension;
       if (i != outputChar.size() - 1) {
         out << "+";

@@ -888,27 +888,32 @@ bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsign
   return true;
 }
 
-void SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup<WeylGroupData> >& output) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup");
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetGroupElementsIndexedAsAmbientGroup(
+  List<ElementWeylGroup>& output
+) {
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetGroupElementsIndexedAsAmbientGroup");
   if (this->ExternalAutomorphisms.size > 0) {
     crash << "This is  a programming error: a function meant for subgroups that are "
-    << "Weyl groups of Levi parts of parabolics is called on a subgroup that is not of that type. "
+    << "Weyl groups of Levi parts of parabolics "
+    << "is called on a subgroup that is not of that type. "
     << crash;
   }
-  output.Reserve(this->size);
+  output.Reserve(this->allElements.size);
   output.SetSize(0);
-  ElementWeylGroup<WeylGroupData> tempElt;
+  ElementWeylGroup currentOutput;
+  currentOutput.owner = this->AmbientWeyl;
   Vector<int> indexShifts;
-  indexShifts.SetSize(this->simpleGenerators.size);
-  for (int i = 0; i < this->simpleGenerators.size; i ++) {
-    indexShifts[i] = this->simpleGenerators[i].GetIndexFirstNonZeroCoordinate();
+  indexShifts.SetSize(this->simpleRootsInner.size);
+  for (int i = 0; i < this->simpleRootsInner.size; i ++) {
+    indexShifts[i] = this->simpleRootsInner[i].GetIndexFirstNonZeroCoordinate();
   }
-  for (int i = 0; i < this->size; i ++) {
-    tempElt = (*this)[i];
-    for (int j = 0; j < tempElt.generatorsLastAppliedFirst.size; j ++) {
-      tempElt.generatorsLastAppliedFirst[j].index = indexShifts[tempElt.generatorsLastAppliedFirst[j].index];
+  for (int i = 0; i < this->allElements.size; i ++) {
+    const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& other = this->allElements[i];
+    currentOutput.generatorsLastAppliedFirst.SetSize(other.generatorsLastAppliedFirst.size);
+    for (int j = 0; j < currentOutput.generatorsLastAppliedFirst.size; j ++) {
+      currentOutput.generatorsLastAppliedFirst[j].index = indexShifts[other.generatorsLastAppliedFirst[j].index];
     }
-    output.AddOnTop(tempElt);
+    output.AddOnTop(currentOutput);
   }
 }
 

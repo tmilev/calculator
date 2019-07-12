@@ -293,6 +293,7 @@ public:
   bool CheckModuleDimensions() const;
   SemisimpleLieAlgebra& GetAmbientSS() const;
   WeylGroupData& GetAmbientWeyl() const;
+  WeylGroupAutomorphisms& GetAmbientWeylAutomorphisms() const;
   void ComputeCartanOfCentralizer();
   void ComputePrimalModuleDecomposition();
   void ComputePrimalModuleDecompositionHWsHWVsOnly();

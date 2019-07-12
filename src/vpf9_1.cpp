@@ -1249,14 +1249,8 @@ void permutation::GetPermutationLthElementIsTheImageofLthIndex(List<int>& output
   }
 }
 
-bool WeylGroupData::AreMaximallyDominant(List<Vector<Rational> >& theWeights, bool useOuterAutos) {
-  MacroRegisterFunctionWithName("WeylGroup::AreMaximallyDominant");
-  MemorySaving<Vectors<Rational> > theWeightsCopy;
-  Vector<Rational> zeroWeight;
-  if (useOuterAutos) {
-    this->ComputeOuterAutos();
-    zeroWeight.MakeZero(this->GetDim());
-  }
+bool WeylGroupData::AreMaximallyDominantGroupInner(List<Vector<Rational> >& theWeights) {
+  MacroRegisterFunctionWithName("WeylGroup::AreMaximallyDominantInner");
   for (int i = 0; i < theWeights.size; i ++) {
     for (int j = 0; j < this->RootsOfBorel.size; j ++) {
       if (this->RootScalarCartanRoot(this->RootsOfBorel[j], theWeights[i]) < 0) {
@@ -1272,12 +1266,44 @@ bool WeylGroupData::AreMaximallyDominant(List<Vector<Rational> >& theWeights, bo
         }
       }
     }
-    if (!useOuterAutos) {
-      continue;
+  }
+  return true;
+}
+
+bool WeylGroupAutomorphisms::checkInitialization() const {
+  if (this->flagDeallocated) {
+    crash << "Use after free of Weyl group automorphism. " << crash;
+  }
+  if (this->theWeyl == 0) {
+    crash << "Non-initialized Weyl group automorphisms. " << crash;
+  }
+  return true;
+}
+
+bool WeylGroupAutomorphisms::AreMaximallyDominantGroupOuter(List<Vector<Rational> >& theWeights) {
+  MacroRegisterFunctionWithName("WeylGroup::AreMaximallyDominantGroupOuter");
+  MemorySaving<Vectors<Rational> > theWeightsCopy;
+  Vector<Rational> zeroWeight;
+  this->ComputeOuterAutos();
+  zeroWeight.MakeZero(this->theWeyl->GetDim());
+  for (int i = 0; i < theWeights.size; i ++) {
+    for (int j = 0; j < this->theWeyl->RootsOfBorel.size; j ++) {
+      if (this->theWeyl->RootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[i]) < 0) {
+        bool reflectionDoesRaise = true;
+        for (int k = 0; k < i; k ++) {
+          if (this->theWeyl->RootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[k]) > 0) {
+            reflectionDoesRaise = false;
+            break;
+          }
+        }
+        if (reflectionDoesRaise) {
+          return false;
+        }
+      }
     }
-    for (int j = 0; j < this->theOuterAutos.GetElement().theElements.size; j ++) {
+    for (int j = 0; j < this->theOuterAutos.theElements.size; j ++) {
       theWeightsCopy.GetElement() = theWeights;
-      this->theOuterAutos.GetElement().theElements[j].ActOnVectorsColumn(theWeightsCopy.GetElement());
+      this->theOuterAutos.theElements[j].ActOnVectorsColumn(theWeightsCopy.GetElement());
       bool isGood = true;
       for (int k = 0; k < i; k ++) {
         if (!(theWeightsCopy.GetElement()[k] - theWeights[k]).IsPositiveOrZero()) {
@@ -1296,7 +1322,6 @@ bool WeylGroupData::AreMaximallyDominant(List<Vector<Rational> >& theWeights, bo
   }
   return true;
 }
-
 void WeylGroupData::GenerateRootSubsystem(Vectors<Rational>& theRoots) {
   Vector<Rational> tempRoot;
   int oldsize = theRoots.size;
@@ -1709,7 +1734,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   ////////////////////////////////////////
   this->preferredBasisChangE.AssignVectorsToRows(this->preferredBasiS);
   this->preferredBasisChangE.Transpose();
-  this->preferredBasisChangeInversE= this->preferredBasisChangE;
+  this->preferredBasisChangeInversE = this->preferredBasisChangE;
   this->preferredBasisChangeInversE.Invert();
   this->preferredBasisChangeInversE.ActOnVectorsColumn
   (this->GmodKnegativeWeightS, this->GmodKNegWeightsBasisChanged);
@@ -1736,7 +1761,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
       theProjectionBasisChanged.elements[j][i] = projectedWeight[j];
     }
   }
-  SubgroupWeylGroupOLD theSubgroup;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected = theParabolicSel;
   Matrix<Rational> DualCartanEmbedding;
   input.GetMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
@@ -1756,25 +1781,25 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\nParabolic subalgebra smaller algebra: " << tempRoot.ToString();
   theSubgroup.MakeParabolicFromSelectionSimpleRoots(theWeYl, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, - 1);
 
-  this->theLinearOperators.SetSize(theSubgroup.size);
-  this->theLinearOperatorsExtended.SetSize(theSubgroup.size);
-  this->theTranslationS.SetSize(theSubgroup.size);
-  this->theTranslationsProjectedBasisChanged.SetSize(theSubgroup.size);
-  this->theCoeffs.SetSize(theSubgroup.size);
+  this->theLinearOperators.SetSize(theSubgroup.allElements.size);
+  this->theLinearOperatorsExtended.SetSize(theSubgroup.allElements.size);
+  this->theTranslationS.SetSize(theSubgroup.allElements.size);
+  this->theTranslationsProjectedBasisChanged.SetSize(theSubgroup.allElements.size);
+  this->theCoeffs.SetSize(theSubgroup.allElements.size);
   this->log << " \n******************\nthe subgroup: \n" << theSubgroup.ToString() << "\n\n\n\n\n\n";
   this->log << theSubgroup.ElementToStringBruhatGraph();
   this->log << "\nMatrix form of the elements of Weyl group of the Levi part of the parabolic ("
-  << theSubgroup.size << " elements):\n";
-  for (int i = 0; i < theSubgroup.size; i ++) {
+  << theSubgroup.allElements.size << " elements):\n";
+  for (int i = 0; i < theSubgroup.allElements.size; i ++) {
     Matrix<Rational>& currentLinearOperator = this->theLinearOperators[i];
-    theSubgroup.GetMatrixOfElement(theSubgroup[i], currentLinearOperator);
+    theSubgroup.GetMatrixOfElement(theSubgroup.allElements[i], currentLinearOperator);
 //    currentLinearOperator.MultiplyOnTheLeft(preferredBasisChangeInverse);
     this->log << "\n" << currentLinearOperator.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
     currentLinearOperator.ActOnVectorColumn(theSubgroup.GetRho(), this->theTranslationS[i]);
     this->theTranslationS[i] -= theSubgroup.GetRho();
     this->theTranslationS[i].Minus();
     theProjectionBasisChanged.ActOnVectorColumn(this->theTranslationS[i], this->theTranslationsProjectedBasisChanged[i]);
-    if (theSubgroup[i].generatorsLastAppliedFirst.size % 2 == 0) {
+    if (theSubgroup.allElements[i].generatorsLastAppliedFirst.size % 2 == 0) {
       this->theCoeffs[i] = 1;
     } else {
       this->theCoeffs[i] = - 1;
@@ -1844,7 +1869,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     for (int j = 0; j < tempVect2.size; j ++) {
       tempVect2[j] += this->theTranslationsProjectedBasisChanged[i][j];
     }
-    this->log << "\n$" << theSubgroup[i].ToString() << "$&$"
+    this->log << "\n$" << theSubgroup.allElements[i].ToString() << "$&$"
     << tempVect2.ToString(&theFormat) << "$\\\\";
   }
   this->log << "\\end{longtable}\n\n";

@@ -759,9 +759,9 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   out << "<br>Dimensionn of the finite dimensional part of the module: " << this->GetDim();
   out << "<br>A module basis follows.";
   out << "<table><tr><td>Monomial label</td><td>Definition</td><td>Littelmann path string</td></tr>";
-  ElementWeylGroup<WeylGroupData> tempWelt;
+  ElementWeylGroup tempWelt;
   int wordCounter = 0;
-  simpleReflectionOrOuterAuto aGen;
+  simpleReflection aGen;
   for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
     List<MonomialUniversalEnveloping<coefficient> >& currentList = this->theGeneratingWordsGrouppedByWeight[i];
     List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt = this->theGeneratingWordsIntGrouppedByWeight[i];

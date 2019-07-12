@@ -537,8 +537,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   std::stringstream out;
   std::string tempS;
   inputData.initAssumingParSelAndHmmInitted();
-  SubgroupWeylGroupOLD& WeylFDSmallAsSubInLarge = inputData.WeylFDSmallAsSubInLarge;
-  SubgroupWeylGroupOLD& WeylFDSmall = inputData.WeylFDSmall;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& WeylFDSmallAsSubInLarge = inputData.WeylFDSmallAsSubInLarge;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& WeylFDSmall = inputData.WeylFDSmall;
   SemisimpleLieAlgebra& theSmallAlgebra = inputData.theHmm.theDomain();
   Vectors<Rational>& embeddingsSimpleEiGoesTo = inputData.theHmm.ImagesCartanDomain;
 
@@ -570,7 +570,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
     orbitDom.SetSize(0);
     if (!inputData.WeylFD.GenerateOrbitReturnFalseIfTruncated(
-      theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, 10000
+      theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, true, 10000
     )) {
       out << "failed to generate the complement-sub-Weyl-orbit of weight "
       << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).ToString();
@@ -643,7 +643,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
       remainingCharProjected.SubtractMonomial(tempMon, bufferCoeff);
     }
   }
-  theFormat.fundamentalWeightLetter ="\\psi";
+  theFormat.fundamentalWeightLetter = "\\psi";
   out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: "
   << HtmlRoutines::GetMathSpanPure(output.ToString(&theFormat));
   if (Report != 0) {

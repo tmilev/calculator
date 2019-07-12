@@ -254,7 +254,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
   charSSAlgMod& output,
   const Selection& splittingParSel,
   const Selection& ParSelFDInducingPart,
-  SubgroupWeylGroupOLD& outputWeylSub
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputWeylSub
 ) {
   MacroRegisterFunctionWithName("charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight");
   this->CheckNonZeroOwner();
@@ -267,7 +267,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
   outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, splittingParSel, 1);
   outputWeylSub.ComputeRootSubsystem();
 
-  SubgroupWeylGroupOLD complementGroup, theFDWeyl;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms complementGroup, theFDWeyl;
   complementGroup.AmbientWeyl = outputWeylSub.AmbientWeyl;
   theFDWeyl.AmbientWeyl = outputWeylSub.AmbientWeyl;
 
@@ -311,7 +311,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
     orbitDom.SetSize(0);
     if (!theFDWeyl.GenerateOrbitReturnFalseIfTruncated(
-      theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, 10000
+      theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, false, 10000
     )) {
       out << "failed to generate the complement-sub-Weyl-orbit of weight "
       << this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).ToString();
@@ -334,9 +334,9 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
     localHighest = *remainingCharDominantLevi.theMonomials.LastObject();
     for (bool Found = true; Found; ) {
       Found = false;
-      for (int i = 0; i < outputWeylSub.simpleGenerators.size; i ++) {
+      for (int i = 0; i < outputWeylSub.simpleRootsInner.size; i ++) {
         tempMon = localHighest;
-        simpleGeneratorBaseField = outputWeylSub.simpleGenerators[i]; // <- implicit type conversion here!
+        simpleGeneratorBaseField = outputWeylSub.simpleRootsInner[i]; // <- implicit type conversion here!
         tempMon.weightFundamentalCoordS += this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
         if (remainingCharDominantLevi.theMonomials.Contains(tempMon)) {
           localHighest = tempMon;
@@ -408,7 +408,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
     << this->GetOwner().GetRank() << " but splitting parabolic selects "
     << " out of " << splittingParSel.MaxSize << " simple roots. " << crash;
   }
-  SubgroupWeylGroupOLD subWeyl;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms subWeyl;
   subWeyl.AmbientWeyl = &this->owner->theWeyl;
   MemorySaving<charSSAlgMod<coefficient> > buffer;
   charSSAlgMod<coefficient>& charWRTsubalgebra = (outputChar == 0) ? buffer.GetElement() : *outputChar;

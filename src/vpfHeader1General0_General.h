@@ -72,7 +72,7 @@ template<class coefficient>
 class ElementSumGeneralizedVermas;
 template <class coefficient>
 class charSSAlgMod;
-class SubgroupWeylGroupOLD;
+class SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms;
 template<class coefficient>
 class ModuleSSalgebra;
 class SltwoSubalgebras;

@@ -41,15 +41,15 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   Matrix<Rational>  matCoxeterElt;
   this->GetCoxeterElement(matCoxeterElt);
   this->ComputeDynkinDiagramKandCentralizer();
-  SubgroupWeylGroupOLD tempGroup;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms tempGroup;
   int coxeterNumber = 1;
   for (int i = 0; i < this->theDynkinDiagram.SimpleBasesConnectedComponents.size; i ++) {
     tempGroup.AmbientWeyl = &this->GetAmbientWeyl();
-    tempGroup.simpleGenerators = this->theDynkinDiagram.SimpleBasesConnectedComponents[i];
+    tempGroup.simpleRootsInner = this->theDynkinDiagram.SimpleBasesConnectedComponents[i];
     tempGroup.ComputeRootSubsystem();
     Vector<Rational>& lastRoot = *tempGroup.RootSubsystem.LastObject();
     Vector<Rational> lastRootInSimpleCoords;
-    lastRoot.GetCoordsInBasiS(tempGroup.simpleGenerators, lastRootInSimpleCoords);
+    lastRoot.GetCoordsInBasiS(tempGroup.simpleRootsInner, lastRootInSimpleCoords);
     coxeterNumber = MathRoutines::Maximum(lastRootInSimpleCoords.SumCoords().NumShort, coxeterNumber);
   }
   CompleX<double> theEigenValue;
@@ -1086,7 +1086,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   Vectors<Rational>& Domain,
   Vectors<Rational>& Range,
   int RecursionDepth,
-  SubgroupWeylGroupOLD* outputAutomorphisms,
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms* outputAutomorphisms,
   bool GenerateAllpossibleExtensions,
   bool* abortKmodule,
   Vectors<Rational>* additionalDomain,
@@ -1200,7 +1200,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
 bool rootSubalgebra::IsAnIsomorphism(
   Vectors<Rational>& domain,
   Vectors<Rational>& range,
-  SubgroupWeylGroupOLD* outputAutomorphisms,
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms* outputAutomorphisms,
   Vectors<Rational>* additionalDomain,
   Vectors<Rational>* additionalRange
 ) {
@@ -1685,6 +1685,11 @@ WeylGroupData& rootSubalgebra::GetAmbientWeyl() const {
   return this->GetOwnerSSalg().theWeyl;
 }
 
+WeylGroupAutomorphisms& rootSubalgebra::GetAmbientWeylAutomorphisms() const {
+  this->CheckInitialization();
+  return this->ownEr->theWeylGroupAutomorphisms;
+}
+
 void rootSubalgebra::WriteToFileNilradicalGeneration(std::fstream& output) {
   output << "Simple_basis_k: ";
   this->SimpleBasisK.WriteToFile(output);
@@ -1830,10 +1835,9 @@ void rootSubalgebra::GeneratePossibleNilradicals(
   }
 }
 
-bool rootSubalgebra::attemptExtensionToIsomorphism(
-  Vectors<Rational>& Domain,
+bool rootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
   Vectors<Rational>& Range,
-  SubgroupWeylGroupOLD* outputAutomorphisms,
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms *outputAutomorphisms,
   rootSubalgebras& inputOwner,
   bool* DomainAndRangeGenerateNonIsoSAs
 ) {
@@ -1927,7 +1931,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(
 }
 
 bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(
-  rootSubalgebra& right, SubgroupWeylGroupOLD* outputAutomorphisms
+  rootSubalgebra& right, SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms *outputAutomorphisms
 ) {
   if (this->theDynkinDiagram.ToString() != right.theDynkinDiagram.ToString()) {
     return false;
@@ -1937,8 +1941,8 @@ bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(
   }
   if (outputAutomorphisms != 0) {
     outputAutomorphisms->ExternalAutomorphisms.size = 0;
-    outputAutomorphisms->simpleGenerators.size = 0;
-    outputAutomorphisms->simpleGenerators = this->SimpleBasisCentralizerRoots;
+    outputAutomorphisms->simpleRootsInner.size = 0;
+    outputAutomorphisms->simpleRootsInner = this->SimpleBasisCentralizerRoots;
   }
   Vectors<Rational> isoDomain, isoRange;
   permutation permComponents, permComponentsCentralizer;
@@ -2197,8 +2201,8 @@ bool rootSubalgebras::GrowDynkinType(
   return true;
 }
 
-void rootSubalgebra::ComputeOuterSAautosExtendingToAmbientAutosGenerators() {
-  MacroRegisterFunctionWithName("rootSubalgebra::ComputeOuterSAautosExtendingToAmbientAutosGenerators");
+void rootSubalgebra::ComputeOuterSAAutosExtendingToAmbientAutosGenerators() {
+  MacroRegisterFunctionWithName("rootSubalgebra::ComputeOuterSAAutosExtendingToAmbientAutosGenerators");
   if (this->SimpleBasisK.size == 0) {
     return;
   }
@@ -2206,7 +2210,7 @@ void rootSubalgebra::ComputeOuterSAautosExtendingToAmbientAutosGenerators() {
   this->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(outerAutos);
   Matrix<Rational> simpleBasisMatrixTimesCartanSymm;
   simpleBasisMatrixTimesCartanSymm.AssignVectorsToRows(this->SimpleBasisK);
-  simpleBasisMatrixTimesCartanSymm*= this->GetAmbientWeyl().CartanSymmetric;
+  simpleBasisMatrixTimesCartanSymm *= this->GetAmbientWeyl().CartanSymmetric;
   Vectors<Rational> basisOrthogonalRoots;
   simpleBasisMatrixTimesCartanSymm.GetZeroEigenSpaceModifyMe(basisOrthogonalRoots);
   Vectors<Rational> imagesWeightBasis, weightBasis = this->SimpleBasisK;
@@ -2219,13 +2223,13 @@ void rootSubalgebra::ComputeOuterSAautosExtendingToAmbientAutosGenerators() {
     outerAutos[i].ActOnVectorROWSOnTheLeft(this->SimpleBasisK, imagesWeightBasis);
     imagesWeightBasis.AddListOnTop(basisOrthogonalRoots);
     resultingOperator.AssignVectorsToColumns(imagesWeightBasis);
-    resultingOperator*=basisMatrixInverted;
-    this->outerSAautos.theGenerators[i] =resultingOperator;
+    resultingOperator *= basisMatrixInverted;
+    this->outerSAautos.theGenerators[i] = resultingOperator;
   }
   this->outerSAautos.GenerateElements(0);
   this->outerSAautosExtendingToAmbientAutosGenerators.theElements.Clear();
   for (int i = 0; i < this->outerSAautos.theElements.size; i ++) {
-    if (this->GetAmbientWeyl().IsElementWeylGroupOrOuterAuto(this->outerSAautos.theElements[i])) {
+    if (this->GetAmbientWeylAutomorphisms().IsElementWeylGroupOrOuterAuto(this->outerSAautos.theElements[i])) {
       this->outerSAautosExtendingToAmbientAutosGenerators.theElements.AddOnTop(this->outerSAautos.theElements[i]);
     }
   }
@@ -2238,7 +2242,7 @@ bool rootSubalgebra::CheckForMaximalDominanceCartanSA() {
     if (!this->outerSAautos.theElements[i].IsID()) {
       simpleBasisOriginalOrderCopy = this->SimpleBasisKinOrderOfGeneration;
       this->outerSAautos.theElements[i].ActOnVectorsColumn(simpleBasisOriginalOrderCopy);
-      this->GetAmbientWeyl().RaiseToMaximallyDominant(simpleBasisOriginalOrderCopy, true);
+      this->GetAmbientWeylAutomorphisms().RaiseToMaximallyDominant(simpleBasisOriginalOrderCopy);
       for (int j = 0; j < simpleBasisOriginalOrderCopy.size; j ++) {
         if (simpleBasisOriginalOrderCopy[j] != this->SimpleBasisKinOrderOfGeneration[j]) {
           if (simpleBasisOriginalOrderCopy[j].IsGreaterThanLexicographic(this->SimpleBasisKinOrderOfGeneration[j])) {
@@ -2331,10 +2335,10 @@ bool rootSubalgebra::ComputeEssentialsIfNew() {
   if (this->SimpleBasisK.GetRankOfSpanOfElements() != this->SimpleBasisK.size) {
     crash << "<br>simple basis vectors not linearly independent! " << crash;
   }
-  if (!this->GetAmbientWeyl().AreMaximallyDominant(this->SimpleBasisKinOrderOfGeneration, true)) {
+  if (!this->GetAmbientWeylAutomorphisms().AreMaximallyDominantGroupOuter(this->SimpleBasisKinOrderOfGeneration)) {
     Vectors<Rational> tempVs = this->SimpleBasisKinOrderOfGeneration;
     tempVs.RemoveLastObject();
-    if (!this->GetAmbientWeyl().AreMaximallyDominant(tempVs, true)) {
+    if (!this->GetAmbientWeylAutomorphisms().AreMaximallyDominantGroupOuter(tempVs)) {
       crash << "<br>This is a programming error: first vectors "
       << tempVs.ToString() << " are not maximally dominant. " << crash;
     }
@@ -2384,7 +2388,9 @@ bool rootSubalgebra::IsEquivalentToByDiagramsAndDimensions(const rootSubalgebra&
   this->theCentralizerDynkinType == other.theCentralizerDynkinType;
 }
 
-void rootSubalgebra::GenerateAutomorphismsPreservingBorel(SubgroupWeylGroupOLD& outputAutomorphisms) {
+void rootSubalgebra::GenerateAutomorphismsPreservingBorel(
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms &outputAutomorphisms
+) {
   this->ComputeEssentialS();
   this->GenerateIsomorphismsPreservingBorel(*this, &outputAutomorphisms);
 }
@@ -2613,7 +2619,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
   Vectors<Rational> rootsScalarProduct2HnonRaised;
   Vectors<Rational> reflectedSimpleBasisK;
   rootsScalarProduct2HnonRaised.Reserve(this->PositiveRootsK.size);
-  ElementWeylGroup<WeylGroupData> raisingElt;
+  ElementWeylGroup raisingElt;
   selectionRootsWithZeroCharacteristic.init(theRelativeDimension);
   Matrix<Rational> InvertedRelativeKillingForm;
   InvertedRelativeKillingForm.init(theRelativeDimension, theRelativeDimension);
@@ -3157,7 +3163,7 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(
   emptyRoots.size = 0;
   for (int i = fromIndex; i < NumToProcess; i ++) {
     rootSubalgebra& current = this->theSubalgebras[i];
-    SubgroupWeylGroupOLD& theOuterIsos = this->CentralizerOuterIsomorphisms[i];
+    SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theOuterIsos = this->CentralizerOuterIsomorphisms[i];
     theOuterIsos.ComputeSubGroupFromGeneratingReflections(&emptyRoots, &theOuterIsos.ExternalAutomorphisms, 0, true);
     Rational numInnerIsos = current.theCentralizerDiagram.GetSizeCorrespondingWeylGroupByFormula();
     if (useHtml) {
@@ -3179,7 +3185,7 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(
     if (useLatex) {
       out << " & ";
     }
-    out << theOuterIsos.size;
+    out << theOuterIsos.allElements.size;
     if (useHtml) {
       out << "</td><td>";
     }
@@ -3193,7 +3199,7 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(
     if (useLatex) {
       out << " & ";
     }
-    out << (numInnerIsos*theOuterIsos.size).ToString();
+    out << (numInnerIsos * theOuterIsos.allElements.size).ToString();
     if (useHtml) {
       out << "</td></tr>";
     }
@@ -3212,7 +3218,7 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(
 
 std::string rootSubalgebras::ToStringAlgebraLink(int index) {
   std::stringstream out;
-  out << "<a href=\"rootSubalgebra_" << index + 1 << ".html\">"
+  out << "<a href = \"rootSubalgebra_" << index + 1 << ".html\">"
   << this->theSubalgebras[index].theDynkinDiagram.ToString() << "</a>";
   return out.str();
 }
@@ -3468,7 +3474,9 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomo
   }
 }
 
-void rootSubalgebras::MakeProgressReportAutomorphisms(SubgroupWeylGroupOLD& theSubgroup, rootSubalgebra& theRootSA) {
+void rootSubalgebras::MakeProgressReportAutomorphisms(
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms &theSubgroup, rootSubalgebra& theRootSA
+) {
   std::stringstream out4, out1;
   out1 << "k_ss: " << theRootSA.theDynkinDiagram.ToString() << " C(k_ss): "
   << theRootSA.theCentralizerDiagram.ToString();
@@ -3476,9 +3484,9 @@ void rootSubalgebras::MakeProgressReportAutomorphisms(SubgroupWeylGroupOLD& theS
   if (theSubgroup.truncated) {
     out4 << "truncated ";
   }
-  out4 << "group preserving k: " << theSubgroup.size;
+  out4 << "group preserving k: " << theSubgroup.allElements.size;
   ProgressReport theReport;
-  theReport.Report(out1.str() +out4.str());
+  theReport.Report(out1.str() + out4.str());
 }
 
 void rootSubalgebras::GenerateActionKintersectBIsos(rootSubalgebra& theRootSA) {
@@ -3498,21 +3506,21 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(
   Selection& SelectedBasisRoots, rootSubalgebra& theRootSA
 ) {
   this->ComputeNormalizerOfCentralizerIntersectNilradical(SelectedBasisRoots, theRootSA);
-  SubgroupWeylGroupOLD& theSubgroup = this->CentralizerIsomorphisms.LastObject();
-  this->ActionsNormalizerCentralizerNilradical.SetSize(theSubgroup.size - 1);
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theSubgroup = this->CentralizerIsomorphisms.LastObject();
+  this->ActionsNormalizerCentralizerNilradical.SetSize(theSubgroup.allElements.size - 1);
   Vector<Rational> tempRoot;
   ProgressReport theReport;
-  for (int i = 0; i < theSubgroup.size - 1; i ++) {
+  for (int i = 0; i < theSubgroup.allElements.size - 1; i ++) {
     this->ActionsNormalizerCentralizerNilradical[i].SetSize(theRootSA.Modules.size);
     for (int j = 0; j < theRootSA.Modules.size; j ++) {
       tempRoot = theRootSA.HighestWeightsPrimalSimple[j];
-      theSubgroup.ActByElement(i + 1, tempRoot);
+      theSubgroup.ActByNonSimpleElement(i + 1, tempRoot);
       int tempI = theRootSA.GetIndexKmoduleContainingRoot(tempRoot);
       this->ActionsNormalizerCentralizerNilradical[i][j] = tempI;
     }
     if (theGlobalVariables.IndicatorStringOutputFunction != 0) {
       std::stringstream out;
-      out << "Computing action of element " << i + 1 << " out of " << theSubgroup.size;
+      out << "Computing action of element " << i + 1 << " out of " << theSubgroup.allElements.size;
       theReport.Report(out.str());
     }
   }
@@ -3533,14 +3541,14 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical(
 
   this->CentralizerIsomorphisms.SetSize(this->CentralizerIsomorphisms.size + 1);
   this->CentralizerOuterIsomorphisms.SetSize(this->CentralizerIsomorphisms.size);
-  SubgroupWeylGroupOLD& outputSubgroup = this->CentralizerIsomorphisms.LastObject();
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputSubgroup = this->CentralizerIsomorphisms.LastObject();
   outputSubgroup.AmbientWeyl = &theRootSA.GetAmbientWeyl();
   this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA);
   theRootSA.GenerateIsomorphismsPreservingBorel(theRootSA, &outputSubgroup);
   outputSubgroup.ComputeSubGroupFromGeneratingReflections(
     &selectedRootsBasisCentralizer, &outputSubgroup.ExternalAutomorphisms, this->UpperLimitNumElementsWeyl, false
   );
-  outputSubgroup.simpleGenerators =(selectedRootsBasisCentralizer);
+  outputSubgroup.simpleRootsInner = selectedRootsBasisCentralizer;
   this->CentralizerOuterIsomorphisms.LastObject().ExternalAutomorphisms = outputSubgroup.ExternalAutomorphisms;
   this->CentralizerOuterIsomorphisms.LastObject().AmbientWeyl = &this->GetOwnerWeyl();
   this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA);
@@ -4214,7 +4222,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(
   if (this->theDiagram.SimpleComponentTypes[0].theLetter == 'A' && this->theDiagram.SimpleComponentTypes[0].theRank == 1) {
    //  crash << crash;
   }
-  SubgroupWeylGroupOLD tempSubgroup;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms tempSubgroup;
   tempSubgroup.AmbientWeyl = &(owner.GetAmbientWeyl());
   tempSubgroup.ComputeSubGroupFromGeneratingReflections(&tempRoots, &tempSubgroup.ExternalAutomorphisms, 0, true);
   Vectors<Rational> NilradicalIntersection, genSingHW;

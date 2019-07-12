@@ -577,7 +577,7 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap
   return out;
 }
 
-void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup<WeylGroupData> >& gens, List<bool>& out) {
+void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>& gens, List<bool>& out) {
   /*List<ElementWeylGroup<WeylGroup>> genes;
   genes.SetSize(gens.size);
   for (int i = 0; i <gens.size; i ++)
@@ -587,9 +587,9 @@ void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup<
   Vector<Rational> HXs;
   H.GetSignCharacter(HXs);*/
 
-  SubgroupData<FiniteGroup<ElementWeylGroup<WeylGroupData> >, ElementWeylGroup<WeylGroupData> > HD;
+  SubgroupData<FiniteGroup<ElementWeylGroup>, ElementWeylGroup> HD;
   HD.initFromGroupAndGenerators(G.theGroup, gens);
-  FiniteGroup<ElementWeylGroup<WeylGroupData> >& H = *HD.theSubgroup;
+  FiniteGroup<ElementWeylGroup>& H = *HD.theSubgroup;
   H.ComputeAllElements(true, - 1);
   Vector<Rational> HXs;
   H.GetSignCharacter(HXs);
@@ -632,7 +632,7 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
   int numCycles = MathRoutines::TwoToTheNth(sel.MaxSize);
   List<List<bool> > tss;
   tss.SetSize(numCycles);
-  List<ElementWeylGroup<WeylGroupData> > theGenerators;
+  List<ElementWeylGroup> theGenerators;
   for (int i = 0; i < numCycles - 2; i ++) {
     sel.incrementSelection();
     theGenerators.SetSize(sel.CardinalitySelection);
@@ -652,7 +652,7 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
 
   if (pseudo) {
     stOutput << "pseudo-parabolics" << "\n";
-    ElementWeylGroup<WeylGroupData> hr = G->GetRootReflection(G->RootSystem.size- 1);
+    ElementWeylGroup hr = G->GetRootReflection(G->RootSystem.size- 1);
     sel.init(G->CartanSymmetric.NumCols);
     for (int i = 0; i < numCycles - 1; i ++) {
       theGenerators.SetSize(sel.CardinalitySelection);

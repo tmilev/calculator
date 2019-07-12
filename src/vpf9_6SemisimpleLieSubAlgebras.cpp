@@ -809,15 +809,16 @@ void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand() {
   this->theOrbitHelementLengths.SetExpectedSize(this->theSl2s.size);
   this->theOrbitDynkinIndices.SetExpectedSize(this->theSl2s.size);
   this->theOrbiTs.SetSize(this->theSl2s.size);
-  List<ElementWeylGroup<WeylGroupData> > theGens;
-  ElementWeylGroup<WeylGroupData> theElt;
+  List<ElementWeylGroup> theGens;
+  ElementWeylGroup theElt;
+  WeylGroupAutomorphisms& theWeylAutomorphisms = this->theSl2s.theRootSAs.theWeylGroupAutomorphisms;
   WeylGroupData& theWeyl = this->owner->theWeyl;
-  theWeyl.ComputeOuterAutoGenerators();
+  this->theSl2s.theRootSAs.theWeylGroupAutomorphisms.ComputeOuterAutoGenerators();
   for (int i = 0; i < this->owner->GetRank(); i ++) {
     theElt.MakeSimpleReflection(i, theWeyl);
     theGens.AddOnTop(theElt);
   }
-  List<MatrixTensor<Rational> >& outerAutos = theWeyl.theOuterAutos.GetElement().theGenerators;
+  List<MatrixTensor<Rational> >& outerAutos = theWeylAutomorphisms.theOuterAutos.theGenerators;
   for (int i = 0; i < outerAutos.size; i ++) {
     if (!outerAutos[i].IsID()) {
       theElt.MakeOuterAuto(i, theWeyl);
@@ -827,7 +828,10 @@ void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand() {
   for (int i = 0; i < this->theSl2s.size; i ++) {
     this->theOrbitHelementLengths.AddOnTop(this->theSl2s[i].LengthHsquared);
     this->theOrbitDynkinIndices.AddOnTop(DynkinSimpleType('A', 1, this->theSl2s[i].LengthHsquared));
-    this->theOrbiTs[i].init(theGens, this->theSl2s[i].theH.GetCartanPart(), theElt.ActOn);
+    OrbitIterator<ElementWeylGroup, Vector<Rational> >::GroupActionWithName theAction;
+    theAction.actOn = theElt.ActOn;
+    theAction.name = "";
+    this->theOrbiTs[i].init(theGens, this->theSl2s[i].theH.GetCartanPart(), theAction);
   }
 //  stOutput << "H lengths:" << this->theOrbitHelementLengths.ToString() << " types: "
 //  << this->theOrbitDynkinIndices.ToString();
@@ -1266,8 +1270,9 @@ bool OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast() {
     this->orbitSize = this->currentIndexInBuffer;
     if (this->computedSize != - 1) {
       if (this->computedSize != this->orbitSize) {
-        crash << "This is a mathematical error: the computed size of the orbit is " << this->computedSize.ToString()
-        << " but I enumerated an orbit of size " << this->orbitSize << ". More details on the orbit: "
+        crash << "This is a mathematical error: "
+        << "the computed size of the orbit is " << this->computedSize.ToString()
+        << " but I enumerated an orbit of size " << this->orbitSize << ". More details on the orbit follow. "
         << this->ToString() << crash;
       }
     }
@@ -1309,13 +1314,13 @@ void OrbitFDRepIteratorWeylGroup::init() {
 }
 
 void OrbitFDRepIteratorWeylGroup::init(
-  const List<ElementWeylGroup<WeylGroupData> >& inputGenerators,
+  const List<ElementWeylGroup>& inputGenerators,
   const Vector<Rational>& inputElement,
-  OrbitIterator<ElementWeylGroup<WeylGroupData>, Vector<Rational> >::GroupAction inputGroupAction
+  const OrbitIterator<ElementWeylGroup, Vector<Rational> >::GroupActionWithName& inputGroupAction
 ) {
   MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::init");
   if (
-    this->theIterator.theGroupAction == inputGroupAction &&
+    this->theIterator.theGroupAction.actOn == inputGroupAction.actOn &&
     this->orbitDefiningElement == inputElement
   ) {
     if (this->flagOrbitIsBuffered) {
@@ -2185,6 +2190,11 @@ bool CandidateSSSubalgebra::CheckFullInitializatioN() const {
     << crash;
   }
   return true;
+}
+
+WeylGroupAutomorphisms& CandidateSSSubalgebra::GetAmbientWeylAutomorphisms() const {
+  this->CheckBasicInitialization();
+  return this->owner->theSl2s.theRootSAs.theWeylGroupAutomorphisms;
 }
 
 WeylGroupData& CandidateSSSubalgebra::GetAmbientWeyl() const {
@@ -6615,13 +6625,17 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat) const 
     }
     out << "</tr><tr><td>weight</td>";
     for (int i = 0; i < this->HighestWeightsNONprimalNonSorted.size; i ++) {
-      out << "<td>\\(" << this->HighestWeightsNONprimalNonSorted[i].ToStringLetterFormat("\\omega", &charFormatNonConst) << "\\)</td>";
+      out << "<td>\\("
+      << this->HighestWeightsNONprimalNonSorted[i].ToStringLetterFormat("\\omega", &charFormatNonConst)
+      << "\\)</td>";
     }
     out << "</tr>";
     if (this->flagCentralizerIsWellChosen && this->CartanOfCentralizer.size > 0) {
       out << "<tr><td>weights rel. to Cartan of (centralizer+semisimple s.a.). </td>";
       for (int i = 0; i < this->HighestWeightsPrimalNonSorted.size; i ++) {
-        out << "<td>\\(" << this->HighestWeightsPrimalNonSorted[i].ToStringLetterFormat("\\omega", &charFormatNonConst) << "\\)</td>";
+        out << "<td>\\("
+        << this->HighestWeightsPrimalNonSorted[i].ToStringLetterFormat("\\omega", &charFormatNonConst)
+        << "\\)</td>";
       }
       out << "</tr>";
     }
@@ -6645,8 +6659,10 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat) const 
     if (this->totalArithmeticOpsToSolveSystem > 1000000 && !shortReportOnly) {
       shouldDisplaySystem = true;
       out << "<br>The total number of arithmetic operations "
-      << "I needed to solve the Serre relations polynomial system was larger than 1 000 000. I am printing out "
-      << " the Serre relations system for you: maybe that can help improve the polynomial system algorithms. ";
+      << "I needed to solve the Serre relations "
+      << "polynomial system was larger than 1 000 000. I am printing out "
+      << "the Serre relations system for you: maybe "
+      << "that can help improve the polynomial system algorithms. ";
     }
   }
   shouldDisplaySystem = shouldDisplaySystem || !this->flagSystemSolved || !this->flagCentralizerIsWellChosen;
@@ -6685,20 +6701,19 @@ void CandidateSSSubalgebra::GetHsScaledToActByTwoByType(
 }
 
 template <class coefficient>
-void WeylGroupData::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights, bool useOuterAutos) {
+void WeylGroupAutomorphisms::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights) {
+  MacroRegisterFunctionWithName("WeylGroupAutomorphisms::RaiseToMaximallyDominant");
   bool found;
-  MemorySaving<Vectors<coefficient> > theWeightsCopy;
-  if (useOuterAutos) {
-    this->ComputeOuterAutos();
-  }
+  Vectors<coefficient> theWeightsCopy;
+  this->ComputeOuterAutos();
   for (int i = 0; i < theWeights.size; i ++) {
     do {
       found = false;
-      for (int j = 0; j < this->RootsOfBorel.size; j ++) {
-        if (this->RootScalarCartanRoot(this->RootsOfBorel[j], theWeights[i]) < 0) {
+      for (int j = 0; j < this->theWeyl->RootsOfBorel.size; j ++) {
+        if (this->theWeyl->RootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[i]) < 0) {
           bool isGood = true;
           for (int k = 0; k < i; k ++) {
-            if (this->RootScalarCartanRoot(this->RootsOfBorel[j], theWeights[k]) > 0) {
+            if (this->theWeyl->RootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[k]) > 0) {
               isGood = false;
               break;
             }
@@ -6707,34 +6722,32 @@ void WeylGroupData::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeig
             continue;
           }
           for (int k = 0; k < theWeights.size; k ++) {
-            this->ReflectBetaWRTAlpha(this->RootsOfBorel[j], theWeights[k], false, theWeights[k]);
+            this->theWeyl->ReflectBetaWRTAlpha(this->theWeyl->RootsOfBorel[j], theWeights[k], false, theWeights[k]);
           }
           found = true;
         }
       }
-      if (useOuterAutos) {
-        Vector<Rational> zeroWeight;
-        zeroWeight.MakeZero(this->GetDim());
-        HashedList<MatrixTensor<Rational> >& outerAutos = this->theOuterAutos.GetElement().theElements;
-        for (int j = 0; j < outerAutos.size; j ++) {
-          theWeightsCopy.GetElement() = theWeights;
-          outerAutos[j].ActOnVectorsColumn(theWeightsCopy.GetElement());
-          bool isGood = true;
-          for (int k = 0; k < i; k ++) {
-            if (!(theWeightsCopy.GetElement()[k] - theWeights[k]).IsPositiveOrZero()) {
-              isGood = false;
-              break;
-            }
+      Vector<Rational> zeroWeight;
+      zeroWeight.MakeZero(this->theWeyl->GetDim());
+      HashedList<MatrixTensor<Rational> >& outerAutos = this->theOuterAutos.theElements;
+      for (int j = 0; j < outerAutos.size; j ++) {
+        theWeightsCopy = theWeights;
+        outerAutos[j].ActOnVectorsColumn(theWeightsCopy);
+        bool isGood = true;
+        for (int k = 0; k < i; k ++) {
+          if (!(theWeightsCopy[k] - theWeights[k]).IsPositiveOrZero()) {
+            isGood = false;
+            break;
           }
-          if (!isGood) {
-            continue;
-          }
-          if (!(theWeightsCopy.GetElement()[i] - theWeights[i]).IsGreaterThanLexicographic(zeroWeight)) {
-            continue;
-          }
-          found = true;
-          theWeights = theWeightsCopy.GetElement();
         }
+        if (!isGood) {
+          continue;
+        }
+        if (!(theWeightsCopy[i] - theWeights[i]).IsGreaterThanLexicographic(zeroWeight)) {
+          continue;
+        }
+        found = true;
+        theWeights = theWeightsCopy;
       }
     } while (found);
   }
@@ -6747,13 +6760,14 @@ bool CandidateSSSubalgebra::HasHsScaledByTwoConjugateTo(List<Vector<Rational> >&
   }
   List<Vector<Rational> > raisedInput = input;
   List<Vector<Rational> > myVectors = this->theHsScaledToActByTwo;
-  WeylGroupData& ambientWeyl = this->GetAmbientWeyl();
-  ambientWeyl.RaiseToMaximallyDominant(raisedInput, true);
-  ambientWeyl.RaiseToMaximallyDominant(myVectors, true);
+  WeylGroupAutomorphisms& ambientWeylAutomorphisms = this->GetAmbientWeylAutomorphisms();
+
+  ambientWeylAutomorphisms.RaiseToMaximallyDominant(raisedInput);
+  ambientWeylAutomorphisms.RaiseToMaximallyDominant(myVectors);
   return myVectors == raisedInput;
 }
 
-std::string simpleReflectionOrOuterAuto::ToString() const {
+std::string simpleReflectionOrOuterAutomorphism::ToString() const {
   std::stringstream out;
   if (!this->flagIsOuter) {
     out << "s_{";
@@ -6762,6 +6776,14 @@ std::string simpleReflectionOrOuterAuto::ToString() const {
   } else {
     out << "a_{" << this->index << "}";
   }
+  return out.str();
+}
+
+std::string simpleReflection::ToString() const {
+  std::stringstream out;
+  out << "s_{";
+  out << this->index + 1;
+  out << "}";
   return out.str();
 }
 
@@ -6800,26 +6822,30 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   bool mustBeTrue = theOuterAutos.GenerateElements(100000);
   if (!mustBeTrue) {
     crash << "Failed to generate outer automorphisms of Dynkin simple type. "
-    << "The upper limit for such automorphism group size is 100000" << crash;
+    << "The upper limit for such automorphism group size is 100000. " << crash;
   }
-  Rational numCyclesFromTypes =selectedTypes.GetNumTotalCombinations();
+  Rational numCyclesFromTypes = selectedTypes.GetNumTotalCombinations();
   if (!numCyclesFromTypes.IsSmallInteger()) {
-    crash << "Computation is too large: I am crashing to let you know that the program cannot "
-    << "handle such a large number of outer automorphisms" << crash;
+    crash << "Computation is too large: "
+    << "I am crashing to let you know that the program cannot "
+    << "handle such a large number of outer automorphisms. " << crash;
   }
   List<Vector<Rational> > conjugationCandidates;
   Vectors<Rational> currentComponent;
   ProgressReport theReport;
   if (theGlobalVariables.flagReportEverything) {
     std::stringstream reportStream;
-    reportStream << "Computing whether " << this->theWeylNonEmbedded->theDynkinType << " is direct summand of "
-    << other.theWeylNonEmbedded->theDynkinType.ToString() << ". The outer automorphisms of the smaller type are: ";
+    reportStream << "Computing whether "
+    << this->theWeylNonEmbedded->theDynkinType << " is direct summand of "
+    << other.theWeylNonEmbedded->theDynkinType.ToString()
+    << ". The outer automorphisms of the smaller type are: ";
     FormatExpressions theFormat;
     theFormat.flagUseHTML = false;
     theFormat.flagUseLatex = true;
     for (int i = 0; i < theOuterAutos.theElements.size; i ++) {
       if (i >= 100) {
-        reportStream << "... and so on, only the first 100 elements printed out of total " << theOuterAutos.theElements.size << ". ";
+        reportStream << "... and so on, only the first 100 elements printed out of total "
+        << theOuterAutos.theElements.size << ". ";
       } else {
         reportStream << "<br>" << HtmlRoutines::GetMathMouseHover(theOuterAutos.theElements[i].ToStringMatForm(&theFormat));
       }
@@ -6962,7 +6988,8 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
     currentSA.ComputeCentralizerIsWellChosen();
     if (currentSA.centralizerRank > this->owner->GetRank()) {
       crash << "Subalgebra " << currentSA.ToStringType() << " has rank "
-      << currentSA.centralizerRank.ToString() << " but the ambient Lie algebra isonly of rank "
+      << currentSA.centralizerRank.ToString()
+      << " but the ambient Lie algebra isonly of rank "
       << this->owner->GetRank() << ". " << crash;
     }
   }

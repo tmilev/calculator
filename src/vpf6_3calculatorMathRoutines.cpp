@@ -6693,7 +6693,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroups(Calculator& theCommand
   }
   SemisimpleLieAlgebra& theSSalgebra = *theSSPointer;
   int numCycles = MathRoutines::TwoToTheNth(selectionParSel.MaxSize);
-  SubgroupWeylGroupOLD theSubgroup;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
   std::stringstream out;
   for (int i = 0; i < numCycles; i ++, selectionParSel.incrementSelection()) {
     theSubgroup.MakeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, 2000);
@@ -6728,7 +6728,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   SemisimpleLieAlgebra& theSSalgebra = *theSSalgPointer;
 
   WeylGroupData& theAmbientWeyl = theSSalgebra.theWeyl;
-  SubgroupWeylGroupOLD theSubgroup;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
   std::stringstream out;
   if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, 500)) {
     return output.MakeError("<br><br>Failed to generate Weyl subgroup, 500 elements is the limit", theCommands);
@@ -6736,12 +6736,12 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   theSubgroup.FindQuotientRepresentatives(2000);
   out << "<br>Number elements of the coset: "
   << theSubgroup.RepresentativesQuotientAmbientOrder.size;
-  out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.size;
+  out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.allElements.size;
   out << "<br>Number of elements of the ambient Weyl: "
   << theSubgroup.AmbientWeyl->theGroup.theElements.size;
   FormatExpressions theFormat;
   hwContext.ContextGetFormatExpressions(theFormat);
-  if (theSubgroup.size > 498) {
+  if (theSubgroup.allElements.size > 498) {
     if (theSubgroup.AmbientWeyl->SizeByFormulaOrNeg1('E', 6) <= theSubgroup.AmbientWeyl->theGroup.GetSize()) {
       out << "Weyl group is too large. <br>";
     } else {
@@ -6750,7 +6750,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   } else {
     std::stringstream outputFileContent, outputFileContent2;
     std::string fileHasse, fileCosetGraph;
-    bool useJavascript = theSubgroup.size < 100;
+    bool useJavascript = (theSubgroup.allElements.size < 100);
     outputFileContent << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
     outputFileContent << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
     outputFileContent << "\n\\end{document}";
@@ -6783,7 +6783,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
     << "<td>weight fund. coords</td></tr>";
     theFormat.fundamentalWeightLetter = "\\omega";
     for (int i = 0; i < theSubgroup.RepresentativesQuotientAmbientOrder.size; i ++) {
-      ElementWeylGroup<WeylGroupData>& current = theSubgroup.RepresentativesQuotientAmbientOrder[i];
+      ElementWeylGroup& current = theSubgroup.RepresentativesQuotientAmbientOrder[i];
       out << "<tr><td>"
       << (useJavascript ? HtmlRoutines::GetMathSpanPure(current.ToString()) : current.ToString())
       << "</td>";
@@ -6988,7 +6988,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
   }
   theHWSimpCoordsFDPart = theWeyl.GetSimpleCoordinatesFromFundamental(theHWFundCoordsFDPart);
   theHWSimpCoordsFDPart += theWeyl.rho;
-  SubgroupWeylGroupOLD theSub;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSub;
   if (!theSub.MakeParabolicFromSelectionSimpleRoots(theWeyl, parSel, 1000)) {
     return output.MakeError(
       "Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).",
@@ -6996,7 +6996,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
     );
   }
   theHWsimpCoords = theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
-  List<ElementWeylGroup<WeylGroupData> > theWeylElements;
+  List<ElementWeylGroup> theWeylElements;
   theSub.GetGroupElementsIndexedAsAmbientGroup(theWeylElements);
   Vector<RationalFunctionOld> currentHW;
   out << "<br>Orbit modified with small rho: <table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
@@ -7009,8 +7009,10 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
     << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToString() << "</td></tr>";
   }
   out << "</table>";
-  out << "<br>The rho of the Levi part is: " << theSub.GetRho().ToString() << "<br>Weyl group of Levi part follows. "
-  << "<br><table><tr><td>Weyl element<td><td>Image hw under small rho modified action fund coords</td>"
+  out << "<br>The rho of the Levi part is: "
+  << theSub.GetRho().ToString() << "<br>Weyl group of Levi part follows. "
+  << "<br><table><tr><td>Weyl element</td>"
+  << "<td>Image hw under small rho modified action fund coords</td>"
   << "<td>Character Verma given h.w.</td></tr>";
   invertedParSel = parSel;
   invertedParSel.InvertSelection();
@@ -7021,10 +7023,13 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
   formatChars.FDrepLetter = "L";
   formatChars.fundamentalWeightLetter = "\\omega";
   formatChars.flagUseLatex = true;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
+  theSubgroup.AmbientWeyl = theKLpolys.TheWeylGroup;
   for (int i = 0; i < theWeylElements.size; i ++) {
-    ElementWeylGroup<WeylGroupData>& currentElt = theWeylElements[i];
-    out << "<tr><td>" << currentElt.ToString() << "</td>";
-    int indexInWeyl = theKLpolys.TheWeylGroup->theGroup.theElements.GetIndex(currentElt);
+    ElementWeylGroup& currentElement = theWeylElements[i];
+    out << "<tr><td>" << currentElement.ToString() << "</td>";
+
+    int indexInWeyl = theKLpolys.TheWeylGroup->theGroup.theElements.GetIndex(currentElement);
     if (indexInWeyl == - 1) {
       crash << "This is a programming error. Something is wrong: "
       << "I am getting that an element of the Weyl group of the Levi part of "
@@ -7038,7 +7043,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
         currentHW = theHWsimpCoords;
         theWeyl.ActOnRhoModified(j, currentHW);
         theMon.weightFundamentalCoordS = theWeyl.GetFundamentalCoordinatesFromSimple(currentHW);
-        int sign = (currentElt.generatorsLastAppliedFirst.size - theWeyl.theGroup.theElements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
+        int sign = (currentElement.generatorsLastAppliedFirst.size - theWeyl.theGroup.theElements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
         currentChar.AddMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j] * sign);
       }
     }
@@ -7048,7 +7053,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
     currentHW -= theSub.GetRho();
     out << "<td>" << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega") << "</td>";
     out << "<td>" << HtmlRoutines::GetMathMouseHover(currentChar.ToString(&formatChars)) << "</td>";
-    if (currentElt.generatorsLastAppliedFirst.size % 2 == 1) {
+    if (currentElement.generatorsLastAppliedFirst.size % 2 == 1) {
       currentChar *= - 1;
     }
     theChar += currentChar;

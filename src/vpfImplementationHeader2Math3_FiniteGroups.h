@@ -102,258 +102,16 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
   return true;
 }
 
-template <class templateWeylGroup>
-ElementWeylGroup<templateWeylGroup> ElementWeylGroup<templateWeylGroup>::operator^(
-  const ElementWeylGroup<templateWeylGroup>& right
-) const {
-  if (this->owner != right.owner) {
-    crash << "Not allowed to conjugate elements of different Weyl groups. "
-    << "If you did this intentionally, change the present file. "
-    << crash;
-  }
-  ElementWeylGroup<templateWeylGroup> out;
-  out.owner = this->owner;
-  out.generatorsLastAppliedFirst = right.generatorsLastAppliedFirst;
-  out.generatorsLastAppliedFirst.AddListOnTop(this->generatorsLastAppliedFirst);
-  for (int i = right.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
-    out.generatorsLastAppliedFirst.AddOnTop(right.generatorsLastAppliedFirst[i]);
-  }
-  out.MakeCanonical();
-  return out;
-}
-
-template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::ConjugationAction(
-  const ElementWeylGroup<templateWeylGroup>& ConjugateWith,
-  const ElementWeylGroup<templateWeylGroup>& ConjugateOn,
-  ElementWeylGroup<templateWeylGroup>& out
-) {
-  out = ConjugateOn^ConjugateWith;
-}
-
-template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::operator*=(const ElementWeylGroup<WeylGroupData>& other) {
-  if (this->owner != other.owner) {
-    crash << "This is a programming error: attempting to multiply elements belonging to different Weyl groups. " << crash;
-  }
-  if (&other == this) {
-    ElementWeylGroup<WeylGroupData> otherCopy = other;
-    (*this) *= otherCopy;
-    return;
-  }
-  this->generatorsLastAppliedFirst.AddListOnTop(other.generatorsLastAppliedFirst);
-  this->MakeCanonical();
-}
-
-template <class templateWeylGroup>
-Vector<Rational> ElementWeylGroup<templateWeylGroup>::operator*(const Vector<Rational>& v) const {
-  Vector<Rational> out = v;
-  this->owner->ActOn(*this,out);
-  return out;
-}
-
-template <class templateWeylGroup>
-std::string ElementWeylGroup<templateWeylGroup>::ToString(FormatExpressions* theFormat) const {
-  MacroRegisterFunctionWithName("ElementWeylGroup::ToString");
-  (void) theFormat;//avoid unused parameter warning, portable
-  if (this->generatorsLastAppliedFirst.size == 0) {
-    return "id";
-  }
-  std::stringstream out;
-  for (int i = 0; i < this->generatorsLastAppliedFirst.size; i ++) {
-    out << this->generatorsLastAppliedFirst[i].ToString();
-  }
-  return out.str();
-}
-
-template <class templateWeylGroup>
-unsigned int ElementWeylGroup<templateWeylGroup>::HashFunction() const {
-  int top = MathRoutines::Minimum(this->generatorsLastAppliedFirst.size, ::SomeRandomPrimesSize);
-  unsigned int result = 0;
-  for (int i = 0; i < top; i ++) {
-    result += this->generatorsLastAppliedFirst[i].HashFunction() * ::SomeRandomPrimes[i];
-  }
-  return result;
-}
-
-template <class templateWeylGroup>
-bool ElementWeylGroup<templateWeylGroup>::operator>(const ElementWeylGroup<templateWeylGroup>& other) const {
-  if (this->owner != other.owner) {
-    crash << "Comparing elements of different Weyl groups. " << crash;
-  }
-  return this->generatorsLastAppliedFirst>other.generatorsLastAppliedFirst;
-}
-
-template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::MakeID(templateWeylGroup& inputWeyl) {
-  this->owner = &inputWeyl;
-  this->generatorsLastAppliedFirst.SetSize(0);
-}
-
-template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::MakeID(const FiniteGroup<ElementWeylGroup<templateWeylGroup> >& inputGroup) {
-  this->owner = inputGroup.generators[0].owner;
-  this->generatorsLastAppliedFirst.SetSize(0);
-}
-
-template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::MakeID(const ElementWeylGroup& initializeFrom) {
-  this->MakeID(*initializeFrom.owner);
-}
-
-template <class templateWeylGroup>
-bool ElementWeylGroup<templateWeylGroup>::IsID() {
-  this->MakeCanonical();
-  return this->generatorsLastAppliedFirst.size == 0;
-}
-
-template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::MakeRootReflection(
-  const Vector<Rational>& mustBeRoot, WeylGroupData& inputWeyl
-) {
-  *this = inputWeyl.GetRootReflection(inputWeyl.RootSystem.GetIndexIMustContainTheObject(mustBeRoot));
-}
-
-template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::MakeSimpleReflection(int simpleRootIndex, WeylGroupData& inputWeyl) {
-  this->owner = &inputWeyl;
-  this->generatorsLastAppliedFirst.SetSize(1);
-  this->generatorsLastAppliedFirst[0].MakeSimpleReflection(simpleRootIndex);
-}
-
-template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::MakeOuterAuto(int outerAutoIndex, WeylGroupData& inputWeyl) {
-  this->owner = &inputWeyl;
-  this->generatorsLastAppliedFirst.SetSize(1);
-  this->generatorsLastAppliedFirst[0].MakeOuterAuto(outerAutoIndex);
-}
-
-template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::MakeFromRhoImage(const Vector<Rational>& inputRhoImage, WeylGroupData& inputWeyl) {
-  this->owner = &inputWeyl;
-  int theRank = this->owner->GetDim();
-  this->generatorsLastAppliedFirst.SetSize(0);
-  Vector<Rational> theVector = inputRhoImage;
-  simpleReflectionOrOuterAuto theGen;
-  while (theVector != this->owner->rho) {
-    for (int i = 0; i < theRank; i ++) {
-      if (this->owner->GetScalarProdSimpleRoot(theVector, i) < 0) {
-        this->owner->SimpleReflection(i, theVector);
-        theGen.MakeSimpleReflection(i);
-        this->generatorsLastAppliedFirst.AddOnTop(theGen);
-        break;
-      }
-    }
-  }
-}
-
-template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::MakeCanonical() {
-  MacroRegisterFunctionWithName("ElementWeylGroup::MakeCanonical");
-  this->CheckInitialization();
-  if (this->owner->rho.size == 0) {
-    this->owner->ComputeRho(false);
-  }
-  Vector<Rational> theVector;
-  this->owner->ActOn(*this, this->owner->rho, theVector);
-  this->MakeFromRhoImage(theVector, *this->owner);
-}
-
-template <class templateWeylGroup>
-bool ElementWeylGroup<templateWeylGroup>::HasDifferentConjugacyInvariantsFrom(
-  const ElementWeylGroup<templateWeylGroup>& right
-) const {
-  MacroRegisterFunctionWithName("ElementWeylGroup::HasDifferentConjugacyInvariantsFrom");
-  if ((this->generatorsLastAppliedFirst.size % 2) != (right.generatorsLastAppliedFirst.size % 2)) {
-    return true;
-  }
-  if (*this == right) {
-    //just in case
-    return false;
-  }
-  this->CheckInitialization();
-  //stOutput << " the sign is the same... ";
-  Polynomial<Rational> leftCharPoly, rightCharPoly;
-  this->GetCharacteristicPolyStandardRepresentation(leftCharPoly);
-  right.GetCharacteristicPolyStandardRepresentation(rightCharPoly);
-  if (leftCharPoly != rightCharPoly) {
-    return true;
-  }
-  VectorSparse<Rational> leftCycleStructure, rightCycleStructure;
-  this->GetCycleStructure(leftCycleStructure);
-  right.GetCycleStructure(rightCycleStructure);
-  if (leftCycleStructure != rightCycleStructure) {
-    return true;
-  }
-  return false;
-}
-
-template <class templateWeylGroup>
-std::string ElementWeylGroup<templateWeylGroup>::ToStringInvariants(FormatExpressions* theFormat) const {
-  MacroRegisterFunctionWithName("ElementWeylGroup::GetCycleStructure");
-  VectorSparse<Rational> theCycleStructure;
-  this->GetCycleStructure(theCycleStructure);
-  FormatExpressions cycleLetterFormat;
-  cycleLetterFormat.polyDefaultLetter = "c";
-  std::stringstream out;
-  out << "Cycle structure: " << theCycleStructure.ToString(&cycleLetterFormat) << ". ";
-  return out.str();
-}
-
-template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::GetCycleStructure(
-  VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult
-) const {
-  MacroRegisterFunctionWithName("ElementWeylGroup::GetCycleStructure");
-  this->CheckInitialization();
-  outputIndexIsCycleSizeCoordinateIsCycleMult.MakeZero();
-  List<bool> Explored;
-  HashedList<Vector<Rational> >& theRootSystem = this->owner->RootSystem;
-  Explored.initializeFillInObject(theRootSystem.size, false);
-  Vector<Rational> currentRoot;
-  for (int i = 0; i < Explored.size; i ++) {
-    if (!Explored[i]) {
-      int currentCycleSize = 1;
-      currentRoot = theRootSystem[i];
-      for (
-        this->owner->ActOn(*this, currentRoot, currentRoot);
-        currentRoot != theRootSystem[i];
-        this->owner->ActOn(*this, currentRoot, currentRoot)
-      ) {
-        currentCycleSize ++;
-        Explored[theRootSystem.GetIndex(currentRoot)] = true;
-      }
-      outputIndexIsCycleSizeCoordinateIsCycleMult.AddMonomial(MonomialVector(currentCycleSize - 1), 1);
-    }
-  }
-}
-
-template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& output) const {
-  MacroRegisterFunctionWithName("ElementWeylGroup::GetCharacteristicPolyStandardRepresentation");
-  this->CheckInitialization();
-  Matrix<Rational> standardRepMat;
-  this->owner->GetMatrixStandardRep(*this, standardRepMat);
-  output.AssignCharPoly(standardRepMat);
-}
-
-template <class templateWeylGroup>
-ElementWeylGroup<WeylGroupData> ElementWeylGroup<templateWeylGroup>::Inverse() const {
-  ElementWeylGroup<WeylGroupData> out = *this;
-  out.generatorsLastAppliedFirst.ReverseOrderElements();
-  out.MakeCanonical();
-  return out;
-}
-
 template <class elementGroup, class elementRepresentation>
 void OrbitIterator<elementGroup, elementRepresentation>::init(
   const List<elementGroup>& inputGenerators,
   const elementRepresentation& inputElement,
-  OrbitIterator::GroupAction inputGroupAction
+  const GroupActionWithName &inputGroupAction
 ) {
   this->reset();
   this->theGroupGeneratingElements = inputGenerators;
-  this->theGroupAction = inputGroupAction;
+  this->theGroupAction.name = inputGroupAction.name;
+  this->theGroupAction.actOn = inputGroupAction.actOn;
   this->currentLayer->Clear();
   this->currentLayer->AddOnTop(inputElement);
   this->indexCurrentElement = 0;
@@ -384,7 +142,7 @@ bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfP
     return false;
   }
   for (int i = 0; i < this->theGroupGeneratingElements.size; i ++) {
-    this->theGroupAction(
+    this->theGroupAction.actOn(
       this->theGroupGeneratingElements[i],
       (*this->currentLayer)[this->indexCurrentElement],
       this->bufferRepresentationElement
@@ -408,7 +166,7 @@ bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfP
     return false;
   }
   for (int i = 0; i < this->theGroupGeneratingElements.size; i ++) {
-    this->theGroupAction(
+    this->theGroupAction.actOn(
       this->theGroupGeneratingElements[i],
       (*this->currentLayer)[this->indexCurrentElement],
       this->bufferRepresentationElement
@@ -759,7 +517,9 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative(
 ) {
   MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesFromCCRepresentatives");
   OrbitIterator<elementSomeGroup, elementSomeGroup> theOrbitIterator;
-  theOrbitIterator.init(this->generators, inputOutputClass.representative, elementSomeGroup::ConjugationAction);
+  theOrbitIterator.theGroupAction.actOn = elementSomeGroup::ConjugationAction;
+  theOrbitIterator.theGroupAction.name = "conjugation action";
+  theOrbitIterator.init(this->generators, inputOutputClass.representative, theOrbitIterator.theGroupAction);
   inputOutputClass.size = 1;
   if (storeCC) {
     inputOutputClass.theElements.SetSize(0);
@@ -1004,13 +764,14 @@ LargeInt WeylGroupData::GetOrbitSize(Vector<coefficient>& theWeight) {
   //I read somewhere, I think it was a paper by W. de Graaf, that the stabilizer
   //of a weight is generated by
   //the root reflections that stabilize the weight.
-  //Whether my memory has served me well shall be seen through implementing this function.
+  //Whether my memory has served me well shall
+  //be seen through implementing this function.
   //In particular, we will compute all root reflections that stabilize the weight,
   //then get a Dynkin diagram from these roots, then compute the size of the stabilizer,
-  // and finally compute the size of the orbit. I will check numerically if everything is ok
+  //and finally compute the size of the orbit. I will check numerically if everything is ok
   //all the way up to E6.
-//  stOutput << "<hr>DEBUG: Calling WeylGroup::GetOrbitSize with input: " << theWeight.ToString()
-//  << ". The Weyl type is: " << this->theDynkinType.ToString();
+  //  stOutput << "<hr>DEBUG: Calling WeylGroup::GetOrbitSize with input: " << theWeight.ToString()
+  //  << ". The Weyl type is: " << this->theDynkinType.ToString();
   Vector<coefficient> currentWeight;
   Vectors<Rational> theStabilizingRoots;
   for (int i = 0; i < this->RootsOfBorel.size; i ++) {
@@ -1045,41 +806,41 @@ LargeInt WeylGroupData::GetOrbitSize(Vector<coefficient>& theWeight) {
 }
 
 template <class coefficient>
-bool WeylGroupData::GenerateOuterOrbit(
+bool WeylGroupAutomorphisms::GenerateOuterOrbit(
   Vectors<coefficient>& theWeights,
   HashedList<Vector<coefficient> >& output,
-  HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset,
-  int UpperLimitNumElements,
-  GlobalVariables* theGlobalVariables
+  HashedList<ElementWeylGroupAutomorphisms>* outputSubset,
+  int UpperLimitNumElements
 ) {
   MacroRegisterFunctionWithName("WeylGroup::GenerateOuterOrbit");
+  this->checkInitialization();
   this->ComputeOuterAutoGenerators();
-  List<MatrixTensor<Rational> > theOuterGens = this->theOuterAutos.GetElement().theGenerators;
+  List<MatrixTensor<Rational> > theOuterGens = this->theOuterAutos.theGenerators;
   output.Clear();
   for (int i = 0; i < theWeights.size; i ++) {
     output.AddOnTop(theWeights[i]);
   }
   Vector<coefficient> currentRoot;
-  ElementWeylGroup<WeylGroupData> currentElt;
+  ElementWeylGroupAutomorphisms currentElt;
   int numElementsToReserve = MathRoutines::Minimum(UpperLimitNumElements, 1000000);
   output.SetExpectedSize(numElementsToReserve);
   ProgressReport theReport;
-  simpleReflectionOrOuterAuto theGen;
+  simpleReflectionOrOuterAutomorphism theGen;
   if (outputSubset != 0) {
     currentElt.MakeID(*this);
     outputSubset->SetExpectedSize(numElementsToReserve);
     outputSubset->Clear();
     outputSubset->AddOnTop(currentElt);
   }
-  int numGens = this->GetDim() + theOuterGens.size;
+  int numGens = this->theWeyl->GetDim() + theOuterGens.size;
   int orbitSizeDiv10000 = 0;
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < numGens; j ++) {
-      if (j < this->GetDim()) {
+      if (j < this->theWeyl->GetDim()) {
         currentRoot = output[i];
-        this->SimpleReflection(j, currentRoot);
+        this->theWeyl->SimpleReflection(j, currentRoot);
       } else {
-        theOuterGens[j - this->GetDim()].ActOnVectorColumn(output[i], currentRoot);
+        theOuterGens[j - this->theWeyl->GetDim()].ActOnVectorColumn(output[i], currentRoot);
       }
       if (output.AddOnTopNoRepetition(currentRoot)) {
         if (outputSubset != 0) {
@@ -1095,16 +856,16 @@ bool WeylGroupData::GenerateOuterOrbit(
           return false;
         }
       }
-      if (theGlobalVariables != 0) {
+      if (theGlobalVariables.flagReportEverything) {
         if (output.size / 10000 > orbitSizeDiv10000) {
           std::stringstream reportStream;
           reportStream << "Generating outer orbit, " << output.size
           << " elements found so far, Weyl group type: "
-          << this->theDynkinType.ToString() << ". ";
+          << this->theWeyl->theDynkinType.ToString() << ". ";
           theReport.Report(reportStream.str());
         }
-        orbitSizeDiv10000 = output.size / 10000;
       }
+      orbitSizeDiv10000 = output.size / 10000;
     }
   }
   return true;
@@ -1112,7 +873,7 @@ bool WeylGroupData::GenerateOuterOrbit(
 
 template <class coefficient>
 void WeylGroupData::RaiseToDominantWeight(
-  Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound, ElementWeylGroup<WeylGroupData>* raisingElt
+  Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound, ElementWeylGroup* raisingElt
 ) {
   MacroRegisterFunctionWithName("WeylGroup::RaiseToDominantWeight");
   if (sign != 0) {
@@ -1123,7 +884,7 @@ void WeylGroupData::RaiseToDominantWeight(
   }
   coefficient theScalarProd;
   int theDim = this->GetDim();
-  simpleReflectionOrOuterAuto theGen;
+  simpleReflection theGen;
   if (raisingElt != 0) {
     raisingElt->MakeID(*this);
   }
@@ -1179,7 +940,7 @@ bool WeylGroupData::GenerateOrbit(
   HashedList<Vector<coefficient> >& output,
   bool UseMinusRho,
   int expectedOrbitSize,
-  HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset,
+  HashedList<ElementWeylGroup>* outputSubset,
   int UpperLimitNumElements
 ) {
   MacroRegisterFunctionWithName("WeylGroup::GenerateOrbit");
@@ -1188,7 +949,7 @@ bool WeylGroupData::GenerateOrbit(
     output.AddOnTopNoRepetition(theWeights[i]);
   }
   Vector<coefficient> currentRoot;
-  ElementWeylGroup<WeylGroupData> currentElt;
+  ElementWeylGroup currentElt;
   if (expectedOrbitSize <= 0) {
     if (!this->theGroup.GetSize().IsIntegerFittingInInt(&expectedOrbitSize)) {
       expectedOrbitSize = - 1;
@@ -1211,7 +972,7 @@ bool WeylGroupData::GenerateOrbit(
     outputSubset->AddOnTop(currentElt);
   }
   ProgressReport theReport;
-  simpleReflectionOrOuterAuto theGen;
+  simpleReflection theGen;
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < this->CartanSymmetric.NumRows; j ++) {
       currentRoot = output[i];
@@ -1649,7 +1410,7 @@ Matrix<coefficient>& GroupRepresentationCarriesAllMatrices<somegroup, coefficien
   if (this->theElementIsComputed[groupElementIndex]) {
     return theMat;
   }
-  const ElementWeylGroup<WeylGroupData>& theElt = this->ownerGroup->theElements[groupElementIndex];
+  const ElementWeylGroup& theElt = this->ownerGroup->theElements[groupElementIndex];
   this->theElementIsComputed[groupElementIndex] = true;
   this->GetMatrixElement(theElt, theMat);
   return theMat;
@@ -1684,11 +1445,6 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetMatrixEle
   this->ownerGroup->CheckInitializationConjugacyClasses();
   output.MakeIdMatrix(this->GetDim());
   for (int i = 0; i < input.generatorsLastAppliedFirst.size; i ++) {
-    if (input.generatorsLastAppliedFirst[i].flagIsOuter) {
-      crash << "WeylGroupRepresentation::GetMatrixElement called on an element that has outer automorphisms. "
-      << "This is not allowed. "
-      << crash;
-    }
     output.MultiplyOnTheRight(this->generatorS[input.generatorsLastAppliedFirst[i].index]);
   }
 }
@@ -1821,7 +1577,7 @@ std::string GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ToStr
       std::stringstream tempStream;
       tempStream << "s_" << i + 1 << "=MatrixRationals{}" << this->generatorS[i].ToString(theFormat) << "; \\\\\n";
       forYourCopyConvenience << tempStream.str();
-      out << HtmlRoutines::GetMathSpanPure("\\begin{array}{l}"+ tempStream.str() +"\\end{array}", 3000);
+      out << HtmlRoutines::GetMathSpanPure("\\begin{array}{l}" + tempStream.str() + "\\end{array}", 3000);
     } else {
       out << "Simple generator " << i + 1 << "} not computed ";
     }
@@ -1831,20 +1587,36 @@ std::string GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ToStr
 }
 
 template <class coefficient>
-void SubgroupWeylGroupOLD::ActByElement(int index, Vector<coefficient>& theRoot) const {
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ActByNonSimpleElement(int index, Vector<coefficient>& inputOutput) const {
   Vector<coefficient> tempRoot;
-  this->ActByElement(index, theRoot, tempRoot);
-  theRoot = tempRoot;
+  this->ActByNonSimpleElement(index, inputOutput, tempRoot);
+  inputOutput = tempRoot;
 }
 
 template <class coefficient>
-void SubgroupWeylGroupOLD::ActByElement(int index, Vector<coefficient>& input, Vector<coefficient>& output) const {
-  this->ActByElement(this->TheObjects[index], input, output);
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ActByNonSimpleElement(
+  int index, Vector<coefficient>& input, Vector<coefficient>& output
+) const {
+  this->ActByElement(this->allElements[index], input, output);
 }
 
 template <class coefficient>
-void SubgroupWeylGroupOLD::ActByElement(
-  const ElementWeylGroup<WeylGroupData>& theElement, const Vector<coefficient>& input, Vector<coefficient>& output
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ActByElement(
+  const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theElement,
+  const Vectors<coefficient>& input,
+  Vectors<coefficient>& output
+) const {
+  output.SetSize(input.size);
+  for (int i = 0; i < input.size; i ++) {
+    this->ActByElement(theElement, input[i], output[i]);
+  }
+}
+
+template <class coefficient>
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ActByElement(
+  const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theElement,
+  const Vector<coefficient>& input,
+  Vector<coefficient>& output
 ) const {
   if (&input == &output) {
     crash << "Input not allowed to coincide with output. " << crash;
@@ -1853,10 +1625,10 @@ void SubgroupWeylGroupOLD::ActByElement(
   output = input;
   for (int i = theElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
     int tempI = theElement.generatorsLastAppliedFirst[i].index;
-    if (tempI< this->simpleGenerators.size) {
-      this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[tempI], output, false, output);
+    if (tempI < this->simpleRootsInner.size) {
+      this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[tempI], output, false, output);
     } else {
-      tempI -= this->simpleGenerators.size;
+      tempI -= this->simpleRootsInner.size;
       tempRoot.MakeZero(input.size);
       for (int j = 0; j < output.size; j ++) {
         tempRoot2 = this->ExternalAutomorphisms[tempI][j];
@@ -1867,22 +1639,9 @@ void SubgroupWeylGroupOLD::ActByElement(
   }
 }
 
-template<class coefficient>
-void SubgroupWeylGroupOLD::ActByElement(
-  const ElementWeylGroup<WeylGroupData>& theElement, const Vectors<coefficient>& input, Vectors<coefficient>& output
-) const {
-  if (&input == &output) {
-    crash << "Input and output pointers must not be equal. " << crash;
-  }
-  output.SetSize(input.size);
-  for (int i = 0; i < input.size; i ++) {
-    this->ActByElement(theElement, input[i], output[i]);
-  }
-}
-
 template <class coefficient>
-bool SubgroupWeylGroupOLD::IsDominantWeight(const Vector<coefficient>& theWeight) {
-  for (int i = 0; i < this->simpleGenerators.size; i ++) {
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::IsDominantWeight(const Vector<coefficient>& theWeight) {
+  for (int i = 0; i < this->simpleRootsInner.size; i ++) {
     if (!this->IsDominantWRTgenerator(theWeight, i)) {
       return false;
     }
@@ -1891,8 +1650,8 @@ bool SubgroupWeylGroupOLD::IsDominantWeight(const Vector<coefficient>& theWeight
 }
 
 template<class coefficient>
-coefficient SubgroupWeylGroupOLD::WeylDimFormulaSimpleCoords(
-  const Vector<coefficient>& theWeightInSimpleCoords, const coefficient& theRingUnit
+coefficient SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::WeylDimFormulaInnerSimpleCoords(
+  const Vector<coefficient>& theWeightInnerSimpleCoords, const coefficient& theRingUnit
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::WeylDimFormulaSimpleCoords");
   this->CheckInitialization();
@@ -1905,7 +1664,7 @@ coefficient SubgroupWeylGroupOLD::WeylDimFormulaSimpleCoords(
   Result = theRingUnit;
   for (int i = 0; i < this->RootsOfBorel.size; i ++) {
     rootOfBorelNewRing = this->RootsOfBorel[i]; //<-type conversion here!
-    sumWithRho = rhoOverNewRing + theWeightInSimpleCoords;
+    sumWithRho = rhoOverNewRing + theWeightInnerSimpleCoords;
     buffer = this->AmbientWeyl->RootScalarCartanRoot(sumWithRho, rootOfBorelNewRing);
     buffer /= this->AmbientWeyl->RootScalarCartanRoot(rhoOverNewRing, rootOfBorelNewRing);
     Result *= buffer;
@@ -1914,7 +1673,7 @@ coefficient SubgroupWeylGroupOLD::WeylDimFormulaSimpleCoords(
 }
 
 template <class coefficient>
-bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM(
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetAlLDominantWeightsHWFDIM(
   Vector<coefficient>& highestWeightSimpleCoords,
   HashedList<Vector<coefficient> >& outputWeightsSimpleCoords,
   int upperBoundDominantWeights,
@@ -1928,7 +1687,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM(
   Vectors<Rational> basisEi;
   int theDim = this->AmbientWeyl->GetDim();
   basisEi.MakeEiBasis(theDim);
-  this->RaiseToDominantWeight(highestWeightTrue);
+  this->RaiseToDominantWeightInner(highestWeightTrue);
   Vector<coefficient> highestWeightFundCoords = this->AmbientWeyl->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
   int theTopHeightSimpleCoords = (int) highestWeightSimpleCoords.GetVectorRational().SumCoords().GetDoubleValue() + 1;
   if (theTopHeightSimpleCoords < 0) {
@@ -1986,8 +1745,10 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM(
 }
 
 template <class coefficient>
-void SubgroupWeylGroupOLD::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::RaiseToDominantWeight");
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::RaiseToDominantWeightInner(
+  Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound
+) {
+  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::RaiseToDominantWeightInner");
   if (sign != 0) {
     *sign = 1;
   }
@@ -1998,10 +1759,10 @@ void SubgroupWeylGroupOLD::RaiseToDominantWeight(Vector<coefficient>& theWeight,
 //  int theDim= this->AmbientWeyl->GetDim();
   for (bool found = true; found; ) {
     found = false;
-    for (int i = 0; i < this->simpleGenerators.size; i ++) {
+    for (int i = 0; i < this->simpleRootsInner.size; i ++) {
       if (!this->IsDominantWRTgenerator(theWeight, i)) {
         found = true;
-        this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[i], theWeight, false, theWeight);
+        this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[i], theWeight, false, theWeight);
         if (sign != 0) {
           *sign *= - 1;
         }
@@ -2016,30 +1777,34 @@ void SubgroupWeylGroupOLD::RaiseToDominantWeight(Vector<coefficient>& theWeight,
 }
 
 template <class coefficient>
-bool SubgroupWeylGroupOLD::GenerateOrbitReturnFalseIfTruncated(
-  const Vector<coefficient>& input, Vectors<coefficient>& outputOrbit, int UpperLimitNumElements
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GenerateOrbitReturnFalseIfTruncated(
+  const Vector<coefficient>& input, Vectors<coefficient>& outputOrbit, bool restrictToInner, int UpperLimitNumElements
 ) {
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GenerateOrbitReturnFalseIfTruncated");
   HashedList<Vector<coefficient> > theOrbit;
   bool result = true;
   theOrbit.Clear();
   Vector<coefficient> tempRoot;
   theOrbit.AddOnTop(input);
-  MemorySaving<Vectors<coefficient> >ExternalAutosOverAmbientField;
+  Vectors<coefficient> ExternalAutosOverAmbientField;
   for (int i = 0; i < theOrbit.size; i ++) {
-    for (int j = 0; j < this->simpleGenerators.size; j ++) {
-      this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[j], theOrbit[i], false, tempRoot);
-      theOrbit.AddOnTopNoRepetition(tempRoot);
-    }
-    for (int j = 1; j < this->ExternalAutomorphisms.size; j ++) {
-      ExternalAutosOverAmbientField.GetElement() = this->ExternalAutomorphisms[j];
-      theOrbit[i].GetCoordsInBasiS(ExternalAutosOverAmbientField.GetElement(), tempRoot);
-      theOrbit.AddOnTopNoRepetition(tempRoot);
-    }
     if (UpperLimitNumElements > 0) {
       if (theOrbit.size >= UpperLimitNumElements) {
         result = false;
         break;
       }
+    }
+    for (int j = 0; j < this->simpleRootsInner.size; j ++) {
+      this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[j], theOrbit[i], false, tempRoot);
+      theOrbit.AddOnTopNoRepetition(tempRoot);
+    }
+    if (restrictToInner) {
+      continue;
+    }
+    for (int j = 1; j < this->ExternalAutomorphisms.size; j ++) {
+      ExternalAutosOverAmbientField = this->ExternalAutomorphisms[j];
+      theOrbit[i].GetCoordsInBasiS(ExternalAutosOverAmbientField, tempRoot);
+      theOrbit.AddOnTopNoRepetition(tempRoot);
     }
   }
   outputOrbit = theOrbit;
@@ -2047,7 +1812,7 @@ bool SubgroupWeylGroupOLD::GenerateOrbitReturnFalseIfTruncated(
 }
 
 template <class coefficient>
-bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart(
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::FreudenthalEvalIrrepIsWRTLeviPart(
   const Vector<coefficient>& inputHWfundamentalCoords,
   HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoordS,
   List<coefficient>& outputMultsSimpleCoords,
@@ -2109,7 +1874,7 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart(
         convertor *= i;
         currentWeight = outputDomWeightsSimpleCoordsLeviPart[k] + convertor;
         currentDominantRepresentative = currentWeight;
-        this->RaiseToDominantWeight(currentDominantRepresentative);
+        this->RaiseToDominantWeightInner(currentDominantRepresentative);
         int theIndex = outputDomWeightsSimpleCoordsLeviPart.GetIndex(currentDominantRepresentative);
         if (theIndex == - 1) {
           break;
@@ -2374,9 +2139,9 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
   if (this->theElements.size == 0) {
     this->ComputeCCfromAllElements();
   }
-  GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> newRep;
+  GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational> newRep;
   int NumClasses = this->ConjugacyClassCount();
-  VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> decompositionNewRep;
+  VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> decompositionNewRep;
   ProgressReport theReport1;
 //  int indexFirstPredefinedRep =1; //<-this should be the index of the sign rep.
 //  int indexLastPredefinedrep =2; //<-this should be the index of the standard rep.

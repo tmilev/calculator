@@ -4377,7 +4377,7 @@ void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinali
     if (this->Multiplicities[i] != 0) {
       crash << "Non-zero multiplicities not implemented here. " << crash;
     }
-    if (Cardinality-currentCardinality >= this->MaxMultiplicity) {
+    if (Cardinality - currentCardinality >= this->MaxMultiplicity) {
       this->Multiplicities[i] = this->MaxMultiplicity;
     } else {
       this->Multiplicities[i] = Cardinality - currentCardinality;
@@ -5678,6 +5678,334 @@ bool DynkinSimpleType::operator<(int otherRank) const {
   return this->theRank < otherRank;
 }
 
+ElementWeylGroupAutomorphisms::ElementWeylGroupAutomorphisms() {
+  this->owner = 0;
+  this->flagDeallocated = false;
+}
+
+ElementWeylGroupAutomorphisms::~ElementWeylGroupAutomorphisms() {
+  this->owner = 0;
+  this->flagDeallocated = true;
+}
+
+void ElementWeylGroupAutomorphisms::MakeID(WeylGroupAutomorphisms& inputAutomorphisms) {
+  this->owner = &inputAutomorphisms;
+  this->generatorsLastAppliedFirst.SetSize(0);
+}
+
+void ElementWeylGroupAutomorphisms::MultiplyOnTheRightByOuterAuto(int outerAutoIndex) {
+  simpleReflectionOrOuterAutomorphism generator;
+  generator.index = outerAutoIndex;
+  generator.flagIsOuter = true;
+  this->generatorsLastAppliedFirst.AddOnTop(generator);
+}
+
+unsigned int ElementWeylGroupAutomorphisms::HashFunction(const ElementWeylGroupAutomorphisms& input) {
+  return input.HashFunction();
+}
+
+unsigned int ElementWeylGroupAutomorphisms::HashFunction() const {
+  return this->generatorsLastAppliedFirst.HashFunction();
+}
+
+std::string ElementWeylGroupAutomorphisms::ToString(FormatExpressions* theFormat) const {
+  MacroRegisterFunctionWithName("ElementWeylGroupAutomorphisms::ToString");
+  (void) theFormat;
+  if (this->generatorsLastAppliedFirst.size == 0) {
+    return "id";
+  }
+  std::stringstream out;
+  for (int i = 0; i < this->generatorsLastAppliedFirst.size; i ++) {
+    out << this->generatorsLastAppliedFirst[i].ToString();
+  }
+  return out.str();
+}
+
+void ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::MultiplyOnTheRightBySimpleRootInner(int simpleRootIndex) {
+  simpleReflectionOrOuterAutomorphism generator;
+  generator.index = simpleRootIndex;
+  this->generatorsLastAppliedFirst.AddOnTop(generator);
+}
+
+void ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::MultiplyOnTheRightByOuterAutomorphism(int indexOuterAutomorphism) {
+  simpleReflectionOrOuterAutomorphism generator;
+  generator.index = indexOuterAutomorphism;
+  generator.flagIsOuter = true;
+  this->generatorsLastAppliedFirst.AddOnTop(generator);
+}
+
+unsigned int ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::HashFunction(
+  const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& input
+) {
+  return input.HashFunction();
+}
+
+unsigned int ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::HashFunction() const {
+  return this->generatorsLastAppliedFirst.HashFunction();
+}
+
+std::string ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ToString(FormatExpressions* theFormat) const {
+  MacroRegisterFunctionWithName("ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ToString");
+  (void) theFormat;
+  if (this->generatorsLastAppliedFirst.size == 0) {
+    return "id";
+  }
+  std::stringstream out;
+  for (int i = 0; i < this->generatorsLastAppliedFirst.size; i ++) {
+    out << this->generatorsLastAppliedFirst[i].ToString();
+  }
+  return out.str();
+}
+
+bool ElementWeylGroup::CheckConsistency() const {
+  if (this->flagDeallocated) {
+    crash << "Programming error: use after free of class ElementWeylGroup" << crash;
+  }
+  return true;
+}
+
+bool ElementWeylGroup::CheckInitialization() const {
+  this->CheckConsistency();
+  if (this->owner == 0) {
+    crash << "This is a programming error: non-initialized element Weyl group. " << crash;
+    return false;
+  }
+  this->owner->CheckConsistency();
+  return true;
+}
+
+int ElementWeylGroup::Sign() const {
+  return this->generatorsLastAppliedFirst.size % 2 == 0 ? 1 : - 1;
+}
+
+ElementWeylGroup ElementWeylGroup::operator^(
+  const ElementWeylGroup& right
+) const {
+  if (this->owner != right.owner) {
+    crash << "Not allowed to conjugate elements of different Weyl groups. "
+    << "If you did this intentionally, change the present file. "
+    << crash;
+  }
+  ElementWeylGroup out;
+  out.owner = this->owner;
+  out.generatorsLastAppliedFirst = right.generatorsLastAppliedFirst;
+  out.generatorsLastAppliedFirst.AddListOnTop(this->generatorsLastAppliedFirst);
+  for (int i = right.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
+    out.generatorsLastAppliedFirst.AddOnTop(right.generatorsLastAppliedFirst[i]);
+  }
+  out.MakeCanonical();
+  return out;
+}
+
+void ElementWeylGroup::ConjugationAction(
+  const ElementWeylGroup& ConjugateWith,
+  const ElementWeylGroup& ConjugateOn,
+  ElementWeylGroup& out
+) {
+  out = ConjugateOn ^ ConjugateWith;
+}
+
+void ElementWeylGroup::operator*=(const ElementWeylGroup& other) {
+  if (this->owner != other.owner) {
+    crash << "This is a programming error: attempting to "
+    << "multiply elements belonging to different Weyl groups. " << crash;
+  }
+  if (&other == this) {
+    ElementWeylGroup otherCopy = other;
+    (*this) *= otherCopy;
+    return;
+  }
+  this->generatorsLastAppliedFirst.AddListOnTop(other.generatorsLastAppliedFirst);
+  this->MakeCanonical();
+}
+
+Vector<Rational> ElementWeylGroup::operator*(const Vector<Rational>& v) const {
+  Vector<Rational> out = v;
+  this->owner->ActOn(*this,out);
+  return out;
+}
+void ElementWeylGroup::MakeID(WeylGroupData& inputWeyl) {
+  this->owner = &inputWeyl;
+  this->generatorsLastAppliedFirst.SetSize(0);
+}
+
+void ElementWeylGroup::MakeID(const FiniteGroup<ElementWeylGroup> &inputGroup) {
+  this->owner = inputGroup.generators[0].owner;
+  this->generatorsLastAppliedFirst.SetSize(0);
+}
+
+void ElementWeylGroup::MakeID(const ElementWeylGroup& initializeFrom) {
+  this->MakeID(*initializeFrom.owner);
+}
+
+bool ElementWeylGroup::IsID() {
+  this->MakeCanonical();
+  return this->generatorsLastAppliedFirst.size == 0;
+}
+
+void ElementWeylGroup::MakeRootReflection(
+  const Vector<Rational>& mustBeRoot, WeylGroupData& inputWeyl
+) {
+  *this = inputWeyl.GetRootReflection(inputWeyl.RootSystem.GetIndexIMustContainTheObject(mustBeRoot));
+}
+
+void ElementWeylGroup::MakeSimpleReflection(int simpleRootIndex, WeylGroupData& inputWeyl) {
+  this->owner = &inputWeyl;
+  this->generatorsLastAppliedFirst.SetSize(1);
+  this->generatorsLastAppliedFirst[0].MakeSimpleReflection(simpleRootIndex);
+}
+
+void ElementWeylGroup::MakeOuterAuto(int outerAutoIndex, WeylGroupData& inputWeyl) {
+  this->owner = &inputWeyl;
+  this->generatorsLastAppliedFirst.SetSize(1);
+  this->generatorsLastAppliedFirst[0].MakeOuterAuto(outerAutoIndex);
+}
+
+void ElementWeylGroup::MakeFromRhoImage(const Vector<Rational>& inputRhoImage, WeylGroupData& inputWeyl) {
+  this->owner = &inputWeyl;
+  int theRank = this->owner->GetDim();
+  this->generatorsLastAppliedFirst.SetSize(0);
+  Vector<Rational> theVector = inputRhoImage;
+  simpleReflection theGen;
+  while (theVector != this->owner->rho) {
+    for (int i = 0; i < theRank; i ++) {
+      if (this->owner->GetScalarProdSimpleRoot(theVector, i) < 0) {
+        this->owner->SimpleReflection(i, theVector);
+        theGen.MakeSimpleReflection(i);
+        this->generatorsLastAppliedFirst.AddOnTop(theGen);
+        break;
+      }
+    }
+  }
+}
+
+void ElementWeylGroup::MakeCanonical() {
+  MacroRegisterFunctionWithName("ElementWeylGroup::MakeCanonical");
+  this->CheckInitialization();
+  if (this->owner->rho.size == 0) {
+    this->owner->ComputeRho(false);
+  }
+  Vector<Rational> theVector;
+  this->owner->ActOn(*this, this->owner->rho, theVector);
+  this->MakeFromRhoImage(theVector, *this->owner);
+}
+
+bool ElementWeylGroup::HasDifferentConjugacyInvariantsFrom(
+  const ElementWeylGroup& right
+) const {
+  MacroRegisterFunctionWithName("ElementWeylGroup::HasDifferentConjugacyInvariantsFrom");
+  if ((this->generatorsLastAppliedFirst.size % 2) != (right.generatorsLastAppliedFirst.size % 2)) {
+    return true;
+  }
+  if (*this == right) {
+    //just in case
+    return false;
+  }
+  this->CheckInitialization();
+  //stOutput << " the sign is the same... ";
+  Polynomial<Rational> leftCharPoly, rightCharPoly;
+  this->GetCharacteristicPolyStandardRepresentation(leftCharPoly);
+  right.GetCharacteristicPolyStandardRepresentation(rightCharPoly);
+  if (leftCharPoly != rightCharPoly) {
+    return true;
+  }
+  VectorSparse<Rational> leftCycleStructure, rightCycleStructure;
+  this->GetCycleStructure(leftCycleStructure);
+  right.GetCycleStructure(rightCycleStructure);
+  if (leftCycleStructure != rightCycleStructure) {
+    return true;
+  }
+  return false;
+}
+
+std::string ElementWeylGroup::ToStringInvariants(FormatExpressions* theFormat) const {
+  MacroRegisterFunctionWithName("ElementWeylGroup::GetCycleStructure");
+  VectorSparse<Rational> theCycleStructure;
+  this->GetCycleStructure(theCycleStructure);
+  FormatExpressions cycleLetterFormat;
+  cycleLetterFormat.polyDefaultLetter = "c";
+  std::stringstream out;
+  out << "Cycle structure: " << theCycleStructure.ToString(&cycleLetterFormat) << ". ";
+  return out.str();
+}
+
+void ElementWeylGroup::GetCycleStructure(
+  VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult
+) const {
+  MacroRegisterFunctionWithName("ElementWeylGroup::GetCycleStructure");
+  this->CheckInitialization();
+  outputIndexIsCycleSizeCoordinateIsCycleMult.MakeZero();
+  List<bool> Explored;
+  HashedList<Vector<Rational> >& theRootSystem = this->owner->RootSystem;
+  Explored.initializeFillInObject(theRootSystem.size, false);
+  Vector<Rational> currentRoot;
+  for (int i = 0; i < Explored.size; i ++) {
+    if (!Explored[i]) {
+      int currentCycleSize = 1;
+      currentRoot = theRootSystem[i];
+      for (
+        this->owner->ActOn(*this, currentRoot, currentRoot);
+        currentRoot != theRootSystem[i];
+        this->owner->ActOn(*this, currentRoot, currentRoot)
+      ) {
+        currentCycleSize ++;
+        Explored[theRootSystem.GetIndex(currentRoot)] = true;
+      }
+      outputIndexIsCycleSizeCoordinateIsCycleMult.AddMonomial(MonomialVector(currentCycleSize - 1), 1);
+    }
+  }
+}
+
+void ElementWeylGroup::GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& output) const {
+  MacroRegisterFunctionWithName("ElementWeylGroup::GetCharacteristicPolyStandardRepresentation");
+  this->CheckInitialization();
+  Matrix<Rational> standardRepMat;
+  this->owner->GetMatrixStandardRep(*this, standardRepMat);
+  output.AssignCharPoly(standardRepMat);
+}
+
+ElementWeylGroup ElementWeylGroup::Inverse() const {
+  ElementWeylGroup out = *this;
+  out.generatorsLastAppliedFirst.ReverseOrderElements();
+  out.MakeCanonical();
+  return out;
+}
+
+std::string ElementWeylGroup::ToString(FormatExpressions* theFormat) const {
+  MacroRegisterFunctionWithName("ElementWeylGroup::ToString");
+  (void) theFormat;//avoid unused parameter warning, portable
+  if (this->generatorsLastAppliedFirst.size == 0) {
+    return "id";
+  }
+  std::stringstream out;
+  for (int i = 0; i < this->generatorsLastAppliedFirst.size; i ++) {
+    out << this->generatorsLastAppliedFirst[i].ToString();
+  }
+  return out.str();
+}
+
+unsigned int ElementWeylGroup::HashFunction() const {
+  int top = MathRoutines::Minimum(this->generatorsLastAppliedFirst.size, ::SomeRandomPrimesSize);
+  unsigned int result = 0;
+  for (int i = 0; i < top; i ++) {
+    result += this->generatorsLastAppliedFirst[i].HashFunction() * ::SomeRandomPrimes[i];
+  }
+  return result;
+}
+
+bool ElementWeylGroup::operator>(const ElementWeylGroup& other) const {
+  if (this->owner != other.owner) {
+    crash << "Comparing elements of different Weyl groups. " << crash;
+  }
+  return this->generatorsLastAppliedFirst > other.generatorsLastAppliedFirst;
+}
+
+void ElementWeylGroup::MultiplyOnTheRightBySimpleReflection(int reflectionIndex) {
+  simpleReflection theGen;
+  theGen.MakeSimpleReflection(reflectionIndex);
+  this->generatorsLastAppliedFirst.AddOnTop(theGen);
+}
+
 void WeylGroupData::SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement) {
   Rational coefficient, tempRat;
   coefficient.Assign(DualSpaceElement[index]);
@@ -5689,13 +6017,13 @@ void WeylGroupData::SimpleReflectionDualSpace(int index, Vector<Rational>& DualS
   }
 }
 
-ElementWeylGroup<WeylGroupData> WeylGroupData::GetRootReflection(int rootIndex) {
+ElementWeylGroup WeylGroupData::GetRootReflection(int rootIndex) {
   if (!this->rho.size == 0) {
     this->ComputeRho(true);
   }
   Vector<Rational> rhoImage;
   this->ReflectBetaWRTAlpha(this->RootSystem[rootIndex], this->rho, false, rhoImage);
-  ElementWeylGroup<WeylGroupData> result;
+  ElementWeylGroup result;
   result.MakeFromRhoImage(rhoImage, *this);
   return result;
 }
@@ -5745,8 +6073,6 @@ Matrix<Rational> WeylGroupData::GetMatrixStandardRep(int elementIndex) const {
 
 void WeylGroupData::init() {
   this->flagFundamentalToSimpleMatricesAreComputed = false;
-  this->flagAllOuterAutosComputed = false;
-  this->flagOuterAutosGeneratorsComputed = false;
   this->flagIrrepsAreComputed = false;
   this->flagCharTableIsComputed = false;
   this->MatrixSendsSimpleVectorsToEpsilonVectors.FreeMemory();
@@ -5779,15 +6105,11 @@ void WeylGroupData::ActOnAffineHyperplaneByGroupElement(
 }
 
 bool WeylGroupData::GetWordByFormulaImplementation(
-  FiniteGroup<ElementWeylGroup<WeylGroupData> >& G, const ElementWeylGroup<WeylGroupData>& g, List<int> &out
+  FiniteGroup<ElementWeylGroup>& G, const ElementWeylGroup& g, List<int>& out
 ) {
   (void) G;// avoid unused parameter warning, portable.
   out.SetSize(g.generatorsLastAppliedFirst.size);
   for (int i = 0; i < g.generatorsLastAppliedFirst.size; i ++) {
-    if (g.generatorsLastAppliedFirst[i].flagIsOuter) {
-      crash << "wait, what?  is this okay to pass through or what should happen now?  see "
-      << __FILE__ << ":" << __LINE__ << crash;
-    }
     out[i] = g.generatorsLastAppliedFirst[i].index;
   }
   return true;
@@ -5819,7 +6141,7 @@ void SubgroupDataWeylGroup::GetSignCharacter(Vector<Rational>& out) {
 */
 
 void WeylGroupData::GetTrivialRepresentation(
-  GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& output
+  GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational>& output
 ) {
   MacroRegisterFunctionWithName("WeylGroup::GetTrivialRepresentation");
   this->theGroup.CheckInitializationConjugacyClasses();
@@ -5832,13 +6154,13 @@ void WeylGroupData::GetTrivialRepresentation(
 }
 
 void WeylGroupData::GetSignRepresentation(
-  GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& output
+  GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational>& output
 ) {
   MacroRegisterFunctionWithName("WeylGroup::GetSignRepresentation");
   this->theGroup.CheckInitializationConjugacyClasses();
   output.init(this->theGroup);
   output.basis.MakeEiBasis(1);
-  ElementWeylGroup<WeylGroupData> currentElt;
+  ElementWeylGroup currentElt;
   for (int i = 0; i < this->GetDim(); i ++) {
     currentElt.MakeSimpleReflection(i, *this);
     output.generatorS[i].MakeIdMatrix(1);
@@ -5848,7 +6170,7 @@ void WeylGroupData::GetSignRepresentation(
 }
 
 void WeylGroupData::GetStandardRepresentation(
-  GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& output
+  GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational>& output
 ) {
   MacroRegisterFunctionWithName("WeylGroup::GetStandardRepresentation");
   this->theGroup.CheckInitializationConjugacyClasses();
@@ -5985,7 +6307,7 @@ bool WeylGroupData::operator==(const WeylGroupData& other) const {
 }
 
 void WeylGroupData::ActOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho) {
-  const ElementWeylGroup<WeylGroupData>& currentElt = this->theGroup.theElements[index];
+  const ElementWeylGroup& currentElt = this->theGroup.theElements[index];
   for (int i = currentElt.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
     this->SimpleReflectionRoot(currentElt.generatorsLastAppliedFirst[i].index, theRoot, RhoAction, UseMinusRho);
   }
@@ -6047,7 +6369,7 @@ void WeylGroupData::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output) {
   }
 }
 
-bool WeylGroupData::LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup<WeylGroupData>& left, ElementWeylGroup<WeylGroupData>& right) {
+bool WeylGroupData::LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right) {
   Vector<Rational> leftImage;
   leftImage = this->rho;
   Vector<Rational> rightImage;
@@ -6163,7 +6485,7 @@ std::string WeylGroupData::ToStringRootsAndRootReflections(FormatExpressions* th
   << "<td>Reflection w.r.t. root</td></tr>";
   Vectors<Rational> rootSystemEpsCoords;
   this->GetEpsilonCoords(this->RootSystem, rootSystemEpsCoords);
-  ElementWeylGroup<WeylGroupData> currentRootReflection;
+  ElementWeylGroup currentRootReflection;
   for (int i = 0; i < this->RootSystem.size; i ++) {
     const Vector<Rational>& current = this->RootSystem[i];
     currentRootReflection.MakeRootReflection(current, *this);
@@ -6224,6 +6546,12 @@ bool WeylGroupData::IsAddmisibleDynkinType(char candidateLetter, int n) {
     return true;
   }
   return false;
+}
+
+void WeylGroupData::ComputeEpsilonMatrix() {
+  if (this->MatrixSendsSimpleVectorsToEpsilonVectors.IsZeroPointer()) {
+    this->theDynkinType.GetEpsilonMatrix(this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement());
+  }
 }
 
 void WeylGroupData::TransformToAdmissibleDynkinType(char inputLetter, int& outputRank) {
@@ -6318,29 +6646,41 @@ void WeylGroupData::MakeArbitrarySimple(char WeylGroupLetter, int n, const Ratio
   this->MakeFromDynkinType(inputType);
 }
 
-void WeylGroupData::ComputeOuterAutos() {
+WeylGroupAutomorphisms::WeylGroupAutomorphisms() {
+  this->flagAllOuterAutosComputed = false;
+  this->flagDeallocated = false;
+  this->flagOuterAutosGeneratorsComputed = false;
+  this->theWeyl = 0;
+}
+
+WeylGroupAutomorphisms::~WeylGroupAutomorphisms() {
+  this->flagDeallocated = true;
+  this->theWeyl = 0;
+}
+
+void WeylGroupAutomorphisms::ComputeOuterAutos() {
+  MacroRegisterFunctionWithName("WeylGroup::ComputeOuterAutos");
   if (this->flagAllOuterAutosComputed) {
     return;
   }
-  MacroRegisterFunctionWithName("WeylGroup::ComputeOuterAutoGenerators");
   this->ComputeOuterAutoGenerators();
-  this->theOuterAutos.GetElement().GenerateElements(0);
+  this->theOuterAutos.GenerateElements(0);
   this->flagAllOuterAutosComputed = true;
 }
 
-void WeylGroupData::ComputeOuterAutoGenerators() {
+void WeylGroupAutomorphisms::ComputeOuterAutoGenerators() {
   if (this->flagOuterAutosGeneratorsComputed) {
     return;
   }
-  List<MatrixTensor<Rational> >& theGens = this->theOuterAutos.GetElement().theGenerators;
-  this->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(theGens);
+  List<MatrixTensor<Rational> >& theGens = this->theOuterAutos.theGenerators;
+  this->theWeyl->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(theGens);
   for (int i = 0; i < theGens.size; i ++) {
     if (
-      theGens[i].GetMinNumColsNumRows() != this->GetDim() ||
-      theGens[i].GetMinNumCols() != this->GetDim() ||
-      theGens[i].GetMinNumRows() != this->GetDim()
+      theGens[i].GetMinNumColsNumRows() != this->theWeyl->GetDim() ||
+      theGens[i].GetMinNumCols() != this->theWeyl->GetDim() ||
+      theGens[i].GetMinNumRows() != this->theWeyl->GetDim()
     ) {
-      crash << "Bad outer automorphisms, type " << this->theDynkinType.ToString() << "." << crash;
+      crash << "Bad outer automorphisms, type " << this->theWeyl->theDynkinType.ToString() << "." << crash;
     }
   }
   this->flagOuterAutosGeneratorsComputed = true;
@@ -6394,7 +6734,7 @@ void WeylGroupData::GetEpsilonCoords(const List<Vector<Rational> >& input, Vecto
   }
 }
 
-LargeInt WeylGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup<WeylGroupData> >& G) {
+LargeInt WeylGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G) {
   WeylGroupData* W = (WeylGroupData*) G.specificDataPointer;
   W->CheckConsistency();
   return W->theDynkinType.GetWeylGroupSizeByFormula();
@@ -6446,7 +6786,7 @@ Rational WeylGroupData::GetKillingDivTraceRatio() {
   return result;
 }
 
-void WeylGroupData::GetLongestWeylElt(ElementWeylGroup<WeylGroupData>& outputWeylElt) {
+void WeylGroupData::GetLongestWeylElt(ElementWeylGroup& outputWeylElt) {
   this->ComputeRho(false);
   Vector<Rational> lowest = this->rho;
   Vectors<Rational> tempRoots;
@@ -6456,7 +6796,7 @@ void WeylGroupData::GetLongestWeylElt(ElementWeylGroup<WeylGroupData>& outputWey
 
 void WeylGroupData::GetExtremeElementInOrbit(
   Vector<Rational>& inputOutput,
-  ElementWeylGroup<WeylGroupData>* outputWeylElt,
+  ElementWeylGroup* outputWeylElt,
   Vectors<Rational>& bufferEiBAsis,
   bool findLowest,
   bool RhoAction,
@@ -6474,7 +6814,7 @@ void WeylGroupData::GetExtremeElementInOrbit(
     *stabilizerFound = false;
   }
   Rational theScalarProd;
-  ElementWeylGroup<WeylGroupData> eltSimplReflection;
+  ElementWeylGroup eltSimplReflection;
   //  static int numTimesReflectionWasApplied = 0;
   for (bool found = true; found;) {
     found = false;
@@ -6512,19 +6852,19 @@ void WeylGroupData::GetExtremeElementInOrbit(
   }
 }
 
-bool WeylGroupData::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& input) {
-  MacroRegisterFunctionWithName("WeylGroup::IsElementGroup(WeylGroup)OrOuterAuto");
+bool WeylGroupAutomorphisms::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& input) {
+  MacroRegisterFunctionWithName("WeylGroup::IsElementGroupOrOuterAuto");
   this->ComputeOuterAutos();
   Vector<Rational> theRhoImage;
-  input.ActOnVectorColumn(this->rho, theRhoImage);
-  ElementWeylGroup<WeylGroupData> theElementCandidate;
-  this->RaiseToDominantWeight(theRhoImage, 0, 0, &theElementCandidate);
+  input.ActOnVectorColumn(this->theWeyl->rho, theRhoImage);
+  ElementWeylGroup theElementCandidate;
+  this->theWeyl->RaiseToDominantWeight(theRhoImage, 0, 0, &theElementCandidate);
   Matrix<Rational> theCandidateMat;
   MatrixTensor<Rational> theCandidateMatTensorForm, theCandidateMatWithOuterAuto;
-  this->GetMatrixStandardRep(theElementCandidate, theCandidateMat);
+  this->theWeyl->GetMatrixStandardRep(theElementCandidate, theCandidateMat);
   theCandidateMatTensorForm = theCandidateMat;
-  for (int i = 0; i < this->theOuterAutos.GetElement().theElements.size; i ++) {
-    theCandidateMatWithOuterAuto = this->theOuterAutos.GetElement().theElements[i];
+  for (int i = 0; i < this->theOuterAutos.theElements.size; i ++) {
+    theCandidateMatWithOuterAuto = this->theOuterAutos.theElements[i];
     theCandidateMatWithOuterAuto *= theCandidateMatTensorForm;
     if (theCandidateMatWithOuterAuto == input) {
       return true;
@@ -6553,7 +6893,7 @@ void WeylGroupData::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
     return;
   }
   ZeroRoot.MakeZero(theDimension);
-  ElementWeylGroup<WeylGroupData> tempElt;
+  ElementWeylGroup tempElt;
   this->GetCoxeterElement(tempElt);
   Matrix<Rational> matCoxeterElt, tempMat;
   this->GetMatrixStandardRep(tempElt, matCoxeterElt);
@@ -6792,7 +7132,7 @@ std::string WeylGroupData::GenerateWeightSupportMethoD1(
 }
 
 bool WeylGroupData::IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input) {
-  ElementWeylGroup<WeylGroupData> tempElt;
+  ElementWeylGroup tempElt;
   this->GetCoxeterElement(tempElt);
   Matrix<Rational> matCoxeterElt;
   this->GetMatrixStandardRep(tempElt, matCoxeterElt);
@@ -6816,7 +7156,7 @@ bool WeylGroupData::IsElementWeylGroup(const MatrixTensor<Rational>& input) {
   MacroRegisterFunctionWithName("WeylGroup::IsElementWeylGroup");
   Vector<Rational> theRhoImage;
   input.ActOnVectorColumn(this->rho, theRhoImage);
-  ElementWeylGroup<WeylGroupData> theElementCandidate;
+  ElementWeylGroup theElementCandidate;
   this->RaiseToDominantWeight(theRhoImage, 0, 0, &theElementCandidate);
   Matrix<Rational> theCandidateMat, inputMat;
   input.GetMatrix(inputMat, this->GetDim());
@@ -6833,7 +7173,7 @@ bool WeylGroupData::ContainsARootNonStronglyPerpendicularTo(Vectors<Rational>& t
   return false;
 }
 
-void WeylGroupData::GetMatrixStandardRep(const ElementWeylGroup<WeylGroupData>& input, Matrix<Rational>& outputMatrix) const {
+void WeylGroupData::GetMatrixStandardRep(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix) const {
   Vector<Rational> tempRoot;
   int theDim = this->CartanSymmetric.NumRows;
   outputMatrix.init(theDim, theDim);
@@ -6872,17 +7212,17 @@ void WeylGroupData::ComputeRho(bool Recompute) {
   this->flagFundamentalToSimpleMatricesAreComputed = false;
 }
 
-std::string SubgroupWeylGroupOLD::ElementToStringFromLayersAndArrows(
+std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringFromLayersAndArrows(
   List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ElementToStringFromLayersAndArrows");
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringFromLayersAndArrows");
   this->CheckInitialization();
   std::stringstream out;
   List<int> DisplayIndicesSimpleGenerators;
   if (!useAmbientIndices) {
-    DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);
-    for (int i = 0; i < this->simpleGenerators.size; i ++) {
-      DisplayIndicesSimpleGenerators[i] = this->AmbientWeyl->RootsOfBorel.GetIndex(this->simpleGenerators[i]) + 1;
+    DisplayIndicesSimpleGenerators.SetSize(this->simpleRootsInner.size);
+    for (int i = 0; i < this->simpleRootsInner.size; i ++) {
+      DisplayIndicesSimpleGenerators[i] = this->AmbientWeyl->RootsOfBorel.GetIndex(this->simpleRootsInner[i]) + 1;
     }
   }
   out << "\\xymatrix{";
@@ -6901,7 +7241,7 @@ std::string SubgroupWeylGroupOLD::ElementToStringFromLayersAndArrows(
     }
     for (int j = 0; j < Layers[i].size; j ++) {
       if (!useAmbientIndices) {
-        out << this->TheObjects[Layers[i][j]].ToString(0);
+        out << this->allElements[Layers[i][j]].ToString(0);
       } else {
         out << this->RepresentativesQuotientAmbientOrder[Layers[i][j]].ToString();
       }
@@ -6943,46 +7283,49 @@ std::string SubgroupWeylGroupOLD::ElementToStringFromLayersAndArrows(
   return out.str();
 }
 
-std::string SubgroupWeylGroupOLD::ElementToStringBruhatGraph() {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ElementToStringBruhatGraph");
+std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringBruhatGraph() {
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringBruhatGraph");
   this->CheckInitialization();
-  if (this->size < 1) {
+  if (this->allElements.size < 1) {
     return "Error, non-initialized group";
   }
-  if (this->size == 1) {
+  if (this->allElements.size == 1) {
     return "id";
   }
   List<List<List<int> > > arrows;
   List<List<int> > Layers;
   Vector<Rational> tempRoot;
-  Layers.Reserve(this->size);
+  Layers.Reserve(this->allElements.size);
   int GraphWidth = 1;
   int oldLayerElementLength = - 1;
-  for (int i = 0; i < this->size; i ++) {
-    if ((*this)[i].generatorsLastAppliedFirst.size != oldLayerElementLength) {
+  for (int i = 0; i < this->allElements.size; i ++) {
+    const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& currentElement = this->allElements[i];
+    if (currentElement.generatorsLastAppliedFirst.size != oldLayerElementLength) {
       Layers.SetSize(Layers.size + 1);
-      oldLayerElementLength = (*this)[i].generatorsLastAppliedFirst.size;
+      oldLayerElementLength = currentElement.generatorsLastAppliedFirst.size;
     }
     Layers.LastObject()->AddOnTop(i);
     GraphWidth = MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
   }
   HashedList<Vector<Rational> > orbit;
-  orbit.Reserve(this->size);
-  for (int i = 0; i < this->size; i ++) {
-    this->ActByElement(i, this->AmbientWeyl->rho, tempRoot);
+  orbit.Reserve(this->allElements.size);
+  for (int i = 0; i < this->allElements.size; i ++) {
+    this->ActByNonSimpleElement(i, this->AmbientWeyl->rho, tempRoot);
     orbit.AddOnTop(tempRoot);
   }
   arrows.SetSize(Layers.size);
   for (int i = 0; i < Layers.size; i ++) {
     arrows[i].SetSize(Layers[i].size);
     for (int j = 0; j < Layers[i].size; j ++) {
-      for (int k = 0; k < this->simpleGenerators.size; k ++) {
-        this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[k], orbit[Layers[i][j]], false, tempRoot);
+      int indexOther = Layers[i][j];
+      for (int k = 0; k < this->simpleRootsInner.size; k ++) {
+        this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[k], orbit[indexOther], false, tempRoot);
         int index = orbit.GetIndex(tempRoot);
         if (index == - 1) {
           crash << "Negative index not allowed. " << crash;
         }
-        if ((*this)[index].generatorsLastAppliedFirst.size > (*this)[Layers[i][j]].generatorsLastAppliedFirst.size) {
+        const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& currentElement = this->allElements[index];
+        if (currentElement.generatorsLastAppliedFirst.size > this->allElements[indexOther].generatorsLastAppliedFirst.size) {
           arrows[i][j].AddOnTop(index);
         }
       }
@@ -6991,38 +7334,38 @@ std::string SubgroupWeylGroupOLD::ElementToStringBruhatGraph() {
   return this->ElementToStringFromLayersAndArrows(arrows, Layers, GraphWidth, false);
 }
 
-void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ToString");
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ToString(std::string& output, bool displayElements) {
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ToString");
   this->CheckInitialization();
   std::stringstream out, head, head2;
   List<int> DisplayIndicesSimpleGenerators;
-  DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);
+  DisplayIndicesSimpleGenerators.SetSize(this->simpleRootsInner.size);
   FormatExpressions latexFormat;
   latexFormat.flagUseHTML = false;
   latexFormat.flagUseLatex = true;
   bool isGood = true;
-  for (int i = 0; i < this->simpleGenerators.size; i ++) {
-    DisplayIndicesSimpleGenerators[i] = this->AmbientWeyl->RootsOfBorel.GetIndex(this->simpleGenerators[i]) + 1;
+  for (int i = 0; i < this->simpleRootsInner.size; i ++) {
+    DisplayIndicesSimpleGenerators[i] = this->AmbientWeyl->RootsOfBorel.GetIndex(this->simpleRootsInner[i]) + 1;
     if (DisplayIndicesSimpleGenerators[i] == 0) {
       isGood = false;
       break;
     }
   }
   if (!isGood) {
-    for (int i = 0; i < this->simpleGenerators.size; i ++) {
+    for (int i = 0; i < this->simpleRootsInner.size; i ++) {
       DisplayIndicesSimpleGenerators[i] = i + 1;
     }
   }
   DynkinDiagramRootSubalgebra tempDyn;
   tempDyn.AmbientRootSystem = this->AmbientWeyl->RootSystem;
   tempDyn.AmbientBilinearForm = this->AmbientWeyl->CartanSymmetric;
-  tempDyn.ComputeDiagramInputIsSimple(this->simpleGenerators);
+  tempDyn.ComputeDiagramInputIsSimple(this->simpleRootsInner);
   out << "Dynkin diagram & subalgebra of root subsystem generated by the given root: "
   << tempDyn.ToString();
   out << "<br>Simple roots:\n<br>\n ";
   head << "\\begin{array}{rcl}";
-  for (int i = 0; i < this->simpleGenerators.size; i ++) {
-    head << "\n\\eta_{" << DisplayIndicesSimpleGenerators[i] << "}&= &" << this->simpleGenerators[i].ToString() << "\\\\";
+  for (int i = 0; i < this->simpleRootsInner.size; i ++) {
+    head << "\n\\eta_{" << DisplayIndicesSimpleGenerators[i] << "}&= &" << this->simpleRootsInner[i].ToString() << "\\\\";
   }
   head << "\\end{array}";
   out << HtmlRoutines::GetMathMouseHover(head.str());
@@ -7045,10 +7388,10 @@ void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements) {
   }
   if (displayElements) {
     std::stringstream body;
-    out << "<br>The elements of the weyl group of the subgroup written with minimal # of generators:<br>";
+    out << "<br>The elements of the automorphisms of the Weyl group of the subgroup written with minimal # of generators:<br>";
     body << "\\begin{array}{l}";
-    for (int i = 0; i < this->size; i ++) {
-      const ElementWeylGroup<WeylGroupData>& currentElt = (*this)[i];
+    for (int i = 0; i < this->allElements.size; i ++) {
+      const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& currentElt = this->allElements[i];
       body << currentElt.ToString(0) << "\\\\";
     }
     body << "\\end{array}";
@@ -7057,7 +7400,7 @@ void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements) {
   output = out.str();
 }
 
-bool SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots(
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::MakeParabolicFromSelectionSimpleRoots(
   WeylGroupData& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, int UpperLimitNumElements
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots");
@@ -7080,13 +7423,13 @@ bool SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots(
   return this->ComputeSubGroupFromGeneratingReflections(&selectedRoots, &tempRootsCol, UpperLimitNumElements, true);
 }
 
-std::string SubgroupWeylGroupOLD::ElementToStringCosetGraph() {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ElementToStringCosetGraph");
+std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringCosetGraph() {
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringCosetGraph");
   this->CheckInitialization();
-  if (this->size < 1) {
+  if (this->allElements.size < 1) {
     return "Error, non-initialized group";
   }
-  if (this->size == 1) {
+  if (this->allElements.size == 1) {
     return "id";
   }
   List<List<List<int> > > arrows;
@@ -7130,8 +7473,8 @@ std::string SubgroupWeylGroupOLD::ElementToStringCosetGraph() {
   return this->ElementToStringFromLayersAndArrows(arrows, Layers, GraphWidth, true);
 }
 
-void SubgroupWeylGroupOLD::FindQuotientRepresentatives(int UpperLimit) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::FindQuotientRepresentatives");
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::FindQuotientRepresentatives(int UpperLimit) {
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::FindQuotientRepresentatives");
   this->CheckInitialization();
   this->AmbientWeyl->theGroup.ComputeAllElements(UpperLimit);
   Vector<Rational> image1;
@@ -7141,8 +7484,8 @@ void SubgroupWeylGroupOLD::FindQuotientRepresentatives(int UpperLimit) {
     image1 = this->AmbientWeyl->rho;
     this->AmbientWeyl->ActOnRootByGroupElement(i, image1, false, false);
     bool isGood = true;
-    for (int j = 0; j < this->simpleGenerators.size; j ++) {
-      if (this->AmbientWeyl->RootScalarCartanRoot(image1, this->simpleGenerators[j]).IsNegative()) {
+    for (int j = 0; j < this->simpleRootsInner.size; j ++) {
+      if (this->AmbientWeyl->RootScalarCartanRoot(image1, this->simpleRootsInner[j]).IsNegative()) {
         isGood = false;
         break;
       }
@@ -7153,7 +7496,7 @@ void SubgroupWeylGroupOLD::FindQuotientRepresentatives(int UpperLimit) {
   }
 }
 
-bool SubgroupWeylGroupOLD::DrawContour(
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::DrawContour(
   const Vector<Rational>& highestWeightSimpleCoord,
   DrawingVariables& theDV,
   const std::string& color,
@@ -7165,9 +7508,9 @@ bool SubgroupWeylGroupOLD::DrawContour(
   WeylGroupData& theWeyl = *this->AmbientWeyl;
   Vector<Rational> tempRoot;
   for (int i = 0; i < theOrbit.size; i ++) {
-    for (int j = 0; j < this->simpleGenerators.size; j ++) {
+    for (int j = 0; j < this->simpleRootsInner.size; j ++) {
       tempRoot = theOrbit[i];
-      theWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], tempRoot, false, tempRoot);
+      theWeyl.ReflectBetaWRTAlpha(this->simpleRootsInner[j], tempRoot, false, tempRoot);
       if (theOrbit.AddOnTopNoRepetition(tempRoot)) {
         theDV.drawLineBetweenTwoVectorsBufferRational(theOrbit[i], tempRoot, color, 1);
       }
@@ -7179,7 +7522,17 @@ bool SubgroupWeylGroupOLD::DrawContour(
   return true;
 }
 
-bool SubgroupWeylGroupOLD::CheckInitialization() {
+SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms() {
+  this->AmbientWeyl = 0;
+  this->flagDeallocated = false;
+}
+
+SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::~SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms() {
+  this->AmbientWeyl = 0;
+  this->flagDeallocated = true;
+}
+
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::CheckInitialization() {
   //if (this == 0)
   //  crash << "Subgroup of Weyl Group has 0 this pointer. " << crash;
   if (this->AmbientWeyl == 0) {
@@ -7194,16 +7547,16 @@ bool SubgroupWeylGroupOLD::CheckInitialization() {
   return true;
 }
 
-void SubgroupWeylGroupOLD::ComputeRootSubsystem() {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ComputeRootSubsystem");
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ComputeRootSubsystem() {
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ComputeRootSubsystem");
   this->RootSubsystem.Clear();
-  this->RootSubsystem.AddOnTop(this->simpleGenerators);
+  this->RootSubsystem.AddOnTop(this->simpleRootsInner);
   this->RootSubsystem.SetExpectedSize(100);
   Vector<Rational> currentRoot;
   for (int i = 0; i < this->RootSubsystem.size; i ++) {
-    for (int j = 0; j < this->simpleGenerators.size; j ++) {
+    for (int j = 0; j < this->simpleRootsInner.size; j ++) {
       currentRoot = this->RootSubsystem[i];
-      this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[j], currentRoot, false, currentRoot);
+      this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[j], currentRoot, false, currentRoot);
       this->RootSubsystem.AddOnTopNoRepetition(currentRoot);
     }
   }
@@ -7215,7 +7568,7 @@ void SubgroupWeylGroupOLD::ComputeRootSubsystem() {
     crash << "This is a programming error. "
     << "I am getting that the number of weights of a root system is odd. "
     << "The generating set of simple weights is "
-    << this->simpleGenerators.ToString() << ", and the "
+    << this->simpleRootsInner.ToString() << ", and the "
     << "generated weight subsystem is " << tempRoots.ToString() << crash;
   }
   int numPosRoots = this->RootSubsystem.size / 2;
@@ -7598,7 +7951,7 @@ bool KLpolys::IndexGreaterThanIndex(int a, int b) {
 
 int KLpolys::ComputeProductfromSimpleReflectionsActionList(int x, int y) {
   int start = y;
-  const ElementWeylGroup<WeylGroupData>& currentElement = this->TheWeylGroup->theGroup.theElements[x];
+  const ElementWeylGroup& currentElement = this->TheWeylGroup->theGroup.theElements[x];
   for (int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
     start = this->SimpleReflectionsActionList[start][
       this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst[i].index

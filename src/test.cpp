@@ -404,7 +404,7 @@ void SubListListInt::SetSize(int newsz) {
   }
 }
 
-void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroupData>& g, PermutationR2& p) {
+void WeylElementPermutesRootSystem(const ElementWeylGroup& g, PermutationR2& p) {
   int rss = g.owner->RootSystem.size;
   List<bool> accountedFor;
   accountedFor.SetSize(rss);
@@ -1684,7 +1684,7 @@ public:
   }
 };
 
-GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>
+GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational>
 get_macdonald_representation(WeylGroupData& W, const List<Vector<Rational> >& roots) {
   stOutput << "starting with roots " << roots << "\n";
   List<Vector<Rational> > monomial;
@@ -1743,7 +1743,7 @@ get_macdonald_representation(WeylGroupData& W, const List<Vector<Rational> >& ro
 
   stOutput << "module rank is " << monomials_used.size << "\n";
 
-  GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> rep;
+  GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational> rep;
   rep.init(W.theGroup);
   for (int i = 1; i < W.GetDim() + 1; i ++) {
     Matrix<Rational> m;

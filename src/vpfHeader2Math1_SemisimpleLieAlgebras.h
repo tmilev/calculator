@@ -408,7 +408,7 @@ class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
     charSSAlgMod& output,
     const Selection& splittingParSel,
     const Selection& ParSelFDInducingPart,
-    SubgroupWeylGroupOLD& outputWeylSub
+    SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputWeylSub
   );
   int GetIndexExtremeWeightRelativeToWeyl(WeylGroupData& theWeyl) const;
   void MakeTrivial(SemisimpleLieAlgebra& inputOwner);

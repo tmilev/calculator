@@ -192,6 +192,7 @@ public:
     this->flagDeallocated = true;
   }
   WeylGroupData& GetAmbientWeyl() const;
+  WeylGroupAutomorphisms& GetAmbientWeylAutomorphisms() const;
   SemisimpleLieAlgebra& GetOwnerSSalg() const;
   //returns - 1 if the weight/root  is not in g/k
   bool CheckInitialization() const;
@@ -208,7 +209,7 @@ public:
   void ComputePotentialExtensions();
   void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexRootSAinContainer);
   bool IsEquivalentToByDiagramsAndDimensions(const rootSubalgebra& other) const;
-  void ComputeOuterSAautosExtendingToAmbientAutosGenerators();
+  void ComputeOuterSAAutosExtendingToAmbientAutosGenerators();
   bool IsGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots);
   bool rootIsInCentralizer(const Vector<Rational>& input);
   bool IsBKhighest(const Vector<Rational>& input);
@@ -228,14 +229,18 @@ public:
     int indexInOwner,
     Vectors<Rational>& Ksingular
   );
-  bool GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, SubgroupWeylGroupOLD* outputAutomorphisms);
-  void GenerateAutomorphismsPreservingBorel(SubgroupWeylGroupOLD& outputAutomorphisms);
+  bool GenerateIsomorphismsPreservingBorel(
+    rootSubalgebra& right, SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms* outputAutomorphisms
+  );
+  void GenerateAutomorphismsPreservingBorel(
+    SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputAutomorphisms
+  );
   void MakeGeneratingSingularVectors(coneRelation& theRelation, Vectors<Rational>& nilradicalRoots);
   bool attemptExtensionToIsomorphismNoCentralizer(
     Vectors<Rational>& Domain,
     Vectors<Rational>& Range,
     int RecursionDepth,
-    SubgroupWeylGroupOLD* outputAutomorphisms,
+    SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms* outputAutomorphisms,
     bool GenerateAllpossibleExtensions,
     bool* abortKmodule,
     Vectors<Rational>* additionalDomain,
@@ -244,7 +249,7 @@ public:
   static bool attemptExtensionToIsomorphism(
     Vectors<Rational>& Domain,
     Vectors<Rational>& Range,
-    SubgroupWeylGroupOLD* outputAutomorphisms,
+    SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms* outputAutomorphisms,
     rootSubalgebras& inputOwner,
     bool* DomainAndRangeGenerateNonIsoSAs
   );
@@ -274,7 +279,7 @@ public:
   bool IsAnIsomorphism(
     Vectors<Rational>& domain,
     Vectors<Rational>& range,
-    SubgroupWeylGroupOLD* outputAutomorphisms,
+    SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms* outputAutomorphisms,
     Vectors<Rational>* additionalDomain,
     Vectors<Rational>* additionalRange
   );
@@ -353,13 +358,14 @@ public:
   coneRelations theGoodRelations;
   coneRelations theMinRels;
   List<List<int> > ActionsNormalizerCentralizerNilradical;
-  ListReferences<SubgroupWeylGroupOLD> CentralizerOuterIsomorphisms;
-  ListReferences<SubgroupWeylGroupOLD> CentralizerIsomorphisms;
+  ListReferences<SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms> CentralizerOuterIsomorphisms;
+  ListReferences<SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms> CentralizerIsomorphisms;
   //Code used in nilradical generation:
   List<Selection> ImpiedSelectionsNilradical;
   List<List<List<int> > > storedNilradicals;
   HashedList<Rational> validScales;
   SemisimpleLieAlgebra* owner;
+  WeylGroupAutomorphisms theWeylGroupAutomorphisms;
   int parabolicsCounterNilradicalGeneration;
   List<int> numNilradicalsBySA;
   int IndexCurrentSANilradicalsGeneration;
@@ -428,7 +434,9 @@ public:
   std::string ToStringDynkinTableFormat2LaTeX(FormatExpressions* theFormat);
   void ComputeLProhibitingRelations();
   void ComputeAllRootSubalgebrasUpToIso(int StartingIndex, int NumToBeProcessed);
-  void MakeProgressReportAutomorphisms(SubgroupWeylGroupOLD& theSubgroup, rootSubalgebra& theRootSA);
+  void MakeProgressReportAutomorphisms(
+    SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theSubgroup, rootSubalgebra& theRootSA
+  );
   void initOwnerMustBeNonZero();
   void initForNilradicalGeneration();
   rootSubalgebras();
@@ -464,7 +472,7 @@ public:
   Vectors<Rational> hCommutingRootSpaces;
   Vectors<Rational> RootsWithScalar2WithH;
   DynkinDiagramRootSubalgebra DiagramM;
-//  DynkinDiagramRootSubalgebra CentralizerDiagram;
+  //  DynkinDiagramRootSubalgebra CentralizerDiagram;
   PolynomialSubstitution<Rational> theSystemToBeSolved;
   Matrix<Rational> theSystemMatrixForm;
   Matrix<Rational> theSystemColumnVector;

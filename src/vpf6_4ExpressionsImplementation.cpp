@@ -228,19 +228,19 @@ int Expression::GetTypeOperation<WeylGroupData>() const {
 }
 
 template < >
-int Expression::GetTypeOperation<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >() const {
+int Expression::GetTypeOperation<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >() const {
   this->CheckInitialization();
   return this->owner->opWeylGroupRep();
 }
 
 template < >
-int Expression::GetTypeOperation<ElementWeylGroup<WeylGroupData> >() const {
+int Expression::GetTypeOperation<ElementWeylGroup>() const {
   this->CheckInitialization();
   return this->owner->opWeylGroupElement();
 }
 
 template < >
-int Expression::GetTypeOperation<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >() const {
+int Expression::GetTypeOperation<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >() const {
   this->CheckInitialization();
   return this->owner->opWeylGroupVirtualRep();
 }
@@ -546,7 +546,7 @@ WeylGroupData
 
 template < >
 int Expression::AddObjectReturnIndex(const
-GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>
+GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theWeylGroupReps
@@ -555,7 +555,7 @@ GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>
 
 template < >
 int Expression::AddObjectReturnIndex(const
-VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>
+VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theWeylGroupVirtualReps
@@ -564,7 +564,7 @@ VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>
 
 template < >
 int Expression::AddObjectReturnIndex(const
-ElementWeylGroup<WeylGroupData>
+ElementWeylGroup
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theWeylGroupElements
@@ -800,8 +800,8 @@ WeylGroupData& Expression::GetValueNonConst() const {
 }
 
 template < >
-GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()) {
+GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::GetValueNonConst() const {
+  if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
     crash << "This is a programming error: expression not of required type "
     << "WeylGroupRepresentation_Rational. The expression equals " << this->ToString() << "." << crash;
   }
@@ -809,8 +809,8 @@ GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Ex
 }
 
 template < >
-ElementWeylGroup<WeylGroupData>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<ElementWeylGroup<WeylGroupData> >()) {
+ElementWeylGroup& Expression::GetValueNonConst() const {
+  if (!this->IsOfType<ElementWeylGroup>()) {
     crash << "This is a programming error: expression not of required type "
     << "ElementWeylGroup. The expression equals " << this->ToString() << "." << crash;
   }
@@ -818,10 +818,11 @@ ElementWeylGroup<WeylGroupData>& Expression::GetValueNonConst() const {
 }
 
 template < >
-VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()) {
+VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::GetValueNonConst() const {
+  if (!this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
     crash << "This is a programming error: expression not of required type "
-    << "WeylGroupVirtualRepresentation. The expression equals " << this->ToString() << "." << crash;
+    << "WeylGroupVirtualRepresentation. The expression equals "
+    << this->ToString() << "." << crash;
   }
   return this->owner->theObjectContainer.theWeylGroupVirtualReps.GetElement(this->GetLastChild().theData);
 }
@@ -1270,9 +1271,9 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
     this->SetChilD(1, inputOutputMinContext);
     return true;
   }
-  if (this->IsOfType<ElementWeylGroup<WeylGroupData> >()) {
+  if (this->IsOfType<ElementWeylGroup>()) {
     return this->AssignValueWithContext(
-      this->GetValue<ElementWeylGroup<WeylGroupData> >(), inputOutputMinContext, *this->owner
+      this->GetValue<ElementWeylGroup>(), inputOutputMinContext, *this->owner
     );
   }
   if (this->IsOfType<AlgebraicNumber>()) {
@@ -2608,24 +2609,24 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseReflectionNotation = true;
     out << theGroup.ToString(&contextFormat.GetElement());
     result = true;
-  } else if (this->IsOfType<ElementWeylGroup<WeylGroupData> >()) {
-    const ElementWeylGroup<WeylGroupData>& theElt = this->GetValue<ElementWeylGroup<WeylGroupData> >();
+  } else if (this->IsOfType<ElementWeylGroup>()) {
+    const ElementWeylGroup& theElt = this->GetValue<ElementWeylGroup>();
     contextFormat.GetElement().flagUseLatex = true;
     contextFormat.GetElement().flagUseHTML = false;
     contextFormat.GetElement().flagUseReflectionNotation = true;
     out << theElt.ToString(&contextFormat.GetElement());
     result = true;
-  } else if (this->IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()) {
-    const GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& theElt =
-    this->GetValue<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >();
+  } else if (this->IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
+    const GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& theElt =
+    this->GetValue<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
     contextFormat.GetElement().flagUseLatex = true;
     contextFormat.GetElement().flagUseHTML = false;
     contextFormat.GetElement().flagUseReflectionNotation = true;
     out << theElt.ToString(&contextFormat.GetElement());
     result = true;
-  } else if (this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()) {
-    const VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& theElt =
-    this->GetValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >();
+  } else if (this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
+    const VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& theElt =
+    this->GetValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
     contextFormat.GetElement().flagUseLatex = true;
     contextFormat.GetElement().flagUseHTML = false;
     contextFormat.GetElement().flagUseReflectionNotation = true;
@@ -3039,7 +3040,7 @@ JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& star
         currentE.HasType<Plot> () ||
         currentE.IsOfType<SemisimpleSubalgebras>() ||
         currentE.IsOfType<WeylGroupData>() ||
-        currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()
+        currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()
       ) {
         out << currentE.ToString(theFormat);
       } else {
@@ -3742,7 +3743,7 @@ std::string Expression::ToString(
             currentE.HasType<Plot> () ||
             currentE.IsOfType<SemisimpleSubalgebras>() ||
             currentE.IsOfType<WeylGroupData>() ||
-            currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()
+            currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()
           ) && isFinal
         ) {
           currentOutput = currentE.ToString(theFormat);

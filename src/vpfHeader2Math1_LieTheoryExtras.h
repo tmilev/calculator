@@ -42,9 +42,9 @@ struct branchingData {
   List<Rational> additionalMultipliers;
   List<RationalFunctionOld> theShapovalovProducts;
   List<ElementSumGeneralizedVermas<RationalFunctionOld> > theEigenVectorsLevi;
-  SubgroupWeylGroupOLD WeylFD;
-  SubgroupWeylGroupOLD WeylFDSmallAsSubInLarge;
-  SubgroupWeylGroupOLD WeylFDSmall;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms WeylFD;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms WeylFDSmallAsSubInLarge;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms WeylFDSmall;
   bool flagUseNilWeightGeneratorOrder;
   bool flagAscendingGeneratorOrder;
   std::string GetStringCasimirProjector(int theIndex, const Rational& additionalMultiple);

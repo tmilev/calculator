@@ -336,7 +336,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt(
   if (!input.IsListNElements(3)) {
     return false;
   }
-  ElementWeylGroup<WeylGroupData> leftR, rightR;
+  ElementWeylGroup leftR, rightR;
   if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR)) {
     return false;
   }
@@ -464,10 +464,10 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(
   if (!inputConverted[2].IsOfType<Weight<Polynomial<Rational> > >(&theWeight)) {
     return false;
   }
-  if (!inputConverted[1].IsOfType<ElementWeylGroup<WeylGroupData> >()) {
+  if (!inputConverted[1].IsOfType<ElementWeylGroup>()) {
     return false;
   }
-  ElementWeylGroup<WeylGroupData> theElt = inputConverted[1].GetValue<ElementWeylGroup<WeylGroupData> >();
+  ElementWeylGroup theElt = inputConverted[1].GetValue<ElementWeylGroup>();
   if (theElt.owner != &theWeight.owner->theWeyl) {
     return theCommands << "<hr>Possible user input error: attempting to apply Weyl group "
     << "element to weight corresponding to different Weyl group.";

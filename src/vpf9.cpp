@@ -5688,6 +5688,13 @@ ElementWeylGroupAutomorphisms::~ElementWeylGroupAutomorphisms() {
   this->flagDeallocated = true;
 }
 
+bool ElementWeylGroupAutomorphisms::CheckInitialization() const {
+  if (this->owner == 0) {
+    crash << "Element of Weyl group automorphisms has zero owner. " << crash;
+  }
+  return true;
+}
+
 void ElementWeylGroupAutomorphisms::MakeID(WeylGroupAutomorphisms& inputAutomorphisms) {
   this->owner = &inputAutomorphisms;
   this->generatorsLastAppliedFirst.SetSize(0);
@@ -5699,6 +5706,19 @@ void ElementWeylGroupAutomorphisms::MultiplyOnTheRightByOuterAuto(int outerAutoI
   generator.flagIsOuter = true;
   this->generatorsLastAppliedFirst.AddOnTop(generator);
 }
+
+void ElementWeylGroupAutomorphisms::MakeSimpleReflection(int simpleRootIndex, WeylGroupAutomorphisms& inputWeyl) {
+  this->owner = &inputWeyl;
+  this->generatorsLastAppliedFirst.SetSize(1);
+  this->generatorsLastAppliedFirst[0].MakeSimpleReflection(simpleRootIndex);
+}
+
+void ElementWeylGroupAutomorphisms::MakeOuterAuto(int outerAutoIndex, WeylGroupAutomorphisms& inputWeyl) {
+  this->owner = &inputWeyl;
+  this->generatorsLastAppliedFirst.SetSize(1);
+  this->generatorsLastAppliedFirst[0].MakeOuterAuto(outerAutoIndex);
+}
+
 
 unsigned int ElementWeylGroupAutomorphisms::HashFunction(const ElementWeylGroupAutomorphisms& input) {
   return input.HashFunction();
@@ -5853,12 +5873,6 @@ void ElementWeylGroup::MakeSimpleReflection(int simpleRootIndex, WeylGroupData& 
   this->owner = &inputWeyl;
   this->generatorsLastAppliedFirst.SetSize(1);
   this->generatorsLastAppliedFirst[0].MakeSimpleReflection(simpleRootIndex);
-}
-
-void ElementWeylGroup::MakeOuterAuto(int outerAutoIndex, WeylGroupData& inputWeyl) {
-  this->owner = &inputWeyl;
-  this->generatorsLastAppliedFirst.SetSize(1);
-  this->generatorsLastAppliedFirst[0].MakeOuterAuto(outerAutoIndex);
 }
 
 void ElementWeylGroup::MakeFromRhoImage(const Vector<Rational>& inputRhoImage, WeylGroupData& inputWeyl) {
@@ -6853,6 +6867,19 @@ void WeylGroupData::GetExtremeElementInOrbit(
       }
     }
   }
+}
+
+LargeInt WeylGroupAutomorphisms::GetOrbitSize(Vector<Rational>& theWeight) {
+  MacroRegisterFunctionWithName("WeylGroupAutomorphisms::GetOrbitSize");
+  this->checkInitialization();
+  HashedList<Vector<Rational> > highestWeights;
+  for (int i = 0; i < this->theOuterAutos.theElements.size; i ++) {
+    Vector<Rational> candidate;
+    this->theOuterAutos.theElements[i].ActOnVectorColumn(theWeight, candidate);
+    this->theWeyl->RaiseToDominantWeight(candidate);
+    highestWeights.AddOnTopNoRepetition(candidate);
+  }
+  return this->theWeyl->GetOrbitSize(theWeight) * highestWeights.size;
 }
 
 bool WeylGroupAutomorphisms::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& input) {

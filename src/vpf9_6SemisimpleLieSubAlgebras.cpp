@@ -809,29 +809,25 @@ void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand() {
   this->theOrbitHelementLengths.SetExpectedSize(this->theSl2s.size);
   this->theOrbitDynkinIndices.SetExpectedSize(this->theSl2s.size);
   this->theOrbiTs.SetSize(this->theSl2s.size);
-  List<ElementWeylGroup> theGens;
-  ElementWeylGroup theElt;
+  List<ElementWeylGroupAutomorphisms> theGens;
   WeylGroupAutomorphisms& theWeylAutomorphisms = this->theSl2s.theRootSAs.theWeylGroupAutomorphisms;
-  WeylGroupData& theWeyl = this->owner->theWeyl;
-  this->theSl2s.theRootSAs.theWeylGroupAutomorphisms.ComputeOuterAutoGenerators();
+  theWeylAutomorphisms.ComputeOuterAutoGenerators();
+  ElementWeylGroupAutomorphisms theElt;
   for (int i = 0; i < this->owner->GetRank(); i ++) {
-    theElt.MakeSimpleReflection(i, theWeyl);
+    theElt.MakeSimpleReflection(i, theWeylAutomorphisms);
     theGens.AddOnTop(theElt);
   }
   List<MatrixTensor<Rational> >& outerAutos = theWeylAutomorphisms.theOuterAutos.theGenerators;
   for (int i = 0; i < outerAutos.size; i ++) {
     if (!outerAutos[i].IsID()) {
-      theElt.MakeOuterAuto(i, theWeyl);
+      theElt.MakeOuterAuto(i, theWeylAutomorphisms);
       theGens.AddOnTop(theElt);
     }
   }
   for (int i = 0; i < this->theSl2s.size; i ++) {
     this->theOrbitHelementLengths.AddOnTop(this->theSl2s[i].LengthHsquared);
     this->theOrbitDynkinIndices.AddOnTop(DynkinSimpleType('A', 1, this->theSl2s[i].LengthHsquared));
-    OrbitIterator<ElementWeylGroup, Vector<Rational> >::GroupActionWithName theAction;
-    theAction.actOn = theElt.ActOn;
-    theAction.name = "";
-    this->theOrbiTs[i].init(theGens, this->theSl2s[i].theH.GetCartanPart(), theAction);
+    this->theOrbiTs[i].initialize(theGens, this->theSl2s[i].theH.GetCartanPart());
   }
 //  stOutput << "H lengths:" << this->theOrbitHelementLengths.ToString() << " types: "
 //  << this->theOrbitDynkinIndices.ToString();
@@ -892,12 +888,15 @@ bool SemisimpleSubalgebras::LoadState(
       isGood = false;
     }
     if (!isGood) {
-      reportStream << "<hr>Subalgebra " << currentSA.theWeylNonEmbedded->theDynkinType.ToString()
-      << " does not appear to be parabolically induced by " << this->baseSubalgebra().theWeylNonEmbedded->theDynkinType.ToString()
+      reportStream << "<hr>Subalgebra "
+      << currentSA.theWeylNonEmbedded->theDynkinType.ToString()
+      << " does not appear to be parabolically induced by "
+      << this->baseSubalgebra().theWeylNonEmbedded->theDynkinType.ToString()
       << ". More precisely, " << currentSA.theWeylNonEmbedded->theDynkinType.ToString()
       << " has h-elements " << currentSA.theHs.ToString() << " however "
       << this->baseSubalgebra().theWeylNonEmbedded->theDynkinType.ToString()
-      << " has h-elements in order of creation: " << this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation.ToString()
+      << " has h-elements in order of creation: "
+      << this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation.ToString()
       << " and h-elements in order induced by the type: " << this->baseSubalgebra().theHs.ToString();
       return false;
     }
@@ -1216,15 +1215,15 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra(
   return !this->flagSystemProvedToHaveNoSolution;
 }
 
-const Vector<Rational>& OrbitFDRepIteratorWeylGroup::GetCurrentElement() {
-  MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::GetCurrentElement");
+const Vector<Rational>& OrbitIteratorRootActionWeylGroupAutomorphisms::GetCurrentElement() {
+  MacroRegisterFunctionWithName("OrbitIteratorRootActionWeylGroupAutomorphisms::GetCurrentElement");
   if (this->flagOrbitIsBuffered) {
     return this->orbitBuffer[this->currentIndexInBuffer];
   }
   return this->theIterator.GetCurrentElement();
 }
 
-bool OrbitFDRepIteratorWeylGroup::CheckConsistency() {
+bool OrbitIteratorRootActionWeylGroupAutomorphisms::CheckConsistency() {
   if (this->flagOrbitIsBuffered) {
     if (this->currentIndexInBuffer >= this->orbitBuffer.size) {
       crash << "Current buffer index is: " << this->currentIndexInBuffer << " but the orbit has "
@@ -1251,9 +1250,10 @@ bool OrbitFDRepIteratorWeylGroup::CheckConsistency() {
   return true;
 }
 
-bool OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast() {
-  MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast");
+bool OrbitIteratorRootActionWeylGroupAutomorphisms::IncrementReturnFalseIfPastLast() {
+  MacroRegisterFunctionWithName("OrbitIteratorRootActionWeylGroupAutomorphisms::IncrementReturnFalseIfPastLast");
   this->CheckConsistency();
+  this->theIterator.CheckInitialization();
   if (this->flagOrbitIsBuffered) {
     this->currentIndexInBuffer ++;
     if (this->currentIndexInBuffer >= this->orbitSize) {
@@ -1271,8 +1271,9 @@ bool OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast() {
     if (this->computedSize != - 1) {
       if (this->computedSize != this->orbitSize) {
         crash << "This is a mathematical error: "
-        << "the computed size of the orbit is " << this->computedSize.ToString()
-        << " but I enumerated an orbit of size " << this->orbitSize << ". More details on the orbit follow. "
+        << "the computed size of the orbit is " << this->computedSize.ToString() << " "
+        << "but I enumerated an orbit of size " << this->orbitSize
+        << ". More details on the orbit follow. "
         << this->ToString() << crash;
       }
     }
@@ -1294,8 +1295,8 @@ bool OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast() {
   return true;
 }
 
-void OrbitFDRepIteratorWeylGroup::init() {
-  MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::init");
+void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize() {
+  MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroupAutomorphisms::initialize");
   this->currentIndexInBuffer = 0;
   if (this->flagOrbitIsBuffered) {
     return;
@@ -1304,23 +1305,22 @@ void OrbitFDRepIteratorWeylGroup::init() {
     this->theIterator.theGroupGeneratingElements, this->orbitDefiningElement, this->theIterator.theGroupAction
   );
   if (this->theIterator.theGroupGeneratingElements.size > 0) {
-    WeylGroupData& ownerGroup = *this->theIterator.theGroupGeneratingElements[0].owner;
+    WeylGroupAutomorphisms& ownerGroup = *this->theIterator.theGroupGeneratingElements[0].owner;
     this->computedSize = ownerGroup.GetOrbitSize(this->orbitDefiningElement);
-    if (this->computedSize>this->maxOrbitBufferSize) {
+    if (this->computedSize > this->maxOrbitBufferSize) {
       this->maxOrbitBufferSize = 0;
       this->orbitBuffer.SetSize(0);
     }
   }
+  this->theIterator.CheckInitialization();
 }
 
-void OrbitFDRepIteratorWeylGroup::init(
-  const List<ElementWeylGroup>& inputGenerators,
-  const Vector<Rational>& inputElement,
-  const OrbitIterator<ElementWeylGroup, Vector<Rational> >::GroupActionWithName& inputGroupAction
+void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize(
+  const List<ElementWeylGroupAutomorphisms>& inputGenerators,
+  const Vector<Rational>& inputElement
 ) {
-  MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::init");
+  MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroupAutomorphisms::initialize");
   if (
-    this->theIterator.theGroupAction.actOn == inputGroupAction.actOn &&
     this->orbitDefiningElement == inputElement
   ) {
     if (this->flagOrbitIsBuffered) {
@@ -1335,10 +1335,16 @@ void OrbitFDRepIteratorWeylGroup::init(
     this->orbitBuffer.SetSize(0);
     this->orbitBuffer.AddOnTop(this->orbitDefiningElement);
   }
-  this->theIterator.init(inputGenerators, this->orbitDefiningElement, inputGroupAction);
+  this->theIterator.init(inputGenerators, this->orbitDefiningElement, this->theIterator.theGroupAction);
 }
 
-void OrbitFDRepIteratorWeylGroup::reset() {
+OrbitIteratorRootActionWeylGroupAutomorphisms::OrbitIteratorRootActionWeylGroupAutomorphisms() {
+  this->theIterator.theGroupAction.name = "WeylGroupAutomorphismRootAction";
+  this->theIterator.theGroupAction.actOn = ElementWeylGroupAutomorphisms::ActOn;
+  this->reset();
+}
+
+void OrbitIteratorRootActionWeylGroupAutomorphisms::reset() {
   this->flagOrbitIsBuffered = false;
   this->flagOrbitEnumeratedOnce = false;
   this->orbitSize = - 1;
@@ -1349,7 +1355,7 @@ void OrbitFDRepIteratorWeylGroup::reset() {
   this->theIterator.reset();
 }
 
-std::string OrbitFDRepIteratorWeylGroup::ToString() const {
+std::string OrbitIteratorRootActionWeylGroupAutomorphisms::ToString() const {
   std::stringstream out;
   out << " The orbit defining element is: " << this->orbitDefiningElement.ToString() << ". ";
   out << "<br>Current element number: " << this->currentIndexInBuffer + 1 << ". ";
@@ -1373,7 +1379,7 @@ std::string OrbitFDRepIteratorWeylGroup::ToString() const {
   return out.str();
 }
 
-std::string OrbitFDRepIteratorWeylGroup::ToStringSize() const {
+std::string OrbitIteratorRootActionWeylGroupAutomorphisms::ToStringSize() const {
   std::stringstream out;
   if (this->orbitSize != - 1) {
     out << this->orbitSize;
@@ -1414,9 +1420,12 @@ void SemisimpleSubalgebras::GetHCandidates(
       std::stringstream reportStreamX;
       reportStreamX << "Trying to realize via orbit number " << j+ 1 << ".";
       if (this->theSl2s[j].LengthHsquared != desiredHScaledToActByTwoLengthSquared) {
-        reportStreamX << " The h element "  << this->theSl2s[j].theH.GetCartanPart().ToString() << " of length "
-        << this->theOrbitHelementLengths[j].ToString() << " generating orbit number " << j + 1 << " out of "
-        << this->theSl2s.size << " does not have the required length of " << desiredHScaledToActByTwoLengthSquared.ToString();
+        reportStreamX << " The h element "
+        << this->theSl2s[j].theH.GetCartanPart().ToString() << " of length "
+        << this->theOrbitHelementLengths[j].ToString()
+        << " generating orbit number " << j + 1 << " out of "
+        << this->theSl2s.size << " does not have the required length of "
+        << desiredHScaledToActByTwoLengthSquared.ToString();
       }
       theReport2.Report(reportStreamX.str());
     }
@@ -1433,8 +1442,8 @@ void SemisimpleSubalgebras::GetHCandidates(
       continue;
     }
     Vector<Rational> currentCandidate;
-    OrbitFDRepIteratorWeylGroup& currentOrbit = this->theOrbiTs[j];
-    currentOrbit.init();
+    OrbitIteratorRootActionWeylGroupAutomorphisms& currentOrbit = this->theOrbiTs[j];
+    currentOrbit.initialize();
     do {
       currentCandidate = currentOrbit.GetCurrentElement();
       if (newCandidate.IsGoodHnewActingByTwo(currentCandidate, currentRootInjection)) {
@@ -1628,13 +1637,16 @@ bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits(
         << " has complement summand " << currentComplementSummand.ToString() << ". "
         << " Then I computed the latter complement summand has centralizer "
         << centralizerOfComplementOfCurrentSummand.ToString() << ". "
-        << "Then I computed the absolute Dynkin indices of the centralizer's sl(2)-subalgebras, namely:<br> "
+        << "Then I computed the absolute Dynkin indices of "
+        << "the centralizer's sl(2)-subalgebras, namely:<br> "
         << theDynkinIndicesCentralizerComplementCurrentSummand.ToStringCommaDelimited()
         << ". If the type was realizable, those would have to contain "
-        << " the absolute Dynkin indices of sl(2) subalgebras of the original summand. However, that is not the case."
-        << " I can therefore conclude that the Dynkin type " << currentType.ToString()
+        << "the absolute Dynkin indices of sl(2) subalgebras of the original summand. "
+        << "However, that is not the case. "
+        << "I can therefore conclude that the Dynkin type " << currentType.ToString()
         << " is not realizable. "
-        << " The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
+        << "The absolute Dynkin indices of the sl(2) subalgebras of "
+        << "the original summand I computed to be:<br> "
         << theDynkinIndicesCurrentSummand.ToStringCommaDelimited() << ". ";
         this->comments += reportStream.str();
         std::fstream theLogFile;
@@ -1663,7 +1675,8 @@ bool CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed() {
   int indexSl2 = - 1;
   bool mustBeTrue =  this->owner->theSl2s.ContainsSl2WithGivenH(theH, &indexSl2);
   if (!mustBeTrue) {
-    crash << "Something went very wrong: the semisimple subalgebra is of rank 1, hence an sl(2) subalgebra, yet "
+    crash << "Something went very wrong: the semisimple "
+    << "subalgebra is of rank 1, hence an sl(2) subalgebra, yet "
     << "I can't find its H element in the list of sl(2) subalgebras. " << crash;
   }
   const slTwoSubalgebra& theSl2= this->owner->theSl2s[indexSl2];
@@ -1715,14 +1728,15 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   << "I have rejected type " << currentType.ToString() << " as non-realizable for the following reasons. "
   << "The type's summand " << newSummandType.ToString()
   << " has complement summand " << complementNewSummandType.ToString() << ". "
-  << " I computed the latter complement summand has centralizer "
+  << "I computed the latter complement summand has centralizer "
   << centralizerComplementNewSummandType.ToString() << ". "
   << "Then I computed the absolute Dynkin indices of the centralizer's sl(2)-subalgebras, namely:<br> "
   << DynkinIndicesTheyGotToFitIn.ToStringCommaDelimited()
   << ". If the type was realizable, those would have to contain "
-  << " the absolute Dynkin indices of sl(2) subalgebras of the original summand. However, that is not the case. "
-  << " I can therefore conclude that the Dynkin type " << currentType.ToString() << " is not realizable. "
-  << " The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
+  << "the absolute Dynkin indices of sl(2) subalgebras "
+  << "of the original summand. However, that is not the case. "
+  << "I can therefore conclude that the Dynkin type " << currentType.ToString() << " is not realizable. "
+  << "The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
   << theDynkinIndicesNewSummand.ToStringCommaDelimited() << ". ";
   theLogFile << reportStream.str();
   stOutput << reportStream.str();
@@ -1801,11 +1815,13 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates() {
     if (indicesModulesNewComponentExtensionMod.size == 0) {
       if (theGlobalVariables.flagReportEverything) {
         std::stringstream reportStream;
-        reportStream << " Extension " << typeIndex + 1 << " out of " << this->currentPossibleLargerDynkinTypes[stackIndex].size
+        reportStream << " Extension " << typeIndex + 1
+        << " out of " << this->currentPossibleLargerDynkinTypes[stackIndex].size
         << ", type  " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
         << " cannot be realized: no appropriate module: desired weight of h element is: "
         << weightHElementWeAreLookingFor.ToString()
-        << " but the highest weights of the base candidate are: " << this->baseSubalgebra().HighestWeightsNONPrimal.ToString();
+        << " but the highest weights of the base candidate are: "
+        << this->baseSubalgebra().HighestWeightsNONPrimal.ToString();
         //stOutput << "<br>Attempting to realize type "
         //<< this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString() << ":"
         //<< reportStream.str();
@@ -1853,7 +1869,8 @@ void SemisimpleSubalgebras::AddSubalgebraToStack(
     crash << "Adding to stack subalgebra with indexInOwner equal to - 1 is forbidden. " << crash;
   }
   if (input.theHs.size != input.theHsScaledToActByTwoInOrderOfCreation.size) {
-    crash << "In order to add subalgebra " << input.theWeylNonEmbedded->theDynkinType.ToString()
+    crash << "In order to add subalgebra "
+    << input.theWeylNonEmbedded->theDynkinType.ToString()
     << " to the stack I need to know the order of creation of its h-vectors. "
     << crash;
   }
@@ -1957,7 +1974,7 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast() {
     << ", and this order is needed to construct extensions. " << crash;
   }
   ProgressReport theReport1;
-  if (this->baseSubalgebra().GetRank()>= this->owner->GetRank()) {
+  if (this->baseSubalgebra().GetRank() >= this->owner->GetRank()) {
     return this->RemoveLastSubalgebra();
   }
   int stackIndex = this->currentSubalgebraChain.size - 1;
@@ -2098,23 +2115,23 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational
       }
     } else {
       for (int i = 0; i < this->theRank - 2; i ++) {
-        output.AddMonomial(MonomialMatrix(i,i), 1);
+        output.AddMonomial(MonomialMatrix(i, i), 1);
       }
       output.AddMonomial(MonomialMatrix(this->theRank - 1, this->theRank - 2), 1);
       output.AddMonomial(MonomialMatrix(this->theRank - 2, this->theRank - 1), 1);
     }
   }
-  if (this->theLetter == 'E' && this->theRank ==6) {
+  if (this->theLetter == 'E' && this->theRank == 6) {
     //We gotta flip the Dynkin diagram of E_6. Note that the extra 1-length sticking root comes second and
     //and the triple node comes fourth.
     //Therefore, we must swap the 1st root with the 6th and the third root
     //with the 5th. Conventions, conventions... no way around 'em!
-     output.AddMonomial(MonomialMatrix(1,1),1);
-     output.AddMonomial(MonomialMatrix(3,3),1);
-     output.AddMonomial(MonomialMatrix(0,5),1);
-     output.AddMonomial(MonomialMatrix(5,0),1);
-     output.AddMonomial(MonomialMatrix(2,4),1);
-     output.AddMonomial(MonomialMatrix(4,2),1);
+     output.AddMonomial(MonomialMatrix(1, 1), 1);
+     output.AddMonomial(MonomialMatrix(3, 3), 1);
+     output.AddMonomial(MonomialMatrix(0, 5), 1);
+     output.AddMonomial(MonomialMatrix(5, 0), 1);
+     output.AddMonomial(MonomialMatrix(2, 4), 1);
+     output.AddMonomial(MonomialMatrix(4, 2), 1);
   }
   Rational tempRat = output.GetDeterminant();
   if (tempRat != 1 && tempRat != - 1) {

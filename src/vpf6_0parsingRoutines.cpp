@@ -265,8 +265,9 @@ void Calculator::initialize() {
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arcsin");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arccos");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arctan");
-  this->controlSequences.AddOnTopNoRepetition
-  (this->knownOperationsInterpretedAsFunctionsMultiplicatively);
+  this->controlSequences.AddOnTopNoRepetition(
+    this->knownOperationsInterpretedAsFunctionsMultiplicatively
+  );
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("SequenceStatements");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MakeSequence");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\setminus");

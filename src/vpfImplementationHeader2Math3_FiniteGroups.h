@@ -160,11 +160,18 @@ bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfP
 }
 
 template <class elementGroup, class elementRepresentation>
+bool OrbitIterator<elementGroup, elementRepresentation>::CheckInitialization() const {
+  this->theGroupAction.CheckInitialization();
+  return true;
+}
+
+template <class elementGroup, class elementRepresentation>
 bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfPastLastFALSE() {
-  MacroRegisterFunctionWithName("OrbitIterator::IncrementReturnFalseIfPastLast");
+  MacroRegisterFunctionWithName("OrbitIterator::IncrementReturnFalseIfPastLastFALSE");
   if (this->theGroupGeneratingElements.size == 0) {
     return false;
   }
+  this->CheckInitialization();
   for (int i = 0; i < this->theGroupGeneratingElements.size; i ++) {
     this->theGroupAction.actOn(
       this->theGroupGeneratingElements[i],

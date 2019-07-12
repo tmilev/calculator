@@ -2474,7 +2474,7 @@ bool slTwoSubalgebra::AttemptExtendingHFtoHEFWRTSubalgebra(
   Matrix<Rational> coeffsF;
   coeffsF.init(1, halfNumberVariables);
   for (int i = 0; i < numRootsChar2; i ++) {
-    coeffsF.elements[0][i] = i*i + 1; //(i%2== 0)? 1: 2;
+    coeffsF.elements[0][i] = i * i + 1; //(i%2== 0)? 1: 2;
   }
   for (int i = numRootsChar2; i < coeffsF.NumCols; i ++) {
     coeffsF.elements[0][i] = i * i + 1;
@@ -2529,7 +2529,7 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
   RootSpacesThatNeedToBeKilled.SetExpectedSize(this->GetOwnerWeyl().RootSystem.size);
   outputSystemToBeSolved.size = 0;
   outputMatrixSystemToBeSolved.init(0, numberVariables);
-  for (int i = 0; i <rootsInPlay.size; i ++) {
+  for (int i = 0; i < rootsInPlay.size; i ++) {
     if (this->GetOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i]) != 2) {
       crash << "The scalar product of the h element: " << targetH.ToString()
       << " and the root in play " << rootsInPlay[i].ToString() << " must be 2, but equals instead "
@@ -2560,7 +2560,7 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
   for (int i = oldSize; i < outputSystemToBeSolved.size; i ++) {
     outputSystemToBeSolved[i].MakeZero();
   }
-  for (int i = 0; i <rootsInPlay.size; i ++) {
+  for (int i = 0; i < rootsInPlay.size; i ++) {
     if (rootsInPlay.size != halfNumberVariables) {
       crash << "Roots in play must be half the number of variables. " << crash;
     }
@@ -2609,7 +2609,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
   SltwoSubalgebras& output, int indexRootSAinContainer
 ) {
   MacroRegisterFunctionWithName("rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition");
-  //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1- 10.4
+  //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1 - 10.4
   int theRelativeDimension = this->SimpleBasisK.size;
   if (theRelativeDimension == 0) {
     return;
@@ -2766,6 +2766,7 @@ void rootSubalgebras::ComputeAllReductiveRootSAsInit() {
   for (int i = 0; i < this->owner->GetRank(); i ++) {
     this->validScales.AddOnTopNoRepetition(2 / this->owner->theWeyl.CartanSymmetric(i, i));
   }
+  this->theWeylGroupAutomorphisms.theWeyl = &this->GetOwnerWeyl();
 }
 
 void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {

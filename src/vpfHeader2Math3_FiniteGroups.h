@@ -382,9 +382,6 @@ struct simpleReflection {
     this->index = - 1;
   }
   std::string ToString() const;
-  void MakeOuterAuto(int inputIndex) {
-    this->index = inputIndex;
-  }
   void MakeSimpleReflection(int inputIndex) {
     this->index = inputIndex;
   }
@@ -447,7 +444,6 @@ public:
   );
   ElementWeylGroup operator^(const ElementWeylGroup& right) const;
   void MakeFromRhoImage(const Vector<Rational>& inputRhoImage, WeylGroupData& inputWeyl);
-  void MakeOuterAuto(int outerAutoIndex, WeylGroupData& inputWeyl);
   void MakeSimpleReflection(int simpleRootIndex, WeylGroupData& inputWeyl);
   void MakeRootReflection(const Vector<Rational>& mustBeRoot, WeylGroupData& inputWeyl);
   void MakeCanonical();
@@ -498,6 +494,15 @@ public:
   void MakeID(WeylGroupAutomorphisms& inputAutomorphisms);
   ElementWeylGroupAutomorphisms();
   ~ElementWeylGroupAutomorphisms();
+  bool CheckInitialization() const;
+  template<class coefficient>
+  static void ActOn(
+    const ElementWeylGroupAutomorphisms& inputElt, const Vector<coefficient>& inputV, Vector<coefficient>& output
+  );
+  template<class coefficient>
+  void ActOn(Vector<coefficient>& inputOutput) const;
+  void MakeOuterAuto(int outerAutoIndex, WeylGroupAutomorphisms& inputWeyl);
+  void MakeSimpleReflection(int simpleRootIndex, WeylGroupAutomorphisms& inputWeyl);
   void MultiplyOnTheRightByOuterAuto(int outerAutoIndex);
   unsigned int HashFunction() const;
   static unsigned int HashFunction(const ElementWeylGroupAutomorphisms& input);
@@ -1031,6 +1036,7 @@ public:
     HashedList<ElementWeylGroupAutomorphisms>* outputSubset = 0,
     int UpperLimitNumElements = - 1
   );
+  LargeInt GetOrbitSize(Vector<Rational>& theWeight);
   bool IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& theMat);
   bool AreMaximallyDominantGroupOuter(List<Vector<Rational> >& theWeights);
   bool checkInitialization() const;
@@ -1040,24 +1046,46 @@ public:
     const ElementWeylGroupAutomorphisms& theGroupElement,
     const Vector<coefficient>& inputVector,
     Vector<coefficient>& outputVector
-  ) const {
-    this->checkInitialization();
-    outputVector = inputVector;
-    for (int i = theGroupElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
-      if (!theGroupElement.generatorsLastAppliedFirst[i].flagIsOuter) {
-        this->theWeyl->SimpleReflection(theGroupElement.generatorsLastAppliedFirst[i].index, outputVector);
-      } else {
-        if (!this->flagAllOuterAutosComputed) {
-          crash << "Weyl group of type " << this->theWeyl->theDynkinType.ToString()
-          << " does not have its outer autos computed at a place where it should. " << crash;
-        }
-        this->theOuterAutos.theGenerators[theGroupElement.generatorsLastAppliedFirst[i].index].ActOnVectorColumn(outputVector, outputVector);
-      }
-    }
-  }
+  ) const;
   template <class coefficient>
   void RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights);
 };
+
+template<class coefficient>
+void ElementWeylGroupAutomorphisms::ActOn(
+  const ElementWeylGroupAutomorphisms& inputElt, const Vector<coefficient>& inputV, Vector<coefficient>& output
+) {
+  inputElt.CheckInitialization();
+  inputElt.owner->ActOn(inputElt, inputV, output);
+}
+
+template<class coefficient>
+void ElementWeylGroupAutomorphisms::ActOn(Vector<coefficient>& inputOutput) const {
+  this->CheckInitialization();
+  this->owner->ActOn(*this, inputOutput, inputOutput);
+}
+
+template <class coefficient>
+void WeylGroupAutomorphisms::ActOn(
+  const ElementWeylGroupAutomorphisms& theGroupElement,
+  const Vector<coefficient>& inputVector,
+  Vector<coefficient>& outputVector
+) const {
+  this->checkInitialization();
+  outputVector = inputVector;
+  for (int i = theGroupElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
+    simpleReflectionOrOuterAutomorphism& currentGenerator = theGroupElement.generatorsLastAppliedFirst[i];
+    if (!currentGenerator.flagIsOuter) {
+      this->theWeyl->SimpleReflection(currentGenerator.index, outputVector);
+    } else {
+      if (!this->flagAllOuterAutosComputed) {
+        crash << "Weyl group of type " << this->theWeyl->theDynkinType.ToString()
+        << " does not have its outer autos computed at a place where it should. " << crash;
+      }
+      this->theOuterAutos.theGenerators[currentGenerator.index].ActOnVectorColumn(outputVector, outputVector);
+    }
+  }
+}
 
 template <typename elementFirstGroup, typename elementSecondGroup>
 class GroupHomomorphism {
@@ -1444,6 +1472,12 @@ public:
     );
     OrbitIterator::GroupActionWithName::GroupAction actOn;
     std::string name;
+    bool CheckInitialization() const {
+      if (this->actOn == 0) {
+        crash << "Non-initialized group action with name: " << this->name << ". " << crash;
+      }
+      return true;
+    }
   };
 private:
   HashedList<elementRepresentation> privateLayer1, privateLayer2, privateLayer3;
@@ -1458,6 +1492,7 @@ public:
   OrbitIterator() {
     this->reset();
   }
+  bool CheckInitialization() const;
   std::string ToStringLayerSize() const;
   void reset() {
     this->previousLayer = &this->privateLayer1;
@@ -1480,8 +1515,8 @@ public:
 class OrbitIteratorWeylGroup: public OrbitIterator<ElementWeylGroup, ElementWeylGroup> {
 };
 
-class OrbitFDRepIteratorWeylGroup {
-  OrbitIterator<ElementWeylGroup, Vector<Rational> > theIterator;
+class OrbitIteratorRootActionWeylGroupAutomorphisms {
+  OrbitIterator<ElementWeylGroupAutomorphisms, Vector<Rational> > theIterator;
   List<Vector<Rational> > orbitBuffer;
   Vector<Rational> orbitDefiningElement;
   int maxOrbitBufferSize;
@@ -1491,21 +1526,16 @@ public:
   int currentIndexInBuffer;
   bool flagOrbitIsBuffered;
   bool flagOrbitEnumeratedOnce;
-  OrbitFDRepIteratorWeylGroup() {
-    this->reset();
-  }
+  OrbitIteratorRootActionWeylGroupAutomorphisms();
   void reset();
   bool IncrementReturnFalseIfPastLast();
   const Vector<Rational>& GetCurrentElement();
   std::string ToString() const;
   std::string ToStringSize() const;
   bool CheckConsistency();
-  void init();
-  void init(
-    const List<ElementWeylGroup>& inputGenerators,
-    const Vector<Rational>& inputElement,
-    const OrbitIterator<ElementWeylGroup, Vector<Rational> >::GroupActionWithName& inputGroupAction
-  );
+  void initialize();
+  void initialize(const List<ElementWeylGroupAutomorphisms>& inputGenerators,
+    const Vector<Rational>& inputElement);
 };
 
 template <typename coefficient>

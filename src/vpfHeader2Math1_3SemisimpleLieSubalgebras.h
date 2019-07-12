@@ -342,7 +342,7 @@ public:
   MapReferenceS<Matrix<Rational>, SemisimpleLieAlgebra> theSubalgebrasNonDefaultCartanAndScale;
   List<List<Rational> > CachedDynkinIndicesSl2subalgebrasSimpleTypes;
   HashedList<DynkinSimpleType> CachedDynkinSimpleTypesWithComputedSl2Subalgebras;
-  List<OrbitFDRepIteratorWeylGroup> theOrbiTs;
+  List<OrbitIteratorRootActionWeylGroupAutomorphisms> theOrbiTs;
   HashedList<Rational> theOrbitHelementLengths;
   HashedList<DynkinSimpleType> theOrbitDynkinIndices;
 //  List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
@@ -508,7 +508,4 @@ public:
   );
 };
 
-
 #endif
-
-

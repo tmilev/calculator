@@ -6703,6 +6703,7 @@ void CandidateSSSubalgebra::GetHsScaledToActByTwoByType(
 template <class coefficient>
 void WeylGroupAutomorphisms::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights) {
   MacroRegisterFunctionWithName("WeylGroupAutomorphisms::RaiseToMaximallyDominant");
+  this->checkInitialization();
   bool found;
   Vectors<coefficient> theWeightsCopy;
   this->ComputeOuterAutos();

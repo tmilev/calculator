@@ -6659,7 +6659,8 @@ WeylGroupAutomorphisms::~WeylGroupAutomorphisms() {
 }
 
 void WeylGroupAutomorphisms::ComputeOuterAutos() {
-  MacroRegisterFunctionWithName("WeylGroup::ComputeOuterAutos");
+  MacroRegisterFunctionWithName("WeylGroupAutomorphisms::ComputeOuterAutos");
+  this->checkInitialization();
   if (this->flagAllOuterAutosComputed) {
     return;
   }
@@ -6669,9 +6670,11 @@ void WeylGroupAutomorphisms::ComputeOuterAutos() {
 }
 
 void WeylGroupAutomorphisms::ComputeOuterAutoGenerators() {
+  MacroRegisterFunctionWithName("WeylGroupAutomorphisms::ComputeOuterAutoGenerators");
   if (this->flagOuterAutosGeneratorsComputed) {
     return;
   }
+  this->checkInitialization();
   List<MatrixTensor<Rational> >& theGens = this->theOuterAutos.theGenerators;
   this->theWeyl->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(theGens);
   for (int i = 0; i < theGens.size; i ++) {

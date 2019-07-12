@@ -1282,6 +1282,7 @@ bool WeylGroupAutomorphisms::checkInitialization() const {
 
 bool WeylGroupAutomorphisms::AreMaximallyDominantGroupOuter(List<Vector<Rational> >& theWeights) {
   MacroRegisterFunctionWithName("WeylGroup::AreMaximallyDominantGroupOuter");
+  this->checkInitialization();
   MemorySaving<Vectors<Rational> > theWeightsCopy;
   Vector<Rational> zeroWeight;
   this->ComputeOuterAutos();

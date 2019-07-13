@@ -2246,8 +2246,9 @@ bool rootSubalgebra::CheckForMaximalDominanceCartanSA() {
       for (int j = 0; j < simpleBasisOriginalOrderCopy.size; j ++) {
         if (simpleBasisOriginalOrderCopy[j] != this->SimpleBasisKinOrderOfGeneration[j]) {
           if (simpleBasisOriginalOrderCopy[j].IsGreaterThanLexicographic(this->SimpleBasisKinOrderOfGeneration[j])) {
-            if (this->indexInducingSubalgebra != - 1)
+            if (this->indexInducingSubalgebra != - 1) {
               this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedNotMaxWRTouterAuto ++;
+            }
             return false;
           } else {
             break;

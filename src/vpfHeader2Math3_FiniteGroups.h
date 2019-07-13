@@ -1419,7 +1419,7 @@ public:
     const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other
   ) const {
     GroupRepresentationCarriesAllMatrices<somegroup, coefficient> result = *this;
-    result*= other;
+    result *= other;
     return result;
   }
   bool operator== (const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other) const {
@@ -2283,7 +2283,7 @@ coefficient UDPolynomial<coefficient>::operator()(const coefficient& x) const {
 }
 
 template <typename coefficient>
-void UDPolynomial<coefficient>::operator+= (const UDPolynomial<coefficient>& right) {
+void UDPolynomial<coefficient>::operator+=(const UDPolynomial<coefficient>& right) {
   int t = min(right.data.size, data.size);
   for (int i = 0; i < t; i ++) {
     data[i] += right.data[i];
@@ -2354,7 +2354,7 @@ UDPolynomial<coefficient> UDPolynomial<coefficient>::TimesXn(int n) const {
 }
 
 template <typename coefficient>
-void UDPolynomial<coefficient>::operator*= (const coefficient& right) {
+void UDPolynomial<coefficient>::operator*=(const coefficient& right) {
   for (int i = 0; i < data.size; i ++) {
     data[i] *= right;
   }

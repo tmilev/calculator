@@ -2141,6 +2141,8 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
   std::stringstream out;
   int lastIndexPlusOne = theTypes.size;
   //lastIndexPlusOne = 1;
+  out << "Generated structure constants, "
+  << "root subalgebras and sl(2) subalgebras for the following. ";
   for (int i = 0; i < lastIndexPlusOne; i ++) {
     std::stringstream reportStream;
     reportStream << "Computing structure of subalgebra "
@@ -2155,7 +2157,7 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
     theAlgebra.FindSl2Subalgebras(theAlgebra, theSl2s);
     theSl2s.ToHTML();
 
-    if (theTypes[i].HasPrecomputedSubalgebras()) {
+    if (theTypes[i].HasPrecomputedSubalgebras() && false) {
       SemisimpleSubalgebras theSubalgebras;
       MapReferenceS<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
       ListReferences<SltwoSubalgebras> sl2Conainer;
@@ -2176,7 +2178,10 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
         out << "Failed to compute " << theTypes[i].ToString();
       }
     }
+    out << theTypes[i].ToString();
+    if (i != theTypes.size - 1) {
+      out << ", ";
+    }
   }
-  //crash << "not implemented yet. " << crash;
-  return false;
+  return output.AssignValue(out.str(), theCommands);
 }

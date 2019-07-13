@@ -1680,7 +1680,7 @@ bool CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed() {
     << "subalgebra is of rank 1, hence an sl(2) subalgebra, yet "
     << "I can't find its H element in the list of sl(2) subalgebras. " << crash;
   }
-  const slTwoSubalgebra& theSl2= this->owner->theSl2s[indexSl2];
+  const slTwoSubalgebra& theSl2 = this->owner->theSl2s[indexSl2];
   if (!theSl2.flagCentralizerTypeComputed) {
     return false;
   }
@@ -1934,7 +1934,7 @@ std::string SemisimpleSubalgebras::ToStringState(FormatExpressions* theFormat) {
         out << "</b>";
       }
       if (j != this->currentPossibleLargerDynkinTypes[i].size - 1) {
-        out << ",";
+        out << ", ";
       }
     }
     out << "<br> " << this->currentNumLargerTypesExplored[i] << " out of "

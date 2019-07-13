@@ -1297,6 +1297,7 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::IncrementReturnFalseIfPastLa
 
 void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize() {
   MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroupAutomorphisms::initialize");
+  this->theIterator.CheckInitialization();
   this->currentIndexInBuffer = 0;
   if (this->flagOrbitIsBuffered) {
     return;
@@ -1352,7 +1353,7 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::reset() {
   this->currentIndexInBuffer = - 1;
   this->maxOrbitBufferSize = 5000000;
   this->orbitBuffer.SetSize(0);
-  this->theIterator.reset();
+  this->theIterator.resetNoActionChange();
 }
 
 std::string OrbitIteratorRootActionWeylGroupAutomorphisms::ToString() const {
@@ -1418,7 +1419,7 @@ void SemisimpleSubalgebras::GetHCandidates(
   for (int j = 0; j < this->theSl2s.size; j ++) {
     if (theGlobalVariables.flagReportEverything) {
       std::stringstream reportStreamX;
-      reportStreamX << "Trying to realize via orbit number " << j+ 1 << ".";
+      reportStreamX << "Trying to realize via orbit number " << j + 1 << ".";
       if (this->theSl2s[j].LengthHsquared != desiredHScaledToActByTwoLengthSquared) {
         reportStreamX << " The h element "
         << this->theSl2s[j].theH.GetCartanPart().ToString() << " of length "

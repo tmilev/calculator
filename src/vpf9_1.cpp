@@ -516,7 +516,8 @@ void FileInformation::AddProjectInfo(const std::string& fileName, const std::str
   theInfo.FileName = fileName;
   theInfo.FileDescription = fileDescription;
   if (theGlobalVariables.flagNotAllocated) {
-    std::cout << "The global variables are not allocated: this is the static initialization order fiasco at work! ";
+    std::cout << "The global variables are not allocated: "
+    << "this is the static initialization order fiasco at work! ";
     assert(false);//cannot crash with mechanisms: nothing works yet!
   }
   theGlobalVariables.theSourceCodeFiles().AddOnTopNoRepetition(theInfo);

@@ -108,7 +108,7 @@ void OrbitIterator<elementGroup, elementRepresentation>::init(
   const elementRepresentation& inputElement,
   const GroupActionWithName &inputGroupAction
 ) {
-  this->reset();
+  this->resetNoActionChange();
   this->theGroupGeneratingElements = inputGenerators;
   this->theGroupAction.name = inputGroupAction.name;
   this->theGroupAction.actOn = inputGroupAction.actOn;

@@ -1490,16 +1490,15 @@ public:
   List<elementGroup> theGroupGeneratingElements;
   int indexCurrentElement;
   OrbitIterator() {
-    this->reset();
+    this->theGroupAction.actOn = 0;
+    this->resetNoActionChange();
   }
   bool CheckInitialization() const;
   std::string ToStringLayerSize() const;
-  void reset() {
+  void resetNoActionChange() {
     this->previousLayer = &this->privateLayer1;
     this->currentLayer = &this->privateLayer2;
     this->nextLayer = &this->privateLayer3;
-    this->theGroupAction.actOn = 0;
-    this->theGroupAction.name = "";
     this->indexCurrentElement = - 1;
   }
   const elementRepresentation& GetCurrentElement();

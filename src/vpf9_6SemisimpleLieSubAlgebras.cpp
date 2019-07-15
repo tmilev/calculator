@@ -409,9 +409,9 @@ void SemisimpleSubalgebras::WriteReportToFiles() {
   commonHead << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owner->theWeyl.theDynkinType.ToString()
   << "</title>";
-  commonHead << HtmlRoutines::GetCSSLinkLieAlgebras("../../../../");
-  commonHead << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../../../");
-  commonHead << HtmlRoutines::GetJavascriptMathjax("../../../../");
+  commonHead << HtmlRoutines::GetCSSLinkLieAlgebras("../../../");
+  commonHead << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../../");
+  commonHead << HtmlRoutines::GetJavascriptMathjax("../../../");
   commonHead << "<body>";
 
   fileSlowLoad << commonHead.str() << this->ToString(&this->currentFormat);
@@ -648,9 +648,9 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
     << "2. The calculator has no write permission to the folder in which the file is located. "
     << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
   }
-  outputFileSubalgebra << "<html>\n" << HtmlRoutines::GetJavascriptMathjax("../../../../")
-  << "\n" << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../../../")
-  << "\n" << HtmlRoutines::GetCSSLinkLieAlgebras("../../../../")
+  outputFileSubalgebra << "<html>\n" << HtmlRoutines::GetJavascriptMathjax("../../../")
+  << "\n" << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../../")
+  << "\n" << HtmlRoutines::GetCSSLinkLieAlgebras("../../../")
   << "\n<body>";
   outputFileSubalgebra << this->ToStringSubalgebraNumberWithAmbientLink(subalgebraIndex, theFormat);
   outputFileSubalgebra << "<div class = \"divSubalgebraInformation\">";
@@ -728,7 +728,7 @@ std::string SemisimpleSubalgebras::ToStringPart2(FormatExpressions *theFormat) {
   out << "<br>Number of sl(2)'s: " << numSl2s << "<hr>";
   std::string summaryString = this->ToStringSSsumaryHTML(theFormat);
   if (summaryString != "") {
-    out << "Summary:" << summaryString << "<hr>";
+    out << "Summary: " << summaryString << "<hr>";
     if (this->flagProduceLaTeXtables) {
       out << "Summary in LaTeX\n<br><br>" << this->ToStringSSsumaryLaTeX(theFormat) << "\n<br><br><hr>";
     }
@@ -754,7 +754,8 @@ std::string SemisimpleSubalgebras::ToStringSl2s(FormatExpressions *theFormat) {
     }
   }
   out << "<hr>Of the " << this->theOrbiTs.size << " h element conjugacy classes " << numComputedOrbits
-  << " had their Weyl group orbits computed and buffered. The h elements and their computed orbit sizes follow. ";
+  << " had their Weyl group automorphism orbits computed and buffered. "
+  << "The h elements and their computed orbit sizes follow. ";
   out << "<table><tr><td>h element</td><td>orbit size</td></tr>";
   for (int i = 0; i < this->theOrbiTs.size; i ++) {
     out << "<tr><td>" << this->theSl2s[i].theH.GetCartanPart().ToString() << "</td>";
@@ -773,11 +774,35 @@ std::string SemisimpleSubalgebras::ToStringSl2s(FormatExpressions *theFormat) {
   return out.str();
 }
 
-std::string SemisimpleSubalgebras::ToStringPart3(FormatExpressions *theFormat) {
+std::string SemisimpleSubalgebras::ToStringPart3(FormatExpressions* theFormat) {
   std::stringstream out;
-  out << this->ToStringSl2s(theFormat);
-  out << "<hr>Calculator input for loading subalgebras directly without recomputation. "
-  << this->ToStringProgressReport(theFormat);
+  bool writingToHD = theFormat == 0 ? false : theFormat->flagUseHtmlAndStoreToHD;
+  if (!writingToHD) {
+    out << this->ToStringSl2s(theFormat);
+    out << "<hr>Calculator input for loading subalgebras directly without recomputation. "
+    << this->ToStringProgressReport(theFormat);
+  } else {
+    std::string sl2SubalgebraReports = "orbit_computation_information_" +
+    HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
+    std::string loadSubalgebrasFile = "load_algebra_" +
+    HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
+
+    out << "<a href = '" << sl2SubalgebraReports  << "'>Nilpotent orbit computation summary</a>.";
+    out << "<hr><a href = '" << loadSubalgebrasFile  << "'>Calculator input for subalgebras load</a>.";
+    std::stringstream fileSl2Content, fileLoadContent;
+    fileSl2Content << "<html>"
+    << HtmlRoutines::GetJavascriptMathjax("../../../")
+    << "<body>"
+    << this->ToStringSl2s()
+    << "</body></html>";
+    fileLoadContent << "<html>"
+    << HtmlRoutines::GetJavascriptMathjax("../../../")
+    << "<body>"
+    << this->ToStringProgressReport(theFormat)
+    << "</body></html>";
+    FileOperations::WriteFileVirual(this->owner->ToStringVirtualFolderName() + sl2SubalgebraReports, fileSl2Content.str(), 0);
+    FileOperations::WriteFileVirual(this->owner->ToStringVirtualFolderName() + loadSubalgebrasFile, fileLoadContent.str(), 0);
+  }
   return out.str();
 }
 
@@ -866,7 +891,7 @@ bool SemisimpleSubalgebras::LoadState(
     CandidateSSSubalgebra& currentSA = this->theSubalgebras[currentChainInt[i]];
     if (!currentSA.ComputeAndVerifyFromGeneratorsAndHs()) {
       reportStream << "<hr>Subalgebra " << currentSA.theWeylNonEmbedded->theDynkinType.ToString()
-      << "is corrupt. " << currentSA.comments;
+      << " is corrupt. " << currentSA.comments;
       return false;
     }
     bool isGood = true;
@@ -1238,8 +1263,10 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::CheckConsistency() {
   }
   if (this->flagOrbitIsBuffered) {
     if (this->orbitSize != this->orbitBuffer.size) {
-     crash << "Orbit is supposed to be buffered but the orbit buffer has " << this->orbitBuffer.size << " elements "
-     << " and the orbit size is reported to be: " << this->orbitSize << ". A detailed orbit printout: <br>"
+     crash << "Orbit is supposed to be buffered but the orbit buffer has "
+     << this->orbitBuffer.size << " elements "
+     << "and the orbit size is reported to be: "
+     << this->orbitSize << ". A detailed orbit printout: <br>"
      << this->ToString() << crash;
     }
   }

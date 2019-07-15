@@ -333,14 +333,15 @@ std::string Calculator::ToStringSemismipleLieAlgebraLinksFromHD(const DynkinType
   std::stringstream out;
   SemisimpleLieAlgebra folderComputer;
   folderComputer.theWeyl.theDynkinType = theType;
+  std::string prefixFolder = "calculator/";
   out << "<tr><td><a href=\""
-  << folderComputer.ToStringDisplayFolderName("")
+  << folderComputer.ToStringDisplayFolderName(prefixFolder)
   << folderComputer.ToStringFileNameNoPathStructureConstants()
   << "\">"
   << theType[0].theLetter << theType[0].theRank << " structure constants</a></td>\n ";
   if (theType[0].HasPrecomputedSubalgebras()) {
     out << "<td><a href=\""
-    << folderComputer.ToStringDisplayFolderName("") << folderComputer.ToStringFileNameNoPathSemisimpleSubalgebras()
+    << folderComputer.ToStringDisplayFolderName(prefixFolder) << folderComputer.ToStringFileNameNoPathSemisimpleSubalgebras()
     << "\">"
     << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a>";
     out << "</td>\n ";
@@ -348,11 +349,11 @@ std::string Calculator::ToStringSemismipleLieAlgebraLinksFromHD(const DynkinType
     out << "<td>Not available</td>\n";
   }
   out << "<td><a href=\""
-  << folderComputer.ToStringDisplayFolderName("")
+  << folderComputer.ToStringDisplayFolderName(prefixFolder)
   << folderComputer.ToStringFileNameRelativePathSlTwoSubalgebras() << "\">"
   << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
   out << "<td><a href=\""
-  << folderComputer.ToStringDisplayFolderName("")
+  << folderComputer.ToStringDisplayFolderName(prefixFolder)
   << folderComputer.ToStringFileNameNoPathRootSubalgebras()
   << "\">" << theType[0].theLetter
   << theType[0].theRank << " root subalgebras</a></td>\n";
@@ -400,7 +401,7 @@ bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const
     outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(precomputedTypes[i]);
   }
   outFromHD << "</table></p>";
-  std::string fileName = "semisimple_lie_algebras/semisimple_subalgebras.php";
+  std::string fileName = "semisimple_lie_algebra_structure.html";
   std::stringstream out;
   out
   << theCommands.WriteFileToOutputFolderReturnLink(outFromHD.str(), fileName, "Links file");

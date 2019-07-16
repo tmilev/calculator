@@ -454,6 +454,7 @@ public:
   std::string ToStringProgressReport(FormatExpressions* theFormat = 0);
   std::string ToString(FormatExpressions* theFormat = 0);
   std::string ToStringPart2(FormatExpressions* theFormat = 0);
+  std::string ToStringTableSubalgebraLinksTable(FormatExpressions* theFormat);
   std::string ToStringSubalgebrasNoHDWrite(FormatExpressions* theFormat = 0);
   std::string ToStringSubalgebrasWithHDWrite(FormatExpressions* theFormat = 0);
   void WriteSubalgebraToFile(FormatExpressions* theFormat, int subalgebraIndex);

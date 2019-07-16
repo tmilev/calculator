@@ -600,7 +600,8 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
   out << "The subalgebras are ordered by rank, "
   << "Dynkin indices of simple constituents and dimensions of simple constituents. <br>"
   << "The upper index indicates the Dynkin index, "
-  << "the lower index indicates the rank of the subalgebra. ";
+  << "the lower index indicates the rank of the subalgebra.<br>";
+  out << this->ToStringTableSubalgebraLinksTable(theFormat) << "<hr>";
   if (this->comments != "") {
     out << "<a href = '" << this->fileNameToLogComments << "'>Generation comments.</a>";
   }
@@ -702,6 +703,38 @@ std::string SemisimpleSubalgebras::ToStringSubalgebrasWithHDWrite(FormatExpressi
   return out.str();
 }
 
+std::string SemisimpleSubalgebras::ToStringTableSubalgebraLinksTable(FormatExpressions* theFormat) {
+  std::stringstream out;
+  int numberOfColumns = 6;
+  out << "<table class = \"tableSemisimpleLieAlgebrasList\">";
+  bool rowStarted = false;
+  int displayedInCurrentRow = 0;
+  for (int i = 0; i < this->theSubalgebras.size(); i ++) {
+    CandidateSSSubalgebra& theSA = this->theSubalgebras[i];
+    if (theSA.flagSystemProvedToHaveNoSolution) {
+      continue;
+    }
+    displayedInCurrentRow ++;
+    if (!rowStarted) {
+      out << "<tr>";
+      rowStarted = true;
+    }
+    int displayIndex = this->GetDisplayIndexFromActual(i);
+    out << "<td>" << displayIndex << ". " << "<a href = \"#semisimple_subalgebra_" << displayIndex
+    << "\">\\(" << theSA.theWeylNonEmbedded->theDynkinType.ToString() << "\\)</a></td>";
+    if (displayedInCurrentRow >= numberOfColumns) {
+      out << "</tr>";
+      rowStarted = false;
+      displayedInCurrentRow = 0;
+    }
+  }
+  if (rowStarted) {
+    out << "</tr>";
+  }
+  out << "</table>";
+  return out.str();
+}
+
 std::string SemisimpleSubalgebras::ToStringPart2(FormatExpressions *theFormat) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringPart2");
   std::stringstream out;
@@ -726,6 +759,7 @@ std::string SemisimpleSubalgebras::ToStringPart2(FormatExpressions *theFormat) {
   }
   out << "Number of root subalgebras other than the Cartan and full subalgebra: " << numRegularSAs - 1;
   out << "<br>Number of sl(2)'s: " << numSl2s << "<hr>";
+
   std::string summaryString = this->ToStringSSsumaryHTML(theFormat);
   if (summaryString != "") {
     out << "Summary: " << summaryString << "<hr>";
@@ -6131,7 +6165,8 @@ std::string SemisimpleSubalgebras::ToStringAlgebraLink(int ActualIndexSubalgebra
   std::string theTypeString = this->theSubalgebras[ActualIndexSubalgebra].theWeylNonEmbedded->theDynkinType.ToString();
   if (makeLink) {
     out << "<a href=\"" << this->GetDisplayFileNameSubalgebraRelative(ActualIndexSubalgebra, theFormat)
-    << "\" style =\"text-decoration: none\">";
+    << "\" id = \"semisimple_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra)
+    << "\" style = \"text-decoration: none\">";
     if (useMouseHover) {
       out << HtmlRoutines::GetMathMouseHover(theTypeString);
     } else {
@@ -6507,9 +6542,11 @@ std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theForm
 }
 
 bool CandidateSSSubalgebra::AmRegularSA() const {
-  for (int i = 0; i < this->theNegGens.size; i ++)
-    if (this->theNegGens[i].size() > 1 || this->thePosGens[i].size() > 1)
+  for (int i = 0; i < this->theNegGens.size; i ++) {
+    if (this->theNegGens[i].size() > 1 || this->thePosGens[i].size() > 1) {
       return false;
+    }
+  }
   return true;
 }
 

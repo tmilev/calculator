@@ -392,19 +392,29 @@ void DynkinType::GetPrecomputedDynkinTypes(List<DynkinType>& output) {
 
 bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const Expression& input, Expression& output) {
   (void) input;//avoid unused parameter warning, portable
-  std::stringstream outFromHD;
-  outFromHD << "\n\n<p>\n\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
+  std::stringstream outFromHD, outRecomputeLinks;
+
+  outFromHD << "\n\n<p>\n\n<table>"
+  << "<tr><td>Structure constants</td>"
+  << "<td>Semisimple subalgebras</td> "
   << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
   List<DynkinType> precomputedTypes;
   DynkinType::GetPrecomputedDynkinTypes(precomputedTypes);
   for (int i = 0; i < precomputedTypes.size; i ++) {
     outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(precomputedTypes[i]);
+    if (precomputedTypes[i].HasPrecomputedSubalgebras()) {
+      std::stringstream recomputeCommand;
+      recomputeCommand << "PrintSemisimpleSubalgebrasRecompute{}(" << precomputedTypes[i].ToString() << ")";
+      outRecomputeLinks << "<br>" << HtmlRoutines::GetCalculatorComputationAnchor(recomputeCommand.str());
+    }
   }
   outFromHD << "</table></p>";
   std::string fileName = "semisimple_lie_algebra_structure.html";
   std::stringstream out;
   out
   << theCommands.WriteFileToOutputFolderReturnLink(outFromHD.str(), fileName, "Links file");
+  out << "<br>Recompute links.";
+  out << outRecomputeLinks.str();
   out << outFromHD.str();
   return output.AssignValue(out.str(), theCommands);
 }
@@ -759,7 +769,7 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
     << matPol.NumRows << " rows. Note that you can compute "
     << "determinant using the \\det function which "
     << "does Gaussian elimination "
-    << " and will work for large rational matrices. "
+    << "and will work for large rational matrices. "
     << "This function is meant to be used with honest "
     << "polynomial entries. ";
   }

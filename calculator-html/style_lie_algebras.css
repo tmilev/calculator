@@ -22,6 +22,15 @@ table.tableModuleDecomposition td {
   border: none;
 }
 
+table.tableSemisimpleLieAlgebrasList {
+  border-collapse: collapse;
+  border: 1px solid;
+}
+
+table.tableSemisimpleLieAlgebrasList td {
+  border: 1px solid;
+}
+
 table.tableNone {
   border-collapse: collapse;
   border: none;

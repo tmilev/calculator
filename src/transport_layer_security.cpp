@@ -210,7 +210,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     return;
   }
   logServer << logger::green << "SSL is available." << logger::endL;
-  SSL_CTX_set_ecdh_auto(this->contextServer, 1);
+  SSL_CTX_set_ecdh_auto(this->context, 1);
   if (SSL_CTX_use_certificate_chain_file(this->context, signedFileCertificate3Physical.c_str()) <= 0) {
     logServer << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
     << logger::endL;

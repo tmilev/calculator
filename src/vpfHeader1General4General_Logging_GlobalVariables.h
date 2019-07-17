@@ -94,6 +94,7 @@ public:
   bool flagServerDetailedLog;
   bool flagIsChildProcess;
   bool flagRestartNeeded;
+  bool flagStopNeeded;
   std::string processType;
 
   bool flagLoggedIn;

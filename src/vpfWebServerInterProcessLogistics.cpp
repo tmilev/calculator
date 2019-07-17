@@ -99,7 +99,7 @@ bool PipePrimitive::CreateMe(
   if (pipe(this->pipeEnds.TheObjects) < 0) {
     logServer << logger::red << "FAILED to create pipe: " << this->name << ". " << logger::endL;
     this->Release();
-    theWebServer.RestarT();
+    theWebServer.StopKillAll(false);
     return false;
   }
   if (!readEndBlocks) {
@@ -336,7 +336,7 @@ bool PipePrimitive::SetPipeFlagsIfFailThenCrash(int inputFlags, int whichEnd, bo
     << theError << ". " << logger::endL;
     if (++ counter > 100) {
       if (restartServerOnFail) {
-        theWebServer.RestarT();
+        theWebServer.StopKillAll(false);
       } else if (!dontCrashOnFail) {
         crash << "fcntl failed more than 100 times on "
         << "file desciptor: " << this->pipeEnds[whichEnd] << ": " << theError << ". " << crash;
@@ -453,7 +453,7 @@ bool PipePrimitive::HandleFailedWriteReturnFalse(
     logServer << logger::red << errorStream.str() << logger::endL;
   }
   if (restartServerOnFail) {
-    theWebServer.RestarT();
+    theWebServer.StopKillAll(false);
   } else if (!dontCrashOnFail) {
     crash << "Failed write on: " << this->ToString() << numBadAttempts << " or more times. Last error: "
     << strerror(errno) << ". " << crash;
@@ -585,7 +585,7 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
       << ": more than 100 iterations of read resulted in an error. "
       << logger::endL;
       if (restartServerOnFail) {
-        theWebServer.RestarT();
+        theWebServer.StopKillAll(false);
       } else if (!dontCrashOnFail) {
         crash << this->ToString() << ": more than 100 iterations of read resulted in an error. " << crash;
       }

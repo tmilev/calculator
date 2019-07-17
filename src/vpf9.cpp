@@ -104,6 +104,7 @@ GlobalVariables::GlobalVariables() {
   this->flagCertificatesAreOfficiallySigned = false;
   this->flagIsChildProcess = false;
   this->flagRestartNeeded = false;
+  this->flagStopNeeded = false;
   this->IndicatorStringOutputFunction = 0;
   this->WebServerReturnDisplayIndicatorCloseConnection = 0;
   this->WebServerTimerPing = 0;

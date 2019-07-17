@@ -13,6 +13,22 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 //This file lists calculator functions and various hard-coded rules. Please do not use for any other purposes.
 
 void Calculator::initAdminFunctions() {
+  this->AddOperationInnerHandler(
+    "StopServer",
+    CalculatorFunctionsGeneral::innerStopServer,
+    "",
+    "Stops the server/kills the calculator for all users. "
+    "Requires admin rights. "
+    "Disabled by default. "
+    "Use to stop server remotely/test server service restart. ",
+    "StopServer 0",
+    true,
+    false,
+    "CalculatorDatabaseFunctions::innerStopServer",
+    "StopServer",
+    true
+  );
+
   if (!theGlobalVariables.flagDatabaseCompiled) {
     return;
   }

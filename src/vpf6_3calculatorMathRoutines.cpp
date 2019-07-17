@@ -8488,6 +8488,17 @@ bool CalculatorFunctionsGeneral::innerCrash(Calculator& theCommands, const Expre
   return output.AssignValue((std::string) "Crashed succesfully", theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerStopServer(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerStopServer");
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+    return output.MakeError("Stop server function allowed to logged-in admins only. ", theCommands);
+  }
+  logWorker << "debug: STOOOOOOOOOOOOOOOOOOOOOOOOOOOOOPING";
+  theGlobalVariables.flagStopNeeded = true;
+  theCommands.flagAbortComputationASAP = true;
+  return output.AssignValue((std::string) "Stopping.", theCommands);
+}
+
 #include <vector>
 bool CalculatorFunctionsGeneral::innerCrashByListOutOfBounds(
   Calculator& theCommands, const Expression& input, Expression& output

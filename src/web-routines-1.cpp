@@ -180,7 +180,7 @@ void WebServerMonitor::Restart() {
   logServerMonitor << logger::red << "Terminating server with pid: " << this->pidServer << logger::endL;
   WebServer::TerminateProcessId(this->pidServer);
   logServerMonitor << logger::red << "Restarting monitor. " << this->pidServer << logger::endL;
-  theWebServer.RestarT();
+  theWebServer.StopKillAll(false);
 }
 
 WebCrawler::WebCrawler() {

@@ -1872,6 +1872,10 @@ void WebWorker::WrapUpConnection() {
   if (theGlobalVariables.flagRestartNeeded) {
     this->resultWork["restartNeeded"] = "true";
   }
+  if (theGlobalVariables.flagStopNeeded) {
+    this->resultWork["stopNeeded"] = "true";
+    logWorker << "DEBUG: stop needed is true";
+  }
   this->pipeWorkerToServerControls.WriteOnceAfterEmptying(this->resultWork.ToString(false, false), false, false);
   if (theGlobalVariables.flagServerDetailedLog) {
     logIO << "Detail: done with pipes, releasing resources. " << logger::endL;
@@ -3698,10 +3702,11 @@ bool WebServer::RestartIsNeeded() {
   << "; latest executable has different time stamp: " << theFileStat.st_ctime
   << ". " << logger::red << "RESTARTING." << logger::endL;
   theGlobalVariables.flagRestartNeeded = true;
+
   return true;
 }
 
-void WebServer::RestarT() {
+void WebServer::StopKillAll(bool attemptToRestart) {
   if (
     theGlobalVariables.processType != ProcessTypes::server &&
     theGlobalVariables.processType != ProcessTypes::serverMonitor
@@ -3746,16 +3751,18 @@ void WebServer::RestarT() {
     theGlobalVariables.FallAsleep(1000000);
   }
   this->ReleaseEverything();
-
-  *currentLog << logger::yellow << "Proceeding to restart server. " << logger::endL;
   std::stringstream theCommand;
-  int timeLimitSeconds = theGlobalVariables.MaxComputationMilliseconds / 1000;
-
-  *currentLog << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
-
-  theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath << " && ./";
-  theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
-  theCommand << " server " << timeLimitSeconds;
+  theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath;
+  if (attemptToRestart) {
+    *currentLog << logger::yellow << "Proceeding to restart server. " << logger::endL;
+    int timeLimitSeconds = theGlobalVariables.MaxComputationMilliseconds / 1000;
+    *currentLog << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
+    theCommand << " && ./";
+    theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
+    theCommand << " server " << timeLimitSeconds;
+  } else {
+    *currentLog << logger::red << "Proceeding to stop server. " << logger::endL;
+  }
   theGlobalVariables.CallSystemNoOutput(theCommand.str(), currentLog); //kill any other running copies of the calculator.
   while (true) {
     theGlobalVariables.FallAsleep(1000000);
@@ -3956,8 +3963,13 @@ void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse) {
   if (workerMessage["connectionsServed"].theType == JSData::JSnumber) {
     this->NumberOfServerRequestsWithinAllConnections += (int) workerMessage["connectionsServed"].number;
   }
+  if (workerMessage["stopNeeded"].isTrueRepresentationInJSON()) {
+    this->StopKillAll(false);
+  }
   if (workerMessage["restartNeeded"].isTrueRepresentationInJSON()) {
-    this->RestarT();
+    //A worker has returned request to restart.
+    //This is likely a user-triggered event; restart is desired.
+    this->StopKillAll(true);
   }
 }
 
@@ -4552,7 +4564,8 @@ int WebWorker::Run() {
       !this->flagKeepAlive ||
       this->flagEncounteredErrorWhileServingFile ||
       this->flagToggleMonitoring ||
-      theGlobalVariables.flagRestartNeeded
+      theGlobalVariables.flagRestartNeeded ||
+      theGlobalVariables.flagStopNeeded
     ) {
       break;
     }
@@ -4850,7 +4863,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
     }
     WebServer::AnalyzeMainArgumentsTimeString(timeLimitString);
     if (doRestart) {
-      theWebServer.RestarT();
+      theWebServer.StopKillAll(true);
     }
     return;
   }

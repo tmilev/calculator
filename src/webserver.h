@@ -300,8 +300,8 @@ public:
   void RecycleChildrenIfPossible();
   void RecycleOneChild(int childIndex, int& numberInUse);
   void HandleTooManyConnections(const std::string& incomingUserAddress);
-  void HandleTooManyWorkers(int &numInUse);
-  void RestarT();
+  void HandleTooManyWorkers(int& numInUse);
+  void StopKillAll(bool attemptToRestart);
   bool RestartIsNeeded();
   void initDates();
   std::string ToStringLastErrorDescription();

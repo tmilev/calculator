@@ -50,12 +50,8 @@ void TransportLayerSecurityOpenSSL::initSSLLibrary() {
   this->flagSSLlibraryInitialized = true;
   std::stringstream commentsOnError;
   // this command loads error strings and initializes openSSL.
-  int loadedSuccessfully = SSL_load_error_strings();
-  if (loadedSuccessfully != 1) {
-    logServer << logger::red << commentsOnError.str() << logger::endL;
-    crash << "Failed to initialize ssl library. " << crash;
-  }
-  loadedSuccessfully = OpenSSL_add_ssl_algorithms();
+  SSL_load_error_strings();
+  int loadedSuccessfully = OpenSSL_add_ssl_algorithms();
   if (!loadedSuccessfully) {
     logServer << logger::red << commentsOnError.str() << logger::endL;
     crash << "Failed to add ssl algorithms. " << crash;

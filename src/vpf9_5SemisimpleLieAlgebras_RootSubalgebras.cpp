@@ -3055,9 +3055,9 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
-  output << HtmlRoutines::GetCSSLinkLieAlgebras("../../../");
+  output << HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator("../../../");
   output << HtmlRoutines::GetJavascriptMathjax("../../../");
-  output << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../../");
+  output << HtmlRoutines::GetJavascriptLinkGraphicsNDimensionsWithPanels("../../../");
   output << "<body>"
   << this->owner->ToStringHTMLMenuStructureSummary("", true, false, true, true)
   << this->ToString(theFormat)

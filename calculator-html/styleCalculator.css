@@ -515,7 +515,7 @@ span.studentScoresWrapper {
   margin-bottom: 0;
 }
 
-.panelExpandable {
+.PanelExpandable {
   transition: all 2s;
   overflow: hidden;
   word-wrap: break-word;

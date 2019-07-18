@@ -409,8 +409,8 @@ void SemisimpleSubalgebras::WriteReportToFiles() {
   commonHead << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owner->theWeyl.theDynkinType.ToString()
   << "</title>";
-  commonHead << HtmlRoutines::GetCSSLinkLieAlgebras("../../../");
-  commonHead << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../../");
+  commonHead << HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator("../../../");
+  commonHead << HtmlRoutines::GetJavascriptLinkGraphicsNDimensionsWithPanels("../../../");
   commonHead << HtmlRoutines::GetJavascriptMathjax("../../../");
   commonHead << "<body>";
 
@@ -650,8 +650,8 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
     << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
   }
   outputFileSubalgebra << "<html>\n" << HtmlRoutines::GetJavascriptMathjax("../../../")
-  << "\n" << HtmlRoutines::GetJavascriptLinkGraphicsNDimensions("../../../")
-  << "\n" << HtmlRoutines::GetCSSLinkLieAlgebras("../../../")
+  << "\n" << HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator("../../../")
+  << "\n" << HtmlRoutines::GetJavascriptLinkGraphicsNDimensionsWithPanels("../../../")
   << "\n<body>";
   outputFileSubalgebra << this->ToStringSubalgebraNumberWithAmbientLink(subalgebraIndex, theFormat);
   outputFileSubalgebra << "<div class = \"divSubalgebraInformation\">";
@@ -676,7 +676,7 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
     }
     outputFileFKFTnilradicals << "<html>"
     << HtmlRoutines::GetJavascriptMathjax("../../../")
-    << HtmlRoutines::GetCSSLinkLieAlgebras("../../../")
+    << HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator("../../../")
     << "<body>"
     << this->ToStringAlgebraLink(subalgebraIndex, theFormat)
     << currentSubalgebra.ToStringNilradicals(theFormat) << "\n</body></html>";
@@ -5152,7 +5152,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat) {
   out << "<html><title>sl(2)-subalgebras of "
   << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString() << "</title>";
   out << HtmlRoutines::GetJavascriptMathjax("../../../../");
-  out << HtmlRoutines::GetCSSLinkLieAlgebras("../../../../");
+  out << HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator("../../../../");
   out << "<meta name =\"keywords\" content =\""
   <<  this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
   << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras, nilpotent orbits of "

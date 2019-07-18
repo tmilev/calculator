@@ -23,6 +23,15 @@
 //TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+
+/**
+ * File needs to function as stand-alone javascript 
+ * as well be used as a commonJS module included via
+ * require('graphics_n_dimension.js')).
+ * Please don't require(...) any modules from this file.
+ **/
+
+var PanelExpandable;
 var collectionGraphicsNDimensions = {};
 
 function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
@@ -32,8 +41,8 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.idCanvas = inputIdCanvas;
   this.idsBasis = [];
   this.idInfo = inputIdInfo;
-  this.panelInfo = null;
   this.idPlaneInfo = `${inputIdInfo}projectionPlane`;
+  this.panelInfo = null;
   this.idHighlightInfo = `${this.idCanvas}HighlightInfo`;
   this.basisCircles = [];
   this.projectionsBasisCircles = [];
@@ -143,27 +152,36 @@ GraphicsNDimensions.prototype.getInfoHTML = function() {
 
 GraphicsNDimensions.prototype.writeInfo = function() {
   var info = this.getInfoHTML();
-  document.getElementById(this.idPlaneInfo).innerHTML = info;
+  var panelInfoElement = document.getElementById(this.idPlaneInfo); 
+  panelInfoElement.innerHTML = info;
 }
 
 GraphicsNDimensions.prototype.initInfo = function () {
-  var result = "";
-  result += `<span id = "${this.idCanvasHighlights}"> </span>\n`;
+  var infoHTML = "";
+  infoHTML += "<div style = 'height:300px; overflow-y: scroll;'>";
   for (var i = 0; i < 2; i ++) {
     this.idsBasis[i] = []; 
     for (var j = 0; j < this.dimension; j ++) { 
       this.idsBasis[i][j] = `${this.idCanvas}textEbasis_${i}_${j}`;
-      result += `<textarea rows = "1" cols = "2" id = "${this.idsBasis[i][j]}"></textarea>`;
-      result += "</textarea>\n";
+      infoHTML += `<textarea rows = "1" cols = "2" id = "${this.idsBasis[i][j]}"></textarea>`;
     }
-    result += "<br>";
+    infoHTML += "<br>";
   }
-  result += `<button onclick = "window.calculator.graphicsNDimensions.startProjectionPlaneUser('${this.idCanvas}')">`;
-  result += `Change to basis</button><br>`;
-  //result += `<button onclick = "snapShotLaTeX('${this.idCanvas}')>LaTeX snapshot</button>`;
-  result += `<span id = "${this.idCanvas}snapShotLateXspan"> </span>\n`;
-  result += `<div id = '${this.idPlaneInfo}'></div><br>`;
-  document.getElementById(this.idInfo).innerHTML = result;
+  infoHTML += `<button onclick = "window.calculator.graphicsNDimensions.startProjectionPlaneUser('${this.idCanvas}')">`;
+  infoHTML += `Change to basis</button><br>`;
+  //infoHTML += `<button onclick = "snapShotLaTeX('${this.idCanvas}')>LaTeX snapshot</button>`;
+  infoHTML += `<span id = '${this.idCanvas}snapShotLateXspan'></span>\n`;
+  infoHTML += `<div id = '${this.idPlaneInfo}' class = 'panel'></div>`;
+  infoHTML += `</div>`;
+  if (PanelExpandable === undefined) {
+    document.getElementById(this.idInfo).innerHTML = infoHTML;
+  } else {
+    this.panelInfo = new PanelExpandable(this.idInfo);
+    this.panelInfo.initialize(this.idInfo, true);
+    this.panelInfo.setPanelContent(infoHTML);
+    this.panelInfo.doToggleContent();
+    this.panelInfo.matchPanelStatus();
+  } 
 }
   
 GraphicsNDimensions.prototype.snapShotLaTeX = function() {

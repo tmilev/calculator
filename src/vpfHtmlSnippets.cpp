@@ -169,8 +169,21 @@ const std::string HtmlRoutines::GetCSSLinkLieAlgebras(const std::string& relativ
   return HtmlRoutines::GetCSSLink(relativeTo + "calculator-html/style_lie_algebras.css");
 }
 
+const std::string HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator(const std::string& relativeTo) {
+  return
+  HtmlRoutines::GetCSSLink(relativeTo + "calculator-html/styleCalculator.css") +
+  HtmlRoutines::GetCSSLink(relativeTo + "calculator-html/style_lie_algebras.css") ;
+}
+
 const std::string HtmlRoutines::GetJavascriptLinkPanels(const std::string& relativeTo) {
   return HtmlRoutines::GetJavascriptLink(relativeTo + "calculator-html/panels.js");
+}
+
+const std::string HtmlRoutines::GetJavascriptLinkGraphicsNDimensionsWithPanels(const std::string& relativeTo) {
+  return
+  HtmlRoutines::GetJavascriptLink(relativeTo + "calculator-html/panels.js") +
+  HtmlRoutines::GetJavascriptLink(relativeTo + "calculator-html/graphics_n_dimensions.js")
+  ;
 }
 
 const std::string HtmlRoutines::GetJavascriptLinkGraphicsNDimensions(const std::string& relativeTo) {

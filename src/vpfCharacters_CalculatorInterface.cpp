@@ -313,7 +313,7 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
   theEigenValueCandidate.SetSize(1);
   Matrix<Rational> tempMat;
   for (int ii = 0; ii < upperLimitComputations; ii ++) {
-    int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0,1,- 1,2,-2,3,-3,...
+    int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0, 1, - 1, 2, - 2, 3, - 3,...
 //    stOutput << "checking " << i << " found " << found << "\n";
     theEigenValueCandidate[0] = i;
     if (theMinPoly.Evaluate(theEigenValueCandidate) == 0) {
@@ -574,9 +574,6 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize(
   Vector<Rational> theWeightRat;
   Expression theContextE;
   if (theCommands.GetTypeWeight<Rational>(theCommands, input, theWeightRat, theContextE, theSSalgebra, 0)) {
-    //stOutput << " DEBUG: needed " << theGlobalVariables.GetElapsedSeconds()-startTimeForDebug
-    //<< " seconds to get type/weight info. ";
-    //stOutput << "DEBUG: Computing orbit size for: " << theSSalgebra->theWeyl.theDynkinType.ToString();
     Rational result = theSSalgebra->theWeyl.GetOrbitSize(theWeightRat);
     return output.AssignValue(result, theCommands);
   }
@@ -1018,8 +1015,6 @@ bool CalculatorFunctionsWeylGroup::innerTensorWeylReps(Calculator& theCommands, 
   FormatExpressions theFormat;
   theFormat.flagUseLatex = true;
   theFormat.flagUseHTML = false;
-  //stOutput << "<br>left rep is: " << leftRep.ToString(&theFormat);
-  //stOutput << "<br>right rep is: " << rightRep.ToString(&theFormat);
   if (leftRep.ownerGroup != rightRep.ownerGroup) {
     return output.MakeError("Error: attempting to tensor irreps with different owner groups. ", theCommands);
   }

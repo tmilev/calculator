@@ -1,11 +1,9 @@
 /**
- * File needs to function as a stand-alone javascript 
+ * This file needs to function as stand-alone javascript 
  * as well be used as a commonJS module included via
  * require('panels.js')).
  * Please don't require(...) any modules from this file.
  **/
-
-
 "use strict";
 
 function modifyHeightForTimeout(currentButtonPanel, newHeight) { 
@@ -58,7 +56,6 @@ function toggleHeight(currentButton, currentPanelID) {
 }
 
 function transitionDone(event) { 
-  //console.log("CAlled transitionDone");
   this.removeEventListener("transitionend", transitionDone);
   if (this.transitionState === "collapsing") { 
     this.style.display = "none";
@@ -234,7 +231,7 @@ PanelExpandable.prototype.initializeProgressPanel = function() {
   spanContent += `onclick = "window.calculator.panels.doToggleContent('${this.containerId}');">`;
   spanContent += `<span id = "${this.attributes.expandedMarkerId}">&#9666;</span>`;
   spanContent += "</button>";
-  spanContent += `<div id = "${this.attributes.panelId}" class = "panelExpandable"></div>`;
+  spanContent += `<div id = "${this.attributes.panelId}" class = "PanelExpandable"></div>`;
   spanContainer.innerHTML = spanContent;
   while (this.container.firstChild) {
     this.container.removeChild(this.container.firstChild);
@@ -264,4 +261,5 @@ module.exports = {
   toggleMenu,
   doToggleContent,
   PanelExpandable,
+  toggleHeight
 };

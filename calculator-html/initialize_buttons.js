@@ -225,7 +225,7 @@ function initializeAccordionButtons() {
       for (var i = 0; i < theProps.length; i ++) { 
         var current = panelsCollapseStatus[theProps[i]];
         if (current.isCollapsed) {
-          toggleHeight(document.getElementById(current.button), theProps[i]);
+          panels.toggleHeight(document.getElementById(current.button), theProps[i]);
         }
       }
     }

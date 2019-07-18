@@ -168,8 +168,8 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(bool Verbose, bool writeToHD,
   FormatExpressions theFormat, latexFormat;
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
-  out << "<hr>Lie algebra type: " << theWeyl.theDynkinType << ". ";
-  out << "<br>Weyl group size: " << theWeyl.theGroup.GetSize().ToString() << ".";
+  out << "<h1>Lie algebra " << this->ToStringLieAlgebraNameFullHTML() << "</h1>";
+  out << "<br>Weyl group size: " << theWeyl.theGroup.GetSize().ToString() << ".<br>";
   if (!Verbose) {
     out << "<br>To get extra details: ";
     std::stringstream tempStream;
@@ -178,8 +178,8 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(bool Verbose, bool writeToHD,
   } else {
     DrawingVariables theDV;
     theWeyl.DrawRootSystem(theDV, true, true, 0, true, 0);
-    out << "<hr>A drawing of the root system in its corresponding Coxeter plane. "
-    << "Computations were carried out as explained by John Stembridge. "
+    out << "A drawing of the root system in its corresponding Coxeter plane. "
+    << "A basis of the plane was computed as explained by the website of John Stembridge. "
     << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
     << "<br>The grey lines are the edges of the Weyl chamber.<br>"
     << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());

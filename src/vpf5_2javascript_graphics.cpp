@@ -114,7 +114,7 @@ std::string DrawingVariables::GetHtmlDiv(int theDimension) {
   out << "<canvas width = '" << this->DefaultHtmlWidth << "' "
   << "height = '" << this->DefaultHtmlHeight << "'"
   << " id = '" << idCanvas << "'>Canvas not supported</canvas><br>";
-  out << "<span id = '" << idSpanInformation << "'></span><br>";
+  out << "<span type =\"text/javascript\" id = '" << idSpanInformation << "'></span><br>";
   JSData theData;
   theData["idCanvas"] = idCanvas;
   theData["idSpanInformation"] = idSpanInformation;

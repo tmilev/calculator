@@ -295,9 +295,9 @@ GraphicsNDimensions.prototype.drawText = function(location, text, color) {
 GraphicsNDimensions.prototype.getBilinearFormInput = function () {
   var result = "";
   result += "The bilinear form of the vector space follows. The ij^th element ";
-  result += " gives the scalar product of e_i and e_j. If you enter a degenerate or non-positive definite ";
-  result += " symmetric bilinear form the javascript might crash. You are expected to enter";
-  result += " a symmetric strictly positive definite matrix. <br> \n";
+  result += "gives the scalar product of e_i and e_j. If you enter a degenerate or non-positive definite ";
+  result += "symmetric bilinear form the javascript might crash. You are expected to enter ";
+  result += "a symmetric strictly positive definite matrix. <br> \n";
   for (var counterRow = 0; counterRow < this.theBilinearForm.length; counterRow ++) { 
     for (var counterColumn = 0; counterColumn < this.theBilinearForm[counterRow].NumCols; counterColumn ++) { 
       var idBilinearForm = `${this.idCanvas}textBilinearForm_${i}_${j}`;
@@ -318,7 +318,7 @@ GraphicsNDimensions.prototype.getBilinearFormInput = function () {
   result += "inside the projection plane or the selected vector is orthogonal to the projection plane. ";
   result += "If one of these cases happens, the picture might jump around a bit.";
   result += "<br>The mouse wheel zooms in/out. ";
-  result += " Zooming is tested to work on Firefox and google Chrome browsers on Ubuntu.";
+  result += "Zooming is tested to work on Firefox and google Chrome browsers on Ubuntu. ";
   result += `<br>${this.drawOperations.length} elements drawn. `;
   var textComponent = document.getElementById(`${this.idCanvas}snapShotLateXspan`);
   textComponent.innerHTML = result;
@@ -542,9 +542,6 @@ GraphicsNDimensions.prototype.drawAll = function() {
   this.computeProjectionsEiBasis();
   this.ComputeProjectionsSpecialVectors();
   this.canvas.clearRect(0, 0, this.widthHTML, this.heightHTML);
-  //this.canvas.fillStyle = "#FFFFFF";
-  //this.canvas.fillRect(0, 0, this.widthHtml, this.heightHtml);
-  //this.canvas.stroke();
   this.writeInfo();
   for (var counterOperation = 0; counterOperation < this.drawOperations.length; counterOperation ++) {
     var currentOperation = this.drawOperations[counterOperation];
@@ -807,7 +804,6 @@ GraphicsNDimensions.prototype.changeBasis = function() {
 GraphicsNDimensions.prototype.computePosXPosY = function(event) {
   this.mousePositionScreen[0] = event.clientX;
   this.mousePositionScreen[1] = event.clientY;
-  var thePointer = this.canvasContainer;
   var rect = this.canvasContainer.getBoundingClientRect();
   this.mousePositionScreen[0] -= rect.left;
   this.mousePositionScreen[1] -= rect.top;

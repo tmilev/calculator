@@ -298,7 +298,6 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(bool Verbose, bool writeToHD,
     outFile << "<html>";
     outFile << HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator("../../../");
     outFile << HtmlRoutines::GetJavascriptMathjax("../../../");
-    outFile << HtmlRoutines::GetJavascriptLinkPanels("../../../");
     outFile << HtmlRoutines::GetJavascriptLinkGraphicsNDimensionsWithPanels("../../../");
     outFile << "<body>";
     outFile << this->ToStringHTMLMenuStructureSummary("", false, true, true, true);

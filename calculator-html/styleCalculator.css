@@ -517,7 +517,7 @@ span.studentScoresWrapper {
 
 .PanelExpandable {
   transition: all 2s;
-  overflow: hidden;
+  overflow: auto;
   word-wrap: break-word;
 }
 

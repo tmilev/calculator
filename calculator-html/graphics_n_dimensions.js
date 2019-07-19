@@ -34,7 +34,7 @@
 var PanelExpandable;
 var collectionGraphicsNDimensions = {};
 
-function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
+function GraphicsNDimensions(inputIdCanvas, inputIdInfo, inputIdHighlightInfo) {
   this.vectors = [];
   this.vectorProjections = [];
   this.drawOperations = [];
@@ -43,7 +43,12 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.idInfo = inputIdInfo;
   this.idPlaneInfo = `${inputIdInfo}projectionPlane`;
   this.panelInfo = null;
-  this.idHighlightInfo = `${this.idCanvas}HighlightInfo`;
+  if (inputIdHighlightInfo !== null && inputIdHighlightInfo !== undefined && inputIdHighlightInfo !== "") {
+    this.idHighlightInfo = inputIdHighlightInfo;
+  } else {
+    this.idHighlightInfo = null;
+  }
+  this.highlightInfoContent = [];
   this.basisCircles = [];
   this.projectionsBasisCircles = [];
   this.eiBasis = [];
@@ -60,7 +65,13 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo) {
   this.graphicsUnit = 0;
   this.selectedBasisIndex = - 1;
   this.selectedHighlightIndex = - 1;
-  this.selectedIndexWithinGroup = -1;
+  /** 
+   * @type {Object<string, Object<string, boolean> >}
+   * Keys are indices of groups currently highlighted. 
+   * Values are arrays with indices 
+   * within each group over which the mouse is located. */
+
+  this.currentHighlightIndices = {};
   this.flagAllowMovingCoordinateSystemFromArbitraryClick = true;
 
   this.vOrthogonalSelected = [];
@@ -391,10 +402,22 @@ DrawHighlights.prototype.computeProjections = function () {
 }
 
 DrawHighlights.prototype.drawNoFinish = function () {
+  /**@type {GraphicsNDimensions} */
   var owner = collectionGraphicsNDimensions[this.ownerId];
-  if (this.indexInOperations != owner.selectedHighlightIndex) {
+  if (!(this.indexInOperations in owner.currentHighlightIndices)) {
     return;
   }
+  var currentIndices = owner.currentHighlightIndices[this.indexInOperations];
+  var nextLine = [];
+  for (var i = 0; i < this.labels.length; i ++) {
+    if (i in currentIndices) {
+      nextLine.push(`<b>${this.labels[i]}</b>`);
+    } else {
+      nextLine.push(this.labels[i]);
+    }
+  }
+  owner.highlightInfoContent.push(nextLine.join(", "));
+
   this.computeProjections();
   var canvas = owner.canvas;
   canvas.strokeStyle = this.color;
@@ -543,6 +566,7 @@ GraphicsNDimensions.prototype.drawAll = function() {
   this.ComputeProjectionsSpecialVectors();
   this.canvas.clearRect(0, 0, this.widthHTML, this.heightHTML);
   this.writeInfo();
+  this.highlightInfoContent = [];
   for (var counterOperation = 0; counterOperation < this.drawOperations.length; counterOperation ++) {
     var currentOperation = this.drawOperations[counterOperation];
     if (currentOperation.frameId !== undefined && currentOperation.frameId !== null) {
@@ -551,6 +575,12 @@ GraphicsNDimensions.prototype.drawAll = function() {
       }
     }
     currentOperation.drawNoFinish();
+  }
+  if (this.highlightInfoContent.length > 0) {
+    if (this.idHighlightInfo !== null) {
+      var highlightComponent = document.getElementById(this.idHighlightInfo);
+      highlightComponent.innerHTML = this.highlightInfoContent.join("<br>");
+    }
   }
   this.animationBasisChange.frameStarted = false;
 }
@@ -892,7 +922,7 @@ GraphicsNDimensions.prototype.clickCanvas = function(event) {
 GraphicsNDimensions.prototype.computeHighlightedIndex = function() {
   var oldSelected = this.selectedHighlightIndex;
   this.selectedHighlightIndex = - 1;
-  this.selectedIndexWithinGroup = - 1;
+  this.currentHighlightIndices = {};
   for (var i = 0; i < this.indicesHighlightOperations.length; i ++) {
     var currentIndex = this.indicesHighlightOperations[i];
     var currentHighlight = this.drawOperations[currentIndex];
@@ -903,11 +933,10 @@ GraphicsNDimensions.prototype.computeHighlightedIndex = function() {
         this.mousePositionScreen[0], this.mousePositionScreen[1], currentVectors[j][0], currentVectors[j][1]
       )) {
         this.selectedHighlightIndex = currentIndex;
-        this.selectedIndexWithinGroup = j;
-        break;
-      }
-      if (this.selectedHighlightIndex != -1) {
-        break;
+        if (this.currentHighlightIndices[currentIndex] === undefined) {
+          this.currentHighlightIndices[currentIndex] = {};
+        }
+        this.currentHighlightIndices[currentIndex][j] = true;
       }
     }
   }
@@ -1101,7 +1130,7 @@ function createGraphicsFromObject(input) {
   if (input.idSpanInformation === undefined || input.idSpanInformation === null) {
     throw("idSpanInformation missing.");
   }
-  var theObject = new GraphicsNDimensions(input.idCanvas, input.idSpanInformation);
+  var theObject = new GraphicsNDimensions(input.idCanvas, input.idSpanInformation, input.idHighlightInformation);
   theObject.initFromObject(input);
 }
 

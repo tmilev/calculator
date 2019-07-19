@@ -109,15 +109,18 @@ std::string DrawingVariables::GetHtmlDiv(int theDimension) {
   std::stringstream out;
   this->NumHtmlGraphics ++;
   std::string idCanvas = "idCanvasNDimensionalGraphics" + std::to_string(this->NumHtmlGraphics);
+  std::string idHighlightInformation = "idHighlightInfoNDimensionalGraphics" + std::to_string(this->NumHtmlGraphics);
   std::string idSpanInformation = "idCanvasInfoNDimensionalGraphics" + std::to_string(this->NumHtmlGraphics);
   std::string graphicsVar = "drawGraphics" + std::to_string(this->NumHtmlGraphics);
   out << "<canvas width = '" << this->DefaultHtmlWidth << "' "
   << "height = '" << this->DefaultHtmlHeight << "'"
   << " id = '" << idCanvas << "'>Canvas not supported</canvas><br>";
-  out << "<span type =\"text/javascript\" id = '" << idSpanInformation << "'></span><br>";
+  out << "<div id = '" << idHighlightInformation << "'></div><br>";
+  out << "<span id = '" << idSpanInformation << "'></span><br>";
   JSData theData;
   theData["idCanvas"] = idCanvas;
   theData["idSpanInformation"] = idSpanInformation;
+  theData["idHighlightInformation"] = idHighlightInformation;
   theData["widthHTML"] = this->DefaultHtmlWidth;
   theData["heightHTML"] = this->DefaultHtmlHeight;
   theData["screenBasis"] = this->theBuffer.BasisProjectionPlane;

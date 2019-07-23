@@ -99,6 +99,8 @@ $(info [1;34mLinker flags part 2: $(LIBRARIES_INCLUDED_AT_THE_END)[0m)
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
 SOURCES_RELATIVE_PATH=\
+abstract_syntax_notation_one_decoder.cpp \
+transport_layer_security_implementation.cpp \
 transport_layer_security.cpp \
 transport_layer_security_openssl.cpp \
 databasemongo.cpp \

@@ -18,7 +18,6 @@ ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementati
 //then get the CSR.csr file to a signing authority,
 //from where you get the signedFileCertificate1 and signedFileCertificate3
 const std::string TransportLayerSecurity::fileCertificate = "certificates/cert.pem";
-const std::string TransportLayerSecurity::fileCertificateConfiguration = "certificates/certificate_configuration.cnf";
 const std::string TransportLayerSecurity::fileKey = "certificates/key.pem";
 const std::string TransportLayerSecurity::signedFileCertificate1 = "certificates/calculator-algebra.crt";
 const std::string TransportLayerSecurity::signedFileCertificate3 = "certificates/godaddy-signature.crt";
@@ -76,45 +75,53 @@ void TransportLayerSecurity::FreeEverythingShutdown() {
 bool TransportLayerSecurity::initSSLKeyFiles() {
   MacroRegisterFunctionWithName("TransportLayerSecurity::initSSLKeyFiles");
   if (!this->flagDontUseOpenSSL) {
-    return this->openSSLData.initSSLkeyFiles();
+    return this->openSSLData.initSSLKeyFiles();
   } else {
-    crash << "not implemented yet. " << crash;
+    std::stringstream commentsOnFailure;
+    this->initSSLKeyFilesInternal(&commentsOnFailure);
+    crash << "Init ssl key files not implemented yet. " << commentsOnFailure.str() << crash;
     return false;
   }
 }
 
-bool TransportLayerSecurityOpenSSL::initSSLkeyFiles() {
-  MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLkeyFiles");
+bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
+  MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand");
   if (
-    !FileOperations::FileExistsVirtual(TransportLayerSecurity::fileCertificate, true, true) ||
-    !FileOperations::FileExistsVirtual(TransportLayerSecurity::fileKey, true, true)
+    FileOperations::FileExistsVirtual(TransportLayerSecurity::fileCertificate, true, true) &&
+    FileOperations::FileExistsVirtual(TransportLayerSecurity::fileKey, true, true)
   ) {
-    logWorker << logger::red << "SSL is available but CERTIFICATE files are missing." << logger::endL;
-    logWorker << logger::green << "Let me try to create those files for you." << logger::endL;
-    std::stringstream theCommand;
-    std::string certificatePhysicalName, keyPhysicalName, certificateConfiguration;
-    FileOperations::GetPhysicalFileNameFromVirtual(
-      TransportLayerSecurity::fileCertificate, certificatePhysicalName, true, true, 0
-    );
-    FileOperations::GetPhysicalFileNameFromVirtual(
-      TransportLayerSecurity::fileKey, keyPhysicalName, true, true, 0
-    );
-    FileOperations::GetPhysicalFileNameFromVirtual(
-      TransportLayerSecurity::fileCertificateConfiguration, certificateConfiguration, true, true, 0
-    );
-    theCommand <<  "openssl req -x509 -newkey rsa:2048 -nodes -keyout " << keyPhysicalName
-    << " -out " << certificatePhysicalName
-    << " -days 3001 ";
-    if (
-      theGlobalVariables.configuration["openSSLSubject"].theType != JSData::JSUndefined &&
-      theGlobalVariables.configuration["openSSLSubject"].theType == JSData::JSstring
-    ) {
-      theCommand << "-subj " << theGlobalVariables.configuration["openSSLSubject"].theString;
-      // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"
-    }
-    logServer << "About to generate key files with the following command. " << logger::endL;
-    logServer << logger::green << theCommand.str() << logger::endL;
-    theGlobalVariables.CallSystemNoOutput(theCommand.str(), &logServer);
+    return true;
+  }
+  logWorker << logger::red << "SSL is available but CERTIFICATE files are missing." << logger::endL;
+  logWorker << logger::green << "Let me try to create those files for you." << logger::endL;
+  std::stringstream theCommand;
+  std::string certificatePhysicalName, keyPhysicalName;
+  FileOperations::GetPhysicalFileNameFromVirtual(
+    TransportLayerSecurity::fileCertificate, certificatePhysicalName, true, true, 0
+  );
+  FileOperations::GetPhysicalFileNameFromVirtual(
+    TransportLayerSecurity::fileKey, keyPhysicalName, true, true, 0
+  );
+  theCommand <<  "openssl req -x509 -newkey rsa:2048 -nodes -keyout " << keyPhysicalName
+  << " -out " << certificatePhysicalName
+  << " -days 3001 ";
+  if (
+    theGlobalVariables.configuration["openSSLSubject"].theType != JSData::JSUndefined &&
+    theGlobalVariables.configuration["openSSLSubject"].theType == JSData::JSstring
+  ) {
+    theCommand << "-subj " << theGlobalVariables.configuration["openSSLSubject"].theString;
+    // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"
+  }
+  logServer << "About to generate key files with the following command. " << logger::endL;
+  logServer << logger::green << theCommand.str() << logger::endL;
+  theGlobalVariables.CallSystemNoOutput(theCommand.str(), &logServer);
+  return true;
+}
+
+bool TransportLayerSecurityOpenSSL::initSSLKeyFiles() {
+  MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLKeyFiles");
+  if (!TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand()) {
+    return false;
   }
   if (
     !FileOperations::FileExistsVirtual(TransportLayerSecurity::fileCertificate, true, true) ||
@@ -206,7 +213,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     TransportLayerSecurity::signedFileKey, signedFileKeyPhysical, true, true, 0
   );
   //////////////////////////////////////////////////////////
-  if (!this->initSSLkeyFiles()) {
+  if (!this->initSSLKeyFiles()) {
     return;
   }
   logServer << logger::green << "SSL is available." << logger::endL;
@@ -299,7 +306,6 @@ bool TransportLayerSecurity::SSLWriteLoop(
   int i = 0;
   int numBytes = - 1;
   for (i = 0; i < numTries; i ++) {
-    logWorker << "DEBUG: about to ssl write!!!\n" << logger::endL;
     numBytes = this->SSLWrite(
       this->writeBuffer,
       outputError,
@@ -307,7 +313,6 @@ bool TransportLayerSecurity::SSLWriteLoop(
       commentsGeneral,
       includeNoErrorInComments
     );
-    logWorker << "DEBUG: ssl write done, numbytes: " << numBytes << "!!!" << logger::endL;
     if (numBytes == this->writeBuffer.size) {
       break;
     }
@@ -454,22 +459,17 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   std::stringstream* commentsGeneral
 ) {
   this->FreeSSL();
-  logWorker << "DEBUG: About to init ssl client. " << logger::endL;
   this->initSSLClient();
-  logWorker << "DEBUG: init ssl client SUCCESS!. " << logger::endL;
   this->sslData = SSL_new(this->context);
   if (this->sslData == 0) {
     this->flagSSLHandshakeSuccessful = false;
     logOpenSSL << logger::red << "Failed to allocate ssl. " << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen. " << crash;
   }
-  logOpenSSL << logger::red << "DEBUG: here i am at handshake no socket cleanup!\nWhy no new line?" << logger::endL;
   this->SetSocketAddToStack(inputSocketID);
   int maxNumHandshakeTries = 4;
   for (int i = 0; i < maxNumHandshakeTries; i ++) {
-    logOpenSSL << logger::red << "DEBUG: before ssl connect.\n" << logger::endL;
     this->errorCode = SSL_connect(this->sslData);
-    logOpenSSL << logger::red << "DEBUG: AFTER ssl connect.\n" << logger::endL;
     this->flagSSLHandshakeSuccessful = false;
     if (this->errorCode != 1) {
       if (this->errorCode == 0) {
@@ -585,11 +585,9 @@ bool TransportLayerSecurity::HandShakeIamClientNoSocketCleanup(
   std::stringstream* commentsGeneral
 ) {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamClientNoSocketCleanup");
-  logWorker << "DEBUG: about to handshake ..." << logger::endL;
   this->openSSLData.CheckCanInitializeToClient();
   this->openSSLData.CheckCanInitializeToClient();
   this->initialize(false);
-  logWorker << "DEBUG: initialized as client..." << logger::endL;
   if (!this->flagDontUseOpenSSL) {
     this->openSSLData.CheckCanInitializeToClient();
     return this->openSSLData.HandShakeIamClientNoSocketCleanup(inputSocketID, commentsOnFailure, commentsGeneral);

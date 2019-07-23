@@ -1257,7 +1257,7 @@ void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat) {
   FileOperations::OpenFileCreateIfNotPresentVirtual(output, myPath.str(), false, true, false);
   output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.ToString() << " root subalgebra of type "
   << this->theDynkinDiagram.ToString() << "</title>";
-  output << "<meta name =\"keywords\" content =\"" << this->GetAmbientWeyl().theDynkinType.ToString()
+  output << "<meta name = \"keywords\" content = \"" << this->GetAmbientWeyl().theDynkinType.ToString()
   << " root subsystems, root subsystems, root systems";
   if (this->GetAmbientWeyl().theDynkinType.HasExceptionalComponent()) {
     output << ", exceptional Lie algebra";
@@ -3048,7 +3048,7 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat) {
   output << "<html><title> Root subsystems of "
   << this->theSubalgebras[0].theDynkinDiagram.ToString()
   << "</title>";
-  output << "<meta name =\"keywords\" content =\""
+  output << "<meta name = \"keywords\" content = \""
   << this->theSubalgebras[0].theDynkinDiagram.ToString()
   << " root subsystems, root subsystems, root systems";
   if (this->GetOwnerWeyl().theDynkinType.HasExceptionalComponent()) {
@@ -3260,7 +3260,7 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
   << " larger than the Cartan subalgebra + the Cartan subalgebra + the full subalgebra).\n\n";
   out << "<table border =\"1\">\n <colgroup>";
   for (int i = 0; i < this->NumColsPerTableLatex; i ++) {
-    out << "<col width =\"180\">";
+    out << "<col width = \"180\">";
   }
   out << "</colgroup>";
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
@@ -3269,7 +3269,7 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
     if (col == 0) {
       out << "<tr>";
     }
-    out << "<td style =\"vertical-align: text-top;\" title =\"" << tooltipSAs << "\">";
+    out << "<td style = \"vertical-align: text-top;\" title =\"" << tooltipSAs << "\">";
     out << "\n\nType k_{ss}: " << this->ToStringAlgebraLink(i);
     out << "<br>";
     if (i == 0) {

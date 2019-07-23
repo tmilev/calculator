@@ -320,7 +320,7 @@ bool Crypto::ConvertBase64ToBitStream(
   int numBitsInStack = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (!Crypto::Get6bitFromChar(input[i], sixBitDigit)) {
-      if (input[i] != '=') {
+      if (input[i] != '=' && input[i] != '\n') {
         if (commentsOnFailure != 0) {
           *commentsOnFailure << "<hr>Error: the input string: <br>\n"
           << input << "\n<br>had characters outside of base64";
@@ -1141,7 +1141,7 @@ void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& outpu
   }
 }
 
-bool Certificate::LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+bool CertificateRSA::LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("Certificate::LoadFromJSON");
   if (commentsGeneral != 0) {
     *commentsGeneral << "<hr>Loading certificate from: "
@@ -1178,7 +1178,7 @@ bool Certificate::LoadFromJSON(JSData& input, std::stringstream* commentsOnFailu
   return true;
 }
 
-List<Certificate> Crypto::knownCertificates;
+List<CertificateRSA> Crypto::knownCertificates;
 
 bool Crypto::LoadOneKnownCertificate(
   const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
@@ -1191,7 +1191,7 @@ bool Crypto::LoadOneKnownCertificate(
   if (!certificateJSON.readstring(input, false, commentsOnFailure)) {
     return false;
   }
-  Certificate currentCert;
+  CertificateRSA currentCert;
   bool isGood = false;
   if (certificateJSON.theType == JSData::JSObject) {
     if (certificateJSON.HasKey("keys")) {
@@ -1218,7 +1218,7 @@ bool Crypto::LoadOneKnownCertificate(
   return true;
 }
 
-std::string Certificate::ToString() {
+std::string CertificateRSA::ToString() {
   std::stringstream out;
   out << "Algorithm: " << this->algorithm << "\n<br>\n";
   out << "Keyid: "     << this->keyid << "\n<br>\n";

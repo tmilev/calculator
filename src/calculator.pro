@@ -320,7 +320,8 @@ HEADERS += \
     vpfMacros.h \
     vpfPackedVector.h \
     webserver.h \
-    transport_layer_security.h
+    transport_layer_security.h \
+    abstract_syntax_notation_one_decoder.h
 
 SOURCES += \
     database.cpp \
@@ -920,4 +921,6 @@ SOURCES += \
     boringssl/crypto/err/err_data.c \
     boringssl/crypto/err/err_data.c \
     transport_layer_security.cpp \
-    transport_layer_security_openssl.cpp
+    transport_layer_security_openssl.cpp \
+    transport_layer_security_implementation.cpp \
+    abstract_syntax_notation_one_decoder.cpp

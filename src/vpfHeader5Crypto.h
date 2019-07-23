@@ -5,7 +5,7 @@
 #include "vpfJson.h"
 static ProjectInformationInstance projectInfoCryptoHeader(__FILE__, "Crypto class declaration.");
 
-class Certificate {
+class CertificateRSA {
 public:
   std::string algorithm;
   std::string keyid;
@@ -25,7 +25,7 @@ public:
   static const int LengthSha3DefaultInBytes = 32;
   static bool flagRIPEMDBigEndian;
 
-  static List<Certificate> knownCertificates;
+  static List<CertificateRSA> knownCertificates;
   static List<uint32_t> kArraySha2xx;
   static bool LoadKnownCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   static bool LoadOneKnownCertificate(

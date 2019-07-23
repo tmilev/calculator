@@ -1742,7 +1742,6 @@ std::string MathRoutines::StringTrimToLengthForDisplay(const std::string& input,
 
 void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::string& output) {
   //this function needs to be rewritten to do one substr call (no time now).
-  std::stringstream out;
   output = "";
   output.reserve(inputString.size());
   unsigned i = 0;

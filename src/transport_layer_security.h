@@ -76,7 +76,32 @@ struct TransportLayerSecurityOpenSSL {
   void RemoveLastSocket();
   bool HandShakeIamServer(int inputSocketID);
   bool InspectCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  static bool initSSLkeyFiles();
+  static bool initSSLKeyFiles();
+  static bool initSSLKeyFilesCreateOnDemand();
+};
+
+class X509Certificate {
+public:
+  X509_CINF *cert_info;
+  X509_ALGOR *sig_alg;
+  ASN1_BIT_STRING *signature;
+  std::string name;
+  CRYPTO_EX_DATA ex_data;
+  /* These contain copies of various extension values */
+  long ex_pathlen;
+  long ex_pcpathlen;
+  unsigned long ex_flags;
+  unsigned long ex_kusage;
+  unsigned long ex_xkusage;
+  unsigned long ex_nscert;
+  ASN1_OCTET_STRING *skid;
+  AUTHORITY_KEYID *akid;
+  X509_POLICY_CACHE *policy_cache;
+  STACK_OF(DIST_POINT) *crldp;
+  STACK_OF(GENERAL_NAME) *altname;
+  NAME_CONSTRAINTS *nc;
+  unsigned char sha1_hash[SHA_DIGEST_LENGTH];
+  X509_CERT_AUX *aux;
 };
 
 class TransportLayerSecurity {
@@ -91,7 +116,6 @@ public:
   int readBufferStandardSize;
 
   static const std::string fileCertificate;
-  static const std::string fileCertificateConfiguration;
   static const std::string fileKey;
   static const std::string signedFileCertificate1;
   static const std::string signedFileCertificate3;
@@ -132,6 +156,9 @@ public:
     int inputSocketID, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   bool initSSLKeyFiles();
+  bool initSSLKeyFilesInternal(std::stringstream* commentsOnFailure);
+  bool LoadPEMCertificate(std::stringstream *commentsOnFailure);
+  bool LoadPEMPrivateKey(std::stringstream* commentsOnFailure);
   void Free();
   void FreeEverythingShutdown();
 };

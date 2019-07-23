@@ -805,8 +805,8 @@ bool Crypto::VerifyJWTagainstKnownKeys(
       break;
     }
     if (commentsGeneral != 0 && i == 0) {
-      *commentsGeneral << "<br><span style =\"color:red\"><b>Couldn't find key ID: "
-      << keyIDstring << " from cached certificate.</b></span>";
+      *commentsGeneral << "<br><b style =\"color:red\">Couldn't find key ID: "
+      << keyIDstring << " from cached certificate.</b>";
     }
     if (commentsGeneral != 0) {
       *commentsGeneral << "<br>Reloading google public keys. ";
@@ -818,16 +818,16 @@ bool Crypto::VerifyJWTagainstKnownKeys(
   }
   if (theIndex == - 1) {
     if (commentsOnFailure != 0) {
-      *commentsOnFailure << "<span style =\"color:red\"><b>Could not find key id: "
-      << keyIDstring << "</b></span>. ";
+      *commentsOnFailure << "<b style =\"color:red\">Could not find key id: "
+      << keyIDstring << "</b>. ";
     }
     return false;
   }
   if (commentsGeneral != 0) {
-    *commentsGeneral << "<span style =\"color:green\"><b>Found key id: "
-    << keyIDstring << ".</b></span>";
+    *commentsGeneral << "<b style =\"color:green\">Found key id: "
+    << keyIDstring << ".</b>";
   }
-  Certificate& currentCert = Crypto::knownCertificates[theIndex];
+  CertificateRSA& currentCert = Crypto::knownCertificates[theIndex];
   return theToken.VerifyRSA256(
     currentCert.theModuluS, currentCert.theExponenT, commentsOnFailure, commentsGeneral
   );
@@ -849,9 +849,9 @@ bool WebCrawler::VerifyRecaptcha(
     "certificates/recaptcha-secret.txt", secret, true, true, commentsOnFailure
   )) {
     if (commentsOnFailure != 0) {
-      *commentsOnFailure << "<span style =\"color:red\"><b>"
+      *commentsOnFailure << "<b style =\"color:red\">"
       << "Failed to load recaptcha secret."
-      << " </b></span>";
+      << "</b>";
     }
     return false;
   }
@@ -861,7 +861,7 @@ bool WebCrawler::VerifyRecaptcha(
   }
   if (recaptchaURLencoded == "") {
     if (commentsOnFailure != 0) {
-      *commentsOnFailure << "<span style =\"color:red\"><b>Recaptcha appears to be missing. </b></span>";
+      *commentsOnFailure << "<b style =\"color:red\">Recaptcha appears to be missing. </b>";
     }
     return false;
   }
@@ -884,7 +884,7 @@ bool WebCrawler::VerifyRecaptcha(
       *commentsOnFailure << "<span style =\"color:red\">"
       << "<b>" << "Failed to extract response token from captcha verification. "
       << "</b>"
-      << " <br>The response string was: "
+      << "<br>The response string was: "
       << response
       << "</span>";
     }
@@ -915,9 +915,9 @@ bool WebCrawler::VerifyRecaptcha(
   } else {
     if (commentsGeneralNONsensitive != 0) {
       *commentsGeneralNONsensitive
-      << "<br><span style =\"color:green\">"
-      << "<b>" << "Your recaptcha answer appears to be valid. "
-      << "</b></span>\n<br>\n";
+      << "<br><b style =\"color:green\">"
+      << "Your recaptcha answer appears to be valid. "
+      << "</b>\n<br>\n";
     }
     if (commentsGeneralSensitive != 0) {
       *commentsGeneralSensitive

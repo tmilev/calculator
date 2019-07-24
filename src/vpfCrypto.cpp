@@ -520,7 +520,7 @@ void Crypto::ConvertUint32ToString(const List<uint32_t>& input, std::string& out
   }
 }
 
-bool Crypto::ConvertHexToString(const std::string& input, std::string& output) {
+bool Crypto::ConvertHexToString(const std::string& input, std::string& output, std::stringstream* commentsOnFailure) {
   output.reserve(input.size() / 2);
   output.clear();
   bool result = true;
@@ -529,6 +529,9 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output) {
     for (unsigned j = 0; j < 2; j ++) {
       if (i + j >= input.size()) {
         result = false;
+        if (commentsOnFailure != 0) {
+          *commentsOnFailure << "Input has an odd number of symbols. ";
+        }
         break;
       }
       char currentChar = input[i + j];
@@ -546,6 +549,9 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output) {
         nextByte *= 16;
         nextByte += theDigit;
       } else {
+        if (commentsOnFailure != 0 && result) {
+          *commentsOnFailure << "Found unexpected character: " << currentChar;
+        }
         result = false;
       }
     }

@@ -588,6 +588,15 @@ void Calculator::initPredefinedInnerFunctions() {
     "LoadKnownCertificates"
   );
   this->AddOperationInnerHandler(
+    "ASN1Decode", CalculatorFunctionsGeneral::innerX509certificateCrunch, "",
+    "Processes a x509 certificate database. This function is part of a security research "
+    "project and will be documented at a later time (if at all). Please do not use this function. ",
+    "X509CertificateCrunch(\"certificates\"); ",
+    false, true,
+    "CalculatorFunctionsGeneral::innerX509certificateCrunch",
+    "X509CertificateCrunch"
+  );
+  this->AddOperationInnerHandler(
     "X509CertificateCrunch", CalculatorFunctionsGeneral::innerX509certificateCrunch, "",
     "Processes a x509 certificate database. This function is part of a security research "
     "project and will be documented at a later time (if at all). Please do not use this function. ",

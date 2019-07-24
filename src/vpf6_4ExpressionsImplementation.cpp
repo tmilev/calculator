@@ -2441,7 +2441,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<std::string>()) {
     if (!useQuotes) {
       if (isFinal) {
-        out << this->GetValue<std::string>();
+        out << Calculator::ConvertStringToHexPrependConversionIfNeeded(this->GetValue<std::string>());
       } else {
         out << HtmlRoutines::ConvertStringToHtmlString(this->GetValue<std::string>(), false);
       }
@@ -2482,7 +2482,6 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << this->GetValue<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >().ToString();
     result = true;
   } else if (this->IsOfType<ElementHyperoctahedralGroupR2>()) {
-    //stOutput << "got here!!!!";
     out << this->GetValue<ElementHyperoctahedralGroupR2>().ToString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<Polynomial<Rational> >()) {
@@ -3738,7 +3737,7 @@ std::string Expression::ToString(
         }
         out << "</td><td class =\"cellCalculatorResult\">";
         if ((*this)[i].IsOfType<std::string>() && isFinal) {
-          currentOutput = currentE.GetValue<std::string>();
+          currentOutput = Calculator::ConvertStringToHexPrependConversionIfNeeded(currentE.GetValue<std::string>());
         } else if ((
             currentE.HasType<Plot> () ||
             currentE.IsOfType<SemisimpleSubalgebras>() ||

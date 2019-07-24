@@ -514,9 +514,9 @@ bool CalculatorFunctionsGeneral::innerHexToString(Calculator& theCommands, const
     inputString = input.ToString();
   }
   std::string result;
-  if (!Crypto::ConvertHexToString(inputString, result)) {
-    return theCommands << "Failed to interpret " << inputString
-    << " as a hex string ";
+  std::stringstream commentsOnFailure;
+  if (!Crypto::ConvertHexToString(inputString, result, &commentsOnFailure)) {
+    return theCommands << "Failed to interpret your input as string. " << commentsOnFailure.str();
   }
   return output.AssignValue(result, theCommands);
 }
@@ -2135,6 +2135,7 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
     }
   }
+  (void) input;
   List<DynkinType> theTypes;
   DynkinType::GetPrecomputedDynkinTypes(theTypes);
   ProgressReport theReport;
@@ -2184,4 +2185,32 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
     }
   }
   return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerASN1Decode(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerASN1Decode");
+  std::string content;
+  if (!input.IsOfType<std::string>(&content)) {
+    return false;
+  }
+  return theCommands << "ASN1 decode not implemented yet. ";
+}
+
+std::string Calculator::ConvertStringToHexPrependConversionIfNeeded(const std::string& input) {
+  bool foundBad = false;
+  for (unsigned i = 0; i < input.size(); i ++) {
+    // All characters smaller than \t = 9
+    // and all characters larger than 127
+    // are considered non-standard.
+    if ((unsigned) (input[i]) < 9 || (unsigned) (input[i]) > 127) {
+      foundBad = true;
+      break;
+    }
+  }
+  if (!foundBad) {
+    return input;
+  }
+  std::stringstream out;
+  out << "ConvertHexToString{}\"" << Crypto::ConvertStringToHex(input) << "\"";
+  return out.str();
 }

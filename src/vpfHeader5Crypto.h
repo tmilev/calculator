@@ -69,7 +69,7 @@ public:
   static bool ConvertBase58ToHexSignificantDigitsFirst(
     const std::string& input, std::string& output, std::stringstream* commentsOnFailure
   );
-  static bool ConvertHexToString(const std::string& input, std::string& output);
+  static bool ConvertHexToString(const std::string& input, std::string& output, std::stringstream* commentsOnFailure);
   static bool ConvertHexToInteger(const std::string& input, LargeIntUnsigned &output, int &outputNumLeadingZeroPairs);
   static bool ConvertStringToHex(const std::string& input, std::string& output);
   static void AppendDoubleSha256Check(const std::string& input, std::string& output);

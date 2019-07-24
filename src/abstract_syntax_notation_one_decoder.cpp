@@ -19,7 +19,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::isCostructedByte(char input) {
 bool AbstractSyntaxNotationOneSubsetDecoder::Decode(std::stringstream* commentsOnError) {
   this->dataPointer = 0;
   while (this->dataPointer < (signed) this->rawData.size()) {
-
+    this->dataPointer ++;
   }
 
   return false;

@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 
 #include "abstract_syntax_notation_one_decoder.h"
+#include "vpfHeader5Crypto.h"
 
 ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementation(__FILE__, "Abstract syntax notation one (ASN-1) implementation");
 
@@ -10,21 +11,130 @@ AbstractSyntaxNotationOneSubsetObject::AbstractSyntaxNotationOneSubsetObject() {
   this->indexInOwner = - 1;
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::isCostructedByte(char input) {
+bool AbstractSyntaxNotationOneSubsetDecoder::isCostructedByte(unsigned char input) {
   int sixthBit = input / 32;
   sixthBit %= 2;
   return sixthBit != 0;
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::Decode(std::stringstream* commentsOnError) {
-  this->dataPointer = 0;
-  while (this->dataPointer < (signed) this->rawData.size()) {
-    this->dataPointer ++;
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrentConstructed(std::stringstream* commentsOnError) {
+  unsigned char startByte = this->rawData[this->dataPointer];
+  if (!this->isCostructedByte(startByte)) {
+    crash << "Byte " << (int) startByte << " must be constructed. " << crash;
   }
+  unsigned char nonConstructedPart = startByte - 32;
+  AbstractSyntaxNotationOneSubsetDecoder::typeDecoder handler = this->decodersByByteValue[nonConstructedPart];
+  if (handler == 0) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "No handler for byte: " << (int) startByte << ". ";
+    }
+    return false;
+  }
+  this->dataPointer ++;
+  return handler(*this, commentsOnError);
+}
 
+AbstractSyntaxNotationOneSubsetDecoder::AbstractSyntaxNotationOneSubsetDecoder() {
+  this->flagLogByteInterpretation = false;
+}
+
+void AbstractSyntaxNotationOneSubsetDecoder::initialize() {
+}
+
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
+  int& outputLengthNegativeOneForVariable, std::stringstream* commentsOnError
+) {
+  outputLengthNegativeOneForVariable = 0;
+  unsigned char currentByte = this->rawData[this->dataPointer];
+  if (currentByte < 128) { // 128 = 0x80
+    outputLengthNegativeOneForVariable = currentByte;
+    this->dataPointer ++;
+    return true;
+  }
+  if (currentByte == 128) { // 128 = 0x80 signals varible-length encoding
+    outputLengthNegativeOneForVariable = - 1;
+    this->dataPointer ++;
+    return true;
+  }
+  int numberOfLengthBytes = currentByte - 128;
+  LargeInt length = 0;
+  this->dataPointer ++;
+  for (int i = 0; i < numberOfLengthBytes; i ++) {
+    length *= 256;
+    if (this->PointerIsBad(commentsOnError)) {
+      return false;
+    }
+    length += this->rawData[this->dataPointer];
+  }
+  if (!length.IsIntegerFittingInInt(&outputLengthNegativeOneForVariable)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Variable length is too large. ";
+    }
+    return false;
+  }
+  return true;
+}
+
+bool AbstractSyntaxNotationOneSubsetDecoder::PointerIsBad(std::stringstream* commentsOnError) {
+  if (this->dataPointer >= (signed) this->rawData.size() || this->dataPointer < 0) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Unexpected overflow error: data pointer is negative. ";
+    }
+    return true;
+  }
   return false;
 }
 
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(std::stringstream* commentsOnError) {
+  if (this->PointerIsBad(commentsOnError)) {
+    return false;
+  }
+  unsigned char startByte = this->rawData[this->dataPointer];
+  this->dataPointer ++;
+  int currentLength = 0;
+  if (!this->DecodeLengthIncrementDataPointer(currentLength, commentsOnError)) {
+    return false;
+  }
+  if (currentLength < 0) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Variable length encoding not implemented. ";
+    }
+    return false;
+  }
+  if (commentsOnError != 0) {
+    *commentsOnError << "Decoded length: " << currentLength << ". ";
+  }
+  return false;
+}
+
+
+bool AbstractSyntaxNotationOneSubsetDecoder::Decode(std::stringstream* commentsOnError) {
+  MacroRegisterFunctionWithName("AbstractSyntaxNotationOneSubsetDecoder::Decode");
+  unsigned int maxAllowedSize = 1000000000;
+  if (this->rawData.size() >= maxAllowedSize) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Input size: " << this->rawData.size() << " too large, max allowed: " << maxAllowedSize << ". ";
+    }
+    return false;
+  }
+  this->initialize();
+  this->dataPointer = 0;
+  this->DecodeCurrent(commentsOnError);
+  if (this->dataPointer < (signed) this->rawData.size()) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Decoded " << this->dataPointer << " bytes but the input had: " << this->rawData.size() << ". ";
+    }
+    return false;
+  }
+  return true;
+}
+
+std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
+  std::stringstream out;
+  out << "Data: ";
+  out << MathRoutines::StringShortenInsertDots(Crypto::ConvertStringToHex(this->rawData), 4000);
+  return out.str();
+}
 
 /*
 #define RET_TAG_NEXT_SAME_LEVEL_THIS_OBJECT_ONLY			0

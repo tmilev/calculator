@@ -330,8 +330,8 @@ bool CalculatorFunctionsGeneral::innerHashString(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerBase64ToString(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerBase64ToString");
+bool CalculatorFunctionsGeneral::innerConvertBase64ToString(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertBase64ToString");
   std::string theString, result;
   if (!input.IsOfType<std::string>(&theString)) {
     theString = input.ToString();

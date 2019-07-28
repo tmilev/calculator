@@ -2190,14 +2190,19 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
 
 bool CalculatorFunctionsGeneral::innerASN1Decode(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerASN1Decode");
-  std::string content;
-  if (!input.IsOfType<std::string>(&content)) {
+  AbstractSyntaxNotationOneSubsetDecoder theDecoder;
+  if (!input.IsOfType<std::string>(&theDecoder.rawData)) {
     return false;
   }
-  AbstractSyntaxNotationOneSubsetDecoder theDecoder;
-
-
-  return theCommands << "ASN1 decode not implemented yet. ";
+  std::stringstream commentsOnError;
+  std::stringstream out;
+  out << "Not implemented yet.<br>";
+  theDecoder.flagLogByteInterpretation = true;
+  if (!theDecoder.Decode(&commentsOnError)) {
+    out << "Failed to decode.<br>" << commentsOnError.str();
+  }
+  out << theDecoder.ToStringDebug();
+  return output.AssignValue(out.str(), theCommands);
 }
 
 std::string Calculator::ConvertStringToHexPrependConversionIfNeeded(const std::string& input) {

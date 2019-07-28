@@ -641,17 +641,17 @@ void Calculator::initPredefinedInnerFunctions() {
     "CharToBase64"
   );
   this->AddOperationInnerHandler(
-    "Base64ToString",
-    CalculatorFunctionsGeneral::innerBase64ToString,
+    "ConvertBase64ToString",
+    CalculatorFunctionsGeneral::innerConvertBase64ToString,
     "",
     "Converts base64 to string",
-    "Base64ToString("
+    "ConvertBase64ToString("
     "\"k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9\""
     ");",
     true,
     false,
-    "CalculatorFunctionsGeneral::innerBase64ToString",
-    "Base64ToString"
+    "CalculatorFunctionsGeneral::innerConvertBase64ToString",
+    "ConvertBase64ToString"
   );
   this->AddOperationInnerHandler(
     "LoadKnownCertificates",
@@ -669,7 +669,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerASN1Decode,
     "",
     "Tests decoding of abstract syntax one. ",
-    "ASN1Decode(LoadFileIntoString(\"output/test_cert.base64\")); ",
+    "ASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_private_key.base64\")));\n"
+    "ASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_cert.base64\")));",
     true,
     true,
     "CalculatorFunctionsGeneral::innerASN1Decode",
@@ -690,7 +691,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "X509CertificateCrunch"
   );
   this->AddOperationInnerHandler(
-    "JWTverifyAgainstKnownKeys", CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys, "",
+    "JWTverifyAgainstKnownKeys",
+    CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys,
+    "",
     "Tries to verify a Json Web Token.",
     "%HideLHS JWTverifyAgainstKnownKeys(\"\"); ",
     true, false,
@@ -698,7 +701,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "JWTverifyAgainstKnownKeys"
   );
   this->AddOperationInnerHandler(
-    "JWTverifyRSA256", CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256, "",
+    "JWTverifyRSA256",
+    CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256,
+    "",
     "Tries to verify a Json Web Token with respect to a given rsa modulus and exponent. "
     "The reference JWT token was taken from: https://tools.ietf.org/html/rfc7515#page-38, "
     "Appendix A.2.",
@@ -712,7 +717,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "JWTverifyRSA256"
   );
   this->AddOperationInnerHandler(
-    "Sha1", CalculatorFunctionsGeneral::innerSha1OfString, "",
+    "Sha1",
+    CalculatorFunctionsGeneral::innerSha1OfString,
+    "",
     "Converts characters to a sequence of bits and computes the sha1 hash value of those bits. "
     "The examples below are taken from Wikipedia. ",
     "Sha1(\"The quick brown fox jumps over the lazy dog\");\n"
@@ -722,7 +729,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "Sha1"
   );
   this->AddOperationInnerHandler(
-    "Sha224", CalculatorFunctionsGeneral::innerSha224OfString, "",
+    "Sha224",
+    CalculatorFunctionsGeneral::innerSha224OfString,
+    "",
     "Converts characters to a sequence of bits and computes the sha224 hash value of those bits. "
     "Reference: Wikipedia. ",
     "Sha224(\"\");",
@@ -1165,7 +1174,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "Polynomialize"
   );
   this->AddOperationInnerHandler(
-    "IsAlgebraicRadical", CalculatorFunctionsGeneral::innerIsAlgebraicRadical, "",
+    "IsAlgebraicRadical",
+    CalculatorFunctionsGeneral::innerIsAlgebraicRadical, "",
     "Tests whether the expression is an algebraic expression "
     "obtained using radicals and the four arithmetic operations.  ",
     "IsAlgebraicRadical(\\sqrt{5+\\sqrt{2}}); "
@@ -1176,7 +1186,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsAlgebraicRadical"
   );
   this->AddOperationInnerHandler(
-    "IsReal", CalculatorFunctionsGeneral::innerIsReal, "",
+    "IsReal",
+    CalculatorFunctionsGeneral::innerIsReal, "",
     "Tests whether the expression is a real constant.  ",
     "IsReal(\\sqrt{5+\\sqrt{- 1}}); IsReal(\\sqrt{\\sqrt{5}- 1});\n"
     "IsReal(sqrt(\\sqrt{\\pi}-2) )",
@@ -1185,7 +1196,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsReal"
   );
   this->AddOperationInnerHandler(
-    "IsConstant", CalculatorFunctionsGeneral::innerIsConstant, "",
+    "IsConstant",
+    CalculatorFunctionsGeneral::innerIsConstant, "",
     "Tests whether the expression is a constant.  ",
     "IsConstant(\\pi^2); IsConstant(1);IsConstant(x);\n"
     "IsConstant(e^{\\sin(\\pi^2+e +\\sqrt{2}+3)}  ); ",
@@ -1394,7 +1406,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateBlockIb"
   );
   this->AddOperationInnerHandler(
-    "\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa, "",
+    "\\int",
+    CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa, "",
     "Integrates building blocks IIa and IIIa.  ",
     "\\int  (\\frac{3x +2}{x^2+x + 1} ) dx ",
     true, false,
@@ -1402,7 +1415,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateBlockIIaIIIa"
   );
   this->AddOperationInnerHandler(
-    "\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb, "",
+    "\\int",
+    CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb, "",
     "Integrates building blocks IIIb.  ",
     "\\int  (\\frac{3x +2}{(x^2+x + 1)^2} ) dx ",
     true, false,
@@ -1432,10 +1446,12 @@ void Calculator::initPredefinedInnerFunctions() {
   */
 
   this->AddOperationInnerHandler(
-    "Differentiate", CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig, "",
-    "Differentiation - product rule.  ",
+    "Differentiate",
+    CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig, "",
+    "Differentiation - product rule. ",
     "Differentiate(x,  (\\sin x) \\cos x )",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig",
     "DifferentiateTrigAndInverseTrig"
   );

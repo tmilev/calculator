@@ -669,8 +669,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerASN1Decode,
     "",
     "Tests decoding of abstract syntax one. ",
-    " ASN1Decode(LoadFileIntoString(\"output/test_cert.base64\")); ",
-    false,
+    "ASN1Decode(LoadFileIntoString(\"output/test_cert.base64\")); ",
+    true,
     true,
     "CalculatorFunctionsGeneral::innerASN1Decode",
     "ASN1Decode"

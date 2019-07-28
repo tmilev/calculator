@@ -10,6 +10,7 @@
 #include "vpfHeader2Math9DrawingVariables.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 #include "vpfHeader5Crypto.h"
+#include "abstract_syntax_notation_one_decoder.h"
 #include "vpfImplementationHeader2Math11_EllipticCurves.h"
 //////////////////////////////////////
 #include "webserver.h"
@@ -2193,6 +2194,9 @@ bool CalculatorFunctionsGeneral::innerASN1Decode(Calculator& theCommands, const 
   if (!input.IsOfType<std::string>(&content)) {
     return false;
   }
+  AbstractSyntaxNotationOneSubsetDecoder theDecoder;
+
+
   return theCommands << "ASN1 decode not implemented yet. ";
 }
 

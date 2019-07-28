@@ -90,7 +90,6 @@ public:
   static bool innerDistributeExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDistributeSqrt(Calculator& theCommands, const Expression& input, Expression& output);
 
-
   static bool innerChooseCartanSA(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPolynomialDivisionSlidesGrLex(Calculator& theCommands, const Expression& input, Expression& output);

@@ -7,13 +7,13 @@ ProjectInformationInstance ProjectInfoVpf6_05cpp(__FILE__, "Calculator core eval
 std::string Calculator::ToStringFunctionHandlersJSON() {
   MacroRegisterFunctionWithName("Calculator::ToStringFunctionHandlersJSON");
   JSData output;
-  output.theType = JSData::JSObject;
+  output.theType = JSData::token::tokenObject;
   for (int currentAtomIndex = 0; currentAtomIndex < this->theAtoms.size; currentAtomIndex ++) {
     const std::string& currentAtom = this->theAtoms[currentAtomIndex];
     JSData currentAtomJSON, currentFunctionListDirect, currentFunctionListComposite;
-    currentAtomJSON.theType = JSData::JSObject;
-    currentFunctionListDirect.theType = JSData::JSarray;
-    currentFunctionListComposite.theType = JSData::JSarray;
+    currentAtomJSON.theType = JSData::token::tokenObject;
+    currentFunctionListDirect.theType = JSData::token::tokenArray;
+    currentFunctionListComposite.theType = JSData::token::tokenArray;
     if (currentAtomIndex >= this->FunctionHandlers.size) {
       crash << "This shouldn't happen: bad atom index. " << crash;
     }
@@ -927,7 +927,7 @@ void Calculator::EvaluateCommands() {
     }
     out << javascriptString;
     JSData result;
-    result.theType = JSData::JSObject;
+    result.theType = JSData::token::tokenObject;
     std::string resultString = this->theProgramExpression.ToString(
       &theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression, true, &result
     );

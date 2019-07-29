@@ -4420,41 +4420,6 @@ public:
   Vector<Rational> GetRootIMustBeWeight() const;
 };
 
-template <class Object>
-const Object& MemorySaving<Object>::GetElementConst() const {
-  if (this->theValue == 0) {
-    crash << "Programming error: attempting to access zero pointer. " << crash;
-  }
-  return *this->theValue;
-}
-
-template <class Object>
-MemorySaving<Object>::~MemorySaving() {
-  this->FreeMemory();
-}
-
-template <class Object>
-void MemorySaving<Object>::FreeMemory() {
-  delete this->theValue;
-  this->theValue = 0;
-#ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter --;
-  ParallelComputing::CheckPointerCounters();
-#endif
-}
-
-template <class Object>
-Object& MemorySaving<Object>::GetElement() {
-  if (this->theValue == 0) {
-    this->theValue = new Object;
-#ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter ++;
-  ParallelComputing::CheckPointerCounters();
-#endif
-  }
-  return *(this->theValue);
-}
-
 template <class coefficient>
 int Matrix<coefficient>::FindPositiveLCMCoefficientDenominatorsTruncated() {
   int result = 1;

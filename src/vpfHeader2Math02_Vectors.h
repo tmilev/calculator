@@ -738,7 +738,7 @@ class Vectors: public List<Vector<coefficient> > {
   bool LinearAlgebraForVertexComputation(
     Selection& theSelection, Vector<coefficient>& output, Matrix<coefficient>& buffer, Selection& NonPivotPointsBuffer
   );
-  void GetVectorsDouble(Vectors<double>& output) {
+  void GetVectorsDouble(Vectors<double>& output) const {
     output.SetSize(this->size);
     for (int i = 0; i < this->size; i ++) {
       output[i] = this->TheObjects[i].GetVectorDouble();

@@ -778,7 +778,7 @@ bool Crypto::VerifyJWTagainstKnownKeys(
     }
     return false;
   }
-  if (header.theType == header.JSObject) {
+  if (header.theType == JSData::token::tokenObject) {
     if (header.HasKey("kid")) {
       keyIDstring = header.GetValue("kid").theString;
     }
@@ -902,7 +902,7 @@ bool WebCrawler::VerifyRecaptcha(
   }
   JSData theSuccess;
   theSuccess = theJSparser.GetValue("success");
-  if (theSuccess.theType != theJSparser.JSbool || theSuccess.theBoolean != true) {
+  if (theSuccess.theType != JSData::token::tokenBool || theSuccess.theBoolean != true) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "<br><b style =\"color:red\">"
       << "Could not verify your captcha solution. "

@@ -478,7 +478,6 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
     Matrix<Rational> M;
     stOutput << "Getting class matrix " << i << "\n";
     M = GetClassMatrix(G,i,&classmap);
-    //stOutput << M.ToString(&consoleFormat) << "\n";
     List<VectorSpace<Rational> > es = GetEigenspaces(M);
     for (int esi = 0; !foundEmAll && esi < es.size; esi ++) {
       int spsize = spaces.size;
@@ -646,7 +645,7 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
   List<bool> tsg;
   tsg.SetSize(G->theGroup.characterTable.size);
   for (int i = 0; i < G->theGroup.characterTable.size; i ++) {
-    tsg[i] =  G->theGroup.characterTable[i].data == Xs;
+    tsg[i] = G->theGroup.characterTable[i].data == Xs;
   }
   tss.AddOnTop(tsg);
 
@@ -689,39 +688,39 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
 
 template <typename elementSomeGroup>
 void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData &data) {
-  data.theType = JSData::JSObject;
+  data.theType = JSData::token::tokenObject;
   JSData& representatives = data.objects.GetValueCreate("representatives");
   JSData& sizes = data.objects.GetValueCreate("sizes");
   JSData& characters = data.objects.GetValueCreate("characters");
-  representatives.theType = JSData::JSarray;
+  representatives.theType = JSData::token::tokenArray;
   representatives.theList.SetSize(G.ConjugacyClassCount());
 
   for (int i = 0; i < G.ConjugacyClassCount(); i ++) {
     List<int> reprefs;
     G.GetWord(G.conjugacyClasseS[i].representative, reprefs);
-    representatives.theList[i].theType = JSData::JSarray;
+    representatives.theList[i].theType = JSData::token::tokenArray;
     representatives.theList[i].theList.SetSize(reprefs.size);
     for (int j = 0; j < reprefs.size; j ++) {
-      representatives.theList[i].theList[j].theType = JSData::JSnumber;
-      representatives.theList[i].theList[j].number = reprefs[j];
+      representatives.theList[i].theList[j].theType = JSData::token::tokenLargeInteger;
+      representatives.theList[i].theList[j].theInteger.GetElement() = reprefs[j];
     }
   }
-  sizes.theType = JSData::JSarray;
+  sizes.theType = JSData::token::tokenArray;
   sizes.theList.SetSize(G.ConjugacyClassCount());
   for (int i = 0; i < G.ConjugacyClassCount(); i ++) {
-    sizes.theList[i].theType = JSData::JSnumber;
-    sizes.theList[i].number = ((Rational) G.conjugacyClasseS[i].size).GetDoubleValue();
+    sizes.theList[i].theType = JSData::token::tokenLargeInteger;
+    sizes.theList[i].theInteger.GetElement() = G.conjugacyClasseS[i].size;
   }
-  characters.theType = JSData::JSarray;
+  characters.theType = JSData::token::tokenArray;
   characters.theList.SetSize(G.characterTable.size);
   for (int i = 0; i < G.characterTable.size; i ++) {
     for (int j = 0; j < G.characterTable[i].data.size; j ++) {
-      characters[i][j] = G.characterTable[i][j].GetDoubleValue();
+      characters[i][j] = G.characterTable[i][j].GetNumerator();
     }
   }
 }
 
-void ExportTauSignatures(WeylGroupData& G, const List<List<bool> > ts, JSData &data) {
+void ExportTauSignatures(WeylGroupData& G, const List<List<bool> >& ts, JSData &data) {
   ExportCharTable(G.theGroup, data["chartable"]);
   for (int i = 0; i < ts.size; i ++) {
     for (int j = 0; j < ts[i].size; j ++) {

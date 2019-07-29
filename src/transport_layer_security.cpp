@@ -106,8 +106,8 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   << " -out " << certificatePhysicalName
   << " -days 3001 ";
   if (
-    theGlobalVariables.configuration["openSSLSubject"].theType != JSData::JSUndefined &&
-    theGlobalVariables.configuration["openSSLSubject"].theType == JSData::JSstring
+    theGlobalVariables.configuration["openSSLSubject"].theType != JSData::token::tokenUndefined &&
+    theGlobalVariables.configuration["openSSLSubject"].theType == JSData::token::tokenString
   ) {
     theCommand << "-subj " << theGlobalVariables.configuration["openSSLSubject"].theString;
     // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"

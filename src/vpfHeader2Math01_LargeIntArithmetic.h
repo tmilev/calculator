@@ -163,7 +163,7 @@ public:
   }
   void MultiplyByInt(int x);
   void ToString(std::string& output) const;
-  inline std::string ToString(FormatExpressions* theFormat = 0) const {
+  std::string ToString(FormatExpressions* theFormat = 0) const {
     (void) theFormat;//avoid unused parameter warning, portable
     std::string tempS;
     this->ToString(tempS);

@@ -363,7 +363,7 @@ bool UserCalculatorData::LoadFromJSON(JSData& input) {
   this->courseInDB                        = input[DatabaseStrings::labelCurrentCourses                    ].theString;
   this->sectionsTaught.SetSize(0);
   JSData sectionsTaughtList = input[DatabaseStrings::labelSectionsTaught];
-  if (sectionsTaughtList.theType == JSData::JSarray) {
+  if (sectionsTaughtList.theType == JSData::token::tokenArray) {
     for (int i = 0; i < sectionsTaughtList.theList.size; i ++) {
       this->sectionsTaught.AddOnTop(sectionsTaughtList.theList[i].theString);
     }
@@ -385,8 +385,8 @@ JSData UserCalculatorData::ToJSON() {
     result[DatabaseStrings::labelProblemDatA                     ] = this->problemDataStrinG                     ;
   }
   result[DatabaseStrings::labelProblemDataJSON                   ] = this->problemDataJSON                       ;
-  if (this->problemDataJSON.theType == JSData::JSUndefined) {
-    result[DatabaseStrings::labelProblemDataJSON].theType = JSData::JSarray;
+  if (this->problemDataJSON.theType == JSData::token::tokenUndefined) {
+    result[DatabaseStrings::labelProblemDataJSON].theType = JSData::token::tokenArray;
     result[DatabaseStrings::labelProblemDataJSON].theList.SetSize(0);
   }
   result[DatabaseStrings::labelPassword                          ] = this->actualHashedSaltedPassword            ;
@@ -397,14 +397,14 @@ JSData UserCalculatorData::ToJSON() {
   result[DatabaseStrings::labelSection                           ] = this->sectionInDB                           ;
   result[DatabaseStrings::labelCurrentCourses                    ] = this->courseInDB                            ;
   JSData sectionsTaughtList;
-  sectionsTaughtList.theType = JSData::JSarray;
+  sectionsTaughtList.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->sectionsTaught.size; i ++) {
     sectionsTaughtList[i] = this->sectionsTaught[i];
   }
   result[DatabaseStrings::labelSectionsTaught] = sectionsTaughtList;
   for (int i = result.objects.size() - 1; i >= 0; i --) {
     JSData& currentValue = result.objects.theValues[i];
-    if (currentValue.theString == "" && currentValue.theType == JSData::JSstring) {
+    if (currentValue.theString == "" && currentValue.theType == JSData::token::tokenString) {
       result.objects.RemoveKey(result.objects.theKeys[i]);
     }
   }
@@ -472,7 +472,7 @@ std::string ProblemData::StorE(){
 JSData ProblemData::StoreJSON() {
   MacroRegisterFunctionWithName("ProblemData::StoreJSON");
   JSData result;
-  result.theType = JSData::JSObject;
+  result.theType = JSData::token::tokenObject;
   if (this->flagRandomSeedGiven) {
     result["randomSeed"] = std::to_string(this->randomSeed);
   }
@@ -1410,7 +1410,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   if (!theData.readstring(theToken.claimsJSON, false, commentsOnFailure)) {
     return false;
   }
-  if (theData.GetValue("email").theType != JSData::JSstring) {
+  if (theData.GetValue("email").theType != JSData::token::tokenString) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "Could not find email entry in the json data " << theData.ToString(true);
     }

@@ -6,11 +6,6 @@
 
 ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementation(__FILE__, "Abstract syntax notation one (ASN-1) implementation");
 
-AbstractSyntaxNotationOneSubsetObject::AbstractSyntaxNotationOneSubsetObject() {
-  this->owner = 0;
-  this->indexInOwner = - 1;
-}
-
 bool AbstractSyntaxNotationOneSubsetDecoder::isCostructedByte(unsigned char input) {
   int sixthBit = input / 32;
   sixthBit %= 2;
@@ -65,6 +60,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
       return false;
     }
     length += this->rawData[this->dataPointer];
+    this->dataPointer ++;
   }
   if (!length.IsIntegerFittingInInt(&outputLengthNegativeOneForVariable)) {
     if (commentsOnError != 0) {
@@ -85,11 +81,60 @@ bool AbstractSyntaxNotationOneSubsetDecoder::PointerIsBad(std::stringstream* com
   return false;
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(std::stringstream* commentsOnError) {
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceContent(
+  std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output
+) {
+  output.reset(JSData::token::tokenArray);
+  int lastIndexPlusOne = this->dataPointer + desiredLengthInBytes;
+  JSData nextElement;
+  int numberOfDecoded = 0;
+  while (this->dataPointer < lastIndexPlusOne) {
+    int lastPointer = this->dataPointer;
+    if (!this->DecodeCurrent(commentsOnError, nextElement)) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Failed to decode sequence element of index: " << numberOfDecoded;
+      }
+      return false;
+    }
+    if (lastPointer >= this->dataPointer) {
+      crash << "Programming error: decode current did not increment the data pointer. " << crash;
+    }
+    output.theList.AddOnTop(nextElement);
+    numberOfDecoded ++;
+  }
+  return true;
+}
+
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
+  std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output
+) {
+  LargeInt reader = 0;
+  int currentContribution;
+  for (int i = 0; i < desiredLengthInBytes; i ++) {
+    currentContribution = this->rawData[this->dataPointer];
+    if (i == 0) {
+      if (currentContribution >= 128) {
+        currentContribution = 256 - currentContribution;
+      }
+    }
+    reader *= 256;
+    reader += currentContribution;
+    this->dataPointer ++;
+  }
+  //output = reader;
+  return true;
+}
+
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(std::stringstream* commentsOnError, JSData& output) {
   if (this->PointerIsBad(commentsOnError)) {
     return false;
   }
   unsigned char startByte = this->rawData[this->dataPointer];
+  int dataPointerAtStart = this->dataPointer;
+  bool isConstructed = this->isCostructedByte(startByte);
+  if (isConstructed) {
+    startByte -= 32;
+  }
   this->dataPointer ++;
   int currentLength = 0;
   if (!this->DecodeLengthIncrementDataPointer(currentLength, commentsOnError)) {
@@ -103,6 +148,17 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(std::stringstream* co
   }
   if (commentsOnError != 0) {
     *commentsOnError << "Decoded length: " << currentLength << ". ";
+  }
+  switch (startByte) {
+  case tags::integer:
+    return this->DecodeIntegerContent(commentsOnError, currentLength, output);
+  case tags::sequence:
+    return this->DecodeSequenceContent(commentsOnError, currentLength, output);
+  default:
+    if (commentsOnError != 0) {
+      *commentsOnError << "Unknown object tag: " << (int) startByte << " at position: " << dataPointerAtStart << ". ";
+    }
+    return false;
   }
   return false;
 }
@@ -119,7 +175,8 @@ bool AbstractSyntaxNotationOneSubsetDecoder::Decode(std::stringstream* commentsO
   }
   this->initialize();
   this->dataPointer = 0;
-  this->DecodeCurrent(commentsOnError);
+  this->decodedData.reset();
+  this->DecodeCurrent(commentsOnError, this->decodedData);
   if (this->dataPointer < (signed) this->rawData.size()) {
     if (commentsOnError != 0) {
       *commentsOnError << "Decoded " << this->dataPointer << " bytes but the input had: " << this->rawData.size() << ". ";

@@ -710,7 +710,7 @@ std::string HtmlInterpretation::GetSelectCourseJSON() {
   }
   CourseList theCourses;
   theCourses.LoadFromString(theTopicFile, &comments);
-  output["courses"].theType = JSData::JSarray;
+  output["courses"].theType = JSData::token::tokenArray;
   for (int i = 0; i < theCourses.theCourses.size; i ++) {
     Course& currentCourse = theCourses.theCourses[i];
     output["courses"].theList.AddOnTop(currentCourse.ToJSON());
@@ -911,7 +911,7 @@ std::string HtmlInterpretation::GetExamPageJSON() {
   if (theFile.flagLoadedSuccessfully) {
     output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
     JSData theScripts;
-    theScripts = JSData::JSarray;
+    theScripts = JSData::token::tokenArray;
     theScripts.theList.SetSize(theFile.theScripts.size());
     for (int i = 0; i < theFile.theScripts.size(); i ++) {
       theScripts[theFile.theScripts.theKeys[i]] =
@@ -991,7 +991,7 @@ std::string HtmlInterpretation::GetEditPageJSON() {
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicBundles);
   }
   JSData theAutoCompleteWordsJS;
-  theAutoCompleteWordsJS.theType = JSData::JSarray;
+  theAutoCompleteWordsJS.theType = JSData::token::tokenArray;
   for (int i = 0; i < theAutocompleteKeyWords.size; i ++) {
     theAutoCompleteWordsJS[i] = theAutocompleteKeyWords[i];
   }
@@ -1323,11 +1323,11 @@ std::string HtmlInterpretation::AddTeachersSections() {
     out << "<b style='color:red'>Failed to interpret your input. </b>";
     return out.str();
   }
-  if (inputParsed["teachers"].theType != JSData::JSstring) {
+  if (inputParsed["teachers"].theType != JSData::token::tokenString) {
     out << "<b style='color:red'>Failed to extract key 'teachers' from your input. </b>";
     return out.str();
   }
-  if (inputParsed["students"].theType != JSData::JSstring) {
+  if (inputParsed["students"].theType != JSData::token::tokenString) {
     out << "<b style='color:red'>Failed to find key 'students' in your input. </b>";
     return out.str();
   }
@@ -1988,7 +1988,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   }
   if (theGlobalVariables.problemExpectedNumberOfAnswers.size() == 0) {
     JSData findProblemInfo;
-    findProblemInfo.theType = JSData::JSarray;
+    findProblemInfo.theType = JSData::token::tokenArray;
     List<JSData> result;
     List<std::string> fields;
     fields.AddOnTop(DatabaseStrings::labelProblemName);

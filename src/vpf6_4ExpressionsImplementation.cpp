@@ -3018,8 +3018,8 @@ std::string Expression::ToStringAllSlidersInExpression() const {
 JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& startingExpression) const {
   MacroRegisterFunctionWithName("Expression::ToJSData");
   JSData result, input, output;
-  input.theType = JSData::JSarray;
-  output.theType = JSData::JSarray;
+  input.theType = JSData::token::tokenArray;
+  output.theType = JSData::token::tokenArray;
   if (this->IsListStartingWithAtom(this->owner->opEndStatement())) {
     for (int i = 1; i < this->size(); i ++) {
       const Expression currentE = (*this)[i];
@@ -3712,8 +3712,8 @@ std::string Expression::ToString(
     }
     std::string currentInput, currentOutput;
     if (outputJS != 0) {
-      (*outputJS)["input"].theType = JSData::JSarray;
-      (*outputJS)["output"].theType = JSData::JSarray;
+      (*outputJS)["input"].theType = JSData::token::tokenArray;
+      (*outputJS)["output"].theType = JSData::token::tokenArray;
     }
     for (int i = 1; i < this->size(); i ++) {
       const Expression currentE = (*this)[i];
@@ -3854,7 +3854,7 @@ std::string Expression::ToString(
     return outTrue.str();
   }
   if (outputJS != 0) {
-    if (outputJS->theType == JSData::JSUndefined) {
+    if (outputJS->theType == JSData::token::tokenUndefined) {
       (*outputJS) = out.str();
     }
   }

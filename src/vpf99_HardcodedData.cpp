@@ -1155,9 +1155,9 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     std::string sgString = currentSGdata.theList[0].theList[1].theString;
     readerSubgroup.generatingSimpleRoots.SetSize(0);
     for (int j = 0; j < currentSGdata.theList[0].theList[2].theList.size; j ++) {
-      readerSubgroup.generatingSimpleRoots.AddOnTop(
-        gapRootSystem[- 1 + (int) currentSGdata.theList[0].theList[2].theList[j].number]
-      );
+      int theInt = 0;
+      currentSGdata.theList[0].theList[2].theList[j].theInteger.GetElement().IsIntegerFittingInInt(&theInt);
+      readerSubgroup.generatingSimpleRoots.AddOnTop(gapRootSystem[- 1 + theInt]);
     }
     DynkinDiagramRootSubalgebra theSAdiagram;
     theSAdiagram.ComputeDiagramTypeModifyInput(readerSubgroup.generatingSimpleRoots, inputGroup);
@@ -1184,8 +1184,8 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
       }
     }
     readerSubgroup.tauSignature.SetSize(inputGroup.theGroup.characterTable.size);
-    for (int j = 0; j<readerSubgroup.tauSignature.size; j ++) {
-      readerSubgroup.tauSignature[j] = (int) currentSGdata.theList[1].theList[j].number;
+    for (int j = 0; j < readerSubgroup.tauSignature.size; j ++) {
+      readerSubgroup.tauSignature[j] = currentSGdata.theList[1].theList[j].theInteger.GetElement();
     }
     outputSubgroups.AddOnTop(readerSubgroup);
   }

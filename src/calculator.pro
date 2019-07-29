@@ -321,7 +321,8 @@ HEADERS += \
     vpfPackedVector.h \
     webserver.h \
     transport_layer_security.h \
-    abstract_syntax_notation_one_decoder.h
+    abstract_syntax_notation_one_decoder.h \
+    vpfHeader1General9_MemorySaving.h
 
 SOURCES += \
     database.cpp \

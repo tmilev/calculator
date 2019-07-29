@@ -450,29 +450,31 @@ void WeylElementPermutesRootSystem(const ElementWeylGroup& g, PermutationR2& p) 
 template <typename somegroup>
 void PrintCharTable(const somegroup& G, const char* filename) {
   JSData data;
-  data.theType = JSData::JSObject;
+  data.theType = JSData::token::tokenObject;
   JSData& representatives = data.objects.GetValueCreate("representatives");
   JSData& sizes = data.objects.GetValueCreate("sizes");
   JSData& characters = data.objects.GetValueCreate("characters");
-  representatives.theType = JSData::JSarray;
+  representatives.theType = JSData::token::tokenArray;
   representatives.theList.SetSize(G.conjugacyClasses.size);
   for (int i = 0; i < G.conjugacyClasses.size; i ++) {
     List<int> reprefs;
     G.GetWord(G.conjugacyClasses[i][0], reprefs);
-    representatives.theList[i].theType = JSData::JSarray;
+    representatives.theList[i].theType = JSData::token::tokenArray;
     representatives.theList[i].theList.SetSize(reprefs.size);
     for (int j = 0; j < reprefs.size; j ++) {
-      representatives.theList[i].theList[j].theType = JSData::JSnumber;
-      representatives.theList[i].theList[j].number = reprefs[j];
+      representatives.theList[i].theList[j].theType = JSData::token::tokenLargeInteger;
+      int fixme;
+      //representatives.theList[i].theList[j].theInteger.GetElement() = reprefs[j];
     }
   }
-  sizes.theType = JSData::JSarray;
+  sizes.theType = JSData::token::tokenArray;
   sizes.theList.SetSize(G.conjugacyClasses.size);
   for (int i = 0; i < G.conjugacyClasses.size; i ++) {
-    sizes.theList[i].theType = JSData::JSnumber;
-    sizes.theList[i].number = G.conjugacyClasses[i].size;
+    sizes.theList[i].theType = JSData::token::tokenLargeInteger;
+    int fixme;
+    //sizes.theList[i].theInteger.GetElement() = G.conjugacyClasses[i].size;
   }
-  characters.theType = JSData::JSarray;
+  characters.theType = JSData::token::tokenArray;
   characters.theList.SetSize(G.characterTable.size);
   for (int i = 0; i < G.characterTable.size; i ++) {
     for (int j = 0; j < G.characterTable[i].size; j ++) {
@@ -493,19 +495,21 @@ void AddCharTable(JSData& chartable, somegroup& G) {
   std::string sizes = "sizes";
 
   // check sizes
-  for (int i = 0; i <G.conjugacyClasses.size; i ++) {
-    if (chartable[sizes][i].number != G.conjugacyClasses[i].size) {
-      stOutput << "Size mismatch in conjugacy class " << i;
-    }
+  for (int i = 0; i < G.conjugacyClasses.size; i ++) {
+    int fixme;
+    //if (chartable[sizes][i].theInteger.GetElement() != G.conjugacyClasses[i].size) {
+    //  stOutput << "Size mismatch in conjugacy class " << i;
+    //}
   }
   // check representatives... well, not yet.
   // load characters
 
   G.characterTable.SetSize(chartable["characters"].theList.size);
-  for (int i = 0; i <chartable["characters"].theList.size; i ++) {
+  for (int i = 0; i < chartable["characters"].theList.size; i ++) {
     G.characterTable[i].SetSize(G.conjugacyClasses.size);
-    for (int j = 0; j<G.conjugacyClasses.size; j ++) {
-      G.characterTable[i][j] = chartable["characters"][i][j].number;
+    for (int j = 0; j < G.conjugacyClasses.size; j ++) {
+      int fixme;
+      //G.characterTable[i][j] = chartable["characters"][i][j].theInteger.GetElement();
     }
   }
 }

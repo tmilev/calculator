@@ -337,7 +337,7 @@ bool MongoQuery::FindMultiple(
     bson_destroy(this->options);
     this->options = 0;
   }
-  if (inputOptions.theType != JSData::JSUndefined) {
+  if (inputOptions.theType != JSData::token::tokenUndefined) {
     std::string optionsString = inputOptions.ToString(false, false);
     this->options = bson_new_from_json((const uint8_t*) optionsString.c_str(), optionsString.size(), &this->theError);
     if (this->options == NULL) {
@@ -479,7 +479,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(
   std::stringstream* commentsOnFailure
 ) {
   JSData options;
-  options.theType = JSData::JSUndefined;
+  options.theType = JSData::token::tokenUndefined;
   return DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions(
     collectionName, findQuery, output, options, maxOutputItems, totalItems, commentsOnFailure
   );
@@ -527,9 +527,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery");
   if (
-    updateQuery.theType != updateQuery.JSstring &&
-    updateQuery.theType != updateQuery.JSObject &&
-    updateQuery.theType != updateQuery.JSarray
+    updateQuery.theType != JSData::token::tokenString &&
+    updateQuery.theType != JSData::token::tokenObject &&
+    updateQuery.theType != JSData::token::tokenArray
   ) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "JSData: "
@@ -538,7 +538,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery(
     }
     return false;
   }
-  if (updateQuery.theType == updateQuery.JSObject) {
+  if (updateQuery.theType == JSData::token::tokenObject) {
     for (int i = 0; i < updateQuery.objects.size(); i ++) {
       if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery(
         updateQuery.objects.theValues[i], commentsOnFailure
@@ -547,7 +547,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery(
       }
     }
   }
-  if (updateQuery.theType == updateQuery.JSarray) {
+  if (updateQuery.theType == JSData::token::tokenArray) {
     for (int i = 0; i < updateQuery.theList.size; i ++) {
       if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery(
         updateQuery.theList[i], commentsOnFailure
@@ -564,7 +564,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoFindQuery(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoFindQuery");
   if (mustBeObject) {
-    if (findQuery.theType != findQuery.JSObject) {
+    if (findQuery.theType != JSData::token::tokenObject) {
       if (commentsOnFailure != 0) {
         *commentsOnFailure << "JSData: "
         << HtmlRoutines::ConvertStringToHtmlString(findQuery.ToString(false), false)
@@ -573,12 +573,12 @@ bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoFindQuery(
       return false;
     }
   } else {
-    if (findQuery.theType == findQuery.JSarray) {
+    if (findQuery.theType == JSData::token::tokenArray) {
       if (findQuery.theList.size == 0) {
         return true;
       }
     }
-    if (findQuery.theType != findQuery.JSstring && findQuery.theType != findQuery.JSObject) {
+    if (findQuery.theType != JSData::token::tokenString && findQuery.theType != JSData::token::tokenObject) {
       if (commentsOnFailure != 0) {
         *commentsOnFailure << "JSData: "
         << HtmlRoutines::ConvertStringToHtmlString(findQuery.ToString(false), false)
@@ -640,7 +640,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString");
   JSData options;
-  options.theType = JSData::JSUndefined;
+  options.theType = JSData::token::tokenUndefined;
   return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions(
     collectionName, findQuery, options, output, commentsOnFailure
   );
@@ -776,7 +776,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::getLabels(
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::getLabels");
   output.SetSize(0);
   for (int i = 0; i < fieldEntries.theList.size; i ++) {
-    if (fieldEntries.theList[i].theType != JSData::JSstring) {
+    if (fieldEntries.theList[i].theType != JSData::token::tokenString) {
       if (commentsOnFailure != 0) {
         *commentsOnFailure << "Label index " << i << " is not of type string as required. ";
       }
@@ -791,7 +791,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::isDeleteable(
   const JSData& theEntry, List<std::string>** outputPattern, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::isDeleteable");
-  if (theEntry.theType != JSData::JSObject || !theEntry.HasKey(DatabaseStrings::labelFields)) {
+  if (theEntry.theType != JSData::token::tokenObject || !theEntry.HasKey(DatabaseStrings::labelFields)) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure
       << "The labels json is required to be an object of the form {fields: [tableName, objectId,...]}. ";
@@ -1108,7 +1108,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchTable(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FetchTable");
   JSData findQuery;
-  findQuery.theType = findQuery.JSObject;
+  findQuery.theType = JSData::token::tokenObject;
   List<JSData> rowsJSON;
   DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(tableName, findQuery, rowsJSON, 200, totalItems, commentsOnFailure);
   HashedList<std::string, MathRoutines::HashString> theLabels;
@@ -1172,8 +1172,8 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONFetchItem(const List<std::str
   std::string currentTable = labelStrings[0];
   result["currentTable"] = currentTable;
   JSData projector, findQuery;
-  findQuery.theType = findQuery.JSObject;
-  projector.theType = projector.JSObject;
+  findQuery.theType = JSData::token::tokenObject;
+  projector.theType = JSData::token::tokenObject;
   findQuery[DatabaseStrings::labelIdMongo][DatabaseStrings::objectSelectorMongo] = labelStrings[1];
   if (labelStrings.size > 2) {
     projector = DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(labelStrings, 2);
@@ -1193,7 +1193,7 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONFetchItem(const List<std::str
     return result;
   }
   JSData theRows;
-  theRows.theType = theRows.JSarray;
+  theRows.theType = JSData::token::tokenArray;
   theRows.theList = rowsJSON;
   if (flagDebuggingAdmin) {
     result["findQuery"] = findQuery;
@@ -1215,7 +1215,7 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(const std:
     List<std::string> theCollectionNames;
     if (DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames(theCollectionNames, &out)) {
       JSData collectionNames;
-      collectionNames.theType = collectionNames.JSarray;
+      collectionNames.theType = JSData::token::tokenArray;
       collectionNames.theList = theCollectionNames;
       result["collections"] = collectionNames;
     } else {
@@ -1228,7 +1228,7 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(const std:
   if (allProjectors.HasKey(currentTable)) {
     projector = allProjectors[currentTable];
   }
-  findQuery.theType = findQuery.JSObject;
+  findQuery.theType = JSData::token::tokenObject;
   List<JSData> rowsJSON;
   long long totalItems = 0;
   std::stringstream comments;
@@ -1255,7 +1255,7 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(const std:
     return result;
   }
   JSData theRows;
-  theRows.theType = theRows.JSarray;
+  theRows.theType = JSData::token::tokenArray;
   theRows.theList = rowsJSON;
   result["rows"] = theRows;
   result["totalRows"] = (int) totalItems;

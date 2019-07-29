@@ -145,23 +145,6 @@ public:
   ~RegisterFunctionCall();
 };
 
-class ParallelComputing {
-public:
-  static long long GlobalPointerCounter;
-  static long long PointerCounterPeakRamUse;
-  static ControllerStartsRunning controllerSignalPauseUseForNonGraciousExitOnly;
-  static long long cgiLimitRAMuseNumPointersInList;
-  static bool flagUngracefulExitInitiated;
-  static unsigned int NumListsCreated;
-  static unsigned int NumListResizesTotal;
-  static unsigned int NumHashResizes;
-
-  static void CheckPointerCounters();
-  inline static void SafePointDontCallMeFromDestructors() {
-    ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly.SafePointDontCallMeFromDestructors();
-  }
-};
-
 typedef void (*drawLineFunction)(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
 typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize);
 typedef void (*drawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
@@ -544,52 +527,6 @@ class PointerObjectDestroyer {
   }
 };
 
-// This is a wrapper-allocate-on-first-use around a regular object.
-template <class Object>
-class MemorySaving {
-private:
-  Object* theValue;
-  MemorySaving(const MemorySaving<Object>& other) {
-    crash << "This constructor should not be used. " << crash;
-  }
-public:
-  void operator=(const MemorySaving<Object>& other) {
-    if (!other.IsZeroPointer()) {
-      this->GetElement() = other.GetElementConst();
-    } else {
-      this->FreeMemory();
-    }
-  }
-  const Object& GetElementConst() const;
-  Object& GetElement();
-  bool operator==(const MemorySaving<Object>& other) const {
-    if (this->IsZeroPointer() != other.IsZeroPointer()) {
-      return false;
-    }
-    if (this->IsZeroPointer()) {
-      return true;
-    }
-    return this->GetElementConst() == other.GetElementConst();
-  }
-  int HashFunction() const {
-    if (this->IsZeroPointer()) {
-      return 0;
-    }
-    return this->GetElementConst().HashFunction();
-  }
-  static inline int HashFunction(const MemorySaving<Object>& input) {
-    return input.HashFunction();
-  }
-  bool IsZeroPointer() const {
-    return this->theValue == 0;
-  }
-  void FreeMemory();
-  MemorySaving() {
-    this->theValue = 0;
-  }
-  ~MemorySaving();
-};
-
 class RecursionDepthCounter {
 public:
   int* theCounter;
@@ -647,8 +584,8 @@ public:
   inline Object& operator[](int i) const {
     return this->TheObjects[i];
   }
-  void operator= (const ListLight<Object>& right);
-  void operator= (const List<Object>& right) {
+  void operator=(const ListLight<Object>& right);
+  void operator=(const List<Object>& right) {
     this->SetSize(right.size);
     for (int i = 0; i < right.size; i ++) {
       this->TheObjects[i] = right[i];

@@ -1334,7 +1334,7 @@ JSData GroupRepresentation<someGroup, coefficient>::JSOut() {
   if (this->flagCharacterIsComputed) {
     out["character"] = this->theCharacteR.data;
   } else {
-    out["character"].theType = JSData::JSnull;
+    out["character"].theType = JSData::token::tokenNull;
   }
   for (int i = 0; i < generatorS.size; i ++) {
     out["generators"][i] = generatorS[i];
@@ -1422,7 +1422,7 @@ public:
     result *= other;
     return result;
   }
-  bool operator== (const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other) const {
+  bool operator==(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other) const {
     return this->ownerGroup == other.ownerGroup && this->theCharacteR == other.theCharacteR;
   }
   void SpreadVector(const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace);

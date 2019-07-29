@@ -173,7 +173,7 @@ void DrawOperations::drawCircleAtVectorBufferRational(
 ) {
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeCircleAtVector;
-  theOperation[DrawOperations::fieldLocation] = input;
+  theOperation[DrawOperations::fieldLocation] = input.GetVectorDouble();
   theOperation[DrawOperations::fieldRadius] = radius;
   theOperation[DrawOperations::fieldColor] = color;
   if (frameId != "") {
@@ -211,7 +211,9 @@ void DrawOperations::drawPath(
 ) {
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typePath;
-  theOperation[DrawOperations::fieldPoints] = theVectors;
+  Vectors<double> vectorsDouble;
+  theVectors.GetVectorsDouble(vectorsDouble);
+  theOperation[DrawOperations::fieldPoints] = vectorsDouble;
   theOperation[DrawOperations::fieldFrameId] = frameId;
   theOperation[DrawOperations::fieldFrameIndex] = frameIndex;
   if (color != "") {
@@ -228,7 +230,7 @@ void DrawOperations::drawLineBetweenTwoVectorsBufferDouble(
 ) {
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment;
-  theOperation[DrawOperations::fieldPoints] = JSData::JSarray;
+  theOperation[DrawOperations::fieldPoints] = JSData::token::tokenArray;
   theOperation[DrawOperations::fieldPoints][0] = vector1;
   theOperation[DrawOperations::fieldPoints][1] = vector2;
   if (color != "") {
@@ -248,7 +250,7 @@ void DrawOperations::drawFilledShape(
   (void) fillColorIndex;
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeFilledShape;
-  theOperation[DrawOperations::fieldPoints] = JSData::JSarray;
+  theOperation[DrawOperations::fieldPoints] = JSData::token::tokenArray;
   for (int i = 0; i < theCorners.size; i ++) {
     theOperation[DrawOperations::fieldPoints][i] = theCorners[i];
   }
@@ -265,7 +267,7 @@ void DrawOperations::drawTextAtVectorBufferRational(
   (void) fontSize;
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
-  theOperation[DrawOperations::fieldLocation] = input;
+  theOperation[DrawOperations::fieldLocation] = input.GetVectorDouble();
   theOperation[DrawOperations::fieldText] = inputText;
   this->theOperations.AddOnTop(theOperation);
 }
@@ -309,7 +311,7 @@ void DrawOperations::drawLineBuffer(
   (void) lineWidth;
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
-  theOperation[DrawOperations::fieldPoints].theType = JSData::JSarray;
+  theOperation[DrawOperations::fieldPoints].theType = JSData::token::tokenArray;
   theOperation[DrawOperations::fieldPoints][0][0] = X1;
   theOperation[DrawOperations::fieldPoints][0][1] = Y1;
   theOperation[DrawOperations::fieldPoints][1][0] = X2;
@@ -325,7 +327,7 @@ void DrawOperations::drawTextBuffer(
   (void) theTextStyle;
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
-  theOperation[DrawOperations::fieldLocation].theType = JSData::JSarray;
+  theOperation[DrawOperations::fieldLocation].theType = JSData::token::tokenArray;
   theOperation[DrawOperations::fieldLocation][0] = X1;
   theOperation[DrawOperations::fieldLocation][1] = Y1;
   theOperation[DrawOperations::fieldText] = inputText;

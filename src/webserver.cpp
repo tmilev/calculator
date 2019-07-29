@@ -3960,8 +3960,10 @@ void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse) {
   if (workerMessage["result"].theString == "toggleMonitoring") {
     this->ToggleProcessMonitoring();
   }
-  if (workerMessage["connectionsServed"].theType == JSData::JSnumber) {
-    this->NumberOfServerRequestsWithinAllConnections += (int) workerMessage["connectionsServed"].number;
+  if (workerMessage["connectionsServed"].theType == JSData::token::tokenLargeInteger) {
+    this->NumberOfServerRequestsWithinAllConnections +=
+    (int) workerMessage["connectionsServed"].theInteger.GetElement().GetIntValueTruncated()
+    ;
   }
   if (workerMessage["stopNeeded"].isTrueRepresentationInJSON()) {
     this->StopKillAll(false);
@@ -4626,7 +4628,7 @@ void WebServer::CheckSystemInstallationOpenSSL() {
   if (!theGlobalVariables.flagDatabaseCompiled) {
     return;
   }
-  if (theGlobalVariables.configuration["openSSL"].theType != JSData::JSUndefined) {
+  if (theGlobalVariables.configuration["openSSL"].theType != JSData::token::tokenUndefined) {
     return;
   }
   theGlobalVariables.configuration["openSSL"] = "Attempted installation";
@@ -4665,7 +4667,7 @@ void WebServer::CheckSystemInstallationMongoDB() {
   if (theGlobalVariables.OperatingSystem == "") {
     return;
   }
-  if (theGlobalVariables.configuration["mongoDB"].theType != JSData::JSUndefined) {
+  if (theGlobalVariables.configuration["mongoDB"].theType != JSData::token::tokenUndefined) {
     return;
   }
   theGlobalVariables.configuration["mongoDB"] = "Attempted installation";
@@ -4696,7 +4698,7 @@ void WebServer::CheckMongoDBSetup() {
   } else {
     logServer << logger::red << "Compiled without mongo DB support. " << logger::endL;
   }
-  if (theGlobalVariables.configuration["mongoDBSetup"].theType != JSData::JSUndefined) {
+  if (theGlobalVariables.configuration["mongoDBSetup"].theType != JSData::token::tokenUndefined) {
     return;
   }
   logServer << logger::yellow << "configuration so far: " << theGlobalVariables.configuration.ToString(false);
@@ -4741,7 +4743,7 @@ void WebServer::CheckMongoDBSetup() {
 
 void WebServer::CheckFreecalcSetup() {
   MacroRegisterFunctionWithName("WebServer::CheckFreecalcSetup");
-  if (theGlobalVariables.configuration["freecalcSetup"].theType != JSData::JSUndefined) {
+  if (theGlobalVariables.configuration["freecalcSetup"].theType != JSData::token::tokenUndefined) {
     return;
   }
   theGlobalVariables.configuration["freecalcSetup"] = "Setup started";
@@ -4760,7 +4762,7 @@ void WebServer::CheckFreecalcSetup() {
 
 void WebServer::CheckMathJaxSetup() {
   MacroRegisterFunctionWithName("WebServer::CheckMathJaxSetup");
-  if (theGlobalVariables.configuration["MathJax"].theType != JSData::JSUndefined) {
+  if (theGlobalVariables.configuration["MathJax"].theType != JSData::token::tokenUndefined) {
     return;
   }
   theGlobalVariables.configuration["MathJax"] = "Attempting to install";
@@ -5224,7 +5226,7 @@ void GlobalVariables::ConfigurationProcess() {
   } else {
     theGlobalVariables.configuration[Configuration::monitorPingTime] = theWebServer.WebServerPingIntervalInSeconds;
   }
-  if (theGlobalVariables.configuration[Configuration::gitRepository].theType == JSData::JSstring) {
+  if (theGlobalVariables.configuration[Configuration::gitRepository].theType == JSData::token::tokenString) {
     HtmlRoutines::gitRepository = theGlobalVariables.configuration[Configuration::gitRepository].theString;
   } else {
     theGlobalVariables.configuration[Configuration::gitRepository] = HtmlRoutines::gitRepository;

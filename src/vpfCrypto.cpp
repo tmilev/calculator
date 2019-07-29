@@ -1153,7 +1153,7 @@ bool CertificateRSA::LoadFromJSON(JSData& input, std::stringstream* commentsOnFa
     *commentsGeneral << "<hr>Loading certificate from: "
     << input.ToString(true);
   }
-  if (input.theType != JSData::JSObject) {
+  if (input.theType != JSData::token::tokenObject) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "Can't load certificate: JSON not of type object. ";
     }
@@ -1199,10 +1199,10 @@ bool Crypto::LoadOneKnownCertificate(
   }
   CertificateRSA currentCert;
   bool isGood = false;
-  if (certificateJSON.theType == JSData::JSObject) {
+  if (certificateJSON.theType == JSData::token::tokenObject) {
     if (certificateJSON.HasKey("keys")) {
       JSData theKeys = certificateJSON.GetValue("keys");
-      if (theKeys.theType == JSData::JSarray) {
+      if (theKeys.theType == JSData::token::tokenArray) {
         isGood = true;
         for (int i = 0; i < theKeys.theList.size; i ++) {
           if (!currentCert.LoadFromJSON(theKeys.theList[i], commentsOnFailure, commentsGeneral)) {

@@ -40,7 +40,7 @@ bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFai
   if (!Crypto::ConvertBase64ToString(certificateContentStripped, theDecoder.rawData, commentsOnFailure, 0)) {
     return false;
   }
-  logServer << "DEBUG: certificate hex:\n" << Crypto::ConvertStringToHex(theDecoder.rawData) << logger::endL;
+  logServer << "DEBUG: certificate hex:\n" << Crypto::ConvertStringToHex(theDecoder.rawData, 100, true) << logger::endL;
   if (!theDecoder.Decode(commentsOnFailure)) {
     return false;
   }

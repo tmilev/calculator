@@ -581,7 +581,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToHex(Calculator& theCommands, const
   if (!Crypto::ConvertBase64ToString(inputString, bitStream, &theCommands.Comments, &theCommands.Comments)) {
     return false;
   }
-  Crypto::ConvertStringToHex(bitStream, result);
+  Crypto::ConvertStringToHex(bitStream, result, 0, false);
   return output.AssignValue(result, theCommands);
 }
 
@@ -2220,6 +2220,6 @@ std::string Calculator::ConvertStringToHexPrependConversionIfNeeded(const std::s
     return input;
   }
   std::stringstream out;
-  out << "ConvertHexToString{}\"" << Crypto::ConvertStringToHex(input) << "\"";
+  out << "ConvertHexToString{}\"" << Crypto::ConvertStringToHex(input, 100, true) << "\"";
   return out.str();
 }

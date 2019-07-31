@@ -1045,7 +1045,7 @@ void WebWorker::AttemptUnknownRequestErrorCorrection() {
   }
   logIO << logger::red << "Unknown request. " << logger::endL;
   logIO << logger::blue << "Message head length: " << this->messageHead.size() << logger::endL;
-  std::string messageHeadHexed = Crypto::ConvertStringToHex(this->messageHead);
+  std::string messageHeadHexed = Crypto::ConvertStringToHex(this->messageHead, 100, false);
   logIO << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(messageHeadHexed, false, 300) << logger::endL;
   logIO << logger::orange << "Message body length: " << this->messageBody.size() << ". " << logger::endL;
   logIO << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->messageBody, false, 300) << logger::endL;

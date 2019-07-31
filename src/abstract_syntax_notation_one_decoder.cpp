@@ -189,7 +189,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::Decode(std::stringstream* commentsO
 std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
   std::stringstream out;
   out << "Data: ";
-  out << MathRoutines::StringShortenInsertDots(Crypto::ConvertStringToHex(this->rawData), 4000);
+  out << MathRoutines::StringShortenInsertDots(Crypto::ConvertStringToHex(this->rawData, 100, true), 4000);
   return out.str();
 }
 

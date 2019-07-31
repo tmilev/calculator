@@ -71,9 +71,11 @@ public:
   );
   static bool ConvertHexToString(const std::string& input, std::string& output, std::stringstream* commentsOnFailure);
   static bool ConvertHexToInteger(const std::string& input, LargeIntUnsigned &output, int &outputNumLeadingZeroPairs);
-  static bool ConvertStringToHex(const std::string& input, std::string& output);
+  static bool ConvertStringToHex(
+    const std::string& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
+  );
   static void AppendDoubleSha256Check(const std::string& input, std::string& output);
-  static std::string ConvertStringToHex(const std::string& input);
+  static std::string ConvertStringToHex(const std::string& input, int byteWidthLineBreakZeroForNone, bool useHtml);
   static bool GetBase58FromChar(unsigned char input, uint32_t& output);
   static bool GetCharFromBase58(uint32_t input, char& output);
   static bool Get6bitFromChar(unsigned char input, uint32_t& output);

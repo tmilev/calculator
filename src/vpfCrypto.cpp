@@ -525,6 +525,12 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output, s
   output.clear();
   bool result = true;
   for (unsigned i = 0; i < input.size(); i += 2) {
+    // Skip single new line
+    // characters appearing at even positions:
+    if (input[i] == '\n') {
+      i -= 1;
+      continue;
+    }
     unsigned char nextByte = 0;
     for (unsigned j = 0; j < 2; j ++) {
       if (i + j >= input.size()) {
@@ -594,9 +600,9 @@ bool Crypto::ConvertHexToInteger(const std::string& input, LargeIntUnsigned& out
   return true;
 }
 
-std::string Crypto::ConvertStringToHex(const std::string& input) {
+std::string Crypto::ConvertStringToHex(const std::string& input, int byteWidthLineBreakZeroForNone, bool useHtml) {
   std::string result;
-  Crypto::ConvertStringToHex(input, result);
+  Crypto::ConvertStringToHex(input, result, byteWidthLineBreakZeroForNone, useHtml);
   return result;
 }
 
@@ -611,9 +617,21 @@ void Crypto::AppendDoubleSha256Check(const std::string& input, std::string& outp
   }
 }
 
-bool Crypto::ConvertStringToHex(const std::string& input, std::string& output) {
+bool Crypto::ConvertStringToHex(
+  const std::string& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
+) {
   std::stringstream out;
-  for (unsigned i = 0; i < input.size(); i ++) {
+  int lineBreakCounter = 0;
+  for (unsigned i = 0; i < input.size(); i ++, lineBreakCounter ++) {
+    if (byteWidthLineBreakZeroForNone > 0) {
+      if (lineBreakCounter >= byteWidthLineBreakZeroForNone) {
+        out << "\\n";
+        if (useHtml) {
+          out << "<br>";
+        }
+        lineBreakCounter = 0;
+      }
+    }
     char high = ((unsigned char) input[i]) / 16;
     char low  = ((unsigned char) input[i]) % 16;
     if (high < 10) {
@@ -848,7 +866,7 @@ bool Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(
 ) {
   std::string outputString;
   Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(input, numberOfLeadingZeroesToPadWith, outputString);
-  Crypto::ConvertStringToHex(outputString, output);
+  Crypto::ConvertStringToHex(outputString, output, 0, false);
   return true;
 }
 
@@ -1360,14 +1378,14 @@ bool JSONWebToken::VerifyRSA256(
     LargeIntUnsigned theShaUI;
     Crypto::ConvertListUintToLargeUInt(outputSha, theShaUI);
     RSAresultBase64 = Crypto::ConvertStringToBase64Standard(RSAresultBitstream);
-    Crypto::ConvertStringToHex(RSAresultBitstream, RSAresultHex);
-    Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex);
+    Crypto::ConvertStringToHex(RSAresultBitstream, RSAresultHex, 0, false);
+    Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex, 0, false);
     Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theShaUI, 0, theShaHex);
     if (!result && commentsOnFailure != 0) {
-      *commentsOnFailure << "<br><b><span style =\"color:red\">Token invalid: the "
-      << "SHA does not match the RSA result. </span></b>";
+      *commentsOnFailure << "<br><b style =\"color:red\">Token invalid: the "
+      << "SHA does not match the RSA result. </b>";
     } else if (commentsGeneral != 0) {
-      *commentsGeneral << "<b><span style =\"color:green\">Validated. </span></b>";
+      *commentsGeneral << "<b style =\"color:green\">Validated. </b>";
     }
     if (commentsGeneral != 0) {
       *commentsGeneral

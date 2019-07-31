@@ -513,11 +513,11 @@ bool CalculatorFunctionsGeneral::innerConvertHexToBase58(Calculator& theCommands
 }
 
 bool CalculatorFunctionsGeneral::innerConvertStringToHex(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCharToBase64");
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertStringToHex");
   if (!input.IsOfType<std::string>()) {
     return false;
   }
-  return output.AssignValue(Crypto::ConvertStringToHex(input.GetValue<std::string>()), theCommands);
+  return output.AssignValue(Crypto::ConvertStringToHex(input.GetValue<std::string>(), 0, false), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output) {

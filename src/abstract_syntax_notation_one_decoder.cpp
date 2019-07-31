@@ -121,7 +121,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
     reader += currentContribution;
     this->dataPointer ++;
   }
-  //output = reader;
+  output = reader;
   return true;
 }
 
@@ -142,12 +142,9 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(std::stringstream* co
   }
   if (currentLength < 0) {
     if (commentsOnError != 0) {
-      *commentsOnError << "Variable length encoding not implemented. ";
+      *commentsOnError << "Failed to decode variable length. ";
     }
     return false;
-  }
-  if (commentsOnError != 0) {
-    *commentsOnError << "Decoded length: " << currentLength << ". ";
   }
   switch (startByte) {
   case tags::integer:
@@ -162,7 +159,6 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(std::stringstream* co
   }
   return false;
 }
-
 
 bool AbstractSyntaxNotationOneSubsetDecoder::Decode(std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("AbstractSyntaxNotationOneSubsetDecoder::Decode");
@@ -188,7 +184,9 @@ bool AbstractSyntaxNotationOneSubsetDecoder::Decode(std::stringstream* commentsO
 
 std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
   std::stringstream out;
-  out << "Data: ";
+  out << "Decoded so far:<br>\n"
+  << this->decodedData.ToString(false, false, true);
+  out << "<br>Data: ";
   out << MathRoutines::StringShortenInsertDots(Crypto::ConvertStringToHex(this->rawData, 100, true), 4000);
   return out.str();
 }

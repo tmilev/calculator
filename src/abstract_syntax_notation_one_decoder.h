@@ -9,10 +9,10 @@ class AbstractSyntaxNotationOneSubsetDecoder;
 // The following class (is supposed to) implement a sufficiently
 // large subset of the ASN-1 so as to serve our cryptographic needs.
 // Materials used, in no particular order:
-// https://www.w3.org/Protocols/HTTP-NG/asn1.html
-// http://luca.ntop.org/Teaching/Appunti/asn1.html
+// https://www.w3.org/Protocols/HTTP-NG/asn1.html [brief philosophy of the how of the encoding, must read]
+// http://luca.ntop.org/Teaching/Appunti/asn1.html [long technical discussion and tables, no proper explanations, use for reference]
 // https://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One
-// https://lapo.it/asn1js
+// https://lapo.it/asn1js [decodes messages and highlights and annotates individual bytes.]
 
 class AbstractSyntaxNotationOneSubsetDecoder {
   // BER (basic encoding rules) concepts.
@@ -32,6 +32,7 @@ public:
   struct tags {
     static const unsigned char integer = 2;
     static const unsigned char sequence = 16;
+    static const unsigned char octet_string = 6;
   };
   int dataPointer;
   std::string rawData;
@@ -46,6 +47,7 @@ public:
   bool DecodeCurrent(std::stringstream* commentsOnError, JSData& output);
   bool DecodeSequenceContent(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
   bool DecodeIntegerContent(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
+  bool DecodeOctetString(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
   bool DecodeCurrentConstructed(std::stringstream* commentsOnError);
   bool DecodeCurrentBuiltInType(std::stringstream* commentsOnError);
   bool DecodeLengthIncrementDataPointer(int& outputLengthNegativeOneForVariable, std::stringstream* commentsOnError);

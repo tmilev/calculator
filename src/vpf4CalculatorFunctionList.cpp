@@ -33,7 +33,9 @@ void Calculator::initAdminFunctions() {
     return;
   }
   this->AddOperationInnerHandler(
-    "MongoFind", CalculatorDatabaseFunctions::innerExecuteMongoQuery, "",
+    "MongoFind",
+    CalculatorDatabaseFunctions::innerExecuteMongoQuery,
+    "",
     "Executes a mongoDB query. Requires admin rights. "
     "The database name is calculator (can't be modified). "
     "First argument: collection name. Second argument: query. ",
@@ -44,7 +46,8 @@ void Calculator::initAdminFunctions() {
   );
   this->AddOperationInnerHandler(
     "RepairDatabaseEmailRecords",
-    CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords, "",
+    CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords,
+    "",
     "Repairs username/email mismatches. Admin use only. ",
     "TurnOnRules(RepairDatabaseEmailRecords); RepairDatabaseEmailRecords(0)",
     false,
@@ -72,7 +75,8 @@ void Calculator::initCalculusTestingFunctions() {
 void Calculator::initPredefinedInnerFunctions() {
   this->AddOperationInnerHandler(
     "SetRandomSeed",
-    CalculatorFunctionsGeneral::innerSetRandomSeed, "",
+    CalculatorFunctionsGeneral::innerSetRandomSeed,
+    "",
     "Sets the random seed of the calculator to the given integer value",
     "SetRandomSeed(123); RandomInteger(- 100,100); RandomInteger(- 100,100)",
     true,
@@ -112,7 +116,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "RandomInteger"
   );
   this->AddOperationInnerHandler(
-    "TurnOffRules", CalculatorFunctionsGeneral::innerTurnOffRules, "",
+    "TurnOffRules",
+    CalculatorFunctionsGeneral::innerTurnOffRules,
+    "",
     "Turns off computational rules.",
     "TurnOffRules(\"sqrt\");\n"
     "a = \\sqrt[4]{t};\n"
@@ -669,6 +675,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerASN1Decode,
     "",
     "Tests decoding of abstract syntax one. ",
+    "%HideLHS\n"
     "ASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_private_key.base64\")));\n"
     "ASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_cert.base64\")));",
     true,

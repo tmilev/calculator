@@ -625,7 +625,7 @@ bool Crypto::ConvertStringToHex(
   for (unsigned i = 0; i < input.size(); i ++, lineBreakCounter ++) {
     if (byteWidthLineBreakZeroForNone > 0) {
       if (lineBreakCounter >= byteWidthLineBreakZeroForNone) {
-        out << "\\n";
+        out << "\n";
         if (useHtml) {
           out << "<br>";
         }

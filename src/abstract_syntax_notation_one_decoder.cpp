@@ -114,6 +114,12 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeOctetString(
   return false;
 }
 
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(
+  std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output
+) {
+  return this->DecodeSequenceContent(commentsOnError, desiredLengthInBytes, output);
+}
+
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
   std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output
 ) {
@@ -160,6 +166,8 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(std::stringstream* co
     return this->DecodeIntegerContent(commentsOnError, currentLength, output);
   case tags::octet_string:
     return this->DecodeOctetString(commentsOnError, currentLength, output);
+  case tags::object_identifier:
+    return this->DecodeObjectIdentifier(commentsOnError, currentLength, output);
   case tags::sequence:
     return this->DecodeSequenceContent(commentsOnError, currentLength, output);
   default:

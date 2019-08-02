@@ -32,7 +32,8 @@ public:
   struct tags {
     static const unsigned char integer = 2;
     static const unsigned char sequence = 16;
-    static const unsigned char octet_string = 6;
+    static const unsigned char octet_string = 4;
+    static const unsigned char object_identifier = 6;
   };
   int dataPointer;
   std::string rawData;
@@ -48,6 +49,7 @@ public:
   bool DecodeSequenceContent(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
   bool DecodeIntegerContent(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
   bool DecodeOctetString(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
+  bool DecodeObjectIdentifier(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
   bool DecodeCurrentConstructed(std::stringstream* commentsOnError);
   bool DecodeCurrentBuiltInType(std::stringstream* commentsOnError);
   bool DecodeLengthIncrementDataPointer(int& outputLengthNegativeOneForVariable, std::stringstream* commentsOnError);

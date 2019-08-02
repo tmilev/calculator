@@ -114,10 +114,39 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeOctetString(
   return false;
 }
 
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeNull(
+  std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output
+) {
+  if (desiredLengthInBytes != 0) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Length of null object is not zero. ";
+    }
+    return false;
+  }
+  output.reset(JSData::token::tokenNull);
+  return true;
+}
+
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(
   std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output
 ) {
-  return this->DecodeSequenceContent(commentsOnError, desiredLengthInBytes, output);
+  int currentPointer = this->dataPointer;
+  this->dataPointer += desiredLengthInBytes;
+  if (this->PointerIsBad(commentsOnError)) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Object identifier length overshoots the total raw data length. ";
+    }
+    return false;
+  }
+  std::stringstream resultStream;
+  for (; currentPointer < this->dataPointer; currentPointer ++) {
+    resultStream << (unsigned int) this->rawData[currentPointer];
+    if (currentPointer != this->dataPointer - 1) {
+      resultStream << ".";
+    }
+  }
+  output["objectIdentifier"] = resultStream.str();
+  return true;
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
@@ -164,10 +193,12 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(std::stringstream* co
   switch (startByte) {
   case tags::integer:
     return this->DecodeIntegerContent(commentsOnError, currentLength, output);
-  case tags::octet_string:
+  case tags::octetString:
     return this->DecodeOctetString(commentsOnError, currentLength, output);
-  case tags::object_identifier:
+  case tags::objectIdentifier:
     return this->DecodeObjectIdentifier(commentsOnError, currentLength, output);
+  case tags::tokenNull:
+    return this->DecodeNull(commentsOnError, currentLength, output);
   case tags::sequence:
     return this->DecodeSequenceContent(commentsOnError, currentLength, output);
   default:

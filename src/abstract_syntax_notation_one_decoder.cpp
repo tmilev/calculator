@@ -127,10 +127,32 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeNull(
   return true;
 }
 
+LargeInt VariableLengthQuantityDecoder::TryToDecode(const std::string& input, int& inputOutputDataPointer) {
+  LargeInt result = 0;
+  for (; inputOutputDataPointer < (signed) input.size() ; inputOutputDataPointer ++) {
+    unsigned char currentByte = input[inputOutputDataPointer];
+    result *= 128;
+    if (currentByte < 128) {
+      result += (int) currentByte;
+      inputOutputDataPointer ++;
+      break;
+    } else {
+      currentByte -= 128;
+      result += (int) currentByte;
+    }
+  }
+  return result;
+}
+
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(
   std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output
 ) {
-  int currentPointer = this->dataPointer;
+  if (this->PointerIsBad(commentsOnError)) {
+    return false;
+  }
+  std::stringstream resultStream;
+  unsigned char firstByte = this->rawData[this->dataPointer];
+  int currentPointer = this->dataPointer + 1;
   this->dataPointer += desiredLengthInBytes;
   if (this->PointerIsBad(commentsOnError)) {
     if (commentsOnError != 0) {
@@ -138,12 +160,13 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(
     }
     return false;
   }
-  std::stringstream resultStream;
-  for (; currentPointer < this->dataPointer; currentPointer ++) {
-    resultStream << (unsigned int) this->rawData[currentPointer];
-    if (currentPointer != this->dataPointer - 1) {
-      resultStream << ".";
-    }
+  // first two entries are encoded in the first byte:
+  unsigned char firstEntry = firstByte / 40;
+  unsigned char secondEntry = firstByte % 40;
+  resultStream << (int) firstEntry << "." << (int) secondEntry;
+  for (;currentPointer < this->dataPointer;) {
+    LargeInt nextInt = VariableLengthQuantityDecoder::TryToDecode(this->rawData, currentPointer);
+    resultStream << "." << nextInt.ToString();
   }
   output["objectIdentifier"] = resultStream.str();
   return true;

@@ -4,7 +4,10 @@
 
 static ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderHeader(__FILE__, "Abstract syntax notation one (ASN-1) header file. ");
 
-class AbstractSyntaxNotationOneSubsetDecoder;
+class VariableLengthQuantityDecoder {
+public:
+  static LargeInt TryToDecode(const std::string& input, int& inputOutputDataPointer);
+};
 
 // The following class (is supposed to) implement a sufficiently
 // large subset of the ASN-1 so as to serve our cryptographic needs.

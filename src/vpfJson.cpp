@@ -405,7 +405,9 @@ std::string JSData::EncodeKeyForMongo(const std::string& input) {
 }
 
 template <typename somestream>
-somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int indentation, bool useNewLine, bool useHTML) const {
+somestream& JSData::IntoStream(
+  somestream& out, bool percentEncodeStrings, int indentation, bool useNewLine, bool useHTML, bool convertNonASCIIStringsToHex
+) const {
   //MacroRegisterFunctionWithName("JSData::IntoStream");
   std::string whiteSpaceOuter = "";
   std::string whiteSpaceInner = "";
@@ -446,7 +448,9 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
       }
       return out;
     case JSData::token::tokenString:
-      if (!percentEncodeStrings) {
+      if (convertNonASCIIStringsToHex) {
+        out << '"' << MathRoutines::ConvertStringToHexPrependConversionIfNeeded(this->theString) << '"';
+      } else if (!percentEncodeStrings) {
         out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->theString) << '"';
       } else {
         out << '"' << HtmlRoutines::ConvertStringToURLString(this->theString, false) << '"';
@@ -460,7 +464,9 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
       out << "[" << newLine;
       for (int i = 0; i < this->theList.size; i ++) {
         out << whiteSpaceInner << whiteSpaceOuter;
-        this->theList[i].IntoStream(out, percentEncodeStrings, indentation, useNewLine, useHTML);
+        this->theList[i].IntoStream(
+          out, percentEncodeStrings, indentation, useNewLine, useHTML, convertNonASCIIStringsToHex
+        );
         if (i != this->theList.size - 1) {
           out << "," << newLine;
         }
@@ -481,7 +487,9 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
           out << '"' << JSData::EncodeKeyForMongo(this->objects.theKeys[i]) << '"';
         }
         out << ':';
-        this->objects.theValues[i].IntoStream(out, percentEncodeStrings, indentation, useNewLine, useHTML);
+        this->objects.theValues[i].IntoStream(
+          out, percentEncodeStrings, indentation, useNewLine, useHTML, convertNonASCIIStringsToHex
+        );
         if (i != this->objects.size() - 1) {
           out << "," << newLine;
         }
@@ -597,9 +605,13 @@ void JSData::reset(char inputType) {
   }
 }
 
-std::string JSData::ToString(bool percentEncodeKeysIncludingDotsExcludingDollarSigns, bool useNewLine, bool useHTML) const {
+std::string JSData::ToString(
+  bool percentEncodeKeysIncludingDotsExcludingDollarSigns, bool useNewLine, bool useHTML, bool convertNonASCIIStringsToHex
+) const {
   std::stringstream out;
-  this->IntoStream(out, percentEncodeKeysIncludingDotsExcludingDollarSigns, 0, useNewLine, useHTML);
+  this->IntoStream(
+    out, percentEncodeKeysIncludingDotsExcludingDollarSigns, 0, useNewLine, useHTML, convertNonASCIIStringsToHex
+  );
   return out.str();
 }
 

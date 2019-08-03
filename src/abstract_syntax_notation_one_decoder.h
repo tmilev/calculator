@@ -4,11 +4,6 @@
 
 static ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderHeader(__FILE__, "Abstract syntax notation one (ASN-1) header file. ");
 
-class VariableLengthQuantityDecoder {
-public:
-  static LargeInt TryToDecode(const std::string& input, int& inputOutputDataPointer);
-};
-
 // The following class (is supposed to) implement a sufficiently
 // large subset of the ASN-1 so as to serve our cryptographic needs.
 // Materials used, in no particular order:
@@ -52,6 +47,7 @@ public:
   bool DecodeCurrent(std::stringstream* commentsOnError, JSData& output);
   bool DecodeSequenceContent(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
   bool DecodeIntegerContent(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
+  static LargeInt TryToDecode(const std::string& input, int& inputOutputDataPointer);
   bool DecodeOctetString(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
   bool DecodeObjectIdentifier(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
   bool DecodeNull(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);

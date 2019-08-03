@@ -239,6 +239,7 @@ public:
   static void StringTrimWhiteSpace(const std::string& inputString, std::string& output);
   static void StringTrimToLengthWithHash(std::string& inputOutput, int desiredLength50AtLeast = 150);
   static std::string StringTrimToLengthForDisplay(const std::string& input, int desiredLength20AtLeast = 50);
+  static std::string ConvertStringToHexPrependConversionIfNeeded(const std::string& input);
 
   static std::string StringTrimWhiteSpace(const std::string& inputString);
   static void SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond);

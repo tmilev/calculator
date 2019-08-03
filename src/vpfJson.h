@@ -85,11 +85,21 @@ public:
   void ExtractScalar(const std::string& json, int begin, int end);
   bool IsValidElement();
   void reset(char inputType = JSData::token::tokenUndefined);
-  std::string ToString(bool percentEncodeKeysIncludingDotsExcludingDollarSigns, bool useNewLine = false, bool useHTML = false) const;
+  std::string ToString(
+    bool percentEncodeKeysIncludingDotsExcludingDollarSigns,
+    bool useNewLine = false,
+    bool useHTML = false,
+    bool convertNonASCIIStringsToHex = false
+  ) const;
   static std::string EncodeKeyForMongo(const std::string& input);
   template <typename somestream>
   somestream& IntoStream(
-    somestream& out, bool percentEncodeStrings, int indentation = 0, bool useNewLine = false, bool useHTML = false
+    somestream& out,
+    bool percentEncodeStrings,
+    int indentation = 0,
+    bool useNewLine = false,
+    bool useHTML = false,
+    bool convertNonASCIIStringsToHex = false
   ) const;
   bool readstring(const std::string& json, bool stringsWerePercentEncoded, std::stringstream* commentsOnFailure = 0);
   void TryToComputeType();

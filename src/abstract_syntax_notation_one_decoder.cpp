@@ -108,10 +108,13 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceContent(
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeOctetString(
   std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output
 ) {
-  if (commentsOnError != 0) {
-    *commentsOnError << "Not implemented yet.";
+  output.reset(JSData::token::tokenString);
+  output.theString.resize(desiredLengthInBytes);
+  for (int i = 0; i < desiredLengthInBytes; i ++) {
+    output.theString[i] = this->rawData[this->dataPointer + i];
   }
-  return false;
+  this->dataPointer += desiredLengthInBytes;
+  return true;
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeNull(
@@ -127,7 +130,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeNull(
   return true;
 }
 
-LargeInt VariableLengthQuantityDecoder::TryToDecode(const std::string& input, int& inputOutputDataPointer) {
+LargeInt AbstractSyntaxNotationOneSubsetDecoder::TryToDecode(const std::string& input, int& inputOutputDataPointer) {
   LargeInt result = 0;
   for (; inputOutputDataPointer < (signed) input.size() ; inputOutputDataPointer ++) {
     unsigned char currentByte = input[inputOutputDataPointer];
@@ -164,8 +167,8 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(
   unsigned char firstEntry = firstByte / 40;
   unsigned char secondEntry = firstByte % 40;
   resultStream << (int) firstEntry << "." << (int) secondEntry;
-  for (;currentPointer < this->dataPointer;) {
-    LargeInt nextInt = VariableLengthQuantityDecoder::TryToDecode(this->rawData, currentPointer);
+  for (; currentPointer < this->dataPointer; ) {
+    LargeInt nextInt = this->TryToDecode(this->rawData, currentPointer);
     resultStream << "." << nextInt.ToString();
   }
   output["objectIdentifier"] = resultStream.str();
@@ -258,7 +261,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::Decode(std::stringstream* commentsO
 std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
   std::stringstream out;
   out << "Decoded so far:<br>\n"
-  << this->decodedData.ToString(false, false, true);
+  << this->decodedData.ToString(false, false, true, true);
   out << "<br>Data: ";
   out << MathRoutines::StringShortenInsertDots(Crypto::ConvertStringToHex(this->rawData, 70, true), 4000);
   return out.str();

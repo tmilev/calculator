@@ -2441,7 +2441,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<std::string>()) {
     if (!useQuotes) {
       if (isFinal) {
-        out << Calculator::ConvertStringToHexPrependConversionIfNeeded(this->GetValue<std::string>());
+        out << MathRoutines::ConvertStringToHexPrependConversionIfNeeded(this->GetValue<std::string>());
       } else {
         out << HtmlRoutines::ConvertStringToHtmlString(this->GetValue<std::string>(), false);
       }
@@ -3737,7 +3737,7 @@ std::string Expression::ToString(
         }
         out << "</td><td class =\"cellCalculatorResult\">";
         if ((*this)[i].IsOfType<std::string>() && isFinal) {
-          currentOutput = Calculator::ConvertStringToHexPrependConversionIfNeeded(currentE.GetValue<std::string>());
+          currentOutput = MathRoutines::ConvertStringToHexPrependConversionIfNeeded(currentE.GetValue<std::string>());
         } else if ((
             currentE.HasType<Plot> () ||
             currentE.IsOfType<SemisimpleSubalgebras>() ||

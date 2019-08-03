@@ -1185,7 +1185,6 @@ public:
   bool IsNonBoundVarInContext(int inputOp);
   Function& GetFunctionHandlerFromNamedRule(const std::string& inputRuleName);
   bool CheckConsistencyAfterInitializationExpressionStackEmpty();
-  static std::string ConvertStringToHexPrependConversionIfNeeded(const std::string& input);
   //to make operations read only, we make operations private and return const pointer to it.
   const HashedList<std::string, MathRoutines::HashString>& GetOperations() {
     return this->theAtoms;

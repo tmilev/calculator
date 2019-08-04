@@ -319,18 +319,22 @@ bool Crypto::ConvertBase64ToBitStream(
   uint32_t theStack = 0, sixBitDigit = 0;
   int numBitsInStack = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
-    if (!Crypto::Get6bitFromChar(input[i], sixBitDigit)) {
-      if (input[i] != '=' && input[i] != '\n') {
-        if (commentsOnFailure != 0) {
-          *commentsOnFailure << "<hr>Error: the input string: <br>\n"
-          << input << "\n<br>had characters outside of base64";
-        }
-        return false;
-      }
+    bool isGood = Crypto::Get6bitFromChar(input[i], sixBitDigit);
+    if (!isGood && input[i] == '\n') {
+      continue;
+    }
+    if (!isGood && input[i] == '=' ) {
       theStack = 0;
       numBitsInStack += 6;
       numBitsInStack %= 8;
       continue;
+    }
+    if (!isGood) {
+      if (commentsOnFailure != 0) {
+        *commentsOnFailure << "<hr>Error: the input string: <br>\n"
+        << input << "\n<br>had characters outside of base64";
+      }
+      return false;
     }
     theStack *= 64;
     theStack += sixBitDigit;

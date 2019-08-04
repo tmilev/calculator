@@ -480,7 +480,7 @@ somestream& JSData::IntoStream(
       }
       out << "{" << newLine;
       for (int i = 0; i < this->objects.size(); i ++) {
-        out << whiteSpaceInner;
+        out << whiteSpaceInner << whiteSpaceOuter;
         if (!percentEncodeStrings) {
           out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->objects.theKeys[i]) << '"';
         } else {
@@ -494,7 +494,7 @@ somestream& JSData::IntoStream(
           out << "," << newLine;
         }
       }
-      out << newLine << '}';
+      out << newLine << whiteSpaceOuter << '}';
       return out;
     case JSData::token::tokenOpenBrace:
       if (useHTML) {

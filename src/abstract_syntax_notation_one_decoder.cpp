@@ -12,21 +12,27 @@ bool AbstractSyntaxNotationOneSubsetDecoder::isCostructedByte(unsigned char inpu
   return sixthBit != 0;
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrentConstructed(std::stringstream* commentsOnError) {
-  unsigned char startByte = this->rawData[this->dataPointer];
-  if (!this->isCostructedByte(startByte)) {
-    crash << "Byte " << (int) startByte << " must be constructed. " << crash;
-  }
-  unsigned char nonConstructedPart = startByte - 32;
-  AbstractSyntaxNotationOneSubsetDecoder::typeDecoder handler = this->decodersByByteValue[nonConstructedPart];
-  if (handler == 0) {
-    if (commentsOnError != 0) {
-      *commentsOnError << "No handler for byte: " << (int) startByte << ". ";
-    }
+bool AbstractSyntaxNotationOneSubsetDecoder::hasBit7Set(unsigned char input) {
+  int seventhBit = input / 64;
+  seventhBit %= 2;
+  return seventhBit != 0;
+}
+
+bool AbstractSyntaxNotationOneSubsetDecoder::hasBit8Set(unsigned char input) {
+  int eighthBit = input / 128;
+  eighthBit %= 2;
+  return eighthBit != 0;
+}
+
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeConstructed(
+  unsigned char startByte, int desiredLengthInBytes, JSData& output, JSData* interpretation
+) {
+  output.reset(JSData::token::tokenObject);
+  JSData objectContent;
+  if (!this->DecodeSequenceContent(desiredLengthInBytes, objectContent, interpretation)) {
     return false;
   }
-  this->dataPointer ++;
-  return handler(*this, commentsOnError);
+  return true;
 }
 
 AbstractSyntaxNotationOneSubsetDecoder::AbstractSyntaxNotationOneSubsetDecoder() {
@@ -37,9 +43,10 @@ void AbstractSyntaxNotationOneSubsetDecoder::initialize() {
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
-  int& outputLengthNegativeOneForVariable, std::stringstream* commentsOnError
+  int& outputLengthNegativeOneForVariable, JSData* interpretation
 ) {
   outputLengthNegativeOneForVariable = 0;
+  int startDataPointer = this->dataPointer;
   unsigned char currentByte = this->rawData[this->dataPointer];
   if (currentByte < 128) { // 128 = 0x80
     outputLengthNegativeOneForVariable = currentByte;
@@ -56,43 +63,60 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
   this->dataPointer ++;
   for (int i = 0; i < numberOfLengthBytes; i ++) {
     length *= 256;
-    if (this->PointerIsBad(commentsOnError)) {
+    if (this->PointerIsBad(interpretation)) {
       return false;
     }
     length += this->rawData[this->dataPointer];
     this->dataPointer ++;
   }
   if (!length.IsIntegerFittingInInt(&outputLengthNegativeOneForVariable)) {
-    if (commentsOnError != 0) {
-      *commentsOnError << "Variable length is too large. ";
+    if (interpretation != 0) {
+      std::stringstream errorStream;
+      errorStream << "Variable length: " << length << " whose decoding started at position: "
+      << startDataPointer << " with first excluded position: " << this->dataPointer << " is too large. ";
+      (*interpretation)["error"] = errorStream.str();
     }
     return false;
   }
   return true;
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::PointerIsBad(std::stringstream* commentsOnError) {
+bool AbstractSyntaxNotationOneSubsetDecoder::PointerIsBad(JSData *interpretation) {
   if (this->dataPointer >= (signed) this->rawData.size() || this->dataPointer < 0) {
-    if (commentsOnError != 0) {
-      *commentsOnError << "Unexpected overflow error: data pointer is negative. ";
+    if (interpretation != 0) {
+      std::stringstream errorStream;
+      errorStream << "Unexpected overflow error: data pointer is negative. ";
+      (*interpretation)["error"] = errorStream.str();
     }
     return true;
   }
   return false;
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceContent(
-  std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceContent(int desiredLengthInBytes, JSData& output, JSData* interpretation
 ) {
   output.reset(JSData::token::tokenArray);
+  if (interpretation != 0) {
+    (*interpretation)["value"].reset(JSData::token::tokenArray);
+  }
   int lastIndexPlusOne = this->dataPointer + desiredLengthInBytes;
-  JSData nextElement;
+  JSData nextElement, nextElementInterpretationContainer;
+  JSData* nextElementInterpretation = 0;
+  if (interpretation != 0) {
+    nextElementInterpretation = &nextElementInterpretationContainer;
+  }
   int numberOfDecoded = 0;
   while (this->dataPointer < lastIndexPlusOne) {
     int lastPointer = this->dataPointer;
-    if (!this->DecodeCurrent(commentsOnError, nextElement)) {
-      if (commentsOnError != 0) {
-        *commentsOnError << "Failed to decode sequence element of index: " << numberOfDecoded << ". ";
+    bool isGood = this->DecodeCurrent(nextElement, nextElementInterpretation);
+    if (interpretation != 0) {
+      (*interpretation)["value"].theList.AddOnTop(*nextElementInterpretation);
+    }
+    if (!isGood){
+      if (interpretation != 0) {
+        std::stringstream errorStream;
+        errorStream << "Failed to decode sequence element of index: " << numberOfDecoded << ". ";
+        (*interpretation)["error"] = errorStream.str();
       }
       return false;
     }
@@ -106,7 +130,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceContent(
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeOctetString(
-  std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output
+  int desiredLengthInBytes, JSData& output, JSData* interpretation
 ) {
   output.reset(JSData::token::tokenString);
   output.theString.resize(desiredLengthInBytes);
@@ -118,19 +142,24 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeOctetString(
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeNull(
-  std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output
+  int desiredLengthInBytes, JSData& output, JSData* interpretation
 ) {
   if (desiredLengthInBytes != 0) {
-    if (commentsOnError != 0) {
-      *commentsOnError << "Length of null object is not zero. ";
+    if (interpretation != 0) {
+      (*interpretation)["error"] = "Length of null object is not zero. ";
     }
     return false;
   }
   output.reset(JSData::token::tokenNull);
+  if (interpretation != 0) {
+    (*interpretation)["value"].reset(JSData::token::tokenNull);
+  }
   return true;
 }
 
-LargeInt AbstractSyntaxNotationOneSubsetDecoder::TryToDecode(const std::string& input, int& inputOutputDataPointer) {
+LargeInt AbstractSyntaxNotationOneSubsetDecoder::VariableLengthQuantityDecode(
+  const std::string& input, int& inputOutputDataPointer
+) {
   LargeInt result = 0;
   for (; inputOutputDataPointer < (signed) input.size() ; inputOutputDataPointer ++) {
     unsigned char currentByte = input[inputOutputDataPointer];
@@ -147,19 +176,20 @@ LargeInt AbstractSyntaxNotationOneSubsetDecoder::TryToDecode(const std::string& 
   return result;
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(
-  std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output
-) {
-  if (this->PointerIsBad(commentsOnError)) {
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(int desiredLengthInBytes, JSData& output
+, JSData *interpretation) {
+  if (this->PointerIsBad(interpretation)) {
     return false;
   }
   std::stringstream resultStream;
   unsigned char firstByte = this->rawData[this->dataPointer];
   int currentPointer = this->dataPointer + 1;
   this->dataPointer += desiredLengthInBytes;
-  if (this->PointerIsBad(commentsOnError)) {
-    if (commentsOnError != 0) {
-      *commentsOnError << "Object identifier length overshoots the total raw data length. ";
+  if (this->PointerIsBad(interpretation)) {
+    if (interpretation != 0) {
+      std::stringstream errorStream;
+      errorStream << "Object identifier length overshoots the total raw data length. ";
+      (*interpretation)["error"] = errorStream.str();
     }
     return false;
   }
@@ -168,15 +198,18 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(
   unsigned char secondEntry = firstByte % 40;
   resultStream << (int) firstEntry << "." << (int) secondEntry;
   for (; currentPointer < this->dataPointer; ) {
-    LargeInt nextInt = this->TryToDecode(this->rawData, currentPointer);
+    LargeInt nextInt = this->VariableLengthQuantityDecode(this->rawData, currentPointer);
     resultStream << "." << nextInt.ToString();
+  }
+  if (interpretation != 0) {
+    (*interpretation)["value"] = resultStream.str();
   }
   output["objectIdentifier"] = resultStream.str();
   return true;
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
-  std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output
+  int desiredLengthInBytes, JSData& output, JSData* interpretation
 ) {
   LargeInt reader = 0;
   int currentContribution;
@@ -195,41 +228,66 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
   return true;
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(std::stringstream* commentsOnError, JSData& output) {
-  if (this->PointerIsBad(commentsOnError)) {
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSData* interpretation) {
+  output.reset(JSData::token::tokenUndefined);
+  if (interpretation != 0) {
+    interpretation->reset(JSData::token::tokenUndefined);
+  }
+  if (this->PointerIsBad(interpretation)) {
     return false;
   }
   unsigned char startByte = this->rawData[this->dataPointer];
+  unsigned char startByteOriginal = startByte;
   int dataPointerAtStart = this->dataPointer;
   bool isConstructed = this->isCostructedByte(startByte);
   if (isConstructed) {
     startByte -= 32;
   }
+  bool hasBit7 = this->hasBit7Set(startByte);
+  if (hasBit7) {
+    startByte -= 64;
+  }
+  bool hasBit8 = this->hasBit8Set(startByte);
+  if (hasBit8) {
+    startByte -= 128;
+  }
+  if (interpretation != 0) {
+    (*interpretation)["offset"] = this->dataPointer;
+    (*interpretation)["startByteOriginal"] = startByteOriginal;
+    (*interpretation)["startByte"] = startByte;
+  }
   this->dataPointer ++;
   int currentLength = 0;
-  if (!this->DecodeLengthIncrementDataPointer(currentLength, commentsOnError)) {
+  if (!this->DecodeLengthIncrementDataPointer(currentLength, interpretation)) {
     return false;
   }
   if (currentLength < 0) {
-    if (commentsOnError != 0) {
-      *commentsOnError << "Failed to decode variable length. ";
+    if (interpretation != 0) {
+      std::stringstream errorStream;
+      errorStream << "Failed to decode variable length. ";
+      (*interpretation)["error"] = errorStream.str();
     }
     return false;
   }
+  std::stringstream errorStream;
   switch (startByte) {
+  case tags::zero:
+    return this->DecodeConstructed(startByte, currentLength, output, interpretation);
   case tags::integer:
-    return this->DecodeIntegerContent(commentsOnError, currentLength, output);
+    return this->DecodeIntegerContent(currentLength, output, interpretation);
   case tags::octetString:
-    return this->DecodeOctetString(commentsOnError, currentLength, output);
+    return this->DecodeOctetString(currentLength, output, interpretation);
   case tags::objectIdentifier:
-    return this->DecodeObjectIdentifier(commentsOnError, currentLength, output);
+    return this->DecodeObjectIdentifier(currentLength, output, interpretation);
   case tags::tokenNull:
-    return this->DecodeNull(commentsOnError, currentLength, output);
+    return this->DecodeNull(currentLength, output, interpretation);
   case tags::sequence:
-    return this->DecodeSequenceContent(commentsOnError, currentLength, output);
+    return this->DecodeSequenceContent(currentLength, output, interpretation);
   default:
-    if (commentsOnError != 0) {
-      *commentsOnError << "Unknown object tag: " << (int) startByte << " at position: " << dataPointerAtStart << ". ";
+    if (interpretation != 0) {
+      errorStream << "Unknown object tag: " << (int) startByte << ", byte: "
+      << (int) startByteOriginal << " at position: " << dataPointerAtStart << ". Length: " << currentLength << ". ";
+      (*interpretation)["error"] = errorStream.str();
     }
     return false;
   }
@@ -248,7 +306,12 @@ bool AbstractSyntaxNotationOneSubsetDecoder::Decode(std::stringstream* commentsO
   this->initialize();
   this->dataPointer = 0;
   this->decodedData.reset();
-  this->DecodeCurrent(commentsOnError, this->decodedData);
+  JSData* interpretation = 0;
+  if (this->flagLogByteInterpretation) {
+    interpretation = &this->dataInterpretation;
+    this->dataInterpretation.reset();
+  }
+  this->DecodeCurrent(this->decodedData, interpretation);
   if (this->dataPointer < (signed) this->rawData.size()) {
     if (commentsOnError != 0) {
       *commentsOnError << "Decoded " << this->dataPointer << " bytes but the input had: " << this->rawData.size() << ". ";
@@ -262,6 +325,9 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
   std::stringstream out;
   out << "Decoded so far:<br>\n"
   << this->decodedData.ToString(false, false, true, true);
+  if (this->flagLogByteInterpretation) {
+    out << "<br>Interpretation status.<br>" << this->dataInterpretation.ToString(false, true, true, true);
+  }
   out << "<br>Data: ";
   out << MathRoutines::StringShortenInsertDots(Crypto::ConvertStringToHex(this->rawData, 70, true), 4000);
   return out.str();

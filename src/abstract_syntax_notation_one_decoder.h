@@ -28,6 +28,7 @@ class AbstractSyntaxNotationOneSubsetDecoder {
   // 11 - private type (interpret as you wish: it's not self-explanatory and the standards do not give a proper definition).
 public:
   struct tags {
+    static const unsigned char zero = 0;
     static const unsigned char integer = 2;
     static const unsigned char sequence = 16;
     static const unsigned char octetString = 4;
@@ -37,27 +38,30 @@ public:
   int dataPointer;
   std::string rawData;
   JSData decodedData;
+  JSData dataInterpretation;
   bool flagLogByteInterpretation;
   List<std::string> byteInterpretationNotes;
   List<int> byteInterpretationDepth;
   typedef bool (*typeDecoder)(AbstractSyntaxNotationOneSubsetDecoder& thisPointer, std::stringstream* commentsOnError);
   List<typeDecoder> decodersByByteValue;
   bool Decode(std::stringstream* commentsOnError);
-  bool PointerIsBad(std::stringstream* commentsOnError);
-  bool DecodeCurrent(std::stringstream* commentsOnError, JSData& output);
-  bool DecodeSequenceContent(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
-  bool DecodeIntegerContent(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
-  static LargeInt TryToDecode(const std::string& input, int& inputOutputDataPointer);
-  bool DecodeOctetString(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
-  bool DecodeObjectIdentifier(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
-  bool DecodeNull(std::stringstream* commentsOnError, int desiredLengthInBytes, JSData& output);
-  bool DecodeCurrentConstructed(std::stringstream* commentsOnError);
+  bool PointerIsBad(JSData* interpretation);
+  bool DecodeCurrent(JSData& output, JSData *interpretation);
+  bool DecodeSequenceContent(int desiredLengthInBytes, JSData& output, JSData* interpretation);
+  bool DecodeIntegerContent(int desiredLengthInBytes, JSData& output, JSData* interpretation);
+  static LargeInt VariableLengthQuantityDecode(const std::string& input, int& inputOutputDataPointer);
+  bool DecodeOctetString(int desiredLengthInBytes, JSData& output, JSData* interpretation);
+  bool DecodeObjectIdentifier(int desiredLengthInBytes, JSData& output, JSData* interpretation);
+  bool DecodeNull(int desiredLengthInBytes, JSData& output, JSData* interpretation);
+  bool DecodeConstructed(unsigned char startByte, int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeCurrentBuiltInType(std::stringstream* commentsOnError);
-  bool DecodeLengthIncrementDataPointer(int& outputLengthNegativeOneForVariable, std::stringstream* commentsOnError);
+  bool DecodeLengthIncrementDataPointer(int& outputLengthNegativeOneForVariable, JSData* interpretation);
   std::string ToStringDebug() const;
   void initialize();
   AbstractSyntaxNotationOneSubsetDecoder();
   static bool isCostructedByte(unsigned char input);
+  static bool hasBit7Set(unsigned char input);
+  static bool hasBit8Set(unsigned char input);
   // Pointers to the following functions will be used.
   // These functions would suitably be member functions, however
   // I chose to make them static members for the following reasons.

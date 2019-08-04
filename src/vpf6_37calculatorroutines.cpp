@@ -2196,7 +2196,6 @@ bool CalculatorFunctionsGeneral::innerASN1Decode(Calculator& theCommands, const 
   }
   std::stringstream commentsOnError;
   std::stringstream out;
-  out << "Not implemented yet.<br>";
   theDecoder.flagLogByteInterpretation = true;
   if (!theDecoder.Decode(&commentsOnError)) {
     out << "Failed to decode.<br>" << commentsOnError.str();

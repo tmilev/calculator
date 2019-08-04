@@ -40,7 +40,8 @@ void Calculator::initAdminFunctions() {
     "The database name is calculator (can't be modified). "
     "First argument: collection name. Second argument: query. ",
     "MongoFind(\"users\", \"{}\")",
-    true, false,
+    true,
+    false,
     "CalculatorDatabaseFunctions::innerExecuteMongoQuery",
     "MongoFind"
   );
@@ -86,7 +87,8 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationInnerHandler(
     "SelectAtRandom",
-    CalculatorFunctionsGeneral::innerSelectAtRandom, "",
+    CalculatorFunctionsGeneral::innerSelectAtRandom,
+    "",
     "Selects at random an object from a sequence.",
     "f=SelectAtRandom(\\sin, \\cos); "
     "g=SelectAtRandom(\\tan, \\cot, \\sec, \\csc);"
@@ -98,7 +100,8 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationInnerHandler(
     "RandomInteger",
-    CalculatorFunctionsGeneral::innerRandomInteger, "",
+    CalculatorFunctionsGeneral::innerRandomInteger,
+    "",
     "Generates a random integer. "
     "The random integer lives in intervals given "
     "by pairs of integers. The example code "
@@ -135,10 +138,12 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationInnerHandler(
     "TurnOnRules",
-    CalculatorFunctionsGeneral::innerTurnOnRules, "",
+    CalculatorFunctionsGeneral::innerTurnOnRules,
+    "",
     "Turns on computational rules.",
     "TurnOffRules(\"sqrt\"); a = \\sqrt[4]{t}; TurnOnRules(\"sqrt\"); a",
-    true, false,
+    true,
+    false,
     "CalculatorConversions::innerTurnOnRules",
     "TurnOnRules"
   );
@@ -148,7 +153,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Turns on numerical approximations. Takes as input dummy argument. ",
     "TurnOffApproximations(0); ln(2); TurnOnApproximations(0); ln(2)",
-    true, false,
+    true,
+    false,
     "CalculatorConversions::innerTurnOnRules",
     "TurnOnApproximations"
   );
@@ -158,7 +164,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Turns on numerical approximations. Takes as input dummy argument. ",
     "TurnOffApproximations(0); ln(2); TurnOnApproximations(0); ln(2)",
-    true, false,
+    true,
+    false,
     "CalculatorConversions::innerTurnOnRules",
     "TurnOffApproximations"
   );
@@ -167,8 +174,10 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorHtmlFunctions::innerEvaluateSymbols,
     "",
     "Evaluates and replaces individual symbols/variables in LaTeX string. Leaves the rest of the string intact.",
-    "x =5; left =a; EvaluateSymbols(\"x^x +ax +a x +\\left(left \\right)\")",
-    true, false, "CalculatorConversions::innerTurnOnRules", "TurnOnRules"
+    "x = 5; left = a; EvaluateSymbols(\"x^x +ax +a x +\\left(left \\right)\")",
+    true,
+    false,
+    "CalculatorConversions::innerTurnOnRules", "TurnOnRules"
   );
   this->AddOperationInnerHandler(
     "or",
@@ -232,7 +241,8 @@ void Calculator::initPredefinedInnerFunctions() {
 
   this->AddOperationInnerHandler(
     "URLStringToNormalString",
-    CalculatorFunctionsGeneral::innerUrlStringToNormalString, "",
+    CalculatorFunctionsGeneral::innerUrlStringToNormalString,
+    "",
     "Converts an url-encoded string to a normal string. ",
     "URLStringToNormalString(\"randomSeed%3d92742048%26submissionsAlgebraAnswer%3\")",
     true,
@@ -300,18 +310,21 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationInnerHandler(
     "ProblemGiveUp",
-    CalculatorHtmlFunctions::innerInterpretProblemGiveUp, "",
+    CalculatorHtmlFunctions::innerInterpretProblemGiveUp,
+    "",
     "Gives the predefined answer to a problem. First argument must be a string with the problem. "
     "The second argument must be the id of the answer. ",
     "ProblemGiveUp(LoadFileIntoString("
     "\"problems/default/Functions-composing-fractional-linear-1.html\"), AlgebraAnswer)",
-    true, false,
+    true,
+    false,
     "CalculatorHtmlFunctions::innerInterpretProblemGiveUp",
     "ProblemGiveUp"
   );
   this->AddOperationInnerHandler(
     "MakeInputBox",
-    CalculatorHtmlFunctions::innerUserInputBox, "",
+    CalculatorHtmlFunctions::innerUserInputBox,
+    "",
     "Creates an user input text box. ",
     "MakeInputBox(name = a, value = RandomInteger((- 5, - 1), (1, 5)));", true, false,
     "CalculatorHtmlFunctions::innerUserInputBox",
@@ -319,7 +332,8 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationInnerHandler(
     "SetInputBox",
-    CalculatorHtmlFunctions::innerSetInputBox, "",
+    CalculatorHtmlFunctions::innerSetInputBox,
+    "",
     "Sets value for input box that overrides the input box (no box is displayed). ",
     "SetInputBox(name =a, value =RandomInteger((-5,- 1), (1,5))); "
     "MakeInputBox(name =a)",
@@ -367,36 +381,47 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestTopCommand"
   );
   this->AddOperationInnerHandler(
-    "TestStandardOutput", CalculatorFunctionsGeneral::innerTestStandardOutput, "",
+    "TestStandardOutput",
+    CalculatorFunctionsGeneral::innerTestStandardOutput,
+    "",
     "(This is not a mathematical function). Tests the calculator standard output.",
     "TestStandardOutput(\"The quick brown fox jumps over the lazy dog\")",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerTestStandardOutput",
     "TestStandardOutput"
   );
   this->AddOperationInnerHandler(
-    "Crash", CalculatorFunctionsGeneral::innerCrash, "",
+    "Crash",
+    CalculatorFunctionsGeneral::innerCrash,
+    "",
     "Crashes the calculator: tests the "
     "crashing mechanism (are crash logs properly created, etc.). ",
     "Crash(0)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerCrash",
     "Crash"
   );
   this->AddOperationInnerHandler(
     "CrashListOutOfBounds",
-    CalculatorFunctionsGeneral::innerCrashByListOutOfBounds, "",
+    CalculatorFunctionsGeneral::innerCrashByListOutOfBounds,
+    "",
     "Crashes the calculator by attempting to use data out-of-bounds in a List data structure. ",
-    "CrashListOutOfBounds(0)", true, false,
+    "CrashListOutOfBounds(0)",
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerCrashByListOutOfBounds",
     "CrashListOutOfBounds"
   );
   this->AddOperationInnerHandler(
     "CrashVectorOutOfBounds",
-    CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds, "",
+    CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds,
+    "",
     "Crashes the calculator by attempting to use data "
     "out-of-bounds in a std::vector.",
-    "CrashVectorOutOfBounds(0)", "CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds",
+    "CrashVectorOutOfBounds(0)",
+    "CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds",
     "CrashVectorOutOfBounds"
   );
   this->AddOperationInnerHandler(
@@ -407,11 +432,14 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotExpressionTree( e^x)"
   );
   this->AddOperationInnerHandler(
-    "Thaw", CalculatorFunctionsGeneral::innerThaw, "",
+    "Thaw",
+    CalculatorFunctionsGeneral::innerThaw,
+    "",
     "If the argument is frozen, removes the top freeze command and returns the argument, "
     "else returns the argument unchanged.",
-    "a =Freeze{}(1+ 1); Thaw a; c =Thaw(Freeze(a,b)); PlotExpressionTree c",
-    true, false,
+    "a =Freeze{}(1 + 1); Thaw a; c =Thaw(Freeze(a,b)); PlotExpressionTree c",
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerThaw"
     "Thaw"
   );
@@ -434,16 +462,19 @@ void Calculator::initPredefinedInnerFunctions() {
     "Show a step-by step evaluation of the calculator. "
     "Some steps my be combined or omitted for improved human readability. ",
     "LogEvaluationStepsHumanReadableMerged((x +2)(x +3))",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerLogEvaluationStepsHumanReadableMerged"
     "LogEvaluationStepsHumanReadableMerged"
   );
   this->AddOperationInnerHandler(
     "PlotExpressionTreeFull",
-    CalculatorFunctionsGeneral::innerDrawExpressionGraphFull, "",
+    CalculatorFunctionsGeneral::innerDrawExpressionGraphFull,
+    "",
     "Draws the internal tree structure of an expression. Unfolds built-in types. ",
     "PlotExpressionTreeFull( 1); PlotExpressionTree(1+ 1);PlotExpressionTree( Freeze{}(1 + 1));",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerDrawExpressionGraphFull",
     "PlotExpressionTreeFull"
   );
@@ -455,102 +486,134 @@ void Calculator::initPredefinedInnerFunctions() {
     "without completely unfolding the tree structure of "
     "expressions that represent a single mathematical entity.",
     "Lispify(e^x)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerLispify",
     "Lispify"
   );
   this->AddOperationInnerHandler(
     "FlattenCommandEnclosuresOneLayer",
-    Calculator::innerFlattenCommandEnclosuresOneLayer, "",
+    Calculator::innerFlattenCommandEnclosuresOneLayer,
+    "",
     "Flattens command enclosures. ",
     "FlattenCommandEnclosuresOneLayer(CommandEnclosure{}(x =5; x); "
     "CommandEnclosure{}(y; x)  ) ",
-    true, false,
+    true,
+    false,
     "Calculator::FlattenCommandEnclosuresOneLayer",
     "FlattenCommandEnclosuresOneLayer"
   );
   this->AddOperationInnerHandler(
-    "LispifyFull", CalculatorFunctionsGeneral::innerLispifyFull, "",
+    "LispifyFull",
+    CalculatorFunctionsGeneral::innerLispifyFull,
+    "",
     "Shows the complete internal tree structure of an expression "
     "(replacing the expression with a string).",
     "LispifyFull( e^x)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerLispifyFull",
     "LispifyFull"
   );
   this->AddOperationInnerHandler(
-    "ChildExpression", CalculatorFunctionsGeneral::innerChildExpression, "",
+    "ChildExpression",
+    CalculatorFunctionsGeneral::innerChildExpression,
+    "",
     "If defined, returns the nth child of an expression.",
     "ChildExpression(e^x, 1); ChildExpression(e^x, 2); ChildExpression(e^x, 3)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerChildExpression",
     "ChildExpression"
   );
   this->AddOperationInnerHandler(
-    "ToString", CalculatorFunctionsGeneral::innerExpressionToString, "",
+    "ToString",
+    CalculatorFunctionsGeneral::innerExpressionToString,
+    "",
     "Transforms an arbitrary expression to its string representation. "
     "The string representation is (supposed to be) LaTeX-compatible. ",
     "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerExpressionToString",
     "ToString"
   );
   this->AddOperationInnerHandler(
-    "ToUTF8String", CalculatorFunctionsGeneral::innerExpressionToUTF8String, "",
+    "ToUTF8String",
+    CalculatorFunctionsGeneral::innerExpressionToUTF8String,
+    "",
     "Transforms an arbitrary expression to its utf8-string representation. "
     "The string is supposed to look reasonable when drawn on a javascript canvas. ",
     "f= \\sin {}x / \\cos {}x; Plot(f, -\\pi/4, \\pi/4) + PlotLabel{}((1,1), \"y =\" + ToUTF8String(f))",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerExpressionToUTF8String",
     "ToUTF8String"
   );
   this->AddOperationInnerHandler(
-    "StringToAtom", CalculatorFunctionsGeneral::innerStringToAtom, "",
+    "StringToAtom",
+    CalculatorFunctionsGeneral::innerStringToAtom,
+    "",
     "Transforms a string to an atom. ",
     "StringToAtom(\"The quick brown fox jumps over the lazy dog.\")",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerStringToAtom",
     "StringToAtom"
   );
   this->AddOperationInnerHandler(
-    "\"", CalculatorFunctionsGeneral::innerQuoteToString, "",
+    "\"",
+    CalculatorFunctionsGeneral::innerQuoteToString,
+    "",
     "Creates a string. ",
     "\"The quick brown fox jumps over the lazy dog.\"",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerQuoteToString",
     "QuoteToString"
   );
   this->AddOperationInnerHandler(
-    "TestBase64", CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test, "",
+    "TestBase64",
+    CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test,
+    "",
     "Test function: converts a base64 string to bitstream and back to base64. "
     "Output must be identical to input. ",
     "TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog=\");\n"
     "TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog\")",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test",
     "TestBase64"
   );
   this->AddOperationInnerHandler(
-    "EllipticCurveOrderNIST", CalculatorFunctionsGeneral::innerNISTEllipticCurveOrder, "",
+    "EllipticCurveOrderNIST",
+    CalculatorFunctionsGeneral::innerNISTEllipticCurveOrder,
+    "",
     "Get a NIST curve order. At present implemented for secp256k1 only. ",
     "g = EllipticCurveGeneratorNIST(\"secp256k1\");\n"
     "order = EllipticCurveOrderNIST(\"secp256k1\");\n"
     "g^order",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerNISTEllipticCurveOrder",
     "EllipticCurveOrderNIST"
   );
   this->AddOperationInnerHandler(
-    "EllipticCurveGeneratorNIST", CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator, "",
+    "EllipticCurveGeneratorNIST",
+    CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator,
+    "",
     "Makes generator of a NIST curve. At present implemented for secp256k1 only. ",
     "g=EllipticCurveGeneratorNIST(\"secp256k1\");\n"
     "g^3; g^115792089237316195423570985008687907852837564279074904382605163141518161494337",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator",
     "EllipticCurveGeneratorNIST"
   );
   this->AddOperationInnerHandler(
-    "Slice", CalculatorFunctionsGeneral::innerSliceString, "",
+    "Slice",
+    CalculatorFunctionsGeneral::innerSliceString,
+    "",
     "Slices a string in an interval [a,b), "
     "where a is the first included index and b the first excluded index. "
     "If b is omitted, then the entire string is sliced. "
@@ -559,41 +622,53 @@ void Calculator::initPredefinedInnerFunctions() {
     "Slice(a, 0,2);\n"
     "Slice(a,0,- 1);\n"
     "Slice(a,1)\n",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerSliceString",
     "Slice"
   );
   this->AddOperationInnerHandler(
-    "ConvertIntegerToBase58", CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58, "",
+    "ConvertIntegerToBase58",
+    CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58,
+    "",
     "Converts an unsigned integer to base58. ",
     "theInt = ConvertHexToInteger(ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\"));"
     "ConvertIntegerToBase58(theInt)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58",
     "ConvertIntegerToBase58"
   );
   this->AddOperationInnerHandler(
-    "ConvertBase58ToHex", CalculatorFunctionsGeneral::innerConvertBase58ToHex, "",
+    "ConvertBase58ToHex",
+    CalculatorFunctionsGeneral::innerConvertBase58ToHex,
+    "",
     "Converts Base58 to hex. ",
     "ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\");",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerConvertBase58ToHex",
     "ConvertBase58ToHex"
   );
   this->AddOperationInnerHandler(
-    "AESCBCEncrypt", CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt, "",
+    "AESCBCEncrypt",
+    CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt,
+    "",
     "Encodes using aes 256 bit in cbc (cipher block chain) mode. "
     "First argument = key. Second argument = text. Reference: NIST SP 800-38A.",
     "text = ConvertHexToString \"6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710\";\n"
     "key = ConvertHexToString \"603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4\";\n"
     "ConvertStringToHex AESCBCEncrypt(key, text);\n"
     "\"f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsCrypto::innerAES_CBC_256_Encode",
     "AESCBCEncrypt"
   );
   this->AddOperationInnerHandler(
-    "AESCBCDecrypt", CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt, "",
+    "AESCBCDecrypt",
+    CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt,
+    "",
     "AES decryption. First argument key, second argument - text. ",
     "text = \"6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710\";\n"
     "key = \"603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4\";\n"
@@ -602,32 +677,41 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n"
     "ConvertStringToHex AESCBCDecrypt(ConvertHexToString key, ConvertHexToString cipherText);\n"
     "text",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt",
     "AESCBCDecrypt"
   );
   this->AddOperationInnerHandler(
-    "AppendDoubleSha256Check", CalculatorFunctionsGeneral::innerAppendDoubleSha256Check, "",
+    "AppendDoubleSha256Check",
+    CalculatorFunctionsGeneral::innerAppendDoubleSha256Check,
+    "",
     "Appends a sha 256 checksum to a string. More precisely, appends the first 4 bytes "
     "of sha256 of the string to the string. ",
     "A= \"80aad3f1f5de25ff67a4fd3d7808d58510e00ec08a55c10ad5751facf35411509701\";\n"
     "B= ConvertHexToString(A);\n"
     "C= AppendDoubleSha256Check(B);\n"
     "D= ConvertStringToHex(C)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerAppendDoubleSha256Check",
     "AppendDoubleSha256Check"
   );
   this->AddOperationInnerHandler(
-    "ConvertHexToBase58", CalculatorFunctionsGeneral::innerConvertHexToBase58, "",
+    "ConvertHexToBase58",
+    CalculatorFunctionsGeneral::innerConvertHexToBase58,
+    "",
     "Converts hex to base58. ",
     "ConvertHexToBase58(\"03aaf2d5530b1a5cbf80c248ca44635ac265f4104ffc5b76ef48f361c03b7f536f\");",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerConvertHexToBase58",
     "ConvertHexToBase58"
   );
   this->AddOperationInnerHandler(
-    "CharToBase64", CalculatorFunctionsGeneral::innerCharToBase64, "",
+    "CharToBase64",
+    CalculatorFunctionsGeneral::innerCharToBase64,
+    "",
     "Converts characters to bit stream and the bitstream to base64. "
     "The character to bit stream conversion is not fixed at the moment "
     "and may be system/compiler dependent. "
@@ -676,8 +760,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Tests decoding of abstract syntax one. ",
     "%HideLHS\n"
-    "ASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_private_key.base64\")));\n"
-    "ASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_cert.base64\")));",
+    "ASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_cert.base64\")));\n"
+    "ASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_private_key.base64\")));\n",
     true,
     true,
     "CalculatorFunctionsGeneral::innerASN1Decode",
@@ -703,7 +787,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Tries to verify a Json Web Token.",
     "%HideLHS JWTverifyAgainstKnownKeys(\"\"); ",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys",
     "JWTverifyAgainstKnownKeys"
   );
@@ -719,7 +804,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "modulus = \"ofgWCuLjybRlzo0tZWJjNiuSfb4p4fAkd_wWJcyQoTbji9k0l8W26mPddxHmfHQp-Vaw-4qPCJrcS2mJPMEzP1Pt0Bm4d4QlL-yRT-SFd2lZS-pCgNMsD1W_YpRPEwOWvG6b32690r2jZ47soMZo9wGzjb_7OMg0LOL-bSf63kpaSHSXndS5z5rexMdbBYUsLA9e-KXBdQOS-UTo7WTBEMa2R2CapHg665xsmtdVMTBQY4uDZlxvb3qCo5ZwKh9kG4LT6_I5IhlJH7aGhyxXFvUK-DWNmoudF8NAco9_h9iaGNj8q2ethFkMLs91kzk2PAcDTW9gb54h4FRWyuXpoQ\";\n"
     "exponent =\"AQAB\";\n"
     "JWTverifyRSA256(token,modulus,exponent);",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256",
     "JWTverifyRSA256"
   );
@@ -731,7 +817,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "The examples below are taken from Wikipedia. ",
     "Sha1(\"The quick brown fox jumps over the lazy dog\");\n"
     "Sha1(\"The quick brown fox jumps over the lazy cog\");",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerSha1OfString",
     "Sha1"
   );
@@ -742,33 +829,41 @@ void Calculator::initPredefinedInnerFunctions() {
     "Converts characters to a sequence of bits and computes the sha224 hash value of those bits. "
     "Reference: Wikipedia. ",
     "Sha224(\"\");",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerSha224OfString",
     "Sha1"
   );
   this->AddOperationInnerHandler(
     "RSAencrypt",
-    CalculatorFunctionsGeneral::innerRSAencrypt, "",
+    CalculatorFunctionsGeneral::innerRSAencrypt,
+    "",
     "Encrypts with RSA. First argument: modulus. Second argument: (public) exponent. "
     "Third argument: message given as a large integer.",
     "RSAencrypt(3233, 17, 65)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerRSAencrypt",
     "RSAencrypt"
   );
   this->AddOperationInnerHandler(
-    "Ripemd160", CalculatorFunctionsGeneral::innerRIPEMD160OfString, "",
+    "Ripemd160",
+    CalculatorFunctionsGeneral::innerRIPEMD160OfString,
+    "",
     "Ripemd160 hash function. See wikipedia page. ",
     "ConvertStringToHex Ripemd160(\"The quick brown fox jumps over the lazy dog\");\n"
     "\"37f332f68db77bd9d7edd4969571ad671cf9dd3b\";\n"
     "ConvertStringToHex Ripemd160(\"The quick brown fox jumps over the lazy cog\");\n"
     "\"132072df690933835eb8b6ad0b77e7b6f14acad7\";\n",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerRIPEMD160OfString",
     "Ripemd160"
   );
   this->AddOperationInnerHandler(
-    "ShaThree256", CalculatorFunctionsGeneral::innerSha3_256OfString, "",
+    "ShaThree256",
+    CalculatorFunctionsGeneral::innerSha3_256OfString,
+    "",
     "SHA3 of input string, 256 bit version. See the wikipedia page on SHA3. ",
     "ConvertStringToHex ShaThree256(\"abc\");\n"
     "\"3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532\";\n"
@@ -778,12 +873,15 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"7f5979fb78f082e8b1c676635db8795c4ac6faba03525fb708cb5fd68fd40c5e\";\n"
     "ConvertStringToHex Keccak256(\"testing\");\n"
     "\"5f16f4c7f149ac4f9510d9cf8cf384038ad348b3bcdc01915f95de12df9d1b02\";\n",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerSha3_256OfString",
     "ShaThree256"
   );
   this->AddOperationInnerHandler(
-    "Keccak256", CalculatorFunctionsGeneral::innerKeccak256OfString, "",
+    "Keccak256",
+    CalculatorFunctionsGeneral::innerKeccak256OfString,
+    "",
     "Keccak256 of input string, 256 bit version. This is ``non-stardard sha3'' "
     "and is different from the sha3. See the wikipedia page on SHA3/Keccak. ",
     "ConvertStringToHex ShaThree256(\"abc\");\n"
@@ -794,110 +892,149 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"7f5979fb78f082e8b1c676635db8795c4ac6faba03525fb708cb5fd68fd40c5e\";\n"
     "ConvertStringToHex Keccak256(\"testing\");\n"
     "\"5f16f4c7f149ac4f9510d9cf8cf384038ad348b3bcdc01915f95de12df9d1b02\";\n",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerKeccak256OfString",
     "Keccak256"
   );
   this->AddOperationInnerHandler(
-    "Sha256", CalculatorFunctionsGeneral::innerSha256OfString, "",
+    "Sha256",
+    CalculatorFunctionsGeneral::innerSha256OfString,
+    "",
     "Converts characters to a sequence of bits and computes the sha256 hash value of those bits. "
     "Reference: Wikipedia. ",
     "Sha256(\"\");",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerSha256OfString",
     "Sha256"
   );
   this->AddOperationInnerHandler(
-    "Sha256Verbose", CalculatorFunctionsGeneral::innerSha256OfStringVerbose, "",
+    "Sha256Verbose",
+    CalculatorFunctionsGeneral::innerSha256OfStringVerbose,
+    "",
     "Same as Sha256 but more verbose. ",
     "Sha256Verbose(\"\");",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerSha256OfStringVerbose",
     "Sha256Verbose"
   );
   this->AddOperationInnerHandler(
-    "TestJSON", CalculatorFunctionsGeneral::innerTestJSON, "",
+    "TestJSON",
+    CalculatorFunctionsGeneral::innerTestJSON,
+    "",
     "Tests the JSON parsing mechanism. Input: json string, use backslash escapes for "
     "backslashes and quotes.",
     "TestJSON(\"{a:1}\"); TestJSON(\"{\\\"a\\\":\\\"\\\\\\\"\\\"}\");",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerTestJSON",
     "TestJSON"
   );
   this->AddOperationInnerHandler(
-    "ConvertBase64ToHex", CalculatorFunctionsGeneral::innerBase64ToHex, "",
+    "ConvertBase64ToHex",
+    CalculatorFunctionsGeneral::innerBase64ToHex,
+    "",
     "Converts base64 string to hexadecimal string. ",
     "ConvertBase64ToHex(\"AQAB\");",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerBase64ToHex",
     "ConvertBase64ToHex"
   );
   this->AddOperationInnerHandler(
-    "ConvertStringToHex", CalculatorFunctionsGeneral::innerConvertStringToHex, "",
+    "ConvertStringToHex",
+    CalculatorFunctionsGeneral::innerConvertStringToHex,
+    "",
     "Converts a bitstream (not necessarily UTF-8 encoded) to hex. ",
     "ConvertStringToHex(Sha256(Sha256(\"hello\")));",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerConvertStringToHex",
     "ConvertStringToHex"
   );
   this->AddOperationInnerHandler(
-    "ConvertHexToInteger", CalculatorFunctionsGeneral::innerHexToInteger, "",
+    "ConvertHexToInteger",
+    CalculatorFunctionsGeneral::innerHexToInteger,
+    "",
     "Converts a hex string to an integer. ",
     "ConvertHexToInteger(Base64ToHex(\"AQAB\"));",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerHexToInteger",
     "ConvertHexToInteger"
   );
   this->AddOperationInnerHandler(
-    "ConvertIntegerToHex", CalculatorFunctionsGeneral::innerIntegerToHex, "",
+    "ConvertIntegerToHex",
+    CalculatorFunctionsGeneral::innerIntegerToHex,
+    "",
     "Converts an integer to hex string. ",
     "ConvertIntegerToHex(65537);",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerIntegerToHex",
     "ConvertIntegerToHex"
   );
   this->AddOperationInnerHandler(
-    "ConvertHexToString", CalculatorFunctionsGeneral::innerHexToString, "",
+    "ConvertHexToString",
+    CalculatorFunctionsGeneral::innerHexToString,
+    "",
     "Converts a hex string to a string. ",
     "ConvertHexToString(\"3031300d060960864801650304020105000420\");",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerHexToString",
     "ConvertHexToString"
   );
   this->AddOperationInnerHandler(
     "MakeMakefile",
-    CalculatorFunctionsGeneral::innerMakeMakeFile, "",
+    CalculatorFunctionsGeneral::innerMakeMakeFile,
+    "",
     "Makes a makefile. ",
     "MakeMakefile(0)",
-    false, false,
+    false,
+    false,
     "CalculatorFunctionsGeneral::innerMakeMakeFile",
     "MakeMakefile"
   );
   this->AddOperationInnerHandler(
-    "FormatCPPCode", CalculatorFunctionsGeneral::innerFormatCPPSourceCode, "",
+    "FormatCPPCode",
+    CalculatorFunctionsGeneral::innerFormatCPPSourceCode,
+    "",
     "Format cpp code. ",
     "FormatCPPCode{}(\"src/database.cpp\")",
-    false, false,
+    false,
+    false,
     "Calculator::innerFormatCPPSourceCode",
-    "FormatCPPCode", false
+    "FormatCPPCode",
+    false
   );
   this->AddOperationInnerHandler(
-    "FormatCPPDirectory", CalculatorFunctionsGeneral::innerFormatCPPDirectory, "",
+    "FormatCPPDirectory",
+    CalculatorFunctionsGeneral::innerFormatCPPDirectory,
+    "",
     "Format cpp directory. ",
     "FormatCPPDirectory{}(\"src/\")",
-    false, false,
+    false,
+    false,
     "Calculator::innerFormatCPPDirectory",
-    "FormatCPPDirectory", false
+    "FormatCPPDirectory",
+    false
   );
 
   this->AddOperationInnerHandler(
-    "AutomatedTest", Calculator::innerAutomatedTest, "",
+    "AutomatedTest",
+    Calculator::innerAutomatedTest,
+    "",
     "Runs a big bad automated test of all built in functions "
     "against a set of known good results. ",
     "AutomatedTest{}(0)",
-    false, false,
+    false,
+    false,
     "Calculator::innerAutomatedTest",
-    "AutomatedTest", true
+    "AutomatedTest",
+    true
   );
   this->AddOperationInnerHandler(
     "AutomatedTestSetKnownGoodCopy",
@@ -905,54 +1042,66 @@ void Calculator::initPredefinedInnerFunctions() {
     "Runs a big bad automated test of all built-in "
     "functions to create a file containing a set of known good results.",
     "AutomatedTestSetKnownGoodCopy 0",
-    false, false,
+    false,
+    false,
     "Calculator::innerAutomatedTestSetKnownGoodCopy",
     "AutomatedTestSetKnownGoodCopy",
     true
   );
   this->AddOperationInnerHandler(
     "AutomatedTestProblemInterpretation",
-    CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation, "",
+    CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation,
+    "",
     "Runs a big bad automated test of all built in "
     "problems located in the problems/default/ folder. "
     "<b style ='color:red'>The example below will not work out of the box: "
     "the automated test rule has to be activated first.</b> To activate the test, "
     "please first use the command: TurnOnRules(AutomatedTestProblemInterpretation).",
     "AutomatedTestProblemInterpretation{}(0,0,0)",
-    false, false,
+    false,
+    false,
     "CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation",
     "AutomatedTestProblemInterpretation",
     true
   );
   this->AddOperationInnerHandler(
-    "!", CalculatorFunctionsGeneral::innerFactorial, "",
+    "!",
+    CalculatorFunctionsGeneral::innerFactorial,
+    "",
     "Factorial function. ",
     "5!",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerFactorial",
     "Factorial"
   );
   this->AddOperationInnerHandler(
     "RepresentElementHyperoctahedral",
-    CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral, "",
+    CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral,
+    "",
     "Represents element of hyperoctahedral into a representation. ",
     "V= HyperOctahedralRepresentation((1,1),1);\n"
     "s = MakeElementHyperOctahedral{}((1,2),1,0,0);\n"
     "RepresentElementHyperoctahedral(s, V)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral"
   );
   this->AddOperationInnerHandler(
     "HyperOctahedralIrreps",
-    CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules, "",
+    CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules,
+    "",
     "Prints all modules induced from Specht modules. ",
     "HyperOctahedralIrreps(3)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules",
     "HyperOctahedralIrreps"
   );
   this->AddOperationInnerHandler(
-    "SpechtModule", CalculatorFunctionsWeylGroup::innerSpechtModule, "",
+    "SpechtModule",
+    CalculatorFunctionsWeylGroup::innerSpechtModule,
+    "",
     "Gets the Specht module of the partition. ",
     "SpechtModule((3,2,1))", true, false,
     "CalculatorFunctionsWeylGroup::innerSpechtModule",
@@ -960,7 +1109,8 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationInnerHandler(
     "HyperOctahedralRepresentation",
-    CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation, "",
+    CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation,
+    "",
     "Gets one hyperoctahedral representation from two partitions. ",
     "HyperOctahedralRepresentation((1,1), (1))",
     true, false,
@@ -969,27 +1119,35 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationInnerHandler(
     "HyperOctahedralGeneratorPrint",
-    CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations, "",
-    "Prints the generator commutation relations of a hyperoctahedral group.  ",
+    CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations,
+    "",
+    "Prints the generator commutation relations of a hyperoctahedral group. ",
     "HyperOctahedralGeneratorPrint(3)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations",
     "HyperOctahedralGeneratorPrint"
   );
   this->AddOperationInnerHandler(
-    "PrintMacdonaldPolys", CalculatorFunctionsWeylGroup::innerMacdonaldPolys, "",
+    "PrintMacdonaldPolys",
+    CalculatorFunctionsWeylGroup::innerMacdonaldPolys,
+    "",
     "Prints macdonald polynomials from a semisimple type. ",
     "PrintMacdonaldPolys{}(B_3)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsWeylGroup::innerMacdonaldPolys",
     "PrintMacdonaldPolys"
   );
   this->AddOperationInnerHandler(
-    "Numerator", CalculatorFunctionsGeneral::innerNumerator, "",
+    "Numerator",
+    CalculatorFunctionsGeneral::innerNumerator,
+    "",
     "If the expression is a fraction, returns the numerator, "
     "else returns the entire expression. ",
     "Numerator(a/b); Numerator(1+ 1/x)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerNumerator",
     "Numerator"
   );
@@ -999,38 +1157,46 @@ void Calculator::initPredefinedInnerFunctions() {
     "Applies a transformation, recursively to all subexpressions of "
     "a list of known functions. ",
     "ApplyToSubexpressionsRecurseThroughCalculusFunctions(Polynomialize, sin ((x + 1)^3))",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculusFunctions",
     "ApplyToSubexpressionsRecurseThroughCalculusFunctions"
   );
   this->AddOperationInnerHandler(
     "SubList",
-    CalculatorFunctionsGeneral::innerSubList, "",
+    CalculatorFunctionsGeneral::innerSubList,
+    "",
     "Extracts a sub-list that contains all elements that satisfy a "
     "condition given by the second argument. Use the bound "
     "variable syntax {{a}} to address the current element of the list.",
     "SubList{}((1,2,3,4), {{a}}>2)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerSubList",
     "SubList"
   );
   this->AddOperationInnerHandler(
     "ApplyToList",
-    CalculatorFunctionsGeneral::innerApplyToList, "",
+    CalculatorFunctionsGeneral::innerApplyToList,
+    "",
     "Applies a transformation to each element of a list. ",
     "SolveForX{}{{a}}=SolveFor(x,{{a}});\n"
     "SolveForX(x^2+2);\n"
     "ApplyToList(SolveForX,(x^2+ 1,x^2-x-2))",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerApplyToList",
     "ApplyToList"
   );
   this->AddOperationInnerHandler(
-    "Denominator", CalculatorFunctionsGeneral::innerDenominator, "",
+    "Denominator",
+    CalculatorFunctionsGeneral::innerDenominator,
+    "",
     "If the expression is a fraction, returns the denominator, "
     "else returns 1. ",
     "Denominator(a/b); Denominator(1+ 1/x)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerDenominator",
     "Denominator"
   );

@@ -2188,8 +2188,8 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerASN1Decode(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerASN1Decode");
+bool CalculatorFunctionsGeneral::innerTestASN1Decode(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestASN1Decode");
   AbstractSyntaxNotationOneSubsetDecoder theDecoder;
   if (!input.IsOfType<std::string>(&theDecoder.rawData)) {
     return false;

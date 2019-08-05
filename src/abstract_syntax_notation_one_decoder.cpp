@@ -459,3 +459,15 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
   out << MathRoutines::StringShortenInsertDots(Crypto::ConvertStringToHex(this->rawData, 70, true), 4000);
   return out.str();
 }
+
+bool CertificateRSA::LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure) {
+  AbstractSyntaxNotationOneSubsetDecoder theDecoder;
+  theDecoder.rawData = input;
+
+  if (commentsOnFailure != 0) {
+    *commentsOnFailure << "Not implemented yet. ";
+  }
+  return false;
+
+}
+

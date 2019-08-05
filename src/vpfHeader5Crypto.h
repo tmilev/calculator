@@ -13,8 +13,10 @@ public:
   std::string theExponentString;
   LargeIntUnsigned theModuluS;
   LargeIntUnsigned theExponenT;
+  bool LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure);
   bool LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   std::string ToString();
+  std::string ToJSON();
 };
 
 class Crypto {

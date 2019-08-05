@@ -60,6 +60,8 @@ public:
   static bool innerNISTEllipticCurveGenerator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNISTEllipticCurveOrder(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLoadKnownCertificates(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTestLoadPEMCertificates(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerJWTverifyAgainstKnownKeys(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerJWTverifyAgainstRSA256(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRSAencrypt(Calculator& theCommands, const Expression& input, Expression& output);
@@ -79,7 +81,7 @@ public:
   static bool innerHexToInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerHexToString(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerASN1Decode(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTestASN1Decode(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerX509certificateCrunch(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerIntersection(Calculator& theCommands, const Expression& input, Expression& output);

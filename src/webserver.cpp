@@ -3758,7 +3758,7 @@ void WebServer::StopKillAll(bool attemptToRestart) {
     int timeLimitSeconds = theGlobalVariables.MaxComputationMilliseconds / 1000;
     *currentLog << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
     theCommand << " && ./";
-    theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
+    theCommand << theGlobalVariables.PhysicalNameExecutableWithPath;
     theCommand << " server " << timeLimitSeconds;
   } else {
     *currentLog << logger::red << "Proceeding to stop server. " << logger::endL;

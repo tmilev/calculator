@@ -747,7 +747,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LoadKnownCertificates",
     CalculatorFunctionsGeneral::innerLoadKnownCertificates,
     "",
-    "Loads known security certificates from the knowncertificates folder. ",
+    "Loads known security certificates from the <a href=\"/certificates-public/\">certificates-public/</a> folder. ",
     "LoadKnownCertificates(0);",
     true,
     false,
@@ -755,17 +755,28 @@ void Calculator::initPredefinedInnerFunctions() {
     "LoadKnownCertificates"
   );
   this->AddOperationInnerHandler(
-    "ASN1Decode",
-    CalculatorFunctionsGeneral::innerASN1Decode,
+    "TestLoadPEMCertificate",
+    CalculatorFunctionsGeneral::innerTestLoadPEMCertificates,
+    "",
+    "Tests the pem parsing functions. ",
+    "LoadFileIntoString(\"output/test_cert.base64\");\n",
+    true,
+    false,
+    "CalculatorFunctionsGeneral::innerTestLoadPEMCertificates",
+    "TestLoadPEMCertificate"
+  );
+  this->AddOperationInnerHandler(
+    "TestASN1Decode",
+    CalculatorFunctionsGeneral::innerTestASN1Decode,
     "",
     "Tests decoding of abstract syntax one. ",
     "%HideLHS\n"
-    "ASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_cert.base64\")));\n"
-    "ASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_private_key.base64\")));\n",
+    "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_cert.base64\")));\n"
+    "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_private_key.base64\")));\n",
     true,
     true,
-    "CalculatorFunctionsGeneral::innerASN1Decode",
-    "ASN1Decode"
+    "CalculatorFunctionsGeneral::innerTestASN1Decode",
+    "TestASN1Decode"
   );
   this->AddOperationInnerHandler(
     "X509CertificateCrunch",
@@ -1038,7 +1049,8 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationInnerHandler(
     "AutomatedTestSetKnownGoodCopy",
-    Calculator::innerAutomatedTestSetKnownGoodCopy, "",
+    Calculator::innerAutomatedTestSetKnownGoodCopy,
+    "",
     "Runs a big bad automated test of all built-in "
     "functions to create a file containing a set of known good results.",
     "AutomatedTestSetKnownGoodCopy 0",
@@ -1201,7 +1213,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "Denominator"
   );
   this->AddOperationInnerHandler(
-    "Product", CalculatorFunctionsGeneral::innerMultiplySequence, "",
+    "Product",
+    CalculatorFunctionsGeneral::innerMultiplySequence,
+    "",
     "Returns the product of the elements in a sequence. "
     "When used on non-sequences, the function "
     "will ignore the first element and "
@@ -1209,12 +1223,15 @@ void Calculator::initPredefinedInnerFunctions() {
     "This may not produce the result you expected for non-sequences, "
     "so use on sequences only. ",
     "Product(a,b); Product{}(Sequence{}a); Product(Sequence{}a); Product(a)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerMultiplySequence",
     "Product"
   );
   this->AddOperationInnerHandler(
-    "\\sum", CalculatorFunctionsGeneral::innerSumSequence, "",
+    "\\sum",
+    CalculatorFunctionsGeneral::innerSumSequence,
+    "",
     "Returns the sum of the elements in a sequence. "
     "When used on non-sequences, the function "
     "will ignore the first element and "
@@ -1222,12 +1239,15 @@ void Calculator::initPredefinedInnerFunctions() {
     "This may not produce the result you expected for non-sequences, "
     "so use on sequences only. ",
     "\\sum(a,b); \\sum{}(Sequence{}a); \\sum(Sequence{}a); \\sum(a)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerSumSequence",
     "\\sum"
   );
   this->AddOperationInnerHandler(
-    "MakeExpression", CalculatorConversions::innerExpressionFromBuiltInType, "",
+    "MakeExpression",
+    CalculatorConversions::innerExpressionFromBuiltInType,
+    "",
     "Creates expression from built-in polynomial. ",
     "MakeExpression(Polynomial{}((x-2y+z- 1)^2(x +y-z)));\n"
     "A = \\frac{64 x^{2} y x y+ 16 x y- y}{-32 x^{2} y x^{2}-8 x^{2}+x};"
@@ -1238,29 +1258,38 @@ void Calculator::initPredefinedInnerFunctions() {
     ");\n"
     "MakeExpression {}D-C;\n"
     "D-B;",
-    true, false, "CalculatorConversions::innerExpressionFromBuiltInType",
+    true,
+    false,
+    "CalculatorConversions::innerExpressionFromBuiltInType",
     "MakeExpression"
   );
   this->AddOperationInnerHandler(
-    "Polynomial", CalculatorConversions::innerPolynomial<Rational>, "",
+    "Polynomial",
+    CalculatorConversions::innerPolynomial<Rational>,
+    "",
     "Creates a polynomial expression with rational coefficients. ",
     "Polynomial{}((x-2y+z- 1)^2(x +y-z));"
     "\nPolynomial{}(y^2)-(Polynomial{}y)^2",
-    true, false,
+    true,
+    false,
     "CalculatorConversions::innerPolynomial",
     "Polynomial"
   );
   this->AddOperationInnerHandler(
-    "PolynomialAlgebraicNumbers", CalculatorConversions::innerPolynomial<AlgebraicNumber>, "",
+    "PolynomialAlgebraicNumbers",
+    CalculatorConversions::innerPolynomial<AlgebraicNumber>,
+    "",
     "Creates a polynomial expression with algebraic number coefficients. ",
     "PolynomialAlgebraicNumbers{}((x +\\sqrt{2})^2 (\\sqrt{3}x-\\sqrt{5}));",
-    true, false,
+    true,
+    false,
     "CalculatorConversions::innerPolynomial",
     "PolynomialAlgebraicNumbers"
   );
   this->AddOperationInnerHandler(
     "ConvertAlgebraicNumberToMatrix",
-    CalculatorFunctionsGeneral::innerConvertAlgebraicNumberToMatrix, "",
+    CalculatorFunctionsGeneral::innerConvertAlgebraicNumberToMatrix,
+    "",
     "Converts the algebraic number to its internal matrix representation. ",
     "a = \\sqrt{2};\n"
     "A = ConvertAlgebraicNumberToMatrix(a);\n"
@@ -1269,13 +1298,15 @@ void Calculator::initPredefinedInnerFunctions() {
     "c = \\sqrt{6};\n"
     "C = ConvertAlgebraicNumberToMatrix(c);\n"
     "A\\otimes B",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerConvertAlgebraicNumberToMatrix",
     "ConvertAlgebraicNumberToMatrix"
   );
   this->AddOperationInnerHandler(
     "AlgebraicNumberFromPoly",
-    CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly, "",
+    CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly,
+    "",
     "Creates an algebraic number that is a root of a polynomial with algebraic number coefficients. ",
     "AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x + 1);",
     true, false,
@@ -1284,16 +1315,19 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationInnerHandler(
     "PrincipalSlTwoIndex",
-    CalculatorFunctionsGeneral::innerGetPrincipalSl2Index, "",
+    CalculatorFunctionsGeneral::innerGetPrincipalSl2Index,
+    "",
     "Gives the symmetric Cartan corresponding to a given dynkin type.",
     "PrincipalSlTwoIndex(G_2^3+D_4^2);",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerGetPrincipalSl2Index",
     "PrincipalSlTwoIndex"
   );
   this->AddOperationInnerHandler(
     "DynkinIndicesSlTwoSubalgebras",
-    CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras, "",
+    CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras,
+    "",
     "Fetches the absolute Dynkin indices of the sl(2) subalgebras of the input Dynkin type. "
     "The indices of each simple component are computed by actually constructing "
     "the sl(2)-subalgebras; clearly this can be greatly optimized "
@@ -1302,129 +1336,161 @@ void Calculator::initPredefinedInnerFunctions() {
     "DynkinIndicesSlTwoSubalgebras(2A_2+A_2^2);\n"
     "DynkinIndicesSlTwoSubalgebras(2A_2+A_2^7);\n"
     "DynkinIndicesSlTwoSubalgebras(2G_2+G_2^7+F_4+F_4^19);",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras",
     "DynkinIndicesSlTwoSubalgebras"
   );
   this->AddOperationInnerHandler(
     "CartanSymmetric",
-    CalculatorFunctionsGeneral::innerGetSymmetricCartan, "",
+    CalculatorFunctionsGeneral::innerGetSymmetricCartan,
+    "",
     "Gives the symmetric Cartan corresponding to a given dynkin type.",
     "CartanSymmetric(e^7_6);",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerGetSymmetricCartan",
     "CartanSymmetric"
   );
   this->AddOperationInnerHandler(
-    "GrowDynkinType", CalculatorFunctionsGeneral::innerGrowDynkinType, "",
+    "GrowDynkinType",
+    CalculatorFunctionsGeneral::innerGrowDynkinType,
+    "",
     "This is a calculator testing function. Grows a Dynkin "
     "type inside an ambient Dynkin type. ",
     "GrowDynkinType(A^30_1+d^30_4, e_6); GrowDynkinType(g^35_2+B^30_2, e_6);",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerGrowDynkinType",
     "GrowDynkinType"
   );
   this->AddOperationInnerHandler(
     "IsDifferentialOneFormOneVariable",
-    CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable, "",
+    CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable,
+    "",
     "Tests whether the expression is a differential form in one variable.  ",
     "IsDifferentialOneFormOneVariable(\\diff x );\n"
     "IsDifferentialOneFormOneVariable(x\\diff y );\n"
     "IsDifferentialOneFormOneVariable(\\frac{\\diff y}{y} );\n"
     "IsDifferentialOneFormOneVariable(1/(\\diff y) );",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable",
     "IsDifferentialOneFormOneVariable"
   );
   this->AddOperationInnerHandler(
     "Polynomialize",
-    CalculatorFunctionsGeneral::outerPolynomialize, "",
+    CalculatorFunctionsGeneral::outerPolynomialize,
+    "",
     "Polynomialize(a) is equivalent to MakeExpression(Polynomial(a)).",
     "C= (c a + a b +b c + 1 )^3;\n"
     "A = Polynomialize(C);B=MakeExpression(Polynomial(C)); A-B",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::outerPolynomialize",
     "Polynomialize"
   );
   this->AddOperationInnerHandler(
     "IsAlgebraicRadical",
-    CalculatorFunctionsGeneral::innerIsAlgebraicRadical, "",
+    CalculatorFunctionsGeneral::innerIsAlgebraicRadical,
+    "",
     "Tests whether the expression is an algebraic expression "
     "obtained using radicals and the four arithmetic operations.  ",
     "IsAlgebraicRadical(\\sqrt{5+\\sqrt{2}}); "
     "IsAlgebraicRadical(\\sqrt{x}); "
     "IsAlgebraicRadical(\\sqrt{\\pi +e + 1})",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerIsAlgebraicRadical",
     "IsAlgebraicRadical"
   );
   this->AddOperationInnerHandler(
     "IsReal",
-    CalculatorFunctionsGeneral::innerIsReal, "",
+    CalculatorFunctionsGeneral::innerIsReal,
+    "",
     "Tests whether the expression is a real constant.  ",
     "IsReal(\\sqrt{5+\\sqrt{- 1}}); IsReal(\\sqrt{\\sqrt{5}- 1});\n"
     "IsReal(sqrt(\\sqrt{\\pi}-2) )",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerIsReal",
     "IsReal"
   );
   this->AddOperationInnerHandler(
     "IsConstant",
-    CalculatorFunctionsGeneral::innerIsConstant, "",
+    CalculatorFunctionsGeneral::innerIsConstant,
+    "",
     "Tests whether the expression is a constant.  ",
     "IsConstant(\\pi^2); IsConstant(1);IsConstant(x);\n"
     "IsConstant(e^{\\sin(\\pi^2+e +\\sqrt{2}+3)}  ); ",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerIsConstant",
     "IsConstant"
   );
   this->AddOperationInnerHandler(
     "\\int",
-    CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral, "",
+    CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral,
+    "",
     "Integrates a definite integral.  ",
     "\\int_{1}^2 (x^2+x) dx ",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral",
     "DefiniteIntegral"
   );
   this->AddOperationInnerHandler(
     "\\int",
-    CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst, "",
+    CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst,
+    "",
     "Attempts to rearrange into standard polynomial form and then integrate.  ",
     "\\int  \\left( \\frac{x(x + 1) }{ 2} \\right)^2 dx ",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst",
     "IntegrateAfterPolynomialization"
   );
   this->AddOperationInnerHandler(
-    "\\int", CalculatorFunctionsGeneral::innerIntegrateXnDiffX, "",
+    "\\int",
+    CalculatorFunctionsGeneral::innerIntegrateXnDiffX,
+    "",
     "Integrates x^n dx.  ",
     "\\int x dx ",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerIntegrateXnDiffX",
     "IntegratePowerRule"
   );
   this->AddOperationInnerHandler(
-    "\\int", CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX, "",
+    "\\int",
+    CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX,
+    "",
     "If a is a number, integrates e^{a x} dx.  ",
     "\\int x dx ",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX",
     "IntegrateEpowerX"
   );
   this->AddOperationInnerHandler(
-    "\\int", CalculatorFunctionsGeneral::innerIntegratePullConstant, "",
+    "\\int",
+    CalculatorFunctionsGeneral::innerIntegratePullConstant,
+    "",
     "Pulls out constants from integrals  ",
     "\\int 2\\sqrt{2-x^2} dx ",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerIntegratePullConstant",
     "IntegratePullConstant"
   );
   this->AddOperationInnerHandler(
-    "\\int", CalculatorFunctionsGeneral::innerIntegrateSqrtOneMinusXsquared, "",
+    "\\int",
+    CalculatorFunctionsGeneral::innerIntegrateSqrtOneMinusXsquared,
+    "",
     "Integrates \\int \\sqrt{a-x^2}dx, a > 0.",
     "\\int 2\\sqrt{2-x^2} dx ",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerIntegrateSqrtOneminusXsquared",
     "IntegrateSqrtOneminusXsquared"
   );

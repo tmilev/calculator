@@ -218,6 +218,10 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerTestLoadPEMCertificates(Calculator& theCommands, const Expression& input, Expression& output) {
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerLoadKnownCertificates(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLoadKnownCertificates");
   (void) input;
@@ -8020,6 +8024,9 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
 
 bool CalculatorFunctionsGeneral::innerTestStandardOutput(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestStandardOutput");
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+    return theCommands << "Standard output test allowed to logged-in admins only. ";
+  }
   FormatExpressions tempFormat;
   tempFormat.flagExpressionIsFinal = true;
   stOutput << "<b>Standard output test. Input string bounced back on the following line.</b><br>" << input.ToString(&tempFormat);

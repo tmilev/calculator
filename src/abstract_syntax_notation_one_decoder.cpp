@@ -59,6 +59,9 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
     return true;
   }
   int numberOfLengthBytes = currentByte - 128;
+  if (interpretation != 0) {
+    (*interpretation)["numberOfLengthBytes"] = numberOfLengthBytes;
+  }
   LargeInt length = 0;
   this->dataPointer ++;
   for (int i = 0; i < numberOfLengthBytes; i ++) {
@@ -66,7 +69,8 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
     if (this->PointerIsBad(interpretation)) {
       return false;
     }
-    length += this->rawData[this->dataPointer];
+    unsigned char nextByte = this->rawData[this->dataPointer];
+    length += (int) nextByte;
     this->dataPointer ++;
   }
   if (!length.IsIntegerFittingInInt(&outputLengthNegativeOneForVariable)) {
@@ -93,7 +97,27 @@ bool AbstractSyntaxNotationOneSubsetDecoder::PointerIsBad(JSData *interpretation
   return false;
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceContent(int desiredLengthInBytes, JSData& output, JSData* interpretation
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSetContent(
+  int desiredLengthInBytes, JSData& output, JSData* interpretation
+) {
+  output.reset(JSData::token::tokenObject);
+  if (interpretation != 0) {
+    interpretation->reset(JSData::token::tokenObject);
+  }
+  JSData theSet, theSetInterpretation;
+  bool success = this->DecodeSequenceContent(desiredLengthInBytes, theSet, &theSetInterpretation);
+  if (interpretation != 0) {
+    (*interpretation)["set"] = theSetInterpretation;
+  }
+  if (!success) {
+    return false;
+  }
+  output["set"] = theSet;
+  return true;
+}
+
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceContent(
+  int desiredLengthInBytes, JSData& output, JSData* interpretation
 ) {
   output.reset(JSData::token::tokenArray);
   if (interpretation != 0) {
@@ -129,6 +153,18 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceContent(int desiredLe
   return true;
 }
 
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeUTF8String(
+  int desiredLengthInBytes, JSData& output, JSData* interpretation
+) {
+  return this->DecodeOctetString(desiredLengthInBytes, output, interpretation);
+}
+
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodePrintableString(
+  int desiredLengthInBytes, JSData& output, JSData* interpretation
+) {
+  return this->DecodeOctetString(desiredLengthInBytes, output, interpretation);
+}
+
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeOctetString(
   int desiredLengthInBytes, JSData& output, JSData* interpretation
 ) {
@@ -138,6 +174,9 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeOctetString(
     output.theString[i] = this->rawData[this->dataPointer + i];
   }
   this->dataPointer += desiredLengthInBytes;
+  if (interpretation != 0) {
+    (*interpretation)["value"] = output.theString;
+  }
   return true;
 }
 
@@ -242,6 +281,9 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
   bool isConstructed = this->isCostructedByte(startByte);
   if (isConstructed) {
     startByte -= 32;
+    if (interpretation != 0) {
+      (*interpretation)["constructed"] = true;
+    }
   }
   bool hasBit7 = this->hasBit7Set(startByte);
   if (hasBit7) {
@@ -269,6 +311,9 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
     }
     return false;
   }
+  if (interpretation != 0) {
+    (*interpretation)["length"] = currentLength;
+  }
   std::stringstream errorStream;
   switch (startByte) {
   case tags::zero:
@@ -283,6 +328,12 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
     return this->DecodeNull(currentLength, output, interpretation);
   case tags::sequence:
     return this->DecodeSequenceContent(currentLength, output, interpretation);
+  case tags::set:
+    return this->DecodeSetContent(currentLength, output, interpretation);
+  case tags::printableString:
+    return this->DecodePrintableString(currentLength, output, interpretation);
+  case tags::utf8String:
+    return this->DecodeUTF8String(currentLength, output, interpretation);
   default:
     if (interpretation != 0) {
       errorStream << "Unknown object tag: " << (int) startByte << ", byte: "

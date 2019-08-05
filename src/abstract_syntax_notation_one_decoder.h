@@ -30,6 +30,7 @@ public:
   struct tags {
     static const unsigned char zero = 0;
     static const unsigned char integer = 2;
+    static const unsigned char bitString = 3;
     static const unsigned char octetString = 4;
     static const unsigned char tokenNull = 5;
     static const unsigned char objectIdentifier = 6;
@@ -37,7 +38,11 @@ public:
     static const unsigned char sequence = 16;
     static const unsigned char set = 17;
     static const unsigned char printableString = 19;
+    static const unsigned char IA5String = 22;
+    static const unsigned char UTCTime = 23;
   };
+  int recursionDepthGuard;
+  int maxRecursionDepth;
   int dataPointer;
   std::string rawData;
   JSData decodedData;
@@ -53,7 +58,10 @@ public:
   bool DecodeSequenceContent(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeSetContent(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodePrintableString(int desiredLengthInBytes, JSData& output, JSData* interpretation);
+  bool DecodeBitString(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeUTF8String(int desiredLengthInBytes, JSData& output, JSData* interpretation);
+  bool DecodeIA5String(int desiredLengthInBytes, JSData& output, JSData* interpretation);
+  bool DecodeUTCString(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeIntegerContent(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   static LargeInt VariableLengthQuantityDecode(const std::string& input, int& inputOutputDataPointer);
   bool DecodeOctetString(int desiredLengthInBytes, JSData& output, JSData* interpretation);

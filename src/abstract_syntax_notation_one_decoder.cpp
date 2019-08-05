@@ -37,9 +37,12 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeConstructed(
 
 AbstractSyntaxNotationOneSubsetDecoder::AbstractSyntaxNotationOneSubsetDecoder() {
   this->flagLogByteInterpretation = false;
+  this->recursionDepthGuard = 0;
+  this->maxRecursionDepth = 10000;
 }
 
 void AbstractSyntaxNotationOneSubsetDecoder::initialize() {
+  this->recursionDepthGuard = 0;
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
@@ -153,7 +156,56 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceContent(
   return true;
 }
 
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeUTCString(
+  int desiredLengthInBytes, JSData& output, JSData* interpretation
+) {
+  JSData theTime;
+  JSData timeInterpretationContainer;
+  JSData* timeInterpretation = interpretation == 0 ? 0 : &timeInterpretationContainer;
+  bool success = this->DecodeOctetString(desiredLengthInBytes, theTime, timeInterpretation);
+  if (interpretation != 0) {
+    (*interpretation)["time"] = timeInterpretationContainer;
+  }
+  if (!success) {
+    return false;
+  }
+  output["time"] = theTime;
+  return true;
+}
+
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeBitString(
+  int desiredLengthInBytes, JSData& output, JSData* interpretation
+) {
+  JSData theBitString, theBitStringInterpretationContainer;
+  JSData* theBitStringInterpretation = interpretation == 0 ? 0 : & theBitStringInterpretationContainer;
+  bool success = this->DecodeOctetString(desiredLengthInBytes, theBitString, theBitStringInterpretation);
+  if (interpretation != 0) {
+    (*interpretation)["bitString"] = *theBitStringInterpretation;
+  }
+  if (!success) {
+    return false;
+  }
+  output["bitString"] = theBitString;
+  AbstractSyntaxNotationOneSubsetDecoder subDecoder;
+  subDecoder.flagLogByteInterpretation = this->flagLogByteInterpretation;
+  subDecoder.rawData = theBitString.theString;
+  if (subDecoder.rawData.size() > 0) {
+    subDecoder.rawData = subDecoder.rawData.substr(1);
+  }
+  subDecoder.recursionDepthGuard = this->recursionDepthGuard;
+  if (subDecoder.Decode(0)) {
+    output["bitStringDecoded"] = subDecoder.decodedData;
+  }
+  return true;
+}
+
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeUTF8String(
+  int desiredLengthInBytes, JSData& output, JSData* interpretation
+) {
+  return this->DecodeOctetString(desiredLengthInBytes, output, interpretation);
+}
+
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIA5String(
   int desiredLengthInBytes, JSData& output, JSData* interpretation
 ) {
   return this->DecodeOctetString(desiredLengthInBytes, output, interpretation);
@@ -251,12 +303,14 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
   int desiredLengthInBytes, JSData& output, JSData* interpretation
 ) {
   LargeInt reader = 0;
-  int currentContribution;
+  int currentContribution = 0;
+
   for (int i = 0; i < desiredLengthInBytes; i ++) {
-    currentContribution = this->rawData[this->dataPointer];
+    unsigned char unsignedContribution = (unsigned char) this->rawData[this->dataPointer];
+    currentContribution = unsignedContribution;
     if (i == 0) {
       if (currentContribution >= 128) {
-        currentContribution = 256 - currentContribution;
+        currentContribution -= 255;
       }
     }
     reader *= 256;
@@ -264,10 +318,26 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
     this->dataPointer ++;
   }
   output = reader;
+  if (interpretation != 0) {
+    interpretation->reset(JSData::token::tokenObject);
+    (*interpretation)["value"] = reader;
+    std::string theSource = this->rawData.substr(this->dataPointer - desiredLengthInBytes, desiredLengthInBytes);
+    (*interpretation)["hex"] = Crypto::ConvertStringToHex(theSource, 0, false);
+  }
   return true;
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSData* interpretation) {
+  MacroRegisterFunctionWithName("AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent");
+  RecursionDepthCounter recursionGuard(&this->recursionDepthGuard);
+  if (this->recursionDepthGuard > this->maxRecursionDepth) {
+    if (interpretation != 0) {
+      std::stringstream errorStream;
+      errorStream << "Max depth of " << this->maxRecursionDepth << " exceeded. ";
+      (*interpretation)["error"] = errorStream.str();
+    }
+    return false;
+  }
   output.reset(JSData::token::tokenUndefined);
   if (interpretation != 0) {
     interpretation->reset(JSData::token::tokenUndefined);
@@ -334,6 +404,12 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
     return this->DecodePrintableString(currentLength, output, interpretation);
   case tags::utf8String:
     return this->DecodeUTF8String(currentLength, output, interpretation);
+  case tags::IA5String:
+    return this->DecodeIA5String(currentLength, output, interpretation);
+  case tags::UTCTime:
+    return this->DecodeUTCString(currentLength, output, interpretation);
+  case tags::bitString:
+    return this->DecodeBitString(currentLength, output, interpretation);
   default:
     if (interpretation != 0) {
       errorStream << "Unknown object tag: " << (int) startByte << ", byte: "

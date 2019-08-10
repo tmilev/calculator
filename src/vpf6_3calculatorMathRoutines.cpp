@@ -224,14 +224,14 @@ bool CalculatorFunctionsGeneral::innerTestLoadPEMCertificates(Calculator& theCom
   if (!input.IsOfType(&binaryString)) {
     return false;
   }
-  CertificateRSA theCertificate;
+  X509Certificate theCertificate;
   std::stringstream errorStream, resultStream;
   bool success = theCertificate.LoadFromASNEncoded(binaryString, &errorStream);
   if (!success) {
     resultStream << "Failed to laod asn encoded certificate.<br>";
     resultStream << errorStream.str();
   } else {
-    resultStream << "Loaded certificate successfully.<br>" << theCertificate.ToJSON();
+    resultStream << "Loaded certificate successfully.<br>" << theCertificate.ToString();
   }
   return output.AssignValue(resultStream.str(), theCommands);
 }

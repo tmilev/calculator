@@ -460,7 +460,16 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
   return out.str();
 }
 
-bool CertificateRSA::LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure) {
+std::string X509Certificate::ToString() {
+
+  std::stringstream out;
+  out << "Certificate RSA:<br>"
+  << this->theRSA.ToString();
+  out << "Source:<br>" << this->sourceJSON.ToString(false, true, true, true);
+  return out.str();
+}
+
+bool X509Certificate::LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure) {
   AbstractSyntaxNotationOneSubsetDecoder theDecoder;
   theDecoder.rawData = input;
   if (!theDecoder.Decode(commentsOnFailure)) {
@@ -469,9 +478,28 @@ bool CertificateRSA::LoadFromASNEncoded(const std::string& input, std::stringstr
     }
     return false;
   }
+  this->sourceJSON = theDecoder.decodedData;
+  JSData rsaPublicKey;
+  JSData rsaModulus;
+  if (!this->sourceJSON.HasCompositeKey("[0][6][1].bitStringDecoded[1]", &rsaModulus, commentsOnFailure)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to read rsa modulus. ";
+    }
+    return false;
+  }
+  if (!this->sourceJSON.HasCompositeKey("[0][6][1].bitStringDecoded[0]", &rsaPublicKey, commentsOnFailure)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to read public key. ";
+    }
+    return false;
+  }
   if (commentsOnFailure != 0) {
-    *commentsOnFailure << "Not implemented yet. Decoded so far: "
-    << theDecoder.decodedData.ToString(false, false, false, true);
+    *commentsOnFailure << "Not implemented yet. "
+    << "RSA modulus: " << rsaModulus.ToString(false, true, true, true)
+    << "RSA pub key: " << rsaPublicKey.ToString(false, true, true, true)
+    << "Decoded so far: "
+    << theDecoder.decodedData.ToString(false, true, true, true)
+    ;
   }
   return false;
 

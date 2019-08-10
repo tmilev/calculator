@@ -55,6 +55,7 @@ public:
   JSData& operator[](const std::string& s);
   JSData GetValue(const std::string& key);
   bool HasKey(const std::string& key) const;
+  bool HasCompositeKey(const std::string& key, JSData* whichValue, std::stringstream* commentsOnFailure) const;
   void SetKeyValue(const std::string& key, const JSData& value);
   int GetKeyIndex(const std::string& key) const;
   JSData();

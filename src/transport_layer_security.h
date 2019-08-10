@@ -80,30 +80,6 @@ struct TransportLayerSecurityOpenSSL {
   static bool initSSLKeyFilesCreateOnDemand();
 };
 
-class X509Certificate {
-public:
-  X509_CINF *cert_info;
-  X509_ALGOR *sig_alg;
-  ASN1_BIT_STRING *signature;
-  std::string name;
-  CRYPTO_EX_DATA ex_data;
-  /* These contain copies of various extension values */
-  long ex_pathlen;
-  long ex_pcpathlen;
-  unsigned long ex_flags;
-  unsigned long ex_kusage;
-  unsigned long ex_xkusage;
-  unsigned long ex_nscert;
-  ASN1_OCTET_STRING *skid;
-  AUTHORITY_KEYID *akid;
-  X509_POLICY_CACHE *policy_cache;
-  STACK_OF(DIST_POINT) *crldp;
-  STACK_OF(GENERAL_NAME) *altname;
-  NAME_CONSTRAINTS *nc;
-  unsigned char sha1_hash[SHA_DIGEST_LENGTH];
-  X509_CERT_AUX *aux;
-};
-
 class TransportLayerSecurity {
 public:
   static bool flagDontUseOpenSSL;

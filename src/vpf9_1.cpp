@@ -296,18 +296,18 @@ std::string GlobalVariables::ToStringProgressReportNoThreadData(bool useHTML) {
     }
     reportStream << theGlobalVariables.GetElapsedMilliseconds()
     << " ms elapsed. ";
-    if (theGlobalVariables.MaxComputationMilliseconds > 0) {
+    if (theGlobalVariables.millisecondsMaxComputation > 0) {
       if (useHTML) {
         reportStream << "<br>";
       }
       reportStream << "\nHard limit: "
-      << theGlobalVariables.MaxComputationMilliseconds
+      << theGlobalVariables.millisecondsMaxComputation
       << " ms [system crash if limit exceeded].";
       if (useHTML) {
         reportStream << "<br>";
       }
       reportStream << "\nSoft limit: "
-      << theGlobalVariables.MaxComputationMilliseconds / 2
+      << theGlobalVariables.millisecondsMaxComputation / 2
       << " ms [computation error if limit exceeded, triggered between calculator/atomic functions].";
     }
   }

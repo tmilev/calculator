@@ -983,8 +983,8 @@ bool DatabaseRoutineS::AddUsersFromEmails(
   int& outputNumUpdatedUsers
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
-  theGlobalVariables.MaxComputationMilliseconds = 100000; //100 seconds
-  theGlobalVariables.replyAfterComputationMilliseconds = 200000; // 200 seconds
+  theGlobalVariables.millisecondsMaxComputation = 100000; //100 seconds
+  theGlobalVariables.millisecondsReplyAfterComputation = 200000; // 200 seconds
   List<std::string> theEmails, thePasswords;
   MathRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
   MathRoutines::StringSplitDefaultDelimiters(userPasswords, thePasswords);
@@ -1125,7 +1125,7 @@ bool CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords(
     out << "Function available to logged-in admins only. ";
     return output.AssignValue(out.str(), theCommands);
   }
-  theGlobalVariables.MaxComputationMilliseconds = 20000000; //20k seconds, ok as this is admin-only.
+  theGlobalVariables.millisecondsMaxComputation = 20000000; //20k seconds, ok as this is admin-only.
   (void) input;//prevent unused parameter, portable
   out << "Testing/repairing database ... Comments:<br>";
   out << "NOT IMPLEMENTED YET";

@@ -50,6 +50,8 @@ var domElements = {
   divCurrentCourse: "divCurrentCourse",
   divCurrentCourseBody: "divCurrentCourseBody",
   divMathjaxProblematicRender: "divMathjaxProblematicRender",
+  divLoginPanelUsernameReport: "divLoginPanelUsernameReport",
+  divLoginPanelExtraInfo: "divLoginPanelExtraInfo",
   courseEditPanel: "divCurrentCourseEditPanel",
   classSpanDeadlineContainer: "spanDeadlineContainer",
   calculatorBuildVersion: "anchorCalculatorBuildVersion",

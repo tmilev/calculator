@@ -14,6 +14,7 @@ var urlFields = {
     monitor: "monitor",
     toggleMonitoring: "toggleMonitoring",
     userInfoJSON: "userInfoJSON",
+    loginDisabledEveryoneIsAdmin: "loginDisabledEveryoneIsAdmin",
     indicator: "indicator",
     pause: "pause",
     slidesFromSource: "slidesFromSource",

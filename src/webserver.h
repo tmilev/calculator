@@ -14,7 +14,10 @@ public:
   int indexInParent;
   int ProcessPID;
   int numberOfReceivesCurrentConnection;
-  int64_t millisecondOffset;
+  int64_t millisecondsServerAtWorkerStart;
+  int64_t millisecondsLastPingServerSideOnly;
+  int64_t millisecondsAfterSelect;
+
   std::string displayUserInput;
 
   std::string messageHead;
@@ -36,8 +39,6 @@ public:
   std::string RelativePhysicalFileNamE;
   std::string status;
   std::string pingMessage;
-  double timeServerAtWorkerStart;
-  double timeOfLastPingServerSideOnly;
   bool flagInUsE;
   bool flagExited;
   bool flagDeallocated;

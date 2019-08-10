@@ -1805,7 +1805,7 @@ void WebWorker::reset() {
   this->connectedSocketIDLastValueBeforeRelease = - 1;
   this->connectionID = - 1;
   this->indexInParent = - 1;
-  this->millisecondOffset = - 1;
+  this->millisecondsAfterSelect = - 1;
   this->parent = 0;
   this->indentationLevelHTML = 0;
   this->displayUserInput = "";
@@ -1813,8 +1813,8 @@ void WebWorker::reset() {
   this->flagToggleMonitoring = false;
   this->flagDoAddContentLength = false;
   this->flagFileNameSanitized = false;
-  this->timeOfLastPingServerSideOnly = - 1;
-  this->timeServerAtWorkerStart = - 1;
+  this->millisecondsLastPingServerSideOnly = - 1;
+  this->millisecondsServerAtWorkerStart = - 1;
   this->flagFoundMalformedFormInput = false;
   this->flagProgressReportAllowed = false;
   this->flagKeepAlive = false;
@@ -2833,7 +2833,7 @@ bool WebWorker::RequireSSL() {
 
 int WebWorker::ServeClient() {
   MacroRegisterFunctionWithName("WebWorker::ServeClient");
-  theGlobalVariables.timeServeClientStart = theGlobalVariables.GetElapsedMilliseconds();
+  theGlobalVariables.millisecondsComputationStart = theGlobalVariables.GetElapsedMilliseconds();
   theGlobalVariables.flagComputationStarted = true;
   theGlobalVariables.flagComputationCompletE = false;
   theGlobalVariables.userDefault.flagMustLogin = true;
@@ -2872,8 +2872,19 @@ int WebWorker::ServeClient() {
     theGlobalVariables.userCalculatorRequestType = theGlobalVariables.GetWebInput("request");
   }
   std::stringstream comments;
-  comments << "Address, request computed: " << this->addressComputed << ", "
-  << theGlobalVariables.userCalculatorRequestType << ". ";
+  comments << "Address, request computed: ";
+  if (this->addressComputed != "") {
+    comments << this->addressComputed;
+  } else {
+    comments << "[empty]";
+  }
+  comments << ", ";
+  if (theGlobalVariables.userCalculatorRequestType != "") {
+    comments << theGlobalVariables.userCalculatorRequestType;
+  } else {
+    comments << "[empty]";
+  }
+  comments << ". ";
   bool isNotModified = this->CorrectRequestsBEFORELoginReturnFalseIfModified();
   if (!isNotModified) {
     comments << this->ToStringAddressRequest() << ": modified before login. ";
@@ -3156,7 +3167,7 @@ void WebWorker::ReleaseKeepInUseFlag() {
   this->PauseComputationReportReceived.Release();
   this->PauseWorker.Release();
   this->PauseIndicatorPipeInUse.Release();
-  this->timeOfLastPingServerSideOnly = - 1;
+  this->millisecondsLastPingServerSideOnly = - 1;
   WebServer::Release(this->connectedSocketID);
 }
 
@@ -3178,7 +3189,7 @@ void WebWorker::OutputShowIndicatorOnTimeout() {
   result[WebAPI::result::timeOut] = true;
   if (!theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed) {
     timeOutComments << "Your computation is taking more than "
-    << theGlobalVariables.replyAfterComputationMilliseconds
+    << theGlobalVariables.millisecondsReplyAfterComputation
     << " ms. ";
   }
   if (!theGlobalVariables.flagAllowProcessMonitoring) {
@@ -3262,7 +3273,7 @@ std::string WebWorker::ToStringStatus() const {
     out << this->connectedSocketID;
   }
   out << ". ";
-  out << " Server time at last ping: " << this->timeOfLastPingServerSideOnly << " seconds. ";
+  out << " Server time at last ping: " << this->millisecondsLastPingServerSideOnly << " milliseconds. ";
   if (this->pingMessage != "") {
     out << " Message at last ping: " << this->pingMessage;
   }
@@ -3582,18 +3593,18 @@ std::string WebServer::ToStringConnectionSummary() {
   TimeWrapper now;
   now.AssignLocalTime();
   out << "<b>Server status.</b> Server time: local: " << now.ToStringLocal() << ", gm: " << now.ToStringGM() << ".<br>";
-  double timeRunning = - 1;
+  int64_t timeRunninG = - 1;
   if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size) {
-    timeRunning = theGlobalVariables.GetElapsedSeconds();
+    timeRunninG = theGlobalVariables.GetElapsedMilliseconds();
   } else {
-    timeRunning = this->GetActiveWorker().timeOfLastPingServerSideOnly;
+    timeRunninG = this->GetActiveWorker().millisecondsLastPingServerSideOnly;
   }
   out
-  << timeRunning
+  << (((double) timeRunninG) / 1000)
   << " seconds = "
-  << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(timeRunning, false, false)
+  << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(timeRunninG / 1000, false, false)
   << " web server uptime. ";
-  int approxNumPings = timeRunning / this->WebServerPingIntervalInSeconds;
+  int approxNumPings = timeRunninG / this->WebServerPingIntervalInSeconds / 1000;
   if (approxNumPings < 0) {
     approxNumPings = 0;
   }
@@ -3755,11 +3766,12 @@ void WebServer::StopKillAll(bool attemptToRestart) {
   theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath;
   if (attemptToRestart) {
     *currentLog << logger::yellow << "Proceeding to restart server. " << logger::endL;
-    int timeLimitSeconds = theGlobalVariables.MaxComputationMilliseconds / 1000;
+    int timeLimitSeconds = theGlobalVariables.millisecondsMaxComputation / 1000;
     *currentLog << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
-    theCommand << " && ./";
+    theCommand << " && ";
     theCommand << theGlobalVariables.PhysicalNameExecutableWithPath;
     theCommand << " server " << timeLimitSeconds;
+    *currentLog << logger::red << "Restart command: " << logger::blue << theCommand.str() << logger::endL;
   } else {
     *currentLog << logger::red << "Proceeding to stop server. " << logger::endL;
   }
@@ -3904,7 +3916,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
   for (int i = 0; i < this->theWorkers.size; i ++) {
     if (this->theWorkers[i].flagInUsE) {
       if (this->theWorkers[i].userAddress == incomingAddress) {
-        theTimes.AddOnTop(this->theWorkers[i].timeServerAtWorkerStart);
+        theTimes.AddOnTop(this->theWorkers[i].millisecondsServerAtWorkerStart);
         theIndices.AddOnTop(i);
       }
     }
@@ -3997,7 +4009,7 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   currentPingPipe.ReadOnceIfFailThenCrash(false, true);
   if (currentPingPipe.lastRead.size > 0) {
     currentWorker.pingMessage = currentPingPipe.GetLastRead();
-    currentWorker.timeOfLastPingServerSideOnly = theGlobalVariables.GetElapsedSeconds();
+    currentWorker.millisecondsLastPingServerSideOnly = theGlobalVariables.GetElapsedMilliseconds();
     if (currentWorker.pingMessage != "") {
       logServer << logger::blue << "Worker " << childIndex + 1 << " ping: "
       << currentWorker.pingMessage << ". " << logger::endL;
@@ -4006,23 +4018,23 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   }
   if (currentWorker.PauseWorker.CheckPauseIsRequested(false, true, true)) {
     currentWorker.pingMessage = "worker paused, no pings.";
-    currentWorker.timeOfLastPingServerSideOnly = theGlobalVariables.GetElapsedSeconds();
+    currentWorker.millisecondsLastPingServerSideOnly = theGlobalVariables.GetElapsedMilliseconds();
     return;
   }
-  if (theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead <= 0) {
+  if (theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead <= 0) {
     return;
   }
-  double timeElapsedInSeconds = theGlobalVariables.GetElapsedSeconds() - currentWorker.timeOfLastPingServerSideOnly;
-  if (timeElapsedInSeconds <= theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead) {
+  int64_t millisecondsElapsed = theGlobalVariables.GetElapsedMilliseconds() - currentWorker.millisecondsLastPingServerSideOnly;
+  if (millisecondsElapsed <= theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead) {
     return;
   }
   this->TerminateChildSystemCall(childIndex);
   std::stringstream pingTimeoutStream;
   pingTimeoutStream
-  << timeElapsedInSeconds
-  << " seconds passed since worker " << childIndex + 1
+  << millisecondsElapsed
+  << " milliseconds passed since worker " << childIndex + 1
   << " last pinged the server; "
-  << "the maximum allowed is: " << theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead
+  << "the maximum allowed is: " << theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead
   << ". ";
   pingTimeoutStream << "Killing connection "
   << currentWorker.connectionID
@@ -4341,7 +4353,7 @@ int WebServer::Run() {
     if (theGlobalVariables.flagServerDetailedLog) {
       logServer << logger::green << "Detail: select success. " << logger::endL;
     }
-    int64_t millisecondsBeforeFork = theGlobalVariables.GetElapsedMilliseconds();
+    int64_t millisecondsAfterSelect = theGlobalVariables.GetElapsedMilliseconds();
     this->NumSuccessfulSelectsSoFar ++;
     if ((this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar) - previousReportedNumberOfSelects > 100) {
       logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and "
@@ -4420,9 +4432,9 @@ int WebServer::Run() {
     this->GetActiveWorker().connectedSocketID = newConnectedSocket;
     this->GetActiveWorker().flagUsingSSLInWorkerProcess = theGlobalVariables.flagUsingSSLinCurrentConnection;
     this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease = newConnectedSocket;
-    this->GetActiveWorker().timeServerAtWorkerStart = theGlobalVariables.GetElapsedSeconds();
-    this->GetActiveWorker().timeOfLastPingServerSideOnly = this->GetActiveWorker().timeServerAtWorkerStart;
-    this->GetActiveWorker().millisecondOffset = millisecondsBeforeFork; //<- measured right after select()
+    this->GetActiveWorker().millisecondsServerAtWorkerStart = theGlobalVariables.GetElapsedMilliseconds();
+    this->GetActiveWorker().millisecondsLastPingServerSideOnly = this->GetActiveWorker().millisecondsServerAtWorkerStart;
+    this->GetActiveWorker().millisecondsAfterSelect = millisecondsAfterSelect; //<- measured right after select()
     //<-cannot set earlier as the active worker may change after recycling.
     this->NumConnectionsSoFar ++;
     this->GetActiveWorker().connectionID = this->NumConnectionsSoFar;
@@ -4497,7 +4509,7 @@ int WebServer::Run() {
 
 int WebWorker::Run() {
   MacroRegisterFunctionWithName("WebWorker::Run");
-  theGlobalVariables.millisecondOffset = this->millisecondOffset;
+  theGlobalVariables.millisecondOffset = this->millisecondsAfterSelect;
   this->CheckConsistency();
   if (this->connectedSocketID == - 1) {
     crash << "Worker::Run() started on a connecting with ID equal to - 1. " << crash;
@@ -4701,7 +4713,8 @@ void WebServer::CheckMongoDBSetup() {
   if (theGlobalVariables.configuration["mongoDBSetup"].theType != JSData::token::tokenUndefined) {
     return;
   }
-  logServer << logger::yellow << "configuration so far: " << theGlobalVariables.configuration.ToString(false);
+  logServer << "DEBUG: mongoDB token: " << (int) theGlobalVariables.configuration["mongoDBSetup"].theType << logger::endL;
+  logServer << logger::yellow << "configuration so far: " << theGlobalVariables.configuration.ToString(false) << logger::endL;
   theGlobalVariables.configuration["mongoDBSetup"] = "Attempting";
   theGlobalVariables.ConfigurationStore();
   WebServer::FigureOutOperatingSystem();
@@ -4795,13 +4808,13 @@ void WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitStrin
   timeLimit.AssignString(timeLimitString);
   int timeLimitInt = 0;
   if (timeLimit.IsIntegerFittingInInt(&timeLimitInt)) {
-    theGlobalVariables.MaxComputationMilliseconds = timeLimitInt;
-    if (theGlobalVariables.MaxComputationMilliseconds <= 0) {
-      theGlobalVariables.MaxComputationMilliseconds = 0;
+    theGlobalVariables.millisecondsMaxComputation = timeLimitInt;
+    if (theGlobalVariables.millisecondsMaxComputation <= 0) {
+      theGlobalVariables.millisecondsMaxComputation = 0;
     } else {
-      theGlobalVariables.MaxComputationMilliseconds *= 1000;
+      theGlobalVariables.millisecondsMaxComputation *= 1000;
     }
-    std::cout << "Max computation time: " << theGlobalVariables.MaxComputationMilliseconds << " ms." << std::endl;
+    std::cout << "Max computation time: " << theGlobalVariables.millisecondsMaxComputation << " ms." << std::endl;
   }
 
 }
@@ -4914,7 +4927,7 @@ void WebServer::InitializeGlobalVariablesHashes() {
 }
 
 void WebServer::InitializeGlobalVariables() {
-  theGlobalVariables.replyAfterComputationMilliseconds = 0;
+  theGlobalVariables.millisecondsReplyAfterComputation = 0;
   theGlobalVariables.flagReportEverything = true;
   ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
   this->InitializeGlobalVariablesHashes();
@@ -5074,7 +5087,7 @@ void WebServer::TurnProcessMonitoringOn() {
   << logger::red << "WARNING: process monitoring IS ON. " << logger::endL
   << logger::purple << "************************" << logger::endL;
   theGlobalVariables.flagAllowProcessMonitoring = true;
-  theGlobalVariables.replyAfterComputationMilliseconds = theGlobalVariables.replyAfterComputationMillisecondsDefault;
+  theGlobalVariables.millisecondsReplyAfterComputation = theGlobalVariables.millisecondsReplyAfterComputationDefault;
   theGlobalVariables.configuration[Configuration::processMonitoringAllowedByDefault] = true;
 
   theGlobalVariables.ConfigurationStore();
@@ -5087,7 +5100,7 @@ void WebServer::TurnProcessMonitoringOff() {
   << logger::green << "Process monitoring is now off. " << logger::endL
   << logger::green << "************************" << logger::endL;
   theGlobalVariables.flagAllowProcessMonitoring = false;
-  theGlobalVariables.replyAfterComputationMilliseconds = 0;
+  theGlobalVariables.millisecondsReplyAfterComputation = 0;
   theGlobalVariables.configuration[Configuration::processMonitoringAllowedByDefault] = false;
   theGlobalVariables.ConfigurationStore();
 }
@@ -5095,10 +5108,15 @@ void WebServer::TurnProcessMonitoringOff() {
 bool GlobalVariables::ConfigurationLoad() {
   MacroRegisterFunctionWithName("GlobalVariables::ConfigurationLoad");
   std::stringstream out;
+  std::string configurationFileName = "/configuration/configuration.json";
   if (!FileOperations::LoadFileToStringVirtual(
-    "/configuration/configuration.json", theGlobalVariables.configurationFileContent, true, false, &out
+    configurationFileName, theGlobalVariables.configurationFileContent, true, false, &out
   )) {
     logServer << logger::yellow << "Failed to read configuration file. " << out.str() << logger::endL;
+    std::string computedPhysicalFileName;
+    if (FileOperations::GetPhysicalFileNameFromVirtual(configurationFileName, computedPhysicalFileName, true, false, 0)) {
+      logServer << logger::yellow << "Computed configuration file name: " << logger::blue << computedPhysicalFileName << logger::endL;
+    }
     return false;
   }
   if (!theGlobalVariables.configuration.readstring(theGlobalVariables.configurationFileContent, false, &out)) {
@@ -5115,10 +5133,16 @@ bool GlobalVariables::ConfigurationStore() {
     return true;
   }
   std::fstream configurationFile;
+  std::string configFileNameVirtual = "configuration/configuration.json";
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
-    configurationFile, "configuration/configuration.json", false, true, false, true
+    configurationFile, configFileNameVirtual, false, true, false, true
   )) {
-    logServer << logger::red << "Could not open file: /configuration/configuration.json" << logger::endL;
+    logServer << logger::red << "Could not open file: " << configFileNameVirtual << logger::endL;
+    std::string configFileNamePhysical;
+    if (FileOperations::GetPhysicalFileNameFromVirtual(configFileNameVirtual, configFileNamePhysical, true, false, 0)) {
+      logServer << logger::red << "Physical file name configuration: " << logger::blue << configFileNamePhysical << logger::endL;
+      logServer << logger::red << "Server base: " << logger::blue << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
+    }
     return false;
   }
   logServer << logger::blue
@@ -5197,13 +5221,13 @@ void GlobalVariables::ConfigurationProcess() {
     theGlobalVariables.flagRunningBuiltInWebServer = true;
     theGlobalVariables.flagRunningCommandLine = false;
     theGlobalVariables.flagRunningApache = false;
-    theGlobalVariables.MaxComputationMilliseconds = 30000; // 30 seconds, default
+    theGlobalVariables.millisecondsMaxComputation = 30000; // 30 seconds, default
   }
   int reader = 0;
   if (theGlobalVariables.configuration[
-    Configuration::replyAfterComputationMillisecondsDefault
+    Configuration::millisecondsReplyAfterComputationDefault
   ].isIntegerFittingInInt(&reader)) {
-    theGlobalVariables.replyAfterComputationMillisecondsDefault = reader;
+    theGlobalVariables.millisecondsReplyAfterComputationDefault = reader;
   }
   if (
     theGlobalVariables.configuration[
@@ -5242,12 +5266,13 @@ int WebServer::main(int argc, char **argv) {
     InitializeGlobalObjects();
     theWebServer.AnalyzeMainArguments(argc, argv);
     // load and parse configuration json
+    logServer << logger::green << "Project base folder: " << logger::blue << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
     theGlobalVariables.ConfigurationLoad();
-    if (theGlobalVariables.MaxComputationMilliseconds > 0) {
-      theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead =
-      theGlobalVariables.MaxComputationMilliseconds + 20000; // + 20 seconds
+    if (theGlobalVariables.millisecondsMaxComputation > 0) {
+      theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead =
+      theGlobalVariables.millisecondsMaxComputation + 20000; // + 20 seconds
     } else {
-      theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead = - 1;
+      theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead = - 1;
     }
     theWebServer.InitializeGlobalVariables();
     // Compute various flags and settings from the desired configuration.
@@ -5267,17 +5292,17 @@ int WebServer::main(int argc, char **argv) {
       logServer << logger::red << "MathJax not available. " << logger::endL;
     }
     if (theGlobalVariables.flagRunningBuiltInWebServer) {
-      if (theGlobalVariables.MaxComputationMilliseconds <= 0) {
+      if (theGlobalVariables.millisecondsMaxComputation <= 0) {
         logServer
         << logger::purple << "************************" << logger::endL
         << logger::red << "WARNING: no computation time limit set. " << logger::endL
         << logger::purple << "************************" << logger::endL;
       }
-      if (theGlobalVariables.MaxComputationMilliseconds > 500000) {
+      if (theGlobalVariables.millisecondsMaxComputation > 500000) {
         logServer
         << logger::purple << "************************" << logger::endL
         << logger::red << "WARNING: computation time limit is high: "
-        << (theGlobalVariables.MaxComputationMilliseconds / 1000)
+        << (theGlobalVariables.millisecondsMaxComputation / 1000)
         << " seconds. " << logger::endL
         << logger::purple << "************************" << logger::endL;
       }
@@ -5360,7 +5385,7 @@ int WebServer::mainApache() {
   theGlobalVariables.IndicatorStringOutputFunction = 0;
   theGlobalVariables.flagServerForkedIntoWorker = true;
   theGlobalVariables.flagComputationStarted = true;
-  theGlobalVariables.MaxComputationMilliseconds = 30000; //<-30 second computation time restriction!
+  theGlobalVariables.millisecondsMaxComputation = 30000; //<-30 second computation time restriction!
   theWebServer.initializeSignals();
   CreateTimerThread();
   theWebServer.CreateNewActiveWorker();

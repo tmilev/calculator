@@ -73,11 +73,11 @@ public:
   void FallAsleep(int microseconds);
   //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   int64_t millisecondOffset;
-  int64_t MaxComputationMilliseconds;
-  int64_t MaxTimeNoPingBeforeChildIsPresumedDead;
-  int64_t replyAfterComputationMilliseconds;
-  int64_t replyAfterComputationMillisecondsDefault;
-  int64_t timeServeClientStart;
+  int64_t millisecondsMaxComputation;
+  int64_t millisecondsNoPingBeforeChildIsPresumedDead;
+  int64_t millisecondsReplyAfterComputation;
+  int64_t millisecondsReplyAfterComputationDefault;
+  int64_t millisecondsComputationStart;
 
   //  bool flagLogInterProcessCommunication;
   //flags: what mode are we running in?

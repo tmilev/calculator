@@ -67,7 +67,7 @@ JSData HtmlInterpretation::GetProblemSolutionJSON() {
       out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
     }
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
@@ -98,7 +98,7 @@ JSData HtmlInterpretation::GetProblemSolutionJSON() {
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   if (theInterpreteR.flagAbortComputationASAP) {
@@ -109,12 +109,12 @@ JSData HtmlInterpretation::GetProblemSolutionJSON() {
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   if (!theProblem.InterpretProcessExecutedCommands(theInterpreteR, currentA.solutionElements, out)) {
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   for (int i = 0; i < currentA.solutionElements.size; i ++) {
@@ -132,7 +132,7 @@ JSData HtmlInterpretation::GetProblemSolutionJSON() {
     << "<hr>Raw input: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   }
   result[WebAPI::result::resultHtml] = out.str();
-  result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+  result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
   return result;
 }
 
@@ -289,7 +289,7 @@ JSData HtmlInterpretation::submitAnswersPreviewJSON() {
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
       errorStream << comments.str();
     }
-    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
     result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::resultHtml] = out.str();
     return result;
@@ -311,14 +311,14 @@ JSData HtmlInterpretation::submitAnswersPreviewJSON() {
     errorStream << "<b style ='color:red'>Failed to parse your answer, got:</b><br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, true);
     result[WebAPI::result::error] = errorStream.str();
-    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   } else if (theInterpreteR.flagAbortComputationASAP) {
     out << "<b style = 'color:red'>Failed to evaluate your answer, got:</b><br>"
     << theInterpreteR.outputString;
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
     return result;
   }
   FormatExpressions theFormat;
@@ -374,7 +374,7 @@ JSData HtmlInterpretation::submitAnswersPreviewJSON() {
       << theInterpreterWithAdvice.outputCommentsString;
     }
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
     return result;
   }
   if (theInterpreterWithAdvice.flagAbortComputationASAP) {
@@ -391,13 +391,13 @@ JSData HtmlInterpretation::submitAnswersPreviewJSON() {
       << calculatorInputStream.str();
     }
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
     return result;
   }
   if (hasCommentsBeforeSubmission){
     out << HtmlInterpretation::GetCommentsInterpretation(theInterpreterWithAdvice, 3, theFormat);
   }
-  result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
+  result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
   if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn()) {
     out << "<hr> " << problemLinkStream.str()
     << "<br>"
@@ -811,12 +811,13 @@ void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::stri
   outputAppend["linkApp"] = outLinkApp.str();
   outLinkAppNoCache << "<a href = '" << theGlobalVariables.DisplayNameExecutableAppNoCache << "'>app no browser cache</a>";
   outputAppend["linkAppNoCache"] = outLinkAppNoCache.str();
+  outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] = theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin;
   if (comments != "") {
     outputAppend["comments"] = comments;
   }
   if (theGlobalVariables.flagAllowProcessMonitoring) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
-    outputAppend[Configuration::replyAfterComputationMilliseconds] = (double) theGlobalVariables.replyAfterComputationMilliseconds;
+    outputAppend[Configuration::millisecondsReplyAfterComputation] = (double) theGlobalVariables.millisecondsReplyAfterComputation;
   } else {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "false";
   }
@@ -1123,7 +1124,7 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
     << "\">Input link</a>";
   }
   if (timeSafetyBrake) {
-    theGlobalVariables.MaxComputationMilliseconds = theGlobalVariables.GetElapsedMilliseconds() + 20000; // + 20 sec
+    theGlobalVariables.millisecondsMaxComputation = theGlobalVariables.GetElapsedMilliseconds() + 20000; // + 20 sec
   }
   Calculator theInterpreter;
   theInterpreter.initialize();
@@ -1149,7 +1150,7 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
     isolatedInterpreter.flagWriteLatexPlots = false;
     isolatedInterpreter.flagPlotNoControls = true;
     if (timeSafetyBrake) {
-      theGlobalVariables.MaxComputationMilliseconds = theGlobalVariables.GetElapsedMilliseconds() + 20000; //+20 sec
+      theGlobalVariables.millisecondsMaxComputation = theGlobalVariables.GetElapsedMilliseconds() + 20000; //+20 sec
     }
     isolatedInterpreter.Evaluate("(" + currentA.currentAnswerClean + ")");
     if (isolatedInterpreter.syntaxErrors != "") {
@@ -1306,7 +1307,7 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
   output << "</td></tr>";
   output << "</table>";
   result[WebAPI::result::resultHtml] = output.str();
-  result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedSeconds() - startTime;
+  result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
   return result;
 }
 
@@ -1491,7 +1492,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
       errorStream << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
       errorStream << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
     }
-    result[WebAPI::result::timeComputationMilliseconds] = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::error] = errorStream.str();
     return result.ToString(false);
   }
@@ -1528,7 +1529,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
     result[WebAPI::result::resultHtml] = out.str();
     int64_t ellapsedTime = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
-    result[WebAPI::result::timeComputationMilliseconds] = ellapsedTime;
+    result[WebAPI::result::millisecondsComputation] = ellapsedTime;
     return result.ToString(false);
   }
   if (theInterpreteR.flagAbortComputationASAP) {
@@ -1546,7 +1547,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;
     int64_t ellapsedTime = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
-    result[WebAPI::result::timeComputationMilliseconds] = ellapsedTime;
+    result[WebAPI::result::millisecondsComputation] = ellapsedTime;
     result[WebAPI::result::resultHtml] = out.str();
     return result.ToString(false);
   }
@@ -1604,7 +1605,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     }
   }
   int64_t ellapsedTime = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
-  result[WebAPI::result::timeComputationMilliseconds] = ellapsedTime;
+  result[WebAPI::result::millisecondsComputation] = ellapsedTime;
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
     out
     << "<hr><a href=\"" << theGlobalVariables.DisplayNameExecutable

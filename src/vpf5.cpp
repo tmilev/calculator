@@ -1922,7 +1922,7 @@ bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, con
     return theCommands << "Function requires admin access. ";
   }
   (void) input;//avoid unused variable warning, portable
-  theGlobalVariables.MaxComputationMilliseconds = 30000000; //30k seconds: ok, we have admin access.
+  theGlobalVariables.millisecondsMaxComputation = 30000000; //30k seconds: ok, we have admin access.
   List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
   std::stringstream out;
   theCommands.theTestFileName = "automatedTest.txt";
@@ -1942,7 +1942,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
     return theCommands << "Automated test requires admin access";
   }
-  theGlobalVariables.MaxComputationMilliseconds = 30000000; //30k seconds, ok as we have admin access
+  theGlobalVariables.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have admin access
   int64_t startTime = theGlobalVariables.GetElapsedMilliseconds();
   theCommands.theTestFileName = "automatedTest.txt";
   if (!FileOperations::FileExistsVirtual("output/" + theCommands.theTestFileName)) {

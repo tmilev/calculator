@@ -108,11 +108,11 @@ GlobalVariables::GlobalVariables() {
   this->IndicatorStringOutputFunction = 0;
   this->WebServerReturnDisplayIndicatorCloseConnection = 0;
   this->WebServerTimerPing = 0;
-  this->MaxComputationMilliseconds = 100000; //100 seconds
+  this->millisecondsMaxComputation = 100000; //100 seconds
   this->millisecondOffset = 0;
-  this->timeServeClientStart = 0;
-  this->replyAfterComputationMilliseconds = 0;
-  this->replyAfterComputationMillisecondsDefault = 5000; //5 seconds
+  this->millisecondsComputationStart = - 1;
+  this->millisecondsReplyAfterComputation = 0;
+  this->millisecondsReplyAfterComputationDefault = 5000; //5 seconds
   this->pointerCallSystemWithOutput = 0;
   this->pointerCallSystemNoOutput = 0;
   this->pointerCallChDir = 0;
@@ -137,7 +137,8 @@ GlobalVariables::GlobalVariables() {
   this->flagServerDetailedLog = false;
   this->flagUsingSSLinCurrentConnection = false;
   this->flagSSLIsAvailable = false;
-  this->MaxTimeNoPingBeforeChildIsPresumedDead = 10;
+
+  this->millisecondsNoPingBeforeChildIsPresumedDead = 10000;
   this->flagAceIsAvailable = false;
   this->MutexProgressReportinG.mutexName = "ProgressReport";
   this->flagCachingInternalFilesOn = true;
@@ -746,8 +747,6 @@ std::string FileOperations::WriteFileReturnHTMLLink(
   out << "<a href=\"" << fileNameVirtual << "\" target = \"_blank\">" << linkText << "</a>";
   return out.str();
 }
-
-
 
 bool FileOperations::LoadFileToStringVirtual(
   const std::string& theFileName,

@@ -43,7 +43,8 @@ public:
     static std::string error;
     static std::string status;
     static std::string crashReport;
-    static std::string timeComputationMilliseconds;
+    static std::string millisecondsComputation;
+    static std::string loginDisabledEveryoneIsAdmin;
   };
   struct problem {
     static std::string title;
@@ -71,8 +72,8 @@ public:
 struct Configuration {
   static std::string processMonitoringAllowedByDefault;
   static std::string processMonitoringTriggerTime;
-  static std::string replyAfterComputationMillisecondsDefault;
-  static std::string replyAfterComputationMilliseconds;
+  static std::string millisecondsReplyAfterComputationDefault;
+  static std::string millisecondsReplyAfterComputation;
   static std::string useBuiltInTLS;
   static std::string serverAutoMonitor;
   static std::string monitorPingTime;

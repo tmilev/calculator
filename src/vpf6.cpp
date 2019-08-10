@@ -2585,7 +2585,7 @@ std::string Calculator::ToStringPerformance() {
   std::stringstream out;
   int64_t elapsedMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
   int64_t computationMilliseconds = elapsedMilliseconds - this->startTimeEvaluationMilliseconds;
-  int64_t requestMilliseconds = elapsedMilliseconds - theGlobalVariables.timeServeClientStart;
+  int64_t requestMilliseconds = elapsedMilliseconds - theGlobalVariables.millisecondsComputationStart;
   int64_t waitingMilliseconds = elapsedMilliseconds - requestMilliseconds;
   out << "<b>Double-click formulas to get their LaTeX.</b>"
   << "<br>Double-click back to hide the LaTeX. ";
@@ -2596,10 +2596,10 @@ std::string Calculator::ToStringPerformance() {
   << " s). ";
   std::stringstream moreDetails;
   moreDetails << "<br>Max computation time soft: "
-  << ((double)(theGlobalVariables.MaxComputationMilliseconds / 2000))
+  << ((double)(theGlobalVariables.millisecondsMaxComputation / 2000))
   << " s [calculator error when exceeded]. ";
   moreDetails << "<br>Max computation time hard: "
-  << (((double) theGlobalVariables.MaxComputationMilliseconds) / 1000) << " s [worker crash when exceeded]. ";
+  << (((double) theGlobalVariables.millisecondsMaxComputation) / 1000) << " s [worker crash when exceeded]. ";
   moreDetails << "<br>Total process request time: "
   << requestMilliseconds << " ms (~"
   << (((double) requestMilliseconds) / 1000)
@@ -2665,9 +2665,9 @@ std::string Calculator::ToString() {
   std::stringstream out2;
   std::string openTag1 = "<span style =\"color:blue\">";
   std::string closeTag1 = "</span>";
-  if (theGlobalVariables.MaxComputationMilliseconds > 0) {
+  if (theGlobalVariables.millisecondsMaxComputation > 0) {
     out2 << "Computation time limit: "
-    << theGlobalVariables.MaxComputationMilliseconds
+    << theGlobalVariables.millisecondsMaxComputation
     << " ms.<hr>";
   } else {
     out2 << "No computation time limit.<hr> ";

@@ -34,7 +34,6 @@ void GlobalVariables::FallAsleep(int microseconds) {
 struct TimerThreadData{
   int elapsedTimeInMilliseconds;
   int elapsedComputationTimeInMilliseconds;
-  int computationStartTimeInMilliseconds;
   int counter ;
   int intervalBetweenChecksInMilliseconds;
 //  ThreadWrapper theThread;
@@ -52,13 +51,13 @@ struct TimerThreadData{
 
 bool TimerThreadData::HandleComputationTimer() {
   if (theGlobalVariables.flagComputationStarted) {
-    if (this->computationStartTimeInMilliseconds < 0) {
-      this->computationStartTimeInMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+    if (theGlobalVariables.millisecondsComputationStart < 0) {
+      theGlobalVariables.millisecondsComputationStart = theGlobalVariables.GetElapsedMilliseconds();
     }
   }
   this->elapsedTimeInMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
-  if (this->computationStartTimeInMilliseconds > 0) {
-    this->elapsedComputationTimeInMilliseconds = this->elapsedTimeInMilliseconds - this->computationStartTimeInMilliseconds;
+  if (theGlobalVariables.millisecondsComputationStart > 0) {
+    this->elapsedComputationTimeInMilliseconds = this->elapsedTimeInMilliseconds - theGlobalVariables.millisecondsComputationStart;
   }
   return false;
 }
@@ -79,13 +78,13 @@ bool TimerThreadData::HandleTimerSignalToServer() {
 }
 
 bool TimerThreadData::HandleMaxComputationTime() {
-  if (theGlobalVariables.MaxComputationMilliseconds <= 0) {
+  if (theGlobalVariables.millisecondsMaxComputation <= 0) {
     return false;
   }
   if (this->elapsedComputationTimeInMilliseconds <= 0) {
     return false;
   }
-  if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.MaxComputationMilliseconds) {
+  if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.millisecondsMaxComputation) {
     return false;
   }
   if (theGlobalVariables.flagComputationCompletE) {
@@ -108,7 +107,7 @@ bool TimerThreadData::HandleMaxComputationTime() {
     out << " (unknown amount of time)";
   }
   out << ". The allowed run time is "
-  << theGlobalVariables.MaxComputationMilliseconds
+  << theGlobalVariables. millisecondsMaxComputation
   << " ms (twice the amount allowed for calculator interpretation). "
   << "<br>This restriction may be lifted "
   << "by restarting the server "
@@ -136,13 +135,13 @@ bool TimerThreadData::HandleComputationTimeout() {
   if (!theGlobalVariables.flagRunningBuiltInWebServer) {
     return false;
   }
-  if (theGlobalVariables.replyAfterComputationMilliseconds <= 0) {
+  if (theGlobalVariables.millisecondsReplyAfterComputation <= 0) {
     return false;
   }
   if (this->elapsedComputationTimeInMilliseconds <= 0) {
     return false;
   }
-  if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.replyAfterComputationMilliseconds) {
+  if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.millisecondsReplyAfterComputation) {
     return false;
   }
   MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
@@ -181,7 +180,6 @@ TimerThreadData::TimerThreadData() {
 void TimerThreadData::reset() {
   this->elapsedTimeInMilliseconds = - 1;
   this->elapsedComputationTimeInMilliseconds = - 1;
-  this->computationStartTimeInMilliseconds = - 1;
   this->counter = 0;
   this->intervalBetweenChecksInMilliseconds = 100000;
 }

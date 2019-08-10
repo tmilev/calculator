@@ -427,11 +427,11 @@ bool Calculator::EvaluateExpression(
 }
 
 bool Calculator::TimedOut() {
-  if (theGlobalVariables.MaxComputationMilliseconds <= 0) {
+  if (theGlobalVariables.millisecondsMaxComputation <= 0) {
     return false;
   }
   int64_t elapsedMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
-  int64_t halfTimeLimit = theGlobalVariables.MaxComputationMilliseconds / 2;
+  int64_t halfTimeLimit = theGlobalVariables.millisecondsMaxComputation / 2;
   if (elapsedMilliseconds <= halfTimeLimit) {
     return false;
   }

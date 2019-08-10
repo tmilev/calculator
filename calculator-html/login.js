@@ -132,9 +132,20 @@ function loginWithServerCallback(incomingString, result) {
   var loginErrorMessage = "";
   var parsedAuthentication = JSON.parse(incomingString);
   resetPagesNeedingReload();
-  
   if (parsedAuthentication["status"] === "logged in") {
+    success = true;  
+  } 
+  if (
+    parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === "true" || 
+    parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === true
+  ) {
+    parsedAuthentication[pathnames.urlFields.username] = "anonymous"; 
+    document.getElementById(ids.domElements.divLoginPanelExtraInfo).innerHTML = "<b style = 'color:red'>DB inactive,<br>everyone is admin.</b>";
     success = true;
+  } else {
+    document.getElementById(ids.domElements.divLoginPanelExtraInfo).innerHTML = "";
+  } 
+  if (success) {
     thePage.user.makeFromUserInfo(parsedAuthentication);
     toggleAccountPanels();
     setAdminPanels();
@@ -206,17 +217,21 @@ function initGoogleLogin() {
 function showLoginCalculatorButtons() {
   document.getElementById("divLoginCalculatorPanel").classList.remove("divInvisible");
   document.getElementById("divLoginCalculatorPanel").classList.add("divVisible");
-  document.getElementById("divLoginPanelUsernameReport").classList.remove("divVisible");
-  document.getElementById("divLoginPanelUsernameReport").classList.add("divInvisible");
+  document.getElementById(ids.domElements.divLoginPanelUsernameReport).classList.remove("divVisible");
+  document.getElementById(ids.domElements.divLoginPanelUsernameReport).classList.add("divInvisible");
+  document.getElementById(ids.domElements.divLoginPanelExtraInfo).classList.remove("divVisible");
+  document.getElementById(ids.domElements.divLoginPanelExtraInfo).classList.add("divInvisible");
 }
 
 function hideLoginCalculatorButtons() {
   var thePage = window.calculator.mainPage;
   document.getElementById("divLoginCalculatorPanel").classList.remove("divVisible");
   document.getElementById("divLoginCalculatorPanel").classList.add("divInvisible");
-  document.getElementById("divLoginPanelUsernameReport").innerHTML = thePage.storage.variables.user.name.value;
-  document.getElementById("divLoginPanelUsernameReport").classList.remove("divInvisible");
-  document.getElementById("divLoginPanelUsernameReport").classList.add("divVisible");
+  document.getElementById(ids.domElements.divLoginPanelUsernameReport).innerHTML = thePage.storage.variables.user.name.value;
+  document.getElementById(ids.domElements.divLoginPanelUsernameReport).classList.remove("divInvisible");
+  document.getElementById(ids.domElements.divLoginPanelUsernameReport).classList.add("divVisible");
+  document.getElementById(ids.domElements.divLoginPanelExtraInfo).classList.remove("divInvisible");
+  document.getElementById(ids.domElements.divLoginPanelExtraInfo).classList.add("divVisible");
 }
 
 function showLogoutButton() {

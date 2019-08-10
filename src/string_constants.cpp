@@ -28,7 +28,8 @@ std::string WebAPI::result::timeOut = "timeOut";
 std::string WebAPI::result::timeOutComments = "timeOutComments";
 std::string WebAPI::result::workerId = "workerId";
 std::string WebAPI::result::crashReport = "crashReport";
-std::string WebAPI::result::timeComputationMilliseconds = "timeComputation";
+std::string WebAPI::result::millisecondsComputation = "timeComputation";
+std::string WebAPI::result::loginDisabledEveryoneIsAdmin = "loginDisabledEveryoneIsAdmin";
 
 std::string WebAPI::problem::title = "title";
 std::string WebAPI::problem::fileName = "fileName";
@@ -117,9 +118,9 @@ std::string DatabaseStrings::labelPageAccount = "account";
 std::string DatabaseStrings::labelPageActivateAccount = "activateAccount";
 
 std::string Configuration::processMonitoringAllowedByDefault = "processMonitoringAllowedByDefault";
-std::string Configuration::replyAfterComputationMillisecondsDefault = "replyAfterComputationMillisecondsDefault";
+std::string Configuration::millisecondsReplyAfterComputationDefault = "millisecondsReplyAfterComputationDefault";
 std::string Configuration::monitorPingTime = "monitorPingTime";
-std::string Configuration::replyAfterComputationMilliseconds = "replyAfterComputationMilliseconds";
+std::string Configuration::millisecondsReplyAfterComputation = "millisecondsReplyAfterComputation";
 std::string Configuration::useBuiltInTLS = "useBuiltInTLS";
 std::string Configuration::serverAutoMonitor = "serverAutoMonitor";
 std::string Configuration::disableDatabaseLogEveryoneAsAdmin = "disableDatabaseLogEveryoneAsAdmin";

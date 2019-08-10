@@ -219,7 +219,21 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
 }
 
 bool CalculatorFunctionsGeneral::innerTestLoadPEMCertificates(Calculator& theCommands, const Expression& input, Expression& output) {
-  return false;
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestLoadPEMCertificates");
+  std::string binaryString;
+  if (!input.IsOfType(&binaryString)) {
+    return false;
+  }
+  CertificateRSA theCertificate;
+  std::stringstream errorStream, resultStream;
+  bool success = theCertificate.LoadFromASNEncoded(binaryString, &errorStream);
+  if (!success) {
+    resultStream << "Failed to laod asn encoded certificate.<br>";
+    resultStream << errorStream.str();
+  } else {
+    resultStream << "Loaded certificate successfully.<br>" << theCertificate.ToJSON();
+  }
+  return output.AssignValue(resultStream.str(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerLoadKnownCertificates(Calculator& theCommands, const Expression& input, Expression& output) {

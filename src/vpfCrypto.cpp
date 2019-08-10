@@ -1246,6 +1246,12 @@ bool Crypto::LoadOneKnownCertificate(
   return true;
 }
 
+std::string CertificateRSA::ToJSON() {
+  std::stringstream out;
+  out << "Not implemented yet. " << this->ToString();
+  return out.str();
+}
+
 std::string CertificateRSA::ToString() {
   std::stringstream out;
   out << "Algorithm: " << this->algorithm << "\n<br>\n";

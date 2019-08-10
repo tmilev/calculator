@@ -20,8 +20,9 @@ std::string SyntacticElement::ToStringHumanReadable(Calculator& theBoss, bool in
   bool makeTable = this->controlIndex == theBoss.conExpression() ||
   this->controlIndex == theBoss.conError() || this->controlIndex == theBoss.conSequence() ||
   this->controlIndex == theBoss.conSequenceStatements()|| this->controlIndex == theBoss.conVariable();
-  if (!makeTable)
+  if (!makeTable) {
     return controlString;
+  }
   std::stringstream out;
   out << "<table style =\"vertical-align:top;border-spacing= 0px 0px\">";
   out << "<tr><td style =\"text-align:center\">" << this->theData.ToString(0) << "</td></tr>";

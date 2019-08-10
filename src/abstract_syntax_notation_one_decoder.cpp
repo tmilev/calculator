@@ -463,9 +463,15 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
 bool CertificateRSA::LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure) {
   AbstractSyntaxNotationOneSubsetDecoder theDecoder;
   theDecoder.rawData = input;
-
+  if (!theDecoder.Decode(commentsOnFailure)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to asn-decode certificate input. ";
+    }
+    return false;
+  }
   if (commentsOnFailure != 0) {
-    *commentsOnFailure << "Not implemented yet. ";
+    *commentsOnFailure << "Not implemented yet. Decoded so far: "
+    << theDecoder.decodedData.ToString(false, false, false, true);
   }
   return false;
 

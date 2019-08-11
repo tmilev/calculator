@@ -766,6 +766,17 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestLoadPEMCertificate"
   );
   this->AddOperationInnerHandler(
+    "TestLoadPEMPrivateKey",
+    CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey,
+    "",
+    "Tests the pem private key functions. ",
+    "TestLoadPEMPrivateKey(ConvertBase64ToString(LoadFileIntoString(\"output/test_private_key.base64\")));\n",
+    true,
+    false,
+    "CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey",
+    "TestLoadPEMPrivateKey"
+  );
+  this->AddOperationInnerHandler(
     "TestASN1Decode",
     CalculatorFunctionsGeneral::innerTestASN1Decode,
     "",

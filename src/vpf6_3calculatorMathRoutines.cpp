@@ -228,10 +228,31 @@ bool CalculatorFunctionsGeneral::innerTestLoadPEMCertificates(Calculator& theCom
   std::stringstream errorStream, resultStream;
   bool success = theCertificate.LoadFromASNEncoded(binaryString, &errorStream);
   if (!success) {
-    resultStream << "Failed to laod asn encoded certificate.<br>";
+    resultStream << "Failed to load asn encoded certificate.<br>";
     resultStream << errorStream.str();
   } else {
-    resultStream << "Loaded certificate successfully.<br>" << theCertificate.ToString();
+    resultStream << "<br>Loaded certificate successfully.<br>" << theCertificate.ToString();
+  }
+  return output.AssignValue(resultStream.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey");
+  std::string binaryString;
+  if (!input.IsOfType(&binaryString)) {
+    return false;
+  }
+  std::stringstream errorStream, resultStream;
+  PrivateKeyRSA thePrivateKey;
+  bool success = thePrivateKey.LoadFromASNEncoded(binaryString, &errorStream);
+  if (!thePrivateKey.BasicChecks(&resultStream)) {
+    resultStream << "<b style = 'color:red'>Private key failed basic checks. </b>";
+  }
+  if (!success) {
+    resultStream << "<br>Failed to load asn encoded certificate.<br>";
+    resultStream << errorStream.str();
+  } else {
+    resultStream << "<br>Loaded private key.<br>" << thePrivateKey.ToString();
   }
   return output.AssignValue(resultStream.str(), theCommands);
 }

@@ -3,6 +3,7 @@
 
 #include "abstract_syntax_notation_one_decoder.h"
 #include "vpfHeader5Crypto.h"
+#include "vpfHeader2Math2_AlgebraicNumbers.h"
 
 ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementation(__FILE__, "Abstract syntax notation one (ASN-1) implementation");
 
@@ -38,7 +39,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeConstructed(
 AbstractSyntaxNotationOneSubsetDecoder::AbstractSyntaxNotationOneSubsetDecoder() {
   this->flagLogByteInterpretation = false;
   this->recursionDepthGuard = 0;
-  this->maxRecursionDepth = 10000;
+  this->maxRecursionDepth = 20;
 }
 
 void AbstractSyntaxNotationOneSubsetDecoder::initialize() {
@@ -461,12 +462,102 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
 }
 
 std::string X509Certificate::ToString() {
-
   std::stringstream out;
   out << "Certificate RSA:<br>"
   << this->theRSA.ToString();
   out << "Source:<br>" << this->sourceJSON.ToString(false, true, true, true);
   return out.str();
+}
+
+std::string PrivateKeyRSA::ToString() const {
+  std::stringstream out;
+  out << "Exponent: " << this->exponent << "<br>Prime 1: " << this->primeOne << "<br>Prime 2: " << this->primeTwo;
+  return out.str();
+}
+
+bool PrivateKeyRSA::BasicChecks(std::stringstream* comments) {
+  std::stringstream commentsContainer;
+  if (comments == 0) {
+    comments = &commentsContainer;
+  }
+  LargeInt mustBeZero;
+  LargeInt primeOneLI = this->primeOne;
+  LargeInt primeTwoLI = this->primeTwo;
+  mustBeZero = this->primeOne;
+  mustBeZero *= this->primeTwo;
+  mustBeZero -= this->modulus;
+  *comments << "Must be zero: " << mustBeZero.ToString();
+  LargeInt EulerPhi = (primeOneLI - 1) * (primeTwoLI - 1);
+  ElementZmodP thePrivateExponent;
+  //theExponent.theModulo = EulerPhi.value;
+  //theExponent.theValue = this->exponent;
+  thePrivateExponent.theModulo = EulerPhi.value;
+  thePrivateExponent.theValue = 1;
+  thePrivateExponent /= this->exponent;
+  *comments << "<br>Private exponent computed:<br>" << thePrivateExponent.theValue.ToString();
+  *comments << "<br>Private exponent on record:<br>" << this->privateExponent.ToString();
+  return true;
+}
+
+bool PrivateKeyRSA::LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure) {
+  AbstractSyntaxNotationOneSubsetDecoder outerDecoder, innerDecoder;
+  outerDecoder.rawData = input;
+  if (!outerDecoder.Decode(commentsOnFailure)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to asn-decode certificate input. ";
+    }
+    return false;
+  }
+  JSData actualContent;
+  if (!outerDecoder.decodedData.HasCompositeKeyOfType("[2]", &actualContent, JSData::token::tokenString, commentsOnFailure)) {
+    return false;
+  }
+  innerDecoder.rawData = actualContent.theString;
+  if (!innerDecoder.Decode(commentsOnFailure)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to asn-decode certificate input. ";
+    }
+    return false;
+  }
+  JSData exponent, modulus, privateExponentJS, prime1, prime2, exponent1, exponent2, coefficient;
+  if (!innerDecoder.decodedData.HasCompositeKeyOfType(
+    "[1]", &modulus, JSData::token::tokenLargeInteger, commentsOnFailure
+  )) {
+    return false;
+  }
+  this->modulus = modulus.theInteger.GetElement().value;
+  if (!innerDecoder.decodedData.HasCompositeKeyOfType(
+    "[2]", &exponent, JSData::token::tokenLargeInteger, commentsOnFailure
+  )) {
+    return false;
+  }
+  this->exponent = exponent.theInteger.GetElement().value;
+  if (!innerDecoder.decodedData.HasCompositeKey("[3]", &privateExponentJS, commentsOnFailure)) {
+    return false;
+  }
+  this->privateExponent = privateExponentJS.theInteger.GetElement().value;
+  if (!innerDecoder.decodedData.HasCompositeKeyOfType(
+    "[4]", &prime1, JSData::token::tokenLargeInteger, commentsOnFailure
+  )) {
+    return false;
+  }
+  this->primeOne = prime1.theInteger.GetElement().value;
+  if (!innerDecoder.decodedData.HasCompositeKeyOfType(
+    "[5]", &prime2, JSData::token::tokenLargeInteger, commentsOnFailure
+  )) {
+    return false;
+  }
+  this->primeTwo = prime2.theInteger.GetElement().value;
+  if (!innerDecoder.decodedData.HasCompositeKey("[6]", &exponent1, commentsOnFailure)) {
+    return false;
+  }
+  if (!innerDecoder.decodedData.HasCompositeKey("[7]", &exponent2, commentsOnFailure)) {
+    return false;
+  }
+  if (!innerDecoder.decodedData.HasCompositeKey("[8]", &coefficient, commentsOnFailure)) {
+    return false;
+  }
+  return true;
 }
 
 bool X509Certificate::LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure) {
@@ -493,15 +584,20 @@ bool X509Certificate::LoadFromASNEncoded(const std::string& input, std::stringst
     }
     return false;
   }
-  if (commentsOnFailure != 0) {
-    *commentsOnFailure << "Not implemented yet. "
-    << "RSA modulus: " << rsaModulus.ToString(false, true, true, true)
-    << "RSA pub key: " << rsaPublicKey.ToString(false, true, true, true)
-    << "Decoded so far: "
-    << theDecoder.decodedData.ToString(false, true, true, true)
-    ;
+  if (rsaModulus.theType != JSData::token::tokenLargeInteger) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "RSA modulus does not appear to be a large integer: " << rsaModulus.ToString(false);
+    }
+    return false;
   }
-  return false;
-
+  if (rsaPublicKey.theType != JSData::token::tokenLargeInteger) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "RSA public key does not appear to be a large integer: " << rsaPublicKey.ToString(false);
+    }
+    return false;
+  }
+  this->theRSA.theModuluS = rsaModulus.theInteger.GetElement().value;
+  this->theRSA.theExponenT = rsaPublicKey.theInteger.GetElement().value;
+  return true;
 }
 

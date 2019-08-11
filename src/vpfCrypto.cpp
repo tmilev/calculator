@@ -1193,15 +1193,20 @@ bool CertificateRSA::LoadFromJSON(JSData& input, std::stringstream* commentsOnFa
   }
   if (input.HasKey("n")) {
     this->theModulusString = input.GetValue("n").theString;
-    if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theModulusString, this->theModuluS, commentsOnFailure)) {
-      return false;
-    }
   }
   if (input.HasKey("e")) {
     this->theExponentString = input.GetValue("e").theString;
-    if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theExponentString, this->theExponenT, commentsOnFailure)) {
-      return false;
-    }
+  }
+  return this->LoadFromModulusAndExponentStrings(commentsOnFailure);
+}
+
+bool CertificateRSA::LoadFromModulusAndExponentStrings(std::stringstream *commentsOnFailure) {
+  MacroRegisterFunctionWithName("CertificateRSA::LoadFromModulusAndExponentStrings");
+  if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theModulusString, this->theModuluS, commentsOnFailure)) {
+    return false;
+  }
+  if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theExponentString, this->theExponenT, commentsOnFailure)) {
+    return false;
   }
   return true;
 }
@@ -1250,12 +1255,12 @@ std::string CertificateRSA::ToString() {
   std::stringstream out;
   out << "Algorithm: " << this->algorithm << "\n<br>\n";
   out << "Keyid: "     << this->keyid << "\n<br>\n";
-  out << "Modulus [base64, math]: [" << this->theModulusString
+  out << "Modulus [string, math]: [" << this->theModulusString
   << ", " << this->theModuluS.ToString() << "]" << "\n<br>\n";
-  out << "Exponent [base64, math]: " << "["
+  out << "Exponent [string, math]: " << "["
   << this->theExponentString << ", "
   << this->theExponenT.ToString()
-  << "\n<br>\n";
+  << "]\n<br>\n";
   return out.str();
 }
 

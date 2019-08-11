@@ -1388,6 +1388,16 @@ bool ElementZmodP::AssignRational(const Rational& other) {
   return true;
 }
 
+bool ElementZmodP::operator/=(const LargeInt& other) {
+  ElementZmodP divisor;
+  divisor.theModulo = this->theModulo;
+  if (!divisor.AssignRational((Rational) other)) {
+    return false;
+  }
+  bool result = ((*this) /= divisor);
+  return result;
+}
+
 bool ElementZmodP::operator/=(const ElementZmodP& other) {
   this->CheckIamInitialized();
   this->CheckEqualModuli(other);

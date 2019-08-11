@@ -280,6 +280,7 @@ public:
     }
   }
   bool operator/=(const ElementZmodP& den);
+  bool operator/=(const LargeInt& den);
   void ScaleToIntegralMinHeightAndGetPoly(
     const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntUnsigned& newModulo
   );

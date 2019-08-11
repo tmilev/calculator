@@ -14,7 +14,24 @@ public:
   LargeIntUnsigned theModuluS;
   LargeIntUnsigned theExponenT;
   bool LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool LoadFromModulusAndExponentStrings(std::stringstream* commentsOnFailure);
   std::string ToString();
+};
+
+class PrivateKeyRSA {
+public:
+  LargeIntUnsigned primeOne;
+  LargeIntUnsigned primeTwo;
+  LargeIntUnsigned modulus;
+  LargeIntUnsigned exponent;
+  LargeIntUnsigned privateExponent;
+  LargeIntUnsigned coefficient;
+  LargeIntUnsigned exponentOne;
+  LargeIntUnsigned exponentTwo;
+  CertificateRSA theCertificate;
+  bool BasicChecks(std::stringstream* comments);
+  bool LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure);
+  std::string ToString() const;
 };
 
 //openSSL version for reference:
@@ -57,6 +74,7 @@ public:
   std::string subjectUniqueId;
   std::string certificateSignatureAlgorithm;
   std::string certificateSignature;
+  std::string sourceBinary;
   JSData sourceJSON;
   CertificateRSA theRSA;
   bool LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure);

@@ -1789,8 +1789,8 @@ std::string HtmlInterpretation::ToStringUserDetailsTable(
     theGlobalVariables.GetWebInput("courseHome"), false
   );
   if (flagFilterCourse) {
-    out << "<br>Displaying only students in course: <span style =\"color:blue\"><b>"
-    << currentCourse << "</b></span>. "
+    out << "<br>Displaying only students in course: <b style =\"color:blue\">"
+    << currentCourse << "</b>. "
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=accounts&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
@@ -1821,7 +1821,6 @@ std::string HtmlInterpretation::ToStringUserDetailsTable(
     }
   }
   theSections.QuickSortAscending(0, &sectionDescriptions);
-  //out << "DEBUG: Section ids: " << sectionIDs.ToStringCommaDelimited();
   activatedAccountBucketsBySection.SetSize(theSections.size);
   nonActivatedAccountBucketsBySection.SetSize(theSections.size);
   preFilledLinkBucketsBySection.SetSize(theSections.size);
@@ -1829,11 +1828,11 @@ std::string HtmlInterpretation::ToStringUserDetailsTable(
   for (int i = 0; i < theUsers.size; i ++) {
     currentUser.LoadFromJSON(theUsers[i]);
     if (currentUser.courseInDB.find('%') != std::string::npos) {
-      out << "<span style =\"color:red\"><b>Non-expected behavior: user: "
+      out << "<b style = \"color:red\">Non-expected behavior: user: "
       << currentUser.username
       << "current course: "
       << currentUser.courseInDB
-      << " contains the % symbol. </b></span><br>";
+      << " contains the % symbol. </b><br>";
     }
     std::stringstream oneTableLineStream;
     oneTableLineStream << "<tr>"

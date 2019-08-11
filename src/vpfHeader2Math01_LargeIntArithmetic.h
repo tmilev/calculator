@@ -224,7 +224,7 @@ public:
     this->value.MakeOne();
     this->sign = - 1;
   }
-  static unsigned int HashFunction (const LargeInt& input) {
+  static unsigned int HashFunction(const LargeInt& input) {
     return input.HashFunction();
   }
   unsigned int HashFunction() const {
@@ -353,9 +353,9 @@ public:
   LargeInt(int x) {
     this->AssignInt(x);
   }
-  LargeInt(const LargeIntUnsigned& other):sign(1), value(other) {
+  LargeInt(const LargeIntUnsigned& other) : sign(1), value(other) {
   }
-  LargeInt(): sign(1){}
+  LargeInt(): sign(1) {}
 };
 
 Rational operator-(const Rational& argument);

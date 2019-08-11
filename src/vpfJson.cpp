@@ -73,6 +73,27 @@ bool JSData::HasKey(const std::string& key) const {
   return this->GetKeyIndex(key) != - 1;
 }
 
+bool JSData::HasCompositeKeyOfType(
+  const std::string& key, JSData* whichValue, char targetType, std::stringstream* commentsOnFailure
+) const {
+  JSData container;
+  if (whichValue == 0) {
+    whichValue = &container;
+  }
+  if (!JSData::HasCompositeKey(key, whichValue, commentsOnFailure)) {
+    return false;
+  }
+  if (whichValue->theType != targetType) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Key: " << key << ", value: " << whichValue->ToString(false)
+      << " is of type " << (int) whichValue->theType
+      << " instead of the target one: " << (int) targetType;
+    }
+    return false;
+  }
+  return true;
+}
+
 bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, std::stringstream* commentsOnFailure) const {
   List<char> delimiters;
   delimiters.AddOnTop('.');

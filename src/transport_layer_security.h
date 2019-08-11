@@ -17,6 +17,7 @@ static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeade
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+#include "vpfHeader5Crypto.h"
 class TransportLayerSecurity;
 struct TransportLayerSecurityOpenSSL {
   std::string name;
@@ -86,6 +87,7 @@ public:
   bool flagInitializedPrivateKey;
   bool flagIsServer;
   bool flagInitialized;
+  X509Certificate theCertificate;
   TransportLayerSecurityOpenSSL openSSLData;
   List<char> readBuffer;
   List<char> writeBuffer;

@@ -150,8 +150,10 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals)
   }
   radicalsNew.QuickSortAscending();
   if (radicalsNew.size > 16) {
-    stOutput << "Computing with fields whose dimension over the rationals is greater than 2^16 is not allowed. "
-    << "Such computations are too large for the current implementation of algberaic extensions of the rationals. "
+    stOutput << "Computing with fields whose dimension over the "
+    << "rationals is greater than 2^16 is not allowed. "
+    << "Such computations are too large for the current "
+    << "implementation of algberaic extensions of the rationals. "
     << Crasher::GetStackTraceEtcErrorMessageHTML();
     return (false);
   }
@@ -588,8 +590,8 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   algNumPoly.Substitution(checkSub);
   if (!algNumPoly.IsEqualToZero()) {
     crash << "This is a programming error. The number z=" << outputRoot.ToString()
-    << " was just adjoined to the base field; z"
-    << " was given by requesting that it has minimial polynomial " << algNumPoly.ToString()
+    << " was just adjoined to the base field; z "
+    << "was given by requesting that it has minimial polynomial " << algNumPoly.ToString()
     << ", however, substituting z back in to the minimal polynomial "
     << "does not yield zero, rather yields " << algNumPoly.ToString() << ". " << crash;
   }
@@ -602,8 +604,10 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail");
   int indexVar = - 1;
   if (!input.IsOneVariableNonConstPoly(&indexVar)) {
-    crash << "This is a programming error: I am being asked convert to a one-variable polynomial a polynomial "
-    << "depending on more than one variables. The input poly is: " << input.ToString() << crash;
+    crash << "This is a programming error: "
+    << "I am being asked convert to a one-variable polynomial a polynomial "
+    << "depending on more than one variables. "
+    << "The input poly is: " << input.ToString() << crash;
   }
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.MakeIdSubstitution(indexVar + 1);
@@ -634,11 +638,11 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
     << ", yielding expected final dimension "
     << startingDim << "*" << degreeMinPoly << " = " << startingDim * degreeMinPoly
     << " over the rationals. The calculator is hard-coded "
-    << " to accept dimension over the rationals no larger than 10000 "
-    << "(multiplication in such a field corresponds to a "
-    << " 10000x10000 matrix (100 000 000 entries). "
+    << "to accept dimension over the rationals no larger than 10000 "
+    << "- multiplication in such a field corresponds to a "
+    << "10000x10000 matrix (100 000 000 entries). "
     << "If you do indeed want to carry out such large computations, you need to "
-    << " compile the calculator on your own, modifying file " << __FILE__ << ", line " << __LINE__ << ".";
+    << "compile the calculator on your own, modifying file " << __FILE__ << ", line " << __LINE__ << ".";
     return false;
   }
   theGenMat.MakeZero();
@@ -712,8 +716,8 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   minPoly.Substitution(theSub);
   if (!minPoly.IsEqualToZero()) {
     crash << "This is a programming error. The number z="
-    << outputRoot.ToString() << " was just adjoined to the base field; z"
-    << " was given by requesting that it has minimial polynomial "
+    << outputRoot.ToString() << " was just adjoined to the base field; z "
+    << "was given by requesting that it has minimial polynomial "
     << minPoly.ToString() << ", however, substituting z back in to the minimal polynomial "
     << "does not yield zero, rather yields " << minPoly.ToString() << ". " << crash;
   }
@@ -733,7 +737,7 @@ void AlgebraicNumber::Invert() {
     if (!isGood) {
       crash << "This is a programming error: Algebraic number has no owner, "
       << "so it must be rational, but it appears to be not. "
-      << " as its theElt vector is: " << this->theElT.ToString() << crash;
+      << "Its theElt vector is: " << this->theElT.ToString() << crash;
     }
     this->theElT.theCoeffs[0].Invert();
     return;
@@ -1334,6 +1338,13 @@ ElementZmodP ElementZmodP::operator/(const ElementZmodP& other) const {
   return result;
 }
 
+ElementZmodP operator*(int left, const ElementZmodP& right) {
+  ElementZmodP result;
+  result = right;
+  result *= left;
+  return result;
+}
+
 void ElementZmodP::operator*=(const LargeInt& other) {
   this->theValue *= other.value;
   if (other.IsNegative()) {
@@ -1373,6 +1384,26 @@ void ElementZmodP::operator-=(const ElementZmodP& other) {
   ElementZmodP otherTimesMinusOne = other;
   otherTimesMinusOne *= -1;
   *this += otherTimesMinusOne;
+}
+
+void ElementZmodP::operator=(const Rational& other) {
+  bool tempB = this->AssignRational(other);
+  if (!tempB) {
+    crash << "This is a programming error: using ElementZmodP::operator= to assign a Rational number failed. "
+    << " Operator = does not allow failure. " << crash;
+  }
+}
+
+void ElementZmodP::operator=(const int other) {
+  LargeInt otherLI = other;
+  *this = otherLI;
+}
+
+void ElementZmodP::operator-=(const LargeIntUnsigned& other) {
+  ElementZmodP otherElt;
+  otherElt.theModulo = this->theModulo;
+  otherElt = other;
+  (*this) -= otherElt;
 }
 
 bool ElementZmodP::AssignRational(const Rational& other) {

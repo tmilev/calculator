@@ -223,12 +223,7 @@ public:
   LargeIntUnsigned theModulo;
   LargeIntUnsigned theValue;
   bool flagDeallocated;
-  friend ElementZmodP operator*(int left, const ElementZmodP& right) {
-    ElementZmodP result;
-    result = right;
-    result *= left;
-    return result;
-  }
+  friend ElementZmodP operator*(int left, const ElementZmodP& right);
   unsigned int HashFunction() const;
   static unsigned int HashFunction(const ElementZmodP& input) {
     return input.HashFunction();
@@ -259,11 +254,9 @@ public:
   void operator*=(const LargeInt& other);
   void operator+=(const ElementZmodP& other);
   void operator-=(const ElementZmodP& other);
+  void operator-=(const LargeIntUnsigned& other);
   bool operator+=(const Rational& other);
-  void operator=(const int other) {
-    LargeInt otherLI = other;
-    *this = otherLI;
-  }
+  void operator=(const int other);
   ElementZmodP operator+(const Rational& other) const;
   ElementZmodP operator-(const ElementZmodP& other) const;
   ElementZmodP operator/(const Rational& other) const;
@@ -272,13 +265,7 @@ public:
   ElementZmodP operator*(const ElementZmodP& other) const;
   void operator=(const LargeInt& other);
   bool AssignRational(const Rational& other);
-  void operator=(const Rational& other) {
-    bool tempB = this->AssignRational(other);
-    if (!tempB) {
-      crash << "This is a programming error: using ElementZmodP::operator= to assign a Rational number failed. "
-      << " Operator = does not allow failure. " << crash;
-    }
-  }
+  void operator=(const Rational& other);
   bool operator/=(const ElementZmodP& den);
   bool operator/=(const LargeInt& den);
   void ScaleToIntegralMinHeightAndGetPoly(

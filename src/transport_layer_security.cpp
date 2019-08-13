@@ -7,6 +7,8 @@
 #include "vpfHeader5Crypto.h"
 
 #include <unistd.h> //<- close, open defined here
+#include <netdb.h> //<-addrinfo and related data structures defined here
+
 
 ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementation(__FILE__, "TSL/ssl implementation.");
 
@@ -576,7 +578,16 @@ TransportLayerSecurityServer::TransportLayerSecurityServer() {
 }
 
 bool TransportLayerSecurityServer::ReadBytesOnce() {
-
+  struct timeval tv; //<- code involving tv taken from stackexchange
+  tv.tv_sec = 5;  // 5 Secs Timeout
+  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  setsockopt(this->socketId, SOL_SOCKET, SO_RCVTIMEO, (void*)(&tv), sizeof(timeval));
+  this->lastRead.SetSize(this->defaultBufferCapacity);
+  int numBytesInBuffer = recv(this->socketId, &this->lastRead.TheObjects, this->lastRead.size - 1, 0);
+  if (numBytesInBuffer >= 0) {
+    this->lastRead.SetSize(numBytesInBuffer);
+  }
+  return numBytesInBuffer > 0;
 }
 
 bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID) {
@@ -627,7 +638,7 @@ bool TransportLayerSecurityOpenSSL::InspectCertificates(
       *commentsGeneral << "SSL connection using: "
       << SSL_get_cipher(this->sslData) << ".<br>\n";
     }
-    tempCharPtr = X509_NAME_oneline(X509_get_subject_name (this->peer_certificate), 0, 0);
+    tempCharPtr = X509_NAME_oneline(X509_get_subject_name(this->peer_certificate), 0, 0);
     if (tempCharPtr == 0) {
       if (commentsOnFailure != 0) {
         *commentsOnFailure << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";

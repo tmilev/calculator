@@ -58,7 +58,7 @@ void TransportLayerSecurity::initialize(bool IamServer) {
       this->openSSLData.initSSLClient();
     }
   } else {
-    crash << "Not implemented yet. " << crash;
+    logServer << logger::red << "DEBUG: TODO: carry out any TLS initializations as needed. " << logger::endL;
   }
   this->flagInitialized = true;
 }
@@ -68,7 +68,7 @@ void TransportLayerSecurity::FreeEverythingShutdown() {
   if (!this->flagDontUseOpenSSL) {
     return this->openSSLData.FreeEverythingShutdownSSL();
   } else {
-    crash << "Not implemented yet. " << crash;
+    crash << "Free everything not implemented yet. " << crash;
   }
 }
 
@@ -79,8 +79,7 @@ bool TransportLayerSecurity::initSSLKeyFiles() {
   } else {
     std::stringstream commentsOnFailure;
     this->initSSLKeyFilesInternal(&commentsOnFailure);
-    crash << "Init ssl key files not implemented yet. " << commentsOnFailure.str() << crash;
-    return false;
+    return true;
   }
 }
 
@@ -428,7 +427,7 @@ void TransportLayerSecurity::Free() {
   if (!this->flagDontUseOpenSSL) {
     this->openSSLData.FreeSSL();
   } else {
-    crash << "Remove last socket not implemented yet. " << crash;
+    logServer << logger::red << "DEBUG: free doesn't do anything yet, please fix as necesary as the code matures. " << logger::endL;
   }
   this->flagInitialized = false;
 }
@@ -570,12 +569,32 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   return true;
 }
 
+TransportLayerSecurityServer::TransportLayerSecurityServer() {
+  this->socketId = - 1;
+  this->millisecondsDefaultTimeOut = 5000;
+  this->millisecondsTimeOut = this->millisecondsDefaultTimeOut;
+}
+
+bool TransportLayerSecurityServer::ReadBytesOnce() {
+
+}
+
+bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID) {
+  MacroRegisterFunctionWithName("TransportLayerSecurityServer::HandShakeIamServer");
+  this->socketId = inputSocketID;
+  bool bytesReceived = this->ReadBytesOnce();
+  crash << "Not implemented yet. " << crash;
+  if (!bytesReceived) {
+    return false;
+  }
+  return false;
+}
+
 bool TransportLayerSecurity::HandShakeIamServer(int inputSocketID) {
   if (!this->flagDontUseOpenSSL) {
     return this->openSSLData.HandShakeIamServer(inputSocketID);
   } else {
-    crash << "Not implemented yet. " << crash;
-    return false;
+    return this->theServer.HandShakeIamServer(inputSocketID);
   }
 }
 
@@ -666,6 +685,7 @@ int TransportLayerSecurity::SSLRead(
   std::stringstream* commentsGeneral,
   bool includeNoErrorInComments
 ) {
+  MacroRegisterFunctionWithName("TransportLayerSecurity::SSLRead");
   this->readBuffer.SetSize(this->readBufferStandardSize);
   if (!this->flagDontUseOpenSSL) {
     return this->openSSLData.SSLRead(readBuffer, outputError, commentsGeneral, includeNoErrorInComments);

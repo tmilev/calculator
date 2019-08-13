@@ -436,8 +436,8 @@ bool Calculator::TimedOut() {
     return false;
   }
   if (!this->flagTimeLimitErrorDetected) {
-    *this << "<br><b>Max allowed computational time is " << halfTimeLimit << " ms;"
-    << " so far, " << elapsedMilliseconds
+    *this << "<br><b>Max allowed computational time is " << halfTimeLimit << " ms; "
+    << "so far, " << elapsedMilliseconds
     << " have elapsed -> aborting computation ungracefully.</b>";
   }
   this->flagTimeLimitErrorDetected = true;
@@ -455,14 +455,6 @@ bool Calculator::EvaluateExpression(
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
   theCommands.NumCallsEvaluateExpression ++;
-  //////////////////////////////
-  //  stOutput << "DEBUG: temporary check comment me out. Evaluating:"
-  //  << input.ToString()
-  //  << " <hr>"
-  //  ;
-  //  input.CheckConsistency();
-  //  input.HashFunction();
-  //////////////////////////////
   if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH < 3) {
     theCommands << "<br>";
     for (int i = 0; i < theCommands.RecursionDeptH; i ++) {
@@ -654,7 +646,6 @@ bool Calculator::EvaluateExpression(
         }
       }
     }
-    //stOutput << "Debug: got here pt2.";
     if (doExpressionHistory) {
       if (HistoryShouldBeRecorded) {
         theRuleStackMaintainer.GetCurrentHistoryRuleNames() = "Sub-expression simplification";

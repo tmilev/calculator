@@ -81,6 +81,21 @@ struct TransportLayerSecurityOpenSSL {
   static bool initSSLKeyFilesCreateOnDemand();
 };
 
+class TransportLayerSecurityServer {
+public:
+  int socketId;
+  int64_t millisecondsTimeOut;
+  int64_t millisecondsDefaultTimeOut;
+  int defaultBufferCapacity;
+  List<char> lastRead;
+  TransportLayerSecurityServer();
+  bool HandShakeIamServer(int inputSocketID);
+  bool ReadBytesOnce();
+  void WriteBytesOnce();
+  void ReadLoop();
+  void WriteLoop();
+};
+
 class TransportLayerSecurity {
 public:
   static bool flagDontUseOpenSSL;
@@ -89,6 +104,7 @@ public:
   bool flagInitialized;
   X509Certificate theCertificate;
   TransportLayerSecurityOpenSSL openSSLData;
+  TransportLayerSecurityServer theServer;
   List<char> readBuffer;
   List<char> writeBuffer;
   int readBufferStandardSize;

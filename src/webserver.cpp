@@ -4521,6 +4521,8 @@ int WebWorker::Run() {
   theGlobalVariables.flagServerForkedIntoWorker = true;
   crash.CleanUpFunction = WebServer::SignalActiveWorkerDoneReleaseEverything;
   CreateTimerThread();
+  // Check web worker indices are initialized properly:
+  theWebServer.GetActiveWorker();
   if (theGlobalVariables.flagUsingSSLinCurrentConnection) {
     if (!theWebServer.SSLServerSideHandShake()) {
       theGlobalVariables.flagUsingSSLinCurrentConnection = false;

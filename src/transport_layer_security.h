@@ -83,6 +83,18 @@ struct TransportLayerSecurityOpenSSL {
 
 class TransportLayerSecurityServer {
 public:
+  class recordsHandshake {
+    static const unsigned char helloRequest = 0;
+    static const unsigned char clientHello = 1;
+    static const unsigned char serverHello = 2;
+    static const unsigned char certificate = 11;
+    static const unsigned char serverKeyExchange = 12;
+    static const unsigned char certificateRequest = 13;
+    static const unsigned char serverHelloDone = 14;
+    static const unsigned char certificateVerify = 15;
+    static const unsigned char clientKeyExchange = 16;
+    static const unsigned char finished = 20;
+  };
   int socketId;
   int64_t millisecondsTimeOut;
   int64_t millisecondsDefaultTimeOut;

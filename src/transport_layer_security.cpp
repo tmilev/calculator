@@ -5,6 +5,7 @@
 #include "vpfHeader1General4General_Logging_GlobalVariables.h"
 #include "vpfHeader1General7FileOperations_Encodings.h"
 #include "vpfHeader5Crypto.h"
+#include "abstract_syntax_notation_one_decoder.h"
 
 #include <unistd.h> //<- close, open defined here
 #include <netdb.h> //<-addrinfo and related data structures defined here
@@ -582,14 +583,14 @@ bool TransportLayerSecurityServer::ReadBytesOnce() {
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
-  logWorker << logger::red << "DEBUG: got to here pt 3:\n" << logger::endL;
+  // logWorker << logger::red << "DEBUG: got to here pt 3:\n" << logger::endL;
 
   setsockopt(this->socketId, SOL_SOCKET, SO_RCVTIMEO, (void*)(&tv), sizeof(timeval));
-  logWorker << logger::red << "DEBUG: got to here pt 4:\n" << logger::endL;
+  // logWorker << logger::red << "DEBUG: got to here pt 4:\n" << logger::endL;
   this->lastRead.SetSize(this->defaultBufferCapacity);
-  logWorker << logger::red << "DEBUG: got to here pt 5: socketid: " << this->socketId << " lastRead size: " << this->lastRead.size << logger::endL;
+  // logWorker << logger::red << "DEBUG: got to here pt 5: socketid: " << this->socketId << " lastRead size: " << this->lastRead.size << logger::endL;
   int numBytesInBuffer = recv(this->socketId, this->lastRead.TheObjects, this->lastRead.size - 1, 0);
-  logWorker << "DEBUG: bytes in buffer: " << numBytesInBuffer << logger::endL;
+  //logWorker << "DEBUG: bytes in buffer: " << numBytesInBuffer << logger::endL;
   if (numBytesInBuffer >= 0) {
     this->lastRead.SetSize(numBytesInBuffer);
   }
@@ -598,13 +599,19 @@ bool TransportLayerSecurityServer::ReadBytesOnce() {
 
 bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::HandShakeIamServer");
-  logWorker << logger::red << "DEBUG: got to here:\n" << logger::endL;
+  //logWorker << logger::red << "DEBUG: got to here:\n" << logger::endL;
   this->socketId = inputSocketID;
-  logWorker << logger::red << "DEBUG: got to here pt 2:\n" << logger::endL;
+  //logWorker << logger::red << "DEBUG: got to here pt 2:\n" << logger::endL;
   bool bytesReceived = this->ReadBytesOnce();
-  logWorker << logger::red << "DEBUG: About to receive bytes:\n" << logger::endL;
-  std::string receivedString(this->lastRead.TheObjects, this->lastRead.size);
-  logWorker << logger::red << "DEBUG: Bytes received:\n" << Crypto::ConvertStringToHex(receivedString, 60, false) << logger::endL;
+  //logWorker << logger::red << "DEBUG: About to receive bytes:\n" << logger::endL;
+  AbstractSyntaxNotationOneSubsetDecoder theDecoder;
+  theDecoder.rawData.assign(this->lastRead.TheObjects, this->lastRead.size);
+  logWorker << logger::red << "DEBUG: Bytes received:\n"
+  << Crypto::ConvertStringToHex(theDecoder.rawData, 60, false) << logger::endL;
+  std::stringstream errorStream;
+  bool success = theDecoder.Decode(&errorStream);
+  logWorker << "DEBUG: success:\n" << success << logger::endL;
+  logWorker << "DEBUG: decoded data:\n" << theDecoder.decodedData.ToString(false) << logger::endL;
   crash << "Not implemented yet. " << crash;
   if (!bytesReceived) {
     return false;

@@ -136,6 +136,12 @@ public:
   );
   static bool ConvertHexToString(const std::string& input, std::string& output, std::stringstream* commentsOnFailure);
   static bool ConvertHexToInteger(const std::string& input, LargeIntUnsigned &output, int &outputNumLeadingZeroPairs);
+  static std::string ConvertListCharsToHex(
+    const List<char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
+  );
+  static bool ConvertListCharsToHex(
+    const List<char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
+  );
   static bool ConvertStringToHex(
     const std::string& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
   );

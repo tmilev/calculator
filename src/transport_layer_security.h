@@ -83,17 +83,23 @@ struct TransportLayerSecurityOpenSSL {
 
 class TransportLayerSecurityServer {
 public:
+  class sslRecord {
+    static const unsigned char handshake = 22; // 0x16
+    static const unsigned char changeCipherSpec = 20; // 0x14
+    static const unsigned char alert = 21; //0x15
+    static const unsigned char applicationData = 23; //0x17
+  };
   class recordsHandshake {
-    static const unsigned char helloRequest = 0;
-    static const unsigned char clientHello = 1;
-    static const unsigned char serverHello = 2;
-    static const unsigned char certificate = 11;
-    static const unsigned char serverKeyExchange = 12;
-    static const unsigned char certificateRequest = 13;
-    static const unsigned char serverHelloDone = 14;
-    static const unsigned char certificateVerify = 15;
-    static const unsigned char clientKeyExchange = 16;
-    static const unsigned char finished = 20;
+    static const unsigned char helloRequest = 0; //0x00
+    static const unsigned char clientHello = 1; //0x01
+    static const unsigned char serverHello = 2; //0x02
+    static const unsigned char certificate = 11; //0x0b
+    static const unsigned char serverKeyExchange = 12; //0x0c
+    static const unsigned char certificateRequest = 13; //0x0d
+    static const unsigned char serverHelloDone = 14; //0x0e
+    static const unsigned char certificateVerify = 15; //0x0f
+    static const unsigned char clientKeyExchange = 16; //0x10
+    static const unsigned char finished = 20; //0x14
   };
   int socketId;
   int64_t millisecondsTimeOut;
@@ -101,8 +107,10 @@ public:
   int defaultBufferCapacity;
   List<char> lastRead;
   TransportLayerSecurityServer();
-  bool HandShakeIamServer(int inputSocketID);
+  bool HandShakeIamServer(int inputSocketID, std::stringstream *commentsOnFailure);
   bool ReadBytesOnce();
+  bool DecodeSSLRecord(std::stringstream* commentsOnFailure);
+  bool ReadBytesDecodeOnce(std::stringstream *commentsOnFailure);
   void WriteBytesOnce();
   void ReadLoop();
   void WriteLoop();
@@ -157,7 +165,7 @@ public:
   ~TransportLayerSecurity();
   void RemoveLastSocket();
   void AddMoreEntropyFromTimer();
-  bool HandShakeIamServer(int inputSocketID);
+  bool HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
   bool HandShakeIamClientNoSocketCleanup(
     int inputSocketID, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );

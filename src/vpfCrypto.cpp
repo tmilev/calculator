@@ -621,6 +621,20 @@ void Crypto::AppendDoubleSha256Check(const std::string& input, std::string& outp
   }
 }
 
+std::string Crypto::ConvertListCharsToHex(
+  const List<char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
+) {
+  std::string inputString(input.TheObjects, input.size);
+  return Crypto::ConvertListCharsToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
+}
+
+bool Crypto::ConvertListCharsToHex(
+  const List<char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
+) {
+  std::string inputString(input.TheObjects, input.size);
+  return Crypto::ConvertListCharsToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
+}
+
 bool Crypto::ConvertStringToHex(
   const std::string& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {

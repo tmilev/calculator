@@ -294,7 +294,7 @@ public:
   void initPortsITry();
   void initListeningSockets();
   void initSSL();
-  bool SSLServerSideHandShake();
+  bool SSLServerSideHandShake(std::stringstream* commentsOnFailure);
   static void TerminateProcessId(int processId);
   void TerminateChildSystemCall(int i);
   void ProcessOneChildMessage(int childIndex, int& outputNumInUse);

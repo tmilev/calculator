@@ -150,14 +150,14 @@ void WebServer::initSSL() {
   this->theTLS.initialize(true);
 }
 
-bool WebServer::SSLServerSideHandShake() {
+bool WebServer::SSLServerSideHandShake(std::stringstream* commentsOnFailure) {
   if (!theGlobalVariables.flagSSLIsAvailable) {
     return false;
   }
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return false;
   }
-  return this->theTLS.HandShakeIamServer(this->GetActiveWorker().connectedSocketID);
+  return this->theTLS.HandShakeIamServer(this->GetActiveWorker().connectedSocketID, commentsOnFailure);
 }
 
 bool WebWorker::ReceiveAllHttpSSL() {
@@ -4524,11 +4524,14 @@ int WebWorker::Run() {
   // Check web worker indices are initialized properly:
   theWebServer.GetActiveWorker();
   if (theGlobalVariables.flagUsingSSLinCurrentConnection) {
-    if (!theWebServer.SSLServerSideHandShake()) {
+    std::stringstream commentsOnFailure;
+
+    if (!theWebServer.SSLServerSideHandShake(&commentsOnFailure)) {
       theGlobalVariables.flagUsingSSLinCurrentConnection = false;
       this->parent->SignalActiveWorkerDoneReleaseEverything();
       this->parent->ReleaseEverything();
       logOpenSSL << logger::red << "Ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
+      logOpenSSL << commentsOnFailure.str() << logger::endL;
       return - 1;
     }
   }

@@ -43,7 +43,6 @@ extern Calculator* theParser;
 
 Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
   (void) dummyCrasherSignalsActualCrash;
-  std::cout << "DEBUG: got to crasher here!\n" ;
   this->FirstRun();
   if (this->flagFinishingCrash) {
     std::cout << "Recursion within the crashing mechanism detected. "

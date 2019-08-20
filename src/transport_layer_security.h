@@ -81,6 +81,14 @@ struct TransportLayerSecurityOpenSSL {
   static bool initSSLKeyFilesCreateOnDemand();
 };
 
+class SSLHello {
+public:
+  unsigned char handshakeType;
+  int version;
+  SSLHello();
+
+};
+
 class SSLRecord {
 public:
   class tokens {
@@ -95,6 +103,7 @@ public:
   int version;
   int length;
   List<char> body;
+  SSLHello decodedBody;
   SSLRecord();
   bool Decode(List<char>& input, int offset, std::stringstream* commentsOnFailure);
   std::string ToString() const;

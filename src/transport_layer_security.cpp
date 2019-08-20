@@ -592,6 +592,11 @@ bool TransportLayerSecurityServer::ReadBytesOnce() {
   return numBytesInBuffer > 0;
 }
 
+SSLHello::SSLHello() {
+  this->handshakeType = 0;
+  this->version = 0;
+}
+
 SSLRecord::SSLRecord() {
   this->theType = SSLRecord::tokens::unknown;
   this->length = 0;
@@ -623,7 +628,10 @@ std::string SSLRecord::ToString() const {
   result["length"] = this->length;
   result["body"] = Crypto::ConvertListCharsToHex(this->body, 50, false);
   result["type"] = this->ToStringType();
-  return result.ToString(false,true, false, true);
+  std::string hexVersion;
+  Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(LargeIntUnsigned((unsigned) this->version), 0, hexVersion);
+  result["version"] = hexVersion;
+  return result.ToString(false, true, false, true);
 }
 
 bool SSLRecord::Decode(List<char>& input, int offset, std::stringstream *commentsOnFailure) {
@@ -652,7 +660,7 @@ bool SSLRecord::Decode(List<char>& input, int offset, std::stringstream *comment
   this->length = input[offset + 3] * 256 + input[offset + 4];
   this->version = input[offset + 1] * 256 + input[offset + 2];
   int highEnd = this->length + offset + 5;
-  if (highEnd >= input.size) {
+  if (highEnd > input.size) {
     logWorker << "DEBUG: high end's too big. " << logger::endL;
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "Insufficent record length: expected: 5 + " << this->length << ", got: " << input.size - offset;
@@ -670,8 +678,8 @@ bool SSLRecord::Decode(List<char>& input, int offset, std::stringstream *comment
 bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::DecodeSSLRecord");
   SSLRecord oneRecord;
-  logWorker << "DEBUG: about to decode ... " << logger::endL;
   if (!oneRecord.Decode(this->lastRead, 0, commentsOnFailure)) {
+    logWorker << "DEBUG: one record decode error.\n" << oneRecord.ToString() << logger::endL;
     return false;
   }
   logWorker << "DEBUG: Decoded: " << oneRecord.ToString() << logger::endL;
@@ -703,11 +711,13 @@ bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID, std::st
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::HandShakeIamServer");
   logWorker << logger::red << "DEBUG: handshaking ...\n" << logger::endL;
   this->socketId = inputSocketID;
-  this->ReadBytesDecodeOnce(commentsOnFailure);
-  logWorker << logger::red << "DEBUG: fater read bytes decode once. \n" << logger::endL;
+  bool success = this->ReadBytesDecodeOnce(commentsOnFailure);
+  if (!success) {
+    logWorker << logger::red << "DEBUG: commentson failure: \n" << commentsOnFailure->str() << logger::endL;
 
-  logWorker << logger::red << "DEBUG: Bytes received:\n"
-  << Crypto::ConvertListCharsToHex(this->lastRead, 60, false) << logger::endL;
+  }
+  logWorker << logger::red << "DEBUG: after read bytes decode once. \n" << logger::endL;
+
   crash.CleanUpFunction = 0;
   crash << "Not implemented yet. " << crash;
   return false;

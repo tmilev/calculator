@@ -81,14 +81,25 @@ struct TransportLayerSecurityOpenSSL {
   static bool initSSLKeyFilesCreateOnDemand();
 };
 
-class TransportLayerSecurityServer {
+class SSLRecord {
 public:
-  class sslRecord {
+  class tokens {
+  public:
     static const unsigned char handshake = 22; // 0x16
     static const unsigned char changeCipherSpec = 20; // 0x14
     static const unsigned char alert = 21; //0x15
     static const unsigned char applicationData = 23; //0x17
+    static const unsigned char unknown = 0;
   };
+  unsigned char theType;
+  int version;
+  int length;
+  SSLRecord();
+  bool Decode(List<char>& input, int offset, std::stringstream* commentsOnFailure);
+};
+
+class TransportLayerSecurityServer {
+public:
   class recordsHandshake {
     static const unsigned char helloRequest = 0; //0x00
     static const unsigned char clientHello = 1; //0x01

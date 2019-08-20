@@ -592,15 +592,45 @@ bool TransportLayerSecurityServer::ReadBytesOnce() {
   return numBytesInBuffer > 0;
 }
 
-bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("TransportLayerSecurityServer::DecodeSSLRecord");
-  if (this->lastRead.size < 5) {
+SSLRecord::SSLRecord() {
+  this->theType = SSLRecord::tokens::unknown;
+  this->length = 0;
+  this->version = 0;
+}
+
+bool SSLRecord::Decode(List<char>& input, int offset, std::stringstream *commentsOnFailure) {
+  if ((unsigned) input.size - offset < 5) {
     if (commentsOnFailure != 0) {
-      *commentsOnFailure << "SSL record needs to have at least 5 bytes, yours has: " << this->lastRead.size << ".";
+      *commentsOnFailure << "SSL record needs to have at least 5 bytes, yours has: " << input.size << ".";
     }
     return false;
   }
+  this->theType = input[offset];
+  if (
+    this->theType != SSLRecord::tokens::handshake
+  //&&
+//    this->theType != SSLRecord::tokens::alert &&
+//    this->theType != SSLRecord::tokens::applicationData &&
+//    this->theType != SSLRecord::tokens::changeCipherSpec
+  ) {
+    this->theType = SSLRecord::tokens::unknown;
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Unknown record type: " << (int) input[offset] << ". ";
+    }
+    return false;
+  }
+  this->length = input[offset + 3] * 256 + input[offset + 4];
+  this->version = input[offset + 1] * 256 + input[offset + 2];
+  return false;
+}
 
+bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("TransportLayerSecurityServer::DecodeSSLRecord");
+  SSLRecord oneRecord;
+  if (!oneRecord.Decode(this->lastRead, 0, commentsOnFailure)) {
+    return false;
+  }
+  crash << "Decode not implemented yet" << crash;
 
   return false;
 }

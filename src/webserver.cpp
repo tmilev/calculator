@@ -151,12 +151,14 @@ void WebServer::initSSL() {
 }
 
 bool WebServer::SSLServerSideHandShake(std::stringstream* commentsOnFailure) {
+  logWorker << "DEBUG: HERE I AM!!!!" << logger::endL;
   if (!theGlobalVariables.flagSSLIsAvailable) {
     return false;
   }
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return false;
   }
+  logWorker << "DEBUG: got to the handshake!!!!" << logger::endL;
   return this->theTLS.HandShakeIamServer(this->GetActiveWorker().connectedSocketID, commentsOnFailure);
 }
 

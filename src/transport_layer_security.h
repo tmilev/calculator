@@ -94,8 +94,11 @@ public:
   unsigned char theType;
   int version;
   int length;
+  List<char> body;
   SSLRecord();
   bool Decode(List<char>& input, int offset, std::stringstream* commentsOnFailure);
+  std::string ToString() const;
+  std::string ToStringType() const;
 };
 
 class TransportLayerSecurityServer {

@@ -598,8 +598,37 @@ SSLRecord::SSLRecord() {
   this->version = 0;
 }
 
+std::string SSLRecord::ToStringType() const{
+  switch (this->theType) {
+  case SSLRecord::tokens::alert:
+    return "alert";
+  case SSLRecord::tokens::applicationData:
+    return "applicationData";
+  case SSLRecord::tokens::changeCipherSpec:
+    return "changeCipherSpec";
+  case SSLRecord::tokens::handshake:
+    return "handshake";
+  case SSLRecord::tokens::unknown:
+    return "unknown";
+  default:
+    break;
+  }
+  std::stringstream out;
+  out << "malformed_type_" << (int) this->theType;
+  return out.str();
+}
+
+std::string SSLRecord::ToString() const {
+  JSData result;
+  result["length"] = this->length;
+  result["body"] = Crypto::ConvertListCharsToHex(this->body, 50, false);
+  result["type"] = this->ToStringType();
+  return result.ToString(false,true, false, true);
+}
+
 bool SSLRecord::Decode(List<char>& input, int offset, std::stringstream *commentsOnFailure) {
-  if ((unsigned) input.size - offset < 5) {
+  this->body.SetSize(0);
+  if (input.size < 5 + offset) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "SSL record needs to have at least 5 bytes, yours has: " << input.size << ".";
     }
@@ -619,18 +648,34 @@ bool SSLRecord::Decode(List<char>& input, int offset, std::stringstream *comment
     }
     return false;
   }
+  logWorker << "DEBUG: got to length extraction. " << logger::endL;
   this->length = input[offset + 3] * 256 + input[offset + 4];
   this->version = input[offset + 1] * 256 + input[offset + 2];
-  return false;
+  int highEnd = this->length + offset + 5;
+  if (highEnd >= input.size) {
+    logWorker << "DEBUG: high end's too big. " << logger::endL;
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Insufficent record length: expected: 5 + " << this->length << ", got: " << input.size - offset;
+    }
+    return false;
+  }
+  this->body.SetSize(this->length);
+  for (int i = 0; i < this->length; i ++) {
+    this->body[i] = input[offset + i];
+  }
+  logWorker << "DEBUG: Got to return true ... " << logger::endL;
+  return true;
 }
 
 bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::DecodeSSLRecord");
   SSLRecord oneRecord;
+  logWorker << "DEBUG: about to decode ... " << logger::endL;
   if (!oneRecord.Decode(this->lastRead, 0, commentsOnFailure)) {
     return false;
   }
-  crash << "Decode not implemented yet" << crash;
+  logWorker << "DEBUG: Decoded: " << oneRecord.ToString() << logger::endL;
+  crash << "Decode not implemented yet. " << crash;
 
   return false;
 }
@@ -638,9 +683,16 @@ bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOn
 bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::ReadBytesDecodeOnce");
   if (!this->ReadBytesOnce()) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to read bytes. ";
+    }
     return false;
   }
+  logWorker << "DEBUG: got to before decode ssl record. " << logger::endL;
   if (!this->DecodeSSLRecord(commentsOnFailure)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to decode ssl record. ";
+    }
     return false;
   }
   crash << "read bytes decode Not implemented yet" << crash;
@@ -649,18 +701,25 @@ bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commen
 
 bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::HandShakeIamServer");
+  logWorker << logger::red << "DEBUG: handshaking ...\n" << logger::endL;
   this->socketId = inputSocketID;
   this->ReadBytesDecodeOnce(commentsOnFailure);
+  logWorker << logger::red << "DEBUG: fater read bytes decode once. \n" << logger::endL;
+
   logWorker << logger::red << "DEBUG: Bytes received:\n"
   << Crypto::ConvertListCharsToHex(this->lastRead, 60, false) << logger::endL;
+  crash.CleanUpFunction = 0;
   crash << "Not implemented yet. " << crash;
   return false;
 }
 
 bool TransportLayerSecurity::HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure) {
   if (!this->flagDontUseOpenSSL) {
+    logWorker << "DEBUG: AM using open ssl. " << logger::endL;
     return this->openSSLData.HandShakeIamServer(inputSocketID);
   } else {
+    logWorker << "DEBUG: not using open ssl. " << logger::endL;
+
     return this->theServer.HandShakeIamServer(inputSocketID, commentsOnFailure);
   }
 }

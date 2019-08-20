@@ -625,14 +625,14 @@ std::string Crypto::ConvertListCharsToHex(
   const List<char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
   std::string inputString(input.TheObjects, input.size);
-  return Crypto::ConvertListCharsToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
+  return Crypto::ConvertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
 }
 
 bool Crypto::ConvertListCharsToHex(
   const List<char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
   std::string inputString(input.TheObjects, input.size);
-  return Crypto::ConvertListCharsToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
+  return Crypto::ConvertStringToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
 }
 
 bool Crypto::ConvertStringToHex(

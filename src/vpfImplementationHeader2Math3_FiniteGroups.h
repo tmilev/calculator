@@ -573,40 +573,6 @@ bool FiniteGroup<elementSomeGroup>::CheckConjugacyClassRepsMatchCCsizes() {
 }
 
 template <class elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::RegisterCCclass(
-  const elementSomeGroup& theRepresentative, bool dontAddIfSameInvariants
-) {
-  MacroRegisterFunctionWithName("FiniteGroup::RegisterCCclass");
-  ConjugacyClass theClass;
-  theClass.representative = theRepresentative;
-  Polynomial<Rational> theCharPoly;
-  theClass.representative.GetCharacteristicPolyStandardRepresentation(theCharPoly);
-  if (this->CCsStandardRepCharPolys.Contains(theCharPoly)) {
-    const List<int>& indicesPossibleConjugates =
-    this->CCsStandardRepCharPolys.GetHashArray(this->CCsStandardRepCharPolys.GetHash(theCharPoly));
-    for (int i = 0; i < indicesPossibleConjugates.size; i ++) {
-      elementSomeGroup& otherRepresentative = this->conjugacyClasseS[indicesPossibleConjugates[i]].representative;
-      if (!dontAddIfSameInvariants) {
-        if (this->AreConjugate(theClass.representative, otherRepresentative)) {
-          return false;
-        }
-      } else {
-        if (!theClass.representative.HasDifferentConjugacyInvariantsFrom(otherRepresentative)) {
-          return false;
-        }
-      }
-    }
-  }
-  theClass.flagRepresentativeComputed = true;
-  this->ComputeCCSizeOrCCFromRepresentative(theClass, false);
-  this->conjugacyClasseS.AddOnTop(theClass);
-  this->CCsStandardRepCharPolys.AddOnTop(theCharPoly);
-  this->sizePrivate += theClass.size;
-  this->conjugacyClasseS.QuickSortAscending();
-  return true;
-}
-
-template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives() {
   MacroRegisterFunctionWithName("FiniteGroup::ComputeCCRepresentatives");
   //This algorithm is effective if the sum of the sizes of the conjugacy classes

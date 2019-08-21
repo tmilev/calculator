@@ -206,7 +206,7 @@ public:
     }
     return false;
   }
-  inline void operator*=(const MonomialTensor<coefficient, inputHashFunction>& standsOnTheRight) {
+  void operator*=(const MonomialTensor<coefficient, inputHashFunction>& standsOnTheRight) {
     if (standsOnTheRight.generatorsIndices.size == 0) {
       return;
     }
@@ -2605,9 +2605,8 @@ public:
   void AssignMinPoly(const Matrix<coefficient>& input);
   void AssignCharPoly(const Matrix<coefficient>& input);
   void AssignMonomialWithExponent(Vector<Rational>& r, const coefficient& theCoeff = 1) {
-    MonomialP tempM = r;
-    this->MakeZero(r.size);
-    this->AddMonomial(r);
+    this->MakeZero();
+    this->AddMonomial(r, theCoeff);
   }
   void GetConstantTerm(coefficient& output, const coefficient& theRingZero = 0) const;
   coefficient GetConstantTerm(const coefficient& theRingZero = 0) const {
@@ -2868,8 +2867,9 @@ public:
   bool operator<=(const coefficient& other) const {
     coefficient constME;
     if (!this->IsConstant(&constME)) {
-      crash << "This may or may not be a programming error: attempting to compare a non-constant polynomial to "
-      << " a constant. I cannot judge at the moment whether allowing that is a good decision. "
+      crash << "This may or may not be a programming error: "
+      << "attempting to compare a non-constant polynomial to "
+      << "a constant. I cannot judge at the moment whether allowing that is a good decision. "
       << "In any case, crashing to let you know. "
       << crash;
       return false;
@@ -2879,7 +2879,8 @@ public:
   bool operator<(const coefficient& other) const {
     coefficient constME;
     if (!this->IsConstant(&constME)) {
-      crash << "This may or may not be a programming error: attempting to compare a non-constant polynomial to "
+      crash << "This may or may not be a programming error: "
+      << "attempting to compare a non-constant polynomial to "
       << " a constant. I cannot judge at the moment whether allowing "
       << "that is a good decision. In any case, crashing to let you know. "
       << crash;
@@ -3429,7 +3430,7 @@ public:
     this->Numerator.GetElement() = other;
     this->ReduceMemory();
   }
-  inline unsigned int HashFunction() const {
+  unsigned int HashFunction() const {
     switch (this->expressionType) {
       case RationalFunctionOld::typeRational:
         return this->ratValue.HashFunction();

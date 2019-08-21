@@ -84,10 +84,11 @@ public:
   void finalize();
   void const *sha3_Finalize(void *priv);
   Sha3();
-  static void sha3_Init256(void* priv);
-  static void sha3_Init384(void* priv);
-  static void sha3_Init512(void* priv);
-  static void sha3_Update(void *priv, void const *bufIn, size_t len);
+  void reset();
+  void sha3_Init256();
+  void sha3_Init384();
+  void sha3_Init512();
+  void sha3_Update(void const *bufIn, size_t len);
   static inline uint64_t rotl64(uint64_t x, unsigned y) {
     return ((x << y) | (x >> ((sizeof(uint64_t) * 8) - y)));
   }
@@ -169,48 +170,54 @@ static void keccakf(uint64_t s[25]) {
 
 // *************************** Public Inteface ************************
 
+void Sha3::reset() {
+  this->byteIndex = 0;
+  this->capacityWords = 0;
+  this->flagUseKeccak = false;
+  int spongeWordsSizeInBytes = Sha3::numberOfSpongeWords * 8;
+  for (int i = 0; i < spongeWordsSizeInBytes; i ++) {
+    this->sb[i] = 0;
+  }
+  this->wordIndex = 0;
+  this->saved = 0;
+}
+
 // For Init or Reset call these:
-void Sha3::sha3_Init256(void *priv) {
-  Sha3 *ctx = (Sha3 *) priv;
-  bool flagOldUseKeccak = ctx->flagUseKeccak;
-  memset(ctx, 0, sizeof(*ctx));
-  ctx->flagUseKeccak = flagOldUseKeccak;
-  ctx->capacityWords = 2 * 256 / (8 * sizeof(uint64_t));
+void Sha3::sha3_Init256() {
+  bool flagOldUseKeccak = this->flagUseKeccak;
+  this->reset();
+  this->flagUseKeccak = flagOldUseKeccak;
+  this->capacityWords = 2 * 256 / (8 * sizeof(uint64_t));
 }
 
-void
-sha3_Init384(void *priv) {
-  Sha3 *ctx = (Sha3 *) priv;
-  memset(ctx, 0, sizeof(*ctx));
-  ctx->capacityWords = 2 * 384 / (8 * sizeof(uint64_t));
+void Sha3::sha3_Init384() {
+  this->reset();
+  this->capacityWords = 2 * 384 / (8 * sizeof(uint64_t));
 }
 
-void
-sha3_Init512(void *priv) {
-  Sha3 *ctx = (Sha3 *) priv;
-  memset(ctx, 0, sizeof(*ctx));
-  ctx->capacityWords = 2 * 512 / (8 * sizeof(uint64_t));
+void Sha3::sha3_Init512() {
+  this->reset();
+  this->capacityWords = 2 * 512 / (8 * sizeof(uint64_t));
 }
 
-void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len) {
-  Sha3 *ctx = (Sha3 *) priv;
+void Sha3::sha3_Update(void const *bufIn, size_t len) {
   /* 0...7 -- how much is needed to have a word */
-  unsigned old_tail = (8 - ctx->byteIndex) & 7;
+  unsigned old_tail = (8 - this->byteIndex) & 7;
   size_t words;
   unsigned tail;
   size_t i;
   const uint8_t* buf = (const uint8_t *) bufIn;
-  if (ctx->byteIndex >= 8)
-    crash << "Internal sha3 computation error. " << crash;
-  if (ctx->wordIndex >= (sizeof(ctx->s) / sizeof(ctx->s[0])))
-    crash << "Internal sha3 computation error. " << crash;
+  if (this->byteIndex >= 8)
+    crash << "Internal sha3 computation error: byteIndex too large: " << (int) this->byteIndex << crash;
+  if (this->wordIndex >= (sizeof(this->s) / sizeof(this->s[0])))
+    crash << "Internal sha3 computation error: wordIndex too large: " << (int) this->wordIndex << crash;
   if (len < old_tail) {
     // Have no complete word or haven't started the word yet.
     // Endian-independent code follows:
     while (len --) {
-      ctx->saved |= (uint64_t) (*(buf ++)) << ((ctx->byteIndex ++) * 8);
+      this->saved |= (uint64_t) (*(buf ++)) << ((this->byteIndex ++) * 8);
     }
-    if (ctx->byteIndex >= 8) {
+    if (this->byteIndex >= 8) {
       crash << "Internal sha3 computation error. " << crash;
     }
     return;
@@ -220,23 +227,23 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len) {
     // endian-independent code follows:
     len -= old_tail;
     while (old_tail --) {
-      ctx->saved |= (uint64_t) (*(buf ++)) << ((ctx->byteIndex ++) * 8);
+      this->saved |= (uint64_t) (*(buf ++)) << ((this->byteIndex ++) * 8);
     }
 
     // now ready to add saved to the sponge
-    ctx->s[ctx->wordIndex] ^= ctx->saved;
-    if (ctx->byteIndex != 8) {
+    this->s[this->wordIndex] ^= this->saved;
+    if (this->byteIndex != 8) {
       crash << "Internal sha3 computation error. " << crash;
     }
-    ctx->byteIndex = 0;
-    ctx->saved = 0;
-    if (++ ctx->wordIndex == (Sha3::numberOfSpongeWords - ctx->capacityWords)) {
-      keccakf(ctx->s);
-      ctx->wordIndex = 0;
+    this->byteIndex = 0;
+    this->saved = 0;
+    if (++ this->wordIndex == (Sha3::numberOfSpongeWords - this->capacityWords)) {
+      keccakf(this->s);
+      this->wordIndex = 0;
     }
   }
   // now work in full words directly from input
-  if (ctx->byteIndex != 0) {
+  if (this->byteIndex != 0) {
     crash << "Internal sha3 computation error. " << crash;
   }
   words = len / sizeof(uint64_t);
@@ -251,20 +258,20 @@ void Sha3::sha3_Update(void *priv, void const *bufIn, size_t len) {
     ((uint64_t) (buf[5]) << 8 * 5) |
     ((uint64_t) (buf[6]) << 8 * 6) |
     ((uint64_t) (buf[7]) << 8 * 7);
-    ctx->s[ctx->wordIndex] ^= t;
-    if (++ ctx->wordIndex == (Sha3::numberOfSpongeWords - ctx->capacityWords)) {
-      keccakf(ctx->s);
-      ctx->wordIndex = 0;
+    this->s[this->wordIndex] ^= t;
+    if (++ this->wordIndex == (Sha3::numberOfSpongeWords - this->capacityWords)) {
+      keccakf(this->s);
+      this->wordIndex = 0;
     }
   }
   // finally, save the partial word
-  if (!(ctx->byteIndex == 0 && tail < 8)) {
+  if (!(this->byteIndex == 0 && tail < 8)) {
     crash << "Internal sha3 computation error. " << crash;
   }
   while (tail --) {
-    ctx->saved |= (uint64_t) (*(buf ++)) << ((ctx->byteIndex ++) * 8);
+    this->saved |= (uint64_t) (*(buf ++)) << ((this->byteIndex ++) * 8);
   }
-  if (ctx->byteIndex >= 8) {
+  if (this->byteIndex >= 8) {
     crash << "Internal sha3 computation error. " << crash;
   }
 }
@@ -311,7 +318,7 @@ void const * Sha3::sha3_Finalize(void *priv) {
 }
 
 void Sha3::init() {
-  this->sha3_Init256(this);
+  this->sha3_Init256();
 }
 
 void Sha3::update(const std::string& input) {
@@ -323,7 +330,7 @@ void Sha3::update(List<unsigned char>& input) {
 }
 
 void Sha3::update(const void* inputBuffer, size_t length) {
-  this->sha3_Update(this, inputBuffer, length);
+  this->sha3_Update(inputBuffer, length);
 }
 
 void Sha3::finalize() {

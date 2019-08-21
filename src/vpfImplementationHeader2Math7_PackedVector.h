@@ -64,14 +64,13 @@ scalar PackedVector<scalar>::ScalarProduct(const PackedVector<scalar>& v, const 
 }
 */
 
-// seriously, this wasn't automatically inlined?
 template <typename scalar>
-inline scalar& PackedVector<scalar>::operator[](int i) {
+scalar& PackedVector<scalar>::operator[](int i) {
   return this->data[i];
 }
 
 template <typename scalar>
-inline scalar PackedVector<scalar>::operator[](int i) const {
+scalar PackedVector<scalar>::operator[](int i) const {
   return this->data[i];
 }
 

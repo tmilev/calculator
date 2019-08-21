@@ -154,7 +154,7 @@ public:
   unsigned int HashFunction() const {
     return MathRoutines::HashListInts(this->p);
   }
-  static inline unsigned int HashFunction(const Partition& input) {
+  static unsigned int HashFunction(const Partition& input) {
     return input.HashFunction();
   }
 };

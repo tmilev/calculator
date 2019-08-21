@@ -57,7 +57,7 @@ public:
   coefficient& operator[](int i) const;
   std::string ToString(FormatExpressions* theFormat = 0) const;
   static unsigned int HashFunction(const ClassFunction& input);
-  inline unsigned int HashFunction() const {
+  unsigned int HashFunction() const {
     return this->HashFunction(*this);
   }
   void operator*=(const coefficient& inputCF) {
@@ -456,7 +456,7 @@ public:
   std::string ToStringInvariants(FormatExpressions* theFormat) const;
   std::string ToString(FormatExpressions* theFormat = 0) const;
   unsigned int HashFunction() const;
-  static inline unsigned int HashFunction(const ElementWeylGroup& input) {
+  static unsigned int HashFunction(const ElementWeylGroup& input) {
     return input.HashFunction();
   }
   void operator*=(const ElementWeylGroup& other);
@@ -465,7 +465,7 @@ public:
     result *= other;
     return result;
   }
-  static inline bool IsMonEqualToZero() {
+  static bool IsMonEqualToZero() {
     return false;
   }
   void GetCycleStructure(VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult) const;
@@ -802,7 +802,7 @@ public:
   );
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
   void GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output);
-  inline int GetDim() const {
+  int GetDim() const {
     return this->CartanSymmetric.NumRows;
   }
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
@@ -1450,10 +1450,10 @@ public:
   void operator*= (const VirtualRepresentation<somegroup, coefficient>& other);
   void AssignRep(const GroupRepresentationCarriesAllMatrices<somegroup, Rational>& other);
   void AssignRep(const GroupRepresentation<somegroup, Rational>& other);
-  inline static unsigned int HashFunction(const VirtualRepresentation<somegroup, coefficient>& input) {
+  static unsigned int HashFunction(const VirtualRepresentation<somegroup, coefficient>& input) {
     return input.HashFunction();
   }
-  inline unsigned int HashFunction() const {
+  unsigned int HashFunction() const {
     return this->::MonomialCollection<ClassFunction<somegroup, coefficient>, Rational>::HashFunction();
   }
 };

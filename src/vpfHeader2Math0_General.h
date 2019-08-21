@@ -50,7 +50,7 @@ public:
   static bool IsMonEqualToZero() {
     return false;
   }
-  static inline unsigned int HashFunction(const ChevalleyGenerator& input) {
+  static unsigned int HashFunction(const ChevalleyGenerator& input) {
     return (unsigned) input.theGeneratorIndex;
   }
   unsigned int HashFunction() const {
@@ -141,7 +141,7 @@ public:
     }
     return result;
   }
-  static inline unsigned int HashFunction(const MonomialTensor<coefficient, inputHashFunction>& input) {
+  static unsigned int HashFunction(const MonomialTensor<coefficient, inputHashFunction>& input) {
     return input.HashFunction();
   }
   void MakeConst() {
@@ -324,7 +324,7 @@ public:
     }
     return this->monBody[i];
   }
-  inline static std::string GetXMLClassName() {
+  static std::string GetXMLClassName() {
     return "MonomialP";
   }
   unsigned  int HashFunction() const {
@@ -345,7 +345,7 @@ public:
   //Warning: HashFunction must return the same result
   //for equal monomials represented by different monBodies.
   // Two such different representation may differ by extra entries filled in with zeroes.
-  static inline unsigned int HashFunction(const MonomialP& input) {
+  static unsigned int HashFunction(const MonomialP& input) {
     unsigned int result = 0;
     int numCycles = MathRoutines::Minimum(input.monBody.size, SomeRandomPrimesSize);
     for (int i = 0; i < numCycles; i ++) {
@@ -374,10 +374,10 @@ public:
     }
     return result;
   }
-  inline void MultiplyBy(const MonomialP& other) {
+  void MultiplyBy(const MonomialP& other) {
     this->operator*=(other);
   }
-  inline void DivideBy(const MonomialP& other) {
+  void DivideBy(const MonomialP& other) {
     this->operator/=(other);
   }
   bool IsLinear() const {
@@ -479,7 +479,7 @@ public:
     }
     return true;
   }
-  inline int GetMinNumVars() const {
+  int GetMinNumVars() const {
     return this->monBody.size;
   }
   void Invert() {
@@ -539,7 +539,7 @@ public:
     return true;
   }
   void Resize(int r, int c, bool PReserveValues, const coefficient* TheRingZero = 0);
-  inline static std::string GetXMLClassName() {
+  static std::string GetXMLClassName() {
     std::string result = "Matrix_";
     result.append(coefficient::GetXMLClassName());
     return result;
@@ -809,7 +809,7 @@ public:
   }
   void ActOnMonomialAsDifferentialOperator(const MonomialP& input, Polynomial<Rational>& output);
   void SwitchTwoRows(int row1, int row2);
-  inline void SwitchTwoRowsWithCarbonCopy(int row1, int row2, Matrix<coefficient>* theCarbonCopy) {
+  void SwitchTwoRowsWithCarbonCopy(int row1, int row2, Matrix<coefficient>* theCarbonCopy) {
     this->SwitchTwoRows(row1, row2);
     if (theCarbonCopy != 0) {
       theCarbonCopy->SwitchTwoRows(row1, row2);
@@ -823,7 +823,7 @@ public:
     }
   }
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
-  inline coefficient ScalarProduct(const Vector<coefficient>& left, const Vector<coefficient>& right) {
+  coefficient ScalarProduct(const Vector<coefficient>& left, const Vector<coefficient>& right) {
     return this->ScalarProduct(left, right, (coefficient) 0);
   }
   coefficient ScalarProduct(
@@ -844,7 +844,7 @@ public:
     }
     return Result;
   }
-  inline coefficient& operator()(int i, int j) const {
+  coefficient& operator()(int i, int j) const {
     if (i < 0 || i >= this->NumRows || j < 0 || j >= this->NumCols) {
       crash << "This is a programming error: requesting row, column indexed by "
       << i + 1 << " and " << j + 1 << " but I am a matrix with "
@@ -901,14 +901,14 @@ public:
     this->Transpose();
   }
   void RowTimesScalar(int rowIndex, const coefficient& scalar);
-  inline void RowTimesScalarWithCarbonCopy(int rowIndex, const coefficient& scalar, Matrix<coefficient>* theCarbonCopy) {
+  void RowTimesScalarWithCarbonCopy(int rowIndex, const coefficient& scalar, Matrix<coefficient>* theCarbonCopy) {
     this->RowTimesScalar(rowIndex, scalar);
     if (theCarbonCopy != 0) {
       theCarbonCopy->RowTimesScalar(rowIndex, scalar);
     }
   }
   void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar);
-  inline void AddTwoRowsWithCarbonCopy(
+  void AddTwoRowsWithCarbonCopy(
     int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar, Matrix<coefficient>* theCarbonCopy
   ) {
     this->AddTwoRows(fromRowIndex, ToRowIndex, StartColIndex, scalar);
@@ -917,7 +917,7 @@ public:
     }
   }
   void SubtractRows(int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const coefficient& scalar);
-  inline void SubtractRowsWithCarbonCopy(
+  void SubtractRowsWithCarbonCopy(
     int indexRowWeSubtractFrom,
     int indexSubtracted,
     int StartColIndex,
@@ -1039,7 +1039,7 @@ public:
     }
   }
   void DirectSumWith(const Matrix<coefficient>& m2, const coefficient& theRingZero = 0);
-  inline bool operator!=(const Matrix<coefficient>& other) const {
+  bool operator!=(const Matrix<coefficient>& other) const {
     return !((*this) == other);
   }
   bool operator==(const Matrix<coefficient>& other) const {
@@ -1284,7 +1284,7 @@ public:
 };
 
 template <typename Element>
-inline void Matrix<Element>::Resize(int r, int c, bool PReserveValues, const Element* const TheRingZero) {
+void Matrix<Element>::Resize(int r, int c, bool PReserveValues, const Element* const TheRingZero) {
   if (r < 0) {
     r = 0;
   }
@@ -1402,7 +1402,7 @@ bool Vectors<coefficient>::ComputeNormal(Vector<coefficient>& output, int inputD
 }
 
 template <typename Element>
-inline void Matrix<Element>::operator=(const Matrix<Element>& m) {
+void Matrix<Element>::operator=(const Matrix<Element>& m) {
   if (this == &m) {
     return;
   }
@@ -1415,7 +1415,7 @@ inline void Matrix<Element>::operator=(const Matrix<Element>& m) {
 }
 
 template <typename Element>
-inline void Matrix<Element>::ReleaseMemory() {
+void Matrix<Element>::ReleaseMemory() {
   for (int i = 0; i < this->ActualNumRows; i ++) {
     delete [] this->elements[i];
   }
@@ -1660,7 +1660,7 @@ void Matrix<Element>::DirectSumWith(const Matrix<Element>& m2, const Element& th
 }
 
 template <typename Element>
-inline int Matrix<Element>::FindPivot(int columnIndex, int RowStartIndex) {
+int Matrix<Element>::FindPivot(int columnIndex, int RowStartIndex) {
   for (int i = RowStartIndex; i < this->NumRows; i ++) {
     if (!this->elements[i][columnIndex].IsEqualToZero()) {
       return i;
@@ -1670,7 +1670,7 @@ inline int Matrix<Element>::FindPivot(int columnIndex, int RowStartIndex) {
 }
 
 template <typename Element>
-inline void Matrix<Element>::SubtractRows(
+void Matrix<Element>::SubtractRows(
   int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const Element& scalar
 ) {
   Element tempElement;
@@ -1682,14 +1682,14 @@ inline void Matrix<Element>::SubtractRows(
 }
 
 template <typename Element>
-inline void Matrix<Element>::RowTimesScalar(int rowIndex, const Element& scalar) {
+void Matrix<Element>::RowTimesScalar(int rowIndex, const Element& scalar) {
   for (int i = 0; i < this->NumCols; i ++) {
     this->elements[rowIndex][i] *= scalar;
   }
 }
 
 template <typename Element>
-inline void Matrix<Element>::SwitchTwoRows(int row1, int row2) {
+void Matrix<Element>::SwitchTwoRows(int row1, int row2) {
   if (row1 == row2) {
     return;
   }
@@ -1785,7 +1785,7 @@ void Matrix<Element>::GaussianEliminationByRowsNoRowSwapPivotPointsByRows(
 }
 
 template <typename Element>
-inline void Matrix<Element>::MakeZero(const Element& theRingZero) {
+void Matrix<Element>::MakeZero(const Element& theRingZero) {
   for (int i = 0; i < this->NumRows; i ++) {
     for (int j = 0; j < this->NumCols; j ++) {
       this->elements[i][j] = theRingZero;
@@ -1794,7 +1794,7 @@ inline void Matrix<Element>::MakeZero(const Element& theRingZero) {
 }
 
 template <typename Element>
-inline void Matrix<Element>::MakeID(const Matrix<Element>& prototype, const Element& theRingZero, const Element& theRingOne) {
+void Matrix<Element>::MakeID(const Matrix<Element>& prototype, const Element& theRingZero, const Element& theRingOne) {
   this->init(prototype.NumRows, prototype.NumCols);
   for (int i = 0; i < this->NumRows; i ++) {
     for (int j = 0; j < this->NumCols; j ++) {
@@ -1961,13 +1961,13 @@ public:
   bool NeedsParenthesisForMultiplication() const {
     return this->size() > 1;
   }
-  inline static std::string GetXMLClassName() {
+  static std::string GetXMLClassName() {
     std::string result = "MonomialCollection_";
     result.append(templateMonomial::GetXMLClassName());
     return result;
   }
   std::string ToString(FormatExpressions* theFormat = 0) const;
-  inline int size() const {
+  int size() const {
     return this->theMonomials.size;
   }
   //BIG FAT WARNING
@@ -2003,7 +2003,7 @@ public:
     this->theMonomials.RemoveIndexSwapWithLast(index);
     this->theCoeffs.RemoveIndexSwapWithLast(index);
   }
-  inline int HashFunction() const {
+  int HashFunction() const {
     return this->HashFunction(*this);
   }
   coefficient GetCoefficientsSum() const {
@@ -2326,7 +2326,7 @@ public:
     this->theMonomials.Clear();
     this->theCoeffs.SetSize(0);
   }
-  inline int GetMinNumVars() const {
+  int GetMinNumVars() const {
     int result = 0;
     for (int i = 0; i < this->size(); i ++) {
       result = MathRoutines::Maximum(result, (*this)[i].GetMinNumVars());
@@ -2353,7 +2353,7 @@ public:
     }
   }
   bool ReadFromFile(std::fstream& input);
-  inline bool operator!=(const MonomialCollection<templateMonomial, coefficient>& other) const {
+  bool operator!=(const MonomialCollection<templateMonomial, coefficient>& other) const {
     return !(*this == other);
   }
   bool operator==(const MonomialCollection<templateMonomial, coefficient>& other) const;
@@ -2364,7 +2364,7 @@ public:
     result *= other;
     return result;
   }
-//  inline void operator+=(const templateMonomial& m)
+//  void operator+=(const templateMonomial& m)
 //  { this->AddMonomial(m, 1);
 //  }
   MonomialCollection<templateMonomial, coefficient> operator-(
@@ -2389,25 +2389,25 @@ public:
   void MakeOne() {
     this->MakeConst(1);
   }
-  inline void operator+=(const int& other) {
+  void operator+=(const int& other) {
     templateMonomial tempM;
     coefficient theCF = other;
     tempM.MakeOne();
     this->AddMonomial(tempM, theCF);
   }
 
-  inline void operator+=(const coefficient& other) {
+  void operator+=(const coefficient& other) {
     templateMonomial tempM;
     tempM.MakeOne();
     this->AddMonomial(tempM, other);
   }
-  inline void operator+=(const templateMonomial& other) {
+  void operator+=(const templateMonomial& other) {
     this->AddMonomial(other, 1);
   }
-  inline void operator-=(const templateMonomial& other) {
+  void operator-=(const templateMonomial& other) {
     this->SubtractMonomial(other, 1);
   }
-  inline void operator-=(const coefficient& other) {
+  void operator-=(const coefficient& other) {
     templateMonomial tempM;
     tempM.MakeOne();
     this->SubtractMonomial(tempM, other);
@@ -2423,7 +2423,7 @@ public:
   void operator-=(const MonomialCollection<templateMonomial, coefficient>& other) {
     this->SubtractOtherTimesCoeff(other);
   }
-  inline void SubtractOtherTimesCoeff(const MonomialCollection<templateMonomial, coefficient>& other, coefficient* inputcf = 0);
+  void SubtractOtherTimesCoeff(const MonomialCollection<templateMonomial, coefficient>& other, coefficient* inputcf = 0);
   template <class otherType>
   void operator/=(const otherType& other) {
     if (other == 0) {
@@ -2437,7 +2437,7 @@ public:
     }
   }
   template <class otherType>
-  inline void operator*=(const otherType& other) {
+  void operator*=(const otherType& other) {
     for (int i = 0; i < this->theCoeffs.size; i ++) {
       this->theCoeffs[i] *= other;
       if (i == 0) {
@@ -2449,7 +2449,7 @@ public:
       }
     }
   }
-  inline const templateMonomial& operator[](int theIndex) const {
+  const templateMonomial& operator[](int theIndex) const {
     return this->theMonomials[theIndex];
   }
   void operator=(const templateMonomial& other) {
@@ -2481,7 +2481,7 @@ class MonomialVector {
   unsigned int HashFunction() const {
     return (unsigned) this->theIndex;
   }
-  static inline unsigned int HashFunction(const MonomialVector& input) {
+  static unsigned int HashFunction(const MonomialVector& input) {
     return input.HashFunction();
   }
   bool operator==(const MonomialVector& other) const {
@@ -2490,7 +2490,7 @@ class MonomialVector {
   void MakeEi(int inputIndex) {
     this->theIndex = inputIndex;
   }
-  inline static bool IsMonEqualToZero() {
+  static bool IsMonEqualToZero() {
     return false;
   }
   bool operator>(const MonomialVector& other) const {
@@ -2546,7 +2546,7 @@ class ElementMonomialAlgebra: public MonomialCollection<templateMonomial, coeffi
     templateMonomial bufferMon;
     this->MultiplyBy(other, *this, bufferPoly, bufferMon);
   }
-  inline void operator*=(const coefficient& other) {
+  void operator*=(const coefficient& other) {
     this->::MonomialCollection<templateMonomial, coefficient>::operator*=(other);
   }
   void RaiseToPower(int d, ElementMonomialAlgebra<templateMonomial, coefficient>& output, const coefficient& theRingUniT);
@@ -2729,7 +2729,7 @@ public:
   }
   void ShiftVariableIndicesToTheRight(int VarIndexShift);
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
-  inline void SetDynamicSubtype(int newNumVars) {
+  void SetDynamicSubtype(int newNumVars) {
     this->SetNumVariablesSubDeletedVarsByOne(newNumVars);
   }
   int GetHighestIndexSuchThatHigherIndexVarsDontParticipate() {
@@ -2831,7 +2831,7 @@ public:
     theOne.MakeOne(this->GetMinNumVars());
     MathRoutines::RaiseToPower(*this, d, theOne);
   }
-  inline bool GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot) {
+  bool GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot) {
     return this->IsLinearGetRootConstantTermLastCoordinate(outputRoot);
   }
   Matrix<coefficient> EvaluateUnivariatePoly(const Matrix<coefficient>& input);//<-for univariate polynomials only
@@ -2996,7 +2996,7 @@ public:
     this->::MonomialCollection<MonomialP, coefficient>::operator/= (other);
   }
   template <class otherType>
-  inline void operator*=(const otherType& other) {
+  void operator*=(const otherType& other) {
     this->::MonomialCollection<MonomialP, coefficient>::operator*= (other);
   }
   void operator=(const Polynomial<coefficient>& other) {
@@ -3443,18 +3443,18 @@ public:
         return (unsigned) - 1;
     }
   }
-  static inline unsigned int HashFunction(const RationalFunctionOld& input) {
+  static unsigned int HashFunction(const RationalFunctionOld& input) {
     return input.HashFunction();
   }
-  inline void operator=(int other) {
+  void operator=(int other) {
     this->MakeConst(other);
   }
-  inline void operator=(const Rational& other) {
+  void operator=(const Rational& other) {
     this->MakeConst(other);
   }
   void operator=(const RationalFunctionOld& other);
   bool checkConsistency() const;
-  inline void SetNumVariables(int GoalNumVars) {
+  void SetNumVariables(int GoalNumVars) {
     this->SetNumVariablesSubDeletedVarsByOne(GoalNumVars);
   }
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
@@ -3496,17 +3496,17 @@ public:
     *this += tempOther;
   }
   void operator+=(const RationalFunctionOld& other);
-  inline bool operator==(int other) const {
+  bool operator==(int other) const {
     if (other == 0) {
       return this->IsEqualToZero();
     } else {
       return this->expressionType == this->typeRational && (this->ratValue == other);
     }
   }
-  inline bool operator!=(int other) {
+  bool operator!=(int other) {
     return !(this->operator==(other));
   }
-  inline bool operator==(const RationalFunctionOld& other) const {
+  bool operator==(const RationalFunctionOld& other) const {
     return this->IsEqualTo(other);
   }
   void Simplify();
@@ -3552,7 +3552,7 @@ public:
         return false;
     }
   }
-  inline void TimesConstant(const Rational& theConst) {
+  void TimesConstant(const Rational& theConst) {
     this->operator*=(theConst);
   }
   void Invert();
@@ -3614,7 +3614,7 @@ public:
   static void gcd(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output);
   static void lcm(const Polynomial<Rational>& left, const Polynomial<Rational>& right,
   Polynomial<Rational>& output);
-  inline void operator-=(int other) {
+  void operator-=(int other) {
     *this -= (Rational) other;
   }
   void operator-=(const Rational& other);
@@ -4134,7 +4134,7 @@ public:
   void init();
   static Vector<Rational> GetCheckSumRoot(int NumVars);
   unsigned int HashFunction() const;
-  static inline unsigned int HashFunction(const oneFracWithMultiplicitiesAndElongations& input) {
+  static unsigned int HashFunction(const oneFracWithMultiplicitiesAndElongations& input) {
     return input.HashFunction();
   }
   void ComputeOneCheckSum(Rational& output, const Vector<Rational>& theExp, int theDimension);
@@ -4313,7 +4313,7 @@ class CompleX {
       this->Re<CompleX<coefficient>::EqualityPrecision && - this->Re<CompleX<coefficient>::EqualityPrecision;
     }
   }
-  inline void Minus() {
+  void Minus() {
     this->Im = - this->Im;
     this->Re = - this->Re;
   }
@@ -4676,7 +4676,7 @@ void Matrix<coefficient>::GetMaxMovementAndLeavingVariableRow(
 }
 
 template <typename coefficient>
-inline void Matrix<coefficient>::ActOnMonomialAsDifferentialOperator(
+void Matrix<coefficient>::ActOnMonomialAsDifferentialOperator(
   const MonomialP& input, Polynomial<Rational>& output
 ) {
   if (this->NumRows != this->NumCols) {
@@ -5310,7 +5310,7 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
 class Lattice {
   void TestGaussianEliminationEuclideanDomainRationals(Matrix<Rational>& output);
 public:
-  inline static const std::string GetXMLClassName() {
+  static const std::string GetXMLClassName() {
     return "Lattice";
   }
   Matrix<Rational> basisRationalForm;
@@ -5418,7 +5418,7 @@ public:
 
 class QuasiPolynomial {
 public:
-  inline static std::string GetXMLClassName() {
+  static std::string GetXMLClassName() {
     return "Quasipolynomial";
   }
   int GetNumVars() const {
@@ -5609,7 +5609,7 @@ public:
   bool AreEqual(PartFraction& p);
   bool IsReduced();
   unsigned int HashFunction() const;
-  static inline unsigned int HashFunction(const PartFraction& input) {
+  static unsigned int HashFunction(const PartFraction& input) {
     return input.HashFunction();
   }
   int MultiplyByOneFrac(oneFracWithMultiplicitiesAndElongations& f);
@@ -5686,7 +5686,7 @@ class Cone {
     return output;
   }
 public:
-  inline static const std::string GetXMLClassName() {
+  static const std::string GetXMLClassName() {
     return "Cone";
   }
   bool flagIsTheZeroCone;
@@ -5787,7 +5787,7 @@ public:
   unsigned int HashFunction() const {
     return this->Vertices.HashFunction();
   }
-  static inline unsigned int HashFunction(const Cone& input) {
+  static unsigned int HashFunction(const Cone& input) {
     return input.HashFunction();
   }
   bool ProduceNormalFromTwoNormalsAndSlicingDirection(
@@ -5829,7 +5829,7 @@ public:
 
 class ConeLatticeAndShift {
   public:
-  inline static std::string GetXMLClassName() {
+  static std::string GetXMLClassName() {
     return "ConeLatticeShift";
   }
   Cone theProjectivizedCone;
@@ -6165,7 +6165,7 @@ class DynkinSimpleType {
   unsigned int HashFunction() const {
     return this->HashFunction(*this);
   }
-  inline bool IsMonEqualToZero() const {
+  bool IsMonEqualToZero() const {
     return false;
   }
   void GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational>& output, int AutoIndex) const;
@@ -6197,7 +6197,7 @@ class DynkinSimpleType {
   void operator++(int);
   bool operator>(const DynkinSimpleType& other) const;
   static void GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output);
-  inline bool operator<(const DynkinSimpleType& other) const {
+  bool operator<(const DynkinSimpleType& other) const {
     return other > *this;
   }
   bool operator<(int otherRank) const;
@@ -6402,10 +6402,10 @@ public:
 template <class coefficient>
 class ElementWeylAlgebra : public MonomialCollection<MonomialWeylAlgebra, coefficient> {
 public:
-  unsigned inline int HashFunction() const {
+  unsigned int HashFunction() const {
     return this->::MonomialCollection<MonomialWeylAlgebra, coefficient>::HashFunction();
   }
-  static inline unsigned int HashFunction(const ElementWeylAlgebra& input) {
+  static unsigned int HashFunction(const ElementWeylAlgebra& input) {
     return input.HashFunction();
   }
   void MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars);
@@ -6457,7 +6457,7 @@ public:
     }
   }
   void operator=(const std::string& input);
-  inline void operator*=(const coefficient& other) {
+  void operator*=(const coefficient& other) {
     this->MonomialCollection<MonomialWeylAlgebra, coefficient>::operator*=(other);
   }
   void operator*=(const ElementWeylAlgebra& other);
@@ -6502,7 +6502,7 @@ public:
   unsigned int HashFunction() const {
     return this->Waypoints.HashFunction();
   }
-  static inline unsigned int HashFunction(const LittelmannPath& input) {
+  static unsigned int HashFunction(const LittelmannPath& input) {
     return input.HashFunction();
   }
   bool IsEqualToZero() const {
@@ -6519,7 +6519,7 @@ public:
 
 class ConeLatticeAndShiftMaxComputation {
 public:
-  inline static const std::string GetXMLClassName() {
+  static const std::string GetXMLClassName() {
     return "ConeLatticeAndShiftMaxComputation";
   }
   int numNonParaM;
@@ -6575,7 +6575,7 @@ class PiecewiseQuasipolynomial {
   int GetNumVars() {
     return this->NumVariables;
   }
-  inline void MakeCommonRefinement(const PiecewiseQuasipolynomial& other) {
+  void MakeCommonRefinement(const PiecewiseQuasipolynomial& other) {
     this->MakeCommonRefinement(other.theProjectivizedComplex);
   }
   bool CheckConsistency() const {
@@ -6644,7 +6644,7 @@ class MonomialMatrix {
   static unsigned int HashFunction(const MonomialMatrix& input) {
     return input.vIndex * SomeRandomPrimes[0] + input.dualIndex * SomeRandomPrimes[1] + input.IsId;
   }
-  inline unsigned int HashFunction() const {
+  unsigned int HashFunction() const {
     return HashFunction(*this);
   }
   bool operator>(const MonomialMatrix& other) const {
@@ -6974,10 +6974,10 @@ public:
     }
     inputOutput = output;
   }
-  inline unsigned int HashFunction() const {
+  unsigned int HashFunction() const {
     return this->::MonomialCollection<MonomialMatrix, coefficient>::HashFunction();
   }
-  static inline unsigned int HashFunction(const MatrixTensor<coefficient>& input) {
+  static unsigned int HashFunction(const MatrixTensor<coefficient>& input) {
     return input.HashFunction();
   }
   template<class otherClass>
@@ -7101,7 +7101,7 @@ class MonomialGeneralizedVerma {
   unsigned int HashFunction() const {
     return this->indexFDVector * SomeRandomPrimes[0] + ((unsigned int) (uintptr_t) this->owner) * SomeRandomPrimes[1];
   }
-  static inline unsigned int HashFunction(const MonomialGeneralizedVerma<coefficient>& input) {
+  static unsigned int HashFunction(const MonomialGeneralizedVerma<coefficient>& input) {
     return input.HashFunction();
   }
   bool operator>(const MonomialGeneralizedVerma<coefficient>& other) {
@@ -7160,7 +7160,7 @@ public:
     return theAnswer;
   }
   bool ExtractElementUE(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebra& theOwner);
-  inline void operator=(const ElementSumGeneralizedVermas<coefficient>& other) {
+  void operator=(const ElementSumGeneralizedVermas<coefficient>& other) {
     this->::MonomialCollection<MonomialGeneralizedVerma<coefficient>, coefficient>::operator=(other);
   }
 };

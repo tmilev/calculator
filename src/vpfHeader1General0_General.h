@@ -572,17 +572,17 @@ public:
     }
     return - 1;
   }
-  inline bool Contains(const Object& o) {
+  bool Contains(const Object& o) {
     return this->IndexInList(o) != - 1;
   }
   void SetSize(int theSize);
-  inline void initializeFillInObject(int theSize, const Object& o) {
+  void initializeFillInObject(int theSize, const Object& o) {
     this->SetSize(theSize);
     for (int i = 0; i < this->size; i ++) {
       this->TheObjects[i] = o;
     }
   }
-  inline Object& operator[](int i) const {
+  Object& operator[](int i) const {
     return this->TheObjects[i];
   }
   void operator=(const ListLight<Object>& right);
@@ -592,7 +592,7 @@ public:
       this->TheObjects[i] = right[i];
     }
   }
-  inline bool operator== (const ListLight<Object>& right) const {
+  bool operator== (const ListLight<Object>& right) const {
     if (this->size != right.size) {
       return false;
     }
@@ -603,7 +603,7 @@ public:
     }
     return true;
   }
-  inline Object* LastObject() const {
+  Object* LastObject() const {
     return &this->TheObjects[this->size - 1];
   }
   ListLight();
@@ -623,12 +623,12 @@ void ListLight<Object>::PopIndexSwapWithLastLight(int index) {
 }
 
 template <class Object>
-inline void ListLight<Object>::operator=(const ListLight<Object>& right) {
+void ListLight<Object>::operator=(const ListLight<Object>& right) {
   this->CopyFromLight(right);
 }
 
 template <class Object>
-inline void ListLight<Object>::SetSize(int theSize) {
+void ListLight<Object>::SetSize(int theSize) {
   if (theSize == this->size) {
     return;
   }
@@ -750,7 +750,7 @@ private:
     int BottomIndex, int TopIndex, compareClass& theCompareror, List<carbonCopyType>* carbonCopy
   );
   void QuickSortDescending(int BottomIndex, int TopIndex);
-  inline void initConstructorCallOnly() {
+  void initConstructorCallOnly() {
     this->TheObjects = 0;
     this->ActualSize = 0;
     this->size = 0;
@@ -783,13 +783,13 @@ public:
     }
     return true;
   }
-  inline static std::string GetXMLClassName() {
+  static std::string GetXMLClassName() {
     std::string result = "List_";
     result.append(Object::GetXMLClassName());
     return result;
   }
 //  void AddOnTop(Object o);
-  inline int GetNewSizeRelativeToExpectedSize(int expectedSize) const {
+  int GetNewSizeRelativeToExpectedSize(int expectedSize) const {
     // <-Registering stack trace forbidden! Multithreading deadlock alert.
     if (expectedSize == 1) {
       return 1;
@@ -821,7 +821,7 @@ public:
     }
   }
   void initializeFillInObject(int theSize, const Object& o);
-  inline void AddObjectOnTopCreateNew();
+  void AddObjectOnTopCreateNew();
   void Reserve(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void SortedInsert(const Object& o) {
     this->BSInsert(o); //fixed :) now all this function does is throw away the return value
@@ -1076,9 +1076,9 @@ public:
   }
   bool ReadFromFile(std::fstream& input, int UpperLimitForDebugPurposes = - 1);
   void WriteToFile(std::fstream& output, int UpperLimitForDebugPurposes = - 1) const;
-//  inline bool Contains(Object& o){return this->Contains(o) != - 1; };
+//  bool Contains(Object& o){return this->Contains(o) != - 1; };
   int SizeWithoutObjects() const;
-  inline Object* LastObject() const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
+  Object* LastObject() const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void ReleaseMemory();
 
   unsigned int HashFunction() const {
@@ -1089,7 +1089,7 @@ public:
     }
     return result;
   }
-  static inline unsigned int HashFunction(const List<Object>& input) {
+  static unsigned int HashFunction(const List<Object>& input) {
     return input.HashFunction();
   }
   void IntersectWith(const List<Object>& other, List<Object>& output) const;
@@ -1142,7 +1142,7 @@ public:
     }
     return this->TheObjects[i];
   }
-  inline bool operator!=(const List<Object>& other) const {
+  bool operator!=(const List<Object>& other) const {
     return !this->IsEqualTo(other);
   }
   bool operator==(const std::string& other) {
@@ -1156,7 +1156,7 @@ public:
     }
     return true;
   }
-  inline bool operator==(const List<Object>& other) const {
+  bool operator==(const List<Object>& other) const {
     return this->IsEqualTo(other);
   }
   bool operator>(const List<Object>& other) const;
@@ -1251,12 +1251,12 @@ private:
 protected:
   List<List<int> > TheHashedArrays;
 public:
-  inline static std::string GetXMLClassName() {
+  static std::string GetXMLClassName() {
     std::string result = "HashedList_";
     result.append(Object::GetXMLClassName());
     return result;
   }
-  inline unsigned int GetHash(const Object& input) const {
+  unsigned int GetHash(const Object& input) const {
     unsigned int result = hashFunction(input);
     result %= this->TheHashedArrays.size; // how did TheHashedArrays.size == 0?
     if (result < 0) {
@@ -1363,7 +1363,7 @@ public:
     this->AddOnTop(o);
     return this->size - 1;
   }
-  inline void AdjustHashes() {
+  void AdjustHashes() {
     this->SetExpectedSize(this->size);
   }
   void AddOnTopNoRepetition(const List<Object>& theList) {
@@ -1454,10 +1454,10 @@ public:
     this->TheHashedArrays[i1Hash].AddOnTop(i2);
     this->TheHashedArrays[i2Hash].AddOnTop(i1);
   }
-  inline bool Contains(const Object& o) const {
+  bool Contains(const Object& o) const {
     return this->GetIndex(o) != - 1;
   }
-  inline bool Contains(const List<Object>& theList) const {
+  bool Contains(const List<Object>& theList) const {
     for (int i = 0; i < theList.size; i ++) {
       if (this->GetIndex(theList[i]) == - 1) {
         return false;
@@ -1480,7 +1480,7 @@ public:
     }
     return - 1;
   }
-  inline int GetIndexIMustContainTheObject(const Object& o) const {
+  int GetIndexIMustContainTheObject(const Object& o) const {
     int result = this->GetIndex(o);
     if (result == - 1) {
       std::stringstream errorStream;
@@ -1507,10 +1507,10 @@ public:
     }
   }
 
-  inline bool IsSparseRelativeToExpectedSize(int expectedSize) const {
+  bool IsSparseRelativeToExpectedSize(int expectedSize) const {
     return expectedSize * 3 < this->TheHashedArrays.size;
   }
-  inline bool IsSparse() const {
+  bool IsSparse() const {
     return this->IsSparseRelativeToExpectedSize(this->size);
   }
   void SetExpectedSize(int expectedSize) {
@@ -1613,31 +1613,31 @@ public:
     this->operator=(other);
   }
   HashedList(){}
-  inline void operator=(const HashedList& other) {
+  void operator=(const HashedList& other) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(other);
   }
-  inline void operator=(const List<Object>& other) {
+  void operator=(const List<Object>& other) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(other);
   }
   //Note The following function specializations are declared entirely in order to
   //facilitate autocomplete in my current IDE. If I find a better autocompletion
   //IDE the following should be removed.
-  inline void AddOnTopNoRepetition(const List<Object>& theList) {
+  void AddOnTopNoRepetition(const List<Object>& theList) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTopNoRepetition(theList);
   }
-  inline bool AddOnTopNoRepetition(const Object& o) {
+  bool AddOnTopNoRepetition(const Object& o) {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTopNoRepetition(o);
   }
-  inline void AddOnTop(const Object& o) {
+  void AddOnTop(const Object& o) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTop(o);
   }
-  inline void AddOnTop(const List<Object>& theList) {
+  void AddOnTop(const List<Object>& theList) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTop(theList);
   }
-  inline bool Contains(const Object& o) const {
+  bool Contains(const Object& o) const {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::Contains(o);
   }
-  inline bool Contains(const List<Object>& theList) const {
+  bool Contains(const List<Object>& theList) const {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::Contains(theList);
   }
   Object& GetElement(int theObjectIndex) const {
@@ -1655,21 +1655,21 @@ public:
   int GetIndex(const Object& o) const {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::GetIndex(o);
   }
-  inline int GetIndexIMustContainTheObject(const Object& o) const {
+  int GetIndexIMustContainTheObject(const Object& o) const {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::GetIndexIMustContainTheObject(o);
   }
-  inline int AddNoRepetitionOrReturnIndexFirst(const Object& o) {
+  int AddNoRepetitionOrReturnIndexFirst(const Object& o) {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::AddNoRepetitionOrReturnIndexFirst(o);
   }
   template <typename otherType = int>
-  inline void QuickSortAscending(typename List<Object>::OrderLeftGreaterThanRight theOrder = 0, List<otherType>* carbonCopy = 0) {
+  void QuickSortAscending(typename List<Object>::OrderLeftGreaterThanRight theOrder = 0, List<otherType>* carbonCopy = 0) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortAscending(theOrder, carbonCopy);
   }
   template <typename otherType = int>
-  inline void QuickSortDescending(typename List<Object>::OrderLeftGreaterThanRight theOrder = 0, List<otherType>* carbonCopy = 0) {
+  void QuickSortDescending(typename List<Object>::OrderLeftGreaterThanRight theOrder = 0, List<otherType>* carbonCopy = 0) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortDescending(theOrder, carbonCopy);
   }
-  inline void SetExpectedSize(int expectedSize) {
+  void SetExpectedSize(int expectedSize) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::SetExpectedSize(expectedSize);
   }
 };
@@ -1978,7 +1978,7 @@ bool List<Object>::AddOnTopNoRepetition(const Object& o) {
 }
 
 template <class Object>
-inline Object* List<Object>::LastObject() const {
+Object* List<Object>::LastObject() const {
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->size <= 0) {
     crash << "This is a programming error: trying to fetch the last object of an array with "
@@ -2079,7 +2079,7 @@ std::string List<Object>::ToStringCommaDelimited(FormatExpressions* theFormat) c
 }
 
 template <class Object>
-inline void List<Object>::AddObjectOnTopCreateNew() {
+void List<Object>::AddObjectOnTopCreateNew() {
   this->SetSize(this->size + 1);
 }
 

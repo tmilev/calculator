@@ -3084,7 +3084,7 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
     tempM.monBody[0] = 1;
     this->SetSize(direction.size);
     for (int i = 0; i < this->size; i ++) {
-      this->TheObjects[i].MakeZero(1);
+      this->TheObjects[i].MakeZero();
       this->TheObjects[i].AddMonomial(tempM,direction.TheObjects[i]);
     }
   }

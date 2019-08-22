@@ -231,10 +231,10 @@ public:
   FiniteGroup(): flagDeallocated(false) {
     this->init();
   }
-  virtual ~FiniteGroup() {
+  ~FiniteGroup() {
     this->flagDeallocated = true;
   }
-  virtual void InitGenerators() {
+  void InitGenerators() {
   }
   bool CheckConsistency() const {
     if (this->flagDeallocated) {
@@ -252,7 +252,14 @@ public:
     this->sizePrivate = inputSize;
   }
   void init();
-  std::string ToString(FormatExpressions* theFormat = 0);
+  std::string ToString(FormatExpressions* theFormat = 0){
+    std::stringstream out;
+    out << this->ToStringElements(theFormat);
+    if (this->flagCCRepresentativesComputed) {
+      out << this->ToStringConjugacyClasses(theFormat);
+    }
+    return out.str();
+  }
   std::string ToStringElements(FormatExpressions* theFormat = 0) const;
   std::string ToStringConjugacyClasses(FormatExpressions* theFormat = 0);
   int ConjugacyClassCount() const;
@@ -2378,16 +2385,6 @@ std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p) 
   tempFormat.polyAlphabeT.SetSize(1);
   tempFormat.polyAlphabeT[0] = "q";
   return out << p.ToString(&tempFormat);
-}
-
-template <class elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat) {
-  std::stringstream out;
-  out << this->ToStringElements(theFormat);
-  if (this->flagCCRepresentativesComputed) {
-    out << this->ToStringConjugacyClasses(theFormat);
-  }
-  return out.str();
 }
 
 template <typename elementSomeGroup>

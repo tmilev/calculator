@@ -43,7 +43,7 @@ struct GraphEdge {
   unsigned int HashFunction() const {
     return vStart + vEnd * SomeRandomPrimes[0];
   }
-  inline static bool IsMonEqualToZero() {
+  static bool IsMonEqualToZero() {
     return false;
   }
   bool operator==(const GraphEdge& other) const {

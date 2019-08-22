@@ -4,10 +4,10 @@
 #define vpfSymmetricGroupsAndGeneralizationsHeader_alreadyIncluded
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math0_General.h"
+#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfHeader2Math8_VectorSpace.h"
 #include "vpfHeader2Math4_Graph.h"
 #include "vpfHeader2Math3_FiniteGroups.h"
-
 
 static ProjectInformationInstance ProjectInfoVpfSymmetricGroups(
   __FILE__, "Header file, symmetric and related groups. Work in progress."
@@ -310,7 +310,6 @@ class TrivialOuterAutomorphism {
   }
 };
 
-
 // see operator* for how this is supposed to work
 template <typename helt, typename kelt, typename oa>
 class SemidirectProductElement {
@@ -444,7 +443,7 @@ void SemidirectProductGroup<hg, kg, helt, kelt, oa>::init(hg* inH, kg* inK) {
     this->generators[i].h = this->H.generators[i];
     this->generators[i].k = this->K.MakeID();
   }
-  for (; i < this->H.generators.size +this->K.generators.size; i ++) {
+  for (; i < this->H.generators.size + this->K.generators.size; i ++) {
     this->generators[i].h = this->H.MakeID();
     this->generators[i].k = this->K.generators[i-this->H.generators.size];
   }
@@ -635,7 +634,7 @@ public:
   }
 };
 
-typedef SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism> ElementHyperoctahedralGroupR2;
+typedef SemidirectProductElement<PermutationR2, ElementZ2N, HyperoctahedralBitsAutomorphism> ElementHyperoctahedralGroupR2;
 
 template <>
 void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in);
@@ -681,7 +680,7 @@ public:
     const Partition& negative,
     GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>& out
   );
-  bool operator== (const HyperoctahedralGroupData& other) const {
+  bool operator==(const HyperoctahedralGroupData& other) const {
     if (!this->flagIsEntireHyperoctahedralGroup || !other.flagIsEntireHyperoctahedralGroup) {
       return false;
     }

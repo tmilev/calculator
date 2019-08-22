@@ -1,6 +1,7 @@
-#include "vpfImplementationHeader2Math0_General.h"
-#include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
+#include "vpfImplementationHeader2Math0_General.h"
+#include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
+#include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 
 ProjectInformationInstance ProjectInfoVpf2Math3_SymmetricGroupsAndGeneralizations(
   __FILE__, "Symmetric groups and generalizations, work in progress by Thomas. "

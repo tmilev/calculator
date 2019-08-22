@@ -138,7 +138,9 @@ public:
   );
   void drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, const std::string& color, int fontSize);
   void drawTextAtVectorBufferDouble(const Vector<double>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
-  void drawCircleAtVectorBufferRational(const Vector<Rational>& input, const std::string& color, double radius, const std::string& frameId = "", int frameIndex = - 1);
+  void drawCircleAtVectorBufferRational(
+    const Vector<Rational>& input, const std::string& color, double radius, const std::string& frameId = "", int frameIndex = - 1
+  );
   void drawCircleAtVectorBufferDouble(const Vector<double>& input, const std::string& color, double radius);
   double getAngleFromXandY(double x, double y);
   void ScaleToUnitLength(Vector<double>& theRoot) {
@@ -261,8 +263,8 @@ public:
   std::string GetColorPsTricksFromColorIndex(int colorIndex);
   static bool GetColorIntFromColorString(const std::string& input, int& output);
   DrawOperations theBuffer;
-  inline int GetActualPenStyleFromFlagsAnd(int inputPenStyle);
-  inline int GetActualTextStyleFromFlagsAnd(int inputTextStyle);
+  int GetActualPenStyleFromFlagsAnd(int inputPenStyle);
+  int GetActualTextStyleFromFlagsAnd(int inputTextStyle);
 
   std::string GetHtmlDiv(int theDimension);
   std::string GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension);

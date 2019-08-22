@@ -15,8 +15,8 @@ public:
 
   static const int size = 8;
 
-  inline scalar& operator[](int i);
-  inline scalar operator[](int i) const;
+  scalar& operator[](int i);
+  scalar operator[](int i) const;
   bool operator!=(const PackedVector<scalar>& other) const;
   bool operator==(const PackedVector<scalar>& other) const;
   bool operator>(const PackedVector<scalar>& other) const;

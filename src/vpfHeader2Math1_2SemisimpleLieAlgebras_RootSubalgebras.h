@@ -80,7 +80,7 @@ public:
     }
     return result;
   }
-  static inline unsigned int HashFunction(const coneRelation& input) {
+  static unsigned int HashFunction(const coneRelation& input) {
     return input.HashFunction();
   }
   coneRelation() {

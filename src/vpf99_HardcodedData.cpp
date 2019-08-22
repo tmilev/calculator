@@ -1,13 +1,9 @@
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
+#include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfJson.h"
 
 static ProjectInformationInstance ProjectInfoVpfHardCodedLoader(__FILE__, "Hard-coded data loading");
-
-//template <>
-//unsigned int Polynomial<Rational>::HashFunction(const Polynomial<Rational>& input) {
-//  return input.HashFunction();
-//}
 
 void ElementWeylGroup::MakeFromReadableReflections(
   WeylGroupData& input, bool dontMakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK, const std::string& inputReflections

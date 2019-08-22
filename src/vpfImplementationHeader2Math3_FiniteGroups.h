@@ -4,6 +4,7 @@
 #define vpfImplementationHeaderFiniteGroupsIncluded
 
 #include "vpfHeader2Math3_FiniteGroups.h"
+#include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderFiniteGroups(__FILE__, "Implementation header, finite groups. ");
 
 template <class coefficient>
@@ -24,8 +25,9 @@ std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressio
 }
 
 template <typename elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::ComputeAllElements
-(bool andWords, int MaxElements) {
+bool FiniteGroup<elementSomeGroup>::ComputeAllElements(
+  bool andWords, int MaxElements
+) {
   MacroRegisterFunctionWithName("FiniteGroup::ComputeAllElements");
   this->CheckConsistency();
   //double startTimeDebug= theGlobalVariables.GetElapsedSeconds();

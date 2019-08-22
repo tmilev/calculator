@@ -48,13 +48,13 @@ class AlgebraicNumber {
   bool CheckNonZeroOwner() const;
   bool CheckCommonOwner(const AlgebraicNumber& other) const;
   unsigned int HashFunction() const;
-  static inline unsigned int HashFunction(const AlgebraicNumber& input) {
+  static unsigned int HashFunction(const AlgebraicNumber& input) {
     return input.HashFunction();
   }
-  inline LargeIntUnsigned GetNumerator() const {
+  LargeIntUnsigned GetNumerator() const {
     return this->theElT.FindGCDCoefficientNumeratorsOverRationals().GetNumerator().value;
   }
-  inline LargeIntUnsigned GetDenominator() const {
+  LargeIntUnsigned GetDenominator() const {
     return this->GetDenominatorRationalPart().GetDenominator();
   }
   bool IsPositive() {
@@ -120,10 +120,10 @@ class AlgebraicNumber {
     return *this == (Rational) other;
   }
 
-  inline bool operator!= (const AlgebraicNumber& other) const {
+  bool operator!= (const AlgebraicNumber& other) const {
     return !(*this == other);
   }
-  inline bool operator!= (int other) const {
+  bool operator!= (int other) const {
     return !(*this == other);
   }
   void Minus() {

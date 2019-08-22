@@ -13,7 +13,7 @@ public:
   List<bool> selected;
   int MaxSize;
   int CardinalitySelection;
-  inline static std::string GetXMLClassName() {
+  static std::string GetXMLClassName() {
     return "Selection";
   }
   void AddSelectionAppendNewIndex(int index);
@@ -48,7 +48,7 @@ public:
   void ComputeIndicesFromSelection();
   void initNoMemoryAllocation();
   unsigned int HashFunction() const;
-  static inline unsigned int HashFunction(const Selection& input) {
+  static unsigned int HashFunction(const Selection& input) {
     return input.HashFunction();
   }
   std::string ToString() const;
@@ -82,7 +82,7 @@ public:
 //  void operator=(const std::string& other);
   //warning: to call the comparison operator sucessfully, cardinalitySelection must
   //be properly computed!
-  inline bool operator==(const Selection& right) const {
+  bool operator==(const Selection& right) const {
     if (this->MaxSize != right.MaxSize || this->CardinalitySelection != right.CardinalitySelection) {
       return false;
     }

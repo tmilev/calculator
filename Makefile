@@ -12,9 +12,33 @@
 # This needs -rdynamic due to implementation.
 # 
 
-FEATUREFLAGS= -std=c++0x -pthread
-CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
-LDFLAGS=$(FEATUREFLAGS)
+OPTIMIZATION_FLAGS=
+# Use native architecture instructions.
+# Did not notice significant difference in performance with / without the flag. 
+# Tested: compute 2019 factorial and openssl-send the result back.
+# 
+# OPTIMIZATION_FLAGS+=-march=native
+
+# - With O2 optimization. 
+# -- Speed: ~84ms to compute 2019 factorial and openssl-send the result back
+# on my current dev laptop. 
+# -- Compilation time: 95 seconds on same machine.
+# - Without O2 optimization.
+# -- Speed: ~121ms to compute 2019 and openssl-send the result back.
+# -- Compilation time: 30 seconds.
+# -O3 "optimization" is known to break linkage, please DO NOT USE.
+#
+# Conclusion: O2 optimization speeds up computations by 40%, 
+# slows down compilation by a factor of three. 
+# Decision: for now, do not use optimizations:
+# 40% speed up not worth the 3-fold increase in build times.
+# 
+
+# OPTIMIZATION_FLAGS+=-O2
+
+
+CFLAGS=-Wall -Wno-address -pthread $(OPTIMIZATION_FLAGS) -c
+LDFLAGS=-pthread $(OPTIMIZATION_FLAGS)
 LIBRARIES_INCLUDED_AT_THE_END=
 
 ifeq ($(hsa), 1)
@@ -30,17 +54,9 @@ else
 	CXX=g++
 endif
 
-ifeq ($(debug), 1)
-	CFLAGS += -g
-	LDFLAGS +=
-else
-	CFLAGS += -O3 -march=native
-	LDFLAGS += -O3 -march=native
-endif
-
 ifeq ($(AllocationStatistics), 1)
-	CFLAGS += -DAllocationStatistics
-	LDFLAGS += -rdynamic
+	CFLAGS+=-DAllocationStatistics
+	LDFLAGS+=-rdynamic
 endif
 
 ########################

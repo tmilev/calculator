@@ -2876,13 +2876,13 @@ int WebWorker::ServeClient() {
   std::stringstream comments;
   comments << "Address, request computed: ";
   if (this->addressComputed != "") {
-    comments << this->addressComputed;
+    comments << HtmlRoutines::ConvertStringToHtmlString(this->addressComputed, false);
   } else {
     comments << "[empty]";
   }
   comments << ", ";
   if (theGlobalVariables.userCalculatorRequestType != "") {
-    comments << theGlobalVariables.userCalculatorRequestType;
+    comments << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userCalculatorRequestType, false);
   } else {
     comments << "[empty]";
   }

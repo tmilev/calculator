@@ -81,12 +81,26 @@ struct TransportLayerSecurityOpenSSL {
   static bool initSSLKeyFilesCreateOnDemand();
 };
 
+
+class CipherSpec {
+
+};
+
+// Specs of ssl client hello:
+// Section E.1 of https://www.ietf.org/rfc/rfc2246.txt
+
 class SSLHello {
 public:
   unsigned char handshakeType;
   int version;
+  int cipherSpecLength;
+  int sessionIdLength;
+  int challengeLength;
+  List<CipherSpec> supportedCiphers;
+  List<char> sessionId;
+  List<char> challenge;
   SSLHello();
-
+  bool Decode(std::stringstream* commentsOnFailure);
 };
 
 class SSLRecord {
@@ -103,9 +117,10 @@ public:
   int version;
   int length;
   List<char> body;
-  SSLHello decodedBody;
+  SSLHello hello;
   SSLRecord();
   bool Decode(List<char>& input, int offset, std::stringstream* commentsOnFailure);
+  bool DecodeBody(std::stringstream* commentsOnFailure);
   std::string ToString() const;
   std::string ToStringType() const;
 };

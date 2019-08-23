@@ -597,6 +597,11 @@ SSLHello::SSLHello() {
   this->version = 0;
 }
 
+bool SSLHello::Decode(std::stringstream *commentsOnFailure) {
+  crash << "SSLHello::Decode Not implemented yet" << crash;
+  return false;
+}
+
 SSLRecord::SSLRecord() {
   this->theType = SSLRecord::tokens::unknown;
   this->length = 0;
@@ -671,9 +676,22 @@ bool SSLRecord::Decode(List<char>& input, int offset, std::stringstream *comment
   for (int i = 0; i < this->length; i ++) {
     this->body[i] = input[offset + i];
   }
-  logWorker << "DEBUG: Got to return true ... " << logger::endL;
-  return true;
+  return this->DecodeBody(commentsOnFailure);
 }
+
+bool SSLRecord::DecodeBody(std::stringstream *commentsOnFailure) {
+  switch (this->theType) {
+    case SSLRecord::tokens::handshake:
+      return this->hello.Decode(commentsOnFailure);
+    default:
+      break;
+  }
+  if (commentsOnFailure != 0) {
+    *commentsOnFailure << "Unrecognized ssl record type: " << (int) this->theType << ". ";
+  }
+  return false;
+}
+
 
 bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::DecodeSSLRecord");

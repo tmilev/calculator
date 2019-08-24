@@ -18,6 +18,7 @@ static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeade
 #include <openssl/err.h>
 
 #include "vpfHeader5Crypto.h"
+#include "vpfHeader1General4General_Logging_GlobalVariables.h"
 class TransportLayerSecurity;
 struct TransportLayerSecurityOpenSSL {
   std::string name;
@@ -81,17 +82,20 @@ struct TransportLayerSecurityOpenSSL {
   static bool initSSLKeyFilesCreateOnDemand();
 };
 
-
 class CipherSpec {
 
 };
 
-// Specs of ssl client hello:
-// Section E.1 of https://www.ietf.org/rfc/rfc2246.txt
 
+class SSLRecord;
+
+// SSL client hello helpful links.
+// https://idea.popcount.org/2012-06-16-dissecting-ssl-handshake/
+//
 class SSLHello {
 public:
   unsigned char handshakeType;
+  int length;
   int version;
   int cipherSpecLength;
   int sessionIdLength;
@@ -100,9 +104,12 @@ public:
   List<char> sessionId;
   List<char> challenge;
   SSLHello();
-  bool Decode(std::stringstream* commentsOnFailure);
+  logger::StringHighligher getStringHighlighter();
+  bool Decode(SSLRecord& owner, std::stringstream* commentsOnFailure);
 };
 
+// A basic explanation of ssl records:
+// https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-socket-layer-ssl/116181-technote-product-00.html
 class SSLRecord {
 public:
   class tokens {
@@ -113,13 +120,14 @@ public:
     static const unsigned char applicationData = 23; //0x17
     static const unsigned char unknown = 0;
   };
+  int offsetDecoded;
   unsigned char theType;
   int version;
   int length;
   List<char> body;
   SSLHello hello;
   SSLRecord();
-  bool Decode(List<char>& input, int offset, std::stringstream* commentsOnFailure);
+  bool Decode(std::stringstream* commentsOnFailure);
   bool DecodeBody(std::stringstream* commentsOnFailure);
   std::string ToString() const;
   std::string ToStringType() const;
@@ -128,6 +136,7 @@ public:
 class TransportLayerSecurityServer {
 public:
   class recordsHandshake {
+  public:
     static const unsigned char helloRequest = 0; //0x00
     static const unsigned char clientHello = 1; //0x01
     static const unsigned char serverHello = 2; //0x02
@@ -143,7 +152,7 @@ public:
   int64_t millisecondsTimeOut;
   int64_t millisecondsDefaultTimeOut;
   int defaultBufferCapacity;
-  List<char> lastRead;
+  SSLRecord lastRecord;
   TransportLayerSecurityServer();
   bool HandShakeIamServer(int inputSocketID, std::stringstream *commentsOnFailure);
   bool ReadBytesOnce();

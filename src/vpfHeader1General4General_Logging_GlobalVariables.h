@@ -273,6 +273,14 @@ public:
 
 class logger {
   public:
+  class StringHighligher {
+    public:
+    List<int> sectionLengths;
+    StringHighligher();
+    StringHighligher(const std::string& input);
+    void reset();
+  };
+  StringHighligher nextHighlighter;
   int currentColor;
   int MaxLogSize;
   std::string theFileName;
@@ -303,6 +311,8 @@ class logger {
   static std::string cyanConsole();
   static std::string orangeConsole();
   static std::string consoleNormal();
+
+
   std::string getStamp();
   std::string getStampShort();
   std::string closeTagConsole();
@@ -311,10 +321,16 @@ class logger {
   std::string openTagHtml();
   void initializeIfNeeded();
   void reset();
+  logger& operator<<(const logger::StringHighligher& input);
+  logger& operator<<(const std::string& input);
   logger& operator<<(const loggerSpecialSymbols& input);
   void flush();
   template <typename theType>
   logger& operator<<(const theType& toBePrinted) {
+    return this->doTheLogging(toBePrinted);
+  }
+  template <typename theType>
+  logger& doTheLogging(const theType& toBePrinted) {
     if (theGlobalVariables.flagRunningApache) {
       return *this;
     }

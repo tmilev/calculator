@@ -371,6 +371,8 @@ public:
       MathRoutines::QuickSortAscendingOrder(theList, 0, theList.size - 1, theOrder, carbonCopy);
     }
   }
+  static bool ParseListInt(const std::string& input, List<int>& result, std::stringstream *commentsOnFailure);
+  static void ParseListIntCrashOnFailure(const std::string& input, List<int>& result);
   template <class templateList, typename objectType, class otherList>
   static void QuickSortDescending(
     templateList& theList,

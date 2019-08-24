@@ -843,6 +843,99 @@ std::string logger::getStamp() {
   return out.str();
 }
 
+void logger::StringHighligher::reset() {
+  this->sectionLengths.SetSize(0);
+}
+
+logger::StringHighligher::StringHighligher() {
+}
+
+logger::StringHighligher::StringHighligher(const std::string& input) {
+  MathRoutines::ParseListIntCrashOnFailure(input, this->sectionLengths);
+}
+
+void MathRoutines::ParseListIntCrashOnFailure(const std::string& input, List<int>& result) {
+  bool success = MathRoutines::ParseListInt(input, result, 0);
+  if (!success) {
+    crash << "Failed to parse list int with a function that does not allow failure. " << crash;
+  }
+}
+
+bool MathRoutines::ParseListInt(const std::string& input, List<int>& result, std::stringstream *commentsOnFailure) {
+  List<char> delimiters;
+  delimiters.AddOnTopNoRepetition('\n');
+  delimiters.AddOnTopNoRepetition(',');
+  delimiters.AddOnTopNoRepetition('[');
+  delimiters.AddOnTopNoRepetition(']');
+  delimiters.AddOnTopNoRepetition('(');
+  delimiters.AddOnTopNoRepetition(')');
+  List<std::string> theNumbers;
+  MathRoutines::StringSplitExcludeDelimiters(input, delimiters, theNumbers);
+  result.SetSize(theNumbers.size);
+  for (int i = 0; i < theNumbers.size; i ++) {
+    LargeInt theInt;
+    bool success = theInt.AssignStringFailureAllowed(theNumbers[i], commentsOnFailure);
+    if (!success) {
+      return false;
+    }
+    if (!theInt.IsIntegerFittingInInt(&result[i])) {
+      if (commentsOnFailure != 0) {
+        *commentsOnFailure << "Integer at position " << i << " is too large. ";
+      }
+      result.SetSize(0);
+      return false;
+    }
+  }
+  return true;
+}
+
+logger& logger::operator<<(const logger::StringHighligher& input) {
+  this->nextHighlighter.sectionLengths = input.sectionLengths;
+  return *this;
+}
+
+logger& logger::operator<<(const std::string& input) {
+  if (input.size() == 0) {
+    return *this;
+  }
+  if (this->nextHighlighter.sectionLengths.size == 0) {
+    return this->doTheLogging(input);
+  }
+  int indexLastNonShownByte = 0;
+  List<std::string> chunks;
+  for (int i = 0; i < this->nextHighlighter.sectionLengths.size && indexLastNonShownByte < (signed) input.size(); i ++) {
+    int nextSectionLength = this->nextHighlighter.sectionLengths[i];
+    if (indexLastNonShownByte + nextSectionLength > (signed) input.size()) {
+      nextSectionLength = input.size() - indexLastNonShownByte;
+    }
+    std::string current = input.substr(indexLastNonShownByte, nextSectionLength);
+    chunks.AddOnTop(current);
+    indexLastNonShownByte += nextSectionLength;
+  }
+  if (indexLastNonShownByte < (signed) input.size()) {
+    chunks.AddOnTop(input.substr(indexLastNonShownByte));
+  }
+  for (int i = 0; i < chunks.size; i ++) {
+    int colorIndex = i % 3;
+    switch(colorIndex) {
+    case 0:
+      *this << logger::blue;
+      break;
+    case 1:
+      *this << logger::red;
+      break;
+    case 2:
+      *this << logger::green;
+      break;
+    default:
+      break;
+    }
+    this->doTheLogging(chunks[i]);
+  }
+  this->nextHighlighter.reset();
+  return *this;
+}
+
 logger& logger::operator<<(const loggerSpecialSymbols& input) {
   if (theGlobalVariables.flagRunningApache) {
     return *this;

@@ -584,10 +584,10 @@ bool TransportLayerSecurityServer::ReadBytesOnce() {
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->socketId, SOL_SOCKET, SO_RCVTIMEO, (void*)(&tv), sizeof(timeval));
-  this->lastRead.SetSize(this->defaultBufferCapacity);
-  int numBytesInBuffer = recv(this->socketId, this->lastRead.TheObjects, this->lastRead.size - 1, 0);
+  this->lastRecord.body.SetSize(this->defaultBufferCapacity);
+  int numBytesInBuffer = recv(this->socketId, this->lastRecord.body.TheObjects, this->lastRecord.body.size - 1, 0);
   if (numBytesInBuffer >= 0) {
-    this->lastRead.SetSize(numBytesInBuffer);
+    this->lastRecord.body.SetSize(numBytesInBuffer);
   }
   return numBytesInBuffer > 0;
 }
@@ -597,7 +597,23 @@ SSLHello::SSLHello() {
   this->version = 0;
 }
 
-bool SSLHello::Decode(std::stringstream *commentsOnFailure) {
+logger::StringHighligher SSLHello::getStringHighlighter() {
+  return logger::StringHighligher("2,4,4,2");
+}
+
+bool SSLHello::Decode(SSLRecord& owner, std::stringstream* commentsOnFailure) {
+  this->handshakeType = owner.body[owner.offsetDecoded];
+  if (
+    this->handshakeType != TransportLayerSecurityServer::recordsHandshake::clientHello &&
+    this->handshakeType != TransportLayerSecurityServer::recordsHandshake::serverHello
+  ) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Message does not appear to be a client/server hello. ";
+    }
+    return false;
+  }
+
+  logWorker << logger::blue << "DEBUG: Input: " << this->getStringHighlighter() << Crypto::ConvertListCharsToHex(owner.body, 0, false) << logger::endL;
   crash << "SSLHello::Decode Not implemented yet" << crash;
   return false;
 }
@@ -608,7 +624,7 @@ SSLRecord::SSLRecord() {
   this->version = 0;
 }
 
-std::string SSLRecord::ToStringType() const{
+std::string SSLRecord::ToStringType() const {
   switch (this->theType) {
   case SSLRecord::tokens::alert:
     return "alert";
@@ -639,15 +655,14 @@ std::string SSLRecord::ToString() const {
   return result.ToString(false, true, false, true);
 }
 
-bool SSLRecord::Decode(List<char>& input, int offset, std::stringstream *commentsOnFailure) {
-  this->body.SetSize(0);
-  if (input.size < 5 + offset) {
+bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
+  if (this->body.size < 5 + this->offsetDecoded) {
     if (commentsOnFailure != 0) {
-      *commentsOnFailure << "SSL record needs to have at least 5 bytes, yours has: " << input.size << ".";
+      *commentsOnFailure << "SSL record needs to have at least 5 bytes, yours has: " << this->body.size << ".";
     }
     return false;
   }
-  this->theType = input[offset];
+  this->theType = this->body[this->offsetDecoded];
   if (
     this->theType != SSLRecord::tokens::handshake
   //&&
@@ -657,32 +672,28 @@ bool SSLRecord::Decode(List<char>& input, int offset, std::stringstream *comment
   ) {
     this->theType = SSLRecord::tokens::unknown;
     if (commentsOnFailure != 0) {
-      *commentsOnFailure << "Unknown record type: " << (int) input[offset] << ". ";
+      *commentsOnFailure << "Unknown record type: " << (int) this->body[this->offsetDecoded] << ". ";
     }
     return false;
   }
   logWorker << "DEBUG: got to length extraction. " << logger::endL;
-  this->length = input[offset + 3] * 256 + input[offset + 4];
-  this->version = input[offset + 1] * 256 + input[offset + 2];
-  int highEnd = this->length + offset + 5;
-  if (highEnd > input.size) {
-    logWorker << "DEBUG: high end's too big. " << logger::endL;
+  this->length = this->body[this->offsetDecoded + 3] * 256 + this->body[this->offsetDecoded + 4];
+  this->version = this->body[this->offsetDecoded + 1] * 256 + this->body[this->offsetDecoded + 2];
+  int highEnd = this->length + this->offsetDecoded + 5;
+  if (highEnd > this->body.size) {
     if (commentsOnFailure != 0) {
-      *commentsOnFailure << "Insufficent record length: expected: 5 + " << this->length << ", got: " << input.size - offset;
+      *commentsOnFailure << "Insufficent record length: expected: 5 + " << this->length << ", got: " << this->body.size - this->offsetDecoded;
     }
     return false;
   }
-  this->body.SetSize(this->length);
-  for (int i = 0; i < this->length; i ++) {
-    this->body[i] = input[offset + i];
-  }
+  this->offsetDecoded += 5;
   return this->DecodeBody(commentsOnFailure);
 }
 
 bool SSLRecord::DecodeBody(std::stringstream *commentsOnFailure) {
   switch (this->theType) {
     case SSLRecord::tokens::handshake:
-      return this->hello.Decode(commentsOnFailure);
+      return this->hello.Decode(*this, commentsOnFailure);
     default:
       break;
   }
@@ -692,15 +703,13 @@ bool SSLRecord::DecodeBody(std::stringstream *commentsOnFailure) {
   return false;
 }
 
-
 bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::DecodeSSLRecord");
-  SSLRecord oneRecord;
-  if (!oneRecord.Decode(this->lastRead, 0, commentsOnFailure)) {
-    logWorker << "DEBUG: one record decode error.\n" << oneRecord.ToString() << logger::endL;
+  if (!this->lastRecord.Decode(commentsOnFailure)) {
+    logWorker << "DEBUG: one record decode error.\n" << this->lastRecord.ToString() << logger::endL;
     return false;
   }
-  logWorker << "DEBUG: Decoded: " << oneRecord.ToString() << logger::endL;
+  logWorker << "DEBUG: Decoded: " << this->lastRecord.ToString() << logger::endL;
   crash << "Decode not implemented yet. " << crash;
 
   return false;
@@ -714,7 +723,7 @@ bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commen
     }
     return false;
   }
-  logWorker << "DEBUG: got to before decode ssl record. " << logger::endL;
+  logWorker << "DEBUG: got to before decode ssl record, received: " << this->lastRecord.body.size << " bytes. " << logger::endL;
   if (!this->DecodeSSLRecord(commentsOnFailure)) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "Failed to decode ssl record. ";

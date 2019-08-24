@@ -921,8 +921,18 @@ void LargeInt::ReadFromFile(std::fstream& input) {
 }
 
 void LargeInt::AssignString(const std::string& input) {
+  bool success = this->AssignStringFailureAllowed(input, 0);
+  if (!success) {
+    crash << "LargeInt::AssignString is not allowed to fail." << crash;
+  }
+}
+
+bool LargeInt::AssignStringFailureAllowed(const std::string& input, std::stringstream* commentsOnFailure) {
   if (input.size() == 0) {
-    return;
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Empty string is not interpretted as zero. ";
+    }
+    return false;
   }
   this->MakeZero();
   unsigned int startingIndex = 0;
@@ -932,7 +942,10 @@ void LargeInt::AssignString(const std::string& input) {
   for (unsigned int i = startingIndex; i < input.size(); i ++) {
     int x = input[i] - '0';
     if (x < 0 || x > 9) {
-      crash << "LargeInt::AssignString is not allowed to fail." << crash;
+      if (commentsOnFailure != 0) {
+        *commentsOnFailure << "Encountered a digit character not between 0 and 9. ";
+      }
+      return false;
     }
     if (i > startingIndex) {
       this->value *= 10;
@@ -944,6 +957,7 @@ void LargeInt::AssignString(const std::string& input) {
       this->sign = - 1;
     }
   }
+  return true;
 }
 
 bool LargeInt::IsIntegerFittingInInt(int* whichInt) {

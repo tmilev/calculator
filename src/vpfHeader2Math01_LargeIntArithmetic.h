@@ -212,6 +212,7 @@ public:
   bool CheckForConsistensy();
   void WriteToFile(std::fstream& output);
   void AssignString(const std::string& input);
+  bool AssignStringFailureAllowed(const std::string& input, std::stringstream* commentsOnFailure);
   void ReadFromFile(std::fstream& input);
   void checkConsistency(){}
   void MakeZero();

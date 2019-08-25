@@ -844,14 +844,58 @@ std::string logger::getStamp() {
 }
 
 void logger::StringHighligher::reset() {
-  this->sectionLengths.SetSize(0);
+  this->sections.SetSize(0);
+}
+
+logger::StringHighligher::Section::Section(int inputLength) {
+  this->theType = "";
+  this->length = inputLength;
+}
+
+logger::StringHighligher::Section::Section(const std::string& input) {
+  this->theType = input;
+  this->length = 0;
+}
+
+logger::StringHighligher::Section::Section() {
+  this->theType = "";
+  this->length = 0;
 }
 
 logger::StringHighligher::StringHighligher() {
 }
 
 logger::StringHighligher::StringHighligher(const std::string& input) {
-  MathRoutines::ParseListIntCrashOnFailure(input, this->sectionLengths);
+  List<char> delimiters;
+  delimiters.AddOnTop(',');
+  delimiters.AddOnTop('(');
+  delimiters.AddOnTop(')');
+  delimiters.AddOnTop('[');
+  delimiters.AddOnTop(']');
+  List<std::string> inputStrings;
+  MathRoutines::StringSplitExcludeDelimiters(input, delimiters, inputStrings);
+  for (int i = 0; i < inputStrings.size; i ++) {
+    std::string current = MathRoutines::StringTrimWhiteSpace(inputStrings[i]);
+    logger::StringHighligher::Section incoming;
+    if (current == "|") {
+      incoming.theType = "|";
+      this->sections.AddOnTop(incoming);
+      continue;
+    }
+    if (current == "||") {
+      incoming.theType = "||";
+      this->sections.AddOnTop(incoming);
+      continue;
+    }
+    incoming.theType = "";
+    LargeInt theLI;
+    theLI.AssignString(current);
+    if (!theLI.IsIntegerFittingInInt(&incoming.length)) {
+      crash << "StringHighligher is not allowed to fail: this is an internal function, "
+      << "please do not expose to the outside world. " << crash;
+    }
+    this->sections.AddOnTop(incoming);
+  }
 }
 
 void MathRoutines::ParseListIntCrashOnFailure(const std::string& input, List<int>& result) {
@@ -890,7 +934,7 @@ bool MathRoutines::ParseListInt(const std::string& input, List<int>& result, std
 }
 
 logger& logger::operator<<(const logger::StringHighligher& input) {
-  this->nextHighlighter.sectionLengths = input.sectionLengths;
+  this->nextHighlighter.sections = input.sections;
   return *this;
 }
 
@@ -898,13 +942,18 @@ logger& logger::operator<<(const std::string& input) {
   if (input.size() == 0) {
     return *this;
   }
-  if (this->nextHighlighter.sectionLengths.size == 0) {
+  if (this->nextHighlighter.sections.size == 0) {
     return this->doTheLogging(input);
   }
   int indexLastNonShownByte = 0;
   List<std::string> chunks;
-  for (int i = 0; i < this->nextHighlighter.sectionLengths.size && indexLastNonShownByte < (signed) input.size(); i ++) {
-    int nextSectionLength = this->nextHighlighter.sectionLengths[i];
+  for (int i = 0; i < this->nextHighlighter.sections.size && indexLastNonShownByte < (signed) input.size(); i ++) {
+    logger::StringHighligher::Section& currentSection = this->nextHighlighter.sections[i];
+    if (currentSection.theType != "") {
+      chunks.AddOnTop(currentSection.theType);
+      continue;
+    }
+    int nextSectionLength = currentSection.length;
     if (indexLastNonShownByte + nextSectionLength > (signed) input.size()) {
       nextSectionLength = input.size() - indexLastNonShownByte;
     }

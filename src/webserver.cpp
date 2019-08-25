@@ -151,14 +151,12 @@ void WebServer::initSSL() {
 }
 
 bool WebServer::SSLServerSideHandShake(std::stringstream* commentsOnFailure) {
-  logWorker << "DEBUG: HERE I AM!!!!" << logger::endL;
   if (!theGlobalVariables.flagSSLIsAvailable) {
     return false;
   }
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     return false;
   }
-  logWorker << "DEBUG: got to the handshake!!!!" << logger::endL;
   return this->theTLS.HandShakeIamServer(this->GetActiveWorker().connectedSocketID, commentsOnFailure);
 }
 
@@ -3196,7 +3194,8 @@ void WebWorker::OutputShowIndicatorOnTimeout() {
   }
   if (!theGlobalVariables.flagAllowProcessMonitoring) {
     timeOutComments << "Monitoring computations is not allowed on this server.<br> "
-    << "If you want to carry out a long computation you will need to install the calculator on your own machine.<br> "
+    << "If you want to carry out a long computation you will "
+    << "need to install the calculator on your own machine.<br> "
     << "At the moment, the only way to do that is by setting the variable "
     << "theGlobalVariables.flagAllowProcessMonitoring to true, "
     << "achieved through manually compiling the calculator from source.<br> ";
@@ -3275,7 +3274,7 @@ std::string WebWorker::ToStringStatus() const {
     out << this->connectedSocketID;
   }
   out << ". ";
-  out << " Server time at last ping: " << this->millisecondsLastPingServerSideOnly << " milliseconds. ";
+  out << "Server time at last ping: " << this->millisecondsLastPingServerSideOnly << " milliseconds. ";
   if (this->pingMessage != "") {
     out << " Message at last ping: " << this->pingMessage;
   }
@@ -3314,13 +3313,13 @@ void WebServer::ReleaseEverything() {
   this->activeWorker = - 1;
   if (theGlobalVariables.flagServerDetailedLog) {
     currentLog << logger::red << "Detail: "
-    << " About to close socket: " << this->listeningSocketHTTP << ". " << logger::endL;
+    << "About to close socket: " << this->listeningSocketHTTP << ". " << logger::endL;
   }
   if (this->listeningSocketHTTP != - 1) {
     close(this->listeningSocketHTTP);
     if (theGlobalVariables.flagServerDetailedLog) {
       currentLog << logger::red << "Detail: "
-      << " Just closed socket: " << this->listeningSocketHTTP << logger::endL;
+      << "Just closed socket: " << this->listeningSocketHTTP << logger::endL;
     }
     this->listeningSocketHTTP = - 1;
   }
@@ -3328,7 +3327,7 @@ void WebServer::ReleaseEverything() {
     close(this->listeningSocketHttpSSL);
     if (theGlobalVariables.flagServerDetailedLog) {
       currentLog << logger::red << "Detail: "
-      << " Just closed socket: " << this->listeningSocketHttpSSL << logger::endL;
+      << "Just closed socket: " << this->listeningSocketHttpSSL << logger::endL;
     }
   }
   this->listeningSocketHttpSSL = - 1;
@@ -3616,11 +3615,11 @@ std::string WebServer::ToStringConnectionSummary() {
   }
   out << "~" << numConnectionsSoFarApprox << " actual connections "
   << "(with " << this->NumberOfServerRequestsWithinAllConnections << " server requests served)" << " + ~"
-  << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total)"
-  << " served since last restart. ";
+  << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total) "
+  << "served since last restart. ";
 
   out
-  << " The number tends to be high as many browsers open more than one connection per page visit. <br>"
+  << "The number tends to be high as many browsers open more than one connection per page visit. <br>"
   << "<b>The following policies are quite strict and will be relaxed in the future. </b><br>"
   << this->MaxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
   << "When the limit is exceeded, all connections except a randomly chosen one will be terminated. "
@@ -3902,7 +3901,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
   }
   if (theGlobalVariables.flagServerDetailedLog) {
     logProcessStats << logger::red << "Detail: "
-    << " too many connections handler start. " << logger::endL;
+    << "too many connections handler start. " << logger::endL;
   }
   MonomialWrapper<std::string, MathRoutines::HashString>
   incomingAddress(incomingUserAddress);
@@ -4341,7 +4340,7 @@ int WebServer::Run() {
     while (select(this->highestSocketNumber + 1, &FDListenSockets, 0, 0, 0) == - 1) {
       if (this->flagReapingChildren) {
         if (theGlobalVariables.flagServerDetailedLog) {
-          logServer << logger::yellow << "Interrupted while by child exit signal. "
+          logServer << logger::yellow << "Interrupted select loop by child exit signal. "
           << logger::endL;
         }
         this->flagReapingChildren = false;

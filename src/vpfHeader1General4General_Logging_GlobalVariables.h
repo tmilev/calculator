@@ -275,7 +275,15 @@ class logger {
   public:
   class StringHighligher {
     public:
-    List<int> sectionLengths;
+    class Section {
+    public:
+      int length;
+      std::string theType;
+      Section();
+      Section(int inputLength);
+      Section(const std::string& input);
+    };
+    List<logger::StringHighligher::Section> sections;
     StringHighligher();
     StringHighligher(const std::string& input);
     void reset();

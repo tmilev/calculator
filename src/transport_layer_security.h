@@ -83,12 +83,21 @@ struct TransportLayerSecurityOpenSSL {
 };
 
 class SSLRecord;
+class SSLHello;
 
 class CipherSuiteSpecification {
 public:
-  int encoding;
+  int theType;
   std::string name;
   bool ComputeName();
+};
+
+class SSLHelloExtension {
+public:
+  SSLHello* owner;
+  int length;
+  List<char> content;
+  int theType;
 };
 
 // SSL client hello helpful links.
@@ -98,20 +107,27 @@ public:
 //
 class SSLHello {
 public:
+  SSLRecord* owner;
   unsigned char handshakeType;
   int length;
   int version;
   int cipherSpecLength;
   int sessionIdLength;
   int challengeLength;
+  int extensionsLength;
   static const int LengthRandomBytesInSSLHello = 32;
   List<char> RandomBytes;
   List<CipherSuiteSpecification> supportedCiphers;
+  List<SSLHelloExtension> extensions;
   List<char> sessionId;
   List<char> challenge;
+  List<char> compression;
+
   SSLHello();
   logger::StringHighligher getStringHighlighter();
-  bool Decode(SSLRecord& owner, std::stringstream* commentsOnFailure);
+  bool Decode(std::stringstream* commentsOnFailure);
+  bool DecodeExtensions(std::stringstream* commentsOnFailure);
+
   JSData ToJSON() const;
   std::string ToStringVersion() const;
 };

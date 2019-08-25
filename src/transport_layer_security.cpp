@@ -627,13 +627,14 @@ bool TransportLayerSecurityServer::ReadBytesOnce() {
 }
 
 SSLHello::SSLHello() {
-  this->owner            = 0;
-  this->handshakeType    = 0;
-  this->length           = 0;
-  this->version          = 0;
-  this->cipherSpecLength = 0;
-  this->sessionIdLength  = 0;
-  this->challengeLength  = 0;
+  this->owner             = 0;
+  this->handshakeType     = 0;
+  this->length            = 0;
+  this->version           = 0;
+  this->cipherSpecLength  = 0;
+  this->challengeLength   = 0;
+  this->flagRenegotiate   = 0;
+  this->compressionMethod = 0;
 }
 
 logger::StringHighligher SSLHello::getStringHighlighter() {
@@ -648,8 +649,8 @@ logger::StringHighligher SSLHello::getStringHighlighter() {
   for (int i = 0; i < this->extensions.size; i ++) {
     result.sections.AddOnTop(4);
     result.sections.AddOnTop(4);
-    if (this->extensions[i].length > 0) {
-      result.sections.AddOnTop(this->extensions[i].length * 2);
+    if (this->extensions[i].content.size > 0) {
+      result.sections.AddOnTop(this->extensions[i].content.size * 2);
     }
   }
   return result;
@@ -671,8 +672,7 @@ JSData SSLHello::ToJSON() const {
   result["version"] = this->ToStringVersion();
   result["length"] = this->length;
   result["cipherSpecLength"] = this->cipherSpecLength;
-  result["sessionIdLength"] = this->sessionIdLength;
-  result["sessionId"] = Crypto::ConvertListCharsToHex(this->sessionId, 0, false);
+  result["sessionId"] = Crypto::ConvertListUnsignedCharsToHex(this->sessionId, 0, false);
   JSData ciphers;
   ciphers.theType = JSData::token::tokenObject;
   ciphers.theList.SetSize(this->supportedCiphers.size);
@@ -690,8 +690,7 @@ JSData SSLHello::ToJSON() const {
     hex << std::hex << std::setfill('0') << std::setw(4) << this->extensions[i].theType;
     JSData extension;
     extension["type"] = hex.str();
-    extension["length"] = this->extensions[i].length;
-    extension["data"] = Crypto::ConvertListCharsToHex(this->extensions[i].content, 0, false);
+    extension["data"] = Crypto::ConvertListUnsignedCharsToHex(this->extensions[i].content, 0, false);
     extensions.theList.AddOnTop(extension);
   }
   result["extensions"] = extensions;
@@ -712,7 +711,14 @@ bool CipherSuiteSpecification::ComputeName() {
 
 bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLHello::Decode");
+  if (this->owner->body.size == 0) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Empty message. ";
+    }
+    return false;
+  }
   this->handshakeType = this->owner->body[this->owner->offsetDecoded];
+  this->owner->offsetDecoded ++;
   if (
     this->handshakeType != TransportLayerSecurityServer::recordsHandshake::clientHello &&
     this->handshakeType != TransportLayerSecurityServer::recordsHandshake::serverHello
@@ -722,57 +728,51 @@ bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  if (this->owner->offsetDecoded + 1 + 3 + 2 + SSLHello::LengthRandomBytesInSSLHello + 1 + 2 >= this->owner->body.size) {
+  if (this->owner->offsetDecoded + 3 + 2 + SSLHello::LengthRandomBytesInSSLHello + 1 + 2 >= this->owner->body.size) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "Client hello is too short.";
     }
     return false;
   }
-  this->length = (unsigned int) this->owner->body[this->owner->offsetDecoded + 1];
-  this->length *= 256;
-  this->length += (unsigned int) this->owner->body[this->owner->offsetDecoded + 2];
-  this->length *= 256;
-  this->length += (unsigned int) this->owner->body[this->owner->offsetDecoded + 3];
-  if (this->length + this->owner->offsetDecoded >= this->owner->body.size) {
+  if (! SSLRecord::ReadThreeByteInt(this->owner->body, this->owner->offsetDecoded, this->length, commentsOnFailure)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to read ssl record length. ";
+    }
+    return false;
+  }
+  this->owner->offsetDecoded += 3;
+  if (this->length + this->owner->offsetDecoded > this->owner->body.size) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "Client hello length is too big. ";
     }
     return false;
   }
-  this->version = ((int) this->owner->body[this->owner->offsetDecoded + 4]) * 256;
-  this->version += this->owner->body[this->owner->offsetDecoded + 5];
-  this->owner->offsetDecoded += 6;
+  if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->version, commentsOnFailure)) {
+    return false;
+  }
+  this->owner->offsetDecoded += 2;
   this->RandomBytes.SetSize(SSLHello::LengthRandomBytesInSSLHello);
-  for (int i = 0; i < 32; i ++) {
+  for (int i = 0; i < SSLHello::LengthRandomBytesInSSLHello; i ++) {
     this->RandomBytes[i] = this->owner->body[this->owner->offsetDecoded + i];
   }
   this->owner->offsetDecoded += SSLHello::LengthRandomBytesInSSLHello;
-  this->sessionIdLength = this->owner->body[this->owner->offsetDecoded];
-  if (
-    this->sessionIdLength + this->owner->offsetDecoded >= this->owner->body.size
-  ) {
+  if (!SSLRecord::ReadOneByteLengthFollowedByBytes(this->owner->body, this->owner->offsetDecoded, 0, & this->sessionId, commentsOnFailure)) {
     if (commentsOnFailure != 0) {
-      *commentsOnFailure << "Session id is too long. ";
+      *commentsOnFailure << "Failed to read session id. ";
     }
     return false;
   }
-  this->owner->offsetDecoded ++;
-  this->sessionId.SetSize(this->sessionIdLength);
-  for (int i = 0; i < this->sessionIdLength; i ++) {
-    this->sessionId[i] = this->owner->body[this->owner->offsetDecoded + i];
-  }
-  this->owner->offsetDecoded += this->sessionIdLength;
-  if (this->owner->offsetDecoded + 2 >= this->owner->body.size) {
+  this->owner->offsetDecoded += 1 + this->sessionId.size;
+
+
+  if (! SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->cipherSpecLength, commentsOnFailure)) {
     if (commentsOnFailure != 0) {
-      *commentsOnFailure << "Cipher suite length is not included in the hello. ";
+      *commentsOnFailure << "Failed to read cipher suite length. ";
     }
     return false;
   }
-  this->cipherSpecLength = (unsigned int) this->owner->body[this->owner->offsetDecoded];
-  this->cipherSpecLength *= 256;
-  this->cipherSpecLength += (unsigned int) this->owner->body[this->owner->offsetDecoded + 1];
   int halfCipherLength = this->cipherSpecLength / 2;
-  this->cipherSpecLength = halfCipherLength * 2;
+  this->cipherSpecLength = halfCipherLength * 2; // make sure cipher spec length is even.
   this->owner->offsetDecoded += 2;
   if (this->cipherSpecLength + this->owner->offsetDecoded >= this->owner->body.size) {
     if (commentsOnFailure != 0) {
@@ -782,23 +782,20 @@ bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
   }
   this->supportedCiphers.SetSize(halfCipherLength);
   for (int i = 0; i < halfCipherLength; i ++) {
-    this->supportedCiphers[i].theType = (unsigned int) this->owner->body[this->owner->offsetDecoded + i * 2];
-    this->supportedCiphers[i].theType *= 256;
-    this->supportedCiphers[i].theType += (unsigned int) this->owner->body[this->owner->offsetDecoded + i * 2 + 1];
+    if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->supportedCiphers[i].theType, commentsOnFailure)) {
+      // this should not happen.
+      return false;
+    }
+    this->owner->offsetDecoded += 2;
     this->supportedCiphers[i].ComputeName();
   }
-  this->owner->offsetDecoded += this->cipherSpecLength;
-  if (this->owner->offsetDecoded + 2 >= this->owner->body.size) {
+  if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->compressionMethod, commentsOnFailure)) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "Compression bytes not set. ";
     }
     return false;
   }
   // compression is ignored.
-  this->compression.SetSize(2);
-  this->compression[0] = this->owner->body[this->owner->offsetDecoded];
-  this->compression[1] = this->owner->body[this->owner->offsetDecoded + 1];
-  this->owner->offsetDecoded += 2;
   return this->DecodeExtensions(commentsOnFailure);
 }
 
@@ -808,14 +805,11 @@ bool SSLHello::DecodeExtensions(std::stringstream *commentsOnFailure) {
     // No extensions
     return true;
   }
-  this->extensionsLength = (unsigned int) this->owner->body[this->owner->offsetDecoded];
-  this->extensionsLength *= 256;
-  this->extensionsLength += (unsigned int) this->owner->body[this->owner->offsetDecoded + 1];
-  this->owner->offsetDecoded += 2;
+  if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->extensionsLength, commentsOnFailure)) {
+    return false;
+  }
   int extensionsLimit = this->owner->offsetDecoded + this->extensionsLength;
   if (extensionsLimit > this->owner->body.size) {
-    logWorker << logger::blue << "DEBUG: Input: " << this->getStringHighlighter()
-    << Crypto::ConvertListUnsignedCharsToHex(this->owner->body, 0, false) << logger::endL;
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "Extension length exceeds message size. ";
     }
@@ -825,44 +819,152 @@ bool SSLHello::DecodeExtensions(std::stringstream *commentsOnFailure) {
 
   while (this->owner->offsetDecoded < extensionsLimit) {
     if (this->owner->offsetDecoded + 4 >= extensionsLimit) {
-      logWorker << logger::blue << "DEBUG: Input: " << this->getStringHighlighter()
-      << Crypto::ConvertListUnsignedCharsToHex(this->owner->body, 0, false) << logger::endL;
       if (commentsOnFailure != 0) {
         *commentsOnFailure << "Extension length + type exceed message size. ";
       }
       return false;
     }
     SSLHelloExtension incoming;
-    incoming.theType = (unsigned int) this->owner->body[this->owner->offsetDecoded];
-    incoming.theType *= 256;
-    incoming.theType += (unsigned int) this->owner->body[this->owner->offsetDecoded + 1];
+    incoming.owner = this;
+    if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, incoming.theType, commentsOnFailure)) {
+      return false;
+    }
     this->owner->offsetDecoded += 2;
-    incoming.length = (unsigned int) this->owner->body[this->owner->offsetDecoded];
-    incoming.length *= 256;
-    incoming.length += (unsigned int) this->owner->body[this->owner->offsetDecoded + 1];
-    this->owner->offsetDecoded += 2;
-    if (incoming.length + this->owner->offsetDecoded > this->owner->body.size) {
-      logWorker << logger::blue << "DEBUG: Input: " << this->getStringHighlighter()
-      << Crypto::ConvertListUnsignedCharsToHex(this->owner->body, 0, false) << logger::endL;
-      if (commentsOnFailure != 0) {
-        *commentsOnFailure << "Extension length: " << incoming.length << " exceeds message body size. ";
+    if (!SSLRecord::ReadTwoByteLengthFollowedByBytes(this->owner->body, this->owner->offsetDecoded, 0, &incoming.content, commentsOnFailure)) {
+      return false;
+    }
+    this->owner->offsetDecoded += 2 + incoming.content.size;
+    this->extensions.AddOnTop(incoming);
+  }
+  return this->ProcessExtensions(commentsOnFailure);
+}
+
+SSLHelloExtension::SSLHelloExtension() {
+  this->owner = 0;
+  this->theType = 0;
+}
+
+bool SSLHelloExtension::ProcessMe(std::stringstream* commentsOnError) {
+  if (this->theType == 0xff01) {
+    if (this->content.size == 1) {
+      if (this->content[0] == 0) {
+        this->owner->flagRenegotiate = true;
+        return true;
+      }
+    }
+  }
+  if (this->theType == 0) {
+    if (!SSLRecord::ReadTwoByteLengthFollowedByBytes(
+      this->content, 0, 0, &this->owner->renegotiationCharacters,  commentsOnError
+    )) {
+      if (commentsOnError != 0) {
+        *commentsOnError << "Failed to read server name extension. ";
       }
       return false;
     }
-    incoming.content.SetSize(incoming.length);
-    for (int i = 0; i < incoming.length; i ++) {
-      incoming.content[i] = this->owner->body[this->owner->offsetDecoded + i];
-    }
-    this->extensions.AddOnTop(incoming);
-    this->owner->offsetDecoded += incoming.length;
   }
 
+  //if (commentsOnError != 0) {
+  //  *commentsOnError << "Bad ssl hello extension. ";
+  //}
+  return true;
+}
+
+bool SSLHello::ProcessExtensions(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("SSLHello::ProcessExtensions");
+  this->renegotiationCharacters.SetSize(0);
+  for (int i = 0; i < this->extensions.size; i ++) {
+    if (!this->extensions[i].ProcessMe(commentsOnFailure)) {
+      logWorker << logger::blue << "DEBUG: Input: " << this->getStringHighlighter()
+      << Crypto::ConvertListUnsignedCharsToHex(this->owner->body, 0, false) << logger::endL;
+      logWorker << "DEBUG: decoded so far: " << this->ToJSON().ToString(false, true, false, false) << logger::endL;
+      return false;
+    }
+  }
   logWorker << logger::blue << "DEBUG: Input: " << this->getStringHighlighter()
   << Crypto::ConvertListUnsignedCharsToHex(this->owner->body, 0, false) << logger::endL;
   logWorker << "DEBUG: decoded so far: " << this->ToJSON().ToString(false, true, false, false) << logger::endL;
   crash << "SSLHello::Decode Not implemented yet" << crash;
   return false;
 
+}
+
+bool SSLRecord::ReadTwoByteInt(const List<unsigned char>& input, int offset, int& result, std::stringstream* commentsOnFailure) {
+  return SSLRecord::ReadNByteInt(2, input, offset, result, commentsOnFailure);
+}
+
+bool SSLRecord::ReadThreeByteInt(const List<unsigned char>& input, int offset, int& result, std::stringstream* commentsOnFailure) {
+  return SSLRecord::ReadNByteInt(3, input, offset, result, commentsOnFailure);
+}
+
+bool SSLRecord::ReadNByteInt(
+  int numBytes, const List<unsigned char>& input, int offset, int& result, std::stringstream* commentsOnFailure
+) {
+  if (numBytes > 4) {
+    crash << "Not allowed to read more than 4 bytes into an integer. " << crash;
+  }
+  if (numBytes + offset > input.size) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to read three-byte integer. ";
+    }
+    return false;
+  }
+  result = 0;
+  for (int i = 0; i < numBytes; i ++) {
+    result *= 256;
+    result += (unsigned int) input[offset + i];
+  }
+  return true;
+}
+
+bool SSLRecord::ReadOneByteLengthFollowedByBytes(
+  const List<unsigned char>& input,
+  int offset,
+  int* resultLength,
+  List<unsigned char>* output,
+  std::stringstream* commentsOnError
+) {
+  return SSLRecord::ReadNByteLengthFollowedByBytes(1, input, offset, resultLength, output, commentsOnError);
+}
+
+bool SSLRecord::ReadTwoByteLengthFollowedByBytes(
+  const List<unsigned char>& input,
+  int offset,
+  int* resultLength,
+  List<unsigned char>* output,
+  std::stringstream* commentsOnError
+) {
+  return SSLRecord::ReadNByteLengthFollowedByBytes(2, input, offset, resultLength, output, commentsOnError);
+}
+
+bool SSLRecord::ReadNByteLengthFollowedByBytes(
+  int numBytesLength,
+  const List<unsigned char>& input,
+  int offset,
+  int* resultLength,
+  List<unsigned char>* output,
+  std::stringstream* commentsOnError
+) {
+  int temp = 0;
+  if (resultLength == 0) {
+    resultLength = &temp;
+  }
+  if (!SSLRecord::ReadNByteInt(numBytesLength, input, offset, *resultLength, commentsOnError)) {
+    return false;
+  }
+  if (*resultLength + numBytesLength + offset > input.size) {
+    if (commentsOnError != 0) {
+      *commentsOnError << "Indicated byte sequence length exceeds input size. ";
+    }
+    return false;
+  }
+  if (output != 0) {
+    output->SetSize(*resultLength);
+    for (int i = 0; i < *resultLength; i ++) {
+      (*output)[i] = input[offset + i + numBytesLength];
+    }
+  }
+  return true;
 }
 
 SSLRecord::SSLRecord() {

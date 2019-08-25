@@ -95,9 +95,10 @@ public:
 class SSLHelloExtension {
 public:
   SSLHello* owner;
-  int length;
-  List<char> content;
+  List<unsigned char> content;
   int theType;
+  SSLHelloExtension();
+  bool ProcessMe(std::stringstream* commentsOnError);
 };
 
 // SSL client hello helpful links.
@@ -112,21 +113,23 @@ public:
   int length;
   int version;
   int cipherSpecLength;
-  int sessionIdLength;
   int challengeLength;
   int extensionsLength;
+  int compressionMethod;
+  bool flagRenegotiate;
+  List<unsigned char> renegotiationCharacters;
   static const int LengthRandomBytesInSSLHello = 32;
-  List<char> RandomBytes;
+  List<unsigned char> RandomBytes;
   List<CipherSuiteSpecification> supportedCiphers;
   List<SSLHelloExtension> extensions;
-  List<char> sessionId;
-  List<char> challenge;
-  List<char> compression;
+  List<unsigned char> sessionId;
+  List<unsigned char> challenge;
 
   SSLHello();
   logger::StringHighligher getStringHighlighter();
   bool Decode(std::stringstream* commentsOnFailure);
   bool DecodeExtensions(std::stringstream* commentsOnFailure);
+  bool ProcessExtensions(std::stringstream* commentsOnFailure);
 
   JSData ToJSON() const;
   std::string ToStringVersion() const;
@@ -155,6 +158,42 @@ public:
   bool DecodeBody(std::stringstream* commentsOnFailure);
   std::string ToString() const;
   std::string ToStringType() const;
+  static bool ReadTwoByteInt(
+    const List<unsigned char>& input, int offset, int& result, std::stringstream* commentsOnFailure
+  );
+  static bool ReadThreeByteInt(
+    const List<unsigned char>& input, int offset, int& result, std::stringstream* commentsOnFailure
+  );
+  static bool ReadNByteInt(
+    int numBytes,
+    const List<unsigned char>& input,
+    int offset,
+    int& result,
+    std::stringstream* commentsOnFailure
+  );
+  static bool ReadTwoByteLengthFollowedByBytes(
+    const List<unsigned char>& input,
+    int offset,
+    int* resultLength,
+    List<unsigned char>* output,
+    std::stringstream* commentsOnError
+  );
+  static bool ReadOneByteLengthFollowedByBytes(
+    const List<unsigned char>& input,
+    int offset,
+    int* resultLength,
+    List<unsigned char>* output,
+    std::stringstream* commentsOnError
+  );
+  static bool ReadNByteLengthFollowedByBytes(
+    int numBytesLength,
+    const List<unsigned char>& input,
+    int offset,
+    int* resultLength,
+    List<unsigned char>* output,
+    std::stringstream* commentsOnError
+  );
+
 };
 
 class TransportLayerSecurityServer {

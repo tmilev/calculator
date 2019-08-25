@@ -433,7 +433,7 @@ bool CalculatorHTML::LoadMe(
         *commentsOnFailure << errorStream.str();
       }
       for (int i = 0; i < this->theTopicS.size(); i ++) {
-        this->ComputeDeadlinesAllSectionsNoInheritance(this->theTopicS[i]);
+        this->ComputeDeadlinesAllSectionsNoInheritance(this->theTopicS.theValues[i]);
       }
     }
   }
@@ -1053,19 +1053,19 @@ bool CalculatorHTML::PrepareCommands(std::stringstream* comments) {
     return false;
   }
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
-    if (!this->PrepareCommandsAnswer(this->theProblemData.theAnswers[i], comments)) {
+    if (!this->PrepareCommandsAnswer(this->theProblemData.theAnswers.theValues[i], comments)) {
       return false;
     }
-    if (!this->PrepareCommandsAnswerOnGiveUp(this->theProblemData.theAnswers[i], comments)) {
+    if (!this->PrepareCommandsAnswerOnGiveUp(this->theProblemData.theAnswers.theValues[i], comments)) {
       return false;
     }
-    if (!this->PrepareCommandsSolution(this->theProblemData.theAnswers[i], comments)) {
+    if (!this->PrepareCommandsSolution(this->theProblemData.theAnswers.theValues[i], comments)) {
       return false;
     }
-    if (!this->PrepareCommentsBeforeSubmission(this->theProblemData.theAnswers[i], comments)) {
+    if (!this->PrepareCommentsBeforeSubmission(this->theProblemData.theAnswers.theValues[i], comments)) {
       return false;
     }
-    if (!this->PrepareCommentsBeforeInterpretation(this->theProblemData.theAnswers[i], comments)) {
+    if (!this->PrepareCommentsBeforeInterpretation(this->theProblemData.theAnswers.theValues[i], comments)) {
       return false;
     }
   }
@@ -1302,7 +1302,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
     << desiredAnswerId << " but the answerId is missing from the list of known answer ids. "
     << this->theProblemData.ToStringAvailableAnswerIds() << crash;
   }
-  Answer& currentA = this->theProblemData.theAnswers[theIndex];
+  Answer& currentA = this->theProblemData.theAnswers.theValues[theIndex];
   if (theIndex < this->answerHighlights.size) {
     currentA.htmlAnswerHighlight = this->answerHighlights[theIndex];
   } else {
@@ -1372,7 +1372,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   if (!this->ComputeAnswerRelatedStrings(inputOutput)) {
     return;
   }
-  Answer& currentA = this->theProblemData.theAnswers[this->GetAnswerIndex(inputOutput.GetKeyValue("id"))];
+  Answer& currentA = this->theProblemData.theAnswers.theValues[this->GetAnswerIndex(inputOutput.GetKeyValue("id"))];
   std::stringstream out;
   out << "<br><span class =\"panelAnswer\" id = \"" << currentA.idAnswerPanel << "\"></span>";
   inputOutput.interpretedCommand = out.str();
@@ -2476,7 +2476,7 @@ bool CalculatorHTML::InterpretOneAnswerElement(SyntacticElementHTML& inputOutput
     inputOutput.interpretedCommand = out.str();
     return true;
   }
-  Answer& currentA = this->theProblemData.theAnswers[theIndex];
+  Answer& currentA = this->theProblemData.theAnswers.theValues[theIndex];
   if (tagClass == "calculatorAnswerVerification") {
     inputOutput.interpretedCommand = currentA.htmlSpanVerifyAnswer;
   }
@@ -2532,7 +2532,7 @@ bool CalculatorHTML::PrepareAnswerElements(std::stringstream &comments) {
       if (index == - 1) {
         continue;
       }
-      Answer& currentA = this->theProblemData.theAnswers[index];
+      Answer& currentA = this->theProblemData.theAnswers.theValues[index];
       std::string tagClass = this->theContent[i].GetTagClass();
       if (
         tagClass == "calculatorButtonSubmit" ||
@@ -2623,9 +2623,9 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream* comments) {
 
 bool CalculatorHTML::CheckConsistencyTopics() {
   for (int i = 0; i < this->theTopicS.size(); i ++) {
-    if (this->theTopicS[i].type == TopicElement::tProblem) {
-      if (this->theTopicS[i].immediateChildren.size > 0) {
-        crash << "Topic element: " << this->theTopicS[i].ToString()
+    if (this->theTopicS.theValues[i].type == TopicElement::tProblem) {
+      if (this->theTopicS.theValues[i].immediateChildren.size > 0) {
+        crash << "Topic element: " << this->theTopicS.theValues[i].ToString()
         << " has non-zero immediate children. " << crash;
         return false;
       }
@@ -2745,7 +2745,7 @@ JSData CalculatorHTML::GetJavascriptMathQuillBoxesForJSON() {
   output.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
     JSData currentAnswerJS;
-    Answer& currentAnswer = this->theProblemData.theAnswers[i];
+    Answer& currentAnswer = this->theProblemData.theAnswers.theValues[i];
     ///////////////
     JSData properties;
     for (int j = 0; j < currentAnswer.properties.size(); j ++) {
@@ -2784,7 +2784,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes() {
   out << "<script type =\"text/javascript\">\n";
   out << "answerMQspanIds = [";
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
-    out << "\"" << this->theProblemData.theAnswers[i].idMQfielD << "\"";
+    out << "\"" << this->theProblemData.theAnswers.theValues[i].idMQfielD << "\"";
     if (i != this->theProblemData.theAnswers.size() - 1) {
       out << ", ";
     }
@@ -2792,7 +2792,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes() {
   out << "];\n";
   out << "preferredButtonContainers = [";
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
-    out << "\"" << this->theProblemData.theAnswers[i].idMQButtonPanelLocation << "\"";
+    out << "\"" << this->theProblemData.theAnswers.theValues[i].idMQButtonPanelLocation << "\"";
     if (i != this->theProblemData.theAnswers.size() - 1) {
       out << ", ";
     }
@@ -2800,14 +2800,14 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes() {
   out << "];\n";
   out << "answerIdsPureLatex = [";
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
-    out << "\"" << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theAnswers[i].answerId, false) << "\"";
+    out << "\"" << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theAnswers.theValues[i].answerId, false) << "\"";
     if (i != this->theProblemData.theAnswers.size() - 1) {
       out << ", ";
     }
   }
   out << "];\n";
   for (int answerCounter = 0; answerCounter < this->theProblemData.theAnswers.size(); answerCounter ++) {
-    Answer& currentA = this->theProblemData.theAnswers[answerCounter];
+    Answer& currentA = this->theProblemData.theAnswers.theValues[answerCounter];
     out << "var " << currentA.varMQfield << ";\n";
     out << "var " << currentA.varAnswerId << ";\n";
     out
@@ -2824,7 +2824,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes() {
   << "function initializeMathQuill(){\n";
 
   for (int answerCounter = 0; answerCounter < this->theProblemData.theAnswers.size(); answerCounter ++) {
-    Answer& currentA = this->theProblemData.theAnswers[answerCounter];
+    Answer& currentA = this->theProblemData.theAnswers.theValues[answerCounter];
     out << "////////////////////////\n";
     out << currentA.varMQfield  << " = document.getElementById('" << currentA.idMQfielD << "');\n"
     << currentA.varAnswerId << " = document.getElementById('" << currentA.answerId << "');\n"
@@ -3836,8 +3836,8 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments) {
   this->CheckConsistencyTopics();
   this->problemNamesNoTopics.Clear();
   for (int i = 0; i < this->theTopicS.size(); i ++) {
-    if (this->theTopicS[i].problemFileName != "") {
-      this->problemNamesNoTopics.AddOnTop(this->theTopicS[i].problemFileName);
+    if (this->theTopicS.theValues[i].problemFileName != "") {
+      this->problemNamesNoTopics.AddOnTop(this->theTopicS.theValues[i].problemFileName);
     }
   }
   for (int i = this->theTopicS.size() - 1; i >= 0; i --) {
@@ -4246,7 +4246,7 @@ void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput
   }
   this->topicLectureCounter = 0;
   for (int i = 0; i < this->theTopicS.size(); i ++) {
-    TopicElement currentTopic = this->theTopicS[i];
+    TopicElement currentTopic = this->theTopicS.theValues[i];
     currentTopic.ComputeLinks(*this, plainStyle);
     if (!currentTopic.flagHasLectureTag) {
       continue;
@@ -4288,10 +4288,10 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
     theGlobalVariables.userCalculatorRequestType != "templateNoLogin";
     HashedList<std::string, MathRoutines::HashString> gradableProblems;
     for (int i = 0; i < this->theTopicS.size(); i ++) {
-      if (this->theTopicS[i].type == TopicElement::tProblem) {
-        gradableProblems.AddOnTopNoRepetition(this->theTopicS[i].id);
-        if (this->theTopicS[i].immediateChildren.size > 0) {
-          crash << "Error: problem " << this->theTopicS[i].ToString() << " has children topics which is not allowed. "
+      if (this->theTopicS.theValues[i].type == TopicElement::tProblem) {
+        gradableProblems.AddOnTopNoRepetition(this->theTopicS.theValues[i].id);
+        if (this->theTopicS.theValues[i].immediateChildren.size > 0) {
+          crash << "Error: problem " << this->theTopicS.theValues[i].ToString() << " has children topics which is not allowed. "
           << crash;
         }
       }
@@ -4362,7 +4362,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
   this->flagTopicSubSectionStarted = false;
   this->flagTopicTableStarted = false;
   for (int i = 0; i < this->theTopicS.size(); i ++) {
-    TopicElement& currentElt = this->theTopicS[i];
+    TopicElement& currentElt = this->theTopicS.theValues[i];
     if (currentElt.type == currentElt.tTexHeader) {
       continue;
     }
@@ -4411,7 +4411,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
   topicListJS << "];\n";
   topicListJS << "var listTopics =[";
   for (int i = 0; i < this->theTopicS.size(); i ++) {
-    TopicElement& currentE = this->theTopicS[i];
+    TopicElement& currentE = this->theTopicS.theValues[i];
     if (currentE.type == currentE.tTexHeader) {
       continue;
     }
@@ -4714,7 +4714,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner) {
     << this->immediateChildren.ToStringCommaDelimited() << crash;
   }
   for (int i = 0; i < this->immediateChildren.size; i ++) {
-    TopicElement& currentChild = owner.theTopicS[this->immediateChildren[i]];
+    TopicElement& currentChild = owner.theTopicS.theValues[this->immediateChildren[i]];
     output["children"].theList.AddOnTop(currentChild.ToJSON(owner));
   }
   output["problemNumberString"] = this->problemNumberString;

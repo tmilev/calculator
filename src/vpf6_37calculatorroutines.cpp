@@ -145,7 +145,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
     for (int j = 0; j < theProblem.theProblemData.theAnswers.size(); j ++) {
       std::string currentAnswer;
       std::string currentKey = "calculatorAnswer" +
-      theProblem.theProblemData.theAnswers[j].answerId;
+      theProblem.theProblemData.theAnswers.theValues[j].answerId;
       theGlobalVariables.SetWebInpuT(currentKey, "1");
       theGlobalVariables.SetWebInpuT("fileName", theProblem.fileName);
       answerGeneration += HtmlInterpretation::GetAnswerOnGiveUp(

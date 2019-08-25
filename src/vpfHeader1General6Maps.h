@@ -69,9 +69,6 @@ public:
   int size() const {
     return this->theValues.size;
   }
-  value& operator[](int i) const {
-    return this->theValues[i];
-  }
   std::string ToStringHtml() const {
     std::stringstream out;
     out << "{";

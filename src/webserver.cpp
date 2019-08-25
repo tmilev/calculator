@@ -4878,7 +4878,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
     if (thirdArgument == "restart") {
       doRestart = true;
       if (argC > 3) {
-        timeLimitString = theGlobalVariables.problemExpectedNumberOfAnswers[3];
+        timeLimitString = theGlobalVariables.problemExpectedNumberOfAnswers.theValues[3];
       }
     } else {
       timeLimitString = thirdArgument;
@@ -5073,6 +5073,7 @@ void WebServer::InitializeGlobalVariables() {
 }
 
 int main(int argc, char **argv) {
+  std::cout << "DBUEG: main started!" << std::endl;
   return WebServer::main(argc, argv);
 }
 
@@ -5466,7 +5467,7 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable() {
   out << "\n<hr>\n";
   for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++) {
     out << theGlobalVariables.webArguments.theKeys[i] << ": "
-    << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.webArguments[i], true);
+    << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.webArguments.theValues[i], true);
     if (i != theGlobalVariables.webArguments.size() - 1) {
       out << "\n<br>\n";
     }

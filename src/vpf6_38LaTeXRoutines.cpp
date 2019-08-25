@@ -899,7 +899,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   }
   int numSlidePairsToBuild = 0;
   for (int i = 0; i < topicParser.theTopicS.size(); i ++) {
-    if (topicParser.theTopicS[i].sourceSlides.size > 0) {
+    if (topicParser.theTopicS.theValues[i].sourceSlides.size > 0) {
       numSlidePairsToBuild ++;
     }
   }
@@ -915,7 +915,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   for (int i = 0; i < topicParser.theTopicS.size()
 //        && numProcessed < 2
         ; i ++) {
-    TopicElement& currentElt = topicParser.theTopicS[i];
+    TopicElement& currentElt = topicParser.theTopicS.theValues[i];
     if (currentElt.sourceHomework.size == 0) {
       continue;
     }
@@ -965,7 +965,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   for (int i = 0; i < topicParser.theTopicS.size()
 //        && numProcessed < 2
         ; i ++) {
-    TopicElement& currentElt = topicParser.theTopicS[i];
+    TopicElement& currentElt = topicParser.theTopicS.theValues[i];
     if (currentElt.sourceSlides.size == 0) {
       continue;
     }

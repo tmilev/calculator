@@ -140,7 +140,7 @@ std::string ProblemData::ToStringAvailableAnswerIds() {
   std::stringstream out;
   out << "Available answer ids: ";
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    out << this->theAnswers[i].answerId;
+    out << this->theAnswers.theValues[i].answerId;
     if (i != this->theAnswers.size() - 1) {
       out << ", ";
     }
@@ -173,7 +173,7 @@ std::string ProblemDataAdministrative::ToString() const {
 bool ProblemData::CheckConsistency() const {
   MacroRegisterFunctionWithName("ProblemData::CheckConsistency");
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].answerId) == "") {
+    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers.theValues[i].answerId) == "") {
       crash << "This is not supposed to happen: empty answer id." << crash;
     }
   }
@@ -183,10 +183,10 @@ bool ProblemData::CheckConsistency() const {
 bool ProblemData::CheckConsistencyMQids() const {
   MacroRegisterFunctionWithName("ProblemData::CheckConsistencyMQids");
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfielD) == "") {
+    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers.theValues[i].idMQfielD) == "") {
       std::stringstream errorStream;
       errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
-      << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>Answer information: "
+      << this->theAnswers.theValues[i].answerId << "<br>" << this->ToString() << "<hr>Answer information: "
       << this->ToString() << "<br>";
       if (true) {
         stOutput << errorStream.str();
@@ -207,7 +207,7 @@ std::string ProblemData::ToString() const {
   }
   out << ". <br>";
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    Answer& currentA = this->theAnswers[i];
+    Answer& currentA = this->theAnswers.theValues[i];
     out << "AnswerId: " << currentA.answerId;
     out << ", numCorrectSubmissions: " << currentA.numCorrectSubmissions;
     out << ", numSubmissions: " << currentA.numSubmissions;
@@ -454,7 +454,7 @@ std::string ProblemData::StorE(){
     out << "randomSeed=" << this->randomSeed;
   }
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    Answer& currentA = this->theAnswers[i];
+    Answer& currentA = this->theAnswers.theValues[i];
     if (this->flagRandomSeedGiven || i != 0) {
       out << "&";
     }
@@ -477,7 +477,7 @@ JSData ProblemData::StoreJSON() {
     result["randomSeed"] = std::to_string(this->randomSeed);
   }
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    Answer& currentA = this->theAnswers[i];
+    Answer& currentA = this->theAnswers.theValues[i];
     JSData currentAnswerJSON;
     currentAnswerJSON["numCorrectSubmissions"] = std::to_string(currentA.numCorrectSubmissions);
     currentAnswerJSON["numSubmissions"] = std::to_string(currentA.numSubmissions);
@@ -754,7 +754,7 @@ bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, st
   ProblemData reader;
   std::string probNameNoWhiteSpace;
   for (int i = 0; i < theMap.size(); i ++) {
-    if (!reader.LoadFroM(HtmlRoutines::ConvertURLStringToNormal(theMap[i], false), commentsOnFailure)) {
+    if (!reader.LoadFroM(HtmlRoutines::ConvertURLStringToNormal(theMap.theValues[i], false), commentsOnFailure)) {
       result = false;
       continue;
     }

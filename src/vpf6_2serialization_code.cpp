@@ -354,7 +354,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementList(
     if (!outputExpressionFormat.theKeys[i].IsOfType<std::string>(&keyName)) {
       keyName = outputExpressionFormat.theKeys[i].ToString();
     }
-    output.SetKeyValue(keyName, outputExpressionFormat[i]);
+    output.SetKeyValue(keyName, outputExpressionFormat.theValues[i]);
   }
   return true;
 }

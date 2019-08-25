@@ -70,7 +70,7 @@ JSData HtmlInterpretation::GetProblemSolutionJSON() {
     result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
     return result;
   }
-  Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
+  Answer& currentA = theProblem.theProblemData.theAnswers.theValues[indexLastAnswerId];
   Calculator theInterpreteR;
   theInterpreteR.initialize();
   theInterpreteR.flagPlotNoControls = true;
@@ -255,7 +255,7 @@ JSData HtmlInterpretation::submitAnswersPreviewJSON() {
   JSData result;
   for (int i = 0; i < theArgs.size(); i ++) {
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID)) {
-      lastAnswer = "(" + HtmlRoutines::ConvertURLStringToNormal(theArgs[i], false) + "); ";
+      lastAnswer = "(" + HtmlRoutines::ConvertURLStringToNormal(theArgs.theValues[i], false) + "); ";
     }
   }
   studentAnswerSream << lastAnswer;
@@ -283,7 +283,7 @@ JSData HtmlInterpretation::submitAnswersPreviewJSON() {
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
-  Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
+  Answer& currentA = theProblem.theProblemData.theAnswers.theValues[indexLastAnswerId];
   if (!theProblem.PrepareCommands(&comments)) {
     errorStream << "Something went wrong while interpreting the problem file. ";
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
@@ -1054,8 +1054,8 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
         answerIdIndex = newAnswerIndex;
       } else if (answerIdIndex != newAnswerIndex && answerIdIndex != - 1 && newAnswerIndex != - 1) {
         output << "<b>You submitted two or more answers [answer tags: "
-        << theProblem.theProblemData.theAnswers[answerIdIndex].answerId
-        << " and " << theProblem.theProblemData.theAnswers[newAnswerIndex].answerId
+        << theProblem.theProblemData.theAnswers.theValues[answerIdIndex].answerId
+        << " and " << theProblem.theProblemData.theAnswers.theValues[newAnswerIndex].answerId
         << "].</b> At present, multiple answer submission is not supported. ";
         result[WebAPI::result::resultHtml] = output.str();
         return result;
@@ -1067,7 +1067,7 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
         result[WebAPI::result::resultHtml] = output.str();
         return result;
       }
-      Answer& currentProblemData = theProblem.theProblemData.theAnswers[answerIdIndex];
+      Answer& currentProblemData = theProblem.theProblemData.theAnswers.theValues[answerIdIndex];
       currentProblemData.currentAnswerURLed = theArgs.theValues[i];
       if (currentProblemData.currentAnswerURLed == "") {
         output << "<b> Your answer to tag with id " << studentAnswerNameReader
@@ -1083,7 +1083,7 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
     return result;
   }
   ProblemData& currentProblemData = theProblem.theProblemData;
-  Answer& currentA = currentProblemData.theAnswers[answerIdIndex];
+  Answer& currentA = currentProblemData.theAnswers.theValues[answerIdIndex];
 
   currentA.currentAnswerClean = HtmlRoutines::ConvertURLStringToNormal(currentA.currentAnswerURLed, false);
   currentA.currentAnswerURLed = HtmlRoutines::ConvertStringToURLString(currentA.currentAnswerClean, false);//<-encoding back to overwrite malformed input
@@ -1496,7 +1496,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     result[WebAPI::result::error] = errorStream.str();
     return result.ToString(false);
   }
-  Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
+  Answer& currentA = theProblem.theProblemData.theAnswers.theValues[indexLastAnswerId];
   if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly == "") {
     out << "<b> Unfortunately there is no answer given for this "
     << "question (answerID: " << lastStudentAnswerID << ").</b>";
@@ -2086,10 +2086,10 @@ void UserCalculator::ComputePointsEarned(
       //stOutput << "Debug: weight not ok: " << problemName << "<br>";
     }
     for (int j = 0; j < currentP.theAnswers.size(); j ++) {
-      if (currentP.theAnswers[j].numCorrectSubmissions > 0) {
+      if (currentP.theAnswers.theValues[j].numCorrectSubmissions > 0) {
         currentP.numCorrectlyAnswered ++;
       }
-      currentP.totalNumSubmissions += currentP.theAnswers[j].numSubmissions;
+      currentP.totalNumSubmissions += currentP.theAnswers.theValues[j].numSubmissions;
     }
     if (currentP.flagProblemWeightIsOK) {
       int expectedNumberOfAnswers = currentP.getExpectedNumberOfAnswers(problemName, commentsOnFailure);
@@ -2214,7 +2214,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.theTopicS, comments);
     this->scoresBreakdown.LastObject()->Clear();
     for (int j = 0; j < theProblem.theTopicS.size(); j ++) {
-      TopicElement& currentTopic = theProblem.theTopicS[j];
+      TopicElement& currentTopic = theProblem.theTopicS.theValues[j];
       Rational currentPts = currentTopic.totalPointsEarned;
       Rational maxPts = currentTopic.maxPointsInAllChildren;
       this->scoresBreakdown.LastObject()->SetKeyValue(theProblem.theTopicS.theKeys[j],currentPts);
@@ -2247,7 +2247,7 @@ std::string HtmlInterpretation::GetScoresInCoursePage() {
   out << "studentScoresInHomePage = new Array("
   << theScores.theProblem.theTopicS.size() << ");\n";
   for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++) {
-    TopicElement& currentElt = theScores.theProblem.theTopicS[i];
+    TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
     out << "studentScoresInHomePage[" << i << "] = new Object;\n";
     if (currentElt.flagSubproblemHasNoWeight) {
       out << "studentScoresInHomePage[" << i << "].weightsOK = false;\n";

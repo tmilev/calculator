@@ -82,11 +82,14 @@ struct TransportLayerSecurityOpenSSL {
   static bool initSSLKeyFilesCreateOnDemand();
 };
 
-class CipherSpec {
-
-};
-
 class SSLRecord;
+
+class CipherSuiteSpecification {
+public:
+  int encoding;
+  std::string name;
+  bool ComputeName();
+};
 
 // SSL client hello helpful links.
 // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art059
@@ -103,7 +106,7 @@ public:
   int challengeLength;
   static const int LengthRandomBytesInSSLHello = 32;
   List<char> RandomBytes;
-  List<CipherSpec> supportedCiphers;
+  List<CipherSuiteSpecification> supportedCiphers;
   List<char> sessionId;
   List<char> challenge;
   SSLHello();
@@ -153,6 +156,7 @@ public:
     static const unsigned char clientKeyExchange = 16; //0x10
     static const unsigned char finished = 20; //0x14
   };
+  static MapLisT<int, std::string, MathRoutines::IntUnsignIdentity>& cipherSuites();
   int socketId;
   int64_t millisecondsTimeOut;
   int64_t millisecondsDefaultTimeOut;

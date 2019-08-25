@@ -86,7 +86,7 @@ void MeshTriangles::PlotGrid(int theColor) {
 double MeshTriangles::GetValueAtPoint(const Vector<double>& thePoint) {
   int theIndex = this->theEvaluatedPoints.GetIndex(thePoint);
   if (theIndex != - 1) {
-    return this->theEvaluatedPoints[theIndex];
+    return this->theEvaluatedPoints.theValues[theIndex];
   }
   this->knownValues[this->knownValues.size - 2] = thePoint[0];
   this->knownValues[this->knownValues.size - 1] = thePoint[1];

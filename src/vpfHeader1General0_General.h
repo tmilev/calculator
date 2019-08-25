@@ -1614,7 +1614,8 @@ public:
   HashedList(const HashedList& other):HashTemplate<Object, List<Object>, hashFunction>() {
     this->operator=(other);
   }
-  HashedList(){}
+  HashedList() {
+  }
   void operator=(const HashedList& other) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(other);
   }

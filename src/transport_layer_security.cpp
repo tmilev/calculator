@@ -572,7 +572,38 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   return true;
 }
 
+MapLisT<int, std::string, MathRoutines::IntUnsignIdentity>& TransportLayerSecurityServer::cipherSuites() {
+  static MapLisT<int, std::string, MathRoutines::IntUnsignIdentity> result;
+  result.theKeys.GrandMasterConsistencyCheck();
+  return result;
+}
+
 TransportLayerSecurityServer::TransportLayerSecurityServer() {
+  std::cout << "Got to here!" << std::endl;
+  MapLisT<int, std::string, MathRoutines::IntUnsignIdentity>& theSuites = this->cipherSuites();
+  std::cout << "Got to here 6!" << std::endl;
+  theSuites.theKeys.GrandMasterConsistencyCheck();
+
+  if (theSuites.size() > 0) {
+    crash << "Only one transport layer security server should ever be initialized. " << crash;
+  }
+  std::cout << "Got to here 4!" << std::endl;
+  theSuites.theKeys.GrandMasterConsistencyCheck();
+  //std::cout << "hash size: suite: " <<  theSuites << std::endl;
+  this->cipherSuites().SetKeyValue(0,      "unknown"                             );
+  this->cipherSuites().SetKeyValue(0xc02b, "ECDHE/ECDSA/AES 128/GCM/SHA2"        ); // (RFC 5289)
+  this->cipherSuites().SetKeyValue(0xc02f, "ECDHE/RSA/AES 128/GCM/SHA2"          ); // (RFC 5289)
+  this->cipherSuites().SetKeyValue(0xc02c, "ECDHE/ECDSA/AES 128/GCM/SHA3"        ); // (RFC 5289)
+  this->cipherSuites().SetKeyValue(0xc030, "ECDHE/RSA/AES 256/GCM/SHA3"          ); // (RFC 5289)
+  this->cipherSuites().SetKeyValue(0xcca9, "ECDHE/ECDSA/CHACHA 20/POLY 1305/SHA2"); // (RFC 7905)
+  this->cipherSuites().SetKeyValue(0xcca8, "ECDHE/RSA/CHACHA 20/POLY 1305/SHA2"  ); // (RFC 7905)
+  this->cipherSuites().SetKeyValue(0xc013, "ECDHE/RSA/AES 128/CBC/SHA"           ); // (RFC 4492)
+  this->cipherSuites().SetKeyValue(0xc014, "ECDHE/RSA/AES 256/CBC/SHA"           ); // (RFC 4492)
+  this->cipherSuites().SetKeyValue(0x009c, "RSA/RSA/AES 128/GCM/SHA2"            ); // (RFC 5288)
+  this->cipherSuites().SetKeyValue(0x009d, "RSA/RSA/AES 256/GCM/SHA2"            ); // (RFC 5288)
+  this->cipherSuites().SetKeyValue(0x002f, "RSA/RSA/AES 128/CBC/SHA"             ); // (RFC 5246)
+  this->cipherSuites().SetKeyValue(0x0035, "RSA/RSA/AES 256/CBC/SHA"             ); // (RFC 5246)
+  this->cipherSuites().SetKeyValue(0x000a, "RSA/RSA/3DES/CBC/SHA"                ); // (RFC 5246)
   this->socketId = - 1;
   this->millisecondsDefaultTimeOut = 5000;
   this->millisecondsTimeOut = this->millisecondsDefaultTimeOut;
@@ -598,7 +629,7 @@ SSLHello::SSLHello() {
 }
 
 logger::StringHighligher SSLHello::getStringHighlighter() {
-  return logger::StringHighligher("2,4,4,2,6,4,8,56");
+  return logger::StringHighligher("2,4,4,2,6,4,64,2,64,4,4");
 }
 
 std::string SSLHello::ToStringVersion() const {
@@ -612,14 +643,40 @@ std::string SSLHello::ToStringVersion() const {
 }
 
 JSData SSLHello::ToJSON() const {
+  MacroRegisterFunctionWithName("SSLHello::ToJSON");
   JSData result;
   result["version"] = this->ToStringVersion();
   result["length"] = this->length;
   result["cipherSpecLength"] = this->cipherSpecLength;
+  result["sessionIdLength"] = this->sessionIdLength;
+  result["sessionId"] = Crypto::ConvertListCharsToHex(this->sessionId, 0, false);
+  JSData ciphers;
+  ciphers.theType = JSData::token::tokenArray;
+  ciphers.theList.SetSize(this->supportedCiphers.size);
+  for (int i = 0; i < this->supportedCiphers.size; i ++) {
+    ciphers.theList[i] = this->supportedCiphers[i].name;
+  }
+  result["cipherSuites"] = ciphers;
   return result;
 }
 
+bool CipherSuiteSpecification::ComputeName() {
+  MacroRegisterFunctionWithName("CipherSuiteSpecification::ComputeName");
+  if (!TransportLayerSecurityServer::cipherSuites().Contains(this->encoding)) {
+    std::cout << "DEBUG: got to here!!!";
+    this->encoding = 0;
+    this->name = "unknown";
+    return false;
+  }
+  std::cout << "DEBUG: got to here 2!!!";
+  this->name = TransportLayerSecurityServer::cipherSuites().GetValueConstCrashIfNotPresent(this->encoding);
+  return true;
+}
+
 bool SSLHello::Decode(SSLRecord& owner, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("SSLHello::Decode");
+  logWorker << logger::blue << "DEBUG: Input: " << this->getStringHighlighter()
+  << Crypto::ConvertListUnsignedCharsToHex(owner.body, 0, false) << logger::endL;
   this->handshakeType = owner.body[owner.offsetDecoded];
   if (
     this->handshakeType != TransportLayerSecurityServer::recordsHandshake::clientHello &&
@@ -647,21 +704,49 @@ bool SSLHello::Decode(SSLRecord& owner, std::stringstream* commentsOnFailure) {
   }
   this->version = owner.body[owner.offsetDecoded + 4] * 256;
   this->version += owner.body[owner.offsetDecoded + 5];
+  owner.offsetDecoded += 6;
   this->RandomBytes.SetSize(SSLHello::LengthRandomBytesInSSLHello);
   for (int i = 0; i < 32; i ++) {
-    this->RandomBytes[i] = owner.body[owner.offsetDecoded + 6 + i];
+    this->RandomBytes[i] = owner.body[owner.offsetDecoded + i];
   }
-  this->sessionIdLength = (unsigned) owner.body[owner.offsetDecoded + 6 + SSLHello::LengthRandomBytesInSSLHello];
-  if (this->sessionIdLength > 0) {
+  owner.offsetDecoded += SSLHello::LengthRandomBytesInSSLHello;
+  this->sessionIdLength = owner.body[owner.offsetDecoded];
+  if (
+    this->sessionIdLength + owner.offsetDecoded >= owner.body.size
+  ) {
     if (commentsOnFailure != 0) {
-      *commentsOnFailure << "Session id not implemented yet. ";
+      *commentsOnFailure << "Session id is too long. ";
     }
     return false;
   }
-  this->cipherSpecLength  = owner.body[owner.offsetDecoded + 6 + SSLHello::LengthRandomBytesInSSLHello + 1 + this->sessionIdLength] * 256;
-  this->cipherSpecLength += owner.body[owner.offsetDecoded + 6 + SSLHello::LengthRandomBytesInSSLHello + 1 + this->sessionIdLength + 1];
-  logWorker << logger::blue << "DEBUG: Input: " << this->getStringHighlighter()
-  << Crypto::ConvertListUnsignedCharsToHex(owner.body, 0, false) << logger::endL;
+  owner.offsetDecoded ++;
+  this->sessionId.SetSize(this->sessionIdLength);
+  for (int i = 0; i < this->sessionIdLength; i ++) {
+    this->sessionId[i] = owner.body[owner.offsetDecoded + i];
+  }
+  owner.offsetDecoded += this->sessionIdLength;
+  if (owner.offsetDecoded + 2 >= owner.body.size) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Cipher suite length is not included in the hello. ";
+    }
+    return false;
+  }
+  this->cipherSpecLength  = owner.body[owner.offsetDecoded] * 256;
+  this->cipherSpecLength += owner.body[owner.offsetDecoded + 1];
+  owner.offsetDecoded += 2;
+  if (this->cipherSpecLength + owner.offsetDecoded >= owner.body.size) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Cipher suite length: " << this->cipherSpecLength << " exceeds message length. ";
+    }
+    return false;
+  }
+  this->supportedCiphers.SetSize(this->cipherSpecLength);
+  for (int i = 0; i < this->cipherSpecLength; i += 2) {
+    this->supportedCiphers[i].encoding = owner.body[owner.offsetDecoded + i] * 256;
+    this->supportedCiphers[i].encoding += owner.body[owner.offsetDecoded + i + 1];
+    this->supportedCiphers[i].ComputeName();
+  }
+  logWorker << "DEBUG: decoded so far: " << this->ToJSON().ToString(false, true, false, false) << logger::endL;
   crash << "SSLHello::Decode Not implemented yet" << crash;
   return false;
 }

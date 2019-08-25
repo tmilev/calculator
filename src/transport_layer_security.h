@@ -86,10 +86,11 @@ class CipherSpec {
 
 };
 
-
 class SSLRecord;
 
 // SSL client hello helpful links.
+// https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art059
+// https://serializethoughts.com/2014/07/27/dissecting-tls-client-hello-message/
 // https://idea.popcount.org/2012-06-16-dissecting-ssl-handshake/
 //
 class SSLHello {
@@ -100,12 +101,16 @@ public:
   int cipherSpecLength;
   int sessionIdLength;
   int challengeLength;
+  static const int LengthRandomBytesInSSLHello = 32;
+  List<char> RandomBytes;
   List<CipherSpec> supportedCiphers;
   List<char> sessionId;
   List<char> challenge;
   SSLHello();
   logger::StringHighligher getStringHighlighter();
   bool Decode(SSLRecord& owner, std::stringstream* commentsOnFailure);
+  JSData ToJSON() const;
+  std::string ToStringVersion() const;
 };
 
 // A basic explanation of ssl records:
@@ -124,7 +129,7 @@ public:
   unsigned char theType;
   int version;
   int length;
-  List<char> body;
+  List<unsigned char> body;
   SSLHello hello;
   SSLRecord();
   bool Decode(std::stringstream* commentsOnFailure);

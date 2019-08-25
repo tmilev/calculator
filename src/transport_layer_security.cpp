@@ -598,7 +598,25 @@ SSLHello::SSLHello() {
 }
 
 logger::StringHighligher SSLHello::getStringHighlighter() {
-  return logger::StringHighligher("2,4,4,2");
+  return logger::StringHighligher("2,4,4,2,6,4,8,56");
+}
+
+std::string SSLHello::ToStringVersion() const {
+  List<char> twoBytes;
+  twoBytes.SetSize(2);
+  twoBytes[0] = (char) (this->version / 256);
+  twoBytes[1] = (char) (this->version % 256);
+  std::stringstream out;
+  out << Crypto::ConvertListCharsToHex(twoBytes, 0, false);
+  return out.str();
+}
+
+JSData SSLHello::ToJSON() const {
+  JSData result;
+  result["version"] = this->ToStringVersion();
+  result["length"] = this->length;
+  result["cipherSpecLength"] = this->cipherSpecLength;
+  return result;
 }
 
 bool SSLHello::Decode(SSLRecord& owner, std::stringstream* commentsOnFailure) {
@@ -612,8 +630,38 @@ bool SSLHello::Decode(SSLRecord& owner, std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-
-  logWorker << logger::blue << "DEBUG: Input: " << this->getStringHighlighter() << Crypto::ConvertListCharsToHex(owner.body, 0, false) << logger::endL;
+  if (owner.offsetDecoded + 1 + 3 + 2 + SSLHello::LengthRandomBytesInSSLHello + 1 + 2 >= owner.body.size) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Client hello is too short.";
+    }
+    return false;
+  }
+  this->length = (unsigned) owner.body[owner.offsetDecoded + 1] * 256 * 256;
+  this->length += (unsigned) owner.body[owner.offsetDecoded + 2] * 256;
+  this->length += (unsigned) owner.body[owner.offsetDecoded + 3];
+  if (this->length + owner.offsetDecoded >= owner.body.size) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Client hello length is too big. ";
+    }
+    return false;
+  }
+  this->version = owner.body[owner.offsetDecoded + 4] * 256;
+  this->version += owner.body[owner.offsetDecoded + 5];
+  this->RandomBytes.SetSize(SSLHello::LengthRandomBytesInSSLHello);
+  for (int i = 0; i < 32; i ++) {
+    this->RandomBytes[i] = owner.body[owner.offsetDecoded + 6 + i];
+  }
+  this->sessionIdLength = (unsigned) owner.body[owner.offsetDecoded + 6 + SSLHello::LengthRandomBytesInSSLHello];
+  if (this->sessionIdLength > 0) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Session id not implemented yet. ";
+    }
+    return false;
+  }
+  this->cipherSpecLength  = owner.body[owner.offsetDecoded + 6 + SSLHello::LengthRandomBytesInSSLHello + 1 + this->sessionIdLength] * 256;
+  this->cipherSpecLength += owner.body[owner.offsetDecoded + 6 + SSLHello::LengthRandomBytesInSSLHello + 1 + this->sessionIdLength + 1];
+  logWorker << logger::blue << "DEBUG: Input: " << this->getStringHighlighter()
+  << Crypto::ConvertListUnsignedCharsToHex(owner.body, 0, false) << logger::endL;
   crash << "SSLHello::Decode Not implemented yet" << crash;
   return false;
 }
@@ -647,8 +695,11 @@ std::string SSLRecord::ToStringType() const {
 std::string SSLRecord::ToString() const {
   JSData result;
   result["length"] = this->length;
-  result["body"] = Crypto::ConvertListCharsToHex(this->body, 50, false);
+  result["body"] = Crypto::ConvertListUnsignedCharsToHex(this->body, 50, false);
   result["type"] = this->ToStringType();
+  if (this->theType == SSLRecord::tokens::handshake) {
+    result["hello"] = this->hello.ToJSON();
+  }
   std::string hexVersion;
   Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(LargeIntUnsigned((unsigned) this->version), 0, hexVersion);
   result["version"] = hexVersion;

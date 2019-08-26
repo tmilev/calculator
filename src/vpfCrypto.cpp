@@ -4,6 +4,7 @@
 #include "vpfHeader1General7FileOperations_Encodings.h"
 #include "vpfJson.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
+#include <iomanip>
 ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA- 1 and base64 implementation.");
 
 unsigned char Crypto::GetCharFrom6bit(uint32_t input, bool useBase64URL) {
@@ -522,6 +523,12 @@ void Crypto::ConvertUint32ToString(const List<uint32_t>& input, std::string& out
     output[i * 4 + 2] = (char) ((input[i] / 256) % 256);
     output[i * 4 + 3] = (char) (input[i] % 256);
   }
+}
+
+std::string Crypto::ConvertUintToHex(unsigned int input, int significantBytes) {
+  std::stringstream out;
+  out << std::hex << std::setfill('0') << std::setw(2 * significantBytes) << input;
+  return out.str();
 }
 
 bool Crypto::ConvertHexToString(const std::string& input, std::string& output, std::stringstream* commentsOnFailure) {

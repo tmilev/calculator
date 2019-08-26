@@ -117,6 +117,8 @@ public:
   int extensionsLength;
   int compressionMethod;
   bool flagRenegotiate;
+  bool flagRequestOnlineCertificateStatusProtocol;
+  bool flagRequestSignedCertificateTimestamp;
   List<unsigned char> renegotiationCharacters;
   static const int LengthRandomBytesInSSLHello = 32;
   List<unsigned char> RandomBytes;

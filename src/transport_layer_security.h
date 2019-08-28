@@ -119,8 +119,8 @@ public:
   bool flagRenegotiate;
   bool flagRequestOnlineCertificateStatusProtocol;
   bool flagRequestSignedCertificateTimestamp;
-  List<unsigned char> renegotiationCharacters;
   static const int LengthRandomBytesInSSLHello = 32;
+  List<unsigned char> renegotiationCharacters;
   List<unsigned char> RandomBytes;
   List<CipherSuiteSpecification> supportedCiphers;
   List<SSLHelloExtension> extensions;
@@ -128,13 +128,14 @@ public:
   List<unsigned char> challenge;
 
   SSLHello();
+  void resetExceptOwner();
   logger::StringHighligher getStringHighlighter();
   bool Decode(std::stringstream* commentsOnFailure);
   bool DecodeExtensions(std::stringstream* commentsOnFailure);
   bool ProcessExtensions(std::stringstream* commentsOnFailure);
-
   JSData ToJSON() const;
   std::string ToStringVersion() const;
+  void ToBytes(List<char>& output) const;
 };
 
 // A basic explanation of ssl records:
@@ -166,36 +167,53 @@ public:
   static bool ReadThreeByteInt(
     const List<unsigned char>& input, int offset, int& result, std::stringstream* commentsOnFailure
   );
-  static bool ReadNByteInt(
-    int numBytes,
+  static bool ReadNByteInt(int numBytes,
     const List<unsigned char>& input,
-    int offset,
+    int &outputOffset,
     int& result,
     std::stringstream* commentsOnFailure
   );
+  static bool ReadTwoByteLengthFollowedByBytesDontOutputOffset(
+    const List<unsigned char>& input,
+    int Offset,
+    int* resultLength,
+    List<unsigned char>* output,
+    std::stringstream* commentsOnError
+  );
   static bool ReadTwoByteLengthFollowedByBytes(
     const List<unsigned char>& input,
-    int offset,
+    int& outputOffset,
     int* resultLength,
     List<unsigned char>* output,
     std::stringstream* commentsOnError
   );
   static bool ReadOneByteLengthFollowedByBytes(
     const List<unsigned char>& input,
-    int offset,
+    int& outputOffset,
     int* resultLength,
     List<unsigned char>* output,
     std::stringstream* commentsOnError
   );
-  static bool ReadNByteLengthFollowedByBytes(
-    int numBytesLength,
+  static bool ReadNByteLengthFollowedByBytes(int numBytesLength,
     const List<unsigned char>& input,
-    int offset,
+    int &outputOffset,
     int* resultLength,
     List<unsigned char>* output,
     std::stringstream* commentsOnError
   );
-
+  //Echoes back the number of bytes written
+  static void WriteNByteLength(// how many bytes are used to record the length
+    int byteCountOfLength,
+    unsigned int input,
+    List<unsigned char>& output,
+    int& inputOutputOffset
+  );
+  static void WriteNByteLengthFollowedByBytes(// how many bytes are used to record the length
+    int byteCountOfLength,
+    List<unsigned char>& input,
+    List<unsigned char>& output,
+    int &inputOutputOffset
+  );
 };
 
 class TransportLayerSecurityServer {
@@ -218,11 +236,13 @@ public:
   int64_t millisecondsTimeOut;
   int64_t millisecondsDefaultTimeOut;
   int defaultBufferCapacity;
-  SSLRecord lastRecord;
+  SSLRecord lastRead;
+  SSLRecord lastToWrite;
   TransportLayerSecurityServer();
   bool HandShakeIamServer(int inputSocketID, std::stringstream *commentsOnFailure);
   bool ReadBytesOnce();
   bool DecodeSSLRecord(std::stringstream* commentsOnFailure);
+  bool ReplyToClientHello(int inputSocketID, std::stringstream* commentsOnFailure);
   bool ReadBytesDecodeOnce(std::stringstream *commentsOnFailure);
   void WriteBytesOnce();
   void ReadLoop();

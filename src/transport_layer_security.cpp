@@ -178,7 +178,7 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
   }
   this->context = SSL_CTX_new(this->theSSLMethod);
 
-  if (this->context == 0) {
+  if (this->context == nullptr) {
     logServer << logger::red << "Failed to create ssl context. " << logger::endL;
     ERR_print_errors_fp(stderr);
     crash << "Openssl context error.\n" << commentsOnError.str() << crash;
@@ -252,7 +252,8 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
   }
 }
 
-bool TransportLayerSecurity::SSLReadLoop(int numTries,
+bool TransportLayerSecurity::SSLReadLoop(
+  int numTries,
   std::string& output,
   const LargeInt& expectedLength,
   std::string* outputError,
@@ -348,37 +349,37 @@ void TransportLayerSecurityOpenSSL::ClearErrorQueue(
   int extraErrorCode = 0;
   switch (theCode) {
   case SSL_ERROR_ZERO_RETURN:
-    if (outputError != 0) {
+    if (outputError != nullptr) {
       *outputError = "SSL_ERROR_ZERO_RETURN";
     }
     break;
   case SSL_ERROR_WANT_READ:
-    if (outputError != 0) {
+    if (outputError != nullptr) {
       *outputError = TransportLayerSecurityOpenSSL::errors::errorWantRead;
     }
     break;
   case SSL_ERROR_WANT_WRITE:
-    if (outputError != 0) {
+    if (outputError != nullptr) {
       *outputError = "SSL_ERROR_WANT_WRITE";
     }
     break;
   case SSL_ERROR_WANT_CONNECT:
-    if (outputError != 0) {
+    if (outputError != nullptr) {
       *outputError = "SSL_ERROR_WANT_CONNECT";
     }
     break;
   case SSL_ERROR_WANT_ACCEPT:
-    if (outputError != 0) {
+    if (outputError != nullptr) {
       *outputError = "SSL_ERROR_WANT_ACCEPT";
     }
     break;
   case SSL_ERROR_WANT_X509_LOOKUP:
-    if (outputError != 0) {
+    if (outputError != nullptr) {
       *outputError = "SSL_ERROR_WANT_X509_LOOKUP";
     }
     break;
   case SSL_ERROR_SYSCALL:
-    if (outputError != 0) {
+    if (outputError != nullptr) {
       *outputError = "SSL_ERROR_SYSCALL";
     }
     extraErrorCode = ERR_get_error();
@@ -393,12 +394,12 @@ void TransportLayerSecurityOpenSSL::ClearErrorQueue(
     }
     break;
   case SSL_ERROR_SSL:
-    if (outputError != 0) {
+    if (outputError != nullptr) {
       *outputError = "SSL_ERROR_SSL";
     }
     break;
   default:
-    if (outputError != 0) {
+    if (outputError != nullptr) {
       *outputError = "SSL_ERROR_unknown";
     }
     break;
@@ -462,7 +463,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   this->FreeSSL();
   this->initSSLClient();
   this->sslData = SSL_new(this->context);
-  if (this->sslData == 0) {
+  if (this->sslData == nullptr) {
     this->flagSSLHandshakeSuccessful = false;
     logOpenSSL << logger::red << "Failed to allocate ssl. " << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen. " << crash;
@@ -642,7 +643,7 @@ void SSLHello::resetExceptOwner() {
 }
 
 SSLHello::SSLHello() {
-  this->owner = 0;
+  this->owner = nullptr;
   this->resetExceptOwner();
 }
 
@@ -1315,12 +1316,12 @@ int TransportLayerSecurity::SSLWrite(
 bool TransportLayerSecurityOpenSSL::HandShakeIamServer(int inputSocketID) {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamServer");
   std::stringstream commentsOnSSLNew;
-  if (this->sslData != 0) {
+  if (this->sslData != nullptr) {
     crash << "SSL data expected to be zero. " << crash;
   }
   this->sslData = SSL_new(this->context);
   SSL_set_verify(this->sslData, SSL_VERIFY_NONE, 0);
-  if (this->sslData == 0) {
+  if (this->sslData == nullptr) {
     logOpenSSL << logger::red << "Failed to allocate ssl: " << commentsOnSSLNew.str() << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
   }
@@ -1398,12 +1399,12 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamServer(int inputSocketID) {
 }
 
 TransportLayerSecurityOpenSSL::TransportLayerSecurityOpenSSL() {
-  this->peer_certificate = 0;
-  this->sslData = 0;
+  this->peer_certificate = nullptr;
+  this->sslData = nullptr;
   this->errorCode = - 1;
-  this->theSSLMethod = 0;
-  this->context = 0;
-  this->owner = 0;
+  this->theSSLMethod = nullptr;
+  this->context = nullptr;
+  this->owner = nullptr;
   this->flagSSLHandshakeSuccessful = false;
   this->flagContextInitialized = false;
   this->flagIsServer = true;

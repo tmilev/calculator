@@ -2694,7 +2694,7 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output, std::
   Expression convertedE;
   for (int i = 1; i < mergedContexts.children.size; i ++) {
     if (!mergedContexts[i].ConvertToType<theType>(convertedE)) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "<hr>Failed to convert "
         << mergedContexts[i].ToString() << " to the desired type. ";
       }

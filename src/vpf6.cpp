@@ -3044,7 +3044,7 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
   }
   for (int i = 1; i < this->size(); i ++) {
     if (!(*this)[i].IsBuiltInTypE()) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "<hr>Failed to merge the arguments of the expression" << this->ToString() << ": the argument "
         << (*this)[i].ToString() << "is not of built-in type";
       }
@@ -3065,7 +3065,7 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
   }
   for (int i = 2; i < this->size(); i ++) {
     if (!(*this)[i].IsBuiltInTypE()) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
       }
       return false;

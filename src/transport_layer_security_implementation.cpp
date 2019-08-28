@@ -16,7 +16,7 @@ extern logger logServer   ;
 bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFailure) {
   std::string certificateContent, certificateContentStripped;
   if (!FileOperations::LoadFileToStringVirtual(TransportLayerSecurity::fileCertificate, certificateContent, true, true, commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load certificate file. ";
     }
     return false;
@@ -24,13 +24,13 @@ bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFai
   //see ASN1_item_d2i_bio for decoding.
   certificateContentStripped = MathRoutines::StringTrimWhiteSpace(certificateContent);
   if (!MathRoutines::StringBeginsWith(certificateContentStripped, "-----BEGIN CERTIFICATE-----", &certificateContentStripped)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad certificate start. ";
     }
     return false;
   }
   if (!MathRoutines::StringEndsWith(certificateContentStripped, "-----END CERTIFICATE-----", &certificateContentStripped)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad certificate end. ";
     }
     return false;
@@ -40,7 +40,7 @@ bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFai
     return false;
   }
   if (!this->theCertificate.LoadFromASNEncoded(this->theCertificate.sourceBinary, commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load certificate. ";
     }
     return false;

@@ -84,7 +84,7 @@ bool JSData::HasCompositeKeyOfType(
     return false;
   }
   if (whichValue->theType != targetType) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Key: " << key << ", value: " << whichValue->ToString(false)
       << " is of type " << (int) whichValue->theType
       << " instead of the target one: " << (int) targetType;
@@ -103,7 +103,7 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
   MathRoutines::StringSplitExcludeDelimiters(inputKeys, delimiters, keys);
   const JSData* currentData = this;
   if (keys.size == 0) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not extract any keys from your input: " << inputKeys;
     }
     return false;
@@ -113,7 +113,7 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
     int theDigit = - 1;
     if (MathRoutines::isADigit(keys[i], &theDigit)) {
       if (currentData->theType != JSData::token::tokenArray) {
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "The sub-object located before the key: " << keys[i] << " [all keys: "
           << keys.ToStringCommaDelimited() << "]"
           << " is not an array, but is instead: " << currentData->ToString(false, true, true, true);
@@ -121,7 +121,7 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
         return false;
       }
       if (currentData->theList.size <= theDigit) {
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Key index: " << theDigit
           << " is too large for current value: " << currentData->ToString(false, true, true, true);
         }
@@ -131,14 +131,14 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
       continue;
     }
     if (currentData->theType != JSData::token::tokenObject) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Value preceding key: " << keys[i]
         << " is not of type object: " << currentData->ToString(false, true, true, true);
       }
       return false;
     }
     if (!currentData->HasKey(keys[i])) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Key: " << keys[i]
         << " not present in: " << currentData->ToString(false, true, true, true);
       }
@@ -440,7 +440,7 @@ bool JSData::readstring(
     readingStack.AddOnTop(theTokenS[i]);
   }
   if (readingStack.size != JSData::numEmptyTokensAtStart + 1) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       std::stringstream calculatorInput;
       calculatorInput
       << "TestJSON(\""

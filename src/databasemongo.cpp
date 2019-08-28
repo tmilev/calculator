@@ -37,7 +37,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::initialize(std::stringstream* comment
   }
   logWorker << logger::blue << "Initializing database. " << logger::endL;
   if (!theGlobalVariables.flagServerForkedIntoWorker) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "MongoDB not allowed to run before server fork. ";
     }
     return false;
@@ -54,7 +54,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::initialize(std::stringstream* comment
   DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableDeleted, DatabaseStrings::labelUsername);
   return true;
 #else
-  if (commentsOnFailure != 0) {
+  if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Calculator compiled without mongoDB support. ";
   }
   return false;
@@ -188,7 +188,7 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
   ((const uint8_t*) this->findQuery.c_str(), this->findQuery.size(), &this->theError);
   bool result = mongoc_collection_remove(theCollection.collection, MONGOC_REMOVE_SINGLE_REMOVE, this->query, NULL, &this->theError);
   if (!result) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
     }
     logWorker << logger::red << "While removing: "
@@ -219,7 +219,7 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
     (const uint8_t*) incomingJSONString.c_str(), incomingJSONString.size(), &this->theError
   );
   if (this->update == NULL) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to create insertion bson.";
     }
     return false;
@@ -227,7 +227,7 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
   this->updateResult = bson_new();
   bool result = mongoc_collection_insert_one(theCollection.collection, this->update, NULL, this->updateResult, &this->theError);
   if (!result) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
     }
     logWorker << logger::red << "While updating: "
@@ -279,7 +279,7 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
     );
   }
   if (!result) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
     }
     logWorker << logger::red << "While updating: "
@@ -324,7 +324,7 @@ bool MongoQuery::FindMultiple(
   }
   this->query = bson_new_from_json((const uint8_t*) this->findQuery.c_str(), this->findQuery.size(), &this->theError);
   if (this->query == NULL) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
     }
     logWorker << logger::red << "While finding: "
@@ -341,7 +341,7 @@ bool MongoQuery::FindMultiple(
     std::string optionsString = inputOptions.ToString(false, false);
     this->options = bson_new_from_json((const uint8_t*) optionsString.c_str(), optionsString.size(), &this->theError);
     if (this->options == NULL) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << this->theError.message;
       }
       logWorker << logger::red << "Mongo error: " << this->theError.message << logger::endL;
@@ -350,7 +350,7 @@ bool MongoQuery::FindMultiple(
   }
   this->cursor = mongoc_collection_find_with_opts(theCollection.collection, this->query, this->options, NULL);
   if (this->cursor == NULL) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad mongoDB cursor. ";
     }
     logWorker << logger::red << "Mongo error: bad mongoDB cursor. " << logger::endL;
@@ -424,7 +424,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromString(
     collectionName, theData, output, maxOutputItems, totalItems, commentsOnFailure
   );
 #else
-  if (commentsOnFailure != 0) {
+  if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Error: code compiled without DB support";
   }
   (void) collectionName;
@@ -515,7 +515,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions(
   (void) output;
   (void) maxOutputItems;
   (void) totalItems;
-  if (commentsOnFailure != 0) {
+  if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Project compiled without mongoDB support. ";
   }
   return false;
@@ -531,7 +531,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoUpdateQuery(
     updateQuery.theType != JSData::token::tokenObject &&
     updateQuery.theType != JSData::token::tokenArray
   ) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "JSData: "
       << HtmlRoutines::ConvertStringToHtmlString(updateQuery.ToString(false), false)
       << " expected to be a string, array or an object. ";
@@ -565,7 +565,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoFindQuery(
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoFindQuery");
   if (mustBeObject) {
     if (findQuery.theType != JSData::token::tokenObject) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "JSData: "
         << HtmlRoutines::ConvertStringToHtmlString(findQuery.ToString(false), false)
         << " expected to be an object. ";
@@ -579,7 +579,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoFindQuery(
       }
     }
     if (findQuery.theType != JSData::token::tokenString && findQuery.theType != JSData::token::tokenObject) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "JSData: "
         << HtmlRoutines::ConvertStringToHtmlString(findQuery.ToString(false), false)
         << " expected to be a string or an object. ";
@@ -705,7 +705,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions(
   (void) findQuery;
   (void) output;
   (void) options;
-  if (commentsOnFailure != 0) {
+  if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Project compiled without mongoDB support. ";
   }
   return false;
@@ -763,7 +763,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::isDeleteable(
       return true;
     }
   }
-  if (commentsOnFailure != 0) {
+  if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Labels: " << theLabels.ToStringCommaDelimited()
     << " do not match any modifiable field pattern. ";
   }
@@ -777,7 +777,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::getLabels(
   output.SetSize(0);
   for (int i = 0; i < fieldEntries.theList.size; i ++) {
     if (fieldEntries.theList[i].theType != JSData::token::tokenString) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Label index " << i << " is not of type string as required. ";
       }
       return false;
@@ -792,7 +792,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::isDeleteable(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::isDeleteable");
   if (theEntry.theType != JSData::token::tokenObject || !theEntry.HasKey(DatabaseStrings::labelFields)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "The labels json is required to be an object of the form {fields: [tableName, objectId,...]}. ";
     }
@@ -810,14 +810,14 @@ bool DatabaseRoutinesGlobalFunctionsMongo::isDeleteable(
 bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry");
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Only logged-in admins can delete DB entries.";
     }
     return false;
   }
   List<std::string>* labelTypes = 0;
   if (!isDeleteable(theEntry, &labelTypes, commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Entry: " << theEntry.ToString(false, false) << " not deleteable.";
     }
     return false;
@@ -831,7 +831,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry
     return false;
   }
   if (theLabels.size < 2) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "When deleting an object, it needs at least two labels: table name and objectid. "
       << "Your input appears to have only " << theLabels.size << " entries: " << theLabels.ToStringCommaDelimited()
@@ -857,7 +857,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById(
 #ifdef MACRO_use_MongoDB
   JSData foundItem;
   if (!FindOneFromJSON(tableName, findQuery, foundItem, commentsOnFailure, false)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Query: " << findQuery.ToString(false, false) << " returned no hits in table: "
       << tableName;
     }
@@ -878,7 +878,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById(
 #else
   (void) tableName;
   (void) findQuery;
-  if (commentsOnFailure != 0) {
+  if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Project compiled without mongoDB support. ";
   }
   return false;
@@ -911,7 +911,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(
   );
 
   if (!didFindItem) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Query: " << findQuery.ToString(false, false) << " returned no hits in table: "
       << tableName;
     }
@@ -922,7 +922,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(
   JSData backUp;
   backUp["deleted"] = foundItem;
   if (!queryBackUp.InsertOne(backUp, commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to insert backup: " << backUp.ToString(false);
     }
     return false;
@@ -941,7 +941,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(
   (void) tableName;
   (void) findQuery;
   (void) selector;
-  if (commentsOnFailure != 0) {
+  if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Project compiled without mongoDB support. ";
   }
   return false;
@@ -988,7 +988,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString(
   (void) collectionName;
   (void) findQuery;
   (void) updateQuery;
-  if (commentsOnFailure != 0) {
+  if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Project compiled without mongoDB support. ";
   }
   return false;
@@ -1083,7 +1083,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames(
     bson_strfreev(theCollectionChars);
     theCollectionChars = 0;
   } else {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to fetch all collections";
     }
     result = false;
@@ -1092,7 +1092,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames(
   return result;
 #else
   (void) output;
-  if (commentsOnFailure != 0) {
+  if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "MongoDB not installed";
   }
   return false;

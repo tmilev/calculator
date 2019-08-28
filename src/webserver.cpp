@@ -8,7 +8,7 @@
 #include "string_constants.h"
 #include "vpfHeader5Crypto.h"
 
-ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
+static ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 WebServer theWebServer;
 
 #include <sys/wait.h>//<-waitpid f-n here
@@ -19,7 +19,8 @@ WebServer theWebServer;
 #include <fcntl.h>//<-setting flags of file descriptors
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
 
-struct SignalsInfrastructure {
+class SignalsInfrastructure {
+public:
   struct sigaction SignalSEGV;
   struct sigaction SignalFPE;
   struct sigaction SignalChild;
@@ -41,7 +42,7 @@ SignalsInfrastructure::SignalsInfrastructure() {
   this->flagInitialized = false;
 }
 
-SignalsInfrastructure theSignals;
+static SignalsInfrastructure theSignals;
 //sigset_t SignalSetToBlockWhileHandlingSIGCHLD;
 
 //This class locks/unlocks all signals within its scope
@@ -2081,7 +2082,7 @@ bool WebWorker::DoSetEmail(
   (void) commentsGeneralNonSensitive;
   (void) commentsGeneralSensitive;
   if (!theGlobalVariables.flagDatabaseCompiled) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Project compiled without database support. ";
     }
     return false;

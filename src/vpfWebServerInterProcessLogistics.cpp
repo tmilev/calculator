@@ -259,7 +259,7 @@ int Pipe::WriteWithTimeoutViaSelect(
     numFails ++;
   } while (numSelected < 0);
   if (numSelected <= 0) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << failStream.str();
     }
     return - 1;
@@ -272,7 +272,7 @@ int Pipe::ReadWithTimeOutViaSelect(
 ) {
   MacroRegisterFunctionWithName("Pipe::ReadWithTimeOutViaSelect");
   if (theFD < 0) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Attempting to read from a negative file descriptor: " << theFD;
     }
     return - 1;
@@ -298,7 +298,7 @@ int Pipe::ReadWithTimeOutViaSelect(
   } while (numSelected < 0);
   //numSelected == 0 most probably means timeout has expired.
   if (numSelected <= 0) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << failStream.str();
     }
     return - 1;
@@ -317,7 +317,7 @@ int Pipe::ReadWithTimeOutViaSelect(
       failStream << "Too many failed attempts: " << maxNumTries
       << " at reading from file descriptor: " << theFD << ". Error message: "
       << strerror(errno) << ".\n";
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << failStream.str();
       }
       return - 1;
@@ -923,7 +923,7 @@ bool MathRoutines::ParseListInt(const std::string& input, List<int>& result, std
       return false;
     }
     if (!theInt.IsIntegerFittingInInt(&result[i])) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Integer at position " << i << " is too large. ";
       }
       result.SetSize(0);

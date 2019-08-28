@@ -11,6 +11,7 @@
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include  <iomanip>
 
+extern ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementation;
 ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementation(__FILE__, "TSL/ssl implementation.");
 
 //http://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl
@@ -99,10 +100,10 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   std::stringstream theCommand;
   std::string certificatePhysicalName, keyPhysicalName;
   FileOperations::GetPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::fileCertificate, certificatePhysicalName, true, true, 0
+    TransportLayerSecurity::fileCertificate, certificatePhysicalName, true, true, nullptr
   );
   FileOperations::GetPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::fileKey, keyPhysicalName, true, true, 0
+    TransportLayerSecurity::fileKey, keyPhysicalName, true, true, nullptr
   );
   theCommand <<  "openssl req -x509 -newkey rsa:2048 -nodes -keyout " << keyPhysicalName
   << " -out " << certificatePhysicalName
@@ -131,10 +132,8 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFiles() {
   ) {
     theGlobalVariables.flagSSLIsAvailable = false;
     return false;
-  } else {
-    return true;
   }
-  return false;
+  return true;
 }
 
 void TransportLayerSecurity::AddMoreEntropyFromTimer() {
@@ -200,19 +199,19 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
   singedFileCertificate1Physical, signedFileCertificate3Physical,
   signedFileKeyPhysical;
   FileOperations::GetPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::signedFileCertificate1, singedFileCertificate1Physical, true, true, 0
+    TransportLayerSecurity::signedFileCertificate1, singedFileCertificate1Physical, true, true, nullptr
   );
   FileOperations::GetPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::signedFileCertificate3, signedFileCertificate3Physical, true, true, 0
+    TransportLayerSecurity::signedFileCertificate3, signedFileCertificate3Physical, true, true, nullptr
   );
   FileOperations::GetPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::fileCertificate, fileCertificatePhysical, true, true, 0
+    TransportLayerSecurity::fileCertificate, fileCertificatePhysical, true, true, nullptr
   );
   FileOperations::GetPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::fileKey, fileKeyPhysical, true, true, 0
+    TransportLayerSecurity::fileKey, fileKeyPhysical, true, true, nullptr
   );
   FileOperations::GetPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::signedFileKey, signedFileKeyPhysical, true, true, 0
+    TransportLayerSecurity::signedFileKey, signedFileKeyPhysical, true, true, nullptr
   );
   //////////////////////////////////////////////////////////
   if (!this->initSSLKeyFiles()) {
@@ -288,7 +287,7 @@ bool TransportLayerSecurity::SSLReadLoop(int numTries,
     }
   }
   if (numBytes < 0) {
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral << "SSL-ERROR reading from socket. ";
     }
     return false;
@@ -320,7 +319,7 @@ bool TransportLayerSecurity::SSLWriteLoop(
     }
   }
   if (numBytes != this->writeBuffer.size) {
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral  << i << " errors writing to socket.\n NumBytes: " << numBytes << ". ";
     }
     return false;
@@ -340,7 +339,7 @@ void TransportLayerSecurityOpenSSL::ClearErrorQueue(
   ERR_print_errors_fp(stderr);
   int theCode = SSL_get_error(this->sslData, errorCode);
   if (theCode == SSL_ERROR_NONE) {
-    if (commentsGeneral != 0 && includeNoErrorInComments) {
+    if (commentsGeneral != nullptr && includeNoErrorInComments) {
       *commentsGeneral << "\n<br>\nNo error.\n";
     }
     return;
@@ -384,11 +383,11 @@ void TransportLayerSecurityOpenSSL::ClearErrorQueue(
     }
     extraErrorCode = ERR_get_error();
     if (extraErrorCode == 0) {
-      if (commentsGeneral != 0) {
+      if (commentsGeneral != nullptr) {
         *commentsGeneral << "Bad eof. ";
       }
     } else if (extraErrorCode == - 1) {
-      if (commentsGeneral != 0) {
+      if (commentsGeneral != nullptr) {
         *commentsGeneral << "I/O error outside of ssl. ";
       }
     }
@@ -475,13 +474,13 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
     this->flagSSLHandshakeSuccessful = false;
     if (this->errorCode != 1) {
       if (this->errorCode == 0) {
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Attempt " << i + 1
           << ": SSL handshake not successful in a "
           << "controlled fashion (errorCode = 0). <br>";
         }
       } else {
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Attempt " << i + 1
           << ": SSL handshake not successful with a fatal error with "
           << "errorCode: " << this->errorCode << ". <br>";
@@ -489,31 +488,31 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
       }
       switch(SSL_get_error(this->sslData, this->errorCode)) {
       case SSL_ERROR_NONE:
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "No error reported, this shouldn't happen. <br>";
         }
         maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_ZERO_RETURN:
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "The TLS/SSL connection has been closed (possibly cleanly).  <br>";
         }
         maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << " During regular I/O: repeat needed (not implemented).  <br>";
         }
         break;
       case SSL_ERROR_WANT_CONNECT:
       case SSL_ERROR_WANT_ACCEPT:
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << " During handshake negotiations: repeat needed (not implemented). <br> ";
         }
         break;
       case SSL_ERROR_WANT_X509_LOOKUP:
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << " Application callback set by SSL_CTX_set_client_cert_cb(): "
           << "repeat needed (not implemented).  <br>";
         }
@@ -524,13 +523,13 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
       //  << logger::endL;
       //  break;
       case SSL_ERROR_SYSCALL:
-        if (commentsOnFailure != 0)
+        if (commentsOnFailure != nullptr)
           *commentsOnFailure << logger::red << "Error: some I/O error occurred. <br>"
           << logger::endL;
         maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_SSL:
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "A failure in the SSL library occurred. <br>";
         }
         //theError = ERR_get_error(3ssl);
@@ -538,13 +537,13 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
         //  maxNumHandshakeTries =1;
         break;
       default:
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Unknown error. <br>";
         }
         maxNumHandshakeTries = 1;
         break;
       }
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Retrying connection in 0.5 seconds... <br>";
       }
       theGlobalVariables.FallAsleep(500000);
@@ -554,11 +553,11 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
     }
   }
   if (this->flagSSLHandshakeSuccessful) {
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral << "<span style =\"color:green\">SSL handshake successful.</span>\n<br>\n";
     }
   } else {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<span style =\"color:red\">SSL handshake failed.</span>\n<br>\n";
     }
     return false;
@@ -732,7 +731,7 @@ bool CipherSuiteSpecification::ComputeName() {
 bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLHello::Decode");
   if (this->owner->body.size == 0) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Empty message. ";
     }
     return false;
@@ -743,25 +742,25 @@ bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
     this->handshakeType != TransportLayerSecurityServer::recordsHandshake::clientHello &&
     this->handshakeType != TransportLayerSecurityServer::recordsHandshake::serverHello
   ) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Message does not appear to be a client/server hello. ";
     }
     return false;
   }
   if (this->owner->offsetDecoded + 3 + 2 + SSLHello::LengthRandomBytesInSSLHello + 1 + 2 >= this->owner->body.size) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Client hello is too short. ";
     }
     return false;
   }
   if (! SSLRecord::ReadThreeByteInt(this->owner->body, this->owner->offsetDecoded, this->length, commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read ssl record length. ";
     }
     return false;
   }
   if (this->length + this->owner->offsetDecoded > this->owner->body.size) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Client hello length is too big. ";
     }
     return false;
@@ -777,13 +776,13 @@ bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
   if (!SSLRecord::ReadOneByteLengthFollowedByBytes(
     this->owner->body, this->owner->offsetDecoded, 0, &this->sessionId, commentsOnFailure
   )) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read session id. ";
     }
     return false;
   }
   if (! SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->cipherSpecLength, commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read cipher suite length. ";
     }
     return false;
@@ -791,7 +790,7 @@ bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
   int halfCipherLength = this->cipherSpecLength / 2;
   this->cipherSpecLength = halfCipherLength * 2; // make sure cipher spec length is even.
   if (this->cipherSpecLength + this->owner->offsetDecoded >= this->owner->body.size) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Cipher suite length: " << this->cipherSpecLength << " exceeds message length. ";
     }
     return false;
@@ -805,7 +804,7 @@ bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
     this->supportedCiphers[i].ComputeName();
   }
   if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->compressionMethod, commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Compression bytes not set. ";
     }
     return false;
@@ -825,7 +824,7 @@ bool SSLHello::DecodeExtensions(std::stringstream *commentsOnFailure) {
   }
   int extensionsLimit = this->owner->offsetDecoded + this->extensionsLength;
   if (extensionsLimit > this->owner->body.size) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Extension length exceeds message size. ";
     }
     return false;
@@ -915,7 +914,7 @@ bool SSLRecord::ReadNByteInt(
     crash << "Not allowed to read more than 4 bytes into an integer. " << crash;
   }
   if (numBytes + outputOffset > input.size) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read three-byte integer. ";
     }
     return false;
@@ -1073,7 +1072,7 @@ std::string SSLRecord::ToString() const {
 
 bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
   if (this->body.size < 5 + this->offsetDecoded) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL record needs to have at least 5 bytes, yours has: " << this->body.size << ".";
     }
     return false;
@@ -1088,7 +1087,7 @@ bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
 //    this->theType != SSLRecord::tokens::changeCipherSpec
   ) {
     this->theType = SSLRecord::tokens::unknown;
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Unknown record type: " << (int) this->body[this->offsetDecoded] << ". ";
     }
     return false;
@@ -1101,8 +1100,8 @@ bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
   }
   int highEnd = this->length + this->offsetDecoded;
   if (highEnd > this->body.size) {
-    if (commentsOnFailure != 0) {
-      *commentsOnFailure << "Insufficent record length: expected: 5 + " << this->length << ", got: " << this->body.size - this->offsetDecoded;
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Insufficient record length: expected: 5 + " << this->length << ", got: " << this->body.size - this->offsetDecoded;
     }
     return false;
   }
@@ -1116,7 +1115,7 @@ bool SSLRecord::DecodeBody(std::stringstream *commentsOnFailure) {
     default:
       break;
   }
-  if (commentsOnFailure != 0) {
+  if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Unrecognized ssl record type: " << (int) this->theType << ". ";
   }
   return false;
@@ -1137,14 +1136,14 @@ bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOn
 bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::ReadBytesDecodeOnce");
   if (!this->ReadBytesOnce()) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read bytes. ";
     }
     return false;
   }
   logWorker << "DEBUG: got to before decode ssl record, received: " << this->lastRead.body.size << " bytes. " << logger::endL;
   if (!this->DecodeSSLRecord(commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to decode ssl record. ";
     }
     return false;
@@ -1203,13 +1202,13 @@ bool TransportLayerSecurityOpenSSL::InspectCertificates(
   this->peer_certificate = SSL_get_peer_certificate(this->sslData);
   if (this->peer_certificate != 0) {
     char* tempCharPtr = 0;
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral << "SSL connection using: "
       << SSL_get_cipher(this->sslData) << ".<br>\n";
     }
     tempCharPtr = X509_NAME_oneline(X509_get_subject_name(this->peer_certificate), 0, 0);
     if (tempCharPtr == 0) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
       }
       return false;
@@ -1217,13 +1216,13 @@ bool TransportLayerSecurityOpenSSL::InspectCertificates(
     this->otherCertificateSubjectName = tempCharPtr;
     free(tempCharPtr);
     tempCharPtr = 0;
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral << "Peer certificate: "
       << "subject: " << this->otherCertificateSubjectName << "<br>\n";
     }
     tempCharPtr = X509_NAME_oneline(X509_get_issuer_name(this->peer_certificate), 0, 0);
     if (tempCharPtr == 0) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
       }
       return false;
@@ -1231,7 +1230,7 @@ bool TransportLayerSecurityOpenSSL::InspectCertificates(
     this->otherCertificateIssuerName = tempCharPtr;
     free(tempCharPtr);
     tempCharPtr = 0;
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral << "Issuer name: "
       << this->otherCertificateIssuerName << "<br>\n";
     }
@@ -1239,7 +1238,7 @@ bool TransportLayerSecurityOpenSSL::InspectCertificates(
     this->peer_certificate = 0;
     return true;
   } else {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL connection using: "
       << SSL_get_cipher(this->sslData) << ". "
       << "No client certificate.<br>\n";

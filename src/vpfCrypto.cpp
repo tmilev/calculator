@@ -320,7 +320,7 @@ bool Crypto::ConvertBase64ToBitStream(
   uint32_t theStack = 0, sixBitDigit = 0;
   int numBitsInStack = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
-    bool isGood = Crypto::Get6bitFromChar(input[i], sixBitDigit);
+    bool isGood = Crypto::Get6bitFromChar(static_cast<unsigned char>(input[i]), sixBitDigit);
     if (!isGood && input[i] == '\n') {
       continue;
     }
@@ -331,7 +331,7 @@ bool Crypto::ConvertBase64ToBitStream(
       continue;
     }
     if (!isGood) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "<hr>Error: the input string: <br>\n"
         << input << "\n<br>had characters outside of base64";
       }
@@ -351,12 +351,12 @@ bool Crypto::ConvertBase64ToBitStream(
       theStack = 0;
     }
     if (numBitsInStack == 10) {
-      output.AddOnTop(theStack / 4);
+      output.AddOnTop(static_cast<unsigned char>(theStack / 4));
       numBitsInStack = 2;
       theStack = theStack % 4;
     }
   }
-  if (commentsGeneral != 0 && numBitsInStack != 0) {
+  if (commentsGeneral != nullptr && numBitsInStack != 0) {
     *commentsGeneral << "<br>Base64: input corresponds modulo 8 to " << numBitsInStack
     << " bits. Perhaps the input was not padded correctly with = signs. The input: "
     << input;
@@ -524,6 +524,9 @@ void Crypto::ConvertUint32ToString(const List<uint32_t>& input, std::string& out
     output[i * 4 + 3] = (char) (input[i] % 256);
   }
 }
+std::string Crypto::ConvertIntToHex(int input, int significantBytes) {
+  return Crypto::ConvertUintToHex((unsigned int) input, significantBytes);
+}
 
 std::string Crypto::ConvertUintToHex(unsigned int input, int significantBytes) {
   std::stringstream out;
@@ -546,7 +549,7 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output, s
     for (unsigned j = 0; j < 2; j ++) {
       if (i + j >= input.size()) {
         result = false;
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Input has an odd number of symbols. ";
         }
         break;
@@ -566,7 +569,7 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output, s
         nextByte *= 16;
         nextByte += theDigit;
       } else {
-        if (commentsOnFailure != 0 && result) {
+        if (commentsOnFailure != nullptr && result) {
           *commentsOnFailure << "Found unexpected character: " << currentChar;
         }
         result = false;
@@ -652,7 +655,7 @@ std::string Crypto::ConvertListUnsignedCharsToHex(
 bool Crypto::ConvertListUnsignedCharsToHex(
   const List<unsigned char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
-  std::string inputString((char*) input.TheObjects, input.size);
+  std::string inputString(reinterpret_cast<const char*>(input.TheObjects), static_cast<unsigned>(input.size));
   return Crypto::ConvertStringToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
 }
 
@@ -1012,7 +1015,7 @@ bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
     if (!Crypto::GetBase58FromChar(input[i], currentChar)) {
       currentChar = 0;
       if (result) {
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Failed to extract base 58 digit from: " << input[i] << " (position " << i << "). ";
         }
       }
@@ -1206,12 +1209,12 @@ void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& outpu
 
 bool CertificateRSA::LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("Certificate::LoadFromJSON");
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "<hr>Loading certificate from: "
     << input.ToString(true);
   }
   if (input.theType != JSData::token::tokenObject) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Can't load certificate: JSON not of type object. ";
     }
     return false;
@@ -1252,7 +1255,7 @@ bool Crypto::LoadOneKnownCertificate(
   const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
   MacroRegisterFunctionWithName("Crypto::LoadOneKnownCertificate");
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "Loading from: " << input;
   }
   JSData certificateJSON;
@@ -1276,7 +1279,7 @@ bool Crypto::LoadOneKnownCertificate(
     }
   }
   if (!isGood) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "I expected an object with key 'keys'"
       << " consisting of an array of public keys. Instead, I got: "
       << certificateJSON.ToString(true);
@@ -1304,12 +1307,12 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
   Crypto::knownCertificates.SetSize(0);
   List<std::string> theFileNames;
   if (! FileOperations::GetFolderFileNamesVirtual("certificates-public/", theFileNames, 0)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not open folder certificates-public/, no certificates loaded.";
     }
     return false;
   }
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Certificates: ";
   }
   for (int i = 0; i < theFileNames.size; i ++) {
@@ -1336,7 +1339,7 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
     }
   }
   for (int i = 0; i < Crypto::knownCertificates.size; i ++) {
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral << "\n<hr>\nLoaded: " << Crypto::knownCertificates[i].ToString();
     }
   }
@@ -1376,12 +1379,12 @@ bool JSONWebToken::VerifyRSA256(
   std::stringstream* commentsGeneral
 ) {
   std::string payload = this->headerBase64 + '.' + this->claimsBase64;
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Payload: " << payload;
   }
   List<uint32_t> outputSha, RSAresultInts;
   Crypto::computeSha256(payload, outputSha);
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     LargeIntUnsigned theSha;
     Crypto::ConvertListUintToLargeUInt(outputSha, theSha);
     *commentsGeneral << "<br>Sha256 of payload: " << theSha.ToString();
@@ -1391,18 +1394,18 @@ bool JSONWebToken::VerifyRSA256(
     return false;
   }
   double timeStart = - 1;
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     timeStart = theGlobalVariables.GetElapsedSeconds();
   }
   if (theModulus == 0 || theExponent == 0) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The modulus and the exponent must be non-zero. "
       << "The mod is: " << theModulus << "; the exponent is: " << theExponent;
     }
     return false;
   }
   LargeIntUnsigned RSAresult = Crypto::RSAencrypt(theModulus, theExponent, theSignatureInt);
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>RSA encryption took: "
     << theGlobalVariables.GetElapsedSeconds() - timeStart << " second(s).<br>";
   }
@@ -1417,7 +1420,7 @@ bool JSONWebToken::VerifyRSA256(
     RSAresultInts.ReverseOrderElements();
     result = (RSAresultInts == outputSha);
   }
-  if ((!result && commentsOnFailure != 0) || commentsGeneral != 0) {
+  if ((!result && commentsOnFailure != nullptr) || commentsGeneral != nullptr) {
     std::string RSAresultTrimmedHex, theShaHex, RSAresultHex, RSAresultBase64;
     LargeIntUnsigned theShaUI;
     Crypto::ConvertListUintToLargeUInt(outputSha, theShaUI);
@@ -1425,13 +1428,13 @@ bool JSONWebToken::VerifyRSA256(
     Crypto::ConvertStringToHex(RSAresultBitstream, RSAresultHex, 0, false);
     Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex, 0, false);
     Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theShaUI, 0, theShaHex);
-    if (!result && commentsOnFailure != 0) {
+    if (!result && commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br><b style =\"color:red\">Token invalid: the "
       << "SHA does not match the RSA result. </b>";
-    } else if (commentsGeneral != 0) {
+    } else if (commentsGeneral != nullptr) {
       *commentsGeneral << "<b style =\"color:green\">Validated. </b>";
     }
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral
       << "<br>Sha integer: " << theShaUI.ToString()
       << "<br>Encrypted signature: " << RSAresult.ToString()
@@ -1449,7 +1452,7 @@ bool JSONWebToken::AssignString(const std::string& other, std::stringstream* com
   List<std::string> theStrings;
   MathRoutines::StringSplitExcludeDelimiter(other, '.', theStrings);
   if (theStrings.size != 3) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Expected 3 strings separated by two dots, got: "
       << theStrings.size << " strings, obtained from: " << other;
     }

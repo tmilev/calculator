@@ -17,7 +17,6 @@
 
 #include "vpfHeader7DatabaseInterface.h"
 
-extern WebServer theWebServer;
 ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
 
 class WebCrawler {
@@ -350,7 +349,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
   if (status != 0) {
     this->lastTransactionErrors =  "Error calling getaddrinfo: ";
     this->lastTransactionErrors += gai_strerror(status);
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->lastTransactionErrors << ". "
       << "Server: " << this->serverToConnectTo << ", port or service: " << this->portOrService << ". ";
     }
@@ -374,7 +373,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
       // IPv4
       struct sockaddr_in *ipv4 = (struct sockaddr_in *) p->ai_addr;
       theAddress = &(ipv4->sin_addr);
-      if (commentsGeneral != 0) {
+      if (commentsGeneral != nullptr) {
         *commentsGeneral << "IPv4: ";
       }
     } else {
@@ -388,7 +387,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
     // convert the IP to a string and print it:
     inet_ntop(p->ai_family, theAddress, ipString, sizeof ipString);
 //    std::string ipString()
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral << this->addressToConnectTo << ": " << ipString << "<br>";
     }
     this->theSocket = socket(this->serverInfo->ai_family, this->serverInfo->ai_socktype, this->serverInfo->ai_protocol);
@@ -416,7 +415,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
       } while (numSelected < 0);
       if (numSelected <= 0) {
         logIO << logger::red << failStream.str() << logger::endL;
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           *commentsOnFailure << failStream.str()
           << "Could not connect through port. Select returned: " << numSelected;
         }
@@ -433,14 +432,14 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
       errorStream
       << "Failed to connect: address: " << this->addressToConnectTo << " port: "
       << this->portOrService << ".<br>";
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << errorStream.str();
       }
       this->lastTransactionErrors = errorStream.str();
       close(this->theSocket);
       continue;
     } else {
-      if (commentsGeneral != 0) {
+      if (commentsGeneral != nullptr) {
         *commentsGeneral << "connected: "
         << this->addressToConnectTo << " port: " << this->portOrService << ". <hr>";
       }
@@ -476,7 +475,7 @@ void WebCrawler::FetchWebPagePart2(
   if (!this->theTSL.HandShakeIamClientNoSocketCleanup(
     this->theSocket, commentsOnFailure, commentsGeneral
   )) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not shake hands. ";
     }
     return;
@@ -484,14 +483,14 @@ void WebCrawler::FetchWebPagePart2(
   this->headerReceived = "";
   this->bodyReceiveD = "";
   this->flagContinueWasNeeded = false;
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "<hr>";
   }
   std::string errorSSL;
   if (!this->theTSL.SSLWriteLoop(
     10, theMessageHeader.str(), &errorSSL, commentsGeneral, true
   )) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;
     }
     return;
@@ -499,7 +498,7 @@ void WebCrawler::FetchWebPagePart2(
   if (!this->theTSL.SSLReadLoop(
     10, this->headerReceived, 0, &errorSSL, commentsGeneral, true
   )) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;
     }
     return;
@@ -540,14 +539,14 @@ void WebCrawler::FetchWebPagePart2(
   if (expectedLengthString != "") {
     expectedLength.AssignString(expectedLengthString);
   }
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Expected length: " << this->expectedLength;
   }
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Header:<br>" << this->headerReceived;
   }
   if (this->headerReceived.find("200 OK") == std::string::npos) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "No 200 ok message found. Headers received: " << this->headerReceived;
     }
     return;
@@ -561,7 +560,7 @@ void WebCrawler::FetchWebPagePart2(
   if (!this->theTSL.SSLWriteLoop(
     10, theContinueHeader.str(), &errorSSL, commentsGeneral, true
   )) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;
     }
     return;
@@ -570,12 +569,12 @@ void WebCrawler::FetchWebPagePart2(
   if (!this->theTSL.SSLReadLoop(
     10, secondPart, expectedLength, &errorSSL, commentsGeneral, true
   )) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL critical error: " << errorSSL;
     }
     return;
   }
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Second part length: " << secondPart.size();
   }
   this->bodyReceiveD = this->bodyReceivedWithHeader + secondPart;
@@ -590,7 +589,7 @@ void WebCrawler::FetchWebPagePart2(
   //  return;
   //this->bodyReceived+=secondPart;
   //stOutput << tempStream.str();
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Body (length: "
     << this->bodyReceiveD.size()
     << ")<br>" << this->bodyReceiveD;
@@ -692,14 +691,14 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   this->portOrService      = "https";
   this->addressToConnectTo = "https://www.googleapis.com/oauth2/v3/certs";
   this->flagDoUseGET = true;
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "<hr>" << "Updating public keys <hr>";
   }
   logWorker << logger::blue << "DEBUG: about to fetch google public keys ..." << logger::endL;
   this->FetchWebPage(commentsOnFailure, commentsGeneral);
   if (this->bodyReceiveD == "") {
     logOpenSSL << logger::red << "Could not fetch the google public keys ..." << logger::endL;
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not fetch google certificate list. ";
     }
     return;
@@ -711,14 +710,14 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
     googleKeysFile, googleKeysFileName, false, true, false
   )) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br>Failed to open: " << googleKeysFileName;
     }
     logOpenSSL << logger::red << "Failed to create google keys file name. " << logger::endL;
     return;
   }
   FileOperations::OpenFileCreateIfNotPresentVirtual(googleKeysDebugFile, googleKeysDebugFileName, false, true, false);
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Updated file: " << googleKeysFileName;
   }
   logOpenSSL << logger::green << "Updated public key file: " << googleKeysFileName << logger::endL;
@@ -773,7 +772,7 @@ bool Crypto::VerifyJWTagainstKnownKeys(
   std::string keyIDstring = "";
   JSData header;
   if (!header.readstring(theToken.headerJSON, false)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Couldn't load JSON from the user token.";
     }
     return false;
@@ -784,13 +783,13 @@ bool Crypto::VerifyJWTagainstKnownKeys(
     }
   }
   if (keyIDstring == "") {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Couldn't find key id in the token.";
     }
     return false;
   }
   int theIndex = - 1;
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "Seeking key: <b style =\"color:brown\">" << keyIDstring << "</b>. ";
   }
   for (int i = 0; i < 2; i ++) {
@@ -804,11 +803,11 @@ bool Crypto::VerifyJWTagainstKnownKeys(
     if (theIndex != - 1 || i == 1) {
       break;
     }
-    if (commentsGeneral != 0 && i == 0) {
+    if (commentsGeneral != nullptr && i == 0) {
       *commentsGeneral << "<br><b style =\"color:red\">Couldn't find key ID: "
       << keyIDstring << " from cached certificate.</b>";
     }
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral << "<br>Reloading google public keys. ";
     }
     WebCrawler theCrawler;
@@ -817,13 +816,13 @@ bool Crypto::VerifyJWTagainstKnownKeys(
     logOpenSSL << "DEBUG: Updated public keys!";
   }
   if (theIndex == - 1) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<b style =\"color:red\">Could not find key id: "
       << keyIDstring << "</b>. ";
     }
     return false;
   }
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "<b style =\"color:green\">Found key id: "
     << keyIDstring << ".</b>";
   }
@@ -848,7 +847,7 @@ bool WebCrawler::VerifyRecaptcha(
   if (!FileOperations::LoadFileToStringVirtual(
     "certificates/recaptcha-secret.txt", secret, true, true, commentsOnFailure
   )) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<b style =\"color:red\">"
       << "Failed to load recaptcha secret."
       << "</b>";
@@ -860,7 +859,7 @@ bool WebCrawler::VerifyRecaptcha(
     *commentsGeneralSensitive << "Recaptcha: " << recaptchaURLencoded;
   }
   if (recaptchaURLencoded == "") {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<b style =\"color:red\">Recaptcha appears to be missing. </b>";
     }
     return false;
@@ -880,7 +879,7 @@ bool WebCrawler::VerifyRecaptcha(
   std::string response = this->bodyReceiveD;
   JSData theJSparser;
   if (!theJSparser.readstring(response, false, commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<span style =\"color:red\">"
       << "<b>" << "Failed to extract response token from captcha verification. "
       << "</b>"
@@ -891,7 +890,7 @@ bool WebCrawler::VerifyRecaptcha(
     return 0;
   }
   if (!theJSparser.HasKey("success")) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "<span style =\"color:red\">"
       << "<b>" << "Captcha failure: could not find key 'success'."
@@ -903,7 +902,7 @@ bool WebCrawler::VerifyRecaptcha(
   JSData theSuccess;
   theSuccess = theJSparser.GetValue("success");
   if (theSuccess.theType != JSData::token::tokenBool || theSuccess.theBoolean != true) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br><b style =\"color:red\">"
       << "Could not verify your captcha solution. "
       << "</b>"

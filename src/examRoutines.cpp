@@ -411,14 +411,14 @@ bool CalculatorHTML::LoadMe(
   if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
     this->fileName, this->RelativePhysicalFileNameWithFolder, commentsOnFailure
   )) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to get physical file name from " << this->fileName << ". ";
     }
     return false;
   }
   (void) doLoadDatabase;
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(this->fileName, this->inputHtml, commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br>User-input file name: <b>" << this->fileName << "</b>";
     }
     return false;
@@ -505,7 +505,7 @@ void CalculatorHTML::LoadCurrentProblemItem(
   this->flagLoadedSuccessfully = true;
   if (this->fileName == "") {
     this->flagLoadedSuccessfully = false;
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<b>No problem file name found. </b>";
     }
   }
@@ -2855,7 +2855,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes() {
 bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("CalculatorHTML::StoreRandomSeedCurrent");
   if (!theGlobalVariables.flagDatabaseCompiled) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Error: database not running. ";
     }
     return false;
@@ -2863,7 +2863,7 @@ bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream* commentsOnFailure
   this->theProblemData.flagRandomSeedGiven = true;
   this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
   if (!this->currentUseR.StoreProblemDataToDatabaseJSON(commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<span style =\"color:red\"> <b>"
       << "Error: failed to store problem in database. "
       << "If you see this message, please take a screenshot and email your instructor. "

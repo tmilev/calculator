@@ -503,7 +503,7 @@ bool PrivateKeyRSA::LoadFromASNEncoded(const std::string& input, std::stringstre
   AbstractSyntaxNotationOneSubsetDecoder outerDecoder, innerDecoder;
   outerDecoder.rawData = input;
   if (!outerDecoder.Decode(commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to asn-decode certificate input. ";
     }
     return false;
@@ -514,7 +514,7 @@ bool PrivateKeyRSA::LoadFromASNEncoded(const std::string& input, std::stringstre
   }
   innerDecoder.rawData = actualContent.theString;
   if (!innerDecoder.Decode(commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to asn-decode certificate input. ";
     }
     return false;
@@ -564,7 +564,7 @@ bool X509Certificate::LoadFromASNEncoded(const std::string& input, std::stringst
   AbstractSyntaxNotationOneSubsetDecoder theDecoder;
   theDecoder.rawData = input;
   if (!theDecoder.Decode(commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to asn-decode certificate input. ";
     }
     return false;
@@ -573,25 +573,25 @@ bool X509Certificate::LoadFromASNEncoded(const std::string& input, std::stringst
   JSData rsaPublicKey;
   JSData rsaModulus;
   if (!this->sourceJSON.HasCompositeKey("[0][6][1].bitStringDecoded[1]", &rsaModulus, commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read rsa modulus. ";
     }
     return false;
   }
   if (!this->sourceJSON.HasCompositeKey("[0][6][1].bitStringDecoded[0]", &rsaPublicKey, commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read public key. ";
     }
     return false;
   }
   if (rsaModulus.theType != JSData::token::tokenLargeInteger) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "RSA modulus does not appear to be a large integer: " << rsaModulus.ToString(false);
     }
     return false;
   }
   if (rsaPublicKey.theType != JSData::token::tokenLargeInteger) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "RSA public key does not appear to be a large integer: " << rsaPublicKey.ToString(false);
     }
     return false;

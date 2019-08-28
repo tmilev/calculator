@@ -512,7 +512,7 @@ bool Crypto::decryptAES_CBC_256(
 ) {
   output.SetSize(inputCipherText.size());
   if (inputKey.size() != 32) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Input key: " << inputKey << " is of length: "
       << inputKey.size() << " (expected: 32). ";
     }
@@ -571,7 +571,7 @@ bool Crypto::encryptAES_CBC_256(
 ) {
   output.SetSize(inputPlainText.size());
   if (inputKey.size() != 32) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Input key: " << inputKey << " is of length: "
       << inputKey.size() << " (expected: 32). ";
     }

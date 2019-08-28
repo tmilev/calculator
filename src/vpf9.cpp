@@ -530,14 +530,14 @@ bool FileOperations::IsOKfileNameVirtual(
   std::string theFileNameNoPath = FileOperations::GetFileNameFromFileNameWithPath(theFileName);
   std::string theFilePath = FileOperations::GetPathFromFileNameWithPath(theFileName);
   if (theFilePath.size() > 10000000) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Invalid file name: too long. ";
     }
     return false;
   }
   if (theFilePath.size() > 0) {
     if (theFilePath[0] == '.') {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Invalid file name: " << theFileName << ": starts with dot but not with ./. ";
       }
       return false;
@@ -547,7 +547,7 @@ bool FileOperations::IsOKfileNameVirtual(
     if (theFilePath[i] == '.') {
       if (i + 1 < theFilePath.size()) {
         if (theFilePath[i + 1] == '.') {
-          if (commentsOnFailure != 0) {
+          if (commentsOnFailure != nullptr) {
             *commentsOnFailure << "Invalid file name: " << theFileName << ": has two consecutive dots. ";
           }
           return false;
@@ -557,7 +557,7 @@ bool FileOperations::IsOKfileNameVirtual(
   }
   if (theFileNameNoPath.size() > 0) {
     if (theFileNameNoPath[0] == '.') {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
        *commentsOnFailure << "Invalid file name: " << theFileName << ": starts with dot. ";
       }
       return false;
@@ -595,7 +595,7 @@ bool FileOperations::IsFileNameSafeForSystemCommands(const std::string& theFileN
   MacroRegisterFunctionWithName("FileOperations::IsFileNameSafeForSystemCommands");
   const unsigned maxAllowedFileNameSize = 1000;
   if (theFileName.size() > maxAllowedFileNameSize) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "File name has length: " << theFileName.size()
       << "; max allowed file name size is: " << maxAllowedFileNameSize;
     }
@@ -603,7 +603,7 @@ bool FileOperations::IsFileNameSafeForSystemCommands(const std::string& theFileN
   }
   for (unsigned i = 0; i < theFileName.size(); i ++) {
     if (!FileOperations::GetSafeFileChars()[theFileName[i]]) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Character: " << theFileName[i] << " not allowed in file name. ";
       }
       return false;
@@ -705,14 +705,14 @@ bool FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
   std::stringstream* commentsOnFailure
 ) {
   if (theFileName == "") {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Empty file name not allowed. ";
     }
     return false;
   }
   std::string computedFileName;
   if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(theFileName, computedFileName, commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to extract physical file name from the virtual file name: " << theFileName;
     }
     return false;
@@ -768,7 +768,7 @@ bool FileOperations::LoadFileToStringUnsecure(
   const std::string& fileNameUnsecure, std::string& output, std::stringstream* commentsOnFailure
 ) {
   if (!FileOperations::FileExistsUnsecure(fileNameUnsecure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The requested file "
       << HtmlRoutines::ConvertStringToHtmlString(fileNameUnsecure, false)
       << " does not appear to exist. ";
@@ -777,7 +777,7 @@ bool FileOperations::LoadFileToStringUnsecure(
   }
   std::ifstream theFile;
   if (!FileOperations::OpenFileUnsecureReadOnly(theFile, fileNameUnsecure, false)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The requested file "
       << HtmlRoutines::ConvertStringToHtmlString(fileNameUnsecure, false)
       << " exists but I failed to open it in text mode (perhaps not a valid ASCII/UTF8 file). ";
@@ -1047,7 +1047,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(
       break;
     }
   if (inputStart == "") {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "File name: " << inputFileName << " does not correspond to a customizable file. ";
     }
     return false;
@@ -1055,7 +1055,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(
   std::string customized =
   HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.instructorComputed, false);
   if (customized == "") {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Customizing files not available for non-logged-in users. ";
     }
     return false;
@@ -1121,7 +1121,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
 ) {
   MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtual");
   if (!FileOperations::IsOKfileNameVirtual(inputFileNamE, accessSensitiveFolders)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "File name: " << inputFileNamE << " not allowed. ";
     }
     return false;

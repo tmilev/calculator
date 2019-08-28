@@ -7,6 +7,8 @@
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
 #include "string_constants.h"
 
+// Avoid previous extern warning:
+extern ProjectInformationInstance ProjectInfoVpfDatabasecpp;
 ProjectInformationInstance ProjectInfoVpfDatabasecpp(__FILE__, "Database-related code. ");
 
 bool DatabaseRoutinesGlobalFunctions::SetPassword(
@@ -49,7 +51,7 @@ bool DatabaseRoutinesGlobalFunctions::UserExists(
   theUserQuery[DatabaseStrings::labelUsername] = inputUsername;
   List<JSData> theUsers;
   DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(
-    DatabaseStrings::tableUsers, theUserQuery, theUsers, - 1, 0, &comments
+    DatabaseStrings::tableUsers, theUserQuery, theUsers, - 1, nullptr, &comments
   );
   return theUsers.size > 0;
 }
@@ -80,7 +82,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase() {
   }
   UserCalculator theUser;
   theUser.UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  theUser.ResetAuthenticationToken(0);
+  theUser.ResetAuthenticationToken(nullptr);
   theGlobalVariables.SetWebInpuT("authenticationToken", "");
   theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
   return true;
@@ -156,7 +158,7 @@ bool ProblemDataAdministrative::GetWeightFromCoursE(
     return false;
   }
   std::string tempString;
-  if (outputAsGivenByInstructor == 0) {
+  if (outputAsGivenByInstructor == nullptr) {
     outputAsGivenByInstructor = &tempString;
   }
   *outputAsGivenByInstructor = this->problemWeightsPerCoursE.GetValueCreate(theCourseNonURLed);
@@ -491,7 +493,7 @@ bool UserCalculator::Authenticate(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   std::stringstream secondCommentsStream;
   if (!this->LoadFromDB(&secondCommentsStream)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "User " << this->username << " does not exist. ";
       if (theGlobalVariables.flagRequestComingLocally) {
         *commentsOnFailure << "If this is your first run, set the username to "
@@ -532,7 +534,7 @@ bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailu
   setUser[DatabaseStrings::labelAuthenticationToken] = this->actualAuthenticationToken;
   setUser[DatabaseStrings::labelTimeOfAuthenticationTokenCreation] = now.theTimeStringNonReadable;
   DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
-    DatabaseStrings::tableUsers, findUser, setUser, 0, commentsOnFailure
+    DatabaseStrings::tableUsers, findUser, setUser, nullptr, commentsOnFailure
   );
   this->flagNewAuthenticationTokenComputedUserNeedsIt = true;
   return true;
@@ -541,7 +543,7 @@ bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailu
 bool UserCalculator::SetPassword(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::SetPassword");
   if (this->enteredPassword == "") {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Empty password not allowed. ";
     }
     return false;
@@ -551,7 +553,7 @@ bool UserCalculator::SetPassword(std::stringstream* commentsOnFailure) {
   findUser[DatabaseStrings::labelUsername] = this->username;
   setUser[DatabaseStrings::labelPassword] = this->enteredHashedSaltedPassword;
   return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
-    DatabaseStrings::tableUsers, findUser, setUser, 0, commentsOnFailure
+    DatabaseStrings::tableUsers, findUser, setUser, nullptr, commentsOnFailure
   );
 }
 
@@ -610,8 +612,6 @@ bool DatabaseRoutineS::SendActivationEmail(
   );
 }
 
-extern WebServer theWebServer;
-
 bool DatabaseRoutineS::SendActivationEmail(
   const List<std::string>& theEmails,
   std::stringstream* commentsOnFailure,
@@ -630,10 +630,10 @@ bool DatabaseRoutineS::SendActivationEmail(
       currentUser, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
     );
   }
-  if (commentsOnFailure != 0) {
+  if (commentsOnFailure != nullptr) {
     logEmail << commentsOnFailure->str();
   }
-  if (commentsGeneral != 0 && commentsOnFailure != commentsGeneral) {
+  if (commentsGeneral != nullptr && commentsOnFailure != commentsGeneral) {
     logEmail << commentsGeneral->str();
   }
   if (commentsGeneralSensitive != 0 && commentsGeneralSensitive != commentsOnFailure) {
@@ -659,7 +659,7 @@ bool ProblemData::LoadFroM(const std::string& inputData, std::stringstream& comm
   this->flagRandomSeedGiven = false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData()) {
     if (theMap.Contains("randomSeed")) {
-      this->randomSeed = atoi(theMap.GetValueCreate("randomSeed").c_str());
+      this->randomSeed = (unsigned) atoi(theMap.GetValueCreate("randomSeed").c_str());
       this->flagRandomSeedGiven = true;
     }
   }
@@ -815,7 +815,7 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findUserQuery, setUserQuery, 0, commentsOnFailure
   )) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Setting activation token failed.";
     }
     this->actualActivationToken = "";
@@ -838,7 +838,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
   if (!theGlobalVariables.flagDatabaseCompiled) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Compiled without database support. ";
     }
     return false;
@@ -866,7 +866,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   if (lastEmailTime != "") {
     lastActivationOnThisEmail.operator=(lastEmailTime);
     lastActivationOnThisAccount.operator=(this->timeOfActivationTokenCreation);
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral
       << "<br>Last activation on this email, GM time: "
       << lastActivationOnThisEmail.ToStringGM() << ".\n"
@@ -874,7 +874,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
       << lastActivationOnThisEmail.ToStringGM() << ".\n";
     }
   }
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral
     << "<br>Total activations (attempted on) this email: "
     << numActivationsThisEmail.ToString() << ".\n<br>\n";
@@ -886,7 +886,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   } else if (this->username != "") {
     findQueryInUsers[DatabaseStrings::labelUsername] = this->username;
   } else {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "This shouldn't happen: both the username and the user id are empty. ";
     }
@@ -896,7 +896,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
     !DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
       DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, 0, commentsOnFailure
   )) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
     }
     return false;
@@ -1250,7 +1250,7 @@ bool EmailRoutines::SendEmailWithMailGun(
   if (!FileOperations::LoadFileToStringVirtual(
     "certificates/mailgun-api.txt", mailGunKey, true, true, commentsOnFailure
   )) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not find mailgun key. The key must be located in file: "
       << "<br>\ncertificates/mailgun-api.txt\n<br>\n "
       << "The file must be uploaded manually to the server. ";
@@ -1259,13 +1259,13 @@ bool EmailRoutines::SendEmailWithMailGun(
   }
   if (!FileOperations::LoadFileToStringVirtual("certificates/mailgun-hostname.txt", hostnameToSendEmailFrom, true, true, 0)) {
     hostnameToSendEmailFrom = theGlobalVariables.hostNoPort;
-    if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != 0) {
+    if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != nullptr) {
       *commentsGeneral << "Did not find the mailgun hostname file: certificates/mailgun-hostname.txt. Using the "
       << "domain name: " << hostnameToSendEmailFrom << " instead. ";
     }
   } else {
     hostnameToSendEmailFrom = MathRoutines::StringTrimWhiteSpace(hostnameToSendEmailFrom);
-    if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != 0) {
+    if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != nullptr) {
       *commentsGeneral << "Hostname loaded: "
       << HtmlRoutines::ConvertStringToURLString(hostnameToSendEmailFrom, false);
     }
@@ -1289,13 +1289,13 @@ bool EmailRoutines::SendEmailWithMailGun(
   << hostnameToSendEmailFrom
   << ">' ";
   if (this->toEmail == "") {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Receiver address is missing. ";
     }
     return false;
   }
   if (this->subject == "" && this->emailContent == "") {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Empty emails not allowed. ";
     }
     return false;
@@ -1411,7 +1411,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
     return false;
   }
   if (theData.GetValue("email").theType != JSData::token::tokenString) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not find email entry in the json data " << theData.ToString(true);
     }
     return false;
@@ -1419,7 +1419,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   userWrapper.email = theData.GetValue("email").theString;
   userWrapper.username = "";
   if (!userWrapper.Iexist(commentsOnFailure)) {
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral << "User with email " << userWrapper.email << " does not exist. ";
     }
     //stOutput << "\n<br>\nDEBUG: User with email " << userWrapper.email.value << " does not exist. ";
@@ -1427,14 +1427,14 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
     if (!userWrapper.StoreToDB(false, commentsOnFailure)) {
       return false;
     }
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral << "Created new user with username: " << userWrapper.username;
     }
     theUseR = userWrapper;
     return true;
   }
   if (!userWrapper.LoadFromDB(commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to fetch user with email " << userWrapper.email << ". ";
     }
     return false;
@@ -1463,7 +1463,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(
   //modify problem files from the one-page app.
   theUser.userRole = UserCalculatorData::Roles::admin;
   theUser.actualAuthenticationToken = "compiledWithoutDatabaseSupport";
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "Automatic login as admin: calculator compiled without DB. ";
   }
   return true;
@@ -1487,7 +1487,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
   if (
     userWrapper.enteredAuthenticationToken != "" &&
     userWrapper.enteredAuthenticationToken != "0" &&
-    commentsOnFailure != 0
+    commentsOnFailure != nullptr
   ) {
     *commentsOnFailure << "<b> Authentication of user: " << userWrapper.username
     << " with token " << userWrapper.enteredAuthenticationToken << " failed. </b>";
@@ -1507,7 +1507,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
           theUseR = userWrapper;
           return true;
         }
-      } else if (commentsOnFailure != 0) {
+      } else if (commentsOnFailure != nullptr) {
         if (userWrapper.actualActivationToken != "error") {
           *commentsOnFailure << "<b>Account already activated. </b>";
         } else {
@@ -1515,7 +1515,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
         }
       }
     } else {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Activation token entered but the user request type: "
         << theGlobalVariables.userCalculatorRequestType
         << " does not allow login with activation token. ";
@@ -1524,7 +1524,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
   }
   if (userWrapper.username == "admin" && userWrapper.enteredPassword != "") {
     if (!userWrapper.Iexist(0)) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "First login of user admin: setting admin password. ";
       }
       logWorker << logger::yellow << "First login of user admin: setting admin password." << logger::endL;
@@ -1532,7 +1532,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
       userWrapper.userRole = "admin";
       if (!userWrapper.StoreToDB(true, commentsOnFailure)) {
         logWorker << logger::red << "Failed to store admin pass to database. ";
-        if (commentsOnFailure != 0) {
+        if (commentsOnFailure != nullptr) {
           logWorker << commentsOnFailure->str();
         }
       }

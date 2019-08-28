@@ -758,7 +758,7 @@ bool LargeIntUnsigned::FactorLargeReturnFalseIfFactorizationIncomplete(
   MacroRegisterFunctionWithName("LargeIntUnsigned::FactorLarge");
   int maximumNumberOfDigits = 1000;
   if (this->theDigits.size > maximumNumberOfDigits) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Number has too many digits: maximum " << maximumNumberOfDigits
       << " digits accepted for factorization attempt. ";
     }
@@ -929,7 +929,7 @@ void LargeInt::AssignString(const std::string& input) {
 
 bool LargeInt::AssignStringFailureAllowed(const std::string& input, std::stringstream* commentsOnFailure) {
   if (input.size() == 0) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Empty string is not interpretted as zero. ";
     }
     return false;
@@ -942,7 +942,7 @@ bool LargeInt::AssignStringFailureAllowed(const std::string& input, std::strings
   for (unsigned int i = startingIndex; i < input.size(); i ++) {
     int x = input[i] - '0';
     if (x < 0 || x > 9) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Encountered a digit character not between 0 and 9. ";
       }
       return false;

@@ -134,6 +134,7 @@ public:
   static bool ConvertBase58ToHexSignificantDigitsFirst(
     const std::string& input, std::string& output, std::stringstream* commentsOnFailure
   );
+  static std::string ConvertIntToHex(int input, int significantBytes);
   static std::string ConvertUintToHex(unsigned int input, int significantBytes);
   static bool ConvertHexToString(const std::string& input, std::string& output, std::stringstream* commentsOnFailure);
   static bool ConvertHexToInteger(const std::string& input, LargeIntUnsigned &output, int &outputNumLeadingZeroPairs);

@@ -213,7 +213,7 @@ bool Calculator::ExpressionMatchesPattern(
     if (matchedExpressions.GetValueCreate(thePattern) != input) {
       return false;
     }
-    if (commentsGeneral != 0) {
+    if (commentsGeneral != nullptr) {
       *commentsGeneral << "<br><b>Match!</b>";
     }
     return true;
@@ -247,7 +247,7 @@ bool Calculator::ExpressionMatchesPattern(
       }
     }
   }
-  if (commentsGeneral != 0) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br><b>Match!</b>";
   }
   return true;

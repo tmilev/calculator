@@ -14,7 +14,7 @@ bool EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(
     output.AssignString("115792089237316195423570985008687907852837564279074904382605163141518161494337");
     return true;
   }
-  if (commentsOnFailure != 0) {
+  if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "I have not yet been taught the order of your desired curve: " << curveName << ". ";
   }
   return false;
@@ -49,7 +49,7 @@ bool ElementEllipticCurve<ElementZmodP>::MakeGeneratorNISTCurve(
     this->MakeGeneratorSecp256k1();
     return true;
   }
-  if (commentsOnFailure != 0) {
+  if (commentsOnFailure != nullptr) {
     *commentsOnFailure
     << "I do not recognize the requested curve name. The curves I have implemented are: "
     << "secp256k1";

@@ -376,7 +376,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementList(
     if (input[i].StartsWith(theCommands.opDefine(), 3)) {
       output.SetKeyValue(input[i][1], input[i][2]);
     } else if (!allowFailure) {
-      if (commentsOnFailure != 0) {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Could not extract key-value pair from: "
         << input.ToString() << ": failed to process: "
         << input[i].ToString() ;

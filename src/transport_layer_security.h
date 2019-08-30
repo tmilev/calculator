@@ -94,6 +94,7 @@ public:
 
 class SSLHelloExtension {
 public:
+
   SSLHello* owner;
   List<unsigned char> content;
   int theType;
@@ -126,7 +127,19 @@ public:
   List<SSLHelloExtension> extensions;
   List<unsigned char> sessionId;
   List<unsigned char> challenge;
-
+  class tokens {
+  public:
+    static const unsigned char helloRequest = 0; //0x00
+    static const unsigned char clientHello = 1; //0x01
+    static const unsigned char serverHello = 2; //0x02
+    static const unsigned char certificate = 11; //0x0b
+    static const unsigned char serverKeyExchange = 12; //0x0c
+    static const unsigned char certificateRequest = 13; //0x0d
+    static const unsigned char serverHelloDone = 14; //0x0e
+    static const unsigned char certificateVerify = 15; //0x0f
+    static const unsigned char clientKeyExchange = 16; //0x10
+    static const unsigned char finished = 20; //0x14
+  };
   SSLHello();
   void resetExceptOwner();
   logger::StringHighligher getStringHighlighter();
@@ -135,7 +148,9 @@ public:
   bool ProcessExtensions(std::stringstream* commentsOnFailure);
   JSData ToJSON() const;
   std::string ToStringVersion() const;
-  void ToBytes(List<char>& output) const;
+  void ToBytes(List<unsigned char>& output) const;
+  void ToBytesNoExtensions(List<unsigned char>& output) const;
+  void ToBytesOnlyExtensions(List<unsigned char>& output) const;
 };
 
 // A basic explanation of ssl records:
@@ -159,17 +174,18 @@ public:
   SSLRecord();
   bool Decode(std::stringstream* commentsOnFailure);
   bool DecodeBody(std::stringstream* commentsOnFailure);
+  std::string ToBytes() const;
   std::string ToString() const;
   std::string ToStringType() const;
   static bool ReadTwoByteInt(
-    const List<unsigned char>& input, int offset, int& result, std::stringstream* commentsOnFailure
+    const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
   );
   static bool ReadThreeByteInt(
-    const List<unsigned char>& input, int offset, int& result, std::stringstream* commentsOnFailure
+    const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
   );
   static bool ReadNByteInt(int numBytes,
     const List<unsigned char>& input,
-    int &outputOffset,
+    int& inputOutputOffset,
     int& result,
     std::stringstream* commentsOnFailure
   );
@@ -206,7 +222,15 @@ public:
     int byteCountOfLength,
     unsigned int input,
     List<unsigned char>& output,
-    int& inputOutputOffset
+    int &inputOutputOffset
+  );
+  static void WriteTwoByteLength(
+    unsigned int input,
+    List<unsigned char>& output
+  );
+  static void WriteThreeByteLength(
+    unsigned int input,
+    List<unsigned char>& output
   );
   static void WriteNByteLengthFollowedByBytes(// how many bytes are used to record the length
     int byteCountOfLength,
@@ -218,19 +242,6 @@ public:
 
 class TransportLayerSecurityServer {
 public:
-  class recordsHandshake {
-  public:
-    static const unsigned char helloRequest = 0; //0x00
-    static const unsigned char clientHello = 1; //0x01
-    static const unsigned char serverHello = 2; //0x02
-    static const unsigned char certificate = 11; //0x0b
-    static const unsigned char serverKeyExchange = 12; //0x0c
-    static const unsigned char certificateRequest = 13; //0x0d
-    static const unsigned char serverHelloDone = 14; //0x0e
-    static const unsigned char certificateVerify = 15; //0x0f
-    static const unsigned char clientKeyExchange = 16; //0x10
-    static const unsigned char finished = 20; //0x14
-  };
   static MapLisT<int, std::string, MathRoutines::IntUnsignIdentity>& cipherSuites();
   int socketId;
   int64_t millisecondsTimeOut;

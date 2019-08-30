@@ -626,7 +626,7 @@ void Crypto::AppendDoubleSha256Check(const std::string& input, std::string& outp
   Crypto::computeSha256(theSha256, doubleSha256);
   output.reserve(input.size() + 4);
   output = input;
-  for (int i = 0; i < 4; i ++) {
+  for (unsigned i = 0; i < 4; i ++) {
     output.push_back(doubleSha256[i]);
   }
 }
@@ -634,21 +634,21 @@ void Crypto::AppendDoubleSha256Check(const std::string& input, std::string& outp
 std::string Crypto::ConvertListCharsToHex(
   const List<char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
-  std::string inputString(input.TheObjects, input.size);
+  std::string inputString(reinterpret_cast<char*>(input.TheObjects), static_cast<unsigned>(input.size));
   return Crypto::ConvertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
 }
 
 bool Crypto::ConvertListCharsToHex(
   const List<char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
-  std::string inputString(input.TheObjects, input.size);
+  std::string inputString(reinterpret_cast<char*>(input.TheObjects), static_cast<unsigned>(input.size));
   return Crypto::ConvertStringToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
 }
 
 std::string Crypto::ConvertListUnsignedCharsToHex(
   const List<unsigned char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
-  std::string inputString((char*) input.TheObjects, input.size);
+  std::string inputString(reinterpret_cast<char*>(input.TheObjects), static_cast<unsigned>(input.size));
   return Crypto::ConvertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
 }
 
@@ -674,17 +674,17 @@ bool Crypto::ConvertStringToHex(
         lineBreakCounter = 0;
       }
     }
-    char high = ((unsigned char) input[i]) / 16;
-    char low  = ((unsigned char) input[i]) % 16;
+    char high = static_cast<char>(( static_cast<unsigned char>(input[i]) / 16));
+    char low  = static_cast<char>(( static_cast<unsigned char>(input[i]) % 16));
     if (high < 10) {
-      out << (int) high;
+      out <<  static_cast<int>(high);
     } else {
-      out << ((unsigned char) ('a' + high - 10));
+      out << static_cast<unsigned char>('a' + high - 10);
     }
     if (low < 10) {
-      out << (int) low;
+      out << static_cast<int>(low);
     } else {
-      out << ((unsigned char) ('a' + low - 10));
+      out << static_cast<unsigned char>('a' + low - 10);
     }
   }
   output = out.str();
@@ -693,14 +693,14 @@ bool Crypto::ConvertStringToHex(
 
 void Crypto::ConvertUint64toBigendianStringAppendResult(uint64_t& input, std::string& outputAppend) {
   //the following code should work on both big- and little-endian systems:
-  outputAppend.push_back((char)  (input / 72057594037927936));
-  outputAppend.push_back((char) ((input / 281474976710656) % 256));
-  outputAppend.push_back((char) ((input / 1099511627776) % 256));
-  outputAppend.push_back((char) ((input / 4294967296) % 256));
-  outputAppend.push_back((char) ((input / 16777216) % 256));
-  outputAppend.push_back((char) ((input / 65536) % 256));
-  outputAppend.push_back((char) ((input / 256) % 256));
-  outputAppend.push_back((char) (input % 256));
+  outputAppend.push_back(static_cast<char>(input / 72057594037927936)      );
+  outputAppend.push_back(static_cast<char>((input / 281474976710656) % 256));
+  outputAppend.push_back(static_cast<char>((input / 1099511627776) % 256)  );
+  outputAppend.push_back(static_cast<char>((input / 4294967296) % 256)     );
+  outputAppend.push_back(static_cast<char>((input / 16777216) % 256)       );
+  outputAppend.push_back(static_cast<char>((input / 65536) % 256)          );
+  outputAppend.push_back(static_cast<char>((input / 256) % 256)            );
+  outputAppend.push_back(static_cast<char>( input % 256)                   );
 }
 
 void Crypto::ConvertStringToListUInt32BigendianZeroPad(const std::string& input, List<uint32_t>& output) {

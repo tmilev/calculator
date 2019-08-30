@@ -152,6 +152,7 @@ public:
   // As the name suggests, this will append the output bytes, without
   // wiping the already existing contents of output.
   void WriteBytes(List<unsigned char>& output) const;
+  void WriteBytesBody(List<unsigned char>& output) const;
   void WriteBytesNoExtensions(List<unsigned char>& output) const;
   void WriteBytesSupportedCiphers(List<unsigned char>& output) const;
   void WriteBytesOnlyExtensions(List<unsigned char>& output) const;
@@ -181,6 +182,7 @@ public:
   std::string ToBytes() const;
   std::string ToString() const;
   std::string ToStringType() const;
+  void WriteBytes(List<unsigned char>& output) const;
   static bool ReadTwoByteInt(
     const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
   );
@@ -244,9 +246,13 @@ public:
     unsigned int input,
     List<unsigned char>& output
   );
+  static void WriteOneByteLengthFollowedByBytes(
+    const List<unsigned char> &input,
+    List<unsigned char>& output
+  );
   static void WriteNByteLengthFollowedByBytes(// how many bytes are used to record the length
     int byteCountOfLength,
-    List<unsigned char>& input,
+    const List<unsigned char> &input,
     List<unsigned char>& output,
     int &inputOutputOffset
   );

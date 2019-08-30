@@ -636,7 +636,7 @@ void SSLHello::resetExceptOwner() {
   this->flagRequestOnlineCertificateStatusProtocol = false;
   this->flagRequestSignedCertificateTimestamp      = false;
   this->renegotiationCharacters.SetSize(0);
-  this->RandomBytes            .SetSize(0);
+  this->RandomBytes.initializeFillInObject(this->LengthRandomBytesInSSLHello, 0);
   this->supportedCiphers       .SetSize(0);
   this->extensions             .SetSize(0);
   this->sessionId              .SetSize(0);
@@ -726,28 +726,41 @@ bool CipherSuiteSpecification::ComputeName() {
   return true;
 }
 
-void SSLHello::WriteBytes(List<unsigned char>& output) const {
-  MacroRegisterFunctionWithName("SSLHello::ToBytes");
-  output.AddOnTop(this->handshakeType);
+void SSLRecord::WriteBytes(List<unsigned char>& output) const {
+  MacroRegisterFunctionWithName("SSLRecord::WriteBytes");
+  output.AddOnTop(static_cast<unsigned char>(SSLRecord::tokens::handshake));
   SSLRecord::WriteTwoByteInt(this->version, output);
+  int offsetOfTwoByteLength = output.size;
+  SSLRecord::WriteTwoByteInt(0, output);
+  this->hello.WriteBytes(output);
+  unsigned int totalLength = static_cast<unsigned int>(output.size - offsetOfTwoByteLength - 3);
+  SSLRecord::WriteNByteLength(2, totalLength, output, offsetOfTwoByteLength);
+}
+
+void SSLHello::WriteBytes(List<unsigned char>& output) const {
+  MacroRegisterFunctionWithName("SSLHello::WriteBytes");
+  output.AddOnTop(this->handshakeType);
   int offsetOfThreeByteLength = output.size;
   SSLRecord::WriteThreeByteInt(0, output);
-  SSLRecord::WriteTwoByteInt(this->version, output);
-  int start = output.size;
-  if (this->sessionId.size > 0) {
-    output.SetSize(output.size + this->sessionId.size);
-    for (int i = 0; i < this->sessionId.size; i ++) {
-      output[start + i] = this->sessionId[i];
-    }
-  } else {
-    output.SetSize(output.size + this->LengthRandomBytesInSSLHello);
-    for (int i = 0; i < this->LengthRandomBytesInSSLHello; i ++) {
-      output[start + i] = 0;
-    }
-  }
-
+  this->WriteBytesBody(output);
   unsigned int totalLength = static_cast<unsigned int>(output.size - offsetOfThreeByteLength - 3);
   SSLRecord::WriteNByteLength(3, totalLength, output, offsetOfThreeByteLength);
+}
+
+void SSLHello::WriteBytesBody(List<unsigned char>& output) const {
+  MacroRegisterFunctionWithName("SSLHello::WriteBytesBody");
+  SSLRecord::WriteTwoByteInt(this->version, output);
+  if (this->RandomBytes.size != this->LengthRandomBytesInSSLHello) {
+    crash << "Writing non-initialized SSL hello forbidden. " << crash;
+  }
+  logWorker << "DEBUG: session id size: " << this->RandomBytes.size << logger::endL;
+  int start = output.size;
+  output.SetSize(output.size + this->RandomBytes.size);
+  for (int i = 0; i < this->RandomBytes.size; i ++) {
+    output[start + i] = this->RandomBytes[i];
+  }
+  SSLRecord::WriteOneByteLengthFollowedByBytes(this->sessionId, output);
+
 }
 
 void SSLHello::WriteBytesSupportedCiphers(List<unsigned char>& output) const {
@@ -1030,9 +1043,7 @@ bool SSLRecord::ReadNByteLengthFollowedByBytes(
     }
     return false;
   }
-  logWorker << "DEBUG: got to here!. " << logger::endL;
   if (output != nullptr) {
-    logWorker << "DEBUG: outputting " << *resultLength << " bytes. " << logger::endL;
     output->SetSize(*resultLength);
     for (int i = 0; i < *resultLength; i ++) {
       (*output)[i] = input[outputOffset + i];
@@ -1096,16 +1107,24 @@ void SSLRecord::WriteNByteLength(
   inputOutputOffset += byteCountOfLength;
 }
 
+void SSLRecord::WriteOneByteLengthFollowedByBytes(
+  const List<unsigned char>& input,
+  List<unsigned char>& output
+) {
+  int inputOutputOffset = output.size;
+  SSLRecord::WriteNByteLengthFollowedByBytes(1, input, output, inputOutputOffset);
+}
+
 void SSLRecord::WriteNByteLengthFollowedByBytes(
   int byteCountOfLength,
-  List<unsigned char>& input,
+  const List<unsigned char>& input,
   List<unsigned char>& output,
   int& inputOutputOffset
 ) {
-  if (inputOutputOffset + byteCountOfLength > output.size) {
-    output.SetSize(inputOutputOffset + byteCountOfLength);
-  }
   SSLRecord::WriteNByteLength(byteCountOfLength, static_cast<unsigned>(input.size), output, inputOutputOffset);
+  if (inputOutputOffset + input.size > output.size) {
+    output.SetSize(inputOutputOffset + input.size);
+  }
   for (int i = 0; i < input.size; i ++) {
     output[i + inputOutputOffset] = input[i];
   }
@@ -1212,12 +1231,7 @@ bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOn
     logWorker << "DEBUG: one record decode error.\n" << this->lastRead.ToString() << logger::endL;
     return false;
   }
-  logWorker << "Message: \n" << this->lastRead.hello.getStringHighlighter()
-  << Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 0, false) << logger::endL;
-  //logWorker << "DEBUG: Decoded: " << this->lastRead.ToString() << logger::endL;
-  crash << "Decode not implemented yet. " << crash;
-
-  return false;
+  return true;
 }
 
 bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commentsOnFailure) {
@@ -1234,8 +1248,7 @@ bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commen
     }
     return false;
   }
-  crash << "read bytes decode Not implemented yet" << crash;
-  return false;
+  return true;
 }
 
 bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::stringstream *commentsOnFailure) {
@@ -1243,9 +1256,17 @@ bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::st
   (void) inputSocketID;
   this->lastToWrite.hello.resetExceptOwner();
   this->lastToWrite.theType = SSLRecord::tokens::handshake;
+  this->lastToWrite.version = 3 * 256 + 1;
+  this->lastToWrite.hello.version = 3 * 256 + 3;
+  this->lastToWrite.hello.sessionId = this->lastRead.hello.sessionId;
   List<unsigned char> helloBytes;
-  this->lastToWrite.hello.WriteBytes(helloBytes);
-  logWorker << "Bytes written: "
+  this->lastToWrite.WriteBytes(helloBytes);
+
+  logWorker << "Incoming message:\n" << this->lastRead.hello.getStringHighlighter()
+  << Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 0, false)
+  << logger::endL;
+  logWorker << "Bytes written:\n"
+  << this->lastToWrite.hello.getStringHighlighter()
   << Crypto::ConvertListUnsignedCharsToHex(helloBytes, 0, false) << logger::endL;
   return false;
 }

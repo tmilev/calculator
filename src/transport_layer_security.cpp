@@ -729,15 +729,32 @@ bool CipherSuiteSpecification::ComputeName() {
 void SSLHello::WriteBytes(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::ToBytes");
   output.AddOnTop(this->handshakeType);
-  //this->WriteBytesNoExtensions(output);
-  //SSLRecord::WriteThreeByteLength();
+  SSLRecord::WriteTwoByteInt(this->version, output);
+  int offsetOfThreeByteLength = output.size;
+  SSLRecord::WriteThreeByteInt(0, output);
+  SSLRecord::WriteTwoByteInt(this->version, output);
+  int start = output.size;
+  if (this->sessionId.size > 0) {
+    output.SetSize(output.size + this->sessionId.size);
+    for (int i = 0; i < this->sessionId.size; i ++) {
+      output[start + i] = this->sessionId[i];
+    }
+  } else {
+    output.SetSize(output.size + this->LengthRandomBytesInSSLHello);
+    for (int i = 0; i < this->LengthRandomBytesInSSLHello; i ++) {
+      output[start + i] = 0;
+    }
+  }
+
+  unsigned int totalLength = static_cast<unsigned int>(output.size - offsetOfThreeByteLength - 3);
+  SSLRecord::WriteNByteLength(3, totalLength, output, offsetOfThreeByteLength);
 }
 
 void SSLHello::WriteBytesSupportedCiphers(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::ToBytesSupportedCiphers");
-  SSLRecord::WriteTwoByteLength(this->supportedCiphers.size, output);
+  SSLRecord::WriteTwoByteInt(this->supportedCiphers.size, output);
   for (int i = 0; i < this->supportedCiphers.size; i ++) {
-    SSLRecord::WriteTwoByteLength(this->supportedCiphers[i].theType, output);
+    SSLRecord::WriteTwoByteInt(this->supportedCiphers[i].theType, output);
   }
 }
 
@@ -956,7 +973,6 @@ bool SSLRecord::ReadNByteInt(
   for (int i = 0; i < numBytes; i ++) {
     result *= 256;
     result += static_cast<unsigned>(input[inputOutputOffset + i]);
-    logWorker << "DEBUG: adn the result is: " << static_cast<int>(result) << logger::endL;
   }
   inputOutputOffset += numBytes;
   return true;
@@ -1024,6 +1040,22 @@ bool SSLRecord::ReadNByteLengthFollowedByBytes(
   }
   outputOffset += *resultLength;
   return true;
+}
+
+void SSLRecord::WriteTwoByteInt(
+  int input,
+  List<unsigned char>& output
+) {
+  int inputOutputOffset = output.size;
+  return SSLRecord::WriteNByteLength(2, static_cast<unsigned>(input), output, inputOutputOffset);
+}
+
+void SSLRecord::WriteThreeByteInt(
+  int input,
+  List<unsigned char>& output
+) {
+  int inputOutputOffset = output.size;
+  return SSLRecord::WriteNByteLength(3, static_cast<unsigned>(input), output, inputOutputOffset);
 }
 
 void SSLRecord::WriteTwoByteLength(
@@ -1180,7 +1212,9 @@ bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOn
     logWorker << "DEBUG: one record decode error.\n" << this->lastRead.ToString() << logger::endL;
     return false;
   }
-  logWorker << "DEBUG: Decoded: " << this->lastRead.ToString() << logger::endL;
+  logWorker << "Message: \n" << this->lastRead.hello.getStringHighlighter()
+  << Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 0, false) << logger::endL;
+  //logWorker << "DEBUG: Decoded: " << this->lastRead.ToString() << logger::endL;
   crash << "Decode not implemented yet. " << crash;
 
   return false;
@@ -1194,7 +1228,6 @@ bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commen
     }
     return false;
   }
-  logWorker << "DEBUG: got to before decode ssl record, received: " << this->lastRead.body.size << " bytes. " << logger::endL;
   if (!this->DecodeSSLRecord(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to decode ssl record. ";
@@ -1212,6 +1245,8 @@ bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::st
   this->lastToWrite.theType = SSLRecord::tokens::handshake;
   List<unsigned char> helloBytes;
   this->lastToWrite.hello.WriteBytes(helloBytes);
+  logWorker << "Bytes written: "
+  << Crypto::ConvertListUnsignedCharsToHex(helloBytes, 0, false) << logger::endL;
   return false;
 }
 

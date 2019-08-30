@@ -149,6 +149,8 @@ public:
   bool ProcessExtensions(std::stringstream* commentsOnFailure);
   JSData ToJSON() const;
   std::string ToStringVersion() const;
+  // As the name suggests, this will append the output bytes, without
+  // wiping the already existing contents of output.
   void WriteBytes(List<unsigned char>& output) const;
   void WriteBytesNoExtensions(List<unsigned char>& output) const;
   void WriteBytesSupportedCiphers(List<unsigned char>& output) const;
@@ -225,6 +227,14 @@ public:
     unsigned int input,
     List<unsigned char>& output,
     int &inputOutputOffset
+  );
+  static void WriteTwoByteInt(
+    int input,
+    List<unsigned char>& output
+  );
+  static void WriteThreeByteInt(
+    int input,
+    List<unsigned char>& output
   );
   static void WriteTwoByteLength(
     unsigned int input,

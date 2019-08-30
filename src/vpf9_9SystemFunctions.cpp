@@ -69,8 +69,9 @@ bool TimerThreadData::HandleComputationCompleteStandard() {
 }
 
 bool TimerThreadData::HandleTimerSignalToServer() {
-  if (this->counter % 20 != 0)
+  if (this->counter % 20 != 0) {
     return false;
+  }
 //  std::stringstream reportStream;
 //  reportStream << "Timer: " << this->elapsedtime << " seconds elapsed since the timer was launched.";
 //  theReport1.SetStatus(reportStream.str());
@@ -124,8 +125,8 @@ bool TimerThreadData::HandleMaxComputationTime() {
   << "<br>Finally, you may modify the timeout restrictions "
   << "by modifying the source code directly, increasing the variable: "
   << "theGlobalVariables.MaxComputationTimeMillisecondsNonPositiveForNoLimit. "
-  << "<br>This may be a lot of work but will allow you to alter"
-  << " time limits dynamically. "
+  << "<br>This may be a lot of work but will allow you to alter "
+  << "time limits dynamically. "
   << __FILE__ << "<br>";
   crash << out.str() << crash;
   return true;

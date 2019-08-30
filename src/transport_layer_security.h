@@ -60,14 +60,14 @@ struct TransportLayerSecurityOpenSSL {
   );
   int SSLRead(
     List<char>& readBuffer,
-    std::string *outputError,
-    std::stringstream *commentsGeneral,
-    bool includeNoErrorInComments
-  );
-  int SSLWrite(const List<char> &writeBuffer,
     std::string* outputError,
     std::stringstream* commentsGeneral,
-    std::stringstream *commentsOnError,
+    bool includeNoErrorInComments
+  );
+  int SSLWrite(const List<char>& writeBuffer,
+    std::string* outputError,
+    std::stringstream* commentsGeneral,
+    std::stringstream* commentsOnError,
     bool includeNoErrorInComments
   );
   bool CheckCanInitializeToClient();
@@ -144,13 +144,15 @@ public:
   void resetExceptOwner();
   logger::StringHighligher getStringHighlighter();
   bool Decode(std::stringstream* commentsOnFailure);
+  bool DecodeSupportedCiphers(std::stringstream* commentsOnFailure);
   bool DecodeExtensions(std::stringstream* commentsOnFailure);
   bool ProcessExtensions(std::stringstream* commentsOnFailure);
   JSData ToJSON() const;
   std::string ToStringVersion() const;
-  void ToBytes(List<unsigned char>& output) const;
-  void ToBytesNoExtensions(List<unsigned char>& output) const;
-  void ToBytesOnlyExtensions(List<unsigned char>& output) const;
+  void WriteBytes(List<unsigned char>& output) const;
+  void WriteBytesNoExtensions(List<unsigned char>& output) const;
+  void WriteBytesSupportedCiphers(List<unsigned char>& output) const;
+  void WriteBytesOnlyExtensions(List<unsigned char>& output) const;
 };
 
 // A basic explanation of ssl records:

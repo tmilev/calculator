@@ -726,17 +726,51 @@ bool CipherSuiteSpecification::ComputeName() {
   return true;
 }
 
-void SSLHello::ToBytes(List<unsigned char>& output) const {
+void SSLHello::WriteBytes(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::ToBytes");
-  output.SetExpectedSize(520);
-  output.SetSize(0);
   output.AddOnTop(this->handshakeType);
-  List<unsigned char> noExtensions;
-  this->ToBytesNoExtensions(noExtensions);
+  //this->WriteBytesNoExtensions(output);
   //SSLRecord::WriteThreeByteLength();
 }
 
-void SSLHello::ToBytesNoExtensions(List<unsigned char>& output) const {
+void SSLHello::WriteBytesSupportedCiphers(List<unsigned char>& output) const {
+  MacroRegisterFunctionWithName("SSLHello::ToBytesSupportedCiphers");
+  SSLRecord::WriteTwoByteLength(this->supportedCiphers.size, output);
+  for (int i = 0; i < this->supportedCiphers.size; i ++) {
+    SSLRecord::WriteTwoByteLength(this->supportedCiphers[i].theType, output);
+  }
+}
+
+bool SSLHello::DecodeSupportedCiphers(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("SSLHello::DecodeSupportedCiphers");
+  if (!SSLRecord::ReadTwoByteInt(
+    this->owner->body, this->owner->offsetDecoded, this->cipherSpecLength, commentsOnFailure
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to read cipher suite length. ";
+    }
+    return false;
+  }
+  int halfCipherLength = this->cipherSpecLength / 2;
+  this->cipherSpecLength = halfCipherLength * 2; // make sure cipher spec length is even.
+  if (this->cipherSpecLength + this->owner->offsetDecoded >= this->owner->body.size) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Cipher suite length: " << this->cipherSpecLength << " exceeds message length. ";
+    }
+    return false;
+  }
+  this->supportedCiphers.SetSize(halfCipherLength);
+  for (int i = 0; i < halfCipherLength; i ++) {
+    if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->supportedCiphers[i].theType, commentsOnFailure)) {
+      // this should not happen.
+      return false;
+    }
+    this->supportedCiphers[i].ComputeName();
+  }
+  return true;
+}
+
+void SSLHello::WriteBytesNoExtensions(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::ToBytesNoExtensions");
 
 }
@@ -792,27 +826,8 @@ bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  if (! SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->cipherSpecLength, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to read cipher suite length. ";
-    }
+  if (!this->DecodeSupportedCiphers(commentsOnFailure)){
     return false;
-  }
-  int halfCipherLength = this->cipherSpecLength / 2;
-  this->cipherSpecLength = halfCipherLength * 2; // make sure cipher spec length is even.
-  if (this->cipherSpecLength + this->owner->offsetDecoded >= this->owner->body.size) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Cipher suite length: " << this->cipherSpecLength << " exceeds message length. ";
-    }
-    return false;
-  }
-  this->supportedCiphers.SetSize(halfCipherLength);
-  for (int i = 0; i < halfCipherLength; i ++) {
-    if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->supportedCiphers[i].theType, commentsOnFailure)) {
-      // this should not happen.
-      return false;
-    }
-    this->supportedCiphers[i].ComputeName();
   }
   if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->compressionMethod, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -1011,6 +1026,14 @@ bool SSLRecord::ReadNByteLengthFollowedByBytes(
   return true;
 }
 
+void SSLRecord::WriteTwoByteLength(
+  unsigned int input,
+  List<unsigned char>& output
+) {
+  int inputOutputOffset = output.size;
+  return SSLRecord::WriteNByteLength(2, input, output, inputOutputOffset);
+}
+
 void SSLRecord::WriteThreeByteLength(
   unsigned int input,
   List<unsigned char>& output
@@ -1188,7 +1211,7 @@ bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::st
   this->lastToWrite.hello.resetExceptOwner();
   this->lastToWrite.theType = SSLRecord::tokens::handshake;
   List<unsigned char> helloBytes;
-  this->lastToWrite.hello.ToBytes(helloBytes);
+  this->lastToWrite.hello.WriteBytes(helloBytes);
   return false;
 }
 

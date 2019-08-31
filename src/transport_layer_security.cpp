@@ -735,7 +735,7 @@ void SSLRecord::WriteBytes(List<unsigned char>& output) const {
   int offsetOfTwoByteLength = output.size;
   SSLRecord::WriteTwoByteInt(0, output);
   this->hello.WriteBytes(output);
-  unsigned int totalLength = static_cast<unsigned int>(output.size - offsetOfTwoByteLength - 3);
+  unsigned int totalLength = static_cast<unsigned int>(output.size - offsetOfTwoByteLength - 2);
   SSLRecord::WriteNByteLength(2, totalLength, output, offsetOfTwoByteLength);
 }
 

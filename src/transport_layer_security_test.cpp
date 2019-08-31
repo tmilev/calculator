@@ -10,7 +10,7 @@
 extern ProjectInformationInstance projectInfoInstanceTransportLayerSecurityTest;
 ProjectInformationInstance projectInfoInstanceTransportLayerSecurityTest(__FILE__, "TSL/ssl implementation.");
 
-extern logger logWorker;
+extern logger logServer;
 
 bool SSLRecord::TestSerialization() {
   MacroRegisterFunctionWithName("SSLRecord::TestSerialization");
@@ -36,15 +36,19 @@ bool SSLRecord::TestSerialization() {
   if (!Crypto::ConvertHexToListUnsignedChar(inputHex, theRecord.body, &comments)) {
     crash << "Bad hard-coded test hex string!" << crash;
   }
-  logWorker << "DEBUG: got to ehre!! " << logger::endL;
+  logServer << "DEBUG: got to ehre!! " << logger::endL;
 
   if (!theRecord.Decode(&comments)) {
     crash << "Failed to decode built-in message." << crash;
   }
-  logWorker << "DEBUG: got to ehre 2!! " << logger::endL;
+  logServer << "DEBUG: got to ehre 2!! " << logger::endL;
   List<unsigned char> encoded;
   theRecord.WriteBytes(encoded);
   if (encoded != theRecord.body) {
+    logServer << "Decoded:\n" << theRecord.hello.getStringHighlighter()
+    << Crypto::ConvertListUnsignedCharsToHex(theRecord.body, 0, false) << logger::endL;
+    logServer << "Encoded:\n" << theRecord.hello.getStringHighlighter()
+    << Crypto::ConvertListUnsignedCharsToHex(encoded, 0, false) << logger::endL;
     crash << "Decode->Encode did not reproduce the original input. " << crash;
   }
   return true;

@@ -137,6 +137,7 @@ public:
   static std::string ConvertIntToHex(int input, int significantBytes);
   static std::string ConvertUintToHex(unsigned int input, int significantBytes);
   static bool ConvertHexToString(const std::string& input, std::string& output, std::stringstream* commentsOnFailure);
+  static bool ConvertHexToListUnsignedChar(const std::string& input, List<unsigned char>& output, std::stringstream* commentsOnFailure);
   static bool ConvertHexToInteger(const std::string& input, LargeIntUnsigned &output, int &outputNumLeadingZeroPairs);
   static std::string ConvertListUnsignedCharsToHex(
     const List<unsigned char>& input, int byteWidthLineBreakZeroForNone, bool useHtml

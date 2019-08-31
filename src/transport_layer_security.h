@@ -94,12 +94,12 @@ public:
 
 class SSLHelloExtension {
 public:
-
   SSLHello* owner;
   List<unsigned char> content;
   int theType;
   SSLHelloExtension();
   bool ProcessMe(std::stringstream* commentsOnError);
+  void WriteBytes(List<unsigned char>& output);
 };
 
 // SSL client hello helpful links.
@@ -147,15 +147,15 @@ public:
   bool DecodeSupportedCiphers(std::stringstream* commentsOnFailure);
   bool DecodeExtensions(std::stringstream* commentsOnFailure);
   bool ProcessExtensions(std::stringstream* commentsOnFailure);
+  void PrepareServerHello(SSLHello& clientHello);
   JSData ToJSON() const;
   std::string ToStringVersion() const;
   // As the name suggests, this will append the output bytes, without
   // wiping the already existing contents of output.
   void WriteBytes(List<unsigned char>& output) const;
   void WriteBytesBody(List<unsigned char>& output) const;
-  void WriteBytesNoExtensions(List<unsigned char>& output) const;
   void WriteBytesSupportedCiphers(List<unsigned char>& output) const;
-  void WriteBytesOnlyExtensions(List<unsigned char>& output) const;
+  void WriteBytesExtensionsOnly(List<unsigned char>& output) const;
 };
 
 // A basic explanation of ssl records:
@@ -182,7 +182,9 @@ public:
   std::string ToBytes() const;
   std::string ToString() const;
   std::string ToStringType() const;
+  void PrepareServerHello(SSLRecord& clientHello);
   void WriteBytes(List<unsigned char>& output) const;
+  static bool TestSerialization();
   static bool ReadTwoByteInt(
     const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
   );
@@ -247,6 +249,10 @@ public:
     List<unsigned char>& output
   );
   static void WriteOneByteLengthFollowedByBytes(
+    const List<unsigned char> &input,
+    List<unsigned char>& output
+  );
+  static void WriteTwoByteLengthFollowedByBytes(
     const List<unsigned char> &input,
     List<unsigned char>& output
   );

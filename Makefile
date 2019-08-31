@@ -119,6 +119,7 @@ abstract_syntax_notation_one_decoder.cpp \
 transport_layer_security_implementation.cpp \
 transport_layer_security.cpp \
 transport_layer_security_openssl.cpp \
+transport_layer_security_test.cpp \
 databasemongo.cpp \
 database_mongo_calculator.cpp \
 webserver.cpp \

@@ -65,6 +65,8 @@ void TransportLayerSecurity::initialize(bool IamServer) {
     logServer << logger::red << "DEBUG: TODO: carry out any TLS initializations as needed. " << logger::endL;
   }
   this->flagInitialized = true;
+  logWorker << "DEBUG: Initializing ssl record test ..." << logger::endL;
+  SSLRecord::TestSerialization();
 }
 
 void TransportLayerSecurity::FreeEverythingShutdown() {
@@ -743,6 +745,10 @@ void SSLHello::WriteBytes(List<unsigned char>& output) const {
   int offsetOfThreeByteLength = output.size;
   SSLRecord::WriteThreeByteInt(0, output);
   this->WriteBytesBody(output);
+  this->WriteBytesSupportedCiphers(output);
+  //256 = 0x0100 = no compression:
+  SSLRecord::WriteTwoByteInt(256, output);
+  this->WriteBytesExtensionsOnly(output);
   unsigned int totalLength = static_cast<unsigned int>(output.size - offsetOfThreeByteLength - 3);
   SSLRecord::WriteNByteLength(3, totalLength, output, offsetOfThreeByteLength);
 }
@@ -765,7 +771,7 @@ void SSLHello::WriteBytesBody(List<unsigned char>& output) const {
 
 void SSLHello::WriteBytesSupportedCiphers(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::ToBytesSupportedCiphers");
-  SSLRecord::WriteTwoByteInt(this->supportedCiphers.size, output);
+  SSLRecord::WriteTwoByteInt(this->supportedCiphers.size * 2, output);
   for (int i = 0; i < this->supportedCiphers.size; i ++) {
     SSLRecord::WriteTwoByteInt(this->supportedCiphers[i].theType, output);
   }
@@ -791,7 +797,12 @@ bool SSLHello::DecodeSupportedCiphers(std::stringstream* commentsOnFailure) {
   }
   this->supportedCiphers.SetSize(halfCipherLength);
   for (int i = 0; i < halfCipherLength; i ++) {
-    if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->supportedCiphers[i].theType, commentsOnFailure)) {
+    if (!SSLRecord::ReadTwoByteInt(
+      this->owner->body,
+      this->owner->offsetDecoded,
+      this->supportedCiphers[i].theType,
+      commentsOnFailure
+    )) {
       // this should not happen.
       return false;
     }
@@ -800,9 +811,15 @@ bool SSLHello::DecodeSupportedCiphers(std::stringstream* commentsOnFailure) {
   return true;
 }
 
-void SSLHello::WriteBytesNoExtensions(List<unsigned char>& output) const {
+void SSLHello::WriteBytesExtensionsOnly(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::ToBytesNoExtensions");
-
+  int offsetExtensionsLength = output.size;
+  SSLRecord::WriteTwoByteInt(0, output);
+  for (int i = 0; i < this->extensions.size; i ++) {
+    this->extensions[i].WriteBytes(output);
+  }
+  int extensionsLength = output.size - offsetExtensionsLength - 2;
+  SSLRecord::WriteNByteLength(2, extensionsLength, output, offsetExtensionsLength);
 }
 
 bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
@@ -906,6 +923,11 @@ bool SSLHello::DecodeExtensions(std::stringstream *commentsOnFailure) {
 SSLHelloExtension::SSLHelloExtension() {
   this->owner = nullptr;
   this->theType = 0;
+}
+
+void SSLHelloExtension::WriteBytes(List<unsigned char>& output) {
+  SSLRecord::WriteTwoByteInt(this->theType, output);
+  SSLRecord::WriteTwoByteLengthFollowedByBytes(this->content, output);
 }
 
 bool SSLHelloExtension::ProcessMe(std::stringstream* commentsOnError) {
@@ -1115,6 +1137,14 @@ void SSLRecord::WriteOneByteLengthFollowedByBytes(
   SSLRecord::WriteNByteLengthFollowedByBytes(1, input, output, inputOutputOffset);
 }
 
+void SSLRecord::WriteTwoByteLengthFollowedByBytes(
+  const List<unsigned char>& input,
+  List<unsigned char>& output
+) {
+  int inputOutputOffset = output.size;
+  SSLRecord::WriteNByteLengthFollowedByBytes(2, input, output, inputOutputOffset);
+}
+
 void SSLRecord::WriteNByteLengthFollowedByBytes(
   int byteCountOfLength,
   const List<unsigned char>& input,
@@ -1135,6 +1165,7 @@ SSLRecord::SSLRecord() {
   this->theType = SSLRecord::tokens::unknown;
   this->length = 0;
   this->version = 0;
+  this->offsetDecoded = 0;
   this->hello.owner = this;
 }
 
@@ -1175,6 +1206,7 @@ std::string SSLRecord::ToString() const {
 }
 
 bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
+  MacroRegisterFunctionWithName("SSLRecord::Decode");
   if (this->body.size < 5 + this->offsetDecoded) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL record needs to have at least 5 bytes, yours has: " << this->body.size << ".";
@@ -1251,14 +1283,29 @@ bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commen
   return true;
 }
 
+void SSLHello::PrepareServerHello(SSLHello& clientHello) {
+  this->version = 3 * 256 + 3;
+  this->sessionId = clientHello.sessionId;
+  for (int i = 0; i < clientHello.extensions.size; i ++) {
+    this->extensions.AddOnTop(clientHello.extensions[i]);
+  }
+  this->supportedCiphers.SetSize(clientHello.supportedCiphers.size);
+  for (int i = 0; i < clientHello.supportedCiphers.size; i ++) {
+    this->supportedCiphers[i] = clientHello.supportedCiphers[i];
+  }
+}
+
+void SSLRecord::PrepareServerHello(SSLRecord& clientHello) {
+  this->hello.resetExceptOwner();
+  this->theType = SSLRecord::tokens::handshake;
+  this->version = 3 * 256 + 1;
+  this->hello.PrepareServerHello(clientHello.hello);
+}
+
 bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::stringstream *commentsOnFailure) {
   (void) commentsOnFailure;
   (void) inputSocketID;
-  this->lastToWrite.hello.resetExceptOwner();
-  this->lastToWrite.theType = SSLRecord::tokens::handshake;
-  this->lastToWrite.version = 3 * 256 + 1;
-  this->lastToWrite.hello.version = 3 * 256 + 3;
-  this->lastToWrite.hello.sessionId = this->lastRead.hello.sessionId;
+  this->lastToWrite.PrepareServerHello(this->lastRead);
   List<unsigned char> helloBytes;
   this->lastToWrite.WriteBytes(helloBytes);
 

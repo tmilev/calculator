@@ -534,6 +534,18 @@ std::string Crypto::ConvertUintToHex(unsigned int input, int significantBytes) {
   return out.str();
 }
 
+bool Crypto::ConvertHexToListUnsignedChar(const std::string& input, List<unsigned char>& output, std::stringstream* commentsOnFailure) {
+  std::string outputString;
+  if (! Crypto::ConvertHexToString(input, outputString, commentsOnFailure)) {
+    return false;
+  }
+  output.SetSize(outputString.size());
+  for (unsigned i = 0; i < outputString.size(); i ++) {
+    output[i] = static_cast<unsigned char>(outputString[i]);
+  }
+  return true;
+}
+
 bool Crypto::ConvertHexToString(const std::string& input, std::string& output, std::stringstream* commentsOnFailure) {
   output.reserve(input.size() / 2);
   output.clear();

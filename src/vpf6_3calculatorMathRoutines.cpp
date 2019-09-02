@@ -9066,7 +9066,7 @@ bool CalculatorFunctionsGeneral::innerIf(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIf");
-  (void) theCommands;//portable way of avoiding unused parameter warning
+  (void) theCommands; //portable way of avoiding unused parameter warning
   if (input.size() != 4) {
     return false;
   }

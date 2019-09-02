@@ -4315,6 +4315,7 @@ int WebServer::Run() {
   //theGlobalVariables.WriteSourceCodeFilesJS();
   theGlobalVariables.initModifiableDatabaseFields();
   HtmlRoutines::LoadStrings();
+  this->theTLS.initialize(true);
   theParser->flagShowCalculatorExamples = false;
   if (!this->initPrepareWebServerALL()) {
     return 1;

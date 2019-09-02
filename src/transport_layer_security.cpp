@@ -62,10 +62,9 @@ void TransportLayerSecurity::initialize(bool IamServer) {
       this->openSSLData.initSSLClient();
     }
   } else {
-    logServer << logger::red << "DEBUG: TODO: carry out any TLS initializations as needed. " << logger::endL;
+    this->theServer.initialize();
   }
   this->flagInitialized = true;
-  logWorker << "DEBUG: Initializing ssl record test ..." << logger::endL;
   SSLRecord::TestSerialization();
 }
 
@@ -570,46 +569,80 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   return true;
 }
 
-MapLisT<int, std::string, MathRoutines::IntUnsignIdentity>& TransportLayerSecurityServer::cipherSuites() {
-  static MapLisT<int, std::string, MathRoutines::IntUnsignIdentity> result;
-  result.theKeys.GrandMasterConsistencyCheck();
+CipherSuiteSpecification TransportLayerSecurityServer::GetCipherCrashIfUnknown(int inputId) {
+  if (inputId == 0) {
+    crash << "Zero cipher suite specification not allowed here. " << crash;
+  }
+  if (!this->cipherSuiteNames.Contains(inputId)) {
+    crash << "Unknown cipher suite specification not allowed here. " << crash;
+  }
+  CipherSuiteSpecification result;
+  result.id = inputId;
+  result.owner = this;
+  result.ComputeName();
   return result;
 }
 
-TransportLayerSecurityServer::TransportLayerSecurityServer() {
-  MapLisT<int, std::string, MathRoutines::IntUnsignIdentity>& theSuites = this->cipherSuites();
-  theSuites.theKeys.GrandMasterConsistencyCheck();
+void TransportLayerSecurityServer::AddSupportedCipher(int inputId) {
+  this->supportedCiphers.SetKeyValue(inputId, this->GetCipherCrashIfUnknown(inputId));
+}
 
-  if (theSuites.size() > 0) {
-    crash << "Only one transport layer security server should ever be initialized. " << crash;
+void TransportLayerSecurityServer::initializeCipherSuites() {
+  if (this->cipherSuiteNames.size() == 0) {
+    return;
   }
-  std::cout << "Got to here 4!" << std::endl;
-  theSuites.theKeys.GrandMasterConsistencyCheck();
-  //std::cout << "hash size: suite: " <<  theSuites << std::endl;
-  this->cipherSuites().SetKeyValue(0,      "unknown"                             );
-  this->cipherSuites().SetKeyValue(0x1301, "TLS_AES_128_GCM_SHA256"              ); //
-  this->cipherSuites().SetKeyValue(0x1302, "TLS_AES_256_GCM_SHA384"              ); //
-  this->cipherSuites().SetKeyValue(0x1303, "TLS_CHACHA20_POLY1305_SHA256"        ); //
-  this->cipherSuites().SetKeyValue(0xc02b, "ECDHE/ECDSA/AES 128/GCM/SHA2"        ); // (RFC 5289)
-  this->cipherSuites().SetKeyValue(0xc02f, "ECDHE/RSA/AES 128/GCM/SHA2"          ); // (RFC 5289)
-  this->cipherSuites().SetKeyValue(0xc02c, "ECDHE/ECDSA/AES 128/GCM/SHA3"        ); // (RFC 5289)
-  this->cipherSuites().SetKeyValue(0xc030, "ECDHE/RSA/AES 256/GCM/SHA3"          ); // (RFC 5289)
-  this->cipherSuites().SetKeyValue(0xcca9, "ECDHE/ECDSA/CHACHA 20/POLY 1305/SHA2"); // (RFC 7905)
-  this->cipherSuites().SetKeyValue(0xcca8, "ECDHE/RSA/CHACHA 20/POLY 1305/SHA2"  ); // (RFC 7905)
-  this->cipherSuites().SetKeyValue(0xc013, "ECDHE/RSA/AES 128/CBC/SHA"           ); // (RFC 4492)
-  this->cipherSuites().SetKeyValue(0xc014, "ECDHE/RSA/AES 256/CBC/SHA"           ); // (RFC 4492)
-  this->cipherSuites().SetKeyValue(0x009c, "RSA/RSA/AES 128/GCM/SHA2"            ); // (RFC 5288)
-  this->cipherSuites().SetKeyValue(0x009d, "RSA/RSA/AES 256/GCM/SHA2"            ); // (RFC 5288)
-  this->cipherSuites().SetKeyValue(0x002f, "RSA/RSA/AES 128/CBC/SHA"             ); // (RFC 5246)
-  this->cipherSuites().SetKeyValue(0x0035, "RSA/RSA/AES 256/CBC/SHA"             ); // (RFC 5246)
-  this->cipherSuites().SetKeyValue(0x000a, "RSA/RSA/3DES/CBC/SHA"                ); // (RFC 5246)
+  this->cipherSuiteNames.SetKeyValue(0xc02f, "ECDHE/RSA/AES 128/GCM/SHA2"          ); // (RFC 5289)
+  this->AddSupportedCipher(0xc02f);
+  this->cipherSuiteNames.SetKeyValue(0x1301, "TLS_AES_128_GCM_SHA256"              ); //
+  this->cipherSuiteNames.SetKeyValue(0x1302, "TLS_AES_256_GCM_SHA384"              ); //
+  this->cipherSuiteNames.SetKeyValue(0x1303, "TLS_CHACHA20_POLY1305_SHA256"        ); //
+  this->cipherSuiteNames.SetKeyValue(0xc02b, "ECDHE/ECDSA/AES 128/GCM/SHA2"        ); // (RFC 5289)
+  this->cipherSuiteNames.SetKeyValue(0xc02c, "ECDHE/ECDSA/AES 128/GCM/SHA3"        ); // (RFC 5289)
+  this->cipherSuiteNames.SetKeyValue(0xc030, "ECDHE/RSA/AES 256/GCM/SHA3"          ); // (RFC 5289)
+  this->cipherSuiteNames.SetKeyValue(0xcca9, "ECDHE/ECDSA/CHACHA 20/POLY 1305/SHA2"); // (RFC 7905)
+  this->cipherSuiteNames.SetKeyValue(0xcca8, "ECDHE/RSA/CHACHA 20/POLY 1305/SHA2"  ); // (RFC 7905)
+  this->cipherSuiteNames.SetKeyValue(0xc013, "ECDHE/RSA/AES 128/CBC/SHA"           ); // (RFC 4492)
+  this->cipherSuiteNames.SetKeyValue(0xc014, "ECDHE/RSA/AES 256/CBC/SHA"           ); // (RFC 4492)
+  this->cipherSuiteNames.SetKeyValue(0x009c, "RSA/RSA/AES 128/GCM/SHA2"            ); // (RFC 5288)
+  this->cipherSuiteNames.SetKeyValue(0x009d, "RSA/RSA/AES 256/GCM/SHA2"            ); // (RFC 5288)
+  this->cipherSuiteNames.SetKeyValue(0x002f, "RSA/RSA/AES 128/CBC/SHA"             ); // (RFC 5246)
+  this->cipherSuiteNames.SetKeyValue(0x0035, "RSA/RSA/AES 256/CBC/SHA"             ); // (RFC 5246)
+  this->cipherSuiteNames.SetKeyValue(0x000a, "RSA/RSA/3DES/CBC/SHA"                ); // (RFC 5246)
+  this->cipherSuiteNames.SetKeyValue(0,      "unknown"                             );
+}
+
+void TransportLayerSecurityServer::initialize() {
+  this->initializeCipherSuites();
+}
+
+TransportLayerSecurityServer::TransportLayerSecurityServer() {
   this->socketId = - 1;
   this->millisecondsDefaultTimeOut = 5000;
   this->millisecondsTimeOut = this->millisecondsDefaultTimeOut;
   this->defaultBufferCapacity = 1000000;
+  this->lastRead.owner = this;
+  this->lastToWrite.owner = this;
+}
+
+bool TransportLayerSecurityServer::WriteBytesOnce(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("TransportLayerSecurityServer::WriteBytesOnce");
+  struct timeval tv; //<- code involving tv taken from stackexchange
+  tv.tv_sec = 5;  // 5 Secs Timeout
+  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  setsockopt(this->socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
+  int numBytesSent = send(
+    this->socketId, this->lastToWrite.body.TheObjects, this->lastToWrite.body.size, 0
+  );
+  if (numBytesSent < 0) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Error receiving bytes. " << strerror(errno);
+    }
+  }
+  return numBytesSent >= 0;
 }
 
 bool TransportLayerSecurityServer::ReadBytesOnce() {
+  MacroRegisterFunctionWithName("TransportLayerSecurityServer::ReadBytesOnce");
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
@@ -627,8 +660,8 @@ bool TransportLayerSecurityServer::ReadBytesOnce() {
   return numBytesInBuffer > 0;
 }
 
-void SSLHello::resetExceptOwner() {
-  this->handshakeType     = 0;
+void SSLContent::resetExceptOwner() {
+  this->theType           = 0;
   this->length            = 0;
   this->version           = 0;
   this->cipherSpecLength  = 0;
@@ -639,20 +672,20 @@ void SSLHello::resetExceptOwner() {
   this->flagRequestSignedCertificateTimestamp      = false;
   this->renegotiationCharacters.SetSize(0);
   this->RandomBytes.initializeFillInObject(this->LengthRandomBytesInSSLHello, 0);
-  this->supportedCiphers       .SetSize(0);
+  this->declaredCiphers        .SetSize(0);
   this->extensions             .SetSize(0);
   this->sessionId              .SetSize(0);
   this->challenge              .SetSize(0);
 }
 
-SSLHello::SSLHello() {
+SSLContent::SSLContent() {
   this->owner = nullptr;
   this->resetExceptOwner();
 }
 
-logger::StringHighligher SSLHello::getStringHighlighter() {
+logger::StringHighligher SSLContent::getStringHighlighter() {
   logger::StringHighligher result("2,4,4,2,6,4,64,2,64,4,||");
-  for (int i = 0; i < this->supportedCiphers.size; i ++) {
+  for (int i = 0; i < this->declaredCiphers.size; i ++) {
     result.sections.AddOnTop(4);
   }
   result.sections.AddOnTop(std::string("||"));
@@ -669,7 +702,7 @@ logger::StringHighligher SSLHello::getStringHighlighter() {
   return result;
 }
 
-std::string SSLHello::ToStringVersion() const {
+std::string SSLContent::ToStringVersion() const {
   List<char> twoBytes;
   twoBytes.SetSize(2);
   twoBytes[0] = static_cast<char> (this->version / 256);
@@ -679,7 +712,7 @@ std::string SSLHello::ToStringVersion() const {
   return out.str();
 }
 
-JSData SSLHello::ToJSON() const {
+JSData SSLContent::ToJSON() const {
   MacroRegisterFunctionWithName("SSLHello::ToJSON");
   JSData result;
   result["version"] = this->ToStringVersion();
@@ -688,10 +721,10 @@ JSData SSLHello::ToJSON() const {
   result["sessionId"] = Crypto::ConvertListUnsignedCharsToHex(this->sessionId, 0, false);
   JSData ciphers;
   ciphers.theType = JSData::token::tokenObject;
-  ciphers.theList.SetSize(this->supportedCiphers.size);
-  for (int i = 0; i < this->supportedCiphers.size; i ++) {
-    CipherSuiteSpecification& current = this->supportedCiphers[i];
-    ciphers[Crypto::ConvertIntToHex(current.theType, 2)] = current.name;
+  ciphers.theList.SetSize(this->declaredCiphers.size);
+  for (int i = 0; i < this->declaredCiphers.size; i ++) {
+    CipherSuiteSpecification& current = this->declaredCiphers[i];
+    ciphers[Crypto::ConvertIntToHex(current.id, 2)] = current.name;
   }
   result["cipherSuites"] = ciphers;
   result["extensionsLength"] = this->extensionsLength;
@@ -716,15 +749,35 @@ JSData SSLHello::ToJSON() const {
   return result;
 }
 
+unsigned int CipherSuiteSpecification::HashFunction(const CipherSuiteSpecification &input) {
+  return input.HashFunction();
+}
+
+unsigned int CipherSuiteSpecification::HashFunction() const {
+  return this->id;
+}
+
+CipherSuiteSpecification::CipherSuiteSpecification() {
+  this->owner = 0;
+}
+
+bool CipherSuiteSpecification::CheckInitialization() const {
+  if (this->owner == 0) {
+    crash << "CipherSuiteSpecification not initialized correctly. " << crash;
+  }
+  return true;
+}
+
 bool CipherSuiteSpecification::ComputeName() {
   MacroRegisterFunctionWithName("CipherSuiteSpecification::ComputeName");
-  if (!TransportLayerSecurityServer::cipherSuites().Contains(this->theType)) {
+  this->CheckInitialization();
+  if (!this->owner->cipherSuiteNames.Contains(this->id)) {
     // GREASE = deliberately invalid cipher suite code.
     // [Generate Random Extensions and Sustain Extensibility]
     this->name = "unknown/GREASE";
     return false;
   }
-  this->name = TransportLayerSecurityServer::cipherSuites().GetValueConstCrashIfNotPresent(this->theType);
+  this->name = this->owner->cipherSuiteNames.GetValueConstCrashIfNotPresent(this->id);
   return true;
 }
 
@@ -739,9 +792,9 @@ void SSLRecord::WriteBytes(List<unsigned char>& output) const {
   SSLRecord::WriteNByteLength(2, totalLength, output, offsetOfTwoByteLength);
 }
 
-void SSLHello::WriteBytes(List<unsigned char>& output) const {
+void SSLContent::WriteBytes(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::WriteBytes");
-  output.AddOnTop(this->handshakeType);
+  output.AddOnTop(this->theType);
   int offsetOfThreeByteLength = output.size;
   SSLRecord::WriteThreeByteInt(0, output);
   this->WriteBytesBody(output);
@@ -753,7 +806,7 @@ void SSLHello::WriteBytes(List<unsigned char>& output) const {
   SSLRecord::WriteNByteLength(3, totalLength, output, offsetOfThreeByteLength);
 }
 
-void SSLHello::WriteBytesBody(List<unsigned char>& output) const {
+void SSLContent::WriteBytesBody(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::WriteBytesBody");
   SSLRecord::WriteTwoByteInt(this->version, output);
   if (this->RandomBytes.size != this->LengthRandomBytesInSSLHello) {
@@ -769,15 +822,15 @@ void SSLHello::WriteBytesBody(List<unsigned char>& output) const {
 
 }
 
-void SSLHello::WriteBytesSupportedCiphers(List<unsigned char>& output) const {
+void SSLContent::WriteBytesSupportedCiphers(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::ToBytesSupportedCiphers");
-  SSLRecord::WriteTwoByteInt(this->supportedCiphers.size * 2, output);
-  for (int i = 0; i < this->supportedCiphers.size; i ++) {
-    SSLRecord::WriteTwoByteInt(this->supportedCiphers[i].theType, output);
+  SSLRecord::WriteTwoByteInt(this->declaredCiphers.size * 2, output);
+  for (int i = 0; i < this->declaredCiphers.size; i ++) {
+    SSLRecord::WriteTwoByteInt(this->declaredCiphers[i].id, output);
   }
 }
 
-bool SSLHello::DecodeSupportedCiphers(std::stringstream* commentsOnFailure) {
+bool SSLContent::DecodeSupportedCiphers(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLHello::DecodeSupportedCiphers");
   if (!SSLRecord::ReadTwoByteInt(
     this->owner->body, this->owner->offsetDecoded, this->cipherSpecLength, commentsOnFailure
@@ -795,23 +848,24 @@ bool SSLHello::DecodeSupportedCiphers(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  this->supportedCiphers.SetSize(halfCipherLength);
+  this->declaredCiphers.SetSize(halfCipherLength);
   for (int i = 0; i < halfCipherLength; i ++) {
+    this->declaredCiphers[i].owner = this->owner->owner;
     if (!SSLRecord::ReadTwoByteInt(
       this->owner->body,
       this->owner->offsetDecoded,
-      this->supportedCiphers[i].theType,
+      this->declaredCiphers[i].id,
       commentsOnFailure
     )) {
       // this should not happen.
       return false;
     }
-    this->supportedCiphers[i].ComputeName();
+    this->declaredCiphers[i].ComputeName();
   }
   return true;
 }
 
-void SSLHello::WriteBytesExtensionsOnly(List<unsigned char>& output) const {
+void SSLContent::WriteBytesExtensionsOnly(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::ToBytesNoExtensions");
   int offsetExtensionsLength = output.size;
   SSLRecord::WriteTwoByteInt(0, output);
@@ -822,7 +876,7 @@ void SSLHello::WriteBytesExtensionsOnly(List<unsigned char>& output) const {
   SSLRecord::WriteNByteLength(2, extensionsLength, output, offsetExtensionsLength);
 }
 
-bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
+bool SSLContent::Decode(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLHello::Decode");
   if (this->owner->body.size == 0) {
     if (commentsOnFailure != nullptr) {
@@ -830,11 +884,11 @@ bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  this->handshakeType = this->owner->body[this->owner->offsetDecoded];
+  this->theType = this->owner->body[this->owner->offsetDecoded];
   this->owner->offsetDecoded ++;
   if (
-    this->handshakeType != SSLHello::tokens::clientHello &&
-    this->handshakeType != SSLHello::tokens::serverHello
+    this->theType != SSLContent::tokens::clientHello &&
+    this->theType != SSLContent::tokens::serverHello
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Message does not appear to be a client/server hello. ";
@@ -856,11 +910,11 @@ bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
   if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->version, commentsOnFailure)) {
     return false;
   }
-  this->RandomBytes.SetSize(SSLHello::LengthRandomBytesInSSLHello);
-  for (int i = 0; i < SSLHello::LengthRandomBytesInSSLHello; i ++) {
+  this->RandomBytes.SetSize(SSLContent::LengthRandomBytesInSSLHello);
+  for (int i = 0; i < SSLContent::LengthRandomBytesInSSLHello; i ++) {
     this->RandomBytes[i] = this->owner->body[this->owner->offsetDecoded + i];
   }
-  this->owner->offsetDecoded += SSLHello::LengthRandomBytesInSSLHello;
+  this->owner->offsetDecoded += SSLContent::LengthRandomBytesInSSLHello;
   if (!SSLRecord::ReadOneByteLengthFollowedByBytes(
     this->owner->body,
     this->owner->offsetDecoded,
@@ -886,7 +940,7 @@ bool SSLHello::Decode(std::stringstream* commentsOnFailure) {
   return this->DecodeExtensions(commentsOnFailure);
 }
 
-bool SSLHello::DecodeExtensions(std::stringstream *commentsOnFailure) {
+bool SSLContent::DecodeExtensions(std::stringstream *commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLHello::DecodeExtensions");
   if (this->owner->offsetDecoded + 2 >= this->owner->body.size) {
     // No extensions
@@ -965,7 +1019,7 @@ bool SSLHelloExtension::ProcessMe(std::stringstream* commentsOnError) {
   return true;
 }
 
-bool SSLHello::ProcessExtensions(std::stringstream* commentsOnFailure) {
+bool SSLContent::ProcessExtensions(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLHello::ProcessExtensions");
   this->renegotiationCharacters.SetSize(0);
   for (int i = 0; i < this->extensions.size; i ++) {
@@ -1161,12 +1215,20 @@ void SSLRecord::WriteNByteLengthFollowedByBytes(
   inputOutputOffset += input.size;
 }
 
+bool SSLRecord::CheckInitialization() const {
+  if (this->owner == 0) {
+    crash << "Uninitialized ssl record. " << crash;
+  }
+  return true;
+}
+
 SSLRecord::SSLRecord() {
   this->theType = SSLRecord::tokens::unknown;
   this->length = 0;
   this->version = 0;
   this->offsetDecoded = 0;
   this->hello.owner = this;
+  this->owner = 0;
 }
 
 std::string SSLRecord::ToStringType() const {
@@ -1207,6 +1269,7 @@ std::string SSLRecord::ToString() const {
 
 bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLRecord::Decode");
+  this->CheckInitialization();
   if (this->body.size < 5 + this->offsetDecoded) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL record needs to have at least 5 bytes, yours has: " << this->body.size << ".";
@@ -1283,15 +1346,53 @@ bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commen
   return true;
 }
 
-void SSLHello::PrepareServerHello(SSLHello& clientHello) {
+bool SSLContent::CheckInitialization() const {
+  if (this->owner == 0) {
+    crash << "Uninitialized ssl content. " << crash;
+  }
+  return true;
+}
+
+std::string CipherSuiteSpecification::ToString() const {
+  std::stringstream out;
+  std::string hexVersion;
+  Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(
+    LargeIntUnsigned(static_cast<unsigned>(this->id)), 0, hexVersion
+  );
+  out << hexVersion << "[" << this->name << "]";
+  return out.str();
+}
+
+void SSLContent::PrepareServerHello(SSLContent& clientHello) {
+  MacroRegisterFunctionWithName("SSLContent::PrepareServerHello");
+  this->CheckInitialization();
   this->version = 3 * 256 + 3;
+  this->theType = SSLContent::tokens::serverHello;
   this->sessionId = clientHello.sessionId;
+  this->compressionMethod = clientHello.compressionMethod;
+  this->RandomBytes = clientHello.RandomBytes;
+  //this->extensions = clientHello.extensions;
   for (int i = 0; i < clientHello.extensions.size; i ++) {
     this->extensions.AddOnTop(clientHello.extensions[i]);
   }
-  this->supportedCiphers.SetSize(clientHello.supportedCiphers.size);
-  for (int i = 0; i < clientHello.supportedCiphers.size; i ++) {
-    this->supportedCiphers[i] = clientHello.supportedCiphers[i];
+  MapLisT<int, CipherSuiteSpecification, MathRoutines::IntUnsignIdentity>& suites =
+  this->owner->owner->supportedCiphers;
+  int bestIndex = suites.size();
+  for (int i = 0; i < clientHello.declaredCiphers.size; i ++) {
+    CipherSuiteSpecification& cipher = clientHello.declaredCiphers[i];
+    if (cipher.id == 0) {
+      continue;
+    }
+    int candidateIndex = suites.GetIndex(cipher.id);
+    if (candidateIndex < 0 || candidateIndex > bestIndex) {
+      continue;
+    }
+    bestIndex = candidateIndex;
+  }
+  logWorker << "About to add supported cipher. ";
+  if (bestIndex < suites.size()) {
+    this->declaredCiphers.AddOnTop(suites.theValues[bestIndex]);
+    logWorker << "DEBUG: Added supported cipher: " << suites.theValues[bestIndex].ToString() << logger::endL;
   }
 }
 
@@ -1306,16 +1407,23 @@ bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::st
   (void) commentsOnFailure;
   (void) inputSocketID;
   this->lastToWrite.PrepareServerHello(this->lastRead);
-  List<unsigned char> helloBytes;
-  this->lastToWrite.WriteBytes(helloBytes);
+  this->lastToWrite.WriteBytes(this->lastToWrite.body);
 
   logWorker << "Incoming message:\n" << this->lastRead.hello.getStringHighlighter()
   << Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 0, false)
   << logger::endL;
   logWorker << "Bytes written:\n"
   << this->lastToWrite.hello.getStringHighlighter()
-  << Crypto::ConvertListUnsignedCharsToHex(helloBytes, 0, false) << logger::endL;
-  return false;
+  << Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 0, false) << logger::endL;
+  if (!this->WriteBytesOnce(commentsOnFailure)) {
+    logWorker << "Error replying to client hello. ";
+    if (commentsOnFailure != 0) {
+      logWorker << "DEBUG: commentsOnFailure: " << commentsOnFailure->str();
+    }
+    return false;
+  }
+  logWorker << "Wrote bytes successfully. " << logger::endL;
+  return true;
 }
 
 bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure) {

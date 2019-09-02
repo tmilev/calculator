@@ -25,88 +25,88 @@ private:
     this->theData = - 1;
   }
   bool SetChilD(int childIndexInMe, int childIndexInBoss);
-  //Definitions.
-  //1. Fundamentals.
-  //1.1. An atom is an expression with zero children.
-  //     *******************************************
-  //     We will say informally "an atom equals (the keyword) X" to mean that
-  //     the theData of the corresponding atom equals the integer Calculator::opX().
-  //     Note that this language use is completely informal, and could be ambiguous:
-  //     the theData entry of an atom can be interpreted either as keyword or as an
-  //     an actual piece of data (not necessarily equal to Calculator::opX() for some X).
-  //     Whenever this ambiguity becomes an issue, the informal language should be dropped,
-  //     and explicit reference to the Expression::theData and Expression::children members
-  //     should be made.
-  //1.2. A list is an expression with 1 or more children whose theData entry equals
-  //     0. The atom 0 *MUST* be equal to Calculator::opList().
-  //1.3. An expression with 1 or more children is not allowed to have theData entry different
-  //     from 0= Calculator::opList(). The system is instructed to
-  //     crash and burn shall such a configuration be detected.
-  //2. Basic building blocks
-  //2.1. A frozen expression is a list whose first entry is an atom equal to Freeze.
-  //2.2. A sequence is a list whose first entry is an atom equal to Sequence.
-  //2.3. A bound variable is a list with two atomic entries, the first of which
-  //     equals Bind.
-  //2.4. An error is a list with two entries whose first entry is an atom equal to Error,
-  //     and whose second entry is a string.
-  //*Note that Calculator::opList() is required to equal zero for reasons of program speed.
-  //This is GUARANTEED, and you MAY assume it.
-  //If you want to have a list of mathematical objects, use the Sequence
-  //data structure. A sequence is a List whose first entry is an atom whose value
-  //is Sequence = Calculator::opSequence().
+  // Definitions.
+  // 1. Fundamentals.
+  // 1.1. An atom is an expression with zero children.
+  //      *******************************************
+  //      We will say informally "an atom equals (the keyword) X" to mean that
+  //      the theData of the corresponding atom equals the integer Calculator::opX().
+  //      Note that this language use is completely informal, and could be ambiguous:
+  //      the theData entry of an atom can be interpreted either as keyword or as an
+  //      an actual piece of data (not necessarily equal to Calculator::opX() for some X).
+  //      Whenever this ambiguity becomes an issue, the informal language should be dropped,
+  //      and explicit reference to the Expression::theData and Expression::children members
+  //      should be made.
+  // 1.2. A list is an expression with 1 or more children whose theData entry equals
+  //      0. The atom 0 *MUST* be equal to Calculator::opList().
+  // 1.3. An expression with 1 or more children is not allowed to have theData entry different
+  //      from 0 = Calculator::opList(). The system is instructed to
+  //      crash and burn shall such a configuration be detected.
+  // 2. Basic building blocks
+  // 2.1. A frozen expression is a list whose first entry is an atom equal to Freeze.
+  // 2.2. A sequence is a list whose first entry is an atom equal to Sequence.
+  // 2.3. A bound variable is a list with two atomic entries, the first of which
+  //      equals Bind.
+  // 2.4. An error is a list with two entries whose first entry is an atom equal to Error,
+  //      and whose second entry is a string.
+  // *Note that Calculator::opList() is required to equal zero for reasons of program speed.
+  // This is GUARANTEED, and you MAY assume it.
+  // If you want to have a list of mathematical objects, use the Sequence
+  // data structure. A sequence is a List whose first entry is an atom whose value
+  // is Sequence = Calculator::opSequence().
   //
   //-------------------------------------------------------
   //
-  //Expressions of built-in types.
-  //1. Expressions of built-in types represent hard-coded C++ types.
-  //2. An expression is said to be of built-in type if it is a list of 2 or 3 elements
-  //   starting with an atom
-  //   equal to one of a set of hard-coded names, and ending in an atom whose value
-  //   is an integer that uniquely (up to operator==) identifies a C++ structure with the corresponding type.
-  //3. A context is a list of 1 or more elements starting with the atom Context. If
-  //   a context has only one child (which must then be equal to the atom Context),
-  //   then we say that we have an "empty context".
-  //4. An expression is said to have context if it is a list of at least two elements,
-  //   the second element of which is a context.
-  //5. If an expression of built-in type has 3 children, the middle child
-  //   must be a context. If an expression of built-in type has 2 children, we say that
-  //   the expression does not have context.
-  //6. Two expressions of built-in type with equal types and C++ identifiers, one having a
-  //   context that is empty, and the other having no context,
-  //   are considered to represent one and the same element.
+  // Expressions of built-in types.
+  // 1. Expressions of built-in types represent hard-coded C++ types.
+  // 2. An expression is said to be of built-in type if it is a list of 2 or 3 elements
+  //    starting with an atom
+  //    equal to one of a set of hard-coded names, and ending in an atom whose value
+  //    is an integer that uniquely (up to operator==) identifies a C++ structure with the corresponding type.
+  // 3. A context is a list of 1 or more elements starting with the atom Context. If
+  //    a context has only one child (which must then be equal to the atom Context),
+  //    then we say that we have an "empty context".
+  // 4. An expression is said to have context if it is a list of at least two elements,
+  //    the second element of which is a context.
+  // 5. If an expression of built-in type has 3 children, the middle child
+  //    must be a context. If an expression of built-in type has 2 children, we say that
+  //    the expression does not have context.
+  // 6. Two expressions of built-in type with equal types and C++ identifiers, one having a
+  //    context that is empty, and the other having no context,
+  //    are considered to represent one and the same element.
   //-------------------------------------------------------
   //-------------------------------------------------------
   //-------------------------------------------------------
-  //Notes on Expression implementation.
-  //While the preceding notes are to be considered as fixed, the following notes
-  //are implementation specific and are subject to change.
-  //The i^th child of an expression can be accessed as const using operator[](i).
-  //The children of an expression are kept as a list of integers indicating the children's
-  //position in Calculator::theExpressionContainer.
-  //Calculator::theExpressionContainer is a Hashed List of references and must not be modified
-  //directly in any way.
-  //Motivation for this implementation choice. The original implementation
-  //had Expression contain all of its children as List<Expression>, making the copy operator=
-  //a recursive function. While this is one of the least-head-aching designs,
-  //it also proved to be remarkably slow: here is why.
-  //When processing an expression, one must traverse all of its subtrees.
-  //Making temporary copies of all subtrees is then approximately O(n^2),
-  //where n^2 is the number of nodes of the tree.
+  // Notes on Expression implementation.
+  // While the preceding notes are to be considered as fixed, the following notes
+  // are implementation specific and are subject to change.
+  // The i^th child of an expression can be accessed as const using operator[](i).
+  // The children of an expression are kept as a list of integers indicating the children's
+  // position in Calculator::theExpressionContainer.
+  // Calculator::theExpressionContainer is a Hashed List of references and must not be modified
+  // directly in any way.
+  // Motivation for this implementation choice. The original implementation
+  // had Expression contain all of its children as List<Expression>, making the copy operator=
+  // a recursive function. While this is one of the least-head-aching designs,
+  // it also proved to be remarkably slow: here is why.
+  // When processing an expression, one must traverse all of its subtrees.
+  // Making temporary copies of all subtrees is then approximately O(n^2),
+  // where n^2 is the number of nodes of the tree.
   //
-  //For a tree with 1k nodes this is already
-  //unacceptably slow, if it could be avoided.
+  // For a tree with 1k nodes this is already
+  // unacceptably slow, if it could be avoided.
   //
-  //If change is to be applied to
-  //most subtrees, then the approximate cost of O(n^2) operations obviously cannot be avoided.
-  //However, in most computations, subtrees need not be changed - in reality, most expression
-  //will arrive to the calculator in reduced or close-to-reduced form.
+  // If change is to be applied to
+  // most subtrees, then the approximate cost of O(n^2) operations obviously cannot be avoided.
+  // However, in most computations, subtrees need not be changed - in reality, most expression
+  // will arrive to the calculator in reduced or close-to-reduced form.
   //
-  //This explains our choice of keeping all children of an expression as a reference to
-  //an ever-growing collection of Expressions.
-  //If a single instance of Calculator is to run over long periods of time,
-  //it is possible that not all such expressions are in use, and we run out of RAM memory.
-  //If that is to happen, some sort of garbage collection will have to be implemented.
-  //However, for the current calculator purposes, no such danger exists.
+  // This explains our choice of keeping all children of an expression as a reference to
+  // an ever-growing collection of Expressions.
+  // If a single instance of Calculator is to run over long periods of time,
+  // it is possible that not all such expressions are in use, and we run out of RAM memory.
+  // If that is to happen, some sort of garbage collection will have to be implemented.
+  // However, for the current calculator purposes, no such danger exists.
   public:
   int theData;
   HashedList<int, MathRoutines::IntUnsignIdentity> children;
@@ -562,12 +562,12 @@ private:
     this->theData == other.theData &&
     this->children.size == other.children.size;
   }
-  //The following function creates an expression by parsing a calculator-like string.
-  //The purpose of this function is to reduce the number of lines needed to create an Expression using C++.
-  //Consider creating the expression f{}{{a}}={{a}}+ 1; f{}b;
-  //We would need to create a large expression tree, so many calls of Expression::MakeXOX.
-  //Instead, we can simply parse the expression from a string.
-  //The inputExpressions give us the ability to specify substitutions
+  // The following function creates an expression by parsing a calculator-like string.
+  // The purpose of this function is to reduce the number of lines needed to create an Expression using C++.
+  // Consider creating the expression f{}{{a}}={{a}}+ 1; f{}b;
+  // We would need to create a large expression tree, so many calls of Expression::MakeXOX.
+  // Instead, we can simply parse the expression from a string.
+  // The inputExpressions give us the ability to specify substitutions
   bool AssignStringParsed(
     const std::string& theString,
     MapLisT<std::string, Expression, MathRoutines::HashString>* substitutions,
@@ -701,7 +701,7 @@ class SyntacticElement {
   List<Expression> dataList;
   std::string ToStringHumanReadable(Calculator& theBoss, bool includeLispifiedExpressions) const;
   SyntacticElement() {
-    this->controlIndex = 0;//controlIndex = 0 *MUST* point to the empty control sequence.
+    this->controlIndex = 0; //controlIndex = 0 *MUST* point to the empty control sequence.
     this->errorString = "";
     this->numNonBoundVariablesInherited = - 1; // - 1 stands for unknown
     this->numBoundVariablesInherited = - 1; // - 1 stands for unknown
@@ -736,8 +736,10 @@ public:
   Matrix<std::string> thePointsJS;
   Vectors<double> thePointsDouble;
   List<Vectors<double> > theRectangles;
-  // each rectangle is a list of two 2-dim vectors. First vector gives the (x,y)-coords
-  //of the lower left corner of the rectangle. Second vector gives the (width,height) of the rectangle.
+  // Each rectangle is a list of two 2-dim vectors.
+  // The first vector gives the (x, y) - coordinates
+  // of the lower left corner of the rectangle.
+  // The Second vector gives the (width, height) of the rectangle.
   std::string thePlotType;
 
   Expression manifoldImmersion;
@@ -811,12 +813,12 @@ public:
   int dimension;
   static int canvasCounteR;
   std::string canvasName;
-  int priorityViewRectangle; //0 or less: compute the view Window. If this quantity is greater than zero,
-  int priorityWindow; //0 or less: compute the view Window. If this quantity is greater than zero,
-  //the user-given bounding box will overwrite any computations.
-  //When adding two plots with positive viewing window priorities, the window with the larger priority is used.
-  //If the priorities are equal, the windows are combined to the smallest window that fits both.
-  int priorityCanvasName; //same as priorityViewWindow but with respect to canvas names.
+  int priorityViewRectangle; // 0 or less: compute the view Window. If this quantity is greater than zero,
+  int priorityWindow; // 0 or less: compute the view Window. If this quantity is greater than zero,
+  // the user-given bounding box will overwrite any computations.
+  // When adding two plots with positive viewing window priorities, the window with the larger priority is used.
+  // If the priorities are equal, the windows are combined to the smallest window that fits both.
+  int priorityCanvasName; // same as priorityViewWindow but with respect to canvas names.
   std::string ToStringDebug();
   std::string GetPlotHtml(Calculator& owner);
   void ComputeCanvasNameIfNecessary();
@@ -847,9 +849,9 @@ struct InputBox {
 };
 
 class ObjectContainer {
-  //Following are containers for data structures that are implemented in C++.
-  //These objects are dynamically allocated and used by the calculator as requested
-  //by various predefined function handlers.
+  // Following are containers for data structures that are implemented in C++.
+  // These objects are dynamically allocated and used by the calculator as requested
+  // by various predefined function handlers.
 public:
   HashedListReferences<ElementWeylGroup> theWeylGroupElements;
 ///////////////////////
@@ -925,7 +927,10 @@ struct ExpressionTripleCrunchers {
    
   }
   static unsigned int HashFunction(const ExpressionTripleCrunchers& input) {
-    return (unsigned int) input.leftType * SomeRandomPrimes[0] + (unsigned int) input.rightType * SomeRandomPrimes[1] + (unsigned int) input.theOp * SomeRandomPrimes[2];
+    return
+    (unsigned int) input.leftType * SomeRandomPrimes[0] +
+    (unsigned int) input.rightType * SomeRandomPrimes[1] +
+    (unsigned int) input.theOp * SomeRandomPrimes[2];
   }
 };
 
@@ -984,53 +989,53 @@ public:
   List<List<Function> > operationsCompositeHandlers;
   HashedList<std::string, MathRoutines::HashString> namedRules;
   List<List<int> > namedRulesLocations;//for each named rule we store a list of triple of ints.
-  //If first int is 0 then the named rule is a function handler.
-  //If first int is 1 then the named rule is a composite operation handler.
-  //Second int gives the index of the atom handled by the named rule.
-  //Third int gives the index of the rule within the list of handlers for that atom.
+  // If first int is 0 then the named rule is a function handler.
+  // If first int is 1 then the named rule is a composite operation handler.
+  // Second int gives the index of the atom handled by the named rule.
+  // Third int gives the index of the rule within the list of handlers for that atom.
 
-  //Calculator functions have as arguments two expressions passed by reference,
-  //const Expression& input and Expression& output. Calculator functions
-  //return bool. It is forbidden to pass the same object as input and output.
-  //If a calculator function returns false this
-  //means that the calculator failed to evaluate the
-  //function. If that is the case, the value of output is not specified and
-  //*MUST NOT* be used in the calling function.
-  //If a function returns true this means that output contains the result of the function.
-  //Note that the output of a function may be of type Error. Error results come, like any other
-  //result, with a true return from the function.
+  // Calculator functions have as arguments two expressions passed by reference,
+  // const Expression& input and Expression& output. Calculator functions
+  // return bool. It is forbidden to pass the same object as input and output.
+  // If a calculator function returns false this
+  // means that the calculator failed to evaluate the
+  // function. If that is the case, the value of output is not specified and
+  // *MUST NOT* be used in the calling function.
+  // If a function returns true this means that output contains the result of the function.
+  // Note that the output of a function may be of type Error. Error results come, like any other
+  // result, with a true return from the function.
   //-----------------------------------------------
-  //In addition, built-in functions are split into two flavors:
-  //inner functions (or just "functions")
+  // In addition, built-in functions are split into two flavors:
+  // inner functions (or just "functions")
   // and outer functions (or "laws").
-  //The only difference between inner functions and outer functions is the
-  //way they are applied when the calculator reduces an expression.
+  // The only difference between inner functions and outer functions is the
+  // way they are applied when the calculator reduces an expression.
   //
-  //Suppose the calculator is reducing Expression X.
-  //1. Outer functions ("laws").
-  //1.1. Let X be expression whose first child is an atom equal to the name of the outer function.
-  //1.2  Call the outer function with input argument equal to X.
-  //1.3. If the outer function returns true but the output argument is identically equal to
-  //     X, nothing is done (the action of the outer function is ignored).
-  //1.4. If an outer function returns true and the output argument is different from X,
-  //     X is replaced by this output.
-  //2. Inner functions ("functions").
-  //2.1. Let X be expression whose first child is an atom equal to the name of the inner function. We define Argument as follows.
-  //2.1.1. If X has two children, Argument is set to the second child of X.
-  //2.1.2. If X does not have two children, Argument is set to be equal to the entire X.
-  //2.2. The inner function is called with input argument equal to Argument.
-  //2.3. If the inner function returns true, X is substituted with
-  //     the output argument of the inner function, else nothing is done.
+  // Suppose the calculator is reducing Expression X.
+  // 1. Outer functions ("laws").
+  // 1.1. Let X be expression whose first child is an atom equal to the name of the outer function.
+  // 1.2  Call the outer function with input argument equal to X.
+  // 1.3. If the outer function returns true but the output argument is identically equal to
+  //      X, nothing is done (the action of the outer function is ignored).
+  // 1.4. If an outer function returns true and the output argument is different from X,
+  //      X is replaced by this output.
+  // 2. Inner functions ("functions").
+  // 2.1. Let X be expression whose first child is an atom equal to the name of the inner function. We define Argument as follows.
+  // 2.1.1. If X has two children, Argument is set to the second child of X.
+  // 2.1.2. If X does not have two children, Argument is set to be equal to the entire X.
+  // 2.2. The inner function is called with input argument equal to Argument.
+  // 2.3. If the inner function returns true, X is substituted with
+  //      the output argument of the inner function, else nothing is done.
   //
-  //As explained above, the distinction between inner functions and outer functions
-  //is only practical. The notions of inner and outer functions do not apply to user-defined
-  //substitution rules entered via the calculator. User-defined substitution rules are
-  //processed like outer functions, with the
-  //major difference that even if their output coincides
-  //with their input the substitution is carried out, resulting in an infinite cycle.
-  //Here, by ``infinite cycle'' we either mean a 100% CPU run until the timeout& algebraic
-  //safety kicks in, or error interception with a ``detected substitution cycle'' or
-  //similar error message.
+  // As explained above, the distinction between inner functions and outer functions
+  // is only practical. The notions of inner and outer functions do not apply to user-defined
+  // substitution rules entered via the calculator. User-defined substitution rules are
+  // processed like outer functions, with the
+  // major difference that even if their output coincides
+  // with their input the substitution is carried out, resulting in an infinite cycle.
+  // Here, by ``infinite cycle'' we either mean a 100% CPU run until the timeout& algebraic
+  // safety kicks in, or error interception with a ``detected substitution cycle'' or
+  // similar error message.
   //
   //----------------------------------------------------------
 
@@ -2640,7 +2645,7 @@ bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expre
     for (int i = 0; i < summandsWithCoeff.size; i ++) {
       for (int j = i; j < summandsWithCoeff.size; j ++) {
         if (summandsWithCoeff[i] > summandsWithCoeff[j] && summandsWithCoeff[j] > summandsWithCoeff[i]) {
-          crash << "This is a programming error: faulty comparison function: each of the expressions "
+          crash << "This is a programming error: bad comparison function: each of the expressions "
           << summandsWithCoeff[i].ToString() << " and " << summandsWithCoeff[j].ToString()
           << " is reported to be greater than the other. " << crash;
         }
@@ -2671,7 +2676,8 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner) {
     curType == owner.opElementWeylAlgebra() ||
     curType == owner.opWeightLieAlgPoly()
   ) {
-    crash << "This may or may not be a programming error. Assigning value WITHOUT CONTEXT to data type "
+    crash << "This may or may not be a programming error. "
+    << "Assigning value WITHOUT CONTEXT to data type "
     << this->owner->GetOperations()[curType]
     << " is discouraged, and most likely is an error. Crashing to let you know. "
     << crash;

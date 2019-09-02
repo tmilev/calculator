@@ -31,12 +31,14 @@ bool SSLRecord::TestSerialization() {
   "000000000000000000000000000000000000000000000000000000000000000"
   "000000000000000000000000000000000000000000000000000000000000000"
   "000000000000000000000000000000000000";
+  TransportLayerSecurityServer server;
   SSLRecord theRecord;
+  theRecord.owner = &server;
   std::stringstream comments;
   if (!Crypto::ConvertHexToListUnsignedChar(inputHex, theRecord.body, &comments)) {
     crash << "Bad hard-coded test hex string!" << crash;
   }
-  logServer << "DEBUG: got to ehre!! " << logger::endL;
+  logServer << "DEBUG: got to here!! " << logger::endL;
 
   if (!theRecord.Decode(&comments)) {
     crash << "Failed to decode built-in message." << crash;

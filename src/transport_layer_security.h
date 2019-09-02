@@ -82,19 +82,27 @@ struct TransportLayerSecurityOpenSSL {
   static bool initSSLKeyFilesCreateOnDemand();
 };
 
+class TransportLayerSecurityServer;
 class SSLRecord;
-class SSLHello;
+class SSLContent;
 
 class CipherSuiteSpecification {
 public:
-  int theType;
+  int id;
   std::string name;
+  TransportLayerSecurityServer* owner;
   bool ComputeName();
+  bool CheckInitialization() const;
+  CipherSuiteSpecification();
+  CipherSuiteSpecification(TransportLayerSecurityServer* owner, int inputType);
+  std::string ToString() const;
+  static unsigned int HashFunction(const CipherSuiteSpecification& input);
+  unsigned int HashFunction() const;
 };
 
 class SSLHelloExtension {
 public:
-  SSLHello* owner;
+  SSLContent* owner;
   List<unsigned char> content;
   int theType;
   SSLHelloExtension();
@@ -107,10 +115,10 @@ public:
 // https://serializethoughts.com/2014/07/27/dissecting-tls-client-hello-message/
 // https://idea.popcount.org/2012-06-16-dissecting-ssl-handshake/
 //
-class SSLHello {
+class SSLContent {
 public:
   SSLRecord* owner;
-  unsigned char handshakeType;
+  unsigned char theType;
   int length;
   int version;
   int cipherSpecLength;
@@ -123,7 +131,7 @@ public:
   static const int LengthRandomBytesInSSLHello = 32;
   List<unsigned char> renegotiationCharacters;
   List<unsigned char> RandomBytes;
-  List<CipherSuiteSpecification> supportedCiphers;
+  List<CipherSuiteSpecification> declaredCiphers;
   List<SSLHelloExtension> extensions;
   List<unsigned char> sessionId;
   List<unsigned char> challenge;
@@ -140,14 +148,15 @@ public:
     static const unsigned char clientKeyExchange = 16; //0x10
     static const unsigned char finished = 20; //0x14
   };
-  SSLHello();
+  SSLContent();
   void resetExceptOwner();
+  bool CheckInitialization() const;
   logger::StringHighligher getStringHighlighter();
   bool Decode(std::stringstream* commentsOnFailure);
   bool DecodeSupportedCiphers(std::stringstream* commentsOnFailure);
   bool DecodeExtensions(std::stringstream* commentsOnFailure);
   bool ProcessExtensions(std::stringstream* commentsOnFailure);
-  void PrepareServerHello(SSLHello& clientHello);
+  void PrepareServerHello(SSLContent& clientHello);
   JSData ToJSON() const;
   std::string ToStringVersion() const;
   // As the name suggests, this will append the output bytes, without
@@ -175,8 +184,10 @@ public:
   int version;
   int length;
   List<unsigned char> body;
-  SSLHello hello;
+  SSLContent hello;
+  TransportLayerSecurityServer* owner;
   SSLRecord();
+  bool CheckInitialization() const;
   bool Decode(std::stringstream* commentsOnFailure);
   bool DecodeBody(std::stringstream* commentsOnFailure);
   std::string ToBytes() const;
@@ -266,22 +277,27 @@ public:
 
 class TransportLayerSecurityServer {
 public:
-  static MapLisT<int, std::string, MathRoutines::IntUnsignIdentity>& cipherSuites();
+  // Ordered by preference (lower index = more preferred):
+  MapLisT<int, std::string, MathRoutines::IntUnsignIdentity> cipherSuiteNames;
+  MapLisT<int, CipherSuiteSpecification, MathRoutines::IntUnsignIdentity> supportedCiphers;
   int socketId;
   int64_t millisecondsTimeOut;
   int64_t millisecondsDefaultTimeOut;
   int defaultBufferCapacity;
   SSLRecord lastRead;
   SSLRecord lastToWrite;
+  HashedList<CipherSuiteSpecification> supportedCiphersInOrderOfPreference;
+  CipherSuiteSpecification GetCipherCrashIfUnknown(int inputId);
+  void AddSupportedCipher(int inputId);
+  void initialize();
+  void initializeCipherSuites();
   TransportLayerSecurityServer();
   bool HandShakeIamServer(int inputSocketID, std::stringstream *commentsOnFailure);
   bool ReadBytesOnce();
   bool DecodeSSLRecord(std::stringstream* commentsOnFailure);
   bool ReplyToClientHello(int inputSocketID, std::stringstream* commentsOnFailure);
   bool ReadBytesDecodeOnce(std::stringstream *commentsOnFailure);
-  void WriteBytesOnce();
-  void ReadLoop();
-  void WriteLoop();
+  bool WriteBytesOnce(std::stringstream *commentsOnFailure);
 };
 
 class TransportLayerSecurity {

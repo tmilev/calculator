@@ -62,6 +62,7 @@ void TransportLayerSecurity::initialize(bool IamServer) {
       this->openSSLData.initSSLClient();
     }
   } else {
+    logServer << "DEBUG: Initializing TLS ..." << logger::endL;
     this->theServer.initialize();
   }
   this->flagInitialized = true;
@@ -588,7 +589,7 @@ void TransportLayerSecurityServer::AddSupportedCipher(int inputId) {
 }
 
 void TransportLayerSecurityServer::initializeCipherSuites() {
-  if (this->cipherSuiteNames.size() == 0) {
+  if (this->cipherSuiteNames.size() != 0) {
     return;
   }
   this->cipherSuiteNames.SetKeyValue(0xc02f, "ECDHE/RSA/AES 128/GCM/SHA2"          ); // (RFC 5289)
@@ -1389,7 +1390,8 @@ void SSLContent::PrepareServerHello(SSLContent& clientHello) {
     }
     bestIndex = candidateIndex;
   }
-  logWorker << "About to add supported cipher. ";
+  logWorker << logger::cyan << "DEBUG: suites: " << suites.size() << logger::endL;
+  logWorker << logger::cyan << "About to add supported cipher. BestIndex = " << bestIndex << logger::endL;
   if (bestIndex < suites.size()) {
     this->declaredCiphers.AddOnTop(suites.theValues[bestIndex]);
     logWorker << "DEBUG: Added supported cipher: " << suites.theValues[bestIndex].ToString() << logger::endL;
@@ -1409,9 +1411,9 @@ bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::st
   this->lastToWrite.PrepareServerHello(this->lastRead);
   this->lastToWrite.WriteBytes(this->lastToWrite.body);
 
-  logWorker << "Incoming message:\n" << this->lastRead.hello.getStringHighlighter()
-  << Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 0, false)
-  << logger::endL;
+  //logWorker << "Incoming message:\n" << this->lastRead.hello.getStringHighlighter()
+  //<< Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 0, false)
+  //<< logger::endL;
   logWorker << "Bytes written:\n"
   << this->lastToWrite.hello.getStringHighlighter()
   << Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 0, false) << logger::endL;

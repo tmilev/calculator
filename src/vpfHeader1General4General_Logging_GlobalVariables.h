@@ -319,8 +319,6 @@ class logger {
   static std::string cyanConsole();
   static std::string orangeConsole();
   static std::string consoleNormal();
-
-
   std::string getStamp();
   std::string getStampShort();
   std::string closeTagConsole();
@@ -354,9 +352,9 @@ class logger {
     if (!this->flagStopWritingToFile) {
       this->bufferFile += out.str();
       if (this->flagWriteImmediately) {
-        //<- Please do not use flagWriteImmediately
-        //unless it is an extremely time-sensitive logging
-        //issue such as investigating fork hangups.
+        // <- Please do not use flagWriteImmediately
+        // unless it is an extremely time-sensitive logging
+        // issue such as investigating fork hangups.
         this->theFile << this->bufferFile;
         this->theFile.flush();
         this->bufferFile.clear();

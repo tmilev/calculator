@@ -293,28 +293,28 @@ bool DynkinSimpleType:: HasPrecomputedSubalgebras() const {
   return false;
 }
 
-//WARNING
-//Do not use the following web addresses to identify the server,
-//EXCEPT in special circumstances described below.
-//Instead, to get the web address of the
-//calculator server,
-//please use theGlobalVariables.hostNoPort.
-//That address is extracted from the
-//incoming message headers
-//and is how our server is seen from the outside world.
-//HOWEVER,
-//the incoming message headers may be forged.
-//In most cases, this is not a problem
-//as the forgery will
-//affect negatively only the forgerer.
-//HOWEVER,
-//we CANNOT rely on the headers when sending
-//activation emails, as an attacker could claim my email,
-//forge his headers, and send me activation email which would
-//wrongly link to the host given in his forged headers
-//- that would be an evil site prompting me for password.
-//So, only in this very special circumstance,
-//we can only rely on a hard-wired web address.
+// WARNING
+// Do not use the following web addresses to identify the server,
+// EXCEPT in special circumstances described below.
+// Instead, to get the web address of the
+// calculator server,
+// please use theGlobalVariables.hostNoPort.
+// That address is extracted from the
+// incoming message headers
+// and is how our server is seen from the outside world.
+// HOWEVER,
+// the incoming message headers may be forged.
+// In most cases, this is not a problem
+// as the forgery will
+// affect negatively only the forgerer.
+// HOWEVER,
+// we CANNOT rely on the headers when sending
+// activation emails, as an attacker could claim my email,
+// forge his headers, and send me activation email which would
+// wrongly link to the host given in his forged headers
+// - that would be an evil site prompting me for password.
+// So, only in this very special circumstance,
+// we can only rely on a hard-coded web address.
 
 std::string GlobalVariables::hopefullyPermanentWebAdress =
 "https://calculator-algebra.org";

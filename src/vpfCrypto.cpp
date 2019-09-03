@@ -720,7 +720,7 @@ bool Crypto::ConvertStringToHex(
   return true;
 }
 
-void Crypto::ConvertUint64toBigendianStringAppendResult(uint64_t& input, std::string& outputAppend) {
+void Crypto::ConvertUint64toBigendianStringAppendResult(uint64_t input, std::string& outputAppend) {
   //the following code should work on both big- and little-endian systems:
   outputAppend.push_back(static_cast<char>(input / 72057594037927936)      );
   outputAppend.push_back(static_cast<char>((input / 281474976710656) % 256));
@@ -730,6 +730,19 @@ void Crypto::ConvertUint64toBigendianStringAppendResult(uint64_t& input, std::st
   outputAppend.push_back(static_cast<char>((input / 65536) % 256)          );
   outputAppend.push_back(static_cast<char>((input / 256) % 256)            );
   outputAppend.push_back(static_cast<char>( input % 256)                   );
+}
+
+void Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(uint64_t input, List<unsigned char>& outputAppend) {
+  //the following code should work on both big- and little-endian systems:
+  outputAppend.SetExpectedSize(outputAppend.size + 8);
+  outputAppend.AddOnTop(static_cast<unsigned char>(input / 72057594037927936)      );
+  outputAppend.AddOnTop(static_cast<unsigned char>((input / 281474976710656) % 256));
+  outputAppend.AddOnTop(static_cast<unsigned char>((input / 1099511627776) % 256)  );
+  outputAppend.AddOnTop(static_cast<unsigned char>((input / 4294967296) % 256)     );
+  outputAppend.AddOnTop(static_cast<unsigned char>((input / 16777216) % 256)       );
+  outputAppend.AddOnTop(static_cast<unsigned char>((input / 65536) % 256)          );
+  outputAppend.AddOnTop(static_cast<unsigned char>((input / 256) % 256)            );
+  outputAppend.AddOnTop(static_cast<unsigned char>( input % 256)                   );
 }
 
 void Crypto::ConvertStringToListUInt32BigendianZeroPad(const std::string& input, List<uint32_t>& output) {
@@ -1080,30 +1093,36 @@ void Crypto::ConvertStringToLargeIntUnsigned(const std::string& input, LargeIntU
   output = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
     output *= 256;
-    output += ((unsigned int) input[i]);
+    output += (static_cast<unsigned int>(input[i]));
   }
 }
 
-void Crypto::computeSha224(const std::string& inputString, List<uint32_t>& output) {
+void Crypto::computeSha224(const List<unsigned char>& input, List<uint32_t>& output) {
   MacroRegisterFunctionWithName("Crypto::computeSha224");
-  return Crypto::computeSha2xx(inputString, output, true);
+  return Crypto::computeSha2xx(input, output, true);
 }
 
-void Crypto::computeSha256(const std::string& inputString, std::string& output) {
- 
+void Crypto::computeSha256(const std::string& input, std::string& output) {
+  List<unsigned char> inputList, outputList;
+  inputList = input;
+  computeSha256(inputList, outputList);
+  output.assign(reinterpret_cast<char*>(outputList.TheObjects), static_cast<unsigned>(outputList.size));
+}
+
+void Crypto::computeSha256(const List<unsigned char>& input, List<unsigned char>& output) {
   List<uint32_t> theSha256Uint;
-  Crypto::computeSha256(inputString, theSha256Uint);
-  Crypto::ConvertUint32ToString(theSha256Uint, output);
+  Crypto::computeSha256(input, theSha256Uint);
+  Crypto::ConvertUint32ToUcharBigendian(theSha256Uint, output);
 }
 
-void Crypto::computeSha256(const std::string& inputString, List<uint32_t>& output) {
+void Crypto::computeSha256(const List<unsigned char>& input, List<uint32_t>& output) {
   MacroRegisterFunctionWithName("Crypto::computeSha256");
-  return Crypto::computeSha2xx(inputString, output, false);
+  return Crypto::computeSha2xx(input, output, false);
 }
 
 List<uint32_t> Crypto::kArraySha2xx;
 
-void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& output, bool is224) {
+void Crypto::computeSha2xx(const List<unsigned char>& input, List<uint32_t>& output, bool is224) {
   MacroRegisterFunctionWithName("Crypto::computeSha2xx");
   //Reference: wikipedia page on sha256.
   //the Algorithm here is a direct implementation of the Wikipedia pseudocode.
@@ -1127,20 +1146,20 @@ void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& outpu
   }
   Crypto::initSha256();
   //stOutput << "DEBUG: start string length: " << inputString.size();
-  uint64_t messageLength = inputString.size() * 8;//*sizeof(char);
-  std::string inputStringPreprocessed = inputString;
-  inputStringPreprocessed.push_back(0x80);
-  unsigned numbytesMod64 = inputStringPreprocessed.size() % 64;
+  uint64_t messageLength = static_cast<unsigned>(input.size) * 8;//*sizeof(char);
+  List<unsigned char> inputPreprocessed = input;
+  inputPreprocessed.AddOnTop(0x80);
+  unsigned numbytesMod64 = inputPreprocessed.size % 64;
   if (numbytesMod64 > 56) {
     for (unsigned i = numbytesMod64; i < 64; i ++) {
-      inputStringPreprocessed.push_back(0);
+      inputPreprocessed.AddOnTop(0);
     }
     numbytesMod64 = 0;
   }
-  for (int i = numbytesMod64; i < 56; i ++) {
-    inputStringPreprocessed.push_back(0);
+  for (unsigned i = numbytesMod64; i < 56; i ++) {
+    inputPreprocessed.AddOnTop(0);
   }
-  Crypto::ConvertUint64toBigendianStringAppendResult(messageLength, inputStringPreprocessed);
+  Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(messageLength, inputPreprocessed);
 ////////////////////////
 //  std::stringstream tempSTream;
 //  for (unsigned i = 0; i < inputStringPreprocessed.size(); i ++)
@@ -1151,13 +1170,13 @@ void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& outpu
 ///////////////////////
   List<unsigned char> convertorToUint32;
   List<uint32_t> inputStringUint32;
-  inputStringUint32.Reserve(1 + inputStringPreprocessed.size() / 4);
+  inputStringUint32.Reserve(1 + inputPreprocessed.size / 4);
   convertorToUint32.SetSize(4);
-  for (unsigned i = 0; i < inputStringPreprocessed.size() / 4; i ++) {
-    convertorToUint32[0] = inputStringPreprocessed[i * 4];
-    convertorToUint32[1] = inputStringPreprocessed[i * 4 + 1];
-    convertorToUint32[2] = inputStringPreprocessed[i * 4 + 2];
-    convertorToUint32[3] = inputStringPreprocessed[i * 4 + 3];
+  for (int i = 0; i < inputPreprocessed.size / 4; i ++) {
+    convertorToUint32[0] = inputPreprocessed[i * 4];
+    convertorToUint32[1] = inputPreprocessed[i * 4 + 1];
+    convertorToUint32[2] = inputPreprocessed[i * 4 + 2];
+    convertorToUint32[3] = inputPreprocessed[i * 4 + 3];
     inputStringUint32.AddOnTop(Crypto::GetUInt32FromCharBigendian(convertorToUint32));
   }
   List<uint32_t> currentChunk;

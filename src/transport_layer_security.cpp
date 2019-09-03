@@ -1370,9 +1370,9 @@ void SSLContent::PrepareServerHello(SSLContent& clientHello) {
   this->CheckInitialization();
   this->version = 3 * 256 + 3;
   this->theType = SSLContent::tokens::serverHello;
-  this->sessionId = clientHello.sessionId;
   this->compressionMethod = clientHello.compressionMethod;
   Crypto::GetRandomBytesSecure(this->RandomBytes, this->LengthRandomBytesInSSLHello);
+  Crypto::computeSha256(this->RandomBytes, this->sessionId);
   //this->extensions = clientHello.extensions;
   for (int i = 0; i < clientHello.extensions.size; i ++) {
     this->extensions.AddOnTop(clientHello.extensions[i]);

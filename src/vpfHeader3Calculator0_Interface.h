@@ -1040,7 +1040,7 @@ public:
   //----------------------------------------------------------
 
 
-  //control sequences parametrize the syntactical elements
+  // Control sequences parametrize the syntactical elements
   HashedList<std::string, MathRoutines::HashString> controlSequences;
 
   HashedList<ExpressionTripleCrunchers> theCruncherIds;

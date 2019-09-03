@@ -92,6 +92,9 @@ public:
 
   static List<CertificateRSA> knownCertificates;
   static List<uint32_t> kArraySha2xx;
+  class Test {
+    static bool Sha256Test();
+  };
   static bool LoadKnownCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   static bool LoadOneKnownCertificate(
     const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
@@ -110,14 +113,14 @@ public:
   static bool ConvertBase64ToBitStream(
     const std::string& input,
     List<unsigned char>& output,
-    std::stringstream* commentsOnFailure = 0,
-    std::stringstream* commentsGeneral = 0
+    std::stringstream* commentsOnFailure = nullptr,
+    std::stringstream* commentsGeneral = nullptr
   );
   static bool ConvertBase64ToString(
     const std::string& input,
     std::string& output,
-    std::stringstream* commentsOnFailure = 0,
-    std::stringstream* commentsGeneral = 0
+    std::stringstream* commentsOnFailure = nullptr,
+    std::stringstream* commentsGeneral = nullptr
   );
 
   static void ConvertStringToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output);
@@ -164,7 +167,8 @@ public:
   static void ConvertStringToListBytes(const std::string& input, List<unsigned char>& output);
   static void ConvertStringToListBytesSigned(const std::string& input, List<char>& output);
   static void ConvertUint32toBigendianStringAppendResult(uint32_t& input, std::string& outputAppend);
-  static void ConvertUint64toBigendianStringAppendResult(uint64_t& input, std::string& outputAppend);
+  static void ConvertUint64toBigendianStringAppendResult(uint64_t input, std::string& outputAppend);
+  static void ConvertUint64toBigendianListUnsignedCharAppendResult(uint64_t input, List<unsigned char>& outputAppend);
   static List<int> ConvertStringToListInt(const std::string& input);
   static uint32_t leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate);
   static uint32_t rightRotateAsIfBigEndian(uint32_t input, int numBitsToRotate);
@@ -173,10 +177,11 @@ public:
 
   static void initSha256();
   static void computeSha1(const std::string& inputString, List<uint32_t>& output);
-  static void computeSha224(const std::string& inputString, List<uint32_t>& output);
-  static void computeSha2xx(const std::string& inputString, List<uint32_t>& output, bool is224);
-  static void computeSha256(const std::string& inputString, List<uint32_t>& output);
-  static void computeSha256(const std::string& inputString, std::string& output);
+  static void computeSha224(const List<unsigned char>& input, List<uint32_t>& output);
+  static void computeSha2xx(const List<unsigned char>& input, List<uint32_t>& output, bool is224);
+  static void computeSha256(const List<unsigned char>& input, List<uint32_t>& output);
+  static void computeSha256(const List<unsigned char>& input, List<unsigned char>& output);
+  static void computeSha256(const std::string& input, std::string& output);
   static void ConvertListUintToLargeUInt(List<uint32_t>& input, LargeIntUnsigned& output);
   static LargeIntUnsigned RSAencrypt(const LargeIntUnsigned& theModulus, const LargeInt& theExponent, const LargeInt& theMessage);
   static void ConvertBitStreamToLargeUnsignedInt(const List<unsigned char>& input, LargeIntUnsigned& output);

@@ -5,7 +5,24 @@
 #include "vpfJson.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
 #include <iomanip>
+#include <sys/random.h>
+
 ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA- 1 and base64 implementation.");
+
+void Crypto::GetRandomBytesSecure(List<unsigned char>& output, int numBytes) {
+  output.SetSize(numBytes);
+  if (numBytes > 256) {
+    crash << "Getting more than 256 random bytes can block "
+    << "(google getrandom(2)) and so we do not allow it here."
+    << crash;
+  }
+  // Must not block or return fewer than requested bytes in Linux according to the
+  // documentation of getrandom.
+  int generatedBytes = getrandom(output.TheObjects, output.size, 0);
+  if (generatedBytes != output.size) {
+    crash << "Failed to get the necessary number of random bytes. " << crash;
+  }
+}
 
 unsigned char Crypto::GetCharFrom6bit(uint32_t input, bool useBase64URL) {
   switch (input) {

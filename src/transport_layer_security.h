@@ -231,7 +231,7 @@ public:
   );
   static bool ReadNByteLengthFollowedByBytes(int numBytesLength,
     const List<unsigned char>& input,
-    int &outputOffset,
+    int& outputOffset,
     int* resultLength,
     List<unsigned char>* output,
     std::stringstream* commentsOnError
@@ -241,7 +241,7 @@ public:
     int byteCountOfLength,
     unsigned int input,
     List<unsigned char>& output,
-    int &inputOutputOffset
+    int& inputOutputOffset
   );
   static void WriteTwoByteInt(
     int input,
@@ -260,18 +260,18 @@ public:
     List<unsigned char>& output
   );
   static void WriteOneByteLengthFollowedByBytes(
-    const List<unsigned char> &input,
+    const List<unsigned char>& input,
     List<unsigned char>& output
   );
   static void WriteTwoByteLengthFollowedByBytes(
-    const List<unsigned char> &input,
+    const List<unsigned char>& input,
     List<unsigned char>& output
   );
   static void WriteNByteLengthFollowedByBytes(// how many bytes are used to record the length
     int byteCountOfLength,
-    const List<unsigned char> &input,
+    const List<unsigned char>& input,
     List<unsigned char>& output,
-    int &inputOutputOffset
+    int& inputOutputOffset
   );
 };
 
@@ -292,7 +292,7 @@ public:
   void initialize();
   void initializeCipherSuites();
   TransportLayerSecurityServer();
-  bool HandShakeIamServer(int inputSocketID, std::stringstream *commentsOnFailure);
+  bool HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
   bool ReadBytesOnce();
   bool DecodeSSLRecord(std::stringstream* commentsOnFailure);
   bool ReplyToClientHello(int inputSocketID, std::stringstream* commentsOnFailure);
@@ -319,8 +319,8 @@ public:
   static const std::string signedFileCertificate3;
   static const std::string signedFileKey;
   void initialize(bool IamServer);
-  int SSLRead(std::string *outputError,
-    std::stringstream *commentsGeneral,
+  int SSLRead(std::string* outputError,
+    std::stringstream* commentsGeneral,
     bool includeNoErrorInComments
   );
   bool SSLReadLoop(
@@ -334,15 +334,15 @@ public:
   bool SSLWriteLoop(
     int numTries,
     const std::string& input,
-    std::string *outputError,
-    std::stringstream *commentsGeneral,
+    std::string* outputError,
+    std::stringstream* commentsGeneral,
     bool includeNoErrorInComments
   );
   int SSLWrite(
     List<char>& writeBuffer,
     std::string* outputError,
     std::stringstream* commentsGeneral,
-    std::stringstream *commentsOnError,
+    std::stringstream* commentsOnError,
     bool includeNoErrorInComments
   );
   TransportLayerSecurity();

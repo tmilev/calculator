@@ -4987,10 +4987,13 @@ void WebServer::InitializeGlobalVariables() {
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::appNoCache);
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::request::onePageJS);
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::request::onePageJSWithHash);
-  //NO! Adding "logout", for example: this->addressStartsNotNeedingLogin.AddOnTop("logout");
-  //is FORBIDDEN! Logging someone out definitely requires authentication (imagine someone
-  //asking for logouts on your account once every second: this would be fatal as proper logout resets
-  //the authentication tokens.
+  // NO! Adding "logout", for example:
+  // this->addressStartsNotNeedingLogin.AddOnTop("logout");
+  // is FORBIDDEN! Logging someone out definitely
+  // requires authentication (imagine someone
+  // asking for logouts on your account once every second:
+  // this would be fatal as proper logout resets
+  // the authentication tokens.
 
   MapLisT<std::string, std::string, MathRoutines::HashString>&
   folderSubstitutionsNonSensitive = FileOperations::FolderVirtualLinksNonSensitive();

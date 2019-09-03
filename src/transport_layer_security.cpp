@@ -561,9 +561,9 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
     }
     return false;
   }
-  //CHK_SSL(err);
-  /* Get the cipher - opt */
-  /* Get client's certificate (note: beware of dynamic allocation) - opt */
+  // CHK_SSL(err).
+  // Get the cipher - opt.
+  // Get client's certificate (note: beware of dynamic allocation) - opt.
   if ((false)) {
     this->InspectCertificates(commentsOnFailure, commentsGeneral);
   }
@@ -795,6 +795,7 @@ void SSLRecord::WriteBytes(List<unsigned char>& output) const {
 
 void SSLContent::WriteBytes(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::WriteBytes");
+  logWorker << "DEBUG: Writing byte" << (int) this->theType << logger::endL;
   output.AddOnTop(this->theType);
   int offsetOfThreeByteLength = output.size;
   SSLRecord::WriteThreeByteInt(0, output);
@@ -813,14 +814,12 @@ void SSLContent::WriteBytesBody(List<unsigned char>& output) const {
   if (this->RandomBytes.size != this->LengthRandomBytesInSSLHello) {
     crash << "Writing non-initialized SSL hello forbidden. " << crash;
   }
-  logWorker << "DEBUG: session id size: " << this->RandomBytes.size << logger::endL;
   int start = output.size;
   output.SetSize(output.size + this->RandomBytes.size);
   for (int i = 0; i < this->RandomBytes.size; i ++) {
     output[start + i] = this->RandomBytes[i];
   }
   SSLRecord::WriteOneByteLengthFollowedByBytes(this->sessionId, output);
-
 }
 
 void SSLContent::WriteBytesSupportedCiphers(List<unsigned char>& output) const {
@@ -1054,7 +1053,8 @@ bool SSLRecord::ReadNByteInt(
   }
   if (numBytes + inputOutputOffset > input.size) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "At least " << numBytes << " bytes required to read integer. Input has: " << input.size
+      *commentsOnFailure << "At least " << numBytes
+      << " bytes required to read integer. Input has: " << input.size
       << " bytes and offset is: " << inputOutputOffset << ". ";
     }
     return false;
@@ -1301,7 +1301,8 @@ bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
   int highEnd = this->length + this->offsetDecoded;
   if (highEnd > this->body.size) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Insufficient record length: expected: 5 + " << this->length << ", got: " << this->body.size - this->offsetDecoded;
+      *commentsOnFailure << "Insufficient record length: expected: 5 + " << this->length
+      << ", got: " << this->body.size - this->offsetDecoded;
     }
     return false;
   }
@@ -1371,7 +1372,7 @@ void SSLContent::PrepareServerHello(SSLContent& clientHello) {
   this->theType = SSLContent::tokens::serverHello;
   this->sessionId = clientHello.sessionId;
   this->compressionMethod = clientHello.compressionMethod;
-  this->RandomBytes = clientHello.RandomBytes;
+  Crypto::GetRandomBytesSecure(this->RandomBytes, this->LengthRandomBytesInSSLHello);
   //this->extensions = clientHello.extensions;
   for (int i = 0; i < clientHello.extensions.size; i ++) {
     this->extensions.AddOnTop(clientHello.extensions[i]);
@@ -1409,6 +1410,10 @@ bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::st
   (void) commentsOnFailure;
   (void) inputSocketID;
   this->lastToWrite.PrepareServerHello(this->lastRead);
+  if (this->lastToWrite.hello.theType != SSLContent::tokens::serverHello) {
+    crash << "DEBUG: this should be so" << crash;
+  }
+  this->lastToWrite.body.SetSize(0);
   this->lastToWrite.WriteBytes(this->lastToWrite.body);
 
   //logWorker << "Incoming message:\n" << this->lastRead.hello.getStringHighlighter()
@@ -1416,7 +1421,7 @@ bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::st
   //<< logger::endL;
   logWorker << "Bytes written:\n"
   << this->lastToWrite.hello.getStringHighlighter()
-  << Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 0, false) << logger::endL;
+  << Crypto::ConvertListUnsignedCharsToHex(this->lastToWrite.body, 0, false) << logger::endL;
   if (!this->WriteBytesOnce(commentsOnFailure)) {
     logWorker << "Error replying to client hello. ";
     if (commentsOnFailure != 0) {
@@ -1519,7 +1524,7 @@ bool TransportLayerSecurityOpenSSL::InspectCertificates(
 }
 
 int TransportLayerSecurityOpenSSL::SSLRead(
-  List<char>& readBuffer, std::string *outputError, std::stringstream *commentsGeneral, bool includeNoErrorInComments
+  List<char>& readBuffer, std::string* outputError, std::stringstream* commentsGeneral, bool includeNoErrorInComments
 ) {
   ERR_clear_error();
   int result = SSL_read(this->sslData, readBuffer.TheObjects, readBuffer.size);

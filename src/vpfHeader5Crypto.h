@@ -222,6 +222,7 @@ public:
     std::string& output,
     std::stringstream* commentsOnFailure
   );
+  static void GetRandomBytesSecure(List<unsigned char>& output, int numBytes);
 };
 
 class JSONWebToken {

@@ -125,7 +125,9 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend(
   std::string currentProbName, currentProbString;
   ProblemData emptyData;
   for (int i = 0; i < CGIedProbs.size(); i ++) {
-    currentProbName = MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(CGIedProbs.theKeys[i], false));
+    currentProbName = MathRoutines::StringTrimWhiteSpace(
+      HtmlRoutines::ConvertURLStringToNormal(CGIedProbs.theKeys[i], false)
+    );
     if (currentProbName == "") {
       continue;
     }
@@ -195,11 +197,15 @@ JSData CalculatorHTML::ToJSONDeadlines(
     std::string currentProblemName = inputProblemInfo.theKeys[i];
     JSData currentProblemJSON;
     for (int j = 0; j < currentProblem.deadlinesPerSection.size(); j ++) {
-      std::string currentDeadline = MathRoutines::StringTrimWhiteSpace(currentProblem.deadlinesPerSection.theValues[j]);
+      std::string currentDeadline = MathRoutines::StringTrimWhiteSpace(
+        currentProblem.deadlinesPerSection.theValues[j]
+      );
       if (currentDeadline == "") {
         continue;
       }
-      std::string currentSection = MathRoutines::StringTrimWhiteSpace(currentProblem.deadlinesPerSection.theKeys[j]);
+      std::string currentSection = MathRoutines::StringTrimWhiteSpace(
+        currentProblem.deadlinesPerSection.theKeys[j]
+      );
       currentProblemJSON[DatabaseStrings::labelDeadlines][currentSection] = currentDeadline;
     }
     output[currentProblemName] = currentProblemJSON;
@@ -472,8 +478,8 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
     } else {
       out << "<b>Your random seed must have been reset. </b>";
     }
-    out << "<br><span style =\"color:red\"><b>If the problem persists after a couple of page refreshes, "
-    << "it's a bug. Please take a screenshot and email the site admin/your instructor. </b></span>";
+    out << "<br><b style =\"color:red\">If the problem persists after a couple of page refreshes, "
+    << "it's a bug. Please take a screenshot and email the site admin/your instructor. </b>";
     out
     << "Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds() - startTime)
@@ -1033,7 +1039,9 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream* comments)
   this->theProblemData.commandsGenerateProblem = streamCommands.str();
   this->theProblemData.commandsGenerateProblemNoEnclosures = streamCommandsNoEnclosures.str();
   std::stringstream debugStream;
-  debugStream << "<a href='" << HtmlRoutines::GetCalculatorComputationURL(this->theProblemData.commandsGenerateProblemNoEnclosures) << "'>"
+  debugStream << "<a href='"
+  << HtmlRoutines::GetCalculatorComputationURL(this->theProblemData.commandsGenerateProblemNoEnclosures)
+  << "'>"
   << "Input link </a>";
   this->theProblemData.commandsGenerateProblemLink = debugStream.str();
   return true;
@@ -1225,7 +1233,7 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
     << "<a href=\""
     << theGlobalVariables.DisplayNameExecutable
     << "?request=calculator&mainInput="
-    << HtmlRoutines::ConvertStringToURLString( this->theProblemData.commandsGenerateProblemNoEnclosures,false)
+    << HtmlRoutines::ConvertStringToURLString(this->theProblemData.commandsGenerateProblemNoEnclosures, false)
     << "\">Input link</a><br>"
     << "The interpretation input was:<br> "
     << this->theProblemData.commandsGenerateProblem << "<br>";
@@ -1354,8 +1362,8 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
     theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON"
   ) {
     if (numCorrectSubmissions > 0) {
-      verifyStream << "<b><span style =\"color:green\">Correctly answered: \\("
-      << currentA.firstCorrectAnswerClean << "\\) </span></b> ";
+      verifyStream << "<b style =\"color:green\">Correctly answered: \\("
+      << currentA.firstCorrectAnswerClean << "\\) </b> ";
       if (numSubmissions > 0) {
         verifyStream << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
       }
@@ -1553,7 +1561,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted(
   }
   if (deadlineHasPassed && !problemAlreadySolved) {
     out << "<span style =\"color:blue\">" << currentDeadline << "</span> ";
-    out << "<span style =\"red\"><b>[passed].</b></span>";
+    out << "<b style =\"red\">[passed].</b>";
   } else {
     if (problemAlreadySolved && !isSection) {
       out << "<span style =\"color:green\">" << currentDeadline << "</span> ";
@@ -2384,11 +2392,11 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
           if (MathRoutines::StringBeginsWith(tagClass, "calculator")) {
             if (!this->calculatorClasses.Contains(tagClass)) {
               *comments
-              << "<hr><b><span style =\"color:red\">Warning: found class tag: "
+              << "<hr><b style =\"color:red\">Warning: found class tag: "
               << tagClass
               << ". The name of this class starts with calculator yet this is not"
               << " a calculator class. This may be a typo. "
-              << "</span></b>";
+              << "</b>";
             }
           }
         }
@@ -2604,12 +2612,12 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream* comments) {
     if (answerIdsSeenSoFar.size == 0 && currentE.GetKeyValue("name") == "") {
       if (comments != 0) {
         *comments << "Auxilary answer element: " << currentE.ToStringDebug()
-        << " has no name and appears before the first answer tag."
-        << " Auxilary answers apply the answer tag whose id is specified in the name"
-        << " tag of the auxilary answer. If the auxilary answer has no "
-        << " name tag, it is assumed to apply to the (nearest) answer tag above it."
-        << " To fix the issue either place the auxilary element after the answer or "
-        << " specify the answer's id in the name tag of the auxilary element. ";
+        << " has no name and appears before the first answer tag. "
+        << "Auxilary answers apply the answer tag whose id is specified in the name "
+        << "tag of the auxilary answer. If the auxilary answer has no "
+        << "name tag, it is assumed to apply to the (nearest) answer tag above it. "
+        << "To fix the issue either place the auxilary element after the answer or "
+        << "specify the answer's id in the name tag of the auxilary element. ";
       }
       return false;
     }
@@ -2864,10 +2872,10 @@ bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream* commentsOnFailure
   this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
   if (!this->currentUseR.StoreProblemDataToDatabaseJSON(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<span style =\"color:red\"> <b>"
+      *commentsOnFailure << "<b style =\"color:red\">"
       << "Error: failed to store problem in database. "
       << "If you see this message, please take a screenshot and email your instructor. "
-      << "</b></span>";
+      << "</b>";
     }
     return false;
   }
@@ -2972,9 +2980,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       this->outputDeadlineString = this->ToStringDeadline(this->fileName, problemAlreadySolved, true, true);
       if (!this->flagUseJSON) {
         if (this->outputDeadlineString == "") {
-          outBody << "<span style =\"color:orange\"><b>No deadline yet but scores are recorded. </b></span>";
+          outBody << "<b style =\"color:orange\">No deadline yet but scores are recorded. </b>";
         } else {
-          outBody << "<span style =\"color:brown\"><b>Scores are recorded. </b></span>";
+          outBody << "<b style =\"color:brown\">Scores are recorded. </b>";
         }
         outBody << problemLabel;
         outBody << this->outputDeadlineString << "\n<hr>\n";
@@ -2988,7 +2996,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     theGlobalVariables.userCalculatorRequestType != "templateJSONNoLogin"
   ) {
     if (!this->flagUseJSON) {
-      outBody << "<span style =\"color:green\"><b>Scores not recorded. </b></span>"
+      outBody << "<b style =\"color:green\">Scores not recorded. </b>"
       << problemLabel << "<hr>";
     }
   }
@@ -3072,15 +3080,15 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (this->flagIsForReal && this->NumAttemptsToInterpret > 1) {
       shouldResetTheRandomSeed = true;
       outBody
-      << "<hr><span style =\"color:red\"><b>"
-      << "Your problem's random seed was just reset. </b></span> "
+      << "<hr><b style =\"color:red\">"
+      << "Your problem's random seed was just reset. </b> "
       << "You should be seeing this message very rarely, "
       << "<b>ONLY IF</b> your problem was changed by your instructor "
       << "<b>AFTER</b> you started solving it. "
       << "You should not be seeing this message a second time. "
-      << "<span style =\"color:red\"><b>If you see this message every "
+      << "<b style =\"color:red\">If you see this message every "
       << "time you reload the problem "
-      << "this is a bug. Please take a screenshot and send it to your instructor. </b></span>";
+      << "this is a bug. Please take a screenshot and send it to your instructor. </b>";
     }
     if (shouldResetTheRandomSeed) {
       bool successStoringSeed = this->StoreRandomSeedCurrent(&comments);
@@ -3133,11 +3141,11 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&"
       << this->ToStringCalculatorArgumentsForProblem("scoredQuiz", studentView)
       << "\">" << this->stringScoredQuizzes << "</a>" << linkSeparator;
-      out << "<span style =\"color:green\"><b>" << this->stringPracticE << "</b>"
-      << "</span>" << linkSeparator;
+      out << "<b style =\"color:green\">" << this->stringPracticE
+      << "</b>" << linkSeparator;
     } else if (theGlobalVariables.userCalculatorRequestType == "scoredQuiz") {
-      out << "<span style =\"color:brown\"><b>"
-      << this->stringScoredQuizzes << "</b></span>" << linkSeparator;
+      out << "<b style =\"color:brown\">"
+      << this->stringScoredQuizzes << "</b>" << linkSeparator;
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=exercise&"
       << this->ToStringCalculatorArgumentsForProblem("exercise", studentView)
@@ -3340,17 +3348,17 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
       }
     } else if (theProbData.totalNumSubmissions != 0) {
       if (theProbData.numCorrectlyAnswered < theProbData.theAnswers.size()) {
-        out << "<span style =\"color:red\"><b> "
+        out << "<b style =\"color:red\">"
         << theProbData.Points << " out of "
-        << currentWeight << " point(s). </b></span>";
+        << currentWeight << " point(s). </b>";
       } else if (theProbData.numCorrectlyAnswered == theProbData.theAnswers.size()) {
-        out << "<span style =\"color:green\"><b> "
+        out << "<b style =\"color:green\">"
         << theProbData.Points << " out of "
-        << currentWeight << " point(s). </b></span>";
+        << currentWeight << " point(s). </b> ";
       }
     }
   } else {
-    out << "<span style =\"color:brown\"><b>No submissions.</b> </span>" ;
+    out << "<b style =\"color:brown\">No submissions.</b>" ;
   }
   return out.str();
 }
@@ -3393,19 +3401,19 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
     outputAlreadySolved = (percentSolved == 1);
     if (!outputAlreadySolved) {
       if (!theProbData.flagProblemWeightIsOK) {
-        out << "<span style =\"color:brown\"><b>" << percentSolved << " out of " << problemWeight.str() << "</b></span>";
+        out << "<b style =\"color:brown\">" << percentSolved << " out of " << problemWeight.str() << "</b>";
       } else {
-        out << "<span style =\"color:red\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
+        out << "<b style =\"color:red\">" << totalPoints << " out of " << problemWeight.str() << "</b>";
       }
     } else {
       if (!theProbData.flagProblemWeightIsOK) {
-        out << "<span style =\"color:green\"><b>solved</b></span>";
+        out << "<b style =\"color:green\">solved</b>";
       } else {
-        out << "<span style =\"color:green\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
+        out << "<b style =\"color:green\">" << totalPoints << " out of " << problemWeight.str() << "</b>";
       }
     }
   } else {
-    out << "<span style =\"color:brown\"><b>need to solve</b></span>";
+    out << "<b style =\"color:brown\">need to solve</b>";
   }
   if (!showModifyButton) {
     return out.str();
@@ -3773,12 +3781,12 @@ void TopicElement::GetTopicList(
         for (int j = 0; j < owner.calculatorTopicElementNames.size; j ++) {
           errorStream << "<br>" << owner.calculatorTopicElementNames[j];
         }
-        errorStream << "<br>You need to include the column character  <b>:</b> "
+        errorStream << "<br>You need to include the column character<b>:</b> "
         << "immediately after the data labels. The data entries are terminated by new line. "
         << "Here is a correctly entered example:"
         << "<br>Title: Complex multiplication"
         << "<br>Problem: DefaultProblemLocation/Complex-multiplication-z-times-w.html"
-        << "<br>SlidesSource: freecalc/modules/complex-numbers/complex-numbers-addition-multiplication-example- 1"
+        << "<br>SlidesSource: freecalc/modules/complex-numbers/complex-numbers-addition-multiplication-example-1"
         << "<br>\n";
       }
       showedAllowedDataEntries = true;
@@ -3824,7 +3832,7 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments) {
       this->topicListFileName, this->topicListContent, &comments
     )) {
       comments << "Failed to load the topic list associated with this course. "
-      << "Go to  ``Select course'' from the menu to see a list of available courses. ";
+      << "Go to ``Select course'' from the menu to see a list of available courses. ";
       return false;
     }
   }
@@ -4153,9 +4161,9 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
   } else {
     out << "<td></td>";
   }
-  out << "<td class =\"deadlineCell\">" << this->displayDeadlinE << "</td>";
+  out << "<td class = \"deadlineCell\">" << this->displayDeadlinE << "</td>";
   out << "</tr></table></div>\n";
-  out << "<div class =\"body" << theClass << "\" id =\"body" << this->idBase64 << "\">";
+  out << "<div class = \"body" << theClass << "\" id = \"body" << this->idBase64 << "\">";
   return out.str();
 }
 
@@ -4228,10 +4236,10 @@ void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput
     return;
   }
   bool plainStyle = (inputOutput.GetKeyValue("topicListStyle") == "plain");
-  out << "<div class =\"headChapter\">Lecture materials "
-  << "<button id =\"buttonToggleCourseInfo\" class =\"buttonToggleTopics\" "
-  << "onclick=\"toggleHeight(this,'tableWithLectureMaterialsFull')\">&#9650;</button>"
-  << "<span style =\"font-weight:normal; font-size:small\">(&larr; click to (un)hide)</span><br>\n"
+  out << "<div class = \"headChapter\">Lecture materials "
+  << "<button id = \"buttonToggleCourseInfo\" class = \"buttonToggleTopics\" "
+  << "onclick = \"toggleHeight(this,'tableWithLectureMaterialsFull')\">&#9650;</button>"
+  << "<span style = \"font-weight:normal; font-size:small\">(&larr; click to (un)hide)</span><br>\n"
   << "</div>";
   out
   << "\n<div class =\"bodyChapter\" id =\"tableWithLectureMaterialsFull\">"
@@ -4240,7 +4248,7 @@ void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput
   out << "\n<tbody>\n";
   if (!plainStyle) {
     out
-    << "\n<tr> <th>Sub-Topic</th>"
+    << "\n<tr><th>Sub-Topic</th>"
     << "<th>Resource Links</th>"
     << "</tr>";
   }
@@ -4291,7 +4299,8 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
       if (this->theTopicS.theValues[i].type == TopicElement::tProblem) {
         gradableProblems.AddOnTopNoRepetition(this->theTopicS.theValues[i].id);
         if (this->theTopicS.theValues[i].immediateChildren.size > 0) {
-          crash << "Error: problem " << this->theTopicS.theValues[i].ToString() << " has children topics which is not allowed. "
+          crash << "Error: problem " << this->theTopicS.theValues[i].ToString()
+          << " has children topics which is not allowed. "
           << crash;
         }
       }
@@ -4386,7 +4395,6 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
   << this->NumSlidesFound << " slides (printable + projector mode counted as a single slide) and "
   << this->NumVideosFound << " = " << this->NumVideosWithSlidesFound << " with-slide + "
   << this->NumVideosHandwrittenFound << " handwritten videos.</panelStudentScores><br>";
-  //outHead << "DEBUG: " << theGlobalVariables.buildHeadHash;
   outFinal << outHead.str() << out.str();
   inputOutput.interpretedCommand = outFinal.str();
   std::stringstream topicListJS;

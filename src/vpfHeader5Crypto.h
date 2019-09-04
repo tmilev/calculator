@@ -93,7 +93,9 @@ public:
   static List<CertificateRSA> knownCertificates;
   static List<uint32_t> kArraySha2xx;
   class Test {
-    static bool Sha256Test();
+  public:
+    static bool All();
+    static bool Sha256();
   };
   static bool LoadKnownCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   static bool LoadOneKnownCertificate(
@@ -159,17 +161,16 @@ public:
   );
   static void AppendDoubleSha256Check(const std::string& input, std::string& output);
   static std::string ConvertStringToHex(const std::string& input, int byteWidthLineBreakZeroForNone, bool useHtml);
-  static bool GetBase58FromChar(unsigned char input, uint32_t& output);
+  static bool GetBase58FromChar(char input, uint32_t& output);
   static bool GetCharFromBase58(uint32_t input, char& output);
   static bool Get6bitFromChar(unsigned char input, uint32_t& output);
-  static unsigned char GetCharFrom6bit(uint32_t input, bool useBase64URL);
+  static char GetCharFrom6bit(uint32_t input, bool useBase64URL);
   static void ConvertBitStreamToString(const List<unsigned char>& input, std::string& output);
   static void ConvertStringToListBytes(const std::string& input, List<unsigned char>& output);
   static void ConvertStringToListBytesSigned(const std::string& input, List<char>& output);
   static void ConvertUint32toBigendianStringAppendResult(uint32_t& input, std::string& outputAppend);
   static void ConvertUint64toBigendianStringAppendResult(uint64_t input, std::string& outputAppend);
   static void ConvertUint64toBigendianListUnsignedCharAppendResult(uint64_t input, List<unsigned char>& outputAppend);
-  static List<int> ConvertStringToListInt(const std::string& input);
   static uint32_t leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate);
   static uint32_t rightRotateAsIfBigEndian(uint32_t input, int numBitsToRotate);
   static uint32_t rightShiftAsIfBigEndian(uint32_t input, int numBitsToShift);

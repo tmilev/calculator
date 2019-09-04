@@ -366,6 +366,7 @@ SOURCES += \
     vpfCharacters.cpp \
     vpfCharacters_CalculatorInterface.cpp \
     vpfCrypto.cpp \
+    crypto_test.cpp \
     vpfCrypto_AES.cpp \
     vpfCrypto_ripemd.cpp \
     vpfCrypto_sha3.cpp \

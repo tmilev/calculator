@@ -163,6 +163,7 @@ vpf9.cpp \
 vpfCharacters_CalculatorInterface.cpp \
 vpfCharacters.cpp \
 vpfCrypto.cpp \
+crypto_test.cpp \
 vpfCrypto_sha3.cpp \
 vpfCrypto_ripemd.cpp \
 vpfCrypto_AES.cpp \

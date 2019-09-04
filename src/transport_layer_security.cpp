@@ -66,7 +66,9 @@ void TransportLayerSecurity::initialize(bool IamServer) {
     this->theServer.initialize();
   }
   this->flagInitialized = true;
-  SSLRecord::TestSerialization();
+  logServer << "DEBUG: Testing crypto functionality..." << logger::endL;
+  SSLRecord::Test::Serialization();
+  Crypto::Test::Sha256();
 }
 
 void TransportLayerSecurity::FreeEverythingShutdown() {
@@ -631,11 +633,14 @@ bool TransportLayerSecurityServer::WriteBytesOnce(std::stringstream* commentsOnF
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
-  int numBytesSent = send(
-    this->socketId, this->lastToWrite.body.TheObjects, this->lastToWrite.body.size, 0
+  ssize_t numBytesSent = send(
+    this->socketId,
+    this->lastToWrite.body.TheObjects,
+        static_cast<size_t>(this->lastToWrite.body.size),
+    0
   );
   if (numBytesSent < 0) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Error receiving bytes. " << strerror(errno);
     }
   }
@@ -668,6 +673,7 @@ void SSLContent::resetExceptOwner() {
   this->cipherSpecLength  = 0;
   this->challengeLength   = 0;
   this->compressionMethod = 0;
+  this->chosenCipher      = 0;
   this->flagRenegotiate                            = false;
   this->flagRequestOnlineCertificateStatusProtocol = false;
   this->flagRequestSignedCertificateTimestamp      = false;
@@ -755,15 +761,15 @@ unsigned int CipherSuiteSpecification::HashFunction(const CipherSuiteSpecificati
 }
 
 unsigned int CipherSuiteSpecification::HashFunction() const {
-  return this->id;
+  return static_cast<unsigned>(this->id);
 }
 
 CipherSuiteSpecification::CipherSuiteSpecification() {
-  this->owner = 0;
+  this->owner = nullptr;
 }
 
 bool CipherSuiteSpecification::CheckInitialization() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "CipherSuiteSpecification not initialized correctly. " << crash;
   }
   return true;
@@ -794,23 +800,55 @@ void SSLRecord::WriteBytes(List<unsigned char>& output) const {
 }
 
 void SSLContent::WriteBytes(List<unsigned char>& output) const {
-  MacroRegisterFunctionWithName("SSLHello::WriteBytes");
-  logWorker << "DEBUG: Writing byte" << (int) this->theType << logger::endL;
+  if (this->theType == SSLContent::tokens::clientHello) {
+    return SSLContent::WriteBytesClientHello(output);
+  } else if (this->theType == SSLContent::tokens::serverHello) {
+    return SSLContent::WriteBytesServerHello(output);
+  }
+}
+
+void SSLContent::WriteBytesServerHello(List<unsigned char>& output) const {
+  MacroRegisterFunctionWithName("SSLHello::WriteBytesServerHello");
+  if (this->theType != SSLContent::tokens::serverHello) {
+    crash << "Not allowed to serialize non server-hello content as server hello. " << crash;
+  }
+  int offsetLength = this->WriteTypeEmptyLengthVersion(output);
+  this->WriteBytesRandomAndSessionId(output);
+  //256 = 0x0100 = no compression:
+  SSLRecord::WriteTwoByteInt(256, output);
+  this->WriteBytesExtensionsOnly(output);
+  this->WriteLength(offsetLength, output);
+}
+
+int SSLContent::WriteTypeEmptyLengthVersion(List<unsigned char>& output) const {
   output.AddOnTop(this->theType);
   int offsetOfThreeByteLength = output.size;
   SSLRecord::WriteThreeByteInt(0, output);
-  this->WriteBytesBody(output);
+  SSLRecord::WriteTwoByteInt(this->version, output);
+  return offsetOfThreeByteLength;
+}
+
+void SSLContent::WriteLength(int offsetToInsertAt, List<unsigned char>& output) const {
+  unsigned int totalLength = static_cast<unsigned int>(output.size - offsetToInsertAt - 3);
+  SSLRecord::WriteNByteLength(3, totalLength, output, offsetToInsertAt);
+}
+
+void SSLContent::WriteBytesClientHello(List<unsigned char>& output) const {
+  MacroRegisterFunctionWithName("SSLHello::WriteBytesClientHello");
+  if (this->theType != SSLContent::tokens::clientHello) {
+    crash << "Not allowed to serialize non client-hello content as client hello. " << crash;
+  }
+  int offsetLength = this->WriteTypeEmptyLengthVersion(output);
+  this->WriteBytesRandomAndSessionId(output);
   this->WriteBytesSupportedCiphers(output);
   //256 = 0x0100 = no compression:
   SSLRecord::WriteTwoByteInt(256, output);
   this->WriteBytesExtensionsOnly(output);
-  unsigned int totalLength = static_cast<unsigned int>(output.size - offsetOfThreeByteLength - 3);
-  SSLRecord::WriteNByteLength(3, totalLength, output, offsetOfThreeByteLength);
+  this->WriteLength(offsetLength, output);
 }
 
-void SSLContent::WriteBytesBody(List<unsigned char>& output) const {
+void SSLContent::WriteBytesRandomAndSessionId(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::WriteBytesBody");
-  SSLRecord::WriteTwoByteInt(this->version, output);
   if (this->RandomBytes.size != this->LengthRandomBytesInSSLHello) {
     crash << "Writing non-initialized SSL hello forbidden. " << crash;
   }
@@ -873,7 +911,7 @@ void SSLContent::WriteBytesExtensionsOnly(List<unsigned char>& output) const {
     this->extensions[i].WriteBytes(output);
   }
   int extensionsLength = output.size - offsetExtensionsLength - 2;
-  SSLRecord::WriteNByteLength(2, extensionsLength, output, offsetExtensionsLength);
+  SSLRecord::WriteNByteLength(2, static_cast<unsigned>(extensionsLength), output, offsetExtensionsLength);
 }
 
 bool SSLContent::Decode(std::stringstream* commentsOnFailure) {
@@ -1217,7 +1255,7 @@ void SSLRecord::WriteNByteLengthFollowedByBytes(
 }
 
 bool SSLRecord::CheckInitialization() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "Uninitialized ssl record. " << crash;
   }
   return true;
@@ -1229,7 +1267,7 @@ SSLRecord::SSLRecord() {
   this->version = 0;
   this->offsetDecoded = 0;
   this->hello.owner = this;
-  this->owner = 0;
+  this->owner = nullptr;
 }
 
 std::string SSLRecord::ToStringType() const {
@@ -1349,7 +1387,7 @@ bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commen
 }
 
 bool SSLContent::CheckInitialization() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "Uninitialized ssl content. " << crash;
   }
   return true;
@@ -1393,9 +1431,11 @@ void SSLContent::PrepareServerHello(SSLContent& clientHello) {
   }
   logWorker << logger::cyan << "DEBUG: suites: " << suites.size() << logger::endL;
   logWorker << logger::cyan << "About to add supported cipher. BestIndex = " << bestIndex << logger::endL;
+  this->chosenCipher = 0;
   if (bestIndex < suites.size()) {
-    this->declaredCiphers.AddOnTop(suites.theValues[bestIndex]);
-    logWorker << "DEBUG: Added supported cipher: " << suites.theValues[bestIndex].ToString() << logger::endL;
+    this->chosenCipher = suites.theKeys[bestIndex];
+    logWorker << "DEBUG: Chose cipher: " << suites.theValues[bestIndex].ToString() << logger::endL;
+    //this->declaredCiphers.AddOnTop(suites.theValues[bestIndex]);
   }
 }
 
@@ -1424,7 +1464,7 @@ bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::st
   << Crypto::ConvertListUnsignedCharsToHex(this->lastToWrite.body, 0, false) << logger::endL;
   if (!this->WriteBytesOnce(commentsOnFailure)) {
     logWorker << "Error replying to client hello. ";
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       logWorker << "DEBUG: commentsOnFailure: " << commentsOnFailure->str();
     }
     return false;
@@ -1442,7 +1482,12 @@ bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID, std::st
     logWorker << logger::red << commentsOnFailure->str() << logger::endL;
     return false;
   }
-  return TransportLayerSecurityServer::ReplyToClientHello(inputSocketID, commentsOnFailure);
+  success = TransportLayerSecurityServer::ReplyToClientHello(inputSocketID, commentsOnFailure);
+  if (!success) {
+    logWorker << logger::red << commentsOnFailure->str() << logger::endL;
+  }
+  crash << "Handshake i am server not implemented yet. " << crash;
+  return false;
 }
 
 bool TransportLayerSecurity::HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure) {

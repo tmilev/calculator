@@ -10,30 +10,30 @@
 
 static ProjectInformationInstance vpfHeader1instance(__FILE__, "Header, general routines. ");
 
-//IMPORTANT.
-//Convention on Hash functions.
-//1. C++ objects that represent mathematically equal objects
-//   are allowed to have different bit representations in RAM memory.
-//2. Mathematically equal objects must have their object::HashFunction return identical
-//   values, even if the objects have bitwise different representations in RAM.
-//3. Mathematical objects representing 0 in an abelian group
-//   must have their hash function return 0.
+// IMPORTANT.
+// Convention on Hash functions.
+// 1. C++ objects that represent mathematically equal objects
+//    are allowed to have different bit representations in RAM memory.
+// 2. Mathematically equal objects must have their object::HashFunction return identical
+//    values, even if the objects have bitwise different representations in RAM.
+// 3. Mathematical objects representing 0 in an abelian group
+//    must have their hash function return 0.
 //
-//In particular, zero rational numbers, zero polynomials/monomial collections/elements
-//of semisimple Lie algebras, etc. must have their hash functions return 0.
-//Motivation: for speed purposes, it is not desirable to fix unique
-//bitwise representations in RAM memory for mathematically equal objects.
-//For example, this means that monomials in a polynomial do not
-//need to be ordered in a specific order. Yet polynomials can be quickly compared by
-//computing their hash functions. Here, as an example we may give two 1-million monomial polynomials
-//(computed, say, by adding two 0.5 million monomial polynomials in two different orders). The
-//polynomials' monomials are ordered differently, yet the polynomials can quickly be compared.
-//Note that sorting N monomials of an arbitrary polynomial is at best O(N log(N) ) operations, while
-//computing the hash functions is only O(N) operations.
+// In particular, zero rational numbers, zero polynomials/monomial collections/elements
+// of semisimple Lie algebras, etc. must have their hash functions return 0.
+// Motivation: for speed purposes, it is not desirable to fix unique
+// bitwise representations in RAM memory for mathematically equal objects.
+// For example, this means that monomials in a polynomial do not
+// need to be ordered in a specific order. Yet polynomials can be quickly compared by
+// computing their hash functions. Here, as an example we may give two 1-million monomial polynomials
+// (computed, say, by adding two 0.5 million monomial polynomials in two different orders). The
+// polynomials' monomials are ordered differently, yet the polynomials can quickly be compared.
+// Note that sorting N monomials of an arbitrary polynomial is at best O(N log(N) ) operations, while
+// computing the hash functions is only O(N) operations.
 
 //used for hashing various things.
 const int SomeRandomPrimesSize = 25;
-const int SomeRandomPrimes[SomeRandomPrimesSize] ={
+const int SomeRandomPrimes[SomeRandomPrimesSize] = {
   607,  1013, 2207, 3001, 4057, 5419, 5849, 6221,
   7057, 7411, 7417, 7681, 7883, 8011, 8209, 8369, 8447,
   9539, 10267, 10657, 11489, 12071, 12613, 13933, 14759
@@ -208,9 +208,9 @@ public:
   }
   static int TwoToTheNth(int n);
   static bool isALatinLetter(char input);
-  static bool isADigit(const std::string& input, int* whichDigit = 0);
+  static bool isADigit(const std::string& input, int* whichDigit = nullptr);
   static bool IsAHexDigit(char digitCandidate);
-  static bool isADigit(char theChar, int* whichDigit = 0);
+  static bool isADigit(char theChar, int* whichDigit = nullptr);
   template <class theType>
   static bool GenerateVectorSpaceClosedWRTLieBracket(List<theType>& inputOutputElts, int upperDimensionBound) {
     return MathRoutines::GenerateVectorSpaceClosedWRTOperation(
@@ -225,10 +225,10 @@ public:
     void (*theBinaryOperation)(const theType& left, const theType& right, theType& output)
   );
   static bool StringBeginsWith(
-    const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd = 0
+    const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd = nullptr
   );
   static bool StringEndsWith(
-    const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning = 0
+    const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning = nullptr
   );
   static char ConvertHumanReadableHexToCharValue(char input);
   static void StringSplitDefaultDelimiters(const std::string& inputString, List<std::string>& output);
@@ -312,18 +312,18 @@ public:
   }
   static double ReducePrecision(double x);
   inline static unsigned int HashDouble(const double& input) {
-    return (unsigned) (input * 10000);
+    return static_cast<unsigned>(input * 10000);
   }
   static unsigned int HashVectorDoubles(const Vector<double>& input);
   static unsigned int HashListDoubles(const List<double>& input);
   static unsigned int HashListInts(const List<int>& input);
   static unsigned int HashListStrings(const List<std::string>& input);
   inline static unsigned int IntUnsignIdentity(const int& input) {
-    return (unsigned) input;
+    return static_cast<unsigned>(input);
   }
   static unsigned int HashString(const std::string& x);
   static unsigned int HashChar(const char& x) {
-    return x;
+    return static_cast<unsigned int>(x);
   }
   template <class Element>
   static void LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
@@ -533,18 +533,18 @@ class PointerObjectDestroyer {
 class RecursionDepthCounter {
 public:
   int* theCounter;
-  RecursionDepthCounter(int* inputCounter): theCounter(0) {
-    if (inputCounter == 0) {
+  RecursionDepthCounter(int* inputCounter): theCounter(nullptr) {
+    if (inputCounter == nullptr) {
       return;
     }
     this->theCounter = inputCounter;
     (*this->theCounter) ++;
   }
   ~RecursionDepthCounter() {
-    if (this->theCounter != 0) {
+    if (this->theCounter != nullptr) {
       (*this->theCounter) --;
     }
-    this->theCounter = 0;
+    this->theCounter = nullptr;
   }
 };
 
@@ -925,7 +925,7 @@ public:
   std::string ToString() const;
   std::string ToStringCommaDelimited(FormatExpressions* theFormat) const;
   std::string ToStringCommaDelimited() const;
-  void ToString(std::string& output, FormatExpressions* theFormat = 0) const {
+  void ToString(std::string& output, FormatExpressions* theFormat = nullptr) const {
     output = this->ToString(theFormat);
   }
   int GetIndex(const Object& o) const;
@@ -1085,7 +1085,7 @@ public:
 
   unsigned int HashFunction() const {
     int numCycles = MathRoutines::Minimum(SomeRandomPrimesSize, this->size);
-    int result = 0;
+    unsigned int result = 0;
     for (int i = 0; i < numCycles; i ++) {
       result += SomeRandomPrimes[i] * MathRoutines::HashFunction(TheObjects[i]);
     }
@@ -1148,7 +1148,7 @@ public:
     return !this->IsEqualTo(other);
   }
   bool operator==(const std::string& other) {
-    if (((unsigned) this->size) != other.size()) {
+    if ((static_cast<unsigned>(this->size)) != other.size()) {
       return false;
     }
     for (int i = 0; i < this->size; i ++) {
@@ -1169,7 +1169,7 @@ public:
   List(int StartingSize, const Object& fillInValue);
   List(const std::string& input) {
     this->initConstructorCallOnly();
-    this->SetSize((signed) input.size());
+    this->SetSize(static_cast<signed>(input.size()));
     for (int i = 0; i < this->size; i ++) {
       this->TheObjects[i] = input[i];
     }
@@ -1260,29 +1260,26 @@ public:
   }
   unsigned int GetHash(const Object& input) const {
     unsigned int result = hashFunction(input);
-    result %= this->TheHashedArrays.size; // how did TheHashedArrays.size == 0?
-    if (result < 0) {
-      result += this->TheHashedArrays.size;
-    }
+    result %= this->TheHashedArrays.size;
     return result;
   }
   void Clear() {
-    //if the hashed list is somewhat sparse, and the index is somewhat large,
-    //(above 20 entries), we clear the hash by finding the occupied hashes and
-    //nullifying them one by one.
-    //else, we simply go through the entire hash index and nullify everything.
-    //Note: for better performance, 20 entries should probably be changed to 100+,
-    //however the smaller number is a good consistency test (it would make it easier to
-    //detect a faulty hash).
-    //If this program ever gets to do some hard-core number crunching, the 20 entries
-    //should be increased.
+    // If the hashed list is somewhat sparse, and the index is somewhat large,
+    // (above 20 entries), we clear the hash by finding the occupied hashes and
+    // nullifying them one by one.
+    // else, we simply go through the entire hash index and nullify everything.
+    // Note: for better performance, 20 entries should probably be changed to 100+,
+    // however the smaller number is a good consistency test (it would make it easier to
+    // detect a faulty hash).
+    // If this program ever gets to do some hard-core number crunching, the 20 entries
+    // should be increased.
     if (this->IsSparse() && this->TheHashedArrays.size > 20) {
       for (int i = 0; i < this->size; i ++) {
         int hashIndex = this->GetHash((*this)[i]);
         this->TheHashedArrays[hashIndex].size = 0;
       }
     } else {
-      for (int i = 0; i < (signed) this->TheHashedArrays.size; i ++) {
+      for (int i = 0; i < this->TheHashedArrays.size; i ++) {
         this->TheHashedArrays[i].size = 0;
       }
     }
@@ -1301,7 +1298,7 @@ public:
       }
     }
     out << "<br>Max hash array size: " << maxHashSize;
-    out << "<br>Average hash array size: " << ((double) this->size) / ((double) numNonZeroHashes);
+    out << "<br>Average hash array size: " << (static_cast<double>(this->size)) / (static_cast<double>(numNonZeroHashes));
     return out.str();
   }
   void AddOnTop(const Object& o) {
@@ -1338,7 +1335,7 @@ public:
           << i << ", entry of index " << j << " reports index "
           << theIndex << " but I have only " << this->size << " entries. " << crash;
         }
-        if (this->GetHash((*this)[theIndex]) != (unsigned) i) {
+        if (this->GetHash((*this)[theIndex]) != static_cast<unsigned>(i)) {
           crash << "<hr>This is a programming error: the hashed element in position "
           << theIndex << " is recorded in hash array of index "
           << i << ", however its hash value is instead " << this->GetHash((*this)[theIndex]) << ". The hash size is "
@@ -1529,7 +1526,7 @@ public:
     }
   }
   void SetHashSizE(unsigned int HS) {
-    if (HS == (unsigned) this->TheHashedArrays.size) {
+    if (HS == static_cast<unsigned>(this->TheHashedArrays.size)) {
       return;
     }
     MacroIncrementCounter(ParallelComputing::NumHashResizes);
@@ -2164,6 +2161,7 @@ void List<Object>::ExpandArrayOnTop(int increase) {
   try {
     newArray = new Object[this->ActualSize + increase];
   } catch (std::bad_alloc& theBA) {
+    (void) theBA;
     crash << "Memory allocation failure: failed to allocate " << this->ActualSize + increase << " objects. " << crash;
   }
 #ifdef AllocationLimitsSafeguard

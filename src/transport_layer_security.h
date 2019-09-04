@@ -125,6 +125,7 @@ public:
   int challengeLength;
   int extensionsLength;
   int compressionMethod;
+  int chosenCipher;
   bool flagRenegotiate;
   bool flagRequestOnlineCertificateStatusProtocol;
   bool flagRequestSignedCertificateTimestamp;
@@ -162,7 +163,12 @@ public:
   // As the name suggests, this will append the output bytes, without
   // wiping the already existing contents of output.
   void WriteBytes(List<unsigned char>& output) const;
-  void WriteBytesBody(List<unsigned char>& output) const;
+  // Writes the message header, using zeroes instead of the message length
+  int WriteTypeEmptyLengthVersion(List<unsigned char>& output) const;
+  void WriteLength(int offsetToInsertAt, List<unsigned char>& output) const;
+  void WriteBytesClientHello(List<unsigned char>& output) const;
+  void WriteBytesServerHello(List<unsigned char>& output) const;
+  void WriteBytesRandomAndSessionId(List<unsigned char>& output) const;
   void WriteBytesSupportedCiphers(List<unsigned char>& output) const;
   void WriteBytesExtensionsOnly(List<unsigned char>& output) const;
 };
@@ -178,6 +184,10 @@ public:
     static const unsigned char alert = 21; //0x15
     static const unsigned char applicationData = 23; //0x17
     static const unsigned char unknown = 0;
+  };
+  class Test {
+  public:
+    static bool Serialization();
   };
   int offsetDecoded;
   unsigned char theType;
@@ -195,7 +205,6 @@ public:
   std::string ToStringType() const;
   void PrepareServerHello(SSLRecord& clientHello);
   void WriteBytes(List<unsigned char>& output) const;
-  static bool TestSerialization();
   static bool ReadTwoByteInt(
     const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
   );

@@ -12,7 +12,7 @@ ProjectInformationInstance projectInfoInstanceTransportLayerSecurityTest(__FILE_
 
 extern logger logServer;
 
-bool SSLRecord::TestSerialization() {
+bool SSLRecord::Test::Serialization() {
   MacroRegisterFunctionWithName("SSLRecord::TestSerialization");
   std::string inputHex =
   "1603010200010001fc03031e70e7e6d1ccf06a234cf5b6f4c207609d824787e70a63808cacbe5fb2b67ea1"

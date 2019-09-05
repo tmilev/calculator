@@ -6251,7 +6251,7 @@ public:
   DynkinSimpleType GetGreatestSimpleType() const;
   DynkinSimpleType GetSmallestSimpleType() const;
   LargeInt GetWeylGroupSizeByFormula() const;
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   void ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy);
   int GetMult(int SimpleTypeIdentifier) const {
     int result = 0;
@@ -6334,7 +6334,7 @@ public:
   List<int> indexUniComponent;
   List<int> indexInUniComponent;
   bool CheckInitialization() const;
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   int RankTotal();
   int NumRootsGeneratedByDiagram();
   void Sort();
@@ -6494,7 +6494,7 @@ public:
     List<LittelmannPath>& output,
     List<List<int> >& outputOperators,
     int UpperBoundNumElts,
-    Selection* parabolicNonSelectedAreInLeviPart = 0
+    Selection* parabolicNonSelectedAreInLeviPart = nullptr
   );
   std::string GenerateOrbitAndAnimate();
   bool MinimaAreIntegral();
@@ -6542,7 +6542,7 @@ public:
   Vectors<Rational> LPtoMaximizeLargerDim;
   Vectors<Rational> LPtoMaximizeSmallerDim;
 
-  std::string ToString(FormatExpressions* theFormat = 0);
+  std::string ToString(FormatExpressions* theFormat = nullptr);
   void init(Vector<Rational>& theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational>& startingShift);
   void FindExtremaParametricStep1(PauseThread& thePauseController);
   void FindExtremaParametricStep2TrimChamberForMultOne(PauseThread& thePauseController);
@@ -6570,8 +6570,8 @@ class PiecewiseQuasipolynomial {
   void DrawMe(
     DrawingVariables& theDrawingVars,
     int numLatticePointsPerDim,
-    Cone* RestrictingChamber = 0,
-    Vector<Rational>* distinguishedPoint = 0
+    Cone* RestrictingChamber = nullptr,
+    Vector<Rational>* distinguishedPoint = nullptr
   );
   int GetNumVars() {
     return this->NumVariables;
@@ -6643,7 +6643,8 @@ class MonomialMatrix {
     return this->vIndex == other.vIndex && this->dualIndex == other.dualIndex && this->IsId == other.IsId;
   }
   static unsigned int HashFunction(const MonomialMatrix& input) {
-    return input.vIndex * SomeRandomPrimes[0] + input.dualIndex * SomeRandomPrimes[1] + input.IsId;
+    return static_cast<unsigned int>(input.vIndex) * SomeRandomPrimes[0] +
+    static_cast<unsigned int>(input.dualIndex) * SomeRandomPrimes[1] + input.IsId;
   }
   unsigned int HashFunction() const {
     return HashFunction(*this);
@@ -6662,7 +6663,7 @@ class MonomialMatrix {
     this->dualIndex = - 1;
     this->IsId = true;
   }
-  std::string ToString(FormatExpressions* theFormat = 0) const {
+  std::string ToString(FormatExpressions* theFormat = nullptr) const {
     (void) theFormat;//avoid unused parameter warning, portable
     std::stringstream out;
     if (!this->IsId) {
@@ -6855,7 +6856,7 @@ public:
     }
     *this = output;
   }
-  std::string ToStringMatForm(FormatExpressions* theFormat = 0) const {
+  std::string ToStringMatForm(FormatExpressions* theFormat = nullptr) const {
     if (this->IsEqualToZero()) {
       return "(0)";
     }
@@ -7079,7 +7080,7 @@ class MonomialGeneralizedVerma {
     this->theMonCoeffOne = other.theMonCoeffOne;
   }
 
-  std::string ToString(FormatExpressions* theFormat = 0, bool includeV = true) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr, bool includeV = true) const;
   static bool IsMonEqualToZero() {
     return false;
   }

@@ -33,7 +33,7 @@ static ProjectInformationInstance vpfHeader1instance(__FILE__, "Header, general 
 
 //used for hashing various things.
 const int SomeRandomPrimesSize = 25;
-const int SomeRandomPrimes[SomeRandomPrimesSize] = {
+const unsigned int SomeRandomPrimes[SomeRandomPrimesSize] = {
   607,  1013, 2207, 3001, 4057, 5419, 5849, 6221,
   7057, 7411, 7417, 7681, 7883, 8011, 8209, 8369, 8447,
   9539, 10267, 10657, 11489, 12071, 12613, 13933, 14759

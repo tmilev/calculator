@@ -318,7 +318,7 @@ public:
     charSSAlgMod<coefficient>& outputAccum
   ) const;
   std::string TensorAndDecompose(const Weight<coefficient>& other, charSSAlgMod<coefficient>& output) const;
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   inline unsigned int HashFunction() const {
     return weightFundamentalCoordS.HashFunction();
   }

@@ -298,7 +298,7 @@ public:
 class SelectionPositiveIntegers {
   public:
   Vector<LargeIntUnsigned> theInts;
-  std::string ToString(FormatExpressions* theFormat = 0) {
+  std::string ToString(FormatExpressions* theFormat = nullptr) {
     (void) theFormat;//avoid unused parameter warning, portable
     return this->theInts.ToString();
   }

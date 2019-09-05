@@ -168,7 +168,7 @@ class AlgebraicNumber {
     this->operator *= ((Rational)other);
   }
   bool operator>(const AlgebraicNumber& other) const;
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
 };
 
 class AlgebraicClosureRationals {
@@ -209,12 +209,12 @@ public:
   bool AdjoinRootQuadraticPolyToQuadraticRadicalExtension(
     const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot
   );
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   bool splitToPartialFractionsOverRealAlgebraicNumbers(
     RationalFunctionOld& inputRF,
     List<Polynomial<AlgebraicNumber> >& outputNumerators,
     List<Polynomial<AlgebraicNumber> >& outputDenominators,
-    std::stringstream* reportStream = 0
+    std::stringstream* reportStream = nullptr
   );
 };
 
@@ -239,7 +239,7 @@ public:
     this->flagDeallocated = true;
   }
   void CheckIamInitialized() const;
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   bool IsEqualToZero() const {
     return this->theValue.IsEqualToZero();
   }

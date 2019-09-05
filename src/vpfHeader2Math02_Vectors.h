@@ -35,7 +35,7 @@ public:
     std::string result = "Vector_" + coefficient::GetXMLClassName();
     return result;
   }
-  std::string ToString(FormatExpressions* theFormat = 0) const {
+  std::string ToString(FormatExpressions* theFormat = nullptr) const {
     std::stringstream out;
     out.precision(5);
     out << "(";
@@ -57,7 +57,7 @@ public:
       output[i] = out.str();
     }
   }
-  std::string ToStringSquareBrackets(FormatExpressions* theFormat = 0) const {
+  std::string ToStringSquareBrackets(FormatExpressions* theFormat = nullptr) const {
     std::stringstream out;
     out.precision(5);
     out << "[";
@@ -70,7 +70,7 @@ public:
     out << "]";
     return out.str();
   }
-  std::string ToStringSquareBracketsBasicType(FormatExpressions* theFormat = 0) const {
+  std::string ToStringSquareBracketsBasicType(FormatExpressions* theFormat = nullptr) const {
     (void) theFormat;
     std::stringstream out;
     out.precision(5);
@@ -85,9 +85,9 @@ public:
     return out.str();
   }
   std::string ToStringLetterFormat(
-    const std::string& inputLetter, FormatExpressions* theFormat = 0, bool DontIncludeLastVar = false
+    const std::string& inputLetter, FormatExpressions* theFormat = nullptr, bool DontIncludeLastVar = false
   ) const;
-  std::string ToStringEpsilonFormat(FormatExpressions* theFormat = 0) const {
+  std::string ToStringEpsilonFormat(FormatExpressions* theFormat = nullptr) const {
     return this->ToStringLetterFormat("\\varepsilon", theFormat);
   }
   template <class otherType>
@@ -734,7 +734,7 @@ class Vectors: public List<Vector<coefficient> > {
   std::string ElementsToInequalitiesString(
     bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat
   ) const;
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   bool LinearAlgebraForVertexComputation(
     Selection& theSelection, Vector<coefficient>& output, Matrix<coefficient>& buffer, Selection& NonPivotPointsBuffer
   );

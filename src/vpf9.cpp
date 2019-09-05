@@ -8,6 +8,8 @@
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfHeader2Math9DrawingVariables.h"
 #include <dirent.h>
+
+extern ProjectInformationInstance ProjectInfoVpf9cpp;
 ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Math routines implementation. ");
 
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
@@ -10582,7 +10584,7 @@ class ImpreciseDouble {
   double precision;
   double theValue;
   public:
-  std::string ToString(FormatExpressions* theFormat = 0) const {
+  std::string ToString(FormatExpressions* theFormat = nullptr) const {
     (void) theFormat; //avoid unused parameter warning, portable.
     std::stringstream out;
     out << this->theValue;

@@ -172,8 +172,8 @@ public:
     const coefficient& theRingUnit,
     const coefficient& theRingZero
   );
-  std::string ToString(FormatExpressions* theFormat = 0) const;
-  std::string ElementToStringHWV(FormatExpressions* theFormat = 0) const {
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string ElementToStringHWV(FormatExpressions* theFormat = nullptr) const {
     if (this->highestWeightVectorNotation != "") {
       return this->highestWeightVectorNotation;
     }

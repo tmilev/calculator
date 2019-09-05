@@ -312,7 +312,7 @@ public:
     bool doExtractRelations
   );
   void PossibleNilradicalComputation(Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
-  std::string ToString(FormatExpressions* theFormat = 0);
+  std::string ToString(FormatExpressions* theFormat = nullptr);
   void ToHTML(int index, FormatExpressions* theFormat);
   std::string ToStringMultTable(bool useLaTeX, bool useHtml, rootSubalgebra& owner);
   bool RootsDefineASubalgebra(Vectors<Rational>& theRoots);
@@ -504,7 +504,7 @@ public:
     }
     return *this->owner;
   }
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   void GetInvolvedPosGenerators(List<ChevalleyGenerator>& output);
   void GetInvolvedNegGenerators(List<ChevalleyGenerator>& output);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(
@@ -615,10 +615,10 @@ public:
   void ComputeDebugStringCurrent();
   bool ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);
   bool ContainsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex);
-  void ToHTML(FormatExpressions* theFormat = 0);
-  std::string ToStringSummary(FormatExpressions* theFormat = 0);
+  void ToHTML(FormatExpressions* theFormat = nullptr);
+  std::string ToStringSummary(FormatExpressions* theFormat = nullptr);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
-  std::string ToString(FormatExpressions* theFormat = 0);
+  std::string ToString(FormatExpressions* theFormat = nullptr);
 };
 
 #endif

@@ -16,7 +16,7 @@ public:
     List<JSData>& output,
     int maxOutputItems = - 1,
     long long* totalItems = 0,
-    std::stringstream* commentsOnFailure = 0
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool FindFromJSON(
     const std::string& collectionName,
@@ -24,7 +24,7 @@ public:
     List<JSData>& output,
     int maxOutputItems = - 1,
     long long* totalItems = 0,
-    std::stringstream* commentsOnFailure = 0
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool FindFromJSONWithProjection(
     const std::string& collectionName,
@@ -33,7 +33,7 @@ public:
     List<std::string>& fieldsToProjectTo,
     int maxOutputItems = - 1,
     long long* totalItems = 0,
-    std::stringstream* commentsOnFailure = 0
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool FindFromJSONWithOptions(
     const std::string& collectionName,
@@ -42,21 +42,21 @@ public:
     const JSData& options,
     int maxOutputItems = - 1,
     long long* totalItems = 0,
-    std::stringstream* commentsOnFailure = 0,
+    std::stringstream* commentsOnFailure = nullptr,
     std::stringstream* commentsGeneralNonSensitive = 0
   );
   static bool FindOneFromQueryString(
     const std::string& collectionName,
     const std::string& findQuery,
     JSData& output,
-    std::stringstream* commentsOnFailure = 0
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool FindOneFromQueryStringWithProjection(
     const std::string& collectionName,
     const std::string& findQuery,
     const List<std::string>& fieldsToProjectTo,
     JSData& output,
-    std::stringstream* commentsOnFailure = 0
+    std::stringstream* commentsOnFailure = nullptr
   );
   static JSData GetProjectionFromFieldNames(const List<std::string>& fieldsToProjectTo, int offset);
   static bool FindOneFromQueryStringWithOptions(
@@ -64,7 +64,7 @@ public:
     const std::string& findQuery,
     const JSData& options,
     JSData& output,
-    std::stringstream* commentsOnFailure = 0,
+    std::stringstream* commentsOnFailure = nullptr,
     std::stringstream* commentsGeneralNonSensitive = 0
   );
   static bool FindOneFromJSONWithProjection(
@@ -75,7 +75,7 @@ public:
     std::stringstream* commentsOnFailure,
     bool doEncodeFindFields
   );
-  static bool GetOrFindQuery(const List<JSData>& input, std::string& output, std::stringstream* commentsOnFailure = 0);
+  static bool GetOrFindQuery(const List<JSData>& input, std::string& output, std::stringstream* commentsOnFailure = nullptr);
   static bool FindOneFromJSON(
     const std::string& collectionName,
     const JSData& findQuery,
@@ -87,38 +87,38 @@ public:
     const std::string& collectionName,
     const List<JSData>& findOrQueries,
     JSData& output,
-    std::stringstream* commentsOnFailure = 0
+    std::stringstream* commentsOnFailure = nullptr
   );
-  static bool IsValidJSONMongoUpdateQuery(const JSData& updateQuery, std::stringstream* commentsOnFailure = 0);
+  static bool IsValidJSONMongoUpdateQuery(const JSData& updateQuery, std::stringstream* commentsOnFailure = nullptr);
   static bool IsValidJSONMongoFindQuery(
-    const JSData& findQuery, std::stringstream* commentsOnFailure = 0, bool mustBeObject = true
+    const JSData& findQuery, std::stringstream* commentsOnFailure = nullptr, bool mustBeObject = true
   );
   static bool UpdateOneFromJSON(
     const std::string& collectionName,
     const JSData& findQuery,
     const JSData& updateQuery,
     List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
-    std::stringstream* commentsOnFailure = 0
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool UpdateOneFromJSONSpecifyField(
     const std::string& collectionName,
     const JSData& findQuery,
     const JSData& updateQuery,
     std::string fieldToSet,
-    std::stringstream* commentsOnFailure = 0
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool UpdateOneFromSomeJSON(
     const std::string& collectionName,
     const List<JSData>& findOrQueries,
     const JSData& updateQuery,
-    std::stringstream* commentsOnFailure = 0
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool UpdateOneFromQueryString(
     const std::string& collectionName,
     const std::string& findQuery,
     const JSData& updateQuery,
     List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
-    std::stringstream* commentsOnFailure = 0
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure);
   static bool FetchTable(
@@ -126,7 +126,7 @@ public:
     List<std::string>& outputLabels,
     List<List<std::string> >& outputRows,
     long long* totalItems = 0,
-    std::stringstream* commentsOnFailure = 0
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure);
   static bool DeleteOneEntryById(const std::string& tableName, const JSData& findQuery, std::stringstream* commentsOnFailure);

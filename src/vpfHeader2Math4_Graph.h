@@ -36,7 +36,7 @@ struct GraphEdge {
   GraphEdge(int inputStart, int inputEnd):vStart(inputStart), vEnd(inputEnd) {}
   GraphEdge(int inputStart, int inputEnd, const std::string& inputLabel)
   : vStart(inputStart), vEnd(inputEnd), label(inputLabel) {}
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   static unsigned int HashFunction(const GraphEdge& input) {
     return input.HashFunction();
   }
@@ -79,7 +79,7 @@ public:
   void AddEdge(int i, int j, const std::string& inputLabel);
   std::string ToStringPsTricks(FormatExpressions* theFormat);
   std::string ToStringNodesAndEdges(FormatExpressions* theFormat);
-  std::string ToStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat = 0);
+  std::string ToStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat = nullptr);
 };
 
 #endif

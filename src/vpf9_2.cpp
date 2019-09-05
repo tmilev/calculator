@@ -1448,6 +1448,16 @@ RationalFunctionOld RationalFunctionOld::GetOne() const {
   return tempRat;
 }
 
+bool RationalFunctionOld::FindOneVarRatRoots(List<Rational>& output) {
+  if (this->expressionType == this->typeRational) {
+    output.SetSize(0);
+    return true;
+  }
+  Polynomial<Rational> tempP;
+  this->GetNumerator(tempP);
+  return tempP.FindOneVarRatRoots(output);
+}
+
 std::string RationalFunctionOld::ToString(FormatExpressions* theFormat) const {
   if (this->expressionType == this->typeRational) {
     return this->ratValue.ToString();
@@ -2574,6 +2584,10 @@ bool MonomialP::IsDivisibleBy(const MonomialP& other) const {
     }
   }
   return true;
+}
+
+void MonomialP::ReadFromFile(std::fstream& input) {
+  this->monBody.ReadFromFile(input);
 }
 
 bool MonomialP::operator==(const MonomialP& other) const {

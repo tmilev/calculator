@@ -11,6 +11,8 @@
 #include "vpfHeader5Crypto.h"
 #include "vpfImplementationHeader2Math11_EllipticCurves.h"
 #include <cmath>
+
+extern ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp;
 ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp(__FILE__, "Calculator expression implementation. ");
 
 Expression operator*(const Expression& left, const Expression& right) {
@@ -49,7 +51,7 @@ Expression operator-(const Expression& left, const Expression& right) {
 template < >
 List<Expression>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<Expression>() {
-  return 0;
+  return nullptr;
 }
 
 //Expression::GetTypeOperation specializations follow
@@ -252,7 +254,7 @@ bool Expression::ConvertsToType(
 ElementSemisimpleLieAlgebra<AlgebraicNumber>* whichElement
 ) const {
   MacroRegisterFunctionWithName("Expression::ConvertsToType");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   ElementUniversalEnveloping<RationalFunctionOld> theUEElt;
@@ -263,7 +265,7 @@ ElementSemisimpleLieAlgebra<AlgebraicNumber>* whichElement
   if (!theUEElt.GetLieAlgebraElementIfPossible(theRatElt)) {
     return false;
   }
-  if (whichElement != 0) {
+  if (whichElement != nullptr) {
     *whichElement = theRatElt;
   }
   return true;
@@ -271,6 +273,7 @@ ElementSemisimpleLieAlgebra<AlgebraicNumber>* whichElement
 
 //Expression::ConvertsToType specializations end.
 //Expression::AddObjectReturnIndex specializations follow
+
 template < >
 int Expression::AddObjectReturnIndex(const
 ElementEllipticCurve<Rational>
@@ -829,7 +832,7 @@ VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::GetV
 
 bool Expression::IsMatrix(int* outputNumRows, int* outputNumCols) const {
   MacroRegisterFunctionWithName("Expression::IsMatrix");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->size() < 1) {
@@ -839,10 +842,10 @@ bool Expression::IsMatrix(int* outputNumRows, int* outputNumCols) const {
   if (!isGood) {
     return false;
   }
-  if (outputNumRows != 0) {
+  if (outputNumRows != nullptr) {
     *outputNumRows = this->size() - 1;
   }
-  if (outputNumCols != 0) {
+  if (outputNumCols != nullptr) {
     if (this->size() <= 1) {
       *outputNumCols = 0;
     } else {
@@ -961,7 +964,7 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
     return true;
   }
   SemisimpleLieAlgebra* theOwner = this->GetAmbientSSAlgebraNonConstUseWithCaution();
-  if (theOwner == 0) {
+  if (theOwner == nullptr) {
     this->owner->Comments << "<hr>Failed to convert " << this->ToString() << " (Lispified: " << this->ToStringFull()
     << ") to element of universal enveloping -  failed to extract ambient Lie algebra. ";
     return false;
@@ -1161,7 +1164,7 @@ bool Expression::AddChildAtomOnTop(const std::string& theOperationString) {
 }
 
 bool Expression::StartsWithBuiltInAtom() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->IsAtom() || this->children.size < 1) {
@@ -1171,7 +1174,7 @@ bool Expression::StartsWithBuiltInAtom() const {
 }
 
 bool Expression::StartsWithArithmeticOperation() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->IsAtom() || this->children.size < 1) {
@@ -1181,7 +1184,7 @@ bool Expression::StartsWithArithmeticOperation() const {
 }
 
 bool Expression::StartsWithFunctionWithComplexRange() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->IsAtom() || this->children.size < 1) {
@@ -1191,7 +1194,7 @@ bool Expression::StartsWithFunctionWithComplexRange() const {
 }
 
 bool Expression::StartsWithGivenAtom(const std::string& theAtom, int desiredChildren) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->size() == 0) {
@@ -1229,7 +1232,7 @@ bool Expression::StartsWith(int theOp, int N) const {
 }
 
 int Expression::ContextGetNumContextVariables() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return 0;
   }
   if (!this->StartsWith(this->owner->opContexT())) {
@@ -1342,7 +1345,7 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
   }
   if (this->IsMatrixGivenType<RationalFunctionOld>()) {
     Matrix<RationalFunctionOld> newMat;
-    this->IsMatrixGivenType<RationalFunctionOld>(0, 0, &newMat);
+    this->IsMatrixGivenType<RationalFunctionOld>(nullptr, nullptr, &newMat);
     PolynomialSubstitution<Rational> subPolyPart;
     myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
     for (int i = 0; i < newMat.NumRows; i ++) {
@@ -1580,7 +1583,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
 void Expression::ContextGetFormatExpressions(FormatExpressions& output) const {
   output.polyAlphabeT.SetSize(0);
   output.polyDefaultLetter = "x";
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return;
   }
   if (!this->StartsWith(this->owner->opContexT())) {
@@ -1600,7 +1603,7 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output) const {
 
 bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const {
   MacroRegisterFunctionWithName("Expression::GetExpressionLeafs");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return true;
   }
   RecursionDepthCounter(&this->owner->RecursionDeptH);
@@ -1621,7 +1624,7 @@ bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeaf
 
 bool Expression::GetBoundVariables(HashedList<Expression>& outputAccumulateBoundVariables) const {
   MacroRegisterFunctionWithName("Expression::GetBoundVariables");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return true;
   }
   RecursionDepthCounter(&this->owner->RecursionDeptH);
@@ -1645,7 +1648,7 @@ bool Expression::GetBoundVariables(HashedList<Expression>& outputAccumulateBound
 
 bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants) const {
   MacroRegisterFunctionWithName("Expression::GetFreeVariables");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return true;
   }
   RecursionDepthCounter(&this->owner->RecursionDeptH);
@@ -1696,7 +1699,7 @@ bool Expression::IsIntegraLfdx(
   Expression* differentialVariable, Expression* functionToIntegrate, Expression* integrationSet
 ) const {
   MacroRegisterFunctionWithName("Expression::IsIntegraLfdx");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (!this->StartsWith(this->owner->opIntegral(), 3)) {
@@ -1705,7 +1708,7 @@ bool Expression::IsIntegraLfdx(
   if (!(*this)[2].IsDifferentialOneFormOneVariablE(differentialVariable, functionToIntegrate)) {
     return false;
   }
-  if (integrationSet != 0) {
+  if (integrationSet != nullptr) {
     *integrationSet = (*this)[1];
   }
   return true;
@@ -1717,7 +1720,7 @@ bool Expression::IsIndefiniteIntegralfdx(
   MacroRegisterFunctionWithName("Expression::IsIndefiniteIntegralfdx");
   this->CheckConsistency();
   Expression tempE;
-  if (integrationSet == 0) {
+  if (integrationSet == nullptr) {
     integrationSet = &tempE;
   }
   if (!this->IsIntegraLfdx(differentialVariable, functionToIntegrate, integrationSet)) {
@@ -1732,7 +1735,7 @@ bool Expression::IsDefiniteIntegralOverIntervalfdx(
   MacroRegisterFunctionWithName("Expression::IsDefiniteIntegralOverIntervalfdx");
   this->CheckConsistency();
   Expression tempE;
-  if (integrationSet == 0) {
+  if (integrationSet == nullptr) {
     integrationSet = &tempE;
   }
   if (!this->IsIntegraLfdx(differentialVariable, functionToIntegrate, integrationSet)) {
@@ -1745,23 +1748,23 @@ bool Expression::IsDifferentialOneFormOneVariablE(
   Expression* outputDifferentialOfWhat, Expression* outputCoeffInFrontOfDifferential
 ) const {
   MacroRegisterFunctionWithName("Expression::IsDifferentialOneFormOneVariablE");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (!this->StartsWith(this->owner->opDifferential()) || this->size() != 3) {
     return false;
   }
-  if (outputDifferentialOfWhat != 0) {
+  if (outputDifferentialOfWhat != nullptr) {
     *outputDifferentialOfWhat = (*this)[1];
   }
-  if (outputCoeffInFrontOfDifferential != 0) {
+  if (outputCoeffInFrontOfDifferential != nullptr) {
     *outputCoeffInFrontOfDifferential = (*this)[2];
   }
   return true;
 }
 
 bool Expression::ContainsAsSubExpressionNoBuiltInTypes(const Expression& input) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
@@ -1783,7 +1786,7 @@ bool Expression::ContainsAsSubExpressionNoBuiltInTypes(const Expression& input) 
 }
 
 bool Expression::ContainsAsSubExpressionNoBuiltInTypes(int inputAtom) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   Expression theE;
@@ -1792,14 +1795,14 @@ bool Expression::ContainsAsSubExpressionNoBuiltInTypes(int inputAtom) const {
 }
 
 bool Expression::IsContext() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   return this->StartsWith(this->owner->opContexT());
 }
 
 bool Expression::IsError(std::string* outputErrorMessage) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (!this->StartsWith(this->owner->opError(), 2)) {
@@ -1809,7 +1812,7 @@ bool Expression::IsError(std::string* outputErrorMessage) const {
 }
 
 bool Expression::IsSequenceDoubleButNotTripleNested() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (!this->IsSequenceNElementS()) {
@@ -1831,14 +1834,14 @@ bool Expression::IsSequenceDoubleButNotTripleNested() const {
 }
 
 bool Expression::IsSequenceNElementS(int N) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   return this->StartsWith(this->owner->opSequence(), N + 1);
 }
 
 bool Expression::IsIntervalRealLine() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->StartsWith(this->owner->opIntervalOpen())) {
@@ -1887,7 +1890,7 @@ bool Expression::IsKnownToBeNonNegative() const {
   if (this->EvaluatesToDouble(&theDouble)) {
     return theDouble >= 0;
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   Expression testInequality, testResult;
@@ -1908,7 +1911,7 @@ bool Expression::IsKnownToBeNonNegative() const {
 }
 
 bool Expression::IsNegativeConstant() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   Rational theRat;
@@ -1945,7 +1948,7 @@ bool Expression::IsEqualToZero() const {
     return this->GetValue<Rational>().IsEqualToZero();
   }
   if (this->IsOfType<double>()) {
-    return this->GetValue<double>() == 0;
+    return this->GetValue<double>() == 0.0;
   }
   if (this->IsOfType<AlgebraicNumber>()) {
     return this->GetValue<AlgebraicNumber>().IsEqualToZero();
@@ -1994,7 +1997,7 @@ bool Expression::IsRational(Rational* whichRational) const {
 }
 
 bool Expression::DivisionByMeShouldBeWrittenInExponentForm() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
@@ -2035,7 +2038,7 @@ bool Expression::IsPositiveNumber() const {
 
 bool Expression::IsConstantNumber() const {
   MacroRegisterFunctionWithName("Expression::IsConstantNumber");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   RecursionDepthCounter thecounter(&this->owner->RecursionDeptH);
@@ -2064,7 +2067,7 @@ bool Expression::IsConstantNumber() const {
 
 bool Expression::IsAlgebraicRadical() const {
   MacroRegisterFunctionWithName("Expression::IsAlgebraicRadical");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   RecursionDepthCounter thecounter(&this->owner->RecursionDeptH);
@@ -2313,7 +2316,7 @@ void Expression::GetCoefficientMultiplicandForm(Rational& outputCoeff, Expressio
 }
 
 int Expression::GetExpressionTreeSize() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return 1;
   }
   this->CheckInitialization();
@@ -2337,9 +2340,12 @@ bool Expression::operator>(const Expression& other) const {
   bool leftEvalsToDouble = this->EvaluatesToDouble(&left);
   bool rightEvalsToDouble = other.EvaluatesToDouble(&right);
   if (leftEvalsToDouble && rightEvalsToDouble) {
-    if (std::isnan(left) && std::isnan(right))
+    if (std::isnan(left) && std::isnan(right)) {
       return false; //WARNING nan == nan evaluates to false!
-    if (left != right) {
+    }
+    // left != right generates a bizarre warning:
+    // "comparing floating point with == or != is unsafe".
+    if ((left - right) != 0.0) {
       if (std::isnan(left)) {
         return true;
       }
@@ -2348,7 +2354,7 @@ bool Expression::operator>(const Expression& other) const {
       }
       return left > right;
     }
-    if (left == right) {
+    if ((left - right) == 0.0) {
       if ((*this) == other) {
         return false;
       }
@@ -2418,15 +2424,16 @@ bool Expression::GreaterThanNoCoeff(const Expression& other) const {
 
 bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("Expression::ToStringData");
-  if (this->owner == 0) {
-    return "(non-initialized)";
+  if (this->owner == nullptr) {
+    output = "(non-initialized)";
+    return true;
   }
   std::stringstream out;
   bool result = false;
-  bool isFinal = theFormat == 0 ? true : theFormat->flagExpressionIsFinal;
-  bool useQuotes = theFormat == 0 ? false : theFormat->flagUseQuotes;
+  bool isFinal = theFormat == nullptr ? true : theFormat->flagExpressionIsFinal;
+  bool useQuotes = theFormat == nullptr ? false : theFormat->flagUseQuotes;
   MemorySaving<FormatExpressions> contextFormat;
-  bool showContext = this->owner == 0 ? false : owner->flagDisplayContext;
+  bool showContext = this->owner == nullptr ? false : owner->flagDisplayContext;
   if (this->IsAtom()) {
     if (this->IsAtomGivenData(this->owner->opPhantom())) {
       out << "\\phantom{}";
@@ -2589,11 +2596,11 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<Plot>()) {
     if (isFinal) {
       Plot& thePlot = this->GetValueNonConst<Plot>();
-      thePlot.flagIncludeExtraHtmlDescriptions = (theFormat == 0) ? true : theFormat->flagIncludeExtraHtmlDescriptionsInPlots;
+      thePlot.flagIncludeExtraHtmlDescriptions = (theFormat == nullptr) ? true : theFormat->flagIncludeExtraHtmlDescriptionsInPlots;
       thePlot.flagPlotShowJavascriptOnly = this->owner->flagPlotShowJavascriptOnly;
       out << thePlot.GetPlotHtml(*this->owner);
       if (this->owner->flagWriteLatexPlots) {
-        out << this->owner->WriteDefaultLatexFileReturnHtmlLink(thePlot.GetPlotStringAddLatexCommands(false), 0, true);
+        out << this->owner->WriteDefaultLatexFileReturnHtmlLink(thePlot.GetPlotStringAddLatexCommands(false), nullptr, true);
         out << "<br><b>LaTeX code used to generate the output. </b><br>"
         << thePlot.GetPlotStringAddLatexCommands(true);
       }
@@ -2687,7 +2694,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseHTML = false;
     contextFormat.GetElement().flagUseLatex = true;
     Matrix<RationalFunctionOld> theMat;
-    this->IsMatrixGivenType(0, 0, &theMat);
+    this->IsMatrixGivenType(nullptr, nullptr, &theMat);
     out << theMat.ToString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<ElementWeylAlgebra<Rational> >()) {
@@ -2745,7 +2752,7 @@ std::string Expression::ToStringFull() const {
 }
 
 bool Expression::NeedsParenthesisForBaseOfExponent() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->StartsWith(this->owner->opBind())) {
@@ -2774,10 +2781,10 @@ bool Expression::NeedsParenthesisForBaseOfExponent() const {
 }
 
 bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(const Expression* leftNeighbor) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
-  if (leftNeighbor != 0) {
+  if (leftNeighbor != nullptr) {
     if (leftNeighbor->StartsWith(this->owner->opDivide(), 3)) {
       if ((*leftNeighbor)[1] == "\\diff") {
         return true;
@@ -2829,7 +2836,7 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(cons
 
 bool Expression::NeedsParenthesisForAddition() const {
   MacroRegisterFunctionWithName("Expression::NeedsParenthesisForAddition");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->StartsWith(this->owner->opDefine())) {
@@ -2839,7 +2846,7 @@ bool Expression::NeedsParenthesisForAddition() const {
 }
 
 bool Expression::NeedsParenthesisForMultiplication() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->IsOfType<std::string>()) {
@@ -3069,11 +3076,11 @@ std::string Expression::ToString(
 ) const {
   MacroRegisterFunctionWithName("Expression::ToString");
   MemorySaving<FormatExpressions> tempFormat;
-  if (theFormat == 0) {
+  if (theFormat == nullptr) {
     theFormat = &tempFormat.GetElement();
     theFormat->flagUseQuotes = false;
   }
-  if (this->owner != 0) {
+  if (this->owner != nullptr) {
     if (this->owner->RecursionDeptH + 1 > this->owner->MaxRecursionDeptH) {
       return "(...)";
     }
@@ -3082,7 +3089,7 @@ std::string Expression::ToString(
   }
   RecursionDepthCounter theRecursionCounter(&this->owner->RecursionDeptH);
   this->CheckConsistency();
-  if (startingExpression != 0 && unfoldCommandEnclosures) {
+  if (startingExpression != nullptr && unfoldCommandEnclosures) {
     Expression newStart, newMe;
     if (
       this->owner->innerFlattenCommandEnclosuresOneLayer(*this->owner, *this, newMe) &&
@@ -3104,7 +3111,7 @@ std::string Expression::ToString(
     !this->IsOfType<std::string>() &&
     !this->StartsWith(this->owner->opEndStatement())
   ) {
-    if (startingExpression == 0) {
+    if (startingExpression == nullptr) {
       theFormat->flagUseQuotes = true;
     } else {
       theFormat->flagUseQuotes = false;
@@ -3113,7 +3120,7 @@ std::string Expression::ToString(
   int lineBreak = 50;
   int charCounter = 0;
   std::string tempS;
-  if (outputJS != 0) {
+  if (outputJS != nullptr) {
     outputJS->reset();
   }
   if (this->ToStringData(tempS, theFormat)) {
@@ -3238,13 +3245,13 @@ std::string Expression::ToString(
         out << secondE;
       }
     } else {
-      if (theFormat != 0) {
+      if (theFormat != nullptr) {
         theFormat->flagExpressionNewLineAllowed = false;
       }
       std::string firstE = (*this)[1].ToString(theFormat);
       std::string secondE = (*this)[2].ToString(theFormat);
       out << "\\frac{" << firstE << "}{" << secondE << "}";
-      if (theFormat != 0) {
+      if (theFormat != nullptr) {
         theFormat->flagExpressionNewLineAllowed = oldAllowNewLine;
       }
     }
@@ -3454,7 +3461,7 @@ std::string Expression::ToString(
       leftString = left.ToString(theFormat);
     }
     out << leftString;
-    if (allowNewLine && !useFrac && leftString.size() > (unsigned) lineBreak) {
+    if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(lineBreak)) {
       out << "\\\\\n";
     }
     std::string rightString = right.NeedsParenthesisForAddition() ?
@@ -3479,7 +3486,7 @@ std::string Expression::ToString(
       leftString = left.ToString(theFormat);
     }
     out << leftString;
-    if (allowNewLine && !useFrac && leftString.size() > (unsigned) lineBreak) {
+    if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(lineBreak)) {
       out << "\\\\\n";
     }
     std::string rightString = right.NeedsParenthesisForAddition() ?
@@ -3660,7 +3667,7 @@ std::string Expression::ToString(
       charCounter += currentChildString.size();
       if (i != this->children.size - 1) {
         out << ", ";
-        if (theFormat != 0) {
+        if (theFormat != nullptr) {
           if (allowNewLine && charCounter > 50) {
             if (theFormat->flagUseLatex) {
               out << "\\\\\n";
@@ -3698,9 +3705,9 @@ std::string Expression::ToString(
   } else if (this->IsListStartingWithAtom(this->owner->opUnionNoRepetition())) {
     out << (*this)[1].ToString(theFormat) << "\\sqcup " << (*this)[2].ToString(theFormat);
   } else if (this->IsListStartingWithAtom(this->owner->opEndStatement())) {
-    bool createTable = (startingExpression != 0);
+    bool createTable = (startingExpression != nullptr);
     bool createSingleTable = false;
-    if (createTable == false && theFormat != 0 && !theGlobalVariables.flagRunningCommandLine) {
+    if (createTable == false && theFormat != nullptr && !theGlobalVariables.flagRunningCommandLine) {
       createSingleTable = theFormat->flagMakingExpressionTableWithLatex;
       theFormat->flagMakingExpressionTableWithLatex = false;
     }
@@ -3711,7 +3718,7 @@ std::string Expression::ToString(
       out << "<table class =\"tableCalculatorOutput\">";
     }
     std::string currentInput, currentOutput;
-    if (outputJS != 0) {
+    if (outputJS != nullptr) {
       (*outputJS)["input"].theType = JSData::token::tokenArray;
       (*outputJS)["output"].theType = JSData::token::tokenArray;
     }
@@ -3729,7 +3736,7 @@ std::string Expression::ToString(
           currentInput = "...";
         }
         out << currentInput;
-        if (outputJS != 0) {
+        if (outputJS != nullptr) {
           (*outputJS)["input"][i - 1] = currentInput;
         }
         if (i != this->size() - 1) {
@@ -3750,7 +3757,7 @@ std::string Expression::ToString(
           currentOutput = HtmlRoutines::GetMathSpanPure(currentE.ToString(theFormat), 1700);
         }
         currentOutput += currentE.ToStringAllSlidersInExpression();
-        if (outputJS != 0) {
+        if (outputJS != nullptr) {
           (*outputJS)["output"][i - 1] = currentOutput;
         }
         out << currentOutput;
@@ -3771,7 +3778,7 @@ std::string Expression::ToString(
         }
         outWithDelimiter << currentE.ToStringAllSlidersInExpression();
         out << outWithDelimiter.str();
-        if (outputJS != 0) {
+        if (outputJS != nullptr) {
           (*outputJS)["output"][i] = outWithDelimiter.str();
         }
         if (createSingleTable) {
@@ -3781,7 +3788,7 @@ std::string Expression::ToString(
           out << ";";
         }
       }
-      if (theFormat != 0) {
+      if (theFormat != nullptr) {
         theFormat->flagExpressionIsFinal = isFinal;
       }
     }
@@ -3826,7 +3833,7 @@ std::string Expression::ToString(
     out << "(ProgrammingError:NotDocumented)";
   }
   std::string input, output;
-  if (startingExpression != 0) {
+  if (startingExpression != nullptr) {
     std::stringstream outTrue;
     outTrue << "<table class =\"tableCalculatorOutput\">";
     outTrue << "<tr><th>Input</th><th>Result</th></tr>";
@@ -3845,7 +3852,7 @@ std::string Expression::ToString(
         output = HtmlRoutines::GetMathSpanPure(out.str(), 1700);
       }
       outTrue << "<td class =\"cellCalculatorResult\">" << output << "</td></tr>";
-      if (outputJS != 0) {
+      if (outputJS != nullptr) {
         (*outputJS)["input"] = input;
         (*outputJS)["output"] = output;
       }
@@ -3853,7 +3860,7 @@ std::string Expression::ToString(
     outTrue << "</table>";
     return outTrue.str();
   }
-  if (outputJS != 0) {
+  if (outputJS != nullptr) {
     if (outputJS->theType == JSData::token::tokenUndefined) {
       (*outputJS) = out.str();
     }
@@ -3862,7 +3869,7 @@ std::string Expression::ToString(
 }
 
 std::string Expression::Lispify() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return "Error: not initialized";
   }
   RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
@@ -3886,7 +3893,7 @@ std::string Expression::Lispify() const {
 }
 
 bool Expression::IsLisT() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->children.size <= 0) {
@@ -3907,7 +3914,7 @@ bool Expression::IsFrozen() const {
 }
 
 bool Expression::IsAtomThatFreezesArguments(std::string* outputWhichAtom) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->IsLisT()) {
@@ -3916,14 +3923,14 @@ bool Expression::IsAtomThatFreezesArguments(std::string* outputWhichAtom) const 
   if (this->theData < 0 || this->theData >= this->owner->GetOperations().size) {
     return false;
   }
-  if (outputWhichAtom != 0) {
+  if (outputWhichAtom != nullptr) {
     *outputWhichAtom = this->owner->GetOperations()[this->theData];
   }
   return this->owner->atomsThatFreezeArguments.Contains(this->owner->GetOperations()[this->theData]);
 }
 
 bool Expression::IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (!this->StartsWith(this->owner->opThePower(), 3)) {
@@ -3933,7 +3940,7 @@ bool Expression::IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const {
 }
 
 bool Expression::IsAtomWhoseExponentsAreInterpretedAsFunction(std::string* outputWhichAtom) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->IsLisT()) {
@@ -3942,14 +3949,14 @@ bool Expression::IsAtomWhoseExponentsAreInterpretedAsFunction(std::string* outpu
   if (this->theData < 0 || this->theData >= this->owner->GetOperations().size) {
     return false;
   }
-  if (outputWhichAtom != 0) {
+  if (outputWhichAtom != nullptr) {
     *outputWhichAtom = this->owner->GetOperations()[this->theData];
   }
   return this->owner->atomsWhoseExponentsAreInterpretedAsFunctions.Contains(this->owner->GetOperations()[this->theData]);
 }
 
 bool Expression::IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->IsLisT()) {
@@ -3958,20 +3965,20 @@ bool Expression::IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom) co
   if (this->theData < 0 || this->theData>= this->owner->GetOperations().size) {
     return false;
   }
-  if (outputWhichAtom != 0) {
+  if (outputWhichAtom != nullptr) {
     *outputWhichAtom = this->owner->GetOperations()[this->theData];
   }
   return this->owner->atomsNotInterpretedAsFunctions.Contains(this->owner->GetOperations()[this->theData]);
 }
 
 bool Expression::IsAtom(std::string* outputWhichOperation) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->IsLisT()) {
     return false;
   }
-  if (outputWhichOperation != 0) {
+  if (outputWhichOperation != nullptr) {
     if (this->theData < 0 || this->theData>= this->owner->GetOperations().size) {
       std::stringstream out;
       out << "(data-atom:~" << this->theData << ")";
@@ -3987,7 +3994,7 @@ bool Expression::IsAtomGivenData(const std::string& desiredAtom) const {
   if (this->IsLisT()) {
     return false;
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   return this->theData == this->owner->theAtoms.GetIndex(desiredAtom);
@@ -4004,11 +4011,11 @@ bool Expression::IsAtomGivenData(int desiredDataUseMinusOneForAny) const {
 }
 
 bool Expression::IsKnownFunctionWithComplexRange(std::string* outputWhichOperation) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   std::string operationName;
-  if (outputWhichOperation == 0) {
+  if (outputWhichOperation == nullptr) {
     outputWhichOperation = &operationName;
   }
   if (!this->IsBuiltInAtom(outputWhichOperation)) {
@@ -4018,7 +4025,7 @@ bool Expression::IsKnownFunctionWithComplexRange(std::string* outputWhichOperati
 }
 
 bool Expression::IsCalculatorStatusChanger() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   return
@@ -4029,11 +4036,11 @@ bool Expression::IsCalculatorStatusChanger() const {
 }
 
 bool Expression::IsArithmeticOperation(std::string* outputWhichOperation) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   std::string operationName;
-  if (outputWhichOperation == 0) {
+  if (outputWhichOperation == nullptr) {
     outputWhichOperation = &operationName;
   }
   if (!this->IsBuiltInAtom(outputWhichOperation)) {
@@ -4043,7 +4050,7 @@ bool Expression::IsArithmeticOperation(std::string* outputWhichOperation) const 
 }
 
 bool Expression::IsBuiltInAtom(std::string* outputWhichOperation) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->IsLisT()) {
@@ -4055,14 +4062,14 @@ bool Expression::IsBuiltInAtom(std::string* outputWhichOperation) const {
   if (this->theData >= this->owner->NumPredefinedAtoms) {
     return false;
   }
-  if (outputWhichOperation != 0) {
+  if (outputWhichOperation != nullptr) {
     *outputWhichOperation = this->owner->GetOperations()[this->theData];
   }
   return true;
 }
 
 bool Expression::IsGoodForChainRuleFunction(std::string* outputWhichOperation) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->IsLisT()) {
@@ -4071,7 +4078,7 @@ bool Expression::IsGoodForChainRuleFunction(std::string* outputWhichOperation) c
   if (this->theData < 0 || this->theData >= this->owner->GetOperations().size) {
     return false;
   }
-  if (outputWhichOperation != 0) {
+  if (outputWhichOperation != nullptr) {
     *outputWhichOperation = this->owner->GetOperations()[this->theData];
   }
   return !this->owner->atomsNotAllowingChainRule.Contains(this->owner->GetOperations()[this->theData]);
@@ -4106,7 +4113,7 @@ bool Expression::HasNonEmptyContext() const {
 
 bool Expression::IsCacheableExpression() const {
   MacroRegisterFunctionWithName("Expression::IsCacheableExpression");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return true;
   }
   if (this->IsBuiltInTypE()) {
@@ -4139,7 +4146,7 @@ bool Expression::IsElementaryObject() const {
   if (this->IsBuiltInTypE()) {
     return true;
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return true;
   }
   if (this->StartsWith(this->owner->opBind())) {
@@ -4157,7 +4164,7 @@ bool Expression::IsBuiltInTypE(std::string* outputWhichOperation) const {
     return false;
   }
   if (this->owner->GetBuiltInTypes().Contains(tempS)) {
-    if (outputWhichOperation != 0) {
+    if (outputWhichOperation != nullptr) {
       *outputWhichOperation = tempS;
     }
     return true;
@@ -4170,7 +4177,7 @@ bool Expression::IsBuiltInTypE(int* outputWhichType) const {
   if (!this->IsBuiltInTypE(&theType)) {
     return false;
   }
-  if (outputWhichType != 0) {
+  if (outputWhichType != nullptr) {
     *outputWhichType = this->owner->GetOperations().GetIndex(theType);
   }
   return true;
@@ -4294,15 +4301,15 @@ bool Expression::MakeXOX(Calculator& owner, int theOp, const Expression& left, c
     Expression rightCopy = right;
     return this->MakeXOX(owner, theOp, leftCopy, rightCopy);
   }
-  if (right.owner == 0 && left.owner == 0) {
+  if (right.owner == nullptr && left.owner == nullptr) {
     crash << "Cannot build an expression from two non-initialized expressions. " << crash;
   }
-  if (right.owner == 0) {
+  if (right.owner == nullptr) {
     Expression rightCopy;
     rightCopy.AssignValue(right.theData, *left.owner);
     return this->MakeXOX(owner, theOp, left, rightCopy);
   }
- if (left.owner == 0) {
+ if (left.owner == nullptr) {
     Expression leftCopy;
     leftCopy.AssignValue(left.theData, *right.owner);
     return this->MakeXOX(owner, theOp, leftCopy, right);
@@ -4336,7 +4343,7 @@ bool Expression::Sequencefy() {
 }
 
 bool Expression::operator==(int other) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   int theInt;
@@ -4356,7 +4363,7 @@ bool Expression::operator==(const std::string& other) const {
 
 std::string Expression::ToUTF8String(FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("Expression::ToUTF8String");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return this->ToString(theFormat);
   }
   std::stringstream out;

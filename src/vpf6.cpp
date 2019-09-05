@@ -209,7 +209,7 @@ class quasiDiffMon {
     }
     return this->theMatMon>other.theMatMon;
   }
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
 };
 
 std::string quasiDiffMon::ToString(FormatExpressions* theFormat) const {
@@ -222,8 +222,8 @@ std::string quasiDiffMon::ToString(FormatExpressions* theFormat) const {
 template <class coefficient>
 class quasiDiffOp : public MonomialCollection<quasiDiffMon, coefficient> {
 public:
-  std::string ToString(FormatExpressions* theFormat = 0) const;
-  void GenerateBasisLieAlgebra(List<quasiDiffOp<coefficient> >& theElts, FormatExpressions* theFormat = 0);
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  void GenerateBasisLieAlgebra(List<quasiDiffOp<coefficient> >& theElts, FormatExpressions* theFormat = nullptr);
   void operator*=(const quasiDiffOp<coefficient>& standsOnTheRight);
   void operator=(const  MonomialCollection<quasiDiffMon, coefficient>& other) {
     this->MonomialCollection<quasiDiffMon, coefficient>::operator=(other);

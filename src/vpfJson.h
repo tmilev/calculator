@@ -103,7 +103,7 @@ public:
     bool useHTML = false,
     bool convertNonASCIIStringsToHex = false
   ) const;
-  bool readstring(const std::string& json, bool stringsWerePercentEncoded, std::stringstream* commentsOnFailure = 0);
+  bool readstring(const std::string& json, bool stringsWerePercentEncoded, std::stringstream* commentsOnFailure = nullptr);
   void TryToComputeType();
   static bool Tokenize(const std::string& input, List<JSData>& output);
   static void FilterColumnsJSDataObjectList(List<JSData>& inputOutput, const List<std::string>& columnsToPreserve);

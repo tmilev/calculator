@@ -45,8 +45,8 @@ public:
   void SubtractSmallerPositive(const LargeIntUnsigned& x);
   void ToString(std::string& output) const;
   void ElementToStringLargeElementDecimal(std::string& output) const;
-  std::string ToString(FormatExpressions* theFormat = 0) const;
-  std::string ToStringAbbreviate(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringAbbreviate(FormatExpressions* theFormat = nullptr) const;
   void DivPositive(const LargeIntUnsigned& divisor, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
   void MakeOne();
   void AddUInt(unsigned int x);
@@ -163,7 +163,7 @@ public:
   }
   void MultiplyByInt(int x);
   void ToString(std::string& output) const;
-  std::string ToString(FormatExpressions* theFormat = 0) const {
+  std::string ToString(FormatExpressions* theFormat = nullptr) const {
     (void) theFormat;//avoid unused parameter warning, portable
     std::string tempS;
     this->ToString(tempS);
@@ -727,7 +727,7 @@ public:
     this->Extended->den.MultiplyBy(x);
     this->Simplify();
   }
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringFrac() const;
   std::string ToStringForFileOperations(FormatExpressions* notUsed = 0) const;
   bool IsEqualTo(const Rational& r) const;

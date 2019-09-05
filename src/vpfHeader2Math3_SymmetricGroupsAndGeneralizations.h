@@ -299,7 +299,7 @@ class TrivialOuterAutomorphism {
   somestream& IntoStream(somestream& out) {
     out << "Identity function";
   }
-  std::string ToString(FormatExpressions* theFormat = 0) const {
+  std::string ToString(FormatExpressions* theFormat = nullptr) const {
     std::stringstream ss;
     ss << *this;
     return ss.str();

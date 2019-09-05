@@ -4,7 +4,7 @@
 #define vpfHeaderLieTheoryMiscellaneous
 
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
-#include "vpfHeader2Math15_UniversalEnveloping.h"
+//#include "vpfHeader2Math15_UniversalEnveloping.h"
 static ProjectInformationInstance ProjectInfoVpfHeaderLieTheoryMiscellaneous(
   __FILE__, "Header, Lie theory, miscellaneous. "
 );
@@ -58,10 +58,7 @@ struct branchingData {
     this->initAssumingParSelAndHmmInittedPart1NoSubgroups();
     this->initAssumingParSelAndHmmInittedPart2Subgroups();
   }
-  branchingData() {
-    this->flagUseNilWeightGeneratorOrder = false;
-    this->flagAscendingGeneratorOrder = false;
-  }
+  branchingData();
 };
 
 class SemisimpleLieAlgebraOrdered {

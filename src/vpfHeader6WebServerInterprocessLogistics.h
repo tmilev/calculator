@@ -108,10 +108,10 @@ public:
   void ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
   static int WriteNoInterrupts(int theFD, const std::string& input);
   static int WriteWithTimeoutViaSelect(
-    int theFD, const std::string& input, int timeOutInSeconds, int maxNumTries = 10, std::stringstream* commentsOnFailure = 0
+    int theFD, const std::string& input, int timeOutInSeconds, int maxNumTries = 10, std::stringstream* commentsOnFailure = nullptr
   );
   static int ReadWithTimeOutViaSelect(
-    int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries = 10, std::stringstream* commentsOnFailure = 0
+    int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries = 10, std::stringstream* commentsOnFailure = nullptr
   );
   void WriteOnceAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail);
 

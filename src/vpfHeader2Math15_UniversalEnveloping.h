@@ -13,7 +13,7 @@ template <class coefficient>
 class MonomialUniversalEnveloping : public MonomialTensor<coefficient> {
 private:
 public:
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
@@ -55,7 +55,7 @@ public:
     const Vector<coefficient>* subHiGoesToIthElement,
     const coefficient& theRingUnit,
     const coefficient& theRingZero,
-    std::stringstream* logStream = 0
+    std::stringstream* logStream = nullptr
   );
   void ModOutVermaRelations(
     coefficient& outputCoeff,
@@ -110,7 +110,7 @@ public:
   void CommuteAnBtoBAnPlusLowerOrder(
     int indexA, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1
   );
-  MonomialUniversalEnveloping(): owner(0) {}
+  MonomialUniversalEnveloping(): owner(nullptr) {}
   bool operator>(const MonomialUniversalEnveloping& other) {
     return this->::MonomialTensor<coefficient>::operator>(other);
   }
@@ -146,7 +146,7 @@ public:
     const Vector<coefficient>* subHiGoesToIthElement,
     const coefficient& theRingUnit,
     const coefficient& theRingZero,
-    std::stringstream* logStream = 0
+    std::stringstream* logStream = nullptr
   );
   std::string IsInProperSubmodule(
     const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero
@@ -157,7 +157,7 @@ public:
     const Vector<coefficient>* subHiGoesToIthElement,
     const coefficient& theRingUnit,
     const coefficient& theRingZero,
-    std::stringstream* logStream = 0
+    std::stringstream* logStream = nullptr
   ) const;
   bool HWTAAbilinearForm(
     const MonomialUniversalEnveloping<coefficient>& right,
@@ -165,7 +165,7 @@ public:
     const Vector<coefficient>* subHiGoesToIthElement,
     const coefficient& theRingUnit,
     const coefficient& theRingZero,
-    std::stringstream* logStream = 0
+    std::stringstream* logStream = nullptr
   ) const {
     ElementUniversalEnveloping<coefficient> tempElt;
     tempElt.MakeZero(*this->owner);
@@ -308,7 +308,7 @@ public:
     this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>
     ::operator/=(other);
   }
-  ElementUniversalEnveloping<coefficient>(): owner(0) {
+  ElementUniversalEnveloping<coefficient>(): owner(nullptr) {
   }
   ElementUniversalEnveloping<coefficient>(const ElementUniversalEnveloping<coefficient>& other) {
     this->operator=(other);

@@ -72,7 +72,7 @@ class NilradicalCandidate {
   void ComputeParabolicACextendsToParabolicAC();
   bool IsCommutingSelectionNilradicalElements(Selection& inputNilradSel);
   void ProcessMe();
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringTableElementWithWeights(
     const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& theElts, const Vectors<Rational>& theWeights
   ) const;
@@ -82,7 +82,7 @@ class NilradicalCandidate {
 
 class SubalgebraSemisimpleLieAlgebra {
 public:
-  std::string ToString(FormatExpressions* theFormat = 0);
+  std::string ToString(FormatExpressions* theFormat = nullptr);
   SemisimpleLieAlgebra* owner;
   GlobalVariables* theGlobalVariables;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theGenerators;
@@ -309,25 +309,25 @@ public:
   bool AttemptToSolveSystem();
   bool IsGoodHnewActingByTwo(const Vector<Rational>& HNewActingByTwo, const List<int>& theRootInjections) const;
   Rational GetScalarSA(const Vector<Rational>& primalWeightLeft, const Vector<Rational>& primalWeightRight) const;
-  std::string ToStringType(FormatExpressions* theFormat = 0) const;
-  std::string ToStringTypeAndHs(FormatExpressions* theFormat = 0) const;
-  std::string ToStringGenerators(FormatExpressions* theFormat = 0) const;
-  std::string ToString(FormatExpressions* theFormat = 0) const;
-  std::string ToStringSystem(FormatExpressions* theFormat = 0) const;
-  std::string ToStringSystemPart2(FormatExpressions* theFormat = 0) const;
-  std::string ToStringLoadUnknown(FormatExpressions* theFormat = 0) const;
-  std::string ToStringCentralizer(FormatExpressions* theFormat = 0) const;
-  std::string ToStringCentralizerDebugData(FormatExpressions* theFormat = 0) const;
-  std::string ToStringCartanSA(FormatExpressions* theFormat = 0) const;
-  std::string ToStringPairingTable(FormatExpressions* theFormat = 0) const;
-  std::string ToStringPairingTableLaTeX(FormatExpressions* theFormat = 0) const;
-  std::string ToStringNilradicals(FormatExpressions* theFormat = 0) const;
-  std::string ToStringNilradicalsSummary(FormatExpressions* theFormat = 0) const;
-  std::string ToStringModuleDecomposition(FormatExpressions* theFormat = 0) const;
-  std::string ToStringModuleDecompositionLaTeX(FormatExpressions* theFormat = 0) const;
-  std::string ToStringDrawWeights(FormatExpressions* theFormat = 0) const;
+  std::string ToStringType(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringTypeAndHs(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringGenerators(FormatExpressions* theFormat = nullptr) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringSystem(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringSystemPart2(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringLoadUnknown(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringCentralizer(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringCentralizerDebugData(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringCartanSA(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringPairingTable(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringPairingTableLaTeX(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringNilradicals(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringNilradicalsSummary(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringModuleDecomposition(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringModuleDecompositionLaTeX(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringDrawWeights(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringDrawWeightsHelper(int indexModule, const Vector<Rational>& theWeight) const;
-  //std::string ToStringDrawWeightsVersion2(FormatExpressions* theFormat = 0) const;
+  //std::string ToStringDrawWeightsVersion2(FormatExpressions* theFormat = nullptr) const;
   bool operator>(const CandidateSSSubalgebra& other) const;
 };
 
@@ -449,19 +449,19 @@ public:
   bool CheckConsistencyHs() const;
   bool CheckConsistency() const;
   bool CheckInitialization() const;
-  std::string ToStringState(FormatExpressions* theFormat = 0);
-  std::string ToStringCurrentChain(FormatExpressions* theFormat = 0);
-  std::string ToStringProgressReport(FormatExpressions* theFormat = 0);
-  std::string ToString(FormatExpressions* theFormat = 0);
-  std::string ToStringPart2(FormatExpressions* theFormat = 0);
+  std::string ToStringState(FormatExpressions* theFormat = nullptr);
+  std::string ToStringCurrentChain(FormatExpressions* theFormat = nullptr);
+  std::string ToStringProgressReport(FormatExpressions* theFormat = nullptr);
+  std::string ToString(FormatExpressions* theFormat = nullptr);
+  std::string ToStringPart2(FormatExpressions* theFormat = nullptr);
   std::string ToStringTableSubalgebraLinksTable(FormatExpressions* theFormat);
-  std::string ToStringSubalgebrasNoHDWrite(FormatExpressions* theFormat = 0);
-  std::string ToStringSubalgebrasWithHDWrite(FormatExpressions* theFormat = 0);
+  std::string ToStringSubalgebrasNoHDWrite(FormatExpressions* theFormat = nullptr);
+  std::string ToStringSubalgebrasWithHDWrite(FormatExpressions* theFormat = nullptr);
   void WriteSubalgebraToFile(FormatExpressions* theFormat, int subalgebraIndex);
-  std::string ToStringPart3(FormatExpressions* theFormat = 0);
-  std::string ToStringSl2s(FormatExpressions* theFormat = 0);
-  std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat = 0) const;
-  std::string ToStringSSsumaryHTML(FormatExpressions* theFormat = 0) const;
+  std::string ToStringPart3(FormatExpressions* theFormat = nullptr);
+  std::string ToStringSl2s(FormatExpressions* theFormat = nullptr);
+  std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringSSsumaryHTML(FormatExpressions* theFormat = nullptr) const;
   void ComputePairingTablesAndFKFTtypes();
   void GetCentralizerChains(List<List<int> >& outputChains);
   int GetIndexFullSubalgebra() const;

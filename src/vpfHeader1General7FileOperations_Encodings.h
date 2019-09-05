@@ -59,36 +59,36 @@ public:
   static bool IsOKfileNameVirtual(
     const std::string& fileName,
     bool accessSensitiveFolders = false,
-    std::stringstream* commentsOnFailure = 0
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool IsFileNameWithoutDotsAndSlashes(const std::string& fileName);
   static bool IsFileNameSafeForSystemCommands(const std::string& fileName, std::stringstream* commentsOnFailure);
   static std::string GetFileNameFromFileNameWithPath(const std::string& fileName);
   static std::string GetPathFromFileNameWithPath(const std::string& fileName);
-  static std::string GetFileExtensionWithDot(const std::string& theFileName, std::string* outputFileNameNoExtension = 0);
+  static std::string GetFileExtensionWithDot(const std::string& theFileName, std::string* outputFileNameNoExtension = nullptr);
   static bool FileExistsUnsecure(const std::string& theFileName);
   static bool FileExistsVirtual(
     const std::string& theFileName,
     bool accessSensitiveFolders = false,
     bool accessULTRASensitiveFolders = false,
-    std::stringstream* commentsOnFailure = 0
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool FileExistsVirtualCustomizedReadOnly(const std::string& theFileName, std::stringstream* commentsOnFailure);
   static bool IsFolderUnsecure(const std::string& theFolderName);
   static bool GetFolderFileNamesUnsecure(
     const std::string& theFolderName,
     List<std::string>& outputFileNamesNoPath,
-    List<std::string>* outputFileTypesWithDot = 0
+    List<std::string>* outputFileTypesWithDot = nullptr
   );
   static std::string GetCurrentFolder();
   static std::string GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath);
   static bool GetFolderFileNamesVirtual(
     const std::string& theFolderName,
     List<std::string>& outputFileNamesNoPath,
-    List<std::string>* outputFileTypesWithDot = 0,
+    List<std::string>* outputFileTypesWithDot = nullptr,
     bool accessSensitiveFolders = false,
     bool accessULTRASensitiveFolders = false,
-    std::stringstream *commentsOnFailure = 0
+    std::stringstream *commentsOnFailure = nullptr
   );
   static bool GetPhysicalFileNameFromVirtualCustomizedReadOnly(
     const std::string& inputFileName,

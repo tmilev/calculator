@@ -49,7 +49,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
 template<class coefficient>
 bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable) const {
   int tempInt;
-  if (whichVariable == 0) {
+  if (whichVariable == nullptr) {
     whichVariable = &tempInt;
   }
   *whichVariable = - 1;
@@ -137,15 +137,6 @@ void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs() {
 }
 
 template <class coefficient>
-Rational Polynomial<coefficient>::TotalDegree() const {
-  Rational result = 0;
-  for (int i = 0; i < this->size(); i ++) {
-    result = MathRoutines::Maximum((*this)[i].TotalDegree(), result);
-  }
-  return result;
-}
-
-template <class coefficient>
 int Polynomial<coefficient>::TotalDegreeInt() const {
   int result = - 1;
   if (!this->TotalDegree().IsSmallInteger(&result)) {
@@ -189,6 +180,7 @@ template <class coefficient>
 void Polynomial<coefficient>::MakeDegreeOne(
   int NVar, int NonZeroIndex1, int NonZeroIndex2, const coefficient& coeff1, const coefficient& coeff2
 ) {
+  (void) NVar;
   this->MakeZero();
   MonomialP tempM;
   tempM.MakeEi(NonZeroIndex1);
@@ -218,7 +210,8 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
       if (!(*this)[i](j).IsSmallInteger(&numCycles)) {
         crash << "This is a programming error. Attempting to evaluate a polynomial whose "
         <<  i + 1 << "^{th} variable is raised to the power "
-        << (*this)[i](j).ToString() << ". Raising variables to power is allowed only if the power is a small integer. "
+        << (*this)[i](j).ToString()
+        << ". Raising variables to power is allowed only if the power is a small integer. "
         << "If the user has requested such an operation, "
         << "it *must* be intercepted at an earlier level (and the user must be informed)." << crash;
       }
@@ -227,7 +220,7 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
         numCycles = - numCycles;
       }
       tempElt = input[j];
-      MathRoutines::RaiseToPower(tempElt, numCycles, (coefficient) 1);
+      MathRoutines::RaiseToPower(tempElt, numCycles, static_cast<coefficient>(1));
       if (!isPositive) {
         tempElt.Invert();
       }
@@ -320,11 +313,6 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
     output += tempElt;
   }
   return output;
-}
-
-template <class coefficient>
-int Polynomial<coefficient>::GetIndexMaxMonomialLexicographicLastVariableStrongest() const {
-  return this->GetIndexMaxMonomial(MonomialP::LeftGreaterThanLexicographicLastVariableStrongest);
 }
 
 template <class coefficient>

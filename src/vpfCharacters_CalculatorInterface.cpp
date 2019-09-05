@@ -1989,7 +1989,7 @@ public:
   bool flagDeallocated;
   MonomialMacdonald():owner(0), flagDeallocated(false) {
   }
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   bool CheckConsistency() {
     if (this->flagDeallocated) {
       crash << "This is a programming error: use after free of MonomialMacdonald. " << crash;

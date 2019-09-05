@@ -55,7 +55,7 @@ public:
   ClassFunction operator-(const ClassFunction& other) const;
   ClassFunction ReducedWithChars(const List<ClassFunction>& chars);
   coefficient& operator[](int i) const;
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   static unsigned int HashFunction(const ClassFunction& input);
   unsigned int HashFunction() const {
     return this->HashFunction(*this);
@@ -178,7 +178,7 @@ public:
     bool flagElementsComputed;
     bool flagRepresentativeWordComputed;
     List<int> representativeWord;
-    std::string ToString(FormatExpressions* theFormat = 0) const {
+    std::string ToString(FormatExpressions* theFormat = nullptr) const {
       (void) theFormat;//avoid unused parameter warning, portable
       std::stringstream out;
       out << "Conj. class size: " << this->size.ToString();
@@ -252,7 +252,7 @@ public:
     this->sizePrivate = inputSize;
   }
   void init();
-  std::string ToString(FormatExpressions* theFormat = 0){
+  std::string ToString(FormatExpressions* theFormat = nullptr){
     std::stringstream out;
     out << this->ToStringElements(theFormat);
     if (this->flagCCRepresentativesComputed) {
@@ -260,8 +260,8 @@ public:
     }
     return out.str();
   }
-  std::string ToStringElements(FormatExpressions* theFormat = 0) const;
-  std::string ToStringConjugacyClasses(FormatExpressions* theFormat = 0);
+  std::string ToStringElements(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringConjugacyClasses(FormatExpressions* theFormat = nullptr);
   int ConjugacyClassCount() const;
   LargeInt GetSize();
   LargeInt SizeByFormulaOrNeg1() {
@@ -412,7 +412,7 @@ public:
   void MultiplyOnTheRightByOuterAutomorphism(int indexOuterAutomorphism);
   static unsigned int HashFunction(const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& input);
   unsigned int HashFunction() const;
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
 };
 
 class ElementWeylGroup {
@@ -461,7 +461,7 @@ public:
   void MakeID(const ElementWeylGroup& initializeFrom);
   bool IsID();
   std::string ToStringInvariants(FormatExpressions* theFormat) const;
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   unsigned int HashFunction() const;
   static unsigned int HashFunction(const ElementWeylGroup& input) {
     return input.HashFunction();
@@ -513,7 +513,7 @@ public:
   void MultiplyOnTheRightByOuterAuto(int outerAutoIndex);
   unsigned int HashFunction() const;
   static unsigned int HashFunction(const ElementWeylGroupAutomorphisms& input);
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
 };
 
 template <class coefficient>
@@ -522,7 +522,7 @@ class FinitelyGeneratedMatrixMonoid {
   List<MatrixTensor<coefficient> > theGenerators;
   HashedList<MatrixTensor<coefficient> > theElements;
   bool GenerateElements(int upperBoundNonPositiveMeansNoLimit);
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
 };
 
 template <class coefficient>
@@ -607,8 +607,8 @@ public:
   );
   bool LoadConjugacyClassesHelper();
   bool LoadSignSignatures(List<SubgroupDataRootReflections>& outputSubgroups);
-  void ComputeOrLoadCharacterTable(std::stringstream* reportStream = 0);
-  void ComputeOrLoadConjugacyClasses(std::stringstream* reportStream = 0);
+  void ComputeOrLoadCharacterTable(std::stringstream* reportStream = nullptr);
+  void ComputeOrLoadConjugacyClasses(std::stringstream* reportStream = nullptr);
   static void ComputeIrreducibleRepresentationsWithFormulasImplementation(FiniteGroup<ElementWeylGroup>& G);
   void ComputeExtremeRootInTheSameKMod(
     const Vectors<Rational>& inputSimpleBasisK,
@@ -618,10 +618,10 @@ public:
   );
   void AddCharacter(const ClassFunction<WeylGroupData::WeylGroupBase, Rational>& X);
   void ComputeRho(bool Recompute);
-  std::string ToStringRootsAndRootReflections(FormatExpressions* theFormat = 0);
-  std::string ToString(FormatExpressions* theFormat = 0);
-  std::string ToStringCppConjugacyClasses(FormatExpressions* theFormat = 0);
-  std::string ToStringCppCharTable(FormatExpressions* theFormat = 0);
+  std::string ToStringRootsAndRootReflections(FormatExpressions* theFormat = nullptr);
+  std::string ToString(FormatExpressions* theFormat = nullptr);
+  std::string ToStringCppConjugacyClasses(FormatExpressions* theFormat = nullptr);
+  std::string ToStringCppCharTable(FormatExpressions* theFormat = nullptr);
   std::string ToStringIrrepLabel(int irrepIndex);
   std::string ToStringSignSignatureRootSubsystem(const List<SubgroupDataRootReflections>& inputSubgroups);
   void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared = 0);
@@ -1434,7 +1434,7 @@ public:
   }
   void SpreadVector(const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace);
   std::string GetName() const;
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   Matrix<coefficient>& GetMatrixElement(int groupElementIndex);
   template <typename elementSomeGroup>
   void GetMatrixElement(const elementSomeGroup& input, Matrix<coefficient>& output);
@@ -1863,7 +1863,7 @@ public:
   void ComputeTauSignature();
   void GetSignCharacter(Vector<Rational>& out);
   SubgroupDataWeylGroup();
-  std::string ToString(FormatExpressions* theFormat = 0);
+  std::string ToString(FormatExpressions* theFormat = nullptr);
 };
 
 class SubgroupDataRootReflections : public SubgroupDataWeylGroup {
@@ -1894,7 +1894,7 @@ public:
     this->flagIsParabolic = false;
     this->flagIsExtendedParabolic = false;
   }
-  std::string ToString(FormatExpressions* theFormat = 0);
+  std::string ToString(FormatExpressions* theFormat = nullptr);
 };
 
 class SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms {
@@ -2223,7 +2223,7 @@ public:
   coefficient& operator[](int i) const;
   bool operator<(const UDPolynomial<coefficient>& right) const;
   bool operator==(int other) const;
-  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   void AssignMinPoly(const Matrix<coefficient>& input);
   void AssignCharPoly(const Matrix<coefficient>& input); // method due to Urbain Le Verrier
 };

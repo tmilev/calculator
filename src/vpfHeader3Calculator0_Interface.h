@@ -20,7 +20,7 @@ static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file, 
 class Expression {
 private:
   void reset() {
-    this->owner = 0;
+    this->owner = nullptr;
     this->children.size = 0;
     this->theData = - 1;
   }
@@ -108,9 +108,9 @@ private:
   // If that is to happen, some sort of garbage collection will have to be implemented.
   // However, for the current calculator purposes, no such danger exists.
   public:
+  Calculator* owner;
   int theData;
   HashedList<int, MathRoutines::IntUnsignIdentity> children;
-  Calculator* owner;
   bool flagDeallocated;
 //////
   typedef bool (*FunctionAddress) (Calculator& theCommands, const Expression& input, Expression& output);
@@ -177,7 +177,7 @@ private:
   bool AssignMatrix(
     const Matrix<coefficient>& input,
     Calculator& owner,
-    Expression const* inputContext = 0,
+    Expression const* inputContext = nullptr,
     bool reduceOneRowToSequenceAndOneByOneToNonMatrix = true
   );
   bool DivisionByMeShouldBeWrittenInExponentForm() const;
@@ -225,57 +225,57 @@ private:
   }
   bool HasSameContextArgumentsNoLog() const;
   bool IsFrozen() const;
-  bool IsAtomThatFreezesArguments(std::string* outputWhichAtom = 0) const;
-  bool IsAtomWhoseExponentsAreInterpretedAsFunction(std::string* outputWhichAtom = 0) const;
+  bool IsAtomThatFreezesArguments(std::string* outputWhichAtom = nullptr) const;
+  bool IsAtomWhoseExponentsAreInterpretedAsFunction(std::string* outputWhichAtom = nullptr) const;
   bool IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const;
-  bool IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom = 0) const;
-  bool IsMatrix(int* outputNumRows = 0, int* outputNumCols = 0) const;
+  bool IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom = nullptr) const;
+  bool IsMatrix(int* outputNumRows = nullptr, int* outputNumCols = nullptr) const;
   template <typename theType>
-  bool IsMatrixGivenType(int* outputNumRows = 0, int* outputNumCols = 0, Matrix<theType>* outputMat = 0) const;
-  bool IsAtom(std::string* outputWhichOperation = 0) const;
+  bool IsMatrixGivenType(int* outputNumRows = nullptr, int* outputNumCols = nullptr, Matrix<theType>* outputMat = nullptr) const;
+  bool IsAtom(std::string* outputWhichOperation = nullptr) const;
   bool IsAtomGivenData(const std::string& desiredAtom) const;
   bool IsAtomGivenData(int desiredDataUseMinusOneForAny = - 1) const;
-  bool IsBuiltInAtom(std::string* outputWhichOperation = 0) const;
-  bool IsGoodForChainRuleFunction(std::string* outputWhichOperation = 0) const;
+  bool IsBuiltInAtom(std::string* outputWhichOperation = nullptr) const;
+  bool IsGoodForChainRuleFunction(std::string* outputWhichOperation = nullptr) const;
   bool IsIntegraLfdx(
-    Expression* differentialVariable = 0, Expression* functionToIntegrate = 0, Expression* integrationSet = 0
+    Expression* differentialVariable = nullptr, Expression* functionToIntegrate = nullptr, Expression* integrationSet = nullptr
   ) const;
   bool IsIndefiniteIntegralfdx(
-    Expression* differentialVariable = 0, Expression* functionToIntegrate = 0, Expression* integrationSet = 0
+    Expression* differentialVariable = nullptr, Expression* functionToIntegrate = nullptr, Expression* integrationSet = nullptr
   ) const;
   bool IsDefiniteIntegralOverIntervalfdx(
-    Expression* differentialVariable = 0, Expression* functionToIntegrate = 0, Expression* integrationSet = 0
+    Expression* differentialVariable = nullptr, Expression* functionToIntegrate = nullptr, Expression* integrationSet = nullptr
   ) const;
   bool IsDifferentialOneFormOneVariablE(
-    Expression* outputDifferentialOfWhat = 0, Expression* outputCoeffInFrontOfDifferential = 0
+    Expression* outputDifferentialOfWhat = nullptr, Expression* outputCoeffInFrontOfDifferential = nullptr
   ) const;
-  bool IsKnownFunctionWithComplexRange(std::string* outputWhichOperation = 0) const;
-  bool IsArithmeticOperation(std::string* outputWhichOperation = 0) const;
+  bool IsKnownFunctionWithComplexRange(std::string* outputWhichOperation = nullptr) const;
+  bool IsArithmeticOperation(std::string* outputWhichOperation = nullptr) const;
   bool IsCacheableExpression() const;
   bool IsBuiltInScalar() const;
   bool IsElementaryObject() const;
-  bool IsBuiltInTypE(std::string* outputWhichOperation = 0) const;
+  bool IsBuiltInTypE(std::string* outputWhichOperation = nullptr) const;
   bool IsBuiltInTypE(int* outputWhichType) const;
   const Expression& operator[](int n) const;
   bool IsIntervalRealLine() const;
   bool IsSequenceDoubleButNotTripleNested() const;
   bool IsSequenceNElementS(int N = - 2) const;
-  bool IsError(std::string* outputErrorMessage = 0) const;
+  bool IsError(std::string* outputErrorMessage = nullptr) const;
   bool IsContext() const;
   bool NeedsParenthesisForBaseOfExponent() const;
   bool NeedsParenthesisForMultiplication() const;
   bool NeedsParenthesisForAddition() const;
-  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(const Expression* leftNeighbor = 0) const;
+  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(const Expression* leftNeighbor = nullptr) const;
 
   int GetExpressionTreeSize() const;
   template <class theType>
   bool ConvertToType(Expression& output) const;
   template <class theType>
-  bool ConvertsToType(theType* whichElement = 0) const;
+  bool ConvertsToType(theType* whichElement = nullptr) const;
   template <class theType>
   bool IsOfType() const {
     MacroRegisterFunctionWithName("Expression::IsOfType");
-    if (this->owner == 0) {
+    if (this->owner == nullptr) {
       return false;
     }
     if (!this->StartsWith(this->GetTypeOperation<theType>())) {
@@ -304,7 +304,7 @@ private:
   template <class theType>
   bool IsOfType(theType* whichElement) const {
     MacroRegisterFunctionWithName("Expression::IsOfType");
-    if (this->owner == 0) {
+    if (this->owner == nullptr) {
       return false;
     }
     if (!this->StartsWith(this->GetTypeOperation<theType>())) {
@@ -428,9 +428,9 @@ private:
   bool MakeProducT(Calculator& owner, const Expression& left, const Expression& right);
   int GetNumCols() const;
   bool MakeSequenceCommands(Calculator& owner, List<std::string>& inputKeys, List<Expression>& inputValues);
-  bool MakeSequenceStatements(Calculator& owner, List<Expression>* inputStatements = 0);
-  bool MakeMatrix(Calculator& owner, Matrix<Expression>* inputMat = 0);
-  bool MakeSequence(Calculator& owner, List<Expression>* inputSequence = 0);
+  bool MakeSequenceStatements(Calculator& owner, List<Expression>* inputStatements = nullptr);
+  bool MakeMatrix(Calculator& owner, Matrix<Expression>* inputMat = nullptr);
+  bool MakeSequence(Calculator& owner, List<Expression>* inputSequence = nullptr);
   bool MakeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right);
   bool MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex = 2);
   bool MakeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex = 2);
@@ -467,18 +467,18 @@ private:
   bool MakeContextSSLieAlg(Calculator& owner, const SemisimpleLieAlgebra& theSSLiealg);
   bool MakeEmptyContext(Calculator& owner);
   std::string Lispify() const;
-  bool ToStringData(std::string& output, FormatExpressions* theFormat = 0) const;
+  bool ToStringData(std::string& output, FormatExpressions* theFormat = nullptr) const;
   std::string ToStringSemiFull() const;
   std::string ToStringFull() const;
   std::string ToStringAllSlidersInExpression() const;
-  std::string ToUTF8String(FormatExpressions* theFormat = 0) const;
+  std::string ToUTF8String(FormatExpressions* theFormat = nullptr) const;
   bool GetListExpressionsFromExpressionHistoryRecursiveNested(Expression& outputAppend) const;
   std::string ToStringExpressionHistoryRecursiveNested();
   std::string ToString(
-    FormatExpressions* theFormat = 0,
-    Expression* startingExpression = 0,
+    FormatExpressions* theFormat = nullptr,
+    Expression* startingExpression = nullptr,
     bool unfoldCommandEnclosures = true,
-    JSData* outputJS = 0
+    JSData* outputJS = nullptr
   ) const;
   JSData ToJSData(FormatExpressions* theFormat, const Expression& startingExpression) const;
   static unsigned int HashFunction(const Expression& input) {
@@ -487,11 +487,11 @@ private:
   unsigned int HashFunction() const {
     return this->HashFunctionRecursive(0, 1000);
   }
-  int HashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth) const {
+  unsigned int HashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth) const {
     if (RecursionDepth > MaxRecursionDepth) {
       return 0;
     }
-    int result = this->theData*SomeRandomPrimes[0];
+    unsigned int result = static_cast<unsigned>(this->theData) * SomeRandomPrimes[0];
     int numCycles = MathRoutines::Minimum(this->children.size, SomeRandomPrimesSize);
     for (int i = 0; i < numCycles; i ++) {
       result += (*this)[i].HashFunctionRecursive(RecursionDepth + 1, MaxRecursionDepth) * SomeRandomPrimes[i];
@@ -531,10 +531,10 @@ private:
   bool CheckInitializationRecursively() const;
   bool CheckConsistency() const;
   bool CheckConsistencyRecursively() const;
-  bool IsIntegerFittingInInt(int* whichInteger = 0) const;
-  bool IsSmallInteger(int* whichInteger = 0) const;
-  bool IsInteger(LargeInt* whichInteger = 0) const;
-  bool IsRational(Rational* whichRational = 0) const;
+  bool IsIntegerFittingInInt(int* whichInteger = nullptr) const;
+  bool IsSmallInteger(int* whichInteger = nullptr) const;
+  bool IsInteger(LargeInt* whichInteger = nullptr) const;
+  bool IsRational(Rational* whichRational = nullptr) const;
   bool IsAlgebraicRadical() const;
   bool IsConstantNumber() const;
   bool IsPositiveNumber() const;
@@ -543,20 +543,20 @@ private:
     double lowBound,
     double highBound,
     int numPoints,
-    double* outputYmin = 0,
-    double* outputYmax = 0,
-    Vectors<double>* outputPoints = 0
+    double* outputYmin = nullptr,
+    double* outputYmax = nullptr,
+    Vectors<double>* outputPoints = nullptr
   ) const;
-  bool EvaluatesToDouble(double* whichDouble = 0) const;
+  bool EvaluatesToDouble(double* whichDouble = nullptr) const;
   bool GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const;
   bool GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants) const;
   bool GetBoundVariables(HashedList<Expression>& outputAccumulateBoundVariables) const;
   bool EvaluatesToDoubleUnderSubstitutions(
-    const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble = 0
+    const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble = nullptr
   ) const;
   bool HasBoundVariables() const;
-  bool HasInputBoxVariables(HashedList<std::string, MathRoutines::HashString>* boxNames = 0) const;
-  bool IsMeltable(int* numResultingChildren = 0) const;
+  bool HasInputBoxVariables(HashedList<std::string, MathRoutines::HashString>* boxNames = nullptr) const;
+  bool IsMeltable(int* numResultingChildren = nullptr) const;
   bool AreEqualExcludingChildren(const Expression& other) const {
     return this->owner == other.owner &&
     this->theData == other.theData &&
@@ -636,16 +636,16 @@ class Function {
   }
   void reset(Calculator& owner) {
     this->theArgumentTypes.reset(owner);
-    this->theFunction = 0;
+    this->theFunction = nullptr;
     this->flagIsInner = true;
   }
   bool inputFitsMyInnerType(const Expression& input);
   Function() {
-    this->theFunction = 0;
+    this->theFunction = nullptr;
     this->indexAmongOperationHandlers = - 1;
     this->indexOperation = - 1;
     this->indexOperationParentThatBansHandler = - 1;
-    this->owner = 0;
+    this->owner = nullptr;
     this->flagIsCompositeHandler = false;
     this->flagDisabledByUserDefaultValue = false;
     this->flagDisabledByUser = false;
@@ -671,7 +671,7 @@ class Function {
     this->theFunction = functionPointer;
     this->theDescription = description;
     this->theExample = inputExample;
-    if (inputArgTypes != 0) {
+    if (inputArgTypes != nullptr) {
       this->theArgumentTypes = *inputArgTypes;
     }
     this->flagIsInner = inputflagIsInner;
@@ -687,7 +687,7 @@ class Function {
     return input.HashFunction();
   }
   unsigned int HashFunction() const {
-    return (unsigned int)(uintptr_t)this->theFunction;
+    return static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->theFunction));
   }
 };
 
@@ -696,9 +696,9 @@ class SyntacticElement {
   int controlIndex;
   int numNonBoundVariablesInherited;
   int numBoundVariablesInherited;
-  std::string errorString;
   Expression theData;
   List<Expression> dataList;
+  std::string errorString;
   std::string ToStringHumanReadable(Calculator& theBoss, bool includeLispifiedExpressions) const;
   SyntacticElement() {
     this->controlIndex = 0; //controlIndex = 0 *MUST* point to the empty control sequence.
@@ -928,9 +928,9 @@ struct ExpressionTripleCrunchers {
   }
   static unsigned int HashFunction(const ExpressionTripleCrunchers& input) {
     return
-    (unsigned int) input.leftType * SomeRandomPrimes[0] +
-    (unsigned int) input.rightType * SomeRandomPrimes[1] +
-    (unsigned int) input.theOp * SomeRandomPrimes[2];
+      static_cast<unsigned int>(input.leftType) * SomeRandomPrimes[0] +
+      static_cast<unsigned int>(input.rightType) * SomeRandomPrimes[1] +
+      static_cast<unsigned int>(input.theOp) * SomeRandomPrimes[2];
   }
 };
 
@@ -1184,7 +1184,7 @@ public:
   void ExpressionHistoryStackAdd();
   void ExpressionHistoryStackPop();
   void RegisterCalculatorFunctionIdentifier(const Function& theFun, int indexOp, int functionType, int theFunIndex);
-  std::string ToStringSemismipleLieAlgebraLinksFromHD(const DynkinType& theType, FormatExpressions* theFormat = 0);
+  std::string ToStringSemismipleLieAlgebraLinksFromHD(const DynkinType& theType, FormatExpressions* theFormat = nullptr);
   //void GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat);
   bool IsBoundVarInContext(int inputOp);
   bool IsNonBoundVarInContext(int inputOp);
@@ -1200,7 +1200,7 @@ public:
   const List<Function>* GetOperationCompositeHandlers(int theOp) {
     int theIndex = this->operationsComposite.GetIndex(this->GetOperations()[theOp]);
     if (theIndex == - 1) {
-      return 0;
+      return nullptr;
     }
     return &this->operationsCompositeHandlers[theIndex];
   }
@@ -1856,13 +1856,13 @@ public:
     const Expression& thePattern,
     Expression& theExpression,
     MapLisT<Expression, Expression>& bufferPairs,
-    const Expression* condition = 0,
-    std::stringstream* theLog = 0
+    const Expression* condition = nullptr,
+    std::stringstream* theLog = nullptr
   );
   bool ProcessOneExpressionOnePatternOneSub(
     const Expression& thePattern,
     Expression& theExpression,
-    MapLisT<Expression, Expression>& bufferPairs, std::stringstream* theLog = 0
+    MapLisT<Expression, Expression>& bufferPairs, std::stringstream* theLog = nullptr
   );
   static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output) {
     if (&input == &output) {
@@ -1879,7 +1879,7 @@ public:
       output = input;
       return true;
     }
-    if (theFun == 0) {
+    if (theFun == nullptr) {
       return false;
     }
     if (!theFun(*this, input, output)) {
@@ -1914,7 +1914,7 @@ public:
     const Expression& thePattern,
     const Expression& input,
     MapLisT<Expression, Expression>& matchedExpressions,
-    std::stringstream* commentsGeneral = 0
+    std::stringstream* commentsGeneral = nullptr
   );
   static bool innerLogEvaluationStepsHumanReadableNested(
     Calculator& theCommands, const Expression& input, Expression& output
@@ -2023,9 +2023,9 @@ public:
   bool GetMatriXFromArguments(
     const Expression& theExpression,
     Matrix<theType>& outputMat,
-    Expression* inputOutputStartingContext = 0,
+    Expression* inputOutputStartingContext = nullptr,
     int targetNumColsNonMandatory = - 1,
-    Expression::FunctionAddress conversionFunction = 0
+    Expression::FunctionAddress conversionFunction = nullptr
   ) {
     Expression tempE = theExpression;
     if (tempE.IsLisT()) {
@@ -2037,17 +2037,17 @@ public:
   bool GetMatrix(
     const Expression& input,
     Matrix<theType>& outputMat,
-    Expression* inputOutputStartingContext = 0,
+    Expression* inputOutputStartingContext = nullptr,
     int targetNumColsNonMandatory = - 1,
-    Expression::FunctionAddress conversionFunction = 0
+    Expression::FunctionAddress conversionFunction = nullptr
   );
   template <class theType>
   bool GetVectorFromFunctionArguments(
     const Expression& input,
     Vector<theType>& output,
-    Expression* inputOutputStartingContext = 0,
+    Expression* inputOutputStartingContext = nullptr,
     int targetDimNonMandatory = - 1,
-    Expression::FunctionAddress conversionFunction = 0
+    Expression::FunctionAddress conversionFunction = nullptr
   ) {
     Expression tempE = input;
     if (tempE.IsLisT()) {
@@ -2057,7 +2057,7 @@ public:
   }
   bool GetSumProductsExpressions(const Expression& inputSum, List<List<Expression> >& outputSumMultiplicands);
   bool GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory = - 1);
-  bool ConvertExpressionsToCommonContext(List<Expression>& inputOutputEs, Expression* inputOutputStartingContext = 0);
+  bool ConvertExpressionsToCommonContext(List<Expression>& inputOutputEs, Expression* inputOutputStartingContext = nullptr);
   bool GetVectoRInt(const Expression& input, List<int>& output);
   bool GetVectorLargeIntFromFunctionArguments(const Expression& input, List<LargeInt>& output);
   bool GetMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols = - 1);
@@ -2070,9 +2070,9 @@ public:
   bool GetVectoR(
     const Expression& input,
     Vector<theType>& output,
-    Expression* inputOutputStartingContext = 0,
+    Expression* inputOutputStartingContext = nullptr,
     int targetDimNonMandatory = - 1,
-    Expression::FunctionAddress conversionFunction = 0
+    Expression::FunctionAddress conversionFunction = nullptr
   );
   static bool innerFunctionToMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGenerateMultiplicativelyClosedSet(
@@ -2218,7 +2218,7 @@ public:
     Expression& output,
     Vector<coefficient>& outputWeight,
     Selection& outputInducingSel,
-    Expression* outputContext = 0
+    Expression* outputContext = nullptr
   );
   static bool innerPrintZnEnumeration(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNot(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2448,13 +2448,13 @@ public:
     Calculator& theCommands,
     const Polynomial<coefficient>& input,
     Expression& output,
-    Expression* inputContext = 0
+    Expression* inputContext = nullptr
   );
   static bool innerExpressionFromRF(
     Calculator& theCommands,
     const RationalFunctionOld& input,
     Expression& output,
-    Expression* inputContext = 0
+    Expression* inputContext = nullptr
   );
   static bool innerLoadKey(
     Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output
@@ -2463,14 +2463,14 @@ public:
     Calculator& theCommands,
     const Expression& input,
     MapLisT<std::string, Expression, MathRoutines::HashString>& output,
-    std::stringstream* commentsOnFailure = 0,
+    std::stringstream* commentsOnFailure = nullptr,
     bool allowFailure = false
   );
   static bool innerLoadKeysFromStatementList(
     Calculator& theCommands,
     const Expression& input,
     MapLisT<Expression, Expression>& output,
-    std::stringstream* commentsOnFailure = 0,
+    std::stringstream* commentsOnFailure = nullptr,
     bool allowFailure = false
   );
   static bool innerStoreSemisimpleSubalgebras(
@@ -2485,7 +2485,7 @@ public:
     Calculator& theCommands,
     const ElementUniversalEnveloping<RationalFunctionOld>& input,
     Expression& output,
-    Expression* inputContext = 0
+    Expression* inputContext = nullptr
   );
   static bool innerStoreCandidateSA(Calculator& theCommands, const CandidateSSSubalgebra& input, Expression& output);
   static bool innerExpressionFromDynkinType(Calculator& theCommands, const DynkinType& input, Expression& output);
@@ -2522,7 +2522,7 @@ public:
     Calculator& theCommands,
     const MonomialUniversalEnveloping<RationalFunctionOld>& input,
     Expression& output,
-    Expression* inputContext = 0
+    Expression* inputContext = nullptr
   );
   static bool innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);
   template <class coefficient>
@@ -2584,7 +2584,7 @@ bool Calculator::GetMatrix(
   convertedEs.init(nonConvertedEs.NumRows, nonConvertedEs.NumCols);
   Expression theContext;
   theContext.MakeEmptyContext(*this);
-  if (inputOutputStartingContext != 0) {
+  if (inputOutputStartingContext != nullptr) {
     if (inputOutputStartingContext->IsContext()) {
       theContext =*inputOutputStartingContext;
     }
@@ -2612,7 +2612,7 @@ bool Calculator::GetMatrix(
       outputMat(i, j) = convertedEs(i, j).GetValue<theType>();
     }
   }
-  if (inputOutputStartingContext != 0) {
+  if (inputOutputStartingContext != nullptr) {
     *inputOutputStartingContext = theContext;
   }
   return true;
@@ -2655,12 +2655,25 @@ bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expre
   return this->MakeOXdotsX(theCommands, theCommands.opPlus(), summandsWithCoeff);
 }
 
+template <typename theType>
+int Expression::AddObjectReturnIndex(const theType& inputValue) const {
+  (void) inputValue;
+  crash << "Please implement AddObjectReturnIndex for the current type. " << crash;
+  return - 1;
+}
+
 template <class theType>
 bool Expression::AssignValueWithContext(const theType& inputValue, const Expression& theContext, Calculator& owner) {
   this->reset(owner, 3);
   this->AddChildAtomOnTop(this->GetTypeOperation<theType>());
   this->AddChildOnTop(theContext);
   return this->AddChildAtomOnTop(this->AddObjectReturnIndex(inputValue));
+}
+
+template<class theType>
+int Expression::GetTypeOperation() const {
+  crash << "Please implement GetTypeOperation for the current type. " << crash;
+  return - 1;
 }
 
 template <class theType>
@@ -2791,7 +2804,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
   if (input.IsListNElements(4)) {
     Vector<Rational> parabolicSel;
     const Expression& rightE = input[3];
-    if (!theCommands.GetVectoR<Rational>(rightE, parabolicSel, &outputHWContext, ambientSSalgebra->GetRank(), 0)) {
+    if (!theCommands.GetVectoR<Rational>(rightE, parabolicSel, &outputHWContext, ambientSSalgebra->GetRank(), nullptr)) {
       std::stringstream tempStream;
       tempStream << "Failed to convert the third argument of HWV to a list of " << ambientSSalgebra->GetRank()
       << " rationals. The third argument you gave is " << rightE.ToString() << ".";
@@ -2828,7 +2841,7 @@ bool Expression::AssignMatrix(
   Expression currentElt;
   for (int i = 0; i < input.NumRows; i ++) {
     for (int j = 0; j < input.NumCols; j ++) {
-      if (inputContext == 0) {
+      if (inputContext == nullptr) {
         currentElt.AssignValue(input(i, j), owner);
       } else {
         currentElt.AssignValueWithContext(input(i, j), *inputContext, owner);
@@ -2843,10 +2856,10 @@ template <typename theType>
 bool Expression::IsMatrixGivenType(int* outputNumRows, int* outputNumCols, Matrix<theType>* outputMat) const {
   MacroRegisterFunctionWithName("Expression::IsMatrixGivenType");
   int numRows = - 1, numCols = - 1;
-  if (outputNumRows == 0) {
+  if (outputNumRows == nullptr) {
     outputNumRows = &numRows;
   }
-  if (outputNumCols == 0) {
+  if (outputNumCols == nullptr) {
     outputNumCols = &numCols;
   }
   if (!this->IsMatrix(outputNumRows, outputNumCols)) {

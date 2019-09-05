@@ -450,7 +450,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperimen
       return false;
     }
     int rootIndex = this->owner->theOwner->GetRootIndexFromGenerator(currentElt[0].theGeneratorIndex);
-    Vector<Rational>& currentRoot = theWeyl.RootSystem[rootIndex];
+    const Vector<Rational>& currentRoot = theWeyl.RootSystem[rootIndex];
     for (int j = 0; j < thePower; j ++) {
       currentWeight += currentRoot;
       testWeight = currentWeight;
@@ -832,6 +832,11 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
       << this->weightsNilradicalSmall[i].ToString() << ". " << crash;
     }
   }
+}
+
+branchingData::branchingData() {
+  this->flagUseNilWeightGeneratorOrder = false;
+  this->flagAscendingGeneratorOrder = false;
 }
 
 void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {

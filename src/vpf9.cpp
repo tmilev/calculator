@@ -77,11 +77,11 @@ unsigned long long int Rational::TotalSmallGCDcalls = 0;
 unsigned long long int Rational::TotalSmallMultiplications = 0;
 
 int GlobalVariables::CallSystemNoOutput(const std::string& systemCommand, logger* theLog) {
-  if (this->pointerCallSystemNoOutput == 0) {
+  if (this->pointerCallSystemNoOutput == nullptr) {
     return - 1;
   }
   int exitCode = this->pointerCallSystemNoOutput(systemCommand);
-  if (exitCode != 0 && theLog != 0) {
+  if (exitCode != 0 && theLog != nullptr) {
     *theLog << logger::red << "System command: " << systemCommand << " exited with " << exitCode << ". " << logger::endL;
   }
   return exitCode;

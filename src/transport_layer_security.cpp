@@ -617,6 +617,7 @@ void TransportLayerSecurityServer::initializeCipherSuites() {
   this->extensionNames.SetKeyValue(SSLContent::tokensExtension::ellipticCurvePointFormat, "elliptic curve point format");
   this->extensionNames.SetKeyValue(SSLContent::tokensExtension::requestOnlineCertificateStatus, "request online certificate status");
   this->extensionNames.SetKeyValue(SSLContent::tokensExtension::serverName, "server name");
+  this->extensionNames.SetKeyValue(SSLContent::tokensExtension::extendedMasterSecret, "extended master secret");
 }
 
 void TransportLayerSecurityServer::initialize() {
@@ -1025,7 +1026,7 @@ void SSLHelloExtension::WriteBytes(List<unsigned char>& output) {
 void SSLHelloExtension::MakeGrease(SSLContent* inputOwner) {
   this->owner = inputOwner;
   this->content.SetSize(0);
-  this->theType = (14 * 16 + 10) * 256 + (14 * 16 + 10); // 0xdada;
+  this->theType = (13 * 16 + 10) * 256 + (13 * 16 + 10); // 0xdada;
 }
 
 void SSLHelloExtension::MakeExtendedMasterSecret(SSLContent* inputOwner) {
@@ -1449,8 +1450,8 @@ std::string CipherSuiteSpecification::ToString() const {
   return out.str();
 }
 
-void SSLContent::PrepareServerHello(SSLContent& clientHello) {
-  MacroRegisterFunctionWithName("SSLContent::PrepareServerHello");
+void SSLContent::PrepareServerHello1Start(SSLContent& clientHello) {
+  MacroRegisterFunctionWithName("SSLContent::PrepareServerHello1Start");
   this->CheckInitialization();
   this->version = 3 * 256 + 3;
   this->theType = SSLContent::tokens::serverHello;
@@ -1489,17 +1490,17 @@ void SSLContent::PrepareServerHello(SSLContent& clientHello) {
   }
 }
 
-void SSLRecord::PrepareServerHello(SSLRecord& clientHello) {
+void SSLRecord::PrepareServerHello1Start(SSLRecord& clientHello) {
   this->hello.resetExceptOwner();
   this->theType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
-  this->hello.PrepareServerHello(clientHello.hello);
+  this->hello.PrepareServerHello1Start(clientHello.hello);
 }
 
 bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::stringstream *commentsOnFailure) {
   (void) commentsOnFailure;
   (void) inputSocketID;
-  this->lastToWrite.PrepareServerHello(this->lastRead);
+  this->lastToWrite.PrepareServerHello1Start(this->lastRead);
   if (this->lastToWrite.hello.theType != SSLContent::tokens::serverHello) {
     crash << "DEBUG: this should be so" << crash;
   }

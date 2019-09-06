@@ -173,7 +173,12 @@ public:
   bool DecodeSupportedCiphers(std::stringstream* commentsOnFailure);
   bool DecodeExtensions(std::stringstream* commentsOnFailure);
   bool ProcessExtensions(std::stringstream* commentsOnFailure);
-  void PrepareServerHello(SSLContent& clientHello);
+  // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art059
+  void PrepareServerHello1Start(SSLContent& clientHello);
+  void PrepareServerHello2Certificate(SSLContent& clientHello);
+  // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art060
+  void PrepareServerHello3SecretNegotiation(SSLContent& clientHello);
+
   JSData ToJSON() const;
   std::string ToStringVersion() const;
   // As the name suggests, this will append the output bytes, without
@@ -219,7 +224,8 @@ public:
   std::string ToBytes() const;
   std::string ToString() const;
   std::string ToStringType() const;
-  void PrepareServerHello(SSLRecord& clientHello);
+  void PrepareServerHello1Start(SSLRecord& clientHello);
+  void PrepareServerHello2Certificate(SSLRecord& clientHello);
   void WriteBytes(List<unsigned char>& output) const;
   static bool ReadTwoByteInt(
     const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure

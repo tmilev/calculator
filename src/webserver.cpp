@@ -609,7 +609,7 @@ std::string WebWorker::GetDatabaseDeleteOneItem() {
 
 bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments) {
   MacroRegisterFunctionWithName("WebWorker::ExtractArgumentsFromCookies");
-  MapLisT<std::string, std::string, MathRoutines::HashString> newlyFoundArgs;
+  MapList<std::string, std::string, MathRoutines::HashString> newlyFoundArgs;
   bool result = true;
   for (int i = 0; i < this->cookies.size; i ++) {
     if (!HtmlRoutines::ChopCGIStringAppend(this->cookies[i], newlyFoundArgs, argumentProcessingFailureComments)) {
@@ -660,7 +660,7 @@ bool WebWorker::ExtractArgumentsFromMessage(
     argumentProcessingFailureComments << "Error: input string encoded too many times";
     return false;
   }
-  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs =
+  MapList<std::string, std::string, MathRoutines::HashString>& theArgs =
   theGlobalVariables.webArguments;
   if (!HtmlRoutines::ChopCGIStringAppend(input, theArgs, argumentProcessingFailureComments))
     return false;
@@ -685,7 +685,7 @@ bool WebWorker::ExtractArgumentsFromMessage(
 bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComments, std::stringstream* comments) {
   MacroRegisterFunctionWithName("WebWorker::Login");
   theGlobalVariables.flagLoggedIn = false;
-  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
+  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theUser.username = HtmlRoutines::ConvertURLStringToNormal(
     theGlobalVariables.GetWebInput("username"), true
@@ -4995,9 +4995,9 @@ void WebServer::InitializeGlobalVariables() {
   // this would be fatal as proper logout resets
   // the authentication tokens.
 
-  MapLisT<std::string, std::string, MathRoutines::HashString>&
+  MapList<std::string, std::string, MathRoutines::HashString>&
   folderSubstitutionsNonSensitive = FileOperations::FolderVirtualLinksNonSensitive();
-  MapLisT<std::string, std::string, MathRoutines::HashString>&
+  MapList<std::string, std::string, MathRoutines::HashString>&
   folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
   FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
   folderSubstitutionsNonSensitive.Clear();

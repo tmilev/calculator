@@ -612,6 +612,11 @@ void TransportLayerSecurityServer::initializeCipherSuites() {
   this->cipherSuiteNames.SetKeyValue(0x0035, "RSA/RSA/AES 256/CBC/SHA"             ); // (RFC 5246)
   this->cipherSuiteNames.SetKeyValue(0x000a, "RSA/RSA/3DES/CBC/SHA"                ); // (RFC 5246)
   this->cipherSuiteNames.SetKeyValue(0,      "unknown"                             );
+
+  this->extensionNames.SetKeyValue(SSLContent::tokensExtension::renegotiateConnection, "renegotiate");
+  this->extensionNames.SetKeyValue(SSLContent::tokensExtension::ellipticCurvePointFormat, "elliptic curve point format");
+  this->extensionNames.SetKeyValue(SSLContent::tokensExtension::requestOnlineCertificateStatus, "request online certificate status");
+  this->extensionNames.SetKeyValue(SSLContent::tokensExtension::serverName, "server name");
 }
 
 void TransportLayerSecurityServer::initialize() {
@@ -736,17 +741,12 @@ JSData SSLContent::ToJSON() const {
   result["cipherSuites"] = ciphers;
   result["extensionsLength"] = this->extensionsLength;
   result["compressionMethod"] = Crypto::ConvertIntToHex(this->compressionMethod, 2);
-  JSData extensions;
-  extensions.theType = JSData::token::tokenArray;
+  JSData extensionsObject;
+  extensionsObject.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->extensions.size; i ++) {
-    std::stringstream hex;
-    hex << std::hex << std::setfill('0') << std::setw(4) << this->extensions[i].theType;
-    JSData extension;
-    extension["type"] = hex.str();
-    extension["data"] = Crypto::ConvertListUnsignedCharsToHex(this->extensions[i].content, 0, false);
-    extensions.theList.AddOnTop(extension);
+    extensionsObject.theList.AddOnTop(this->extensions[i].ToJSON());
   }
-  result["extensions"] = extensions;
+  result["extensions"] = extensionsObject;
   if (this->renegotiationCharacters.size > 0) {
     result["renegotiationCharacters"] = Crypto::ConvertListUnsignedCharsToHex(this->renegotiationCharacters, 0, false);
   }
@@ -1022,8 +1022,58 @@ void SSLHelloExtension::WriteBytes(List<unsigned char>& output) {
   SSLRecord::WriteTwoByteLengthFollowedByBytes(this->content, output);
 }
 
+void SSLHelloExtension::MakeGrease(SSLContent* inputOwner) {
+  this->owner = inputOwner;
+  this->content.SetSize(0);
+  this->theType = (14 * 16 + 10) * 256 + (14 * 16 + 10); // 0xdada;
+}
+
+void SSLHelloExtension::MakeExtendedMasterSecret(SSLContent* inputOwner) {
+  this->owner = inputOwner;
+  this->content.SetSize(0);
+  this->theType = SSLContent::tokensExtension::extendedMasterSecret;
+}
+
+void SSLHelloExtension::MakeEllipticCurvePointFormat(SSLContent* inputOwner) {
+  this->owner = inputOwner;
+  this->theType = SSLContent::tokensExtension::ellipticCurvePointFormat;
+  this->content.SetSize(0);
+  this->content.AddOnTop(0);
+  this->content.AddOnTop(4);
+  this->content.AddOnTop(3);
+  this->content.AddOnTop(0);
+  this->content.AddOnTop(1);
+  this->content.AddOnTop(2);
+}
+
+bool SSLHelloExtension::CheckInitialization() {
+  if (this->owner == nullptr) {
+    crash << "Non-initialized owner of ssl hello extension. " << crash;
+  }
+  return true;
+}
+
+JSData SSLHelloExtension::ToJSON() {
+  JSData result;
+  result.theType = JSData::token::tokenObject;
+  result["name"] = this->Name();
+  std::stringstream hex;
+  hex << std::hex << std::setfill('0') << std::setw(4) << this->theType;
+  result["type"] = hex.str();
+  result["data"] = Crypto::ConvertListUnsignedCharsToHex(this->content, 0, false);
+  return result;
+}
+
+std::string SSLHelloExtension::Name() {
+  this->CheckInitialization();
+  if (this->owner->owner->owner->extensionNames.Contains(this->theType)) {
+    return this->owner->owner->owner->extensionNames.GetValueConstCrashIfNotPresent(this->theType);
+  }
+  return "unknown";
+}
+
 bool SSLHelloExtension::ProcessMe(std::stringstream* commentsOnError) {
-  if (this->theType == 0xff01) {
+  if (this->theType == SSLContent::tokensExtension::renegotiateConnection) {
     if (this->content.size == 1) {
       if (this->content[0] == 0) {
         this->owner->flagRenegotiate = true;
@@ -1031,9 +1081,9 @@ bool SSLHelloExtension::ProcessMe(std::stringstream* commentsOnError) {
       }
     }
   }
-  if (this->theType == 0) {
+  if (this->theType == SSLContent::tokensExtension::serverName) {
     if (!SSLRecord::ReadTwoByteLengthFollowedByBytesDontOutputOffset(
-      this->content, 0, nullptr, &this->owner->renegotiationCharacters,  commentsOnError
+      this->content, 0, nullptr, &this->owner->renegotiationCharacters, commentsOnError
     )) {
       if (commentsOnError != nullptr) {
         *commentsOnError << "Failed to read server name extension. ";
@@ -1042,18 +1092,14 @@ bool SSLHelloExtension::ProcessMe(std::stringstream* commentsOnError) {
     }
     return true;
   }
-  if (this->theType == 5) {
+  if (this->theType == SSLContent::tokensExtension::requestOnlineCertificateStatus) {
     this->owner->flagRequestOnlineCertificateStatusProtocol = true;
     return true;
   }
-  if (this->theType == 18) {
+  if (this->theType == SSLContent::tokensExtension::requestSignedCertificateTimestamp) {
     this->owner->flagRequestSignedCertificateTimestamp = true;
     return true;
   }
-
-  //if (commentsOnError != 0) {
-  //  *commentsOnError << "Bad ssl hello extension. ";
-  //}
   return true;
 }
 
@@ -1411,12 +1457,16 @@ void SSLContent::PrepareServerHello(SSLContent& clientHello) {
   this->compressionMethod = clientHello.compressionMethod;
   Crypto::GetRandomBytesSecure(this->RandomBytes, this->LengthRandomBytesInSSLHello);
   Crypto::computeSha256(this->RandomBytes, this->sessionId);
-  //this->extensions = clientHello.extensions;
-  for (int i = 0; i < clientHello.extensions.size; i ++) {
-    this->extensions.AddOnTop(clientHello.extensions[i]);
-  }
-  MapLisT<int, CipherSuiteSpecification, MathRoutines::IntUnsignIdentity>& suites =
+  MapList<int, CipherSuiteSpecification, MathRoutines::IntUnsignIdentity>& suites =
   this->owner->owner->supportedCiphers;
+  this->extensions.SetSize(0);
+  SSLHelloExtension newExtension;
+  newExtension.MakeGrease(this);
+  this->extensions.AddOnTop(newExtension);
+  newExtension.MakeExtendedMasterSecret(this);
+  this->extensions.AddOnTop(newExtension);
+  newExtension.MakeEllipticCurvePointFormat(this);
+  this->extensions.AddOnTop(newExtension);
   int bestIndex = suites.size();
   for (int i = 0; i < clientHello.declaredCiphers.size; i ++) {
     CipherSuiteSpecification& cipher = clientHello.declaredCiphers[i];
@@ -1459,9 +1509,10 @@ bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::st
   //logWorker << "Incoming message:\n" << this->lastRead.hello.getStringHighlighter()
   //<< Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 0, false)
   //<< logger::endL;
-  logWorker << "Bytes written:\n"
+  logWorker << "DEBUG: Bytes written:\n"
   << this->lastToWrite.hello.getStringHighlighter()
   << Crypto::ConvertListUnsignedCharsToHex(this->lastToWrite.body, 0, false) << logger::endL;
+  logWorker << "DEBUG: Record written:\n" << this->lastToWrite.ToString() << logger::endL;
   if (!this->WriteBytesOnce(commentsOnFailure)) {
     logWorker << "Error replying to client hello. ";
     if (commentsOnFailure != nullptr) {

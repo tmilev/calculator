@@ -13,7 +13,7 @@ class JSData;
 class HtmlRoutines {
 public:
 public:
-  static MapLisT<std::string, std::string, MathRoutines::HashString> preLoadedFiles;
+  static MapList<std::string, std::string, MathRoutines::HashString> preLoadedFiles;
   static std::stringstream outputStream;
   static int GlobalMathSpanID;
   static int GlobalCanvasID;
@@ -118,17 +118,17 @@ public:
   static bool AccountOneInputCGIString(
     const std::string& fieldName,
     const std::string& fieldValue,
-    MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
+    MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
     std::stringstream& commentsOnFailure
   );
   static bool ChopCGIString(
     const std::string& input,
-    MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
+    MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
     std::stringstream& commentsOnFailure
   );
   static bool ChopCGIStringAppend(
     const std::string& input,
-    MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
+    MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
     std::stringstream& commentsOnFailure
   );
   static void ElementToStringTooltip(

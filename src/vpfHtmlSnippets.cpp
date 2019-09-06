@@ -9,7 +9,7 @@
 
 ProjectInformationInstance projectInfoInstanceHtmlSnippets(__FILE__, "Html Snippets.");
 
-MapLisT<std::string, std::string, MathRoutines::HashString> HtmlRoutines::preLoadedFiles;
+MapList<std::string, std::string, MathRoutines::HashString> HtmlRoutines::preLoadedFiles;
 
 std::string HtmlRoutines::gitRepository = "https://github.com/tmilev/calculator";
 
@@ -306,7 +306,7 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
   if (recursionDepth > 50) {
     return input;
   }
-  MapLisT<std::string, std::string, MathRoutines::HashString> currentMap;
+  MapList<std::string, std::string, MathRoutines::HashString> currentMap;
   std::stringstream notUsed;
   if (!HtmlRoutines::ChopCGIString(input, currentMap, notUsed)) {
     return input;
@@ -383,7 +383,7 @@ std::string HtmlRoutines::GetJavascriptMathjax(const std::string& baseFolder) {
 
 bool HtmlRoutines::AccountOneInputCGIString(
   const std::string& fieldName, const std::string& fieldValue,
-  MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
+  MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::AccountOneInputCGIString");
@@ -404,7 +404,7 @@ bool HtmlRoutines::AccountOneInputCGIString(
 
 bool HtmlRoutines::ChopCGIString(
   const std::string& input,
-  MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
+  MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIString");
@@ -415,7 +415,7 @@ bool HtmlRoutines::ChopCGIString(
 
 bool HtmlRoutines::ChopCGIStringAppend(
   const std::string& input,
-  MapLisT<std::string, std::string, MathRoutines::HashString>& outputMap,
+  MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIStringAppend");

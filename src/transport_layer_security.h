@@ -105,9 +105,15 @@ public:
   SSLContent* owner;
   List<unsigned char> content;
   int theType;
+  std::string Name();
   SSLHelloExtension();
+  JSData ToJSON();
+  bool CheckInitialization();
   bool ProcessMe(std::stringstream* commentsOnError);
   void WriteBytes(List<unsigned char>& output);
+  void MakeEllipticCurvePointFormat(SSLContent* inputOwner);
+  void MakeExtendedMasterSecret(SSLContent* inputOwner);
+  void MakeGrease(SSLContent* inputOwner);
 };
 
 // SSL client hello helpful links.
@@ -149,6 +155,16 @@ public:
     static const unsigned char clientKeyExchange = 16; //0x10
     static const unsigned char finished = 20; //0x14
   };
+  class tokensExtension {
+  public:
+    static const unsigned int renegotiateConnection = 255 * 256 + 1; // 0xff01
+    static const unsigned int ellipticCurvePointFormat = 11; // 0x000b
+    static const unsigned int requestOnlineCertificateStatus = 5; //0x0005
+    static const unsigned int requestSignedCertificateTimestamp = 18; // 0x0012
+    static const unsigned int serverName = 0; // 0x0000
+    static const unsigned int extendedMasterSecret = 23; // 0x0017
+  };
+
   SSLContent();
   void resetExceptOwner();
   bool CheckInitialization() const;
@@ -287,15 +303,15 @@ public:
 class TransportLayerSecurityServer {
 public:
   // Ordered by preference (lower index = more preferred):
-  MapLisT<int, std::string, MathRoutines::IntUnsignIdentity> cipherSuiteNames;
-  MapLisT<int, CipherSuiteSpecification, MathRoutines::IntUnsignIdentity> supportedCiphers;
+  MapList<int, std::string, MathRoutines::IntUnsignIdentity> cipherSuiteNames;
+  MapList<int, CipherSuiteSpecification, MathRoutines::IntUnsignIdentity> supportedCiphers;
+  MapList<int, std::string, MathRoutines::IntUnsignIdentity> extensionNames;
   int socketId;
   int64_t millisecondsTimeOut;
   int64_t millisecondsDefaultTimeOut;
   int defaultBufferCapacity;
   SSLRecord lastRead;
   SSLRecord lastToWrite;
-  HashedList<CipherSuiteSpecification> supportedCiphersInOrderOfPreference;
   CipherSuiteSpecification GetCipherCrashIfUnknown(int inputId);
   void AddSupportedCipher(int inputId);
   void initialize();

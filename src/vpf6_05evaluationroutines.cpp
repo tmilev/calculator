@@ -177,7 +177,7 @@ bool Calculator::outerStandardFunction(
 }
 
 bool Calculator::ExpressionMatchesPattern(
-  const Expression& thePattern, const Expression& input, MapLisT<Expression, Expression>& matchedExpressions,
+  const Expression& thePattern, const Expression& input, MapList<Expression, Expression>& matchedExpressions,
   std::stringstream* commentsGeneral
 ) {
   MacroRegisterFunctionWithName("Calculator::ExpressionMatchesPattern");
@@ -685,7 +685,7 @@ bool Calculator::EvaluateExpression(
       if (theCommands.flagLogEvaluatioN) {
         beforePatternMatch = output;
       }
-      MapLisT<Expression, Expression> bufferPairs;
+      MapList<Expression, Expression> bufferPairs;
       std::stringstream* theLog = theCommands.flagLogPatternMatching ? &theCommands.Comments : 0;
       if (theCommands.ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, theLog)) {
         ReductionOcurred = true;
@@ -714,7 +714,7 @@ bool Calculator::EvaluateExpression(
 Expression* Calculator::PatternMatch(
   const Expression& thePattern,
   Expression& theExpression,
-  MapLisT<Expression, Expression>& bufferPairs,
+  MapList<Expression, Expression>& bufferPairs,
   const Expression* condition,
   std::stringstream* theLog
 ) {
@@ -761,7 +761,7 @@ Expression* Calculator::PatternMatch(
   return 0;
 }
 
-void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapLisT<Expression, Expression>& matchedPairs) {
+void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapList<Expression, Expression>& matchedPairs) {
   MacroRegisterFunctionWithName("Calculator::SpecializeBoundVars");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (toBeSubbedIn.IsListOfTwoAtomsStartingWith(this->opBind())) {
@@ -783,7 +783,7 @@ void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapLisT<Expressio
 bool Calculator::ProcessOneExpressionOnePatternOneSub(
   const Expression& thePattern,
   Expression& theExpression,
-  MapLisT<Expression, Expression>& bufferPairs,
+  MapList<Expression, Expression>& bufferPairs,
   std::stringstream* theLog
 ) {
   MacroRegisterFunctionWithName("Calculator::ProcessOneExpressionOnePatternOneSub");

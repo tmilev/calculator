@@ -19,11 +19,11 @@ public:
   static HashedList<std::string, MathRoutines::HashString>&
   FolderVirtualLinksToWhichWeAppendTimeAndBuildHash();
 
-  static MapLisT<std::string, std::string, MathRoutines::HashString>&
+  static MapList<std::string, std::string, MathRoutines::HashString>&
   FolderVirtualLinksNonSensitive();
-  static MapLisT<std::string, std::string, MathRoutines::HashString>&
+  static MapList<std::string, std::string, MathRoutines::HashString>&
   FolderVirtualLinksSensitive(); //<- admin access only
-  static MapLisT<std::string, std::string, MathRoutines::HashString>&
+  static MapList<std::string, std::string, MathRoutines::HashString>&
   FolderVirtualLinksULTRASensitive(); //<- no access allowed through web server
 
   static List<bool> safeFileCharacters;

@@ -24,7 +24,7 @@ struct MeshTriangles {
   double minTriangleSideAsPercentOfWidthPlusHeight;
   List<bool> trianglesUsed;
   List<List<Vector<double> > > theTriangles;
-  MapLisT<Vector<double>, double, MathRoutines::HashVectorDoubles> theEvaluatedPoints;
+  MapList<Vector<double>, double, MathRoutines::HashVectorDoubles> theEvaluatedPoints;
   HashedList<Expression> knownEs;
   List<double> knownValues;
   Vector<double> lowerLeftCorner, upperRightCorner;
@@ -2062,7 +2062,7 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
       }
     }
   }
-  MapLisT<std::string, Expression, MathRoutines::HashString> theKeys;
+  MapList<std::string, Expression, MathRoutines::HashString> theKeys;
   if (CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theKeys, &theCommands.Comments, true)) {
     if (theKeys.Contains("color1")) {
       thePlot.colorUV = theKeys.GetValueCreate("color1").ToString();
@@ -2070,7 +2070,7 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
     if (theKeys.Contains("color2")) {
       thePlot.colorVU = theKeys.GetValueCreate("color2").ToString();
     }
-    MapLisT<std::string, std::string, MathRoutines::HashString> keysToConvert;
+    MapList<std::string, std::string, MathRoutines::HashString> keysToConvert;
     keysToConvert.GetValueCreate("numSegments1");
     keysToConvert.GetValueCreate("numSegments2");
     keysToConvert.GetValueCreate("lineWidth");

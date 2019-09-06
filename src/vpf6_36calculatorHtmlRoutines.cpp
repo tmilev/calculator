@@ -11,7 +11,7 @@ bool CalculatorHtmlFunctions::innerUserInputBox(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
-  MapLisT<std::string, Expression, MathRoutines::HashString> theArguments;
+  MapList<std::string, Expression, MathRoutines::HashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theArguments, &theCommands.Comments)) {
     return false;
   }
@@ -85,7 +85,7 @@ bool CalculatorHtmlFunctions::innerSetInputBox(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
-  MapLisT<std::string, Expression, MathRoutines::HashString> theArguments;
+  MapList<std::string, Expression, MathRoutines::HashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theArguments, &theCommands.Comments)) {
     return false;
   }
@@ -114,7 +114,7 @@ std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBo
     return "non-initialized-expression";
   }
   Calculator& theCommands = *theBox.owner;
-  MapLisT<std::string, Expression, MathRoutines::HashString> theArguments;
+  MapList<std::string, Expression, MathRoutines::HashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, theBox, theArguments)) {
     return "corrupt-box";
   }

@@ -59,7 +59,7 @@ extern logger logWorker;
 
 bool CalculatorHTML::LoadProblemInfoFromJSONAppend(
   const JSData& inputJSON,
-  MapLisT<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
+  MapList<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemInfoFromJSONAppend");
@@ -112,11 +112,11 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend(
 
 bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend(
   const std::string& inputInfoString,
-  MapLisT<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
+  MapList<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemInfoFromURLedInputAppend");
-  MapLisT<std::string, std::string, MathRoutines::HashString>
+  MapList<std::string, std::string, MathRoutines::HashString>
   CGIedProbs, currentKeyValues, sectionDeadlineInfo, problemWeightInfo;
   if (!HtmlRoutines::ChopCGIString(inputInfoString, CGIedProbs, commentsOnFailure)) {
     return false;
@@ -183,7 +183,7 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend(
 }
 
 JSData CalculatorHTML::ToJSONDeadlines(
-  MapLisT<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo
+  MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::ToJSONDeadlines");
   JSData output;
@@ -214,7 +214,7 @@ JSData CalculatorHTML::ToJSONDeadlines(
 }
 
 JSData CalculatorHTML::ToJSONProblemWeights(
-  MapLisT<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo
+  MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::ToJSONProblemWeights");
   JSData output;
@@ -322,13 +322,13 @@ bool CalculatorHTML::MergeOneProblemAdminData(
   }
   ProblemDataAdministrative& currentProblem =
   this->currentUseR.theProblemData.GetValueCreate(inputProblemName).adminData;
-  MapLisT<std::string, std::string, MathRoutines::HashString>&
+  MapList<std::string, std::string, MathRoutines::HashString>&
   currentDeadlines = currentProblem.deadlinesPerSection;
-  MapLisT<std::string, std::string, MathRoutines::HashString>&
+  MapList<std::string, std::string, MathRoutines::HashString>&
   incomingDeadlines = inputProblemInfo.adminData.deadlinesPerSection;
-  MapLisT<std::string, std::string, MathRoutines::HashString>&
+  MapList<std::string, std::string, MathRoutines::HashString>&
   currentWeightS = currentProblem.problemWeightsPerCoursE;
-  MapLisT<std::string, std::string, MathRoutines::HashString>&
+  MapList<std::string, std::string, MathRoutines::HashString>&
   incomingWeightS = inputProblemInfo.adminData.problemWeightsPerCoursE;
 
   for (int i = 0; i < incomingDeadlines.size(); i ++) {
@@ -356,7 +356,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabaseJSON(
   if (!theProblemJSON.readstring(incomingProblemInfo, false, &commentsOnFailure)) {
     return false;
   }
-  MapLisT<std::string, ProblemData, MathRoutines::HashString> incomingProblems;
+  MapList<std::string, ProblemData, MathRoutines::HashString> incomingProblems;
   if (!this->LoadProblemInfoFromJSONAppend(theProblemJSON, incomingProblems, commentsOnFailure)) {
     commentsOnFailure << "Failed to parse your request";
     return false;
@@ -985,7 +985,7 @@ std::string CalculatorHTML::PrepareUserInputBoxes() {
     return "";
   }
   std::stringstream out;
-  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
+  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   std::string inputNonAnswerReader;
   for (int i = 0; i < theArgs.size(); i ++) {
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader)) {
@@ -3492,7 +3492,7 @@ void TopicElement::ComputeID() {
   this->studentScoresSpanId = "topic" + Crypto::computeSha3_256OutputBase64URL(this->id);
 }
 
-void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::HashString>& output) {
+void TopicElement::AddTopic(TopicElement& inputElt, MapList<std::string, TopicElement, MathRoutines::HashString>& output) {
   MacroRegisterFunctionWithName("TopicElement::AddTopic");
   int numToCheck = 4;
   if (output.size() >= numToCheck && inputElt.type != inputElt.tTexHeader && inputElt.type != inputElt.tChapter) {
@@ -3539,7 +3539,7 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicEl
   }
 }
 
-void TopicElement::reset(int parentSize, MapLisT<std::string, TopicElement, MathRoutines::HashString>* containerElements) {
+void TopicElement::reset(int parentSize, MapList<std::string, TopicElement, MathRoutines::HashString>* containerElements) {
   this->type = this->tUndefined;
   this->indexInParent = - 1;
   this->flagSubproblemHasNoWeight = false;
@@ -3601,7 +3601,7 @@ void TopicElement::reset(int parentSize, MapLisT<std::string, TopicElement, Math
 
 bool TopicElement::LoadTopicBundle(
   const std::string& inputFileName,
-  MapLisT<std::string, List<std::string>, MathRoutines::HashString>& output,
+  MapList<std::string, List<std::string>, MathRoutines::HashString>& output,
   CalculatorHTML& owner,
   std::stringstream& errorStream
 ) {
@@ -3641,7 +3641,7 @@ bool TopicElement::LoadTopicBundle(
 
 void TopicElement::GetTopicList(
   const std::string& inputString,
-  MapLisT<std::string, TopicElement, MathRoutines::HashString>& output,
+  MapList<std::string, TopicElement, MathRoutines::HashString>& output,
   CalculatorHTML& owner
 ) {
   MacroRegisterFunctionWithName("TopicElement::GetTopicList");
@@ -3650,7 +3650,7 @@ void TopicElement::GetTopicList(
   TopicElement currentElt;
   bool found = false;
   currentElt.problemNumber.initializeFillInObject(4, 0);
-  MemorySaving<MapLisT<std::string, List<std::string>, MathRoutines::HashString> > topicBundles;
+  MemorySaving<MapList<std::string, List<std::string>, MathRoutines::HashString> > topicBundles;
   List<std::string> lineStack;
   owner.initTopicElementNames();
   int numLinesSoFar = 0;

@@ -18,7 +18,7 @@ public:
   int SelectedCircleMinus2noneMinus1Center; //-2= none, - 1= center of coordinate system, nonnegative integers = selectedindex
   Vectors<double> BasisToDrawCirclesAt;
   Matrix<double> theBilinearForm;
-  MapLisT<std::string, List<int>, MathRoutines::HashString> frames;
+  MapList<std::string, List<int>, MathRoutines::HashString> frames;
   double ClickToleranceX;
   double ClickToleranceY;
   double centerX;

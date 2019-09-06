@@ -5659,7 +5659,7 @@ bool CalculatorFunctionsGeneral::innerPlotViewWindow(
     widthHeight.SetSize(2);
     widthHeight[0] = 100;
     widthHeight[1] = 100;
-    MapLisT<std::string, Expression, MathRoutines::HashString> theMap;
+    MapList<std::string, Expression, MathRoutines::HashString> theMap;
     if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theMap, 0, false)) {
       isGood = false;
     } else {

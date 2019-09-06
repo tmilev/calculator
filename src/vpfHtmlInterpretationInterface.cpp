@@ -52,7 +52,7 @@ JSData HtmlInterpretation::GetProblemSolutionJSON() {
 
   }
   std::string lastStudentAnswerID;
-  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
+  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   for (int i = 0; i < theArgs.size(); i ++) {
     MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   }
@@ -250,7 +250,7 @@ JSData HtmlInterpretation::submitAnswersPreviewJSON() {
   std::string lastStudentAnswerID;
   std::string lastAnswer;
   std::stringstream out, studentAnswerSream;
-  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs =
+  MapList<std::string, std::string, MathRoutines::HashString>& theArgs =
   theGlobalVariables.webArguments;
   JSData result;
   for (int i = 0; i < theArgs.size(); i ++) {
@@ -1045,7 +1045,7 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
   }
   std::string studentAnswerNameReader;
   theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size());
-  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
+  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   int answerIdIndex = - 1;
   for (int i = 0; i < theArgs.size(); i ++) {
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader)) {
@@ -1476,7 +1476,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     return result.ToString(false);
   }
   std::string lastStudentAnswerID;
-  MapLisT<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
+  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   for (int i = 0; i < theArgs.size(); i ++) {
     MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   }
@@ -2053,7 +2053,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
 
 void UserCalculator::ComputePointsEarned(
   const HashedList<std::string, MathRoutines::HashString>& gradableProblems,
-  MapLisT<std::string, TopicElement, MathRoutines::HashString>* theTopics,
+  MapList<std::string, TopicElement, MathRoutines::HashString>* theTopics,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
@@ -2123,7 +2123,7 @@ public:
   CalculatorHTML theProblem;
   std::string currentSection;
   std::string currentCourse;
-  List<MapLisT<std::string, Rational, MathRoutines::HashString> > scoresBreakdown;
+  List<MapList<std::string, Rational, MathRoutines::HashString> > scoresBreakdown;
   List<JSData> userProblemData;
   List<Rational> userScores;
   List<std::string> userInfos;

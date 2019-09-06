@@ -1750,7 +1750,7 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml) {
 }
 
 bool Expression::AssignStringParsed(
-  const std::string& theString, MapLisT<std::string, Expression, MathRoutines::HashString>* substitutions, Calculator& owner
+  const std::string& theString, MapList<std::string, Expression, MathRoutines::HashString>* substitutions, Calculator& owner
 ) {
   MacroRegisterFunctionWithName("Expression::AssignStringParsed");
   Expression commands, result;
@@ -1766,7 +1766,7 @@ bool Expression::AssignStringParsed(
     result = commands;
   }
   if (substitutions != 0) {
-    MapLisT<Expression, Expression> theSubs;
+    MapList<Expression, Expression> theSubs;
     for (int i = 0; i < substitutions->size(); i ++) {
       Expression theSubbed;
       theSubbed.MakeAtom(substitutions->theKeys[i], owner);
@@ -1798,7 +1798,7 @@ bool Expression::IsSuitableForRecursion() const {
   return true;
 }
 
-void Expression::SubstituteRecursively(MapLisT<Expression, Expression>& theSubs) {
+void Expression::SubstituteRecursively(MapList<Expression, Expression>& theSubs) {
   if (theSubs.Contains(*this)) {
     (*this) = theSubs.GetValueCreate(*this);
     return;
@@ -1806,7 +1806,7 @@ void Expression::SubstituteRecursively(MapLisT<Expression, Expression>& theSubs)
   this->SubstituteRecursivelyInChildren(theSubs);
 }
 
-void Expression::SubstituteRecursivelyInChildren(MapLisT<Expression, Expression>& theSubs) {
+void Expression::SubstituteRecursivelyInChildren(MapList<Expression, Expression>& theSubs) {
   if (!this->IsSuitableForSubstitution()) {
     return;
   }
@@ -2437,7 +2437,7 @@ public:
   List<List<std::string> > rulesNames;
   List<List<std::string> > rulesDisplayNames;
   HashedList<std::string, MathRoutines::HashString> rulesToBeIgnored;
-  MapLisT<std::string, std::string, MathRoutines::HashString> rulesDisplayNamesMap;
+  MapList<std::string, std::string, MathRoutines::HashString> rulesDisplayNamesMap;
   Calculator* owner;
   bool initialized;
   bool IncrementReturnFalseIfPastLast();

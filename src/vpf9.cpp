@@ -794,9 +794,9 @@ bool FileOperations::LoadFileToStringUnsecure(
 
 #include "vpfHeader1General2Multitasking.h"
 
-MapLisT<std::string, std::string, MathRoutines::HashString>&
+MapList<std::string, std::string, MathRoutines::HashString>&
 FileOperations::FolderVirtualLinksNonSensitive() {
-  static MapLisT<std::string, std::string, MathRoutines::HashString> result;
+  static MapList<std::string, std::string, MathRoutines::HashString> result;
   static bool firstRun = false;
   if (!firstRun) {
     firstRun = true;
@@ -829,9 +829,9 @@ FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash() {
   return result;
 }
 
-MapLisT<std::string, std::string, MathRoutines::HashString>&
+MapList<std::string, std::string, MathRoutines::HashString>&
 FileOperations::FolderVirtualLinksSensitive() {
-  static MapLisT<std::string, std::string, MathRoutines::HashString> result;
+  static MapList<std::string, std::string, MathRoutines::HashString> result;
   static bool firstRun = false;
   if (!firstRun) {
     firstRun = true;
@@ -845,9 +845,9 @@ FileOperations::FolderVirtualLinksSensitive() {
   return result;
 }
 
-MapLisT<std::string, std::string, MathRoutines::HashString>&
+MapList<std::string, std::string, MathRoutines::HashString>&
 FileOperations::FolderVirtualLinksULTRASensitive() {
-  static MapLisT<std::string, std::string, MathRoutines::HashString> result;
+  static MapList<std::string, std::string, MathRoutines::HashString> result;
   static bool firstRun = false;
   if (!firstRun) {
     firstRun = true;

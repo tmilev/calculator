@@ -88,7 +88,7 @@ public:
 template <class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
 using MapReferenceS = MapTemplatE<ListReferences<value>, key, value, hashFunction>;
 template <class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
-using MapLisT = MapTemplatE<List<value>, key, value, hashFunction>;
+using MapList = MapTemplatE<List<value>, key, value, hashFunction>;
 
 /*
 template <class value, class key, unsigned int hashFunction(const key&)=key::HashFunction>

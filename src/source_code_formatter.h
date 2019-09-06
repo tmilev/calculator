@@ -24,7 +24,7 @@ public:
   std::string inputCode, outputCode;
   char currentChar;
   std::string currentWord;
-  MapLisT<std::string, std::string, MathRoutines::HashString> builtInTypes;
+  MapList<std::string, std::string, MathRoutines::HashString> builtInTypes;
   List<CodeElement> originalElements;
   List<CodeElement> transformedElements;
   std::string whiteSpaceCharactersNoNewLine;

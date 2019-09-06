@@ -54,7 +54,7 @@ public:
   bool flagAllBytesSentUsingFile;
   bool flagEncounteredErrorWhileServingFile;
   List<std::string> theMessageHeaderStrings;
-  MapLisT<std::string, std::string, MathRoutines::HashString> requestHeaders;
+  MapList<std::string, std::string, MathRoutines::HashString> requestHeaders;
   int ContentLength;
   int requestTypE;
   int connectedSocketID;

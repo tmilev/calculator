@@ -570,7 +570,7 @@ private:
   // The inputExpressions give us the ability to specify substitutions
   bool AssignStringParsed(
     const std::string& theString,
-    MapLisT<std::string, Expression, MathRoutines::HashString>* substitutions,
+    MapList<std::string, Expression, MathRoutines::HashString>* substitutions,
     Calculator& owner
   );
   void operator/=(const Expression& other);
@@ -599,8 +599,8 @@ private:
 //  void operator=(const Expression& other);
   bool operator>(const Expression& other) const;
   bool GreaterThanNoCoeff(const Expression& other) const;
-  void SubstituteRecursively(MapLisT<Expression, Expression>& theSubs);
-  void SubstituteRecursivelyInChildren(MapLisT<Expression, Expression>& theSubs);
+  void SubstituteRecursively(MapList<Expression, Expression>& theSubs);
+  void SubstituteRecursivelyInChildren(MapList<Expression, Expression>& theSubs);
 };
 
 class Function {
@@ -984,7 +984,7 @@ public:
 
   HashedList<std::string, MathRoutines::HashString> stringsThatSplitIfFollowedByDigit;
 
-  MapLisT<std::string, List<std::string>, MathRoutines::HashString> predefinedWordSplits;
+  MapList<std::string, List<std::string>, MathRoutines::HashString> predefinedWordSplits;
   List<List<Function> > FunctionHandlers;
   List<List<Function> > operationsCompositeHandlers;
   HashedList<std::string, MathRoutines::HashString> namedRules;
@@ -1851,18 +1851,18 @@ public:
   bool AppendSummandsReturnTrueIfOrderNonCanonical(const Expression& theExpression, List<Expression>& output) {
     return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus());
   }
-  void SpecializeBoundVars(Expression& toBeSubbedIn, MapLisT<Expression, Expression>& matchedPairs);
+  void SpecializeBoundVars(Expression& toBeSubbedIn, MapList<Expression, Expression>& matchedPairs);
   Expression* PatternMatch(
     const Expression& thePattern,
     Expression& theExpression,
-    MapLisT<Expression, Expression>& bufferPairs,
+    MapList<Expression, Expression>& bufferPairs,
     const Expression* condition = nullptr,
     std::stringstream* theLog = nullptr
   );
   bool ProcessOneExpressionOnePatternOneSub(
     const Expression& thePattern,
     Expression& theExpression,
-    MapLisT<Expression, Expression>& bufferPairs, std::stringstream* theLog = nullptr
+    MapList<Expression, Expression>& bufferPairs, std::stringstream* theLog = nullptr
   );
   static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output) {
     if (&input == &output) {
@@ -1913,7 +1913,7 @@ public:
   bool ExpressionMatchesPattern(
     const Expression& thePattern,
     const Expression& input,
-    MapLisT<Expression, Expression>& matchedExpressions,
+    MapList<Expression, Expression>& matchedExpressions,
     std::stringstream* commentsGeneral = nullptr
   );
   static bool innerLogEvaluationStepsHumanReadableNested(
@@ -2462,14 +2462,14 @@ public:
   static bool innerLoadKeysFromStatementList(
     Calculator& theCommands,
     const Expression& input,
-    MapLisT<std::string, Expression, MathRoutines::HashString>& output,
+    MapList<std::string, Expression, MathRoutines::HashString>& output,
     std::stringstream* commentsOnFailure = nullptr,
     bool allowFailure = false
   );
   static bool innerLoadKeysFromStatementList(
     Calculator& theCommands,
     const Expression& input,
-    MapLisT<Expression, Expression>& output,
+    MapList<Expression, Expression>& output,
     std::stringstream* commentsOnFailure = nullptr,
     bool allowFailure = false
   );

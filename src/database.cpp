@@ -649,7 +649,7 @@ ProblemData& UserCalculator::GetProblemDataAddIfNotPresent(const std::string& pr
 
 bool ProblemData::LoadFroM(const std::string& inputData, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("ProblemData::LoadFrom");
-  MapLisT<std::string, std::string, MathRoutines::HashString> theMap;
+  MapList<std::string, std::string, MathRoutines::HashString> theMap;
   if (!HtmlRoutines::ChopCGIString(inputData, theMap, commentsOnFailure)) {
     return false;
   }
@@ -665,7 +665,7 @@ bool ProblemData::LoadFroM(const std::string& inputData, std::stringstream& comm
   }
   this->theAnswers.Clear();
   bool result = true;
-  MapLisT<std::string, std::string, MathRoutines::HashString> currentQuestionMap;
+  MapList<std::string, std::string, MathRoutines::HashString> currentQuestionMap;
   for (int i = 0; i < theMap.size(); i ++) {
     if (theMap.theKeys[i] == "randomSeed") {
       continue;
@@ -744,7 +744,7 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
 
 bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemData");
-  MapLisT<std::string, std::string, MathRoutines::HashString> theMap;
+  MapList<std::string, std::string, MathRoutines::HashString> theMap;
   if (!HtmlRoutines::ChopCGIString(theInfo, theMap, commentsOnFailure)) {
     return false;
   }

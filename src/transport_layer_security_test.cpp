@@ -47,9 +47,9 @@ bool SSLRecord::Test::Serialization() {
   List<unsigned char> encoded;
   theRecord.WriteBytes(encoded);
   if (encoded != theRecord.body) {
-    logServer << "Decoded:\n" << theRecord.hello.getStringHighlighter()
+    logServer << "Decoded:\n" << theRecord.content.getStringHighlighter()
     << Crypto::ConvertListUnsignedCharsToHex(theRecord.body, 0, false) << logger::endL;
-    logServer << "Encoded:\n" << theRecord.hello.getStringHighlighter()
+    logServer << "Encoded:\n" << theRecord.content.getStringHighlighter()
     << Crypto::ConvertListUnsignedCharsToHex(encoded, 0, false) << logger::endL;
     crash << "Decode->Encode did not reproduce the original input. " << crash;
   }

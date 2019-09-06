@@ -173,9 +173,11 @@ public:
   bool DecodeSupportedCiphers(std::stringstream* commentsOnFailure);
   bool DecodeExtensions(std::stringstream* commentsOnFailure);
   bool ProcessExtensions(std::stringstream* commentsOnFailure);
+  // https://tls.ulfheim.net
   // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art059
   void PrepareServerHello1Start(SSLContent& clientHello);
-  void PrepareServerHello2Certificate(SSLContent& clientHello);
+  // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art061
+  void PrepareServerHello2Certificate();
   // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art060
   void PrepareServerHello3SecretNegotiation(SSLContent& clientHello);
 
@@ -185,10 +187,11 @@ public:
   // wiping the already existing contents of output.
   void WriteBytes(List<unsigned char>& output) const;
   // Writes the message header, using zeroes instead of the message length
-  int WriteTypeEmptyLengthVersion(List<unsigned char>& output) const;
-  void WriteLength(int offsetToInsertAt, List<unsigned char>& output) const;
-  void WriteBytesClientHello(List<unsigned char>& output) const;
-  void WriteBytesServerHello(List<unsigned char>& output) const;
+  void WriteType(List<unsigned char>& output) const;
+  void WriteVersion(List<unsigned char>& output) const;
+  void WriteBytesHandshakeClientHello(List<unsigned char>& output) const;
+  void WriteBytesHandshakeServerHello(List<unsigned char>& output) const;
+  void WriteBytesHandshakeCertificate(List<unsigned char>& output) const;
   void WriteBytesRandomAndSessionId(List<unsigned char>& output) const;
   void WriteBytesSupportedCiphers(List<unsigned char>& output) const;
   void WriteBytesExtensionsOnly(List<unsigned char>& output) const;
@@ -215,7 +218,7 @@ public:
   int version;
   int length;
   List<unsigned char> body;
-  SSLContent hello;
+  SSLContent content;
   TransportLayerSecurityServer* owner;
   SSLRecord();
   bool CheckInitialization() const;
@@ -224,8 +227,27 @@ public:
   std::string ToBytes() const;
   std::string ToString() const;
   std::string ToStringType() const;
+
+  template <unsigned int numberOfBytes>
+  class LengthWriterNBytes {
+  public:
+    List<unsigned char>* outputPointer;
+    int offset;
+    LengthWriterNBytes(List<unsigned char>& output) {
+      this->outputPointer = &output;
+      this->offset = output.size;
+      int theSize = output.size;
+      SSLRecord::WriteNByteLength(numberOfBytes, 0, output, theSize);
+    }
+    ~LengthWriterNBytes() {
+      unsigned int totalLength = static_cast<unsigned int>(this->outputPointer->size - this->offset - numberOfBytes);
+      SSLRecord::WriteNByteLength(numberOfBytes, totalLength, *this->outputPointer, this->offset);
+    }
+  };
+  typedef LengthWriterNBytes<3> LengthWriterThreeBytes;
+  typedef LengthWriterNBytes<2> LengthWriterTwoBytes;
   void PrepareServerHello1Start(SSLRecord& clientHello);
-  void PrepareServerHello2Certificate(SSLRecord& clientHello);
+  void PrepareServerHello2Certificate();
   void WriteBytes(List<unsigned char>& output) const;
   static bool ReadTwoByteInt(
     const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
@@ -317,7 +339,10 @@ public:
   int64_t millisecondsDefaultTimeOut;
   int defaultBufferCapacity;
   SSLRecord lastRead;
-  SSLRecord lastToWrite;
+  SSLRecord serverHelloStart;
+  SSLRecord serverHelloCertificate;
+  SSLRecord serverHelloKeyExchange;
+  List<unsigned char> nextServerMessage;
   CipherSuiteSpecification GetCipherCrashIfUnknown(int inputId);
   void AddSupportedCipher(int inputId);
   void initialize();

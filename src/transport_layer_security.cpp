@@ -630,7 +630,9 @@ TransportLayerSecurityServer::TransportLayerSecurityServer() {
   this->millisecondsTimeOut = this->millisecondsDefaultTimeOut;
   this->defaultBufferCapacity = 1000000;
   this->lastRead.owner = this;
-  this->lastToWrite.owner = this;
+  this->serverHelloCertificate.owner = this;
+  this->serverHelloKeyExchange.owner = this;
+  this->serverHelloStart.owner = this;
 }
 
 bool TransportLayerSecurityServer::WriteBytesOnce(std::stringstream* commentsOnFailure) {
@@ -641,8 +643,8 @@ bool TransportLayerSecurityServer::WriteBytesOnce(std::stringstream* commentsOnF
   setsockopt(this->socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
   ssize_t numBytesSent = send(
     this->socketId,
-    this->lastToWrite.body.TheObjects,
-        static_cast<size_t>(this->lastToWrite.body.size),
+    this->nextServerMessage.TheObjects,
+    static_cast<size_t>(this->nextServerMessage.size),
     0
   );
   if (numBytesSent < 0) {
@@ -791,61 +793,70 @@ bool CipherSuiteSpecification::ComputeName() {
 
 void SSLRecord::WriteBytes(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLRecord::WriteBytes");
+  logServer << "DEBUG: GOt to here pt -1!!!" << logger::endL;
   output.AddOnTop(static_cast<unsigned char>(SSLRecord::tokens::handshake));
   SSLRecord::WriteTwoByteInt(this->version, output);
-  int offsetOfTwoByteLength = output.size;
-  SSLRecord::WriteTwoByteInt(0, output);
-  this->hello.WriteBytes(output);
-  unsigned int totalLength = static_cast<unsigned int>(output.size - offsetOfTwoByteLength - 2);
-  SSLRecord::WriteNByteLength(2, totalLength, output, offsetOfTwoByteLength);
+  logServer << "DEBUG: GOt to here!!!" << logger::endL;
+  SSLRecord::LengthWriterTwoBytes writeLength(output);
+  logServer << "DEBUG: GOt to here pt 2!!!" << logger::endL;
+  this->content.WriteBytes(output);
+  logServer << "DEBUG: GOt to here pt 3!!!" << logger::endL;
 }
 
 void SSLContent::WriteBytes(List<unsigned char>& output) const {
   if (this->theType == SSLContent::tokens::clientHello) {
-    return SSLContent::WriteBytesClientHello(output);
+    return SSLContent::WriteBytesHandshakeClientHello(output);
   } else if (this->theType == SSLContent::tokens::serverHello) {
-    return SSLContent::WriteBytesServerHello(output);
+    return SSLContent::WriteBytesHandshakeServerHello(output);
   }
 }
 
-void SSLContent::WriteBytesServerHello(List<unsigned char>& output) const {
+void SSLContent::WriteBytesHandshakeServerHello(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::WriteBytesServerHello");
   if (this->theType != SSLContent::tokens::serverHello) {
     crash << "Not allowed to serialize non server-hello content as server hello. " << crash;
   }
-  int offsetLength = this->WriteTypeEmptyLengthVersion(output);
+  this->WriteType(output);
+  SSLRecord::LengthWriterThreeBytes writeLength(output);
+  this->WriteVersion(output);
   this->WriteBytesRandomAndSessionId(output);
   //256 = 0x0100 = no compression:
   SSLRecord::WriteTwoByteInt(256, output);
   this->WriteBytesExtensionsOnly(output);
-  this->WriteLength(offsetLength, output);
 }
 
-int SSLContent::WriteTypeEmptyLengthVersion(List<unsigned char>& output) const {
+void SSLContent::WriteType(List<unsigned char>& output) const {
   output.AddOnTop(this->theType);
-  int offsetOfThreeByteLength = output.size;
-  SSLRecord::WriteThreeByteInt(0, output);
+}
+
+void SSLContent::WriteVersion(List<unsigned char>& output) const {
   SSLRecord::WriteTwoByteInt(this->version, output);
-  return offsetOfThreeByteLength;
 }
 
-void SSLContent::WriteLength(int offsetToInsertAt, List<unsigned char>& output) const {
-  unsigned int totalLength = static_cast<unsigned int>(output.size - offsetToInsertAt - 3);
-  SSLRecord::WriteNByteLength(3, totalLength, output, offsetToInsertAt);
+void SSLContent::WriteBytesHandshakeCertificate(List<unsigned char> &output) const {
+  MacroRegisterFunctionWithName("SSLHello::WriteBytesHandshakeCertificate");
+  if (this->theType != SSLContent::tokens::certificate) {
+    crash << "Not allowed to serialize non-certificate content as certificate. " << crash;
+  }
+  this->WriteType(output);
+  SSLRecord::LengthWriterThreeBytes writeLength(output);
+  SSLRecord::LengthWriterThreeBytes writeLengthAgain(output);
+
 }
 
-void SSLContent::WriteBytesClientHello(List<unsigned char>& output) const {
-  MacroRegisterFunctionWithName("SSLHello::WriteBytesClientHello");
+void SSLContent::WriteBytesHandshakeClientHello(List<unsigned char>& output) const {
+  MacroRegisterFunctionWithName("SSLHello::WriteBytesHandshakeClientHello");
   if (this->theType != SSLContent::tokens::clientHello) {
     crash << "Not allowed to serialize non client-hello content as client hello. " << crash;
   }
-  int offsetLength = this->WriteTypeEmptyLengthVersion(output);
+  this->WriteType(output);
+  SSLRecord::LengthWriterThreeBytes writeLength(output);
+  this->WriteVersion(output);
   this->WriteBytesRandomAndSessionId(output);
   this->WriteBytesSupportedCiphers(output);
   //256 = 0x0100 = no compression:
   SSLRecord::WriteTwoByteInt(256, output);
   this->WriteBytesExtensionsOnly(output);
-  this->WriteLength(offsetLength, output);
 }
 
 void SSLContent::WriteBytesRandomAndSessionId(List<unsigned char>& output) const {
@@ -1313,7 +1324,7 @@ SSLRecord::SSLRecord() {
   this->length = 0;
   this->version = 0;
   this->offsetDecoded = 0;
-  this->hello.owner = this;
+  this->content.owner = this;
   this->owner = nullptr;
 }
 
@@ -1343,7 +1354,7 @@ std::string SSLRecord::ToString() const {
   result["body"] = Crypto::ConvertListUnsignedCharsToHex(this->body, 50, false);
   result["type"] = this->ToStringType();
   if (this->theType == SSLRecord::tokens::handshake) {
-    result["hello"] = this->hello.ToJSON();
+    result["hello"] = this->content.ToJSON();
   }
   std::string hexVersion;
   Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(
@@ -1397,7 +1408,7 @@ bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
 bool SSLRecord::DecodeBody(std::stringstream *commentsOnFailure) {
   switch (this->theType) {
     case SSLRecord::tokens::handshake:
-      return this->hello.Decode(commentsOnFailure);
+      return this->content.Decode(commentsOnFailure);
     default:
       break;
   }
@@ -1450,6 +1461,14 @@ std::string CipherSuiteSpecification::ToString() const {
   return out.str();
 }
 
+// https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art061
+void SSLContent::PrepareServerHello2Certificate() {
+  MacroRegisterFunctionWithName("SSLContent::PrepareServerHello2Certificate");
+  this->CheckInitialization();
+  this->version = 3 * 256 + 3;
+  this->theType = SSLContent::tokens::certificate;
+}
+
 void SSLContent::PrepareServerHello1Start(SSLContent& clientHello) {
   MacroRegisterFunctionWithName("SSLContent::PrepareServerHello1Start");
   this->CheckInitialization();
@@ -1491,29 +1510,39 @@ void SSLContent::PrepareServerHello1Start(SSLContent& clientHello) {
 }
 
 void SSLRecord::PrepareServerHello1Start(SSLRecord& clientHello) {
-  this->hello.resetExceptOwner();
+  this->content.resetExceptOwner();
   this->theType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
-  this->hello.PrepareServerHello1Start(clientHello.hello);
+  this->content.PrepareServerHello1Start(clientHello.content);
+}
+
+void SSLRecord::PrepareServerHello2Certificate() {
+  this->content.resetExceptOwner();
+  this->theType = SSLRecord::tokens::handshake;
+  this->version = 3 * 256 + 1;
+  this->content.PrepareServerHello2Certificate();
 }
 
 bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::stringstream *commentsOnFailure) {
   (void) commentsOnFailure;
   (void) inputSocketID;
-  this->lastToWrite.PrepareServerHello1Start(this->lastRead);
-  if (this->lastToWrite.hello.theType != SSLContent::tokens::serverHello) {
+  this->nextServerMessage.SetSize(0);
+
+  this->serverHelloStart.PrepareServerHello1Start(this->lastRead);
+  if (this->serverHelloStart.content.theType != SSLContent::tokens::serverHello) {
     crash << "DEBUG: this should be so" << crash;
   }
-  this->lastToWrite.body.SetSize(0);
-  this->lastToWrite.WriteBytes(this->lastToWrite.body);
+  this->serverHelloStart.WriteBytes(this->nextServerMessage);
+  this->serverHelloCertificate.PrepareServerHello2Certificate();
+  this->serverHelloCertificate.WriteBytes(this->nextServerMessage);
 
   //logWorker << "Incoming message:\n" << this->lastRead.hello.getStringHighlighter()
   //<< Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 0, false)
   //<< logger::endL;
   logWorker << "DEBUG: Bytes written:\n"
-  << this->lastToWrite.hello.getStringHighlighter()
-  << Crypto::ConvertListUnsignedCharsToHex(this->lastToWrite.body, 0, false) << logger::endL;
-  logWorker << "DEBUG: Record written:\n" << this->lastToWrite.ToString() << logger::endL;
+  << this->serverHelloStart.content.getStringHighlighter()
+  << Crypto::ConvertListUnsignedCharsToHex(this->nextServerMessage, 0, false) << logger::endL;
+  logWorker << "DEBUG: Record written:\n" << this->serverHelloStart.ToString() << logger::endL;
   if (!this->WriteBytesOnce(commentsOnFailure)) {
     logWorker << "Error replying to client hello. ";
     if (commentsOnFailure != nullptr) {

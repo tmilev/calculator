@@ -221,6 +221,7 @@ public:
   int listeningSocketHTTPSOpenSSL;
   int listeningSocketHTTPSBuiltIn;
   int listeningSocketHTTPSDefault;
+  int lastListeningSocket;
   int highestSocketNumber;
   int MaxNumWorkersPerIPAdress;
   int MaxTotalUsedWorkers;

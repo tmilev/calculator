@@ -4166,10 +4166,9 @@ bool WebServer::initBindToPorts() {
   if (!this->initBindToOnePort(this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn)) {
     return false;
   }
-  if (! this->initBindToOnePort(this->portHTTPSOpenSSL, this->listeningSocketHTTPSBuiltIn)) {
-
+  if (!this->initBindToOnePort(this->portHTTPSOpenSSL, this->listeningSocketHTTPSOpenSSL)) {
+    return false;
   }
-  this->initBindToOnePort(this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn);
   return true;
 }
 
@@ -4262,6 +4261,87 @@ void WebServer::WriteVersionJSFile() {
   theFileStream << out.str();
 }
 
+// class not included in header for portability reasons
+// - the header needs not to know of
+// the fd_set and sockaddr_storage structures.
+class Listener {
+public:
+  fd_set FDSetListenSockets;
+  WebServer* owner;
+  sockaddr_storage theirAddress; // connector's address information
+  char userAddressBuffer[INET6_ADDRSTRLEN];
+  std::string userAddress;
+  void zeroSocketSet();
+  Listener(WebServer* inputOwner) {
+    this->owner = inputOwner;
+  }
+  int Accept();
+  void Select();
+  void ComputeUserAddress();
+};
+
+void Listener::zeroSocketSet() {
+  FD_ZERO(&this->FDSetListenSockets);
+  for (int i = 0; i < this->owner->theListeningSockets.size; i ++) {
+    FD_SET(this->owner->theListeningSockets[i], &this->FDSetListenSockets);
+  }
+  if (theGlobalVariables.flagServerDetailedLog) {
+    logServer << logger::red << "Detail: About to enter select loop. " << logger::endL;
+  }
+
+}
+
+void Listener::Select() {
+  while (select(this->owner->highestSocketNumber + 1, &this->FDSetListenSockets, 0, 0, 0) == - 1) {
+    if (this->owner->flagReapingChildren) {
+      if (theGlobalVariables.flagServerDetailedLog) {
+        logServer << logger::yellow << "Interrupted select loop by child exit signal. "
+        << logger::endL;
+      }
+      this->owner->flagReapingChildren = false;
+    } else {
+      logServer << logger::red << "Select failed: this is not expected. Error message: "
+      << strerror(errno) << logger::endL;
+    }
+    this->owner->NumFailedSelectsSoFar ++;
+  }
+}
+
+int Listener::Accept() {
+  MacroRegisterFunctionWithName("Listener::Accept");
+  socklen_t sin_size = sizeof (this->theirAddress);
+  for (int i = this->owner->theListeningSockets.size - 1; i >= 0; i --) {
+    int currentListeningSocket = this->owner->theListeningSockets[i];
+    if (!FD_ISSET(currentListeningSocket, &this->FDSetListenSockets)) {
+      continue;
+    }
+    int result = accept(currentListeningSocket, (struct sockaddr *)& this->theirAddress, &sin_size);
+    if (result >= 0) {
+      this->owner->lastListeningSocket = currentListeningSocket;
+      logServer << logger::green << "Connection candidate "
+      << this->owner->NumConnectionsSoFar + 1 << ". "
+      << "Connected via listening socket " << currentListeningSocket
+      << " on socket: " << result;
+      return result;
+    } else {
+      logSocketAccept << logger::red
+      << "This is not supposed to happen: accept failed. Error: "
+      << this->owner->ToStringLastErrorDescription() << logger::endL;
+    }
+  }
+  return - 1;
+}
+
+void Listener::ComputeUserAddress() {
+  inet_ntop(
+    this->theirAddress.ss_family,
+    get_in_addr((struct sockaddr *) &this->theirAddress),
+    this->userAddressBuffer,
+    sizeof this->userAddressBuffer
+  );
+  this->userAddress = this->userAddressBuffer;
+}
+
 int WebServer::Run() {
   MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog = "crash_WebServerRun.html";
@@ -4269,7 +4349,8 @@ int WebServer::Run() {
   //<-resets of the server logs are not needed, but I put them here nonetheless.
   if (theGlobalVariables.flagSSLIsAvailable) {
     // creates key files if absent. Does not call any openssl functions.
-    this->theTLS.initSSLKeyFiles();
+    std::stringstream commentsOnFailure;
+    this->theTLS.initSSLKeyFiles(&commentsOnFailure);
   }
   logWorker         .reset();
   logServerMonitor  .reset();
@@ -4315,37 +4396,17 @@ int WebServer::Run() {
     return 1;
   }
   logServer << logger::purple << "waiting for connections..." << logger::endL;
-  sockaddr_storage their_addr; // connector's address information
-  socklen_t sin_size = sizeof their_addr;
-  char userAddressBuffer[INET6_ADDRSTRLEN];
+  logServer << logger::purple << "DEBUG: listening sockets: " << this->theListeningSockets << logger::endL;
   this->initSSL();
-  fd_set FDListenSockets;
   this->NumSuccessfulSelectsSoFar = 0;
   this->NumFailedSelectsSoFar = 0;
   long long previousReportedNumberOfSelects = 0;
+  Listener theListener(this);
   while (true) {
     // main accept() loop
-    FD_ZERO(&FDListenSockets);
-    for (int i = 0; i < this->theListeningSockets.size; i ++) {
-      FD_SET(this->theListeningSockets[i], &FDListenSockets);
-    }
-    if (theGlobalVariables.flagServerDetailedLog) {
-      logServer << logger::red << "Detail: About to enter select loop. " << logger::endL;
-    }
+    theListener.zeroSocketSet();
     theSignals.unblockSignals();
-    while (select(this->highestSocketNumber + 1, &FDListenSockets, 0, 0, 0) == - 1) {
-      if (this->flagReapingChildren) {
-        if (theGlobalVariables.flagServerDetailedLog) {
-          logServer << logger::yellow << "Interrupted select loop by child exit signal. "
-          << logger::endL;
-        }
-        this->flagReapingChildren = false;
-      } else {
-        logServer << logger::red << "Select failed: this is not expected. Error message: "
-        << strerror(errno) << logger::endL;
-      }
-      this->NumFailedSelectsSoFar ++;
-    }
+    theListener.Select();
     theSignals.blockSignals();
     if (theGlobalVariables.flagServerDetailedLog) {
       logServer << logger::green << "Detail: select success. " << logger::endL;
@@ -4372,33 +4433,9 @@ int WebServer::Run() {
       this->previousServerStatDetailedReport = reportCount;
       logProcessStats << this->ToStringStatusForLogFile() << logger::endL;
     }
-    int newConnectedSocket = - 1;
     theGlobalVariables.flagUsingSSLinCurrentConnection = false;
-    bool found = false;
-    for (int i = theListeningSockets.size - 1; i >= 0; i --) {
-      if (FD_ISSET(this->theListeningSockets[i], &FDListenSockets)) {
-        newConnectedSocket = accept(this->theListeningSockets[i], (struct sockaddr *)& their_addr, &sin_size);
-        if (newConnectedSocket >= 0) {
-          logServer << logger::green << "Connection candidate "
-          << this->NumConnectionsSoFar + 1 << ". "
-          << "Connected via listening socket " << this->theListeningSockets[i]
-          << " on socket: " << newConnectedSocket;
-          if (this->theListeningSockets[i] == this->listeningSocketHTTP) {
-            logServer << logger::yellow << " (non-encrypted). " << logger::endL;
-          } else {
-            theGlobalVariables.flagUsingSSLinCurrentConnection = true;
-            logServer << logger::purple << " (SSL encrypted). " << logger::endL;
-          }
-          break;
-        } else {
-          logSocketAccept << logger::red
-          << "This is not supposed to happen: accept failed. Error: "
-          << this->ToStringLastErrorDescription() << logger::endL;
-          found = true;
-        }
-      }
-    }
-    if (newConnectedSocket < 0 && !found) {
+    int newConnectedSocket = theListener.Accept();
+    if (newConnectedSocket < 0) {
       logSocketAccept << logger::red << "This is not supposed to to happen: select succeeded "
       << "but I found no set socket. " << logger::endL;
     }
@@ -4409,13 +4446,8 @@ int WebServer::Run() {
       }
       continue;
     }
-    inet_ntop(
-      their_addr.ss_family,
-      get_in_addr((struct sockaddr *) &their_addr),
-      userAddressBuffer,
-      sizeof userAddressBuffer
-    );
-    this->HandleTooManyConnections(userAddressBuffer);
+    theListener.ComputeUserAddress();
+    this->HandleTooManyConnections(theListener.userAddress);
     this->RecycleChildrenIfPossible();
     if (!this->CreateNewActiveWorker()) {
       logPlumbing << logger::purple
@@ -4435,7 +4467,7 @@ int WebServer::Run() {
     //<-cannot set earlier as the active worker may change after recycling.
     this->NumConnectionsSoFar ++;
     this->GetActiveWorker().connectionID = this->NumConnectionsSoFar;
-    this->GetActiveWorker().userAddress.theObject = userAddressBuffer;
+    this->GetActiveWorker().userAddress.theObject = theListener.userAddress;
     this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1);
 //    logWorker << this->ToStringStatus();
     /////////////
@@ -4506,6 +4538,14 @@ int WebServer::Run() {
 
 int WebWorker::Run() {
   MacroRegisterFunctionWithName("WebWorker::Run");
+  if (theWebServer.lastListeningSocket == theWebServer.listeningSocketHTTPSBuiltIn) {
+    logWorker << "DEBUG: BUILT IN: " << this->connectedSocketID << logger::endL;
+    theWebServer.theTLS.flagUseBuiltInTlS = true;
+  } else {
+    logWorker << "DEBUG: openssl :((" << this->connectedSocketID << logger::endL;
+    theWebServer.theTLS.flagUseBuiltInTlS = false;
+  }
+
   theGlobalVariables.millisecondOffset = this->millisecondsAfterSelect;
   this->CheckConsistency();
   if (this->connectedSocketID == - 1) {
@@ -5070,7 +5110,6 @@ void WebServer::InitializeGlobalVariables() {
 }
 
 int main(int argc, char **argv) {
-  std::cout << "DBUEG: main started!" << std::endl;
   return WebServer::main(argc, argv);
 }
 
@@ -5242,9 +5281,9 @@ void GlobalVariables::ConfigurationProcess() {
     logServer << logger::blue << "Process monitoring turned on from configuration.json." << logger::endL;
     WebServer::TurnProcessMonitoringOn();
   }
-  if (theGlobalVariables.configuration[Configuration::useBuiltInTLS].isTrueRepresentationInJSON()) {
+  if (theGlobalVariables.configuration[Configuration::builtInTLSAvailable].isTrueRepresentationInJSON()) {
     logServer << logger::red << "Experimental: " << logger::blue << "using built-in TLS library." << logger::endL;
-    TransportLayerSecurity::flagDontUseOpenSSL = true;
+    TransportLayerSecurity::flagBuiltInTLSAvailable = true;
   }
   if (theGlobalVariables.configuration[Configuration::monitorPingTime].isIntegerFittingInInt(
     &theWebServer.WebServerPingIntervalInSeconds

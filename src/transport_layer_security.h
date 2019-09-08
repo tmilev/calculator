@@ -364,10 +364,11 @@ public:
 
 class TransportLayerSecurity {
 public:
-  static bool flagDontUseOpenSSL;
+  static bool flagBuiltInTLSAvailable;
   bool flagInitializedPrivateKey;
   bool flagIsServer;
   bool flagInitialized;
+  bool flagUseBuiltInTlS;
   TransportLayerSecurityOpenSSL openSSLData;
   TransportLayerSecurityServer theServer;
   List<char> readBuffer;
@@ -414,7 +415,7 @@ public:
   bool HandShakeIamClientNoSocketCleanup(
     int inputSocketID, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
-  bool initSSLKeyFiles();
+  bool initSSLKeyFiles(std::stringstream* commentsOnFailure);
   bool initSSLKeyFilesInternal(std::stringstream* commentsOnFailure);
   bool LoadPEMCertificate(std::stringstream *commentsOnFailure);
   bool LoadPEMPrivateKey(std::stringstream* commentsOnFailure);

@@ -74,7 +74,7 @@ struct Configuration {
   static std::string processMonitoringTriggerTime;
   static std::string millisecondsReplyAfterComputationDefault;
   static std::string millisecondsReplyAfterComputation;
-  static std::string useBuiltInTLS;
+  static std::string builtInTLSAvailable;
   static std::string serverAutoMonitor;
   static std::string monitorPingTime;
   static std::string disableDatabaseLogEveryoneAsAdmin;

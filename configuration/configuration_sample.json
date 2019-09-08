@@ -6,7 +6,7 @@
   "runServerOnEmptyCommandLine":true,
   "replyAfterComputationMillisecondsDefault":null,
   "processMonitoringAllowedByDefault":true,
-  "useBuiltInTLS":false,
+  "builtInTLSAvailable":false,
   "monitorPingTime":10,
   "gitRepository":"https://github.com/tmilev/calculator",
   "mongoDBSetup":"Setup complete",

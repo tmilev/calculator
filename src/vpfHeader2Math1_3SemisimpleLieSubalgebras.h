@@ -205,7 +205,7 @@ public:
     this->flagDeallocated = true;
   }
   WeylGroupData& GetWeylNonEmbeddedDefaultScale();
-  void reset(SemisimpleSubalgebras* inputOwner = 0);
+  void reset(SemisimpleSubalgebras* inputOwner = nullptr);
   bool CheckConsistency() const;
   bool CheckMaximalDominance() const;
   bool ComputeAndVerifyFromGeneratorsAndHs();
@@ -407,13 +407,13 @@ public:
     if (this->owner == other.owner) {
       return true;
     }
-    if (this->owner == 0 || other.owner == 0) {
+    if (this->owner == nullptr || other.owner == nullptr) {
       crash << "This is a programming error: comparing non-initialized Semisimple Lie Subalgebras. " << crash;
     }
     return *this->owner == *other.owner;
   }
   SemisimpleLieAlgebra& GetSSowner() const {
-    if (this->owner == 0) {
+    if (this->owner == nullptr) {
       crash << "This is a programming error: attempted to access non-initialized semisimple Lie subalgerbas. " << crash;
     }
     return *this->owner;

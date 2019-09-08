@@ -733,7 +733,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
 template <class coefficient>
 std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("ModuleSSalgebra::ToString");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return "(Error: module not initialized)";
   }
   SemisimpleLieAlgebra& theAlgebrA = *this->owner;
@@ -1115,7 +1115,7 @@ bool Expression::CheckInitializationRecursively() const {
 }
 
 bool Expression::CheckInitialization() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "This is a programming error: " << "Expression has non-initialized owner. " << crash;
     return false;
   }
@@ -1124,7 +1124,7 @@ bool Expression::CheckInitialization() const {
 
 bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::HashString>* boxNames) const {
   MacroRegisterFunctionWithName("Expression::HasInputBoxVariables");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   RecursionDepthCounter recursionCounter(&this->owner->RecursionDeptH);
@@ -1156,7 +1156,7 @@ bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::Hash
 }
 
 bool Expression::HasBoundVariables() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "This is a programming error: calling function "
     << "HasBoundVariables on non-initialized expression. " << crash;
   }
@@ -1857,20 +1857,20 @@ bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Ex
 
 void Expression::operator+=(const Expression& other) {
   MacroRegisterFunctionWithName("Expression::operator+=");
-  if (this->owner == 0 && other.owner == 0) {
+  if (this->owner == nullptr && other.owner == nullptr) {
     this->theData += other.theData;
     if (this->theData != 1 && this->theData != 0) {
       crash << "Attempting to add non-initialized expressions" << crash;
     }
     return;
   }
-  if (other.owner == 0) {
+  if (other.owner == nullptr) {
     Expression otherCopy;
     otherCopy.AssignValue(other.theData, *this->owner);
     *this += otherCopy;
     return;
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     this->AssignValue(this->theData, *other.owner);
   }
   if (this->owner != other.owner) {
@@ -1883,20 +1883,20 @@ void Expression::operator+=(const Expression& other) {
 
 void Expression::operator-=(const Expression& other) {
   MacroRegisterFunctionWithName("Expression::operator+=");
-  if (this->owner == 0 && other.owner == 0) {
+  if (this->owner == nullptr && other.owner == nullptr) {
     this->theData -= other.theData;
     if (this->theData != 1 && this->theData != 0) {
       crash << "Attempting to subtract non-initialized expressions" << crash;
     }
     return;
   }
-  if (other.owner == 0) {
+  if (other.owner == nullptr) {
     Expression otherCopy;
     otherCopy.AssignValue(other.theData, *this->owner);
     (*this) -= otherCopy;
     return;
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     this->AssignValue(this->theData, *other.owner);
   }
   if (this->owner != other.owner) {
@@ -1918,7 +1918,7 @@ Expression Expression::operator*(const Expression& other) {
 Expression Expression::operator*(int other) {
   MacroRegisterFunctionWithName("Expression::operator*");
   Expression result;
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     //perhaps we should allow the code below for convenience: really
     //hard to judge if the convenience is worth it, or whether it will cause hard-to-detect bugs.
     //Rational resultRat = this->theData;
@@ -1939,7 +1939,7 @@ Expression Expression::operator*(int other) {
 Expression Expression::operator/(int other) {
   MacroRegisterFunctionWithName("Expression::operator/");
   Expression result;
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "Multiplying non-initialized expression with data: "
     << this->theData << " by integer " << other
     << " is not allowed. "
@@ -1976,20 +1976,20 @@ Expression Expression::operator/(const Expression& other) {
 
 void Expression::operator/=(const Expression& other) {
   MacroRegisterFunctionWithName("Expression::operator/=");
-  if (this->owner == 0 && other.owner == 0) {
+  if (this->owner == nullptr && other.owner == nullptr) {
     this->theData /= other.theData;
     if (this->theData != 1 && this->theData != 0) {
       crash << "Attempting to divide non-initialized expressions" << crash;
     }
     return;
   }
-  if (other.owner == 0) {
+  if (other.owner == nullptr) {
     Expression otherCopy;
     otherCopy.AssignValue(other.theData, *this->owner);
     (*this) /= otherCopy;
     return;
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     this->AssignValue(this->theData, *other.owner);
   }
   if (this->owner != other.owner) {
@@ -2002,20 +2002,20 @@ void Expression::operator/=(const Expression& other) {
 
 void Expression::operator*=(const Expression& other) {
   MacroRegisterFunctionWithName("Expression::operator*=");
-  if (this->owner == 0 && other.owner == 0) {
+  if (this->owner == nullptr && other.owner == nullptr) {
     this->theData *= other.theData;
     if (this->theData != 1 && this->theData != 0) {
       crash << "Attempting to add non-initialized expressions" << crash;
     }
     return;
   }
-  if (other.owner == 0) {
+  if (other.owner == nullptr) {
     Expression otherCopy;
     otherCopy.AssignValue(other.theData, *this->owner);
     (*this) *= otherCopy;
     return;
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     this->AssignValue(this->theData, *other.owner);
   }
   if (this->owner != other.owner) {
@@ -2035,10 +2035,10 @@ bool Expression::operator==(const Expression& other) const {
 
 bool Expression::IsEqualToMathematically(const Expression& other) const {
   MacroRegisterFunctionWithName("Expression::IsEqualToMathematically");
-  if (this->owner == 0 && other.owner == 0) {
+  if (this->owner == nullptr && other.owner == nullptr) {
     return this->theData == other.theData;
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (*this == other) {
@@ -2364,17 +2364,17 @@ bool Function::inputFitsMyInnerType(const Expression& input) {
 }
 
 std::string Function::ToStringShort() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return "(non-initialized)";
   }
   std::stringstream out;
   if (this->flagIsCompositeHandler) {
-    out << "<span style =\"color:#FF0000\">" << this->owner->operationsComposite[this->indexOperation]
-    << " </span><span style =\"color:#00FF00\">(composite)</span> ("
+    out << "<span style =\"color:red\">" << this->owner->operationsComposite[this->indexOperation]
+    << " </span><span style =\"color:blue\">(composite)</span> ("
     << this->indexAmongOperationHandlers + 1 << " out of "
     << this->owner->operationsCompositeHandlers[this->indexOperation].size << ") ";
   } else {
-    out << "<span style =\"color:#FF0000\">" << this->owner->theAtoms[this->indexOperation]
+    out << "<span style =\"color:red\">" << this->owner->theAtoms[this->indexOperation]
     << "</span> (" << this->indexAmongOperationHandlers + 1 << " out of "
     << this->owner->FunctionHandlers[this->indexOperation].size << "). ";
   }
@@ -2382,7 +2382,7 @@ std::string Function::ToStringShort() const {
 }
 
 std::string Function::ToStringSummary() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return "(non-initialized)";
   }
   std::stringstream out;
@@ -2410,7 +2410,7 @@ JSData Function::ToJSON() const {
   MacroRegisterFunctionWithName("Function::ToJSON");
   JSData result;
   result.theType = JSData::token::tokenObject;
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     result["error"] = "bad_owner";
     return result;
   }
@@ -2460,7 +2460,7 @@ std::string Function::ToStringFull() const {
   if (!this->flagIamVisible) {
     return "";
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return "(non-intialized)";
   }
   std::stringstream out2;

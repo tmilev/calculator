@@ -1171,7 +1171,7 @@ bool CalculatorFunctionsGeneral::innerCollectSummands(
 }
 
 bool CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight(const Expression& left, const Expression& right) {
-  if (left.owner == 0 || right.owner == 0) {
+  if (left.owner == nullptr || right.owner == nullptr) {
     return left > right;
   }
   if (left.size() != 3 || right.size() != 3) {

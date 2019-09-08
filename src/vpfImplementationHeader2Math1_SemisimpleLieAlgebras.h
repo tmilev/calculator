@@ -15,7 +15,7 @@ std::string Weight<coefficient>::ToString(FormatExpressions* theFormat) const {
   std::stringstream out;
   bool formatWeightAsIndexVectorSpace = theFormat == 0 ? true : theFormat->flagFormatWeightAsVectorSpaceIndex;
   if (!formatWeightAsIndexVectorSpace) {
-    if (this->owner == 0) {
+    if (this->owner == nullptr) {
       return this->weightFundamentalCoordS.ToStringLetterFormat("\\psi", theFormat);
     }
     Vector<coefficient> weightEpsCoords, weightSimpleCoords;
@@ -147,7 +147,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeFullCharacter(
   HashedList<Vector<Rational> > theOrbit;
   theVect.SetSize(1);
   Weight<coefficient> tempMon;
-  tempMon.owner = 0;
+  tempMon.owner = nullptr;
   for (int i = 0; i < domChar.size(); i ++) {
     theVect[0] = this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental(domChar[i].weightFundamentalCoordS);
     if (!(this->GetOwner()->theWeyl.GenerateOrbit(theVect, false, theOrbit, false, - 1, 0, upperBoundNumDominantWeights))) {
@@ -215,7 +215,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeDominantWeightsOnly(
   std::stringstream localErrors, localDetails;
   std::string localDetail;
   Weight<coefficient> tempMon;
-  tempMon.owner = 0;
+  tempMon.owner = nullptr;
   coefficient bufferCoeff;
   for (int i = 0; i < this->size(); i ++) {
     currentWeightFundCoords = (*this)[i].weightFundamentalCoordS;
@@ -349,7 +349,7 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart() co
   int theRank = owner->GetRank();
   int numPosRoots = owner->GetNumPosRoots();
   result.MakeZero(theRank);
-  if (theRank <= 0 || owner == 0) {
+  if (theRank <= 0 || owner == nullptr) {
     crash << "This is a programming error: the owner of "
     << "a semisimple Lie algebra element is non-present or corrupted. " << crash;
   }

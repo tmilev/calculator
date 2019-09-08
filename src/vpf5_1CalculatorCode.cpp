@@ -1779,7 +1779,7 @@ bool Expression::AssignStringParsed(
 }
 
 bool Expression::IsSuitableForSubstitution() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->IsBuiltInTypE() || this->StartsWith(this->owner->opBind())) {
@@ -1789,7 +1789,7 @@ bool Expression::IsSuitableForSubstitution() const {
 }
 
 bool Expression::IsSuitableForRecursion() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->IsAtom() || this->IsBuiltInTypE() || this->StartsWith(this->owner->opBind())) {
@@ -2259,7 +2259,7 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
 
 bool Expression::GetListExpressionsFromExpressionHistoryRecursiveNested(Expression& outputAppend) const {
   MacroRegisterFunctionWithName("Expression::GetListExpressionsFromExpressionHistoryRecursiveNested");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     outputAppend.AddChildOnTop(*this);
     return true;
   }
@@ -2306,7 +2306,7 @@ bool Expression::GetListExpressionsFromExpressionHistoryRecursiveNested(Expressi
 std::string Expression::ToStringExpressionHistoryRecursiveNested() {
   MacroRegisterFunctionWithName("Expression::ToStringExpressionHistoryRecursiveNested");
   std::stringstream out;
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return "(no owner)";
   }
   Expression processedHistory;
@@ -2446,11 +2446,11 @@ public:
   const Expression* getCurrentE(const List<Expression>& input);
   ExpressionHistoryEnumerator() {
     this->initialized = false;
-    this->owner = 0;
+    this->owner = nullptr;
   }
   bool IncrementRecursivelyReturnFalseIfPastLast(TreeNode<HistorySubExpression>& currentNode);
   bool CheckInitialization() {
-    if (this->owner == 0) {
+    if (this->owner == nullptr) {
       crash << "Expression history enumerator has zero owner. " << crash;
     }
     return true;

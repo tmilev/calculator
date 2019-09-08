@@ -110,7 +110,7 @@ bool CalculatorHtmlFunctions::innerSetInputBox(
 
 std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBox) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::GetUserInputBoxName");
-  if (theBox.owner == 0) {
+  if (theBox.owner == nullptr) {
     return "non-initialized-expression";
   }
   Calculator& theCommands = *theBox.owner;

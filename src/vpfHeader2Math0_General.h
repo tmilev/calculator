@@ -12,9 +12,9 @@
 
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 
-//we are wrapping the math.h c++ functions for portability reasons
-//(if for some reason we want to change from math.h to a better floating point
-//library, we only need to change the implementation of the Floatingpoint class.
+// We are wrapping the math.h c++ functions for portability reasons
+// (if for some reason we want to change from math.h to a better floating point
+// library, we only need to change the implementation of the FloatingPoint class.
 class FloatingPoint {
 public:
   static double abs(double argument);
@@ -1979,12 +1979,12 @@ public:
     }
     return result;
   }
-  void QuickSortAscending(typename List<templateMonomial>::OrderLeftGreaterThanRight theOrder = 0) {
+  void QuickSortAscending(typename List<templateMonomial>::OrderLeftGreaterThanRight theOrder = nullptr) {
     List<templateMonomial> theSortedMons = this->theMonomials;
     theSortedMons.QuickSortAscending(theOrder, &this->theCoeffs);
     this->theMonomials = theSortedMons;
   }
-  void QuickSortDescending(typename List<templateMonomial>::OrderLeftGreaterThanRight theOrder = 0) {
+  void QuickSortDescending(typename List<templateMonomial>::OrderLeftGreaterThanRight theOrder = nullptr) {
     List<templateMonomial> theSortedMons = this->theMonomials;
     theSortedMons.QuickSortDescending(theOrder, &this->theCoeffs);
     this->theMonomials = theSortedMons;
@@ -2079,13 +2079,13 @@ public:
   static void IntersectVectorSpaces(
     const List<MonomialCollectionTemplate>& vectorSpace1,
     const List<MonomialCollectionTemplate>& vectorSpace2,
-    List<MonomialCollectionTemplate>& outputIntersection, HashedList<templateMonomial>* seedMonomials = 0
+    List<MonomialCollectionTemplate>& outputIntersection, HashedList<templateMonomial>* seedMonomials = nullptr
   );
   template <class MonomialCollectionTemplate>
   static int GetRankIntersectionVectorSpaces(
     List<MonomialCollectionTemplate>& vectorSpace1,
     List<MonomialCollectionTemplate>& vectorSpace2,
-    HashedList<templateMonomial>* seedMonomials = 0
+    HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
     List<MonomialCollectionTemplate> listCopy = vectorSpace1;
     listCopy.AddListOnTop(vectorSpace2);
@@ -2096,7 +2096,7 @@ public:
   static bool VectorSpacesIntersectionIsNonTrivial(
     List<MonomialCollectionTemplate>& vectorSpace1,
     List<MonomialCollectionTemplate>& vectorSpace2,
-    HashedList<templateMonomial>* seedMonomials = 0
+    HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
     return 0 != MonomialCollection<templateMonomial, coefficient>::GetRankIntersectionVectorSpaces(
       vectorSpace1, vectorSpace2, seedMonomials
@@ -2106,7 +2106,7 @@ public:
   static bool LinSpanContains(
     const List<MonomialCollectionTemplate>& theList,
     const MonomialCollectionTemplate& input,
-    HashedList<templateMonomial>* seedMonomials = 0
+    HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
     List<MonomialCollectionTemplate> listCopy = theList;
     MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
@@ -2120,12 +2120,12 @@ public:
     const List<MonomialCollectionTemplate>& theList,
     const MonomialCollectionTemplate& input,
     Vector<coefficient>& outputFirstLinearCombination,
-    HashedList<templateMonomial>* seedMonomials = 0
+    HashedList<templateMonomial>* seedMonomials = nullptr
   );
-  bool HasRationalCoeffs(MonomialCollection<templateMonomial, Rational>* outputConversionToRationals = 0) {
+  bool HasRationalCoeffs(MonomialCollection<templateMonomial, Rational>* outputConversionToRationals = nullptr) {
     Rational tempRat;
     Rational* theCF = nullptr;
-    if (outputConversionToRationals != 0) {
+    if (outputConversionToRationals != nullptr) {
       theCF = &tempRat;
       outputConversionToRationals->MakeZero();
     }
@@ -2133,7 +2133,7 @@ public:
       if (!this->theCoeffs[i].IsRational(theCF)) {
         return false;
       } else {
-        if (outputConversionToRationals != 0) {
+        if (outputConversionToRationals != nullptr) {
           outputConversionToRationals->AddMonomial((*this)[i], *theCF);
         }
       }
@@ -2142,7 +2142,7 @@ public:
   }
   template <class MonomialCollectionTemplate>
   static int GetRankOfSpanOfElements(
-    List<MonomialCollectionTemplate>& theList, HashedList<templateMonomial>* seedMonomials = 0
+    List<MonomialCollectionTemplate>& theList, HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
     List<MonomialCollectionTemplate> listCopy = theList;
     MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
@@ -6344,11 +6344,13 @@ public:
   Rational GetSquareLengthLongestRootLinkedTo(const Vector<Rational>& inputVector);
   Rational GetSquareLengthShortestRootLinkedTo(const Vector<Rational>& inputVector);
   bool LetterIsDynkinGreaterThanLetter(char letter1, char letter2);
-  //the below function takes as an input a set of roots and computes the corredponding Dynkin diagram of the
-  //root  subsystem. Note: the simleBasisInput is required to be a set of simple roots.
-  //The procedure calls a
-  //transformation to simple basis on the simpleBasisInput, so your input will get changed if it wasn't
-  //simple as required!
+  // The function below takes as an input a set of roots and
+  // computes the corredponding Dynkin diagram of the
+  // root subsystem. Note: the simleBasisInput is required to be a set of simple roots.
+  // The procedure calls a
+  // transformation to simple basis on the simpleBasisInput,
+  // so your input will get changed if it wasn't
+  // simple as required.
   void ComputeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroupData& theWeyl);
   //the below function is just as the above but doesn't modify simpleBasisInput
   void ComputeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput);
@@ -6381,10 +6383,10 @@ public:
   Vector<Rational> goalVector;
   List<int> currentPartition;
   Vector<Rational> currentPartitionSum;
-  //format: each element of thePartitions gives an array whose entries give
+  // Format: each element of thePartitions gives an array whose entries give
   // the multiplicity of the weights. I.e. if PartitioningRoots has 2 elements, then thePartitions[0]
   // would have 2 elements: the first giving the multiplicity of PartitioningRoots[0]
-  //and the second - the multiplicity of
+  // and the second - the multiplicity of
   // PartitioningRoots[1]
   List<List<int> > thePartitions;
   bool flagStoreAllPartitions;
@@ -7148,7 +7150,7 @@ public:
   }
   void MakeHWV(ModuleSSalgebra<coefficient>& theOwner, const coefficient& theRingUnit);
   int GetNumVars() {
-    if (this->owner == 0) {
+    if (this->owner == nullptr) {
       return - 1;
     }
     if (this->owner->size == 0) {
@@ -7419,7 +7421,7 @@ std::string MonomialTensorGeneralizedVermas<coefficient>::ToString(FormatExpress
 
 template <class coefficient>
 std::string MonomialGeneralizedVerma<coefficient>::ToString(FormatExpressions* theFormat, bool includeV) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "This is a programming error: non-initialized generalized Verma monomial (owner is 0)." << crash;
   }
   ModuleSSalgebra<coefficient>& theMod = *this->owner;

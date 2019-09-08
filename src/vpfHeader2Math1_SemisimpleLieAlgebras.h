@@ -305,7 +305,7 @@ public:
   Weight() : owner(0) {
   }
   void CheckNonZeroOwner() const {
-    if (this->owner != 0) {
+    if (this->owner != nullptr) {
       return;
     }
     crash << "This is a programming error: Monomial char has zero owner, "

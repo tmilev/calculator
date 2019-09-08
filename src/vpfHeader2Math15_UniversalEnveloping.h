@@ -17,7 +17,7 @@ public:
   SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
-  friend std::ostream& operator << (std::ostream& output, const MonomialUniversalEnveloping<coefficient>& theMon) {
+  friend std::ostream& operator<<(std::ostream& output, const MonomialUniversalEnveloping<coefficient>& theMon) {
     output << theMon.ToString();
     return output;
   }

@@ -912,7 +912,7 @@ void ChevalleyGenerator::CheckConsistencyWithOther(const ChevalleyGenerator& oth
 }
 
 bool ChevalleyGenerator::CheckInitialization() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "This is a programming error: attempting to use a non-initialized Chevalley generator. " << crash;
     return false;
   }
@@ -1916,7 +1916,7 @@ void RationalFunctionOld::ScaleClearDenominator(List<RationalFunctionOld>& input
 }
 
 bool SemisimpleLieAlgebraOrdered::CheckInitialization() const {
-  if (this->theOwner == 0) {
+  if (this->theOwner == nullptr) {
     crash << "Use of semisimple Lie algebra without an owner. " << crash;
   }
   if (this->theOwner->flagDeallocated) {

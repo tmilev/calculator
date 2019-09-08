@@ -76,7 +76,7 @@ bool CalculatorFunctionsGeneral::innerConstructCartanSA(Calculator& theCommands,
   }
   for (int i = 0; i < theSA.theGenerators.size; i ++) {
     if (!theSA.theGenerators[i].IsEqualToZero()) {
-      if (theSA.owner != 0) {
+      if (theSA.owner != nullptr) {
         if (theSA.owner != theSA.theGenerators[i].GetOwner()) {
           return theCommands << "The input elements in " << input.ToString()
           << " belong to different semisimple Lie algebras";
@@ -85,7 +85,7 @@ bool CalculatorFunctionsGeneral::innerConstructCartanSA(Calculator& theCommands,
       theSA.owner = theSA.theGenerators[i].GetOwner();
     }
   }
-  if (theSA.owner == 0) {
+  if (theSA.owner == nullptr) {
     return theCommands << "Failed to extract input semisimple Lie algebra "
     << "elements from the inputs of " << input.ToString();
   }
@@ -1365,12 +1365,12 @@ public:
   bool PreparePFExpressionSummands();
   std::string ToStringRationalFunctionLatex();
   bool IntegrateRF();
-  IntegralRFComputation(Calculator* inputOwner):owner(inputOwner){}
+  IntegralRFComputation(Calculator* inputOwner): owner(inputOwner) {}
   bool CheckConsistency() const;
 };
 
 bool IntegralRFComputation::CheckConsistency() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "Non-initialized rf computation" << crash;
   }
   return true;
@@ -3776,7 +3776,7 @@ bool CalculatorFunctionsGeneral::extractQuadraticCoeffsWRTvariable(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::extractQuadraticCoeffsWRTvariable");
   VectorSparse<Expression> theCoeffs;
-  if (theQuadratic.owner == 0) {
+  if (theQuadratic.owner == nullptr) {
     return false;
   }
   Calculator& theCommands = *theQuadratic.owner;
@@ -3809,7 +3809,7 @@ bool CalculatorFunctionsGeneral::extractLinearCoeffsWRTvariable(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::extractLinearCoeffsWRTvariable");
   VectorSparse<Expression> theCoeffs;
-  if (theLinearExpression.owner == 0) {
+  if (theLinearExpression.owner == nullptr) {
     return false;
   }
   Calculator& theCommands = *theLinearExpression.owner;
@@ -7711,7 +7711,7 @@ bool Expression::EvaluatesToDoubleInRange(
   Vectors<double>* outputPoints
 ) const {
   MacroRegisterFunctionWithName("Expression::EvaluatesToDoubleInRange");
-  if (numIntervals < 1 || this->owner == 0) {
+  if (numIntervals < 1 || this->owner == nullptr) {
     return false;
   }
   HashedList<Expression> knownEs = this->owner->knownDoubleConstants;
@@ -7791,7 +7791,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
 (const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs,
  double* whichDouble) const {
   MacroRegisterFunctionWithName("Expression::EvaluatesToDoubleUnderSubstitutions");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   Calculator& theCommands = *this->owner;
@@ -8746,7 +8746,7 @@ public:
     this->indexCurrentChild = - 1;
     this->maxNumCharsInString = 100;
     this->numLayers = 0;
-    this->owner = 0;
+    this->owner = nullptr;
     this->charWidth.AssignNumeratorAndDenominator(1, 20);
     this->padding = 1;
     this->layerHeight = 2;

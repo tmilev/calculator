@@ -1128,7 +1128,7 @@ public:
     out.generatorS.SetSize(this->preimageGroup->generators.size);
     for (int i = 0; i < this->preimageGroup->generators.size; i ++) {
       elementSecondGroup ki = (*this)(this->preimageGroup->generators[i]);
-      M2.GetMatrixOfElement(ki,out.generatorS[i]);
+      M2.GetMatrixOfElement(ki, out.generatorS[i]);
     }
     return out;
   }

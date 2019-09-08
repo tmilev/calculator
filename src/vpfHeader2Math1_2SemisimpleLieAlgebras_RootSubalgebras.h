@@ -498,7 +498,7 @@ public:
   }
   const WeylGroupData& GetOwnerWeyl() const;
   SemisimpleLieAlgebra& GetOwnerSSAlgebra() {
-    if (this->owner == 0) {
+    if (this->owner == nullptr) {
       crash << "This is a programming error: attempting to access "
       << "the ambient Lie algebra of a non-initialized sl(2)-subalgebra. " << crash;
     }
@@ -588,17 +588,17 @@ public:
    
   }
   bool operator==(const SltwoSubalgebras& other) const {
-    if (this->owner == 0) {
-      return other.owner == 0;
+    if (this->owner == nullptr) {
+      return other.owner == nullptr;
     }
-    if (other.owner == 0) {
+    if (other.owner == nullptr) {
       return false;
     }
     return this->GetOwner() == other.GetOwner();
   }
   bool CheckConsistency() const;
   void CheckForCorrectInitializationCrashIfNot() const {
-    if (this->owner == 0) {
+    if (this->owner == nullptr) {
       crash << "<br>This is a programming error. Object SltwoSubalgebras "
       << "is not initialized, although it is supposed to be. " << crash;
     }

@@ -40,56 +40,56 @@ std::string Calculator::ToStringFunctionHandlersJSON() {
 }
 
 const Expression& Calculator::EZero() {
-  if (this->frequentConstantZero.owner == 0) {
+  if (this->frequentConstantZero.owner == nullptr) {
     this->frequentConstantZero.AssignValue(0, *this);
   }
   return this->frequentConstantZero;
 }
 
 const Expression& Calculator::EOne() {
-  if (this->frequentConstantOne.owner == 0) {
+  if (this->frequentConstantOne.owner == nullptr) {
     this->frequentConstantOne.AssignValue(1, *this);
   }
   return this->frequentConstantOne;
 }
 
 const Expression& Calculator::EMOne() {
-  if (this->frequentConstantMinusOne.owner == 0) {
+  if (this->frequentConstantMinusOne.owner == nullptr) {
     this->frequentConstantMinusOne.AssignValue(- 1, *this);
   }
   return this->frequentConstantMinusOne;
 }
 
 const Expression& Calculator::EFour() {
-  if (this->frequentConstantFour.owner == 0) {
+  if (this->frequentConstantFour.owner == nullptr) {
     this->frequentConstantFour.AssignValue(4, *this);
   }
   return this->frequentConstantFour;
 }
 
 const Expression& Calculator::ETwo() {
-  if (this->frequentConstantTwo.owner == 0) {
+  if (this->frequentConstantTwo.owner == nullptr) {
     this->frequentConstantTwo.AssignValue(2, *this);
   }
   return this->frequentConstantTwo;
 }
 
 const Expression& Calculator::EMHalf() {
-  if (this->frequentConstantMinusHalf.owner == 0) {
+  if (this->frequentConstantMinusHalf.owner == nullptr) {
     this->frequentConstantMinusHalf.AssignValue(Rational(- 1, 2), *this);
   }
   return this->frequentConstantMinusHalf;
 }
 
 const Expression& Calculator::EInfinity() {
-  if (this->frequentEInfinity.owner == 0) {
+  if (this->frequentEInfinity.owner == nullptr) {
     this->frequentEInfinity.MakeAtom(this->opInfinity(), *this);
   }
   return this->frequentEInfinity;
 }
 
 const Expression& Calculator::EMInfinity() {
-  if (this->frequentEMInfinity.owner == 0) {
+  if (this->frequentEMInfinity.owner == nullptr) {
     this->frequentEMInfinity = this->EMOne() * this->EInfinity();
   }
   return this->frequentEMInfinity;
@@ -254,7 +254,7 @@ bool Calculator::ExpressionMatchesPattern(
 }
 
 void StateMaintainerCalculator::AddRule(const Expression& theRule) {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "StackMaintainerCalculator has zero owner. " << crash;
   }
   this->owner->RuleStack.AddChildOnTop(theRule);
@@ -309,7 +309,7 @@ StateMaintainerCalculator::StateMaintainerCalculator(Calculator& inputBoss) {
 }
 
 StateMaintainerCalculator::~StateMaintainerCalculator() {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return;
   }
   this->owner->historyStack.SetSize(this->historyOuterSize);
@@ -365,7 +365,7 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
   }
   this->owner->RuleStackCacheIndex = this->startingRuleStackIndex;
   this->owner->RuleStack.children.SetSize(this->startingRuleStackSize);
-  this->owner = 0;
+  this->owner = nullptr;
 }
 
 Expression Calculator::GetNewBoundVar() {

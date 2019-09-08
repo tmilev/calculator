@@ -5680,17 +5680,17 @@ bool DynkinSimpleType::operator<(int otherRank) const {
 }
 
 ElementWeylGroupAutomorphisms::ElementWeylGroupAutomorphisms() {
-  this->owner = 0;
+  this->owner = nullptr;
   this->flagDeallocated = false;
 }
 
 ElementWeylGroupAutomorphisms::~ElementWeylGroupAutomorphisms() {
-  this->owner = 0;
+  this->owner = nullptr;
   this->flagDeallocated = true;
 }
 
 bool ElementWeylGroupAutomorphisms::CheckInitialization() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "Element of Weyl group automorphisms has zero owner. " << crash;
   }
   return true;
@@ -5787,7 +5787,7 @@ bool ElementWeylGroup::CheckConsistency() const {
 
 bool ElementWeylGroup::CheckInitialization() const {
   this->CheckConsistency();
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "This is a programming error: non-initialized element Weyl group. " << crash;
     return false;
   }

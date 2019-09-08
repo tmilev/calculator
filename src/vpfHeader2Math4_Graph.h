@@ -21,7 +21,7 @@ public:
   void AddDiEdge(int v1, int v2);
   List<List<int> > DestructivelyGetConnectedComponents();
 private:
-  void TreeRecurseCopyDelete(List<int> &l, int v, int m);
+  void TreeRecurseCopyDelete(List<int>& l, int v, int m);
 };
 
 struct GraphEdge {

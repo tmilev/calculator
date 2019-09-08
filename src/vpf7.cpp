@@ -88,7 +88,7 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
 }
 
 void LittelmannPath::ActByEFDisplayIndex(int displayIndex) {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << " This is a programming error: LS path without initialized owner is begin acted upon. " << crash;
   }
   if (displayIndex > 0) {
@@ -99,7 +99,7 @@ void LittelmannPath::ActByEFDisplayIndex(int displayIndex) {
 }
 
 void LittelmannPath::ActByEalpha(int indexAlpha) {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << " This is a programming error: LS path without initialized owner is begin acted upon. " << crash;
   }
   if (indexAlpha < 0 || indexAlpha >= this->owner->GetDim()) {
@@ -110,7 +110,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha) {
   }
   Rational theMin = 0;
   int minIndex = - 1;
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "Zero owner not allowed here. " << crash;
   }
   WeylGroupData& theWeyl = *this->owner;
@@ -181,7 +181,7 @@ void LittelmannPath::ActByFalpha(int indexAlpha) {
   if (this->Waypoints.size == 0) {
     return;
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << " This is a programming error: LS path without initialized owner is begin acted upon. " << crash;
   }
   if (indexAlpha < 0 || indexAlpha >= this->owner->GetDim()) {

@@ -186,7 +186,7 @@ bool Calculator::innerAnimateLittelmannPaths(Calculator& theCommands, const Expr
   if (!input.IsListNElements(3)) {
     return output.MakeError("This function takes 2 arguments", theCommands);
   }
-  SemisimpleLieAlgebra* theSSowner = 0;
+  SemisimpleLieAlgebra* theSSowner = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, input[1], theSSowner
   )) {

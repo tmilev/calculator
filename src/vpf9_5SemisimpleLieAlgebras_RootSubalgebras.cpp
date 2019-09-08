@@ -1540,7 +1540,7 @@ bool rootSubalgebra::LinCombToString(
 
 rootSubalgebra::rootSubalgebra() {
   this->flagDeallocated = false;
-  this->ownEr = 0;
+  this->ownEr = nullptr;
   this->NumGmodKtableRowsAllowedLatex = 35;
   this->flagMakingProgressReport = true;
   this->flagComputeConeCondition = true;
@@ -1744,7 +1744,7 @@ bool rootSubalgebra::LinCombToStringDistinguishedIndex(
 }
 
 SemisimpleLieAlgebra& rootSubalgebra::GetOwnerSSalg() const {
-  if (this->ownEr == 0) {
+  if (this->ownEr == nullptr) {
     crash << "This is a programming error. Attempting to "
     << "access ambient Lie algebra of non-initialized root subalgebras. " << crash;
   }
@@ -2103,7 +2103,7 @@ bool rootSubalgebra::CheckConsistency() const {
 
 bool rootSubalgebra::CheckInitialization() const {
   this->CheckConsistency();
-  if (this->ownEr == 0) {
+  if (this->ownEr == nullptr) {
     crash << "Root subalgebra is not initialized properly. " << crash;
     return false;
   }
@@ -3405,7 +3405,7 @@ void rootSubalgebras::ComputeKmodMultTables() {
 }
 
 bool rootSubalgebras::CheckInitialization() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "This is a programming error: root subalgebras with non-initialized owner. " << crash;
   }
   return true;
@@ -3568,7 +3568,7 @@ rootSubalgebras::rootSubalgebras() {
   this->NumLinesPerTableLatex = 20;
   this->NumColsPerTableLatex = 4;
   this->UpperLimitNumElementsWeyl = 0;
-  this->owner = 0;
+  this->owner = nullptr;
   this->flagPrintGAPinput = false;
   this->flagPrintParabolicPseudoParabolicInfo = false;
   this->initForNilradicalGeneration();

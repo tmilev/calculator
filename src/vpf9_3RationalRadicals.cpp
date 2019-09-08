@@ -323,7 +323,7 @@ void AlgebraicClosureRationals::GetAdditionTo(const AlgebraicNumber& input, Vect
     this->GetAdditionTo(anCopy, output);
     return;
   }
-  if (input.owner == 0) {
+  if (input.owner == nullptr) {
     if (input.theElT.size() > 0) {
       output.MaKeEi(0, input.theElT.theCoeffs[0]);
     }
@@ -370,7 +370,7 @@ void AlgebraicClosureRationals::GetMultiplicationBy(
 }
 
 Rational AlgebraicNumber::GetDenominatorRationalPart() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     if (this->theElT.IsEqualToZero()) {
       return 1;
     }
@@ -454,7 +454,7 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
 }
 
 Rational AlgebraicNumber::GetNumeratorRationalPart() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     if (this->theElT.IsEqualToZero()) {
       return 0;
     }
@@ -498,7 +498,7 @@ bool AlgebraicNumber::operator==(const Rational& other) const {
 }
 
 bool AlgebraicNumber::NeedsParenthesisForMultiplication() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return false;
   }
   VectorSparse<Rational> additiveForm;
@@ -507,7 +507,7 @@ bool AlgebraicNumber::NeedsParenthesisForMultiplication() const {
 }
 
 bool AlgebraicNumber::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     Rational tempRat;
     if (this->IsRational(&tempRat)) {
       return tempRat.NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
@@ -523,7 +523,7 @@ bool AlgebraicNumber::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost
 }
 
 bool AlgebraicNumber::CheckNonZeroOwner() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "This is a programming error: algebraic number with "
     << "non-initialized owner not permitted in the current context." << crash;
   }
@@ -726,7 +726,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
 
 void AlgebraicNumber::Invert() {
   MacroRegisterFunctionWithName("AlgebraicNumber::Invert");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     if (this->theElT.IsEqualToZero()) {
       crash << "This is a programming error: division by zero. " << crash;
     }
@@ -765,7 +765,7 @@ void AlgebraicNumber::operator*=(const Rational& other) {
 }
 
 bool AlgebraicNumber::CheckCommonOwner(const AlgebraicNumber& other) const {
-  if (this->owner == 0 || other.owner == 0) {
+  if (this->owner == nullptr || other.owner == nullptr) {
     return true;
   }
   if (this->owner != other.owner) {
@@ -784,10 +784,10 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other) {
     return;
   }
   AlgebraicClosureRationals* theOwner = this->owner;
-  if (theOwner == 0) {
+  if (theOwner == nullptr) {
     theOwner = other.owner;
   }
-  if (theOwner == 0 && this->basisIndex != other.basisIndex) {
+  if (theOwner == nullptr && this->basisIndex != other.basisIndex) {
     crash << "This is a programming error: algebraic numbers "
     << "with zero owners but different basis indices. " << crash;
   }
@@ -811,10 +811,10 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
   }
   this->CheckCommonOwner(other);
   AlgebraicClosureRationals* theOwner = this->owner;
-  if (theOwner == 0) {
+  if (theOwner == nullptr) {
     theOwner = other.owner;
   }
-  if (theOwner == 0 && this->basisIndex != other.basisIndex) {
+  if (theOwner == nullptr && this->basisIndex != other.basisIndex) {
     crash << "This is a programming error: algebraic numbers: "
     << this->ToString() << " and " << other.ToString()
     << " have with zero owners but different basis indices. " << crash;
@@ -840,7 +840,7 @@ bool AlgebraicNumber::CheckConsistency() const {
   if (this->flagDeallocated) {
     crash << "This is a programming error: use after free of AlgebraicNumber. " << crash;
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     if (!this->IsRational()) {
       for (int i = 0; i < this->theElT.size(); i ++) {
         stOutput << "<br>index: " << this->theElT[i].theIndex << ", coefficient: "
@@ -863,7 +863,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     return;
   }
   this->CheckConsistency();
-  if (other.owner == 0) {
+  if (other.owner == nullptr) {
     if (other.IsEqualToZero()) {
       this->theElT.MakeZero();
       return;
@@ -871,7 +871,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     this->theElT *= other.theElT.theCoeffs[0];
     return;
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     if (this->theElT.IsEqualToZero()) {
       return;
     }
@@ -930,14 +930,14 @@ void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRati
 }
 
 bool AlgebraicNumber::IsExpressedViaLatestBasis() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return true;
   }
   return this->basisIndex == this->owner->theBasesAdditive.size - 1;
 }
 
 void AlgebraicNumber::ExpressViaLatestBasis() {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return;
   }
   if (this->basisIndex == this->owner->theBasesAdditive.size - 1) {
@@ -961,7 +961,7 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble) const {
     }
     return true;
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "Owner is zero but algebraic number is not rational. " << crash;
   }
   if (!this->owner->flagIsQuadraticRadicalExtensionRationals) {
@@ -1164,7 +1164,7 @@ bool AlgebraicNumber::IsEqualToZero() const {
 }
 
 std::string AlgebraicNumber::ToString(FormatExpressions* theFormat) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     if (this->theElT.IsEqualToZero()) {
       return "0";
     }
@@ -1218,7 +1218,7 @@ void AlgebraicNumber::operator=(const Polynomial<AlgebraicNumber>& other) {
 }
 
 void AlgebraicNumber::operator=(const Rational& other) {
-  this->owner = 0;
+  this->owner = nullptr;
   this->theElT.MaKeEi(0, other);
   this->basisIndex = 0;
 }

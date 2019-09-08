@@ -198,7 +198,7 @@ std::string HtmlInterpretation::GetSanitizedComment(
     return "";
   }
   //<- expression has a partially drawn plot-> not displaying.
-  if (input.owner == 0) {
+  if (input.owner == nullptr) {
     return "";
   }
   if (input.StartsWith(input.owner->opRulesOff()) || input.StartsWith(input.owner->opRulesOn())) {

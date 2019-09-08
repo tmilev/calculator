@@ -293,7 +293,7 @@ public:
     const coefficient& theRingZero = 0
   );
   MonomialUniversalEnvelopingOrdered() {
-    this->owner = 0;
+    this->owner = nullptr;
   }
   void SubstitutionCoefficients(PolynomialSubstitution<Rational>& theSub);
   bool operator==(const MonomialUniversalEnvelopingOrdered& other) const {
@@ -486,7 +486,7 @@ public:
   template<class otherType>
   void operator*=(const otherType& other);
   ElementUniversalEnvelopingOrdered() {
-    this->owner = 0;
+    this->owner = nullptr;
   }
   bool IsProportionalTo(
     const ElementUniversalEnvelopingOrdered<coefficient>& other,

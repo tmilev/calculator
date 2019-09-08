@@ -20,7 +20,7 @@ public:
    
   }
   bool CheckInitialization() {
-    if (this->owner == 0) {
+    if (this->owner == nullptr) {
       crash << "Tree node without parent. " << crash;
     }
     return true;

@@ -42,7 +42,8 @@ bool FiniteGroup<elementSomeGroup>::CheckInitializationFDrepComputation() const 
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::CheckInitializationConjugacyClasses() const {
   if (this->ConjugacyClassCount() == 0) {
-    crash << "This is a programming error: requesting to compute character hermitian product in a group whose "
+    crash << "This is a programming error: requesting to "
+    << "compute character hermitian product in a group whose "
     << "conjugacy classes and/or elements have not been computed. The group reports to have "
     << this->ConjugacyClassCount() << " conjugacy classes and " << this->theElements.size << " elements. "
     << crash;
@@ -252,7 +253,8 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict(
   MacroRegisterFunctionWithName("WeylGroupRepresentation::Restrict");
   this->CheckAllSimpleGensAreOK();
   if (VectorSpaceBasisSubrep.size == 0) {
-    crash << "This is a programming error: restriction of representation to a zero subspace is not allowed. " << crash;
+    crash << "This is a programming error: restriction of "
+    << "representation to a zero subspace is not allowed. " << crash;
   }
   output.init(*this->ownerGroup);
   output.basis = VectorSpaceBasisSubrep;
@@ -314,12 +316,12 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
   Matrix<Rational> tempMat;
   for (int ii = 0; ii < upperLimitComputations; ii ++) {
     int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0, 1, - 1, 2, - 2, 3, - 3,...
-//    stOutput << "checking " << i << " found " << found << "\n";
+    //    stOutput << "checking " << i << " found " << found << "\n";
     theEigenValueCandidate[0] = i;
     if (theMinPoly.Evaluate(theEigenValueCandidate) == 0) {
       tempMat = *this;
-//      stOutput << "<hr>The min poly is: " << theMinPoly.ToString() << " and evaluates at "
-//      << theEigenValueCandidate << " to " << theMinPoly.Evaluate(theEigenValueCandidate).ToString();
+      //      stOutput << "<hr>The min poly is: " << theMinPoly.ToString() << " and evaluates at "
+      //      << theEigenValueCandidate << " to " << theMinPoly.Evaluate(theEigenValueCandidate).ToString();
       output.SetSize(output.size + 1);
       tempMat.GetEigenspaceModifyMe(theEigenValueCandidate[0], *output.LastObject());
       if (output.LastObject()->size == 0) {
@@ -409,10 +411,11 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
     stOutput << imG.PrettyPrintGeneratorCommutationRelations();
     stOutput << G.PrettyPrintGeneratorCommutationRelations() << '\n';
   }
-// silently fail instead of crashing to support calling into this and if it doesn't
-// work then using brute force
-//  else
-//    crash << "ComputeIrreducibleRepresentationsUsingSpechtModules: Type " << this->theDynkinType << " is unsupported.  If you think it should work, edit " << __FILE__ << ":" << __LINE__ << crash;
+  // silently fail instead of crashing to support calling into this and if it doesn't
+  // work then using brute force
+  //  else
+  //    crash << "ComputeIrreducibleRepresentationsUsingSpechtModules: Type "
+  // << this->theDynkinType << " is unsupported.  If you think it should work, edit " << __FILE__ << ":" << __LINE__ << crash;
   stOutput << G.PrettyPrintCharacterTable() << '\n';
 }
 
@@ -626,8 +629,11 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
     out << "The orbit has " << outputOrbit.size << " elements.";
   }
   latexReport
-  << "\\begin{longtable}{p{3cm}p{4cm}p{4cm}p{4cm}}Element & Eps. coord. & Image fund. coordinates& Hw minus wt. \\\\\n<br>";
-  out << "<table><tr> <td>Group element</td> <td>Image in simple coords</td> <td>Epsilon coords</td><td>Fundamental coords</td>";
+  << "\\begin{longtable}{p{3cm}p{4cm}p{4cm}p{4cm}}Element & Eps. coord. "
+  << "& Image fund. coordinates& Hw minus wt. \\\\\n<br>";
+  out << "<table><tr> <td>Group element</td>"
+  << "<td>Image in simple coords</td>"
+  << "<td>Epsilon coords</td><td>Fundamental coords</td>";
   if (useRho) {
     out << "<td>Homomorphism generator candidate</td>";
   }
@@ -1360,7 +1366,7 @@ public:
   int MaxNumCachedKostkaNumbers;
   LargeInt value;
 //  bool IncrementReturnFalseIfPastLast();
-  bool initTableaux(std::stringstream* comments = 0);
+  bool initTableaux(std::stringstream* comments = nullptr);
   bool operator==(const KostkaNumber& other) const;
   static Rational ComputeTypeBParabolicSignMultiplicity(
     const Partition& parabolicPartition,
@@ -1372,7 +1378,7 @@ public:
   static unsigned int HashFunction(const KostkaNumber& input);
   std::string ToString();
   KostkaNumber();
-  bool Compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments = 0);
+  bool Compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments = nullptr);
 };
 
 class SelectionFixedRankDifferentMaxMultiplicities {
@@ -2012,7 +2018,7 @@ public:
 std::string MonomialMacdonald::ToString(FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("MonomialMacdonald::ToString");
   (void) theFormat; //prevent unused parameter warning, portable
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return "(non-initialized)";
   }
   if (this->rootSel.CardinalitySelection == 0) {
@@ -2120,7 +2126,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
     return false;
   }
   Expression tempE;
-  SemisimpleLieAlgebra* theSSowner = 0;
+  SemisimpleLieAlgebra* theSSowner = nullptr;
   if (!CalculatorConversions::innerSSLieAlgebra(theCommands, input[1], tempE, theSSowner)) {
     return theCommands << "<hr>Failed to load semisimple Lie algebra";
   }
@@ -2174,7 +2180,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
 bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight");
   Weight<Polynomial<Rational> > resultWeight;
-  SemisimpleLieAlgebra* theSSowner = 0;
+  SemisimpleLieAlgebra* theSSowner = nullptr;
   Expression tempE;
   if (!CalculatorConversions::innerSSLieAlgebra(theCommands, input, tempE, theSSowner)) {
     return theCommands << "<hr>Failed to load semisimple Lie algebra. ";

@@ -1998,7 +1998,7 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
     << " variables, namely: "
     << thePlot.variablesInPlay.ToStringCommaDelimited()
     << ". I've been taught to plot 2d surfaces only. "
-    << " Please reduce the number of variables to 2. ";
+    << "Please reduce the number of variables to 2. ";
   }
   Expression uE,vE;
   uE.MakeAtom("u", theCommands);
@@ -2118,8 +2118,6 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
 }
 
 class QRFactorizationComputation{
-
-
 };
 
 //bool CalculatorFunctionsGeneral::innerGramSchmidtVerbose(Calculator& theCommands, const Expression& input, Expression& output)

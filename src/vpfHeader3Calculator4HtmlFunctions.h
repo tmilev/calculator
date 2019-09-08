@@ -17,6 +17,5 @@ public:
   static std::string GetUserInputBoxName(const Expression& theBox);
 };
 
-
 #endif // VPFHEADER3CALCULATOR4HTMLFUNCTIONS_H
 

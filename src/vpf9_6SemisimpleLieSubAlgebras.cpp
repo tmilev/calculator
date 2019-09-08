@@ -192,11 +192,11 @@ bool SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan(
 
 SubalgebraSemisimpleLieAlgebra::SubalgebraSemisimpleLieAlgebra() {
   this->theGlobalVariables = 0;
-  this->owner = 0;
+  this->owner = nullptr;
 }
 
 bool SubalgebraSemisimpleLieAlgebra::CheckInitialization() {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "Non-initilized (no owner) subalgebra of semisimple Lie algebra." << crash;
   }
   return true;
@@ -204,8 +204,8 @@ bool SubalgebraSemisimpleLieAlgebra::CheckInitialization() {
 
 std::string SubalgebraSemisimpleLieAlgebra::ToString(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("SubalgebraSemisimpleLieAlgebra::ToString");
-  (void) theFormat;//avoid unused parameter warning in a portable way
-  if (this->owner == 0) {
+  (void) theFormat; //avoid unused parameter warning in a portable way
+  if (this->owner == nullptr) {
     return "A non-initialized subalgebra of a semisimple Lie algebra; ";
   }
   std::stringstream out;
@@ -422,7 +422,7 @@ void SemisimpleSubalgebras::ComputeFolderNames(FormatExpressions& inputFormat) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
   (void) inputFormat;//avoid unused parameter warning in a portable way
   this->CheckConsistency();
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "To compute semisimple subalgebra folders, "
     << "you need to specify the ambient Lie algebra. " << crash;
   }
@@ -994,7 +994,7 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue() {
 void SemisimpleSubalgebras::FindTheSSSubalgebrasInit() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasInit");
   this->CheckConsistency();
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "<hr>Owner of semisimple subalgebras is zero" << crash;
   }
   if (theGlobalVariables.flagReportEverything) {
@@ -1048,7 +1048,7 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(
   const DynkinType* targetType
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch");
-  if (this->theSubalgebrasNonEmbedded == 0 || this->owner == 0) {
+  if (this->theSubalgebrasNonEmbedded == 0 || this->owner == nullptr) {
     this->initHookUpPointers(newOwner, &ownerField, &containerSubalgebras, &containerSl2Subalgebras);
   }
 
@@ -2247,7 +2247,7 @@ bool CandidateSSSubalgebra::CheckBasicInitialization() const {
   if (this->flagDeallocated) {
     crash << "This is a programming error: use after free of CandidateSSSubalgebra. " << crash;
   }
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "This is a programming error: use of non-initialized semisimple subalgebra candidate. " << crash;
   }
   return true;
@@ -2978,7 +2978,7 @@ void CandidateSSSubalgebra::ComputeCharsPrimalModules() {
   this->CharsPrimalModules.SetSize(this->Modules.size);
   this->CharsPrimalModulesMerged.SetSize(this->Modules.size);
   Weight<Rational> currentWeight;
-  currentWeight.owner = 0;
+  currentWeight.owner = nullptr;
   for (int i = 0; i < this->CharsPrimalModules.size; i ++) {
     this->CharsPrimalModules[i].MakeZero();
     this->CharsPrimalModulesMerged[i].MakeZero();
@@ -3123,7 +3123,7 @@ int CandidateSSSubalgebra::GetPrimalRank() const {
 }
 
 void NilradicalCandidate::CheckInitialization() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "This is a programming error: NilradicalCandidate with non-initialized owner" << crash;
   }
 }
@@ -3831,7 +3831,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
   this->HighestWeightsNONprimalNonSorted.SetSize(this->HighestVectorsNonSorted.size);
   this->thePrimalChaR.MakeZero();
   Weight<Rational> theWeight;
-  theWeight.owner = 0;
+  theWeight.owner = nullptr;
   Vector<Rational> currentRoot;
   //stOutput << this->theWeylNonEmbedded->theDynkinType.ToString();
   //if (this->theWeylNonEmbedded->theDynkinType.ToString() == "A^{56/3}_1")
@@ -4017,7 +4017,7 @@ bool SemisimpleSubalgebras::CheckConsistencyHs() const {
 
 bool SemisimpleSubalgebras::CheckInitialization() const {
   this->CheckConsistency();
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "No owner semisimple Lie algebra. " << crash;
   }
   if (this->theSubalgebrasNonEmbedded == 0) {
@@ -4050,9 +4050,9 @@ void SemisimpleSubalgebras::initHookUpPointers(
 
 void SemisimpleSubalgebras::reset() {
   this->ToStringExpressionString = 0;
-  this->owner = 0;
+  this->owner = nullptr;
   this->ownerField = 0;
-  this->theSl2s.owner = 0;
+  this->theSl2s.owner = nullptr;
   this->flagRealizedAllCandidates = true;
   this->flagAttemptToSolveSystems = true;
   this->flagComputeModuleDecomposition = true;
@@ -4199,7 +4199,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
   this->theWeylNonEmbedded->ComputeRho(true);
   Weight<Rational> tempMon;
   tempMon.weightFundamentalCoordS.MakeZero(this->theWeylNonEmbedded->GetDim());
-  tempMon.owner = 0;
+  tempMon.owner = nullptr;
   this->theCharFundamentalCoordsRelativeToCartan.MakeZero();
   this->theCharFundamentalCoordsRelativeToCartan.AddMonomial(tempMon, this->GetAmbientSS().GetRank());
   List<DynkinSimpleType> theTypes;
@@ -4338,7 +4338,7 @@ void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegular
 }
 
 const WeylGroupData& slTwoSubalgebra::GetOwnerWeyl() const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     crash << "Weyl group with non-initialized owner. " << crash;
   }
   return this->owner->theWeyl;
@@ -4464,7 +4464,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat) const {
 }
 
 void slTwoSubalgebra::init() {
-  this->owner = 0;
+  this->owner = nullptr;
   this->container = 0;
   this->indexInContainer = - 1;
   this->flagCentralizerTypeComputed = false;
@@ -4476,7 +4476,7 @@ bool slTwoSubalgebra::CheckConsistency() const {
   if (this->flagDeallocated) {
     crash << "This is a programming error: use after free of slTwoSubalgebra. " << crash;
   }
-  if (this->owner != 0) {
+  if (this->owner != nullptr) {
     this->owner->CheckConsistency();
   }
   return true;
@@ -4693,7 +4693,7 @@ bool SltwoSubalgebras::CheckConsistency() const {
   if (this->flagDeallocated) {
     crash << "This is a programming error: use after free of SemisimpleLieAlgebra. " << crash;
   }
-  if (this->owner != 0) {
+  if (this->owner != nullptr) {
     this->owner->CheckConsistency();
   }
   for (int i = 0; i < this->size; i ++) {
@@ -6313,7 +6313,7 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen() {
     return;
   }
   Weight<Rational> theZeroWeight;
-  theZeroWeight.owner = 0;
+  theZeroWeight.owner = nullptr;
   theZeroWeight.weightFundamentalCoordS.MakeZero(this->theHs.size);
   this->centralizerDimension = this->theCharNonPrimalFundCoords.GetMonomialCoefficient(theZeroWeight);
   this->centralizerRank = this->centralizerDimension;

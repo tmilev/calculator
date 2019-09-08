@@ -605,7 +605,7 @@ template <class coefficient>
 std::string MonomialUniversalEnveloping<coefficient>::ToString(FormatExpressions* theFormat) const {
   std::stringstream out;
   std::string tempS;
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return "(Error:Programming:NonInitializedMonomial)";
   }
   if (this->generatorsIndices.size == 0) {
@@ -1791,7 +1791,7 @@ template <class coefficient>
 std::string MonomialUniversalEnvelopingOrdered<coefficient>::ToString(
   bool useLatex, bool useCalculatorFormat, FormatExpressions* PolyFormatLocal
 ) const {
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     return "faulty monomial non-initialized owner. Slap the programmer.";
   }
   if (this->IsEqualToZero()) {

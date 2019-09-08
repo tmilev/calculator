@@ -630,7 +630,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
   }
   this->theModuleWeightsSimpleCoords.Clear();
   Weight<coefficient> tempCharMon;
-  tempCharMon.owner = 0;
+  tempCharMon.owner = nullptr;
   this->theCharOverH.MakeZero();
   for (int i = 0; i < this->thePaths.size; i ++) {
     this->theModuleWeightsSimpleCoords.AddOnTopNoRepetition(*this->thePaths[i].Waypoints.LastObject());
@@ -958,7 +958,7 @@ void ModuleSSalgebra<coefficient>::reset() {
   this->actionsGeneratorsMaT.SetSize(0);
   this->actionsGeneratorS.SetSize(0);
   this->ComputedGeneratorActions.init(0);
-  this->owner = 0;
+  this->owner = nullptr;
   this->theGeneratingWordsNonReduced.Clear();
   //Note: for some reason, the linker fails to resolve without the explicit template
   //specialization below.

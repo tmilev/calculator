@@ -127,7 +127,7 @@ public:
     if (this->flagDeallocated) {
       crash << "Use after free of ModuleSSalgebra. " << crash;
     }
-    if (this->owner == 0) {
+    if (this->owner == nullptr) {
       crash << "ModuleSSalgebra does not have its owner Semisimple algebra properly set. " << crash;
     }
     return true;
@@ -143,7 +143,7 @@ public:
     bool computeSimpleGens = true
   );
   SemisimpleLieAlgebra& GetOwner() const {
-    if (this->owner == 0) {
+    if (this->owner == nullptr) {
       crash << "This is a programming error: calling GetOwner() "
       << "on a non-initialized generalized Verma module. " << crash;
     }

@@ -36,16 +36,16 @@ bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFai
     return false;
   }
   certificateContentStripped = MathRoutines::StringTrimWhiteSpace(certificateContentStripped);
-  if (!Crypto::ConvertBase64ToString(certificateContentStripped, this->theCertificate.sourceBinary, commentsOnFailure, 0)) {
+  if (!Crypto::ConvertBase64ToString(certificateContentStripped, this->theServer.certificate.sourceBinary, commentsOnFailure, 0)) {
     return false;
   }
-  if (!this->theCertificate.LoadFromASNEncoded(this->theCertificate.sourceBinary, commentsOnFailure)) {
+  if (!this->theServer.certificate.LoadFromASNEncoded(this->theServer.certificate.sourceBinary, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load certificate. ";
     }
     return false;
   }
-  logServer << "Loaded certificate: " << this->theCertificate.theRSA.ToString() << logger::endL;
+  logServer << "Loaded certificate: " << this->theServer.certificate.theRSA.ToString() << logger::endL;
   //if (SSL_CTX_use_certificate_file(this->context, fileCertificatePhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
   //  ERR_print_errors_fp(stderr);
   //  exit(3);

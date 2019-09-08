@@ -893,11 +893,11 @@ public:
   }
   //The following function returns false if the comparison operator failed!!!!
   template <class compareClass, class carbonCopyType = Object>
-  bool QuickSortAscendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy = 0) {
+  bool QuickSortAscendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy = nullptr) {
     return this->QuickSortAscendingCustomRecursive(0, this->size - 1, theCompareror, carbonCopy);
   }
   template <class compareClass, class carbonCopyType = Object>
-  bool QuickSortDescendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy = 0) {
+  bool QuickSortDescendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy = nullptr) {
     bool result = this->QuickSortAscendingCustomRecursive(0, this->size - 1, theCompareror, carbonCopy);
     this->ReverseOrderElements();
     if (carbonCopy != 0) {
@@ -910,11 +910,11 @@ public:
   //If comparison function is not specified, QuickSortAscending uses operator>, else it uses the given
   //comparison function
   template <class otherType = Object>
-  void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder = 0, List<otherType>* carbonCopy = 0) {
+  void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder = nullptr, List<otherType>* carbonCopy = nullptr) {
     MathRoutines::QuickSortAscending(*this, theOrder, carbonCopy);
   }
   template <class otherType = Object>
-  void QuickSortDescending(List<Object>::OrderLeftGreaterThanRight theOrder = 0, List<otherType>* carbonCopy = 0) {
+  void QuickSortDescending(List<Object>::OrderLeftGreaterThanRight theOrder = nullptr, List<otherType>* carbonCopy = nullptr) {
     MathRoutines::QuickSortDescending(*this, theOrder, carbonCopy);
   }
   bool HasACommonElementWith(List<Object>& right);
@@ -1540,14 +1540,20 @@ public:
     }
   }
   template<typename otherType = int>
-  void QuickSortAscending(typename List<Object>::OrderLeftGreaterThanRight theOrder = 0, List<otherType>* carbonCopy = 0) {
+  void QuickSortAscending(
+    typename List<Object>::OrderLeftGreaterThanRight theOrder = nullptr,
+    List<otherType>* carbonCopy = nullptr
+  ) {
     List<Object> theList;
     theList = *this;
     theList.QuickSortAscending(theOrder, carbonCopy);
     this->operator=(theList);
   }
   template<typename otherType>
-  void QuickSortDescending(typename List<Object>::OrderLeftGreaterThanRight theOrder = 0, List<otherType>* carbonCopy = 0) {
+  void QuickSortDescending(
+    typename List<Object>::OrderLeftGreaterThanRight theOrder = nullptr,
+    List<otherType>* carbonCopy = nullptr
+  ) {
     List<Object> theList;
     theList = *this;
     theList.QuickSortDescending(theOrder, carbonCopy);
@@ -1662,11 +1668,17 @@ public:
     return this->::HashTemplate<Object, List<Object>, hashFunction>::AddNoRepetitionOrReturnIndexFirst(o);
   }
   template <typename otherType = int>
-  void QuickSortAscending(typename List<Object>::OrderLeftGreaterThanRight theOrder = 0, List<otherType>* carbonCopy = 0) {
+  void QuickSortAscending(
+    typename List<Object>::OrderLeftGreaterThanRight theOrder = nullptr,
+    List<otherType>* carbonCopy = nullptr
+  ) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortAscending(theOrder, carbonCopy);
   }
   template <typename otherType = int>
-  void QuickSortDescending(typename List<Object>::OrderLeftGreaterThanRight theOrder = 0, List<otherType>* carbonCopy = 0) {
+  void QuickSortDescending(
+    typename List<Object>::OrderLeftGreaterThanRight theOrder = nullptr,
+    List<otherType>* carbonCopy = nullptr
+  ) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortDescending(theOrder, carbonCopy);
   }
   void SetExpectedSize(int expectedSize) {
@@ -1778,7 +1790,7 @@ bool List<Object>::QuickSortAscendingCustomRecursive(
     if (theCompareror.CompareLeftGreaterThanRight(
       this->TheObjects[LowIndex], this->TheObjects[BottomIndex]
     )) {
-      if (carbonCopy != 0) {
+      if (carbonCopy != nullptr) {
         carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
       }
       this->SwapTwoIndices(LowIndex, HighIndex);
@@ -1789,7 +1801,7 @@ bool List<Object>::QuickSortAscendingCustomRecursive(
   if (theCompareror.CompareLeftGreaterThanRight(this->TheObjects[HighIndex], this->TheObjects[BottomIndex])) {
     HighIndex --;
   }
-  if (carbonCopy != 0) {
+  if (carbonCopy != nullptr) {
     carbonCopy->SwapTwoIndices(BottomIndex, HighIndex);
   }
   this->SwapTwoIndices(BottomIndex, HighIndex);

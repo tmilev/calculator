@@ -923,7 +923,9 @@ struct ExpressionTripleCrunchers {
   }
   ExpressionTripleCrunchers(): theOp(- 1), leftType(- 1), rightType(- 1) {
   }
-  ExpressionTripleCrunchers(int inputOp, int inputLeft, int inputRight): theOp(inputOp), leftType(inputLeft), rightType(inputRight) {
+  ExpressionTripleCrunchers(
+    int inputOp, int inputLeft, int inputRight
+  ): theOp(inputOp), leftType(inputLeft), rightType(inputRight) {
    
   }
   static unsigned int HashFunction(const ExpressionTripleCrunchers& input) {
@@ -1183,8 +1185,12 @@ public:
   void ExpressionHistoryAdd(Expression& theExpression, int expressionLabel);
   void ExpressionHistoryStackAdd();
   void ExpressionHistoryStackPop();
-  void RegisterCalculatorFunctionIdentifier(const Function& theFun, int indexOp, int functionType, int theFunIndex);
-  std::string ToStringSemismipleLieAlgebraLinksFromHD(const DynkinType& theType, FormatExpressions* theFormat = nullptr);
+  void RegisterCalculatorFunctionIdentifier(
+    const Function& theFun, int indexOp, int functionType, int theFunIndex
+  );
+  std::string ToStringSemismipleLieAlgebraLinksFromHD(
+    const DynkinType& theType, FormatExpressions* theFormat = nullptr
+  );
   //void GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat);
   bool IsBoundVarInContext(int inputOp);
   bool IsNonBoundVarInContext(int inputOp);
@@ -1237,7 +1243,9 @@ public:
   bool DecreaseStackExceptLast(int decrease);
   bool DecreaseStackExceptLastTwo(int decrease);
   std::string ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclosures);
-  std::string ToStringSyntacticStackHumanReadable(bool includeLispifiedExpressions, bool ignoreCommandEnclosures);
+  std::string ToStringSyntacticStackHumanReadable(
+    bool includeLispifiedExpressions, bool ignoreCommandEnclosures
+  );
   std::string WriteDefaultLatexFileReturnHtmlLink(
     const std::string& fileContent, std::string* outputFileNameNoExtension, bool useLatexDviPSpsToPNG = false
   );
@@ -1360,29 +1368,36 @@ public:
   bool ReplaceXdotsXByMatrixStart(int numXes);
   bool ReplaceXXXXByCon(int con1);
   bool ReplaceXXYByY() {
-    (*this->CurrentSyntacticStacK)[this->CurrentSyntacticStacK->size - 3] = (*this->CurrentSyntacticStacK)[this->CurrentSyntacticStacK->size - 1];
+    (*this->CurrentSyntacticStacK)[this->CurrentSyntacticStacK->size - 3] =
+    (*this->CurrentSyntacticStacK)[this->CurrentSyntacticStacK->size - 1];
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 2);
     return true;
   }
   bool ReplaceXXYXByYX() {
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4] =
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] =
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 2);
     return true;
   }
   bool ReplaceXYYXByYY() {
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4] =
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] =
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 2);
     return true;
   }
   bool ReplaceXYXByY() {
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] =
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
     this->DecreaseStackSetCharacterRangeS(2);
     return true;
   }
   bool ReplaceXYByY() {
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2] = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2] =
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 1);
     return true;
   }

@@ -80,6 +80,7 @@ public:
   bool LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure);
   bool LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   std::string ToString();
+  void WriteBytes(List<unsigned char>& output);
 };
 
 class Crypto {

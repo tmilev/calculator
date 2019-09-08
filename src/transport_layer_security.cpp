@@ -674,6 +674,10 @@ bool TransportLayerSecurityServer::ReadBytesOnce() {
   return numBytesInBuffer > 0;
 }
 
+TransportLayerSecurityServer& SSLContent::GetServer() const {
+  return *this->owner->owner;
+}
+
 void SSLContent::resetExceptOwner() {
   this->theType           = 0;
   this->length            = 0;
@@ -840,8 +844,8 @@ void SSLContent::WriteBytesHandshakeCertificate(List<unsigned char> &output) con
   }
   this->WriteType(output);
   SSLRecord::LengthWriterThreeBytes writeLength(output);
-  SSLRecord::LengthWriterThreeBytes writeLengthAgain(output);
-
+  SSLRecord::LengthWriterThreeBytes writeLengthFirstCertificate(output);
+  this->GetServer().certificate.WriteBytes(output);
 }
 
 void SSLContent::WriteBytesHandshakeClientHello(List<unsigned char>& output) const {

@@ -1,8 +1,8 @@
 #ifdef MACRO_use_MongoDB
 #include <mongoc.h>
 #include <bcon.h>
-mongoc_client_t* databaseClient = 0;
-mongoc_database_t *database = 0;
+mongoc_client_t* databaseClient = nullptr;
+mongoc_database_t *database = nullptr;
 #endif //MACRO_use_MongoDB
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
 #include "vpfJson.h"
@@ -65,13 +65,13 @@ bool DatabaseRoutinesGlobalFunctionsMongo::initialize(std::stringstream* comment
 DatabaseRoutinesGlobalFunctionsMongo::~DatabaseRoutinesGlobalFunctionsMongo() {
  
 #ifdef MACRO_use_MongoDB
-  if (database != 0) {
+  if (database != nullptr) {
     mongoc_database_destroy(database);
-    database = 0;
+    database = nullptr;
   }
-  if (databaseClient != 0) {
+  if (databaseClient != nullptr) {
     mongoc_client_destroy(databaseClient);
-    databaseClient = 0;
+    databaseClient = nullptr;
   }
   mongoc_cleanup();
 #endif
@@ -99,7 +99,7 @@ MongoCollection::MongoCollection(const std::string& collectionName) {
 
 MongoCollection::~MongoCollection() {
   mongoc_collection_destroy(this->collection);
-  this->collection = 0;
+  this->collection = nullptr;
 }
 
 class MongoQuery {
@@ -137,41 +137,41 @@ MongoQuery::MongoQuery() {
   if (!databaseMongo.initialize(0)) {
     crash << "Mongo DB did not start correctly. " << crash;
   }
-  this->query = 0;
-  this->command = 0;
-  this->update = 0;
-  this->options = 0;
-  this->cursor = 0;
-  this->updateResult = 0;
+  this->query = nullptr;
+  this->command = nullptr;
+  this->update = nullptr;
+  this->options = nullptr;
+  this->cursor = nullptr;
+  this->updateResult = nullptr;
   this->maxOutputItems = - 1;
   this->totalItems = - 1;
   this->flagFindOneOnly = false;
 }
 
 MongoQuery::~MongoQuery() {
-  if (this->command != 0) {
+  if (this->command != nullptr) {
     bson_destroy (this->command);
-    this->command = 0;
+    this->command = nullptr;
   }
-  if (this->cursor != 0) {
+  if (this->cursor != nullptr) {
     mongoc_cursor_destroy(this->cursor);
-    this->cursor = 0;
+    this->cursor = nullptr;
   }
-  if (this->updateResult != 0) {
+  if (this->updateResult != nullptr) {
     bson_destroy(this->updateResult);
-    this->updateResult = 0;
+    this->updateResult = nullptr;
   }
-  if (this->options != 0) {
+  if (this->options != nullptr) {
     bson_destroy(this->options);
-    this->options = 0;
+    this->options = nullptr;
   }
-  if (this->update != 0) {
+  if (this->update != nullptr) {
     bson_destroy(this->update);
-    this->update = 0;
+    this->update = nullptr;
   }
-  if (this->query != 0) {
+  if (this->query != nullptr) {
     bson_destroy(this->query);
-    this->query = 0;
+    this->query = nullptr;
   }
 }
 
@@ -181,7 +181,7 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
     return false;
   }
   MongoCollection theCollection(this->collectionName);
-  if (this->query != 0) {
+  if (this->query != nullptr) {
     crash << "At this point of code, query is supposed to be 0. " << crash;
   }
   this->query = bson_new_from_json
@@ -211,7 +211,7 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
     return false;
   }
   MongoCollection theCollection(this->collectionName);
-  if (this->query != 0) {
+  if (this->query != nullptr) {
     crash << "At this point of code, query is supposed to be 0. " << crash;
   }
   std::string incomingJSONString = incoming.ToString(true, false);
@@ -252,7 +252,7 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
   MongoCollection theCollection(this->collectionName);
 //  logWorker << "DEBUG: Update: " << this->findQuery << " to: "
 //  << this->updateQuery << " inside: " << this->collectionName << logger::endL;
-  if (this->query != 0) {
+  if (this->query != nullptr) {
     crash << "At this point of code, query is supposed to be 0. " << crash;
   }
   this->query = bson_new_from_json(
@@ -315,11 +315,11 @@ bool MongoQuery::FindMultiple(
     return false;
   }
   MongoCollection theCollection(this->collectionName);
-  if (commentsGeneralNonSensitive != 0 && theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (commentsGeneralNonSensitive != nullptr && theGlobalVariables.UserDefaultHasAdminRights()) {
     *commentsGeneralNonSensitive
     << "Query: " << this->findQuery << ". Options: " << inputOptions.ToString(false, false);
   }
-  if (this->query != 0) {
+  if (this->query != nullptr) {
     crash << "At this point of code, query is supposed to be 0. " << crash;
   }
   this->query = bson_new_from_json((const uint8_t*) this->findQuery.c_str(), this->findQuery.size(), &this->theError);
@@ -333,9 +333,9 @@ bool MongoQuery::FindMultiple(
     << this->theError.message << logger::endL;
     return false;
   }
-  if (this->options != 0) {
+  if (this->options != nullptr) {
     bson_destroy(this->options);
-    this->options = 0;
+    this->options = nullptr;
   }
   if (inputOptions.theType != JSData::token::tokenUndefined) {
     std::string optionsString = inputOptions.ToString(false, false);
@@ -360,7 +360,7 @@ bool MongoQuery::FindMultiple(
   const bson_t* bufferOutput;
   List<std::string> outputString;
   while (mongoc_cursor_next(this->cursor, &bufferOutput)) {
-    char* bufferOutpurStringFormat = 0;
+    char* bufferOutpurStringFormat = nullptr;
     bufferOutpurStringFormat = bson_as_canonical_extended_json(bufferOutput, NULL);
     std::string current(bufferOutpurStringFormat);
     bson_free(bufferOutpurStringFormat);
@@ -757,7 +757,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::isDeleteable(
     if (DatabaseRoutinesGlobalFunctionsMongo::matchesPattern(
       theLabels, theGlobalVariables.databaseModifiableFields[i]
     )) {
-      if (outputPattern != 0) {
+      if (outputPattern != nullptr) {
         *outputPattern = &theGlobalVariables.databaseModifiableFields[i];
       }
       return true;
@@ -815,7 +815,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry
     }
     return false;
   }
-  List<std::string>* labelTypes = 0;
+  List<std::string>* labelTypes = nullptr;
   if (!isDeleteable(theEntry, &labelTypes, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Entry: " << theEntry.ToString(false, false) << " not deleteable.";
@@ -965,7 +965,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString(
   query.findQuery = findQuery;
   query.collectionName = collectionName;
   std::stringstream updateQueryStream;
-  if (fieldsToSetIfNullUseFirstFieldIfUpdateQuery == 0) {
+  if (fieldsToSetIfNullUseFirstFieldIfUpdateQuery == nullptr) {
     updateQueryStream << "{\"$set\": " << updateQuery.ToString(true) << "}";
   } else {
     updateQueryStream << "{\"$set\":{";
@@ -1181,7 +1181,7 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONFetchItem(const List<std::str
   List<JSData> rowsJSON;
   long long totalItems = 0;
   std::stringstream comments;
-  std::stringstream* commentsPointer = 0;
+  std::stringstream* commentsPointer = nullptr;
   bool flagDebuggingAdmin = theGlobalVariables.UserDefaultIsDebuggingAdmin();
   if (flagDebuggingAdmin) {
     commentsPointer = &comments;
@@ -1232,7 +1232,7 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(const std:
   List<JSData> rowsJSON;
   long long totalItems = 0;
   std::stringstream comments;
-  std::stringstream* commentsPointer = 0;
+  std::stringstream* commentsPointer = nullptr;
   bool flagDebuggingAdmin = theGlobalVariables.UserDefaultIsDebuggingAdmin();
   if (flagDebuggingAdmin) {
     commentsPointer = &comments;

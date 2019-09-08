@@ -461,6 +461,10 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
   return out.str();
 }
 
+void X509Certificate::WriteBytes(List<unsigned char>& output) {
+
+}
+
 std::string X509Certificate::ToString() {
   std::stringstream out;
   out << "Certificate RSA:<br>"

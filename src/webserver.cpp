@@ -2796,7 +2796,7 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection() {
   if (this->hostNoPort == "") {
     newAddressStream << "calculator-algebra.org";
   }
-  newAddressStream << ":" << this->parent->httpSSLPort;
+  newAddressStream << ":" << this->parent->portHTTPSDefault;
   if (this->addressGetOrPost.size() != 0) {
     if (this->addressGetOrPost[0] != '/') {
       this->addressGetOrPost = '/' + this->addressGetOrPost;
@@ -3316,22 +3316,17 @@ void WebServer::ReleaseEverything() {
     currentLog << logger::red << "Detail: "
     << "About to close socket: " << this->listeningSocketHTTP << ". " << logger::endL;
   }
-  if (this->listeningSocketHTTP != - 1) {
-    close(this->listeningSocketHTTP);
+  for (int i = 0; i < this->theListeningSockets.size; i ++) {
+    int socket = this->theListeningSockets[i];
+    close(socket);
     if (theGlobalVariables.flagServerDetailedLog) {
       currentLog << logger::red << "Detail: "
-      << "Just closed socket: " << this->listeningSocketHTTP << logger::endL;
-    }
-    this->listeningSocketHTTP = - 1;
-  }
-  if (this->listeningSocketHttpSSL != - 1) {
-    close(this->listeningSocketHttpSSL);
-    if (theGlobalVariables.flagServerDetailedLog) {
-      currentLog << logger::red << "Detail: "
-      << "Just closed socket: " << this->listeningSocketHttpSSL << logger::endL;
+      << "Closed socket: " << socket << ". " << logger::endL;
     }
   }
-  this->listeningSocketHttpSSL = - 1;
+  this->listeningSocketHTTP = - 1;
+  this->listeningSocketHTTPSBuiltIn = - 1;
+  this->listeningSocketHTTPSOpenSSL = - 1;
 }
 
 WebServer::~WebServer() {
@@ -3363,7 +3358,9 @@ WebServer::WebServer() {
   this->activeWorker = - 1;
   this->timeLastExecutableModification = - 1;
   this->listeningSocketHTTP = - 1;
-  this->listeningSocketHttpSSL = - 1;
+  this->listeningSocketHTTPSBuiltIn = - 1;
+  this->listeningSocketHTTPSDefault = - 1;
+  this->listeningSocketHTTPSOpenSSL = - 1;
   this->highestSocketNumber = - 1;
   this->flagReapingChildren = false;
   this->MaxNumWorkersPerIPAdress = 24;
@@ -3785,38 +3782,35 @@ void WebServer::StopKillAll(bool attemptToRestart) {
 }
 
 void WebServer::initPortsITry() {
-  this->PortsITryHttp.AddOnTop("8155");
-  this->PortsITryHttp.AddOnTop("8156");
-  this->PortsITryHttp.AddOnTop("8157");
-  this->PortsITryHttp.AddOnTop("8158");
-  this->PortsITryHttp.AddOnTop("8159");
+  this->portHTTP = "8155";
   if (!theGlobalVariables.flagSSLIsAvailable) {
     return;
   }
-  this->PortsITryHttpSSL.AddOnTop("8166");
-  this->PortsITryHttpSSL.AddOnTop("8167");
-  this->PortsITryHttpSSL.AddOnTop("8168");
-  this->PortsITryHttpSSL.AddOnTop("8169");
+  this->portHTTPSOpenSSL = "8166";
+  this->portHTTPSBuiltIn = "8177";
+  this->portHTTPSDefault = this->portHTTPSOpenSSL;
 }
 
 void WebServer::initListeningSockets() {
   MacroRegisterFunctionWithName("WebServer::initListeningSockets");
-  if (listen(this->listeningSocketHTTP, WebServer::maxNumPendingConnections) == - 1) {
-    crash << "Listen function failed on http port." << crash;
-  }
-  if (theGlobalVariables.flagSSLIsAvailable) {
-    if (listen(this->listeningSocketHttpSSL, WebServer::maxNumPendingConnections) == - 1) {
-      crash << "Listen function failed on https port." << crash;
-    }
-  }
   this->highestSocketNumber = - 1;
   if (this->listeningSocketHTTP != - 1) {
     this->theListeningSockets.AddOnTop(this->listeningSocketHTTP);
-    this->highestSocketNumber = MathRoutines::Maximum(this->listeningSocketHTTP, this->highestSocketNumber);
   }
-  if (this->listeningSocketHttpSSL != - 1) {
-    this->theListeningSockets.AddOnTop(this->listeningSocketHttpSSL);
-    this->highestSocketNumber = MathRoutines::Maximum(this->listeningSocketHttpSSL, this->highestSocketNumber);
+  if (this->listeningSocketHTTPSBuiltIn != - 1) {
+    this->theListeningSockets.AddOnTop(this->listeningSocketHTTPSBuiltIn);
+    this->listeningSocketHTTPSDefault = this->listeningSocketHTTPSBuiltIn;
+  }
+  if (this->listeningSocketHTTPSOpenSSL != - 1) {
+    this->theListeningSockets.AddOnTop(this->listeningSocketHTTPSOpenSSL);
+    this->listeningSocketHTTPSDefault = this->listeningSocketHTTPSOpenSSL;
+  }
+  this->highestSocketNumber = - 1;
+  for (int i = 0; i < this->theListeningSockets.size; i ++) {
+    this->highestSocketNumber = MathRoutines::Maximum(this->theListeningSockets[i], this->highestSocketNumber);
+    if (listen(this->theListeningSockets[i], WebServer::maxNumPendingConnections) == - 1) {
+      crash << "Listen function failed on socket: " << this->theListeningSockets[i] << crash;
+    }
   }
 }
 
@@ -4112,8 +4106,8 @@ bool WebServer::initPrepareWebServerALL() {
   return true;
 }
 
-bool WebServer::initBindToPorts() {
-  MacroRegisterFunctionWithName("WebServer::initBindToPorts");
+bool WebServer::initBindToOnePort(const std::string& thePort, int& outputListeningSocket) {
+  MacroRegisterFunctionWithName("WebServer::initBindToOnePort");
   addrinfo hints;
   addrinfo *servinfo = 0;
   addrinfo *p = 0;
@@ -4124,58 +4118,58 @@ bool WebServer::initBindToPorts() {
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE; // use my IP
   // loop through all the results and bind to the first we can
-  List<std::string>* thePorts = &this->PortsITryHttp;
-  int* theListeningSocket = 0;
-  theListeningSocket = &this->listeningSocketHTTP;
-  for (int j = 0; j < 2; j ++, thePorts = &this->PortsITryHttpSSL, theListeningSocket = &this->listeningSocketHttpSSL) {
-    for (int i = 0; i < (*thePorts).size; i ++) {
-      rv = getaddrinfo(NULL, (*thePorts)[i].c_str(), &hints, &servinfo);
-      if (rv != 0) {
-        logWorker << "getaddrinfo: " << gai_strerror(rv) << logger::endL;
-        return false;
-      }
-      for (p = servinfo; p != NULL; p = p->ai_next) {
-        *theListeningSocket = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (*theListeningSocket == - 1) {
-          logWorker << "Error: socket failed.\n";
-          continue;
-        }
-        if (setsockopt(*theListeningSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == - 1) {
-          crash << "Error: setsockopt failed, error: \n" << strerror(errno) << crash;
-        }
-        if (bind(*theListeningSocket, p->ai_addr, p->ai_addrlen) == - 1) {
-          close(*theListeningSocket);
-          *theListeningSocket = - 1;
-          logServer << "Error: bind failed at port: " << (*thePorts)[i] << ". Error: "
-          << this->ToStringLastErrorDescription() << logger::endL;
-          continue;
-        }
-        int setFlagCounter = 0;
-        while (fcntl(*theListeningSocket, F_SETFL, O_NONBLOCK) != 0) {
-          if (++ setFlagCounter > 10) {
-            crash << "Error: failed to set non-blocking status to listening socket. " << crash;
-          }
-        }
-        break;
-      }
-      if (p != NULL) {
-        logServer << logger::yellow << "Successfully bound to port " << (*thePorts)[i] << logger::endL;
-        if (j == 0) {
-          this->httpPort = (*thePorts)[i];
-        } else {
-          this->httpSSLPort = (*thePorts)[i];
-        }
-        break;
-      }
-      freeaddrinfo(servinfo); // all done with this structure
+  rv = getaddrinfo(NULL, thePort.c_str(), &hints, &servinfo);
+  if (rv != 0) {
+    logWorker << "getaddrinfo: " << gai_strerror(rv) << logger::endL;
+    return false;
+  }
+  outputListeningSocket = - 1;
+  for (p = servinfo; p != NULL; p = p->ai_next) {
+    outputListeningSocket = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+    if (outputListeningSocket == - 1) {
+      logWorker << "Error: socket failed.\n";
+      continue;
     }
+    if (setsockopt(outputListeningSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == - 1) {
+      crash << "Error: setsockopt failed, error: \n" << strerror(errno) << crash;
+    }
+    if (bind(outputListeningSocket, p->ai_addr, p->ai_addrlen) == - 1) {
+      close(outputListeningSocket);
+      outputListeningSocket = - 1;
+      logServer << "Error: bind failed at port: " << thePort << ". Error: "
+      << this->ToStringLastErrorDescription() << logger::endL;
+      continue;
+    }
+    int setFlagCounter = 0;
+    while (fcntl(outputListeningSocket, F_SETFL, O_NONBLOCK) != 0) {
+      if (++ setFlagCounter > 10) {
+        crash << "Error: failed to set non-blocking status to listening socket. " << crash;
+      }
+    }
+    break;
   }
-  if (this->listeningSocketHTTP == - 1) {
-    crash << "Failed to bind to any of the ports " << this->PortsITryHttp.ToStringCommaDelimited() << "\n" << crash;
+  if (p != NULL) {
+    logServer << logger::yellow << "Successfully bound to port " << thePort << logger::endL;
   }
-  if (theGlobalVariables.flagSSLIsAvailable && this->listeningSocketHttpSSL == - 1) {
-    crash << "Failed to bind to any of the ports " << this->PortsITryHttpSSL.ToStringCommaDelimited() << "\n" << crash;
+  freeaddrinfo(servinfo); // all done with this structure
+  if (outputListeningSocket == - 1) {
+    crash << "Failed to bind to port: " << thePort << ". " << crash;
   }
+  return true;
+}
+
+bool WebServer::initBindToPorts() {
+  MacroRegisterFunctionWithName("WebServer::initBindToPorts");
+  if (!this->initBindToOnePort(this->portHTTP, this->listeningSocketHTTP)) {
+    return false;
+  }
+  if (!this->initBindToOnePort(this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn)) {
+    return false;
+  }
+  if (! this->initBindToOnePort(this->portHTTPSOpenSSL, this->listeningSocketHTTPSBuiltIn)) {
+
+  }
+  this->initBindToOnePort(this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn);
   return true;
 }
 
@@ -4389,11 +4383,11 @@ int WebServer::Run() {
           << this->NumConnectionsSoFar + 1 << ". "
           << "Connected via listening socket " << this->theListeningSockets[i]
           << " on socket: " << newConnectedSocket;
-          if (this->theListeningSockets[i] == this->listeningSocketHttpSSL) {
+          if (this->theListeningSockets[i] == this->listeningSocketHTTP) {
+            logServer << logger::yellow << " (non-encrypted). " << logger::endL;
+          } else {
             theGlobalVariables.flagUsingSSLinCurrentConnection = true;
             logServer << logger::purple << " (SSL encrypted). " << logger::endL;
-          } else {
-            logServer << logger::yellow << " (non-encrypted). " << logger::endL;
           }
           break;
         } else {
@@ -4528,7 +4522,6 @@ int WebWorker::Run() {
   theWebServer.GetActiveWorker();
   if (theGlobalVariables.flagUsingSSLinCurrentConnection) {
     std::stringstream commentsOnFailure;
-
     if (!theWebServer.SSLServerSideHandShake(&commentsOnFailure)) {
       theGlobalVariables.flagUsingSSLinCurrentConnection = false;
       this->parent->SignalActiveWorkerDoneReleaseEverything();
@@ -5406,8 +5399,8 @@ int WebServer::mainApache() {
   theDestroyer.RenewObject();
   theParser->initialize();
   std::cin >> theWorker.messageBody;
-  theWebServer.httpSSLPort = "443";
-  theWebServer.httpPort = "80";
+  theWebServer.portHTTPSOpenSSL = "443";
+  theWebServer.portHTTP = "80";
   std::string theRequestMethod = WebServer::GetEnvironment("REQUEST_METHOD");
   theWorker.cookiesApache = WebServer::GetEnvironment("HTTP_COOKIE");
   std::string thePort = WebServer::GetEnvironment("SERVER_PORT");

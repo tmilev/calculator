@@ -14,12 +14,12 @@ class ModuleSSalgebra {
   Rational hwtaabfSimpleGensOnly(
     const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon,
     const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon,
-    ProgressReport* theProgressReport = 0
+    ProgressReport* theProgressReport = nullptr
   );
   Rational hwTrace(
     const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
     MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& thePair,
-    ProgressReport* theProgressReport = 0
+    ProgressReport* theProgressReport = nullptr
   );
   void CheckConsistency(GlobalVariables& theGlobalVariables);
 public:
@@ -187,18 +187,18 @@ public:
   void SplitOverLevi(
     std::string* Report,
     Selection& splittingParSel,
-    List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors = 0,
-    Vectors<coefficient>* outputWeightsFundCoords = 0,
-    Vectors<coefficient>* outputEigenSpace = 0,
-    charSSAlgMod<coefficient>* outputChar = 0
+    List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors = nullptr,
+    Vectors<coefficient>* outputWeightsFundCoords = nullptr,
+    Vectors<coefficient>* outputEigenSpace = nullptr,
+    charSSAlgMod<coefficient>* outputChar = nullptr
   );
   void SplitFDpartOverFKLeviRedSubalg(
     HomomorphismSemisimpleLieAlgebra& theHmm,
     Selection& LeviInSmall,
-    List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors = 0,
-    Vectors<coefficient>* outputWeightsFundCoords = 0,
-    Vectors<coefficient>* outputEigenSpace = 0,
-    std::stringstream* comments = 0
+    List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors = nullptr,
+    Vectors<coefficient>* outputWeightsFundCoords = nullptr,
+    Vectors<coefficient>* outputEigenSpace = nullptr,
+    std::stringstream* comments = nullptr
   );
   template<class ResultType>
   void GetElementsNilradical(

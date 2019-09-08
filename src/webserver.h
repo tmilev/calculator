@@ -218,7 +218,9 @@ class WebServer {
 public:
   static const int maxNumPendingConnections;     // how many pending connections queue will hold
   int listeningSocketHTTP;
-  int listeningSocketHttpSSL;
+  int listeningSocketHTTPSOpenSSL;
+  int listeningSocketHTTPSBuiltIn;
+  int listeningSocketHTTPSDefault;
   int highestSocketNumber;
   int MaxNumWorkersPerIPAdress;
   int MaxTotalUsedWorkers;
@@ -236,10 +238,10 @@ public:
   TransportLayerSecurity theTLS;
   PointerObjectDestroyer<Calculator> theCalculator;
   MonomialCollection<MonomialWrapper<std::string, MathRoutines::HashString>, LargeInt> currentlyConnectedAddresses;
-  List<std::string> PortsITryHttp;
-  List<std::string> PortsITryHttpSSL;
-  std::string httpPort;
-  std::string httpSSLPort;
+  std::string portHTTP;
+  std::string portHTTPSOpenSSL;
+  std::string portHTTPSBuiltIn;
+  std::string portHTTPSDefault;
   List<int> theListeningSockets;
   //List<int> theListeningSocketsReadyToAccept;
   ListReferences<WebWorker> theWorkers;
@@ -291,6 +293,7 @@ public:
   bool initPrepareWebServerALL();
   void initializeSignals();
   bool initBindToPorts();
+  bool initBindToOnePort(const std::string& thePort, int& outputListeningSocket);
   void initPortsITry();
   void initListeningSockets();
   void initSSL();

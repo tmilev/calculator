@@ -117,7 +117,10 @@ public:
 };
 
 // SSL client hello helpful links.
+// Detailed walkthrough of the handshake process:
 // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art059
+// Byte by byte annotated explanations of the handshake:
+// https://tls.ulfheim.net
 // https://serializethoughts.com/2014/07/27/dissecting-tls-client-hello-message/
 // https://idea.popcount.org/2012-06-16-dissecting-ssl-handshake/
 //
@@ -167,6 +170,7 @@ public:
 
   SSLContent();
   void resetExceptOwner();
+  TransportLayerSecurityServer& GetServer() const;
   bool CheckInitialization() const;
   logger::StringHighligher getStringHighlighter();
   bool Decode(std::stringstream* commentsOnFailure);
@@ -182,6 +186,7 @@ public:
   void PrepareServerHello3SecretNegotiation(SSLContent& clientHello);
 
   JSData ToJSON() const;
+
   std::string ToStringVersion() const;
   // As the name suggests, this will append the output bytes, without
   // wiping the already existing contents of output.
@@ -330,6 +335,7 @@ public:
 
 class TransportLayerSecurityServer {
 public:
+  X509Certificate certificate;
   // Ordered by preference (lower index = more preferred):
   MapList<int, std::string, MathRoutines::IntUnsignIdentity> cipherSuiteNames;
   MapList<int, CipherSuiteSpecification, MathRoutines::IntUnsignIdentity> supportedCiphers;
@@ -362,7 +368,6 @@ public:
   bool flagInitializedPrivateKey;
   bool flagIsServer;
   bool flagInitialized;
-  X509Certificate theCertificate;
   TransportLayerSecurityOpenSSL openSSLData;
   TransportLayerSecurityServer theServer;
   List<char> readBuffer;

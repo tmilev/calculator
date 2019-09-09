@@ -1975,7 +1975,8 @@ bool WebWorker::ShouldDisplayLoginPage() {
     return true;
   }
   if (
-    theGlobalVariables.flagUsingSSLinCurrentConnection && !theGlobalVariables.flagLoggedIn &&
+    theGlobalVariables.flagUsingSSLinCurrentConnection &&
+    !theGlobalVariables.flagLoggedIn &&
     theGlobalVariables.userCalculatorRequestType != "calculator"
   ) {
     return true;
@@ -4433,10 +4434,10 @@ int WebServer::Run() {
       this->previousServerStatDetailedReport = reportCount;
       logProcessStats << this->ToStringStatusForLogFile() << logger::endL;
     }
-    theGlobalVariables.flagUsingSSLinCurrentConnection = false;
     int newConnectedSocket = theListener.Accept();
     if (newConnectedSocket < 0) {
-      logSocketAccept << logger::red << "This is not supposed to to happen: select succeeded "
+      logSocketAccept << logger::red
+      << "This is not supposed to to happen: select succeeded "
       << "but I found no set socket. " << logger::endL;
     }
     if (newConnectedSocket < 0) {
@@ -4507,7 +4508,8 @@ int WebServer::Run() {
       theGlobalVariables.flagIsChildProcess = true;
       if (theGlobalVariables.flagServerDetailedLog) {
         logWorker << logger::green << "Detail: "
-        << " FORK successful in worker, next step. Time elapsed: " << theGlobalVariables.GetElapsedSeconds()
+        << "FORK successful in worker, next step. "
+        << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds()
         << " second(s). Calling sigprocmask. " << logger::endL;
       }
       theSignals.unblockSignals();
@@ -4538,10 +4540,14 @@ int WebServer::Run() {
 
 int WebWorker::Run() {
   MacroRegisterFunctionWithName("WebWorker::Run");
+  theGlobalVariables.flagUsingSSLinCurrentConnection = false;
+
   if (theWebServer.lastListeningSocket == theWebServer.listeningSocketHTTPSBuiltIn) {
+    theGlobalVariables.flagUsingSSLinCurrentConnection = true;
     logWorker << "DEBUG: BUILT IN: " << this->connectedSocketID << logger::endL;
     theWebServer.theTLS.flagUseBuiltInTlS = true;
   } else {
+    theGlobalVariables.flagUsingSSLinCurrentConnection = true;
     logWorker << "DEBUG: openssl :((" << this->connectedSocketID << logger::endL;
     theWebServer.theTLS.flagUseBuiltInTlS = false;
   }

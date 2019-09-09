@@ -29,8 +29,17 @@ public:
   LargeIntUnsigned exponentOne;
   LargeIntUnsigned exponentTwo;
   CertificateRSA theCertificate;
+  List<unsigned char> sourceBinary;
+  class Test {
+    public:
+    static bool LoadFromASNEncoded();
+    static bool LoadFromPEMFile();
+    static bool LoadFromPEM();
+  };
   bool BasicChecks(std::stringstream* comments);
-  bool LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure);
+  bool LoadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure);
+  bool LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure);
+  bool LoadFromASNEncoded(List<unsigned char>& input, std::stringstream* commentsOnFailure);
   std::string ToString() const;
 };
 
@@ -74,10 +83,19 @@ public:
   std::string subjectUniqueId;
   std::string certificateSignatureAlgorithm;
   std::string certificateSignature;
-  std::string sourceBinary;
+  List<unsigned char> sourceBinary;
   JSData sourceJSON;
   CertificateRSA theRSA;
-  bool LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure);
+  class Test {
+  public:
+    static bool All();
+    static bool LoadFromASNEncoded();
+    static bool LoadFromPEMFile();
+    static bool LoadFromPEM();
+  };
+  bool LoadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure);
+  bool LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure);
+  bool LoadFromASNEncoded(const List<unsigned char>& input, std::stringstream* commentsOnFailure);
   bool LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   std::string ToString();
   void WriteBytes(List<unsigned char>& output);

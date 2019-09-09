@@ -44,7 +44,7 @@ public:
   int recursionDepthGuard;
   int maxRecursionDepth;
   int dataPointer;
-  std::string rawData;
+  List<unsigned char> rawData;
   JSData decodedData;
   JSData dataInterpretation;
   bool flagLogByteInterpretation;
@@ -63,7 +63,7 @@ public:
   bool DecodeIA5String(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeUTCString(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeIntegerContent(int desiredLengthInBytes, JSData& output, JSData* interpretation);
-  static LargeInt VariableLengthQuantityDecode(const std::string& input, int& inputOutputDataPointer);
+  static LargeInt VariableLengthQuantityDecode(const List<unsigned char> &input, int& inputOutputDataPointer);
   bool DecodeOctetString(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeObjectIdentifier(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeNull(int desiredLengthInBytes, JSData& output, JSData* interpretation);
@@ -73,6 +73,7 @@ public:
   std::string ToStringDebug() const;
   void initialize();
   AbstractSyntaxNotationOneSubsetDecoder();
+  ~AbstractSyntaxNotationOneSubsetDecoder();
   static bool isCostructedByte(unsigned char input);
   static bool hasBit7Set(unsigned char input);
   static bool hasBit8Set(unsigned char input);

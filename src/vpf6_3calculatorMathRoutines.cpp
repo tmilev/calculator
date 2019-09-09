@@ -16,6 +16,7 @@
 #include "source_code_formatter.h"
 #include <cmath>
 
+extern ProjectInformationInstance ProjectInfoVpf6_3cpp;
 ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");
 
 extern logger logWorker;
@@ -191,13 +192,15 @@ bool CalculatorFunctionsGeneral::innerTestLoadPEMCertificates(Calculator& theCom
 
 bool CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey");
-  std::string binaryString;
-  if (!input.IsOfType(&binaryString)) {
+  std::string privateKeyString;
+  if (!input.IsOfType(&privateKeyString)) {
     return false;
   }
+  List<unsigned char> privateKeyBytes;
+  privateKeyBytes = privateKeyString;
   std::stringstream errorStream, resultStream;
   PrivateKeyRSA thePrivateKey;
-  bool success = thePrivateKey.LoadFromASNEncoded(binaryString, &errorStream);
+  bool success = thePrivateKey.LoadFromASNEncoded(privateKeyBytes, &errorStream);
   if (!thePrivateKey.BasicChecks(&resultStream)) {
     resultStream << "<b style = 'color:red'>Private key failed basic checks. </b>";
   }
@@ -271,15 +274,12 @@ bool CalculatorFunctionsGeneral::innerHashString(
   Calculator& theCommands, const Expression& input, Expression& output, const std::string& hashId, bool verbose
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerHashString");
-  if (!input.IsOfType<std::string>()) {
+  std::string inputString;
+  if (!input.IsOfType(&inputString)) {
     return false;
   }
   List<unsigned char> theBitStream;
-  const std::string& inputString = input.GetValue<std::string>();
-  theBitStream.SetSize(inputString.size());
-  for (unsigned i = 0; i < inputString.size(); i ++) {
-    theBitStream[i] = inputString[i];
-  }
+  theBitStream = inputString;
   std::stringstream out;
   if (verbose) {
     out << "<br>Input: " << inputString;
@@ -385,7 +385,7 @@ bool CalculatorFunctionsGeneral::innerSliceString(Calculator& theCommands, const
   if (leftIndex < 0) {
     return theCommands << "Slice input " << input[2] << " appears to be negative. ";
   }
-  if (leftIndex >= (signed) inputString.size()) {
+  if (leftIndex >= static_cast<signed>(inputString.size())) {
     return output.AssignValue(std::string(""), theCommands);
   }
   if (input.size() <= 3) {
@@ -1824,9 +1824,9 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   this->printoutPFsLatex << "In other words, we need to solve the following system. "
   << "\\[" << theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT) << "\\]";
   this->currentFormaT.flagUseHTML = true;
-  theSystemHomogeneous.GaussianEliminationByRows(&theConstTerms, 0, 0, &this->printoutPFsHtml, &this->currentFormaT);
+  theSystemHomogeneous.GaussianEliminationByRows(&theConstTerms, nullptr, nullptr, &this->printoutPFsHtml, &this->currentFormaT);
   this->currentFormaT.flagUseHTML = false;
-  theSystemHomogeneousForLaTeX.GaussianEliminationByRows(&theConstTermsForLaTeX, 0, 0, &this->printoutPFsLatex, &this->currentFormaT);
+  theSystemHomogeneousForLaTeX.GaussianEliminationByRows(&theConstTermsForLaTeX, nullptr, nullptr, &this->printoutPFsLatex, &this->currentFormaT);
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.MakeIdSubstitution(this->NumberOfSystemVariables + 1);
   for (int i = 1; i < theSub.size; i ++) {
@@ -5332,7 +5332,7 @@ bool LargeIntUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun, std::string
   List<unsigned int> aFewPrimes;
   LargeIntUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(100000, aFewPrimes);
   if (numTimesToRun > aFewPrimes.size) {
-    numTimesToRun = aFewPrimes.size; 
+    numTimesToRun = aFewPrimes.size;
   }
   LargeIntUnsigned theOddFactorOfNminusOne = *this;
   int theExponentOfThePowerTwoFactorOfNminusOne = 0;
@@ -7219,7 +7219,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(
     << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank
     << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
   }
-  Vector<Rational> theFDhw;  
+  Vector<Rational> theFDhw;
   if (!theCommands.GetVectoR<Rational>(fdWeightNode, theFDhw, 0, theRank, 0)) {
     return theCommands
     << "Failed to convert the second argument of innerSplitGenericGenVermaTensorFD to a list of "

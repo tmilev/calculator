@@ -114,12 +114,12 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=exerciseNoLogin"
     << "&"
-    << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
+    << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
     << "fileName=" << theProblem.fileName << "&randomSeed="
     << randomSeedCurrent << "\">"
     << theFileNames[i]
     << "</a>"
-    << "</td>";  
+    << "</td>";
     if (!isGoodLoad) {
       out << "<td><b>Couldn't load. </b>"
       << problemComments.str() << "</td>";
@@ -1272,7 +1272,7 @@ bool CalculatorFunctionsGeneral::innerIntersectIntervals(
       leftIsClosed = false;
     }
   }
-  if (left1 == right1) {
+  if (left1 - right1 == 0.0) {
     leftFinal = leftE[1];
     leftResult = left1;
     if (
@@ -1305,7 +1305,7 @@ bool CalculatorFunctionsGeneral::innerIntersectIntervals(
       rightIsClosed = false;
     }
   }
-  if (left2 == right2) {
+  if (left2 - right2 == 0.0) {
     rightFinal = rightE[2];
     rightResult = right2;
     if (
@@ -2188,10 +2188,12 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
 
 bool CalculatorFunctionsGeneral::innerTestASN1Decode(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestASN1Decode");
-  AbstractSyntaxNotationOneSubsetDecoder theDecoder;
-  if (!input.IsOfType<std::string>(&theDecoder.rawData)) {
+  std::string data;
+  if (!input.IsOfType<std::string>(&data)) {
     return false;
   }
+  AbstractSyntaxNotationOneSubsetDecoder theDecoder;
+  theDecoder.rawData = data;
   std::stringstream commentsOnError;
   std::stringstream out;
   theDecoder.flagLogByteInterpretation = true;

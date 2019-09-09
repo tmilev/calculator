@@ -85,9 +85,7 @@ bool TransportLayerSecurity::initSSLKeyFiles(std::stringstream* commentsOnFailur
     return true;
   }
   if (!this->initSSLKeyFilesInternal(commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to initialize ssl keys of built-in tls server. ";
-    }
+    crash << "Failed to initialize ssl keys of built-in tls server. " << crash;
   }
   return true;
 }

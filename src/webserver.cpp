@@ -4149,7 +4149,7 @@ bool WebServer::initBindToOnePort(const std::string& thePort, int& outputListeni
     }
     break;
   }
-  if (p != NULL) {
+  if (p != nullptr) {
     logServer << logger::yellow << "Successfully bound to port " << thePort << logger::endL;
   }
   freeaddrinfo(servinfo); // all done with this structure
@@ -4164,8 +4164,10 @@ bool WebServer::initBindToPorts() {
   if (!this->initBindToOnePort(this->portHTTP, this->listeningSocketHTTP)) {
     return false;
   }
-  if (!this->initBindToOnePort(this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn)) {
-    return false;
+  if (theWebServer.theTLS.flagBuiltInTLSAvailable) {
+    if (!this->initBindToOnePort(this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn)) {
+      return false;
+    }
   }
   if (!this->initBindToOnePort(this->portHTTPSOpenSSL, this->listeningSocketHTTPSOpenSSL)) {
     return false;

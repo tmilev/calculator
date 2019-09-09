@@ -16,7 +16,7 @@ bool CalculatorFunctionsGeneral::innerX509CertificateServer(
   (void) input;
   List<unsigned char> outputChars;
   theWebServer.theTLS.theServer.certificate.WriteBytes(outputChars);
-  std::string result(reinterpret_cast<char*>(outputChars.TheObjects), outputChars.size);
+  std::string result(reinterpret_cast<char*>(outputChars.TheObjects), static_cast<unsigned>(outputChars.size));
   return output.AssignValue(result, theCommands);
 }
 

@@ -14,51 +14,25 @@ ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementati
 extern logger logServer   ;
 
 bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFailure) {
-  std::string certificateContent, certificateContentStripped;
+  std::string certificateContent;
   if (!FileOperations::LoadFileToStringVirtual(TransportLayerSecurity::fileCertificate, certificateContent, true, true, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load certificate file. ";
     }
     return false;
   }
-  //see ASN1_item_d2i_bio for decoding.
-  certificateContentStripped = MathRoutines::StringTrimWhiteSpace(certificateContent);
-  if (!MathRoutines::StringBeginsWith(certificateContentStripped, "-----BEGIN CERTIFICATE-----", &certificateContentStripped)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Bad certificate start. ";
-    }
-    return false;
-  }
-  if (!MathRoutines::StringEndsWith(certificateContentStripped, "-----END CERTIFICATE-----", &certificateContentStripped)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Bad certificate end. ";
-    }
-    return false;
-  }
-  certificateContentStripped = MathRoutines::StringTrimWhiteSpace(certificateContentStripped);
-  if (!Crypto::ConvertBase64ToString(certificateContentStripped, this->theServer.certificate.sourceBinary, commentsOnFailure, 0)) {
-    return false;
-  }
-  if (!this->theServer.certificate.LoadFromASNEncoded(this->theServer.certificate.sourceBinary, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to load certificate. ";
-    }
-    return false;
-  }
-  logServer << "Loaded certificate: " << this->theServer.certificate.theRSA.ToString() << logger::endL;
-  //if (SSL_CTX_use_certificate_file(this->context, fileCertificatePhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
-  //  ERR_print_errors_fp(stderr);
-  //  exit(3);
-  //}
-  return false;
+  return this->theServer.certificate.LoadFromPEM(certificateContent, commentsOnFailure);
 }
 
 bool TransportLayerSecurity::LoadPEMPrivateKey(std::stringstream *commentsOnFailure) {
-  //if (SSL_CTX_use_PrivateKey_file(this->context, fileKeyPhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
-  //  ERR_print_errors_fp(stderr);
-  //  exit(4);
-  //}
-  return false;
+  std::string certificateContent, certificateContentStripped;
+  if (!FileOperations::LoadFileToStringVirtual(TransportLayerSecurity::fileKey, certificateContent, true, true, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to load key file. ";
+    }
+    return false;
+  }
+  return this->theServer.privateKey.LoadFromPEM(certificateContent, commentsOnFailure);
 }
 
 bool TransportLayerSecurity::initSSLKeyFilesInternal(std::stringstream* commentsOnFailure) {
@@ -66,12 +40,15 @@ bool TransportLayerSecurity::initSSLKeyFilesInternal(std::stringstream* comments
   this->openSSLData.initSSLKeyFilesCreateOnDemand();
   logServer << logger::purple << "Using self-signed certificate. " << logger::endL;
   if (!this->LoadPEMCertificate(commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to load pem certificate. ";
+    }
     return false;
   }
   if (!this->LoadPEMPrivateKey(commentsOnFailure)) {
-    crash << "Failed to load PEM private key. " << crash;
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to load pem certificate. ";
+    }
   }
-
-
-  return false;
+  return true;
 }

@@ -28,6 +28,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::hasBit8Set(unsigned char input) {
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeConstructed(
   unsigned char startByte, int desiredLengthInBytes, JSData& output, JSData* interpretation
 ) {
+  (void) startByte;
   output.reset(JSData::token::tokenObject);
   JSData objectContent;
   if (!this->DecodeSequenceContent(desiredLengthInBytes, objectContent, interpretation)) {
@@ -40,6 +41,12 @@ AbstractSyntaxNotationOneSubsetDecoder::AbstractSyntaxNotationOneSubsetDecoder()
   this->flagLogByteInterpretation = false;
   this->recursionDepthGuard = 0;
   this->maxRecursionDepth = 20;
+}
+
+AbstractSyntaxNotationOneSubsetDecoder::~AbstractSyntaxNotationOneSubsetDecoder() {
+  for (int i = 0; i < this->rawData.size; i ++) {
+    this->rawData[i] = 0;
+  }
 }
 
 void AbstractSyntaxNotationOneSubsetDecoder::initialize() {
@@ -63,7 +70,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
     return true;
   }
   int numberOfLengthBytes = currentByte - 128;
-  if (interpretation != 0) {
+  if (interpretation != nullptr) {
     (*interpretation)["numberOfLengthBytes"] = numberOfLengthBytes;
   }
   LargeInt length = 0;
@@ -90,8 +97,8 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::PointerIsBad(JSData *interpretation) {
-  if (this->dataPointer >= (signed) this->rawData.size() || this->dataPointer < 0) {
-    if (interpretation != 0) {
+  if (this->dataPointer >= this->rawData.size || this->dataPointer < 0) {
+    if (interpretation != nullptr) {
       std::stringstream errorStream;
       errorStream << "Unexpected overflow error: data pointer is negative. ";
       (*interpretation)["error"] = errorStream.str();
@@ -124,24 +131,24 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceContent(
   int desiredLengthInBytes, JSData& output, JSData* interpretation
 ) {
   output.reset(JSData::token::tokenArray);
-  if (interpretation != 0) {
+  if (interpretation != nullptr) {
     (*interpretation)["value"].reset(JSData::token::tokenArray);
   }
   int lastIndexPlusOne = this->dataPointer + desiredLengthInBytes;
   JSData nextElement, nextElementInterpretationContainer;
-  JSData* nextElementInterpretation = 0;
-  if (interpretation != 0) {
+  JSData* nextElementInterpretation = nullptr;
+  if (interpretation != nullptr) {
     nextElementInterpretation = &nextElementInterpretationContainer;
   }
   int numberOfDecoded = 0;
   while (this->dataPointer < lastIndexPlusOne) {
     int lastPointer = this->dataPointer;
     bool isGood = this->DecodeCurrent(nextElement, nextElementInterpretation);
-    if (interpretation != 0) {
+    if (interpretation != nullptr) {
       (*interpretation)["value"].theList.AddOnTop(*nextElementInterpretation);
     }
     if (!isGood){
-      if (interpretation != 0) {
+      if (interpretation != nullptr) {
         std::stringstream errorStream;
         errorStream << "Failed to decode sequence element of index: " << numberOfDecoded << ". ";
         (*interpretation)["error"] = errorStream.str();
@@ -162,9 +169,9 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeUTCString(
 ) {
   JSData theTime;
   JSData timeInterpretationContainer;
-  JSData* timeInterpretation = interpretation == 0 ? 0 : &timeInterpretationContainer;
+  JSData* timeInterpretation = interpretation == nullptr ? nullptr : &timeInterpretationContainer;
   bool success = this->DecodeOctetString(desiredLengthInBytes, theTime, timeInterpretation);
-  if (interpretation != 0) {
+  if (interpretation != nullptr) {
     (*interpretation)["time"] = timeInterpretationContainer;
   }
   if (!success) {
@@ -190,8 +197,8 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeBitString(
   AbstractSyntaxNotationOneSubsetDecoder subDecoder;
   subDecoder.flagLogByteInterpretation = this->flagLogByteInterpretation;
   subDecoder.rawData = theBitString.theString;
-  if (subDecoder.rawData.size() > 0) {
-    subDecoder.rawData = subDecoder.rawData.substr(1);
+  if (subDecoder.rawData.size > 0) {
+    subDecoder.rawData.PopIndexShiftDown(0);
   }
   subDecoder.recursionDepthGuard = this->recursionDepthGuard;
   if (subDecoder.Decode(0)) {
@@ -222,12 +229,12 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeOctetString(
   int desiredLengthInBytes, JSData& output, JSData* interpretation
 ) {
   output.reset(JSData::token::tokenString);
-  output.theString.resize(desiredLengthInBytes);
+  output.theString.resize(static_cast<unsigned>(desiredLengthInBytes));
   for (int i = 0; i < desiredLengthInBytes; i ++) {
-    output.theString[i] = this->rawData[this->dataPointer + i];
+    output.theString[static_cast<unsigned>(i)] = static_cast<char>(this->rawData[this->dataPointer + i]);
   }
   this->dataPointer += desiredLengthInBytes;
-  if (interpretation != 0) {
+  if (interpretation != nullptr) {
     (*interpretation)["value"] = output.theString;
   }
   return true;
@@ -237,32 +244,32 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeNull(
   int desiredLengthInBytes, JSData& output, JSData* interpretation
 ) {
   if (desiredLengthInBytes != 0) {
-    if (interpretation != 0) {
+    if (interpretation != nullptr) {
       (*interpretation)["error"] = "Length of null object is not zero. ";
     }
     return false;
   }
   output.reset(JSData::token::tokenNull);
-  if (interpretation != 0) {
+  if (interpretation != nullptr) {
     (*interpretation)["value"].reset(JSData::token::tokenNull);
   }
   return true;
 }
 
 LargeInt AbstractSyntaxNotationOneSubsetDecoder::VariableLengthQuantityDecode(
-  const std::string& input, int& inputOutputDataPointer
+  const List<unsigned char>& input, int& inputOutputDataPointer
 ) {
   LargeInt result = 0;
-  for (; inputOutputDataPointer < (signed) input.size() ; inputOutputDataPointer ++) {
+  for (; inputOutputDataPointer < input.size ; inputOutputDataPointer ++) {
     unsigned char currentByte = input[inputOutputDataPointer];
     result *= 128;
     if (currentByte < 128) {
-      result += (int) currentByte;
+      result += static_cast<int>(currentByte);
       inputOutputDataPointer ++;
       break;
     } else {
       currentByte -= 128;
-      result += (int) currentByte;
+      result += static_cast<int>(currentByte);
     }
   }
   return result;
@@ -307,7 +314,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
   int currentContribution = 0;
 
   for (int i = 0; i < desiredLengthInBytes; i ++) {
-    unsigned char unsignedContribution = (unsigned char) this->rawData[this->dataPointer];
+    unsigned char unsignedContribution = this->rawData[this->dataPointer];
     currentContribution = unsignedContribution;
     if (i == 0) {
       if (currentContribution >= 128) {
@@ -319,10 +326,14 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
     this->dataPointer ++;
   }
   output = reader;
-  if (interpretation != 0) {
+  if (interpretation != nullptr) {
     interpretation->reset(JSData::token::tokenObject);
     (*interpretation)["value"] = reader;
-    std::string theSource = this->rawData.substr(this->dataPointer - desiredLengthInBytes, desiredLengthInBytes);
+    int startIndex = this->dataPointer - desiredLengthInBytes;
+    std::string theSource(
+      reinterpret_cast<char *>(this->rawData.TheObjects + startIndex),
+      static_cast<unsigned>(desiredLengthInBytes)
+    );
     (*interpretation)["hex"] = Crypto::ConvertStringToHex(theSource, 0, false);
   }
   return true;
@@ -424,10 +435,10 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
 
 bool AbstractSyntaxNotationOneSubsetDecoder::Decode(std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("AbstractSyntaxNotationOneSubsetDecoder::Decode");
-  unsigned int maxAllowedSize = 1000000000;
-  if (this->rawData.size() >= maxAllowedSize) {
-    if (commentsOnError != 0) {
-      *commentsOnError << "Input size: " << this->rawData.size() << " too large, max allowed: " << maxAllowedSize << ". ";
+  int maxAllowedSize = 1000000000;
+  if (this->rawData.size >= maxAllowedSize) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Input size: " << this->rawData.size << " too large, max allowed: " << maxAllowedSize << ". ";
     }
     return false;
   }
@@ -440,9 +451,10 @@ bool AbstractSyntaxNotationOneSubsetDecoder::Decode(std::stringstream* commentsO
     this->dataInterpretation.reset();
   }
   this->DecodeCurrent(this->decodedData, interpretation);
-  if (this->dataPointer < (signed) this->rawData.size()) {
-    if (commentsOnError != 0) {
-      *commentsOnError << "Decoded " << this->dataPointer << " bytes but the input had: " << this->rawData.size() << ". ";
+  if (this->dataPointer < this->rawData.size) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Decoded " << this->dataPointer
+      << " bytes but the input had: " << this->rawData.size << ". ";
     }
     return false;
   }
@@ -457,7 +469,7 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
     out << "<br>Interpretation status.<br>" << this->dataInterpretation.ToString(false, true, true, true);
   }
   out << "<br>Data: ";
-  out << MathRoutines::StringShortenInsertDots(Crypto::ConvertStringToHex(this->rawData, 70, true), 4000);
+  out << MathRoutines::StringShortenInsertDots(Crypto::ConvertListUnsignedCharsToHex(this->rawData, 70, true), 4000);
   return out.str();
 }
 
@@ -481,7 +493,7 @@ std::string PrivateKeyRSA::ToString() const {
 
 bool PrivateKeyRSA::BasicChecks(std::stringstream* comments) {
   std::stringstream commentsContainer;
-  if (comments == 0) {
+  if (comments == nullptr) {
     comments = &commentsContainer;
   }
   LargeInt mustBeZero;
@@ -503,7 +515,44 @@ bool PrivateKeyRSA::BasicChecks(std::stringstream* comments) {
   return true;
 }
 
-bool PrivateKeyRSA::LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure) {
+bool PrivateKeyRSA::LoadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("PrivateKeyRSA::LoadFromPEMFile");
+  std::string certificateContent;
+  // No access to sensitive folders here, so this cannot be used for the server's private key.
+  // For server's certificate, use TransportLayerSecurity::LoadPEMPrivateKey.
+  if (!FileOperations::LoadFileToStringVirtual(input, certificateContent, false, false, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to load key file. ";
+    }
+    return false;
+  }
+  return this->LoadFromPEM(certificateContent, commentsOnFailure);
+}
+
+
+bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure){
+  MacroRegisterFunctionWithName("PrivateKeyRSA::LoadFromPEM");
+  std::string certificateContentStripped = MathRoutines::StringTrimWhiteSpace(input);
+  if (!MathRoutines::StringBeginsWith(certificateContentStripped, "-----BEGIN PRIVATE KEY-----", &certificateContentStripped)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Bad private key start. ";
+    }
+    return false;
+  }
+  if (!MathRoutines::StringEndsWith(certificateContentStripped, "-----END PRIVATE KEY-----", &certificateContentStripped)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Bad private key end. ";
+    }
+    return false;
+  }
+  certificateContentStripped = MathRoutines::StringTrimWhiteSpace(certificateContentStripped);
+  if (!Crypto::ConvertBase64ToBitStream(certificateContentStripped, this->sourceBinary, commentsOnFailure, nullptr)) {
+    return false;
+  }
+  return this->LoadFromASNEncoded(this->sourceBinary, commentsOnFailure);
+}
+
+bool PrivateKeyRSA::LoadFromASNEncoded(List<unsigned char>& input, std::stringstream* commentsOnFailure) {
   AbstractSyntaxNotationOneSubsetDecoder outerDecoder, innerDecoder;
   outerDecoder.rawData = input;
   if (!outerDecoder.Decode(commentsOnFailure)) {
@@ -564,7 +613,47 @@ bool PrivateKeyRSA::LoadFromASNEncoded(const std::string& input, std::stringstre
   return true;
 }
 
-bool X509Certificate::LoadFromASNEncoded(const std::string& input, std::stringstream* commentsOnFailure) {
+bool X509Certificate::LoadFromPEM(const std::string& input, std::stringstream *commentsOnFailure) {
+  std::string certificateContentStripped;
+  //see ASN1_item_d2i_bio for decoding.
+  certificateContentStripped = MathRoutines::StringTrimWhiteSpace(input);
+  std::string beginCertificate = "-----BEGIN CERTIFICATE-----";
+  std::string endCertificate = "-----END CERTIFICATE-----";
+  if (!MathRoutines::StringBeginsWith(certificateContentStripped, beginCertificate, &certificateContentStripped)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Bad certificate start. ";
+    }
+    return false;
+  }
+  if (!MathRoutines::StringEndsWith(certificateContentStripped, endCertificate, &certificateContentStripped)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Bad certificate end. ";
+    }
+    return false;
+  }
+  certificateContentStripped = MathRoutines::StringTrimWhiteSpace(certificateContentStripped);
+  if (!Crypto::ConvertBase64ToBitStream(certificateContentStripped, this->sourceBinary, commentsOnFailure, nullptr)) {
+    return false;
+  }
+  return this->LoadFromASNEncoded(this->sourceBinary, commentsOnFailure);
+}
+
+bool X509Certificate::LoadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure) {
+  std::string certificateContent;
+  // No access to sensitive folders here, so this cannot be used for the server's certificate.
+  // For server's certificate, use TransportLayerSecurity::LoadPEMCertificate.
+  if (!FileOperations::LoadFileToStringVirtual(input, certificateContent, false, false, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to load key file. ";
+    }
+    return false;
+  }
+  return this->LoadFromPEM(certificateContent, commentsOnFailure);
+}
+
+bool X509Certificate::LoadFromASNEncoded(
+  const List<unsigned char>& input, std::stringstream* commentsOnFailure
+) {
   AbstractSyntaxNotationOneSubsetDecoder theDecoder;
   theDecoder.rawData = input;
   if (!theDecoder.Decode(commentsOnFailure)) {

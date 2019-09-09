@@ -336,6 +336,7 @@ public:
 class TransportLayerSecurityServer {
 public:
   X509Certificate certificate;
+  PrivateKeyRSA privateKey;
   // Ordered by preference (lower index = more preferred):
   MapList<int, std::string, MathRoutines::IntUnsignIdentity> cipherSuiteNames;
   MapList<int, CipherSuiteSpecification, MathRoutines::IntUnsignIdentity> supportedCiphers;

@@ -790,18 +790,26 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestASN1Decode"
   );
   this->AddOperationInnerHandler(
-    "X509CertificateCrunch",
-    CalculatorFunctionsGeneral::innerX509certificateCrunch,
+    "X509CertificateServer",
+    CalculatorFunctionsGeneral::innerX509CertificateServer,
     "",
-    "Processes a x509 certificate database. "
-    "This function is part of a security research "
-    "project and will be documented at a later time (if at all). "
-    "Please do not use this function. ",
-    "X509CertificateCrunch(\"certificates\"); ",
-    false,
+    "Returns the bytes of the X509 certificate of this server. ",
+    "ConvertStringToHex X509CertificateServer 0; ",
     true,
+    false,
     "CalculatorFunctionsGeneral::innerX509certificateCrunch",
-    "X509CertificateCrunch"
+    "X509CertificateServer"
+  );
+  this->AddOperationInnerHandler(
+    "X509CertificateDecode",
+    CalculatorFunctionsGeneral::innerX509CertificateDecode,
+    "",
+    "Decodes raw X509 certificate to a string. ",
+    "X509CertificateDecode X509CertificateServer 0; ",
+    true,
+    false,
+    "CalculatorFunctionsGeneral::innerX509CertificateDecode",
+    "X509CertificateDecode"
   );
   this->AddOperationInnerHandler(
     "JWTverifyAgainstKnownKeys",

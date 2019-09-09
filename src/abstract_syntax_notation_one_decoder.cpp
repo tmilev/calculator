@@ -462,7 +462,7 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
 }
 
 void X509Certificate::WriteBytes(List<unsigned char>& output) {
-
+  output = this->sourceBinary;
 }
 
 std::string X509Certificate::ToString() {

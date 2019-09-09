@@ -171,53 +171,6 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerX509certificateCrunch");
-  std::string theCertificateFileNameNoFolder;
-  if (!input.IsOfType<std::string>(&theCertificateFileNameNoFolder)) {
-    return false;
-  }
-  if (!FileOperations::IsFileNameWithoutDotsAndSlashes(theCertificateFileNameNoFolder)) {
-    return theCommands << "The file name contains forbidden characters, computation aborted. ";
-  }
-  std::string theCertificateFileName = theCertificateFileNameNoFolder;
-  std::fstream theCertFile;
-  if (!FileOperations::OpenFileVirtual(theCertFile, "output/" + theCertificateFileName, false, false, false)) {
-    return theCommands << "Failed to open file " << theCertificateFileName;
-  }
-  theCertFile.seekg(0);
-  List<std::string> theCerts, theShas, certsAndShas;
-  List<List<unsigned char> > theCertsRAWuchars;
-  List<std::string> theCertsRAWstrings;
-  const int sampleSize = 100;
-  theCerts.SetSize(sampleSize);
-  theShas.SetSize(sampleSize);
-  certsAndShas.SetSize(sampleSize);
-  theCertsRAWuchars.SetSize(sampleSize);
-  theCertsRAWstrings.SetSize(sampleSize);
-  std::stringstream out;
-  for (int i = 0; i < sampleSize; i ++) {
-    theCertFile >> certsAndShas[i];
-    unsigned commaPosition = 0;
-    for (;commaPosition < certsAndShas[i].size(); commaPosition ++) {
-      if (certsAndShas[i][commaPosition] == ',') {
-        break;
-      }
-    }
-    MathRoutines::SplitStringInTwo(certsAndShas[i], commaPosition + 1, theShas[i], theCerts[i]);
-    if (theShas[i].size() > 0) {
-      theShas[i].resize(theShas[i].size() - 1);
-    }
-    out << "Raw cert +sha:<br>" << certsAndShas[i] << "<br>Certificate " << i + 1
-    << " (base64):<br>" << theCerts[i] << "<br>Sha1:<br>" << theShas[i]
-    << "<br>Comments while extracting the raw certificate: ";
-    Crypto::ConvertBase64ToBitStream(theCerts[i], theCertsRAWuchars[i], &out);
-    Crypto::ConvertBitStreamToString(theCertsRAWuchars[i], theCertsRAWstrings[i]);
-    out << "<br>Raw certificate: " << theCertsRAWstrings[i];
-  }
-  return output.AssignValue(out.str(), theCommands);
-}
-
 bool CalculatorFunctionsGeneral::innerTestLoadPEMCertificates(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestLoadPEMCertificates");
   std::string binaryString;

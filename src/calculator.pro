@@ -926,4 +926,5 @@ SOURCES += \
     transport_layer_security_openssl.cpp \
     transport_layer_security_implementation.cpp \
     abstract_syntax_notation_one_decoder.cpp \
-    transport_layer_security_test.cpp
+    transport_layer_security_test.cpp \
+    calculator_webserver_functions.cpp

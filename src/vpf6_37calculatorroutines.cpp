@@ -12,10 +12,6 @@
 #include "vpfHeader5Crypto.h"
 #include "abstract_syntax_notation_one_decoder.h"
 #include "vpfImplementationHeader2Math11_EllipticCurves.h"
-//////////////////////////////////////
-#include "webserver.h"
-#include "vpfHeader4SystemFunctionsGlobalObjects.h"
-///////////////////////////////////
 
 extern ProjectInformationInstance ProjectInfoVpf6_37cpp;
 ProjectInformationInstance ProjectInfoVpf6_37cpp(__FILE__, "More calculator built-in functions. ");

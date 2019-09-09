@@ -122,6 +122,7 @@ transport_layer_security_openssl.cpp \
 transport_layer_security_test.cpp \
 databasemongo.cpp \
 database_mongo_calculator.cpp \
+calculator_webserver_functions.cpp \
 webserver.cpp \
 web-routines-1.cpp \
 database.cpp \

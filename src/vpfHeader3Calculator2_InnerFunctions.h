@@ -83,7 +83,9 @@ public:
   static bool innerHexToString(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerTestASN1Decode(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerX509certificateCrunch(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerX509CertificateServer(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerX509CertificateDecode(Calculator& theCommands, const Expression& input, Expression& output);
+
 
   static bool innerIntersection(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerUnion(Calculator& theCommands, const Expression& input, Expression& output);

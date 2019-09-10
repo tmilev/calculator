@@ -782,8 +782,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Tests decoding of abstract syntax one. ",
     "%HideLHS\n"
-    "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_cert.base64\")));\n"
-    "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"output/test_private_key.base64\")));\n",
+    "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"test/certificate_self_signed.base64\")));\n"
+    "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"test/private_key.base64\")));\n",
     true,
     true,
     "CalculatorFunctionsGeneral::innerTestASN1Decode",

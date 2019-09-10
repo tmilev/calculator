@@ -32,7 +32,7 @@ public:
   List<unsigned char> sourceBinary;
   class Test {
     public:
-    static bool LoadFromASNEncoded();
+    static bool All();
     static bool LoadFromPEMFile();
     static bool LoadFromPEM();
   };
@@ -89,7 +89,6 @@ public:
   class Test {
   public:
     static bool All();
-    static bool LoadFromASNEncoded();
     static bool LoadFromPEMFile();
     static bool LoadFromPEM();
   };
@@ -113,7 +112,6 @@ public:
   static List<uint32_t> kArraySha2xx;
   class Test {
   public:
-    static bool All();
     static bool Sha256();
   };
   static bool LoadKnownCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);

@@ -64,6 +64,8 @@ void TransportLayerSecurity::initialize(bool IamServer) {
       logServer << "DEBUG: Testing crypto functionality..." << logger::endL;
       SSLRecord::Test::Serialization();
       Crypto::Test::Sha256();
+      PrivateKeyRSA::Test::All();
+      X509Certificate::Test::All();
     }
   } else {
     this->openSSLData.initSSLClient();

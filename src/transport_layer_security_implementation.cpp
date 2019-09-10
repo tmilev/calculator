@@ -9,6 +9,7 @@
 
 #include <unistd.h> //<- close, open defined here
 
+extern ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementationInternal;
 ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementationInternal(__FILE__, "TSL/ssl implementation playground.");
 
 extern logger logServer   ;

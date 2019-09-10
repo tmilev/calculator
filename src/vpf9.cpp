@@ -807,6 +807,7 @@ FileOperations::FolderVirtualLinksNonSensitive() {
     result.SetKeyValue("html/", "../public_html/");
     result.SetKeyValue("html-common/", "html-common/");
     result.SetKeyValue("certificates-public/", "certificates-public/");
+    result.SetKeyValue("test/", "test/");
   }
   return result;
 }
@@ -965,13 +966,7 @@ bool FileOperations::OpenFileVirtual(
 #include <unistd.h>
 
 std::string FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath) {
-  //I have no idea how safe this code is.
-  //This definitely will need a rewrite.
-  //Unfortunately no time to investigate the matter further and do things the right way:
-  //I need a solution
-  //to this problem now.
-  //If anyone (including myself at another time) sees this and you have time,
-  //please fix this. -Todor
+  // TODO: Investigate whether this code is safe.
   std::string currentFolder = FileOperations::GetCurrentFolder();
   theGlobalVariables.ChDir(wouldBePath);
   std::string result = FileOperations::GetCurrentFolder();

@@ -5054,55 +5054,57 @@ void WebServer::InitializeGlobalVariables() {
       theGlobalVariables.buildHeadHashWithServerTime
     );
   }
-  //Warning: order of substitutions is important.
-  //Only the first rule that applies is applied, once.
-  //No further rules are applied after that.
-  folderSubstitutionsNonSensitive.SetKeyValue("/output/", "output/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("output/", "output/");//<-internal use
-  folderSubstitutionsNonSensitive.SetKeyValue("/src/", "src/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("src/", "src/");//<-internal use
-  folderSubstitutionsNonSensitive.SetKeyValue("/certificates-public/", "certificates-public/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("certificates-public/", "certificates-public/");//<-internal use
+  // Warning: order of substitutions is important.
+  // Only the first rule that applies is applied, once.
+  // No further rules are applied after that.
+  // Locations that start with "/" are coming from webserver references.
+  // Locations that do not start with "/" are for internal use.
+  folderSubstitutionsNonSensitive.SetKeyValue("/output/", "output/");
+  folderSubstitutionsNonSensitive.SetKeyValue("output/", "output/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/src/", "src/");
+  folderSubstitutionsNonSensitive.SetKeyValue("src/", "src/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/certificates-public/", "certificates-public/");
+  folderSubstitutionsNonSensitive.SetKeyValue("certificates-public/", "certificates-public/");
   folderSubstitutionsNonSensitive.SetKeyValue("problems/", "../problems/");
   folderSubstitutionsNonSensitive.SetKeyValue("/problems/", "../problems/");
 
-  folderSubstitutionsNonSensitive.SetKeyValue("/html/", "../public_html/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("/html/", "../public_html/");
 
-  folderSubstitutionsNonSensitive.SetKeyValue("/calculator-html/", "./calculator-html/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("/font/", "./html-common/fonts/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/fonts/", "./html-common/fonts/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/font/", "./html-common/fonts/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "./html-common/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("/calculator-html/", "calculator-html/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/font/", "html-common/fonts/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/fonts/", "html-common/fonts/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/font/", "html-common/fonts/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "html-common/");
 
-  folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problems/");//<-internal use
+  folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problems/");
   //referred to by site:
   folderSubstitutionsNonSensitive.SetKeyValue("coursetemplates/", "../coursetemplates/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/coursesavailable/", "../coursesavailable/"); //<-web server
+  folderSubstitutionsNonSensitive.SetKeyValue("/coursesavailable/", "../coursesavailable/");
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
 
   folderSubstitutionsNonSensitive.SetKeyValue(
     "/MathJax-2.7-latest/config/mathjax-calculator-setup.js",
     "./calculator-html/mathjax-calculator-setup.js"
-  );//<-coming from web server
-  folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");//<-coming from webserver
+  );
+  folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");
 
   folderSubstitutionsNonSensitive.SetKeyValue("/LaTeX-materials/", "../LaTeX-materials/");
-  //referred to by site:
   folderSubstitutionsNonSensitive.SetKeyValue("LaTeX-materials/", "../LaTeX-materials/");
   folderSubstitutionsNonSensitive.SetKeyValue("/freecalc/", "../freecalc/");
-  //referred to by site:
   folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");
   folderSubstitutionsNonSensitive.SetKeyValue("/slides-video/", "../slides-video/");
   folderSubstitutionsNonSensitive.SetKeyValue("slides-video/", "../slides-video/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/test/", "test/");
+  folderSubstitutionsNonSensitive.SetKeyValue("test/", "test/");
 
   folderSubstitutionsSensitive.Clear();
-  folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");//<-internal use
-  folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");//<-coming from webserver
-  folderSubstitutionsSensitive.SetKeyValue("configuration/", "configuration/");//<-internal use
-  folderSubstitutionsSensitive.SetKeyValue("/configuration/", "configuration/");//<-coming from webserver
+  folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");
+  folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");
+  folderSubstitutionsSensitive.SetKeyValue("configuration/", "configuration/");
+  folderSubstitutionsSensitive.SetKeyValue("/configuration/", "configuration/");
 
-  folderSubstitutionsSensitive.SetKeyValue("/crashes/", "./LogFiles/crashes/");
-  folderSubstitutionsSensitive.SetKeyValue("crashes/", "./LogFiles/crashes/");
+  folderSubstitutionsSensitive.SetKeyValue("/crashes/", "LogFiles/crashes/");
+  folderSubstitutionsSensitive.SetKeyValue("crashes/", "LogFiles/crashes/");
 
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("favicon.ico");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/favicon.ico");

@@ -20,7 +20,7 @@ bool PrivateKeyRSA::Test::LoadFromPEMFile() {
   PrivateKeyRSA theKey;
   std::stringstream commentsOnFailure;
   if (!theKey.LoadFromPEMFile(fileName, &commentsOnFailure)) {
-    crash << "Failed to load pem file. " << crash;
+    crash << "Failed to load pem file. " << commentsOnFailure.str() << crash;
   }
   return true;
 }

@@ -61,11 +61,15 @@ void TransportLayerSecurity::initialize(bool IamServer) {
     if (this->flagBuiltInTLSAvailable) {
       logServer << "DEBUG: Initializing built-in TLS ..." << logger::endL;
       this->theServer.initialize();
-      logServer << "DEBUG: Testing crypto functionality..." << logger::endL;
-      SSLRecord::Test::Serialization();
-      Crypto::Test::Sha256();
-      PrivateKeyRSA::Test::All();
-      X509Certificate::Test::All();
+      if (theGlobalVariables.flagAutoUnitTest) {
+        logServer << logger::yellow
+        << "Testing cryptographic functions ..." << logger::endL;
+        SSLRecord::Test::Serialization();
+        Crypto::Test::Sha256();
+        PrivateKeyRSA::Test::All();
+        X509Certificate::Test::All();
+        logServer << logger::green << "Cryptographic tests done." << logger::endL;
+      }
     }
   } else {
     this->openSSLData.initSSLClient();

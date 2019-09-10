@@ -101,6 +101,7 @@ void GlobalVariables::ChDir(const std::string& systemCommand) {
 }
 
 GlobalVariables::GlobalVariables() {
+  this->flagAutoUnitTest = false;
   this->flagNotAllocated = false;
   this->flagAllowProcessMonitoring = false;
   this->flagCertificatesAreOfficiallySigned = false;
@@ -133,7 +134,6 @@ GlobalVariables::GlobalVariables() {
   this->flagRunningCommandLine = false;
   this->flagRunningApache = false;
   this->flagRunningBuiltInWebServer = false;
-  this->flagRunningAce = false;
   this->flagLoggedIn = false;
   this->flagLogInAttempted = false;
   this->flagServerDetailedLog = false;
@@ -141,7 +141,6 @@ GlobalVariables::GlobalVariables() {
   this->flagSSLIsAvailable = false;
 
   this->millisecondsNoPingBeforeChildIsPresumedDead = 10000;
-  this->flagAceIsAvailable = false;
   this->MutexProgressReportinG.mutexName = "ProgressReport";
   this->flagCachingInternalFilesOn = true;
   this->flagRunServerOnEmptyCommandLine = false;

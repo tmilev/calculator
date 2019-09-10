@@ -38,25 +38,25 @@ public:
 class logger;
 
 class GlobalVariables {
-  //Warning: please pay attention to the static initialization order fiasco.
-  //The fiasco states that global objects (allocated before main)
-  //may be allocated in an unexpected order.
-  //In particular an object allocated before main cannot
-  //assume that the constructor of theGlobalVariables
-  //object has already been called.
-  //In particular one should avoid declaring objects at global scope as
-  //the constructors of those may rely on the theGlobalVariables object.
-  //A possible "horror" scenario: the programmer decides to register a stack trace
-  //in the constructor of an object. That runs just fine.
-  //One year later, the programmer decides to
-  //declare a global object of that type,
-  //and again everything runs just fine as theGlobalVariables
-  //happens to be initialized before that object.
-  //Finally, two years later, the same programmer
-  //decides to declare a global object of the same type in
-  //a file initialized before the declaration of theGlobalVariables.
-  //This causes a nasty and difficult to catch
-  //crash before main.
+  // Warning: please pay attention to the static initialization order fiasco.
+  // The fiasco states that global objects (allocated before main)
+  // may be allocated in an unexpected order.
+  // In particular an object allocated before main cannot
+  // assume that the constructor of theGlobalVariables
+  // object has already been called.
+  // In particular one should avoid declaring objects at global scope as
+  // the constructors of those may rely on the theGlobalVariables object.
+  // A possible "horror" scenario: the programmer decides to register a stack trace
+  // in the constructor of an object. That runs just fine.
+  // One year later, the programmer decides to
+  // declare a global object of that type,
+  // and again everything runs just fine as theGlobalVariables
+  // happens to be initialized before that object.
+  // Finally, two years later, the same programmer
+  // decides to declare a global object of the same type in
+  // a file initialized before the declaration of theGlobalVariables.
+  // This causes a nasty and difficult to catch
+  // crash before main.
 public:
   int (*pointerCallSystemNoOutput)(const std::string& theSystemCommand);
   std::string (*pointerCallSystemWithOutput)(const std::string& theSystemCommand);
@@ -70,7 +70,6 @@ public:
       this->PauseUponUserRequest();
     }
   }
-  void FallAsleep(int microseconds);
   //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   int64_t millisecondOffset;
   int64_t millisecondsMaxComputation;
@@ -85,9 +84,6 @@ public:
   bool flagRunningCommandLine;
   bool flagRunningConsoleTest;
   bool flagRunningBuiltInWebServer;
-  //special flags
-  bool flagRunningAce;
-  bool flagAceIsAvailable;
   //webserver flags and variables
   bool flagRunServerOnEmptyCommandLine;
   bool flagCachingInternalFilesOn;
@@ -115,8 +111,10 @@ public:
   std::string hostNoPort;
 
   bool flagRequestComingLocally;
+  // Various unit tests will be run on calculator boot if this is true:
+  bool flagAutoUnitTest;
 
-  //internal infrastructure flags
+  // internal infrastructure flags
   bool flagServerForkedIntoWorker;
   bool flagNotAllocated;
 
@@ -129,10 +127,9 @@ public:
   bool flagTimedOutComputationIsDone;
   bool flagOutputTimedOut;
   bool flagComputationFinishedAllOutputSentClosing;
-  //experimental flags, known to cause stability issues when set to true:
+  // experimental flags:
   bool flagAllowProcessMonitoring;
-  //progress report flags:
-  //  bool flagPreparingReport;
+  // progress report flags:
   bool flagReportEverything;
   bool flagReportFileIO;
   bool flagReportLargeIntArithmetic;
@@ -228,6 +225,7 @@ public:
   bool UserDefaultHasProblemComposingRights();
   bool UserRequestRequiresLoadingRealExamData();
   bool UserRequestMustBePromptedToLogInIfNotLoggedIn();
+  void FallAsleep(int microseconds);
 
   std::string ToStringNavigation();
   std::string ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude);

@@ -126,3 +126,4 @@ std::string Configuration::serverAutoMonitor = "serverAutoMonitor";
 std::string Configuration::disableDatabaseLogEveryoneAsAdmin = "disableDatabaseLogEveryoneAsAdmin";
 std::string Configuration::serverDetailedLog = "serverDetailedLog";
 std::string Configuration::gitRepository = "gitRepository";
+std::string Configuration::autoUnitTest = "autoUnitTest";

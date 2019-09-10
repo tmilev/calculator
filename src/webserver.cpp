@@ -4879,7 +4879,6 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
     //std::cout << "Argument " << i + 1 << ": " << theGlobalVariables.programArguments[i] << "\n";
   }
   ////////////////////////////////////////////////////
-  theGlobalVariables.flagRunningAce = true;
   theGlobalVariables.flagRunningCommandLine = false;
   theGlobalVariables.flagRunningConsoleTest = false;
   theGlobalVariables.flagRunningApache = false;
@@ -4910,7 +4909,6 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   std::string& secondArgument = theGlobalVariables.programArguments[1];
   if (secondArgument == "server") {
     theGlobalVariables.flagRunningBuiltInWebServer = true;
-    theGlobalVariables.flagRunningAce = false;
     if (argC == 2) {
       return;
     }
@@ -5210,6 +5208,17 @@ void GlobalVariables::ConfigurationProcess() {
   theGlobalVariables.flagServerDetailedLog = theGlobalVariables.configuration[
     Configuration::serverDetailedLog
   ].isTrueRepresentationInJSON();
+  theGlobalVariables.flagAutoUnitTest = theGlobalVariables.configuration[
+    Configuration::autoUnitTest
+  ].isTrueRepresentationInJSON();
+  if (theGlobalVariables.flagAutoUnitTest) {
+    logServer
+    << logger::purple << "************************" << logger::endL
+    << logger::yellow << "Auto-unit tests are ON. "
+    << logger::red << "This will slow down the calculator boot. "
+    << logger::endL
+    << logger::purple << "************************" << logger::endL;
+  }
   theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin = theGlobalVariables.configuration[
     Configuration::disableDatabaseLogEveryoneAsAdmin
   ].isTrueRepresentationInJSON();
@@ -5341,8 +5350,8 @@ int WebServer::main(int argc, char **argv) {
     theWebServer.CheckMathJaxSetup();
     theWebServer.CheckFreecalcSetup();
 
-    theGlobalVariables.flagAceIsAvailable = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
-    if (!theGlobalVariables.flagAceIsAvailable && theGlobalVariables.flagRunningBuiltInWebServer) {
+    bool mathJaxPresent = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
+    if (!mathJaxPresent && theGlobalVariables.flagRunningBuiltInWebServer) {
       logServer << logger::red << "MathJax not available. " << logger::endL;
     }
     if (theGlobalVariables.flagRunningBuiltInWebServer) {

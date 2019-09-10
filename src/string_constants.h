@@ -81,6 +81,7 @@ public:
   static std::string disableDatabaseLogEveryoneAsAdmin;
   static std::string serverDetailedLog;
   static std::string gitRepository;
+  static std::string autoUnitTest;
 };
 
 class DatabaseStrings {

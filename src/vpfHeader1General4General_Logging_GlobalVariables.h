@@ -28,7 +28,7 @@ public:
   ~ThreadData();
 };
 
-struct ProcessTypes {
+class ProcessTypes {
 public:
   static std::string worker;
   static std::string server;

@@ -4,7 +4,7 @@
 
 static ProjectInformationInstance vpfWEBAPI_HEADER_Hinstance(__FILE__, "Header, web api strings. ");
 
-struct WebAPI {
+class WebAPI {
 public:
   static std::string appNoCache;
   static std::string app;
@@ -69,7 +69,8 @@ public:
   };
 };
 
-struct Configuration {
+class Configuration {
+public:
   static std::string processMonitoringAllowedByDefault;
   static std::string processMonitoringTriggerTime;
   static std::string millisecondsReplyAfterComputationDefault;
@@ -82,7 +83,7 @@ struct Configuration {
   static std::string gitRepository;
 };
 
-struct DatabaseStrings {
+class DatabaseStrings {
 public:
 ///credentials of calculator to use database
   static std::string theDatabaseUser;

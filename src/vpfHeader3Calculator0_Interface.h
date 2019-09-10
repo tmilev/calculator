@@ -834,7 +834,8 @@ public:
   bool operator==(const Plot& other) const;
 };
 
-struct InputBox {
+class InputBox {
+public:
   friend std::ostream& operator<<(std::ostream& output, const InputBox& input) {
     output << "name: " << input.name << ", ...";
     return output;
@@ -909,7 +910,8 @@ public:
   std::string ToStringJavascriptForUserInputBoxes();
 };
 
-struct ExpressionTripleCrunchers {
+class ExpressionTripleCrunchers {
+public:
   int theOp;
   int leftType;
   int rightType;
@@ -936,7 +938,7 @@ struct ExpressionTripleCrunchers {
   }
 };
 
-struct StateMaintainerCalculator {
+class StateMaintainerCalculator {
 public:
   Calculator* owner;
   int startingRuleStackIndex;

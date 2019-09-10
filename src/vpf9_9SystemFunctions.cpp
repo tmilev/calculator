@@ -31,7 +31,8 @@ void GlobalVariables::FallAsleep(int microseconds) {
   usleep(microseconds);
 }
 
-struct TimerThreadData{
+class TimerThreadData{
+public:
   int elapsedTimeInMilliseconds;
   int elapsedComputationTimeInMilliseconds;
   int counter ;

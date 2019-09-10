@@ -2411,7 +2411,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableNested(
 
 #include "vpfHeader2Math4_5_Tree.h"
 
-struct HistorySubExpression {
+class HistorySubExpression {
 public:
   friend std::ostream& operator << (std::ostream& output, const HistorySubExpression& theH) {
     if (theH.currentE == 0) {

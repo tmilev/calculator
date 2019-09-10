@@ -95,7 +95,8 @@ public:
   }
 };
 
-struct Answer {
+class Answer {
+public:
   bool flagAutoGenerateSubmitButtons;
   bool flagAutoGenerateMQButtonPanel;
   bool flagAutoGenerateMQfield;
@@ -152,7 +153,7 @@ struct Answer {
   std::string ToString();
 };
 
-struct ProblemDataAdministrative {
+class ProblemDataAdministrative {
 public:
   MapList<std::string, std::string, MathRoutines::HashString> problemWeightsPerCoursE;
   MapList<std::string, std::string, MathRoutines::HashString> deadlinesPerSection;
@@ -160,7 +161,7 @@ public:
   std::string ToString() const;
 };
 
-struct ProblemData {
+class ProblemData {
 private:
   int expectedNumberOfAnswersFromDB;
   int knownNumberOfAnswersFromHD;

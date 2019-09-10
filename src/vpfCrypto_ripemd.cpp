@@ -50,7 +50,8 @@ ProjectInformationInstance project_RIPEMD160_implementation(__FILE__, "Ripemd160
 
 bool Crypto::flagRIPEMDBigEndian = false;
 
-struct Ripemd160State {
+class Ripemd160State {
+public:
   uint64_t length;
   union {
     uint32_t w[16];
@@ -60,7 +61,8 @@ struct Ripemd160State {
   uint8_t bufpos;
 };
 
-struct RIPEMD160Internal {
+class RIPEMD160Internal {
+public:
   static const uint32_t initial_h[5];
   static const uint8_t RL[5][16];
   static const uint8_t RR[5][16];

@@ -2560,7 +2560,7 @@ class ElementMonomialAlgebra: public MonomialCollection<templateMonomial, coeffi
 };
 
 template<class coefficient>
-struct PolynomialOrder {
+class PolynomialOrder {
   public:
   List<MonomialP>::OrderLeftGreaterThanRight theMonOrder;
   bool CompareLeftGreaterThanRight(const Polynomial<coefficient>& left, const Polynomial<coefficient>& right) const;

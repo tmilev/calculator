@@ -1705,7 +1705,7 @@ public:
 };
 
 class FileInformation {
-  friend std::ostream& operator << (std::ostream& output, const FileInformation& theFI) {
+  friend std::ostream& operator<<(std::ostream& output, const FileInformation& theFI) {
     output << theFI.ToString();
     return output;
   }
@@ -1879,8 +1879,8 @@ int List<Object>::GetIndex(const Object& o) const {
 
 template <class Object>
 void List<Object>::swap(List<Object>& l1, List<Object>& l2) {
-  List<Object>* bigL;
-  List<Object>* smallL;
+  List<Object>* bigL = nullptr;
+  List<Object>* smallL = nullptr;
   int smallSize;
   if (l1.size < l2.size) {
     smallL = &l1;

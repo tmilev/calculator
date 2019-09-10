@@ -10,7 +10,7 @@ static ProjectInformationInstance ProjectInfoHeaderHtmlInterpretation(__FILE__, 
 
 class CalculatorHTML;
 
-struct TopicElement {
+class TopicElement {
 public:
   static int scoreButtonCounter;
   int type;
@@ -97,7 +97,7 @@ public:
   static void AddTopic(TopicElement& inputElt, MapList<std::string, TopicElement, MathRoutines::HashString>& output);
 };
 
-struct ProblemResources {
+class ProblemResources {
 public:
   std::string video;
   std::string slides;

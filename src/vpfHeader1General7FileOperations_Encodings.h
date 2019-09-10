@@ -10,7 +10,7 @@ static ProjectInformationInstance ProjectInfoVpfHeader1General7FileOperations_En
   __FILE__, "Header, file routines, encodings and more. "
 );
 
-struct FileOperations {
+class FileOperations {
 public:
   static HashedList<std::string, MathRoutines::HashString>&
   FilesStartsToWhichWeAppendHostName();
@@ -180,7 +180,7 @@ public:
   );
 };
 
-struct StateMaintainerCurrentFolder {
+class StateMaintainerCurrentFolder {
 public:
   std::string currentFolderPhysicalAbsolute;
   StateMaintainerCurrentFolder();

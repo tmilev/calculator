@@ -46,7 +46,7 @@ static SignalsInfrastructure theSignals;
 //sigset_t SignalSetToBlockWhileHandlingSIGCHLD;
 
 //This class locks/unlocks all signals within its scope
-struct SignalLock {
+class SignalLock {
   SignalLock() {
     theSignals.blockSignals();
   }

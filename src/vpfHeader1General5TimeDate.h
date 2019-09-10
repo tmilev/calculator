@@ -7,7 +7,7 @@
 
 static ProjectInformationInstance ProjectInfoHeaderDateAndtimeWrappers(__FILE__, "Date and time wrapper classes. ");
 
-struct TimeWrapper {
+class TimeWrapper {
 public:
   tm timeGM;
   tm timeLocal;

@@ -20,7 +20,8 @@ static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeade
 #include "vpfHeader5Crypto.h"
 #include "vpfHeader1General4General_Logging_GlobalVariables.h"
 class TransportLayerSecurity;
-struct TransportLayerSecurityOpenSSL {
+class TransportLayerSecurityOpenSSL {
+public:
   std::string name;
   TransportLayerSecurity* owner;
   int errorCode;

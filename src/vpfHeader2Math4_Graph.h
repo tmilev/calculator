@@ -24,7 +24,8 @@ private:
   void TreeRecurseCopyDelete(List<int>& l, int v, int m);
 };
 
-struct GraphEdge {
+class GraphEdge {
+public:
   friend std::ostream& operator << (std::ostream& output, const GraphEdge& theEdge) {
     output << theEdge.ToString();
     return output;

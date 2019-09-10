@@ -2118,7 +2118,7 @@ void UserCalculator::ComputePointsEarned(
   }
 }
 
-struct UserScores {
+class UserScores {
 public:
   CalculatorHTML theProblem;
   std::string currentSection;

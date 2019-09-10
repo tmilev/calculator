@@ -23,7 +23,8 @@ template <typename someGroup, typename elementSomeGroup>
 class SubgroupData;
 
 template <typename ElementEuclideanDomain>
-struct DivisionResult {
+class DivisionResult {
+public:
   ElementEuclideanDomain quotient;
   ElementEuclideanDomain remainder;
 };

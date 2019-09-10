@@ -11,7 +11,8 @@
 #include <cmath>
 ProjectInformationInstance ProjectInfoVpf6_35cpp(__FILE__, "More calculator built-in functions. ");
 
-struct MeshTriangles {
+class MeshTriangles {
+public:
   Expression theFun;
   Calculator* owner;
   int XstartingGridCount;

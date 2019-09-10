@@ -88,14 +88,14 @@ int GlobalVariables::CallSystemNoOutput(const std::string& systemCommand, logger
 }
 
 std::string GlobalVariables::CallSystemWithOutput(const std::string& systemCommand) {
-  if (this->pointerCallSystemWithOutput == 0) {
+  if (this->pointerCallSystemWithOutput == nullptr) {
     return "Error";
   }
   return this->pointerCallSystemWithOutput(systemCommand);
 }
 
 void GlobalVariables::ChDir(const std::string& systemCommand) {
-  if (this->pointerCallChDir != 0) {
+  if (this->pointerCallChDir != nullptr) {
     this->pointerCallChDir(FileOperations::ConvertStringToEscapedStringFileNameSafe(systemCommand));
   }
 }
@@ -108,17 +108,17 @@ GlobalVariables::GlobalVariables() {
   this->flagIsChildProcess = false;
   this->flagRestartNeeded = false;
   this->flagStopNeeded = false;
-  this->IndicatorStringOutputFunction = 0;
-  this->WebServerReturnDisplayIndicatorCloseConnection = 0;
-  this->WebServerTimerPing = 0;
+  this->IndicatorStringOutputFunction = nullptr;
+  this->WebServerReturnDisplayIndicatorCloseConnection = nullptr;
+  this->WebServerTimerPing = nullptr;
   this->millisecondsMaxComputation = 100000; //100 seconds
   this->millisecondOffset = 0;
   this->millisecondsComputationStart = - 1;
   this->millisecondsReplyAfterComputation = 0;
   this->millisecondsReplyAfterComputationDefault = 5000; //5 seconds
-  this->pointerCallSystemWithOutput = 0;
-  this->pointerCallSystemNoOutput = 0;
-  this->pointerCallChDir = 0;
+  this->pointerCallSystemWithOutput = nullptr;
+  this->pointerCallSystemNoOutput = nullptr;
+  this->pointerCallChDir = nullptr;
   this->flagReportEverything = false;
   this->flagReportGaussianElimination = false;
   this->flagReportLargeIntArithmetic = false;
@@ -194,7 +194,7 @@ void ProgressReport::init() {
     return;
   }
   this->currentLevel = theGlobalVariables.ProgressReportStringS[this->threadIndex].size;
-  theGlobalVariables.ProgressReportStringS[this->threadIndex].AddOnTop((std::string)"");
+  theGlobalVariables.ProgressReportStringS[this->threadIndex].AddOnTop(std::string(""));
 }
 
 ProgressReport::~ProgressReport() {
@@ -247,16 +247,20 @@ int DrawingVariables::GetColorFromChamberIndex(int index) {
   int r = (255 * (tempI % NumColorsBase)) / NumColorsBase;
   int g = (255 * (tempI % (NumColorsBase * NumColorsBase))) / (NumColorsBase * NumColorsBase);
   int b = (255 * (tempI % (NumColorsBase * NumColorsBase * NumColorsBase))) / (NumColorsBase * NumColorsBase * NumColorsBase);
-  return HtmlRoutines::RedGreenBlue(r, g, b);
+  return static_cast<int>(HtmlRoutines::RedGreenBlue(
+    static_cast<unsigned int>(r),
+    static_cast<unsigned int>(g),
+    static_cast<unsigned int>(b)
+  ));
 }
 
 void DrawingVariables::initDrawingVariables() {
   this->DefaultHtmlHeight = 400;
   this->DefaultHtmlWidth = 400;
-  this->theDrawLineFunction = 0;
-  this->theDrawTextFunction = 0;
-  this->theDrawCircleFunction = 0;
-  this->theDrawClearScreenFunction = 0;
+  this->theDrawLineFunction = nullptr;
+  this->theDrawTextFunction = nullptr;
+  this->theDrawCircleFunction = nullptr;
+  this->theDrawClearScreenFunction = nullptr;
   this->fontSizeNormal = 10;
   this->fontSizeSubscript = 6;
   this->flagLaTeXDraw = false;
@@ -265,15 +269,15 @@ void DrawingVariables::initDrawingVariables() {
   this->flagDrawingInvisibles = false;
   this->flagDrawingLinkToOrigin = true;
   this->flagFillUserDefinedProjection = false;
-  this->ColorDashes = HtmlRoutines::RedGreenBlue(200, 200, 200);
+  this->ColorDashes = static_cast<int>(HtmlRoutines::RedGreenBlue(200, 200, 200));
   this->flag2DprojectionDraw = true;
   this->flagIncludeExtraHtmlDescriptions = true;
   this->flagAllowMovingCoordinateSystemFromArbitraryClick = true;
-  this->ColorChamberIndicator = HtmlRoutines::RedGreenBlue(220, 220, 0);
-  this->ColorWeylChamberWalls = HtmlRoutines::RedGreenBlue(220, 220, 0);
-  this->ColorTextPermanentlyZeroChamber = HtmlRoutines::RedGreenBlue(250, 220, 220);
-  this->ColorTextZeroChamber = HtmlRoutines::RedGreenBlue(200, 100, 100);
-  this->ColorTextDefault = HtmlRoutines::RedGreenBlue(0, 0, 0);
+  this->ColorChamberIndicator = static_cast<int>(HtmlRoutines::RedGreenBlue(220, 220, 0));
+  this->ColorWeylChamberWalls = static_cast<int>(HtmlRoutines::RedGreenBlue(220, 220, 0));
+  this->ColorTextPermanentlyZeroChamber = static_cast<int>(HtmlRoutines::RedGreenBlue(250, 220, 220));
+  this->ColorTextZeroChamber = static_cast<int>(HtmlRoutines::RedGreenBlue(200, 100, 100));
+  this->ColorTextDefault = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
   this->Selected = - 2;
   this->textX = 0;
   this->textY = 15;
@@ -293,7 +297,7 @@ int HtmlRoutines::scale = 100;
 
 std::string HtmlRoutines::CleanUpForFileNameUse(const std::string& inputString) {
   std::stringstream out;
-  for (int i = 0; i < (signed) inputString.size(); i ++) {
+  for (unsigned i = 0; i < inputString.size(); i ++) {
     if (inputString[i] == '/') {
       out << "_div_";
     } else {
@@ -305,7 +309,7 @@ std::string HtmlRoutines::CleanUpForFileNameUse(const std::string& inputString) 
 
 std::string HtmlRoutines::CleanUpForLaTeXLabelUse(const std::string& inputString) {
   std::stringstream out;
-  for (int i = 0; i < (signed) inputString.size(); i ++) {
+  for (unsigned i = 0; i < inputString.size(); i ++) {
     if (
       inputString[i] != '/' &&
       inputString[i] != '^' &&
@@ -331,7 +335,7 @@ void HtmlRoutines::clearDollarSigns(std::string& theString, std::string& output)
 
 std::string HtmlRoutines::DoubleBackslashes(const std::string& input) {
   std::stringstream out;
-  for (int i = 0; i < (signed) input.size(); i ++) {
+  for (unsigned i = 0; i < input.size(); i ++) {
     out << input[i];
     if (input[i] == '\\') {
       out << "\\";
@@ -342,7 +346,7 @@ std::string HtmlRoutines::DoubleBackslashes(const std::string& input) {
 
 std::string HtmlRoutines::clearNewLines(const std::string& input) {
   std::stringstream out;
-  for (int i = 0; i < (signed) input.size(); i ++) {
+  for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == '\n' || input[i] == '\r') {
       out << " ";
     } else {
@@ -354,7 +358,7 @@ std::string HtmlRoutines::clearNewLines(const std::string& input) {
 
 std::string HtmlRoutines::backslashQuotes(const std::string& input) {
   std::stringstream out;
-  for (int i = 0; i < (signed) input.size(); i ++) {
+  for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == '"') {
       out << "\\";
     }
@@ -436,9 +440,10 @@ std::string HtmlRoutines::ConvertStringToHtmlStringRestrictSize(
 ) {
   std::string result = HtmlRoutines::ConvertStringToHtmlString(theString, doReplaceNewLineByBr);
   if (maxStringSize > 0) {
-    if ((signed) result.size() > maxStringSize) {
+    if (static_cast<signed>(result.size()) > maxStringSize) {
       std::stringstream resultStream;
-      resultStream << result.substr(0, maxStringSize) << "...[only first " << maxStringSize << " chars shown]. ";
+      resultStream << result.substr(0, static_cast<unsigned>(maxStringSize))
+      << "...[only first " << maxStringSize << " chars shown]. ";
       return resultStream.str();
     }
   }
@@ -462,7 +467,7 @@ bool FileOperations::IsFolderUnsecure(const std::string& theFolderName) {
   MacroRegisterFunctionWithName("FileOperations::IsFolderUnsecure");
   DIR *pDir;
   pDir = opendir(theFolderName.c_str());
-  if (pDir != NULL) {
+  if (pDir != nullptr) {
     closedir(pDir);
     return true;
   }
@@ -478,12 +483,12 @@ std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileNa
     std::string theCopy = theFileName;
     return FileOperations::GetFileExtensionWithDot(theCopy, outputFileNameNoExtension);
   }
-  for (int i = (signed) theFileName.size() - 1; i >= 0; i --) {
-    if (theFileName[i] == '.') {
-      if (outputFileNameNoExtension != 0) {
-        *outputFileNameNoExtension = theFileName.substr(0, i);
+  for (int i = static_cast<signed>(theFileName.size() - 1); i >= 0; i --) {
+    if (theFileName[static_cast<unsigned>(i)] == '.') {
+      if (outputFileNameNoExtension != nullptr) {
+        *outputFileNameNoExtension = theFileName.substr(0, static_cast<unsigned>(i));
       }
-      return theFileName.substr(i, std::string::npos);
+      return theFileName.substr(static_cast<unsigned>(i), std::string::npos);
     }
   }
   return "";
@@ -498,7 +503,7 @@ std::string FileOperations::ConvertStringToLatexFileName(const std::string& inpu
     } else if (input[i] == ' ' || input[i] == ':') {
       out << "_";
     } else {
-      out << "_" << (int) input[i];
+      out << "_" << static_cast<int>(input[i]);
     }
   }
   std::string result = out.str();
@@ -586,7 +591,9 @@ List<bool>& FileOperations::GetSafeFileChars() {
     theChars += "@";
     theChars += "+-/=._%";
     for (unsigned i = 0; i < theChars.size(); i ++) {
-      FileOperations::safeFileCharacters[ ((unsigned char)theChars[i])] = true;
+      FileOperations::safeFileCharacters[
+        static_cast<int>(static_cast<unsigned int>(static_cast<unsigned char>(theChars[i])))
+      ] = true;
     }
   }
   return FileOperations::safeFileCharacters;
@@ -672,17 +679,17 @@ bool FileOperations::GetFolderFileNamesUnsecure(
 ) {
   MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesUnsecure");
   DIR *theDirectory = opendir(theFolderName.c_str());
-  if (theDirectory == NULL) {
+  if (theDirectory == nullptr) {
     return false;
   }
   outputFileNamesNoPath.Reserve(1000);
-  if (outputFileTypesWithDot != 0) {
+  if (outputFileTypesWithDot != nullptr) {
     outputFileTypesWithDot->Reserve(1000);
   }
   std::string fileNameNoPath, fullName, theExtension;
-  for (dirent *fileOrFolder = readdir(theDirectory); fileOrFolder != 0; fileOrFolder = readdir (theDirectory)) {
+  for (dirent *fileOrFolder = readdir(theDirectory); fileOrFolder != nullptr; fileOrFolder = readdir (theDirectory)) {
     outputFileNamesNoPath.AddOnTop(fileOrFolder->d_name);
-    if (outputFileTypesWithDot != 0) {
+    if (outputFileTypesWithDot != nullptr) {
       fileNameNoPath = fileOrFolder->d_name;
       fullName = theFolderName + fileNameNoPath;
       if (FileOperations::IsFolderUnsecure(fullName)) {
@@ -726,7 +733,7 @@ bool FileOperations::WriteFileVirual(
 ) {
   std::fstream theFile;
   if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(theFile, fileNameVirtual, false, true, false)) {
-    if (commentsOnError != 0) {
+    if (commentsOnError != nullptr) {
       *commentsOnError << "Filed to open file. ";
     }
     return false;
@@ -893,7 +900,9 @@ bool FileOperations::OpenFileVirtualReadOnly(
   std::ifstream& theFile, const std::string& theFileName, bool openAsBinary, bool accessSensitiveFolders
 ) {
   std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, false, 0)) {
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+    theFileName, computedFileName, accessSensitiveFolders, false, nullptr
+  )) {
     return false;
   }
   return FileOperations::OpenFileUnsecureReadOnly(theFile, computedFileName, openAsBinary);
@@ -956,7 +965,7 @@ bool FileOperations::OpenFileVirtual(
   bool accessSensitiveFolders
 ) {
   std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, false, 0)) {
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, false, nullptr)) {
     return false;
   }
   return FileOperations::OpenFileUnsecure(theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
@@ -975,7 +984,7 @@ std::string FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(
 
 std::string FileOperations::GetCurrentFolder() {
   char cwd[100000];
-  if (getcwd(cwd, sizeof(cwd)) != NULL) {
+  if (getcwd(cwd, sizeof(cwd)) != nullptr) {
     return std::string(cwd);
   } else {
     crash << "Error: getcwd returned NULL. This shouldn't happen. " << crash;
@@ -1199,7 +1208,9 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
 ) {
   std::string computedFileName;
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, false, 0)) {
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+    theFileName, computedFileName, accessSensitiveFolders, false, nullptr
+  )) {
     return false;
   }
   std::string folderName = FileOperations::GetPathFromFileNameWithPath(computedFileName);
@@ -1221,7 +1232,9 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtual(
 ) {
   std::string computedFileName;
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, false, 0)) {
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+    theFileName, computedFileName, accessSensitiveFolders, false, nullptr
+  )) {
     return false;
   }
   return FileOperations::OpenFileCreateIfNotPresentUnsecure(
@@ -1253,7 +1266,7 @@ bool FileOperations::OpenFileCreateIfNotPresentUnsecure(
   if (theFile.is_open()) {
     theFile.clear();
     theFile.seekp(0, std::ios_base::end);
-    int tempI = theFile.tellp();
+    long tempI = theFile.tellp();
     if (tempI > 0) {
       if (!OpenInAppendMode) {
         theFile.seekp(0);
@@ -1279,17 +1292,17 @@ StateMaintainerCurrentFolder::~StateMaintainerCurrentFolder() {
 bool XML::ReadFromFile(std::fstream& inputFile) {
   MacroRegisterFunctionWithName("XML::ReadFromFile");
   inputFile.seekg(0, std::fstream::end);
-  unsigned int theFileSize = inputFile.tellg();
+  long theFileSize = inputFile.tellg();
   List<char> memoryBlock;
-  memoryBlock.SetSize(theFileSize);
+  memoryBlock.SetSize(static_cast<int>(theFileSize));
   inputFile.seekg (0, std::fstream::beg);
   inputFile.read (memoryBlock.TheObjects, theFileSize);
-  this->theString.assign(memoryBlock.TheObjects, memoryBlock.size);
+  this->theString.assign(memoryBlock.TheObjects, static_cast<unsigned int>(memoryBlock.size));
   return true;
 }
 
 XML::XML() {
-  this->positionInString = - 1;
+  this->positionInString = 0;
 }
 
 std::string XML::GetOpenTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters) {
@@ -1384,18 +1397,15 @@ bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& output
   std::string charReader = "";
   std::string theOpenTagWithSymbols = this->GetOpenTagNoInputCheck(theTagName);
   std::string theCloseTagWithSymbols = this->GetCloseTagNoInputCheck(theTagName);
-  int lengthOpenTag = theOpenTagWithSymbols.size();
-  int lengthCloseTag = theCloseTagWithSymbols.size();
-  int positionInOpenTag = 0;
-  int positionInCloseTag = 0;
+  size_t lengthOpenTag = theOpenTagWithSymbols.size();
+  size_t lengthCloseTag = theCloseTagWithSymbols.size();
+  unsigned positionInOpenTag = 0;
+  unsigned positionInCloseTag = 0;
   int numTags = 0;
   std::stringstream out;
-  if (this->positionInString < 0) {
-    this->positionInString = 0;
-  }
   bool tagWasClosed = false;
   int numCharRead = 0;
-  for (; this->positionInString < (signed)this->theString.size(); this->positionInString ++) {
+  for (; this->positionInString < this->theString.size(); this->positionInString ++) {
     numCharRead ++;
     charReader.push_back(this->theString[this->positionInString]);
     bool tagStarted = false;
@@ -1474,7 +1484,7 @@ void DrawingVariables::drawLineBufferOld(
   double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, std::fstream* LatexOutFile
 ) {
   this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex, 1);
-  if (LatexOutFile != 0) {
+  if (LatexOutFile != nullptr) {
     LaTeXProcedures::drawline(X1, Y1, X2, Y2, thePenStyle, ColorIndex, *LatexOutFile, *this);
   }
 }
@@ -1506,10 +1516,12 @@ void DrawingVariables::drawCircleAtVectorBufferDouble(
 void DrawingVariables::drawTextDirectly(
   double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile
 ) {
-  if (this->theDrawTextFunction != 0) {
-    this->theDrawTextFunction(X1 - 7, Y1 - 7, inputText.c_str(), inputText.length(), color, this->fontSizeNormal);
+  if (this->theDrawTextFunction != nullptr) {
+    this->theDrawTextFunction(
+      X1 - 7, Y1 - 7, inputText.c_str(), static_cast<int>(inputText.length()), color, this->fontSizeNormal
+    );
   }
-  if (LatexOutFile != 0) {
+  if (LatexOutFile != nullptr) {
     LaTeXProcedures::drawTextDirectly(X1, Y1, inputText, color, *LatexOutFile);
   }
 }
@@ -1662,10 +1674,13 @@ unsigned int MathRoutines::HashListInts(const List<int>& input) {
 }
 
 unsigned int MathRoutines::HashString(const std::string& x) {
-  int numCycles = x.size();
+  size_t numCycles = x.size();
   unsigned int result = 0;
-  for (int i = 0; i < numCycles; i ++) {
-    result += x[i] * SomeRandomPrimes[i % SomeRandomPrimesSize];
+  for (unsigned i = 0, counter = 0; i < numCycles; i ++, counter ++) {
+    if (counter >= SomeRandomPrimesSize) {
+      counter = 0;
+    }
+    result += static_cast<unsigned>(x[i]) * SomeRandomPrimes[counter];
   }
   return result;
 }
@@ -1675,15 +1690,15 @@ unsigned int MathRoutines::HashVectorDoubles(const Vector<double>& input) {
 }
 
 std::string MathRoutines::StringShortenInsertDots(const std::string& inputString, int maxNumChars) {
-  if (inputString.size() <= (unsigned) maxNumChars) {
+  if (inputString.size() <= static_cast<unsigned>(maxNumChars)) {
     return inputString;
   }
   std::stringstream out;
   int numCharsBeginEnd = maxNumChars / 2 - 2;
-  int numCharsOmitted = inputString.size() - numCharsBeginEnd * 2;
-  out << inputString.substr(0, numCharsBeginEnd) << "... ("
+  int numCharsOmitted = static_cast<signed>(inputString.size()) - numCharsBeginEnd * 2;
+  out << inputString.substr(0, static_cast<unsigned>(numCharsBeginEnd)) << "... ("
   << numCharsOmitted << " characters omitted)..."
-  << inputString.substr(inputString.size() - numCharsBeginEnd);
+  << inputString.substr(static_cast<unsigned>( static_cast<signed>(inputString.size()) - numCharsBeginEnd));
   return out.str();
 }
 
@@ -1702,14 +1717,14 @@ std::string MathRoutines::StringTrimWhiteSpace(const std::string& inputString) {
 }
 
 void MathRoutines::StringTrimToLengthWithHash(std::string& inputOutput, int desiredLength50AtLeast) {
-  if (((signed) inputOutput.size()) <= desiredLength50AtLeast) {
+  if (static_cast<signed>(inputOutput.size()) <= desiredLength50AtLeast) {
     return;
   }
   if (desiredLength50AtLeast < 40) {
     return;
   }
   std::stringstream inputAbbreviatedStream;
-  inputAbbreviatedStream << inputOutput.substr(0, desiredLength50AtLeast - 30)
+  inputAbbreviatedStream << inputOutput.substr(0, static_cast<unsigned>(desiredLength50AtLeast - 30))
   << "_abbrev_hash_" << MathRoutines::HashString(inputOutput);
   inputOutput = inputAbbreviatedStream.str();
 }
@@ -1718,19 +1733,21 @@ std::string MathRoutines::StringTrimToLengthForDisplay(const std::string& input,
   if (desiredLength20AtLeast < 20) {
     desiredLength20AtLeast = 20;
   }
-  if (((signed) input.size()) <= desiredLength20AtLeast) {
+  if (static_cast<signed>(input.size()) <= desiredLength20AtLeast) {
     return input;
   }
   std::stringstream abbreviationStream;
   abbreviationStream << "...(" << input.size() << " characters) ...";
-  int numCharsAtEnds = (input.size() - desiredLength20AtLeast) / 2;
+  int numCharsAtEnds = (static_cast<signed>(input.size()) - desiredLength20AtLeast) / 2;
   std::stringstream out;
   for (int i = 0; i < numCharsAtEnds; i ++) {
-    out << input[i];
+    out << input[static_cast<unsigned>(i)];
   }
   out << abbreviationStream.str();
   for (int i = 0; i < numCharsAtEnds; i ++) {
-    out << input[input.size() - numCharsAtEnds + i];
+    out << input[
+      static_cast<unsigned>(static_cast<signed>(input.size()) - numCharsAtEnds + i)
+    ];
   }
   return out.str();
 }
@@ -1755,19 +1772,20 @@ void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::str
     return;
   }
   signed j = 0;
-  for (j = (signed) output.size() - 1; j >= 0; j --) {
+  for (j = static_cast<signed>(output.size()) - 1; j >= 0; j --) {
+    unsigned k = static_cast<unsigned>(j);
     if (
-      output[j] != ' ' &&
-      output[j] != '\r' &&
-      output[j] != '\t' &&
-      output[j] != '\n' &&
-      output[j] != '\0'
+      output[k] != ' ' &&
+      output[k] != '\r' &&
+      output[k] != '\t' &&
+      output[k] != '\n' &&
+      output[k] != '\0'
     ) {
       break;
     }
   }
   j ++;
-  output = output.substr(0, j);
+  output = output.substr(0, static_cast<unsigned>(j));
 }
 
 void MathRoutines::StringSplitDefaultDelimiters(const std::string& inputString, List<std::string>& output) {
@@ -1779,7 +1797,7 @@ void MathRoutines::StringSplitDefaultDelimiters(const std::string& inputString, 
   delimiters.AddOnTop('\t');
   delimiters.AddOnTop(',');
   delimiters.AddOnTop(';');
-  delimiters.AddOnTop(160);//<-&nbsp
+  delimiters.AddOnTop(static_cast<char>(160)); //<-&nbsp
   MathRoutines::StringSplitExcludeDelimiters(inputString, delimiters, output);
 }
 
@@ -1815,15 +1833,16 @@ void MathRoutines::SplitStringInTwo(
   if (firstStringSize < 0) {
     firstStringSize = 0;
   }
-  if (firstStringSize > (signed) inputString.size()) {
-    firstStringSize = inputString.size();
+  int inputSize = static_cast<signed>(inputString.size());
+  if (firstStringSize > inputSize) {
+    firstStringSize = inputSize;
   }
   outputFirst = "";
-  outputFirst = inputString.substr(0, firstStringSize);
+  outputFirst = inputString.substr(0, static_cast<unsigned>(firstStringSize));
   outputSecond = "";
-  int secondStringSize = inputString.size() - firstStringSize;
+  int secondStringSize =  inputSize - firstStringSize;
   if (secondStringSize > 0) {
-    outputSecond = inputString.substr(firstStringSize, secondStringSize);
+    outputSecond = inputString.substr(static_cast<unsigned>(firstStringSize), static_cast<unsigned>(secondStringSize));
   }
 }
 
@@ -1884,22 +1903,22 @@ bool MathRoutines::StringEndsWith(
 ) {
   MacroRegisterFunctionWithName("MathRoutines::StringEndsWith");
   if (desiredEnd.size() == 0) {
-    if (outputStringBeginning == 0) {
+    if (outputStringBeginning == nullptr) {
       *outputStringBeginning = theString;
     }
     return true;
   }
-  int indexInTheString = theString.size() - 1;
-  for (int i = ((signed)desiredEnd.size()) - 1; i >= 0; i --) {
+  int indexInTheString = static_cast<signed>(theString.size()) - 1;
+  for (int i = static_cast<signed>(desiredEnd.size()) - 1; i >= 0; i --) {
     if (indexInTheString < 0) {
       return false;
     }
-    if (desiredEnd[i] != theString[indexInTheString]) {
+    if (desiredEnd[static_cast<unsigned>(i)] != theString[static_cast<unsigned>(indexInTheString)]) {
       return false;
     }
     indexInTheString --;
   }
-  if (outputStringBeginning != 0) {
+  if (outputStringBeginning != nullptr) {
     *outputStringBeginning = theString.substr(0, theString.size() - desiredEnd.size());
   }
   return true;
@@ -1909,10 +1928,10 @@ bool MathRoutines::StringBeginsWith(
   const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd
 ) {
   std::string actualBeginning, stringEnd;
-  MathRoutines::SplitStringInTwo(theString, desiredBeginning.size(), actualBeginning, stringEnd);
+  MathRoutines::SplitStringInTwo(theString, static_cast<int>(desiredBeginning.size()), actualBeginning, stringEnd);
   bool result = (actualBeginning == desiredBeginning);
   //outputstring is only modified if result is true
-  if (result && outputStringEnd != 0) {
+  if (result && outputStringEnd != nullptr) {
     *outputStringEnd = stringEnd;
   }
   return result;
@@ -1931,7 +1950,7 @@ bool MathRoutines::isALatinLetter(char input) {
 bool MathRoutines::isADigit(char theChar, int* whichDigit) {
   int theDigit = theChar - '0';
   bool result = (theDigit < 10 && theDigit >= 0);
-  if (result && whichDigit != 0) {
+  if (result && whichDigit != nullptr) {
     *whichDigit = theDigit;
   }
   return result;
@@ -2226,7 +2245,7 @@ unsigned int Selection::HashFunction() const {
   unsigned int result = 0;
   for (int i = 0; i < tempMin; i ++) {
     if (this->selected[i]) {
-      result += i * SomeRandomPrimes[i];
+      result += static_cast<unsigned>(i) * SomeRandomPrimes[i];
     }
   }
   return result;
@@ -2237,7 +2256,7 @@ unsigned int Selection::HashFunction() const {
 template<>
 List<MonomialWrapper<std::string, MathRoutines::HashString> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialWrapper<std::string, MathRoutines::HashString> >() {
-  return 0;
+  return nullptr;
 }
 
 template<>
@@ -2247,67 +2266,67 @@ List<MonomialP>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<Monomi
 
 template<>
 List<Polynomial<AlgebraicNumber> >::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<Polynomial<AlgebraicNumber> >() {
-  return 0;
+  return nullptr;
 }
 
 template<>
 List<MonomialVector>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialVector>() {
-  return 0;
+  return nullptr;
 }
 
 template<>
 List<MonomialWeylAlgebra>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialWeylAlgebra>() {
-  return 0;
+  return nullptr;
 }
 
 template<>
 List<MonomialUniversalEnveloping<RationalFunctionOld> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<RationalFunctionOld> >() {
-  return 0;
+  return nullptr;
 }
 
 template<>
 List<MonomialGeneralizedVerma<RationalFunctionOld> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialGeneralizedVerma<RationalFunctionOld> >() {
-  return 0;
+  return nullptr;
 }
 
 template<>
 List<ChevalleyGenerator >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<ChevalleyGenerator>() {
-  return 0;
+  return nullptr;
 }
 
 template<>
 List<MonomialMatrix>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialMatrix>() {
-  return 0;
+  return nullptr;
 }
 
 template<>
 List<MonomialUniversalEnveloping<Rational> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<Rational> >() {
-  return 0;
+  return nullptr;
 }
 
 template<>
 List<MonomialTensorGeneralizedVermas<RationalFunctionOld> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialTensorGeneralizedVermas<RationalFunctionOld> >() {
-  return 0;
+  return nullptr;
 }
 
 template<>
 List<quasiDiffMon>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<quasiDiffMon>() {
-  return 0;
+  return nullptr;
 }
 
 template<>
 List<MonomialUniversalEnveloping<Polynomial<Rational> > >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<Polynomial<Rational> > >() {
-  return 0;
+  return nullptr;
 }
 
 FormatExpressions::FormatExpressions() {
@@ -2332,7 +2351,7 @@ FormatExpressions::FormatExpressions() {
   this->MaxLinesPerPage = 40;
   this->NumAmpersandsPerNewLineForLaTeX = 0;
   this->MaxRecursionDepthPerExpression = 500;
-  this->thePolyMonOrder = 0;
+  this->thePolyMonOrder = nullptr;
   this->flagExpressionIsFinal = true;
   this->flagExpressionNewLineAllowed = false;
   this->flagIncludeLieAlgebraTypes = true;
@@ -2475,7 +2494,7 @@ bool PartFraction::ReduceOnceGeneralMethod(
 int PartFraction::SizeWithoutDebugString() const {
   int Accum = 0;
   Accum += this->::ListLight<oneFracWithMultiplicitiesAndElongations>::SizeWithoutObjects();
-  Accum += this->size * sizeof(oneFracWithMultiplicitiesAndElongations);
+  Accum += this->size * static_cast<int>(sizeof(oneFracWithMultiplicitiesAndElongations));
   Accum += this->IndicesNonZeroMults.SizeWithoutObjects();
   return Accum;
 }
@@ -2552,7 +2571,7 @@ std::string PartFraction::ToString(
   tempS = out.str();
   if (LatexFormat) {
     out << stringPoly;
-    if (stringPoly.size() > (unsigned) PolyFormatLocal.MaxLineLength) {
+    if (stringPoly.size() > static_cast<unsigned>(PolyFormatLocal.MaxLineLength)) {
       out << ("\\\\\n&&");
       NumLinesUsed++;
     }
@@ -2565,7 +2584,7 @@ std::string PartFraction::ToString(
 }
 
 bool PartFraction::rootIsInFractionCone(PartFractions& owner, Vector<Rational>* theRoot) const {
-  if (theRoot == 0) {
+  if (theRoot == nullptr) {
     return true;
   }
   if (this->RelevanceIsComputed) {
@@ -2886,7 +2905,7 @@ void PartFraction::ApplySzenesVergneFormulA(
     currentFrac.AddMultiplicity(- 1, LargestElongation);
     tempM.MakeOne(theDim);
     for (int j = 0; j < i; j ++) {
-      int tempElongation = (int) (*this)[theSelectedIndices[j]].GetLargestElongation();
+      int tempElongation = (*this)[theSelectedIndices[j]].GetLargestElongation();
       for (int k = 0; k < theDim; k ++) {
         tempM[k] += startingVectors[theSelectedIndices[j]][k] * theElongations[j] * tempElongation;
       }
@@ -3642,14 +3661,15 @@ int PartFractions::ElementToStringBasisChangeOutputToFile(std::fstream& output, 
 }
 
 int PartFraction::ControlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal) {
-  int numCutOffs = output.size() % PolyFormatLocal.MaxLineLength;
+  int numCutOffs = static_cast<signed>(output.size()) % PolyFormatLocal.MaxLineLength;
   int LastCutOffIndex = 0;
   int NumLinesAdded = 0;
   for (int i = 0; i < numCutOffs; i ++) {
-    for (int j = LastCutOffIndex + PolyFormatLocal.MaxLineLength; j < ((int) output.size()) - 1; j ++) {
-      if (output[j] == '\\' && output[j + 1] == 'f') {
-        output.insert(j, "\\\\\n&&");
-        NumLinesAdded++;
+    for (int j = LastCutOffIndex + PolyFormatLocal.MaxLineLength; j < static_cast<signed>(output.size()) - 1; j ++) {
+      unsigned k = static_cast<unsigned>(j);
+      if (output[k] == '\\' && output[k + 1] == 'f') {
+        output.insert(k, "\\\\\n&&");
+        NumLinesAdded ++;
         LastCutOffIndex = j + 5;
         break;
       }
@@ -3659,13 +3679,14 @@ int PartFraction::ControlLineSizeFracs(std::string& output, FormatExpressions& P
 }
 
 int PartFraction::ControlLineSizeStringPolys(std::string& output, FormatExpressions& PolyFormatLocal) {
-  int numCutOffs = output.size() % PolyFormatLocal.MaxLineLength;
+  int numCutOffs = static_cast<int>(static_cast<int>(output.size()) % PolyFormatLocal.MaxLineLength);
   int LastCutOffIndex = 0;
   int NumLinesAdded = 0;
   for (int i = 0; i < numCutOffs; i ++) {
-    for (int j = LastCutOffIndex + PolyFormatLocal.MaxLineLength; j < (int)(output.size()) - 1; j ++) {
-      if ((output[j] == '+' || output[j] == '-') && output[j - 1] != '{') {
-        output.insert(j, "\\\\\n&&");
+    for (int j = LastCutOffIndex + PolyFormatLocal.MaxLineLength; j < static_cast<int>(output.size()) - 1; j ++) {
+      unsigned k = static_cast<unsigned>(j);
+      if ((output[k] == '+' || output[k] == '-') && output[k - 1] != '{') {
+        output.insert(k, "\\\\\n&&");
         NumLinesAdded ++;
         LastCutOffIndex = j + 5;
         break;
@@ -3676,7 +3697,7 @@ int PartFraction::ControlLineSizeStringPolys(std::string& output, FormatExpressi
 }
 
 void PartFractions::MakeProgressReportSplittingMainPart() {
-  if (theGlobalVariables.IndicatorStringOutputFunction == 0) {
+  if (theGlobalVariables.IndicatorStringOutputFunction == nullptr) {
     return;
   }
   std::stringstream out1, out2, out3;
@@ -3708,7 +3729,7 @@ void PartFractions::MakeProgressReportSplittingMainPart() {
 
 void PartFractions::MakeProgressVPFcomputation() {
   this->NumProcessedForVPFfractions ++;
-  if (theGlobalVariables.IndicatorStringOutputFunction == 0) {
+  if (theGlobalVariables.IndicatorStringOutputFunction == nullptr) {
     return;
   }
   std::stringstream out2;
@@ -3765,14 +3786,14 @@ bool PartFractions::initFromRoots(Vectors<Rational>& input) {
 
 void PartFractions::initAndSplit(Vectors<Rational>& input) {
   this->initFromRoots(input);
-  this->split(0);
+  this->split(nullptr);
 }
 
 void PartFractions::Run(Vectors<Rational>& input) {
   if (!this->flagInitialized) {
     this->initFromRoots(input);
   }
-  this->split(0);
+  this->split(nullptr);
 }
 
 void PartFractions::RemoveRedundantShortRoots(Vector<Rational>* Indicator) {
@@ -3822,14 +3843,14 @@ void FileSetPutPointerToEnd(std::fstream& theFile, bool StoreToFile) {
     crash << "Put pointer seek on closed file not allowed. " << crash;
   }
   std::filebuf* pbuf = theFile.rdbuf();
-  int tempSize = pbuf->pubseekoff(0, std::fstream::end);
+  long tempSize = pbuf->pubseekoff(0, std::fstream::end);
   theFile.seekp(tempSize);
 }
 
 bool PartFractions::VerifyFileComputedContributions() {
   int tempI = this->ReadFromFileComputedContributions(PartFractions::ComputedContributionsList);
   std::filebuf* pbuf = PartFraction::TheBigDump.rdbuf();
-  int tempSize = pbuf->pubseekoff(0, std::fstream::end);
+  long tempSize = pbuf->pubseekoff(0, std::fstream::end);
   PartFraction::TheBigDump.seekp(tempSize);
   return(tempSize >= tempI);
 }
@@ -3944,8 +3965,8 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup(
     for (int i = this->AmbientDimension - 3; i >= 0; i --) {
       tempRoot[i] = 2;
       crash << "This is a programming error: this line of code "
-      << "needs to be fixed but I don't have time right now."
-      << " This code shouldn't be used before the line is fixed! " << crash;
+      << "needs to be fixed but I don't have time right now. "
+      << "This code shouldn't be used before the line is fixed! " << crash;
     }
     tempWeight[this->AmbientDimension - 2] = 7;
     tempWeight[this->AmbientDimension - 1] = 8;
@@ -3961,7 +3982,7 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup(
   }
   //return;
   Vector<Rational> tempRoot;
-  if (ChamberIndicator != 0) {
+  if (ChamberIndicator != nullptr) {
     tempRoot = *ChamberIndicator;
   } else {
     tempRoot.MakeZero(this->AmbientDimension);
@@ -3978,7 +3999,7 @@ void oneFracWithMultiplicitiesAndElongations::operator=(oneFracWithMultiplicitie
 }
 
 unsigned int oneFracWithMultiplicitiesAndElongations::HashFunction() const {
-  return (unsigned) this->GetTotalMultiplicity();
+  return static_cast<unsigned>(this->GetTotalMultiplicity());
 }
 
 void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator(
@@ -4213,14 +4234,14 @@ void PartFractions::initFromRoots(Vectors<Rational>& theAlgorithmBasis, Vector<R
     return;
   }
   int theDimension = theAlgorithmBasis[0].size;
-  if (theWeights != 0) {
+  if (theWeights != nullptr) {
     this->weights = *theWeights;
   }
   this->startingVectors.Clear();
   for (int i = 0; i < theAlgorithmBasis.size; i ++) {
     this->AddRootAndSort(theAlgorithmBasis[i]);
   }
-  if (theWeights != 0) {
+  if (theWeights != nullptr) {
     this->startingVectors.QuickSortAscending();
   }
   this->NumNonRedundantShortRoots = this->size();
@@ -4273,7 +4294,7 @@ int PartFractions::AddRootAndSort(Vector<Rational>& theRoot) {
 }
 
 int PartFractions::getIndex(const Vector<Rational>& TheRoot) {
-  return this->startingVectors. GetIndex(TheRoot);
+  return this->startingVectors.GetIndex(TheRoot);
 }
 
 int PartFractions::getIndexDoubleOfARoot(const Vector<Rational>& TheRoot) {
@@ -4594,32 +4615,32 @@ void DynkinType::GetLettersTypesMults(
   List<int>* outputMults,
   List<Rational>* outputFirstCoRootLengthsSquared
 ) const {
-  if (outputLetters != 0) {
+  if (outputLetters != nullptr) {
     outputLetters->SetSize(0);
   }
-  if (outputRanks != 0) {
+  if (outputRanks != nullptr) {
     outputRanks->SetSize(0);
   }
-  if (outputMults != 0) {
+  if (outputMults != nullptr) {
     outputMults->SetSize(0);
   }
-  if (outputFirstCoRootLengthsSquared != 0) {
+  if (outputFirstCoRootLengthsSquared != nullptr) {
     outputFirstCoRootLengthsSquared->SetSize(0);
   }
   List<DynkinSimpleType> componentsSorted;
   this->GetSortedDynkinTypes(componentsSorted);
   for (int i = 0; i < componentsSorted.size; i ++) {
     int theIndex = this->theMonomials.GetIndex(componentsSorted[i]);
-    if (outputLetters != 0) {
+    if (outputLetters != nullptr) {
       outputLetters->AddOnTop((*this)[theIndex].theLetter);
     }
-    if (outputRanks != 0) {
+    if (outputRanks != nullptr) {
       outputRanks->AddOnTop((*this)[theIndex].theRank);
     }
-    if (outputFirstCoRootLengthsSquared != 0) {
+    if (outputFirstCoRootLengthsSquared != nullptr) {
       outputFirstCoRootLengthsSquared->AddOnTop((*this)[theIndex].CartanSymmetricInverseScale);
     }
-    if (outputMults != 0) {
+    if (outputMults != nullptr) {
       outputMults->AddOnTop(this->GetMult(theIndex));
     }
   }
@@ -4670,7 +4691,7 @@ bool DynkinType::Grow(
 ) const {
   MacroRegisterFunctionWithName("DynkinType::Grow");
   output.SetSize(0);
-  if (outputPermutationRoots != 0) {
+  if (outputPermutationRoots != nullptr) {
     outputPermutationRoots->SetSize(0);
   }
   if (this->GetRank() >= AmbientWeylDim) {
@@ -4678,12 +4699,12 @@ bool DynkinType::Grow(
   }
   if (this->IsEqualToZero()) {
     output.SetSize(allowedInverseScales.size);
-    if (outputPermutationRoots != 0) {
+    if (outputPermutationRoots != nullptr) {
       outputPermutationRoots->SetSize(allowedInverseScales.size);
     }
     for (int i = 0; i < allowedInverseScales.size; i ++) {
       output[i].MakeSimpleType('A', 1, &allowedInverseScales[i]);
-      if (outputPermutationRoots != 0) {
+      if (outputPermutationRoots != nullptr) {
         (*outputPermutationRoots)[i].SetSize(1);
         (*outputPermutationRoots)[i][0] = 0;
       }
@@ -4716,7 +4737,7 @@ bool DynkinType::Grow(
       }
       output.AddOnTop(typeMinusMin);
       output.LastObject()->AddMonomial(theSimpleTypes[i], 1);
-      if (outputPermutationRoots != 0) {
+      if (outputPermutationRoots != nullptr) {
         int baseTypeRank = typeMinusMin.GetRank();
         for (int j = 0; j < baseTypeRank; j ++) {
           currentRootInjection[j] = j;
@@ -4737,7 +4758,7 @@ bool DynkinType::Grow(
     output.AddOnTop(*this);
     *output.LastObject() += currentA1;
     currentRootInjection.SetSize(output.LastObject()->GetRank());
-    if (outputPermutationRoots != 0) {
+    if (outputPermutationRoots != nullptr) {
       for (int j = 0; j < currentRootInjection.size; j ++) {
         currentRootInjection[j] = j;
       }
@@ -4763,7 +4784,7 @@ int DynkinType::GetIndexPreimageFromRootInjection(int inputIndex, const List<int
 
 void DynkinType::MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength) {
   DynkinSimpleType theMon;
-  Rational cartanSymmetricInvScale = (inputFirstCoRootSqLength == 0 ? 1 : *inputFirstCoRootSqLength);
+  Rational cartanSymmetricInvScale = (inputFirstCoRootSqLength == nullptr ? 1 : *inputFirstCoRootSqLength);
   theMon.MakeArbitrary(type, rank, cartanSymmetricInvScale);
   this->MakeZero();
   this->AddMonomial(theMon, 1);
@@ -4795,13 +4816,13 @@ bool DynkinType::IsSimple(char* outputtype, int* outputRank, Rational* outputLen
     return false;
   }
   const DynkinSimpleType& theMon = (*this)[0];
-  if (outputtype != 0) {
+  if (outputtype != nullptr) {
     *outputtype = theMon.theLetter;
   }
-  if (outputRank != 0) {
+  if (outputRank != nullptr) {
     *outputRank = theMon.theRank;
   }
-  if (outputLength != 0) {
+  if (outputLength != nullptr) {
     *outputLength = theMon.CartanSymmetricInverseScale;
   }
   return true;
@@ -5027,11 +5048,11 @@ std::string DynkinSimpleType::ToStringNonTechnicalName(FormatExpressions* theFor
 
 std::string DynkinSimpleType::ToString(FormatExpressions* theFormat) const {
   std::stringstream out;
-  bool includeTechnicalNames = theFormat == 0 ? true : theFormat->flagIncludeLieAlgebraTypes;
-  bool usePlusesAndExponents = theFormat == 0 ? true: !theFormat->flagDynkinTypeDontUsePlusAndExponent;
-  bool supressDynkinIndexOne = theFormat == 0 ? false : theFormat->flagSupressDynkinIndexOne;
+  bool includeTechnicalNames = theFormat == nullptr ? true : theFormat->flagIncludeLieAlgebraTypes;
+  bool usePlusesAndExponents = theFormat == nullptr ? true: !theFormat->flagDynkinTypeDontUsePlusAndExponent;
+  bool supressDynkinIndexOne = theFormat == nullptr ? false : theFormat->flagSupressDynkinIndexOne;
   bool hasAmbient = false;
-  if (theFormat != 0) {
+  if (theFormat != nullptr) {
     hasAmbient = (theFormat->AmbientWeylLetter != 'X');
   }
   if (includeTechnicalNames) {
@@ -5382,7 +5403,7 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
   //E6 (grown from D_5), E7 (grown from E6) and E8 (grown from E7).
   output.SetSize(0);
   List<int> currentImagesSimpleRootsCurrent;
-  if (outputPermutationRoots != 0) {
+  if (outputPermutationRoots != nullptr) {
     outputPermutationRoots->SetSize(0);
   }
   currentImagesSimpleRootsCurrent.SetSize(this->theRank + 1);
@@ -5390,7 +5411,7 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
   if (this->theLetter == 'B' && this->theRank == 3) {
     newType.MakeArbitrary('F', 4, this->CartanSymmetricInverseScale);
     output.AddOnTop(newType);
-    if (outputPermutationRoots != 0) {
+    if (outputPermutationRoots != nullptr) {
       for (int i = 0; i < currentImagesSimpleRootsCurrent.size; i ++) {
         currentImagesSimpleRootsCurrent[i] = i;
       }
@@ -5400,7 +5421,7 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
   if (this->theLetter == 'D' && this->theRank == 5) {
     newType.MakeArbitrary('E', 6, this->CartanSymmetricInverseScale);
     output.AddOnTop(newType);
-    if (outputPermutationRoots != 0) {
+    if (outputPermutationRoots != nullptr) {
       currentImagesSimpleRootsCurrent[0] = 0;
       currentImagesSimpleRootsCurrent[1] = 2;
       currentImagesSimpleRootsCurrent[2] = 3;
@@ -5413,7 +5434,7 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
   if (this->theLetter == 'E' && this->theRank < 8) {
     newType.MakeArbitrary('E', this->theRank + 1, this->CartanSymmetricInverseScale);
     output.AddOnTop(newType);
-    if (outputPermutationRoots != 0) {
+    if (outputPermutationRoots != nullptr) {
       for (int i = 0; i < currentImagesSimpleRootsCurrent.size; i ++) {
         currentImagesSimpleRootsCurrent[i] = i;
       }
@@ -5425,7 +5446,7 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
   }
   newType.MakeArbitrary(this->theLetter, this->theRank + 1, this->CartanSymmetricInverseScale);
   output.AddOnTop(newType);
-  if (outputPermutationRoots != 0) {
+  if (outputPermutationRoots != nullptr) {
     for (int i = 0; i < currentImagesSimpleRootsCurrent.size; i ++) {
       currentImagesSimpleRootsCurrent[i] = i;
     }
@@ -5433,27 +5454,27 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
   }
   newType.MakeArbitrary('B', this->theRank + 1, this->CartanSymmetricInverseScale);
   output.AddOnTop(newType);
-  if (outputPermutationRoots != 0) {
+  if (outputPermutationRoots != nullptr) {
     outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
   }
   if (this->theRank > 1) {
     newType.MakeArbitrary('C', this->theRank + 1, this->CartanSymmetricInverseScale / 2);
     output.AddOnTop(newType);
-    if (outputPermutationRoots != 0) {
+    if (outputPermutationRoots != nullptr) {
       outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
     }
   }
   if (this->theRank > 2) {
     newType.MakeArbitrary('D', this->theRank + 1, this->CartanSymmetricInverseScale);
     output.AddOnTop(newType);
-    if (outputPermutationRoots != 0) {
+    if (outputPermutationRoots != nullptr) {
       outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
     }
   }
   if (this->theRank == 1) {
     newType.MakeArbitrary('G', 2, this->CartanSymmetricInverseScale / 3);
     output.AddOnTop(newType);
-    if (outputPermutationRoots != 0) {
+    if (outputPermutationRoots != nullptr) {
       outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
     }
   }
@@ -5929,6 +5950,7 @@ bool ElementWeylGroup::HasDifferentConjugacyInvariantsFrom(
 
 std::string ElementWeylGroup::ToStringInvariants(FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("ElementWeylGroup::GetCycleStructure");
+  (void) theFormat;
   VectorSparse<Rational> theCycleStructure;
   this->GetCycleStructure(theCycleStructure);
   FormatExpressions cycleLetterFormat;
@@ -6027,7 +6049,7 @@ void WeylGroupData::SimpleReflectionDualSpace(int index, Vector<Rational>& DualS
 }
 
 ElementWeylGroup WeylGroupData::GetRootReflection(int rootIndex) {
-  if (!this->rho.size == 0) {
+  if (this->rho.size == 0) {
     this->ComputeRho(true);
   }
   Vector<Rational> rhoImage;
@@ -6089,9 +6111,9 @@ void WeylGroupData::init() {
   this->theGroup.specificDataPointer = this;
   this->theGroup.GetWordByFormula = this->GetWordByFormulaImplementation;
   this->theGroup.GetSizeByFormula = this->GetSizeByFormulaImplementation;
-  this->theGroup.ComputeCCSizesAndRepresentativesByFormula = 0;
-  this->theGroup.AreConjugateByFormula = 0;
-  this->theGroup.ComputeIrreducibleRepresentationsWithFormulas = 0;
+  this->theGroup.ComputeCCSizesAndRepresentativesByFormula = nullptr;
+  this->theGroup.AreConjugateByFormula = nullptr;
+  this->theGroup.ComputeIrreducibleRepresentationsWithFormulas = nullptr;
   //this->theGroup.CheckInitialization();
 }
 
@@ -6244,12 +6266,12 @@ void WeylGroupData::PerturbWeightToRegularWRTrootSystem(const Vector<Rational>& 
 }
 
 bool WeylGroupData::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicularRoot) {
-  if (indexFirstPerpendicularRoot != 0) {
+  if (indexFirstPerpendicularRoot != nullptr) {
     *indexFirstPerpendicularRoot = - 1;
   }
   for (int i = 0; i < this->RootSystem.size; i ++) {
     if (this->RootScalarCartanRoot(input, this->RootSystem[i]).IsEqualToZero()) {
-      if (indexFirstPerpendicularRoot != 0) {
+      if (indexFirstPerpendicularRoot != nullptr) {
         *indexFirstPerpendicularRoot = i;
       }
       return false;
@@ -6417,7 +6439,7 @@ std::string WeylGroupData::ToStringCppCharTable(FormatExpressions* theFormat) {
     for (int j = 0; j < this->theGroup.characterTable[i].data.size; j ++) {
       std::string theNumber = this->theGroup.characterTable[i].data[j].ToString();
       out << theNumber;
-      for (int k = theNumber.size(); k < 3; k ++) {
+      for (size_t k = theNumber.size(); k < 3; k ++) {
         out << "&nbsp;";
       }
       if (j != this->theGroup.characterTable[i].data.size - 1) {
@@ -6456,7 +6478,7 @@ std::string WeylGroupData::ToStringCppConjugacyClasses(FormatExpressions* theFor
   << this->theGroup.conjugacyClasseS.size << ", emptyClass);";
   for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++) {
     out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS[" << i;
-    for (int j = ((Rational) i).ToString().size(); j < 3; j ++) { //<-if the index i is smaller than 100, make sure it takes
+    for (size_t j = (Rational(i)).ToString().size(); j < 3; j ++) { //<-if the index i is smaller than 100, make sure it takes
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
     }
     out << "].representative.MakeFromReadableReflections(output, false, \"";
@@ -6470,7 +6492,7 @@ std::string WeylGroupData::ToStringCppConjugacyClasses(FormatExpressions* theFor
   }
   for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++) {
     out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS[" << i;
-    for (int j = ((Rational) i).ToString().size(); j < 3; j ++) { //<-if the index i is smaller than 100, make sure it takes
+    for (size_t j = (Rational(i)).ToString().size(); j < 3; j ++) { //<-if the index i is smaller than 100, make sure it takes
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
     }
     out  << "].size =" << this->theGroup.conjugacyClasseS[i].size.ToString() << ";";
@@ -6630,7 +6652,7 @@ void WeylGroupData::MakeFromDynkinType(const DynkinType& inputType) {
   // eventually, there will be formulas for all classical types
   List<char> letters;
   List<int> ranks;
-  this->theDynkinType.GetLettersTypesMults(&letters, &ranks, NULL);
+  this->theDynkinType.GetLettersTypesMults(&letters, &ranks, nullptr);
   if (letters.size == 1) {
     if (ranks.size == 1) {
       if (letters[0] == 'A') {
@@ -6659,12 +6681,12 @@ WeylGroupAutomorphisms::WeylGroupAutomorphisms() {
   this->flagAllOuterAutosComputed = false;
   this->flagDeallocated = false;
   this->flagOuterAutosGeneratorsComputed = false;
-  this->theWeyl = 0;
+  this->theWeyl = nullptr;
 }
 
 WeylGroupAutomorphisms::~WeylGroupAutomorphisms() {
   this->flagDeallocated = true;
-  this->theWeyl = 0;
+  this->theWeyl = nullptr;
 }
 
 void WeylGroupAutomorphisms::ComputeOuterAutos() {
@@ -6724,7 +6746,7 @@ void WeylGroupData::GetEpsilonCoordsWRTsubalgebra(
     DynkinSimpleType::GetEpsilonMatrix(
       tempDyn.SimpleComponentTypes[i].theLetter, tempDyn.SimpleComponentTypes[i].theRank, tempMat
     );
-    basisChange.DirectSumWith(tempMat, (Rational) 0);
+    basisChange.DirectSumWith(tempMat, Rational(0));
   }
   simpleBasis.AssignListList(tempDyn.SimpleBasesConnectedComponents);
   coordsInNewBasis.SetSize(input.size);
@@ -6747,7 +6769,7 @@ void WeylGroupData::GetEpsilonCoords(const List<Vector<Rational> >& input, Vecto
 }
 
 LargeInt WeylGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G) {
-  WeylGroupData* W = (WeylGroupData*) G.specificDataPointer;
+  WeylGroupData* W = static_cast<WeylGroupData*>(G.specificDataPointer);
   W->CheckConsistency();
   return W->theDynkinType.GetWeylGroupSizeByFormula();
 }
@@ -6816,13 +6838,13 @@ void WeylGroupData::GetExtremeElementInOrbit(
   int* sign,
   bool* stabilizerFound
 ) {
-  if (outputWeylElt != 0) {
+  if (outputWeylElt != nullptr) {
     outputWeylElt->MakeID(*this);
   }
-  if (sign != 0) {
+  if (sign != nullptr) {
     *sign = 1;
   }
-  if (stabilizerFound != 0) {
+  if (stabilizerFound != nullptr) {
     *stabilizerFound = false;
   }
   Rational theScalarProd;
@@ -6838,7 +6860,7 @@ void WeylGroupData::GetExtremeElementInOrbit(
       } else {
         shouldApplyReflection = theScalarProd.IsNegative();
       }
-      if (stabilizerFound != 0) {
+      if (stabilizerFound != nullptr) {
         if (theScalarProd.IsEqualToZero()) {
           *stabilizerFound = true;
         }
@@ -6852,11 +6874,11 @@ void WeylGroupData::GetExtremeElementInOrbit(
         } else {
           this->SimpleReflectionMinusRhoModified(i, inputOutput);
         }
-        if (outputWeylElt != 0) {
+        if (outputWeylElt != nullptr) {
           eltSimplReflection.MakeSimpleReflection(i, *this);
           *outputWeylElt = eltSimplReflection*(*outputWeylElt);
         }
-        if (sign != 0) {
+        if (sign != nullptr) {
           *sign *= - 1;
         }
       }
@@ -6883,7 +6905,7 @@ bool WeylGroupAutomorphisms::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Ra
   Vector<Rational> theRhoImage;
   input.ActOnVectorColumn(this->theWeyl->rho, theRhoImage);
   ElementWeylGroup theElementCandidate;
-  this->theWeyl->RaiseToDominantWeight(theRhoImage, 0, 0, &theElementCandidate);
+  this->theWeyl->RaiseToDominantWeight(theRhoImage, nullptr, nullptr, &theElementCandidate);
   Matrix<Rational> theCandidateMat;
   MatrixTensor<Rational> theCandidateMatTensorForm, theCandidateMatWithOuterAuto;
   this->theWeyl->GetMatrixStandardRep(theElementCandidate, theCandidateMat);
@@ -7009,7 +7031,7 @@ void WeylGroupData::DrawRootSystem(
   }
   Vector<double> tempRoot;
   Vectors<double>& theTwoPlane = output.BasisProjectionPlane;
-  if (predefinedProjectionPlane == 0) {
+  if (predefinedProjectionPlane == nullptr) {
     this->GetCoxeterPlane(theTwoPlane[0], theTwoPlane[1]);
   } else {
     predefinedProjectionPlane->GetVectorsDouble(theTwoPlane);
@@ -7049,7 +7071,7 @@ void WeylGroupData::DrawRootSystem(
     }
   }
   Rational tempRat;
-  if (bluePoint != 0) {
+  if (bluePoint != nullptr) {
     output.drawCircleAtVectorBufferRational(*bluePoint, "blue", 5);
     output.drawCircleAtVectorBufferRational(*bluePoint, "blue", 4);
     output.drawCircleAtVectorBufferRational(*bluePoint, "blue", 3);
@@ -7058,7 +7080,7 @@ void WeylGroupData::DrawRootSystem(
     Cone theWeylChamber;
     this->GetWeylChamber(theWeylChamber);
     FormatExpressions tempFormat;
-    theWeylChamber.DrawMeProjective(0, false, outputDV, tempFormat);
+    theWeylChamber.DrawMeProjective(nullptr, false, outputDV, tempFormat);
   }
   output.centerX = 300;
   output.centerY = 300;
@@ -7100,14 +7122,21 @@ void WeylGroupData::DrawRootSystem(
   }
   std::stringstream tempStream;
   tempStream << this->theDynkinType.GetWeylGroupName();
-  if (this->GetDim() == 2 && predefinedProjectionPlane != 0) {
+  if (this->GetDim() == 2 && predefinedProjectionPlane != nullptr) {
     theTwoPlane[1][0] = 1;
     theTwoPlane[1][1] = 0;
     theTwoPlane[0][0] = 0;
     theTwoPlane[0][1] = 1;
     outputDV.theBuffer.ModifyToOrthonormalNoShiftSecond(theTwoPlane[0], theTwoPlane[1]);
   }
-  output.drawTextBuffer(0, 0, tempStream.str(), 10, HtmlRoutines::RedGreenBlue(0, 0, 0), DrawingVariables::TextStyleNormal);
+  output.drawTextBuffer(
+    0,
+    0,
+    tempStream.str(),
+    10,
+    static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0)),
+    DrawingVariables::TextStyleNormal
+  );
 }
 
 std::string WeylGroupData::GenerateWeightSupportMethoD1(
@@ -7115,8 +7144,8 @@ std::string WeylGroupData::GenerateWeightSupportMethoD1(
 ) {
   HashedList<Vector<Rational> > theDominantWeights;
   (void) upperBoundWeights;//portable way to avoid non-used parameter warning.
-  double upperBoundDouble = 100000 / ((Rational)this->theGroup.GetSize()).GetDoubleValue();
-  int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
+  double upperBoundDouble = 100000 / (Rational(this->theGroup.GetSize())).GetDoubleValue();
+  int upperBoundInt = MathRoutines::Maximum(static_cast<int>(upperBoundDouble), 10000);
   //int upperBoundInt = 10000;
   Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
   this->RaiseToDominantWeight(highestWeightTrue);
@@ -7135,13 +7164,13 @@ std::string WeylGroupData::GenerateWeightSupportMethoD1(
     out << "Number of (non-strictly) dominant weights: " << theDominantWeights.size << "<br>";
   }
   HashedList<Vector<Rational> > finalWeights;
-  int estimatedNumWeights = (int) (((Rational)this->theGroup.GetSize()).GetDoubleValue() * theDominantWeights.size);
+  int estimatedNumWeights = static_cast<int>((Rational(this->theGroup.GetSize())).GetDoubleValue() * theDominantWeights.size);
   estimatedNumWeights = MathRoutines::Minimum(10000, estimatedNumWeights);
   finalWeights.Reserve(estimatedNumWeights);
   finalWeights.SetHashSizE(estimatedNumWeights);
   Vectors<Rational> dominantWeightsNonHashed;
   dominantWeightsNonHashed = (theDominantWeights);
-  this->GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 0, 0, 10000);
+  this->GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 0, nullptr, 10000);
   if (finalWeights.size >= 10000) {
     out << "Did not generate all weights of the module due to RAM limits. ";
     if (!isTrimmed) {
@@ -7182,7 +7211,7 @@ bool WeylGroupData::IsElementWeylGroup(const MatrixTensor<Rational>& input) {
   Vector<Rational> theRhoImage;
   input.ActOnVectorColumn(this->rho, theRhoImage);
   ElementWeylGroup theElementCandidate;
-  this->RaiseToDominantWeight(theRhoImage, 0, 0, &theElementCandidate);
+  this->RaiseToDominantWeight(theRhoImage, nullptr, nullptr, &theElementCandidate);
   Matrix<Rational> theCandidateMat, inputMat;
   input.GetMatrix(inputMat, this->GetDim());
   this->GetMatrixStandardRep(theElementCandidate, theCandidateMat);
@@ -7266,7 +7295,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
     }
     for (int j = 0; j < Layers[i].size; j ++) {
       if (!useAmbientIndices) {
-        out << this->allElements[Layers[i][j]].ToString(0);
+        out << this->allElements[Layers[i][j]].ToString(nullptr);
       } else {
         out << this->RepresentativesQuotientAmbientOrder[Layers[i][j]].ToString();
       }
@@ -7417,7 +7446,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::T
     body << "\\begin{array}{l}";
     for (int i = 0; i < this->allElements.size; i ++) {
       const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& currentElt = this->allElements[i];
-      body << currentElt.ToString(0) << "\\\\";
+      body << currentElt.ToString(nullptr) << "\\\\";
     }
     body << "\\end{array}";
     out << HtmlRoutines::GetMathMouseHover(body.str());
@@ -7548,19 +7577,19 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::D
 }
 
 SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms() {
-  this->AmbientWeyl = 0;
+  this->AmbientWeyl = nullptr;
   this->flagDeallocated = false;
 }
 
 SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::~SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms() {
-  this->AmbientWeyl = 0;
+  this->AmbientWeyl = nullptr;
   this->flagDeallocated = true;
 }
 
 bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::CheckInitialization() {
   //if (this == 0)
   //  crash << "Subgroup of Weyl Group has 0 this pointer. " << crash;
-  if (this->AmbientWeyl == 0) {
+  if (this->AmbientWeyl == nullptr) {
     crash << "Use of non-initialized subgroup of Weyl Group. " << crash;
   }
   if (this->flagDeallocated) {
@@ -7700,7 +7729,7 @@ std::string KLpolys::ToString(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("KLpolys::ToString");
   std::stringstream out;
   bool useHtml = false;
-  if (theFormat != 0) {
+  if (theFormat != nullptr) {
     useHtml = theFormat->flagUseHTML;
   }
   if (!useHtml) {
@@ -8230,7 +8259,7 @@ void LaTeXProcedures::drawline(
   std::fstream& output,
   DrawingVariables& drawInput
 ) {
-  if ((int) thePenStyle == DrawingVariables::PenStyleInvisible) {
+  if (static_cast<int>(thePenStyle) == DrawingVariables::PenStyleInvisible) {
     return;
   }
   output.precision(4);
@@ -8239,7 +8268,7 @@ void LaTeXProcedures::drawline(
   Y1 /= LaTeXProcedures::ScaleFactor;
   Y2 /= LaTeXProcedures::ScaleFactor;
   std::string tempS;
-  if (thePenStyle == (unsigned) DrawingVariables::PenStyleDashed) {
+  if (thePenStyle == static_cast<unsigned>(DrawingVariables::PenStyleDashed)) {
     tempS = "lightgray";
   } else {
     LaTeXProcedures::GetStringFromColorIndex(ColorIndex, tempS, drawInput);
@@ -8573,7 +8602,7 @@ bool Lattice::FindOnePreimageInLatticeOf(
 ) {
   Vectors<Rational> thisBasis;
   thisBasis.AssignMatrixRows(this->basisRationalForm);
-  theLinearMap.ActOnVectorsColumn(thisBasis, (Rational) 0);
+  theLinearMap.ActOnVectorsColumn(thisBasis, Rational(0));
   bool result = input.GetIntegralCoordsInBasisIfTheyExist(thisBasis, output, 1, - 1, 0);
   Matrix<Rational> tempMat;
   tempMat = this->basisRationalForm;
@@ -8594,7 +8623,9 @@ void Lattice::IntersectWithPreimageOfLattice(const Matrix<Rational> & theLinearM
   Vectors<Rational> tempBasisImageIntersection, tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords;
   basisImageIntersection = tempBasisImageIntersection;
   imageStartingBasis = tempImageStartingBasis;
-  bool tempBool = tempBasisImageIntersection.GetIntegralCoordsInBasisIfTheyExist(tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords, (Rational) 1, (Rational) - 1, (Rational) 0);
+  bool tempBool = tempBasisImageIntersection.GetIntegralCoordsInBasisIfTheyExist(
+    tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords, Rational(1), Rational(- 1), Rational(0)
+  );
   ImageBasisInImageStartingBasisCoords =(tempImageBasisInImageStartingBasisCoords);
   if (!tempBool) {
     crash << "Coordinates not integral when they should be. " << crash;
@@ -8816,7 +8847,7 @@ bool Lattice::ReduceVector(Vector<Rational>& theVector) const {
 
 void Lattice::MakeZn(int theDim) {
   this->basisRationalForm.MakeIdMatrix(theDim);
-  this->basis.MakeIdMatrix(theDim, (LargeInt) 1, (LargeInt) 0);
+  this->basis.MakeIdMatrix(theDim, LargeInt(1), LargeInt(0));
   this->Den.MakeOne();
 }
 
@@ -8934,7 +8965,7 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString(
 //  this->theChambersOld.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
 //  this->theChambersOld.thePauseController.ExitComputation();
   DrawingVariables theDVs;
-  this->theChambers.DrawMeProjective(0, true, theDVs, theFormat);
+  this->theChambers.DrawMeProjective(nullptr, true, theDVs, theFormat);
   outHtml << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->AmbientDimension);
   Vector<Rational> tempRoot;
   tempRoot.MakeZero(this->AmbientDimension);
@@ -8946,7 +8977,7 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString(
   crash << crash;
 //  out << this->theChambersOld.theDirections.ElementToStringGeneric();
   out << "\n\n The corresponding generating function is: " << this->ToString(theFormat) << "= (after splitting acording to algorithm)";
-  this->split(0);
+  this->split(nullptr);
   out << this->ToString(theFormat);
   crash << crash;
 //  out << "Therefore the vector partition function is given by " << this->theChambersOld.GetNumNonZeroPointers()
@@ -8975,7 +9006,7 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString(
     }
     */
   out << "\\end{document}";
-  if (outputHtml != 0) {
+  if (outputHtml != nullptr) {
     *outputHtml = outHtml.str();
   }
   return out.str();
@@ -9061,7 +9092,7 @@ void QuasiPolynomial::Substitution(
   //and the translation has coordinates (t_1, ..., t_n),
   //then the resulting quasipolynomial will be P(x_1-t_1, ..., x_n-t_n)
   PolynomialSubstitution<Rational> theSub;
-  theSub.MakeIdSubstitution(this->GetNumVars(), (Rational) 1);
+  theSub.MakeIdSubstitution(this->GetNumVars(), Rational(1));
   for (int i = 0; i < theSub.size; i ++) {
     theSub[i].AddConstant(- inputTranslationSubtractedFromArgument[i]);
   }
@@ -9103,7 +9134,7 @@ bool QuasiPolynomial::SubstitutionLessVariables(const PolynomialSubstitution<Rat
   }
   theSubLatticeShift.init(theLatticeSub.NumRows, 1);
   for (int i = 0; i < theSubLatticeShift.NumRows; i ++) {
-    theSub[i].GetConstantTerm(theSubLatticeShift.elements[i][0], (Rational) 0);
+    theSub[i].GetConstantTerm(theSubLatticeShift.elements[i][0], Rational(0));
   }
   Matrix<Rational> theShiftImage, shiftMatForm;
   output.LatticeShifts.size = 0;
@@ -9739,7 +9770,7 @@ std::string HtmlRoutines::ConvertStringToURLStringExceptDashesAndSlashes(const s
       out << input[i];
     } else {
       out << "%";
-      int x = (char) input[i];
+      int x = input[i];
       out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
     }
   }
@@ -9755,7 +9786,7 @@ std::string HtmlRoutines::ConvertStringToURLString(const std::string& input, boo
       out << '+';
     } else {
       out << "%";
-      int x = (char) input[i];
+      int x = input[i];
       out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
     }
   }
@@ -9946,30 +9977,30 @@ std::string DrawingVariables::GetColorPsTricksFromColorIndex(int colorIndex) {
   int r = (colorIndex / 65536) % 256;
   int g = (colorIndex / 256) % 256;
   int b = colorIndex % 256;
-  out << "\\\\newrgbcolor{currentColor}{" << ((double) r) / 255 << ", "
-  << ((double) g) / 255 << ", " << ((double) b) / 255 << "}";
+  out << "\\\\newrgbcolor{currentColor}{" << (static_cast<double>(r) / 255) << ", "
+  << ((static_cast<double>(g)) / 255) << ", " << ((static_cast<double>(b)) / 255) << "}";
   return out.str();
 }
 
 bool DrawingVariables::GetColorIntFromColorString(const std::string& input, int& output) {
   if (input == "blue") {
-    output = HtmlRoutines::RedGreenBlue(0, 0, 255);
+    output = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 255));
     return true;
   }
   if (input == "green") {
-    output = HtmlRoutines::RedGreenBlue(0, 255, 0);
+    output = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 255, 0));
     return true;
   }
   if (input == "red") {
-    output = HtmlRoutines::RedGreenBlue(255, 0, 0);
+    output = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 0, 0));
     return true;
   }
   if (input == "cyan") {
-    output = HtmlRoutines::RedGreenBlue(0, 255, 255);
+    output = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 255, 255));
     return true;
   }
   if (input == "orange") {
-    output = HtmlRoutines::RedGreenBlue(255, 127, 0);
+    output = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 127, 0));
     return true;
   }
   return false;
@@ -10010,8 +10041,8 @@ void DrawOperations::MakeMeAStandardBasis(int theDim) {
   if (theDim > 3) {
     this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
     for (int i = 0; i < theDim; i ++) {
-      this->ProjectionsEiVectors[i][0] = FloatingPoint::sin((double) i / (double) theDim * MathRoutines::Pi());
-      this->ProjectionsEiVectors[i][1] = FloatingPoint::cos((double) i / (double) theDim * MathRoutines::Pi());
+      this->ProjectionsEiVectors[i][0] = FloatingPoint::sin(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::Pi()));
+      this->ProjectionsEiVectors[i][1] = FloatingPoint::cos(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::Pi()));
     }
   } else if (theDim == 3) {
     this->ProjectionsEiVectors.SetSizeMakeMatrix(3, 2);
@@ -10067,7 +10098,7 @@ std::string ConeComplex::DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawin
 
 std::string ConeComplex::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat) {
   bool isGood = true;
-  isGood = this->DrawMeProjective(0, true, theDrawingVariables, theFormat);
+  isGood = this->DrawMeProjective(nullptr, true, theDrawingVariables, theFormat);
   std::stringstream out;
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
   if (!isGood) {
@@ -10220,7 +10251,7 @@ bool Cone::DrawMeProjective(
   (void) theFormat;  //avoid unused parameter warning, portable.
   Vector<Rational> ZeroRoot, coordCenter;
   ZeroRoot.MakeZero(this->GetDim());
-  if (coordCenterTranslation == 0) {
+  if (coordCenterTranslation == nullptr) {
     coordCenter = ZeroRoot;
   } else {
     coordCenter = *coordCenterTranslation;
@@ -10283,7 +10314,7 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
     return out.str();
   }
   theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
-  this->DrawMeProjective(0, true, theDrawingVariables, theFormat);
+  this->DrawMeProjective(nullptr, true, theDrawingVariables, theFormat);
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim());
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
   out << "<br>" << this->ToString(&theFormat);
@@ -10406,7 +10437,7 @@ void DrawOperations::init() {
 
 double DrawOperations::getAngleFromXandY(double x, double y) {
   double result;
-  if (x != 0) {
+  if (x != 0.0) {
     result = FloatingPoint::arctan(y / x);
   } else {
     if (y > 0) {
@@ -10491,7 +10522,7 @@ void DrawOperations::changeBasisPReserveAngles(double newX, double newY) {
   double bufferGraphicsUnit = this->GraphicsUnit;
   newX = (newX - bufferCenterX) / bufferGraphicsUnit;
   newY = (newY - bufferCenterY) / bufferGraphicsUnit;
-  if (newX == 0 && newY == 0) {
+  if (newX == 0.0 && newY == 0.0) {
     return;
   }
   std::stringstream out;
@@ -10566,7 +10597,7 @@ void DrawOperations::changeBasisPReserveAngles(double newX, double newY) {
   out << "\ne1=" << currentBasisPlane[0];
   out << "\ne2=" << currentBasisPlane[1];
   out << "\ne1*e2=" << this->theBilinearForm.ScalarProduct(currentBasisPlane[0], currentBasisPlane[1]);
-  if (this->specialOperationsOnBasisChange != 0) {
+  if (this->specialOperationsOnBasisChange != nullptr) {
     this->specialOperationsOnBasisChange(*this);
   }
   this->ComputeProjectionsEiVectors();
@@ -10662,7 +10693,7 @@ class ImpreciseDouble {
     }
   }
   bool operator==(const ImpreciseDouble& other) const {
-    int diff = this->theValue - other.theValue;
+    double diff = this->theValue - other.theValue;
     if (diff < 0) {
       diff = - diff;
     }
@@ -10693,7 +10724,7 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
   ProgressReport theReport;
   std::stringstream out;
   out << "before elimination:\n" << theMat.ToString();
-  theMat.GaussianEliminationEuclideanDomain(0, ImpreciseDouble::GetMinusOne(), ImpreciseDouble::GetOne());
+  theMat.GaussianEliminationEuclideanDomain(nullptr, ImpreciseDouble::GetMinusOne(), ImpreciseDouble::GetOne());
   out << "after elimination:\n" << theMat.ToString();
   theReport.Report(out.str());
 }
@@ -10894,7 +10925,7 @@ bool Cone::GetLatticePointsInCone(
   LatticeBasis.AssignMatrixRows(theLattice.basisRationalForm);
   for (int i = 0; i < numCycles; i ++, boundingBox.IncrementSubset()) {
     candidatePoint = theActualShift;
-    if (shiftAllPointsBy != 0) {
+    if (shiftAllPointsBy != nullptr) {
       candidatePoint += *shiftAllPointsBy;
     }
     for (int j = 0; j < boundingBox.Multiplicities.size; j ++) {
@@ -10946,7 +10977,7 @@ bool PiecewiseQuasipolynomial::MakeVPF(Vectors<Rational>& theRoots, std::string&
 
   theFracs.initFromRoots(theRoots);
   out << HtmlRoutines::GetMathMouseHover(theFracs.ToString(theFormat));
-  theFracs.split(0);
+  theFracs.split(nullptr);
   out << HtmlRoutines::GetMathMouseHover(theFracs.ToString(theFormat));
   //theFracs.theChambers.InitFromDirectionsAndRefine(theRoots);
   crash << "Not implemented. " << crash ;
@@ -11141,7 +11172,7 @@ void PiecewiseQuasipolynomial::DrawMe(
         distinguishedPoint
       );
       tempList.initializeFillInObject(latticePoints.size, chamberWallColor);
-      if (RestrictingChamber != 0) {
+      if (RestrictingChamber != nullptr) {
         for (int k = 0; k < latticePoints.size; k ++) {
           tempRoot = latticePoints[k];
           tempRoot.MakeAffineUsingLastCoordinate();
@@ -11204,7 +11235,7 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Ratio
     if (this->theProjectivizedComplex[i].IsInCone(input)) {
       Rational altResult = this->theQPs[i].Evaluate(AffineInput);
       if (result != altResult) {
-        if (false) {
+        if ((false)) {
           if (!firstFail) {
             break;
           }
@@ -11799,9 +11830,9 @@ void ConeComplex::GetNewVerticesAppend(
     for (int k = 0; k < theDim; k ++) {
       theLinearAlgebra.elements[theDimMinusTwo][k] = killerNormal[k];
     }
-    theLinearAlgebra.GaussianEliminationByRows(0, &nonPivotPoints);
+    theLinearAlgebra.GaussianEliminationByRows(nullptr, &nonPivotPoints);
     if (nonPivotPoints.CardinalitySelection == 1) {
-      theLinearAlgebra.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot, (Rational) 1, (Rational) 0);
+      theLinearAlgebra.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot, Rational(1), Rational(0));
       tempRoot.ScaleByPositiveRationalToIntegralMinHeight();
       if (myDyingCone.IsInCone(tempRoot)) {
         outputVertices.AddOnTopNoRepetition(tempRoot);
@@ -11822,7 +11853,7 @@ bool ConeComplex::SplitChamber(
   Cone newPlusCone, newMinusCone;
   Matrix<Rational> bufferMat;
   Selection bufferSel;
-  bool needToRecomputeVertices =  (myDyingCone.Normals.GetRankOfSpanOfElements(&bufferMat, &bufferSel) < this->GetDim());
+  bool needToRecomputeVertices = (myDyingCone.Normals.GetRankOfSpanOfElements(&bufferMat, &bufferSel) < this->GetDim());
 //  newPlusCone.flagHasSufficientlyManyVertices = true;
 //  newMinusCone.flagHasSufficientlyManyVertices = true;
   newPlusCone.LowestIndexNotCheckedForSlicingInDirection = myDyingCone.LowestIndexNotCheckedForSlicingInDirection;
@@ -12030,7 +12061,7 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices() {
         theMat.elements[j][k] = this->Normals[theSel.elements[j]][k];
       }
     }
-    theMat.GaussianEliminationByRows(0, &nonPivotPoints);
+    theMat.GaussianEliminationByRows(nullptr, &nonPivotPoints);
     if (nonPivotPoints.CardinalitySelection == 1) {
       theMat.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot);
       bool tempBool = this->IsInCone(tempRoot);
@@ -12315,9 +12346,9 @@ void ConeComplex::initFromCones(
 
 std::string Cone::ToString(FormatExpressions* theFormat) const {
   std::stringstream out;
-  bool PrepareMathReport = theFormat == 0 ? false: theFormat->flagUseLatex;
-  bool useHtml = theFormat == 0 ? false: theFormat->flagUseHTML;
-  bool useLatex = theFormat == 0 ? false: theFormat->flagUseLatex;
+  bool PrepareMathReport = theFormat == nullptr ? false: theFormat->flagUseLatex;
+  bool useHtml = theFormat == nullptr ? false: theFormat->flagUseHTML;
+  bool useLatex = theFormat == nullptr ? false: theFormat->flagUseLatex;
   bool lastVarIsConstant = false;
   if (this->flagIsTheZeroCone) {
     out << "The cone is the zero cone.";
@@ -12342,7 +12373,7 @@ std::string Cone::ToString(FormatExpressions* theFormat) const {
     out << "\\[";
   }
   FormatExpressions tempF;
-  if (theFormat == 0) {
+  if (theFormat == nullptr) {
     theFormat = &tempF;
   }
   out << this->Normals.ElementsToInequalitiesString(useLatex, useHtml, lastVarIsConstant, *theFormat);

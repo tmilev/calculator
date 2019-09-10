@@ -14,6 +14,7 @@ class MemorySaving {
 private:
   Object* theValue;
   MemorySaving(const MemorySaving<Object>& other) {
+    (void) other;
     crash << "This constructor should not be used. " << crash;
   }
 public:

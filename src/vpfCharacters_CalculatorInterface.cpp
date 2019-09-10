@@ -39,33 +39,6 @@ bool FiniteGroup<elementSomeGroup>::CheckInitializationFDrepComputation() const 
   return this->CheckInitializationConjugacyClasses();
 }
 
-template <typename elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::CheckInitializationConjugacyClasses() const {
-  if (this->ConjugacyClassCount() == 0) {
-    crash << "This is a programming error: requesting to "
-    << "compute character hermitian product in a group whose "
-    << "conjugacy classes and/or elements have not been computed. The group reports to have "
-    << this->ConjugacyClassCount() << " conjugacy classes and " << this->theElements.size << " elements. "
-    << crash;
-    return false;
-  }
-  for (int i = 0; i < this->irreps.size; i ++) {
-    if (this->irreps[i].theCharacteR.data.IsEqualToZero()) {
-      crash << "This is a programming error: irrep number " << i + 1 << " has zero character!" << crash;
-      return false;
-    }
-  }
-/*  Rational sumSquares = 0;
-  Rational tempRat;
-  for (int i = 0; i < this->ConjugacyClassCount(); i ++) {
-    tempRat = this->ConjugacyClassCount()/this->GetGroupSizeByFormula();
-    sumSquares+= tempRat*tempRat;
-  }
-  if (sumSquares !=1)
-    crash << "This is a programming error: sumSquares equals " << sumSquares.ToString() << " when it should equal 1. " << crash;*/
-  return true;
-}
-
 template <typename somegroup, typename coefficient>
 bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckAllSimpleGensAreOK() const {
   this->CheckInitialization();

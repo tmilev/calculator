@@ -9,6 +9,8 @@
 #include "vpfHeader2Math5_SubsetsSelections.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
+
+extern ProjectInformationInstance ProjectInfoVpf5cpp;
 ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Calculator built-in functions. ");
 
 //If you get the C++ multiple definition error:
@@ -1881,7 +1883,7 @@ bool Calculator::ReadTestStrings(
   outputCommands.SetExpectedSize(this->GetNumBuiltInFunctions());
   outputResults.Reserve(this->GetNumBuiltInFunctions());
   std::string buffer;
-  while (theFileReader.positionInString < (signed) theFileReader.theString.size()) {
+  while (theFileReader.positionInString < theFileReader.theString.size()) {
     if (!theFileReader.GetStringEnclosedIn("input", buffer)) {
       break;
     }

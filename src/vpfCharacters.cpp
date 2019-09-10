@@ -12,7 +12,7 @@ extern FormatExpressions consoleFormat;
 
 template<>
 List<ElementWeylGroup>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<ElementWeylGroup>() {
-  return 0;
+  return nullptr;
 }
 
 Vector<Rational> WeylGroupData::ApplyReflectionList(const List<int>& rightReflectionsActFirst, const Vector<Rational>& vv) const {
@@ -960,11 +960,16 @@ bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable() {
 }
 
 SubgroupDataWeylGroup::SubgroupDataWeylGroup() {
-  this->theWeylData = 0;
+  this->theWeylData = nullptr;
+}
+
+SubgroupDataRootReflections::SubgroupDataRootReflections() {
+  this->flagIsParabolic = false;
+  this->flagIsExtendedParabolic = false;
 }
 
 bool SubgroupDataWeylGroup::CheckInitialization() {
-  if (this->theWeylData == 0) {
+  if (this->theWeylData == nullptr) {
     crash << "SubgroupDataWeylGroup: non-initialized theWeylData pointer. " << crash;
   }
   return true;
@@ -974,10 +979,10 @@ template <class someGroup, class elementSomeGroup>
 std::string SubgroupData<someGroup, elementSomeGroup>::ToString(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("SubgroupData::ToString");
   (void) theFormat;//avoid unused parameter warning, portable.
-  if (this->theGroup == 0) {
+  if (this->theGroup == nullptr) {
     return "(not initialized (no owner group))";
   }
-  if (this->theSubgroup == 0) {
+  if (this->theSubgroup == nullptr) {
     return "(not initialized (subgroup pointer is 0))";
   }
   std::stringstream out;

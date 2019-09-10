@@ -203,28 +203,6 @@ bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfP
   return true;
 }
 
-template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::init() {
-  this->generators.SetSize(0);
-  this->conjugacyClasseS.SetSize(0);
-  this->squaresCCReps.SetSize(0);
-  this->theElements.Clear();
-  this->flagAllElementsAreComputed = false;
-  this->flagCCsComputed = false;
-  this->flagCCRepresentativesComputed = false;
-  this->flagCharPolysAreComputed = false;
-  this->flagGeneratorsConjugacyClassesComputed = false;
-  this->flagWordsComputed = false;
-  this->flagCharTableIsComputed = false;
-  this->flagIrrepsAreComputed = false;
-  this->sizePrivate = 0;
-  this->specificDataPointer = 0;
-  this->AreConjugateByFormula = 0;
-  this->ComputeCCSizesAndRepresentativesByFormula = 0;
-  this->GetSizeByFormula = 0;
-  this->GetWordByFormula = 0;
-}
-
 template <class someGroup, class elementSomeGroup>
 void SubgroupData<someGroup, elementSomeGroup>::initFromGroupAndGenerators(
   someGroup& inputGroup, const List<elementSomeGroup>& inputGenerators
@@ -1104,28 +1082,6 @@ coefficient WeylGroupData::WeylDimFormulaFundamentalCoords(Vector<coefficient>& 
   Vector<coefficient> theWeightInSimpleCoords;
   theWeightInSimpleCoords = this->GetSimpleCoordinatesFromFundamental(weightFundCoords);
   return this->WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
-}
-
-template<class leftType, class rightType>
-void WeylGroupData::RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output) const {
-  if (r1.size != r2.size || r1.size != this->GetDim()) {
-    crash << "This is a programming error: attempting to get the scalar product of the weight "
-    << r1 << " (dimension " << r1.size
-    << ") with the weight " << r2 << " (dimension " << r2.size
-    << "), while the dimension of the ambient Weyl group is " << this->GetDim()
-    << ". ";
-    crash << crash;
-  }
-  output = r1[0].GetZero();
-  leftType buffer;
-  for (int i = 0; i < this->CartanSymmetric.NumRows; i ++) {
-    for (int j = 0; j < this->CartanSymmetric.NumCols; j ++) {
-      buffer = r1[i];
-      buffer *= r2[j];
-      buffer *= this->CartanSymmetric.elements[i][j];
-      output += buffer;
-    }
-  }
 }
 
 template <class coefficient>

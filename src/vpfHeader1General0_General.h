@@ -467,7 +467,7 @@ private:
   static std::string GetCloseTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters);
 public:
   std::string theString;
-  int positionInString;
+  unsigned positionInString;
   XML();
   bool ReadFromFile(std::fstream& inputFile);
   static std::string GetOpenTagNoInputCheckAppendSpacE(const std::string& tagNameNoSpacesNoForbiddenCharacters);
@@ -1524,6 +1524,9 @@ public:
     if (!this->IsSparseRelativeToExpectedSize(expectedSize)) {
       this->SetHashSizE(expectedSize * 5);
     }
+  }
+  inline void SetHashSizE(int inputHashSize) {
+    return this->SetHashSizE(static_cast<unsigned>(inputHashSize));
   }
   void SetHashSizE(unsigned int HS) {
     if (HS == static_cast<unsigned>(this->TheHashedArrays.size)) {

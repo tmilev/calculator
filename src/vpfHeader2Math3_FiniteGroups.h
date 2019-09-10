@@ -353,6 +353,28 @@ public:
   }
 };
 
+template <class elementSomeGroup>
+void FiniteGroup<elementSomeGroup>::init() {
+  this->generators.SetSize(0);
+  this->conjugacyClasseS.SetSize(0);
+  this->squaresCCReps.SetSize(0);
+  this->theElements.Clear();
+  this->flagAllElementsAreComputed = false;
+  this->flagCCsComputed = false;
+  this->flagCCRepresentativesComputed = false;
+  this->flagCharPolysAreComputed = false;
+  this->flagGeneratorsConjugacyClassesComputed = false;
+  this->flagWordsComputed = false;
+  this->flagCharTableIsComputed = false;
+  this->flagIrrepsAreComputed = false;
+  this->sizePrivate = 0;
+  this->specificDataPointer = nullptr;
+  this->AreConjugateByFormula = nullptr;
+  this->ComputeCCSizesAndRepresentativesByFormula = nullptr;
+  this->GetSizeByFormula = nullptr;
+  this->GetWordByFormula = nullptr;
+}
+
 struct simpleReflectionOrOuterAutomorphism {
   bool flagIsOuter;
   int index;
@@ -368,7 +390,7 @@ struct simpleReflectionOrOuterAutomorphism {
     this->index = inputIndex;
   }
   unsigned int HashFunction() const {
-    return 1 + this->index + 100 * flagIsOuter;
+    return static_cast<unsigned>(1 + this->index + 100 * flagIsOuter);
   }
   bool operator==(const simpleReflectionOrOuterAutomorphism& other) const {
     return this->flagIsOuter == other.flagIsOuter && this->index == other.index;
@@ -394,7 +416,7 @@ struct simpleReflection {
     this->index = inputIndex;
   }
   unsigned int HashFunction() const {
-    return index;
+    return static_cast<unsigned>(index);
   }
   bool operator==(const simpleReflection& other) const {
     return this->index == other.index;
@@ -429,7 +451,7 @@ public:
     this->flagDeallocated = false;
     this->operator=(other);
   }
-  ElementWeylGroup(): owner(0), flagDeallocated(false) {
+  ElementWeylGroup(): owner(nullptr), flagDeallocated(false) {
    
   }
   ~ElementWeylGroup() {
@@ -625,7 +647,7 @@ public:
   std::string ToStringCppCharTable(FormatExpressions* theFormat = nullptr);
   std::string ToStringIrrepLabel(int irrepIndex);
   std::string ToStringSignSignatureRootSubsystem(const List<SubgroupDataRootReflections>& inputSubgroups);
-  void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared = 0);
+  void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared = nullptr);
   void MakeFromDynkinType(const DynkinType& inputType);
   void MakeFinalSteps();
   void InitGenerators();
@@ -735,9 +757,9 @@ public:
   template <class coefficient>
   void RaiseToDominantWeight(
     Vector<coefficient>& theWeight,
-    int* sign = 0,
-    bool* stabilizerFound = 0,
-    ElementWeylGroup* raisingElt = 0
+    int* sign = nullptr,
+    bool* stabilizerFound = nullptr,
+    ElementWeylGroup* raisingElt = nullptr
   );
   bool AreMaximallyDominantGroupInner(List<Vector<Rational> >& theWeights);
   template <class coefficient>
@@ -751,9 +773,9 @@ public:
     DrawingVariables& outputDV,
     bool wipeCanvas,
     bool drawWeylChamber,
-    Vector<Rational>* bluePoint = 0,
+    Vector<Rational>* bluePoint = nullptr,
     bool LabelDynkinDiagramVertices = false,
-    Vectors<Rational>* predefinedProjectionPlane = 0
+    Vectors<Rational>* predefinedProjectionPlane = nullptr
   );
   bool HasStronglyPerpendicularDecompositionWRT(
     Vector<Rational>& input,
@@ -828,7 +850,7 @@ public:
     HashedList<Vector<coefficient> >& output,
     bool UseMinusRho,
     int expectedOrbitSize = - 1,
-    HashedList<ElementWeylGroup>* outputSubset = 0,
+    HashedList<ElementWeylGroup>* outputSubset = nullptr,
     int UpperLimitNumElements = - 1
   );
   template <class coefficient>
@@ -838,7 +860,7 @@ public:
     HashedList<Vector<coefficient> >& output,
     bool UseMinusRho,
     int expectedOrbitSize = - 1,
-    HashedList<ElementWeylGroup>* outputSubset = 0,
+    HashedList<ElementWeylGroup>* outputSubset = nullptr,
     int UpperLimitNumElements = - 1
   ) {
     Vectors<coefficient> theWeights;
@@ -859,8 +881,8 @@ public:
     Vectors<Rational>& bufferEiBAsis,
     bool RhoAction,
     bool UseMinusRho,
-    int* sign = 0,
-    bool* stabilizerFound = 0
+    int* sign = nullptr,
+    bool* stabilizerFound = nullptr
   ) {
     this->GetExtremeElementInOrbit(
       inputOutput, outputWeylElt, bufferEiBAsis, true, RhoAction, UseMinusRho, sign, stabilizerFound
@@ -1013,6 +1035,28 @@ public:
   void operator+= (const WeylGroupData& other);
 };
 
+template<class leftType, class rightType>
+void WeylGroupData::RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output) const {
+  if (r1.size != r2.size || r1.size != this->GetDim()) {
+    crash << "This is a programming error: attempting to get the scalar product of the weight "
+    << r1 << " (dimension " << r1.size
+    << ") with the weight " << r2 << " (dimension " << r2.size
+    << "), while the dimension of the ambient Weyl group is " << this->GetDim()
+    << ". ";
+    crash << crash;
+  }
+  output = r1[0].GetZero();
+  leftType buffer;
+  for (int i = 0; i < this->CartanSymmetric.NumRows; i ++) {
+    for (int j = 0; j < this->CartanSymmetric.NumCols; j ++) {
+      buffer = r1[i];
+      buffer *= r2[j];
+      buffer *= this->CartanSymmetric.elements[i][j];
+      output += buffer;
+    }
+  }
+}
+
 template<class coefficient>
 void ElementWeylGroup::ActOn(const ElementWeylGroup& inputElt, const Vector<coefficient>& inputV, Vector<coefficient>& output) {
   inputElt.CheckInitialization();
@@ -1041,7 +1085,7 @@ public:
   bool GenerateOuterOrbit(
     Vectors<coefficient>& theWeights,
     HashedList<Vector<coefficient> >& output,
-    HashedList<ElementWeylGroupAutomorphisms>* outputSubset = 0,
+    HashedList<ElementWeylGroupAutomorphisms>* outputSubset = nullptr,
     int UpperLimitNumElements = - 1
   );
   LargeInt GetOrbitSize(Vector<Rational>& theWeight);
@@ -1193,8 +1237,8 @@ public:
 
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
-  std::string ToString(FormatExpressions* fmt = 0) const;
-  friend std::ostream& operator<< (std::ostream& out, GroupRepresentation<someGroup, coefficient>& data) {
+  std::string ToString(FormatExpressions* fmt = nullptr) const;
+  friend std::ostream& operator<<(std::ostream& out, GroupRepresentation<someGroup, coefficient>& data) {
     return data.IntoStream(out);
   }
   bool operator== (const GroupRepresentation<someGroup, coefficient>& right) const {
@@ -1619,8 +1663,8 @@ public:
   GroupRepresentation<someGroup, coefficient> InduceRepresentationNormalSubgroup(
     GroupRepresentation<someGroup, coefficient>& in
   );
-  void (*CosetRepresentativeEnumerator)(void* H) = NULL;
-  bool (*SameCosetAsByFormula)(void* H, elementSomeGroup& g1, elementSomeGroup& g2) = NULL;
+  void (*CosetRepresentativeEnumerator)(void* H) = nullptr;
+  bool (*SameCosetAsByFormula)(void* H, elementSomeGroup& g1, elementSomeGroup& g2) = nullptr;
   //GroupRepresentation<Subgroup<somegroup,elementSomeGroup>, Rational> GetEmptyRationalRepresentationSubgroup();
 };
 
@@ -1891,10 +1935,7 @@ public:
   );
   void ComputeDynkinType();
   void ComputeCCSizesRepresentativesPreimages();
-  SubgroupDataRootReflections() {
-    this->flagIsParabolic = false;
-    this->flagIsExtendedParabolic = false;
-  }
+  SubgroupDataRootReflections();
   std::string ToString(FormatExpressions* theFormat = nullptr);
 };
 
@@ -1935,7 +1976,9 @@ public:
   }
   Vector<Rational> GetRho();
   template <class coefficient>
-  void RaiseToDominantWeightInner(Vector<coefficient>& theWeight, int* sign = 0, bool* stabilizerFound = 0);
+  void RaiseToDominantWeightInner(
+    Vector<coefficient>& theWeight, int* sign = nullptr, bool* stabilizerFound = nullptr
+  );
   template <class coefficient>
   bool FreudenthalEvalIrrepIsWRTLeviPart(
     const Vector<coefficient>& inputHWfundamentalCoords,
@@ -2045,7 +2088,7 @@ void ElementWeylGroupRing<coefficient>::MakeFromClassFunction(const ClassFunctio
 template <typename coefficient>
 void ElementWeylGroupRing<coefficient>::MakeFromClassFunction(WeylGroupData* GG, const List<coefficient>& l) {
   MacroRegisterFunctionWithName("ElementWeylGroupRing::MakeFromClassFunction");
-  if (GG == 0) {
+  if (GG == nullptr) {
     crash << "Weyl group pointer not allowed to be zero. " << crash;
   }
   this->MakeZero();
@@ -2429,6 +2472,33 @@ bool FiniteGroup<elementSomeGroup>::RegisterCCclass(
   this->CCsStandardRepCharPolys.AddOnTop(theCharPoly);
   this->sizePrivate += theClass.size;
   this->conjugacyClasseS.QuickSortAscending();
+  return true;
+}
+
+template <typename elementSomeGroup>
+bool FiniteGroup<elementSomeGroup>::CheckInitializationConjugacyClasses() const {
+  if (this->ConjugacyClassCount() == 0) {
+    crash << "This is a programming error: requesting to "
+    << "compute character hermitian product in a group whose "
+    << "conjugacy classes and/or elements have not been computed. The group reports to have "
+    << this->ConjugacyClassCount() << " conjugacy classes and " << this->theElements.size << " elements. "
+    << crash;
+    return false;
+  }
+  for (int i = 0; i < this->irreps.size; i ++) {
+    if (this->irreps[i].theCharacteR.data.IsEqualToZero()) {
+      crash << "This is a programming error: irrep number " << i + 1 << " has zero character!" << crash;
+      return false;
+    }
+  }
+/*  Rational sumSquares = 0;
+  Rational tempRat;
+  for (int i = 0; i < this->ConjugacyClassCount(); i ++) {
+    tempRat = this->ConjugacyClassCount()/this->GetGroupSizeByFormula();
+    sumSquares+= tempRat*tempRat;
+  }
+  if (sumSquares !=1)
+    crash << "This is a programming error: sumSquares equals " << sumSquares.ToString() << " when it should equal 1. " << crash;*/
   return true;
 }
 

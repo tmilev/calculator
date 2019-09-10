@@ -5,6 +5,7 @@
 
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math02_Vectors.h"
+#include "vpfHeader1General9_MemorySaving.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1_5(__FILE__, "Header, selections, subsets, etc. ");
 
 class Selection {
@@ -120,7 +121,7 @@ public:
   static unsigned int HashFunction(const SelectionWithMultiplicities& input) {
     unsigned int result = 0;
     for (int i = 0; i < input.elements.size; i ++) {
-      result += input.Multiplicities[input.elements[i]] * SomeRandomPrimes[input.elements[i]];
+      result += static_cast<unsigned int>(input.Multiplicities[input.elements[i]]) * SomeRandomPrimes[input.elements[i]];
     }
     return result;
   }
@@ -150,7 +151,7 @@ public:
   }
   int CardinalitySelectionWithMultiplicities();
   static unsigned int HashFunction(const SelectionWithMaxMultiplicity& input) {
-    return input.MaxMultiplicity*SomeRandomPrimes[0] +
+    return static_cast<unsigned int>(input.MaxMultiplicity) * SomeRandomPrimes[0] +
     input.::SelectionWithMultiplicities::HashFunction(input);
   }
 };
@@ -368,7 +369,7 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots(
   }
   int theDimension = this->TheObjects[0].size;
   output.SetSize(theDimension);
-  bufferMat.init((int) theSelection.CardinalitySelection + 2, (int) theDimension);
+  bufferMat.init(theSelection.CardinalitySelection + 2, theDimension);
   for (int j = 0; j < theDimension; j ++) {
     for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
       bufferMat.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
@@ -388,7 +389,7 @@ template <typename coefficient>
 void Vectors<coefficient>::SelectionToMatrix(
   Selection& theSelection, int OutputDimension, Matrix<coefficient>& output
 ) {
-  output.init((int)OutputDimension, (int)theSelection.CardinalitySelection);
+  output.init(OutputDimension, theSelection.CardinalitySelection);
   this->SelectionToMatrix(theSelection, OutputDimension, output, 0);
 }
 
@@ -426,7 +427,7 @@ bool Vectors<coefficient>::ComputeNormalExcludingIndex(
   }
   int theDimension = this->TheObjects[0].size;
   output.SetSize(theDimension);
-  bufferMatrix.init((int) this->size - 1, (int) theDimension);
+  bufferMatrix.init(this->size - 1, theDimension);
   int k = - 1;
   for (int i = 0; i < this->size; i ++) {
     if (i != index) {
@@ -450,7 +451,7 @@ bool Vectors<coefficient>::ComputeNormalFromSelection(
 ) {
   Selection NonPivotPoints;
   output.SetSize(theDimension);
-  bufferMatrix.init((int)theSelection.CardinalitySelection, (int)theDimension);
+  bufferMatrix.init(theSelection.CardinalitySelection, theDimension);
   for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
     for (int j = 0; j < theDimension; j ++) {
       bufferMatrix.elements[i][j] = this->TheObjects[theSelection.elements[i]].TheObjects[j];
@@ -479,7 +480,7 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot(
   output.SetSize(theDimension);
   Matrix<coefficient> matOutputEmpty;
   Selection& NonPivotPoints = bufferSel;
-  bufferMatrix.init((int) theSelection.CardinalitySelection + 1, (int) theDimension);
+  bufferMatrix.init(theSelection.CardinalitySelection + 1, theDimension);
   matOutputEmpty.init(- 1, - 1);
   for (int j = 0; j < theDimension; j ++) {
     for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
@@ -499,7 +500,7 @@ template <class coefficient>
 void Vectors<coefficient>::GaussianEliminationForNormalComputation(
   Matrix<coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension
 ) const {
-  inputMatrix.init((int) this->size, (int) theDimension);
+  inputMatrix.init(this->size, theDimension);
   outputNonPivotPoints.init(theDimension);
   for (int i = 0; i < this->size; i ++) {
     for (int j = 0; j < theDimension; j ++) {
@@ -517,10 +518,10 @@ int Vectors<coefficient>::GetRankOfSpanOfElements(Matrix<coefficient>* buffer, S
   int theDimension = this->TheObjects[0].size;
   MemorySaving<Matrix<coefficient> > emergencyMatBuf;
   MemorySaving<Selection> emergencySelBuf;
-  if (buffer == 0) {
+  if (buffer == nullptr) {
     buffer = &emergencyMatBuf.GetElement();
   }
-  if (bufferSelection == 0) {
+  if (bufferSelection == nullptr) {
     bufferSelection = &emergencySelBuf.GetElement();
   }
   this->GaussianEliminationForNormalComputation(*buffer, *bufferSelection, theDimension);
@@ -575,7 +576,7 @@ bool Vectors<coefficient>::LinearAlgebraForVertexComputation(
   if (theDimension - 1 != theSelection.CardinalitySelection) {
     crash << "Dimensions don't match. " << crash;
   }
-  buffer.init((int) (theDimension - 1), (int) theDimension);
+  buffer.init(theDimension - 1, theDimension);
   for (int i = 0; i < theDimension - 1; i ++) {
     for (int j = 0; j < theDimension; j ++) {
       buffer.elements[i][j] = (this->Externalwalls[theSelection.elements[i]].normal[j]);

@@ -3,6 +3,7 @@
 #ifndef vpfHeader_HeaderModulesSSLiealgebras
 #define vpfHeader_HeaderModulesSSLiealgebras
 #include "vpfHeader2Math0_General.h"
+#include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeaderModulesSSLielgebras(__FILE__, "Header, generalized Verma modules. ");
 
@@ -232,8 +233,7 @@ public:
     bool ascending
   );
   bool GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO);
-  ModuleSSalgebra() : owner(0), flagIsInitialized(false), flagDeallocated(false), MaxNumCachedPairs(1000000) {
-   
+  ModuleSSalgebra() : owner(nullptr), flagIsInitialized(false), flagDeallocated(false), MaxNumCachedPairs(1000000) {
   }
   ~ModuleSSalgebra() {
     this->flagDeallocated = true;

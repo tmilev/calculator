@@ -81,7 +81,7 @@ public:
   void ComputeHomework(CalculatorHTML& owner);
   void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
   TopicElement() {
-    this->reset(0, 0);
+    this->reset(0, nullptr);
   }
   static void GetTopicList(
     const std::string& inputString,

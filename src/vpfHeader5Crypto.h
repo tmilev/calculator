@@ -97,6 +97,7 @@ public:
   bool LoadFromASNEncoded(const List<unsigned char>& input, std::stringstream* commentsOnFailure);
   bool LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   std::string ToString();
+  std::string ToStringTestEncode();
   void WriteBytes(List<unsigned char>& output);
 };
 

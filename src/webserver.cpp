@@ -56,7 +56,7 @@ class SignalLock {
 };
 
 void SignalsInfrastructure::unblockSignals() {
-  int error = sigprocmask(SIG_SETMASK, &oldSignals, NULL);
+  int error = sigprocmask(SIG_SETMASK, &oldSignals, nullptr);
   if (error < 0) {
     logServer << "Sigprocmask failed on server, I shall now crash. " << logger::endL;
     crash << "Sigprocmask failed on server." << crash;
@@ -68,7 +68,7 @@ void SignalsInfrastructure::unblockSignals() {
 }
 
 void SignalsInfrastructure::blockSignals() {
-  sigset_t* theSignals = 0;
+  sigset_t* theSignals = nullptr;
   if (!this->flagSignalsAreStored) {
     //store signals on first run.
     theSignals = &this->oldSignals;

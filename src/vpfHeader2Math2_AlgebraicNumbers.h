@@ -25,15 +25,15 @@ class AlgebraicNumber {
   int basisIndex;
   VectorSparse<Rational> theElT;
   bool flagDeallocated;
-  AlgebraicNumber():owner(0), basisIndex(0), flagDeallocated(false) {}
-  AlgebraicNumber(const Rational& other):owner(0), basisIndex(0), flagDeallocated(false) {
+  AlgebraicNumber(): owner(nullptr), basisIndex(0), flagDeallocated(false) {}
+  AlgebraicNumber(const Rational& other): owner(nullptr), basisIndex(0), flagDeallocated(false) {
     this->operator= (other);
   }
-  AlgebraicNumber(int other):owner(0), basisIndex(0), flagDeallocated(false) {
-    this->operator= ((Rational)other);
+  AlgebraicNumber(int other): owner(nullptr), basisIndex(0), flagDeallocated(false) {
+    this->operator=(Rational(other));
   }
-  AlgebraicNumber(const AlgebraicNumber& other):owner(0), basisIndex(0), flagDeallocated(false) {
-    this->operator= (other);
+  AlgebraicNumber(const AlgebraicNumber& other): owner(nullptr), basisIndex(0), flagDeallocated(false) {
+    this->operator=(other);
   }
   bool IsExpressedViaLatestBasis() const;
   void ExpressViaLatestBasis();
@@ -64,7 +64,7 @@ class AlgebraicNumber {
     }
     return false;
   }
-  bool IsRational(Rational* whichRational = 0) const;
+  bool IsRational(Rational* whichRational = nullptr) const;
   bool IsNegative() const {
     Rational theRationalValue;
     if (this->IsRational(&theRationalValue)) {
@@ -74,7 +74,7 @@ class AlgebraicNumber {
   }
   bool IsEqualToZero() const;
   bool IsEqualToOne() const {
-    return (*this == 1);
+    return (*this) == 1;
   }
   void operator= (const AlgebraicNumber& other) {
     this->basisIndex = other.basisIndex;
@@ -83,7 +83,7 @@ class AlgebraicNumber {
   }
   void operator=(const Rational& other);
   void operator=(int other) {
-    *this = (Rational) other;
+    *this = Rational(other);
   }
   bool ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner);
   bool ConstructFromMinPoly(const Polynomial<Rational>& thePoly, AlgebraicClosureRationals& inputOwner) {
@@ -117,7 +117,7 @@ class AlgebraicNumber {
   bool operator==(const AlgebraicNumber& other) const;
   bool operator==(const Rational& other) const;
   bool operator==(int other) const {
-    return *this == (Rational) other;
+    return *this == Rational(other);
   }
 
   bool operator!= (const AlgebraicNumber& other) const {
@@ -162,10 +162,10 @@ class AlgebraicNumber {
   void operator*= (const AlgebraicNumber& other);
   void operator*= (const Rational& other);
   void operator*= (LargeInt other) {
-    this->operator *= ((Rational)other);
+    this->operator*=(Rational(other));
   }
   void operator*= (int other) {
-    this->operator *= ((Rational)other);
+    this->operator*=(Rational(other));
   }
   bool operator>(const AlgebraicNumber& other) const;
   std::string ToString(FormatExpressions* theFormat = nullptr) const;

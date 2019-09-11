@@ -478,11 +478,44 @@ void X509Certificate::WriteBytes(List<unsigned char>& output) {
   int implementMeNext;
 }
 
+std::string X509Certificate::ToStringTestEncode() {
+  std::stringstream out;
+  std::string sourceHex = Crypto::ConvertListUnsignedCharsToHex(this->sourceBinary, 80, true);
+  List<unsigned char> recoded;
+  this->WriteBytes(recoded);
+  std::string recodedHex = Crypto::ConvertListUnsignedCharsToHex(recoded, 80, true);
+  unsigned firstDifferentChar = 0;
+  for (firstDifferentChar = 0; firstDifferentChar < sourceHex.size(); firstDifferentChar ++) {
+    if (firstDifferentChar >= recodedHex.size()) {
+      break;
+    }
+    if (sourceHex[firstDifferentChar] != recodedHex[firstDifferentChar]) {
+      break;
+    }
+  }
+  std::string originalLeft, originalRight, recodedLeft, recodedRight;
+  MathRoutines::SplitStringInTwo(sourceHex, static_cast<int>(firstDifferentChar), originalLeft, originalRight);
+  MathRoutines::SplitStringInTwo(recodedHex, static_cast<int>(firstDifferentChar), recodedLeft, recodedRight);
+  out <<  "Source:<br>\n" << originalLeft;
+  if (originalRight.size() > 0) {
+    out << "<b style='color:red'>" << originalRight << "</b>";
+  }
+  out << "\n<br>Recoded:<br>\n";
+  out << recodedLeft;
+  if (recodedRight.size() > 0) {
+    out << "<b style='color:red'>" << recodedRight << "</b>";
+  }
+  return out.str();
+}
+
 std::string X509Certificate::ToString() {
   std::stringstream out;
   out << "Certificate RSA:<br>"
   << this->theRSA.ToString();
-  out << "Source:<br>" << this->sourceJSON.ToString(false, true, true, true);
+  out << "<br>Source binary (" << this->sourceBinary.size << " bytes):<br>";
+  std::string sourceHex = Crypto::ConvertListUnsignedCharsToHex(this->sourceBinary, 80, true);
+  out << sourceHex;
+  out << "<br>Source:<br>" << this->sourceJSON.ToString(false, true, true, true);
   return out.str();
 }
 

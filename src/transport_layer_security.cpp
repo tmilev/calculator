@@ -93,6 +93,8 @@ bool TransportLayerSecurity::initSSLKeyFiles(std::stringstream* commentsOnFailur
   if (!this->initSSLKeyFilesInternal(commentsOnFailure)) {
     crash << "Failed to initialize ssl keys of built-in tls server. " << crash;
   }
+  logServer << logger::green << "DEBUG: success with init ssl certificate!!!" << logger::endL;
+  logServer << "DEBUG: source binary length: " << this->theServer.certificate.sourceBinary.size;
   return true;
 }
 

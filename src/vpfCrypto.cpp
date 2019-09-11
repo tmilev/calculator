@@ -1324,7 +1324,7 @@ std::string CertificateRSA::ToString() {
   out << "Exponent [string, math]: " << "["
   << this->theExponentString << ", "
   << this->theExponenT.ToString()
-  << "]\n<br>\n";
+  << "]\n\n";
   return out.str();
 }
 

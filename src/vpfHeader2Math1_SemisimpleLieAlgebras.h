@@ -124,7 +124,7 @@ public:
   void GetChevalleyGeneratorAsLieBracketsSimpleGens(
     int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc, Rational& outputMultiplyLieBracketsToGetGenerator
   );
-  std::string ToString(FormatExpressions* inputFormat = 0);
+  std::string ToString(FormatExpressions* inputFormat = nullptr);
   std::string ToStringHTMLMenuStructureSummary(
     const std::string& relativeTo,
     bool includeStructureConstants,
@@ -258,13 +258,13 @@ public:
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputH,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputE,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputF,
-    std::stringstream* logStream = 0
+    std::stringstream* logStream = nullptr
   );
   bool AttemptExtendingEtoHEFwithHinCartan(
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputH,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF,
-    std::stringstream* logStream = 0
+    std::stringstream* logStream = nullptr
   );
   bool AttemptExtendingHtoHEFwithHinCartan(
     ElementSemisimpleLieAlgebra<Rational>& theH,
@@ -302,7 +302,7 @@ public:
     output << input.ToString();
     return output;
   }
-  Weight() : owner(0) {
+  Weight(): owner(nullptr) {
   }
   void CheckNonZeroOwner() const {
     if (this->owner != nullptr) {
@@ -443,18 +443,18 @@ public:
   Vectors<Rational> RestrictedRootSystem;
   Vectors<Rational> ImagesCartanDomain;
   SemisimpleLieAlgebra& theDomain() {
-    if (domainAlg == 0) {
+    if (this->domainAlg == nullptr) {
       crash << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << crash;
     }
-    return *domainAlg;
+    return *this->domainAlg;
   }
   SemisimpleLieAlgebra& theRange() {
-    if (rangeAlg == 0) {
+    if (this->rangeAlg == nullptr) {
       crash << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << crash;
     }
-    return *rangeAlg;
+    return *this->rangeAlg;
   }
-  HomomorphismSemisimpleLieAlgebra(): domainAlg(0), rangeAlg(0) {
+  HomomorphismSemisimpleLieAlgebra(): domainAlg(nullptr), rangeAlg(nullptr) {
   }
   std::string DebugString;
   void GetWeightsGmodKInSimpleCoordsK(Vectors<Rational>& outputWeights) {

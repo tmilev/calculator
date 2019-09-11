@@ -111,7 +111,7 @@ public:
     }
     if (this->SelectedCircleMinus2noneMinus1Center >= 0) {
       if (this->flagRotatingPreservingAngles) {
-        this->changeBasisPReserveAngles((double) X , (double) Y);
+        this->changeBasisPReserveAngles(static_cast<double>(X) , static_cast<double>(Y));
         return true;
       }
     }
@@ -163,7 +163,7 @@ public:
   DrawOperations() {
     this->initDimensions(2);
     this->flagAnimatingMovingCoordSystem = false;
-    this->specialOperationsOnBasisChange = 0;
+    this->specialOperationsOnBasisChange = nullptr;
     this->indexStartingModifiableTextCommands = 0;
   }
   void init();

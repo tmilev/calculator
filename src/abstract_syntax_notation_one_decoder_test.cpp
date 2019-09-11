@@ -60,6 +60,9 @@ bool PrivateKeyRSA::Test::LoadFromPEM() {
   if (!theKey.LoadFromPEM(pemContent, &commentsOnFailure)) {
     crash << "Failed to load pem content. " << crash;
   }
+  if (!theKey.BasicChecks(&commentsOnFailure)) {
+    crash << "Hard coded private key did not pass basic checks. " << crash;
+  }
   return true;
 }
 

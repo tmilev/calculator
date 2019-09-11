@@ -9,6 +9,8 @@
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
 #include "vpfHeader7DatabaseInterface.h"
 #include "vpfHeader3Calculator5_Database_Mongo.h"
+
+extern ProjectInformationInstance ProjectInfoVpf4cpp;
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
 //This file lists calculator functions and various hard-coded rules. Please do not use for any other purposes.
 
@@ -421,6 +423,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "Crashes the calculator by attempting to use data "
     "out-of-bounds in a std::vector.",
     "CrashVectorOutOfBounds(0)",
+    true,
+    false,
     "CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds",
     "CrashVectorOutOfBounds"
   );
@@ -5273,57 +5277,92 @@ void Calculator::initPredefinedStandardOperations() {
     "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly, this->opRational(), this->opPolyOverANs(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    this->opRational(),
+    this->opPolyOverANs(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "1+PolynomialAlgebraicNumbers(\\sqrt{12}x)",
-    true, "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
+    true,
+    false,
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly, this->opPolyOverANs(), this->opRational(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    this->opPolyOverANs(),
+    this->opRational(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{12}x) + 1",
-    true, false, "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
+    true,
+    false,
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly, this->opPoly(), this->opAlgNumber(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    this->opPoly(),
+    this->opAlgNumber(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(x) +\\sqrt{2}",
     true, false, "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly, this->opPoly(), this->opPolyOverANs(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    this->opPoly(),
+    this->opPolyOverANs(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "Polynomial{}x + PolynomialAlgebraicNumbers(\\sqrt{2}x)",
     true, false, "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly, this->opPolyOverANs(), this->opPoly(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    this->opPolyOverANs(),
+    this->opPoly(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{2}x) +Polynomial{}x",
-    true, false, "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
-    "AddNumberOrPolyToPoly"
-  );
-  this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly, this->opAlgNumber(), this->opPoly(),
-    "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
-    "\\sqrt{2}+PolynomialAlgebraicNumbers(x)",
-    true, false,
+    true,
+    false,
     "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
     "AddNumberOrPolyToPoly"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opRational(), this->opElementWeylAlgebra(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    this->opAlgNumber(),
+    this->opPoly(),
+    "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
+    "\\sqrt{2}+PolynomialAlgebraicNumbers(x)",
+    true,
+    false,
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "AddNumberOrPolyToPoly"
+  );
+  this->AddOperationBinaryInnerHandlerWithTypes(
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA,
+    this->opRational(),
+    this->opElementWeylAlgebra(),
     "Adds a rational or polynomial to element Weyl algebra. ",
     " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA"
+    true,
+    false,
+    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opPoly(), this->opElementWeylAlgebra(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA,
+    this->opPoly(),
+    this->opElementWeylAlgebra(),
     "Adds a rational or polynomial to element Weyl algebra. ",
     " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\nx_i +\\partial_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA"
+    true,
+    false,
+    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opPoly(),

@@ -253,7 +253,7 @@ public:
   HashedList<std::string, MathRoutines::HashString> addressStartsInterpretedAsCalculatorRequest;
 
   int activeWorker;
-  int timeLastExecutableModification;
+  int64_t timeLastExecutableModification;
   ListReferences<std::string> theProgressReports;
   bool flagDeallocated;
   WebServer();
@@ -287,7 +287,7 @@ public:
   static void ReturnActiveIndicatorAlthoughComputationIsNotDone();
   static void SendStringThroughActiveWorker(const std::string& input);
   static void PipeProgressReport(const std::string& input);
-  static void fperror_sigaction(int signal);
+  static void fperror_sigaction[[noreturn]](int signal);
   void ReapOneChild();
   void ReapChildren();
   static void Signal_SIGCHLD_handler(int s);
@@ -306,7 +306,7 @@ public:
   void RecycleOneChild(int childIndex, int& numberInUse);
   void HandleTooManyConnections(const std::string& incomingUserAddress);
   void HandleTooManyWorkers(int& numInUse);
-  void StopKillAll(bool attemptToRestart);
+  void StopKillAll[[noreturn]](bool attemptToRestart);
   bool RestartIsNeeded();
   void initDates();
   std::string ToStringLastErrorDescription();

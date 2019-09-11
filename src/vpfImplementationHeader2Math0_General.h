@@ -316,6 +316,54 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
 }
 
 template <class coefficient>
+void Vectors<coefficient>::ChooseABasis() {
+  Vectors<Rational> output;
+  Matrix<coefficient> tempMat;
+  Selection tempSel;
+  for (int i = 0; i < this->size; i ++) {
+    output.AddOnTop(this->TheObjects[i]);
+    if (output.GetRankOfSpanOfElements(&tempMat, &tempSel) < output.size) {
+      output.RemoveLastObject();
+    }
+  }
+  this->operator=(output);
+}
+
+template <class coefficient>
+void Vectors<coefficient>::BeefUpWithEiToLinearlyIndependentBasis(int theDim) {
+  Selection BufferSel;
+  Matrix<coefficient> Buffer;
+  if (this->size != 0 && theDim != this->GetDim()) {
+    crash << "Vector dimension is incorrect. " << crash;
+  }
+  int currentRank = this->GetRankOfSpanOfElements(Buffer, BufferSel);
+  if (currentRank == theDim) {
+    return;
+  }
+  Vector<coefficient> theVect;
+  for (int i = 0; i < theDim && currentRank < theDim; i ++) {
+    theVect.MakeEi(theDim, i);
+    this->AddOnTop(theVect);
+    int candidateRank = this->GetRankOfSpanOfElements(Buffer, BufferSel);
+    if (candidateRank > currentRank) {
+      currentRank = candidateRank;
+    } else {
+      this->size --;
+    }
+  }
+  if (currentRank != theDim) {
+    crash << "Rank does not match dimension. " << crash;
+  }
+}
+
+template <class coefficient>
+bool Vectors<coefficient>::LinSpanContainsVector(const Vector<coefficient>& input) const {
+    Matrix<coefficient> buffer;
+    Selection bufferSelection;
+    return this->LinSpanContainsVector(input, buffer, bufferSelection);
+  }
+
+template <class coefficient>
 void Vectors<coefficient>::SelectABasisInSubspace(
   const List<Vector<coefficient> >& input, List<Vector<coefficient> >& output, Selection& outputSelectedPivotColumns
 ) {

@@ -7,6 +7,7 @@
 #include <iomanip>
 #include "string_constants.h"
 
+extern ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation;
 ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation(
   __FILE__, "Routines for calculus teaching: calculator exam mode."
 );
@@ -431,7 +432,7 @@ std::string HtmlInterpretation::ClonePageResult() {
     return result.ToString(false);
   }
   std::fstream theFile;
-  if (FileOperations::FileExistsVirtualCustomizedReadOnly(fileNameResulT, 0)) {
+  if (FileOperations::FileExistsVirtualCustomizedReadOnly(fileNameResulT, nullptr)) {
     out << "Output file: " << fileNameResulT << " already exists. ";
     result[WebAPI::result::error] = out.str();
     return out.str();
@@ -500,7 +501,7 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash) {
   WebAPI::request::calculatorHTML;
 
   for (std::string currentLine; std::getline(theReader, currentLine, '\n');) {
-    int startChar = currentLine.find(WebAPI::request::calculatorHTML);
+    int startChar = static_cast<int>( currentLine.find(WebAPI::request::calculatorHTML));
     bool shouldShortCut = false;
     if (startChar == - 1) {
       shouldShortCut = true;
@@ -515,7 +516,12 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash) {
     }
     std::string firstPart, secondAndThirdPart, thirdPart, notUsed;
     MathRoutines::SplitStringInTwo(currentLine, startChar, firstPart, secondAndThirdPart);
-    MathRoutines::SplitStringInTwo(secondAndThirdPart, WebAPI::request::calculatorHTML.size(), notUsed, thirdPart);
+    MathRoutines::SplitStringInTwo(
+      secondAndThirdPart,
+      static_cast<int>(WebAPI::request::calculatorHTML.size()),
+      notUsed,
+      thirdPart
+    );
     if (
       currentLine.find("<script") == std::string::npos ||
       currentLine.find("/MathJax.js?") != std::string::npos
@@ -817,7 +823,7 @@ void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::stri
   }
   if (theGlobalVariables.flagAllowProcessMonitoring) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
-    outputAppend[Configuration::millisecondsReplyAfterComputation] = (double) theGlobalVariables.millisecondsReplyAfterComputation;
+    outputAppend[Configuration::millisecondsReplyAfterComputation] = static_cast<double>(theGlobalVariables.millisecondsReplyAfterComputation);
   } else {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "false";
   }
@@ -1003,7 +1009,7 @@ std::string HtmlInterpretation::GetEditPageJSON() {
 
 std::string HtmlInterpretation::SubmitAnswersString() {
   JSData result;
-  result = HtmlInterpretation::SubmitAnswersJSON(theGlobalVariables.GetWebInput("randomSeed"), 0, true);
+  result = HtmlInterpretation::SubmitAnswersJSON(theGlobalVariables.GetWebInput("randomSeed"), nullptr, true);
   return result.ToString(false);
 }
 
@@ -1171,7 +1177,7 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
     return result;
   }
   bool tempIsCorrect = false;
-  if (outputIsCorrect == 0) {
+  if (outputIsCorrect == nullptr) {
     outputIsCorrect = &tempIsCorrect;
   }
   *outputIsCorrect = false;
@@ -1349,7 +1355,7 @@ std::string HtmlInterpretation::AddTeachersSections() {
   delimiters.AddOnTop('\t');
   delimiters.AddOnTop(',');
   delimiters.AddOnTop(';');
-  delimiters.AddOnTop(160);//<-&nbsp
+  delimiters.AddOnTop(static_cast<char>(160));//<-&nbsp
   MathRoutines::StringSplitExcludeDelimiters(desiredSectionsOneString, delimiters, desiredSectionsList);
 
   MathRoutines::StringSplitExcludeDelimiters(desiredUsers, delimiters, theTeachers);
@@ -1370,7 +1376,7 @@ std::string HtmlInterpretation::AddTeachersSections() {
     findQuery[DatabaseStrings::labelUsername] = currentTeacher.username;
     setQuery[DatabaseStrings::labelSectionsTaught] = desiredSectionsList;
     if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
-      DatabaseStrings::tableUsers, findQuery, setQuery, 0, &out
+      DatabaseStrings::tableUsers, findQuery, setQuery, nullptr, &out
     )) {
       out << "<span style =\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
     } else {
@@ -1443,13 +1449,13 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
   const std::string& inputRandomSeed, std::string* outputNakedAnswer, bool* outputDidSucceed
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
-  if (outputNakedAnswer != 0) {
+  if (outputNakedAnswer != nullptr) {
     *outputNakedAnswer = "";
   }
-  if (outputDidSucceed != 0) {
+  if (outputDidSucceed != nullptr) {
     *outputDidSucceed = false;
   }
-  int startTimeInMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+  int64_t startTimeInMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
   CalculatorHTML theProblem;
   std::stringstream errorStream;
   theProblem.LoadCurrentProblemItem(false, inputRandomSeed, &errorStream);
@@ -1561,10 +1567,10 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
   const Expression& currentE = theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size() - 1][1];
   if (!currentE.StartsWith(theInterpreteR.opEndStatement())) {
     out << "\\(\\displaystyle " << currentE.ToString(&theFormat) << "\\)";
-    if (outputNakedAnswer != 0) {
+    if (outputNakedAnswer != nullptr) {
       *outputNakedAnswer = currentE.ToString(&theFormat);
     }
-    if (outputDidSucceed != 0) {
+    if (outputDidSucceed != nullptr) {
       *outputDidSucceed = true;
     }
   } else {
@@ -1594,10 +1600,10 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
         out << "\\(\\displaystyle " << currentE[j].ToString(&theFormat) << "\\)";
       }
       if (isFirst) {
-        if (outputNakedAnswer != 0) {
+        if (outputNakedAnswer != nullptr) {
           *outputNakedAnswer = currentE[j].ToString(&theFormat);
         }
-        if (outputDidSucceed != 0) {
+        if (outputDidSucceed != nullptr) {
           *outputDidSucceed = true;
         }
       }
@@ -1660,7 +1666,7 @@ std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAd
     return output.ToString(false);
   }
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection(
-    DatabaseStrings::tableUsers, findAdmins, admins, columnsToRetain, - 1, 0, &commentsOnFailure
+    DatabaseStrings::tableUsers, findAdmins, admins, columnsToRetain, - 1, nullptr, &commentsOnFailure
   )) {
     output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
     return output.ToString(false);
@@ -1700,7 +1706,7 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
     return out.str();
   }
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(
-    DatabaseStrings::tableUsers, findAdmins, admins, - 1, 0, &commentsOnFailure
+    DatabaseStrings::tableUsers, findAdmins, admins, - 1, nullptr, &commentsOnFailure
   )) {
     out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
     return out.str();
@@ -1793,7 +1799,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable(
     << currentCourse << "</b>. "
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=accounts&"
-    << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
+    << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
     << "filterAccounts=false&"
     << "\">Show all. </a>"
     << "<br>";
@@ -1820,7 +1826,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable(
       sectionDescriptions.AddOnTop(currentSectionInfo.str());
     }
   }
-  theSections.QuickSortAscending(0, &sectionDescriptions);
+  theSections.QuickSortAscending(nullptr, &sectionDescriptions);
   activatedAccountBucketsBySection.SetSize(theSections.size);
   nonActivatedAccountBucketsBySection.SetSize(theSections.size);
   preFilledLinkBucketsBySection.SetSize(theSections.size);
@@ -1995,7 +2001,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
     fields.AddOnTop(DatabaseStrings::labelProblemTotalQuestions);
     //logWorker << logger::yellow << "DEBUG: About to query db to find problem info." << logger::endL;
     if (DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection(
-      DatabaseStrings::tableProblemInformation, findProblemInfo, result, fields, - 1, 0, &commentsOnFailure
+      DatabaseStrings::tableProblemInformation, findProblemInfo, result, fields, - 1, nullptr, &commentsOnFailure
     )) {
       for (int i = 0; i < result.size; i ++) {
         const std::string& currentProblemName = result[i][DatabaseStrings::labelProblemName].theString;
@@ -2046,7 +2052,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   stringConverter << this->knownNumberOfAnswersFromHD;
   newDBentry[DatabaseStrings::labelProblemTotalQuestions] = stringConverter.str();
   DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
-    DatabaseStrings::tableProblemInformation, findDBentry, newDBentry, 0, &commentsOnFailure
+    DatabaseStrings::tableProblemInformation, findDBentry, newDBentry, nullptr, &commentsOnFailure
   );
   return this->knownNumberOfAnswersFromHD;
 }
@@ -2059,7 +2065,7 @@ void UserCalculator::ComputePointsEarned(
   MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
   this->pointsEarned = 0;
   this->pointsMax = 0;
-  if (theTopics != 0) {
+  if (theTopics != nullptr) {
     for (int i = 0; i < theTopics->size(); i ++) {
       (*theTopics).theValues[i].totalPointsEarned = 0;
       (*theTopics).theValues[i].pointsEarnedInProblemsThatAreImmediateChildren = 0;
@@ -2098,7 +2104,7 @@ void UserCalculator::ComputePointsEarned(
         this->pointsEarned += currentP.Points;
       }
     }
-    if (theTopics != 0) {
+    if (theTopics != nullptr) {
       if (theTopics->Contains(problemName)) {
         TopicElement& currentElt = theTopics->GetValueCreate(problemName);
         this->pointsMax += currentWeight;
@@ -2154,11 +2160,13 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   List<std::string> userLabels;
   int usernameIndex = userLabels.GetIndex(DatabaseStrings::labelUsername);
   if (usernameIndex == - 1) {
-    return "Could not find username column. ";
+    comments << "Could not find username column. ";
+    return false;
   }
   int problemDataIndex = userLabels.GetIndex(DatabaseStrings::labelProblemDataJSON);
   if (problemDataIndex == - 1) {
-    return "Could not find problem data column. ";
+    comments << "Could not find problem data column. ";
+    return false;
   }
   CalculatorHTML currentUserRecord;
   this->userScores.Reserve(this->userProblemData.size);
@@ -2465,7 +2473,7 @@ std::string HtmlInterpretation::ToStringNavigation() {
       } else {
         out << "?request=template";
       }
-      out << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
+      out << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
       << "studentView=" << studentView << "&";
       if (section != "") {
         out << "studentSection="
@@ -2490,14 +2498,14 @@ std::string HtmlInterpretation::ToStringNavigation() {
     }
     out << ": " << theGlobalVariables.userDefault.username << linkSeparator;
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout&";
-    out << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">Log out</a>" << linkSeparator;
+    out << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr) << " \">Log out</a>" << linkSeparator;
     if (theGlobalVariables.userCalculatorRequestType == "changePasswordPage") {
       out << "<b>Account";
       out << "</b>" << linkSeparator;
     } else {
       if (theGlobalVariables.flagUsingSSLinCurrentConnection) {
         out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage&"
-        << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << "\">Account</a>" << linkSeparator;
+        << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr) << "\">Account</a>" << linkSeparator;
       } else {
         out << "<b>Account settings: requires secure connection</b>" << linkSeparator;
       }
@@ -2513,7 +2521,7 @@ std::string HtmlInterpretation::ToStringNavigation() {
     if (theGlobalVariables.userCalculatorRequestType != "accounts") {
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=accounts&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
       << "&filterAccounts=true"
       << "\">Accounts</a>" << linkSeparator;
     } else {
@@ -2521,21 +2529,21 @@ std::string HtmlInterpretation::ToStringNavigation() {
     }
     if (theGlobalVariables.userCalculatorRequestType != "scores") {
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scores&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
       << "\">Scores</a>" << linkSeparator;
     } else {
       out << "<b>Scores</b>" << linkSeparator;
     }
     if (theGlobalVariables.userCalculatorRequestType != "status") {
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=status&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
       << "\">Server</a>" << linkSeparator;
     } else {
       out << "<b>Server</b>" << linkBigSeparator;
     }
     if (theGlobalVariables.userCalculatorRequestType != "database") {
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
       << "\">Database</a>" << linkBigSeparator;
     } else {
       out << "<b>Database</b>" << linkBigSeparator;
@@ -2543,13 +2551,13 @@ std::string HtmlInterpretation::ToStringNavigation() {
   }
   if (theGlobalVariables.userCalculatorRequestType != "calculator") {
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=calculator&"
-    << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">Calculator</a>" << linkBigSeparator;
+    << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr) << " \">Calculator</a>" << linkBigSeparator;
   } else {
     out << "<b>Calculator</b> " << linkBigSeparator;
   }
   if (theGlobalVariables.userCalculatorRequestType != "about") {
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=about&"
-    << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">About</a>" << linkBigSeparator;
+    << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr) << " \">About</a>" << linkBigSeparator;
   } else {
     out << "<b>About</b> " << linkBigSeparator;
   }
@@ -2559,7 +2567,7 @@ std::string HtmlInterpretation::ToStringNavigation() {
   if (!theGlobalVariables.flagRunningApache) {
     if (theGlobalVariables.flagAllowProcessMonitoring) {
       if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-        out << "<span style =\"color:red\"><b>Monitoring on</b></span>" << linkSeparator;
+        out << "<b style =\"color:red\">Monitoring on</b>" << linkSeparator;
       } else {
         out << "<a style =\"color:red\" href=\""
         << theGlobalVariables.DisplayNameExecutable

@@ -66,7 +66,7 @@ public:
   void (*WebServerTimerPing)(int64_t pingTime);
   void (*PauseUponUserRequest)();
   void Pause() {
-    if (this->PauseUponUserRequest != 0) {
+    if (this->PauseUponUserRequest != nullptr) {
       this->PauseUponUserRequest();
     }
   }
@@ -217,7 +217,7 @@ public:
   int GetGlobalTimeInSeconds();
   int64_t GetElapsedMilliseconds();
   double GetElapsedSeconds() {
-    return ((double) this->GetElapsedMilliseconds()) / 1000;
+    return static_cast<double>(this->GetElapsedMilliseconds()) / 1000;
   }
   static void InitThreadsExecutableStart();
   bool UserDefaultIsDebuggingAdmin();
@@ -260,7 +260,7 @@ public:
   JSData ToStringProgressReportJSData();
   std::string ToStringProgressReportConsole();
   void MakeReport(const std::string& input) {
-    if (this->IndicatorStringOutputFunction != 0) {
+    if (this->IndicatorStringOutputFunction != nullptr) {
       this->IndicatorStringOutputFunction(input);
     }
   }
@@ -358,7 +358,7 @@ class logger {
         this->bufferFile.clear();
       }
     }
-    if (this->carbonCopy != 0) {
+    if (this->carbonCopy != nullptr) {
       (*(this->carbonCopy)) << out.str();
     } else if (theGlobalVariables.flagRunningBuiltInWebServer || theGlobalVariables.flagRunningCommandLine) {
       if (this->flagWriteImmediately) {

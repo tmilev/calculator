@@ -15,7 +15,7 @@ class f65521 {
 public:
   unsigned int n;
 
-  f65521(){};
+  f65521(){}
 
   f65521(const int right) {
     *this = right;
@@ -46,7 +46,7 @@ public:
   bool NeedsParenthesisForMultiplication() {
     return false;
   }
-  std::string ToString(FormatExpressions* f = 0) const;
+  std::string ToString(FormatExpressions* f = nullptr) const;
 };
 std::ostream& operator<<(std::ostream& out, const f65521& data);
 
@@ -55,7 +55,7 @@ class f211 {
 public:
   char n;
 
-  f211(){};
+  f211(){}
 
   f211(const int right) {
     *this = right;
@@ -95,7 +95,7 @@ public:
 
   unsigned int HashFunction() const;
 
-  std::string ToString(FormatExpressions* f = 0) const;
+  std::string ToString(FormatExpressions* f = nullptr) const;
 };
 std::ostream& operator<<(std::ostream& out, const f211& data);
 

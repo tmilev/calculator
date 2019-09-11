@@ -1,4 +1,9 @@
 #include "vpfJson.h"
+#include "assert.h"
+#include "vpfHeader2Math0_General.h"
+#include "vpfHeader2Math8_VectorSpace.h"
+#include "vpfHeader2Math0_General.h"
+#include "vpfHeader2Math3_FiniteGroups.h"
 #ifndef vpfPackedVector_h_already_included
 #define vpfPackedVector_h_already_included
 
@@ -138,6 +143,7 @@ bool PackedVector<scalar>::operator>(const PackedVector<scalar>&w) const {
 
 template <typename scalar>
 void PackedVector<scalar>::MakeZero(int n) {
+  (void) n;
   for (int i = 0; i < this->size; i ++) {
     this->data[i] = 0;
   }
@@ -145,6 +151,7 @@ void PackedVector<scalar>::MakeZero(int n) {
 
 template <typename scalar>
 void PackedVector<scalar>::MakeEi(int d, int ei) {
+  (void) d;
   for (int i = 0; i < this->size; i ++) {
     this->data[i] = 0;
   }
@@ -160,7 +167,7 @@ template <typename scalar>
 unsigned int PackedVector<scalar>::HashFunction() const {
   unsigned int result = 0;
   for (int i = 0; i < this->size; i ++) {
-    result += (unsigned int) (this->data[i] * SomeRandomPrimes[i]);
+    result += static_cast<unsigned int> (this->data[i]) * SomeRandomPrimes[i];
   }
   return result;
 }
@@ -482,7 +489,7 @@ template<typename scalar, typename vector>
 Matrix<Rational>& AnotherWeylGroup<scalar, vector>::GetClassMatrix(int cc) {
   if (this->classMatrices.size == 0) {
     if (this->conjugacyClasses.size == 0) {
-      this.ComputeConjugacyClasses();
+      this->ComputeConjugacyClasses();
     }
     this->classMatrices.SetSize(this->conjugacyClasses.size);
   }
@@ -588,7 +595,7 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G) {
       spaces.AddOnTop(xspi);
       allchars.AddVector(G.characterTable[i]);
     }
-    spaces.AddOnTop(allchars.OrthogonalComplement(0,&form));
+    spaces.AddOnTop(allchars.OrthogonalComplement(nullptr, &form));
   } else {
     Vector<Rational> X1;
     X1.SetSize(G.conjugacyClasses.size);
@@ -598,7 +605,7 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G) {
     VectorSpace<Rational> sp1;
     sp1.AddVector(X1);
     spaces.AddOnTop(sp1);
-    spaces.AddOnTop(sp1.OrthogonalComplement(0,&form));
+    spaces.AddOnTop(sp1.OrthogonalComplement(nullptr, &form));
   }
   bool found = false;
   for (int i = 0; i < G.conjugacyClasses.size; i ++) {
@@ -694,7 +701,7 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G) {
   for (int i = 0; i < chars.size; i ++) {
     Rational x = G.GetHermitianProduct(chars[i], chars[i]);
     int x2 = x.GetDenominator().GetUnsignedIntValueTruncated();
-    x2 = sqrt(x2);
+    x2 = static_cast<int>(FloatingPoint::sqrt(x2));
     chars[i] *= x2;
     if (chars[i][0] < 0) {
       chars[i] *= - 1;
@@ -721,7 +728,7 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G) {
 }
 
 template <typename somegroup>
-Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap = 0) {
+Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap = nullptr) {
   List<int> invl;
   invl.SetSize(G.conjugacyClasses[cci].size);
   for (int i = 0; i < G.conjugacyClasses[cci].size; i ++) {
@@ -755,10 +762,10 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap
   return out;
 }
 
+/*
 template <typename somegroup>
-bool Subgroup<somegroup>::MakeFrom(somegroup &G, const List<int>& generators, int MaxElements) {
+bool Subgroup::MakeFrom<somegroup>(somegroup &G, const List<int>& generators, int MaxElements) {
   // bookkeeping...
-  // this class does things in such a bizarre way
   this->parent = &G;
   List<int> newElements;
   for (int i = 0; i < generators.size; i ++) {
@@ -789,7 +796,9 @@ bool Subgroup<somegroup>::MakeFrom(somegroup &G, const List<int>& generators, in
   }
   return true;
 }
+*/
 
+/*
 template <typename somegroup>
 void Subgroup<somegroup>::ComputeConjugacyClasses() {
   List<bool> Accounted;
@@ -848,17 +857,19 @@ Rational Subgroup<somegroup>::GetHermitianProduct(const Vector<Rational>& X1, co
   }
   return acc / this->theElements.size;
 }
+*/
 
+/*
 template <typename weylgroup>
 void GetTauSignaturesFromSubgroup(weylgroup& G, const List<int>& gens, List<bool>& out) {
-  /*List<ElementWeylGroup> genes;
+  List<ElementWeylGroup> genes;
   genes.SetSize(gens.size);
   for (int i = 0; i <gens.size; i ++)
     genes[i] = G.theElements[gens[i]];
   FiniteGroup<ElementWeylGroup> H;
   H.MakeFrom(genes);
   Vector<Rational> HXs;
-  H.GetSignCharacter(HXs);*/
+  H.GetSignCharacter(HXs);
 
   Subgroup<weylgroup> H;
   H.MakeFrom(G, gens);
@@ -895,7 +906,7 @@ void GetTauSignaturesFromSubgroup(weylgroup& G, const List<int>& gens, List<bool
     }
   }
 }
-
+*/
 
 template <typename weylgroup>
 void ComputeTauSignatures(weylgroup* G, List<List<bool> >& tauSignatures, bool pseudo = false) {
@@ -957,6 +968,7 @@ void ComputeTauSignatures(weylgroup* G, List<List<bool> >& tauSignatures, bool p
   }
 }
 
+/*
 template <typename somegroup>
 void ExportCharTable(const somegroup& G, JSData &data) {
   data.type = JSOBJ;
@@ -993,6 +1005,7 @@ void ExportCharTable(const somegroup& G, JSData &data) {
     }
   }
 }
+*/
 
 template <typename somegroup>
 void ExportTauSignatures(const somegroup& G, const List<List<bool> > ts, JSData &data) {

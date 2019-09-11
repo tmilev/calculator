@@ -960,6 +960,10 @@ bool LargeInt::AssignStringFailureAllowed(const std::string& input, std::strings
   return true;
 }
 
+void LargeInt::RaiseToPower(int thePower) {
+  MathRoutines::RaiseToPower(*this, thePower, LargeInt(1));
+}
+
 bool LargeInt::IsIntegerFittingInInt(int* whichInt) {
   if (!this->value.IsIntegerFittingInInt(whichInt)) {
     return false;

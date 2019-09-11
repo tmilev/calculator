@@ -704,6 +704,7 @@ std::string SemisimpleSubalgebras::ToStringSubalgebrasWithHDWrite(FormatExpressi
 }
 
 std::string SemisimpleSubalgebras::ToStringTableSubalgebraLinksTable(FormatExpressions* theFormat) {
+  (void) theFormat;
   std::stringstream out;
   int numberOfColumns = 6;
   out << "<table class = \"tableSemisimpleLieAlgebrasList\">";
@@ -4369,7 +4370,7 @@ bool slTwoSubalgebra::operator==(const slTwoSubalgebra& right) const {
 
 std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("slTwoSubalgebra::ToString");
-  if (this->container == 0) {
+  if (this->container == nullptr) {
     return "sl(2) subalgebra not initialized.";
   }
   std::stringstream out;  std::string tempS;
@@ -4588,7 +4589,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   for (int i = 0; i < thePermutation.size; i ++) {
     thePermutation[i] = i;
   }
-  output.QuickSortDescending(0, &thePermutation);
+  output.QuickSortDescending(nullptr, &thePermutation);
   for (int i = 0; i < theIndexMap.size; i ++) {
     theIndexMap[thePermutation[i]] = i;
   }
@@ -4712,14 +4713,15 @@ void SltwoSubalgebras::ComputeModuleDecompositionsOfAmbientLieAlgebra() {
 }
 
 bool SltwoSubalgebras::ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex) {
-  if (outputIndex != 0)
+  if (outputIndex != nullptr) {
     *outputIndex = - 1;
+  }
   ElementSemisimpleLieAlgebra<Rational> tempH;
   this->CheckForCorrectInitializationCrashIfNot();
   tempH.MakeHgenerator(theH, *this->owner);
   for (int i = 0; i < this->size; i ++) {
     if (this->TheObjects[i].theH == tempH) {
-      if (outputIndex != 0) {
+      if (outputIndex != nullptr) {
         *outputIndex = i;
       }
       return true;
@@ -4729,12 +4731,12 @@ bool SltwoSubalgebras::ContainsSl2WithGivenH(Vector<Rational>& theH, int* output
 }
 
 bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex) {
-  if (outputIndex != 0) {
+  if (outputIndex != nullptr) {
     *outputIndex = - 1;
   }
   for (int i = 0; i < this->size; i ++) {
     if ((*this)[i].hCharacteristic == theHCharacteristic) {
-      if (outputIndex != 0) {
+      if (outputIndex != nullptr) {
         *outputIndex = i;
       }
       return true;
@@ -5122,7 +5124,7 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat) {
   std::string tempS;
   std::stringstream out;
   std::stringstream body;
-  bool useHtml = theFormat == 0 ? true : theFormat->flagUseHTML;
+  bool useHtml = theFormat == nullptr ? true : theFormat->flagUseHTML;
   for (int i = 0; i < this->size; i ++) {
     tempS = (*this)[i].ToString(theFormat);
   //  body<< "Index " << i << ": ";
@@ -5260,7 +5262,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   if (!this->flagCentralizerIsWellChosen) {
     return "";
   }
-  if (theFormat != 0) {
+  if (theFormat != nullptr) {
     if (!theFormat->flagIncludeMutableInformation) {
       return "<br>Weight diagram not drawn to avoid javascript problems "
       "(use command PrintSemisimpleSubalgebras if you want to see the weight diagram). ";
@@ -6156,9 +6158,9 @@ std::string SemisimpleSubalgebras::ToStringAlgebraLink(int ActualIndexSubalgebra
     return "(non-initialized)";
   }
 //  bool shortReportOnly = theFormat == 0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
-  bool useMouseHover = theFormat == 0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
+  bool useMouseHover = theFormat == nullptr ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
   std::stringstream out;
-  bool makeLink = theFormat == 0 ? false : theFormat->flagUseHtmlAndStoreToHD;
+  bool makeLink = theFormat == nullptr ? false : theFormat->flagUseHtmlAndStoreToHD;
   if (this->theSubalgebras.theValues[ActualIndexSubalgebra].flagSystemProvedToHaveNoSolution) {
     makeLink = false;
   }
@@ -6181,9 +6183,9 @@ std::string SemisimpleSubalgebras::ToStringAlgebraLink(int ActualIndexSubalgebra
 
 std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat) const {
   std::stringstream out;
-  bool useLaTeX = theFormat == 0 ? true : theFormat->flagUseLatex;
-  bool useHtml = theFormat == 0 ? true : theFormat->flagUseHTML;
-  bool useMouseHover = theFormat == 0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
+  bool useLaTeX = theFormat == nullptr ? true : theFormat->flagUseLatex;
+  bool useHtml = theFormat == nullptr ? true : theFormat->flagUseHTML;
+  bool useMouseHover = theFormat == nullptr ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
 
   List<DynkinSimpleType> theSimpleTypes;
   this->theWeylNonEmbedded->theDynkinType.GetTypesWithMults(theSimpleTypes);
@@ -6231,7 +6233,7 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
     return "";
   }
   std::stringstream out;
-  bool useMouseHover = theFormat == 0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
+  bool useMouseHover = theFormat == nullptr ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
   if (this->flagCentralizerIsWellChosen && this->centralizerRank != 0 ) {
     out << "<br>Centralizer: ";
     Rational dimToralPartCentralizer = this->centralizerRank;
@@ -6502,10 +6504,10 @@ std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theForm
   if (this->theBasis.size == 0) {
     return "";
   }
-  bool useLaTeX = theFormat == 0 ? true : theFormat->flagUseLatex;
-  bool useHtml = theFormat == 0 ? true : theFormat->flagUseHTML;
-  bool shortReportOnly = theFormat == 0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
-  bool useMouseHover = theFormat == 0 ? true : ((shortReportOnly && !theFormat->flagUseMathSpanPureVsMouseHover) || !theFormat->flagUseHtmlAndStoreToHD);
+  bool useLaTeX = theFormat == nullptr ? true : theFormat->flagUseLatex;
+  bool useHtml = theFormat == nullptr ? true : theFormat->flagUseHTML;
+  bool shortReportOnly = theFormat == nullptr ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
+  bool useMouseHover = theFormat == nullptr ? true : ((shortReportOnly && !theFormat->flagUseMathSpanPureVsMouseHover) || !theFormat->flagUseHtmlAndStoreToHD);
   std::stringstream out;
   out << "<br>Dimension of subalgebra generated by predefined or computed generators: "
   << this->theBasis.size << ". " << "<br>Negative simple generators: ";

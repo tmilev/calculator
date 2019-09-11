@@ -409,7 +409,7 @@ public:
     const coefficient& theRingZero
   );
   void GetVectorsPerpendicularTo(
-    Vectors<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero
+    Vectors<coefficient>& output
   ) {
     int Pivot = - 1;
     if (!this->FindIndexFirstNonZeroCoordinateFromTheLeft(Pivot)) {
@@ -810,9 +810,9 @@ class Vectors: public List<Vector<coefficient> > {
   void SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output);
   void SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex);
   void SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex);
-  void GetGramMatrix(Matrix<coefficient>& output, const Matrix<Rational>* theBilinearForm = 0) const;
+  void GetGramMatrix(Matrix<coefficient>& output, const Matrix<Rational>* theBilinearForm = nullptr) const;
   void GetMatrixRootsToRows(Matrix<Rational>& output) const;
-  void GetOrthogonalComplement(Vectors<coefficient>& output, Matrix<Rational>* theBilinearForm = 0);
+  void GetOrthogonalComplement(Vectors<coefficient>& output, Matrix<Rational>* theBilinearForm = nullptr);
   bool LinSpanContainsVector(
     const Vector<coefficient>& input, Matrix<coefficient>& bufferMatrix, Selection& bufferSelection
   ) const;
@@ -822,20 +822,16 @@ class Vectors: public List<Vector<coefficient> > {
       this->TheObjects[i].MakeEi(theDimension, i);
     }
   }
-  bool LinSpanContainsVector(const Vector<coefficient>& input) const {
-    Matrix<coefficient> buffer;
-    Selection bufferSelection;
-    return this->LinSpanContainsVector(input, buffer, bufferSelection);
-  }
+  bool LinSpanContainsVector(const Vector<coefficient>& input) const;
   static void SelectABasisInSubspace(
     const List<Vector<coefficient> >& input, List<Vector<coefficient> >& output, Selection& outputSelectedPivots
   );
-  int GetRankOfSpanOfElements(Matrix<coefficient>* buffer = 0, Selection* bufferSelection = 0) const;
+  int GetRankOfSpanOfElements(Matrix<coefficient>* buffer = 0, Selection* bufferSelection = nullptr) const;
   static bool ConesIntersect(
     List<Vector<Rational> >& StrictCone,
     List<Vector<Rational> >& NonStrictCone,
-    Vector<Rational>* outputLinearCombo = 0,
-    Vector<Rational>* outputSplittingNormal = 0
+    Vector<Rational>* outputLinearCombo = nullptr,
+    Vector<Rational>* outputSplittingNormal = nullptr
   );
   static bool GetNormalSeparatingCones(
     List<Vector<coefficient> >& coneStrictlyPositiveCoeffs,
@@ -997,45 +993,8 @@ class Vectors: public List<Vector<coefficient> > {
     }
     return - 1;
   }
-  void BeefUpWithEiToLinearlyIndependentBasis(
-    int theDim, const coefficient& ringUnit =(coefficient) 1, const coefficient& ringZero = (coefficient) 0
-  ) {
-    Selection BufferSel;
-    Matrix<coefficient> Buffer;
-    if (this->size != 0 && theDim != this->GetDim()) {
-      crash << "Vector dimension is incorrect. " << crash;
-    }
-    int currentRank = this->GetRankOfSpanOfElements(Buffer, BufferSel);
-    if (currentRank == theDim) {
-      return;
-    }
-    Vector<coefficient> theVect;
-    for (int i = 0; i < theDim && currentRank < theDim; i ++) {
-      theVect.MakeEi(theDim, i);
-      this->AddOnTop(theVect);
-      int candidateRank = this->GetRankOfSpanOfElements(Buffer, BufferSel);
-      if (candidateRank > currentRank) {
-        currentRank = candidateRank;
-      } else {
-        this->size --;
-      }
-    }
-    if (currentRank != theDim) {
-      crash << "Rank does not match dimension. " << crash;
-    }
-  }
-  void ChooseABasis() {
-    Vectors<Rational> output;
-    Matrix<coefficient> tempMat;
-    Selection tempSel;
-    for (int i = 0; i < this->size; i ++) {
-      output.AddOnTop(this->TheObjects[i]);
-      if (output.GetRankOfSpanOfElements(&tempMat, &tempSel) < output.size) {
-        output.RemoveLastObject();
-      }
-    }
-    this->operator=(output);
-  }
+  void BeefUpWithEiToLinearlyIndependentBasis(int theDim);
+  void ChooseABasis();
   static void IntersectTwoLinSpaces(
     const List<Vector<coefficient> >& firstSpace,
     const List<Vector<coefficient> >& secondSpace,

@@ -709,23 +709,23 @@ void logger::flush() {
 }
 
 std::string logger::consoleBlue() {
-  return "\e[1;34m";
+  return "\x1b[1;34m";
 }
 
 std::string logger::consoleYellow() {
-  return "\e[1;33m";
+  return "\x1b[1;33m";
 }
 
 std::string logger::consoleGreen() {
-  return "\e[1;32m";
+  return "\x1b[1;32m";
 }
 
 std::string logger::consoleRed() {
-  return "\e[1;31m";
+  return "\x1b[1;31m";
 }
 
 std::string logger::consoleNormal() {
-  return "\e[0m";
+  return "\x1b[0m";
 }
 
 std::string logger::closeTagConsole() {
@@ -733,7 +733,7 @@ std::string logger::closeTagConsole() {
     return "";
   }
   this->flagTagColorConsoleOpened = false;
-  return "\e[0m";
+  return "\x1b[0m";
 }
 
 std::string logger::closeTagHtml() {
@@ -749,31 +749,31 @@ std::string logger::openTagConsole() {
   out << logger::closeTagConsole();
   switch (this->currentColor) {
     case logger::red:
-      out << "\e[1;31m";
+      out << "\x1b[1;31m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
     case logger::green:
-      out << "\e[1;32m";
+      out << "\x1b[1;32m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
     case logger::yellow:
-      out << "\e[1;33m";
+      out << "\x1b[1;33m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
     case logger::blue:
-      out << "\e[1;34m";
+      out << "\x1b[1;34m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
     case logger::purple:
-      out << "\e[1;35m";
+      out << "\x1b[1;35m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
     case logger::cyan:
-      out << "\e[1;36m";
+      out << "\x1b[1;36m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
     case logger::orange:
-      out << "\e[0;33m";
+      out << "\x1b[0;33m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
     default:

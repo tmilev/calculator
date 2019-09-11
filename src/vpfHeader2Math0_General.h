@@ -267,23 +267,23 @@ class MonomialWrapper {
 
 class MonomialP {
 private:
-  //monbody contains the exponents of the variables.
-  //IMPORTANT. The monBody of a monomial is NOT unique.
-  //Two monomials whose non-zero entries coincide
-  //(but otherwise one monomial might have more entries filled with zeroes)
-  //are considered to be equal.
-  //Therefore special attention must be paid when performing operations with
-  //MonomialP's, especially with operator== and MonomialP::HashFunction!
-  //Please modify this class in accordance with what was just explained.
-  //Note that by the above token I decided to declare operator[] as non-const
-  //function and operator() as a const function but returning a copy of the
-  //underlying element, rather than a reference to the element.
+  // monbody contains the exponents of the variables.
+  // IMPORTANT. The monBody of a monomial is NOT unique.
+  // Two monomials whose non-zero entries coincide
+  // (but otherwise one monomial might have more entries filled with zeroes)
+  // are considered to be equal.
+  // Therefore special attention must be paid when performing operations with
+  // MonomialP's, especially with operator== and MonomialP::HashFunction!
+  // Please modify this class in accordance with what was just explained.
+  // Note that by the above token I decided to declare operator[] as non-const
+  // function and operator() as a const function but returning a copy of the
+  // underlying element, rather than a reference to the element.
   //
-  //IMPORTANT. The default monomial order, implemented by operator>, is the graded lexicographic
-  //last variable strongest order. Other monomial orders are not referred by operator>, but
+  // IMPORTANT. The default monomial order, implemented by operator>, is the graded lexicographic
+  // last variable strongest order. Other monomial orders are not referred by operator>, but
   // by their explicit names.
-  //Note that the MonomialCollection::ToString method uses the FormatExpressions::thePolyMonOrder
-  //to sort monomials when displaying polynomials to the screen.
+  // Note that the MonomialCollection::ToString method uses the FormatExpressions::thePolyMonOrder
+  // to sort monomials when displaying polynomials to the screen.
   List<Rational> monBody;
 public:
   MonomialP(int letterIndex) {
@@ -2599,7 +2599,7 @@ public:
     output.MultiplyBy(other, theCoeff);
   }
   //////////////////////////////////////////////
-  void AssignFloor() const {   
+  void AssignFloor() const {
   }
   void AssignMinPoly(const Matrix<coefficient>& input);
   void AssignCharPoly(const Matrix<coefficient>& input);
@@ -5408,7 +5408,7 @@ public:
   void MakeZn(int theDim);
   void RefineByOtherLattice(const Lattice& other);
   void MakeFromRoots(const Vectors<Rational>& input);
-  Lattice() { 
+  Lattice() {
   }
   Lattice(const Lattice& other) {
     this->operator=(other);
@@ -6092,11 +6092,11 @@ class DynkinSimpleType {
   char theLetter;
   int theRank;
   Rational CartanSymmetricInverseScale;
-  DynkinSimpleType(): theLetter('X'), theRank(- 1), CartanSymmetricInverseScale(0) {   
+  DynkinSimpleType(): theLetter('X'), theRank(- 1), CartanSymmetricInverseScale(0) {
   }
   DynkinSimpleType(char inputChar, int inputRank, const Rational& inputScale = 1) :
     theLetter(inputChar), theRank(inputRank), CartanSymmetricInverseScale(inputScale) {
-   
+
   }
   void MakeAone() {
     this->theLetter = 'A';
@@ -6613,7 +6613,7 @@ class MonomialMatrix {
   }
   MonomialMatrix(): vIndex(- 1), dualIndex(- 1), IsId(false) {
   }
-  MonomialMatrix(int i, int j): vIndex(i), dualIndex(j), IsId(false) {   
+  MonomialMatrix(int i, int j): vIndex(i), dualIndex(j), IsId(false) {
   }
   void operator=(const MonomialMatrix& other) {
     this->vIndex = other.vIndex;

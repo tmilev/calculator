@@ -157,7 +157,7 @@ class ProblemDataAdministrative {
 public:
   MapList<std::string, std::string, MathRoutines::HashString> problemWeightsPerCoursE;
   MapList<std::string, std::string, MathRoutines::HashString> deadlinesPerSection;
-  bool GetWeightFromCoursE(const std::string& theCourseNonURLed, Rational& output, std::string* outputAsGivenByInstructor = 0);
+  bool GetWeightFromCoursE(const std::string& theCourseNonURLed, Rational& output, std::string* outputAsGivenByInstructor = nullptr);
   std::string ToString() const;
 };
 
@@ -245,9 +245,9 @@ public:
   bool StoreProblemDataToDatabaseJSON(std::stringstream* commentsOnFailure);
   std::string GetSelectedRowEntry(const std::string& theKey);
   std::string GetMySQLclauseIdentifyingUserByEmailOrID();
-  bool LoadFromDB(std::stringstream* failureStream, std::stringstream* commentsGeneral = 0);
+  bool LoadFromDB(std::stringstream* failureStream, std::stringstream* commentsGeneral = nullptr);
   bool FetchOneColumn(
-    const std::string& columnNameUnsafe, std::string& outputUnsafe, std::stringstream* failureComments = 0
+    const std::string& columnNameUnsafe, std::string& outputUnsafe, std::stringstream* failureComments = nullptr
   );
   void FetchColumns();
   bool AuthenticateWithUserNameAndPass(std::stringstream* commentsOnFailure);

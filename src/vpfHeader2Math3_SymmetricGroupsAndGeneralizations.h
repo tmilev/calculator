@@ -8,6 +8,7 @@
 #include "vpfHeader2Math8_VectorSpace.h"
 #include "vpfHeader2Math4_Graph.h"
 #include "vpfHeader2Math3_FiniteGroups.h"
+#include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
 static ProjectInformationInstance ProjectInfoVpfSymmetricGroups(
   __FILE__, "Header file, symmetric and related groups. Work in progress."
@@ -120,7 +121,7 @@ public:
 
   int& operator[](int i) const;
   void FromListInt(const List<int>& in, int lastElement = - 1);
-  static void GetPartitions(List<Partition> &out, int n);
+  static void GetPartitions(List<Partition>& out, int n);
   void Transpose();
   void FillTableau(Tableau& out, List<int>& stuffing) const;
   void FillTableauOrdered(Tableau& out) const;
@@ -282,7 +283,7 @@ public:
   }
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
-  std::string ToString(FormatExpressions* format = 0) const;
+  std::string ToString(FormatExpressions* format = nullptr) const;
   friend std::ostream& operator<<(std::ostream& out, const PermutationR2& data) {
     return data.IntoStream(out);
   }
@@ -291,6 +292,7 @@ public:
 template <typename helt, typename kelt>
 class TrivialOuterAutomorphism {
   kelt oa(helt& x, kelt& y) {
+    (void) x;
     kelt z = y;
     return z;
   }
@@ -300,6 +302,7 @@ class TrivialOuterAutomorphism {
     out << "Identity function";
   }
   std::string ToString(FormatExpressions* theFormat = nullptr) const {
+    (void) theFormat;
     std::stringstream ss;
     ss << *this;
     return ss.str();
@@ -377,11 +380,11 @@ public:
     return this->k.IsID() && this->h.IsID();
   }
 
-  std::string ToString(FormatExpressions* format = 0) const {
+  std::string ToString(FormatExpressions* format = nullptr) const {
     std::stringstream out;
     char leftDelimiter = '[';
     char rightDelimiter = ']';
-    if (format != 0) {
+    if (format != nullptr) {
       leftDelimiter ='(';
       rightDelimiter =')';
     }
@@ -561,9 +564,9 @@ public:
     return false;
   }
 
-  std::string ToString(FormatExpressions* format = 0) const {
+  std::string ToString(FormatExpressions* format = nullptr) const {
     std::stringstream out;
-    if (format == 0) {
+    if (format == nullptr) {
       for (int i = 0; i < this->bits.size; i ++) {
         // parentheses are needed because << binds like a bitwise operator
         out << (this->bits[i] ? '1' : '0');
@@ -584,7 +587,7 @@ public:
     this->bits.SetSize(0);
     for (unsigned i = 0; i < in.size(); i ++) {
       if (in[i] == '1') {
-        this->ToggleBit(i);
+        this->ToggleBit(static_cast<int>(i));
       }
     }
   }
@@ -896,9 +899,6 @@ public:
   }
 };
 
-// PermutationR2::bon was never intended to be configured properly everywhere
-// and PermutationR2s returned from here don't have it set
-// is it even a good idea for a PermutationR2 to carry it around?
 class GeneratorPermutationR2sOnIndices {
 public:
   List<int> replacements;
@@ -1170,9 +1170,9 @@ class ElementFiniteGroup: public GroupConjugacyImplementation<ElementFiniteGroup
   void* (*inv)(void*);
 
   ElementFiniteGroup() {
-    this->data = 0;
-    this->mul = 0;
-    this->inv= 0;
+    this->data = nullptr;
+    this->mul = nullptr;
+    this->inv= nullptr;
   }
 
   ElementFiniteGroup operator*(ElementFiniteGroup right) {
@@ -1184,10 +1184,12 @@ class ElementFiniteGroup: public GroupConjugacyImplementation<ElementFiniteGroup
   }
   ElementFiniteGroup Invert() {
     ElementFiniteGroup out;
-    if (inv != NULL) {
+    if (inv != nullptr) {
       out.data = this->inv(this->data);
       return out;
     }
+    crash << "Inversion function not available. " << crash;
+    return out;
   }
   ElementFiniteGroup MakeID(const ElementFiniteGroup& prototype) {
     ElementFiniteGroup out;
@@ -1508,6 +1510,7 @@ void PermutationR2::ActOnTensor(
 
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::PossiblyConjugate(const elementSomeGroup& x, const elementSomeGroup& y) {
+  (void) x, y;
   return true;
 }
 
@@ -1680,11 +1683,11 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelati
   this->ComputeGeneratorCommutationRelations();
   std::string crs = this->generatorCommutationRelations.ToStringPlainText();
   List<char*> rows;
-  int i;
   rows.AddOnTop(&crs[0]);
+  int i;
   while ((i = crs.find('\n')) != - 1) {
-    crs[i] = 0;
-    rows.AddOnTop(&crs[i + 1]);
+    crs[static_cast<unsigned>(i)] = 0;
+    rows.AddOnTop(&crs[static_cast<unsigned>(i) + 1]);
   }
   bool generatorStringsTooLarge = false;
   bool generatorStringsHaveNewline = false;
@@ -1778,15 +1781,15 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPri
 
   // ok print it all up
   for (int i = 0; i < values.size; i ++) {
-    int padn = numpad - numbers[i].length();
+    int padn = numpad - static_cast<signed>(numbers[i].length());
     for (int pp = 0; pp < padn; pp ++) {
       out << ' ';
     }
     out << numbers[i];
     out << ' ';
     out << '[';
-    for (int j = 0; j<values[i].size; j ++) {
-      int padl = cols_per_elt - values[i][j].length();
+    for (int j = 0; j < values[i].size; j ++) {
+      int padl = cols_per_elt - static_cast<int>( values[i][j].length());
       for (int pp = 0; pp < padl; pp ++) {
         out << ' ';
       }
@@ -1851,13 +1854,13 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCCRepsSizes(bool andPrint)
 
   for (int i = 0; i < this->conjugacyClasseS.size; i ++) {
     int pad;
-    pad = numpad-numbers[i].length();
+    pad = numpad - static_cast<int>(numbers[i].length());
     for (int j = 0; j < pad; j ++) {
       out << " ";
     }
     out << numbers[i];
     out << " ";
-    pad = sizepad-sizes[i].length();
+    pad = sizepad - static_cast<int>(sizes[i].length());
     for (int j = 0; j < pad; j ++) {
       out << " ";
     }

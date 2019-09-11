@@ -390,7 +390,7 @@ void rootSubalgebra::PossibleNilradicalComputation(Selection& selKmods, rootSuba
         currentSAList.AddOnTop(newNilradical);
       }
     } else {
-     
+
       //the below commented out code should be incapsulated. It computes whether a given nilradical is a nilradical of a parabolic subalgebra.
       //this task is pushed on the end of the to-do list.
       /* owner.NumConeConditionHoldsBySSpart.TheObjects[indexInOwner] ++;
@@ -4484,7 +4484,7 @@ void coneRelations::AddRelationNoRepetition(coneRelation& input, rootSubalgebras
     }
   }
   this->AddOnTop(input);
-  if (this->flagIncludeCoordinateRepresentation) { 
+  if (this->flagIncludeCoordinateRepresentation) {
   }
 }
 

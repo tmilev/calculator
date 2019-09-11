@@ -7,34 +7,36 @@
 
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 #include "vpfHeader1General4General_Logging_GlobalVariables.h"
+
+extern ProjectInformationInstance projectInfoInstanceCalculatorSystem;
 ProjectInformationInstance projectInfoInstanceCalculatorSystem(__FILE__, "System functions, platform dependent code.");
 
 
-timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
+static timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
 
 int64_t GlobalVariables::GetElapsedMilliseconds() {
-  gettimeofday(&LastMeasureOfCurrentTime, NULL);
+  gettimeofday(&LastMeasureOfCurrentTime, nullptr);
   return (LastMeasureOfCurrentTime.tv_sec - ComputationStartGlobal.tv_sec) * 1000 +
   (LastMeasureOfCurrentTime.tv_usec - ComputationStartGlobal.tv_usec) / 1000 - theGlobalVariables.millisecondOffset;
 }
 
 void InitializeTimeR() {
-  gettimeofday(&ComputationStartGlobal, NULL);
+  gettimeofday(&ComputationStartGlobal, nullptr);
 }
 
 int GlobalVariables::GetGlobalTimeInSeconds() {
-  time_t result = time(0);
-  return (int) result;
+  time_t result = time(nullptr);
+  return static_cast<int>(result);
 }
 
 void GlobalVariables::FallAsleep(int microseconds) {
-  usleep(microseconds);
+  usleep(static_cast<useconds_t>(microseconds));
 }
 
 class TimerThreadData{
 public:
-  int elapsedTimeInMilliseconds;
-  int elapsedComputationTimeInMilliseconds;
+  int64_t elapsedTimeInMilliseconds;
+  int64_t elapsedComputationTimeInMilliseconds;
   int counter ;
   int intervalBetweenChecksInMilliseconds;
 //  ThreadWrapper theThread;
@@ -147,7 +149,7 @@ bool TimerThreadData::HandleComputationTimeout() {
     return false;
   }
   MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
-  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection == 0) {
+  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection == nullptr) {
     return false;
   }
   if (theGlobalVariables.flagOutputTimedOut) {
@@ -168,7 +170,7 @@ bool TimerThreadData::HandlePingServerIamAlive() {
   if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing) {
     return true;
   }
-  if (theGlobalVariables.WebServerTimerPing == 0) {
+  if (theGlobalVariables.WebServerTimerPing == nullptr) {
     return false;
   }
   theGlobalVariables.WebServerTimerPing(this->elapsedTimeInMilliseconds);
@@ -229,7 +231,7 @@ std::string CallSystemWrapperReturnStandardOutput(const std::string& inputComman
   char buffer[bufferSize];
   std::string result = "";
   while (!feof(pipe.get())) {
-    if (fgets(buffer, bufferSize, pipe.get()) != 0) {
+    if (fgets(buffer, bufferSize, pipe.get()) != nullptr) {
       result += buffer;
     }
   }

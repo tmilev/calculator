@@ -70,7 +70,7 @@ public:
   }
   ~MutexLockGuard() {
     this->theMutex->UnlockMe();
-    this->theMutex = 0;
+    this->theMutex = nullptr;
   }
 };
 

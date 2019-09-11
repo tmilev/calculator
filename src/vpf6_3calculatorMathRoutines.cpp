@@ -8480,18 +8480,19 @@ bool CalculatorFunctionsGeneral::innerCrash(Calculator& theCommands, const Expre
   crash << "This is a test of the crashing mechanism. "
   << "If you're admin, check out the <a href=\"/LogFiles/crashes/\" target=\"_blank\">"
   << "crash report folder<a> [requires admin access]." << crash;
-  return output.AssignValue((std::string) "Crashed succesfully", theCommands);
+  return output.AssignValue(std::string("Crashed succesfully"), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerStopServer(Calculator& theCommands, const Expression& input, Expression& output) {
+  (void) input;
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerStopServer");
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
     return output.MakeError("Stop server function allowed to logged-in admins only. ", theCommands);
   }
-  logWorker << "debug: STOOOOOOOOOOOOOOOOOOOOOOOOOOOOOPING";
+  logWorker << "Stopping server as requested. ";
   theGlobalVariables.flagStopNeeded = true;
   theCommands.flagAbortComputationASAP = true;
-  return output.AssignValue((std::string) "Stopping.", theCommands);
+  return output.AssignValue(std::string("Stopping."), theCommands);
 }
 
 #include <vector>
@@ -8510,7 +8511,7 @@ bool CalculatorFunctionsGeneral::innerCrashByListOutOfBounds(
   theVector.resize(0);
   theVector[1] = 1;
   theList[1] = 1;
-  return output.AssignValue((std::string) "Crashing: list out of bounds.", theCommands);
+  return output.AssignValue(std::string("Crashing: list out of bounds."), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds(

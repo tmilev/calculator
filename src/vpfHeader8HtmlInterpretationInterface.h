@@ -3,6 +3,7 @@
 #ifndef vpfHeaderHtmlInterpretationInterfaceAlreadyDefined
 #define vpfHeaderHtmlInterpretationInterfaceAlreadyDefined
 #include "vpfMacros.h"
+#include "vpfHeader1General0_General.h"
 #include <ctime>
 
 class JSData;

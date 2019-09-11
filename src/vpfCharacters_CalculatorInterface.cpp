@@ -11,7 +11,7 @@ static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP
 template<>
 List<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >() {
-  return 0;
+  return nullptr;
 }
 
 bool WeylGroupData::CheckConsistency() const {
@@ -52,7 +52,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckAllSimp
   return true;
 }
 
-template <typename somegroup, typename coefficient>
+/*template <typename somegroup, typename coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckRepIsMultiplicativelyClosed() {
   HashedList<Matrix<Rational> > tempList;
   tempList.AddOnTop(this->theElementImages);
@@ -74,6 +74,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckRepIsMu
     }
   }
 }
+*/
 
 /*
 template <typename somegroup, typename coefficient>
@@ -316,7 +317,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
   List<char> letters;
   List<int> ranks;
   WeylGroupData& WD = *(G.generators[0].owner);
-  WD.theDynkinType.GetLettersTypesMults(&letters,&ranks,NULL);
+  WD.theDynkinType.GetLettersTypesMults(&letters, &ranks, nullptr);
   // When WeylGroupRepresentation is merged with GroupRepresentation,
   // and WeylGroupData split from FiniteGroup<ElementWeylGroup<WeylGroup> >
   // theRepresentations will be this->theGroup->irreps
@@ -437,8 +438,8 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   Vectors<Rational> theHWs;
   theHWs.SetSize(input.children.size - 2);
   bool isGood = true;
-  for (int i = 2; i < input.children.size; i ++) {
-    if (!theCommands.GetVectoR<Rational>(input[i], theHWs[i - 2], 0, theSSalgebra->GetRank())) {
+  for (int i = 2; i < input.size(); i ++) {
+    if (!theCommands.GetVectoR<Rational>(input[i], theHWs[i - 2], nullptr, theSSalgebra->GetRank())) {
       isGood = false;
       break;
     }
@@ -446,7 +447,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   if (!isGood && input.children.size == 3) {
     //stOutput << "here be i";
     Matrix<Rational> theHWsMatForm;
-    if (theCommands.GetMatrix(input[2], theHWsMatForm, 0, theSSalgebra->GetRank())) {
+    if (theCommands.GetMatrix(input[2], theHWsMatForm, nullptr, theSSalgebra->GetRank())) {
       theHWsMatForm.GetVectorsFromRows(theHWs);
       isGood = true;
     }
@@ -546,10 +547,10 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize");
   //double startTimeForDebug= theGlobalVariables.GetElapsedSeconds();
-  SemisimpleLieAlgebra* theSSalgebra = 0;
+  SemisimpleLieAlgebra* theSSalgebra = nullptr;
   Vector<Rational> theWeightRat;
   Expression theContextE;
-  if (theCommands.GetTypeWeight<Rational>(theCommands, input, theWeightRat, theContextE, theSSalgebra, 0)) {
+  if (theCommands.GetTypeWeight<Rational>(theCommands, input, theWeightRat, theContextE, theSSalgebra, nullptr)) {
     Rational result = theSSalgebra->theWeyl.GetOrbitSize(theWeightRat);
     return output.AssignValue(result, theCommands);
   }
@@ -570,7 +571,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   if (!input.IsListNElements(3)) {
     return output.MakeError("innerWeylOrbit takes two arguments", theCommands);
   }
-  SemisimpleLieAlgebra* theSSalgebra = 0;
+  SemisimpleLieAlgebra* theSSalgebra = nullptr;
   Vector<Polynomial<Rational> > theWeight;
   Expression theContextE;
   if (!theCommands.GetTypeWeight(
@@ -658,7 +659,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
     }
   }
   integralPositiveRootReflectionGraph.CheckConsistency();
-  out << integralPositiveRootReflectionGraph.ToStringPsTricks(0);
+  out << integralPositiveRootReflectionGraph.ToStringPsTricks(nullptr);
   for (int i = 0; i < outputOrbit.size; i ++) {
     theFormat.simpleRootLetter = "\\alpha";
     theFormat.fundamentalWeightLetter = "\\psi";
@@ -1403,7 +1404,7 @@ std::string KostkaNumber::ToString() {
 bool KostkaNumber::initTableaux(std::stringstream* comments) {
   for (int i = 0; i < this->partition.size - 1; i ++) {
     if (this->partition[i] < this->partition[i + 1]) {
-      if (comments != 0) {
+      if (comments != nullptr) {
         *comments << "Partition is supposed to be a non-decreasing sequence of integers, instead it is: "
         << this->partition;
       }
@@ -1415,7 +1416,7 @@ bool KostkaNumber::initTableaux(std::stringstream* comments) {
   for (int i = 0; i < this->tuple.size; i ++) {
     this->sumTuple += this->tuple[i];
     if (this->sumTuple > 10000000 || this->tuple[i] > 10000000 || this->tuple[i] < 0) {
-      if (comments != 0) {
+      if (comments != nullptr) {
         *comments << "Failed to compute Kostka number: the tuple "
         << this->tuple << " is too large or negative. ";
       }
@@ -1425,7 +1426,7 @@ bool KostkaNumber::initTableaux(std::stringstream* comments) {
   for (int i = 0; i < this->partition.size; i ++) {
     this->sumPartition += this->partition[i];
     if (this->sumPartition > 10000000 || this->partition[i] > 10000000 || this->partition[i] < 0) {
-      if (comments != 0) {
+      if (comments != nullptr) {
         *comments << "Failed to compute Kostka number: the partition: "
         << this->partition << " is too large or negative. ";
       }
@@ -1475,7 +1476,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
     for (int i = 0; i < theSel.Multiplicities.size; i ++) {
       ancestor.partition[i] -= theSel.Multiplicities[i];
     }
-    if (KNcache != 0) {
+    if (KNcache != nullptr) {
       int ancestorIndex = KNcache->GetIndex(ancestor);
       if (ancestorIndex != - 1) {
         ancestor = KNcache->GetElement(ancestorIndex);
@@ -1641,7 +1642,7 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
   MacroRegisterFunctionWithName("KostkaNumber::ComputeTypeBParabolicSignMultiplicity");
   int rank = leftPartition.n + rightPartition.n;
   int BcomponentSize = rank - parabolicPartition.n;
-  if (comments != 0) {
+  if (comments != nullptr) {
     *comments << "<br>dim Hom_P(Sign P_{("
     << parabolicPartition.p << "), ("
     << BcomponentSize << ")}, V_{"
@@ -1669,13 +1670,13 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
       complementSelection[k] = parabolicPartition.p[k] - theSelection.Multiplicities[k];
     }
     leftKN.tuple = theSelection.Multiplicities;
-    leftKN.Compute(&KNcache, 0);
+    leftKN.Compute(&KNcache, nullptr);
     rightKN.tuple = complementSelection;
     rightKN.tuple.AddOnTop(BcomponentSize);
-    rightKN.Compute(&KNcache, 0);
+    rightKN.Compute(&KNcache, nullptr);
     result += leftKN.value * rightKN.value;
   } while (theSelection.IncrementReturnFalseIfPastLast());
-  if (comments != 0) {
+  if (comments != nullptr) {
     *comments << result.ToString();
   }
   return result;
@@ -1835,17 +1836,19 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNum
     out << KostkaNumber::GetTypeBParabolicSignMultiplicityTable(rank);
   }
   if (type == 'A') {
-    return theCommands << "Not implemented yet.";
-    int permutationSize = rank + 1;
-    List<Partition> thePartitions, partitionsTransposed;
-    Partition::GetPartitions(thePartitions, permutationSize);
-    partitionsTransposed.SetSize(thePartitions.size);
-    for (int i = 0; i < thePartitions.size; i ++) {
-      partitionsTransposed[i] = thePartitions[i];
-      partitionsTransposed[i].Transpose();
-      out << "<br>Partition: " << thePartitions[i].ToString()
-      << ", transposed: " << partitionsTransposed[i].ToString();
+    if ((false)) {
+      int permutationSize = rank + 1;
+      List<Partition> thePartitions, partitionsTransposed;
+      Partition::GetPartitions(thePartitions, permutationSize);
+      partitionsTransposed.SetSize(thePartitions.size);
+      for (int i = 0; i < thePartitions.size; i ++) {
+        partitionsTransposed[i] = thePartitions[i];
+        partitionsTransposed[i].Transpose();
+        out << "<br>Partition: " << thePartitions[i].ToString()
+        << ", transposed: " << partitionsTransposed[i].ToString();
+      }
     }
+    return theCommands << "Not implemented yet.";
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -1876,7 +1879,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(
     finalSubGroups.Reserve(allRootSubgroups.size);
     Pair<std::string, List<Rational>, MathRoutines::HashString> currentTauSig;
     for (int j = 0; j < 3; j ++) {
-      List<SubgroupDataRootReflections>* currentSGs = 0;
+      List<SubgroupDataRootReflections>* currentSGs = nullptr;
       if (j == 0) {
         currentSGs = &parabolicSubgroupS;
       }
@@ -1922,7 +1925,7 @@ bool CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup(Calculator& theComm
     return theCommands << "<hr>Failed to get Dynkin type from argument. " << input[1].ToString();
   }
   Matrix<Rational> theMat;
-  if (!input[2].IsMatrixGivenType<Rational>(0, 0, &theMat)) {
+  if (!input[2].IsMatrixGivenType<Rational>(nullptr, nullptr, &theMat)) {
     if (!theCommands.GetMatrix(input[2], theMat)) {
       return theCommands << "<hr>Failed to get matrix from argument. " << input[2].ToString();
     }
@@ -1966,7 +1969,7 @@ public:
   SemisimpleLieAlgebra* owner;
   Selection rootSel;
   bool flagDeallocated;
-  MonomialMacdonald():owner(0), flagDeallocated(false) {
+  MonomialMacdonald(): owner(nullptr), flagDeallocated(false) {
   }
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
   bool CheckConsistency() {
@@ -1979,13 +1982,16 @@ public:
   static unsigned int HashFunction(const MonomialMacdonald& input) {
     return input.rootSel.HashFunction();
   }
+  void operator=(const MonomialMacdonald& other) {
+    this->owner = other.owner;
+    this->rootSel = other.rootSel;
+    this->flagDeallocated = other.flagDeallocated;
+  }
   bool operator==(const MonomialMacdonald& other) const;
   void MakeFromRootSubsystem(const Vectors<Rational>& inputRoots, SemisimpleLieAlgebra& inputOwner);
   void ActOnMeSimpleReflection(int indexSimpleReflection, Rational& outputMultiple);
   void GenerateMyOrbit(HashedList<MonomialMacdonald>& output);
-  ~MonomialMacdonald() {
-    this->flagDeallocated = true;
-  }
+  ~MonomialMacdonald();
 };
 
 std::string MonomialMacdonald::ToString(FormatExpressions* theFormat) const {
@@ -2006,6 +2012,10 @@ std::string MonomialMacdonald::ToString(FormatExpressions* theFormat) const {
 
 bool MonomialMacdonald::operator==(const MonomialMacdonald& other) const {
   return this->owner == other.owner && this->rootSel == other.rootSel;
+}
+
+MonomialMacdonald::~MonomialMacdonald() {
+  this->flagDeallocated = true;
 }
 
 void MonomialMacdonald::GenerateMyOrbit(HashedList<MonomialMacdonald>& output) {
@@ -2065,7 +2075,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerMacdonaldPolys");
   //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
   //input[1] and input[2];
-  SemisimpleLieAlgebra* thePointer = 0;
+  SemisimpleLieAlgebra* thePointer = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, input, thePointer
   )) {
@@ -2208,7 +2218,7 @@ bool CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral(
     return theCommands << "Failed to get matrix of element " << theElt.ToString()
     << " from representation: " << theRep.ToString();
   }
-  return output.AssignMatrix(result, theCommands, 0, false);
+  return output.AssignMatrix(result, theCommands, nullptr, false);
 }
 
 bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(

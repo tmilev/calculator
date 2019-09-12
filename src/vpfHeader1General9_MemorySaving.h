@@ -4,7 +4,7 @@
 #define vpfHeader9MemorySaving_h_already_included
 
 #include "vpfMacros.h"
-#include "vpfHeader1General2Multitasking.h"
+#include "general_2_list_references.h"
 
 static ProjectInformationInstance vpfHeader9MemorySaving(__FILE__, "Header, memory some basic templates. ");
 

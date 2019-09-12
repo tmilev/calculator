@@ -21,67 +21,6 @@ INCLUDEPATH+=/usr/local/include/libmongoc-1.0
 INCLUDEPATH+=/usr/local/include/libbson-1.0
 
 HEADERS += \
-    source_code_formatter.h \
-    string_constants.h \
-    vpf.h \
-    vpfFiniteFields.h \
-    vpfHeader1General0_General.h \
-    vpfHeader1General1_ListReferences.h \
-    vpfHeader1General2Multitasking.h \
-    vpfHeader1General3_Test.h \
-    vpfHeader1General4General_Logging_GlobalVariables.h \
-    vpfHeader1General5TimeDate.h \
-    vpfHeader1General6Maps.h \
-    vpfHeader1General7FileOperations_Encodings.h \
-    vpfHeader1General8DatabaseSystemIndependent.h \
-    vpfHeader2Math01_LargeIntArithmetic.h \
-    vpfHeader2Math02_Vectors.h \
-    vpfHeader2Math0_General.h \
-    vpfHeader2Math10_LaTeXRoutines.h \
-    vpfHeader2Math11_EllipticCurves.h \
-    vpfHeader2Math15_UniversalEnveloping.h \
-    vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h \
-    vpfHeader2Math1_3SemisimpleLieSubalgebras.h \
-    vpfHeader2Math1_LieTheoryExtras.h \
-    vpfHeader2Math1_SemisimpleLieAlgebras.h \
-    vpfHeader2Math2_AlgebraicNumbers.h \
-    vpfHeader2Math3_FiniteGroups.h \
-    vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h \
-    vpfHeader2Math4_5_Tree.h \
-    vpfHeader2Math4_Graph.h \
-    vpfHeader2Math5_SubsetsSelections.h \
-    vpfHeader2Math6_ModulesSSLieAlgebras.h \
-    vpfHeader2Math7_PackedVector.h \
-    vpfHeader2Math8_VectorSpace.h \
-    vpfHeader2Math9DrawingVariables.h \
-    vpfHeader3Calculator0_Interface.h \
-    vpfHeader3Calculator1_InnerTypedFunctions.h \
-    vpfHeader3Calculator2_InnerFunctions.h \
-    vpfHeader3Calculator3_WeylGroupCharacters.h \
-    vpfHeader3Calculator4HtmlFunctions.h \
-    vpfHeader3Calculator5_Database_Mongo.h \
-    vpfHeader4SystemFunctionsGlobalObjects.h \
-    vpfHeader5Crypto.h \
-    vpfHeader6WebServerInterprocessLogistics.h \
-    vpfHeader7DatabaseInterface.h \
-    vpfHeader7DatabaseInterface_Mongodb.h \
-    vpfHeader8HtmlInterpretation.h \
-    vpfHeader8HtmlInterpretationInterface.h \
-    vpfHeader8HtmlSnippets.h \
-    vpfImplementationHeader2Math051_PolynomialComputations_Basic.h \
-    vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h \
-    vpfImplementationHeader2Math0_General.h \
-    vpfImplementationHeader2Math11_EllipticCurves.h \
-    vpfImplementationHeader2Math15_UniversalEnveloping.h \
-    vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h \
-    vpfImplementationHeader2Math3_FiniteGroups.h \
-    vpfImplementationHeader2Math3_WeylAlgebra.h \
-    vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h \
-    vpfImplementationHeader2Math7_PackedVector.h \
-    vpfJson.h \
-    vpfMacros.h \
-    vpfPackedVector.h \
-    webserver.h \
 #    boringssl/crypto/asn1/asn1_locl.h \
 #    boringssl/crypto/bio/internal.h \
 #    boringssl/crypto/bytestring/internal.h \
@@ -261,28 +200,18 @@ HEADERS += \
 #    boringssl/tool/transport_common.h \
     source_code_formatter.h \
     string_constants.h \
-    calculator.h \
+    transport_layer_security.h \
     vpfFiniteFields.h \
-    general_1_lists.h \
-    vpfHeader1General1_ListReferences.h \
-    vpfHeader1General2Multitasking.h \
-    vpfHeader1General3_Test.h \
-    vpfHeader1General4General_Logging_GlobalVariables.h \
     vpfHeader1General5TimeDate.h \
-    vpfHeader1General6Maps.h \
-    vpfHeader1General7FileOperations_Encodings.h \
-    vpfHeader1General8DatabaseSystemIndependent.h \
-    vpfHeader2Math01_LargeIntArithmetic.h \
-    vpfHeader2Math02_Vectors.h \
+    vpfHeader1General9_MemorySaving.h \
     vpfHeader2Math0_General.h \
-    vpfHeader2Math10_LaTeXRoutines.h \
-    vpfHeader2Math11_EllipticCurves.h \
-    vpfHeader2Math15_UniversalEnveloping.h \
     vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h \
     vpfHeader2Math1_3SemisimpleLieSubalgebras.h \
+    vpfHeader2Math01_LargeIntArithmetic.h \
     vpfHeader2Math1_LieTheoryExtras.h \
     vpfHeader2Math1_SemisimpleLieAlgebras.h \
     vpfHeader2Math2_AlgebraicNumbers.h \
+    vpfHeader2Math02_Vectors.h \
     vpfHeader2Math3_FiniteGroups.h \
     vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h \
     vpfHeader2Math4_5_Tree.h \
@@ -292,6 +221,9 @@ HEADERS += \
     vpfHeader2Math7_PackedVector.h \
     vpfHeader2Math8_VectorSpace.h \
     vpfHeader2Math9DrawingVariables.h \
+    vpfHeader2Math10_LaTeXRoutines.h \
+    vpfHeader2Math11_EllipticCurves.h \
+    vpfHeader2Math15_UniversalEnveloping.h \
     vpfHeader3Calculator0_Interface.h \
     vpfHeader3Calculator1_InnerTypedFunctions.h \
     vpfHeader3Calculator2_InnerFunctions.h \
@@ -306,23 +238,21 @@ HEADERS += \
     vpfHeader8HtmlInterpretation.h \
     vpfHeader8HtmlInterpretationInterface.h \
     vpfHeader8HtmlSnippets.h \
-    vpfImplementationHeader2Math051_PolynomialComputations_Basic.h \
-    vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h \
     vpfImplementationHeader2Math0_General.h \
-    vpfImplementationHeader2Math11_EllipticCurves.h \
-    vpfImplementationHeader2Math15_UniversalEnveloping.h \
     vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h \
     vpfImplementationHeader2Math3_FiniteGroups.h \
     vpfImplementationHeader2Math3_WeylAlgebra.h \
     vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h \
     vpfImplementationHeader2Math7_PackedVector.h \
+    vpfImplementationHeader2Math11_EllipticCurves.h \
+    vpfImplementationHeader2Math15_UniversalEnveloping.h \
+    vpfImplementationHeader2Math051_PolynomialComputations_Basic.h \
+    vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h \
     vpfJson.h \
     vpfMacros.h \
     vpfPackedVector.h \
-    webserver.h \
-    transport_layer_security.h \
-    abstract_syntax_notation_one_decoder.h \
-    vpfHeader1General9_MemorySaving.h
+    webserver.h
+
 
 SOURCES += \
     database.cpp \
@@ -929,3 +859,47 @@ SOURCES += \
 #    boringssl/third_party/sike/sike.c \
 #    boringssl/crypto/err/err_data.c \
 #    boringssl/crypto/err/err_data.c \
+    source_code_formatter.cpp \
+    string_constants.cpp \
+    test.cpp \
+    transport_layer_security.cpp \
+    transport_layer_security_implementation.cpp \
+    transport_layer_security_openssl.cpp \
+    transport_layer_security_test.cpp \
+    vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
+    vpf6.cpp \
+    vpf6_3calculatorMathRoutines.cpp \
+    vpf6_4ExpressionsImplementation.cpp \
+    vpf6_35calculatorMathRoutinesPart2.cpp \
+    vpf6_36calculatorHtmlRoutines.cpp \
+    vpf6_37calculatorroutines.cpp \
+    vpf6_38LaTeXRoutines.cpp \
+    vpf7.cpp \
+    vpf8.cpp \
+    vpf9.cpp \
+    vpf9_1.cpp \
+    vpf9_2.cpp \
+    vpf9_3RationalRadicals.cpp \
+    vpf9_4SemisimpleLieAlgebras.cpp \
+    vpf9_5SemisimpleLieAlgebras_RootSubalgebras.cpp \
+    vpf9_6SemisimpleLieSubAlgebras.cpp \
+    vpf9_7floating_point_routines.cpp \
+    vpf9_9SystemFunctions.cpp \
+    vpf9_85TimeDateWrappers.cpp \
+    vpf9_92multitasking.cpp \
+    vpf99_HardcodedData.cpp \
+    vpfCharacters.cpp \
+    vpfCharacters_CalculatorInterface.cpp \
+    vpfCrypto.cpp \
+    vpfCrypto_AES.cpp \
+    vpfCrypto_ripemd.cpp \
+    vpfCrypto_sha3.cpp \
+    vpfEllipticCurves.cpp \
+    vpfFiniteFields.cpp \
+    vpfGraph.cpp \
+    vpfHtmlInterpretationInterface.cpp \
+    vpfHtmlSnippets.cpp \
+    vpfJson.cpp \
+    vpfWebServerInterProcessLogistics.cpp \
+    web-routines-1.cpp \
+    webserver.cpp

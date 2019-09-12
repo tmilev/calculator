@@ -1,6 +1,6 @@
 #include "transport_layer_security.h"
-#include "vpfHeader1General4General_Logging_GlobalVariables.h"
-#include "vpfHeader1General7FileOperations_Encodings.h"
+#include "general_4_logging_global_variables.h"
+#include "general_7_file_operations_encodings.h"
 #include "vpfHeader5Crypto.h"
 
 #include <unistd.h> //<- close, open defined here

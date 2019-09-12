@@ -2,7 +2,7 @@
 //For additional information refer to the file "calculator.h".
 #ifndef vpfHeader1_HeaderLaTeXRoutines
 #define vpfHeader1_HeaderLaTeXRoutines
-#include "vpfHeader1General1_ListReferences.h"
+#include "general_2_list_references.h"
 
 static ProjectInformationInstance ProjectInfovpfHeader_HeaderLaTeXRoutines(__FILE__, "Header, LaTeX routines. ");
 

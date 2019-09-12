@@ -798,7 +798,7 @@ bool FileOperations::LoadFileToStringUnsecure(
   return true;
 }
 
-#include "vpfHeader1General2Multitasking.h"
+#include "general_2_list_references.h"
 
 MapList<std::string, std::string, MathRoutines::HashString>&
 FileOperations::FolderVirtualLinksNonSensitive() {

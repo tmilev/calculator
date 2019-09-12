@@ -8,7 +8,7 @@
 #include "vpfHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math4_Graph.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
-#include "vpfHeader1General1_ListReferences.h"
+#include "general_2_list_references.h"
 #include "vpfHeader2Math1_3SemisimpleLieSubalgebras.h"
 #include "vpfHeader2Math15_UniversalEnveloping.h"
 #include "vpfHeader2Math6_ModulesSSLieAlgebras.h"

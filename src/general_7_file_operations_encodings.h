@@ -4,8 +4,8 @@
 #define vpfHeader1General7FileOperations_Encodings_already_included
 
 #include "general_1_lists.h"
-#include "vpfHeader1General1_ListReferences.h"
-#include "vpfHeader1General6Maps.h"
+#include "general_2_list_references.h"
+#include "general_6_maps.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1General7FileOperations_EncodingsHeader1instance(
   __FILE__, "Header, file routines, encodings and more. "
 );

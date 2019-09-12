@@ -1,6 +1,6 @@
 #ifndef VPFHEADER7DATABASEINTERFACE_MONGODB_H
 #define VPFHEADER7DATABASEINTERFACE_MONGODB_H
-#include "vpfHeader1General8DatabaseSystemIndependent.h"
+#include "general_8_database_system_independent.h"
 
 static ProjectInformationInstance ProjectInfoVpfHEADER7DATABASEINTERFACE_MONGODB_H(__FILE__, "MongoDB interface header.");
 

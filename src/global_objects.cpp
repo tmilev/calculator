@@ -4,7 +4,7 @@
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 #include "webserver.h"
 #include "vpfHeader3Calculator0_Interface.h"
-#include "vpfHeader1General4General_Logging_GlobalVariables.h"
+#include "general_4_logging_global_variables.h"
 #include "vpfHeader1General5TimeDate.h"
 
 ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global objects");

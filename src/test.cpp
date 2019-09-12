@@ -16,7 +16,7 @@
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
-#include "vpfHeader1General3_Test.h"
+#include "general_3_test.h"
 #include "vpfImplementationHeader2Math0_General.h"
 
 /*

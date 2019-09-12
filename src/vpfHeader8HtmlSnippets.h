@@ -3,8 +3,8 @@
 #ifndef vpfHeaderHtmlSnippetsAlreadyDefined
 #define vpfHeaderHtmlSnippetsAlreadyDefined
 #include "vpfMacros.h"
-#include "vpfHeader1General6Maps.h"
-#include "vpfHeader1General1_ListReferences.h"
+#include "general_6_maps.h"
+#include "general_2_list_references.h"
 
 static ProjectInformationInstance ProjectInfoHeaderHtmlSnippets(__FILE__, "Html snippets header.");
 

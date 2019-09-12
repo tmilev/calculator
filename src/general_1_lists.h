@@ -4,7 +4,7 @@
 #define vpfHeader1_h_already_included
 
 #include "vpfMacros.h"
-#include "vpfHeader1General2Multitasking.h"
+#include "general_3_multitasking.h"
 #include <algorithm>
 #include <string.h>
 
@@ -637,7 +637,7 @@ void ListLight<Object>::SetSize(int theSize) {
   if (theSize < 0) {
     theSize = 0;
   }
-  if (theSize == 0) {   
+  if (theSize == 0) {
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter -= this->size;
   ParallelComputing::CheckPointerCounters();

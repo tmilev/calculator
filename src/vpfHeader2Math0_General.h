@@ -3,11 +3,11 @@
 #ifndef vpfHeader1_2_h_already_included
 #define vpfHeader1_2_h_already_included
 
-#include "vpfHeader1General4General_Logging_GlobalVariables.h"
+#include "general_4_logging_global_variables.h"
 #include "vpfHeader2Math01_LargeIntArithmetic.h"
 #include "vpfHeader2Math02_Vectors.h"
 #include "vpfHeader2Math5_SubsetsSelections.h"
-#include "vpfHeader1General7FileOperations_Encodings.h"
+#include "general_7_file_operations_encodings.h"
 #include "vpfHeader8HtmlSnippets.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");

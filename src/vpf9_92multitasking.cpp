@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "vpfHeader2Math0_General.h"
-#include "vpfHeader1General4General_Logging_GlobalVariables.h"
+#include "general_4_logging_global_variables.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 #include <assert.h>
 #include <mutex>

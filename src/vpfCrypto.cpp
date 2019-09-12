@@ -1,7 +1,7 @@
 #include "vpfHeader5Crypto.h"
 #include "vpfImplementationHeader2Math0_General.h"
-#include "vpfHeader1General1_ListReferences.h"
-#include "vpfHeader1General7FileOperations_Encodings.h"
+#include "general_2_list_references.h"
+#include "general_7_file_operations_encodings.h"
 #include "vpfJson.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
 #include <iomanip>

@@ -3,10 +3,9 @@
 #ifndef vpfHeaderLoggingGlobalVars_already_defined
 #define vpfHeaderLoggingGlobalVars_already_defined
 #include "general_1_lists.h"
-#include "vpfHeader1General1_ListReferences.h"
-#include "vpfHeader1General6Maps.h"
-#include "vpfHeader1General8DatabaseSystemIndependent.h"
-#include "vpfHeader1General8DatabaseSystemIndependent.h"
+#include "general_2_list_references.h"
+#include "general_6_maps.h"
+#include "general_8_database_system_independent.h"
 #include <thread>
 
 static ProjectInformationInstance projectInfoHeaderLoggingRoutines(__FILE__, "Logging routines, global variables. ");

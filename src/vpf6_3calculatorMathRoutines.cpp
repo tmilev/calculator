@@ -1,18 +1,18 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "calculator.h"
-#include "calculator_3_inner_functions.h"
-#include "math_1_general_implementation.h"
-#include "math_extra_17_Weyl_algebras_implementation.h"
-#include "math_1_general_polynomial_computations_basic_implementation.h"
-#include "math_1_general_polynomial_computations_advanced_implementation.h"
-#include "math_extra_10_universal_enveloping_implementation.h"
-#include "math_extra_4_finite_groups_implementation.h"
-#include "math_extra_16_modules_semisimple_Lie_algebras_implementation.h"
+#include "calculator_inner_functions.h"
+#include "math_general_implementation.h"
+#include "math_extra_Weyl_algebras_implementation.h"
+#include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_extra_universal_enveloping_implementation.h"
+#include "math_extra_finite_groups_implementation.h"
+#include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
 #include "vpfHeader5Crypto.h"
-#include "math_extra_1_semisimple_Lie_algebras_implementation.h" // undefined reference to `charSSAlgMod<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, charSSAlgMod<RationalFunctionOld>&, branchingData&, GlobalVariables&)'
+#include "math_extra_semisimple_Lie_algebras_implementation.h" // undefined reference to `charSSAlgMod<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, charSSAlgMod<RationalFunctionOld>&, branchingData&, GlobalVariables&)'
 #include "vpfHeader8HtmlSnippets.h"
-#include "math_extra_11_latex_routines.h"
+#include "math_extra_latex_routines.h"
 #include "source_code_formatter.h"
 #include <cmath>
 

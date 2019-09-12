@@ -1,13 +1,13 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "calculator_3_inner_functions.h"
-#include "calculator_5_html_functions.h"
+#include "calculator_inner_functions.h"
+#include "calculator_html_functions.h"
 #include "vpfHeader7DatabaseInterface.h"
-#include "general_5_time_date.h"
+#include "general_time_date.h"
 #include "vpfHeader8HtmlInterpretation.h"
 #include "vpfHeader8HtmlSnippets.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
-#include "math_extra_11_latex_routines.h"
+#include "math_extra_latex_routines.h"
 #include <iomanip>
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
 #include "string_constants.h"

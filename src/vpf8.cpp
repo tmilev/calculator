@@ -1,9 +1,9 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "general_1_lists.h"
-#include "math_1_general_implementation.h"
-#include "math_1_general.h"
-#include "math_extra_3_algebraic_numbers.h"
+#include "general_lists.h"
+#include "math_general_implementation.h"
+#include "math_general.h"
+#include "math_extra_algebraic_numbers.h"
 
 ProjectInformationInstance ProjectInfoVpf8cpp(__FILE__, "Math routines implementation. ");
 

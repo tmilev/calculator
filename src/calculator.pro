@@ -200,53 +200,53 @@ HEADERS += \
 #    boringssl/tool/transport_common.h
     abstract_syntax_notation_one_decoder.h \
     calculator.h \
-    calculator_1_interface.h \
-    calculator_2_inner_typed_functions.h \
-    calculator_3_inner_functions.h \
-    calculator_4_Weyl_group_characters.h \
-    calculator_5_html_functions.h \
-    calculator_6_database_mongo.h \
-    general_1_lists.h \
-    general_2_list_references.h \
-    general_3_multitasking.h \
-    general_4_logging_global_variables.h \
-    general_5_time_date.h \
-    general_6_maps.h \
-    general_7_file_operations_encodings.h \
-    general_8_database_system_independent.h \
-    general_9_memory_saving.h \
-    general_10_test.h \
+    calculator_interface.h \
+    calculator_inner_typed_functions.h \
+    calculator_inner_functions.h \
+    calculator_Weyl_group_characters.h \
+    calculator_html_functions.h \
+    calculator_database_mongo.h \
+    general_lists.h \
+    general_list_references.h \
+    general_multitasking.h \
+    general_logging_global_variables.h \
+    general_time_date.h \
+    general_maps.h \
+    general_file_operations_encodings.h \
+    general_database_system_independent.h \
+    general_memory_saving.h \
+    general__test.h \
     macros.h \
-    math_1_general.h \
-    math_1_general_implementation.h \
-    math_1_general_polynomial_computations_advanced_implementation.h \
-    math_1_general_polynomial_computations_basic_implementation.h \
-    math_2_large_integers.h \
-    math_3_vectors.h \
-    math_4_subsets_selections.h \
-    math_extra_1_semisimple_Lie_algebras.h \
-    math_extra_1_semisimple_Lie_algebras_implementation.h \
-    math_extra_2_semisimple_Lie_algebras_root_subalgebras.h \
-    math_extra_3_algebraic_numbers.h \
-    math_extra_4_finite_groups.h \
-    math_extra_4_finite_groups_implementation.h \
-    math_extra_5_tree.h \
-    math_extra_6_graph.h \
-    math_extra_7_packed_vector.h \
-    math_extra_7_packed_vector_implementation.h \
-    math_extra_8_semisimple_Lie_subalgebras.h \
-    math_extra_9_drawing_variables.h \
-    math_extra_10_universal_enveloping.h \
-    math_extra_10_universal_enveloping_implementation.h \
-    math_extra_11_latex_routines.h \
-    math_extra_12_elliptic_curves.h \
-    math_extra_12_elliptic_curves_implementation.h \
-    math_extra_13_vector_space.h \
-    math_extra_14_Lie_theory_extras.h \
-    math_extra_15_symmetric_groups_and_generalizations.h \
-    math_extra_16_modules_semisimple_Lie_algebras.h \
-    math_extra_16_modules_semisimple_Lie_algebras_implementation.h \
-    math_extra_17_Weyl_algebras_implementation.h \
+    math_general.h \
+    math_general_implementation.h \
+    math_general_polynomial_computations_advanced_implementation.h \
+    math_general_polynomial_computations_basic_implementation.h \
+    math_large_integers.h \
+    math_vectors.h \
+    math_subsets_selections.h \
+    math_extra_semisimple_Lie_algebras.h \
+    math_extra_semisimple_Lie_algebras_implementation.h \
+    math_extra_semisimple_Lie_algebras_root_subalgebras.h \
+    math_extra_algebraic_numbers.h \
+    math_extra_finite_groups.h \
+    math_extra_finite_groups_implementation.h \
+    math_extra_tree.h \
+    math_extra_graph.h \
+    math_extra_packed_vector.h \
+    math_extra_packed_vector_implementation.h \
+    math_extra_semisimple_Lie_subalgebras.h \
+    math_extra_drawing_variables.h \
+    math_extra_universal_enveloping.h \
+    math_extra_universal_enveloping_implementation.h \
+    math_extra_latex_routines.h \
+    math_extra_elliptic_curves.h \
+    math_extra_elliptic_curves_implementation.h \
+    math_extra_vector_space.h \
+    math_extra_Lie_theory_extras.h \
+    math_extra_symmetric_groups_and_generalizations.h \
+    math_extra_modules_semisimple_Lie_algebras.h \
+    math_extra_modules_semisimple_Lie_algebras_implementation.h \
+    math_extra_Weyl_algebras_implementation.h \
     source_code_formatter.h \
     string_constants.h \
     transport_layer_security.h \
@@ -262,7 +262,6 @@ HEADERS += \
     vpfJson.h \
     vpfPackedVector.h \
     webserver.h
-
 
 SOURCES += \
     database.cpp \

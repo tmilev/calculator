@@ -24,11 +24,11 @@
 //This header file includes the various sub-headers.
 //The splitting into sub-headers is needed to speed up compilation times.
 #include "macros.h"
-#include "general_1_lists.h"
-#include "math_1_general.h"
-//#include "math_extra_3_algebraic_numbers.h"
-#include "math_extra_1_semisimple_Lie_algebras.h"
-#include "math_extra_4_finite_groups.h"
-#include "calculator_1_interface.h"
+#include "general_lists.h"
+#include "math_general.h"
+//#include "math_extra_algebraic_numbers.h"
+#include "math_extra_semisimple_Lie_algebras.h"
+#include "math_extra_finite_groups.h"
+#include "calculator_interface.h"
 static ProjectInformationInstance ProjectInfoVpfH(__FILE__, "Wrapper header file (includes everything).");
 #endif

@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "general_7_file_operations_encodings.h"
-#include "general_4_logging_global_variables.h"
+#include "general_file_operations_encodings.h"
+#include "general_logging_global_variables.h"
 #include "source_code_formatter.h"
 
 static ProjectInformationInstance ProjectInfoVpfSourceCodeFormatter(__FILE__, "Source code formatter implementation.");

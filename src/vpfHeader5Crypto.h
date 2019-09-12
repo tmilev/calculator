@@ -1,7 +1,7 @@
 #ifndef header_crypto_was_already_defined
 #define header_crypto_was_already_defined
-#include "general_1_lists.h"
-#include "math_2_large_integers.h"
+#include "general_lists.h"
+#include "math_large_integers.h"
 #include "vpfJson.h"
 static ProjectInformationInstance projectInfoCryptoHeader(__FILE__, "Crypto class declaration.");
 

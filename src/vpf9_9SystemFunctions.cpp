@@ -6,7 +6,7 @@
 //#define cgiLimitRAMuseNumPointersInList
 
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
-#include "general_4_logging_global_variables.h"
+#include "general_logging_global_variables.h"
 
 extern ProjectInformationInstance projectInfoInstanceCalculatorSystem;
 ProjectInformationInstance projectInfoInstanceCalculatorSystem(__FILE__, "System functions, platform dependent code.");

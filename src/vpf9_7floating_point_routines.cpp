@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 
-#include "math_1_general.h"
+#include "math_general.h"
 #include <math.h>
 ProjectInformationInstance projectInfoInstanceFloatingPoint(__FILE__, "Built in c++ floating point routines wrapper.");
 

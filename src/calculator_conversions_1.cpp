@@ -1,9 +1,9 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
-//For additional information refer to the file "calculator.h".#include "calculator_1_interface.h"
-#include "calculator_1_interface.h"
-#include "calculator_2_inner_typed_functions.h"
-#include "math_1_general_polynomial_computations_basic_implementation.h"
-#include "math_extra_10_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'
+//For additional information refer to the file "calculator.h".#include "calculator_interface.h"
+#include "calculator_interface.h"
+#include "calculator_inner_typed_functions.h"
+#include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'
 static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "C++ object <-> calculator expression conversions.");
 
 bool CalculatorConversions::innerExpressionFromChevalleyGenerator(

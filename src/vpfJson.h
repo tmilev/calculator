@@ -3,9 +3,9 @@
 #ifndef vpfJson_h_already_included
 #define vpfJson_h_already_included
 
-#include "general_9_memory_saving.h"
-#include "general_2_list_references.h"
-#include "general_6_maps.h"
+#include "general_memory_saving.h"
+#include "general_list_references.h"
+#include "general_maps.h"
 
 
 static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, work in progress.");

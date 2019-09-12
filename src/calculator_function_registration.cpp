@@ -1,14 +1,14 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "calculator.h"
-#include "math_1_general_implementation.h"
-#include "calculator_4_Weyl_group_characters.h"
-#include "calculator_2_inner_typed_functions.h"
-#include "calculator_3_inner_functions.h"
-#include "calculator_5_html_functions.h"
-#include "math_1_general_polynomial_computations_basic_implementation.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
+#include "math_general_implementation.h"
+#include "calculator_Weyl_group_characters.h"
+#include "calculator_inner_typed_functions.h"
+#include "calculator_inner_functions.h"
+#include "calculator_html_functions.h"
+#include "math_general_polynomial_computations_basic_implementation.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
 #include "vpfHeader7DatabaseInterface.h"
-#include "calculator_6_database_mongo.h"
+#include "calculator_database_mongo.h"
 
 extern ProjectInformationInstance ProjectInfoVpf4cpp;
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");

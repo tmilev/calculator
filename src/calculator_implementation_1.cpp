@@ -1,14 +1,14 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "calculator_1_interface.h"
-#include "math_1_general_implementation.h"
-#include "math_extra_1_semisimple_Lie_algebras.h"
-#include "math_extra_10_universal_enveloping_implementation.h"
-#include "math_1_general_polynomial_computations_basic_implementation.h"
-#include "math_1_general_polynomial_computations_advanced_implementation.h"
-#include "math_extra_1_semisimple_Lie_algebras_implementation.h"
-#include "math_extra_4_finite_groups_implementation.h" // undefined reference to `WeylGroupRepresentation<Rational>::reset()
-#include "math_extra_5_tree.h"
+#include "calculator_interface.h"
+#include "math_general_implementation.h"
+#include "math_extra_semisimple_Lie_algebras.h"
+#include "math_extra_universal_enveloping_implementation.h"
+#include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_extra_semisimple_Lie_algebras_implementation.h"
+#include "math_extra_finite_groups_implementation.h" // undefined reference to `WeylGroupRepresentation<Rational>::reset()
+#include "math_extra_tree.h"
 
 #include <cmath>
 #include <cfloat>

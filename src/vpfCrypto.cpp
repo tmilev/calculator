@@ -1,9 +1,9 @@
 #include "vpfHeader5Crypto.h"
-#include "math_1_general_implementation.h"
-#include "general_2_list_references.h"
-#include "general_7_file_operations_encodings.h"
+#include "math_general_implementation.h"
+#include "general_list_references.h"
+#include "general_file_operations_encodings.h"
 #include "vpfJson.h"
-#include "math_extra_3_algebraic_numbers.h"
+#include "math_extra_algebraic_numbers.h"
 #include <iomanip>
 #include <sys/random.h>
 

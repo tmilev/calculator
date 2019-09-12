@@ -1,4 +1,4 @@
-#include "calculator_6_database_mongo.h"
+#include "calculator_database_mongo.h"
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
 ProjectInformationInstance ProjectInfoVpfMongoCalculatorInterface(__FILE__, "Database mongo<->calculator interface.");
 

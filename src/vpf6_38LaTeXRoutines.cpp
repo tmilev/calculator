@@ -1,8 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "math_extra_11_latex_routines.h"
-#include "general_7_file_operations_encodings.h"
-#include "general_4_logging_global_variables.h"
+#include "math_extra_latex_routines.h"
+#include "general_file_operations_encodings.h"
+#include "general_logging_global_variables.h"
 #include "vpfHeader8HtmlSnippets.h"
 
 ProjectInformationInstance ProjectInfoVpf6_38LaTeXRoutines(__FILE__, "LaTeX routines. ");

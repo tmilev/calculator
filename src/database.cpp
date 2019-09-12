@@ -1114,7 +1114,7 @@ bool UserCalculator::GetActivationAddress(
 }
 
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
-#include "calculator_6_database_mongo.h"
+#include "calculator_database_mongo.h"
 
 bool CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords(
   Calculator& theCommands, const Expression& input, Expression& output

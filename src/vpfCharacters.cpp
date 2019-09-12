@@ -1,11 +1,11 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "math_1_general.h"
-#include "math_extra_2_semisimple_Lie_algebras_root_subalgebras.h" // WeylGroup::GetSignSignatureAllRootSubsystems
-#include "math_extra_4_finite_groups_implementation.h"
-#include "math_extra_15_symmetric_groups_and_generalizations.h"
-#include "math_extra_6_graph.h"
-#include "math_1_general_implementation.h"
+#include "math_general.h"
+#include "math_extra_semisimple_Lie_algebras_root_subalgebras.h" // WeylGroup::GetSignSignatureAllRootSubsystems
+#include "math_extra_finite_groups_implementation.h"
+#include "math_extra_symmetric_groups_and_generalizations.h"
+#include "math_extra_graph.h"
+#include "math_general_implementation.h"
 static ProjectInformationInstance ProjectInfoVpfCharacters(__FILE__, "Finite group characters sandbox. Work in progress by Thomas. ");
 
 extern FormatExpressions consoleFormat;

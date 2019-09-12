@@ -1,11 +1,11 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "math_1_general_implementation.h"
-#include "math_extra_8_semisimple_Lie_subalgebras.h"
-#include "math_4_subsets_selections.h"
-#include "math_1_general_polynomial_computations_advanced_implementation.h"
-#include "math_extra_1_semisimple_Lie_algebras_implementation.h"
-#include "math_extra_4_finite_groups_implementation.h"
+#include "math_general_implementation.h"
+#include "math_extra_semisimple_Lie_subalgebras.h"
+#include "math_subsets_selections.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_extra_semisimple_Lie_algebras_implementation.h"
+#include "math_extra_finite_groups_implementation.h"
 ProjectInformationInstance ProjectInfoVpfSemisimpleSubalgebras(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
 
 extern logger logWorker;

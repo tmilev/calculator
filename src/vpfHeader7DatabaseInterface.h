@@ -2,9 +2,9 @@
 //For additional information refer to the file "calculator.h".
 #ifndef vpfHeader7_databaseMySQL_already_included
 #define vpfHeader7_databaseMySQL_already_included
-#include "calculator_1_interface.h"
-#include "general_5_time_date.h"
-#include "general_8_database_system_independent.h"
+#include "calculator_interface.h"
+#include "general_time_date.h"
+#include "general_database_system_independent.h"
 
 static ProjectInformationInstance ProjectInfoVpf8_1HeaderDatabaseInterface_MySQLx(__FILE__, "Database interface header. ");
 

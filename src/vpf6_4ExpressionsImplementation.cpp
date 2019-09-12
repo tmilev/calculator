@@ -1,15 +1,15 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "calculator.h"
-#include "math_extra_17_Weyl_algebras_implementation.h"
-#include "math_extra_10_universal_enveloping_implementation.h"
-#include "math_extra_16_modules_semisimple_Lie_algebras_implementation.h"
-#include "math_extra_1_semisimple_Lie_algebras_implementation.h"
-#include "math_extra_4_finite_groups_implementation.h"
-#include "math_extra_15_symmetric_groups_and_generalizations.h"
-#include "calculator_5_html_functions.h"
+#include "math_extra_Weyl_algebras_implementation.h"
+#include "math_extra_universal_enveloping_implementation.h"
+#include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
+#include "math_extra_semisimple_Lie_algebras_implementation.h"
+#include "math_extra_finite_groups_implementation.h"
+#include "math_extra_symmetric_groups_and_generalizations.h"
+#include "calculator_html_functions.h"
 #include "vpfHeader5Crypto.h"
-#include "math_extra_12_elliptic_curves_implementation.h"
+#include "math_extra_elliptic_curves_implementation.h"
 #include <cmath>
 
 extern ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp;

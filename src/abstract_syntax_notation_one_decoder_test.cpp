@@ -3,7 +3,7 @@
 
 #include "abstract_syntax_notation_one_decoder.h"
 #include "vpfHeader5Crypto.h"
-#include "math_extra_3_algebraic_numbers.h"
+#include "math_extra_algebraic_numbers.h"
 
 extern ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementationTest;
 ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementationTest(__FILE__, "Test routines for abstract syntax notation one (ASN-1).");

@@ -2,8 +2,8 @@
 //For additional information refer to the file "calculator.h".
 
 #include "transport_layer_security.h"
-#include "general_4_logging_global_variables.h"
-#include "general_7_file_operations_encodings.h"
+#include "general_logging_global_variables.h"
+#include "general_file_operations_encodings.h"
 #include "vpfHeader5Crypto.h"
 #include "abstract_syntax_notation_one_decoder.h"
 

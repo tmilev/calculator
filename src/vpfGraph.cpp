@@ -1,5 +1,5 @@
-#include "math_extra_6_graph.h"
-#include "math_1_general.h"
+#include "math_extra_graph.h"
+#include "math_general.h"
 static ProjectInformationInstance ProjectInfoVpfGraphs(__FILE__, "A graph class.");
 
 GraphOLD::GraphOLD(int max_vertices, int max_edges) {

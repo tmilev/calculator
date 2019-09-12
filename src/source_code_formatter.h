@@ -3,8 +3,8 @@
 #ifndef vpfHeaderHtmlSourceCodeFormatter
 #define vpfHeaderHtmlSourceCodeFormatter
 #include "macros.h"
-#include "general_2_list_references.h"
-#include "general_6_maps.h"
+#include "general_list_references.h"
+#include "general_maps.h"
 
 static ProjectInformationInstance ProjectInfoHeaderSourceCodeFormatterHeader(__FILE__, "Source code formatter header.");
 

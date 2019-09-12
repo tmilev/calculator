@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "webserver.h"
-#include "calculator_1_interface.h"
+#include "calculator_interface.h"
 #include "vpfHeader7DatabaseInterface.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
 #include "vpfHeader8HtmlSnippets.h"
@@ -2461,7 +2461,7 @@ int WebWorker::ProcessEditPageJSON() {
   return 0;
 }
 
-#include "math_extra_11_latex_routines.h"
+#include "math_extra_latex_routines.h"
 int WebWorker::ProcessSlidesOrHomeworkFromSource() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSlidesOrHomeworkFromSource");
   this->SetHeaderOKNoContentLength("");

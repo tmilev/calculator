@@ -1,5 +1,5 @@
 #include "vpfJson.h"
-#include "math_1_general.h"
+#include "math_general.h"
 
 #include <sys/stat.h>
 #include <cassert>

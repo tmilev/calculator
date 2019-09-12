@@ -1,8 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "general_5_time_date.h"
-#include "general_1_lists.h"
-#include "math_1_general.h"
+#include "general_time_date.h"
+#include "general_lists.h"
+#include "math_general.h"
 
 static ProjectInformationInstance ProjectInfoDateAndtimeWrappers(__FILE__, "Date and time wrapper class implementation. ");
 

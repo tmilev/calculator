@@ -1,9 +1,9 @@
 #include "vpfJson.h"
 #include "assert.h"
-#include "math_1_general.h"
-#include "math_extra_13_vector_space.h"
-#include "math_1_general.h"
-#include "math_extra_4_finite_groups.h"
+#include "math_general.h"
+#include "math_extra_vector_space.h"
+#include "math_general.h"
+#include "math_extra_finite_groups.h"
 #ifndef vpfPackedVector_h_already_included
 #define vpfPackedVector_h_already_included
 

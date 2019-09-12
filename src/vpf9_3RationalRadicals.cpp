@@ -1,9 +1,9 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "math_1_general_polynomial_computations_basic_implementation.h"
-#include "math_extra_3_algebraic_numbers.h"
-#include "math_4_subsets_selections.h"
-#include "math_1_general_implementation.h"
+#include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_extra_algebraic_numbers.h"
+#include "math_subsets_selections.h"
+#include "math_general_implementation.h"
 ProjectInformationInstance ProjectInfoVpf9_3cpp(__FILE__, "Algebraic numbers. ");
 
 std::string MonomialVector::ToString(FormatExpressions* theFormat) const {

@@ -1,7 +1,7 @@
 #ifndef vpfHeaderTransportLayerSecurity_already_included
 #define vpfHeaderTransportLayerSecurity_already_included
 
-#include "general_1_lists.h"
+#include "general_lists.h"
 
 static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeader(__FILE__, "TLS/ssl header.");
 
@@ -18,7 +18,7 @@ static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeade
 #include <openssl/err.h>
 
 #include "vpfHeader5Crypto.h"
-#include "general_4_logging_global_variables.h"
+#include "general_logging_global_variables.h"
 class TransportLayerSecurity;
 class TransportLayerSecurityOpenSSL {
 public:

@@ -4,10 +4,10 @@
 mongoc_client_t* databaseClient = nullptr;
 mongoc_database_t *database = nullptr;
 #endif //MACRO_use_MongoDB
-#include "vpfHeader7DatabaseInterface_Mongodb.h"
-#include "vpfJson.h"
+#include "database_mongo.h"
+#include "json.h"
 #include "general_logging_global_variables.h"
-#include "vpfHeader8HtmlSnippets.h"
+#include "html_snippets.h"
 #include "string_constants.h"
 ProjectInformationInstance ProjectInfoVpfDatabaseMongo(__FILE__, "Database mongoDB.");
 

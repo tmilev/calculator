@@ -2,7 +2,7 @@
 //For additional information refer to the file "calculator.h".
 #include "math_general.h"
 #include "general_logging_global_variables.h"
-#include "vpfHeader4SystemFunctionsGlobalObjects.h"
+#include "system_functions_global_objects.h"
 #include <assert.h>
 #include <mutex>
 

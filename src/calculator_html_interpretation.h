@@ -3,7 +3,7 @@
 #ifndef vpfHeaderHtmlInterpretationAlreadyDefined
 #define vpfHeaderHtmlInterpretationAlreadyDefined
 #include "general_lists.h"
-#include "vpfHeader7DatabaseInterface.h"
+#include "database.h"
 #include <ctime>
 
 static ProjectInformationInstance ProjectInfoHeaderHtmlInterpretation(__FILE__, "Html interpretation.");

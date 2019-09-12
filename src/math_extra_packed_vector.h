@@ -2,7 +2,7 @@
 //For additional information refer to the file "calculator.h".
 #ifndef vpfPackedVector_h_already_included
 #define vpfPackedVector_h_already_included
-#include "vpfJson.h"
+#include "json.h"
 #include "math_extra_vector_space.h"
 #include "math_extra_finite_groups_implementation.h"
 

@@ -8,7 +8,7 @@
 #include "math_extra_drawing_variables.h"
 #include <assert.h>
 #include "calculator_interface.h"
-#include "vpfHeader4SystemFunctionsGlobalObjects.h"
+#include "system_functions_global_objects.h"
 #include "string_constants.h"
 
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");

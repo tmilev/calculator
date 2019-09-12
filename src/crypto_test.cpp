@@ -1,4 +1,4 @@
-#include "vpfHeader5Crypto.h"
+#include "crypto.h"
 
 extern ProjectInformationInstance projectInfoCryptoFile2;
 ProjectInformationInstance projectInfoCryptoFile2(__FILE__, "Tests for crypto functions.");

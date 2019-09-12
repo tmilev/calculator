@@ -6,7 +6,7 @@
 #include "math_general.h"
 #include "math_extra_vector_space.h"
 #include "math_extra_graph.h"
-#include "vpfJson.h"
+#include "json.h"
 
 //To do: move Weyl groups to this file. Eliminate all redundant code and organize nicely.
 

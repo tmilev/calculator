@@ -2,11 +2,11 @@
 //For additional information refer to the file "calculator.h".
 #include "webserver.h"
 #include "calculator_interface.h"
-#include "vpfHeader7DatabaseInterface.h"
-#include "vpfHeader8HtmlInterpretationInterface.h"
-#include "vpfHeader8HtmlSnippets.h"
+#include "database.h"
+#include "calculator_html_interpretation_interface.h"
+#include "html_snippets.h"
 #include "string_constants.h"
-#include "vpfHeader5Crypto.h"
+#include "crypto.h"
 
 static ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 WebServer theWebServer;
@@ -17,7 +17,7 @@ WebServer theWebServer;
 #include <unistd.h>
 #include <sys/stat.h>//<-for file statistics
 #include <fcntl.h>//<-setting flags of file descriptors
-#include "vpfHeader7DatabaseInterface_Mongodb.h"
+#include "database_mongo.h"
 
 class SignalsInfrastructure {
 public:

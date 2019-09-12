@@ -7,7 +7,7 @@
 #include "calculator_inner_functions.h"
 #include "calculator_html_functions.h"
 #include "math_general_polynomial_computations_basic_implementation.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
-#include "vpfHeader7DatabaseInterface.h"
+#include "database.h"
 #include "calculator_database_mongo.h"
 
 extern ProjectInformationInstance ProjectInfoVpf4cpp;

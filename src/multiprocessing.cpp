@@ -1,6 +1,6 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "vpfHeader6WebServerInterprocessLogistics.h"
+#include "multiprocessing.h"
 #include <fcntl.h> //<- setting of flags for pipes and the like (example: making a pipe non-blocking).
 #include <unistd.h>
 #include <netdb.h> //<-addrinfo and related data structures defined here

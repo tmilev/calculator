@@ -4,7 +4,7 @@
 #include "transport_layer_security.h"
 #include "general_logging_global_variables.h"
 #include "general_file_operations_encodings.h"
-#include "vpfHeader5Crypto.h"
+#include "crypto.h"
 #include "abstract_syntax_notation_one_decoder.h"
 
 #include <unistd.h> //<- close, open defined here

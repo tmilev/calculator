@@ -4,7 +4,13 @@
 #define vpfVectorSpaceHeader_alreadyIncluded
 #include "math_general.h"
 
-static ProjectInformationInstance ProjectInfoVpfVectorSpace(__FILE__, "Header file, vector spaces (similar to vectors but with more structure; usefulness of the class not agreed upon yet).");
+static ProjectInformationInstance ProjectInfoVpfVectorSpace(
+  __FILE__,
+  "Header file, Vector spaces. "
+  "Encodes global information about vector spaces. "
+  "Utility of class not agreed upon yet. "
+);
+
 template <typename coefficient>
 class Basis {
   public:

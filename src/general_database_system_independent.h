@@ -7,7 +7,7 @@
 static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemIndependentinstance(
   __FILE__, "Header, system independent database data structures. "
 );
-#include "vpfJson.h"
+#include "json.h"
 
 class UserCalculatorData {
   public:

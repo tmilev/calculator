@@ -1,7 +1,7 @@
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
-#include "vpfHeader6WebServerInterprocessLogistics.h"
-#include "vpfHeader4SystemFunctionsGlobalObjects.h"
+#include "multiprocessing.h"
+#include "system_functions_global_objects.h"
 #include "transport_layer_security.h"
 
 static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "Web server classes declarations.");

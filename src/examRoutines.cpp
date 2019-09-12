@@ -2,14 +2,14 @@
 //For additional information refer to the file "calculator.h".
 #include "calculator_inner_functions.h"
 #include "calculator_html_functions.h"
-#include "vpfHeader7DatabaseInterface.h"
+#include "database.h"
 #include "general_time_date.h"
-#include "vpfHeader8HtmlInterpretation.h"
-#include "vpfHeader8HtmlSnippets.h"
-#include "vpfHeader8HtmlInterpretationInterface.h"
+#include "calculator_html_interpretation.h"
+#include "html_snippets.h"
+#include "calculator_html_interpretation_interface.h"
 #include "math_extra_latex_routines.h"
 #include <iomanip>
-#include "vpfHeader7DatabaseInterface_Mongodb.h"
+#include "database_mongo.h"
 #include "string_constants.h"
 
 ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutinesCustomCode(
@@ -1453,7 +1453,7 @@ std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink) {
   return inputLink.substr(firstMeaningfulChar, lastMeaningfulChar - firstMeaningfulChar + 1);
 }
 
-#include "vpfHeader5Crypto.h"
+#include "crypto.h"
 
 std::string CalculatorHTML::GetDeadlineNoInheritance(const std::string& id) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetDeadlineNoInheritance");

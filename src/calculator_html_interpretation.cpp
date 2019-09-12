@@ -1,9 +1,9 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "vpfHeader8HtmlInterpretation.h"
-#include "vpfHeader8HtmlSnippets.h"
-#include "vpfHeader8HtmlInterpretationInterface.h"
-#include "vpfHeader7DatabaseInterface_Mongodb.h"
+#include "calculator_html_interpretation.h"
+#include "html_snippets.h"
+#include "calculator_html_interpretation_interface.h"
+#include "database_mongo.h"
 #include <iomanip>
 #include "string_constants.h"
 

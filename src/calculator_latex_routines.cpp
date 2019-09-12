@@ -3,7 +3,7 @@
 #include "math_extra_latex_routines.h"
 #include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
-#include "vpfHeader8HtmlSnippets.h"
+#include "html_snippets.h"
 
 ProjectInformationInstance ProjectInfoVpf6_38LaTeXRoutines(__FILE__, "LaTeX routines. ");
 
@@ -883,7 +883,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   return true;
 }
 
-#include "vpfHeader8HtmlInterpretation.h"
+#include "calculator_html_interpretation.h"
 bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("LaTeXcrawler::BuildTopicList");
   //stOutput << "DEBUG: Here we are. ";

@@ -160,7 +160,7 @@ bool Vectors<coefficient>::ConesIntersect(
   Matrix<Rational> matA;
   Matrix<Rational> matb;
   if (StrictCone.size == 0) {
-    if (outputSplittingNormal != 0) {
+    if (outputSplittingNormal != nullptr) {
       if (NonStrictCone.size > 0) {
         outputSplittingNormal->MakeZero(NonStrictCone[0].size);
       }
@@ -169,8 +169,8 @@ bool Vectors<coefficient>::ConesIntersect(
   }
   int theDimension = StrictCone[0].size;
   int numCols = StrictCone.size + NonStrictCone.size;
-  matA.init((int) theDimension + 1, (int)numCols);
-  matb.init((int) theDimension + 1, 1);
+  matA.init(theDimension + 1, numCols);
+  matb.init(theDimension + 1, 1);
   matb.MakeZero(); matb.elements[theDimension][0].MakeOne();
   for (int i = 0; i < StrictCone.size; i ++) {
     for (int k = 0; k < theDimension; k ++) {
@@ -189,7 +189,7 @@ bool Vectors<coefficient>::ConesIntersect(
   if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
     matA, matb, outputLinearCombo
   )) {
-    if (outputSplittingNormal != 0) {
+    if (outputSplittingNormal != nullptr) {
       bool tempBool = Vectors<coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal);
       if (!tempBool) {
         crash << "This is an algorithmic/mathematical (hence also programming) error: "
@@ -202,7 +202,7 @@ bool Vectors<coefficient>::ConesIntersect(
     }
     return false;
   }
-  if (outputLinearCombo != 0) {
+  if (outputLinearCombo != nullptr) {
     for (int i = StrictCone.size; i < outputLinearCombo->size; i ++) {
       (*outputLinearCombo)[i] *= - 1;
     }
@@ -458,12 +458,12 @@ bool Calculator::innerPrintSSSubalgebras(
     }
   }
   if (theGlobalVariables.flagAllowProcessMonitoring) {
-    if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != 0) {
+    if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
     }
   }
   std::stringstream out;
-  SemisimpleLieAlgebra* ownerSSPointer = 0;
+  SemisimpleLieAlgebra* ownerSSPointer = nullptr;
   bool isAlreadySubalgebrasObject = input.IsOfType<SemisimpleSubalgebras>();
   if (!isAlreadySubalgebrasObject) {
     if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
@@ -482,7 +482,7 @@ bool Calculator::innerPrintSSSubalgebras(
   } else {
     ownerSSPointer = input.GetValue<SemisimpleSubalgebras>().owner;
   }
-  if (ownerSSPointer == 0) {
+  if (ownerSSPointer == nullptr) {
     crash << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << crash;
   }
   SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;

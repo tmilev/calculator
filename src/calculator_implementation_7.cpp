@@ -9,9 +9,9 @@
 #include "math_extra_universal_enveloping_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
-#include "vpfHeader5Crypto.h"
+#include "crypto.h"
 #include "math_extra_semisimple_Lie_algebras_implementation.h" // undefined reference to `charSSAlgMod<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, charSSAlgMod<RationalFunctionOld>&, branchingData&, GlobalVariables&)'
-#include "vpfHeader8HtmlSnippets.h"
+#include "html_snippets.h"
 #include "math_extra_latex_routines.h"
 #include "source_code_formatter.h"
 #include <cmath>

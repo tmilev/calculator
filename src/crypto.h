@@ -2,7 +2,7 @@
 #define header_crypto_was_already_defined
 #include "general_lists.h"
 #include "math_large_integers.h"
-#include "vpfJson.h"
+#include "json.h"
 static ProjectInformationInstance projectInfoCryptoHeader(__FILE__, "Crypto class declaration.");
 
 class CertificateRSA {

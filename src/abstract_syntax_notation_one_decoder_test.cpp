@@ -2,7 +2,7 @@
 //For additional information refer to the file "calculator.h".
 
 #include "abstract_syntax_notation_one_decoder.h"
-#include "vpfHeader5Crypto.h"
+#include "crypto.h"
 #include "math_extra_algebraic_numbers.h"
 
 extern ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementationTest;

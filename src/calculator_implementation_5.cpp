@@ -5,8 +5,8 @@
 #include "calculator_inner_typed_functions.h"
 #include "math_extra_drawing_variables.h"
 #include "calculator_html_functions.h"
-#include "vpfHeader5Crypto.h"
-#include "vpfHeader8HtmlSnippets.h"
+#include "crypto.h"
+#include "html_snippets.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include <cmath>
 ProjectInformationInstance ProjectInfoVpf6_35cpp(__FILE__, "More calculator built-in functions. ");

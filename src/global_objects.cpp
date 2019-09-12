@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 
-#include "vpfHeader4SystemFunctionsGlobalObjects.h"
+#include "system_functions_global_objects.h"
 #include "webserver.h"
 #include "calculator_interface.h"
 #include "general_logging_global_variables.h"

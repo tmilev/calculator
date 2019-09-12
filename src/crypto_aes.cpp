@@ -30,7 +30,7 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
         For AES192/256 the key size is proportionally larger.
 
 */
-#include "vpfHeader5Crypto.h"
+#include "crypto.h"
 
 ProjectInformationInstance projectInfoCrypto_AES_implementation(__FILE__, "AES implementation.");
 

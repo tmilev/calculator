@@ -1,4 +1,4 @@
-#include "vpfFiniteFields.h"
+#include "math_extra_finite_fields.h"
 #include <cassert>
 
 f65521 f65521::operator+(const f65521 right) const {

@@ -4,14 +4,14 @@
 #include <assert.h>
 
 
-#include "vpfHeader4SystemFunctionsGlobalObjects.h"
+#include "system_functions_global_objects.h"
 
 //#include "testlib.h"
 #include <iostream>
 #include <algorithm>
 
-#include "vpfJson.h"
-#include "vpfFiniteFields.h"
+#include "json.h"
+#include "math_extra_finite_fields.h"
 #include "math_extra_packed_vector_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 

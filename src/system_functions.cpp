@@ -5,7 +5,7 @@
 #include <unistd.h>
 //#define cgiLimitRAMuseNumPointersInList
 
-#include "vpfHeader4SystemFunctionsGlobalObjects.h"
+#include "system_functions_global_objects.h"
 #include "general_logging_global_variables.h"
 
 extern ProjectInformationInstance projectInfoInstanceCalculatorSystem;

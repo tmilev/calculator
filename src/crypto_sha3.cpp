@@ -21,7 +21,7 @@
 // Aug 2015. Andrey Jivsov. crypto@brainhub.org
 // ----------------------------------------------------------------------
 
-#include "vpfHeader5Crypto.h"
+#include "crypto.h"
 extern ProjectInformationInstance project_SHA3_implementation;
 ProjectInformationInstance project_SHA3_implementation(__FILE__, "Sha3 implementation");
 

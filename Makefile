@@ -115,67 +115,67 @@ $(info [1;34mLinker flags part 2: $(LIBRARIES_INCLUDED_AT_THE_END)[0m)
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
 SOURCES_RELATIVE_PATH=\
-abstract_syntax_notation_one_decoder.cpp \
-abstract_syntax_notation_one_decoder_test.cpp \
-transport_layer_security_implementation.cpp \
-transport_layer_security.cpp \
-transport_layer_security_openssl.cpp \
-transport_layer_security_test.cpp \
-databasemongo.cpp \
-database_mongo_calculator.cpp \
-calculator_webserver_functions.cpp \
-webserver.cpp \
-web-routines-1.cpp \
-database.cpp \
-examRoutines.cpp \
-vpfHtmlInterpretationInterface.cpp \
-vpfHtmlSnippets.cpp \
-test.cpp \
-vpfEllipticCurves.cpp \
-vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
-calculator_function_registration.cpp \
-calculator_implementation_1.cpp \
-calculator_implementation_2.cpp \
-calculator_implementation_3.cpp \
-calculator_javascript_graphics.cpp \
-calculator_parsing_routines.cpp \
-calculator_typed_functions_1.cpp \
-calculator_conversions_1.cpp \
-vpf6_3calculatorMathRoutines.cpp \
-vpf6_35calculatorMathRoutinesPart2.cpp \
-vpf6_36calculatorHtmlRoutines.cpp \
-vpf6_37calculatorroutines.cpp \
-vpf6_38LaTeXRoutines.cpp \
-vpf6_4ExpressionsImplementation.cpp \
-vpf6.cpp \
-vpf7.cpp \
-vpf8.cpp \
-vpf9_1.cpp \
-vpf9_2.cpp \
-vpf9_3RationalRadicals.cpp \
-vpf9_4SemisimpleLieAlgebras.cpp \
-vpf9_5SemisimpleLieAlgebras_RootSubalgebras.cpp \
-vpf9_6SemisimpleLieSubAlgebras.cpp \
-vpf9_7floating_point_routines.cpp \
-global_objects.cpp \
-vpf9_92multitasking.cpp \
-vpf99_HardcodedData.cpp \
-vpf9_9SystemFunctions.cpp \
-vpf9.cpp \
-vpfCharacters_CalculatorInterface.cpp \
-vpfCharacters.cpp \
-vpfCrypto.cpp \
-crypto_test.cpp \
-vpfCrypto_sha3.cpp \
-vpfCrypto_ripemd.cpp \
-vpfCrypto_AES.cpp \
-vpfFiniteFields.cpp \
-vpfGraph.cpp \
-vpfJson.cpp \
-vpfWebServerInterProcessLogistics.cpp \
-vpf9_85TimeDateWrappers.cpp \
-string_constants.cpp \
-source_code_formatter.cpp
+    abstract_syntax_notation_one_decoder.cpp \
+    abstract_syntax_notation_one_decoder_test.cpp \
+    calculator_conversions_1.cpp \
+    calculator_expressions.cpp \
+    calculator_finite_group_characters.cpp \
+    calculator_function_registration.cpp \
+    calculator_html_interpretation.cpp \
+    calculator_html_routines.cpp \
+    calculator_implementation_1.cpp \
+    calculator_implementation_2.cpp \
+    calculator_implementation_3.cpp \
+    calculator_implementation_4.cpp \
+    calculator_implementation_5.cpp \
+    calculator_implementation_6.cpp \
+    calculator_implementation_7.cpp \
+    calculator_javascript_graphics.cpp \
+    calculator_latex_routines.cpp \
+    calculator_parsing_routines.cpp \
+    calculator_typed_functions_1.cpp \
+    calculator_webserver_functions.cpp \
+    crypto.cpp \
+    crypto_aes.cpp \
+    crypto_ripemd.cpp \
+    crypto_sha3.cpp \
+    crypto_test.cpp \
+    database.cpp \
+    databasemongo.cpp \
+    database_mongo_calculator.cpp \
+    date_time_wrappers.cpp \
+    examRoutines.cpp \
+    global_objects.cpp \
+    html_snippets.cpp \
+    json.cpp \
+    math_algebraic_numbers.cpp \
+    math_elliptic_curves.cpp \
+    math_finite_fields.cpp \
+    math_finite_group_characters.cpp \
+    math_floating_point.cpp \
+    math_graph.cpp \
+    math_hard_coded_data.cpp \
+    math_implementation_1.cpp \
+    math_implementation_2.cpp \
+    math_implementation_3.cpp \
+    math_implementation_4.cpp \
+    math_implementation_5.cpp \
+    math_semisimple_Lie_algebras.cpp \
+    math_semisimple_Lie_root_subalggebras.cpp \
+    math_semisimple_Lie_subalgebras.cpp \
+    multiprocessing.cpp \
+    multitasking.cpp \
+    source_code_formatter.cpp \
+    string_constants.cpp \
+    symmetric_groups_and_generalizations.cpp \
+    system_functions.cpp \
+    test.cpp \
+    transport_layer_security.cpp \
+    transport_layer_security_implementation.cpp \
+    transport_layer_security_openssl.cpp \
+    transport_layer_security_test.cpp \
+    web-routines-1.cpp \
+    webserver.cpp
 
 SOURCES_RELATIVE_PATH_C=\
 # boringssl/crypto/cipher_extra/cipher_extra.c \

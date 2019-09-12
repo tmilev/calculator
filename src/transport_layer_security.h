@@ -17,7 +17,7 @@ static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeade
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-#include "vpfHeader5Crypto.h"
+#include "crypto.h"
 #include "general_logging_global_variables.h"
 class TransportLayerSecurity;
 class TransportLayerSecurityOpenSSL {

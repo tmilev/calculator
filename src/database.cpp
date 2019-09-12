@@ -1,10 +1,10 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "vpfHeader7DatabaseInterface.h"
-#include "vpfHeader5Crypto.h"
+#include "database.h"
+#include "crypto.h"
 #include "webserver.h"
-#include "vpfHeader4SystemFunctionsGlobalObjects.h"
-#include "vpfHeader7DatabaseInterface_Mongodb.h"
+#include "system_functions_global_objects.h"
+#include "database_mongo.h"
 #include "string_constants.h"
 
 // Avoid previous extern warning:
@@ -1113,7 +1113,7 @@ bool UserCalculator::GetActivationAddress(
   return true;
 }
 
-#include "vpfHeader7DatabaseInterface_Mongodb.h"
+#include "database_mongo.h"
 #include "calculator_database_mongo.h"
 
 bool CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords(
@@ -1576,7 +1576,7 @@ bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOn
 }
 
 //meld comment
-#include "vpfHeader5Crypto.h"
+#include "crypto.h"
 
 std::string UserCalculator::GetActivationAddressFromActivationToken(
   const std::string& theActivationToken,

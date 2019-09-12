@@ -3,7 +3,7 @@
 #include "calculator_inner_functions.h"
 #include "general_time_date.h"
 #include "webserver.h"
-#include "vpfHeader5Crypto.h"
+#include "crypto.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -15,7 +15,7 @@
 #include <arpa/inet.h>
 //#include <libexplain/connect.h>
 
-#include "vpfHeader7DatabaseInterface.h"
+#include "database.h"
 
 ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
 

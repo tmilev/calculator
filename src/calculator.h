@@ -29,6 +29,6 @@
 //#include "math_extra_3_algebraic_numbers.h"
 #include "math_extra_1_semisimple_Lie_algebras.h"
 #include "math_extra_4_finite_groups.h"
-#include "vpfHeader3Calculator0_Interface.h"
+#include "calculator_1_interface.h"
 static ProjectInformationInstance ProjectInfoVpfH(__FILE__, "Wrapper header file (includes everything).");
 #endif

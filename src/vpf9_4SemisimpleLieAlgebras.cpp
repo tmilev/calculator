@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "math_extra_1_semisimple_Lie_algebras.h"
-#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
+#include "math_1_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_9_drawing_variables.h"
 ProjectInformationInstance ProjectInfoVpf9_4cpp(__FILE__, "Semisimple Lie algebras. ");
 

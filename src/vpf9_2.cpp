@@ -1,15 +1,15 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "general_1_lists.h"
-#include "vpfImplementationHeader2Math0_General.h"
+#include "math_1_general_implementation.h"
 #include "math_1_general.h"
-#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
+#include "math_1_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_3_algebraic_numbers.h"
 #include "math_extra_10_universal_enveloping.h"
 #include "math_extra_2_semisimple_Lie_algebras_root_subalgebras.h"
-#include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
-#include "vpfImplementationHeader2Math3_FiniteGroups.h"
-#include "vpfImplementationHeader2Math15_UniversalEnveloping.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'
+#include "math_extra_1_semisimple_Lie_algebras_implementation.h"
+#include "math_extra_4_finite_groups_implementation.h"
+#include "math_extra_10_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'
 
 ProjectInformationInstance ProjectInfoVpf9_2cpp(__FILE__, "Math routines implementation. ");
 

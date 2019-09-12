@@ -200,6 +200,12 @@ HEADERS += \
 #    boringssl/tool/transport_common.h
     abstract_syntax_notation_one_decoder.h \
     calculator.h \
+    calculator_1_interface.h \
+    calculator_2_inner_typed_functions.h \
+    calculator_3_inner_functions.h \
+    calculator_4_Weyl_group_characters.h \
+    calculator_5_html_functions.h \
+    calculator_6_database_mongo.h \
     general_1_lists.h \
     general_2_list_references.h \
     general_3_multitasking.h \
@@ -212,35 +218,39 @@ HEADERS += \
     general_10_test.h \
     macros.h \
     math_1_general.h \
+    math_1_general_implementation.h \
+    math_1_general_polynomial_computations_advanced_implementation.h \
+    math_1_general_polynomial_computations_basic_implementation.h \
     math_2_large_integers.h \
     math_3_vectors.h \
     math_4_subsets_selections.h \
     math_extra_1_semisimple_Lie_algebras.h \
+    math_extra_1_semisimple_Lie_algebras_implementation.h \
     math_extra_2_semisimple_Lie_algebras_root_subalgebras.h \
     math_extra_3_algebraic_numbers.h \
     math_extra_4_finite_groups.h \
+    math_extra_4_finite_groups_implementation.h \
     math_extra_5_tree.h \
     math_extra_6_graph.h \
     math_extra_7_packed_vector.h \
+    math_extra_7_packed_vector_implementation.h \
     math_extra_8_semisimple_Lie_subalgebras.h \
     math_extra_9_drawing_variables.h \
     math_extra_10_universal_enveloping.h \
+    math_extra_10_universal_enveloping_implementation.h \
     math_extra_11_latex_routines.h \
     math_extra_12_elliptic_curves.h \
+    math_extra_12_elliptic_curves_implementation.h \
     math_extra_13_vector_space.h \
     math_extra_14_Lie_theory_extras.h \
     math_extra_15_symmetric_groups_and_generalizations.h \
     math_extra_16_modules_semisimple_Lie_algebras.h \
+    math_extra_16_modules_semisimple_Lie_algebras_implementation.h \
+    math_extra_17_Weyl_algebras_implementation.h \
     source_code_formatter.h \
     string_constants.h \
     transport_layer_security.h \
     vpfFiniteFields.h \
-    vpfHeader3Calculator0_Interface.h \
-    vpfHeader3Calculator1_InnerTypedFunctions.h \
-    vpfHeader3Calculator2_InnerFunctions.h \
-    vpfHeader3Calculator3_WeylGroupCharacters.h \
-    vpfHeader3Calculator4HtmlFunctions.h \
-    vpfHeader3Calculator5_Database_Mongo.h \
     vpfHeader4SystemFunctionsGlobalObjects.h \
     vpfHeader5Crypto.h \
     vpfHeader6WebServerInterprocessLogistics.h \
@@ -249,20 +259,9 @@ HEADERS += \
     vpfHeader8HtmlInterpretation.h \
     vpfHeader8HtmlInterpretationInterface.h \
     vpfHeader8HtmlSnippets.h \
-    vpfImplementationHeader2Math0_General.h \
-    vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h \
-    vpfImplementationHeader2Math3_FiniteGroups.h \
-    vpfImplementationHeader2Math3_WeylAlgebra.h \
-    vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h \
-    vpfImplementationHeader2Math7_PackedVector.h \
-    vpfImplementationHeader2Math11_EllipticCurves.h \
-    vpfImplementationHeader2Math15_UniversalEnveloping.h \
-    vpfImplementationHeader2Math051_PolynomialComputations_Basic.h \
-    vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h \
     vpfJson.h \
     vpfPackedVector.h \
     webserver.h
-
 
 
 SOURCES += \
@@ -929,6 +928,65 @@ SOURCES += \
     database_mongo_calculator.cpp \
     examRoutines.cpp \
     global_objects.cpp \
+    calculator_conversions_1.cpp \
+    calculator_function_registration.cpp \
+    calculator_implementation_1.cpp \
+    calculator_implementation_2.cpp \
+    calculator_implementation_3.cpp \
+    calculator_javascript_graphics.cpp \
+    calculator_parsing_routines.cpp \
+    calculator_typed_functions_1.cpp \
+    calculator_webserver_functions.cpp \
+    crypto_test.cpp \
+    database.cpp \
+    databasemongo.cpp \
+    database_mongo_calculator.cpp \
+    examRoutines.cpp \
+    global_objects.cpp \
+    source_code_formatter.cpp \
+    string_constants.cpp \
+    test.cpp \
+    transport_layer_security.cpp \
+    transport_layer_security_implementation.cpp \
+    transport_layer_security_openssl.cpp \
+    transport_layer_security_test.cpp \
+    vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
+    vpf6.cpp \
+    vpf6_3calculatorMathRoutines.cpp \
+    vpf6_4ExpressionsImplementation.cpp \
+    vpf6_35calculatorMathRoutinesPart2.cpp \
+    vpf6_36calculatorHtmlRoutines.cpp \
+    vpf6_37calculatorroutines.cpp \
+    vpf6_38LaTeXRoutines.cpp \
+    vpf7.cpp \
+    vpf8.cpp \
+    vpf9.cpp \
+    vpf9_1.cpp \
+    vpf9_2.cpp \
+    vpf9_3RationalRadicals.cpp \
+    vpf9_4SemisimpleLieAlgebras.cpp \
+    vpf9_5SemisimpleLieAlgebras_RootSubalgebras.cpp \
+    vpf9_6SemisimpleLieSubAlgebras.cpp \
+    vpf9_7floating_point_routines.cpp \
+    vpf9_9SystemFunctions.cpp \
+    vpf9_85TimeDateWrappers.cpp \
+    vpf9_92multitasking.cpp \
+    vpf99_HardcodedData.cpp \
+    vpfCharacters.cpp \
+    vpfCharacters_CalculatorInterface.cpp \
+    vpfCrypto.cpp \
+    vpfCrypto_AES.cpp \
+    vpfCrypto_ripemd.cpp \
+    vpfCrypto_sha3.cpp \
+    vpfEllipticCurves.cpp \
+    vpfFiniteFields.cpp \
+    vpfGraph.cpp \
+    vpfHtmlInterpretationInterface.cpp \
+    vpfHtmlSnippets.cpp \
+    vpfJson.cpp \
+    vpfWebServerInterProcessLogistics.cpp \
+    web-routines-1.cpp \
+    webserver.cpp \
     calculator_conversions_1.cpp \
     calculator_function_registration.cpp \
     calculator_implementation_1.cpp \

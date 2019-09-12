@@ -3,7 +3,7 @@
 #ifndef vpfImplementationHeaderPolyComputationsAdvanced_already_included
 #define vpfImplementationHeaderPolyComputationsAdvanced_already_included
 
-#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
+#include "math_1_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_3_algebraic_numbers.h"
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialComputations(__FILE__, "Implementation header, polynomial computations, more advanced. ");
 

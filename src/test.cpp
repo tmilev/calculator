@@ -12,12 +12,12 @@
 
 #include "vpfJson.h"
 #include "vpfFiniteFields.h"
-#include "vpfImplementationHeader2Math7_PackedVector.h"
-#include "vpfImplementationHeader2Math3_FiniteGroups.h"
+#include "math_extra_7_packed_vector_implementation.h"
+#include "math_extra_4_finite_groups_implementation.h"
 
 #include "math_extra_15_symmetric_groups_and_generalizations.h"
 #include "general_10_test.h"
-#include "vpfImplementationHeader2Math0_General.h"
+#include "math_1_general_implementation.h"
 
 /*
 // The Plan:

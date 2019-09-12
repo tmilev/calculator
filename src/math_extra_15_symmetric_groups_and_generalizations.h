@@ -4,11 +4,11 @@
 #define vpfSymmetricGroupsAndGeneralizationsHeader_alreadyIncluded
 #include "general_1_lists.h"
 #include "math_1_general.h"
-#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
+#include "math_1_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_13_vector_space.h"
 #include "math_extra_6_graph.h"
 #include "math_extra_4_finite_groups.h"
-#include "vpfImplementationHeader2Math3_FiniteGroups.h"
+#include "math_extra_4_finite_groups_implementation.h"
 
 static ProjectInformationInstance ProjectInfoVpfSymmetricGroups(
   __FILE__, "Header file, symmetric and related groups. Work in progress."

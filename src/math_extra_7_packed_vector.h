@@ -4,7 +4,7 @@
 #define vpfPackedVector_h_already_included
 #include "vpfJson.h"
 #include "math_extra_13_vector_space.h"
-#include "vpfImplementationHeader2Math3_FiniteGroups.h"
+#include "math_extra_4_finite_groups_implementation.h"
 
 static ProjectInformationInstance vpfPackedVector(__FILE__, "Very small (RAM-wise) vectors for extreme computations with small built-in coefficients. ");
 

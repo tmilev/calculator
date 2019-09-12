@@ -1,8 +1,8 @@
-#ifndef VPFHEADER3CALCULATOR4HTMLFUNCTIONS_H
-#define VPFHEADER3CALCULATOR4HTMLFUNCTIONS_H
+#ifndef calculator_5_html_functions_H
+#define calculator_5_html_functions_H
 
-#include "vpfHeader3Calculator0_Interface.h"
-static ProjectInformationInstance ProjectInfoVPFHEADER3CALCULATOR4HTMLFUNCTIONS_H(__FILE__, "Header, calculator html functions. ");
+#include "calculator_1_interface.h"
+static ProjectInformationInstance ProjectInfocalculator_5_html_functions_H(__FILE__, "Header, calculator html functions. ");
 
 class Answer;
 
@@ -17,5 +17,5 @@ public:
   static std::string GetUserInputBoxName(const Expression& theBox);
 };
 
-#endif // VPFHEADER3CALCULATOR4HTMLFUNCTIONS_H
+#endif // calculator_5_html_functions_H
 

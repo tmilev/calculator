@@ -1,7 +1,7 @@
-#ifndef VPFIMPLEMENTATIONHEADER2MATH0_GENERAL_H
-#define VPFIMPLEMENTATIONHEADER2MATH0_GENERAL_H
+#ifndef math_1_general_implementation_H
+#define math_1_general_implementation_H
 #include "math_1_general.h"
-static ProjectInformationInstance ProjectInfoVPFIMPLEMENTATIONHEADER2MATH0_GENERAL_H(
+static ProjectInformationInstance ProjectInfomath_1_general_implementation_H(
   __FILE__, "Header implementation, math routines. "
 );
 
@@ -623,5 +623,5 @@ void Matrix<coefficient>::GaussianEliminationByRows(
   }
 }
 
-#endif // VPFIMPLEMENTATIONHEADER2MATH0_GENERAL_H
+#endif // math_1_general_implementation_H
 

@@ -4,7 +4,7 @@
 #define vpfImplementationHeaderFiniteGroupsIncluded
 
 #include "math_extra_4_finite_groups.h"
-#include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
+#include "math_1_general_polynomial_computations_advanced_implementation.h"
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderFiniteGroups(__FILE__, "Implementation header, finite groups. ");
 
 template <class coefficient>

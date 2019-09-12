@@ -1,14 +1,14 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "vpfHeader3Calculator0_Interface.h"
-#include "vpfImplementationHeader2Math0_General.h"
-#include "vpfImplementationHeader2Math3_WeylAlgebra.h"
-#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
-#include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
-#include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
+#include "calculator_1_interface.h"
+#include "math_1_general_implementation.h"
+#include "math_extra_17_Weyl_algebras_implementation.h"
+#include "math_1_general_polynomial_computations_basic_implementation.h"
+#include "math_extra_10_universal_enveloping_implementation.h"
+#include "math_extra_16_modules_semisimple_Lie_algebras_implementation.h"
 #include "math_4_subsets_selections.h"
-#include "vpfImplementationHeader2Math3_FiniteGroups.h"
-#include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
+#include "math_extra_4_finite_groups_implementation.h"
+#include "math_extra_1_semisimple_Lie_algebras_implementation.h"
 
 extern ProjectInformationInstance ProjectInfoVpf5cpp;
 ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Calculator built-in functions. ");

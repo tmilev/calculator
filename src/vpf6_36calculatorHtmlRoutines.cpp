@@ -1,9 +1,9 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "calculator.h"
-#include "vpfHeader3Calculator2_InnerFunctions.h"
-#include "vpfHeader3Calculator1_InnerTypedFunctions.h"
-#include "vpfHeader3Calculator4HtmlFunctions.h"
+#include "calculator_3_inner_functions.h"
+#include "calculator_2_inner_typed_functions.h"
+#include "calculator_5_html_functions.h"
 
 ProjectInformationInstance ProjectInfoVpf6_36pp(__FILE__, "Calculator html functions implementation. ");
 

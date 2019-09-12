@@ -1,14 +1,14 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "calculator.h"
-#include "vpfHeader3Calculator1_InnerTypedFunctions.h"
-#include "vpfImplementationHeader2Math0_General.h"
-#include "vpfImplementationHeader2Math3_WeylAlgebra.h"
-#include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
-#include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
-#include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
-#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
-#include "vpfImplementationHeader2Math3_FiniteGroups.h" // undefined reference to `void WeylGroup::RaiseToDominantWeight<Rational>(Vector<Rational>&, int*, bool*, ElementWeylGroup<WeylGroup>*)
+#include "calculator_2_inner_typed_functions.h"
+#include "math_1_general_implementation.h"
+#include "math_extra_17_Weyl_algebras_implementation.h"
+#include "math_extra_10_universal_enveloping_implementation.h"
+#include "math_extra_1_semisimple_Lie_algebras_implementation.h"
+#include "math_extra_16_modules_semisimple_Lie_algebras_implementation.h"
+#include "math_1_general_polynomial_computations_basic_implementation.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
+#include "math_extra_4_finite_groups_implementation.h" // undefined reference to `void WeylGroup::RaiseToDominantWeight<Rational>(Vector<Rational>&, int*, bool*, ElementWeylGroup<WeylGroup>*)
 
 ProjectInformationInstance ProjectInfoVpf6_1cpp(__FILE__, "Calculator inner binary typed functions. ");
 

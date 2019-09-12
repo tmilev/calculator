@@ -3,7 +3,7 @@
 #ifndef vpfHeader6_1InnerTypedFns_h_already_included
 #define vpfHeader6_1InnerTypedFns_h_already_included
 
-#include "vpfHeader3Calculator0_Interface.h"
+#include "calculator_1_interface.h"
 
 static ProjectInformationInstance ProjectInfoVpf6_1Header(__FILE__, "Header, calculator inner binary typed functions. ");
 

@@ -2,7 +2,7 @@
 //For additional information refer to the file "calculator.h".
 #ifndef vpfHeader6_2InnerFns
 #define vpfHeader6_2InnerFns
-#include "vpfHeader3Calculator0_Interface.h"
+#include "calculator_1_interface.h"
 
 static ProjectInformationInstance ProjectInfoVpf6_2Header(__FILE__, "Header, calculator built-in functions. ");
 

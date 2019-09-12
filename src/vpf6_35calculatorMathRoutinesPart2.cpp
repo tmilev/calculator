@@ -1,13 +1,13 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "calculator.h"
-#include "vpfHeader3Calculator2_InnerFunctions.h"
-#include "vpfHeader3Calculator1_InnerTypedFunctions.h"
+#include "calculator_3_inner_functions.h"
+#include "calculator_2_inner_typed_functions.h"
 #include "math_extra_9_drawing_variables.h"
-#include "vpfHeader3Calculator4HtmlFunctions.h"
+#include "calculator_5_html_functions.h"
 #include "vpfHeader5Crypto.h"
 #include "vpfHeader8HtmlSnippets.h"
-#include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
+#include "math_1_general_polynomial_computations_advanced_implementation.h"
 #include <cmath>
 ProjectInformationInstance ProjectInfoVpf6_35cpp(__FILE__, "More calculator built-in functions. ");
 

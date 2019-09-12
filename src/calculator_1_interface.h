@@ -13,7 +13,7 @@
 #include "math_extra_10_universal_enveloping.h"
 #include "math_extra_16_modules_semisimple_Lie_algebras.h"
 #include "math_extra_15_symmetric_groups_and_generalizations.h"
-#include "vpfImplementationHeader2Math11_EllipticCurves.h"
+#include "math_extra_12_elliptic_curves_implementation.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file, calculator declaration. ");
 

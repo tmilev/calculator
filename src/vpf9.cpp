@@ -1,10 +1,10 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "general_1_lists.h"
-#include "vpfImplementationHeader2Math0_General.h"
-#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
-#include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
-#include "vpfImplementationHeader2Math3_FiniteGroups.h"
+#include "math_1_general_implementation.h"
+#include "math_1_general_polynomial_computations_basic_implementation.h"
+#include "math_1_general_polynomial_computations_advanced_implementation.h"
+#include "math_extra_4_finite_groups_implementation.h"
 #include "math_extra_15_symmetric_groups_and_generalizations.h"
 #include "math_extra_9_drawing_variables.h"
 #include <dirent.h>

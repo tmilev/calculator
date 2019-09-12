@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "vpfHeader3Calculator2_InnerFunctions.h"
-#include "vpfHeader3Calculator4HtmlFunctions.h"
+#include "calculator_3_inner_functions.h"
+#include "calculator_5_html_functions.h"
 #include "vpfHeader7DatabaseInterface.h"
 #include "general_5_time_date.h"
 #include "vpfHeader8HtmlInterpretation.h"
@@ -748,7 +748,7 @@ void SyntacticElementHTML::resetAllExceptContent() {
 
 std::string SyntacticElementHTML::ToStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose) {
   if (this->tag == "" || this->flagUseMathSpan == false) {
-    return "";  
+    return "";
   }
   std::stringstream out;
   if (overrideTagIfNonEmpty == "") {

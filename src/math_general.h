@@ -4382,7 +4382,6 @@ public:
   void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
   static void GetBasisFromSpanOfElements(
     List<ElementSemisimpleLieAlgebra>& theElements,
-    Vectors<RationalFunctionOld>& outputCoords,
     List<ElementSemisimpleLieAlgebra>& outputTheBasis
   );
   void ActOnMe(const ElementSemisimpleLieAlgebra& theElt, ElementSemisimpleLieAlgebra& output, SemisimpleLieAlgebra& owner);
@@ -4393,7 +4392,7 @@ public:
     const RationalFunctionOld& theRingUnit,
     const RationalFunctionOld& theRingZero
   );
-  bool IsACoeffOneChevalleyGenerator(int& outputGenerator, SemisimpleLieAlgebra& owner);
+  bool IsACoeffOneChevalleyGenerator();
   bool IsProportionalTo(const ElementSemisimpleLieAlgebra& other) const {
     Vector<Rational> tempRoot1, tempRoot2;
     this->ElementToVectorNegativeRootSpacesFirst(tempRoot1);
@@ -6558,14 +6557,10 @@ public:
 
 class PiecewiseQuasipolynomial {
   public:
-  //Note: PiecewiseQuasipolynomial assumes that its variable GlobalVariables* theBuffers
-  // is always initialized with a non-zero object.
-  //This is an engineering decision that yet has to be proven good: please follow the assumption,
-  //but keep in mind that a better solution might exist, and be ready to switch.
-  //Let the piecewise quasipolynomial be in n variables.
-  //Then the theProjectivizedComplex is an n + 1-dimensional complex,
-  //which is the projectivization of the n-dim affine complex representing the
-  //domain of the piecewise quasipoly.
+  // Let the piecewise quasipolynomial be in n variables.
+  // Then the theProjectivizedComplex is an n + 1-dimensional complex,
+  // which is the projectivization of the n-dim affine complex representing the
+  // domain of the piecewise quasipoly.
   ConeComplex theProjectivizedComplex;
   List<QuasiPolynomial> theQPs;
   int NumVariables;

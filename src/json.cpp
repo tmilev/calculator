@@ -77,7 +77,7 @@ bool JSData::HasCompositeKeyOfType(
   const std::string& key, JSData* whichValue, char targetType, std::stringstream* commentsOnFailure
 ) const {
   JSData container;
-  if (whichValue == 0) {
+  if (whichValue == nullptr) {
     whichValue = &container;
   }
   if (!JSData::HasCompositeKey(key, whichValue, commentsOnFailure)) {
@@ -86,8 +86,8 @@ bool JSData::HasCompositeKeyOfType(
   if (whichValue->theType != targetType) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Key: " << key << ", value: " << whichValue->ToString(false)
-      << " is of type " << (int) whichValue->theType
-      << " instead of the target one: " << (int) targetType;
+      << " is of type " << static_cast<int>(whichValue->theType)
+      << " instead of the target one: " << static_cast<int>(targetType);
     }
     return false;
   }
@@ -146,7 +146,7 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
     }
     currentData = &currentData->objects.GetValueConstCrashIfNotPresent(keys[i]);
   }
-  if (whichValue != 0) {
+  if (whichValue != nullptr) {
     *whichValue = *currentData;
   }
   return true;

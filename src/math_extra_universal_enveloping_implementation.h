@@ -940,7 +940,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::GetElementUniversalEnvelop
       tempMon.RaiseToPower(theDegree);
       Accum *= tempMon;
     } else {
-      if (this->owner->theOrder[this->generatorsIndices[i]].IsACoeffOneChevalleyGenerator(theIndex, *inputOwner.theOwner)) {
+      if (this->owner->theOrder[this->generatorsIndices[i]].IsACoeffOneChevalleyGenerator()) {
         tempMon.MakeOneGeneratorCoeffOne(theIndex, inputOwner, this->Coefficient.GetOne(), this->Coefficient.GetZero());
         tempMon[0].Powers[0] = this->Powers[i];
         Accum *= tempMon;
@@ -955,9 +955,9 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::GetElementUniversalEnvelop
 
 template <class coefficient>
 void MonomialUniversalEnvelopingOrdered<coefficient>::SetNumVariables(int newNumVars) {
-  this->Coefficient.SetNumVariablesSubDeletedVarsByOne((int)newNumVars);
+  this->Coefficient.SetNumVariablesSubDeletedVarsByOne(newNumVars);
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
-    this->Powers[i].SetNumVariablesSubDeletedVarsByOne((int)newNumVars);
+    this->Powers[i].SetNumVariablesSubDeletedVarsByOne(newNumVars);
   }
 }
 
@@ -1074,7 +1074,7 @@ void ElementUniversalEnveloping<coefficient>::MultiplyBy(
 template <class coefficient>
 void ElementUniversalEnveloping<coefficient>::operator*=(const ElementUniversalEnveloping& standsOnTheRight) {
   this->::ElementMonomialAlgebra<MonomialUniversalEnveloping<coefficient>, coefficient>
-  ::operator*=((ElementMonomialAlgebra<MonomialUniversalEnveloping<coefficient>, coefficient>) standsOnTheRight);
+  ::operator*=(static_cast<ElementMonomialAlgebra<MonomialUniversalEnveloping<coefficient>, coefficient> >(standsOnTheRight));
 }
 
 template <class coefficient>
@@ -1734,7 +1734,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::CommutingLeftIndexAroundRi
 
 template <class coefficient>
 void MonomialUniversalEnvelopingOrdered<coefficient>::MakeZero(int numVars, SemisimpleLieAlgebraOrdered& theOwner) {
-  this->Coefficient.MakeZero((int) numVars);
+  this->Coefficient.MakeZero(numVars);
   this->owner = &theOwner;
   this->generatorsIndices.size = 0;
   this->Powers.size = 0;
@@ -1789,8 +1789,9 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::MultiplyByGeneratorPowerOn
 
 template <class coefficient>
 std::string MonomialUniversalEnvelopingOrdered<coefficient>::ToString(
-  bool useLatex, bool useCalculatorFormat, FormatExpressions* PolyFormatLocal
+  FormatExpressions* PolyFormatLocal
 ) const {
+
   if (this->owner == nullptr) {
     return "faulty monomial non-initialized owner. Slap the programmer.";
   }
@@ -1840,7 +1841,7 @@ std::string MonomialUniversalEnvelopingOrdered<coefficient>::ToString(
 
 template <class coefficient>
 void ElementUniversalEnvelopingOrdered<coefficient>::ToString(
-  std::string& output, bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal
+  std::string& output, FormatExpressions* PolyFormatLocal
 ) const {
   std::stringstream out;
   std::string tempS;
@@ -1850,7 +1851,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::ToString(
   int IndexCharAtLastLineBreak = 0;
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnvelopingOrdered<coefficient>& current = this->TheObjects[i];
-    tempS = current.ToString(false, useCalculatorFormat, &PolyFormatLocal);
+    tempS = current.ToString(PolyFormatLocal);
     if (i != 0) {
       if (tempS.size() > 0) {
         if (tempS[0] != '-') {
@@ -1859,7 +1860,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::ToString(
       }
     }
     out << tempS;
-    if (((int) out.tellp())- IndexCharAtLastLineBreak > 150) {
+    if ((static_cast<int>(out.tellp())) - IndexCharAtLastLineBreak > 150) {
       IndexCharAtLastLineBreak = out.tellp();
       out << "\\\\&&";
     }

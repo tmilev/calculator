@@ -11,6 +11,7 @@
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'
 
+extern ProjectInformationInstance ProjectInfoVpf9_2cpp;
 ProjectInformationInstance ProjectInfoVpf9_2cpp(__FILE__, "Math routines implementation. ");
 
 std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat) const {
@@ -19,7 +20,7 @@ std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat) const {
   }
   std::stringstream out;
   FormatExpressions tempFormat;
-  if (theFormat == 0) {
+  if (theFormat == nullptr) {
     tempFormat.polyDefaultLetter = "\\partial";
   } else {
     tempFormat.polyDefaultLetter = theFormat->WeylAlgebraDefaultLetter;
@@ -87,10 +88,10 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
     this->AmbientWeyl->ComputeRho(false);
   }
   this->simpleRootsInner.SetSize(0);
-  if (inputRoots != 0) {
+  if (inputRoots != nullptr) {
     this->simpleRootsInner = *inputRoots;
   }
-  if (inputExternalAutos != 0) {
+  if (inputExternalAutos != nullptr) {
     this->ExternalAutomorphisms = *inputExternalAutos;
   }
   this->AmbientWeyl->TransformToSimpleBasisGenerators(this->simpleRootsInner, this->AmbientWeyl->RootSystem);
@@ -219,7 +220,7 @@ void DrawOperations::drawPath(
   if (color != "") {
     theOperation[DrawOperations::fieldColor] = color;
   }
-  if (lineWidth != 1) {
+  if (lineWidth != 1.0) {
     theOperation[DrawOperations::fieldLineWidth] = lineWidth;
   }
   this->theOperations.AddOnTop(theOperation);
@@ -236,7 +237,7 @@ void DrawOperations::drawLineBetweenTwoVectorsBufferDouble(
   if (color != "") {
     theOperation[DrawOperations::fieldColor] = color;
   }
-  if (lineWidth != 1) {
+  if (lineWidth != 1.0) {
     theOperation[DrawOperations::fieldLineWidth] = lineWidth;
   }
   this->theOperations.AddOnTop(theOperation);
@@ -254,7 +255,7 @@ void DrawOperations::drawFilledShape(
   for (int i = 0; i < theCorners.size; i ++) {
     theOperation[DrawOperations::fieldPoints][i] = theCorners[i];
   }
-  if (lineWidth != 1) {
+  if (lineWidth != 1.0) {
     theOperation[DrawOperations::fieldLineWidth] = lineWidth;
   }
   this->theOperations.AddOnTop(theOperation);
@@ -424,7 +425,7 @@ void DrawingVariables::drawString(
       theFontSize,
       theTextStyle
     );
-    theDrawData.outputWidth += (int)(((double) theFontSize) / 1.15);
+    theDrawData.outputWidth += static_cast<int>(static_cast<double>(theFontSize) / 1.15);
   }
 }
 
@@ -933,7 +934,7 @@ std::string SemisimpleLieAlgebra::GetStringFromChevalleyGenerator(
 ) const {
   std::stringstream out;
   MemorySaving<FormatExpressions> tempFormat;
-  if (thePolynomialFormat == 0) {
+  if (thePolynomialFormat == nullptr) {
     thePolynomialFormat = &tempFormat.GetElement();
   }
   if (this->IsGeneratorFromCartan(theIndex)) {
@@ -1140,7 +1141,7 @@ void HtmlRoutines::MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank) {
 }
 
 void HtmlRoutines::ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput) {
-  for (int i = 0; i < (signed) inputOutput.size(); i ++) {
+  for (unsigned i = 0; i < inputOutput.size(); i ++) {
     if (inputOutput[i] == '=' || inputOutput[i] == '&') {
       inputOutput[i] = ' ';
     }
@@ -1222,7 +1223,7 @@ bool VectorPartition::IncrementReturnFalseIfPastLast() {
       return false;
     }
   }
-  return false;
+  // return false;
 }
 
 std::string VectorPartition::ToStringPartitioningVectors() {
@@ -1351,7 +1352,7 @@ void RationalFunctionOld::operator/=(int other) {
 }
 
 void RationalFunctionOld::Minus() {
-  this->operator*=((Rational) - 1);
+  this->operator*= (Rational(- 1));
   if (!this->checkConsistency()) {
     crash << "Failed to take the negative sign of a rational function. " << crash;
   }
@@ -1402,7 +1403,7 @@ void RationalFunctionOld::MakeZero() {
 
 void RationalFunctionOld::operator+=(int theConstant) {
   RationalFunctionOld tempRF;
-  tempRF.MakeConst((Rational) theConstant);
+  tempRF.MakeConst(Rational(theConstant));
   (*this) += tempRF;
 }
 
@@ -1466,7 +1467,7 @@ std::string RationalFunctionOld::ToString(FormatExpressions* theFormat) const {
     return this->Numerator.GetElementConst().ToString(theFormat);
   }
   std::stringstream out;
-  bool useFrac = theFormat == 0 ? false : theFormat->flagUseFrac;
+  bool useFrac = theFormat == nullptr ? false : theFormat->flagUseFrac;
   bool needParenthesis = false;
   if (!useFrac) {
     needParenthesis = this->Numerator.GetElementConst().NeedsParenthesisForMultiplication();
@@ -1588,7 +1589,7 @@ void RationalFunctionOld::lcm(
   rightTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
   leftTemp.ScaleToIntegralNoGCDCoeffs();
   rightTemp.ScaleToIntegralNoGCDCoeffs();
-  tempP.MakeMonomiaL(theNumVars, 1, (Rational) 1, theNumVars + 1);
+  tempP.MakeMonomiaL(theNumVars, 1, Rational(1), theNumVars + 1);
   leftTemp *= tempP;
   tempP *= - 1;
   tempP += 1;
@@ -1794,7 +1795,7 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other) {
 
 void RationalFunctionOld::operator+=(const RationalFunctionOld& other) {
   if (this == &other) {
-    *this *= (Rational) 2;
+    *this *= Rational(2);
     return;
   }
   if (!this->checkConsistency()) {
@@ -1877,7 +1878,7 @@ void RationalFunctionOld::SimplifyLeadingCoefficientOnly() {
 void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational> & output) {
   int theRank = theAlgebra.theWeyl.CartanSymmetric.NumRows;
   int numPosRoots = theAlgebra.theWeyl.RootsOfBorel.size;
-  output.MakeDegreeOne((int)(theRank+numPosRoots), theIndex + theRank, (Rational) 1);
+  output.MakeDegreeOne(theRank + numPosRoots, theIndex + theRank, Rational(1));
 }
 
 template <class coefficient>
@@ -1997,7 +1998,7 @@ bool ElementSemisimpleLieAlgebra<coefficient>::MustUseBracketsWhenDisplayingMeRa
 }
 
 template <class coefficient>
-bool ElementSemisimpleLieAlgebra<coefficient>::IsACoeffOneChevalleyGenerator(int& outputGenerator, SemisimpleLieAlgebra& owner) {
+bool ElementSemisimpleLieAlgebra<coefficient>::IsACoeffOneChevalleyGenerator() {
   if (this->size == 1) {
     return this->theCoeffs[0] == 1;
   }
@@ -2034,7 +2035,6 @@ void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK(
 template <class coefficient>
 void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements(
   List<ElementSemisimpleLieAlgebra>& theElements,
-  Vectors<RationalFunctionOld>& outputCoords,
   List<ElementSemisimpleLieAlgebra>& outputTheBasis
 ) {
   Vectors<Rational> theRootForm;

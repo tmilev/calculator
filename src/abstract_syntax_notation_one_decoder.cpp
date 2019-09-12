@@ -475,7 +475,6 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
 }
 
 void X509Certificate::WriteBytes(List<unsigned char>& output) {
-  int implementMeNext;
 }
 
 std::string X509Certificate::ToStringTestEncode() {

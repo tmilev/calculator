@@ -6,13 +6,15 @@
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
+
+extern ProjectInformationInstance ProjectInfoVpfSemisimpleSubalgebras;
 ProjectInformationInstance ProjectInfoVpfSemisimpleSubalgebras(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
 
 extern logger logWorker;
 template<>
 List<DynkinSimpleType>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<DynkinSimpleType>() {
-  return 0;
+  return nullptr;
 }
 
 template<class coefficient>
@@ -74,7 +76,7 @@ std::string SemisimpleLieAlgebra::ToStringLieAlgebraNameNonTechnicalHTML() const
     }
     const DynkinSimpleType& currentSimpleType = theType[indexType];
     for (int indexIsotypic = 0; indexIsotypic < theType.theCoeffs[indexType]; indexIsotypic ++) {
-      out << currentSimpleType.ToStringNonTechnicalName(0);
+      out << currentSimpleType.ToStringNonTechnicalName(nullptr);
       if (indexIsotypic + 1 < theType.theCoeffs[indexType]) {
         out << "\\oplus";
       }
@@ -119,7 +121,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
   for (int i = 0; i < mustBeZero.size(); i ++) {
     theSystem.AddOnTop(mustBeZero.theCoeffs[i]);
   }
-  if (logStream != 0) {
+  if (logStream != nullptr) {
     *logStream << "The system to solve: ";
     for (int i = 0; i < theSystem.size; i ++) {
       *logStream << "<br>" << theSystem[i].ToString() << " = 0 ";
@@ -131,7 +133,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
   MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
   theComputation.SolveSerreLikeSystem(theSystem);
   if (!theComputation.flagSystemSolvedOverBaseField) {
-    if (logStream != 0) {
+    if (logStream != nullptr) {
       if (theComputation.flagSystemProvenToHaveNoSolution) {
         *logStream << "<br><b>System proven to have no solution. </b>";
       }
@@ -142,7 +144,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
     }
     return false;
   }
-  if (logStream != 0) {
+  if (logStream != nullptr) {
     *logStream << "Solved successfully! One solution: " << theComputation.ToStringSerreLikeSolution();
   }
   PolynomialSubstitution<AlgebraicNumber> theSolutionSub;
@@ -150,7 +152,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
   inputOutputF.SubstitutionCoefficients(theSolutionSub);
   inputOutputH.SubstitutionCoefficients(theSolutionSub);
   inputOutputE.SubstitutionCoefficients(theSolutionSub);
-  if (logStream != 0) {
+  if (logStream != nullptr) {
     *logStream << "<br>H = " << inputOutputH.ToString() << "<br>E = "
     << inputOutputE.ToString() << "<br>F = " << inputOutputF.ToString();
   }
@@ -171,7 +173,7 @@ bool SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan(
   theId.MakeId(theM.NumRows);
   MathRoutines::RaiseToPower(theMatTensor, this->GetNumPosRoots(), theId);
   if (!theMatTensor.IsEqualToZero()) {
-    if (logStream != 0) {
+    if (logStream != nullptr) {
       *logStream << "The input E element " << theE.ToString()
       << " is not nilpotent. The matrix tensor is: " << theMatTensor.ToString();
     }
@@ -191,7 +193,6 @@ bool SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan(
 }
 
 SubalgebraSemisimpleLieAlgebra::SubalgebraSemisimpleLieAlgebra() {
-  this->theGlobalVariables = 0;
   this->owner = nullptr;
 }
 
@@ -273,7 +274,7 @@ void SubalgebraSemisimpleLieAlgebra::ComputeCartanSA() {
     }
     this->CartanSA.AddOnTop(newElt);
     this->owner->GetCommonCentralizer(this->CartanSA, CurrentCentralizer);
-    newElt.IntersectVectorSpaces(CurrentCentralizer, this->theBasis, CurrentCentralizer, 0);
+    newElt.IntersectVectorSpaces(CurrentCentralizer, this->theBasis, CurrentCentralizer, nullptr);
   }
 
 }
@@ -375,7 +376,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
   this->owner->ToStringVirtualFolderName() + "testFileWritePermissionsSSsas.txt";
   std::string testFileFolderPhysical;
   FileOperations::GetPhysicalFileNameFromVirtual(
-    this->owner->ToStringVirtualFolderName(), testFileFolderPhysical, false, false, 0
+    this->owner->ToStringVirtualFolderName(), testFileFolderPhysical, false, false, nullptr
   );
   theGlobalVariables.CallSystemNoOutput("mkdir " + testFileFolderPhysical, &logWorker);
 
@@ -394,7 +395,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
 }
 
 void SemisimpleSubalgebras::WriteReportToFiles() {
-  this->timeComputationEndInSeconds = theGlobalVariables.GetElapsedSeconds();
+  this->millisecondsComputationEnd = theGlobalVariables.GetElapsedMilliseconds();
   this->numAdditions = Rational::TotalSmallAdditions + Rational::TotalLargeAdditions;
   this->numMultiplications = Rational::TotalSmallMultiplications + Rational::TotalLargeMultiplications;
   this->currentFormat.flagUseHTML = true;
@@ -563,7 +564,7 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theF
 std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToString");
   HtmlRoutines::GlobalMathSpanID = 0;
-  bool writingToHD = theFormat == 0 ? false : theFormat->flagUseHtmlAndStoreToHD;
+  bool writingToHD = theFormat == nullptr ? false : theFormat->flagUseHtmlAndStoreToHD;
   std::stringstream out;
   int candidatesRealized = 0;
   int candidatesNotRealizedNotProvenImpossible = 0;
@@ -605,14 +606,14 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat) {
   if (this->comments != "") {
     out << "<a href = '" << this->fileNameToLogComments << "'>Generation comments.</a>";
   }
-  bool showTime = theFormat == 0 ? true : theFormat->flagIncludeMutableInformation;
+  bool showTime = theFormat == nullptr ? true : theFormat->flagIncludeMutableInformation;
   if (showTime) {
-    if (this->timeComputationStartInSeconds != - 1 && this->timeComputationEndInSeconds != - 1) {
-      out << "<br>Computation time in seconds: "
-      << this->timeComputationEndInSeconds - this->timeComputationStartInSeconds << ".";
+    if (this->millisecondsComputationStart > 0 && this->millisecondsComputationEnd > 0) {
+      out << "<br>Computation milliseconds: "
+      << this->millisecondsComputationEnd - this->millisecondsComputationStart << ".";
     }
   }
-  if (this->numAdditions != - 1) {
+  if (this->numAdditions > 0) {
     out << "<br>" << this->numAdditions + this->numMultiplications << " total arithmetic operations performed = "
     << this->numAdditions << " additions and "
     << this->numMultiplications << " multiplications. ";
@@ -686,13 +687,13 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
 
 std::string SemisimpleSubalgebras::ToStringSubalgebrasWithHDWrite(FormatExpressions *theFormat) {
   std::stringstream out;
-  if (theFormat != 0) {
+  if (theFormat != nullptr) {
     theFormat->flagCandidateSubalgebraShortReportOnly = true;
     theFormat->flagUseHtmlAndStoreToHD = true;
   }
   out << this->ToStringSubalgebrasNoHDWrite(theFormat);
   FormatExpressions theFormatCopy;
-  if (theFormat != 0) {
+  if (theFormat != nullptr) {
     theFormatCopy = *theFormat;
   }
   theFormatCopy.flagUseMathSpanPureVsMouseHover = true;
@@ -739,10 +740,10 @@ std::string SemisimpleSubalgebras::ToStringTableSubalgebraLinksTable(FormatExpre
 std::string SemisimpleSubalgebras::ToStringPart2(FormatExpressions *theFormat) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringPart2");
   std::stringstream out;
-  bool writingToHD = theFormat == 0 ? false : theFormat->flagUseHtmlAndStoreToHD;
+  bool writingToHD = theFormat == nullptr ? false : theFormat->flagUseHtmlAndStoreToHD;
   out << "<hr>";
   out << "The base field over which the subalgebras were realized is: ";
-  if (this->ownerField == 0) {
+  if (this->ownerField == nullptr) {
     out << HtmlRoutines::GetMathSpanPure("\\mathbb Q");
   } else {
     out << this->ownerField->ToString();
@@ -811,7 +812,7 @@ std::string SemisimpleSubalgebras::ToStringSl2s(FormatExpressions *theFormat) {
 
 std::string SemisimpleSubalgebras::ToStringPart3(FormatExpressions* theFormat) {
   std::stringstream out;
-  bool writingToHD = theFormat == 0 ? false : theFormat->flagUseHtmlAndStoreToHD;
+  bool writingToHD = theFormat == nullptr ? false : theFormat->flagUseHtmlAndStoreToHD;
   if (!writingToHD) {
     out << this->ToStringSl2s(theFormat);
     out << "<hr>Calculator input for loading subalgebras directly without recomputation. "
@@ -835,8 +836,8 @@ std::string SemisimpleSubalgebras::ToStringPart3(FormatExpressions* theFormat) {
     << "<body>"
     << this->ToStringProgressReport(theFormat)
     << "</body></html>";
-    FileOperations::WriteFileVirual(this->owner->ToStringVirtualFolderName() + sl2SubalgebraReports, fileSl2Content.str(), 0);
-    FileOperations::WriteFileVirual(this->owner->ToStringVirtualFolderName() + loadSubalgebrasFile, fileLoadContent.str(), 0);
+    FileOperations::WriteFileVirual(this->owner->ToStringVirtualFolderName() + sl2SubalgebraReports, fileSl2Content.str(), nullptr);
+    FileOperations::WriteFileVirual(this->owner->ToStringVirtualFolderName() + loadSubalgebrasFile, fileLoadContent.str(), nullptr);
   }
   return out.str();
 }
@@ -4050,9 +4051,9 @@ void SemisimpleSubalgebras::initHookUpPointers(
 }
 
 void SemisimpleSubalgebras::reset() {
-  this->ToStringExpressionString = 0;
+  this->ToStringExpressionString = nullptr;
   this->owner = nullptr;
-  this->ownerField = 0;
+  this->ownerField = nullptr;
   this->theSl2s.owner = nullptr;
   this->flagRealizedAllCandidates = true;
   this->flagAttemptToSolveSystems = true;
@@ -4061,11 +4062,11 @@ void SemisimpleSubalgebras::reset() {
   this->flagComputeNilradicals = false;
   this->flagProduceLaTeXtables = false;
   this->flagAttemptToAdjustCentralizers = true;
-  this->timeComputationStartInSeconds = - 1;
-  this->timeComputationEndInSeconds = - 1;
-  this->numAdditions = - 1;
-  this->numMultiplications = - 1;
-  this->theSubalgebrasNonEmbedded = 0;
+  this->millisecondsComputationStart = - 1;
+  this->millisecondsComputationEnd = - 1;
+  this->numAdditions = 0;
+  this->numMultiplications = 0;
+  this->theSubalgebrasNonEmbedded = nullptr;
 }
 
 bool CandidateSSSubalgebra::AttemptToSolveSystem() {

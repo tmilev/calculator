@@ -27,12 +27,12 @@ public:
   static const int CarryOverBound = 1000000000;
   //the above choice of CarryOverBound facilitates very quick conversions of Large integers into decimal, with
   //relatively small loss of speed and RAM memory.
-//  static const unsigned int CarryOverBound =2147483648UL; //=2^31
+  //static const unsigned int CarryOverBound =2147483648UL; //=2^31
   //The following must be less than or equal to the square root of CarryOverBound.
   //It is used for quick multiplication of Rational-s.
   //static const int SquareRootOfCarryOverBound =3;//<-for extreme "corner case" testing
   static const int SquareRootOfCarryOverBound = 31000; //31000*31000=961000000<1000000000
-//  static const int SquareRootOfCarryOverBound =32768; //=2^15
+  //static const int SquareRootOfCarryOverBound =32768; //=2^15
   friend bool operator<(int left, const LargeIntUnsigned& right) {
     return right > left;
   }
@@ -81,6 +81,7 @@ public:
   void MultiplyByUInt(unsigned int x);
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void AssignShiftedUInt(unsigned int x, int shift);
+  void AssignUInt64(uint64_t x);
   void AccountFactor(const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<int>& outputMultiplicities) const;
   bool FactorReturnFalseIfFactorizationIncomplete(
     List<LargeInt>& outputFactors,
@@ -202,6 +203,8 @@ public:
     this->sign = 1;
   }
   void AssignInt(int x);
+  void AssignInt64(int64_t x);
+  void AssignUInt64(uint64_t x);
   void AddLargeIntUnsigned(const LargeIntUnsigned& x);
   inline void AddInt(int x) {
     LargeInt tempInt;
@@ -351,6 +354,12 @@ public:
   }
   LargeInt(int x) {
     this->AssignInt(x);
+  }
+  LargeInt(int64_t x) {
+    this->AssignInt64(x);
+  }
+  LargeInt(uint64_t x) {
+    this->AssignUInt64(x);
   }
   LargeInt(const LargeIntUnsigned& other) : sign(1), value(other) {
   }

@@ -606,13 +606,13 @@ void Vector<coefficient>::ScaleByPositiveRationalToIntegralMinHeight() {
       }
       tempUI = (*this)[i].GetDenominator();
       if (!tempUI.IsEqualToOne()) {
-        (*this) *= (coefficient) tempUI;
+        (*this) *= static_cast<coefficient>(tempUI);
       }
     }
   }
   if (foundNonZero) {
     if (!numGCD.IsEqualToOne()) {
-      *this /= (coefficient)(numGCD);
+      *this /= static_cast<coefficient>(numGCD);
     }
   }
 }

@@ -592,7 +592,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   theSAs.flagComputeModuleDecomposition = true;
   theSAs.flagComputePairingTable = false;
   theSAs.flagComputeNilradicals = false;
-  theSAs.timeComputationStartInSeconds = theGlobalVariables.GetElapsedSeconds();
+  theSAs.millisecondsComputationStart = theGlobalVariables.GetElapsedMilliseconds();
   reportStream << " done. <br>Total subalgebras: " << theSAsE.children.size - 1 << ". ";
   theReport.Report(reportStream.str());
 
@@ -614,7 +614,8 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     if (theSAs.theSubalgebras.Contains(currentCandidate.theHs)) {
       theCommands << "<hr>Did not load subalgebra of type "
       << currentCandidate.theWeylNonEmbedded->ToString()
-      << " because I've already loaded a subalgebra with the same cartan subalgebra. ";
+      << " because I've already loaded a subalgebra with "
+      << "the same Cartan subalgebra. ";
       continue;
     }
     theSAs.theSubalgebras.SetKeyValue(currentCandidate.theHs, currentCandidate);
@@ -637,7 +638,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     << theSAs.ToStringProgressReport();
     return output.AssignValue(out.str(), theCommands);
   }
-  theSAs.timeComputationEndInSeconds = theGlobalVariables.GetElapsedSeconds();
+  theSAs.millisecondsComputationEnd = theGlobalVariables.GetElapsedMilliseconds();
   return output.AssignValue(theSAs, theCommands);
 }
 

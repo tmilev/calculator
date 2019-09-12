@@ -210,11 +210,7 @@ class MonomialUniversalEnvelopingOrdered {
 public:
   SemisimpleLieAlgebraOrdered* owner;
   std::string DebugString;
-  std::string ToString(bool useLatex, bool useCalculatorFormat, FormatExpressions* PolyFormatLocal) const;
-  void ComputeDebugString() {
-    FormatExpressions PolyFormatLocal;
-    this->DebugString = this->ToString(false, true, &PolyFormatLocal);
-  }
+  std::string ToString(FormatExpressions* PolyFormatLocal) const;
   // SelectedIndices gives the non-zero powers of the generators participating in the monomial
   // Powers gives the powers of the generators in the order specified in the owner
   List<int> generatorsIndices;
@@ -331,15 +327,10 @@ private:
   friend class MonomialUniversalEnvelopingOrdered<coefficient>;
 public:
   std::string DebugString;
-  void ToString(std::string& output, bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal) const;
-  std::string ToString(bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal) const {
+  void ToString(std::string& output, FormatExpressions* PolyFormatLocal) const;
+  std::string ToString(FormatExpressions* PolyFormatLocal) const {
     std::string tempS;
-    this->ToString(tempS, useLatex, useCalculatorFormat, PolyFormatLocal);
-    return tempS;
-  }
-  std::string ToString(FormatExpressions& PolyFormatLocal) const {
-    std::string tempS;
-    this->ToString(tempS, true, true, PolyFormatLocal);
+    this->ToString(tempS, PolyFormatLocal);
     return tempS;
   }
   bool NeedsParenthesisForMultiplication() const {

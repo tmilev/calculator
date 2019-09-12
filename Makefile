@@ -37,7 +37,7 @@ OPTIMIZATION_FLAGS=
 # OPTIMIZATION_FLAGS+=-O2
 
 
-CFLAGS=-Wpedantic -Wall -Wextra -std=c++0x -pthread $(OPTIMIZATION_FLAGS) -c
+CFLAGS=-Wpedantic -Wall -Wextra -std=c++0x $(OPTIMIZATION_FLAGS) -c
 LDFLAGS=-pthread $(OPTIMIZATION_FLAGS)
 LIBRARIES_INCLUDED_AT_THE_END=
 

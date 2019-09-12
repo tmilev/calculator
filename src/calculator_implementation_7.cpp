@@ -90,7 +90,6 @@ bool CalculatorFunctionsGeneral::innerConstructCartanSA(Calculator& theCommands,
     return theCommands << "Failed to extract input semisimple Lie algebra "
     << "elements from the inputs of " << input.ToString();
   }
-  theSA.theGlobalVariables = &theGlobalVariables;
   theSA.ComputeBasis();
   theSA.ComputeCartanSA();
   return output.AssignValue(theSA.ToString(), theCommands);
@@ -389,20 +388,20 @@ bool CalculatorFunctionsGeneral::innerSliceString(Calculator& theCommands, const
     return output.AssignValue(std::string(""), theCommands);
   }
   if (input.size() <= 3) {
-    return output.AssignValue(inputString.substr(leftIndex), theCommands);
+    return output.AssignValue(inputString.substr(static_cast<unsigned>(leftIndex)), theCommands);
   }
   int rightIndex = 0;
   if (!input[3].IsSmallInteger(&rightIndex)) {
     return theCommands << "Failed to convert slice input " << input[3] << " to small integer. ";
   }
   if (rightIndex < 0) {
-    rightIndex = ((int) inputString.size()) + rightIndex;
+    rightIndex += static_cast<signed>(inputString.size());
   }
   int size = rightIndex - leftIndex ;
   if (size <= 0) {
     return output.AssignValue(std::string(""), theCommands);
   }
-  return output.AssignValue(inputString.substr(leftIndex, size), theCommands);
+  return output.AssignValue(inputString.substr(static_cast<unsigned>(leftIndex), static_cast<unsigned>(size)), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58(
@@ -519,10 +518,7 @@ bool CalculatorFunctionsGeneral::innerCharToBase64(Calculator& theCommands, cons
   }
   List<unsigned char> theBitStream;
   const std::string& inputString = input.GetValue<std::string>();
-  theBitStream.SetSize(inputString.size());
-  for (unsigned i = 0; i < inputString.size(); i ++) {
-    theBitStream[i] = inputString[i];
-  }
+  theBitStream = inputString;
   return output.AssignValue(Crypto::ConvertStringToBase64(theBitStream, false), theCommands);
 }
 
@@ -631,14 +627,14 @@ bool CalculatorFunctionsGeneral::innerCasimirWRTlevi(Calculator& theCommands, co
   if (!input.IsListNElements(3)) {
     return false;
   }
-  SemisimpleLieAlgebra* theSSalg = 0;
+  SemisimpleLieAlgebra* theSSalg = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   Vector<Rational> leviSelection;
-  if (!theCommands.GetVectoR(input[2], leviSelection, 0, theSSalg->GetRank())) {
+  if (!theCommands.GetVectoR(input[2], leviSelection, nullptr, theSSalg->GetRank())) {
     return theCommands << "<hr>Failed to extract parabolic selection. ";
   }
   Selection theParSel;
@@ -676,19 +672,19 @@ bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Express
   double theArgument;
   if (!input.EvaluatesToDouble(&theArgument)) {
     if (input.IsAtomGivenData(theCommands.opE())) {
-      return output.AssignValue((Rational) 1, theCommands);
+      return output.AssignValue(Rational(1), theCommands);
     }
     return false;
   }
   if (theArgument > 0) {
     if (input.IsAtomGivenData(theCommands.opE())) {
-      return output.AssignValue((Rational) 1, theCommands);
+      return output.AssignValue(Rational(1), theCommands);
     }
     return output.AssignValue(FloatingPoint::log(theArgument), theCommands);
   }
   theArgument *= - 1;
   Expression iE, ipiE, piE, lnPart;
-  iE.MakeSqrt(theCommands, (Rational) - 1, 2);
+  iE.MakeSqrt(theCommands, Rational(- 1), 2);
   piE.MakeAtom(theCommands.opPi(), theCommands);
   ipiE.MakeXOX(theCommands, theCommands.opTimes(), piE, iE);
   lnPart.AssignValue(FloatingPoint::log(theArgument), theCommands);
@@ -1348,7 +1344,7 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
       currentCoefficient = denRescaled.theCoeffs[denRescaled.GetIndexMaxMonomial()];
       currentCoefficient.Invert();
       denRescaled *= currentCoefficient;
-      MathRoutines::RaiseToPower(currentCoefficient, j + 1, (AlgebraicNumber) 1);
+      MathRoutines::RaiseToPower(currentCoefficient, j + 1, AlgebraicNumber(1));
       numScale = numRescaled.theCoeffs[numRescaled.GetIndexMaxMonomial()];
       numRescaled /= numScale;
       currentCoefficient *= numScale;
@@ -1411,7 +1407,7 @@ bool IntegralRFComputation::IntegrateRF() {
       currentCoefficient = denRescaled.theCoeffs[denRescaled.GetIndexMaxMonomial()];
       currentCoefficient.Invert();
       denRescaled *= currentCoefficient;
-      MathRoutines::RaiseToPower(currentCoefficient, j + 1, (AlgebraicNumber) 1);
+      MathRoutines::RaiseToPower(currentCoefficient, j + 1, AlgebraicNumber(1));
       numScale = numRescaled.theCoeffs[numRescaled.GetIndexMaxMonomial()];
       numRescaled /= numScale;
       currentCoefficient *= numScale;
@@ -1912,7 +1908,7 @@ bool CalculatorFunctionsGeneral::innerGaussianEliminationMatrix(
     return theCommands << "<hr>Failed to extract algebraic number matrix from " << input.ToString();
   }
   Matrix<AlgebraicNumber> theMat;
-  if (!theConverted.IsMatrixGivenType<AlgebraicNumber>(0, 0, &theMat)) {
+  if (!theConverted.IsMatrixGivenType<AlgebraicNumber>(nullptr, nullptr, &theMat)) {
     return theCommands << "<hr>Failed to extract algebraic number matrix, got intermediate conversion to: "
     << theConverted.ToString();
   }
@@ -1922,7 +1918,7 @@ bool CalculatorFunctionsGeneral::innerGaussianEliminationMatrix(
   std::stringstream out;
   FormatExpressions theFormat;
   theFormat.flagUseFrac = true;
-  theMat.GaussianEliminationByRows(0, 0, 0, &out, &theFormat);
+  theMat.GaussianEliminationByRows(nullptr, nullptr, nullptr, &out, &theFormat);
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -2035,15 +2031,18 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(
     }
     theFileNameWithPath.resize(theFileNameWithPath.size() - 4);
     std::string theFileNameNoPathNoExtensionReversed, theFileNameNoPathNoExtension;
-    for (int j = theFileNameWithPath.size() - 1; j >= 0; j --) {
-      if (theFileNameWithPath[j] == '/') {
+    for (int j = static_cast<signed>(theFileNameWithPath.size()) - 1; j >= 0; j --) {
+      unsigned k = static_cast<unsigned>(j);
+      if (theFileNameWithPath[k] == '/') {
         break;
       } else {
-        theFileNameNoPathNoExtensionReversed.push_back(theFileNameWithPath[j]);
+        theFileNameNoPathNoExtensionReversed.push_back(theFileNameWithPath[k]);
       }
     }
-    for (int j = theFileNameNoPathNoExtensionReversed.size() - 1; j >= 0; j --) {
-      theFileNameNoPathNoExtension.push_back(theFileNameNoPathNoExtensionReversed[j]);
+    for (int j = static_cast<signed>(theFileNameNoPathNoExtensionReversed.size()) - 1; j >= 0; j --) {
+      theFileNameNoPathNoExtension.push_back(
+        theFileNameNoPathNoExtensionReversed[static_cast<unsigned>(j)]
+      );
     }
     cppFilesNoExtension.AddOnTop(theFileNameNoPathNoExtension);
   }
@@ -2417,7 +2416,7 @@ bool CalculatorFunctionsGeneral::innerMax(Calculator& theCommands, const Express
   if (input.size() < 3) {
     return false;
   }
-  double theMax, current;
+  double theMax = 0, current = 0;
   int bestIndex = 1;
   for (int i = 1; i < input.size(); i ++) {
     if (!input[i].EvaluatesToDouble(&current)) {
@@ -2440,7 +2439,7 @@ bool CalculatorFunctionsGeneral::innerMin(Calculator& theCommands, const Express
   if (input.size() < 3) {
     return false;
   }
-  double theMin, current;
+  double theMin = 0, current = 0;
   int bestIndex = 1;
   for (int i = 1; i < input.size(); i ++) {
     if (!input[i].EvaluatesToDouble(& current)) {
@@ -2866,7 +2865,9 @@ bool CalculatorFunctionsGeneral::innerCompareFunctionsNumerically(
     }
   }
   double minDiff = 0, maxDiff = 0;
-  if (!theFunE.EvaluatesToDoubleInRange(theVars[0].ToString(), leftBoundary, rightBoundary, numPoints, &minDiff, &maxDiff, 0)) {
+  if (!theFunE.EvaluatesToDoubleInRange(
+    theVars[0].ToString(), leftBoundary, rightBoundary, numPoints, &minDiff, &maxDiff, nullptr
+  )) {
     return theCommands << "Failed to evaluate your function to a number. "
     << "The sampling interval may be outside of the domain of the function. ";
   }
@@ -2933,7 +2934,9 @@ bool CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints(
   }
   const Expression& thePointsE = input[4][2];
   Matrix<double> thePoints;
-  if (!theCommands.GetMatrix(thePointsE, thePoints, 0, varsGiven.size, CalculatorFunctionsGeneral::innerEvaluateToDouble)) {
+  if (!theCommands.GetMatrix(
+    thePointsE, thePoints, nullptr, varsGiven.size, CalculatorFunctionsGeneral::innerEvaluateToDouble
+  )) {
     return theCommands << "Failed to extract list of points from: " << thePointsE.ToString();
   }
   HashedList<Expression> knownEs = theCommands.knownDoubleConstants;
@@ -3133,7 +3136,7 @@ bool CalculatorFunctionsGeneral::innerIsEven(Calculator& theCommands, const Expr
 
 bool CalculatorFunctionsGeneral::innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsConstant");
-  int result = (int) input.IsConstantNumber();
+  int result = static_cast<int>(input.IsConstantNumber());
   return output.AssignValue(result, theCommands);
 }
 
@@ -3165,7 +3168,7 @@ bool CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable");
-  return output.AssignValue((int) input.IsDifferentialOneFormOneVariablE(), theCommands);
+  return output.AssignValue(static_cast<int>(input.IsDifferentialOneFormOneVariablE()), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerInterpretAsDifferential(
@@ -3269,7 +3272,7 @@ bool CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(Calculator& theComm
   MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
   Matrix<RationalFunctionOld> mat, outputMat, tempMat;
   Expression theContext;
-  if (!input.IsMatrixGivenType<RationalFunctionOld>(0, 0, &mat)) {
+  if (!input.IsMatrixGivenType<RationalFunctionOld>(nullptr, nullptr, &mat)) {
     return output.MakeError("Failed to extract matrix. ", theCommands);
   }
   theContext = input.GetContext();
@@ -3381,7 +3384,7 @@ bool CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(Calculator& theComm
 bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
   Matrix<Rational> mat, outputMat, tempMat;
-  if (!theCommands.GetMatriXFromArguments<Rational>(input, mat, 0, - 1, 0)) {
+  if (!theCommands.GetMatriXFromArguments<Rational>(input, mat, nullptr, - 1, nullptr)) {
     return CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(theCommands, input, output);
   }
   if (mat.NumRows != mat.NumCols || mat.NumCols < 1) {
@@ -4693,8 +4696,9 @@ bool CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx(Calculator& theComman
   if (denominatorString[0] != 'd') {
     return false;
   }
-  for (int i = 0; i < ((signed) denominatorString.size()) - 1; i ++) {
-    denominatorString[i] = denominatorString[i + 1];
+  for (int i = 0; i < static_cast<signed>(denominatorString.size()) - 1; i ++) {
+    unsigned k = static_cast<unsigned>(i);
+    denominatorString[k] = denominatorString[k + 1];
   }
   denominatorString.resize(denominatorString.size() - 1);
   Expression numeratorE, denominatorE(theCommands), rightDenE;
@@ -4863,7 +4867,7 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
   if (!CalculatorConversions::innerDynkinType(theCommands, theSmallerTypeE, theSmallDynkinType)) {
     return false;
   }
-  SemisimpleLieAlgebra* theSSalg = 0;
+  SemisimpleLieAlgebra* theSSalg = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, input[2], theSSalg
   )) {
@@ -4946,7 +4950,7 @@ void Expression::GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inp
 
 bool Expression::MakeMatrix(Calculator& owner, Matrix<Expression>* inputMat) {
   MacroRegisterFunctionWithName("Expression::MakeMatrix");
-  if (inputMat == 0) {
+  if (inputMat == nullptr) {
     this->reset(owner);
     Expression theMatID(owner);
     theMatID.AddChildAtomOnTop(owner.opMatriX());
@@ -4958,9 +4962,9 @@ bool Expression::MakeMatrix(Calculator& owner, Matrix<Expression>* inputMat) {
 
 bool Expression::MakeSequence(Calculator& owner, List<Expression>* inputSequence) {
   MacroRegisterFunctionWithName("Expression::MakeSequence");
-  this->reset(owner, inputSequence == 0 ? 1 : inputSequence->size + 1);
+  this->reset(owner, inputSequence == nullptr ? 1 : inputSequence->size + 1);
   this->AddChildAtomOnTop(owner.opSequence());
-  if (inputSequence != 0) {
+  if (inputSequence != nullptr) {
     for (int i = 0; i < inputSequence->size; i ++) {
       this->AddChildOnTop((*inputSequence)[i]);
     }
@@ -4987,9 +4991,9 @@ bool Expression::MakeSequenceCommands(Calculator& owner, List<std::string>& inpu
 
 bool Expression::MakeSequenceStatements(Calculator& owner, List<Expression>* inputStatements) {
   MacroRegisterFunctionWithName("Expression::MakeSequenceStatements");
-  this->reset(owner, inputStatements == 0 ? 1 : inputStatements->size + 1);
+  this->reset(owner, inputStatements == nullptr ? 1 : inputStatements->size + 1);
   this->AddChildAtomOnTop(owner.opEndStatement());
-  if (inputStatements != 0) {
+  if (inputStatements != nullptr) {
     for (int i = 0; i < inputStatements->size; i ++) {
       this->AddChildOnTop((*inputStatements)[i]);
     }
@@ -5034,7 +5038,7 @@ bool CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras(
     theCommands.theObjectContainer.theAlgebraicClosure,
     theCommands.theObjectContainer.theSSLieAlgebras,
     theCommands.theObjectContainer.theSltwoSAs,
-    0
+    nullptr
   );
   return output.AssignValue(theSSsubalgebras, theCommands);
 }
@@ -5057,7 +5061,7 @@ bool CalculatorFunctionsGeneral::innerMinPolyMatrix(Calculator& theCommands, con
     }
   }
   Matrix<Rational> theMat;
-  if (!output.IsMatrixGivenType<Rational>(0, 0, &theMat)) {
+  if (!output.IsMatrixGivenType<Rational>(nullptr, nullptr, &theMat)) {
     return theCommands << "<hr>Minimal poly computation: could not convert " << input.ToString() << " to rational matrix.";
   }
   if (theMat.NumRows != theMat.NumCols || theMat.NumRows <= 0) {
@@ -5079,7 +5083,7 @@ bool CalculatorFunctionsGeneral::innerCharPolyMatrix(Calculator& theCommands, co
     }
   }
   Matrix<Rational> theMat;
-  if (!output.IsMatrixGivenType<Rational>(0, 0, &theMat)) {
+  if (!output.IsMatrixGivenType<Rational>(nullptr, nullptr, &theMat)) {
     return theCommands << "<hr>Characteristic poly computation: could not convert " << input.ToString() << " to rational matrix.";
   }
   if (theMat.NumRows != theMat.NumCols || theMat.NumRows <= 0) {
@@ -5110,14 +5114,14 @@ bool CalculatorFunctionsGeneral::innerReverseBytes(Calculator& theCommands, cons
 bool CalculatorFunctionsGeneral::innerTrace(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTrace");
   Matrix<Rational> theMat;
-  if (input.IsMatrixGivenType<Rational>(0, 0, &theMat)) {
+  if (input.IsMatrixGivenType<Rational>(nullptr, nullptr, &theMat)) {
     if (!theMat.IsSquare()) {
       return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands, true);
     }
     return output.AssignValue(theMat.GetTrace(), theCommands);
   }
   Matrix<RationalFunctionOld> theMatRF;
-  if (input.IsMatrixGivenType<RationalFunctionOld>(0, 0, &theMatRF)) {
+  if (input.IsMatrixGivenType<RationalFunctionOld>(nullptr, nullptr, &theMatRF)) {
     if (!theMatRF.IsSquare()) {
       return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands, true);
     }
@@ -5131,7 +5135,7 @@ bool CalculatorFunctionsGeneral::innerTrace(Calculator& theCommands, const Expre
     return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands, true);
   }
   if (theMat.NumRows == 1) {
-    theCommands << "Requesting trace of 1x1 matrix: possible interpretation of a scalar as a 1x1 matrix. Trace not taken";
+    theCommands << "Requested trace of 1x1 matrix: possible interpretation of a scalar as a 1x1 matrix. Trace not taken. ";
     return false;
   }
   output = theMat.GetTrace();
@@ -5222,7 +5226,7 @@ bool ElementZmodP::operator==(int other) const {
   this->CheckIamInitialized();
   ElementZmodP tempElt;
   tempElt.theModulo = this->theModulo;
-  tempElt = (LargeInt) other;
+  tempElt = LargeInt(other);
   return *this == tempElt;
 }
 
@@ -5264,7 +5268,7 @@ bool LargeIntUnsigned::IsPossiblyPrimeMillerRabinOnce(
       return true;
     }
     if (i == theExponentOfThePowerTwoFactorOfNminusOne - 1) {
-      if (comments != 0) {
+      if (comments != nullptr) {
         std::stringstream theTwoPowerContraStream, theTwoPowerStream;
         if (i > 0) {
           theTwoPowerContraStream << "2";
@@ -5296,7 +5300,7 @@ bool LargeIntUnsigned::TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& ou
   MacroRegisterFunctionWithName("LargeIntUnsigned::TryToFindWhetherIsPower");
   List<LargeInt> theFactors;
   List<int> theMults;
-  if (!this->FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, 0)) {
+  if (!this->FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, nullptr)) {
     return false;
   }
   if (theMults.size == 0) {
@@ -5377,12 +5381,12 @@ bool CalculatorFunctionsGeneral::innerIsNilpotent(Calculator& theCommands, const
   Matrix<Rational> theMat;
   MatrixTensor<Rational> theMatTensor;
   bool found = false;
-  if (input.IsMatrixGivenType<Rational>(0, 0, &theMat)) {
+  if (input.IsMatrixGivenType<Rational>(nullptr, nullptr, &theMat)) {
     found = true;
     theMatTensor = theMat;
   } else if (input.IsOfType<MatrixTensor<Rational> >(&theMatTensor)) {
     found = true;
-  } else if (theCommands.GetMatriXFromArguments<Rational>(input, theMat, 0, - 1, 0)) {
+  } else if (theCommands.GetMatriXFromArguments<Rational>(input, theMat, nullptr, - 1, nullptr)) {
     theMatTensor = theMat;
     found = true;
   }
@@ -5399,11 +5403,11 @@ bool CalculatorFunctionsGeneral::innerInvertMatrix(Calculator& theCommands, cons
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInvertMatrix");
   Matrix<Rational> theMat;
   bool matRatWorks = false;
-  if (input.IsMatrixGivenType(0, 0, &theMat)) {
+  if (input.IsMatrixGivenType(nullptr, nullptr, &theMat)) {
     matRatWorks = true;
   }
   if (!matRatWorks) {
-    if (theCommands.GetMatriXFromArguments(input, theMat, 0, - 1, 0)) {
+    if (theCommands.GetMatriXFromArguments(input, theMat, nullptr, - 1, nullptr)) {
       matRatWorks = true;
     }
   }
@@ -5419,11 +5423,11 @@ bool CalculatorFunctionsGeneral::innerInvertMatrix(Calculator& theCommands, cons
   }
   Matrix<AlgebraicNumber> theMatAlg;
   bool matAlgWorks = false;
-  if (input.IsMatrixGivenType<AlgebraicNumber>(0, 0, &theMatAlg)) {
+  if (input.IsMatrixGivenType<AlgebraicNumber>(nullptr, nullptr, &theMatAlg)) {
     matAlgWorks = true;
   }
   if (!matAlgWorks) {
-    if (theCommands.GetMatriXFromArguments(input, theMatAlg, 0, - 1, 0)) {
+    if (theCommands.GetMatriXFromArguments(input, theMatAlg, nullptr, - 1, nullptr)) {
       matAlgWorks = true;
     }
   }
@@ -5487,7 +5491,7 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
     return theCommands << "The number of points for Euler's method is " << numPoints
     << ", I am not allowed to handle that many. ";
   }
-  if (leftEndpoint == rightEndpoint) {
+  if (leftEndpoint - rightEndpoint == 0.0) {
     return theCommands << "Whlie doing Euler's method: right endpoint equals left! ";
   }
   double delta = (rightEndpoint - leftEndpoint) / numPoints;
@@ -5613,7 +5617,7 @@ bool CalculatorFunctionsGeneral::innerPlotViewWindow(
     widthHeight[0] = 100;
     widthHeight[1] = 100;
     MapList<std::string, Expression, MathRoutines::HashString> theMap;
-    if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theMap, 0, false)) {
+    if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theMap, nullptr, false)) {
       isGood = false;
     } else {
       if (theMap.Contains("width")) {
@@ -5632,8 +5636,8 @@ bool CalculatorFunctionsGeneral::innerPlotViewWindow(
     return theCommands << "Failed to extract a pair of positive numbers from: "
     << input.ToString();
   }
-  emptyPlot.DesiredHtmlWidthInPixels = (int) widthHeight[0];
-  emptyPlot.DesiredHtmlHeightInPixels = (int) widthHeight[1];
+  emptyPlot.DesiredHtmlWidthInPixels = static_cast<int>(widthHeight[0]);
+  emptyPlot.DesiredHtmlHeightInPixels = static_cast<int>(widthHeight[1]);
   return output.AssignValue(emptyPlot, theCommands);
 }
 
@@ -5779,7 +5783,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   } else {
     thePlotObj.colorJS = "red";
   }
-  thePlotObj.colorRGB = HtmlRoutines::RedGreenBlue(255, 0, 0);
+  thePlotObj.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 0, 0));
   DrawingVariables::GetColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
   thePlotObj.lineWidth = 1;
   if (input.size() >= 6) {
@@ -5951,7 +5955,7 @@ bool CalculatorFunctionsGeneral::innerPlotPoint(Calculator& theCommands, const E
     }
   }
   thePlot.dimension = theFinalPlot.dimension;
-  thePlot.colorRGB = HtmlRoutines::RedGreenBlue(0, 0, 0);
+  thePlot.colorRGB =static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
   if (input[2].IsOfType<std::string>()) {
     DrawingVariables::GetColorIntFromColorString(input[2].GetValue<std::string>(), thePlot.colorRGB);
   }
@@ -6002,7 +6006,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   if (theDeltaNoSign < 0) {
     theDeltaNoSign *= - 1;
   }
-  if (theDeltaNoSign == 0) {
+  if (theDeltaNoSign == 0.0) {
     theDeltaNoSign = 1;
   }
   double upperBound, lowerBound;
@@ -6018,7 +6022,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   List<double> xValues;
   List<double> fValuesLower;
   List<double> fValuesUpper;
-  if (theDeltaNoSign == 0) {
+  if (theDeltaNoSign == 0.0) {
     return output.MakeError("Delta equal to zero is not allowed", theCommands, true);
   }
   if ((upperBound - lowerBound) / theDeltaNoSign > 10000) {
@@ -6047,10 +6051,10 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   double yMax = - 0.5, yMin = 0.5;
   for (double i = lowerBound; i <= upperBound; i += theDeltaNoSign) {
     for (int j = 0; j < 2; j ++) {
-      if (theDeltaWithSign < 0 && i == lowerBound) {
+      if (theDeltaWithSign < 0 && (i - lowerBound == 0.0)) {
         continue;
       }
-      if (theDeltaWithSign > 0 && i == upperBound) {
+      if (theDeltaWithSign > 0 && (i - upperBound >= 0.0)) {
         continue;
       }
       xValueE.AssignValue(i, theCommands);
@@ -6250,7 +6254,7 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(
     HtmlRoutines::GetJavascriptVariable(thePlot.variablesInPlay[0].ToString())
   );
   thePlot.colorJS = "red";
-  thePlot.colorRGB=HtmlRoutines::RedGreenBlue(255, 0, 0);
+  thePlot.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 0, 0));
   if (input.size() >= 5) {
     if (!input[4].IsOfType<std::string>(&thePlot.colorJS)) {
       thePlot.colorJS = input[4].ToString();
@@ -6483,7 +6487,7 @@ bool CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo(
   ) {
     return theCommands << "Failed to convert arguments of " << input.ToString() << " to two DynkinType's.";
   }
-  return output.AssignValue((int)smallType.CanBeExtendedParabolicallyTo(targetType), theCommands);
+  return output.AssignValue(static_cast<int>(smallType.CanBeExtendedParabolicallyTo(targetType)), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerGetSymmetricCartan(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -6539,13 +6543,13 @@ bool CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg(Calculator& theCommands,
   }
   const Expression& EsmallSA = input[1];
   const Expression& ElargeSA = input[2];
-  SemisimpleLieAlgebra* theSmallSapointer = 0;
+  SemisimpleLieAlgebra* theSmallSapointer = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, EsmallSA, theSmallSapointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra* thelargeSapointer = 0;
+  SemisimpleLieAlgebra* thelargeSapointer = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, ElargeSA, thelargeSapointer
   )) {
@@ -6615,7 +6619,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverL
   const Expression& weightNode = input[2];
   const Expression& inducingParNode = input[3];
   const Expression& splittingParNode = input[4];
-  SemisimpleLieAlgebra* ownerSSPointer = 0;
+  SemisimpleLieAlgebra* ownerSSPointer = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, typeNode, ownerSSPointer
   )) {
@@ -6632,10 +6636,10 @@ bool CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverL
   )) {
     return output.MakeError("Failed to extract highest weight from the second argument.", theCommands);
   }
-  if (!theCommands.GetVectoR<Rational>(inducingParNode, inducingParSel, &finalContext, theDim, 0)) {
+  if (!theCommands.GetVectoR<Rational>(inducingParNode, inducingParSel, &finalContext, theDim, nullptr)) {
     return output.MakeError("Failed to extract parabolic selection from the third argument", theCommands);
   }
-  if (!theCommands.GetVectoR<Rational>(splittingParNode, splittingParSel, &finalContext, theDim, 0)) {
+  if (!theCommands.GetVectoR<Rational>(splittingParNode, splittingParSel, &finalContext, theDim, nullptr)) {
     return output.MakeError("Failed to extract parabolic selection from the fourth argument", theCommands);
   }
   theCommands << "Your input weight in fundamental coordinates: " << theWeightFundCoords.ToString();
@@ -6646,7 +6650,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverL
   ModuleSSalgebra<RationalFunctionOld> theMod;
   Selection selInducing = inducingParSel;
   Selection selSplittingParSel = splittingParSel;
-  theMod.MakeFromHW(ownerSS, theWeightFundCoords, selInducing, 1, 0, 0, false);
+  theMod.MakeFromHW(ownerSS, theWeightFundCoords, selInducing, 1, 0, nullptr, false);
   std::string report;
   theMod.SplitOverLevi(&report, selSplittingParSel);
   return output.AssignValue(report, theCommands);
@@ -6829,7 +6833,7 @@ bool CalculatorFunctionsGeneral::innerAllVectorPartitions(Calculator& theCommand
     return theCommands << "<hr>Failed to extract vector from " << theVectorE.ToString();
   }
   Matrix<Rational> vectorsMatForm;
-  if (!theCommands.GetMatrix(thePartitioningVectorsE, vectorsMatForm, 0, thePartition.goalVector.size)) {
+  if (!theCommands.GetMatrix(thePartitioningVectorsE, vectorsMatForm, nullptr, thePartition.goalVector.size)) {
     return theCommands << "<hr>Failed to extract list of vectors from " << thePartitioningVectorsE.ToString();
   }
   Vectors<Rational> theInputVectors;
@@ -6864,9 +6868,9 @@ bool CalculatorFunctionsGeneral::innerDeterminant(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDeterminant");
   Matrix<Rational> matRat;
-  bool isMatRat = input.IsMatrixGivenType(0, 0, &matRat);
+  bool isMatRat = input.IsMatrixGivenType(nullptr, nullptr, &matRat);
   if (!isMatRat) {
-    isMatRat = theCommands.GetMatriXFromArguments(input, matRat, 0, 0, 0);
+    isMatRat = theCommands.GetMatriXFromArguments(input, matRat, nullptr, 0, nullptr);
   }
   if (isMatRat) {
     if (matRat.NumRows == matRat.NumCols) {
@@ -6888,9 +6892,9 @@ bool CalculatorFunctionsGeneral::innerDeterminant(
     }
   }
   Matrix<AlgebraicNumber> matAlg;
-  bool isMatAlg = input.IsMatrixGivenType(0, 0, &matAlg);
+  bool isMatAlg = input.IsMatrixGivenType(nullptr, nullptr, &matAlg);
   if (!isMatAlg) {
-    isMatAlg = theCommands.GetMatriXFromArguments(input, matAlg, 0, 0, 0);
+    isMatAlg = theCommands.GetMatriXFromArguments(input, matAlg, nullptr, 0, nullptr);
   }
   if (isMatAlg) {
     if (matAlg.NumRows == matAlg.NumCols) {
@@ -6910,7 +6914,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant(
   }
   Matrix<RationalFunctionOld> matRF;
   Expression theContext;
-  if (!input.IsMatrixGivenType(0, 0, &matRF)) {
+  if (!input.IsMatrixGivenType(nullptr, nullptr, &matRF)) {
     if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, - 1, CalculatorConversions::innerRationalFunction)) {
       return theCommands << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
       << " rational functions or rationals, and I failed to convert your matrix to either type. "
@@ -6924,7 +6928,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant(
     if (matRF.NumRows > 50) {
       return theCommands << "I have been instructed not to "
       << "compute determinants of matrices of rational functions larger than "
-      << " 50 x 50, and your matrix had " << matRF.NumRows
+      << "50 x 50, and your matrix had " << matRF.NumRows
       << " rows. To lift the restriction edit function located in file "
       << __FILE__ << ", line " << __LINE__ << ". ";
     }
@@ -6948,7 +6952,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
   Expression theContext;
   Vector<RationalFunctionOld> theHWfundcoords, theHWsimpCoords, theHWFundCoordsFDPart, theHWSimpCoordsFDPart;
   Selection parSel, invertedParSel;
-  SemisimpleLieAlgebra* theSSlieAlg = 0;
+  SemisimpleLieAlgebra* theSSlieAlg = nullptr;
   output.reset(theCommands);
   if (!theCommands.GetTypeHighestWeightParabolic<RationalFunctionOld>(
     theCommands,
@@ -7061,7 +7065,7 @@ bool CalculatorFunctionsGeneral::innerPrintGenVermaModule(Calculator& theCommand
   Selection selectionParSel;
   Vector<RationalFunctionOld> theHWfundcoords;
   Expression hwContext(theCommands);
-  SemisimpleLieAlgebra* theSSalgebra = 0;
+  SemisimpleLieAlgebra* theSSalgebra = nullptr;
   if (!theCommands.GetTypeHighestWeightParabolic(
     theCommands,
     input,
@@ -7161,7 +7165,19 @@ bool CalculatorFunctionsGeneral::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   hwContext.ContextGetFormatExpressions(theFormat);
 //  stOutput << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
   return theCommands.innerWriteGenVermaModAsDiffOperatorInner(
-    theCommands, input, output, theHws, hwContext, selInducing, theSSalgebra, false, 0, 0, 0, true, true
+    theCommands,
+    input,
+    output,
+    theHws,
+    hwContext,
+    selInducing,
+    theSSalgebra,
+    false,
+    nullptr,
+    nullptr,
+    nullptr,
+    true,
+    true
   );
 }
 
@@ -7169,7 +7185,7 @@ bool CalculatorFunctionsGeneral::innerHWV(Calculator& theCommands, const Express
   Selection selectionParSel;
   Vector<RationalFunctionOld> theHWfundcoords;
   Expression hwContext(theCommands);
-  SemisimpleLieAlgebra* theSSalgebra = 0;
+  SemisimpleLieAlgebra* theSSalgebra = nullptr;
   if (!theCommands.GetTypeHighestWeightParabolic(
     theCommands,
     input,
@@ -7220,7 +7236,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(
     << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
   }
   Vector<Rational> theFDhw;
-  if (!theCommands.GetVectoR<Rational>(fdWeightNode, theFDhw, 0, theRank, 0)) {
+  if (!theCommands.GetVectoR<Rational>(fdWeightNode, theFDhw, nullptr, theRank, nullptr)) {
     return theCommands
     << "Failed to convert the second argument of innerSplitGenericGenVermaTensorFD to a list of "
     << theRank
@@ -7308,8 +7324,12 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(
   }
   std::string report;
   theFDMod.SplitOverLevi(
-    &report, theGenMod.parabolicSelectionNonSelectedAreElementsLevi,
-    &theLeviEigenVectors, &theEigenVectorWeightsFund, 0, &theFDLeviSplit
+    &report,
+    theGenMod.parabolicSelectionNonSelectedAreElementsLevi,
+    &theLeviEigenVectors,
+    &theEigenVectorWeightsFund,
+    nullptr,
+    &theFDLeviSplit
   );
   theFDMod.GetFDchar(theFDChaR);
   List<ElementUniversalEnveloping<RationalFunctionOld> > theCentralCharacters;
@@ -7680,7 +7700,7 @@ bool Expression::EvaluatesToDoubleInRange(
   double delta = (highBound - lowBound) / (numIntervals);
   *knownValues.LastObject() = lowBound;
   double currentValue = 0;
-  if (outputPoints != 0) {
+  if (outputPoints != nullptr) {
     outputPoints->SetSize(numPoints);
   }
   bool result = true;
@@ -7699,28 +7719,28 @@ bool Expression::EvaluatesToDoubleInRange(
         *(this->owner) << "<br>...";
       }
       result = false;
-      if (outputPoints != 0) {
+      if (outputPoints != nullptr) {
         (*outputPoints)[i].SetSize(2);
         (*outputPoints)[i][0] = *knownValues.LastObject();
-        (*outputPoints)[i][1] = NAN;
+        (*outputPoints)[i][1] = std::nan("");
       }
       *knownValues.LastObject() += delta;
       continue;
     }
-    if (outputPoints != 0) {
+    if (outputPoints != nullptr) {
       (*outputPoints)[i].SetSize(2);
       (*outputPoints)[i][0] = *knownValues.LastObject();
       (*outputPoints)[i][1] = currentValue;
     }
     *knownValues.LastObject() += delta;
-    if (outputYmin != 0) {
+    if (outputYmin != nullptr) {
       if (i == 0) {
         *outputYmin = currentValue;
       } else {
         *outputYmin = MathRoutines::Minimum(currentValue, *outputYmin);
       }
     }
-    if (outputYmax != 0) {
+    if (outputYmax != nullptr) {
       if (i == 0) {
         *outputYmax = currentValue;
       } else {
@@ -7752,7 +7772,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
     return true;
   }
   if (this->IsOfType<Rational>()) {
-    if (whichDouble != 0) {
+    if (whichDouble != nullptr) {
       *whichDouble = this->GetValue<Rational>().GetDoubleValue();
     }
     return true;
@@ -7768,7 +7788,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
     << " This may be a programming error. ";
   }
   if (knownEs.Contains(*this)) {
-    if (whichDouble != 0) {
+    if (whichDouble != nullptr) {
       *whichDouble = valuesKnownEs[knownEs.GetIndex(*this)];
     }
     return true;
@@ -7790,19 +7810,19 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       return false;
     }
     if ((*this).StartsWith(theCommands.opTimes(), 3)) {
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         *whichDouble = leftD * rightD;
       }
       return true;
     }
     if ((*this).StartsWith(theCommands.opPlus(), 3)) {
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         *whichDouble = leftD + rightD;
       }
       return true;
     }
     if ((*this).StartsWith(theCommands.opMinus(), 3)) {
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         *whichDouble = leftD - rightD;
       }
       return true;
@@ -7811,10 +7831,10 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       if (leftD <= 0 || rightD <= 0) {
         return false;
       }
-      if (leftD == 1) {
+      if (leftD - 1 == 0.0) {
         return false;
       }
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         *whichDouble = (FloatingPoint::log(rightD)) / (FloatingPoint::log(leftD));
       }
       return true;
@@ -7833,13 +7853,13 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
         }
       }
       double tempDouble = 0;
-      if (whichDouble == 0) {
+      if (whichDouble == nullptr) {
         whichDouble = &tempDouble;
       }
-      if (leftD == 0 && rightD < 0) {
+      if (leftD == 0.0 && rightD < 0) {
         return false;
       }
-      if (leftD == 0 && rightD > 0) {
+      if (leftD == 0.0 && rightD > 0) {
         *whichDouble = 0;
       } else {
         *whichDouble = FloatingPoint::power(leftD, rightD);
@@ -7862,14 +7882,14 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
           }
         }
       }
-      if (leftD == 0 && rightD < 0) {
+      if (leftD == 0.0 && rightD < 0) {
         return false;
       }
       double tempDouble = 0;
-      if (whichDouble == 0) {
+      if (whichDouble == nullptr) {
         whichDouble = &tempDouble;
       }
-      if (rightD == 0 && leftD > 0) {
+      if (rightD == 0.0 && leftD > 0) {
         *whichDouble = 0;
       } else {
         *whichDouble = FloatingPoint::power(rightD, 1 / leftD);
@@ -7880,13 +7900,13 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       return !std::isnan(*whichDouble) && !std::isinf(*whichDouble);
     }
     if ((*this).StartsWith(theCommands.opDivide(), 3)) {
-      if (rightD == 0) {
-        if (whichDouble != 0) {
-          *whichDouble = NAN;
+      if (rightD == 0.0) {
+        if (whichDouble != nullptr) {
+          *whichDouble = std::nan("");
         }
         return false;
       }
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         *whichDouble = leftD / rightD;
       }
       return true;
@@ -7917,12 +7937,12 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       if (argumentD < 0) {
         return false;
       }
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         *whichDouble = FloatingPoint::sqrt(argumentD);
       }
     }
     if (this->StartsWith(theCommands.opAbsoluteValue())) {
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         if (argumentD < 0) {
           *whichDouble = - argumentD;
         } else {
@@ -7934,7 +7954,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       if (argumentD > 1 || argumentD < - 1) {
         return false;
       }
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         *whichDouble = FloatingPoint::arccos(argumentD);
       }
     }
@@ -7942,58 +7962,58 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       if (argumentD > 1 || argumentD < - 1) {
         return false;
       }
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         *whichDouble = FloatingPoint::arcsin(argumentD);
       }
     }
     if (this->StartsWith(theCommands.opSin())) {
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         *whichDouble = FloatingPoint::sin(argumentD);
       }
     }
     if (this->StartsWith(theCommands.opCos())) {
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         *whichDouble = FloatingPoint::cos(argumentD);
       }
     }
     if (this->StartsWith(theCommands.opTan())) {
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         double denominator = FloatingPoint::cos(argumentD);
-        if (denominator == 0) {
+        if (denominator == 0.0) {
           return false;
         }
         *whichDouble = FloatingPoint::sin(argumentD) / denominator;
       }
     }
     if (this->StartsWith(theCommands.opCot())) {
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         double denominator = FloatingPoint::sin(argumentD);
-        if (denominator == 0) {
+        if (denominator == 0.0) {
           return false;
         }
         *whichDouble = FloatingPoint::cos(argumentD) / denominator;
       }
     }
     if (this->StartsWith(theCommands.opCsc())) {
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         double denominator = FloatingPoint::sin(argumentD);
-        if (denominator == 0) {
+        if (denominator == 0.0) {
           return false;
         }
         *whichDouble = 1 / denominator;
       }
     }
     if (this->StartsWith(theCommands.opSec())) {
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         double denominator = FloatingPoint::cos(argumentD);
-        if (denominator == 0) {
+        if (denominator == 0.0) {
           return false;
         }
         *whichDouble = 1 / denominator;
       }
     }
     if (this->StartsWith(theCommands.opArcTan())) {
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         *whichDouble = FloatingPoint::arctan(argumentD);
       }
     }
@@ -8001,7 +8021,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       if (argumentD <= 0) {
         return false;
       }
-      if (whichDouble != 0) {
+      if (whichDouble != nullptr) {
         *whichDouble = FloatingPoint::log(argumentD);
       }
     }
@@ -8018,7 +8038,7 @@ bool CalculatorFunctionsGeneral::innerTestStandardOutput(Calculator& theCommands
   FormatExpressions tempFormat;
   tempFormat.flagExpressionIsFinal = true;
   stOutput << "<b>Standard output test. Input string bounced back on the following line.</b><br>" << input.ToString(&tempFormat);
-  return output.AssignValue((std::string) "Standard output tested, verify your input is displayed correctly. ", theCommands);
+  return output.AssignValue(std::string("Standard output tested, verify your input is displayed correctly. "), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerTestTopCommand(
@@ -8050,7 +8070,7 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
   if (numRuns < 0) {
     numRuns = 0;
   }
-  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != 0) {
+  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
     theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
   } else {
     theCommands << "WebServerReturnDisplayIndicatorCloseConnection is zero. ";
@@ -8248,13 +8268,13 @@ bool CalculatorFunctionsGeneral::innerFindProductDistanceModN(
   theList.initializeFillInObject(theSize, 0);
   theIndexStack.Reserve(theSize);
   LargeIntUnsigned theMod;
-  theMod = theSize;
+  theMod = static_cast<unsigned>(theSize);
   int numElementsCovered = 0;
   for (int i = 0; i < theInts.size; i ++) {
     if (theList[theIntsReduced[i]] == 0) {
       numElementsCovered ++;
     }
-    theList[theIntsReduced[i]] = theInts[i];
+    theList[theIntsReduced[i]] = static_cast<unsigned>(theInts[i]);
     theIndexStack.AddOnTop(theIntsReduced[i]);
   }
   LargeIntUnsigned currentIndexLarge, currentDistance, maxDistanceGenerated;
@@ -8267,15 +8287,15 @@ bool CalculatorFunctionsGeneral::innerFindProductDistanceModN(
   maxDistanceGenerated = 0;
   for (int i = 0; i < theIndexStack.size; i ++) {
     for (int j = 0; j < theIntsReduced.size; j ++) {
-      currentIndexLarge = theIndexStack[i];
-      currentIndexLarge *= theIntsReduced[j];
+      currentIndexLarge = static_cast<unsigned>(theIndexStack[i]);
+      currentIndexLarge *= static_cast<unsigned>(theIntsReduced[j]);
       currentIndexLarge %= theMod;
       if (!currentIndexLarge.IsIntegerFittingInInt(&currentIndex)) {
         return theCommands << "An internal check has failed. "
         << "This shouldn't happen, this is possibly a programming bug.";
       }
       currentDistance = theList[theIndexStack[i]];
-      currentDistance += theIntsReduced[j];
+      currentDistance += static_cast<unsigned>(theIntsReduced[j]);
       if (theList[currentIndex] > 0) {
         if (theList[currentIndex] < currentDistance) {
           numElementsNotAddedToStack ++;
@@ -8382,14 +8402,14 @@ bool CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN(
     return theCommands << "Failed to initialize the computation. ";
   }
   LargeIntUnsigned theModLarge;
-  theModLarge = theMod;
+  theModLarge = static_cast<unsigned>(theMod);
   int numTestedSoFar = 0;
   ProgressReport theReport;
   LargeIntUnsigned oneUI = 1;
   while (thePartition.IncrementReturnFalseIfPastLast()) {
     LargeIntUnsigned theProduct = 1;
     for (int i = 0; i < thePartition.currentPartition.size; i ++) {
-      LargeIntUnsigned theNumber = theInts[i];
+      LargeIntUnsigned theNumber = static_cast<unsigned>(theInts[i]);
       MathRoutines::RaiseToPower(theNumber, thePartition.currentPartition[i], oneUI);
       theProduct *= theNumber;
       theProduct %= theModLarge;
@@ -8413,7 +8433,7 @@ bool CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN(
     reportStream << numTestedSoFar << " tested so far ...";
     theReport.Report(reportStream.str());
   }
-  return output.AssignValue((std::string)"Couldn't find solution", theCommands);
+  return output.AssignValue(std::string("Couldn't find solution"), theCommands);
 }
 
 void Calculator::AutomatedTestRun(
@@ -8521,7 +8541,7 @@ bool CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds(
   (void) input;//portable way of avoiding unused parameter warning
   std::vector<int> theVector;
   theVector[1] = 1;
-  return output.AssignValue((std::string) "Crashing: std::vector out of bounds.", theCommands);
+  return output.AssignValue(std::string("Crashing: std::vector out of bounds."), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults(
@@ -8529,13 +8549,13 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults(
 ) {
   if (!input.IsListNElements(3)) {
     return output.MakeError(
-      "Error: the function for drawing weight support takes two  arguments (type and highest weight)",
+      "Error: the function for drawing weight support takes two arguments (type and highest weight)",
       theCommands
     );
   }
   const Expression& typeNode = input[1];
   const Expression& hwNode = input[2];
-  SemisimpleLieAlgebra* theSSalgpointer = 0;
+  SemisimpleLieAlgebra* theSSalgpointer = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, typeNode, theSSalgpointer
   )) {
@@ -8543,7 +8563,9 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults(
   }
   Vector<Rational> highestWeightFundCoords;
   Expression theContext;
-  if (!theCommands.GetVectoR<Rational>(hwNode, highestWeightFundCoords, &theContext, theSSalgpointer->GetRank(), 0)) {
+  if (!theCommands.GetVectoR<Rational>(
+    hwNode, highestWeightFundCoords, &theContext, theSSalgpointer->GetRank(), nullptr
+  )) {
     return output.MakeError("Failed to extract highest weight vector", theCommands);
   }
   Vector<Rational> highestWeightSimpleCoords;
@@ -8576,11 +8598,15 @@ bool CalculatorFunctionsGeneral::innerDrawRootSystem(Calculator& theCommands, co
     bool isGood = theCommands.GetVectoR(
       input[2],
       preferredProjectionPlane[0],
-      0,
+      nullptr,
       theWeyl.GetDim(),
-      0
+      nullptr
     ) && theCommands.GetVectoR(
-      input[3], preferredProjectionPlane[1], 0, theWeyl.GetDim(), 0
+      input[3],
+      preferredProjectionPlane[1],
+      nullptr,
+      theWeyl.GetDim(),
+      nullptr
     );
     if (!isGood) {
       return output.MakeError("Failed to convert second or third argument to vector of desired dimension", theCommands);
@@ -8588,7 +8614,7 @@ bool CalculatorFunctionsGeneral::innerDrawRootSystem(Calculator& theCommands, co
   }
   std::stringstream out;
   DrawingVariables theDV;
-  theWeyl.DrawRootSystem(theDV, true, false, 0, true, 0);
+  theWeyl.DrawRootSystem(theDV, true, false, nullptr, true, nullptr);
   if (hasPreferredProjectionPlane) {
     theDV.flagFillUserDefinedProjection = true;
     theDV.FillUserDefinedProjection = preferredProjectionPlane;
@@ -8619,7 +8645,7 @@ std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable() {
   MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::ToStringFullCharacterWeightsTable");
   std::stringstream out;
   charSSAlgMod<coefficient> outputChar;
-  if (!this->FreudenthalEvalMeFullCharacter(outputChar, 10000, 0)) {
+  if (!this->FreudenthalEvalMeFullCharacter(outputChar, 10000, nullptr)) {
     out << "Failed to compute the character with highest weight " << this->ToString()
     << " I used Fredenthal's formula; likely the computation was too large. ";
     return out.str();
@@ -8651,12 +8677,12 @@ std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable() {
       );
     }
     if (outputSimpleStringCoords != outputChar[k].weightFundamentalCoordS) {
-      out << "<td><span style =\"color:#FF0000\"><b>" << outputSimpleStringCoords.ToString() << "</b></span></td>" ;
+      out << "<td><b style =\"color:red\">" << outputSimpleStringCoords.ToString() << "</b></td>" ;
     } else {
       out << "<td>" << outputSimpleStringCoords.ToString() << "</td>";
     }
     if (outputSimpleHalfStringCoords != outputChar[k].weightFundamentalCoordS) {
-      out << "<td><span style =\"color:#FF0000\"><b>" << outputSimpleHalfStringCoords.ToString() << "</b></span></td>" ;
+      out << "<td><b style =\"color:red\">" << outputSimpleHalfStringCoords.ToString() << "</b></td>" ;
     } else {
       out << "<td>" << outputSimpleHalfStringCoords.ToString() << "</td>";
     }
@@ -8723,7 +8749,7 @@ public:
       this->currentEchildrenTruncated.AddOnTop(this->GetCurrentE()[i]);
       if (i + 1 + this->indexCurrentChild > this->MaxDisplayedNodes || i > this->MaxAllowedWidth) {
         Expression dotsAtom;
-        dotsAtom.MakeAtom((std::string) "...", *this->owner);
+        dotsAtom.MakeAtom(std::string("..."), *this->owner);
         this->currentEchildrenTruncated.AddOnTop(dotsAtom);
         break;
       }
@@ -8802,12 +8828,12 @@ public:
   }
   void AddStringTruncate(const std::string& input, bool isLeaf) {
     this->DisplayedStringIsLeaf.AddOnTop(isLeaf);
-    if (input.size() <= (unsigned) this->maxNumCharsInString) {
+    if (input.size() <= static_cast<unsigned>(this->maxNumCharsInString)) {
       this->DisplayedEstrings.AddOnTop(input);
       return;
     }
     std::string truncatedInput = input;
-    truncatedInput.resize(this->maxNumCharsInString - 3);
+    truncatedInput.resize(static_cast<unsigned>(this->maxNumCharsInString) - 3);
     truncatedInput += "...";
     this->DisplayedEstrings.AddOnTop(truncatedInput);
   }
@@ -8832,7 +8858,10 @@ public:
   }
   Rational GetStringWidthTruncated(int theIndex) {
     return this->charWidth *
-    MathRoutines::Minimum(this->maxNumCharsInString, (signed) this->DisplayedEstrings[theIndex].size());
+    MathRoutines::Minimum(
+      this->maxNumCharsInString,
+      static_cast<signed>(this->DisplayedEstrings[theIndex].size())
+    );
   }
   Rational GetLayerWidth(int layerIndex) {
     MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetLayerWidth");
@@ -8861,7 +8890,7 @@ public:
       this->NodePositions[i].SetSize(2);
       this->NodePositions[i][0] = currentX + this->GetStringWidthTruncated(i) / 2;
       this->NodePositions[i][1] = this->layerHeight * layerIndex * (- 1);
-      currentX += this->charWidth * this->DisplayedEstrings[i].size() + this->padding;
+      currentX += this->charWidth * static_cast<int>(this->DisplayedEstrings[i].size()) + this->padding;
     }
   }
   void DrawToDV() {
@@ -8944,7 +8973,7 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupport(
   SemisimpleLieAlgebra& theAlg = *theAlgPointer;
   Vector<Rational> highestWeightFundCoords;
   Expression tempContext;
-  if (!theCommands.GetVectoR<Rational>(hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), 0)) {
+  if (!theCommands.GetVectoR<Rational>(hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), nullptr)) {
     return false;
   }
   Vector<Rational> highestWeightSimpleCoords;
@@ -8973,8 +9002,8 @@ bool CalculatorFunctionsGeneral::innerSetRandomSeed(
   }
   std::stringstream out;
   theCommands.theObjectContainer.CurrentRandomSeed = theInt;
-  srand((unsigned) theInt);
-  out << "Successfully set random seed to: " << (unsigned) theInt;
+  srand(static_cast<unsigned>(theInt));
+  out << "Successfully set random seed to: " << static_cast<unsigned>(theInt);
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -9090,7 +9119,7 @@ bool CalculatorFunctionsGeneral::innerTurnOnApproximations(
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTurnOnApproximations");
   (void) input;
   theCommands.flagNoApproximationS = false;
-  return output.AssignValue((std::string) "Approximations have been turned on. ", theCommands);
+  return output.AssignValue(std::string("Approximations have been turned on. "), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerTurnOffApproximations(
@@ -9099,7 +9128,7 @@ bool CalculatorFunctionsGeneral::innerTurnOffApproximations(
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTurnOffApproximations");
   (void) input;
   theCommands.flagNoApproximationS = true;
-  return output.AssignValue((std::string) "Approximations have been turned off. ", theCommands);
+  return output.AssignValue(std::string("Approximations have been turned off. "), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerTurnOffRules(

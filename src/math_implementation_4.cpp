@@ -11,6 +11,7 @@
 #include "system_functions_global_objects.h"
 #include "string_constants.h"
 
+extern ProjectInformationInstance ProjectInfoVpf9_1cpp;
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
 
 std::string UserCalculatorData::Roles::admin = "admin";
@@ -21,7 +22,7 @@ std::string UserCalculatorData::Roles::teacher = "teacher";
 Crasher::Crasher() {
   this->flagCrashInitiateD = false;
   this->flagFinishingCrash = false;
-  this->CleanUpFunction = 0;
+  this->CleanUpFunction = nullptr;
 }
 
 void Crasher::FirstRun() {
@@ -85,7 +86,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
     }
   }
   if (!theGlobalVariables.flagNotAllocated) {
-    if (theParser != 0) {
+    if (theParser != nullptr) {
       if (theParser->Comments.str() != "") {
         this->crashReportHtml << "<hr>Additional comments follow. " << theParser->Comments.str();
       }
@@ -118,7 +119,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
     this->crashReportHtml << "GlobalVariables.flagNotAllocated is true. ";
     this->crashReportConsolE << "GlobalVariables.flagNotAllocated is true. ";
   }
-  if (stOutput.theOutputFunction == 0) {
+  if (stOutput.theOutputFunction == nullptr) {
     std::cout << this->crashReportConsolE.str() << std::endl;
   } else {
     JSData output;
@@ -127,7 +128,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
     stOutput.Flush();
     std::cout << this->crashReportConsolE.str() << std::endl;
   }
-  if (this->CleanUpFunction != 0) {
+  if (this->CleanUpFunction != nullptr) {
     this->CleanUpFunction();
   }
   assert(false);
@@ -462,7 +463,7 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tag
     ) {
       continue;
     }
-    if (tagsToExclude != 0) {
+    if (tagsToExclude != nullptr) {
       if (tagsToExclude->Contains(currentName)) {
         continue;
       }
@@ -480,7 +481,7 @@ std::string GlobalVariables::GetWebInput(const std::string& inputName) {
 
 void GlobalVariables::MakeReport() {
   MacroRegisterFunctionWithName("GlobalVariables::MakeReport");
-  if (this->IndicatorStringOutputFunction == 0) {
+  if (this->IndicatorStringOutputFunction == nullptr) {
     return;
   }
   if (this->flagRunningCommandLine || this->flagRunningConsoleTest) {
@@ -606,13 +607,13 @@ std::string UserCalculatorData::ToStringUnsecure() {
 template<>
 List<Weight<RationalFunctionOld> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<Weight<RationalFunctionOld> >() {
-  return 0;
+  return nullptr;
 }
 
 template<>
 List<Weight<Rational> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<Weight<Rational> >() {
-  return 0;
+  return nullptr;
 }
 
 void DynkinDiagramRootSubalgebra::SwapDynkinStrings(int i, int j) {
@@ -1275,7 +1276,7 @@ bool WeylGroupAutomorphisms::checkInitialization() const {
   if (this->flagDeallocated) {
     crash << "Use after free of Weyl group automorphism. " << crash;
   }
-  if (this->theWeyl == 0) {
+  if (this->theWeyl == nullptr) {
     crash << "Non-initialized Weyl group automorphisms. " << crash;
   }
   return true;
@@ -1350,7 +1351,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex() {
   this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged);
   this->thePfs.ComputeDebugString();
   out << this->thePfs.DebugString;
-  this->thePfs.split(0);
+  this->thePfs.split(nullptr);
   this->thePfs.ComputeDebugString();
   out << "=" << this->thePfs.DebugString;
 //  int totalDim= this->theTranslationS[0].size +this->theTranslationsProjecteD[0].size;
@@ -1552,9 +1553,10 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(Vector<Rational>& pa
   std::stringstream out;
   this->thePauseControlleR.InitComputation();
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSel;
-  if (false)
-  if (this->UpperLimitChambersForDebugPurposes == 0 || this->theLinearOperators.size == 0) {
-    this->ReadFromDefaultFile();
+  if ((false)) {
+    if (this->UpperLimitChambersForDebugPurposes == 0 || this->theLinearOperators.size == 0) {
+      this->ReadFromDefaultFile();
+    }
   }
   switch (this->computationPhase) {
     case 0:
@@ -1686,12 +1688,12 @@ GeneralizedVermaModuleCharacters::GeneralizedVermaModuleCharacters() {
   this->NumProcessedConesParam = 0;
   this->NumProcessedExtremaEqualOne = 0;
   this->numNonZeroMults = 0;
-  this->WeylLarger = 0;
-  this->WeylSmaller = 0;
+  this->WeylLarger = nullptr;
+  this->WeylSmaller = nullptr;
 }
 
 bool GeneralizedVermaModuleCharacters::CheckInitialization() const {
-  if (this->WeylLarger == 0 || this->WeylSmaller == 0) {
+  if (this->WeylLarger == nullptr || this->WeylSmaller == nullptr) {
     crash << "Use of non-initialized Weyl group within generalized Verma module characters. " << crash;
   }
   if (this->WeylLarger->flagDeallocated || this->WeylSmaller->flagDeallocated) {
@@ -1839,7 +1841,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   Vector<Polynomial<Rational> > tempVect, tempVect2;
   tempVect.SetSize(input.theDomain().theWeyl.GetDim() + input.theRange().theWeyl.GetDim());
   for (int i = 0; i < tempVect.size; i ++) {
-    tempVect[i].MakeMonomiaL(i, 1, (Rational) 1, tempVect.size);
+    tempVect[i].MakeMonomiaL(i, 1, Rational(1), tempVect.size);
   }
   tempMatPoly.init(input.theDomain().theWeyl.GetDim(), tempVect.size);
   Polynomial<Rational> polyZero;
@@ -1879,7 +1881,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   Lattice tempLattice;
   theWeYl.GetIntegralLatticeInSimpleCoordinates(tempLattice);
   this->theExtendedIntegralLatticeMatForM.basisRationalForm.MakeIdMatrix(input.theDomain().GetRank());
-  this->theExtendedIntegralLatticeMatForM.basisRationalForm.DirectSumWith(tempLattice.basisRationalForm, (Rational) 0);
+  this->theExtendedIntegralLatticeMatForM.basisRationalForm.DirectSumWith(tempLattice.basisRationalForm, Rational(0));
   this->theExtendedIntegralLatticeMatForM.MakeFromMat(this->theExtendedIntegralLatticeMatForM.basisRationalForm);
   tempMat = theWeYl.CartanSymmetric;
   tempMat.Invert();
@@ -2203,7 +2205,7 @@ std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesRepor
     numInequalities += this->projectivizedChambeR[i].Normals.size;
   }
   out << "\nNumber of inequalities: " << numInequalities;
-  if (!this->ParabolicLeviPartRootSpacesZeroStandsForSelected.CardinalitySelection == 0) {
+  if (this->ParabolicLeviPartRootSpacesZeroStandsForSelected.CardinalitySelection != 0) {
     out << this->PrepareReport();
   }
   return out.str();

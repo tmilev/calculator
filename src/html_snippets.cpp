@@ -7,6 +7,7 @@
 #include <iomanip>
 #include "string_constants.h"
 
+extern ProjectInformationInstance projectInfoInstanceHtmlSnippets;
 ProjectInformationInstance projectInfoInstanceHtmlSnippets(__FILE__, "Html Snippets.");
 
 MapList<std::string, std::string, MathRoutines::HashString> HtmlRoutines::preLoadedFiles;
@@ -23,7 +24,7 @@ std::string HtmlRoutines::GetJavascriptVariable(const std::string& theVar) {
     if (i == 0) {
       sanitizer << "_";
     }
-    sanitizer << ((int) theVar[i]);
+    sanitizer << static_cast<int>(theVar[i]);
   }
   return sanitizer.str();
 }
@@ -54,7 +55,7 @@ std::string HtmlRoutines::GetHtmlLinkFromProjectFileName(
 std::string HtmlRoutines::GetMathMouseHoverBeginArrayL(const std::string& input, int upperNumChars) {
   std::stringstream out;
   out << "\\begin{array}{l}" << input << "\\end{array}";
-  if (out.str().size() < (unsigned) upperNumChars && upperNumChars > 0) {
+  if (out.str().size() < static_cast<unsigned>(upperNumChars) && upperNumChars > 0) {
     return HtmlRoutines::GetMathMouseHover(out.str(), upperNumChars);
   } else {
     return HtmlRoutines::GetMathMouseHover(input, upperNumChars);
@@ -64,7 +65,7 @@ std::string HtmlRoutines::GetMathMouseHoverBeginArrayL(const std::string& input,
 std::string HtmlRoutines::GetMathSpanBeginArrayL(const std::string& input, int upperNumChars) {
   std::stringstream out;
   out << "\\begin{array}{l} " << input << " \\end{array}";
-  if (out.str().size() < (unsigned) upperNumChars && upperNumChars > 0) {
+  if (out.str().size() < static_cast<unsigned>(upperNumChars) && upperNumChars > 0) {
     return HtmlRoutines::GetMathSpanPure(out.str(), upperNumChars);
   } else {
     return HtmlRoutines::GetMathSpanPure(input, upperNumChars);
@@ -270,7 +271,7 @@ std::string HtmlRoutines::GetMathSpanPure(const std::string& input, int upperNum
   std::stringstream out;
 //  int dirtylittleHAckHEre;
 //  upperNumChars =1;
-  if (input.size() > (unsigned) upperNumChars && upperNumChars > 0) {
+  if (input.size() > static_cast<unsigned>(upperNumChars) && upperNumChars > 0) {
     out << "<b>LaTeX output is longer than " << upperNumChars
     << " characters and I dare not use mathjax. Here is the output as plain LaTeX.</b> " << input;
     return out.str();
@@ -281,7 +282,7 @@ std::string HtmlRoutines::GetMathSpanPure(const std::string& input, int upperNum
 
 std::string HtmlRoutines::GetMathMouseHover(const std::string& input, int upperNumChars) {
   std::stringstream out;
-  if (input.size() > (unsigned) upperNumChars) {
+  if (input.size() > static_cast<unsigned>(upperNumChars)) {
     out << "<b>LaTeX output is longer than " << upperNumChars
     << " characters and I dare not process the LaTeX. Here is the output as plain (LaTeX-able) text.</b> " << input;
     return out.str();
@@ -349,10 +350,10 @@ std::string HtmlRoutines::ConvertURLStringToNormal(const std::string& input, boo
 void HtmlRoutines::ConvertURLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace) {
   std::string readAhead;
   std::stringstream out;
-  int inputSize = (signed) input.size();
-  for (int i = 0; i < inputSize; i ++) {
+  unsigned inputSize = static_cast<unsigned>(input.size());
+  for (unsigned i = 0; i < inputSize; i ++) {
     readAhead = "";
-    for (int j = 0; j < 6; j ++) {
+    for (unsigned j = 0; j < 6; j ++) {
       if (i + j < inputSize) {
         readAhead.push_back(input[i + j]);
       }
@@ -382,7 +383,8 @@ std::string HtmlRoutines::GetJavascriptMathjax(const std::string& baseFolder) {
 }
 
 bool HtmlRoutines::AccountOneInputCGIString(
-  const std::string& fieldName, const std::string& fieldValue,
+  const std::string& fieldName,
+  const std::string& fieldValue,
   MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
@@ -419,13 +421,13 @@ bool HtmlRoutines::ChopCGIStringAppend(
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIStringAppend");
-  int inputLength = (signed) input.size();
+  unsigned inputLength = static_cast<unsigned>(input.size());
   bool readingData = false;
   std::string currentFieldName = "";
   std::string currentFieldValue = "";
   currentFieldName.reserve(input.size());
   currentFieldValue.reserve(input.size());
-  for (int i = 0; i < inputLength; i ++) {
+  for (unsigned i = 0; i < inputLength; i ++) {
     if (!readingData && input[i] == '=') {
       readingData = true;
       continue;
@@ -466,11 +468,14 @@ bool HtmlRoutines::URLStringToNormalOneStep(std::string& readAhead, std::strings
   }
   if (readAhead.size() == 3) {
     if (
-      readAhead[0] == '%' && MathRoutines::IsAHexDigit(readAhead[1]) &&
+      readAhead[0] == '%' &&
+      MathRoutines::IsAHexDigit(readAhead[1]) &&
       MathRoutines::IsAHexDigit(readAhead[2])
     ) {
-      out << (char)(MathRoutines::ConvertHumanReadableHexToCharValue(readAhead[1]) * 16 +
-      MathRoutines::ConvertHumanReadableHexToCharValue(readAhead[2]));
+      char next =
+      MathRoutines::ConvertHumanReadableHexToCharValue(readAhead[1]) * 16 +
+      MathRoutines::ConvertHumanReadableHexToCharValue(readAhead[2]);
+      out << next;
       return true;
     }
   }

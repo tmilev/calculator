@@ -7,6 +7,7 @@
 #include "general_logging_global_variables.h"
 #include "general_time_date.h"
 
+extern ProjectInformationInstance projectInfoInstanceCalculatorGlobal;
 ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global objects");
 
 GlobalVariables theGlobalVariables;

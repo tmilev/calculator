@@ -33,7 +33,7 @@ void WeylGroupData::ComputeOrLoadCharacterTable(std::stringstream* reportStream)
   }
   this->ComputeOrLoadConjugacyClasses(reportStream);
   if (this->LoadCharTable()) {
-    if (reportStream != 0) {
+    if (reportStream != nullptr) {
       *reportStream << "The character table of " << this->theDynkinType.ToString()
       << " is precomputed (hard-coded in c++), loading directly. ";
     }
@@ -57,7 +57,7 @@ void WeylGroupData::ComputeOrLoadConjugacyClasses(std::stringstream* reportStrea
     return;
   }
   if (this->LoadConjugacyClasses()) {
-    if (reportStream != 0) {
+    if (reportStream != nullptr) {
       *reportStream << "The conjugacy classes of "
       << this->theDynkinType.ToString()
       << " are precomputed (hard-coded in c++), loading directly. ";

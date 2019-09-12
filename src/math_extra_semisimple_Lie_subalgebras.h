@@ -51,7 +51,7 @@ class NilradicalCandidate {
   Vectors<Rational> theNonFKhwVectorsStrongRelativeToSubsetWeights;
 
   NilradicalCandidate() :
-    owner(0),
+    owner(nullptr),
     flagRestrictedCentralizerConditionHoldS(false),
     flagParabolicACextendsToParabolicAC(false),
     flagLinfiniteRelFound(false) {
@@ -84,7 +84,6 @@ class SubalgebraSemisimpleLieAlgebra {
 public:
   std::string ToString(FormatExpressions* theFormat = nullptr);
   SemisimpleLieAlgebra* owner;
-  GlobalVariables* theGlobalVariables;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theGenerators;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theBasis;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > CartanSA;
@@ -252,15 +251,15 @@ public:
     const CandidateSSSubalgebra& baseSubalgebra,
     const DynkinType& theNewType,
     const List<int>& theRootInjection,
-    Vector<Rational>* newHScaledToActByTwo = 0
+    Vector<Rational>* newHScaledToActByTwo = nullptr
   );
   void EnumerateAllNilradicals();
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
-  void EnumerateNilradicalsRecursively(List<int>& theSelection, std::stringstream* logStream = 0);
+  void EnumerateNilradicalsRecursively(List<int>& theSelection, std::stringstream* logStream = nullptr);
   void ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra(
     HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput
   );
-  bool IsPossibleNilradicalCarryOutSelectionImplications(List<int>& theSelection, std::stringstream* logStream = 0);
+  bool IsPossibleNilradicalCarryOutSelectionImplications(List<int>& theSelection, std::stringstream* logStream = nullptr);
   void ExtendToModule(List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput);
   Vector<Rational> GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input) const;
   Vector<Rational> GetNonPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input) const;
@@ -371,10 +370,10 @@ public:
   bool flagComputeNilradicals;
   bool flagProduceLaTeXtables;
   bool flagAttemptToAdjustCentralizers;
-  double timeComputationStartInSeconds;
-  double timeComputationEndInSeconds;
-  signed long long int numAdditions;
-  signed long long int numMultiplications;
+  int64_t millisecondsComputationStart;
+  int64_t millisecondsComputationEnd;
+  unsigned long long int numAdditions;
+  unsigned long long int numMultiplications;
   bool flagDeallocated;
   std::string DisplayNameMainFile1NoPath;
   std::string DisplayNameMainFile1WithPath;

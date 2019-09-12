@@ -141,7 +141,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       return false;
     }
   }
-  if (outputSolution != 0) {
+  if (outputSolution != nullptr) {
     outputSolution->SetSize(NumTrueVariables);
     for (int i = 0; i < NumTrueVariables; i ++) {
       (*outputSolution)[i] = matX[i];
@@ -525,7 +525,7 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
   this->ComputeFolderNames(this->currentFormat);
   if (!FileOperations::FileExistsVirtual(this->VirtualNameMainFile1) || forceRecompute) {
     if (doFullInit) {
-      this->timeComputationStartInSeconds = theGlobalVariables.GetElapsedSeconds();
+      this->millisecondsComputationStart = theGlobalVariables.GetElapsedMilliseconds();
     }
     this->flagComputeNilradicals = computeNilradicals;
     this->flagComputeModuleDecomposition = computeModuleDecomposition;
@@ -534,15 +534,15 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
     this->flagAttemptToAdjustCentralizers = adjustCentralizers;
     this->CheckFileWritePermissions();
     if (doFullInit) {
-      this->FindTheSSSubalgebrasFromScratch(newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, 0);
+      this->FindTheSSSubalgebrasFromScratch(newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, nullptr);
     }
     this->WriteReportToFiles();
   } else {
-    if (outputStream != 0) {
+    if (outputStream != nullptr) {
       *outputStream << "Files precomputed, serving from HD. ";
     }
   }
-  if (outputStream != 0) {
+  if (outputStream != nullptr) {
     *outputStream << "<br>Output file: <a href = \""
     << this->DisplayNameMainFile1WithPath << "\" target = \"_blank\">"
     << this->DisplayNameMainFile1NoPath << "</a>";
@@ -567,7 +567,7 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
   if (input.size() != 3) {
     return output.MakeError("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra* ownerSS = 0;
+  SemisimpleLieAlgebra* ownerSS = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS
   )) {
@@ -651,12 +651,12 @@ bool Calculator::innerGroebner(
       theCommands
     );
   }
-  int upperBoundComputations = (int) upperBound.GetDoubleValue();
+  int upperBoundComputations = int(upperBound.GetDoubleValue());
   output.reset(theCommands);
   for (int i = 1; i < input.children.size; i ++) {
     output.children.AddOnTop(input.children[i]);
   }
-  int theMod;
+  int theMod = 0;
   if (useModZp) {
     if (!output[1].IsSmallInteger(&theMod)) {
       return output.MakeError("Error: failed to extract modulo from the second argument. ", theCommands);
@@ -678,7 +678,7 @@ bool Calculator::innerGroebner(
   theContext.ContextGetFormatExpressions(theGlobalVariables.theDefaultFormat.GetElement());
   if (useModZp) {
     ElementZmodP tempElt;
-    tempElt.MakeMOne(theMod);
+    tempElt.MakeMOne(static_cast<unsigned>(theMod));
     inputVectorZmodP.SetSize(inputVector.size);
     for (int i = 0; i < inputVector.size; i ++) {
       inputVectorZmodP[i].MakeZero();
@@ -855,10 +855,10 @@ bool Plot::operator==(const Plot& other) const {
   this->priorityViewRectangle == other.priorityViewRectangle &&
   this->DesiredHtmlHeightInPixels == other.DesiredHtmlHeightInPixels &&
   this->DesiredHtmlWidthInPixels == other.DesiredHtmlWidthInPixels &&
-  this->highBoundY == other.highBoundY &&
-  this->lowBoundY == other.lowBoundY &&
-  this->theLowerBoundAxes == other.theLowerBoundAxes &&
-  this->theUpperBoundAxes == other.theUpperBoundAxes &&
+  ((this->highBoundY        - other.highBoundY       ) == 0.0) &&
+  ((this->lowBoundY         - other.lowBoundY        ) == 0.0) &&
+  ((this->theLowerBoundAxes - other.theLowerBoundAxes) == 0.0) &&
+  ((this->theUpperBoundAxes - other.theUpperBoundAxes) == 0.0) &&
   this->thePlots == other.thePlots &&
   this->boxesThatUpdateMe == other.boxesThatUpdateMe &&
   this->canvasName == other.canvasName &&
@@ -881,48 +881,48 @@ void Plot::operator+=(const PlotObject& other) {
 
 bool PlotObject::operator==(const PlotObject& other) const {
   return
-  this->thePlotString                == other.thePlotString                &&
-  this->fillStyle                    == other.fillStyle                    &&
-  this->thePlotStringWithHtml        == other.thePlotStringWithHtml        &&
-  this->xLow                         == other.xLow                         &&
-  this->xHigh                        == other.xHigh                        &&
-  this->yLow                         == other.yLow                         &&
-  this->yHigh                        == other.yHigh                        &&
-  this->paramLow                     == other.paramLow                     &&
-  this->paramHigh                    == other.paramHigh                    &&
-  this->colorRGB                     == other.colorRGB                     &&
-  this->colorFillRGB                 == other.colorFillRGB                 &&
-  this->lineWidth                    == other.lineWidth                    &&
-  this->dimension                    == other.dimension                    &&
-  this->colorUV                      == other.colorUV                      &&
-  this->colorVU                      == other.colorVU                      &&
-  this->colorJS                      == other.colorJS                      &&
-  this->lineWidthJS                  == other.lineWidthJS                  &&
-  this->numSegmenTsJS                == other.numSegmenTsJS                &&
-  this->thePointS                    == other.thePointS                    &&
-  this->thePointsDouble              == other.thePointsDouble              &&
-  this->thePointsJS                  == other.thePointsJS                  &&
-  this->theRectangles                == other.theRectangles                &&
-  this->thePlotType                  == other.thePlotType                  &&
-  this->manifoldImmersion            == other.manifoldImmersion            &&
-  this->coordinateFunctionsE         == other.coordinateFunctionsE         &&
-  this->coordinateFunctionsJS        == other.coordinateFunctionsJS        &&
-  this->variablesInPlay              == other.variablesInPlay              &&
-  this->theVarRangesJS               == other.theVarRangesJS               &&
-  this->leftPtE                      == other.leftPtE                      &&
-  this->rightPtE                     == other.rightPtE                     &&
-  this->paramLowE                    == other.paramLowE                    &&
-  this->paramHighE                   == other.paramHighE                   &&
-  this->numSegmentsE                 == other.numSegmentsE                 &&
-  this->variablesInPlayJS            == other.variablesInPlayJS            &&
-  this->leftBoundaryIsMinusInfinity  == other.leftBoundaryIsMinusInfinity  &&
-  this->rightBoundaryIsMinusInfinity == other.rightBoundaryIsMinusInfinity &&
-  this->leftPtJS                     == other.leftPtJS                     &&
-  this->rightPtJS                    == other.rightPtJS                    &&
-  this->colorFillJS                  == other.colorFillJS                  &&
-  this->paramLowJS                   == other.paramLowJS                   &&
-  this->paramHighJS                  == other.paramHighJS                  &&
-  this->defaultLengthJS              == other.defaultLengthJS
+  ((this->xLow      - other.xLow     ) == 0.0)                               &&
+  ((this->xHigh     - other.xHigh    ) == 0.0)                               &&
+  ((this->yLow      - other.yLow     ) == 0.0)                               &&
+  ((this->yHigh     - other.yHigh    ) == 0.0)                               &&
+  ((this->paramLow  - other.paramLow ) == 0.0)                               &&
+  ((this->paramHigh - other.paramHigh) == 0.0)                               &&
+  ((this->lineWidth - other.lineWidth) == 0.0)                               &&
+  this->thePlotString                  == other.thePlotString                &&
+  this->fillStyle                      == other.fillStyle                    &&
+  this->thePlotStringWithHtml          == other.thePlotStringWithHtml        &&
+  this->colorRGB                       == other.colorRGB                     &&
+  this->colorFillRGB                   == other.colorFillRGB                 &&
+  this->dimension                      == other.dimension                    &&
+  this->colorUV                        == other.colorUV                      &&
+  this->colorVU                        == other.colorVU                      &&
+  this->colorJS                        == other.colorJS                      &&
+  this->lineWidthJS                    == other.lineWidthJS                  &&
+  this->numSegmenTsJS                  == other.numSegmenTsJS                &&
+  this->thePointS                      == other.thePointS                    &&
+  this->thePointsDouble                == other.thePointsDouble              &&
+  this->thePointsJS                    == other.thePointsJS                  &&
+  this->theRectangles                  == other.theRectangles                &&
+  this->thePlotType                    == other.thePlotType                  &&
+  this->manifoldImmersion              == other.manifoldImmersion            &&
+  this->coordinateFunctionsE           == other.coordinateFunctionsE         &&
+  this->coordinateFunctionsJS          == other.coordinateFunctionsJS        &&
+  this->variablesInPlay                == other.variablesInPlay              &&
+  this->theVarRangesJS                 == other.theVarRangesJS               &&
+  this->leftPtE                        == other.leftPtE                      &&
+  this->rightPtE                       == other.rightPtE                     &&
+  this->paramLowE                      == other.paramLowE                    &&
+  this->paramHighE                     == other.paramHighE                   &&
+  this->numSegmentsE                   == other.numSegmentsE                 &&
+  this->variablesInPlayJS              == other.variablesInPlayJS            &&
+  this->leftBoundaryIsMinusInfinity    == other.leftBoundaryIsMinusInfinity  &&
+  this->rightBoundaryIsMinusInfinity   == other.rightBoundaryIsMinusInfinity &&
+  this->leftPtJS                       == other.leftPtJS                     &&
+  this->rightPtJS                      == other.rightPtJS                    &&
+  this->colorFillJS                    == other.colorFillJS                  &&
+  this->paramLowJS                     == other.paramLowJS                   &&
+  this->paramHighJS                    == other.paramHighJS                  &&
+  this->defaultLengthJS                == other.defaultLengthJS
   ;
 }
 
@@ -1766,7 +1766,7 @@ bool Expression::AssignStringParsed(
   } else {
     result = commands;
   }
-  if (substitutions != 0) {
+  if (substitutions != nullptr) {
     MapList<Expression, Expression> theSubs;
     for (int i = 0; i < substitutions->size(); i ++) {
       Expression theSubbed;
@@ -1855,7 +1855,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   MacroRegisterFunctionWithName("Calculator::innerSuffixNotationForPostScript");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   if (*theCounter.theCounter == theCommands.MaxRecursionDeptH - 2) {
-    return output.AssignValue((std::string) "...", theCommands);
+    return output.AssignValue(std::string("..."), theCommands);
   }
   std::string currentString;
   if (input.IsAtom(&currentString)) {
@@ -1918,7 +1918,10 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   double theDoubleValue = - 1;
   Rational theRat;
   if (input.IsOfType<Rational>(&theRat)) {
-    if (theRat.GetDenominator().IsIntegerFittingInInt(0) && theRat.GetNumerator().IsIntegerFittingInInt(0)) {
+    if (
+      theRat.GetDenominator().IsIntegerFittingInInt(nullptr) &&
+      theRat.GetNumerator().IsIntegerFittingInInt(nullptr)
+    ) {
       out << " " << theRat.GetNumerator().ToString() << " " << theRat.GetDenominator() << " div ";
       return output.AssignValue(out.str(), theCommands);
     }
@@ -1975,13 +1978,15 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
   Selection parSel;
   SemisimpleLieAlgebra* ownerSSLiealg;
   Expression tempE, tempE2;
-  if (!theCommands.GetTypeHighestWeightParabolic(theCommands, input, output, theHW, parSel, tempE, ownerSSLiealg, 0)) {
+  if (!theCommands.GetTypeHighestWeightParabolic(
+    theCommands, input, output, theHW, parSel, tempE, ownerSSLiealg, nullptr
+  )) {
     return false;
   }
   if (output.IsError()) {
     return true;
   }
-  if (!parSel.CardinalitySelection == 0) {
+  if (parSel.CardinalitySelection != 0) {
     return output.MakeError("I know only to compute with finite dimensional characters, for the time being.", theCommands);
   }
   charSSAlgMod<Rational> theElt;
@@ -2187,7 +2192,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   if (input.children.size < 3) {
     return false;
   }
-  SemisimpleLieAlgebra* theSSlieAlg = 0;
+  SemisimpleLieAlgebra* theSSlieAlg = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, input[1], theSSlieAlg
   )) {
@@ -2201,7 +2206,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
     return theCommands << "<hr>Function root subsystem works for simple ambient types only.";
   }
   for (int i = 2; i < input.size(); i ++) {
-    if (!theCommands.GetVectoR(input[i], currentRoot, 0, theRank, 0)) {
+    if (!theCommands.GetVectoR(input[i], currentRoot, nullptr, theRank, nullptr)) {
       return false;
     }
     if (!theWeyl.RootSystem.Contains(currentRoot)) {
@@ -2230,16 +2235,16 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
     return output.MakeError(out.str(), theCommands);
   }
   Vector<Rational> splittingNormal;
-  if (!theCommands.GetVectoR(input[1], splittingNormal, 0)) {
+  if (!theCommands.GetVectoR(input[1], splittingNormal, nullptr)) {
     return output.MakeError("Failed to extract normal from first argument. ", theCommands);
   }
   Matrix<Rational> theMat;
   Vectors<Rational> NonStrictCone, VectorsToPerturbRelativeTo;
-  if (!theCommands.GetMatrix(input[2], theMat, 0, splittingNormal.size, 0)) {
+  if (!theCommands.GetMatrix(input[2], theMat, nullptr, splittingNormal.size, nullptr)) {
     return output.MakeError("Failed to extract matrix from second argument. ", theCommands);
   }
   NonStrictCone.AssignMatrixRows(theMat);
-  if (!theCommands.GetMatrix(input[3], theMat, 0, splittingNormal.size, 0)) {
+  if (!theCommands.GetMatrix(input[3], theMat, nullptr, splittingNormal.size, nullptr)) {
     return output.MakeError("Failed to extract matrix from third argument. ", theCommands);
   }
   VectorsToPerturbRelativeTo.AssignMatrixRows(theMat);
@@ -2347,7 +2352,7 @@ void Calculator::ExpressionHistoryAddEmptyHistory() {
   currentExpressionHistory.reset(*this);
   currentExpressionHistory.AddChildAtomOnTop(this->opExpressionHistory());
   this->historyRuleNames.LastObject().SetSize(currentExpressionHistoryStack.size);
-  this->historyRuleNames.LastObject().LastObject() = (std::string) "";
+  this->historyRuleNames.LastObject().LastObject() = "";
 }
 
 void Calculator::ExpressionHistoryAdd(Expression& theExpression, int expressionLabel) {
@@ -2413,7 +2418,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableNested(
 class HistorySubExpression {
 public:
   friend std::ostream& operator << (std::ostream& output, const HistorySubExpression& theH) {
-    if (theH.currentE == 0) {
+    if (theH.currentE == nullptr) {
       output << "(no expression)";
     } else {
       output << theH.currentE->ToString();
@@ -2423,7 +2428,7 @@ public:
   }
   const Expression* currentE;
   int lastActiveSubexpression;
-  HistorySubExpression(): currentE(0), lastActiveSubexpression(- 1) {
+  HistorySubExpression(): currentE(nullptr), lastActiveSubexpression(- 1) {
   }
 };
 

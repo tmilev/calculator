@@ -1,9 +1,9 @@
-//The current file is licensed under the license terms found in the main header file "vpf.h".
-//For additional information refer to the file "vpf.h".
+//The current file is licensed under the license terms found in the main header file "calculator.h".
+//For additional information refer to the file "calculator.h".
 #ifndef vpfHeader1General8DatabaseSystemIndependent_already_included
 #define vpfHeader1General8DatabaseSystemIndependent_already_included
 
-#include "vpfHeader1General0_General.h"
+#include "general_1_lists.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemIndependentinstance(
   __FILE__, "Header, system independent database data structures. "
 );

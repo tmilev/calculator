@@ -1,6 +1,6 @@
-//The current file is licensed under the license terms found in the main header file "vpf.h".
-//For additional information refer to the file "vpf.h".
-#include "vpf.h"
+//The current file is licensed under the license terms found in the main header file "calculator.h".
+//For additional information refer to the file "calculator.h".
+#include "calculator.h"
 #include <assert.h>
 
 
@@ -720,7 +720,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false) {
 
 // now the pseudo tau signatures
   if (pseudo) {
-   
+
 
     if (ts[0].size > numCycles) {
       stOutput << "hr is ";
@@ -998,7 +998,7 @@ class polynom1al
 
 
   static List<polynom1al<coefficient> > LagrangeInterpolants(List<int> points) {
-   
+
 
   }
 
@@ -2057,7 +2057,7 @@ int pointis(int d, int n) {
     //        for wp in pw:
     //          cnt += len(ways_of_placing(negpart, d-nonzero_entries(wp))) # (d choose negpart.rows)
     for (int m= 0; m<n + 1; m ++) {
-     
+
       // vectors(n = abs sum,m = number of positives)
 
 
@@ -2513,7 +2513,7 @@ class SparseTensor
 };
 
 void SparseTensor::Canonicalize() {
- 
+
 }
 */
 
@@ -3022,7 +3022,7 @@ void TestInduction(int n = 4, int m = 3) {
   /*
     Matrix<Rational> XP;
     for (int i = 0; i <G.ccCount; i ++) {
-     
+
     XP = GetMatrix(G.characterTable[i]);
     XP *= G.characterTable[i].data[0];
     stOutput << G.characterTable[i] << "\n";
@@ -3295,7 +3295,7 @@ void TestInduction(int n = 4, int m = 3) {
   */
   /*    int i = 0; j = 0;
       while (spaces.size > 0) {
-       
+
 
       }
   */

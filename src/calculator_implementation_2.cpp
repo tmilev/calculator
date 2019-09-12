@@ -1,6 +1,6 @@
-//The current file is licensed under the license terms found in the main header file "vpf.h".
-//For additional information refer to the file "vpf.h".
-#include "vpf.h"
+//The current file is licensed under the license terms found in the main header file "calculator.h".
+//For additional information refer to the file "calculator.h".
+#include "calculator.h"
 #include "string_constants.h"
 ProjectInformationInstance ProjectInfoVpf6_05cpp(__FILE__, "Calculator core evaluation engine. ");
 

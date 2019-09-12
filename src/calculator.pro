@@ -261,7 +261,7 @@ HEADERS += \
 #    boringssl/tool/transport_common.h \
     source_code_formatter.h \
     string_constants.h \
-    vpf.h \
+    calculator.h \
     vpfFiniteFields.h \
     general_1_lists.h \
     vpfHeader1General1_ListReferences.h \

@@ -1,5 +1,5 @@
-//The current file is licensed under the license terms found in the main header file "vpf.h".
-//For additional information refer to the file "vpf.h".
+//The current file is licensed under the license terms found in the main header file "calculator.h".
+//For additional information refer to the file "calculator.h".
 #ifndef vpfHeaderMathVectors_h_already_included
 #define vpfHeaderMathVectors_h_already_included
 

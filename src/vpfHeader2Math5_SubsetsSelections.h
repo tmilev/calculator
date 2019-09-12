@@ -1,9 +1,9 @@
-//The current file is licensed under the license terms found in the main header file "vpf.h".
-//For additional information refer to the file "vpf.h".
+//The current file is licensed under the license terms found in the main header file "calculator.h".
+//For additional information refer to the file "calculator.h".
 #ifndef vpfHeader1_2SubsetsSelections_already_included
 #define vpfHeader1_2SubsetsSelections_already_included
 
-#include "vpfHeader1General0_General.h"
+#include "general_1_lists.h"
 #include "vpfHeader2Math02_Vectors.h"
 #include "vpfHeader1General9_MemorySaving.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1_5(__FILE__, "Header, selections, subsets, etc. ");

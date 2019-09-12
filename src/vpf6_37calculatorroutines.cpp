@@ -7,7 +7,7 @@
 #include "vpfHeader8HtmlSnippets.h"
 #include "vpfHeader8HtmlInterpretation.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
-#include "vpfHeader2Math9DrawingVariables.h"
+#include "math_extra_9_drawing_variables.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 #include "vpfHeader5Crypto.h"
 #include "abstract_syntax_notation_one_decoder.h"

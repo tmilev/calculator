@@ -3,8 +3,8 @@
 #ifndef vpfHeaderSemisimpleLieSubalgebrasIncluded
 #define vpfHeaderSemisimpleLieSubalgebrasIncluded
 
-#include "vpfHeader2Math0_General.h"
-#include "vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h"
+#include "math_1_general.h"
+#include "math_extra_2_semisimple_Lie_algebras_root_subalgebras.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1_4(__FILE__, "Header, semisimple Lie subalgebras. ");
 
 class SemisimpleSubalgebras;

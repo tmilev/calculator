@@ -3,7 +3,7 @@
 #include "general_2_list_references.h"
 #include "general_7_file_operations_encodings.h"
 #include "vpfJson.h"
-#include "vpfHeader2Math2_AlgebraicNumbers.h"
+#include "math_extra_3_algebraic_numbers.h"
 #include <iomanip>
 #include <sys/random.h>
 

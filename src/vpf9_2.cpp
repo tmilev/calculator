@@ -2,11 +2,11 @@
 //For additional information refer to the file "calculator.h".
 #include "general_1_lists.h"
 #include "vpfImplementationHeader2Math0_General.h"
-#include "vpfHeader2Math0_General.h"
+#include "math_1_general.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
-#include "vpfHeader2Math2_AlgebraicNumbers.h"
-#include "vpfHeader2Math15_UniversalEnveloping.h"
-#include "vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h"
+#include "math_extra_3_algebraic_numbers.h"
+#include "math_extra_10_universal_enveloping.h"
+#include "math_extra_2_semisimple_Lie_algebras_root_subalgebras.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'

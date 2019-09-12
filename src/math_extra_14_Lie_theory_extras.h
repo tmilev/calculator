@@ -3,8 +3,8 @@
 #ifndef vpfHeaderLieTheoryMiscellaneous
 #define vpfHeaderLieTheoryMiscellaneous
 
-#include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
-//#include "vpfHeader2Math15_UniversalEnveloping.h"
+#include "math_extra_1_semisimple_Lie_algebras.h"
+//#include "math_extra_10_universal_enveloping.h"
 static ProjectInformationInstance ProjectInfoVpfHeaderLieTheoryMiscellaneous(
   __FILE__, "Header, Lie theory, miscellaneous. "
 );

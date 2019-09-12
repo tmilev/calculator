@@ -3,7 +3,7 @@
 #ifndef vpfHeaderSemisimpleLieAlgebrasRootSubalgebras
 #define vpfHeaderSemisimpleLieAlgebrasRootSubalgebras
 
-#include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
+#include "math_extra_1_semisimple_Lie_algebras.h"
 
 static ProjectInformationInstance ProjectInfoVpfSSlieAlgRootSAs(
   __FILE__, "Header, root and sl2 subalgebras of semisimple Lie algebras. "

@@ -6,7 +6,7 @@
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 #include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
-#include "vpfHeader2Math5_SubsetsSelections.h"
+#include "math_4_subsets_selections.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
 

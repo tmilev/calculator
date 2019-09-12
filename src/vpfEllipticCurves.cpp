@@ -1,5 +1,5 @@
 #include "vpfImplementationHeader2Math11_EllipticCurves.h"
-#include "vpfHeader2Math2_AlgebraicNumbers.h"
+#include "math_extra_3_algebraic_numbers.h"
 
 unsigned int EllipticCurveWeierstrassNormalForm::HashFunction(const EllipticCurveWeierstrassNormalForm& input) {
   return

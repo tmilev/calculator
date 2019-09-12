@@ -1,6 +1,6 @@
 #ifndef vpfGraphHeaderAlreadyDefined
 #define vpfGraphHeaderAlreadyDefined
-#include "vpfHeader2Math0_General.h"
+#include "math_1_general.h"
 static ProjectInformationInstance ProjectInfoVpfGraphsHeader(
   __FILE__, "Header file, graphs (Thomas)."
 );

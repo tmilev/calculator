@@ -197,33 +197,44 @@ HEADERS += \
 #    boringssl/third_party/sike/sike.h \
 #    boringssl/third_party/sike/utils.h \
 #    boringssl/tool/internal.h \
-#    boringssl/tool/transport_common.h \
+#    boringssl/tool/transport_common.h
+    abstract_syntax_notation_one_decoder.h \
+    calculator.h \
+    general_1_lists.h \
+    general_2_list_references.h \
+    general_3_multitasking.h \
+    general_4_logging_global_variables.h \
+    general_5_time_date.h \
+    general_6_maps.h \
+    general_7_file_operations_encodings.h \
+    general_8_database_system_independent.h \
+    general_9_memory_saving.h \
+    general_10_test.h \
+    macros.h \
+    math_1_general.h \
+    math_2_large_integers.h \
+    math_3_vectors.h \
+    math_4_subsets_selections.h \
+    math_extra_1_semisimple_Lie_algebras.h \
+    math_extra_2_semisimple_Lie_algebras_root_subalgebras.h \
+    math_extra_3_algebraic_numbers.h \
+    math_extra_4_finite_groups.h \
+    math_extra_5_tree.h \
+    math_extra_6_graph.h \
+    math_extra_7_packed_vector.h \
+    math_extra_8_semisimple_Lie_subalgebras.h \
+    math_extra_9_drawing_variables.h \
+    math_extra_10_universal_enveloping.h \
+    math_extra_11_latex_routines.h \
+    math_extra_12_elliptic_curves.h \
+    math_extra_13_vector_space.h \
+    math_extra_14_Lie_theory_extras.h \
+    math_extra_15_symmetric_groups_and_generalizations.h \
+    math_extra_16_modules_semisimple_Lie_algebras.h \
     source_code_formatter.h \
     string_constants.h \
     transport_layer_security.h \
     vpfFiniteFields.h \
-    vpfHeader1General5TimeDate.h \
-    vpfHeader1General9_MemorySaving.h \
-    vpfHeader2Math0_General.h \
-    vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h \
-    vpfHeader2Math1_3SemisimpleLieSubalgebras.h \
-    vpfHeader2Math01_LargeIntArithmetic.h \
-    vpfHeader2Math1_LieTheoryExtras.h \
-    vpfHeader2Math1_SemisimpleLieAlgebras.h \
-    vpfHeader2Math2_AlgebraicNumbers.h \
-    vpfHeader2Math02_Vectors.h \
-    vpfHeader2Math3_FiniteGroups.h \
-    vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h \
-    vpfHeader2Math4_5_Tree.h \
-    vpfHeader2Math4_Graph.h \
-    vpfHeader2Math5_SubsetsSelections.h \
-    vpfHeader2Math6_ModulesSSLieAlgebras.h \
-    vpfHeader2Math7_PackedVector.h \
-    vpfHeader2Math8_VectorSpace.h \
-    vpfHeader2Math9DrawingVariables.h \
-    vpfHeader2Math10_LaTeXRoutines.h \
-    vpfHeader2Math11_EllipticCurves.h \
-    vpfHeader2Math15_UniversalEnveloping.h \
     vpfHeader3Calculator0_Interface.h \
     vpfHeader3Calculator1_InnerTypedFunctions.h \
     vpfHeader3Calculator2_InnerFunctions.h \
@@ -249,9 +260,9 @@ HEADERS += \
     vpfImplementationHeader2Math051_PolynomialComputations_Basic.h \
     vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h \
     vpfJson.h \
-    vpfMacros.h \
     vpfPackedVector.h \
     webserver.h
+
 
 
 SOURCES += \
@@ -859,6 +870,80 @@ SOURCES += \
 #    boringssl/third_party/sike/sike.c \
 #    boringssl/crypto/err/err_data.c \
 #    boringssl/crypto/err/err_data.c \
+    source_code_formatter.cpp \
+    string_constants.cpp \
+    test.cpp \
+    transport_layer_security.cpp \
+    transport_layer_security_implementation.cpp \
+    transport_layer_security_openssl.cpp \
+    transport_layer_security_test.cpp \
+    vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
+    vpf6.cpp \
+    vpf6_3calculatorMathRoutines.cpp \
+    vpf6_4ExpressionsImplementation.cpp \
+    vpf6_35calculatorMathRoutinesPart2.cpp \
+    vpf6_36calculatorHtmlRoutines.cpp \
+    vpf6_37calculatorroutines.cpp \
+    vpf6_38LaTeXRoutines.cpp \
+    vpf7.cpp \
+    vpf8.cpp \
+    vpf9.cpp \
+    vpf9_1.cpp \
+    vpf9_2.cpp \
+    vpf9_3RationalRadicals.cpp \
+    vpf9_4SemisimpleLieAlgebras.cpp \
+    vpf9_5SemisimpleLieAlgebras_RootSubalgebras.cpp \
+    vpf9_6SemisimpleLieSubAlgebras.cpp \
+    vpf9_7floating_point_routines.cpp \
+    vpf9_9SystemFunctions.cpp \
+    vpf9_85TimeDateWrappers.cpp \
+    vpf9_92multitasking.cpp \
+    vpf99_HardcodedData.cpp \
+    vpfCharacters.cpp \
+    vpfCharacters_CalculatorInterface.cpp \
+    vpfCrypto.cpp \
+    vpfCrypto_AES.cpp \
+    vpfCrypto_ripemd.cpp \
+    vpfCrypto_sha3.cpp \
+    vpfEllipticCurves.cpp \
+    vpfFiniteFields.cpp \
+    vpfGraph.cpp \
+    vpfHtmlInterpretationInterface.cpp \
+    vpfHtmlSnippets.cpp \
+    vpfJson.cpp \
+    vpfWebServerInterProcessLogistics.cpp \
+    web-routines-1.cpp \
+    webserver.cpp \
+    calculator_conversions_1.cpp \
+    calculator_function_registration.cpp \
+    calculator_implementation_1.cpp \
+    calculator_implementation_2.cpp \
+    calculator_implementation_3.cpp \
+    calculator_javascript_graphics.cpp \
+    calculator_parsing_routines.cpp \
+    calculator_typed_functions_1.cpp \
+    calculator_webserver_functions.cpp \
+    crypto_test.cpp \
+    database.cpp \
+    databasemongo.cpp \
+    database_mongo_calculator.cpp \
+    examRoutines.cpp \
+    global_objects.cpp \
+    calculator_conversions_1.cpp \
+    calculator_function_registration.cpp \
+    calculator_implementation_1.cpp \
+    calculator_implementation_2.cpp \
+    calculator_implementation_3.cpp \
+    calculator_javascript_graphics.cpp \
+    calculator_parsing_routines.cpp \
+    calculator_typed_functions_1.cpp \
+    calculator_webserver_functions.cpp \
+    crypto_test.cpp \
+    database.cpp \
+    databasemongo.cpp \
+    database_mongo_calculator.cpp \
+    examRoutines.cpp \
+    global_objects.cpp \
     source_code_formatter.cpp \
     string_constants.cpp \
     test.cpp \

@@ -2,12 +2,13 @@
 //For additional information refer to the file "calculator.h".
 #include "vpfHeader3Calculator0_Interface.h"
 #include "vpfImplementationHeader2Math0_General.h"
-#include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
+#include "math_extra_1_semisimple_Lie_algebras.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h" // undefined reference to `WeylGroupRepresentation<Rational>::reset()
+#include "math_extra_5_tree.h"
 
 #include <cmath>
 #include <cfloat>
@@ -2408,8 +2409,6 @@ bool Calculator::innerLogEvaluationStepsHumanReadableNested(
   theCommands.ExpressionHistoryStackPop();
   return output.AssignValue(out.str(), theCommands);
 }
-
-#include "vpfHeader2Math4_5_Tree.h"
 
 class HistorySubExpression {
 public:

@@ -4,7 +4,7 @@
 #define vpfImplementationHeaderPolyComputationsAdvanced_already_included
 
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
-#include "vpfHeader2Math2_AlgebraicNumbers.h"
+#include "math_extra_3_algebraic_numbers.h"
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialComputations(__FILE__, "Implementation header, polynomial computations, more advanced. ");
 
 template <class coefficient>

@@ -2,7 +2,7 @@
 //For additional information refer to the file "calculator.h".
 #ifndef vpfImplementationHeader1_HeaderUniversalEnveloping
 #define vpfImplementationHeader1_HeaderUniversalEnveloping
-#include "vpfHeader2Math15_UniversalEnveloping.h"
+#include "math_extra_10_universal_enveloping.h"
 static ProjectInformationInstance ProjectInfovpfImplementationHeader1_HeaderUniversalEnveloping(__FILE__, "Implementation header, universal enveloping algebras. ");
 
 template <class coefficient>

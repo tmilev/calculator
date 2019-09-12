@@ -4,15 +4,15 @@
 #define vpfHeader2_h_already_included
 
 //the following  include contains all the c++ math routines used in the calculator.
-#include "vpfHeader2Math0_General.h"
-#include "vpfHeader2Math3_FiniteGroups.h"
-#include "vpfHeader2Math4_Graph.h"
-#include "vpfHeader2Math2_AlgebraicNumbers.h"
+#include "math_1_general.h"
+#include "math_extra_4_finite_groups.h"
+#include "math_extra_6_graph.h"
+#include "math_extra_3_algebraic_numbers.h"
 #include "general_2_list_references.h"
-#include "vpfHeader2Math1_3SemisimpleLieSubalgebras.h"
-#include "vpfHeader2Math15_UniversalEnveloping.h"
-#include "vpfHeader2Math6_ModulesSSLieAlgebras.h"
-#include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
+#include "math_extra_8_semisimple_Lie_subalgebras.h"
+#include "math_extra_10_universal_enveloping.h"
+#include "math_extra_16_modules_semisimple_Lie_algebras.h"
+#include "math_extra_15_symmetric_groups_and_generalizations.h"
 #include "vpfImplementationHeader2Math11_EllipticCurves.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file, calculator declaration. ");
@@ -928,7 +928,7 @@ public:
   ExpressionTripleCrunchers(
     int inputOp, int inputLeft, int inputRight
   ): theOp(inputOp), leftType(inputLeft), rightType(inputRight) {
-   
+
   }
   static unsigned int HashFunction(const ExpressionTripleCrunchers& input) {
     return

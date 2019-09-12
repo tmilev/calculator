@@ -1,6 +1,6 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "vpfHeader2Math10_LaTeXRoutines.h"
+#include "math_extra_11_latex_routines.h"
 #include "general_7_file_operations_encodings.h"
 #include "general_4_logging_global_variables.h"
 #include "vpfHeader8HtmlSnippets.h"

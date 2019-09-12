@@ -3,7 +3,7 @@
 
 #include "abstract_syntax_notation_one_decoder.h"
 #include "vpfHeader5Crypto.h"
-#include "vpfHeader2Math2_AlgebraicNumbers.h"
+#include "math_extra_3_algebraic_numbers.h"
 
 extern ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementation;
 

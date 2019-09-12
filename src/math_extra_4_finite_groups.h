@@ -3,9 +3,9 @@
 #ifndef vpfCharacterHeader_alreadyIncluded
 #define vpfCharacterHeader_alreadyIncluded
 #include "general_1_lists.h"
-#include "vpfHeader2Math0_General.h"
-#include "vpfHeader2Math8_VectorSpace.h"
-#include "vpfHeader2Math4_Graph.h"
+#include "math_1_general.h"
+#include "math_extra_13_vector_space.h"
+#include "math_extra_6_graph.h"
 #include "vpfJson.h"
 
 //To do: move Weyl groups to this file. Eliminate all redundant code and organize nicely.

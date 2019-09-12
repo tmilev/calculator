@@ -2,8 +2,8 @@
 //For additional information refer to the file "calculator.h".
 #ifndef vpfHeader11_ImplementationHeaderEllipticCurves
 #define vpfHeader11_ImplementationHeaderEllipticCurves
-#include "vpfHeader2Math11_EllipticCurves.h"
-#include "vpfHeader2Math2_AlgebraicNumbers.h"
+#include "math_extra_12_elliptic_curves.h"
+#include "math_extra_3_algebraic_numbers.h"
 
 static ProjectInformationInstance ProjectInfovpfImplementationHeader_HeaderEllipticCurves(
   __FILE__, "Implementation header, elliptic curves. "

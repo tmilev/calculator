@@ -2,7 +2,7 @@
 //For additional information refer to the file "calculator.h".
 #ifndef vpfVectorSpaceHeader_alreadyIncluded
 #define vpfVectorSpaceHeader_alreadyIncluded
-#include "vpfHeader2Math0_General.h"
+#include "math_1_general.h"
 
 static ProjectInformationInstance ProjectInfoVpfVectorSpace(__FILE__, "Header file, vector spaces (similar to vectors but with more structure; usefulness of the class not agreed upon yet).");
 template <typename coefficient>

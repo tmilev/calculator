@@ -2,8 +2,8 @@
 //For additional information refer to the file "calculator.h".
 #ifndef vpfHeader1_HeaderUniversalEnveloping
 #define vpfHeader1_HeaderUniversalEnveloping
-#include "vpfHeader2Math0_General.h"
-#include "vpfHeader2Math1_LieTheoryExtras.h"
+#include "math_1_general.h"
+#include "math_extra_14_Lie_theory_extras.h"
 
 static ProjectInformationInstance ProjectInfovpfHeader1_HeaderUniversalEnveloping(
   __FILE__, "Header, universal enveloping algebras. "

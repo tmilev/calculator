@@ -2,7 +2,7 @@
 //For additional information refer to the file "calculator.h".
 #ifndef vpfHeaderHtmlSnippetsAlreadyDefined
 #define vpfHeaderHtmlSnippetsAlreadyDefined
-#include "vpfMacros.h"
+#include "macros.h"
 #include "general_6_maps.h"
 #include "general_2_list_references.h"
 

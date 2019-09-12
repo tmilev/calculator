@@ -1,11 +1,11 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#include "vpfHeader2Math0_General.h"
+#include "math_1_general.h"
 #include "vpfImplementationHeader2Math0_General.h"
-#include "vpfHeader2Math1_LieTheoryExtras.h"
+#include "math_extra_14_Lie_theory_extras.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
-#include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
-#include "vpfHeader2Math9DrawingVariables.h"
+#include "math_extra_15_symmetric_groups_and_generalizations.h"
+#include "math_extra_9_drawing_variables.h"
 #include <assert.h>
 #include "vpfHeader3Calculator0_Interface.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"

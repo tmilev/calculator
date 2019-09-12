@@ -3,11 +3,11 @@
 #ifndef vpfSymmetricGroupsAndGeneralizationsHeader_alreadyIncluded
 #define vpfSymmetricGroupsAndGeneralizationsHeader_alreadyIncluded
 #include "general_1_lists.h"
-#include "vpfHeader2Math0_General.h"
+#include "math_1_general.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
-#include "vpfHeader2Math8_VectorSpace.h"
-#include "vpfHeader2Math4_Graph.h"
-#include "vpfHeader2Math3_FiniteGroups.h"
+#include "math_extra_13_vector_space.h"
+#include "math_extra_6_graph.h"
+#include "math_extra_4_finite_groups.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
 static ProjectInformationInstance ProjectInfoVpfSymmetricGroups(

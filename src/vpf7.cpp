@@ -1,8 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "general_1_lists.h"
-#include "vpfHeader2Math0_General.h"
-#include "vpfHeader2Math15_UniversalEnveloping.h"
+#include "math_1_general.h"
+#include "math_extra_10_universal_enveloping.h"
 
 ProjectInformationInstance ProjectInfoVpf7cpp(__FILE__, "Math routines implementation. ");
 

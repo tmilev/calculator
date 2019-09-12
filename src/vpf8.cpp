@@ -2,8 +2,8 @@
 //For additional information refer to the file "calculator.h".
 #include "general_1_lists.h"
 #include "vpfImplementationHeader2Math0_General.h"
-#include "vpfHeader2Math0_General.h"
-#include "vpfHeader2Math2_AlgebraicNumbers.h"
+#include "math_1_general.h"
+#include "math_extra_3_algebraic_numbers.h"
 
 ProjectInformationInstance ProjectInfoVpf8cpp(__FILE__, "Math routines implementation. ");
 

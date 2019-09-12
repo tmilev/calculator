@@ -5,8 +5,8 @@
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
-#include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
-#include "vpfHeader2Math9DrawingVariables.h"
+#include "math_extra_15_symmetric_groups_and_generalizations.h"
+#include "math_extra_9_drawing_variables.h"
 #include <dirent.h>
 
 extern ProjectInformationInstance ProjectInfoVpf9cpp;

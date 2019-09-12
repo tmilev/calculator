@@ -3,7 +3,7 @@
 #ifndef vpfHeaderDrawingVars_Already_included
 #define vpfHeaderDrawingVars_Already_included
 
-#include "vpfHeader2Math0_General.h"
+#include "math_1_general.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeaderDrawingVars(__FILE__, "Header, drawing routines. ");
 

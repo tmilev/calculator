@@ -4,8 +4,8 @@
 #define vpfHeader1_2SubsetsSelections_already_included
 
 #include "general_1_lists.h"
-#include "vpfHeader2Math02_Vectors.h"
-#include "vpfHeader1General9_MemorySaving.h"
+#include "math_3_vectors.h"
+#include "general_9_memory_saving.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1_5(__FILE__, "Header, selections, subsets, etc. ");
 
 class Selection {

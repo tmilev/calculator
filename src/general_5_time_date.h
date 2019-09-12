@@ -2,7 +2,7 @@
 //For additional information refer to the file "calculator.h".
 #ifndef vpfHeaderDateAndTimeWrappersAlreadyDefined
 #define vpfHeaderDateAndTimeWrappersAlreadyDefined
-#include "vpfMacros.h"
+#include "macros.h"
 #include <ctime>
 
 static ProjectInformationInstance ProjectInfoHeaderDateAndtimeWrappers(__FILE__, "Date and time wrapper classes. ");

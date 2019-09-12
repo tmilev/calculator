@@ -3,11 +3,11 @@
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfHeader3Calculator4HtmlFunctions.h"
 #include "vpfHeader7DatabaseInterface.h"
-#include "vpfHeader1General5TimeDate.h"
+#include "general_5_time_date.h"
 #include "vpfHeader8HtmlInterpretation.h"
 #include "vpfHeader8HtmlSnippets.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
-#include "vpfHeader2Math10_LaTeXRoutines.h"
+#include "math_extra_11_latex_routines.h"
 #include <iomanip>
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
 #include "string_constants.h"

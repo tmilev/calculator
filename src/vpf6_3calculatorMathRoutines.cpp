@@ -12,7 +12,7 @@
 #include "vpfHeader5Crypto.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h" // undefined reference to `charSSAlgMod<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, charSSAlgMod<RationalFunctionOld>&, branchingData&, GlobalVariables&)'
 #include "vpfHeader8HtmlSnippets.h"
-#include "vpfHeader2Math10_LaTeXRoutines.h"
+#include "math_extra_11_latex_routines.h"
 #include "source_code_formatter.h"
 #include <cmath>
 

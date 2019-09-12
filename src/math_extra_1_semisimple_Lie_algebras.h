@@ -3,7 +3,7 @@
 #ifndef vpfHeaderSemisimpleLieAlgebrasIncluded
 #define vpfHeaderSemisimpleLieAlgebrasIncluded
 
-#include "vpfHeader2Math3_FiniteGroups.h"
+#include "math_extra_4_finite_groups.h"
 static ProjectInformationInstance ProjectInfoVpfHeaderSemisimpleLieAlgebras(__FILE__, "Header, semisimple Lie algebras. ");
 
 class SemisimpleLieAlgebra {

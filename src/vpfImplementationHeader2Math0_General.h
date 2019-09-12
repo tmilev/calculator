@@ -1,6 +1,6 @@
 #ifndef VPFIMPLEMENTATIONHEADER2MATH0_GENERAL_H
 #define VPFIMPLEMENTATIONHEADER2MATH0_GENERAL_H
-#include "vpfHeader2Math0_General.h"
+#include "math_1_general.h"
 static ProjectInformationInstance ProjectInfoVPFIMPLEMENTATIONHEADER2MATH0_GENERAL_H(
   __FILE__, "Header implementation, math routines. "
 );

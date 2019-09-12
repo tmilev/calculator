@@ -6,7 +6,7 @@
 #include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
-#include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
+#include "math_extra_15_symmetric_groups_and_generalizations.h"
 #include "vpfHeader3Calculator4HtmlFunctions.h"
 #include "vpfHeader5Crypto.h"
 #include "vpfImplementationHeader2Math11_EllipticCurves.h"

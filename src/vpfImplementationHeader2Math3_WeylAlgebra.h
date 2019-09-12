@@ -3,8 +3,8 @@
 #ifndef vpfImplementationHeaderWeylAlgebras_already_included
 #define vpfImplementationHeaderWeylAlgebras_already_included
 
-#include "vpfHeader2Math0_General.h"
-#include "vpfHeader2Math2_AlgebraicNumbers.h"
+#include "math_1_general.h"
+#include "math_extra_3_algebraic_numbers.h"
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderWeylAlgebras(
   __FILE__, "Implementation header, Weyl algebra routines. "
 );

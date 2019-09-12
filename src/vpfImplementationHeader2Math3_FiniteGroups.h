@@ -3,7 +3,7 @@
 #ifndef vpfImplementationHeaderFiniteGroupsIncluded
 #define vpfImplementationHeaderFiniteGroupsIncluded
 
-#include "vpfHeader2Math3_FiniteGroups.h"
+#include "math_extra_4_finite_groups.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderFiniteGroups(__FILE__, "Implementation header, finite groups. ");
 

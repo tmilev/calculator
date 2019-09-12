@@ -2,8 +2,8 @@
 //For additional information refer to the file "calculator.h".
 #ifndef vpfHeader_HeaderModulesSSLiealgebras
 #define vpfHeader_HeaderModulesSSLiealgebras
-#include "vpfHeader2Math0_General.h"
-#include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
+#include "math_1_general.h"
+#include "math_extra_1_semisimple_Lie_algebras.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeaderModulesSSLielgebras(__FILE__, "Header, generalized Verma modules. ");
 

@@ -23,12 +23,12 @@
 #define vpf_h_already_included
 //This header file includes the various sub-headers.
 //The splitting into sub-headers is needed to speed up compilation times.
-#include "vpfMacros.h"
+#include "macros.h"
 #include "general_1_lists.h"
-#include "vpfHeader2Math0_General.h"
-//#include "vpfHeader2Math2_AlgebraicNumbers.h"
-#include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
-#include "vpfHeader2Math3_FiniteGroups.h"
+#include "math_1_general.h"
+//#include "math_extra_3_algebraic_numbers.h"
+#include "math_extra_1_semisimple_Lie_algebras.h"
+#include "math_extra_4_finite_groups.h"
 #include "vpfHeader3Calculator0_Interface.h"
 static ProjectInformationInstance ProjectInfoVpfH(__FILE__, "Wrapper header file (includes everything).");
 #endif

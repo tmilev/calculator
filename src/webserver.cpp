@@ -2461,7 +2461,7 @@ int WebWorker::ProcessEditPageJSON() {
   return 0;
 }
 
-#include "vpfHeader2Math10_LaTeXRoutines.h"
+#include "math_extra_11_latex_routines.h"
 int WebWorker::ProcessSlidesOrHomeworkFromSource() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSlidesOrHomeworkFromSource");
   this->SetHeaderOKNoContentLength("");

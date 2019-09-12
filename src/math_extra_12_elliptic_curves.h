@@ -2,7 +2,7 @@
 //For additional information refer to the file "calculator.h".
 #ifndef vpfHeader11_HeaderEllipticCurves
 #define vpfHeader11_HeaderEllipticCurves
-#include "vpfHeader2Math0_General.h"
+#include "math_1_general.h"
 
 static ProjectInformationInstance ProjectInfovpfHeader_HeaderEllipticCurves(__FILE__, "Header, elliptic curves. ");
 

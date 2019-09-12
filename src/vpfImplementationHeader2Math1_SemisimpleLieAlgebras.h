@@ -3,9 +3,9 @@
 #ifndef vpfImplementationHeaderSemisimpleLieAlgebrasIncluded
 #define vpfImplementationHeaderSemisimpleLieAlgebrasIncluded
 
-#include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
-#include "vpfHeader2Math1_LieTheoryExtras.h" // error: invalid use of incomplete type ‘struct branchingData’
-#include "vpfHeader2Math9DrawingVariables.h"
+#include "math_extra_1_semisimple_Lie_algebras.h"
+#include "math_extra_14_Lie_theory_extras.h" // error: invalid use of incomplete type ‘struct branchingData’
+#include "math_extra_9_drawing_variables.h"
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderSemisimpleLieAlgebras(
   __FILE__, "Implementation header, semisimple Lie algebra routines. "
 );

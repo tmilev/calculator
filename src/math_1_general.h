@@ -4,9 +4,9 @@
 #define vpfHeader1_2_h_already_included
 
 #include "general_4_logging_global_variables.h"
-#include "vpfHeader2Math01_LargeIntArithmetic.h"
-#include "vpfHeader2Math02_Vectors.h"
-#include "vpfHeader2Math5_SubsetsSelections.h"
+#include "math_2_large_integers.h"
+#include "math_3_vectors.h"
+#include "math_4_subsets_selections.h"
 #include "general_7_file_operations_encodings.h"
 #include "vpfHeader8HtmlSnippets.h"
 

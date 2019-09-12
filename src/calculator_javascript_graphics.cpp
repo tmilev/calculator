@@ -1,8 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "general_1_lists.h"
-#include "vpfHeader2Math0_General.h"
-#include "vpfHeader2Math9DrawingVariables.h"
+#include "math_1_general.h"
+#include "math_extra_9_drawing_variables.h"
 ProjectInformationInstance ProjectInfoVpf5_2cpp(__FILE__, "Calculator javascript/html/graphics. ");
 
 std::string CreateJavaScriptVectors(Vectors<double>& inputVectors, const std::string& arrayName, bool useVar) {

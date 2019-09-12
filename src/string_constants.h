@@ -1,6 +1,6 @@
 #ifndef vpfWEBAPI_HEADER_H
 #define vpfWEBAPI_HEADER_H
-#include "vpfMacros.h"
+#include "macros.h"
 
 static ProjectInformationInstance vpfWEBAPI_HEADER_Hinstance(__FILE__, "Header, web api strings. ");
 

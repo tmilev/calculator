@@ -1,6 +1,6 @@
 #ifndef header_vpfHeader1General2Mutexes_already_Defined
 #define header_vpfHeader1General2Mutexes_already_Defined
-#include "vpfMacros.h"
+#include "macros.h"
 static ProjectInformationInstance vpfHeader1General2Mutexes(__FILE__, "Header, mutexes. ");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #ifndef vpfHeaderLoggingGlobalVars_already_defined
 #define vpfHeaderLoggingGlobalVars_already_defined
-#include "vpfHeader1General0_General.h"
+#include "general_1_lists.h"
 #include "vpfHeader1General1_ListReferences.h"
 #include "vpfHeader1General6Maps.h"
 #include "vpfHeader1General8DatabaseSystemIndependent.h"

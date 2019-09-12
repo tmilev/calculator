@@ -2,7 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #ifndef vpfCharacterHeader_alreadyIncluded
 #define vpfCharacterHeader_alreadyIncluded
-#include "vpfHeader1General0_General.h"
+#include "general_1_lists.h"
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math8_VectorSpace.h"
 #include "vpfHeader2Math4_Graph.h"
@@ -452,7 +452,7 @@ public:
     this->operator=(other);
   }
   ElementWeylGroup(): owner(nullptr), flagDeallocated(false) {
-   
+
   }
   ~ElementWeylGroup() {
     this->flagDeallocated = true;
@@ -2233,7 +2233,7 @@ class UDPolynomial {
 public:
    // "So the last shall be first, and the first last" -- Matthew 20:12
   List<coefficient> data;
-  UDPolynomial() {   
+  UDPolynomial() {
   }
   UDPolynomial(const UDPolynomial<coefficient>& other) {
     this->data = other.data;

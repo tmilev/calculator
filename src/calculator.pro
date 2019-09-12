@@ -263,7 +263,7 @@ HEADERS += \
     string_constants.h \
     vpf.h \
     vpfFiniteFields.h \
-    vpfHeader1General0_General.h \
+    general_1_lists.h \
     vpfHeader1General1_ListReferences.h \
     vpfHeader1General2Multitasking.h \
     vpfHeader1General3_Test.h \
@@ -332,16 +332,23 @@ SOURCES += \
     source_code_formatter.cpp \
     string_constants.cpp \
     test.cpp \
+    transport_layer_security.cpp \
+    transport_layer_security_openssl.cpp \
+    transport_layer_security_implementation.cpp \
+    abstract_syntax_notation_one_decoder.cpp \
+    transport_layer_security_test.cpp \
+    calculator_webserver_functions.cpp \
+    abstract_syntax_notation_one_decoder_test.cpp \
     vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
-    vpf4CalculatorFunctionList.cpp \
-    vpf5.cpp \
-    vpf5_1CalculatorCode.cpp \
-    vpf5_2javascript_graphics.cpp \
+    calculator_function_registration.cpp \
+    calculator_implementation_1.cpp \
+    calculator_implementation_2.cpp \
+    calculator_implementation_3.cpp \
+    calculator_javascript_graphics.cpp \
     vpf6.cpp \
-    vpf6_05evaluationroutines.cpp \
-    vpf6_0parsingRoutines.cpp \
-    vpf6_1innerTypedFunctions.cpp \
-    vpf6_2serialization_code.cpp \
+    calculator_parsing_routines.cpp \
+    calculator_typed_functions_1.cpp \
+    calculator_conversions_1.cpp \
     vpf6_35calculatorMathRoutinesPart2.cpp \
     vpf6_36calculatorHtmlRoutines.cpp \
     vpf6_37calculatorroutines.cpp \
@@ -360,7 +367,7 @@ SOURCES += \
     vpf9_6SemisimpleLieSubAlgebras.cpp \
     vpf9_7floating_point_routines.cpp \
     vpf9_85TimeDateWrappers.cpp \
-    vpf9_8GlobalObjects.cpp \
+    global_objects.cpp \
     vpf9_92multitasking.cpp \
     vpf9_9SystemFunctions.cpp \
     vpfCharacters.cpp \
@@ -922,10 +929,3 @@ SOURCES += \
 #    boringssl/third_party/sike/sike.c \
 #    boringssl/crypto/err/err_data.c \
 #    boringssl/crypto/err/err_data.c \
-    transport_layer_security.cpp \
-    transport_layer_security_openssl.cpp \
-    transport_layer_security_implementation.cpp \
-    abstract_syntax_notation_one_decoder.cpp \
-    transport_layer_security_test.cpp \
-    calculator_webserver_functions.cpp \
-    abstract_syntax_notation_one_decoder_test.cpp

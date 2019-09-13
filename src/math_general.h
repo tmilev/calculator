@@ -7062,7 +7062,7 @@ class MonomialGeneralizedVerma {
   ModuleSSalgebra<coefficient>* owner;
   MonomialUniversalEnveloping<coefficient> theMonCoeffOne;
   int indexFDVector;
-  MonomialGeneralizedVerma(): owner(0), indexFDVector(- 1) {
+  MonomialGeneralizedVerma(): owner(nullptr), indexFDVector(- 1) {
   }
   friend std::ostream& operator << (std::ostream& output, const MonomialGeneralizedVerma<coefficient>& theGen) {
     output << theGen.ToString();

@@ -32,9 +32,9 @@ public:
 template<class someFiniteGroup, typename coefficient>
 class ClassFunction {
 public:
-  someFiniteGroup *G;
+  someFiniteGroup* G;
   Vector<coefficient> data;
-  ClassFunction(): G(0) {
+  ClassFunction(): G(nullptr) {
   } //the syntax :G(0) initializes the pointer G with 0.
   //Although there may be a minor speed penalty
   //(such a speed penalty is system dependent and possibly
@@ -120,8 +120,8 @@ public:
 // To make certain operations go faster, it might be nice to put smarter algorithms
 // in the function pointers in the FiniteGroup class
 //
-//assumptions on the FiniteGroup:
-//1. The finite group has a small number of conjugacy classes. Z/10000000Z is not OK
+// assumptions on the FiniteGroup:
+// 1. The finite group has a small number of conjugacy classes. Z/10000000Z is not OK
 //
 // An uninitialized element is expected to be the identity element to the full
 // extent allowed by law.  Two uninitialized elements can be expected to multiply,
@@ -279,11 +279,11 @@ public:
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
   bool AreConjugate_OLD_Deprecated_Version_By_Todor(const elementSomeGroup& left, const elementSomeGroup& right);
   bool ComputeAllElements(bool andWords, int MaxElements = 1000000);
-  //MaxElements gives an upper bound to the number of elements this function will try to find.
-  //Set MaxElements = - 1 for "unlimited" upper bound.
+  // MaxElements gives an upper bound to the number of elements this function will try to find.
+  // Set MaxElements = - 1 for "unlimited" upper bound.
   bool ComputeAllElementsLargeGroup(bool andWords, int MaxElements = 1000000);
-  //MaxElements gives an upper bound to the number of elements this function will try to find.
-  //Set MaxElements = - 1 for "unlimited" upper bound.
+  // MaxElements gives an upper bound to the number of elements this function will try to find.
+  // Set MaxElements = - 1 for "unlimited" upper bound.
 
   // Historical note: this was from Thomas' second finite group class, and is
   // as of 2015- 11 the only way to generate the words and conjugacy information
@@ -614,7 +614,7 @@ public:
 
   List<std::string> ccCarterLabels;
   List<std::string> irrepsCarterLabels;
-  //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
+  // void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
   bool flagDeallocated;
 
   typedef FiniteGroup<ElementWeylGroup> WeylGroupBase;
@@ -785,11 +785,11 @@ public:
     List<Rational>& outputCoeffs,
     bool IntegralCoefficientsOnly
   );
-  //  void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, List<int>* theMultiplicities);
-  //  void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks){ this->MakeFromDynkinType(theLetters, theRanks, 0); }
-  //void GetLongRootLength(Rational& output);
+  // void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, List<int>* theMultiplicities);
+  // void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks){ this->MakeFromDynkinType(theLetters, theRanks, 0); }
+  // void GetLongRootLength(Rational& output);
   static bool IsAddmisibleDynkinType(char candidateLetter, int n);
-  //the below will not do anything if the inputLetter is not a valid Dynkin letter
+  // the below will not do anything if the inputLetter is not a valid Dynkin letter
   static void TransformToAdmissibleDynkinType(char inputLetter, int& outputRank);
   void ComputeEpsilonMatrix();
   template <class coefficient>

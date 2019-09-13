@@ -41,6 +41,21 @@ public:
     static const unsigned char IA5String = 22;
     static const unsigned char UTCTime = 23;
   };
+  // writes fixed lenght encodings.
+  class WriterSequenceFixedLength {
+  public:
+    List<unsigned char>* outputPointer;
+    int offset;
+    int totalByteLength;
+    int reservedBytesForLength;
+    int GetReservedBytesForLength(int length);
+    WriterSequenceFixedLength(
+      List<unsigned char>& output,
+      int expectedByteLengthOfLength,
+      bool isConstructed = true
+    );
+    ~WriterSequenceFixedLength();
+  };
   int recursionDepthGuard;
   int maxRecursionDepth;
   int dataPointer;

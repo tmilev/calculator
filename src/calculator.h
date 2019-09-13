@@ -1,20 +1,20 @@
 //*********************************************************************************************************
 //*********************************************************************************************************
-//Vector partition function - a mathematical library  with focus on
-//1) symbolic computation (with the goal of becoming a complete computer algebra system);
-//2) computations in the area of Lie representation theory;
-//3) computations with vector partition functions.
+// Calculator - a computer algebra system with focus on
+// 1) symbolic computation;
+// 2) computations in the area of Lie Representation Theory;
+// 3) computations with vector partition functions.
 //
-//CopyRight (C) 2009-2018: Todor Milev
-//email: todor.milev@gmail.com
+// CopyRight (C) 2009-2018: Todor Milev
+// email: todor.milev@gmail.com
 //
-//This code is licensed under the
+// This code is licensed under the
 //
-//Apache License, Version 2.0
+// Apache License, Version 2.0
 //
-//For more details, see the file
+// For more details, see the file
 //
-//License.md
+// License.md
 //
 //*********************************************************************************************************
 //*********************************************************************************************************

@@ -4,6 +4,9 @@
 #include "abstract_syntax_notation_one_decoder.h"
 #include "crypto.h"
 #include "math_extra_algebraic_numbers.h"
+#include "serialization_basic.h"
+
+extern logger logWorker;
 
 extern ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementation;
 
@@ -56,7 +59,8 @@ void AbstractSyntaxNotationOneSubsetDecoder::initialize() {
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
-  int& outputLengthNegativeOneForVariable, JSData* interpretation
+  int& outputLengthNegativeOneForVariable,
+  JSData* interpretation
 ) {
   outputLengthNegativeOneForVariable = 0;
   int startDataPointer = this->dataPointer;
@@ -277,8 +281,9 @@ LargeInt AbstractSyntaxNotationOneSubsetDecoder::VariableLengthQuantityDecode(
   return result;
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(int desiredLengthInBytes, JSData& output
-, JSData *interpretation) {
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(
+  int desiredLengthInBytes, JSData& output, JSData *interpretation
+) {
   if (this->PointerIsBad(interpretation)) {
     return false;
   }
@@ -474,14 +479,83 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
   return out.str();
 }
 
-void X509Certificate::WriteBytes(List<unsigned char>& output) {
+int AbstractSyntaxNotationOneSubsetDecoder::WriterSequenceFixedLength::GetReservedBytesForLength(int length) {
+  int result = 1;
+  if (length < 128) {
+    return result;
+  }
+  while (length > 0) {
+    length /= 256;
+    result ++;
+  }
+  return result;
+}
+
+AbstractSyntaxNotationOneSubsetDecoder::WriterSequenceFixedLength::WriterSequenceFixedLength(
+  List<unsigned char>& output,
+  int expectedTotalElementByteLength,
+  bool isConstructed
+) {
+  if (expectedTotalElementByteLength < 0) {
+    expectedTotalElementByteLength = 0;
+  }
+  this->outputPointer = &output;
+  this->offset = output.size;
+  unsigned char theTag = AbstractSyntaxNotationOneSubsetDecoder::tags::sequence;
+  if (isConstructed) {
+    theTag += 32;
+  }
+  this->outputPointer->AddOnTop(theTag);
+  this->totalByteLength = expectedTotalElementByteLength;
+  this->reservedBytesForLength = this->GetReservedBytesForLength(expectedTotalElementByteLength);
+  for (int i = 0; i < this->reservedBytesForLength; i ++) {
+    this->outputPointer->AddOnTop(0);
+  }
+}
+
+AbstractSyntaxNotationOneSubsetDecoder::WriterSequenceFixedLength::~WriterSequenceFixedLength() {
+  this->totalByteLength = this->outputPointer->size - this->offset - 1 - this->reservedBytesForLength;
+  int actualBytesNeededForLength = this->GetReservedBytesForLength(this->totalByteLength);
+  if (actualBytesNeededForLength > this->reservedBytesForLength) {
+    logWorker << logger::red << "Wrong number of reserved bytes for sequence writer. "
+    << "This is non-fatal but affects negatively performance. " << logger::endL;
+    this->outputPointer->ShiftUpExpandOnTopRepeated(
+      this->offset + 1, actualBytesNeededForLength - this->reservedBytesForLength
+    );
+  }
+  if (actualBytesNeededForLength < this->reservedBytesForLength) {
+    logWorker << logger::red << "Wrong number of reserved bytes for sequence writer. "
+    << "This is non-fatal but affects negatively performance. " << logger::endL;
+    this->outputPointer->RemoveIndicesShiftDown(
+      this->offset + 1, this->reservedBytesForLength - actualBytesNeededForLength
+    );
+  }
+  this->reservedBytesForLength = actualBytesNeededForLength;
+  if (this->totalByteLength < 128) {
+    unsigned char length = static_cast<unsigned char>(this->totalByteLength);
+    (*this->outputPointer)[this->offset + 1] = length;
+  } else {
+    unsigned char lengthPlus128 = 128 + static_cast<unsigned char>(this->reservedBytesForLength);
+    (*this->outputPointer)[this->offset + 1] = lengthPlus128;
+    int offsetTemporary = this->offset + 2;
+    Serialization::WriteNByteLength(
+      this->reservedBytesForLength,
+      static_cast<unsigned int>(this->totalByteLength),
+      *this->outputPointer,
+      offsetTemporary
+    );
+  }
+}
+
+void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequenceFixedLength writeLength(output, 2000);
 }
 
 std::string X509Certificate::ToStringTestEncode() {
   std::stringstream out;
   std::string sourceHex = Crypto::ConvertListUnsignedCharsToHex(this->sourceBinary, 80, true);
   List<unsigned char> recoded;
-  this->WriteBytes(recoded);
+  this->WriteBytesASN1(recoded);
   std::string recodedHex = Crypto::ConvertListUnsignedCharsToHex(recoded, 80, true);
   unsigned firstDifferentChar = 0;
   for (firstDifferentChar = 0; firstDifferentChar < sourceHex.size(); firstDifferentChar ++) {

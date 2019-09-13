@@ -1164,6 +1164,8 @@ public:
   bool operator>(const List<Object>& other) const;
   bool operator<(const List<Object>& other) const;
   void ShiftUpExpandOnTop(int StartingIndex);
+  void ShiftUpExpandOnTopRepeated(int StartingIndex, int numberOfNewElements);
+
   void Slice(int StartingIndex, int SizeOfSlice);
   List(int StartingSize);
   List(int StartingSize, const Object& fillInValue);
@@ -1952,9 +1954,15 @@ bool List<Object>::operator<(const List<Object>& other) const {
 
 template <class Object>
 void List<Object>::ShiftUpExpandOnTop(int StartingIndex) {
-  this->SetSize(this->size + 1);
-  for (int i = this->size - 1; i > StartingIndex; i --) {
-    this->TheObjects[i] = this->TheObjects[i - 1];
+  this->ShiftUpExpandOnTopRepeated(StartingIndex, 1);
+}
+
+template <class Object>
+void List<Object>::ShiftUpExpandOnTopRepeated(int StartingIndex, int numberOfNewElements) {
+  this->SetSize(this->size + numberOfNewElements);
+  int lowBound = StartingIndex + numberOfNewElements;
+  for (int i = this->size - 1; i >= lowBound; i --) {
+    this->TheObjects[i] = this->TheObjects[i - numberOfNewElements];
   }
 }
 

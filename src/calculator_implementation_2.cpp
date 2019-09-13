@@ -2,6 +2,8 @@
 //For additional information refer to the file "calculator.h".
 #include "calculator.h"
 #include "string_constants.h"
+
+extern ProjectInformationInstance ProjectInfoVpf6_05cpp;
 ProjectInformationInstance ProjectInfoVpf6_05cpp(__FILE__, "Calculator core evaluation engine. ");
 
 std::string Calculator::ToStringFunctionHandlersJSON() {
@@ -122,7 +124,7 @@ bool Calculator::outerStandardFunction(
   const Expression& functionNameNode = input[0];
   if (functionNameNode.StartsWith()) {
     const List<Function>* theHandlers = theCommands.GetOperationCompositeHandlers(functionNameNode[0].theData);
-    if (theHandlers != 0) {
+    if (theHandlers != nullptr) {
       for (int i = 0; i < theHandlers->size; i ++) {
         if ((*theHandlers)[i].ShouldBeApplied(opIndexParentIfAvailable)) {
           if ((*theHandlers)[i].theFunction(theCommands, input, output)) {
@@ -191,7 +193,7 @@ bool Calculator::ExpressionMatchesPattern(
     << "is a stack trace, however beware that the error might be in code preceding the stack loading. "
     << crash;
   }
-  if (commentsGeneral!= 0) {
+  if (commentsGeneral!= nullptr) {
     *commentsGeneral << " <hr> current input: " << input.ToString() << "<br>current pattern: " << thePattern.ToString();
     *commentsGeneral << "<br> current matched expressions: " << matchedExpressions.ToStringHtml();
   }
@@ -686,7 +688,7 @@ bool Calculator::EvaluateExpression(
         beforePatternMatch = output;
       }
       MapList<Expression, Expression> bufferPairs;
-      std::stringstream* theLog = theCommands.flagLogPatternMatching ? &theCommands.Comments : 0;
+      std::stringstream* theLog = theCommands.flagLogPatternMatching ? &theCommands.Comments : nullptr;
       if (theCommands.ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, theLog)) {
         ReductionOcurred = true;
         if (theCommands.flagLogEvaluatioN) {
@@ -725,40 +727,40 @@ Expression* Calculator::PatternMatch(
     out << "Error: while trying to evaluate expression, the maximum recursion depth of "
     << this->MaxRecursionDeptH << " was exceeded";
     theExpression.MakeError(out.str(), *this);
-    return 0;
+    return nullptr;
   }
   thePattern.CheckInitialization();
   theExpression.CheckInitialization();
   if (!this->ExpressionMatchesPattern(thePattern, theExpression, bufferPairs, theLog)) {
-    return 0;
+    return nullptr;
   }
-  if (theLog != 0) {
+  if (theLog != nullptr) {
     (*theLog) << "<hr>found pattern: " << theExpression.ToString() << " -> "
     << thePattern.ToString() << " with " << bufferPairs.ToStringHtml();
   }
-  if (condition == 0) {
+  if (condition == nullptr) {
     return &theExpression;
   }
   Expression tempExp = *condition;
   tempExp.CheckInitialization();
-  if (theLog != 0) {
+  if (theLog != nullptr) {
     (*theLog) << "<hr>Specializing condition pattern: " << tempExp.ToString();
   }
   this->SpecializeBoundVars(tempExp, bufferPairs);
   tempExp.CheckInitialization();
-  if (theLog != 0) {
+  if (theLog != nullptr) {
     (*theLog) << "<hr>Specialized condition: " << tempExp.ToString() << "; evaluating...";
   }
   Expression conditionResult;
   this->EvaluateExpression(*this, tempExp, conditionResult);
-  if (theLog != 0) {
+  if (theLog != nullptr) {
     (*theLog) << "<hr>The evaluated specialized condition: " << conditionResult.ToString()
     << "; evaluating...";
   }
   if (conditionResult.IsEqualToOne()) {
     return &theExpression;
   }
-  return 0;
+  return nullptr;
 }
 
 void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapList<Expression, Expression>& matchedPairs) {
@@ -791,13 +793,13 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub(
   if (!thePattern.StartsWith(this->opDefine(), 3) && !thePattern.StartsWith(this->opDefineConditional(), 4)) {
     return false;
   }
-  if (theLog != 0) {
+  if (theLog != nullptr) {
     (*theLog) << "<hr>attempting to reduce expression " << theExpression.ToString();
     (*theLog) << " by pattern " << thePattern.ToString();
   }
   theExpression.CheckInitialization();
   const Expression& currentPattern = thePattern[1];
-  const Expression* theCondition = 0;
+  const Expression* theCondition = nullptr;
   bool isConditionalDefine = thePattern.StartsWith(this->opDefineConditional(), 4);
   if (isConditionalDefine) {
     theCondition = &thePattern[2];
@@ -805,10 +807,10 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub(
   Expression* toBeSubbed = this->PatternMatch(
     currentPattern, theExpression, bufferPairs, theCondition, theLog
   );
-  if (toBeSubbed == 0) {
+  if (toBeSubbed == nullptr) {
     return false;
   }
-  if (theLog != 0) {
+  if (theLog != nullptr) {
     *theLog << "<br><b>found a match!</b>";
   }
   if (isConditionalDefine) {
@@ -839,15 +841,15 @@ bool Calculator::ParseAndExtractExpressions(
 
 void Calculator::initComputationStats() {
   this->startTimeEvaluationMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
-  this->NumListsStart                   = ParallelComputing::NumListsCreated;
-  this->NumListResizesStart             = ParallelComputing::NumListResizesTotal;
-  this->NumHashResizesStart             = ParallelComputing::NumHashResizes;
-  this->NumSmallAdditionsStart          = Rational::TotalSmallAdditions;
-  this->NumSmallMultiplicationsStart    = Rational::TotalSmallMultiplications;
-  this->NumSmallGCDcallsStart           = Rational::TotalSmallGCDcalls;
-  this->NumLargeAdditionsStart          = Rational::TotalLargeAdditions;
-  this->NumLargeMultiplicationsStart    = Rational::TotalLargeMultiplications;
-  this->NumLargeGCDcallsStart           = Rational::TotalLargeGCDcalls;
+  this->NumListsStart                   = static_cast<signed>( ParallelComputing::NumListsCreated    );
+  this->NumListResizesStart             = static_cast<signed>( ParallelComputing::NumListResizesTotal);
+  this->NumHashResizesStart             = static_cast<signed>( ParallelComputing::NumHashResizes     );
+  this->NumSmallAdditionsStart          = static_cast<signed>( Rational::TotalSmallAdditions         );
+  this->NumSmallMultiplicationsStart    = static_cast<signed>( Rational::TotalSmallMultiplications   );
+  this->NumSmallGCDcallsStart           = static_cast<signed>( Rational::TotalSmallGCDcalls          );
+  this->NumLargeAdditionsStart          = static_cast<signed>( Rational::TotalLargeAdditions         );
+  this->NumLargeMultiplicationsStart    = static_cast<signed>( Rational::TotalLargeMultiplications   );
+  this->NumLargeGCDcallsStart           = static_cast<signed>( Rational::TotalLargeGCDcalls          );
 }
 
 void Calculator::Evaluate(const std::string& theInput) {

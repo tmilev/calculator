@@ -98,7 +98,7 @@ public:
   bool LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   std::string ToString();
   std::string ToStringTestEncode();
-  void WriteBytes(List<unsigned char>& output);
+  void WriteBytesASN1(List<unsigned char>& output);
 };
 
 class Crypto {

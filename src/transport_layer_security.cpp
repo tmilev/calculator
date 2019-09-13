@@ -6,10 +6,11 @@
 #include "general_file_operations_encodings.h"
 #include "crypto.h"
 #include "abstract_syntax_notation_one_decoder.h"
+#include "serialization_basic.h"
 
 #include <unistd.h> //<- close, open defined here
 #include <netdb.h> //<-addrinfo and related data structures defined here
-#include  <iomanip>
+#include <iomanip>
 
 extern ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementation;
 ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementation(__FILE__, "TSL/ssl implementation.");
@@ -798,9 +799,9 @@ void SSLRecord::WriteBytes(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLRecord::WriteBytes");
   logServer << "DEBUG: GOt to here pt -1!!!" << logger::endL;
   output.AddOnTop(static_cast<unsigned char>(SSLRecord::tokens::handshake));
-  SSLRecord::WriteTwoByteInt(this->version, output);
+  Serialization::WriteTwoByteInt(this->version, output);
   logServer << "DEBUG: GOt to here!!!" << logger::endL;
-  SSLRecord::LengthWriterTwoBytes writeLength(output);
+  Serialization::LengthWriterTwoBytes writeLength(output);
   logServer << "DEBUG: GOt to here pt 2!!!" << logger::endL;
   this->content.WriteBytes(output);
   logServer << "DEBUG: GOt to here pt 3!!!" << logger::endL;
@@ -820,11 +821,11 @@ void SSLContent::WriteBytesHandshakeServerHello(List<unsigned char>& output) con
     crash << "Not allowed to serialize non server-hello content as server hello. " << crash;
   }
   this->WriteType(output);
-  SSLRecord::LengthWriterThreeBytes writeLength(output);
+  Serialization::LengthWriterThreeBytes writeLength(output);
   this->WriteVersion(output);
   this->WriteBytesRandomAndSessionId(output);
   //256 = 0x0100 = no compression:
-  SSLRecord::WriteTwoByteInt(256, output);
+  Serialization::WriteTwoByteInt(256, output);
   this->WriteBytesExtensionsOnly(output);
 }
 
@@ -833,7 +834,7 @@ void SSLContent::WriteType(List<unsigned char>& output) const {
 }
 
 void SSLContent::WriteVersion(List<unsigned char>& output) const {
-  SSLRecord::WriteTwoByteInt(this->version, output);
+  Serialization::WriteTwoByteInt(this->version, output);
 }
 
 void SSLContent::WriteBytesHandshakeCertificate(List<unsigned char> &output) const {
@@ -842,9 +843,9 @@ void SSLContent::WriteBytesHandshakeCertificate(List<unsigned char> &output) con
     crash << "Not allowed to serialize non-certificate content as certificate. " << crash;
   }
   this->WriteType(output);
-  SSLRecord::LengthWriterThreeBytes writeLength(output);
-  SSLRecord::LengthWriterThreeBytes writeLengthFirstCertificate(output);
-  this->GetServer().certificate.WriteBytes(output);
+  Serialization::LengthWriterThreeBytes writeLength(output);
+  Serialization::LengthWriterThreeBytes writeLengthFirstCertificate(output);
+  this->GetServer().certificate.WriteBytesASN1(output);
 }
 
 void SSLContent::WriteBytesHandshakeClientHello(List<unsigned char>& output) const {
@@ -853,12 +854,12 @@ void SSLContent::WriteBytesHandshakeClientHello(List<unsigned char>& output) con
     crash << "Not allowed to serialize non client-hello content as client hello. " << crash;
   }
   this->WriteType(output);
-  SSLRecord::LengthWriterThreeBytes writeLength(output);
+  Serialization::LengthWriterThreeBytes writeLength(output);
   this->WriteVersion(output);
   this->WriteBytesRandomAndSessionId(output);
   this->WriteBytesSupportedCiphers(output);
   //256 = 0x0100 = no compression:
-  SSLRecord::WriteTwoByteInt(256, output);
+  Serialization::WriteTwoByteInt(256, output);
   this->WriteBytesExtensionsOnly(output);
 }
 
@@ -872,20 +873,20 @@ void SSLContent::WriteBytesRandomAndSessionId(List<unsigned char>& output) const
   for (int i = 0; i < this->RandomBytes.size; i ++) {
     output[start + i] = this->RandomBytes[i];
   }
-  SSLRecord::WriteOneByteLengthFollowedByBytes(this->sessionId, output);
+  Serialization::WriteOneByteLengthFollowedByBytes(this->sessionId, output);
 }
 
 void SSLContent::WriteBytesSupportedCiphers(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::ToBytesSupportedCiphers");
-  SSLRecord::WriteTwoByteInt(this->declaredCiphers.size * 2, output);
+  Serialization::WriteTwoByteInt(this->declaredCiphers.size * 2, output);
   for (int i = 0; i < this->declaredCiphers.size; i ++) {
-    SSLRecord::WriteTwoByteInt(this->declaredCiphers[i].id, output);
+    Serialization::WriteTwoByteInt(this->declaredCiphers[i].id, output);
   }
 }
 
 bool SSLContent::DecodeSupportedCiphers(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLHello::DecodeSupportedCiphers");
-  if (!SSLRecord::ReadTwoByteInt(
+  if (!Serialization::ReadTwoByteInt(
     this->owner->body, this->owner->offsetDecoded, this->cipherSpecLength, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -904,7 +905,7 @@ bool SSLContent::DecodeSupportedCiphers(std::stringstream* commentsOnFailure) {
   this->declaredCiphers.SetSize(halfCipherLength);
   for (int i = 0; i < halfCipherLength; i ++) {
     this->declaredCiphers[i].owner = this->owner->owner;
-    if (!SSLRecord::ReadTwoByteInt(
+    if (!Serialization::ReadTwoByteInt(
       this->owner->body,
       this->owner->offsetDecoded,
       this->declaredCiphers[i].id,
@@ -921,12 +922,12 @@ bool SSLContent::DecodeSupportedCiphers(std::stringstream* commentsOnFailure) {
 void SSLContent::WriteBytesExtensionsOnly(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLHello::ToBytesNoExtensions");
   int offsetExtensionsLength = output.size;
-  SSLRecord::WriteTwoByteInt(0, output);
+  Serialization::WriteTwoByteInt(0, output);
   for (int i = 0; i < this->extensions.size; i ++) {
     this->extensions[i].WriteBytes(output);
   }
   int extensionsLength = output.size - offsetExtensionsLength - 2;
-  SSLRecord::WriteNByteLength(2, static_cast<unsigned>(extensionsLength), output, offsetExtensionsLength);
+  Serialization::WriteNByteLength(2, static_cast<unsigned>(extensionsLength), output, offsetExtensionsLength);
 }
 
 bool SSLContent::Decode(std::stringstream* commentsOnFailure) {
@@ -948,7 +949,7 @@ bool SSLContent::Decode(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  if (!SSLRecord::ReadThreeByteInt(this->owner->body, this->owner->offsetDecoded, this->length, commentsOnFailure)) {
+  if (!Serialization::ReadThreeByteInt(this->owner->body, this->owner->offsetDecoded, this->length, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read ssl record length. ";
     }
@@ -960,7 +961,7 @@ bool SSLContent::Decode(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->version, commentsOnFailure)) {
+  if (!Serialization::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->version, commentsOnFailure)) {
     return false;
   }
   this->RandomBytes.SetSize(SSLContent::LengthRandomBytesInSSLHello);
@@ -968,7 +969,7 @@ bool SSLContent::Decode(std::stringstream* commentsOnFailure) {
     this->RandomBytes[i] = this->owner->body[this->owner->offsetDecoded + i];
   }
   this->owner->offsetDecoded += SSLContent::LengthRandomBytesInSSLHello;
-  if (!SSLRecord::ReadOneByteLengthFollowedByBytes(
+  if (!Serialization::ReadOneByteLengthFollowedByBytes(
     this->owner->body,
     this->owner->offsetDecoded,
     nullptr,
@@ -983,7 +984,7 @@ bool SSLContent::Decode(std::stringstream* commentsOnFailure) {
   if (!this->DecodeSupportedCiphers(commentsOnFailure)){
     return false;
   }
-  if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->compressionMethod, commentsOnFailure)) {
+  if (!Serialization::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->compressionMethod, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Compression bytes not set. ";
     }
@@ -999,7 +1000,7 @@ bool SSLContent::DecodeExtensions(std::stringstream *commentsOnFailure) {
     // No extensions
     return true;
   }
-  if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->extensionsLength, commentsOnFailure)) {
+  if (!Serialization::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, this->extensionsLength, commentsOnFailure)) {
     return false;
   }
   int extensionsLimit = this->owner->offsetDecoded + this->extensionsLength;
@@ -1014,10 +1015,10 @@ bool SSLContent::DecodeExtensions(std::stringstream *commentsOnFailure) {
   while (this->owner->offsetDecoded < extensionsLimit) {
     SSLHelloExtension incoming;
     incoming.owner = this;
-    if (!SSLRecord::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, incoming.theType, commentsOnFailure)) {
+    if (!Serialization::ReadTwoByteInt(this->owner->body, this->owner->offsetDecoded, incoming.theType, commentsOnFailure)) {
       return false;
     }
-    if (!SSLRecord::ReadTwoByteLengthFollowedByBytes(
+    if (!Serialization::ReadTwoByteLengthFollowedByBytes(
       this->owner->body, this->owner->offsetDecoded, nullptr, &incoming.content, commentsOnFailure
     )) {
       return false;
@@ -1033,8 +1034,8 @@ SSLHelloExtension::SSLHelloExtension() {
 }
 
 void SSLHelloExtension::WriteBytes(List<unsigned char>& output) {
-  SSLRecord::WriteTwoByteInt(this->theType, output);
-  SSLRecord::WriteTwoByteLengthFollowedByBytes(this->content, output);
+  Serialization::WriteTwoByteInt(this->theType, output);
+  Serialization::WriteTwoByteLengthFollowedByBytes(this->content, output);
 }
 
 void SSLHelloExtension::MakeGrease(SSLContent* inputOwner) {
@@ -1097,7 +1098,7 @@ bool SSLHelloExtension::ProcessMe(std::stringstream* commentsOnError) {
     }
   }
   if (this->theType == SSLContent::tokensExtension::serverName) {
-    if (!SSLRecord::ReadTwoByteLengthFollowedByBytesDontOutputOffset(
+    if (!Serialization::ReadTwoByteLengthFollowedByBytesDontOutputOffset(
       this->content, 0, nullptr, &this->owner->renegotiationCharacters, commentsOnError
     )) {
       if (commentsOnError != nullptr) {
@@ -1132,19 +1133,19 @@ bool SSLContent::ProcessExtensions(std::stringstream* commentsOnFailure) {
   return true;
 }
 
-bool SSLRecord::ReadTwoByteInt(
+bool Serialization::ReadTwoByteInt(
   const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
 ) {
-  return SSLRecord::ReadNByteInt(2, input, inputOutputOffset, result, commentsOnFailure);
+  return Serialization::ReadNByteInt(2, input, inputOutputOffset, result, commentsOnFailure);
 }
 
-bool SSLRecord::ReadThreeByteInt(
+bool Serialization::ReadThreeByteInt(
   const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
 ) {
-  return SSLRecord::ReadNByteInt(3, input, inputOutputOffset, result, commentsOnFailure);
+  return Serialization::ReadNByteInt(3, input, inputOutputOffset, result, commentsOnFailure);
 }
 
-bool SSLRecord::ReadNByteInt(
+bool Serialization::ReadNByteInt(
   int numBytes, const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
 ) {
   if (numBytes > 4) {
@@ -1167,27 +1168,27 @@ bool SSLRecord::ReadNByteInt(
   return true;
 }
 
-bool SSLRecord::ReadOneByteLengthFollowedByBytes(
+bool Serialization::ReadOneByteLengthFollowedByBytes(
   const List<unsigned char>& input,
   int& outputOffset,
   int* resultLength,
   List<unsigned char>* output,
   std::stringstream* commentsOnError
 ) {
-  return SSLRecord::ReadNByteLengthFollowedByBytes(1, input, outputOffset, resultLength, output, commentsOnError);
+  return Serialization::ReadNByteLengthFollowedByBytes(1, input, outputOffset, resultLength, output, commentsOnError);
 }
 
-bool SSLRecord::ReadTwoByteLengthFollowedByBytes(
+bool Serialization::ReadTwoByteLengthFollowedByBytes(
   const List<unsigned char>& input,
   int& outputOffset,
   int* resultLength,
   List<unsigned char>* output,
   std::stringstream* commentsOnError
 ) {
-  return SSLRecord::ReadNByteLengthFollowedByBytes(2, input, outputOffset, resultLength, output, commentsOnError);
+  return Serialization::ReadNByteLengthFollowedByBytes(2, input, outputOffset, resultLength, output, commentsOnError);
 }
 
-bool SSLRecord::ReadTwoByteLengthFollowedByBytesDontOutputOffset(
+bool Serialization::ReadTwoByteLengthFollowedByBytesDontOutputOffset(
   const List<unsigned char>& input,
   int offset,
   int* resultLength,
@@ -1195,10 +1196,10 @@ bool SSLRecord::ReadTwoByteLengthFollowedByBytesDontOutputOffset(
   std::stringstream* commentsOnError
 ) {
   int outputOffset = offset;
-  return SSLRecord::ReadNByteLengthFollowedByBytes(2, input, outputOffset, resultLength, output, commentsOnError);
+  return Serialization::ReadNByteLengthFollowedByBytes(2, input, outputOffset, resultLength, output, commentsOnError);
 }
 
-bool SSLRecord::ReadNByteLengthFollowedByBytes(
+bool Serialization::ReadNByteLengthFollowedByBytes(
   int numBytesLength,
   const List<unsigned char>& input,
   int& outputOffset,
@@ -1210,7 +1211,7 @@ bool SSLRecord::ReadNByteLengthFollowedByBytes(
   if (resultLength == nullptr) {
     resultLength = &temp;
   }
-  if (!SSLRecord::ReadNByteInt(numBytesLength, input, outputOffset, *resultLength, commentsOnError)) {
+  if (!Serialization::ReadNByteInt(numBytesLength, input, outputOffset, *resultLength, commentsOnError)) {
     return false;
   }
   if (*resultLength + outputOffset > input.size) {
@@ -1229,39 +1230,39 @@ bool SSLRecord::ReadNByteLengthFollowedByBytes(
   return true;
 }
 
-void SSLRecord::WriteTwoByteInt(
+void Serialization::WriteTwoByteInt(
   int input,
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return SSLRecord::WriteNByteLength(2, static_cast<unsigned>(input), output, inputOutputOffset);
+  return Serialization::WriteNByteLength(2, static_cast<unsigned>(input), output, inputOutputOffset);
 }
 
-void SSLRecord::WriteThreeByteInt(
+void Serialization::WriteThreeByteInt(
   int input,
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return SSLRecord::WriteNByteLength(3, static_cast<unsigned>(input), output, inputOutputOffset);
+  return Serialization::WriteNByteLength(3, static_cast<unsigned>(input), output, inputOutputOffset);
 }
 
-void SSLRecord::WriteTwoByteLength(
+void Serialization::WriteTwoByteLength(
   unsigned int input,
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return SSLRecord::WriteNByteLength(2, input, output, inputOutputOffset);
+  return Serialization::WriteNByteLength(2, input, output, inputOutputOffset);
 }
 
-void SSLRecord::WriteThreeByteLength(
+void Serialization::WriteThreeByteLength(
   unsigned int input,
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return SSLRecord::WriteNByteLength(3, input, output, inputOutputOffset);
+  return Serialization::WriteNByteLength(3, input, output, inputOutputOffset);
 }
 
-void SSLRecord::WriteNByteLength(
+void Serialization::WriteNByteLength(
   int byteCountOfLength,
   unsigned int input,
   List<unsigned char>& output,
@@ -1283,29 +1284,29 @@ void SSLRecord::WriteNByteLength(
   inputOutputOffset += byteCountOfLength;
 }
 
-void SSLRecord::WriteOneByteLengthFollowedByBytes(
+void Serialization::WriteOneByteLengthFollowedByBytes(
   const List<unsigned char>& input,
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  SSLRecord::WriteNByteLengthFollowedByBytes(1, input, output, inputOutputOffset);
+  Serialization::WriteNByteLengthFollowedByBytes(1, input, output, inputOutputOffset);
 }
 
-void SSLRecord::WriteTwoByteLengthFollowedByBytes(
+void Serialization::WriteTwoByteLengthFollowedByBytes(
   const List<unsigned char>& input,
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  SSLRecord::WriteNByteLengthFollowedByBytes(2, input, output, inputOutputOffset);
+  Serialization::WriteNByteLengthFollowedByBytes(2, input, output, inputOutputOffset);
 }
 
-void SSLRecord::WriteNByteLengthFollowedByBytes(
+void Serialization::WriteNByteLengthFollowedByBytes(
   int byteCountOfLength,
   const List<unsigned char>& input,
   List<unsigned char>& output,
   int& inputOutputOffset
 ) {
-  SSLRecord::WriteNByteLength(byteCountOfLength, static_cast<unsigned>(input.size), output, inputOutputOffset);
+  Serialization::WriteNByteLength(byteCountOfLength, static_cast<unsigned>(input.size), output, inputOutputOffset);
   if (inputOutputOffset + input.size > output.size) {
     output.SetSize(inputOutputOffset + input.size);
   }
@@ -1391,10 +1392,10 @@ bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
     }
     return false;
   }
-  if (!this->ReadTwoByteInt(this->body, this->offsetDecoded, this->version, commentsOnFailure)) {
+  if (!Serialization::ReadTwoByteInt(this->body, this->offsetDecoded, this->version, commentsOnFailure)) {
     return false;
   }
-  if (!this->ReadTwoByteInt(this->body, this->offsetDecoded, this->length, commentsOnFailure)) {
+  if (!Serialization::ReadTwoByteInt(this->body, this->offsetDecoded, this->length, commentsOnFailure)) {
     return false;
   }
   int highEnd = this->length + this->offsetDecoded;

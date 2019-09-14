@@ -1689,100 +1689,174 @@ unsigned int MathRoutines::HashVectorDoubles(const Vector<double>& input) {
   return MathRoutines::HashListDoubles(input);
 }
 
-class stringDiffer {
-public:
-  Matrix<int> matrixLongestCommonSubsequence;
-  std::string left;
-  std::string right;
-  int MaxMatrixSize;
-  List<int> commonStringSizesReverseOrder;
-  List<int> commonStringsLeftStartsReverseOrder;
-  List<int> commonStringsRightStartsReverseOrder;
-  List<std::string> leftResult;
-  List<std::string> rightResult;
-  int currentCommonStringLength;
-  bool ComputeDifference(std::stringstream* commentsOnFailure);
-  void ComputeLongestSubsequenceMatrix();
-  void ExtractCommonStrings(int indexLeft, int indexRight, int previousLeft, int previousRight);
-  void ExtractDifferences();
-  void ExtractResult(const List<int>& starts, const std::string& input, List<std::string>& output);
-  void PushCommonString(int indexLeft, int indexRight);
-  stringDiffer();
-};
+std::string StringRoutines::Differ::DifferenceHTMLStatic(
+  const std::string& inputLeft, const std::string& inputRight
+) {
+  StringRoutines::Differ theDiffer;
+  theDiffer.left = inputLeft;
+  theDiffer.right = inputRight;
+  return theDiffer.DifferenceHTML();
+}
 
-stringDiffer::stringDiffer() {
+std::string StringRoutines::Differ::DifferenceHTML() {
+  MacroRegisterFunctionWithName("StringRoutines::Differ::DifferenceHTML");
+  std::stringstream leftOut, rightOut, commentsOnFailure;
+  if (!this->ComputeDifference(&commentsOnFailure)) {
+    leftOut << "Failed to compute string difference. " << commentsOnFailure.str();
+    return leftOut.str();
+  }
+  for (int i = 0; i < this->leftResult.size; i ++) {
+    std::string leftS = this->leftResult[i];
+    std::string rightS = this->rightResult[i];
+    if (leftS == rightS && leftS.size() != 0) {
+      if (leftS.size() > 0) {
+        leftOut << "<b style='color:green'>" << leftS << "</b>";
+      }
+      if (rightS.size() > 0) {
+        rightOut << "<b style='color:green'>" << rightS << "</b>";
+      }
+    } else {
+      if (leftS.size() > 0) {
+        leftOut << "<b style='color:red'>" << leftS << "</b>";
+      }
+      if (rightS.size() > 0) {
+        rightOut << "<b style='color:red'>" << rightS << "</b>";
+      }
+    }
+  }
+  leftOut << "<br>";
+  leftOut << rightOut.str();
+  return leftOut.str();
+}
+
+StringRoutines::Differ::Differ() {
   this->MaxMatrixSize = 10000000;
   this->currentCommonStringLength = 0;
 }
 
-void stringDiffer::ComputeLongestSubsequenceMatrix() {
-  unsigned numberOfRows = static_cast<unsigned>(left.size() );
-  unsigned numberOfColumns = static_cast<unsigned>(right.size());
-  this->matrixLongestCommonSubsequence.init(
-    static_cast<int>(numberOfRows), static_cast<int>(numberOfColumns)
-  );
-  for (int j = 0; j < this->matrixLongestCommonSubsequence.NumCols; j ++) {
-    this->matrixLongestCommonSubsequence(0, j) = 0;
-  }
-  for (int i = 0; i < this->matrixLongestCommonSubsequence.NumRows; i ++) {
-    this->matrixLongestCommonSubsequence(i, 0) = 0;
-  }
-  for (unsigned i = 1; i < numberOfRows; i ++) {
-    for (unsigned j = 1; j < numberOfColumns; j ++) {
-      if (this->left[i] == this->right[j]) {
-        this->matrixLongestCommonSubsequence(i, j) = this->matrixLongestCommonSubsequence(i - 1, j - 1) + 1;
-      } else {
-        this->matrixLongestCommonSubsequence(i, j) = MathRoutines::Maximum(
-          this->matrixLongestCommonSubsequence(i - 1, j),
-          this->matrixLongestCommonSubsequence(i, j - 1)
-        );
+std::string StringRoutines::Differ::ToString() {
+  FormatExpressions theFormat;
+  theFormat.flagUseHTML = true;
+  std::stringstream out;
+  out << "Matrix:<br>" << this->matrixLongestCommonSubsequence.GetElement() << "<br>"
+  << "Common string sizes:<br>"
+  << this->commonStringSizesReverseOrder
+  << "<br>"
+  << "String starts, reverse order:<br>"
+  << "left: <br>"
+  << this->commonStringsLeftStartsReverseOrder
+  << "<br>right: <br>"
+  << this->commonStringsRightStartsReverseOrder;
+  return out.str();
+}
+
+void StringRoutines::Differ::ComputeBestStartingIndices(int& outputIndexLeft, int& outputIndexRight) {
+  MacroRegisterFunctionWithName("StringRoutines::Differ::ComputeBestStartingIndex");
+  Matrix<int> theMatrix = this->matrixLongestCommonSubsequence.GetElement();
+  outputIndexLeft = theMatrix.NumRows - 1;
+  outputIndexRight = theMatrix.NumCols - 1;
+  int bestSoFar = 0;
+  for (int i = 1; i < theMatrix.NumRows; i ++) {
+    for (int j = 1; j < theMatrix.NumCols; j ++) {
+      if (this->left[static_cast<unsigned>(i - 1)] != this->right[static_cast<unsigned>(j - 1)]) {
+        continue;
+      }
+      int current = theMatrix(i, j);
+      bool isBetter = false;
+      if (current > bestSoFar) {
+        isBetter = true;
+      }
+      if (current == bestSoFar && i + j < outputIndexLeft + outputIndexRight) {
+        isBetter = true;
+      }
+      if (isBetter) {
+        bestSoFar = current;
+        outputIndexLeft = i;
+        outputIndexRight = j;
       }
     }
   }
 }
 
-void stringDiffer::PushCommonString(int indexLeft, int indexRight) {
+void StringRoutines::Differ::ComputeLongestSubsequenceMatrix() {
+  MacroRegisterFunctionWithName("StringRoutines::Differ::ComputeLongestSubsequenceMatrix");
+  unsigned numberOfRows = static_cast<unsigned>(left.size() ) + 1;
+  unsigned numberOfColumns = static_cast<unsigned>(right.size()) + 1;
+  Matrix<int>& theMatrix = this->matrixLongestCommonSubsequence.GetElement();
+  theMatrix.init(
+    static_cast<int>(numberOfRows), static_cast<int>(numberOfColumns)
+  );
+  for (int j = 0; j < theMatrix.NumCols; j ++) {
+    theMatrix(0, j) = 0;
+  }
+  for (int i = 0; i < theMatrix.NumRows; i ++) {
+    theMatrix(i, 0) = 0;
+  }
+  for (unsigned i = 1; i < numberOfRows; i ++) {
+    for (unsigned j = 1; j < numberOfColumns; j ++) {
+      if (this->left[i - 1] == this->right[j - 1]) {
+        theMatrix(i, j) = theMatrix(i - 1, j - 1) + 1;
+      } else {
+        theMatrix(i, j) = MathRoutines::Maximum(theMatrix(i - 1, j), theMatrix(i, j - 1));
+      }
+    }
+  }
+}
+
+void StringRoutines::Differ::PushCommonString(int indexLeft, int indexRight) {
   if (this->currentCommonStringLength == 0) {
     return;
   }
   this->commonStringSizesReverseOrder.AddOnTop(this->currentCommonStringLength);
-  this->commonStringsLeftStartsReverseOrder.AddOnTop(indexLeft);
-  this->commonStringsRightStartsReverseOrder.AddOnTop(indexRight);
+  this->commonStringsLeftStartsReverseOrder.AddOnTop(indexLeft - 1);
+  this->commonStringsRightStartsReverseOrder.AddOnTop(indexRight - 1);
   this->currentCommonStringLength = 0;
 }
 
-void stringDiffer::ExtractCommonStrings(int indexLeft, int indexRight, int previousLeft, int previousRight) {
-  if (indexLeft < 0 || indexRight < 0) {
+void StringRoutines::Differ::ExtractCommonStrings(
+  int indexLeft, int indexRight, int previousLeft, int previousRight
+) {
+  MacroRegisterFunctionWithName("stringDiffer::ExtractCommonStrings");
+  if (indexLeft == 0 || indexRight == 0) {
     this->PushCommonString(previousLeft, previousRight);
     return;
   }
-  unsigned leftUnsigned  = static_cast<unsigned>(indexLeft );
-  unsigned rightUnsigned = static_cast<unsigned>(indexRight);
+  unsigned leftUnsigned  = static_cast<unsigned>(indexLeft - 1);
+  unsigned rightUnsigned = static_cast<unsigned>(indexRight - 1);
   if (this->left[leftUnsigned] == this->right[rightUnsigned]) {
     this->currentCommonStringLength ++ ;
     this->ExtractCommonStrings(indexLeft - 1, indexRight - 1, indexLeft, indexRight);
     return;
   }
   this->PushCommonString(previousLeft, previousRight);
+  Matrix<int>& theMatrix = this->matrixLongestCommonSubsequence.GetElement();
   if (
-    this->matrixLongestCommonSubsequence(indexLeft, indexRight - 1) >
-    this->matrixLongestCommonSubsequence(indexLeft - 1, indexRight)
+    theMatrix(indexLeft - 1, indexRight) > theMatrix(indexLeft, indexRight - 1)
   ) {
+    this->ExtractCommonStrings(indexLeft - 1, indexRight, indexLeft, indexRight);
+
+  } else {
     this->ExtractCommonStrings(indexLeft, indexRight - 1, indexLeft, indexRight);
   }
-  this->ExtractCommonStrings(indexLeft - 1, indexRight, indexLeft, indexRight);
 }
 
-void stringDiffer::ExtractDifferences() {
+void StringRoutines::Differ::ExtractDifferences() {
   this->ExtractResult(this->commonStringsLeftStartsReverseOrder, this->left, this->leftResult);
   this->ExtractResult(this->commonStringsRightStartsReverseOrder, this->right, this->rightResult);
+  while (this->leftResult.size < this->rightResult.size) {
+    this->leftResult.AddOnTop("");
+  }
+  while (this->rightResult.size < this->leftResult.size) {
+    this->rightResult.AddOnTop("");
+  }
 }
 
-void stringDiffer::ExtractResult(
+void StringRoutines::Differ::ExtractResult(
   const List<int>& starts, const std::string& input, List<std::string>& output
 ) {
+  MacroRegisterFunctionWithName("StringRoutines::Differ::ExtractResult");
   output.SetSize(0);
-  int previousEnd = 0;
+  unsigned int previousEnd = 0;
   for (int i = this->commonStringSizesReverseOrder.size - 1; i >= 0; i --) {
     int stringSize = this->commonStringSizesReverseOrder[i];
     int stringStart = starts[i];
@@ -1798,9 +1872,16 @@ void stringDiffer::ExtractResult(
     previousEnd = stringStart + stringSize;
     output.AddOnTop(common);
   }
+  if (previousEnd < input.size()) {
+    output.AddOnTop(input.substr(previousEnd));
+  }
 }
 
-bool stringDiffer::ComputeDifference(std::stringstream* commentsOnFailure) {
+// We compute string difference using the
+// longest common subsequence problem.
+// https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
+bool StringRoutines::Differ::ComputeDifference(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("StringRoutines::Differ::ComputeDifference");
   LargeInt leftSize = left.size();
   LargeInt rightSize = right.size();
   if (leftSize * rightSize > this->MaxMatrixSize) {
@@ -1815,34 +1896,15 @@ bool stringDiffer::ComputeDifference(std::stringstream* commentsOnFailure) {
   }
   this->ComputeLongestSubsequenceMatrix();
   this->currentCommonStringLength = 0;
+  int startLeft = 0, startRight = 0;
+  this->ComputeBestStartingIndices(startLeft, startRight);
   this->ExtractCommonStrings(
-    static_cast<int>(this->left.size()) - 1,
-    static_cast<int>(this->right.size()) - 1,
+    startLeft,
+    startRight,
     0,
     0
   );
   this->ExtractDifferences();
-  return true;
-}
-
-// We compute string difference using the
-// longest common subsequence problem.
-// https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
-bool StringRoutines::Difference(
-  const std::string& left,
-  const std::string& right,
-  List<std::string>& outputLeft,
-  List<std::string>& outputRight,
-  std::stringstream *commentsOnFailure
-) {
-  stringDiffer theDiffer;
-  theDiffer.left = left;
-  theDiffer.right = right;
-  if (!theDiffer.ComputeDifference(commentsOnFailure)) {
-    return false;
-  }
-  outputLeft = theDiffer.leftResult;
-  outputRight = theDiffer.rightResult;
   return true;
 }
 

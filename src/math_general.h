@@ -848,7 +848,7 @@ public:
   coefficient& operator()(int i, int j) const {
     if (i < 0 || i >= this->NumRows || j < 0 || j >= this->NumCols) {
       crash << "This is a programming error: requesting row, column indexed by "
-      << i + 1 << " and " << j + 1 << " but I am a matrix with "
+      << i << " and " << j << " but I am a matrix with "
       << this->NumRows << " rows and " << this->NumCols << " colums. " << crash;
     }
     return this->elements[i][j];

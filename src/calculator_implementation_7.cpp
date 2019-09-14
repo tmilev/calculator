@@ -381,15 +381,7 @@ bool CalculatorFunctionsGeneral::innerStringDifference(
   if (!input[1].IsOfType(&left) || !input[2].IsOfType(&right)) {
     return false;
   }
-  List<std::string> leftResult, rightResult;
-  std::stringstream commentsOnFailure;
-  if (!StringRoutines::Difference(left, right, leftResult, rightResult, &commentsOnFailure)) {
-    return theCommands << commentsOnFailure.str();
-  }
-  std::stringstream out;
-  out << "Left:<br>" << leftResult << "<br>";
-  out << "Right:<br>" << rightResult << "<br>";
-  return output.AssignValue(out.str(), theCommands);
+  return output.AssignValue(StringRoutines::Differ::DifferenceHTMLStatic(left, right), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerSliceString(Calculator& theCommands, const Expression& input, Expression& output) {

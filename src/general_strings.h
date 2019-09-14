@@ -7,6 +7,9 @@
 
 static ProjectInformationInstance headerGeneralStringsProjectInformation(__FILE__, "Header, string operations. ");
 
+template <typename coefficient>
+class Matrix;
+
 class StringRoutines {
 public:
   static bool StringBeginsWith(
@@ -29,12 +32,33 @@ public:
   static void SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond);
   static std::string StringShortenInsertDots(const std::string& inputString, int maxNumChars);
 
-  static bool Difference(
-    const std::string& left,
-    const std::string& right,
-    List<std::string>& outputLeft,
-    List<std::string>& outputRight,
-    std::stringstream* commentsOnFailure
-  );
+
+  class Differ {
+  public:
+    MemorySaving<Matrix<int> > matrixLongestCommonSubsequence;
+    std::string left;
+    std::string right;
+    int MaxMatrixSize;
+    List<int> commonStringSizesReverseOrder;
+    List<int> commonStringsLeftStartsReverseOrder;
+    List<int> commonStringsRightStartsReverseOrder;
+    List<std::string> leftResult;
+    List<std::string> rightResult;
+    int currentCommonStringLength;
+    static std::string DifferenceHTMLStatic(
+      const std::string& inputLeft,
+      const std::string& inputRight
+    );
+    std::string DifferenceHTML();
+    bool ComputeDifference(std::stringstream* commentsOnFailure);
+    void ComputeLongestSubsequenceMatrix();
+    void ComputeBestStartingIndices(int& outputIndexLeft, int& outputIndexRight);
+    void ExtractCommonStrings(int indexLeft, int indexRight, int previousLeft, int previousRight);
+    void ExtractDifferences();
+    void ExtractResult(const List<int>& starts, const std::string& input, List<std::string>& output);
+    void PushCommonString(int indexLeft, int indexRight);
+    std::string ToString();
+    Differ();
+  };
 };
 #endif

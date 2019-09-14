@@ -566,18 +566,8 @@ std::string X509Certificate::ToStringTestEncode() {
       break;
     }
   }
-  std::string originalLeft, originalRight, recodedLeft, recodedRight;
-  StringRoutines::SplitStringInTwo(sourceHex, static_cast<int>(firstDifferentChar), originalLeft, originalRight);
-  StringRoutines::SplitStringInTwo(recodedHex, static_cast<int>(firstDifferentChar), recodedLeft, recodedRight);
-  out <<  "Source:<br>\n" << originalLeft;
-  if (originalRight.size() > 0) {
-    out << "<b style='color:red'>" << originalRight << "</b>";
-  }
-  out << "\n<br>Recoded:<br>\n";
-  out << recodedLeft;
-  if (recodedRight.size() > 0) {
-    out << "<b style='color:red'>" << recodedRight << "</b>";
-  }
+  out << "Original, recoded binary source:<br>"
+  << StringRoutines::Differ::DifferenceHTMLStatic(sourceHex, recodedHex);
   return out.str();
 }
 

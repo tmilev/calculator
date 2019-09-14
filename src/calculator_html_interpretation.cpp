@@ -55,7 +55,7 @@ JSData HtmlInterpretation::GetProblemSolutionJSON() {
   std::string lastStudentAnswerID;
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   for (int i = 0; i < theArgs.size(); i ++) {
-    MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
+    StringRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   }
   int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId == - 1) {
@@ -186,7 +186,7 @@ std::string HtmlInterpretation::GetSanitizedComment(
   resultIsPlot = false;
   std::string theString;
   if (input.IsOfType<std::string>(&theString)) {
-    if (MathRoutines::StringBeginsWith(theString, "Approximations have been")) {
+    if (StringRoutines::StringBeginsWith(theString, "Approximations have been")) {
       return "";
     }
     return input.ToString(&theFormat);
@@ -229,7 +229,7 @@ std::string HtmlInterpretation::GetCommentsInterpretation(
   std::string currentS;
   for (int i = 1; i < currentE.size(); i ++) {
     currentS = HtmlInterpretation::GetSanitizedComment(currentE[i], theFormat,resultIsPlot);
-    if (MathRoutines::StringTrimWhiteSpace(currentS) == "") {
+    if (StringRoutines::StringTrimWhiteSpace(currentS) == "") {
       continue;
     }
     out << currentS;
@@ -255,7 +255,7 @@ JSData HtmlInterpretation::submitAnswersPreviewJSON() {
   theGlobalVariables.webArguments;
   JSData result;
   for (int i = 0; i < theArgs.size(); i ++) {
-    if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID)) {
+    if (StringRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID)) {
       lastAnswer = "(" + HtmlRoutines::ConvertURLStringToNormal(theArgs.theValues[i], false) + "); ";
     }
   }
@@ -348,7 +348,7 @@ JSData HtmlInterpretation::submitAnswersPreviewJSON() {
   << ");";
   calculatorInputStreamNoEnclosures
   << currentA.answerId << " = " << lastAnswer << "";
-  bool hasCommentsBeforeSubmission = (MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != "");
+  bool hasCommentsBeforeSubmission = (StringRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != "");
   if (hasCommentsBeforeSubmission) {
     calculatorInputStream << "CommandEnclosure{}("
     <<  currentA.commandsCommentsBeforeSubmission
@@ -515,8 +515,8 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash) {
       continue;
     }
     std::string firstPart, secondAndThirdPart, thirdPart, notUsed;
-    MathRoutines::SplitStringInTwo(currentLine, startChar, firstPart, secondAndThirdPart);
-    MathRoutines::SplitStringInTwo(
+    StringRoutines::SplitStringInTwo(currentLine, startChar, firstPart, secondAndThirdPart);
+    StringRoutines::SplitStringInTwo(
       secondAndThirdPart,
       static_cast<int>(WebAPI::request::calculatorHTML.size()),
       notUsed,
@@ -534,7 +534,7 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash) {
         outFirstPart << lineStream.str();
       }
     } else {
-      MathRoutines::StringSplitExcludeDelimiter(secondAndThirdPart, '"', splitterStrings);
+      StringRoutines::StringSplitExcludeDelimiter(secondAndThirdPart, '"', splitterStrings);
       this->jsFileNames.AddOnTop(splitterStrings[0]);
     }
   }
@@ -576,7 +576,7 @@ std::string HtmlInterpretation::GetOnePageJSBrowserify() {
   out << "var theJSContent = {\n";
   for (int i = 0; i < this->jsFileContents.size; i ++) {
     std::string fileNameNoJS;
-    if (!MathRoutines::StringEndsWith(this->jsFileNames[i], ".js", &fileNameNoJS)) {
+    if (!StringRoutines::StringEndsWith(this->jsFileNames[i], ".js", &fileNameNoJS)) {
       fileNameNoJS = this->jsFileNames[i];
     }
     out << "\"" << fileNameNoJS << "\" : function(require, module, exports){\n";
@@ -663,33 +663,33 @@ void CourseList::LoadFromString(const std::string& input, std::stringstream* com
   std::string currentLine, currentArgument;
   Course current;
   while (std::getline(tableReader, currentLine, '\n')) {
-    if (MathRoutines::StringBeginsWith(currentLine, "Html:", &currentArgument)) {
+    if (StringRoutines::StringBeginsWith(currentLine, "Html:", &currentArgument)) {
       if (current.courseTemplate != "") {
         this->theCourses.AddOnTop(current);
         current.reset();
       }
-      current.courseTemplate = MathRoutines::StringTrimWhiteSpace(currentArgument);
+      current.courseTemplate = StringRoutines::StringTrimWhiteSpace(currentArgument);
     }
-    if (MathRoutines::StringBeginsWith(currentLine, "Topics:", &currentArgument)) {
+    if (StringRoutines::StringBeginsWith(currentLine, "Topics:", &currentArgument)) {
       if (current.courseTopics != "") {
         this->theCourses.AddOnTop(current);
         current.reset();
       }
-      current.courseTopics = MathRoutines::StringTrimWhiteSpace(currentArgument);
+      current.courseTopics = StringRoutines::StringTrimWhiteSpace(currentArgument);
     }
-    if (MathRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument)) {
+    if (StringRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument)) {
       if (current.title != "") {
         this->theCourses.AddOnTop(current);
         current.reset();
       }
-      current.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
+      current.title = StringRoutines::StringTrimWhiteSpace(currentArgument);
     }
-    if (MathRoutines::StringBeginsWith(currentLine, "RoughDraft:", &currentArgument)) {
+    if (StringRoutines::StringBeginsWith(currentLine, "RoughDraft:", &currentArgument)) {
       if (current.flagRoughDraft != "") {
         this->theCourses.AddOnTop(current);
         current.reset();
       }
-      current.flagRoughDraft = MathRoutines::StringTrimWhiteSpace(currentArgument);
+      current.flagRoughDraft = StringRoutines::StringTrimWhiteSpace(currentArgument);
     }
   }
   if (!current.IsEmpty()) {
@@ -1054,7 +1054,7 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   int answerIdIndex = - 1;
   for (int i = 0; i < theArgs.size(); i ++) {
-    if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader)) {
+    if (StringRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader)) {
       int newAnswerIndex = theProblem.GetAnswerIndex(studentAnswerNameReader);
       if (answerIdIndex == - 1) {
         answerIdIndex = newAnswerIndex;
@@ -1108,7 +1108,7 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
   completedProblemStreamNoEnclosures << currentA.answerId << "= (" << currentA.currentAnswerClean << ");";
 
   bool hasCommentsBeforeSubmission = (
-    MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != ""
+    StringRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != ""
   );
   if (hasCommentsBeforeSubmission) {
     completedProblemStream
@@ -1356,9 +1356,9 @@ std::string HtmlInterpretation::AddTeachersSections() {
   delimiters.AddOnTop(',');
   delimiters.AddOnTop(';');
   delimiters.AddOnTop(static_cast<char>(160));//<-&nbsp
-  MathRoutines::StringSplitExcludeDelimiters(desiredSectionsOneString, delimiters, desiredSectionsList);
+  StringRoutines::StringSplitExcludeDelimiters(desiredSectionsOneString, delimiters, desiredSectionsList);
 
-  MathRoutines::StringSplitExcludeDelimiters(desiredUsers, delimiters, theTeachers);
+  StringRoutines::StringSplitExcludeDelimiters(desiredUsers, delimiters, theTeachers);
   if (theTeachers.size == 0) {
     out << "<b>Could not extract teachers from " << desiredUsers << ".</b>";
     return out.str();
@@ -1400,7 +1400,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   std::string inputEmails = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userList"), false);
   std::string userPasswords = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("passwordList"), false);
   std::string userGroup =
-  MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(
+  StringRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(
     theGlobalVariables.GetWebInput(DatabaseStrings::labelSection), false
   ));
   std::string userRole = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userRole"), false);
@@ -1484,7 +1484,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
   std::string lastStudentAnswerID;
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   for (int i = 0; i < theArgs.size(); i ++) {
-    MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
+    StringRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   }
   int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
   std::stringstream out;
@@ -1583,7 +1583,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
       }
       std::string stringAnswer;
       if (currentE[j].IsOfType<std::string>(&stringAnswer)) {
-        if (MathRoutines::StringBeginsWith(stringAnswer, "Approximations have been")) {
+        if (StringRoutines::StringBeginsWith(stringAnswer, "Approximations have been")) {
           continue;
         }
       }
@@ -2184,7 +2184,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   this->currentSection = theGlobalVariables.userDefault.sectionComputed;
   this->currentCourse = theGlobalVariables.GetWebInput("courseHome");
   if (theGlobalVariables.GetWebInput("request") == "scoresInCoursePage") {
-    this->currentSection = MathRoutines::StringTrimWhiteSpace(
+    this->currentSection = StringRoutines::StringTrimWhiteSpace(
       HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false)
     );
   }

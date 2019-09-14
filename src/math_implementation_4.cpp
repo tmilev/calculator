@@ -506,7 +506,7 @@ void GlobalVariables::initOutputReportAndCrashFileNames(
     this->userInputStringRAWIfAvailable = "Raw user input string not available in SSL mode. ";
     inputAbbreviated = this->userInputStringIfAvailable;
   }
-  MathRoutines::StringTrimToLengthWithHash(inputAbbreviated, 150);
+  StringRoutines::StringTrimToLengthWithHash(inputAbbreviated, 150);
   this->RelativePhysicalNameCrashLog = "crash_" + inputAbbreviated + ".html";
   this->RelativePhysicalNameProgressReport = "progressReport_" + inputAbbreviated + ".html";
   this->RelativePhysicalNameOutpuT = "output_" + inputAbbreviated + ".html";

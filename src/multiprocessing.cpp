@@ -443,7 +443,7 @@ bool PipePrimitive::HandleFailedWriteReturnFalse(
 ) {
   std::stringstream errorStream;
   errorStream << "Failed write: " << toBeSent.size() << " bytes ["
-  << MathRoutines::StringShortenInsertDots(toBeSent, 200) << "] onto: " << this->ToString() << numBadAttempts
+  << StringRoutines::StringShortenInsertDots(toBeSent, 200) << "] onto: " << this->ToString() << numBadAttempts
   << " or more times. Last error: "
   << strerror(errno) << ". ";
   if (theGlobalVariables.processType == ProcessTypes::worker) {
@@ -873,9 +873,9 @@ logger::StringHighligher::StringHighligher(const std::string& input) {
   delimiters.AddOnTop('[');
   delimiters.AddOnTop(']');
   List<std::string> inputStrings;
-  MathRoutines::StringSplitExcludeDelimiters(input, delimiters, inputStrings);
+  StringRoutines::StringSplitExcludeDelimiters(input, delimiters, inputStrings);
   for (int i = 0; i < inputStrings.size; i ++) {
-    std::string current = MathRoutines::StringTrimWhiteSpace(inputStrings[i]);
+    std::string current = StringRoutines::StringTrimWhiteSpace(inputStrings[i]);
     logger::StringHighligher::Section incoming;
     if (current == "|") {
       incoming.theType = "|";
@@ -914,7 +914,7 @@ bool MathRoutines::ParseListInt(const std::string& input, List<int>& result, std
   delimiters.AddOnTopNoRepetition('(');
   delimiters.AddOnTopNoRepetition(')');
   List<std::string> theNumbers;
-  MathRoutines::StringSplitExcludeDelimiters(input, delimiters, theNumbers);
+  StringRoutines::StringSplitExcludeDelimiters(input, delimiters, theNumbers);
   result.SetSize(theNumbers.size);
   for (int i = 0; i < theNumbers.size; i ++) {
     LargeInt theInt;

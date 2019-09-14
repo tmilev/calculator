@@ -175,7 +175,7 @@ std::string ProblemDataAdministrative::ToString() const {
 bool ProblemData::CheckConsistency() const {
   MacroRegisterFunctionWithName("ProblemData::CheckConsistency");
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers.theValues[i].answerId) == "") {
+    if (StringRoutines::StringTrimWhiteSpace(this->theAnswers.theValues[i].answerId) == "") {
       crash << "This is not supposed to happen: empty answer id." << crash;
     }
   }
@@ -185,7 +185,7 @@ bool ProblemData::CheckConsistency() const {
 bool ProblemData::CheckConsistencyMQids() const {
   MacroRegisterFunctionWithName("ProblemData::CheckConsistencyMQids");
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers.theValues[i].idMQfielD) == "") {
+    if (StringRoutines::StringTrimWhiteSpace(this->theAnswers.theValues[i].idMQfielD) == "") {
       std::stringstream errorStream;
       errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
       << this->theAnswers.theValues[i].answerId << "<br>" << this->ToString() << "<hr>Answer information: "
@@ -606,7 +606,7 @@ bool DatabaseRoutineS::SendActivationEmail(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   List<std::string> theEmails;
-  MathRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
+  StringRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
   return DatabaseRoutineS::SendActivationEmail(
     theEmails, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
   );
@@ -758,7 +758,7 @@ bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, st
       result = false;
       continue;
     }
-    probNameNoWhiteSpace = MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
+    probNameNoWhiteSpace = StringRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
     if (probNameNoWhiteSpace == "") {
       continue;
     }
@@ -779,7 +779,7 @@ bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std
       result = false;
       continue;
     }
-    probNameNoWhiteSpace = MathRoutines::StringTrimWhiteSpace(
+    probNameNoWhiteSpace = StringRoutines::StringTrimWhiteSpace(
       HtmlRoutines::ConvertURLStringToNormal(theData.objects.theKeys[i], false
     ));
     if (probNameNoWhiteSpace == "") {
@@ -986,8 +986,8 @@ bool DatabaseRoutineS::AddUsersFromEmails(
   theGlobalVariables.millisecondsMaxComputation = 100000; //100 seconds
   theGlobalVariables.millisecondsReplyAfterComputation = 200000; // 200 seconds
   List<std::string> theEmails, thePasswords;
-  MathRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
-  MathRoutines::StringSplitDefaultDelimiters(userPasswords, thePasswords);
+  StringRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
+  StringRoutines::StringSplitDefaultDelimiters(userPasswords, thePasswords);
   if (thePasswords.size > 0) {
     if (thePasswords.size != theEmails.size) {
       comments << "Different number of usernames/emails and passwords: " << theEmails.size << " emails and "
@@ -1264,7 +1264,7 @@ bool EmailRoutines::SendEmailWithMailGun(
       << "domain name: " << hostnameToSendEmailFrom << " instead. ";
     }
   } else {
-    hostnameToSendEmailFrom = MathRoutines::StringTrimWhiteSpace(hostnameToSendEmailFrom);
+    hostnameToSendEmailFrom = StringRoutines::StringTrimWhiteSpace(hostnameToSendEmailFrom);
     if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != nullptr) {
       *commentsGeneral << "Hostname loaded: "
       << HtmlRoutines::ConvertStringToURLString(hostnameToSendEmailFrom, false);
@@ -1586,9 +1586,9 @@ std::string UserCalculator::GetActivationAddressFromActivationToken(
 ) {
   MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
   std::stringstream out;
-  if (MathRoutines::StringBeginsWith(calculatorBase, "localhost")) {
+  if (StringRoutines::StringBeginsWith(calculatorBase, "localhost")) {
     out << "https://" << calculatorBase;
-  } else if (MathRoutines::StringBeginsWith(calculatorBase, "https://localhost")) {
+  } else if (StringRoutines::StringBeginsWith(calculatorBase, "https://localhost")) {
     out << calculatorBase;
   } else {
     out << theGlobalVariables.hopefullyPermanentWebAdress;

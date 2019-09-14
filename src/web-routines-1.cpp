@@ -521,7 +521,7 @@ void WebCrawler::FetchWebPagePart2(
     this->headerReceived = this->headerReceived.substr(0, bodyStart);
   }
   List<std::string> theHeaderPieces;
-  MathRoutines::StringSplitDefaultDelimiters(this->headerReceived, theHeaderPieces);
+  StringRoutines::StringSplitDefaultDelimiters(this->headerReceived, theHeaderPieces);
   std::string expectedLengthString;
   for (int i = 0; i < theHeaderPieces.size; i ++) {
     if (

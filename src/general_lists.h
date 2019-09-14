@@ -224,25 +224,8 @@ public:
     int upperDimensionBound,
     void (*theBinaryOperation)(const theType& left, const theType& right, theType& output)
   );
-  static bool StringBeginsWith(
-    const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd = nullptr
-  );
-  static bool StringEndsWith(
-    const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning = nullptr
-  );
-  static char ConvertHumanReadableHexToCharValue(char input);
-  static void StringSplitDefaultDelimiters(const std::string& inputString, List<std::string>& output);
-  static void StringSplitExcludeDelimiter(const std::string& inputString, char delimiter, List<std::string>& output);
-  static void StringSplitExcludeDelimiters(
-    const std::string& inputString, const List<char>& delimiters, List<std::string>& output
-  );
-  static void StringTrimWhiteSpace(const std::string& inputString, std::string& output);
-  static void StringTrimToLengthWithHash(std::string& inputOutput, int desiredLength50AtLeast = 150);
-  static std::string StringTrimToLengthForDisplay(const std::string& input, int desiredLength20AtLeast = 50);
-  static std::string ConvertStringToHexPrependConversionIfNeeded(const std::string& input);
 
-  static std::string StringTrimWhiteSpace(const std::string& inputString);
-  static void SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond);
+  static char ConvertHumanReadableHexToCharValue(char input);
   static void NChooseK(int n, int k, LargeInt& result);
   static int NChooseK(int n, int k);
   static int Factorial(int n);
@@ -257,7 +240,6 @@ public:
   static int KToTheNth(int k, int n);
   static void KToTheNth(int k, int n, LargeInt& output);
   inline static int parity(int n);
-  static std::string StringShortenInsertDots(const std::string& inputString, int maxNumChars);
   static int BinomialCoefficientMultivariate(int N, List<int>& theChoices);
   static bool IsPrime(int theInt);
   template <class coefficient, typename theIntegerType>
@@ -371,7 +353,7 @@ public:
       MathRoutines::QuickSortAscendingOrder(theList, 0, theList.size - 1, theOrder, carbonCopy);
     }
   }
-  static bool ParseListInt(const std::string& input, List<int>& result, std::stringstream *commentsOnFailure);
+  static bool ParseListInt(const std::string& input, List<int>& result, std::stringstream* commentsOnFailure);
   static void ParseListIntCrashOnFailure(const std::string& input, List<int>& result);
   template <class templateList, typename objectType, class otherList>
   static void QuickSortDescending(

@@ -368,6 +368,30 @@ bool CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator(
   return output.AssignValueWithContext(generator, theContext, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerStringDifference(
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerStringDifference");
+  if (input.size() != 3) {
+    return false;
+  }
+  std::string left, right;
+  if (!input[1].IsOfType(&left) || !input[2].IsOfType(&right)) {
+    return false;
+  }
+  List<std::string> leftResult, rightResult;
+  std::stringstream commentsOnFailure;
+  if (!StringRoutines::Difference(left, right, leftResult, rightResult, &commentsOnFailure)) {
+    return theCommands << commentsOnFailure.str();
+  }
+  std::stringstream out;
+  out << "Left:<br>" << leftResult << "<br>";
+  out << "Right:<br>" << rightResult << "<br>";
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerSliceString(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSliceString");
   if (input.size() < 3) {

@@ -507,7 +507,7 @@ std::string FileOperations::ConvertStringToLatexFileName(const std::string& inpu
     }
   }
   std::string result = out.str();
-  MathRoutines::StringTrimToLengthWithHash(result, 220);
+  StringRoutines::StringTrimToLengthWithHash(result, 220);
   return result;
 }
 
@@ -1030,7 +1030,7 @@ std::string FileOperations::GetVirtualNameWithHash(const std::string& inputFileN
   std::string fileNameEnd;
   for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
     const std::string& currentStart = FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i];
-    if (MathRoutines::StringBeginsWith(result, currentStart, &fileNameEnd)) {
+    if (StringRoutines::StringBeginsWith(result, currentStart, &fileNameEnd)) {
       result = currentStart + theGlobalVariables.buildHeadHashWithServerTime + fileNameEnd;
       break;
     }
@@ -1045,7 +1045,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(
   std::string fileEnd = "";
   std::string inputStart = "";
   for (int i = 0; i < FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().size; i ++)
-    if (MathRoutines::StringBeginsWith(
+    if (StringRoutines::StringBeginsWith(
       inputFileName, FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i], &fileEnd
     )) {
       inputStart = FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i];
@@ -1092,7 +1092,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
   std::string fileEnd = "";
   std::string inputStart = "";
   for (int i = 0; i < FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().size; i ++) {
-    if (MathRoutines::StringBeginsWith(
+    if (StringRoutines::StringBeginsWith(
       inputFileName,
       FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i],
       &fileEnd
@@ -1134,11 +1134,11 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
   std::string inputCopy = inputFileNamE;
   std::string folderEnd, folderEnd2;
   for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
-    if (MathRoutines::StringBeginsWith(
+    if (StringRoutines::StringBeginsWith(
       inputCopy,
       FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i], &folderEnd
     )) {
-      if (MathRoutines::StringBeginsWith(
+      if (StringRoutines::StringBeginsWith(
         folderEnd, theGlobalVariables.buildHeadHashWithServerTime, &folderEnd2
       )) {
         inputCopy = FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] + folderEnd2;
@@ -1146,16 +1146,16 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
     }
   }
   for (int i = 0; i < FileOperations::FilesStartsToWhichWeAppendHostName().size; i ++) {
-    if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FilesStartsToWhichWeAppendHostName()[i])) {
+    if (StringRoutines::StringBeginsWith(inputCopy, FileOperations::FilesStartsToWhichWeAppendHostName()[i])) {
       if (!FileOperations::IsOKfileNameVirtual(theGlobalVariables.hostNoPort)) {
         return false;
       }
       std::string toAppend = theGlobalVariables.hostNoPort;
-      if (MathRoutines::StringBeginsWith(toAppend, "www.")) {
+      if (StringRoutines::StringBeginsWith(toAppend, "www.")) {
         toAppend = toAppend.substr(4);
       }
       if (
-        MathRoutines::StringBeginsWith(toAppend, "localhost") ||
+        StringRoutines::StringBeginsWith(toAppend, "localhost") ||
         toAppend == "calculator-algebra.org" ||
         toAppend == "www.calculator-algebra.org"
       ) {
@@ -1170,7 +1170,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
     }
   }
   for (int i = 0; i < FileOperations::FolderVirtualLinksNonSensitive().size(); i ++) {
-    if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd)) {
+    if (StringRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd)) {
       output = theGlobalVariables.PhysicalPathProjectBase +
       FileOperations::FolderVirtualLinksNonSensitive().theValues[i] + folderEnd;
       return true;
@@ -1178,7 +1178,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
   }
   if (accessSensitiveFolders) {
     for (int i = 0; i < FileOperations::FolderVirtualLinksSensitive().size(); i ++) {
-      if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd)) {
+      if (StringRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd)) {
         output = theGlobalVariables.PhysicalPathProjectBase +
         FileOperations::FolderVirtualLinksSensitive().theValues[i] + folderEnd;
         return true;
@@ -1187,7 +1187,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
   }
   if (accessULTRASensitiveFolders) {
     for (int i = 0; i < FileOperations::FolderVirtualLinksULTRASensitive().size(); i ++) {
-      if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksULTRASensitive().theKeys[i], &folderEnd)) {
+      if (StringRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksULTRASensitive().theKeys[i], &folderEnd)) {
         output = theGlobalVariables.PhysicalPathProjectBase +
         FileOperations::FolderVirtualLinksULTRASensitive().theValues[i] + folderEnd;
         return true;
@@ -1689,7 +1689,164 @@ unsigned int MathRoutines::HashVectorDoubles(const Vector<double>& input) {
   return MathRoutines::HashListDoubles(input);
 }
 
-std::string MathRoutines::StringShortenInsertDots(const std::string& inputString, int maxNumChars) {
+class stringDiffer {
+public:
+  Matrix<int> matrixLongestCommonSubsequence;
+  std::string left;
+  std::string right;
+  int MaxMatrixSize;
+  List<int> commonStringSizesReverseOrder;
+  List<int> commonStringsLeftStartsReverseOrder;
+  List<int> commonStringsRightStartsReverseOrder;
+  List<std::string> leftResult;
+  List<std::string> rightResult;
+  int currentCommonStringLength;
+  bool ComputeDifference(std::stringstream* commentsOnFailure);
+  void ComputeLongestSubsequenceMatrix();
+  void ExtractCommonStrings(int indexLeft, int indexRight, int previousLeft, int previousRight);
+  void ExtractDifferences();
+  void ExtractResult(const List<int>& starts, const std::string& input, List<std::string>& output);
+  void PushCommonString(int indexLeft, int indexRight);
+  stringDiffer();
+};
+
+stringDiffer::stringDiffer() {
+  this->MaxMatrixSize = 10000000;
+  this->currentCommonStringLength = 0;
+}
+
+void stringDiffer::ComputeLongestSubsequenceMatrix() {
+  unsigned numberOfRows = static_cast<unsigned>(left.size() );
+  unsigned numberOfColumns = static_cast<unsigned>(right.size());
+  this->matrixLongestCommonSubsequence.init(
+    static_cast<int>(numberOfRows), static_cast<int>(numberOfColumns)
+  );
+  for (int j = 0; j < this->matrixLongestCommonSubsequence.NumCols; j ++) {
+    this->matrixLongestCommonSubsequence(0, j) = 0;
+  }
+  for (int i = 0; i < this->matrixLongestCommonSubsequence.NumRows; i ++) {
+    this->matrixLongestCommonSubsequence(i, 0) = 0;
+  }
+  for (unsigned i = 1; i < numberOfRows; i ++) {
+    for (unsigned j = 1; j < numberOfColumns; j ++) {
+      if (this->left[i] == this->right[j]) {
+        this->matrixLongestCommonSubsequence(i, j) = this->matrixLongestCommonSubsequence(i - 1, j - 1) + 1;
+      } else {
+        this->matrixLongestCommonSubsequence(i, j) = MathRoutines::Maximum(
+          this->matrixLongestCommonSubsequence(i - 1, j),
+          this->matrixLongestCommonSubsequence(i, j - 1)
+        );
+      }
+    }
+  }
+}
+
+void stringDiffer::PushCommonString(int indexLeft, int indexRight) {
+  if (this->currentCommonStringLength == 0) {
+    return;
+  }
+  this->commonStringSizesReverseOrder.AddOnTop(this->currentCommonStringLength);
+  this->commonStringsLeftStartsReverseOrder.AddOnTop(indexLeft);
+  this->commonStringsRightStartsReverseOrder.AddOnTop(indexRight);
+  this->currentCommonStringLength = 0;
+}
+
+void stringDiffer::ExtractCommonStrings(int indexLeft, int indexRight, int previousLeft, int previousRight) {
+  if (indexLeft < 0 || indexRight < 0) {
+    this->PushCommonString(previousLeft, previousRight);
+    return;
+  }
+  unsigned leftUnsigned  = static_cast<unsigned>(indexLeft );
+  unsigned rightUnsigned = static_cast<unsigned>(indexRight);
+  if (this->left[leftUnsigned] == this->right[rightUnsigned]) {
+    this->currentCommonStringLength ++ ;
+    this->ExtractCommonStrings(indexLeft - 1, indexRight - 1, indexLeft, indexRight);
+    return;
+  }
+  this->PushCommonString(previousLeft, previousRight);
+  if (
+    this->matrixLongestCommonSubsequence(indexLeft, indexRight - 1) >
+    this->matrixLongestCommonSubsequence(indexLeft - 1, indexRight)
+  ) {
+    this->ExtractCommonStrings(indexLeft, indexRight - 1, indexLeft, indexRight);
+  }
+  this->ExtractCommonStrings(indexLeft - 1, indexRight, indexLeft, indexRight);
+}
+
+void stringDiffer::ExtractDifferences() {
+  this->ExtractResult(this->commonStringsLeftStartsReverseOrder, this->left, this->leftResult);
+  this->ExtractResult(this->commonStringsRightStartsReverseOrder, this->right, this->rightResult);
+}
+
+void stringDiffer::ExtractResult(
+  const List<int>& starts, const std::string& input, List<std::string>& output
+) {
+  output.SetSize(0);
+  int previousEnd = 0;
+  for (int i = this->commonStringSizesReverseOrder.size - 1; i >= 0; i --) {
+    int stringSize = this->commonStringSizesReverseOrder[i];
+    int stringStart = starts[i];
+    std::string nonCommon = input.substr(
+      static_cast<unsigned>(previousEnd),
+      static_cast<unsigned>(stringStart - previousEnd)
+    );
+    output.AddOnTop(nonCommon);
+    std::string common = input.substr(
+      static_cast<unsigned>(stringStart),
+      static_cast<unsigned>(stringSize)
+    );
+    previousEnd = stringStart + stringSize;
+    output.AddOnTop(common);
+  }
+}
+
+bool stringDiffer::ComputeDifference(std::stringstream* commentsOnFailure) {
+  LargeInt leftSize = left.size();
+  LargeInt rightSize = right.size();
+  if (leftSize * rightSize > this->MaxMatrixSize) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "The product of the sizes of the two strings equals "
+      << leftSize * rightSize
+      << " which exceeds the maximum allowed "
+      << this->MaxMatrixSize;
+    }
+    return false;
+  }
+  this->ComputeLongestSubsequenceMatrix();
+  this->currentCommonStringLength = 0;
+  this->ExtractCommonStrings(
+    static_cast<int>(this->left.size()) - 1,
+    static_cast<int>(this->right.size()) - 1,
+    0,
+    0
+  );
+  this->ExtractDifferences();
+  return true;
+}
+
+// We compute string difference using the
+// longest common subsequence problem.
+// https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
+bool StringRoutines::Difference(
+  const std::string& left,
+  const std::string& right,
+  List<std::string>& outputLeft,
+  List<std::string>& outputRight,
+  std::stringstream *commentsOnFailure
+) {
+  stringDiffer theDiffer;
+  theDiffer.left = left;
+  theDiffer.right = right;
+  if (!theDiffer.ComputeDifference(commentsOnFailure)) {
+    return false;
+  }
+  outputLeft = theDiffer.leftResult;
+  outputRight = theDiffer.rightResult;
+  return true;
+}
+
+std::string StringRoutines::StringShortenInsertDots(const std::string& inputString, int maxNumChars) {
   if (inputString.size() <= static_cast<unsigned>(maxNumChars)) {
     return inputString;
   }
@@ -1702,21 +1859,21 @@ std::string MathRoutines::StringShortenInsertDots(const std::string& inputString
   return out.str();
 }
 
-void MathRoutines::StringSplitExcludeDelimiter(
+void StringRoutines::StringSplitExcludeDelimiter(
   const std::string& inputString, char delimiter, List<std::string>& output
 ) {
   List<char> tempList;
   tempList.AddOnTop(delimiter);
-  MathRoutines::StringSplitExcludeDelimiters(inputString, tempList, output);
+  StringRoutines::StringSplitExcludeDelimiters(inputString, tempList, output);
 }
 
-std::string MathRoutines::StringTrimWhiteSpace(const std::string& inputString) {
+std::string StringRoutines::StringTrimWhiteSpace(const std::string& inputString) {
   std::string result;
-  MathRoutines::StringTrimWhiteSpace(inputString, result);
+  StringRoutines::StringTrimWhiteSpace(inputString, result);
   return result;
 }
 
-void MathRoutines::StringTrimToLengthWithHash(std::string& inputOutput, int desiredLength50AtLeast) {
+void StringRoutines::StringTrimToLengthWithHash(std::string& inputOutput, int desiredLength50AtLeast) {
   if (static_cast<signed>(inputOutput.size()) <= desiredLength50AtLeast) {
     return;
   }
@@ -1729,7 +1886,7 @@ void MathRoutines::StringTrimToLengthWithHash(std::string& inputOutput, int desi
   inputOutput = inputAbbreviatedStream.str();
 }
 
-std::string MathRoutines::StringTrimToLengthForDisplay(const std::string& input, int desiredLength20AtLeast) {
+std::string StringRoutines::StringTrimToLengthForDisplay(const std::string& input, int desiredLength20AtLeast) {
   if (desiredLength20AtLeast < 20) {
     desiredLength20AtLeast = 20;
   }
@@ -1752,7 +1909,7 @@ std::string MathRoutines::StringTrimToLengthForDisplay(const std::string& input,
   return out.str();
 }
 
-void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::string& output) {
+void StringRoutines::StringTrimWhiteSpace(const std::string& inputString, std::string& output) {
   //this function needs to be rewritten to do one substr call (no time now).
   output = "";
   output.reserve(inputString.size());
@@ -1788,8 +1945,8 @@ void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::str
   output = output.substr(0, static_cast<unsigned>(j));
 }
 
-void MathRoutines::StringSplitDefaultDelimiters(const std::string& inputString, List<std::string>& output) {
-  MacroRegisterFunctionWithName("MathRoutines::StringSplitDefaultDelimiters");
+void StringRoutines::StringSplitDefaultDelimiters(const std::string& inputString, List<std::string>& output) {
+  MacroRegisterFunctionWithName("StringRoutines::StringSplitDefaultDelimiters");
   List<char> delimiters;
   delimiters.AddOnTop(' ');
   delimiters.AddOnTop('\r');
@@ -1798,10 +1955,10 @@ void MathRoutines::StringSplitDefaultDelimiters(const std::string& inputString, 
   delimiters.AddOnTop(',');
   delimiters.AddOnTop(';');
   delimiters.AddOnTop(static_cast<char>(160)); //<-&nbsp
-  MathRoutines::StringSplitExcludeDelimiters(inputString, delimiters, output);
+  StringRoutines::StringSplitExcludeDelimiters(inputString, delimiters, output);
 }
 
-void MathRoutines::StringSplitExcludeDelimiters(
+void StringRoutines::StringSplitExcludeDelimiters(
   const std::string& inputString, const List<char>& delimiters, List<std::string>& output
 ) {
   MacroRegisterFunctionWithName("MathRoutines::StringSplit");
@@ -1822,12 +1979,12 @@ void MathRoutines::StringSplitExcludeDelimiters(
   }
 }
 
-void MathRoutines::SplitStringInTwo(
+void StringRoutines::SplitStringInTwo(
   const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond
 ) {
   if (&outputFirst == &inputString || &outputSecond == &inputString) {
     std::string inputCopy = inputString;
-    MathRoutines::SplitStringInTwo(inputCopy, firstStringSize, outputFirst, outputSecond);
+    StringRoutines::SplitStringInTwo(inputCopy, firstStringSize, outputFirst, outputSecond);
     return;
   }
   if (firstStringSize < 0) {
@@ -1898,10 +2055,10 @@ int MathRoutines::NChooseK(int n, int k) {
   return result;
 }
 
-bool MathRoutines::StringEndsWith(
+bool StringRoutines::StringEndsWith(
   const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning
 ) {
-  MacroRegisterFunctionWithName("MathRoutines::StringEndsWith");
+  MacroRegisterFunctionWithName("StringRoutines::StringEndsWith");
   if (desiredEnd.size() == 0) {
     if (outputStringBeginning == nullptr) {
       *outputStringBeginning = theString;
@@ -1924,11 +2081,11 @@ bool MathRoutines::StringEndsWith(
   return true;
 }
 
-bool MathRoutines::StringBeginsWith(
+bool StringRoutines::StringBeginsWith(
   const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd
 ) {
   std::string actualBeginning, stringEnd;
-  MathRoutines::SplitStringInTwo(theString, static_cast<int>(desiredBeginning.size()), actualBeginning, stringEnd);
+  StringRoutines::SplitStringInTwo(theString, static_cast<int>(desiredBeginning.size()), actualBeginning, stringEnd);
   bool result = (actualBeginning == desiredBeginning);
   //outputstring is only modified if result is true
   if (result && outputStringEnd != nullptr) {
@@ -2590,7 +2747,7 @@ bool PartFraction::rootIsInFractionCone(PartFractions& owner, Vector<Rational>* 
   if (this->RelevanceIsComputed) {
     return !this->IsIrrelevant;
   }
-  if (PartFraction::flagAnErrorHasOccurredTimeToPanic) {   
+  if (PartFraction::flagAnErrorHasOccurredTimeToPanic) {
   }
   Cone tempCone;
   Vectors<Rational> tempRoots;
@@ -2710,7 +2867,7 @@ bool PartFraction::DecomposeFromLinRelation(
   theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].MultiplyByInt(tempI);
   //theLinearRelation.ComputeDebugString();
   theLinearRelation.ScaleToIntegralForMinRationalHeightNoSignChange();
-  if (this->flagAnErrorHasOccurredTimeToPanic) {  
+  if (this->flagAnErrorHasOccurredTimeToPanic) {
   }
   ElongationGainingMultiplicityIndex = theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].NumShort;
   if (ElongationGainingMultiplicityIndex < 0) {
@@ -3377,12 +3534,12 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
     for (int j = 0; j<owner.AmbientDimension; j ++)
       tempMat.elements[j][i] =(owner.startingVectors[this->IndicesNonZeroMults[i]][j]*this->TheObjects[this->IndicesNonZeroMults[i]].GetLargestElongation());
   if (this->flagAnErrorHasOccurredTimeToPanic) {
-   
+
   }
   startAsIdMat.MakeIdMatrix(owner.AmbientDimension);
   Matrix<Rational> ::GaussianEliminationByRows(tempMat, startAsIdMat, tempSel, false);
   if (this->flagAnErrorHasOccurredTimeToPanic) {
-   
+
   }
   SelectionWithDifferentMaxMultiplicities thePowers;
   List<int> thePowersSigned;
@@ -3391,11 +3548,11 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
   for (int k = 0; k< this->Coefficient.size; k++) {
     this->Coefficient[k].MonomialExponentToColumnMatrix(matColumn);
     if (this->flagAnErrorHasOccurredTimeToPanic) {
-     
+
     }
     matColumn.MultiplyOnTheLeft(startAsIdMat);
     if (this->flagAnErrorHasOccurredTimeToPanic) {
-     
+
     }
     tempFrac.AssignDenominatorOnly(*this);
     tempFrac.Coefficient.MakeZero(this->Coefficient.NumVars);
@@ -3403,7 +3560,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
     if (tempMat.RowEchelonFormToLinearSystemSolution(tempSel, matColumn, matLinComb)) {
       tempMon = this->Coefficient[k];
       if (this->flagAnErrorHasOccurredTimeToPanic) {
-       
+
       }
       for (int i = 0; i <matLinComb.NumRows; i ++) {
         thePowers.MaxMultiplicities[i] = 0;
@@ -9659,7 +9816,7 @@ std::string HtmlRoutines::ToHtmlTableRowsFromStringContainingJSON(const std::str
   MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromStringContainingJSON");
   JSData parser;
   if (!parser.readstring(theJSON, false)) {
-    return MathRoutines::StringTrimToLengthForDisplay(theJSON, 1000);
+    return StringRoutines::StringTrimToLengthForDisplay(theJSON, 1000);
   }
   return HtmlRoutines::ToHtmlTableRowsFromJSON(parser);
 }
@@ -9695,7 +9852,7 @@ std::string HtmlRoutines::ToHtmlTable(List<std::string>& labels, List<List<std::
   out << "<table class =\"tableDatabase\">";
   out << "<tr>";
   for (int i = 0; i < labels.size; i ++) {
-    out << "<th>" << MathRoutines::StringTrimToLengthForDisplay(labels[i], 1000) << "</th>";
+    out << "<th>" << StringRoutines::StringTrimToLengthForDisplay(labels[i], 1000) << "</th>";
   }
   out << "</tr>";
   for (int i = 0; i < content.size; i ++) {
@@ -9706,7 +9863,7 @@ std::string HtmlRoutines::ToHtmlTable(List<std::string>& labels, List<List<std::
     }
     for (int j = 0; j < content[i].size; j ++) {
       if (! nestTables) {
-        out << "<td>" << MathRoutines::StringTrimToLengthForDisplay(content[i][j], 1000) << "</td>";
+        out << "<td>" << StringRoutines::StringTrimToLengthForDisplay(content[i][j], 1000) << "</td>";
       } else {
         out << "<td>" << HtmlRoutines::ToHtmlTableRowsFromStringContainingJSON(content[i][j]) << "</td>";
       }

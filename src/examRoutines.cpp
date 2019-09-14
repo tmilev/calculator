@@ -125,7 +125,7 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend(
   std::string currentProbName, currentProbString;
   ProblemData emptyData;
   for (int i = 0; i < CGIedProbs.size(); i ++) {
-    currentProbName = MathRoutines::StringTrimWhiteSpace(
+    currentProbName = StringRoutines::StringTrimWhiteSpace(
       HtmlRoutines::ConvertURLStringToNormal(CGIedProbs.theKeys[i], false)
     );
     if (currentProbName == "") {
@@ -169,7 +169,7 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend(
         );
       }
     }
-    std::string problemWeightString = MathRoutines::StringTrimWhiteSpace(
+    std::string problemWeightString = StringRoutines::StringTrimWhiteSpace(
       currentKeyValues.GetValueCreate(DatabaseStrings::labelProblemWeights)
     );
     if (problemWeightString != "") {
@@ -197,13 +197,13 @@ JSData CalculatorHTML::ToJSONDeadlines(
     std::string currentProblemName = inputProblemInfo.theKeys[i];
     JSData currentProblemJSON;
     for (int j = 0; j < currentProblem.deadlinesPerSection.size(); j ++) {
-      std::string currentDeadline = MathRoutines::StringTrimWhiteSpace(
+      std::string currentDeadline = StringRoutines::StringTrimWhiteSpace(
         currentProblem.deadlinesPerSection.theValues[j]
       );
       if (currentDeadline == "") {
         continue;
       }
-      std::string currentSection = MathRoutines::StringTrimWhiteSpace(
+      std::string currentSection = StringRoutines::StringTrimWhiteSpace(
         currentProblem.deadlinesPerSection.theKeys[j]
       );
       currentProblemJSON[DatabaseStrings::labelDeadlines][currentSection] = currentDeadline;
@@ -226,11 +226,11 @@ JSData CalculatorHTML::ToJSONProblemWeights(
     std::string currentProblemName = inputProblemInfo.theKeys[i];
     JSData currentProblemJSON;
     for (int j = 0; j < currentProblem.problemWeightsPerCoursE.size(); j ++) {
-      std::string currentWeight = MathRoutines::StringTrimWhiteSpace(currentProblem.problemWeightsPerCoursE.theValues[j]);
+      std::string currentWeight = StringRoutines::StringTrimWhiteSpace(currentProblem.problemWeightsPerCoursE.theValues[j]);
       if (currentWeight == "") {
         continue;
       }
-      std::string currentCourse = MathRoutines::StringTrimWhiteSpace(currentProblem.problemWeightsPerCoursE.theKeys[j]);
+      std::string currentCourse = StringRoutines::StringTrimWhiteSpace(currentProblem.problemWeightsPerCoursE.theKeys[j]);
       currentProblemJSON[currentCourse] = currentWeight;
     }
     JSData currentWeight;
@@ -625,7 +625,7 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   if (
     theFileName == this->topicListFileName ||
     theFileName == this->courseHome ||
-    MathRoutines::StringEndsWith(theFileName, ".txt")
+    StringRoutines::StringEndsWith(theFileName, ".txt")
   ) {
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
@@ -988,7 +988,7 @@ std::string CalculatorHTML::PrepareUserInputBoxes() {
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   std::string inputNonAnswerReader;
   for (int i = 0; i < theArgs.size(); i ++) {
-    if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader)) {
+    if (StringRoutines::StringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader)) {
       if (inputNonAnswerReader != "" && theArgs.theValues[i] != "") {
         out << "setInputBox(name = "
         << inputNonAnswerReader
@@ -1494,7 +1494,7 @@ std::string CalculatorHTML::GetDeadline(
       ProblemDataAdministrative& currentProb =
       this->currentUseR.theProblemData.GetValueCreateNoInit(containerName).adminData;
       result = currentProb.deadlinesPerSection.GetValueCreate(sectionNumber);
-      if (MathRoutines::StringTrimWhiteSpace(result) != "") {
+      if (StringRoutines::StringTrimWhiteSpace(result) != "") {
         outputIsInherited = (containerName != problemName);
         return result;
       }
@@ -2389,7 +2389,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       } else {
         secondToLast.content =secondToLast.ToStringOpenTag("");
         if (theGlobalVariables.UserDefaultHasProblemComposingRights() && comments != 0) {
-          if (MathRoutines::StringBeginsWith(tagClass, "calculator")) {
+          if (StringRoutines::StringBeginsWith(tagClass, "calculator")) {
             if (!this->calculatorClasses.Contains(tagClass)) {
               *comments
               << "<hr><b style =\"color:red\">Warning: found class tag: "
@@ -2578,7 +2578,7 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream* comments) {
   for (int i = 0; i < this->theContent.size; i ++) {
     SyntacticElementHTML& currentE = this->theContent[i];
     if (currentE.IsAnswer()) {
-      std::string currentId = MathRoutines::StringTrimWhiteSpace(currentE.GetKeyValue("id"));
+      std::string currentId = StringRoutines::StringTrimWhiteSpace(currentE.GetKeyValue("id"));
       if (currentId == "") {
         if (comments != 0) {
           *comments << "The answer element: " << currentE.ToStringDebug() << " has empty id. This is not allowed. ";
@@ -3606,7 +3606,7 @@ bool TopicElement::LoadTopicBundle(
   std::stringstream& errorStream
 ) {
   MacroRegisterFunctionWithName("TopicElement::LoadTopicBundle");
-  std::string fileName = MathRoutines::StringTrimWhiteSpace(inputFileName);
+  std::string fileName = StringRoutines::StringTrimWhiteSpace(inputFileName);
   std::string newTopicBundles;
   if (!FileOperations::IsOKfileNameVirtual(fileName, false, &errorStream)) {
     errorStream << "The file name " << fileName << " is not a valid topic bundle file name. ";
@@ -3621,9 +3621,9 @@ bool TopicElement::LoadTopicBundle(
   List<std::string> bundleNameStack;
   std::stringstream bundleReader(newTopicBundles);
   while (std::getline(bundleReader, currentLine, '\n')) {
-    if (MathRoutines::StringBeginsWith(currentLine, "BundleBegin:", &currentId)) {
-      bundleNameStack.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentId));
-    } else if (MathRoutines::StringBeginsWith(currentLine, "BundleEnd:", &currentId)) {
+    if (StringRoutines::StringBeginsWith(currentLine, "BundleBegin:", &currentId)) {
+      bundleNameStack.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentId));
+    } else if (StringRoutines::StringBeginsWith(currentLine, "BundleEnd:", &currentId)) {
       if (bundleNameStack.size > 0) {
         bundleNameStack.RemoveLastObject();
       } else {
@@ -3675,7 +3675,7 @@ void TopicElement::GetTopicList(
       break;
     }
     currentLine = lineStack.PopLastObject();
-    if (MathRoutines::StringTrimWhiteSpace(currentLine) == "") {
+    if (StringRoutines::StringTrimWhiteSpace(currentLine) == "") {
       continue;
     }
     if (currentLine.size() > 0) {
@@ -3683,17 +3683,17 @@ void TopicElement::GetTopicList(
         continue;
       }
     }
-    if (MathRoutines::StringBeginsWith(currentLine, "LoadTopicBundles:", &currentArgument)) {
+    if (StringRoutines::StringBeginsWith(currentLine, "LoadTopicBundles:", &currentArgument)) {
       std::stringstream errorStream;
       if (!TopicElement::LoadTopicBundle(
-        MathRoutines::StringTrimWhiteSpace(currentArgument), topicBundles.GetElement(), owner, errorStream
+        StringRoutines::StringTrimWhiteSpace(currentArgument), topicBundles.GetElement(), owner, errorStream
       )) {
         currentElt.error = errorStream.str();
         currentElt.type = currentElt.tError;
         found = true;
       }
-    } else if (MathRoutines::StringBeginsWith(currentLine, "TopicBundle:", &currentArgument)) {
-      currentArgument = MathRoutines::StringTrimWhiteSpace(currentArgument);
+    } else if (StringRoutines::StringBeginsWith(currentLine, "TopicBundle:", &currentArgument)) {
+      currentArgument = StringRoutines::StringTrimWhiteSpace(currentArgument);
       std::stringstream errorStream;
       if (topicBundles.GetElement().Contains(currentArgument)) {
         List<std::string>& currentBundle = topicBundles.GetElement().GetValueCreate(currentArgument);
@@ -3709,68 +3709,68 @@ void TopicElement::GetTopicList(
         currentElt.error = errorStream.str();
         currentElt.type = currentElt.tError;
       }
-    } else if (MathRoutines::StringBeginsWith(currentLine, "SlidesSourceHeader:", &currentArgument)) {
-      owner.slidesSourcesHeaders.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
+    } else if (StringRoutines::StringBeginsWith(currentLine, "SlidesSourceHeader:", &currentArgument)) {
+      owner.slidesSourcesHeaders.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentArgument));
       continue;
-    } else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkSourceHeader:", &currentArgument)) {
-      owner.sourcesHomeworkHeaders.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
+    } else if (StringRoutines::StringBeginsWith(currentLine, "HomeworkSourceHeader:", &currentArgument)) {
+      owner.sourcesHomeworkHeaders.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentArgument));
       continue;
-    } else if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument)) {
+    } else if (StringRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument)) {
       if (found) {
         TopicElement::AddTopic(currentElt, output);
       }
       found = true;
       currentElt.reset(0, &output);
       currentElt.parentTopics.AddOnTop(output.size());
-      currentElt.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
-    } else if (MathRoutines::StringBeginsWith(currentLine, "Section:", &currentArgument)) {
+      currentElt.title = StringRoutines::StringTrimWhiteSpace(currentArgument);
+    } else if (StringRoutines::StringBeginsWith(currentLine, "Section:", &currentArgument)) {
       if (found) {
         TopicElement::AddTopic(currentElt, output);
       }
       found = true;
       currentElt.reset(1, &output);
       currentElt.parentTopics.AddOnTop(output.size());
-      currentElt.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
+      currentElt.title = StringRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.title;
-    } else if (MathRoutines::StringBeginsWith(currentLine, "Topic:", &currentArgument)) {
+    } else if (StringRoutines::StringBeginsWith(currentLine, "Topic:", &currentArgument)) {
       if (found) {
         TopicElement::AddTopic(currentElt, output);
       }
       found = true;
       currentElt.reset(2, &output);
       currentElt.parentTopics.AddOnTop(output.size());
-      currentElt.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
+      currentElt.title = StringRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.title;
-    } else if (MathRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument)) {
+    } else if (StringRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument)) {
       if (found) {
         TopicElement::AddTopic(currentElt, output);
       }
       found = true;
       currentElt.reset(3, &output);
       currentElt.parentTopics.AddOnTop(output.size());
-      currentElt.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
+      currentElt.title = StringRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.title;
-    } else if (MathRoutines::StringBeginsWith(currentLine, "Video:", &currentArgument)) {
-      currentElt.video = MathRoutines::StringTrimWhiteSpace(currentArgument);
-    } else if (MathRoutines::StringBeginsWith(currentLine, "VideoHandwritten:", &currentArgument)) {
-      currentElt.videoHandwritten = MathRoutines::StringTrimWhiteSpace(currentArgument);
-    } else if (MathRoutines::StringBeginsWith(currentLine, "SlidesSource:", &currentArgument)) {
-      currentElt.sourceSlides.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
-    } else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkSource:", &currentArgument)) {
-      currentElt.sourceHomework.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
+    } else if (StringRoutines::StringBeginsWith(currentLine, "Video:", &currentArgument)) {
+      currentElt.video = StringRoutines::StringTrimWhiteSpace(currentArgument);
+    } else if (StringRoutines::StringBeginsWith(currentLine, "VideoHandwritten:", &currentArgument)) {
+      currentElt.videoHandwritten = StringRoutines::StringTrimWhiteSpace(currentArgument);
+    } else if (StringRoutines::StringBeginsWith(currentLine, "SlidesSource:", &currentArgument)) {
+      currentElt.sourceSlides.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentArgument));
+    } else if (StringRoutines::StringBeginsWith(currentLine, "HomeworkSource:", &currentArgument)) {
+      currentElt.sourceHomework.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentArgument));
       currentElt.sourceHomeworkIsSolution.AddOnTop(false);
-    } else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkSolutionSource:", &currentArgument)) {
-      currentElt.sourceHomework.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
+    } else if (StringRoutines::StringBeginsWith(currentLine, "HomeworkSolutionSource:", &currentArgument)) {
+      currentElt.sourceHomework.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentArgument));
       currentElt.sourceHomeworkIsSolution.AddOnTop(true);
-    } else if (MathRoutines::StringBeginsWith(currentLine, "SlidesLatex:", &currentArgument)) {
-      currentElt.sourceSlides.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
-    } else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkLatex:", &currentArgument)) {
-      currentElt.sourceHomework.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
+    } else if (StringRoutines::StringBeginsWith(currentLine, "SlidesLatex:", &currentArgument)) {
+      currentElt.sourceSlides.AddOnTop("LaTeX: " + StringRoutines::StringTrimWhiteSpace(currentArgument));
+    } else if (StringRoutines::StringBeginsWith(currentLine, "HomeworkLatex:", &currentArgument)) {
+      currentElt.sourceHomework.AddOnTop("LaTeX: " + StringRoutines::StringTrimWhiteSpace(currentArgument));
       currentElt.sourceHomeworkIsSolution.AddOnTop(false);
-    } else if (MathRoutines::StringBeginsWith(currentLine, "HandwrittenSolutions:", &currentArgument)) {
-      currentElt.handwrittenSolution = MathRoutines::StringTrimWhiteSpace(currentArgument);
-    } else if (MathRoutines::StringBeginsWith(currentLine, "Problem:", &currentArgument)) {
-      currentElt.problemFileName = MathRoutines::StringTrimWhiteSpace(currentArgument);
+    } else if (StringRoutines::StringBeginsWith(currentLine, "HandwrittenSolutions:", &currentArgument)) {
+      currentElt.handwrittenSolution = StringRoutines::StringTrimWhiteSpace(currentArgument);
+    } else if (StringRoutines::StringBeginsWith(currentLine, "Problem:", &currentArgument)) {
+      currentElt.problemFileName = StringRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.problemFileName;
       found = true;
     } else {
@@ -4009,7 +4009,7 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
 
 void CalculatorHTML::InterpretJavascripts(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretJavascripts");
-  std::string javascriptName = MathRoutines::StringTrimWhiteSpace(inputOutput.content);
+  std::string javascriptName = StringRoutines::StringTrimWhiteSpace(inputOutput.content);
   if (javascriptName == "MathJax") {
     inputOutput.interpretedCommand = HtmlRoutines::GetJavascriptMathjax("");
   }

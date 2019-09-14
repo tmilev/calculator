@@ -9,9 +9,13 @@ mongoc_database_t *database = nullptr;
 #include "general_logging_global_variables.h"
 #include "html_snippets.h"
 #include "string_constants.h"
+#include "general_strings.h"
+
+extern ProjectInformationInstance ProjectInfoVpfDatabaseMongo;
 ProjectInformationInstance ProjectInfoVpfDatabaseMongo(__FILE__, "Database mongoDB.");
 
 int DatabaseRoutinesGlobalFunctionsMongo::numDatabaseInstancesMustBeOneOrZero = 0;
+extern DatabaseRoutinesGlobalFunctionsMongo databaseMongo;
 DatabaseRoutinesGlobalFunctionsMongo databaseMongo;
 
 extern logger logWorker;
@@ -63,7 +67,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::initialize(std::stringstream* comment
 }
 
 DatabaseRoutinesGlobalFunctionsMongo::~DatabaseRoutinesGlobalFunctionsMongo() {
- 
+
 #ifdef MACRO_use_MongoDB
   if (database != nullptr) {
     mongoc_database_destroy(database);
@@ -1138,7 +1142,7 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseFetch(const std::stri
   JSData labels;
   std::stringstream commentsOnFailure;
   if (!labels.readstring(incomingLabels, false, &commentsOnFailure)) {
-    commentsOnFailure << "Failed to parse labels from: " << MathRoutines::StringTrimToLengthForDisplay(incomingLabels, 100);
+    commentsOnFailure << "Failed to parse labels from: " << StringRoutines::StringTrimToLengthForDisplay(incomingLabels, 100);
     result["error"] = commentsOnFailure.str();
     return result;
   }

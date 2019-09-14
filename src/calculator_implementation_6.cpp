@@ -2204,7 +2204,7 @@ bool CalculatorFunctionsGeneral::innerTestASN1Decode(Calculator& theCommands, co
   return output.AssignValue(out.str(), theCommands);
 }
 
-std::string MathRoutines::ConvertStringToHexPrependConversionIfNeeded(const std::string& input) {
+std::string StringRoutines::ConvertStringToHexPrependConversionIfNeeded(const std::string& input) {
   bool foundBad = false;
   for (unsigned i = 0; i < input.size(); i ++) {
     // All characters smaller than \t = 9

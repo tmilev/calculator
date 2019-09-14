@@ -603,13 +603,13 @@ bool Calculator::EvaluateExpression(
                 output[j].StartsWith(theCommands.opDefine()) ||
                 output[j].StartsWith(theCommands.opDefineConditional())
               ) {
-                reportStream << "<br>" << MathRoutines::StringShortenInsertDots(
+                reportStream << "<br>" << StringRoutines::StringShortenInsertDots(
                   output[j].ToString(), 100
                 );
               }
             }
             reportStream << "<br>Evaluating:<br><b>"
-            << MathRoutines::StringShortenInsertDots(output[i].ToString(), 100) << "</b>";
+            << StringRoutines::StringShortenInsertDots(output[i].ToString(), 100) << "</b>";
             theReport.Report(reportStream.str());
           }
         }

@@ -475,7 +475,7 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
     out << "<br>Interpretation status.<br>" << this->dataInterpretation.ToString(false, true, true, true);
   }
   out << "<br>Data: ";
-  out << MathRoutines::StringShortenInsertDots(Crypto::ConvertListUnsignedCharsToHex(this->rawData, 70, true), 4000);
+  out << StringRoutines::StringShortenInsertDots(Crypto::ConvertListUnsignedCharsToHex(this->rawData, 70, true), 4000);
   return out.str();
 }
 
@@ -567,8 +567,8 @@ std::string X509Certificate::ToStringTestEncode() {
     }
   }
   std::string originalLeft, originalRight, recodedLeft, recodedRight;
-  MathRoutines::SplitStringInTwo(sourceHex, static_cast<int>(firstDifferentChar), originalLeft, originalRight);
-  MathRoutines::SplitStringInTwo(recodedHex, static_cast<int>(firstDifferentChar), recodedLeft, recodedRight);
+  StringRoutines::SplitStringInTwo(sourceHex, static_cast<int>(firstDifferentChar), originalLeft, originalRight);
+  StringRoutines::SplitStringInTwo(recodedHex, static_cast<int>(firstDifferentChar), recodedLeft, recodedRight);
   out <<  "Source:<br>\n" << originalLeft;
   if (originalRight.size() > 0) {
     out << "<b style='color:red'>" << originalRight << "</b>";
@@ -639,20 +639,20 @@ bool PrivateKeyRSA::LoadFromPEMFile(const std::string& input, std::stringstream*
 
 bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure){
   MacroRegisterFunctionWithName("PrivateKeyRSA::LoadFromPEM");
-  std::string certificateContentStripped = MathRoutines::StringTrimWhiteSpace(input);
-  if (!MathRoutines::StringBeginsWith(certificateContentStripped, "-----BEGIN PRIVATE KEY-----", &certificateContentStripped)) {
+  std::string certificateContentStripped = StringRoutines::StringTrimWhiteSpace(input);
+  if (!StringRoutines::StringBeginsWith(certificateContentStripped, "-----BEGIN PRIVATE KEY-----", &certificateContentStripped)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad private key start. ";
     }
     return false;
   }
-  if (!MathRoutines::StringEndsWith(certificateContentStripped, "-----END PRIVATE KEY-----", &certificateContentStripped)) {
+  if (!StringRoutines::StringEndsWith(certificateContentStripped, "-----END PRIVATE KEY-----", &certificateContentStripped)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad private key end. ";
     }
     return false;
   }
-  certificateContentStripped = MathRoutines::StringTrimWhiteSpace(certificateContentStripped);
+  certificateContentStripped = StringRoutines::StringTrimWhiteSpace(certificateContentStripped);
   if (!Crypto::ConvertBase64ToBitStream(certificateContentStripped, this->sourceBinary, commentsOnFailure, nullptr)) {
     return false;
   }
@@ -723,22 +723,22 @@ bool PrivateKeyRSA::LoadFromASNEncoded(List<unsigned char>& input, std::stringst
 bool X509Certificate::LoadFromPEM(const std::string& input, std::stringstream *commentsOnFailure) {
   std::string certificateContentStripped;
   //see ASN1_item_d2i_bio for decoding.
-  certificateContentStripped = MathRoutines::StringTrimWhiteSpace(input);
+  certificateContentStripped = StringRoutines::StringTrimWhiteSpace(input);
   std::string beginCertificate = "-----BEGIN CERTIFICATE-----";
   std::string endCertificate = "-----END CERTIFICATE-----";
-  if (!MathRoutines::StringBeginsWith(certificateContentStripped, beginCertificate, &certificateContentStripped)) {
+  if (!StringRoutines::StringBeginsWith(certificateContentStripped, beginCertificate, &certificateContentStripped)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad certificate start. ";
     }
     return false;
   }
-  if (!MathRoutines::StringEndsWith(certificateContentStripped, endCertificate, &certificateContentStripped)) {
+  if (!StringRoutines::StringEndsWith(certificateContentStripped, endCertificate, &certificateContentStripped)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad certificate end. ";
     }
     return false;
   }
-  certificateContentStripped = MathRoutines::StringTrimWhiteSpace(certificateContentStripped);
+  certificateContentStripped = StringRoutines::StringTrimWhiteSpace(certificateContentStripped);
   if (!Crypto::ConvertBase64ToBitStream(certificateContentStripped, this->sourceBinary, commentsOnFailure, nullptr)) {
     return false;
   }

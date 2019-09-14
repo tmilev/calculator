@@ -2448,7 +2448,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<std::string>()) {
     if (!useQuotes) {
       if (isFinal) {
-        out << MathRoutines::ConvertStringToHexPrependConversionIfNeeded(this->GetValue<std::string>());
+        out << StringRoutines::ConvertStringToHexPrependConversionIfNeeded(this->GetValue<std::string>());
       } else {
         out << HtmlRoutines::ConvertStringToHtmlString(this->GetValue<std::string>(), false);
       }
@@ -3152,7 +3152,7 @@ std::string Expression::ToString(
     this->StartsWith(this->owner->opLog(), 2)
   ) {
     std::string theArg = (*this)[1].ToString(theFormat);
-    if (!MathRoutines::StringBeginsWith(theArg, "\\left|")) {
+    if (!StringRoutines::StringBeginsWith(theArg, "\\left|")) {
       out << "\\ln \\left|" << theArg << "\\right|";
     } else {
       out << "\\ln " << theArg;
@@ -3322,7 +3322,7 @@ std::string Expression::ToString(
           mustHaveTimes = true;
         }
         if (MathRoutines::isADigit(firstE[firstE.size() - 1]) ) {
-          if (MathRoutines::StringBeginsWith(secondE, "\\frac")) {
+          if (StringRoutines::StringBeginsWith(secondE, "\\frac")) {
             mustHaveTimes = true;
           }
         }
@@ -3744,7 +3744,7 @@ std::string Expression::ToString(
         }
         out << "</td><td class =\"cellCalculatorResult\">";
         if ((*this)[i].IsOfType<std::string>() && isFinal) {
-          currentOutput = MathRoutines::ConvertStringToHexPrependConversionIfNeeded(currentE.GetValue<std::string>());
+          currentOutput = StringRoutines::ConvertStringToHexPrependConversionIfNeeded(currentE.GetValue<std::string>());
         } else if ((
             currentE.HasType<Plot> () ||
             currentE.IsOfType<SemisimpleSubalgebras>() ||
@@ -4403,7 +4403,7 @@ std::string Expression::ToUTF8String(FormatExpressions* theFormat) const {
           if (MathRoutines::isADigit(secondUTF8String[0])) {
             mustHaveTimes = true;
           }
-          if (MathRoutines::StringBeginsWith(secondString, "\\frac")) {
+          if (StringRoutines::StringBeginsWith(secondString, "\\frac")) {
             mustHaveTimes = true;
           }
         }

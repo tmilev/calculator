@@ -39,7 +39,7 @@ bool TimeWrapper::AssignMonthDayYear(const std::string& input, std::stringstream
   theDelimiters.AddOnTop('-');
   theDelimiters.AddOnTop('.');
   List<std::string> output;
-  MathRoutines::StringSplitExcludeDelimiters(input, theDelimiters, output);
+  StringRoutines::StringSplitExcludeDelimiters(input, theDelimiters, output);
   if (output.size < 3) {
     commentsOnFailure << "Failed to extract a M/D/Y date from: " << input;
     return false;

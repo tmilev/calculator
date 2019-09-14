@@ -262,7 +262,8 @@ HEADERS += \
     system_functions_global_objects.h \
     transport_layer_security.h \
     webserver.h \
-    serialization_basic.h
+    serialization_basic.h \
+    general_strings.h
 
 
 SOURCES += \

@@ -57,6 +57,7 @@ public:
   static bool innerConvertHexToBase58(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConvertIntegerUnsignedToBase58(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSliceString(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerStringDifference(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNISTEllipticCurveGenerator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNISTEllipticCurveOrder(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLoadKnownCertificates(Calculator& theCommands, const Expression& input, Expression& output);

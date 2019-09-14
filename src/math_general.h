@@ -4,6 +4,7 @@
 #define vpfHeader1_2_h_already_included
 
 #include "general_logging_global_variables.h"
+#include "general_strings.h"
 #include "math_large_integers.h"
 #include "math_vectors.h"
 #include "math_subsets_selections.h"
@@ -841,6 +842,9 @@ public:
     }
     return Result;
   }
+  inline coefficient& operator()(unsigned i, unsigned j) const {
+    return (*this)(static_cast<signed>(i), static_cast<signed>(j));
+  }
   coefficient& operator()(int i, int j) const {
     if (i < 0 || i >= this->NumRows || j < 0 || j >= this->NumCols) {
       crash << "This is a programming error: requesting row, column indexed by "
@@ -1255,7 +1259,8 @@ public:
   }
   // The following are for compatibility with the FiniteGroup class
   void GetCharacteristicPolyStandardRepresentation(Polynomial<coefficient>& out) {
-    out.AssignCharPoly(*this); }
+    out.AssignCharPoly(*this);
+  }
   bool HasDifferentConjugacyInvariantsFrom(Matrix<coefficient>& other) {
     Polynomial<coefficient> p, q;
     this->GetCharacteristicPolyStandardRepresentation(p);
@@ -4496,7 +4501,7 @@ coefficient Matrix<coefficient>::GetTrace() const {
   if (this->NumCols != this->NumRows) {
     crash << "This is either programming error, a mathematical error, "
     << "or requires a more general definition of trace. Requesting the trace of "
-    << " a non-square matrix of " << this->NumRows << " rows and "
+    << "a non-square matrix of " << this->NumRows << " rows and "
     << this->NumCols << " columns is not allowed. "
     << crash;
   }
@@ -5242,9 +5247,9 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
       }
       if (useFracSpecial) {
         std::string tempS3;
-        if (MathRoutines::StringBeginsWith(tempS1, "\\frac{1}", &tempS3)) {
+        if (StringRoutines::StringBeginsWith(tempS1, "\\frac{1}", &tempS3)) {
           tempS1 = "\\frac{" + tempS2 + "}" + tempS3;
-        } else if (MathRoutines::StringBeginsWith(tempS1, "-\\frac{1}", &tempS3)) {
+        } else if (StringRoutines::StringBeginsWith(tempS1, "-\\frac{1}", &tempS3)) {
           tempS1 = "-\\frac{" + tempS2 + "}" + tempS3;
         } else {
           useFracSpecial = false;

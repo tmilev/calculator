@@ -1745,7 +1745,7 @@ int WebWorker::ProcessFile() {
   << this->GetMIMEtypeFromFileExtension(fileExtension)
   << "Access-Control-Allow-Origin: *\r\n";
   for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++) {
-    if (MathRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i])) {
+    if (StringRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i])) {
       theHeader << WebAPI::HeaderCacheControl << "\r\n";
       withCacheHeader = true;
       break;
@@ -2468,13 +2468,13 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource() {
   LaTeXcrawler theCrawler;
   for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++) {
     std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
-    if (theKey != "fileName" && MathRoutines::StringBeginsWith(theKey, "file")) {
-      theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(MathRoutines::StringTrimWhiteSpace(
+    if (theKey != "fileName" && StringRoutines::StringBeginsWith(theKey, "file")) {
+      theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(StringRoutines::StringTrimWhiteSpace(
         HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theValues[i], false)
       ));
     }
-    if (MathRoutines::StringBeginsWith(theKey, "isSolutionFile")) {
-      theCrawler.slideFilesExtraFlags.AddOnTop(MathRoutines::StringTrimWhiteSpace(
+    if (StringRoutines::StringBeginsWith(theKey, "isSolutionFile")) {
+      theCrawler.slideFilesExtraFlags.AddOnTop(StringRoutines::StringTrimWhiteSpace(
         HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theValues[i], false)
       ));
     }
@@ -2521,9 +2521,9 @@ int WebWorker::ProcessSlidesSource() {
   for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++) {
     std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
     if (
-      theKey != "fileName" && MathRoutines::StringBeginsWith(theKey, "file")
+      theKey != "fileName" && StringRoutines::StringBeginsWith(theKey, "file")
     ) {
-      theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(MathRoutines::StringTrimWhiteSpace(
+      theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(StringRoutines::StringTrimWhiteSpace(
         HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theValues[i], false)
       ));
     }
@@ -2773,7 +2773,7 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified() {
 
 bool WebWorker::ProcessRedirectAwayFromWWW() {
   std::string addressNoWWW;
-  if (!MathRoutines::StringBeginsWith(theGlobalVariables.hostWithPort, "www.", &addressNoWWW)) {
+  if (!StringRoutines::StringBeginsWith(theGlobalVariables.hostWithPort, "www.", &addressNoWWW)) {
     return false;
   }
   std::stringstream newAddressStream, redirectHeaderStream;
@@ -2900,7 +2900,7 @@ int WebWorker::ServeClient() {
   if (theWebServer.addressStartsInterpretedAsCalculatorRequest.Contains(this->addressComputed)) {
     theGlobalVariables.userCalculatorRequestType = this->addressComputed;
     std::string correctedRequest;
-    if (MathRoutines::StringBeginsWith(theGlobalVariables.userCalculatorRequestType, "/", &correctedRequest)) {
+    if (StringRoutines::StringBeginsWith(theGlobalVariables.userCalculatorRequestType, "/", &correctedRequest)) {
       theGlobalVariables.userCalculatorRequestType = correctedRequest;
       comments << "Address was interpretted as request, so your request was set to: "
       << theGlobalVariables.userCalculatorRequestType << ". ";
@@ -3852,7 +3852,7 @@ bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string
     }
   }
   for (int i = 0; i < this->addressStartsNotNeedingLogin.size; i ++) {
-    if (MathRoutines::StringBeginsWith(inputAddress, this->addressStartsNotNeedingLogin[i])) {
+    if (StringRoutines::StringBeginsWith(inputAddress, this->addressStartsNotNeedingLogin[i])) {
       return false;
     }
   }
@@ -4950,16 +4950,16 @@ void WebServer::InitializeGlobalVariablesHashes() {
   theGlobalVariables.ChDir("../");
   if (theGlobalVariables.buildVersionSimple == "") {
     theGlobalVariables.buildVersionSimple =
-    MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
+    StringRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
   }
-  theGlobalVariables.buildVersionSimple = MathRoutines::StringTrimWhiteSpace(theGlobalVariables.buildVersionSimple);
+  theGlobalVariables.buildVersionSimple = StringRoutines::StringTrimWhiteSpace(theGlobalVariables.buildVersionSimple);
   for (unsigned i = 0; i < theGlobalVariables.buildVersionSimple.size(); i ++) {
     if (MathRoutines::isALatinLetter(theGlobalVariables.buildVersionSimple[i])) {
       theGlobalVariables.buildVersionSimple = "?";
       break;
     }
   }
-  theGlobalVariables.buildHeadHashWithServerTime = MathRoutines::StringTrimWhiteSpace(
+  theGlobalVariables.buildHeadHashWithServerTime = StringRoutines::StringTrimWhiteSpace(
     theGlobalVariables.CallSystemWithOutput("git rev-parse HEAD")
   );
   for (unsigned i = 0; i < theGlobalVariables.buildHeadHashWithServerTime.size(); i ++) {
@@ -5494,9 +5494,9 @@ int WebServer::mainApache() {
     theWorker.requestTypE = theWorker.requestPost;
   }
   theGlobalVariables.flagComputationCompletE = true;
-  MathRoutines::StringSplitExcludeDelimiter(theWorker.cookiesApache, ' ', theWorker.cookies);
+  StringRoutines::StringSplitExcludeDelimiter(theWorker.cookiesApache, ' ', theWorker.cookies);
   for (int i = 0; i < theWorker.cookies.size; i ++) {
-    theWorker.cookies[i] = MathRoutines::StringTrimWhiteSpace(theWorker.cookies[i]);
+    theWorker.cookies[i] = StringRoutines::StringTrimWhiteSpace(theWorker.cookies[i]);
   }
   theWorker.ServeClient();
   theGlobalVariables.flagComputationFinishedAllOutputSentClosing = true;

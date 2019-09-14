@@ -1345,13 +1345,13 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
     if (theFileNames[i] == "." || theFileNames[i] == "..") {
       continue;
     }
-    if (MathRoutines::StringBeginsWith(theFileNames[i], "debug")) {
+    if (StringRoutines::StringBeginsWith(theFileNames[i], "debug")) {
       continue;
     }
-    if (MathRoutines::StringEndsWith(theFileNames[i], "readme.md")) {
+    if (StringRoutines::StringEndsWith(theFileNames[i], "readme.md")) {
       continue;
     }
-    if (MathRoutines::StringEndsWith(theFileNames[i], "README.md")) {
+    if (StringRoutines::StringEndsWith(theFileNames[i], "README.md")) {
       continue;
     }
     std::string currentCert;
@@ -1476,7 +1476,7 @@ bool JSONWebToken::VerifyRSA256(
 bool JSONWebToken::AssignString(const std::string& other, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("JSONWebToken::AssignString");
   List<std::string> theStrings;
-  MathRoutines::StringSplitExcludeDelimiter(other, '.', theStrings);
+  StringRoutines::StringSplitExcludeDelimiter(other, '.', theStrings);
   if (theStrings.size != 3) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Expected 3 strings separated by two dots, got: "

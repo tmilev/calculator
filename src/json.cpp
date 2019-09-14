@@ -100,7 +100,7 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
   delimiters.AddOnTop('[');
   delimiters.AddOnTop(']');
   List<std::string> keys;
-  MathRoutines::StringSplitExcludeDelimiters(inputKeys, delimiters, keys);
+  StringRoutines::StringSplitExcludeDelimiters(inputKeys, delimiters, keys);
   const JSData* currentData = this;
   if (keys.size == 0) {
     if (commentsOnFailure != nullptr) {
@@ -115,8 +115,8 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
       if (currentData->theType != JSData::token::tokenArray) {
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "The sub-object located before the key: " << keys[i] << " [all keys: "
-          << keys.ToStringCommaDelimited() << "]"
-          << " is not an array, but is instead: " << currentData->ToString(false, true, true, true);
+          << keys.ToStringCommaDelimited() << "] "
+          << "is not an array, but is instead: " << currentData->ToString(false, true, true, true);
         }
         return false;
       }
@@ -528,7 +528,7 @@ somestream& JSData::IntoStream(
       return out;
     case JSData::token::tokenString:
       if (convertNonASCIIStringsToHex) {
-        out << '"' << MathRoutines::ConvertStringToHexPrependConversionIfNeeded(this->theString) << '"';
+        out << '"' << StringRoutines::ConvertStringToHexPrependConversionIfNeeded(this->theString) << '"';
       } else if (!percentEncodeStrings) {
         out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->theString) << '"';
       } else {

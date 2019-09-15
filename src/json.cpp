@@ -116,7 +116,7 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "The sub-object located before the key: " << keys[i] << " [all keys: "
           << keys.ToStringCommaDelimited() << "] "
-          << "is not an array, but is instead: " << currentData->ToString(false, true, true, true);
+          << "is not an array, but is instead: " << currentData->ToString(false, true, true, true) << ". ";
         }
         return false;
       }
@@ -528,7 +528,7 @@ somestream& JSData::IntoStream(
       return out;
     case JSData::token::tokenString:
       if (convertNonASCIIStringsToHex) {
-        out << '"' << StringRoutines::ConvertStringToHexPrependConversionIfNeeded(this->theString) << '"';
+        out << '"' << StringRoutines::ConvertStringToHexIfNonReadable(this->theString, 0, useHTML) << '"';
       } else if (!percentEncodeStrings) {
         out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->theString) << '"';
       } else {

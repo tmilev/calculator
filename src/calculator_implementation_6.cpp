@@ -2193,18 +2193,33 @@ bool CalculatorFunctionsGeneral::innerTestASN1Decode(Calculator& theCommands, co
     return false;
   }
   AbstractSyntaxNotationOneSubsetDecoder theDecoder;
-  theDecoder.rawData = data;
+  List<unsigned char> dataList;
+  dataList = data;
   std::stringstream commentsOnError;
   std::stringstream out;
-  theDecoder.flagLogByteInterpretation = true;
-  if (!theDecoder.Decode(&commentsOnError)) {
+  JSData result, interpretation;
+  if (!theDecoder.Decode(dataList, result, &interpretation, &commentsOnError)) {
     out << "Failed to decode.<br>" << commentsOnError.str();
   }
   out << theDecoder.ToStringDebug();
   return output.AssignValue(out.str(), theCommands);
 }
 
-std::string StringRoutines::ConvertStringToHexPrependConversionIfNeeded(const std::string& input) {
+std::string StringRoutines::ConvertStringToCalculatorDisplay(
+  const std::string& input
+) {
+  std::string converted = StringRoutines::ConvertStringToHexIfNonReadable(input, 100, true);
+  if (converted == input) {
+    return converted;
+  }
+  std::stringstream out;
+  out << "ConvertHexToString{}\"" << converted << "\"";
+  return out.str();
+}
+
+std::string StringRoutines::ConvertStringToHexIfNonReadable(
+  const std::string& input, int lineWidthZeroForNone, bool useHTML
+) {
   bool foundBad = false;
   for (unsigned i = 0; i < input.size(); i ++) {
     // All characters smaller than \t = 9
@@ -2218,7 +2233,5 @@ std::string StringRoutines::ConvertStringToHexPrependConversionIfNeeded(const st
   if (!foundBad) {
     return input;
   }
-  std::stringstream out;
-  out << "ConvertHexToString{}\"" << Crypto::ConvertStringToHex(input, 100, true) << "\"";
-  return out.str();
+  return Crypto::ConvertStringToHex(input, lineWidthZeroForNone, useHTML);
 }

@@ -56,18 +56,23 @@ public:
     );
     ~WriterSequenceFixedLength();
   };
-  int recursionDepthGuard;
+  int recursionDepthGuarD;
   int maxRecursionDepth;
   int dataPointer;
-  List<unsigned char> rawData;
-  JSData decodedData;
-  JSData dataInterpretation;
+  const List<unsigned char>* rawDatA;
+  JSData* decodedData;
+  JSData* dataInterpretation;
   bool flagLogByteInterpretation;
   List<std::string> byteInterpretationNotes;
   List<int> byteInterpretationDepth;
   typedef bool (*typeDecoder)(AbstractSyntaxNotationOneSubsetDecoder& thisPointer, std::stringstream* commentsOnError);
   List<typeDecoder> decodersByByteValue;
-  bool Decode(std::stringstream* commentsOnError);
+  bool Decode(
+    const List<unsigned char>& inputRawData,
+    JSData& outputDecodedData,
+    JSData* outputInterpretation,
+    std::stringstream* commentsOnError
+  );
   bool PointerIsBad(JSData* interpretation);
   bool DecodeCurrent(JSData& output, JSData *interpretation);
   bool DecodeSequenceContent(int desiredLengthInBytes, JSData& output, JSData* interpretation);
@@ -85,8 +90,10 @@ public:
   bool DecodeConstructed(unsigned char startByte, int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeCurrentBuiltInType(std::stringstream* commentsOnError);
   bool DecodeLengthIncrementDataPointer(int& outputLengthNegativeOneForVariable, JSData* interpretation);
+  std::string ToStringAnnotateBinary();
   std::string ToStringDebug() const;
-  void initialize();
+  void reset();
+  bool CheckInitialization() const;
   AbstractSyntaxNotationOneSubsetDecoder();
   ~AbstractSyntaxNotationOneSubsetDecoder();
   static bool isCostructedByte(unsigned char input);

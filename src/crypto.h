@@ -30,6 +30,8 @@ public:
   LargeIntUnsigned exponentTwo;
   CertificateRSA theCertificate;
   List<unsigned char> sourceBinary;
+  JSData sourceJSONOuter;
+  JSData sourceJSONInner;
   class Test {
     public:
     static bool All();
@@ -85,6 +87,7 @@ public:
   std::string certificateSignature;
   List<unsigned char> sourceBinary;
   JSData sourceJSON;
+  JSData sourceInterpretation;
   CertificateRSA theRSA;
   class Test {
   public:

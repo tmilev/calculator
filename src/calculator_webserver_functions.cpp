@@ -36,7 +36,7 @@ bool CalculatorFunctionsGeneral::innerX509CertificateDecode(
     return output.AssignValue(commentsOnError.str(), theCommands);
   }
   std::stringstream out;
-  out << theCertificate.ToStringTestEncode();
+  out << theCertificate.ToStringTestEncode() << "<br>";
   out << theCertificate.ToString();
   return output.AssignValue(out.str(), theCommands);
 }

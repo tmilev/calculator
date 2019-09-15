@@ -100,6 +100,8 @@ class Pair;
 template <class Object>
 class List;
 template <class Object>
+class ListZeroAfterUse;
+template <class Object>
 class Matrix;
 template <class Object, unsigned int hashFunction(const Object&)>
 class HashedList;
@@ -724,6 +726,7 @@ class List {
 public:
   typedef bool (*OrderLeftGreaterThanRight) (const Object& left, const Object& right);
 private:
+  friend class ListZeroAfterUse<Object>;
   friend class Polynomial<Rational>;
   friend class IntegerPoly;
   friend class PartFractions;
@@ -1172,6 +1175,20 @@ public:
       for (int j = 0; j < input[i].size; j ++) {
         this->AddOnTop(input[i][j]);
       }
+    }
+  }
+};
+
+template <typename Object>
+class ListZeroAfterUse {
+  public:
+  List<Object> data;
+  ~ListZeroAfterUse() {
+    for (int i = 0; i < this->data.ActualSize; i ++) {
+      // We zero the underlying buffer:
+      // this->data[i] may be out of bounds if
+      // the actual size does not equal the size.
+      this->data.TheObjects[i] = 0;
     }
   }
 };

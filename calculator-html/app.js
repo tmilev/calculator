@@ -27,6 +27,7 @@ window.calculator = {
   account: null,
   jwt: null,
   processMonitoring: null,
+  crypto: null,
 };
 
 //load globals:
@@ -55,5 +56,6 @@ window.calculator.processMonitoring = require('./process_monitoring');
 //initialize everything not initilized while loading:
 window.calculator.mainPage.initializeCalculatorPage();
 window.calculator.storageVariables = window.calculator.mainPage.storage.variables;
+window.calculator.crypto = require('./crypto');
 
 require('./external/build/output-min');

@@ -44,18 +44,31 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeConstructed(
 
 AbstractSyntaxNotationOneSubsetDecoder::AbstractSyntaxNotationOneSubsetDecoder() {
   this->flagLogByteInterpretation = false;
-  this->recursionDepthGuard = 0;
+  this->dataInterpretation = nullptr;
+  this->decodedData = nullptr;
+  this->dataPointer = 0;
+  this->recursionDepthGuarD = 0;
   this->maxRecursionDepth = 20;
 }
 
 AbstractSyntaxNotationOneSubsetDecoder::~AbstractSyntaxNotationOneSubsetDecoder() {
-  for (int i = 0; i < this->rawData.size; i ++) {
-    this->rawData[i] = 0;
-  }
 }
 
-void AbstractSyntaxNotationOneSubsetDecoder::initialize() {
-  this->recursionDepthGuard = 0;
+bool AbstractSyntaxNotationOneSubsetDecoder::CheckInitialization() const {
+  if (this->decodedData == nullptr) {
+    crash << "Uninitialized ASN1 output json. " << crash;
+  }
+  if (this->rawDatA == nullptr) {
+    crash << "Uninitialized ASN1 raw data. " << crash;
+  }
+  return true;
+}
+
+void AbstractSyntaxNotationOneSubsetDecoder::reset() {
+  this->rawDatA = nullptr;
+  this->dataInterpretation = nullptr;
+  this->decodedData = nullptr;
+  this->dataPointer = 0;
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
@@ -64,7 +77,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
 ) {
   outputLengthNegativeOneForVariable = 0;
   int startDataPointer = this->dataPointer;
-  unsigned char currentByte = this->rawData[this->dataPointer];
+  unsigned char currentByte = (*this->rawDatA)[this->dataPointer];
   if (currentByte < 128) { // 128 = 0x80
     outputLengthNegativeOneForVariable = currentByte;
     this->dataPointer ++;
@@ -86,7 +99,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
     if (this->PointerIsBad(interpretation)) {
       return false;
     }
-    unsigned char nextByte = this->rawData[this->dataPointer];
+    unsigned char nextByte = (*this->rawDatA)[this->dataPointer];
     length += static_cast<signed>(static_cast<unsigned int>(nextByte));
     this->dataPointer ++;
   }
@@ -103,7 +116,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::PointerIsBad(JSData *interpretation) {
-  if (this->dataPointer >= this->rawData.size || this->dataPointer < 0) {
+  if (this->dataPointer >= this->rawDatA->size || this->dataPointer < 0) {
     if (interpretation != nullptr) {
       std::stringstream errorStream;
       errorStream << "Unexpected overflow error: data pointer is negative. ";
@@ -201,14 +214,22 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeBitString(
   }
   output["bitString"] = theBitString;
   AbstractSyntaxNotationOneSubsetDecoder subDecoder;
-  subDecoder.flagLogByteInterpretation = this->flagLogByteInterpretation;
-  subDecoder.rawData = theBitString.theString;
-  if (subDecoder.rawData.size > 0) {
-    subDecoder.rawData.PopIndexShiftDown(0);
+  JSData subDecoderInterpretationContainer, subDecoderResult;
+  JSData* subDecoderInterpretation = nullptr;
+  if (this->flagLogByteInterpretation) {
+    subDecoderInterpretation = &subDecoderInterpretationContainer;
   }
-  subDecoder.recursionDepthGuard = this->recursionDepthGuard;
-  if (subDecoder.Decode(nullptr)) {
-    output["bitStringDecoded"] = subDecoder.decodedData;
+  List<unsigned char> data;
+  data = theBitString.theString;
+  if (data.size > 0) {
+    data.PopIndexShiftDown(0);
+  }
+  subDecoder.recursionDepthGuarD = this->recursionDepthGuarD + 1;
+  if (subDecoder.Decode(data, subDecoderResult, subDecoderInterpretation, nullptr)) {
+    output["bitStringDecoded"] = subDecoderResult;
+    if (subDecoderInterpretation != nullptr) {
+      output["bitStringDecodedInterpretation"] = *subDecoderInterpretation;
+    }
   }
   return true;
 }
@@ -237,7 +258,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeOctetString(
   output.reset(JSData::token::tokenString);
   output.theString.resize(static_cast<unsigned>(desiredLengthInBytes));
   for (int i = 0; i < desiredLengthInBytes; i ++) {
-    output.theString[static_cast<unsigned>(i)] = static_cast<char>(this->rawData[this->dataPointer + i]);
+    output.theString[static_cast<unsigned>(i)] = static_cast<char>((*this->rawDatA)[this->dataPointer + i]);
   }
   this->dataPointer += desiredLengthInBytes;
   if (interpretation != nullptr) {
@@ -288,7 +309,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(
     return false;
   }
   std::stringstream resultStream;
-  unsigned char firstByte = this->rawData[this->dataPointer];
+  unsigned char firstByte = (*this->rawDatA)[this->dataPointer];
   int currentPointer = this->dataPointer + 1;
   this->dataPointer += desiredLengthInBytes;
   if (this->PointerIsBad(interpretation)) {
@@ -304,7 +325,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(
   unsigned char secondEntry = firstByte % 40;
   resultStream << static_cast<int>(firstEntry) << "." << static_cast<int>(secondEntry);
   for (; currentPointer < this->dataPointer; ) {
-    LargeInt nextInt = this->VariableLengthQuantityDecode(this->rawData, currentPointer);
+    LargeInt nextInt = this->VariableLengthQuantityDecode(*this->rawDatA, currentPointer);
     resultStream << "." << nextInt.ToString();
   }
   if (interpretation != nullptr) {
@@ -321,7 +342,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
   int currentContribution = 0;
 
   for (int i = 0; i < desiredLengthInBytes; i ++) {
-    unsigned char unsignedContribution = this->rawData[this->dataPointer];
+    unsigned char unsignedContribution = (*this->rawDatA)[this->dataPointer];
     currentContribution = unsignedContribution;
     if (i == 0) {
       if (currentContribution >= 128) {
@@ -338,7 +359,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
     (*interpretation)["value"] = reader;
     int startIndex = this->dataPointer - desiredLengthInBytes;
     std::string theSource(
-      reinterpret_cast<char *>(this->rawData.TheObjects + startIndex),
+      reinterpret_cast<char *>(this->rawDatA->TheObjects + startIndex),
       static_cast<unsigned>(desiredLengthInBytes)
     );
     (*interpretation)["hex"] = Crypto::ConvertStringToHex(theSource, 0, false);
@@ -348,8 +369,8 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSData* interpretation) {
   MacroRegisterFunctionWithName("AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent");
-  RecursionDepthCounter recursionGuard(&this->recursionDepthGuard);
-  if (this->recursionDepthGuard > this->maxRecursionDepth) {
+  RecursionDepthCounter recursionGuard(&this->recursionDepthGuarD);
+  if (this->recursionDepthGuarD > this->maxRecursionDepth) {
     if (interpretation != nullptr) {
       std::stringstream errorStream;
       errorStream << "Max depth of " << this->maxRecursionDepth << " exceeded. ";
@@ -364,7 +385,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
   if (this->PointerIsBad(interpretation)) {
     return false;
   }
-  unsigned char startByte = this->rawData[this->dataPointer];
+  unsigned char startByte = (*this->rawDatA)[this->dataPointer];
   unsigned char startByteOriginal = startByte;
   int dataPointerAtStart = this->dataPointer;
   bool isConstructed = this->isCostructedByte(startByte);
@@ -439,43 +460,92 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
   }
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::Decode(std::stringstream* commentsOnError) {
+bool AbstractSyntaxNotationOneSubsetDecoder::Decode(
+  const List<unsigned char>& inputRawData,
+  JSData &outputDecodedData,
+  JSData *outputInterpretation,
+  std::stringstream* commentsOnError
+) {
   MacroRegisterFunctionWithName("AbstractSyntaxNotationOneSubsetDecoder::Decode");
-  int maxAllowedSize = 1000000000;
-  if (this->rawData.size >= maxAllowedSize) {
+  if (inputRawData.size == 0) {
     if (commentsOnError != nullptr) {
-      *commentsOnError << "Input size: " << this->rawData.size << " too large, max allowed: " << maxAllowedSize << ". ";
+      *commentsOnError << "Empty sequences are not allowed in our ASN-1 decoder. ";
     }
     return false;
   }
-  this->initialize();
-  this->dataPointer = 0;
-  this->decodedData.reset();
-  JSData* interpretation = nullptr;
-  if (this->flagLogByteInterpretation) {
-    interpretation = &this->dataInterpretation;
-    this->dataInterpretation.reset();
+  int maxAllowedSize = 1000000000;
+  if (inputRawData.size >= maxAllowedSize) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Input size: " << this->rawDatA->size << " too large, max allowed: " << maxAllowedSize << ". ";
+    }
+    return false;
   }
-  this->DecodeCurrent(this->decodedData, interpretation);
-  if (this->dataPointer < this->rawData.size) {
+  this->reset();
+
+  this->decodedData = &outputDecodedData;
+  this->dataInterpretation = outputInterpretation;
+  this->rawDatA = &inputRawData;
+  this->CheckInitialization();
+  this->decodedData->reset();
+  this->flagLogByteInterpretation = (this->dataInterpretation != nullptr);
+  if (this->flagLogByteInterpretation) {
+    this->dataInterpretation->reset();
+  }
+  this->DecodeCurrent(*this->decodedData, this->dataInterpretation);
+  if (commentsOnError != nullptr) {
+    *commentsOnError << "DEBUG: So far: decoded data pointer, raw size: "
+    << this->dataPointer << ", " << this->rawDatA->size << ". ";
+  }
+  if (this->dataPointer < this->rawDatA->size) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Decoded " << this->dataPointer
-      << " bytes but the input had: " << this->rawData.size << ". ";
+      << " bytes but the input had: " << this->rawDatA->size << ". ";
+      if (this->dataInterpretation != nullptr) {
+        *commentsOnError << "DEBUG: intepretation: " << this->dataInterpretation->ToString(false, true, false, true);
+      }
     }
     return false;
   }
   return true;
 }
 
+std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringAnnotateBinary() {
+  if (this->dataInterpretation == nullptr) {
+    return "Annotation not available. ";
+  }
+  if (!this->CheckInitialization()) {
+    return "ASN1 not initialized properly. ";
+  }
+  std::stringstream out;
+  out << "<script>";
+  out << "window.calculator.crypto.abstractSyntaxNotationAnnotate(";
+  out << "\"" << Crypto::ConvertListUnsignedCharsToHex(*this->rawDatA, 0, false) << "\"";
+  out << ", ";
+  out << this->dataInterpretation->ToString(false, false, false, true);
+  out << ", ";
+  out << this->decodedData->ToString(false, false, false, true);
+  out << ", ";
+  List<unsigned char> idNonHexed;
+  Crypto::computeSha256(*this->rawDatA, idNonHexed);
+  std::string theID = Crypto::ConvertListUnsignedCharsToHex(idNonHexed, 0, false);
+  out << "\"" << theID << "\"";
+  out << ");";
+  out << "</script>";
+  out << "<span id=\"" << theID << "\"></span>";
+  return out.str();
+}
+
 std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
+  MacroRegisterFunctionWithName("AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug");
+  this->CheckInitialization();
   std::stringstream out;
   out << "Decoded so far:<br>\n"
-  << this->decodedData.ToString(false, false, true, true);
+  << this->decodedData->ToString(false, false, true, true);
   if (this->flagLogByteInterpretation) {
-    out << "<br>Interpretation status.<br>" << this->dataInterpretation.ToString(false, true, true, true);
+    out << "<br>Interpretation status.<br>" << this->dataInterpretation->ToString(false, true, true, true);
   }
   out << "<br>Data: ";
-  out << StringRoutines::StringShortenInsertDots(Crypto::ConvertListUnsignedCharsToHex(this->rawData, 70, true), 4000);
+  out << StringRoutines::StringShortenInsertDots(Crypto::ConvertListUnsignedCharsToHex(*this->rawDatA, 70, true), 4000);
   return out.str();
 }
 
@@ -557,15 +627,6 @@ std::string X509Certificate::ToStringTestEncode() {
   List<unsigned char> recoded;
   this->WriteBytesASN1(recoded);
   std::string recodedHex = Crypto::ConvertListUnsignedCharsToHex(recoded, 80, true);
-  unsigned firstDifferentChar = 0;
-  for (firstDifferentChar = 0; firstDifferentChar < sourceHex.size(); firstDifferentChar ++) {
-    if (firstDifferentChar >= recodedHex.size()) {
-      break;
-    }
-    if (sourceHex[firstDifferentChar] != recodedHex[firstDifferentChar]) {
-      break;
-    }
-  }
   out << "Original, recoded binary source:<br>"
   << StringRoutines::Differ::DifferenceHTMLStatic(sourceHex, recodedHex);
   return out.str();
@@ -575,10 +636,12 @@ std::string X509Certificate::ToString() {
   std::stringstream out;
   out << "Certificate RSA:<br>"
   << this->theRSA.ToString();
-  out << "<br>Source binary (" << this->sourceBinary.size << " bytes):<br>";
-  std::string sourceHex = Crypto::ConvertListUnsignedCharsToHex(this->sourceBinary, 80, true);
-  out << sourceHex;
-  out << "<br>Source:<br>" << this->sourceJSON.ToString(false, true, true, true);
+  out << "<br>Source binary: " << this->sourceBinary.size << " bytes.<br>";
+  AbstractSyntaxNotationOneSubsetDecoder theDecoder;
+  theDecoder.dataInterpretation = &this->sourceInterpretation;
+  theDecoder.decodedData = &this->sourceJSON;
+  theDecoder.rawDatA = &this->sourceBinary;
+  out << theDecoder.ToStringAnnotateBinary();
   return out.str();
 }
 
@@ -650,61 +713,62 @@ bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* com
 }
 
 bool PrivateKeyRSA::LoadFromASNEncoded(List<unsigned char>& input, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("PrivateKeyRSA::LoadFromASNEncoded");
   AbstractSyntaxNotationOneSubsetDecoder outerDecoder, innerDecoder;
-  outerDecoder.rawData = input;
-  if (!outerDecoder.Decode(commentsOnFailure)) {
+  if (!outerDecoder.Decode(input, this->sourceJSONOuter, nullptr, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to asn-decode certificate input. ";
+      *commentsOnFailure << "Failed to asn-decode private key outer data. ";
     }
     return false;
   }
   JSData actualContent;
-  if (!outerDecoder.decodedData.HasCompositeKeyOfType("[2]", &actualContent, JSData::token::tokenString, commentsOnFailure)) {
+  if (!this->sourceJSONOuter.HasCompositeKeyOfType("[2]", &actualContent, JSData::token::tokenString, commentsOnFailure)) {
     return false;
   }
-  innerDecoder.rawData = actualContent.theString;
-  if (!innerDecoder.Decode(commentsOnFailure)) {
+  ListZeroAfterUse<unsigned char> innerData;
+  innerData.data = actualContent.theString;
+  if (!innerDecoder.Decode(innerData.data, this->sourceJSONInner, nullptr, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to asn-decode certificate input. ";
+      *commentsOnFailure << "Failed to asn-decode private key inner data. ";
     }
     return false;
   }
   JSData exponent, modulus, privateExponentJS, prime1, prime2, exponent1, exponent2, coefficient;
-  if (!innerDecoder.decodedData.HasCompositeKeyOfType(
+  if (!this->sourceJSONInner.HasCompositeKeyOfType(
     "[1]", &modulus, JSData::token::tokenLargeInteger, commentsOnFailure
   )) {
     return false;
   }
   this->modulus = modulus.theInteger.GetElement().value;
-  if (!innerDecoder.decodedData.HasCompositeKeyOfType(
+  if (!this->sourceJSONInner.HasCompositeKeyOfType(
     "[2]", &exponent, JSData::token::tokenLargeInteger, commentsOnFailure
   )) {
     return false;
   }
   this->exponent = exponent.theInteger.GetElement().value;
-  if (!innerDecoder.decodedData.HasCompositeKey("[3]", &privateExponentJS, commentsOnFailure)) {
+  if (!this->sourceJSONInner.HasCompositeKey("[3]", &privateExponentJS, commentsOnFailure)) {
     return false;
   }
   this->privateExponent = privateExponentJS.theInteger.GetElement().value;
-  if (!innerDecoder.decodedData.HasCompositeKeyOfType(
+  if (!this->sourceJSONInner.HasCompositeKeyOfType(
     "[4]", &prime1, JSData::token::tokenLargeInteger, commentsOnFailure
   )) {
     return false;
   }
   this->primeOne = prime1.theInteger.GetElement().value;
-  if (!innerDecoder.decodedData.HasCompositeKeyOfType(
+  if (!this->sourceJSONInner.HasCompositeKeyOfType(
     "[5]", &prime2, JSData::token::tokenLargeInteger, commentsOnFailure
   )) {
     return false;
   }
   this->primeTwo = prime2.theInteger.GetElement().value;
-  if (!innerDecoder.decodedData.HasCompositeKey("[6]", &exponent1, commentsOnFailure)) {
+  if (!this->sourceJSONInner.HasCompositeKey("[6]", &exponent1, commentsOnFailure)) {
     return false;
   }
-  if (!innerDecoder.decodedData.HasCompositeKey("[7]", &exponent2, commentsOnFailure)) {
+  if (!this->sourceJSONInner.HasCompositeKey("[7]", &exponent2, commentsOnFailure)) {
     return false;
   }
-  if (!innerDecoder.decodedData.HasCompositeKey("[8]", &coefficient, commentsOnFailure)) {
+  if (!this->sourceJSONInner.HasCompositeKey("[8]", &coefficient, commentsOnFailure)) {
     return false;
   }
   return true;
@@ -752,19 +816,21 @@ bool X509Certificate::LoadFromASNEncoded(
   const List<unsigned char>& input, std::stringstream* commentsOnFailure
 ) {
   AbstractSyntaxNotationOneSubsetDecoder theDecoder;
-  theDecoder.rawData = input;
-  if (!theDecoder.Decode(commentsOnFailure)) {
+  if (!theDecoder.Decode(input, this->sourceJSON, &this->sourceInterpretation, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to asn-decode certificate input. ";
     }
     return false;
   }
-  this->sourceJSON = theDecoder.decodedData;
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "decoded json: " << this->sourceJSON.ToString(false, true, true, true);
+  }
   JSData rsaPublicKey;
   JSData rsaModulus;
   if (!this->sourceJSON.HasCompositeKey("[0][6][1].bitStringDecoded[1]", &rsaModulus, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to read rsa modulus. ";
+      *commentsOnFailure << "Failed to read rsa modulus. JSON decoded: "
+      << this->sourceJSON.ToString(false, true, true, true);
     }
     return false;
   }

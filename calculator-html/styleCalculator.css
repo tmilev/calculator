@@ -1473,6 +1473,7 @@ input:checked + .slider:before {
 }
 
 span.abstractSyntaxOneAnnotation {
+  position: relative;
   display: inline-block;
   width: 900px;
   max-width: 900px;

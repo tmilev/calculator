@@ -64,20 +64,22 @@ AbstractSyntaxOne.prototype.computeAnnotation = function(
   outputDOMElements, 
   currentInterpretation,
 ) {
-  var offsetHex = currentInterpretation.offset * 2;
-  var lengthBytes = currentInterpretation.numberOfLengthBytes * 2;
-  if (currentInterpretation.length >= 128) {
-    lengthBytes += 2;
-  }
+  var offset = currentInterpretation.offset;
   var elementLeadingByte = document.createElement("SPAN");
   elementLeadingByte.classList.add("abstractSyntaxOneLeadingByte"); 
   elementLeadingByte.innerHTML = currentInterpretation.startByteOriginal;
-  attachTooltip(elementLeadingByte, `Leading byte: ${currentInterpretation.startByteOriginal}`);
+  attachTooltip(
+    elementLeadingByte, 
+    `Type: ${currentInterpretation.type}` +
+    `<br>Leading byte: ${currentInterpretation.startByteOriginal}` +
+    `<br>Leading bits: ${currentInterpretation.leadingBits}` +
+    `<br>Offset: ${offset}`
+  );
 
   var elementLength = document.createElement("SPAN");
   elementLength.classList.add("abstractSyntaxOneLength");
   elementLength.innerHTML = currentInterpretation.lengthEncoding;
-  attachTooltip(elementLength, `Length:`);
+  attachTooltip(elementLength, `Length encoding`);
 
   var elementHeader = document.createElement("SPAN");
   elementHeader.classList.add("abstractSyntaxOneHeader");
@@ -99,6 +101,9 @@ AbstractSyntaxOne.prototype.computeAnnotation = function(
     var elementHex = document.createElement("SPAN");
     elementHex.innerHTML = currentInterpretation.body;
     elementHex.classList.add("abstractSyntaxOneContent");
+    if (currentInterpretation.value !== undefined) {
+      attachTooltip(elementHex, `Value: ${currentInterpretation.value}`);
+    }
     outputDOMElements.appendChild(elementHex);
     foundContent = true;
   } 

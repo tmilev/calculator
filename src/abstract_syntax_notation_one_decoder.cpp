@@ -96,7 +96,6 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
   }
   int numberOfLengthBytes = currentByte - 128;
   if (interpretation != nullptr) {
-    (*interpretation)["numberOfLengthBytes"] = numberOfLengthBytes;
     List<unsigned char> lengthBytes = this->rawDatA->SliceCopy(this->dataPointer, 1 + numberOfLengthBytes);
     (*interpretation)["lengthEncoding"] = Crypto::ConvertListUnsignedCharsToHex(lengthBytes, 0, false);
   }
@@ -363,8 +362,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
   }
   output = reader;
   if (interpretation != nullptr) {
-    interpretation->reset(JSData::token::tokenObject);
-    (*interpretation)["value"] = reader;
+    (*interpretation)["value"] = reader.ToString();
     int startIndex = this->dataPointer - desiredLengthInBytes;
     std::string theSource(
       reinterpret_cast<char *>(this->rawDatA->TheObjects + startIndex),
@@ -373,6 +371,37 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
     (*interpretation)["body"] = Crypto::ConvertStringToHex(theSource, 0, false);
   }
   return true;
+}
+
+std::string AbstractSyntaxNotationOneSubsetDecoder::GetType(unsigned char startByte) {
+  switch (startByte) {
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::sequence:
+    return "sequence";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::integer:
+    return "integer";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::zero:
+    return "zero";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::bitString:
+    return "bitString";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::octetString:
+    return "octetString";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::tokenNull:
+    return "null";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier:
+    return "objectID";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String:
+    return "utf8 string";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::set:
+    return "set";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::printableString:
+    return "printable string";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::IA5String:
+    return "IA5String";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::UTCTime:
+    return "UTCTime";
+  default:
+    return "unknown";
+  }
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSData* interpretation) {
@@ -415,6 +444,14 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
     (*interpretation)["offset"] = this->dataPointer;
     (*interpretation)["startByteOriginal"] =  StringRoutines::ConvertByteToHex(startByteOriginal);
     (*interpretation)["startByte"] = StringRoutines::ConvertByteToHex(startByte);
+    if (isConstructed) {
+      (*interpretation)["constructed"] = true;
+      (*interpretation)["constructed"] = true;
+      (*interpretation)["constructed"] = true;
+    }
+    std::stringstream leadingBits;
+    leadingBits << static_cast<int>(hasBit8) << static_cast<int>(hasBit7);
+    (*interpretation)["leadingBits"] = leadingBits.str();
   }
   this->dataPointer ++;
   int currentLength = 0;
@@ -430,7 +467,10 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
     return false;
   }
   if (interpretation != nullptr) {
-    (*interpretation)["length"] = currentLength;    
+    (*interpretation)["length"] = currentLength;
+    (*interpretation)["type"] = this->GetType(startByte);
+    List<unsigned char> body = this->rawDatA->SliceCopy(this->dataPointer, currentLength);
+    (*interpretation)["body"] = Crypto::ConvertListUnsignedCharsToHex(body, 0, false);
   }
   std::stringstream errorStream;
   switch (startByte) {

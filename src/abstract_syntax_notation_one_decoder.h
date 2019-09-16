@@ -34,9 +34,9 @@ public:
     static const unsigned char octetString = 4;
     static const unsigned char tokenNull = 5;
     static const unsigned char objectIdentifier = 6;
-    static const unsigned char utf8String = 12;
-    static const unsigned char sequence = 16;
-    static const unsigned char set = 17;
+    static const unsigned char utf8String = 12; // 0x0c
+    static const unsigned char sequence = 16; //0x10
+    static const unsigned char set = 17; //0x11
     static const unsigned char printableString = 19;
     static const unsigned char IA5String = 22;
     static const unsigned char UTCTime = 23;
@@ -73,6 +73,7 @@ public:
     JSData* outputInterpretation,
     std::stringstream* commentsOnError
   );
+  std::string GetType(unsigned char startByte);
   bool PointerIsBad(JSData* interpretation);
   bool DecodeCurrent(JSData& output, JSData *interpretation);
   bool DecodeSequenceContent(int desiredLengthInBytes, JSData& output, JSData* interpretation);

@@ -169,7 +169,6 @@ bool Crypto::GetCharFromBase58(uint32_t input, char& output) {
     case 57: output = 'z'; return true;
     default: return false;
   }
-  return false;
 }
 
 bool Crypto::GetBase58FromChar(char input, uint32_t& output) {
@@ -234,9 +233,7 @@ bool Crypto::GetBase58FromChar(char input, uint32_t& output) {
     case 'z': output = 57; return true;
     default: return false;
   }
-  return false;
 }
-
 
 bool Crypto::Get6bitFromChar(unsigned char input, uint32_t& output) {
   switch (input) {
@@ -311,7 +308,6 @@ bool Crypto::Get6bitFromChar(unsigned char input, uint32_t& output) {
     case '=': return false;
     default: return false;
   }
-  return false;
 }
 
 bool Crypto::ConvertBase64ToString(

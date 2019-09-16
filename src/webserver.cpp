@@ -340,7 +340,7 @@ void WebWorker::SendAllBytesHttpSSL() {
       numTimesRunWithoutSending = 0;
     }
     logWorker << numBytesSent;
-    this->remainingBytesToSenD.Slice(numBytesSent, this->remainingBytesToSenD.size - numBytesSent);
+    this->remainingBytesToSenD.SliceInPlace(numBytesSent, this->remainingBytesToSenD.size - numBytesSent);
     if (this->remainingBytesToSenD.size > 0) {
       logWorker << ", ";
     }
@@ -5623,7 +5623,7 @@ void WebWorker::SendAllBytesHttp() {
       numTimesRunWithoutSending = 0;
     }
     logWorker << numBytesSent;
-    this->remainingBytesToSenD.Slice(
+    this->remainingBytesToSenD.SliceInPlace(
       numBytesSent,
       this->remainingBytesToSenD.size - numBytesSent
     );

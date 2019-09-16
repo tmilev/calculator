@@ -1474,7 +1474,62 @@ input:checked + .slider:before {
 
 span.abstractSyntaxOneAnnotation {
   display: inline-block;
-  width: 600px;
-  max-width: 600px;
+  width: 900px;
+  max-width: 900px;
   word-break: break-all;
+}
+
+span.abstractSyntaxOneHeader {
+  background-color: gainsboro;
+}
+
+span.abstractSyntaxOneLeadingByte {
+  background-color: gainsboro;
+}
+
+span.abstractSyntaxOneLeadingByte:hover {
+  background-color: lightgray;
+}
+
+span.abstractSyntaxOneLength {
+  background-color: gainsboro;
+}
+
+span.abstractSyntaxOneLength:hover {
+  background-color: lightgray;
+}
+
+span.abstractSyntaxOneElement {
+  border-style: solid;
+  border-width: 1px;
+  word-break: break-all;
+}
+
+span.abstractSyntaxOneContent {
+  background-color: lightgreen;
+}
+
+span.abstractSyntaxOneElement:hover {
+  background-color:gray;
+}
+
+span.abstractSyntaxOneHeader:hover {
+  background-color:silver;
+}
+
+span.abstractSyntaxOneContent:hover {
+  background-color: lime;
+}
+
+.tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+   /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
 }

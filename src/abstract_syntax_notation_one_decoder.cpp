@@ -81,16 +81,24 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
   if (currentByte < 128) { // 128 = 0x80
     outputLengthNegativeOneForVariable = currentByte;
     this->dataPointer ++;
+    if (interpretation != nullptr) {
+      (*interpretation)["lengthEncoding"] = StringRoutines::ConvertByteToHex(currentByte);
+    }
     return true;
   }
   if (currentByte == 128) { // 128 = 0x80 signals varible-length encoding
     outputLengthNegativeOneForVariable = - 1;
     this->dataPointer ++;
+    if (interpretation != nullptr) {
+      (*interpretation)["lengthEncoding"] = StringRoutines::ConvertByteToHex(80);
+    }
     return true;
   }
   int numberOfLengthBytes = currentByte - 128;
   if (interpretation != nullptr) {
     (*interpretation)["numberOfLengthBytes"] = numberOfLengthBytes;
+    List<unsigned char> lengthBytes = this->rawDatA->SliceCopy(this->dataPointer, 1 + numberOfLengthBytes);
+    (*interpretation)["lengthEncoding"] = Crypto::ConvertListUnsignedCharsToHex(lengthBytes, 0, false);
   }
   LargeInt length = 0;
   this->dataPointer ++;
@@ -362,7 +370,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
       reinterpret_cast<char *>(this->rawDatA->TheObjects + startIndex),
       static_cast<unsigned>(desiredLengthInBytes)
     );
-    (*interpretation)["hex"] = Crypto::ConvertStringToHex(theSource, 0, false);
+    (*interpretation)["body"] = Crypto::ConvertStringToHex(theSource, 0, false);
   }
   return true;
 }
@@ -405,8 +413,8 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
   }
   if (interpretation != nullptr) {
     (*interpretation)["offset"] = this->dataPointer;
-    (*interpretation)["startByteOriginal"] = startByteOriginal;
-    (*interpretation)["startByte"] = startByte;
+    (*interpretation)["startByteOriginal"] =  StringRoutines::ConvertByteToHex(startByteOriginal);
+    (*interpretation)["startByte"] = StringRoutines::ConvertByteToHex(startByte);
   }
   this->dataPointer ++;
   int currentLength = 0;
@@ -422,7 +430,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
     return false;
   }
   if (interpretation != nullptr) {
-    (*interpretation)["length"] = currentLength;
+    (*interpretation)["length"] = currentLength;    
   }
   std::stringstream errorStream;
   switch (startByte) {

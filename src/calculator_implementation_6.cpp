@@ -12,6 +12,7 @@
 #include "crypto.h"
 #include "abstract_syntax_notation_one_decoder.h"
 #include "math_extra_elliptic_curves_implementation.h"
+#include <iomanip>
 
 extern ProjectInformationInstance ProjectInfoVpf6_37cpp;
 ProjectInformationInstance ProjectInfoVpf6_37cpp(__FILE__, "More calculator built-in functions. ");
@@ -2214,6 +2215,12 @@ std::string StringRoutines::ConvertStringToCalculatorDisplay(
   }
   std::stringstream out;
   out << "ConvertHexToString{}\"" << converted << "\"";
+  return out.str();
+}
+
+std::string StringRoutines::ConvertByteToHex(unsigned char byte) {
+  std::stringstream out;
+  out << std::hex << std::setfill('0') << std::setw(2) << static_cast<unsigned>(byte);
   return out.str();
 }
 

@@ -1151,7 +1151,9 @@ public:
   void ShiftUpExpandOnTop(int StartingIndex);
   void ShiftUpExpandOnTopRepeated(int StartingIndex, int numberOfNewElements);
 
-  void Slice(int StartingIndex, int SizeOfSlice);
+  List<Object> SliceCopy(int StartingIndex, int SizeOfSlice) const;
+  void SliceInPlace(int StartingIndex, int SizeOfSlice);
+  void Slice(int StartingIndex, int SizeOfSlice, List<Object>& output) const;
   List(int StartingSize);
   List(int StartingSize, const Object& fillInValue);
   List(const std::string& input) {
@@ -1966,7 +1968,20 @@ void List<Object>::ShiftUpExpandOnTopRepeated(int StartingIndex, int numberOfNew
 }
 
 template <class Object>
-void List<Object>::Slice(int StartingIndex, int SizeOfSlice) {
+void List<Object>::SliceInPlace(int StartingIndex, int SizeOfSlice) {
+  this->Slice(StartingIndex, SizeOfSlice, *this);
+}
+
+template <class Object>
+List<Object> List<Object>::SliceCopy(int StartingIndex, int SizeOfSlice) const {
+  List<Object> result;
+  this->Slice(StartingIndex, SizeOfSlice, result);
+  return result;
+}
+
+template <class Object>
+void List<Object>::Slice(int StartingIndex, int SizeOfSlice, List<Object>& output) const {
+  // output allowed to equal this
   if (StartingIndex < 0) {
     StartingIndex = 0;
   }
@@ -1976,10 +1991,15 @@ void List<Object>::Slice(int StartingIndex, int SizeOfSlice) {
   if (SizeOfSlice + StartingIndex > this->size) {
     SizeOfSlice = this->size - StartingIndex;
   }
-  for (int i = 0; i < SizeOfSlice; i ++) {
-    this->TheObjects[i] = this->TheObjects[i + StartingIndex];
+  if (output.size < SizeOfSlice) {
+    // Implies output is not this.
+    // In case output is this we only need to resize at the end.
+    output.SetSize(SizeOfSlice);
   }
-  this->SetSize(SizeOfSlice);
+  for (int i = 0; i < SizeOfSlice; i ++) {
+    output[i] = this->TheObjects[i + StartingIndex];
+  }
+  output.SetSize(SizeOfSlice);
 }
 
 template <class Object>

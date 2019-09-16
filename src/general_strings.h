@@ -32,6 +32,7 @@ public:
   static std::string ConvertStringToHexIfNonReadable(
     const std::string& input, int lineWidthZeroForNone, bool useHTML
   );
+  static std::string ConvertByteToHex(unsigned char byte);
 
   static std::string StringTrimWhiteSpace(const std::string& inputString);
   static void SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond);

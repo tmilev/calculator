@@ -2448,8 +2448,8 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<std::string>()) {
     if (!useQuotes) {
       if (isFinal) {
-        out << "ConvertHexToString{}\""
-        << StringRoutines::ConvertStringToHexIfNonReadable(this->GetValue<std::string>(), 100, true) << "\"";
+        out
+        << StringRoutines::ConvertStringToCalculatorDisplay(this->GetValue<std::string>());
       } else {
         out << HtmlRoutines::ConvertStringToHtmlString(this->GetValue<std::string>(), false);
       }

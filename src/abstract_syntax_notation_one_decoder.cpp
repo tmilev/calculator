@@ -30,18 +30,6 @@ bool AbstractSyntaxNotationOneSubsetDecoder::hasBit8Set(unsigned char input) {
   return eighthBit != 0;
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::DecodeConstructed(
-  unsigned char startByte, int desiredLengthInBytes, JSData& output, JSData* interpretation
-) {
-  (void) startByte;
-  output.reset(JSData::token::tokenObject);
-  JSData objectContent;
-  if (!this->DecodeSequenceContent(desiredLengthInBytes, objectContent, interpretation)) {
-    return false;
-  }
-  return true;
-}
-
 AbstractSyntaxNotationOneSubsetDecoder::AbstractSyntaxNotationOneSubsetDecoder() {
   this->flagLogByteInterpretation = false;
   this->dataInterpretation = nullptr;
@@ -134,26 +122,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::PointerIsBad(JSData *interpretation
   return false;
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSetContent(
-  int desiredLengthInBytes, JSData& output, JSData* interpretation
-) {
-  output.reset(JSData::token::tokenObject);
-  if (interpretation != nullptr) {
-    interpretation->reset(JSData::token::tokenObject);
-  }
-  JSData theSet, theSetInterpretation;
-  bool success = this->DecodeSequenceContent(desiredLengthInBytes, theSet, &theSetInterpretation);
-  if (interpretation != nullptr) {
-    (*interpretation)["set"] = theSetInterpretation;
-  }
-  if (!success) {
-    return false;
-  }
-  output["set"] = theSet;
-  return true;
-}
-
-bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceContent(
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceLikeContent(
   int desiredLengthInBytes, JSData& output, JSData* interpretation
 ) {
   output.reset(JSData::token::tokenArray);
@@ -180,6 +149,9 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceContent(
         (*interpretation)["error"] = errorStream.str();
       }
       return false;
+    }
+    if (interpretation != nullptr) {
+      (*interpretation)["numberOfElements"] = numberOfDecoded;
     }
     if (lastPointer >= this->dataPointer) {
       crash << "Programming error: decode current did not increment the data pointer. " << crash;
@@ -375,30 +347,38 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
 
 std::string AbstractSyntaxNotationOneSubsetDecoder::GetType(unsigned char startByte) {
   switch (startByte) {
-  case AbstractSyntaxNotationOneSubsetDecoder::tags::sequence:
-    return "sequence";
-  case AbstractSyntaxNotationOneSubsetDecoder::tags::integer:
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::reserved0:
+    return "reserved";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02:
     return "integer";
-  case AbstractSyntaxNotationOneSubsetDecoder::tags::zero:
-    return "zero";
-  case AbstractSyntaxNotationOneSubsetDecoder::tags::bitString:
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03:
     return "bitString";
-  case AbstractSyntaxNotationOneSubsetDecoder::tags::octetString:
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::octetString0x04:
     return "octetString";
-  case AbstractSyntaxNotationOneSubsetDecoder::tags::tokenNull:
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::tokenNull0x05:
     return "null";
-  case AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier:
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06:
     return "objectID";
-  case AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String:
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c:
     return "utf8 string";
-  case AbstractSyntaxNotationOneSubsetDecoder::tags::set:
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10:
+    return "sequence";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11:
     return "set";
-  case AbstractSyntaxNotationOneSubsetDecoder::tags::printableString:
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::printableString0x13:
     return "printable string";
-  case AbstractSyntaxNotationOneSubsetDecoder::tags::IA5String:
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::IA5String0x16:
     return "IA5String";
-  case AbstractSyntaxNotationOneSubsetDecoder::tags::UTCTime:
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::UTCTime0x17:
     return "UTCTime";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::date0x1f:
+    return "date";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::timeOfDay0x20:
+    return "timeOfDay";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::dateTime0x21:
+    return "dateTime";
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::duration0x22:
+    return "duration";
   default:
     return "unknown";
   }
@@ -427,9 +407,15 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
   int dataPointerAtStart = this->dataPointer;
   bool isConstructed = this->isCostructedByte(startByte);
   if (isConstructed) {
-    startByte -= 32;
     if (interpretation != nullptr) {
       (*interpretation)["constructed"] = true;
+    }
+    if (
+      startByte != AbstractSyntaxNotationOneSubsetDecoder::tags::timeOfDay0x20 &&
+      startByte != AbstractSyntaxNotationOneSubsetDecoder::tags::dateTime0x21 &&
+      startByte != AbstractSyntaxNotationOneSubsetDecoder::tags::duration0x22
+    ) {
+      startByte -= 32;
     }
   }
   bool hasBit7 = this->hasBit7Set(startByte);
@@ -474,29 +460,29 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
   }
   std::stringstream errorStream;
   switch (startByte) {
-  case tags::zero:
-    return this->DecodeConstructed(startByte, currentLength, output, interpretation);
-  case tags::integer:
+  case tags::reserved0:
+    return this->DecodeSequenceLikeContent(currentLength, output, interpretation);
+  case tags::integer0x02:
     return this->DecodeIntegerContent(currentLength, output, interpretation);
-  case tags::octetString:
+  case tags::octetString0x04:
     return this->DecodeOctetString(currentLength, output, interpretation);
-  case tags::objectIdentifier:
+  case tags::objectIdentifier0x06:
     return this->DecodeObjectIdentifier(currentLength, output, interpretation);
-  case tags::tokenNull:
+  case tags::tokenNull0x05:
     return this->DecodeNull(currentLength, output, interpretation);
-  case tags::sequence:
-    return this->DecodeSequenceContent(currentLength, output, interpretation);
-  case tags::set:
-    return this->DecodeSetContent(currentLength, output, interpretation);
-  case tags::printableString:
+  case tags::sequence0x10:
+    return this->DecodeSequenceLikeContent(currentLength, output, interpretation);
+  case tags::set0x11:
+    return this->DecodeSequenceLikeContent(currentLength, output, interpretation);
+  case tags::printableString0x13:
     return this->DecodePrintableString(currentLength, output, interpretation);
-  case tags::utf8String:
+  case tags::utf8String0x0c:
     return this->DecodeUTF8String(currentLength, output, interpretation);
-  case tags::IA5String:
+  case tags::IA5String0x16:
     return this->DecodeIA5String(currentLength, output, interpretation);
-  case tags::UTCTime:
+  case tags::UTCTime0x17:
     return this->DecodeUTCString(currentLength, output, interpretation);
-  case tags::bitString:
+  case tags::bitString0x03:
     return this->DecodeBitString(currentLength, output, interpretation);
   default:
     if (interpretation != nullptr) {
@@ -597,7 +583,7 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
   return out.str();
 }
 
-int AbstractSyntaxNotationOneSubsetDecoder::WriterSequenceFixedLength::GetReservedBytesForLength(int length) {
+int AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::GetReservedBytesForLength(int length) {
   int result = 1;
   if (length < 128) {
     return result;
@@ -609,9 +595,10 @@ int AbstractSyntaxNotationOneSubsetDecoder::WriterSequenceFixedLength::GetReserv
   return result;
 }
 
-AbstractSyntaxNotationOneSubsetDecoder::WriterSequenceFixedLength::WriterSequenceFixedLength(
-  List<unsigned char>& output,
+AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriterObjectFixedLength(
+  unsigned char startByte,
   int expectedTotalElementByteLength,
+  List<unsigned char>& output,
   bool isConstructed
 ) {
   if (expectedTotalElementByteLength < 0) {
@@ -619,11 +606,10 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterSequenceFixedLength::WriterSequenc
   }
   this->outputPointer = &output;
   this->offset = output.size;
-  unsigned char theTag = AbstractSyntaxNotationOneSubsetDecoder::tags::sequence;
   if (isConstructed) {
-    theTag += 32;
+    startByte += 32;
   }
-  this->outputPointer->AddOnTop(theTag);
+  this->outputPointer->AddOnTop(startByte);
   this->totalByteLength = expectedTotalElementByteLength;
   this->reservedBytesForLength = this->GetReservedBytesForLength(expectedTotalElementByteLength);
   for (int i = 0; i < this->reservedBytesForLength; i ++) {
@@ -631,7 +617,7 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterSequenceFixedLength::WriterSequenc
   }
 }
 
-AbstractSyntaxNotationOneSubsetDecoder::WriterSequenceFixedLength::~WriterSequenceFixedLength() {
+AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::~WriterObjectFixedLength() {
   this->totalByteLength = this->outputPointer->size - this->offset - 1 - this->reservedBytesForLength;
   int actualBytesNeededForLength = this->GetReservedBytesForLength(this->totalByteLength);
   if (actualBytesNeededForLength > this->reservedBytesForLength) {
@@ -665,8 +651,18 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterSequenceFixedLength::~WriterSequen
   }
 }
 
+void X509Certificate::WriteUnsignedInteger(unsigned int input) {
+
+}
+
 void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequenceFixedLength writeLength(output, 2000);
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeLength(2000, output);
+  { AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeLength(2000, output);
+    output.AddOnTop(0xa0); //
+    output.AddOnTop(0x03);
+
+
+  }
 }
 
 std::string X509Certificate::ToStringTestEncode() {

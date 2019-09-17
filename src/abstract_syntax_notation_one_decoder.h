@@ -28,34 +28,52 @@ class AbstractSyntaxNotationOneSubsetDecoder {
   // 11 - private type (interpret as you wish: it's not self-explanatory and the standards do not give a proper definition).
 public:
   struct tags {
-    static const unsigned char zero = 0;
-    static const unsigned char integer = 2;
-    static const unsigned char bitString = 3;
-    static const unsigned char octetString = 4;
-    static const unsigned char tokenNull = 5;
-    static const unsigned char objectIdentifier = 6;
-    static const unsigned char utf8String = 12; // 0x0c
-    static const unsigned char sequence = 16; //0x10
-    static const unsigned char set = 17; //0x11
-    static const unsigned char printableString = 19;
-    static const unsigned char IA5String = 22;
-    static const unsigned char UTCTime = 23;
+    static const unsigned char reserved0 = 0;
+    static const unsigned char integer0x02 = 2;
+    static const unsigned char bitString0x03 = 3;
+    static const unsigned char octetString0x04 = 4;
+    static const unsigned char tokenNull0x05 = 5;
+    static const unsigned char objectIdentifier0x06 = 6;
+    static const unsigned char utf8String0x0c = 12; // 0x0c
+    static const unsigned char sequence0x10 = 16; //0x10
+    static const unsigned char set0x11 = 17; //0x11
+    static const unsigned char printableString0x13 = 19;
+    static const unsigned char IA5String0x16 = 22;
+    static const unsigned char UTCTime0x17 = 23;
+    static const unsigned char date0x1f = 31;
+    static const unsigned char timeOfDay0x20 = 32;
+    static const unsigned char dateTime0x21 = 33;
+    static const unsigned char duration0x22 = 34;
   };
   // writes fixed lenght encodings.
-  class WriterSequenceFixedLength {
+  class WriterObjectFixedLength {
   public:
     List<unsigned char>* outputPointer;
     int offset;
     int totalByteLength;
     int reservedBytesForLength;
     int GetReservedBytesForLength(int length);
-    WriterSequenceFixedLength(
+    WriterObjectFixedLength(
+      unsigned char startByte,
+      int expectedTotalElementByteLength,
       List<unsigned char>& output,
-      int expectedByteLengthOfLength,
       bool isConstructed = true
     );
-    ~WriterSequenceFixedLength();
+    ~WriterObjectFixedLength();
   };
+  class WriterSequence : WriterObjectFixedLength {
+  public:
+    WriterSequence(
+      int expectedTotalElementByteLength,
+      List<unsigned char>& output
+    ) : WriterObjectFixedLength(
+      AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10,
+      expectedTotalElementByteLength,
+      output,
+      true
+      ) {}
+  };
+
   int recursionDepthGuarD;
   int maxRecursionDepth;
   int dataPointer;
@@ -76,8 +94,7 @@ public:
   std::string GetType(unsigned char startByte);
   bool PointerIsBad(JSData* interpretation);
   bool DecodeCurrent(JSData& output, JSData *interpretation);
-  bool DecodeSequenceContent(int desiredLengthInBytes, JSData& output, JSData* interpretation);
-  bool DecodeSetContent(int desiredLengthInBytes, JSData& output, JSData* interpretation);
+  bool DecodeSequenceLikeContent(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodePrintableString(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeBitString(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeUTF8String(int desiredLengthInBytes, JSData& output, JSData* interpretation);
@@ -88,7 +105,6 @@ public:
   bool DecodeOctetString(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeObjectIdentifier(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeNull(int desiredLengthInBytes, JSData& output, JSData* interpretation);
-  bool DecodeConstructed(unsigned char startByte, int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeCurrentBuiltInType(std::stringstream* commentsOnError);
   bool DecodeLengthIncrementDataPointer(int& outputLengthNegativeOneForVariable, JSData* interpretation);
   std::string ToStringAnnotateBinary();

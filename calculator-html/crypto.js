@@ -68,18 +68,23 @@ AbstractSyntaxOne.prototype.computeAnnotation = function(
   var elementLeadingByte = document.createElement("SPAN");
   elementLeadingByte.classList.add("abstractSyntaxOneLeadingByte"); 
   elementLeadingByte.innerHTML = currentInterpretation.startByteOriginal;
+  var tooltipLeadingByte =     `Type: ${currentInterpretation.type}`;
+  tooltipLeadingByte += `<br>Leading byte: ${currentInterpretation.startByteOriginal}`;
+  tooltipLeadingByte += `<br>Leading bits: ${currentInterpretation.leadingBits}`;
+  tooltipLeadingByte += `<br>Offset: ${offset}`;
+  if (currentInterpretation.numberOfElements) {
+    tooltipLeadingByte += `<br># of sub-elements: ${currentInterpretation.numberOfElements}`;
+  }
   attachTooltip(
     elementLeadingByte, 
-    `Type: ${currentInterpretation.type}` +
-    `<br>Leading byte: ${currentInterpretation.startByteOriginal}` +
-    `<br>Leading bits: ${currentInterpretation.leadingBits}` +
-    `<br>Offset: ${offset}`
+    tooltipLeadingByte,
   );
 
   var elementLength = document.createElement("SPAN");
   elementLength.classList.add("abstractSyntaxOneLength");
   elementLength.innerHTML = currentInterpretation.lengthEncoding;
-  attachTooltip(elementLength, `Length encoding`);
+  var lengthTooltipContent = `Length: ${currentInterpretation.length}`;
+  attachTooltip(elementLength, lengthTooltipContent);
 
   var elementHeader = document.createElement("SPAN");
   elementHeader.classList.add("abstractSyntaxOneHeader");
@@ -87,11 +92,19 @@ AbstractSyntaxOne.prototype.computeAnnotation = function(
   elementHeader.appendChild(elementLength);
 
   outputDOMElements.appendChild(elementHeader);
-  var foundContent = false;
+  /**@type {Array} */
+  var subList = null;
   if (Array.isArray(currentInterpretation.value)) {
+    subList = currentInterpretation.value;
+  } else if (Array.isArray(currentInterpretation.set)) {
+    subList = currentInterpretation.set;
+  }
+  
+  var foundContent = false;
+  if (subList !== null) {
     foundContent = true;
-    for (var i = 0; i < currentInterpretation.value.length; i ++) {
-      var interpretation = currentInterpretation.value[i];
+    for (var i = 0; i < subList.length; i ++) {
+      var interpretation = subList[i];
       var domElement = document.createElement("SPAN");
       domElement.classList.add("abstractSyntaxOneElement");
       this.computeAnnotation(domElement, interpretation);
@@ -120,7 +133,7 @@ AbstractSyntaxOne.prototype.annotate = function() {
   this.positionInBinary = 0;
   this.computeAnnotation(this.DOMElementAnnotation, this.interpretation);
   var debugElement = document.createElement("SPAN");
-  debugElement.innerHTML = JSON.stringify(this.parsed);
+  // debugElement.innerHTML = JSON.stringify(this.parsed);
   this.DOMElementAnnotation.appendChild(debugElement);
 }
 

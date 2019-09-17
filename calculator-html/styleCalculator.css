@@ -1481,23 +1481,31 @@ span.abstractSyntaxOneAnnotation {
 }
 
 span.abstractSyntaxOneHeader {
-  background-color: gainsboro;
+  background-color: white;
+}
+
+span.abstractSyntaxOneHeader:hover {
+  background-color:lightgray;
 }
 
 span.abstractSyntaxOneLeadingByte {
-  background-color: gainsboro;
+  background-color: white;
 }
 
 span.abstractSyntaxOneLeadingByte:hover {
-  background-color: lightgray;
+  background-color: lavenderblush;
 }
 
 span.abstractSyntaxOneLength {
-  background-color: gainsboro;
+  background-color: whitesmoke;
 }
 
 span.abstractSyntaxOneLength:hover {
-  background-color: lightgray;
+  background-color: beige;
+}
+
+span.abstractSyntaxOneContent {
+  background-color: lightcyan;
 }
 
 span.abstractSyntaxOneElement {
@@ -1506,25 +1514,17 @@ span.abstractSyntaxOneElement {
   word-break: break-all;
 }
 
-span.abstractSyntaxOneContent {
-  background-color: lightgreen;
-}
-
 span.abstractSyntaxOneElement:hover {
   background-color:gray;
 }
 
-span.abstractSyntaxOneHeader:hover {
-  background-color:silver;
-}
-
 span.abstractSyntaxOneContent:hover {
-  background-color: lime;
+  background-color: lightgoldenrodyellow;
 }
 
 .tooltiptext {
   visibility: hidden;
-  width: 120px;
+  max-width: 800px;
   background-color: black;
   color: #fff;
   text-align: center;
@@ -1533,4 +1533,5 @@ span.abstractSyntaxOneContent:hover {
    /* Position the tooltip text - see examples below! */
   position: absolute;
   z-index: 1;
+  word-break: normal;
 }

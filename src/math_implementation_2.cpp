@@ -19,11 +19,11 @@ void LargeIntUnsigned::AssignString(const std::string& input) {
     this->operator*=(10);
     int whichDigit = input[i] - '0';
     if (whichDigit > 9 || whichDigit < 0) {
-      crash << "This is a programming error: LargeIntUnsigned::AssignString"
-      << " called on the string " << input
+      crash << "This is a programming error: LargeIntUnsigned::AssignString "
+      << "called on the string " << input
       << " which does not consist entirely of digits. "
       << "Please note that LargeIntUnsigned::AssignString is a no-fail function, intended for "
-      << " internal use only. If you want to parse arbitrary unsafe "
+      << "internal use only. If you want to parse arbitrary unsafe "
       << "expressions coming from the user, please use the big gun (a.k.a. Calculator). "
       << crash;
     }

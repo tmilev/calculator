@@ -5,7 +5,13 @@
 #include "json.h"
 #include "math_extra_algebraic_numbers.h"
 #include <iomanip>
-#include <sys/random.h>
+
+// sys/random.h is missing from older distros/kernels.
+// #include <sys/random.h>
+// Used in place of sys/random.h:
+#include <syscall.h> // <- SYS_getrandom defined here.
+#include <linux/random.h> // <- GRND_NONBLOCK defined here.
+#include <unistd.h> // <- syycall defined here.
 
 extern ProjectInformationInstance projectInfoCryptoFile1;
 ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA- 1 and base64 implementation.");
@@ -19,7 +25,11 @@ void Crypto::GetRandomBytesSecure(List<unsigned char>& output, int numBytes) {
   }
   // Must not block or return fewer than requested bytes in Linux according to the
   // documentation of getrandom.
-  int generatedBytes =static_cast<int>(getrandom(output.TheObjects, static_cast<unsigned>(output.size), 0));
+  int generatedBytes = static_cast<int>(
+    syscall(SYS_getrandom, output.TheObjects, static_cast<unsigned>(output.size), GRND_NONBLOCK)
+    // Does not compile on older linux systems:
+    // getrandom(output.TheObjects, static_cast<unsigned>(output.size), 0)
+  );
   if (generatedBytes != output.size) {
     crash << "Failed to get the necessary number of random bytes. " << crash;
   }

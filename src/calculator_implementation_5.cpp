@@ -1794,7 +1794,7 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(
     return output.AssignValue(out.str(), theCommands);
   }
   out.precision(7);
-  bool hasDoubleValue = false;;
+  bool hasDoubleValue = false;
   double theDoubleValue = - 1;
   if (input.IsOfType<Rational>()) {
     hasDoubleValue = true;

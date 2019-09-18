@@ -70,11 +70,39 @@ public:
 //  X509_CERT_AUX *aux;
 //};
 
+class TBSCertificateField {
+private:
+  // the map below records samples for each known objectId
+  static MapList<std::string, TBSCertificateField, MathRoutines::HashString> objectIdSamples;
+public:
+  std::string name;
+  unsigned char contentTag;
+  List<unsigned char> content;
+  List<unsigned char> objectId;
+  void MakeLookupId(const std::string& inputName, List<unsigned char>& inputContent);
+  void Make(List<unsigned char>& inputObjectId, List<unsigned char>& inputContent);
+  // static initialization order fiasco guard:
+  static MapList<std::string, TBSCertificateField, MathRoutines::HashString>& GetSamplesNonThreadSafe();
+  static void initializeNonThreadSafe();
+};
+
+class TBSCertificateInfo {
+public:
+  TBSCertificateField countryName;
+  TBSCertificateField stateOrProviceName;
+  TBSCertificateField localityName;
+  TBSCertificateField organizationName;
+  TBSCertificateField organizationUnitName;
+  TBSCertificateField commonName;
+  TBSCertificateField emailAddress;
+};
+
 class X509Certificate {
 public:
   int version;
   LargeIntUnsigned serialNumber;
   List<unsigned char> signatureAlgorithmId;
+  TBSCertificateInfo information;
   std::string issuerName;
   std::string validityNotBefore;
   std::string validityNotAfter;
@@ -104,6 +132,8 @@ public:
   void WriteBytesASN1(List<unsigned char>& output);
   void WriteBytesTBSCertificate(List<unsigned char>& output);
   void WriteBytesAlgorithmIdentifier(List<unsigned char>& output);
+  void WriteBytesTBSCertificateInformation(List<unsigned char>& output);
+  void WriteBytesTBSCertificateField(TBSCertificateField& input, List<unsigned char>& output);
   void WriteVersion(List<unsigned char>& output);
 };
 

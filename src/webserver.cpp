@@ -148,7 +148,7 @@ void WebServer::initSSL() {
     return;
   }
   //////////////////////////////////////////////////////////////////////////
-  this->theTLS.initialize(true);
+  this->theTLS.initializeNonThreadSafeOnFirstCall(true);
 }
 
 bool WebServer::SSLServerSideHandShake(std::stringstream* commentsOnFailure) {
@@ -4399,7 +4399,7 @@ int WebServer::Run() {
   //theGlobalVariables.WriteSourceCodeFilesJS();
   theGlobalVariables.initModifiableDatabaseFields();
   HtmlRoutines::LoadStrings();
-  this->theTLS.initialize(true);
+  this->theTLS.initializeNonThreadSafeOnFirstCall(true);
   theParser->flagShowCalculatorExamples = false;
   if (!this->initPrepareWebServerALL()) {
     return 1;

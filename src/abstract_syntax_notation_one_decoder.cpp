@@ -712,6 +712,42 @@ void X509Certificate::WriteBytesTBSCertificate(List<unsigned char>& output) {
   AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(2, output);
   AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(this->serialNumber, output);
   this->WriteBytesAlgorithmIdentifier(output);
+  this->WriteBytesTBSCertificateInformation(output);
+
+}
+
+void X509Certificate::WriteBytesTBSCertificateField(TBSCertificateField& input, List<unsigned char>& output) {
+  if (input.name == "") {
+    // field is empty, do nothing
+    return;
+  }
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSet writeSet(100, output);
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeSequence(100, output);
+  AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(input.objectId, output);
+  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength contentWriter(input.contentTag, input.content.size, output, false);
+  output.AddListOnTop(input.content);
+}
+
+MapList<std::string, TBSCertificateField, MathRoutines::HashString>& TBSCertificateField::GetSamplesNonThreadSafe() {
+  static MapList<std::string, TBSCertificateField, MathRoutines::HashString> container;
+  if (container.size() == 0) {
+
+  }
+}
+
+void TBSCertificateField::initializeNonThreadSafe() {
+  TBSCertificateField::GetSamplesNonThreadSafe();
+}
+
+void X509Certificate::WriteBytesTBSCertificateInformation(List<unsigned char> &output) {
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTBSCertificateContent(200, output);
+  this->WriteBytesTBSCertificateField(this->information.countryName, output);
+  this->WriteBytesTBSCertificateField(this->information.stateOrProviceName, output);
+  this->WriteBytesTBSCertificateField(this->information.localityName, output);
+  this->WriteBytesTBSCertificateField(this->information.organizationName, output);
+  this->WriteBytesTBSCertificateField(this->information.organizationUnitName, output);
+  this->WriteBytesTBSCertificateField(this->information.commonName, output);
+  this->WriteBytesTBSCertificateField(this->information.emailAddress, output);
 }
 
 void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
@@ -919,14 +955,14 @@ bool X509Certificate::LoadFromASNEncoded(
   if (!this->sourceJSON.HasCompositeKeyOfType(
     "[0][1]", this->serialNumber, commentsOnFailure
   )) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read serial number. JSON decoded: "
       << this->sourceJSON.ToString(false, true, true, true);
     }
     return false;
   }
   if (!this->sourceJSON.HasCompositeKeyOfType("[0][2][0].objectIdentifierBytes", this->signatureAlgorithmId, commentsOnFailure)) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to get signature algorithm id. ";
     }
     return false;

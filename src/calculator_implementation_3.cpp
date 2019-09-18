@@ -120,7 +120,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   if (!highestWeightFundCoords.SumCoords().IsSmallInteger()) {
     return false;
   }
-  int theTopHeightSimpleCoords = (int) highestWeightSimpleCoords.SumCoords().GetDoubleValue() + 1;
+  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.SumCoords().GetDoubleValue()) + 1;
   if (theTopHeightSimpleCoords < 0) {
     theTopHeightSimpleCoords = 0;
   }
@@ -196,7 +196,7 @@ bool Calculator::innerAnimateLittelmannPaths(Calculator& theCommands, const Expr
   }
   Vector<Rational> theWeight;
   Expression tempContext(theCommands);
-  if (!theCommands.GetVectoR<Rational>(input[2], theWeight, &tempContext, theSSowner->GetRank(), 0)) {
+  if (!theCommands.GetVectoR<Rational>(input[2], theWeight, &tempContext, theSSowner->GetRank(), nullptr)) {
     return output.MakeError("Failed to convert the argument of the function to a highest weight vector", theCommands);
   }
   Vector<Rational> theWeightInSimpleCoords;
@@ -210,7 +210,7 @@ bool Calculator::innerAnimateLittelmannPaths(Calculator& theCommands, const Expr
 
 bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, Expression& output) {
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  SemisimpleLieAlgebra* theSSalg = 0;
+  SemisimpleLieAlgebra* theSSalg = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, input, theSSalg
   )) {
@@ -271,7 +271,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
   std::stringstream out;
   List<LittelmannPath> theOrbit;
   List<List<int> > theGens;
-  if (!this->GenerateOrbit(theOrbit, theGens, 1000, 0)) {
+  if (!this->GenerateOrbit(theOrbit, theGens, 1000, nullptr)) {
     out  << "<b>Not all paths were genenerated, only the first " << theOrbit.size << "</b>";
   }
   Vectors<double> coxPlane;
@@ -370,7 +370,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg");
   if (this->theChaR.size() != 1) {
-    if (comments != 0) {
+    if (comments != nullptr) {
       std::stringstream out;
       out << "I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
       out << " Instead I got the character " << this->theChaR.ToString()
@@ -381,7 +381,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   }
   std::string tempS;
   std::stringstream out;
-  if (comments != 0) {
+  if (comments != nullptr) {
     out << tempS;
   }
   out << "<br>Parabolic selection: " << LeviInSmall.ToString();
@@ -397,7 +397,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   eigenSpacesPerSimpleGenerator.SetSize(InvertedLeviInSmall.CardinalitySelection);
   Vectors<coefficient> tempSpace1, tempSpace2;
   MemorySaving<Vectors<coefficient> > tempEigenVects;
-  Vectors<coefficient>& theFinalEigenSpace = (outputEigenSpace == 0) ? tempEigenVects.GetElement() : *outputEigenSpace;
+  Vectors<coefficient>& theFinalEigenSpace = (outputEigenSpace == nullptr) ? tempEigenVects.GetElement() : *outputEigenSpace;
   theFinalEigenSpace.SetSize(0);
   if (InvertedLeviInSmall.CardinalitySelection == 0) {
     theFinalEigenSpace.MakeEiBasis(this->GetDim());
@@ -446,7 +446,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   hwFundCoordsNilPart = this->theHWFundamentalCoordsBaseField;
   hwFundCoordsNilPart -= this->theHWFDpartFundamentalCoordS;
   ElementUniversalEnveloping<coefficient> currentElt, tempElt;
-  if (outputEigenVectors != 0) {
+  if (outputEigenVectors != nullptr) {
     outputEigenVectors->SetSize(0);
   }
   for (int j = 0; j < theFinalEigenSpace.size; j ++) {
@@ -471,10 +471,10 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
     if (currentElt.size() > 1) {
       out << "(";
     }
-    if (outputEigenVectors != 0) {
+    if (outputEigenVectors != nullptr) {
       outputEigenVectors->AddOnTop(currentElt);
     }
-    if (outputWeightsFundCoords != 0) {
+    if (outputWeightsFundCoords != nullptr) {
       outputWeightsFundCoords->AddOnTop(currentWeight);
     }
     out << currentElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
@@ -490,7 +490,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   out << "<br>Your ready for LaTeX consumption text follows.<br>";
   out << readyForLatexComsumption.str();
   theReport.Report("SplitFDpartOverFKLeviRedSubalg done!");
-  if (comments != 0) {
+  if (comments != nullptr) {
     *comments << out.str();
   }
 }
@@ -788,7 +788,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
       theg2b3data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theHWs[k]),
       &theg2b3data.theHmm.theRange()
     );
-    theCharacter.SplitCharOverRedSubalg(0, outputChar, theg2b3data);
+    theCharacter.SplitCharOverRedSubalg(nullptr, outputChar, theg2b3data);
     theg2b3data.theFormat.fundamentalWeightLetter = "\\omega";
     out << "<tr><td> " << theCharacter.ToString(&theg2b3data.theFormat) << "</td> ";
     Vector<RationalFunctionOld> simpleCoordinates;
@@ -878,7 +878,7 @@ bool ElementSumGeneralizedVermas<coefficient>::ExtractElementUE(
   ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebra& theOwner
 ) {
   output.MakeZero(theOwner);
-  ModuleSSalgebra<coefficient>* theModPtr = 0;
+  ModuleSSalgebra<coefficient>* theModPtr = nullptr;
   MonomialUniversalEnveloping<coefficient> tempMon;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialGeneralizedVerma<coefficient>& currentMon = (*this)[i];
@@ -899,7 +899,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   MacroRegisterFunctionWithName("Calculator::innerSplitFDpartB3overG2inner");
   ModuleSSalgebra<RationalFunctionOld> theModCopy;
   theModCopy.MakeFromHW(
-    theG2B3Data.theHmm.theRange(), theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, 1, 0, 0, false
+    theG2B3Data.theHmm.theRange(), theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, 1, 0, nullptr, false
   );
   theG2B3Data.resetOutputData();
   theG2B3Data.initAssumingParSelAndHmmInitted();
@@ -924,7 +924,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
     &theG2B3Data.outputEigenWords,
     &theG2B3Data.outputWeightsFundCoordS,
     &theG2B3Data.leviEigenSpace,
-    0
+    nullptr
   );
   theCommands << "<br>Time needed to make B3 irrep: " << theGlobalVariables.GetElapsedSeconds() - timeAtStart;
   theG2B3Data.g2Weights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
@@ -1016,7 +1016,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
     theG2B3Data.additionalMultipliers[k] = currentTensorEltEigen.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
     currentTensorEltEigen.ExtractElementUE(currentUEelt, *theMod.owner);
     currentUEelt.HWTAAbilinearForm(
-      currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, 1, 0, 0
+      currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, 1, 0, nullptr
     );
   }
   return output.AssignValue(out.str(), theCommands);
@@ -1027,7 +1027,6 @@ bool Calculator::innerJacobiSymbol(Calculator& theCommands, const Expression& in
   crash << "Function not implemented yet." << crash;
   (void) theCommands;//avoid unused parameter warning, portable
   (void) output;
-  return false;
   if (input.children.size != 3) {
     return false;
   }
@@ -1226,7 +1225,8 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       hwPath.GenerateOrbit(
         tempList,
         theStrings,
-        MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).NumShort), 0
+        MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).NumShort),
+        nullptr
       );
       reportStream << "\nPath orbit size = " << theStrings.size
       << " generated in " << theGlobalVariables.GetElapsedSeconds() << " seconds. ";
@@ -1337,7 +1337,9 @@ bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, E
   Vectors<Rational> waypoints;
   waypoints.SetSize(input.children.size - 2);
   for (int i = 2; i < input.children.size; i ++) {
-    if (!theCommands.GetVectoR<Rational>(input[i], waypoints[i - 2], 0, ownerSSalgebra.GetRank(), 0)) {
+    if (!theCommands.GetVectoR<Rational>(
+      input[i], waypoints[i - 2], nullptr, ownerSSalgebra.GetRank(), nullptr
+    )) {
       return output.MakeError("Failed to extract waypoints", theCommands);
     }
   }
@@ -1466,7 +1468,7 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
       if (!tempLI.value.FactorReturnFalseIfFactorizationIncomplete(
         thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i], 0, comments
       )) {
-        if (comments != 0) {
+        if (comments != nullptr) {
           *comments << "<br>Aborting polynomial factorization: failed to factor the integer "
           << theValuesAtPoints[i].ToString() << " (most probably the integer is too large).";
         }
@@ -1533,7 +1535,7 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
       if (!isGood) {
         continue;
       }
-      output.Interpolate((Vector<Rational>) PointsOfInterpolationLeft, (Vector<Rational>) theValuesAtPointsLeft);
+      output.Interpolate(Vector<Rational>(PointsOfInterpolationLeft), Vector<Rational>(theValuesAtPointsLeft));
       this->DivideBy(output, quotient, remainder);
       if (!remainder.IsEqualToZero()) {
         continue;
@@ -1605,7 +1607,7 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
 bool Calculator::innerInterpolatePoly(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerInterpolatePoly");
   Matrix<Rational> pointsOfInterpoly;
-  if (!theCommands.GetMatriXFromArguments(input, pointsOfInterpoly, 0, 2)) {
+  if (!theCommands.GetMatriXFromArguments(input, pointsOfInterpoly, nullptr, 2)) {
     return theCommands << "<hr>Failed to extract points of interpolation from " << input.ToString();
   }
   Polynomial<Rational> interPoly;
@@ -1633,7 +1635,7 @@ bool Calculator::innerPrintZnEnumeration(Calculator& theCommands, const Expressi
   SelectionPositiveIntegers theSel;
   theSel.init(dimension);
   std::stringstream out2, out;
-  LargeIntUnsigned gradeLarge = (unsigned) grade;
+  LargeIntUnsigned gradeLarge = static_cast<unsigned>(grade);
   int counter = 0;
   for (theSel.SetFirstInGradeLevel(gradeLarge); theSel.GetGrading() == gradeLarge; theSel.IncrementReturnFalseIfPastLast()) {
     out2 << theSel.ToString() << "<br>";
@@ -2006,7 +2008,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
     allWentGreat = false;
   }
   if (allWentGreat) {
-    out << "<span style =\"color:#0000FF\">All " << commandStrings.size
+    out << "<span style =\"color:blue\">All " << commandStrings.size
     << " results coincide with previously recorded values.</span> ";
   }
   out << "<br>The command for updating the test file is "

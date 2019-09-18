@@ -185,13 +185,13 @@ void WebServerMonitor::Restart() {
 WebCrawler::WebCrawler() {
   this->flagInitialized = false;
   this->theSocket = - 1;
-  this->serverOtherSide = 0;
-  this->serverInfo = 0;
+  this->serverOtherSide = nullptr;
+  this->serverInfo = nullptr;
   this->lastNumBytesRead = 0;
 }
 
 void WebCrawler::FreeAddressInfo() {
-  if (this->serverInfo != 0) {
+  if (this->serverInfo != nullptr) {
     freeaddrinfo(this->serverInfo);
   }
   this->serverInfo = 0;
@@ -335,7 +335,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
   (void) commentsOnFailure;
   (void) commentsGeneral;
   this->theTSL.openSSLData.CheckCanInitializeToClient();
-  this->theTSL.initialize(false);
+  this->theTSL.initializeNonThreadSafeOnFirstCall(false);
 #ifdef MACRO_use_open_ssl
   //logOpenSSL << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
   this->lastTransaction = "";
@@ -912,13 +912,13 @@ bool WebCrawler::VerifyRecaptcha(
     }
     return false;
   } else {
-    if (commentsGeneralNONsensitive != 0) {
+    if (commentsGeneralNONsensitive != nullptr) {
       *commentsGeneralNONsensitive
       << "<br><b style =\"color:green\">"
       << "Your recaptcha answer appears to be valid. "
       << "</b>\n<br>\n";
     }
-    if (commentsGeneralSensitive != 0) {
+    if (commentsGeneralSensitive != nullptr) {
       *commentsGeneralSensitive
       << "The response from google was: "
       << response;

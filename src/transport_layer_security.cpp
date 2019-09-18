@@ -52,11 +52,16 @@ TransportLayerSecurity::~TransportLayerSecurity() {
 
 bool TransportLayerSecurity::flagBuiltInTLSAvailable = false;
 
-void TransportLayerSecurity::initialize(bool IamServer) {
+void TransportLayerSecurity::initializeNonThreadSafePartsCommon() {
+  TBSCertificateField::initializeNonThreadSafe();
+}
+
+void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool IamServer) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::initialize");
   if (this->flagInitialized) {
     return;
   }
+  this->initializeNonThreadSafePartsCommon();
   if (IamServer) {
     this->openSSLData.initSSLServer();
     if (this->flagBuiltInTLSAvailable) {
@@ -1593,7 +1598,7 @@ bool TransportLayerSecurity::HandShakeIamClientNoSocketCleanup(
   MacroRegisterFunctionWithName("WebServer::HandShakeIamClientNoSocketCleanup");
   this->openSSLData.CheckCanInitializeToClient();
   this->openSSLData.CheckCanInitializeToClient();
-  this->initialize(false);
+  this->initializeNonThreadSafeOnFirstCall(false);
   this->openSSLData.CheckCanInitializeToClient();
   return this->openSSLData.HandShakeIamClientNoSocketCleanup(inputSocketID, commentsOnFailure, commentsGeneral);
 }

@@ -288,7 +288,11 @@ public:
   static const std::string signedFileCertificate1;
   static const std::string signedFileCertificate3;
   static const std::string signedFileKey;
-  void initialize(bool IamServer);
+  // Once the first function call returns, the function becomes thread-safe.
+  static void initializeNonThreadSafePartsCommon();
+  // First call of function (with any member function) is not thread safe (must be called in a single thread).
+  // Once the first function call returns, the function becomes thread-safe for all members.
+  void initializeNonThreadSafeOnFirstCall(bool IamServer);
   int SSLRead(std::string* outputError,
     std::stringstream* commentsGeneral,
     bool includeNoErrorInComments

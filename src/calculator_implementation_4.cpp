@@ -13,6 +13,7 @@
 #include <cfloat>
 
 extern logger logWorker;
+extern ProjectInformationInstance ProjectInfoVpf6cpp;
 ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Calculator parser, implementation. ");
 
 Calculator::Calculator() {
@@ -41,9 +42,9 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
   }
   std::string baseFolder;
   std::string fileNameWithPathPhysical;
-  FileOperations::GetPhysicalFileNameFromVirtual("output/", baseFolder, false, false, 0);
+  FileOperations::GetPhysicalFileNameFromVirtual("output/", baseFolder, false, false, nullptr);
   FileOperations::GetPhysicalFileNameFromVirtual(
-    "output/" + fileName.str(), fileNameWithPathPhysical, false, false, 0
+    "output/" + fileName.str(), fileNameWithPathPhysical, false, false, nullptr
   );
   theFile << fileContent;
   theFile.flush();
@@ -64,7 +65,7 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
   << theGlobalVariables.DisplayPathOutputFolder
   << fileName.str() << ".tex\">" << theGlobalVariables.DisplayPathOutputFolder
   << fileName.str() << ".tex</a>";
-  if (outputFileNameNoExtension != 0) {
+  if (outputFileNameNoExtension != nullptr) {
     *outputFileNameNoExtension = theGlobalVariables.DisplayPathOutputFolder + fileName.str();
   }
   this->numOutputFileS ++;
@@ -161,7 +162,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra::GetGenericUnMinusElt");
   List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
-  this->GetElementsNilradical(eltsNilrad, true, 0, useNilWeight, ascending);
+  this->GetElementsNilradical(eltsNilrad, true, nullptr, useNilWeight, ascending);
   Polynomial<Rational> tempRF;
   output.MakeZero(*this->owner);
   MonomialUniversalEnveloping<Polynomial<Rational> > tempMon;
@@ -289,7 +290,7 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(
   List<quasiDiffOp<coefficient> >& theElts, FormatExpressions* theFormat
 ) {
   MacroRegisterFunctionWithName("quasiDiffOp<coefficient>::GenerateBasisLieAlgebra");
-  ProgressReport theReport (theGlobalVariables);
+  ProgressReport theReport;
   HashedList<quasiDiffMon> bufferMons;
   List< MonomialCollection<quasiDiffMon, coefficient> > theEltsConverted;
   theEltsConverted = theElts;
@@ -362,7 +363,7 @@ void quasiDiffOp<coefficient>::operator*=(const quasiDiffOp<coefficient>& stands
 template <class coefficient>
 std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat) const {
   bool combineWeylPart = true;
-  if (theFormat != 0) {
+  if (theFormat != nullptr) {
     combineWeylPart = theFormat->flagQuasiDiffOpCombineWeylPart;
   }
   if (!combineWeylPart) {
@@ -537,7 +538,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   theUEformat.chevalleyGgeneratorLetter = "g";
   theUEformat.chevalleyHgeneratorLetter = "h";
   hwContext.ContextGetFormatExpressions(theUEformat);
-  theUEformat.polyDefaultLetter = exponentVariableLetter == 0  ? "a" : *exponentVariableLetter;
+  theUEformat.polyDefaultLetter = exponentVariableLetter == nullptr  ? "a" : *exponentVariableLetter;
   theUEformat.MaxLineLength = 178;
   theUEformat.NumAmpersandsPerNewLineForLaTeX = 2;
   theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 2;
@@ -582,11 +583,11 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   for (int i = 0; i < theHws.size; i ++) {
     ModuleSSalgebra<RationalFunctionOld>& theMod = theMods[i];
     tempV = theHws[i];
-    if (!theMod.MakeFromHW(theSSalgebra, tempV, selInducing, 1, 0, 0, true)) {
+    if (!theMod.MakeFromHW(theSSalgebra, tempV, selInducing, 1, 0, nullptr, true)) {
       return output.MakeError("Failed to create module.", theCommands);
     }
     if (i == 0) {
-      theMod.GetElementsNilradical(elementsNegativeNilrad, true, 0, useNilWeight, ascending);
+      theMod.GetElementsNilradical(elementsNegativeNilrad, true, nullptr, useNilWeight, ascending);
       Polynomial<Rational> Pone, Pzero;
       Pone.MakeOne(elementsNegativeNilrad.size + theMod.GetMinNumVars());
       Pzero.MakeZero();
@@ -597,8 +598,8 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       for (int k = 0; k < numStartingVars; k ++) {
         theWeylFormat.weylAlgebraLetters[k] = "error";
       }
-      std::string theFinalXletter = (xLetter == 0) ? "x": *xLetter;
-      std::string theFinalPartialLetter = (partialLetter == 0) ? "\\partial" : *partialLetter;
+      std::string theFinalXletter = (xLetter == nullptr) ? "x": *xLetter;
+      std::string theFinalPartialLetter = (partialLetter == nullptr) ? "\\partial" : *partialLetter;
       for (int k = numStartingVars; k < theUEformat.polyAlphabeT.size; k ++) {
         std::stringstream tmpStream, tempstream2, tempstream3, tempStream4;
         tmpStream << theUEformat.polyDefaultLetter << "_{" << k-hwContext.ContextGetNumContextVariables() + 1 << "}";
@@ -1017,13 +1018,13 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   if (!input.IsListNElements(3)) {
     return false;
   }
-  SemisimpleLieAlgebra* theSSalg = 0;
+  SemisimpleLieAlgebra* theSSalg = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  if (theSSalg == 0) {
+  if (theSSalg == nullptr) {
     crash << "This is a programming error: called conversion function successfully, "
     << "but the output is a zero pointer to a semisimple Lie algebra. "
     << crash;
@@ -1049,7 +1050,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
 bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerKLcoeffs");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  SemisimpleLieAlgebra* theSSalgebra = 0;
+  SemisimpleLieAlgebra* theSSalgebra = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, input, theSSalgebra
   )) {
@@ -1082,7 +1083,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
 
 bool Calculator::innerWriteSSLieAlgebraToHD(Calculator& theCommands, const Expression& input, Expression& output) {
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-    return output.MakeError((std::string) "Caching structure constants to HD available to logged-in admins only. ", theCommands);
+    return output.MakeError(std::string("Caching structure constants to HD available to logged-in admins only. "), theCommands);
   }
   return Calculator::innerWriteToHDOrPrintSSLieAlgebra(theCommands, input, output, true, true);
 }
@@ -1092,7 +1093,7 @@ bool Calculator::innerWriteToHDOrPrintSSLieAlgebra(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintSSLieAlgebra");
 //  double startTimeDebug= theGlobalVariables.GetElapsedSeconds();
-  SemisimpleLieAlgebra *tempSSpointer = 0;
+  SemisimpleLieAlgebra *tempSSpointer = nullptr;
   input.CheckInitialization();
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
     CalculatorConversions::innerSSLieAlgebra, input, tempSSpointer
@@ -1136,7 +1137,7 @@ bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::Hash
   bool result = false;
   InputBox tempBox;
   if (this->IsOfType<InputBox>(&tempBox)) {
-    if (boxNames == 0) {
+    if (boxNames == nullptr) {
       return true;
     } else {
       result = true;
@@ -1145,7 +1146,7 @@ bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::Hash
   }
   for (int i = 0; i < this->size(); i ++) {
     if ((*this)[i].HasInputBoxVariables(boxNames)) {
-      if (boxNames == 0) {
+      if (boxNames == nullptr) {
         return true;
       } else {
         result = true;
@@ -1318,8 +1319,8 @@ bool Calculator::outerCombineFractions(Calculator& theCommands, const Expression
   if (!input.StartsWith(theCommands.opPlus(), 3)) {
     return false;
   }
-  const Expression* quotientE = 0;
-  const Expression* summandE = 0;
+  const Expression* quotientE = nullptr;
+  const Expression* summandE = nullptr;
   if (input[1].StartsWith(theCommands.opDivide(), 3)) {
     quotientE = &input[1];
     summandE = &input[2];
@@ -2057,7 +2058,7 @@ bool Expression::IsEqualToMathematically(const Expression& other) const {
   }
   double leftD = - 1, rightD = - 1;
   if (this->EvaluatesToDouble(&leftD) && other.EvaluatesToDouble(&rightD)) {
-    return leftD == rightD;
+    return (leftD - rightD == 0.0);
   }
   Expression differenceE = *this;
   differenceE -= other;
@@ -2095,7 +2096,7 @@ SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution() co
   Expression myContext = this->GetContext();
   int indexSSalg = myContext.ContextGetIndexAmbientSSalg();
   if (indexSSalg == - 1) {
-    return 0;
+    return nullptr;
   }
   return &this->owner->theObjectContainer.theSSLieAlgebras.theValues[indexSSalg];
 }
@@ -2160,7 +2161,7 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes(
     indexOp,
     this->FunctionHandlers[indexOp].size,
     innerHandler,
-    0,
+    nullptr,
     opDescription,
     opExample,
     true,
@@ -2249,7 +2250,7 @@ void Calculator::AddOperationHandler(
     indexOp,
     this->FunctionHandlers[indexOp].size,
     handler,
-    0,
+    nullptr,
     opDescription,
     opExample,
     isInner,
@@ -2299,7 +2300,7 @@ void Calculator::AddOperationComposite(
     theIndex,
     this->operationsCompositeHandlers[theIndex].size,
     handler,
-    0,
+    nullptr,
     opDescription,
     opExample,
     isInner,
@@ -2326,7 +2327,7 @@ std::string Calculator::ElementToStringNonBoundVars() {
     if (this->FunctionHandlers[i].size > 0) {
       out << " [handled by: ";
       for (int j = 0; j < this->FunctionHandlers[i].size; j ++) {
-        out << std::hex << (unsigned long) this->FunctionHandlers[i][j].theFunction;
+        out << std::hex << reinterpret_cast<unsigned long>(this->FunctionHandlers[i][j].theFunction);
         if (this->FunctionHandlers[i][j].flagIsInner) {
           out << "(inner)";
         } else {
@@ -2443,7 +2444,7 @@ JSData Function::ToJSON() const {
     result["additionalIdentifier"] = this->additionalIdentifier;
   }
   std::stringstream functionAddress;
-  functionAddress << std::hex << (unsigned long) this->theFunction;
+  functionAddress << std::hex << reinterpret_cast<unsigned long>(this->theFunction);
   result["memoryAddress"] = functionAddress.str();
   if (this->flagIsInner) {
     result["inner"] = "true";
@@ -2477,7 +2478,7 @@ std::string Function::ToStringFull() const {
     // use of unsigned long is correct on i386 and amd64
     // uintptr_t is only available in c++ 0x
     // Please fix if the following code is not portable:
-    out << "Function memory address: " << std::hex << (unsigned long) this->theFunction << ". ";
+    out << "Function memory address: " << std::hex << reinterpret_cast<unsigned long>(this->theFunction) << ". ";
     if (!this->flagIsInner) {
       out << "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. ";
     }
@@ -2592,21 +2593,21 @@ std::string Calculator::ToStringPerformance() {
   out << "<br>Computation time: "
   << computationMilliseconds
   << " ms (~"
-  << (((double) computationMilliseconds) / 1000)
+  << ((static_cast<double>(computationMilliseconds)) / 1000)
   << " s). ";
   std::stringstream moreDetails;
   moreDetails << "<br>Max computation time soft: "
-  << ((double)(theGlobalVariables.millisecondsMaxComputation / 2000))
+  << (static_cast<double>(theGlobalVariables.millisecondsMaxComputation) / 2000)
   << " s [calculator error when exceeded]. ";
   moreDetails << "<br>Max computation time hard: "
-  << (((double) theGlobalVariables.millisecondsMaxComputation) / 1000) << " s [worker crash when exceeded]. ";
+  << (static_cast<double>(theGlobalVariables.millisecondsMaxComputation) / 1000) << " s [worker crash when exceeded]. ";
   moreDetails << "<br>Total process request time: "
   << requestMilliseconds << " ms (~"
-  << (((double) requestMilliseconds) / 1000)
+  << (static_cast<double> (requestMilliseconds) / 1000)
   << " s). ";
   moreDetails << "<br>Time waiting on open connection: "
   << waitingMilliseconds << " ms (~"
-  << (((double) waitingMilliseconds) / 1000)
+  << ( static_cast<double>(waitingMilliseconds) / 1000)
   << " s).";
   moreDetails << "<br>Total expressions: " << this->theExpressionContainer.size << ". ";
   moreDetails << "<br>Total evaluations: " << this->NumCallsEvaluateExpression << ". ";
@@ -2617,42 +2618,42 @@ std::string Calculator::ToStringPerformance() {
   }
   #ifdef MacroIncrementCounter
   moreDetails << "<br>Lists created: " << "computation: "
-  << (ParallelComputing::NumListsCreated - this->NumListsStart)
+  << (ParallelComputing::NumListsCreated - static_cast<unsigned>(this->NumListsStart))
   << ", total: " << ParallelComputing::NumListsCreated;
   moreDetails << "<br> # List resizes: computation: "
-  << (ParallelComputing::NumListResizesTotal - this->NumListResizesStart)
+  << (ParallelComputing::NumListResizesTotal - static_cast<unsigned>(this->NumListResizesStart))
   << ", total: " << ParallelComputing::NumListResizesTotal
-  << "<br> # hash resizing: computation: " << (ParallelComputing::NumHashResizes - this->NumHashResizesStart)
+  << "<br> # hash resizing: computation: " << (ParallelComputing::NumHashResizes - static_cast<unsigned>(this->NumHashResizesStart))
   << ", total: " << ParallelComputing::NumHashResizes;
   if (Rational::TotalSmallAdditions > 0) {
     moreDetails << "<br>Small rational additions: computation: "
-    << Rational::TotalSmallAdditions - this->NumSmallAdditionsStart
+    << Rational::TotalSmallAdditions - static_cast<unsigned long long>(this->NumSmallAdditionsStart)
     << ", total: " << Rational::TotalSmallAdditions;
   }
   if (Rational::TotalSmallMultiplications > 0) {
     moreDetails << "<br>Small rational multiplications: computation: "
-    << Rational::TotalSmallMultiplications - this->NumSmallMultiplicationsStart
+    << Rational::TotalSmallMultiplications - static_cast<unsigned long long>(this->NumSmallMultiplicationsStart)
     << ", total: " << Rational::TotalSmallMultiplications;
   }
   if (Rational::TotalSmallGCDcalls > 0) {
     moreDetails << "<br>Small gcd calls: computation: "
-    << Rational::TotalSmallGCDcalls - this->NumSmallGCDcallsStart
+    << Rational::TotalSmallGCDcalls - static_cast<unsigned long long>(this->NumSmallGCDcallsStart)
     << ", total: " << Rational::TotalSmallGCDcalls;
   }
   if (Rational::TotalLargeAdditions > 0) {
     moreDetails << "<br>Large integer additions: "
-    << Rational::TotalLargeAdditions - this->NumLargeAdditionsStart
+    << Rational::TotalLargeAdditions - static_cast<unsigned long long>(this->NumLargeAdditionsStart)
     << ", total: "
     << Rational::TotalLargeAdditions;
   }
   if (Rational::TotalLargeMultiplications > 0) {
     moreDetails << "<br>Large integer multiplications: computation: "
-    << Rational::TotalLargeMultiplications - this->NumLargeMultiplicationsStart
+    << Rational::TotalLargeMultiplications - static_cast<unsigned long long>(this->NumLargeMultiplicationsStart)
     << ", total: " << Rational::TotalLargeMultiplications;
   }
   if (Rational::TotalLargeGCDcalls > 0) {
     moreDetails << "<br>Large gcd calls: "
-    << Rational::TotalLargeGCDcalls - this->NumLargeGCDcallsStart
+    << Rational::TotalLargeGCDcalls - static_cast<unsigned long long>(this->NumLargeGCDcallsStart)
     << ", total: " << Rational::TotalLargeGCDcalls;
   }
   out << "<br>" << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(moreDetails.str(), "More details");
@@ -2896,13 +2897,13 @@ void ObjectContainer::reset() {
   this->theWeightsPoly.Clear();
   this->theHyperOctahedralGroups.SetSize(0);
   this->theElementsHyperOctGroup.Clear();
-  this->CurrentRandomSeed = time(NULL);
+  this->CurrentRandomSeed = static_cast<int>(time(nullptr));
   this->theUserInputTextBoxesWithValues.Clear();
   this->graphicsScripts.Clear();
   this->EllipticCurveElementsZmodP.Clear();
   this->EllipticCurveElementsRational.Clear();
    //Setting up a random seed.
-  srand (this->CurrentRandomSeed);
+  srand (static_cast<unsigned>(this->CurrentRandomSeed));
 }
 
 bool Calculator::innerWriteGenVermaModAsDiffOperators(
@@ -2973,7 +2974,7 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
   SemisimpleLieAlgebra* theSSalg;
   Expression context;
   if (!theCommands.GetTypeHighestWeightParabolic<Rational>(
-    theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0
+    theCommands, input, output, hwFundamental, tempSel, context, theSSalg, nullptr
   )) {
     return output.MakeError("Failed to extract highest weight and algebra", theCommands);
   }
@@ -2998,10 +2999,10 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
 bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression& input, Expression& output) {
   Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
-  SemisimpleLieAlgebra* theSSalg = 0;
+  SemisimpleLieAlgebra* theSSalg = nullptr;
   Expression context;
   if (!theCommands.GetTypeHighestWeightParabolic<Rational>(
-    theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0
+    theCommands, input, output, hwFundamental, tempSel, context, theSSalg, nullptr
   )) {
     return output.MakeError("Failed to extract highest weight and algebra", theCommands);
   }
@@ -3026,7 +3027,7 @@ bool Expression::IsMeltable(int* numResultingChildren) const {
   if (!this->StartsWith(this->owner->opMelt(), 2)) {
     return false;
   }
-  if (numResultingChildren != 0) {
+  if (numResultingChildren != nullptr) {
     if (!(*this)[1].StartsWith(this->owner->opEndStatement())) {
       *numResultingChildren = 1;
     } else {
@@ -3094,7 +3095,7 @@ bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutput
   MacroRegisterFunctionWithName("Calculator::ConvertExpressionsToCommonContext");
   Expression commonContext;
   commonContext.MakeEmptyContext(*this);
-  if (inputOutputStartingContext != 0) {
+  if (inputOutputStartingContext != nullptr) {
     if (inputOutputStartingContext->IsContext()) {
       commonContext = *inputOutputStartingContext;
     }
@@ -3115,7 +3116,7 @@ bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutput
       return false;
     }
   }
-  if (inputOutputStartingContext != 0) {
+  if (inputOutputStartingContext != nullptr) {
     *inputOutputStartingContext = commonContext;
   }
   return true;

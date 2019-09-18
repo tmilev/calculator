@@ -110,6 +110,18 @@ public:
       false
       ) {}
   };
+  class WriterSet: public WriterObjectFixedLength {
+  public:
+    WriterSet(
+      int expectedTotalElementByteLength,
+      List<unsigned char>& output
+    ) : WriterObjectFixedLength(
+      AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11,
+      expectedTotalElementByteLength,
+      output,
+      true
+      ) {}
+  };
   int recursionDepthGuarD;
   int maxRecursionDepth;
   int dataPointer;

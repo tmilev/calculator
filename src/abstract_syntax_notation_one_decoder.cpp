@@ -292,6 +292,12 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(
     return false;
   }
   std::stringstream resultStream;
+  List<unsigned char> data = this->rawDatA->SliceCopy(this->dataPointer, desiredLengthInBytes);
+
+  output["objectIdentifierBytes"] = std::string(
+    reinterpret_cast<char*>(data.TheObjects),
+    static_cast<unsigned>(data.size)
+  );
   unsigned char firstByte = (*this->rawDatA)[this->dataPointer];
   int currentPointer = this->dataPointer + 1;
   this->dataPointer += desiredLengthInBytes;
@@ -694,7 +700,6 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(
 }
 
 void X509Certificate::WriteBytesAlgorithmIdentifier(List<unsigned char>& output) {
-
   AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeAlgorithmIdentifier(100, output);
   AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(this->signatureAlgorithmId, output);
   AbstractSyntaxNotationOneSubsetDecoder::WriteNull(output);
@@ -706,7 +711,7 @@ void X509Certificate::WriteBytesTBSCertificate(List<unsigned char>& output) {
   this->WriteVersion(output);
   AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(2, output);
   AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(this->serialNumber, output);
-
+  this->WriteBytesAlgorithmIdentifier(output);
 }
 
 void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
@@ -920,7 +925,7 @@ bool X509Certificate::LoadFromASNEncoded(
     }
     return false;
   }
-  if (!this->sourceJSON.HasCompositeKeyOfType("[0][2][0]", this->signatureAlgorithmId, commentsOnFailure)) {
+  if (!this->sourceJSON.HasCompositeKeyOfType("[0][2][0].objectIdentifierBytes", this->signatureAlgorithmId, commentsOnFailure)) {
     if (commentsOnFailure != 0) {
       *commentsOnFailure << "Failed to get signature algorithm id. ";
     }

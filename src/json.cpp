@@ -127,7 +127,7 @@ bool JSData::HasCompositeKeyOfTokeN(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Key: " << key << ", value: " << whichValue->ToString(false)
       << " is of type " << static_cast<int>(whichValue->theType)
-      << " instead of the target one: " << static_cast<int>(targetType);
+      << " instead of the target one: " << static_cast<int>(targetType) << ". ";
     }
     return false;
   }

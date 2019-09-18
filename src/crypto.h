@@ -72,9 +72,9 @@ public:
 
 class X509Certificate {
 public:
-  std::string versionNumber;
-  std::string serialNumber;
-  std::string signatureAlgorithmId;
+  int version;
+  LargeIntUnsigned serialNumber;
+  List<unsigned char> signatureAlgorithmId;
   std::string issuerName;
   std::string validityNotBefore;
   std::string validityNotAfter;
@@ -102,6 +102,8 @@ public:
   std::string ToString();
   std::string ToStringTestEncode();
   void WriteBytesASN1(List<unsigned char>& output);
+  void WriteBytesTBSCertificate(List<unsigned char>& output);
+  void WriteBytesAlgorithmIdentifier(List<unsigned char>& output);
   void WriteVersion(List<unsigned char>& output);
 };
 

@@ -12,6 +12,10 @@ extern ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImp
 
 ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementation(__FILE__, "Abstract syntax notation one (ASN-1) implementation");
 
+// Putting this in the header file currently breaks the linking for this particular tag.
+// Appears to be a compiler/linker bug (?).
+const unsigned char AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05 = 5;
+
 bool AbstractSyntaxNotationOneSubsetDecoder::isCostructedByte(unsigned char input) {
   int sixthBit = input / 32;
   sixthBit %= 2;
@@ -355,7 +359,7 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::GetType(unsigned char startB
     return "bitString";
   case AbstractSyntaxNotationOneSubsetDecoder::tags::octetString0x04:
     return "octetString";
-  case AbstractSyntaxNotationOneSubsetDecoder::tags::tokenNull0x05:
+  case AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05:
     return "null";
   case AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06:
     return "objectID";
@@ -382,6 +386,12 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::GetType(unsigned char startB
   default:
     return "unknown";
   }
+}
+
+void AbstractSyntaxNotationOneSubsetDecoder::WriteNull(List<unsigned char>& output) {
+  MacroRegisterFunctionWithName("AbstractSyntaxNotationOneSubsetDecoder::WriteNull");
+  output.AddOnTop(AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05);
+  output.AddOnTop(0);
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSData* interpretation) {
@@ -468,7 +478,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
     return this->DecodeOctetString(currentLength, output, interpretation);
   case tags::objectIdentifier0x06:
     return this->DecodeObjectIdentifier(currentLength, output, interpretation);
-  case tags::tokenNull0x05:
+  case tags::null0x05:
     return this->DecodeNull(currentLength, output, interpretation);
   case tags::sequence0x10:
     return this->DecodeSequenceLikeContent(currentLength, output, interpretation);
@@ -676,14 +686,33 @@ void X509Certificate::WriteVersion(List<unsigned char>& output) {
   output.AddOnTop(0x03);
 }
 
-void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTotalLength(2000, output);
-  {
-    AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeFirstPart(2000, output);
-    this->WriteVersion(output);
-    AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(2, output);
+void AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(
+  const List<unsigned char>& input, List<unsigned char>& output
+) {
+  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectId(input.size, output);
+  output.AddListOnTop(input);
+}
 
-  }
+void X509Certificate::WriteBytesAlgorithmIdentifier(List<unsigned char>& output) {
+
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeAlgorithmIdentifier(100, output);
+  AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(this->signatureAlgorithmId, output);
+  AbstractSyntaxNotationOneSubsetDecoder::WriteNull(output);
+}
+
+void X509Certificate::WriteBytesTBSCertificate(List<unsigned char>& output) {
+  MacroRegisterFunctionWithName("X509Certificate::WriteBytesTBSCertificate");
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTBSCertificateSequence(2000, output);
+  this->WriteVersion(output);
+  AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(2, output);
+  AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(this->serialNumber, output);
+
+}
+
+void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
+  MacroRegisterFunctionWithName("X509Certificate::WriteBytesASN1");
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTotalLength(2000, output);
+  this->WriteBytesTBSCertificate(output);
 }
 
 std::string X509Certificate::ToStringTestEncode() {
@@ -786,47 +815,42 @@ bool PrivateKeyRSA::LoadFromASNEncoded(List<unsigned char>& input, std::stringst
     }
     return false;
   }
-  JSData actualContent;
-  if (!this->sourceJSONOuter.HasCompositeKeyOfType("[2]", &actualContent, JSData::token::tokenString, commentsOnFailure)) {
+  ListZeroAfterUse<unsigned char> innerData;
+  if (!this->sourceJSONOuter.HasCompositeKeyOfType("[2]", innerData.data, commentsOnFailure)) {
     return false;
   }
-  ListZeroAfterUse<unsigned char> innerData;
-  innerData.data = actualContent.theString;
   if (!innerDecoder.Decode(innerData.data, this->sourceJSONInner, nullptr, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to asn-decode private key inner data. ";
     }
     return false;
   }
-  JSData exponent, modulus, privateExponentJS, prime1, prime2, exponent1, exponent2, coefficient;
+  JSData exponent1, exponent2, coefficient;
   if (!this->sourceJSONInner.HasCompositeKeyOfType(
-    "[1]", &modulus, JSData::token::tokenLargeInteger, commentsOnFailure
+    "[1]", this->modulus, commentsOnFailure
   )) {
     return false;
   }
-  this->modulus = modulus.theInteger.GetElement().value;
   if (!this->sourceJSONInner.HasCompositeKeyOfType(
-    "[2]", &exponent, JSData::token::tokenLargeInteger, commentsOnFailure
+    "[2]", this->exponent, commentsOnFailure
   )) {
     return false;
   }
-  this->exponent = exponent.theInteger.GetElement().value;
-  if (!this->sourceJSONInner.HasCompositeKey("[3]", &privateExponentJS, commentsOnFailure)) {
-    return false;
-  }
-  this->privateExponent = privateExponentJS.theInteger.GetElement().value;
   if (!this->sourceJSONInner.HasCompositeKeyOfType(
-    "[4]", &prime1, JSData::token::tokenLargeInteger, commentsOnFailure
+    "[3]", this->privateExponent, commentsOnFailure
   )) {
     return false;
   }
-  this->primeOne = prime1.theInteger.GetElement().value;
   if (!this->sourceJSONInner.HasCompositeKeyOfType(
-    "[5]", &prime2, JSData::token::tokenLargeInteger, commentsOnFailure
+    "[4]", this->primeOne, commentsOnFailure
   )) {
     return false;
   }
-  this->primeTwo = prime2.theInteger.GetElement().value;
+  if (!this->sourceJSONInner.HasCompositeKeyOfType(
+    "[5]", this->primeTwo, commentsOnFailure
+  )) {
+    return false;
+  }
   if (!this->sourceJSONInner.HasCompositeKey("[6]", &exponent1, commentsOnFailure)) {
     return false;
   }
@@ -887,38 +911,42 @@ bool X509Certificate::LoadFromASNEncoded(
     }
     return false;
   }
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "decoded json: " << this->sourceJSON.ToString(false, true, true, true);
-  }
-  JSData rsaPublicKey;
-  JSData rsaModulus;
-  if (!this->sourceJSON.HasCompositeKey("[0][6][1].bitStringDecoded[1]", &rsaModulus, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to read rsa modulus. JSON decoded: "
+  if (!this->sourceJSON.HasCompositeKeyOfType(
+    "[0][1]", this->serialNumber, commentsOnFailure
+  )) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to read serial number. JSON decoded: "
       << this->sourceJSON.ToString(false, true, true, true);
     }
     return false;
   }
-  if (!this->sourceJSON.HasCompositeKey("[0][6][1].bitStringDecoded[0]", &rsaPublicKey, commentsOnFailure)) {
+  if (!this->sourceJSON.HasCompositeKeyOfType("[0][2][0]", this->signatureAlgorithmId, commentsOnFailure)) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Failed to get signature algorithm id. ";
+    }
+    return false;
+  }
+  if (!this->sourceJSON.HasCompositeKeyOfType(
+    "[0][6][1].bitStringDecoded[1]", this->theRSA.theModuluS, commentsOnFailure
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to read RSA modulus. JSON decoded: "
+      << this->sourceJSON.ToString(false, true, true, true);
+    }
+    return false;
+  }
+  if (!this->sourceJSON.HasCompositeKeyOfType("[0][6][1].bitStringDecoded[0]", this->theRSA.theExponenT, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read public key. ";
     }
     return false;
   }
-  if (rsaModulus.theType != JSData::token::tokenLargeInteger) {
+  if (this->theRSA.theModuluS == 0 || this->theRSA.theExponenT == 0) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "RSA modulus does not appear to be a large integer: " << rsaModulus.ToString(false);
+      *commentsOnFailure << "Invalid RSA modulus or exponent. ";
     }
     return false;
   }
-  if (rsaPublicKey.theType != JSData::token::tokenLargeInteger) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "RSA public key does not appear to be a large integer: " << rsaPublicKey.ToString(false);
-    }
-    return false;
-  }
-  this->theRSA.theModuluS = rsaModulus.theInteger.GetElement().value;
-  this->theRSA.theExponenT = rsaPublicKey.theInteger.GetElement().value;
   return true;
 }
 

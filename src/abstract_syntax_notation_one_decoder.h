@@ -32,7 +32,6 @@ public:
     static const unsigned char integer0x02 = 2;
     static const unsigned char bitString0x03 = 3;
     static const unsigned char octetString0x04 = 4;
-    static const unsigned char tokenNull0x05 = 5;
     static const unsigned char objectIdentifier0x06 = 6;
     static const unsigned char utf8String0x0c = 12; // 0x0c
     static const unsigned char sequence0x10 = 16; //0x10
@@ -44,6 +43,7 @@ public:
     static const unsigned char timeOfDay0x20 = 32;
     static const unsigned char dateTime0x21 = 33;
     static const unsigned char duration0x22 = 34;
+    static const unsigned char null0x05; //0x05
   };
   // writes fixed lenght encodings.
   class WriterObjectFixedLength {
@@ -86,6 +86,30 @@ public:
       false
       ) {}
   };
+  class WriterBitString: public WriterObjectFixedLength {
+  public:
+    WriterBitString(
+      int expectedTotalElementByteLength,
+      List<unsigned char>& output
+    ) : WriterObjectFixedLength(
+      AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03,
+      expectedTotalElementByteLength,
+      output,
+      false
+      ) {}
+  };
+  class WriterObjectId: public WriterObjectFixedLength {
+  public:
+    WriterObjectId(
+      int expectedTotalElementByteLength,
+      List<unsigned char>& output
+    ) : WriterObjectFixedLength(
+      AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06,
+      expectedTotalElementByteLength,
+      output,
+      false
+      ) {}
+  };
   int recursionDepthGuarD;
   int maxRecursionDepth;
   int dataPointer;
@@ -120,7 +144,9 @@ public:
   bool DecodeCurrentBuiltInType(std::stringstream* commentsOnError);
   bool DecodeLengthIncrementDataPointer(int& outputLengthNegativeOneForVariable, JSData* interpretation);
 
-  static void WriteUnsignedIntegerObject(const LargeIntUnsigned &input, List<unsigned char>& output);
+  static void WriteUnsignedIntegerObject(const LargeIntUnsigned& input, List<unsigned char>& output);
+  static void WriteObjectId(const List<unsigned char>& input, List<unsigned char>& output);
+  static void WriteNull(List<unsigned char>& output);
 
   std::string ToStringAnnotateBinary();
   std::string ToStringDebug() const;

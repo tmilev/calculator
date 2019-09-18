@@ -56,7 +56,11 @@ public:
   JSData GetValue(const std::string& key);
   bool HasKey(const std::string& key) const;
   bool HasCompositeKey(const std::string& key, JSData* whichValue, std::stringstream* commentsOnFailure) const;
-  bool HasCompositeKeyOfType(const std::string& key, JSData* whichValue, char targetType, std::stringstream* commentsOnFailure) const;
+  bool HasCompositeKeyOfTokeN(const std::string& key, JSData* whichValue, char targetType, std::stringstream* commentsOnFailure) const;
+  bool HasCompositeKeyOfType(const std::string& key, std::string& output, std::stringstream* commentsOnFailure) const;
+  bool HasCompositeKeyOfType(const std::string& key, LargeIntUnsigned& output, std::stringstream* commentsOnFailure) const;
+  bool HasCompositeKeyOfType(const std::string& key, List<unsigned char>& output, std::stringstream* commentsOnFailure) const;
+
   void SetKeyValue(const std::string& key, const JSData& value);
   int GetKeyIndex(const std::string& key) const;
   JSData();

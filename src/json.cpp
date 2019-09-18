@@ -73,8 +73,48 @@ bool JSData::HasKey(const std::string& key) const {
   return this->GetKeyIndex(key) != - 1;
 }
 
+bool JSData::HasCompositeKeyOfType(const std::string& key, LargeIntUnsigned& output, std::stringstream* commentsOnFailure) const {
+  JSData container;
+  if (!this->HasCompositeKeyOfTokeN(key, &container, JSData::token::tokenLargeInteger, commentsOnFailure)) {
+    return false;
+  }
+  if (container.theInteger.GetElement() < 0) {
+    if (commentsOnFailure != 0) {
+      *commentsOnFailure << "Error: integer is negative. ";
+    }
+    return false;
+  }
+  output = container.theInteger.GetElement().value;
+  return true;
+}
+
 bool JSData::HasCompositeKeyOfType(
-  const std::string& key, JSData* whichValue, char targetType, std::stringstream* commentsOnFailure
+  const std::string& key, std::string& output, std::stringstream* commentsOnFailure
+) const {
+  JSData container;
+  if (!this->HasCompositeKeyOfTokeN(key, &container, JSData::token::tokenString, commentsOnFailure)) {
+    return false;
+  }
+  output = container.theString;
+  return true;
+}
+
+bool JSData::HasCompositeKeyOfType(
+  const std::string& key, List<unsigned char>& output, std::stringstream* commentsOnFailure
+) const {
+  JSData container;
+  if (!this->HasCompositeKeyOfTokeN(key, &container, JSData::token::tokenString, commentsOnFailure)) {
+    return false;
+  }
+  output = container.theString;
+  return true;
+}
+
+bool JSData::HasCompositeKeyOfTokeN(
+  const std::string& key,
+  JSData* whichValue,
+  char targetType,
+  std::stringstream* commentsOnFailure
 ) const {
   JSData container;
   if (whichValue == nullptr) {

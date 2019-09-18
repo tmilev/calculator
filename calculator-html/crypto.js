@@ -59,12 +59,15 @@ function hideToolTip(
   tooltipElement.style.visibility = "hidden";  
 }
 
-AbstractSyntaxOne.prototype.computeAnnotation = function(
+AbstractSyntaxOne.prototype.appendAnnotation = function(
   /**@type {HTMLElement} */ 
-  outputDOMElements, 
+  container, 
   currentInterpretation,
 ) {
   var offset = currentInterpretation.offset;
+  var currentElement = document.createElement("SPAN");
+  currentElement.classList.add("abstractSyntaxOneElement");
+
   var elementLeadingByte = document.createElement("SPAN");
   elementLeadingByte.classList.add("abstractSyntaxOneLeadingByte"); 
   elementLeadingByte.innerHTML = currentInterpretation.startByteOriginal;
@@ -91,7 +94,7 @@ AbstractSyntaxOne.prototype.computeAnnotation = function(
   elementHeader.appendChild(elementLeadingByte);
   elementHeader.appendChild(elementLength);
 
-  outputDOMElements.appendChild(elementHeader);
+  currentElement.appendChild(elementHeader);
   /**@type {Array} */
   var subList = null;
   if (Array.isArray(currentInterpretation.value)) {
@@ -105,10 +108,7 @@ AbstractSyntaxOne.prototype.computeAnnotation = function(
     foundContent = true;
     for (var i = 0; i < subList.length; i ++) {
       var interpretation = subList[i];
-      var domElement = document.createElement("SPAN");
-      domElement.classList.add("abstractSyntaxOneElement");
-      this.computeAnnotation(domElement, interpretation);
-      outputDOMElements.appendChild(domElement);
+      this.appendAnnotation(currentElement, interpretation);
     }  
   } else if (currentInterpretation.body !== undefined && currentInterpretation.body !== null) {
     var elementHex = document.createElement("SPAN");
@@ -117,21 +117,22 @@ AbstractSyntaxOne.prototype.computeAnnotation = function(
     if (currentInterpretation.value !== undefined) {
       attachTooltip(elementHex, `Value: ${currentInterpretation.value}`);
     }
-    outputDOMElements.appendChild(elementHex);
+    currentElement.appendChild(elementHex);
     foundContent = true;
   } 
   if (!foundContent) {
     var noContent = document.createElement("SPAN");
     noContent.innerHTML = `[no content] ${JSON.stringify(currentInterpretation)}`;
-    outputDOMElements.appendChild(noContent);
+    currentElement.appendChild(noContent);
   }
+  container.appendChild(currentElement);
 }
 
 AbstractSyntaxOne.prototype.annotate = function() {
   this.DOMElementAnnotation.classList.add("abstractSyntaxOneAnnotation");
   this.DOMElementAnnotation.innerHTML = "";
   this.positionInBinary = 0;
-  this.computeAnnotation(this.DOMElementAnnotation, this.interpretation);
+  this.appendAnnotation(this.DOMElementAnnotation, this.interpretation);
   var debugElement = document.createElement("SPAN");
   // debugElement.innerHTML = JSON.stringify(this.parsed);
   this.DOMElementAnnotation.appendChild(debugElement);

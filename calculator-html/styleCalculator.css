@@ -1478,34 +1478,19 @@ span.abstractSyntaxOneAnnotation {
   width: 900px;
   max-width: 900px;
   word-break: break-all;
-}
-
-span.abstractSyntaxOneHeader {
-  background-color: white;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 span.abstractSyntaxOneHeader:hover {
   background-color:lightgray;
 }
 
-span.abstractSyntaxOneLeadingByte {
-  background-color: white;
-}
-
 span.abstractSyntaxOneLeadingByte:hover {
-  background-color: lavenderblush;
-}
-
-span.abstractSyntaxOneLength {
-  background-color: whitesmoke;
+  background-color: gray;
 }
 
 span.abstractSyntaxOneLength:hover {
-  background-color: beige;
-}
-
-span.abstractSyntaxOneContent {
-  background-color: lightcyan;
+  background-color: lightskyblue;
 }
 
 span.abstractSyntaxOneElement {
@@ -1514,12 +1499,12 @@ span.abstractSyntaxOneElement {
   word-break: break-all;
 }
 
-span.abstractSyntaxOneElement:hover {
-  background-color:gray;
-}
+/*span.abstractSyntaxOneElement:hover {
+  background-color:lightyellow;
+}*/
 
 span.abstractSyntaxOneContent:hover {
-  background-color: lightgoldenrodyellow;
+  background-color: lightgreen;
 }
 
 .tooltiptext {
@@ -1532,6 +1517,7 @@ span.abstractSyntaxOneContent:hover {
   border-radius: 6px;
    /* Position the tooltip text - see examples below! */
   position: absolute;
+  top: 20px;
   z-index: 1;
   word-break: normal;
 }

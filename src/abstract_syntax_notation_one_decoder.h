@@ -52,16 +52,17 @@ public:
     int offset;
     int totalByteLength;
     int reservedBytesForLength;
-    int GetReservedBytesForLength(int length);
+    static int GetReservedBytesForLength(int length);
+    static void WriteLength(unsigned int input, List<unsigned char>& output, int offset);
     WriterObjectFixedLength(
       unsigned char startByte,
       int expectedTotalElementByteLength,
       List<unsigned char>& output,
-      bool isConstructed = true
+      bool isConstructed
     );
     ~WriterObjectFixedLength();
   };
-  class WriterSequence : WriterObjectFixedLength {
+  class WriterSequence : public WriterObjectFixedLength {
   public:
     WriterSequence(
       int expectedTotalElementByteLength,
@@ -73,7 +74,18 @@ public:
       true
       ) {}
   };
-
+  class WriterInteger: public WriterObjectFixedLength {
+  public:
+    WriterInteger(
+      int expectedTotalElementByteLength,
+      List<unsigned char>& output
+    ) : WriterObjectFixedLength(
+      AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02,
+      expectedTotalElementByteLength,
+      output,
+      false
+      ) {}
+  };
   int recursionDepthGuarD;
   int maxRecursionDepth;
   int dataPointer;
@@ -107,6 +119,9 @@ public:
   bool DecodeNull(int desiredLengthInBytes, JSData& output, JSData* interpretation);
   bool DecodeCurrentBuiltInType(std::stringstream* commentsOnError);
   bool DecodeLengthIncrementDataPointer(int& outputLengthNegativeOneForVariable, JSData* interpretation);
+
+  static void WriteUnsignedIntegerObject(const LargeIntUnsigned &input, List<unsigned char>& output);
+
   std::string ToStringAnnotateBinary();
   std::string ToStringDebug() const;
   void reset();

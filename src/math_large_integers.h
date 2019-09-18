@@ -40,6 +40,10 @@ public:
     output << theLIU.ToString();
     return output;
   }
+  class Test {
+    public:
+    static bool SerializationToHex(const LargeIntUnsigned& input);
+  };
   void PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
   void AddLargeIntUnsignedShiftedTimesDigit(const LargeIntUnsigned& other, int digitShift, int theConst);
   void SubtractSmallerPositive(const LargeIntUnsigned& x);
@@ -126,6 +130,8 @@ public:
   bool operator<(const LargeIntUnsigned& other) const;
   bool operator>=(const LargeIntUnsigned& other) const;
   bool operator>(const LargeIntUnsigned& other) const;
+  void WriteBigEndianBytes(List<unsigned char>& output) const;
+  void GetHexBigEndian(int numberOfLeadingZeroesToPadWith, std::string& output) const;
   //must be rewritten:
   double GetDoubleValue() const;
   void FitSize();

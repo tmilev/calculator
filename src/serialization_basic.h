@@ -14,11 +14,11 @@ public:
       this->outputPointer = &output;
       this->offset = output.size;
       int theSize = output.size;
-      Serialization::WriteNByteLength(numberOfBytes, 0, output, theSize);
+      Serialization::WriteNByteUnsignedInt(numberOfBytes, 0, output, theSize);
     }
     ~LengthWriterNBytes() {
       unsigned int totalLength = static_cast<unsigned int>(this->outputPointer->size - this->offset - numberOfBytes);
-      Serialization::WriteNByteLength(numberOfBytes, totalLength, *this->outputPointer, this->offset);
+      Serialization::WriteNByteUnsignedInt(numberOfBytes, totalLength, *this->outputPointer, this->offset);
     }
   };
   typedef LengthWriterNBytes<3> LengthWriterThreeBytes;
@@ -63,7 +63,7 @@ public:
     List<unsigned char>* output,
     std::stringstream* commentsOnError
   );
-  static void WriteNByteLength(// how many bytes are used to record the length
+  static void WriteNByteUnsignedInt(// how many bytes are used to record the length
     int byteCountOfLength,
     unsigned int input,
     List<unsigned char>& output,
@@ -77,11 +77,11 @@ public:
     int input,
     List<unsigned char>& output
   );
-  static void WriteTwoByteLength(
+  static void WriteTwoByteUnsignedInt(
     unsigned int input,
     List<unsigned char>& output
   );
-  static void WriteThreeByteLength(
+  static void WriteThreeByteUnsignedInt(
     unsigned int input,
     List<unsigned char>& output
   );

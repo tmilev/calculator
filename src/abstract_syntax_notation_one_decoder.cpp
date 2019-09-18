@@ -543,6 +543,26 @@ bool AbstractSyntaxNotationOneSubsetDecoder::Decode(
   return true;
 }
 
+void AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLength(
+  unsigned int input, List<unsigned char>& output, int offset
+) {
+ if (input < 128) {
+    unsigned char length = static_cast<unsigned char>(input);
+    output[offset] = length;
+    return;
+  }
+  int numBytes = AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::GetReservedBytesForLength(static_cast<signed>(input));
+  unsigned char lengthPlus128 = 128 + static_cast<unsigned char>(numBytes);
+  output[offset] = lengthPlus128;
+  offset ++;
+  Serialization::WriteNByteUnsignedInt(
+    numBytes,
+    static_cast<unsigned int>(input),
+    output,
+    offset
+  );
+}
+
 std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringAnnotateBinary() {
   if (this->dataInterpretation == nullptr) {
     return "Annotation not available. ";
@@ -635,32 +655,33 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::~WriterObjectFi
     );
   }
   this->reservedBytesForLength = actualBytesNeededForLength;
-  if (this->totalByteLength < 128) {
-    unsigned char length = static_cast<unsigned char>(this->totalByteLength);
-    (*this->outputPointer)[this->offset + 1] = length;
-  } else {
-    unsigned char lengthPlus128 = 128 + static_cast<unsigned char>(this->reservedBytesForLength);
-    (*this->outputPointer)[this->offset + 1] = lengthPlus128;
-    int offsetTemporary = this->offset + 2;
-    Serialization::WriteNByteLength(
-      this->reservedBytesForLength,
-      static_cast<unsigned int>(this->totalByteLength),
-      *this->outputPointer,
-      offsetTemporary
-    );
-  }
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence::WriteLength(
+    static_cast<unsigned>(this->totalByteLength),
+    *this->outputPointer,
+    this->offset + 1
+  );
 }
 
-void X509Certificate::WriteUnsignedInteger(unsigned int input) {
+void AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(
+  const LargeIntUnsigned& input, List<unsigned char>& output
+) {
+  List<unsigned char> serializedInput;
+  input.WriteBigEndianBytes(serializedInput);
+  AbstractSyntaxNotationOneSubsetDecoder::WriterInteger writeInteger(serializedInput.size, output);
+  output.AddListOnTop(serializedInput);
+}
 
+void X509Certificate::WriteVersion(List<unsigned char>& output) {
+  output.AddOnTop(0xa0);
+  output.AddOnTop(0x03);
 }
 
 void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeLength(2000, output);
-  { AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeLength(2000, output);
-    output.AddOnTop(0xa0); //
-    output.AddOnTop(0x03);
-
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTotalLength(2000, output);
+  {
+    AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeFirstPart(2000, output);
+    this->WriteVersion(output);
+    AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(2, output);
 
   }
 }

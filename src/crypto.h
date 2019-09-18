@@ -103,7 +103,6 @@ public:
   std::string ToStringTestEncode();
   void WriteBytesASN1(List<unsigned char>& output);
   void WriteVersion(List<unsigned char>& output);
-  void WriteUnsignedInteger(unsigned int input);
 };
 
 class Crypto {

@@ -941,21 +941,7 @@ bool Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(
 bool Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(
   const LargeIntUnsigned& input, int numberOfLeadingZeroesToPadWith, std::string& output
 ) {
-  List<char> result;
-  LargeIntUnsigned digit, inputCopy = input;
-  while (inputCopy > 0) {
-    digit = static_cast<unsigned char>(inputCopy % 256);
-    inputCopy /= 256;
-    int digitInt = 0;
-    digit.IsIntegerFittingInInt(&digitInt);
-    char digitChar = static_cast<char>(digitInt);
-    result.AddOnTop(digitChar);
-  }
-  for (int i = 0; i < numberOfLeadingZeroesToPadWith; i ++) {
-    result.AddOnTop(0);
-  }
-  result.ReverseOrderElements();
-  output.assign(result.TheObjects, static_cast<unsigned>(result.size));
+  input.GetHexBigEndian(numberOfLeadingZeroesToPadWith, output);
   return true;
 }
 

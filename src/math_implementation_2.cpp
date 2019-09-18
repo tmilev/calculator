@@ -90,6 +90,40 @@ int LargeIntUnsigned::operator%(unsigned int x) {
   return result;
 }
 
+void LargeIntUnsigned::GetHexBigEndian(
+  int numberOfLeadingZeroesToPadWith, std::string& output
+) const {
+  List<char> result;
+  LargeIntUnsigned digit, inputCopy = *this;
+  while (inputCopy > 0) {
+    digit = static_cast<unsigned char>(inputCopy % 256);
+    inputCopy /= 256;
+    int digitInt = 0;
+    digit.IsIntegerFittingInInt(&digitInt);
+    char digitChar = static_cast<char>(digitInt);
+    result.AddOnTop(digitChar);
+  }
+  for (int i = 0; i < numberOfLeadingZeroesToPadWith; i ++) {
+    result.AddOnTop(0);
+  }
+  result.ReverseOrderElements();
+  output.assign(result.TheObjects, static_cast<unsigned>(result.size));
+}
+
+void LargeIntUnsigned::WriteBigEndianBytes(List<unsigned char>& output) const {
+  LargeIntUnsigned remainder = *this;
+  List<unsigned char> digitsReveredOrder;
+  while (remainder > 0) {
+    int nextDigit = remainder % 256;
+    digitsReveredOrder.AddOnTop(static_cast<unsigned char>(nextDigit));
+    remainder /= 256;
+  }
+  output.Reserve(output.size + digitsReveredOrder.size);
+  for (int i = digitsReveredOrder.size - 1; i >= 0; i --) {
+    output.AddOnTop(digitsReveredOrder[i]);
+  }
+}
+
 void LargeIntUnsigned::MakeOne() {
   this->theDigits.SetSize(1);
   this->theDigits[0] = 1;

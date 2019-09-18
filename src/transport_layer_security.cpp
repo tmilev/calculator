@@ -930,7 +930,7 @@ void SSLContent::WriteBytesExtensionsOnly(List<unsigned char>& output) const {
     this->extensions[i].WriteBytes(output);
   }
   int extensionsLength = output.size - offsetExtensionsLength - 2;
-  Serialization::WriteNByteLength(2, static_cast<unsigned>(extensionsLength), output, offsetExtensionsLength);
+  Serialization::WriteNByteUnsignedInt(2, static_cast<unsigned>(extensionsLength), output, offsetExtensionsLength);
 }
 
 bool SSLContent::Decode(std::stringstream* commentsOnFailure) {
@@ -1238,7 +1238,7 @@ void Serialization::WriteTwoByteInt(
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return Serialization::WriteNByteLength(2, static_cast<unsigned>(input), output, inputOutputOffset);
+  return Serialization::WriteNByteUnsignedInt(2, static_cast<unsigned>(input), output, inputOutputOffset);
 }
 
 void Serialization::WriteThreeByteInt(
@@ -1246,26 +1246,26 @@ void Serialization::WriteThreeByteInt(
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return Serialization::WriteNByteLength(3, static_cast<unsigned>(input), output, inputOutputOffset);
+  return Serialization::WriteNByteUnsignedInt(3, static_cast<unsigned>(input), output, inputOutputOffset);
 }
 
-void Serialization::WriteTwoByteLength(
+void Serialization::WriteTwoByteUnsignedInt(
   unsigned int input,
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return Serialization::WriteNByteLength(2, input, output, inputOutputOffset);
+  return Serialization::WriteNByteUnsignedInt(2, input, output, inputOutputOffset);
 }
 
-void Serialization::WriteThreeByteLength(
+void Serialization::WriteThreeByteUnsignedInt(
   unsigned int input,
   List<unsigned char>& output
 ) {
   int inputOutputOffset = output.size;
-  return Serialization::WriteNByteLength(3, input, output, inputOutputOffset);
+  return Serialization::WriteNByteUnsignedInt(3, input, output, inputOutputOffset);
 }
 
-void Serialization::WriteNByteLength(
+void Serialization::WriteNByteUnsignedInt(
   int byteCountOfLength,
   unsigned int input,
   List<unsigned char>& output,
@@ -1309,7 +1309,7 @@ void Serialization::WriteNByteLengthFollowedByBytes(
   List<unsigned char>& output,
   int& inputOutputOffset
 ) {
-  Serialization::WriteNByteLength(byteCountOfLength, static_cast<unsigned>(input.size), output, inputOutputOffset);
+  Serialization::WriteNByteUnsignedInt(byteCountOfLength, static_cast<unsigned>(input.size), output, inputOutputOffset);
   if (inputOutputOffset + input.size > output.size) {
     output.SetSize(inputOutputOffset + input.size);
   }

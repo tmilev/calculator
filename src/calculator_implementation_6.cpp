@@ -375,7 +375,7 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(
   } else {
     thePlotObj.colorJS = "blue";
   }
-  thePlotObj.colorRGB = HtmlRoutines::RedGreenBlue(0, 0, 255);
+  thePlotObj.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 255));
   DrawingVariables::GetColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
   thePlotObj.lineWidth = 1;
   if (input.size() >= 8) {
@@ -535,7 +535,28 @@ bool CalculatorFunctionsGeneral::innerIntegerToHex(Calculator& theCommands, cons
     return theCommands << "Failed to convert " << theLI
     << " to a hex string. ";
   }
+  if (theGlobalVariables.flagAutoUnitTest) {
+    LargeIntUnsigned::Test::SerializationToHex(theLI.value);
+  }
   return output.AssignValue(result, theCommands);
+}
+
+bool LargeIntUnsigned::Test::SerializationToHex(const LargeIntUnsigned& input) {
+  MacroRegisterFunctionWithName("LargeIntUnsigned::Test::SerializationToHex");
+  std::string resultCryptoHex, resultByteSerializationHex;
+  if (!Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(input, 0, resultCryptoHex)) {
+    crash << "Function Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst is not supposed to return false. " << crash;
+  }
+  List<unsigned char> serialization;
+  input.WriteBigEndianBytes(serialization);
+  resultByteSerializationHex = Crypto::ConvertListUnsignedCharsToHex(serialization, 0, false);
+  if (resultByteSerializationHex != resultCryptoHex) {
+    crash << "Byte serialization hex: " << resultByteSerializationHex
+    << " not equal to crypto hex conversion: "
+    << resultCryptoHex << ". "
+    << crash;
+  }
+  return true;
 }
 
 bool CalculatorFunctionsGeneral::innerHexToInteger(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -608,7 +629,7 @@ bool CalculatorFunctionsGeneral::innerRSAencrypt(Calculator& theCommands, const 
     return theCommands << "Modulus 1 not allowed";
   }
   result = Crypto::RSAencrypt(theModulus.value, theExponent, theMessage);
-  return output.AssignValue((Rational)result, theCommands);
+  return output.AssignValue(Rational(result), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun(
@@ -654,7 +675,7 @@ bool CalculatorFunctionsGeneral::innerIsSquare(Calculator& theCommands, const Ex
   }
   List<int> theMults;
   List<LargeInt> theFactors;
-  if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, 0)) {
+  if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, nullptr)) {
     return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
   }
   int result = 1;
@@ -749,7 +770,7 @@ bool CalculatorFunctionsGeneral::innerFactorInteger(Calculator& theCommands, con
   }
   for (int i = 0; i < numberOfPrimeFactors; i ++) {
     Expression currentE;
-    currentE.AssignValue((Rational) primeFactors[i], theCommands);
+    currentE.AssignValue(Rational(primeFactors[i]), theCommands);
     for (int j = 0; j < multiplicities[i]; j ++) {
       result.AddOnTop(currentE);
     }
@@ -764,7 +785,7 @@ bool CalculatorFunctionsGeneral::innerFactorInteger(Calculator& theCommands, con
     factorsSoFar.MakeSequence(theCommands, &result);
     factorNext.reset(theCommands);
     factorNext.AddChildAtomOnTop(opFactorInteger);
-    numberLast.AssignValue((Rational) primeFactors[primeFactors.size - 1], theCommands);
+    numberLast.AssignValue(Rational(primeFactors[primeFactors.size - 1]), theCommands);
     factorNext.AddChildOnTop(numberLast);
     return output.MakeXOX(theCommands, theCommands.opUnion(), factorsSoFar, factorNext);
   }
@@ -818,7 +839,7 @@ bool CalculatorFunctionsGeneral::innerSubList(Calculator& theCommands, const Exp
     return true;
   }
   if (boundVars.size == 0) {
-    return output.MakeSequence(theCommands, 0);
+    return output.MakeSequence(theCommands, nullptr);
   }
   Expression theSubbed, toBeSubbed, subbedSimplified;
   toBeSubbed.reset(theCommands);
@@ -1017,7 +1038,7 @@ bool CalculatorFunctionsGeneral::innerMatchesPattern(Calculator& theCommands, co
     return false;
   }
   MapList<Expression, Expression> matchedExpressions;
-  if (!theCommands.ExpressionMatchesPattern(input[2], input[1], matchedExpressions, 0)) {
+  if (!theCommands.ExpressionMatchesPattern(input[2], input[1], matchedExpressions, nullptr)) {
     return output.AssignValue(0, theCommands);
   }
   Expression commandList;
@@ -1397,7 +1418,7 @@ bool CalculatorFunctionsGeneral::innerUnionIntervals(
     makeUnion = true;
   }
   if (
-    right1 == left2 &&
+    (right1 - left2 == 0.0) &&
     leftE.StartsWith(theCommands.opIntervalOpen(), 3) &&
     rightE.StartsWith(theCommands.opIntervalOpen(), 3)
   ) {
@@ -1418,7 +1439,7 @@ bool CalculatorFunctionsGeneral::innerUnionIntervals(
       leftIsClosed = true;
     }
   }
-  if (left1 == right1) {
+  if (left1 - right1 == 0.0) {
     leftFinal = leftE[1];
     if (
       leftE .StartsWith(theCommands.opIntervalClosed()) ||
@@ -1448,7 +1469,7 @@ bool CalculatorFunctionsGeneral::innerUnionIntervals(
       rightIsClosed = true;
     }
   }
-  if (left2 == right2) {
+  if (left2 - right2 == 0.0) {
     rightFinal = rightE[2];
     if (
       leftE .StartsWith(theCommands.opIntervalClosed()) ||
@@ -1751,9 +1772,8 @@ bool CalculatorFunctionsGeneral::innerTrigSumToTrigProduct(
       output = leftMultiplicand * rightMultiplicand * 2;
       return true;
     }
-    return true;
   }
-  return false;
+  // return false;
 }
 
 bool CalculatorFunctionsGeneral::innerCosineOfAngleSumToTrig(
@@ -1809,7 +1829,7 @@ bool CalculatorFunctionsGeneral::innerDistributeSqrt(Calculator& theCommands, co
 
 bool CalculatorFunctionsGeneral::innerIsAlgebraicRadical(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsAlgebraicRadical");
-  int result = (int) input.IsAlgebraicRadical();
+  int result = static_cast<int>(input.IsAlgebraicRadical());
   return output.AssignValue(result, theCommands);
 }
 
@@ -1931,7 +1951,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
     return false;
   }
   Expression theIntegerPower;
-  theIntegerPower.AssignValue((Rational) exponent.GetNumerator(), theCommands);
+  theIntegerPower.AssignValue(Rational(exponent.GetNumerator()), theCommands);
   return output.MakeXOX(theCommands, theCommands.opThePower(),reduced, theIntegerPower);
 }
 
@@ -2131,7 +2151,7 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure");
   if (theGlobalVariables.flagAllowProcessMonitoring) {
-    if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != 0) {
+    if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
     }
   }
@@ -2157,26 +2177,27 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
     theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo = true;
     theAlgebra.FindSl2Subalgebras(theAlgebra, theSl2s);
     theSl2s.ToHTML();
-
-    if (theTypes[i].HasPrecomputedSubalgebras() && false) {
-      SemisimpleSubalgebras theSubalgebras;
-      MapReferenceS<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
-      ListReferences<SltwoSubalgebras> sl2Conainer;
-      if (!theSubalgebras.ComputeStructureWriteFiles(
-        theAlgebra,
-        theCommands.theObjectContainer.theAlgebraicClosure,
-        subalgebrasContainer,
-        sl2Conainer,
-        0,
-        false,
-        true,
-        false,
-        true,
-        true,
-        false,
-        true
-      )) {
-        out << "Failed to compute " << theTypes[i].ToString();
+    if ((false)) {
+      if (theTypes[i].HasPrecomputedSubalgebras()) {
+        SemisimpleSubalgebras theSubalgebras;
+        MapReferenceS<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
+        ListReferences<SltwoSubalgebras> sl2Conainer;
+        if (!theSubalgebras.ComputeStructureWriteFiles(
+          theAlgebra,
+          theCommands.theObjectContainer.theAlgebraicClosure,
+          subalgebrasContainer,
+          sl2Conainer,
+          nullptr,
+          false,
+          true,
+          false,
+          true,
+          true,
+          false,
+          true
+        )) {
+          out << "Failed to compute " << theTypes[i].ToString();
+        }
       }
     }
     out << theTypes[i].ToString();
@@ -2232,7 +2253,7 @@ std::string StringRoutines::ConvertStringToHexIfNonReadable(
     // All characters smaller than \t = 9
     // and all characters larger than 127
     // are considered non-standard.
-    if ((unsigned) (input[i]) < 9 || (unsigned) (input[i]) > 127) {
+    if (static_cast<unsigned>(input[i]) < 9 || static_cast<unsigned>(input[i]) > 127) {
       foundBad = true;
       break;
     }

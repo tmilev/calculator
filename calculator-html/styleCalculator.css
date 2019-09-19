@@ -1521,3 +1521,15 @@ span.abstractSyntaxOneContent:hover {
   z-index: 1;
   word-break: normal;
 }
+
+span.spanStringEqual {
+  font-weight: bold;
+  font-family: 'Courier New', Courier, monospace;
+  color: green
+}
+
+span.spanStringDifferent {
+  font-weight: bold;
+  font-family: 'Courier New', Courier, monospace;
+  color: red
+}

@@ -1719,17 +1719,17 @@ std::string StringRoutines::Differ::DifferenceHTML() {
     std::string rightS = this->rightResult[i];
     if (leftS == rightS && leftS.size() != 0) {
       if (leftS.size() > 0) {
-        leftOut << "<b style='color:green'>" << leftS << "</b>";
+        leftOut << "<span class = 'spanStringEqual'>" << leftS << "</span>";
       }
       if (rightS.size() > 0) {
-        rightOut << "<b style='color:green'>" << rightS << "</b>";
+        rightOut << "<span class = 'spanStringEqual'>" << rightS << "</span>";
       }
     } else {
       if (leftS.size() > 0) {
-        leftOut << "<b style='color:red'>" << leftS << "</b>";
+        leftOut << "<span class = 'spanStringDifferent'>" << leftS << "</span>";
       }
       if (rightS.size() > 0) {
-        rightOut << "<b style='color:red'>" << rightS << "</b>";
+        rightOut << "<span class = 'spanStringDifferent'>" << rightS << "</span>";
       }
     }
   }

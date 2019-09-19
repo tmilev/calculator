@@ -813,8 +813,6 @@ MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObj
       ASNObject& current = container.theValues[i];
       reverseMap.SetKeyValue(current.objectId, current);
     }
-    logWorker << "DEBUG: Container size: " << container.theValues.size;
-    logWorker << "DEBUG: reverse Container size: " << reverseMap.theValues.size;
   }
   return container;
 }
@@ -941,6 +939,11 @@ void ASNObject::initializeNonThreadSafe() {
 void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
   MacroRegisterFunctionWithName("X509Certificate::WriteBytesASN1");
   AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTotalLength(2000, output);
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeMetadata(2000, output);
+  this->WriteVersion(output);
+  AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(2, output);
+  AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(this->serialNumber, output);
+  this->WriteBytesAlgorithmIdentifier(output);
   this->information.WriteBytesASN1(output);
 }
 

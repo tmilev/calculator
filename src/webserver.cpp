@@ -4359,6 +4359,7 @@ int WebServer::Run() {
   if (theGlobalVariables.flagSSLIsAvailable) {
     // creates key files if absent. Does not call any openssl functions.
     std::stringstream commentsOnFailure;
+    TransportLayerSecurity::initializeNonThreadSafePartsCommon();
     this->theTLS.initSSLKeyFiles(&commentsOnFailure);
   }
   logWorker         .reset();

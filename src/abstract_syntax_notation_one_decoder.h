@@ -39,7 +39,7 @@ public:
   static MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& ObjectIdsToNames();
   static void initializeNonThreadSafe();
   bool LoadFromJSON(
-    const JSData& input,
+    const JSData& inputShell,
     std::stringstream* commentsOnFailure
   );
   static bool LoadFieldsFromJSArray(
@@ -52,6 +52,7 @@ public:
     const MapList<std::string, ASNObject, MathRoutines::HashString> &inputFields,
     const std::string& fieldName
   );
+  static std::string ToStringAllRecognizedObjectIds();
   void WriteBytesASNObject(List<unsigned char>& output);
 };
 

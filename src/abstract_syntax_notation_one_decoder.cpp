@@ -450,8 +450,6 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(JSData& output, JSDat
     (*interpretation)["startByte"] = StringRoutines::ConvertByteToHex(startByte);
     if (isConstructed) {
       (*interpretation)["constructed"] = true;
-      (*interpretation)["constructed"] = true;
-      (*interpretation)["constructed"] = true;
     }
     std::stringstream leadingBits;
     leadingBits << static_cast<int>(hasBit8) << static_cast<int>(hasBit7);
@@ -745,7 +743,7 @@ void ASNObject::initializeAddSample(
   container.SetKeyValue(incoming.name, incoming);
 }
 
-MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars> &ASNObject::ObjectIdsToNames() {
+MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& ASNObject::ObjectIdsToNames() {
   static MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars> result;
   return result;
 }
@@ -810,11 +808,13 @@ MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObj
       "2a864886f70d010901",
       AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
     );
-    static MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& reverseMap = ASNObject::ObjectIdsToNames();
+    MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& reverseMap = ASNObject::ObjectIdsToNames();
     for (int i = 0; i < container.theValues.size; i ++) {
       ASNObject& current = container.theValues[i];
       reverseMap.SetKeyValue(current.objectId, current);
     }
+    logWorker << "DEBUG: Container size: " << container.theValues.size;
+    logWorker << "DEBUG: reverse Container size: " << reverseMap.theValues.size;
   }
   return container;
 }
@@ -830,6 +830,18 @@ int ASNObject::LoadField(const MapList<std::string, ASNObject, MathRoutines::Has
   }
   *this = inputFields.GetValueConstCrashIfNotPresent(fieldName);
   return 1;
+}
+
+std::string ASNObject::ToStringAllRecognizedObjectIds() {
+  std::stringstream out;
+  out << "There are: " << ASNObject::ObjectIdsToNames().size() << " known fields. ";
+  out << "DEBUG: There are: " << ASNObject::NamesToObjectIdsNonThreadSafe().size() << " known fields. ";
+  for (int i = 0; i < ASNObject::ObjectIdsToNames().size(); i ++) {
+    ASNObject& current = ASNObject::ObjectIdsToNames().theValues[i];
+    const List<unsigned char>& currentId = ASNObject::ObjectIdsToNames().theKeys[i];
+    out << Crypto::ConvertListUnsignedCharsToHex(currentId, 50, false) << ": " << current.name << "\n";
+  }
+  return out.str();
 }
 
 bool ASNObject::LoadFieldsFromJSArray(
@@ -848,7 +860,7 @@ bool ASNObject::LoadFieldsFromJSArray(
     ASNObject current;
     if (!current.LoadFromJSON(jsonArray.theList[i], commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Failed to load entry index: " << i;
+        *commentsOnFailure << "Failed to load certificate entry index: " << i << ". ";
       }
       return false;
     }
@@ -857,13 +869,21 @@ bool ASNObject::LoadFieldsFromJSArray(
 
 }
 
-bool ASNObject::LoadFromJSON(
-  const JSData& input,
+bool ASNObject::LoadFromJSON(const JSData& inputShell,
   std::stringstream* commentsOnFailure
 ) {
+  if (inputShell.theType != JSData::token::tokenArray || inputShell.theList.size != 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "ASNObject JSON outer layer must be a single sequence. ";
+    }
+    return false;
+  }
+  const JSData& input = inputShell.theList[0];
+
   if (input.theType != JSData::token::tokenArray || input.theList.size != 2) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "ASNObject JSON representation must be a two-element array. ";
+      *commentsOnFailure << "DEBUG: instead i got: " << input.ToString(false, true, false, true);
     }
     return false;
   }
@@ -874,17 +894,26 @@ bool ASNObject::LoadFromJSON(
     }
     return false;
   }
-  JSData& desiredContent = first;
-  if (desiredContent.theType != JSData::token::tokenString) {
+  if (!first.HasKey("objectIdentifierBytes")) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "objectIdentifierBytes key missing. ";
+    }
+    return false;
+  }
+  JSData objectIdJSON = first.GetValue("objectIdentifierBytes");
+  if (objectIdJSON.theType != JSData::token::tokenString) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "objectIdentifierBytes key required to have a string value. ";
     }
     return false;
   }
-  this->objectId = desiredContent.theString;
+  this->objectId = objectIdJSON.theString;
   if (!ASNObject::ObjectIdsToNames().Contains(this->objectId)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Unrecognized object id. ";
+      *commentsOnFailure << "DEBUG: and the id: " << Crypto::ConvertListUnsignedCharsToHex(this->objectId, 0, false)
+      << ". ";
+      *commentsOnFailure << "DEBUG: all ids: " << ASNObject::ToStringAllRecognizedObjectIds();
     }
     return false;
   }
@@ -1188,7 +1217,7 @@ bool X509Certificate::LoadFromASNEncoded(
     return false;
   }
   JSData certificateFieldsJSON;
-  if (!this->sourceJSON.HasCompositeKey("[0][2][3]", &certificateFieldsJSON, commentsOnFailure)) {
+  if (!this->sourceJSON.HasCompositeKey("[0][3]", &certificateFieldsJSON, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to get sequence of certificate fields. ";
     }
